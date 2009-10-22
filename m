@@ -1,7 +1,7 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.17 released
-Date: Mon, 19 Oct 2009 16:08:35 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.0910191607530.24087@cobra.newdream.net>
+From: Noah Watkins <jayhawk@soe.ucsc.edu>
+Subject: _XOPEN_SOURCE redefined
+Date: Thu, 22 Oct 2009 10:59:24 -0700 (PDT)
+Message-ID: <2124777445.2161201256234364994.JavaMail.root@mail-01.cse.ucsc.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -14,27 +14,34 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: ceph-devel@lists.sf.net
+To: ceph-devel <ceph-devel@lists.sourceforge.net>
 List-Id: ceph-devel.vger.kernel.org
 
-We've released v0.17.  This is mainly bug fixes and some monitor 
-improvements.  Changes since v0.16 include:
+Sage, I'm getting this redefinition warning on a new box.
+Should there be an:
 
-    * kclient: fix >1 mds mdsmap decoding
-    * kclient: fix mon subscription renewal
-    * osdmap: fix encoding bug (and resulting kclient crash)
-    * msgr: simplified policy, failure model, code
-    * mon: less push, more pull
-    * mon: clients maintain single monitor session, requests and replies 
-      are routed by the cluster
-    * mon cluster expansion works (see Monitor cluster expansion)
-    * osd: fix pgid parsing bug (broke restarts on clusters with 10 osds 
-      or more)
+#undef _XOPEN_SOURCE in ./include/buffer.h before Ceph's new definition?
 
-The other change with this release is that the kernel code is no longer 
-bundled with the server code; it lives in a separate git tree.
+-n
 
-sage
+g++-4.3 -DHAVE_CONFIG_H -I.    -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT ExportControl.o -MD -MP -MF .deps/ExportControl.Tpo -c -o ExportControl.o `test -f 'auth/ExportControl.cc' || echo './'`auth/ExportControl.cc
+In file included from ./include/cstring.h:12,
+                 from ./include/nstring.h:8,
+                 from ./include/object.h:28,
+                 from ./include/types.h:53,
+                 from ./msg/msg_types.h:18,
+                 from ./config.h:32,
+                 from auth/ExportControl.h:5,
+                 from auth/ExportControl.cc:16:
+./include/buffer.h:18:1: warning: "_XOPEN_SOURCE" redefined
+In file included from /usr/include/c++/4.3/x86_64-linux-gnu/bits/os_defines.h:44,
+                 from /usr/include/c++/4.3/x86_64-linux-gnu/bits/c++config.h:40,
+                 from /usr/include/c++/4.3/bits/stl_algobase.h:65,
+                 from /usr/include/c++/4.3/bits/stl_tree.h:67,
+                 from /usr/include/c++/4.3/map:65,
+                 from auth/ExportControl.h:4,
+                 from auth/ExportControl.cc:16:
+/usr/include/features.h:160:1: warning: this is the location of the previous definition
 
 ------------------------------------------------------------------------------
 Come build with us! The BlackBerry(R) Developer Conference in SF, CA
