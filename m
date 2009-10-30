@@ -1,15 +1,14 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: (no subject)
-Date: Wed, 28 Oct 2009 20:12:29 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.0910282010310.27853@cobra.newdream.net>
-References: <D32A0D11-5C03-401C-B165-2F067F04B2EA@soe.ucsc.edu>
-	<Pine.LNX.4.64.0910281731450.27853@cobra.newdream.net>
-	<F645251D-3111-4389-8F93-E685944C00DF@soe.ucsc.edu>
-Mime-Version: 1.0
+From: Noah Watkins <jayhawk@soe.ucsc.edu>
+Subject: patch: update object mapping calculation
+Date: Fri, 30 Oct 2009 13:15:38 -0700
+Message-ID: <6C4FFEC7-CAB3-4B30-B96F-A54E539267AA@soe.ucsc.edu>
+References: <04BF1C09-FD96-4666-8C0B-31416E1ECC3C@soe.ucsc.edu>
+	<Pine.LNX.4.64.0910281458380.18824@cobra.newdream.net>
+Mime-Version: 1.0 (Apple Message framework v753.1)
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <F645251D-3111-4389-8F93-E685944C00DF@soe.ucsc.edu>
+In-Reply-To: <Pine.LNX.4.64.0910281458380.18824@cobra.newdream.net>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -18,29 +17,84 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Noah Watkins <jayhawk@soe.ucsc.edu>
-Cc: ceph-devel@lists.sourceforge.net
+To: Sage Weil <sage@newdream.net>
+Cc: noah@noahdesu.com, ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 28 Oct 2009, Noah Watkins wrote:
 
-> > 
-> > This one belongs in ceph-client-standalone.git...
-> > 
-> > >       ceph: replace list_entry with container_of
-> > >       ceph: remove redundant use of le32_to_cpu
-> 
-> All three patches were against ceph-client-standalone.git. You want them
-> re-submitted against ceph-client.git ?
+> Actually, it looks like that calculation is wrong.. I also added
+>
+> 	*oxoff += (stripeno % su_per_object) * su;
 
-No worries, I fixed these up and applied them.
+Looks like this update fixes the object offset for multiple stripes  
+per object, but 'oxlen' needs adjusted. With the current calculation:
 
-The -standalone.git has a pull.sh and tries to mirror the git history for 
-just commits affecting fs/ceph/.  A backport.sh maintains the backport 
-branch.  There're not much use to anyone unless I forget to update 
--standalone.git and you want to pull the latest from the main repo.
+- oxlen = min(plen, offset % su)
 
-sage
+A length of zero is calculated when offset equals stripe unit.  
+Consider osize=128, stripe unit = 64, stripe count = 2. A write  
+request of
+
+length, offset
+4096, 0
+
+gives:
+ono = 0, oxoff = 0, oxlen = 64
+ono = 1, oxoff = 0, oxlen = 64
+ono = 0, oxoff = 64, oxlen = 0 <-- infinite loop wrt to calling context
+
+So, assuming that object size is a multiple of stripe unit, we really  
+want the minimum between the total request and the remaining space in  
+the current stripe:
+
+- oxlen = min(plen, su - (offset % su))
+
+I put a path in against ceph-client/unstable @
+
+http://code.noahdesu.com/git/linux26-dev.git ceph/unstable-for-sage
+
+-n
+
+-------------
+
+diff --git a/fs/ceph/osdmap.c b/fs/ceph/osdmap.c
+index 5a5520c..d62e111 100644
+--- a/fs/ceph/osdmap.c
++++ b/fs/ceph/osdmap.c
+@@ -731,7 +731,7 @@ void ceph_calc_file_object_mapping(struct  
+ceph_file_layout *layout,
+         u32 sc = le32_to_cpu(layout->fl_stripe_count);
+         u32 bl, stripeno, stripepos, objsetno;
+         u32 su_per_object;
+-       u64 t;
++       u64 t, su_offset;
+
+         dout("mapping %llu~%llu  osize %u fl_su %u\n", off, *plen,
+              osize, su);
+@@ -755,10 +755,15 @@ void ceph_calc_file_object_mapping(struct  
+ceph_file_layout *layout,
+
+         /* *oxoff = *off % layout->fl_stripe_unit;  # offset in su */
+         t = off;
+-       *oxoff = do_div(t, su);
+-       *oxoff += (stripeno % su_per_object) * su;
+-
+-       *oxlen = min_t(u64, *plen, su - *oxoff);
++       su_offset = do_div(t, su);
++       *oxoff = su_offset + (stripeno % su_per_object) * su;
++
++       /*
++        * Calculate the length of the extent being written to the  
+selected
++        * object. This is the minimum of the full length requested  
+(plen) or
++        * the remainder of the current stripe being written to.
++        */
++       *oxlen = min_t(u64, *plen, su - su_offset);
+         *plen = *oxlen;
+
+         dout(" obj extent %llu~%llu\n", *oxoff, *oxlen);
+
 
 ------------------------------------------------------------------------------
 Come build with us! The BlackBerry(R) Developer Conference in SF, CA
