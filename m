@@ -1,19 +1,11 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [RFC] v2 separate otw data from host data
-Date: Fri, 6 Nov 2009 12:49:44 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0911061245270.15146@cobra.newdream.net>
-References: <A559A761-1932-464D-8EBA-0A7DDDF14E44@soe.ucsc.edu>
-	<Pine.LNX.4.64.0911052127340.24285@cobra.newdream.net>
-	<3A19C8FD-BDC5-41A5-BBED-8C8CE47FBEFC@soe.ucsc.edu>
-	<Pine.LNX.4.64.0911052224121.24285@cobra.newdream.net>
-	<1826697A-2DAB-4532-99B1-E1247AFDAD64@soe.ucsc.edu>
-	<Pine.LNX.4.64.0911061138560.15146@cobra.newdream.net>
-	<AF9F8769-3573-40CE-B786-433CD60245DE@soe.ucsc.edu>
+From: =?iso-8859-15?Q?J=FCrgen_Herrmann?= <Juergen.Herrmann@XLhost.de>
+Subject: prefering local reads?
+Date: Mon, 9 Nov 2009 12:36:31 +0100 (CET)
+Message-ID: <ff215e13c5bc2943146ddf9f7fd3852a.squirrel@xlhost.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-15"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <AF9F8769-3573-40CE-B786-433CD60245DE@soe.ucsc.edu>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -22,52 +14,49 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Noah Watkins <jayhawk@soe.ucsc.edu>
-Cc: Noah Watkins <noah@noahdesu.com>, ceph-devel@lists.sourceforge.net
+To: ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 6 Nov 2009, Noah Watkins wrote:
+hi there!
 
-> > - should use 'wire' instead of 'otw' consistently?
-> Up vote from me. I like 'wire' better than 'otw'.
-> 
-> > - the layout validation func is used by userspace, and should  
-> > eventually
-> > be used by the kclient
-> Ahh, I'll restore this. And ceph_ioctl_set_layout does some basic  
-> layout validation. These could be merged?
+i plan to set up a ceph fs for our mail cluster testing.
+initially i want to have 2 mds and 2 osds, one on each of the
+involved machines. each machine would mount the ceph fs.
+so in the non-failure case every client could read from
+the local osd, is there a way to assure that?
 
-Yes please :)
+is the requirement to have at least 3 mons in clustered mode
+still in effect? reading
+http://ceph.newdream.net/wiki/Monitor_cluster_expansion
+one could come to the conclusion that having 2 mons is
+working too.
 
-> > - lost the comments on the struct in ceph_fs.h
-> I bumped the inline comments to a block comment above the struct. Or  
-> did you mean 'lose them' instead of 'lost' ?
+thanks in andvance,
+j=FCrgen
+--
+>> XLhost.de - eXperts in Linux hosting =AE <<
 
-Oh right.  Let's keep them inline.
+XLhost.de GmbH
+J=FCrgen Herrmann, Gesch=E4ftsf=FChrer
+Boelckestrasse 21, 93051 Regensburg, Germany
 
-> >> Looking over it again, perhaps just using some accessor macros is  
-> >> the best.
-> >
-> > Yeah...  Well, at some point we should probably add a 'wire' suffix
-> > (prefix?) to all the disk/wire types, though.  (I'll stick that in the
-> > TODO.  It needs to be coordinated with the userspace change.)  This  
-> > can
-> > come after?
-> If this is overall a step in the right direction then starting with  
-> this patch, and re-visiting the topic as a larger iterative clean-up  
-> seems reasonable.
-> 
-> This brings up a good point about the level at which nested  
-> structures are labeled as 'wire'. For example, ceph_mds_reply_inode  
-> is a struct that should be labeled as 'wire', but it would be ugly to  
-> label all members of that struct as 'wire'.
+Gesch=E4ftsf=FChrer: Volker Geith, J=FCrgen Herrmann
+Registriert unter: HRB9918
+Umsatzsteuer-Identifikationsnummer: DE245931218
 
-The type naming should be consistent.  ceph_wire_ prefix?
+Fon:  +49 (0)800 XLHOSTDE [0800 95467833]
+Fax:  +49 (0)800 95467830
 
-sage
+WEB:  http://www.XLhost.de
+IRC:  #XLhost@irc.quakenet.org
 
-------------------------------------------------------------------------------
-Let Crystal Reports handle the reporting - Free Crystal Reports 2008 30-Day 
-trial. Simplify your report design, integration and deployment - and focus on 
+
+---------------------------------------------------------------------------=
+---
+Let Crystal Reports handle the reporting - Free Crystal Reports 2008 30-Day =
+
+trial. Simplify your report design, integration and deployment - and focus =
+on =
+
 what you do best, core application coding. Discover what's new with
 Crystal Reports now.  http://p.sf.net/sfu/bobj-july
