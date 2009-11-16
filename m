@@ -1,77 +1,34 @@
-From: Julia Lawall <julia@diku.dk>
-Subject: [PATCH 8/8] fs/ceph: introduce missing kfree
-Date: Sat, 21 Nov 2009 12:53:08 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.0911211252440.23681@ask.diku.dk>
+From: Tim Cullen <timcullen2001@yahoo.com>
+Subject: trouble with the kernel client git repo
+Date: Mon, 16 Nov 2009 15:04:11 -0800 (PST)
+Message-ID: <331434.59606.qm@web43133.mail.sp1.yahoo.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754128AbZKULxG@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: sage@newdream.net, ceph-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-bounces@lists.sourceforge.net>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
+	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
+List-Post: <mailto:ceph-devel@lists.sourceforge.net>
+List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
+	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
+Errors-To: ceph-devel-bounces@lists.sourceforge.net
+To: ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-From: Julia Lawall <julia@diku.dk>
+I am doing something wrong here or is there something wrong with the kernel client git repo?
 
-Error handling code following a kmalloc should free the allocated data.
+[root@rna13 tmp]# git clone http://git.kernel.org/?p=linux/kernel/git/sage/ceph-client.git
+Initialized empty Git repository in /root/src/tmp/ceph-client/.git/
+fatal: http://git.kernel.org/?p=linux/kernel/git/sage/ceph-client.git/info/refs not found: did you run git update-server-info on the server?
 
-The semantic match that finds this problem is as follows:
-(http://www.emn.fr/x-info/coccinelle/)
 
-// <smpl>
-@r exists@
-local idexpression x;
-statement S;
-expression E;
-identifier f,f1,l;
-position p1,p2;
-expression *ptr != NULL;
-@@
 
-x@p1 = \(kmalloc\|kzalloc\|kcalloc\)(...);
-...
-if (x == NULL) S
-<... when != x
-     when != if (...) { <+...x...+> }
-(
-x->f1 = E
-|
- (x->f1 == NULL || ...)
-|
- f(...,x->f1,...)
-)
-...>
-(
- return \(0\|<+...x...+>\|ptr\);
-|
- return@p2 ...;
-)
+      
 
-@script:python@
-p1 << r.p1;
-p2 << r.p2;
-@@
-
-print "* file: %s kmalloc %s return %s" % (p1[0].file,p1[0].line,p2[0].line)
-// </smpl>
-
-Signed-off-by: Julia Lawall <julia@diku.dk>
----
- fs/ceph/xattr.c |    6 ++++--
- 1 files changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 1a48a55..04769a3 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -655,8 +655,10 @@ static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
- 	/* do request */
- 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SETXATTR,
- 				       USE_AUTH_MDS);
--	if (IS_ERR(req))
--		return PTR_ERR(req);
-+	if (IS_ERR(req)) {
-+		err = PTR_ERR(req);
-+		goto out;
-+	}
- 	req->r_inode = igrab(inode);
- 	req->r_inode_drop = CEPH_CAP_XATTR_SHARED;
- 	req->r_num_caps = 1;
+------------------------------------------------------------------------------
+Let Crystal Reports handle the reporting - Free Crystal Reports 2008 30-Day 
+trial. Simplify your report design, integration and deployment - and focus on 
+what you do best, core application coding. Discover what's new with
+Crystal Reports now.  http://p.sf.net/sfu/bobj-july
