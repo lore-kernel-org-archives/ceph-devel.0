@@ -1,58 +1,68 @@
-From: Julia Lawall <julia@diku.dk>
-Subject: [PATCH] fs/ceph: Move a dereference below a NULL test
-Date: Sat, 21 Nov 2009 16:53:16 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.0911211652550.26930@ask.diku.dk>
+From: Noah Watkins <jayhawk@soe.ucsc.edu>
+Subject: Re: trouble with the kernel client git repo
+Date: Sat, 21 Nov 2009 08:55:51 -0800 (PST)
+Message-ID: <1638771833.265881258822551177.JavaMail.root@mail-01.cse.ucsc.edu>
+References: <331434.59606.qm@web43133.mail.sp1.yahoo.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756301AbZKUPxN@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@newdream.net>, ceph-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-bounces@lists.sourceforge.net>
+In-Reply-To: <331434.59606.qm@web43133.mail.sp1.yahoo.com>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
+	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
+List-Post: <mailto:ceph-devel@lists.sourceforge.net>
+List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
+	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
+Errors-To: ceph-devel-bounces@lists.sourceforge.net
+To: Tim Cullen <timcullen2001@yahoo.com>
+Cc: ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-From: Julia Lawall <julia@diku.dk>
+Give one of these a shot:
 
-If the NULL test is necessary, then the dereference should be moved below
-the NULL test.
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git
+  http://www.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git
+  http://git.kernel.org/smart/pub/scm/linux/kernel/git/sage/ceph-client.git
 
-The semantic patch that makes this change is as follows:
-(http://coccinelle.lip6.fr/).
+Best to use the Git protocol:
 
-// <smpl>
-@@
-type T;
-expression E;
-identifier i,fld;
-statement S;
-@@
+  $ git clone git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git
 
-- T i = E->fld;
-+ T i;
-  ... when != E
-      when != i
-  if (E == NULL) S
-+ i = E->fld;
-// </smpl>
+You were using the Gitweb URLs, which are the browsable web front-end view
+of the ceph-client repository.
 
-Signed-off-by: Julia Lawall <julia@diku.dk>
+-n
 
----
- fs/ceph/osd_client.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+----- Original Message -----
+From: "Tim Cullen" <timcullen2001@yahoo.com>
+To: ceph-devel@lists.sourceforge.net
+Sent: Monday, November 16, 2009 3:04:11 PM GMT -08:00 US/Canada Pacific
+Subject: [ceph-devel] trouble with the kernel client git repo
 
-diff -u -p a/fs/ceph/osd_client.c b/fs/ceph/osd_client.c
---- a/fs/ceph/osd_client.c
-+++ b/fs/ceph/osd_client.c
-@@ -1244,11 +1244,12 @@ int ceph_osdc_writepages(struct ceph_osd
- static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
- {
- 	struct ceph_osd *osd = con->private;
--	struct ceph_osd_client *osdc = osd->o_osdc;
-+	struct ceph_osd_client *osdc;
- 	int type = le16_to_cpu(msg->hdr.type);
- 
- 	if (!osd)
- 		return;
-+	osdc = osd->o_osdc;
- 
- 	switch (type) {
- 	case CEPH_MSG_OSD_MAP:
+I am doing something wrong here or is there something wrong with the kernel client git repo?
+
+[root@rna13 tmp]# git clone http://git.kernel.org/?p=linux/kernel/git/sage/ceph-client.git
+Initialized empty Git repository in /root/src/tmp/ceph-client/.git/
+fatal: http://git.kernel.org/?p=linux/kernel/git/sage/ceph-client.git/info/refs not found: did you run git update-server-info on the server?
+
+
+
+      
+
+------------------------------------------------------------------------------
+Let Crystal Reports handle the reporting - Free Crystal Reports 2008 30-Day 
+trial. Simplify your report design, integration and deployment - and focus on 
+what you do best, core application coding. Discover what's new with
+Crystal Reports now.  http://p.sf.net/sfu/bobj-july
+_______________________________________________
+Ceph-devel mailing list
+Ceph-devel@lists.sourceforge.net
+https://lists.sourceforge.net/lists/listinfo/ceph-devel
+
+------------------------------------------------------------------------------
+Let Crystal Reports handle the reporting - Free Crystal Reports 2008 30-Day 
+trial. Simplify your report design, integration and deployment - and focus on 
+what you do best, core application coding. Discover what's new with
+Crystal Reports now.  http://p.sf.net/sfu/bobj-july
