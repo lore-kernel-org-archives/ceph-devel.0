@@ -1,45 +1,83 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: question about fs/ceph/snap.c
-Date: Sat, 21 Nov 2009 12:53:53 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0911211250240.15569@cobra.newdream.net>
-References: <Pine.LNX.4.64.0911212130530.28848@ask.diku.dk>
+Subject: Re: [ceph-devel] [PATCH] fs/ceph: Move a dereference below a NULL
+ test
+Date: Sat, 21 Nov 2009 13:03:42 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0911211302440.15569@cobra.newdream.net>
+References: <Pine.LNX.4.64.0911211652550.26930@ask.diku.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <Pine.LNX.4.64.0911212130530.28848@ask.diku.dk>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
-	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
-List-Post: <mailto:ceph-devel@lists.sourceforge.net>
-List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
-	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
-Errors-To: ceph-devel-bounces@lists.sourceforge.net
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753951AbZKUVDd@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.0911211652550.26930@ask.diku.dk>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Julia Lawall <julia@diku.dk>
-Cc: ceph-devel@lists.sourceforge.net
+Cc: ceph-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
 On Sat, 21 Nov 2009, Julia Lawall wrote:
 
-> The file fs/ceph/snap.c contains four calls to ceph_lookup_snap_realm, all 
-> of which test the returned value first with IS_ERR and then by checking 
-> for a NULL pointer.  But the definition of ceph_lookup_snap_realm contains
-> a dereference of its argument if it is not NULL, which suggests that an 
-> ERR_PTR value is not what expected.  So something seems to be inconsistent 
-> here.
+> From: Julia Lawall <julia@diku.dk>
+> 
+> If the NULL test is necessary, then the dereference should be moved below
+> the NULL test.
 
-Yeah, I'm not sure how it ended up that way.  I'll just remove the 
-IS_ERR() checks, since there are no errors the lookup can return (besides 
-not found).
+I've applied this (and the previous patch) to the ceph tree.  
 
-The other patches look good; applying them now.  Thank you!  Coccinelle is 
-pretty slick.  :)
-
+Thanks!
 sage
 
-------------------------------------------------------------------------------
-Let Crystal Reports handle the reporting - Free Crystal Reports 2008 30-Day 
-trial. Simplify your report design, integration and deployment - and focus on 
-what you do best, core application coding. Discover what's new with
-Crystal Reports now.  http://p.sf.net/sfu/bobj-july
+
+> 
+> The semantic patch that makes this change is as follows:
+> (http://coccinelle.lip6.fr/).
+> 
+> // <smpl>
+> @@
+> type T;
+> expression E;
+> identifier i,fld;
+> statement S;
+> @@
+> 
+> - T i = E->fld;
+> + T i;
+>   ... when != E
+>       when != i
+>   if (E == NULL) S
+> + i = E->fld;
+> // </smpl>
+> 
+> Signed-off-by: Julia Lawall <julia@diku.dk>
+> 
+> ---
+>  fs/ceph/osd_client.c |    3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff -u -p a/fs/ceph/osd_client.c b/fs/ceph/osd_client.c
+> --- a/fs/ceph/osd_client.c
+> +++ b/fs/ceph/osd_client.c
+> @@ -1244,11 +1244,12 @@ int ceph_osdc_writepages(struct ceph_osd
+>  static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
+>  {
+>  	struct ceph_osd *osd = con->private;
+> -	struct ceph_osd_client *osdc = osd->o_osdc;
+> +	struct ceph_osd_client *osdc;
+>  	int type = le16_to_cpu(msg->hdr.type);
+>  
+>  	if (!osd)
+>  		return;
+> +	osdc = osd->o_osdc;
+>  
+>  	switch (type) {
+>  	case CEPH_MSG_OSD_MAP:
+> 
+> ------------------------------------------------------------------------------
+> Let Crystal Reports handle the reporting - Free Crystal Reports 2008 30-Day 
+> trial. Simplify your report design, integration and deployment - and focus on 
+> what you do best, core application coding. Discover what's new with
+> Crystal Reports now.  http://p.sf.net/sfu/bobj-july
+> _______________________________________________
+> Ceph-devel mailing list
+> Ceph-devel@lists.sourceforge.net
+> https://lists.sourceforge.net/lists/listinfo/ceph-devel
+> 
+> 
