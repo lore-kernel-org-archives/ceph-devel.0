@@ -1,7 +1,7 @@
-From: Vitaly Shishakov <shift@cmpd2.phys.msu.su>
-Subject: build ceph 0.17 on OpenSuSE 11.0 (success)
-Date: Wed, 25 Nov 2009 07:35:28 +0300
-Message-ID: <4B0CB410.7070701@cmpd2.phys.msu.su>
+From: Sage Weil <sage@newdream.net>
+Subject: v0.18 released
+Date: Fri, 4 Dec 2009 10:52:53 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0912041045520.5007@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -14,45 +14,59 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: ceph-devel@lists.sourceforge.net
+To: ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-I tried to build ceph-0.17 on OpenSUSE 11.0 (default kernel - 2.6.25, 
-libfuse 2.8 upgraded from repository, default version is 2.7)
+There's a v0.18 release to match the latest posting of the kernel client 
+code on the Linux email lists.  If there are no final issues there, that 
+will be what I send to Linus for 2.6.33.
 
-to do that i had to make the following changes:
+Most of the changes since v0.17 are bug fixes in the MDS and kclient.  The 
+main other item is an authentication framework to restrict access to the 
+cluster and it's services to authorized clients.  Two protocols/schemes 
+are implemented: an AUTH_NONE framework that does no real authentication 
+(and is essentially equivalent to what we've had until now) and a 
+AUTH_CEPHX scheme that uses  Kerberos-like tickets to mutually 
+authenticate clients and services.
 
-1) install more fresh version on BOOST (default version was 1.34, i 
-installed 1.39 from repositories),
-and other prereqs, like libedit-devel,  fuse-devel, etc.
-2) change  src/include/object.h -- add  #include <stdio.h>  -- to 
-suppress error about not found sprintf function
-3) change dependencies in  ceph.spec --
-(i actually removed them, only left build_reqs and relied on automagical 
-dependency discovery)
-4) in .spec file I commented out everything about kernel client, due to 
-some kernel requirements
-(like unaligned access functions. at first i )
-i only left FUSE client, and added those files, that were missing.
+Changes since v0.17 include:
+- osd: basic ENOSPC handling
+- big endian fixes (required protocol/disk format change)
+- osd: improved object -> pg hash function; selectable
+- crush: selectable hash function(s)
+- mds restart bug fixes
+- kclient: mds reconnect bug fixes
+- fixed mds log trimming bug
+- fixed mds cap vs snap deadlock
+- filestore: faster flushing
+- uclient,kclient: snapshot fixes
+- mds: fix recursive accounting bug
+- uclient: fixes for 32bit clients
+- auth: 'none' security framework
+- mon: "safely" bail on write errors (e.g. ENOSPC)
+- mds: fix replay/reconnect race (caused (fast) client reconnect to fail)
+- mds: misc journal replay, session fixes
 
-then i built rpms, which i used to distribute along my cluster nodes.
-20 nodes, 1 managing server, 1Gbit network.
-each node has 6x640GB SATA HDD !
+There is a known memory leak in the MDS in this release.  It should be 
+fixed in the unstable git shortly.
 
-so far i tested with 4 nodes, each hosting 1 OSD based on ext3 volume. + 
-1mon and 1msd.
-i have to say, that bonnie++ went successfully, showing 50MB/sec,
-same as NFS on the same network (seems like bad ethernet card or bad switch)
+Looking forward, the main items are:
 
-more tests to come.
-the only problem so far:  cfuse-mounted filesystem refuse to unmount. 
-(says that device is busy)
+    * stability
+    * fixing a few pressing MDS performance issues
+    * improving OSD interaction with btrfs (we may switch to using btrfs 
+      snapshots in place of the user transaction ioctls)
+    * stability
 
-I have to admit:  far more easier deployment, than with Lustre!
+Relevant URLs:
 
+    * Direct download at http://ceph.newdream.net/download/ceph-0.18.tar.gz
+    * For Debian packages see http://ceph.newdream.net/wiki/Debian
+
+sage
 
 ------------------------------------------------------------------------------
-Let Crystal Reports handle the reporting - Free Crystal Reports 2008 30-Day 
-trial. Simplify your report design, integration and deployment - and focus on 
-what you do best, core application coding. Discover what's new with
-Crystal Reports now.  http://p.sf.net/sfu/bobj-july
+Join us December 9, 2009 for the Red Hat Virtual Experience,
+a free event focused on virtualization and cloud computing. 
+Attend in-depth sessions from your desk. Your couch. Anywhere.
+http://p.sf.net/sfu/redhat-sfdev2dev
