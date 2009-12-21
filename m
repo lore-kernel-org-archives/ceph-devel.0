@@ -1,11 +1,15 @@
 From: Sage Weil <sage@newdream.net>
-Subject: v0.18 released
-Date: Fri, 4 Dec 2009 10:52:53 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0912041045520.5007@cobra.newdream.net>
+Subject: ceph in v2.6.33?
+Date: Mon, 21 Dec 2009 09:06:55 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0912181629100.29068@cobra.newdream.net>
+References: <Pine.LNX.4.64.0912071511470.32397@cobra.newdream.net>
+	<Pine.LNX.4.64.0912181140370.26094@cobra.newdream.net>
+	<alpine.LFD.2.00.0912181327200.3712@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
+In-Reply-To: <alpine.LFD.2.00.0912181327200.3712@localhost.localdomain>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -17,56 +21,86 @@ Errors-To: ceph-devel-bounces@lists.sourceforge.net
 To: ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-There's a v0.18 release to match the latest posting of the kernel client 
-code on the Linux email lists.  If there are no final issues there, that 
-will be what I send to Linus for 2.6.33.
+The Ceph kernel client may not make it into .33 after all... in the 
+absense of other issues, Linus would like to see some user demand before 
+merging a new subsystem.  If you'd like to see it in mainline sooner, 
+now's the time to speak up.
 
-Most of the changes since v0.17 are bug fixes in the MDS and kclient.  The 
-main other item is an authentication framework to restrict access to the 
-cluster and it's services to authorized clients.  Two protocols/schemes 
-are implemented: an AUTH_NONE framework that does no real authentication 
-(and is essentially equivalent to what we've had until now) and a 
-AUTH_CEPHX scheme that uses  Kerberos-like tickets to mutually 
-authenticate clients and services.
-
-Changes since v0.17 include:
-- osd: basic ENOSPC handling
-- big endian fixes (required protocol/disk format change)
-- osd: improved object -> pg hash function; selectable
-- crush: selectable hash function(s)
-- mds restart bug fixes
-- kclient: mds reconnect bug fixes
-- fixed mds log trimming bug
-- fixed mds cap vs snap deadlock
-- filestore: faster flushing
-- uclient,kclient: snapshot fixes
-- mds: fix recursive accounting bug
-- uclient: fixes for 32bit clients
-- auth: 'none' security framework
-- mon: "safely" bail on write errors (e.g. ENOSPC)
-- mds: fix replay/reconnect race (caused (fast) client reconnect to fail)
-- mds: misc journal replay, session fixes
-
-There is a known memory leak in the MDS in this release.  It should be 
-fixed in the unstable git shortly.
-
-Looking forward, the main items are:
-
-    * stability
-    * fixing a few pressing MDS performance issues
-    * improving OSD interaction with btrfs (we may switch to using btrfs 
-      snapshots in place of the user transaction ioctls)
-    * stability
-
-Relevant URLs:
-
-    * Direct download at http://ceph.newdream.net/download/ceph-0.18.tar.gz
-    * For Debian packages see http://ceph.newdream.net/wiki/Debian
+Either way, this doesn't change too much for us.  We're still focusing in 
+improving stability and fixing osd performance problems, and not much 
+else.  The disk format and wire protocol are very nearly stabilized.  An 
+earlier merge would make it easier for people to test the system, but 
+pulling the client from the ceph tree or building the standalone module 
+will make it easier for us to manage bug fixes.
 
 sage
 
+
+On Fri, 18 Dec 2009, Linus Torvalds wrote:
+> 
+> On Fri, 18 Dec 2009, Sage Weil wrote:
+> > 
+> > I would still like to see ceph merged for 2.6.33.  It's certainly not 
+> > production ready, but it would be greatly beneficial to be in mainline for 
+> > the same reasons other file systems like btrfs and exofs were merged 
+> > early.
+> 
+> So what happened to ceph is the same thing that happened to the alacrityvm 
+> pull request (Greg Haskins added to cc): I pretty much continually had a 
+> _lot_ of pull requests, and all the time the priority for the ceph and 
+> alactrityvm pull requests were just low enough on my priority list that I 
+> never felt I had the reason to look into the background enough to make an 
+> even half-assed decision of whether to pull or not.
+> 
+> And no, "just pull" is not my default answer - if I don't have a reason, 
+> the default action is "don't pull".
+> 
+> I used to say that "my job is to say 'no'", although I've been so good at 
+> farming out submaintainers that most of the time my real job is to pull 
+> from submaintainers who hopefully know how to say 'no'. But when it comes 
+> to whole new driver features, I'm still "no by default - tell me _why_ I 
+> should pull".
+> 
+> So what is a new subsystem person to do?
+> 
+> The best thing to do is to try to have users that are vocal about the 
+> feature, and talk about how great it is. Some advocates for it, in other 
+> words. Just a few other people saying "hey, I use this, it's great", is 
+> actually a big deal to me. For alacrityvm and cephfs, I didn't have that, 
+> or they just weren't loud enough for me to hear.
+> 
+> So since you mentioned btrfs as an "early merge", I'll mention it too, as 
+> a great example of how something got merged early because it had easily 
+> gotten past my "people are asking for it" filter, to the point where _I_ 
+> was interested in trying it out personally, and asking Chris&co to tell me 
+> when it was ready.
+> 
+> Ok, so that was somewhat unusual - I'm not suggesting you'd need to try to 
+> drum up quite _that_ much hype - but it kind of illustrates the opposite 
+> extreme of your issue. Get some PR going, get people talking about it, get 
+> people testing it out. Get people outside of your area saying "hey, I use 
+> it, and I hate having to merge it every release".
+> 
+> Then, when I see a pull request during the merge window, the pull suddenly 
+> has a much higher priority, and I go "Ok, I know people are using this".
+> 
+> So no astro-turfing, but real grass-roots support really does help (or 
+> top-down feedback for that matter - if a _distribution_ says "we're going 
+> to merge this in our distro regardless", that also counts as a big hint 
+> for me that people actually expect to use it and would like to not go 
+> through the pain of merging).
+> 
+> 			Linus
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+
 ------------------------------------------------------------------------------
-Join us December 9, 2009 for the Red Hat Virtual Experience,
-a free event focused on virtualization and cloud computing. 
-Attend in-depth sessions from your desk. Your couch. Anywhere.
-http://p.sf.net/sfu/redhat-sfdev2dev
+This SF.Net email is sponsored by the Verizon Developer Community
+Take advantage of Verizon's best-in-class app development support
+A streamlined, 14 day to market process makes app distribution fast and easy
+Join now and get one step closer to millions of Verizon customers
+http://p.sf.net/sfu/verizon-dev2dev 
