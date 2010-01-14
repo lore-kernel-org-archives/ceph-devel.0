@@ -1,10 +1,12 @@
 From: "Magarshak, Roman" <roman.magarshak@sap.com>
-Subject: Problem on ceph configuration
-Date: Thu, 14 Jan 2010 16:24:38 +0100
-Message-ID: <8C507B5E0BA5114E933C3C6E2E9729E005ECB42098@DEWDFECCR01.wdf.sap.corp>
+Subject: Re: Problem on ceph configuration
+Date: Thu, 14 Jan 2010 17:01:33 +0100
+Message-ID: <8C507B5E0BA5114E933C3C6E2E9729E005ECB4211B@DEWDFECCR01.wdf.sap.corp>
+References: <8C507B5E0BA5114E933C3C6E2E9729E005ECB42098@DEWDFECCR01.wdf.sap.corp>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============8290918129783070595=="
+Content-Type: multipart/mixed; boundary="===============7740020738304660422=="
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
+In-Reply-To: <8C507B5E0BA5114E933C3C6E2E9729E005ECB42098@DEWDFECCR01.wdf.sap.corp>
 Content-Language: en-US
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
@@ -18,14 +20,35 @@ To: "ceph-devel@lists.sourceforge.net" <ceph-devel@lists.sourceforge.net>
 Cc: "Talyansky, Roman" <roman.talyansky@sap.com>
 List-Id: ceph-devel.vger.kernel.org
 
---===============8290918129783070595==
+--===============7740020738304660422==
 Content-Language: en-US
 Content-Type: multipart/alternative;
-	boundary="_000_8C507B5E0BA5114E933C3C6E2E9729E005ECB42098DEWDFECCR01wd_"
+	boundary="_000_8C507B5E0BA5114E933C3C6E2E9729E005ECB4211BDEWDFECCR01wd_"
 
---_000_8C507B5E0BA5114E933C3C6E2E9729E005ECB42098DEWDFECCR01wd_
+--_000_8C507B5E0BA5114E933C3C6E2E9729E005ECB4211BDEWDFECCR01wd_
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
+
+Hi all ,
+  I've forgot to mention that the problems is , that the kernel client gets=
+ stuck and any other mount tries fail.
+
+
+\Roman.
+
+
+Roman Magarshak
+Intern
+SAP Research Israel
+T   +972   9 777 9853
+M  +972 54 464 0910
+E   mailto:roman.magarshak@sap.com
+
+From: Magarshak, Roman [mailto:roman.magarshak@sap.com]
+Sent: Thursday, January 14, 2010 5:25 PM
+To: ceph-devel@lists.sourceforge.net
+Cc: Talyansky, Roman
+Subject: [LIKELY JUNK][ceph-devel] Problem on ceph configuration
 
 Hi all ,
   We have tried to run ceph on 2 nodes without btrfs and encountered the fo=
@@ -75,7 +98,7 @@ M  +972 54 464 0910
 E   mailto:roman.magarshak@sap.com
 
 
---_000_8C507B5E0BA5114E933C3C6E2E9729E005ECB42098DEWDFECCR01wd_
+--_000_8C507B5E0BA5114E933C3C6E2E9729E005ECB4211BDEWDFECCR01wd_
 Content-Type: text/html; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 
@@ -96,6 +119,9 @@ xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
 @font-face
 	{font-family:Calibri;
 	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{margin:0in;
@@ -119,31 +145,22 @@ p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
 	margin-bottom:.0001pt;
 	font-size:11.0pt;
 	font-family:"Calibri","sans-serif";}
-span.EmailStyle17
-	{mso-style-type:personal-compose;
+span.EmailStyle18
+	{mso-style-type:personal;
 	font-family:"Calibri","sans-serif";
 	color:windowtext;}
+span.EmailStyle19
+	{mso-style-type:personal-reply;
+	font-family:"Calibri","sans-serif";
+	color:#1F497D;}
 .MsoChpDefault
-	{mso-style-type:export-only;}
+	{mso-style-type:export-only;
+	font-size:10.0pt;}
 @page Section1
 	{size:8.5in 11.0in;
 	margin:1.0in 1.0in 1.0in 1.0in;}
 div.Section1
 	{page:Section1;}
- /* List Definitions */
- @list l0
-	{mso-list-id:1412505528;
-	mso-list-type:hybrid;
-	mso-list-template-ids:632061028 67698703 67698713 67698715 67698703 676987=
-13 67698715 67698703 67698713 67698715;}
-@list l0:level1
-	{mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;}
-ol
-	{margin-bottom:0in;}
-ul
-	{margin-bottom:0in;}
 -->
 </style>
 <!--[if gte mso 9]><xml>
@@ -157,6 +174,89 @@ ul
 <body lang=3DEN-US link=3Dblue vlink=3Dpurple>
 
 <div class=3DSection1>
+
+<p class=3DMsoNormal><span style=3D'color:#1F497D'>Hi all , <o:p></o:p></sp=
+an></p>
+
+<p class=3DMsoNormal><span style=3D'color:#1F497D'>&nbsp; I&#8217;ve forgot=
+ to mention
+that the problems is , that the kernel client gets stuck and any other moun=
+t
+tries fail.<o:p></o:p></span></p>
+
+<p class=3DMsoNormal><span style=3D'color:#1F497D'><o:p>&nbsp;</o:p></span>=
+</p>
+
+<p class=3DMsoNormal><span style=3D'color:#1F497D'><o:p>&nbsp;</o:p></span>=
+</p>
+
+<p class=3DMsoNormal><span style=3D'color:#1F497D'>\Roman.<o:p></o:p></span=
+></p>
+
+<p class=3DMsoNormal><span style=3D'color:#1F497D'><o:p>&nbsp;</o:p></span>=
+</p>
+
+<p class=3DMsoNormal><span style=3D'color:#1F497D'><o:p>&nbsp;</o:p></span>=
+</p>
+
+<div>
+
+<p class=3DMsoNormal style=3D'mso-margin-top-alt:auto;mso-margin-bottom-alt=
+:auto'><b><span
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:blue'>Roma=
+n
+Magarshak</span></b><span style=3D'font-size:12.0pt;font-family:"Times New =
+Roman","serif";
+color:#1F497D'> <br>
+</span><span style=3D'font-size:7.5pt;font-family:"Arial","sans-serif";
+color:#7F7F7F'>Intern</span><span style=3D'font-size:12.0pt;font-family:"Ti=
+mes New Roman","serif";
+color:#1F497D'> <br>
+</span><span style=3D'font-size:7.5pt;font-family:"Arial","sans-serif";
+color:#7F7F7F'>SAP Research Israel</span><span style=3D'font-size:12.0pt;
+font-family:"Times New Roman","serif";color:#1F497D'> <br>
+</span><span style=3D'font-size:7.5pt;font-family:"Arial","sans-serif";
+color:gray'>T&nbsp;&nbsp; +972&nbsp;&nbsp; 9 777 9853</span><span
+style=3D'font-size:12.0pt;font-family:"Times New Roman","serif";color:#1F49=
+7D'> <br>
+</span><span style=3D'font-size:7.5pt;font-family:"Arial","sans-serif";
+color:gray'>M&nbsp; +972 54 464 0910</span><span style=3D'font-size:12.0pt;
+font-family:"Times New Roman","serif";color:#1F497D'> <br>
+</span><span style=3D'font-size:7.5pt;font-family:"Arial","sans-serif";
+color:gray'>E&nbsp;&nbsp; <a href=3D"mailto:roman.magarshak@sap.com">mailto=
+:roman.magarshak@sap.com</a></span><span
+style=3D'font-size:12.0pt;font-family:"Times New Roman","serif";color:#1F49=
+7D'><o:p></o:p></span></p>
+
+</div>
+
+<p class=3DMsoNormal><span style=3D'color:#1F497D'><o:p>&nbsp;</o:p></span>=
+</p>
+
+<div style=3D'border:none;border-left:solid blue 1.5pt;padding:0in 0in 0in =
+4.0pt'>
+
+<div>
+
+<div style=3D'border:none;border-top:solid #B5C4DF 1.0pt;padding:3.0pt 0in =
+0in 0in'>
+
+<p class=3DMsoNormal><b><span style=3D'font-size:10.0pt;font-family:"Tahoma=
+","sans-serif"'>From:</span></b><span
+style=3D'font-size:10.0pt;font-family:"Tahoma","sans-serif"'> Magarshak, Ro=
+man
+[mailto:roman.magarshak@sap.com] <br>
+<b>Sent:</b> Thursday, January 14, 2010 5:25 PM<br>
+<b>To:</b> ceph-devel@lists.sourceforge.net<br>
+<b>Cc:</b> Talyansky, Roman<br>
+<b>Subject:</b> [LIKELY JUNK][ceph-devel] Problem on ceph configuration<o:p=
+></o:p></span></p>
+
+</div>
+
+</div>
+
+<p class=3DMsoNormal><o:p>&nbsp;</o:p></p>
 
 <p class=3DMsoNormal>Hi all , <o:p></o:p></p>
 
@@ -209,8 +309,8 @@ o:p></span></b></p>
 ommands
 are executed:<o:p></o:p></span></p>
 
-<p class=3DMsoNormal><span style=3D'color:#1F497D'>$ mkcephfs --allhosts -c=
- /mnt/nfs/ceph/ceph.conf<o:p></o:p></span></p>
+<p class=3DMsoNormal><span style=3D'color:#1F497D'>$ mkcephfs --allhosts -c
+/mnt/nfs/ceph/ceph.conf<o:p></o:p></span></p>
 
 <p class=3DMsoNormal><span style=3D'color:#1F497D'>$ /etc/init.d/ceph -a -c
 /mnt/nfs/ceph/ceph.conf start<o:p></o:p></span></p>
@@ -294,8 +394,8 @@ style=3D'font-size:12.0pt;font-family:"Times New Roman","serif"'> <br>
 color:gray'>M&nbsp; +972 54 464 0910</span><span style=3D'font-size:12.0pt;
 font-family:"Times New Roman","serif"'> <br>
 </span><span style=3D'font-size:7.5pt;font-family:"Arial","sans-serif";
-color:gray'>E&nbsp;&nbsp; <a href=3D"mailto:roman.magarshak@sap.com"><span
-style=3D'color:blue'>mailto:roman.magarshak@sap.com</span></a></span><span
+color:gray'>E&nbsp;&nbsp; <a href=3D"mailto:roman.magarshak@sap.com">mailto=
+:roman.magarshak@sap.com</a></span><span
 style=3D'font-size:12.0pt;font-family:"Times New Roman","serif"'><o:p></o:p=
 ></span></p>
 
@@ -303,14 +403,16 @@ style=3D'font-size:12.0pt;font-family:"Times New Roman","serif"'><o:p></o:p=
 
 </div>
 
+</div>
+
 </body>
 
 </html>
 
---_000_8C507B5E0BA5114E933C3C6E2E9729E005ECB42098DEWDFECCR01wd_--
+--_000_8C507B5E0BA5114E933C3C6E2E9729E005ECB4211BDEWDFECCR01wd_--
 
 
---===============8290918129783070595==
+--===============7740020738304660422==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -322,7 +424,7 @@ world's best and brightest in the field, creating opportunities for Conference
 attendees to learn about information security's most important issues through
 interactions with peers, luminaries and emerging and established companies.
 http://p.sf.net/sfu/rsaconf-dev2dev
---===============8290918129783070595==
+--===============7740020738304660422==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -333,4 +435,4 @@ Ceph-devel mailing list
 Ceph-devel@lists.sourceforge.net
 https://lists.sourceforge.net/lists/listinfo/ceph-devel
 
---===============8290918129783070595==--
+--===============7740020738304660422==--
