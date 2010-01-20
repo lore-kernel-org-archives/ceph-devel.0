@@ -1,53 +1,40 @@
-From: Julia Lawall <julia@diku.dk>
-Subject: [PATCH 8/9] fs/ceph: Eliminate useless code
-Date: Sat, 16 Jan 2010 17:00:10 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1001161659520.28745@ask.diku.dk>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH 8/9] fs/ceph: Eliminate useless code
+Date: Wed, 20 Jan 2010 15:18:49 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1001201518230.29039@cobra.newdream.net>
+References: <Pine.LNX.4.64.1001161659520.28745@ask.diku.dk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755395Ab0APQAY@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@newdream.net>, ceph-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-bounces@lists.sourceforge.net>
+In-Reply-To: <Pine.LNX.4.64.1001161659520.28745@ask.diku.dk>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
+	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
+List-Post: <mailto:ceph-devel@lists.sourceforge.net>
+List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
+	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
+Errors-To: ceph-devel-bounces@lists.sourceforge.net
+To: Julia Lawall <julia@diku.dk>
+Cc: ceph-devel@lists.sourceforge.net, kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-From: Julia Lawall <julia@diku.dk>
+On Sat, 16 Jan 2010, Julia Lawall wrote:
 
-The variable client is initialized twice to the same (side effect-free)
-expression.  Drop one initialization.
+> From: Julia Lawall <julia@diku.dk>
+> 
+> The variable client is initialized twice to the same (side effect-free)
+> expression.  Drop one initialization.
 
-A simplified version of the semantic match that finds this problem is:
-(http://coccinelle.lip6.fr/)
+Applied to the ceph tree.
 
-// <smpl>
-@forall@
-idexpression *x;
-identifier f!=ERR_PTR;
-@@
+Thanks-
+sage
 
-x = f(...)
-... when != x
-(
-x = f(...,<+...x...+>,...)
-|
-* x = f(...)
-)
-// </smpl>
-
-Signed-off-by: Julia Lawall <julia@diku.dk>
-
----
- fs/ceph/addr.c  |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index eab46b0..8686018 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -567,9 +567,9 @@ static int ceph_writepages_start(struct address_space *mapping,
- 	struct inode *inode = mapping->host;
- 	struct backing_dev_info *bdi = mapping->backing_dev_info;
- 	struct ceph_inode_info *ci = ceph_inode(inode);
--	struct ceph_client *client = ceph_inode_to_client(inode);
-+	struct ceph_client *client;
- 	pgoff_t index, start, end;
- 	int range_whole = 0;
- 	int should_loop = 1;
+------------------------------------------------------------------------------
+Throughout its 18-year history, RSA Conference consistently attracts the
+world's best and brightest in the field, creating opportunities for Conference
+attendees to learn about information security's most important issues through
+interactions with peers, luminaries and emerging and established companies.
+http://p.sf.net/sfu/rsaconf-dev2dev
