@@ -1,13 +1,14 @@
-From: Sage Weil <sage@newdream.net>
+From: Craig Dunwoody <cdunwoody@graphstream.com>
 Subject: Re: Slides from Ceph talk at linux.conf.au?
-Date: Tue, 2 Feb 2010 13:43:27 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1002021340380.9187@cobra.newdream.net>
-References: <26595.1265144721@n20.hq.graphstream.com>
+Date: Thu, 04 Feb 2010 03:54:24 -0800
+Message-ID: <4497.1265284464@n20.hq.graphstream.com>
+References: <Pine.LNX.4.64.1002021340380.9187@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <26595.1265144721@n20.hq.graphstream.com>
+In-Reply-To: Your message of "Tue, 02 Feb 2010 13:43:27 PST."
+	<Pine.LNX.4.64.1002021340380.9187@cobra.newdream.net>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -16,31 +17,26 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Craig Dunwoody <cdunwoody@graphstream.com>
-Cc: ceph-devel@lists.sourceforge.net
+To: Sage Weil <sage@newdream.net>
+Cc: cdunwoody@graphstream.com, ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Craig,
 
-On Tue, 2 Feb 2010, Craig Dunwoody wrote:
-> Hello Sage,
-> 
-> Could you make available the slides from your recent Ceph talk at
-> linux.conf.au?  I'd be very interested to see them, and I expect that
-> others here would as well.
+Hi Sage,
 
-I've posted the openoffice presentation at
+sage writes:
+>I've posted the openoffice presentation at
+>http://ceph.newdream.net/presentations/
+>There's also a PDF version, although some slides may look weird due to the 
+>animated figures.
+>I think LCA should have the slides (and video) up soon for all the talks 
+>as well.
 
-	http://ceph.newdream.net/presentations/
+Great presentation, thanks for posting this!
 
-There's also a PDF version, although some slides may look weird due to the 
-animated figures.
+Craig Dunwoody
+GraphStream Incorporated
 
-I think LCA should have the slides (and video) up soon for all the talks 
-as well.
-
-Enjoy!
-sage
 
 ------------------------------------------------------------------------------
 The Planet: dedicated and managed hosting, cloud storage, colocation
