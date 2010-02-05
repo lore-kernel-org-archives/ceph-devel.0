@@ -1,13 +1,13 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: loadable object classes
-Date: Thu, 4 Feb 2010 14:48:53 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1002041437100.24705@cobra.newdream.net>
-References: <261c158e1002041216u593cfef2vb82e4c65504a4af@mail.gmail.com>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Hard links
+Date: Fri, 5 Feb 2010 00:17:05 +0000 (UTC)
+Message-ID: <loom.20100205T000156-623@post.gmane.org>
+References: <26595.1265144721@n20.hq.graphstream.com>
+	<Pine.LNX.4.64.1002021340380.9187@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <261c158e1002041216u593cfef2vb82e4c65504a4af@mail.gmail.com>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -16,62 +16,43 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Jack Culpepper <jackculpepper@gmail.com>
-Cc: ceph-devel@lists.sourceforge.net
+To: ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Jack!
+G'day Sage,
 
-On Thu, 4 Feb 2010, Jack Culpepper wrote:
-> I am trying to understand the loadable class stuff, which seems really
-> cool. I see the objclass directory and cls_crypto.cc seems to be a
-> good example that I could copy and change around.
+Sage Weil <sage <at> newdream.net> writes:
+> I've posted the openoffice presentation at
 > 
-> Does the code in cls_crypto.cc get linked into code at the storage node?
+> 	http://ceph.newdream.net/presentations/
 
-Yeah, the storage daemon will do a dlopen() to link in the .so.
+The last slide (39) mentions "Hard links are rare!".
 
-> Is it run in userspace?
+This isn't necessarily true in a backup system where each
+snapshot hard links to the previous snapshot for files that
+haven't changed, e.g. an 'rsnapshot' installation.
 
-Yep.
+For some hard numbers, one of our server backups has 72316 files
+in yesterday's set, with only 194 not hard linked, and 62141
+have 76 hard links (there are currently 76 days of backups for
+this server).  This is one of 66 servers being backed up to this
+one 4.5 TB storage pool.
 
-> I see an exec() in librados.cc, and then testrados.c seems to be the
-> place where I would add a driver program to call whatever class I add?
+Does the "hard links are rare" assertion imply that ceph may
+have some issues (e.g. hard limits or performance) handling very
+large numbers of hard links?
 
-Right.
- 
-> You link to openssl for the crypto. Is it ok to link to other,
-> possibly huge libraries?
+E.g. I see that hard links are mentioned in your Dec 2007
+dissertation on ceph, along with the use of an anchor table
+which is "managed by a single MDS".  Might this be an issue
+(e.g. a 'hot spot') for situations with a large number of hard
+links such as that described above?
 
-Yeah, so long as you keep in mind it'll get loaded into all instances of 
-the cosd storage daemon.
+Cheers,
 
-> On the test system, will there be a special place to store the
-> libraries my class needs?
+Chris
 
-The system manages the library of loaded classes internally.  You load 
-them into the system with something like
 
-$ ./ceph class add crypto 1 x86-64 -i libcls_crypto.so
-
-where 1 is the version, x86-64 is the arch.  (Note that it may take a few 
-seconds for the classes to propagate to all nodes.)  If you have multiple 
-versions loaded, you need to explicitly activate the version you want.  
-See
-
-$ ./ceph class list
-$ ./ceph class activate crypto 2 
-
-etc.
-
-If you load the libcls_acl.so and libcls_crypto.so classes, testradospp 
-will test them.
-
-It's pretty rough around the edges (hasn't seen a lot of testing).  We're 
-definitely interested in hearing how it works for you (in terms of the api 
-and everything else)!
-
-sage
 
 ------------------------------------------------------------------------------
 The Planet: dedicated and managed hosting, cloud storage, colocation
