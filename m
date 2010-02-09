@@ -1,15 +1,13 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: Hard links
-Date: Sun, 7 Feb 2010 01:09:40 +0000 (UTC)
-Message-ID: <loom.20100207T015701-836@post.gmane.org>
-References: <26595.1265144721@n20.hq.graphstream.com>
-	<Pine.LNX.4.64.1002021340380.9187@cobra.newdream.net>
-	<loom.20100205T000156-623@post.gmane.org>
-	<Pine.LNX.4.64.1002050828120.9306@cobra.newdream.net>
+From: Josef Bacik <josef@redhat.com>
+Subject: [PATCH] CEPH: fix manpages so they are only installed
+	once
+Date: Tue, 9 Feb 2010 10:18:03 -0500
+Message-ID: <20100209151802.GA10045@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
+Content-Disposition: inline
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -21,45 +19,32 @@ Errors-To: ceph-devel-bounces@lists.sourceforge.net
 To: ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-Sage Weil <sage <at> newdream.net> writes:
-> On Fri, 5 Feb 2010, Chris Dunlop wrote:
->> Does the "hard links are rare" assertion imply that ceph may
->> have some issues (e.g. hard limits or performance) handling very
->> large numbers of hard links?
->> 
->> E.g. I see that hard links are mentioned in your Dec 2007
->> dissertation on ceph, along with the use of an anchor table
->> which is "managed by a single MDS".  Might this be an issue
->> (e.g. a 'hot spot') for situations with a large number of hard
->> links such as that described above?
-> 
-> Yes and no.  The performance impact of hard links is low for the 
-> common backup scenario, but the anchor table scaling has not been 
-> address (it's still a single MDS).
-> 
-> What slide 39 doesn't include is a description of the figure.  One of the 
-> most common use scenarios of hard links is what I called 'parallel' links, 
-> where many files in one directory are all hard linked to parallel files in 
-> a different directory, which is exactly what you see with cp -al or 
-> rsnapshot.  In that case, the cost of doing a lookup in the anchor 
-> table is amortized over the whole directory.
-> 
-> The anchor table is still maintained by a single MDS, though, and it's all 
-> in RAM at once, so it will be a scaling problem if the fs has a lot of 
-> hard links.  That just needs some design attention at some point.
+While creating a spec file for CEPH, rpmbuild was complaining because make
+install was copying the manpages in, and then copying them in again.  This is
+because man_MANS and dist_man_MANS are supposed to be two seperate lists that do
+not overlap.  So make install would install all the man pages in the man_MANS
+list and the dist_man_MANS list.  This patch kills the dist_man_MANS thing to
+keep this from happening.  This made rpmbuild happy, which makes me happy :).
+Thanks,
 
-"Just a small matter of designing and coding..."  :-)
+Signed-off-by: Josef Bacik <josef@redhat.com>
+---
+ man/Makefile.am |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
 
-With the current design of the anchor table maintained by a
-single MDS, does this have an impact on the resiliancy of the
-system? Specifically, what happens if that one MDS becomes
-unavailable?
-
-How much memory does the anchor table require?  E.g. for a
-million, or 100 million hard links?
-
-Chris
-
+diff --git a/man/Makefile.am b/man/Makefile.am
+index 56bc6e1..c3e139f 100644
+--- a/man/Makefile.am
++++ b/man/Makefile.am
+@@ -17,5 +17,3 @@ man_MANS = \
+ 	mount.ceph.8 \
+ 	radosgw.8 \
+ 	radosgw_admin.8
+-
+-dist_man_MANS = $(man_MANS)
+\ No newline at end of file
+-- 
+1.6.2.5
 
 
 ------------------------------------------------------------------------------
