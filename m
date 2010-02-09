@@ -1,14 +1,11 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] CEPH: fix manpages so they are only
- installed once
-Date: Tue, 9 Feb 2010 08:28:33 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1002090827060.1321@cobra.newdream.net>
-References: <20100209151802.GA10045@localhost.localdomain>
+Subject: [PATCH] ceph: fix up async vmtruncate race
+Date: Tue,  9 Feb 2010 15:26:08 -0800
+Message-ID: <1265757968-29999-1-git-send-email-sage@newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <20100209151802.GA10045@localhost.localdomain>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -17,83 +14,82 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Josef Bacik <josef@redhat.com>
-Cc: ceph-devel@lists.sourceforge.net
+To: ceph-devel@lists.sf.net
+Cc: Sage Weil <sage@newdream.net>
 List-Id: ceph-devel.vger.kernel.org
 
-Aha, I was just trying to fix this (with the debian build).  I had to 
-use dist_man_MANS, though, since the *.8 files don't have to be built.  
-Pushed.
+Use a helper to ensure that we properly maintain the i_truncate_pending
+counter when we queue an async truncation.
 
-Thanks!
-sage
+Signed-off-by: Sage Weil <sage@newdream.net>
+---
+ fs/ceph/caps.c  |    4 +---
+ fs/ceph/inode.c |   25 ++++++++++++++++++++++---
+ 2 files changed, 23 insertions(+), 6 deletions(-)
 
-
-diff --git a/man/Makefile.am b/man/Makefile.am
-index 56bc6e1..c721023 100644
---- a/man/Makefile.am
-+++ b/man/Makefile.am
-@@ -1,6 +1,6 @@
- AUTOMAKE_OPTIONS = gnu
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 7f4841c..726f7c8 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -2479,9 +2479,7 @@ static void handle_cap_trunc(struct inode *inode,
+ 	spin_unlock(&inode->i_lock);
  
--man_MANS = \
-+dist_man_MANS = \
-        cosd.8 \
-        cmds.8 \
-        cmon.8 \
-@@ -17,5 +17,3 @@ man_MANS = \
-        mount.ceph.8 \
-        radosgw.8 \
-        radosgw_admin.8
--
--dist_man_MANS = $(man_MANS)
+ 	if (queue_trunc)
+-		if (queue_work(ceph_client(inode->i_sb)->trunc_wq,
+-			       &ci->i_vmtruncate_work))
+-			igrab(inode);
++		__ceph_queue_vmtruncate(inode);
+ }
+ 
+ /*
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index e75847d..37f9be8 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -675,9 +675,7 @@ no_change:
+ 
+ 	/* queue truncate if we saw i_size decrease */
+ 	if (queue_trunc)
+-		if (queue_work(ceph_client(inode->i_sb)->trunc_wq,
+-			       &ci->i_vmtruncate_work))
+-			igrab(inode);
++		__ceph_queue_vmtruncate(inode);
+ 
+ 	/* populate frag tree */
+ 	/* FIXME: move me up, if/when version reflects fragtree changes */
+@@ -1321,6 +1319,27 @@ void ceph_vmtruncate_work(struct work_struct *work)
+ }
+ 
+ /*
++ * Queue an async vmtruncate.  If we fail to queue work, decrement the
++ * pending counter (which the caller incremented when we decided to
++ * try to queue).
++ */
++void __ceph_queue_vmtruncate(struct inode *inode)
++{
++	struct ceph_inode_info *ci = ceph_inode(inode);
++
++	if (queue_work(ceph_client(inode->i_sb)->trunc_wq,
++		       &ci->i_vmtruncate_work)) {
++		igrab(inode);
++	} else {
++		spin_lock(&inode->i_lock);
++		ci->i_truncate_pending--;
++		spin_unlock(&inode->i_lock);
++		dout("__ceph_queue_vmtruncate failed to queue, pending=%d\n",
++		     ci->i_truncate_pending);
++	}
++}
++
++/*
+  * called with i_mutex held.
+  *
+  * Make sure any pending truncation is applied before doing anything
+-- 
+1.5.6.5
 
-On Tue, 9 Feb 2010, Josef Bacik wrote:
-
-> While creating a spec file for CEPH, rpmbuild was complaining because make
-> install was copying the manpages in, and then copying them in again.  This is
-> because man_MANS and dist_man_MANS are supposed to be two seperate lists that do
-> not overlap.  So make install would install all the man pages in the man_MANS
-> list and the dist_man_MANS list.  This patch kills the dist_man_MANS thing to
-> keep this from happening.  This made rpmbuild happy, which makes me happy :).
-> Thanks,
-> 
-> Signed-off-by: Josef Bacik <josef@redhat.com>
-> ---
->  man/Makefile.am |    2 --
->  1 files changed, 0 insertions(+), 2 deletions(-)
-> 
-> diff --git a/man/Makefile.am b/man/Makefile.am
-> index 56bc6e1..c3e139f 100644
-> --- a/man/Makefile.am
-> +++ b/man/Makefile.am
-> @@ -17,5 +17,3 @@ man_MANS = \
->  	mount.ceph.8 \
->  	radosgw.8 \
->  	radosgw_admin.8
-> -
-> -dist_man_MANS = $(man_MANS)
-> \ No newline at end of file
-> -- 
-> 1.6.2.5
-> 
-> 
-> ------------------------------------------------------------------------------
-> The Planet: dedicated and managed hosting, cloud storage, colocation
-> Stay online with enterprise data centers and the best network in the business
-> Choose flexible plans and management services without long-term contracts
-> Personal 24x7 support from experience hosting pros just a phone call away.
-> http://p.sf.net/sfu/theplanet-com
-> _______________________________________________
-> Ceph-devel mailing list
-> Ceph-devel@lists.sourceforge.net
-> https://lists.sourceforge.net/lists/listinfo/ceph-devel
-> 
-> 
 
 ------------------------------------------------------------------------------
-The Planet: dedicated and managed hosting, cloud storage, colocation
-Stay online with enterprise data centers and the best network in the business
-Choose flexible plans and management services without long-term contracts
-Personal 24x7 support from experience hosting pros just a phone call away.
-http://p.sf.net/sfu/theplanet-com
+SOLARIS 10 is the OS for Data Centers - provides features such as DTrace,
+Predictive Self Healing and Award Winning ZFS. Get Solaris 10 NOW
+http://p.sf.net/sfu/solaris-dev2dev
