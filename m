@@ -1,15 +1,10 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Write operation is stuck
-Date: Tue, 16 Feb 2010 10:35:00 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1002161032280.31640@cobra.newdream.net>
-References: <C6A64D82E3A5D24B949315CFBC1FA1AD0729EFCD7D@DEWDFECCR01.wdf.sap.corp>
-	<Pine.LNX.4.64.1002101332500.32089@cobra.newdream.net>
-	<C6A64D82E3A5D24B949315CFBC1FA1AD072A0E1D74@DEWDFECCR01.wdf.sap.corp>
+Subject: v0.19 released
+Date: Wed, 17 Feb 2010 14:47:31 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1002171440270.10839@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-294301310-1266446851=:10839"
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <C6A64D82E3A5D24B949315CFBC1FA1AD072A0E1D74@DEWDFECCR01.wdf.sap.corp>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -18,50 +13,99 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: "Talyansky, Roman" <roman.talyansky@sap.com>
-Cc: "ceph-devel@lists.sourceforge.net" <ceph-devel@lists.sourceforge.net>
+To: ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 16 Feb 2010, Talyansky, Roman wrote:
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-> Hi Sage,
-> 
-> I am trying to reproduce the hang with the latest client and servers.
-> I am able to start the servers, however mount fails with input/output error 5. The dmesg listing shows the following info:
-> 
-> [17008.244739] ceph: loaded 0.18.0 (mon/mds/osd proto 15/30/22)
-> [17015.888143] ceph: mon0 10.55.147.70:6789 connection failed
-> [17025.880170] ceph: mon0 10.55.147.70:6789 connection failed
-> [17035.880121] ceph: mon0 10.55.147.70:6789 connection failed
-> [17045.880189] ceph: mon0 10.55.147.70:6789 connection failed
-> [17055.880130] ceph: mon0 10.55.147.70:6789 connection failed
-> [17065.880113] ceph: mon0 10.55.147.70:6789 connection failed
-> [17075.880170] ceph: mon0 10.55.147.70:6789 connection failed
-> 
-> The server is reachable, as the following command output shows:
-> 
-> $ nc 10.55.147.83 6789
-> ceph v027
+--557981400-294301310-1266446851=:10839
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-It looks like dmesg shows it trying to connect to the monitor at .70, but 
-you tested .83?
+The v0.19 release is finally here.  The focus this past cycle was on=20
+stability and the disk format, and things have improved greatly in that=20
+area.  Our plan is to make any future disk format changes roll forward, so=
+=20
+that users won=E2=80=99t need to rebuild their file systems.  The protocol =
+has=20
+also grown feature bits that so it is at least possible to make protocol=20
+changes transparent; whether we do so or not will depend on the severity=20
+of the change and cost of maintaining compatibility.
 
-> I started running the experiments with ceph 0.18 using the 
-> configuration, where clients and servers run on separate nodes. It turns 
-> out that the performance is extremely bad. Looking at dmesg trace I see 
-> ceph-related faults (the partial trace is attached to the email).
+Overall, things are looking good.  If you've been standing on the=20
+sidelines waiting for something more stable to test, now is a good time to=
+=20
+try things out.  There are some lingering OSD performance problems (see=20
+below), and we are still a long ways off from something we would recommend=
+=20
+for use in a production environment, but otherwise this release is looking=
+=20
+pretty good for evaluation purposes.
 
-The oops in the attached trace.txt was fixed last week in the unstable 
-code.  It also looks like the IO is synchronous, which may have something 
-to do with your performance.  Are you mounting with -o sync or using 
-direct IO, or are multiple clients reading and writing to the same file or 
-something?
+Changes since v0.18 include:
 
-Thanks-
+    * Stabilized disk format, with feature bits
+    * Wire protocol feature bits
+    * structure encoding versioning throughout
+    * msgr: code simplification, cleanup, bug fixes
+    * truncation fixes
+    * debian: packaging improvements
+    * rados: pool deletion, misc fixes
+    * osd: recovery fixes, journaling fixes
+    * lots of bug fixes (osd, mds, client)
+
+On the kernel client side of things,
+
+    * Support for Kerberos-like =E2=80=98cephx=E2=80=99 authentication
+    * sync/directio read/write bug fixes (multiple client access to a=20
+      single file)
+    * writeback congestion control
+    * mds ops interruptible (with control-c)
+    * lots of code cleanup
+    * lots of bug fixes
+
+Notably, there are major revisions underway with the way the storage=20
+daemon cosd interacts with btrfs, and these are sufficiently intrusive and=
+=20
+untested that they did not make it into this release.  They should be in=20
+v0.20.  That means that OSD performance is still not great in v0.19.  (So=
+=20
+far performance with the new code is much much better.)
+
+The primary focus areas for v0.20 will be
+
+    * OSD performance and btrfs interface changes
+    * Clustered MDS
+
+Relevant URLs:
+
+    * Direct download at http://ceph.newdream.net/download/ceph-0.19.tar.gz
+    * For Debian packages see http://ceph.newdream.net/wiki/Debian
+
+Enjoy!
 sage
-
+--557981400-294301310-1266446851=:10839
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
 ------------------------------------------------------------------------------
-SOLARIS 10 is the OS for Data Centers - provides features such as DTrace,
-Predictive Self Healing and Award Winning ZFS. Get Solaris 10 NOW
-http://p.sf.net/sfu/solaris-dev2dev
+Download Intel&reg; Parallel Studio Eval
+Try the new software tools for yourself. Speed compiling, find bugs 
+proactively, and fine-tune applications for parallel performance. 
+See why Intel Parallel Studio got high marks during beta.
+http://p.sf.net/sfu/intel-sw-dev
+--557981400-294301310-1266446851=:10839
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+Ceph-devel mailing list
+Ceph-devel@lists.sourceforge.net
+https://lists.sourceforge.net/lists/listinfo/ceph-devel
+
+--557981400-294301310-1266446851=:10839--
