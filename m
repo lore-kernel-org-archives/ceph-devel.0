@@ -1,10 +1,14 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.19 released
-Date: Wed, 17 Feb 2010 14:47:31 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1002171440270.10839@cobra.newdream.net>
+From: Andreas Hirczy <ahi@itp.tugraz.at>
+Subject: Re: v0.19 released
+Date: Thu, 18 Feb 2010 13:22:57 +0100
+Message-ID: <8atytevila.fsf@faepop01.tu-graz.ac.at>
+References: <Pine.LNX.4.64.1002171440270.10839@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-294301310-1266446851=:10839"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
+In-Reply-To: <Pine.LNX.4.64.1002171440270.10839@cobra.newdream.net> (Sage
+	Weil's message of "Wed, 17 Feb 2010 14:47:31 -0800 (PST)")
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -13,83 +17,115 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: ceph-devel@lists.sf.net
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Sage Weil <sage@newdream.net> writes:
 
---557981400-294301310-1266446851=:10839
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+> The v0.19 release is finally here.  The focus this past cycle was on 
+> ...
+>     * For Debian packages see http://ceph.newdream.net/wiki/Debian
 
-The v0.19 release is finally here.  The focus this past cycle was on=20
-stability and the disk format, and things have improved greatly in that=20
-area.  Our plan is to make any future disk format changes roll forward, so=
-=20
-that users won=E2=80=99t need to rebuild their file systems.  The protocol =
-has=20
-also grown feature bits that so it is at least possible to make protocol=20
-changes transparent; whether we do so or not will depend on the severity=20
-of the change and cost of maintaining compatibility.
+Hi!
 
-Overall, things are looking good.  If you've been standing on the=20
-sidelines waiting for something more stable to test, now is a good time to=
-=20
-try things out.  There are some lingering OSD performance problems (see=20
-below), and we are still a long ways off from something we would recommend=
-=20
-for use in a production environment, but otherwise this release is looking=
-=20
-pretty good for evaluation purposes.
+It seems the debian packages for "ceph-kclient-source" miss a
+Makefile. I transplanted one from the git repo; this works as outlined
+in <http://ceph.newdream.net/wiki/Building_kernel_client>, but not with
+"make-kpkg":
 
-Changes since v0.18 include:
+###########################################
+make[1]: Entering directory `/usr/src/modules/ceph'
+fakeroot /usr/bin/make -w -f debian/rules kdist_clean kdist_config binary-modules
+make[2]: Entering directory `/usr/src/modules/ceph'
+make[3]: Entering directory `/usr/src/modules/ceph'
+/usr/bin/make -C /usr/src/linux-2.6.32.7 M=/usr/src/modules/ceph clean
+make[4]: Entering directory `/usr/src/linux-2.6.32.7'
+make[4]: Leaving directory `/usr/src/linux-2.6.32.7'
+make[3]: Leaving directory `/usr/src/modules/ceph'
+make[2]: Nothing to be done for `kdist_config'.
+for templ in ; do \
+    cp $templ `echo $templ | sed -e 's/_KVERS_/2.6.32.8/g'` ; \
+  done
+for templ in `ls debian/*.modules.in` ; do \
+    test -e ${templ%.modules.in}.backup || cp ${templ%.modules.in} ${templ%.modules.in}.backup 2>/dev/null || true; \
+    sed -e 's/##KVERS##/2.6.32.8/g ;s/#KVERS#/2.6.32.8/g ; s/_KVERS_/2.6.32.8/g ; s/##KDREV##/itp.1/g ; s/#KDREV#/itp.1/g ; s/_KDREV_/itp.1/g  ' < $templ > ${templ%.modules.in}; \
+  done
+ls: cannot access debian/*.modules.in: No such file or directory
+dh_testroot
+dh_clean -k
+/usr/bin/make KERNELDIR=/usr/src/linux-2.6.32.7 all
+make[3]: Entering directory `/usr/src/modules/ceph'
+/usr/bin/make -C /usr/src/linux-2.6.32.7 M=/usr/src/modules/ceph CONFIG_CEPH_FS=m modules
+make[4]: Entering directory `/usr/src/linux-2.6.32.7'
+  CC [M]  /usr/src/modules/ceph/super.o
+  CC [M]  /usr/src/modules/ceph/inode.o
+  CC [M]  /usr/src/modules/ceph/dir.o
+  CC [M]  /usr/src/modules/ceph/file.o
+  CC [M]  /usr/src/modules/ceph/addr.o
+  CC [M]  /usr/src/modules/ceph/ioctl.o
+  CC [M]  /usr/src/modules/ceph/export.o
+  CC [M]  /usr/src/modules/ceph/caps.o
+  CC [M]  /usr/src/modules/ceph/snap.o
+  CC [M]  /usr/src/modules/ceph/xattr.o
+  CC [M]  /usr/src/modules/ceph/messenger.o
+  CC [M]  /usr/src/modules/ceph/msgpool.o
+  CC [M]  /usr/src/modules/ceph/buffer.o
+  CC [M]  /usr/src/modules/ceph/pagelist.o
+  CC [M]  /usr/src/modules/ceph/mds_client.o
+  CC [M]  /usr/src/modules/ceph/mdsmap.o
+  CC [M]  /usr/src/modules/ceph/mon_client.o
+  CC [M]  /usr/src/modules/ceph/osd_client.o
+  CC [M]  /usr/src/modules/ceph/osdmap.o
+  CC [M]  /usr/src/modules/ceph/crush/crush.o
+  CC [M]  /usr/src/modules/ceph/crush/mapper.o
+  CC [M]  /usr/src/modules/ceph/crush/hash.o
+  CC [M]  /usr/src/modules/ceph/debugfs.o
+  CC [M]  /usr/src/modules/ceph/auth.o
+  CC [M]  /usr/src/modules/ceph/auth_none.o
+  CC [M]  /usr/src/modules/ceph/crypto.o
+  CC [M]  /usr/src/modules/ceph/armor.o
+  CC [M]  /usr/src/modules/ceph/auth_x.o
+  CC [M]  /usr/src/modules/ceph/ceph_fs.o
+  CC [M]  /usr/src/modules/ceph/ceph_strings.o
+  CC [M]  /usr/src/modules/ceph/ceph_hash.o
+  CC [M]  /usr/src/modules/ceph/ceph_frag.o
+  LD [M]  /usr/src/modules/ceph/ceph.o
+  Building modules, stage 2.
+  MODPOST 1 modules
+  CC      /usr/src/modules/ceph/ceph.mod.o
+  LD [M]  /usr/src/modules/ceph/ceph.ko
+make[4]: Leaving directory `/usr/src/linux-2.6.32.7'
+make[3]: Leaving directory `/usr/src/modules/ceph'
+mkdir -p ./debian/ceph-modules-2.6.32.8/lib/modules/2.6.32.8/kernel/fs/ceph
+cp ceph.ko ./debian/ceph-modules-2.6.32.8/lib/modules/2.6.32.8/kernel/fs/ceph/
+dh_installdocs
+dh_installchangelogs
+dh_compress
+dh_fixperms
+dh_strip
+dh_installmodules
+dh_install
+dh_install: ceph-kclient-source missing files (usr/src/*), aborting
+make[2]: *** [binary-modules] Error 1
+make[2]: Leaving directory `/usr/src/modules/ceph'
+make[1]: *** [kdist_build] Error 2
+make[1]: Leaving directory `/usr/src/modules/ceph'
+Module /usr/src/modules/ceph failed.
+Perhaps /usr/src/modules/ceph does not understand --rootcmd?
+If you see messages that indicate that it is not
+in fact being built as root, please file a bug 
+against /usr/src/modules/ceph.
+Hit return to Continue
+###########################################
 
-    * Stabilized disk format, with feature bits
-    * Wire protocol feature bits
-    * structure encoding versioning throughout
-    * msgr: code simplification, cleanup, bug fixes
-    * truncation fixes
-    * debian: packaging improvements
-    * rados: pool deletion, misc fixes
-    * osd: recovery fixes, journaling fixes
-    * lots of bug fixes (osd, mds, client)
-
-On the kernel client side of things,
-
-    * Support for Kerberos-like =E2=80=98cephx=E2=80=99 authentication
-    * sync/directio read/write bug fixes (multiple client access to a=20
-      single file)
-    * writeback congestion control
-    * mds ops interruptible (with control-c)
-    * lots of code cleanup
-    * lots of bug fixes
-
-Notably, there are major revisions underway with the way the storage=20
-daemon cosd interacts with btrfs, and these are sufficiently intrusive and=
-=20
-untested that they did not make it into this release.  They should be in=20
-v0.20.  That means that OSD performance is still not great in v0.19.  (So=
-=20
-far performance with the new code is much much better.)
-
-The primary focus areas for v0.20 will be
-
-    * OSD performance and btrfs interface changes
-    * Clustered MDS
-
-Relevant URLs:
-
-    * Direct download at http://ceph.newdream.net/download/ceph-0.19.tar.gz
-    * For Debian packages see http://ceph.newdream.net/wiki/Debian
-
-Enjoy!
-sage
---557981400-294301310-1266446851=:10839
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Best regards,
+Andreas
+-- 
+Andreas Hirczy <ahi@itp.tugraz.at>                   http://itp.tugraz.at/~ahi/
+Graz University of Technology                        phone: +43/316/873-   8190
+Institute of Theoretical and Computational Physics     fax: +43/316/873-10 8190
+Petersgasse 16, A-8010 Graz                         mobile: +43/664/859 23 57
 
 ------------------------------------------------------------------------------
 Download Intel&reg; Parallel Studio Eval
@@ -97,15 +133,3 @@ Try the new software tools for yourself. Speed compiling, find bugs
 proactively, and fine-tune applications for parallel performance. 
 See why Intel Parallel Studio got high marks during beta.
 http://p.sf.net/sfu/intel-sw-dev
---557981400-294301310-1266446851=:10839
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-Ceph-devel mailing list
-Ceph-devel@lists.sourceforge.net
-https://lists.sourceforge.net/lists/listinfo/ceph-devel
-
---557981400-294301310-1266446851=:10839--
