@@ -1,7 +1,7 @@
-From: Sage Weil <sage@newdream.net>
+From: "Talyansky, Roman" <roman.talyansky@sap.com>
 Subject: Re: Write operation is stuck
-Date: Wed, 24 Feb 2010 10:43:34 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1002241039500.17054@cobra.newdream.net>
+Date: Thu, 25 Feb 2010 00:21:53 +0100
+Message-ID: <C6A64D82E3A5D24B949315CFBC1FA1AD072A3B58D6@DEWDFECCR01.wdf.sap.corp>
 References: <C6A64D82E3A5D24B949315CFBC1FA1AD0729EFCD7D@DEWDFECCR01.wdf.sap.corp>
 	<Pine.LNX.4.64.1002101332500.32089@cobra.newdream.net>
 	<C6A64D82E3A5D24B949315CFBC1FA1AD072A0E1D74@DEWDFECCR01.wdf.sap.corp>
@@ -13,11 +13,13 @@ References: <C6A64D82E3A5D24B949315CFBC1FA1AD0729EFCD7D@DEWDFECCR01.wdf.sap.corp
 	<C6A64D82E3A5D24B949315CFBC1FA1AD072A3B5200@DEWDFECCR01.wdf.sap.corp>
 	<Pine.LNX.4.64.1002240654191.1887@cobra.newdream.net>
 	<C6A64D82E3A5D24B949315CFBC1FA1AD072A3B5605@DEWDFECCR01.wdf.sap.corp>
+	<Pine.LNX.4.64.1002241039500.17054@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <C6A64D82E3A5D24B949315CFBC1FA1AD072A3B5605@DEWDFECCR01.wdf.sap.corp>
+In-Reply-To: <Pine.LNX.4.64.1002241039500.17054@cobra.newdream.net>
+Content-Language: en-US
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -26,9 +28,24 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: "Talyansky, Roman" <roman.talyansky@sap.com>
+To: Sage Weil <sage@newdream.net>
 Cc: "ceph-devel@lists.sourceforge.net" <ceph-devel@lists.sourceforge.net>
 List-Id: ceph-devel.vger.kernel.org
+
+Hi Sage,
+
+That's right the file was corrupted. Currently I have extremely slow network. So probably I'll open access to the non-corrupted file tomorrow. 
+Meanwhile the system with higher trace level also hangs and I'll be able to send you more informative traces. 
+
+Thanks,
+Roman
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net] 
+Sent: Wednesday, February 24, 2010 8:44 PM
+To: Talyansky, Roman
+Cc: ceph-devel@lists.sourceforge.net
+Subject: Re: [ceph-devel] Write operation is stuck
 
 Hi Roman,
 
