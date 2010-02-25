@@ -1,7 +1,7 @@
 From: "Talyansky, Roman" <roman.talyansky@sap.com>
 Subject: Re: Write operation is stuck
-Date: Thu, 25 Feb 2010 00:21:53 +0100
-Message-ID: <C6A64D82E3A5D24B949315CFBC1FA1AD072A3B58D6@DEWDFECCR01.wdf.sap.corp>
+Date: Thu, 25 Feb 2010 11:07:08 +0100
+Message-ID: <C6A64D82E3A5D24B949315CFBC1FA1AD072A41A3D0@DEWDFECCR01.wdf.sap.corp>
 References: <C6A64D82E3A5D24B949315CFBC1FA1AD0729EFCD7D@DEWDFECCR01.wdf.sap.corp>
 	<Pine.LNX.4.64.1002101332500.32089@cobra.newdream.net>
 	<C6A64D82E3A5D24B949315CFBC1FA1AD072A0E1D74@DEWDFECCR01.wdf.sap.corp>
@@ -34,10 +34,10 @@ List-Id: ceph-devel.vger.kernel.org
 
 Hi Sage,
 
-That's right the file was corrupted. Currently I have extremely slow network. So probably I'll open access to the non-corrupted file tomorrow. 
-Meanwhile the system with higher trace level also hangs and I'll be able to send you more informative traces. 
+The file with the new traces can be found at https://sapmats-de.sap-ag.de/download/download.cgi?id=A90NAAZ5KZG8IXQP7Z9Z084IKX6HF47GE2OEEPT740RBRSGJNO
 
 Thanks,
+
 Roman
 
 -----Original Message-----
