@@ -1,7 +1,7 @@
 From: Sage Weil <sage@newdream.net>
-Subject: users, 2.6.34
-Date: Tue, 2 Mar 2010 11:27:11 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1003011019020.10267@cobra.newdream.net>
+Subject: debian
+Date: Tue, 2 Mar 2010 13:37:57 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1003021257250.27181@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -17,24 +17,16 @@ Errors-To: ceph-devel-bounces@lists.sourceforge.net
 To: ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+The ceph.newdream.net debian repository is now being built with reprepro, 
+and has been cleaned up some.  Your sources.list entries should look like
 
-The 2.6.34 merge window is open, and I will be sending another request to 
-Linus shortly asking him to merge the Ceph kernel client.  I'd like to be 
-able to accurate describe the current user base and level of interest.
+deb http://ceph.newdream.net/debian/ $dist $what
 
-If you've tried v0.19, can you take a minute to let us know what your 
-experience has been?  Did you get the system up and running?  Were there 
-problems along the way?  What size system are you testing and/or planning?
+where $dist is lenny, squeeze, or sid (it shouldn't much matter, since the 
+packages are identical aside from the build environment), and $what is 
+either ceph-stable (last release) or ceph-unstable (recent git snapshot).
 
-If you haven't tried the code recently, is there anything specific you're 
-waiting to see before you do?
-
-The next Fedora will include packages for the Ceph server side.  It 
-probably won't include the kernel client, unless it goes upstream first.  
-Is there interest in seeing packages build for other distributions?
-
-Thanks-
+If you see any problems, let me know!
 sage
 
 ------------------------------------------------------------------------------
