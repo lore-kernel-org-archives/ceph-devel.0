@@ -1,7 +1,7 @@
 From: Sage Weil <sage@newdream.net>
-Subject: v0.19.1 stable updates
-Date: Tue, 2 Mar 2010 11:19:46 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1003021113360.27180@cobra.newdream.net>
+Subject: users, 2.6.34
+Date: Tue, 2 Mar 2010 11:27:11 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1003011019020.10267@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -17,48 +17,25 @@ Errors-To: ceph-devel-bounces@lists.sourceforge.net
 To: ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-Hi all,
+Hi,
 
-We've pushed out some stable updates to master granches of the git trees 
-and tagged a 0.19.1 stable release.  For the server side, the fixes are 
-minor: mainly a problem with /etc/init.d/ceph when /bin/sh is dash 
-(ubuntu) and a rare mds crash.  The kernel client fixes are a bit more 
-significant: mainly a bad write(2) return value and a crash when snapshots 
-were deleted.
+The 2.6.34 merge window is open, and I will be sending another request to 
+Linus shortly asking him to merge the Ceph kernel client.  I'd like to be 
+able to accurate describe the current user base and level of interest.
 
+If you've tried v0.19, can you take a minute to let us know what your 
+experience has been?  Did you get the system up and running?  Were there 
+problems along the way?  What size system are you testing and/or planning?
+
+If you haven't tried the code recently, is there anything specific you're 
+waiting to see before you do?
+
+The next Fedora will include packages for the Ceph server side.  It 
+probably won't include the kernel client, unless it goes upstream first.  
+Is there interest in seeing packages build for other distributions?
+
+Thanks-
 sage
-
--- server side ------------------
-
-Sage Weil (8):
-      debian: mount.ceph in /sbin, not /usr/sbin
-      Makefile: include debian/
-      Makefile: fix /sbin hack
-      mds: fix sessionmap decoding
-      init-ceph: don't barf on dash when no command
-      cauthtool: --caps fn alone is a command
-      debian: new release, push, build, publish scripts
-      0.19.1
-
-Yehuda Sadeh (1):
-      automake: fix mount sbin dir when configured with prefix
-
-
--- kernel client -----------------
-
-Alexander Beregalov (1):
-      ceph: move dereference after NULL test
-
-Sage Weil (5):
-      ceph: fix handle_forward parsing
-      ceph: reset front len on return to msgpool; BUG on mismatched front iov
-      ceph: set osd request message front length correctly
-      ceph: fix osdmap decoding when pools include (removed) snaps
-      ceph: v0.19.1 stable release
-
-Yehuda Sadeh (1):
-      ceph: don't clobber write return value when using O_SYNC
-
 
 ------------------------------------------------------------------------------
 Download Intel&#174; Parallel Studio Eval
