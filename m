@@ -1,14 +1,13 @@
-From: Sage Weil <sage@newdream.net>
+From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
 Subject: Re: users, 2.6.34
-Date: Tue, 2 Mar 2010 16:27:20 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1003021619380.27179@cobra.newdream.net>
+Date: Wed, 3 Mar 2010 01:10:14 +0000
+Message-ID: <20100303011014.f4fb95b3.ctpm@ist.utl.pt>
 References: <Pine.LNX.4.64.1003011019020.10267@cobra.newdream.net>
-	<a4423d671003021406s57ab89c5j9e1537a99914531@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED;
-	BOUNDARY="557981400-1751934109-1267576040=:27179"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <a4423d671003021406s57ab89c5j9e1537a99914531@mail.gmail.com>
+In-Reply-To: <Pine.LNX.4.64.1003011019020.10267@cobra.newdream.net>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -17,84 +16,36 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Alexander Beregalov <a.beregalov@gmail.com>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-1751934109-1267576040=:27179
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On Wed, 3 Mar 2010, Alexander Beregalov wrote:
-> On 2 March 2010 22:27, Sage Weil <sage@newdream.net> wrote:
-> > Hi,
-> >
-> > The 2.6.34 merge window is open, and I will be sending another request =
-to
-> > Linus shortly asking him to merge the Ceph kernel client. =A0I'd like t=
-o be
-> > able to accurate describe the current user base and level of interest.
-> >
-> > If you've tried v0.19, can you take a minute to let us know what your
-> > experience has been? =A0Did you get the system up and running? =A0Were =
-there
-> > problems along the way? =A0What size system are you testing and/or plan=
-ning?
->=20
-> Hi Sage
-> I tried Ceph two weeks ago on two hosts (one mds, two osds, two
-> clients), but performance was not so good as I expected. I used
-> dbench. Perhaps the reason was high logging traffic, but I did not try
-> to turn it off. I am going to test it on real world task - kernel
-> building, but sorry, I do not have time to look at it now.
-
-If you have any logging turned on, that will definitely slow things down a=
-=20
-lot.
-
-> My dream is to have a parallel-distributed FS with good performance on
-> small files. We have few tens (up to hundred) of hosts for distributed
-> compilation tasks (that's why small files) and others (not so small
-> files). OSDs should work as clients as well.
-> Now we run on NFSv3 and fight with it (not atomic, not coherent, hard
-> to scale). But NFS performance is not awful really, new FS should work
-> at least not worse than it (I mean aggregated performance).
-
-If you are comparing NFS vs ceph on equivalent hardware (single server,=20
-with single mds+osd), the performance will be similar, or a bit slower=20
-with ceph (it is not heavily optimized).  The real advantage is that=20
-overall system performance will scale linearly as you go from one server=20
-to 10's or 100's of servers. For a compilation workload, performance will=
-=20
-be bounded mostly by metadata operations.  If you have lots of clients,=20
-you should see quite a bit of benefit from multiple MDSs.
-
-Anyway, thanks for the feedback!
-sage
---557981400-1751934109-1267576040=:27179
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-------------------------------------------------------------------------------
-Download Intel&#174; Parallel Studio Eval
-Try the new software tools for yourself. Speed compiling, find bugs
-proactively, and fine-tune applications for parallel performance.
-See why Intel Parallel Studio got high marks during beta.
-http://p.sf.net/sfu/intel-sw-dev
---557981400-1751934109-1267576040=:27179
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-Ceph-devel mailing list
-Ceph-devel@lists.sourceforge.net
-https://lists.sourceforge.net/lists/listinfo/ceph-devel
-
---557981400-1751934109-1267576040=:27179--
+Ck9uIFR1ZSwgMiBNYXIgMjAxMCAxMToyNzoxMSAtMDgwMCAoUFNUKSBTYWdlIFdlaWwgPHNhZ2VA
+bmV3ZHJlYW0ubmV0PiB3cm90ZToKPiBIaSwKPiAKPiBUaGUgMi42LjM0IG1lcmdlIHdpbmRvdyBp
+cyBvcGVuLCBhbmQgSSB3aWxsIGJlIHNlbmRpbmcgYW5vdGhlciByZXF1ZXN0IHRvIAo+IExpbnVz
+IHNob3J0bHkgYXNraW5nIGhpbSB0byBtZXJnZSB0aGUgQ2VwaCBrZXJuZWwgY2xpZW50LiAgSSdk
+IGxpa2UgdG8gYmUgCj4gYWJsZSB0byBhY2N1cmF0ZSBkZXNjcmliZSB0aGUgY3VycmVudCB1c2Vy
+IGJhc2UgYW5kIGxldmVsIG9mIGludGVyZXN0Lgo+IAoKIEhpIFNhZ2UsCgogRldJVywgd2Ugd2ls
+bCBiZSB0ZXN0aW5nIENlcGggd2l0aCA2IG9yIG1vcmUgT1NEcyBhIDJ+MyBNRFNzIGluIHRoZQpu
+ZXh0IDIgbW9udGhzIChhbmQgYmV5b25kKS4gVGhlIGJhc2ljIGlkZWEgaXMgdG8gZXZhbHVhdGUg
+Q2VwaCBhcyBhCmNhbmRpZGF0ZSBmb3IgZnV0dXJlIHVzZSBpbiBhIG1peGVkIHdvcmtsb2FkIHVu
+aXZlcnNpdHkgZW52aXJvbm1lbnQgd2l0aApzZXZlcmFsIGRvemVucyBvZiBsaW51eCBtYWNoaW5l
+cyAocGh5c2ljYWwgYW5kIHZpcnR1YWwpIGFuZCBtdWx0aXBsZQpTYW1iYSAiZ2F0ZXdheXMiIGZv
+ciBhYm91dCAyNTAgV2luZG93cyB3b3Jrc3RhdGlvbnMuCgogSSdkIGFsc28gbGlrZSB0byBwb2lu
+dCBvdXQgdGhhdCBiZXNpZGVzIHRoZSByb2J1c3RuZXNzIGFuZCBwZXJmb3JtYW5jZQphZHZhbnRh
+Z2VzIHRoYXQgQ2VwaCBzaG91bGQgaGF2ZSBvdmVyIGFuIE5GU3Y0IG9yIEFGUyBzZXR1cCwgd2Ug
+YXJlCmVzcGVjaWFsbHkgaW50ZXJlc3RlZCBpbiBLZXJiZXJvcyBzdXBwb3J0IGFuZCBBQ0wgc3Vw
+cG9ydCAobWF5YmUgTkZTdjQKZXF1aXZhbGVudCBBQ0xzPyksIGFuZCB3aWxsIGJlIGdsYWQgdG8g
+dGVzdCBhbnkgZmVhdHVyZXMvaW1wcm92ZW1lbnRzCmluIHRob3NlIGFyZWFzIChhbiBtYXliZSBl
+dmVuIGhhY2sgYSBiaXQgb24gaXQsIGlmIHRpbWUgcGVybWl0cykuCgogU28gY29uZ3JhdHVsYXRp
+b25zIGZvciB0aGUgZ3JlYXQgd29yayBzbyBmYXIsIGFuZCB0aGFua3MgZm9yIHNoYXJpbmcKaXQg
+d2l0aCBhbGwgb2YgdXMuCgpCZXN0IHJlZ2FyZHMKCkNsw6F1ZGlvIE1hcnRpbnMKCgotLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0KRG93bmxvYWQgSW50ZWwmIzE3NDsgUGFyYWxsZWwgU3R1ZGlvIEV2YWwK
+VHJ5IHRoZSBuZXcgc29mdHdhcmUgdG9vbHMgZm9yIHlvdXJzZWxmLiBTcGVlZCBjb21waWxpbmcs
+IGZpbmQgYnVncwpwcm9hY3RpdmVseSwgYW5kIGZpbmUtdHVuZSBhcHBsaWNhdGlvbnMgZm9yIHBh
+cmFsbGVsIHBlcmZvcm1hbmNlLgpTZWUgd2h5IEludGVsIFBhcmFsbGVsIFN0dWRpbyBnb3QgaGln
+aCBtYXJrcyBkdXJpbmcgYmV0YS4KaHR0cDovL3Auc2YubmV0L3NmdS9pbnRlbC1zdy1kZXYKX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KQ2VwaC1kZXZlbCBt
+YWlsaW5nIGxpc3QKQ2VwaC1kZXZlbEBsaXN0cy5zb3VyY2Vmb3JnZS5uZXQKaHR0cHM6Ly9saXN0
+cy5zb3VyY2Vmb3JnZS5uZXQvbGlzdHMvbGlzdGluZm8vY2VwaC1kZXZlbAo=
