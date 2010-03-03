@@ -1,14 +1,15 @@
-From: Andreas Hirczy <ahi@itp.tugraz.at>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: users, 2.6.34
-Date: Wed, 03 Mar 2010 11:11:59 +0100
-Message-ID: <8atysxn28g.fsf@faepop29.tu-graz.ac.at>
+Date: Wed, 3 Mar 2010 13:59:17 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1003031355290.1006@cobra.newdream.net>
 References: <Pine.LNX.4.64.1003011019020.10267@cobra.newdream.net>
+	<20100303011014.f4fb95b3.ctpm@ist.utl.pt>
+	<261c158e1003030027p71278f92h5a4abd82b5ab6d57@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <Pine.LNX.4.64.1003011019020.10267@cobra.newdream.net> (Sage
-	Weil's message of "Tue\, 2 Mar 2010 11\:27\:11 -0800 \(PST\)")
+In-Reply-To: <261c158e1003030027p71278f92h5a4abd82b5ab6d57@mail.gmail.com>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -17,36 +18,28 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Sage Weil <sage@newdream.net>
+To: Jack Culpepper <jackculpepper@gmail.com>
 Cc: ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-Sage Weil <sage@newdream.net> writes:
+On Wed, 3 Mar 2010, Jack Culpepper wrote:
+> Hey Sager! I am coming off the sidelines! :) I have been poking
+> through the code for a while but just tried installing for the first
+> time. Brand new clean debian 5.0.4 installation. The first issue is
+> the "unauthenticated package" thing, does everyone just hit "y" here?
 
-> If you've tried v0.19, can you take a minute to let us know what your 
-> experience has been?  Did you get the system up and running?  Were there 
-> problems along the way?  What size system are you testing and/or planning?
+Yeah, the packages aren't signed by a trusted debian gpg key.
 
-Hi!
+> Hmm, something's weird. No makefile! Also, the README has zero bytes.
+> [...]
+> Maybe a packaging goof?
 
-I have started on a test cluster (16 OSD, 2.1 TiByte), but currently not
-implemented because of time constraints. Single OSD worked as expected. Our
-Plan is to harvest otherwise unused disk space from workstations as a scratch
-volume for batch jobs.
+Yeah, I forgot to backport the debian/rules fix to the stable branch.  
+I uploaded fixed packages.
 
-In the long run this should replace one of our NFS servers, with about 80
-machines acting as OSD and client at the same time.
+Did you ever try out the active object stuff?
 
-Security is not of prime importance for us, since for the moment its just a
-complement to our existing AFS services.
-
-Sincerely
-Andreas
--- 
-Andreas Hirczy <ahi@itp.tugraz.at>                   http://itp.tugraz.at/~ahi/
-Graz University of Technology                        phone: +43/316/873-   8190
-Institute of Theoretical and Computational Physics     fax: +43/316/873-10 8190
-Petersgasse 16, A-8010 Graz                         mobile: +43/664/859 23 57
+sage
 
 ------------------------------------------------------------------------------
 Download Intel&#174; Parallel Studio Eval
