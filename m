@@ -1,13 +1,14 @@
-From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
+From: Jack Culpepper <jackculpepper@gmail.com>
 Subject: Re: users, 2.6.34
-Date: Wed, 3 Mar 2010 01:10:14 +0000
-Message-ID: <20100303011014.f4fb95b3.ctpm@ist.utl.pt>
+Date: Wed, 3 Mar 2010 00:27:34 -0800
+Message-ID: <261c158e1003030027p71278f92h5a4abd82b5ab6d57@mail.gmail.com>
 References: <Pine.LNX.4.64.1003011019020.10267@cobra.newdream.net>
+	<20100303011014.f4fb95b3.ctpm@ist.utl.pt>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <Pine.LNX.4.64.1003011019020.10267@cobra.newdream.net>
+In-Reply-To: <20100303011014.f4fb95b3.ctpm@ist.utl.pt>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -16,36 +17,126 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@lists.sf.net
+To: Sage Weil <sage@newdream.net>, ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-Ck9uIFR1ZSwgMiBNYXIgMjAxMCAxMToyNzoxMSAtMDgwMCAoUFNUKSBTYWdlIFdlaWwgPHNhZ2VA
-bmV3ZHJlYW0ubmV0PiB3cm90ZToKPiBIaSwKPiAKPiBUaGUgMi42LjM0IG1lcmdlIHdpbmRvdyBp
-cyBvcGVuLCBhbmQgSSB3aWxsIGJlIHNlbmRpbmcgYW5vdGhlciByZXF1ZXN0IHRvIAo+IExpbnVz
-IHNob3J0bHkgYXNraW5nIGhpbSB0byBtZXJnZSB0aGUgQ2VwaCBrZXJuZWwgY2xpZW50LiAgSSdk
-IGxpa2UgdG8gYmUgCj4gYWJsZSB0byBhY2N1cmF0ZSBkZXNjcmliZSB0aGUgY3VycmVudCB1c2Vy
-IGJhc2UgYW5kIGxldmVsIG9mIGludGVyZXN0Lgo+IAoKIEhpIFNhZ2UsCgogRldJVywgd2Ugd2ls
-bCBiZSB0ZXN0aW5nIENlcGggd2l0aCA2IG9yIG1vcmUgT1NEcyBhIDJ+MyBNRFNzIGluIHRoZQpu
-ZXh0IDIgbW9udGhzIChhbmQgYmV5b25kKS4gVGhlIGJhc2ljIGlkZWEgaXMgdG8gZXZhbHVhdGUg
-Q2VwaCBhcyBhCmNhbmRpZGF0ZSBmb3IgZnV0dXJlIHVzZSBpbiBhIG1peGVkIHdvcmtsb2FkIHVu
-aXZlcnNpdHkgZW52aXJvbm1lbnQgd2l0aApzZXZlcmFsIGRvemVucyBvZiBsaW51eCBtYWNoaW5l
-cyAocGh5c2ljYWwgYW5kIHZpcnR1YWwpIGFuZCBtdWx0aXBsZQpTYW1iYSAiZ2F0ZXdheXMiIGZv
-ciBhYm91dCAyNTAgV2luZG93cyB3b3Jrc3RhdGlvbnMuCgogSSdkIGFsc28gbGlrZSB0byBwb2lu
-dCBvdXQgdGhhdCBiZXNpZGVzIHRoZSByb2J1c3RuZXNzIGFuZCBwZXJmb3JtYW5jZQphZHZhbnRh
-Z2VzIHRoYXQgQ2VwaCBzaG91bGQgaGF2ZSBvdmVyIGFuIE5GU3Y0IG9yIEFGUyBzZXR1cCwgd2Ug
-YXJlCmVzcGVjaWFsbHkgaW50ZXJlc3RlZCBpbiBLZXJiZXJvcyBzdXBwb3J0IGFuZCBBQ0wgc3Vw
-cG9ydCAobWF5YmUgTkZTdjQKZXF1aXZhbGVudCBBQ0xzPyksIGFuZCB3aWxsIGJlIGdsYWQgdG8g
-dGVzdCBhbnkgZmVhdHVyZXMvaW1wcm92ZW1lbnRzCmluIHRob3NlIGFyZWFzIChhbiBtYXliZSBl
-dmVuIGhhY2sgYSBiaXQgb24gaXQsIGlmIHRpbWUgcGVybWl0cykuCgogU28gY29uZ3JhdHVsYXRp
-b25zIGZvciB0aGUgZ3JlYXQgd29yayBzbyBmYXIsIGFuZCB0aGFua3MgZm9yIHNoYXJpbmcKaXQg
-d2l0aCBhbGwgb2YgdXMuCgpCZXN0IHJlZ2FyZHMKCkNsw6F1ZGlvIE1hcnRpbnMKCgotLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0KRG93bmxvYWQgSW50ZWwmIzE3NDsgUGFyYWxsZWwgU3R1ZGlvIEV2YWwK
-VHJ5IHRoZSBuZXcgc29mdHdhcmUgdG9vbHMgZm9yIHlvdXJzZWxmLiBTcGVlZCBjb21waWxpbmcs
-IGZpbmQgYnVncwpwcm9hY3RpdmVseSwgYW5kIGZpbmUtdHVuZSBhcHBsaWNhdGlvbnMgZm9yIHBh
-cmFsbGVsIHBlcmZvcm1hbmNlLgpTZWUgd2h5IEludGVsIFBhcmFsbGVsIFN0dWRpbyBnb3QgaGln
-aCBtYXJrcyBkdXJpbmcgYmV0YS4KaHR0cDovL3Auc2YubmV0L3NmdS9pbnRlbC1zdy1kZXYKX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KQ2VwaC1kZXZlbCBt
-YWlsaW5nIGxpc3QKQ2VwaC1kZXZlbEBsaXN0cy5zb3VyY2Vmb3JnZS5uZXQKaHR0cHM6Ly9saXN0
-cy5zb3VyY2Vmb3JnZS5uZXQvbGlzdHMvbGlzdGluZm8vY2VwaC1kZXZlbAo=
+Hey Sager! I am coming off the sidelines! :) I have been poking
+through the code for a while but just tried installing for the first
+time. Brand new clean debian 5.0.4 installation. The first issue is
+the "unauthenticated package" thing, does everyone just hit "y" here?
+
+jack@xyz:~$ sudo apt-get install ceph ceph-kclient-source
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+The following extra packages will be installed:
+  ceph-fuse fuse-utils libceph1 libcrush1 libfuse2 librados1 make
+Suggested packages:
+  make-doc
+The following NEW packages will be installed:
+  ceph ceph-fuse ceph-kclient-source fuse-utils libceph1 libcrush1 libfuse2
+  librados1 make
+0 upgraded, 9 newly installed, 0 to remove and 1 not upgraded.
+Need to get 8221kB of archives.
+After this operation, 21.4MB of additional disk space will be used.
+Do you want to continue [Y/n]?
+WARNING: The following packages cannot be authenticated!
+  libcrush1 librados1 ceph ceph-fuse ceph-kclient-source libceph1
+Install these packages without verification [y/N]?
+
+I hit "y" and continue with the instructions..
+
+jack@xyz:~$ uname -r
+2.6.26-2-amd64
+jack@xyz:~$ sudo bash
+root@xyz:~# apt-get install linux-headers-$(uname -r)
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+The following extra packages will be installed:
+  binutils cpp-4.1 gcc-4.1 gcc-4.1-base libc6-dev linux-headers-2.6.26-2-co=
+mmon
+  linux-kbuild-2.6.26 linux-libc-dev
+
+root@xyz:~# cd /usr/src/modules/ceph
+root@xyz:/usr/src/modules/ceph# make
+make: *** No targets specified and no makefile found.  Stop.
+root@xyz:/usr/src/modules/ceph#
+
+Hmm, something's weird. No makefile! Also, the README has zero bytes.
+
+root@xyz:/usr/src/modules/ceph# ls -l README NEWS Makefile
+ls: cannot access Makefile: No such file or directory
+-rw-r--r-- 1 root root 0 2010-03-02 10:59 NEWS
+-rw-r--r-- 1 root root 0 2010-03-02 10:59 README
+root@xyz:/usr/src/modules/ceph#
+
+But I see those files in the 0.17 distribution I checked out from git
+a while back..
+
+l1$ pwd
+/home/jack/ceph-0.17/debian/ceph-kclient-source/usr/src/modules/ceph
+l1$ ls -l README NEWS Makefile
+-rw-r--r-- 1 jack jack 691 Jun  3  2009 Makefile
+-rw-r--r-- 1 jack jack   0 Jun  3  2009 NEWS
+-rw-r--r-- 1 jack jack 574 Jun  3  2009 README
+l1$
+
+Maybe a packaging goof?
+
+Jack
+
+2010/3/2 Cl=E1udio Martins <ctpm@ist.utl.pt>:
+>
+> On Tue, 2 Mar 2010 11:27:11 -0800 (PST) Sage Weil <sage@newdream.net> wro=
+te:
+>> Hi,
+>>
+>> The 2.6.34 merge window is open, and I will be sending another request to
+>> Linus shortly asking him to merge the Ceph kernel client. =A0I'd like to=
+ be
+>> able to accurate describe the current user base and level of interest.
+>>
+>
+> =A0Hi Sage,
+>
+> =A0FWIW, we will be testing Ceph with 6 or more OSDs a 2~3 MDSs in the
+> next 2 months (and beyond). The basic idea is to evaluate Ceph as a
+> candidate for future use in a mixed workload university environment with
+> several dozens of linux machines (physical and virtual) and multiple
+> Samba "gateways" for about 250 Windows workstations.
+>
+> =A0I'd also like to point out that besides the robustness and performance
+> advantages that Ceph should have over an NFSv4 or AFS setup, we are
+> especially interested in Kerberos support and ACL support (maybe NFSv4
+> equivalent ACLs?), and will be glad to test any features/improvements
+> in those areas (an maybe even hack a bit on it, if time permits).
+>
+> =A0So congratulations for the great work so far, and thanks for sharing
+> it with all of us.
+>
+> Best regards
+>
+> Cl=E1udio Martins
+>
+>
+> -------------------------------------------------------------------------=
+-----
+> Download Intel&#174; Parallel Studio Eval
+> Try the new software tools for yourself. Speed compiling, find bugs
+> proactively, and fine-tune applications for parallel performance.
+> See why Intel Parallel Studio got high marks during beta.
+> http://p.sf.net/sfu/intel-sw-dev
+> _______________________________________________
+> Ceph-devel mailing list
+> Ceph-devel@lists.sourceforge.net
+> https://lists.sourceforge.net/lists/listinfo/ceph-devel
+>
+
+---------------------------------------------------------------------------=
+---
+Download Intel&#174; Parallel Studio Eval
+Try the new software tools for yourself. Speed compiling, find bugs
+proactively, and fine-tune applications for parallel performance.
+See why Intel Parallel Studio got high marks during beta.
+http://p.sf.net/sfu/intel-sw-dev
