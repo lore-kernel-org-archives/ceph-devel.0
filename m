@@ -1,13 +1,15 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: users, 2.6.34
-Date: Thu, 4 Mar 2010 08:06:05 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1003040757180.28379@cobra.newdream.net>
-References: <ce7365351003040429w39061f24yb614988339828bc9@mail.gmail.com>
+Subject: Re: build fails on centos 5
+Date: Thu, 4 Mar 2010 08:18:05 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1003040808250.28379@cobra.newdream.net>
+References: <hmo8e2$lnv$1@dough.gmane.org>
+	<Pine.LNX.4.64.1003040707500.28379@cobra.newdream.net>
+	<hmokna$lnv$2@dough.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <ce7365351003040429w39061f24yb614988339828bc9@mail.gmail.com>
+In-Reply-To: <hmokna$lnv$2@dough.gmane.org>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -16,64 +18,97 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Stefan Majer <stefan.majer@gmail.com>
+To: Thomas Mueller <thomas@chaschperli.ch>
 Cc: ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Stefan,
-
-On Thu, 4 Mar 2010, Stefan Majer wrote:
-> we are currently in the evaluation of ceph. We want to use ceph as
-> filesystem to store kvm virtual machine block images, as well as a s3
-> object store.
-
-We have talked about writing a storage driver for qemu to interact 
-directly with the object storage layer for KVM images.  This would avoid 
-any interaction with the MDS (which is largely superfluous) and hopefully 
-be a bit faster.  Have you seen the Sheepdog project?  They've done 
-something similar.
-
-> Our test setup is build of 4 servers with 1.2TB raid0, composed of
-> 4*300GB SCSI drives. We have 4 osds and 1 mds running actually but we
-> want to have at least 2-3 mds.
+On Thu, 4 Mar 2010, Thomas Mueller wrote:
+> Am Thu, 04 Mar 2010 07:11:00 -0800 schrieb Sage Weil:
+> > Hi Thomas,
+> > 
+> > On Thu, 4 Mar 2010, Thomas Mueller wrote:
+> >> /usr/src/ceph-0.19.1/src/os/FileStore.cc:928: undefined reference to
+> >> `sync_file_range' libos.a(FileStore.o): In function
+> >> `FileStore::flusher_entry()':
+> > 
+> > sync_file_range() appeared in 2.6.17.  It sounds like CentOS 5 was based
+> > on an older kernel.  Since your kernel is new, a recent glibc is
+> > probably all you need to get things going.
 > 
-> We use fedora12 x64 and we had a couple of issues so far.
+> original centos kernel is 2.6.18. anyhow, i found a RHEL bug (which 
+> centos is based on):
 > 
-> 1. We were not able to start 4 individual osd per server. With this
-> configuration we tried to get best cpu utilization (one osd per
-> CPU-Core, one osd per single disk). We always got Kernel OOPS when we
-> tried to stop osd.
-> [...]
-> 2. With the actual configuration (4 disks per server configured to
-> raid0, one osd per server ) we sometimes have similar crashes when we
-> try to stop ceph.
-
-Are you using btrfs?  If so, there was a problem a while back where the 
-user transaction code would break jbd journaling (in ext3/4) due to the 
-btrfs' use of current->journal_info.  The bug was fixed in 2.6.32, so just 
-upgrading your kernel should fix the problem.  (You _may_ also be able to 
-work around it by disabling all logging, but no promises there. :)
-
-> 3. modifying the crushmap does not work at all:
+> https://bugzilla.redhat.com/show_bug.cgi?id=518581
 > 
-> [root@sc01 ~]# ceph osd getcrushmap -o /tmp/crush
-> 10.03.04 14:25:53.944335 mon <- [osd,getcrushmap]
-> 10.03.04 14:25:53.944921 mon0 -> 'got crush map from osdmap epoch 33' (0)
-> 10.03.04 14:25:53.945578 wrote 349 byte payload to /tmp/crush
-> [root@sc01 ~]# crushtool -d /tmp/crush -o /tmp/crush.txt
-> [root@sc01 ~]#  crushtool -c /tmp/crush.txt -o /tmp/crush.new
-> /tmp/crush.txt:52 error: parse error at ''
+> comment #1 from this bug:
+> It has only been added to glibc 2.6, and cannot be backported due to ABI
+> breakage.  You can always fall back to syscall(3).    
+> 
+> so, RHEL/CentOS 5 will never support this directly. 
 
-This appears to be a problem with the version of the latest boost parsing 
-library used for building the sid package (the slightly older version on 
-my dev machine work fine).  I'll see if I can narrow it down today.
+Ah, makes sense.
+ 
+> what about implementing the mentioned "syscall(3)" workaround for RHEL/
+> CentOS?
 
-> Beside that we think that ceph is very promising and we would like to
-> contribute to bring this filesystem to a production quality, at least
-> with extensive testing.
+I can add a check in configure.ac for sync_file_range(3) in the unstable 
+branch.  In the meantime, the easiest thing would be to just replace 
+those lines with a call to fdatasync() (or leave them off entirely in 
+os/FileStore.cc, where it's purely an optimization).
 
-Thanks!
 sage
+
+
+
+diff --git a/src/os/FileJournal.cc b/src/os/FileJournal.cc
+index 639b7d7..e11e092 100644
+--- a/src/os/FileJournal.cc
++++ b/src/os/FileJournal.cc
+@@ -544,15 +544,18 @@ void FileJournal::do_write(bufferlist& bl)
+     ::fsync(fd);
+ #else
+     if (is_bdev) {
+-      if (split) {
++      ::fdatasync(fd);
++      /*if (split) {
+ 	::sync_file_range(fd, header.max_size - split, split, SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE);
+ 	::sync_file_range(fd, get_top(), bl.length() - split, SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE);
+ 	::sync_file_range(fd, header.max_size - split, split, SYNC_FILE_RANGE_WAIT_AFTER);
+ 	::sync_file_range(fd, get_top(), bl.length() - split, SYNC_FILE_RANGE_WAIT_AFTER);
++
+       } else {
+ 	::sync_file_range(fd, write_pos, bl.length(),
+ 			  SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
+       }
++	*/
+     } else
+       ::fdatasync(fd);
+ #endif
+diff --git a/src/os/FileStore.cc b/src/os/FileStore.cc
+index 8dd7998..1f511c4 100644
+--- a/src/os/FileStore.cc
++++ b/src/os/FileStore.cc
+@@ -1327,8 +1327,8 @@ int FileStore::_write(coll_t cid, const sobject_t& oid,
+ 
+     if (!g_conf.filestore_flusher ||
+ 	!queue_flusher(fd, offset, len)) {
+-      if (g_conf.filestore_sync_flush)
+-	::sync_file_range(fd, offset, len, SYNC_FILE_RANGE_WRITE);
++      /*if (g_conf.filestore_sync_flush)
++	::sync_file_range(fd, offset, len, SYNC_FILE_RANGE_WRITE);*/
+       ::close(fd);
+     }
+     r = did;
+@@ -1508,7 +1508,7 @@ void FileStore::flusher_entry()
+ 	q.pop_front();
+ 	if (!stop && ep == sync_epoch) {
+ 	  dout(10) << "flusher_entry flushing+closing " << fd << " ep " << ep << dendl;
+-	  ::sync_file_range(fd, off, len, SYNC_FILE_RANGE_WRITE);
++	  //::sync_file_range(fd, off, len, SYNC_FILE_RANGE_WRITE);
+ 	} else 
+ 	  dout(10) << "flusher_entry JUST closing " << fd << " (stop=" << stop << ", ep=" << ep
+ 		   << ", sync_epoch=" << sync_epoch << ")" << dendl;
+
 
 ------------------------------------------------------------------------------
 Download Intel&#174; Parallel Studio Eval
