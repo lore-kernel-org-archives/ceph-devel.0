@@ -1,15 +1,13 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: Unexpected rmpool behavior
-Date: Tue, 16 Mar 2010 20:48:39 +0100
-Message-ID: <20100316194839.GB97732@ncolin.muc.de>
-References: <20100314162323.GA83257@ncolin.muc.de>
-	<1471eea71003142229t30045d3bgdfd0529e995677fb@mail.gmail.com>
+From: Anton <anton@eastera.tj>
+Subject: Re: v0.19.1 stable updates
+Date: Tue, 9 Mar 2010 16:26:00 +0500
+Message-ID: <201003091626.00189.anton@eastera.tj>
+References: <Pine.LNX.4.64.1003021113360.27180@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-Content-Disposition: inline
-In-Reply-To: <1471eea71003142229t30045d3bgdfd0529e995677fb@mail.gmail.com>
+In-Reply-To: <Pine.LNX.4.64.1003021113360.27180@cobra.newdream.net>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -19,22 +17,87 @@ List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
 To: ceph-devel@lists.sourceforge.net
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Mar 15, 2010 at 05:29:38AM +0000, Gregory Farnum wrote:
-> Christian:
-> I've just tested this and it sure looks to me like deleting a pool
-> deletes the objects in it. It's not necessarily instantaneous, though
-> -- stuff won't get deleted until the OSD gets a new OSDMap.
-> Try writing something (which will generally put new maps on all the
-> OSDs involved) and see if the pool and its contents disappear from the
-> OSD then. :)
-> -Greg
+Sage, do you think CEPH now is ok (stable enough) to be 
+atleast sure that uploaded data will not be corrupted, (and 
+could be recovered in the case of fault) - for use as simple 
+file store - say in the scenario of  "upload/modify rarely, 
+read often"?. Right now I use Gluster as clustered FS - but 
+overhead of 1+1 replication in Gluster is just HUGE
 
-OK - I'm sorry. I was just to impatient. I did an rmpool and saw that the space was not freed immediately.
+Regards,
+Anton.
 
-Christian
+On Wednesday 03 March 2010, Sage Weil wrote:
+> Hi all,
+> 
+> We've pushed out some stable updates to master granches
+>  of the git trees and tagged a 0.19.1 stable release. 
+>  For the server side, the fixes are minor: mainly a
+>  problem with /etc/init.d/ceph when /bin/sh is dash
+>  (ubuntu) and a rare mds crash.  The kernel client fixes
+>  are a bit more significant: mainly a bad write(2) return
+>  value and a crash when snapshots were deleted.
+> 
+> sage
+> 
+> -- server side ------------------
+> 
+> Sage Weil (8):
+>       debian: mount.ceph in /sbin, not /usr/sbin
+>       Makefile: include debian/
+>       Makefile: fix /sbin hack
+>       mds: fix sessionmap decoding
+>       init-ceph: don't barf on dash when no command
+>       cauthtool: --caps fn alone is a command
+>       debian: new release, push, build, publish scripts
+>       0.19.1
+> 
+> Yehuda Sadeh (1):
+>       automake: fix mount sbin dir when configured with
+>  prefix
+> 
+> 
+> -- kernel client -----------------
+> 
+> Alexander Beregalov (1):
+>       ceph: move dereference after NULL test
+> 
+> Sage Weil (5):
+>       ceph: fix handle_forward parsing
+>       ceph: reset front len on return to msgpool; BUG on
+>  mismatched front iov ceph: set osd request message front
+>  length correctly ceph: fix osdmap decoding when pools
+>  include (removed) snaps ceph: v0.19.1 stable release
+> 
+> Yehuda Sadeh (1):
+>       ceph: don't clobber write return value when using
+>  O_SYNC
+> 
+> 
+> ---------------------------------------------------------
+> --------------------- Download Intel&#174; Parallel
+>  Studio Eval
+> Try the new software tools for yourself. Speed compiling,
+>  find bugs proactively, and fine-tune applications for
+>  parallel performance. See why Intel Parallel Studio got
+>  high marks during beta. http://p.sf.net/sfu/intel-sw-dev
+> _______________________________________________
+> Ceph-devel mailing list
+> Ceph-devel@lists.sourceforge.net
+> https://lists.sourceforge.net/lists/listinfo/ceph-devel
+> 
 
+
+-- 
+Anton V. Gnitko
+Technical Director
+Eastera Co. Ltd.
++992 43 3770123
++992 37 2270101
+http://www.eastera.tj
 
 ------------------------------------------------------------------------------
 Download Intel&#174; Parallel Studio Eval
