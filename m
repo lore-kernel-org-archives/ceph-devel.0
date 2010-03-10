@@ -1,13 +1,14 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: how can i disable replication
-Date: Wed, 10 Mar 2010 08:39:44 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1003100839050.5681@cobra.newdream.net>
-References: <courier.4B97B8B6.000065A0@red.servers.aueb.gr>
+Subject: Re: v0.19.1 stable updates
+Date: Wed, 10 Mar 2010 08:43:58 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1003100839460.5681@cobra.newdream.net>
+References: <201003091648.36832.anton.vazir@gmail.com>
+	<201003101833.21410.anton.vazir@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <courier.4B97B8B6.000065A0@red.servers.aueb.gr>
+In-Reply-To: <201003101833.21410.anton.vazir@gmail.com>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -16,26 +17,135 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: parissis@aueb.gr
-Cc: ceph-devel@lists.sourceforge.net
+To: Anton <anton.vazir@gmail.com>
+Cc: ceph-devel@lists.sourceforge.net, ceph-devel@lists.sf.net
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, 10 Mar 2010, parissis@aueb.gr wrote:
-> Hello, 
-> 
-> I would to ask if there is a way (via a configuration parameter) to 
-> completely disable data and metadata replication? 
+Hi Anton,
+On Wed, 10 Mar 2010, Anton wrote:
+> Considering the silence,
+> I understand that stuff still in the heavy development, but 
+> 0.19 have been named "stable" and I thought that its time to 
+> ask again, but anyway looks like it's time to test. :)
 
-Hi George,
+Sorry for the slow reply, this got lost in my mail yesterday.
 
-You can adjust the replication level with
+> On Tuesday 09 March 2010, Anton wrote:
+> > Sage, do you think CEPH now is ok (stable enough) to be
+> > atleast sure that uploaded data will not be corrupted,
+> >  (and could be recovered in the case of fault) - for use
+> >  as simple file store - say in the scenario of 
+> >  "upload/modify rarely, read often"?. Right now I use
+> >  Gluster as clustered FS - but overhead of 1+1
+> >  replication in Gluster is just HUGE
 
-$ ceph osd pool set data size 1
-$ ceph osd pool set metadata size 1
+The disk format in 0.19 is stable, which means we will maintain 
+compatibility with new version going forward so that you won't have to 
+reformat the file system.
 
-(Replacing 1 with 3 will switch to 3x replication, etc.)
+The system itself is still under heavy development, however, and should 
+not be trusted with important data.  The latest code is stable enough that 
+we would benefit from broader testing on a wider range of hardware and 
+deployment scenarios, and in a read-mostly environment I don't anticipate 
+many problems (read: please test!), but you sooner or later you will run 
+into trouble if you try to use the current code in production.
 
 sage
+
+
+
+> > 
+> > Regards,
+> > Anton.
+> > 
+> > On Wednesday 03 March 2010, Sage Weil wrote:
+> > > Hi all,
+> > >
+> > > We've pushed out some stable updates to master granches
+> > >  of the git trees and tagged a 0.19.1 stable release.
+> > >  For the server side, the fixes are minor: mainly a
+> > >  problem with /etc/init.d/ceph when /bin/sh is dash
+> > >  (ubuntu) and a rare mds crash.  The kernel client
+> > > fixes are a bit more significant: mainly a bad write(2)
+> > > return value and a crash when snapshots were deleted.
+> > >
+> > > sage
+> > >
+> > > -- server side ------------------
+> > >
+> > > Sage Weil (8):
+> > >       debian: mount.ceph in /sbin, not /usr/sbin
+> > >       Makefile: include debian/
+> > >       Makefile: fix /sbin hack
+> > >       mds: fix sessionmap decoding
+> > >       init-ceph: don't barf on dash when no command
+> > >       cauthtool: --caps fn alone is a command
+> > >       debian: new release, push, build, publish scripts
+> > >       0.19.1
+> > >
+> > > Yehuda Sadeh (1):
+> > >       automake: fix mount sbin dir when configured with
+> > >  prefix
+> > >
+> > >
+> > > -- kernel client -----------------
+> > >
+> > > Alexander Beregalov (1):
+> > >       ceph: move dereference after NULL test
+> > >
+> > > Sage Weil (5):
+> > >       ceph: fix handle_forward parsing
+> > >       ceph: reset front len on return to msgpool; BUG
+> > > on mismatched front iov ceph: set osd request message
+> > > front length correctly ceph: fix osdmap decoding when
+> > > pools include (removed) snaps ceph: v0.19.1 stable
+> > > release
+> > >
+> > > Yehuda Sadeh (1):
+> > >       ceph: don't clobber write return value when using
+> > >  O_SYNC
+> > >
+> > >
+> > > -------------------------------------------------------
+> > >-- --------------------- Download Intel&#174; Parallel
+> > > Studio Eval
+> > > Try the new software tools for yourself. Speed
+> > > compiling, find bugs proactively, and fine-tune
+> > > applications for parallel performance. See why Intel
+> > > Parallel Studio got high marks during beta.
+> > > http://p.sf.net/sfu/intel-sw-dev
+> > > _______________________________________________
+> > > Ceph-devel mailing list
+> > > Ceph-devel@lists.sourceforge.net
+> > > https://lists.sourceforge.net/lists/listinfo/ceph-devel
+> > 
+> > ---------------------------------------------------------
+> > --------------------- Download Intel&#174; Parallel
+> >  Studio Eval
+> > Try the new software tools for yourself. Speed compiling,
+> >  find bugs proactively, and fine-tune applications for
+> >  parallel performance. See why Intel Parallel Studio got
+> >  high marks during beta. http://p.sf.net/sfu/intel-sw-dev
+> > _______________________________________________
+> > Ceph-devel mailing list
+> > Ceph-devel@lists.sourceforge.net
+> > https://lists.sourceforge.net/lists/listinfo/ceph-devel
+> > 
+> 
+> 
+> 
+> ------------------------------------------------------------------------------
+> Download Intel&#174; Parallel Studio Eval
+> Try the new software tools for yourself. Speed compiling, find bugs
+> proactively, and fine-tune applications for parallel performance.
+> See why Intel Parallel Studio got high marks during beta.
+> http://p.sf.net/sfu/intel-sw-dev
+> _______________________________________________
+> Ceph-devel mailing list
+> Ceph-devel@lists.sourceforge.net
+> https://lists.sourceforge.net/lists/listinfo/ceph-devel
+> 
+> 
 
 ------------------------------------------------------------------------------
 Download Intel&#174; Parallel Studio Eval
