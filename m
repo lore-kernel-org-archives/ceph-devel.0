@@ -1,12 +1,11 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: =?gb2312?b?bWttb25mc7XEzsrM4g==?=
-Date: Fri, 12 Mar 2010 08:51:41 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1003120848001.28255@cobra.newdream.net>
-References: <79eb276e1003120055q19c9bb83h293175f2613709de@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: Updated kvm driver
+Date: Sun, 14 Mar 2010 17:14:15 +0100
+Message-ID: <20100314161415.GA83139@ncolin.muc.de>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-64055637-1268412701=:28255"
+Content-Type: multipart/mixed; boundary="3MwIy2ne0vdjdPXF"
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <79eb276e1003120055q19c9bb83h293175f2613709de@mail.gmail.com>
+Content-Disposition: inline
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -15,69 +14,489 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: sheng zheng <zhengsheng2006@gmail.com>
-Cc: ceph-devel@lists.sourceforge.net
+To: ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
 
---557981400-64055637-1268412701=:28255
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+--3MwIy2ne0vdjdPXF
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Hi Sheng,
+Attached is an updated version of my rados kvm driver. I did the following
+changes:
 
-On Fri, 12 Mar 2010, sheng zheng wrote:
+- modifications for qemu "configure" - you must use "--enable-rbd" to 
+  compile the rbd driver
+- new naming scheme for the objects stored
+- object size can be specified when creating an image with
+  "-o cluster_size=<size in bytes>" (default is 4MB)
+- new method for "qemu-img info"
+- extended header format, to be prepared for encryption, compression and
+  snapshots
 
-> hi=A3=ACall
->   when i install a test cluster with ceph-0.19-tar.gz,it runs abnormally.
->  1) when i run mkmonfs, the follwing arise:
->   mkmonfs -i 0 --mon-data mondata/mon0 --monmap monmap --osdmap osdmap
-> 10.03.12 17:07:28.542772 store(mondata/mon0) mkfs
-> 10.03.12 17:07:28.542932 store(mondata/mon0) test -d mondata/mon0 && /bin=
-/rm
-> -rf mondata/mon0 ; mkdir -p mondata/mon0
-> 10.03.12 17:07:28.558756 mon0(starting).class v0 create_initial -- creati=
-ng
-> initial map
-> 10.03.12 17:07:28.562110 mon0(starting).auth v0 create_initial -- creatin=
-g
-> initial map
-> 10.03.12 17:07:28.562143 mon0(starting).auth v0 reading initial keyring
-> can't open ~/.ceph/keyring.bin, /etc/ceph/keyring.bin, .ceph_keyring: No
-> such file or directory
-> can't open ~/.ceph/keyring.bin, /etc/ceph/keyring.bin, .ceph_keyring: No
-> such file or directory
-> can't open ~/.ceph/keyring.bin, /etc/ceph/keyring.bin, .ceph_keyring: No
-> such file or directory
-> mkmonfs: created monfs at mondata/mon0 for mon0
+Everything seems to work fine now and I think that the driver is in a usable
+state. During the next two weeks I'll do some testing. I also hope that
+'ll be able to test live migration of a virtual machine.
 
-The keyring.bin warnings can be ignored if you're not using the cephx=20
-authentication (i.e., if you don't have
+If there are no objections on this list, I would like to send the patch to
+the qemu-devel list.
 
-=09auth supported =3D cephx
+Snapshots and AIO might be the next things I'll try to implement. Snapshots
+will probably be taken on a per pool basis, since this will make things
+a lot simpler. If you have multiple disk images in one pool, every image
+will be snapshot, but there won't be a reference to the snapshot in the
+metadata of the image. To avoid extra overhead you will have to create a
+new pool for every image. - Ideas for a better solution are welcome.
 
-in your ceph.conf).  If you _do_ have it enabled, you need to add '-k=20
-adminkeyring.bin' to the mkcephfs command line so that you get a copy of=20
-the admin key to administer the cluster.  But I'd recommend just leaving=20
-authentication off for now!
+Christian
 
-> 2) when i  mount -t ceph 192.168.1.202:/ /mnt/ceph,the follwing arise:
-> mount: 192.168.1.202:/: can't read superblock
-> dmesg:
->      [ 1581.804768] ceph: client4100 fsid
-> 07bd01d9-93b0-8928-1d87-cb3bb0d76684
-> [ 1581.804847] ceph: mon0 192.168.1.202:6789 session established
+-- 
+Christian Brunner
 
-Probably the MDS isn't letting the client open the root inode.  That may=20
-be because the MDS didn't start, or because the OSDs aren't up (without=20
-which the MDS can't do anything useful).  The output from 'ceph -w' would=
-=20
-narrow it down.
+--3MwIy2ne0vdjdPXF
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: attachment; filename="qemu-kvm-0.12.3-rbd-20100314.patch"
 
-sage
---557981400-64055637-1268412701=:28255
+--- qemu-kvm-0.12.3.orig/block/rbd.c	1970-01-01 01:00:00.000000000 +0100
++++ qemu-kvm-0.12.3/block/rbd.c	2010-03-14 11:37:30.490285574 +0100
+@@ -0,0 +1,346 @@
++/*
++ * QEMU Block driver for RADOS (Ceph)
++ *
++ * Copyright (C) 2010 Christian Brunner <chb@muc.de>
++ *
++ * This work is licensed under the terms of the GNU GPL, version 2.  See
++ * the COPYING file in the top-level directory.
++ *
++ */
++
++#include "qemu-common.h"
++#include <sys/types.h>
++#include <stdbool.h>
++
++#include <qemu-common.h>
++
++//#include "rbd.h"
++#include "module.h"
++#include "block_int.h"
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <rados/librados.h>
++
++#include <signal.h>
++
++/*
++ * When specifying the image filename use:
++ *
++ * rbd:poolname/devicename
++ *
++ * poolname must be the name of an existing rados pool
++ *
++ * devicename is the basename for all objects used to
++ * emulate the raw device.
++ *
++ * Metadata information (image size, ...) is stored in an 
++ * object with the name "devicename.metadata".
++ *
++ * The raw device is split into 4MB sized objects by default.
++ * The sequencenumber is encoded in a 12 byte long hex-string,
++ * and is attached to the devicename, separated by a dot.
++ * e.g. "devicename.1234567890ab"
++ *
++ */
++
++#define OBJ_MAX_SIZE (1UL<<22)	// 22 Bit = 4MB (as default)
++#define MAX_NAME 128 		// Maximum size of the poolname plus objectname
++#define MAX_SNAPS 4096		// Maximum number of snapshots (unsupported at
++				// the moment)
++
++typedef struct RBDRVRBDState {
++	rados_pool_t pool;
++	char name[MAX_NAME];
++	int name_len;
++	uint64_t size;
++	uint64_t objsize;
++} RBDRVRBDState;
++	
++#define RBD_TEXT "<<< Rados Block Device Image >>>\n"
++#define RBD_SIGNATURE "RBD"
++#define RBD_VERSION1 "001.000"
++
++#define COMP_NONE 0
++#define CRYPT_NONE 0
++
++typedef struct {
++	char text[64];
++	char signature[4];
++	char version[8];
++	uint64_t imagesize;
++	uint64_t objsize;
++	uint8_t crypt_type;
++	uint8_t comp_type;			// unsupported at the moment
++	uint16_t snap_count;			// unsupported at the moment
++	uint32_t snap_id[MAX_SNAPS];	// unsupported at the moment
++} RbdHeader1;
++
++static int rbd_parsename(const char *filename, char *pool, char *name) {
++	const char *rbdname;
++	char *p, *n;
++	int l;
++
++	if(!strstart(filename, "rbd:", &rbdname)) {
++		return -EINVAL;
++	}
++		
++	pstrcpy(pool, MAX_NAME, rbdname);
++	p = strchr(pool, '/');
++	if (p == NULL) {
++		return -EINVAL;
++	}
++
++	*p = '\0';
++	n = ++p;
++
++	l = strlen(n);
++
++	if (l > MAX_NAME-14) {
++		fprintf(stderr, "object name to long\n");
++		return -EINVAL;
++	} else if (l <= 0) {
++		fprintf(stderr, "object name to short\n");
++		return -EINVAL;
++	}
++
++	strcpy(name, n);
++
++	return l;
++}
++
++static int rbd_create(const char *filename, QEMUOptionParameter *options) {
++	int64_t bytes = 0;
++	int64_t objsize = OBJ_MAX_SIZE;
++	char pool[MAX_NAME];
++	char n[MAX_NAME];
++	char name[MAX_NAME];
++	RbdHeader1 header;
++	rados_pool_t p;
++	int name_len;
++
++	if ((name_len = rbd_parsename(filename, pool, name)) < 0) {
++		return -EINVAL;
++	}
++	snprintf(n, MAX_NAME, "%s.metadata", name);
++
++	/* Read out options */
++	while (options && options->name) {
++		if (!strcmp(options->name, BLOCK_OPT_SIZE)) {
++			bytes = options->value.n;
++		} else if (!strcmp(options->name, BLOCK_OPT_CLUSTER_SIZE)) {
++			if (options->value.n) {
++				objsize = options->value.n;
++			}
++		}
++		options++;
++	}
++
++	memset(&header, 0, sizeof(header));
++	pstrcpy(header.text, sizeof(header.text), RBD_TEXT);
++	pstrcpy(header.signature, sizeof(header.signature), RBD_SIGNATURE);
++	pstrcpy(header.version, sizeof(header.version), RBD_VERSION1);
++	header.imagesize = bytes;
++	cpu_to_le64s(&header.imagesize);
++	header.objsize = objsize;
++	cpu_to_le64s(&header.objsize);
++	header.crypt_type = CRYPT_NONE;
++	header.comp_type = COMP_NONE;
++	header.snap_count = 0;
++	cpu_to_le16s(&header.snap_count);
++
++        if (rados_initialize(0, NULL) < 0) {
++                fprintf(stderr, "error initializing\n");
++		return -EIO;
++        }
++
++	if (rados_open_pool(pool, &p)) {
++                fprintf(stderr, "error opening pool %s\n", pool);
++		return -EIO;
++	}
++
++	if (rados_write(p, n, 0, (const char *) &header, sizeof(header)) < 0) {
++		return -errno;
++	}
++
++	rados_close_pool(p);
++	rados_deinitialize();
++
++	return 0;
++}
++
++static int rbd_open(BlockDriverState *bs, const char *filename, int flags) {
++	RBDRVRBDState *s = bs->opaque;
++	char pool[MAX_NAME];
++	char n[MAX_NAME];
++	char hbuf[4096];
++
++	if ((s->name_len = rbd_parsename(filename, pool, s->name)) < 0) {
++		return -EINVAL;
++	}
++	snprintf(n, MAX_NAME, "%s.metadata", s->name);
++	
++        if (rados_initialize(0, NULL) < 0) {
++                fprintf(stderr, "error initializing\n");
++		return -EIO;
++        }
++
++	if (rados_open_pool(pool, &s->pool)) {
++                fprintf(stderr, "error opening pool %s\n", pool);
++		return -EIO;
++	}
++
++	if (rados_read(s->pool, n, 0, hbuf, 4096) < 0) {
++                fprintf(stderr, "error reading header from %s\n", s->name);
++		return -EIO;
++	}
++	if (!strncmp(hbuf+64, RBD_SIGNATURE, 4)) {
++		if(!strncmp(hbuf+68, RBD_VERSION1, 8)) {
++			RbdHeader1 *header;
++
++			header = (RbdHeader1 *) hbuf;
++			le64_to_cpus(&header->imagesize);
++			s->size = header->imagesize;
++			le64_to_cpus(&header->objsize);
++			s->objsize = header->objsize;
++		} else {
++                	fprintf(stderr, "Unknown image version %s\n", hbuf+68);
++			return -EIO;
++		}
++	} else {
++                fprintf(stderr, "Invalid header signature %s\n", hbuf+64);
++		return -EIO;
++	}
++
++	return 0;
++}
++
++static void rbd_close(BlockDriverState *bs) {
++	RBDRVRBDState *s = bs->opaque;
++
++	rados_close_pool(s->pool);
++	rados_deinitialize();
++}
++
++static int rbd_write(BlockDriverState *bs, int64_t sector_num, 
++		const uint8_t *buf, int nb_sectors) {
++	RBDRVRBDState *s = bs->opaque;
++	char n[MAX_NAME];
++
++	int64_t segnr, segoffs, segsize;
++	int64_t off, size;
++
++	off = sector_num * 512;
++	size = nb_sectors * 512;
++	segnr = (int64_t) (off / s->objsize);
++	segoffs = (int64_t) (off % s->objsize);
++	segsize  = (int64_t) (s->objsize - segoffs);
++
++	while (size > 0) {
++		if (size < segsize) {
++			segsize = size;
++		}
++
++		snprintf(n, MAX_NAME, "%s.%012llx", s->name, (long long unsigned int) segnr);
++
++		if (rados_write(s->pool, n, segoffs, (const char *) buf, segsize) < 0) {
++			return -errno;
++		}
++
++		buf += segsize;
++		size -= segsize;
++		segoffs = 0;
++		segsize = s->objsize;
++		segnr++;
++	}
++
++	return(0);
++}
++
++static int rbd_read(BlockDriverState *bs, int64_t sector_num, 
++		uint8_t *buf, int nb_sectors) {
++	RBDRVRBDState *s = bs->opaque;
++	char n[MAX_NAME];
++
++	int64_t segnr, segoffs, segsize, r;
++	int64_t off, size;
++
++	off = sector_num * 512;
++	size = nb_sectors * 512;
++	segnr = (int64_t) (off / s->objsize);
++	segoffs = (int64_t) (off % s->objsize);
++	segsize  = (int64_t) (s->objsize - segoffs);
++
++	while (size > 0) {
++		if (size < segsize) {
++			segsize = size;
++		}
++
++		snprintf(n, MAX_NAME, "%s.%012llx", s->name, (long long unsigned int) segnr);
++
++		r = rados_read(s->pool, n, segoffs, (char *) buf, segsize);
++		if (r < 0) {
++			memset(buf, 0, segsize);
++		} else if (r < segsize) {
++			memset(buf+r, 0, segsize-r);
++		}
++
++		buf += segsize;
++		size -= segsize;
++		segoffs = 0;
++		segsize = s->objsize;
++		segnr++;
++	}
++
++	return(0);
++}
++
++static int rbd_getinfo(BlockDriverState *bs, BlockDriverInfo *bdi)
++{
++    RBDRVRBDState *s = bs->opaque;
++    bdi->cluster_size = s->objsize;
++    return 0;
++}
++
++static int64_t rbd_getlength(BlockDriverState *bs) {
++	RBDRVRBDState *s = bs->opaque;
++
++	return s->size;
++}
++
++
++static QEMUOptionParameter rbd_create_options[] = {
++    {
++        .name = BLOCK_OPT_SIZE,
++        .type = OPT_SIZE,
++        .help = "Virtual disk size"
++    },
++    {
++        .name = BLOCK_OPT_CLUSTER_SIZE,
++        .type = OPT_SIZE,
++        .help = "RBD object size"
++    },
++    { NULL }
++};
++
++static BlockDriver bdrv_rbd = {
++	.format_name	= "rbd",
++	.instance_size	= sizeof(RBDRVRBDState),
++	.bdrv_open	= rbd_open,
++	.bdrv_read 	= rbd_read,
++	.bdrv_write	= rbd_write,
++	.bdrv_close	= rbd_close,
++	.bdrv_create	= rbd_create,
++	.bdrv_get_info	= rbd_getinfo,
++	.create_options = rbd_create_options,
++	.bdrv_getlength	= rbd_getlength,
++	.protocol_name	= "rbd",
++};
++
++static void bdrv_rbd_init(void) {
++	bdrv_register(&bdrv_rbd);
++}
++
++block_init(bdrv_rbd_init);
++
++
+--- qemu-kvm-0.12.3.orig/Makefile	2010-02-26 03:34:00.000000000 +0100
++++ qemu-kvm-0.12.3/Makefile	2010-03-11 21:25:07.400595864 +0100
+@@ -28,6 +28,7 @@
+ VPATH=$(SRC_PATH):$(SRC_PATH)/hw
+ 
+ LIBS+=-lz $(LIBS_TOOLS)
++LIBS+=-lrados
+ 
+ ifdef BUILD_DOCS
+ DOCS=qemu-doc.html qemu-tech.html qemu.1 qemu-img.1 qemu-nbd.8
+@@ -114,6 +115,7 @@
+ block-nested-$(CONFIG_WIN32) += raw-win32.o
+ block-nested-$(CONFIG_POSIX) += raw-posix.o
+ block-nested-$(CONFIG_CURL) += curl.o
++block-nested-$(CONFIG_RBD) += rbd.o
+ 
+ block-obj-y +=  $(addprefix block/, $(block-nested-y))
+ 
+--- qemu-kvm-0.12.3.orig/configure	2010-02-26 03:34:00.000000000 +0100
++++ qemu-kvm-0.12.3/configure	2010-03-11 21:24:01.073595962 +0100
+@@ -272,6 +272,7 @@
+ check_utests="no"
+ user_pie="no"
+ zero_malloc=""
++rbd="no"
+ 
+ # OS specific
+ if check_define __linux__ ; then
+@@ -635,6 +636,8 @@
+   ;;
+   --disable-cpu-emulation) cpu_emulation="no"
+   ;;
++  --enable-rbd) rbd="yes"
++  ;;
+   *) echo "ERROR: unknown option $opt"; show_help="yes"
+   ;;
+   esac
+@@ -793,6 +796,7 @@
+ echo "  --kerneldir=PATH         look for kernel includes in PATH"
+ echo "  --with-kvm-trace         enable building the KVM module with the kvm trace option"
+ echo "  --disable-cpu-emulation  disables use of qemu cpu emulation code"
++echo "  --enable-rbd		 enable building the rados block device (rbd)"
+ echo ""
+ echo "NOTE: The object files are built at the place where configure is launched"
+ exit 1
+@@ -1556,6 +1560,25 @@
+ fi
+ 
+ ##########################################
++# rbd probe
++if test "$rbd" != "no" ; then
++  cat > $TMPC <<EOF
++#include <stdio.h>
++#include <rados/librados.h>
++int main(void) { rados_initialize(0, NULL); return 0; }
++EOF
++  if compile_prog "" "-lrados -lcrypto" ; then
++    rbd=yes
++    LIBS="$LIBS -lrados -lcrypto"
++  else
++    if test "$rbd" = "yes" ; then
++      feature_not_found "rados block device"
++    fi
++    rbd=no
++  fi
++fi
++
++##########################################
+ # linux-aio probe
+ 
+ if test "$linux_aio" != "no" ; then
+@@ -2058,6 +2081,7 @@
+ echo "preadv support    $preadv"
+ echo "fdatasync         $fdatasync"
+ echo "uuid support      $uuid"
++echo "rbd support       $rbd"
+ 
+ if test $sdl_too_old = "yes"; then
+ echo "-> Your SDL version is too old - please upgrade to have SDL support"
+@@ -2277,6 +2301,9 @@
+ else
+   echo "CONFIG_NO_CPU_EMULATION=y" >> $config_host_mak
+ fi
++if test "$rbd" = "yes" ; then
++  echo "CONFIG_RBD=y" >> $config_host_mak
++fi
+ 
+ # XXX: suppress that
+ if [ "$bsd" = "yes" ] ; then
+
+--3MwIy2ne0vdjdPXF
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -89,7 +508,7 @@ Try the new software tools for yourself. Speed compiling, find bugs
 proactively, and fine-tune applications for parallel performance.
 See why Intel Parallel Studio got high marks during beta.
 http://p.sf.net/sfu/intel-sw-dev
---557981400-64055637-1268412701=:28255
+--3MwIy2ne0vdjdPXF
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -100,4 +519,4 @@ Ceph-devel mailing list
 Ceph-devel@lists.sourceforge.net
 https://lists.sourceforge.net/lists/listinfo/ceph-devel
 
---557981400-64055637-1268412701=:28255--
+--3MwIy2ne0vdjdPXF--
