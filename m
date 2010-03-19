@@ -1,13 +1,11 @@
-From: Anton <anton@eastera.tj>
-Subject: Re: v0.19.1 stable updates
-Date: Tue, 9 Mar 2010 16:26:00 +0500
-Message-ID: <201003091626.00189.anton@eastera.tj>
-References: <Pine.LNX.4.64.1003021113360.27180@cobra.newdream.net>
+From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
+Subject: Mainline
+Date: Fri, 19 Mar 2010 21:48:10 +0000
+Message-ID: <20100319214810.2cf3f0de.ctpm@ist.utl.pt>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <Pine.LNX.4.64.1003021113360.27180@cobra.newdream.net>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -17,91 +15,17 @@ List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
 To: ceph-devel@lists.sourceforge.net
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@lists.sf.net
+Cc: sage@newdream.net
 List-Id: ceph-devel.vger.kernel.org
 
-Sage, do you think CEPH now is ok (stable enough) to be 
-atleast sure that uploaded data will not be corrupted, (and 
-could be recovered in the case of fault) - for use as simple 
-file store - say in the scenario of  "upload/modify rarely, 
-read often"?. Right now I use Gluster as clustered FS - but 
-overhead of 1+1 replication in Gluster is just HUGE
-
-Regards,
-Anton.
-
-On Wednesday 03 March 2010, Sage Weil wrote:
-> Hi all,
-> 
-> We've pushed out some stable updates to master granches
->  of the git trees and tagged a 0.19.1 stable release. 
->  For the server side, the fixes are minor: mainly a
->  problem with /etc/init.d/ceph when /bin/sh is dash
->  (ubuntu) and a rare mds crash.  The kernel client fixes
->  are a bit more significant: mainly a bad write(2) return
->  value and a crash when snapshots were deleted.
-> 
-> sage
-> 
-> -- server side ------------------
-> 
-> Sage Weil (8):
->       debian: mount.ceph in /sbin, not /usr/sbin
->       Makefile: include debian/
->       Makefile: fix /sbin hack
->       mds: fix sessionmap decoding
->       init-ceph: don't barf on dash when no command
->       cauthtool: --caps fn alone is a command
->       debian: new release, push, build, publish scripts
->       0.19.1
-> 
-> Yehuda Sadeh (1):
->       automake: fix mount sbin dir when configured with
->  prefix
-> 
-> 
-> -- kernel client -----------------
-> 
-> Alexander Beregalov (1):
->       ceph: move dereference after NULL test
-> 
-> Sage Weil (5):
->       ceph: fix handle_forward parsing
->       ceph: reset front len on return to msgpool; BUG on
->  mismatched front iov ceph: set osd request message front
->  length correctly ceph: fix osdmap decoding when pools
->  include (removed) snaps ceph: v0.19.1 stable release
-> 
-> Yehuda Sadeh (1):
->       ceph: don't clobber write return value when using
->  O_SYNC
-> 
-> 
-> ---------------------------------------------------------
-> --------------------- Download Intel&#174; Parallel
->  Studio Eval
-> Try the new software tools for yourself. Speed compiling,
->  find bugs proactively, and fine-tune applications for
->  parallel performance. See why Intel Parallel Studio got
->  high marks during beta. http://p.sf.net/sfu/intel-sw-dev
-> _______________________________________________
-> Ceph-devel mailing list
-> Ceph-devel@lists.sourceforge.net
-> https://lists.sourceforge.net/lists/listinfo/ceph-devel
-> 
-
-
--- 
-Anton V. Gnitko
-Technical Director
-Eastera Co. Ltd.
-+992 43 3770123
-+992 37 2270101
-http://www.eastera.tj
-
-------------------------------------------------------------------------------
-Download Intel&#174; Parallel Studio Eval
-Try the new software tools for yourself. Speed compiling, find bugs
-proactively, and fine-tune applications for parallel performance.
-See why Intel Parallel Studio got high marks during beta.
-http://p.sf.net/sfu/intel-sw-dev
+CgogQ29uZ3JhdHVsYXRpb25zIG9uIGdldHRpbmcgQ2VwaCBtZXJnZWQgaW50byBtYWlubGluZSEK
+CiBHb29kIGpvYiEKCiBCZXN0IHJlZ2FyZHMKCkNsw6F1ZGlvCgoKLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tCkRvd25sb2FkIEludGVsJiMxNzQ7IFBhcmFsbGVsIFN0dWRpbyBFdmFsClRyeSB0aGUgbmV3
+IHNvZnR3YXJlIHRvb2xzIGZvciB5b3Vyc2VsZi4gU3BlZWQgY29tcGlsaW5nLCBmaW5kIGJ1Z3MK
+cHJvYWN0aXZlbHksIGFuZCBmaW5lLXR1bmUgYXBwbGljYXRpb25zIGZvciBwYXJhbGxlbCBwZXJm
+b3JtYW5jZS4KU2VlIHdoeSBJbnRlbCBQYXJhbGxlbCBTdHVkaW8gZ290IGhpZ2ggbWFya3MgZHVy
+aW5nIGJldGEuCmh0dHA6Ly9wLnNmLm5ldC9zZnUvaW50ZWwtc3ctZGV2Cl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCkNlcGgtZGV2ZWwgbWFpbGluZyBsaXN0
+CkNlcGgtZGV2ZWxAbGlzdHMuc291cmNlZm9yZ2UubmV0Cmh0dHBzOi8vbGlzdHMuc291cmNlZm9y
+Z2UubmV0L2xpc3RzL2xpc3RpbmZvL2NlcGgtZGV2ZWwK
