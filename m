@@ -1,31 +1,31 @@
-From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
-Subject: Mainline
-Date: Fri, 19 Mar 2010 21:48:10 +0000
-Message-ID: <20100319214810.2cf3f0de.ctpm@ist.utl.pt>
+From: Dan Carpenter <error27@gmail.com>
+Subject: [patch] ceph: handle kmalloc() failure
+Date: Sat, 20 Mar 2010 15:30:16 +0300
+Message-ID: <20100320123015.GA29929@bicker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
-	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
-List-Post: <mailto:ceph-devel@lists.sourceforge.net>
-List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
-	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
-Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: ceph-devel@lists.sourceforge.net
-Cc: sage@newdream.net
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, ceph-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-CgogQ29uZ3JhdHVsYXRpb25zIG9uIGdldHRpbmcgQ2VwaCBtZXJnZWQgaW50byBtYWlubGluZSEK
-CiBHb29kIGpvYiEKCiBCZXN0IHJlZ2FyZHMKCkNsw6F1ZGlvCgoKLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tCkRvd25sb2FkIEludGVsJiMxNzQ7IFBhcmFsbGVsIFN0dWRpbyBFdmFsClRyeSB0aGUgbmV3
-IHNvZnR3YXJlIHRvb2xzIGZvciB5b3Vyc2VsZi4gU3BlZWQgY29tcGlsaW5nLCBmaW5kIGJ1Z3MK
-cHJvYWN0aXZlbHksIGFuZCBmaW5lLXR1bmUgYXBwbGljYXRpb25zIGZvciBwYXJhbGxlbCBwZXJm
-b3JtYW5jZS4KU2VlIHdoeSBJbnRlbCBQYXJhbGxlbCBTdHVkaW8gZ290IGhpZ2ggbWFya3MgZHVy
-aW5nIGJldGEuCmh0dHA6Ly9wLnNmLm5ldC9zZnUvaW50ZWwtc3ctZGV2Cl9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCkNlcGgtZGV2ZWwgbWFpbGluZyBsaXN0
-CkNlcGgtZGV2ZWxAbGlzdHMuc291cmNlZm9yZ2UubmV0Cmh0dHBzOi8vbGlzdHMuc291cmNlZm9y
-Z2UubmV0L2xpc3RzL2xpc3RpbmZvL2NlcGgtZGV2ZWwK
+Return ERR_PTR(-ENOMEM) if kmalloc() fails.  We handle allocation 
+failures the same way later in the function.
+
+Signed-off-by: Dan Carpenter <error27@gmail.com>
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index a260010..655b005 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -328,6 +328,8 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
+ 	struct ceph_mds_session *s;
+ 
+ 	s = kzalloc(sizeof(*s), GFP_NOFS);
++	if (!s)
++		return ERR_PTR(-ENOMEM);
+ 	s->s_mdsc = mdsc;
+ 	s->s_mds = mds;
+ 	s->s_state = CEPH_MDS_SESSION_NEW;
