@@ -1,35 +1,50 @@
-From: Dan Carpenter <error27@gmail.com>
-Subject: [patch] ceph: cleanup: remove dead code
-Date: Sat, 20 Mar 2010 16:01:27 +0300
-Message-ID: <20100320130127.GA32626@bicker>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: bug report: ceph: && vs ||
+Date: Sat, 20 Mar 2010 20:59:23 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1003202058140.15445@cobra.newdream.net>
+References: <20100320123926.GA30085@bicker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-bounces@lists.sourceforge.net>
+In-Reply-To: <20100320123926.GA30085@bicker>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
+	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
+List-Post: <mailto:ceph-devel@lists.sourceforge.net>
+List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
+	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
+Errors-To: ceph-devel-bounces@lists.sourceforge.net
+To: Dan Carpenter <error27@gmail.com>
+Cc: ceph-devel@lists.sourceforge.net, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-"xattr" is never NULL here.  We took care of that in the previous
-if statement block.
+On Sat, 20 Mar 2010, Dan Carpenter wrote:
+> 
+> 
+>   1772          /* correct session? */
+>   1773          if (!req->r_session && req->r_session != session) {
+> 
+> 	Is this supposed to || here?  We know "session" is non-NULL at
+> 	the point because we already dereferenced it.  If "req->r_session"
+> 	is null then the second condition is always true.
+> 
+> 	Also we dereference "req->r_session" later on without checking.
 
-Signed-off-by: Dan Carpenter <error27@gmail.com>
+Yeah, that check is clearly wrong.  A
 
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 37d6ce6..65b0e9b 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -185,12 +185,6 @@ static int __set_xattr(struct ceph_inode_info *ci,
- 		ci->i_xattrs.names_size -= xattr->name_len;
- 		ci->i_xattrs.vals_size -= xattr->val_len;
- 	}
--	if (!xattr) {
--		pr_err("__set_xattr ENOMEM on %p %llx.%llx xattr %s=%s\n",
--		       &ci->vfs_inode, ceph_vinop(&ci->vfs_inode), name,
--		       xattr->val);
--		return -ENOMEM;
--	}
- 	ci->i_xattrs.names_size += name_len;
- 	ci->i_xattrs.vals_size += val_len;
- 	if (val)
+	if (req->r_session != session) {
+
+is sufficient because the passed session is always non-NULL.  Applied a 
+fix.
+
+Thanks-
+sage
+
+------------------------------------------------------------------------------
+Download Intel&#174; Parallel Studio Eval
+Try the new software tools for yourself. Speed compiling, find bugs
+proactively, and fine-tune applications for parallel performance.
+See why Intel Parallel Studio got high marks during beta.
+http://p.sf.net/sfu/intel-sw-dev
