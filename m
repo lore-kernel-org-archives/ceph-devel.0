@@ -1,15 +1,11 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [cppcheck] suggested a few performance improvements
-Date: Thu, 25 Mar 2010 11:57:31 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1003251154380.29332@cobra.newdream.net>
-References: <20100322203502.295370@gmx.net>
-	<Pine.LNX.4.64.1003221348030.21746@cobra.newdream.net>
-	<20100324200852.307830@gmx.net>
+From: Cheng Renquan <crquan@gmail.com>
+Subject: [PATCH] ceph: handle kzalloc() failure
+Date: Fri, 26 Mar 2010 18:04:40 +0800
+Message-ID: <1269597880-6125-1-git-send-email-crquan@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-bounces@lists.sourceforge.net>
-In-Reply-To: <20100324200852.307830@gmx.net>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=ceph-devel>
@@ -18,27 +14,39 @@ List-Help: <mailto:ceph-devel-request@lists.sourceforge.net?subject=help>
 List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/ceph-devel>,
 	<mailto:ceph-devel-request@lists.sourceforge.net?subject=subscribe>
 Errors-To: ceph-devel-bounces@lists.sourceforge.net
-To: Martin Ettl <ettl.martin@gmx.de>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@lists.sourceforge.net
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Martin,
+Signed-off-by: Cheng Renquan <crquan@gmail.com>
+---
+ fs/ceph/mds_client.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
 
-On Wed, 24 Mar 2010, Martin Ettl wrote:
-> attached to this mail, there is the output of scan with cppcheck. 
-> Cppcheck reports few issues about post and pre incrementation of 
-> iterators (post increment is faster) and const correctness,e.g:
-
-Thanks for the results.  I'll fix some of these (those that look like 
-actual errors).  Some of the style complaints probably aren't worth 
-changing (e.g. pre/post increment, const), unless someone has time to 
-kill.
-
-I'm looking into Coverity as well... scan.coverity.com does free analysis 
-of open source projects.
-
-Thanks-
-sage
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 5268d40..5a209d9 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2614,6 +2614,9 @@ int ceph_mdsc_init(struct ceph_mds_client *mdsc, struct ceph_client *client)
+ 	mdsc->client = client;
+ 	mutex_init(&mdsc->mutex);
+ 	mdsc->mdsmap = kzalloc(sizeof(*mdsc->mdsmap), GFP_NOFS);
++	if (mdsc->mdsmap == NULL)
++		return -ENOMEM;
++
+ 	init_completion(&mdsc->safe_umount_waiters);
+ 	init_completion(&mdsc->session_close_waiters);
+ 	INIT_LIST_HEAD(&mdsc->waiting_for_map);
+@@ -2639,6 +2642,7 @@ int ceph_mdsc_init(struct ceph_mds_client *mdsc, struct ceph_client *client)
+ 	init_waitqueue_head(&mdsc->cap_flushing_wq);
+ 	spin_lock_init(&mdsc->dentry_lru_lock);
+ 	INIT_LIST_HEAD(&mdsc->dentry_lru);
++
+ 	return 0;
+ }
+ 
+-- 
+1.7.0.2
 
 
 ------------------------------------------------------------------------------
