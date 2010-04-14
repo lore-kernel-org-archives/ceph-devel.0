@@ -1,36 +1,34 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] ceph fixes for 2.6.34-rc5
-Date: Wed, 14 Apr 2010 11:29:30 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1004141121320.10273@cobra.newdream.net>
+Subject: Re: [GIT PULL] ceph fixes for 2.6.34-rc5
+Date: Wed, 14 Apr 2010 11:32:23 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1004141130590.10273@cobra.newdream.net>
+References: <Pine.LNX.4.64.1004141121320.10273@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36971 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36977 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756292Ab0DNS1e (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Apr 2010 14:27:34 -0400
+	with ESMTP id S1756461Ab0DNSaY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Apr 2010 14:30:24 -0400
+In-Reply-To: <Pine.LNX.4.64.1004141121320.10273@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: torvalds@linux-foundation.org
 Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Hi Linus,
+On Wed, 14 Apr 2010, Sage Weil wrote:
+> Please pull the following ceph bug fixes from
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-Please pull the following ceph bug fixes from
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-There are a few one-liners (leaked dentry refs, rehashing hashed dentries, 
-off-by-one error), a few patches fixing up writeback for snapshotted data 
-and metadata, and one patch to decode an updated version of the osd map 
-that should get into .35 to make everyone's life easier.
+Whoops, I missed one patch in there that fixes a lockdep false positive.  
+The updated shortlog is below.
 
 Thanks-
 sage
 
---
 
-Sage Weil (8):
+Sage Weil (9):
       ceph: fix dentry rehashing on virtual .snap dir
       ceph: allow writeback of snapped pages older than 'oldest' snapc
       ceph: fix snap context reference leaks
@@ -39,6 +37,7 @@ Sage Weil (8):
       ceph: decode v5 of osdmap (pool names) [protocol change]
       ceph: fix dentry reference leak in dcache readdir
       ceph: queue_cap_snap should always queue dirty context
+      ceph: use separate class for ceph sockets' sk_lock
 
 Yehuda Sadeh (1):
       ceph: reserve one more caps space when doing readdir
@@ -47,11 +46,10 @@ Yehuda Sadeh (1):
  fs/ceph/caps.c      |   42 +++++++++---
  fs/ceph/dir.c       |    7 +-
  fs/ceph/inode.c     |   10 +++-
- fs/ceph/messenger.c |    1 +
+ fs/ceph/messenger.c |    9 +++
  fs/ceph/osdmap.c    |  180 +++++++++++++++++++++++++++++++--------------------
  fs/ceph/osdmap.h    |    1 +
  fs/ceph/rados.h     |    6 +-
  fs/ceph/snap.c      |   26 ++++----
  fs/ceph/super.h     |    3 +-
- 10 files changed, 204 insertions(+), 134 deletions(-)
-
+ 10 files changed, 212 insertions(+), 134 deletions(-)
