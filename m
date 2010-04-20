@@ -1,122 +1,94 @@
-From: Wido den Hollander <wido@pcextreme.nl>
+From: Christian Baun <cray@unix-ag.uni-kl.de>
 Subject: Re: Problem with Ceph installation inside Amazon EC2
-Date: Tue, 20 Apr 2010 17:41:57 +0200
-Message-ID: <1271778117.1905.81.camel@wido-desktop>
-References: <1271773294.1905.75.camel@wido-desktop>
-	 <201004201718.35784.cray@unix-ag.uni-kl.de>
-Reply-To: wido@pcextreme.nl
+Date: Tue, 20 Apr 2010 18:13:36 +0200
+Message-ID: <201004201813.36253.cray@unix-ag.uni-kl.de>
+References: <1271773294.1905.75.camel@wido-desktop> <201004201718.35784.cray@unix-ag.uni-kl.de> <1271778117.1905.81.camel@wido-desktop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from support.pcextreme.nl ([89.18.190.50]:51645 "EHLO
-	support.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753109Ab0DTPlz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Apr 2010 11:41:55 -0400
-In-Reply-To: <201004201718.35784.cray@unix-ag.uni-kl.de>
+Received: from mailgw1.uni-kl.de ([131.246.120.220]:38375 "EHLO
+	mailgw1.uni-kl.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753850Ab0DTQN4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Apr 2010 12:13:56 -0400
+In-Reply-To: <1271778117.1905.81.camel@wido-desktop>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Baun <cray@unix-ag.uni-kl.de>
+To: wido@pcextreme.nl
 Cc: ceph-devel@vger.kernel.org
 
 Hi,
 
-Do you have the following processes running?
+I think it is working now.
 
-- cmon
-- cmds
-- cosd
+I had to do these steps:
+cp src/init-ceph /etc/init.d/ceph
+chmod a+x /etc/init.d/ceph
+chmod u+w /etc/init.d/ceph
+/etc/init.d/ceph -c /etc/ceph/ceph.conf start
 
-And you are trying to mount the Ceph filesystem which is running local
-isn't it?
+Now, the server processes are running
 
-I also experienced some troubles with mounting a local Ceph filesystem,
-so i switched to a dedicated client.
+# ps -aux | grep ceph
+Warning: bad ps syntax, perhaps a bogus '-'? See http://procps.sf.net/faq.html
+root      1948  0.0  0.0      0     0 ?        S    11:28   0:00 [ceph-msgr/0]
+root      1949  0.0  0.0      0     0 ?        S    11:28   0:00 [ceph-msgr/1]
+root     12467  0.0  0.0 179812  3452 ?        Ssl  15:58   0:00 /usr/local/bin/cmon -i 0 -c /etc/ceph/ceph.conf
+root     12495  0.0  0.0 189532  3792 ?        Ssl  15:58   0:00 /usr/local/bin/cmds -i 0 -c /etc/ceph/ceph.conf
+root     12545  0.0  0.2 247480 21676 ?        Ssl  15:58   0:00 /usr/local/bin/cosd -i 1 -c /etc/ceph/ceph.conf
+root     12597  0.0  0.0   7616   920 pts/1    R+   16:01   0:00 grep --color=auto ceph
 
---=20
-Met vriendelijke groet,
+The mount command at the client machine was successful too:
 
-Wido den Hollander
-Hoofd Systeembeheer / CSO
-Telefoon Support Nederland: 0900 9633 (45 cpm)
-Telefoon Support Belgi=C3=AB: 0900 70312 (45 cpm)
-Telefoon Direct: (+31) (0)20 50 60 104
-=46ax: +31 (0)20 50 60 111
-E-mail: support@pcextreme.nl
-Website: http://www.pcextreme.nl
-Kennisbank: http://support.pcextreme.nl/
-Netwerkstatus: http://nmc.pcextreme.nl
+# mount | grep ceph
+10.194.145.203:/ on /mnt/ceph type ceph (rw)
 
 
-On Tue, 2010-04-20 at 15:18 +0000, Christian Baun wrote:
+
+A small performance test inside EC2:
+
+I created 2 Instances. 1 Instance has an EBS-Volume attached. The EBS-Volume is the storage for the Ceoh. Both instances (m1.large) are inside EC2 us-east-1d.
+
+Create testdata
+
+# dd if=/dev/zero of=/tmp/testfile bs=1024 count=1000000
+1000000+0 records in
+1000000+0 records out
+1024000000 bytes (1.0 GB) copied, 7.24084 s, 141 MB/s
+
+# cat test.bat 
+cp /tmp/testfile /mnt/ceph
+sync
+
+Copy the testdata from the client to the server:
+
+# time ./test.bat 
+real	0m29.211s
+user	0m0.020s
+sys	0m1.490s
+
+Thanks a lot for the help.
+
+Best Regards,
+   Christian 
+
+
+Am Dienstag, 20. April 2010 schrieb Wido den Hollander:
 > Hi,
->=20
-> I have just these logfiles in /var/log/ceph:
->=20
-> # ls -l /var/log/ceph/
-> total 4
-> -rw-r--r-- 1 root root 940 2010-04-20 15:12 ip-10-194-145-203.12134
-> lrwxrwxrwx 1 root root  23 2010-04-20 15:12 osd1 -> ip-10-194-145-203=
-=2E12134
->=20
-> # cat ip-10-194-145-203.12134=20
-> 10.04.20 15:12:06.702434 --- opened log /var/log/ceph/ip-10-194-145-2=
-03.12134 ---
-> ceph version 0.19.1 (7d7f925bcd03630778e36fe633efaf92768925c7)
-> 10.04.20 15:12:06.702550 ---- renamed symlink /var/log/ceph/osd1 -> /=
-var/log/ceph/osd1.0 ----
-> 10.04.20 15:12:06.702573 ---- created symlink /var/log/ceph/osd1 -> i=
-p-10-194-145-203.12134 ----
-> 10.04.20 15:12:06.702674 7fd59e775720 -- :/12134 messenger.start
-> 10.04.20 15:12:06.702726 7fd59e775720 -- :/12134 shutdown complete.
-> 10.04.20 15:12:06.702788 7fd59e775720 filestore(/srv/ceph/osd) mkfs i=
-n /srv/ceph/osd
-> 10.04.20 15:12:06.717191 7fd59e775720 filestore(/srv/ceph/osd) mkfs d=
-one in /srv/ceph/osd
-> 10.04.20 15:12:06.717467 7fd59e775720 filestore(/srv/ceph/osd) mount =
-btrfs TRANS_START ioctl is supported
-> 10.04.20 15:12:06.717481 7fd59e775720 filestore(/srv/ceph/osd) mount =
-btrfs CLONE_RANGE ioctl is supported
-> 10.04.20 15:12:06.717488 7fd59e775720 filestore(/srv/ceph/osd) mount =
-detected btrfs
->=20
-> There is no mon0 logfile.
->=20
-> "ceph -w" says the same as "ceph start"
->=20
-> # ceph -w
-> 10.04.20 15:14:31.755364 7fc9f7329720 -- :/12154 messenger.start
-> 10.04.20 15:14:31.755598 7fc9f7329720 -- :/12154 --> mon0 10.194.145.=
-203:6789/0 -- auth(proto 0 30 bytes) -- ?+0 0xc99de0
-> 10.04.20 15:14:31.755777 7fc9f45aa710 -- :/12154 >> 10.194.145.203:67=
-89/0 pipe(0xc9d2f0 sd=3D-1 pgs=3D0 cs=3D0 l=3D0).fault first fault
->=20
-> # mount -t ceph 10.194.145.203:/ /mnt/ceph/
-> mount: 10.194.145.203:/: can't read superblock
->=20
-> Best Regards,
->    Christian=20
->=20
->=20
->=20
->=20
-> Am Dienstag, 20. April 2010 schrieb Wido den Hollander:
-> > Hi,
-> >=20
-> > What does "ceph -w" show?
-> >=20
-> > Do you get some "xauth" messages in your mon0 logfiles?
-> >=20
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> Do you have the following processes running?
+> 
+> - cmon
+> - cmds
+> - cosd
+> 
+> And you are trying to mount the Ceph filesystem which is running local
+> isn't it?
+> 
+> I also experienced some troubles with mounting a local Ceph filesystem,
+> so i switched to a dedicated client.
+> 
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
