@@ -1,53 +1,69 @@
-From: Sage Weil <sage@newdream.net>
+From: Thomas Mueller <thomas@chaschperli.ch>
 Subject: Re: mkcephfs 0.20 failure on debian: FAILED assert(r == 0)
-Date: Sun, 2 May 2010 15:05:48 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005021501240.32001@cobra.newdream.net>
+Date: Mon, 3 May 2010 06:18:42 +0000 (UTC)
+Message-ID: <hrlps2$bk3$1@dough.gmane.org>
 References: <hrhh53$gf3$2@dough.gmane.org>
+	<Pine.LNX.4.64.1005021501240.32001@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56136 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752304Ab0EBWDV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 2 May 2010 18:03:21 -0400
-In-Reply-To: <hrhh53$gf3$2@dough.gmane.org>
+Received: from lo.gmane.org ([80.91.229.12]:56177 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755910Ab0ECGS5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 3 May 2010 02:18:57 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1O8ozV-0001Ax-RA
+	for ceph-devel@vger.kernel.org; Mon, 03 May 2010 08:18:53 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 03 May 2010 08:18:53 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 03 May 2010 08:18:53 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Thomas,
+hi sage
 
-On Sat, 1 May 2010, Thomas Mueller wrote:
-
-> Hi
+> It sounds like the osd journal file exists, but is 0 bytes.  You can
+> include
 > 
-> I wanted to do some testing. but i failed on mkcephfs.  see mkcephfs 
-> output below. 
+> 	osd journal size = 100    ; measured in MB
 > 
-> this is on debian lenny, i follow the howto in the wiki http://
-> ceph.newdream.net/wiki/Debian and 
-> http://ceph.newdream.net/wiki/Installing_on_Debian
+> to your ceph.conf and it will be resized during mkfs (iff it is 0
+> bytes). Or use 'dd'.  Or (better yet) point it at a raw block device.
 > 
-> 0.19 worked with the wiki-howto.
 
-It sounds like the osd journal file exists, but is 0 bytes.  You can 
-include
+ok, this worked.
 
-	osd journal size = 100    ; measured in MB
 
-to your ceph.conf and it will be resized during mkfs (iff it is 0 bytes).  
-Or use 'dd'.  Or (better yet) point it at a raw block device.
 
-I'm fixing up the error handling to return an error instead of asserting.
+> I'm fixing up the error handling to return an error instead of
+> asserting.
+> 
+>> .. and what happend to the ceph-kclient-source package?
+> 
+> Well, I'm not sure if we should keep building that package.  The kernel
+> client versioning is somewhat divorced from the server side now that the
+> client is in the mainline kernel (and releases are dictated by kernel
+> releases).  But I take it people use that package?  I suppose as long as
+> there is some 'stable' release that coincides with the final kernel
+> release (e.g., v0.20.1 for v2.6.34 in a few weeks, in this case).
 
-> .. and what happend to the ceph-kclient-source package? 
+debian squeeze will be released with kernel 2.6.32 - so it won't have the 
+upstream ceph module. 
 
-Well, I'm not sure if we should keep building that package.  The kernel 
-client versioning is somewhat divorced from the server side now that the 
-client is in the mainline kernel (and releases are dictated by kernel 
-releases).  But I take it people use that package?  I suppose as long as 
-there is some 'stable' release that coincides with the final kernel 
-release (e.g., v0.20.1 for v2.6.34 in a few weeks, in this case).
+the kvm project releases "kvm-kmod" source tarballs numberd like the 
+kernel for use with older kernels. something like that would be nice. 
 
-sage
+even more nice would be a dkms* package. maybe i get the time this week 
+to try creating one. 
+
+- Thomas
+
+* http://linux.die.net/man/8/dkms
+
