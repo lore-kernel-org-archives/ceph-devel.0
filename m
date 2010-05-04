@@ -1,53 +1,53 @@
-From: Huang Weiyi <weiyi.huang@gmail.com>
-Subject: [PATCH 2/2] ceph: remove duplicated #include
-Date: Tue,  4 May 2010 15:16:54 +0800
-Message-ID: <1272957414-2816-1-git-send-email-weiyi.huang@gmail.com>
+From: =?ISO-8859-1?Q?Micka=EBl_Can=E9vet?= <canevet@embl.fr>
+Subject: Multiple disks per server.
+Date: Tue, 04 May 2010 14:18:25 +0200
+Message-ID: <4BE01091.7040103@embl.fr>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:40493 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751923Ab0EDHRG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 May 2010 03:17:06 -0400
-Received: by mail-pw0-f46.google.com with SMTP id 5so20049pwi.19
-        for <ceph-devel@vger.kernel.org>; Tue, 04 May 2010 00:17:05 -0700 (PDT)
+Received: from emblmta1.embl.fr ([193.49.43.176]:38949 "EHLO emblmta1.embl.fr"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758556Ab0EDM2G (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 4 May 2010 08:28:06 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@newdream.net
-Cc: ceph-devel@vger.kernel.org, Huang Weiyi <weiyi.huang@gmail.com>
+To: ceph-devel@vger.kernel.org
 
-Remove duplicated #include('s) in
-  fs/ceph/auth.c
-  fs/ceph/super.h
+Hi,
 
-Signed-off-by: Huang Weiyi <weiyi.huang@gmail.com>
----
- fs/ceph/auth.c  |    1 -
- fs/ceph/super.h |    1 -
- 2 files changed, 0 insertions(+), 2 deletions(-)
+I'm testing ceph on 4 old servers.
 
-diff --git a/fs/ceph/auth.c b/fs/ceph/auth.c
-index 818afe7..f6394b9 100644
---- a/fs/ceph/auth.c
-+++ b/fs/ceph/auth.c
-@@ -3,7 +3,6 @@
- #include <linux/module.h>
- #include <linux/slab.h>
- #include <linux/err.h>
--#include <linux/slab.h>
- 
- #include "types.h"
- #include "auth_none.h"
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 13513b8..dbf474e 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -13,7 +13,6 @@
- #include <linux/slab.h>
- #include <linux/wait.h>
- #include <linux/writeback.h>
--#include <linux/slab.h>
- 
- #include "types.h"
- #include "messenger.h"
--- 
-1.6.1.3
+As there is more then one disk per server available for data (2 with 6=20
+disks and 2 with 10 disks for a total of 32 disks over 4 nodes), I was=20
+wondering how to define OSDs.
 
+I have choice between one OSD per disk (32 OSDs on the cluster) or one=20
+OSD per server with one btrfs filesystem over all disks of the server (=
+4=20
+OSDs on the cluster). Which one is the best solution ?
+
+In the first case, if I lose one disk, I lose only a small part of=20
+available space. In the other case, if I lose one disk, I lose the whol=
+e=20
+server (as btrfs filesystem is in stripping) much more space.
+
+On the other hand, if I lose the whole server in the first case, I can=20
+lose all replicates of a data because they may be on two different OSD=20
+on the same server.
+
+Is there a way to define OSD groups so that we can be sure that 2=20
+replicates are not on OSDs of the same group (could be usefull for=20
+multiple OSDs per server, but also mutliple server per computing room -=
+=20
+if I lose one whole room, a lot of server, I will be sure that I have=20
+not lost every replicates).
+
+Thanks a lot.
+Micka=EBl
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
