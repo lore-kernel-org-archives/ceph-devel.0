@@ -1,76 +1,48 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Multiple disks per server.
-Date: Tue, 4 May 2010 10:37:06 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005040947230.11433@cobra.newdream.net>
-References: <4BE01091.7040103@embl.fr>
+Subject: Re: Integration with Management Layers
+Date: Tue, 4 May 2010 10:44:01 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1005041037500.11433@cobra.newdream.net>
+References: <k2p543a57a81005040638p134d8fct6e89ab1cbef6c0af@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-385837958-1272994626=:11433"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51445 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:33428 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757792Ab0EDReU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 May 2010 13:34:20 -0400
-In-Reply-To: <4BE01091.7040103@embl.fr>
+	with ESMTP id S1751269Ab0EDRlP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 May 2010 13:41:15 -0400
+In-Reply-To: <k2p543a57a81005040638p134d8fct6e89ab1cbef6c0af@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Micka=EBl_Can=E9vet?= <canevet@embl.fr>
+To: Joel Merrick <joel.merrick@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Joel,
 
---557981400-385837958-1272994626=:11433
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+On Tue, 4 May 2010, Joel Merrick wrote:
+> Firstly well done with the project, it looks very interesting and I'm
+> looking forward to see how it develops.
+> 
+> Has any work been done with any of the abstraction layers for VM
+> management. I'm on the OpenNebula and Ganeti lists and I know nothing
+> has been done with these yet, but I'd like to help adapt/patch/test
+> these (specifically Ganeti as we use it in production) where possible
+> to support ceph storage.
 
-Hi,
+I haven't use either of those projects, but having them manage the 
+backed VM storage using ceph would be extremely handy!  Let us know how we 
+can help.
 
-On Tue, 4 May 2010, Micka=EBl Can=E9vet wrote:
-> As there is more then one disk per server available for data (2 with 6 di=
-sks
-> and 2 with 10 disks for a total of 32 disks over 4 nodes), I was wonderin=
-g how
-> to define OSDs.
->=20
-> I have choice between one OSD per disk (32 OSDs on the cluster) or one OS=
-D per
-> server with one btrfs filesystem over all disks of the server (4 OSDs on =
-the
-> cluster). Which one is the best solution ?
->=20
-> In the first case, if I lose one disk, I lose only a small part of availa=
-ble
-> space. In the other case, if I lose one disk, I lose the whole server (as
-> btrfs filesystem is in stripping) much more space.
->=20
-> On the other hand, if I lose the whole server in the first case, I can lo=
-se
-> all replicates of a data because they may be on two different OSD on the =
-same
-> server.
+Currently, most of the rbd (rados block device) image management is done 
+through the 'rbdtool'.  There are some missing features still, but it 
+works for creating, resizing, and deleting images.
 
-Right.  You can make btrfs do some replication (e.g. 2x metadata, 1x data)=
-=20
-to mitigate the risk somewhat, but it'll use more disk space.  raid[56]=20
-in btrfs is still a ways off.
+The rbd driver itself is in the 'rbd' branch of ceph-client.git.  It is 
+managed via /sys/class/rbd, although that interface is still in flux.  
+Currently we're working on snapshot support.
 
-> Is there a way to define OSD groups so that we can be sure that 2 replica=
-tes
-> are not on OSDs of the same group (could be usefull for multiple OSDs per
-> server, but also mutliple server per computing room - if I lose one whole
-> room, a lot of server, I will be sure that I have not lost every replicat=
-es).
-
-This is probably the best route.  The process isn't streamlined, however. =
-=20
-It involves constructing an appropriate CRUSH rule that includes a=20
-hierarchy of disks and hosts, and distributes replicas across hosts. =20
-
-I threw together a wiki article at
-
-=09http://ceph.newdream.net/wiki/Custom_data_placement_with_CRUSH
-
-Please let me know if you have questions or run into problems.
+There is also a compatible qemu/kvm storage driver.  That means a VM can 
+use an rbd device in two or three ways: either via the storage driver,  
+by mapping the block device on the host and passing it through to the 
+guest, or by mapping it directly on the guest.
 
 sage
---557981400-385837958-1272994626=:11433--
