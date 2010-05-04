@@ -1,58 +1,39 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] ceph fixes for 2.6.34-rc7
-Date: Mon, 3 May 2010 15:42:25 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005031531330.23536@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Huang Weiyi <weiyi.huang@gmail.com>
+Subject: [PATCH 1/2] ceph: remove unused #include <linux/version.h>
+Date: Tue,  4 May 2010 15:16:39 +0800
+Message-ID: <1272957399-6032-1-git-send-email-weiyi.huang@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53018 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755281Ab0ECWjl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 May 2010 18:39:41 -0400
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:40493 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751217Ab0EDHQx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 May 2010 03:16:53 -0400
+Received: by pwi5 with SMTP id 5so20049pwi.19
+        for <ceph-devel@vger.kernel.org>; Tue, 04 May 2010 00:16:52 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: sage@newdream.net
+Cc: ceph-devel@vger.kernel.org, Huang Weiyi <weiyi.huang@gmail.com>
 
-Hi Linus,
+Remove unused #include <linux/version.h>('s) in
+  fs/ceph/super.c
 
-Please pull the following Ceph fixes from
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-The main items are fixes for rename, a direct io oops, and a mismatched 
-spin_unlock.  The others fix less common bugs.  The last batch of testing 
-has gone smoothly, so hopefully this will be the last before 2.6.34.
-
-Thanks-
-sage
-
+Signed-off-by: Huang Weiyi <weiyi.huang@gmail.com>
 ---
+ fs/ceph/super.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
 
-Sage Weil (11):
-      ceph: clear dir complete on d_move
-      ceph: fix snap realm splits
-      ceph: print more useful version info on module load
-      ceph: fix leaked spinlock during mds reconnect
-      ceph: add missing #includes
-      ceph: fix seq counting for skipped messages
-      ceph: discard incoming messages with bad seq #
-      ceph: fix direct io truncate offset
-      ceph: clear dir complete, invalidate dentry on replayed rename
-      ceph: fix lockless caps check
-      ceph: remove bad auth_x kmem_cache
-
- fs/ceph/addr.c      |    2 +-
- fs/ceph/auth.c      |    1 +
- fs/ceph/auth_none.h |    2 ++
- fs/ceph/auth_x.c    |   32 ++++++++++----------------------
- fs/ceph/caps.c      |    2 +-
- fs/ceph/dir.c       |    9 +++++++++
- fs/ceph/file.c      |    3 ++-
- fs/ceph/inode.c     |    4 ++++
- fs/ceph/messenger.c |   22 ++++++++++++++++++++++
- fs/ceph/snap.c      |   24 ++++++++++++++----------
- fs/ceph/super.c     |    7 ++++---
- fs/ceph/super.h     |    1 +
- 12 files changed, 71 insertions(+), 38 deletions(-)
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index f888cf4..82b709f 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -14,7 +14,6 @@
+ #include <linux/slab.h>
+ #include <linux/statfs.h>
+ #include <linux/string.h>
+-#include <linux/version.h>
+ #include <linux/vmalloc.h>
+ 
+ #include "decode.h"
+-- 
+1.6.1.3
 
