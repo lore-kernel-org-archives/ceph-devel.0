@@ -1,58 +1,58 @@
-From: Alex Elsayed <eternaleye@gmail.com>
-Subject: Re: Replacing DRBD use with RBD
-Date: Wed, 05 May 2010 00:30:39 -0700
-Message-ID: <hrr69o$fhb$1@dough.gmane.org>
-References: <801672.55708.qm@web36106.mail.mud.yahoo.com>
+From: Yehuda Sadeh Weinraub <yehuda@hq.newdream.net>
+Subject: Re: qemu-kvm/rbd: aio patch in git
+Date: Wed, 5 May 2010 11:41:55 -0700
+Message-ID: <y2ga37615151005051141i2912e0dftc76eb9c0ade806f7@mail.gmail.com>
+References: <20100504223315.GA42090@ncolin.muc.de>
+	 <v2ra37615151005051048ya839625ejbbe44c5fc2202785@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:49178 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752880Ab0EEHZE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 5 May 2010 03:25:04 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1O9Yyd-0006AZ-16
-	for ceph-devel@vger.kernel.org; Wed, 05 May 2010 09:25:03 +0200
-Received: from rain.gmane.org ([80.91.229.7])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 05 May 2010 09:25:03 +0200
-Received: from eternaleye by rain.gmane.org with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 05 May 2010 09:25:03 +0200
+Received: from mail.hq.newdream.net ([66.33.206.127]:34035 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757772Ab0EESl5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 May 2010 14:41:57 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 45DD926AA8
+	for <ceph-devel@vger.kernel.org>; Wed,  5 May 2010 11:41:57 -0700 (PDT)
+Received: from mail-vw0-f46.google.com (mail-vw0-f46.google.com [209.85.212.46])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 1A5A1269FA
+	for <ceph-devel@vger.kernel.org>; Wed,  5 May 2010 11:41:57 -0700 (PDT)
+Received: by vws12 with SMTP id 12so1248541vws.19
+        for <ceph-devel@vger.kernel.org>; Wed, 05 May 2010 11:41:56 -0700 (PDT)
+In-Reply-To: <v2ra37615151005051048ya839625ejbbe44c5fc2202785@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Martin Fick wrote:
+On Tue, May 4, 2010 at 3:33 PM, Christian Brunner <chb@muc.de> wrote:
+>
+> Hi Yehuda,
+>
+> I've seen that my initial aio implementation is now in the git repository.
+> This patch isn't working very well. Could you revert it, please?
+Done.
 
-> Hello,
-> 
-> I have a questions with respect to RADOS and RBD and the cluster monitor
-> daemons.
+>
+> I'm still having problems with aio handling, but I'll try to send an
+>
+> updated patch by the weekend.
+>
+Great!
 
-I'm not one of the developers, but I've been following for a while and one 
-of your sub-questions intriqued me; specifically:
+We're currently working on rbd snapshots and there were a few header
+changes. Currently snapshot creation is being done via the rbd kernel
+driver, but we're planning in adding that capability to the rbdtool.
+Once this works, it'll be easy to implement the kvm-rbd snapshots.
+Note that at this point snapshots are read-only. Adding a writable
+snapshots, as well as snapshots branching would be awesome, however,
+it looks like it's not going to be easy to integrate it easily into
+the current system. So probably the easiest at this point would be to
+have some revert-to-snapshot capability.
 
->...This would open up the use of RBD devices for linux
-> containers or linux vservers which could run on any machine in a cluster
-> (similar to the idea of using it with kvm/qemu).
+The next thing would be making it safer for multiple clients to
+collaborate on a single rbd image., e.g., adding atomic header
+modification operations and such. This requires some changes in the
+osd (new ops), and will probably require adding some new librados api
+functions.
 
-As it currently stands you could likely run a vserver or an 
-OpenVZ/Virtuozzo/LXC container on Ceph (the distributed FS) directly, rather 
-than layering a local FS over RBD. Also, this would probably provide better 
-performance in the end. As a side benefit, you would gain the ability to 
-make fine-grained snapshots of the guests' filesystems, access them directly 
-from the host (or another Ceph client), and adjust quotas for the guest 
-while running. This is probably a better solution for container-based 
-virtualization than RBD-based options, due to the advantage one can take of 
-all guests sharing a kernel with the host. RBD is more likely to be useful 
-for full virtualization like KVM, but even in that case you could probably 
-make a specialized initramfs that mounts a rootfs over Ceph with a prefix 
-(taking advantage of that Ceph allows mounting a subdirectory as if it was 
-the whole FS).
-
-Hope this helps!
-
+Yehuda
