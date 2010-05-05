@@ -1,55 +1,99 @@
-From: chb@muc.de
-Subject: AW: qemu-kvm/rbd: aio patch in git
-Date: Wed, 5 May 2010 22:29:58 +0200
-Message-ID: <vmime.4be1d546.527.f32ec785842ba48@lvps80-237-162-219.dedicated.hosteurope.de>
-References: <v2ra37615151005051048ya839625ejbbe44c5fc2202785@mail.gmail.com>
+From: Martin Fick <mogulguy@yahoo.com>
+Subject: Re: Replacing DRBD use with RBD
+Date: Wed, 5 May 2010 13:34:08 -0700 (PDT)
+Message-ID: <582033.76293.qm@web36101.mail.mud.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.brunner-muc.de ([80.237.162.219]:47395 "EHLO
-	mail.brunner-muc.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755986Ab0EEUaG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 May 2010 16:30:06 -0400
-Received: from lvps80-237-162-219.dedicated.hosteurope.de (localhost [127.0.0.1])
-	by mail.brunner-muc.de (Postfix) with ESMTP id 7B587C048079
-	for <ceph-devel@vger.kernel.org>; Wed,  5 May 2010 22:29:58 +0200 (CEST)
-In-Reply-To: <y2ga37615151005051141i2912e0dftc76eb9c0ade806f7@mail.gmail.com>
+Received: from web36101.mail.mud.yahoo.com ([66.163.179.215]:20608 "HELO
+	web36101.mail.mud.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753302Ab0EEUeK convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 5 May 2010 16:34:10 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-> We're currently working on rbd snapshots and there were a few header
-> changes. Currently snapshot creation is being done via the rbd kernel
-> driver, but we're planning in adding that capability to the rbdtool.
-> Once this works, it'll be easy to implement the kvm-rbd snapshots.
-> Note that at this point snapshots are read-only. Adding a writable
-> snapshots, as well as snapshots branching would be awesome, however,
-> it looks like it's not going to be easy to integrate it easily into
-> the current system. So probably the easiest at this point would be to
-> have some revert-to-snapshot capability.
+--- On Wed, 5/5/10, Yehuda Sadeh Weinraub <yehudasa@gmail.com> wrote:
+> The problem is that the ceph monitors require a quorum in
+> order to decide on the cluster state. The way the system=20
+> works right now, a 2-way monitor setup would be less stable=20
+> than a system with a single monitor since it wouldn't work
+> whenever any of the two monitors crashes.=20
 
-This is great news.
+Right, that is indeed not nice. :)
 
-> The next thing would be making it safer for multiple clients to
-> collaborate on a single rbd image., e.g., adding atomic header
-> modification operations and such. This requires some changes in the
-> osd (new ops), and will probably require adding some new librados api
-> functions.
+> A possible workaround would be to have a special case for a
+> 2-way mon clusters, where it'd require a single mon for
+> getting a majority. I'm not sure whether this is actually=20
+> feasible. As usual, the devil is in the details.
 
-Another thing that would be interesting is support for releasing sectors 
-(aka TRIM support). However I think this would require some kind of
-sector map, where we store information about allocated and released 
-sectors. At the moment I'm not sure if it is worth the effort and the
-performance impact.
+Yes. One simple way is to use a ping node.=A0 If a node can
+reach the ping node, but not its peer, it should be able
+to assume "lone operation" and thus effectively degrade to
+a single monitor situation temporarily. I guess my question
+is, "is this something that the ceph project is=20
+potentially willing to support for OSDs?"
 
-Maybe we should add a flag to the header, that indicates the existence
-of a sector map. This way we could decide about this feature
-later without changing the header again.
-
-Christian
+I suspect that also supporting dynamic reconfiguration:
+http://en.wikipedia.org/wiki/Paxos_algorithm#Cheap_Paxos
+would also help a great deal to make clusters more
+adaptable.
 
 
+> > One suggestion I have would be to do this would be to
+> > use some of the same techniques that heartbeat uses to
+> > determine whether a node has gone down or if instead there
+> > is network segregation: a serial port connection, common
+> > ping nodes (such as a router)...
+
+> There is a heartbeat mechanism withing the mon cluster, and
+> it's being used for the monitors to keep track of their peer
+> status. It might be a good idea to add different configurable=20
+> types of heartbeats.
+
+Yes, specifically, I meant by using some of the techniques
+that the heartbeat project uses:
+
+http://www.linux-ha.org/wiki/Heartbeat
+
+Ideally (my suggestion,) they would make some of them=20
+available in a library so that other projects like=20
+RADOS could use them independently without having to=20
+rewrite them from scratch.
 
 
 
+> > 2) Is there any way of preventing two users of an RBD
+> > device from using the device concurrently?=A0 ...
+>=20
+> We were just thinking about the proper solution to this
+> problem ourselves. There are a few options. One is to=20
+> add some kinds of locking mechanism to the osd, which
+> would allow doing just that. E.g., a client would take=20
+> a lock, do whatever it needs to do, a second client=20
+> would try to get the lock but will be able to hold it only
+> after the first one has released it. Another option would
+> be to have the clients handle the mutual exclusion=20
+> themselves (hence not enforced by the osd) by setting=20
+> flags and leases on the rbd header.
+
+I'm curious, do you mean a scheme such as writing the
+name of the node "locking" the image along with a=20
+timestamp regularly to the header as a heartbeat?=A0=20
+Along with some lock acquisition logic?
+
+Thanks for the replies!
+
+-Martin
+
+
+
+     =20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
