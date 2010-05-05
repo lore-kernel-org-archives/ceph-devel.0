@@ -1,100 +1,105 @@
-From: Christian Brunner <chb@muc.de>
-Subject: [PATCH] ceph: re-enable rados_aio_set_callback
-Date: Wed, 5 May 2010 21:50:53 +0200
-Message-ID: <20100505195053.GA50246@ncolin.muc.de>
+From: Alex Elsayed <eternaleye@gmail.com>
+Subject: Re: Replacing DRBD use with RBD
+Date: Wed, 05 May 2010 13:02:44 -0700
+Message-ID: <hrsibo$29c$1@dough.gmane.org>
+References: <801672.55708.qm@web36106.mail.mud.yahoo.com> <hrr69o$fhb$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=unknown-8bit
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ncolin.muc.de ([193.149.48.11]:62933 "EHLO ncolin.muc.de"
+Received: from lo.gmane.org ([80.91.229.12]:46978 "EHLO lo.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753510Ab0EETuy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 5 May 2010 15:50:54 -0400
-Content-Disposition: inline
+	id S1751043Ab0EETxn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 5 May 2010 15:53:43 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1O9kf3-0004U3-AR
+	for ceph-devel@vger.kernel.org; Wed, 05 May 2010 21:53:37 +0200
+Received: from rain.gmane.org ([80.91.229.7])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 05 May 2010 21:53:37 +0200
+Received: from eternaleye by rain.gmane.org with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 05 May 2010 21:53:37 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-While implementing the AIO parts of the qemu-kvm driver I realized that
-for every call to rados_aio_write the callback is called twice. The fir=
-st
-time, when the write is complete (committed to journal?) and the second
-time, when the write is safe (committed to the object store?).
+Replying to a response that was off-list:
 
-Usually I would think that a complete call is sufficient in most use
-cases. However when I call rados_aio_release on the first callback, I g=
-et
-an error message (on the second callback):
+On Wed, May 5, 2010 at 9:02 AM, Martin Fick <mogulguy@yahoo.com> wrote:
+>
+> --- On Wed, 5/5/10, Alex Elsayed <eternaleye@gmail.com> wrote:
+>
+> > >...This would open up the use of RBD devices for linux
+> > > containers or linux vservers which could run on any
+> > > machine in a cluster (similar to the idea of using it
+> > > with kvm/qemu).
+> >
+> > As it currently stands you could likely run a vserver or an
+> > OpenVZ/Virtuozzo/LXC container on Ceph (the distributed FS)
+> > directly, rather than layering a local FS over RBD. Also,
+> > this would probably provide better performance in the end.
+>
+> Could you please explain why you would think that this
+> would provide better performance in the end?  I would think
+> that a simpler local filesystem (with remote read writes)
+> could outperform ceph in most situations that would matter
+> for virtual systems (i.e. low latencies for small
+> read/writes), would it not?
 
-common/Mutex.h: In function 'void Mutex::Lock(bool)':
-common/Mutex.h:97: FAILED assert(r =3D=3D 0)
- 1: (RadosClient::C_aio_Safe::finish(int)+0x7f) [0x3ea0262e0f]
- 2: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x5cb) [0x3ea027fc2b]
- 3: (RadosClient::_dispatch(Message*)+0x7c) [0x3ea0250bac]
- 4: (RadosClient::ms_dispatch(Message*)+0x33) [0x3ea0250ee3]
- 5: (SimpleMessenger::dispatch_entry()+0x6a2) [0x3ea0268aa2]
- 6: (SimpleMessenger::DispatchThread::entry()+0x51) [0x3ea025db41]
- 7: (Thread::_entry_func(void*)+0xc) [0x3ea027645c]
- 8: /lib64/libpthread.so.0() [0x3293406a3a]
- 9: (clone()+0x6d) [0x3292cde67d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
-ed to interpret this.
-common/Mutex.h: In function 'void Mutex::Lock(bool)':
-common/Mutex.h:97: FAILED assert(r =3D=3D 0)
- 1: (RadosClient::C_aio_Safe::finish(int)+0x7f) [0x3ea0262e0f]
- 2: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x5cb) [0x3ea027fc2b]
- 3: (RadosClient::_dispatch(Message*)+0x7c) [0x3ea0250bac]
- 4: (RadosClient::ms_dispatch(Message*)+0x33) [0x3ea0250ee3]
- 5: (SimpleMessenger::dispatch_entry()+0x6a2) [0x3ea0268aa2]
- 6: (SimpleMessenger::DispatchThread::entry()+0x51) [0x3ea025db41]
- 7: (Thread::_entry_func(void*)+0xc) [0x3ea027645c]
- 8: /lib64/libpthread.so.0() [0x3293406a3a]
- 9: (clone()+0x6d) [0x3292cde67d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
-ed to interpret this.
-terminate called after throwing an instance of 'ceph::FailedAssertion*'
-Aborted (core dumped)
+I would recommend benchmarking to have empirical results rather
+than going with my presumptions, but in Ceph the metadata servers
+cache the metadata and the OSDs journal writes, so any writes which
+fit in the journal will be quite fast. Also, RBD has no way of
+knowing what reads/writes are 'small' in the RBD block device,
+because it works by splitting the disk image into 4MB chunks and
+deals with those. That means that even small reads and writes
+have a minimum size of 4MB.
 
-To work around this, I=E2=80=99d suggest to re-enable rados_aio_set_cal=
-lback.
-This way it would possible to clear (cb=3DNULL) or change the callback
-handler.
+>
+> > ...This is probably a better solution for container-based
+> > virtualization than RBD-based options, due to the advantage
+> > one can take of all guests sharing a kernel with the host.
+>
+> I am not sure I understand why you are saying the guest/host
+> sharing thing is an advantage that would benefit using ceph
+> over RBD, could you pleas expound?
 
-Regards,
-Christian
----
- src/librados.cc |    5 +++++
- 1 files changed, 5 insertions(+), 0 deletions(-)
+This is an advantage in the container virtualization case because
+you can (say) mount the entire Ceph FS on the host and treat the
+containers simply run the containers from a very basic LXC or other 
+container config, treating the Ceph filesystem as just another
+directory tree from the point of view of the container. This
+simplifies your container config, and gives the advantages I named
+earlier (online resize, etc).
 
-diff --git a/src/librados.cc b/src/librados.cc
-index 76d4a53..c3a34d7 100644
---- a/src/librados.cc
-+++ b/src/librados.cc
-@@ -1811,6 +1811,11 @@ extern "C" int rados_aio_create_completion(rados=
-_callback_t cb, void *cba, rados
-   return 0;
- }
-=20
-+extern "C" int rados_aio_set_callback(rados_completion_t c, rados_call=
-back_t cb, void *cba)
-+{
-+  return ((RadosClient::AioCompletion *)c)->set_callback(cb, cba);
-+}
-+
- extern "C" int rados_aio_wait_for_complete(rados_completion_t c)
- {
-   return ((RadosClient::AioCompletion *)c)->wait_for_complete();
---=20
-1.6.6.1
+> > RBD is more likely to be useful for full virtualization
+> > like KVM,
+>
+> Again, why so specifically?
 
+Because for containers, the config is simplest when you can hand
+them a directory tree, but for full virtualization, the config is
+simplest when you can hand them a block device. Simplicity reduces
+the number of potential points where errors can be introduced.
 
---=20
-Christian Brunner                              MUC.DE e.V.
-                                               Joseph-Dollinger-Bogen 1=
-4
-                                               D-80807 Muenchen
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I agree that ceph would also have it's advantages, but
+> RBD based solutions would likely have some advantages
+> that ceph will never have.  RBD allows one to use any
+> local filesystem with any semantics/features that one
+> wishes. RBD is simpler.  RBD is likely currently more
+> mature than ceph?
+
+Ceph has POSIX (or as close as possible) semantics, matching local
+filesystems, and provides more features than any local FS except
+BtrFS, which is similarly under heavy development.
+
+RBD is actually a rather recent addition - the first mailing
+list message about it was on March 7th, 2010, whereas Ceph has
+been in development since 2007.
+
+I am posting this to the mailing list as well, as others may find it 
+interesting.
+
