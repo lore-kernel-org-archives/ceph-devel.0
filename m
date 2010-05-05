@@ -1,99 +1,87 @@
 From: Martin Fick <mogulguy@yahoo.com>
 Subject: Re: Replacing DRBD use with RBD
-Date: Wed, 5 May 2010 13:34:08 -0700 (PDT)
-Message-ID: <582033.76293.qm@web36101.mail.mud.yahoo.com>
+Date: Wed, 5 May 2010 13:59:13 -0700 (PDT)
+Message-ID: <290088.71767.qm@web36106.mail.mud.yahoo.com>
+References: <hrsibo$29c$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from web36101.mail.mud.yahoo.com ([66.163.179.215]:20608 "HELO
-	web36101.mail.mud.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753302Ab0EEUeK convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 5 May 2010 16:34:10 -0400
+Received: from web36106.mail.mud.yahoo.com ([66.163.179.220]:27337 "HELO
+	web36106.mail.mud.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1758168Ab0EEU7O (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 May 2010 16:59:14 -0400
+In-Reply-To: <hrsibo$29c$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, Alex Elsayed <eternaleye@gmail.com>
 
---- On Wed, 5/5/10, Yehuda Sadeh Weinraub <yehudasa@gmail.com> wrote:
-> The problem is that the ceph monitors require a quorum in
-> order to decide on the cluster state. The way the system=20
-> works right now, a 2-way monitor setup would be less stable=20
-> than a system with a single monitor since it wouldn't work
-> whenever any of the two monitors crashes.=20
+--- On Wed, 5/5/10, Alex Elsayed <eternaleye@gmail.com> wrote:
 
-Right, that is indeed not nice. :)
+Sorry about the accidental off-list reply, thanks 
+for replying on list...
+ 
 
-> A possible workaround would be to have a special case for a
-> 2-way mon clusters, where it'd require a single mon for
-> getting a majority. I'm not sure whether this is actually=20
-> feasible. As usual, the devil is in the details.
+> I would recommend benchmarking to have empirical results
+> rather than going with my presumptions, 
 
-Yes. One simple way is to use a ping node.=A0 If a node can
-reach the ping node, but not its peer, it should be able
-to assume "lone operation" and thus effectively degrade to
-a single monitor situation temporarily. I guess my question
-is, "is this something that the ceph project is=20
-potentially willing to support for OSDs?"
+Or my presumptions, :) agreed.
 
-I suspect that also supporting dynamic reconfiguration:
-http://en.wikipedia.org/wiki/Paxos_algorithm#Cheap_Paxos
-would also help a great deal to make clusters more
-adaptable.
+> but in Ceph the metadata servers cache the metadata and
+> the OSDs journal writes, so any writes which fit in the
+> journal will be quite fast.
+
+Yes, but the kernel will do that also (albeit differently)
+for local file systems even if the block device is remote.
+
+> Also, RBD has no way of knowing what reads/writes are
+> 'small' in the RBD block device, because it works by splitting
+> the disk image into 4MB chunks and deals with those.
+
+Good point. I assume that is tunable, at least by editing
+the rbd driver, no?
 
 
-> > One suggestion I have would be to do this would be to
-> > use some of the same techniques that heartbeat uses to
-> > determine whether a node has gone down or if instead there
-> > is network segregation: a serial port connection, common
-> > ping nodes (such as a router)...
+> This is an advantage in the container virtualization case
+> because you can (say) mount the entire Ceph FS on the 
+> host and treat the containers simply run the containers 
+> from a very basic LXC or other container config, 
+> treating the Ceph filesystem as just another directory 
+> tree from the point of view of the container.
+> This simplifies your container config, and gives the 
+> advantages I named earlier (online resize, etc).
 
-> There is a heartbeat mechanism withing the mon cluster, and
-> it's being used for the monitors to keep track of their peer
-> status. It might be a good idea to add different configurable=20
-> types of heartbeats.
+Hmm, while some of those are good advantages (and
+some may not be depending on your mindset), I am missing
+the main point as the why this is different than with
+"real VMs" except for maybe your claim of "not being 
+usual" ...
 
-Yes, specifically, I meant by using some of the techniques
-that the heartbeat project uses:
+ 
+> Ceph has POSIX (or as close as possible) semantics,
+> matching local filesystems, and provides more features
+> than any local FS except BtrFS, which is similarly 
+> under heavy development.
 
-http://www.linux-ha.org/wiki/Heartbeat
+Perhaps it has many of the features that you want,
+but there are many things that many other FSs can
+do (good and bad depending again on your mindset),
+that ceph cannot and will likely never be able to
+do.  For example, can it be case insensitive such
+as a DOS FS?
 
-Ideally (my suggestion,) they would make some of them=20
-available in a library so that other projects like=20
-RADOS could use them independently without having to=20
-rewrite them from scratch.
 
+> RBD is actually a rather recent addition - the first
+> mailing list message about it was on March 7th, 2010,
+> whereas Ceph has been in development since 2007.
 
+True, I guess I meant that using the OSDs will likely
+always be simpler and more stable than using them 
+through ceph.
 
-> > 2) Is there any way of preventing two users of an RBD
-> > device from using the device concurrently?=A0 ...
->=20
-> We were just thinking about the proper solution to this
-> problem ourselves. There are a few options. One is to=20
-> add some kinds of locking mechanism to the osd, which
-> would allow doing just that. E.g., a client would take=20
-> a lock, do whatever it needs to do, a second client=20
-> would try to get the lock but will be able to hold it only
-> after the first one has released it. Another option would
-> be to have the clients handle the mutual exclusion=20
-> themselves (hence not enforced by the osd) by setting=20
-> flags and leases on the rbd header.
-
-I'm curious, do you mean a scheme such as writing the
-name of the node "locking" the image along with a=20
-timestamp regularly to the header as a heartbeat?=A0=20
-Along with some lock acquisition logic?
-
-Thanks for the replies!
+Thanks,
 
 -Martin
 
 
 
-     =20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+      
