@@ -1,58 +1,243 @@
-From: Yehuda Sadeh Weinraub <yehuda@hq.newdream.net>
-Subject: Re: qemu-kvm/rbd: aio patch in git
-Date: Wed, 5 May 2010 11:41:55 -0700
-Message-ID: <y2ga37615151005051141i2912e0dftc76eb9c0ade806f7@mail.gmail.com>
-References: <20100504223315.GA42090@ncolin.muc.de>
-	 <v2ra37615151005051048ya839625ejbbe44c5fc2202785@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: [PATCH 1/2] qemu-kvm/rbd: Implement aio
+Date: Wed, 5 May 2010 21:49:10 +0200
+Message-ID: <20100505194909.GA50182@ncolin.muc.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:34035 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757772Ab0EESl5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 May 2010 14:41:57 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 45DD926AA8
-	for <ceph-devel@vger.kernel.org>; Wed,  5 May 2010 11:41:57 -0700 (PDT)
-Received: from mail-vw0-f46.google.com (mail-vw0-f46.google.com [209.85.212.46])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 1A5A1269FA
-	for <ceph-devel@vger.kernel.org>; Wed,  5 May 2010 11:41:57 -0700 (PDT)
-Received: by vws12 with SMTP id 12so1248541vws.19
-        for <ceph-devel@vger.kernel.org>; Wed, 05 May 2010 11:41:56 -0700 (PDT)
-In-Reply-To: <v2ra37615151005051048ya839625ejbbe44c5fc2202785@mail.gmail.com>
+Received: from ncolin.muc.de ([193.149.48.11]:55044 "EHLO ncolin.muc.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752324Ab0EETtM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 5 May 2010 15:49:12 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-On Tue, May 4, 2010 at 3:33 PM, Christian Brunner <chb@muc.de> wrote:
->
-> Hi Yehuda,
->
-> I've seen that my initial aio implementation is now in the git repository.
-> This patch isn't working very well. Could you revert it, please?
-Done.
+Finally I've managed to get a working implementation of async-I/O for qemu.
+(At least in my test setup things are looking good now.)
 
->
-> I'm still having problems with aio handling, but I'll try to send an
->
-> updated patch by the weekend.
->
-Great!
+The attached patch requires a small modification of librados. I will
+send a mail on this in a few minutes.
 
-We're currently working on rbd snapshots and there were a few header
-changes. Currently snapshot creation is being done via the rbd kernel
-driver, but we're planning in adding that capability to the rbdtool.
-Once this works, it'll be easy to implement the kvm-rbd snapshots.
-Note that at this point snapshots are read-only. Adding a writable
-snapshots, as well as snapshots branching would be awesome, however,
-it looks like it's not going to be easy to integrate it easily into
-the current system. So probably the easiest at this point would be to
-have some revert-to-snapshot capability.
+Christian 
+---
+ block/rbd.c |  179 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 178 insertions(+), 1 deletions(-)
 
-The next thing would be making it safer for multiple clients to
-collaborate on a single rbd image., e.g., adding atomic header
-modification operations and such. This requires some changes in the
-osd (new ops), and will probably require adding some new librados api
-functions.
+diff --git a/block/rbd.c b/block/rbd.c
+index 2177fcd..a3bfb4d 100644
+--- a/block/rbd.c
++++ b/block/rbd.c
+@@ -47,6 +47,25 @@
+ 
+ #define OBJ_MAX_SIZE (1UL << OBJ_DEFAULT_OBJ_ORDER)
+ 
++typedef struct RBDAIOCB {
++        BlockDriverAIOCB common;
++        QEMUBH *bh;
++        int ret;
++        QEMUIOVector *qiov;
++        char *bounce;
++        int write;
++        int64_t sector_num;
++        int aiocnt;
++	int rccomplete;
++} RBDAIOCB;
++
++typedef struct RADOSCB {
++        int rcbid;
++        RBDAIOCB *acb;
++        int done;
++        int64_t segsize;
++        char *buf;
++} RADOSCB;
+ 
+ typedef struct RBDRVRBDState {
+ 	rados_pool_t pool;
+@@ -341,6 +360,162 @@ static int rbd_read(BlockDriverState *bs, int64_t sector_num,
+ 	return(0);
+ }
+ 
++static void rbd_aio_cancel(BlockDriverAIOCB *blockacb)
++{
++    RBDAIOCB *acb = (RBDAIOCB *)blockacb;
++    qemu_bh_delete(acb->bh);
++    acb->bh = NULL;
++    qemu_aio_release(acb);
++}
++
++static AIOPool rbd_aio_pool = 
++{
++    .aiocb_size         = sizeof(RBDAIOCB),
++    .cancel             = rbd_aio_cancel,
++};
++
++static void rbd_finish_aiocb(rados_completion_t c, RADOSCB *rcb) 
++{
++    RBDAIOCB *acb = rcb->acb;
++    int64_t r;
++    int i;
++
++    if (rados_aio_is_complete(c)) {
++        acb->aiocnt--;
++        r = rados_aio_get_return_value(c);
++        rados_aio_set_callback(c, NULL, NULL);
++        rados_aio_release(c);
++        if (acb->write) {
++            acb->ret += r;
++        } else {
++            if (r < 0) {
++                memset(rcb->buf, 0, rcb->segsize);
++                acb->ret += rcb->segsize;
++            } else if (r < rcb->segsize) {
++                memset(rcb->buf+r, 0, rcb->segsize-r);
++                acb->ret += rcb->segsize;
++            } else {
++                acb->ret += r;
++            }
++        }
++        qemu_free(rcb);
++        i=0;
++        while ((acb->aiocnt == 0) && !acb->rccomplete && i<5) {
++	    usleep(100);
++            i++;
++        }
++        if ((acb->aiocnt == 0) && acb->rccomplete && acb->bh) {
++            qemu_bh_schedule(acb->bh);
++	}
++    }
++}
++            
++static void rbd_aio_bh_cb(void *opaque) 
++{
++    RBDAIOCB *acb = opaque;
++
++    if (!acb->write) {
++        qemu_iovec_from_buffer(acb->qiov, acb->bounce, acb->qiov->size);
++    }
++    qemu_vfree(acb->bounce);
++    acb->common.cb(acb->common.opaque, acb->ret);
++    qemu_bh_delete(acb->bh);
++    acb->bh = NULL;
++    qemu_aio_release(acb);
++}
++
++static BlockDriverAIOCB *rbd_aio_rw_vector(BlockDriverState *bs,
++                                           int64_t sector_num,
++                                           QEMUIOVector *qiov,
++                                           int nb_sectors,
++                                           BlockDriverCompletionFunc *cb,
++                                           void *opaque,
++                                           int write)
++{
++    RBDAIOCB *acb;
++    RADOSCB *rcb;
++    rados_completion_t c;
++    char n[RBD_MAX_SEG_NAME_SIZE];
++    int64_t segnr, segoffs, segsize;
++    int64_t off, size;
++    char *buf;
++
++    RBDRVRBDState *s = bs->opaque;
++
++    acb = qemu_aio_get(&rbd_aio_pool, bs, cb, opaque);
++    acb->write = write;
++    acb->qiov = qiov;
++    acb->bounce = qemu_blockalign(bs, qiov->size);
++    acb->aiocnt=0;
++    acb->ret=0;
++    acb->rccomplete=0;
++
++    if (!acb->bh) {
++        acb->bh = qemu_bh_new(rbd_aio_bh_cb, acb);
++    }
++
++    if (write) {
++        qemu_iovec_to_buffer(acb->qiov, acb->bounce);
++    }
++
++    buf = acb->bounce;
++
++    off = sector_num * 512;
++    size = nb_sectors * 512;
++    segnr = (int64_t) (off / s->objsize);
++    segoffs = (int64_t) (off % s->objsize);
++    segsize  = (int64_t) (s->objsize - segoffs);
++
++    while (size > 0) {
++        if (size < segsize) {
++            segsize = size;
++        }
++
++        snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s.%012llx", s->name, (long long unsigned int) segnr);
++
++        rcb = qemu_malloc(sizeof(RADOSCB));
++        rcb->done = 0;
++        rcb->acb = acb;
++        rcb->segsize = segsize;
++        rcb->buf = buf;
++
++        acb->aiocnt++;
++
++        rados_aio_create_completion((rados_callback_t) rbd_finish_aiocb, rcb, &c);
++        if (write) {
++            rados_aio_write(s->pool, n, segoffs, buf , segsize, c);
++	} else {
++            rados_aio_read(s->pool, n, segoffs, buf , segsize, c);
++	}
++
++        buf += segsize;
++        size -= segsize;
++        segoffs = 0;
++        segsize = s->objsize;
++        segnr++;
++    }
++
++    acb->rccomplete=1;
++
++    return &acb->common;
++}
++
++
++static BlockDriverAIOCB *rbd_aio_readv(BlockDriverState *bs,
++        int64_t sector_num, QEMUIOVector *qiov, int nb_sectors,
++        BlockDriverCompletionFunc *cb, void *opaque)
++{
++    return rbd_aio_rw_vector(bs, sector_num, qiov, nb_sectors, cb, opaque, 0);
++}
++
++static BlockDriverAIOCB *rbd_aio_writev(BlockDriverState *bs,
++        int64_t sector_num, QEMUIOVector *qiov, int nb_sectors,
++        BlockDriverCompletionFunc *cb, void *opaque)
++{
++    return rbd_aio_rw_vector(bs, sector_num, qiov, nb_sectors, cb, opaque, 1);
++}
++
++
+ static int rbd_getinfo(BlockDriverState *bs, BlockDriverInfo *bdi)
+ {
+     RBDRVRBDState *s = bs->opaque;
+@@ -381,6 +556,9 @@ static BlockDriver bdrv_rbd = {
+ 	.create_options = rbd_create_options,
+ 	.bdrv_getlength	= rbd_getlength,
+ 	.protocol_name	= "rbd",
++
++	.bdrv_aio_readv = rbd_aio_readv,
++	.bdrv_aio_writev= rbd_aio_writev,
+ };
+ 
+ static void bdrv_rbd_init(void) {
+@@ -389,4 +567,3 @@ static void bdrv_rbd_init(void) {
+ 
+ block_init(bdrv_rbd_init);
+ 
+-
+-- 
+1.6.6.1
 
-Yehuda
+
+-- 
+Christian Brunner                              MUC.DE e.V.
+                                               Joseph-Dollinger-Bogen 14
+                                               D-80807 Muenchen
