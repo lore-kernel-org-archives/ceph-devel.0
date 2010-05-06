@@ -1,194 +1,145 @@
-From: Wido den Hollander <wido@pcextreme.nl>
-Subject: MDS crashing after a lot of random I/O operations
-Date: Thu, 06 May 2010 13:23:42 +0200
-Message-ID: <1273145022.1876.27.camel@wido-desktop>
-Reply-To: wido@pcextreme.nl
+From: =?ISO-8859-1?Q?Micka=EBl_Can=E9vet?= <canevet@embl.fr>
+Subject: Error creating filesystem
+Date: Thu, 06 May 2010 14:40:38 +0200
+Message-ID: <4BE2B8C6.6050006@embl.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from support.pcextreme.nl ([89.18.190.50]:45005 "EHLO
-	support.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756294Ab0EFLXq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 May 2010 07:23:46 -0400
-Received: from zarafa.pcextreme.nl (zarafa.pcextreme.nl [79.99.135.237])
-	by support.pcextreme.nl (Postfix) with ESMTP id DDD4F841FC
-	for <ceph-devel@vger.kernel.org>; Thu,  6 May 2010 13:23:42 +0200 (CEST)
-Received: from [192.168.6.32] (cable-191-148.zeelandnet.nl [82.176.191.148])
-	by zarafa.pcextreme.nl (Postfix) with ESMTPSA id E5DBE600009F
-	for <ceph-devel@vger.kernel.org>; Thu,  6 May 2010 13:24:22 +0200 (CEST)
+Received: from emblmta1.embl.fr ([193.49.43.176]:22384 "EHLO emblmta1.embl.fr"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752372Ab0EFMkh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 6 May 2010 08:40:37 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
 Hi,
 
-Today i started to see new crashes on my cluster, this time my MDS
-(both) are crashing with a different message.
+I have an error creating filesystem with ceph 0.20 installed in 2 nodes 
+in 64bits Debian squeeze:
 
-What did i do?
+~# mkcephfs -c /etc/ceph/ceph.conf --allhosts --mkbtrfs
+/usr/bin/monmaptool --create --clobber --add 172.26.15.234:6789 --print 
+/tmp/monmap.1644
+/usr/bin/monmaptool: monmap file /tmp/monmap.1644
+/usr/bin/monmaptool: generated fsid d2ebbcdc-f9f4-b27e-4fa1-a7ba65debea1
+epoch 1
+fsid d2ebbcdc-f9f4-b27e-4fa1-a7ba65debea1
+last_changed 10.05.06 14:34:27.663460
+created 10.05.06 14:34:27.663460
+     mon0 172.26.15.234:6789/0
+/usr/bin/monmaptool: writing epoch 1 to /tmp/monmap.1644 (1 monitors)
+max osd in /etc/ceph/ceph.conf is 1, num osd is 2
+/usr/bin/osdmaptool: osdmap file '/tmp/osdmap.1644'
+/usr/bin/osdmaptool: writing epoch 1 to /tmp/osdmap.1644
+Building admin keyring at /tmp/admin.keyring.1644
+creating /tmp/admin.keyring.1644
+Building monitor keyring with all service keys
+creating /tmp/monkeyring.1644
+importing contents of /tmp/admin.keyring.1644 into /tmp/monkeyring.1644
+creating /tmp/keyring.mds.pc234
+importing contents of /tmp/keyring.mds.pc234 into /tmp/monkeyring.1644
+creating /tmp/keyring.mds.pc238
+importing contents of /tmp/keyring.mds.pc238 into /tmp/monkeyring.1644
+creating /tmp/keyring.osd.0
+importing contents of /tmp/keyring.osd.0 into /tmp/monkeyring.1644
+creating /tmp/keyring.osd.1
+importing contents of /tmp/keyring.osd.1 into /tmp/monkeyring.1644
+=== mon0 ===
+The authenticity of host 'pc234 (172.26.15.234)' can't be established.
+RSA key fingerprint is 38:4b:fe:76:3e:fb:9a:07:a8:2b:77:c5:78:57:e6:f1.
+Are you sure you want to continue connecting (yes/no)? yes
+10.05.06 14:34:30.220850 7f55fbcaa710 store(/data/mon0) mkfs
+10.05.06 14:34:30.220994 7f55fbcaa710 store(/data/mon0) test -d 
+/data/mon0 && /bin/rm -rf /data/mon0 ; mkdir -p /data/mon0
+10.05.06 14:34:30.234028 7f55fbcaa710 mon0(starting).class v0 
+create_initial -- creating initial map
+10.05.06 14:34:30.237482 7f55fbcaa710 mon0(starting).auth v0 
+create_initial -- creating initial map
+10.05.06 14:34:30.237496 7f55fbcaa710 mon0(starting).auth v0 reading 
+initial keyring
+/usr/bin/mkmonfs: created monfs at /data/mon0 for mon0
+admin.keyring.1644                                                                                                                                                           
+100%  123     0.1KB/s   00:00
+=== mds.pc234 ===
+keyring.mds.pc234                                                                                                                                                            
+100%  125     0.1KB/s   00:00
+=== mds.pc238 ===
+`/tmp/keyring.mds.pc238' -> `/data/keyring.mds.pc238'
+=== osd0 ===
+umount: /data/osd0: not mounted
+umount: /dev/sdb: not mounted
 
-1. Unpack a tarball with a lot of small files
-2. Chown and rename some files
-3. Remove the entire directory
+WARNING! - Btrfs Btrfs v0.19 IS EXPERIMENTAL
+WARNING! - see http://btrfs.wiki.kernel.org before using
 
-The removal of the files didn't go as planned, some directories have
-become unable to remove, the message is that the directory is not empty=
-=2E
+fs created label (null) on /dev/sdb
+     nodesize 4096 leafsize 4096 sectorsize 4096 size 149.05GB
+Btrfs Btrfs v0.19
+Scanning for Btrfs filesystems
+failed to read /dev/hda
+monmap.1644                                                                                                                                                                  
+100%  187     0.2KB/s   00:00
+  ** WARNING: Ceph is still under heavy development, and is only 
+suitable for **
+  **          testing and review.  Do not trust it with important 
+data.       **
+os/FileJournal.cc: In function 'int FileJournal::_open(bool, bool)':
+os/FileJournal.cc:74: FAILED assert(r == 0)
+  1: (FileJournal::create()+0x7e) [0x553f9e]
+  2: (FileStore::mkjournal()+0x74) [0x53f9e4]
+  3: (FileStore::mkfs()+0x64c) [0x53b67c]
+  4: (OSD::mkfs(char const*, char const*, ceph_fsid, int)+0x40) [0x4c25a0]
+  5: (main()+0x3a9) [0x455af9]
+  6: (__libc_start_main()+0xfd) [0x7f6be70e4abd]
+  7: /usr/bin/cosd [0x455579]
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
+terminate called after throwing an instance of 'ceph::FailedAssertion*'
+bash: line 1:  2924 Aborted                 (core dumped) /usr/bin/cosd 
+-c /etc/ceph/ceph.conf --monmap /tmp/monmap.1644 -i 0 --mkfs --osd-data 
+/data/osd0
+failed: 'ssh pc234 /usr/bin/cosd -c /etc/ceph/ceph.conf --monmap 
+/tmp/monmap.1644 -i 0 --mkfs --osd-data /data/osd0'
 
-Afterwards i see one of my MDS (seems a random order) to use up 100% an=
-d
-also 100% disk (I thought the MDS didn't use any disk I/O?)
 
-Then the MDS stop out of their self:
+FYI my ceph.conf:
 
-10.05.06 13:18:50.023843 7ffcfdd59710 -- 192.168.6.209:6800/27888 >>
-192.168.6.211:6800/29237 pipe(0x22bf050 sd=3D-1 pgs=3D80 cs=3D1
-l=3D1).discard_queue
-10.05.06 13:18:50.023869 7ffcfdd59710 -- 192.168.6.209:6800/27888 >>
-192.168.6.211:6800/29237 pipe(0x22bf050 sd=3D-1 pgs=3D80 cs=3D1
-l=3D1).unregister_pipe - not registered
-10.05.06 13:18:50.023952 7ffcfdd59710 -- 192.168.6.209:6800/27888 reape=
-r
-reaped pipe 0x22bf050 192.168.6.211:6800/29237
-10.05.06 13:18:50.024079 7ffcfdd59710 -- 192.168.6.209:6800/27888 reape=
-r
-deleted pipe 0x22bf050
-10.05.06 13:18:50.024097 7ffcfdd59710 -- 192.168.6.209:6800/27888 wait:
-done.
-10.05.06 13:18:50.024113 7ffcfdd59710 -- 192.168.6.209:6800/27888
-shutdown complete.
-10.05.06 13:18:50.025938 7ffcfdd59710 7ffcfdd59710 stopped.
+[global]
+     auth supported = cephx
 
-The lines are almost the same at both hosts, they seem to shutdown?
+[mon]
+     mon data = /data/mon$id
+     debug ms = 1
 
-But they do not always stop "cleanly", in some cases (haven't really
-been able to reproduce it) the segfault and i get the following
-coredump:
+[mon0]
+     host = pc234
+     mon addr = 172.26.15.234:6789
 
-**** ceph01 (mds) ****
-warning: Can't read pathname for load map: Input/output error.
-Reading symbols from /lib/libpthread.so.0...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libpthread.so.0
-Reading symbols from /lib/libcrypto.so.0.9.8...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libcrypto.so.0.9.8
-Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib/libstdc++.so.6
-Reading symbols from /lib/libm.so.6...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libm.so.6
-Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libgcc_s.so.1
-Reading symbols from /lib/libc.so.6...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libc.so.6
-Reading symbols from /lib64/ld-linux-x86-64.so.2...(no debugging symbol=
-s
-found)...done.
-Loaded symbols for /lib64/ld-linux-x86-64.so.2
-Reading symbols from /lib/libdl.so.2...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libdl.so.2
-Reading symbols from /lib/libz.so.1...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libz.so.1
-Core was generated by `/usr/bin/cmds -i 0 -c /etc/ceph/ceph.conf'.
-Program terminated with signal 11, Segmentation fault.
-#0  0x0000000000687d48 in Logger::_flush(bool) ()
-(gdb) bt
-#0  0x0000000000687d48 in Logger::_flush(bool) ()
-#1  0x000000000068894e in ?? ()
-#2  0x000000000068c839 in SafeTimer::EventWrapper::finish(int) ()
-#3  0x000000000068e1d4 in Timer::timer_entry() ()
-#4  0x0000000000477b2d in Timer::TimerThread::entry() ()
-#5  0x0000000000488b3a in Thread::_entry_func(void*) ()
-#6  0x00007f8951a2fa04 in start_thread () from /lib/libpthread.so.0
-#7  0x00007f8950c6780d in clone () from /lib/libc.so.6
-#8  0x0000000000000000 in ?? ()
-(gdb)=20
+[mds]
+     keyring = /data/keyring.$name
 
-**** ceph02 (mds) ****
-warning: Can't read pathname for load map: Input/output error.
-Reading symbols from /lib/libpthread.so.0...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libpthread.so.0
-Reading symbols from /lib/libcrypto.so.0.9.8...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libcrypto.so.0.9.8
-Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib/libstdc++.so.6
-Reading symbols from /lib/libm.so.6...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libm.so.6
-Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libgcc_s.so.1
-Reading symbols from /lib/libc.so.6...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libc.so.6
-Reading symbols from /lib64/ld-linux-x86-64.so.2...(no debugging symbol=
-s
-found)...done.
-Loaded symbols for /lib64/ld-linux-x86-64.so.2
-Reading symbols from /lib/libdl.so.2...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libdl.so.2
-Reading symbols from /lib/libz.so.1...(no debugging symbols
-found)...done.
-Loaded symbols for /lib/libz.so.1
-Core was generated by `/usr/bin/cmds -i 1 -c /etc/ceph/ceph.conf'.
-Program terminated with signal 11, Segmentation fault.
-#0  0x00000000005c0b47 in CDir::_fetched(ceph::buffer::list&) ()
-(gdb) bt
-#0  0x00000000005c0b47 in CDir::_fetched(ceph::buffer::list&) ()
-#1  0x000000000062f5a5 in Objecter::handle_osd_op_reply(MOSDOpReply*) (=
-)
-#2  0x00000000004a0e9d in MDS::_dispatch(Message*) ()
-#3  0x00000000004a0f97 in MDS::ms_dispatch(Message*) ()
-#4  0x000000000047ef29 in SimpleMessenger::dispatch_entry() ()
-#5  0x0000000000477d7c in SimpleMessenger::DispatchThread::entry() ()
-#6  0x0000000000488b3a in Thread::_entry_func(void*) ()
-#7  0x00007f235278ba04 in start_thread () from /lib/libpthread.so.0
-#8  0x00007f23519c380d in clone () from /lib/libc.so.6
-#9  0x0000000000000000 in ?? ()
-(gdb)=20
+[mds.pc234]
+     host = pc234
 
-While the MDS is eating 100% CPU and disk you can clearly see it's
-waiting for I/O:
+[mds.pc238]
+     host = pc238
 
-root     11041 99.1 84.6 2052804 864932 ?      Dsl  13:18
-0:57 /usr/bin/cmds -i 1 -c /etc/ceph/ceph.conf
+[osd]
+     osd data = /data/osd$id
+     osd journal = /data/osd$id/journal
 
-Right now my MDS are running in a KVM Virtual Machine, both on the same
-physical machine, but that shouldn't be a problem, should it? The
-performance could be a lot lower, but the crashes shouldn't be there.
+[osd0]
+     host = pc234
+     btrfs devs = /dev/sdb
 
-I'll try to get some hardware for the MDS to run them directly on a
-physical machine.
-
---=20
-Met vriendelijke groet,
-
-Wido den Hollander
-Hoofd Systeembeheer / CSO
-Telefoon Support Nederland: 0900 9633 (45 cpm)
-Telefoon Support Belgi=C3=AB: 0900 70312 (45 cpm)
-Telefoon Direct: (+31) (0)20 50 60 104
-=46ax: +31 (0)20 50 60 111
-E-mail: support@pcextreme.nl
-Website: http://www.pcextreme.nl
-Kennisbank: http://support.pcextreme.nl/
-Netwerkstatus: http://nmc.pcextreme.nl
+[osd1]
+     host = pc238
+     btrfs devs = /dev/sdb
 
 
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+Did I make something wrong ?
