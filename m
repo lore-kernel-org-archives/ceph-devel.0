@@ -1,197 +1,147 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] ceph: re-enable rados_aio_set_callback
-Date: Wed, 5 May 2010 14:40:47 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005051425180.16467@cobra.newdream.net>
-References: <20100505195053.GA50246@ncolin.muc.de>
- <h2oa37615151005051322z8a2c781ajdfe4f31fef78a8a1@mail.gmail.com>
+From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
+Subject: Re: Multiple disks per server.
+Date: Thu, 6 May 2010 04:18:27 +0100
+Message-ID: <20100506041827.c1e51f92.ctpm@ist.utl.pt>
+References: <4BE01091.7040103@embl.fr>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34714 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758845Ab0EEVh6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 May 2010 17:37:58 -0400
-In-Reply-To: <h2oa37615151005051322z8a2c781ajdfe4f31fef78a8a1@mail.gmail.com>
+Received: from smtp1.ist.utl.pt ([193.136.128.21]:43421 "EHLO smtp1.ist.utl.pt"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751544Ab0EFD1z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 5 May 2010 23:27:55 -0400
+In-Reply-To: <4BE01091.7040103@embl.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: Christian Brunner <chb@muc.de>, ceph-devel@vger.kernel.org
-
-On Wed, 5 May 2010, Yehuda Sadeh Weinraub wrote:
-> On Wed, May 5, 2010 at 12:50 PM, Christian Brunner <chb@muc.de> wrote:
-> ...
-> >
-> > To work around this, I?d suggest to re-enable rados_aio_set_callback.
-> > This way it would possible to clear (cb=NULL) or change the callback
-> > handler.
-> 
-> 
-> Although this would solve that specific problem I'd rather leave this
-> function out, as it is racy and could be misused. I think having a
-> solution in which we either set different callbacks for the complete
-> and for the safe replies, or just set a flag that specifies when to
-> use this callback would be better.
-
-I think being able to specify a callback for each would be the most 
-flexible.  Also, to be clear, setting adjusting the completions callback 
-is safe if it happens prior to the completion being used (before calling 
-aio_read or whatever).  After that I don't think we should make any 
-promises.
-
-The patch below changes the API a bit.  Since I think kvm-rbd is the only 
-aio callback user so far, I'm going to be lazy and skip any compat cruft 
-to maintain compatibility.  Does this look okay?
-
-sage
+To: =?UTF-8?B?TWlja2HDq2wgQ2Fuw6l2ZXQ=?= <canevet@embl.fr>
+Cc: ceph-devel@vger.kernel.org, sage@newdream.net
 
 
-diff --git a/src/include/librados.h b/src/include/librados.h
-index 5f20c5a..5418c87 100644
---- a/src/include/librados.h
-+++ b/src/include/librados.h
-@@ -79,8 +79,8 @@ int rados_exec(rados_pool_t pool, const char *oid, const char *cls, const char *
- typedef void *rados_completion_t;
- typedef void (*rados_callback_t)(rados_completion_t cb, void *arg);
- 
--int rados_aio_create_completion(rados_callback_t, void *arg, rados_completion_t *pc);
--int rados_aio_set_callback(rados_completion_t c, rados_callback_t, void *arg);
-+int rados_aio_create_completion(void *cb_arg, rados_callback_t cb_ack, rados_callback_t cb_safe,
-+				rados_completion_t *pc);
- int rados_aio_wait_for_complete(rados_completion_t c);
- int rados_aio_wait_for_safe(rados_completion_t c);
- int rados_aio_is_complete(rados_completion_t c);
-diff --git a/src/include/librados.hpp b/src/include/librados.hpp
-index 0e70e30..b9ec3c2 100644
---- a/src/include/librados.hpp
-+++ b/src/include/librados.hpp
-@@ -100,7 +100,8 @@ public:
-   struct AioCompletion {
-     void *pc;
-     AioCompletion(void *_pc) : pc(_pc) {}
--    int set_callback(callback_t cb, void *cba);
-+    int set_ack_callback(void *cba, callback_t cb);
-+    int set_safe_callback(void *cba, callback_t cb);
-     int wait_for_complete();
-     int wait_for_safe();
-     bool is_complete();
-@@ -114,7 +115,7 @@ public:
-   int aio_write(pool_t pool, const std::string& oid, off_t off, const bufferlist& bl, size_t len,
- 		AioCompletion *c);
-   AioCompletion *aio_create_completion();
--  AioCompletion *aio_create_completion(callback_t cb, void *cba);
-+  AioCompletion *aio_create_completion(void *cb_arg, callback_t cb_ack, callback_t cb_safe);
- };
- 
- }
-diff --git a/src/librados.cc b/src/librados.cc
-index 76d4a53..1135a42 100644
---- a/src/librados.cc
-+++ b/src/librados.cc
-@@ -147,7 +147,7 @@ public:
-     bool released;
-     bool ack, safe;
- 
--    rados_callback_t callback;
-+    rados_callback_t callback_ack, callback_safe;
-     void *callback_arg;
- 
-     // for read
-@@ -157,12 +157,19 @@ public:
- 
-     AioCompletion() : lock("RadosClient::AioCompletion::lock"),
- 		      ref(1), rval(0), released(false), ack(false), safe(false), 
--		      callback(0), callback_arg(0),
-+		      callback_ack(0), callback_safe(0), callback_arg(0),
- 		      pbl(0), buf(0), maxlen(0) { }
- 
--    int set_callback(rados_callback_t cb, void *cba) {
-+    int set_ack_callback(void *cba, rados_callback_t cb) {
-       lock.Lock();
--      callback = cb;
-+      callback_ack = cb;
-+      callback_arg = cba;
-+      lock.Unlock();
-+      return 0;
-+    }
-+    int set_safe_callback(void *cba, rados_callback_t cb) {
-+      lock.Lock();
-+      callback_safe = cb;
-       callback_arg = cba;
-       lock.Unlock();
-       return 0;
-@@ -242,8 +249,8 @@ public:
- 	*c->pbl = c->bl;
-       }
- 
--      if (c->callback) {
--	rados_callback_t cb = c->callback;
-+      if (c->callback_ack) {
-+	rados_callback_t cb = c->callback_ack;
- 	void *cba = c->callback_arg;
- 	c->lock.Unlock();
- 	cb(c, cba);
-@@ -268,8 +275,8 @@ public:
-       c->safe = true;
-       c->cond.Signal();
- 
--      if (c->callback) {
--	rados_callback_t cb = c->callback;
-+      if (c->callback_safe) {
-+	rados_callback_t cb = c->callback_safe;
- 	void *cba = c->callback_arg;
- 	c->lock.Unlock();
- 	cb(c, cba);
-@@ -294,9 +301,12 @@ public:
-   AioCompletion *aio_create_completion() {
-     return new AioCompletion;
-   }
--  AioCompletion *aio_create_completion(rados_callback_t cb, void *cba) {
-+  AioCompletion *aio_create_completion(void *cb_arg, rados_callback_t cb_ack, rados_callback_t cb_safe) {
-     AioCompletion *c = new AioCompletion;
--    c->set_callback(cb, cba);
-+    if (cb_ack)
-+      c->set_ack_callback(cb_arg, cb_ack);
-+    if (cb_safe)
-+      c->set_safe_callback(cb_arg, cb_safe);
-     return c;
-   }
- };
-@@ -1454,16 +1464,21 @@ Rados::AioCompletion *Rados::aio_create_completion()
-   return new AioCompletion(c);
- }
- 
--Rados::AioCompletion *Rados::aio_create_completion(callback_t cb, void *cba)
-+Rados::AioCompletion *Rados::aio_create_completion(void *cb_arg, callback_t cb_ack, callback_t cb_safe)
- {
--  RadosClient::AioCompletion *c = ((RadosClient *)client)->aio_create_completion(cb, cba);
-+  RadosClient::AioCompletion *c = ((RadosClient *)client)->aio_create_completion(cb_arg, cb_ack, cb_safe);
-   return new AioCompletion(c);
- }
- 
--int Rados::AioCompletion::set_callback(rados_callback_t cb, void *cba)
-+int Rados::AioCompletion::set_ack_callback(void *cba, rados_callback_t cb)
-+{
-+  RadosClient::AioCompletion *c = (RadosClient::AioCompletion *)pc;
-+  return c->set_ack_callback(cba, cb);
-+}
-+int Rados::AioCompletion::set_safe_callback(void *cba, rados_callback_t cb)
- {
-   RadosClient::AioCompletion *c = (RadosClient::AioCompletion *)pc;
--  return c->set_callback(cb, cba);
-+  return c->set_safe_callback(cba, cb);
- }
- int Rados::AioCompletion::wait_for_complete()
- {
-@@ -1805,9 +1820,9 @@ extern "C" int rados_list_objects_next(rados_list_ctx_t listctx, const char **en
- // -------------------------
- // aio
- 
--extern "C" int rados_aio_create_completion(rados_callback_t cb, void *cba, rados_completion_t *pc)
-+extern "C" int rados_aio_create_completion(void *cb_arg, rados_callback_t cb_ack, rados_callback_t cb_safe, rados_completion_t *pc)
- {
--  *pc = radosp->aio_create_completion(cb, cba);
-+  *pc = radosp->aio_create_completion(cb_arg, cb_ack, cb_safe);
-   return 0;
- }
- 
+On Tue, 04 May 2010 14:18:25 +0200 Micka=C3=ABl Can=C3=A9vet <canevet@e=
+mbl.fr> wrote:
+> Hi,
+>=20
+> I'm testing ceph on 4 old servers.
+>=20
+> As there is more then one disk per server available for data (2 with =
+6=20
+> disks and 2 with 10 disks for a total of 32 disks over 4 nodes), I wa=
+s=20
+> wondering how to define OSDs.
+>=20
+> I have choice between one OSD per disk (32 OSDs on the cluster) or on=
+e=20
+> OSD per server with one btrfs filesystem over all disks of the server=
+ (4=20
+> OSDs on the cluster). Which one is the best solution ?
+>=20
+> In the first case, if I lose one disk, I lose only a small part of=20
+> available space. In the other case, if I lose one disk, I lose the wh=
+ole=20
+> server (as btrfs filesystem is in stripping) much more space.
 
+ Hi,
+
+ I too am facing a similar dilemma:
+
+ Scenario 1:
+ I can set up an MD raid6 array for each OSD box and so can afford up
+to 2 simultaneous disk failures without Ceph noticing anything wrong.
+When the 3rd drive fails, a long time will be spent redistributing data
+across the cluster (though much less time than a simple 25TB raid6
+rebuild) . This setup should be quite simple, and a 16 disk raid6
+should give generally nice performance, though. I probably would use
+2-way data replication (on Ceph config.) for this case.
+
+ Scenario 2:
+
+ I can try to configure 1 OSD per disk. As soon as a drive fails, there
+will be data redistribution across the remaining OSDs - but this should
+be quite fast, as only the content of a single drive (or slightly more)
+has to be redistributed across the cluster (worst case). In this case I
+would use 3-way replication for added protection against simultaneous
+double drive failures and to compensate for the OSDs not having a raid
+array underneath them.
+
+ I can see several potential advantages in "Scenario 2":
+
+ * Greater simplicity and ease of administration, as there's no need to
+worry about RAID arrays, their configuration and their possible bugs.
+You have one less layer in the stack to worry about, and that has to be
+good news.
+
+ * You can replace failed drives with different drives without worrying
+about wasted capacity because they are bigger (as you would on raid),
+and you can even take advantage of older, smaller drives that would
+otherwise go to the trash can. This will give greater liberty when
+upgrading hardware, overall.
+
+ * Degradation of available cluster capacity and bandwidth would be
+much softer. In fact, assuming that you don't have many power supplies
+or mainboards burning up, your cluster will maintain redundancy as
+drives go failing. That is, as long as you have more drives than
+(amount_of_data * replication_level) your cluster will probably be in a
+good, fully redundant state. That should make for better sleep at night=
+=2E
+
+ * Workloads with small, spread writes should perform better. In a RAID
+array those could cause entire stripes to be read, thus requiring data
+chunks to be read from a lot of disks just to compute the redundancy
+chunks. This one should be quite an advantage for big mail server
+workloads, which is one of the workloads I'm interested in.
+
+ * Large write performance should be no worse than with raid, since Cep=
+h
+also spreads chunks across OSDs.
+
+
+ Having said that, there are some aspects about how Ceph would behave
+in Scenario 2 that I still have to investigate:
+
+ * If multiple OSDs per node is a well suported option. Do multiple OSD=
+s
+per node play well with each other and with a node's resources?
+
+ * If there are issues with network ports/addresses when setting up mor=
+e
+than 1 OSD per node.
+
+ * OSD behaviour when getting I/O errors from its drive -- this is
+really the most complex and important one, and the one I wish I could
+hear your opinions about:
+
+  Usually, in a RAID array, when there is a fatal failure, the upper
+layers will just get permanent I/O errors and you can assume that
+storage area is dead and go on with life.
+ However, this is frequently not true when you consider single drives
+as in Scenario 2, at least for reads: the drive may return read errors
+for a small region but still be quite ok for the remaining data.
+
+ So, ideally, a Ceph OSD receiving a read error from the filesystem
+would request a copy of the Object in question from another OSD and try
+to rewrite it several times before giving up and declaring the drive
+dead (1). This is actually what Linux MD does on recent kernels and I
+know from my experience that it increases array survivability a lot.
+ Background data scrubbing would help a lot with the above, and I guess
+BTRFS checksuming will simplify things here.
+
+
+ Sorry for the huge email, but I hope that what I wrote are valid
+points to make Ceph more robust, and hope to know what you think about
+them.
+
+Notes:
+  (1) Better yet, if the error repeats, it could leave the old backing
+file alone, and try to alloc a new one for that object, thus avoiding
+declaring the drive completely dead too early.
+
+ Best regards and thanks
+
+Cl=C3=A1udio
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
