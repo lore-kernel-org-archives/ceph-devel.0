@@ -1,55 +1,194 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: Re: Replacing DRBD use with RBD
-Date: Thu, 6 May 2010 05:10:11 +0000 (UTC)
-Message-ID: <hrtivj$1uq$1@dough.gmane.org>
-References: <582033.76293.qm@web36101.mail.mud.yahoo.com>
+From: Wido den Hollander <wido@pcextreme.nl>
+Subject: MDS crashing after a lot of random I/O operations
+Date: Thu, 06 May 2010 13:23:42 +0200
+Message-ID: <1273145022.1876.27.camel@wido-desktop>
+Reply-To: wido@pcextreme.nl
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:35886 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750710Ab0EFFKV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 6 May 2010 01:10:21 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1O9tLo-0007yJ-GI
-	for ceph-devel@vger.kernel.org; Thu, 06 May 2010 07:10:20 +0200
-Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 06 May 2010 07:10:20 +0200
-Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 06 May 2010 07:10:20 +0200
+Received: from support.pcextreme.nl ([89.18.190.50]:45005 "EHLO
+	support.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756294Ab0EFLXq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 May 2010 07:23:46 -0400
+Received: from zarafa.pcextreme.nl (zarafa.pcextreme.nl [79.99.135.237])
+	by support.pcextreme.nl (Postfix) with ESMTP id DDD4F841FC
+	for <ceph-devel@vger.kernel.org>; Thu,  6 May 2010 13:23:42 +0200 (CEST)
+Received: from [192.168.6.32] (cable-191-148.zeelandnet.nl [82.176.191.148])
+	by zarafa.pcextreme.nl (Postfix) with ESMTPSA id E5DBE600009F
+	for <ceph-devel@vger.kernel.org>; Thu,  6 May 2010 13:24:22 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
+Hi,
 
->> There is a heartbeat mechanism withing the mon cluster, and it's being
->> used for the monitors to keep track of their peer status. It might be a
->> good idea to add different configurable types of heartbeats.
-> 
-> Yes, specifically, I meant by using some of the techniques that the
-> heartbeat project uses:
-> 
-> http://www.linux-ha.org/wiki/Heartbeat
-> 
-> Ideally (my suggestion,) they would make some of them available in a
-> library so that other projects like RADOS could use them independently
-> without having to rewrite them from scratch.
+Today i started to see new crashes on my cluster, this time my MDS
+(both) are crashing with a different message.
 
-IMHO Heartbeat is not developed anymore. the new thing (some parts 
-derived from Heartbeat) is pacemaker/corosync . It is/will be standard on 
-RH (Fedora,EL), SuSE , Ubuntu and Debian.
+What did i do?
 
-I'm not a developter but IMHO ceph could(/should?) take advantage from 
-these projects to not reinvent the wheel. ;)
+1. Unpack a tarball with a lot of small files
+2. Chown and rename some files
+3. Remove the entire directory
 
-- Thomas
+The removal of the files didn't go as planned, some directories have
+become unable to remove, the message is that the directory is not empty=
+=2E
 
-* http://www.clusterlabs.org
-* http://en.wikipedia.org/wiki/Corosync_%28project%29
-* http://www.openais.org
+Afterwards i see one of my MDS (seems a random order) to use up 100% an=
+d
+also 100% disk (I thought the MDS didn't use any disk I/O?)
 
+Then the MDS stop out of their self:
+
+10.05.06 13:18:50.023843 7ffcfdd59710 -- 192.168.6.209:6800/27888 >>
+192.168.6.211:6800/29237 pipe(0x22bf050 sd=3D-1 pgs=3D80 cs=3D1
+l=3D1).discard_queue
+10.05.06 13:18:50.023869 7ffcfdd59710 -- 192.168.6.209:6800/27888 >>
+192.168.6.211:6800/29237 pipe(0x22bf050 sd=3D-1 pgs=3D80 cs=3D1
+l=3D1).unregister_pipe - not registered
+10.05.06 13:18:50.023952 7ffcfdd59710 -- 192.168.6.209:6800/27888 reape=
+r
+reaped pipe 0x22bf050 192.168.6.211:6800/29237
+10.05.06 13:18:50.024079 7ffcfdd59710 -- 192.168.6.209:6800/27888 reape=
+r
+deleted pipe 0x22bf050
+10.05.06 13:18:50.024097 7ffcfdd59710 -- 192.168.6.209:6800/27888 wait:
+done.
+10.05.06 13:18:50.024113 7ffcfdd59710 -- 192.168.6.209:6800/27888
+shutdown complete.
+10.05.06 13:18:50.025938 7ffcfdd59710 7ffcfdd59710 stopped.
+
+The lines are almost the same at both hosts, they seem to shutdown?
+
+But they do not always stop "cleanly", in some cases (haven't really
+been able to reproduce it) the segfault and i get the following
+coredump:
+
+**** ceph01 (mds) ****
+warning: Can't read pathname for load map: Input/output error.
+Reading symbols from /lib/libpthread.so.0...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libpthread.so.0
+Reading symbols from /lib/libcrypto.so.0.9.8...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libcrypto.so.0.9.8
+Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib/libstdc++.so.6
+Reading symbols from /lib/libm.so.6...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libm.so.6
+Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libgcc_s.so.1
+Reading symbols from /lib/libc.so.6...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libc.so.6
+Reading symbols from /lib64/ld-linux-x86-64.so.2...(no debugging symbol=
+s
+found)...done.
+Loaded symbols for /lib64/ld-linux-x86-64.so.2
+Reading symbols from /lib/libdl.so.2...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libdl.so.2
+Reading symbols from /lib/libz.so.1...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libz.so.1
+Core was generated by `/usr/bin/cmds -i 0 -c /etc/ceph/ceph.conf'.
+Program terminated with signal 11, Segmentation fault.
+#0  0x0000000000687d48 in Logger::_flush(bool) ()
+(gdb) bt
+#0  0x0000000000687d48 in Logger::_flush(bool) ()
+#1  0x000000000068894e in ?? ()
+#2  0x000000000068c839 in SafeTimer::EventWrapper::finish(int) ()
+#3  0x000000000068e1d4 in Timer::timer_entry() ()
+#4  0x0000000000477b2d in Timer::TimerThread::entry() ()
+#5  0x0000000000488b3a in Thread::_entry_func(void*) ()
+#6  0x00007f8951a2fa04 in start_thread () from /lib/libpthread.so.0
+#7  0x00007f8950c6780d in clone () from /lib/libc.so.6
+#8  0x0000000000000000 in ?? ()
+(gdb)=20
+
+**** ceph02 (mds) ****
+warning: Can't read pathname for load map: Input/output error.
+Reading symbols from /lib/libpthread.so.0...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libpthread.so.0
+Reading symbols from /lib/libcrypto.so.0.9.8...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libcrypto.so.0.9.8
+Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib/libstdc++.so.6
+Reading symbols from /lib/libm.so.6...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libm.so.6
+Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libgcc_s.so.1
+Reading symbols from /lib/libc.so.6...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libc.so.6
+Reading symbols from /lib64/ld-linux-x86-64.so.2...(no debugging symbol=
+s
+found)...done.
+Loaded symbols for /lib64/ld-linux-x86-64.so.2
+Reading symbols from /lib/libdl.so.2...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libdl.so.2
+Reading symbols from /lib/libz.so.1...(no debugging symbols
+found)...done.
+Loaded symbols for /lib/libz.so.1
+Core was generated by `/usr/bin/cmds -i 1 -c /etc/ceph/ceph.conf'.
+Program terminated with signal 11, Segmentation fault.
+#0  0x00000000005c0b47 in CDir::_fetched(ceph::buffer::list&) ()
+(gdb) bt
+#0  0x00000000005c0b47 in CDir::_fetched(ceph::buffer::list&) ()
+#1  0x000000000062f5a5 in Objecter::handle_osd_op_reply(MOSDOpReply*) (=
+)
+#2  0x00000000004a0e9d in MDS::_dispatch(Message*) ()
+#3  0x00000000004a0f97 in MDS::ms_dispatch(Message*) ()
+#4  0x000000000047ef29 in SimpleMessenger::dispatch_entry() ()
+#5  0x0000000000477d7c in SimpleMessenger::DispatchThread::entry() ()
+#6  0x0000000000488b3a in Thread::_entry_func(void*) ()
+#7  0x00007f235278ba04 in start_thread () from /lib/libpthread.so.0
+#8  0x00007f23519c380d in clone () from /lib/libc.so.6
+#9  0x0000000000000000 in ?? ()
+(gdb)=20
+
+While the MDS is eating 100% CPU and disk you can clearly see it's
+waiting for I/O:
+
+root     11041 99.1 84.6 2052804 864932 ?      Dsl  13:18
+0:57 /usr/bin/cmds -i 1 -c /etc/ceph/ceph.conf
+
+Right now my MDS are running in a KVM Virtual Machine, both on the same
+physical machine, but that shouldn't be a problem, should it? The
+performance could be a lot lower, but the crashes shouldn't be there.
+
+I'll try to get some hardware for the MDS to run them directly on a
+physical machine.
+
+--=20
+Met vriendelijke groet,
+
+Wido den Hollander
+Hoofd Systeembeheer / CSO
+Telefoon Support Nederland: 0900 9633 (45 cpm)
+Telefoon Support Belgi=C3=AB: 0900 70312 (45 cpm)
+Telefoon Direct: (+31) (0)20 50 60 104
+=46ax: +31 (0)20 50 60 111
+E-mail: support@pcextreme.nl
+Website: http://www.pcextreme.nl
+Kennisbank: http://support.pcextreme.nl/
+Netwerkstatus: http://nmc.pcextreme.nl
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
