@@ -1,37 +1,34 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: RBD/OSD questions
-Date: Fri, 7 May 2010 09:43:19 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005070942350.18563@cobra.newdream.net>
-References: <784866.39317.qm@web36101.mail.mud.yahoo.com>
- <Pine.LNX.4.64.1005061517070.18563@cobra.newdream.net>
- <v2vcf40c6a91005070938y85d18ec2wa5a579944841511f@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: [PATCH 1/2] qemu-kvm/rbd: use new librados callback for
+	ack/complete
+Date: Fri, 7 May 2010 23:26:46 +0200
+Message-ID: <20100507212646.GA74145@ncolin.muc.de>
+References: <20100506205411.GA57852@ncolin.muc.de> <z2za37615151005061441zfd7e2e6en2474c796562756bd@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53436 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751397Ab0EGQk1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 May 2010 12:40:27 -0400
-In-Reply-To: <v2vcf40c6a91005070938y85d18ec2wa5a579944841511f@mail.gmail.com>
+Received: from ncolin.muc.de ([193.149.48.11]:60019 "EHLO ncolin.muc.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758504Ab0EGV0t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 7 May 2010 17:26:49 -0400
+Content-Disposition: inline
+In-Reply-To: <z2za37615151005061441zfd7e2e6en2474c796562756bd@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Grimm <agrimm61@gmail.com>
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, 7 May 2010, Andreas Grimm wrote:
-> That sounds promising. I have another question about the OSDs.
-> Following scenario:
+On Thu, May 06, 2010 at 09:41:55PM +0000, Yehuda Sadeh Weinraub wrote:
+> This one should fix and remove the nasty usleep that handles the acb
+> initialization race. I didn't verify that it actually works, so please
+> let me know if there are any issues with it.
 > 
-> I have a couple servers with each having six disks. My idea is to
-> start an osd for every single disk on each server.
-> Will Ceph place the replicas on different hosts by design, or can i
-> solve this via a crush map?
+> Thanks,
+> Yehuda
 
-You need to set up a crush map.  See this wiki page:
-	http://ceph.newdream.net/wiki/Custom_data_placement_with_CRUSH
+Perfect! - I wonder why I didn't think of this... ;-)
 
-> Just a short question on terminus: what is a RBD (something about rados?)?
+I think that you can commit the patches to git now.
 
-rbd = rados block device
-
-sage
+Thanks,
+Christian
