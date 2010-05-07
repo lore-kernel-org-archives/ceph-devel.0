@@ -1,38 +1,45 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: [PATCH 1/2] qemu-kvm/rbd: use new librados callback for
-	ack/complete
-Date: Fri, 7 May 2010 14:34:02 -0700
-Message-ID: <z2ja37615151005071434z746e8315i3afda0b21f0d063c@mail.gmail.com>
-References: <20100506205411.GA57852@ncolin.muc.de>
-	 <z2za37615151005061441zfd7e2e6en2474c796562756bd@mail.gmail.com>
-	 <20100507212646.GA74145@ncolin.muc.de>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [patch] ceph: cleanup: remove unused assignement
+Date: Fri, 7 May 2010 14:42:29 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1005071441550.18563@cobra.newdream.net>
+References: <20100507082713.GQ27064@bicker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:60079 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753846Ab0EGVeC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 May 2010 17:34:02 -0400
-Received: by mail-vw0-f46.google.com with SMTP id 3so168368vws.19
-        for <ceph-devel@vger.kernel.org>; Fri, 07 May 2010 14:34:02 -0700 (PDT)
-In-Reply-To: <20100507212646.GA74145@ncolin.muc.de>
+Received: from cobra.newdream.net ([66.33.216.30]:49608 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753033Ab0EGVjf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 May 2010 17:39:35 -0400
+In-Reply-To: <20100507082713.GQ27064@bicker>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
-Cc: ceph-devel@vger.kernel.org
+To: Dan Carpenter <error27@gmail.com>
+Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, ceph-devel@vger.kernel.org
 
-On Fri, May 7, 2010 at 2:26 PM, Christian Brunner <chb@muc.de> wrote:
-> On Thu, May 06, 2010 at 09:41:55PM +0000, Yehuda Sadeh Weinraub wrote:
->> This one should fix and remove the nasty usleep that handles the acb
->> initialization race. I didn't verify that it actually works, so please
->> let me know if there are any issues with it.
->>
->> Thanks,
->> Yehuda
->
-> Perfect! - I wonder why I didn't think of this... ;-)
->
-> I think that you can commit the patches to git now.
-Great, pushed.
+On Fri, 7 May 2010, Dan Carpenter wrote:
+> We don't ever use "dirty" so we can remove it.
+> 
+> Signed-off-by: Dan Carpenter <error27@gmail.com>
+> 
+> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> index 0c16818..a8db1a6 100644
+> --- a/fs/ceph/caps.c
+> +++ b/fs/ceph/caps.c
+> @@ -1711,10 +1711,9 @@ out_unlocked:
+>  static int caps_are_flushed(struct inode *inode, unsigned tid)
+>  {
+>  	struct ceph_inode_info *ci = ceph_inode(inode);
+> -	int dirty, i, ret = 1;
+> +	int i, ret = 1;
+>  
+>  	spin_lock(&inode->i_lock);
+> -	dirty = __ceph_caps_dirty(ci);
+>  	for (i = 0; i < CEPH_CAP_BITS; i++)
+>  		if ((ci->i_flushing_caps & (1 << i)) &&
+>  		    ci->i_cap_flush_tid[i] <= tid) {
 
-Yehuda
+Queued up for the 2.6.35 window.
+
+Thanks!
+sage
+
