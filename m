@@ -1,35 +1,30 @@
-From: Paul Chiang <paul_chiang@tcloudcomputing.com>
-Subject: mkmonfs error
-Date: Tue, 11 May 2010 09:53:05 +0800
-Message-ID: <AANLkTin_nfsvA5jqFQ5BhsuzI1IVLmU2ubk6YKPTFagX@mail.gmail.com>
+From: Anton <anton.vazir@gmail.com>
+Subject: Re: RBD/OSD questions
+Date: Tue, 11 May 2010 13:39:06 +0500
+Message-ID: <201005111339.06101.anton.vazir@gmail.com>
+References: <784866.39317.qm@web36101.mail.mud.yahoo.com> <v2vcf40c6a91005070938y85d18ec2wa5a579944841511f@mail.gmail.com> <Pine.LNX.4.64.1005070942350.18563@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f46.google.com ([74.125.82.46]:34406 "EHLO
-	mail-ww0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754055Ab0EKBxJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 May 2010 21:53:09 -0400
-Received: by wwa36 with SMTP id 36so2078579wwa.19
-        for <ceph-devel@vger.kernel.org>; Mon, 10 May 2010 18:53:05 -0700 (PDT)
+Received: from mail.eastera.tj ([62.122.137.85]:33795 "EHLO mail.eastera.tj"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757431Ab0EKIq1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 11 May 2010 04:46:27 -0400
+In-Reply-To: <Pine.LNX.4.64.1005070942350.18563@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Andreas Grimm <agrimm61@gmail.com>, ceph-devel@vger.kernel.org
 
-Hello,
+Sage, what about rebalancing of already existing replicas, 
+on crush-map change? 
 
-I'm getting an error with mkmonfs while trying to expand the monitor
-cluster as per the instructions on the wiki.
+On Friday 07 May 2010, Sage Weil wrote:
+> You need to set up a crush map.  See this wiki page:
+>         http://ceph.newdream.net/wiki/Custom_data_placeme
+> nt_with_CRUSH
+> 
 
-The error seems to originate from line 951~970 of Monitor.cc
 
-Suppose we start with map epoch 3:
-1. create_pending() increments the epoch to 4
-2. create_initial() then sets it back to 3
-3. encode_pending() finds 3+1 != 3, throws an error and dies
-
-Not sure if this is a bug or there's something wrong with my proceedure.
-
-Thanks in advance,
-Paul Chiang
-
-P.S. I'm using the unstable branch
