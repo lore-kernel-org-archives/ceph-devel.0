@@ -1,45 +1,35 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [patch] ceph: cleanup: remove unused assignement
-Date: Fri, 7 May 2010 14:42:29 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005071441550.18563@cobra.newdream.net>
-References: <20100507082713.GQ27064@bicker>
+From: Paul Chiang <paul_chiang@tcloudcomputing.com>
+Subject: mkmonfs error
+Date: Tue, 11 May 2010 09:53:05 +0800
+Message-ID: <AANLkTin_nfsvA5jqFQ5BhsuzI1IVLmU2ubk6YKPTFagX@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49608 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753033Ab0EGVjf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 May 2010 17:39:35 -0400
-In-Reply-To: <20100507082713.GQ27064@bicker>
+Received: from mail-ww0-f46.google.com ([74.125.82.46]:34406 "EHLO
+	mail-ww0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754055Ab0EKBxJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 May 2010 21:53:09 -0400
+Received: by wwa36 with SMTP id 36so2078579wwa.19
+        for <ceph-devel@vger.kernel.org>; Mon, 10 May 2010 18:53:05 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <error27@gmail.com>
-Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, 7 May 2010, Dan Carpenter wrote:
-> We don't ever use "dirty" so we can remove it.
-> 
-> Signed-off-by: Dan Carpenter <error27@gmail.com>
-> 
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 0c16818..a8db1a6 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -1711,10 +1711,9 @@ out_unlocked:
->  static int caps_are_flushed(struct inode *inode, unsigned tid)
->  {
->  	struct ceph_inode_info *ci = ceph_inode(inode);
-> -	int dirty, i, ret = 1;
-> +	int i, ret = 1;
->  
->  	spin_lock(&inode->i_lock);
-> -	dirty = __ceph_caps_dirty(ci);
->  	for (i = 0; i < CEPH_CAP_BITS; i++)
->  		if ((ci->i_flushing_caps & (1 << i)) &&
->  		    ci->i_cap_flush_tid[i] <= tid) {
+Hello,
 
-Queued up for the 2.6.35 window.
+I'm getting an error with mkmonfs while trying to expand the monitor
+cluster as per the instructions on the wiki.
 
-Thanks!
-sage
+The error seems to originate from line 951~970 of Monitor.cc
 
+Suppose we start with map epoch 3:
+1. create_pending() increments the epoch to 4
+2. create_initial() then sets it back to 3
+3. encode_pending() finds 3+1 != 3, throws an error and dies
+
+Not sure if this is a bug or there's something wrong with my proceedure.
+
+Thanks in advance,
+Paul Chiang
+
+P.S. I'm using the unstable branch
