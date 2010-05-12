@@ -1,16 +1,20 @@
 From: Yehuda Sadeh <yehuda@hq.newdream.net>
-Subject: [PATCH 7/8] ceph: rados block device
-Date: Wed, 12 May 2010 16:23:39 -0700
-Message-ID: <f93e056d8da87770b00ff25a8512b37ec8db3830.1273705300.git.yehuda@hq.newdream.net>
+Subject: [PATCH 7/8] ceph-rbd: rados block device
+Date: Wed, 12 May 2010 16:23:40 -0700
+Message-ID: <6809d9842d8c1964571dd74b05992c3bdff23df5.1273705398.git.yehuda@hq.newdream.net>
 References: <1273706621-12822-1-git-send-email-yehuda@hq.newdream.net>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:47916 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758187Ab0ELXQS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 May 2010 19:16:18 -0400
 In-Reply-To: <1273706621-12822-1-git-send-email-yehuda@hq.newdream.net>
-In-Reply-To: <ccf96c67246e67d3d9bd73d47777411cbfbb5cf0.1273705300.git.yehuda@hq.newdream.net>
-References: <ccf96c67246e67d3d9bd73d47777411cbfbb5cf0.1273705300.git.yehuda@hq.newdream.net>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <ccf96c67246e67d3d9bd73d47777411cbfbb5cf0.1273705398.git.yehuda@hq.newdream.net>
+References: <ccf96c67246e67d3d9bd73d47777411cbfbb5cf0.1273705398.git.yehuda@hq.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: linux-fsdevel@vger.kernel.org, axboe@kernel.dk, sage@newdream.net, Yehuda Sadeh <yehuda@hq.newdream.net>
-List-Id: ceph-devel.vger.kernel.org
 
 This adds the rbd under fs/ceph. The rados block device is
 based on the drivers/block/osdblk.c. It allows mapping of
@@ -1756,3 +1760,4 @@ index 8640043..9ccc247 100644
  extern struct ceph_client *ceph_create_client(struct ceph_mount_args *args,
 -- 
 1.5.6.5
+
