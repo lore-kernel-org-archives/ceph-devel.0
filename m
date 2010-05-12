@@ -1,377 +1,429 @@
 From: Yehuda Sadeh <yehuda@hq.newdream.net>
-Subject: [PATCH 5/8] ceph: refactor mount related functions, add helpers
-Date: Wed, 12 May 2010 16:23:37 -0700
-Message-ID: <ac3d49e9770db54e21158babc463a234981ab333.1273705398.git.yehuda@hq.newdream.net>
+Subject: [PATCH 3/8] ceph: message layer can send/receive data in bio
+Date: Wed, 12 May 2010 16:23:35 -0700
+Message-ID: <ab64b3cde0fe00bdd53758ded5b18a872be81efb.1273705398.git.yehuda@hq.newdream.net>
 References: <1273706621-12822-1-git-send-email-yehuda@hq.newdream.net>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:47901 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756694Ab0ELXQQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 May 2010 19:16:16 -0400
 In-Reply-To: <1273706621-12822-1-git-send-email-yehuda@hq.newdream.net>
 In-Reply-To: <ccf96c67246e67d3d9bd73d47777411cbfbb5cf0.1273705398.git.yehuda@hq.newdream.net>
 References: <ccf96c67246e67d3d9bd73d47777411cbfbb5cf0.1273705398.git.yehuda@hq.newdream.net>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: linux-fsdevel@vger.kernel.org, axboe@kernel.dk, sage@newdream.net, Yehuda Sadeh <yehuda@hq.newdream.net>
-List-Id: ceph-devel.vger.kernel.org
 
-Removed some functions' static declarations, separated mount
-operation to __open_session and open_root_dentry for clients
-that don't need the latter (rbd). Added other helper functions
-that will be used later in the rbd.
+This capability is being added so that we wouldn't
+need to copy the data from the rados block device.
 
 Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
 ---
- fs/ceph/file.c       |   46 ++++++++++++++++
- fs/ceph/osd_client.h |    1 +
- fs/ceph/super.c      |  142 ++++++++++++++++++++++++++++++++++++++-----------
- fs/ceph/super.h      |   24 ++++++++-
- 4 files changed, 180 insertions(+), 33 deletions(-)
+ fs/ceph/messenger.c  |  177 +++++++++++++++++++++++++++++++++++++++++--------
+ fs/ceph/messenger.h  |    3 +
+ fs/ceph/osd_client.c |   14 ++++-
+ fs/ceph/osd_client.h |    4 +-
+ 4 files changed, 166 insertions(+), 32 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index ef8f9e9..4ee8381 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -362,6 +362,52 @@ static int copy_user_to_page_vector(struct page **pages,
- 	return len;
+diff --git a/fs/ceph/messenger.c b/fs/ceph/messenger.c
+index d60c489..e4871d9 100644
+--- a/fs/ceph/messenger.c
++++ b/fs/ceph/messenger.c
+@@ -8,6 +8,8 @@
+ #include <linux/net.h>
+ #include <linux/socket.h>
+ #include <linux/string.h>
++#include <linux/bio.h>
++#include <linux/blkdev.h>
+ #include <net/tcp.h>
+ 
+ #include "super.h"
+@@ -537,8 +539,11 @@ static void prepare_write_message(struct ceph_connection *con)
+ 	if (le32_to_cpu(m->hdr.data_len) > 0) {
+ 		/* initialize page iterator */
+ 		con->out_msg_pos.page = 0;
+-		con->out_msg_pos.page_pos =
+-			le16_to_cpu(m->hdr.data_off) & ~PAGE_MASK;
++		if (m->pages)
++			con->out_msg_pos.page_pos =
++				le16_to_cpu(m->hdr.data_off) & ~PAGE_MASK;
++		else
++			con->out_msg_pos.page_pos = 0;
+ 		con->out_msg_pos.data_pos = 0;
+ 		con->out_msg_pos.did_page_crc = 0;
+ 		con->out_more = 1;  /* data + footer will follow */
+@@ -720,6 +725,29 @@ out:
+ 	return ret;  /* done! */
  }
  
-+int ceph_copy_to_page_vector(struct page **pages,
-+				    const char *data,
-+				    loff_t off, size_t len)
++static void init_bio_iter(struct bio *bio, struct bio **iter, int *seg)
 +{
-+	int i = 0;
-+	size_t po = off & ~PAGE_CACHE_MASK;
-+	size_t left = len;
-+	size_t l;
-+
-+	while (left > 0) {
-+		l = min_t(size_t, PAGE_CACHE_SIZE-po, left);
-+		memcpy(page_address(pages[i]) + po, data, l);
-+		data += l;
-+		left -= l;
-+		po += l;
-+		if (po == PAGE_CACHE_SIZE) {
-+			po = 0;
-+			i++;
-+		}
++	if (!bio) {
++		*iter = NULL;
++		*seg = 0;
++		return;
 +	}
-+	return len;
++	*iter = bio;
++	*seg = bio->bi_idx;
 +}
 +
-+int ceph_copy_from_page_vector(struct page **pages,
-+				    char *data,
-+				    loff_t off, size_t len)
++static void iter_bio_next(struct bio **bio_iter, int *seg)
 +{
-+	int i = 0;
-+	size_t po = off & ~PAGE_CACHE_MASK;
-+	size_t left = len;
-+	size_t l;
++	if (*bio_iter == NULL)
++		return;
 +
-+	while (left > 0) {
-+		l = min_t(size_t, PAGE_CACHE_SIZE-po, left);
-+		memcpy(data, page_address(pages[i]) + po, l);
-+		data += l;
-+		left -= l;
-+		po += l;
-+		if (po == PAGE_CACHE_SIZE) {
-+			po = 0;
-+			i++;
-+		}
-+	}
-+	return len;
++	BUG_ON(*seg >= (*bio_iter)->bi_vcnt);
++
++	(*seg)++;
++	if (*seg == (*bio_iter)->bi_vcnt)
++		init_bio_iter((*bio_iter)->bi_next, bio_iter, seg);
 +}
 +
  /*
-  * copy user data from a page vector into a user pointer
-  */
-diff --git a/fs/ceph/osd_client.h b/fs/ceph/osd_client.h
-index 76aa63e..7fb03e8 100644
---- a/fs/ceph/osd_client.h
-+++ b/fs/ceph/osd_client.h
-@@ -67,6 +67,7 @@ struct ceph_osd_request {
+  * Write as much message data payload as we can.  If we finish, queue
+  * up the footer.
+@@ -734,14 +762,20 @@ static int write_partial_msg_pages(struct ceph_connection *con)
+ 	size_t len;
+ 	int crc = con->msgr->nocrc;
+ 	int ret;
++	int page_shift;
  
- 	struct inode *r_inode;         	      /* for use by callbacks */
- 	struct writeback_control *r_wbc;      /* ditto */
-+	void *r_priv;			      /* ditto */
+ 	dout("write_partial_msg_pages %p msg %p page %d/%d offset %d\n",
+ 	     con, con->out_msg, con->out_msg_pos.page, con->out_msg->nr_pages,
+ 	     con->out_msg_pos.page_pos);
  
- 	char              r_oid[40];          /* object name */
- 	int               r_oid_len;
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 56fe97b..b6d6258 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -372,14 +372,15 @@ static match_table_t arg_tokens = {
- };
- 
- 
--static struct ceph_mount_args *parse_mount_args(int flags, char *options,
--						const char *dev_name,
--						const char **path)
-+struct ceph_mount_args *parse_mount_args(int flags, char *options,
-+					 const char *dev_name,
-+					 const char **path)
- {
- 	struct ceph_mount_args *args;
- 	const char *c;
- 	int err = -ENOMEM;
- 	substring_t argstr[MAX_OPT_ARGS];
-+	const char *end_path;
- 
- 	args = kzalloc(sizeof(*args), GFP_KERNEL);
- 	if (!args)
-@@ -410,23 +411,29 @@ static struct ceph_mount_args *parse_mount_args(int flags, char *options,
- 	err = -EINVAL;
- 	if (!dev_name)
- 		goto out;
--	*path = strstr(dev_name, ":/");
--	if (*path == NULL) {
--		pr_err("device name is missing path (no :/ in %s)\n",
--		       dev_name);
--		goto out;
+-	while (con->out_msg_pos.page < con->out_msg->nr_pages) {
++	if (msg->bio && !msg->bio_iter)
++		init_bio_iter(msg->bio, &msg->bio_iter, &msg->bio_seg);
 +
-+	if (path) {
-+		*path = strstr(dev_name, ":/");
-+		if (*path == NULL) {
-+			pr_err("device name is missing path (no :/ in %s)\n",
-+			       dev_name);
-+			goto out;
-+		}
-+		end_path = *path;
 +
-+		/* path on server */
-+		*path += 2;
-+		dout("server path '%s'\n", *path);
-+	} else {
-+		end_path = dev_name + strlen(dev_name);
- 	}
++	while (data_len - con->out_msg_pos.data_pos > 0) {
+ 		struct page *page = NULL;
+ 		void *kaddr = NULL;
++		int max_write;
  
- 	/* get mon ip(s) */
--	err = ceph_parse_ips(dev_name, *path, args->mon_addr,
-+	err = ceph_parse_ips(dev_name, end_path, args->mon_addr,
- 			     CEPH_MAX_MON, &args->num_mon);
- 	if (err < 0)
- 		goto out;
- 
--	/* path on server */
--	*path += 2;
--	dout("server path '%s'\n", *path);
--
- 	/* parse mount options */
- 	while ((c = strsep(&options, ",")) != NULL) {
- 		int token, intval, ret;
-@@ -562,6 +569,51 @@ static void destroy_mount_args(struct ceph_mount_args *args)
- 	kfree(args);
- }
- 
-+static int strcmp_null(const char *s1, const char *s2)
-+{
-+	if (!s1 && !s2)
-+		return 0;
-+	if (s1 && !s2)
-+		return -1;
-+	if (!s1 && s2)
-+		return 1;
-+	return strcmp(s1, s2);
-+}
+ 		/*
+ 		 * if we are calculating the data crc (the default), we need
+@@ -752,18 +786,29 @@ static int write_partial_msg_pages(struct ceph_connection *con)
+ 			page = msg->pages[con->out_msg_pos.page];
+ 			if (crc)
+ 				kaddr = kmap(page);
++			max_write = PAGE_SIZE;
+ 		} else if (msg->pagelist) {
+ 			page = list_first_entry(&msg->pagelist->head,
+ 						struct page, lru);
+ 			if (crc)
+ 				kaddr = kmap(page);
++			max_write = PAGE_SIZE;
++		} else if (msg->bio) {
++			struct bio_vec *bv;
 +
-+int ceph_compare_mount_args(struct ceph_mount_args *new_args,
-+			    struct ceph_client *client)
-+{
-+	struct ceph_mount_args *args1 = new_args;
-+	struct ceph_mount_args *args2 = client->mount_args;
-+	int ofs = offsetof(struct ceph_mount_args, mon_addr);
-+	int i;
-+	int ret;
-+
-+	ret = memcmp(args1, args2, ofs);
-+	if (ret)
-+		return ret;
-+
-+	ret = strcmp_null(args1->snapdir_name, args2->snapdir_name);
-+	if (ret)
-+		return ret;
-+
-+	ret = strcmp_null(args1->name, args2->name);
-+	if (ret)
-+		return ret;
-+
-+	ret = strcmp_null(args1->secret, args2->secret);
-+	if (ret)
-+		return ret;
-+
-+	for (i = 0; i < args1->num_mon; i++) {
-+		if (ceph_monmap_contains(client->monc.monmap,
-+				 &args1->mon_addr[i]))
-+			return 0;
-+	}
-+
-+	return -1;
-+}
-+
- /*
-  * create a fresh client instance
-  */
-@@ -649,7 +701,7 @@ fail:
- 	return ERR_PTR(err);
- }
- 
--static void ceph_destroy_client(struct ceph_client *client)
-+void ceph_destroy_client(struct ceph_client *client)
- {
- 	dout("destroy_client %p\n", client);
- 
-@@ -750,17 +802,12 @@ static struct dentry *open_root_dentry(struct ceph_client *client,
- /*
-  * mount: join the ceph cluster, and open root directory.
-  */
--static int ceph_mount(struct ceph_client *client, struct vfsmount *mnt,
--		      const char *path)
-+static int __ceph_open_session(struct ceph_client *client,
-+			       unsigned long started)
- {
- 	struct ceph_entity_addr *myaddr = NULL;
- 	int err;
- 	unsigned long timeout = client->mount_args->mount_timeout * HZ;
--	unsigned long started = jiffies;  /* note the start time */
--	struct dentry *root;
--
--	dout("mount start\n");
--	mutex_lock(&client->mount_mutex);
- 
- 	/* initialize the messenger */
- 	if (client->msgr == NULL) {
-@@ -768,9 +815,8 @@ static int ceph_mount(struct ceph_client *client, struct vfsmount *mnt,
- 			myaddr = &client->mount_args->my_addr;
- 		client->msgr = ceph_messenger_create(myaddr);
- 		if (IS_ERR(client->msgr)) {
--			err = PTR_ERR(client->msgr);
- 			client->msgr = NULL;
--			goto out;
-+			return PTR_ERR(client->msgr);
++			bv = bio_iovec_idx(msg->bio_iter, msg->bio_seg);
++			page = bv->bv_page;
++			page_shift = bv->bv_offset;
++			if (crc)
++				kaddr = kmap(page) + page_shift;
++			max_write = bv->bv_len;
+ 		} else {
+ 			page = con->msgr->zero_page;
+ 			if (crc)
+ 				kaddr = page_address(con->msgr->zero_page);
  		}
- 		client->msgr->nocrc = ceph_test_opt(client, NOCRC);
- 	}
-@@ -778,26 +824,58 @@ static int ceph_mount(struct ceph_client *client, struct vfsmount *mnt,
- 	/* open session, and wait for mon, mds, and osd maps */
- 	err = ceph_monc_open_session(&client->monc);
- 	if (err < 0)
--		goto out;
-+		return err;
+-		len = min((int)(PAGE_SIZE - con->out_msg_pos.page_pos),
+-			  (int)(data_len - con->out_msg_pos.data_pos));
++		len = min_t(int, max_write - con->out_msg_pos.page_pos,
++			    data_len - con->out_msg_pos.data_pos);
+ 		if (crc && !con->out_msg_pos.did_page_crc) {
+ 			void *base = kaddr + con->out_msg_pos.page_pos;
+ 			u32 tmpcrc = le32_to_cpu(con->out_msg->footer.data_crc);
+@@ -775,11 +820,12 @@ static int write_partial_msg_pages(struct ceph_connection *con)
+ 		}
  
- 	while (!have_mon_and_osd_map(client)) {
- 		err = -EIO;
- 		if (timeout && time_after_eq(jiffies, started + timeout))
--			goto out;
-+			return err;
+ 		ret = kernel_sendpage(con->sock, page,
+-				      con->out_msg_pos.page_pos, len,
++				      con->out_msg_pos.page_pos + page_shift,
++				      len,
+ 				      MSG_DONTWAIT | MSG_NOSIGNAL |
+ 				      MSG_MORE);
  
- 		/* wait */
- 		dout("mount waiting for mon_map\n");
- 		err = wait_event_interruptible_timeout(client->auth_wq,
--		       have_mon_and_osd_map(client) || (client->auth_err < 0),
--		       timeout);
-+			have_mon_and_osd_map(client) || (client->auth_err < 0),
-+			timeout);
- 		if (err == -EINTR || err == -ERESTARTSYS)
--			goto out;
--		if (client->auth_err < 0) {
--			err = client->auth_err;
--			goto out;
--		}
-+			return err;
-+		if (client->auth_err < 0)
-+			return client->auth_err;
+-		if (crc && (msg->pages || msg->pagelist))
++		if (crc && (msg->pages || msg->pagelist || msg->bio))
+ 			kunmap(page);
+ 
+ 		if (ret <= 0)
+@@ -794,6 +840,8 @@ static int write_partial_msg_pages(struct ceph_connection *con)
+ 			if (msg->pagelist)
+ 				list_move_tail(&page->lru,
+ 					       &msg->pagelist->head);
++			if (msg->bio)
++				iter_bio_next(&msg->bio_iter, &msg->bio_seg);
+ 		}
  	}
  
-+	return 0;
-+}
+@@ -1299,8 +1347,7 @@ static int read_partial_message_section(struct ceph_connection *con,
+ 					struct kvec *section, unsigned int sec_len,
+ 					u32 *crc)
+ {
+-	int left;
+-	int ret;
++	int ret, left;
+ 
+ 	BUG_ON(!section);
+ 
+@@ -1323,13 +1370,81 @@ static int read_partial_message_section(struct ceph_connection *con,
+ static struct ceph_msg *ceph_alloc_msg(struct ceph_connection *con,
+ 				struct ceph_msg_header *hdr,
+ 				int *skip);
 +
-+int ceph_open_session(struct ceph_client *client)
++
++static int read_partial_message_pages(struct ceph_connection *con,
++				      struct page **pages,
++				      unsigned data_len, int datacrc)
 +{
++	void *p;
 +	int ret;
-+	unsigned long started = jiffies;  /* note the start time */
++	int left;
 +
-+	dout("open_session start\n");
-+	mutex_lock(&client->mount_mutex);
++	left = min((int)(data_len - con->in_msg_pos.data_pos),
++		   (int)(PAGE_SIZE - con->in_msg_pos.page_pos));
++	/* (page) data */
++	BUG_ON(pages == NULL);
++	p = kmap(pages[con->in_msg_pos.page]);
++	ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
++			       left);
++	if (ret > 0 && datacrc)
++		con->in_data_crc =
++			crc32c(con->in_data_crc,
++				  p + con->in_msg_pos.page_pos, ret);
++	kunmap(pages[con->in_msg_pos.page]);
++	if (ret <= 0)
++		return ret;
++	con->in_msg_pos.data_pos += ret;
++	con->in_msg_pos.page_pos += ret;
++	if (con->in_msg_pos.page_pos == PAGE_SIZE) {
++		con->in_msg_pos.page_pos = 0;
++		con->in_msg_pos.page++;
++	}
 +
-+	ret = __ceph_open_session(client, started);
-+
-+	mutex_unlock(&client->mount_mutex);
 +	return ret;
 +}
 +
-+/*
-+ * mount: join the ceph cluster, and open root directory.
-+ */
-+static int ceph_mount(struct ceph_client *client, struct vfsmount *mnt,
-+		      const char *path)
++static int read_partial_message_bio(struct ceph_connection *con,
++				    struct bio **bio_iter, int *bio_seg,
++				    unsigned data_len, int datacrc)
 +{
-+	int err;
-+	unsigned long started = jiffies;  /* note the start time */
-+	struct dentry *root;
++	struct bio_vec *bv = bio_iovec_idx(*bio_iter, *bio_seg);
++	void *p;
++	int ret, left;
 +
-+	dout("mount start\n");
-+	mutex_lock(&client->mount_mutex);
++	if (IS_ERR(bv))
++		return PTR_ERR(bv);
 +
-+	err = __ceph_open_session(client, started);
-+	if (err < 0)
-+		goto out;
++	left = min((int)(data_len - con->in_msg_pos.data_pos),
++		   (int)(bv->bv_len - con->in_msg_pos.page_pos));
 +
- 	dout("mount opening root\n");
- 	root = open_root_dentry(client, "", started);
- 	if (IS_ERR(root)) {
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 429f6b7..8640043 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -48,7 +48,6 @@
- #define ceph_test_opt(client, opt) \
- 	(!!((client)->mount_args->flags & CEPH_OPT_##opt))
++	p = kmap(bv->bv_page) + bv->bv_offset;
++
++	ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
++			       left);
++	if (ret > 0 && datacrc)
++		con->in_data_crc =
++			crc32c(con->in_data_crc,
++				  p + con->in_msg_pos.page_pos, ret);
++	kunmap(bv->bv_page);
++	if (ret <= 0)
++		return ret;
++	con->in_msg_pos.data_pos += ret;
++	con->in_msg_pos.page_pos += ret;
++	if (con->in_msg_pos.page_pos == bv->bv_len) {
++		con->in_msg_pos.page_pos = 0;
++		iter_bio_next(bio_iter, bio_seg);
++	}
++
++	return ret;
++}
++
+ /*
+  * read (part of) a message.
+  */
+ static int read_partial_message(struct ceph_connection *con)
+ {
+ 	struct ceph_msg *m = con->in_msg;
+-	void *p;
+ 	int ret;
+ 	int to, left;
+ 	unsigned front_len, middle_len, data_len, data_off;
+@@ -1393,7 +1508,10 @@ static int read_partial_message(struct ceph_connection *con)
+ 			m->middle->vec.iov_len = 0;
  
--
- struct ceph_mount_args {
- 	int sb_flags;
- 	int flags;
-@@ -66,6 +65,13 @@ struct ceph_mount_args {
- 	int caps_wanted_delay_min, caps_wanted_delay_max;
- 	int cap_release_safety;
- 	int max_readdir;      /* max readdir size */
+ 		con->in_msg_pos.page = 0;
+-		con->in_msg_pos.page_pos = data_off & ~PAGE_MASK;
++		if (m->pages)
++			con->in_msg_pos.page_pos = data_off & ~PAGE_MASK;
++		else
++			con->in_msg_pos.page_pos = 0;
+ 		con->in_msg_pos.data_pos = 0;
+ 	}
+ 
+@@ -1410,27 +1528,25 @@ static int read_partial_message(struct ceph_connection *con)
+ 		if (ret <= 0)
+ 			return ret;
+ 	}
++	if (m->bio && !m->bio_iter)
++		init_bio_iter(m->bio, &m->bio_iter, &m->bio_seg);
+ 
+ 	/* (page) data */
+ 	while (con->in_msg_pos.data_pos < data_len) {
+-		left = min((int)(data_len - con->in_msg_pos.data_pos),
+-			   (int)(PAGE_SIZE - con->in_msg_pos.page_pos));
+-		BUG_ON(m->pages == NULL);
+-		p = kmap(m->pages[con->in_msg_pos.page]);
+-		ret = ceph_tcp_recvmsg(con->sock, p + con->in_msg_pos.page_pos,
+-				       left);
+-		if (ret > 0 && datacrc)
+-			con->in_data_crc =
+-				crc32c(con->in_data_crc,
+-					  p + con->in_msg_pos.page_pos, ret);
+-		kunmap(m->pages[con->in_msg_pos.page]);
+-		if (ret <= 0)
+-			return ret;
+-		con->in_msg_pos.data_pos += ret;
+-		con->in_msg_pos.page_pos += ret;
+-		if (con->in_msg_pos.page_pos == PAGE_SIZE) {
+-			con->in_msg_pos.page_pos = 0;
+-			con->in_msg_pos.page++;
++		if (m->pages) {
++			ret = read_partial_message_pages(con, m->pages,
++						 data_len, datacrc);
++			if (ret <= 0)
++				return ret;
++		} else if (m->bio) {
 +
-+	/* any type that can't be simply compared or doesn't need
-+	   need to be compared should go beyond this point,
-+	   ceph_compare_mount_args() should be updated accordingly */
-+	struct ceph_entity_addr *mon_addr; /* should be the first
-+					      pointer type of args */
-+	int num_mon;
- 	char *snapdir_name;   /* default ".snap" */
- 	char *name;
- 	char *secret;
-@@ -737,6 +743,15 @@ extern struct kmem_cache *ceph_file_cachep;
++			ret = read_partial_message_bio(con,
++						 &m->bio_iter, &m->bio_seg,
++						 data_len, datacrc);
++			if (ret <= 0)
++				return ret;
++		} else {
++			BUG_ON(1);
+ 		}
+ 	}
  
- extern const char *ceph_msg_type_name(int type);
- extern int ceph_check_fsid(struct ceph_client *client, struct ceph_fsid *fsid);
-+extern struct ceph_mount_args *parse_mount_args(int flags, char *options,
-+						const char *dev_name,
-+						const char **path);
-+extern int ceph_compare_mount_args(struct ceph_mount_args *new_args,
-+			    struct ceph_client *client);
-+extern struct ceph_client *ceph_create_client(struct ceph_mount_args *args,
-+					      int need_mdsc);
-+extern void ceph_destroy_client(struct ceph_client *client);
-+extern int ceph_open_session(struct ceph_client *client);
+@@ -2099,6 +2215,9 @@ struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags)
+ 	m->nr_pages = 0;
+ 	m->pages = NULL;
+ 	m->pagelist = NULL;
++	m->bio = NULL;
++	m->bio_iter = NULL;
++	m->bio_seg = 0;
  
- #define FSID_FORMAT "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-" \
- 	"%02x%02x%02x%02x%02x%02x"
-@@ -847,6 +862,13 @@ extern int ceph_mmap(struct file *file, struct vm_area_struct *vma);
- /* file.c */
- extern const struct file_operations ceph_file_fops;
- extern const struct address_space_operations ceph_aops;
-+extern int ceph_copy_to_page_vector(struct page **pages,
-+				    const char *data,
-+				    loff_t off, size_t len);
-+extern int ceph_copy_from_page_vector(struct page **pages,
-+				    char *data,
-+				    loff_t off, size_t len);
-+extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
- extern int ceph_open(struct inode *inode, struct file *file);
- extern struct dentry *ceph_lookup_open(struct inode *dir, struct dentry *dentry,
- 				       struct nameidata *nd, int mode,
+ 	dout("ceph_msg_new %p front %d\n", m, front_len);
+ 	return m;
+diff --git a/fs/ceph/messenger.h b/fs/ceph/messenger.h
+index fe24e6f..1f5bb9d 100644
+--- a/fs/ceph/messenger.h
++++ b/fs/ceph/messenger.h
+@@ -84,6 +84,9 @@ struct ceph_msg {
+ 	struct ceph_pagelist *pagelist; /* instead of pages */
+ 	struct list_head list_head;
+ 	struct kref kref;
++	struct bio  *bio;		/* instead of pages/pagelist */
++	struct bio  *bio_iter;		/* bio iterator */
++	int bio_seg;			/* current bio segment */
+ 	bool front_is_vmalloc;
+ 	bool more_to_follow;
+ 	int front_max;
+diff --git a/fs/ceph/osd_client.c b/fs/ceph/osd_client.c
+index 278c6fe..e5bb5d5 100644
+--- a/fs/ceph/osd_client.c
++++ b/fs/ceph/osd_client.c
+@@ -6,6 +6,7 @@
+ #include <linux/pagemap.h>
+ #include <linux/slab.h>
+ #include <linux/uaccess.h>
++#include <linux/bio.h>
+ 
+ #include "super.h"
+ #include "osd_client.h"
+@@ -111,6 +112,8 @@ void ceph_osdc_release_request(struct kref *kref)
+ 	if (req->r_own_pages)
+ 		ceph_release_page_vector(req->r_pages,
+ 					 req->r_num_pages);
++	if (req->r_bio)
++		bio_put(req->r_bio);
+ 	ceph_put_snap_context(req->r_snapc);
+ 	if (req->r_mempool)
+ 		mempool_free(req, req->r_osdc->req_mempool);
+@@ -124,7 +127,8 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 					       int do_sync,
+ 					       bool use_mempool,
+ 					       gfp_t gfp_flags,
+-					       struct page **pages)
++					       struct page **pages,
++					       struct bio *bio)
+ {
+ 	struct ceph_osd_request *req;
+ 	struct ceph_msg *msg;
+@@ -189,6 +193,10 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
+ 
+ 	req->r_request = msg;
+ 	req->r_pages = pages;
++	if (bio) {
++		req->r_bio = bio;
++		bio_get(req->r_bio);
++	}
+ 
+ 	return req;
+ }
+@@ -290,7 +298,7 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 		ceph_osdc_alloc_request(osdc, flags,
+ 					 snapc, do_sync,
+ 					 use_mempool,
+-					 GFP_NOFS, NULL);
++					 GFP_NOFS, NULL, NULL);
+ 	if (IS_ERR(req))
+ 		return req;
+ 
+@@ -1156,6 +1164,7 @@ int ceph_osdc_start_request(struct ceph_osd_client *osdc,
+ 
+ 	req->r_request->pages = req->r_pages;
+ 	req->r_request->nr_pages = req->r_num_pages;
++	req->r_request->bio = req->r_bio;
+ 
+ 	register_request(osdc, req);
+ 
+@@ -1474,6 +1483,7 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
+ 		}
+ 		m->pages = req->r_pages;
+ 		m->nr_pages = req->r_num_pages;
++		m->bio = req->r_bio;
+ 	}
+ 	*skip = 0;
+ 	req->r_con_filling_msg = ceph_con_get(con);
+diff --git a/fs/ceph/osd_client.h b/fs/ceph/osd_client.h
+index 0b6b697..76aa63e 100644
+--- a/fs/ceph/osd_client.h
++++ b/fs/ceph/osd_client.h
+@@ -79,6 +79,7 @@ struct ceph_osd_request {
+ 	struct page     **r_pages;            /* pages for data payload */
+ 	int               r_pages_from_pool;
+ 	int               r_own_pages;        /* if true, i own page list */
++	struct bio       *r_bio;	      /* instead of pages */
+ };
+ 
+ struct ceph_osd_client {
+@@ -129,7 +130,8 @@ extern struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *
+ 					       int do_sync,
+ 					       bool use_mempool,
+ 					       gfp_t gfp_flags,
+-					       struct page **pages);
++					       struct page **pages,
++					       struct bio *bio);
+ 
+ extern void ceph_osdc_build_request(struct ceph_osd_request *req,
+ 			    u64 off, u64 *plen,
 -- 
 1.5.6.5
+
