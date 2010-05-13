@@ -1,51 +1,35 @@
 From: Christian Brunner <chb@muc.de>
-Subject: [PATCH 2/2] avoid overwriting the header
-Date: Thu, 13 May 2010 17:10:54 +0200
-Message-ID: <20100513151054.GB53373@ncolin.muc.de>
+Subject: additional librados functions
+Date: Thu, 13 May 2010 17:34:53 +0200
+Message-ID: <20100513153453.GC53373@ncolin.muc.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ncolin.muc.de ([193.149.48.11]:52718 "EHLO ncolin.muc.de"
+Received: from ncolin.muc.de ([193.149.48.11]:60289 "EHLO ncolin.muc.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751981Ab0EMPKz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 13 May 2010 11:10:55 -0400
+	id S1751776Ab0EMPe5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 13 May 2010 11:34:57 -0400
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-avoid overwriting the rbd header when doing qemu-img create
-to resize a rbd image use rbdtool --resize instead
----
- block/rbd.c |    8 ++++++++
- 1 files changed, 8 insertions(+), 0 deletions(-)
+Hi Yehuda,
+Hi Sage,
 
-diff --git a/block/rbd.c b/block/rbd.c
-index a182d5e..11b7c10 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -163,6 +163,8 @@ static int rbd_create(const char *filename, QEMUOptionParameter * options)
- {
-     int64_t bytes = 0;
-     int64_t objsize;
-+    uint64_t size;
-+    time_t mtime;
-     uint8_t obj_order = RBD_DEFAULT_OBJ_ORDER;
-     char pool[RBD_MAX_SEG_NAME_SIZE];
-     char n[RBD_MAX_SEG_NAME_SIZE];
-@@ -227,6 +229,12 @@ static int rbd_create(const char *filename, QEMUOptionParameter * options)
-         return -EIO;
-     }
- 
-+    ret = rados_stat(p, n, &size, &mtime);
-+    if (ret == 0) {
-+        ret=-EEXIST;
-+        goto done;
-+    }
-+
-     ret = rados_write(p, n, 0, (const char *)&header, sizeof(header));
-     if (ret < 0) {
-         goto done;
--- 
-1.7.0.4
+while thinking about using RBD in our environment I came across two things:
 
+1. I would like to be able to clone an image. This doesn't need to be
+   based on a snapshot. Doing a simple copy of the objects would be
+   sufficient. I could do this by using rados_read and rados_write easily.
+   However I think that calling something like rados_copy would be more
+   efficient, since the client wouldn't be involved.  Would it be possible 
+   to provide such a call?
+
+2. For accounting purposes I would like to read pool statistics. In the
+   librados header file I can see that there are two structures () where
+   the data may get stored. However I can't find a function to fill these
+   structures. Am I missing something here?
+
+Thanks,
+Christian
