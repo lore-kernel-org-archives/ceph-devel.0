@@ -1,35 +1,49 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.20.1 released
-Date: Mon, 17 May 2010 10:50:16 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005171045200.2404@cobra.newdream.net>
+From: "Cash Creation" <admin@mg-advs.com>
+Subject: get paid just for clicking your mouse...
+Date: Wed, 19 May 2010 00:30:34 +0800
+Message-ID: <CBEBE97C.337038BD@mg-advs.com>
+Reply-To: "Cash Creation" <admin@mg-advs.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52026 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755473Ab0EQRq6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 May 2010 13:46:58 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 3480ABC776
-	for <ceph-devel@vger.kernel.org>; Mon, 17 May 2010 10:50:16 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 0C230BC776
-	for <ceph-devel@vger.kernel.org>; Mon, 17 May 2010 10:50:16 -0700 (PDT)
+Received: from [124.232.147.3] ([124.232.147.3]:2940 "HELO mg-advs.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with SMTP
+	id S1753068Ab0ERPtS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 18 May 2010 11:49:18 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-We've released a stable update with a bunch of bug fixes since v0.20.  
-Notably, we'e fixed
+How would you like to make 75 - 250 
+every single day just for clicking your mouse?
 
-    * mkfs problems with osd journal file
-    * librados aio api issues
-    * misc osd fixes (crashes, hangs)
-    * inconsistent readdir results across nodes
+Start earning Minutes from now!
 
-and lots of other small stuff.  To get it:
+Don't believe any hyped promises - you won't 
+be making thousands of dollars every day and 
+you won't be a millionaire by next year but 
+my System is a surefire method for everyone 
+who wants to start earning online.
 
-    * Direct download at http://ceph.newdream.net/download/ceph-0.20.1.tar.gz
-    * For Debian packages see http://ceph.newdream.net/wiki/Debian
 
-sage
+http://www.mg-advs.com/cashcreation/
+
+
+
+
+
+
+
+
+
+
+
+Remove link:
+http://www.mg-advs.com/remove/
+
+Contact us:
+http://www.mg-advs.com/contact/
+
+
