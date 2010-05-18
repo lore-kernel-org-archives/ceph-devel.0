@@ -1,49 +1,42 @@
-From: "Cash Creation" <admin@mg-advs.com>
-Subject: get paid just for clicking your mouse...
-Date: Wed, 19 May 2010 00:30:34 +0800
-Message-ID: <CBEBE97C.337038BD@mg-advs.com>
-Reply-To: "Cash Creation" <admin@mg-advs.com>
+From: Erner Balcitis <invigorate@imcev.it>
+Subject: nd cras
+Date: Tue, 18 May 2010 18:17:48 +0200
+Message-ID: <4BF2BCB3.3040308@surdimobil.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: application/octet-stream; name="anomeric.rtf"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [124.232.147.3] ([124.232.147.3]:2940 "HELO mg-advs.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with SMTP
-	id S1753068Ab0ERPtS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 18 May 2010 11:49:18 -0400
+Received: from net-93-149-13-213.t2.dsl.vodafone.it ([93.149.13.213]:22031
+	"HELO bhmacl.vodafone.it" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with SMTP id S1753406Ab0ERQRv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 18 May 2010 12:17:51 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Dile Auel <ceph-devel@vger.kernel.org>
 
-How would you like to make 75 - 250 
-every single day just for clicking your mouse?
-
-Start earning Minutes from now!
-
-Don't believe any hyped promises - you won't 
-be making thousands of dollars every day and 
-you won't be a millionaire by next year but 
-my System is a surefire method for everyone 
-who wants to start earning online.
-
-
-http://www.mg-advs.com/cashcreation/
-
-
-
-
-
-
-
-
-
-
-
-Remove link:
-http://www.mg-advs.com/remove/
-
-Contact us:
-http://www.mg-advs.com/contact/
-
-
+e1xydGYxXGFuc2lcYW5zaWNwZzEyNTJcZGVmZjBcZGVmbGFuZzEwMzN7XCpcZ2VuZXJhdG9y
+IE1zZnRlZGl0IDMuMzAuOS42NTkxO317XGZvbnR0Ymx7XGYwXGZuaWxcZmNoYXJzZXQwIENh
+bGlicmk7fX0NCntcKlxnZW5lcmF0b3IgTXNmdGVkaXQgMy4zMC45LjY1OTE7fXtcY29sb3J0
+YmwgO1xyZWQwXGdyZWVuMFxibHVlMjU1O1xyZWQxOTJcZ3JlZW44MFxibHVlNzc7XHJlZDBc
+Z3JlZW4xNzZcYmx1ZTgwO1xyZWQyMDRcZ3JlZW4xODBcYmx1ZTA7XHJlZDI1NVxncmVlbjBc
+Ymx1ZTA7XHJlZDIyM1xncmVlbjIwNlxibHVlNDtccmVkMTU1XGdyZWVuMFxibHVlMjExO1xy
+ZWQ3OVxncmVlbjEyOVxibHVlMTg5O1xyZWQxNjVcZ3JlZW4xNjVcYmx1ZTE2NTtccmVkMTI4
+XGdyZWVuMTU4XGJsdWUxOTQ7XHJlZDI0N1xncmVlbjE1MFxibHVlNzA7XHJlZDBcZ3JlZW43
+N1xibHVlMTg3O1xyZWQ3NVxncmVlbjE3MlxibHVlMTk4O1xyZWQyMjFcZ3JlZW4xMzJcYmx1
+ZTEzMjtccmVkNTFcZ3JlZW41MVxibHVlNTE7XHJlZDE1OFxncmVlbjEyNFxibHVlMTI0O1xy
+ZWQxNTVcZ3JlZW4xODdcYmx1ZTg5O30NCntcKlxnZW5lcmF0b3IgTXNmdGVkaXQgMy4zMC45
+LjY1OTE7fVx2aWV3a2luZDRcdWMxXHBhcmRcc2EyMDBcc2wyNzZcc2xtdWx0MVxsYW5nOVxm
+MFxmczMye1xmaWVsZHtcKlxmbGRpbnN0e0hZUEVSTElOSyAiaHtcKlxkZCAzLjMwLjkuNjU5
+MTt9dHRwOi8vd3d3LmZ1OTkucnUifX17XGZsZHJzbHR7XHVsXGNmMSBodHRwOi8vd3d3LmZ1
+OTkucnV9fX1cZjBcY2YxXGJcZnMzMiAgLSBPcmRlciB0aGUgY2hlYXBlc3QgbWVkaWNhdGlv
+bnMgbm93IVxwYXINClZpYWdyYSBcY2Y0IENpYWxpcyBcY2YzIFZpYWdyYSBQcm9mZXNzaW9u
+YWwgXGNmNSBDaWFsaXMgUHJvZmVzc2lvbmFsIFxjZjYgVmlhZ3JhIFN1cGVyIEFjdGl2ZSsg
+XGNmMyBDaWFsaXMgU3VwZXIgQWN0aXZlKyBcY2Y3IExldml0cmFcY2YwICBcY2Y4IFZpYWdy
+YSBTb2Z0IFRhYnMgXGNmOSBDaWFsaXMgU29mdCBUYWJzXGNmMTAgIFxjZjExIExldml0cmEg
+UHJvZmVzc2lvbmFsIFxjZjQgRmVtYWxlIFZpYWdyYSBcY2YxMiBQcm9wZWNpYSBcY2Y3IEFj
+b21wbGlhIFxjZjYgWGVuaWNhbFxjZjAgIFxjZjUgQnJhbmQgTGV2aXRyYSBcY2YxMyBGZW1h
+bGUgQ2lhbGlzIFxjZjE0IExldml0cmEgU3VwZXIgQWN0aXZlKyBcY2YxNSBUYW1pZmx1XGNm
+MCAgXGNmNyBWUFhMXGNmMCAgXGNmMTYgVmlhZ3JhIFNvZnQgRmxhdm91cmVkIFxjZjUgQnJh
+bmQgVmlhZ3JhIFxjZjE3IEJyYW5kIENpYWxpc1xjZjANCntcKlxnZW5lcmF0b3IgTXNmdGVk
+aXQgMy4zMC45LjY1OTE7fX0=
