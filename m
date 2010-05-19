@@ -1,41 +1,60 @@
-From: Nieves Masaki <denoting@orka.si>
-Subject: d greater discrimination in the
-Date: Tue, 18 May 2010 22:04:43 +0200
-Message-ID: <4BF2EE9D.8010805@orka.si>
+From: Christian Brunner <chb@muc.de>
+Subject: [RFC PATCH 0/1] ceph/rbd block driver for qemu-kvm
+Date: Wed, 19 May 2010 21:20:53 +0200
+Message-ID: <20100519192053.GC61706@ncolin.muc.de>
 Mime-Version: 1.0
-Content-Type: application/octet-stream; name="homily.rtf"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 5ED75382.cable.ziggo.nl ([94.215.83.130]:33780 "HELO
-	csmwu.ziggo.nl" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with SMTP id S1757053Ab0ERUC7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 May 2010 16:02:59 -0400
+Received: from ncolin.muc.de ([193.149.48.11]:51156 "EHLO ncolin.muc.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754214Ab0ESTUz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 19 May 2010 15:20:55 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Seymour Lindbo <ceph-devel@vger.kernel.org>
+To: kvm@vger.kernel.org, qemu-devel@nongnu.org
+Cc: ceph-devel@vger.kernel.org
 
-e1xydGYxXGFuc2lcYW5zaWNwZzEyNTJcZGVmZjBcZGVmbGFuZzEwMzN7XCpcZ2VuZXJhdG9y
-IE1zZnRlZGl0IDQuMzIuNDQuNDM4MTt9e1xmb250dGJse1xmMFxmbmlsXGZjaGFyc2V0MCBD
-YWxpYnJpO319DQp7XCpcZ2VuZXJhdG9yIE1zZnRlZGl0IDQuMzIuNDQuNDM4MTt9e1xjb2xv
-cnRibCA7XHJlZDBcZ3JlZW4wXGJsdWUyNTU7XHJlZDE5MlxncmVlbjgwXGJsdWU3NztccmVk
-MFxncmVlbjE3NlxibHVlODA7XHJlZDIwNFxncmVlbjE4MFxibHVlMDtccmVkMjU1XGdyZWVu
-MFxibHVlMDtccmVkMjIzXGdyZWVuMjA2XGJsdWU0O1xyZWQxNTVcZ3JlZW4wXGJsdWUyMTE7
-XHJlZDc5XGdyZWVuMTI5XGJsdWUxODk7XHJlZDE2NVxncmVlbjE2NVxibHVlMTY1O1xyZWQx
-MjhcZ3JlZW4xNThcYmx1ZTE5NDtccmVkMjQ3XGdyZWVuMTUwXGJsdWU3MDtccmVkMFxncmVl
-bjc3XGJsdWUxODc7XHJlZDc1XGdyZWVuMTcyXGJsdWUxOTg7XHJlZDIyMVxncmVlbjEzMlxi
-bHVlMTMyO1xyZWQ1MVxncmVlbjUxXGJsdWU1MTtccmVkMTU4XGdyZWVuMTI0XGJsdWUxMjQ7
-XHJlZDE1NVxncmVlbjE4N1xibHVlODk7fQ0Ke1wqXGdlbmVyYXRvciBNc2Z0ZWRpdCA0LjMy
-LjQ0LjQzODE7fVx2aWV3a2luZDRcdWMxXHBhcmRcc2EyMDBcc2wyNzZcc2xtdWx0MVxsYW5n
-OVxmMFxmczMye1xmaWVsZHtcKlxmbGRpbnN0e0hZUEVSTElOSyAiaHtcKlxkZCA0LjMyLjQ0
-LjQzODE7fXR0cDovL3d3dy5jYTY2LnJ1In19e1xmbGRyc2x0e1x1bFxjZjEgaHR0cDovL3d3
-dy5jYTY2LnJ1fX19XGYwXGNmMVxiXGZzMzIgIC0gT3JkZXIgdGhlIGNoZWFwZXN0IG1lZGlj
-YXRpb25zIG5vdyFccGFyDQpWaWFncmEgXGNmNCBDaWFsaXMgXGNmMyBWaWFncmEgUHJvZmVz
-c2lvbmFsIFxjZjUgQ2lhbGlzIFByb2Zlc3Npb25hbCBcY2Y2IFZpYWdyYSBTdXBlciBBY3Rp
-dmUrIFxjZjMgQ2lhbGlzIFN1cGVyIEFjdGl2ZSsgXGNmNyBMZXZpdHJhXGNmMCAgXGNmOCBW
-aWFncmEgU29mdCBUYWJzIFxjZjkgQ2lhbGlzIFNvZnQgVGFic1xjZjEwICBcY2YxMSBMZXZp
-dHJhIFByb2Zlc3Npb25hbCBcY2Y0IEZlbWFsZSBWaWFncmEgXGNmMTIgUHJvcGVjaWEgXGNm
-NyBBY29tcGxpYSBcY2Y2IFhlbmljYWxcY2YwICBcY2Y1IEJyYW5kIExldml0cmEgXGNmMTMg
-RmVtYWxlIENpYWxpcyBcY2YxNCBMZXZpdHJhIFN1cGVyIEFjdGl2ZSsgXGNmMTUgVGFtaWZs
-dVxjZjAgIFxjZjcgVlBYTFxjZjAgIFxjZjE2IFZpYWdyYSBTb2Z0IEZsYXZvdXJlZCBcY2Y1
-IEJyYW5kIFZpYWdyYSBcY2YxNyBCcmFuZCBDaWFsaXNcY2YwDQp7XCpcZ2VuZXJhdG9yIE1z
-ZnRlZGl0IDQuMzIuNDQuNDM4MTt9fQ==
+Hi,
+
+this patch is a block driver for the distributed file system Ceph
+(http://ceph.newdream.net/). Ceph was included in the Linux v2.6.34
+kernel. However, this driver uses librados (which is part of the Ceph
+server) for direct access to the Ceph object store and is running entirely
+in userspace. Therefore it is called "rbd" - rados block device.
+
+The basic idea is to stripe a VM block device over (by default) 4MB objects
+stored in the Ceph distributed object store.  This is very similar to what
+the sheepdog project is doing, but uses the ceph server as a storage backend.
+If you don't plan on using the entire ceph filesystem you may leave out the
+metadata service of ceph.
+
+Yehuda Sadeh helped me with the implementation and put some additional
+usage information on the Ceph-Wiki (http://ceph.newdream.net/wiki/Kvm-rbd).
+He has also written a Linux kernel driver to make an rbd image accessible as
+a block device.
+
+To compile the driver a recent version of ceph (>= 0.20.1) is needed and
+you have to "--enable-rbd" when running configure.
+
+Since our tests where quite promising, I would like to have feedback from
+other qemu-kvm developers/users. If someone could check the AIO handling
+of the driver I would be glad, too.
+
+Thanks,
+Christian
+
+PS: The patch is based on git://repo.or.cz/qemu/kevin.git block
+
+---
+ Makefile          |    3 +
+ Makefile.objs     |    1 +
+ block/rados.h     |  376 ++++++++++++++++++++++++++++++++++
+ block/rbd.c       |  585 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ block/rbd_types.h |   48 +++++
+ configure         |   27 +++
+ 6 files changed, 1040 insertions(+), 0 deletions(-)
+ create mode 100644 block/rados.h
+ create mode 100644 block/rbd.c
+ create mode 100644 block/rbd_types.h
+
