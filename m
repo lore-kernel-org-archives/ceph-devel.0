@@ -1,68 +1,43 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Questions about a possible Ceph setup
-Date: Thu, 20 May 2010 10:09:41 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005201004040.4397@cobra.newdream.net>
-References: <909721.18944.qm@web114302.mail.gq1.yahoo.com>
+Subject: Re: phantom MDS, blacklisted OSDs?
+Date: Thu, 20 May 2010 10:14:43 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1005201011170.4397@cobra.newdream.net>
+References: <879378.31395.qm@web114302.mail.gq1.yahoo.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56712 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:50208 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754197Ab0ETRGR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 May 2010 13:06:17 -0400
-In-Reply-To: <909721.18944.qm@web114302.mail.gq1.yahoo.com>
+	with ESMTP id S1753498Ab0ETRLU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 May 2010 13:11:20 -0400
+In-Reply-To: <879378.31395.qm@web114302.mail.gq1.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Fred Ar <ar.fred@yahoo.com>
 Cc: ceph-devel@vger.kernel.org
 
-> > I'd prefer the situation where i'd stripe over all 4 disks, giving me 
-> > and extra pro. In this situation i could configure my node to panic 
-> > whenever a disk is starting to give errors, so my cluster can take 
-> > over immediately.
-> > 
-> > Am i right? Is this "the way to go"?
+On Thu, 20 May 2010, Fred Ar wrote:
+> Hello,
 > 
-> I don't know the way to go. But I think that in the 1st case (1 OSD per 
-> hard disk) when a hard disk fails, it gets replicated elsewhere. During 
-> that time the other 3 OSDs on the same machine are still working fine 
-> and serving requests. And then some time later, you've got a brand new 
-> disk, you shutdown the machnie, that's 3 more OSDs down. In the 2nd 
-> case, as soon as 1 disk starts failing, your OSD (which is 4 disks) gets 
-> taken down, that's approximately equivalent to 4 OSDs going down at the 
-> same time if we compare to your 1st case.
-
-The other 3 osds don't have to rereplicate if you swap the failed disk 
-quickly, or otherwise inform the system that the failure is temporary.  By 
-default there is a 5 minute timeout.  That can be adjusted, or we can add 
-other administrative hooks to 'suspend' any declarations of permanent 
-failure for this sort of case.
-
-> About your 2nd case: as cheap as the hardware may be, having 3 perfectly 
-> operational disks not working has a cost...
+> today I noticed some strange things on my 3 machines with each 1 hard 
+> disk, 1 osd, 1 mds, 1 mon. They are named r1-9, r1-10, r1-11.
+> [...]
+> why do r1-9 and r1-10 appear twice, and why does r1-11 appear 5 times? Is it a problem, how to fix it ?
 > 
-> What I don't know, in both cases, is: when the machines gets back 
-> online, will it hold the same data as before being shutdown, or will 
-> they get entirely new data? I can remember that crush was quite stable 
-> and designed to avoid that kind of full cluster rebalance on failing/new 
-> OSD...
+> I also had a 2 blacklisted OSDs (out of 3). Could it be because I 
+> restarted them many times in a row? How to clear the blacklisted status 
+> by hand (if I don't want to wait the delay)?
 
-For independent disks, the the old data will still be there on the 3 that 
-weren't replaced.  If the 4 are striped without redundancy, all will be 
-lost due to the singel failure.  If they are striped with redudancy (btrfs 
-mirroring, DM/MD or hardware raid, etc.), all 4 disks' data will be there 
-(tho there will be some internal rebuild load in the raid).
+Yeah.  The monitor doesn't clear our 'laggy' (unresponsive, possibly dead) 
+mds entries if they are standby, since they might come back and nothing 
+is depending on them.  We can add a longer timeout to clean these out if 
+its clear the system is otherwise functional (e.g., other mds's are 
+responsive).
 
-> I don't understand how - in the 2nd case - the btrfs pool of 4 disks 
-> would "repair" its missing data, so that the data on the 3 good disks 
-> does not need to get replicated over the network.
-
-Currently it won't, unless you enable data mirroring (off by default).  
-The problem is that costs you 2x the storage space, which combined with 
-ceph mirroring means you're buying 4x the disk.
-
-I lean toward a cosd per disk in this situation.  The downside is there is 
-a bit more work in setting up the CRUSH hierarchy and rules properly.  
-User friendly tools to do this would certainly be nice.
+The blacklist entries can't be cleaned out manually right now, but there 
+is no significant 'cost' to them being there, so you can ignore them.  The 
+blacklist just means that any IO they attempt with the OSDs will be 
+rejected, to avoid a partitioned or misbehaving or laggy daemon from 
+fighting with another mds instance.
 
 sage
