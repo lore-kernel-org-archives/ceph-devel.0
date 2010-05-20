@@ -1,70 +1,114 @@
-From: Christian Brunner <chb@muc.de>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Fri, 21 May 2010 00:16:46 +0200
-Message-ID: <AANLkTinlpdEK-vqMYkYwvWT-tZBpfn2FZHi6LUiS5cPz@mail.gmail.com>
+Date: Thu, 20 May 2010 16:02:20 -0700
+Message-ID: <AANLkTinvwpG_7T2L8IvFuJZRTE8HvkAF3EOqOH8duaFH@mail.gmail.com>
 References: <20100519192222.GD61706@ncolin.muc.de>
 	 <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>
-	 <AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>
-	 <4BF5A9D2.5080609@codemonkey.ws>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:58412 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754977Ab0ETWQs convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 May 2010 18:16:48 -0400
-In-Reply-To: <4BF5A9D2.5080609@codemonkey.ws>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:47137 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753002Ab0ETXCV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 May 2010 19:02:21 -0400
+In-Reply-To: <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Anthony Liguori <anthony@codemonkey.ws>
-Cc: Blue Swirl <blauwirbel@gmail.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: Blue Swirl <blauwirbel@gmail.com>
+Cc: Christian Brunner <chb@muc.de>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
 
-2010/5/20 Anthony Liguori <anthony@codemonkey.ws>:
->> With new approaches like Sheepdog or Ceph, things are getting a lot
->> cheaper and you can scale your system without disrupting your servic=
-e.
->> The concepts are quite similar to what Amazon is doing in their EC2
->> environment, but they certainly won't publish it as OpenSource anyti=
-me
->> soon.
->>
->> Both projects have advantages and disadvantages. Ceph is a bit more
->> universal as it implements a whole filesystem. Sheepdog is more
->> feature complete in regards of managing images (e.g. snapshots). Bot=
-h
->> projects require some additional work to become stable, but they are
->> on a good way.
->>
->> I would really like to see both drivers in the qemu tree, as they ar=
-e
->> the key to a design shift in how storage in the datacenter is being
->> built.
->>
+On Thu, May 20, 2010 at 1:31 PM, Blue Swirl <blauwirbel@gmail.com> wrot=
+e:
+> On Wed, May 19, 2010 at 7:22 PM, Christian Brunner <chb@muc.de> wrote=
+:
+>> The attached patch is a block driver for the distributed file system
+>> Ceph (http://ceph.newdream.net/). This driver uses librados (which
+>> is part of the Ceph server) for direct access to the Ceph object
+>> store and is running entirely in userspace. Therefore it is
+>> called "rbd" - rados block device.
+=2E..
 >
-> I'd be more interested in enabling people to build these types of sto=
-rage
-> systems without touching qemu.
+> IIRC underscores here may conflict with system header use. Please use
+> something like QEMU_BLOCK_RADOS_H.
 
-You could do this by using Yehuda's rbd kernel driver, but I think
-that it would be better to avoid this additional layer.
+This header is shared between the linux kernel client and the ceph
+userspace servers and client. We can actually get rid of it, as we
+only need it to define CEPH_OSD_TMAP_SET. We can move this definition
+to librados.h.
 
-> Both sheepdog and ceph ultimately transmit I/O over a socket to a cen=
-tral
-> daemon, right? =A0So could we not standardize a protocol for this tha=
-t both
-> sheepdog and ceph could implement?
+>> diff --git a/block/rbd_types.h b/block/rbd_types.h
+>> new file mode 100644
+>> index 0000000..dfd5aa0
+>> --- /dev/null
+>> +++ b/block/rbd_types.h
+>> @@ -0,0 +1,48 @@
+>> +#ifndef _FS_CEPH_RBD
+>> +#define _FS_CEPH_RBD
+>
+> QEMU_BLOCK_RBD?
 
-There is no central daemon. The concept is that they talk to many
-storage nodes at the same time. Data is distributed and replicated
-over many nodes in the network. The mechanism to do this is quite
-complex. I don't know about sheepdog, but in Ceph this is called RADOS
-(reliable autonomic distributed object store). Sheepdog and Ceph may
-look similar, but this is where they act different. I don't think that
-it would be possible to implement a common protocol.
+This header is shared between the ceph kernel client, between the qemu
+rbd module (and between other ceph utilities). It'd be much easier
+maintaining it without having to have a different implementation for
+each. The same goes to the use of __le32/64 and __u32/64 within these
+headers.
 
-Regards,
-Christian
+>
+>> +
+>> +#include <linux/types.h>
+>
+> Can you use standard includes, like <sys/types.h> or <inttypes.h>? Ar=
+e
+> Ceph libraries used in other systems than Linux?
+
+Not at the moment. I guess that we can take this include out.
+
+>
+>> +
+>> +/*
+>> + * rbd image 'foo' consists of objects
+>> + * =A0 foo.rbd =A0 =A0 =A0- image metadata
+>> + * =A0 foo.00000000
+>> + * =A0 foo.00000001
+>> + * =A0 ... =A0 =A0 =A0 =A0 =A0- data
+>> + */
+>> +
+>> +#define RBD_SUFFIX =A0 =A0 =A0 =A0 =A0 =A0 ".rbd"
+>> +#define RBD_DIRECTORY =A0 =A0 =A0 =A0 =A0 "rbd_directory"
+>> +
+>> +#define RBD_DEFAULT_OBJ_ORDER =A022 =A0 /* 4MB */
+>> +
+>> +#define RBD_MAX_OBJ_NAME_SIZE =A096
+>> +#define RBD_MAX_SEG_NAME_SIZE =A0128
+>> +
+>> +#define RBD_COMP_NONE =A0 =A0 =A0 =A0 =A00
+>> +#define RBD_CRYPT_NONE =A0 =A0 =A0 =A0 0
+>> +
+>> +static const char rbd_text[] =3D "<<< Rados Block Device Image >>>\=
+n";
+>> +static const char rbd_signature[] =3D "RBD";
+>> +static const char rbd_version[] =3D "001.001";
+>> +
+>> +struct rbd_obj_snap_ondisk {
+>> + =A0 =A0 =A0 __le64 id;
+>> + =A0 =A0 =A0 __le64 image_size;
+>> +} __attribute__((packed));
+>> +
+>> +struct rbd_obj_header_ondisk {
+>> + =A0 =A0 =A0 char text[64];
+>> + =A0 =A0 =A0 char signature[4];
+>> + =A0 =A0 =A0 char version[8];
+>> + =A0 =A0 =A0 __le64 image_size;
+>
+> Unaligned? Is the disk format fixed?
+
+This is a packed structure that represents the on disk format.
+Operations on it are being done only to read from the disk header or
+to write to the disk header.
+
+
+Yehuda
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
