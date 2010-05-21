@@ -1,114 +1,56 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+From: Stefan Hajnoczi <stefanha@gmail.com>
 Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Thu, 20 May 2010 16:02:20 -0700
-Message-ID: <AANLkTinvwpG_7T2L8IvFuJZRTE8HvkAF3EOqOH8duaFH@mail.gmail.com>
+Date: Fri, 21 May 2010 06:28:42 +0100
+Message-ID: <AANLkTimwt6XgIVRc7CC-aN--bmhg1xsDpo0MHUWEd5Ri@mail.gmail.com>
 References: <20100519192222.GD61706@ncolin.muc.de>
 	 <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>
+	 <AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>
+	 <4BF5A9D2.5080609@codemonkey.ws>
+	 <AANLkTinlpdEK-vqMYkYwvWT-tZBpfn2FZHi6LUiS5cPz@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:47137 "EHLO
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:61022 "EHLO
 	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753002Ab0ETXCV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 May 2010 19:02:21 -0400
-In-Reply-To: <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>
+	with ESMTP id S1752292Ab0EUF2n convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 May 2010 01:28:43 -0400
+In-Reply-To: <AANLkTinlpdEK-vqMYkYwvWT-tZBpfn2FZHi6LUiS5cPz@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Blue Swirl <blauwirbel@gmail.com>
-Cc: Christian Brunner <chb@muc.de>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: Christian Brunner <chb@muc.de>
+Cc: Anthony Liguori <anthony@codemonkey.ws>, Blue Swirl <blauwirbel@gmail.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org
 
-On Thu, May 20, 2010 at 1:31 PM, Blue Swirl <blauwirbel@gmail.com> wrot=
-e:
-> On Wed, May 19, 2010 at 7:22 PM, Christian Brunner <chb@muc.de> wrote=
-:
->> The attached patch is a block driver for the distributed file system
->> Ceph (http://ceph.newdream.net/). This driver uses librados (which
->> is part of the Ceph server) for direct access to the Ceph object
->> store and is running entirely in userspace. Therefore it is
->> called "rbd" - rados block device.
-=2E..
+On Thu, May 20, 2010 at 11:16 PM, Christian Brunner <chb@muc.de> wrote:
+> 2010/5/20 Anthony Liguori <anthony@codemonkey.ws>:
+>> Both sheepdog and ceph ultimately transmit I/O over a socket to a ce=
+ntral
+>> daemon, right? =A0So could we not standardize a protocol for this th=
+at both
+>> sheepdog and ceph could implement?
 >
-> IIRC underscores here may conflict with system header use. Please use
-> something like QEMU_BLOCK_RADOS_H.
+> There is no central daemon. The concept is that they talk to many
+> storage nodes at the same time. Data is distributed and replicated
+> over many nodes in the network. The mechanism to do this is quite
+> complex. I don't know about sheepdog, but in Ceph this is called RADO=
+S
+> (reliable autonomic distributed object store). Sheepdog and Ceph may
+> look similar, but this is where they act different. I don't think tha=
+t
+> it would be possible to implement a common protocol.
 
-This header is shared between the linux kernel client and the ceph
-userspace servers and client. We can actually get rid of it, as we
-only need it to define CEPH_OSD_TMAP_SET. We can move this definition
-to librados.h.
+I believe Sheepdog has a local daemon on each node.  The QEMU storage
+backend talks to the daemon on the same node, which then does the real
+network communication with the rest of the distributed storage system.
+ So I think we're not talking about a network protocol here, we're
+talking about a common interface that can be used by QEMU and other
+programs to take advantage of Ceph, Sheepdog, etc services available
+on the local node.
 
->> diff --git a/block/rbd_types.h b/block/rbd_types.h
->> new file mode 100644
->> index 0000000..dfd5aa0
->> --- /dev/null
->> +++ b/block/rbd_types.h
->> @@ -0,0 +1,48 @@
->> +#ifndef _FS_CEPH_RBD
->> +#define _FS_CEPH_RBD
->
-> QEMU_BLOCK_RBD?
+Haven't looked into your patch enough yet, but does librados talk
+directly over the network or does it connect to a local daemon/driver?
 
-This header is shared between the ceph kernel client, between the qemu
-rbd module (and between other ceph utilities). It'd be much easier
-maintaining it without having to have a different implementation for
-each. The same goes to the use of __le32/64 and __u32/64 within these
-headers.
-
->
->> +
->> +#include <linux/types.h>
->
-> Can you use standard includes, like <sys/types.h> or <inttypes.h>? Ar=
-e
-> Ceph libraries used in other systems than Linux?
-
-Not at the moment. I guess that we can take this include out.
-
->
->> +
->> +/*
->> + * rbd image 'foo' consists of objects
->> + * =A0 foo.rbd =A0 =A0 =A0- image metadata
->> + * =A0 foo.00000000
->> + * =A0 foo.00000001
->> + * =A0 ... =A0 =A0 =A0 =A0 =A0- data
->> + */
->> +
->> +#define RBD_SUFFIX =A0 =A0 =A0 =A0 =A0 =A0 ".rbd"
->> +#define RBD_DIRECTORY =A0 =A0 =A0 =A0 =A0 "rbd_directory"
->> +
->> +#define RBD_DEFAULT_OBJ_ORDER =A022 =A0 /* 4MB */
->> +
->> +#define RBD_MAX_OBJ_NAME_SIZE =A096
->> +#define RBD_MAX_SEG_NAME_SIZE =A0128
->> +
->> +#define RBD_COMP_NONE =A0 =A0 =A0 =A0 =A00
->> +#define RBD_CRYPT_NONE =A0 =A0 =A0 =A0 0
->> +
->> +static const char rbd_text[] =3D "<<< Rados Block Device Image >>>\=
-n";
->> +static const char rbd_signature[] =3D "RBD";
->> +static const char rbd_version[] =3D "001.001";
->> +
->> +struct rbd_obj_snap_ondisk {
->> + =A0 =A0 =A0 __le64 id;
->> + =A0 =A0 =A0 __le64 image_size;
->> +} __attribute__((packed));
->> +
->> +struct rbd_obj_header_ondisk {
->> + =A0 =A0 =A0 char text[64];
->> + =A0 =A0 =A0 char signature[4];
->> + =A0 =A0 =A0 char version[8];
->> + =A0 =A0 =A0 __le64 image_size;
->
-> Unaligned? Is the disk format fixed?
-
-This is a packed structure that represents the on disk format.
-Operations on it are being done only to read from the disk header or
-to write to the disk header.
-
-
-Yehuda
+Stefan
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
