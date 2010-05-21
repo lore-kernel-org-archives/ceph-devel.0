@@ -1,63 +1,41 @@
-From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
-Subject: [Bug Report] Running git-clone on ceph get "File exists" errors
-Date: Fri, 21 May 2010 16:08:26 +0800
-Message-ID: <AANLkTilWmjbZ6OQYbf2L_RvCguqx6EflOMkGtxbrr4RO@mail.gmail.com>
+From: Quaye Courtway <standpoint@iftps.org>
+Subject: its than was
+Date: Fri, 21 May 2010 12:04:43 -0300
+Message-ID: <4BF69F2B.5090104@kleinhenz.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: application/octet-stream; name="unbreathable.rtf"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qy0-f171.google.com ([209.85.221.171]:61263 "EHLO
-	mail-qy0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756235Ab0EUII1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 May 2010 04:08:27 -0400
-Received: by qyk1 with SMTP id 1so1072788qyk.5
-        for <ceph-devel@vger.kernel.org>; Fri, 21 May 2010 01:08:27 -0700 (PDT)
+Received: from [201.39.1.2] ([201.39.1.2]:2594 "HELO kkfbr.nyby.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with SMTP
+	id S1755483Ab0EUPAt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 21 May 2010 11:00:49 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Polverari Daviau <ceph-devel@vger.kernel.org>
 
-Hello,
-
-I got the following errors when I tried to do "git clone
-git://ceph.newdream.net/git/ceph.git" on ceph fs.
-=============================================================
-[root@henry-dev ceph]# git clone git://ceph.newdream.net/git/ceph.git
-Initialized empty Git repository in /mnt/ceph/ceph/.git/
-remote: Counting objects: 81057, done.
-remote: Compressing objects: 100% (19534/19534), done.
-remote: Total 81057 (delta 65953), reused 75288 (delta 60315)
-Receiving objects: 100% (81057/81057), 15.37 MiB | 66 KiB/s, done.
-Resolving deltas: 100% (65953/65953), done.
-error: git checkout-index: unable to create file
-src/auth/RotatingKeyRing.cc (File exists)
-error: git checkout-index: unable to create file
-src/crush.old/test/creeping_failure_variance.cc (File exists)
-error: git checkout-index: unable to create file
-src/jobs/alcdat/ossh.lib.big (File exists)
-error: git checkout-index: unable to create file
-src/messages/MMonSubscribe.h (File exists)
-error: git checkout-index: unable to create file src/osbdb/OSBDB.cc
-(File exists)
-Checking out files: 100% (814/814), done.
-==============================================================
-
-These errors are similar to the issue mentioned in
-http://ceph.newdream.net/git/?p=ceph-client-standalone.git;a=commit;h=f131f56ea2a09edc5de227975ef7b57ba1592880.
-But, it does not work for my case.
-
-So, I traced the client and mds logs. It looks like
-ceph_mdsc_do_request() does not handle ERESTARTSYS properly.
-The logs show that the file creation request had been sent to MDS, and
-MDS did complete the request.
-However, before the reply has been received, the request on the client
-side was aborted due to some interrupt.
-VFS got the ERESTARTSYS error and tried to create the file again.
-Since MDS has already created the file, "File exists" errors were returned.
-
-Then, I replaced "wait_for_completion_interruptible" with
-"wait_for_completion" in ceph_mdsc_do_request().
-The above errors were gone, but I don't feel it is a right way to fix
-it. Any ideas?
-
-ps. I am using master version of ceph and master-backport of ceph client.
-
---Henry C Chang
+e1xydGYxXGFuc2lcYW5zaWNwZzEyNTJcZGVmZjBcZGVmbGFuZzEwMzN7XCpcZ2VuZXJhdG9y
+IE1zZnRlZGl0IDMuNy4yOS41MzI3O317XGZvbnR0Ymx7XGYwXGZuaWxcZmNoYXJzZXQwIENh
+bGlicmk7fX0NCntcKlxnZW5lcmF0b3IgTXNmdGVkaXQgMy43LjI5LjUzMjc7fXtcY29sb3J0
+YmwgO1xyZWQwXGdyZWVuMFxibHVlMjU1O1xyZWQxOTJcZ3JlZW44MFxibHVlNzc7XHJlZDBc
+Z3JlZW4xNzZcYmx1ZTgwO1xyZWQyMDRcZ3JlZW4xODBcYmx1ZTA7XHJlZDI1NVxncmVlbjBc
+Ymx1ZTA7XHJlZDIyM1xncmVlbjIwNlxibHVlNDtccmVkMTU1XGdyZWVuMFxibHVlMjExO1xy
+ZWQ3OVxncmVlbjEyOVxibHVlMTg5O1xyZWQxNjVcZ3JlZW4xNjVcYmx1ZTE2NTtccmVkMTI4
+XGdyZWVuMTU4XGJsdWUxOTQ7XHJlZDI0N1xncmVlbjE1MFxibHVlNzA7XHJlZDBcZ3JlZW43
+N1xibHVlMTg3O1xyZWQ3NVxncmVlbjE3MlxibHVlMTk4O1xyZWQyMjFcZ3JlZW4xMzJcYmx1
+ZTEzMjtccmVkNTFcZ3JlZW41MVxibHVlNTE7XHJlZDE1OFxncmVlbjEyNFxibHVlMTI0O1xy
+ZWQxNTVcZ3JlZW4xODdcYmx1ZTg5O30NCntcKlxnZW5lcmF0b3IgTXNmdGVkaXQgMy43LjI5
+LjUzMjc7fVx2aWV3a2luZDRcdWMxXHBhcmRcc2EyMDBcc2wyNzZcc2xtdWx0MVxsYW5nOVxm
+MFxmczMye1xmaWVsZHtcKlxmbGRpbnN0e0hZUEVSTElOSyAiaHtcKlxkZCAzLjcuMjkuNTMy
+Nzt9dHRwOi8vd3d3LmRhODUucnUifX17XGZsZHJzbHR7XHVsXGNmMSBodHRwOi8vd3d3LmRh
+ODUucnV9fX1cZjBcY2YxXGJcZnMzMiAgLSBPcmRlciB0aGUgY2hlYXBlc3QgbWVkaWNhdGlv
+bnMgbm93IVxwYXINClZpYWdyYSBcY2Y0IENpYWxpcyBcY2YzIFZpYWdyYSBQcm9mZXNzaW9u
+YWwgXGNmNSBDaWFsaXMgUHJvZmVzc2lvbmFsIFxjZjYgVmlhZ3JhIFN1cGVyIEFjdGl2ZSsg
+XGNmMyBDaWFsaXMgU3VwZXIgQWN0aXZlKyBcY2Y3IExldml0cmFcY2YwICBcY2Y4IFZpYWdy
+YSBTb2Z0IFRhYnMgXGNmOSBDaWFsaXMgU29mdCBUYWJzXGNmMTAgIFxjZjExIExldml0cmEg
+UHJvZmVzc2lvbmFsIFxjZjQgRmVtYWxlIFZpYWdyYSBcY2YxMiBQcm9wZWNpYSBcY2Y3IEFj
+b21wbGlhIFxjZjYgWGVuaWNhbFxjZjAgIFxjZjUgQnJhbmQgTGV2aXRyYSBcY2YxMyBGZW1h
+bGUgQ2lhbGlzIFxjZjE0IExldml0cmEgU3VwZXIgQWN0aXZlKyBcY2YxNSBUYW1pZmx1XGNm
+MCAgXGNmNyBWUFhMXGNmMCAgXGNmMTYgVmlhZ3JhIFNvZnQgRmxhdm91cmVkIFxjZjUgQnJh
+bmQgVmlhZ3JhIFxjZjE3IEJyYW5kIENpYWxpc1xjZjANCntcKlxnZW5lcmF0b3IgTXNmdGVk
+aXQgMy43LjI5LjUzMjc7fX0=
