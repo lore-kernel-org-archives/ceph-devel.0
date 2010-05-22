@@ -1,52 +1,126 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [Bug Report] Running git-clone on ceph get "File exists" errors
-Date: Fri, 21 May 2010 08:57:41 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005210851180.11676@cobra.newdream.net>
-References: <AANLkTilWmjbZ6OQYbf2L_RvCguqx6EflOMkGtxbrr4RO@mail.gmail.com>
+From: Julia Lawall <julia@diku.dk>
+Subject: [PATCH 7/8] fs/ceph: Use ERR_CAST
+Date: Sat, 22 May 2010 12:01:14 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1005221200560.13021@ask.diku.dk>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41841 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754258Ab0EUPyP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 May 2010 11:54:15 -0400
-In-Reply-To: <AANLkTilWmjbZ6OQYbf2L_RvCguqx6EflOMkGtxbrr4RO@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry_c_chang@tcloudcomputing.com>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 21 May 2010, Henry C Chang wrote:
-> These errors are similar to the issue mentioned in
-> http://ceph.newdream.net/git/?p=ceph-client-standalone.git;a=commit;h=f131f56ea2a09edc5de227975ef7b57ba1592880.
-> But, it does not work for my case.
-> 
-> So, I traced the client and mds logs. It looks like
-> ceph_mdsc_do_request() does not handle ERESTARTSYS properly.
-> The logs show that the file creation request had been sent to MDS, and
-> MDS did complete the request.
-> However, before the reply has been received, the request on the client
-> side was aborted due to some interrupt.
-> VFS got the ERESTARTSYS error and tried to create the file again.
-> Since MDS has already created the file, "File exists" errors were returned.
-> 
-> Then, I replaced "wait_for_completion_interruptible" with
-> "wait_for_completion" in ceph_mdsc_do_request().
-> The above errors were gone, but I don't feel it is a right way to fix
-> it. Any ideas?
+From: Julia Lawall <julia@diku.dk>
 
-Hmm.  The problem is that ideally we want to be able to control-c an 
-operation if the mds is slow or hung.  However, hitting control-c triggers 
-an ERESTARTSYS, same as a bunch of other signals that come up.
+Use ERR_CAST(x) rather than ERR_PTR(PTR_ERR(x)).  The former makes more
+clear what is the purpose of the operation, which otherwise looks like a
+no-op.
 
-If there is a way for the client to tell that it is retrying the _same_ 
-vfs op and somehow match that up with the pending request, then we could 
-do that, but I'm skeptical that would work (or be very pretty).  It may be 
-we need to drop the ability to control-c on a slow/hung operation.  :/
+In the case of fs/ceph/inode.c, ERR_CAST is not needed, because the type of
+the returned value is the same as the type of the enclosing function.
 
-There is probably a way to tell which signal is pending when we get 
-ERESTARTSYS?  I wonder what NFS does in this case?
+The semantic patch that makes this change is as follows:
+(http://coccinelle.lip6.fr/)
 
-I created http://tracker.newdream.net/issues/141
+// <smpl>
+@@
+type T;
+T x;
+identifier f;
+@@
 
-sage
+T f (...) { <+...
+- ERR_PTR(PTR_ERR(x))
++ x
+ ...+> }
+
+@@
+expression x;
+@@
+
+- ERR_PTR(PTR_ERR(x))
++ ERR_CAST(x)
+// </smpl>
+
+Signed-off-by: Julia Lawall <julia@diku.dk>
+
+---
+ fs/ceph/dir.c    |    2 +-
+ fs/ceph/export.c |    2 +-
+ fs/ceph/file.c   |    2 +-
+ fs/ceph/inode.c  |    2 +-
+ fs/ceph/osdmap.c |    2 +-
+ fs/ceph/super.c  |    2 +-
+ 6 files changed, 6 insertions(+), 6 deletions(-)
+
+diff -u -p a/fs/ceph/dir.c b/fs/ceph/dir.c
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -587,7 +587,7 @@ static struct dentry *ceph_lookup(struct
+ 		CEPH_MDS_OP_LOOKUPSNAP : CEPH_MDS_OP_LOOKUP;
+ 	req = ceph_mdsc_create_request(mdsc, op, USE_ANY_MDS);
+ 	if (IS_ERR(req))
+-		return ERR_PTR(PTR_ERR(req));
++		return ERR_CAST(req);
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+ 	/* we only need inode linkage */
+diff -u -p a/fs/ceph/export.c b/fs/ceph/export.c
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -133,7 +133,7 @@ static struct dentry *__cfh_to_dentry(st
+ 		req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_LOOKUPHASH,
+ 					       USE_ANY_MDS);
+ 		if (IS_ERR(req))
+-			return ERR_PTR(PTR_ERR(req));
++			return ERR_CAST(req);
+ 
+ 		req->r_ino1 = vino;
+ 		req->r_ino2.ino = cfh->parent_ino;
+diff -u -p a/fs/ceph/file.c b/fs/ceph/file.c
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -230,7 +230,7 @@ struct dentry *ceph_lookup_open(struct i
+ 	/* do the open */
+ 	req = prepare_open_request(dir->i_sb, flags, mode);
+ 	if (IS_ERR(req))
+-		return ERR_PTR(PTR_ERR(req));
++		return ERR_CAST(req);
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+ 	if (flags & O_CREAT) {
+diff -u -p a/fs/ceph/inode.c b/fs/ceph/inode.c
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -69,7 +69,7 @@ struct inode *ceph_get_snapdir(struct in
+ 
+ 	BUG_ON(!S_ISDIR(parent->i_mode));
+ 	if (IS_ERR(inode))
+-		return ERR_PTR(PTR_ERR(inode));
++		return inode;
+ 	inode->i_mode = parent->i_mode;
+ 	inode->i_uid = parent->i_uid;
+ 	inode->i_gid = parent->i_gid;
+diff -u -p a/fs/ceph/osdmap.c b/fs/ceph/osdmap.c
+--- a/fs/ceph/osdmap.c
++++ b/fs/ceph/osdmap.c
+@@ -706,7 +706,7 @@ struct ceph_osdmap *osdmap_apply_increme
+ 		     len, *p, end);
+ 		newcrush = crush_decode(*p, min(*p+len, end));
+ 		if (IS_ERR(newcrush))
+-			return ERR_PTR(PTR_ERR(newcrush));
++			return ERR_CAST(newcrush);
+ 	}
+ 
+ 	/* new flags? */
+diff -u -p a/fs/ceph/super.c b/fs/ceph/super.c
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -738,7 +738,7 @@ static struct dentry *open_root_dentry(s
+ 	dout("open_root_inode opening '%s'\n", path);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, USE_ANY_MDS);
+ 	if (IS_ERR(req))
+-		return ERR_PTR(PTR_ERR(req));
++		return ERR_CAST(req);
+ 	req->r_path1 = kstrdup(path, GFP_NOFS);
+ 	req->r_ino1.ino = CEPH_INO_ROOT;
+ 	req->r_ino1.snap = CEPH_NOSNAP;
