@@ -1,126 +1,140 @@
-From: Julia Lawall <julia@diku.dk>
-Subject: [PATCH 7/8] fs/ceph: Use ERR_CAST
-Date: Sat, 22 May 2010 12:01:14 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1005221200560.13021@ask.diku.dk>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph updates for 2.6.35-rc1
+Date: Sat, 22 May 2010 08:52:51 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1005211517270.18940@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:39690 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752248Ab0EVPtW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 22 May 2010 11:49:22 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: torvalds@linux-foundation.org, linux-kernel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org
 
-From: Julia Lawall <julia@diku.dk>
+Hi Linus,
 
-Use ERR_CAST(x) rather than ERR_PTR(PTR_ERR(x)).  The former makes more
-clear what is the purpose of the operation, which otherwise looks like a
-no-op.
+Please pull the following Ceph updates for 2.6.35 from
 
-In the case of fs/ceph/inode.c, ERR_CAST is not needed, because the type of
-the returned value is the same as the type of the enclosing function.
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-The semantic patch that makes this change is as follows:
-(http://coccinelle.lip6.fr/)
+There is a lot of code cleanup, a handful of bug fixes, some improvement 
+in the MDS reconnect process, a (backward compatible) protocol 
+improvement, and some improvement in the way memory is preallocated to 
+avoid ENOMEM at awkward times.
 
-// <smpl>
-@@
-type T;
-T x;
-identifier f;
-@@
-
-T f (...) { <+...
-- ERR_PTR(PTR_ERR(x))
-+ x
- ...+> }
-
-@@
-expression x;
-@@
-
-- ERR_PTR(PTR_ERR(x))
-+ ERR_CAST(x)
-// </smpl>
-
-Signed-off-by: Julia Lawall <julia@diku.dk>
+Thanks!
+sage
 
 ---
- fs/ceph/dir.c    |    2 +-
- fs/ceph/export.c |    2 +-
- fs/ceph/file.c   |    2 +-
- fs/ceph/inode.c  |    2 +-
- fs/ceph/osdmap.c |    2 +-
- fs/ceph/super.c  |    2 +-
- 6 files changed, 6 insertions(+), 6 deletions(-)
 
-diff -u -p a/fs/ceph/dir.c b/fs/ceph/dir.c
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -587,7 +587,7 @@ static struct dentry *ceph_lookup(struct
- 		CEPH_MDS_OP_LOOKUPSNAP : CEPH_MDS_OP_LOOKUP;
- 	req = ceph_mdsc_create_request(mdsc, op, USE_ANY_MDS);
- 	if (IS_ERR(req))
--		return ERR_PTR(PTR_ERR(req));
-+		return ERR_CAST(req);
- 	req->r_dentry = dget(dentry);
- 	req->r_num_caps = 2;
- 	/* we only need inode linkage */
-diff -u -p a/fs/ceph/export.c b/fs/ceph/export.c
---- a/fs/ceph/export.c
-+++ b/fs/ceph/export.c
-@@ -133,7 +133,7 @@ static struct dentry *__cfh_to_dentry(st
- 		req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_LOOKUPHASH,
- 					       USE_ANY_MDS);
- 		if (IS_ERR(req))
--			return ERR_PTR(PTR_ERR(req));
-+			return ERR_CAST(req);
- 
- 		req->r_ino1 = vino;
- 		req->r_ino2.ino = cfh->parent_ino;
-diff -u -p a/fs/ceph/file.c b/fs/ceph/file.c
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -230,7 +230,7 @@ struct dentry *ceph_lookup_open(struct i
- 	/* do the open */
- 	req = prepare_open_request(dir->i_sb, flags, mode);
- 	if (IS_ERR(req))
--		return ERR_PTR(PTR_ERR(req));
-+		return ERR_CAST(req);
- 	req->r_dentry = dget(dentry);
- 	req->r_num_caps = 2;
- 	if (flags & O_CREAT) {
-diff -u -p a/fs/ceph/inode.c b/fs/ceph/inode.c
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -69,7 +69,7 @@ struct inode *ceph_get_snapdir(struct in
- 
- 	BUG_ON(!S_ISDIR(parent->i_mode));
- 	if (IS_ERR(inode))
--		return ERR_PTR(PTR_ERR(inode));
-+		return inode;
- 	inode->i_mode = parent->i_mode;
- 	inode->i_uid = parent->i_uid;
- 	inode->i_gid = parent->i_gid;
-diff -u -p a/fs/ceph/osdmap.c b/fs/ceph/osdmap.c
---- a/fs/ceph/osdmap.c
-+++ b/fs/ceph/osdmap.c
-@@ -706,7 +706,7 @@ struct ceph_osdmap *osdmap_apply_increme
- 		     len, *p, end);
- 		newcrush = crush_decode(*p, min(*p+len, end));
- 		if (IS_ERR(newcrush))
--			return ERR_PTR(PTR_ERR(newcrush));
-+			return ERR_CAST(newcrush);
- 	}
- 
- 	/* new flags? */
-diff -u -p a/fs/ceph/super.c b/fs/ceph/super.c
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -738,7 +738,7 @@ static struct dentry *open_root_dentry(s
- 	dout("open_root_inode opening '%s'\n", path);
- 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_GETATTR, USE_ANY_MDS);
- 	if (IS_ERR(req))
--		return ERR_PTR(PTR_ERR(req));
-+		return ERR_CAST(req);
- 	req->r_path1 = kstrdup(path, GFP_NOFS);
- 	req->r_ino1.ino = CEPH_INO_ROOT;
- 	req->r_ino1.snap = CEPH_NOSNAP;
+Cheng Renquan (2):
+      ceph: handle kzalloc() failure
+      ceph: use ceph_sb_to_client instead of ceph_client
+
+Dan Carpenter (3):
+      ceph: cleanup: remove dead code
+      ceph: d_obtain_alias() returns ERR_PTR()
+      ceph: cleanup: remove unused assignement
+
+Henry C Chang (1):
+      ceph: listxattr should compare version by >=
+
+Huang Weiyi (1):
+      ceph: remove unused #includes
+
+Julia Lawall (1):
+      ceph: Use kzalloc
+
+Sage Weil (45):
+      ceph: clean up mds reply, error handling
+      ceph: fix race between aborted requests and fill_trace
+      ceph: invalidate affected dentry leases on aborted requests
+      ceph: simplify page setup for incoming data
+      ceph: reduce build_path debug output
+      ceph: fix theoretically possible double-put on connection
+      ceph: clean up statfs
+      ceph: drop unnecessary msgpool for mon_client auth_reply
+      ceph: drop unnecessary msgpool for mon_client subscribe_ack
+      ceph: rewrite msgpool using mempool_t
+      ceph: make ceph_msg_new return NULL on failure; clean up, fix callers
+      ceph: simplify ceph_msg_new
+      ceph: clean up connection reset
+      ceph: wait for both monmap and osdmap when opening session
+      ceph: osdtimeout=0 for now timeout
+      ceph: include auth method in error messages
+      ceph: fix memory leak due to possible dentry init race
+      ceph: name msgpools; useful error messages
+      ceph: close messenger race
+      ceph: fix xattr dangling pointer / double free
+      ceph: set next_offset on readdir finish
+      ceph: skip set_dentry_offset work if directory not I_COMPLETE
+      ceph: don't clobber i_max_offset on already complete dir
+      ceph: set dn offset when spliced
+      ceph: clean up mount options, ->show_options()
+      ceph: adjust masked struct_v variable names
+      ceph: skip mds sync on forced unmount
+      ceph: name bdi ceph-%d instead of major:minor
+      ceph: clean up cap release loop vs spinlock
+      ceph: drop src address(es) from message header [new protocol feature]
+      ceph: dicard cap releases on mds restart
+      ceph: only send cap releases when mds is OPEN|HUNG
+      ceph: wait for mds OPEN reply to indicate reconnect success
+      ceph: clean up send_mds_reconnect interface
+      ceph: attempt mds reconnect if mds closes our session
+      ceph: throw out dirty caps metadata, data on session teardown
+      ceph: use ceph. prefix for virtual xattrs
+      ceph: resync headers with userland
+      ceph: save peer feature bits in connection structure
+      ceph: cope with out of order (unsafe after safe) mds reply
+      ceph: use common helper for aborted dir request invalidation
+      ceph: cleanup pool op strings
+      ceph: specify max_bytes on readdir replies
+      ceph: avoid resending queued message to monitor
+      ceph: reuse mon subscribe message instead of allocated anew
+
+Stephen Rothwell (1):
+      ceph: update for removal of kref_set
+
+Tobias Klauser (1):
+      ceph: Storage class should be before const qualifier
+
+Yehuda Sadeh (4):
+      ceph: use __page_cache_alloc and add_to_page_cache_lru
+      ceph: wake up mount thread when getting osdmap
+      ceph: make mon client statfs handling more generic
+      ceph: all allocation functions should get gfp_mask
+
+ fs/ceph/addr.c         |   11 +-
+ fs/ceph/auth.c         |    9 +-
+ fs/ceph/auth.h         |    2 +
+ fs/ceph/auth_none.c    |    1 +
+ fs/ceph/auth_x.c       |   19 ++-
+ fs/ceph/caps.c         |   24 ++--
+ fs/ceph/ceph_fs.h      |   62 +++++++-
+ fs/ceph/ceph_strings.c |   16 ++-
+ fs/ceph/debugfs.c      |   13 +-
+ fs/ceph/dir.c          |   45 ++++--
+ fs/ceph/export.c       |   14 +-
+ fs/ceph/file.c         |   16 +-
+ fs/ceph/inode.c        |   97 +++++++------
+ fs/ceph/ioctl.c        |    2 +-
+ fs/ceph/mds_client.c   |  385 +++++++++++++++++++++++++++++------------------
+ fs/ceph/mds_client.h   |    6 +-
+ fs/ceph/messenger.c    |   91 +++++-------
+ fs/ceph/messenger.h    |   10 +-
+ fs/ceph/mon_client.c   |  257 +++++++++++++++++++--------------
+ fs/ceph/mon_client.h   |   27 ++--
+ fs/ceph/msgpool.c      |  180 ++++-------------------
+ fs/ceph/msgpool.h      |   12 +-
+ fs/ceph/msgr.h         |   21 +++-
+ fs/ceph/osd_client.c   |   98 +++++--------
+ fs/ceph/pagelist.c     |    2 +-
+ fs/ceph/rados.h        |   23 +++-
+ fs/ceph/snap.c         |    2 +-
+ fs/ceph/super.c        |  125 ++++++++++------
+ fs/ceph/super.h        |   30 ++--
+ fs/ceph/xattr.c        |   35 ++---
+ 30 files changed, 876 insertions(+), 759 deletions(-)
