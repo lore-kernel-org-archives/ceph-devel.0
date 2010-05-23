@@ -1,36 +1,37 @@
-From: Avi Kivity <avi@redhat.com>
-Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Sun, 23 May 2010 15:01:59 +0300
-Message-ID: <4BF91937.2070801@redhat.com>
-References: <20100519192222.GD61706@ncolin.muc.de>	 <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com> <AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com> <4BF5A9D2.5080609@codemonkey.ws>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Quota support
+Date: Sun, 23 May 2010 09:00:30 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1005230855200.11676@cobra.newdream.net>
+References: <201005231227.47393.michal.humpula@hudrydum.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <4BF5A9D2.5080609@codemonkey.ws>
-Sender: kvm-owner@vger.kernel.org
-To: Anthony Liguori <anthony@codemonkey.ws>
-Cc: Christian Brunner <chb@muc.de>, Blue Swirl <blauwirbel@gmail.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:52881 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753274Ab0EWP47 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 May 2010 11:56:59 -0400
+In-Reply-To: <201005231227.47393.michal.humpula@hudrydum.cz>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Michal Humpula <michal.humpula@hudrydum.cz>
+Cc: ceph-devel@vger.kernel.org
 
-On 05/21/2010 12:29 AM, Anthony Liguori wrote:
->
-> I'd be more interested in enabling people to build these types of 
-> storage systems without touching qemu.
->
-> Both sheepdog and ceph ultimately transmit I/O over a socket to a 
-> central daemon, right? 
+On Sun, 23 May 2010, Michal Humpula wrote:
+> I was interesting if there is some plan for linux quota support (I've searched 
+> the list and the code and found nothing). If it is, is there some experimental 
+> code or at least some place with ideas how it should be implemented?
 
-That incurs an extra copy.
+Hi Michal,
 
-> So could we not standardize a protocol for this that both sheepdog and 
-> ceph could implement?
+Kristal Pollack did a paper on distributed quotas that represents one 
+possible approach for enforcement in the case where clients are untrusted:
 
-The protocol already exists, nbd.  It doesn't support snapshotting etc. 
-but we could extend it.
+	http://ceph.newdream.net/publications/quota-voucher-paper.pdf
 
-But IMO what's needed is a plugin API for the block layer.
+There is also the recursive accounting in the the MDS that in theory could 
+facilitate subtree quotas.  It already implements the accounting half of 
+the problem, but the implementation of enforcement would be tricky.  See
 
--- 
-error compiling committee.c: too many arguments to function
+	http://marc.info/?t=127264993600004&r=1&w=2
 
+sage
