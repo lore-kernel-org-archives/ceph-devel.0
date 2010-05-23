@@ -1,39 +1,52 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Quota support
-Date: Sun, 23 May 2010 09:14:00 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005230913420.11676@cobra.newdream.net>
-References: <201005231227.47393.michal.humpula@hudrydum.cz>
- <Pine.LNX.4.64.1005230855200.11676@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Andrea Gelmini <andrea.gelmini@gelma.net>
+Subject: [PATCH 1/4] fs/ceph: removed duplicated #includes
+Date: Sun, 23 May 2010 21:47:58 +0200
+Message-ID: <1274644078-23167-1-git-send-email-andrea.gelmini@gelma.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50322 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752188Ab0EWQKa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 May 2010 12:10:30 -0400
-In-Reply-To: <Pine.LNX.4.64.1005230855200.11676@cobra.newdream.net>
+Received: from fg-out-1718.google.com ([72.14.220.153]:39503 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752938Ab0EWTsH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 May 2010 15:48:07 -0400
+Received: by fg-out-1718.google.com with SMTP id d23so1665760fga.1
+        for <ceph-devel@vger.kernel.org>; Sun, 23 May 2010 12:48:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Michal Humpula <michal.humpula@hudrydum.cz>
-Cc: ceph-devel@vger.kernel.org
+To: andrea.gelmini@gelma.net
+Cc: Sage Weil <sage@newdream.net>, Yehuda Sadeh <yehuda@hq.newdream.net>, Tejun Heo <tj@kernel.org>, Christoph Lameter <cl@linux-foundation.org>, ceph-devel@vger.kernel.org
 
+fs/ceph/auth.c: linux/slab.h is included more than once.
+fs/ceph/super.h: linux/slab.h is included more than once.
 
-On Sun, 23 May 2010, Sage Weil wrote:
+Signed-off-by: Andrea Gelmini <andrea.gelmini@gelma.net>
+---
+ fs/ceph/auth.c  |    1 -
+ fs/ceph/super.h |    1 -
+ 2 files changed, 0 insertions(+), 2 deletions(-)
 
-> On Sun, 23 May 2010, Michal Humpula wrote:
-> > I was interesting if there is some plan for linux quota support (I've searched 
-> > the list and the code and found nothing). If it is, is there some experimental 
-> > code or at least some place with ideas how it should be implemented?
-> 
-> Hi Michal,
-> 
-> Kristal Pollack did a paper on distributed quotas that represents one 
-> possible approach for enforcement in the case where clients are untrusted:
-> 
-> 	http://ceph.newdream.net/publications/quota-voucher-paper.pdf
+diff --git a/fs/ceph/auth.c b/fs/ceph/auth.c
+index 818afe7..39208ee 100644
+--- a/fs/ceph/auth.c
++++ b/fs/ceph/auth.c
+@@ -1,7 +1,6 @@
+ #include "ceph_debug.h"
+ 
+ #include <linux/module.h>
+-#include <linux/slab.h>
+ #include <linux/err.h>
+ #include <linux/slab.h>
+ 
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 13513b8..e30dfbb 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -10,7 +10,6 @@
+ #include <linux/fs.h>
+ #include <linux/mempool.h>
+ #include <linux/pagemap.h>
+-#include <linux/slab.h>
+ #include <linux/wait.h>
+ #include <linux/writeback.h>
+ #include <linux/slab.h>
+-- 
+1.7.1.251.gf80a2
 
-Sorry,
-
-	http://ceph.newdream.net/pubs/quota-voucher-paper.pdf
-
-sage
