@@ -1,61 +1,74 @@
-From: Christian Brunner <chb@muc.de>
+From: Anthony Liguori <anthony@codemonkey.ws>
 Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Mon, 24 May 2010 21:07:14 +0200
-Message-ID: <AANLkTilHGvaCDjeRSG3al2GOC7ts9uXGZ9DOGwBU5MEy@mail.gmail.com>
-References: <20100519192222.GD61706@ncolin.muc.de>
-	 <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>
-	 <AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>
-	 <4BF5A9D2.5080609@codemonkey.ws> <4BF91937.2070801@redhat.com>
-	 <87wrutg4dk.wl%morita.kazutaka@lab.ntt.co.jp>
-	 <4BFA5D96.3030603@redhat.com>
-	 <lpvdad4jcf.wl%morita.kazutaka@lab.ntt.co.jp>
-	 <4BFA696D.2060606@redhat.com>
-	 <lphblxiele.wl%morita.kazutaka@lab.ntt.co.jp>
+Date: Mon, 24 May 2010 14:16:32 -0500
+Message-ID: <4BFAD090.3000203@codemonkey.ws>
+References: <20100519192222.GD61706@ncolin.muc.de>	<AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>	<AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>	<4BF5A9D2.5080609@codemonkey.ws>	<4BF91937.2070801@redhat.com>	<87wrutg4dk.wl%morita.kazutaka@lab.ntt.co.jp>	<4BFA5D96.3030603@redhat.com> <lpvdad4jcf.wl%morita.kazutaka@lab.ntt.co.jp> <4BFA696D.2060606@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <lphblxiele.wl%morita.kazutaka@lab.ntt.co.jp>
+In-Reply-To: <4BFA696D.2060606@redhat.com>
 Sender: kvm-owner@vger.kernel.org
-To: MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
-Cc: Avi Kivity <avi@redhat.com>, Anthony Liguori <anthony@codemonkey.ws>, Blue Swirl <blauwirbel@gmail.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: Avi Kivity <avi@redhat.com>
+Cc: MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>, Christian Brunner <chb@muc.de>, Blue Swirl <blauwirbel@gmail.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-2010/5/24 MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>:
-
->> However, I don't think nbd would be a good protocol. =A0My preferenc=
-e
->> would be for a plugin API, or for a new local protocol that uses
->> splice() to avoid copies.
+On 05/24/2010 06:56 AM, Avi Kivity wrote:
+> On 05/24/2010 02:42 PM, MORITA Kazutaka wrote:
 >>
+>>> The server would be local and talk over a unix domain socket, perhaps
+>>> anonymous.
+>>>
+>>> nbd has other issues though, such as requiring a copy and no support 
+>>> for
+>>> metadata operations such as snapshot and file size extension.
+>>>
+>> Sorry, my explanation was unclear.  I'm not sure how running servers
+>> on localhost can solve the problem.
 >
-> Both would be okay for Sheepdog. =A0I want to take a suitable approac=
-h
-> for qemu.
+> The local server can convert from the local (nbd) protocol to the 
+> remote (sheepdog, ceph) protocol.
+>
+>> What I wanted to say was that we cannot specify the image of VM. With
+>> nbd protocol, command line arguments are as follows:
+>>
+>>   $ qemu nbd:hostname:port
+>>
+>> As this syntax shows, with nbd protocol the client cannot pass the VM
+>> image name to the server.
+>
+> We would extend it to allow it to connect to a unix domain socket:
+>
+>   qemu nbd:unix:/path/to/socket
 
-I think both should be possible:
+nbd is a no-go because it only supports a single, synchronous I/O 
+operation at a time and has no mechanism for extensibility.
 
-- Using splice() we would need a daemon that is listening on a control
-socket for
-  requests from qemu-processes or admin commands. When a qemu-process
-  wants to open an image it could call open_image("protocol:imagename")=
- on the
-  controll socket and the daemon has to create a pipe to which the
-image is mapped.
-  (What I'm unsure about, are the security implications. Do we need som=
-e kind of
-  authentication for the sockets? What about sVirt?
+If we go this route, I think two options are worth considering.  The 
+first would be a purely socket based approach where we just accepted the 
+extra copy.
 
-- Building a plugin API seems a bit simpler to me, although I'm to
-sure if I'd get the
-  idea correctly:
-  The block layer has already some kind of api (.bdrv_file_open, .bdrv_=
-read). We
-  could simply compile the block-drivers as shared objects and create a=
- method
-  for loading the necessary modules at runtime.
+The other potential approach would be shared memory based.  We export 
+all guest ram as shared memory along with a small bounce buffer pool.  
+We would then use a ring queue (potentially even using virtio-blk) and 
+an eventfd for notification.
 
-Are you planing to use this for all block drivers?
+> The server at the other end would associate the socket with a filename 
+> and forward it to the server using the remote protocol.
+>
+> However, I don't think nbd would be a good protocol.  My preference 
+> would be for a plugin API, or for a new local protocol that uses 
+> splice() to avoid copies.
+
+I think a good shared memory implementation would be preferable to 
+plugins.  I think it's worth attempting to do a plugin interface for the 
+block layer but I strongly suspect it would not be sufficient.
+
+I would not want to see plugins that interacted with BlockDriverState 
+directly, for instance.  We change it far too often.  Our main loop 
+functions are also not terribly stable so I'm not sure how we would 
+handle that (unless we forced all block plugins to be in a separate thread).
 
 Regards,
-Christian
+
+Anthony Liguori
