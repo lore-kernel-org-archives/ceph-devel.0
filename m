@@ -1,58 +1,63 @@
-From: Avi Kivity <avi@redhat.com>
+From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
 Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Mon, 24 May 2010 14:56:29 +0300
-Message-ID: <4BFA696D.2060606@redhat.com>
-References: <20100519192222.GD61706@ncolin.muc.de>	<AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>	<AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>	<4BF5A9D2.5080609@codemonkey.ws>	<4BF91937.2070801@redhat.com>	<87wrutg4dk.wl%morita.kazutaka@lab.ntt.co.jp>	<4BFA5D96.3030603@redhat.com> <lpvdad4jcf.wl%morita.kazutaka@lab.ntt.co.jp>
+Date: Mon, 24 May 2010 13:07:47 +0100
+Message-ID: <20100524130747.a33910b5.ctpm@ist.utl.pt>
+References: <20100519192222.GD61706@ncolin.muc.de>
+	<AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>
+	<AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>
+	<4BF5A9D2.5080609@codemonkey.ws>
+	<4BF91937.2070801@redhat.com>
+	<87wrutg4dk.wl%morita.kazutaka@lab.ntt.co.jp>
+	<4BFA5D96.3030603@redhat.com>
+	<lpvdad4jcf.wl%morita.kazutaka@lab.ntt.co.jp>
+	<4BFA696D.2060606@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60947 "EHLO mx1.redhat.com"
+Received: from smtp1.ist.utl.pt ([193.136.128.21]:60423 "EHLO smtp1.ist.utl.pt"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756017Ab0EXL4s (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 24 May 2010 07:56:48 -0400
-In-Reply-To: <lpvdad4jcf.wl%morita.kazutaka@lab.ntt.co.jp>
+	id S1755390Ab0EXMHv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 24 May 2010 08:07:51 -0400
+In-Reply-To: <4BFA696D.2060606@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
-Cc: Anthony Liguori <anthony@codemonkey.ws>, Christian Brunner <chb@muc.de>, Blue Swirl <blauwirbel@gmail.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: Avi Kivity <avi@redhat.com>
+Cc: MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>, Anthony Liguori <anthony@codemonkey.ws>, Christian Brunner <chb@muc.de>, Blue Swirl <blauwirbel@gmail.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
 
-On 05/24/2010 02:42 PM, MORITA Kazutaka wrote:
->
->> The server would be local and talk over a unix domain socket, perhaps
->> anonymous.
->>
->> nbd has other issues though, such as requiring a copy and no support for
->> metadata operations such as snapshot and file size extension.
->>
->>      
-> Sorry, my explanation was unclear.  I'm not sure how running servers
-> on localhost can solve the problem.
->    
 
-The local server can convert from the local (nbd) protocol to the remote 
-(sheepdog, ceph) protocol.
+On Mon, 24 May 2010 14:56:29 +0300 Avi Kivity <avi@redhat.com> wrote:
+> On 05/24/2010 02:42 PM, MORITA Kazutaka wrote:
+> >
+> >> The server would be local and talk over a unix domain socket, perh=
+aps
+> >> anonymous.
+> >>
+> >> nbd has other issues though, such as requiring a copy and no suppo=
+rt for
+> >> metadata operations such as snapshot and file size extension.
+> >>
+> >>     =20
+> > Sorry, my explanation was unclear.  I'm not sure how running server=
+s
+> > on localhost can solve the problem.
+> >   =20
+>=20
+> The local server can convert from the local (nbd) protocol to the rem=
+ote=20
+> (sheepdog, ceph) protocol.
+>=20
 
-> What I wanted to say was that we cannot specify the image of VM. With
-> nbd protocol, command line arguments are as follows:
->
->   $ qemu nbd:hostname:port
->
-> As this syntax shows, with nbd protocol the client cannot pass the VM
-> image name to the server.
->    
+ Please note that this shouldn't be relevant to the block driver based
+on ceph, as it does not use a local daemon -- it connects to the Object
+Storage Devices directly over the network.
 
-We would extend it to allow it to connect to a unix domain socket:
+ Best regards
 
-   qemu nbd:unix:/path/to/socket
+Cl=C3=A1udio
 
-The server at the other end would associate the socket with a filename 
-and forward it to the server using the remote protocol.
-
-However, I don't think nbd would be a good protocol.  My preference 
-would be for a plugin API, or for a new local protocol that uses 
-splice() to avoid copies.
-
--- 
-Do not meddle in the internals of kernels, for they are subtle and quick to panic.
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
