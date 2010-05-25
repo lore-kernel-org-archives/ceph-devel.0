@@ -1,45 +1,53 @@
-From: Avi Kivity <avi@redhat.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Tue, 25 May 2010 19:27:23 +0300
-Message-ID: <4BFBFA6B.7080501@redhat.com>
-References: <20100519192222.GD61706@ncolin.muc.de>		<AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>	<AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>	<4BF5A9D2.5080609@codemonkey.ws> <4BF91937.2070801@redhat.com> <4BFBAE46.5050801@redhat.com> <4BFBB3C1.9020905@redhat.com> <4BFBCFAC.9070807@codemonkey.ws> <4BFBD13C.60605@redhat.com> <4BFBD20E.5060207@codemonkey.ws> <4BFBD2D5.2000201@redhat.com> <4BFBD6CD.3000503@codemonkey.ws> <4BFBD82F.3020404@redhat.com> <4BFBD943.8020704@codemonkey.ws> <4BFBE614.9080306@redhat.com> <4BFBE64F.6020901@codemonkey.ws> <4BFBF7D4.80900@redhat.com> <4BFBF905.1030901@codemonkey.ws>
+Date: Tue, 25 May 2010 10:12:53 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1005250939440.8523@cobra.newdream.net>
+References: <20100519192222.GD61706@ncolin.muc.de>
+ <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>
+ <AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>
+ <4BF5A9D2.5080609@codemonkey.ws> <4BF91937.2070801@redhat.com>
+ <87wrutg4dk.wl%morita.kazutaka@lab.ntt.co.jp>  <4BFA5D96.3030603@redhat.com>
+  <lpvdad4jcf.wl%morita.kazutaka@lab.ntt.co.jp>  <4BFA696D.2060606@redhat.com>
+  <lphblxiele.wl%morita.kazutaka@lab.ntt.co.jp>
+ <AANLkTilHGvaCDjeRSG3al2GOC7ts9uXGZ9DOGwBU5MEy@mail.gmail.com>
+ <4BFAD59E.2010706@codemonkey.ws> <4BFB94D9.5080904@redhat.com>
+ <4BFBCDD9.4070104@codemonkey.ws> <4BFBCFB9.6020104@redhat.com>
+ <4BFBD833.1030503@redhat.com> <4BFBF906.7010809@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <4BFBF905.1030901@codemonkey.ws>
-Sender: kvm-owner@vger.kernel.org
-To: Anthony Liguori <anthony@codemonkey.ws>
-Cc: Kevin Wolf <kwolf@redhat.com>, Blue Swirl <blauwirbel@gmail.com>, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>, kvm@vger.kernel.org, qemu-devel@nongnu.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:60938 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754277Ab0EYRJR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 May 2010 13:09:17 -0400
+In-Reply-To: <4BFBF906.7010809@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Avi Kivity <avi@redhat.com>
+Cc: Kevin Wolf <kwolf@redhat.com>, Anthony Liguori <anthony@codemonkey.ws>, kvm@vger.kernel.org, qemu-devel@nongnu.org, Blue Swirl <blauwirbel@gmail.com>, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>, MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
 
-On 05/25/2010 07:21 PM, Anthony Liguori wrote:
-> On 05/25/2010 11:16 AM, Avi Kivity wrote:
->> On 05/25/2010 06:01 PM, Anthony Liguori wrote:
->>> On 05/25/2010 10:00 AM, Avi Kivity wrote:
->>>> The latter.  Why is it less important?  If you don't inherit the 
->>>> memory, you can't access it.
->>>>
->>>>> You can also pass /dev/shm fd's via SCM_RIGHTs to establish shared 
->>>>> memory segments dynamically.
->>>>
->>>> Doesn't work for anonymous memory.
->>>
->>> What's wrong with /dev/shm memory?
->>
->> The kernel treats anonymous and nonymous memory differently for 
->> swapping (see /proc/sys/vm/swappiness); transparent hugepages won't 
->> work for /dev/shm (though it may be argued that that's a problem with 
->> thp); setup (/dev/shm defaults to half memory IIRC, we want 
->> mem+swap); different cgroup handling; somewhat clunky (a minor 
->> concern to be sure).
->
-> Surely, with mmu notifiers, it wouldn't be that hard to share 
-> anonymous memory via an fd though, no?
+On Tue, 25 May 2010, Avi Kivity wrote:
+> > What's the reason for not having these drivers upstream? Do we gain
+> > anything by hiding them from our users and requiring them to install the
+> > drivers separately from somewhere else?
+> >    
+> 
+> Six months.
 
-That's what I suggested with processfd().  I wouldn't call it easy but 
-it's likely doable.  Whether it's mergable is a different issue.
+FWIW, we (Ceph) aren't complaining about the 6 month lag time (and I don't 
+think the Sheepdog guys are either).
 
--- 
-error compiling committee.c: too many arguments to function
+From our perspective, the current BlockDriver abstraction is ideal, as it 
+represents the reality of qemu's interaction with storage.  Any 'external' 
+interface will be inferior to that in one way or another.  But either way, 
+we are perfectly willing to work with you to all to keep in sync with any 
+future BlockDriver API improvements.  It is worth our time investment even 
+if the API is less stable.
 
+The ability to dynamically load a shared object using the existing api 
+would make development a bit easier, but I'm not convinced it's better for 
+for users.  I think having ceph and sheepdog upstream with qemu will serve 
+end users best, and we at least are willing to spend the time to help 
+maintain that code in qemu.git.
+
+sage
