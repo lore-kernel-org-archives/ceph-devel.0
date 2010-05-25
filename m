@@ -1,35 +1,42 @@
-From: Anthony Liguori <anthony@codemonkey.ws>
+From: Avi Kivity <avi@redhat.com>
 Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Tue, 25 May 2010 10:01:35 -0500
-Message-ID: <4BFBE64F.6020901@codemonkey.ws>
-References: <20100519192222.GD61706@ncolin.muc.de>		<AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>	<AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>	<4BF5A9D2.5080609@codemonkey.ws> <4BF91937.2070801@redhat.com> <4BFBAE46.5050801@redhat.com> <4BFBB3C1.9020905@redhat.com> <4BFBCFAC.9070807@codemonkey.ws> <4BFBD13C.60605@redhat.com> <4BFBD20E.5060207@codemonkey.ws> <4BFBD2D5.2000201@redhat.com> <4BFBD6CD.3000503@codemonkey.ws> <4BFBD82F.3020404@redhat.com> <4BFBD943.8020704@codemonkey.ws> <4BFBE614.9080306@redhat.com>
+Date: Tue, 25 May 2010 18:02:15 +0300
+Message-ID: <4BFBE677.9060701@redhat.com>
+References: <20100519192222.GD61706@ncolin.muc.de>		<AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>	<AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>	<4BF5A9D2.5080609@codemonkey.ws> <4BF91937.2070801@redhat.com> <4BFBAE46.5050801@redhat.com> <4BFBB3C1.9020905@redhat.com> <4BFBCFAC.9070807@codemonkey.ws> <4BFBD63D.5040900@redhat.com> <4BFBD6D4.2040707@redhat.com> <4BFBD8C2.1010705@codemonkey.ws>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qy0-f183.google.com ([209.85.221.183]:42592 "EHLO
-	mail-qy0-f183.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932338Ab0EYPBk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 May 2010 11:01:40 -0400
-In-Reply-To: <4BFBE614.9080306@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:55498 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933013Ab0EYPC2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 25 May 2010 11:02:28 -0400
+In-Reply-To: <4BFBD8C2.1010705@codemonkey.ws>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Avi Kivity <avi@redhat.com>
+To: Anthony Liguori <anthony@codemonkey.ws>
 Cc: Kevin Wolf <kwolf@redhat.com>, Blue Swirl <blauwirbel@gmail.com>, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>, kvm@vger.kernel.org, qemu-devel@nongnu.org
 
-On 05/25/2010 10:00 AM, Avi Kivity wrote:
-> The latter.  Why is it less important?  If you don't inherit the 
-> memory, you can't access it.
+On 05/25/2010 05:03 PM, Anthony Liguori wrote:
+> On 05/25/2010 08:55 AM, Avi Kivity wrote:
+>> On 05/25/2010 04:53 PM, Kevin Wolf wrote:
+>>>
+>>> I'm still not convinced that we need either. I share Christoph's 
+>>> concern
+>>> that we would make our life harder for almost no gain. It's probably a
+>>> very small group of users (if it exists at all) that wants to add new
+>>> block drivers themselves, but at the same time can't run upstream qemu.
+>>>
+>>
+>> The first part of your argument may be true, but the second isn't.  
+>> No user can run upstream qemu.git.  It's not tested or supported, and 
+>> has no backwards compatibility guarantees.
 >
->> You can also pass /dev/shm fd's via SCM_RIGHTs to establish shared 
->> memory segments dynamically.
->
-> Doesn't work for anonymous memory.
+> Yes, it does have backwards compatibility guarantees.
 
-What's wrong with /dev/shm memory?
+I meant a random untagged qemu.git snapshot.  Do we guarantee anything 
+about it, except that it's likely to be broken?
 
-Regards,
-
-Anthony Liguori
-
+-- 
+error compiling committee.c: too many arguments to function
 
