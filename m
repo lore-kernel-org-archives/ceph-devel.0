@@ -1,47 +1,48 @@
-From: Avi Kivity <avi@redhat.com>
-Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Tue, 25 May 2010 12:22:14 +0300
-Message-ID: <4BFB96C6.8030006@redhat.com>
-References: <20100519192222.GD61706@ncolin.muc.de>	 <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>	 <AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>	 <4BF5A9D2.5080609@codemonkey.ws> <4BF91937.2070801@redhat.com> <AANLkTimrjccJqeTSosYsG8VihDjpyVT69bRN7NJdX-uR@mail.gmail.com> <4BFA5D07.8030309@redhat.com> <4BFAD146.9090708@codemonkey.ws>
+From: Dan Carpenter <error27@gmail.com>
+Subject: bug report: potential null dereference
+Date: Tue, 25 May 2010 11:42:03 +0200
+Message-ID: <20100525094202.GE22515@bicker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <4BFAD146.9090708@codemonkey.ws>
-Sender: kvm-owner@vger.kernel.org
-To: Anthony Liguori <anthony@codemonkey.ws>
-Cc: Stefan Hajnoczi <stefanha@gmail.com>, Christian Brunner <chb@muc.de>, Blue Swirl <blauwirbel@gmail.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ww0-f46.google.com ([74.125.82.46]:36820 "EHLO
+	mail-ww0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756283Ab0EYJms (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 May 2010 05:42:48 -0400
+Received: by wwe15 with SMTP id 15so1211145wwe.19
+        for <ceph-devel@vger.kernel.org>; Tue, 25 May 2010 02:42:47 -0700 (PDT)
+Content-Disposition: inline
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-On 05/24/2010 10:19 PM, Anthony Liguori wrote:
-> On 05/24/2010 06:03 AM, Avi Kivity wrote:
->> On 05/24/2010 11:27 AM, Stefan Hajnoczi wrote:
->>> On Sun, May 23, 2010 at 1:01 PM, Avi Kivity<avi@redhat.com>  wrote:
->>>> On 05/21/2010 12:29 AM, Anthony Liguori wrote:
->>>>> I'd be more interested in enabling people to build these types of 
->>>>> storage
->>>>> systems without touching qemu.
->>>>>
->>>>> Both sheepdog and ceph ultimately transmit I/O over a socket to a 
->>>>> central
->>>>> daemon, right?
->>>> That incurs an extra copy.
->>> Besides a shared memory approach, I wonder if the splice() family of
->>> syscalls could be used to send/receive data through a storage daemon
->>> without the daemon looking at or copying the data?
->>
->> Excellent idea.
->
-> splice() eventually requires a copy.  You cannot splice() to linux-aio 
-> so you'd have to splice() to a temporary buffer and then call into 
-> linux-aio.  With shared memory, you can avoid ever bringing the data 
-> into memory via O_DIRECT and linux-aio.
+Hello,
 
-If the final destination is a socket, then you end up queuing guest 
-memory as an skbuff.  In theory we could do an aio splice to block 
-devices but I don't think that's realistic given our experience with aio 
-changes.
+This is a Smatch thing.
 
--- 
-error compiling committee.c: too many arguments to function
+fs/ceph/auth.c +220 ceph_handle_auth_reply(55) error: potential null derefence 'ac->ops'.
+   211                  /* set up (new) protocol handler? */
+   212                  if (ac->protocol && ac->protocol != protocol) {
+   213                          ac->ops->destroy(ac);
+   214                          ac->protocol = 0;
+   215                          ac->ops = NULL;
+                                ^^^^^^^^^^^^^^^
+	We set ac->ops to NULL here.
 
+   216                  }
+   217                  if (ac->protocol != protocol) {
+   218                          ret = ceph_auth_init_protocol(ac, protocol);
+   219                          if (ret) {
+   220                                  pr_err("error %d on auth method %s init\n",
+   221                                         ret, ac->ops->name);
+                                                    ^^^^^^^^^^^^^^
+	We dereference it here.  ceph_auth_init_protocol() can fail
+	before re-assigning it.
+
+   222                                  goto out;
+   223                          }
+   224                  }
+
+regards,
+dan carpenter
