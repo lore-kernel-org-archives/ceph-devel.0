@@ -1,30 +1,38 @@
 From: Avi Kivity <avi@redhat.com>
 Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Tue, 25 May 2010 16:55:32 +0300
-Message-ID: <4BFBD6D4.2040707@redhat.com>
-References: <20100519192222.GD61706@ncolin.muc.de>		<AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>	<AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>	<4BF5A9D2.5080609@codemonkey.ws> <4BF91937.2070801@redhat.com> <4BFBAE46.5050801@redhat.com> <4BFBB3C1.9020905@redhat.com> <4BFBCFAC.9070807@codemonkey.ws> <4BFBD63D.5040900@redhat.com>
+Date: Tue, 25 May 2010 16:57:45 +0300
+Message-ID: <4BFBD759.40601@redhat.com>
+References: <20100519192222.GD61706@ncolin.muc.de>	 <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>	 <AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>	 <4BF5A9D2.5080609@codemonkey.ws> <4BF91937.2070801@redhat.com>	 <87wrutg4dk.wl%morita.kazutaka@lab.ntt.co.jp>	 <4BFA5D96.3030603@redhat.com>	 <lpvdad4jcf.wl%morita.kazutaka@lab.ntt.co.jp>	 <4BFA696D.2060606@redhat.com>	 <lphblxiele.wl%morita.kazutaka@lab.ntt.co.jp> <AANLkTilHGvaCDjeRSG3al2GOC7ts9uXGZ9DOGwBU5MEy@mail.gmail.com> <4BFAD59E.2010706@codemonkey.ws> <4BFB94D9.5080904@redhat.com> <4BFBCDD9.4070104@codemonkey.ws> <4BFBCFB9.6020104@redhat.com> <4BFBD0C6.9000105@codemonkey.ws> <4BFBD261.9040908@redhat.com> <4BFBD693.2030108@codemonkey.ws>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <4BFBD63D.5040900@redhat.com>
-Sender: kvm-owner@vger.kernel.org
-To: Kevin Wolf <kwolf@redhat.com>
-Cc: Anthony Liguori <anthony@codemonkey.ws>, Blue Swirl <blauwirbel@gmail.com>, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>, kvm@vger.kernel.org, qemu-devel@nongnu.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:30100 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754873Ab0EYN57 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 25 May 2010 09:57:59 -0400
+In-Reply-To: <4BFBD693.2030108@codemonkey.ws>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Anthony Liguori <anthony@codemonkey.ws>
+Cc: Christian Brunner <chb@muc.de>, MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>, Blue Swirl <blauwirbel@gmail.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
 
-On 05/25/2010 04:53 PM, Kevin Wolf wrote:
+On 05/25/2010 04:54 PM, Anthony Liguori wrote:
+> On 05/25/2010 08:36 AM, Avi Kivity wrote:
+>>
+>> We'd need a kernel-level generic snapshot API for this eventually.
+>>
+>>> or (2) implement BUSE to complement FUSE and CUSE to enable proper 
+>>> userspace block devices.
+>>
+>> Likely slow due do lots of copying.  Also needs a snapshot API.
 >
-> I'm still not convinced that we need either. I share Christoph's concern
-> that we would make our life harder for almost no gain. It's probably a
-> very small group of users (if it exists at all) that wants to add new
-> block drivers themselves, but at the same time can't run upstream qemu.
->
->    
+> The kernel could use splice.
 
-The first part of your argument may be true, but the second isn't.  No 
-user can run upstream qemu.git.  It's not tested or supported, and has 
-no backwards compatibility guarantees.
+Still can't make guest memory appear in (A)BUSE process memory without 
+either mmu tricks (vmsplice in reverse) or a copy.  May be workable for 
+an (A)BUSE driver that talks over a network, and thus can splice() its 
+way out.
 
 -- 
 error compiling committee.c: too many arguments to function
