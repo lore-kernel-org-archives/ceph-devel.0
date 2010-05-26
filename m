@@ -1,50 +1,50 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: compile error on testing branch - missing
- anchor_create_prep_locks()
-Date: Wed, 26 May 2010 10:17:37 -0600
-Message-ID: <1274890657.4773.153.camel@sale659.sandia.gov>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: compile error on testing branch - missing anchor_create_prep_locks()
+Date: Wed, 26 May 2010 09:45:15 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1005260944410.24698@cobra.newdream.net>
+References: <1274890657.4773.153.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1963923926-1274892315=:24698"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:56798 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755246Ab0EZQRy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 May 2010 12:17:54 -0400
-Received: from sentry.sandia.gov (mm03snlnto.sandia.gov [132.175.109.20])
-	by sentry-three.sandia.gov (Postfix) with ESMTP id 1F3AC526395
-	for <ceph-devel@vger.kernel.org>; Wed, 26 May 2010 10:17:47 -0600 (MDT)
+Received: from cobra.newdream.net ([66.33.216.30]:36712 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932105Ab0EZQlh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 May 2010 12:41:37 -0400
+In-Reply-To: <1274890657.4773.153.camel@sale659.sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-=46WIW, I'm getting this compile error on the testing branch:
+--557981400-1963923926-1274892315=:24698
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-if g++ -DHAVE_CONFIG_H -I. -I. -I.    -Wall -D_FILE_OFFSET_BITS=3D64 -D=
-_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT Server.o -MD -MP -MF ".d=
-eps/Server.Tpo" -c -o Server.o `test -f 'mds/Server.cc' || echo './'`md=
-s/Server.cc; \
-        then mv -f ".deps/Server.Tpo" ".deps/Server.Po"; else rm -f ".d=
-eps/Server.Tpo"; exit 1; fi
-mds/Server.cc: In member function =E2=80=98void Server::handle_client_u=
-nlink(MDRequest*)=E2=80=99:
-mds/Server.cc:3705: error: =E2=80=98class MDCache=E2=80=99 has no membe=
-r named =E2=80=98anchor_create_prep_locks=E2=80=99
+On Wed, 26 May 2010, Jim Schutt wrote:
+> FWIW, I'm getting this compile error on the testing branch:
+>=20
+> if g++ -DHAVE_CONFIG_H -I. -I. -I.    -Wall -D_FILE_OFFSET_BITS=3D64 -D_R=
+EENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT Server.o -MD -MP -MF ".deps/Se=
+rver.Tpo" -c -o Server.o `test -f 'mds/Server.cc' || echo './'`mds/Server.c=
+c; \
+>         then mv -f ".deps/Server.Tpo" ".deps/Server.Po"; else rm -f ".dep=
+s/Server.Tpo"; exit 1; fi
+> mds/Server.cc: In member function =FF=FFvoid Server::handle_client_unlink=
+(MDRequest*)=FF=FF:
+> mds/Server.cc:3705: error: =FF=FFclass MDCache=FF=FF has no member named =
+=FF=FFanchor_create_prep_locks=FF=FF
+>=20
+>=20
+> The missing function seems to have been introduced in commit 4a449ec7.
+>=20
+> It exists in the unstable branch, but I get conflicts if
+> I try to merge testing into unstable.
 
+Fixed this.  The missing unstable commit was 14dd8a9a.
 
-The missing function seems to have been introduced in commit 4a449ec7.
-
-It exists in the unstable branch, but I get conflicts if
-I try to merge testing into unstable.
-
--- Jim
-
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks!
+sage
+--557981400-1963923926-1274892315=:24698--
