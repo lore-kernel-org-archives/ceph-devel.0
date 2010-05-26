@@ -1,36 +1,50 @@
-From: Avi Kivity <avi@redhat.com>
-Subject: Re: [Qemu-devel] [RFC PATCH 1/1] ceph/rbd block driver for qemu-kvm
-Date: Wed, 26 May 2010 11:46:04 +0300
-Message-ID: <4BFCDFCC.2050008@redhat.com>
-References: <20100519192222.GD61706@ncolin.muc.de>  <AANLkTimXqk7oa4mtcoHX1rKWzi_Nccb0FJu_QDtwJ-sP@mail.gmail.com>  <AANLkTil-aogxdnMallKTDo1bKXj6QmaU0ojJuiZgXaqC@mail.gmail.com>  <4BF5A9D2.5080609@codemonkey.ws> <4BF91937.2070801@redhat.com>  <87wrutg4dk.wl%morita.kazutaka@lab.ntt.co.jp>  <4BFA5D96.3030603@redhat.com>  <lpvdad4jcf.wl%morita.kazutaka@lab.ntt.co.jp>  <4BFA696D.2060606@redhat.com>  <lphblxiele.wl%morita.kazutaka@lab.ntt.co.jp> <AANLkTilHGvaCDjeRSG3al2GOC7ts9uXGZ9DOGwBU5MEy@mail.gmail.com> <4BFAD59E.2010706@codemonkey.ws> <4BFB94D9.5080904@redhat.com> <4BFBCDD9.4070104@codemonkey.ws> <4BFBCFB9.6020104@redhat.com> <4BFBD833.1030503@redhat.com> <4BFBF906.7010809@redhat.com> <Pine.LNX.4.64.1005250939440.8523@cobra.newdream.net>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: compile error on testing branch - missing
+ anchor_create_prep_locks()
+Date: Wed, 26 May 2010 10:17:37 -0600
+Message-ID: <1274890657.4773.153.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1005250939440.8523@cobra.newdream.net>
-Sender: kvm-owner@vger.kernel.org
-To: Sage Weil <sage@newdream.net>
-Cc: Kevin Wolf <kwolf@redhat.com>, Anthony Liguori <anthony@codemonkey.ws>, kvm@vger.kernel.org, qemu-devel@nongnu.org, Blue Swirl <blauwirbel@gmail.com>, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>, MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:56798 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755246Ab0EZQRy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 May 2010 12:17:54 -0400
+Received: from sentry.sandia.gov (mm03snlnto.sandia.gov [132.175.109.20])
+	by sentry-three.sandia.gov (Postfix) with ESMTP id 1F3AC526395
+	for <ceph-devel@vger.kernel.org>; Wed, 26 May 2010 10:17:47 -0600 (MDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 05/25/2010 08:12 PM, Sage Weil wrote:
-> On Tue, 25 May 2010, Avi Kivity wrote:
->    
->>> What's the reason for not having these drivers upstream? Do we gain
->>> anything by hiding them from our users and requiring them to install the
->>> drivers separately from somewhere else?
->>>
->>>        
->> Six months.
->>      
-> FWIW, we (Ceph) aren't complaining about the 6 month lag time (and I don't
-> think the Sheepdog guys are either).
->
->    
+Hi,
 
-In that case (and if there are no other potential users), then there's 
-no need for a plugin API.
+=46WIW, I'm getting this compile error on the testing branch:
 
--- 
-error compiling committee.c: too many arguments to function
+if g++ -DHAVE_CONFIG_H -I. -I. -I.    -Wall -D_FILE_OFFSET_BITS=3D64 -D=
+_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT Server.o -MD -MP -MF ".d=
+eps/Server.Tpo" -c -o Server.o `test -f 'mds/Server.cc' || echo './'`md=
+s/Server.cc; \
+        then mv -f ".deps/Server.Tpo" ".deps/Server.Po"; else rm -f ".d=
+eps/Server.Tpo"; exit 1; fi
+mds/Server.cc: In member function =E2=80=98void Server::handle_client_u=
+nlink(MDRequest*)=E2=80=99:
+mds/Server.cc:3705: error: =E2=80=98class MDCache=E2=80=99 has no membe=
+r named =E2=80=98anchor_create_prep_locks=E2=80=99
 
+
+The missing function seems to have been introduced in commit 4a449ec7.
+
+It exists in the unstable branch, but I get conflicts if
+I try to merge testing into unstable.
+
+-- Jim
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
