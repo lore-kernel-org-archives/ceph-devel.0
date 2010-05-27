@@ -1,33 +1,41 @@
-From: Sage Weil <sage@newdream.net>
-Subject: lazy io
-Date: Wed, 26 May 2010 16:41:55 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005261635380.24698@cobra.newdream.net>
-References: <20100526210645.035A7224805A@bear.spirit.com>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: ceph.spec for Centos 5
+Date: Thu, 27 May 2010 11:44:31 +0000 (UTC)
+Message-ID: <htlluv$70g$2@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52392 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935028Ab0EZXl4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 May 2010 19:41:56 -0400
-In-Reply-To: <20100526210645.035A7224805A@bear.spirit.com>
+Received: from lo.gmane.org ([80.91.229.12]:51598 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755121Ab0E0Lon (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 27 May 2010 07:44:43 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OHbVv-0008JT-IJ
+	for ceph-devel@vger.kernel.org; Thu, 27 May 2010 13:44:39 +0200
+Received: from cust.static.109-164-193-63.swisscomdata.ch ([109.164.193.63])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 27 May 2010 13:44:39 +0200
+Received: from thomas by cust.static.109-164-193-63.swisscomdata.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 27 May 2010 13:44:39 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: eestolan@cs.ucsc.edu, carlosm@soe.ucsc.edu
 
-I just pushed out some "lazy io" patches to the unstable branches.  Lazy 
-io is enabled on a file handle via a ceph ioctl (CEPH_IOC_LAZYIO).  Once 
-that happens, an application can do buffered reads/writes even when a file 
-is open on multiple clients, and is responsible for managing it's own 
-cache conherency between nodes.
+hi 
 
-An application can flush dirty data using sync_file_range(2), and 
-invalidate cached data using posix_fadvise(2) (POSIX_FADV_DONTNEED).  
-These are equivalent to the lazyio_propagate(2) and lazyio_synchronise(2) 
-in the original O_LAZY proposal from the POSIX IO group way back when.
+i've took the ceph.spec from the 0.20.1 tar.gz and modified it to work 
+with Centos 5.
 
-If anybody is interested in testing this functionality, let us know!
+i've sucessfully built/installed/uninstalled the package (but not tried 
+to use it yet)
 
-sage
+get the .spec file here:
+http://pastebin.com/JBSBWUbB
+
+
+- Thomas
 
