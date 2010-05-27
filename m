@@ -1,30 +1,32 @@
-From: Christian Brunner <chb@muc.de>
-Subject: CEPH_OSD_TMAP_SET in librados.h
-Date: Thu, 27 May 2010 20:46:20 +0200
-Message-ID: <AANLkTinw76aIGD2pH67r-KDxSScAWJ7cRvrPliDnYl09@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: CEPH_OSD_TMAP_SET in librados.h
+Date: Thu, 27 May 2010 11:50:49 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1005271150070.27661@cobra.newdream.net>
+References: <AANLkTinw76aIGD2pH67r-KDxSScAWJ7cRvrPliDnYl09@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:63343 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932914Ab0E0SqW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 May 2010 14:46:22 -0400
-Received: by wyb29 with SMTP id 29so241206wyb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 27 May 2010 11:46:20 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:44622 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756656Ab0E0Sus (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 May 2010 14:50:48 -0400
+In-Reply-To: <AANLkTinw76aIGD2pH67r-KDxSScAWJ7cRvrPliDnYl09@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Christian Brunner <chb@muc.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Thu, 27 May 2010, Christian Brunner wrote:
+> while preparing the next qemu patch I realized that you need
+> ceph-unstable now to build the qemu-rbd driver.
+> 
+> This is because CEPH_OSD_TMAP_SET is only defined in librados.h
+> unstable. Could you please apply the patch in testing, too?
+> 
+> I guess I'm to late for 0.20.2, but I would like to state in my mail
+> to the qemu list that it will work with 0.20.3.
 
-while preparing the next qemu patch I realized that you need
-ceph-unstable now to build the qemu-rbd driver.
+Whoops, sorry about that.  I cherry-picked it into the testing branch and 
+it'll be in 0.20.3.
 
-This is because CEPH_OSD_TMAP_SET is only defined in librados.h
-unstable. Could you please apply the patch in testing, too?
-
-I guess I'm to late for 0.20.2, but I would like to state in my mail
-to the qemu list that it will work with 0.20.3.
-
-Regards,
-Christian
+sage
