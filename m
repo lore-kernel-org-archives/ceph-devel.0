@@ -1,44 +1,60 @@
 From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: cmon silently fails if addr is wrong in ceph.conf (0.20.1)
-Date: Fri, 28 May 2010 07:47:38 +0000 (UTC)
-Message-ID: <htnseq$l6k$1@dough.gmane.org>
+Subject: Re: ceph.spec for Centos 5
+Date: Fri, 28 May 2010 08:13:55 +0000 (UTC)
+Message-ID: <htnu03$l6k$2@dough.gmane.org>
+References: <htlluv$70g$2@dough.gmane.org>
+	<Pine.LNX.4.64.1005271424210.27661@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:37836 "EHLO lo.gmane.org"
+Received: from lo.gmane.org ([80.91.229.12]:35226 "EHLO lo.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755844Ab0E1Hrt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 28 May 2010 03:47:49 -0400
+	id S1754684Ab0E1IOI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 28 May 2010 04:14:08 -0400
 Received: from list by lo.gmane.org with local (Exim 4.69)
 	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OHuIE-00063k-Bq
-	for ceph-devel@vger.kernel.org; Fri, 28 May 2010 09:47:46 +0200
+	id 1OHuhj-0000Gs-CO
+	for ceph-devel@vger.kernel.org; Fri, 28 May 2010 10:14:07 +0200
 Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 28 May 2010 09:47:46 +0200
+        for <ceph-devel@vger.kernel.org>; Fri, 28 May 2010 10:14:07 +0200
 Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 28 May 2010 09:47:46 +0200
+        for <ceph-devel@vger.kernel.org>; Fri, 28 May 2010 10:14:07 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-hi
+Am Thu, 27 May 2010 14:26:38 -0700 schrieb Sage Weil:
 
-i missconfigured the mon addr in ceph.conf. /etc/init.d/ceph did not show 
-any errors - seemd to start. but cmon did not start.
+> Hi Thomas,
+> 
+> On Thu, 27 May 2010, Thomas Mueller wrote:
+>> hi
+>> 
+>> i've took the ceph.spec from the 0.20.1 tar.gz and modified it to work
+>> with Centos 5.
+>> 
+>> i've sucessfully built/installed/uninstalled the package (but not tried
+>> to use it yet)
+>> 
+>> get the .spec file here:
+>> http://pastebin.com/JBSBWUbB
+> 
+> Thanks.
+> 
+> It looks like your changes are all RHEL <= 5, Fedora <= 9 specific, with
+> the exception of the build-requires changes, which I've updated in git.
 
-i've "straced" cmon:
+these new files needed to be included as well:
 
-bind(6, {sa_family=AF_INET, sin_port=htons(6789), sin_addr=inet_addr
-("192.168.32.61")}, 16) = -1 EADDRNOTAVAbind(6, {sa_family=AF_INET, 
-sin_port=htons(6789), sin_addr=inet_addr("192.168.32.61")}, 16) = -1 
-EADDRNOTAVAIL (Cannot assign requested address)IL (Cannot assign 
-requested address)
+%{_bindir}/dumpjournal
+%{_bindir}/dupstore
+%{_bindir}/radosacl
+%{_bindir}/streamtest
+%{_bindir}/test*
 
-A descriptive error message would be cool.
 
-- Thomas
 
