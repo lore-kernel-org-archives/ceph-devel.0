@@ -1,64 +1,56 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] more Ceph bits for 2.6.35-rc1
-Date: Sat, 29 May 2010 15:46:37 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1005291535070.27550@cobra.newdream.net>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: filename too long (pjd-fstest on centos5 with ceph 0.20.2)
+Date: Mon, 31 May 2010 10:35:30 +0000 (UTC)
+Message-ID: <hu03dh$vgc$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from lo.gmane.org ([80.91.229.12]:51702 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756736Ab0EaKfj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 31 May 2010 06:35:39 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OJ2LK-0007ue-7Z
+	for ceph-devel@vger.kernel.org; Mon, 31 May 2010 12:35:38 +0200
+Received: from zux221-125-110.adsl.green.ch ([81.221.125.110])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 31 May 2010 12:35:38 +0200
+Received: from thomas by zux221-125-110.adsl.green.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 31 May 2010 12:35:38 +0200
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Linus,
+hi 
 
-Please pull these last few fixes and cleanups for 2.6.35-rc1 from 
+i'm doing some testing. i've ran pjd-fstest. on ceph (kclient) 
+mountpoints there are many "file name too long" messages. 
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-The main item here is a fix when waiting for mds request completion, which 
-includes adding wait_for_completion_killable_timeout() to the completion 
-api.  There is also a fix for a use after free on umount, a couple memory 
-leaks, some non-critial protocol items, and a couple cleanups.
-
-Thanks-
-sage
+example error message:
+mkdir: `_xxxxxx-veryveryveryverylongpath/x': File name too long
 
 
-Andrea Gelmini (1):
-      ceph: removed duplicated #includes
+fstest results:
 
-Julia Lawall (1):
-      fs/ceph: Use ERR_CAST
+Failed Test                   Stat Wstat Total Fail  Failed  List of Failed
+-------------------------------------------------------------------------------
+/tmp/fstest/tests/mkdir/00.t                36    5  13.89%  30-34
+/tmp/fstest/tests/mkfifo/00.t               36    5  13.89%  30-34
+/tmp/fstest/tests/open/00.t                 47    5  10.64%  30-34
+Failed 3/184 test scripts, 98.37% okay. 15/1957 subtests failed, 99.23% 
+okay.
 
-Sage Weil (9):
-      sched: add wait_for_completion_killable_timeout
-      ceph: make mds requests killable, not interruptible
-      ceph: avoid possible null dereference
-      ceph: do not resend mon requests on auth ticket renewal
-      ceph: renew auth tickets before they expire
-      ceph: make lease code DN specific
-      ceph: close out mds, osd connections before stopping auth
-      ceph: fix leak of osd authorizer
-      ceph: clean up on forwarded aborted mds request
 
- fs/ceph/auth.c             |    7 +++----
- fs/ceph/auth.h             |    6 ++++++
- fs/ceph/auth_none.c        |    8 ++++++++
- fs/ceph/auth_x.c           |   12 ++++++++++++
- fs/ceph/ceph_fs.h          |   21 +++++++++++----------
- fs/ceph/dir.c              |    2 +-
- fs/ceph/export.c           |    2 +-
- fs/ceph/file.c             |    2 +-
- fs/ceph/inode.c            |    2 +-
- fs/ceph/mds_client.c       |   21 +++++++++++++--------
- fs/ceph/messenger.c        |    6 ++++++
- fs/ceph/messenger.h        |    1 +
- fs/ceph/mon_client.c       |    5 ++++-
- fs/ceph/osd_client.c       |    7 ++++++-
- fs/ceph/osdmap.c           |    2 +-
- fs/ceph/super.c            |   12 ++++++++++--
- fs/ceph/super.h            |    1 -
- include/linux/completion.h |    2 ++
- kernel/sched.c             |   17 +++++++++++++++++
- 19 files changed, 104 insertions(+), 32 deletions(-)
+if I run fstest on the local filesystem it completes without errors - so 
+the "filename too long" seems to be a ceph specific error.
+
+- Thomas
+
+Env:
+- 4x osd, 1x mds, 1x mon, 1x kclient
+- ceph 0.20.2, ceph kclient 2.6.34, Cento5, pjd-fstest-20080816
+
