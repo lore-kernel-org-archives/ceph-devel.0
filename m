@@ -1,30 +1,46 @@
-From: Kevin Wolf <kwolf@redhat.com>
-Subject: Re: [Qemu-devel] [PATCH] ceph/rbd block driver for qemu-kvm (v3)
-Date: Tue, 01 Jun 2010 10:43:02 +0200
-Message-ID: <4C04C816.40409@redhat.com>
-References: <20100531193140.GA13993@chb-desktop>
+From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+Subject: [PATCH] ceph: fix d_subdirs ordering problem
+Date: Tue, 1 Jun 2010 18:47:07 +0800
+Message-ID: <AANLkTikAPg1pVfpnH_BSQFyQn2BzUNiGB3tVC2104Ts1@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20100531193140.GA13993@chb-desktop>
-Sender: kvm-owner@vger.kernel.org
-To: Christian Brunner <chb@muc.de>
-Cc: ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:45409 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752955Ab0FAKrJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jun 2010 06:47:09 -0400
+Received: by vws11 with SMTP id 11so836654vws.19
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Jun 2010 03:47:08 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Christian,
+We misused list_move_tail() to order the dentry in d_subdirs.
+This will screw up the d_subdirs order.
 
-Am 31.05.2010 21:31, schrieb Christian Brunner:
-> Hi Kevin,
-> 
-> here is an updated patch for the ceph/rbd driver. I hope that everything 
-> is fine now.
+This bug can be reliably reproduced by:
+1. mount ceph fs.
+2. on ceph fs, git clone git://ceph.newdream.net/git/ceph.git
+3. Run autogen.sh in ceph directory.
+(Note: Errors only occur at the first time you run autogen.sh.)
 
-I'll try to get to give it a final review later this week. In the
-meantime, I would be happy to see another review by someone else.
+Signed-off-by: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+---
+ inode.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Do you have some specific tests for the driver or should we extend
-qemu-iotests to work with protocols and use only that?
+diff --git a/inode.c b/inode.c
+index a81b8b6..72903a1 100644
+--- a/inode.c
++++ b/inode.c
+@@ -827,7 +827,7 @@ static void ceph_set_dentry_offset(struct dentry *dn)
 
-Kevin
+        spin_lock(&dcache_lock);
+        spin_lock(&dn->d_lock);
+-       list_move_tail(&dir->d_subdirs, &dn->d_u.d_child);
++       list_move(&dn->d_u.d_child, &dir->d_subdirs);
+        dout("set_dentry_offset %p %lld (%p %p)\n", dn, di->offset,
+             dn->d_u.d_child.prev, dn->d_u.d_child.next);
+        spin_unlock(&dn->d_lock);
+--
+1.6.5.2
