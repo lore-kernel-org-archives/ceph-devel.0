@@ -1,110 +1,181 @@
-From: Andre Noll <maan@systemlinux.org>
-Subject: Re: osd: terminate called after throwing an instance of 'std::bad_alloc'
-Date: Wed, 2 Jun 2010 10:10:44 +0200
-Message-ID: <20100602081044.GY1212@skl-net.de>
-References: <20100531125156.GJ1211@skl-net.de> <Pine.LNX.4.64.1006011025090.14408@cobra.newdream.net>
+From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+Subject: Re: subdir quotas
+Date: Wed, 2 Jun 2010 17:34:22 +0800
+Message-ID: <AANLkTimi8lrwiblFXYJIiprfy3gCZOoGu5auL3umEqA2@mail.gmail.com>
+References: <w2ibe579e381004290204lb59c124di7a59f71bbf4ede1@mail.gmail.com>
+	<Pine.LNX.4.64.1004290937110.5285@cobra.newdream.net>
+	<l2nbe579e381004300827l4c695cb1g2e6ff032fddee222@mail.gmail.com>
+	<Pine.LNX.4.64.1004301112010.30864@cobra.newdream.net>
+	<m2obe579e381005022121z1ace49f3o188240077631f497@mail.gmail.com>
+	<w2vbe579e381005022341yccbd20b5w24c66e97bbcced55@mail.gmail.com>
+	<Pine.LNX.4.64.1006011206040.14408@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="apSYfA7d5AHMku3c"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from systemlinux.org ([83.151.29.59]:37084 "EHLO m18s25.vlinux.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752684Ab0FBILF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 2 Jun 2010 04:11:05 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1006011025090.14408@cobra.newdream.net>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:54168 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754585Ab0FBJeX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jun 2010 05:34:23 -0400
+Received: by vws11 with SMTP id 11so2326519vws.19
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Jun 2010 02:34:22 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1006011206040.14408@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
+Yes, I am interested and that's what I am doing right now.
+In fact, we have a clone of ceph on github, and have had a "quick"
+implementation already. You can get it from:
 
---apSYfA7d5AHMku3c
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+http://github.com/tcloud/ceph/tree/folder-quota
+http://github.com/tcloud/ceph-client-standalone/tree/folder-quota
 
-On 10:28, Sage Weil wrote:
+To allow switching quota on/off, we added the option/configuration on b=
+oth
+client and server sides. To enable folder quota, you need to mount ceph=
+ with
+"-o folder_quota=3D1" on client side. On server side, you need to add
+"folder quota =3D 1" in the global section of ceph config file. We also
+implemented a tool to set/unset/get/list quota limits on folders.
 
-> So, the mmap code in buffer.h is actually never called, so my guess is=20
-> that posix_memalign() or some other library implementation is doing it. =
-=20
-> Can you get a stack trace?  Either look at the core file with gdb or run=
-=20
-> cosd via gdb?
+To enforce the quota more precisely, our imlementation, however, sacrif=
+ies
+the writing throughput and introduces more traffic:
 
-Sure. Here we go:
+1. We modified the max_size request-reply behaviour between client and =
+mds.
+   Our client requests a new max_size only when endoff > max_size. (i.e=
+=2E, it
+   will not pre-request a larger max-size when it's approached the max_=
+size.)
 
-	root@node142:~# gdb /usr/local/bin/cosd
-	GNU gdb 6.8-debian
-	Copyright (C) 2008 Free Software Foundation, Inc.
-	License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.ht=
-ml>
-	This is free software: you are free to change and redistribute it.
-	There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
-	and "show warranty" for details.
-	This GDB was configured as "x86_64-linux-gnu"...
-	(gdb) run -f -i 6 -c /etc/ceph/ceph.conf
-	Starting program: /usr/local/bin/cosd -f -i 6 -c /etc/ceph/ceph.conf
-	[Thread debugging using libthread_db enabled]
-	 ** WARNING: Ceph is still under heavy development, and is only suitable f=
-or **
-	 **          testing and review.  Do not trust it with important data.    =
-   **
-	starting osd6 at 0.0.0.0:6800/3869 osd_data /var/ceph/osd6 /var/ceph/osd6/=
-journal
-	[New Thread 0x7f995df606f0 (LWP 3869)]
-	[New Thread 0x4227e950 (LWP 3872)]
-	[New Thread 0x41896950 (LWP 3873)]
-	[New Thread 0x42a7f950 (LWP 3874)]
-	[New Thread 0x43280950 (LWP 3875)]
-	[New Thread 0x43a81950 (LWP 3876)]
-	[New Thread 0x40dd1950 (LWP 3877)]
-	[New Thread 0x44282950 (LWP 3878)]
-	[New Thread 0x44a83950 (LWP 3879)]
-	[New Thread 0x45284950 (LWP 3880)]
-	[New Thread 0x45a85950 (LWP 3881)]
-	terminate called after throwing an instance of 'std::bad_alloc'
-	  what():  std::bad_alloc
+2. Our client requests a constant 4 MB (the object size) every time. Th=
+is
+   degrades the throughput significantly. (It used to request more and =
+more.)
 
-	Program received signal SIGABRT, Aborted.
-	[Switching to Thread 0x7f995df606f0 (LWP 3869)]
-	0x00007f995caf3095 in raise () from /lib/libc.so.6
-	(gdb)  bt
-	#0  0x00007f995caf3095 in raise () from /lib/libc.so.6
-	#1  0x00007f995caf4af0 in abort () from /lib/libc.so.6
-	#2  0x00007f995d3780e4 in __gnu_cxx::__verbose_terminate_handler () from /=
-usr/lib/libstdc++.so.6
-	#3  0x00007f995d376076 in ?? () from /usr/lib/libstdc++.so.6
-	#4  0x00007f995d3760a3 in std::terminate () from /usr/lib/libstdc++.so.6
-	#5  0x00007f995d37618a in __cxa_throw () from /usr/lib/libstdc++.so.6
-	#6  0x00007f995d376649 in operator new () from /usr/lib/libstdc++.so.6
-	#7  0x00007f995d376709 in operator new[] () from /usr/lib/libstdc++.so.6
-	#8  0x0000000000540920 in PG::read_log (this=3D0x7f995845be60, store=3D<va=
-lue optimized out>) at ./include/cstring.h:120
-	#9  0x0000000000543187 in PG::read_state (this=3D0x7f995845be60, store=3D0=
-x8a4840) at osd/PG.cc:2294
-	#10 0x00000000004ec1f9 in OSD::load_pgs (this=3D0x8a04b0) at osd/OSD.cc:884
-	#11 0x00000000004ecb00 in OSD::init (this=3D0x8a04b0) at osd/OSD.cc:462
-	#12 0x000000000045f2cc in main (argc=3D<value optimized out>, argv=3D<valu=
-e optimized out>) at cosd.cc:171
+Anyway, it is the initial implementation. I will take your comments int=
+o
+consideration and try to revise the current implementation. Of course, =
+I will
+need your help on rstat propagation issue 'cause I have no clue right n=
+ow
+and have to dig the mds source code more to understand the existing
+implementation. :)
 
-Thanks for looking into this.
-Andre
---=20
-The only person who always got his work done by Friday was Robinson Crusoe
+A few questions about ceph testing:
+- When will a subtree be fragmented?
+- Can I force a subtree to be framented to faciliate testing?
+- How do I know which mds is authoritive for particular fragment?
 
---apSYfA7d5AHMku3c
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
+Thanks,
+Henry
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.1 (GNU/Linux)
-
-iD8DBQFMBhIEWto1QDEAkw8RAiXdAJ0day3VEyxCvoE0SobsOLhWHKu7hACfUhmQ
-zmJlWnDAKX4j3TB+IUM3GkI=
-=Z62y
------END PGP SIGNATURE-----
-
---apSYfA7d5AHMku3c--
+On Wed, Jun 2, 2010 at 3:17 AM, Sage Weil <sage@newdream.net> wrote:
+> Hi,
+>
+> The subject of quota enforcement came up in the IRC channel last week=
+ so I
+> thought I'd resurrect this discussion.
+>
+>> > On Fri, 30 Apr 2010, Henry C Chang wrote:
+>> > > In fact, I am trying to add "folder quota support" to ceph right=
+ now.
+>> > > My rough idea is as below:
+>> > >
+>> > > (1) Store the quota limit in the xattr of the folder;
+>> > > (2) When the client requests a new max size for writing content =
+to a file,
+>> > > MDS authorizes the request according to the quota and the rstat =
+of the
+>> > > folder.
+>> >
+>> > One thing to keep in mind is that because the recursive rsize info=
+ is
+>> > lazily propagated up the file tree, this won't work perfectly. =C2=
+=A0If you set
+>> > a limit of 1GB on /foo and are writing data in /foo/bar/baz, it wo=
+n't stop
+>> > you right at 1GB. =C2=A0Similarly, if you hit the limit, and delet=
+e some stuff,
+>> > it will take time before the MDS notices and lets you start writin=
+g again.
+>> >
+>> Hmm... this would be a problem....
+>> From the perspective of a user, I would be happy if I can write more
+>> than my quota. However, I would get pissed off if I have deleted som=
+e
+>> stuff but still cannot write anything and don't know how long I have=
+ to
+>> wait.
+>>
+>> Is it possible to force MDS to propaget rsize info when files are de=
+leted?
+>> Or, can lazy propagation be bounded to a maximum interval (say 5 sec=
+onds)?
+>
+> The propagation is bounded by a tunable timeout (30 seconds by defaul=
+t,
+> but adjustable). =C2=A0That's per ancestor.. so if you're three level=
+s deep,
+> the max is 3x that. =C2=A0In practice, it's typically less, though, a=
+nd I think
+> we could come up with something that would force propagation to happe=
+n
+> faster in these situations. =C2=A0The reason it's there is just to li=
+mit the
+> overhead of maintaining the recursive stats. =C2=A0We don't want to u=
+pdate all
+> ancestors every time we change something, and because we're distribut=
+ed
+> over multiple nodes we can't.
+>
+>> > What is your use case?
+>>
+>> I want to create "depots" inside ceph:
+>> - Each depot has its own quota limit and can be resized as needed.
+>> - Multiple users can read/write the same depot concurrently.
+>>
+>> My original plan is to create a first-level folder for each depot
+>> (e.g., /mnt/ceph/depot1, /mnt/ceph/depot2, ...) and set quota on it.
+>> Do you have any suggestion on implementing such a use case?
+>
+> There's no reason to restrict this to first-level folders (if that's =
+what
+> you were suggesting). =C2=A0We should allow a subdir quota to be set =
+on any
+> directory, probably iff you are the owner. =C2=A0We can make the user=
+ interface
+> based on xattrs, since that's generally nicer to interact with than a=
+n
+> ioctl based interface. =C2=A0That's not to say the quota should neces=
+sarily be
+> handled/stored internally as an xattr (although it could be). =C2=A0I=
+t might
+> make more sense to add a field to the inode and extend the client/mds
+> protocol to manipulate it.
+>
+> Either way, I think a coarse implementation could be done pretty easi=
+ly,
+> where by 'coarse' I mean we don't necessarily stop writes exactly at =
+the
+> limit (they can write a bit more before they start getting ENOSPC).
+>
+> On IRC the subject of soft quotas also came up (where you're allowed =
+over
+> the soft limit for some grace period before writes start failing). =C2=
+=A0That's
+> also not terribly difficult to implement (we just need to store some
+> timestamp field as well so we know when they initially cross the soft
+> threashold).
+>
+> Are you still interested in working on this?
+>
+> sage
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
