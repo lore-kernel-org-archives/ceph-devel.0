@@ -1,36 +1,38 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: filename too long (pjd-fstest on centos5 with ceph 0.20.2)
-Date: Tue, 1 Jun 2010 12:51:45 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006011250090.14408@cobra.newdream.net>
-References: <hu03dh$vgc$1@dough.gmane.org> <AANLkTinYa6a6yqnbjBH99seMT4NJgXpQig38mV4rmEkM@mail.gmail.com>
- <hu06m8$vgc$2@dough.gmane.org>
+From: Paul <paul_chiang@tcloudcomputing.com>
+Subject: Correct proceedure for removing ceph nodes
+Date: Wed, 2 Jun 2010 15:31:43 +0800
+Message-ID: <AANLkTimW7oNdbDnTTyPzlOlD8fr0Bw5rRybuTiHNQTmV@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55275 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753334Ab0FATvb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Jun 2010 15:51:31 -0400
-In-Reply-To: <hu06m8$vgc$2@dough.gmane.org>
+Received: from mail-ww0-f46.google.com ([74.125.82.46]:33496 "EHLO
+	mail-ww0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751350Ab0FBHbs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Jun 2010 03:31:48 -0400
+Received: by wwb28 with SMTP id 28so2648674wwb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Jun 2010 00:31:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, 31 May 2010, Thomas Mueller wrote:
-> Am Mon, 31 May 2010 03:42:33 -0700 schrieb Gregory Farnum:
-> 
-> > Thomas:
-> > The "file name too long" errors are actually supposed to occur in a
-> > number of places in pjd-fstest -- it's part of the correctness testing!
-> 
-> I can't see these error messages if I run the test on the local fs. 
+Hello,
 
-Fixed this.  The problem was that we were reporting PATH_MAX instead of 
-NAME_MAX as the max file name length in statfs.  The pjd tests actually 
-all succeeded, but the script would spit out those errors when trying to 
-clean up.
+We're having trouble figuring out what the correct proceedure for
+(permanently) removing nodes from a ceph cluster is.
+1. Mon:
+    I see that the MonMap class has a remove operation, but is not
+exposed through the MonmapMonitor. Any reason why not?
+2. MDS:
+    I guess we just kill the daemon and let the recovery mechanism do
+its job. We notcied however, that decreasing the active mds count
+using set max mds doesn't seem to have any effect: i.e. no MDSes are
+moved back to standby.
+3. OSD:
+   Again, I suppose we could just kill the daemon, but that'd leave
+holes in the data placement which doesn't seem to be very elegant.
+Setting the device weight to 0 in the crushmap works, but trying to
+remove a device entriely produces strange results. Could you shed some
+light on this?
 
-Thanks for the heads up!
-sage
-
+Thanks in advance,
+Paul C
