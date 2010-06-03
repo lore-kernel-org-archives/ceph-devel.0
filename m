@@ -1,45 +1,108 @@
-From: Christian Brunner <chb@muc.de>
-Subject: [PATCH] qemu/rbd bugfix for create_tmap_op
-Date: Thu, 3 Jun 2010 23:08:31 +0200
-Message-ID: <20100603210831.GA17094@chb-desktop>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: cosd death by oom-killer
+Date: Thu, 3 Jun 2010 15:24:12 -0600
+Message-ID: <1275600252.4800.13.camel@sale659.sandia.gov>
+References: <1274912650.4773.243.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1005261626220.24698@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from fg-out-1718.google.com ([72.14.220.158]:26462 "EHLO
-	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752752Ab0FCVIh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jun 2010 17:08:37 -0400
-Received: by fg-out-1718.google.com with SMTP id l26so2322412fgb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jun 2010 14:08:36 -0700 (PDT)
-Content-Disposition: inline
+Received: from sentry-three.sandia.gov ([132.175.109.17]:36295 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751776Ab0FCVYZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jun 2010 17:24:25 -0400
+In-Reply-To: <Pine.LNX.4.64.1005261626220.24698@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: kwolf@redhat.com
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The patch I sent in response to kevins comments contains a bug in 
-create_tmap_op. (I've deleted to much here). Please include the 
-following fix.
+Hi Sage,
 
-Regards,
-Christian
----
- block/rbd.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+So I've made a little progress on this.
 
-diff --git a/block/rbd.c b/block/rbd.c
-index e4c4deb..74589cb 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -124,7 +124,7 @@ static int create_tmap_op(uint8_t op, const char *name, char **tmap_desc)
-     uint32_t total_len = 1 + (sizeof(uint32_t) + len) + sizeof(uint32_t);
-     char *desc = NULL;
- 
--    qemu_malloc(total_len);
-+    desc = qemu_malloc(total_len);
- 
-     *tmap_desc = desc;
- 
--- 
-1.7.0.4
+I think I have a smoking gun: the "buf" column of
+/var/log/ceph/stat/osd0 shows that bufferlist memory
+grows to several GiB, and stays that way until the cosd
+process is killed via the oom-killer.
+
+I also think that my test configuration contributes:
+my client host is several years newer than the server
+host, and my network is 10 Gb/s.
+
+I've got a little patch that puts a Pipe reader to
+sleep for a bit if the bufferlist memory use gets too
+big, and it completely solves my problem.  With it my
+cosd RSS hovers in the few hundred MiB range.  I doubt if
+it is the correct final solution, but it surely seems
+to point in the direction of one.
+
+I'll post it as a reply to this email; please let me know
+what you think.
+
+-- Jim
+
+On Wed, 2010-05-26 at 17:28 -0600, Sage Weil wrote:
+> Hi Jim,
+> 
+> Interesting.. we saw a similar report on irc.  Can you add
+> 
+> 	debug osd = 20
+> 	debug filestore = 20
+> 	debug journal = 20
+> 	debug ms = 1
+> 
+> to your [osd] section, reproduce the crash, and then send us the osd log?  
+> (It's at /var/log/ceph/osd$id, unless you've put it somewhere else.)
+> 
+> Thanks!
+> sage
+> 
+> 
+> On Wed, 26 May 2010, Jim Schutt wrote:
+> 
+> > Hi,
+> > 
+> > I'm running an interesting test case where I can
+> > cause an instance of cosd to use all available memory on
+> > its server.
+> > 
+> > On the server side I'm running the testing branch (at 
+> > commit  817495d2).  On the client side I'm running the
+> > for-linus branch (at commit 240ed68e).  Client and server
+> > are both CentOS 5.5.
+> > 
+> > My filesystem has one monitor daemon, two mds daemons,
+> > and one osd daemon, all running on one system with 4 GiB
+> > memory.  I'm running with no swap, because otherwise 
+> > during this test the system swaps like mad and becomes
+> > unresponsive.  The swapping is what made me look deeper.
+> > 
+> > I mount this filesystem on a client system, then try to 
+> > create a 16 GiB file on it using dd.  While creating
+> > the file I watch the server with top, and see that both
+> > the virtual memory use and resident set size of the
+> > cosd instance grow to ~4 GiB, and a short time later cosd 
+> > dies by oom-killer:
+> > 
+> > May 26 16:12:28 sasa008 kernel: [  902.544418] Killed process 6621 (cosd) vsz:4319672kB, anon-rss:3832152kB, file-rss:208kB
+> > 
+> > The osd has a 100 GiB partition for its data.
+> > 
+> > Am I maybe doing something wrong? 
+> > Is there anything else I can do to help debug this?
+> > 
+> > Thanks -- Jim
+> > 
+> > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> 
+
 
