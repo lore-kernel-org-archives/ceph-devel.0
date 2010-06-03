@@ -1,41 +1,49 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Snapshot in subdirectory lost when removing parent directory
-Date: Thu, 3 Jun 2010 07:32:18 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006030731160.18396@cobra.newdream.net>
-References: <1275558004.14588.106.camel@wido-laptop.pcextreme.nl>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: automated testing
+Date: Thu, 3 Jun 2010 14:53:29 +0000 (UTC)
+Message-ID: <hu8fl9$7nd$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39868 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754061Ab0FCOcB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jun 2010 10:32:01 -0400
-In-Reply-To: <1275558004.14588.106.camel@wido-laptop.pcextreme.nl>
+Received: from lo.gmane.org ([80.91.229.12]:51156 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755589Ab0FCOxj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Jun 2010 10:53:39 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OKBne-0000L0-7p
+	for ceph-devel@vger.kernel.org; Thu, 03 Jun 2010 16:53:38 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jun 2010 16:53:38 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jun 2010 16:53:38 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@pcextreme.nl>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, 3 Jun 2010, Wido den Hollander wrote:
-> Hi,
-> 
-> When creating a snapshot in a subdirectory, this gets lost when the
-> parent directory is removed, see the following command sequence:
-> http://www.pastebin.org/302447
-> 
-> Now, i had a snapshot of the directory "beta" holding my really
-> important file "randomfile.txt".
-> 
-> Since creating a snapshot of the root directory is not possible i could
-> loose all my data when someone hacks a box and does a "rm -rf /".
-> 
-> What would you advice in this scenario?
-> 
-> 1. Create snapshots of the RADOS pools?
-> 2. Never mount the root directory, but a subdir (mount x.x.x.x:/subdir)
-> 3. Prevent your box from being hacked ;-)
+hi 
 
-Hmm.  What about returning ENOTEMPTY when you try to rmdir(2) a directory 
-that contains snapshots?
+i thought about some automated testing of ceph. :)
 
-sage
+i've once used cdash/ctest . I implemented/configured it for ceph.
+
+here is the cdash page:
+
+"root": 
+http://chaschperli.ch/testing
+
+project overview site: 
+http://chaschperli.ch/testing/index.php?project=ceph
+
+sample configure/build log: 
+http://chaschperli.ch/testing/buildSummary.php?buildid=24
+
+if there is some interest i'll publish the code.
+
+
+- Thomas
+
