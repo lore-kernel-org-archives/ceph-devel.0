@@ -1,74 +1,45 @@
-From: CC Lien <cc_lien@tcloudcomputing.com>
-Subject: mkcephfs: error when creating journal file in a directory that
-	differs from OSD data dir
-Date: Thu, 3 Jun 2010 23:43:54 +0800
-Message-ID: <AANLkTil_ohGJT2BXejGM0__A_WMdhXUQKdXQK7oKjdPR@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: [PATCH] qemu/rbd bugfix for create_tmap_op
+Date: Thu, 3 Jun 2010 23:08:31 +0200
+Message-ID: <20100603210831.GA17094@chb-desktop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:55898 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756082Ab0FCPoC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jun 2010 11:44:02 -0400
-Received: by pwj2 with SMTP id 2so122415pwj.19
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Jun 2010 08:44:01 -0700 (PDT)
+Received: from fg-out-1718.google.com ([72.14.220.158]:26462 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752752Ab0FCVIh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jun 2010 17:08:37 -0400
+Received: by fg-out-1718.google.com with SMTP id l26so2322412fgb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Jun 2010 14:08:36 -0700 (PDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: kwolf@redhat.com
 
-Hi
+The patch I sent in response to kevins comments contains a bug in 
+create_tmap_op. (I've deleted to much here). Please include the 
+following fix.
 
-I have a small fix for mkcephfs script, which fixed the problem mentioned
-below.
-
-
-mkcephfs creates osd data directory automatically, but it doesn't create a
-directory for the osd journal file.
-
-When you have a journal file in a directory that differs from the osd data
-directory in your configuration, like:
-
-       osd data = /osd/osd$id
-
-       osd journal = /journal/osd$id
-
-
-You will receive a "mount failed to open journal /journal/osd0/journal: No
-such file or directory" error when doing mkcephfs
-
-
-* The patch is based on the latest "unstable" branch.
-
-
-cclien
-
-
-Signed-off-by: CC Lien <cc_lien@tcloudcomputing.com>
+Regards,
+Christian
 ---
- src/mkcephfs.in |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+ block/rbd.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/src/mkcephfs.in b/src/mkcephfs.in
-index 1caddf1..6c1f2dc 100644
---- a/src/mkcephfs.in
-+++ b/src/mkcephfs.in
-@@ -220,6 +220,7 @@ for name in $what; do
-
-     if [ "$type" = "osd" ]; then
-  get_conf osd_data "" "osd data"
-+ get_conf osd_journal "" "osd journal"
-  get_conf keyring "" "keyring"
-  get_conf btrfs_path "$osd_data" "btrfs path"  # mount point defaults so
-osd data
-  get_conf btrfs_devs "" "btrfs devs"
-@@ -228,6 +229,7 @@ for name in $what; do
-  [ -n "$btrfs_opt" ] && btrfs_opt="-o $btrfs_opt"
-
-  do_cmd "test -d $osd_data || mkdir -p $osd_data"
-+ [ -n "$osd_journal" ] && do_cmd "test -d $osd_journal || mkdir -p `dirname
-$osd_journal`"
-
-  if [ $mkbtrfs -eq 1 ]; then
-     get_conf osd_user "root" "user"
+diff --git a/block/rbd.c b/block/rbd.c
+index e4c4deb..74589cb 100644
+--- a/block/rbd.c
++++ b/block/rbd.c
+@@ -124,7 +124,7 @@ static int create_tmap_op(uint8_t op, const char *name, char **tmap_desc)
+     uint32_t total_len = 1 + (sizeof(uint32_t) + len) + sizeof(uint32_t);
+     char *desc = NULL;
+ 
+-    qemu_malloc(total_len);
++    desc = qemu_malloc(total_len);
+ 
+     *tmap_desc = desc;
+ 
 -- 
 1.7.0.4
+
