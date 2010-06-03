@@ -1,108 +1,74 @@
 From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: cosd death by oom-killer
-Date: Thu, 3 Jun 2010 15:24:12 -0600
-Message-ID: <1275600252.4800.13.camel@sale659.sandia.gov>
-References: <1274912650.4773.243.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1005261626220.24698@cobra.newdream.net>
+Subject: [RFC PATCH] msgr: Prevent unbounded use of bufferlist memory by
+ throttling incoming messages.
+Date: Thu,  3 Jun 2010 15:25:57 -0600
+Message-ID: <1275600357-11367-1-git-send-email-jaschut@sandia.gov>
+References: <16744_1275600306_o53LOfiY016748_1275600252.4800.13.camel@sale659.sandia.gov>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:36295 "EHLO
+Received: from sentry-three.sandia.gov ([132.175.109.17]:37195 "EHLO
 	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751776Ab0FCVYZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jun 2010 17:24:25 -0400
-In-Reply-To: <Pine.LNX.4.64.1005261626220.24698@cobra.newdream.net>
+	with ESMTP id S1751776Ab0FCV0m (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Jun 2010 17:26:42 -0400
+In-Reply-To: <16744_1275600306_o53LOfiY016748_1275600252.4800.13.camel@sale659.sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@newdream.net, Jim Schutt <jaschut@sandia.gov>
 
-Hi Sage,
+Under some conditions it is possible for a daemon to accept new messages
+faster than it can process them.  Since there is no limit on the number
+of outstanding messages, if this condition persists the daemon will
+consume all available memory/swap on the server.
 
-So I've made a little progress on this.
+Fix this by causing the message reader to monitor the bufferlist
+memory use, and sleep for a bit if some threshold is exceeded.
+Some more sophisticated technique that prevents more demanding clients
+from starving less demanding clients may be needed.
 
-I think I have a smoking gun: the "buf" column of
-/var/log/ceph/stat/osd0 shows that bufferlist memory
-grows to several GiB, and stays that way until the cosd
-process is killed via the oom-killer.
+Without this patch, for a filesystem with a single osd, I was able to
+reliably cause the osd to be killed by the kernel oom-killer with a
+large streaming write from a single client.  In my case the client
+machine was several years newer than the server machine, and the
+network was 10 Gb/s Ethernet with 9000B MTU, which configuration
+probably contributes to the problem.
 
-I also think that my test configuration contributes:
-my client host is several years newer than the server
-host, and my network is 10 Gb/s.
+With this patch, the same test ran reliably, with the osd RSS staying
+below a few hundred MiB.
 
-I've got a little patch that puts a Pipe reader to
-sleep for a bit if the bufferlist memory use gets too
-big, and it completely solves my problem.  With it my
-cosd RSS hovers in the few hundred MiB range.  I doubt if
-it is the correct final solution, but it surely seems
-to point in the direction of one.
+Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+---
+ src/msg/SimpleMessenger.cc |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
 
-I'll post it as a reply to this email; please let me know
-what you think.
-
--- Jim
-
-On Wed, 2010-05-26 at 17:28 -0600, Sage Weil wrote:
-> Hi Jim,
-> 
-> Interesting.. we saw a similar report on irc.  Can you add
-> 
-> 	debug osd = 20
-> 	debug filestore = 20
-> 	debug journal = 20
-> 	debug ms = 1
-> 
-> to your [osd] section, reproduce the crash, and then send us the osd log?  
-> (It's at /var/log/ceph/osd$id, unless you've put it somewhere else.)
-> 
-> Thanks!
-> sage
-> 
-> 
-> On Wed, 26 May 2010, Jim Schutt wrote:
-> 
-> > Hi,
-> > 
-> > I'm running an interesting test case where I can
-> > cause an instance of cosd to use all available memory on
-> > its server.
-> > 
-> > On the server side I'm running the testing branch (at 
-> > commit  817495d2).  On the client side I'm running the
-> > for-linus branch (at commit 240ed68e).  Client and server
-> > are both CentOS 5.5.
-> > 
-> > My filesystem has one monitor daemon, two mds daemons,
-> > and one osd daemon, all running on one system with 4 GiB
-> > memory.  I'm running with no swap, because otherwise 
-> > during this test the system swaps like mad and becomes
-> > unresponsive.  The swapping is what made me look deeper.
-> > 
-> > I mount this filesystem on a client system, then try to 
-> > create a 16 GiB file on it using dd.  While creating
-> > the file I watch the server with top, and see that both
-> > the virtual memory use and resident set size of the
-> > cosd instance grow to ~4 GiB, and a short time later cosd 
-> > dies by oom-killer:
-> > 
-> > May 26 16:12:28 sasa008 kernel: [  902.544418] Killed process 6621 (cosd) vsz:4319672kB, anon-rss:3832152kB, file-rss:208kB
-> > 
-> > The osd has a 100 GiB partition for its data.
-> > 
-> > Am I maybe doing something wrong? 
-> > Is there anything else I can do to help debug this?
-> > 
-> > Thanks -- Jim
-> > 
-> > 
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> 
+diff --git a/src/msg/SimpleMessenger.cc b/src/msg/SimpleMessenger.cc
+index a7fb18d..11163e3 100644
+--- a/src/msg/SimpleMessenger.cc
++++ b/src/msg/SimpleMessenger.cc
+@@ -1750,6 +1750,20 @@ Message *SimpleMessenger::Pipe::read_message()
+   unsigned data_off = le32_to_cpu(header.data_off);
+   if (data_len) {
+     int left = data_len;
++    int throttled = 0;
++
++    while (buffer_total_alloc.read() + data_len > (64*1024*1024)) {
++      struct timespec sleepy_time = {0, (1000 * 1000)}; // 1 msec
++      if (!throttled)
++	dout(4) << " pipe reader paused" << "; buffer_total_alloc "
++		<< buffer_total_alloc.read() << dendl;
++      ::nanosleep(&sleepy_time, 0);
++      throttled++;
++    }
++    if (throttled)
++      dout(4) << " pipe reader unpaused; buffer_total_alloc "
++	       << buffer_total_alloc.read() << dendl;
++      
+     if (data_off & ~PAGE_MASK) {
+       // head
+       int head = MIN(PAGE_SIZE - (data_off & ~PAGE_MASK),
+-- 
+1.6.6.1
 
 
