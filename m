@@ -1,60 +1,69 @@
-From: Andre Noll <maan@systemlinux.org>
-Subject: Re: Correct proceedure for removing ceph nodes
-Date: Mon, 7 Jun 2010 10:10:48 +0200
-Message-ID: <20100607081048.GW1211@skl-net.de>
-References: <AANLkTimW7oNdbDnTTyPzlOlD8fr0Bw5rRybuTiHNQTmV@mail.gmail.com> <Pine.LNX.4.64.1006021122300.1269@cobra.newdream.net> <20100604130359.GT1211@skl-net.de> <Pine.LNX.4.64.1006040951210.2384@cobra.newdream.net>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: Re: "VFS: Busy inodes after unmount of ceph" kernel-message after
+ umount
+Date: Mon, 7 Jun 2010 08:33:09 +0000 (UTC)
+Message-ID: <huias5$pf4$1@dough.gmane.org>
+References: <hudfmd$kjm$1@dough.gmane.org>
+	<Pine.LNX.4.64.1006062109410.14891@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="D2rVImvqWGvKULsk"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from systemlinux.org ([83.151.29.59]:58100 "EHLO m18s25.vlinux.de"
+Received: from lo.gmane.org ([80.91.229.12]:37085 "EHLO lo.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755444Ab0FGILC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 7 Jun 2010 04:11:02 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1006040951210.2384@cobra.newdream.net>
+	id S1751666Ab0FGIdX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 7 Jun 2010 04:33:23 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OLXlm-0006Z0-Ob
+	for ceph-devel@vger.kernel.org; Mon, 07 Jun 2010 10:33:18 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Jun 2010 10:33:18 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Jun 2010 10:33:18 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Paul <paul_chiang@tcloudcomputing.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+
+Am Sun, 06 Jun 2010 21:10:28 -0700 schrieb Sage Weil:
+
+> On Sat, 5 Jun 2010, Thomas Mueller wrote:
+>> hi
+>> 
+>> since running an new snapshot test* that creates some(many?) snapshots
+>> I get this kernel message on umount:
+>> 
+>> VFS: Busy inodes after unmount of ceph. Self-destruct in 5 seconds. 
+>> Have a nice day...
+>> 
+>> this is with kernel 2.6.34 and ceph-client-standalone
+> 
+> This one is new.  Can you say a bit more about what workload induced the
+> crash?  Or better yet, are you able to reproduce it?
+> 
+
+yes, i get the message every time i run the test and do the umount. the 
+system is debian squeeze with 4GB of RAM and 2.6.34 kernel from 
+experimental repo. cannot test it on centos5 right now. 
 
 
---D2rVImvqWGvKULsk
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+what the script does:
+- mkdir snaptest-2; cd snaptest-2
+- create 100 dirs with 1 textfile in it
+- mkdir .snap/test-1
+- create 100 dirs with 1 textfile in it
+- for every subdir create a snapshot (mkdir $i/.snap/snaptest) and then 
+create 10 textfiles
+- mkdir .snap/test-2
+- mkdir copysnap1; cp -R .snap/test-1 copysnap1/
+- mkdir .snap/test-3
+- rm -Rf ./*
+- umount
 
-On Fri, Jun 04, 09:52, Sage Weil Wrote
-> > IOW, something like the "clone failing disk" feature of some hardware
-> > raids or LVM's pvmove. The idea is to first mirror all data on two
-> > disks/PVs/OSDs and to kick out one only after mirroring is complete.
->=20
-> You basically get this by marking the osd 'out' but not 'down', e.g.,
->=20
->  $ ceph osd out 23   # mark out osd23
->=20
-> The data on osd23 isn't removed until the pg is fully replicated/migrated=
-=20
-> to it's new location.
+(http://github.com/vinzent/ceph-testsuite/blob/master/tests/snaptest-2)
 
-Wow, that's awesome!
+- Thomas
 
-Thanks
-Andre
---=20
-The only person who always got his work done by Friday was Robinson Crusoe
-
---D2rVImvqWGvKULsk
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.1 (GNU/Linux)
-
-iD8DBQFMDKmIWto1QDEAkw8RAvOMAJkB9vR93j5kS9VQzDN9IOArod/sOACfW3Oe
-sjvJ3bOKZqzCkyAzYPpQWO4=
-=j1Vc
------END PGP SIGNATURE-----
-
---D2rVImvqWGvKULsk--
