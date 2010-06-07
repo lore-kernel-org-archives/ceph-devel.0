@@ -1,425 +1,86 @@
-From: Paul <paul_chiang@tcloudcomputing.com>
-Subject: Re: Correct proceedure for removing ceph nodes
-Date: Mon, 7 Jun 2010 15:27:52 +0800
-Message-ID: <AANLkTik0eXCX53WQ9aTYz5qmpFunTTCoTxQeK42lYWfb@mail.gmail.com>
-References: <AANLkTimW7oNdbDnTTyPzlOlD8fr0Bw5rRybuTiHNQTmV@mail.gmail.com>
-	<Pine.LNX.4.64.1006021122300.1269@cobra.newdream.net>
-	<20100604130359.GT1211@skl-net.de>
-	<Pine.LNX.4.64.1006040951210.2384@cobra.newdream.net>
+From: Andre Noll <maan@systemlinux.org>
+Subject: Re: osd: terminate called after throwing an instance of 'std::bad_alloc'
+Date: Mon, 7 Jun 2010 10:07:54 +0200
+Message-ID: <20100607080754.GU1211@skl-net.de>
+References: <20100531125156.GJ1211@skl-net.de> <Pine.LNX.4.64.1006011025090.14408@cobra.newdream.net> <20100602081044.GY1212@skl-net.de> <Pine.LNX.4.64.1006021115240.1269@cobra.newdream.net> <20100604084521.GO1211@skl-net.de> <Pine.LNX.4.64.1006040944331.2384@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="vEk28Nl/eckWL8CC"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:36122 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756302Ab0FGH14 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Jun 2010 03:27:56 -0400
-Received: by wyi11 with SMTP id 11so2126594wyi.19
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Jun 2010 00:27:54 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1006040951210.2384@cobra.newdream.net>
+Received: from systemlinux.org ([83.151.29.59]:45289 "EHLO m18s25.vlinux.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751666Ab0FGIIF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 7 Jun 2010 04:08:05 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1006040944331.2384@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-Took a shot at implementing the remove mon command, turned out to be
-not _quite_ as trivial as I'd expected.
 
-The monitors need to adjust their whoami values after getting the new
-map, which is annoying since the value is stored in quite a few
-places. Ended up removing all the direct copies I could find and had
-them lookup the value in Monitor instead.
-The interaction with MonClient (i.e. via ceph command) needs a bit
-more work, but I'm not really sure how to proceed at this point. If
-the client happens to pick the monitor that is to be removed to send
-the remove command to, it'll retry with another monitor and get a
-"does not exist" error (because the first operation already removed
-it). If the client happens to pick a monitor whose id is greater than
-the one to be removed, it will never get an response to the command.
+--vEk28Nl/eckWL8CC
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-From 1d30deea10266392328c6fbdf176b766db42c32f Mon Sep 17 00:00:00 2001
-From: Paul Chiang <paul_chiang@tcloudcomputing.com>
-Date: Mon, 7 Jun 2010 09:47:48 +0800
-Subject: [PATCH 1/2] Removed all copies of the whoami value
+On Fri, Jun 04, 09:48, Sage Weil Wrote
+> On Fri, 4 Jun 2010, Andre Noll wrote:
+> > On Wed, Jun 02, 11:19, Sage Weil Wrote
+> > > Okay, it looks like there is a corrupt PG log.  Can you tar up the=20
+> > > $osd_data/current/meta directory, and then 'f 8' and 'p /x info.pgid'=
+ from=20
+> > > gdb (to figure out which pg it's loading)?
+> >=20
+> > It's in decode_nohead():
+> >=20
+> > 	...
+> > 	Program received signal SIGABRT, Aborted.
+> > 	[Switching to Thread 0x7ff115b566f0 (LWP 5045)]
+> > 	0x00007ff1146e9095 in raise () from /lib/libc.so.6
+> > 	(gdb) f 8
+> > 	#8  0x0000000000540920 in PG::read_log (this=3D0x7ff1104b6460,
+> > 	store=3D<value optimized out>) at ./include/cstring.h:120
+> > 	120         _data =3D new char[_len + 1];
+> > 	(gdb) p /x info.pgid
+> > 	$1 =3D {v =3D {preferred =3D {v =3D 0xffff}, ps =3D {v =3D 0x1bf}, poo=
+l =3D {v =3D 0x0}}}
+>=20
+> The pgid's format like $pool.$ps[p$preferred] (where the preferred bit=20
+> only shows up if >=3D 0).  In hex.  So the pgid above is 0.1bf, and the=
+=20
+> corrupted log should be current/meta/pglog_0.1bf_0.  If you send me that=
+=20
+> file (off list) I can see what the corruption looks like.
 
+Thanks for the explanation. I'll send it off-list in a minute.
+It's 361K large.
 
-Signed-off-by: Paul Chiang <paul_chiang@tcloudcomputing.com>
----
- src/mon/Elector.cc |   10 +++++-----
- src/mon/Elector.h  |    3 +--
- src/mon/Monitor.cc |    4 ++--
- src/mon/Paxos.cc   |   16 ++++++++--------
- src/mon/Paxos.h    |    5 ++---
- 5 files changed, 18 insertions(+), 20 deletions(-)
+> If you want to try to bring the osd up without that pg, you can move that=
+=20
+> pglog file and current/0.1bf to some other temp directory and restart=20
+> cosd.
 
-diff --git a/src/mon/Elector.cc b/src/mon/Elector.cc
-index 7f8fa62..41fde6e 100644
---- a/src/mon/Elector.cc
-+++ b/src/mon/Elector.cc
-@@ -69,11 +69,11 @@ void Elector::start()
-     bump_epoch(epoch+1);  // odd == election cycle
-   start_stamp = g_clock.now();
-   electing_me = true;
--  acked_me.insert(whoami);
-+  acked_me.insert(mon->whoami);
+Did not work. It recreated that file and then crashed for the same
+reason. The gdb output is identical, but the file contents have
+changed. I'll send the new pglog_0.1bf_0 as well.
 
-   // bcast to everyone else
-   for (unsigned i=0; i<mon->monmap->size(); ++i) {
--    if ((int)i == whoami) continue;
-+    if ((int)i == mon->whoami) continue;
-     mon->messenger->send_message(new
-MMonElection(MMonElection::OP_PROPOSE, epoch, mon->monmap),
- 				 mon->monmap->get_inst(i));
-   }
-@@ -151,7 +151,7 @@ void Elector::victory()
-   for (set<int>::iterator p = quorum.begin();
-        p != quorum.end();
-        ++p) {
--    if (*p == whoami) continue;
-+    if (*p == mon->whoami) continue;
-     MMonElection *m = new MMonElection(MMonElection::OP_VICTORY,
-epoch, mon->monmap);
-     m->quorum = quorum;
-     mon->messenger->send_message(m, mon->monmap->get_inst(*p));
-@@ -186,7 +186,7 @@ void Elector::handle_propose(MMonElection *m)
-     }
-   }
+Thanks
+Andre
+--=20
+The only person who always got his work done by Friday was Robinson Crusoe
 
--  if (whoami < from) {
-+  if (mon->whoami < from) {
-     // i would win over them.
-     if (leader_acked >= 0) {        // we already acked someone
-       assert(leader_acked < from);  // and they still win, of course
-@@ -250,7 +250,7 @@ void Elector::handle_victory(MMonElection *m)
-   dout(5) << "handle_victory from " << m->get_source() << dendl;
-   int from = m->get_source().num();
+--vEk28Nl/eckWL8CC
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
 
--  assert(from < whoami);
-+  assert(from < mon->whoami);
-   assert(m->epoch % 2 == 0);
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
 
-   // i should have seen this election if i'm getting the victory.
-diff --git a/src/mon/Elector.h b/src/mon/Elector.h
-index 9bfd7cb..8a21e09 100644
---- a/src/mon/Elector.h
-+++ b/src/mon/Elector.h
-@@ -32,7 +32,6 @@ class Monitor;
- class Elector {
-  private:
-   Monitor *mon;
--  int whoami;
+iD8DBQFMDKjaWto1QDEAkw8RAutsAJ9O9UBPO2hLcpNh2o46zOjpDFTaUgCZAW5e
+zxgy62il249ETQZUgYTGG/s=
+=qXGx
+-----END PGP SIGNATURE-----
 
-   Context *expire_event;
-
-@@ -71,7 +70,7 @@ class Elector {
-   void handle_victory(class MMonElection *m);
-
-  public:
--  Elector(Monitor *m, int w) : mon(m), whoami(w),
-+  Elector(Monitor *m) : mon(m),
- 			       expire_event(0),
- 			       epoch(0),
- 			       electing_me(false),
-diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
-index cf0b20b..db086be 100644
---- a/src/mon/Monitor.cc
-+++ b/src/mon/Monitor.cc
-@@ -93,7 +93,7 @@ Monitor::Monitor(int w, MonitorStore *s, Messenger
-*m, MonMap *map) :
-
-   state(STATE_STARTING), stopping(false),
-
--  elector(this, w),
-+  elector(this),
-   mon_epoch(0),
-   leader(0),
-   paxos(PAXOS_NUM), paxos_service(PAXOS_NUM),
-@@ -114,7 +114,7 @@ Monitor::Monitor(int w, MonitorStore *s, Messenger
-*m, MonMap *map) :
-
- Paxos *Monitor::add_paxos(int type)
- {
--  Paxos *p = new Paxos(this, whoami, type);
-+  Paxos *p = new Paxos(this, type);
-   paxos[type] = p;
-   return p;
- }
-diff --git a/src/mon/Paxos.cc b/src/mon/Paxos.cc
-index d10f31c..9c247e8 100644
---- a/src/mon/Paxos.cc
-+++ b/src/mon/Paxos.cc
-@@ -23,7 +23,7 @@
-
- #define DOUT_SUBSYS paxos
- #undef dout_prefix
--#define dout_prefix _prefix(mon, whoami, machine_name, state, last_committed)
-+#define dout_prefix _prefix(mon, mon->whoami, machine_name, state,
-last_committed)
- static ostream& _prefix(Monitor *mon, int whoami, const char
-*machine_name, int state, version_t last_committed) {
-   return *_dout << dbeginl
- 		<< "mon" << whoami
-@@ -87,7 +87,7 @@ void Paxos::collect(version_t oldpn)
-   for (set<int>::const_iterator p = mon->get_quorum().begin();
-        p != mon->get_quorum().end();
-        ++p) {
--    if (*p == whoami) continue;
-+    if (*p == mon->whoami) continue;
-
-     MMonPaxos *collect = new MMonPaxos(mon->get_epoch(),
-MMonPaxos::OP_COLLECT, machine_id);
-     collect->last_committed = last_committed;
-@@ -336,7 +336,7 @@ void Paxos::begin(bufferlist& v)
-
-   // accept it ourselves
-   accepted.clear();
--  accepted.insert(whoami);
-+  accepted.insert(mon->whoami);
-   new_value = v;
-   mon->store->put_bl_sn(new_value, machine_name, last_committed+1);
-
-@@ -356,7 +356,7 @@ void Paxos::begin(bufferlist& v)
-   for (set<int>::const_iterator p = mon->get_quorum().begin();
-        p != mon->get_quorum().end();
-        ++p) {
--    if (*p == whoami) continue;
-+    if (*p == mon->whoami) continue;
-
-     dout(10) << " sending begin to mon" << *p << dendl;
-     MMonPaxos *begin = new MMonPaxos(mon->get_epoch(),
-MMonPaxos::OP_BEGIN, machine_id);
-@@ -483,7 +483,7 @@ void Paxos::commit()
-   for (set<int>::const_iterator p = mon->get_quorum().begin();
-        p != mon->get_quorum().end();
-        ++p) {
--    if (*p == whoami) continue;
-+    if (*p == mon->whoami) continue;
-
-     dout(10) << " sending commit to mon" << *p << dendl;
-     MMonPaxos *commit = new MMonPaxos(mon->get_epoch(),
-MMonPaxos::OP_COMMIT, machine_id);
-@@ -527,7 +527,7 @@ void Paxos::extend_lease()
-   lease_expire = g_clock.now();
-   lease_expire += g_conf.mon_lease;
-   acked_lease.clear();
--  acked_lease.insert(whoami);
-+  acked_lease.insert(mon->whoami);
-
-   dout(7) << "extend_lease now+" << g_conf.mon_lease << " (" <<
-lease_expire << ")" << dendl;
-
-@@ -535,7 +535,7 @@ void Paxos::extend_lease()
-   for (set<int>::const_iterator p = mon->get_quorum().begin();
-        p != mon->get_quorum().end();
-        ++p) {
--    if (*p == whoami) continue;
-+    if (*p == mon->whoami) continue;
-     MMonPaxos *lease = new MMonPaxos(mon->get_epoch(),
-MMonPaxos::OP_LEASE, machine_id);
-     lease->last_committed = last_committed;
-     lease->lease_timestamp = lease_expire;
-@@ -724,7 +724,7 @@ version_t Paxos::get_new_proposal_number(version_t gt)
-   last_pn /= 100;
-   last_pn++;
-   last_pn *= 100;
--  last_pn += (version_t)whoami;
-+  last_pn += (version_t)mon->whoami;
-
-   // write
-   mon->store->put_int(last_pn, machine_name, "last_pn");
-diff --git a/src/mon/Paxos.h b/src/mon/Paxos.h
-index c6eff22..9d34605 100644
---- a/src/mon/Paxos.h
-+++ b/src/mon/Paxos.h
-@@ -68,7 +68,6 @@ class Paxos;
- // i am one state machine.
- class Paxos {
-   Monitor *mon;
--  int whoami;
-
-   // my state machine info
-   int machine_id;
-@@ -225,8 +224,8 @@ private:
-   version_t get_new_proposal_number(version_t gt=0);
-
- public:
--  Paxos(Monitor *m, int w,
--	int mid) : mon(m), whoami(w),
-+  Paxos(Monitor *m,
-+	int mid) : mon(m),
- 		   machine_id(mid),
- 		   machine_name(get_paxos_name(mid)),
- 		   state(STATE_RECOVERING),
--- 
-1.6.4.2
-
-From eb7308104c33aa50195e3736483c6bf9a145a518 Mon Sep 17 00:00:00 2001
-From: Paul Chiang <paul_chiang@tcloudcomputing.com>
-Date: Mon, 7 Jun 2010 10:16:39 +0800
-Subject: [PATCH 2/2] Introduced ceph mon remove command
-
-
-Signed-off-by: Paul Chiang <paul_chiang@tcloudcomputing.com>
----
- src/common/LogClient.h   |    1 +
- src/mon/Monitor.cc       |    1 +
- src/mon/Monitor.h        |    1 +
- src/mon/MonmapMonitor.cc |   61 ++++++++++++++++++++++++++++++++++++++++++++++
- src/mon/MonmapMonitor.h  |    1 +
- 5 files changed, 65 insertions(+), 0 deletions(-)
-
-diff --git a/src/common/LogClient.h b/src/common/LogClient.h
-index 0185eec..bc5e227 100644
---- a/src/common/LogClient.h
-+++ b/src/common/LogClient.h
-@@ -56,6 +56,7 @@ class LogClient : public Dispatcher {
-   void send_log();
-   void handle_log_ack(MLogAck *m);
-   void set_synchronous(bool sync) { is_synchronous = sync; }
-+  void set_mon(int mon_id) { mon = mon_id; }
-
-   LogClient(Messenger *m, MonMap *mm) :
-     messenger(m), monmap(mm), mon(-1), is_synchronous(false),
-diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
-index db086be..259b6ce 100644
---- a/src/mon/Monitor.cc
-+++ b/src/mon/Monitor.cc
-@@ -110,6 +110,7 @@ Monitor::Monitor(int w, MonitorStore *s, Messenger
-*m, MonMap *map) :
-   mon_caps = new MonCaps();
-   mon_caps->set_allow_all(true);
-   mon_caps->text = "allow *";
-+  myaddr = map->get_inst(w).addr;
- }
-
- Paxos *Monitor::add_paxos(int type)
-diff --git a/src/mon/Monitor.h b/src/mon/Monitor.h
-index 829c506..a673972 100644
---- a/src/mon/Monitor.h
-+++ b/src/mon/Monitor.h
-@@ -58,6 +58,7 @@ class Monitor : public Dispatcher {
- public:
-   // me
-   int whoami;
-+  entity_addr_t myaddr;
-   Messenger *messenger;
-   Mutex lock;
-
-diff --git a/src/mon/MonmapMonitor.cc b/src/mon/MonmapMonitor.cc
-index 0aca5fb..5368ab7 100644
---- a/src/mon/MonmapMonitor.cc
-+++ b/src/mon/MonmapMonitor.cc
-@@ -48,6 +48,7 @@ bool MonmapMonitor::update_from_paxos()
-   dout(10) << "update_from_paxos paxosv " << paxosv
- 	   << ", my v " << mon->monmap->epoch << dendl;
-
-+  int original_map_size = mon->monmap->size();
-   //read and decode
-   monmap_bl.clear();
-   bool success = paxos->read(paxosv, monmap_bl);
-@@ -58,6 +59,20 @@ bool MonmapMonitor::update_from_paxos()
-   //save the bufferlist version in the paxos instance as well
-   paxos->stash_latest(paxosv, monmap_bl);
-
-+  if (original_map_size != mon->monmap->size())
-+  {
-+    _update_whoami();
-+
-+    // call election?
-+    if (mon->monmap->size() > 1) {
-+      mon->call_election();
-+    } else {
-+      // we're standalone.
-+      set<int> q;
-+      q.insert(mon->whoami);
-+      mon->win_election(1, q);
-+    }
-+  }
-   return true;
- }
-
-@@ -127,6 +142,8 @@ bool MonmapMonitor::preprocess_command(MMonCommand *m)
-     }
-     else if (m->cmd[1] == "add")
-       return false;
-+    else if (m->cmd[1] == "remove")
-+      return false;
-   }
-
-   if (r != -1) {
-@@ -177,6 +194,23 @@ bool MonmapMonitor::prepare_command(MMonCommand *m)
-       paxos->wait_for_commit(new Monitor::C_Command(mon, m, 0, rs,
-paxos->get_version()));
-       return true;
-     }
-+    else if (m->cmd.size() == 3 && m->cmd[1] == "remove") {
-+      entity_addr_t addr;
-+      parse_ip_port(m->cmd[2].c_str(), addr);
-+      bufferlist rdata;
-+      if (!pending_map.contains(addr)) {
-+        err = -ENOENT;
-+        ss << "mon " << addr << " does not exist";
-+        goto out;
-+      }
-+
-+      pending_map.remove(addr);
-+      pending_map.last_changed = g_clock.now();
-+      ss << "removed mon" << " at " << addr << ", there are now " <<
-pending_map.size() << " monitors" ;
-+      getline(ss, rs);
-+      paxos->wait_for_commit(new Monitor::C_Command(mon, m, 0, rs,
-paxos->get_version()));
-+      return true;
-+    }
-     else
-       ss << "unknown command " << m->cmd[1];
-   } else
-@@ -203,3 +237,30 @@ void MonmapMonitor::tick()
- {
-   update_from_paxos();
- }
-+
-+void MonmapMonitor::_update_whoami()
-+{
-+  // first check if there is any change
-+  if (mon->whoami < mon->monmap->size() &&
-+      mon->monmap->get_inst(mon->whoami).addr == mon->myaddr)
-+  {
-+    return;
-+  }
-+
-+  // then check backwards starting from min(whoami-1, size-1) since
-whoami only ever decreases
-+  unsigned i=(mon->whoami-1) < mon->monmap->size() ?
-(mon->whoami-1):(mon->monmap->size()-1);
-+  for (; i>=0; i--)
-+  {
-+    if (mon->monmap->get_inst(i).addr == mon->myaddr)
-+    {
-+      dout(10) << "Changing whoami from " << mon->whoami << " to " <<
-i << dendl;
-+      mon->whoami = i;
-+      mon->messenger->set_myname(entity_name_t::MON(i));
-+      mon->logclient.set_mon(i);
-+      return;
-+    }
-+  }
-+  dout(0) << "Cannot find myself (mon" << mon->whoami << ", " <<
-mon->myaddr << ") in new monmap! I must have been removed, shutting
-down." << dendl;
-+  mon->shutdown();
-+}
-+
-diff --git a/src/mon/MonmapMonitor.h b/src/mon/MonmapMonitor.h
-index fbb7fa5..b14c012 100644
---- a/src/mon/MonmapMonitor.h
-+++ b/src/mon/MonmapMonitor.h
-@@ -67,6 +67,7 @@ class MonmapMonitor : public PaxosService {
-
-  private:
-   bufferlist monmap_bl;
-+  void _update_whoami();
- };
-
-
--- 
-1.6.4.2
+--vEk28Nl/eckWL8CC--
