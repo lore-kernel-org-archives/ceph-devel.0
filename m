@@ -1,46 +1,37 @@
 From: Sage Weil <sage@newdream.net>
 Subject: Re: ceph, slow (cheap) and fast (expensive) storage?
-Date: Tue, 8 Jun 2010 10:51:37 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006081047120.15202@cobra.newdream.net>
-References: <4C0E1BAC.8070306@wpkg.org>
+Date: Tue, 8 Jun 2010 11:03:17 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1006081051520.15202@cobra.newdream.net>
+References: <4C0E1BAC.8070306@wpkg.org> <huldph$fmu$1@dough.gmane.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45029 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44818 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755943Ab0FHRvI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jun 2010 13:51:08 -0400
-In-Reply-To: <4C0E1BAC.8070306@wpkg.org>
+	with ESMTP id S1755061Ab0FHSCr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jun 2010 14:02:47 -0400
+In-Reply-To: <huldph$fmu$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tomasz Chmielewski <mangoo@wpkg.org>
+To: Thomas Mueller <thomas@chaschperli.ch>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, 8 Jun 2010, Tomasz Chmielewski wrote:
-> I'd like to build a cluster for storing large amounts of data.
+On Tue, 8 Jun 2010, Thomas Mueller wrote:
+> I would not expect to be the fast (expensive) storage to be that faster 
+> in a ceph cluster. if you get enough cheap storage nodes it will scale 
+> with the amount of disks/nics as the date is striped among all the nodes 
+> (osd's). But this is just my speculation.
 > 
-> The cluster would consist of slow (cheap) storage and fast (expensive)
-> storage.
-> 
-> I would like to migrate data from fast (expensive) storage to slow (cheap)
-> storage if it wasn't accessed for, say, 6 months.
-> 
-> Would ceph somehow help me achieve that?
+> if you have some amount storage nodes and you are on GigE you will hit 
+> the ethernet limit on the client faster than anything else. 
 
-We don't currently have that functionality.  In principle it's certainly 
-something the system could do, and the underlying storage architecture 
-lends itself to that: you can create different object storage pools, with 
-different data distribution (crush) rules, mapped to different devices, 
-etc.  What's missing is the HSM process that goes and finds old, idle data 
-and migrates it.  And atime tracking.
+You can also think of "fast" and "slow" in terms of the ratio of io 
+bandwidth to capacity on each individual device.  For example you can use 
+lots of SATA disks in parallel to get more IOPs and throughput, but the 
+platters will be mostly empty.  It's often a question of how much total 
+data you have and how much IO to it you need to serve. 
 
-You can also use a mix of small+fast and big+slow disks/ssds with a single 
-pool of storage by writing a crush rule that puts the primary replica on 
-the fast disks and additional replicas on slow disks.  (The primary 
-replicas handle the read workload.)  That approach fixes the ratio between 
-fast and slow capacity, though.  You could also build each osd volume with 
-a mix of fast and slow disks/ssds, and use btrfs or some other local fs to 
-manage the distribution of objects across disk types.  (Btrfs doesn't do 
-that yet, but presumably will at some point.)
+Of course, there are also absolute performance considerations (SSD read 
+latencies are lower than a disk), so both factors should be considered.
 
 sage
