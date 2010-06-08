@@ -1,63 +1,75 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: Re: ceph, slow (cheap) and fast (expensive) storage?
-Date: Tue, 8 Jun 2010 12:41:21 +0000 (UTC)
-Message-ID: <huldph$fmu$1@dough.gmane.org>
-References: <4C0E1BAC.8070306@wpkg.org>
+From: ales-76@seznam.cz
+Subject: =?us-ascii?Q?Re=3A=20ceph=2C=20slow=20=28cheap=29=20and=20fast=20=28expensive=29=20storage=3F?=
+Date: Tue, 08 Jun 2010 15:13:17 +0200 (CEST)
+Message-ID: <6410.1165.492-24748-1755564191-1276002797@seznam.cz>
+References: <4C0E31B7.4010606@wpkg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=iso-8859-2;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:48713 "EHLO lo.gmane.org"
+Received: from mxh.seznam.cz ([77.75.72.26]:36619 "EHLO mxh.seznam.cz"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754463Ab0FHMlb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 8 Jun 2010 08:41:31 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OLy7V-0003w2-Vj
-	for ceph-devel@vger.kernel.org; Tue, 08 Jun 2010 14:41:29 +0200
-Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Jun 2010 14:41:29 +0200
-Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Jun 2010 14:41:29 +0200
+	id S1755031Ab0FHNNi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jun 2010 09:13:38 -0400
+In-Reply-To: <4C0E31B7.4010606@wpkg.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?us-ascii?Q?Tomasz=20Chmielewski?= <mangoo@wpkg.org>
+Cc: wido@pcextreme.nl, ceph-devel@vger.kernel.org
 
-Am Tue, 08 Jun 2010 12:30:04 +0200 schrieb Tomasz Chmielewski:
+Hello,
 
-> I'd like to build a cluster for storing large amounts of data.
-> 
-> The cluster would consist of slow (cheap) storage and fast (expensive)
-> storage.
-> 
-> I would like to migrate data from fast (expensive) storage to slow
-> (cheap) storage if it wasn't accessed for, say, 6 months.
-> 
-> Would ceph somehow help me achieve that?
+During the last year Ottawa Linux Symposium there was a presentation of=
+ open-souce implementation of Hierarchical Storage Management framework=
+ for Linux. See: http://www.kernel.org/doc/ols/2009/ols2009-pages-263-2=
+74.pdf AFAK it is only a prototype, works only with ext2/ext3 and no ot=
+her open-source storage system offers anything like this just yet. So I=
+ guess you have to wait a little. But it sounds like useful feature and=
+ it would be nice if Ceph can do something like that. Would it be possi=
+ble for Ceph to change data placement depending on by example file popu=
+larity?
 
+Ales Blaha
 
-I would not expect to be the fast (expensive) storage to be that faster 
-in a ceph cluster. if you get enough cheap storage nodes it will scale 
-with the amount of disks/nics as the date is striped among all the nodes 
-(osd's). But this is just my speculation.
-
-if you have some amount storage nodes and you are on GigE you will hit 
-the ethernet limit on the client faster than anything else. 
-
-"cheap" not in sens of crap hardware. cheap as in SATA 24x7 enterprise 
-drives.
-
-and remember:
-
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-
-- Thomas
-
-PS: "cheap" storage selfmade: 
-http://blog.backblaze.com/2009/09/01/petabytes-on-a-budget-how-to-build-
-cheap-cloud-storage/
-
+> ------------ P=F9vodn=ED zpr=E1va ------------
+> Od: Tomasz Chmielewski <mangoo@wpkg.org>
+> P=F8edm=ECt: Re: ceph, slow (cheap) and fast (expensive) storage?
+> Datum: 08.6.2010 14:04:17
+> ----------------------------------------
+> Am 08.06.2010 12:53, Wido den Hollander wrote:
+> > Hi,
+> >
+> > I'm not aware of any of those features in Ceph and i don't think th=
+at it
+> > will be possible in the near future.
+> >
+> > But while thinking about it, is ZFS an option for you? You could th=
+en
+> > use a lot of SATA disks and add some SAS disks for your caching. ZF=
+S
+> > will then place the most used blocks on the SAS disks.
+>=20
+> Not sure, perhaps not.
+>=20
+> I was thinking of something in the line of:
+>=20
+> http://en.wikipedia.org/wiki/Hierarchical_storage_management
+>=20
+>=20
+> --=20
+> Tomasz Chmielewski
+> http://wpkg.org
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+>=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
