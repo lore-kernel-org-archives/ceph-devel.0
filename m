@@ -1,38 +1,55 @@
-From: Matthew Roy <imjustmatthew@gmail.com>
-Subject: IPv6 Status
-Date: Mon, 7 Jun 2010 22:24:58 -0400
-Message-ID: <AANLkTikUFKCG8KEhbc3wqWRIbciPnIyNgJMSz5GucMj4@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: IPv6 Status
+Date: Mon, 7 Jun 2010 21:42:28 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1006072137540.3013@cobra.newdream.net>
 References: <AANLkTimTZSGxg-0LFo9BtSJpq74JV-I0V84m7I5DVxCB@mail.gmail.com>
+ <AANLkTikUFKCG8KEhbc3wqWRIbciPnIyNgJMSz5GucMj4@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-315127405-1275972148=:3013"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:61879 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751543Ab0FHCZA convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Jun 2010 22:25:00 -0400
-Received: by vws17 with SMTP id 17so818706vws.19
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Jun 2010 19:24:59 -0700 (PDT)
-In-Reply-To: <AANLkTimTZSGxg-0LFo9BtSJpq74JV-I0V84m7I5DVxCB@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:47601 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750739Ab0FHEl7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Jun 2010 00:41:59 -0400
+In-Reply-To: <AANLkTikUFKCG8KEhbc3wqWRIbciPnIyNgJMSz5GucMj4@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Matthew Roy <imjustmatthew@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On=A02009-10-02=A0there was a commit "use sockaddr_storage; and some=A0=
-ipv6
-support groundwork" but I can't find any references to IPv6 support
-being completed. Did that commit actually complete IPv6 support or are
-more changes still required?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Commit diff:
-http://ceph.newdream.net/git/p=3Dceph.git;a=3Dcommitdiff;h=3Ddd732cbfc1=
-c92f0d8dba2743a979baad6685a98c;hp=3D18b3bfc5650be6584c5c95fce447fa66fb9=
-18a83
+--557981400-315127405-1275972148=:3013
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Thanks,
-Matthew Roy
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi Matthew,
+
+On Mon, 7 Jun 2010, Matthew Roy wrote:
+> On=A02009-10-02=A0there was a commit "use sockaddr_storage; and some=A0ip=
+v6
+> support groundwork" but I can't find any references to IPv6 support
+> being completed. Did that commit actually complete IPv6 support or are
+> more changes still required?
+>=20
+> Commit diff:
+> http://ceph.newdream.net/git/p=3Dceph.git;a=3Dcommitdiff;h=3Ddd732cbfc1c9=
+2f0d8dba2743a979baad6685a98c;hp=3D18b3bfc5650be6584c5c95fce447fa66fb918a83
+
+I think all the basic groundwork is there.  The entity_addr_t type used=20
+throughout contains a sockaddr_storage, which can hold either ipv4 or ipv6=
+=20
+addresses, and that commit updated the parsing function to handle v6=20
+address syntax.
+
+The last step is just to update msg/SimpleMessenger.cc to actually bind or=
+=20
+connect an ipv6 socket.  It should be pretty straightforward to fix the=20
+various places in the bind(), accept(), and connect() methods to do that,=
+=20
+particularly if you already have v6 networking set up in your=20
+environment.
+
+sage
+--557981400-315127405-1275972148=:3013--
