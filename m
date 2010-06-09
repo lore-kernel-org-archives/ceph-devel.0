@@ -1,85 +1,48 @@
-From: Andre Noll <maan@systemlinux.org>
-Subject: Re: osd: terminate called after throwing an instance of 'std::bad_alloc'
-Date: Wed, 9 Jun 2010 10:16:04 +0200
-Message-ID: <20100609081604.GG9152@skl-net.de>
-References: <Pine.LNX.4.64.1006011025090.14408@cobra.newdream.net> <20100602081044.GY1212@skl-net.de> <Pine.LNX.4.64.1006021115240.1269@cobra.newdream.net> <20100604084521.GO1211@skl-net.de> <Pine.LNX.4.64.1006040944331.2384@cobra.newdream.net> <20100607080754.GU1211@skl-net.de> <20100607080932.GV1211@skl-net.de> <Pine.LNX.4.64.1006071016470.20365@cobra.newdream.net> <20100608122838.GA9152@skl-net.de> <Pine.LNX.4.64.1006082246540.3595@cobra.newdream.net>
+From: Tomasz Chmielewski <mangoo@wpkg.org>
+Subject: Re: ceph, slow (cheap) and fast (expensive) storage?
+Date: Wed, 09 Jun 2010 16:55:34 +0200
+Message-ID: <4C0FAB66.6030003@wpkg.org>
+References: <4C0E1BAC.8070306@wpkg.org> <Pine.LNX.4.64.1006081047120.15202@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="E69HUUNAyIJqGpVn"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from systemlinux.org ([83.151.29.59]:47989 "EHLO m18s25.vlinux.de"
+Received: from mail.virtall.com ([178.63.195.102]:36054 "EHLO mail.virtall.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752986Ab0FIIQT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 Jun 2010 04:16:19 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1006082246540.3595@cobra.newdream.net>
+	id S1755892Ab0FIOzn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 9 Jun 2010 10:55:43 -0400
+In-Reply-To: <Pine.LNX.4.64.1006081047120.15202@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-
---E69HUUNAyIJqGpVn
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Jun 08, 22:54, Sage Weil wrote:
-> Hmm, okay.  Unfortunately the logs don't have any clues.  I'm giving on u=
-p=20
-> solving the mystery this time around.  You can go ahead and stop all the=
-=20
-> daemons and re-run mkcephfs.=20
-
-OK, there was only stress-test data on the cephfs anyway. I'll start
-=66rom scratch and run another set of tests. Fortunately we haven't
-told the users about the shiny new file systems yet, so we are in no
-hurry ;)
-
-> I've added a 'scripts/check_pglog.sh $osddatadir' script that will just=
-=20
-> look for any corruption.  Running that periodically will let you verify=
-=20
-> that you haven't hit the same corruption without having to restart cosd. =
-=20
-
-Goodie. I'll set up a cron job to run this automatically. Should I
-do this on each osd?
-
-> Ideally we can figure out what kind of workloads are triggering the=20
-> problem, and then reproduce it with sufficient logging enabled to find=20
-> where the race is taking place.
+Am 08.06.2010 19:51, Sage Weil wrote:
+> On Tue, 8 Jun 2010, Tomasz Chmielewski wrote:
+>> I'd like to build a cluster for storing large amounts of data.
+>>
+>> The cluster would consist of slow (cheap) storage and fast (expensive)
+>> storage.
+>>
+>> I would like to migrate data from fast (expensive) storage to slow (cheap)
+>> storage if it wasn't accessed for, say, 6 months.
+>>
+>> Would ceph somehow help me achieve that?
 >
-> If you have any details about the workload or any failure/recovery=20
-> activity that may have been going on at the time that may shed some light=
-=20
-> on it...
+> We don't currently have that functionality.  In principle it's certainly
+> something the system could do, and the underlying storage architecture
+> lends itself to that:
 
-Funny enough, the problem occurred while the fs was idle. I ran
-some simple tests a few days earlier and these completed with no
-problems. From that point on, nobody ever accessed it.
+Hmm, since quite recently, Linux kernel has FS-Cache, which:
 
-I'll let you know if I can trigger it reliably. If you have any
-suggestions for a workload that is likely to trigger the race, I'm
-happy to give it a try. Otherwise, I'll just use "stress" again to
-write to the cephfs from a couple of clients simultaneously.
+	This facility is a general purpose cache for network
+	filesystems, though it could be used for caching other things
+	such as ISO9660 filesystems too.
 
-Thanks
-Andre
---=20
-The only person who always got his work done by Friday was Robinson Crusoe
 
---E69HUUNAyIJqGpVn
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
+I wonder if it could work with ceph and/or traditional filesystems, too?
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.1 (GNU/Linux)
 
-iD8DBQFMD03EWto1QDEAkw8RAshDAJ9vRZOaxkKNHcI9isrgCWlmjyOoAwCdFa6j
-2Rid6pO9ube26AOzGUjVdQY=
-=xFHQ
------END PGP SIGNATURE-----
-
---E69HUUNAyIJqGpVn--
+-- 
+Tomasz Chmielewski
+http://wpkg.org
