@@ -1,72 +1,59 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: osd: terminate called after throwing an instance of 'std::bad_alloc'
-Date: Tue, 8 Jun 2010 22:54:35 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006082246540.3595@cobra.newdream.net>
-References: <20100531125156.GJ1211@skl-net.de> <Pine.LNX.4.64.1006011025090.14408@cobra.newdream.net>
- <20100602081044.GY1212@skl-net.de> <Pine.LNX.4.64.1006021115240.1269@cobra.newdream.net>
- <20100604084521.GO1211@skl-net.de> <Pine.LNX.4.64.1006040944331.2384@cobra.newdream.net>
- <20100607080754.GU1211@skl-net.de> <20100607080932.GV1211@skl-net.de>
- <Pine.LNX.4.64.1006071016470.20365@cobra.newdream.net> <20100608122838.GA9152@skl-net.de>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: cmds segfault on pdj-fstest (ceph.git unstable)
+Date: Wed, 9 Jun 2010 06:48:58 +0000 (UTC)
+Message-ID: <hundgq$ums$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40147 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752978Ab0FIFyG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jun 2010 01:54:06 -0400
-In-Reply-To: <20100608122838.GA9152@skl-net.de>
+Received: from lo.gmane.org ([80.91.229.12]:42029 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752998Ab0FIGtM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 9 Jun 2010 02:49:12 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OMF64-0005LU-RV
+	for ceph-devel@vger.kernel.org; Wed, 09 Jun 2010 08:49:08 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Jun 2010 08:49:08 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Jun 2010 08:49:08 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andre Noll <maan@systemlinux.org>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hmm, okay.  Unfortunately the logs don't have any clues.  I'm giving on up 
-solving the mystery this time around.  You can go ahead and stop all the 
-daemons and re-run mkcephfs. 
+hi 
 
-I've added a 'scripts/check_pglog.sh $osddatadir' script that will just 
-look for any corruption.  Running that periodically will let you verify 
-that you haven't hit the same corruption without having to restart cosd.  
-Ideally we can figure out what kind of workloads are triggering the 
-problem, and then reproduce it with sufficient logging enabled to find 
-where the race is taking place.
+since this morning cmds segfaults on the pdj-fstest. 
+(git rev 12798de37169f6561f0dc7643ca626957f7ab37e)
 
-If you have any details about the workload or any failure/recovery 
-activity that may have been going on at the time that may shed some light 
-on it...
+What happend:
+<start server with vstart.sh>
+<mount>
+08:39:08 [  176.460708] ceph: loaded (mon/mds/osd proto 15/32/24, osdmap 5/5 5/5)
+08:39:08 [  176.463965] ceph: client4101 fsid a7b6294d-a074-8e0e-2cee-a48fe2f85c86
+08:39:08 [  176.464240] ceph: mon1 127.0.0.1:6789 session established
+<start pdj-fstest>
+08:40:51 [  279.406980] cmds[6675]: segfault at 0 ip 00000000004bddbd sp 00007f6861ba34e0 error 4 in cmds[400000+331000]
+08:40:51 [  279.409895] ceph: mds0 127.0.0.1:6802 socket closed
+08:40:51 [  279.804386] ceph: mds0 127.0.0.1:6802 connection failed
+08:40:52 [  280.804383] ceph: mds0 127.0.0.1:6802 connection failed
+08:40:54 [  282.804381] ceph: mds0 127.0.0.1:6802 connection failed
+08:40:58 [  286.804387] ceph: mds0 127.0.0.1:6802 connection failed
+08:41:06 [  294.804793] ceph: mds0 127.0.0.1:6802 connection failed
+<killed pdj-fstest>
+08:41:22 [  310.804820] ceph: mds0 127.0.0.1:6802 connection failed
+08:41:38 [  326.804288] ceph: mds0 caps stale
+08:41:53 [  341.804327] ceph: mds0 caps stale
+08:41:54 [  342.804245] ceph: mds0 127.0.0.1:6802 connection failed
 
-FYI, this is http://tracker.newdream.net/issues/114
 
-Thanks!
-sage
+the segfault is reproducable on my machine. yesterday 
+(git rev  58fe4b8d5441982d0103817666a6d1bfdd8e04cd) this error was not present.
 
 
-On Tue, 8 Jun 2010, Andre Noll wrote:
+- Thomas
 
-> On Mon, Jun 07, 10:20, Sage Weil wrote:
-> 
-> > Do you have osd logs?
-> 
-> Should all be there. At least I did not remove anything.
-> 
-> > This is the same corruption I've seen previously, but I've just
-> > reaudited the code I suspect and it looks ok.  Some insight into what
-> > happened to the cluster would help.  Which osd is it?
-> 
-> It's osd6 running on node142. I was running osd from ceph-v0.20.2 but
-> also tried the osd compiled from the "testing" branch of the git repo.
-> 
-> > Do you still have the logs (/var/log/ceph/osd$n*)?  The osdmap
-> > sequence (tarball of $mon_data/osdmap) would be helpful too.
-> 
-> I created a tarball of the full /var/log/ceph directory of node142
-> (which is only a storage node) and will send it to you off-line.
-> 
-> We have three monitors. I'll send a tarball of /var/ceph/mon0/monmap/
-> of mon0 (node141) as well.
-> 
-> Thanks
-> Andre
-> -- 
-> The only person who always got his work done by Friday was Robinson Crusoe
-> 
