@@ -1,59 +1,85 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: cmds segfault on pdj-fstest (ceph.git unstable)
-Date: Wed, 9 Jun 2010 06:48:58 +0000 (UTC)
-Message-ID: <hundgq$ums$1@dough.gmane.org>
+From: Andre Noll <maan@systemlinux.org>
+Subject: Re: osd: terminate called after throwing an instance of 'std::bad_alloc'
+Date: Wed, 9 Jun 2010 10:16:04 +0200
+Message-ID: <20100609081604.GG9152@skl-net.de>
+References: <Pine.LNX.4.64.1006011025090.14408@cobra.newdream.net> <20100602081044.GY1212@skl-net.de> <Pine.LNX.4.64.1006021115240.1269@cobra.newdream.net> <20100604084521.GO1211@skl-net.de> <Pine.LNX.4.64.1006040944331.2384@cobra.newdream.net> <20100607080754.GU1211@skl-net.de> <20100607080932.GV1211@skl-net.de> <Pine.LNX.4.64.1006071016470.20365@cobra.newdream.net> <20100608122838.GA9152@skl-net.de> <Pine.LNX.4.64.1006082246540.3595@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="E69HUUNAyIJqGpVn"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:42029 "EHLO lo.gmane.org"
+Received: from systemlinux.org ([83.151.29.59]:47989 "EHLO m18s25.vlinux.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752998Ab0FIGtM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 Jun 2010 02:49:12 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OMF64-0005LU-RV
-	for ceph-devel@vger.kernel.org; Wed, 09 Jun 2010 08:49:08 +0200
-Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Jun 2010 08:49:08 +0200
-Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Jun 2010 08:49:08 +0200
+	id S1752986Ab0FIIQT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 9 Jun 2010 04:16:19 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1006082246540.3595@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-hi 
-
-since this morning cmds segfaults on the pdj-fstest. 
-(git rev 12798de37169f6561f0dc7643ca626957f7ab37e)
-
-What happend:
-<start server with vstart.sh>
-<mount>
-08:39:08 [  176.460708] ceph: loaded (mon/mds/osd proto 15/32/24, osdmap 5/5 5/5)
-08:39:08 [  176.463965] ceph: client4101 fsid a7b6294d-a074-8e0e-2cee-a48fe2f85c86
-08:39:08 [  176.464240] ceph: mon1 127.0.0.1:6789 session established
-<start pdj-fstest>
-08:40:51 [  279.406980] cmds[6675]: segfault at 0 ip 00000000004bddbd sp 00007f6861ba34e0 error 4 in cmds[400000+331000]
-08:40:51 [  279.409895] ceph: mds0 127.0.0.1:6802 socket closed
-08:40:51 [  279.804386] ceph: mds0 127.0.0.1:6802 connection failed
-08:40:52 [  280.804383] ceph: mds0 127.0.0.1:6802 connection failed
-08:40:54 [  282.804381] ceph: mds0 127.0.0.1:6802 connection failed
-08:40:58 [  286.804387] ceph: mds0 127.0.0.1:6802 connection failed
-08:41:06 [  294.804793] ceph: mds0 127.0.0.1:6802 connection failed
-<killed pdj-fstest>
-08:41:22 [  310.804820] ceph: mds0 127.0.0.1:6802 connection failed
-08:41:38 [  326.804288] ceph: mds0 caps stale
-08:41:53 [  341.804327] ceph: mds0 caps stale
-08:41:54 [  342.804245] ceph: mds0 127.0.0.1:6802 connection failed
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
 
-the segfault is reproducable on my machine. yesterday 
-(git rev  58fe4b8d5441982d0103817666a6d1bfdd8e04cd) this error was not present.
+--E69HUUNAyIJqGpVn
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+On Tue, Jun 08, 22:54, Sage Weil wrote:
+> Hmm, okay.  Unfortunately the logs don't have any clues.  I'm giving on u=
+p=20
+> solving the mystery this time around.  You can go ahead and stop all the=
+=20
+> daemons and re-run mkcephfs.=20
 
-- Thomas
+OK, there was only stress-test data on the cephfs anyway. I'll start
+=66rom scratch and run another set of tests. Fortunately we haven't
+told the users about the shiny new file systems yet, so we are in no
+hurry ;)
 
+> I've added a 'scripts/check_pglog.sh $osddatadir' script that will just=
+=20
+> look for any corruption.  Running that periodically will let you verify=
+=20
+> that you haven't hit the same corruption without having to restart cosd. =
+=20
+
+Goodie. I'll set up a cron job to run this automatically. Should I
+do this on each osd?
+
+> Ideally we can figure out what kind of workloads are triggering the=20
+> problem, and then reproduce it with sufficient logging enabled to find=20
+> where the race is taking place.
+>
+> If you have any details about the workload or any failure/recovery=20
+> activity that may have been going on at the time that may shed some light=
+=20
+> on it...
+
+Funny enough, the problem occurred while the fs was idle. I ran
+some simple tests a few days earlier and these completed with no
+problems. From that point on, nobody ever accessed it.
+
+I'll let you know if I can trigger it reliably. If you have any
+suggestions for a workload that is likely to trigger the race, I'm
+happy to give it a try. Otherwise, I'll just use "stress" again to
+write to the cephfs from a couple of clients simultaneously.
+
+Thanks
+Andre
+--=20
+The only person who always got his work done by Friday was Robinson Crusoe
+
+--E69HUUNAyIJqGpVn
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
+
+iD8DBQFMD03EWto1QDEAkw8RAshDAJ9vRZOaxkKNHcI9isrgCWlmjyOoAwCdFa6j
+2Rid6pO9ube26AOzGUjVdQY=
+=xFHQ
+-----END PGP SIGNATURE-----
+
+--E69HUUNAyIJqGpVn--
