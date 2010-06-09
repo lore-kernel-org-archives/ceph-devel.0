@@ -1,82 +1,59 @@
-From: Wido den Hollander <wido@pcextreme.nl>
-Subject: Re: ceph, slow (cheap) and fast (expensive) storage?
-Date: Wed, 09 Jun 2010 17:11:55 +0200
-Message-ID: <1276096315.2284.12.camel@wido-laptop.pcextreme.nl>
-References: <Pine.LNX.4.64.1006081047120.15202@cobra.newdream.net>
-	 <4C0FAB66.6030003@wpkg.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: osd: terminate called after throwing an instance of 'std::bad_alloc'
+Date: Wed, 9 Jun 2010 10:29:00 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1006091025500.28853@cobra.newdream.net>
+References: <Pine.LNX.4.64.1006011025090.14408@cobra.newdream.net>
+ <20100602081044.GY1212@skl-net.de> <Pine.LNX.4.64.1006021115240.1269@cobra.newdream.net>
+ <20100604084521.GO1211@skl-net.de> <Pine.LNX.4.64.1006040944331.2384@cobra.newdream.net>
+ <20100607080754.GU1211@skl-net.de> <20100607080932.GV1211@skl-net.de>
+ <Pine.LNX.4.64.1006071016470.20365@cobra.newdream.net> <20100608122838.GA9152@skl-net.de>
+ <Pine.LNX.4.64.1006082246540.3595@cobra.newdream.net> <20100609081604.GG9152@skl-net.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from support.pcextreme.nl ([89.18.190.50]:51215 "EHLO
-	support.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755549Ab0FIPL6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jun 2010 11:11:58 -0400
-In-Reply-To: <4C0FAB66.6030003@wpkg.org>
+Received: from cobra.newdream.net ([66.33.216.30]:35646 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753169Ab0FIR22 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jun 2010 13:28:28 -0400
+In-Reply-To: <20100609081604.GG9152@skl-net.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tomasz Chmielewski <mangoo@wpkg.org>
+To: Andre Noll <maan@systemlinux.org>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Thomas,
+> > I've added a 'scripts/check_pglog.sh $osddatadir' script that will just 
+> > look for any corruption.  Running that periodically will let you verify 
+> > that you haven't hit the same corruption without having to restart cosd.  
+> 
+> Goodie. I'll set up a cron job to run this automatically. Should I
+> do this on each osd?
 
-=46or every backend (like NFS, Ceph, CIFS, etc, etc) FS-Cache needs a
-custom module. So in theory it should work with Ceph, but someone would
-have to write a backend for it.
+Yeah, that would be ideal.
 
-I don't really know what the benefit would be for Ceph, sometimes
-caching can slow things down rather then speeding up.
-
---=20
-Met vriendelijke groet,
-
-Wido den Hollander
-Hoofd Systeembeheer / CSO
-Telefoon Support Nederland: 0900 9633 (45 cpm)
-Telefoon Support Belgi=C3=AB: 0900 70312 (45 cpm)
-Telefoon Direct: (+31) (0)20 50 60 104
-=46ax: +31 (0)20 50 60 111
-E-mail: support@pcextreme.nl
-Website: http://www.pcextreme.nl
-Kennisbank: http://support.pcextreme.nl/
-Netwerkstatus: http://nmc.pcextreme.nl
-
-
-On Wed, 2010-06-09 at 14:55 +0000, Tomasz Chmielewski wrote:
-> Am 08.06.2010 19:51, Sage Weil wrote:
-> > On Tue, 8 Jun 2010, Tomasz Chmielewski wrote:
-> >> I'd like to build a cluster for storing large amounts of data.
-> >>
-> >> The cluster would consist of slow (cheap) storage and fast (expens=
-ive)
-> >> storage.
-> >>
-> >> I would like to migrate data from fast (expensive) storage to slow=
- (cheap)
-> >> storage if it wasn't accessed for, say, 6 months.
-> >>
-> >> Would ceph somehow help me achieve that?
+> > Ideally we can figure out what kind of workloads are triggering the 
+> > problem, and then reproduce it with sufficient logging enabled to find 
+> > where the race is taking place.
 > >
-> > We don't currently have that functionality.  In principle it's cert=
-ainly
-> > something the system could do, and the underlying storage architect=
-ure
-> > lends itself to that:
->=20
-> Hmm, since quite recently, Linux kernel has FS-Cache, which:
->=20
-> 	This facility is a general purpose cache for network
-> 	filesystems, though it could be used for caching other things
-> 	such as ISO9660 filesystems too.
->=20
->=20
-> I wonder if it could work with ceph and/or traditional filesystems, t=
-oo?
->=20
->=20
+> > If you have any details about the workload or any failure/recovery 
+> > activity that may have been going on at the time that may shed some light 
+> > on it...
+> 
+> Funny enough, the problem occurred while the fs was idle. I ran
+> some simple tests a few days earlier and these completed with no
+> problems. From that point on, nobody ever accessed it.
+>
+> I'll let you know if I can trigger it reliably. If you have any
+> suggestions for a workload that is likely to trigger the race, I'm
+> happy to give it a try. Otherwise, I'll just use "stress" again to
+> write to the cephfs from a couple of clients simultaneously.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I think the corruption can happen when the osd map updates.  The problem 
+is that the corrupt data is never read until cosd is restarted, usually a 
+long time after the actual problem occurred, so adding that cron job 
+should help narrow it down.
+
+I would just proceed with your usual testing and see what happens.
+
+Thanks!
+sage
+
