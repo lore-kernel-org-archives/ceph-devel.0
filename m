@@ -1,26 +1,54 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: cmds segfault on pdj-fstest (ceph.git unstable)
-Date: Thu, 10 Jun 2010 09:26:04 -0700
-Message-ID: <AANLkTimpR0HCuF9o-SL4ea_6trR860rQ6vNAX6_j_pCL@mail.gmail.com>
-References: <hundgq$ums$1@dough.gmane.org>
-	<huqcjt$khk$1@dough.gmane.org>
-	<AANLkTikoEestUHujD0_TcG0haFOcOX4pYPVodpr6NOKF@mail.gmail.com>
-	<AANLkTikMYO91t3Y1euaFybiZLlhXq4EcTps--A-Uq0GX@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH] ceph: fix atomic64_t initialization on ia64
+Date: Thu, 10 Jun 2010 10:00:58 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1006101000160.30677@cobra.newdream.net>
+References: <4C110136.3080709@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f204.google.com ([209.85.211.204]:45873 "EHLO
-	mail-yw0-f204.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759520Ab0FJQ0K (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jun 2010 12:26:10 -0400
-Received: by ywh42 with SMTP id 42so167409ywh.15
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Jun 2010 09:26:08 -0700 (PDT)
-In-Reply-To: <AANLkTikMYO91t3Y1euaFybiZLlhXq4EcTps--A-Uq0GX@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46504 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759618Ab0FJRAZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jun 2010 13:00:25 -0400
+In-Reply-To: <4C110136.3080709@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry_c_chang@tcloudcomputing.com>
-Cc: Thomas Mueller <thomas@chaschperli.ch>, ceph-devel@vger.kernel.org
+To: Jeff Mahoney <jeffm@suse.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, ceph-devel@vger.kernel.org
 
-On Thu, Jun 10, 2010 at 9:11 AM, Gregory Farnum <gregf@hq.newdream.net> wrote:
-> (Would've just pushed yours, Harry, but I didn't see it in time -- sorry!)
-Apparently I can't do anything right this morning -- sorry twice, Henry!
+Thanks, Jeff.  I'll send this to Linus shortly with the other pending Ceph 
+stuff.
+
+sage
+
+
+On Thu, 10 Jun 2010, Jeff Mahoney wrote:
+
+>  bdi_seq is an atomic_long_t but we're using ATOMIC_INIT, which causes
+>  build failures on ia64. This patch fixes it to use ATOMIC_LONG_INIT.
+> 
+> Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+> ---
+>  fs/ceph/super.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -926,7 +926,7 @@ static int ceph_compare_super(struct sup
+>  /*
+>   * construct our own bdi so we can control readahead, etc.
+>   */
+> -static atomic_long_t bdi_seq = ATOMIC_INIT(0);
+> +static atomic_long_t bdi_seq = ATOMIC_LONG_INIT(0);
+>  
+>  static int ceph_register_bdi(struct super_block *sb, struct ceph_client *client)
+>  {
+> -- 
+> Jeff Mahoney
+> SUSE Labs
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
