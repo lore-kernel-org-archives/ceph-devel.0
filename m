@@ -1,59 +1,56 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: osd: terminate called after throwing an instance of 'std::bad_alloc'
-Date: Wed, 9 Jun 2010 10:29:00 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006091025500.28853@cobra.newdream.net>
-References: <Pine.LNX.4.64.1006011025090.14408@cobra.newdream.net>
- <20100602081044.GY1212@skl-net.de> <Pine.LNX.4.64.1006021115240.1269@cobra.newdream.net>
- <20100604084521.GO1211@skl-net.de> <Pine.LNX.4.64.1006040944331.2384@cobra.newdream.net>
- <20100607080754.GU1211@skl-net.de> <20100607080932.GV1211@skl-net.de>
- <Pine.LNX.4.64.1006071016470.20365@cobra.newdream.net> <20100608122838.GA9152@skl-net.de>
- <Pine.LNX.4.64.1006082246540.3595@cobra.newdream.net> <20100609081604.GG9152@skl-net.de>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: Re: cmds segfault on pdj-fstest (ceph.git unstable)
+Date: Thu, 10 Jun 2010 09:51:57 +0000 (UTC)
+Message-ID: <huqcjt$khk$1@dough.gmane.org>
+References: <hundgq$ums$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35646 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753169Ab0FIR22 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Jun 2010 13:28:28 -0400
-In-Reply-To: <20100609081604.GG9152@skl-net.de>
+Received: from lo.gmane.org ([80.91.229.12]:40405 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753703Ab0FJJwL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 Jun 2010 05:52:11 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OMeQk-0007xd-1D
+	for ceph-devel@vger.kernel.org; Thu, 10 Jun 2010 11:52:10 +0200
+Received: from cust.dyn.95-152-71-88.swisscomdata.ch ([95.152.71.88])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Jun 2010 11:52:10 +0200
+Received: from thomas by cust.dyn.95-152-71-88.swisscomdata.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Jun 2010 11:52:10 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andre Noll <maan@systemlinux.org>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-> > I've added a 'scripts/check_pglog.sh $osddatadir' script that will just 
-> > look for any corruption.  Running that periodically will let you verify 
-> > that you haven't hit the same corruption without having to restart cosd.  
+Am Wed, 09 Jun 2010 06:48:58 +0000 schrieb Thomas Mueller:
+
+> hi
 > 
-> Goodie. I'll set up a cron job to run this automatically. Should I
-> do this on each osd?
-
-Yeah, that would be ideal.
-
-> > Ideally we can figure out what kind of workloads are triggering the 
-> > problem, and then reproduce it with sufficient logging enabled to find 
-> > where the race is taking place.
-> >
-> > If you have any details about the workload or any failure/recovery 
-> > activity that may have been going on at the time that may shed some light 
-> > on it...
+> since this morning cmds segfaults on the pdj-fstest. (git rev
+> 12798de37169f6561f0dc7643ca626957f7ab37e)
+...
 > 
-> Funny enough, the problem occurred while the fs was idle. I ran
-> some simple tests a few days earlier and these completed with no
-> problems. From that point on, nobody ever accessed it.
->
-> I'll let you know if I can trigger it reliably. If you have any
-> suggestions for a workload that is likely to trigger the race, I'm
-> happy to give it a try. Otherwise, I'll just use "stress" again to
-> write to the cephfs from a couple of clients simultaneously.
+> the segfault is reproducable on my machine. yesterday (git rev 
+> 58fe4b8d5441982d0103817666a6d1bfdd8e04cd) this error was not present.
+> 
+> 
+> - Thomas
 
-I think the corruption can happen when the osd map updates.  The problem 
-is that the corrupt data is never read until cosd is restarted, usually a 
-long time after the actual problem occurred, so adding that cron job 
-should help narrow it down.
+tried to track down where that segfault comes from - with "git bisect" 
+(my first git bisect try)
 
-I would just proceed with your usual testing and see what happens.
+the output after a while:
 
-Thanks!
-sage
+2a88e2e54ee0b9449e86cec02315e2809b75ca8b is the first bad commit
+commit 2a88e2e54ee0b9449e86cec02315e2809b75ca8b
+Author: Greg Farnum <gregf@hq.newdream.net>
+Date:   Mon Jun 7 10:04:33 2010 -0700
+
+    add checks for being a snapshot root to dir_is_nonempty
+
+:040000 040000 6c45c68b84800b105299133374f0f91d82948659 2c1b290125ae435679ab29d6fbab7f5b8f81e4b9 M	src
 
