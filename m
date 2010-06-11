@@ -1,55 +1,31 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] ceph fixes for 2.6.35-rc3
-Date: Thu, 10 Jun 2010 14:09:22 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006101351070.1777@cobra.newdream.net>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: 2.6.34 soft lockup - CPU#1 stuck for 61s!
+Date: Thu, 10 Jun 2010 17:11:14 -0700
+Message-ID: <AANLkTil5rDlFX56U8ohpLxBfVyiXJXl3PaYnKgwESRnU@mail.gmail.com>
+References: <4C110BBD.7070402@watson.wustl.edu>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59554 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751492Ab0FJVIr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jun 2010 17:08:47 -0400
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:64273 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759924Ab0FKALP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jun 2010 20:11:15 -0400
+Received: by pwi1 with SMTP id 1so150923pwi.19
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Jun 2010 17:11:15 -0700 (PDT)
+In-Reply-To: <4C110BBD.7070402@watson.wustl.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Matt Weil <mweil@watson.wustl.edu>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Linus,
+That usually happens when there's some pending request that waits too
+long. It's really hard to tell what exactly happened from this log as
+for some reason we don't see the expected backtrace.
 
-Please pull the following ceph fixes from
+Yehuda
 
- git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-Most of these are one- or few-liners, including an IA64 build error, a 
-caching issue, a statfs memory leak, a bad statfs result, a lease 
-revocation fix, and misleading console output.  The last two patches fix 
-an mds interaction problem (deadlock with the mds) but need to move some 
-code into a helper function to do it.
-
-Thanks!
-sage
-
-
-Henry C Chang (1):
-      ceph: fix d_subdirs ordering problem
-
-Jeff Mahoney (1):
-      ceph: fix atomic64_t initialization on ia64
-
-Sage Weil (5):
-      ceph: fix f_namelen reported by statfs
-      ceph: fix lease revocation when seq doesn't match
-      ceph: fix misleading/incorrect debug message
-      ceph: release cap on import if we don't have the inode
-      ceph: try to send partial cap release on cap message on missing inode
-
-Yehuda Sadeh (1):
-      ceph: fix memory leak in statfs
-
- fs/ceph/caps.c       |   93 ++++++++++++++++++++++++++++++-------------------
- fs/ceph/inode.c      |    2 +-
- fs/ceph/mds_client.c |   28 ++++++++------
- fs/ceph/mds_client.h |    6 +++
- fs/ceph/mon_client.c |    2 +
- fs/ceph/super.c      |    4 +-
- 6 files changed, 84 insertions(+), 51 deletions(-)
+On Thu, Jun 10, 2010 at 8:58 AM, Matt Weil <mweil@watson.wustl.edu> wrote:
+> anyone seen this?
+>
+> ceph client
+>
