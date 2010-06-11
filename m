@@ -1,1044 +1,643 @@
-From: Simone Gotti <simone.gotti@gmail.com>
-Subject: Re: [PATCH] ceph/rbd block driver for qemu-kvm (v3)
-Date: Fri, 11 Jun 2010 21:51:19 +0200
-Message-ID: <4C1293B7.1060307@gmail.com>
-References: <20100531193140.GA13993@chb-desktop>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Correct proceedure for removing ceph nodes
+Date: Fri, 11 Jun 2010 14:11:51 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1006111402370.20973@cobra.newdream.net>
+References: <AANLkTimW7oNdbDnTTyPzlOlD8fr0Bw5rRybuTiHNQTmV@mail.gmail.com>
+ <Pine.LNX.4.64.1006021122300.1269@cobra.newdream.net> <20100604130359.GT1211@skl-net.de>
+ <Pine.LNX.4.64.1006040951210.2384@cobra.newdream.net>
+ <AANLkTik0eXCX53WQ9aTYz5qmpFunTTCoTxQeK42lYWfb@mail.gmail.com>
+ <Pine.LNX.4.64.1006071033460.20365@cobra.newdream.net>
+ <AANLkTiluECDjr8D8wYrqRpZ7gK3iAmdRxnHrW7ouHjC2@mail.gmail.com>
+ <Pine.LNX.4.64.1006081142200.15202@cobra.newdream.net>
+ <AANLkTim9exs1Qu-VAqCWA9DxAhchVeAEaQy1uwyRaLPR@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1722380202-1276290711=:20973"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ey-out-2122.google.com ([74.125.78.26]:42806 "EHLO
-	ey-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753324Ab0FKTvY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jun 2010 15:51:24 -0400
-In-Reply-To: <20100531193140.GA13993@chb-desktop>
+Received: from cobra.newdream.net ([66.33.216.30]:41605 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760427Ab0FKVLN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jun 2010 17:11:13 -0400
+In-Reply-To: <AANLkTim9exs1Qu-VAqCWA9DxAhchVeAEaQy1uwyRaLPR@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
-Cc: Kevin Wolf <kwolf@redhat.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: Paul <paul_chiang@tcloudcomputing.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Christian,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-thanks for you patch. I tried it a little and it worked quite well but
-during some live migration tests I noticed a problem.
+--557981400-1722380202-1276290711=:20973
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
+Hi Paul,
 
-The problem is related to live migration with high I/O using the AIO
-calls (I triggered it with a simple "dd").
+On Fri, 11 Jun 2010, Paul wrote:
+> Hiding the details of the id number sequence from the user seems like
+> a great idea.
+>=20
+> Havn't seen any serious problems while running the mon-remove branch.
+> A few minor ones:
+> 1. the mkcephfs and init scripts need a bit of tweaking to parse the
+> new config format. Also, "mon0" used to have a special meaning in
+> mkcephfs... going to need an equivalent in the new scheme.
+> 2. monmaptool could use an update to it's usage string
 
-If you launch a live migration and the guest is stopped and started on
-the new qemu process while some AIO was in flight the guest on the new
-qemu will wait undefinitely for data this will never come. With ata
-emulation an ata reset is sent after some seconds but with virtio this
-won't happen.
+Fixed these.
 
-I'm not a qemu expert but from what I understand qemu in
-savevm.c:do_savevm calls qemu_aio_flush to wait that all the asyncronous
-aio returned (the callback si called). But the rbd block driver doesn't
-use the qemu aio model but the rados one so that function will never
-know of the rados aio.
+> 3. mon add needs to return a reply immediately as well since the rank
+> might also change during an add
 
-So a solution will be to glue the block driver with the qemu aio model.
-I tried to do this to test if this will work in the attached patch. I
-only tested with one rbd block device but the live migration tests
-worked (in the patch I removed all the debug prints I adedd to see if
-all AIO requets really returned.
+This was actually a problem with how the request forwarding/proxying was=20
+happening.  I simplified that code a bit (using the MonSession now to=20
+track proxy info instead of hidden fields in the message) and it seems to=
+=20
+be working just fine.
 
-This is an RFC just to know what you think about this possible solution.
-As qemu's aio model is event based and it needs a file descriptor for
-event communication i used eventfd to do this.
-Let me know if you need a detailed description of the patch!
+> Starting the cluster using the old config format doesn't work - the
+> other daemons complain that they can't find any monitors.
 
+I think this was just monclient's parsing of the ceph.conf.. I made the=20
+'.' optional (mon0 or mon.0 or monfoo or mon.foo all ok).
 
-I've also got a question: as librados is multithreaded the callbacks are
-called in another thread. Is there the need to protect some critical
-sections with a lock (for example in rbd_aio_rw_vector and in
-rbd_finish_aiocb)?
+Pushed to mon-remove on ceph.git.. let me know if you have any problems. =
+=20
+Not sure if we should merge it for v0.21 or not.  Depends on how much=20
+testing we'll do in the next couple weeks.
 
-
-Thanks!
-
-Bye!
-
-
-From: Simone Gotti <simone.gotti@gmail.com>
-Date: Fri, 11 Jun 2010 21:19:39 +0200
-Subject: [PATCH] block/rbd: Added glue to qemu aio model to fix live
-migration with outstanding aio
-
-Signed-off-by: Simone Gotti <simone.gotti@gmail.com>
+sage
 
 
----
- block/rbd.c |   63
-+++++++++++++++++++++++++++++++++++++++++++++++++++++-----
- 1 files changed, 57 insertions(+), 6 deletions(-)
-
-diff --git a/block/rbd.c b/block/rbd.c
-index 4d22069..83b7898 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -25,6 +25,8 @@
- 
- #include <signal.h>
- 
-+#include <sys/eventfd.h>
-+
- /*
-  * When specifying the image filename use:
-  *
-@@ -47,6 +49,15 @@
- 
- #define OBJ_MAX_SIZE (1UL << OBJ_DEFAULT_OBJ_ORDER)
- 
-+typedef struct BDRVRBDState {
-+    int efd;
-+    rados_pool_t pool;
-+    char name[RBD_MAX_OBJ_NAME_SIZE];
-+    uint64_t size;
-+    uint64_t objsize;
-+    int qemu_aio_count;
-+} BDRVRBDState;
-+
- typedef struct RBDAIOCB {
-     BlockDriverAIOCB common;
-     QEMUBH *bh;
-@@ -57,6 +68,7 @@ typedef struct RBDAIOCB {
-     int64_t sector_num;
-     int aiocnt;
-     int error;
-+    BDRVRBDState *s;
- } RBDAIOCB;
- 
- typedef struct RADOSCB {
-@@ -67,12 +79,6 @@ typedef struct RADOSCB {
-     char *buf;
- } RADOSCB;
- 
--typedef struct BDRVRBDState {
--    rados_pool_t pool;
--    char name[RBD_MAX_OBJ_NAME_SIZE];
--    uint64_t size;
--    uint64_t objsize;
--} BDRVRBDState;
- 
- typedef struct rbd_obj_header_ondisk RbdHeader1;
- 
-@@ -255,6 +261,31 @@ done:
-     return ret;
- }
- 
-+static void rbd_aio_completion_cb(void *opaque)
-+{
-+    BDRVRBDState *s = opaque;
-+
-+    uint64_t val;
-+    ssize_t ret;
-+
-+    do {
-+        if ((ret = read(s->efd, &val, sizeof(val))) > 0) {
-+            s->qemu_aio_count -= val;
-+       }
-+    } while (ret == -1 && errno == EINTR);
-+
-+    return;
-+}
-+
-+static int rbd_aio_flush_cb(void *opaque)
-+{
-+    BDRVRBDState *s = opaque;
-+
-+    return (s->qemu_aio_count > 0) ? 1 : 0;
-+}
-+
-+
-+
- static int rbd_open(BlockDriverState *bs, const char *filename, int flags)
- {
-     BDRVRBDState *s = bs->opaque;
-@@ -303,6 +334,15 @@ static int rbd_open(BlockDriverState *bs, const
-char *filename, int flags)
-     s->size = header->image_size;
-     s->objsize = 1 << header->options.order;
- 
-+    s->efd = eventfd(0, 0);
-+    if (s->efd == -1) {
-+        error_report("error opening eventfd");
-+        goto failed;
-+    }
-+    fcntl(s->efd, F_SETFL, O_NONBLOCK);
-+    qemu_aio_set_fd_handler(s->efd, rbd_aio_completion_cb, NULL,
-+        rbd_aio_flush_cb, NULL, s);
-+
-     return 0;
- 
- failed:
-@@ -393,6 +433,7 @@ static AIOPool rbd_aio_pool = {
- };
- 
- /* This is the callback function for rados_aio_read and _write */
-+
- static void rbd_finish_aiocb(rados_completion_t c, RADOSCB *rcb)
- {
-     RBDAIOCB *acb = rcb->acb;
-@@ -427,6 +468,8 @@ static void rbd_finish_aiocb(rados_completion_t c,
-RADOSCB *rcb)
-             acb->ret += r;
-         }
-     }
-+    uint64_t buf = 1;
-+    write(acb->s->efd, &buf, sizeof(buf));
-     qemu_free(rcb);
-     i = 0;
-     if (!acb->aiocnt && acb->bh) {
-@@ -435,6 +478,7 @@ static void rbd_finish_aiocb(rados_completion_t c,
-RADOSCB *rcb)
- }
- 
- /* Callback when all queued rados_aio requests are complete */
-+
- static void rbd_aio_bh_cb(void *opaque)
- {
-     RBDAIOCB *acb = opaque;
-@@ -446,6 +490,10 @@ static void rbd_aio_bh_cb(void *opaque)
-     acb->common.cb(acb->common.opaque, (acb->ret > 0 ? 0 : acb->ret));
-     qemu_bh_delete(acb->bh);
-     acb->bh = NULL;
-+
-+    uint64_t buf = 1;
-+    write(acb->s->efd, &buf, sizeof(buf));
-+
-     qemu_aio_release(acb);
- }
- 
-@@ -473,6 +521,7 @@ static BlockDriverAIOCB
-*rbd_aio_rw_vector(BlockDriverState *bs,
-     acb->aiocnt = 0;
-     acb->ret = 0;
-     acb->error = 0;
-+    acb->s = s;
- 
-     if (!acb->bh) {
-         acb->bh = qemu_bh_new(rbd_aio_bh_cb, acb);
-@@ -493,6 +542,8 @@ static BlockDriverAIOCB
-*rbd_aio_rw_vector(BlockDriverState *bs,
-     last_segnr = ((off + size - 1) / s->objsize);
-     acb->aiocnt = (last_segnr - segnr) + 1;
- 
-+    s->qemu_aio_count+=acb->aiocnt + 1; /* All the RADOSCB and the
-related RBDAIOCB */
-+
-     while (size > 0) {
-         if (size < segsize) {
-             segsize = size;
--- 
-1.7.0.1
-
-
-
-
- 
-
-On 05/31/2010 09:31 PM, Christian Brunner wrote:
-> Hi Kevin,
->
-> here is an updated patch for the ceph/rbd driver. I hope that everything 
-> is fine now.
->
-> Regards,
-> Christian
->
->
-> This is a block driver for the distributed file system Ceph
-> (http://ceph.newdream.net/). This driver uses librados (which
-> is part of the Ceph server) for direct access to the Ceph object
-> store and is running entirely in userspace. Therefore it is
-> called "rbd" - rados block device.
->
-> To compile the driver a recent version of ceph (unstable/testing git
-> head or 0.20.3 once it is released) is needed.
->
-> Additional information is available on the Ceph-Wiki:
->
-> http://ceph.newdream.net/wiki/Kvm-rbd
->
-> The patch is based on git://repo.or.cz/qemu/kevin.git block
->
->
-> Signed-off-by: Christian Brunner <chb@muc.de>
-> ---
->  Makefile.objs     |    1 +
->  block/rbd.c       |  600 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  block/rbd_types.h |   64 ++++++
->  configure         |   31 +++
->  4 files changed, 696 insertions(+), 0 deletions(-)
->  create mode 100644 block/rbd.c
->  create mode 100644 block/rbd_types.h
->
-> diff --git a/Makefile.objs b/Makefile.objs
-> index 1a942e5..08dc11f 100644
-> --- a/Makefile.objs
-> +++ b/Makefile.objs
-> @@ -18,6 +18,7 @@ block-nested-y += parallels.o nbd.o blkdebug.o
->  block-nested-$(CONFIG_WIN32) += raw-win32.o
->  block-nested-$(CONFIG_POSIX) += raw-posix.o
->  block-nested-$(CONFIG_CURL) += curl.o
-> +block-nested-$(CONFIG_RBD) += rbd.o
->  
->  block-obj-y +=  $(addprefix block/, $(block-nested-y))
->  
-> diff --git a/block/rbd.c b/block/rbd.c
-> new file mode 100644
-> index 0000000..4a60dda
-> --- /dev/null
-> +++ b/block/rbd.c
-> @@ -0,0 +1,600 @@
-> +/*
-> + * QEMU Block driver for RADOS (Ceph)
-> + *
-> + * Copyright (C) 2010 Christian Brunner <chb@muc.de>
-> + *
-> + * This work is licensed under the terms of the GNU GPL, version 2.  See
-> + * the COPYING file in the top-level directory.
-> + *
-> + */
-> +
-> +#include "qemu-common.h"
-> +#include "qemu-error.h"
-> +#include <sys/types.h>
-> +#include <stdbool.h>
-> +
-> +#include <qemu-common.h>
-> +
-> +#include "rbd_types.h"
-> +#include "module.h"
-> +#include "block_int.h"
-> +
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <rados/librados.h>
-> +
-> +#include <signal.h>
-> +
-> +/*
-> + * When specifying the image filename use:
-> + *
-> + * rbd:poolname/devicename
-> + *
-> + * poolname must be the name of an existing rados pool
-> + *
-> + * devicename is the basename for all objects used to
-> + * emulate the raw device.
-> + *
-> + * Metadata information (image size, ...) is stored in an
-> + * object with the name "devicename.rbd".
-> + *
-> + * The raw device is split into 4MB sized objects by default.
-> + * The sequencenumber is encoded in a 12 byte long hex-string,
-> + * and is attached to the devicename, separated by a dot.
-> + * e.g. "devicename.1234567890ab"
-> + *
-> + */
-> +
-> +#define OBJ_MAX_SIZE (1UL << OBJ_DEFAULT_OBJ_ORDER)
-> +
-> +typedef struct RBDAIOCB {
-> +    BlockDriverAIOCB common;
-> +    QEMUBH *bh;
-> +    int ret;
-> +    QEMUIOVector *qiov;
-> +    char *bounce;
-> +    int write;
-> +    int64_t sector_num;
-> +    int aiocnt;
-> +    int error;
-> +} RBDAIOCB;
-> +
-> +typedef struct RADOSCB {
-> +    int rcbid;
-> +    RBDAIOCB *acb;
-> +    int done;
-> +    int64_t segsize;
-> +    char *buf;
-> +} RADOSCB;
-> +
-> +typedef struct BDRVRBDState {
-> +    rados_pool_t pool;
-> +    char name[RBD_MAX_OBJ_NAME_SIZE];
-> +    uint64_t size;
-> +    uint64_t objsize;
-> +} BDRVRBDState;
-> +
-> +typedef struct rbd_obj_header_ondisk RbdHeader1;
-> +
-> +static int rbd_parsename(const char *filename, char *pool, char *name)
-> +{
-> +    const char *rbdname;
-> +    char *p;
-> +    int l;
-> +
-> +    if (!strstart(filename, "rbd:", &rbdname)) {
-> +        return -EINVAL;
-> +    }
-> +
-> +    pstrcpy(pool, 2 * RBD_MAX_SEG_NAME_SIZE, rbdname);
-> +    p = strchr(pool, '/');
-> +    if (p == NULL) {
-> +        return -EINVAL;
-> +    }
-> +
-> +    *p = '\0';
-> +
-> +    l = strlen(pool);
-> +    if(l >= RBD_MAX_SEG_NAME_SIZE) {
-> +        error_report("pool name to long");
-> +        return -EINVAL;
-> +    } else if (l <= 0) {
-> +        error_report("pool name to short");
-> +        return -EINVAL;
-> +    }
-> +
-> +    l = strlen(++p);
-> +    if (l >= RBD_MAX_OBJ_NAME_SIZE) {
-> +        error_report("object name to long");
-> +        return -EINVAL;
-> +    } else if (l <= 0) {
-> +        error_report("object name to short");
-> +        return -EINVAL;
-> +    }
-> +
-> +    strcpy(name, p);
-> +
-> +    return l;
-> +}
-> +
-> +static int create_tmap_op(uint8_t op, const char *name, char **tmap_desc)
-> +{
-> +    uint32_t len = strlen(name);
-> +    /* total_len = encoding op + name + empty buffer */
-> +    uint32_t total_len = 1 + (sizeof(uint32_t) + len) + sizeof(uint32_t);
-> +    char *desc = NULL;
-> +
-> +    qemu_malloc(total_len);
-> +
-> +    *tmap_desc = desc;
-> +
-> +    *desc = op;
-> +    desc++;
-> +    memcpy(desc, &len, sizeof(len));
-> +    desc += sizeof(len);
-> +    memcpy(desc, name, len);
-> +    desc += len;
-> +    len = 0;
-> +    memcpy(desc, &len, sizeof(len));
-> +    desc += sizeof(len);
-> +
-> +    return desc - *tmap_desc;
-> +}
-> +
-> +static void free_tmap_op(char *tmap_desc)
-> +{
-> +    qemu_free(tmap_desc);
-> +}
-> +
-> +static int rbd_register_image(rados_pool_t pool, const char *name)
-> +{
-> +    char *tmap_desc;
-> +    const char *dir = RBD_DIRECTORY;
-> +    int ret;
-> +
-> +    ret = create_tmap_op(CEPH_OSD_TMAP_SET, name, &tmap_desc);
-> +    if (ret < 0) {
-> +        return ret;
-> +    }
-> +
-> +    ret = rados_tmap_update(pool, dir, tmap_desc, ret);
-> +    free_tmap_op(tmap_desc);
-> +
-> +    return ret;
-> +}
-> +
-> +static int rbd_create(const char *filename, QEMUOptionParameter *options)
-> +{
-> +    int64_t bytes = 0;
-> +    int64_t objsize;
-> +    uint64_t size;
-> +    time_t mtime;
-> +    uint8_t obj_order = RBD_DEFAULT_OBJ_ORDER;
-> +    char pool[RBD_MAX_SEG_NAME_SIZE];
-> +    char n[RBD_MAX_SEG_NAME_SIZE];
-> +    char name[RBD_MAX_SEG_NAME_SIZE];
-> +    RbdHeader1 header;
-> +    rados_pool_t p;
-> +    int ret;
-> +
-> +    if (rbd_parsename(filename, pool, name) < 0) {
-> +        return -EINVAL;
-> +    }
-> +
-> +    snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s%s", name, RBD_SUFFIX);
-> +
-> +    /* Read out options */
-> +    while (options && options->name) {
-> +        if (!strcmp(options->name, BLOCK_OPT_SIZE)) {
-> +            bytes = options->value.n;
-> +        } else if (!strcmp(options->name, BLOCK_OPT_CLUSTER_SIZE)) {
-> +            if (options->value.n) {
-> +                objsize = options->value.n;
-> +                if ((objsize - 1) & objsize) {    /* not a power of 2? */
-> +                    error_report("obj size needs to be power of 2");
-> +                    return -EINVAL;
-> +                }
-> +                if (objsize < 4096) {
-> +                    error_report("obj size too small");
-> +                    return -EINVAL;
-> +                }
-> +
-> +                for (obj_order = 0; obj_order < 64; obj_order++) {
-> +                    if (objsize == 1) {
-> +                        break;
-> +                    }
-> +                    objsize >>= 1;
-> +                }
-> +            }
-> +        }
-> +        options++;
-> +    }
-> +
-> +    memset(&header, 0, sizeof(header));
-> +    pstrcpy(header.text, sizeof(header.text), RBD_HEADER_TEXT);
-> +    pstrcpy(header.signature, sizeof(header.signature), RBD_HEADER_SIGNATURE);
-> +    pstrcpy(header.version, sizeof(header.version), RBD_HEADER_VERSION);
-> +    header.image_size = bytes;
-> +    cpu_to_le64s((uint64_t *) & header.image_size);
-> +    header.options.order = obj_order;
-> +    header.options.crypt_type = RBD_CRYPT_NONE;
-> +    header.options.comp_type = RBD_COMP_NONE;
-> +    header.snap_seq = 0;
-> +    header.snap_count = 0;
-> +    cpu_to_le32s(&header.snap_count);
-> +
-> +    if (rados_initialize(0, NULL) < 0) {
-> +        error_report("error initializing");
-> +        return -EIO;
-> +    }
-> +
-> +    if (rados_open_pool(pool, &p)) {
-> +        error_report("error opening pool %s", pool);
-> +        rados_deinitialize();
-> +        return -EIO;
-> +    }
-> +
-> +    /* check for existing rbd header file */
-> +    ret = rados_stat(p, n, &size, &mtime);
-> +    if (ret == 0) {
-> +        ret=-EEXIST;
-> +        goto done;
-> +    }
-> +
-> +    /* create header file */
-> +    ret = rados_write(p, n, 0, (const char *)&header, sizeof(header));
-> +    if (ret < 0) {
-> +        goto done;
-> +    }
-> +
-> +    ret = rbd_register_image(p, name);
-> +done:
-> +    rados_close_pool(p);
-> +    rados_deinitialize();
-> +
-> +    return ret;
-> +}
-> +
-> +static int rbd_open(BlockDriverState *bs, const char *filename, int flags)
-> +{
-> +    BDRVRBDState *s = bs->opaque;
-> +    char pool[RBD_MAX_SEG_NAME_SIZE];
-> +    char n[RBD_MAX_SEG_NAME_SIZE];
-> +    char hbuf[4096];
-> +    int r;
-> +
-> +    if (rbd_parsename(filename, pool, s->name) < 0) {
-> +        return -EINVAL;
-> +    }
-> +    snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s%s", s->name, RBD_SUFFIX);
-> +
-> +    if ((r = rados_initialize(0, NULL)) < 0) {
-> +        error_report("error initializing");
-> +        return r;
-> +    }
-> +
-> +    if ((r = rados_open_pool(pool, &s->pool))) {
-> +        error_report("error opening pool %s", pool);
-> +        rados_deinitialize();
-> +        return r;
-> +    }
-> +
-> +    if ((r = rados_read(s->pool, n, 0, hbuf, 4096)) < 0) {
-> +        error_report("error reading header from %s", s->name);
-> +        goto failed;
-> +    }
-> +
-> +    if (strncmp(hbuf + 64, RBD_HEADER_SIGNATURE, 4)) {
-> +        error_report("Invalid header signature %s", hbuf + 64);
-> +        r = -EMEDIUMTYPE;
-> +        goto failed;
-> +    }
-> +
-> +    if (strncmp(hbuf + 68, RBD_HEADER_VERSION, 8)) {
-> +        error_report("Unknown image version %s", hbuf + 68);
-> +        r = -EMEDIUMTYPE;
-> +        goto failed;
-> +    }
-> +
-> +    RbdHeader1 *header;
-> +
-> +    header = (RbdHeader1 *) hbuf;
-> +    le64_to_cpus((uint64_t *) & header->image_size);
-> +    s->size = header->image_size;
-> +    s->objsize = 1 << header->options.order;
-> +
-> +    return 0;
-> +
-> +failed:
-> +    rados_close_pool(s->pool);
-> +    rados_deinitialize();
-> +    return r;
-> +}
-> +
-> +static void rbd_close(BlockDriverState *bs)
-> +{
-> +    BDRVRBDState *s = bs->opaque;
-> +
-> +    rados_close_pool(s->pool);
-> +    rados_deinitialize();
-> +}
-> +
-> +static int rbd_rw(BlockDriverState *bs, int64_t sector_num,
-> +                  uint8_t *buf, int nb_sectors, int write)
-> +{
-> +    BDRVRBDState *s = bs->opaque;
-> +    char n[RBD_MAX_SEG_NAME_SIZE];
-> +
-> +    int64_t segnr, segoffs, segsize, r;
-> +    int64_t off, size;
-> +
-> +    off = sector_num * BDRV_SECTOR_SIZE;
-> +    size = nb_sectors * BDRV_SECTOR_SIZE;
-> +    segnr = off / s->objsize;
-> +    segoffs = off % s->objsize;
-> +    segsize = s->objsize - segoffs;
-> +
-> +    while (size > 0) {
-> +        if (size < segsize) {
-> +            segsize = size;
-> +        }
-> +
-> +        snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s.%012" PRIx64, s->name, segnr);
-> +
-> +        if (write) {
-> +            if ((r = rados_write(s->pool, n, segoffs, (const char *)buf,
-> +                segsize)) < 0) {
-> +                return r;
-> +            }
-> +        } else {
-> +            r = rados_read(s->pool, n, segoffs, (char *)buf, segsize);
-> +            if (r == -ENOENT) {
-> +                memset(buf, 0, segsize);
-> +            } else if (r < 0) {
-> +                return r;
-> +            } else if (r < segsize) {
-> +                memset(buf + r, 0, segsize - r);
-> +            }
-> +        }
-> +
-> +        buf += segsize;
-> +        size -= segsize;
-> +        segoffs = 0;
-> +        segsize = s->objsize;
-> +        segnr++;
-> +    }
-> +
-> +    return 0;
-> +}
-> +
-> +static int rbd_read(BlockDriverState *bs, int64_t sector_num,
-> +                    uint8_t *buf, int nb_sectors)
-> +{
-> +    return rbd_rw(bs, sector_num, buf, nb_sectors, 0);
-> +}
-> +
-> +static int rbd_write(BlockDriverState *bs, int64_t sector_num,
-> +                     const uint8_t *buf, int nb_sectors)
-> +{
-> +    return rbd_rw(bs, sector_num, (uint8_t *) buf, nb_sectors, 1);
-> +}
-> +
-> +static void rbd_aio_cancel(BlockDriverAIOCB *blockacb)
-> +{
-> +    RBDAIOCB *acb = (RBDAIOCB *) blockacb;
-> +    qemu_bh_delete(acb->bh);
-> +    acb->bh = NULL;
-> +    qemu_aio_release(acb);
-> +}
-> +
-> +static AIOPool rbd_aio_pool = {
-> +    .aiocb_size = sizeof(RBDAIOCB),
-> +    .cancel = rbd_aio_cancel,
-> +};
-> +
-> +/* This is the callback function for rados_aio_read and _write */
-> +static void rbd_finish_aiocb(rados_completion_t c, RADOSCB *rcb)
-> +{
-> +    RBDAIOCB *acb = rcb->acb;
-> +    int64_t r;
-> +    int i;
-> +
-> +    acb->aiocnt--;
-> +    r = rados_aio_get_return_value(c);
-> +    rados_aio_release(c);
-> +    if (acb->write) {
-> +        if (r < 0) {
-> +            acb->ret = r;
-> +            acb->error = 1;
-> +        } else if (!acb->error) {
-> +            acb->ret += rcb->segsize;
-> +        }
-> +    } else {
-> +        if (r == -ENOENT) {
-> +            memset(rcb->buf, 0, rcb->segsize);
-> +            if (!acb->error) {
-> +                acb->ret += rcb->segsize;
-> +            }
-> +        } else if (r < 0) {
-> +            acb->ret = r;
-> +            acb->error = 1;
-> +        } else if (r < rcb->segsize) {
-> +            memset(rcb->buf + r, 0, rcb->segsize - r);
-> +            if (!acb->error) {
-> +                acb->ret += rcb->segsize;
-> +            }
-> +        } else if (!acb->error) {
-> +            acb->ret += r;
-> +        }
-> +    }
-> +    qemu_free(rcb);
-> +    i = 0;
-> +    if (!acb->aiocnt && acb->bh) {
-> +        qemu_bh_schedule(acb->bh);
-> +    }
-> +}
-> +
-> +/* Callback when all queued rados_aio requests are complete */
-> +static void rbd_aio_bh_cb(void *opaque)
-> +{
-> +    RBDAIOCB *acb = opaque;
-> +
-> +    if (!acb->write) {
-> +        qemu_iovec_from_buffer(acb->qiov, acb->bounce, acb->qiov->size);
-> +    }
-> +    qemu_vfree(acb->bounce);
-> +    acb->common.cb(acb->common.opaque, (acb->ret > 0 ? 0 : acb->ret));
-> +    qemu_bh_delete(acb->bh);
-> +    acb->bh = NULL;
-> +    qemu_aio_release(acb);
-> +}
-> +
-> +static BlockDriverAIOCB *rbd_aio_rw_vector(BlockDriverState *bs,
-> +                                           int64_t sector_num,
-> +                                           QEMUIOVector *qiov,
-> +                                           int nb_sectors,
-> +                                           BlockDriverCompletionFunc *cb,
-> +                                           void *opaque, int write)
-> +{
-> +    RBDAIOCB *acb;
-> +    RADOSCB *rcb;
-> +    rados_completion_t c;
-> +    char n[RBD_MAX_SEG_NAME_SIZE];
-> +    int64_t segnr, segoffs, segsize, last_segnr;
-> +    int64_t off, size;
-> +    char *buf;
-> +
-> +    BDRVRBDState *s = bs->opaque;
-> +
-> +    acb = qemu_aio_get(&rbd_aio_pool, bs, cb, opaque);
-> +    acb->write = write;
-> +    acb->qiov = qiov;
-> +    acb->bounce = qemu_blockalign(bs, qiov->size);
-> +    acb->aiocnt = 0;
-> +    acb->ret = 0;
-> +    acb->error = 0;
-> +
-> +    if (!acb->bh) {
-> +        acb->bh = qemu_bh_new(rbd_aio_bh_cb, acb);
-> +    }
-> +
-> +    if (write) {
-> +        qemu_iovec_to_buffer(acb->qiov, acb->bounce);
-> +    }
-> +
-> +    buf = acb->bounce;
-> +
-> +    off = sector_num * BDRV_SECTOR_SIZE;
-> +    size = nb_sectors * BDRV_SECTOR_SIZE;
-> +    segnr = off / s->objsize;
-> +    segoffs = off % s->objsize;
-> +    segsize = s->objsize - segoffs;
-> +
-> +    last_segnr = ((off + size - 1) / s->objsize);
-> +    acb->aiocnt = (last_segnr - segnr) + 1;
-> +
-> +    while (size > 0) {
-> +        if (size < segsize) {
-> +            segsize = size;
-> +        }
-> +
-> +        snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s.%012llx", s->name,
-> +                 (long long unsigned int)segnr);
-> +
-> +        rcb = qemu_malloc(sizeof(RADOSCB));
-> +        rcb->done = 0;
-> +        rcb->acb = acb;
-> +        rcb->segsize = segsize;
-> +        rcb->buf = buf;
-> +
-> +        if (write) {
-> +            rados_aio_create_completion(rcb, NULL,
-> +                                        (rados_callback_t) rbd_finish_aiocb,
-> +                                        &c);
-> +            rados_aio_write(s->pool, n, segoffs, buf, segsize, c);
-> +        } else {
-> +            rados_aio_create_completion(rcb,
-> +                                        (rados_callback_t) rbd_finish_aiocb,
-> +                                        NULL, &c);
-> +            rados_aio_read(s->pool, n, segoffs, buf, segsize, c);
-> +        }
-> +
-> +        buf += segsize;
-> +        size -= segsize;
-> +        segoffs = 0;
-> +        segsize = s->objsize;
-> +        segnr++;
-> +    }
-> +
-> +    return &acb->common;
-> +}
-> +
-> +static BlockDriverAIOCB *rbd_aio_readv(BlockDriverState * bs,
-> +                                       int64_t sector_num, QEMUIOVector * qiov,
-> +                                       int nb_sectors,
-> +                                       BlockDriverCompletionFunc * cb,
-> +                                       void *opaque)
-> +{
-> +    return rbd_aio_rw_vector(bs, sector_num, qiov, nb_sectors, cb, opaque, 0);
-> +}
-> +
-> +static BlockDriverAIOCB *rbd_aio_writev(BlockDriverState * bs,
-> +                                        int64_t sector_num, QEMUIOVector * qiov,
-> +                                        int nb_sectors,
-> +                                        BlockDriverCompletionFunc * cb,
-> +                                        void *opaque)
-> +{
-> +    return rbd_aio_rw_vector(bs, sector_num, qiov, nb_sectors, cb, opaque, 1);
-> +}
-> +
-> +static int rbd_getinfo(BlockDriverState * bs, BlockDriverInfo * bdi)
-> +{
-> +    BDRVRBDState *s = bs->opaque;
-> +    bdi->cluster_size = s->objsize;
-> +    return 0;
-> +}
-> +
-> +static int64_t rbd_getlength(BlockDriverState * bs)
-> +{
-> +    BDRVRBDState *s = bs->opaque;
-> +
-> +    return s->size;
-> +}
-> +
-> +static QEMUOptionParameter rbd_create_options[] = {
-> +    {
-> +     .name = BLOCK_OPT_SIZE,
-> +     .type = OPT_SIZE,
-> +     .help = "Virtual disk size"
-> +    },
-> +    {
-> +     .name = BLOCK_OPT_CLUSTER_SIZE,
-> +     .type = OPT_SIZE,
-> +     .help = "RBD object size"
-> +    },
-> +    {NULL}
-> +};
-> +
-> +static BlockDriver bdrv_rbd = {
-> +    .format_name        = "rbd",
-> +    .instance_size      = sizeof(BDRVRBDState),
-> +    .bdrv_file_open     = rbd_open,
-> +    .bdrv_read          = rbd_read,
-> +    .bdrv_write         = rbd_write,
-> +    .bdrv_close         = rbd_close,
-> +    .bdrv_create        = rbd_create,
-> +    .bdrv_get_info      = rbd_getinfo,
-> +    .create_options     = rbd_create_options,
-> +    .bdrv_getlength     = rbd_getlength,
-> +    .protocol_name      = "rbd",
-> +
-> +    .bdrv_aio_readv     = rbd_aio_readv,
-> +    .bdrv_aio_writev    = rbd_aio_writev,
-> +};
-> +
-> +static void bdrv_rbd_init(void)
-> +{
-> +    bdrv_register(&bdrv_rbd);
-> +}
-> +
-> +block_init(bdrv_rbd_init);
-> diff --git a/block/rbd_types.h b/block/rbd_types.h
-> new file mode 100644
-> index 0000000..91ac4f9
-> --- /dev/null
-> +++ b/block/rbd_types.h
-> @@ -0,0 +1,64 @@
-> +/*
-> + * Ceph - scalable distributed file system
-> + *
-> + * Copyright (C) 2004-2010 Sage Weil <sage@newdream.net>
-> + *
-> + * This is free software; you can redistribute it and/or
-> + * modify it under the terms of the GNU Lesser General Public
-> + * License version 2.1, as published by the Free Software
-> + * Foundation.  See file COPYING.
-> + *
-> + */
-> +
-> +#ifndef QEMU_BLOCK_RBD_TYPES_H
-> +#define QEMU_BLOCK_RBD_TYPES_H
-> +
-> +
-> +/*
-> + * rbd image 'foo' consists of objects
-> + *   foo.rbd      - image metadata
-> + *   foo.00000000
-> + *   foo.00000001
-> + *   ...          - data
-> + */
-> +
-> +#define RBD_SUFFIX              ".rbd"
-> +#define RBD_DIRECTORY           "rbd_directory"
-> +
-> +#define RBD_DEFAULT_OBJ_ORDER   22   /* 4MB */
-> +
-> +#define RBD_MAX_OBJ_NAME_SIZE   96
-> +#define RBD_MAX_SEG_NAME_SIZE   128
-> +
-> +#define RBD_COMP_NONE           0
-> +#define RBD_CRYPT_NONE          0
-> +
-> +#define RBD_HEADER_TEXT         "<<< Rados Block Device Image >>>\n"
-> +#define RBD_HEADER_SIGNATURE    "RBD"
-> +#define RBD_HEADER_VERSION      "001.004"
-> +
-> +struct rbd_obj_snap_ondisk {
-> +    uint64_t id;
-> +    uint64_t image_size;
-> +} __attribute__((packed));
-> +
-> +struct rbd_obj_header_ondisk {
-> +    char text[64];
-> +    char signature[4];
-> +    char version[8];
-> +    struct {
-> +        uint8_t order;
-> +        uint8_t crypt_type;
-> +        uint8_t comp_type;
-> +        uint8_t unused;
-> +    } __attribute__((packed)) options;
-> +    uint64_t image_size;
-> +    uint64_t snap_seq;
-> +    uint32_t snap_count;
-> +    uint32_t reserved;
-> +    uint64_t snap_names_len;
-> +    struct rbd_obj_snap_ondisk snaps[0];
-> +} __attribute__((packed));
-> +
-> +
-> +#endif
-> diff --git a/configure b/configure
-> index 3cd2c5f..3f5c8ce 100755
-> --- a/configure
-> +++ b/configure
-> @@ -299,6 +299,7 @@ pkgversion=""
->  check_utests="no"
->  user_pie="no"
->  zero_malloc=""
-> +rbd=""
->  
->  # OS specific
->  if check_define __linux__ ; then
-> @@ -660,6 +661,10 @@ for opt do
->    ;;
->    --enable-vhost-net) vhost_net="yes"
->    ;;
-> +  --disable-rbd) rbd="no"
-> +  ;;
-> +  --enable-rbd) rbd="yes"
-> +  ;;
->    *) echo "ERROR: unknown option $opt"; show_help="yes"
->    ;;
->    esac
-> @@ -826,6 +831,7 @@ echo "  --enable-docs            enable documentation build"
->  echo "  --disable-docs           disable documentation build"
->  echo "  --disable-vhost-net      disable vhost-net acceleration support"
->  echo "  --enable-vhost-net       enable vhost-net acceleration support"
-> +echo "  --enable-rbd		 enable building the rados block device (rbd)"
->  echo ""
->  echo "NOTE: The object files are built at the place where configure is launched"
->  exit 1
-> @@ -1579,6 +1585,27 @@ if test "$mingw32" != yes -a "$pthread" = no; then
->  fi
->  
->  ##########################################
-> +# rbd probe
-> +if test "$rbd" != "no" ; then
-> +  cat > $TMPC <<EOF
-> +#include <stdio.h>
-> +#include <rados/librados.h>
-> +int main(void) { rados_initialize(0, NULL); return 0; }
-> +EOF
-> +  rbd_libs="-lrados -lcrypto"
-> +  if compile_prog "" "$rbd_libs" ; then
-> +    rbd=yes
-> +    libs_tools="$rbd_libs $libs_tools"
-> +    libs_softmmu="$rbd_libs $libs_softmmu"
-> +  else
-> +    if test "$rbd" = "yes" ; then
-> +      feature_not_found "rados block device"
-> +    fi
-> +    rbd=no
-> +  fi
-> +fi
-> +
-> +##########################################
->  # linux-aio probe
->  
->  if test "$linux_aio" != "no" ; then
-> @@ -2041,6 +2068,7 @@ echo "preadv support    $preadv"
->  echo "fdatasync         $fdatasync"
->  echo "uuid support      $uuid"
->  echo "vhost-net support $vhost_net"
-> +echo "rbd support       $rbd"
->  
->  if test $sdl_too_old = "yes"; then
->  echo "-> Your SDL version is too old - please upgrade to have SDL support"
-> @@ -2270,6 +2298,9 @@ echo "CONFIG_UNAME_RELEASE=\"$uname_release\"" >> $config_host_mak
->  if test "$zero_malloc" = "yes" ; then
->    echo "CONFIG_ZERO_MALLOC=y" >> $config_host_mak
->  fi
-> +if test "$rbd" = "yes" ; then
-> +  echo "CONFIG_RBD=y" >> $config_host_mak
-> +fi
->  
->  # USB host support
->  case "$usb" in
->   
-
+ >=20
+>=20
+> Paul C
+>=20
+> On Wed, Jun 9, 2010 at 2:56 AM, Sage Weil <sage@newdream.net> wrote:
+> > On Tue, 8 Jun 2010, Paul wrote:
+> >> Could you take a look at the commits at http://github.com/tcloud/ceph
+> >> on the mon-remove branch please.
+> >
+> > It seems to work pretty well. =A0I changed the LogClient interaction to=
+ be
+> > less annoying, simplified the mon removal check, and did a few small
+> > cleanups. =A0I pushed a mon-remove branch to
+> > git://ceph.newdream.net/git/ceph.git.
+> >
+> > The one remaining issue I see is the way that monitors are
+> > identified/named. =A0We dealt with a similar issue with the MDSs a whil=
+e
+> > back. =A0The problem is that we need to identify a particular instance =
+of
+> > cmon somehow (in ceph.conf, and at startup) so that cmon knows which
+> > address to bind to. =A0But if you have 3 monitors, identified as 0, 1, =
+2,
+> > and remove 1, then 2 becomes 1. =A0We fixed things up so that the runni=
+ng
+> > instance adjusts it's rank, but the ceph.conf is still wrong.
+> >
+> > We could take a similar route as we did with the mds, and identify each
+> > cmon instance by name and not just by number. =A0Then the ceph.conf ent=
+ry
+> > would look like
+> >
+> > [mon.foo]
+> > =A0 =A0 =A0 =A0...
+> >
+> > and on startup you'd run
+> >
+> > =A0 =A0 =A0 =A0$ cmon -i foo =A0 =A0 =A0 =A0# and not 'cmon -i 0'
+> >
+> > That would mean adjusting the monmap to store the names of monitors. =
+=A0The
+> > numeric 'rank' would just the current position of a monitor during a
+> > particular epoch.
+> >
+> > The result would be more like
+> >
+> > =A0$ ceph mon add foo 1.2.3.4:6789
+> > =A0$ ceph mon remove bar
+> > or
+> > =A0$ ceph mon remove 1.2.3.6:6789
+> >
+> > Alternatively, we could keep the monmap the same, and allow ranks to be
+> > empty, so that we could have say mon 0, 2, and 3. =A0That would require=
+ some
+> > MonClient changes to the code that picks a new monitor, and to any othe=
+r
+> > code that might assume that monmap.size() determines the range of exist=
+ing
+> > monitors.
+> >
+> > I think I prefer the first approach, because it is easier for people to
+> > identify specific instances in terms of a name (not a number with speci=
+fic
+> > constraints). =A0And because the MonMap encoding could be simplified an=
+yway
+> > (no reason for it to be an entity_inst_t vector instead of an
+> > entity_addr_t vector).
+> >
+> > sage
+> >
+> >
+> >
+> >>
+> >> The second case was partly due to the MonClient trying to contact the
+> >> monitor in the new map that has the same id (which is now mapped to a
+> >> different address) as the one it was talking to before. Added a patch
+> >> for this.
+> >>
+> >> Also, about the AuthMon issue we were talking about earlier: I wasn't
+> >> able to reproduce it afterwards. Hopefully the root cause is the same
+> >> as above.
+> >>
+> >> Thanks,
+> >> Paul C
+> >>
+> >> On Tue, Jun 8, 2010 at 1:38 AM, Sage Weil <sage@newdream.net> wrote:
+> >> > On Mon, 7 Jun 2010, Paul wrote:
+> >> >> Took a shot at implementing the remove mon command, turned out to b=
+e
+> >> >> not _quite_ as trivial as I'd expected.
+> >> >>
+> >> >> The monitors need to adjust their whoami values after getting the n=
+ew
+> >> >> map, which is annoying since the value is stored in quite a few
+> >> >> places. Ended up removing all the direct copies I could find and ha=
+d
+> >> >> them lookup the value in Monitor instead.
+> >> >
+> >> > Looks good.
+> >> >
+> >> >> The interaction with MonClient (i.e. via ceph command) needs a bit
+> >> >> more work, but I'm not really sure how to proceed at this point. If
+> >> >> the client happens to pick the monitor that is to be removed to sen=
+d
+> >> >> the remove command to, it'll retry with another monitor and get a
+> >> >> "does not exist" error (because the first operation already removed
+> >> >> it). If the client happens to pick a monitor whose id is greater th=
+an
+> >> >> the one to be removed, it will never get an response to the command=
+=2E
+> >> >
+> >> > Hmm. =A0If we can get the reply sent before the monmap change is bro=
+adcast,
+> >> > the first case should be avoidable. =A0I'm not sure what would case =
+the
+> >> > second case.
+> >> >
+> >> > The patches below are mangled (wordwrapped) by gmail. =A0Can you res=
+end them
+> >> > using 'git send-email'? =A0Or if they're in a public git tree somewh=
+ere I
+> >> > can grab them from there.
+> >> >
+> >> > Thanks!
+> >> > sage
+> >> >
+> >> >
+> >> >>
+> >> >> >From 1d30deea10266392328c6fbdf176b766db42c32f Mon Sep 17 00:00:00 =
+2001
+> >> >> From: Paul Chiang <paul_chiang@tcloudcomputing.com>
+> >> >> Date: Mon, 7 Jun 2010 09:47:48 +0800
+> >> >> Subject: [PATCH 1/2] Removed all copies of the whoami value
+> >> >>
+> >> >>
+> >> >> Signed-off-by: Paul Chiang <paul_chiang@tcloudcomputing.com>
+> >> >> ---
+> >> >> =A0src/mon/Elector.cc | =A0 10 +++++-----
+> >> >> =A0src/mon/Elector.h =A0| =A0 =A03 +--
+> >> >> =A0src/mon/Monitor.cc | =A0 =A04 ++--
+> >> >> =A0src/mon/Paxos.cc =A0 | =A0 16 ++++++++--------
+> >> >> =A0src/mon/Paxos.h =A0 =A0| =A0 =A05 ++---
+> >> >> =A05 files changed, 18 insertions(+), 20 deletions(-)
+> >> >>
+> >> >> diff --git a/src/mon/Elector.cc b/src/mon/Elector.cc
+> >> >> index 7f8fa62..41fde6e 100644
+> >> >> --- a/src/mon/Elector.cc
+> >> >> +++ b/src/mon/Elector.cc
+> >> >> @@ -69,11 +69,11 @@ void Elector::start()
+> >> >> =A0 =A0 =A0bump_epoch(epoch+1); =A0// odd =3D=3D election cycle
+> >> >> =A0 =A0start_stamp =3D g_clock.now();
+> >> >> =A0 =A0electing_me =3D true;
+> >> >> - =A0acked_me.insert(whoami);
+> >> >> + =A0acked_me.insert(mon->whoami);
+> >> >>
+> >> >> =A0 =A0// bcast to everyone else
+> >> >> =A0 =A0for (unsigned i=3D0; i<mon->monmap->size(); ++i) {
+> >> >> - =A0 =A0if ((int)i =3D=3D whoami) continue;
+> >> >> + =A0 =A0if ((int)i =3D=3D mon->whoami) continue;
+> >> >> =A0 =A0 =A0mon->messenger->send_message(new
+> >> >> MMonElection(MMonElection::OP_PROPOSE, epoch, mon->monmap),
+> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mon-=
+>monmap->get_inst(i));
+> >> >> =A0 =A0}
+> >> >> @@ -151,7 +151,7 @@ void Elector::victory()
+> >> >> =A0 =A0for (set<int>::iterator p =3D quorum.begin();
+> >> >> =A0 =A0 =A0 =A0 p !=3D quorum.end();
+> >> >> =A0 =A0 =A0 =A0 ++p) {
+> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
+> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
+> >> >> =A0 =A0 =A0MMonElection *m =3D new MMonElection(MMonElection::OP_VI=
+CTORY,
+> >> >> epoch, mon->monmap);
+> >> >> =A0 =A0 =A0m->quorum =3D quorum;
+> >> >> =A0 =A0 =A0mon->messenger->send_message(m, mon->monmap->get_inst(*p=
+));
+> >> >> @@ -186,7 +186,7 @@ void Elector::handle_propose(MMonElection *m)
+> >> >> =A0 =A0 =A0}
+> >> >> =A0 =A0}
+> >> >>
+> >> >> - =A0if (whoami < from) {
+> >> >> + =A0if (mon->whoami < from) {
+> >> >> =A0 =A0 =A0// i would win over them.
+> >> >> =A0 =A0 =A0if (leader_acked >=3D 0) { =A0 =A0 =A0 =A0// we already =
+acked someone
+> >> >> =A0 =A0 =A0 =A0assert(leader_acked < from); =A0// and they still wi=
+n, of course
+> >> >> @@ -250,7 +250,7 @@ void Elector::handle_victory(MMonElection *m)
+> >> >> =A0 =A0dout(5) << "handle_victory from " << m->get_source() << dend=
+l;
+> >> >> =A0 =A0int from =3D m->get_source().num();
+> >> >>
+> >> >> - =A0assert(from < whoami);
+> >> >> + =A0assert(from < mon->whoami);
+> >> >> =A0 =A0assert(m->epoch % 2 =3D=3D 0);
+> >> >>
+> >> >> =A0 =A0// i should have seen this election if i'm getting the victo=
+ry.
+> >> >> diff --git a/src/mon/Elector.h b/src/mon/Elector.h
+> >> >> index 9bfd7cb..8a21e09 100644
+> >> >> --- a/src/mon/Elector.h
+> >> >> +++ b/src/mon/Elector.h
+> >> >> @@ -32,7 +32,6 @@ class Monitor;
+> >> >> =A0class Elector {
+> >> >> =A0 private:
+> >> >> =A0 =A0Monitor *mon;
+> >> >> - =A0int whoami;
+> >> >>
+> >> >> =A0 =A0Context *expire_event;
+> >> >>
+> >> >> @@ -71,7 +70,7 @@ class Elector {
+> >> >> =A0 =A0void handle_victory(class MMonElection *m);
+> >> >>
+> >> >> =A0 public:
+> >> >> - =A0Elector(Monitor *m, int w) : mon(m), whoami(w),
+> >> >> + =A0Elector(Monitor *m) : mon(m),
+> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0expire_e=
+vent(0),
+> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0epoch(0)=
+,
+> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0electing=
+_me(false),
+> >> >> diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
+> >> >> index cf0b20b..db086be 100644
+> >> >> --- a/src/mon/Monitor.cc
+> >> >> +++ b/src/mon/Monitor.cc
+> >> >> @@ -93,7 +93,7 @@ Monitor::Monitor(int w, MonitorStore *s, Messenge=
+r
+> >> >> *m, MonMap *map) :
+> >> >>
+> >> >> =A0 =A0state(STATE_STARTING), stopping(false),
+> >> >>
+> >> >> - =A0elector(this, w),
+> >> >> + =A0elector(this),
+> >> >> =A0 =A0mon_epoch(0),
+> >> >> =A0 =A0leader(0),
+> >> >> =A0 =A0paxos(PAXOS_NUM), paxos_service(PAXOS_NUM),
+> >> >> @@ -114,7 +114,7 @@ Monitor::Monitor(int w, MonitorStore *s, Messen=
+ger
+> >> >> *m, MonMap *map) :
+> >> >>
+> >> >> =A0Paxos *Monitor::add_paxos(int type)
+> >> >> =A0{
+> >> >> - =A0Paxos *p =3D new Paxos(this, whoami, type);
+> >> >> + =A0Paxos *p =3D new Paxos(this, type);
+> >> >> =A0 =A0paxos[type] =3D p;
+> >> >> =A0 =A0return p;
+> >> >> =A0}
+> >> >> diff --git a/src/mon/Paxos.cc b/src/mon/Paxos.cc
+> >> >> index d10f31c..9c247e8 100644
+> >> >> --- a/src/mon/Paxos.cc
+> >> >> +++ b/src/mon/Paxos.cc
+> >> >> @@ -23,7 +23,7 @@
+> >> >>
+> >> >> =A0#define DOUT_SUBSYS paxos
+> >> >> =A0#undef dout_prefix
+> >> >> -#define dout_prefix _prefix(mon, whoami, machine_name, state, last=
+_committed)
+> >> >> +#define dout_prefix _prefix(mon, mon->whoami, machine_name, state,
+> >> >> last_committed)
+> >> >> =A0static ostream& _prefix(Monitor *mon, int whoami, const char
+> >> >> *machine_name, int state, version_t last_committed) {
+> >> >> =A0 =A0return *_dout << dbeginl
+> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 << "mon" << whoami
+> >> >> @@ -87,7 +87,7 @@ void Paxos::collect(version_t oldpn)
+> >> >> =A0 =A0for (set<int>::const_iterator p =3D mon->get_quorum().begin(=
+);
+> >> >> =A0 =A0 =A0 =A0 p !=3D mon->get_quorum().end();
+> >> >> =A0 =A0 =A0 =A0 ++p) {
+> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
+> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
+> >> >>
+> >> >> =A0 =A0 =A0MMonPaxos *collect =3D new MMonPaxos(mon->get_epoch(),
+> >> >> MMonPaxos::OP_COLLECT, machine_id);
+> >> >> =A0 =A0 =A0collect->last_committed =3D last_committed;
+> >> >> @@ -336,7 +336,7 @@ void Paxos::begin(bufferlist& v)
+> >> >>
+> >> >> =A0 =A0// accept it ourselves
+> >> >> =A0 =A0accepted.clear();
+> >> >> - =A0accepted.insert(whoami);
+> >> >> + =A0accepted.insert(mon->whoami);
+> >> >> =A0 =A0new_value =3D v;
+> >> >> =A0 =A0mon->store->put_bl_sn(new_value, machine_name, last_committe=
+d+1);
+> >> >>
+> >> >> @@ -356,7 +356,7 @@ void Paxos::begin(bufferlist& v)
+> >> >> =A0 =A0for (set<int>::const_iterator p =3D mon->get_quorum().begin(=
+);
+> >> >> =A0 =A0 =A0 =A0 p !=3D mon->get_quorum().end();
+> >> >> =A0 =A0 =A0 =A0 ++p) {
+> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
+> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
+> >> >>
+> >> >> =A0 =A0 =A0dout(10) << " sending begin to mon" << *p << dendl;
+> >> >> =A0 =A0 =A0MMonPaxos *begin =3D new MMonPaxos(mon->get_epoch(),
+> >> >> MMonPaxos::OP_BEGIN, machine_id);
+> >> >> @@ -483,7 +483,7 @@ void Paxos::commit()
+> >> >> =A0 =A0for (set<int>::const_iterator p =3D mon->get_quorum().begin(=
+);
+> >> >> =A0 =A0 =A0 =A0 p !=3D mon->get_quorum().end();
+> >> >> =A0 =A0 =A0 =A0 ++p) {
+> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
+> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
+> >> >>
+> >> >> =A0 =A0 =A0dout(10) << " sending commit to mon" << *p << dendl;
+> >> >> =A0 =A0 =A0MMonPaxos *commit =3D new MMonPaxos(mon->get_epoch(),
+> >> >> MMonPaxos::OP_COMMIT, machine_id);
+> >> >> @@ -527,7 +527,7 @@ void Paxos::extend_lease()
+> >> >> =A0 =A0lease_expire =3D g_clock.now();
+> >> >> =A0 =A0lease_expire +=3D g_conf.mon_lease;
+> >> >> =A0 =A0acked_lease.clear();
+> >> >> - =A0acked_lease.insert(whoami);
+> >> >> + =A0acked_lease.insert(mon->whoami);
+> >> >>
+> >> >> =A0 =A0dout(7) << "extend_lease now+" << g_conf.mon_lease << " (" <=
+<
+> >> >> lease_expire << ")" << dendl;
+> >> >>
+> >> >> @@ -535,7 +535,7 @@ void Paxos::extend_lease()
+> >> >> =A0 =A0for (set<int>::const_iterator p =3D mon->get_quorum().begin(=
+);
+> >> >> =A0 =A0 =A0 =A0 p !=3D mon->get_quorum().end();
+> >> >> =A0 =A0 =A0 =A0 ++p) {
+> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
+> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
+> >> >> =A0 =A0 =A0MMonPaxos *lease =3D new MMonPaxos(mon->get_epoch(),
+> >> >> MMonPaxos::OP_LEASE, machine_id);
+> >> >> =A0 =A0 =A0lease->last_committed =3D last_committed;
+> >> >> =A0 =A0 =A0lease->lease_timestamp =3D lease_expire;
+> >> >> @@ -724,7 +724,7 @@ version_t Paxos::get_new_proposal_number(versio=
+n_t gt)
+> >> >> =A0 =A0last_pn /=3D 100;
+> >> >> =A0 =A0last_pn++;
+> >> >> =A0 =A0last_pn *=3D 100;
+> >> >> - =A0last_pn +=3D (version_t)whoami;
+> >> >> + =A0last_pn +=3D (version_t)mon->whoami;
+> >> >>
+> >> >> =A0 =A0// write
+> >> >> =A0 =A0mon->store->put_int(last_pn, machine_name, "last_pn");
+> >> >> diff --git a/src/mon/Paxos.h b/src/mon/Paxos.h
+> >> >> index c6eff22..9d34605 100644
+> >> >> --- a/src/mon/Paxos.h
+> >> >> +++ b/src/mon/Paxos.h
+> >> >> @@ -68,7 +68,6 @@ class Paxos;
+> >> >> =A0// i am one state machine.
+> >> >> =A0class Paxos {
+> >> >> =A0 =A0Monitor *mon;
+> >> >> - =A0int whoami;
+> >> >>
+> >> >> =A0 =A0// my state machine info
+> >> >> =A0 =A0int machine_id;
+> >> >> @@ -225,8 +224,8 @@ private:
+> >> >> =A0 =A0version_t get_new_proposal_number(version_t gt=3D0);
+> >> >>
+> >> >> =A0public:
+> >> >> - =A0Paxos(Monitor *m, int w,
+> >> >> - =A0 =A0 int mid) : mon(m), whoami(w),
+> >> >> + =A0Paxos(Monitor *m,
+> >> >> + =A0 =A0 int mid) : mon(m),
+> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0machine_id(mid),
+> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0machine_name(get_paxos_name(mid)=
+),
+> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0state(STATE_RECOVERING),
+> >> >> --
+> >> >> 1.6.4.2
+> >> >>
+> >> >> >From eb7308104c33aa50195e3736483c6bf9a145a518 Mon Sep 17 00:00:00 =
+2001
+> >> >> From: Paul Chiang <paul_chiang@tcloudcomputing.com>
+> >> >> Date: Mon, 7 Jun 2010 10:16:39 +0800
+> >> >> Subject: [PATCH 2/2] Introduced ceph mon remove command
+> >> >>
+> >> >>
+> >> >> Signed-off-by: Paul Chiang <paul_chiang@tcloudcomputing.com>
+> >> >> ---
+> >> >> =A0src/common/LogClient.h =A0 | =A0 =A01 +
+> >> >> =A0src/mon/Monitor.cc =A0 =A0 =A0 | =A0 =A01 +
+> >> >> =A0src/mon/Monitor.h =A0 =A0 =A0 =A0| =A0 =A01 +
+> >> >> =A0src/mon/MonmapMonitor.cc | =A0 61 ++++++++++++++++++++++++++++++=
+++++++++++++++++
+> >> >> =A0src/mon/MonmapMonitor.h =A0| =A0 =A01 +
+> >> >> =A05 files changed, 65 insertions(+), 0 deletions(-)
+> >> >>
+> >> >> diff --git a/src/common/LogClient.h b/src/common/LogClient.h
+> >> >> index 0185eec..bc5e227 100644
+> >> >> --- a/src/common/LogClient.h
+> >> >> +++ b/src/common/LogClient.h
+> >> >> @@ -56,6 +56,7 @@ class LogClient : public Dispatcher {
+> >> >> =A0 =A0void send_log();
+> >> >> =A0 =A0void handle_log_ack(MLogAck *m);
+> >> >> =A0 =A0void set_synchronous(bool sync) { is_synchronous =3D sync; }
+> >> >> + =A0void set_mon(int mon_id) { mon =3D mon_id; }
+> >> >>
+> >> >> =A0 =A0LogClient(Messenger *m, MonMap *mm) :
+> >> >> =A0 =A0 =A0messenger(m), monmap(mm), mon(-1), is_synchronous(false)=
+,
+> >> >> diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
+> >> >> index db086be..259b6ce 100644
+> >> >> --- a/src/mon/Monitor.cc
+> >> >> +++ b/src/mon/Monitor.cc
+> >> >> @@ -110,6 +110,7 @@ Monitor::Monitor(int w, MonitorStore *s, Messen=
+ger
+> >> >> *m, MonMap *map) :
+> >> >> =A0 =A0mon_caps =3D new MonCaps();
+> >> >> =A0 =A0mon_caps->set_allow_all(true);
+> >> >> =A0 =A0mon_caps->text =3D "allow *";
+> >> >> + =A0myaddr =3D map->get_inst(w).addr;
+> >> >> =A0}
+> >> >>
+> >> >> =A0Paxos *Monitor::add_paxos(int type)
+> >> >> diff --git a/src/mon/Monitor.h b/src/mon/Monitor.h
+> >> >> index 829c506..a673972 100644
+> >> >> --- a/src/mon/Monitor.h
+> >> >> +++ b/src/mon/Monitor.h
+> >> >> @@ -58,6 +58,7 @@ class Monitor : public Dispatcher {
+> >> >> =A0public:
+> >> >> =A0 =A0// me
+> >> >> =A0 =A0int whoami;
+> >> >> + =A0entity_addr_t myaddr;
+> >> >> =A0 =A0Messenger *messenger;
+> >> >> =A0 =A0Mutex lock;
+> >> >>
+> >> >> diff --git a/src/mon/MonmapMonitor.cc b/src/mon/MonmapMonitor.cc
+> >> >> index 0aca5fb..5368ab7 100644
+> >> >> --- a/src/mon/MonmapMonitor.cc
+> >> >> +++ b/src/mon/MonmapMonitor.cc
+> >> >> @@ -48,6 +48,7 @@ bool MonmapMonitor::update_from_paxos()
+> >> >> =A0 =A0dout(10) << "update_from_paxos paxosv " << paxosv
+> >> >> =A0 =A0 =A0 =A0 =A0<< ", my v " << mon->monmap->epoch << dendl;
+> >> >>
+> >> >> + =A0int original_map_size =3D mon->monmap->size();
+> >> >> =A0 =A0//read and decode
+> >> >> =A0 =A0monmap_bl.clear();
+> >> >> =A0 =A0bool success =3D paxos->read(paxosv, monmap_bl);
+> >> >> @@ -58,6 +59,20 @@ bool MonmapMonitor::update_from_paxos()
+> >> >> =A0 =A0//save the bufferlist version in the paxos instance as well
+> >> >> =A0 =A0paxos->stash_latest(paxosv, monmap_bl);
+> >> >>
+> >> >> + =A0if (original_map_size !=3D mon->monmap->size())
+> >> >> + =A0{
+> >> >> + =A0 =A0_update_whoami();
+> >> >> +
+> >> >> + =A0 =A0// call election?
+> >> >> + =A0 =A0if (mon->monmap->size() > 1) {
+> >> >> + =A0 =A0 =A0mon->call_election();
+> >> >> + =A0 =A0} else {
+> >> >> + =A0 =A0 =A0// we're standalone.
+> >> >> + =A0 =A0 =A0set<int> q;
+> >> >> + =A0 =A0 =A0q.insert(mon->whoami);
+> >> >> + =A0 =A0 =A0mon->win_election(1, q);
+> >> >> + =A0 =A0}
+> >> >> + =A0}
+> >> >> =A0 =A0return true;
+> >> >> =A0}
+> >> >>
+> >> >> @@ -127,6 +142,8 @@ bool MonmapMonitor::preprocess_command(MMonComm=
+and *m)
+> >> >> =A0 =A0 =A0}
+> >> >> =A0 =A0 =A0else if (m->cmd[1] =3D=3D "add")
+> >> >> =A0 =A0 =A0 =A0return false;
+> >> >> + =A0 =A0else if (m->cmd[1] =3D=3D "remove")
+> >> >> + =A0 =A0 =A0return false;
+> >> >> =A0 =A0}
+> >> >>
+> >> >> =A0 =A0if (r !=3D -1) {
+> >> >> @@ -177,6 +194,23 @@ bool MonmapMonitor::prepare_command(MMonComman=
+d *m)
+> >> >> =A0 =A0 =A0 =A0paxos->wait_for_commit(new Monitor::C_Command(mon, m=
+, 0, rs,
+> >> >> paxos->get_version()));
+> >> >> =A0 =A0 =A0 =A0return true;
+> >> >> =A0 =A0 =A0}
+> >> >> + =A0 =A0else if (m->cmd.size() =3D=3D 3 && m->cmd[1] =3D=3D "remov=
+e") {
+> >> >> + =A0 =A0 =A0entity_addr_t addr;
+> >> >> + =A0 =A0 =A0parse_ip_port(m->cmd[2].c_str(), addr);
+> >> >> + =A0 =A0 =A0bufferlist rdata;
+> >> >> + =A0 =A0 =A0if (!pending_map.contains(addr)) {
+> >> >> + =A0 =A0 =A0 =A0err =3D -ENOENT;
+> >> >> + =A0 =A0 =A0 =A0ss << "mon " << addr << " does not exist";
+> >> >> + =A0 =A0 =A0 =A0goto out;
+> >> >> + =A0 =A0 =A0}
+> >> >> +
+> >> >> + =A0 =A0 =A0pending_map.remove(addr);
+> >> >> + =A0 =A0 =A0pending_map.last_changed =3D g_clock.now();
+> >> >> + =A0 =A0 =A0ss << "removed mon" << " at " << addr << ", there are =
+now " <<
+> >> >> pending_map.size() << " monitors" ;
+> >> >> + =A0 =A0 =A0getline(ss, rs);
+> >> >> + =A0 =A0 =A0paxos->wait_for_commit(new Monitor::C_Command(mon, m, =
+0, rs,
+> >> >> paxos->get_version()));
+> >> >> + =A0 =A0 =A0return true;
+> >> >> + =A0 =A0}
+> >> >> =A0 =A0 =A0else
+> >> >> =A0 =A0 =A0 =A0ss << "unknown command " << m->cmd[1];
+> >> >> =A0 =A0} else
+> >> >> @@ -203,3 +237,30 @@ void MonmapMonitor::tick()
+> >> >> =A0{
+> >> >> =A0 =A0update_from_paxos();
+> >> >> =A0}
+> >> >> +
+> >> >> +void MonmapMonitor::_update_whoami()
+> >> >> +{
+> >> >> + =A0// first check if there is any change
+> >> >> + =A0if (mon->whoami < mon->monmap->size() &&
+> >> >> + =A0 =A0 =A0mon->monmap->get_inst(mon->whoami).addr =3D=3D mon->my=
+addr)
+> >> >> + =A0{
+> >> >> + =A0 =A0return;
+> >> >> + =A0}
+> >> >> +
+> >> >> + =A0// then check backwards starting from min(whoami-1, size-1) si=
+nce
+> >> >> whoami only ever decreases
+> >> >> + =A0unsigned i=3D(mon->whoami-1) < mon->monmap->size() ?
+> >> >> (mon->whoami-1):(mon->monmap->size()-1);
+> >> >> + =A0for (; i>=3D0; i--)
+> >> >> + =A0{
+> >> >> + =A0 =A0if (mon->monmap->get_inst(i).addr =3D=3D mon->myaddr)
+> >> >> + =A0 =A0{
+> >> >> + =A0 =A0 =A0dout(10) << "Changing whoami from " << mon->whoami << =
+" to " <<
+> >> >> i << dendl;
+> >> >> + =A0 =A0 =A0mon->whoami =3D i;
+> >> >> + =A0 =A0 =A0mon->messenger->set_myname(entity_name_t::MON(i));
+> >> >> + =A0 =A0 =A0mon->logclient.set_mon(i);
+> >> >> + =A0 =A0 =A0return;
+> >> >> + =A0 =A0}
+> >> >> + =A0}
+> >> >> + =A0dout(0) << "Cannot find myself (mon" << mon->whoami << ", " <<
+> >> >> mon->myaddr << ") in new monmap! I must have been removed, shutting
+> >> >> down." << dendl;
+> >> >> + =A0mon->shutdown();
+> >> >> +}
+> >> >> +
+> >> >> diff --git a/src/mon/MonmapMonitor.h b/src/mon/MonmapMonitor.h
+> >> >> index fbb7fa5..b14c012 100644
+> >> >> --- a/src/mon/MonmapMonitor.h
+> >> >> +++ b/src/mon/MonmapMonitor.h
+> >> >> @@ -67,6 +67,7 @@ class MonmapMonitor : public PaxosService {
+> >> >>
+> >> >> =A0 private:
+> >> >> =A0 =A0bufferlist monmap_bl;
+> >> >> + =A0void _update_whoami();
+> >> >> =A0};
+> >> >>
+> >> >>
+> >> >> --
+> >> >> 1.6.4.2
+> >> >> --
+> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+> >> >> the body of a message to majordomo@vger.kernel.org
+> >> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
+> >> >>
+> >> >>
+> >> >
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-1722380202-1276290711=:20973--
