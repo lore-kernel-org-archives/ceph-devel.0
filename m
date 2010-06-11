@@ -1,31 +1,33 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: 2.6.34 soft lockup - CPU#1 stuck for 61s!
-Date: Thu, 10 Jun 2010 17:11:14 -0700
-Message-ID: <AANLkTil5rDlFX56U8ohpLxBfVyiXJXl3PaYnKgwESRnU@mail.gmail.com>
-References: <4C110BBD.7070402@watson.wustl.edu>
+From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+Subject: Re: cmds segfault on pdj-fstest (ceph.git unstable)
+Date: Fri, 11 Jun 2010 10:17:49 +0800
+Message-ID: <AANLkTinkYi4vOYcMxIm5Z7uS8TbannrSFdUtj9gshftO@mail.gmail.com>
+References: <hundgq$ums$1@dough.gmane.org>
+	<huqcjt$khk$1@dough.gmane.org>
+	<AANLkTikoEestUHujD0_TcG0haFOcOX4pYPVodpr6NOKF@mail.gmail.com>
+	<AANLkTikMYO91t3Y1euaFybiZLlhXq4EcTps--A-Uq0GX@mail.gmail.com>
+	<AANLkTimpR0HCuF9o-SL4ea_6trR860rQ6vNAX6_j_pCL@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:64273 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759924Ab0FKALP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jun 2010 20:11:15 -0400
-Received: by pwi1 with SMTP id 1so150923pwi.19
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Jun 2010 17:11:15 -0700 (PDT)
-In-Reply-To: <4C110BBD.7070402@watson.wustl.edu>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:63878 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754733Ab0FKCRv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Jun 2010 22:17:51 -0400
+Received: by vws17 with SMTP id 17so586039vws.19
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Jun 2010 19:17:50 -0700 (PDT)
+In-Reply-To: <AANLkTimpR0HCuF9o-SL4ea_6trR860rQ6vNAX6_j_pCL@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Weil <mweil@watson.wustl.edu>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregf@hq.newdream.net>
+Cc: Thomas Mueller <thomas@chaschperli.ch>, ceph-devel@vger.kernel.org
 
-That usually happens when there's some pending request that waits too
-long. It's really hard to tell what exactly happened from this log as
-for some reason we don't see the expected backtrace.
-
-Yehuda
-
-On Thu, Jun 10, 2010 at 8:58 AM, Matt Weil <mweil@watson.wustl.edu> wrote:
-> anyone seen this?
+On Fri, Jun 11, 2010 at 12:26 AM, Gregory Farnum <gregf@hq.newdream.net> wrote:
+> On Thu, Jun 10, 2010 at 9:11 AM, Gregory Farnum <gregf@hq.newdream.net> wrote:
+>> (Would've just pushed yours, Harry, but I didn't see it in time -- sorry!)
+> Apparently I can't do anything right this morning -- sorry twice, Henry!
 >
-> ceph client
->
+
+No problem! Never mind. :)
+
+Henry
