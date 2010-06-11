@@ -1,39 +1,65 @@
-From: Sage Weil <sage@newdream.net>
+From: Peter Niemayer <niemayer@isg.de>
 Subject: Re: Using other filesystems than btrfs with Ceph
-Date: Fri, 11 Jun 2010 09:40:46 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006110938120.20973@cobra.newdream.net>
+Date: Fri, 11 Jun 2010 18:42:54 +0200
+Message-ID: <hutp2e$od8$1@dough.gmane.org>
 References: <hutgsk$oh4$1@dough.gmane.org> <AANLkTin6wleXQVepvMACh8JMr5sa1g4neVXD_Voi7rYT@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33384 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752874Ab0FKQkJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jun 2010 12:40:09 -0400
+Received: from lo.gmane.org ([80.91.229.12]:33007 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756392Ab0FKQnO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 11 Jun 2010 12:43:14 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1ON7K3-0006Xa-M6
+	for ceph-devel@vger.kernel.org; Fri, 11 Jun 2010 18:43:11 +0200
+Received: from barriere.frankfurter-softwarefabrik.de ([217.11.197.1])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Jun 2010 18:43:11 +0200
+Received: from niemayer by barriere.frankfurter-softwarefabrik.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Jun 2010 18:43:11 +0200
 In-Reply-To: <AANLkTin6wleXQVepvMACh8JMr5sa1g4neVXD_Voi7rYT@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: Peter Niemayer <niemayer@isg.de>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, 11 Jun 2010, Gregory Farnum wrote:
-> That said, btrfs is most beneficial when you engage in snapshotting,
-> or have to handle recoveries. Ceph makes use of a number of ioctls to
-> ensure consistency and provide speed when running on btrfs; on other
-> filesystems snapshots will be much slower, and OSDs will be more
-> likely to lose data in the case of a power failure or similar problem.
-> If these aren't big problems for you, you can run Ceph on whatever fs
-> you like.
+On 06/11/2010 06:26 PM, Gregory Farnum wrote:
+>> Also, the documentation in the Wiki does not mention what would need
+>> to be configured differently if another filesystem was to be used -
+>> what would I have to use instead of "btrfs devs = /dev/sdy"?
+> You can look at the ceph.conf file produced by the vstart script for a
+> non-btrfs example -- just use
+> osd data = path
+> osd journal = path2
+> osd journal size = [# in MB]
 
-Right.
+Thanks for this info!
 
-The btrfs isn't required for consistency if the writeahead journal is 
-enabled (which it is by default).  However, at the moment the code that 
-controls trimming the journal assumes ext3 data=ordered fsync semantics 
-(fsync flushes the entire journal and all prior writes).  This needs a 
-little bit of work to do the right thing with ext4 and xfs.
 
-So: I would stick with btrfs or ext3 for now if you want recovery to work 
-reliably!
+> Well, it's possible that you could improve Ceph's performance in
+> certain workloads by using different underlying filesystems, but in
+> general Ceph's interfaces and protocols are going to matter a lot
+> more, and btrfs works very well with it.
 
-sage
+It would be interesting to me what would be a factor of slow-down
+to be expected when setting up a minimalistic one-node-Ceph service,
+where all daemons run on localhost, and just one local filesystem
+is created for the OSD, in comparison to using btrfs directly on that
+local filesystem?
+
+Would you expect a significant decrease in sequential read/write throughput?
+And what about latencies for small reads/writes?
+
+I wonder what would be an acceptable design-goal when ruling
+out physical network equipment or cabling for the moment...
+
+
+Regards,
+
+Peter Niemayer
+
+
