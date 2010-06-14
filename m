@@ -1,643 +1,124 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Correct proceedure for removing ceph nodes
-Date: Fri, 11 Jun 2010 14:11:51 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006111402370.20973@cobra.newdream.net>
-References: <AANLkTimW7oNdbDnTTyPzlOlD8fr0Bw5rRybuTiHNQTmV@mail.gmail.com>
- <Pine.LNX.4.64.1006021122300.1269@cobra.newdream.net> <20100604130359.GT1211@skl-net.de>
- <Pine.LNX.4.64.1006040951210.2384@cobra.newdream.net>
- <AANLkTik0eXCX53WQ9aTYz5qmpFunTTCoTxQeK42lYWfb@mail.gmail.com>
- <Pine.LNX.4.64.1006071033460.20365@cobra.newdream.net>
- <AANLkTiluECDjr8D8wYrqRpZ7gK3iAmdRxnHrW7ouHjC2@mail.gmail.com>
- <Pine.LNX.4.64.1006081142200.15202@cobra.newdream.net>
- <AANLkTim9exs1Qu-VAqCWA9DxAhchVeAEaQy1uwyRaLPR@mail.gmail.com>
+From: Andre Noll <maan@systemlinux.org>
+Subject: Re: osd: terminate called after throwing an instance of 'std::bad_alloc'
+Date: Mon, 14 Jun 2010 10:48:58 +0200
+Message-ID: <20100614084858.GC17950@skl-net.de>
+References: <Pine.LNX.4.64.1006021115240.1269@cobra.newdream.net> <20100604084521.GO1211@skl-net.de> <Pine.LNX.4.64.1006040944331.2384@cobra.newdream.net> <20100607080754.GU1211@skl-net.de> <20100607080932.GV1211@skl-net.de> <Pine.LNX.4.64.1006071016470.20365@cobra.newdream.net> <20100608122838.GA9152@skl-net.de> <Pine.LNX.4.64.1006082246540.3595@cobra.newdream.net> <20100609081604.GG9152@skl-net.de> <Pine.LNX.4.64.1006091025500.28853@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1722380202-1276290711=:20973"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="FsscpQKzF/jJk6ya"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41605 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760427Ab0FKVLN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Jun 2010 17:11:13 -0400
-In-Reply-To: <AANLkTim9exs1Qu-VAqCWA9DxAhchVeAEaQy1uwyRaLPR@mail.gmail.com>
+Received: from systemlinux.org ([83.151.29.59]:59862 "EHLO m18s25.vlinux.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755292Ab0FNItL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 14 Jun 2010 04:49:11 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1006091025500.28853@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Paul <paul_chiang@tcloudcomputing.com>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
 
---557981400-1722380202-1276290711=:20973
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+--FsscpQKzF/jJk6ya
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Hi Paul,
+On Wed, Jun 09, 10:29, Sage Weil wrote:
 
-On Fri, 11 Jun 2010, Paul wrote:
-> Hiding the details of the id number sequence from the user seems like
-> a great idea.
->=20
-> Havn't seen any serious problems while running the mon-remove branch.
-> A few minor ones:
-> 1. the mkcephfs and init scripts need a bit of tweaking to parse the
-> new config format. Also, "mon0" used to have a special meaning in
-> mkcephfs... going to need an equivalent in the new scheme.
-> 2. monmaptool could use an update to it's usage string
+> > I'll let you know if I can trigger it reliably.
 
-Fixed these.
+I recreated the cephfs using the same setup (7 osds, 3 mons, 3 mds),
+and the problem happened again, this time while running "stress"
+=66rom two clients over the weekend.
 
-> 3. mon add needs to return a reply immediately as well since the rank
-> might also change during an add
+This morning all stress processes were stuck in state D and access
+to the ceph fs blocks. Not even ls -l works.  I rebooted one machine
+that was running stress, cosd, cmds and cmon. Had to power cycle it
+as reboot was unable to kill the stress processes.
 
-This was actually a problem with how the request forwarding/proxying was=20
-happening.  I simplified that code a bit (using the MonSession now to=20
-track proxy info instead of hidden fields in the message) and it seems to=
-=20
-be working just fine.
+On reboot, cosd crashes after a few seconds due to hitting
 
-> Starting the cluster using the old config format doesn't work - the
-> other daemons complain that they can't find any monitors.
+	assert(recovering_oids.count(soid) =3D=3D 0
 
-I think this was just monclient's parsing of the ceph.conf.. I made the=20
-'.' optional (mon0 or mon.0 or monfoo or mon.foo all ok).
-
-Pushed to mon-remove on ceph.git.. let me know if you have any problems. =
-=20
-Not sure if we should merge it for v0.21 or not.  Depends on how much=20
-testing we'll do in the next couple weeks.
-
-sage
+in start_recovery_op(). gdb output:
 
 
- >=20
->=20
-> Paul C
->=20
-> On Wed, Jun 9, 2010 at 2:56 AM, Sage Weil <sage@newdream.net> wrote:
-> > On Tue, 8 Jun 2010, Paul wrote:
-> >> Could you take a look at the commits at http://github.com/tcloud/ceph
-> >> on the mon-remove branch please.
-> >
-> > It seems to work pretty well. =A0I changed the LogClient interaction to=
- be
-> > less annoying, simplified the mon removal check, and did a few small
-> > cleanups. =A0I pushed a mon-remove branch to
-> > git://ceph.newdream.net/git/ceph.git.
-> >
-> > The one remaining issue I see is the way that monitors are
-> > identified/named. =A0We dealt with a similar issue with the MDSs a whil=
-e
-> > back. =A0The problem is that we need to identify a particular instance =
-of
-> > cmon somehow (in ceph.conf, and at startup) so that cmon knows which
-> > address to bind to. =A0But if you have 3 monitors, identified as 0, 1, =
-2,
-> > and remove 1, then 2 becomes 1. =A0We fixed things up so that the runni=
-ng
-> > instance adjusts it's rank, but the ceph.conf is still wrong.
-> >
-> > We could take a similar route as we did with the mds, and identify each
-> > cmon instance by name and not just by number. =A0Then the ceph.conf ent=
-ry
-> > would look like
-> >
-> > [mon.foo]
-> > =A0 =A0 =A0 =A0...
-> >
-> > and on startup you'd run
-> >
-> > =A0 =A0 =A0 =A0$ cmon -i foo =A0 =A0 =A0 =A0# and not 'cmon -i 0'
-> >
-> > That would mean adjusting the monmap to store the names of monitors. =
-=A0The
-> > numeric 'rank' would just the current position of a monitor during a
-> > particular epoch.
-> >
-> > The result would be more like
-> >
-> > =A0$ ceph mon add foo 1.2.3.4:6789
-> > =A0$ ceph mon remove bar
-> > or
-> > =A0$ ceph mon remove 1.2.3.6:6789
-> >
-> > Alternatively, we could keep the monmap the same, and allow ranks to be
-> > empty, so that we could have say mon 0, 2, and 3. =A0That would require=
- some
-> > MonClient changes to the code that picks a new monitor, and to any othe=
-r
-> > code that might assume that monmap.size() determines the range of exist=
-ing
-> > monitors.
-> >
-> > I think I prefer the first approach, because it is easier for people to
-> > identify specific instances in terms of a name (not a number with speci=
-fic
-> > constraints). =A0And because the MonMap encoding could be simplified an=
-yway
-> > (no reason for it to be an entity_inst_t vector instead of an
-> > entity_addr_t vector).
-> >
-> > sage
-> >
-> >
-> >
-> >>
-> >> The second case was partly due to the MonClient trying to contact the
-> >> monitor in the new map that has the same id (which is now mapped to a
-> >> different address) as the one it was talking to before. Added a patch
-> >> for this.
-> >>
-> >> Also, about the AuthMon issue we were talking about earlier: I wasn't
-> >> able to reproduce it afterwards. Hopefully the root cause is the same
-> >> as above.
-> >>
-> >> Thanks,
-> >> Paul C
-> >>
-> >> On Tue, Jun 8, 2010 at 1:38 AM, Sage Weil <sage@newdream.net> wrote:
-> >> > On Mon, 7 Jun 2010, Paul wrote:
-> >> >> Took a shot at implementing the remove mon command, turned out to b=
-e
-> >> >> not _quite_ as trivial as I'd expected.
-> >> >>
-> >> >> The monitors need to adjust their whoami values after getting the n=
-ew
-> >> >> map, which is annoying since the value is stored in quite a few
-> >> >> places. Ended up removing all the direct copies I could find and ha=
-d
-> >> >> them lookup the value in Monitor instead.
-> >> >
-> >> > Looks good.
-> >> >
-> >> >> The interaction with MonClient (i.e. via ceph command) needs a bit
-> >> >> more work, but I'm not really sure how to proceed at this point. If
-> >> >> the client happens to pick the monitor that is to be removed to sen=
-d
-> >> >> the remove command to, it'll retry with another monitor and get a
-> >> >> "does not exist" error (because the first operation already removed
-> >> >> it). If the client happens to pick a monitor whose id is greater th=
-an
-> >> >> the one to be removed, it will never get an response to the command=
-=2E
-> >> >
-> >> > Hmm. =A0If we can get the reply sent before the monmap change is bro=
-adcast,
-> >> > the first case should be avoidable. =A0I'm not sure what would case =
-the
-> >> > second case.
-> >> >
-> >> > The patches below are mangled (wordwrapped) by gmail. =A0Can you res=
-end them
-> >> > using 'git send-email'? =A0Or if they're in a public git tree somewh=
-ere I
-> >> > can grab them from there.
-> >> >
-> >> > Thanks!
-> >> > sage
-> >> >
-> >> >
-> >> >>
-> >> >> >From 1d30deea10266392328c6fbdf176b766db42c32f Mon Sep 17 00:00:00 =
-2001
-> >> >> From: Paul Chiang <paul_chiang@tcloudcomputing.com>
-> >> >> Date: Mon, 7 Jun 2010 09:47:48 +0800
-> >> >> Subject: [PATCH 1/2] Removed all copies of the whoami value
-> >> >>
-> >> >>
-> >> >> Signed-off-by: Paul Chiang <paul_chiang@tcloudcomputing.com>
-> >> >> ---
-> >> >> =A0src/mon/Elector.cc | =A0 10 +++++-----
-> >> >> =A0src/mon/Elector.h =A0| =A0 =A03 +--
-> >> >> =A0src/mon/Monitor.cc | =A0 =A04 ++--
-> >> >> =A0src/mon/Paxos.cc =A0 | =A0 16 ++++++++--------
-> >> >> =A0src/mon/Paxos.h =A0 =A0| =A0 =A05 ++---
-> >> >> =A05 files changed, 18 insertions(+), 20 deletions(-)
-> >> >>
-> >> >> diff --git a/src/mon/Elector.cc b/src/mon/Elector.cc
-> >> >> index 7f8fa62..41fde6e 100644
-> >> >> --- a/src/mon/Elector.cc
-> >> >> +++ b/src/mon/Elector.cc
-> >> >> @@ -69,11 +69,11 @@ void Elector::start()
-> >> >> =A0 =A0 =A0bump_epoch(epoch+1); =A0// odd =3D=3D election cycle
-> >> >> =A0 =A0start_stamp =3D g_clock.now();
-> >> >> =A0 =A0electing_me =3D true;
-> >> >> - =A0acked_me.insert(whoami);
-> >> >> + =A0acked_me.insert(mon->whoami);
-> >> >>
-> >> >> =A0 =A0// bcast to everyone else
-> >> >> =A0 =A0for (unsigned i=3D0; i<mon->monmap->size(); ++i) {
-> >> >> - =A0 =A0if ((int)i =3D=3D whoami) continue;
-> >> >> + =A0 =A0if ((int)i =3D=3D mon->whoami) continue;
-> >> >> =A0 =A0 =A0mon->messenger->send_message(new
-> >> >> MMonElection(MMonElection::OP_PROPOSE, epoch, mon->monmap),
-> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mon-=
->monmap->get_inst(i));
-> >> >> =A0 =A0}
-> >> >> @@ -151,7 +151,7 @@ void Elector::victory()
-> >> >> =A0 =A0for (set<int>::iterator p =3D quorum.begin();
-> >> >> =A0 =A0 =A0 =A0 p !=3D quorum.end();
-> >> >> =A0 =A0 =A0 =A0 ++p) {
-> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
-> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
-> >> >> =A0 =A0 =A0MMonElection *m =3D new MMonElection(MMonElection::OP_VI=
-CTORY,
-> >> >> epoch, mon->monmap);
-> >> >> =A0 =A0 =A0m->quorum =3D quorum;
-> >> >> =A0 =A0 =A0mon->messenger->send_message(m, mon->monmap->get_inst(*p=
-));
-> >> >> @@ -186,7 +186,7 @@ void Elector::handle_propose(MMonElection *m)
-> >> >> =A0 =A0 =A0}
-> >> >> =A0 =A0}
-> >> >>
-> >> >> - =A0if (whoami < from) {
-> >> >> + =A0if (mon->whoami < from) {
-> >> >> =A0 =A0 =A0// i would win over them.
-> >> >> =A0 =A0 =A0if (leader_acked >=3D 0) { =A0 =A0 =A0 =A0// we already =
-acked someone
-> >> >> =A0 =A0 =A0 =A0assert(leader_acked < from); =A0// and they still wi=
-n, of course
-> >> >> @@ -250,7 +250,7 @@ void Elector::handle_victory(MMonElection *m)
-> >> >> =A0 =A0dout(5) << "handle_victory from " << m->get_source() << dend=
-l;
-> >> >> =A0 =A0int from =3D m->get_source().num();
-> >> >>
-> >> >> - =A0assert(from < whoami);
-> >> >> + =A0assert(from < mon->whoami);
-> >> >> =A0 =A0assert(m->epoch % 2 =3D=3D 0);
-> >> >>
-> >> >> =A0 =A0// i should have seen this election if i'm getting the victo=
-ry.
-> >> >> diff --git a/src/mon/Elector.h b/src/mon/Elector.h
-> >> >> index 9bfd7cb..8a21e09 100644
-> >> >> --- a/src/mon/Elector.h
-> >> >> +++ b/src/mon/Elector.h
-> >> >> @@ -32,7 +32,6 @@ class Monitor;
-> >> >> =A0class Elector {
-> >> >> =A0 private:
-> >> >> =A0 =A0Monitor *mon;
-> >> >> - =A0int whoami;
-> >> >>
-> >> >> =A0 =A0Context *expire_event;
-> >> >>
-> >> >> @@ -71,7 +70,7 @@ class Elector {
-> >> >> =A0 =A0void handle_victory(class MMonElection *m);
-> >> >>
-> >> >> =A0 public:
-> >> >> - =A0Elector(Monitor *m, int w) : mon(m), whoami(w),
-> >> >> + =A0Elector(Monitor *m) : mon(m),
-> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0expire_e=
-vent(0),
-> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0epoch(0)=
-,
-> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0electing=
-_me(false),
-> >> >> diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
-> >> >> index cf0b20b..db086be 100644
-> >> >> --- a/src/mon/Monitor.cc
-> >> >> +++ b/src/mon/Monitor.cc
-> >> >> @@ -93,7 +93,7 @@ Monitor::Monitor(int w, MonitorStore *s, Messenge=
-r
-> >> >> *m, MonMap *map) :
-> >> >>
-> >> >> =A0 =A0state(STATE_STARTING), stopping(false),
-> >> >>
-> >> >> - =A0elector(this, w),
-> >> >> + =A0elector(this),
-> >> >> =A0 =A0mon_epoch(0),
-> >> >> =A0 =A0leader(0),
-> >> >> =A0 =A0paxos(PAXOS_NUM), paxos_service(PAXOS_NUM),
-> >> >> @@ -114,7 +114,7 @@ Monitor::Monitor(int w, MonitorStore *s, Messen=
-ger
-> >> >> *m, MonMap *map) :
-> >> >>
-> >> >> =A0Paxos *Monitor::add_paxos(int type)
-> >> >> =A0{
-> >> >> - =A0Paxos *p =3D new Paxos(this, whoami, type);
-> >> >> + =A0Paxos *p =3D new Paxos(this, type);
-> >> >> =A0 =A0paxos[type] =3D p;
-> >> >> =A0 =A0return p;
-> >> >> =A0}
-> >> >> diff --git a/src/mon/Paxos.cc b/src/mon/Paxos.cc
-> >> >> index d10f31c..9c247e8 100644
-> >> >> --- a/src/mon/Paxos.cc
-> >> >> +++ b/src/mon/Paxos.cc
-> >> >> @@ -23,7 +23,7 @@
-> >> >>
-> >> >> =A0#define DOUT_SUBSYS paxos
-> >> >> =A0#undef dout_prefix
-> >> >> -#define dout_prefix _prefix(mon, whoami, machine_name, state, last=
-_committed)
-> >> >> +#define dout_prefix _prefix(mon, mon->whoami, machine_name, state,
-> >> >> last_committed)
-> >> >> =A0static ostream& _prefix(Monitor *mon, int whoami, const char
-> >> >> *machine_name, int state, version_t last_committed) {
-> >> >> =A0 =A0return *_dout << dbeginl
-> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 << "mon" << whoami
-> >> >> @@ -87,7 +87,7 @@ void Paxos::collect(version_t oldpn)
-> >> >> =A0 =A0for (set<int>::const_iterator p =3D mon->get_quorum().begin(=
-);
-> >> >> =A0 =A0 =A0 =A0 p !=3D mon->get_quorum().end();
-> >> >> =A0 =A0 =A0 =A0 ++p) {
-> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
-> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
-> >> >>
-> >> >> =A0 =A0 =A0MMonPaxos *collect =3D new MMonPaxos(mon->get_epoch(),
-> >> >> MMonPaxos::OP_COLLECT, machine_id);
-> >> >> =A0 =A0 =A0collect->last_committed =3D last_committed;
-> >> >> @@ -336,7 +336,7 @@ void Paxos::begin(bufferlist& v)
-> >> >>
-> >> >> =A0 =A0// accept it ourselves
-> >> >> =A0 =A0accepted.clear();
-> >> >> - =A0accepted.insert(whoami);
-> >> >> + =A0accepted.insert(mon->whoami);
-> >> >> =A0 =A0new_value =3D v;
-> >> >> =A0 =A0mon->store->put_bl_sn(new_value, machine_name, last_committe=
-d+1);
-> >> >>
-> >> >> @@ -356,7 +356,7 @@ void Paxos::begin(bufferlist& v)
-> >> >> =A0 =A0for (set<int>::const_iterator p =3D mon->get_quorum().begin(=
-);
-> >> >> =A0 =A0 =A0 =A0 p !=3D mon->get_quorum().end();
-> >> >> =A0 =A0 =A0 =A0 ++p) {
-> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
-> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
-> >> >>
-> >> >> =A0 =A0 =A0dout(10) << " sending begin to mon" << *p << dendl;
-> >> >> =A0 =A0 =A0MMonPaxos *begin =3D new MMonPaxos(mon->get_epoch(),
-> >> >> MMonPaxos::OP_BEGIN, machine_id);
-> >> >> @@ -483,7 +483,7 @@ void Paxos::commit()
-> >> >> =A0 =A0for (set<int>::const_iterator p =3D mon->get_quorum().begin(=
-);
-> >> >> =A0 =A0 =A0 =A0 p !=3D mon->get_quorum().end();
-> >> >> =A0 =A0 =A0 =A0 ++p) {
-> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
-> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
-> >> >>
-> >> >> =A0 =A0 =A0dout(10) << " sending commit to mon" << *p << dendl;
-> >> >> =A0 =A0 =A0MMonPaxos *commit =3D new MMonPaxos(mon->get_epoch(),
-> >> >> MMonPaxos::OP_COMMIT, machine_id);
-> >> >> @@ -527,7 +527,7 @@ void Paxos::extend_lease()
-> >> >> =A0 =A0lease_expire =3D g_clock.now();
-> >> >> =A0 =A0lease_expire +=3D g_conf.mon_lease;
-> >> >> =A0 =A0acked_lease.clear();
-> >> >> - =A0acked_lease.insert(whoami);
-> >> >> + =A0acked_lease.insert(mon->whoami);
-> >> >>
-> >> >> =A0 =A0dout(7) << "extend_lease now+" << g_conf.mon_lease << " (" <=
-<
-> >> >> lease_expire << ")" << dendl;
-> >> >>
-> >> >> @@ -535,7 +535,7 @@ void Paxos::extend_lease()
-> >> >> =A0 =A0for (set<int>::const_iterator p =3D mon->get_quorum().begin(=
-);
-> >> >> =A0 =A0 =A0 =A0 p !=3D mon->get_quorum().end();
-> >> >> =A0 =A0 =A0 =A0 ++p) {
-> >> >> - =A0 =A0if (*p =3D=3D whoami) continue;
-> >> >> + =A0 =A0if (*p =3D=3D mon->whoami) continue;
-> >> >> =A0 =A0 =A0MMonPaxos *lease =3D new MMonPaxos(mon->get_epoch(),
-> >> >> MMonPaxos::OP_LEASE, machine_id);
-> >> >> =A0 =A0 =A0lease->last_committed =3D last_committed;
-> >> >> =A0 =A0 =A0lease->lease_timestamp =3D lease_expire;
-> >> >> @@ -724,7 +724,7 @@ version_t Paxos::get_new_proposal_number(versio=
-n_t gt)
-> >> >> =A0 =A0last_pn /=3D 100;
-> >> >> =A0 =A0last_pn++;
-> >> >> =A0 =A0last_pn *=3D 100;
-> >> >> - =A0last_pn +=3D (version_t)whoami;
-> >> >> + =A0last_pn +=3D (version_t)mon->whoami;
-> >> >>
-> >> >> =A0 =A0// write
-> >> >> =A0 =A0mon->store->put_int(last_pn, machine_name, "last_pn");
-> >> >> diff --git a/src/mon/Paxos.h b/src/mon/Paxos.h
-> >> >> index c6eff22..9d34605 100644
-> >> >> --- a/src/mon/Paxos.h
-> >> >> +++ b/src/mon/Paxos.h
-> >> >> @@ -68,7 +68,6 @@ class Paxos;
-> >> >> =A0// i am one state machine.
-> >> >> =A0class Paxos {
-> >> >> =A0 =A0Monitor *mon;
-> >> >> - =A0int whoami;
-> >> >>
-> >> >> =A0 =A0// my state machine info
-> >> >> =A0 =A0int machine_id;
-> >> >> @@ -225,8 +224,8 @@ private:
-> >> >> =A0 =A0version_t get_new_proposal_number(version_t gt=3D0);
-> >> >>
-> >> >> =A0public:
-> >> >> - =A0Paxos(Monitor *m, int w,
-> >> >> - =A0 =A0 int mid) : mon(m), whoami(w),
-> >> >> + =A0Paxos(Monitor *m,
-> >> >> + =A0 =A0 int mid) : mon(m),
-> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0machine_id(mid),
-> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0machine_name(get_paxos_name(mid)=
-),
-> >> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0state(STATE_RECOVERING),
-> >> >> --
-> >> >> 1.6.4.2
-> >> >>
-> >> >> >From eb7308104c33aa50195e3736483c6bf9a145a518 Mon Sep 17 00:00:00 =
-2001
-> >> >> From: Paul Chiang <paul_chiang@tcloudcomputing.com>
-> >> >> Date: Mon, 7 Jun 2010 10:16:39 +0800
-> >> >> Subject: [PATCH 2/2] Introduced ceph mon remove command
-> >> >>
-> >> >>
-> >> >> Signed-off-by: Paul Chiang <paul_chiang@tcloudcomputing.com>
-> >> >> ---
-> >> >> =A0src/common/LogClient.h =A0 | =A0 =A01 +
-> >> >> =A0src/mon/Monitor.cc =A0 =A0 =A0 | =A0 =A01 +
-> >> >> =A0src/mon/Monitor.h =A0 =A0 =A0 =A0| =A0 =A01 +
-> >> >> =A0src/mon/MonmapMonitor.cc | =A0 61 ++++++++++++++++++++++++++++++=
-++++++++++++++++
-> >> >> =A0src/mon/MonmapMonitor.h =A0| =A0 =A01 +
-> >> >> =A05 files changed, 65 insertions(+), 0 deletions(-)
-> >> >>
-> >> >> diff --git a/src/common/LogClient.h b/src/common/LogClient.h
-> >> >> index 0185eec..bc5e227 100644
-> >> >> --- a/src/common/LogClient.h
-> >> >> +++ b/src/common/LogClient.h
-> >> >> @@ -56,6 +56,7 @@ class LogClient : public Dispatcher {
-> >> >> =A0 =A0void send_log();
-> >> >> =A0 =A0void handle_log_ack(MLogAck *m);
-> >> >> =A0 =A0void set_synchronous(bool sync) { is_synchronous =3D sync; }
-> >> >> + =A0void set_mon(int mon_id) { mon =3D mon_id; }
-> >> >>
-> >> >> =A0 =A0LogClient(Messenger *m, MonMap *mm) :
-> >> >> =A0 =A0 =A0messenger(m), monmap(mm), mon(-1), is_synchronous(false)=
-,
-> >> >> diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
-> >> >> index db086be..259b6ce 100644
-> >> >> --- a/src/mon/Monitor.cc
-> >> >> +++ b/src/mon/Monitor.cc
-> >> >> @@ -110,6 +110,7 @@ Monitor::Monitor(int w, MonitorStore *s, Messen=
-ger
-> >> >> *m, MonMap *map) :
-> >> >> =A0 =A0mon_caps =3D new MonCaps();
-> >> >> =A0 =A0mon_caps->set_allow_all(true);
-> >> >> =A0 =A0mon_caps->text =3D "allow *";
-> >> >> + =A0myaddr =3D map->get_inst(w).addr;
-> >> >> =A0}
-> >> >>
-> >> >> =A0Paxos *Monitor::add_paxos(int type)
-> >> >> diff --git a/src/mon/Monitor.h b/src/mon/Monitor.h
-> >> >> index 829c506..a673972 100644
-> >> >> --- a/src/mon/Monitor.h
-> >> >> +++ b/src/mon/Monitor.h
-> >> >> @@ -58,6 +58,7 @@ class Monitor : public Dispatcher {
-> >> >> =A0public:
-> >> >> =A0 =A0// me
-> >> >> =A0 =A0int whoami;
-> >> >> + =A0entity_addr_t myaddr;
-> >> >> =A0 =A0Messenger *messenger;
-> >> >> =A0 =A0Mutex lock;
-> >> >>
-> >> >> diff --git a/src/mon/MonmapMonitor.cc b/src/mon/MonmapMonitor.cc
-> >> >> index 0aca5fb..5368ab7 100644
-> >> >> --- a/src/mon/MonmapMonitor.cc
-> >> >> +++ b/src/mon/MonmapMonitor.cc
-> >> >> @@ -48,6 +48,7 @@ bool MonmapMonitor::update_from_paxos()
-> >> >> =A0 =A0dout(10) << "update_from_paxos paxosv " << paxosv
-> >> >> =A0 =A0 =A0 =A0 =A0<< ", my v " << mon->monmap->epoch << dendl;
-> >> >>
-> >> >> + =A0int original_map_size =3D mon->monmap->size();
-> >> >> =A0 =A0//read and decode
-> >> >> =A0 =A0monmap_bl.clear();
-> >> >> =A0 =A0bool success =3D paxos->read(paxosv, monmap_bl);
-> >> >> @@ -58,6 +59,20 @@ bool MonmapMonitor::update_from_paxos()
-> >> >> =A0 =A0//save the bufferlist version in the paxos instance as well
-> >> >> =A0 =A0paxos->stash_latest(paxosv, monmap_bl);
-> >> >>
-> >> >> + =A0if (original_map_size !=3D mon->monmap->size())
-> >> >> + =A0{
-> >> >> + =A0 =A0_update_whoami();
-> >> >> +
-> >> >> + =A0 =A0// call election?
-> >> >> + =A0 =A0if (mon->monmap->size() > 1) {
-> >> >> + =A0 =A0 =A0mon->call_election();
-> >> >> + =A0 =A0} else {
-> >> >> + =A0 =A0 =A0// we're standalone.
-> >> >> + =A0 =A0 =A0set<int> q;
-> >> >> + =A0 =A0 =A0q.insert(mon->whoami);
-> >> >> + =A0 =A0 =A0mon->win_election(1, q);
-> >> >> + =A0 =A0}
-> >> >> + =A0}
-> >> >> =A0 =A0return true;
-> >> >> =A0}
-> >> >>
-> >> >> @@ -127,6 +142,8 @@ bool MonmapMonitor::preprocess_command(MMonComm=
-and *m)
-> >> >> =A0 =A0 =A0}
-> >> >> =A0 =A0 =A0else if (m->cmd[1] =3D=3D "add")
-> >> >> =A0 =A0 =A0 =A0return false;
-> >> >> + =A0 =A0else if (m->cmd[1] =3D=3D "remove")
-> >> >> + =A0 =A0 =A0return false;
-> >> >> =A0 =A0}
-> >> >>
-> >> >> =A0 =A0if (r !=3D -1) {
-> >> >> @@ -177,6 +194,23 @@ bool MonmapMonitor::prepare_command(MMonComman=
-d *m)
-> >> >> =A0 =A0 =A0 =A0paxos->wait_for_commit(new Monitor::C_Command(mon, m=
-, 0, rs,
-> >> >> paxos->get_version()));
-> >> >> =A0 =A0 =A0 =A0return true;
-> >> >> =A0 =A0 =A0}
-> >> >> + =A0 =A0else if (m->cmd.size() =3D=3D 3 && m->cmd[1] =3D=3D "remov=
-e") {
-> >> >> + =A0 =A0 =A0entity_addr_t addr;
-> >> >> + =A0 =A0 =A0parse_ip_port(m->cmd[2].c_str(), addr);
-> >> >> + =A0 =A0 =A0bufferlist rdata;
-> >> >> + =A0 =A0 =A0if (!pending_map.contains(addr)) {
-> >> >> + =A0 =A0 =A0 =A0err =3D -ENOENT;
-> >> >> + =A0 =A0 =A0 =A0ss << "mon " << addr << " does not exist";
-> >> >> + =A0 =A0 =A0 =A0goto out;
-> >> >> + =A0 =A0 =A0}
-> >> >> +
-> >> >> + =A0 =A0 =A0pending_map.remove(addr);
-> >> >> + =A0 =A0 =A0pending_map.last_changed =3D g_clock.now();
-> >> >> + =A0 =A0 =A0ss << "removed mon" << " at " << addr << ", there are =
-now " <<
-> >> >> pending_map.size() << " monitors" ;
-> >> >> + =A0 =A0 =A0getline(ss, rs);
-> >> >> + =A0 =A0 =A0paxos->wait_for_commit(new Monitor::C_Command(mon, m, =
-0, rs,
-> >> >> paxos->get_version()));
-> >> >> + =A0 =A0 =A0return true;
-> >> >> + =A0 =A0}
-> >> >> =A0 =A0 =A0else
-> >> >> =A0 =A0 =A0 =A0ss << "unknown command " << m->cmd[1];
-> >> >> =A0 =A0} else
-> >> >> @@ -203,3 +237,30 @@ void MonmapMonitor::tick()
-> >> >> =A0{
-> >> >> =A0 =A0update_from_paxos();
-> >> >> =A0}
-> >> >> +
-> >> >> +void MonmapMonitor::_update_whoami()
-> >> >> +{
-> >> >> + =A0// first check if there is any change
-> >> >> + =A0if (mon->whoami < mon->monmap->size() &&
-> >> >> + =A0 =A0 =A0mon->monmap->get_inst(mon->whoami).addr =3D=3D mon->my=
-addr)
-> >> >> + =A0{
-> >> >> + =A0 =A0return;
-> >> >> + =A0}
-> >> >> +
-> >> >> + =A0// then check backwards starting from min(whoami-1, size-1) si=
-nce
-> >> >> whoami only ever decreases
-> >> >> + =A0unsigned i=3D(mon->whoami-1) < mon->monmap->size() ?
-> >> >> (mon->whoami-1):(mon->monmap->size()-1);
-> >> >> + =A0for (; i>=3D0; i--)
-> >> >> + =A0{
-> >> >> + =A0 =A0if (mon->monmap->get_inst(i).addr =3D=3D mon->myaddr)
-> >> >> + =A0 =A0{
-> >> >> + =A0 =A0 =A0dout(10) << "Changing whoami from " << mon->whoami << =
-" to " <<
-> >> >> i << dendl;
-> >> >> + =A0 =A0 =A0mon->whoami =3D i;
-> >> >> + =A0 =A0 =A0mon->messenger->set_myname(entity_name_t::MON(i));
-> >> >> + =A0 =A0 =A0mon->logclient.set_mon(i);
-> >> >> + =A0 =A0 =A0return;
-> >> >> + =A0 =A0}
-> >> >> + =A0}
-> >> >> + =A0dout(0) << "Cannot find myself (mon" << mon->whoami << ", " <<
-> >> >> mon->myaddr << ") in new monmap! I must have been removed, shutting
-> >> >> down." << dendl;
-> >> >> + =A0mon->shutdown();
-> >> >> +}
-> >> >> +
-> >> >> diff --git a/src/mon/MonmapMonitor.h b/src/mon/MonmapMonitor.h
-> >> >> index fbb7fa5..b14c012 100644
-> >> >> --- a/src/mon/MonmapMonitor.h
-> >> >> +++ b/src/mon/MonmapMonitor.h
-> >> >> @@ -67,6 +67,7 @@ class MonmapMonitor : public PaxosService {
-> >> >>
-> >> >> =A0 private:
-> >> >> =A0 =A0bufferlist monmap_bl;
-> >> >> + =A0void _update_whoami();
-> >> >> =A0};
-> >> >>
-> >> >>
-> >> >> --
-> >> >> 1.6.4.2
-> >> >> --
-> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> >> >> the body of a message to majordomo@vger.kernel.org
-> >> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
-l
-> >> >>
-> >> >>
-> >> >
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-1722380202-1276290711=:20973--
+	osd/PG.cc: In function 'void PG::start_recovery_op(const sobject_t&)':
+	osd/PG.cc:1833: FAILED assert(recovering_oids.count(soid) =3D=3D 0)
+	 1: (ReplicatedPG::issue_repop(ReplicatedPG::RepGather*, utime_t, eversion=
+_t, bool, unsigned long, eversion_t)+0x84e) [0x49c88e]
+	 2: (ReplicatedPG::do_op(MOSDOp*)+0xa9a) [0x4a22ba]
+	 3: (OSD::dequeue_op(PG*)+0x402) [0x4e4dc2]
+	 4: (ThreadPool::worker()+0x1fc) [0x5ec64c]
+	 5: (ThreadPool::WorkThread::entry()+0xd) [0x50480d]
+	 6: (Thread::_entry_func(void*)+0x7) [0x476f57]
+	 7: /lib/libpthread.so.0 [0x7fc9556523f7]
+	 8: (clone()+0x6d) [0x7fc9548a7b4d]
+	 NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed =
+to interpret this.
+	terminate called after throwing an instance of 'ceph::FailedAssertion*'
+
+	Program received signal SIGABRT, Aborted.
+
+	(gdb) bt
+	#0  0x00007fc954802095 in raise () from /lib/libc.so.6
+	#1  0x00007fc954803af0 in abort () from /lib/libc.so.6
+	#2  0x00007fc9550870e4 in __gnu_cxx::__verbose_terminate_handler () from /=
+usr/lib/libstdc++.so.6
+	#3  0x00007fc955085076 in ?? () from /usr/lib/libstdc++.so.6
+	#4  0x00007fc9550850a3 in std::terminate () from /usr/lib/libstdc++.so.6
+	#5  0x00007fc95508518a in __cxa_throw () from /usr/lib/libstdc++.so.6
+	#6  0x00000000005eb22f in ceph::__ceph_assert_fail (assertion=3D0x6211d0 "=
+recovering_oids.count(soid) =3D=3D 0", file=3D0x620113 "osd/PG.cc", line=3D=
+1833,=20
+	    func=3D0x622140 "void PG::start_recovery_op(const sobject_t&)") at com=
+mon/assert.cc:30
+	#7  0x0000000000546b68 in PG::start_recovery_op (this=3D0xa846d0, soid=3D@=
+0x12ceb98) at osd/PG.cc:1833
+	#8  0x000000000049c88e in ReplicatedPG::issue_repop (this=3D0xa846d0, repo=
+p=3D0x1296d70, now=3D<value optimized out>, old_last_update=3D
+	      {version =3D 249, epoch =3D 137, __pad =3D 0}, old_exists=3Dtrue, ol=
+d_size=3D4194304, old_version=3D{version =3D 249, epoch =3D 137, __pad =3D =
+0})
+	    at osd/ReplicatedPG.cc:2280
+	#9  0x00000000004a22ba in ReplicatedPG::do_op (this=3D0xa846d0, op=3D<valu=
+e optimized out>) at osd/ReplicatedPG.cc:637
+	#10 0x00000000004e4dc2 in OSD::dequeue_op (this=3D0x8a9fc0, pg=3D0xa846d0)=
+ at osd/OSD.cc:4456
+	#11 0x00000000005ec64c in ThreadPool::worker (this=3D0x8aa478) at common/W=
+orkQueue.cc:44
+	#12 0x000000000050480d in ThreadPool::WorkThread::entry (this=3D<value opt=
+imized out>) at ./common/WorkQueue.h:113
+	#13 0x0000000000476f57 in Thread::_entry_func (arg=3D0xa63) at ./common/Th=
+read.h:39
+	#14 0x00007fc9556523f7 in start_thread () from /lib/libpthread.so.0
+	#15 0x00007fc9548a7b4d in clone () from /lib/libc.so.6
+	#16 0x0000000000000000 in ?? ()
+
+I also ran the checkpg script as you suggested, but this did not find
+any corrupted pgs. The tip of the git branch this cosd was compiled
+=66rom is
+
+	214a42798b4a5cd57d09c6a13b39b17c4f616aa3 (mds: handle dup anchorclient ACK=
+s gracefully)
+
+Any hints?
+Andre
+--=20
+The only person who always got his work done by Friday was Robinson Crusoe
+
+--FsscpQKzF/jJk6ya
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
+
+iD8DBQFMFez6Wto1QDEAkw8RAloZAJ9ZlXxXp+xMZJiS9ybTWZwLA8/mbgCcC6TV
+jCvpxdksXfQVfqIUp9+oiwo=
+=QfEi
+-----END PGP SIGNATURE-----
+
+--FsscpQKzF/jJk6ya--
