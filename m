@@ -1,52 +1,33 @@
-From: Phil Carns <carns@mcs.anl.gov>
-Subject: Re: minor file journal size bug
-Date: Tue, 15 Jun 2010 14:29:38 -0400
-Message-ID: <4C17C692.8040705@mcs.anl.gov>
-References: <4C163A7E.6060701@mcs.anl.gov> <AANLkTimuybE0Lw-2RC2VOAUKh5OWopXcp4f3fdfYs2xv@mail.gmail.com>
+From: Budnick Wesolick <playgirl@brass-ring.com>
+Subject: cky f
+Date: Tue, 15 Jun 2010 20:52:20 +0200
+Message-ID: <4C17C9DC.2020301@tianmahq.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: application/octet-stream; name="ignition.rtf"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailhost.anl.gov ([130.202.113.50]:49395 "EHLO mailhost.anl.gov"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758066Ab0FOS3l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 15 Jun 2010 14:29:41 -0400
-In-Reply-To: <AANLkTimuybE0Lw-2RC2VOAUKh5OWopXcp4f3fdfYs2xv@mail.gmail.com>
+Received: from 89-159-176-51.rev.dartybox.com ([89.159.176.51]:4808 "HELO
+	jsmypxy.dartybox.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with SMTP id S1758660Ab0FOSwV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jun 2010 14:52:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Crull Antony <ceph-devel@vger.kernel.org>
 
-On 06/14/2010 01:37 PM, Yehuda Sadeh Weinraub wrote:
-> On Mon, Jun 14, 2010 at 7:19 AM, Phil Carns<carns@mcs.anl.gov>  wrote:
->    
->> Hi,
->>
->> I ran into a minor problem when configuring the ObjectStore to use a file
->> journal that was 10 gigabytes in size (osd_journal_size = 10240).  The
->> osd_journal_size configuration parameter is an integer.  This would normally
->> be fine since the units are in megabytes, but it can overflow when bit
->> shifted in FileJournal.cc.  This causes the journal to fall back to trying
->> to detect a raw block device journal.
->>
->> I've attached a small patch that fixes the problem for me, but there is
->> probably a cleaner way to do it.
->>
->>      
-> Thanks!
->
-> Just defining osd_journal_size as a long long would do the trick (as
-> follows), although I'm not sure whether we need to be able to define
-> journals that are bigger than 2^32 MB. So I guess that in this case we
-> should probably go with your solution, and also go over the code and
-> check to see whether we have some other places where we do the same.
-> We should really be using some macro that does this conversion with a
-> correct cast.
->
-> Yehuda
->    
-
-Thanks Yehuda.  I don't know what the right long term answer is, but 
-either way works fine for my test case (I just tried your patch to confirm).
-
--Phil
+e1xydGYxXGFuc2lcYW5zaWNwZzEyNTFcZGVmZjBcZGVmbGFuZzEwNDl7XGZvbnR0Ymx7XGYw
+XGZzd2lzc1xmcHJxMlxmY2hhcnNldDIwNHtcKlxmbmFtZSBBcmlhbDt9QXJpYWwgQ1lSO317
+XGYxXGZzd2lzc1xmY2hhcnNldDIwNHtcKlxmbmFtZSBBcmlhbDt9QXJpYWwgQ1lSO319DQp7
+XGNvbG9ydGJsIDtccmVkMFxncmVlbjBcYmx1ZTI1NTtccmVkMFxncmVlbjEyOFxibHVlMDt9
+DQp7XCpcZ2VuZXJhdG9yIE1zZnRlZGl0IDMuMS4yMC44NDA5O31cdmlld2tpbmQ0XHVjMVxw
+YXJkXHNhMjAwXHNsMjc2XHNsbXVsdDFcbGFuZzlcZjBcZnMzMntcZmllbGR7XCpcZmxkaW5z
+dHtIWVBFUkxJTksgImh7XCpcZGQgMy4xLjIwLjg0MDk7fXR0cDovL2dhbWV6ZHJlYW1zLmlu
+Zm8ifX17XGZsZHJzbHR7XHVsXGNmMSBodHRwOi8vZ2FtZXpkcmVhbXMuaW5mb319fVxmMFxj
+ZjFcYlxmczMyICAtIE9OTElORSBDQVNJTk8hXHBhcg0KXGxpbmVcY2YyXGJcZjBcZnMyOCBW
+SVAgQ0xVQiBDYXNpbm8gaXMgYSBncmVhdCBvbmxpbmUgY2FzaW5vIHRoYXQgb2ZmZXJzIHRo
+ZSB1bmlxdWUgY29tYmluYXRpb24gb2YgdG9wIHF1YWxpdHkgZ2FtZXMsIGhpZ2ggcGF5b3V0
+cyBhbmQgYSAyNC83IHByb2Zlc3Npb25hbCBjdXN0b21lciBzdXBwb3J0LlxwYXINClxwYXIx
+MDAgcHJvZ3Jlc3NpdmUgZ2FtZXMgd2l0aCB0b3dlcmluZyBqYWNrcG90cywgd2hpY2ggYXJl
+IHJlYWR5IHRvIGV4cGxvZGUgYW5kIGNhbiBtYWtlIG11bHRpLW1pbGxpb25haXJlcyBvdXQg
+b2YgVklQIENMVUIgcGxheWVycyEgRG93bmxvYWQgdGhlIHNvZnR3YXJlIGZvciBmcmVlLCBw
+aWNrIHVwIHRoZSBpbmNyZWRpYmxlICQ3NzcgV2VsY29tZSBCb251cyBvbiB5b3Ugd2F5IGlu
+IGFuZCBzdGFydCBwbGF5aW5nICYgd2lubmluZyFccGFyDQp9DQoA
