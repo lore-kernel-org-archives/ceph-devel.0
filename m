@@ -1,57 +1,72 @@
-From: Peter Niemayer <niemayer@isg.de>
-Subject: "umount" of ceph filesystem that has become unavailable hangs forever
-Date: Wed, 16 Jun 2010 17:35:18 +0200
-Message-ID: <hvaqvm$fdp$1@dough.gmane.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: crush update failure ("corrupt inc osdmap epoch 5 off 50")
+Date: Wed, 16 Jun 2010 09:57:56 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1006160950430.12761@cobra.newdream.net>
+References: <hv9r6e$4tp$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:37572 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932118Ab0FPPf3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Jun 2010 11:35:29 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OOueF-0000Rz-NW
-	for ceph-devel@vger.kernel.org; Wed, 16 Jun 2010 17:35:27 +0200
-Received: from barriere.frankfurter-softwarefabrik.de ([217.11.197.1])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jun 2010 17:35:27 +0200
-Received: from niemayer by barriere.frankfurter-softwarefabrik.de with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jun 2010 17:35:27 +0200
+Received: from cobra.newdream.net ([66.33.216.30]:53588 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932261Ab0FPQ5I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jun 2010 12:57:08 -0400
+In-Reply-To: <hv9r6e$4tp$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Thomas Mueller <thomas@chaschperli.ch>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+Hi Thomas,
 
-trying to "umount" a formerly mounted ceph filesystem that has become
-unavailable (osd crashed, then msd/mon were shut down using 
-/etc/init.d/ceph stop) results in "umount" hanging forever in
-"D" state.
+On Wed, 16 Jun 2010, Thomas Mueller wrote:
+> i tried to change data "max_size" to 1 to disable replication for testing.
 
-Strangely, "umount -f" started from another terminal reports
-the ceph filesystem as not being mounted anymore, which is consistent
-with what the mount-table says.
+You don't actually need/want to change the crush map to adjust 
+replication.  Each crush rule is written to generalize to some range of 
+replication levels (hence the min/max size definitions).  To adjust 
+replication for testing/whatever, just do
 
-The kernel keeps emitting the following messages from time to time:
-> Jun 16 17:25:29 gitega kernel: ceph:  tid 211912 timed out on osd0, will reset osd
-> Jun 16 17:25:35 gitega kernel: ceph: mon0 10.166.166.1:6789 connection failed
-> Jun 16 17:26:15 gitega last message repeated 4 times
+ $ ceph osd pool data size 1   # 1x replication
 
-I would have expected the "umount" to terminate at least after some 
-generous timeout.
+See
 
-Ceph should probably support something like the "soft,intr" options
-of NFS, because if the only supported way of mounting is one where
-a client is more or less stuck-until-reboot when the service fails,
-many potential test-configurations involving Ceph are way too dangerous
-to try...
+ http://ceph.newdream.net/wiki/Adjusting_replication_level
 
-Regards,
+> what i've done (reproducable):
+> 
+> mkcephfs -c /etc/ceph/ceph.conf --mkbtrfs (1mds, 1mon, 2osd (2 phyiscal disks))
+> start ceph
+> mount ceph fs
+> write some files to the mount
+> ceph osd getcrushmap -o /tmp/crush
+> crushtool -d /tmp/crush -o /tmp/crush.txt
+> change data "max_size 10" to "max_size 1" in /tmp/crush.txt
+> crushtool -c /tmp/crush.txt -o /tmp/crush.new
+> ceph osd setcrushmap -i /tmp/crush.new (Output:
+> * read 428 bytes from /tmp/crush.new
+> * 10.06.16_08:12:57.187556 41223950 monclient(hunting): found mon0
+> * 10.06.16_08:12:57.188298 mon <- [osd,setcrushmap]
+> * 10.06.16_08:12:58.303241 mon0 -> 'set crush map' (0)
+> )
+> 
+> 
+> after starting to write a file to the mount, I see these kernel messages :
+> http://pastebin.com/maVj9daV
+> 
+> ceph / kclient are yesterdays git unstable / unstable-backport versions.
+> kernel is debian lenny backport 2.6.32.
 
-Peter Niemayer
+We'll fix this up to not crash in that case.  :)
+
+sage
 
 
+> 
+> - Thomas
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
