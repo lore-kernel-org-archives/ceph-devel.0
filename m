@@ -1,57 +1,77 @@
 From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: crush update failure ("corrupt inc osdmap epoch 5 off 50")
-Date: Wed, 16 Jun 2010 06:32:46 +0000 (UTC)
-Message-ID: <hv9r6e$4tp$1@dough.gmane.org>
+Subject: simple performance tests
+Date: Wed, 16 Jun 2010 09:15:43 +0000 (UTC)
+Message-ID: <hva4nu$2nr$1@dough.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:47365 "EHLO lo.gmane.org"
+Received: from lo.gmane.org ([80.91.229.12]:52412 "EHLO lo.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754247Ab0FPGcz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Jun 2010 02:32:55 -0400
+	id S1751249Ab0FPJP4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Jun 2010 05:15:56 -0400
 Received: from list by lo.gmane.org with local (Exim 4.69)
 	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OOmBC-0003Ed-PQ
-	for ceph-devel@vger.kernel.org; Wed, 16 Jun 2010 08:32:54 +0200
+	id 1OOoiv-00052v-QS
+	for ceph-devel@vger.kernel.org; Wed, 16 Jun 2010 11:15:53 +0200
 Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jun 2010 08:32:54 +0200
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jun 2010 11:15:53 +0200
 Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Jun 2010 08:32:54 +0200
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jun 2010 11:15:53 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-hi 
+hi
 
-i tried to change data "max_size" to 1 to disable replication for testing.
+i've done some performance tests on a small system.
 
-what i've done (reproducable):
+HW:
+* Supermicro X7SPA-HF (with IMPI and KVMoverIP integrated))
+* Atom D510 1.6GHz DualCore and HT
+* WD RE3 500GB 7200umin disks
+* 4GB RAM
 
-mkcephfs -c /etc/ceph/ceph.conf --mkbtrfs (1mds, 1mon, 2osd (2 phyiscal disks))
-start ceph
-mount ceph fs
-write some files to the mount
-ceph osd getcrushmap -o /tmp/crush
-crushtool -d /tmp/crush -o /tmp/crush.txt
-change data "max_size 10" to "max_size 1" in /tmp/crush.txt
-crushtool -c /tmp/crush.txt -o /tmp/crush.new
-ceph osd setcrushmap -i /tmp/crush.new (Output:
-* read 428 bytes from /tmp/crush.new
-* 10.06.16_08:12:57.187556 41223950 monclient(hunting): found mon0
-* 10.06.16_08:12:57.188298 mon <- [osd,setcrushmap]
-* 10.06.16_08:12:58.303241 mon0 -> 'set crush map' (0)
-)
+SW:
+* Debian 5.0 "Lenny"
+* Kernel 2.6.32 (backports.org)
+* ceph/unstable
+* ceph-client-standalone/unstable-backport
 
+values are MB/s. all tests are local.
 
-after starting to write a file to the mount, I see these kernel messages :
-http://pastebin.com/maVj9daV
+dbench 1 results:
+* 1 disk, btrfs: 115
+* 2 disks, btrfs data/metadata raid0: 115
+* 1 osd/disk, 1 mds, 1 mon: 7
+* 2 osd/disk, 1 mds, 1mon: 6.2117
+* 1 disk, btrfs, samba: 14.02
+* 2 disks, btrfs data/metadata raid0, samba: 13.781
 
-ceph / kclient are yesterdays git unstable / unstable-backport versions.
-kernel is debian lenny backport 2.6.32.
+dbench 10 results:
+* 1 disk, btrfs: 271.724
+* 2 disks, btrfs data/metadata raid0: 270.043
+* 1 osd/disk, 1 mds, 1 mon: -
+* 2 osd/disk, 1 mds, 1mon: 12.1862
+* 1 disk, btrfs, samba: 20.22
+* 2 disks, btfs data/metadata raid0, samba: 20.26
+
+dd bs=1M count=8192 if=/dev/zero
+* 1 disk, btrfs: 126
+* 2 disks, btrfs data/metadata raid0:  271
+* 1 osd/disk, 1 mds, 1 mon: -
+* 2 osd/disk, 1 mds, 1mon: 51.2
+* 1 disk, btrfs, samba: 95.2
+* 2 disks, btrfs data/metadata raid0, samba: 85.9
+
+will add a AOC-USAS-H8iR (LSI) RAID card to the mix if  i get the cables 
+needed.
+
+i'm a bit suprised about the low rates of ceph. i'll try to to the same 
+tests on a more powerfull machine. 
 
 - Thomas
 
