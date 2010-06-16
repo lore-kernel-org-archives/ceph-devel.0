@@ -1,43 +1,58 @@
-From: "K. Richard Pixley" <rich@noir.com>
-Subject: Re: simple performance tests
-Date: Wed, 16 Jun 2010 10:58:01 -0700
-Message-ID: <4C1910A9.4030305@noir.com>
-References: <hva4nu$2nr$1@dough.gmane.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: "umount" of ceph filesystem that has become unavailable hangs
+ forever
+Date: Wed, 16 Jun 2010 11:56:03 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1006161151420.22082@cobra.newdream.net>
+References: <hvaqvm$fdp$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m209-5.dsl.rawbw.com ([198.144.209.5]:33222 "EHLO
-	kyoto.noir.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756492Ab0FPSGa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 16 Jun 2010 14:06:30 -0400
-In-Reply-To: <hva4nu$2nr$1@dough.gmane.org>
+Received: from cobra.newdream.net ([66.33.216.30]:57363 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755892Ab0FPSzO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jun 2010 14:55:14 -0400
+In-Reply-To: <hvaqvm$fdp$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
+To: Peter Niemayer <niemayer@isg.de>
 Cc: ceph-devel@vger.kernel.org
 
-Hi.  I've been running some similar tests recently, (on ubuntu, but still).
+On Wed, 16 Jun 2010, Peter Niemayer wrote:
+> Hi,
+> 
+> trying to "umount" a formerly mounted ceph filesystem that has become
+> unavailable (osd crashed, then msd/mon were shut down using /etc/init.d/ceph
+> stop) results in "umount" hanging forever in
+> "D" state.
+> 
+> Strangely, "umount -f" started from another terminal reports
+> the ceph filesystem as not being mounted anymore, which is consistent
+> with what the mount-table says.
+> 
+> The kernel keeps emitting the following messages from time to time:
+> > Jun 16 17:25:29 gitega kernel: ceph:  tid 211912 timed out on osd0, will
+> > reset osd
+> > Jun 16 17:25:35 gitega kernel: ceph: mon0 10.166.166.1:6789 connection
+> > failed
+> > Jun 16 17:26:15 gitega last message repeated 4 times
+> 
+> I would have expected the "umount" to terminate at least after some generous
+> timeout.
+> 
+> Ceph should probably support something like the "soft,intr" options
+> of NFS, because if the only supported way of mounting is one where
+> a client is more or less stuck-until-reboot when the service fails,
+> many potential test-configurations involving Ceph are way too dangerous
+> to try...
 
-Thomas Mueller wrote:
-> dbench 1 results:
-> * 1 disk, btrfs: 115
-> * 2 disks, btrfs data/metadata raid0: 115
->   
-This is suspicious.
+Yeah, being able to force it to shut down when servers are unresponsive is 
+definitely the intent.  'umount -f' should work.  It sounds like the 
+problem is related to the initial 'umount' (which doesn't time out) 
+followed by 'umount -f'.
 
-I'm also not sure whether you mean that you're running btrfs on an md or 
-lvm stripe or using multiple device btrfs file systems.
+I'm hesitant to add a blanket umount timeout, as that could prevent proper 
+writeout of cached data/metadata in some cases.  So I think the goal 
+should be that if a normal umount hangs for some reason, you should be 
+able to intervene to add the 'force' if things don't go well.
 
-My numbers are showing that btrfs multidevice support may not be very 
-good right now but I get pretty good results from lvm stripes.  The 
-hardware I'm testing now is the first hardware I've tried, (of prolly a 
-couple dozen over the years), where the controller can actually keep all 
-disks spinning.  Most cannot.
-
-Try building an lvm stripe on your two disks and testing dd directly to 
-the stripe.
-
---rich
-
-
+sage
