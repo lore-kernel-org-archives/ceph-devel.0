@@ -1,93 +1,57 @@
-From: Min Zhou <coderplay@gmail.com>
-Subject: Re: setup ceph cluster failed
-Date: Wed, 16 Jun 2010 10:32:45 +0800
-Message-ID: <AANLkTinaE0QGHc6t86C2ti00TAuUyH0I7FPh1bclLxKz@mail.gmail.com>
-References: <AANLkTikdrTuquXK2sr5rz4rRASJWHvkVzkw4Y26rusds@mail.gmail.com>
-	<AANLkTikuhGLl59papaPJPvfN584gPi-B10xiXIZNrS-O@mail.gmail.com>
-	<AANLkTimknLJUt0GetPjwA7ZV9t_DWb1btOFMtd8XXY80@mail.gmail.com>
-	<AANLkTik8gRPzwBzzI8rJGp2b-o6dpoFzRcGJZORC81sY@mail.gmail.com>
-	<AANLkTinreVMIcxZAUuKWDjYbh2cvLi025d0QWYD8SSJs@mail.gmail.com>
-	<AANLkTikUSPzXJ2rWJp1oBaJbGfz2NW_gJalhIA2eNrIz@mail.gmail.com>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: crush update failure ("corrupt inc osdmap epoch 5 off 50")
+Date: Wed, 16 Jun 2010 06:32:46 +0000 (UTC)
+Message-ID: <hv9r6e$4tp$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:57116 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754308Ab0FPCcq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Jun 2010 22:32:46 -0400
-Received: by qyk1 with SMTP id 1so942988qyk.19
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Jun 2010 19:32:46 -0700 (PDT)
-In-Reply-To: <AANLkTikUSPzXJ2rWJp1oBaJbGfz2NW_gJalhIA2eNrIz@mail.gmail.com>
+Received: from lo.gmane.org ([80.91.229.12]:47365 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754247Ab0FPGcz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Jun 2010 02:32:55 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OOmBC-0003Ed-PQ
+	for ceph-devel@vger.kernel.org; Wed, 16 Jun 2010 08:32:54 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jun 2010 08:32:54 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Jun 2010 08:32:54 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi, Yehuda,
+hi 
 
+i tried to change data "max_size" to 1 to disable replication for testing.
 
+what i've done (reproducable):
 
-
-On Wed, Jun 16, 2010 at 5:19 AM, Yehuda Sadeh Weinraub
-<yehudasa@gmail.com> wrote:
-> On Tue, Jun 15, 2010 at 1:54 PM, Min Zhou <coderplay@gmail.com> wrote:
->>
->>
->> Still two questions:
->> 1. Why it prompted the need of all osd's root passwords?
-> You specified --allhosts in the mkcephfs script command line. The
-> script uses ssh to run commands on the remote hosts, so you'd probably
-> need to setup your environment so that it doesn't prompt for password
-> when you login there (e.g., one way to do it is to create a
-> private/public keys pair, put the copy of your public key in the
-> remote host under ~/.ssh/authorized_keys).
-
-
-Actually, my machines were configured to SSH to without being prompted
-for a password from any node to another one under the same user
-account ceph. Why the system ask me for root passwords?
-
-Btw, it seems there is still somewhat incorrectnesses of my
-deployment, see below
-
-$ ceph  -c ceph_conf/ceph.conf  start
-10.06.16 05:00:29.182841 439bc940 -- :/10572 >> 192.168.0.2:6789/0
-pipe(0x108f2df0 sd=-1 pgs=0 cs=0 l=0).fault first fault
-10.06.16 05:00:39.185779 42fbb940 monclient(hunting): continuing hunt
-10.06.16 05:00:39.186014 41ab6940 -- :/10572 >> 192.168.0.2:6789/0
-pipe(0x108f58b0 sd=-1 pgs=0 cs=0 l=0).fault first fault
-10.06.16 05:00:49.188963 42fbb940 monclient(hunting): continuing hunt
-10.06.16 05:00:49.189299 443bd940 -- :/10572 >> 192.168.0.3:6789/0
-pipe(0x108f5ee0 sd=-1 pgs=0 cs=0 l=0).fault first fault
-10.06.16 05:00:59.192191 42fbb940 monclient(hunting): continuing hunt
-10.06.16 05:00:59.192630 44dbe940 -- :/10572 >> 192.168.0.3:6789/0
-pipe(0x108f7020 sd=-1 pgs=0 cs=0 l=0).fault first fault
-10.06.16 05:01:09.195363 42fbb940 monclient(hunting): continuing hunt
-10.06.16 05:01:09.195714 457bf940 -- :/10572 >> 192.168.0.3:6789/0
-pipe(0x108f65e0 sd=-1 pgs=0 cs=0 l=0).fault first fault
-10.06.16 05:01:19.198552 42fbb940 monclient(hunting): continuing hunt
+mkcephfs -c /etc/ceph/ceph.conf --mkbtrfs (1mds, 1mon, 2osd (2 phyiscal disks))
+start ceph
+mount ceph fs
+write some files to the mount
+ceph osd getcrushmap -o /tmp/crush
+crushtool -d /tmp/crush -o /tmp/crush.txt
+change data "max_size 10" to "max_size 1" in /tmp/crush.txt
+crushtool -c /tmp/crush.txt -o /tmp/crush.new
+ceph osd setcrushmap -i /tmp/crush.new (Output:
+* read 428 bytes from /tmp/crush.new
+* 10.06.16_08:12:57.187556 41223950 monclient(hunting): found mon0
+* 10.06.16_08:12:57.188298 mon <- [osd,setcrushmap]
+* 10.06.16_08:12:58.303241 mon0 -> 'set crush map' (0)
+)
 
 
-Thanks,
-Min
+after starting to write a file to the mount, I see these kernel messages :
+http://pastebin.com/maVj9daV
 
+ceph / kclient are yesterdays git unstable / unstable-backport versions.
+kernel is debian lenny backport 2.6.32.
 
->> 2. Why it still has warning that tell me no keyring specified for each osd.
->
-> Probably because there wasn't any keyring specified in your ceph.conf.
-> As you don't setup your ceph cluster with authentication it doesn't
-> really matter.
->
-> Yehuda
->
+- Thomas
 
-
-
--- 
-My research interests are distributed systems, parallel computing and
-bytecode based virtual machine.
-
-My profile:
-http://www.linkedin.com/in/coderplay
-My blog:
-http://coderplay.javaeye.com
