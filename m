@@ -1,46 +1,33 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: block device journal durability
-Date: Wed, 16 Jun 2010 10:03:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006161000170.12761@cobra.newdream.net>
-References: <4C18E3C4.5030303@mcs.anl.gov>
+From: Guiterrez King <misprises@cdl.co.im>
+Subject: ntreat me
+Date: Wed, 16 Jun 2010 19:29:52 +0200
+Message-ID: <4C19082E.8080102@emborg.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: application/octet-stream; name="uranalysis.rtf"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42390 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755879Ab0FPRDH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Jun 2010 13:03:07 -0400
-In-Reply-To: <4C18E3C4.5030303@mcs.anl.gov>
+Received: from [92.246.113.62] ([92.246.113.62]:62444 "HELO weio.gqzwxd.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with SMTP
+	id S1756294Ab0FPR3v (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 16 Jun 2010 13:29:51 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Phil Carns <carns@mcs.anl.gov>
-Cc: ceph-devel@vger.kernel.org
+To: Bullen Daniel <ceph-devel@vger.kernel.org>
 
-On Wed, 16 Jun 2010, Phil Carns wrote:
-> I noticed that Ceph issues a warning if it detects that you are using a raw
-> block device as the journal and write caching is enabled on that device.
-> 
-> When it opens the block device file, however, the FileJournal is using
-> O_DIRECT|O_SYNC.  In recent kernels, syncing a block device file actually
-> triggers a proper write barrier operation
-> (http://lxr.linux.no/linux+v2.6.34/fs/block_dev.c#L420).  The barrier
-> operation is also supported on MD and LVM now as well if you happen to have a
-> journal on a multi-disk volume.
->
-> Does this mean that if you have a new enough kernel, and a block device that
-> understands barriers, that you can safely leave the write cache enabled for
-> the journal device?  It seems that way to me, but I wanted to make sure that I
-> am not missing a more subtle issue related to how Ceph performs its
-> journaling.
-
-You're correct.  The only concern is that the data is safely on disk when 
-the write returns, and it sounds like recent kernels issue the barriers to 
-make that happen.  Depending on how recent that behavior is, we can 
-probably either remove the warning entirely, or try to guess based on 
-kernel version.
-
-> Kudos on the user-friendly warning messages in Ceph in general, by the way.
-
-Thanks!
-sage
-
+e1xydGYxXGFuc2lcYW5zaWNwZzEyNTFcZGVmZjBcZGVmbGFuZzEwNDl7XGZvbnR0Ymx7XGYw
+XGZzd2lzc1xmcHJxMlxmY2hhcnNldDIwNHtcKlxmbmFtZSBBcmlhbDt9QXJpYWwgQ1lSO317
+XGYxXGZzd2lzc1xmY2hhcnNldDIwNHtcKlxmbmFtZSBBcmlhbDt9QXJpYWwgQ1lSO319DQp7
+XGNvbG9ydGJsIDtccmVkMFxncmVlbjBcYmx1ZTI1NTtccmVkMFxncmVlbjEyOFxibHVlMDt9
+DQp7XCpcZ2VuZXJhdG9yIE1zZnRlZGl0IDAuMTEuMzguMzE0Mjt9XHZpZXdraW5kNFx1YzFc
+cGFyZFxzYTIwMFxzbDI3NlxzbG11bHQxXGxhbmc5XGYwXGZzMzJ7XGZpZWxke1wqXGZsZGlu
+c3R7SFlQRVJMSU5LICJoe1wqXGRkIDAuMTEuMzguMzE0Mjt9dHRwOi8vZ29sZHJ1c2hvbmxp
+bmUuaW5mbyJ9fXtcZmxkcnNsdHtcdWxcY2YxIGh0dHA6Ly9nb2xkcnVzaG9ubGluZS5pbmZv
+fX19XGYwXGNmMVxiXGZzMzIgIC0gT05MSU5FIENBU0lOTyFccGFyDQpcbGluZVxjZjJcYlxm
+MFxmczI4IFZJUCBDTFVCIENhc2lubyBpcyBhIGdyZWF0IG9ubGluZSBjYXNpbm8gdGhhdCBv
+ZmZlcnMgdGhlIHVuaXF1ZSBjb21iaW5hdGlvbiBvZiB0b3AgcXVhbGl0eSBnYW1lcywgaGln
+aCBwYXlvdXRzIGFuZCBhIDI0LzcgcHJvZmVzc2lvbmFsIGN1c3RvbWVyIHN1cHBvcnQuXHBh
+cg0KXHBhcjEwMCBwcm9ncmVzc2l2ZSBnYW1lcyB3aXRoIHRvd2VyaW5nIGphY2twb3RzLCB3
+aGljaCBhcmUgcmVhZHkgdG8gZXhwbG9kZSBhbmQgY2FuIG1ha2UgbXVsdGktbWlsbGlvbmFp
+cmVzIG91dCBvZiBWSVAgQ0xVQiBwbGF5ZXJzISBEb3dubG9hZCB0aGUgc29mdHdhcmUgZm9y
+IGZyZWUsIHBpY2sgdXAgdGhlIGluY3JlZGlibGUgJDc3NyBXZWxjb21lIEJvbnVzIG9uIHlv
+dSB3YXkgaW4gYW5kIHN0YXJ0IHBsYXlpbmcgJiB3aW5uaW5nIVxwYXINCn0NCgA=
