@@ -1,44 +1,51 @@
 From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: ceph.conf sanity checks
-Date: Thu, 17 Jun 2010 14:24:05 +0000 (UTC)
-Message-ID: <hvdb65$5tm$4@dough.gmane.org>
+Subject: pdj-fstest mkdir/rm error messages  again
+Date: Thu, 17 Jun 2010 14:55:33 +0000 (UTC)
+Message-ID: <hvdd15$r1o$1@dough.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:37466 "EHLO lo.gmane.org"
+Received: from lo.gmane.org ([80.91.229.12]:40302 "EHLO lo.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752999Ab0FQOYV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 17 Jun 2010 10:24:21 -0400
+	id S1756173Ab0FQOzv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 17 Jun 2010 10:55:51 -0400
 Received: from list by lo.gmane.org with local (Exim 4.69)
 	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OPG0x-0006JB-1D
-	for ceph-devel@vger.kernel.org; Thu, 17 Jun 2010 16:24:19 +0200
+	id 1OPGVO-0000s7-Ss
+	for ceph-devel@vger.kernel.org; Thu, 17 Jun 2010 16:55:46 +0200
 Received: from cust.dyn.95-152-101-48.swisscomdata.ch ([95.152.101.48])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jun 2010 16:24:19 +0200
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Jun 2010 16:55:46 +0200
 Received: from thomas by cust.dyn.95-152-101-48.swisscomdata.ch with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Jun 2010 16:24:19 +0200
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Jun 2010 16:55:46 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
 hi
 
-doing some testing I've made some mistakes and configured the same device 
-for "btrfs devs" and "osd journal". 
+for a while the pdj-fstest worked without error messages. 
 
-I then ran happily "mkcephfs -c /etc/ceph/ceph.conf --mkbtrfs", started 
-ceph, mounted it and wrote to it, umounted and stopped ceph.
+now the pdj-fstest says again "successfull" but prints these:
 
-no errors thrown.
+/home/tmu//home/tmu/src/ceph-testsuite/tools/pjd-fstest-20080816/tests/chmod/02.t ..... ok
+mkdir: cannot create directory `_xxxxveryveryveryverylongxxxxxxxxxxx': File name too long
+rm: cannot remove `_xxveryveryveryverylongxxxxxx': File name too long
+/home/tmu/src/ceph-testsuite/tools/pjd-fstest-20080816/tests/chmod/03.t ..... oksrc/ceph-testsuite/tools/pjd-fstest-20080816/tests/chmod/02.t ..... ok
+mkdir: cannot create directory `_xxxxveryveryveryverylongxxxxxxxxxxx': File name too long
+rm: cannot remove `_xxveryveryveryverylongxxxxxx': File name too long
+/home/tmu/src/ceph-testsuite/tools/pjd-fstest-20080816/tests/chmod/03.t ..... ok
 
-Either ceph does some magic when the journal is on the same device as the 
-osd btrfs or it should already stop on parsing the conf if a device is 
-configured twice. :) 
+
+ceph.git revs (maybe this is kclient related and this means nothing):
+rev ok: 
+658d51dae14a724f167a02f18ebce19ca943f465 (2010-06-13 10:25:45 CEST)
+
+rev bad again: 
+658d51dae14a724f167a02f18ebce19ca943f465 (2010-06-14 16:32:03 CEST)
 
 - Thomas
-
 
