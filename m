@@ -1,53 +1,37 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: Re: simple performance tests
-Date: Fri, 18 Jun 2010 08:10:34 +0000 (UTC)
-Message-ID: <hvf9lq$lik$1@dough.gmane.org>
-References: <hva4nu$2nr$1@dough.gmane.org>
-	<AANLkTikactG3sjz7mwC1620jM19_6N6W3IPTrbgmIpvr@mail.gmail.com>
-	<hvcnpj$5tm$2@dough.gmane.org>
+From: Kevin Wolf <kwolf@redhat.com>
+Subject: Re: [Qemu-devel] Re: [PATCH] ceph/rbd block driver for qemu-kvm (v3)
+Date: Fri, 18 Jun 2010 12:09:31 +0200
+Message-ID: <4C1B45DB.4000502@redhat.com>
+References: <20100531193140.GA13993@chb-desktop> <4C1293B7.1060307@gmail.com> <AANLkTimQ8voPJC6krCAsvlzoOZOZ-1LDXXI6_asbO9xT@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:49222 "EHLO lo.gmane.org"
+Received: from mx1.redhat.com ([209.132.183.28]:12729 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756812Ab0FRIKr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 18 Jun 2010 04:10:47 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OPWew-0000hC-I8
-	for ceph-devel@vger.kernel.org; Fri, 18 Jun 2010 10:10:42 +0200
-Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Jun 2010 10:10:42 +0200
-Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Jun 2010 10:10:42 +0200
+	id S1752577Ab0FRKKG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 18 Jun 2010 06:10:06 -0400
+In-Reply-To: <AANLkTimQ8voPJC6krCAsvlzoOZOZ-1LDXXI6_asbO9xT@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Christian Brunner <chb@muc.de>
+Cc: Simone Gotti <simone.gotti@gmail.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org
 
-Am Thu, 17 Jun 2010 08:53:07 +0000 schrieb Thomas Mueller:
-
-> Am Wed, 16 Jun 2010 07:45:47 -0700 schrieb Gregory Farnum:
+Am 17.06.2010 21:05, schrieb Christian Brunner:
+> Hi Simone,
 > 
->> How's your CPU utilization on that processor? It'd be good if all those
->> daemons ran fine on an Atom but I'm not sure?
+> sorry for the late reply. I've been on vacation for a week.
 > 
-> I'll do some load monitoring and post the results.
+> Thanks for sending the patch. At first sight your patch looks good.
+> I'll do some testing by the weekend.
+> 
+> Kevin also sent me a note about the missing aio support, but I didn't
+> have the time to implement it yet. Now it seems, that I don't have to
+> do it, since you where quicker... :)
 
-I getting used to atop - nice tool to have a summary of what's going on.
+Are you going to send a final version which includes Simone's patch or
+should I apply them as two patches and just accept that rbd is broken
+after the first one? Or were there any other problems that need to be
+solved first?
 
-it showed that cmds ate 50% of the cpu power.
-
-i've started the MDS on another computer. with 3 osds (1 disk per osd) 
-and journal on a partition (same disk as osd) i get now 47 mb/s in dbench 
-10 test (ceph data/metadata size 1) and with "size 2" 31.3649mb/s
-
-dd bs=1M count=8192 gives me 107mb/s ("size 1")
-
-so now ceph outperforms samba. :)
-
-- Thomas
-
+Kevin
