@@ -1,51 +1,34 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: creation of ./.snap/test creates something in ./subdir/.snap/
-Date: Sat, 19 Jun 2010 08:40:48 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006190833230.17737@cobra.newdream.net>
-References: <hvhrh3$n0a$1@dough.gmane.org>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: [Qemu-devel] Re: [PATCH] ceph/rbd block driver for qemu-kvm (v3)
+Date: Sat, 19 Jun 2010 17:48:12 +0200
+Message-ID: <AANLkTilSXVV6JzLXGBZ0OvVuut9wad7TLkZtxEmXmrEy@mail.gmail.com>
+References: <20100531193140.GA13993@chb-desktop>
+	<4C1293B7.1060307@gmail.com>
+	<AANLkTimQ8voPJC6krCAsvlzoOZOZ-1LDXXI6_asbO9xT@mail.gmail.com>
+	<4C1B45DB.4000502@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38061 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756227Ab0FSPjw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Jun 2010 11:39:52 -0400
-In-Reply-To: <hvhrh3$n0a$1@dough.gmane.org>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:34094 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756157Ab0FSPsO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Jun 2010 11:48:14 -0400
+In-Reply-To: <4C1B45DB.4000502@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
+To: Kevin Wolf <kwolf@redhat.com>
+Cc: Simone Gotti <simone.gotti@gmail.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org
 
-On Sat, 19 Jun 2010, Thomas Mueller wrote:
-> hi
-> 
-> i was looking for a way to list all snapshots*.
-> 
-> then i discovered this:
-> 
-> 
-> mkdir ./.snap/test
-> 
-> then i found this:
-> ./.snap/test
-> ./subdir/.snap/_test_1099511630280
-> 
-> 
-> the subdir/.snap/_test_1099511630280 vanishes if i delete the ./.snap/
-> test.
+>
+> Are you going to send a final version which includes Simone's patch or
+> should I apply them as two patches and just accept that rbd is broken
+> after the first one? Or were there any other problems that need to be
+> solved first?
 
-This is expected, because subdir's contents are contained by the 'test' 
-snap, and we want the .snap/ dir to show you all snaps that contain 
-copies of the current directory.  The name is mangled 
-(_$snap_$snap_root_ino) to avoid collisions with the current directory's 
-snap namespace.  Snaps beginning with _ are disallowed.
+I'll send a final version, when I've tested everything.
 
-> find ./ -type d -print0 | \
-> 	xargs -0 -I% -n1 find %/.snap -mindepth 1 -maxdepth 1
+There is another problem with very large i/o requests. I suspect that
+this can be triggered only
+with qemu-io and not in kvm, but I'll try to get a proper solution it anyway.
 
-find ./ -type d -print0 | \
-	xargs -0 -I% -n1 find %/.snap -mindepth 1 -maxdepth 1 \
-                         \( ! -name "_*" \)
-
-should do it, I think.  
-sage
+Christian
