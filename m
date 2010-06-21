@@ -1,46 +1,50 @@
-From: Jerker Nyberg <jerker@Update.UU.SE>
-Subject: Re: creation of ./.snap/test creates something in ./subdir/.snap/
-Date: Mon, 21 Jun 2010 09:30:34 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1006210908450.25950@Psilocybe.Update.UU.SE>
-References: <hvhrh3$n0a$1@dough.gmane.org> <Pine.LNX.4.64.1006190833230.17737@cobra.newdream.net>
- <hvipog$r1f$1@dough.gmane.org>
-Reply-To: ceph-devel@vger.kernel.org
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: [PATCH] add helptext for option "snapdirname" to manpage of
+ mount.ceph
+Date: Mon, 21 Jun 2010 10:32:26 +0000 (UTC)
+Message-ID: <hvnf3q$iq7$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from Psilocybe.Update.UU.SE ([130.238.19.25]:42489 "EHLO
-	Psilocybe.Update.UU.SE" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751696Ab0FUHg4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jun 2010 03:36:56 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by Psilocybe.Update.UU.SE (Postfix) with ESMTP id D48D230079
-	for <ceph-devel@vger.kernel.org>; Mon, 21 Jun 2010 09:30:34 +0200 (CEST)
-In-Reply-To: <hvipog$r1f$1@dough.gmane.org>
+Received: from lo.gmane.org ([80.91.229.12]:54990 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757809Ab0FUKcf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 21 Jun 2010 06:32:35 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OQeIr-0003ig-M3
+	for ceph-devel@vger.kernel.org; Mon, 21 Jun 2010 12:32:33 +0200
+Received: from cust.dyn.95-152-66-220.swisscomdata.ch ([95.152.66.220])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Jun 2010 12:32:33 +0200
+Received: from thomas by cust.dyn.95-152-66-220.swisscomdata.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Jun 2010 12:32:33 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
+inspired by the addition to 
+http://ceph.newdream.net/wiki/Snapshots about the snapdirname
+ option i've created a patch for the mount.ceph manpage
 
-Hi all,
+- Thomas
 
-It would be sweet to get shadow copy for Samba to work with Ceph 
-snapshots. This blog entry (for ZFS) might be a good start if anyone is 
-interested in experimenting and documenting (for Ceph)!
-
-http://www.edplese.com/blog/2009/12/02/samba-shadow_copy2-enhancements/
-
-One difference seem to be that Samba is expecting the snapshots to be per 
-volume and not per directory, but I havn't had time to look into it 
-further.
-
---jerker
-
-
-On Sat, 19 Jun 2010, Thomas Mueller wrote:
-
-> thanks for the explanation! i've created
->
-> http://ceph.newdream.net/wiki/Snapshots
->
-> for future  reference.
+diff --git a/man/mount.ceph.8 b/man/mount.ceph.8
+index d2cf027..996d68e 100644
+--- a/man/mount.ceph.8
++++ b/man/mount.ceph.8
+@@ -29,6 +29,10 @@ the time of mount.
+ .PP
+ A subdirectory \fIsubdir\fP may be specified if a subset of the file system is to be
+ mounted.
++.SH OPTIONS
++snapdirname
++.IP
++set the name of the hidden snapdir. Default: .snap
+ .SH EXAMPLES
+ Mount the full file system:
+ .IP
 
