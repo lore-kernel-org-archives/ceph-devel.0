@@ -1,76 +1,46 @@
-From: Christian Brunner <chb@muc.de>
-Subject: [PATCH] rbd: add queuing delay
-Date: Sun, 20 Jun 2010 22:44:26 +0200
-Message-ID: <20100620204426.GA7139@chb-desktop>
+From: Jerker Nyberg <jerker@Update.UU.SE>
+Subject: Re: creation of ./.snap/test creates something in ./subdir/.snap/
+Date: Mon, 21 Jun 2010 09:30:34 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1006210908450.25950@Psilocybe.Update.UU.SE>
+References: <hvhrh3$n0a$1@dough.gmane.org> <Pine.LNX.4.64.1006190833230.17737@cobra.newdream.net>
+ <hvipog$r1f$1@dough.gmane.org>
+Reply-To: ceph-devel@vger.kernel.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:46574 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757079Ab0FTUoa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Jun 2010 16:44:30 -0400
-Received: by fxm10 with SMTP id 10so1459822fxm.19
-        for <ceph-devel@vger.kernel.org>; Sun, 20 Jun 2010 13:44:29 -0700 (PDT)
-Content-Disposition: inline
+Received: from Psilocybe.Update.UU.SE ([130.238.19.25]:42489 "EHLO
+	Psilocybe.Update.UU.SE" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751696Ab0FUHg4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jun 2010 03:36:56 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by Psilocybe.Update.UU.SE (Postfix) with ESMTP id D48D230079
+	for <ceph-devel@vger.kernel.org>; Mon, 21 Jun 2010 09:30:34 +0200 (CEST)
+In-Reply-To: <hvipog$r1f$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi Yehuda,
 
-while running tests with qemu-io I've been experiencing a lot of
-messages when running a large writev request (several hundred MB in
-a single call):
+Hi all,
 
-10.06.20 22:10:07.337108 b67dcb70 client4136.objecter  pg 3.437e on [0] is laggy: 33
-10.06.20 22:10:07.337708 b67dcb70 client4136.objecter  pg 3.2553 on [0] is laggy: 19
-[...]
+It would be sweet to get shadow copy for Samba to work with Ceph 
+snapshots. This blog entry (for ZFS) might be a good start if anyone is 
+interested in experimenting and documenting (for Ceph)!
 
-Everything is working fine, though. I think that the large number of
-queued requests is the cause for this behaviour and I would propose to
-delay futher requests (see attached patch).
+http://www.edplese.com/blog/2009/12/02/samba-shadow_copy2-enhancements/
 
-What do you think about it?
+One difference seem to be that Samba is expecting the snapshots to be per 
+volume and not per directory, but I havn't had time to look into it 
+further.
 
-Another question: I there a way to figure out max_osd through librados?
+--jerker
 
-Christian
 
----
- block/rbd.c |   13 +++++++++++++
- 1 files changed, 13 insertions(+), 0 deletions(-)
+On Sat, 19 Jun 2010, Thomas Mueller wrote:
 
-diff --git a/block/rbd.c b/block/rbd.c
-index 74589cb..241b0c6 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -47,6 +47,14 @@
- 
- #define OBJ_MAX_SIZE (1UL << OBJ_DEFAULT_OBJ_ORDER)
- 
-+/*
-+ * For best performance MAX_RADOS_REQS should be at least as large as the 
-+ * number of osds. It may be larger, but if to high you may experience lagging
-+ *
-+ * XXX: automatically set to 2*max_osd ???
-+ */
-+#define MAX_RADOS_REQS 16
-+
- typedef struct RBDAIOCB {
-     BlockDriverAIOCB common;
-     QEMUBH *bh;
-@@ -507,6 +515,11 @@ static BlockDriverAIOCB *rbd_aio_rw_vector(BlockDriverState *bs,
-         rcb->segsize = segsize;
-         rcb->buf = buf;
- 
-+        /* delay rados aio requests when the queue is getting to large */
-+        while ((segnr - last_segnr + acb->aiocnt) > MAX_RADOS_REQS) {
-+		usleep(100);
-+	}
-+
-         if (write) {
-             rados_aio_create_completion(rcb, NULL,
-                                         (rados_callback_t) rbd_finish_aiocb,
--- 
-1.7.0.4
+> thanks for the explanation! i've created
+>
+> http://ceph.newdream.net/wiki/Snapshots
+>
+> for future  reference.
 
