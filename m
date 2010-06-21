@@ -1,51 +1,60 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Disk utilisation
-Date: Mon, 21 Jun 2010 09:02:57 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006210852560.27038@cobra.newdream.net>
-References: <7F0D01755BF855478E2847A50C09FA4DD1A0A94DF4@HERMES8.ds.leeds.ac.uk>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: [PATCH] rbd: add queuing delay
+Date: Mon, 21 Jun 2010 16:52:35 -0700
+Message-ID: <AANLkTikMSExF8V783S_wOsfCK7mRQT24g5SV4qaYUlrv@mail.gmail.com>
+References: <20100620204426.GA7139@chb-desktop>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51268 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757152Ab0FUQB5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jun 2010 12:01:57 -0400
-In-Reply-To: <7F0D01755BF855478E2847A50C09FA4DD1A0A94DF4@HERMES8.ds.leeds.ac.uk>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:57914 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752908Ab0FUXwh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jun 2010 19:52:37 -0400
+Received: by vws9 with SMTP id 9so126999vws.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Jun 2010 16:52:36 -0700 (PDT)
+In-Reply-To: <20100620204426.GA7139@chb-desktop>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christopher McLean <C.J.McLean@leeds.ac.uk>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Christian Brunner <chb@muc.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Sun, Jun 20, 2010 at 1:44 PM, Christian Brunner <chb@muc.de> wrote:
+> Hi Yehuda,
+>
+> while running tests with qemu-io I've been experiencing a lot of
+> messages when running a large writev request (several hundred MB in
+> a single call):
+>
+> 10.06.20 22:10:07.337108 b67dcb70 client4136.objecter =A0pg 3.437e on=
+ [0] is laggy: 33
+> 10.06.20 22:10:07.337708 b67dcb70 client4136.objecter =A0pg 3.2553 on=
+ [0] is laggy: 19
+> [...]
+>
+> Everything is working fine, though. I think that the large number of
+> queued requests is the cause for this behaviour and I would propose t=
+o
+> delay futher requests (see attached patch).
+>
+> What do you think about it?
 
-On Mon, 21 Jun 2010, Christopher McLean wrote:
-> Hi,
-> 
-> Going to cut to the chase on this. I'm pretty sure that this is not the 
-> correct place to ask, but the IRC channel is quiet and we can find no 
-> other sources of information - sorry in advance!
-> 
-> we've been hunting for some stats on ceph, notably disk utilisation e.g. 
-> given 3 servers providing 100Gb each to the cluster, how much useable 
-> space would be available after management/redundancy overheads? Can't 
-> find anything of relevance online. needing the info for a comparative 
-> study into costs for deploying ceph
-> 
-> any help/pointers/references would be of great help!
+It seems that the osd is lagging behind. The usleep might work for you
+as you avoid the pressure, but it's also somewhat random and will
+probably hurt performance on other setups. I'd rather see a
+configurable solution that lets you specify a total in-flight bytes or
+some other resizable window scheme.
 
-Generally speaking, you need to account for 2x replication, btrfs 
-overhead, cosd overhead (contents of $osd_data/current/meta directory), 
-and the pseudorandom distribution.
+>
+> Another question: I there a way to figure out max_osd through librado=
+s?
 
-The last one is the trickiest.  Because data is placed based on a hash, 
-there will be some natural variance is osd utilization, which will depend 
-on the total number of objects and osds.  There is a facility in crush to 
-adjust the distribution to correct for that natural variance, but ceph 
-isn't using it yet.
+Not currently.
 
-I would probably allow for 10% utilization variance for a smallish cluster 
-and maybe another 10% for the rest to be safe.  Something along the lines 
-of total_disk * .8 / replication_level?  You generally shouldn't fill any 
-file system beyond 80% or 90% anyway and expect it to perform well.
-
-sage
+Thanks,
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
