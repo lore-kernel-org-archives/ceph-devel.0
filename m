@@ -1,60 +1,43 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: [PATCH] rbd: add queuing delay
-Date: Mon, 21 Jun 2010 16:52:35 -0700
-Message-ID: <AANLkTikMSExF8V783S_wOsfCK7mRQT24g5SV4qaYUlrv@mail.gmail.com>
-References: <20100620204426.GA7139@chb-desktop>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph: splice_dentry error
+Date: Mon, 21 Jun 2010 16:53:41 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1006211651390.31636@cobra.newdream.net>
+References: <hvnkai$3lg$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:57914 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752908Ab0FUXwh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jun 2010 19:52:37 -0400
-Received: by vws9 with SMTP id 9so126999vws.19
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Jun 2010 16:52:36 -0700 (PDT)
-In-Reply-To: <20100620204426.GA7139@chb-desktop>
+Received: from cobra.newdream.net ([66.33.216.30]:52474 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752908Ab0FUXwj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jun 2010 19:52:39 -0400
+In-Reply-To: <hvnkai$3lg$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
+To: Thomas Mueller <thomas@chaschperli.ch>
 Cc: ceph-devel@vger.kernel.org
 
-On Sun, Jun 20, 2010 at 1:44 PM, Christian Brunner <chb@muc.de> wrote:
-> Hi Yehuda,
->
-> while running tests with qemu-io I've been experiencing a lot of
-> messages when running a large writev request (several hundred MB in
-> a single call):
->
-> 10.06.20 22:10:07.337108 b67dcb70 client4136.objecter =A0pg 3.437e on=
- [0] is laggy: 33
-> 10.06.20 22:10:07.337708 b67dcb70 client4136.objecter =A0pg 3.2553 on=
- [0] is laggy: 19
-> [...]
->
-> Everything is working fine, though. I think that the large number of
-> queued requests is the cause for this behaviour and I would propose t=
-o
-> delay futher requests (see attached patch).
->
-> What do you think about it?
+On Mon, 21 Jun 2010, Thomas Mueller wrote:
+> since 2 days 1 of my tests fail and crash my machine. 
+> 
+> the script crashing the machine is:
+> http://github.com/vinzent/ceph-testsuite/blob/master/tests/snaptest-2 
+> ( take lines 13 to 67 for standalone usage)
+> 
+> i can see these messages before my machine stops responding:
+> 
+> [11188.432605] ceph:  tid 67394 timed out on osd0, will reset osd
+> [11530.455936] ceph: splice_dentry error ffff8800a4891d80 inode 
+> ffff880100349d30 ino 10000001a4d.6
+> [11530.455961] BUG: unable to handle kernel NULL pointer dereference at 
+> 0000000000000078
+> [11530.455964] IP: [<ffffffffa0734049>] update_dentry_lease+0x20/0x10a 
+> [ceph]
 
-It seems that the osd is lagging behind. The usleep might work for you
-as you avoid the pressure, but it's also somewhat random and will
-probably hurt performance on other setups. I'd rather see a
-configurable solution that lets you specify a total in-flight bytes or
-some other resizable window scheme.
+I fixed the bug that allowed the splice_dentry error to result in a crash.  
 
->
-> Another question: I there a way to figure out max_osd through librado=
-s?
+I'm still a bit worried about the initial failure, though 
+(d_materialize_unique returning an error).  I'll have to look closer at a 
+test case to see if it's legitimate.  If you figure out how to produce 
+those splice_dentry warnings on your console reliably, please let us know!
 
-Not currently.
-
-Thanks,
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
