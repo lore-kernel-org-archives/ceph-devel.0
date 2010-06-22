@@ -1,43 +1,63 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: ceph: splice_dentry error
-Date: Mon, 21 Jun 2010 16:53:41 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006211651390.31636@cobra.newdream.net>
-References: <hvnkai$3lg$1@dough.gmane.org>
+From: Andre Noll <maan@systemlinux.org>
+Subject: Re: Disk utilisation
+Date: Tue, 22 Jun 2010 11:28:06 +0200
+Message-ID: <20100622092806.GC16886@skl-net.de>
+References: <7F0D01755BF855478E2847A50C09FA4DD1A0A94DF4@HERMES8.ds.leeds.ac.uk> <Pine.LNX.4.64.1006210852560.27038@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="bAmEntskrkuBymla"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52474 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752908Ab0FUXwj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Jun 2010 19:52:39 -0400
-In-Reply-To: <hvnkai$3lg$1@dough.gmane.org>
+Received: from systemlinux.org ([83.151.29.59]:55494 "EHLO m18s25.vlinux.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751897Ab0FVJ20 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 Jun 2010 05:28:26 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1006210852560.27038@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Christopher McLean <C.J.McLean@leeds.ac.uk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, 21 Jun 2010, Thomas Mueller wrote:
-> since 2 days 1 of my tests fail and crash my machine. 
-> 
-> the script crashing the machine is:
-> http://github.com/vinzent/ceph-testsuite/blob/master/tests/snaptest-2 
-> ( take lines 13 to 67 for standalone usage)
-> 
-> i can see these messages before my machine stops responding:
-> 
-> [11188.432605] ceph:  tid 67394 timed out on osd0, will reset osd
-> [11530.455936] ceph: splice_dentry error ffff8800a4891d80 inode 
-> ffff880100349d30 ino 10000001a4d.6
-> [11530.455961] BUG: unable to handle kernel NULL pointer dereference at 
-> 0000000000000078
-> [11530.455964] IP: [<ffffffffa0734049>] update_dentry_lease+0x20/0x10a 
-> [ceph]
 
-I fixed the bug that allowed the splice_dentry error to result in a crash.  
+--bAmEntskrkuBymla
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I'm still a bit worried about the initial failure, though 
-(d_materialize_unique returning an error).  I'll have to look closer at a 
-test case to see if it's legitimate.  If you figure out how to produce 
-those splice_dentry warnings on your console reliably, please let us know!
+On Mon, Jun 21, 09:02, Sage Weil wrote:
+> I would probably allow for 10% utilization variance for a smallish cluste=
+r=20
+> and maybe another 10% for the rest to be safe.  Something along the lines=
+=20
+> of total_disk * .8 / replication_level?  You generally shouldn't fill any=
+=20
+> file system beyond 80% or 90% anyway and expect it to perform well.
 
-sage
+Sure, but the thing is users couldn't care less about file system
+usage. So at least in a scenario where users write temporary data
+=66rom cluster jobs to a world-writable ceph fs, the fs _will_ fill up.
+
+So "you should not fill it beyond 80% anyway" is like asking for
+a pony: You won't get it. It is important that filling up the
+fs completely does not cause any problems for independent read
+operations. Otherwise the fs is next to useless, at least for this
+/tmp-like scenario.
+
+Andre
+--=20
+The only person who always got his work done by Friday was Robinson Crusoe
+
+--bAmEntskrkuBymla
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
+
+iD8DBQFMIIImWto1QDEAkw8RArTrAKCk8jSzZrZuauQ1uaKrQGaetpDenACfWG1j
+mZawlxG5WT/NUgYaRs3KHvw=
+=/P+p
+-----END PGP SIGNATURE-----
+
+--bAmEntskrkuBymla--
