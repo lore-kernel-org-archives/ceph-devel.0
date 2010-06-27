@@ -1,71 +1,68 @@
-From: Wido den Hollander <wido@pcextreme.nl>
-Subject: Performance scaling with multiple OSD's
-Date: Sun, 27 Jun 2010 11:39:04 +0200
-Message-ID: <1277631544.2291.10.camel@wido-laptop.pcextreme.nl>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: [PATCH] rbd: add queuing delay
+Date: Sun, 27 Jun 2010 23:05:00 +0200
+Message-ID: <20100627210500.GB1568@chb-desktop>
+References: <AANLkTilzf9GqS4Nqyz02IH59Wyb28gy5ojgxDU78CWsK@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from support.pcextreme.nl ([89.18.190.50]:33574 "EHLO
-	support.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754277Ab0F0JjK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Jun 2010 05:39:10 -0400
-Received: from zarafa.pcextreme.nl (zarafa.pcextreme.nl [79.99.135.237])
-	by support.pcextreme.nl (Postfix) with ESMTP id 9D78A841FC
-	for <ceph-devel@vger.kernel.org>; Sun, 27 Jun 2010 11:39:05 +0200 (CEST)
-Received: from [79.99.132.153] (unknown [79.99.132.153])
-	by zarafa.pcextreme.nl (Postfix) with ESMTPSA id 5D18460000B1
-	for <ceph-devel@vger.kernel.org>; Sun, 27 Jun 2010 11:39:07 +0200 (CEST)
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:62361 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754340Ab0F0VFF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Jun 2010 17:05:05 -0400
+Received: by fxm14 with SMTP id 14so290559fxm.19
+        for <ceph-devel@vger.kernel.org>; Sun, 27 Jun 2010 14:05:03 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <AANLkTilzf9GqS4Nqyz02IH59Wyb28gy5ojgxDU78CWsK@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi,
+> >> > 10.06.20 22:10:07.337108 b67dcb70 client4136.objecter =A0pg 3.43=
+7e on [0] is laggy: 33
+> >> > 10.06.20 22:10:07.337708 b67dcb70 client4136.objecter =A0pg 3.25=
+53 on [0] is laggy: 19
+> >> > [...]
+> >> >
+> >> > Everything is working fine, though. I think that the large numbe=
+r of
+> >> > queued requests is the cause for this behaviour and I would prop=
+ose to
+> >> > delay futher requests (see attached patch).
+> >>
+> >> It seems that the osd is lagging behind. The usleep might work for=
+ you
+> >> as you avoid the pressure, but it's also somewhat random and will
+> >> probably hurt performance on other setups. I'd rather see a
+> >> configurable solution that lets you specify a total in-flight byte=
+s or
+> >> some other resizable window scheme.
+> >
+> > I'm not sure if I understand what "lagging behind" means. If the in=
+-flight
+> > bytes are the sum of all requests in the queue, a solution could lo=
+ok like
+> > this (although it isn't configurable yet).
+> >
+> The problem is that the sleep will lead to having the osd being
+> underutilized in certain configurations. What you probably need here
+> is some mechanism that keeps feeding the osd with pending data
+> whenever old data has been cleared. E.g., make use of the async
+> callbacks to wake up the sender whenever the amount of pending
+> outgoing data has fell below some threshold.
 
-Although much of this has been discussed at IRC, i thought it might me
-helpfull to post it at the ml so i can be found easily.
+Do you mean replacing the sleep with something like a futex?=20
 
-In my Ceph cluster i was experiencing a performance problem, which afte=
-r
-some tests was due to a number of OSD's which had some disk I/O
-problems.
+When thinking about this a little bit more I'm not sure if doing this i=
+n
+the client is the right way to handle this. The client has no way to=20
+judge if the delay is caused by a general high load or by a single slow=
+ osd.
+Maybe it would be better if libraos could notify the client to slow dow=
+n?
 
-At the moment i have 4 OSD's which all get performance of roughly
-55MB/sec (ceph osd bench), where the journal and data is on the same
-disk (seperate partition though).
-
-Now i'm seeing about 50MB/sec with the rados benchmarks, which seem
-fine, but as i have 4 OSD's i expected to get a performance of about
-100MB/sec (since my replication level is at two).
-
-The question is, how does Ceph scale? Will a single writer thread be
-limited to the performance of one OSD and will i get a higher
-performance when multiple threads are started?
-
-Can a dev shed some light on this topic?
-
-=46or the reference, you can benchmark your OSD with: ceph osd tell 0
-bench
-
-Make sure you have "ceph -w" running somewhere so you can see the
-result.
-
---=20
-Met vriendelijke groet,
-
-Wido den Hollander
-Hoofd Systeembeheer / CSO
-Telefoon Support Nederland: 0900 9633 (45 cpm)
-Telefoon Support Belgi=C3=AB: 0900 70312 (45 cpm)
-Telefoon Direct: (+31) (0)20 50 60 104
-=46ax: +31 (0)20 50 60 111
-E-mail: support@pcextreme.nl
-Website: http://www.pcextreme.nl
-Kennisbank: http://support.pcextreme.nl/
-Netwerkstatus: http://nmc.pcextreme.nl
-
-
-
+Christian
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
