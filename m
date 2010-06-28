@@ -1,70 +1,184 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: [PATCH] rbd: add queuing delay
-Date: Sun, 27 Jun 2010 23:05:00 +0200
-Message-ID: <20100627210500.GB1568@chb-desktop>
-References: <AANLkTilzf9GqS4Nqyz02IH59Wyb28gy5ojgxDU78CWsK@mail.gmail.com>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: PATCH: extend man page mount.ceph.8 with available options
+Date: Mon, 28 Jun 2010 05:51:21 +0000 (UTC)
+Message-ID: <i09d8p$qic$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:62361 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754340Ab0F0VFF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Jun 2010 17:05:05 -0400
-Received: by fxm14 with SMTP id 14so290559fxm.19
-        for <ceph-devel@vger.kernel.org>; Sun, 27 Jun 2010 14:05:03 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <AANLkTilzf9GqS4Nqyz02IH59Wyb28gy5ojgxDU78CWsK@mail.gmail.com>
+Received: from lo.gmane.org ([80.91.229.12]:50048 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752497Ab0F1Fvd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 28 Jun 2010 01:51:33 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OT7Fj-00068T-34
+	for ceph-devel@vger.kernel.org; Mon, 28 Jun 2010 07:51:31 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Jun 2010 07:51:31 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Jun 2010 07:51:31 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-> >> > 10.06.20 22:10:07.337108 b67dcb70 client4136.objecter =A0pg 3.43=
-7e on [0] is laggy: 33
-> >> > 10.06.20 22:10:07.337708 b67dcb70 client4136.objecter =A0pg 3.25=
-53 on [0] is laggy: 19
-> >> > [...]
-> >> >
-> >> > Everything is working fine, though. I think that the large numbe=
-r of
-> >> > queued requests is the cause for this behaviour and I would prop=
-ose to
-> >> > delay futher requests (see attached patch).
-> >>
-> >> It seems that the osd is lagging behind. The usleep might work for=
- you
-> >> as you avoid the pressure, but it's also somewhat random and will
-> >> probably hurt performance on other setups. I'd rather see a
-> >> configurable solution that lets you specify a total in-flight byte=
-s or
-> >> some other resizable window scheme.
-> >
-> > I'm not sure if I understand what "lagging behind" means. If the in=
--flight
-> > bytes are the sum of all requests in the queue, a solution could lo=
-ok like
-> > this (although it isn't configurable yet).
-> >
-> The problem is that the sleep will lead to having the osd being
-> underutilized in certain configurations. What you probably need here
-> is some mechanism that keeps feeding the osd with pending data
-> whenever old data has been cleared. E.g., make use of the async
-> callbacks to wake up the sender whenever the amount of pending
-> outgoing data has fell below some threshold.
+hi
 
-Do you mean replacing the sleep with something like a futex?=20
+i was searching the mount options in the code. i've extended
+the man page of mount.ceph.8 with my findings.
 
-When thinking about this a little bit more I'm not sure if doing this i=
-n
-the client is the right way to handle this. The client has no way to=20
-judge if the delay is caused by a general high load or by a single slow=
- osd.
-Maybe it would be better if libraos could notify the client to slow dow=
-n?
+* i've excludede fsidmajor and fsidminor as i really don't known 
+what they do 
 
-Christian
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+* excluded monport as it seems not to be use anywhere in the code.
+
+* for dirstat and nodirstat i don't know which of the both
+is enabled by default.
+
+* rbytes/norbytes - same as for dirstat and I don't know what the
+switch does.
+
+* "don't share client with other sbs" - what does "sbs" mean? (found
+this one in the code)
+
+
+
+- Thomas
+
+
+
+diff --git a/man/mount.ceph.8 b/man/mount.ceph.8
+index 996d68e..771b293 100644
+--- a/man/mount.ceph.8
++++ b/man/mount.ceph.8
+@@ -29,10 +29,125 @@ the time of mount.
+ .PP
+ A subdirectory \fIsubdir\fP may be specified if a subset of the file system is to be
+ mounted.
++
+ .SH OPTIONS
++
++wsize
++.IP
++int, ?
++.PP
++
++rsize
++.IP
++int (bytes), max readahead, multiple of 1024, Default: 524288 (512*1024)
++.PP
++
++osdtimeout
++.IP
++int (seconds), Default: 60
++.PP
++
++osdkeepalivetimeout
++.IP
++int, Default: 5
++.PP
++
++mount_timeout
++.IP
++int (seconds), Default: 60
++.PP
++
++osd_idle_ttl
++.IP
++int (seconds), Default: 60
++.PP
++
++caps_wanted_delay_min
++.IP
++int, cap release delay, Default: 5
++.PP
++
++caps_wanted_delay_max
++.IP
++int, cap release delay, Default: 60
++.PP
++
++cap_release_safety
++.IP
++int, Default: calculated
++.PP
++
++readdir_max_entries
++.IP
++int, Default: 1024
++.PP
++
++readdir_max_bytes
++.IP
++int, Default: 524288 (512*1024)
++.PP
++
++write_congestion_kb
++.IP
++int (kb), max writeback in flight. scale with available memory. Default: calculated from available memory
++.PP
++
+ snapdirname
+ .IP
+-set the name of the hidden snapdir. Default: .snap
++string, set the name of the hidden snapdir. Default: .snap
++.PP
++
++name
++.IP
++string, used with authx, Default: guest
++.PP
++
++secret
++.IP
++string, used with authx 
++.PP
++
++ip
++.IP
++my ip
++.PP
++
++noshare
++.IP
++don't share client with other sbs
++.PP
++
++dirstat
++.IP
++funky `cat dirname` for stats
++.PP
++
++nodirstat
++.IP
++no funky `cat dirname` for stats
++.PP
++
++rbytes
++.IP
++?
++.PP
++
++norbytes
++.IP
++?
++.PP
++
++nocrc
++.IP
++no data crc on writes
++.PP
++
++noasyncreaddir
++.IP
++no dcache readdir
++.PP
++
++
+ .SH EXAMPLES
+ Mount the full file system:
+ .IP
+
