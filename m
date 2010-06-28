@@ -1,49 +1,58 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
+From: =?utf-8?Q?Alex=E2=80=8E_Nelson?= <ajnelson@cs.ucsc.edu>
 Subject: Re: Chunk size in Ceph
-Date: Mon, 28 Jun 2010 15:53:25 +0000 (UTC)
-Message-ID: <i0aghl$7jd$1@dough.gmane.org>
-References: <201006281627.54957.cray@unix-ag.uni-kl.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Date: Mon, 28 Jun 2010 08:58:19 -0700
+Message-ID: <59AE22D6-8E1B-478E-8F03-04791D9C4FCC@cs.ucsc.edu>
+References: <201006281627.54957.cray@unix-ag.uni-kl.de> <i0aghl$7jd$1@dough.gmane.org>
+Mime-Version: 1.0 (Apple Message framework v1081)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:41758 "EHLO lo.gmane.org"
+Received: from mustang.nps.edu ([205.155.65.61]:53646 "EHLO mustang.nps.edu"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751620Ab0F1Pxo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 28 Jun 2010 11:53:44 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OTGeU-0008VO-Te
-	for ceph-devel@vger.kernel.org; Mon, 28 Jun 2010 17:53:42 +0200
-Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Jun 2010 17:53:42 +0200
-Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Jun 2010 17:53:42 +0200
+	id S1751210Ab0F1QJf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jun 2010 12:09:35 -0400
+In-Reply-To: <i0aghl$7jd$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Thomas Mueller <thomas@chaschperli.ch>
+Cc: ceph-devel@vger.kernel.org
 
-Am Mon, 28 Jun 2010 16:27:54 +0200 schrieb Christian Baun:
+Hello all,
 
-> Hi,
+Sage informed me of the place where the default size is set a while back.  In src/config.cc, the struct g_default_file_layout has a few default size parameters.  He advised me that fl_stripe_unit and fl_object_size should be the same.  He also told me there's a way to set those on individual files, though that's potentially a pain and could be easier by just setting the default at compile time.
+
+There's also a feature request in on alternate methods of setting these.  I'm sure the Ceph team would welcome input on this.
+
+http://tracker.newdream.net/issues/185
+
+--Alex
+
+
+On Jun 28, 2010, at 08:53 , Thomas Mueller wrote:
+
+> Am Mon, 28 Jun 2010 16:27:54 +0200 schrieb Christian Baun:
 > 
-> What is the chunk size of Ceph?
-> I couldn't find this information.
+>> Hi,
+>> 
+>> What is the chunk size of Ceph?
+>> I couldn't find this information.
+>> 
+>> Best Regards
+>>   Christian
 > 
-> Best Regards
->    Christian
-
-IMHO 4mb 
-
-found in first link if I google "ceph chunk size":
-http://lmgtfy.com/?q=ceph+chunk+size
-
-(http://www.usenix.org/events/fast09/wips_posters/molina_wip.pdf)
-
-:)
-
-- Thomas
+> IMHO 4mb 
+> 
+> found in first link if I google "ceph chunk size":
+> http://lmgtfy.com/?q=ceph+chunk+size
+> 
+> (http://www.usenix.org/events/fast09/wips_posters/molina_wip.pdf)
+> 
+> :)
+> 
+> - Thomas
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
