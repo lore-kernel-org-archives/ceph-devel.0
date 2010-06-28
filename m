@@ -1,58 +1,196 @@
-From: =?utf-8?Q?Alex=E2=80=8E_Nelson?= <ajnelson@cs.ucsc.edu>
-Subject: Re: Chunk size in Ceph
-Date: Mon, 28 Jun 2010 08:58:19 -0700
-Message-ID: <59AE22D6-8E1B-478E-8F03-04791D9C4FCC@cs.ucsc.edu>
-References: <201006281627.54957.cray@unix-ag.uni-kl.de> <i0aghl$7jd$1@dough.gmane.org>
-Mime-Version: 1.0 (Apple Message framework v1081)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Sage Weil <sage@newdream.net>
+Subject: Re: PATCH: extend man page mount.ceph.8 with available options
+Date: Mon, 28 Jun 2010 09:53:42 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1006280947510.3822@cobra.newdream.net>
+References: <i09d8p$qic$1@dough.gmane.org>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mustang.nps.edu ([205.155.65.61]:53646 "EHLO mustang.nps.edu"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751210Ab0F1QJf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jun 2010 12:09:35 -0400
-In-Reply-To: <i0aghl$7jd$1@dough.gmane.org>
+Received: from cobra.newdream.net ([66.33.216.30]:58084 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751734Ab0F1QwZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Jun 2010 12:52:25 -0400
+In-Reply-To: <i09d8p$qic$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Thomas Mueller <thomas@chaschperli.ch>
 Cc: ceph-devel@vger.kernel.org
 
-Hello all,
+On Mon, 28 Jun 2010, Thomas Mueller wrote:
+> * i've excludede fsidmajor and fsidminor as i really don't known 
+> what they do 
 
-Sage informed me of the place where the default size is set a while back.  In src/config.cc, the struct g_default_file_layout has a few default size parameters.  He advised me that fl_stripe_unit and fl_object_size should be the same.  He also told me there's a way to set those on individual files, though that's potentially a pain and could be easier by just setting the default at compile time.
+Yeah, those are poorly implemented anyway.  They'll be fixed up in the 
+next cycle.
 
-There's also a feature request in on alternate methods of setting these.  I'm sure the Ceph team would welcome input on this.
+> * excluded monport as it seems not to be use anywhere in the code.
 
-http://tracker.newdream.net/issues/185
+Fixed, thanks.
 
---Alex
+> * for dirstat and nodirstat i don't know which of the both
+> is enabled by default.
 
+Off by default.
 
-On Jun 28, 2010, at 08:53 , Thomas Mueller wrote:
+> * rbytes/norbytes - same as for dirstat and I don't know what the
+> switch does.
 
-> Am Mon, 28 Jun 2010 16:27:54 +0200 schrieb Christian Baun:
+On by default (makes reported dir st_size equal to rbytes).
+
+> * "don't share client with other sbs" - what does "sbs" mean? (found
+> this one in the code)
+
+Superblocks.  Normally, if you mount the same cluster twice (maybe two 
+subdirs, or in two different places) the same client instance is shared.  
+'noshare' will force a new, unique client instance.
+
+I'll fix this up and apply, thanks!
+
+Thanks-
+sage
+
 > 
->> Hi,
->> 
->> What is the chunk size of Ceph?
->> I couldn't find this information.
->> 
->> Best Regards
->>   Christian
 > 
-> IMHO 4mb 
-> 
-> found in first link if I google "ceph chunk size":
-> http://lmgtfy.com/?q=ceph+chunk+size
-> 
-> (http://www.usenix.org/events/fast09/wips_posters/molina_wip.pdf)
-> 
-> :)
 > 
 > - Thomas
+> 
+> 
+> 
+> diff --git a/man/mount.ceph.8 b/man/mount.ceph.8
+> index 996d68e..771b293 100644
+> --- a/man/mount.ceph.8
+> +++ b/man/mount.ceph.8
+> @@ -29,10 +29,125 @@ the time of mount.
+>  .PP
+>  A subdirectory \fIsubdir\fP may be specified if a subset of the file system is to be
+>  mounted.
+> +
+>  .SH OPTIONS
+> +
+> +wsize
+> +.IP
+> +int, ?
+> +.PP
+> +
+> +rsize
+> +.IP
+> +int (bytes), max readahead, multiple of 1024, Default: 524288 (512*1024)
+> +.PP
+> +
+> +osdtimeout
+> +.IP
+> +int (seconds), Default: 60
+> +.PP
+> +
+> +osdkeepalivetimeout
+> +.IP
+> +int, Default: 5
+> +.PP
+> +
+> +mount_timeout
+> +.IP
+> +int (seconds), Default: 60
+> +.PP
+> +
+> +osd_idle_ttl
+> +.IP
+> +int (seconds), Default: 60
+> +.PP
+> +
+> +caps_wanted_delay_min
+> +.IP
+> +int, cap release delay, Default: 5
+> +.PP
+> +
+> +caps_wanted_delay_max
+> +.IP
+> +int, cap release delay, Default: 60
+> +.PP
+> +
+> +cap_release_safety
+> +.IP
+> +int, Default: calculated
+> +.PP
+> +
+> +readdir_max_entries
+> +.IP
+> +int, Default: 1024
+> +.PP
+> +
+> +readdir_max_bytes
+> +.IP
+> +int, Default: 524288 (512*1024)
+> +.PP
+> +
+> +write_congestion_kb
+> +.IP
+> +int (kb), max writeback in flight. scale with available memory. Default: calculated from available memory
+> +.PP
+> +
+>  snapdirname
+>  .IP
+> -set the name of the hidden snapdir. Default: .snap
+> +string, set the name of the hidden snapdir. Default: .snap
+> +.PP
+> +
+> +name
+> +.IP
+> +string, used with authx, Default: guest
+> +.PP
+> +
+> +secret
+> +.IP
+> +string, used with authx 
+> +.PP
+> +
+> +ip
+> +.IP
+> +my ip
+> +.PP
+> +
+> +noshare
+> +.IP
+> +don't share client with other sbs
+> +.PP
+> +
+> +dirstat
+> +.IP
+> +funky `cat dirname` for stats
+> +.PP
+> +
+> +nodirstat
+> +.IP
+> +no funky `cat dirname` for stats
+> +.PP
+> +
+> +rbytes
+> +.IP
+> +?
+> +.PP
+> +
+> +norbytes
+> +.IP
+> +?
+> +.PP
+> +
+> +nocrc
+> +.IP
+> +no data crc on writes
+> +.PP
+> +
+> +noasyncreaddir
+> +.IP
+> +no dcache readdir
+> +.PP
+> +
+> +
+>  .SH EXAMPLES
+>  Mount the full file system:
+>  .IP
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+> 
+> 
