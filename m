@@ -1,53 +1,60 @@
-From: Sage Weil <sage@newdream.net>
+From: =?ISO-8859-1?Q?S=E9bastien_Paolacci?=
+	<sebastien.paolacci@gmail.com>
 Subject: Re: pg 0.xxxx on [] is laggy
-Date: Wed, 30 Jun 2010 11:06:57 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1006301104320.29167@cobra.newdream.net>
+Date: Wed, 30 Jun 2010 22:57:21 +0200
+Message-ID: <AANLkTikisr1MNv4mw1PkwEEX1vxE_2vcRRAdCgcD33p1@mail.gmail.com>
 References: <AANLkTimJpJeHVMvhLSyASwo3DjE9sd1njJ7PGG9yhPa1@mail.gmail.com>
- <Pine.LNX.4.64.1006290850420.12768@cobra.newdream.net>
- <AANLkTini3YGPjANBw-FgWDld2J1cpe2GXsimpMI-0y1Z@mail.gmail.com>
+	<Pine.LNX.4.64.1006290850420.12768@cobra.newdream.net>
+	<AANLkTini3YGPjANBw-FgWDld2J1cpe2GXsimpMI-0y1Z@mail.gmail.com>
+	<i0forb$a8e$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-678454730-1277921217=:29167"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52338 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753041Ab0F3SFf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jun 2010 14:05:35 -0400
-In-Reply-To: <AANLkTini3YGPjANBw-FgWDld2J1cpe2GXsimpMI-0y1Z@mail.gmail.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:63590 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753416Ab0F3U5Y convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Jun 2010 16:57:24 -0400
+Received: by wyf23 with SMTP id 23so608332wyf.19
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Jun 2010 13:57:22 -0700 (PDT)
+In-Reply-To: <i0forb$a8e$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?S=E9bastien_Paolacci?= <sebastien.paolacci@gmail.com>
+To: Thomas Mueller <thomas@chaschperli.ch>
 Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wed, Jun 30, 2010 at 5:45 PM, Thomas Mueller <thomas@chaschperli.ch>=
+ wrote:
+>
+> give the kclient a try? git://ceph.newdream.net/ceph-client-
+> standalone.git branch unstable-backport for use with "older" kernels.
 
---557981400-678454730-1277921217=:29167
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+It's working like a charm (albeit abit more difficult to debug...), tha=
+nks.
 
-Hi,
+> why not let ceph manage the whole partition without a fs inbetween ? =
+like
+>
+> osd journal =3D /dev/sdX1
+>
+> (and remove "journal size")
+>
+>> =A0 =A0 =A0 =A0filestore journal writeahead =3D true
+>
+> seems to be true by default (http://ceph.newdream.net/wiki/Ceph.conf =
+->
+> filestore_journal_parallel)
+>
+> - Thomas
 
-On Wed, 30 Jun 2010, S=E9bastien Paolacci wrote:
-> It actually works better when removing the old deb pacakge;)... thanks!
+Mainly because performance is (currently) not my very priority but it
+actually works this way and bypass the issue (as a side note there's
+indeed a huge performance benefit).
 
-Good to hear!
-
-> I however get the a bunch of metadata sync warnings on the cfuse side
-> "10.06.30_13:16:20.556187 7f2bc5817720 client4100 fsync - not syncing
-> metadata yet.. implement me"
-
-Added this to the issue tracker.
-
-> On a different topic (sorry for the mix-up), pushing the journal on a
-> seperate partition give me the following crash:
-
-Hmm.. is this reproducible?  I just pushed something to ceph.git unstable=
-=20
-that prints out useful debugging info when that happens, but the question=
-=20
-remains what is causing it to happen in the first place.  Do you mind=20
-giving the latest a go and seeing what it tells us?
-
-Thanks!
-sage
---557981400-678454730-1277921217=:29167--
+Thanks for the tips,
+Sebastien
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
