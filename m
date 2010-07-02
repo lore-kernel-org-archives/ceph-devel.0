@@ -1,90 +1,38 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: make with -j fails
-Date: Fri, 2 Jul 2010 10:04:43 -0700
-Message-ID: <AANLkTinhbEZtQmrjbeWRQQSCkAjmG-1ZQEjtCY8SAaqG@mail.gmail.com>
-References: <i0k456$g5f$1@dough.gmane.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: OSD scalability & thread stacksize
+Date: Fri, 2 Jul 2010 10:08:40 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1007021006070.32597@cobra.newdream.net>
+References: <AANLkTilDYesH_4FFEPUdLGvQRoZcW99czwfGru44RW3i@mail.gmail.com>
+ <Pine.LNX.4.64.1007010724060.5822@cobra.newdream.net>
+ <AANLkTikMO6VLTd4VyGhxWnJhgGbXHFNc10Z7uf-GRA66@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:35866 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758747Ab0GBREp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jul 2010 13:04:45 -0400
-Received: by fxm14 with SMTP id 14so2561217fxm.19
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Jul 2010 10:04:44 -0700 (PDT)
-In-Reply-To: <i0k456$g5f$1@dough.gmane.org>
+Received: from cobra.newdream.net ([66.33.216.30]:48051 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756701Ab0GBSYm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jul 2010 14:24:42 -0400
+In-Reply-To: <AANLkTikMO6VLTd4VyGhxWnJhgGbXHFNc10Z7uf-GRA66@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
+To: Paul <paul_chiang@tcloudcomputing.com>
 Cc: ceph-devel@vger.kernel.org
 
-This is a longstanding but minor bug (it works without issue after the
-initial compile); Sage fixed it in commit
-9be976259a4630563e0aeaec390a217e40ae5c0f.
+On Fri, 2 Jul 2010, Paul wrote:
+> Yes, this seems to be what is happening. Taking a look, our kernels
+> had ulimit -v set to equal total physical memory. After setting ulimit
+> -v to unlimited, 32748 threads can be created regardless of what stack
+> size is allocated to each thread, at which point pthread_create
+> returns ENOMEM rather than EAGAIN. I'd still prefer to manage the
+> allocated size though, since kernel settings might not be totally
+> within our control.
 
-On Fri, Jul 2, 2010 at 12:23 AM, Thomas Mueller <thomas@chaschperli.ch>=
- wrote:
-> hi
->
-> as soon as I try to use the -j option the make fails. tried with -j2 =
-and -
-> j8
->
-> is it supposed to work to call make with "-j" to speedup the compilat=
-ion
-> time?
->
-> - Thomas
->
-> if g++ -DHAVE_CONFIG_H -I. -I. -I. =A0 =A0-Wall -D__CEPH__ -
-> D_FILE_OFFSET_BITS=3D64 -D_REENTRANT -D_THREAD_SAFE -rdynamic -O2 -g =
--pipe -
-> Wall -Wp,-D_FORTIFY_SOURCE=3D2 -fexceptions -fstack-protector --param=
-=3Dssp-
-> buffer-size=3D4 -m64 -mtune=3Dgeneric -MT buffer.o -MD -MP -MF ".deps=
-/
-> buffer.Tpo" -c -o buffer.o `test -f 'common/buffer.cc' || echo
-> './'`common/buffer.cc; \
-> =A0 =A0 =A0 =A0then mv -f ".deps/buffer.Tpo" ".deps/buffer.Po"; else =
-rm -f
-> ".deps/buffer.Tpo"; exit 1; fi
-> if g++ -DHAVE_CONFIG_H -I. -I. -I. =A0 =A0-Wall -D__CEPH__ -
-> D_FILE_OFFSET_BITS=3D64 -D_REENTRANT -D_THREAD_SAFE -rdynamic -O2 -g =
--pipe -
-> Wall -Wp,-D_FORTIFY_SOURCE=3D2 -fexceptions -fstack-protector --param=
-=3Dssp-
-> buffer-size=3D4 -m64 -mtune=3Dgeneric -MT debug.o -MD -MP -MF ".deps/
-> debug.Tpo" -c -o debug.o `test -f 'common/debug.cc' || echo './'`comm=
-on/
-> debug.cc; \
-> =A0 =A0 =A0 =A0then mv -f ".deps/debug.Tpo" ".deps/debug.Po"; else rm=
- -f ".deps/
-> debug.Tpo"; exit 1; fi
-> common/debug.cc:8:22: error: ceph_ver.h: No such file or directory
-> make[2]: *** [debug.o] Error 1
-> make[2]: *** Waiting for unfinished jobs....
-> make[2]: Leaving directory `/builddir/build/BUILD/ceph-0.21~rc/src'
-> make[1]: *** [all] Error 2
-> make[1]: Leaving directory `/builddir/build/BUILD/ceph-0.21~rc/src'
-> Making all in man
-> make[1]: Entering directory `/builddir/build/BUILD/ceph-0.21~rc/man'
-> make[1]: Nothing to be done for `all'.
-> make[1]: Leaving directory `/builddir/build/BUILD/ceph-0.21~rc/man'
-> make[1]: Entering directory `/builddir/build/BUILD/ceph-0.21~rc'
-> make[1]: Nothing to be done for `all-am'.
-> make[1]: Leaving directory `/builddir/build/BUILD/ceph-0.21~rc'
-> make: *** [all-recursive] Error 1
-> error: Bad exit status from /var/tmp/rpm-tmp.52754 (%build)
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+That explains it.  I pushed out your patches (with a few small changes), 
+and set the default stack size for the msgr threads to 1MB.  If you run 
+with something smaller reliably (I suspect 32 KB is a safe bet) let us 
+know.
+
+I also cherry-picked a few other bug fixes for that tree, btw.  Let me me 
+know if I missed anything important.
+
+sage
