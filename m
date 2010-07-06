@@ -1,32 +1,63 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: POSIX ACL support?
-Date: Mon, 5 Jul 2010 10:52:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1007051050160.8676@cobra.newdream.net>
-References: <1278351313.2552.26.camel@jdlaptop.lesbg.loc>
+From: Miguel F Mascarenhas Sousa Filipe <miguel.filipe@gmail.com>
+Subject: doubt: inode_t->get_layout_size_increment() is signed.
+Date: Tue, 6 Jul 2010 01:16:45 +0100
+Message-ID: <AANLkTingtd5NZClFkNsiuzX3phcFTzCeLw4-MiBt_wA9@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50691 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751102Ab0GERvV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jul 2010 13:51:21 -0400
-In-Reply-To: <1278351313.2552.26.camel@jdlaptop.lesbg.loc>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:40537 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753252Ab0GFAQr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jul 2010 20:16:47 -0400
+Received: by bwz1 with SMTP id 1so3090096bwz.19
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Jul 2010 17:16:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jonathan Dieter <jdieter@lesbg.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, 5 Jul 2010, Jonathan Dieter wrote:
-> Is there POSIX ACL support in ceph?  If not, what needs to be done to
-> get it added?  I've set up a test system using Fedora 13 + a Rawhide
-> 2.6.34.1-rc1 kernel, and copying files is working fine, but setting ACLs
-> gives me an "Operation not supported" error message.
+Hi there,
 
-Very little, I suspect, if all you want is ACL enforcement on the client 
-side.  The xattr support is there, so I think some vfs hooks just need to 
-be implemented.  I'm not too familiar with that part of the vfs, but I 
-suspect most of the work is done by generic vfs helpers.
+I'm interested in this project and started now checking out the code
+and make it compile...
 
-http://tracker.newdream.net/issues/27
+I got hunting this signed comparison warning:
 
-sage
+mds/Locker.cc: In member function =E2=80=98bool
+Locker::_do_cap_update(CInode*, Capability*, int, snapid_t,
+MClientCaps*, MClientCaps*)=E2=80=99:
+mds/Locker.cc:1923: warning: comparison between signed and unsigned
+integer expressions
+
+that is related with inode_t->get_layout_size_increment() being signed.
+This seems like a bug since it returns a size, but since I don't know
+the implications of changing this to uint64_t.. I'm asking..
+
+Is this the right fix?
+--------
+
+
+diff --git a/src/mds/mdstypes.h b/src/mds/mdstypes.h
+index b7bfd1d..3054610 100644
+--- a/src/mds/mdstypes.h
++++ b/src/mds/mdstypes.h
+@@ -379,7 +379,7 @@ struct inode_t {
+
+   bool is_truncating() const { return (truncate_pending > 0); }
+
+-  int64_t get_layout_size_increment() {
++  uint64_t get_layout_size_increment() {
+     return layout.fl_object_size * layout.fl_stripe_count;
+   }
+
+------
+
+Kind regards,
+
+--=20
+Miguel Mascarenhas Filipe
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
