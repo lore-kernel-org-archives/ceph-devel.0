@@ -1,63 +1,81 @@
-From: Miguel F Mascarenhas Sousa Filipe <miguel.filipe@gmail.com>
-Subject: doubt: inode_t->get_layout_size_increment() is signed.
-Date: Tue, 6 Jul 2010 01:16:45 +0100
-Message-ID: <AANLkTingtd5NZClFkNsiuzX3phcFTzCeLw4-MiBt_wA9@mail.gmail.com>
+From: Jonathan Dieter <jdieter@lesbg.com>
+Subject: ceph auth add?
+Date: Tue, 06 Jul 2010 22:28:55 +0300
+Message-ID: <1278444535.2500.11.camel@jdlaptop.lesbg.loc>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature"; boundary="=-Z1IsIMs7IbzJTPLrCNRr"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:40537 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753252Ab0GFAQr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jul 2010 20:16:47 -0400
-Received: by bwz1 with SMTP id 1so3090096bwz.19
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jul 2010 17:16:45 -0700 (PDT)
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:61327 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752044Ab0GFT5J (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jul 2010 15:57:09 -0400
+Received: by wwb24 with SMTP id 24so2178218wwb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Jul 2010 12:57:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi there,
 
-I'm interested in this project and started now checking out the code
-and make it compile...
+--=-Z1IsIMs7IbzJTPLrCNRr
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-I got hunting this signed comparison warning:
+Are there any pointers on how to use "ceph auth add"?  I'm trying to add
+a second osd and am running into trouble at the step where I'm supposed
+to run "ceph auth get osd.1 -o /data/keyring.osd1" at
+http://ceph.newdream.net/wiki/OSD_cluster_expansion/contraction
 
-mds/Locker.cc: In member function =E2=80=98bool
-Locker::_do_cap_update(CInode*, Capability*, int, snapid_t,
-MClientCaps*, MClientCaps*)=E2=80=99:
-mds/Locker.cc:1923: warning: comparison between signed and unsigned
-integer expressions
+It seems that osd.1 isn't in the server's keyring yet, but I haven't
+worked out how to add it yet.
 
-that is related with inode_t->get_layout_size_increment() being signed.
-This seems like a bug since it returns a size, but since I don't know
-the implications of changing this to uint64_t.. I'm asking..
+Running the following commands on the server:
+ceph auth add osd.1 --in-file=3D/data/keyring.osd1
+ceph auth add osd.1 /data/keyring.osd1
+ceph auth add osd.1 < /data/keyring.osd1
 
-Is this the right fix?
---------
+all give me variants of
 
+10.07.06 22:23:58.953255 7f3cffc5f710 monclient(hunting): found mon0
+10.07.06 22:23:58.953509 mon <- [auth,add,osd.1]
+10.07.06 22:23:58.953702 mon0 -> 'error decoding keyring' (-22)
 
-diff --git a/src/mds/mdstypes.h b/src/mds/mdstypes.h
-index b7bfd1d..3054610 100644
---- a/src/mds/mdstypes.h
-+++ b/src/mds/mdstypes.h
-@@ -379,7 +379,7 @@ struct inode_t {
+# ceph auth list
+mon.
+	key: AQ**********************************+w=3D=3D
+mds.ceph-server-01
+	key: AQ**********************************zA=3D=3D
+	caps: [mds] allow
+	caps: [mon] allow rwx
+	caps: [osd] allow *
+osd.0
+	key: AQ**********************************Ug=3D=3D
+	caps: [mon] allow rwx
+	caps: [osd] allow *
+client.admin
+	key: AQ**********************************zg=3D=3D
+	caps: [mds] allow
+	caps: [mon] allow *
+	caps: [osd] allow *
+' (0)
 
-   bool is_truncating() const { return (truncate_pending > 0); }
+# cauthtool --list /data/keyring.osd1
+osd.1
+	key: AQ**********************************GA=3D=3D
+	auid: 18***************15
+	caps: [mon] allow rwx
+	caps: [osd] allow *
 
--  int64_t get_layout_size_increment() {
-+  uint64_t get_layout_size_increment() {
-     return layout.fl_object_size * layout.fl_stripe_count;
-   }
+--=-Z1IsIMs7IbzJTPLrCNRr
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
 
-------
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.14 (GNU/Linux)
 
-Kind regards,
+iEYEABECAAYFAkwzg/cACgkQH3CnpFdSY1wgVgCeJGclKkVTAnOUk5yq7Nyj3bCp
+4pIAmgLndHEhREyH/9JA1B7Ej4UDWrNh
+=eUMH
+-----END PGP SIGNATURE-----
 
---=20
-Miguel Mascarenhas Filipe
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--=-Z1IsIMs7IbzJTPLrCNRr--
+
