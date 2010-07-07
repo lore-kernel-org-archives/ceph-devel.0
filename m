@@ -1,84 +1,91 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: cmds segfault on startup (ceph.git/unstable)
-Date: Wed, 7 Jul 2010 07:44:16 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1007070743510.23002@cobra.newdream.net>
-References: <i11j40$mk1$3@dough.gmane.org> <1278496830.1946.5.camel@wido-desktop>
+Subject: Re: PATCH: link ceph-client version to kernel version
+Date: Wed, 7 Jul 2010 08:03:33 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1007070757310.23002@cobra.newdream.net>
+References: <i11fb7$mk1$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-2002872900-1278513856=:23002"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38475 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:53534 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756081Ab0GGOmp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jul 2010 10:42:45 -0400
-In-Reply-To: <1278496830.1946.5.camel@wido-desktop>
+	with ESMTP id S1756142Ab0GGPBy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Jul 2010 11:01:54 -0400
+In-Reply-To: <i11fb7$mk1$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@pcextreme.nl>
-Cc: Thomas Mueller <thomas@chaschperli.ch>, ceph-devel@vger.kernel.org
+To: Thomas Mueller <thomas@chaschperli.ch>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wed, 7 Jul 2010, Thomas Mueller wrote:
+> hi
+> 
+> reading the version in ceph_fs.h made me think, that now that ceph is in 
+> vanilla kernel, it would be nice to have the version linked to the kernel 
+> version. this is how the kvm guys work for their backported module.
 
---557981400-2002872900-1278513856=:23002
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Hmm, how does that work?  This would divorce the kclient version from the 
+server side (which is basically already is, teh CEPH_VERSION* defines are 
+ignored by the kclient currently) and match it up with the kernel version.  
+For most people, that is just whatever upstream kernel they downloaded.
 
-On Wed, 7 Jul 2010, Wido den Hollander wrote:
-> Hi Thomas,
->=20
-> I just noticed the same, see my issue:
-> http://tracker.newdream.net/issues/259
->=20
-> Seems to be due to this commit: 83d1ea6636dd432dcbb6a0c6046d551bee7be5c6
->=20
-> Rolling back one revision right now to see if it indeed is the problem.
+Is the goal just to make the standalone/backported code tell you which 
+version the client code corresponds to?  If that's the case, I wonder the 
+defines should be generated exclusively in the backport branches of the 
+-standalone.git repo.
 
-Yeah, that was the one.  Fixed by 9432a958.
+(Currently the only reason those defines are there at all is because the
+ceph_fs.h header (along with a few others) is periodically synced up with 
+the server code.  Probably they should be moved into a non-synced header 
+to avoid that confusion.)
 
 sage
 
->=20
-> --=20
-> Met vriendelijke groet,
->=20
-> Wido den Hollander
-> Hoofd Systeembeheer / CSO
-> Telefoon Support Nederland: 0900 9633 (45 cpm)
-> Telefoon Support Belgi=EB: 0900 70312 (45 cpm)
-> Telefoon Direct: (+31) (0)20 50 60 104
-> Fax: +31 (0)20 50 60 111
-> E-mail: support@pcextreme.nl
-> Website: http://www.pcextreme.nl
-> Kennisbank: http://support.pcextreme.nl/
-> Netwerkstatus: http://nmc.pcextreme.nl
->=20
->=20
-> On Wed, 2010-07-07 at 09:58 +0000, Thomas Mueller wrote:
-> > hi
-> >=20
-> > my tests fail today because cmds segfaults on start.
-> >=20
-> >=20
-> > [116817.230467] cmds[2868]: segfault at 10 ip 0000000000686bee sp=20
-> > 00007fc0a3831230 error 4 in cmds[400000+335000]
-> >=20
-> >=20
-> >=20
-> > Bad Rev: 83d1ea6636dd432dcbb6a0c6046d551bee7be5c6
-> > Last known good: b0056ad0c09dd4e9cbd46f84a4123cdc9c4b7a02 (yesterday)
-> >=20
-> > - Thomas
-> >=20
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+> I've also patched super.c to expose the version to modinfo.
+> 
+> - Thomas
+> 
+> 
+> diff --git a/ceph_fs.h b/ceph_fs.h
+> index 63ff461..cfc995b 100644
+> --- a/ceph_fs.h
+> +++ b/ceph_fs.h
+> @@ -18,16 +18,17 @@
+>  /*
+>   * Ceph release version
+>   */
+> -#define CEPH_VERSION_MAJOR 0
+> -#define CEPH_VERSION_MINOR 20
+> -#define CEPH_VERSION_PATCH 0
+> +#define CEPH_VERSION_MAJOR 2
+> +#define CEPH_VERSION_MINOR 6
+> +#define CEPH_VERSION_PATCH 35
+> +#define CEPH_VERSION_FIX 0
+>  
+>  #define _CEPH_STRINGIFY(x) #x
+>  #define CEPH_STRINGIFY(x) _CEPH_STRINGIFY(x)
+> -#define CEPH_MAKE_VERSION(x, y, z) CEPH_STRINGIFY(x) "." CEPH_STRINGIFY(y) \
+> -       "." CEPH_STRINGIFY(z)
+> +#define CEPH_MAKE_VERSION(w, x, y, z) CEPH_STRINGIFY(w) "." CEPH_STRINGIFY(x) \
+> +       "." CEPH_STRINGIFY(y) "." CEPH_STRINGIFY(z)
+>  #define CEPH_VERSION CEPH_MAKE_VERSION(CEPH_VERSION_MAJOR, \
+> -                                      CEPH_VERSION_MINOR, CEPH_VERSION_PATCH)
+> +                                      CEPH_VERSION_MINOR, CEPH_VERSION_PATCH, CEPH_VERSION_FIX)
+>  
+>  /*
+>   * subprotocol versions.  when specific messages types or high-level
+> diff --git a/super.c b/super.c
+> index 27447a2..93d9c59 100644
+> --- a/super.c
+> +++ b/super.c
+> @@ -1149,3 +1149,4 @@ MODULE_AUTHOR("Yehuda Sadeh <yehuda@hq.newdream.net>");
+>  MODULE_AUTHOR("Patience Warnick <patience@newdream.net>");
+>  MODULE_DESCRIPTION("Ceph filesystem for Linux");
+>  MODULE_LICENSE("GPL");
+> +MODULE_INFO(version, CEPH_VERSION);
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-2002872900-1278513856=:23002--
+> 
+> 
