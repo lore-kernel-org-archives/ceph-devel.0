@@ -1,51 +1,86 @@
-From: Brian Jackson <iggy@theiggy.com>
-Subject: Re: PATCH: link ceph-client version to kernel version
-Date: Wed, 7 Jul 2010 13:04:18 -0500
-Message-ID: <201007071304.18434.iggy@theiggy.com>
-References: <i11fb7$mk1$1@dough.gmane.org> <201007071234.35911.iggy@theiggy.com>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from theiggy.com ([66.220.1.110]:42648 "EHLO mail.theiggy.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753424Ab0GGSEU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 7 Jul 2010 14:04:20 -0400
-In-Reply-To: <201007071234.35911.iggy@theiggy.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
+From: Yehuda Sadeh <yehuda@hq.newdream.net>
+Subject: [PATCH v3 00/10] ceph-rbd: ceph RADOS block device
+Date: Wed,  7 Jul 2010 15:11:22 -0700
+Message-ID: <cover.1278539315.git.yehuda@hq.newdream.net>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, sage@newdream.net, Yehuda Sadeh <yehuda@hq.newdream.net>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wednesday, July 07, 2010 12:34:35 pm Brian Jackson wrote:
-> On Wednesday, July 07, 2010 03:54:00 am Thomas Mueller wrote:
-> > hi
-> > 
-> > reading the version in ceph_fs.h made me think, that now that ceph is in
-> > vanilla kernel, it would be nice to have the version linked to the kernel
-> > version. this is how the kvm guys work for their backported module.
-> 
-> That makes sense for KVM because it's reached a level of maturity where
-> they only bother doing the backports of specific kernel releases. I don't
-> think it's a good idea for ceph to go this direction yet. Mostly I'd hate
-> to see the standalone client packages only released when there's a new
-> kernel. It seems like something that would be more useful once ceph has
-> some kernel releases under it's belt.
+The following is our latest version of the rados block device. Any comments,
+questions, suggestions are more than welcome. We would like to have that ready
+for inclusion for the next window and it'd be nice having it reviewed by
+someone more familiar with the block/storage layer. Note that the actual block
+device implementation that we'd happy to get review for is located in the last
+patch of the series. All the preceding patches just build up the groundwork,
+and implement the infrastructure for it.
+
+RBD allows striping of data across rados, the ceph distributed block layer, and
+is binary compatible with Christian Brunner's kvm-rbd implementation. Similarly
+to the Sheepdog project, it stripes the block device across 4MB (or other
+configurable size) objects stored by the distributed object store, and enjoys
+all the rados features (high availability, scalability, snapshots, etc.)
+
+A use case for this device would be to have some kind of a local file system
+created on it, and use it with conjuction of kvm to do migration and other
+related stuff.  Another option would be to use it as data devices for other
+distributed file systems (e.g., ocfs2, gfs2).
+
+The device driver is is based on osdblk. Currently, it resides under the
+fs/ceph tree and does not exist as a separate module of its own, such that the
+ceph.ko module contains both the ceph file system and the rbd block device.
+Another option would be to have it as a separate module that resides under
+drivers/block, however, it would still depend on the ceph.ko module.
+
+This version of the patch series includes many bug fixes. The major change is
+that it moves the snapshot administration functionality (e.g., snapshot
+creation, listing) to the osd side, and takes advantage of the osd extensible
+functionality. Also, snapshots can now be rolled back to a specific version.
 
 
-Cancel that. Talked to sagewk on irc and he said development of the kclient is 
-taking place in upstream git now, so I guess this does make sense.
+Yehuda
+---
 
+Yehuda Sadeh (10):
+  ceph-rbd: lookup pool in osdmap by name
+  ceph-rbd: refactor osdc requests creation functions
+  ceph-rbd: messenger and osdc changes for rbd
+  ceph-rbd: enable creation of clients that don't need mds
+  ceph-rbd: refactor mount related functions, add helpers
+  ceph-rbd: generalize mon requests, add pool op support
+  ceph-rbd: some super.c changes for rbd
+  ceph-rbd: osdc support for osd call and rollback operations
+  ceph-rbd: sync common header and source files with server version
+  ceph-rbd: rados block device
 
+ fs/ceph/Kconfig        |   10 +
+ fs/ceph/Makefile       |    2 +-
+ fs/ceph/README         |    1 +
+ fs/ceph/ceph_fs.c      |   50 +-
+ fs/ceph/ceph_fs.h      |    8 +-
+ fs/ceph/ceph_strings.c |    1 +
+ fs/ceph/debugfs.c      |   11 +-
+ fs/ceph/decode.h       |    5 +
+ fs/ceph/file.c         |   46 ++
+ fs/ceph/messenger.c    |  215 +++++-
+ fs/ceph/messenger.h    |    4 +
+ fs/ceph/mon_client.c   |  173 ++++-
+ fs/ceph/mon_client.h   |    5 +
+ fs/ceph/osd_client.c   |  353 ++++++++--
+ fs/ceph/osd_client.h   |   66 ++
+ fs/ceph/osdmap.c       |   13 +
+ fs/ceph/osdmap.h       |    2 +
+ fs/ceph/pagelist.c     |    2 +-
+ fs/ceph/pagelist.h     |    2 +-
+ fs/ceph/rados.h        |    8 +
+ fs/ceph/rbd.c          | 1835 ++++++++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/rbd.h          |    8 +
+ fs/ceph/rbd_types.h    |   71 ++
+ fs/ceph/super.c        |  194 ++++--
+ fs/ceph/super.h        |   36 +-
+ 25 files changed, 2918 insertions(+), 203 deletions(-)
+ create mode 100644 fs/ceph/rbd.c
+ create mode 100644 fs/ceph/rbd.h
+ create mode 100644 fs/ceph/rbd_types.h
 
-> 
-> > I've also patched super.c to expose the version to modinfo.
-> > 
-> > - Thomas
-> 
-> <snip>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
