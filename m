@@ -1,76 +1,60 @@
-From: Miguel F Mascarenhas Sousa Filipe <miguel.filipe@gmail.com>
-Subject: Re: service ceph vs. /etc/init.d/ceph
-Date: Thu, 8 Jul 2010 16:42:30 +0100
-Message-ID: <AANLkTik1943swfYSA5qyzFCxU_1_RhCQFcCx4sfh3_EJ@mail.gmail.com>
-References: <i14p03$hn$5@dough.gmane.org>
-	<1278602038.2253.24.camel@wido-laptop.pcextreme.nl>
-	<i14qoh$hn$7@dough.gmane.org>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: Re: "clocks not synchronized" warning message
+Date: Thu, 8 Jul 2010 15:44:07 +0000 (UTC)
+Message-ID: <i14ro7$hn$8@dough.gmane.org>
+References: <i14hq2$hn$1@dough.gmane.org>
+	<1278598768.2253.18.camel@wido-laptop.pcextreme.nl>
+	<i14nfj$hn$4@dough.gmane.org>
+	<Pine.LNX.4.64.1007080750200.32514@cobra.newdream.net>
+	<i14pea$hn$6@dough.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:61530 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755003Ab0GHPmb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jul 2010 11:42:31 -0400
-Received: by bwz1 with SMTP id 1so514214bwz.19
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 08:42:30 -0700 (PDT)
-In-Reply-To: <i14qoh$hn$7@dough.gmane.org>
+Received: from lo.gmane.org ([80.91.229.12]:53202 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756545Ab0GHPoZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 8 Jul 2010 11:44:25 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OWtGw-00072Q-5F
+	for ceph-devel@vger.kernel.org; Thu, 08 Jul 2010 17:44:22 +0200
+Received: from cust.dyn.95-152-98-129.swisscomdata.ch ([95.152.98.129])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 17:44:22 +0200
+Received: from thomas by cust.dyn.95-152-98-129.swisscomdata.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 17:44:22 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
-
-Regarding this, I had a problem with installing ceph from source on a
-non-debian derived, nor redhat derived distro (it's mandriva derived).
-make install doesn't seem to install any init/startup script.
+To: ceph-devel@vger.kernel.org
 
 
+>> 
+>> How about .5 seconds?  We sync our machines to a local ntp server, so
+>> the clocks get really close (sub-ms).  I forget that NTP isn't so
+>> accurate over a WAN.
+>> 
+>> The issue is that the monitor leases and timeouts are something like 2
+>> seconds (so that failures/unavailability) are detected quickly, so the
+>> tolerable clock drift can't get too close to that.
+>> 
+>> sage
+> 
+> ok, if this is the problem, then I would also recommend running an ntp
+> daemon (not ntpdate) on every node. A running ntpd will manage the
+> timesource to be in sync.
+> 
+> If anyone likes to run an mds/mon on a VM I expect problems -
+> virtualized clocksources are far less stable (my experience).
+> 
 
-On Thu, Jul 8, 2010 at 4:27 PM, Thomas Mueller <thomas@chaschperli.ch> =
-wrote:
-> Am Thu, 08 Jul 2010 17:13:58 +0200 schrieb Wido den Hollander:
->
->> Hi Thomas,
->>
->> About Debian, your right, the service command is not installed by
->> default.
->>
->> RHEL, CentOS and Ubuntu all support the "service" command, which mak=
-es
->> the Wiki usefull for those three distributions.
->>
->> I'm not sure what Debian's plan is with the service command, they al=
-so
->> might install it.
->>
->> As far as i know the service command is a part of the Linux Standard
->> Base (LSB), so using that would be a good idea.
->>
->> I'll change back the Debian specific page.
->>
->
-> hmm.. ok you're right. after lenny (5.0) it's in sysvinit-utils which=
- is
-> installed an every machine.
->
->
-> - Thomas
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
->
+started the ntpd on the nodes. now i'm able to run it with "mon lease 
+wiggle room = 0.1".
 
+as Wido is using ntpdate and he's successfull with 0.5 I would say 0.5 is 
+possible a good default.  
 
+- Thomas
 
---=20
-Miguel Mascarenhas Filipe
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
