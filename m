@@ -1,54 +1,76 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
+From: Miguel F Mascarenhas Sousa Filipe <miguel.filipe@gmail.com>
 Subject: Re: service ceph vs. /etc/init.d/ceph
-Date: Thu, 8 Jul 2010 15:27:13 +0000 (UTC)
-Message-ID: <i14qoh$hn$7@dough.gmane.org>
+Date: Thu, 8 Jul 2010 16:42:30 +0100
+Message-ID: <AANLkTik1943swfYSA5qyzFCxU_1_RhCQFcCx4sfh3_EJ@mail.gmail.com>
 References: <i14p03$hn$5@dough.gmane.org>
 	<1278602038.2253.24.camel@wido-laptop.pcextreme.nl>
+	<i14qoh$hn$7@dough.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:49431 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755323Ab0GHP1Z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 8 Jul 2010 11:27:25 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OWt0T-0000dW-Py
-	for ceph-devel@vger.kernel.org; Thu, 08 Jul 2010 17:27:21 +0200
-Received: from cust.dyn.95-152-98-129.swisscomdata.ch ([95.152.98.129])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 17:27:21 +0200
-Received: from thomas by cust.dyn.95-152-98-129.swisscomdata.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 17:27:21 +0200
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:61530 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755003Ab0GHPmb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jul 2010 11:42:31 -0400
+Received: by bwz1 with SMTP id 1so514214bwz.19
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 08:42:30 -0700 (PDT)
+In-Reply-To: <i14qoh$hn$7@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Thomas Mueller <thomas@chaschperli.ch>
+Cc: ceph-devel@vger.kernel.org
 
-Am Thu, 08 Jul 2010 17:13:58 +0200 schrieb Wido den Hollander:
-
-> Hi Thomas,
-> 
-> About Debian, your right, the service command is not installed by
-> default.
-> 
-> RHEL, CentOS and Ubuntu all support the "service" command, which makes
-> the Wiki usefull for those three distributions.
-> 
-> I'm not sure what Debian's plan is with the service command, they also
-> might install it.
-> 
-> As far as i know the service command is a part of the Linux Standard
-> Base (LSB), so using that would be a good idea.
-> 
-> I'll change back the Debian specific page.
-> 
-
-hmm.. ok you're right. after lenny (5.0) it's in sysvinit-utils which is 
-installed an every machine.
+Regarding this, I had a problem with installing ceph from source on a
+non-debian derived, nor redhat derived distro (it's mandriva derived).
+make install doesn't seem to install any init/startup script.
 
 
-- Thomas
 
+On Thu, Jul 8, 2010 at 4:27 PM, Thomas Mueller <thomas@chaschperli.ch> =
+wrote:
+> Am Thu, 08 Jul 2010 17:13:58 +0200 schrieb Wido den Hollander:
+>
+>> Hi Thomas,
+>>
+>> About Debian, your right, the service command is not installed by
+>> default.
+>>
+>> RHEL, CentOS and Ubuntu all support the "service" command, which mak=
+es
+>> the Wiki usefull for those three distributions.
+>>
+>> I'm not sure what Debian's plan is with the service command, they al=
+so
+>> might install it.
+>>
+>> As far as i know the service command is a part of the Linux Standard
+>> Base (LSB), so using that would be a good idea.
+>>
+>> I'll change back the Debian specific page.
+>>
+>
+> hmm.. ok you're right. after lenny (5.0) it's in sysvinit-utils which=
+ is
+> installed an every machine.
+>
+>
+> - Thomas
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
+ml
+>
+
+
+
+--=20
+Miguel Mascarenhas Filipe
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
