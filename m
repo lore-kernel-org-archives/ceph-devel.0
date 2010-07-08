@@ -1,43 +1,39 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: "clocks not synchronized" warning message
-Date: Thu, 8 Jul 2010 07:53:00 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1007080750200.32514@cobra.newdream.net>
-References: <i14hq2$hn$1@dough.gmane.org> <1278598768.2253.18.camel@wido-laptop.pcextreme.nl>
- <i14nfj$hn$4@dough.gmane.org>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: service ceph vs. /etc/init.d/ceph
+Date: Thu, 8 Jul 2010 14:57:07 +0000 (UTC)
+Message-ID: <i14p03$hn$5@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54808 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755733Ab0GHOvS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jul 2010 10:51:18 -0400
-In-Reply-To: <i14nfj$hn$4@dough.gmane.org>
+Received: from lo.gmane.org ([80.91.229.12]:51962 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755639Ab0GHO5R (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 8 Jul 2010 10:57:17 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OWsXL-0001Im-MH
+	for ceph-devel@vger.kernel.org; Thu, 08 Jul 2010 16:57:15 +0200
+Received: from cust.dyn.95-152-98-129.swisscomdata.ch ([95.152.98.129])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 16:57:15 +0200
+Received: from thomas by cust.dyn.95-152-98-129.swisscomdata.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 16:57:15 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, 8 Jul 2010, Thomas Mueller wrote:
+hi wido
 
-> Am Thu, 08 Jul 2010 16:19:28 +0200 schrieb Wido den Hollander:
-> 
-> > Hi,
-> > 
-> > I'm experiencing the same. The default "mon lease wiggle room" is set t
-> > .001, which gives the messages in my setup.
-> 
-> this is what I just found too - in unstable the default is now 0.010.  
-> with 0.5 the message was still there. with 1.0 it was away.
-> 
-> I think 0.010 is still a bit small for a system not connected to a atomic 
-> clock? :)
+i see you replacing "/etc/init.d/ceph" with  "service ceph" .
 
-How about .5 seconds?  We sync our machines to a local ntp server, so the 
-clocks get really close (sub-ms).  I forget that NTP isn't so accurate 
-over a WAN.
+The service thing does not exist on debian. IMHO /etc/init.d/ceph working 
+for all - so may we have it called /etc/init.d/ceph instead of "service 
+ceph"?
 
-The issue is that the monitor leases and timeouts are something like 2 
-seconds (so that failures/unavailability) are detected quickly, so the 
-tolerable clock drift can't get too close to that.
+Or at least on debian specific pages please do not change it.
 
-sage
+- Thomas
+
