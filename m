@@ -1,67 +1,61 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: Re: "clocks not synchronized" warning message
-Date: Thu, 8 Jul 2010 15:04:42 +0000 (UTC)
-Message-ID: <i14pea$hn$6@dough.gmane.org>
-References: <i14hq2$hn$1@dough.gmane.org>
-	<1278598768.2253.18.camel@wido-laptop.pcextreme.nl>
-	<i14nfj$hn$4@dough.gmane.org>
-	<Pine.LNX.4.64.1007080750200.32514@cobra.newdream.net>
+From: Wido den Hollander <wido@pcextreme.nl>
+Subject: Re: service ceph vs. /etc/init.d/ceph
+Date: Thu, 08 Jul 2010 17:13:58 +0200
+Message-ID: <1278602038.2253.24.camel@wido-laptop.pcextreme.nl>
+References: <i14p03$hn$5@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:57697 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754475Ab0GHPEx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 8 Jul 2010 11:04:53 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OWseg-0007Rl-M3
-	for ceph-devel@vger.kernel.org; Thu, 08 Jul 2010 17:04:50 +0200
-Received: from cust.dyn.95-152-98-129.swisscomdata.ch ([95.152.98.129])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 17:04:50 +0200
-Received: from thomas by cust.dyn.95-152-98-129.swisscomdata.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Jul 2010 17:04:50 +0200
+Received: from support.pcextreme.nl ([89.18.190.50]:39459 "EHLO
+	support.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754442Ab0GHPOA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jul 2010 11:14:00 -0400
+In-Reply-To: <i14p03$hn$5@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Thomas Mueller <thomas@chaschperli.ch>
+Cc: ceph-devel@vger.kernel.org
 
-Am Thu, 08 Jul 2010 07:53:00 -0700 schrieb Sage Weil:
+Hi Thomas,
 
-> On Thu, 8 Jul 2010, Thomas Mueller wrote:
+About Debian, your right, the service command is not installed by
+default.
+
+RHEL, CentOS and Ubuntu all support the "service" command, which makes
+the Wiki usefull for those three distributions.
+
+I'm not sure what Debian's plan is with the service command, they also
+might install it.
+
+As far as i know the service command is a part of the Linux Standard
+Base (LSB), so using that would be a good idea.
+
+I'll change back the Debian specific page.
+
+-- 
+Met vriendelijke groet,
+
+Wido den Hollander
+CTO
+Contact: http://www.pcextreme.nl/contact
+
+
+On Thu, 2010-07-08 at 14:57 +0000, Thomas Mueller wrote:
+> hi wido
 > 
->> Am Thu, 08 Jul 2010 16:19:28 +0200 schrieb Wido den Hollander:
->> 
->> > Hi,
->> > 
->> > I'm experiencing the same. The default "mon lease wiggle room" is set
->> > t .001, which gives the messages in my setup.
->> 
->> this is what I just found too - in unstable the default is now 0.010.
->> with 0.5 the message was still there. with 1.0 it was away.
->> 
->> I think 0.010 is still a bit small for a system not connected to a
->> atomic clock? :)
+> i see you replacing "/etc/init.d/ceph" with  "service ceph" .
 > 
-> How about .5 seconds?  We sync our machines to a local ntp server, so
-> the clocks get really close (sub-ms).  I forget that NTP isn't so
-> accurate over a WAN.
+> The service thing does not exist on debian. IMHO /etc/init.d/ceph working 
+> for all - so may we have it called /etc/init.d/ceph instead of "service 
+> ceph"?
 > 
-> The issue is that the monitor leases and timeouts are something like 2
-> seconds (so that failures/unavailability) are detected quickly, so the
-> tolerable clock drift can't get too close to that.
+> Or at least on debian specific pages please do not change it.
 > 
-> sage
-
-ok, if this is the problem, then I would also recommend running an ntp 
-daemon (not ntpdate) on every node. A running ntpd will manage the 
-timesource to be in sync. 
-
-If anyone likes to run an mds/mon on a VM I expect problems - virtualized 
-clocksources are far less stable (my experience).
-
-- Thomas 
+> - Thomas
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
