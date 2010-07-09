@@ -1,95 +1,77 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Attempt to create a new file in a snapshot crashes the MDS
-Date: Fri, 9 Jul 2010 12:43:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1007091241350.5826@cobra.newdream.net>
-References: <87wrt4fok9.wl%aemerson@linuxbox.com>
- <1278704335.2253.48.camel@wido-laptop.pcextreme.nl>
+From: Christian Brunner <chb@muc.de>
+Subject: [PATCH] fix FCGI detection and specfile
+Date: Fri, 9 Jul 2010 22:43:42 +0200
+Message-ID: <20100709204342.GA31275@sir.home>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49725 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752449Ab0GITmL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jul 2010 15:42:11 -0400
-In-Reply-To: <1278704335.2253.48.camel@wido-laptop.pcextreme.nl>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:36118 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752661Ab0GIUoM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jul 2010 16:44:12 -0400
+Received: by fxm14 with SMTP id 14so1360588fxm.19
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Jul 2010 13:44:11 -0700 (PDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@pcextreme.nl>
-Cc: "Adam C. Emerson" <aemerson@linuxbox.com>, Ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is primarily a cfuse bug.. it should generate EROFS locally.  The 
-MDS should also not crash. 
+configure is building radosgw as soon as libfcgi is installed, even
+if --without-radosgw is given. Here is a fix for configure.in and the
+specfile.
 
-In any case, we shouldn't need the debug output.  :)
+Regards,
+Christian
+---
+ ceph.spec.in |    2 +-
+ configure.ac |   18 ++++++++----------
+ 2 files changed, 9 insertions(+), 11 deletions(-)
 
-Thanks for the bug report!
-sage
+diff --git a/ceph.spec.in b/ceph.spec.in
+index caf33d2..ca0c698 100644
+--- a/ceph.spec.in
++++ b/ceph.spec.in
+@@ -59,7 +59,7 @@ conjunction with any FastCGI capable web server.
+ %if %{with_radosgw}
+ %{configure} --without-hadoop --with-radosgw
+ %else
+-%{configure} --without-hadoop 
++%{configure} --without-hadoop --without-radosgw
+ %endif
+ make -j$(getconf _NPROCESSORS_ONLN) CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS"
+ 
+diff --git a/configure.ac b/configure.ac
+index 2b30fba..53a1d27 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -45,19 +45,17 @@ AC_ARG_WITH([radosgw],
+             [AS_HELP_STRING([--with-radosgw], [build RADOS gateway])],
+             [],
+             [with_radosgw=check])
+-RADOSGW=1
++RADOSGW=0
+ AS_IF([test "x$with_radosgw" != xno],
+ 	    [AC_CHECK_LIB([fcgi], [FCGX_Init],
+-             [true],
+-	     [RADOSGW=0
+-	     if test "x$with_radosgw" != "xcheck"; then
++             [AC_CHECK_LIB([expat], [XML_Parse],
++              [RADOSGW=1],
++	      [if test "x$with_radosgw" != "xcheck"; then
++		   AC_MSG_FAILURE([--with-radosgw was given but libexpat (libexpat1-dev on debian) not found])
++	      fi])
++             ],
++	     [if test "x$with_radosgw" != "xcheck"; then
+ 		AC_MSG_FAILURE([--with-radosgw was given but libfcgi (libfcgi-dev on debian) not found])
+-	     fi])
+-	     AC_CHECK_LIB([expat], [XML_Parse],
+-             [true],
+-	     [RADOSGW=0
+-	     if test "x$with_radosgw" != "xcheck"; then
+-		AC_MSG_FAILURE([--with-radosgw was given but libexpat (libexpat1-dev on debian) not found])
+ 	     fi])])
+ AM_CONDITIONAL(WITH_RADOSGW, test "$RADOSGW" = "1")
+ 
+-- 
+1.5.5.6
 
-On Fri, 9 Jul 2010, Wido den Hollander wrote:
-
-> Hi Adam,
-> 
-> Could you add "debug mds = 20" in your ceph.conf and retry?
-> 
-> There should also be a file "core" in /, this is a dump which you can
-> use to make a backtrace with gdb (if you have the debug symbols).
-> 
-> gdb /usr/bin/cmds /core
-> gdb> bt
-> 
-> Could you try this?
-> 
-> -- 
-> Met vriendelijke groet,
-> 
-> Wido den Hollander
-> CTO
-> Contact: http://www.pcextreme.nl/contact
-> 
-> 
-> On Fri, 2010-07-09 at 19:22 +0000, Adam C. Emerson wrote:
-> > I know it's not supported, but I tried it out to see what kind of
-> > error behaviour I would get.
-> > 
-> > The following were preformed on a simple ceph filesystem (one monitor,
-> > one mds, one osd all on the same machine) running current unstable
-> > with the filesystem mounted via cfuse:
-> > 
-> > /mnt# mkdir foo
-> > /mnt# cd foo
-> > /mnt/foo# cat > something
-> > These are the contents of the file.
-> > /mnt/foo# cd .snap
-> > /mnt/foo/.snap# mkdir old
-> > /mnt/foo/.snap# cd ..
-> > /mnt/foo# cat > something
-> > These are different contents of the file.
-> > /mnt/foo# cd .snap
-> > /mnt/foo/.snap# ls
-> > old/
-> > /mnt/foo/.snap# cd old 
-> > root@seasalt:/mnt/foo/.snap/old# ls
-> > something
-> > /mnt/foo/.snap/old# cat something 
-> > These are the contents of the file.
-> > /mnt/foo/.snap/old# cat > something
-> > zsh: invalid argument: something
-> > /mnt/foo/.snap/old# cat > somthingelse
-> > These are divergent contents.
-> > 
-> > This last command hangs, and in the MDS log I find:
-> > mds/CDir.cc: In function 'CDentry* CDir::add_null_dentry(const std::string&, snapid_t, snapid_t)':
-> > mds/CDir.cc:225: FAILED assert(lookup_exact_snap(dname, last) == 0)
-> > 
-> > Thank you very much.
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
