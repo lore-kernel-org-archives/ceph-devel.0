@@ -1,77 +1,26 @@
-From: Christian Brunner <chb@muc.de>
-Subject: [PATCH] fix FCGI detection and specfile
-Date: Fri, 9 Jul 2010 22:43:42 +0200
-Message-ID: <20100709204342.GA31275@sir.home>
+From: Roland Rabben <roland@jotta.no>
+Subject: CEPH distributed filesystem on two sites
+Date: Mon, 12 Jul 2010 20:59:38 +0200
+Message-ID: <AANLkTikDlZd0AUFzJ_VCnWYYsTnHlTmilok2o4_ErFvq@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:36118 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752661Ab0GIUoM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jul 2010 16:44:12 -0400
-Received: by fxm14 with SMTP id 14so1360588fxm.19
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Jul 2010 13:44:11 -0700 (PDT)
-Content-Disposition: inline
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:48911 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753157Ab0GLS7q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jul 2010 14:59:46 -0400
+Received: by bwz1 with SMTP id 1so2544496bwz.19
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Jul 2010 11:59:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-configure is building radosgw as soon as libfcgi is installed, even
-if --without-radosgw is given. Here is a fix for configure.in and the
-specfile.
+Have there been any work to get CEPH working with two datacenters?
 
-Regards,
-Christian
----
- ceph.spec.in |    2 +-
- configure.ac |   18 ++++++++----------
- 2 files changed, 9 insertions(+), 11 deletions(-)
+I would like to have two copies of a file at site 1 and a third copy
+at site two.
+And would you be able to continue running with one of the sites down?
 
-diff --git a/ceph.spec.in b/ceph.spec.in
-index caf33d2..ca0c698 100644
---- a/ceph.spec.in
-+++ b/ceph.spec.in
-@@ -59,7 +59,7 @@ conjunction with any FastCGI capable web server.
- %if %{with_radosgw}
- %{configure} --without-hadoop --with-radosgw
- %else
--%{configure} --without-hadoop 
-+%{configure} --without-hadoop --without-radosgw
- %endif
- make -j$(getconf _NPROCESSORS_ONLN) CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS"
- 
-diff --git a/configure.ac b/configure.ac
-index 2b30fba..53a1d27 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -45,19 +45,17 @@ AC_ARG_WITH([radosgw],
-             [AS_HELP_STRING([--with-radosgw], [build RADOS gateway])],
-             [],
-             [with_radosgw=check])
--RADOSGW=1
-+RADOSGW=0
- AS_IF([test "x$with_radosgw" != xno],
- 	    [AC_CHECK_LIB([fcgi], [FCGX_Init],
--             [true],
--	     [RADOSGW=0
--	     if test "x$with_radosgw" != "xcheck"; then
-+             [AC_CHECK_LIB([expat], [XML_Parse],
-+              [RADOSGW=1],
-+	      [if test "x$with_radosgw" != "xcheck"; then
-+		   AC_MSG_FAILURE([--with-radosgw was given but libexpat (libexpat1-dev on debian) not found])
-+	      fi])
-+             ],
-+	     [if test "x$with_radosgw" != "xcheck"; then
- 		AC_MSG_FAILURE([--with-radosgw was given but libfcgi (libfcgi-dev on debian) not found])
--	     fi])
--	     AC_CHECK_LIB([expat], [XML_Parse],
--             [true],
--	     [RADOSGW=0
--	     if test "x$with_radosgw" != "xcheck"; then
--		AC_MSG_FAILURE([--with-radosgw was given but libexpat (libexpat1-dev on debian) not found])
- 	     fi])])
- AM_CONDITIONAL(WITH_RADOSGW, test "$RADOSGW" = "1")
- 
--- 
-1.5.5.6
+Best regards
 
+Roland Rabben
