@@ -1,46 +1,39 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: CEPH distributed filesystem on two sites
-Date: Mon, 12 Jul 2010 12:39:14 -0700
-Message-ID: <AANLkTikj5e1JlAHK2lfoiVlXsnxCh0M5gAMBl6ZdxtEn@mail.gmail.com>
-References: <AANLkTikDlZd0AUFzJ_VCnWYYsTnHlTmilok2o4_ErFvq@mail.gmail.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: [Qemu-devel] Re: [PATCH] ceph/rbd block driver for qemu-kvm (v3)
+Date: Tue, 13 Jul 2010 11:27:03 -0700
+Message-ID: <AANLkTilnN7SXDXIulNICT5kjdgYJuVJIWYhKr6RVP_7K@mail.gmail.com>
+References: <20100531193140.GA13993@chb-desktop>
+	<4C1293B7.1060307@gmail.com>
+	<AANLkTimQ8voPJC6krCAsvlzoOZOZ-1LDXXI6_asbO9xT@mail.gmail.com>
+	<4C1B45DB.4000502@redhat.com>
+	<AANLkTilSXVV6JzLXGBZ0OvVuut9wad7TLkZtxEmXmrEy@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:64351 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751708Ab0GLTjP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jul 2010 15:39:15 -0400
-Received: by qwh6 with SMTP id 6so1383818qwh.19
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Jul 2010 12:39:15 -0700 (PDT)
-In-Reply-To: <AANLkTikDlZd0AUFzJ_VCnWYYsTnHlTmilok2o4_ErFvq@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Roland Rabben <roland@jotta.no>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <kvm-owner@vger.kernel.org>
+In-Reply-To: <AANLkTilSXVV6JzLXGBZ0OvVuut9wad7TLkZtxEmXmrEy@mail.gmail.com>
+Sender: kvm-owner@vger.kernel.org
+To: Christian Brunner <chb@muc.de>
+Cc: Kevin Wolf <kwolf@redhat.com>, Simone Gotti <simone.gotti@gmail.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Jul 12, 2010 at 11:59 AM, Roland Rabben <roland@jotta.no> wrote:
-> Have there been any work to get CEPH working with two datacenters?
+On Sat, Jun 19, 2010 at 8:48 AM, Christian Brunner <chb@muc.de> wrote:
+>>
+>> Are you going to send a final version which includes Simone's patch or
+>> should I apply them as two patches and just accept that rbd is broken
+>> after the first one? Or were there any other problems that need to be
+>> solved first?
 >
-> I would like to have two copies of a file at site 1 and a third copy
-> at site two.
-> And would you be able to continue running with one of the sites down?
+> I'll send a final version, when I've tested everything.
 >
-> Best regards
+> There is another problem with very large i/o requests. I suspect that
+> this can be triggered only
+> with qemu-io and not in kvm, but I'll try to get a proper solution it anyway.
 >
-> Roland Rabben
-We've tossed around a few ideas for this but there hasn't been any
-serious work on making it happen. Ceph very much assumes a fast
-network between all the OSDs and any work on supporting multi-site
-installations would require significant updates to the basic
-algorithms.
-That said, as Brian discusses it will work, but expect writes to
-proceed at about the speed of your datacenter interconnect. And
-there's not any sort of transparent mapping between a file being
-created in one datacenter and it having a master there.
 
-At present, the best options I know of for multi-site filesystems are
-something like XtreemFS or an AndrewFS derivative -- they won't
-necessarily satisfy your requirements but they are standard
-filesystems designed for multi-site support, unlike any others I'm
-aware of.
--Greg
+Have you made any progress with this issue? Just note that there were
+a few changes we introduced recently (a format change that allows
+renaming of rbd images, and some snapshots support), so everything
+will needed to be reposted once we figure out the aio issue.
+
+Thanks,
+Yehuda
