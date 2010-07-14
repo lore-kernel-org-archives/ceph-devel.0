@@ -1,43 +1,63 @@
-From: Christian Brunner <chb@muc.de>
-Subject: [PATCH] lower loglevel for successfull mon hunting
-Date: Wed, 14 Jul 2010 15:43:38 +0200
-Message-ID: <20100714134338.GA22287@bambus>
+From: Andre Noll <maan@systemlinux.org>
+Subject: Re: Linux 2.6.35-rc5
+Date: Wed, 14 Jul 2010 19:41:38 +0200
+Message-ID: <20100714174138.GC27457@skl-net.de>
+References: <AANLkTikro3L1Hy3BYmY-KE8-KviZIrWOCAb54FkF7eX-@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="+nBD6E3TurpgldQp"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:48367 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752681Ab0GNNnp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jul 2010 09:43:45 -0400
-Received: by bwz1 with SMTP id 1so931243bwz.19
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jul 2010 06:43:43 -0700 (PDT)
+Received: from systemlinux.org ([83.151.29.59]:36605 "EHLO m18s25.vlinux.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753902Ab0GNRmO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 14 Jul 2010 13:42:14 -0400
 Content-Disposition: inline
+In-Reply-To: <AANLkTikro3L1Hy3BYmY-KE8-KviZIrWOCAb54FkF7eX-@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-I'm receving log output on every rados_initialize (... found mon0). 
-Since this makes the qemu-iotests fail, I'd suggest to lower the loglevel.
 
-Christian
+--+nBD6E3TurpgldQp
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
----
- src/mon/MonClient.cc |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+Hi Sage,
 
-diff --git a/src/mon/MonClient.cc b/src/mon/MonClient.cc
-index b5192b2..b405ec6 100644
---- a/src/mon/MonClient.cc
-+++ b/src/mon/MonClient.cc
-@@ -429,7 +429,7 @@ bool MonClient::ms_handle_reset(Connection *con)
- void MonClient::_finish_hunting()
- {
-   if (hunting) {
--    dout(0) << "found mon" << cur_mon << dendl; 
-+    dout(5) << "found mon" << cur_mon << dendl; 
-     hunting = false;
-   }
- }
--- 
-1.6.5.2
+On Mon, Jul 12, 16:37, Linus Torvalds wrote:
+> Sage Weil (10):
+>       ceph: fix map handler error path
+>       ceph: fix message memory leak, uninitialized variable
+>       ceph: fix crush map update decoding
+>       ceph: handle splice_dentry/d_materialize_unique error in
+> readdir_prepopulate
+>       ceph: delay umount until all mds requests drop inode+dentry refs
+>       ceph: fix crush recursion
+>       ceph: fix crush CHOOSE_LEAF when type is already a leaf
+>       ceph: only release clean, unused caps with mds requests
+>       ceph: fix caps usage accounting for import (non-reserved) case
+>       ceph: fix crush device 'out' threshold to 1.0, not 0.1
 
+Are you planning to backport any of these to the 2.6.34 stable tree?
+
+Thanks
+Andre
+--=20
+The only person who always got his work done by Friday was Robinson Crusoe
+
+--+nBD6E3TurpgldQp
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
+
+iD8DBQFMPfbSWto1QDEAkw8RAi7GAJ9o1oHBjrhcqOTmqVUblatXMk+0+gCeKwou
+qWcQxvWt+2F5Zs6Y87EOi14=
+=gDTp
+-----END PGP SIGNATURE-----
+
+--+nBD6E3TurpgldQp--
