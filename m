@@ -1,48 +1,44 @@
-From: Ryan Grant <rgrant+ceph@metascopic.com>
-Subject: Re: CEPH distributed filesystem on two sites
-Date: Wed, 14 Jul 2010 11:15:37 -0700
-Message-ID: <AANLkTilK9ca7yhp_5oxWro_uAD045kdKZytVogNgxZ-3@mail.gmail.com>
-References: <AANLkTikDlZd0AUFzJ_VCnWYYsTnHlTmilok2o4_ErFvq@mail.gmail.com>
-	<AANLkTikj5e1JlAHK2lfoiVlXsnxCh0M5gAMBl6ZdxtEn@mail.gmail.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: Linux 2.6.35-rc5
+Date: Wed, 14 Jul 2010 11:46:23 -0700
+Message-ID: <AANLkTinnIr6Z9AhxvObLje3tmXonvVnrWQmsFUE8wFJT@mail.gmail.com>
+References: <AANLkTikro3L1Hy3BYmY-KE8-KviZIrWOCAb54FkF7eX-@mail.gmail.com>
+	<20100714174138.GC27457@skl-net.de>
+	<AANLkTilbabX3IoxHvC5ljAsNpKRg6YRhJ0GjyspIEh47@mail.gmail.com>
+	<20100714180551.GK16603@skl-net.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-px0-f174.google.com ([209.85.212.174]:62349 "EHLO
-	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757194Ab0GNSPu convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jul 2010 14:15:50 -0400
-Received: by pxi14 with SMTP id 14so85868pxi.19
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jul 2010 11:15:45 -0700 (PDT)
-In-Reply-To: <AANLkTikj5e1JlAHK2lfoiVlXsnxCh0M5gAMBl6ZdxtEn@mail.gmail.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:34428 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751786Ab0GNSqZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jul 2010 14:46:25 -0400
+Received: by vws5 with SMTP id 5so74481vws.19
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Jul 2010 11:46:24 -0700 (PDT)
+In-Reply-To: <20100714180551.GK16603@skl-net.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>, Roland Rabben <roland@jotta.no>, ceph-devel@vger.kernel.org
+To: Andre Noll <maan@systemlinux.org>
+Cc: Gregory Farnum <gregf@hq.newdream.net>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-> On Mon, Jul 12, 2010 at 11:59 AM, Roland Rabben <roland@jotta.no> wro=
-te:
->> Have there been any work to get CEPH working with two datacenters?
+On Wed, Jul 14, 2010 at 11:05 AM, Andre Noll <maan@systemlinux.org> wrote:
+> On Wed, Jul 14, 10:49, Gregory Farnum wrote:
+>> Check out the backports at
+>> http://git.kernel.org/?p=linux/kernel/git/sage/ceph-client-standalone.git;a=summary.
+>
+> Thanks. In order to compile e.g. the master branch of this repo,
+> one has to replace fs/ceph dir of the kernel tree by the checked-out
+> copy of the ceph-client-standalone repo. Is that correct?
 
-On Mon, Jul 12, 2010 at 12:39 PM, Gregory Farnum <gregf@hq.newdream.net=
-> wrote:
-> That said, as Brian discusses it will work, but expect writes to
-> proceed at about the speed of your datacenter interconnect.
+That's one option, although for older kernels you wouldn't have the
+fs/ceph directory and you'll also have to update the fs/Kconfig file.
+Another option for building the standalone is just running 'make
+KERNELDIR=<yourkerneldir>'  inside your ceph-client-standalone tree.
 
-Roland did not specify an access pattern, but from context he may
-be considering the offsite copy as a backup.
+>
+> Another question: How do I tell which kernel version is compatible with
+> any of the the various branches of the ceph-client-standalone repo?
 
-my understanding is that ceph is smart enough not to make
-writes block, when there are no other open readers of files - it
-returns as fast as local disk can acknowledge.
+The backport branches currently support 2.6.28 and up.
 
-what does ceph do if it can get a couple copies made quickly
-(but not the third remote copy)
-and all readers are in the local datacenter?
-
---=20
-=A0 Ryan Grant
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yehuda
