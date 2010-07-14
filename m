@@ -1,57 +1,48 @@
-From: Andre Noll <maan@systemlinux.org>
-Subject: Re: Linux 2.6.35-rc5
-Date: Wed, 14 Jul 2010 20:05:51 +0200
-Message-ID: <20100714180551.GK16603@skl-net.de>
-References: <AANLkTikro3L1Hy3BYmY-KE8-KviZIrWOCAb54FkF7eX-@mail.gmail.com> <20100714174138.GC27457@skl-net.de> <AANLkTilbabX3IoxHvC5ljAsNpKRg6YRhJ0GjyspIEh47@mail.gmail.com>
+From: Ryan Grant <rgrant+ceph@metascopic.com>
+Subject: Re: CEPH distributed filesystem on two sites
+Date: Wed, 14 Jul 2010 11:15:37 -0700
+Message-ID: <AANLkTilK9ca7yhp_5oxWro_uAD045kdKZytVogNgxZ-3@mail.gmail.com>
+References: <AANLkTikDlZd0AUFzJ_VCnWYYsTnHlTmilok2o4_ErFvq@mail.gmail.com>
+	<AANLkTikj5e1JlAHK2lfoiVlXsnxCh0M5gAMBl6ZdxtEn@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="x+RZeZVNR8VILNfK"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from systemlinux.org ([83.151.29.59]:50428 "EHLO m18s25.vlinux.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756982Ab0GNSGA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 14 Jul 2010 14:06:00 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTilbabX3IoxHvC5ljAsNpKRg6YRhJ0GjyspIEh47@mail.gmail.com>
+Received: from mail-px0-f174.google.com ([209.85.212.174]:62349 "EHLO
+	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757194Ab0GNSPu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jul 2010 14:15:50 -0400
+Received: by pxi14 with SMTP id 14so85868pxi.19
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Jul 2010 11:15:45 -0700 (PDT)
+In-Reply-To: <AANLkTikj5e1JlAHK2lfoiVlXsnxCh0M5gAMBl6ZdxtEn@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregf@hq.newdream.net>, Roland Rabben <roland@jotta.no>, ceph-devel@vger.kernel.org
 
+> On Mon, Jul 12, 2010 at 11:59 AM, Roland Rabben <roland@jotta.no> wro=
+te:
+>> Have there been any work to get CEPH working with two datacenters?
 
---x+RZeZVNR8VILNfK
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Mon, Jul 12, 2010 at 12:39 PM, Gregory Farnum <gregf@hq.newdream.net=
+> wrote:
+> That said, as Brian discusses it will work, but expect writes to
+> proceed at about the speed of your datacenter interconnect.
 
-On Wed, Jul 14, 10:49, Gregory Farnum wrote:
-> Check out the backports at
-> http://git.kernel.org/?p=3Dlinux/kernel/git/sage/ceph-client-standalone.g=
-it;a=3Dsummary.
+Roland did not specify an access pattern, but from context he may
+be considering the offsite copy as a backup.
 
-Thanks. In order to compile e.g. the master branch of this repo,
-one has to replace fs/ceph dir of the kernel tree by the checked-out
-copy of the ceph-client-standalone repo. Is that correct?
+my understanding is that ceph is smart enough not to make
+writes block, when there are no other open readers of files - it
+returns as fast as local disk can acknowledge.
 
-Another question: How do I tell which kernel version is compatible with
-any of the the various branches of the ceph-client-standalone repo?
+what does ceph do if it can get a couple copies made quickly
+(but not the third remote copy)
+and all readers are in the local datacenter?
 
-Thanks again
-Andre
 --=20
-The only person who always got his work done by Friday was Robinson Crusoe
-
---x+RZeZVNR8VILNfK
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.1 (GNU/Linux)
-
-iD8DBQFMPfx/Wto1QDEAkw8RAsEEAJ0VvEYrB7KO7RIfO5KoDHjMDcE8ZACbBVjC
-MRT4VlaDyUWpdIQ2l8vBU5U=
-=hPEC
------END PGP SIGNATURE-----
-
---x+RZeZVNR8VILNfK--
+=A0 Ryan Grant
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
