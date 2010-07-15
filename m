@@ -1,75 +1,52 @@
 From: Sage Weil <sage@newdream.net>
 Subject: Re: CEPH distributed filesystem on two sites
-Date: Thu, 15 Jul 2010 09:10:05 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1007150905010.26304@cobra.newdream.net>
+Date: Thu, 15 Jul 2010 09:20:46 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1007150917290.26304@cobra.newdream.net>
 References: <AANLkTikDlZd0AUFzJ_VCnWYYsTnHlTmilok2o4_ErFvq@mail.gmail.com>
- <201007121409.00765.iggy@theiggy.com>
+ <AANLkTikj5e1JlAHK2lfoiVlXsnxCh0M5gAMBl6ZdxtEn@mail.gmail.com>
+ <AANLkTilK9ca7yhp_5oxWro_uAD045kdKZytVogNgxZ-3@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43995 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35692 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933646Ab0GOQIH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jul 2010 12:08:07 -0400
-In-Reply-To: <201007121409.00765.iggy@theiggy.com>
+	with ESMTP id S933658Ab0GOQSr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Jul 2010 12:18:47 -0400
+In-Reply-To: <AANLkTilK9ca7yhp_5oxWro_uAD045kdKZytVogNgxZ-3@mail.gmail.com>
+Content-ID: <Pine.LNX.4.64.1007150917401.26304@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brian Jackson <iggy@theiggy.com>
-Cc: Roland Rabben <roland@jotta.no>, ceph-devel@vger.kernel.org
+To: Ryan Grant <rgrant+ceph@metascopic.com>
+Cc: Gregory Farnum <gregf@hq.newdream.net>, Roland Rabben <roland@jotta.no>, ceph-devel@vger.kernel.org
 
-On Mon, 12 Jul 2010, Brian Jackson wrote:
-> On Monday, July 12, 2010 01:59:38 pm Roland Rabben wrote:
-> > Have there been any work to get CEPH working with two datacenters?
+On Wed, 14 Jul 2010, Ryan Grant wrote:
+> > On Mon, Jul 12, 2010 at 11:59 AM, Roland Rabben <roland@jotta.no> wrote:
+> >> Have there been any work to get CEPH working with two datacenters?
 > 
+> On Mon, Jul 12, 2010 at 12:39 PM, Gregory Farnum <gregf@hq.newdream.net> wrote:
+> > That said, as Brian discusses it will work, but expect writes to
+> > proceed at about the speed of your datacenter interconnect.
 > 
-> We've talked about it on irc in the past. It's not really what ceph was 
-> designed for, but given sufficient bandwidth between the DCs it should work.
+> Roland did not specify an access pattern, but from context he may
+> be considering the offsite copy as a backup.
 > 
-> In your particular situation if 1 DC was disconnected but not down, you could 
-> have an issue if things changed in both locations. You would also have an 
-> issue if connectivity was lost because ceph would try to replicate things up 
-> to 3x at both sites.
+> my understanding is that ceph is smart enough not to make
+> writes block, when there are no other open readers of files - it
+> returns as fast as local disk can acknowledge.
 
-Well, sort of.  If have a network partition, only one partition will be 
-available (whichever can reach the majority of the monitors).  No updates 
-will be applied to the disconnected DC.  Ceph favors consistency over 
-availability in the presence of a partition.
+Well, if you have a single writer and no readers, writes go into the 
+buffer cache and don't flush to the osds until you call fsync() or the 
+linux VM pushes things out due to memory pressure, timeout, etc.  When 
+data _is_ written to the OSDs, it has to hit all replicas before the write
+"succeeds".
 
-This lends itself to a primary + data backup DC type of situation where 
-the majority (or all) monitors are in the primary DC, but there is no 
-failover.  Actual failover would need a one or more monitors is at a third 
-location.  But this is not a case that is designed or optimized for, so 
-improvements could definitely be made.
+> what does ceph do if it can get a couple copies made quickly
+> (but not the third remote copy)
+> and all readers are in the local datacenter?
+
+Currently it waits for all copies.  It would certianly be possible to 
+define "success" from the client perspective as N/M copies written, 
+though.  Even without changing/redefining reads (ala Dynamo), since reads 
+and writes are serialized by the primary replica.
 
 sage
-
-> 
-> > 
-> > I would like to have two copies of a file at site 1 and a third copy
-> > at site two.
-> 
-> 
-> That should be achievable.
-> 
-> 
-> > And would you be able to continue running with one of the sites down?
-> 
-> 
-> Well, taking into consideration the things I already mentioned, you should 
-> continue to have access to the filesystem.
-> 
-> 
-> > 
-> > Best regards
-> > 
-> > Roland Rabben
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
