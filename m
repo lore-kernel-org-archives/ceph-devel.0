@@ -1,50 +1,50 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] ceph fixes for 2.6.35-rc6
-Date: Tue, 20 Jul 2010 16:22:50 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1007151246150.655@cobra.newdream.net>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: [PATCH] qemu-kvm/rbd: add queueing delay based on queuesize
+	(using use qemu_mutex_* and qemu_cond_*)
+Date: Wed, 21 Jul 2010 21:18:36 +0200
+Message-ID: <AANLkTikUykm7LOtlu1BWQwWr28w548tLI-gylJcJs8Mq@mail.gmail.com>
+References: <20100714133545.GA21617@bambus>
+	<AANLkTimuA4w0o_jyDJPslhvl4S0wpqTq-cChL2fBs6GF@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51570 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933098Ab0GTXUj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jul 2010 19:20:39 -0400
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:58057 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756666Ab0GUTSi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jul 2010 15:18:38 -0400
+Received: by wwj40 with SMTP id 40so2734258wwj.1
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Jul 2010 12:18:37 -0700 (PDT)
+In-Reply-To: <AANLkTimuA4w0o_jyDJPslhvl4S0wpqTq-cChL2fBs6GF@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Kevin Wolf <kwolf@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Linus,
+2010/7/20 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
+>> + =A0 =A0 =A0 =A0while =A0(s->queuesize > MAX_QUEUE_SIZE) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0qemu_mutex_lock(s->queue_mutex);
+>> + =A0 =A0 =A0 =A0 =A0 =A0qemu_cond_wait(s->queue_threshold, s->queue=
+_mutex);
+>> + =A0 =A0 =A0 =A0 =A0 =A0qemu_mutex_unlock(s->queue_mutex);
+>> + =A0 =A0 =A0 =A0}
+>
+> Actually we shouldn't be waiting inside the aio handler. We should
+> probably be feeding the request into some wait queue and have a
+> separate thread that drains all those requests out. Though this
+> wouldn't help us in throttling the client memory, it's probably a mor=
+e
+> correct way to handle the problem.
 
-Please pull the following Ceph fixes for 2.6.35-rc6 from
+I agree with you, however I don't think that this is worth the effort.
+I've never seen this occur when running a virtual machine, only when
+running qemu-io.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+@Kevin: Did you follow this thread? What is your opinion?
 
-There are two memory leak fixes, a fix for an occasional crash when OSDs 
-restart, mds reconnect fixes, and fixes for IPv6 addresses.  One of those 
-(fix printing of ipv6 addrs') was overrunning a buffer and is a must-fix.  
-The other two just make IPv6 addresses work properly. The recovering MDS 
-patches fix a couple bugs that turn up when replaying uncommitted requests 
-against a recovering MDS.
-
-Thanks!
-sage
-
-Dan Carpenter (1):
-      ceph: add kfree() to error path
-
-Sage Weil (7):
-      ceph: fix message revocation
-      ceph: fix leak of mon authorizer
-      ceph: fix printing of ipv6 addrs
-      ceph: fix parsing of ipv6 addresses
-      ceph: fix creation of ipv6 sockets
-      ceph: reuse request message when replaying against recovering mds
-      ceph: do not include cap/dentry releases in replayed messages
-
- fs/ceph/auth_x.c     |    3 ++
- fs/ceph/mds_client.c |   35 +++++++++++++++++++++---
- fs/ceph/mds_client.h |    1 +
- fs/ceph/messenger.c  |   71 ++++++++++++++++++++++++++------------------------
- fs/ceph/osdmap.c     |    1 +
- 5 files changed, 72 insertions(+), 39 deletions(-)
+Christian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
