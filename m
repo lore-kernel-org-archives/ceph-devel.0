@@ -1,27 +1,27 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+From: Hugo Slabbert <hugo.slabbert@slabnet.com>
 Subject: Re: ceph, shadow_copy, cifs, and "Previous Versions"
-Date: Thu, 22 Jul 2010 10:37:42 -0700
-Message-ID: <AANLkTingctUjysTZZ6b0ItbqlELT6PxAaxqttq5iRkxG@mail.gmail.com>
+Date: Thu, 22 Jul 2010 10:39:01 -0700
+Message-ID: <AANLkTin8GQG3jlmM4jIMWHx86ni6TY4h6JvU5z69TnbP@mail.gmail.com>
 References: <AANLkTilFlPF4vBYErEWtFaoR7IfXOh6ts6bY-VKvZmRD@mail.gmail.com>
 	<AANLkTinENbMvvBImMJjEhZNOWSUn0ClutWZfZTxhknLY@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:40324 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754768Ab0GVRhn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Jul 2010 13:37:43 -0400
-Received: by gxk23 with SMTP id 23so4749805gxk.19
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Jul 2010 10:37:42 -0700 (PDT)
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:39136 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750817Ab0GVRjR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Jul 2010 13:39:17 -0400
+Received: by vws3 with SMTP id 3so400641vws.19
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Jul 2010 10:39:16 -0700 (PDT)
 In-Reply-To: <AANLkTinENbMvvBImMJjEhZNOWSUn0ClutWZfZTxhknLY@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Hugo Slabbert <hugo.slabbert@slabnet.com>
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
 On Thu, Jul 22, 2010 at 10:34 AM, Yehuda Sadeh Weinraub
-<yehudasa@gmail.com> wrote:
+<yehudasa@gmail.com> wrote:=EF=9C=AB
 > On Wed, Jul 21, 2010 at 11:19 PM, Hugo Slabbert
 > <hugo.slabbert@slabnet.com> wrote:
 >> Hi all,
@@ -56,19 +56,29 @@ te on this?
 > it is possible to create a snapshot with the same name on different
 > directories within the file hierarchy). E.g.,
 >
-> =A0# mkdir a; mkdir a/b
-> =A0# mkdir a/.snap
-> =A0# ls -l a/b/.snap
-> =A0drwxr-xr-x 1 root root 0 Jul 22 17:50 1
-> =A0drwxr-xr-x 1 root root 0 Jul 22 17:50 _1_1099511627776
+> =C2=A0# mkdir a; mkdir a/b
+> =C2=A0# mkdir a/.snap
+> =C2=A0# ls -l a/b/.snap
+> =C2=A0drwxr-xr-x 1 root root 0 Jul 22 17:50 1
+> =C2=A0drwxr-xr-x 1 root root 0 Jul 22 17:50 _1_1099511627776
+>
+>
+> We'd love to see cifs integration, and it'd be great getting this
+> specific feature working with ceph. Please let us know if there are
+> other issues that you hit.
+>
+> Yehuda
+>
 
-This example is erroneous, should be:
- # mkdir a; mkdir a/b
- # mkdir a/.snap/1
- # mkdir a/b/.snap/1
- # ls -l a/b/.snap
- drwxr-xr-x 1 root root 0 Jul 22 17:50 1
- drwxr-xr-x 1 root root 0 Jul 22 17:50 _1_1099511627776
+Thanks Yehuda,
+
+I have a few more things to try out on this. I may have to shelf it
+for a bit, but I'll post back if I strike any success or weird
+challenges.
+
+Cheers,
+
+Hugo Slabbert
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
