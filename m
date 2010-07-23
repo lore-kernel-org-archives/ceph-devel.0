@@ -1,15 +1,17 @@
-From: Anton <anton.vazir@gmail.com>
+From: "Anton V.G." <anton@eastera.tj>
 Subject: Re: "umount" of ceph filesystem that has become unavailable hangs forever
-Date: Fri, 23 Jul 2010 16:43:37 +0500
-Message-ID: <201007231643.37780.anton.vazir@gmail.com>
+Date: Fri, 23 Jul 2010 16:42:21 +0500
+Message-ID: <201007231642.21239.anton@eastera.tj>
+References: <AANLkTi=EgtWA6+jGODrsVreODwFgDrKkfWcrnL15_K32@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: Text/Plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.eastera.tj ([62.122.137.85]:44129 "EHLO mail.eastera.tj"
+Received: from mail.eastera.tj ([62.122.137.85]:44128 "EHLO mail.eastera.tj"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758730Ab0GWLvq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	id S1758752Ab0GWLvq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
 	Fri, 23 Jul 2010 07:51:46 -0400
+In-Reply-To: <AANLkTi=EgtWA6+jGODrsVreODwFgDrKkfWcrnL15_K32@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: =?iso-8859-1?q?S=E9bastien_Paolacci?= <sebastien.paolacci@gmail.com>
