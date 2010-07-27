@@ -1,86 +1,53 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: 4 new compiler warnings (ceph.git/unstable)
-Date: Tue, 27 Jul 2010 19:53:27 +0000 (UTC)
-Message-ID: <i2ndfm$ck$1@dough.gmane.org>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: mds crash on snaptest-2
+Date: Tue, 27 Jul 2010 12:54:57 -0700
+Message-ID: <AANLkTinM5e1024M+rg9GBym-MsdQ0qmh++Ywa-pcWOZ-@mail.gmail.com>
+References: <i21p5k$fma$2@dough.gmane.org>
+	<AANLkTinxy56sN1K39-1z0AtcYWBI0ndPZQnlZzgaG0xx@mail.gmail.com>
+	<i2m8g9$53k$2@dough.gmane.org>
+	<AANLkTimrW=DquX_Pyi8M7wb_GWV1DJr6w28LTOC9RkfD@mail.gmail.com>
+	<4C4F3876.3030306@chaschperli.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:58316 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751195Ab0G0Txq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 27 Jul 2010 15:53:46 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OdqDe-0004oR-WE
-	for ceph-devel@vger.kernel.org; Tue, 27 Jul 2010 21:53:43 +0200
-Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Jul 2010 21:53:42 +0200
-Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Jul 2010 21:53:42 +0200
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:40112 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751825Ab0G0Ty7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jul 2010 15:54:59 -0400
+Received: by fxm14 with SMTP id 14so878482fxm.19
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Jul 2010 12:54:58 -0700 (PDT)
+In-Reply-To: <4C4F3876.3030306@chaschperli.ch>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Thomas Mueller <thomas@chaschperli.ch>
+Cc: ceph-devel@vger.kernel.org
 
-hi
+On Tue, Jul 27, 2010 at 12:50 PM, Thomas Mueller <thomas@chaschperli.ch=
+> wrote:
+> i'm =A0always starting just one daemon. my test script sets these var=
+s before
+> calling "vstart.sh":
+>
+> export CEPH_NUM_MON=3D1
+> export CEPH_NUM_OSD=3D1
+> export CEPH_NUM_MDS=3D1
+>
+> last known good rev was =A0ae82dd5a5c964bb310a5512d10d1e062cbb0c1a5 o=
+n July 8
+> - with this rev the test was working fine.
+>
+> i've also tried to compile with "-O0" to run it with gdb (not that i'=
+m a gdb
+> expert..) - but the binaries failed to start (ok back then it was bit=
+ late
+> ...)
+Huh. Can you double check that you have the latest code? Specifically,
+it needs to include commit e2b1a4ee119a68b403582ae3bc15b54e9458b9b5.
+I've run your test a number of times under cfuse and haven't gotten
+any single-MDS crashes or hangs with that.
 
-there are new compiler warnings:
-
-g++ -DHAVE_CONFIG_H -I.    -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=3D64 -D=
-_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT Server.o -MD -MP -MF .de=
-ps/Server.Tpo -c -o Server.o `test -f 'mds/Server.cc' || echo './'`mds/=
-Server.cc
-mv -f .deps/MDS.Tpo .deps/MDS.Po
-g++ -DHAVE_CONFIG_H -I.    -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=3D64 -D=
-_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT MDCache.o -MD -MP -MF .d=
-eps/MDCache.Tpo -c -o MDCache.o `test -f 'mds/MDCache.cc' || echo './'`=
-mds/MDCache.cc
-mv -f .deps/Server.Tpo .deps/Server.Po
-g++ -DHAVE_CONFIG_H -I.    -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=3D64 -D=
-_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT Locker.o -MD -MP -MF .de=
-ps/Locker.Tpo -c -o Locker.o `test -f 'mds/Locker.cc' || echo './'`mds/=
-Locker.cc
-=2E/include/encoding.h: In member function =E2=80=98void Locker::issue_=
-client_lease(CDentry*, client_t, ceph::bufferlist&, utime_t, Session*)=E2=
-=80=99:
- ./include/encoding.h:80: warning: =E2=80=98e.LeaseStat::duration_ms=E2=
-=80=99 may be used uninitialized in this function
-
-<snip>
-
-mds/Locker.cc:2251: note: =E2=80=98e.LeaseStat::duration_ms=E2=80=99 wa=
-s declared here
-
-<snip>
-
-
-=2E/include/encoding.h:80: warning: =E2=80=98e.LeaseStat::seq=E2=80=99 =
-may be used uninitialized in this function
-
-<snip>
-
-mds/Locker.cc:2251: note: =E2=80=98e.LeaseStat::seq=E2=80=99 was declar=
-ed here
- mv -f .deps/Locker.Tpo .deps/Locker.Po
-g++ -DHAVE_CONFIG_H -I.    -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=3D64 -D=
-_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT Migrator.o -MD -MP -MF .=
-deps/Migrator.Tpo -c -o Migrator.o `test -f 'mds/Migrator.cc' || echo '=
-=2E/'`mds/Migrator.cc
-mv -f .deps/MDCache.Tpo .deps/MDCache.Po
-g++ -DHAVE_CONFIG_H -I.    -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=3D64 -D=
-_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT MDBalancer.o -MD -MP -MF=
- .deps/MDBalancer.Tpo -c -o MDBalancer.o `test -f 'mds/MDBalancer.cc' |=
-| echo './'`mds/MDBalancer.cc
-mv -f .deps/Migrator.Tpo .deps/Migrator.Po
-g++ -DHAVE_CONFIG_H -I.    -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=3D64 -D=
-_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT CDentry.o -MD -MP -MF .d=
-eps/CDentry.Tpo -c -o CDentry.o `test -f
-
-- Thomas
-
+Are you running it under the kclient or cfuse?
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
