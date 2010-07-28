@@ -1,57 +1,53 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] ceph fixes for 2.6.35
-Date: Wed, 28 Jul 2010 10:15:55 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1007281006010.4611@cobra.newdream.net>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: Re: [PATCH 1/2] add dkms support
+Date: Wed, 28 Jul 2010 17:46:28 +0000 (UTC)
+Message-ID: <i2pqdk$8l1$1@dough.gmane.org>
+References: <Pine.LNX.4.64.1007280957090.4541@cobra.newdream.net>
+	<Pine.LNX.4.64.1007280959400.4541@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55199 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751707Ab0G1RNZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jul 2010 13:13:25 -0400
+Received: from lo.gmane.org ([80.91.229.12]:41896 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755960Ab0G1Rqk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 28 Jul 2010 13:46:40 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OeAiD-0005GP-D3
+	for ceph-devel@vger.kernel.org; Wed, 28 Jul 2010 19:46:37 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jul 2010 19:46:37 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jul 2010 19:46:37 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Linus,
+Am Wed, 28 Jul 2010 10:02:19 -0700 schrieb Sage Weil:
 
-Please pull this final set of ceph bug fixes for 2.6.35 from
+> BTW, the Debian kernel guys would rather include the ceph module in the
+> main kernel package than include a dkms package directly in Debian. 
+> That means maintaining a backport branch specifically for 2.6.32 (the
+> squeeze kernel).
+> 
+> (We should still have this dkms package available on the ceph site, of
+> course!)
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+would be cool if they included it in squeeze kernel. but i'm bit 
+surprised. squeeze freeze is expected late august (http://
+lists.debian.org/debian-devel-announce/2010/06/msg00002.html) and debian 
+folks normaly don't bump versions and only do bugfixing after a release. 
 
-There is a trivial Kconfig fix, a wake_up patch that fixes hanging 
-concurrent 'sync' instances (among other things), a couple memory leaks, 
-and some dentry lease fixes that correct dentry release and caching 
-behavior in the snapshotted portions of the namespace.
+so I would expect that squeeze has to include a stable ceph.ko and stable 
+server side too. And as the freeze seems to be approaching fast this 
+would be a tough schedule.
 
-The rate of bug fixes continues to be unrelated to the upstream release 
-cycle.  I'm hoping things will settle down a bit for 2.6.36!
+what leads me to my other question: when will ceph be considered 
+"stable"? :)
 
-Thanks!
-sage
+- Thomas 
 
-
-Robert P. J. Day (1):
-      ceph: Correct obvious typo of Kconfig variable "CRYPTO_AES"
-
-Sage Weil (5):
-      ceph: avoid dcache readdir for snapdir
-      ceph: fix d_release dop for snapdir, snapped dentries
-      ceph: fix pg_mapping leak on pg_temp updates
-      ceph: fix leak of dentry in ceph_init_dentry() error path
-      ceph: fix dentry lease release
-
-Yehuda Sadeh (1):
-      ceph: use complete_all and wake_up_all
-
- fs/ceph/Kconfig      |    2 +-
- fs/ceph/caps.c       |   15 ++++++++-------
- fs/ceph/dir.c        |   13 ++++++++++---
- fs/ceph/file.c       |    2 +-
- fs/ceph/inode.c      |    6 ++++--
- fs/ceph/mds_client.c |   10 +++++-----
- fs/ceph/mon_client.c |    6 +++---
- fs/ceph/osd_client.c |    6 +++---
- fs/ceph/osdmap.c     |   26 +++++++++++++++-----------
- 9 files changed, 50 insertions(+), 36 deletions(-)
