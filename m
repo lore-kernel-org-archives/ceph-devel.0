@@ -1,165 +1,113 @@
-From: y@vger.kernel.org
-Subject: [PATCH 1/2] add dkms support
-Date: Wed, 28 Jul 2010 14:10:35 +0200
-Message-ID: <30772.004745859$1280319565@news.gmane.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: client released lease on dn which does not exist
+Date: Wed, 28 Jul 2010 09:37:34 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1007280936140.4541@cobra.newdream.net>
+References: <AANLkTikmuytto8kwi4fNN1xUtNkAR_cIDPhd65xrLwkZ@mail.gmail.com>
+ <AANLkTimMK22DcnrFO7LwSBqQbGkEDKdSzeOF3WSx4Hzj@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-326236342-1280335054=:4541"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.muellerit.ch ([92.51.129.153]:45867 "EHLO
-	mail.muellerit.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754851Ab0G1MTQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jul 2010 08:19:16 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:34411 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754493Ab0G1QfE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jul 2010 12:35:04 -0400
+In-Reply-To: <AANLkTimMK22DcnrFO7LwSBqQbGkEDKdSzeOF3WSx4Hzj@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Thomas Mueller <thomas@chaschperli.ch>
+To: =?ISO-8859-1?Q?S=E9bastien_Paolacci?= <sebastien.paolacci@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-From: Thomas Mueller <thomas@chaschperli.ch>
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-hi
+--557981400-326236342-1280335054=:4541
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-saw that now the cpeh-client-standalone contains a version - this is the dkms patch updated. 
+On Wed, 28 Jul 2010, S=E9bastien Paolacci wrote:
+> FYI, the same test pass without any warning now (unstable from yesterday)=
+=2E
 
-only dkms part - debian package parts follow some time later.
+Yeah, sorry I missed this email.  I fixed a few different lease related=20
+problems on Monday.  There may still be (rare) cases where that warning=20
+comes up which need some additional scrutity, so if you do see it again,=20
+please let me know.
 
-- Thomas
+Thanks!
+sage
 
----
- Makefile                   |    3 ++-
- dkms.conf                  |    7 +++++++
- dkms/add-to-dkms-and-build |   15 +++++++++++++++
- dkms/postremove.sh         |   34 ++++++++++++++++++++++++++++++++++
- dkms/prebuild.sh           |   32 ++++++++++++++++++++++++++++++++
- 5 files changed, 90 insertions(+), 1 deletions(-)
- create mode 100644 dkms.conf
- create mode 100644 dkms/add-to-dkms-and-build
- create mode 100644 dkms/postremove.sh
- create mode 100644 dkms/prebuild.sh
 
-diff --git a/Makefile b/Makefile
-index 6a660e6..4b8f6e7 100644
---- a/Makefile
-+++ b/Makefile
-@@ -22,7 +22,8 @@ else
- #Otherwise we were called directly from the command
- # line; invoke the kernel build system.
- 
--KERNELDIR ?= /lib/modules/$(shell uname -r)/build
-+KERNELRELEASE ?= $(shell uname -r)
-+KERNELDIR ?= /lib/modules/$(KERNELRELEASE)/build
- PWD := $(shell pwd)
- 
- default: all
-diff --git a/dkms.conf b/dkms.conf
-new file mode 100644
-index 0000000..bbf607c
---- /dev/null
-+++ b/dkms.conf
-@@ -0,0 +1,7 @@
-+PACKAGE_NAME="ceph"
-+PACKAGE_VERSION="1.0"
-+DEST_MODULE_LOCATION[0]="/updates/ceph"
-+BUILT_MODULE_NAME[0]="ceph"
-+AUTOINSTALL="yes"
-+PRE_BUILD="dkms/prebuild.sh ${kernelver}"
-+POST_REMOVE="dkms/postremove.sh ${kernelver}"
-diff --git a/dkms/add-to-dkms-and-build b/dkms/add-to-dkms-and-build
-new file mode 100644
-index 0000000..ffea573
---- /dev/null
-+++ b/dkms/add-to-dkms-and-build
-@@ -0,0 +1,15 @@
-+#!/bin/sh
-+
-+if ! [ -f ./upstream_version.h ]
-+then
-+	echo "Failure: ./upstream_version.h not found. Did you call this script from ceph-client root?"
-+fi
-+
-+CEPH_VERSION=$(grep CEPH_VERSION upstream_version.h | egrep -o "[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+[^\"]+")
-+
-+mkdir /usr/src/ceph-${CEPH_VERSION} || exit 1
-+cp -r ./ /usr/src/ceph-${CEPH_VERSION}
-+
-+dkms add -m ceph -v ${CEPH_VERSION} &&
-+dkms build -m ceph -v ${CEPH_VERSION} &&
-+dkms install -m ceph -v ${CEPH_VERSION}
-diff --git a/dkms/postremove.sh b/dkms/postremove.sh
-new file mode 100644
-index 0000000..8693fcf
---- /dev/null
-+++ b/dkms/postremove.sh
-@@ -0,0 +1,34 @@
-+#!/bin/sh
-+
-+
-+if [ "$1" = "" ]
-+then
-+        echo "Usage: $0 <kernelver>"
-+        exit
-+fi
-+
-+MODROOT="/lib/modules/$1"
-+
-+if ! [ -f /etc/debian_version ]
-+then
-+        echo "Info: runs only on Debian and derivates"
-+        exit
-+fi
-+
-+
-+
-+if [ -d "$MODROOT" ]
-+then
-+        if [ -f "$MODROOT/kernel/fs/ceph/ceph.ko.dpkg-divert-by-ceph-dkms" ]
-+        then
-+                if  ! [ -f "$MODROOT/kernel/fs/ceph/ceph.ko" ]
-+                then
-+                        dpkg-divert --rename --remove "$MODROOT/kernel/fs/ceph/ceph.ko"
-+                else
-+                        echo "Warning: $MODROOT/kernel/fs/ceph/ceph.ko  and diverted $MODROOT/kernel/fs/ceph/ceph.ko.dpkg-divert-by-ceph-dkms exist both!"
-+                fi
-+        fi
-+else
-+        echo "Warning: $MODROOT is not a directory"
-+fi
-+
-diff --git a/dkms/prebuild.sh b/dkms/prebuild.sh
-new file mode 100644
-index 0000000..1aee069
---- /dev/null
-+++ b/dkms/prebuild.sh
-@@ -0,0 +1,32 @@
-+#!/bin/sh
-+
-+
-+if [ "$1" = "" ]
-+then
-+	echo "Usage: $0 <kernelver>"
-+	exit
-+fi
-+
-+MODROOT="/lib/modules/$1"
-+
-+if ! [ -f /etc/debian_version ]
-+then
-+	echo "Info: runs only on Debian and derivates"
-+	exit
-+fi
-+
-+
-+if [ -d "$MODROOT" ]
-+then
-+	if [ -f "$MODROOT/kernel/fs/ceph/ceph.ko" ] 
-+	then
-+		if  ! [ -f "$MODROOT/kernel/fs/ceph/ceph.ko.dpkg-divert-by-ceph-dkms" ]
-+		then
-+			dpkg-divert --rename --package ceph-dkms --divert "$MODROOT/kernel/fs/ceph/ceph.ko.dpkg-divert-by-ceph-dkms" --add "$MODROOT/kernel/fs/ceph/ceph.ko"
-+		else
-+			echo "Warning: $MODROOT/kernel/fs/ceph/ceph.ko  and diverted $MODROOT/kernel/fs/ceph/ceph.ko.dpkg-divert-by-ceph-dkms exist both!"
-+		fi
-+	fi
-+else 
-+	echo "Warning: $MODROOT is not a directory"
-+fi
--- 
-1.7.1
-
+ >=20
+> Sebastien
+>=20
+> 2010/7/17 S=E9bastien Paolacci <sebastien.paolacci@gmail.com>:
+> > Hello all,
+> >
+> > I'm getting some warnings that I've not been able to find informations
+> > for when running dbench on a newly setup box (nettop, atom dual core
+> > 2.5" very low-end hdd). Seems however to be easily reproducible
+> > (unstable server and kernel client from yesterday) :
+> >
+> > srv:# mkcephfs -c ceph.conf --allhosts --mkbtrfs
+> > srv:# for srv in cosd cmon cmds; do $srv -c ceph.conf -i 0; done
+> >
+> > client:# mount -t ceph srv:/ /mnt/
+> > client:# dbench -D /mnt/ 1
+> >
+> > Few seconds later:
+> > srv:# ceph -w
+> > 10.07.17_18:40:12.797372 =A0 =A0pg v7: 264 pgs: 264 active+clean+degrad=
+ed;
+> > 69 KB data, 508 KB used, 450 GB / 450 GB avail; 10/20 degraded
+> > (50.000%)
+> > 10.07.17_18:40:12.800218 =A0 mds e4: 1/1/1 up {0=3Dup:active}
+> > 10.07.17_18:40:12.800303 =A0 osd e3: 1 osds: 1 up, 1 in
+> > 10.07.17_18:40:12.800448 =A0 log 10.07.17_18:39:56.072957 mon0
+> > 192.168.0.3:6789/0 4 : [INF] mds0 192.168.0.3:6802/6754 up:active
+> > 10.07.17_18:40:12.800598 =A0 mon e1: 1 mons at 192.168.0.3:6789/0
+> > 10.07.17_18:40:14.234588 =A0 =A0pg v8: 264 pgs: 264 active+clean+degrad=
+ed;
+> > 1166 KB data, 1280 KB used, 450 GB / 450 GB avail; 28/56 degraded
+> > (50.000%)
+> > 10.07.17_18:40:18.159014 =A0 log 10.07.17_18:40:12.067141 mds0
+> > 192.168.0.3:6802/6754 1 : [WRN] client4099 released lease on dn
+> > 1000000000c/RESULTS3.PRN which dne
+> > 10.07.17_18:40:19.199284 =A0 =A0pg v9: 264 pgs: 264 active+clean+degrad=
+ed;
+> > 2103 KB data, 2536 KB used, 450 GB / 450 GB avail; 33/66 degraded
+> > (50.000%)
+> >
+> > Does anyone know how "severe" the warning is and what could I
+> > undertake to get rid of it?
+> >
+> > Thanks,
+> > Sebastien
+> >
+> > ps: I can (separately) provide the 90MB mds log file should it be neede=
+d.
+> >
+> > [global]
+> > [mon]
+> > =A0 =A0 =A0 =A0mon data =3D /data/mon$id
+> > [mon0]
+> > =A0 =A0 =A0 =A0host =3D srv
+> > =A0 =A0 =A0 =A0mon addr =3D 192.168.0.3:6789
+> > [mds]
+> > =A0 =A0 =A0 =A0debug ms =3D 1
+> > =A0 =A0 =A0 =A0debug mds =3D 20
+> > [mds0]
+> > =A0 =A0 =A0 =A0host =3D srv
+> > [osd]
+> > =A0 =A0 =A0 =A0osd data =3D /data/osd$id
+> > =A0 =A0 =A0 =A0osd journal =3D /dev/sda3
+> > [osd0]
+> > =A0 =A0 =A0 =A0host =3D srv
+> > =A0 =A0 =A0 =A0btrfs devs =3D /dev/sda4
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-326236342-1280335054=:4541--
