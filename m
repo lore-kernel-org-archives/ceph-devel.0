@@ -1,44 +1,45 @@
 From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: thounds of files in monX/logm dir
-Date: Thu, 29 Jul 2010 15:30:46 +0000 (UTC)
-Message-ID: <i2s6r5$33r$2@dough.gmane.org>
+Subject: [PATCH] ceph.spec.in: create /var/log/ceph/stat dir
+Date: Thu, 29 Jul 2010 15:52:05 +0000 (UTC)
+Message-ID: <i2s835$33r$3@dough.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:60702 "EHLO lo.gmane.org"
+Received: from lo.gmane.org ([80.91.229.12]:59407 "EHLO lo.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757352Ab0G2PbA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 29 Jul 2010 11:31:00 -0400
+	id S1757875Ab0G2PwS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 29 Jul 2010 11:52:18 -0400
 Received: from list by lo.gmane.org with local (Exim 4.69)
 	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OeV4T-0004uU-3K
-	for ceph-devel@vger.kernel.org; Thu, 29 Jul 2010 17:30:57 +0200
+	id 1OeVP5-0001f7-HX
+	for ceph-devel@vger.kernel.org; Thu, 29 Jul 2010 17:52:15 +0200
 Received: from cust.dyn.95-152-98-129.swisscomdata.ch ([95.152.98.129])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 17:30:57 +0200
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 17:52:15 +0200
 Received: from thomas by cust.dyn.95-152-98-129.swisscomdata.ch with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 17:30:57 +0200
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 17:52:15 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-hi
+the logrotate config expects a var/log/ceph/stat dir - create it.
 
-had running a 4 node cluster with 3mon,3mds,4osd for a while with no one 
-accessing it (actually nobody mounted it, i just forgot to stop the 
-services). this was about ceph.git/unstable a month ago.
 
-today i've upgraded to the latest ceph.git/unstable . to start over I 
-deleted the ceph data completly. 
-
-after 3mins of deleting i got curious.
-
-every of the 3 mon nodes got about 530'000 files in the monX/logm dir.
-
-is this expected?
-
-- Thomas
+diff --git a/ceph.spec.in b/ceph.spec.in
+index a74702d..908a65b 100644
+--- a/ceph.spec.in
++++ b/ceph.spec.in
+@@ -73,6 +73,7 @@ chmod 0644 $RPM_BUILD_ROOT%{_sysconfdir}/ceph/
+sample.ceph.conf
+ install -m 0644 -D debian/ceph.logrotate $RPM_BUILD_ROOT%{_sysconfdir}/
+logrotate.d/ceph
+ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/lib/ceph/tmp/
+ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log/ceph/
++mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log/ceph/stat
+ 
+ %clean
+ rm -rf $RPM_BUILD_ROOT
 
