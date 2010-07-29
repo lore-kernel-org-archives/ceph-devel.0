@@ -1,46 +1,41 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: [PATCH] debian/ceph.logrotate: enhance postrotate for "service"
- util
-Date: Thu, 29 Jul 2010 15:58:17 +0000 (UTC)
-Message-ID: <i2s8ep$33r$4@dough.gmane.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: thounds of files in monX/logm dir
+Date: Thu, 29 Jul 2010 09:41:27 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1007290939520.799@cobra.newdream.net>
+References: <i2s6r5$33r$2@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:58818 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753626Ab0G2P62 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 29 Jul 2010 11:58:28 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OeVV3-0005C1-6m
-	for ceph-devel@vger.kernel.org; Thu, 29 Jul 2010 17:58:25 +0200
-Received: from cust.dyn.95-152-98-129.swisscomdata.ch ([95.152.98.129])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 17:58:25 +0200
-Received: from thomas by cust.dyn.95-152-98-129.swisscomdata.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 17:58:25 +0200
+Received: from cobra.newdream.net ([66.33.216.30]:47423 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754652Ab0G2Qiz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jul 2010 12:38:55 -0400
+In-Reply-To: <i2s6r5$33r$2@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Thomas Mueller <thomas@chaschperli.ch>
+Cc: ceph-devel@vger.kernel.org
 
-invoke-rc.d is debian specific. 
+On Thu, 29 Jul 2010, Thomas Mueller wrote:
+> hi
+> 
+> had running a 4 node cluster with 3mon,3mds,4osd for a while with no one 
+> accessing it (actually nobody mounted it, i just forgot to stop the 
+> services). this was about ceph.git/unstable a month ago.
+> 
+> today i've upgraded to the latest ceph.git/unstable . to start over I 
+> deleted the ceph data completly. 
+> 
+> after 3mins of deleting i got curious.
+> 
+> every of the 3 mon nodes got about 530'000 files in the monX/logm dir.
+> 
+> is this expected?
 
-run "service ceph reload" if invoke-rc.d fails.
+It's an open issue without a comprehensive solution.  I added a trim on 
+just the log states for now that will keep this in check (although keep in 
+mind the $mon_data/log* files aren't rotated still).
 
+http://tracker.newdream.net/issues/250
 
-diff --git a/debian/ceph.logrotate b/debian/ceph.logrotate
-index 851d57f..baea2e9 100644
---- a/debian/ceph.logrotate
-+++ b/debian/ceph.logrotate
-@@ -4,6 +4,6 @@
-     compress
-     sharedscripts
-     postrotate
--        invoke-rc.d ceph reload
-+        invoke-rc.d ceph reload || service ceph reload
-     endscript
- }
-
+sage
