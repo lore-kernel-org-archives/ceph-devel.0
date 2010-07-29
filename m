@@ -1,54 +1,65 @@
 From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: [PATCH] debian: ceph-cfuse: move ceph from Recommends to Suggests
-Date: Thu, 29 Jul 2010 15:02:07 +0200
-Message-ID: <4C517BCF.9050504@chaschperli.ch>
+Subject: [PATCH] ceph.spec.in: rbdtool renamed, add libcls_sync.*
+Date: Thu, 29 Jul 2010 14:45:55 +0000 (UTC)
+Message-ID: <i2s473$33r$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from trillian.muellerit.ch ([83.169.22.129]:34901 "EHLO
-	trillian.muellerit.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756810Ab0G2NCO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jul 2010 09:02:14 -0400
-Received: from trillian.muellerit.ch ([127.0.0.1])
-	by localhost (trillian.muellerit.ch [127.0.0.1]) (amavisd-new, port 10026)
-	with ESMTP id ey5nMCfivcvL for <ceph-devel@vger.kernel.org>;
-	Thu, 29 Jul 2010 15:02:08 +0200 (CEST)
-Received: from [192.168.32.117] (cust.dyn.95-152-98-129.swisscomdata.ch [95.152.98.129])
-	by trillian.muellerit.ch (Postfix) with ESMTPSA id 5B13A19C803F
-	for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 15:02:08 +0200 (CEST)
+Received: from lo.gmane.org ([80.91.229.12]:60850 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757596Ab0G2OqF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 29 Jul 2010 10:46:05 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OeUN1-0004gV-R9
+	for ceph-devel@vger.kernel.org; Thu, 29 Jul 2010 16:46:03 +0200
+Received: from cust.dyn.95-152-98-129.swisscomdata.ch ([95.152.98.129])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 16:46:03 +0200
+Received: from thomas by cust.dyn.95-152-98-129.swisscomdata.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 16:46:03 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-  on a standalone fuse client ceph serverside is not needed. if it's 
-"Recommended" the default behaviour is to install it too. Move it to 
-"Suggests" that it's not installed by default if one installs just 
-ceph-fuse.
+* rbdtool got renamed to rbd
+* add new libs libcls_sync.*
 
-from debian policy:
-Suggests:
-This is used to declare that one package may be more useful with one or 
-more others. Using this field tells the packaging system and the user 
-that the listed packages are related to this one and can perhaps enhance 
-its usefulness, but that installing this one without them is perfectly 
-reasonable.
-
-- Thomas
-
-
-diff --git a/debian/control b/debian/control
-index 622242d..a1db488 100644
---- a/debian/control
-+++ b/debian/control
-@@ -30,7 +30,7 @@ Description: debugging symbols for ceph
-  Package: ceph-fuse
-  Architecture: any
-  Depends: ${shlibs:Depends}, ${misc:Depends}, libfuse2
--Recommends: ceph
-+Suggests: ceph
-  Description: FUSE-based client for the Ceph distributed file system
-   Ceph is a distributed network file system designed to provide
-   excellent performance, reliability, and scalability.  This is a
-
+--- a/ceph.spec.in
++++ b/ceph.spec.in
+@@ -111,12 +111,13 @@ fi
+ %{_bindir}/cosd
+ %{_bindir}/rados
+ %{_bindir}/radosacl
+-%{_bindir}/rbdtool
++%{_bindir}/rbd
+ %{_initrddir}/ceph
+ %{_libdir}/libceph.so.*
+ %{_libdir}/libcrush.so.*
+ %{_libdir}/librados.so.*
+ %{_libdir}/rados-classes/libcls_rbd.so.*
++%{_libdir}/rados-classes/libcls_sync.so.*
+ %{_sbindir}/mkcephfs
+ /sbin/mount.ceph
+ %{_libdir}/ceph
+@@ -138,7 +139,7 @@ fi
+ %{_mandir}/man8/radosgw.8*
+ %{_mandir}/man8/radosgw_admin.8*
+ %{_mandir}/man8/rados.8*
+-%{_mandir}/man8/rbdtool.8*
++%{_mandir}/man8/rbd.8*
+ %{_mandir}/man8/cauthtool.8*
+ %{_mandir}/man8/cclass.8.gz
+ %{_mandir}/man8/cclsinfo.8.gz
+@@ -172,6 +173,7 @@ fi
+ %{_libdir}/libcrush.so
+ %{_libdir}/librados.so
+ %{_libdir}/rados-classes/libcls_rbd.so
++%{_libdir}/rados-classes/libcls_sync.so
+ 
+ %if %{with_radosgw}
+ %files radosgw
 
