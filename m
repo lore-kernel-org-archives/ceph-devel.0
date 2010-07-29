@@ -1,107 +1,54 @@
-From: Anton VG <anton.vazir@gmail.com>
-Subject: Re: Roadmap to production
-Date: Thu, 29 Jul 2010 17:31:51 +0500
-Message-ID: <AANLkTi=fa7BG-J47Y3V7j0d=Zo9OKXahA50+Wk5icx8U@mail.gmail.com>
-References: <i29ckr$lab$1@dough.gmane.org>
-	<Pine.LNX.4.64.1007271024060.28672@cobra.newdream.net>
-	<i2r4ih$nki$1@dough.gmane.org>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: [PATCH] debian: ceph-cfuse: move ceph from Recommends to Suggests
+Date: Thu, 29 Jul 2010 15:02:07 +0200
+Message-ID: <4C517BCF.9050504@chaschperli.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:38546 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756996Ab0G2Mbw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jul 2010 08:31:52 -0400
-Received: by pwi5 with SMTP id 5so67293pwi.19
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 05:31:52 -0700 (PDT)
-In-Reply-To: <i2r4ih$nki$1@dough.gmane.org>
+Received: from trillian.muellerit.ch ([83.169.22.129]:34901 "EHLO
+	trillian.muellerit.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756810Ab0G2NCO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jul 2010 09:02:14 -0400
+Received: from trillian.muellerit.ch ([127.0.0.1])
+	by localhost (trillian.muellerit.ch [127.0.0.1]) (amavisd-new, port 10026)
+	with ESMTP id ey5nMCfivcvL for <ceph-devel@vger.kernel.org>;
+	Thu, 29 Jul 2010 15:02:08 +0200 (CEST)
+Received: from [192.168.32.117] (cust.dyn.95-152-98-129.swisscomdata.ch [95.152.98.129])
+	by trillian.muellerit.ch (Postfix) with ESMTPSA id 5B13A19C803F
+	for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 15:02:08 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Also, maybe there should be a small check list for different usage
-scenarios, like for example maybe
-the most generic usage will be just a file storage, without needs for
-snapshotting, dkms support, and other complicated stuff.
+  on a standalone fuse client ceph serverside is not needed. if it's 
+"Recommended" the default behaviour is to install it too. Move it to 
+"Suggests" that it's not installed by default if one installs just 
+ceph-fuse.
 
-works/tested
-- file storing and retrieving in ext3/4
-- snapshotting works
-- dkms
-- usage
-=2E..
+from debian policy:
+Suggests:
+This is used to declare that one package may be more useful with one or 
+more others. Using this field tells the packaging system and the user 
+that the listed packages are related to this one and can perhaps enhance 
+its usefulness, but that installing this one without them is perfectly 
+reasonable.
 
-so those who'd need just a plain file store - would not afraid trying a=
-nd using.
+- Thomas
 
-2010/7/29 Thomas Mueller <thomas@chaschperli.ch>:
-> Am Wed, 28 Jul 2010 11:25:40 -0700 schrieb Sage Weil:
->
->> On Thu, 22 Jul 2010, Thomas Mueller wrote:
->>> reading http://ceph.newdream.net/roadmap/ leaves me with some
->>> questions. :)
->>>
->>> * is there some roadmap when CEPH will be official announced
->>> "production ready"
->>
->> These are good questions. =A0:)
->>
->> I've made the Ceph site link directly into the redmine roadmap, wher=
-e
->> we'll be maintaining a detailed set of issues (features, bugs) for e=
-ach
->> upcoming release along with a target release date. =A0The roadmap no=
-w
->> includes a v1.0, which will be something we at least will cautiously
->> deploy in production. =A0I would like to get there (or close to it) =
-by the
->> end of the year.
->>
->> I prefer to avoid "production ready" as that is a bit of a subjectiv=
-e
->> term. =A0Different people have different stability requirements and
->> expectations. =A0That said, I would like v1.0 to be something I am
->> comfortable encouraging people to use in real (but non-critical)
->> deployments.
->>
->
-> answering here the question from another thread because IMHO it fits
-> better:
->
->> > what leads me to my other question: when will ceph be considered
->> > "stable"?
->> Soon? =A0 =A0I'd be interested in hearing what you (or anyone else) =
-expect
->> from a "stable" v1.0 release.
->
-> as storage is a fundamental service there are for sure other "stable"
-> demands than for a newsreader/mailclient/whateveruncriticalapp.
->
-> I'll give it a try to describe my idea of stable:
->
-> - stable means promised features (http://ceph.newdream.net/about/) wo=
-rk
-> reliable
-> - no workarounds needed to use these features
-> - (at least) in a series of stable releases (aka "1.x") i can upgrade
-> without downtime
-> - in a series of stable releases a can do a rolling upgrade
-> - in a stable series there no design changes introduced
->
->
->
-> - Thomas
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+diff --git a/debian/control b/debian/control
+index 622242d..a1db488 100644
+--- a/debian/control
++++ b/debian/control
+@@ -30,7 +30,7 @@ Description: debugging symbols for ceph
+  Package: ceph-fuse
+  Architecture: any
+  Depends: ${shlibs:Depends}, ${misc:Depends}, libfuse2
+-Recommends: ceph
++Suggests: ceph
+  Description: FUSE-based client for the Ceph distributed file system
+   Ceph is a distributed network file system designed to provide
+   excellent performance, reliability, and scalability.  This is a
+
+
