@@ -1,60 +1,46 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.21 released
-Date: Thu, 29 Jul 2010 13:04:38 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1007291303220.799@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: [PATCH] add files to .gitignore
+Date: Fri, 30 Jul 2010 08:19:53 +0200
+Message-ID: <1280470793-6360-1-git-send-email-thomas@chaschperli.ch>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57740 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752281Ab0G2UCH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jul 2010 16:02:07 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 29E43BC940
-	for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 13:04:39 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id EC0E7BC940
-	for <ceph-devel@vger.kernel.org>; Thu, 29 Jul 2010 13:04:38 -0700 (PDT)
+Received: from mail.muellerit.ch ([92.51.129.153]:54169 "EHLO
+	mail.muellerit.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752285Ab0G3GUH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jul 2010 02:20:07 -0400
+Received: from mail.muellerit.ch ([127.0.0.1])
+	by localhost (mail.muellerit.ch [127.0.0.1]) (amavisd-new, port 10026)
+	with ESMTP id zsv6xIgHl39X for <ceph-devel@vger.kernel.org>;
+	Fri, 30 Jul 2010 08:19:55 +0200 (CEST)
+Received: from gargelblaster.mit.local (zux221-125-110.adsl.green.ch [81.221.125.110])
+	by mail.muellerit.ch (Postfix) with ESMTPSA id ACB9F792402E
+	for <ceph-devel@vger.kernel.org>; Fri, 30 Jul 2010 08:19:55 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Thomas Mueller <thomas@chaschperli.ch>
 
-It's been a while, but v0.21 is ready.  Most of the work this time 
-around has been on stability. There is one key new feature, however: RBD, 
-the rados block device, which let you create a virtual disk backed by 
-objects stored in the Ceph cluster.  The images can be mapped natively by 
-the ceph kernel module or via a driver in qemu/KVM.  Although neither of 
-those drivers is upstream yet, the server side functionality and admin 
-tools are in place.
+add generated files to gitignore.
 
-Changes since v0.20 include:
 
-    * improved logging infrastructure
-    * log rotate
-    * mkfs improvements
-    * rbd tool, and rados class
-    * mds: return ENOTEMPTY when removing directory with snapshots
-    * mds: lazy io support (experimental)
-    * msgr: send messages directory to connection handles (more efficient)
-    * faster atomic_t via libatomic-ops
-    * mon: recovery improvements, fixes (e.g. when one mon is down for a 
-long time)
-    * mon: warn on monitor clock drift
-    * osd: large object support
-    * osd: heartbeat improvements, fixes
-    * osd: journaling fixes, improvements (bugs, better use of direct io)
-    * osd: snapshot rollback op (for rbd)
-    * radosgw fixes, improvements
-    * many memory leaks and other bugs fixed
+Signed-off-by: Thomas Mueller <thomas@chaschperli.ch>
+---
+ .gitignore |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
 
-The project roadmap has been updated and is available via the issue 
-tracker at
+diff --git a/.gitignore b/.gitignore
+index 0858c08..1f1ee4a 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -49,3 +49,9 @@ testkeys
+ testmsgr
+ testrados
+ testradospp
++ceph.spec
++compile
++config.guess
++config.sub
++libtool
++ltmain.sh
+-- 
+1.7.1
 
-	http://tracker.newdream.net/projects/ceph/roadmap
-
-Relevant URLs:
-
-    * Direct download at http://ceph.newdream.net/download/ceph-0.21.tar.gz
-    * For Debian packages see http://ceph.newdream.net/wiki/Debian
-
-sage
