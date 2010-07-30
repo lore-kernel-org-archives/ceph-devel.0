@@ -1,47 +1,37 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: writes-starving-reads problem
-Date: Fri, 30 Jul 2010 10:14:52 -0700
-Message-ID: <AANLkTik==iekRavs8iJzAHPpxX=qrfqkS_GtAp8gp_iV@mail.gmail.com>
-References: <AANLkTimDmPzWMBHKmgkRoE5LHqWL3-6_=R+PxZokqxVN@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: client-standalone/master-backport: "CEPH_VERSION" redefined
+Date: Fri, 30 Jul 2010 10:50:26 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1007301048490.28085@cobra.newdream.net>
+References: <i2u3ju$hnt$2@dough.gmane.org> <Pine.LNX.4.64.1007300944210.28085@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:32901 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752240Ab0G3ROx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jul 2010 13:14:53 -0400
-Received: by wwj40 with SMTP id 40so1739044wwj.1
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Jul 2010 10:14:52 -0700 (PDT)
-In-Reply-To: <AANLkTimDmPzWMBHKmgkRoE5LHqWL3-6_=R+PxZokqxVN@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51589 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932673Ab0G3Rrv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jul 2010 13:47:51 -0400
+In-Reply-To: <Pine.LNX.4.64.1007300944210.28085@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+To: Thomas Mueller <thomas@chaschperli.ch>
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, Jul 30, 2010 at 2:40 AM, Henry C Chang
-<henry_c_chang@tcloudcomputing.com> wrote:
-> Hi,
->
-> I ran into "writes-starving-reads" problem on a machine with 48G RAM.
->
-> I have two processes running concurrently:
-> Process 1 copies an 8 GB file from local disk to CEPH.
-> Process 2 copies an 8 GB file from CEPH to local disk.
->
-> Process 1 finished quickly since the data were cached in memory first.
-> Process 2 was blocked until all the cached data have been written to OSD.
-> (Maybe not all the cached data, but I waited for a long time.)
->
-> I don't have this problem on a machine with 8G RAM.
->
-> Has anyone experienced this before or any idea why?
->
-> Thanks,
-> Henry
-We haven't heard of anything like this ourselves, although locally
-we're not using such beefy machines yet.
-Can you give us more information on your cluster configuration and how
-the problem presented itself? Did the processes have progress bars and
-you watched the ceph->local have no progress until the local->ceph
-completed, or did the ceph->local copy just take much longer?
--Greg
+On Fri, 30 Jul 2010, Sage Weil wrote:
+> > what is the worklfow in client-standalone - not unstable to master? which 
+> > one should be used for testing?
+> 
+> I have a script that mirrors just the commits affecting fs/ceph in the 
+> kernel git tree (http://pastebin.org/433717), so the -standalone.git 
+> unstable matches the ceph-client.git unstable branch.  Generally I don't 
+> bother cleaning up and rebasing the unstable tree there until it's time to 
+> send things upstream for the merge window or there is some other specific 
+> reason to.  I'll do that as soon as 2.6.35 is out.  In the meantime, you 
+> should be able to merge the -standalone.git unstable into master-backport 
+> with minimal pain.
+
+I just did a rebase and some cleanup for the merge window.  It'll get 
+rebased once more after 2.6.35.
+
+And the CEPH_VERSION warning can be ignored... it'll go away soon!
+
+sage
