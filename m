@@ -1,49 +1,35 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: Re: /sys/class/rbd does not exist after loading ceph module
-Date: Fri, 30 Jul 2010 09:02:57 +0000 (UTC)
-Message-ID: <i2u4g1$hnt$3@dough.gmane.org>
-References: <AANLkTi=r74Q3SBS71+QcditFhNxzUfdCf1F9F18R4Yiy@mail.gmail.com>
-	<AANLkTikOViq3VCY2fwtut1c1kU8dkM7pRRwqfrYyhEPL@mail.gmail.com>
+From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+Subject: writes-starving-reads problem
+Date: Fri, 30 Jul 2010 17:40:11 +0800
+Message-ID: <AANLkTimDmPzWMBHKmgkRoE5LHqWL3-6_=R+PxZokqxVN@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:55042 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754321Ab0G3JDJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 30 Jul 2010 05:03:09 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OelUh-0000yc-CH
-	for ceph-devel@vger.kernel.org; Fri, 30 Jul 2010 11:03:07 +0200
-Received: from zux221-125-110.adsl.green.ch ([81.221.125.110])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Jul 2010 11:03:07 +0200
-Received: from thomas by zux221-125-110.adsl.green.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Jul 2010 11:03:07 +0200
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:42761 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755381Ab0G3JkM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jul 2010 05:40:12 -0400
+Received: by pvc7 with SMTP id 7so443907pvc.19
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Jul 2010 02:40:11 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Am Fri, 30 Jul 2010 16:41:51 +0800 schrieb Xiaoguang Liu:
+Hi,
 
+I ran into "writes-starving-reads" problem on a machine with 48G RAM.
 
+I have two processes running concurrently:
+Process 1 copies an 8 GB file from local disk to CEPH.
+Process 2 copies an 8 GB file from CEPH to local disk.
 
-> I would like to try the RBD feature of Ceph. I am following
-> http://ceph.newdream.net/wiki/Rbd,=C2=A0 but failed at :
+Process 1 finished quickly since the data were cached in memory first.
+Process 2 was blocked until all the cached data have been written to OSD.
+(Maybe not all the cached data, but I waited for a long time.)
 
-* did you really compile the ceph.ko module from source?
-* did you verify that you actually loaded the right ceph.ko module and=20
-not stock ceph.ko?
+I don't have this problem on a machine with 8G RAM.
 
-general note: do use the new 0.21. you won't get happy with 0.20.2.
+Has anyone experienced this before or any idea why?
 
-- Thomas
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Henry
