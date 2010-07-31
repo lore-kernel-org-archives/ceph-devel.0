@@ -1,75 +1,42 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: PATCH: Auth: Make a correct cast
-Date: Sat, 31 Jul 2010 11:29:58 +0200
-Message-ID: <1280568598.2116.5.camel@wido-laptop.pcextreme.nl>
+From: Dan Carpenter <error27@gmail.com>
+Subject: [patch] ceph: create_workqueue() doesn't return ERR_PTR
+Date: Sat, 31 Jul 2010 22:26:31 +0200
+Message-ID: <20100731202631.GH26313@bicker>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=-PCMg5KetEQVIyiTYjc80"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:59819 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751367Ab0GaJaA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 31 Jul 2010 05:30:00 -0400
-Received: from [79.99.132.153] (unknown [79.99.132.153])
-	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPA id 03DD53FC5C
-	for <ceph-devel@vger.kernel.org>; Sat, 31 Jul 2010 11:29:58 +0200 (CEST)
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:42306 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752391Ab0GaU0z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 31 Jul 2010 16:26:55 -0400
+Received: by wwj40 with SMTP id 40so2640630wwj.1
+        for <ceph-devel@vger.kernel.org>; Sat, 31 Jul 2010 13:26:53 -0700 (PDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
 
+create_workqueue() returns a NULL pointer on errors.
 
---=-PCMg5KetEQVIyiTYjc80
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Signed-off-by: Dan Carpenter <error27@gmail.com>
 
-Hi,
-
-Commit 8b8fd7e9c22153024b1ce1438b8737b37df6f3aa introduced a compile
-issue under Ubuntu 10.04 AMD64 (Don't know what other platforms did).
-
-CEPH_AES_IV is not casted correctly, which causes the compile to fail:
-
-g++ -DHAVE_CONFIG_H -I.    -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=64
--D_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT librados_a-Crypto.o -MD
--MP -MF .deps/librados_a-Crypto.Tpo -c -o librados_a-Crypto.o `test -f
-'auth/Crypto.cc' || echo './'`auth/Crypto.cc
-auth/Crypto.cc:110: error: invalid conversion from ‘const char*’ to
-‘const unsigned char*’
-make: *** [librados_a-Crypto.o] Error 1
-
-The attached patch makes a correct cast and makes it compile correctly.
-
-Wido
-
---=-PCMg5KetEQVIyiTYjc80
-Content-Disposition: attachment; filename="0001-auth-Make-a-correct-cast.patch"
-Content-Type: text/x-patch; name="0001-auth-Make-a-correct-cast.patch"; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-
-From bdb0acaaeb03bfc39e0dfab276e693b2f2e7c1c1 Mon Sep 17 00:00:00 2001
-From: Wido den Hollander <wido@widodh.nl>
-Date: Sat, 31 Jul 2010 11:27:24 +0200
-Subject: [PATCH] auth: Make a correct cast
-
----
- src/auth/Crypto.cc |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/src/auth/Crypto.cc b/src/auth/Crypto.cc
-index 102c8d2..26b7b5c 100644
---- a/src/auth/Crypto.cc
-+++ b/src/auth/Crypto.cc
-@@ -107,7 +107,7 @@ public:
-   int decrypt(bufferptr& secret, const bufferlist& in, bufferlist& out);
- };
- 
--static const unsigned char *aes_iv = CEPH_AES_IV;
-+static const unsigned char *aes_iv = (const unsigned char *)CEPH_AES_IV;
- 
- int CryptoAES::create(bufferptr& secret)
+diff --git a/fs/ceph/messenger.c b/fs/ceph/messenger.c
+index 15167b2..d959dba 100644
+--- a/fs/ceph/messenger.c
++++ b/fs/ceph/messenger.c
+@@ -94,11 +94,9 @@ struct workqueue_struct *ceph_msgr_wq;
+ int __init ceph_msgr_init(void)
  {
--- 
-1.7.0.4
-
-
---=-PCMg5KetEQVIyiTYjc80--
-
+ 	ceph_msgr_wq = create_workqueue("ceph-msgr");
+-	if (IS_ERR(ceph_msgr_wq)) {
+-		int ret = PTR_ERR(ceph_msgr_wq);
+-		pr_err("msgr_init failed to create workqueue: %d\n", ret);
+-		ceph_msgr_wq = NULL;
+-		return ret;
++	if (!ceph_msgr_wq) {
++		pr_err("msgr_init failed to create workqueue\n");
++		return -ENOMEM;
+ 	}
+ 	return 0;
+ }
