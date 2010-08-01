@@ -1,42 +1,36 @@
-From: Dan Carpenter <error27@gmail.com>
-Subject: [patch] ceph: create_workqueue() doesn't return ERR_PTR
-Date: Sat, 31 Jul 2010 22:26:31 +0200
-Message-ID: <20100731202631.GH26313@bicker>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: coverity - static code analysis
+Date: Sun, 1 Aug 2010 11:41:06 +0000 (UTC)
+Message-ID: <i33mgi$97i$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:42306 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752391Ab0GaU0z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 31 Jul 2010 16:26:55 -0400
-Received: by wwj40 with SMTP id 40so2640630wwj.1
-        for <ceph-devel@vger.kernel.org>; Sat, 31 Jul 2010 13:26:53 -0700 (PDT)
-Content-Disposition: inline
+Received: from lo.gmane.org ([80.91.229.12]:48963 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752188Ab0HALlQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 1 Aug 2010 07:41:16 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OfWuo-0008ML-JW
+	for ceph-devel@vger.kernel.org; Sun, 01 Aug 2010 13:41:14 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 01 Aug 2010 13:41:14 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 01 Aug 2010 13:41:14 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-create_workqueue() returns a NULL pointer on errors.
+hi
 
-Signed-off-by: Dan Carpenter <error27@gmail.com>
+what about asking Coverity to add ceph to testing? It's free for open 
+source projects.
 
-diff --git a/fs/ceph/messenger.c b/fs/ceph/messenger.c
-index 15167b2..d959dba 100644
---- a/fs/ceph/messenger.c
-+++ b/fs/ceph/messenger.c
-@@ -94,11 +94,9 @@ struct workqueue_struct *ceph_msgr_wq;
- int __init ceph_msgr_init(void)
- {
- 	ceph_msgr_wq = create_workqueue("ceph-msgr");
--	if (IS_ERR(ceph_msgr_wq)) {
--		int ret = PTR_ERR(ceph_msgr_wq);
--		pr_err("msgr_init failed to create workqueue: %d\n", ret);
--		ceph_msgr_wq = NULL;
--		return ret;
-+	if (!ceph_msgr_wq) {
-+		pr_err("msgr_init failed to create workqueue\n");
-+		return -ENOMEM;
- 	}
- 	return 0;
- }
+http://scan.coverity.com/
+
+- Thomas
+
