@@ -1,83 +1,72 @@
-From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
-Subject: Re: cephx questions
-Date: Sun, 1 Aug 2010 18:42:48 +0100
-Message-ID: <20100801184248.24cec525.ctpm@ist.utl.pt>
-References: <7083006A98B5314F86152D05FFB1B99814AAEF06FF@ICE-MBX-2.ice.nd.edu>
-	<Pine.LNX.4.64.1007301553230.28085@cobra.newdream.net>
+From: Roland Rabben <roland@jotta.no>
+Subject: Re: Best way to store billions of files
+Date: Sun, 1 Aug 2010 20:23:30 +0200
+Message-ID: <AANLkTikdYMP9J9defmO25t_Nzcb+M8cSGJWqnr543v36@mail.gmail.com>
+References: <AANLkTi=YSaX9tnynEHj4rS=1wOcTrmvAds7XNnZB1sGj@mail.gmail.com>
+	<AANLkTimWOWqf+61FK4DmpN+GhxZ0_3o_v+xj=mWXYqcj@mail.gmail.com>
+	<AANLkTimaUsbQTAmOi0TXquOnfJvPMmBkMSRSKuicPvrh@mail.gmail.com>
+	<AANLkTikJSaZx9O2HGzNUJ6YQ5fhtMmE_vfNzQPH=Ferv@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.ist.utl.pt ([193.136.128.21]:48228 "EHLO smtp1.ist.utl.pt"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752215Ab0HARuO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 1 Aug 2010 13:50:14 -0400
-In-Reply-To: <Pine.LNX.4.64.1007301553230.28085@cobra.newdream.net>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:42638 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750784Ab0HASXc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Aug 2010 14:23:32 -0400
+Received: by bwz1 with SMTP id 1so1147302bwz.19
+        for <ceph-devel@vger.kernel.org>; Sun, 01 Aug 2010 11:23:31 -0700 (PDT)
+In-Reply-To: <AANLkTikJSaZx9O2HGzNUJ6YQ5fhtMmE_vfNzQPH=Ferv@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Nathan Regola <nregola@nd.edu>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gregf@hq.newdream.net>
+Cc: ceph-devel@vger.kernel.org
+
+Thanks. Copying the respons back to the list.
+
+Roland
+
+2010/8/1 Gregory Farnum <gregf@hq.newdream.net>:
+> On Sun, Aug 1, 2010 at 11:02 AM, Roland Rabben <roland@jotta.no> wrote:
+>> Great. I'll have a look at BTRFS. Any draw-backs with BTRFS? It looks
+>> pretty young.
+> It is pretty young, but we expect it'll be ready (at least for
+> replicated storage) as soon as Ceph is. :)
+>
+>> So if I understand you correctly. Use BTRFS to combine the disks in
+>> logical volumes. Perhaps 3 logical volumes each accross 12 disks each?
+>> Then running 3 OSDs, each with 4 GB of RAM.
+> Well, actually you'd want to do 3 logical volumes across 11 volumes
+> each, and save one disk per OSD instance to provide a journaling
+> device.
+>
+>> 6 logical volumes accross 6 disks each. Then running 6 OSDs with 2 GB RAM each.
+> We don't really have performance data to determine which of these
+> setups will be better for you; you'd have to experiment. Each OSD
+> daemon will take up between 200 and 800MB of RAM to do its work, but
+> any extra will be used by the kernel to cache file data, and depending
+> on your workload that can be a serious performance advantage.
+> It's not like you need to manually partition the RAM or anything, though!
+>
+>> Does BTRFS support a situation if a disk in a logical volume fails?
+>> Any RAID 5-like features where it could continue running wit a failed
+>> disk and rebuild once the failed disk is replaced?
+> Hmm, I don't know. I'm sure somebody on the list does though, if you
+> want to move the discussion back on-list. :) (We don't get enough
+> traffic to need discussions to stay off-list for traffic reasons or
+> anything, and if you keep it on-list Sage [lead developer] will see it
+> all.)
+>
+>> Any performance gains with larger number of disks in a logical BTRFS volume?
+> Not sure. I think btrfs can stripe across disks but depending on your
+> network connection that's more likely to be a limiting factor. :)
+> -Greg
+>
 
 
-On Fri, 30 Jul 2010 16:07:47 -0700 (PDT) Sage Weil <sage@newdream.net> =
-wrote:
-> On Fri, 30 Jul 2010, Nathan Regola wrote:
-> > Hi,
-> >=20
-> > Thank you for this excellent project.=C2=A0 Are you still planning =
-on=20
-> > incorporating the code from the Maat paper at some time in the futu=
-re?=20
-> > As I'm sure you already know, access control lists on the storage=20
-> > objects would be quite useful to store research data.=C2=A0
->=20
-> We may.  The question is what granularity of security people really n=
-eed. =20
-> Maat essentially gives fine-grains access control on individual objec=
-ts=20
-> storing file data, based on the user you are logged in as on the clie=
-nt. =20
-> But in order for this to be very useful, you need some additional=20
-> user-level distributed authentiation scheme like Kerberos, or else a=20
-> misbehaving client can pose as any user on that host.  Currently, the=
-=20
-> kernel client authenticates to cephx and is given a capability to acc=
-ess=20
-> all objects in the file system object pool.. the same set of objects =
-it=20
-> can access by traversing the namespace as 'root'.  It doesn't get acc=
-ess=20
-> to other object pools in the distributed object store (e.g., metadata=
-=20
-> objects, rbd images, or other pools you may create).
->=20
-> What kind of objects (or files?) do you want to protect with ACLs?  D=
-o you=20
-> need object granularity, or is pool granularity sufficient?
->=20
 
- Hi all,
-
- As far as I'm concerned, if we could get file granularity it would be
-great. I think the NFSv4 ACL model, for example, would be an excellent
-model for Ceph ACLs.
- Note that for realistic general purpose deployments (think big
-enterprise workgroup or university campus) you will have to cope with
-untrusted client machines. So you will end up using Kerberos or some
-kerberos-like security mechanism. NFSv4 and AFS are attractive because
-of this and I think that Ceph with file ACLs and Kerberos support would
-be very appealing to those people (who already have a working Kerberos
-setup, but may be looking for a more scalable/robust file storage
-solution).
-
- I'd be glad to help test/debug any such features.
-
-Best regards
-
-Cl=C3=A1udio
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Roland Rabben
+Founder & CEO Jotta AS
+Cell: +47 90 85 85 39
+Phone: +47 21 04 29 00
+Email: roland@jotta.no
