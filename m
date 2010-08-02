@@ -1,24 +1,24 @@
-From: Jonathan Dieter <jdieter@gmail.com>
+From: Jonathan Dieter <jdieter@lesbg.com>
 Subject: Re: how to build rpm for ceph 0.21 on Fedora
-Date: Mon, 02 Aug 2010 11:51:07 +0300
-Message-ID: <1280739067.2280.24.camel@jdlaptop.lesbg.loc>
+Date: Mon, 02 Aug 2010 11:54:32 +0300
+Message-ID: <1280739272.2280.25.camel@jdlaptop.lesbg.loc>
 References: <AANLkTimgak-e4vEs6omRssohcm5RJKm8LKV+uYPzKcTR@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature"; boundary="=-k6+w1iNn+Vx/mmaQdBNN"
+Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature"; boundary="=-Bbr0zeq0HTKhy5TXaVax"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:58103 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:46037 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752680Ab0HBIvM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Aug 2010 04:51:12 -0400
-Received: by fxm14 with SMTP id 14so1575100fxm.19
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Aug 2010 01:51:10 -0700 (PDT)
+	with ESMTP id S1752299Ab0HBIyh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Aug 2010 04:54:37 -0400
+Received: by fxm14 with SMTP id 14so1575958fxm.19
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Aug 2010 01:54:36 -0700 (PDT)
 In-Reply-To: <AANLkTimgak-e4vEs6omRssohcm5RJKm8LKV+uYPzKcTR@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
 
---=-k6+w1iNn+Vx/mmaQdBNN
+--=-Bbr0zeq0HTKhy5TXaVax
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -46,17 +46,18 @@ update.
 Jonathan
 
 
---=-k6+w1iNn+Vx/mmaQdBNN
+
+--=-Bbr0zeq0HTKhy5TXaVax
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: This is a digitally signed message part
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.14 (GNU/Linux)
 
-iEYEABECAAYFAkxWhvsACgkQH3CnpFdSY1xlKACeK/AfGVzwJanxo6y8xlU/Qk/9
-ge0AnjmjoSJ9wWqGdCKTSaCOR99euUAI
-=aOYF
+iEYEABECAAYFAkxWh8gACgkQH3CnpFdSY1xFuwCcC3+54l0cbhJj8opzOPR7pLN4
+IWcAnAh61YOiz29evrMd+SDWvoPJRPj5
+=TdpQ
 -----END PGP SIGNATURE-----
 
---=-k6+w1iNn+Vx/mmaQdBNN--
+--=-Bbr0zeq0HTKhy5TXaVax--
 
