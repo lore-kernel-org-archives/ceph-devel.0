@@ -1,62 +1,88 @@
-From: Xiaoguang Liu <syslxg@gmail.com>
-Subject: build ceph-client failed
-Date: Mon, 2 Aug 2010 11:52:29 +0800
-Message-ID: <AANLkTi=QFSR9X9OrcrtzJwbWtFdY4VkQV0PePZ_Jm3Fq@mail.gmail.com>
+From: Nathan Regola <nregola@nd.edu>
+Subject: RE: cephx questions
+Date: Sun, 1 Aug 2010 23:53:36 -0400
+Message-ID: <7083006A98B5314F86152D05FFB1B99814AAEF0872@ICE-MBX-2.ice.nd.edu>
+References: <7083006A98B5314F86152D05FFB1B99814AAEF06FF@ICE-MBX-2.ice.nd.edu>
+	<Pine.LNX.4.64.1007301553230.28085@cobra.newdream.net>
+ <20100801184248.24cec525.ctpm@ist.utl.pt>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:57447 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752050Ab0HBDwb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Aug 2010 23:52:31 -0400
-Received: by qyk7 with SMTP id 7so5120542qyk.19
-        for <ceph-devel@vger.kernel.org>; Sun, 01 Aug 2010 20:52:30 -0700 (PDT)
+Received: from mx-p1.cc.nd.edu ([129.74.250.57]:49770 "EHLO mx-p1.cc.nd.edu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752137Ab0HBDxs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 1 Aug 2010 23:53:48 -0400
+In-Reply-To: <20100801184248.24cec525.ctpm@ist.utl.pt>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: =?utf-8?B?Q2zDoXVkaW8gTWFydGlucw==?= <ctpm@ist.utl.pt>
 
-I wanted to build RBD client. Following
-http://ceph.newdream.net/wiki/Rbd, I check out the code by
-
-git clone git://ceph.newdream.net/git/ceph-client.git
-cd ceph-client
-git checkout -b rbd origin/rbd
-
-By the wiki, I should run make EXTRA_CFLAGS=3D"-DCONFIG_CEPH_RBD" next.
-But "make" told me nothing to build because no ".config" found. so I
-did a "make menuconfig" first. (Glad to find the new symbol
-CONFIG_CEPH_RBD).
-
-run make EXTRA_CFLAGS=3D"-DCONFIG_CEPH_RBD" again, make start compiling
-and stop after a while with the error message below:
-
-
-		  CC [M]  arch/x86/kernel/test_nx.o
-		  CC [M]  arch/x86/kernel/microcode_core.o
-		  CC [M]  arch/x86/kernel/microcode_intel.o
-		  CC [M]  arch/x86/kernel/microcode_amd.o
-		  LD [M]  arch/x86/kernel/microcode.o
-		  LD      arch/x86/kvm/built-in.o
-		  CC [M]  arch/x86/kvm/svm.o
-		In file included from arch/x86/kvm/svm.c:18:
-		arch/x86/kvm/irq.h:30:19: error: iodev.h: No such file or directory
-		arch/x86/kvm/irq.h:31:20: error: ioapic.h: No such file or directory
-		In file included from arch/x86/kvm/irq.h:32,
-						 from arch/x86/kvm/svm.c:18:
-		arch/x86/kvm/lapic.h:11: error: field a=80?deva=80? has incomplete ty=
-pe
-		In file included from arch/x86/kvm/svm.c:18:
-		arch/x86/kvm/irq.h:73: error: field a=80?deva=80? has incomplete type
-		make[2]: *** [arch/x86/kvm/svm.o] Error 1
-		make[1]: *** [arch/x86/kvm] Error 2
-		make: *** [arch/x86] Error 2
-
-
-I can find iodev.h at ./virt/kvm/, why make can not find it? BTW, I
-did this on Fedora 13, stock kernel 2.6.33.3.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+WWVzLCBTYWdlLCB5b3VyIGFuc3dlcnMgbWFrZSBzZW5zZSAoaW4gcmVnYXJkIHRvIGNlcGh4KS4g
+VGhhbmtzIQ0KDQpBIHdvcmQgb2Ygd2FybmluZyBvbiB0aGlzIHJlc3BvbnNlOiBJIGFtIGluIHRo
+ZSBSJkQgc2lkZSBvZiBvdXIgY2VudGVyIGFuZCBkbyBub3QgbWFrZSBmaW5hbCBkZWNpc2lvbnMg
+b24gZmlsZSBzeXN0ZW0gYWRvcHRpb24uICANCg0KSWRlYWxseSwgcHJvdGVjdGluZyBLVk0gaW1h
+Z2VzIChzdG9yZWQgdXNpbmcgdGhlIEtWTS1SQkQgY29kZSkgYW5kIGZpbGVzIHdpdGggQUNMcyB3
+b3VsZCBiZSBpZGVhbC4gSSBhZ3JlZSB3aXRoIENsYXVkaW8gb24gdGhlIG5lZWQgdG8gZGVhbCB3
+aXRoIHVudHJ1c3RlZCBjbGllbnQgbWFjaGluZXMgaW4gbGFyZ2UgZGVwbG95bWVudHMuIEkgdGhp
+bmsgYSBwb3RlbnRpYWwgdXNhZ2Ugc2NlbmFyaW8gZm9yIGNlcGggKGlmIGl0IGhhcyBlbnRlcnBy
+aXNlIGF1dGhlbnRpY2F0aW9uIGxpa2UgS2VyYmVyb3MpIGlzIHRvIGNvbWJpbmUgdGhlIHBlcmZv
+cm1hbmNlIG9mIGEgc2NhbGFibGUgc2NyYXRjaCBmaWxlIHN5c3RlbSB3aXRoIHRoZSBzZWN1cml0
+eSBiZW5lZml0cyBvZiBhbiBlbnRlcnByaXNlIGZpbGUgc3lzdGVtIGxpa2UgQUZTIGZvciBzaGFy
+aW5nIGRhdGEgYWNyb3NzIG9yZ2FuaXphdGlvbnMgKG9yIHdpdGhpbiB3b3JrZ3JvdXBzKS4gIFRo
+ZSBhYmlsaXR5IHRvIHBvdGVudGlhbGx5IHVzZSBvbmUgZmlsZSBzeXN0ZW0gKGluc3RlYWQgb2Yg
+dHdvKSBpcyBhbiBhdHRyYWN0aXZlIHRob3VnaHQgZm9yIGEgaGlnaCBwZXJmb3JtYW5jZSBjb21w
+dXRpbmcgY2VudGVyIChhbmQgaXRzIHVzZXJzKS4gIEluIHRoZW9yeSwgSSB0aGluayBjZXBoJ3Mg
+dXNlIG9mIHNjYWxhYmxlIG1ldGFkYXRhIHdvdWxkIGFsbG93IGl0IHRvIGFjaGlldmUgaGlnaGVy
+IHBlcmZvcm1hbmNlIHRoYW4gQUZTIHdoZW4gbWFueSBjbGllbnQgY29tcHV0ZSBub2RlcyBhY2Nl
+c3MgdGhlIHNhbWUgZGlyZWN0b3J5ICh3aXRoIHRlbnMgb2YgdGhvdXNhbmRzIG9mIGZpbGVzKS4g
+SW4gYWRkaXRpb24sIGNlcGggY291bGQgZWxpbWluYXRlIHNvbWUgb2YgdGhlIGNvbXBsZXhpdHkg
+b2YgQUZTLS10ZWFjaGluZyB1c2VycyBhYm91dCBjbGllbnQgc2lkZSBjYWNoaW5nIGFuZCBjYWxs
+YmFja3MuICBJJ20gbm90IHRyeWluZyB0byBiYXNoIEFGUyAoYW5kIEkgZG9u4oCZdCB0aGluayBp
+dCB3aWxsIGRpc2FwcGVhciBhbnl0aW1lIHNvb24pIHNpbmNlIGl0IGlzIHZlcnkgc3RhYmxlLCBi
+dXQgSSB0aGluayBjZXBoIGhhcyBhIHByb21pc2luZyBkZXNpZ24sIGVzcGVjaWFsbHkgd2l0aCBy
+ZXNwZWN0IHRvIHNjYWxhYmxlIG1ldGFkYXRhLiANCg0KVGhhbmtzLA0KTmF0aGFuDQoNCi0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBDbMOhdWRpbyBNYXJ0aW5zIFttYWlsdG86Y3Rw
+bUBpc3QudXRsLnB0XSANClNlbnQ6IFN1bmRheSwgQXVndXN0IDAxLCAyMDEwIDE6NDMgUE0NClRv
+OiBTYWdlIFdlaWwNCkNjOiBOYXRoYW4gUmVnb2xhOyBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zw0KU3ViamVjdDogUmU6IGNlcGh4IHF1ZXN0aW9ucw0KDQoNCk9uIEZyaSwgMzAgSnVsIDIwMTAg
+MTY6MDc6NDcgLTA3MDAgKFBEVCkgU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFtLm5ldD4gd3JvdGU6
+DQo+IE9uIEZyaSwgMzAgSnVsIDIwMTAsIE5hdGhhbiBSZWdvbGEgd3JvdGU6DQo+ID4gSGksDQo+
+ID4gDQo+ID4gVGhhbmsgeW91IGZvciB0aGlzIGV4Y2VsbGVudCBwcm9qZWN0LsKgIEFyZSB5b3Ug
+c3RpbGwgcGxhbm5pbmcgb24gDQo+ID4gaW5jb3Jwb3JhdGluZyB0aGUgY29kZSBmcm9tIHRoZSBN
+YWF0IHBhcGVyIGF0IHNvbWUgdGltZSBpbiB0aGUgZnV0dXJlPyANCj4gPiBBcyBJJ20gc3VyZSB5
+b3UgYWxyZWFkeSBrbm93LCBhY2Nlc3MgY29udHJvbCBsaXN0cyBvbiB0aGUgc3RvcmFnZSANCj4g
+PiBvYmplY3RzIHdvdWxkIGJlIHF1aXRlIHVzZWZ1bCB0byBzdG9yZSByZXNlYXJjaCBkYXRhLsKg
+DQo+IA0KPiBXZSBtYXkuICBUaGUgcXVlc3Rpb24gaXMgd2hhdCBncmFudWxhcml0eSBvZiBzZWN1
+cml0eSBwZW9wbGUgcmVhbGx5IG5lZWQuICANCj4gTWFhdCBlc3NlbnRpYWxseSBnaXZlcyBmaW5l
+LWdyYWlucyBhY2Nlc3MgY29udHJvbCBvbiBpbmRpdmlkdWFsIG9iamVjdHMgDQo+IHN0b3Jpbmcg
+ZmlsZSBkYXRhLCBiYXNlZCBvbiB0aGUgdXNlciB5b3UgYXJlIGxvZ2dlZCBpbiBhcyBvbiB0aGUg
+Y2xpZW50LiAgDQo+IEJ1dCBpbiBvcmRlciBmb3IgdGhpcyB0byBiZSB2ZXJ5IHVzZWZ1bCwgeW91
+IG5lZWQgc29tZSBhZGRpdGlvbmFsIA0KPiB1c2VyLWxldmVsIGRpc3RyaWJ1dGVkIGF1dGhlbnRp
+YXRpb24gc2NoZW1lIGxpa2UgS2VyYmVyb3MsIG9yIGVsc2UgYSANCj4gbWlzYmVoYXZpbmcgY2xp
+ZW50IGNhbiBwb3NlIGFzIGFueSB1c2VyIG9uIHRoYXQgaG9zdC4gIEN1cnJlbnRseSwgdGhlIA0K
+PiBrZXJuZWwgY2xpZW50IGF1dGhlbnRpY2F0ZXMgdG8gY2VwaHggYW5kIGlzIGdpdmVuIGEgY2Fw
+YWJpbGl0eSB0byBhY2Nlc3MgDQo+IGFsbCBvYmplY3RzIGluIHRoZSBmaWxlIHN5c3RlbSBvYmpl
+Y3QgcG9vbC4uIHRoZSBzYW1lIHNldCBvZiBvYmplY3RzIGl0IA0KPiBjYW4gYWNjZXNzIGJ5IHRy
+YXZlcnNpbmcgdGhlIG5hbWVzcGFjZSBhcyAncm9vdCcuICBJdCBkb2Vzbid0IGdldCBhY2Nlc3Mg
+DQo+IHRvIG90aGVyIG9iamVjdCBwb29scyBpbiB0aGUgZGlzdHJpYnV0ZWQgb2JqZWN0IHN0b3Jl
+IChlLmcuLCBtZXRhZGF0YSANCj4gb2JqZWN0cywgcmJkIGltYWdlcywgb3Igb3RoZXIgcG9vbHMg
+eW91IG1heSBjcmVhdGUpLg0KPiANCj4gV2hhdCBraW5kIG9mIG9iamVjdHMgKG9yIGZpbGVzPykg
+ZG8geW91IHdhbnQgdG8gcHJvdGVjdCB3aXRoIEFDTHM/ICBEbyB5b3UgDQo+IG5lZWQgb2JqZWN0
+IGdyYW51bGFyaXR5LCBvciBpcyBwb29sIGdyYW51bGFyaXR5IHN1ZmZpY2llbnQ/DQo+IA0KDQog
+SGkgYWxsLA0KDQogQXMgZmFyIGFzIEknbSBjb25jZXJuZWQsIGlmIHdlIGNvdWxkIGdldCBmaWxl
+IGdyYW51bGFyaXR5IGl0IHdvdWxkIGJlDQpncmVhdC4gSSB0aGluayB0aGUgTkZTdjQgQUNMIG1v
+ZGVsLCBmb3IgZXhhbXBsZSwgd291bGQgYmUgYW4gZXhjZWxsZW50DQptb2RlbCBmb3IgQ2VwaCBB
+Q0xzLg0KIE5vdGUgdGhhdCBmb3IgcmVhbGlzdGljIGdlbmVyYWwgcHVycG9zZSBkZXBsb3ltZW50
+cyAodGhpbmsgYmlnDQplbnRlcnByaXNlIHdvcmtncm91cCBvciB1bml2ZXJzaXR5IGNhbXB1cykg
+eW91IHdpbGwgaGF2ZSB0byBjb3BlIHdpdGgNCnVudHJ1c3RlZCBjbGllbnQgbWFjaGluZXMuIFNv
+IHlvdSB3aWxsIGVuZCB1cCB1c2luZyBLZXJiZXJvcyBvciBzb21lDQprZXJiZXJvcy1saWtlIHNl
+Y3VyaXR5IG1lY2hhbmlzbS4gTkZTdjQgYW5kIEFGUyBhcmUgYXR0cmFjdGl2ZSBiZWNhdXNlDQpv
+ZiB0aGlzIGFuZCBJIHRoaW5rIHRoYXQgQ2VwaCB3aXRoIGZpbGUgQUNMcyBhbmQgS2VyYmVyb3Mg
+c3VwcG9ydCB3b3VsZA0KYmUgdmVyeSBhcHBlYWxpbmcgdG8gdGhvc2UgcGVvcGxlICh3aG8gYWxy
+ZWFkeSBoYXZlIGEgd29ya2luZyBLZXJiZXJvcw0Kc2V0dXAsIGJ1dCBtYXkgYmUgbG9va2luZyBm
+b3IgYSBtb3JlIHNjYWxhYmxlL3JvYnVzdCBmaWxlIHN0b3JhZ2UNCnNvbHV0aW9uKS4NCg0KIEkn
+ZCBiZSBnbGFkIHRvIGhlbHAgdGVzdC9kZWJ1ZyBhbnkgc3VjaCBmZWF0dXJlcy4NCg0KQmVzdCBy
+ZWdhcmRzDQoNCkNsw6F1ZGlvDQoNCg==
