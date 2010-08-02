@@ -1,55 +1,1129 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: RPM build errors: Bad exit status from /var/tmp/rpm-tmp.s5lEiY
-  (%install)
-Date: Mon, 2 Aug 2010 09:19:37 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1008020918490.14285@cobra.newdream.net>
-References: <AANLkTimdgrE3h+uRbWr+tcu7Ds6O5_Je4Y4ssXacJhwh@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: [PATCH] ceph/rbd block driver for qemu-kvm (v4)
+Date: Mon, 2 Aug 2010 21:46:31 +0200
+Message-ID: <20100802194631.GA4923@chb-desktop>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48451 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753261Ab0HBQQz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Aug 2010 12:16:55 -0400
-In-Reply-To: <AANLkTimdgrE3h+uRbWr+tcu7Ds6O5_Je4Y4ssXacJhwh@mail.gmail.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:39115 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754546Ab0HBTqh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Aug 2010 15:46:37 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaoguang Liu <syslxg@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: kvm@vger.kernel.org, qemu-devel@nongnu.org
+Cc: Kevin Wolf <kwolf@redhat.com>, ceph-devel@vger.kernel.org
 
-On Mon, 2 Aug 2010, Xiaoguang Liu wrote:
-> I am building rpm for ceph 0.21 and encountered error as below:
-> 
-> here is what I did:
-> 
-> 1.  download 0.21 from http://ceph.newdream.net/download/ceph-0.21.tar.gz
-> 2. uncompress
-> 3. ./autogen && ./configure
-> 4. copy ceph.spec into my SPECS folder
-> 5. copy ceph-0.21.tar.gz into SOURCES folder
-> 6. rpmbuild -ba ceph.spec
-> 
-> 
-> make[1]: Leaving directory `/home/lxg/src/rpm/BUILD/ceph-0.21/man'
-> make[1]: Entering directory `/home/lxg/src/rpm/BUILD/ceph-0.21'
-> make[2]: Entering directory `/home/lxg/src/rpm/BUILD/ceph-0.21'
-> make[2]: Nothing to be done for `install-exec-am'.
-> make[2]: Nothing to be done for `install-data-am'.
-> make[2]: Leaving directory `/home/lxg/src/rpm/BUILD/ceph-0.21'
-> make[1]: Leaving directory `/home/lxg/src/rpm/BUILD/ceph-0.21'
-> + find /home/lxg/src/rpm/BUILDROOT/ceph-0.21-4.fc13.x86_64 -type f
-> -name '*.la' -exec rm -f '{}' ';'
-> + find /home/lxg/src/rpm/BUILDROOT/ceph-0.21-4.fc13.x86_64 -type f
-> -name '*.a' -exec rm -f '{}' ';'
-> + install -D src/init-ceph
-> /home/lxg/src/rpm/BUILDROOT/ceph-0.21-4.fc13.x86_64/etc/rc.d/init.d/ceph
-> + chmod 0644 /home/lxg/src/rpm/BUILDROOT/ceph-0.21-4.fc13.x86_64/etc/ceph/sample.ceph.conf
-> + install -m 0644 -D debian/ceph.logrotate
-> /home/lxg/src/rpm/BUILDROOT/ceph-0.21-4.fc13.x86_64/etc/logrotate.d/ceph
-> install: cannot stat `debian/ceph.logrotate': No such file or directory
-> error: Bad exit status from /var/tmp/rpm-tmp.s5lEiY (%install)
+After the release of ceph 0.21 I felt it was about time to re-submit
+the qemu block driver for ceph:
 
-Oh, debian/ isn't in the release tarball.  This will be fixed in 0.21.1.  
-In the meantime, you can build the rpm from a git checkout.
+This is an updated block driver for the distributed file system Ceph
+(http://ceph.newdream.net/). This driver uses librados (which
+is part of the Ceph server) for direct access to the Ceph object
+store and is running entirely in userspace.
 
-sage
+It now has (read only) snapshot support and passes all relevant
+qemu-iotests.
+
+To compile the driver you need at least ceph 0.21.
+
+Additional information is available on the Ceph-Wiki:
+
+http://ceph.newdream.net/wiki/Kvm-rbd
+
+The patch is based on git://repo.or.cz/qemu/kevin.git block
+
+Signed-off-by: Christian Brunner <chb@muc.de>
+
+---
+ Makefile.objs     |    1 +
+ block/rbd.c       |  907 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ block/rbd_types.h |   71 +++++
+ configure         |   31 ++
+ 4 files changed, 1010 insertions(+), 0 deletions(-)
+ create mode 100644 block/rbd.c
+ create mode 100644 block/rbd_types.h
+
+diff --git a/Makefile.objs b/Makefile.objs
+index 4a1eaa1..bf45142 100644
+--- a/Makefile.objs
++++ b/Makefile.objs
+@@ -18,6 +18,7 @@ block-nested-y += parallels.o nbd.o blkdebug.o sheepdog.o
+ block-nested-$(CONFIG_WIN32) += raw-win32.o
+ block-nested-$(CONFIG_POSIX) += raw-posix.o
+ block-nested-$(CONFIG_CURL) += curl.o
++block-nested-$(CONFIG_RBD) += rbd.o
+ 
+ block-obj-y +=  $(addprefix block/, $(block-nested-y))
+ 
+diff --git a/block/rbd.c b/block/rbd.c
+new file mode 100644
+index 0000000..6f8ff15
+--- /dev/null
++++ b/block/rbd.c
+@@ -0,0 +1,907 @@
++/*
++ * QEMU Block driver for RADOS (Ceph)
++ *
++ * Copyright (C) 2010 Christian Brunner <chb@muc.de>
++ *
++ * This work is licensed under the terms of the GNU GPL, version 2.  See
++ * the COPYING file in the top-level directory.
++ *
++ */
++
++#include "qemu-common.h"
++#include "qemu-error.h"
++#include <sys/types.h>
++#include <stdbool.h>
++
++#include <qemu-common.h>
++
++#include "rbd_types.h"
++#include "module.h"
++#include "block_int.h"
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <rados/librados.h>
++
++#include <signal.h>
++
++
++int eventfd(unsigned int initval, int flags);
++
++
++/*
++ * When specifying the image filename use:
++ *
++ * rbd:poolname/devicename
++ *
++ * poolname must be the name of an existing rados pool
++ *
++ * devicename is the basename for all objects used to
++ * emulate the raw device.
++ *
++ * Metadata information (image size, ...) is stored in an
++ * object with the name "devicename.rbd".
++ *
++ * The raw device is split into 4MB sized objects by default.
++ * The sequencenumber is encoded in a 12 byte long hex-string,
++ * and is attached to the devicename, separated by a dot.
++ * e.g. "devicename.1234567890ab"
++ *
++ */
++
++#define OBJ_MAX_SIZE (1UL << OBJ_DEFAULT_OBJ_ORDER)
++
++typedef struct RBDAIOCB {
++    BlockDriverAIOCB common;
++    QEMUBH *bh;
++    int ret;
++    QEMUIOVector *qiov;
++    char *bounce;
++    int write;
++    int64_t sector_num;
++    int aiocnt;
++    int error;
++    struct BDRVRBDState *s;
++} RBDAIOCB;
++
++typedef struct RADOSCB {
++    int rcbid;
++    RBDAIOCB *acb;
++    int done;
++    int64_t segsize;
++    char *buf;
++} RADOSCB;
++
++typedef struct BDRVRBDState {
++    int efd;
++    rados_pool_t pool;
++    rados_pool_t header_pool;
++    char name[RBD_MAX_OBJ_NAME_SIZE];
++    char block_name[RBD_MAX_BLOCK_NAME_SIZE];
++    uint64_t size;
++    uint64_t objsize;
++    int qemu_aio_count;
++    int read_only;
++} BDRVRBDState;
++
++typedef struct rbd_obj_header_ondisk RbdHeader1;
++
++static int rbd_parsename(const char *filename, char *pool, char **snap,
++                         char *name)
++{
++    const char *rbdname;
++    char *p;
++    int l;
++
++    if (!strstart(filename, "rbd:", &rbdname)) {
++        return -EINVAL;
++    }
++
++    pstrcpy(pool, 2 * RBD_MAX_SEG_NAME_SIZE, rbdname);
++    p = strchr(pool, '/');
++    if (p == NULL) {
++        return -EINVAL;
++    }
++
++    *p = '\0';
++
++    l = strlen(pool);
++    if(l >= RBD_MAX_SEG_NAME_SIZE) {
++        error_report("pool name to long");
++        return -EINVAL;
++    } else if (l <= 0) {
++        error_report("pool name to short");
++        return -EINVAL;
++    }
++
++    l = strlen(++p);
++    if (l >= RBD_MAX_OBJ_NAME_SIZE) {
++        error_report("object name to long");
++        return -EINVAL;
++    } else if (l <= 0) {
++        error_report("object name to short");
++        return -EINVAL;
++    }
++
++    strcpy(name, p);
++
++    *snap = strchr(name, '@');
++    if (*snap) {
++      *(*snap) = '\0';
++      (*snap)++;
++      if (!*snap) *snap = NULL;
++    }
++
++    return l;
++}
++
++static int create_tmap_op(uint8_t op, const char *name, char **tmap_desc)
++{
++    uint32_t len = strlen(name);
++    /* total_len = encoding op + name + empty buffer */
++    uint32_t total_len = 1 + (sizeof(uint32_t) + len) + sizeof(uint32_t);
++    char *desc = NULL;
++
++    desc = qemu_malloc(total_len);
++
++    *tmap_desc = desc;
++
++    *desc = op;
++    desc++;
++    memcpy(desc, &len, sizeof(len));
++    desc += sizeof(len);
++    memcpy(desc, name, len);
++    desc += len;
++    len = 0;
++    memcpy(desc, &len, sizeof(len));
++    desc += sizeof(len);
++
++    return desc - *tmap_desc;
++}
++
++static void free_tmap_op(char *tmap_desc)
++{
++    qemu_free(tmap_desc);
++}
++
++static int rbd_register_image(rados_pool_t pool, const char *name)
++{
++    char *tmap_desc;
++    const char *dir = RBD_DIRECTORY;
++    int ret;
++
++    ret = create_tmap_op(CEPH_OSD_TMAP_SET, name, &tmap_desc);
++    if (ret < 0) {
++        return ret;
++    }
++
++    ret = rados_tmap_update(pool, dir, tmap_desc, ret);
++    free_tmap_op(tmap_desc);
++
++    return ret;
++}
++
++static int touch_rbd_info(rados_pool_t pool, const char *info_oid)
++{
++    int r = rados_write(pool, info_oid, 0, NULL, 0);
++    if (r < 0) {
++        return r;
++    }
++    return 0;
++}
++
++static int rbd_assign_bid(rados_pool_t pool, uint64_t *id)
++{
++    uint64_t out[1];
++    const char *info_oid = RBD_INFO;
++
++    *id = 0;
++
++    int r = touch_rbd_info(pool, info_oid);
++    if (r < 0) {
++        return r;
++    }
++
++    r = rados_exec(pool, info_oid, "rbd", "assign_bid", NULL,
++                   0, (char *)out, sizeof(out));
++    if (r < 0) {
++        return r;
++    }
++
++    *id = out[0];
++    le64_to_cpus(out);
++
++    return 0;
++}
++
++static int rbd_create(const char *filename, QEMUOptionParameter *options)
++{
++    int64_t bytes = 0;
++    int64_t objsize;
++    uint64_t size;
++    time_t mtime;
++    uint8_t obj_order = RBD_DEFAULT_OBJ_ORDER;
++    char pool[RBD_MAX_SEG_NAME_SIZE];
++    char n[RBD_MAX_SEG_NAME_SIZE];
++    char name[RBD_MAX_SEG_NAME_SIZE];
++    char *snap;
++    RbdHeader1 header;
++    rados_pool_t p;
++    uint64_t bid;
++    uint32_t hi, lo;
++    int ret;
++
++    if (rbd_parsename(filename, pool, &snap, name) < 0) {
++        return -EINVAL;
++    }
++
++    snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s%s", name, RBD_SUFFIX);
++
++    /* Read out options */
++    while (options && options->name) {
++        if (!strcmp(options->name, BLOCK_OPT_SIZE)) {
++            bytes = options->value.n;
++        } else if (!strcmp(options->name, BLOCK_OPT_CLUSTER_SIZE)) {
++            if (options->value.n) {
++                objsize = options->value.n;
++                if ((objsize - 1) & objsize) {    /* not a power of 2? */
++                    error_report("obj size needs to be power of 2");
++                    return -EINVAL;
++                }
++                if (objsize < 4096) {
++                    error_report("obj size too small");
++                    return -EINVAL;
++                }
++
++                for (obj_order = 0; obj_order < 64; obj_order++) {
++                    if (objsize == 1) {
++                        break;
++                    }
++                    objsize >>= 1;
++                }
++            }
++        }
++        options++;
++    }
++
++    memset(&header, 0, sizeof(header));
++    pstrcpy(header.text, sizeof(header.text), RBD_HEADER_TEXT);
++    pstrcpy(header.signature, sizeof(header.signature), RBD_HEADER_SIGNATURE);
++    pstrcpy(header.version, sizeof(header.version), RBD_HEADER_VERSION);
++    header.image_size = bytes;
++    cpu_to_le64s((uint64_t *) & header.image_size);
++    header.options.order = obj_order;
++    header.options.crypt_type = RBD_CRYPT_NONE;
++    header.options.comp_type = RBD_COMP_NONE;
++    header.snap_seq = 0;
++    header.snap_count = 0;
++    cpu_to_le32s(&header.snap_count);
++
++    if (rados_initialize(0, NULL) < 0) {
++        error_report("error initializing");
++        return -EIO;
++    }
++
++    if (rados_open_pool(pool, &p)) {
++        error_report("error opening pool %s", pool);
++        rados_deinitialize();
++        return -EIO;
++    }
++
++    /* check for existing rbd header file */
++    ret = rados_stat(p, n, &size, &mtime);
++    if (ret == 0) {
++        ret=-EEXIST;
++        goto done;
++    }
++
++    ret = rbd_assign_bid(p, &bid);
++    if (ret < 0) {
++        error_report("failed assigning block id");
++        rados_deinitialize();
++        return -EIO;
++    }
++    hi = bid >> 32;
++    lo = bid & 0xFFFFFFFF;
++    snprintf(header.block_name, sizeof(header.block_name), "rb.%x.%x", hi, lo);
++
++    /* create header file */
++    ret = rados_write(p, n, 0, (const char *)&header, sizeof(header));
++    if (ret < 0) {
++        goto done;
++    }
++
++    ret = rbd_register_image(p, name);
++done:
++    rados_close_pool(p);
++    rados_deinitialize();
++
++    return ret;
++}
++
++static void rbd_aio_completion_cb(void *opaque)
++{
++    BDRVRBDState *s = opaque;
++
++    uint64_t val;
++    ssize_t ret;
++
++    do {
++        if ((ret = read(s->efd, &val, sizeof(val))) > 0) {
++            s->qemu_aio_count -= val;
++       }
++    } while (ret < 0 && errno == EINTR);
++
++    return;
++}
++
++static int rbd_aio_flush_cb(void *opaque)
++{
++    BDRVRBDState *s = opaque;
++
++    return (s->qemu_aio_count > 0);
++}
++
++
++static int rbd_set_snapc(rados_pool_t pool, const char *snap, RbdHeader1 *header)
++{
++    uint32_t snap_count = header->snap_count;
++    rados_snap_t *snaps = NULL;
++    rados_snap_t seq;
++    uint32_t i;
++    uint64_t snap_names_len = header->snap_names_len;
++    int r;
++    rados_snap_t snapid = 0;
++
++    cpu_to_le32s(&snap_count);
++    cpu_to_le64s(&snap_names_len);
++    if (snap_count) {
++	const char *header_snap = (const char *)&header->snaps[snap_count];
++        const char *end = header_snap + snap_names_len;
++        snaps = qemu_malloc(sizeof(rados_snap_t) * header->snap_count);
++
++        for (i=0; i < snap_count; i++) {
++            snaps[i] = (uint64_t)header->snaps[i].id;
++            cpu_to_le64s(&snaps[i]);
++
++            if (snap && strcmp(snap, header_snap) == 0) {
++                snapid = snaps[i];
++            }
++
++            header_snap += strlen(header_snap) + 1;
++            if (header_snap > end)
++                error_report("bad header, snapshot list broken");
++        }
++    }
++
++    if (snap && !snapid) {
++        error_report("snapshot not found");
++        return -ENOENT;
++    }
++    seq = header->snap_seq;
++    cpu_to_le32s((uint32_t *)&seq);
++
++    r = rados_set_snap_context(pool, seq, snaps, snap_count);
++
++    rados_set_snap(pool, snapid);
++
++    qemu_free(snaps);
++
++    return r;
++}
++
++#define BUF_READ_START_LEN    4096
++
++static int rbd_read_header(BDRVRBDState *s, char **hbuf)
++{
++    char *buf = NULL;
++    char n[RBD_MAX_SEG_NAME_SIZE];
++    uint64_t len = BUF_READ_START_LEN;
++    int r;
++
++    snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s%s", s->name, RBD_SUFFIX);
++
++    buf = qemu_malloc(len);
++
++    r = rados_read(s->header_pool, n, 0, buf, len);
++    if (r < 0)
++        goto failed;
++
++    if (r < len)
++        goto done;
++
++    qemu_free(buf);
++    buf = qemu_malloc(len);
++
++    r = rados_stat(s->header_pool, n, &len, NULL);
++    if (r < 0)
++        goto failed;
++
++    r = rados_read(s->header_pool, n, 0, buf, len);
++    if (r < 0)
++        goto failed;
++
++done:
++    *hbuf = buf;
++    return 0;
++
++failed:
++    qemu_free(buf);
++    return r;
++}
++
++static int rbd_open(BlockDriverState *bs, const char *filename, int flags)
++{
++    BDRVRBDState *s = bs->opaque;
++    char pool[RBD_MAX_SEG_NAME_SIZE];
++    char *snap;
++    char *hbuf = NULL;
++    int r;
++
++    if (rbd_parsename(filename, pool, &snap, s->name) < 0) {
++        return -EINVAL;
++    }
++
++    if ((r = rados_initialize(0, NULL)) < 0) {
++        error_report("error initializing");
++        return r;
++    }
++
++    if ((r = rados_open_pool(pool, &s->pool))) {
++        error_report("error opening pool %s", pool);
++        rados_deinitialize();
++        return r;
++    }
++
++    if ((r = rados_open_pool(pool, &s->header_pool))) {
++        error_report("error opening pool %s", pool);
++        rados_deinitialize();
++        return r;
++    }
++
++   if ((r = rbd_read_header(s, &hbuf)) < 0) {
++        error_report("error reading header from %s", s->name);
++        goto failed;
++    }
++
++    if (strncmp(hbuf + 64, RBD_HEADER_SIGNATURE, 4)) {
++        error_report("Invalid header signature %s", hbuf + 64);
++        r = -EMEDIUMTYPE;
++        goto failed;
++    }
++
++    if (strncmp(hbuf + 68, RBD_HEADER_VERSION, 8)) {
++        error_report("Unknown image version %s", hbuf + 68);
++        r = -EMEDIUMTYPE;
++        goto failed;
++    }
++
++    RbdHeader1 *header;
++
++    header = (RbdHeader1 *) hbuf;
++    le64_to_cpus((uint64_t *) & header->image_size);
++    s->size = header->image_size;
++    s->objsize = 1 << header->options.order;
++    memcpy(s->block_name, header->block_name, sizeof(header->block_name));
++
++    r = rbd_set_snapc(s->pool, snap, header);
++    if (r < 0) {
++        error_report("failed setting snap context: %s", strerror(-r));
++        goto failed;
++    }
++
++    s->read_only = (snap != NULL);
++
++    s->efd = eventfd(0, 0);
++    if (s->efd < 0) {
++        error_report("error opening eventfd");
++        goto failed;
++    }
++    fcntl(s->efd, F_SETFL, O_NONBLOCK);
++    qemu_aio_set_fd_handler(s->efd, rbd_aio_completion_cb, NULL,
++        rbd_aio_flush_cb, NULL, s);
++
++    qemu_free(hbuf);
++
++    return 0;
++
++failed:
++    if (hbuf)
++        qemu_free(hbuf);
++
++    rados_close_pool(s->header_pool);
++    rados_close_pool(s->pool);
++    rados_deinitialize();
++    return r;
++}
++
++static void rbd_close(BlockDriverState *bs)
++{
++    BDRVRBDState *s = bs->opaque;
++
++    close(s->efd);
++    qemu_aio_set_fd_handler(s->efd, NULL , NULL, NULL, NULL, NULL);
++
++    rados_close_pool(s->header_pool);
++    rados_close_pool(s->pool);
++    rados_deinitialize();
++}
++
++static int rbd_rw(BlockDriverState *bs, int64_t sector_num,
++                  uint8_t *buf, int nb_sectors, int write)
++{
++    BDRVRBDState *s = bs->opaque;
++    char n[RBD_MAX_SEG_NAME_SIZE];
++
++    int64_t segnr, segoffs, segsize, r;
++    int64_t off, size;
++
++    off = sector_num * BDRV_SECTOR_SIZE;
++    size = nb_sectors * BDRV_SECTOR_SIZE;
++    segnr = off / s->objsize;
++    segoffs = off % s->objsize;
++    segsize = s->objsize - segoffs;
++
++    while (size > 0) {
++        if (size < segsize) {
++            segsize = size;
++        }
++
++        snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s.%012" PRIx64, s->block_name, segnr);
++
++        if (write) {
++            if (s->read_only)
++                return -EROFS;
++            if ((r = rados_write(s->pool, n, segoffs, (const char *)buf,
++                segsize)) < 0) {
++                return r;
++            }
++        } else {
++            r = rados_read(s->pool, n, segoffs, (char *)buf, segsize);
++            if (r == -ENOENT) {
++                memset(buf, 0, segsize);
++            } else if (r < 0) {
++                return r;
++            } else if (r < segsize) {
++                memset(buf + r, 0, segsize - r);
++            }
++        }
++
++        buf += segsize;
++        size -= segsize;
++        segoffs = 0;
++        segsize = s->objsize;
++        segnr++;
++    }
++
++    return 0;
++}
++
++static int rbd_read(BlockDriverState *bs, int64_t sector_num,
++                    uint8_t *buf, int nb_sectors)
++{
++    return rbd_rw(bs, sector_num, buf, nb_sectors, 0);
++}
++
++static int rbd_write(BlockDriverState *bs, int64_t sector_num,
++                     const uint8_t *buf, int nb_sectors)
++{
++    return rbd_rw(bs, sector_num, (uint8_t *) buf, nb_sectors, 1);
++}
++
++static void rbd_aio_cancel(BlockDriverAIOCB *blockacb)
++{
++    RBDAIOCB *acb = (RBDAIOCB *) blockacb;
++    qemu_bh_delete(acb->bh);
++    acb->bh = NULL;
++    qemu_aio_release(acb);
++}
++
++static AIOPool rbd_aio_pool = {
++    .aiocb_size = sizeof(RBDAIOCB),
++    .cancel = rbd_aio_cancel,
++};
++
++/* This is the callback function for rados_aio_read and _write */
++
++static void rbd_finish_aiocb(rados_completion_t c, RADOSCB *rcb)
++{
++    RBDAIOCB *acb = rcb->acb;
++    int64_t r;
++    uint64_t buf = 1;
++    int i;
++
++    acb->aiocnt--;
++    r = rados_aio_get_return_value(c);
++    rados_aio_release(c);
++    if (acb->write) {
++        if (r < 0) {
++            acb->ret = r;
++            acb->error = 1;
++        } else if (!acb->error) {
++            acb->ret += rcb->segsize;
++        }
++    } else {
++        if (r == -ENOENT) {
++            memset(rcb->buf, 0, rcb->segsize);
++            if (!acb->error) {
++                acb->ret += rcb->segsize;
++            }
++        } else if (r < 0) {
++            acb->ret = r;
++            acb->error = 1;
++        } else if (r < rcb->segsize) {
++            memset(rcb->buf + r, 0, rcb->segsize - r);
++            if (!acb->error) {
++                acb->ret += rcb->segsize;
++            }
++        } else if (!acb->error) {
++            acb->ret += r;
++        }
++    }
++    if (write(acb->s->efd, &buf, sizeof(buf)) < 0)
++        error_report("failed writing to acb->s->efd\n");
++    qemu_free(rcb);
++    i = 0;
++    if (!acb->aiocnt && acb->bh) {
++        qemu_bh_schedule(acb->bh);
++    }
++}
++
++/* Callback when all queued rados_aio requests are complete */
++
++static void rbd_aio_bh_cb(void *opaque)
++{
++    RBDAIOCB *acb = opaque;
++    uint64_t buf = 1;
++
++    if (!acb->write) {
++        qemu_iovec_from_buffer(acb->qiov, acb->bounce, acb->qiov->size);
++    }
++    qemu_vfree(acb->bounce);
++    acb->common.cb(acb->common.opaque, (acb->ret > 0 ? 0 : acb->ret));
++    qemu_bh_delete(acb->bh);
++    acb->bh = NULL;
++
++    if (write(acb->s->efd, &buf, sizeof(buf)) < 0)
++        error_report("failed writing to acb->s->efd\n");
++    qemu_aio_release(acb);
++}
++
++static BlockDriverAIOCB *rbd_aio_rw_vector(BlockDriverState *bs,
++                                           int64_t sector_num,
++                                           QEMUIOVector *qiov,
++                                           int nb_sectors,
++                                           BlockDriverCompletionFunc *cb,
++                                           void *opaque, int write)
++{
++    RBDAIOCB *acb;
++    RADOSCB *rcb;
++    rados_completion_t c;
++    char n[RBD_MAX_SEG_NAME_SIZE];
++    int64_t segnr, segoffs, segsize, last_segnr;
++    int64_t off, size;
++    char *buf;
++
++    BDRVRBDState *s = bs->opaque;
++
++    acb = qemu_aio_get(&rbd_aio_pool, bs, cb, opaque);
++    acb->write = write;
++    acb->qiov = qiov;
++    acb->bounce = qemu_blockalign(bs, qiov->size);
++    acb->aiocnt = 0;
++    acb->ret = 0;
++    acb->error = 0;
++    acb->s = s;
++
++    if (!acb->bh) {
++        acb->bh = qemu_bh_new(rbd_aio_bh_cb, acb);
++    }
++
++    if (write) {
++        qemu_iovec_to_buffer(acb->qiov, acb->bounce);
++    }
++
++    buf = acb->bounce;
++
++    off = sector_num * BDRV_SECTOR_SIZE;
++    size = nb_sectors * BDRV_SECTOR_SIZE;
++    segnr = off / s->objsize;
++    segoffs = off % s->objsize;
++    segsize = s->objsize - segoffs;
++
++    last_segnr = ((off + size - 1) / s->objsize);
++    acb->aiocnt = (last_segnr - segnr) + 1;
++
++    s->qemu_aio_count+=acb->aiocnt + 1; /* All the RADOSCB and the related RBDAIOCB */
++
++    if (write && s->read_only) {
++        acb->ret = -EROFS;
++        return NULL;
++    }
++
++    while (size > 0) {
++        if (size < segsize) {
++            segsize = size;
++        }
++
++        snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s.%012" PRIx64, s->block_name,
++                 segnr);
++
++        rcb = qemu_malloc(sizeof(RADOSCB));
++        rcb->done = 0;
++        rcb->acb = acb;
++        rcb->segsize = segsize;
++        rcb->buf = buf;
++
++        if (write) {
++            rados_aio_create_completion(rcb, NULL,
++                                        (rados_callback_t) rbd_finish_aiocb,
++                                        &c);
++            rados_aio_write(s->pool, n, segoffs, buf, segsize, c);
++        } else {
++            rados_aio_create_completion(rcb,
++                                        (rados_callback_t) rbd_finish_aiocb,
++                                        NULL, &c);
++            rados_aio_read(s->pool, n, segoffs, buf, segsize, c);
++        }
++
++        buf += segsize;
++        size -= segsize;
++        segoffs = 0;
++        segsize = s->objsize;
++        segnr++;
++    }
++
++    return &acb->common;
++}
++
++static BlockDriverAIOCB *rbd_aio_readv(BlockDriverState * bs,
++                                       int64_t sector_num, QEMUIOVector * qiov,
++                                       int nb_sectors,
++                                       BlockDriverCompletionFunc * cb,
++                                       void *opaque)
++{
++    return rbd_aio_rw_vector(bs, sector_num, qiov, nb_sectors, cb, opaque, 0);
++}
++
++static BlockDriverAIOCB *rbd_aio_writev(BlockDriverState * bs,
++                                        int64_t sector_num, QEMUIOVector * qiov,
++                                        int nb_sectors,
++                                        BlockDriverCompletionFunc * cb,
++                                        void *opaque)
++{
++    return rbd_aio_rw_vector(bs, sector_num, qiov, nb_sectors, cb, opaque, 1);
++}
++
++static int rbd_getinfo(BlockDriverState * bs, BlockDriverInfo * bdi)
++{
++    BDRVRBDState *s = bs->opaque;
++    bdi->cluster_size = s->objsize;
++    return 0;
++}
++
++static int64_t rbd_getlength(BlockDriverState * bs)
++{
++    BDRVRBDState *s = bs->opaque;
++
++    return s->size;
++}
++
++static int rbd_snap_create(BlockDriverState *bs, QEMUSnapshotInfo *sn_info)
++{
++    BDRVRBDState *s = bs->opaque;
++    char inbuf[512], outbuf[128];
++    uint64_t snap_id;
++    int r;
++    char *p = inbuf;
++    char *end = inbuf + sizeof(inbuf);
++    char n[RBD_MAX_SEG_NAME_SIZE];
++    char *hbuf = NULL;
++
++    if (sn_info->name[0] == '\0')
++        return -EINVAL; /* we need a name for rbd snapshots */
++
++    /*
++     * rbd snapshots are using the name as the user controlled unique identifier
++     * we can't use the rbd snapid for that purpose, as it can't be set
++     */
++    if (sn_info->id_str[0] != '\0' &&
++        strcmp(sn_info->id_str, sn_info->name) != 0)
++        return -EINVAL;
++
++    if (strlen(sn_info->name) >= sizeof(sn_info->id_str))
++        return -ERANGE;
++
++    r = rados_selfmanaged_snap_create(s->header_pool, &snap_id);
++    if (r < 0) {
++        error_report("failed to create snap id: %s", strerror(-r));
++        return r;
++    }
++
++    *(uint32_t *)p = strlen(sn_info->name);
++    cpu_to_le32s((uint32_t *)p);
++    p += sizeof(uint32_t);
++    strncpy(p, sn_info->name, end - p);
++    p += strlen(p);
++    if (p + sizeof(snap_id) > end) {
++        error_report("invalid input parameter");
++        return -EINVAL;
++    }
++
++    *(uint64_t *)p = snap_id;
++    cpu_to_le64s((uint64_t *)p);
++
++    snprintf(n, RBD_MAX_SEG_NAME_SIZE, "%s%s", s->name, RBD_SUFFIX);
++
++    r = rados_exec(s->header_pool, n, "rbd", "snap_add", inbuf,
++                   sizeof(inbuf), outbuf, sizeof(outbuf));
++    if (r < 0) {
++        error_report("rbd.snap_add execution failed failed: %s", strerror(-r));
++        return r;
++    }
++
++    sprintf(sn_info->id_str, "%s", sn_info->name);
++
++    r = rbd_read_header(s, &hbuf);
++    if (r < 0) {
++        error_report("failed reading header: %s", strerror(-r));
++        return r;
++    }
++
++    RbdHeader1 *header;
++
++    header = (RbdHeader1 *) hbuf;
++    r = rbd_set_snapc(s->pool, sn_info->name, header);
++    if (r < 0) {
++        error_report("failed setting snap context: %s", strerror(-r));
++        goto failed;
++    }
++
++    return 0;
++
++failed:
++    if (hbuf)
++        qemu_free(header);
++    return r;
++}
++
++static QEMUOptionParameter rbd_create_options[] = {
++    {
++     .name = BLOCK_OPT_SIZE,
++     .type = OPT_SIZE,
++     .help = "Virtual disk size"
++    },
++    {
++     .name = BLOCK_OPT_CLUSTER_SIZE,
++     .type = OPT_SIZE,
++     .help = "RBD object size"
++    },
++    {NULL}
++};
++
++static BlockDriver bdrv_rbd = {
++    .format_name        = "rbd",
++    .instance_size      = sizeof(BDRVRBDState),
++    .bdrv_file_open     = rbd_open,
++    .bdrv_read          = rbd_read,
++    .bdrv_write         = rbd_write,
++    .bdrv_close         = rbd_close,
++    .bdrv_create        = rbd_create,
++    .bdrv_get_info      = rbd_getinfo,
++    .create_options     = rbd_create_options,
++    .bdrv_getlength     = rbd_getlength,
++    .protocol_name      = "rbd",
++
++    .bdrv_aio_readv     = rbd_aio_readv,
++    .bdrv_aio_writev    = rbd_aio_writev,
++
++    .bdrv_snapshot_create = rbd_snap_create,
++};
++
++static void bdrv_rbd_init(void)
++{
++    bdrv_register(&bdrv_rbd);
++}
++
++block_init(bdrv_rbd_init);
+diff --git a/block/rbd_types.h b/block/rbd_types.h
+new file mode 100644
+index 0000000..c35d840
+--- /dev/null
++++ b/block/rbd_types.h
+@@ -0,0 +1,71 @@
++/*
++ * Ceph - scalable distributed file system
++ *
++ * Copyright (C) 2004-2010 Sage Weil <sage@newdream.net>
++ *
++ * This is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License version 2.1, as published by the Free Software
++ * Foundation.  See file COPYING.
++ *
++ */
++
++#ifndef CEPH_RBD_TYPES_H
++#define CEPH_RBD_TYPES_H
++
++
++/*
++ * rbd image 'foo' consists of objects
++ *   foo.rbd      - image metadata
++ *   foo.00000000
++ *   foo.00000001
++ *   ...          - data
++ */
++
++#define RBD_SUFFIX              ".rbd"
++#define RBD_DIRECTORY           "rbd_directory"
++#define RBD_INFO                "rbd_info"
++
++#define RBD_DEFAULT_OBJ_ORDER   22   /* 4MB */
++
++#define RBD_MAX_OBJ_NAME_SIZE   96
++#define RBD_MAX_BLOCK_NAME_SIZE 24
++#define RBD_MAX_SEG_NAME_SIZE   128
++
++#define RBD_COMP_NONE           0
++#define RBD_CRYPT_NONE          0
++
++#define RBD_HEADER_TEXT         "<<< Rados Block Device Image >>>\n"
++#define RBD_HEADER_SIGNATURE    "RBD"
++#define RBD_HEADER_VERSION      "001.005"
++
++struct rbd_info {
++    uint64_t max_id;
++} __attribute__ ((packed));
++
++struct rbd_obj_snap_ondisk {
++    uint64_t id;
++    uint64_t image_size;
++} __attribute__((packed));
++
++struct rbd_obj_header_ondisk {
++    char text[40];
++    char block_name[RBD_MAX_BLOCK_NAME_SIZE];
++    char signature[4];
++    char version[8];
++    struct {
++        uint8_t order;
++        uint8_t crypt_type;
++        uint8_t comp_type;
++        uint8_t unused;
++    } __attribute__((packed)) options;
++    uint64_t image_size;
++    uint64_t snap_seq;
++    uint32_t snap_count;
++    uint32_t reserved;
++    uint64_t snap_names_len;
++    struct rbd_obj_snap_ondisk snaps[0];
++} __attribute__((packed));
++
++
++#endif
+diff --git a/configure b/configure
+index a20371c..d135445 100755
+--- a/configure
++++ b/configure
+@@ -315,6 +315,7 @@ pkgversion=""
+ check_utests="no"
+ user_pie="no"
+ zero_malloc=""
++rbd=""
+ 
+ # OS specific
+ if check_define __linux__ ; then
+@@ -709,6 +710,10 @@ for opt do
+   ;;
+   --*dir)
+   ;;
++  --disable-rbd) rbd="no"
++  ;;
++  --enable-rbd) rbd="yes"
++  ;;
+   *) echo "ERROR: unknown option $opt"; show_help="yes"
+   ;;
+   esac
+@@ -895,6 +900,7 @@ echo "  --enable-docs            enable documentation build"
+ echo "  --disable-docs           disable documentation build"
+ echo "  --disable-vhost-net      disable vhost-net acceleration support"
+ echo "  --enable-vhost-net       enable vhost-net acceleration support"
++echo "  --enable-rbd		 enable building the rados block device (rbd)"
+ echo ""
+ echo "NOTE: The object files are built at the place where configure is launched"
+ exit 1
+@@ -1701,6 +1707,27 @@ if test "$mingw32" != yes -a "$pthread" = no; then
+ fi
+ 
+ ##########################################
++# rbd probe
++if test "$rbd" != "no" ; then
++  cat > $TMPC <<EOF
++#include <stdio.h>
++#include <rados/librados.h>
++int main(void) { rados_initialize(0, NULL); return 0; }
++EOF
++  rbd_libs="-lrados -lcrypto"
++  if compile_prog "" "$rbd_libs" ; then
++    rbd=yes
++    libs_tools="$rbd_libs $libs_tools"
++    libs_softmmu="$rbd_libs $libs_softmmu"
++  else
++    if test "$rbd" = "yes" ; then
++      feature_not_found "rados block device"
++    fi
++    rbd=no
++  fi
++fi
++
++##########################################
+ # linux-aio probe
+ 
+ if test "$linux_aio" != "no" ; then
+@@ -2187,6 +2214,7 @@ echo "preadv support    $preadv"
+ echo "fdatasync         $fdatasync"
+ echo "uuid support      $uuid"
+ echo "vhost-net support $vhost_net"
++echo "rbd support       $rbd"
+ 
+ if test $sdl_too_old = "yes"; then
+ echo "-> Your SDL version is too old - please upgrade to have SDL support"
+@@ -2434,6 +2462,9 @@ echo "CONFIG_UNAME_RELEASE=\"$uname_release\"" >> $config_host_mak
+ if test "$zero_malloc" = "yes" ; then
+   echo "CONFIG_ZERO_MALLOC=y" >> $config_host_mak
+ fi
++if test "$rbd" = "yes" ; then
++  echo "CONFIG_RBD=y" >> $config_host_mak
++fi
+ 
+ # USB host support
+ case "$usb" in
+-- 
+1.7.0.4
+
