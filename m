@@ -1,42 +1,62 @@
-From: Takuya ASADA <syuu@dokukino.com>
-Subject: "acconfig.h: No such file or directory" when -DNO_ATOMIC_OPS
-Date: Tue, 3 Aug 2010 22:53:40 +0900
-Message-ID: <AANLkTi=-00_d8_ZM_jz+HWBv9Hk1L5JGPss2ri6tHXvo@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: librados.hpp fix
+Date: Tue, 3 Aug 2010 09:45:47 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1008030945240.19076@cobra.newdream.net>
+References: <AANLkTi=wtavHtw04KwZRfK2LrWahS6TdmN2nh_phcRJn@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:45274 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755949Ab0HCNyB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Aug 2010 09:54:01 -0400
-Received: by wwj40 with SMTP id 40so5160846wwj.1
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Aug 2010 06:54:00 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:42631 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756180Ab0HCQnE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Aug 2010 12:43:04 -0400
+In-Reply-To: <AANLkTi=wtavHtw04KwZRfK2LrWahS6TdmN2nh_phcRJn@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Takuya ASADA <syuu@dokukino.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+Thanks, applied this.  And fixed the acconfig.h #include.  Pushed to 
+the testing and unstable branches.
 
-The program using librados.hpp cannot compile in case
--DNO_ATOMIC_OPS(without libatomic_ops), like this:
+sage
 
-g++ -Wall -Werror -D_FILE_OFFSET_BITS=64 -g -DNO_ATOMIC_OPS   -c -o
-put_obj.o put_obj.cc
-In file included from /usr/local/include/rados/Spinlock.h:19,
-                 from /usr/local/include/rados/atomic.h:57,
-                 from /usr/local/include/rados/buffer.h:55,
-                 from /usr/local/include/rados/librados.hpp:9,
-                 from put_obj.cc:6:
-/usr/local/include/rados/assert.h:6:22: error: acconfig.h: No such
-file or directory
+On Tue, 3 Aug 2010, Takuya ASADA wrote:
 
-To avoid the error, we need to comment out #include "acconfig.h" in assert.h.
-
-If libatomic_ops exist, it won't happen.
-yum -y install libatomic_ops-devel
-g++ -Wall -Werror -D_FILE_OFFSET_BITS=64 -g -c -o put_obj.o put_obj.cc
-
-Note: put_obj.cc is on github.com.
-http://github.com/syuu1228/radoscmds/blob/master/put_obj.cc
-
-syuu
+> Hi,
+> 
+> I just realized librados.hpp could compile only if "using namespace
+> std;" is declared before "#include <rados/librados.hpp>", because
+> "vector" used without std namespace, and I think it's wrong.
+> It can fix following patch.
+> 
+> syuu
+> 
+> diff --git a/src/include/librados.hpp b/src/include/librados.hpp
+> index b0d3622..06fa3b2 100644
+> --- a/src/include/librados.hpp
+> +++ b/src/include/librados.hpp
+> @@ -38,7 +38,7 @@ namespace librados {
+> 
+>    struct SnapContext {
+>      snap_t seq;
+> -    vector<snap_t> snaps;
+> +    std::vector<snap_t> snaps;
+>    };
+> 
+> 
+> @@ -57,7 +57,7 @@ public:
+>    int lookup_pool(const char *name);
+> 
+>    void set_snap(pool_t pool, snap_t seq);
+> -  int set_snap_context(pool_t pool, snap_t seq, vector<snap_t>& snaps);
+> +  int set_snap_context(pool_t pool, snap_t seq, std::vector<snap_t>& snaps);
+> 
+> 
+>    int create(pool_t pool, const std::string& oid, bool exclusive);
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
