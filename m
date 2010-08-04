@@ -1,34 +1,52 @@
-From: Xiaoguang Liu <syslxg@gmail.com>
-Subject: ceph.spec.in problem in unstable ceph
-Date: Wed, 4 Aug 2010 17:18:27 +0800
-Message-ID: <AANLkTikzSGtffR3oZAwVNsa5RNtkFXx9HvazFBhf501L@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph.spec.in problem in unstable ceph
+Date: Wed, 4 Aug 2010 09:59:40 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1008040959130.16157@cobra.newdream.net>
+References: <AANLkTikzSGtffR3oZAwVNsa5RNtkFXx9HvazFBhf501L@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:42568 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756945Ab0HDJS2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Aug 2010 05:18:28 -0400
-Received: by vws3 with SMTP id 3so3922828vws.19
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Aug 2010 02:18:27 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:38047 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756839Ab0HDQ4y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Aug 2010 12:56:54 -0400
+In-Reply-To: <AANLkTikzSGtffR3oZAwVNsa5RNtkFXx9HvazFBhf501L@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Xiaoguang Liu <syslxg@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-rpmbuild fails at this line:
+Hi,
 
-chmod 0644 $RPM_BUILD_ROOT%{_sysconfdir}/ceph/sample.ceph.conf
+I pushed a fix to the testing branch, but I don't have a Fedora VM handy 
+to test it.  Can you let me know if it resolves the problem?
 
-I think this is becuase sample.ceph.conf is no longer in /etc/ceph,
-but %{_docdir}/,  in unstable .
-
-If I remove this line from spec file, rpmbuild fails at:
+Thanks-
+sage
 
 
-RPM build errors:
-    File not found:
-/root/src/rpm/BUILDROOT/ceph-0.22rc-4.fc13.x86_64/usr/share/doc/sample.ceph.conf
-    File not found:
-/root/src/rpm/BUILDROOT/ceph-0.22rc-4.fc13.x86_64/usr/share/doc/sample.fetch_config
+On Wed, 4 Aug 2010, Xiaoguang Liu wrote:
 
-You may want to fix these two issues.
+> rpmbuild fails at this line:
+> 
+> chmod 0644 $RPM_BUILD_ROOT%{_sysconfdir}/ceph/sample.ceph.conf
+> 
+> I think this is becuase sample.ceph.conf is no longer in /etc/ceph,
+> but %{_docdir}/,  in unstable .
+> 
+> If I remove this line from spec file, rpmbuild fails at:
+> 
+> 
+> RPM build errors:
+>     File not found:
+> /root/src/rpm/BUILDROOT/ceph-0.22rc-4.fc13.x86_64/usr/share/doc/sample.ceph.conf
+>     File not found:
+> /root/src/rpm/BUILDROOT/ceph-0.22rc-4.fc13.x86_64/usr/share/doc/sample.fetch_config
+> 
+> You may want to fix these two issues.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
