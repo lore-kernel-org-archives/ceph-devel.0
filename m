@@ -1,39 +1,27 @@
-From: Randy Dunlap <randy.dunlap@oracle.com>
-Subject: [PATCH -next] ceph: rbd depends on BLOCK
-Date: Wed, 4 Aug 2010 10:16:24 -0700
-Message-ID: <20100804101624.5189893c.randy.dunlap@oracle.com>
-References: <20100804151035.14678528.sfr@canb.auug.org.au>
+From: Haifeng Liu <haifeng@yahoo-inc.com>
+Subject: A typo fix
+Date: Thu, 5 Aug 2010 17:16:23 +0900
+Message-ID: <C8809457.57BD%haifeng@yahoo-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-next-owner@vger.kernel.org>
-In-Reply-To: <20100804151035.14678528.sfr@canb.auug.org.au>
-Sender: linux-next-owner@vger.kernel.org
-To: Stephen Rothwell <sfr@canb.auug.org.au>, Sage Weil <sage@newdream.net>
-Cc: linux-next@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mrout1.yahoo.com ([216.145.54.171]:46354 "EHLO mrout1.yahoo.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758810Ab0HEI2k (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 5 Aug 2010 04:28:40 -0400
+Received: from kr1-ex07cas01.ds.corp.yahoo.com (kr1-ex07cas01.ds.corp.yahoo.com [202.93.7.140])
+	by mrout1.yahoo.com (8.13.8/8.13.8/y.out) with ESMTP id o758GOPG026723
+	for <ceph-devel@vger.kernel.org>; Thu, 5 Aug 2010 01:16:25 -0700 (PDT)
+Content-Language: en
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-From: Randy Dunlap <randy.dunlap@oracle.com>
-
-When CONFIG_BLOCK is not enabled, fs/ceph/rbd has:
-file: fs/ceph/rbd.c: errors: 71, warnings: 18
-
-This is due to BLOCK being spelled as CONFIG_BLOCK
-(and depends on being spelled as select).
-
-Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
----
- fs/ceph/Kconfig |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
---- linux-next-20100804.orig/fs/ceph/Kconfig
-+++ linux-next-20100804/fs/ceph/Kconfig
-@@ -28,7 +28,7 @@ config CEPH_FS_PRETTYDEBUG
- config CEPH_RBD
- 	bool "Rados block device (RBD)"
- 	depends on CEPH_FS
--	select  CONFIG_BLOCK
-+	depends on BLOCK
- 	default y
- 	help
- 	  If you say Y here, ceph will include rbd, the RADOS block
+SGkgY2VwaCBkZXYsDQoNClRoZXJlIHNlZW1zIGEgdHlwby4NCiANCg0KZGlmZiAtLWdpdCBhL21h
+bi9tb25tYXB0b29sLjggYi9tYW4vbW9ubWFwdG9vbC44DQppbmRleCBiY2NmNTI3Li41OTFlMjNh
+IDEwMDY0NA0KLS0tIGEvbWFuL21vbm1hcHRvb2wuOA0KKysrIGIvbWFuL21vbm1hcHRvb2wuOA0K
+QEAgLTEsNiArMSw2IEBADQogLlRIIE1PTk1BUFRPT0wgOA0KIC5TSCBOQU1FDQotbW9ubWFwdG9v
+bCBcLSBjZXBoIG1vbnV0aXIgY2x1c3RlciBtYXAgbWFuaXB1bGF0aW9uIHRvb2wNCittb25tYXB0
+b29sIFwtIGNlcGggbW9uaXRvciBjbHVzdGVyIG1hcCBtYW5pcHVsYXRpb24gdG9vbA0KIC5TSCBT
+WU5PUFNJUw0KIC5CIG1vbm1hcHRvb2wNCiBcZkltYXBmaWxlbmFtZVxmUA0KDQo=
