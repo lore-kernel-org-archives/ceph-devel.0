@@ -1,46 +1,43 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: compiler warnings on centos5
-Date: Fri, 6 Aug 2010 09:25:53 -0700
-Message-ID: <AANLkTinKDgH-K7myRsEeP3PUHP3E_fM8CQd=gMzha6uR@mail.gmail.com>
-References: <i3e1fs$mv$1@dough.gmane.org>
-	<AANLkTi=uegGEfjXw_DpfshdArsjQjk=sOv8DJ0-TF5be@mail.gmail.com>
-	<i3gthp$56v$2@dough.gmane.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: rbd create command fails to create image
+Date: Fri, 6 Aug 2010 09:44:16 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1008060940300.26680@cobra.newdream.net>
+References: <AANLkTim1YdtvJ4mnV2P8m3xyyPTdRvPDsQ8R1G3Xk6=x@mail.gmail.com>
+ <AANLkTiksxkHQ-bJuKuE=sxGUpeBUcB16sjqmVRB4GkCU@mail.gmail.com>
+ <AANLkTikyKWEObcbRJ1pTjMuEHOAXrRxiKO5ts+9m9cx0@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:45106 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752066Ab0HFQZy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Aug 2010 12:25:54 -0400
-Received: by wyb39 with SMTP id 39so7922791wyb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Aug 2010 09:25:53 -0700 (PDT)
-In-Reply-To: <i3gthp$56v$2@dough.gmane.org>
+Received: from cobra.newdream.net ([66.33.216.30]:34909 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933833Ab0HFQlY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Aug 2010 12:41:24 -0400
+In-Reply-To: <AANLkTikyKWEObcbRJ1pTjMuEHOAXrRxiKO5ts+9m9cx0@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
+To: Xiaoguang Liu <syslxg@gmail.com>
+Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, ceph-devel@vger.kernel.org
 
-On Fri, Aug 6, 2010 at 5:00 AM, Thomas Mueller <thomas@chaschperli.ch> wrote:
-> I found out that Centos5 actually provides a gcc44 and gcc44-c++ package.
-> Compiling with those doesn't show the wanrings.
->
-> symlinking g++44 and gcc44 to /usr/local/(gcc|g++) works.
->
->
-> calling configure with the custom paths for gcc and g++ doesn't:
->
-> CC=/usr/bin/gcc44 CXX=/usr/bin/g++44 ./configure --prefix=/usr
-> ...
-> checking for atomic_ops.h... yes
-> checking for dirent.h that defines DIR... yes
-> checking for library containing opendir... none required
-> checking for ANSI C header files... (cached) yes
-> checking for sys/wait.h that is POSIX.1 compatible... yes
-> checking boost/spirit.hpp usability... no
-> checking boost/spirit.hpp presence... no
-> checking for boost/spirit.hpp... no
-> configure: error: Sorry you need to install the Boost spirit parser
-> library (libboost-dev on debian)
-Looks like a configuration issue since it can't find the Boost header
-file. I imagine that by calling them directly you're losing some
-include lines or something?
+Hi Xiaoguang,
+
+The problem is that /usr/lib/rados-classes/* shouldn't have symbols 
+stripped.  I'm no rpmbuild expert, but a search for 'rpmbuild strip' 
+turned up a few things.  Can you see if the below patch fixes the problem 
+for you?
+
+Thanks!
+sage
+
+
+diff --git a/ceph.spec.in b/ceph.spec.in
+index 20e0251..f068edd 100644
+--- a/ceph.spec.in
++++ b/ceph.spec.in
+@@ -64,6 +64,7 @@ conjunction with any FastCGI capable web server.
+ make -j$(getconf _NPROCESSORS_ONLN) CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS"
+ 
+ %install
++export DONT_STRIP=1
+ rm -rf $RPM_BUILD_ROOT
+ make install DESTDIR=$RPM_BUILD_ROOT
+ find $RPM_BUILD_ROOT -type f -name "*.la" -exec rm -f {} ';'
