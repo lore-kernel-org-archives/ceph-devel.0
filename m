@@ -1,71 +1,78 @@
 From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: Re: compiler warnings on centos5
-Date: Sat, 07 Aug 2010 12:54:44 +0200
-Message-ID: <4C5D3B74.2050307@chaschperli.ch>
-References: <i3e1fs$mv$1@dough.gmane.org>	<AANLkTi=uegGEfjXw_DpfshdArsjQjk=sOv8DJ0-TF5be@mail.gmail.com>	<i3gthp$56v$2@dough.gmane.org> <AANLkTinKDgH-K7myRsEeP3PUHP3E_fM8CQd=gMzha6uR@mail.gmail.com>
+Subject: Re: rbd create command fails to create image
+Date: Sat, 7 Aug 2010 11:38:41 +0000 (UTC)
+Message-ID: <i3jgk1$iog$1@dough.gmane.org>
+References: <AANLkTim1YdtvJ4mnV2P8m3xyyPTdRvPDsQ8R1G3Xk6=x@mail.gmail.com>
+	<AANLkTiksxkHQ-bJuKuE=sxGUpeBUcB16sjqmVRB4GkCU@mail.gmail.com>
+	<AANLkTikyKWEObcbRJ1pTjMuEHOAXrRxiKO5ts+9m9cx0@mail.gmail.com>
+	<Pine.LNX.4.64.1008060940300.26680@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from trillian.muellerit.ch ([83.169.22.129]:43675 "EHLO
-	trillian.muellerit.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752950Ab0HGKzP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Aug 2010 06:55:15 -0400
-In-Reply-To: <AANLkTinKDgH-K7myRsEeP3PUHP3E_fM8CQd=gMzha6uR@mail.gmail.com>
+Received: from lo.gmane.org ([80.91.229.12]:40020 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751908Ab0HGMUn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 7 Aug 2010 08:20:43 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OhiO8-0001R5-1y
+	for ceph-devel@vger.kernel.org; Sat, 07 Aug 2010 14:20:32 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 07 Aug 2010 14:20:32 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 07 Aug 2010 14:20:32 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 06.08.2010 18:25, Gregory Farnum wrote:
-> On Fri, Aug 6, 2010 at 5:00 AM, Thomas Mueller<thomas@chaschperli.ch>  wrote:
->> I found out that Centos5 actually provides a gcc44 and gcc44-c++ package.
->> Compiling with those doesn't show the wanrings.
->>
->> symlinking g++44 and gcc44 to /usr/local/(gcc|g++) works.
+Am Fri, 06 Aug 2010 09:44:16 -0700 schrieb Sage Weil:
 
-I just thought it would work. did not look at the configure output.
+> Hi Xiaoguang,
+> 
+> The problem is that /usr/lib/rados-classes/* shouldn't have symbols
+> stripped.  I'm no rpmbuild expert, but a search for 'rpmbuild strip'
+> turned up a few things.  Can you see if the below patch fixes the
+> problem for you?
+> 
+> Thanks!
+> sage
+> 
+> 
+> diff --git a/ceph.spec.in b/ceph.spec.in index 20e0251..f068edd 100644
+> --- a/ceph.spec.in
+> +++ b/ceph.spec.in
+> @@ -64,6 +64,7 @@ conjunction with any FastCGI capable web server.
+>  make -j$(getconf _NPROCESSORS_ONLN) CFLAGS="$RPM_OPT_FLAGS"
+>  CXXFLAGS="$RPM_OPT_FLAGS"
+>  
+>  %install
+> +export DONT_STRIP=1
+>  rm -rf $RPM_BUILD_ROOT
+>  make install DESTDIR=$RPM_BUILD_ROOT
+>  find $RPM_BUILD_ROOT -type f -name "*.la" -exec rm -f {} ';'
 
->>
->>
->> calling configure with the custom paths for gcc and g++ doesn't:
->>
->> CC=/usr/bin/gcc44 CXX=/usr/bin/g++44 ./configure --prefix=/usr
->> ...
->> checking for atomic_ops.h... yes
->> checking for dirent.h that defines DIR... yes
->> checking for library containing opendir... none required
->> checking for ANSI C header files... (cached) yes
->> checking for sys/wait.h that is POSIX.1 compatible... yes
->> checking boost/spirit.hpp usability... no
->> checking boost/spirit.hpp presence... no
->> checking for boost/spirit.hpp... no
->> configure: error: Sorry you need to install the Boost spirit parser
->> library (libboost-dev on debian)
-> Looks like a configuration issue since it can't find the Boost header
-> file. I imagine that by calling them directly you're losing some
-> include lines or something?
+I'm not a rpm expert either. :) but grepping /usr/lib/rpm did not reveal 
+any DONT_STRIP information. 
 
+the strip'ing is done by "%__os_install_post" macro:
 
-I think i finally located the problem, in config.log:
+%__os_install_post        \
+      /usr/lib/rpm/brp-compress \
+      /usr/lib/rpm/brp-strip \
+      /usr/lib/rpm/brp-strip-comment-note \
 
+maybe redefining it in spec like this:
 
-configure:20728: g++ -E  conftest.cc
-In file included from /usr/include/boost/mpl/apply.hpp:23,
-                  from /usr/include/boost/iterator/iterator_facade.hpp:34,
-                  from /usr/include/boost/iterator/iterator_adaptor.hpp:15,
-                  from /usr/include/boost/iterator_adaptors.hpp:8,
-                  from 
-/usr/include/boost/spirit/iterator/file_iterator.hpp:55,
-                  from /usr/include/boost/spirit/iterator.hpp:21,
-                  from /usr/include/boost/spirit.hpp:49,
-                  from conftest.cc:30:
-/usr/include/boost/mpl/apply_wrap.hpp:81:31: error: missing binary 
-operator before token "("
-/usr/include/boost/mpl/apply_wrap.hpp:173:31: error: missing binary 
-operator before token "("
+%define __os_install_post /usr/lib/rpm/brp-compress
 
-seems that the version of boost (1.33.1) in Centos5 does not compile 
-with gcc 4.4.
+may help?
+
+either way, it disables strip'ing for all the files. Is this good? :)
 
 - Thomas
+
+
