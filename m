@@ -1,48 +1,37 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: how to remove/update a RBD device?
-Date: Mon, 09 Aug 2010 12:38:18 +0200
-Message-ID: <1281350298.2246.8.camel@wido-desktop>
-References: <AANLkTinm2C+LrSUPsnf_djAbQS-0VRX8tHw2T1bf2qbR@mail.gmail.com>
+From: Takuya ASADA <syuu@dokukino.com>
+Subject: RADOS Java binding & RADOS for Eucalyptus Walrus(S3 interface)
+Date: Tue, 10 Aug 2010 00:36:22 +0900
+Message-ID: <AANLkTikt9FfcGqwHmrBS==OxLVQcwPUkSEdTmmGM9bYt@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:33539 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756114Ab0HIKiV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Aug 2010 06:38:21 -0400
-In-Reply-To: <AANLkTinm2C+LrSUPsnf_djAbQS-0VRX8tHw2T1bf2qbR@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:58125 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756212Ab0HIPgo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Aug 2010 11:36:44 -0400
+Received: by wwj40 with SMTP id 40so11700513wwj.1
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Aug 2010 08:36:42 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaoguang Liu <syslxg@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Xiaoguang,
+Hi,
 
-I don't have a RBD system running at the moment, so i can't check my
-commands.
+I'm considering to use RADOS for Eucalyptus Walrus backend to make it
+more scaleable, and I just implemented experimental code for it.
+At the beginning I tried to figure out the way to use radosgw instead
+of Walrus for S3 interface, but it's looks bit difficult to fill the
+gap of authorization code between Eucalyptus and radosgw, therefore I
+implemented RADOS Java binding and RADOS interface for Walrus.
 
-But when you have /dev/rbd0, you can remove this device with:
+It's not so well tested, but at least S3 client(s3cmd) and
+euca-upload-bundle worked on it.
+If the project has interest on it, I'm very happy to contribute the
+code and work on it continuously.
 
-echo 0 > /sys/class/rbd/remove
+Currently the code are on github.com:
+http://github.com/syuu1228/rados4j
+http://github.com/syuu1228/RADOS4Eucalyptus
 
-There might be a resize option, see:
-http://tracker.newdream.net/issues/42
-
-echo 0 > /sys/class/rbd/refresh
-
-Does that work for you?
-
-Wido
-
-On Mon, 2010-08-09 at 14:48 +0800, Xiaoguang Liu wrote:
-> the following command will add rbd device on Linux
->          echo "172.16.12.1 name=admin rbd foo" > /sys/class/rbd/add
-> 
-> but how to remove it or change it (after I resize the image by rbd
-> resize foo -size=xxx)? the wiki does not say.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Thanks,
+syuu
