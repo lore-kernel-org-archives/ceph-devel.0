@@ -1,82 +1,94 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: osd crashed after adding new osd
-Date: Tue, 10 Aug 2010 13:56:59 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1008101347500.9792@cobra.newdream.net>
-References: <AANLkTi=bUW_twak9n_jwcp2VkrRN_pztEzkUMzW72z5=@mail.gmail.com>
- <1281454926.2812.3.camel@wido-laptop.pcextreme.nl>
- <AANLkTiksxQ6EGpgBq7jZfR2KQdV4G=9eoK7ASBfDNtcQ@mail.gmail.com>
+Subject: Re: cosd dying after start
+Date: Tue, 10 Aug 2010 14:04:27 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1008101358280.9792@cobra.newdream.net>
+References: <AANLkTi=zkYni8xgp5aMQ6Q52RmDnu3eAqZ-8-DO-_6n_@mail.gmail.com>
+ <AANLkTi=_kCreuSdkywt2xgcPrHebR6tBODvNnguhXFrU@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55927 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:43527 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752513Ab0HJU4w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Aug 2010 16:56:52 -0400
-In-Reply-To: <AANLkTiksxQ6EGpgBq7jZfR2KQdV4G=9eoK7ASBfDNtcQ@mail.gmail.com>
+	with ESMTP id S1752491Ab0HJVEU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Aug 2010 17:04:20 -0400
+In-Reply-To: <AANLkTi=_kCreuSdkywt2xgcPrHebR6tBODvNnguhXFrU@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry_c_chang@tcloudcomputing.com>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+To: Christian Brunner <chb@muc.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Henry,
+On Tue, 10 Aug 2010, Christian Brunner wrote:
 
-Your osd add procedure looks correct.  Did the osd start correct after 
-this point?  Are you able to reproduce the problem with osd logging 
-turned up (debug osd = 20 in [osd])?
+> After a bit more debuging I've found out that there seems to be a file
+> missing from the filestore:
+> 
+> 10.08.10_18:14:07.862190 7f568d3e5710 filestore(/ceph/osd/osd02)
+> getattr /ceph/osd/osd02/current/3.f2_head/rb.0.1d6.00000000000e_head
+> '_' = -2
 
-I just tried this with the latest unstable and wasn't able to reproduce 
-the problem.
+There was a bug last week in the kernel client rbd branch that was 
+improperly encoding osd write operation payloads.  Can you check that your 
+rbd client is running 79c49720, which fixes it?
 
+That error above was probably just because that object hadn't been written 
+yet, and isn't a fatal error.  There is a 'scrub' function that verifies 
+that most of the osd metadata is in order and replication is accurate: 
+'ceph osd scrub <osdnum>' and watch 'ceph -w' to see the success or error 
+messages go by for each pg (or tail $mon_data/log on any monitor)
+
+Thanks
 sage
 
-On Wed, 11 Aug 2010, Henry C Chang wrote:
 
-> Hi Wido,
+
 > 
-> I am running unstable branch (commit: b72c1bb6e9b77e1ab6c2) dated July 30.
-> I just uploaded the core dumps to
+> Is there something like fsck.cephfs ?
 > 
-> http://home.anet.net.tw/cycbbb/coredumps/core.2580.gz
-> http://home.anet.net.tw/cycbbb/coredumps/core.2602.gz
+> Christian
 > 
-> 
-> 
-> On Tue, Aug 10, 2010 at 11:42 PM, Wido den Hollander <wido@widodh.nl> wrote:
-> > Hi Henry,
+> 2010/8/10 Christian Brunner <chb@muc.de>:
+> > Hi,
 > >
-> > Is there a core-dump of these crashes in /? If so, these could help
-> > finding the cause of this.
+> > we have a problem with one cosd instance (v0.21) in our test
+> > environment: It is dying 3 seconds after start with the message:
 > >
-> > See: http://ceph.newdream.net/wiki/Troubleshooting
+> > terminate called after throwing an instance of 'ceph::buffer::end_of_buffer*'
 > >
-> > And btw, which version of Ceph are you running?
+> > When I run with debugging on, the output looks like this:
 > >
-> > Wido
+> > [...]
+> > 10.08.10_17:25:33.187255 7fac762e1710 -- 10.165.254.22:6800/2773 >>
+> > 10.165.254.132:0/23863 pipe(0x7fac7c003f50 sd=25 pgs=70 cs=1
+> > l=1).writer: state = 2 policy.server=1
+> > 10.08.10_17:25:33.187331 7fac762e1710 -- 10.165.254.22:6800/2773 >>
+> > 10.165.254.132:0/23863 pipe(0x7fac7c003f50 sd=25 pgs=70 cs=1
+> > l=1).writer encoding 1 0x7fac980ff6e0 osd_map(210,210) v1
+> > 10.08.10_17:25:33.187396 7fac762e1710 -- 10.165.254.22:6800/2773 >>
+> > 10.165.254.132:0/23863 pipe(0x7fac7c003f50 sd=25 pgs=70 cs=1
+> > l=1).writer sending 1 0x7fac980ff6e0
+> > 10.08.10_17:25:33.187448 7fac762e1710 -- 10.165.254.22:6800/2773 >>
+> > 10.165.254.132:0/23863 pipe(0x7fac7c003f50 sd=25 pgs=70 cs=1
+> > l=1).write_message 0x7fac980ff6e0
+> > 10.08.10_17:25:33.187522 7fac762e1710 -- 10.165.254.22:6800/2773 >>
+> > 10.165.254.132:0/23863 pipe(0x7fac7c003f50 sd=25 pgs=70 cs=1
+> > l=1).writer: state = 2 policy.server=1
+> > 10.08.10_17:25:33.187559 7fac762e1710 -- 10.165.254.22:6800/2773 >>
+> > 10.165.254.132:0/23863 pipe(0x7fac7c003f50 sd=25 pgs=70 cs=1
+> > l=1).writer sleeping
+> > terminate called after throwing an instance of 'ceph::buffer::end_of_buffer*'
+> > 10.08.10_17:25:33.188116 7faca9b34710 -- 10.165.254.22:6800/2773 -->
+> > client711674 10.165.254.131:0/1510 -- osd_map(210,210) v1 -- ?+0
+> > 0x7fac98002260
+> > 10.08.10_17:25:33.188162 7faca9b34710 -- 10.165.254.22:6800/2773
+> > submit_message osd_map(210,210) v1 remote, 10.165.254.131:0/1510, have
+> > pipe.
+> > Aborted
 > >
-> > On Tue, 2010-08-10 at 21:09 +0800, Henry C Chang wrote:
-> >> Hi,
-> >>
-> >> I have a ceph cluster: 3 (mon+osd) and 2 (mds).
-> >> When I tried to add the 4th osd to the cluster, osd0 and osd1 crashed.
-> >> The error logs are attached.
-> >>
-> >> My procedure to add the 4th osd is:
-> >>
-> >> add [osd3] in the conf file: /etc/ceph/ceph.conf
-> >> ceph -c /etc/ceph/ceph.conf mon getmap -o /tmp/monmap
-> >> cosd -c /etc/ceph/ceph.conf -i 3 --mkfs --monmap /tmp/monmap
-> >> ceph -c /etc/ceph/ceph.conf osd setmaxosd 4
-> >> osdmaptool --createsimple 4 --clobber /tmp/osdmap.junk --export-crush
-> >> /tmp/crush.new
-> >> ceph -c /etc/ceph.conf osd setcrushmap -i /tmp/crush.new
-> >> /etc/init.d/ceph -c
-> >> /etc/ceph/d2c5d946-b888-40b3-aac2-adda05477a81.conf start osd
-> >>
-> >> Is my procedure to add an osd incorrect?
-> >>
-> >> Thanks,
-> >> Henry
+> > Any ideas?
 > >
+> > Thank you,
+> >
+> > Christian
 > >
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
