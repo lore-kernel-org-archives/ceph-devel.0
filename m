@@ -1,39 +1,92 @@
-From: Haifeng Liu <haifeng@yahoo-inc.com>
+From: Ulrich Oelmann <ulrich.oelmann@web.de>
 Subject: Re: RBD performance is not good
-Date: Tue, 10 Aug 2010 14:46:52 +0900
-Message-ID: <C88708CC.5980%haifeng@yahoo-inc.com>
-References: <AANLkTi=+bAquZFutD=_uwQAgdC3CzcdNz=Mi+5__AVYW@mail.gmail.com>
+Date: Tue, 10 Aug 2010 10:18:04 +0200 (CEST)
+Message-ID: <341848787.2318972.1281428284840.JavaMail.fmail@mwmweb029>
+References: <C88708CC.5980%haifeng@yahoo-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mrout1-b.corp.re1.yahoo.com ([69.147.107.20]:31002 "EHLO
-	mrout1-b.corp.re1.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751244Ab0HJF7G (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 10 Aug 2010 01:59:06 -0400
-Received: from kr1-ex07cas02.ds.corp.yahoo.com (kr1-ex07cas02.ds.corp.yahoo.com [202.93.7.141])
-	by mrout1-b.corp.re1.yahoo.com (8.13.8/8.13.8/y.out) with ESMTP id o7A5krdb089446
-	for <ceph-devel@vger.kernel.org>; Mon, 9 Aug 2010 22:46:54 -0700 (PDT)
-In-Reply-To: <AANLkTi=+bAquZFutD=_uwQAgdC3CzcdNz=Mi+5__AVYW@mail.gmail.com>
-Content-Language: en
+Received: from fmmailgate04.web.de ([217.72.192.242]:44318 "EHLO
+	fmmailgate04.web.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751819Ab0HJISG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Aug 2010 04:18:06 -0400
+Received: from mwmweb029  ( [172.20.18.38])
+	by fmmailgate04.web.de (Postfix) with ESMTP id CF0A068A38CF
+	for <ceph-devel@vger.kernel.org>; Tue, 10 Aug 2010 10:18:04 +0200 (CEST)
+In-Reply-To: <C88708CC.5980%haifeng@yahoo-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-WGlhb2d1YW5nLA0KDQpUaGlzIHNob3VsZCBiZSBhIG5vcm1hbCByZXN1bHQg4oCTIHRoZSBjbGll
-bnTigJlzIHBhZ2VjYWNoZSBidWZmZXJlZCB0aGUgd3JpdGUNCndoZW4geW91IGRkIG9udG8gYSBj
-ZXBoIGZzLCB3aGlsZSBubyBidWZmZXJpbmcgd2hlbiBkZCB0byBhIHJiZC4gV2hhdCBkbyB5b3UN
-CnRoaW5rPyANCg0KVGhhbmtzDQotaGFpZmVuZw0KDQoNCk9uIDgvMTAvMTAgMTE6MjMgQU0sICJY
-aWFvZ3VhbmcgTGl1IiA8c3lzbHhnQGdtYWlsLmNvbT4gd3JvdGU6DQoNCj4gb24gbXkgMi1vZHMt
-bm9kZSBjbHVzdGVyLCBkZCBjYW4gb25seSByZWFjaCAxM01CL3Mgb24gcmJkIGRldmljZS4gdGhp
-cw0KPiBpcyBtdWNoIGxvd2VyIHRoYW4gd2hhdCBJIGV4cGVjdGVkLg0KPiBJIGNhbiBnZXQgMzAt
-NjAgTUIvcyBvbiBhIGNlcGggZmlsZXN5c3RlbSBvdmVyIHRoZSBzYW1lIGNsdXN0ZXIuDQo+IA0K
-PiBhbnkgaWRlYT8NCj4gDQo+IA0KPiANCj4gDQo+IFtyb290QGNlcGgtMSB+XSMgZGQgaWY9L2Rl
-di96ZXJvIG9mPS9kZXYvcmJkMCAgYnM9MU0gY291bnQ9NTAwMA0KPiA1MDAwKzAgcmVjb3JkcyBp
-bg0KPiA1MDAwKzAgcmVjb3JkcyBvdXQNCj4gNTI0Mjg4MDAwMCBieXRlcyAoNS4yIEdCKSBjb3Bp
-ZWQsIDM5MS41MDggcywgMTMuNCBNQi9zDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
-cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KPiB0aGUg
-Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBNb3JlIG1h
-am9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNCj4gDQoNCg==
+Hi there,
+
+I don't think that Xiaoguang saw the speed of 30-60 MB/s because of cac=
+he
+effects as the speed should be in the order of at least some hundred MB=
+/s
+then. Do you agree?
+
+Could perhaps someone having an rbd-setup running confirm or reject
+Xiaoguangs measurements?
+
+Best regards
+Ulrich
+
+
+-----Urspr=C3=BCngliche Nachricht-----
+Von: Haifeng Liu <haifeng@yahoo-inc.com>
+Gesendet: Aug 10, 2010 7:46:52 AM
+An: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Betreff: Re: RBD performance is not good
+
+>Xiaoguang,
+>
+>This should be a normal result =E2=80=93 the client=E2=80=99s pagecach=
+e buffered the write
+>when you dd onto a ceph fs, while no buffering when dd to a rbd. What =
+do you
+>think?=20
+>
+>Thanks
+>-haifeng
+>
+>
+>On 8/10/10 11:23 AM, "Xiaoguang Liu"  wrote:
+>
+>> on my 2-ods-node cluster, dd can only reach 13MB/s on rbd device. th=
+is
+>> is much lower than what I expected.
+>> I can get 30-60 MB/s on a ceph filesystem over the same cluster.
+>>=20
+>> any idea?
+>>=20
+>>=20
+>>=20
+>>=20
+>> [root@ceph-1 ~]# dd if=3D/dev/zero of=3D/dev/rbd0  bs=3D1M count=3D5=
+000
+>> 5000+0 records in
+>> 5000+0 records out
+>> 5242880000 bytes (5.2 GB) copied, 391.508 s, 13.4 MB/s
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>=20
+>
+>N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=EF=BF=BDy=EF=BF=
+=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7v=EF=BF=BD^=EF=BF=
+=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD]z=EF=BF=BD=
+=EF=BF=BD=EF=BF=BD{ay=EF=BF=BD=1D=CA=87=DA=99=EF=BF=BD,j=07=EF=BF=BD=EF=
+=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=
+=1E=EF=BF=BDw=EF=BF=BD=EF=BF=BD=EF=BF=BD=0C=EF=BF=BD=EF=BF=BD=EF=BF=BDj=
+:+v=EF=BF=BD=EF=BF=BD=EF=BF=BDw=EF=BF=BDj=EF=BF=BDm=EF=BF=BD=EF=BF=BD=EF=
+=BF=BD=EF=BF=BD=07=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDzZ+=EF=BF=BD=EF=BF=
+=BD=DD=A2j"=EF=BF=BD=EF=BF=BD
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
