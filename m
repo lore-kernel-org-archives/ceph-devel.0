@@ -1,99 +1,120 @@
-From: "Smets, Jan (Jan)" <jan.smets@alcatel-lucent.com>
-Subject: RE: MonitorStore.cc assert
-Date: Wed, 11 Aug 2010 09:08:09 +0200
-Message-ID: <14C7F4F06DB5814AB0DE29716C4F6D670C562ABB@FRMRSSXCHMBSB1.dc-m.alcatel-lucent.com>
-References: <14C7F4F06DB5814AB0DE29716C4F6D670C562AB6@FRMRSSXCHMBSB1.dc-m.alcatel-lucent.com>
+From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+Subject: Re: osd crashed after adding new osd
+Date: Wed, 11 Aug 2010 19:16:19 +0800
+Message-ID: <AANLkTi=Z1C9WL0W=4ehxe4MX72wqKpiEZh42AvvUUm5F@mail.gmail.com>
+References: <AANLkTi=bUW_twak9n_jwcp2VkrRN_pztEzkUMzW72z5=@mail.gmail.com>
+	<1281454926.2812.3.camel@wido-laptop.pcextreme.nl>
+	<AANLkTiksxQ6EGpgBq7jZfR2KQdV4G=9eoK7ASBfDNtcQ@mail.gmail.com>
+	<Pine.LNX.4.64.1008101347500.9792@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smail6.alcatel.fr ([64.208.49.42]:58966 "EHLO smail6.alcatel.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751966Ab0HKHIM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Aug 2010 03:08:12 -0400
-Received: from FRMRSSXCHHUB03.dc-m.alcatel-lucent.com (FRMRSSXCHHUB03.dc-m.alcatel-lucent.com [135.120.45.63])
-	by smail6.alcatel.fr (8.14.3/8.14.3/ICT) with ESMTP id o7B788nD027108
-	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Aug 2010 09:08:09 +0200
-In-Reply-To: <14C7F4F06DB5814AB0DE29716C4F6D670C562AB6@FRMRSSXCHMBSB1.dc-m.alcatel-lucent.com>
-Content-Language: en-US
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:37312 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751503Ab0HKLQV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Aug 2010 07:16:21 -0400
+Received: by wyb32 with SMTP id 32so1735078wyb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Aug 2010 04:16:19 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1008101347500.9792@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
 
-And also something similar on my other server
+Hi Sage,
 
-10.08.11_00:14:54.656802 7fbdf3c14710 log [WRN] : lease_expire from mon0 was sent from future time 10.08.11_00:14:58.132006, clocks not synchronized
-10.08.11_00:14:54.656814 7fbdf3c14710 log [WRN] :
-mon/MonitorStore.cc: In function 'int MonitorStore::write_bl_ss(ceph::bufferlist&, const char*, const char*, bool, bool)':
-mon/MonitorStore.cc:273: FAILED assert(!err)
- 1: (Paxos::store_state(MMonPaxos*)+0xe6) [0x47b5d6]
- 2: (Paxos::handle_commit(MMonPaxos*)+0x3e) [0x47b8fe]
- 3: (Paxos::dispatch(PaxosServiceMessage*)+0x18b) [0x47fe4b]
- 4: (Monitor::_ms_dispatch(Message*)+0x82d) [0x46d76d]
- 5: (Monitor::ms_dispatch(Message*)+0x57) [0x4799b7]
- 6: (SimpleMessenger::dispatch_entry()+0x79b) [0x453b6b]
- 7: (SimpleMessenger::DispatchThread::entry()+0x1f) [0x44abbf]
- 8: (Thread::_entry_func(void*)+0xa) [0x45d4da]
- 9: (()+0x68ba) [0x7fbdf5ee68ba]
- 10: (clone()+0x6d) [0x7fbdf510101d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+After adding osd3, only osd2 is alive.
+But the whole cluster can be recovered after restarting all dead osds.
 
-- Jan
- 
+I read the wiki and reversed the order of my procedure: starting osd
+before setting crush map.
+It seems to work ok now.
 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Smets, 
-> Jan (Jan)
-> Sent: woensdag 11 augustus 2010 9:06
-> To: ceph-devel@vger.kernel.org
-> Subject: MonitorStore.cc assert
-> 
-> I was not using ceph at that time, and my clocks are drifting 
-> somehow ...
-> 
-> Last logs seen:
-> 
-> 10.08.10_22:55:02.051810 7fdbdaac9710 log [WRN] : 
-> lease_expire from mon0 was sent from future time 
-> 10.08.10_22:55:03.346407, clocks not synchronized
-> ...
-> 10.08.11_00:16:49.492554 7fe740de6710 mds0.2  last tick was 
-> 90.001027 > 5 seconds ago, laggy_until 0.000000, setting laggy flag
-> 
-> 
-> 
-> 
-> mon/MonitorStore.cc: In function 'int 
-> MonitorStore::write_bl_ss(ceph::bufferlist&, const char*, 
-> const char*, bool, bool)':
-> mon/MonitorStore.cc:273: FAILED assert(!err)
->  1: (Paxos::stash_latest(unsigned long, 
-> ceph::buffer::list&)+0x170) [0x47a780]
->  2: (LogMonitor::update_from_paxos()+0x7bd) [0x4ca5cd]
->  3: (Monitor::_ms_dispatch(Message*)+0x851) [0x46d791]
->  4: (Monitor::ms_dispatch(Message*)+0x57) [0x4799b7]
->  5: (SimpleMessenger::dispatch_entry()+0x79b) [0x453b6b]
->  6: (SimpleMessenger::DispatchThread::entry()+0x1f) [0x44abbf]
->  7: (Thread::_entry_func(void*)+0xa) [0x45d4da]
->  8: (()+0x68ba) [0x7fdbdcd9b8ba]
->  9: (clone()+0x6d) [0x7fdbdbfb601d]
->  NOTE: a copy of the executable, or `objdump -rdS 
-> <executable>` is needed to interpret this.
-> 
-> Executable is the one from:
-> 
-> ii  ceph                                
-> 0.21~rc-unstable201007281541-3ed08a33-1~bpo50+1 distributed 
-> storage and file system
-> 
-> 
-> At your service.
->  - Jan
-> --
-> To unsubscribe from this list: send the line "unsubscribe 
-> ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Thanks,
+Henry
+
+
+On Wed, Aug 11, 2010 at 4:56 AM, Sage Weil <sage@newdream.net> wrote:
+> Hi Henry,
+>
+> Your osd add procedure looks correct. =C2=A0Did the osd start correct=
+ after
+> this point? =C2=A0Are you able to reproduce the problem with osd logg=
+ing
+> turned up (debug osd =3D 20 in [osd])?
+>
+> I just tried this with the latest unstable and wasn't able to reprodu=
+ce
+> the problem.
+>
+> sage
+>
+> On Wed, 11 Aug 2010, Henry C Chang wrote:
+>
+>> Hi Wido,
+>>
+>> I am running unstable branch (commit: b72c1bb6e9b77e1ab6c2) dated Ju=
+ly 30.
+>> I just uploaded the core dumps to
+>>
+>> http://home.anet.net.tw/cycbbb/coredumps/core.2580.gz
+>> http://home.anet.net.tw/cycbbb/coredumps/core.2602.gz
+>>
+>>
+>>
+>> On Tue, Aug 10, 2010 at 11:42 PM, Wido den Hollander <wido@widodh.nl=
+> wrote:
+>> > Hi Henry,
+>> >
+>> > Is there a core-dump of these crashes in /? If so, these could hel=
+p
+>> > finding the cause of this.
+>> >
+>> > See: http://ceph.newdream.net/wiki/Troubleshooting
+>> >
+>> > And btw, which version of Ceph are you running?
+>> >
+>> > Wido
+>> >
+>> > On Tue, 2010-08-10 at 21:09 +0800, Henry C Chang wrote:
+>> >> Hi,
+>> >>
+>> >> I have a ceph cluster: 3 (mon+osd) and 2 (mds).
+>> >> When I tried to add the 4th osd to the cluster, osd0 and osd1 cra=
+shed.
+>> >> The error logs are attached.
+>> >>
+>> >> My procedure to add the 4th osd is:
+>> >>
+>> >> add [osd3] in the conf file: /etc/ceph/ceph.conf
+>> >> ceph -c /etc/ceph/ceph.conf mon getmap -o /tmp/monmap
+>> >> cosd -c /etc/ceph/ceph.conf -i 3 --mkfs --monmap /tmp/monmap
+>> >> ceph -c /etc/ceph/ceph.conf osd setmaxosd 4
+>> >> osdmaptool --createsimple 4 --clobber /tmp/osdmap.junk --export-c=
+rush
+>> >> /tmp/crush.new
+>> >> ceph -c /etc/ceph.conf osd setcrushmap -i /tmp/crush.new
+>> >> /etc/init.d/ceph -c
+>> >> /etc/ceph/d2c5d946-b888-40b3-aac2-adda05477a81.conf start osd
+>> >>
+>> >> Is my procedure to add an osd incorrect?
+>> >>
+>> >> Thanks,
+>> >> Henry
+>> >
+>> >
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
+>>
+>>
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
