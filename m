@@ -1,130 +1,46 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: osd crashed after adding new osd
-Date: Wed, 11 Aug 2010 09:08:53 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1008110908110.6194@cobra.newdream.net>
-References: <AANLkTi=bUW_twak9n_jwcp2VkrRN_pztEzkUMzW72z5=@mail.gmail.com>
- <1281454926.2812.3.camel@wido-laptop.pcextreme.nl>
- <AANLkTiksxQ6EGpgBq7jZfR2KQdV4G=9eoK7ASBfDNtcQ@mail.gmail.com>
- <Pine.LNX.4.64.1008101347500.9792@cobra.newdream.net>
- <AANLkTi=Z1C9WL0W=4ehxe4MX72wqKpiEZh42AvvUUm5F@mail.gmail.com>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: Re: MonitorStore.cc assert
+Date: Wed, 11 Aug 2010 17:40:25 +0000 (UTC)
+Message-ID: <i3una9$gdc$2@dough.gmane.org>
+References: <14C7F4F06DB5814AB0DE29716C4F6D670C562AB6@FRMRSSXCHMBSB1.dc-m.alcatel-lucent.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-240580922-1281542933=:6194"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49780 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752581Ab0HKQIn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Aug 2010 12:08:43 -0400
-In-Reply-To: <AANLkTi=Z1C9WL0W=4ehxe4MX72wqKpiEZh42AvvUUm5F@mail.gmail.com>
+Received: from lo.gmane.org ([80.91.229.12]:40777 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751983Ab0HKRkj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 Aug 2010 13:40:39 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1OjFI1-0005L3-35
+	for ceph-devel@vger.kernel.org; Wed, 11 Aug 2010 19:40:33 +0200
+Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Aug 2010 19:40:33 +0200
+Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Aug 2010 19:40:33 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry_c_chang@tcloudcomputing.com>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Am Wed, 11 Aug 2010 09:06:14 +0200 schrieb Smets, Jan (Jan):
 
---557981400-240580922-1281542933=:6194
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+> I was not using ceph at that time, and my clocks are drifting somehow
+> ...
+> 
+> Last logs seen:
+> 
+> 10.08.10_22:55:02.051810 7fdbdaac9710 log [WRN] : lease_expire from mon0
+> was sent from future time 10.08.10_22:55:03.346407, clocks not
+> synchronized ...
 
-On Wed, 11 Aug 2010, Henry C Chang wrote:
-> After adding osd3, only osd2 is alive.
-> But the whole cluster can be recovered after restarting all dead osds.
->=20
-> I read the wiki and reversed the order of my procedure: starting osd
-> before setting crush map.
-> It seems to work ok now.
+maybe not related to the problem, but also important:
 
-Hmm, the order shouldn't matter--there's definitely something going wrong. =
-=20
-Are you able to reproduce the crash with the old order?  (With logs?  :)
+do run a ntpd on every osd/mon/mds as there is a need for precise 
+syncronised time. 
 
-sage
+- Thomas
 
-
->=20
-> Thanks,
-> Henry
->=20
->=20
-> On Wed, Aug 11, 2010 at 4:56 AM, Sage Weil <sage@newdream.net> wrote:
-> > Hi Henry,
-> >
-> > Your osd add procedure looks correct. =A0Did the osd start correct afte=
-r
-> > this point? =A0Are you able to reproduce the problem with osd logging
-> > turned up (debug osd =3D 20 in [osd])?
-> >
-> > I just tried this with the latest unstable and wasn't able to reproduce
-> > the problem.
-> >
-> > sage
-> >
-> > On Wed, 11 Aug 2010, Henry C Chang wrote:
-> >
-> >> Hi Wido,
-> >>
-> >> I am running unstable branch (commit: b72c1bb6e9b77e1ab6c2) dated July=
- 30.
-> >> I just uploaded the core dumps to
-> >>
-> >> http://home.anet.net.tw/cycbbb/coredumps/core.2580.gz
-> >> http://home.anet.net.tw/cycbbb/coredumps/core.2602.gz
-> >>
-> >>
-> >>
-> >> On Tue, Aug 10, 2010 at 11:42 PM, Wido den Hollander <wido@widodh.nl> =
-wrote:
-> >> > Hi Henry,
-> >> >
-> >> > Is there a core-dump of these crashes in /? If so, these could help
-> >> > finding the cause of this.
-> >> >
-> >> > See: http://ceph.newdream.net/wiki/Troubleshooting
-> >> >
-> >> > And btw, which version of Ceph are you running?
-> >> >
-> >> > Wido
-> >> >
-> >> > On Tue, 2010-08-10 at 21:09 +0800, Henry C Chang wrote:
-> >> >> Hi,
-> >> >>
-> >> >> I have a ceph cluster: 3 (mon+osd) and 2 (mds).
-> >> >> When I tried to add the 4th osd to the cluster, osd0 and osd1 crash=
-ed.
-> >> >> The error logs are attached.
-> >> >>
-> >> >> My procedure to add the 4th osd is:
-> >> >>
-> >> >> add [osd3] in the conf file: /etc/ceph/ceph.conf
-> >> >> ceph -c /etc/ceph/ceph.conf mon getmap -o /tmp/monmap
-> >> >> cosd -c /etc/ceph/ceph.conf -i 3 --mkfs --monmap /tmp/monmap
-> >> >> ceph -c /etc/ceph/ceph.conf osd setmaxosd 4
-> >> >> osdmaptool --createsimple 4 --clobber /tmp/osdmap.junk --export-cru=
-sh
-> >> >> /tmp/crush.new
-> >> >> ceph -c /etc/ceph.conf osd setcrushmap -i /tmp/crush.new
-> >> >> /etc/init.d/ceph -c
-> >> >> /etc/ceph/d2c5d946-b888-40b3-aac2-adda05477a81.conf start osd
-> >> >>
-> >> >> Is my procedure to add an osd incorrect?
-> >> >>
-> >> >> Thanks,
-> >> >> Henry
-> >> >
-> >> >
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-240580922-1281542933=:6194--
