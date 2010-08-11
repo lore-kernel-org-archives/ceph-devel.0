@@ -1,46 +1,65 @@
-From: Thomas Mueller <thomas@chaschperli.ch>
-Subject: Re: MonitorStore.cc assert
-Date: Wed, 11 Aug 2010 17:40:25 +0000 (UTC)
-Message-ID: <i3una9$gdc$2@dough.gmane.org>
-References: <14C7F4F06DB5814AB0DE29716C4F6D670C562AB6@FRMRSSXCHMBSB1.dc-m.alcatel-lucent.com>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: cosd dying after start
+Date: Wed, 11 Aug 2010 22:07:57 +0200
+Message-ID: <AANLkTi=rYmFBg=SR-XBeCqu2V67tH9Fw1g7H3Rq7TE4V@mail.gmail.com>
+References: <AANLkTi=zkYni8xgp5aMQ6Q52RmDnu3eAqZ-8-DO-_6n_@mail.gmail.com>
+	<AANLkTi=_kCreuSdkywt2xgcPrHebR6tBODvNnguhXFrU@mail.gmail.com>
+	<Pine.LNX.4.64.1008101358280.9792@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:40777 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751983Ab0HKRkj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Aug 2010 13:40:39 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1OjFI1-0005L3-35
-	for ceph-devel@vger.kernel.org; Wed, 11 Aug 2010 19:40:33 +0200
-Received: from 80-219-106-215.dclient.hispeed.ch ([80.219.106.215])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Aug 2010 19:40:33 +0200
-Received: from thomas by 80-219-106-215.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Aug 2010 19:40:33 +0200
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:63028 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753557Ab0HKUH7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Aug 2010 16:07:59 -0400
+Received: by wwj40 with SMTP id 40so554048wwj.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Aug 2010 13:07:58 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1008101358280.9792@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-Am Wed, 11 Aug 2010 09:06:14 +0200 schrieb Smets, Jan (Jan):
+2010/8/10 Sage Weil <sage@newdream.net>:
+> On Tue, 10 Aug 2010, Christian Brunner wrote:
+>
+>> After a bit more debuging I've found out that there seems to be a fi=
+le
+>> missing from the filestore:
+>>
+>> 10.08.10_18:14:07.862190 7f568d3e5710 filestore(/ceph/osd/osd02)
+>> getattr /ceph/osd/osd02/current/3.f2_head/rb.0.1d6.00000000000e_head
+>> '_' =3D -2
+>
+> There was a bug last week in the kernel client rbd branch that was
+> improperly encoding osd write operation payloads. =A0Can you check th=
+at your
+> rbd client is running 79c49720, which fixes it?
 
-> I was not using ceph at that time, and my clocks are drifting somehow
-> ...
-> 
-> Last logs seen:
-> 
-> 10.08.10_22:55:02.051810 7fdbdaac9710 log [WRN] : lease_expire from mon0
-> was sent from future time 10.08.10_22:55:03.346407, clocks not
-> synchronized ...
+I'm not using the kernel client. - The problem started after a crash
+of the cosd. If you want me to, I can try to analyse the coredump.
 
-maybe not related to the problem, but also important:
+> That error above was probably just because that object hadn't been wr=
+itten
+> yet, and isn't a fatal error. =A0There is a 'scrub' function that ver=
+ifies
+> that most of the osd metadata is in order and replication is accurate=
+:
+> 'ceph osd scrub <osdnum>' and watch 'ceph -w' to see the success or e=
+rror
+> messages go by for each pg (or tail $mon_data/log on any monitor)
 
-do run a ntpd on every osd/mon/mds as there is a need for precise 
-syncronised time. 
+I was not able to start the osd, so the scrub didn't run either. Every
+time I tried to start it, it died with the message
+"terminate called after throwing an instance of
+'ceph::buffer::end_of_buffer*'" after 3 seconds.
 
-- Thomas
+The only thing that worked was to set up a whole new filesystem.
 
+Christian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
