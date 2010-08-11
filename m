@@ -1,78 +1,52 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: how to remove/update a RBD device?
-Date: Wed, 11 Aug 2010 08:55:35 +0200
-Message-ID: <1281509735.2812.8.camel@wido-laptop.pcextreme.nl>
-References: <AANLkTinm2C+LrSUPsnf_djAbQS-0VRX8tHw2T1bf2qbR@mail.gmail.com>
-	 <1281350298.2246.8.camel@wido-desktop>
-	 <AANLkTiniVGoWBLMFaKbrNcni6Q=5nE7WV0Xb=GhrEBx-@mail.gmail.com>
-	 <Pine.LNX.4.64.1008101405060.9792@cobra.newdream.net>
+From: "Smets, Jan (Jan)" <jan.smets@alcatel-lucent.com>
+Subject: MonitorStore.cc assert
+Date: Wed, 11 Aug 2010 09:06:14 +0200
+Message-ID: <14C7F4F06DB5814AB0DE29716C4F6D670C562AB6@FRMRSSXCHMBSB1.dc-m.alcatel-lucent.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:50547 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932653Ab0HKGzi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Aug 2010 02:55:38 -0400
-In-Reply-To: <Pine.LNX.4.64.1008101405060.9792@cobra.newdream.net>
+Received: from smail3.alcatel.fr ([64.208.49.56]:53774 "EHLO smail3.alcatel.fr"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752037Ab0HKHGR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Aug 2010 03:06:17 -0400
+Received: from FRMRSSXCHHUB02.dc-m.alcatel-lucent.com (FRMRSSXCHHUB02.dc-m.alcatel-lucent.com [135.120.45.62])
+	by smail3.alcatel.fr (8.14.3/8.14.3/ICT) with ESMTP id o7B76EDf008135
+	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Aug 2010 09:06:15 +0200
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+I was not using ceph at that time, and my clocks are drifting somehow ...
 
-Shrinking is ofcourse always a risky operation, but resizing the
-blockdev while it is active is not a problem, but i'm not sure if it is
-even possible when the blockdev is in use.
+Last logs seen:
 
-When working with iSCSI i always have to unmount the filesystem and then
-run: blockdev --rereadpt /dev/sdX to get the new size, i can't run that
-command when the blockdev is in use.
+10.08.10_22:55:02.051810 7fdbdaac9710 log [WRN] : lease_expire from mon0 was sent from future time 10.08.10_22:55:03.346407, clocks not synchronized
+...
+10.08.11_00:16:49.492554 7fe740de6710 mds0.2  last tick was 90.001027 > 5 seconds ago, laggy_until 0.000000, setting laggy flag
 
-For example, XFS, btrfs and ext4 support online resizing (mostly
-growing), but still you can't grow the blockdev beneath them when it is
-on use.
 
-When using a LV (Logical Volume) underneath the filesystem you can grow
-the LV and then online grow the filesystem, but again, you can't grow
-the PV (Physical Volume) when it is in use.
 
-Might be that i'm missing something here, but that is my experience when
-using iSCSI for the last few years, since iSCSI also gives you block
-devices, RBD won't be much different.
 
-Wido
+mon/MonitorStore.cc: In function 'int MonitorStore::write_bl_ss(ceph::bufferlist&, const char*, const char*, bool, bool)':
+mon/MonitorStore.cc:273: FAILED assert(!err)
+ 1: (Paxos::stash_latest(unsigned long, ceph::buffer::list&)+0x170) [0x47a780]
+ 2: (LogMonitor::update_from_paxos()+0x7bd) [0x4ca5cd]
+ 3: (Monitor::_ms_dispatch(Message*)+0x851) [0x46d791]
+ 4: (Monitor::ms_dispatch(Message*)+0x57) [0x4799b7]
+ 5: (SimpleMessenger::dispatch_entry()+0x79b) [0x453b6b]
+ 6: (SimpleMessenger::DispatchThread::entry()+0x1f) [0x44abbf]
+ 7: (Thread::_entry_func(void*)+0xa) [0x45d4da]
+ 8: (()+0x68ba) [0x7fdbdcd9b8ba]
+ 9: (clone()+0x6d) [0x7fdbdbfb601d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
 
-On Tue, 2010-08-10 at 14:07 -0700, Sage Weil wrote:
-> On Mon, 9 Aug 2010, Yehuda Sadeh Weinraub wrote:
-> > On Mon, Aug 9, 2010 at 3:38 AM, Wido den Hollander <wido@widodh.nl> wrote:
-> > > Hi Xiaoguang,
-> > >
-> > > I don't have a RBD system running at the moment, so i can't check my
-> > > commands.
-> > >
-> > > But when you have /dev/rbd0, you can remove this device with:
-> > >
-> > > echo 0 > /sys/class/rbd/remove
-> > >
-> > > There might be a resize option, see:
-> > > http://tracker.newdream.net/issues/42
-> > >
-> > > echo 0 > /sys/class/rbd/refresh
-> > >
-> > 
-> > This will update the list of snapshots, but will not resize a mapped
-> > device. For doing that you'll need to remove/add the device.
-> > Also, it is highly unrecommended to alter the image while it is
-> > mapped, as there is no proper locking and notification mechanism.
-> 
-> Some file systems (ext3 and btrfs for sure, probably xfs?) can handle 
-> online expansion when the underlying block device grows.  Is there 
-> anything preventing us from making the rbd refresh allow bdev expansion at 
-> least?
-> 
-> I wonder if something like LVM lets you shrink a mounted bdev?
-> 
-> sage
+Executable is the one from:
 
+ii  ceph                                0.21~rc-unstable201007281541-3ed08a33-1~bpo50+1 distributed storage and file system
+
+
+At your service.
+ - Jan
