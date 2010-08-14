@@ -1,57 +1,106 @@
-From: Randy Dunlap <rdunlap@xenotime.net>
-Subject: Re: [PATCH 0/8] rados block device and ceph refactor
-Date: Fri, 13 Aug 2010 19:32:33 -0700
-Message-ID: <20100813193233.80f09131.rdunlap@xenotime.net>
+From: Randy Dunlap <randy.dunlap@oracle.com>
+Subject: Re: [PATCH 8/8] rbd: introduce rados block device (rbd), based on
+ libceph
+Date: Fri, 13 Aug 2010 19:44:10 -0700
+Message-ID: <20100813194410.9c608b38.randy.dunlap@oracle.com>
 References: <1281721240-26130-1-git-send-email-sage@newdream.net>
-	<20100813153706.ee61c94e.rdunlap@xenotime.net>
-	<Pine.LNX.4.64.1008131609270.5383@cobra.newdream.net>
+	<1281721240-26130-9-git-send-email-sage@newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from xenotime.net ([72.52.115.56]:37969 "HELO xenotime.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1756905Ab0HNCcg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 13 Aug 2010 22:32:36 -0400
-Received: from chimera.site ([173.50.240.230]) by xenotime.net for <ceph-devel@vger.kernel.org>; Fri, 13 Aug 2010 19:32:33 -0700
-In-Reply-To: <Pine.LNX.4.64.1008131609270.5383@cobra.newdream.net>
+Received: from rcsinet10.oracle.com ([148.87.113.121]:35495 "EHLO
+	rcsinet10.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756922Ab0HNCp1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Aug 2010 22:45:27 -0400
+In-Reply-To: <1281721240-26130-9-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-scsi@vger.kernel.org, ceph-devel@vger.kernel.org, hch@lst.de, akpm@linux-foundation.org, yehuda@hq.newdream.net
 
-On Fri, 13 Aug 2010 16:11:55 -0700 (PDT) Sage Weil wrote:
+On Fri, 13 Aug 2010 10:40:40 -0700 Sage Weil wrote:
 
-> On Fri, 13 Aug 2010, Randy Dunlap wrote:
-> > On Fri, 13 Aug 2010 10:40:32 -0700 Sage Weil wrote:
-> > 
-> > > Hi,
-> > > 
-> > > The rados block device (rbd) implements a network block device backed by 
-> > > the Ceph distributed object store (think nbd/iSCSI, but distributed and 
-> > > fault tolerant).  At the suggestion of Christoph and James, this version 
-> > > of the patchset factors out the common Ceph bits (the network protocol, 
-> > > cluster membership, and object storage parts) into a libceph module 
-> > > (currently in net/ceph/ and include/linux/ceph/) that is shared by the 
-> > > file system component (fs/ceph) and rbd (drivers/block/rbd.c). The first 
-> > > few patches lay some groundwork, #7 moves does the ceph -> libceph+ceph 
-> > > split, and #8 adds the block device driver.
-> > 
-> > Hi,
-> > Did patch #7 make it to any mailing lists?
-> > I didn't receive it.
+> From: Yehuda Sadeh <yehuda@hq.newdream.net>
 > 
-> Sorry, I think vger ate it (it's 850KB).  You can see it here:
+> The rados block device (rbd), based on osdblk, creates a block device
+> that is backed by objects stored in the Ceph distributed object storage
+> cluster.  Each device consists of a single metadata object and data
+> striped over many data objects.
 > 
-> http://git.kernel.org/?p=linux/kernel/git/sage/ceph-client.git;a=commit;h=a6da68196474aabcdcc2f5dab64c0b55ca5090b7
+> The rbd driver supports read-only snapshots.
+> 
+> Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
+> Signed-off-by: Sage Weil <sage@newdream.net>
+> ---
+>  MAINTAINERS               |    9 +
+>  drivers/block/Kconfig     |   13 +
+>  drivers/block/Makefile    |    1 +
+>  drivers/block/rbd.c       | 1844 +++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/block/rbd_types.h |   73 ++
+>  5 files changed, 1940 insertions(+), 0 deletions(-)
+>  create mode 100644 drivers/block/rbd.c
+>  create mode 100644 drivers/block/rbd_types.h
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 5102922..cb34b1b 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -4694,6 +4694,15 @@ F:	fs/qnx4/
+>  F:	include/linux/qnx4_fs.h
+>  F:	include/linux/qnxtypes.h
+>  
+> +RADOS BLOCK DEVICE (RBD)
+> +F:	include/linux/qnxtypes.h
+> +M:	Yehuda Sadeh <yehuda@hq.newdream.net>
+> +M:	Sage Weil <sage@newdream.net>
+> +M:	ceph-devel@vger.kernel.org
+> +S:	Supported
+> +F:	drivers/block/rbd.c
+> +F:	drivers/block/rbd_types.h
+> +
+>  RADEON FRAMEBUFFER DISPLAY DRIVER
+>  M:	Benjamin Herrenschmidt <benh@kernel.crashing.org>
+>  L:	linux-fbdev@vger.kernel.org
+> diff --git a/drivers/block/Kconfig b/drivers/block/Kconfig
+> index de27768..708104b 100644
+> --- a/drivers/block/Kconfig
+> +++ b/drivers/block/Kconfig
+> @@ -488,4 +488,17 @@ config BLK_DEV_HD
+>  
+>  	  If unsure, say N.
+>  
+> +config BLK_DEV_RBD
+> +	tristate "Rados block device (RBD)"
+> +	select CEPH_LIB
+> +	default n
+> +	help
+> +	  Say Y here if you want include the Rados block device, which stripes
+> +	  a block device over objects stored in the Ceph distributed object
+> +	  store.
+> +
+> +	  More information at http://ceph.newdream.net/.
+> +
+> +	  If unsure, say N.
+> +
+>  endif # BLK_DEV
 
-Yes, vger has a limit of 400 KB on lkml and netdev.
-Other lists are probably less than that.
+In linux-next of 20100813, I get:
 
-David M. wrote on 13-AUG-2007:
+net/built-in.o: In function `read_partial_message_section':
+messenger.c:(.text+0x6598b): undefined reference to `crc32c'
+net/built-in.o: In function `read_partial_message_bio':
+messenger.c:(.text+0x65a57): undefined reference to `crc32c'
+net/built-in.o: In function `write_partial_msg_pages':
+messenger.c:(.text+0x65e22): undefined reference to `crc32c'
+net/built-in.o: In function `prepare_write_message':
+messenger.c:(.text+0x66219): undefined reference to `crc32c'
+messenger.c:(.text+0x66240): undefined reference to `crc32c'
+net/built-in.o:messenger.c:(.text+0x66264): more undefined references to `crc32c' follow
 
-"The posting limit is 400K for linux-kernel, netdev, and one
-or two of the other lists."
+when CONFIG_INET is not enabled.  It looks like BLK_DEV_RBD needs to depend on
+INET and possibly on BLOCK (I sent a patch for depends on BLOCK on 2010-aug-04
+due to other build errors).
 
 ---
 ~Randy
