@@ -1,41 +1,32 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.21.1 released
-Date: Mon, 16 Aug 2010 08:04:32 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1008160804100.16542@cobra.newdream.net>
+From: Randy Dunlap <randy.dunlap@oracle.com>
+Subject: Re: linux-next: Tree for August 16 (ceph)
+Date: Mon, 16 Aug 2010 10:08:08 -0700
+Message-ID: <20100816100808.ff0fa2b4.randy.dunlap@oracle.com>
+References: <20100816150420.7f3f8cfd.sfr@canb.auug.org.au>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38247 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753398Ab0HPPEL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Aug 2010 11:04:11 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 9BE49BC699
-	for <ceph-devel@vger.kernel.org>; Mon, 16 Aug 2010 08:04:32 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 6E87EBC699
-	for <ceph-devel@vger.kernel.org>; Mon, 16 Aug 2010 08:04:32 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-next-owner@vger.kernel.org>
+In-Reply-To: <20100816150420.7f3f8cfd.sfr@canb.auug.org.au>
+Sender: linux-next-owner@vger.kernel.org
+To: Stephen Rothwell <sfr@canb.auug.org.au>, Sage Weil <sage@newdream.net>
+Cc: linux-next@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-We did a bugfix release for v0.21 last week.  Changes include:
+On Mon, 16 Aug 2010 15:04:20 +1000 Stephen Rothwell wrote:
 
-    * debian and rpm packaging fixes
-    * mds: fixed crash on some mds->client messages
-    * mds: fix snaprealm behavior on readdir (occasional client misbehavior)
-    * monmaptool: man page typo
-    * rados: usage fix
-    * osd: fix heartbeat to/from osds (fixing osd up/down flapping)
-    * osd: fix replies to dup/committed requests (fixes client hangs)
-    * librados: .hpp fix
-    * cclass: fix .so loading
-    * cauthtool: fix man page example for fs clients
-    * fix log rotation
+> Hi all,
+> 
+> As the merge window has closed, let the flood commence. :-)
+> 
+> Changes since 20100813:
 
-Relevant URLs:
 
-    * Direct download at http://ceph.newdream.net/download/ceph-0.21.1.tar.gz
-    * For Debian packages see http://ceph.newdream.net/wiki/Debian
+linux-next-20100816/net/ceph/debugfs.c:255: error: conflicting types for 'ceph_debugfs_client_init'
+linux-next-20100816/include/linux/ceph/debugfs.h:29: note: previous declaration of 'ceph_debugfs_client_init' was here
 
-sage
+
+
+---
+~Randy
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
