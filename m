@@ -1,96 +1,72 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [patch] ceph: fix get_ticket_handler() error handling
-Date: Thu, 26 Aug 2010 09:30:18 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1008260930140.22216@cobra.newdream.net>
-References: <20100826091238.GB20072@bicker>
+Subject: [GIT PULL] Ceph fixes for 2.6.36-rc3
+Date: Thu, 26 Aug 2010 15:14:59 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1008261506480.26593@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40774 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:33448 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752759Ab0HZQ3d (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Aug 2010 12:29:33 -0400
-In-Reply-To: <20100826091238.GB20072@bicker>
+	with ESMTP id S1753127Ab0HZWOO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Aug 2010 18:14:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <error27@gmail.com>
-Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Applied, thanks!
+Hi Linus,
+
+Please pull the following Ceph fixes for 2.6.36-rc3 from
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+
+There are some fixed up compile warnings (32 bit archs), some error return 
+code fixes, an argument inversion for list_move_tail, an mm cleanup (I 
+duplicated a non-exported helper in 2.6.27 or so and things changed a bit 
+since then), and some uninitialized fields.  The rest are fixes with async 
+metadata writeback and making it coherent with respect to snapshots.
+
+Thanks!
 sage
 
 
-On Thu, 26 Aug 2010, Dan Carpenter wrote:
+Alan Cox (1):
+      ceph: Fix warnings
 
-> get_ticket_handler() returns a valid pointer or it returns
-> ERR_PTR(-ENOMEM) if kzalloc() fails.
-> 
-> Signed-off-by: Dan Carpenter <error27@gmail.com>
-> 
-> diff --git a/fs/ceph/auth_x.c b/fs/ceph/auth_x.c
-> index 582e0b2..a2d002c 100644
-> --- a/fs/ceph/auth_x.c
-> +++ b/fs/ceph/auth_x.c
-> @@ -376,7 +376,7 @@ static void ceph_x_validate_tickets(struct ceph_auth_client *ac, int *pneed)
->  
->  		th = get_ticket_handler(ac, service);
->  
-> -		if (!th) {
-> +		if (IS_ERR(th)) {
->  			*pneed |= service;
->  			continue;
->  		}
-> @@ -399,6 +399,9 @@ static int ceph_x_build_request(struct ceph_auth_client *ac,
->  	struct ceph_x_ticket_handler *th =
->  		get_ticket_handler(ac, CEPH_ENTITY_TYPE_AUTH);
->  
-> +	if (IS_ERR(th))
-> +		return PTR_ERR(th);
-> +
->  	ceph_x_validate_tickets(ac, &need);
->  
->  	dout("build_request want %x have %x need %x\n",
-> @@ -450,7 +453,6 @@ static int ceph_x_build_request(struct ceph_auth_client *ac,
->  			return -ERANGE;
->  		head->op = cpu_to_le16(CEPHX_GET_PRINCIPAL_SESSION_KEY);
->  
-> -		BUG_ON(!th);
->  		ret = ceph_x_build_authorizer(ac, th, &xi->auth_authorizer);
->  		if (ret)
->  			return ret;
-> @@ -505,7 +507,8 @@ static int ceph_x_handle_reply(struct ceph_auth_client *ac, int result,
->  
->  	case CEPHX_GET_PRINCIPAL_SESSION_KEY:
->  		th = get_ticket_handler(ac, CEPH_ENTITY_TYPE_AUTH);
-> -		BUG_ON(!th);
-> +		if (IS_ERR(th))
-> +			return PTR_ERR(th);
->  		ret = ceph_x_proc_ticket_reply(ac, &th->session_key,
->  					       buf + sizeof(*head), end);
->  		break;
-> @@ -563,8 +566,8 @@ static int ceph_x_verify_authorizer_reply(struct ceph_auth_client *ac,
->  	void *end = p + sizeof(au->reply_buf);
->  
->  	th = get_ticket_handler(ac, au->service);
-> -	if (!th)
-> -		return -EIO;  /* hrm! */
-> +	if (IS_ERR(th))
-> +		return PTR_ERR(th);
->  	ret = ceph_x_decrypt(&th->session_key, &p, end, &reply, sizeof(reply));
->  	if (ret < 0)
->  		return ret;
-> @@ -626,7 +629,7 @@ static void ceph_x_invalidate_authorizer(struct ceph_auth_client *ac,
->  	struct ceph_x_ticket_handler *th;
->  
->  	th = get_ticket_handler(ac, peer_type);
-> -	if (th && !IS_ERR(th))
-> +	if (!IS_ERR(th))
->  		remove_ticket_handler(ac, th);
->  }
->  
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Dan Carpenter (3):
+      ceph: ceph_get_inode() returns an ERR_PTR
+      ceph: ceph_mdsc_build_path() returns an ERR_PTR
+      ceph: fix get_ticket_handler() error handling
+
+Henry C Chang (1):
+      ceph: fix osd request lru adjustment when sending request
+
+Michael Rubin (1):
+      mm: exporting account_page_dirty
+
+Sage Weil (9):
+      ceph: fix multiple mds session shutdown
+      ceph: fix xattr cap writeback
+      ceph: include dirty xattrs state in snapped caps
+      ceph: queue cap snap writeback for realm children on snap update
+      ceph: direct requests in snapped namespace based on nonsnap parent
+      ceph: don't improperly set dir complete when holding EXCL cap
+      ceph: maintain i_head_snapc when any caps are dirty, not just for data
+      ceph: initialize fields on new dentry_infos
+      ceph: don't BUG on ENOMEM during mds reconnect
+
+ fs/ceph/addr.c       |   12 +----
+ fs/ceph/auth_x.c     |   15 ++++---
+ fs/ceph/caps.c       |   32 +++++++++++----
+ fs/ceph/debugfs.c    |    4 ++
+ fs/ceph/dir.c        |    2 +-
+ fs/ceph/inode.c      |    5 +-
+ fs/ceph/locks.c      |   14 ++++--
+ fs/ceph/mds_client.c |  101 +++++++++++++++++++++++++++++++-------------------
+ fs/ceph/mds_client.h |    3 +-
+ fs/ceph/osd_client.c |    2 +-
+ fs/ceph/snap.c       |   89 ++++++++++++++++++++++++++++---------------
+ fs/ceph/super.h      |   11 +++--
+ fs/ceph/xattr.c      |    1 +
+ mm/page-writeback.c  |    1 +
+ 14 files changed, 185 insertions(+), 107 deletions(-)
