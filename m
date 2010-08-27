@@ -1,16 +1,15 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: Write operation is stuck
-Date: Fri, 27 Aug 2010 17:42:36 +0200
-Message-ID: <1282923756.2548.137.camel@wido-laptop.pcextreme.nl>
+Date: Fri, 27 Aug 2010 09:09:03 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1008270908001.1510@cobra.newdream.net>
 References: <loom.20100827T140056-342@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:51330 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753016Ab0H0Pmi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Aug 2010 11:42:38 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:57368 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752829Ab0H0QIQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Aug 2010 12:08:16 -0400
 In-Reply-To: <loom.20100827T140056-342@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -19,15 +18,14 @@ Cc: ceph-devel@vger.kernel.org
 
 Hi Bogdan,
 
-Are you running your OSD data on ext3? It seems that you are hitting
-some ext3 bug.
+This is a bug in the ext3 xattr code.  It seems to be gone in 2.6.34 and 
+later.  Or, you can switch to btrfs!
 
-Could you try changing to btrfs? This since ext is not yet fully
-supported.
+sage
 
-Wido
 
-On Fri, 2010-08-27 at 12:18 +0000, Bogdan Lobodzinski wrote:
+On Fri, 27 Aug 2010, Bogdan Lobodzinski wrote:
+
 > Hello,
 > 
 > working with ceph on my test configuration 
@@ -161,4 +159,5 @@ On Fri, 2010-08-27 at 12:18 +0000, Bogdan Lobodzinski wrote:
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+> 
+> 
