@@ -1,180 +1,83 @@
-From: "FWDF" <fwdflywl@gmail.com>
-Subject: some questions about ceph deployment
-Date: Sat, 4 Sep 2010 21:45:27 +0800
-Message-ID: <000d01cb4c37$71fadf90$55f09eb0$@com>
+From: Leander Yu <leander.yu@gmail.com>
+Subject: OSD assert fail
+Date: Mon, 6 Sep 2010 17:18:04 +0800
+Message-ID: <AANLkTi=MH3b8ar-tikkMw0v+PUYrCQ1VBsBbC37OaT-G@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=000e0cdf6feafce5c6048f93c109
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:37983 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753111Ab0IDNpn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Sep 2010 09:45:43 -0400
-Received: by pvg2 with SMTP id 2so875503pvg.19
-        for <ceph-devel@vger.kernel.org>; Sat, 04 Sep 2010 06:45:42 -0700 (PDT)
-Content-Language: zh-cn
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:49182 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750929Ab0IFJSF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Sep 2010 05:18:05 -0400
+Received: by wyf22 with SMTP id 22so2701940wyf.19
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Sep 2010 02:18:04 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-=E3=80=80=E3=80=80We use 3 servers to build a test system of ceph, conf=
-igured as below:
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80Host                          IP     =20
-=E3=80=80=E3=80=80client01            192.168.1.10  =20
-=E3=80=80=E3=80=80ceph01              192.168.2.50
-=E3=80=80=E3=80=80ceph02              192.168.2.51  =20
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80The OS is unbuntu 10.04 LTS and the version of ceph i=
-s v0.21.1
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80ceph.conf:
-=E3=80=80=E3=80=80[global]
-=E3=80=80=E3=80=80        auth supported =3D cephx
-=E3=80=80=E3=80=80        pid file =3D /var/run/ceph/$name.pid
-=E3=80=80=E3=80=80        debug ms =3D 0
-=E3=80=80=E3=80=80        keyring =3D /etc/ceph/keyring.bin
-=E3=80=80=E3=80=80 [mon]
-=E3=80=80=E3=80=80        mon data =3D /mnt/ceph/data/mon$id
-=E3=80=80=E3=80=80        debug ms =3D 1
-=E3=80=80=E3=80=80[mon0]
-=E3=80=80=E3=80=80        host =3D ceph01
-=E3=80=80=E3=80=80        mon addr =3D 192.168.2.50:6789
-=E3=80=80=E3=80=80 [mds]
-=E3=80=80=E3=80=80        keyring =3D /etc/ceph/keyring.$name
-debug ms =3D 1
-=E3=80=80=E3=80=80[mds.ceph01]
-=E3=80=80=E3=80=80        host =3D ceph01
-=E3=80=80=E3=80=80[mds.ceph02]
-=E3=80=80=E3=80=80        host =3D ceph02
-=E3=80=80=E3=80=80[osd]
-=E3=80=80=E3=80=80        sudo =3D true
-=E3=80=80=E3=80=80        osd data =3D /mnt/ceph/osd$id/data
-=E3=80=80=E3=80=80        keyring =3D /etc/ceph/keyring.$name
-=E3=80=80=E3=80=80        osd journal =3D /mnt/ceph/osd$id/data/journal
-=E3=80=80=E3=80=80        osd journal size =3D 100
-=E3=80=80=E3=80=80[osd0]
-=E3=80=80=E3=80=80        host =3D ceph01
-=E3=80=80=E3=80=80[osd1]
-=E3=80=80=E3=80=80        host =3D ceph01
-=E3=80=80=E3=80=80[osd2]
-=E3=80=80=E3=80=80        host =3D ceph01
-=E3=80=80=E3=80=80[osd3]
-=E3=80=80=E3=80=80        host =3D ceph01
-=E3=80=80=E3=80=80[osd10]
-=E3=80=80=E3=80=80        host =3D ceph02
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80There are 4 HDDs in the ceph01 and every HDD has a OS=
-D named as osd0, osd1, osd2,osd3; there is 1 HDD in the ceph02 named as=
- osd10. All these HDDs are made as btrfs and mounted on the mount point=
- as listed below:
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80ceph01
-=E3=80=80=E3=80=80         /dev/sdc1         /mnt/ceph/osd0/data       =
-        btrfs
-=E3=80=80=E3=80=80         /dev/sdd1         /mnt/ceph/osd1/data       =
-        btrfs
-=E3=80=80=E3=80=80         /dev/sde1         /mnt/ceph/osd2/data       =
-        btrfs
-=E3=80=80=E3=80=80         /dev/sdf1          /mnt/ceph/osd3/data      =
-         btrfs
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80ceph02
-=E3=80=80=E3=80=80         /dev/sdb1         /mnt.ceph/osd10/data      =
-       btrfs
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80Make ceph FileSystem:
-=E3=80=80=E3=80=80root@ceph01:~#  mkcephfs  -c /etc/cepf/ceph.conf -a -=
-k /etc/ceph/keyring.bin
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80Startup ceph:
-=E3=80=80=E3=80=80root@ceph01:~#  /etc/init.d/ceph =E2=80=93a  start
+--000e0cdf6feafce5c6048f93c109
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-         Then
-=E3=80=80=E3=80=80root@ceph01:~#  ceph -w
-=E3=80=80=E3=80=8010.09.01_17:56:19.337895   mds e17: 1/1/1 up {0=3Dup:=
-active}, 1 up:standby
-=E3=80=80=E3=80=8010.09.01_17:56:19.347184   osd e27: 5 osds: 5 up, 5 i=
-n
-=E3=80=80=E3=80=8010.09.01_17:56:19.349447     log =E2=80=A6=20
-=E3=80=80=E3=80=8010.09.01_17:56:19.373773   mon e1: 1 mons at 192.168.=
-2.50:6789/0
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80The ceph file system is mounted to client01(192.168.1=
-=2E10), ceph01(192.168.2.50), ceph02=EF=BC=88192.168.2.51=EF=BC=89at /d=
-ata/ceph. It works fine at the beginning, I can use ls and the write an=
-d read of file is ok. After some files are wrote , I find I can=E2=80=99=
-t use ls =E2=80=93l /data/ceph until I umount ceph from ceph02, but one=
- day later the same problem occurred again, then I umount ceph from cep=
-h01 the system and everything is ok.
+Hi all,
+I have setup a 10 osd + 2 mds + 3 mon ceph cluster. it runs ok at
+beginning. However after one day, some of the osd  crashed with
+following assert fail
+I am using the unstable trunk. ceph.conf is attached.
 
-=E3=80=80=E3=80=80Q1:
-         Can the ceph filesystem be mounted to a member of ceph cluster=
-?
+-------------- osd 3 -----------------
+osd/PG.h: In function 'void PG::IndexedLog::index(PG::Log::Entry&)':
+osd/PG.h:429: FAILED assert(caller_ops.count(e.reqid) =3D=3D 0)
+=A01: (OSD::_process_pg_info(unsigned int, int, PG::Info&, PG::Log&,
+PG::Missing&, std::map<int, MOSDPGInfo*, std::less<int>,
+std::allocator<std::pair<int const, MOSDPGInfo*> > >*, int&)+0xb06)
+[0x4cf426]
+=A02: (OSD::handle_pg_log(MOSDPGLog*)+0xa9) [0x4cf999]
+=A03: (OSD::_dispatch(Message*)+0x3ed) [0x4e7dfd]
+=A04: (OSD::ms_dispatch(Message*)+0x39) [0x4e86c9]
+=A05: (SimpleMessenger::dispatch_entry()+0x789) [0x46b5f9]
+=A06: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x45849c]
+=A07: (Thread::_entry_func(void*)+0xa) [0x46c0ca]
+=A08: (()+0x6a3a) [0x7f69fd39ea3a]
+=A09: (clone()+0x6d) [0x7f69fc5bc77d]
 
-         When I follow the instruction of http://ceph.newdream.net/wiki=
-/Monitor_cluster_expansion to expand a monitor to ceph02, the following=
- error occurred:
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80root@ceph02:~#  /etc/init.d/ceph start mon1
-=E3=80=80=E3=80=80[/etc/ceph/fetch_config/tmp/fetched.ceph.conf.14210] =
-ceph.conf 100%  2565  2.5KB/s  00:00=20
-=E3=80=80=E3=80=80=3D=3D=3D mon.1 =3D=3D=3D
-=E3=80=80=E3=80=80Starting Ceph mon1 on ceph02...
-=E3=80=80=E3=80=80 ** WARNING: Ceph is still under heavy development, a=
-nd is only suitable for **
-=E3=80=80=E3=80=80 ** testing and review.  Do not trust it with importa=
-nt data.  **
-=E3=80=80=E3=80=80terminate called after throwing an instance of 'std::=
-logic_error'
-=E3=80=80=E3=80=80  what():  basic_string::_S_construct NULL not valid
-=E3=80=80=E3=80=80Aborted (core dumped)
-=E3=80=80=E3=80=80failed: ' /usr/bin/cmon -i 1 -c /tmp/fetched.ceph.con=
-f.14210 '
+-------------- osd 7 --------------------
+osd/ReplicatedPG.cc: In function 'void ReplicatedPG::sub_op_pull(MOSDSubOp*=
+)':
+osd/ReplicatedPG.cc:3021: FAILED assert(r =3D=3D 0)
+ 1: (OSD::dequeue_op(PG*)+0x344) [0x4e6fd4]
+ 2: (ThreadPool::worker()+0x28f) [0x5b5a9f]
+ 3: (ThreadPool::WorkThread::entry()+0xd) [0x4f0acd]
+ 4: (Thread::_entry_func(void*)+0xa) [0x46c0ca]
+ 5: (()+0x6a3a) [0x7efff4f12a3a]
+ 6: (clone()+0x6d) [0x7efff413077d]
 
-=E3=80=80=E3=80=80Q2:
-=E3=80=80=E3=80=80How to expand a monitor to a running ceph system?
-  =20
-=E3=80=80=E3=80=80Q3
-=E3=80=80=E3=80=80    Is it possible to add mds when the ceph system is=
- running? how?
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80I fdisked a HDD into two partition, one for journal, =
-other one for data like this:
-=E3=80=80=E3=80=80/dev/sdc1=EF=BC=88180GB=EF=BC=89as data
-=E3=80=80=E3=80=80/dev/sdc2=EF=BC=8810GB=EF=BC=89as journal
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80/dev/sdc1 made as btrfs, mount to /mnt/osd0/data
-=E3=80=80=E3=80=80/dev/sdc2 made as btrfs, mount to /mnt/osd0/journal
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80ceph.conf:
-=E3=80=80=E3=80=80=E2=80=A6
-=E3=80=80=E3=80=80[osd]
-=E3=80=80=E3=80=80        osd data =3D /mnt/ceph/osd$id/data
-=E3=80=80=E3=80=80        osd journal =3D /mnt/ceph/osd$id/journal
-=E3=80=80=E3=80=80        ; osd journal size =3D 100
-=E3=80=80=E3=80=80=E2=80=A6
-=E3=80=80=E3=80=80When I use mkcephfs command, I can't build osd until =
-I edited ceph.conf like this:
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80[osd]
-=E3=80=80=E3=80=80        osd data =3D /mnt/ceph/osd$id/data
-=E3=80=80=E3=80=80        osd journal =3D /mnt/ceph/osd$id/data/journal
-=E3=80=80=E3=80=80        osd journal size =3D 100
-=E3=80=80=E3=80=80=E2=80=A6
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80Q4.
-=E3=80=80=E3=80=80  How to set the journal path to a device or patition=
-?
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80Thanks for all help and reply , sorry for my lame Eng=
-lish.
-=E3=80=80=E3=80=80
-=E3=80=80=E3=80=80Lin
+Please let me if you need more information. I still keep the
+environment for collecting more data for debug.
 
+Thanks.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--000e0cdf6feafce5c6048f93c109
+Content-Type: application/octet-stream; name="ceph.conf"
+Content-Disposition: attachment; filename="ceph.conf"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gdr4b25t0
+
+W2dsb2JhbF0KZm9sZGVyIHF1b3RhID0gMApwaWQgZmlsZSA9IC92YXIvcnVuL2NlcGgvJG5hbWUu
+cGlkCgpbbWRzLjFdCmhvc3QgPSAxOTIuMTY4LjE5Ny4xNDQKClttZHMuMF0KaG9zdCA9IDE5Mi4x
+NjguMTk3LjE0NQoKW21kc10KCltvc2QxXQpob3N0ID0gMTkyLjE2OC4xOTcuMTQ3Cgpbb3NkXQpv
+c2Qgam91cm5hbCA9IC9kYXRhL2NlcGgvb3Nkam91cm5hbC9vc2QkaWQKb3NkIGRhdGEgPSAvc3Bh
+cmUvb3NkJGlkCm9zZCBqb3VybmFsIHNpemUgPSAxMDAKClttb24uMV0KaG9zdCA9IDE5Mi4xNjgu
+MTk3LjE0OAptb24gYWRkciA9IDE5Mi4xNjguMTk3LjE0ODo2Nzg5CgpbbW9uLjBdCmhvc3QgPSAx
+OTIuMTY4LjE5Ny4xNDYKbW9uIGFkZHIgPSAxOTIuMTY4LjE5Ny4xNDY6Njc4OQoKW21vbi4yXQpo
+b3N0ID0gMTkyLjE2OC4xOTcuMTQ3Cm1vbiBhZGRyID0gMTkyLjE2OC4xOTcuMTQ3OjY3ODkKClt0
+Y2xvdWRdCmRlcG90ID0gZDJjNWQ5NDYtYjg4OC00MGIzLWFhYzItYWRkYTA1NDc3YTgxCgpbbW9u
+XQptb24gbGVhc2Ugd2lnZ2xlIHJvb20gPSAyLjAwMAptb24gZGF0YSA9IC9kYXRhL2NlcGgvbW9u
+JGlkCgpbZ3JvdXAgZXZlcnlvbmVdCmFkZHIgPSAwLjAuMC4wLzAKCltvc2Q4XQpob3N0ID0gMTky
+LjE2OC4xOTcuMTYwCgpbb3NkOV0KaG9zdCA9IDE5Mi4xNjguMTk3LjE1OQoKW29zZDZdCmhvc3Qg
+PSAxOTIuMTY4LjE5Ny4xNTgKCltvc2Q3XQpob3N0ID0gMTkyLjE2OC4xOTcuMTYxCgpbb3NkNF0K
+aG9zdCA9IDE5Mi4xNjguMTk3LjE2MgoKW29zZDVdCmhvc3QgPSAxOTIuMTY4LjE5Ny4xNTcKCltv
+c2QyXQpob3N0ID0gMTkyLjE2OC4xOTcuMTQ2Cgpbb3NkM10KaG9zdCA9IDE5Mi4xNjguMTk3LjE1
+NgoKW29zZDBdCmhvc3QgPSAxOTIuMTY4LjE5Ny4xNDgKClttb3VudCAvXQphbGxvdyA9ICVldmVy
+eW9uZQoK
+--000e0cdf6feafce5c6048f93c109--
