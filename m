@@ -1,47 +1,60 @@
-From: Takuya ASADA <syuu@dokukino.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: read/write on RADOS using external buffer
-Date: Wed, 15 Sep 2010 06:03:06 +0900
-Message-ID: <AANLkTi=cp6QipKogCfqNOaEoanP3K+XEeczoZe2k7JzN@mail.gmail.com>
-References: <AANLkTikRnvWbsD5OD7a88hpHsm5N3hJteaisYkfjdY2H@mail.gmail.com> <Pine.LNX.4.64.1009141142250.8559@cobra.newdream.net>
+Date: Tue, 14 Sep 2010 14:10:15 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1009141407520.29179@cobra.newdream.net>
+References: <AANLkTikRnvWbsD5OD7a88hpHsm5N3hJteaisYkfjdY2H@mail.gmail.com>
+ <Pine.LNX.4.64.1009141142250.8559@cobra.newdream.net>
+ <AANLkTi=cp6QipKogCfqNOaEoanP3K+XEeczoZe2k7JzN@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-2052412093-1284498615=:29179"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:41222 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752541Ab0INVDc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Sep 2010 17:03:32 -0400
-Received: by wwd20 with SMTP id 20so233409wwd.1
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Sep 2010 14:03:30 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1009141142250.8559@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:34979 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751479Ab0INVIo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Sep 2010 17:08:44 -0400
+In-Reply-To: <AANLkTi=cp6QipKogCfqNOaEoanP3K+XEeczoZe2k7JzN@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Takuya ASADA <syuu@dokukino.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-> There currently isn't a way to use a preallocated buffer for reads. =C2=
-=A0The
-> incoming data is read into a buffer allocated low in the stack by the
-> messaging layer. =C2=A0The bufferlist& ref is really a handle for the=
- caller to
-> get at the buffers; any prior contents are discarded.
+--557981400-2052412093-1284498615=:29179
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-I understood.
-So that allocated inside SimpleMessenger::Pipe::read_message(), right?
+On Wed, 15 Sep 2010, Takuya ASADA wrote:
+> Hi,
+>=20
+> > There currently isn't a way to use a preallocated buffer for reads. =A0=
+The
+> > incoming data is read into a buffer allocated low in the stack by the
+> > messaging layer. =A0The bufferlist& ref is really a handle for the call=
+er to
+> > get at the buffers; any prior contents are discarded.
+>=20
+> I understood.
+> So that allocated inside SimpleMessenger::Pipe::read_message(), right?
+>=20
+> > This is something that could be changed, but it will require an additio=
+nal
+> > messenger callback so that the upper layers can provide the buffer to r=
+ead
+> > the data into. =A0(That is what the kernel implementation does.)
+>=20
+> Well, could you tell me where can I find that callback code?
+> In fs/ceph/messenger.c?
+> I'd like to look into it.
 
-> This is something that could be changed, but it will require an addit=
-ional
-> messenger callback so that the upper layers can provide the buffer to=
- read
-> the data into. =C2=A0(That is what the kernel implementation does.)
+Yeah, it's the alloc_msg callback in struct ceph_connection_operations. =20
+You'll find implementations in {osd,mon,mds}_client.c.  The message header=
+=20
+is passed as an argument, which includes message payload sizes as well as=
+=20
+a tid (request/transaction id) to (say) look up the request the response=20
+is for.
 
-Well, could you tell me where can I find that callback code?
-In fs/ceph/messenger.c?
-I'd like to look into it.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
+--557981400-2052412093-1284498615=:29179--
