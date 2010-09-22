@@ -1,57 +1,30 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph fixes for v2.6.36-rc6
-Date: Tue, 21 Sep 2010 11:18:23 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1009211109280.17668@cobra.newdream.net>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Commit 13a98a972cef3560ddaa2462f8cab50a2d820cfb breaks compilation
+Date: Wed, 22 Sep 2010 12:44:28 +0200
+Message-ID: <1285152268.2392.32.camel@wido-desktop>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46026 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758120Ab0IUSQg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Sep 2010 14:16:36 -0400
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:59255 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751947Ab0IVKoa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Sep 2010 06:44:30 -0400
+Received: from [192.168.6.32] (cable-191-148.zeelandnet.nl [82.176.191.148])
+	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id F402E1AC388
+	for <ceph-devel@vger.kernel.org>; Wed, 22 Sep 2010 12:44:28 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Linus,
+Hi,
 
-Please pull the following Ceph fixes for v2.6.36-rc6 from
+In commit 13a98a972cef3560ddaa2462f8cab50a2d820cfb the flock type was
+moved to "flock.h", but flock.h wasn't added to the repository, thus
+breaking compilation.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+Reverting to c33685764a3f0c63fab5e75fe287059b7f6d97fd gives you Ceph
+packages again :-)
 
-There are a few fixes for bugs introduced in -rc1 (mds reconnect, bad 
-kunmap), a corruption fix for 32 bit archs (wrap at 4GB), a crash 
-triggered with multiple mounts (e.g., both server:/foo and server:/), a 
-Kconfig fixup, and a cap logic fix.  The balance are more fixes for 
-snapped metadata writeback to the MDS.
+Wido
 
-Thanks!
-sage
-
-
-Sage Weil (10):
-      ceph: fix null pointer deref on anon root dentry release
-      ceph: fix reconnect encoding for old servers
-      ceph: fix file offset wrapping at 4GB on 32-bit archs
-      ceph: fix dn offset during readdir_prepopulate
-      ceph: correctly set 'follows' in flushsnap messages
-      ceph: stop sending FLUSHSNAPs when we hit a dirty capsnap
-      ceph: fix cap_snap and realm split
-      ceph: only send one flushsnap per cap_snap per mds session
-      ceph: check mapping to determine if FILE_CACHE cap is used
-      ceph: select CRYPTO
-
-Yehuda Sadeh (1):
-      ceph: fix pagelist kunmap tail
-
- fs/ceph/Kconfig      |    1 +
- fs/ceph/addr.c       |    7 ++--
- fs/ceph/caps.c       |   27 ++++++++++----
- fs/ceph/dir.c        |   10 ++++--
- fs/ceph/inode.c      |   11 +++---
- fs/ceph/mds_client.c |    2 +
- fs/ceph/pagelist.c   |   12 +++++-
- fs/ceph/snap.c       |   92 +++++++++++++++++---------------------------------
- fs/ceph/super.h      |    5 ++-
- 9 files changed, 84 insertions(+), 83 deletions(-)
