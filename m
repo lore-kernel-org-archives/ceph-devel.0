@@ -1,49 +1,40 @@
-From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
-Subject: Several patches for CEPH
-Date: Wed, 22 Sep 2010 23:29:49 +0800
-Message-ID: <AANLkTi=LJHRqKGYQ44h_K75oq2L9KUsZWoS1o--ipwCt@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Commit 13a98a972cef3560ddaa2462f8cab50a2d820cfb breaks compilation
+Date: Wed, 22 Sep 2010 09:09:48 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1009220909420.6962@cobra.newdream.net>
+References: <1285152268.2392.32.camel@wido-desktop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:64288 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755293Ab0IVP3v (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Sep 2010 11:29:51 -0400
-Received: by qyk33 with SMTP id 33so912269qyk.19
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Sep 2010 08:29:49 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:33909 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752289Ab0IVQH6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Sep 2010 12:07:58 -0400
+In-Reply-To: <1285152268.2392.32.camel@wido-desktop>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Sage,
+Yep, reverted.  Thanks!
+sage
 
-Would you help to review several patches on our github for ceph-unstable?
+On Wed, 22 Sep 2010, Wido den Hollander wrote:
 
-1. http://github.com/tcloud/ceph/commit/3c91d0c0e20425f94eaa374f39b2a1f398270255
-
-This fixed a monitor bug we hit several times. When some osds report
-that other osds are down,
-there is a chance that the leading monitor would enter an infinite loop (you can
-see the CPU usage of cmon is 100% from "top").
-
-ps. I found that the master branch does not contain this piece of
-code. Is there any concern?
-
-
-2. http://github.com/tcloud/ceph/commit/e3147e8929220997017de8fffa34b9d9c2abf9cf
-
-We hit this assert fail once. Can you check if this patch is reasonable?
-
-
-3. http://github.com/tcloud/ceph/commit/01e3bd78fe7ae26b394f5acda5c0ea875726a387
-
-We found that every execution of 'ceph -s' causes a thread leaking on
-the monitor.
-This patch sort of fixed the problem: the thread will be terminated
-when the subscription
-expires. However, I wonder if we should provide an "unsubscribe" mechanism to
-allow the client to explicitly unsubscribe it.
-
-Thanks,
-Henry
+> Hi,
+> 
+> In commit 13a98a972cef3560ddaa2462f8cab50a2d820cfb the flock type was
+> moved to "flock.h", but flock.h wasn't added to the repository, thus
+> breaking compilation.
+> 
+> Reverting to c33685764a3f0c63fab5e75fe287059b7f6d97fd gives you Ceph
+> packages again :-)
+> 
+> Wido
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
