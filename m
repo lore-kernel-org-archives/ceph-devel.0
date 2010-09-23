@@ -1,49 +1,80 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: osd stops working with cep-0.21.3
-Date: Thu, 23 Sep 2010 08:07:50 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1009230806130.16100@cobra.newdream.net>
-References: <AANLkTikzFomxEJNGjxpG+JDZtL-ZMpwh0OnyEa4VXRTf@mail.gmail.com>
+From: Leander Yu <leander.yu@gmail.com>
+Subject: Re: corrupt pg logs
+Date: Thu, 23 Sep 2010 23:46:16 +0800
+Message-ID: <AANLkTimU5s3Ti32BZGjMo4japLVJ0=aDLy7DV6BnN=sX@mail.gmail.com>
+References: <Pine.LNX.4.64.1009230757330.16100@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52617 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754034Ab0IWPF6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Sep 2010 11:05:58 -0400
-In-Reply-To: <AANLkTikzFomxEJNGjxpG+JDZtL-ZMpwh0OnyEa4VXRTf@mail.gmail.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:54068 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753190Ab0IWPqT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Sep 2010 11:46:19 -0400
+Received: by wyb28 with SMTP id 28so999846wyb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Sep 2010 08:46:18 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1009230757330.16100@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Majer <stefan.majer@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org, henry_c_chang@tcloudcomputing.com
 
-Hi Stefan,
+Hi Sage,
+I have some high level idea about this but I haven't fully trace the
+code so please forgive me if it's too naive
 
-On Thu, 23 Sep 2010, Stefan Majer wrote:
+On Thu, Sep 23, 2010 at 11:05 PM, Sage Weil <sage@newdream.net> wrote:
+> One problem that keeps popping up is corruption in the PG logs. =A0Th=
+is
+> usually manifests itself as a crash when the OSD restarts and is unab=
+le to
+> parse the log. =A0There are a couple of things to do here.
+>
+> First, we need to figure out where the corruption is coming from. =A0=
+Dumps
+> of the corrupt pglog files will help. =A0Are they zeroed out? =A0Enti=
+rely? =A0Is
+> there valid data at the end of the file? =A0etc.
+>
 
-> Hi,
-> 
-> we saw on one of our OSDs (16 in total) the followin assert.
-> 
-> osd/OSD.cc: In function 'void OSD::start_recovery_op(PG*, const sobject_t&)':
-> osd/OSD.cc:4250: FAILED assert(recovery_oids.count(soid) == 0)
->  1: (PG::start_recovery_op(sobject_t const&)+0x127) [0x525627]
->  2: (ReplicatedPG::recover_object_replicas(sobject_t const&)+0x191) [0x482881]
->  3: (ReplicatedPG::recover_replicas(int)+0x2db) [0x482ddb]
->  4: (ReplicatedPG::start_recovery_ops(int)+0x92) [0x4832f2]
->  5: (OSD::do_recovery(PG*)+0x1e3) [0x4b8cf3]
->  6: (ThreadPool::worker()+0x291) [0x5ac5d1]
->  7: (ThreadPool::WorkThread::entry()+0xd) [0x4ec93d]
->  8: (Thread::_entry_func(void*)+0x7) [0x46eee7]
->  9: (()+0x77e1) [0x7f952e6917e1]
->  10: (clone()+0x6d) [0x7f952d8b551d]
-> 
-> Any hints to further nail down this problem.
+I am thinking to have a checksum for each log entry, when osd restart
+and parse the log it will be able to detect if the data is corrupt.
 
-Without logs, it's hard to tell what caused it.  Has it only happened the 
-one time?  Did the OSD behave when it was restarted?
+> Second, we need to come up with a reasonable way to start up even whe=
+n
+> some PGs are corrupt. =A0Deleting them is one option, but we want to =
+avoid
+> doing so unless we're sure we have a good copy elsewhere.
+>
 
-Generally speaking, 'debug osd = 20' and 'debug ms = 1' would have the 
-context needed to identify the problem, but it's a lot of a logging and 
-will slow things down some.  
+By implement the checksum for each log entry, we will be able to
+ignore the corrupted log and hopefully it can be rebuilt.
+This is the place I am not certain, we have deleted the single PGinfo
+that cause the error manually and see that osd start successfully, but
+due to the limited knowledge about current implementation we are not
+sure if everything is rebuilt properly.
 
-sage
+> Another option would be to make a 'corrupt' subdirectory on the OSD a=
+nd
+> move the log there. =A0Without the log, the OSD will need to rebuild =
+the
+> object list to recover/resync with other PG copies, but at least it w=
+ill
+> start and (eventually) recover.
+>
+> http://tracker.newdream.net/issues/169
+>
+> Thoughts?
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
