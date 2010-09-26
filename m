@@ -1,98 +1,64 @@
-From: Mag Gam <magawake@gmail.com>
-Subject: Re: roadmap
-Date: Fri, 24 Sep 2010 23:52:43 -0400
-Message-ID: <AANLkTi=K5PudSyrh=Pf5hpMw-xqV-WMrxCVr1WKvCPdz@mail.gmail.com>
-References: <Pine.LNX.4.64.1009241526010.17668@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:38252 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755238Ab0IYDwn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Sep 2010 23:52:43 -0400
-Received: by iwn5 with SMTP id 5so2909697iwn.19
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Sep 2010 20:52:43 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1009241526010.17668@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+From: Vasiliy Kulikov <segooon@gmail.com>
+Subject: [PATCH] block: rbd: fixed may leaks
+Date: Sun, 26 Sep 2010 12:59:37 +0400
+Message-ID: <1285491578-32580-1-git-send-email-segooon@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: kernel-janitors@vger.kernel.org
+Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Thanks for the timeline.
+rbd_client_create() doesn't free rbdc, this leads to many leaks.
 
-We would like to see file striping. Instead of replicating the data it
-would be even better if we are able to maintain parity amongst the
-objects. No opensource project has this.
-What do you think?
+seg_len in rbd_do_op() is unsigned, so (seg_len < 0) makes no sense.
+Also if fixed check fails then seg_name is leaked.
+---
+ Compile tested.
 
-On Fri, Sep 24, 2010 at 6:48 PM, Sage Weil <sage@newdream.net> wrote:
-> I've been working on keeping the roadmap in the project tracker up to=
- date
-> with the current release schedule and the features targetting each
-> version. =C2=A0That can be found at
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0http://tracker.newdream.net/projects/ceph/=
-roadmap
->
-> The main exception is that many bugs end up accumulating with the nex=
-t
-> stable release as a target (e.g., v0.21.4), and then (when they're no=
-t
-> resolved) get pushed off to the next release. =C2=A0And as releases g=
-et further
-> into the future the picture gets a bit for hazy.
->
-> Those caveats aside, the basic schedule and goals are:
->
-> v0.22 (1-2 weeks away)
-> =C2=A0- Stable and usable clustered MDS in non-failure conditions. =C2=
-=A0We will
-> encourage anybody to test the clustered MDS for correctness, performa=
-nce,
-> and stability, and to report any and all issue.
-> =C2=A0- Background OSD scrubbing. =C2=A0This will help us catch remai=
-ning object
-> replication/recovery problems sooner rather than later.
-> =C2=A0- Stable RBD.
->
-> v0.23 (6 weeks away)
-> =C2=A0- Stable clustered MDS failure recovery.
-> =C2=A0- Stable directory fragmentation and defragmetnation. =C2=A0(Fr=
-agmentation is
-> what faciliates very large directories and the distribution of large
-> directories over multiple nodes in the MDS cluster.)
-> =C2=A0- RBD image locking.
-> =C2=A0- Stable radosgw (S3 compatible REST proxy)
->
-> v1.0 (Christmas!)
-> =C2=A0- Some basic fsck functionality
-> =C2=A0- Cautious use in production setting.
->
-> This is all, of course, subject to change depending on what issues co=
-me up
-> as we ramp up our testing and QA.
->
-> I'm also interested in hearing from you what features or issues you a=
-re
-> most interested in seeing us focus on. =C2=A0What are your use cases?=
- =C2=A0If you
-> have done any testing, what problems have you run into? =C2=A0If you =
-haven't,
-> what is preventing you from testing (besides some promise of stabilit=
-y or
-> production readiness)?
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ drivers/block/rbd.c |   14 ++++++++------
+ 1 files changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index c42f305..83b15dd 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -241,6 +241,7 @@ static struct rbd_client *rbd_client_create(struct ceph_options *opt)
+ 	rbdc->client = ceph_create_client(opt, rbdc);
+ 	if (IS_ERR(rbdc->client))
+ 		goto out_rbdc;
++	opt = NULL; /* Now rbdc->client is responsible for opt */
+ 
+ 	ret = ceph_open_session(rbdc->client);
+ 	if (ret < 0)
+@@ -255,13 +256,12 @@ static struct rbd_client *rbd_client_create(struct ceph_options *opt)
+ 
+ out_err:
+ 	ceph_destroy_client(rbdc->client);
+-	return ERR_PTR(ret);
+-
+ out_rbdc:
+ 	kfree(rbdc);
+ out_opt:
+-	ceph_destroy_options(opt);
+-	return ERR_PTR(-ENOMEM);
++	if (opt)
++		ceph_destroy_options(opt);
++	return ERR_PTR(ret);
+ }
+ 
+ /*
+@@ -889,8 +889,10 @@ static int rbd_do_op(struct request *rq,
+ 				  rbd_dev->header.block_name,
+ 				  ofs, len,
+ 				  seg_name, &seg_ofs);
+-	if (seg_len < 0)
+-		return seg_len;
++	if ((s64)seg_len < 0) {
++		ret = seg_len;
++		goto done;
++	}
+ 
+ 	payload_len = (flags & CEPH_OSD_FLAG_WRITE ? seg_len : 0);
+ 
+-- 
+1.7.0.4
