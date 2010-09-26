@@ -1,64 +1,75 @@
-From: Vasiliy Kulikov <segooon@gmail.com>
-Subject: [PATCH] block: rbd: fixed may leaks
-Date: Sun, 26 Sep 2010 12:59:37 +0400
-Message-ID: <1285491578-32580-1-git-send-email-segooon@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: kernel-janitors@vger.kernel.org
-Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: cang lin <fwdflywl@gmail.com>
+Subject: Some problem of ceph and radosgw
+Date: Sun, 26 Sep 2010 18:24:43 +0800
+Message-ID: <AANLkTimTkphpGFqZ1R46CiJ5UFG394FQ=uy6SjiLXqho@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:34866 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756075Ab0IZKYp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Sep 2010 06:24:45 -0400
+Received: by wyb28 with SMTP id 28so3073743wyb.19
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Sep 2010 03:24:43 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-rbd_client_create() doesn't free rbdc, this leads to many leaks.
+Write speed of osd is very slow.
 
-seg_len in rbd_do_op() is unsigned, so (seg_len < 0) makes no sense.
-Also if fixed check fails then seg_name is leaked.
----
- Compile tested.
+Test osd1 according to
+http://ceph.newdream.net/wiki/Troubleshooting#OSD performance
 
- drivers/block/rbd.c |   14 ++++++++------
- 1 files changed, 8 insertions(+), 6 deletions(-)
+# ceph osd tell 1 bench
+10.09.23_21:33:06.774427 mon <- [osd,tell,1,bench]
+10.09.23_21:33:06.775481 mon0 -> 'ok' (0)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index c42f305..83b15dd 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -241,6 +241,7 @@ static struct rbd_client *rbd_client_create(struct ceph_options *opt)
- 	rbdc->client = ceph_create_client(opt, rbdc);
- 	if (IS_ERR(rbdc->client))
- 		goto out_rbdc;
-+	opt = NULL; /* Now rbdc->client is responsible for opt */
- 
- 	ret = ceph_open_session(rbdc->client);
- 	if (ret < 0)
-@@ -255,13 +256,12 @@ static struct rbd_client *rbd_client_create(struct ceph_options *opt)
- 
- out_err:
- 	ceph_destroy_client(rbdc->client);
--	return ERR_PTR(ret);
--
- out_rbdc:
- 	kfree(rbdc);
- out_opt:
--	ceph_destroy_options(opt);
--	return ERR_PTR(-ENOMEM);
-+	if (opt)
-+		ceph_destroy_options(opt);
-+	return ERR_PTR(ret);
- }
- 
- /*
-@@ -889,8 +889,10 @@ static int rbd_do_op(struct request *rq,
- 				  rbd_dev->header.block_name,
- 				  ofs, len,
- 				  seg_name, &seg_ofs);
--	if (seg_len < 0)
--		return seg_len;
-+	if ((s64)seg_len < 0) {
-+		ret = seg_len;
-+		goto done;
-+	}
- 
- 	payload_len = (flags & CEPH_OSD_FLAG_WRITE ? seg_len : 0);
- 
--- 
-1.7.0.4
+log 10.09.23_21:39:09.949601 osd1 ???.???.248.176:6801/25594 1 : [INF]
+bench: wrote 1024 MB in blocks of 4096 KB in 363.165841 sec at 2887
+KB/sec
+
+Test of osd0
+
+# ceph osd tell 0 bench
+10.09.23_21:39:58.046587 mon <- [osd,tell,0,bench]
+10.09.23_21:39:58.047716 mon0 -> 'ok' (0)
+
+log 10.09.23_21:45:17.907473 osd0 ???.???.248.177:6801/13222 1 : [INF]
+bench: wrote 1024 MB in blocks of 4096 KB in 319.851284 sec at 3278
+KB/sec
+
+The network is tested to be ok by iperf. mds, mon, osd0  and other 3
+osd(osd02,osd03,osd04) are running on the same host.The standby mds
+and osd1 are running on other host. Journal is a file and the size of
+it is about 100MB.
+
+Error occurs when test radoswg
+
+Config radosgw,apache web server,fastcgi module on the host which is
+running mon,mds and ods. Can use radosgw_admin to generate UserID and
+SecretKey,libs3 throw error when use s3 -u.
+
+web1@ceph01:~$ s3 -u create alpha
+ERROR: ConnectionFailed
+
+web1@ceph01:~$ s3 -u list
+ERROR: ConnectionFailed
+
+Config radosgw,apache web server,fastcgi module on another host. Can
+use radosgw_admin to generate UserID and Secret Key,but error occurs
+when create bucket.
+
+web1@cl0:~$ s3 -u create alpha
+ERROR: XmlParseFailure
+
+But list works fine.
+
+web1@cl0:~$ s3 -u list
+                Bucket                                 Created
+--------------------------------------------------------  --------------------
+web1@c01:~$
+
+How the solve the problem?
+
+Thanks!
+Lin
