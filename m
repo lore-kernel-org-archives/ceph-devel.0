@@ -1,26 +1,55 @@
-From: Takuya ASADA <syuu@dokukino.com>
-Subject: Re: Usage of rbd
-Date: Wed, 29 Sep 2010 04:19:25 +0900
-Message-ID: <AANLkTi=b6AEiP2_tV32b9rHgkyNeMNgwu7ipTB8vt=df@mail.gmail.com>
-References: <AANLkTikUMZiGmjF9xPhn-9UiknrnQWLLrMgFEFU83PF7@mail.gmail.com> <AANLkTi=mftr=1=KG18nBpKHycGO24QPvLT6FJvFjyh3w@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH -next] ceph: fix debugfs warnings
+Date: Tue, 28 Sep 2010 12:42:10 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1009281241450.16237@cobra.newdream.net>
+References: <20100928141823.8c61000e.sfr@canb.auug.org.au>
+ <20100928095310.2983a888.randy.dunlap@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:44699 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752350Ab0I1TTr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Sep 2010 15:19:47 -0400
-Received: by wyb28 with SMTP id 28so5315460wyb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Sep 2010 12:19:45 -0700 (PDT)
-In-Reply-To: <AANLkTi=mftr=1=KG18nBpKHycGO24QPvLT6FJvFjyh3w@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-next-owner@vger.kernel.org>
+In-Reply-To: <20100928095310.2983a888.randy.dunlap@oracle.com>
+Sender: linux-next-owner@vger.kernel.org
+To: Randy Dunlap <randy.dunlap@oracle.com>
+Cc: Stephen Rothwell <sfr@canb.auug.org.au>, linux-next@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-> The rbd class is loaded but not activated. You can run 'ceph class
-> activate rbd 1.2', it should fix it (note that it takes a minute to
-> propagate).
+Thanks, Randy.  This is in my for-next branch now!
 
-Oh I see.
-I think we need to add this instruction to the wiki.
+sage
+
+
+On Tue, 28 Sep 2010, Randy Dunlap wrote:
+
+> From: Randy Dunlap <randy.dunlap@oracle.com>
+> 
+> Include "super.h" outside of CONFIG_DEBUG_FS to eliminate a compiler warning:
+> 
+> fs/ceph/debugfs.c:266: warning: 'struct ceph_fs_client' declared inside parameter list
+> fs/ceph/debugfs.c:266: warning: its scope is only this definition or declaration, which is probably not what you want
+> fs/ceph/debugfs.c:271: warning: 'struct ceph_fs_client' declared inside parameter list
+> 
+> Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
+> ---
+>  fs/ceph/debugfs.c |    3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> --- linux-next-20100927.orig/fs/ceph/debugfs.c
+> +++ linux-next-20100927/fs/ceph/debugfs.c
+> @@ -12,9 +12,10 @@
+>  #include <linux/ceph/auth.h>
+>  #include <linux/ceph/debugfs.h>
+>  
+> +#include "super.h"
+> +
+>  #ifdef CONFIG_DEBUG_FS
+>  
+> -#include "super.h"
+>  #include "mds_client.h"
+>  
+>  static int mdsmap_show(struct seq_file *s, void *p)
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
