@@ -1,55 +1,40 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH -next] ceph: fix debugfs warnings
-Date: Tue, 28 Sep 2010 12:42:10 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1009281241450.16237@cobra.newdream.net>
-References: <20100928141823.8c61000e.sfr@canb.auug.org.au>
- <20100928095310.2983a888.randy.dunlap@oracle.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Usage of rbd
+Date: Tue, 28 Sep 2010 21:48:32 +0200
+Message-ID: <1285703312.3394.4.camel@wido-laptop.pcextreme.nl>
+References: <AANLkTikUMZiGmjF9xPhn-9UiknrnQWLLrMgFEFU83PF7@mail.gmail.com>
+	 <AANLkTi=mftr=1=KG18nBpKHycGO24QPvLT6FJvFjyh3w@mail.gmail.com>
+	 <AANLkTi=b6AEiP2_tV32b9rHgkyNeMNgwu7ipTB8vt=df@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-next-owner@vger.kernel.org>
-In-Reply-To: <20100928095310.2983a888.randy.dunlap@oracle.com>
-Sender: linux-next-owner@vger.kernel.org
-To: Randy Dunlap <randy.dunlap@oracle.com>
-Cc: Stephen Rothwell <sfr@canb.auug.org.au>, linux-next@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:52618 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756088Ab0I1Tsf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Sep 2010 15:48:35 -0400
+In-Reply-To: <AANLkTi=b6AEiP2_tV32b9rHgkyNeMNgwu7ipTB8vt=df@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Takuya ASADA <syuu@dokukino.com>
+Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, ceph-devel@vger.kernel.org
 
-Thanks, Randy.  This is in my for-next branch now!
+Hi,
 
-sage
+I've added some instructions to the Wiki:
+http://ceph.newdream.net/wiki/Rbd#Loading_RBD
 
+Wido
 
-On Tue, 28 Sep 2010, Randy Dunlap wrote:
-
-> From: Randy Dunlap <randy.dunlap@oracle.com>
+On Wed, 2010-09-29 at 04:19 +0900, Takuya ASADA wrote:
+> > The rbd class is loaded but not activated. You can run 'ceph class
+> > activate rbd 1.2', it should fix it (note that it takes a minute to
+> > propagate).
 > 
-> Include "super.h" outside of CONFIG_DEBUG_FS to eliminate a compiler warning:
-> 
-> fs/ceph/debugfs.c:266: warning: 'struct ceph_fs_client' declared inside parameter list
-> fs/ceph/debugfs.c:266: warning: its scope is only this definition or declaration, which is probably not what you want
-> fs/ceph/debugfs.c:271: warning: 'struct ceph_fs_client' declared inside parameter list
-> 
-> Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
-> ---
->  fs/ceph/debugfs.c |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> --- linux-next-20100927.orig/fs/ceph/debugfs.c
-> +++ linux-next-20100927/fs/ceph/debugfs.c
-> @@ -12,9 +12,10 @@
->  #include <linux/ceph/auth.h>
->  #include <linux/ceph/debugfs.h>
->  
-> +#include "super.h"
-> +
->  #ifdef CONFIG_DEBUG_FS
->  
-> -#include "super.h"
->  #include "mds_client.h"
->  
->  static int mdsmap_show(struct seq_file *s, void *p)
+> Oh I see.
+> I think we need to add this instruction to the wiki.
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
