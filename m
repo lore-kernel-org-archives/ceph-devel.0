@@ -1,42 +1,74 @@
-From: Randy Dunlap <randy.dunlap@oracle.com>
-Subject: [PATCH -next] ceph: fix debugfs warnings
-Date: Tue, 28 Sep 2010 09:53:10 -0700
-Message-ID: <20100928095310.2983a888.randy.dunlap@oracle.com>
-References: <20100928141823.8c61000e.sfr@canb.auug.org.au>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: Usage of rbd
+Date: Tue, 28 Sep 2010 11:20:05 -0700
+Message-ID: <AANLkTi=mftr=1=KG18nBpKHycGO24QPvLT6FJvFjyh3w@mail.gmail.com>
+References: <AANLkTikUMZiGmjF9xPhn-9UiknrnQWLLrMgFEFU83PF7@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100928141823.8c61000e.sfr@canb.auug.org.au>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Rothwell <sfr@canb.auug.org.au>, Sage Weil <sage@newdream.net>
-Cc: linux-next@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:51784 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757500Ab0I1SUH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Sep 2010 14:20:07 -0400
+Received: by ewy23 with SMTP id 23so1945529ewy.19
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Sep 2010 11:20:06 -0700 (PDT)
+In-Reply-To: <AANLkTikUMZiGmjF9xPhn-9UiknrnQWLLrMgFEFU83PF7@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Takuya ASADA <syuu@dokukino.com>
+Cc: ceph-devel@vger.kernel.org
 
-From: Randy Dunlap <randy.dunlap@oracle.com>
+On Tue, Sep 28, 2010 at 8:55 AM, Takuya ASADA <syuu@dokukino.com> wrote:
+>
+> Hi,
+>
+> I'm trying to test kvm-rbd, and I just failed to create image on it.
+> I followed installation sequence on the wiki
+> (http://ceph.newdream.net/wiki/Kvm-rbd),
+> and executed
+> $ qemu-img create -f rbd rbd:data/foo 10G
+> it returned
+>
+> failed assigning block id
+> qemu-img: rbd:data/foo: error while creating rbd: Input/output error
+>
+> Then I looked into source code, and realized maybe I need to load libcls_rbd.so,
+> so I executed
+> $ cclass -a
+> $ ceph class list
+> rbd class shows up.
+>
+> 10.09.29_00:55:53.939866 mon <- [class,list]
+> 10.09.29_00:55:53.940230 mon0 -> 'installed classes:
+> rbd (v1.2 [x86-64])
+> ' (0)
+>
+> Then I tried "qemu-img create" again, also "rbd create", it didn't work at all.
+> Like this:
+>
+> $ rbd -p hoge99 --size 10 create test.img
+> failed to assign a block name for image
+> create error: Operation not supported
+>
+> $ qemu-img create -f rbd rbd:data/foo 10G
+> Formatting 'rbd:data/foo', fmt=rbd size=10737418240 cluster_size=0
+> failed assigning block id
+> qemu-img: rbd:data/foo: error while creating rbd: Input/output error
+>
+> osd and mon are working correctly, I can use it via rados command and librados.
+>
+> My question is:
+> - Am I missing something to start using rbd?
 
-Include "super.h" outside of CONFIG_DEBUG_FS to eliminate a compiler warning:
+The rbd class is loaded but not activated. You can run 'ceph class
+activate rbd 1.2', it should fix it (note that it takes a minute to
+propagate).
 
-fs/ceph/debugfs.c:266: warning: 'struct ceph_fs_client' declared inside parameter list
-fs/ceph/debugfs.c:266: warning: its scope is only this definition or declaration, which is probably not what you want
-fs/ceph/debugfs.c:271: warning: 'struct ceph_fs_client' declared inside parameter list
+>
+> - Do I need rbd kernel module for kvm-rbd?
+> I thought it's just a userland application, which calling librados.
+>
+It is a userland application, and you don't need any kernel module.
 
-Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
----
- fs/ceph/debugfs.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
---- linux-next-20100927.orig/fs/ceph/debugfs.c
-+++ linux-next-20100927/fs/ceph/debugfs.c
-@@ -12,9 +12,10 @@
- #include <linux/ceph/auth.h>
- #include <linux/ceph/debugfs.h>
- 
-+#include "super.h"
-+
- #ifdef CONFIG_DEBUG_FS
- 
--#include "super.h"
- #include "mds_client.h"
- 
- static int mdsmap_show(struct seq_file *s, void *p)
+Thanks,
+Yehuda
