@@ -1,54 +1,45 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Several patches for CEPH
-Date: Wed, 29 Sep 2010 11:15:40 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1009291113130.4494@cobra.newdream.net>
-References: <AANLkTi=LJHRqKGYQ44h_K75oq2L9KUsZWoS1o--ipwCt@mail.gmail.com>
- <AANLkTimSQKsa60B1i1FyxDQDu91SKCPLF9yAEARY3nks@mail.gmail.com>
- <AANLkTikbbO48kojFbV3jQ8L2A77mr5rRGd_=fKE+XB3W@mail.gmail.com>
- <AANLkTikFQZtvzhR3wcChXV0j1ZjyTU7VFU2b24Q+pVME@mail.gmail.com>
+From: "Colin P. McCabe" <colinm@hq.newdream.net>
+Subject: cluster-optimized network transports
+Date: Wed, 29 Sep 2010 11:27:58 -0700
+Message-ID: <AANLkTikw2sOcMzLE8ur4Zdr_Px8KT-+Zw1rci2LmTeWN@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58434 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753926Ab0I2SNe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Sep 2010 14:13:34 -0400
-In-Reply-To: <AANLkTikFQZtvzhR3wcChXV0j1ZjyTU7VFU2b24Q+pVME@mail.gmail.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:42852 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754480Ab0I2S2A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Sep 2010 14:28:00 -0400
+Received: by fxm4 with SMTP id 4so142017fxm.19
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Sep 2010 11:27:59 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: Henry C Chang <henry_c_chang@tcloudcomputing.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wed, 29 Sep 2010, Gregory Farnum wrote:
+Hi all,
 
-> On Wed, Sep 29, 2010 at 9:29 AM, Henry C Chang
-> <henry_c_chang@tcloudcomputing.com> wrote:
-> > On Thu, Sep 23, 2010 at 1:14 AM, Gregory Farnum <gregf@hq.newdream.net> wrote:
-> >> On Wed, Sep 22, 2010 at 8:29 AM, Henry C Chang
-> >> <henry_c_chang@tcloudcomputing.com> wrote:
-> >>> 1. http://github.com/tcloud/ceph/commit/3c91d0c0e20425f94eaa374f39b2a1f398270255
-> >>>
-> >>> This fixed a monitor bug we hit several times. When some osds report
-> >>> that other osds are down,
-> >>> there is a chance that the leading monitor would enter an infinite loop (you can
-> >>> see the CPU usage of cmon is 100% from "top").
-> >> You diagnosed the problem correctly, but it looks like your patch can
-> >> make the monitor discard the wrong report! Fixed this by sticking an
-> >> "&& i != fail_notes.end()" into the while loop, in
-> >> commit:2c5a3d99aa3be5ce114072e84f73a0a6426e63fd.
-> >
-> > With this commit, however, if i == fail_notes.end() and leaves the while loop,
-> > it will cause segfault/abort in the following if-else when
-> > fail_notes.erase(i) is called.
-> > (I wonder if my patch is right.)
-> Whoops, I missed that in the branching.
-> The basic problem here is that if you reach end() then attempting to
-> deref either of the values returns 0 -- which in this case can be a
-> valid value. So, also, check for end() in the if clause.
-> commit:ba39fd782375dc1bc909519fa3f5307a9696032b
+Ceph relies on TCP for inter-node communication. One thing that might
+be interesting is to use a cluster-optimized network transport
+protocol for Ceph.
 
-I think the order in the if () should be reversed... it's not legal to 
-dereference the iterator if it's == end().
+For example, TIPC provides the same sockets interface, and can provide
+reliable delivery. But unlike TCP, TIPC was optimized for cluster
+environments where packet loss is low, bandwidth is high, etc.
+Ericsson uses it for cluster applications. (See
+http://tipc.sourceforge.net/ )
 
-Thanks!
-sage
+There are some papers out there that benchmark TCP vs. TIPC and other
+protocols. Basically TCP has a lot of mechanisms that were created to
+work well on the open internet, which is kind of a risky place. But
+dropping them can result in better latency and bandwidth in a closed
+cluster. TIPC uses a different acknowledgement mechanism, doesn't
+checksum packets since it assumes that the hardware does that, avoids
+the overhead of the 3-way handshake, etc.
+
+There is apparently a native interface and a sockets interface to
+TIPC. I'm not sure what the advantages of the native interface are
+versus sockets. Ideally this would be a drop-in replacement.
+
+Just a random idea.
+
+cheers,
+Colin McCabe
