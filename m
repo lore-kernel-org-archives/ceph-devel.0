@@ -1,45 +1,28 @@
-From: "Colin P. McCabe" <colinm@hq.newdream.net>
-Subject: cluster-optimized network transports
-Date: Wed, 29 Sep 2010 11:27:58 -0700
-Message-ID: <AANLkTikw2sOcMzLE8ur4Zdr_Px8KT-+Zw1rci2LmTeWN@mail.gmail.com>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: Several patches for CEPH
+Date: Wed, 29 Sep 2010 11:33:49 -0700
+Message-ID: <AANLkTiko9p7dBEtNNUFXUTgoWUROxD=d4sk58vpP2SQ1@mail.gmail.com>
+References: <AANLkTi=LJHRqKGYQ44h_K75oq2L9KUsZWoS1o--ipwCt@mail.gmail.com>
+	<AANLkTimSQKsa60B1i1FyxDQDu91SKCPLF9yAEARY3nks@mail.gmail.com>
+	<AANLkTikbbO48kojFbV3jQ8L2A77mr5rRGd_=fKE+XB3W@mail.gmail.com>
+	<AANLkTikFQZtvzhR3wcChXV0j1ZjyTU7VFU2b24Q+pVME@mail.gmail.com>
+	<Pine.LNX.4.64.1009291113130.4494@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:42852 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754480Ab0I2S2A (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Sep 2010 14:28:00 -0400
-Received: by fxm4 with SMTP id 4so142017fxm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Sep 2010 11:27:59 -0700 (PDT)
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:50940 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754217Ab0I2Sdv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Sep 2010 14:33:51 -0400
+Received: by qyk36 with SMTP id 36so1377750qyk.19
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Sep 2010 11:33:50 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1009291113130.4494@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Henry C Chang <henry_c_chang@tcloudcomputing.com>, ceph-devel@vger.kernel.org
 
-Hi all,
-
-Ceph relies on TCP for inter-node communication. One thing that might
-be interesting is to use a cluster-optimized network transport
-protocol for Ceph.
-
-For example, TIPC provides the same sockets interface, and can provide
-reliable delivery. But unlike TCP, TIPC was optimized for cluster
-environments where packet loss is low, bandwidth is high, etc.
-Ericsson uses it for cluster applications. (See
-http://tipc.sourceforge.net/ )
-
-There are some papers out there that benchmark TCP vs. TIPC and other
-protocols. Basically TCP has a lot of mechanisms that were created to
-work well on the open internet, which is kind of a risky place. But
-dropping them can result in better latency and bandwidth in a closed
-cluster. TIPC uses a different acknowledgement mechanism, doesn't
-checksum packets since it assumes that the hardware does that, avoids
-the overhead of the 3-way handshake, etc.
-
-There is apparently a native interface and a sockets interface to
-TIPC. I'm not sure what the advantages of the native interface are
-versus sockets. Ideally this would be a drop-in replacement.
-
-Just a random idea.
-
-cheers,
-Colin McCabe
+On Wed, Sep 29, 2010 at 11:15 AM, Sage Weil <sage@newdream.net> wrote:
+> I think the order in the if () should be reversed... it's not legal to
+> dereference the iterator if it's == end().
+Good catch -- switched in the if and the while loop condition checks.
