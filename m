@@ -1,33 +1,27 @@
-From: Takuya ASADA <syuu@dokukino.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 Subject: Re: Usage of rbd
-Date: Wed, 29 Sep 2010 11:42:49 +0900
-Message-ID: <AANLkTimge7x+P6JANFXHty5C9crPQYmiFu1YD5OCK1S2@mail.gmail.com>
+Date: Tue, 28 Sep 2010 21:39:54 -0700
+Message-ID: <AANLkTik9gkz_2M-CNYoc8+uVLWdVdOyygef86giLDnp4@mail.gmail.com>
 References: <AANLkTikUMZiGmjF9xPhn-9UiknrnQWLLrMgFEFU83PF7@mail.gmail.com>
- <AANLkTi=mftr=1=KG18nBpKHycGO24QPvLT6FJvFjyh3w@mail.gmail.com> <AANLkTin6oL-U4_0s4Qk5Uc9LctgP_71K0BxJDtbXuRtt@mail.gmail.com>
+	<AANLkTi=mftr=1=KG18nBpKHycGO24QPvLT6FJvFjyh3w@mail.gmail.com>
+	<AANLkTin6oL-U4_0s4Qk5Uc9LctgP_71K0BxJDtbXuRtt@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:60507 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751335Ab0I2CnK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Sep 2010 22:43:10 -0400
-Received: by wyb28 with SMTP id 28so317643wyb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Sep 2010 19:43:09 -0700 (PDT)
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:33053 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750801Ab0I2Ejz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Sep 2010 00:39:55 -0400
+Received: by wwd20 with SMTP id 20so357192wwd.1
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Sep 2010 21:39:54 -0700 (PDT)
 In-Reply-To: <AANLkTin6oL-U4_0s4Qk5Uc9LctgP_71K0BxJDtbXuRtt@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ml ml <takada_ml@mail.syonbori.net>
-Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, ceph-devel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
-
-I haven't check debug output(yet), but it looks similar here.
-rbd create never succeeded on my environment.
-
-syuu
-
-On Wed, Sep 29, 2010 at 9:32 AM, ml ml <takada_ml@mail.syonbori.net> wr=
+On Tue, Sep 28, 2010 at 5:32 PM, ml ml <takada_ml@mail.syonbori.net> wr=
 ote:
 > Hi
 >
@@ -56,7 +50,7 @@ ruction.
 > 192.168.101.41:0/2359 <=3D=3D mon0 192.168.101.41:6789/0 4 =3D=3D=3D=3D
 > mon_command_ack([class,list]=3D0 installed classes:
 > rbd (v1.2 [x86-64]) [active]
-> =C2=A0v3) v1 =3D=3D=3D=3D 96+0+0 (1704564143 0 0) 0x7f0268000bf0
+> =A0v3) v1 =3D=3D=3D=3D 96+0+0 (1704564143 0 0) 0x7f0268000bf0
 > 10.09.29_09:01:44.151874 mon0 -> 'installed classes:
 > rbd (v1.2 [x86-64]) [active]
 > ' (0)
@@ -133,105 +127,16 @@ ruction.
 > osd_op(client4104.0:3 rbd_info [call rbd.assign_bid] 4.573a) v1 -- ?+=
 0
 > 0x25d43a0
-> 192.168.101.41:0/2428 --> mon0 192.168.101.41:6789/0 --
-> mon_subscribe({monmap=3D2+,osdmap=3D6}) v1 -- ?+0 0x7ff874000a90
-> 192.168.101.41:0/2428 --> osd0 192.168.101.41:6801/2231 -- ping v1 --
-> ?+0 0x7ff874000d20
-> 192.168.101.41:0/2428 <=3D=3D mon0 192.168.101.41:6789/0 10 =3D=3D=3D=
-=3D
-> mon_subscribe_ack(300s) v1 =3D=3D=3D=3D 20+0+0 (388814775 0 0) 0x7ff8=
-8c000920
-> 192.168.101.41:0/2428 --> osd0 192.168.101.41:6801/2231 -- ping v1 --
-> ?+0 0x7ff874000d20
->
-> -* rbd command doesnt return, the ping v1 log continues.
-> -* mon0, mds0, osd0 are on the same machine and they work well in cep=
-h
-> fuse environment.
-> -* the result is same if i change testpool to rbd...
->
-> 2010/9/29 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
->> On Tue, Sep 28, 2010 at 8:55 AM, Takuya ASADA <syuu@dokukino.com> wr=
-ote:
->>>
->>> Hi,
->>>
->>> I'm trying to test kvm-rbd, and I just failed to create image on it=
-=2E
->>> I followed installation sequence on the wiki
->>> (http://ceph.newdream.net/wiki/Kvm-rbd),
->>> and executed
->>> $ qemu-img create -f rbd rbd:data/foo 10G
->>> it returned
->>>
->>> failed assigning block id
->>> qemu-img: rbd:data/foo: error while creating rbd: Input/output erro=
-r
->>>
->>> Then I looked into source code, and realized maybe I need to load l=
-ibcls_rbd.so,
->>> so I executed
->>> $ cclass -a
->>> $ ceph class list
->>> rbd class shows up.
->>>
->>> 10.09.29_00:55:53.939866 mon <- [class,list]
->>> 10.09.29_00:55:53.940230 mon0 -> 'installed classes:
->>> rbd (v1.2 [x86-64])
->>> ' (0)
->>>
->>> Then I tried "qemu-img create" again, also "rbd create", it didn't =
-work at all.
->>> Like this:
->>>
->>> $ rbd -p hoge99 --size 10 create test.img
->>> failed to assign a block name for image
->>> create error: Operation not supported
->>>
->>> $ qemu-img create -f rbd rbd:data/foo 10G
->>> Formatting 'rbd:data/foo', fmt=3Drbd size=3D10737418240 cluster_siz=
-e=3D0
->>> failed assigning block id
->>> qemu-img: rbd:data/foo: error while creating rbd: Input/output erro=
-r
->>>
->>> osd and mon are working correctly, I can use it via rados command a=
-nd librados.
->>>
->>> My question is:
->>> - Am I missing something to start using rbd?
->>
->> The rbd class is loaded but not activated. You can run 'ceph class
->> activate rbd 1.2', it should fix it (note that it takes a minute to
->> propagate).
->>
->>>
->>> - Do I need rbd kernel module for kvm-rbd?
->>> I thought it's just a userland application, which calling librados.
->>>
->> It is a userland application, and you don't need any kernel module.
->>
->> Thanks,
->> Yehuda
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
-tml
->>
->
-> --
-> Software Laboratory, Graduate school of Systems and Information
-> Engineering, Univ. of Tsukuba.
-> Shingo TAKADA
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
->
+
+This last operation never returns. What version are you using? Can you
+add the corresponding osd logs?
+Also, can you verify that /var/lib/ceph/tmp exists and is writable by
+the user running the cosd daemon, and make sure that there is no
+execution restriction there (this path can be configured by the 'osd
+class tmp' config variable).
+
+Thanks,
+Yehuda
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
