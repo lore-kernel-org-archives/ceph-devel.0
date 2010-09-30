@@ -1,113 +1,95 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: multi-mds crash on first file create (git/unstable)
-Date: Thu, 30 Sep 2010 10:59:45 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1009301059010.11268@cobra.newdream.net>
-References: <i82id5$cuv$1@dough.gmane.org>
+From: Thomas Mueller <thomas@chaschperli.ch>
+Subject: multi-mds crash: In function 'void
+ MDCache::adjust_subtree_auth(CDir*, std::pair<int, int>, bool)
+Date: Thu, 30 Sep 2010 18:55:02 +0000 (UTC)
+Message-ID: <i82me6$4a8$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54694 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751610Ab0I3R5g (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Sep 2010 13:57:36 -0400
-In-Reply-To: <i82id5$cuv$1@dough.gmane.org>
+Received: from lo.gmane.org ([80.91.229.12]:36449 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752591Ab0I3SzN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Sep 2010 14:55:13 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1P1OHe-0002Aw-QQ
+	for ceph-devel@vger.kernel.org; Thu, 30 Sep 2010 20:55:10 +0200
+Received: from 46-127-100-83.dclient.hispeed.ch ([46.127.100.83])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Sep 2010 20:55:10 +0200
+Received: from thomas by 46-127-100-83.dclient.hispeed.ch with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Sep 2010 20:55:10 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Thomas Mueller <thomas@chaschperli.ch>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, 30 Sep 2010, Thomas Mueller wrote:
-> hi
-> 
-> now on git/unstable - no more git/master.
-> 
-> started with vstart.sh and
-> 
-> export CEPH_NUM_MON=1
-> export CEPH_NUM_OSD=1
-> export CEPH_NUM_MDS=3
-> 
-> 
-> right after first file creation (mktemp 
-> /<pathto>/testspace/ceph_basiccheck_testspace.XXXX) the mds0
-> crashed and the kclient hangs now.
-> 
-> do i need the 2.6.36rc kclient to work with multi-mds testing?
+hi 
 
-No need.  It was a bad assert I introduced a few days ago.  Reverted for 
-now, and will audit this code later.  The fix is pushed to unstable.
+updated to new git/unstable. mds0 crashed on bonnie++.
 
-Thanks!
-sage
+rev: 0e67718a365b42969e785f544ea3b4258bb2407f
+
+- Thomas
 
 
+2010-09-30 20:50:37.349983 7f7ac0f83710 mds0.server  dest #1/pdj-fstest/fstest_dee6a1bf32b15e529c858789b95da80d/fstest_39eb4dd94c47707f5e10d6fcce034889/fstest_f0b645c62a70749289ae2636d07bbe50
+2010-09-30 20:50:37.349999 7f7ac0f83710 mds0.cache traverse: opening base ino 1 snap head
+2010-09-30 20:50:37.350011 7f7ac0f83710 mds0.cache traverse: path seg depth 0 'pdj-fstest' snapid head
+2010-09-30 20:50:37.350022 7f7ac0f83710 mds0.cache.dir(1) lookup (head, 'pdj-fstest')
+2010-09-30 20:50:37.350034 7f7ac0f83710 mds0.cache.dir(1)   hit -> (pdj-fstest,head)
+2010-09-30 20:50:37.350045 7f7ac0f83710 mds0.cache traverse: path seg depth 1 'fstest_dee6a1bf32b15e529c858789b95da80d' snapid head
+2010-09-30 20:50:37.350057 7f7ac0f83710 mds0.cache.dir(10000004007) lookup (head, 'fstest_dee6a1bf32b15e529c858789b95da80d')
+2010-09-30 20:50:37.350068 7f7ac0f83710 mds0.cache.dir(10000004007)   hit -> (fstest_dee6a1bf32b15e529c858789b95da80d,head)
+2010-09-30 20:50:37.350079 7f7ac0f83710 mds0.cache traverse: path seg depth 2 'fstest_39eb4dd94c47707f5e10d6fcce034889' snapid head
+2010-09-30 20:50:37.350090 7f7ac0f83710 mds0.cache.dir(10000004197) lookup (head, 'fstest_39eb4dd94c47707f5e10d6fcce034889')
+2010-09-30 20:50:37.350101 7f7ac0f83710 mds0.cache.dir(10000004197)   hit -> (fstest_39eb4dd94c47707f5e10d6fcce034889,head)
+2010-09-30 20:50:37.350112 7f7ac0f83710 mds0.cache traverse: path seg depth 3 'fstest_f0b645c62a70749289ae2636d07bbe50' snapid head
+2010-09-30 20:50:37.350124 7f7ac0f83710 mds0.cache.dir(10000004198) lookup (head, 'fstest_f0b645c62a70749289ae2636d07bbe50')
+2010-09-30 20:50:37.350134 7f7ac0f83710 mds0.cache.dir(10000004198)   hit -> (fstest_f0b645c62a70749289ae2636d07bbe50,head)
+2010-09-30 20:50:37.350146 7f7ac0f83710 mds0.cache path_traverse finish on snapid head
+2010-09-30 20:50:37.350158 7f7ac0f83710 mds0.server  destdn [dentry #1/pdj-fstest/fstest_dee6a1bf32b15e529c858789b95da80d/fstest_39eb4dd94c47707f5e10d6fcce034889/fstest_f0b645c62a70749289ae2636d07bbe50 [2,head] rep@2,-2.1 (dn lock) (dversion lock) v=85 inode=0x2637ae0 0x71cc2d0]
+2010-09-30 20:50:37.350176 7f7ac0f83710 mds0.server  src #1/pdj-fstest/fstest_dee6a1bf32b15e529c858789b95da80d/fstest_0f57639c4e31382d35f7d80cbf5c01e6/fstest_3ba1f332cdbc0043df8a732dca0de7bd
+2010-09-30 20:50:37.350188 7f7ac0f83710 mds0.cache traverse: opening base ino 1 snap head
+2010-09-30 20:50:37.350198 7f7ac0f83710 mds0.cache traverse: path seg depth 0 'pdj-fstest' snapid head
+2010-09-30 20:50:37.350209 7f7ac0f83710 mds0.cache.dir(1) lookup (head, 'pdj-fstest')
+2010-09-30 20:50:37.350220 7f7ac0f83710 mds0.cache.dir(1)   hit -> (pdj-fstest,head)
+2010-09-30 20:50:37.350231 7f7ac0f83710 mds0.cache traverse: path seg depth 1 'fstest_dee6a1bf32b15e529c858789b95da80d' snapid head
+2010-09-30 20:50:37.350241 7f7ac0f83710 mds0.cache.dir(10000004007) lookup (head, 'fstest_dee6a1bf32b15e529c858789b95da80d')
+2010-09-30 20:50:37.350253 7f7ac0f83710 mds0.cache.dir(10000004007)   hit -> (fstest_dee6a1bf32b15e529c858789b95da80d,head)
+2010-09-30 20:50:37.350263 7f7ac0f83710 mds0.cache traverse: path seg depth 2 'fstest_0f57639c4e31382d35f7d80cbf5c01e6' snapid head
+2010-09-30 20:50:37.350274 7f7ac0f83710 mds0.cache.dir(10000004197) lookup (head, 'fstest_0f57639c4e31382d35f7d80cbf5c01e6')
+2010-09-30 20:50:37.350285 7f7ac0f83710 mds0.cache.dir(10000004197)   hit -> (fstest_0f57639c4e31382d35f7d80cbf5c01e6,head)
+2010-09-30 20:50:37.350296 7f7ac0f83710 mds0.cache traverse: path seg depth 3 'fstest_3ba1f332cdbc0043df8a732dca0de7bd' snapid head
+2010-09-30 20:50:37.350306 7f7ac0f83710 mds0.cache.dir(10000004199) lookup (head, 'fstest_3ba1f332cdbc0043df8a732dca0de7bd')
+2010-09-30 20:50:37.350317 7f7ac0f83710 mds0.cache.dir(10000004199)   hit -> (fstest_3ba1f332cdbc0043df8a732dca0de7bd,head)
+2010-09-30 20:50:37.350329 7f7ac0f83710 mds0.cache path_traverse finish on snapid head
+2010-09-30 20:50:37.350340 7f7ac0f83710 mds0.server  srcdn [dentry #1/pdj-fstest/fstest_dee6a1bf32b15e529c858789b95da80d/fstest_0f57639c4e31382d35f7d80cbf5c01e6/fstest_3ba1f332cdbc0043df8a732dca0de7bd [2,head] rep@2,-2.1 (dn lock) (dversion lock) v=89 inode=0x26560a0 0x71c3910]
+2010-09-30 20:50:37.350371 7f7ac0f83710 mds0.cache add_replica_inode added [inode 602 [...2,head] #602/ rep@-2.1 v1 f() n() (inest lock) (ifile lock) (iversion lock) 0x2636a20]
+2010-09-30 20:50:37.350389 7f7ac0f83710 mds0.cache strayin [inode 602 [...2,head] #602/ rep@-2.1 v1 f() n() (inest lock) (ifile lock) (iversion lock) 0x2636a20]
+2010-09-30 20:50:37.350438 7f7ac0f83710 mds0.cache adjust_subtree_auth -1,-2 -> 2,-2 on [dir 602 #602/ [2,head] rep@-2.1 state=0 f() n() hs=0+0,ss=0+0 0x9fff0d0]
+2010-09-30 20:50:37.350454 7f7ac0f83710 mds0.cache show_subtrees
+2010-09-30 20:50:37.350471 7f7ac0f83710 mds0.cache |_.__ 0    auth [dir 1 / [2,head] auth{1=2,2=2} v=4521 cv=653/653 REP dir_auth=0 state=1610612738|complete f(v0 m2010-09-30 20:48:31.288385 3=0+3) n(v538 rc2010-09-30 20:50:36.629117 15478=15471+7) hs=3+8,ss=0+0 dirty=3 | child subtree replicated dirty 0x1ef5000]
+2010-09-30 20:50:37.350493 7f7ac0f83710 mds0.cache | |__ 2     rep [dir 10000004007 /pdj-fstest/ [2,head] rep@2.1 dir_auth=2 state=0 f(v0 m2010-09-30 20:50:34.678949 1=0+1) n(v22 rc2010-09-30 20:50:36.659797 5=2+3)/n(v22 rc2010-09-30 20:50:36.629117 4=1+3) hs=1+5,ss=0+0 | child subtree 0x1ef8080]
+2010-09-30 20:50:37.350514 7f7ac0f83710 mds0.cache | |__ 1     rep [dir 10000000002 /bonnie-1/ [2,head] rep@1.1 dir_auth=1 state=0 f(v0 m2010-09-30 20:19:32.173041 1=0+1) n(v333 rc2010-09-30 20:48:35.281655 15471=15470+1) hs=1+0,ss=0+0 | child subtree 0x1ef6840]
+2010-09-30 20:50:37.350534 7f7ac0f83710 mds0.cache |____ 0    auth [dir 100 ~mds0/ [2,head] auth v=2490 cv=14/14 dir_auth=0 state=1610612738|complete f(v0 2=1+1) n(v30 rc2010-09-30 20:50:36.608644 b317719418 1028=773+255) hs=2+0,ss=0+0 dirty=1 | child subtree dirty 0x1ef5c20]
+2010-09-30 20:50:37.350553 7f7ac0f83710 mds0.cache |____ 1     rep [dir 101 ~mds1/ [2,head] rep@1.303 dir_auth=1 state=0 f(v0 2=1+1) n(v301 rc2010-09-30 20:48:35.281655 305=304+1)/n(v301 rc2010-09-30 20:48:30.292270 304=303+1) hs=1+0,ss=0+0 | child subtree 0x1ef7460]
+mds/MDCache.cc: In function 'void MDCache::adjust_subtree_auth(CDir*, std::pair<int, int>, bool)':
+mds/MDCache.cc:644: FAILED assert(root)
+ ceph version 0.22~rc (0e67718a365b42969e785f544ea3b4258bb2407f)
+ 1: (MDCache::add_replica_dir(ceph::buffer::list::iterator&, CInode*, int, std::list<Context*, std::allocator<Context*> >&)+0x1c1) [0x536a91]
+ 2: (MDCache::add_replica_stray(ceph::buffer::list&, int)+0xdb) [0x536fab]
+ 3: (Server::handle_slave_rename_prep(MDRequest*)+0x1113) [0x4d5c33]
+ 4: (Server::dispatch_slave_request(MDRequest*)+0x21b) [0x4de80b]
+ 5: (Server::handle_slave_request(MMDSSlaveRequest*)+0x145) [0x4e1955]
+ 6: (MDS::_dispatch(Message*)+0x2598) [0x49e038]
+ 7: (MDS::ms_dispatch(Message*)+0x5b) [0x49e1ab]
+ 8: (SimpleMessenger::dispatch_entry()+0x67a) [0x483f9a]
+ 9: (SimpleMessenger::DispatchThread::entry()+0x4d) [0x47a4ed]
+ 10: (Thread::_entry_func(void*)+0x7) [0x48dd17]
+ 11: (()+0x68ba) [0x7f7ac36d48ba]
+ 12: (clone()+0x6d) [0x7f7ac268802d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
 
-> 
-> rev: 7657a6d5b30dd181350acf19681847d9c8f5d694
-> 
-> - Thomas
-> 
-> 2010-09-30 19:37:44.538704 7f7802dea710 mds0.locker eval done
-> 2010-09-30 19:37:44.538715 7f7802dea710 mds0.server dispatch_client_request client_request(client4106:27 create #1/ceph_basiccheck_testspace.VArD)
-> 2010-09-30 19:37:44.538733 7f7802dea710 mds0.server open w/ O_CREAT on #1/ceph_basiccheck_testspace.VArD
-> 2010-09-30 19:37:44.538746 7f7802dea710 mds0.server rdlock_path_xlock_dentry request(client4106:27 cr=0x29e7b40) #1/ceph_basiccheck_testspace.VArD
-> 2010-09-30 19:37:44.538758 7f7802dea710 mds0.server traverse_to_auth_dir dirpath #1 dname ceph_basiccheck_testspace.VArD
-> 2010-09-30 19:37:44.538769 7f7802dea710 mds0.cache traverse: opening base ino 1 snap head
-> 2010-09-30 19:37:44.538781 7f7802dea710 mds0.cache path_traverse finish on snapid head
-> 2010-09-30 19:37:44.538792 7f7802dea710 mds0.server traverse_to_auth_dir [dir 1 / [2,head] auth{1=2,2=1} v=1 cv=1/1 REP dir_auth=0 state=1073741826|complete f(v0 1=0+1) n(v0 1=0+1) hs=1+6,ss=0+0 | child subtree replicated 0x29fd000]
-> 2010-09-30 19:37:44.538808 7f7802dea710 mds0.server rdlock_path_xlock_dentry dir [dir 1 / [2,head] auth{1=2,2=1} v=1 cv=1/1 REP dir_auth=0 state=1073741826|complete f(v0 1=0+1) n(v0 1=0+1) hs=1+6,ss=0+0 | child subtree replicated 0x29fd000]
-> 2010-09-30 19:37:44.538823 7f7802dea710 mds0.server prepare_null_dentry ceph_basiccheck_testspace.VArD in [dir 1 / [2,head] auth{1=2,2=1} v=1 cv=1/1 REP dir_auth=0 state=1073741826|complete f(v0 1=0+1) n(v0 1=0+1) hs=1+6,ss=0+0 | child subtree replicated 0x29fd000]
-> 2010-09-30 19:37:44.538839 7f7802dea710 mds0.cache.dir(1) lookup (head, 'ceph_basiccheck_testspace.VArD')
-> 2010-09-30 19:37:44.538849 7f7802dea710 mds0.cache.dir(1)   hit -> (ceph_basiccheck_testspace.VArD,head)
-> 2010-09-30 19:37:44.538862 7f7802dea710 mds0.locker acquire_locks request(client4106:27 cr=0x29e7b40)
-> 2010-09-30 19:37:44.538873 7f7802dea710 mds0.locker  must xlock (dn sync) [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock) pv=0 v=1 inode=0 0x2a0ae80]
-> 2010-09-30 19:37:44.538890 7f7802dea710 mds0.locker  must wrlock (ifile sync) [inode 1 [...2,head] / auth{1=2,2=1} v1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated 0x29e9000]
-> 2010-09-30 19:37:44.538907 7f7802dea710 mds0.locker  must wrlock (inest sync) [inode 1 [...2,head] / auth{1=2,2=1} v1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated 0x29e9000]
-> 2010-09-30 19:37:44.538926 7f7802dea710 mds0.locker  must wrlock (dversion lock) [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock) pv=0 v=1 inode=0 0x2a0ae80]
-> 2010-09-30 19:37:44.538940 7f7802dea710 mds0.locker  must rdlock (iauth sync) [inode 1 [...2,head] / auth{1=2,2=1} v1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated 0x29e9000]
-> 2010-09-30 19:37:44.538958 7f7802dea710 mds0.locker  must rdlock (isnap sync) [inode 1 [...2,head] / auth{1=2,2=1} v1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated 0x29e9000]
-> 2010-09-30 19:37:44.538975 7f7802dea710 mds0.locker  must rdlock (dn sync) [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock) pv=0 v=1 inode=0 0x2a0ae80]
-> 2010-09-30 19:37:44.538989 7f7802dea710 mds0.locker  must authpin [inode 1 [...2,head] / auth{1=2,2=1} v1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated 0x29e9000]
-> 2010-09-30 19:37:44.539006 7f7802dea710 mds0.locker  must authpin [inode 1 [...2,head] / auth{1=2,2=1} v1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated 0x29e9000]
-> 2010-09-30 19:37:44.539023 7f7802dea710 mds0.locker  must authpin [inode 1 [...2,head] / auth{1=2,2=1} v1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated 0x29e9000]
-> 2010-09-30 19:37:44.539039 7f7802dea710 mds0.locker  must authpin [inode 1 [...2,head] / auth{1=2,2=1} v1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated 0x29e9000]
-> 2010-09-30 19:37:44.539059 7f7802dea710 mds0.locker  must authpin [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock) pv=0 v=1 inode=0 0x2a0ae80]
-> 2010-09-30 19:37:44.539073 7f7802dea710 mds0.locker  must authpin [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock) pv=0 v=1 inode=0 0x2a0ae80]
-> 2010-09-30 19:37:44.539085 7f7802dea710 mds0.locker  auth_pinning [inode 1 [...2,head] / auth{1=2,2=1} v1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated 0x29e9000]
-> 2010-09-30 19:37:44.539103 7f7802dea710 mds0.cache.ino(1) auth_pin by 0x2a1a000 on [inode 1 [...2,head] / auth{1=2,2=1} v1 ap=1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated authpin 0x29e9000] now 1+0
-> 2010-09-30 19:37:44.539121 7f7802dea710 mds0.locker  already auth_pinned [inode 1 [...2,head] / auth{1=2,2=1} v1 ap=1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated authpin 0x29e9000]
-> 2010-09-30 19:37:44.539138 7f7802dea710 mds0.locker  already auth_pinned [inode 1 [...2,head] / auth{1=2,2=1} v1 ap=1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated authpin 0x29e9000]
-> 2010-09-30 19:37:44.539155 7f7802dea710 mds0.locker  already auth_pinned [inode 1 [...2,head] / auth{1=2,2=1} v1 ap=1 snaprealm=0x29e8480 f(v0 1=0+1) n(v0 1=0+1) (iversion lock) caps={4106=pAsLsXs/p@26} | dirfrag caps replicated authpin 0x29e9000]
-> 2010-09-30 19:37:44.539172 7f7802dea710 mds0.locker  auth_pinning [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock) pv=0 v=1 inode=0 0x2a0ae80]
-> 2010-09-30 19:37:44.539185 7f7802dea710 mds0.cache.den(1 ceph_basiccheck_testspace.VArD) auth_pin by 0x2a1a000 on [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock) pv=0 v=1 ap=1+0 inode=0 | authpin 0x2a0ae80] now 1+0
-> 2010-09-30 19:37:44.539199 7f7802dea710 mds0.cache.dir(1) adjust_nested_auth_pins 1/1 on [dir 1 / [2,head] auth{1=2,2=1} v=1 cv=1/1 REP dir_auth=0 ap=0+1+1 state=1073741826|complete f(v0 1=0+1) n(v0 1=0+1) hs=1+6,ss=0+0 | child subtree replicated 0x29fd000] count now 0 + 1
-> 2010-09-30 19:37:44.539216 7f7802dea710 mds0.locker  already auth_pinned [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock) pv=0 v=1 ap=1+0 inode=0 | authpin 0x2a0ae80]
-> 2010-09-30 19:37:44.539231 7f7802dea710 mds0.locker local_wrlock_start  on (dversion lock) on [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock) pv=0 v=1 ap=1+0 inode=0 | authpin 0x2a0ae80]
-> 2010-09-30 19:37:44.539246 7f7802dea710 mds0.locker  got wrlock on (dversion lock w=1 last_client=4106) [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock w=1 last_client=4106) pv=0 v=1 ap=1+0 inode=0 | lock authpin 0x2a0ae80]
-> 2010-09-30 19:37:44.539262 7f7802dea710 mds0.locker xlock_start on (dn sync) on [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock w=1 last_client=4106) pv=0 v=1 ap=1+0 inode=0 | lock authpin 0x2a0ae80]
-> 2010-09-30 19:37:44.539276 7f7802dea710 mds0.locker simple_lock on (dn sync) on [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dversion lock w=1 last_client=4106) pv=0 v=1 ap=1+0 inode=0 | lock authpin 0x2a0ae80]
-> 2010-09-30 19:37:44.539293 7f7802dea710 mds0.locker simple_xlock on (dn lock) on [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dn lock) (dversion lock w=1 last_client=4106) pv=0 v=1 ap=1+0 inode=0 | lock authpin 0x2a0ae80]
-> 2010-09-30 19:37:44.539308 7f7802dea710 mds0.cache.den(1 ceph_basiccheck_testspace.VArD) auth_pin by 0x2a0afc8 on [dentry #1/ceph_basiccheck_testspace.VArD [2,head] auth NULL (dn lock) (dversion lock w=1 last_client=4106) pv=0 v=1 ap=2+0 inode=0 | lock authpin 0x2a0ae80] now 2+0
-> 2010-09-30 19:37:44.539323 7f7802dea710 mds0.cache.dir(1) adjust_nested_auth_pins 1/1 on [dir 1 / [2,head] auth{1=2,2=1} v=1 cv=1/1 REP dir_auth=0 ap=0+2+2 state=1073741826|complete f(v0 1=0+1) n(v0 1=0+1) hs=1+6,ss=0+0 | child subtree replicated 0x29fd000] count now 0 + 2
-> mds/Locker.cc: In function 'void Locker::simple_xlock(SimpleLock*)':
-> mds/Locker.cc:3138: FAILED assert("shouldn't be called if we are already xlockable" == 0)
->  ceph version 0.22~rc (7657a6d5b30dd181350acf19681847d9c8f5d694)
->  1: (Locker::xlock_start(SimpleLock*, MDRequest*)+0x2ab) [0x5811ab]
->  2: (Locker::acquire_locks(MDRequest*, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&)+0x1749) [0x586a99]
->  3: (Server::handle_client_openc(MDRequest*)+0x407) [0x4dd737]
->  4: (Server::handle_client_request(MClientRequest*)+0x340) [0x4e2990]
->  5: (MDS::_dispatch(Message*)+0x2598) [0x49e038]
->  6: (MDS::ms_dispatch(Message*)+0x5b) [0x49e1ab]
->  7: (SimpleMessenger::dispatch_entry()+0x67a) [0x483f9a]
->  8: (SimpleMessenger::DispatchThread::entry()+0x4d) [0x47a4ed]
->  9: (Thread::_entry_func(void*)+0x7) [0x48dd17]
->  10: (()+0x68ba) [0x7f780553b8ba]
->  11: (clone()+0x6d) [0x7f78044ef02d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
