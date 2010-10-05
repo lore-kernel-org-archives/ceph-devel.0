@@ -1,92 +1,36 @@
-From: Sage Weil <sage@newdream.net>
+From: "Aneesh Kumar K. V" <aneesh.kumar@linux.vnet.ibm.com>
 Subject: Re: [PATCH 1/2] ceph: Fix return value of encode_fh function
-Date: Tue, 5 Oct 2010 10:02:34 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1010051001480.21681@cobra.newdream.net>
-References: <1286274822-27738-1-git-send-email-aneesh.kumar@linux.vnet.ibm.com>
+Date: Tue, 05 Oct 2010 23:15:17 +0530
+Message-ID: <m3d3rojzyq.fsf@linux.vnet.ibm.com>
+References: <1286274822-27738-1-git-send-email-aneesh.kumar@linux.vnet.ibm.com> <Pine.LNX.4.64.1010051001480.21681@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38652 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753245Ab0JERAO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Oct 2010 13:00:14 -0400
-In-Reply-To: <1286274822-27738-1-git-send-email-aneesh.kumar@linux.vnet.ibm.com>
+Received: from e23smtp05.au.ibm.com ([202.81.31.147]:42228 "EHLO
+	e23smtp05.au.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753292Ab0JERp1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Oct 2010 13:45:27 -0400
+Received: from d23relay03.au.ibm.com (d23relay03.au.ibm.com [202.81.31.245])
+	by e23smtp05.au.ibm.com (8.14.4/8.13.1) with ESMTP id o95HehIK016733
+	for <ceph-devel@vger.kernel.org>; Wed, 6 Oct 2010 04:40:43 +1100
+Received: from d23av03.au.ibm.com (d23av03.au.ibm.com [9.190.234.97])
+	by d23relay03.au.ibm.com (8.13.8/8.13.8/NCO v10.0) with ESMTP id o95HjPcQ2961442
+	for <ceph-devel@vger.kernel.org>; Wed, 6 Oct 2010 04:45:25 +1100
+Received: from d23av03.au.ibm.com (loopback [127.0.0.1])
+	by d23av03.au.ibm.com (8.14.4/8.13.1/NCO v10.0 AVout) with ESMTP id o95HjPiH016253
+	for <ceph-devel@vger.kernel.org>; Wed, 6 Oct 2010 04:45:25 +1100
+In-Reply-To: <Pine.LNX.4.64.1010051001480.21681@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Aneesh Kumar K.V" <aneesh.kumar@linux.vnet.ibm.com>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-Aneesh,
-
-I'll add these to my tree (unless you want to send them separately?).
-
-Thanks!
-sage
-
-
-On Tue, 5 Oct 2010, Aneesh Kumar K.V wrote:
-
-> encode_fh function should return 255 on error as done by other file
-> system to indicate EOVERFLOW. Also max_len is in sizeof(u32) units
-> and not in bytes.
+On Tue, 5 Oct 2010 10:02:34 -0700 (PDT), Sage Weil <sage@newdream.net> wrote:
+> Aneesh,
 > 
-> Signed-off-by: Aneesh Kumar K.V <aneesh.kumar@linux.vnet.ibm.com>
-> ---
->  fs/ceph/export.c |   16 +++++++++-------
->  1 files changed, 9 insertions(+), 7 deletions(-)
+> I'll add these to my tree (unless you want to send them separately?).
 > 
-> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-> index 4480cb1..387c582 100644
-> --- a/fs/ceph/export.c
-> +++ b/fs/ceph/export.c
-> @@ -42,32 +42,34 @@ struct ceph_nfs_confh {
->  static int ceph_encode_fh(struct dentry *dentry, u32 *rawfh, int *max_len,
->  			  int connectable)
->  {
-> +	int type;
->  	struct ceph_nfs_fh *fh = (void *)rawfh;
->  	struct ceph_nfs_confh *cfh = (void *)rawfh;
->  	struct dentry *parent = dentry->d_parent;
->  	struct inode *inode = dentry->d_inode;
-> -	int type;
-> +	int connected_handle_length = sizeof(*cfh)/4;
-> +	int handle_length = sizeof(*fh)/4;
->  
->  	/* don't re-export snaps */
->  	if (ceph_snap(inode) != CEPH_NOSNAP)
->  		return -EINVAL;
->  
-> -	if (*max_len >= sizeof(*cfh)) {
-> +	if (*max_len >= connected_handle_length) {
->  		dout("encode_fh %p connectable\n", dentry);
->  		cfh->ino = ceph_ino(dentry->d_inode);
->  		cfh->parent_ino = ceph_ino(parent->d_inode);
->  		cfh->parent_name_hash = parent->d_name.hash;
-> -		*max_len = sizeof(*cfh);
-> +		*max_len = connected_handle_length;
->  		type = 2;
-> -	} else if (*max_len > sizeof(*fh)) {
-> +	} else if (*max_len >= handle_length) {
->  		if (connectable)
-> -			return -ENOSPC;
-> +			return 255;
->  		dout("encode_fh %p\n", dentry);
->  		fh->ino = ceph_ino(dentry->d_inode);
-> -		*max_len = sizeof(*fh);
-> +		*max_len = handle_length;
->  		type = 1;
->  	} else {
-> -		return -ENOSPC;
-> +		return 255;
->  	}
->  	return type;
->  }
-> -- 
-> 1.7.0.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+They can go via your tree.
+
+-aneesh
