@@ -1,76 +1,90 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: [Qemu-devel] [PATCH] ceph/rbd block driver for qemu-kvm (v4)
-Date: Thu, 7 Oct 2010 13:47:08 -0700
-Message-ID: <AANLkTimW98qPTYZ=Bct7k7XqaOXswC51QdQOW6fLsWkQ@mail.gmail.com>
-References: <20100802194631.GA4923@chb-desktop>
-	<alpine.LNX.2.00.1008030033550.2664@linmac>
-	<20100803201407.GD1475@chb-desktop>
-	<4CADD567.9010606@codemonkey.ws>
-	<AANLkTikuNq1ApT+2ML6s6NXXpTZaedgJDG1xq_=oBQPK@mail.gmail.com>
-	<4CAE13BA.70707@codemonkey.ws>
-	<AANLkTim2qfA+MncyF9Cx1oGYEzgW2TugG9sFTLP8T=J-@mail.gmail.com>
-	<4CAE24C5.8030007@codemonkey.ws>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Questions about CRUSH
+Date: Thu, 7 Oct 2010 13:50:16 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1010071344240.16416@cobra.newdream.net>
+References: <1286482123.2633.17.camel@wido-laptop.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:51781 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755925Ab0JGUrK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Oct 2010 16:47:10 -0400
-In-Reply-To: <4CAE24C5.8030007@codemonkey.ws>
+Received: from cobra.newdream.net ([66.33.216.30]:48589 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751728Ab0JGUru (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Oct 2010 16:47:50 -0400
+In-Reply-To: <1286482123.2633.17.camel@wido-laptop.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Anthony Liguori <anthony@codemonkey.ws>
-Cc: Christian Brunner <chb@muc.de>, malc <av1474@comtv.ru>, kvm@vger.kernel.org, qemu-devel@nongnu.org, Kevin Wolf <kwolf@redhat.com>, ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Oct 7, 2010 at 12:51 PM, Anthony Liguori <anthony@codemonkey.ws=
-> wrote:
-> On 10/07/2010 01:41 PM, Yehuda Sadeh Weinraub wrote:
->>
->> On Thu, Oct 7, 2010 at 11:38 AM, Anthony Liguori<anthony@codemonkey.=
-ws>
->> =A0wrote:
->>
->>>
->>> On 10/07/2010 01:08 PM, Yehuda Sadeh Weinraub wrote:
->>>
->>>> On Thu, Oct 7, 2010 at 7:12 AM, Anthony Liguori<anthony@codemonkey=
-=2Ews>
->>>
-=2E..
->>> There's no fd at all? =A0 How do you get notifications about an
->>> asynchronous
->>> event completion?
->>>
->>> Regards,
->>>
->>> Anthony Liguori
->>>
->>>
->>
->> (resending to list, sorry)
->>
->> The fd is hidden deep under in librados. We get callback notificatio=
-ns
->> for events completion.
->>
+Hi Wido!
+
+On Thu, 7 Oct 2010, Wido den Hollander wrote:
+> Hi,
+> 
+> I'm working on a crushmap where I have my hosts spread out over 3 racks
+> (leafs).
+> 
+> I have 9 physical machines, each with one OSD, spread out over three
+> racks.
+> 
+> The replication level I intend to use is 3, my goal with this crushmap
+> is to prevent two replicas being stored in the same rack.
+> 
+> Now, this map seems fine to me, but what if one of the racks fails and
+> the cluster starts to fix itself, then I would get two replicas in the
+> same rack, wouldn't I?
+
+Right.
+
+> Is it better to have: leafs at root = (max replication level + 1) ?
+> 
+> So, if I have my replication level set to 3, I should have 4 racks with
+> each 3 OSD's, then the cluster could restore from a complete rack
+> failure, without compromising my data safety.
+> 
+> When a complete leaf (rack) fails, the other leafs should be able to
+> store all the data, so if my replication level is set to 3, I should
+> always have at least 1/3 of free space, otherwise a full recovery won't
+> be possible, correct? (OSD's run out of disk space).
+> 
+> Am I missing something here or is this the right approach?
+
+Yeah, I think this is the right approach. 
+
+> And I'm not completely sure about:
+> 
+> rule placein3racks {
+rule placeinNracks {
+>         ruleset 0
+>         type replicated
+>         min_size 2
+>         max_size 2
+	min_size 2
+	max_size 10
+>         step take root
+>         step chooseleaf firstn 0 type rack
+>         step emit
+> }
 >
-> How is that possible? =A0Are the callbacks delivered in the context o=
-f a
-> different thread? =A0If so, don't you need locking?
+> Is that correct? Here I say that the first step should be to choose a
+> rack where the replica should be saved. Should I also specify to choose
+> a host afterwards?
 
-Not sure I'm completely following you. The callbacks are delivered in
-the context of a different thread, but won't run concurrently. Do you
-see any specific concurrency issue? We can add some mutex protection
-around at the aio callback, so that if librados turns multithreaded at
-this point we're covered.
+The rule generalizes to N replicas, where N can be 2..10 (that's what the 
+min/max size fields are for).  And the chooseleaf line is correct.  That 
+chooses N leaves/devices that are nested beneath N distinct racks.  Which 
+is what you want!
 
+You could also do
 
-Thanks,
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+	step take root
+	step choose firstn 0 type rack
+	step choose firstn 1 type device
+	step emit
+
+That would choose N racks, and then for each rack, choose a nested device.  
+The problem is when one of the racks it chooses has no (or few) online 
+devices beneath it, we fail to find a usable device, and the result set 
+will have <N devices.  Chooseleaf doesn't have that problem.
+
+sage
