@@ -1,36 +1,50 @@
-From: Anthony Liguori <anthony@codemonkey.ws>
-Subject: Re: [Qemu-devel] [PATCH] ceph/rbd block driver for qemu-kvm (v4)
-Date: Fri, 08 Oct 2010 11:05:14 -0500
-Message-ID: <4CAF413A.1000407@codemonkey.ws>
-References: <20100802194631.GA4923@chb-desktop>	<alpine.LNX.2.00.1008030033550.2664@linmac>	<20100803201407.GD1475@chb-desktop>	<4CADD567.9010606@codemonkey.ws>	<AANLkTikuNq1ApT+2ML6s6NXXpTZaedgJDG1xq_=oBQPK@mail.gmail.com>	<4CAE13BA.70707@codemonkey.ws>	<AANLkTim2qfA+MncyF9Cx1oGYEzgW2TugG9sFTLP8T=J-@mail.gmail.com>	<4CAE24C5.8030007@codemonkey.ws>	<AANLkTimW98qPTYZ=Bct7k7XqaOXswC51QdQOW6fLsWkQ@mail.gmail.com>	<4CAE35C5.2010809@codemonkey.ws>	<AANLkTinzdiJZFxacD1BDCPWt44ChokNaNVU6_E=GtcTD@mail.gmail.com>	<4CAE41BD.2070508@codemonkey.ws>	<Pine.LNX.4.64.1010071518120.11342@cobra.newdream.net>	<4CAF255A.1030103@codemonkey.ws> <AANLkTinim=+MebUgSkpn2d2C2vY2bREwBor4xCf27s6n@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph fixes for 2.6.36
+Date: Fri, 8 Oct 2010 11:02:57 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1010081058420.7972@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:47471 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753952Ab0JHQFR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Oct 2010 12:05:17 -0400
-In-Reply-To: <AANLkTinim=+MebUgSkpn2d2C2vY2bREwBor4xCf27s6n@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:34177 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754277Ab0JHSA3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Oct 2010 14:00:29 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, Kevin Wolf <kwolf@redhat.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-On 10/08/2010 10:50 AM, Yehuda Sadeh Weinraub wrote:
-> Oh, that makes it more clean. Considering that we did it for kvm, and
-> looking at the kvm qemu_bh_schedule() implementation, it does look
-> thread safe (there might be an issue though with canceling the bh
-> though, haven't looked at it, not really relevant).
+Hi Linus,
 
-It's definitely not thread safe.  Even though you can set the flag 
-atomically (not guaranteed, but assume you can), we rely on the fact 
-that we can check for pending BHs before entering sleep without having 
-to worry about new BHs being scheduled in between the sleep and the 
-check.  If you schedule a BH in a thread then you open yourself up to 
-the race.
+Please pull the following Ceph fixes from
 
-Regards,
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-Anthony Liguori
+There are a couple NFS filehandle encoding fixes, a list_add argument 
+order fix, a null deref in an error path, and two MDS protocol fixes (a 
+variable update that was missed and an extra flush to avoid unnecessary 
+delay in certain cases).
 
+Thanks!
+sage
+
+
+Aneesh Kumar K.V (2):
+      ceph: Fix return value of encode_fh function
+      ceph: Update max_len with minimum required size
+
+Greg Farnum (1):
+      ceph: send cap release message early on failed revoke.
+
+Henry C Chang (1):
+      ceph: fix list_add usage on unsafe_writes list
+
+Sage Weil (2):
+      ceph: avoid null deref in osd request error path
+      ceph: update issue_seq on cap grant
+
+ fs/ceph/caps.c       |   31 ++++++++++++++++++-------------
+ fs/ceph/export.c     |   21 +++++++++++++--------
+ fs/ceph/file.c       |    2 +-
+ fs/ceph/osd_client.c |    2 +-
+ 4 files changed, 33 insertions(+), 23 deletions(-)
