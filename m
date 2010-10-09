@@ -1,18 +1,19 @@
-From: Martin <martin@air-maxx.net>
+From: "martin" <martin@air-maxx.net>
 Subject: cosd locks up with 100% CPU during mkcephfs
-Date: Sat, 9 Oct 2010 02:50:23 +0200
-Message-ID: <AANLkTikinaUn2ZZGJ3Ze57noAzD4okvy6Aans-VhPvtC@mail.gmail.com>
-References: <8969876631394566913@unknownmsgid>
+Date: Sat, 9 Oct 2010 08:26:24 +0200
+Message-ID: <006601cb677a$e640d270$b2c27750$@net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:50187 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759927Ab0JIAu0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Oct 2010 20:50:26 -0400
-Received: by iwn6 with SMTP id 6so947025iwn.19
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Oct 2010 17:50:26 -0700 (PDT)
-In-Reply-To: <8969876631394566913@unknownmsgid>
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:48114 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752756Ab0JIG01 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Oct 2010 02:26:27 -0400
+Received: by ewy23 with SMTP id 23so991678ewy.19
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Oct 2010 23:26:25 -0700 (PDT)
+Content-Language: de
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
@@ -23,23 +24,20 @@ I have the problem that mkcephfs does not run through. It stops when cosd
 locks up with 100%CPU on the first node - named CEPH1.
 Out of the script:
 fs created label (null) on /dev/sdb1
-       nodesize 4096 leafsize 4096 sectorsize 4096 size 19.99GB
-Btrfs Btrfs v0.19
-Scanning for Btrfs filesystems
-monmap.4203                                   100%  477     0.5KB/s
-00:00<x-apple-data-detectors://0>
+        nodesize 4096 leafsize 4096 sectorsize 4096 size 19.99GB Btrfs Btrfs
+v0.19 Scanning for Btrfs filesystems
+monmap.4203                                   100%  477     0.5KB/s   00:00
 --- ssh ceph1  "cd /home/ceph/ceph/ceph-0.21.3/src ; ulimit -c unlimited ;
 /usr/local/bin/cosd -c /etc/ceph/ceph.conf --monmap /tmp/monmap.4203 -i 0
 --mkfs --osd-data /data/osd0"
-** WARNING: Ceph is still under heavy development, and is only suitable for
+ ** WARNING: Ceph is still under heavy development, and is only suitable for
 **
-**          testing and review.  Do not trust it with important data.
+ **          testing and review.  Do not trust it with important data.
 **
 -> then the script never returns
 Top
- PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
-4691 root      20   0 15164 2228 1864 <tel:0%2015164%202228%201864> R 94.8
- 0.9  25:54.65 cosd
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
+ 4691 root      20   0 15164 2228 1864 R 94.8  0.9  25:54.65 cosd
 root@CEPH1:/var/log/ceph# kill 4691
 bash: line 1:  4691 Terminated              /usr/local/bin/cosd -c
 /etc/ceph/ceph.conf --monmap /tmp/monmap.4203 -i 0 --mkfs --osd-data
@@ -71,7 +69,7 @@ SNAP_CREATE is supported
 10.10.09_01:27:52.663403 b77856d0 filestore(/data/osd0) mount btrfs
 SNAP_DESTROY is supported
 10.10.09_01:27:52.663539 b77856d0 filestore(/data/osd0) mount fsid is
-206080828 <tel:206080828>
+206080828
 10.10.09_01:27:52.663655 b77856d0 filestore(/data/osd0) mount found snaps <>
 10.10.09_01:27:52.663938 b77856d0 filestore(/data/osd0) mount op_seq is 0
 10.10.09_01:27:52.663956 b77856d0 filestore(/data/osd0) open_journal at
@@ -87,21 +85,18 @@ device, NOT checking disk write cache on /data/osd0/journal
 4096 max_size 0
 10.10.09_01:27:52.665352 b77856d0 journal header: start 4096
 10.10.09_01:27:52.665365 b77856d0 journal  write_pos 4096
-10.10.09_01:27:52.665389 b77856d0 journal open header.fsid =
-206080828<tel:206080828>
+10.10.09_01:27:52.665389 b77856d0 journal open header.fsid = 206080828
 ____________________________________________________________________________
 ___
 
 
-I just downloaded
-<http://ceph.newdream.net/download/ceph-0.21.3.tar.gz><http://ceph.newdream.net/download/ceph-0.21.3.tar.gz>
-http://ceph.newdream.net/download/ceph-0.21.3.tar.gz on a
-Ubuntu 10.10 Server (x32).
+I just downloaded http://ceph.newdream.net/download/ceph-0.21.3.tar.gz on a
+Ubuntu 10.10 Server (x32). 
 root@CEPH1:/etc/ceph# uname -a
 Linux CEPH1 2.6.35-22-generic #33-Ubuntu SMP Sun Sep 19 20:34:50 UTC 2010
-i686 GNU/Linux
-Done configure and make, followed by an install. Then I cloned the machine 3
-more times, making 4 nodes. /dev/sdb1 is formatted with btrfs.
+i686 GNU/Linux Done configure and make, followed by an install. Then I
+cloned the machine 3 more times, making 4 nodes. /dev/sdb1 is formatted with
+btrfs.
 
 The nodes are running in VirtualBox
 root@CEPH1:/etc/ceph# cat /etc/hosts
@@ -117,67 +112,62 @@ My ceph.conf looks like this:
 root@CEPH1:/etc/ceph# cat ceph.conf
 ; global
 [global]
-       ; enable secure authentication
+        ; enable secure authentication
 auth supported = cephx
 
 ; monitors
-[mon]
-       mon data = /data/mon$id
-       debug ms = 1
-       debug mon = 20
-       debug paxos = 20
-       debug auth = 20
+ [mon]
+        mon data = /data/mon$id
+        debug ms = 1
+        debug mon = 20
+        debug paxos = 20
+        debug auth = 20
 
 [mon0]
-       host = CEPH1
-       mon addr = x.x.239.140:6789
+        host = CEPH1
+        mon addr = x.x.239.140:6789
 
 [mon1]
-       host = CEPH2
-       mon addr = x.x.239.141:6789
+        host = CEPH2
+        mon addr = x.x.239.141:6789
 
 [mon2]
-       host = CEPH3
-       mon addr = x.x.239.142:6789
+        host = CEPH3
+        mon addr = x.x.239.142:6789
 
 ; mds
 ;  You need at least one.  Define two to get a standby.
 [mds]
-       ; where the mds keeps it's secret encryption keys
-       keyring = /data/keyring.$name
-       ; mds logging to debug issues.
-       debug ms = 1
-       debug mds = 20
+        ; where the mds keeps it's secret encryption keys
+        keyring = /data/keyring.$name
+        ; mds logging to debug issues.
+        debug ms = 1
+        debug mds = 20
 
 [mds.ceph1]
-       host = ceph1
+        host = ceph1
 [mds.ceph3]
-       host = ceph3
+        host = ceph3
 
 ; osd
-[osd]
-       osd data = /data/osd$id
-       osd journal = /data/osd$id/journal
-       debug ms = 1
-       debug osd = 20
-       debug filestore = 20
-       debug journal = 20
+ [osd]
+        osd data = /data/osd$id
+        osd journal = /data/osd$id/journal
+        debug ms = 1
+        debug osd = 20
+        debug filestore = 20
+        debug journal = 20
 
 [osd0]
-       host = ceph1
-       btrfs devs = /dev/sdb1
+        host = ceph1
+        btrfs devs = /dev/sdb1
 [osd1]
-       host = ceph2
-       btrfs devs = /dev/sdb1
+        host = ceph2
+        btrfs devs = /dev/sdb1
 [osd2]
-       host = ceph3
-       btrfs devs = /dev/sdb1
+        host = ceph3
+        btrfs devs = /dev/sdb1
 [osd3]
-       host = ceph4
-       btrfs devs = /dev/sdb1
+        host = ceph4
+        btrfs devs = /dev/sdb1
 
-
-
--- 
---
-Martin
