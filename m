@@ -1,43 +1,57 @@
 From: Julia Lawall <julia@diku.dk>
-Subject: Re: [PATCH 2/3] fs/ceph/xattr.c: Use kasprintf
-Date: Sun, 17 Oct 2010 21:02:39 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1010172101570.394@ask.diku.dk>
+Subject: [PATCH 2/3] fs/ceph/xattr.c: Use kmemdup
+Date: Sun, 17 Oct 2010 21:55:21 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1010172154400.394@ask.diku.dk>
 References: <1287341311-11161-1-git-send-email-julia@diku.dk>
  <1287341311-11161-3-git-send-email-julia@diku.dk> <1287341657.20968.61.camel@Joe-Laptop>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mgw2.diku.dk ([130.225.96.92]:52044 "EHLO mgw2.diku.dk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932531Ab0JQTCl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 17 Oct 2010 15:02:41 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1287341657.20968.61.camel@Joe-Laptop>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Joe Perches <joe@perches.com>
 Cc: Sage Weil <sage@newdream.net>, kernel-janitors@vger.kernel.org, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Sun, 17 Oct 2010, Joe Perches wrote:
+Convert a sequence of kmalloc and memcpy to use kmemdup.
 
-> On Sun, 2010-10-17 at 20:48 +0200, Julia Lawall wrote:
-> > Convert a sequence of kmalloc and memcpy to use kasprintf.  The argument is
-> > checked for being a string by the presence of a previous call to strlen.
-> []
-> > diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-> []
-> > @@ -716,10 +716,9 @@ int ceph_setxattr(struct dentry *dentry, const char *name,
-> >  
-> >  	/* preallocate memory for xattr name, value, index node */
-> >  	err = -ENOMEM;
-> > -	newname = kmalloc(name_len + 1, GFP_NOFS);
-> > +	newname = kasprintf(GFP_NOFS, "%s", name);
-> 
-> This one is probably better converted to kmemdup
-> as name_len is already known and is used later
-> in the routine.
-> 
-> kstrdup is also a possibility.
+The semantic patch that performs this transformation is:
+(http://coccinelle.lip6.fr/)
 
-That calculates the length again, so I will change it to kmemdup.
+// <smpl>
+@@
+expression a,flag,len;
+expression arg,e1,e2;
+statement S;
+@@
 
-julia
+  a =
+-  \(kmalloc\|kzalloc\)(len,flag)
++  kmemdup(arg,len,flag)
+  <... when != a
+  if (a == NULL || ...) S
+  ...>
+- memcpy(a,arg,len+1);
+// </smpl>
+
+Signed-off-by: Julia Lawall <julia@diku.dk>
+
+---
+ fs/ceph/xattr.c |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff -u -p a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -716,10 +716,9 @@ int ceph_setxattr(struct dentry *dentry,
+ 
+ 	/* preallocate memory for xattr name, value, index node */
+ 	err = -ENOMEM;
+-	newname = kmalloc(name_len + 1, GFP_NOFS);
++	newname = kmemdup(name, name_len + 1, GFP_NOFS);
+ 	if (!newname)
+ 		goto out;
+-	memcpy(newname, name, name_len + 1);
+ 
+ 	if (val_len) {
+ 		newval = kmalloc(val_len + 1, GFP_NOFS);
