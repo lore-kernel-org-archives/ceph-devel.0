@@ -1,62 +1,59 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.22 released
-Date: Fri, 15 Oct 2010 16:50:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1010151648220.30297@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34815 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750800Ab0JOXsL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Oct 2010 19:48:11 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 40E46BC704
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Oct 2010 16:50:56 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 1F10FBC704
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Oct 2010 16:50:56 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+From: Julia Lawall <julia@diku.dk>
+Subject: [PATCH 2/3] fs/ceph/xattr.c: Use kasprintf
+Date: Sun, 17 Oct 2010 20:48:30 +0200
+Message-ID: <1287341311-11161-3-git-send-email-julia@diku.dk>
+References: <1287341311-11161-1-git-send-email-julia@diku.dk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1287341311-11161-1-git-send-email-julia@diku.dk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: kernel-janitors@vger.kernel.org, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi everyone,
+Convert a sequence of kmalloc and memcpy to use kasprintf.  The argument is
+checked for being a string by the presence of a previous call to strlen.
 
-It's a bit late, but v0.22 is here.  The original goal for this release 
-was to have a stable clustered MDS that we can encourage users to test.  
-Unfortunately, we did not quite make that mark: there are still a couple 
-significant bugs we're working on, and I don't want to push this release 
-back any farther.  In retrospect, having such an infrequent release 
-schedule to begin with (>2 months since v0.21!) makes our life harder 
-because we are tracking bug fixes in both branches, and end up with a long 
-delay between a new feature being merged and most users testing it.  For 
-the next release (and the immediate future), we will be aiming for more 
-frequent releases, and will stick as close as possible to the original 
-timeline.
+The semantic patch that performs this transformation is:
+(http://coccinelle.lip6.fr/)
 
-Notable changes in v0.22 include:
- * mon: improved naming
- * osd: support separate interface for cluster-internal traffic
- * mds: many many snapshot, recursive accounting fixes
- * mon: back off on clock drift errors/warnings
- * mds: fix xattr bugs
- * cfuse: readdir caching, readdir fixes
- * mon: trim laggy standby mds's from map
- * osd: data integrity fixes
- * osd: fix hang during mkfs/journal creation
- * improved debug logging on crash
- * cdebugpack: new debug information capture tool
- * mon: improve osd failure logic
- * mds/osd: use tcmalloc (faster, more memory efficient)
- * mds: set file layout/striping policy on directory/subtree basis
- * cfuse: mount subdir
- * mds: respawn on failure
+// <smpl>
+@@
+expression a,flag,len;
+expression arg,e1,e2;
+statement S;
+@@
 
-At a high level, the goals for v0.23 are a stable clustered MDS and 
-directory fragmentation.  We are also continuing to work on hardening the 
-OSD cluster recovery, particularly given the level of interest in RBD.
+  len = strlen(arg)
+  ... when != len = e1
+      when != arg = e2
+  a =
+-  \(kmalloc\|kzalloc\)(len+1,flag)
++  kasprintf(flag,"%s",arg)
+  <... when != a
+  if (a == NULL || ...) S
+  ...>
+- memcpy(a,arg,len+1);
+// </smpl>
 
-Relevant URLs:
- * Direct download at: http://ceph.newdream.net/download/ceph-0.22.tar.gz
- * For Debian packages, see http://ceph.newdream.net/wiki/Debian
+Signed-off-by: Julia Lawall <julia@diku.dk>
 
-sage
+---
+ fs/ceph/xattr.c |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 70e9199..b8dd1f0 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -716,10 +716,9 @@ int ceph_setxattr(struct dentry *dentry, const char *name,
+ 
+ 	/* preallocate memory for xattr name, value, index node */
+ 	err = -ENOMEM;
+-	newname = kmalloc(name_len + 1, GFP_NOFS);
++	newname = kasprintf(GFP_NOFS, "%s", name);
+ 	if (!newname)
+ 		goto out;
+-	memcpy(newname, name, name_len + 1);
+ 
+ 	if (val_len) {
+ 		newval = kmalloc(val_len + 1, GFP_NOFS);
