@@ -1,95 +1,130 @@
 From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: read/write on RADOS using external buffer
-Date: Wed, 20 Oct 2010 10:04:58 -0700
-Message-ID: <AANLkTingwXNcvkTV3OG-siRywzEj6r_Vmb==BnodEUka@mail.gmail.com>
-References: <AANLkTikRnvWbsD5OD7a88hpHsm5N3hJteaisYkfjdY2H@mail.gmail.com>
-	<Pine.LNX.4.64.1009141142250.8559@cobra.newdream.net>
-	<20101019222727.GA1737@enoki.dokukino.com>
-	<AANLkTinjo-cyALumDEHiw4NwwJS5E0v5_59X1w11iTog@mail.gmail.com>
-	<Pine.LNX.4.64.1010192059070.21300@cobra.newdream.net>
-	<AANLkTin0+n+e6Cb_WJcz5JA7xR_XG_K=2k0_bhSDuDRh@mail.gmail.com>
-	<Pine.LNX.4.64.1010200821210.3927@cobra.newdream.net>
-	<AANLkTi=GyJdFkRV5zo-v-74tn=YBKCBuZC9fdeg1fJCr@mail.gmail.com>
-	<Pine.LNX.4.64.1010200948040.3927@cobra.newdream.net>
+Subject: Re: commit ad12d5d5be41ce introduces a mkcephfs regression?
+Date: Wed, 20 Oct 2010 12:28:03 -0700
+Message-ID: <AANLkTi=GukFwnuYg0VcprwXi7fkPKU-o4aO1Z6ZtQw_V@mail.gmail.com>
+References: <1287587307.6806.15.camel@sale659.sandia.gov>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:37938 "EHLO
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:48476 "EHLO
 	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752069Ab0JTRFA convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Oct 2010 13:05:00 -0400
-Received: by ywi6 with SMTP id 6so2117704ywi.19
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Oct 2010 10:04:59 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1010200948040.3927@cobra.newdream.net>
+	with ESMTP id S1751904Ab0JTT2G convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Oct 2010 15:28:06 -0400
+Received: by ywi6 with SMTP id 6so2238903ywi.19
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Oct 2010 12:28:05 -0700 (PDT)
+In-Reply-To: <1287587307.6806.15.camel@sale659.sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Takuya ASADA <syuu@dokukino.com>, ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 20, 2010 at 9:53 AM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 20 Oct 2010, Colin McCabe wrote:
->> > SimpleMessenger will change no matter what, because the core probl=
-em that
->> > we're trying to solve is that it allocates a new buffer when a mes=
-sage is
->> > being read off the wire. =A0See SimpleMessenger::read_message(). =A0=
-Somehow
->> > that needs to discover and use the user provided buffer instead. =A0=
-That
->> > will invariably involve a callback of some sort to find the user b=
-uffer.
->> > And some means of yanking the buffer away to deal with the corner =
-issue
->> > above.
->>
->> I can see now that we're always allocating a new bufferlist in
->> SimpleMessenger. I can see why we want this feature.
->>
->> I wish we didn't have to have a callback just to get the buffer we'r=
-e
->> trying to write into. It feels like that should somehow be grouped
->> with the rest of the transaction data. Why can't we add it to
->> Objector::Op's constructor, for example. There must be some obvious
->> reason but I don't see it yet.
->
-> Well, we could push it into the Objecter. =A0We could also try to pus=
-h it
-> all the way down into the messenger, my maintaining a map of <type,ti=
-d> to
-> buffer or something. =A0Mainly I want to avoid changing too much of t=
-he
-> intervening interfaces if we can avoid it. =A0That may be possible, t=
-hough.
-> If the Objecter::read() is given a non-empty bufferlist* to read into=
-, it
-> could advertise that buffer to the messenger and the messenger could
-> handle it all.
+Hi Jim,
 
-I kind of like the idea of always having the Objecter to pass in a
-bufferlist. If the user wants to allocate a new buffer each time, he
-knows how to call bufferlist::new().
+I think you're right. Commit ad12d5d5be41ce fixed a bug for users
+creating a journal that resided in a regular file, but introduced an
+inconvenience for users who put the journal on a raw block device. If
+no size is specified, but a raw block device is given as an argument,
+we should discover the size of the raw block device and set the
+journal size appropriately.
 
-> But the same problem comes up: we need to also have an interface to t=
-ake
-> the buffer back, which will mean some interesting interaction with th=
-e
-> reader threads.
-
-Yeah, we would need to know when it's safe for the client to read /
-reuse the buffer they passed in.
-
+cheers,
 Colin
 
-> The kernel messenger avoids this, btw, because it is event driven: we=
- wake
-> up when there is socket activity and do non-blocking reads/writes, so=
- we
-> can lock the buffers while doing that IO. =A0The SimpleMessenger
-> implementation uses threads, and IIRC the pthread locking
-> and select/poll interfaces don't play well together.
+
+On Wed, Oct 20, 2010 at 8:08 AM, Jim Schutt <jaschut@sandia.gov> wrote:
 >
-> sage
+> Hi,
+>
+> Current testing head mkcephfs fails when trying to create
+> a file system with an osd journal on a partition, rather than
+> a file, when the journal size is not specified. =A0It fails like
+> this:
+>
+> =3D=3D=3D osd.0 =3D=3D=3D
+> scp: /etc/ceph/ceph.conf: Read-only file system
+> /usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd =A0"osd data" ""
+> /usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd =A0"osd journal" ""
+> /usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd =A0"keyring" ""
+> /usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd =A0"btrfs path" "/r=
+am/mnt/ceph/disk.00p2"
+> /usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd =A0"btrfs devs" ""
+> /usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd =A0"btrfs options" =
+"noatime"
+> --- ssh an1 =A0"cd /root ; ulimit -c unlimited ; test -d /ram/mnt/cep=
+h/disk.00p2 || mkdir -p /ram/mnt/ceph/disk.00p2"
+> Warning: Permanently added 'an1,172.17.0.21' (RSA) to the list of kno=
+wn hosts.
+> --- ssh an1 =A0"cd /root ; ulimit -c unlimited ; test -d /dev/disk/by=
+-path/fc-0:0:00:00p1 || mkdir -p /dev/disk/by-path"
+> Warning: Permanently added 'an1,172.17.0.21' (RSA) to the list of kno=
+wn hosts.
+> Warning: Permanently added 'an1,172.17.0.21' (RSA) to the list of kno=
+wn hosts.
+> monmap.17120 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 100% =A0183 =A0 =A0 0.2KB/s =A0 00:00
+> --- ssh an1 =A0"cd /root ; ulimit -c unlimited ; /usr/bin/cosd -c /et=
+c/ceph/ceph.conf --monmap /tmp/monmap.17120 -i 0 --mkfs --osd-data /ram=
+/mnt/ceph/disk.00p2"
+> Warning: Permanently added 'an1,172.17.0.21' (RSA) to the list of kno=
+wn hosts.
+> =A0** WARNING: Ceph is still under heavy development, and is only sui=
+table for **
+> =A0** =A0 =A0 =A0 =A0 =A0testing and review. =A0Do not trust it with =
+important data. =A0 =A0 =A0 **
+> =A0** ERROR: error creating empty object store in /ram/mnt/ceph/disk.=
+00p2: Invalid argument
+> failed: 'ssh an1 /usr/bin/cosd -c /etc/ceph/ceph.conf --monmap /tmp/m=
+onmap.17120 -i 0 --mkfs --osd-data /ram/mnt/ceph/disk.00p2'
+>
+>
+> The osd.0 part of my ceph.conf looks like this:
+>
+> ; osd daemon common options:
+> [osd]
+> =A0 =A0 =A0 =A0keyring =3D /ceph/osd/keyring.$name
+> =A0 =A0 =A0 =A0osd client message size cap =3D 67108864
+> =A0 =A0 =A0 =A0debug osd =3D 5
+>
+> ; osd daemon options per instance:
+> [osd0]
+> =A0 =A0 =A0 =A0host =3D an1
+> =A0 =A0 =A0 =A0osd addr =3D 172.17.40.21
+> =A0 =A0 =A0 =A0osd journal =3D /dev/disk/by-path/fc-0:0:00:00p1
+> =A0 =A0 =A0 =A0btrfs devs =A0=3D /dev/disk/by-path/fc-0:0:00:00p2
+> =A0 =A0 =A0 =A0osd data =3D /ram/mnt/ceph/disk.00p2
+> =A0 =A0 =A0 =A0# Do not attempt btrfs mount until udev link shows up,
+> =A0 =A0 =A0 =A0# and make sure mount point exists.
+> =A0 =A0 =A0 =A0pre mount command =3D "until [ -L /dev/disk/by-path/fc=
+-0:0:00:00p2 ]; do sleep 1; done && { [ -d /mnt/ceph/disk.00p2 ] || mkd=
+ir /mnt/ceph/disk.00p2; }"
+>
+>
+> Adding "osd journal size =3D 104857600" to my ceph.conf
+> allows mkcephfs to succeed.
+>
+> Alternatively, reverting commit ad12d5d5be41ce allows mkcephfs to
+> succeed without specifying the journal size.
+>
+> Was this change of behavior an intentional part of the
+> bugfix, or am I doing something wrong?
+>
+> Would it be possible to discover when the journal is a
+> partition, and if so query its size?
+>
+> Thanks -- Jim
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
