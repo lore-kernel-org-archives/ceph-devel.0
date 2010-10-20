@@ -1,85 +1,98 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: commit ad12d5d5be41ce introduces a mkcephfs regression?
-Date: Wed, 20 Oct 2010 09:08:27 -0600
-Message-ID: <1287587307.6806.15.camel@sale659.sandia.gov>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: read/write on RADOS using external buffer
+Date: Wed, 20 Oct 2010 08:34:25 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1010200821210.3927@cobra.newdream.net>
+References: <AANLkTikRnvWbsD5OD7a88hpHsm5N3hJteaisYkfjdY2H@mail.gmail.com>
+ <Pine.LNX.4.64.1009141142250.8559@cobra.newdream.net>
+ <20101019222727.GA1737@enoki.dokukino.com> <AANLkTinjo-cyALumDEHiw4NwwJS5E0v5_59X1w11iTog@mail.gmail.com>
+ <Pine.LNX.4.64.1010192059070.21300@cobra.newdream.net>
+ <AANLkTin0+n+e6Cb_WJcz5JA7xR_XG_K=2k0_bhSDuDRh@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1933876146-1287588865=:3927"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:48628 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752296Ab0JTPIk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Oct 2010 11:08:40 -0400
-Received: from sentry.sandia.gov (sentry.sandia.gov [132.175.109.21])
-	by sentry-three.sandia.gov (Postfix) with ESMTP id 10BAC4D55DB
-	for <ceph-devel@vger.kernel.org>; Wed, 20 Oct 2010 09:08:35 -0600 (MDT)
+Received: from cobra.newdream.net ([66.33.216.30]:59595 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753723Ab0JTPb2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Oct 2010 11:31:28 -0400
+In-Reply-To: <AANLkTin0+n+e6Cb_WJcz5JA7xR_XG_K=2k0_bhSDuDRh@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Colin McCabe <cmccabe@alumni.cmu.edu>
+Cc: Takuya ASADA <syuu@dokukino.com>, ceph-devel@vger.kernel.org
 
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Hi,
+--557981400-1933876146-1287588865=:3927
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Current testing head mkcephfs fails when trying to create
-a file system with an osd journal on a partition, rather than
-a file, when the journal size is not specified.  It fails like
-this:
+On Tue, 19 Oct 2010, Colin McCabe wrote:
+> On Tue, Oct 19, 2010 at 9:26 PM, Sage Weil <sage@newdream.net> wrote:
+> > =A0- SimpleMessenger::read_message() just needs to call
+> > ms_deliver_get_data_buffer() if data_len > 0. =A0If it returns true, us=
+e the
+> > provided bufferptr.
+> >
+> > =A0- The existing Objecter::read() method returns the tid, which librad=
+os
+> > can then store in a private map of tid -> bufferptrs. =A0When it's
+> > ms_get_data_buffer() is called it can provide the bufferptr; no need to
+> > modify the Objecter at all! =A0Just make sure to verify that the entry
+> > exists in the map before using the operator[] (use find()).
+>=20
+> If we want thread-local data, we should at least use
+> pthread_setspecific / pthread_getspecific. No need for tids and STL
+> maps. gettid() is a syscall and it will be slow.
 
-=== osd.0 === 
-scp: /etc/ceph/ceph.conf: Read-only file system
-/usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd  "osd data" ""
-/usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd  "osd journal" ""
-/usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd  "keyring" ""
-/usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd  "btrfs path" "/ram/mnt/ceph/disk.00p2"
-/usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd  "btrfs devs" ""
-/usr/bin/cconf -c /etc/ceph/ceph.conf -i 0 -t osd  "btrfs options" "noatime"
---- ssh an1  "cd /root ; ulimit -c unlimited ; test -d /ram/mnt/ceph/disk.00p2 || mkdir -p /ram/mnt/ceph/disk.00p2"
-Warning: Permanently added 'an1,172.17.0.21' (RSA) to the list of known hosts.
---- ssh an1  "cd /root ; ulimit -c unlimited ; test -d /dev/disk/by-path/fc-0:0:00:00p1 || mkdir -p /dev/disk/by-path"
-Warning: Permanently added 'an1,172.17.0.21' (RSA) to the list of known hosts.
-Warning: Permanently added 'an1,172.17.0.21' (RSA) to the list of known hosts.
-monmap.17120                                                                                                                                                                                 100%  183     0.2KB/s   00:00    
---- ssh an1  "cd /root ; ulimit -c unlimited ; /usr/bin/cosd -c /etc/ceph/ceph.conf --monmap /tmp/monmap.17120 -i 0 --mkfs --osd-data /ram/mnt/ceph/disk.00p2"
-Warning: Permanently added 'an1,172.17.0.21' (RSA) to the list of known hosts.
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
- ** ERROR: error creating empty object store in /ram/mnt/ceph/disk.00p2: Invalid argument
-failed: 'ssh an1 /usr/bin/cosd -c /etc/ceph/ceph.conf --monmap /tmp/monmap.17120 -i 0 --mkfs --osd-data /ram/mnt/ceph/disk.00p2'
+There's no pthread specific data or gettid() syscalls here.  The 'tid' is=
+=20
+a transaction id generated by the Objecter that matchers up replies to=20
+requests.
 
+> > The main corner case is this: if there is some osd cluster change, it's
+> > theoretically possible we could have two threads reading read replies t=
+o
+> > the same request off the wire at the same time. =A0Even if we carefully
+> > define which reply "wins", we need to make sure there isn't a stray thr=
+ead
+> > read/accessing the buffer after the read() call returns.
+>=20
+> I just don't see why we have to care about threads at all.
 
-The osd.0 part of my ceph.conf looks like this:
+The corner case is when we are reading two replies for the same request=20
+off of two different sockets from two different OSDs.  If they are=20
+both reading directly into the user supplied buffer, we need to make sure=
+=20
+they both stop before returning success to the user; after that point=20
+we're not longer allows to touch that memory.  That will probably require=
+=20
+some locking and non-blocking IO, which can be tricky since the pthread=20
+stuff doesn't usually interact well with select/poll.
 
-; osd daemon common options:
-[osd]
-        keyring = /ceph/osd/keyring.$name
-        osd client message size cap = 67108864
-        debug osd = 5
+> I think I can propose a patch which solves this problem without rados
+> client-specific data, threads, tids, maps, thread-local data, or
+> changes to SimpleMessenger.
 
-; osd daemon options per instance:
-[osd0]
-        host = an1
-        osd addr = 172.17.40.21
-        osd journal = /dev/disk/by-path/fc-0:0:00:00p1
-        btrfs devs  = /dev/disk/by-path/fc-0:0:00:00p2
-        osd data = /ram/mnt/ceph/disk.00p2
-        # Do not attempt btrfs mount until udev link shows up,
-        # and make sure mount point exists.
-        pre mount command = "until [ -L /dev/disk/by-path/fc-0:0:00:00p2 ]; do sleep 1; done && { [ -d /mnt/ceph/disk.00p2 ] || mkdir /mnt/ceph/disk.00p2; }"
+SimpleMessenger will change no matter what, because the core problem that=
+=20
+we're trying to solve is that it allocates a new buffer when a message is=
+=20
+being read off the wire.  See SimpleMessenger::read_message().  Somehow=20
+that needs to discover and use the user provided buffer instead.  That=20
+will invariably involve a callback of some sort to find the user buffer. =
+=20
+And some means of yanking the buffer away to deal with the corner issue=20
+above.
 
+> It will just involve modifying bufferlist
+> so that it can use a buffer that's passed to it, rather than
+> allocating its own.  Then we need something like a freeze operation
+> that will stop it from trying to reallocate or resize the buffer. This
+> solution will have much more generality and probably will be useful
+> elsewhere too.
 
-Adding "osd journal size = 104857600" to my ceph.conf
-allows mkcephfs to succeed.
+That sounds useful, but not in this particular case... :/
 
-Alternatively, reverting commit ad12d5d5be41ce allows mkcephfs to
-succeed without specifying the journal size.
-
-Was this change of behavior an intentional part of the 
-bugfix, or am I doing something wrong?  
-
-Would it be possible to discover when the journal is a 
-partition, and if so query its size?
-
-Thanks -- Jim
-
-
-
+sage
+--557981400-1933876146-1287588865=:3927--
