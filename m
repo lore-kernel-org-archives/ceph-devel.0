@@ -1,7 +1,7 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
+From: Gregory Farnum <gregf@hq.newdream.net>
 Subject: Re: read/write on RADOS using external buffer
-Date: Tue, 19 Oct 2010 20:35:22 -0700
-Message-ID: <AANLkTinjo-cyALumDEHiw4NwwJS5E0v5_59X1w11iTog@mail.gmail.com>
+Date: Tue, 19 Oct 2010 21:10:48 -0700
+Message-ID: <AANLkTim7ZEAUuZhc+u99cMSi1sD6OQ=AhKN8ONVg61yb@mail.gmail.com>
 References: <AANLkTikRnvWbsD5OD7a88hpHsm5N3hJteaisYkfjdY2H@mail.gmail.com>
 	<Pine.LNX.4.64.1009141142250.8559@cobra.newdream.net>
 	<20101019222727.GA1737@enoki.dokukino.com>
@@ -9,41 +9,26 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:42588 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757042Ab0JTDfY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Oct 2010 23:35:24 -0400
-Received: by fxm4 with SMTP id 4so2349132fxm.19
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Oct 2010 20:35:23 -0700 (PDT)
+Received: from mail-px0-f174.google.com ([209.85.212.174]:62426 "EHLO
+	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750781Ab0JTEKt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Oct 2010 00:10:49 -0400
+Received: by pxi16 with SMTP id 16so794047pxi.19
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Oct 2010 21:10:48 -0700 (PDT)
 In-Reply-To: <20101019222727.GA1737@enoki.dokukino.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Takuya ASADA <syuu@dokukino.com>
 Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-Hi Takuya,
-
-Thanks for looking at this!
-
-Unfortunately I think you have taken the wrong approach here. There
-isn't any need for thread-local data in the Objecter. It's not threads
-that the Objecter cares about, it's clients. Also, I don't think a
-change like this needs to involve SimpleMessenger and all that.
-
-Take a look at rados_read in librados.cc. This function implements the
-C API, which can already handle using external buffers. It may be that
-all you need to do is add functions in the C++ header that call
-rados_read and rados_write!
-
-I actually think that rados_read could be made slightly more
-efficient. We could probably add a bufferlist constructor that starts
-with an already allocated buffer, to avoid the call to bl.copy. I
-haven't thought too hard about how to do this but in principle it
-seems reasonable.
-
-regards,
-Colin McCabe
-
+Takuya:
+At first glance this looks okay, but we're going to want to review it
+carefully given the changes to SimpleMessenger, and check its impact
+on performance, etc to decide if this is something we actually want to
+merge, or if we'd like to implement this as a derivative messenger or
+something. :)
+Could you let us know how you've been testing this? :)
+-Greg
 
 On Tue, Oct 19, 2010 at 3:27 PM, Takuya ASADA <syuu@dokukino.com> wrote=
 :
