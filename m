@@ -1,63 +1,67 @@
 From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: commit ad12d5d5be41ce introduces a mkcephfs regression?
-Date: Thu, 21 Oct 2010 09:38:33 -0600
-Message-ID: <1287675513.6806.47.camel@sale659.sandia.gov>
-References: <1287587307.6806.15.camel@sale659.sandia.gov>
- <AANLkTi=GukFwnuYg0VcprwXi7fkPKU-o4aO1Z6ZtQw_V@mail.gmail.com>
- <1287607793.6806.46.camel@sale659.sandia.gov>
- <AANLkTi=4F4ujKD1bkfZYNNhccVSUbPcjB-pbyodFBVL7@mail.gmail.com>
+Subject: [PATCH] init-ceph: Make sure daemon_is_running() checks the
+ correct instance
+Date: Thu, 21 Oct 2010 10:32:09 -0600
+Message-ID: <1287678729-14132-1-git-send-email-jaschut@sandia.gov>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:44281 "EHLO
+Received: from sentry-three.sandia.gov ([132.175.109.17]:51878 "EHLO
 	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750881Ab0JUPio (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Oct 2010 11:38:44 -0400
-In-Reply-To: <AANLkTi=4F4ujKD1bkfZYNNhccVSUbPcjB-pbyodFBVL7@mail.gmail.com>
+	with ESMTP id S1751011Ab0JUQce (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Oct 2010 12:32:34 -0400
+Received: from sentry.sandia.gov (sentry.sandia.gov [132.175.109.21])
+	by sentry-three.sandia.gov (Postfix) with ESMTP id 15B864DB9D3
+	for <ceph-devel@vger.kernel.org>; Thu, 21 Oct 2010 10:32:30 -0600 (MDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Jim Schutt <jaschut@sandia.gov>
 
+When starting multiple instances of a daemon on a single host,
+for unknown reasons /var/run/ceph/$type.$id.pid can hold a pid
+for which /proc/$pid/cmdline identifies the right type of daemon,
+but the wrong instance.  When this happens, all the configured
+instances of a daemon are not running, but repeated invocations
+of "init-ceph start" do not start the missing instances.
 
-On Wed, 2010-10-20 at 16:27 -0600, Colin McCabe wrote:
-> Fixed by 18b1f78b3df1a611e0c7932a2053d6b19a1ddc01.
+So, check for the correct daemon instance id as well as type when
+testing if the daemon is up.
 
-Thanks for the quick turnaround.
+Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+---
+ src/init-ceph.in |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
 
--- Jim
-
-> 
-> cheers,
-> Colin
-> 
-> 
-> On Wed, Oct 20, 2010 at 1:49 PM, Jim Schutt <jaschut@sandia.gov> wrote:
-> > Hi Colin,
-> >
-> > On Wed, 2010-10-20 at 13:28 -0600, Colin McCabe wrote:
-> >> Hi Jim,
-> >>
-> >> I think you're right. Commit ad12d5d5be41ce fixed a bug for users
-> >> creating a journal that resided in a regular file, but introduced an
-> >> inconvenience for users who put the journal on a raw block device. If
-> >> no size is specified, but a raw block device is given as an argument,
-> >> we should discover the size of the raw block device and set the
-> >> journal size appropriately.
-> >
-> > Thanks for taking a look.
-> >
-> > -- Jim
-> >
-> >>
-> >> cheers,
-> >> Colin
-> >>
-> >>
-> >
-> >
-> >
-> 
+diff --git a/src/init-ceph.in b/src/init-ceph.in
+index 52891c0..d42a806 100644
+--- a/src/init-ceph.in
++++ b/src/init-ceph.in
+@@ -69,10 +69,11 @@ signal_daemon() {
+ daemon_is_running() {
+     name=$1
+     daemon=$2
+-    pidfile=$3
++    daemon_id=$3
++    pidfile=$4
+     do_cmd "[ -e $pidfile ] || exit 1   # no pid, presumably not running
+ 	pid=\`cat $pidfile\`
+-	[ -e /proc/\$pid ] && grep -q $daemon /proc/\$pid/cmdline && exit 0 # running
++	[ -e /proc/\$pid ] && grep -q $daemon /proc/\$pid/cmdline && grep -qwe -i.$daemon_id /proc/\$pid/cmdline && exit 0 # running
+         exit 1  # pid is something else" "" "okfail"
+ }
+ 
+@@ -195,7 +196,7 @@ for name in $what; do
+ 
+     # start, and already running?  (do this check early to avoid unnecessary work!)
+     if [ "$command" = "start" ]; then
+-	if daemon_is_running $name c$type $pid_file; then
++	if daemon_is_running $name c$type $id $pid_file; then
+ 	    echo "Starting Ceph $name on $host...already running"
+ 	    continue
+ 	fi
+-- 
+1.6.6
 
 
