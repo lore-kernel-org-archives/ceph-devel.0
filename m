@@ -1,75 +1,74 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Fwd: [Qemu-devel] bdrv_flush for qemu block drivers nbd, rbd
- and sheepdog
-Date: Thu, 21 Oct 2010 11:59:49 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1010211155301.18946@cobra.newdream.net>
-References: <4CC04920.8040902@redhat.com> <AANLkTikHAm7opg1TzUrUWis53ENT_z6DjfT9GPeBdqA0@mail.gmail.com>
+Subject: Re: [PATCH] init-ceph: Make sure daemon_is_running() checks the
+ correct instance
+Date: Thu, 21 Oct 2010 13:22:07 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1010211321540.18946@cobra.newdream.net>
+References: <1287678729-14132-1-git-send-email-jaschut@sandia.gov>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40563 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:49578 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755875Ab0JUS4t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Oct 2010 14:56:49 -0400
-In-Reply-To: <AANLkTikHAm7opg1TzUrUWis53ENT_z6DjfT9GPeBdqA0@mail.gmail.com>
+	with ESMTP id S1755482Ab0JUUTI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Oct 2010 16:19:08 -0400
+In-Reply-To: <1287678729-14132-1-git-send-email-jaschut@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
-Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, 21 Oct 2010, Christian Brunner wrote:
-> Hi,
-> 
-> is there a flush operation in librados? - I guess the only way to
-> handle this, would be waiting until all aio requests are finished?
-
-There is no flush currently.  But librados does no caching, so in this 
-case at least silenting upgrading to cache=writethrough should work.
-
-If that's a problem, we can implement a flush.  Just let us know.
+Thanks Jim, this will be in v0.22.1.
 
 sage
 
+On Thu, 21 Oct 2010, Jim Schutt wrote:
 
-
+> When starting multiple instances of a daemon on a single host,
+> for unknown reasons /var/run/ceph/$type.$id.pid can hold a pid
+> for which /proc/$pid/cmdline identifies the right type of daemon,
+> but the wrong instance.  When this happens, all the configured
+> instances of a daemon are not running, but repeated invocations
+> of "init-ceph start" do not start the missing instances.
 > 
-> Regards,
-> Christian
+> So, check for the correct daemon instance id as well as type when
+> testing if the daemon is up.
 > 
-> ---------- Forwarded message ----------
-> From: Kevin Wolf <kwolf@redhat.com>
-> Date: 2010/10/21
-> Subject: [Qemu-devel] bdrv_flush for qemu block drivers nbd, rbd and sheepdog
-> To: Christian Brunner <chb@muc.de>, Laurent Vivier
-> <Laurent@vivier.eu>, MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
-> Cc: Qemu-devel@nongnu.org
+> Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+> ---
+>  src/init-ceph.in |    7 ++++---
+>  1 files changed, 4 insertions(+), 3 deletions(-)
+> 
+> diff --git a/src/init-ceph.in b/src/init-ceph.in
+> index 52891c0..d42a806 100644
+> --- a/src/init-ceph.in
+> +++ b/src/init-ceph.in
+> @@ -69,10 +69,11 @@ signal_daemon() {
+>  daemon_is_running() {
+>      name=$1
+>      daemon=$2
+> -    pidfile=$3
+> +    daemon_id=$3
+> +    pidfile=$4
+>      do_cmd "[ -e $pidfile ] || exit 1   # no pid, presumably not running
+>  	pid=\`cat $pidfile\`
+> -	[ -e /proc/\$pid ] && grep -q $daemon /proc/\$pid/cmdline && exit 0 # running
+> +	[ -e /proc/\$pid ] && grep -q $daemon /proc/\$pid/cmdline && grep -qwe -i.$daemon_id /proc/\$pid/cmdline && exit 0 # running
+>          exit 1  # pid is something else" "" "okfail"
+>  }
+>  
+> @@ -195,7 +196,7 @@ for name in $what; do
+>  
+>      # start, and already running?  (do this check early to avoid unnecessary work!)
+>      if [ "$command" = "start" ]; then
+> -	if daemon_is_running $name c$type $pid_file; then
+> +	if daemon_is_running $name c$type $id $pid_file; then
+>  	    echo "Starting Ceph $name on $host...already running"
+>  	    continue
+>  	fi
+> -- 
+> 1.6.6
 > 
 > 
-> Hi all,
-> 
-> I'm currently looking into adding a return value to qemu's bdrv_flush
-> function and I noticed that your block drivers (nbd, rbd and sheepdog)
-> don't implement bdrv_flush at all. bdrv_flush is going to return
-> -ENOTSUP for any block driver not implementing this, effectively
-> breaking these three drivers for anything but cache=unsafe.
-> 
-> Is there a specific reason why your drivers don't implement this? I
-> think I remember that one of the drivers always provides
-> cache=writethough semantics. It would be okay to silently "upgrade" to
-> cache=writethrough, so in this case I'd just need to add an empty
-> bdrv_flush implementation.
-> 
-> Otherwise, we really cannot allow any option except cache=unsafe because
-> that's the semantics provided by the driver.
-> 
-> In any case, I think it would be a good idea to implement a real
-> bdrv_flush function to allow the write-back cache modes cache=off and
-> cache=writeback in order to improve performance over writethrough.
-> 
-> Is this possible with your protocols, or can the protocol be changed to
-> consider this? Any hints on how to proceed?
-> 
-> Kevin
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
