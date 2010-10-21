@@ -1,66 +1,53 @@
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: [PATCH] mkcephfs.in: Use $user when copying files using scp
-Date: Thu, 21 Oct 2010 18:54:24 -0400
-Message-ID: <1287701664-6945-1-git-send-email-tytso@mit.edu>
+From: Sage Weil <sage@newdream.net>
+Subject: handling lost objects
+Date: Thu, 21 Oct 2010 16:41:45 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1010211631150.27821@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from thunk.org ([69.25.196.29]:52474 "EHLO thunker.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758569Ab0JUWy0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 21 Oct 2010 18:54:26 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:46680 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751897Ab0JUXis (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Oct 2010 19:38:48 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 2A086BC7C5
+	for <ceph-devel@vger.kernel.org>; Thu, 21 Oct 2010 16:41:46 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id E21BDBC7C5
+	for <ceph-devel@vger.kernel.org>; Thu, 21 Oct 2010 16:41:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Theodore Ts'o <tytso@google.com>
 
-From: Theodore Ts'o <tytso@google.com>
+If you have an unfortunate series of OSD failures, you can get into a 
+situation where you know that objects were modified, but weren't able to 
+copy the data off of the OSDs that contained them before they failed.  
+Or, you only have what are (at least potentially) stale copies, but the 
+OSDs with the most recent copies are down and declared (by an 
+administrator) "lost" and irretrieable.
 
-The use of $user was missing in a few places.  This was needed so I
-could run as a different userid than the userid than is used to install
-and run the Ceph daemons.
+The current strategy is/was to go through and log LOST events for any 
+object for which we have no copy.  Essentially it is treated like a 
+delete... the object is gone.  For objects where we have an old version of 
+the data, a LOST_REVERT event would be logged and we'd revert back to the 
+old content (this second case isn't implemented yet).
 
-Signed-off-by: "Theodore Ts'o" <tytso@google.com>
----
- src/mkcephfs.in |   20 ++++++++++++++++----
- 1 files changed, 16 insertions(+), 4 deletions(-)
+I wonder if a better strategy would be to _not_ delete the objects, but to 
+create a placeholder, and mark it such that any attempts to read it return 
+EIO or ESTALE or something along those lines.  That would let an 
+application know when data is gone instead of 'silently' (well, at the 
+behest of a desperate administrator) losing the data.  Things like remove 
+and replace would succeed, but reads would not.  Stale objects could then 
+always be removed on a per-object basis.
 
-diff --git a/src/mkcephfs.in b/src/mkcephfs.in
-index 9359118..6bb3b3c 100644
---- a/src/mkcephfs.in
-+++ b/src/mkcephfs.in
-@@ -185,9 +185,15 @@ for name in $what; do
-     check_host || continue
- 
-     if [ -n "$ssh" ] && ( echo $pushed_to | grep -v -q " $host " ); then
--	scp -q $conf $host:$conf
--	scp -q $osdmap $host:$osdmap
--	scp -q $monmap $host:$monmap
-+	if [ -n "$user" ]; then
-+	  scp -q $conf $user@$host:$conf
-+	  scp -q $osdmap $user@$host:$osdmap
-+	  scp -q $monmap $user@$host:$monmap
-+        else
-+	  scp -q $conf $host:$conf
-+	  scp -q $osdmap $host:$osdmap
-+	  scp -q $monmap $host:$monmap
-+        fi
- 	pushed_to="$pushed_to $host "
-     fi
- 
-@@ -239,7 +245,13 @@ for name in $what; do
- 	    do_root_cmd "umount $btrfs_path ; for f in $btrfs_devs ; do umount \$f ; done ; modprobe btrfs ; mkfs.btrfs $btrfs_devs ; modprobe btrfs ; btrfsctl -a ; mount -t btrfs $btrfs_opt $first_dev $btrfs_path ; chown $osd_user $btrfs_path ; chmod +w $btrfs_path "
- 	fi
- 
--	[ -n "$ssh" ] && scp $monmap $host:$monmap
-+	if [ -n "$ssh" ]; then
-+          if [ -n "$user" ]; then
-+            scp $monmap $user@$host:$monmap
-+          else
-+            scp $monmap $host:$monmap
-+          fi
-+        fi
- 	do_cmd "$BINDIR/cosd -c $conf --monmap $monmap -i $num --mkfs --osd-data $osd_data"
- 
- 	if [ -n "$keyring" ]; then
--- 
-1.7.1
+The other nice thing about this is currently the peering phase stalls 
+until it locates all lost objects.  But we know exactly which objects 
+those are, and can go active (allowing IO to the rest of the PG) and stall 
+only requests for those objects (until they are located or declared lost).  
+(Actually, we can make this change regardless of whether we decide to mark 
+or silently delete/revert.)
+
+Any thoughts here?
+
+sage
 
