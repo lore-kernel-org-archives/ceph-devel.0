@@ -1,110 +1,80 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fwd: [Qemu-devel] bdrv_flush for qemu block drivers nbd, rbd
- and sheepdog
-Date: Fri, 22 Oct 2010 09:22:00 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1010220916000.24595@cobra.newdream.net>
-References: <4CC04920.8040902@redhat.com> <AANLkTikHAm7opg1TzUrUWis53ENT_z6DjfT9GPeBdqA0@mail.gmail.com>
- <Pine.LNX.4.64.1010211155301.18946@cobra.newdream.net> <4CC14DD3.6060504@redhat.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: common/Mutex.h:102: FAILED assert(nlock > 0)
+Date: Fri, 22 Oct 2010 12:56:50 -0600
+Message-ID: <1287773810.6806.74.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49259 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756429Ab0JVQS6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Oct 2010 12:18:58 -0400
-In-Reply-To: <4CC14DD3.6060504@redhat.com>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:60349 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759498Ab0JVS5E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Oct 2010 14:57:04 -0400
+Received: from sentry.sandia.gov (mm03snlnto.sandia.gov [132.175.109.20])
+	by sentry-three.sandia.gov (Postfix) with ESMTP id 15AEF4E3AEE
+	for <ceph-devel@vger.kernel.org>; Fri, 22 Oct 2010 12:56:58 -0600 (MDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Wolf <kwolf@redhat.com>
-Cc: Christian Brunner <chb@muc.de>, ceph-devel@vger.kernel.org, Qemu-devel@nongnu.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 22 Oct 2010, Kevin Wolf wrote:
-> [ Adding qemu-devel to CC again ]
-> 
-> Am 21.10.2010 20:59, schrieb Sage Weil:
-> > On Thu, 21 Oct 2010, Christian Brunner wrote:
-> >> Hi,
-> >>
-> >> is there a flush operation in librados? - I guess the only way to
-> >> handle this, would be waiting until all aio requests are finished?
-> 
-> That's not the semantics of bdrv_flush, you don't need to wait for
-> running requests. You just need to make sure that all completed requests
-> are safe on disk so that they would persist even in case of a
-> crash/power failure.
+Hi,
 
-Okay, in that case we're fine.  librados doesn't declare a write committed 
-until it is safely on disk on multiple backend nodes.  There is a 
-mechanism to get an ack sooner, but the qemu storage driver does not use 
-it.  
+The unstable branch is giving me lots of these asserts when
+I try to start up a file system with 10 servers, 16 cosd/server:
 
-> > There is no flush currently.  But librados does no caching, so in this 
-> > case at least silenting upgrading to cache=writethrough should work.
-> 
-> You're making sure that the data can't be cached in the server's page
-> cache or volatile disk cache either, e.g. by using O_SYNC for the image
-> file? If so, upgrading would be safe.
-
-Right.
-
-> > If that's a problem, we can implement a flush.  Just let us know.
-> 
-> Presumably providing a writeback mode with explicit flushes could
-> improve performance. Upgrading to writethrough is not a correctness
-> problem, though, so it's your decision if you want to implement it.
-
-So is a bdrv_flush generated when e.g. the guest filesystem issues a 
-barrier, or would otherwise normally ask a SATA disk to flush it's cache?
-
-sage
+# tail -30 /var/log/ceph/osd.113.log 
+2010-10-22 12:46:41.372489 4733b940 -- 172.17.40.28:6803/10781 <== osd128 172.17.40.29:6801/6905 1 ==== osd_ping(e0 as_of 4 ACK) v1 ==== 61+0+0 (2649909510 0 0) 0x226bc30
+2010-10-22 12:46:41.372507 4733b940 osd113 4  peer osd128 172.17.40.29:6801/6905 requesting heartbeats
+common/Mutex.h: In function 'void Mutex::Unlock()':
+common/Mutex.h:102: FAILED assert(nlock > 0)
+ ceph version 0.23~rc (commit:55fcbc649c42f029ca63a1f36acc5244beacf705)
+ 1: (SimpleMessenger::Pipe::accept()+0x130e) [0x474a2e]
+ 2: (SimpleMessenger::Pipe::reader()+0x1f5) [0x476b15]
+ 3: (SimpleMessenger::Pipe::Reader::entry()+0xd) [0x46562d]
+ 4: (Thread::_entry_func(void*)+0x7) [0x480607]
+ 5: /lib64/libpthread.so.0 [0x7fda5bce973d]
+ 6: (clone()+0x6d) [0x7fda5af7dd1d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+*** Caught signal (ABRT) ***
+ ceph version 0.23~rc (commit:55fcbc649c42f029ca63a1f36acc5244beacf705)
+ 1: (sigabrt_handler(int)+0x4a) [0x614cfa]
+ 2: /lib64/libc.so.6 [0x7fda5aeda2d0]
+ 3: (gsignal()+0x35) [0x7fda5aeda265]
+ 4: (abort()+0x110) [0x7fda5aedbd10]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x114) [0x7fda5b750cb4]
+ 6: /usr/lib64/libstdc++.so.6 [0x7fda5b74edb6]
+ 7: /usr/lib64/libstdc++.so.6 [0x7fda5b74ede3]
+ 8: /usr/lib64/libstdc++.so.6 [0x7fda5b74eeca]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x214) [0x601a34]
+ 10: (Mutex::Unlock()+0x5b) [0x4655fb]
+ 11: (SimpleMessenger::Pipe::accept()+0x130e) [0x474a2e]
+ 12: (SimpleMessenger::Pipe::reader()+0x1f5) [0x476b15]
+ 13: (SimpleMessenger::Pipe::Reader::entry()+0xd) [0x46562d]
+ 14: (Thread::_entry_func(void*)+0x7) [0x480607]
+ 15: /lib64/libpthread.so.0 [0x7fda5bce973d]
+ 16: (clone()+0x6d) [0x7fda5af7dd1d]
 
 
+# gdb /usr/bin/cosd
+Reading symbols from /usr/bin/cosd...done.
+(gdb) l *0x474a2e
+0x474a2e is in SimpleMessenger::Pipe::accept() (msg/SimpleMessenger.cc:897).
+892       return 0;   // success.
+893
+894      fail_unlocked:
+895       if (existing)
+896         existing->pipe_lock.Unlock();
+897       pipe_lock.Lock();
+898       bool queued = is_queued();
+899       if (queued)
+900         state = STATE_CONNECTING;
+901       else
+(gdb) q
 
-> Kevin
-> 
-> >> ---------- Forwarded message ----------
-> >> From: Kevin Wolf <kwolf@redhat.com>
-> >> Date: 2010/10/21
-> >> Subject: [Qemu-devel] bdrv_flush for qemu block drivers nbd, rbd and sheepdog
-> >> To: Christian Brunner <chb@muc.de>, Laurent Vivier
-> >> <Laurent@vivier.eu>, MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
-> >> Cc: Qemu-devel@nongnu.org
-> >>
-> >>
-> >> Hi all,
-> >>
-> >> I'm currently looking into adding a return value to qemu's bdrv_flush
-> >> function and I noticed that your block drivers (nbd, rbd and sheepdog)
-> >> don't implement bdrv_flush at all. bdrv_flush is going to return
-> >> -ENOTSUP for any block driver not implementing this, effectively
-> >> breaking these three drivers for anything but cache=unsafe.
-> >>
-> >> Is there a specific reason why your drivers don't implement this? I
-> >> think I remember that one of the drivers always provides
-> >> cache=writethough semantics. It would be okay to silently "upgrade" to
-> >> cache=writethrough, so in this case I'd just need to add an empty
-> >> bdrv_flush implementation.
-> >>
-> >> Otherwise, we really cannot allow any option except cache=unsafe because
-> >> that's the semantics provided by the driver.
-> >>
-> >> In any case, I think it would be a good idea to implement a real
-> >> bdrv_flush function to allow the write-back cache modes cache=off and
-> >> cache=writeback in order to improve performance over writethrough.
-> >>
-> >> Is this possible with your protocols, or can the protocol be changed to
-> >> consider this? Any hints on how to proceed?
-> >>
-> >> Kevin
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+FWIW, it looks to me like a double unlock via a failed reply.
+
+-- Jim
+
+
+
