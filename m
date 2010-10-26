@@ -1,68 +1,92 @@
-From: Christian Brunner <chb@muc.de>
-Subject: osd/ReplicatedPG.cc:2403: FAILED assert(!missing.is_missing(soid))
-Date: Tue, 26 Oct 2010 14:14:58 +0200
-Message-ID: <AANLkTim_-Je553u5FVv6bdhCirz1t90KQEUG=icmMr5-@mail.gmail.com>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: ./osd/OSDMap.h:460: FAILED assert(exists(osd) && is_up(osd))
+Date: Tue, 26 Oct 2010 10:59:57 -0700
+Message-ID: <AANLkTim6dKYgt+Yw_-hFLa8XFp6KaMnrCFYAd9VhYHqa@mail.gmail.com>
+References: <AANLkTikqk0KDAKRt=ED4-HCzKiUw9jhew+tyaZe1TGOM@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:34948 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932478Ab0JZMO7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Oct 2010 08:14:59 -0400
-Received: by gyg4 with SMTP id 4so2753184gyg.19
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Oct 2010 05:14:58 -0700 (PDT)
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:33711 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933335Ab0JZR76 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Oct 2010 13:59:58 -0400
+Received: by qyk12 with SMTP id 12so3064187qyk.19
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Oct 2010 10:59:57 -0700 (PDT)
+In-Reply-To: <AANLkTikqk0KDAKRt=ED4-HCzKiUw9jhew+tyaZe1TGOM@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Christian Brunner <chb@muc.de>
+Cc: ceph-devel@vger.kernel.org
 
-Here is another problem (I think it's unrelated to the previous, but
-I'm not sure).
+Do you have any down OSDs? Looking through the code I am noticing an
+issue with down OSDs where op_submit can get an error code that it
+isn't watching for, but there may be checks in other places to prevent
+that actually happening.
+-Greg
 
-One of our osds crashed with the following message:
-
-osd/ReplicatedPG.cc: In function 'void ReplicatedPG::sub_op_modify(MOSDSubOp*)':
-osd/ReplicatedPG.cc:2403: FAILED assert(!missing.is_missing(soid))
-ceph version 0.22.1 (commit:c6f403a6f441184956e00659ce713eaee7014279)
-1: (OSD::dequeue_op(PG*)+0x374) [0x4d27a4]
-2: (ThreadPool::worker()+0x291) [0x5b69d1]
-3: (ThreadPool::WorkThread::entry()+0xd) [0x4f36dd]
-4: (Thread::_entry_func(void*)+0x7) [0x470927]
-5: (()+0x77e1) [0x7fe83e60e7e1]
-6: (clone()+0x6d) [0x7fe83d83251d]
-NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-*** Caught signal (ABRT) ***
-ceph version 0.22.1 (commit:c6f403a6f441184956e00659ce713eaee7014279)
-1: (sigabrt_handler(int)+0x7d) [0x5c767d]
-2: (()+0x32a30) [0x7fe83d783a30]
-3: (gsignal()+0x35) [0x7fe83d7839b5]
-4: (abort()+0x175) [0x7fe83d785195]
-5: (__gnu_cxx::__verbose_terminate_handler()+0x12d) [0x7fe83e028aad]
-6: (()+0xbcc36) [0x7fe83e026c36]
-7: (()+0xbcc63) [0x7fe83e026c63]
-8: (()+0xbcd5e) [0x7fe83e026d5e]
-9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x448) [0x5b5338]
-10: (ReplicatedPG::sub_op_modify(MOSDSubOp*)+0x719) [0x48d8b9]
-11: (OSD::dequeue_op(PG*)+0x374) [0x4d27a4]
-12: (ThreadPool::worker()+0x291) [0x5b69d1]
-13: (ThreadPool::WorkThread::entry()+0xd) [0x4f36dd]
-14: (Thread::_entry_func(void*)+0x7) [0x470927]
-15: (()+0x77e1) [0x7fe83e60e7e1]
-16: (clone()+0x6d) [0x7fe83d83251d]
-
-When we are trying to restart the cosd, we can see the following log-output:
-
-2010-10-26 13:51:52.176904 7f005e83e720 journal read_entry
-10102640640: seq 188804 728 bytes
-2010-10-26 13:51:52.308172 7f0054f31710 osd5 39 map says i am down or
-have a different address.  switching to boot state.
-2010-10-26 13:51:52.308222 7f0054f31710 log [WRN] : map e39 wrongly
-marked me down
-2010-10-26 13:51:56.097515 7f0054f31710 journal throttle: waited for ops
-
-After that we are unable to do any rados operations in our cluster.
-The only way to solve this, was killing the cosd again.
-
-Regards,
-Christian
+On Tue, Oct 26, 2010 at 5:13 AM, Christian Brunner <chb@muc.de> wrote:
+> When accessing multiple RBD-Volumes from one VM in parallel, we are
+> receiving an assertion:
+>
+> ./osd/OSDMap.h: In function 'entity_inst_t OSDMap::get_inst(int)':
+> ./osd/OSDMap.h:460: FAILED assert(exists(osd) && is_up(osd))
+> ceph version 0.22.1 (commit:c6f403a6f441184956e00659ce713eaee7014279)
+> 1: (Objecter::op_submit(Objecter::Op*)+0x6c2) [0x38658854c2]
+> 2: /usr/lib64/librados.so.1() [0x3865855dc9]
+> 3: (RadosClient::aio_write(RadosClient::PoolCtx&, object_t, long,
+> ceph::buffer::list const&, unsigned long,
+> RadosClient::AioCompletion*)+0x24b) [0x386585724b]
+> 4: (rados_aio_write()+0x9a) [0x386585741a]
+> 5: /usr/bin/qemu-kvm() [0x45a305]
+> 6: /usr/bin/qemu-kvm() [0x45a430]
+> 7: /usr/bin/qemu-kvm() [0x43bb73]
+> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+> ./osd/OSDMap.h: In function 'entity_inst_t OSDMap::get_inst(int)':
+> ./osd/OSDMap.h:460: FAILED assert(exists(osd) && is_up(osd))
+> ceph version 0.22.1 (commit:c6f403a6f441184956e00659ce713eaee7014279)
+> 1: (Objecter::op_submit(Objecter::Op*)+0x6c2) [0x38658854c2]
+> 2: /usr/lib64/librados.so.1() [0x3865855dc9]
+> 3: (RadosClient::aio_write(RadosClient::PoolCtx&, object_t, long,
+> ceph::buffer::list const&, unsigned long,
+> RadosClient::AioCompletion*)+0x24b) [0x386585724b]
+> 4: (rados_aio_write()+0x9a) [0x386585741a]
+> 5: /usr/bin/qemu-kvm() [0x45a305]
+> 6: /usr/bin/qemu-kvm() [0x45a430]
+> 7: /usr/bin/qemu-kvm() [0x43bb73]
+> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+> terminate called after throwing an instance of 'ceph::FailedAssertion=
+'
+> *** Caught signal (ABRT) ***
+> ceph version 0.22.1 (commit:c6f403a6f441184956e00659ce713eaee7014279)
+> 1: (sigabrt_handler(int)+0x91) [0x3865922b91]
+> 2: /lib64/libc.so.6() [0x3c0c032a30]
+> 3: (gsignal()+0x35) [0x3c0c0329b5]
+> 4: (abort()+0x175) [0x3c0c034195]
+> 5: (__gnu_cxx::__verbose_terminate_handler()+0x12d) [0x3c110beaad]
+>
+> This is reproducible by doing the following inside a VM:
+>
+> # mkfs.btrfs /dev/vdb /dev/vdc /dev/vdd /dev/vde
+> # mount /dev/vdb /mnt
+> # cd /mnt
+> # bonnie++ -u root -d /mnt -f
+>
+> Any hints are welcome...
+>
+> Thanks,
+>
+> Christian
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
