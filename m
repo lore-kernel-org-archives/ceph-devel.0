@@ -1,152 +1,102 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: ceph-client-standalone bug update ,make,WARNING: "task_dirty_inc"
- ,ubuntu10.10 Linux-2.6.35-22-generic
-Date: Thu, 28 Oct 2010 08:55:37 -0700
-Message-ID: <AANLkTinS72oaJK4GLkFC675PkV40EsFjCeJPRuLwJ_7J@mail.gmail.com>
-References: <AANLkTikqKtEC4pQP0-DKgyz+VD_14iRFL6JtSY7Y=3Nb@mail.gmail.com>
-	<Pine.LNX.4.64.1010081159120.7262@cobra.newdream.net>
-	<AANLkTininb3-EF1__WjB9CA4w2uPxW=wUFODg=L6U2X5@mail.gmail.com>
-	<Pine.LNX.4.64.1010102108410.25037@cobra.newdream.net>
-	<1288259734.2621.23.camel@osd1>
-	<AANLkTikwQG6EWdr_kqmCGHR0iBnsQFWXZ8V+r7Vy+EjM@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: unstable branch: ls -l hang after write by 64 clients
+Date: Thu, 28 Oct 2010 10:16:28 -0600
+Message-ID: <1288282588.10847.131.camel@sale659.sandia.gov>
+References: <1288117260.10847.93.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1010261224450.20055@cobra.newdream.net>
+ <1288128642.10847.95.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1010272200340.14714@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:58965 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754932Ab0J1Pzh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Oct 2010 11:55:37 -0400
-Received: by qwf7 with SMTP id 7so1279737qwf.19
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Oct 2010 08:55:37 -0700 (PDT)
-In-Reply-To: <AANLkTikwQG6EWdr_kqmCGHR0iBnsQFWXZ8V+r7Vy+EjM@mail.gmail.com>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:54450 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753683Ab0J1QQd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Oct 2010 12:16:33 -0400
+In-Reply-To: <Pine.LNX.4.64.1010272200340.14714@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yonggang Liu <myidpt@gmail.com>
-Cc: Jeff Wu <cpwu@tnsoft.com.cn>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The ceph-client tree is always maintained against the latest rc from
-Linus. For any other kernel you need to use the -backports branches.
-It looks like this is what's causing both your troubles. :)
--Greg
+Hi Sage,
 
-On Thu, Oct 28, 2010 at 8:20 AM, Yonggang Liu <myidpt@gmail.com> wrote:
-> The same thing happens here, I was using Debian 5.0 with kernel 2.6.3=
-2-5-686.
-> I had the following error message:
-> client:~/ceph-client-standalone# insmod ceph.ko
-> insmod: error inserting 'ceph.ko': -1 Unknown symbol in module
-> client:~/ceph-client-standalone# dmesg -c
-> [ 4295.877555] ceph: Unknown symbol task_dirty_inc
->
-> Any ideas?
->
-> On Thu, Oct 28, 2010 at 5:55 AM, Jeff Wu <cpwu@tnsoft.com.cn> wrote:
->> Hi ,all
->>
->> At Ubuntu 10.10 x86_64 , kernel : Linux-2.6.35-22-generic ,
->>
->> I git Lastest ceph-client-standalone source codes from
->> git://ceph.newdream.net/ceph-client-standalone.git
->>
->> it make fail, get the warning messages: "account_page_dirtied"
->>
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D Logs =3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>
->> jeff@cephserver:~/work/ceph-client-standalone$ make
->>
->> =A0...................................
->>
->> CC [M] =A0/home/jeff/work/ceph-client-standalone/ceph_hash.o
->> =A0CC [M] =A0/home/jeff/work/ceph-client-standalone/ceph_frag.o
->> =A0LD [M] =A0/home/jeff/work/ceph-client-standalone/ceph.o
->> =A0Building modules, stage 2.
->> =A0MODPOST 1 modules
->> WARNING:
->> "account_page_dirtied" [/home/jeff/work/ceph-client-standalone/ceph.=
-ko]
->> undefined!
->> =A0CC =A0 =A0 =A0/home/jeff/work/ceph-client-standalone/ceph.mod.o
->> =A0LD [M] =A0/home/jeff/work/ceph-client-standalone/ceph.ko
->> make[1]: Leaving directory `/usr/src/linux-headers-2.6.35-22-generic=
-'
->> jeff@cephserver:~/work/ceph-client-standalone$
->>
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D
->>
->> then =A0i change to master-backport, to make it ,
->> still get a warning messages : "task_dirty_inc" .
->>
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3Dlogs=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D
->>
->> jeff@cephserver:~/work/ceph-client-standalone$ git checkout -b
->> master-backport origin/master-backport
->> Branch master-backport set up to track remote branch master-backport
->> from origin.
->> Switched to a new branch 'master-backport'
->> jeff@cephserver:~/work/ceph-client-standalone$ git pull
->> Already up-to-date.
->>
->> jeff@cephserver:~/work/ceph-client-standalone$ make
->>
->> .........................................
->>
->> =A0CC [M] =A0/home/jeff/work/ceph-client-standalone/osdmap.o
->> =A0CC [M] =A0/home/jeff/work/ceph-client-standalone/debugfs.o
->> =A0CC [M] =A0/home/jeff/work/ceph-client-standalone/auth.o
->> =A0LD [M] =A0/home/jeff/work/ceph-client-standalone/ceph.o
->> =A0Building modules, stage 2.
->> =A0MODPOST 1 modules
->> WARNING:
->> "task_dirty_inc" [/home/jeff/work/ceph-client-standalone/ceph.ko]
->> undefined!
->> =A0CC =A0 =A0 =A0/home/jeff/work/ceph-client-standalone/ceph.mod.o
->> =A0LD [M] =A0/home/jeff/work/ceph-client-standalone/ceph.ko
->> make[1]: Leaving directory `/usr/src/linux-headers-2.6.35-22-generic=
-'
->> jeff@cephserver:~/work/ceph-client-standalone$
->>
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>
->> Is it a bug ? or i git wrong source package ?
->>
->> Thanks,
->> Jeff,Wu
->>
->>
->>
->>
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
->
->
->
-> --
-> Yonggang Liu
-> Advanced Computing and Information Systems Laboratory
-> University of Florida
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Wed, 2010-10-27 at 23:06 -0600, Sage Weil wrote:
+> Hi Jim,
+> 
+> It turns out Henry's problem was actually cause by a bad fix on my part, 
+> d91f2438 in ceph-client.git.  (Unfortunately that made it into 2.6.36!)  
+> Reverting that commit fixed things for him.
+> 
+> I pushed that revert to the ceph-client.git master branch, or you can 
+> revert it yourself.  master also includes everything that's been merged 
+> for 2.6.37-rc1, so you may want to revert it yourself and keep the 2.6.36 
+> stuff.
+> 
+> In any case, please let us know if it fixes your problem. 
+
+Thanks, reverting d91f2438 fixes my problem.
+
+To be clear, I'm running 2.6.36 + for-linus (as of commit efa4c1206ea)
++ d91f2438 reverted against unstable branch server code as of
+commit c1a6ee574b.
+
+-- Jim
+
+>  In the 
+> meantime, I'll try to figure out what it was I thought I was fixing in the 
+> first place!  :(
+> 
+> sage
+> 
+> 
+> On Tue, 26 Oct 2010, Jim Schutt wrote:
+> 
+> > 
+> > Hi,
+> > 
+> > On Tue, 2010-10-26 at 13:25 -0600, Sage Weil wrote:
+> > > On Tue, 26 Oct 2010, Jim Schutt wrote:
+> > > > Hi,
+> > > >
+> > > > I'm testing a file system with 10 osd daemons,
+> > > > 1 mds daemon, 1 mon daemon.
+> > > >
+> > > > Client code is 2.6.36 + current for-linus branch
+> > > > Server code is unstable branch, 2a3e73bb325f.
+> > > >
+> > > > After mounting 64 clients, I had each write its own 512 MiB
+> > > > file with dd, with all files being created in the same directory.
+> > > >
+> > > > A few seconds after they completed, from another client (not one
+> > > > of the 64 writers) I did "ls -l" on the directory holding the
+> > > > new files.
+> > > >
+> > > > After several minutes, it still hasn't returned;
+> > > > all the daemons are still running.
+> > > 
+> > > This looks just like a client bug I'm tracking down with Henry Chang.
+> > > I'll try again to reproduce it in my environment (as that should speed
+> > > up
+> > > the debugging process anyway!).
+> > 
+> > Cool!  Let me know if it turns out there's some way for
+> > me to help further on this.
+> > 
+> > -- Jim
+> > 
+> > > 
+> > > sage
+> > > 
+> > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> 
+
+
