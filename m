@@ -1,172 +1,217 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: mds getattr locked again
-Date: Fri, 29 Oct 2010 09:26:29 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1010290920220.13796@cobra.newdream.net>
-References: <AANLkTi=R=bnsjZeq5DibVzVK__evwajLefSHuA6iJKTW@mail.gmail.com>
- <Pine.LNX.4.64.1010282151220.27485@cobra.newdream.net>
- <AANLkTinOOi4XjfnfxP8qL81sxzOTLaS4zPJYwY979J0L@mail.gmail.com>
+Subject: Re: ceph-client-standalone bug update ,make,WARNING: "task_dirty_inc"
+ ,ubuntu10.10 Linux-2.6.35-22-generic
+Date: Fri, 29 Oct 2010 10:29:01 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1010291018120.17302@cobra.newdream.net>
+References: <AANLkTikqKtEC4pQP0-DKgyz+VD_14iRFL6JtSY7Y=3Nb@mail.gmail.com>
+ <Pine.LNX.4.64.1010081159120.7262@cobra.newdream.net>
+ <AANLkTininb3-EF1__WjB9CA4w2uPxW=wUFODg=L6U2X5@mail.gmail.com>
+ <Pine.LNX.4.64.1010102108410.25037@cobra.newdream.net> <1288259734.2621.23.camel@osd1>
+ <AANLkTikwQG6EWdr_kqmCGHR0iBnsQFWXZ8V+r7Vy+EjM@mail.gmail.com>
+ <AANLkTinS72oaJK4GLkFC675PkV40EsFjCeJPRuLwJ_7J@mail.gmail.com>
+ <AANLkTik5J8KAAnV67U4gkgEC9E8_C+z8ivaz2vB8Hg-4@mail.gmail.com>
+ <1288318077.2332.3.camel@osd1>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1950223456-1288369565=:13796"
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-656080416-1288373341=:17302"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56279 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:33901 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757613Ab0J2QXS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Oct 2010 12:23:18 -0400
-In-Reply-To: <AANLkTinOOi4XjfnfxP8qL81sxzOTLaS4zPJYwY979J0L@mail.gmail.com>
-Content-ID: <Pine.LNX.4.64.1010290926160.13796@cobra.newdream.net>
+	with ESMTP id S934246Ab0J2RZm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Oct 2010 13:25:42 -0400
+In-Reply-To: <1288318077.2332.3.camel@osd1>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Leander Yu <leander.yu@gmail.com>
-Cc: Henry C Chang <henry_c_chang@tcloudcomputing.com>, ceph-devel@vger.kernel.org
+To: Jeff Wu <cpwu@tnsoft.com.cn>
+Cc: Yonggang Liu <myidpt@gmail.com>, Gregory Farnum <gregf@hq.newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
   This message is in MIME format.  The first part should be readable text,
   while the remaining parts are likely unreadable without MIME-aware tools.
 
---557981400-1950223456-1288369565=:13796
-Content-Type: TEXT/PLAIN; CHARSET=iso-8859-1
+--557981400-656080416-1288373341=:17302
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Content-ID: <Pine.LNX.4.64.1010290926161.13796@cobra.newdream.net>
 
-On Fri, 29 Oct 2010, Leander Yu wrote:
-> Hi Sage,
->=20
-> On Fri, Oct 29, 2010 at 1:08 PM, Sage Weil <sage@newdream.net> wrote:
-> > On Fri, 29 Oct 2010, Henry C Chang wrote:
-> >> Hi,
-> >>
-> >> getattr on mds hanged again.
-> >>
-> >> I have already reverted d91f2438d881514e4a923fd786dbd94b764a9440.
-> >> Although the probability is significant lowered down, it still has the
-> >> chance to hang on getattr.
-> >>
-> >> Attached are the logs of mds and the hanging client. :(
-> >>
-> >> I'm using ceph-client-standalone master-backport branch on 2.6.32 kern=
-el.
-> >
-> > It looks like ceph_check_caps is hung somehow:
-> >
-> > ceph:ceph: =A0handle_caps from mds0
-> > ceph:ceph: =A0 mds0 seq 99 cap seq 28
-> > ceph:ceph: =A0 op revoke ino 10000000bd1.fffffffffffffffe inode
-> > ffff8800a6251d88
-> > ceph:ceph: =A0handle_cap_grant inode ffff8800a6251d88 cap ffff8800a635b=
-780
-> > mds0 seq 28 pAsLsXsFr
-> > ceph:ceph: =A0 size 4294967296 max_size 8594128896, i_size 4294967296
-> > ceph:ceph: =A0try_nonblocking_invalidate ffff8800a6251d88 success
-> > ceph:ceph: =A0__ceph_caps_issued ffff8800a6251d88 cap ffff8800a635b780
-> > issued pAsLsXsFscr
-> > ceph:ceph: =A0__ceph_caps_issued ffff8800a6251d88 cap ffff8800a635b780
-> > issued pAsLsXsFscr
-> > ceph:ceph: =A0ffff8800a6251d88 mode 0100644 uid.gid 0.0
-> > ceph:ceph: =A0 my wanted =3D pAsxXsxFsxcrwb, used =3D pFcr, dirty -
-> > ceph:ceph: =A0revocation: pAsLsXsFscr -> pAsLsXsFr (revoking Fsc)
-> > ceph:ceph: =A0__ceph_caps_issued ffff8800a6251d88 cap ffff8800a635b780
-> > issued pAsLsXsFr
-> > ceph:ceph: =A0check_caps ffff8800a6251d88 file_want pAsxXsxFsxcrwb used=
- pFcr
-> > dirty - flushing - issued pAsLsXsFr revoking Fsc retain pAsxLsxXsxFsxcr=
-wbl
-> > AUTHONLY NODELAY
-> > ceph:ceph: =A0 mds0 revoking Fsc
-> > ceph:ceph: =A0mdsc put_session ffff8800b41c6000 3 -> 2
-> > ceph:ceph: =A0mdsc con_put ffff8800b41c6000 (2)
-> > ceph:ceph: =A0aio_read ffff8800a6251d88 10000000bd1.fffffffffffffffe
-> > dropping cap refs on Fcr =3D 512
-> > ceph:ceph: =A0put_cap_refs ffff8800a6251d88 had Fcr last
-> > ceph:ceph: =A0__ceph_caps_issued ffff8800a6251d88 cap ffff8800a635b780
-> > issued pAsLsXsFr
-> > ceph:ceph: =A0check_caps ffff8800a6251d88 file_want pAsxXsxFsxcrwb used=
- pFc
-> > dirty - flushing - issued pAsLsXsFr revoking Fsc retain pAsxLsxXsxFsxcr=
-wbl
-> > ceph:ceph: =A0check_caps trying to invalidate on ffff8800a6251d88
-> > ceph:ceph: =A0try_nonblocking_invalidate ffff8800a6251d88 failed
-> > ceph:ceph: =A0check_caps queuing invalidate
-> >
-> > --> this means queue_invalidate =3D 1, and check_caps will call
-> > ceph_queue_invalidate on exit, which will always print something...
-> >
-> > ceph:ceph: =A0__ceph_caps_issued ffff8800a6251d88 cap ffff8800a635b780 =
-issued pAsLsXsFr
-> > ceph:ceph: =A0check_caps ffff8800a6251d88 file_want pAsxXsxFsxcrwb used=
- pFc
-> > dirty - flushing - issued pAsLsXsFr revoking Fsc retain pAsxLsxXsxFsxcr=
-wbl
-> > ceph:ceph: =A0 mds0 revoking Fsc
-> > ceph:ceph: =A0__cap_delay_cancel ffff8800a6251d88
-> >
-> > ...but that never happens. =A0Probably the CPU got blocked somewhere? =
-=A0Can
-> > you see what the system is doing at this point? =A0sysrq-t, or check th=
-e
-> > process list for ceph-msgr and cat it's stack (/proc/$pid/stack)? =A0Th=
-e
-> > task should be blocked in ceph_check_caps() somewhere...
->=20
-> it didn't go to ceph_queue_invalidate because delayed and is_delayed =3D =
-0.
->
->          if (delayed && is_delayed)
->                  force_requeue =3D 1;   /* __send_cap delayed release; re=
-queue */
->          if (!delayed && !is_delayed)
->                  __cap_delay_cancel(mdsc, ci);
->          else if (!is_delayed || force_requeue)
->                  __cap_delay_requeue(mdsc, ci);
->=20
->          spin_unlock(&inode->i_lock);
->=20
->          if (queue_invalidate)
->                  ceph_queue_invalidate(inode);
->=20
-> so it goes to __cap_delay_cancel().
->=20
-> Should I said, the correct behavior is to go to ceph_queue_invalidate(ino=
-de)?
+On Fri, 29 Oct 2010, Jeff Wu wrote:
+> Thank you Gregory and Yonggang,i git rbd-backport , make sucessfully.
 
-I don't think delayed && is_delayed are related.  (Those deal with whether=
+A word of caution: the rbd-backport branch is really old and out of date. =
 =20
-we come back and re-check caps a little latter.)  The invalidate should be=
+The reason it compiles is because it doesn't have the task_dirty_inc call=
 =20
-queued immediately: at this point queue_invalidate =3D=3D 1, and the functi=
-on=20
-only has one exit point, so one way or another ceph_queue_invalidate()=20
-should get called.  Since it's not, we must be getting stuck somewhere...
-
-Some combination of sysrq and strategic printk's should narrow down where=
+at all.  And looking at it more closely, it looks like task_dirty_inc was=
 =20
-things go wrong.
+never exported to modules.  Whoops!  I'm not sure what the implications of=
+=20
+not calling it are (presumably the VMs space accounting gets out of=20
+whack), but it was also missing from the upstream version until 2.6.36, so=
+=20
+I'll just drop it from the -backport branches.  (I suspect I added it when=
+=20
+the account_page_dirtied() call was added in 2.6.36 and noticed it was=20
+doing it.)
 
-Thanks!
-sage=20
+In any case, the ceph-client-standalone.git is fixed up, and you should=20
+now be able to use either master-backport or unstable-backport.
+
+sage
+
 
 >=20
+> Regards,
+> Jeff.Wu
+> Transoft.inc=20
+> Senior software Engineer
 >=20
-> >
-> > (BTW, if you're building your own kernel, one thing that I've found
-> > helpful is enabling the CONFIG_PRINTK_TIME option in .config, and updat=
-ing
-> > kernel/printk.c to also include current->pid in the line prefix. =A0Tha=
+> =FF=FF 2010-10-29=FF=FF=FF=FF 00:54 +0800=FF=FFYonggang Liu=FF=FF=FF=FF=
+=FF=FF
+> > Solved. Thank you Gregory!
+> > I used the branck rbd-backport and it works perfectly.
+> >=20
+> > Regards,
+> >=20
+> > On Thu, Oct 28, 2010 at 11:55 AM, Gregory Farnum <gregf@hq.newdream.net=
+> wrote:
+> > > The ceph-client tree is always maintained against the latest rc from
+> > > Linus. For any other kernel you need to use the -backports branches.
+> > > It looks like this is what's causing both your troubles. :)
+> > > -Greg
+> > >
+> > > On Thu, Oct 28, 2010 at 8:20 AM, Yonggang Liu <myidpt@gmail.com> wrot=
+e:
+> > >> The same thing happens here, I was using Debian 5.0 with kernel 2.6.=
+32-5-686.
+> > >> I had the following error message:
+> > >> client:~/ceph-client-standalone# insmod ceph.ko
+> > >> insmod: error inserting 'ceph.ko': -1 Unknown symbol in module
+> > >> client:~/ceph-client-standalone# dmesg -c
+> > >> [ 4295.877555] ceph: Unknown symbol task_dirty_inc
+> > >>
+> > >> Any ideas?
+> > >>
+> > >> On Thu, Oct 28, 2010 at 5:55 AM, Jeff Wu <cpwu@tnsoft.com.cn> wrote:
+> > >>> Hi ,all
+> > >>>
+> > >>> At Ubuntu 10.10 x86_64 , kernel : Linux-2.6.35-22-generic ,
+> > >>>
+> > >>> I git Lastest ceph-client-standalone source codes from
+> > >>> git://ceph.newdream.net/ceph-client-standalone.git
+> > >>>
+> > >>> it make fail, get the warning messages: "account_page_dirtied"
+> > >>>
+> > >>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D Logs =3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > >>>
+> > >>> jeff@cephserver:~/work/ceph-client-standalone$ make
+> > >>>
+> > >>>  ...................................
+> > >>>
+> > >>> CC [M]  /home/jeff/work/ceph-client-standalone/ceph_hash.o
+> > >>>  CC [M]  /home/jeff/work/ceph-client-standalone/ceph_frag.o
+> > >>>  LD [M]  /home/jeff/work/ceph-client-standalone/ceph.o
+> > >>>  Building modules, stage 2.
+> > >>>  MODPOST 1 modules
+> > >>> WARNING:
+> > >>> "account_page_dirtied" [/home/jeff/work/ceph-client-standalone/ceph=
+=2Eko]
+> > >>> undefined!
+> > >>>  CC      /home/jeff/work/ceph-client-standalone/ceph.mod.o
+> > >>>  LD [M]  /home/jeff/work/ceph-client-standalone/ceph.ko
+> > >>> make[1]: Leaving directory `/usr/src/linux-headers-2.6.35-22-generi=
+c'
+> > >>> jeff@cephserver:~/work/ceph-client-standalone$
+> > >>>
+> > >>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D
+> > >>>
+> > >>> then  i change to master-backport, to make it ,
+> > >>> still get a warning messages : "task_dirty_inc" .
+> > >>>
+> > >>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3Dlogs=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D
+> > >>>
+> > >>> jeff@cephserver:~/work/ceph-client-standalone$ git checkout -b
+> > >>> master-backport origin/master-backport
+> > >>> Branch master-backport set up to track remote branch master-backpor=
 t
-> > helps sort out what tasks are doing what when. =A0But if you're stuck o=
-n
-> > 2.6.32 for some reason that probably not the case!)
-> >
-> > Thanks!
-> > sage
+> > >>> from origin.
+> > >>> Switched to a new branch 'master-backport'
+> > >>> jeff@cephserver:~/work/ceph-client-standalone$ git pull
+> > >>> Already up-to-date.
+> > >>>
+> > >>> jeff@cephserver:~/work/ceph-client-standalone$ make
+> > >>>
+> > >>> .........................................
+> > >>>
+> > >>>  CC [M]  /home/jeff/work/ceph-client-standalone/osdmap.o
+> > >>>  CC [M]  /home/jeff/work/ceph-client-standalone/debugfs.o
+> > >>>  CC [M]  /home/jeff/work/ceph-client-standalone/auth.o
+> > >>>  LD [M]  /home/jeff/work/ceph-client-standalone/ceph.o
+> > >>>  Building modules, stage 2.
+> > >>>  MODPOST 1 modules
+> > >>> WARNING:
+> > >>> "task_dirty_inc" [/home/jeff/work/ceph-client-standalone/ceph.ko]
+> > >>> undefined!
+> > >>>  CC      /home/jeff/work/ceph-client-standalone/ceph.mod.o
+> > >>>  LD [M]  /home/jeff/work/ceph-client-standalone/ceph.ko
+> > >>> make[1]: Leaving directory `/usr/src/linux-headers-2.6.35-22-generi=
+c'
+> > >>> jeff@cephserver:~/work/ceph-client-standalone$
+> > >>>
+> > >>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > >>>
+> > >>> Is it a bug ? or i git wrong source package ?
+> > >>>
+> > >>> Thanks,
+> > >>> Jeff,Wu
+> > >>>
+> > >>>
+> > >>>
+> > >>>
+> > >>>
+> > >>>
+> > >>>
+> > >>> --
+> > >>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+> > >>> the body of a message to majordomo@vger.kernel.org
+> > >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >>>
+> > >>
+> > >>
+> > >>
+> > >> --
+> > >> Yonggang Liu
+> > >> Advanced Computing and Information Systems Laboratory
+> > >> University of Florida
+> > >> --
+> > >> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+> > >> the body of a message to majordomo@vger.kernel.org
+> > >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >>
+> > >
+> >=20
+> >=20
+> >=20
+> > --=20
+> > Yonggang Liu
+> > Advanced Computing and Information Systems Laboratory
+> > University of Florida
 > > --
 > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
 > > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-> >
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >=20
 >=20
---557981400-1950223456-1288369565=:13796--
+--557981400-656080416-1288373341=:17302--
