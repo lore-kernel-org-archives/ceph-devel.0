@@ -1,49 +1,196 @@
-From: Ted Ts'o <tytso@mit.edu>
-Subject: Re: osd sequence number mismatches and timeout's
-Date: Tue, 2 Nov 2010 11:29:16 -0400
-Message-ID: <20101102152916.GC25614@thunk.org>
-References: <E1PD2eA-0005Tn-G4@tytso-glaptop>
- <Pine.LNX.4.64.1011011549520.26372@cobra.newdream.net>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: rbd storage pool support for libvirt
+Date: Tue, 02 Nov 2010 20:47:51 +0100
+Message-ID: <1288727271.2284.161.camel@wido-laptop.pcextreme.nl>
+References: <Pine.LNX.4.64.1011012051190.28156@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from thunk.org ([69.25.196.29]:41529 "EHLO thunker.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751176Ab0KBP3Y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 2 Nov 2010 11:29:24 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1011011549520.26372@cobra.newdream.net>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:56714 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752523Ab0KBTry (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Nov 2010 15:47:54 -0400
+Received: from [79.99.132.153] (unknown [79.99.132.153])
+	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPA id 5F6F1DEB05
+	for <ceph-devel@vger.kernel.org>; Tue,  2 Nov 2010 20:47:52 +0100 (CET)
+In-Reply-To: <Pine.LNX.4.64.1011012051190.28156@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, Nov 01, 2010 at 03:57:55PM -0700, Sage Weil wrote:
-> Is there something in dmesg before the osd22 seq number errors pop up?  
+Hi,
 
-Yup, you were quite right.  There was a bad crc that probably caused
-the seq's to get out of sync.
+I've given this a try a few months ago, what I found out that there is a
+difference between a storage pool and a disk declaration in libvirt.
 
-Nov  1 10:12:50 bdio20 kernel: [233439.052725] ceph: osd22 10.138.138.13:6804 bad crc
-Nov  1 10:12:51 bdio20 kernel: [233440.672738] ceph: skipping osd22 192.168.168.13:6804 seq 1, expected 2
-Nov  1 10:12:51 bdio20 kernel: [233440.672958] ceph: skipping osd22 192.168.168.13:6804 seq 2, expected 3
-Nov  1 10:12:51 bdio20 kernel: [233440.675705] ceph: skipping osd22 192.168.168.13:6804 seq 3, expected 4
+I'll take the LVM storage pool as an example:
 
-> Something originally caused the seq's to get out of sync.  I suspect it 
-> was a transient network error that made the TCP session drop and 
-> reconnect, and it's not skipping already-received messages.  There was a 
-> bug in the skip code (so they stayed out of sync and osd22 eventually 
-> timed out).  I pushed a fix for that to the ceph-client.git master branch 
-> (df9f86fa).
+In src/storage you will find storage_backend_logical.c|h, these are
+simple "wrappers" around the LVM commands like lvcreate, lvremove, etc,
+etc.
 
-BTW, it looks like something may be unhappy?  I tried doing a clone of
-ceph-client.git, and I'm getting a failure:
 
-% git clone git://ceph.newdream.net/git/ceph-client.git ceph-client
-Cloning into ceph-client...
-fatal: I don't handle protocol '/usr/local/google/git'
+static int
+virStorageBackendLogicalDeleteVol(virConnectPtr conn ATTRIBUTE_UNUSED,
+                                  virStoragePoolObjPtr pool
+ATTRIBUTE_UNUSED,
+                                  virStorageVolDefPtr vol,
+                                  unsigned int flags ATTRIBUTE_UNUSED)
+{
+    const char *cmdargv[] = {
+        LVREMOVE, "-f", vol->target.path, NULL
+    };
 
-I downloaded df9f86fa and will try it out.  Thanks for pushing out the
-patch so quickly!
+    if (virRun(cmdargv, NULL) < 0)
+        return -1;
 
-					- Ted
+    return 0;
+}
+
+
+virStorageBackend virStorageBackendLogical = {
+    .type = VIR_STORAGE_POOL_LOGICAL,
+
+    ....
+    ....
+    ....
+    .deleteVol = virStorageBackendLogicalDeleteVol,
+    ....
+};
+
+As you can see, libvirt simply calls "lvremove" to remove the command,
+but this does not help you mapping the LV to a virtual machine, it's
+just a mechanism to manage your storage via libvirt, as you can do with
+Virt-Manager (which uses libvirt)
+
+Below you find two screenshots how this works in Virt Manager, as you
+can see, you can manage your VG's and attach LV's to a Virtual Machine.
+
+* http://zooi.widodh.nl/ceph/qemu-kvm/screenshots/storage_allocation.png
+*
+http://zooi.widodh.nl/ceph/qemu-kvm/screenshots/storage_manager_virt.png
+
+Note, this is Virt Manager and not libvirt, but it uses libvirt you
+perform these actions.
+
+On the CLI you have for example: vol-create, vol-delete, pool-create,
+pool-delete
+
+But, there is no special disk format for a LV, in my XML there is:
+
+    <disk type='block' device='disk'>
+      <source dev='/dev/xen-domains/v3-root'/>
+      <target dev='sda' bus='scsi'/>
+    </disk>
+
+So libvirt somehow reads "source dev" and maps this back to a VG and LV.
+
+A storage manager for RBD would simply mean implementing wrap functions
+around the "rbd" binary and parsing output from it.
+
+Implementing RBD support in libvirt would then mean two things:
+
+1. Storage manager in libvirt
+2. A special disk format for RBD
+
+The first one is done as I explained above, but for the second one, I'm
+not sure how you could do that.
+
+Libvirt now expects a disk to always be a file/block, the virtual disks
+like RBD and NBD are not supported.
+
+For #2 we should have a "special" disk declaration format, like
+mentioned on the RedHat mailinglist:
+
+http://www.redhat.com/archives/libvir-list/2010-June/msg00300.html
+
+<disk type='rbd' device='disk'>
+  <driver name='qemu' type='raw' />
+  <source pool='rbd' image='alpha' />
+  <target dev='vda' bus='virtio' />
+</disk>
+
+As images on a RBD image are always "raw", it might seem obsolete to
+define this, but newer version of Qemu don't autodetect formats.
+
+Defining a monitor in the disk declaration won't be possible I think, I
+don't see a way to get that parameter down to librados, so we need a
+valid /etc/ceph/ceph.conf
+
+Now, I'm not a libvirt expert, this is what I found in my search.
+
+Any suggestions / thoughts about this?
+
+Thanks,
+
+Wido
+
+On Mon, 2010-11-01 at 20:52 -0700, Sage Weil wrote:
+> Hi,
+> 
+> We've been working on RBD, a distributed block device backed by the Ceph 
+> distributed object store.  (Ceph is a highly scalable, fault tolerant 
+> distributed storage and file system; see http://ceph.newdream.net.)  
+> Although the Ceph file system client has been in Linux since 2.6.34, the 
+> RBD block device was just merged for 2.6.37.  We also have patches pending 
+> for Qemu that use librados to natively talk to the Ceph storage backend, 
+> avoiding any kernel dependency.
+> 
+> To support disks backed by RBD in libvirt, we originally proposed a 
+> 'virtual' type that simply passed the configuration information through to 
+> qemu, but that idea was shot down for a variety of reasons:
+> 
+> 	http://www.redhat.com/archives/libvir-list/2010-June/thread.html#00257
+> 
+> It sounds like the "right" approach is to create a storage pool type.  
+> Ceph also has a 'pool' concept that contains some number of RBD images and 
+> a command line tool to manipulate (create, destroy, resize, rename, 
+> snapshot, etc.) those images, which seems to map nicely onto the storage 
+> pool abstraction.  For example,
+> 
+>  $ rbd create foo -s 1000
+>  rbd image 'foo':
+>          size 1000 MB in 250 objects
+>          order 22 (4096 KB objects)
+>  adding rbd image to directory...
+>   creating rbd image...
+>  done.
+>  $ rbd create bar -s 10000
+>  [...]
+>  $ rbd list
+>  bar
+>  foo
+> 
+> Something along the lines of
+> 
+>  <pool type="rbd">
+>    <name>virtimages</name>
+>    <source mode="kernel">
+>      <host monitor="ceph-mon1.domain.com:6789"/>
+>      <host monitor="ceph-mon2.domain.com:6789"/>
+>      <host monitor="ceph-mon3.domain.com:6789"/>
+>      <pool name="rbd"/>
+>    </source>
+>  </pool>
+> 
+> or whatever (I'm not too familiar with the libvirt schema)?  One 
+> difference between the existing pool types listed at 
+> libvirt.org/storage.html is that RBD does not necessarily associate itself 
+> with a path in the local file system.  If the native qemu driver is used, 
+> there is no path involved, just a magic string passed to qemu 
+> (rbd:poolname/imagename).  If the kernel RBD driver is used, it gets 
+> mapped to a /dev/rbd/$n (or similar, depending on the udev rule), but $n 
+> is not static across reboots.
+> 
+> In any case, before someone goes off and implements something, does this 
+> look like the right general approach to adding rbd support to libvirt?
+> 
+> Thanks!
+> sage
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
