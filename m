@@ -1,78 +1,68 @@
-From: Sage Weil <sage@newdream.net>
-Subject: rbd storage pool support for libvirt
-Date: Mon, 1 Nov 2010 20:52:05 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1011012051190.28156@cobra.newdream.net>
+From: Jeff Wu <cpwu@tnsoft.com.cn>
+Subject: Questions about ceph OSD
+Date: Tue, 2 Nov 2010 14:49:58 +0800
+Message-ID: <1288680598.2366.253.camel@osd1>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52074 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751176Ab0KBDsi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Nov 2010 23:48:38 -0400
+Received: from [210.22.136.227] ([210.22.136.227]:60632 "EHLO
+	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752933Ab0KBGtw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Nov 2010 02:49:52 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: libvir-list@redhat.com
-Cc: ceph-devel@vger.kernel.org
+To: sage@newdream.net, ceph-devel@vger.kernel.org
 
-Hi,
+Hi ,
 
-We've been working on RBD, a distributed block device backed by the Ceph 
-distributed object store.  (Ceph is a highly scalable, fault tolerant 
-distributed storage and file system; see http://ceph.newdream.net.)  
-Although the Ceph file system client has been in Linux since 2.6.34, the 
-RBD block device was just merged for 2.6.37.  We also have patches pending 
-for Qemu that use librados to natively talk to the Ceph storage backend, 
-avoiding any kernel dependency.
+I have recently been working the preliminary research whether ceph=20
+can use at our cloud computing storage system in the future ,
+ceph is a very very excellent file system.But ,Now ,i hit a very
+important problem for us:
 
-To support disks backed by RBD in libvirt, we originally proposed a 
-'virtual' type that simply passed the configuration information through to 
-qemu, but that idea was shot down for a variety of reasons:
+Normally, as ceph described , all of the data are saved at OSDs with
+CRUSHMAP at ceph system.
 
-	http://www.redhat.com/archives/libvir-list/2010-June/thread.html#00257
+but my goal is to :
+1. add a ext3 disk to ceph system ,but doesn't set it as a OSD;
+2. save the normal data at the OSDs of a ceph system;
+3. save the special data to a local ext3 disk at a ceph system,
+   the ext3 disk is not set as a ceph OSD,but its infos are added to=20
+  MDS and  MON,when Write the special data at a ceph client ,these
+special data are not saved to ceph server OSDs ,but saved at the local
+ext3 disk.
 
-It sounds like the "right" approach is to create a storage pool type.  
-Ceph also has a 'pool' concept that contains some number of RBD images and 
-a command line tool to manipulate (create, destroy, resize, rename, 
-snapshot, etc.) those images, which seems to map nicely onto the storage 
-pool abstraction.  For example,
+like this:
+At ceph client:
+$ mount.ceph 1.2.3.4:6789:/ /ceph
+$ cd /ceph
+$ ls
+cloud user secret =20
 
- $ rbd create foo -s 1000
- rbd image 'foo':
-         size 1000 MB in 250 objects
-         order 22 (4096 KB objects)
- adding rbd image to directory...
-  creating rbd image...
- done.
- $ rbd create bar -s 10000
- [...]
- $ rbd list
- bar
- foo
+when do writing,"cloud and user" folder data are saved to ceph OSDs ,
+but "secret" folder data are saved to a local ext3 disk .
 
-Something along the lines of
+My question is:
+Q1- If i add a new OSD to the ceph system ,but i do a special CRUSH
+placement map . Could this ways solved this problem ?,If can ,How ?
 
- <pool type="rbd">
-   <name>virtimages</name>
-   <source mode="kernel">
-     <host monitor="ceph-mon1.domain.com:6789"/>
-     <host monitor="ceph-mon2.domain.com:6789"/>
-     <host monitor="ceph-mon3.domain.com:6789"/>
-     <pool name="rbd"/>
-   </source>
- </pool>
+Q2 - If to implement this function as a patch myself, Could you give me
+any ideas ? or what parts of ceph codes(server/client) that i need look
+into ?=20
 
-or whatever (I'm not too familiar with the libvirt schema)?  One 
-difference between the existing pool types listed at 
-libvirt.org/storage.html is that RBD does not necessarily associate itself 
-with a path in the local file system.  If the native qemu driver is used, 
-there is no path involved, just a magic string passed to qemu 
-(rbd:poolname/imagename).  If the kernel RBD driver is used, it gets 
-mapped to a /dev/rbd/$n (or similar, depending on the udev rule), but $n 
-is not static across reboots.
+Thanks for all help and reply .
 
-In any case, before someone goes off and implements something, does this 
-look like the right general approach to adding rbd support to libvirt?
 
-Thanks!
-sage
+Jeff.Wu
+Transoft.inc ,Sr.software engineer.
+=E3=80=80=E3=80=80
 
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
