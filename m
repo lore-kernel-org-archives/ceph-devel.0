@@ -1,68 +1,49 @@
-From: Jeff Wu <cpwu@tnsoft.com.cn>
-Subject: Questions about ceph OSD
-Date: Tue, 2 Nov 2010 14:49:58 +0800
-Message-ID: <1288680598.2366.253.camel@osd1>
+From: Ted Ts'o <tytso@mit.edu>
+Subject: Re: osd sequence number mismatches and timeout's
+Date: Tue, 2 Nov 2010 11:29:16 -0400
+Message-ID: <20101102152916.GC25614@thunk.org>
+References: <E1PD2eA-0005Tn-G4@tytso-glaptop>
+ <Pine.LNX.4.64.1011011549520.26372@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [210.22.136.227] ([210.22.136.227]:60632 "EHLO
-	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752933Ab0KBGtw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Nov 2010 02:49:52 -0400
+Received: from thunk.org ([69.25.196.29]:41529 "EHLO thunker.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751176Ab0KBP3Y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 2 Nov 2010 11:29:24 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1011011549520.26372@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@newdream.net, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-Hi ,
+On Mon, Nov 01, 2010 at 03:57:55PM -0700, Sage Weil wrote:
+> Is there something in dmesg before the osd22 seq number errors pop up?  
 
-I have recently been working the preliminary research whether ceph=20
-can use at our cloud computing storage system in the future ,
-ceph is a very very excellent file system.But ,Now ,i hit a very
-important problem for us:
+Yup, you were quite right.  There was a bad crc that probably caused
+the seq's to get out of sync.
 
-Normally, as ceph described , all of the data are saved at OSDs with
-CRUSHMAP at ceph system.
+Nov  1 10:12:50 bdio20 kernel: [233439.052725] ceph: osd22 10.138.138.13:6804 bad crc
+Nov  1 10:12:51 bdio20 kernel: [233440.672738] ceph: skipping osd22 192.168.168.13:6804 seq 1, expected 2
+Nov  1 10:12:51 bdio20 kernel: [233440.672958] ceph: skipping osd22 192.168.168.13:6804 seq 2, expected 3
+Nov  1 10:12:51 bdio20 kernel: [233440.675705] ceph: skipping osd22 192.168.168.13:6804 seq 3, expected 4
 
-but my goal is to :
-1. add a ext3 disk to ceph system ,but doesn't set it as a OSD;
-2. save the normal data at the OSDs of a ceph system;
-3. save the special data to a local ext3 disk at a ceph system,
-   the ext3 disk is not set as a ceph OSD,but its infos are added to=20
-  MDS and  MON,when Write the special data at a ceph client ,these
-special data are not saved to ceph server OSDs ,but saved at the local
-ext3 disk.
+> Something originally caused the seq's to get out of sync.  I suspect it 
+> was a transient network error that made the TCP session drop and 
+> reconnect, and it's not skipping already-received messages.  There was a 
+> bug in the skip code (so they stayed out of sync and osd22 eventually 
+> timed out).  I pushed a fix for that to the ceph-client.git master branch 
+> (df9f86fa).
 
-like this:
-At ceph client:
-$ mount.ceph 1.2.3.4:6789:/ /ceph
-$ cd /ceph
-$ ls
-cloud user secret =20
+BTW, it looks like something may be unhappy?  I tried doing a clone of
+ceph-client.git, and I'm getting a failure:
 
-when do writing,"cloud and user" folder data are saved to ceph OSDs ,
-but "secret" folder data are saved to a local ext3 disk .
+% git clone git://ceph.newdream.net/git/ceph-client.git ceph-client
+Cloning into ceph-client...
+fatal: I don't handle protocol '/usr/local/google/git'
 
-My question is:
-Q1- If i add a new OSD to the ceph system ,but i do a special CRUSH
-placement map . Could this ways solved this problem ?,If can ,How ?
+I downloaded df9f86fa and will try it out.  Thanks for pushing out the
+patch so quickly!
 
-Q2 - If to implement this function as a patch myself, Could you give me
-any ideas ? or what parts of ceph codes(server/client) that i need look
-into ?=20
-
-Thanks for all help and reply .
-
-
-Jeff.Wu
-Transoft.inc ,Sr.software engineer.
-=E3=80=80=E3=80=80
-
-
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+					- Ted
