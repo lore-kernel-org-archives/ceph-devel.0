@@ -1,140 +1,99 @@
-From: "Daniel P. Berrange" <berrange@redhat.com>
-Subject: Re: [libvirt] rbd storage pool support for libvirt
-Date: Wed, 3 Nov 2010 13:59:00 +0000
-Message-ID: <20101103135900.GQ29893@redhat.com>
-References: <Pine.LNX.4.64.1011012051190.28156@cobra.newdream.net>
-Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
+From: srimugunthan dhandapani <srimugunthan.dhandapani@gmail.com>
+Subject: continuous writing of same file
+Date: Wed, 3 Nov 2010 23:10:52 +0530
+Message-ID: <AANLkTin9ZnME53-wE_ZLNn5TAm+3ibmBZXfBF0G55Oc-@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50123 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751488Ab0KCN7I (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Nov 2010 09:59:08 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1011012051190.28156@cobra.newdream.net>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:49857 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753115Ab0KCRkx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Nov 2010 13:40:53 -0400
+Received: by wyf28 with SMTP id 28so839533wyf.19
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Nov 2010 10:40:52 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, Nov 01, 2010 at 08:52:05PM -0700, Sage Weil wrote:
-> Hi,
-> 
-> We've been working on RBD, a distributed block device backed by the Ceph 
-> distributed object store.  (Ceph is a highly scalable, fault tolerant 
-> distributed storage and file system; see http://ceph.newdream.net.)  
-> Although the Ceph file system client has been in Linux since 2.6.34, the 
-> RBD block device was just merged for 2.6.37.  We also have patches pending 
-> for Qemu that use librados to natively talk to the Ceph storage backend, 
-> avoiding any kernel dependency.
-> 
-> To support disks backed by RBD in libvirt, we originally proposed a 
-> 'virtual' type that simply passed the configuration information through to 
-> qemu, but that idea was shot down for a variety of reasons:
-> 
-> 	http://www.redhat.com/archives/libvir-list/2010-June/thread.html#00257
+Hi all,
+I am using kernel client based Ceph version 0.21.1 on linux kernel
+2.6.35. I am using a six node cluster with 3 machines and 3 virtual
+machines.
+=A0I wrote a simple program to continuously write to a file. After a fe=
+w
+iterations, the test gets stuck. Sometimes i am unable to unmount the
+ceph mountpt subsequently.
+I am using the following code
+--
+int main()
+{
 
-NB, I'm not against adding new disk types to the guest XML, just
-that each type should be explicitly modelled, rather than being
-lumped under a generic 'virtual' type.
- 
-> It sounds like the "right" approach is to create a storage pool type.  
+=A0=A0=A0 FILE *fp;
+=A0=A0=A0 int i;
+=A0=A0=A0 int written_before_stat;
+=A0=A0=A0 int ret_value;
 
-Sort of. There's really two separate aspects to handling storage
-in libvirt
 
- 1. How do you configure a VM to use a storage volume
- 2. How do you list/create/delete storage volumes
+=A0=A0=A0 /* some junk buffer*/
+=A0=A0=A0 char buffer[1024* SIZEOF_ONE_NODE];
 
-The XML addition proposed in the mailing list post above is attempting
-to cater for the first aspect. The storage pool type idea you're 
-describing in this post is catering to the second aspect. 
+=A0=A0=A0 char tbuffer[30];
+=A0=A0=A0 struct timeval tv;
 
-If the storage pool ends up providing real block devices that exist
-on the filesystem, then the first item is trivially solved, because
-libvirt can already point any guest at a block device. If the storage
-pool provides some kind of virtual device, then we'd still need to
-decide how to deal with the XML for configuring the guest VM.
+=A0=A0=A0 time_t curtime;
 
-> Ceph also has a 'pool' concept that contains some number of RBD images and 
-> a command line tool to manipulate (create, destroy, resize, rename, 
-> snapshot, etc.) those images, which seems to map nicely onto the storage 
-> pool abstraction.  For example,
+=A0=A0=A0 gettimeofday(&tv, NULL);
+=A0=A0=A0 curtime=3Dtv.tv_sec;
 
-Agreed, it does look like it'd map in quite well and let the RDB
-functionality more or less 'just work' in virt-manager & other 
-apps using storage pool APIs.
+=A0=A0=A0 strftime(tbuffer,30,"%m-%d-%Y=A0 %T.",localtime(&curtime));
+=A0=A0=A0 printf("%s%ld\t|",tbuffer,tv.tv_usec);
 
->  $ rbd create foo -s 1000
->  rbd image 'foo':
->          size 1000 MB in 250 objects
->          order 22 (4096 KB objects)
->  adding rbd image to directory...
->   creating rbd image...
->  done.
->  $ rbd create bar -s 10000
->  [...]
->  $ rbd list
->  bar
->  foo
-> 
-> Something along the lines of
-> 
->  <pool type="rbd">
->    <name>virtimages</name>
->    <source mode="kernel">
->      <host monitor="ceph-mon1.domain.com:6789"/>
->      <host monitor="ceph-mon2.domain.com:6789"/>
->      <host monitor="ceph-mon3.domain.com:6789"/>
->      <pool name="rbd"/>
->    </source>
->  </pool>
 
-What do the 3 hostnames represent in this context ?
+=A0=A0=A0 printf("starting....\n");
+=A0=A0=A0 printf("infinite loop. Ctrl+C when you wish !!\n");
 
-> or whatever (I'm not too familiar with the libvirt schema)?  One 
-> difference between the existing pool types listed at 
-> libvirt.org/storage.html is that RBD does not necessarily associate itself 
-> with a path in the local file system.  If the native qemu driver is used, 
-> there is no path involved, just a magic string passed to qemu 
-> (rbd:poolname/imagename).  If the kernel RBD driver is used, it gets 
-> mapped to a /dev/rbd/$n (or similar, depending on the udev rule), but $n 
-> is not static across reboots.
+=A0=A0=A0 /* keep writing to the ceph file*/
+=A0=A0=A0 /* infinite loop. Ctrl+C when you wish*/
+=A0=A0=A0 while(1)
+=A0=A0=A0 {
 
-The docs about storage pool are slightly inaccurate. While it is
-desirable that the storage volume path exists on the filesystem,
-it is not something we strictly require. The only require that
-there is some way to map from the storage volume path to the
-corresponding guest XML
+=A0=A0=A0 =A0=A0=A0 /* the frenetic writing phase */
 
-If we define a new guest XML syntax for RBD magic strings, then
-we can also define a storage pool that provides path data in a
-corresponding format.
+=A0=A0=A0 =A0=A0=A0 fp =3D fopen("/ceph/test_file1","w");
+=A0=A0=A0 =A0=A0=A0 if(fp =3D=3D NULL)
+=A0=A0=A0 =A0=A0=A0 {
+=A0=A0=A0 =A0=A0=A0 =A0=A0=A0 printf("ceph dir write file open err\n");
 
-WRT to the issue of /dev/rbd/$n being unstable, this is quite similar
-to the issue of /dev/sdXX device names being unstable for SCSI. The
-way to cope with this is to drop in a UDEV ruleset that creates 
-symlinks with sensible names, eg perhaps setup symlinks for: 
+=A0=A0=A0 =A0=A0=A0 =A0=A0=A0 exit(-1);
+=A0=A0=A0 =A0=A0=A0 }
+=A0=A0=A0 =A0=A0=A0 for(i =3D 0; i < 1024 ;i++)
+=A0=A0=A0 =A0=A0=A0 =A0=A0=A0 fwrite(buffer, sizeof(buffer[0]),
+sizeof(buffer)/sizeof(buffer[0]), fp);
 
-  /dev/disk/by-id/rbd-$poolname-$imagename -> /dev/rbd/0
+=A0=A0=A0 =A0=A0=A0 fclose(fp);
+=A0=A0=A0 =A0=A0=A0 gettimeofday(&tv, NULL);
+=A0=A0=A0 =A0=A0=A0 curtime=3Dtv.tv_sec;
 
-It might also make sense to wire up /dev/disk/by-path symlinks
-for RBD devices.
+=A0=A0=A0 =A0=A0=A0 strftime(tbuffer,30,"%m-%d-%Y=A0 %T.",localtime(&cu=
+rtime));
+=A0=A0=A0 =A0=A0=A0 printf("%s%ld\t|",tbuffer,tv.tv_usec);
 
-> In any case, before someone goes off and implements something, does this 
-> look like the right general approach to adding rbd support to libvirt?
+=A0=A0=A0 =A0=A0=A0 printf("120MB written..\n");
+=A0=A0=A0 =A0=A0=A0 fflush(stdout);
+=A0=A0=A0 =A0=A0=A0 usleep(1000);
 
-I think this looks reasonable. I'd be inclined to get the storage pool
-stuff working with the kernel RBD driver & UDEV rules for stable path
-names, since that avoids needing to make any changes to guest XML
-format. Support for QEMU with the native librados CEPH driver could
-be added as a second patch.
+=A0=A0=A0 }
 
-Regards,
-Daniel
--- 
-|: Red Hat, Engineering, London    -o-   http://people.redhat.com/berrange/ :|
-|: http://libvirt.org -o- http://virt-manager.org -o- http://deltacloud.org :|
-|: http://autobuild.org        -o-         http://search.cpan.org/~danberr/ :|
-|: GnuPG: 7D3B9505  -o-   F3C9 553F A1DA 4AC2 5648 23C1 B3DF F742 7D3B 9505 :|
+
+}
+--------
+Am i missing something?. Thanks for any help.
+
+Thanks,
+Mugunthan
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
