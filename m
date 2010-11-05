@@ -1,55 +1,115 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: [RFC] rbd sysfs interface
-Date: Fri, 5 Nov 2010 16:09:31 -0700
-Message-ID: <AANLkTinOeby9P847gJFn_t0h5nDY7cfi3cW9hEaUrS1v@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [libvirt] rbd storage pool support for libvirt
+Date: Fri, 5 Nov 2010 16:33:46 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1011051530100.21692@cobra.newdream.net>
+References: <Pine.LNX.4.64.1011012051190.28156@cobra.newdream.net>
+ <20101103135900.GQ29893@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:54978 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755045Ab0KEXJd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Nov 2010 19:09:33 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:59020 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753783Ab0KEXaL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Nov 2010 19:30:11 -0400
+In-Reply-To: <20101103135900.GQ29893@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@newdream.net>, Greg KH <greg@kroah.com>, linux-kernel@vger.kernel.org
+To: "Daniel P. Berrange" <berrange@redhat.com>
+Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-The rbd module that was recently merged into the linux kernel on the
-2.6.37-rc1 merge window is based on the osdblk device driver. Other
-than being somewhat confusing (as in ceph we use the term osd too) it
-had been a valuable resource and jump started the development effort.
-One thing that we inherited from osdblk is the sysfs class interface
-that was used there. Generally, there is a single flat class control
-directory that allows adding, removing and listing of devices. For rbd
-we expanded this interface to include all snapshots operations too.
-This, however, might not be completely suitable to rbd. First, there
-might be many different devices, so that having a single control for
-all is cumbersome. The problem is exacerbated with rbd snapshots, as
-there can be many snapshots to a single device, so using a single
-control for all devices and snapshots doesn't scale.
+Hi Daniel,
 
-Another point to consider is the integration with udev, so that
-devices can be created and mapped automaticallty to /dev.
-We'd like to replace the current rbd class interface, and if possible
-to make it asap, so that the current interfaces won't be set in stone
-once 2.6.37 is out. At this point we wanted to do something like the
-following:
+On Wed, 3 Nov 2010, Daniel P. Berrange wrote:
+> > Ceph also has a 'pool' concept that contains some number of RBD images and 
+> > a command line tool to manipulate (create, destroy, resize, rename, 
+> > snapshot, etc.) those images, which seems to map nicely onto the storage 
+> > pool abstraction.  For example,
+> 
+> Agreed, it does look like it'd map in quite well and let the RDB
+> functionality more or less 'just work' in virt-manager & other 
+> apps using storage pool APIs.
 
-Under /sys/class/rbd there'd we'll keep the 'add' entry that adds rbd devices:
+Great!
 
- # echo "10.0.0.1 name=admin rbd myimage" > /sys/class/rbd/add
+> > Something along the lines of
+> > 
+> >  <pool type="rbd">
+> >    <name>virtimages</name>
+> >    <source mode="kernel">
+> >      <host monitor="ceph-mon1.domain.com:6789"/>
+> >      <host monitor="ceph-mon2.domain.com:6789"/>
+> >      <host monitor="ceph-mon3.domain.com:6789"/>
+> >      <pool name="rbd"/>
+> >    </source>
+> >  </pool>
+> 
+> What do the 3 hostnames represent in this context ?
 
-The devices that'll be created still be enumerated, and there'll be a
-subdirectory under rbd/ for each (actually a soft link to
-/sys/devices/virtual/rbd/<id>). For each device we'll have multiple
-read-only properties (name, pool, size, client_id, major, cur_snap,
-snapshots) and a few control entries that'll allow controlling it
-(e.g., remove, refresh, snap_create, snap_rollback).
+They're the host(s) that RBD needs to be fed to talk to the storage 
+cluster.  Ideally there's more than one for redundancy. Does the above 
+syntax look reasonable, or is there something you would propose instead?  
+From the RBD side of things, the key parameters are
 
-We're not sure whether the available snapshots go under the device
-(e.g., rbd/<id>/snaps/...) or just keep it on a single 'snapshots'
-entry.
+ - pool name
+ - monitor address(es)
+ - user and secret key to authenticate with
 
-Does this seem sane? Any comments would be greatly appreciated.
+If the 'rbd' command line tool is used for this, everything but the pool 
+can come out of the default /etc/ceph/ceph.conf config file, or we could
+have a way to specify a config path in the XML.
 
-Yehuda
+> > or whatever (I'm not too familiar with the libvirt schema)?  One 
+> > difference between the existing pool types listed at 
+> > libvirt.org/storage.html is that RBD does not necessarily associate itself 
+> > with a path in the local file system.  If the native qemu driver is used, 
+> > there is no path involved, just a magic string passed to qemu 
+> > (rbd:poolname/imagename).  If the kernel RBD driver is used, it gets 
+> > mapped to a /dev/rbd/$n (or similar, depending on the udev rule), but $n 
+> > is not static across reboots.
+> 
+> The docs about storage pool are slightly inaccurate. While it is
+> desirable that the storage volume path exists on the filesystem,
+> it is not something we strictly require. The only require that
+> there is some way to map from the storage volume path to the
+> corresponding guest XML
+> 
+> If we define a new guest XML syntax for RBD magic strings, then
+> we can also define a storage pool that provides path data in a
+> corresponding format.
+
+Ok thanks, that clarifies things.
+ 
+> WRT to the issue of /dev/rbd/$n being unstable, this is quite similar
+> to the issue of /dev/sdXX device names being unstable for SCSI. The
+> way to cope with this is to drop in a UDEV ruleset that creates 
+> symlinks with sensible names, eg perhaps setup symlinks for: 
+> 
+>   /dev/disk/by-id/rbd-$poolname-$imagename -> /dev/rbd/0
+> 
+> It might also make sense to wire up /dev/disk/by-path symlinks
+> for RBD devices.
+
+We're putting together some udev rules to do this.
+
+> > In any case, before someone goes off and implements something, does this 
+> > look like the right general approach to adding rbd support to libvirt?
+> 
+> I think this looks reasonable. I'd be inclined to get the storage pool
+> stuff working with the kernel RBD driver & UDEV rules for stable path
+> names, since that avoids needing to make any changes to guest XML
+> format. Support for QEMU with the native librados CEPH driver could
+> be added as a second patch.
+
+Okay, that sounds reasonable.  Supporting the QEMU librados driver is 
+definitely something we want to target, though, and seems to be route that 
+more users are interested in.  Is defining the XML syntax for a guest VM 
+something we can discuss now as well?
+
+(BTW this is biting NBD users too.  Presumably the guest VM XML should 
+look similar?
+
+http://www.redhat.com/archives/libvir-list/2010-October/msg01247.html
+)
+
+Thanks!
+sage
