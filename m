@@ -1,66 +1,35 @@
-From: Greg KH <greg@kroah.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 Subject: Re: [RFC] rbd sysfs interface
-Date: Fri, 5 Nov 2010 22:07:21 -0700
-Message-ID: <20101106050721.GA2194@kroah.com>
+Date: Fri, 5 Nov 2010 22:51:26 -0700
+Message-ID: <AANLkTinQK_9qp-8jJ5j3-ChUjwhGiGzAmCu5cBtHX75g@mail.gmail.com>
 References: <AANLkTinOeby9P847gJFn_t0h5nDY7cfi3cW9hEaUrS1v@mail.gmail.com>
+	<20101106050721.GA2194@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from kroah.org ([198.145.64.141]:56248 "EHLO coco.kroah.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750717Ab0KFFHE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 6 Nov 2010 01:07:04 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTinOeby9P847gJFn_t0h5nDY7cfi3cW9hEaUrS1v@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:52006 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752311Ab0KFFv2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 6 Nov 2010 01:51:28 -0400
+In-Reply-To: <20101106050721.GA2194@kroah.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+To: Greg KH <greg@kroah.com>
 Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>, linux-kernel@vger.kernel.org
 
-On Fri, Nov 05, 2010 at 04:09:31PM -0700, Yehuda Sadeh Weinraub wrote:
-> The rbd module that was recently merged into the linux kernel on the
-> 2.6.37-rc1 merge window is based on the osdblk device driver. Other
-> than being somewhat confusing (as in ceph we use the term osd too) it
-> had been a valuable resource and jump started the development effort.
-> One thing that we inherited from osdblk is the sysfs class interface
-> that was used there. Generally, there is a single flat class control
-> directory that allows adding, removing and listing of devices. For rbd
-> we expanded this interface to include all snapshots operations too.
-> This, however, might not be completely suitable to rbd. First, there
-> might be many different devices, so that having a single control for
-> all is cumbersome. The problem is exacerbated with rbd snapshots, as
-> there can be many snapshots to a single device, so using a single
-> control for all devices and snapshots doesn't scale.
-> 
-> Another point to consider is the integration with udev, so that
-> devices can be created and mapped automaticallty to /dev.
-> We'd like to replace the current rbd class interface, and if possible
-> to make it asap, so that the current interfaces won't be set in stone
-> once 2.6.37 is out. At this point we wanted to do something like the
-> following:
-> 
-> Under /sys/class/rbd there'd we'll keep the 'add' entry that adds rbd devices:
-> 
->  # echo "10.0.0.1 name=admin rbd myimage" > /sys/class/rbd/add
-> 
-> The devices that'll be created still be enumerated, and there'll be a
-> subdirectory under rbd/ for each (actually a soft link to
-> /sys/devices/virtual/rbd/<id>). For each device we'll have multiple
-> read-only properties (name, pool, size, client_id, major, cur_snap,
-> snapshots) and a few control entries that'll allow controlling it
-> (e.g., remove, refresh, snap_create, snap_rollback).
-> 
-> We're not sure whether the available snapshots go under the device
-> (e.g., rbd/<id>/snaps/...) or just keep it on a single 'snapshots'
-> entry.
-> 
-> Does this seem sane? Any comments would be greatly appreciated.
+On Fri, Nov 5, 2010 at 10:07 PM, Greg KH <greg@kroah.com> wrote:
+> On Fri, Nov 05, 2010 at 04:09:31PM -0700, Yehuda Sadeh Weinraub wrote:
+>>
+>> Does this seem sane? Any comments would be greatly appreciated.
+>
+> It sounds like you need to use configfs instead of sysfs, as your model
+> was the reason it was created.
+>
+> Have you tried that?
 
-It sounds like you need to use configfs instead of sysfs, as your model
-was the reason it was created.
+Oh, will look at it now. With ceph (although for a different purpose)
+we went through proc -> sysfs -> debugfs, however, it seems that we've
+missed at least one userspace-kernel channel.
 
-Have you tried that?
-
-thanks,
-
-greg k-h
+Thanks,
+Yehuda
