@@ -1,79 +1,86 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: questions about weight
-Date: Mon, 08 Nov 2010 14:07:52 +0100
-Message-ID: <1289221672.2266.9.camel@wido-desktop>
-References: <AANLkTi=_qKOzX4KgB8eA1b+Gq-A1botpix=vv-9WCYQS@mail.gmail.com>
+From: "Daniel P. Berrange" <berrange@redhat.com>
+Subject: Re: [libvirt] rbd storage pool support for libvirt
+Date: Mon, 8 Nov 2010 13:16:34 +0000
+Message-ID: <20101108131634.GJ26714@redhat.com>
+References: <Pine.LNX.4.64.1011012051190.28156@cobra.newdream.net> <20101103135900.GQ29893@redhat.com> <Pine.LNX.4.64.1011051530100.21692@cobra.newdream.net>
+Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:41032 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751222Ab0KHNHx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Nov 2010 08:07:53 -0500
-In-Reply-To: <AANLkTi=_qKOzX4KgB8eA1b+Gq-A1botpix=vv-9WCYQS@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:59719 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753771Ab0KHNQm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 8 Nov 2010 08:16:42 -0500
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1011051530100.21692@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ravi Pinjala <pstatic@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-Hi Ravi,
-
-On Sun, 2010-11-07 at 23:52 -0800, Ravi Pinjala wrote:
-> First off: what does weight actually mean in a CRUSH map? I had
-> assumed it was there to balance capacity, and should be set to
-> something proportional to the size of the disk. However, the page on
-> the wiki about osd_auto_weight seems to indicate that it's related to
-> disk performance, not size. Is it one of these, or something
-> completely different?
-
-It is the size of the disk, for example:
-
-osd1, size 120GB, weight: 1.200
-osd2, size 560GB, weight: 5.600
-osd3, size 340GB, weight: 3.400
-
-Now, you should be careful, since osd2 and osd3 will have to do much
-more IOps, so make sure their hardware is up to the job.
-
+On Fri, Nov 05, 2010 at 04:33:46PM -0700, Sage Weil wrote:
+> On Wed, 3 Nov 2010, Daniel P. Berrange wrote:
+> > > Something along the lines of
+> > > 
+> > >  <pool type="rbd">
+> > >    <name>virtimages</name>
+> > >    <source mode="kernel">
+> > >      <host monitor="ceph-mon1.domain.com:6789"/>
+> > >      <host monitor="ceph-mon2.domain.com:6789"/>
+> > >      <host monitor="ceph-mon3.domain.com:6789"/>
+> > >      <pool name="rbd"/>
+> > >    </source>
+> > >  </pool>
+> > 
+> > What do the 3 hostnames represent in this context ?
 > 
-> Also: when defining several levels of buckets, how does the weight on
-> the higher levels of buckets affect the overall distribution? I've got
-> the beginning of a cluster running now, with one host with a 640GB
-> drive and a 1TB drive, and another host with a 640GB drive. I've been
-> playing with the weights to try and get the amount of data on each
-> disk proportional to its size, to maximize the space I have available.
-> I have my CRUSH map set up like this right now:
+> They're the host(s) that RBD needs to be fed to talk to the storage 
+> cluster.  Ideally there's more than one for redundancy. Does the above 
+> syntax look reasonable, or is there something you would propose instead?  
+> From the RBD side of things, the key parameters are
 > 
-> host0 {
->     item device 0 weight 0.640
->     item device 1 weight 1.000
-> }
+>  - pool name
+>  - monitor address(es)
+>  - user and secret key to authenticate with
 > 
-> host1 {
->     item device 2 weight 0.640
-> }
+> If the 'rbd' command line tool is used for this, everything but the pool 
+> can come out of the default /etc/ceph/ceph.conf config file, or we could
+> have a way to specify a config path in the XML.
+
+It makes sense to allow the hostname in the XML, because the general
+goal is that you should be able to configure storage without needing
+to SSH into a machine & manually setup config files. The XML does not
+currently allow multiple hosts, but we can extend that. 
+
+The pool name / user / key are already covered.
+
+> > > In any case, before someone goes off and implements something, does this 
+> > > look like the right general approach to adding rbd support to libvirt?
+> > 
+> > I think this looks reasonable. I'd be inclined to get the storage pool
+> > stuff working with the kernel RBD driver & UDEV rules for stable path
+> > names, since that avoids needing to make any changes to guest XML
+> > format. Support for QEMU with the native librados CEPH driver could
+> > be added as a second patch.
 > 
-> root {
->     item host0 weight 1.640
->     item host1 weight 0.640
-> }
+> Okay, that sounds reasonable.  Supporting the QEMU librados driver is 
+> definitely something we want to target, though, and seems to be route that 
+> more users are interested in.  Is defining the XML syntax for a guest VM 
+> something we can discuss now as well?
 > 
-> Will this do what I'm expecting, and maximize the amount of data I can
-> store before any of the disks fill up?
+> (BTW this is biting NBD users too.  Presumably the guest VM XML should 
+> look similar?
 
-You don't have to calculate a hosts weight in the root, this will be
-done automatically by summing the device's weight.
+And also Sheepdog storage volumes. To define a syntax for all these we need
+to determine what configuration metadata is required at a per-VM level for
+each of them. Then try and decide how to represent that in the guest XML.
+It looks like at a VM level we'd need a hostname, port number and a volume
+name (or path).
 
-But, it looks fine what you've done, that should work.
-
-Wido
-
-> 
-> Thanks,
-> --Ravi
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Regards,
+Daniel
+-- 
+|: Red Hat, Engineering, London    -o-   http://people.redhat.com/berrange/ :|
+|: http://libvirt.org -o- http://virt-manager.org -o- http://deltacloud.org :|
+|: http://autobuild.org        -o-         http://search.cpan.org/~danberr/ :|
+|: GnuPG: 7D3B9505  -o-   F3C9 553F A1DA 4AC2 5648 23C1 B3DF F742 7D3B 9505 :|
