@@ -1,374 +1,82 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Why I try to run the "ceph" command line tool, it fails
-Date: Tue, 9 Nov 2010 09:22:41 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1011090921480.14309@cobra.newdream.net>
-References: <E1PFrmt-0001IW-3c@tytso-glaptop>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: mds crash in testing: e90a3b623
+Date: Tue, 09 Nov 2010 12:28:34 -0500
+Message-ID: <E1PFrzm-0001ZT-CV@tytso-glaptop>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35847 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752385Ab0KIRS6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Nov 2010 12:18:58 -0500
-In-Reply-To: <E1PFrmt-0001IW-3c@tytso-glaptop>
+Received: from thunk.org ([69.25.196.29]:58693 "EHLO thunker.thunk.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751825Ab0KIR2h (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 9 Nov 2010 12:28:37 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-On Tue, 9 Nov 2010, Theodore Ts'o wrote:
-> ... with the error message:
-> 
-> "unable to find any monitors in conf".
-> 
-> What does this mean?  I assume it means that something must be wrong in
-> my config file, but it's not at all obvious what *is* wrong.
-
-Normally it means it can't find any 'mon addr' items in the [mon*] 
-sections, but clearly you have them.  So either it's not finding the 
-config (it's at /etc/ceph/ceph.conf?) or there is some parsing regression.  
-What version are you running?  (`ceph -v`)
-
-sage
+To: ceph-devel@vger.kernel.org
 
 
-> 
-> Thanks, regards,
-> 
-> 							- Ted
-> 
-> ;
-> ; This is the test ceph configuration file
-> ;
-> ; [tytso:20101007.0813EDT]
-> ;
-> ; This file defines cluster membership, the various locations
-> ; that Ceph stores data, and any other runtime options.
-> ;
-> ; If a 'host' is defined for a daemon, the start/stop script will
-> ; verify that it matches the hostname (or else ignore it).  If it is
-> ; not defined, it is assumed that the daemon is intended to start on
-> ; the current host (e.g., in a setup with a startup.conf on each
-> ; node).
-> 
-> ; global
-> [global]
-> 	user = root
-> 	pid file = /disk/sda3/tmp/ceph/$name.pid
-> 	logger dir = /disk/sda3/tmp/ceph
-> 	log dir = /disk/sda3/tmp/ceph
-> 	chdir = /disk/sda3
-> 
-> ; monitors
-> ;  You need at least one.  You need at least three if you want to
-> ;  tolerate any node failures.  Always create an odd number.
-> [mon]
-> 	mon data = /disk/sda3/cephmon/data/mon$id
-> 
-> 	; logging, for debugging monitor crashes, in order of
-> 	; their likelihood of being helpful :)
-> 	;debug ms = 1
-> 	;debug mon = 20
-> 	;debug paxos = 20
-> 	;debug auth = 20
-> 
-> [mon0]
-> 	host = mach1
-> 	mon addr = 1.2.3.4:6789
-> 
-> [mon1]
-> 	host = mach2
-> 	mon addr = 1.2.3.5:6789
-> 
-> [mon1]
-> 	host = mach3
-> 	mon addr = 1.2.3.6:6789
-> 
-> ; mds
-> ;  You need at least one.  Define two to get a standby.
-> [mds]
-> 	; where the mds keeps it's secret encryption keys
-> 	keyring = /data/keyring.$name
-> 
-> 	; mds logging to debug issues.
-> 	;debug ms = 1
-> 	;debug mds = 20
-> 
-> [mds.alpha]
-> 	host = mach2
-> 
-> [mds.beta]
-> 	host = mach3
-> 
-> [mds.gamma]
-> 	host = mach1
-> 
-> ; osd
-> ;  You need at least one.  Two if you want data to be replicated.
-> ;  Define as many as you like.
-> [osd]
-> 	; osd logging to debug osd issues, in order of likelihood of being
-> 	; helpful
-> 	;debug ms = 1
-> 	;debug osd = 20
-> 	;debug filestore = 20
-> 	;debug journal = 20
-> 
-> [osd0]
-> 	host = mach10
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd1]
-> 	host = mach11
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd2]
-> 	host = mach12
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd3]
-> 	host = mach13
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd4]
-> 	host = mach14
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd5]
-> 	host = mach15
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd6]
-> 	host = mach16
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd7]
-> 	host = mach17
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd8]
-> 	host = mach18
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd9]
-> 	host = mach19
-> 	osd data = /disk/sdb3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdb3
-> 
-> [osd10]
-> 	host = mach10
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd11]
-> 	host = mach11
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd12]
-> 	host = mach12
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd13]
-> 	host = mach13
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd14]
-> 	host = mach14
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd15]
-> 	host = mach15
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd16]
-> 	host = mach16
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd17]
-> 	host = mach17
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd18]
-> 	host = mach18
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd19]
-> 	host = mach19
-> 	osd data = /disk/sdd3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdd3
-> 
-> [osd20]
-> 	host = mach10
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd21]
-> 	host = mach11
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd22]
-> 	host = mach12
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd23]
-> 	host = mach13
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd24]
-> 	host = mach14
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd25]
-> 	host = mach15
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd26]
-> 	host = mach16
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd27]
-> 	host = mach17
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd28]
-> 	host = mach18
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd29]
-> 	host = mach19
-> 	osd data = /disk/sde3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sde3
-> 
-> [osd30]
-> 	host = mach10
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd31]
-> 	host = mach11
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd32]
-> 	host = mach12
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd33]
-> 	host = mach13
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd34]
-> 	host = mach14
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd35]
-> 	host = mach15
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd36]
-> 	host = mach16
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd37]
-> 	host = mach17
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd38]
-> 	host = mach18
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd39]
-> 	host = mach19
-> 	osd data = /disk/sdf3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdf3
-> 
-> [osd40]
-> 	host = mach10
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> [osd41]
-> 	host = mach11
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> [osd42]
-> 	host = mach12
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> [osd43]
-> 	host = mach13
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> [osd44]
-> 	host = mach14
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> [osd45]
-> 	host = mach15
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> [osd46]
-> 	host = mach16
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> [osd47]
-> 	host = mach17
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> [osd48]
-> 	host = mach18
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> [osd49]
-> 	host = mach19
-> 	osd data = /disk/sdg3/cephdata
-> 	osd journal = /disk/sdc3/cephjnl.sdg3
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Hi there.  I tried building the latest in the testing branch (commit id
+e90a3b623), and things didn't go all that well.  Using a 2.6.36 client
+with commit d91f2438 reverted and the "ceph: fix small seq message
+skipping" comimt added, I was able to mount the test file system, but
+when I tried to list a directory in the ceph file system, the ls command
+hung forever.  Dmesg show that it was a problem communicating with
+mds0.  When I looked on that machine's log, I found the attached stack
+dump.
+
+I'm going to back off to 0.22.2, which worked much better for me, but I
+figured you'd probably be interested in the heads up.
+
+Regards,
+
+					- Ted
+
+mds/CInode.cc: In function 'void CInode::finish_scatter_gather_update(int)':
+mds/CInode.cc:1479: FAILED assert(pi->dirstat.size() >= 0)
+ ceph version 0.22.2 (commit:652417c19f5d18c70d5928e67f72c3770c3c57c5)
+ 1: (CInode::finish_scatter_gather_update(int)+0x839) [0x8ee20d]
+ 2: (Locker::scatter_writebehind(ScatterLock*)+0x237) [0x88b2f1]
+ 3: (Locker::simple_sync(SimpleLock*, bool*)+0x350) [0x88a44e]
+ 4: (Locker::_rdlock_kick(SimpleLock*)+0xc2) [0x87e30c]
+ 5: (Locker::rdlock_start(SimpleLock*, MDRequest*, bool)+0x1dc) [0x87e778]
+ 6: (Locker::acquire_locks(MDRequest*, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&)+0x1b3d) [0x87be7f]
+ 7: (Server::handle_client_stat(MDRequest*)+0x33b) [0x76d2a7]
+ 8: (Server::dispatch_client_request(MDRequest*)+0x2a5) [0x767caf]
+ 9: (Server::handle_client_request(MClientRequest*)+0x938) [0x7679f4]
+ 10: (Server::dispatch(Message*)+0x358) [0x760680]
+ 11: (MDS::_dispatch(Message*)+0x137a) [0x72c97e]
+ 12: (MDS::ms_dispatch(Message*)+0x38) [0x72b48a]
+ 13: (Messenger::ms_deliver_dispatch(Message*)+0x63) [0x716a2d]
+ 14: (SimpleMessenger::dispatch_entry()+0x5d4) [0x707d46]
+ 15: (SimpleMessenger::DispatchThread::entry()+0x2c) [0x6fcd40]
+ 16: (Thread::_entry_func(void*)+0x23) [0x715935]
+ 17: (()+0x6b9a) [0x2b1c972ccb9a]
+ 18: (clone()+0x6d) [0x2b1c97cb253d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+*** Caught signal (ABRT) ***
+ ceph version 0.22.2 (commit:652417c19f5d18c70d5928e67f72c3770c3c57c5)
+ 1: (ceph::BackTrace::BackTrace(int)+0x2d) [0x9d8e93]
+ 2: (sigabrt_handler(int)+0x49) [0x9e8ffd]
+ 3: (()+0x1e9e0) [0x2b1c97cab9e0]
+ 4: (gsignal()+0x35) [0x2b1c97cc89f5]
+ 5: (abort()+0x183) [0x2b1c97ccc413]
+ 6: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x2b1c975a5275]
+ 7: (()+0xbf696) [0x2b1c975a3696]
+ 8: (()+0xbf6c3) [0x2b1c975a36c3]
+ 9: (()+0xbf7c6) [0x2b1c975a37c6]
+ 10: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x24f) [0x9d8ca4]
+ 11: (CInode::finish_scatter_gather_update(int)+0x839) [0x8ee20d]
+ 12: (Locker::scatter_writebehind(ScatterLock*)+0x237) [0x88b2f1]
+ 13: (Locker::simple_sync(SimpleLock*, bool*)+0x350) [0x88a44e]
+ 14: (Locker::_rdlock_kick(SimpleLock*)+0xc2) [0x87e30c]
+ 15: (Locker::rdlock_start(SimpleLock*, MDRequest*, bool)+0x1dc) [0x87e778]
+ 16: (Locker::acquire_locks(MDRequest*, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&)+0x1b3d) [0x87be7f]
+ 17: (Server::handle_client_stat(MDRequest*)+0x33b) [0x76d2a7]
+ 18: (Server::dispatch_client_request(MDRequest*)+0x2a5) [0x767caf]
+ 19: (Server::handle_client_request(MClientRequest*)+0x938) [0x7679f4]
+ 20: (Server::dispatch(Message*)+0x358) [0x760680]
+ 21: (MDS::_dispatch(Message*)+0x137a) [0x72c97e]
+ 22: (MDS::ms_dispatch(Message*)+0x38) [0x72b48a]
+ 23: (Messenger::ms_deliver_dispatch(Message*)+0x63) [0x716a2d]
+ 24: (SimpleMessenger::dispatch_entry()+0x5d4) [0x707d46]
+ 25: (SimpleMessenger::DispatchThread::entry()+0x2c) [0x6fcd40]
+ 26: (Thread::_entry_func(void*)+0x23) [0x715935]
+ 27: (()+0x6b9a) [0x2b1c972ccb9a]
+ 28: (clone()+0x6d) [0x2b1c97cb253d]
