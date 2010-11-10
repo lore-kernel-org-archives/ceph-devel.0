@@ -1,104 +1,113 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: mds crash in testing: e90a3b623
-Date: Tue, 9 Nov 2010 09:47:20 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1011090942570.14309@cobra.newdream.net>
-References: <E1PFrzm-0001ZT-CV@tytso-glaptop>
+From: srimugunthan dhandapani <srimugunthan.dhandapani@gmail.com>
+Subject: mount error on cephv0.22.2
+Date: Wed, 10 Nov 2010 18:45:12 +0530
+Message-ID: <AANLkTinJUHUs1Zub-05ov=SXnLEn7mHrGihxnzad4G3+@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/mixed; boundary=0016e649ceacb774270494b2a52c
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43121 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752278Ab0KIRng (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Nov 2010 12:43:36 -0500
-In-Reply-To: <E1PFrzm-0001ZT-CV@tytso-glaptop>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:48993 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751072Ab0KJNPN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Nov 2010 08:15:13 -0500
+Received: by wyb36 with SMTP id 36so660846wyb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Nov 2010 05:15:12 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, 9 Nov 2010, Theodore Ts'o wrote:
-> 
-> Hi there.  I tried building the latest in the testing branch (commit id
-> e90a3b623), and things didn't go all that well.  Using a 2.6.36 client
-> with commit d91f2438 reverted and the "ceph: fix small seq message
-> skipping" comimt added, I was able to mount the test file system, but
-> when I tried to list a directory in the ceph file system, the ls command
-> hung forever.  Dmesg show that it was a problem communicating with
-> mds0.  When I looked on that machine's log, I found the attached stack
-> dump.
+--0016e649ceacb774270494b2a52c
+Content-Type: text/plain; charset=ISO-8859-1
 
-Was it a fresh file system, or something with data from before?
+Hi all,
+I used v0.22.2 ceph with latest git "ceph-standalone-client kernel"
+(2.6.36-rc8) and when i try to mount i get the following error
+mount error 5 = Input/output error
+the dmesg call trace is as follows:
+[  199.099511] ceph: loaded (mds proto 32)
+[  227.730778] libceph: client4099 fsid 2bf77910-49e4-89cb-8ef0-b74ce321acc4
+[  227.730999] libceph: mon0 192.168.1.79:6789 session established
+[  360.236062] INFO: task cosd:5004 blocked for more than 120 seconds.
+[  360.236068] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+disables this message.
+[  360.236073] cosd          D f4f7df20     0  5004      1 0x00000000
+[  360.236080]  f4f7df30 00200086 00000002 f4f7df20 f4f7dee8 c01673d0
+ffffffff 00000000
+[  360.236092]  c02383f0 f4f758d0 c085c940 f4f75b58 f4f75b5c 5adef48d
+00000035 c085c940
+[  360.236104]  c085c940 c085c940 00000000 c085c940 5ade69ed 00000035
+f4f758d0 00000001
+[  360.236115] Call Trace:
+[  360.236128]  [<c01673d0>] ? autoremove_wake_function+0x20/0x50
+[  360.236135]  [<c02383f0>] ? blkdev_writepage+0x0/0x20
+[  360.236143]  [<c05a21e5>] rwsem_down_failed_common+0x95/0xf0
+[  360.236148]  [<c05a2272>] rwsem_down_read_failed+0x12/0x20
+[  360.236153]  [<c05a22c7>] call_rwsem_down_read_failed+0x7/0x10
+[  360.236157]  [<c05a16ec>] ? down_read+0x1c/0x20
+[  360.236163]  [<c020f51f>] iterate_supers+0x5f/0xc0
+[  360.236167]  [<c0230400>] ? sync_one_sb+0x0/0x30
+[  360.236171]  [<c0230459>] sys_sync+0x29/0x60
+[  360.236176]  [<c0102fe3>] sysenter_do_call+0x12/0x28
 
-> I'm going to back off to 0.22.2, which worked much better for me, but I
-> figured you'd probably be interested in the heads up.
-> 
-> Regards,
-> 
-> 					- Ted
-> 
-> mds/CInode.cc: In function 'void CInode::finish_scatter_gather_update(int)':
-> mds/CInode.cc:1479: FAILED assert(pi->dirstat.size() >= 0)
+my ceph.conf is attached. i was able to mount with the same ceph.conf
+file in ceph0.21.1 and kernel 2.6.35  and also with ceph0.21.3 and
+2.6.35 kernel.
+I got  the same error with v0.22.2 and kernel 2.6.35 . So i updated
+the kernel but it didn't help.
+In ceph code , in src/cmds.cc and src/cosd.cc i commented out the line
+//  g_conf.profiler_running = IsHeapProfilerRunning;
+for the compilation to pass.
 
-I don't think think this code was touched in that branch since 0.22.2.  
-However, it was heavily revised for 0.23, and all those changes are in the 
-'rc' branch.  I think you'll have better luck there.
+the steps i used the following commands as root:
 
-sage
+mkcephfs -c /etc/ceph/ceph.conf --allhosts -v
+/etc/init.d/ceph -a start
+modprobe ceph
+mount -t ceph 192.168.1.79:/ /ceph
 
+Kindly point out what i am missing.
+thanks,
+mugunthan
 
->  ceph version 0.22.2 (commit:652417c19f5d18c70d5928e67f72c3770c3c57c5)
->  1: (CInode::finish_scatter_gather_update(int)+0x839) [0x8ee20d]
->  2: (Locker::scatter_writebehind(ScatterLock*)+0x237) [0x88b2f1]
->  3: (Locker::simple_sync(SimpleLock*, bool*)+0x350) [0x88a44e]
->  4: (Locker::_rdlock_kick(SimpleLock*)+0xc2) [0x87e30c]
->  5: (Locker::rdlock_start(SimpleLock*, MDRequest*, bool)+0x1dc) [0x87e778]
->  6: (Locker::acquire_locks(MDRequest*, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&)+0x1b3d) [0x87be7f]
->  7: (Server::handle_client_stat(MDRequest*)+0x33b) [0x76d2a7]
->  8: (Server::dispatch_client_request(MDRequest*)+0x2a5) [0x767caf]
->  9: (Server::handle_client_request(MClientRequest*)+0x938) [0x7679f4]
->  10: (Server::dispatch(Message*)+0x358) [0x760680]
->  11: (MDS::_dispatch(Message*)+0x137a) [0x72c97e]
->  12: (MDS::ms_dispatch(Message*)+0x38) [0x72b48a]
->  13: (Messenger::ms_deliver_dispatch(Message*)+0x63) [0x716a2d]
->  14: (SimpleMessenger::dispatch_entry()+0x5d4) [0x707d46]
->  15: (SimpleMessenger::DispatchThread::entry()+0x2c) [0x6fcd40]
->  16: (Thread::_entry_func(void*)+0x23) [0x715935]
->  17: (()+0x6b9a) [0x2b1c972ccb9a]
->  18: (clone()+0x6d) [0x2b1c97cb253d]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
-> *** Caught signal (ABRT) ***
->  ceph version 0.22.2 (commit:652417c19f5d18c70d5928e67f72c3770c3c57c5)
->  1: (ceph::BackTrace::BackTrace(int)+0x2d) [0x9d8e93]
->  2: (sigabrt_handler(int)+0x49) [0x9e8ffd]
->  3: (()+0x1e9e0) [0x2b1c97cab9e0]
->  4: (gsignal()+0x35) [0x2b1c97cc89f5]
->  5: (abort()+0x183) [0x2b1c97ccc413]
->  6: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x2b1c975a5275]
->  7: (()+0xbf696) [0x2b1c975a3696]
->  8: (()+0xbf6c3) [0x2b1c975a36c3]
->  9: (()+0xbf7c6) [0x2b1c975a37c6]
->  10: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x24f) [0x9d8ca4]
->  11: (CInode::finish_scatter_gather_update(int)+0x839) [0x8ee20d]
->  12: (Locker::scatter_writebehind(ScatterLock*)+0x237) [0x88b2f1]
->  13: (Locker::simple_sync(SimpleLock*, bool*)+0x350) [0x88a44e]
->  14: (Locker::_rdlock_kick(SimpleLock*)+0xc2) [0x87e30c]
->  15: (Locker::rdlock_start(SimpleLock*, MDRequest*, bool)+0x1dc) [0x87e778]
->  16: (Locker::acquire_locks(MDRequest*, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&, std::set<SimpleLock*, std::less<SimpleLock*>, std::allocator<SimpleLock*> >&)+0x1b3d) [0x87be7f]
->  17: (Server::handle_client_stat(MDRequest*)+0x33b) [0x76d2a7]
->  18: (Server::dispatch_client_request(MDRequest*)+0x2a5) [0x767caf]
->  19: (Server::handle_client_request(MClientRequest*)+0x938) [0x7679f4]
->  20: (Server::dispatch(Message*)+0x358) [0x760680]
->  21: (MDS::_dispatch(Message*)+0x137a) [0x72c97e]
->  22: (MDS::ms_dispatch(Message*)+0x38) [0x72b48a]
->  23: (Messenger::ms_deliver_dispatch(Message*)+0x63) [0x716a2d]
->  24: (SimpleMessenger::dispatch_entry()+0x5d4) [0x707d46]
->  25: (SimpleMessenger::DispatchThread::entry()+0x2c) [0x6fcd40]
->  26: (Thread::_entry_func(void*)+0x23) [0x715935]
->  27: (()+0x6b9a) [0x2b1c972ccb9a]
->  28: (clone()+0x6d) [0x2b1c97cb253d]
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--0016e649ceacb774270494b2a52c
+Content-Type: application/octet-stream; name="ceph.conf"
+Content-Disposition: attachment; filename="ceph.conf"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_ggc8gzo30
+
+Owo7IFNhbXBsZSBjZXBoIGNlcGguY29uZiBmaWxlLgo7CjsgVGhpcyBmaWxlIGRlZmluZXMgY2x1
+c3RlciBtZW1iZXJzaGlwLCB0aGUgdmFyaW91cyBsb2NhdGlvbnMKOyB0aGF0IENlcGggc3RvcmVz
+IGRhdGEsIGFuZCBhbnkgb3RoZXIgcnVudGltZSBvcHRpb25zLgoKOyBJZiBhICdob3N0JyBpcyBk
+ZWZpbmVkIGZvciBhIGRhZW1vbiwgdGhlIHN0YXJ0L3N0b3Agc2NyaXB0IHdpbGwKOyB2ZXJpZnkg
+dGhhdCBpdCBtYXRjaGVzIHRoZSBob3N0bmFtZSAob3IgZWxzZSBpZ25vcmUgaXQpLiAgSWYgaXQg
+aXMKOyBub3QgZGVmaW5lZCwgaXQgaXMgYXNzdW1lZCB0aGF0IHRoZSBkYWVtb24gaXMgaW50ZW5k
+ZWQgdG8gc3RhcnQgb24KOyB0aGUgY3VycmVudCBob3N0IChlLmcuLCBpbiBhIHNldHVwIHdpdGgg
+YSBzdGFydHVwLmNvbmYgb24gZWFjaAo7IG5vZGUpLgoKCjsgY3VycmVudCBjbHVzdGVyIG1hZGUg
+b2Ygbm9kZTQgbm9kZTUgbm9kZTYgYW5kIG5vZGU3IHdpdGggbm9kZTQgYmVpbmcgdGhlIG1kcyBh
+bmQgbW9uaXRvcgo7IGdsb2JhbApbZ2xvYmFsXQoJOyBlbmFibGUgc2VjdXJlIGF1dGhlbnRpY2F0
+aW9uCjsJYXV0aCBzdXBwb3J0ZWQgPSBjZXBoeAoJcGlkIGZpbGUgPSAvdmFyL3J1bi9jZXBoLyRu
+YW1lLnBpZAogICAgICAgIGRlYnVnIG1zID0gMQoKOyBtb25pdG9ycwo7ICBZb3UgbmVlZCBhdCBs
+ZWFzdCBvbmUuICBZb3UgbmVlZCBhdCBsZWFzdCB0aHJlZSBpZiB5b3Ugd2FudCB0bwo7ICB0b2xl
+cmF0ZSBhbnkgbm9kZSBmYWlsdXJlcy4gIEFsd2F5cyBjcmVhdGUgYW4gb2RkIG51bWJlci4KW21v
+bl0KCW1vbiBkYXRhID0gL2RhdGEvbW9uJGlkCgoJOyBsb2dnaW5nLCBmb3IgZGVidWdnaW5nIG1v
+bml0b3IgY3Jhc2hlcywgaW4gb3JkZXIgb2YKCTsgdGhlaXIgbGlrZWxpaG9vZCBvZiBiZWluZyBo
+ZWxwZnVsIDopCgk7ZGVidWcgbXMgPSAxCgk7ZGVidWcgbW9uID0gMjAKCTtkZWJ1ZyBwYXhvcyA9
+IDIwCgk7ZGVidWcgYXV0aCA9IDIwCgpbbW9uMF0KCWhvc3QgPSAxOTIuMTY4LjEuNzkKCW1vbiBh
+ZGRyID0gMTkyLjE2OC4xLjc5OjY3ODkKCjsgbWRzCjsgIFlvdSBuZWVkIGF0IGxlYXN0IG9uZS4g
+IERlZmluZSB0d28gdG8gZ2V0IGEgc3RhbmRieS4KW21kc10KCTsgd2hlcmUgdGhlIG1kcyBrZWVw
+cyBpdCdzIHNlY3JldCBlbmNyeXB0aW9uIGtleXMKCTtrZXlyaW5nID0gL2RhdGEva2V5cmluZy4k
+bmFtZQoKCTsgbWRzIGxvZ2dpbmcgdG8gZGVidWcgaXNzdWVzLgoJO2RlYnVnIG1zID0gMQoJO2Rl
+YnVnIG1kcyA9IDIwCgpbbWRzLm5vZGUwXQoJaG9zdCA9IDE5Mi4xNjguMS43OQoKOyBvc2QKOyAg
+WW91IG5lZWQgYXQgbGVhc3Qgb25lLiAgVHdvIGlmIHlvdSB3YW50IGRhdGEgdG8gYmUgcmVwbGlj
+YXRlZC4KOyAgRGVmaW5lIGFzIG1hbnkgYXMgeW91IGxpa2UuCltvc2RdCgk7IFRoaXMgaXMgd2hl
+cmUgdGhlIGJ0cmZzIHZvbHVtZSB3aWxsIGJlIG1vdW50ZWQuCgk7IG9zZCBkYXRhID0gL2RhdGEv
+b3NkJGlkCgoJOyBJZGVhbGx5LCBtYWtlIHRoaXMgYSBzZXBhcmF0ZSBkaXNrIG9yIHBhcnRpdGlv
+bi4gIEEgZmV3CiAJOyBodW5kcmVkIE1CIHNob3VsZCBiZSBlbm91Z2g7IG1vcmUgaWYgeW91IGhh
+dmUgZmFzdCBvciBtYW55CiAJOyBkaXNrcy4gIFlvdSBjYW4gdXNlIGEgZmlsZSB1bmRlciB0aGUg
+b3NkIGRhdGEgZGlyIGlmIG5lZWQgYmUKIAk7IChlLmcuIC9kYXRhL29zZCRpZC9qb3VybmFsKSwg
+YnV0IGl0IHdpbGwgYmUgc2xvd2VyIHRoYW4gYQogCTsgc2VwYXJhdGUgZGlzayBvciBwYXJ0aXRp
+b24uCgk7IG9zZCBqb3VybmFsID0gL2RhdGEvb3NkJGlkL2pvdXJuYWwKCgk7IG9zZCBsb2dnaW5n
+IHRvIGRlYnVnIG9zZCBpc3N1ZXMsIGluIG9yZGVyIG9mIGxpa2VsaWhvb2Qgb2YgYmVpbmcKCTsg
+aGVscGZ1bAoJO2RlYnVnIG1zID0gMQoJO2RlYnVnIG9zZCA9IDIwCgk7ZGVidWcgZmlsZXN0b3Jl
+ID0gMjAKCTtkZWJ1ZyBqb3VybmFsID0gMjAKCgoKCltvc2QxXQoJaG9zdCA9IDE5Mi4xNjguMS43
+OQoJb3NkIGRhdGEgPSAvbW50L29zZF9jZXBoCg==
+--0016e649ceacb774270494b2a52c--
