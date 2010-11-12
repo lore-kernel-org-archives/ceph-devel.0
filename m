@@ -1,79 +1,47 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: [RFC] rbd sysfs interface
-Date: Fri, 12 Nov 2010 09:49:46 -0800
-Message-ID: <AANLkTi=J4Y5K8wm6PGf+B2F1-CCqX--RWHeS3YbkBP60@mail.gmail.com>
-References: <AANLkTinOeby9P847gJFn_t0h5nDY7cfi3cW9hEaUrS1v@mail.gmail.com>
-	<20101106050721.GA2194@kroah.com>
-	<AANLkTinQK_9qp-8jJ5j3-ChUjwhGiGzAmCu5cBtHX75g@mail.gmail.com>
-	<AANLkTikdr=nJF45QUCKAOY8NSh9GNtv8c9K_oNdJeJfc@mail.gmail.com>
-	<20101111010841.GA23127@kroah.com>
-	<AANLkTikUjYUR-WguZ999YtyWLc8+U0184y0Sb6SSSgKz@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: v0.23 released
+Date: Fri, 12 Nov 2010 10:02:08 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1011121001420.14310@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:39404 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751829Ab0KLRts convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Nov 2010 12:49:48 -0500
-In-Reply-To: <AANLkTikUjYUR-WguZ999YtyWLc8+U0184y0Sb6SSSgKz@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:44324 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753461Ab0KLR6Q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Nov 2010 12:58:16 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 96D0ABC715
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Nov 2010 10:02:08 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 6C0A1BC715
+	for <ceph-devel@vger.kernel.org>; Fri, 12 Nov 2010 10:02:08 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg KH <greg@kroah.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>, linux-kernel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wed, Nov 10, 2010 at 9:16 PM, Yehuda Sadeh Weinraub
-<yehudasa@gmail.com> wrote:
-> On Wed, Nov 10, 2010 at 5:08 PM, Greg KH <greg@kroah.com> wrote:
->>
->> So, back to sysfs. =A0But I can't recall what your sysfs interface l=
-ooked
->> like, do you have Documentation/ABI/ files that show what it does? =A0=
-If
->> not, you are required to, so you might as well write them now :)
->>
->
-> The original sysfs interface is described in the rbd.c prefix
-> comments, which we can copy to Documentation/ABI without much pain.
-> However, we were just thinking of modifying it a bit, as described
-> previously in my first email. The hierarchy will look like this:
->
-> rbd/
-> =A0 =A0add
-> =A0 =A0remove
-> =A0 =A0<id>/
-> =A0 =A0 =A0name
-> =A0 =A0 =A0pool
-> =A0 =A0 =A0size
-> =A0 =A0 =A0..
-> =A0 =A0 =A0snap_add
-> =A0 =A0 =A0snap_remove
-> =A0 =A0 =A0snap_rollback
-> =A0 =A0 =A0 =A0<snap_name>/
-> =A0 =A0 =A0 =A0 =A0size
->
-> The 'add' entry will be used to add a device (as before):
->
-> =A0# echo "10.0.0.1 name=3Dadmin rbd myimage" > /sys/class/rbd/add
->
-> The devices that'll be created still be enumerated, and there'll be a
-> subdirectory under rbd/ for each (actually a soft link to
-> /sys/devices/virtual/rbd/<id>). For each device we'll have multiple
-> read-only properties (name, pool, size, client_id, major, cur_snap)
-> and a few control entries (e.g., snap_add, snap_remove, etc.)
->
-> There will be a subdirectory per snapshot under each device, and all
-> the snapshots properties will be kept there.
->
+Another month, and v0.23 is out.  The main milestone here is that 
+clustered MDS is pretty stable.  Stable enough that, if you're interested 
+and willing, we'd like you to try it and let us know what problems you 
+have.  Notably, clustered recovery is not yet well tested (that's v0.24), 
+so don't do this unless you're feeling adventurous.  Directory 
+fragmentation (splitting and merging) is also working, although still off 
+by default.  If you'd like to try that too, add 'mds bal frag = true' to 
+your [mds] section.
 
-Unless I hear otherwise, I'm going to assume that this proposed
-interface is an improvement over the existing osdblk-based one and get
-this upstream asap..
+Other notable changes this time around:
+ * osd: use new btrfs snapshot ioctls (2.6.37), parallel journaling
+ * mds: clustering, replay fixes
+ * mon: better commit batches, lower latency updates
+ * objecter: bug fixes
+ * osd: spread data across multiple xattrs; assert on io/enospc errors
+ * osd: start up despite corrupt pg logs
+ * ceph: new gui (ceph -g)
 
-Thanks,
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The general focus for v0.24 will be continuing OSD stability and clustered 
+MDS recovery.
+
+Relevant URLs:
+ * Direct download at: http://ceph.newdream.net/download/ceph-0.23.tar.gz
+ * For Debian packages, see http://ceph.newdream.net/wiki/Debian
+
+sage
