@@ -1,72 +1,79 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Java binding for RADOS API
-Date: Fri, 12 Nov 2010 14:35:44 +0100
-Message-ID: <1289568944.4894.16.camel@wido-desktop>
-References: <AANLkTinCd2NJAo7WFY0EcOirWBbu_SfM7M0GcDGbxYHx@mail.gmail.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: [RFC] rbd sysfs interface
+Date: Fri, 12 Nov 2010 09:49:46 -0800
+Message-ID: <AANLkTi=J4Y5K8wm6PGf+B2F1-CCqX--RWHeS3YbkBP60@mail.gmail.com>
+References: <AANLkTinOeby9P847gJFn_t0h5nDY7cfi3cW9hEaUrS1v@mail.gmail.com>
+	<20101106050721.GA2194@kroah.com>
+	<AANLkTinQK_9qp-8jJ5j3-ChUjwhGiGzAmCu5cBtHX75g@mail.gmail.com>
+	<AANLkTikdr=nJF45QUCKAOY8NSh9GNtv8c9K_oNdJeJfc@mail.gmail.com>
+	<20101111010841.GA23127@kroah.com>
+	<AANLkTikUjYUR-WguZ999YtyWLc8+U0184y0Sb6SSSgKz@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:58161 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751730Ab0KLNfr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Nov 2010 08:35:47 -0500
-In-Reply-To: <AANLkTinCd2NJAo7WFY0EcOirWBbu_SfM7M0GcDGbxYHx@mail.gmail.com>
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:39404 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751829Ab0KLRts convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Nov 2010 12:49:48 -0500
+In-Reply-To: <AANLkTikUjYUR-WguZ999YtyWLc8+U0184y0Sb6SSSgKz@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Takuya ASADA <syuu@dokukino.com>
-Cc: ceph-devel@vger.kernel.org
+To: Greg KH <greg@kroah.com>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>, linux-kernel@vger.kernel.org
 
-Hi Takuya,
+On Wed, Nov 10, 2010 at 9:16 PM, Yehuda Sadeh Weinraub
+<yehudasa@gmail.com> wrote:
+> On Wed, Nov 10, 2010 at 5:08 PM, Greg KH <greg@kroah.com> wrote:
+>>
+>> So, back to sysfs. =A0But I can't recall what your sysfs interface l=
+ooked
+>> like, do you have Documentation/ABI/ files that show what it does? =A0=
+If
+>> not, you are required to, so you might as well write them now :)
+>>
+>
+> The original sysfs interface is described in the rbd.c prefix
+> comments, which we can copy to Documentation/ABI without much pain.
+> However, we were just thinking of modifying it a bit, as described
+> previously in my first email. The hierarchy will look like this:
+>
+> rbd/
+> =A0 =A0add
+> =A0 =A0remove
+> =A0 =A0<id>/
+> =A0 =A0 =A0name
+> =A0 =A0 =A0pool
+> =A0 =A0 =A0size
+> =A0 =A0 =A0..
+> =A0 =A0 =A0snap_add
+> =A0 =A0 =A0snap_remove
+> =A0 =A0 =A0snap_rollback
+> =A0 =A0 =A0 =A0<snap_name>/
+> =A0 =A0 =A0 =A0 =A0size
+>
+> The 'add' entry will be used to add a device (as before):
+>
+> =A0# echo "10.0.0.1 name=3Dadmin rbd myimage" > /sys/class/rbd/add
+>
+> The devices that'll be created still be enumerated, and there'll be a
+> subdirectory under rbd/ for each (actually a soft link to
+> /sys/devices/virtual/rbd/<id>). For each device we'll have multiple
+> read-only properties (name, pool, size, client_id, major, cur_snap)
+> and a few control entries (e.g., snap_add, snap_remove, etc.)
+>
+> There will be a subdirectory per snapshot under each device, and all
+> the snapshots properties will be kept there.
+>
 
-Great work! I've been following rados4j for a while now (Found you on
-Github), like the approach!
-
-Eucalyptus works with Qemu took right, wouldn't Qemu-RBD be a better
-solution? Or what are your plans with RADOS for Eucalyptus?
-
-But great work! I think a lot of people don't see the full potential of
-RADOS, hope your bindings and phprados will make more people use RADOS.
-
-If you ask Sage, he might want to setup a new GIT repo for you and a
-project in the tracker, so we can keep track of bugs and features.
+Unless I hear otherwise, I'm going to assume that this proposed
+interface is an improvement over the existing osdblk-based one and get
+this upstream asap..
 
 Thanks,
-
-Wido
-
-On Fri, 2010-11-12 at 12:37 +0000, Takuya ASADA wrote:
-> Hi,
-> 
-> I had implemented Java binding for RADOS API to integrate RADOS for
-> Eucalyptus, the opensource IaaS platform.
-> 
-> The API is based on librados with small changes:
-> class Rados is container of librados::Rados, it does only create_pool,
-> list_pools, lookup_pool, open_pool.
-> To access objects, it uses class Pool, which is container of
-> librados::pool_t, can received from Rados.openPool().
-> This has read, write, remove, stat and list_objects_open.
-> 
-> Sample code:
-> https://github.com/syuu1228/rados4j/blob/master/test/Test.java
-> 
-> Whole code can fetch from:
-> https://github.com/syuu1228/rados4j
-> 
-> Javadoc is available on following URL(API list only, not documented yet):
-> http://rados4j.dokukino.com/doc/
-> 
-> Here's build sequence:
-> $ ant             # this will save librados4j.so and rados4j.jar into target/
-> $ ant javadoc # if an API document needed
-> 
-> I want to contribute it like phprados.
-> Comments?
-> 
-> syuu
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
