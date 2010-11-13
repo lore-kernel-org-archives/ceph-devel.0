@@ -1,73 +1,50 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: claims to be ... - wrong node!
-Date: Fri, 12 Nov 2010 10:09:36 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1011121005350.13140@cobra.newdream.net>
-References: <AANLkTikN49QYMDw4WhatqtcQjBn_8cFsDfm+VPjyud0x@mail.gmail.com>
+From: Takuya ASADA <syuu@dokukino.com>
+Subject: Re: Java binding for RADOS API
+Date: Sun, 14 Nov 2010 00:41:25 +0900
+Message-ID: <AANLkTins-08+N4Wqj-0qSE4XrZ1LaestckCd4RL9w+R2@mail.gmail.com>
+References: <AANLkTinCd2NJAo7WFY0EcOirWBbu_SfM7M0GcDGbxYHx@mail.gmail.com> <1289568944.4894.16.camel@wido-desktop>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52136 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753145Ab0KLSFp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Nov 2010 13:05:45 -0500
-In-Reply-To: <AANLkTikN49QYMDw4WhatqtcQjBn_8cFsDfm+VPjyud0x@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:61998 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754825Ab0KMPlr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 13 Nov 2010 10:41:47 -0500
+Received: by wwb28 with SMTP id 28so180727wwb.1
+        for <ceph-devel@vger.kernel.org>; Sat, 13 Nov 2010 07:41:45 -0800 (PST)
+In-Reply-To: <1289568944.4894.16.camel@wido-desktop>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, 12 Nov 2010, Christian Brunner wrote:
-> Presumably I'm doing something wrong here, but I don't have clue what to...
-> 
-> After restarting one of our osd-servers I get the following messages
-> in the cosd-log:
-> 
-> 2010-11-12 10:24:31.965058 7f5bac380710 -- 10.255.0.60:6802/17175 >>
-> 10.255.0.60:6800/15859 pipe(0x7f5b98089300 sd=26 pgs=0 cs=0
-> l=0).connect claims to be 0.0.0.0:6800/17108 not
-> 10.255.0.60:6800/15859 - wrong node!
-> 2010-11-12 10:24:32.489423 7f5b955ea710 -- 10.255.0.60:6803/17175 >>
-> 10.255.0.60:6801/17108 pipe(0x7f5b98000d40 sd=30 pgs=0 cs=0
-> l=0).connect claims to be 0.0.0.0:6801/17108 not
-> 10.255.0.60:6801/17108 - presumably this is the same node!
+Hi,
 
-Hmm.  Some of these messages come up normally, but this sequence doesn't 
-look quite right.  What usually happens is:
+On Fri, Nov 12, 2010 at 10:35 PM, Wido den Hollander <wido@widodh.nl> wrote:
+> Hi Takuya,
+>
+> Great work! I've been following rados4j for a while now (Found you on
+> Github), like the approach!
+>
+> Eucalyptus works with Qemu took right, wouldn't Qemu-RBD be a better
+> solution? Or what are your plans with RADOS for Eucalyptus?
 
-B restarts.
-A's connection to B drops.
-A reconnects to B's old address, reaches the new B, and gets 'wrong node!'
-A gets a new osdmap with B's new address 
-A connects to new B.
+I know about qemu-rbd, that's for block device service similar to Amazon EBS.
+I only implemented RADOS backend for "Walrus", that is similar to Amazon S3.
+So these are different services, which can work together.
+I think if both services could integrated into Eucalyptus(or the
+another IaaS platform such as OpenStack) that will be exciting.
 
-What doesn't make sense to me here is that we then get 0.0.0.0:6801/17108, 
-because B doesn't yet know it's address.  But in fact B must, because it's 
-address was published in the map.
+Ceph already has radosgw for S3 compatible service anyway, but it
+looks much easier to use RADOS API from Walrus, so I implemented that
+way.
 
-Is this reproducible?  Can you reproduce with
-	debug ms = 20
-	debug osd = 20
-on the OSD, and
-	debug mon = 20
-	debug ms = 1
-on the monitor, and send the logs from the mon and both OSDs?
-
-Thanks!
-sage
-
-
-> 
-> The wrong node message is repeated a vew more times.
-> 
-> After this every write to the osd seems to block. What is the right
-> way to handle this?
-> 
+> But great work! I think a lot of people don't see the full potential of
+> RADOS, hope your bindings and phprados will make more people use RADOS.
+>
+> If you ask Sage, he might want to setup a new GIT repo for you and a
+> project in the tracker, so we can keep track of bugs and features.
+>
 > Thanks,
-> Christian
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-
+>
+> Wido
