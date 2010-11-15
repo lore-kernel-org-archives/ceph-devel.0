@@ -1,37 +1,43 @@
-From: Joe Perches <joe@perches.com>
-Subject: [PATCH 33/44] fs/ceph: Remove unnecessary semicolons
-Date: Sun, 14 Nov 2010 19:04:52 -0800
-Message-ID: <e01252afc842668a94fb0549e2d1833d77a6411f.1289789605.git.joe@perches.com>
-References: <cover.1289789604.git.joe@perches.com>
+From: Takuya ASADA <syuu@dokukino.com>
+Subject: Re: Java binding for RADOS API
+Date: Mon, 15 Nov 2010 07:19:36 +0000
+Message-ID: <AANLkTimyM6=yjDxjM1JGYqMSwErPk5s7XqRBoowCzm01@mail.gmail.com>
+References: <AANLkTinCd2NJAo7WFY0EcOirWBbu_SfM7M0GcDGbxYHx@mail.gmail.com> <Pine.LNX.4.64.1011121002150.13140@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.perches.com ([173.55.12.10]:1231 "EHLO mail.perches.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932849Ab0KODF5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 14 Nov 2010 22:05:57 -0500
-In-Reply-To: <cover.1289789604.git.joe@perches.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:34333 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757584Ab0KOHT7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 15 Nov 2010 02:19:59 -0500
+Received: by wyb28 with SMTP id 28so4101893wyb.19
+        for <ceph-devel@vger.kernel.org>; Sun, 14 Nov 2010 23:19:57 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.64.1011121002150.13140@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jiri Kosina <trivial@kernel.org>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-Signed-off-by: Joe Perches <joe@perches.com>
----
- fs/ceph/mds_client.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+Hi,
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 3142b15..931124c 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2023,7 +2023,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 		} else  {
- 			struct ceph_inode_info *ci = ceph_inode(req->r_inode);
- 			struct ceph_cap *cap =
--				ceph_get_cap_for_mds(ci, req->r_mds);;
-+				ceph_get_cap_for_mds(ci, req->r_mds);
- 
- 			dout("already using auth");
- 			if ((!cap || cap != ci->i_auth_cap) ||
--- 
-1.7.3.1.g432b3.dirty
+On Fri, Nov 12, 2010 at 6:04 PM, Sage Weil <sage@newdream.net> wrote:
+> Hi Takuya,
+>
+> This looks great! =C2=A0(At least to my largely Java-averse eyes :). =
+=C2=A0I'm happy
+> to put a git tree clone up, although I don't have a way to allow outs=
+ide
+> access so any pushes would have to then go through me. =C2=A0We can a=
+lso link
+> it up in the wiki and elsewhere.
 
+You mean git://ceph.newdream.net is not allowed to push from external n=
+etwork?
+If so I think it better to link github repository from wiki.
+Can I create new wiki page for it?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
