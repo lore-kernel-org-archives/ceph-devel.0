@@ -1,76 +1,160 @@
-From: Greg KH <greg@kroah.com>
-Subject: Re: [PATCH] rbd: replace the rbd sysfs interface
-Date: Wed, 17 Nov 2010 09:19:24 -0800
-Message-ID: <20101117171924.GC12050@kroah.com>
-References: <1289953929-30896-1-git-send-email-yehuda@hq.newdream.net>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Broken build on current unstable branch
+Date: Wed, 17 Nov 2010 12:06:12 -0700
+Message-ID: <1290020772.6990.23.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from kroah.org ([198.145.64.141]:47875 "EHLO coco.kroah.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S934912Ab0KQR37 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 17 Nov 2010 12:29:59 -0500
-Content-Disposition: inline
-In-Reply-To: <1289953929-30896-1-git-send-email-yehuda@hq.newdream.net>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:37411 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758687Ab0KQTGX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Nov 2010 14:06:23 -0500
+Received: from sentry.sandia.gov (sentry.sandia.gov [132.175.109.20])
+	by sentry-three.sandia.gov (Postfix) with ESMTP id 159254EA6EF
+	for <ceph-devel@vger.kernel.org>; Wed, 17 Nov 2010 12:06:17 -0700 (MST)
+Received: from mail.sandia.gov (cas2.sandia.gov [134.253.165.160]) by
+ mailgate.sandia.gov (8.14.4/8.14.4) with ESMTP id oAHJ63u7016670 for
+ <ceph-devel@vger.kernel.org>; Wed, 17 Nov 2010 12:06:03 -0700
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@hq.newdream.net>
-Cc: sage@newdream.net, yehudasa@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 16, 2010 at 04:32:09PM -0800, Yehuda Sadeh wrote:
-> Hi Greg,
-> 
-> Following is the new rbd sysfs interface. It lists devices in their own
-> subdirectories, as well as their underlying snapshots. Please let us
-> know if there's any issue you think we missed or did wrong.
-> 
-> Thanks,
-> Yehuda
-> 
-> ---
-> 
-> The new interface creates directories per mapped image
-> and under each it creates a subdir per available snapshot.
-> This allows keeping a cleaner interface within the sysfs
-> guidelines. The ABI documentation was updated too.
-> 
-> Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
-> ---
->  Documentation/ABI/testing/sysfs-class-rbd |   83 +++
->  drivers/block/rbd.c                       |  775 +++++++++++++++++------------
->  2 files changed, 547 insertions(+), 311 deletions(-)
-> 
-> diff --git a/Documentation/ABI/testing/sysfs-class-rbd b/Documentation/ABI/testing/sysfs-class-rbd
-> new file mode 100644
-> index 0000000..4d96618
-> --- /dev/null
-> +++ b/Documentation/ABI/testing/sysfs-class-rbd
-> @@ -0,0 +1,83 @@
-> +What:		/sys/class/rbd/
+Hi,
 
-I thought I mentioned that you should not add new classes to the kernel.
-Please don't do that, make it a bus_type instead.
+Build for current unstable (d57181d3d5b0) 
+is broken for me on RedHat 5.5, like this:
 
-Actually, that will solve some of your coding problems as well:
+make  all-am
+make[2]: Entering directory `/bigdata1/home/jaschut/git/ceph.git/src'
+make[2]: *** No rule to make target `/ceph_ver.c', needed by `ceph_ver.o'.  Stop.
+make[2]: Leaving directory `/bigdata1/home/jaschut/git/ceph.git/src'
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/bigdata1/home/jaschut/git/ceph.git/src'
+make: *** [all-recursive] Error 1
 
-> @@ -193,6 +130,11 @@ struct rbd_device {
->  	int read_only;
->  
->  	struct list_head	node;
-> +
-> +	struct device		dev;
-> +	struct kobject		snaps_kobj;
-> +	struct list_head	snaps;
-> +	int			kobj_ready;
->  };
 
-Woah, that's wrong.  You can NEVER have two different reference counted
-objects as part of a single structure.  Your reference counting is
-guaranteed to be wrong.
+This fixes the above for me:
 
-You should not need a kobject at all here, just use a device and be done
-with it.
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 7bf088e..487f205 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -398,7 +398,7 @@ clean-local:
+ 
+ # libs
+ libcommon_a_SOURCES = \
+-	$(builddir)/ceph_ver.c \
++	$(srcdir)/ceph_ver.c \
+ 	$(libcommon_files)
+ 
+ # this list ommits the ceph_ver.c file
 
-Hope this helps,
 
-greg k-h
+With the above, the build then breaks like this:
+
+make  all-am
+make[2]: Entering directory `/bigdata1/home/jaschut/git/ceph.git/src'
+make[2]: *** No rule to make target `/ceph_ver.h', needed by `ceph_ver.c'.  Stop.
+make[2]: Leaving directory `/bigdata1/home/jaschut/git/ceph.git/src'
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/bigdata1/home/jaschut/git/ceph.git/src'
+make: *** [all-recursive] Error 1
+
+
+Evidently, for this version of automake (1.9.6), $(builddir)
+is empty; e.g. I found this:
+http://www.mail-archive.com/automake@gnu.org/msg15428.html
+
+FWIW, the following, when added to the above, fixes the build for me:
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 7bf088e..38916c8 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -352,8 +352,8 @@ docdir = ${datadir}/doc/ceph
+ doc_DATA = $(srcdir)/sample.ceph.conf
+ doc_SCRIPTS = sample.fetch_config
+ 
+-sample.fetch_config: fetch_config
+-	cp -f $(srcdir)/fetch_config $(builddir)/sample.fetch_config
++ $(top_builddir)/src/sample.fetch_config: fetch_config
++	cp -f $(srcdir)/fetch_config $(top_builddir)/src/sample.fetch_config
+ 
+ shell_commondir = $(libdir)/ceph
+ shell_common_SCRIPTS = ceph_common.sh
+@@ -382,13 +382,13 @@ crush_include_DATA = \
+ FORCE:
+ .git_version: FORCE
+ 	$(srcdir)/check_version $(srcdir)/.git_version
+-ceph_ver.h: .git_version
+-	$(srcdir)/make_version $(srcdir)/.git_version $(builddir)/ceph_ver.h
++$(top_builddir)/src/ceph_ver.h: .git_version
++	$(srcdir)/make_version $(srcdir)/.git_version $(top_builddir)/src/ceph_ver.h
+ 
+-ceph_ver.c: $(builddir)/ceph_ver.h
+-common/debug.cc: $(builddir)/ceph_ver.h
+-common/BackTrace.cc: $(builddir)/ceph_ver.h
+-config.cc: $(builddir)/ceph_ver.h
++ceph_ver.c: $(top_builddir)/src/ceph_ver.h
++common/debug.cc: $(top_builddir)/src/ceph_ver.h
++common/BackTrace.cc: $(top_builddir)/src/ceph_ver.h
++config.cc: $(top_builddir)/src/ceph_ver.h
+ 
+ # cleaning
+ clean-local:
+@@ -398,7 +398,7 @@ clean-local:
+ 
+ # libs
+ libcommon_a_SOURCES = \
+-       $(builddir)/ceph_ver.c \
++       $(srcdir)/ceph_ver.c \
+        $(libcommon_files)
+ 
+ # this list ommits the ceph_ver.c file
+
+
+Also FWIW, the following alternative, in addition to
+the ceph_ver.c fix above, also fixes the build for me:
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 7bf088e..c3db491 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -353,7 +353,7 @@ doc_DATA = $(srcdir)/sample.ceph.conf
+ doc_SCRIPTS = sample.fetch_config
+ 
+ sample.fetch_config: fetch_config
+-	cp -f $(srcdir)/fetch_config $(builddir)/sample.fetch_config
++	cp -f $(srcdir)/fetch_config sample.fetch_config
+ 
+ shell_commondir = $(libdir)/ceph
+ shell_common_SCRIPTS = ceph_common.sh
+@@ -383,12 +383,12 @@ FORCE:
+ .git_version: FORCE
+ 	$(srcdir)/check_version $(srcdir)/.git_version
+ ceph_ver.h: .git_version
+-	$(srcdir)/make_version $(srcdir)/.git_version $(builddir)/ceph_ver.h
++	$(srcdir)/make_version $(srcdir)/.git_version ceph_ver.h
+ 
+-ceph_ver.c: $(builddir)/ceph_ver.h
+-common/debug.cc: $(builddir)/ceph_ver.h
+-common/BackTrace.cc: $(builddir)/ceph_ver.h
+-config.cc: $(builddir)/ceph_ver.h
++ceph_ver.c: ceph_ver.h
++common/debug.cc: ceph_ver.h
++common/BackTrace.cc: ceph_ver.h
++config.cc: ceph_ver.h
+ 
+ # cleaning
+ clean-local:
+
+
+If any of the above is commit-worthy:
+
+Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+
+Thanks -- Jim
+
+
+
