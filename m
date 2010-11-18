@@ -1,87 +1,67 @@
-From: Yehuda Sadeh Weinraub <yehuda@hq.newdream.net>
-Subject: Re: [PATCH] rbd: replace the rbd sysfs interface
-Date: Wed, 17 Nov 2010 15:00:17 -0800
-Message-ID: <AANLkTims_MjBS1SdHkOjOWvGqg1aRABH23MWk8J-E+-Y@mail.gmail.com>
-References: <1289953929-30896-1-git-send-email-yehuda@hq.newdream.net>
-	<20101117171924.GC12050@kroah.com>
+From: Josh Durgin <joshd@hq.newdream.net>
+Subject: Re: [libvirt] rbd storage pool support for libvirt
+Date: Wed, 17 Nov 2010 16:33:07 -0800
+Message-ID: <4CE47443.4000503@hq.newdream.net>
+References: <Pine.LNX.4.64.1011012051190.28156@cobra.newdream.net> <20101103135900.GQ29893@redhat.com> <Pine.LNX.4.64.1011051530100.21692@cobra.newdream.net> <20101108131634.GJ26714@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:55148 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:46991 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932840Ab0KQXAU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Nov 2010 18:00:20 -0500
-In-Reply-To: <20101117171924.GC12050@kroah.com>
+	with ESMTP id S1752243Ab0KRAdI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Nov 2010 19:33:08 -0500
+In-Reply-To: <20101108131634.GJ26714@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg KH <greg@kroah.com>
-Cc: sage@newdream.net, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "Daniel P. Berrange" <berrange@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-On Wed, Nov 17, 2010 at 9:19 AM, Greg KH <greg@kroah.com> wrote:
-> On Tue, Nov 16, 2010 at 04:32:09PM -0800, Yehuda Sadeh wrote:
->> Hi Greg,
+Hi Daniel,
+
+On 11/08/2010 05:16 AM, Daniel P. Berrange wrote:
+>>>> In any case, before someone goes off and implements something, does this
+>>>> look like the right general approach to adding rbd support to libvirt?
+>>>
+>>> I think this looks reasonable. I'd be inclined to get the storage pool
+>>> stuff working with the kernel RBD driver&  UDEV rules for stable path
+>>> names, since that avoids needing to make any changes to guest XML
+>>> format. Support for QEMU with the native librados CEPH driver could
+>>> be added as a second patch.
 >>
->> Following is the new rbd sysfs interface. It lists devices in their =
-own
->> subdirectories, as well as their underlying snapshots. Please let us
->> know if there's any issue you think we missed or did wrong.
+>> Okay, that sounds reasonable.  Supporting the QEMU librados driver is
+>> definitely something we want to target, though, and seems to be route that
+>> more users are interested in.  Is defining the XML syntax for a guest VM
+>> something we can discuss now as well?
 >>
->> Thanks,
->> Yehuda
->>
->> ---
->>
->> The new interface creates directories per mapped image
->> and under each it creates a subdir per available snapshot.
->> This allows keeping a cleaner interface within the sysfs
->> guidelines. The ABI documentation was updated too.
->>
->> Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
->> ---
->> =A0Documentation/ABI/testing/sysfs-class-rbd | =A0 83 +++
->> =A0drivers/block/rbd.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 |=
- =A0775 +++++++++++++++++------------
->> =A02 files changed, 547 insertions(+), 311 deletions(-)
->>
->> diff --git a/Documentation/ABI/testing/sysfs-class-rbd b/Documentati=
-on/ABI/testing/sysfs-class-rbd
->> new file mode 100644
->> index 0000000..4d96618
->> --- /dev/null
->> +++ b/Documentation/ABI/testing/sysfs-class-rbd
->> @@ -0,0 +1,83 @@
->> +What: =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/sys/class/rbd/
+>> (BTW this is biting NBD users too.  Presumably the guest VM XML should
+>> look similar?
 >
-> I thought I mentioned that you should not add new classes to the kern=
-el.
-> Please don't do that, make it a bus_type instead.
+> And also Sheepdog storage volumes. To define a syntax for all these we need
+> to determine what configuration metadata is required at a per-VM level for
+> each of them. Then try and decide how to represent that in the guest XML.
+> It looks like at a VM level we'd need a hostname, port number and a volume
+> name (or path).
 
+It looks like that's what Sheepdog needs from the patch that was
+submitted earlier today. For RBD, we would want to allow multiple hosts,
+and specify the pool and image name when the QEMU librados driver is
+used, e.g.:
 
-Ahmm.. apparently not in the rbd related threads. So moving things
-around and having rbd under /sys/bus we'll have the following:
+     <disk type="rbd" device="disk">
+       <driver name="qemu" type="raw" />
+       <source vdi="image_name" pool="pool_name">
+         <host name="mon1.example.org" port="6000">
+         <host name="mon2.example.org" port="6000">
+         <host name="mon3.example.org" port="6000">
+       </source>
+       <target dev="vda" bus="virtio" />
+     </disk>
 
-/sys/bus/rbd/drivers/rbd/..
-    add - add a device
-    remove - remove a device
+As you mentioned earlier, we could just use the existing source format
+for the kernel RBD driver.
 
-/sys/bus/rbd/devices/<id>
-   name
-   pool
-   ...
-
-/sys/bus/rbd/devices/<id>/snaps/<name>
-    id
-    size
-    ...
-
-
-Would this work?
+Does this seem like a reasonable format for the VM XML? Any suggestions?
 
 Thanks,
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Josh
