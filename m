@@ -1,65 +1,91 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph updates for 2.6.37-rc3
-Date: Fri, 19 Nov 2010 14:35:32 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1011191429530.1019@cobra.newdream.net>
+From: Josh Durgin <joshd@hq.newdream.net>
+Subject: Re: [libvirt] [PATCH] support sheepdog volumes
+Date: Fri, 19 Nov 2010 14:56:35 -0800
+Message-ID: <4CE700A3.6090408@hq.newdream.net>
+References: <1289985598-20565-1-git-send-email-morita.kazutaka@lab.ntt.co.jp>	<20101118104630.GX15851@redhat.com> <4CE5C7F2.2080606@lab.ntt.co.jp>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47119 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757084Ab0KSWbX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Nov 2010 17:31:23 -0500
+Received: from mail.hq.newdream.net ([66.33.206.127]:51061 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757006Ab0KSW4g (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Nov 2010 17:56:36 -0500
+In-Reply-To: <4CE5C7F2.2080606@lab.ntt.co.jp>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: libvir-list@redhat.com
+Cc: ceph-devel@vger.kernel.org
 
-Hi Linus,
+On 11/18/2010 04:42 PM, MORITA Kazutaka wrote:
+> On 2010/11/18 19:46, Daniel P. Berrange wrote:
+>> On Wed, Nov 17, 2010 at 06:19:58PM +0900, MORITA Kazutaka wrote:
+>>> Sheepdog is a distributed storage system for QEMU. It provides highly
+>>> available block level storage volumes to VMs like Amazon EBS.  This
+>>> patch adds support for Sheepdog; we can create VMs with sheepdog
+>>> volumes, and attach sheepdog volumes to running machines via the
+>>> attach-device command.
+>>>
+>>> Sheepdog volumes can be declared like this:
+>>>
+>>>      <disk type='sheepdog' device='disk'>
+>>>        <driver name='qemu' type='raw' />
+>>>        <source vdi='volume_name' host='hostname' port='7000'/>
+>>>        <target dev='vda' bus='virtio' />
+>>>      </disk>
+>>>
+>>> 'host' and 'port' in the source element are optional.  If they are not
+>>> specified, sheepdog clients use the default value (localhost:7000).
+>>
+>> I'm not too familiar with sheepdog implementation, but I understand
+>> that each block device is stored across multiple hosts, but you're
+>> only listing one hostname here.  In the proposal for supporting RBD/
+>> CEPH in libvirt/QEMU, there's tan option to give multiple hostnames.
+>> Is the need to give multiple hostnames going to be something that
+>> is also relevant for Sheepdog, or does it cope with this in an
+>> entirely different way ?
+>
+> We use the hostname as like a gateway to access sheepdog volumes.
+> Though we could extend it to multiple hostnames to achieve high
+> availability, how to use these parameters as qemu arguments needs to
+> be discussed.
 
-Please pull the following Ceph updates from
+For RBD, the monitor hostnames can be set through the environment. It
+looks like this is easy to add to the libvirt QEMU driver. Would
+environment variables work for sheepdog as well?
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+>>
+>> As mentioned in the RBD thread[1], I'm wondering whether we should aim
+>> for separate 'types' for each network block device or try to merge
+>> them into one common syntax like
+>>
+>>       <disk type="network" device="disk">
+>>         <driver name="qemu" type="raw" />
+>>         <source protocol='rbd|sheepdog|nbd' name="...some image identifier...">
+>>           <host name="mon1.example.org" port="6000">
+>>           <host name="mon2.example.org" port="6000">
+>>           <host name="mon3.example.org" port="6000">
+>>         </source>
+>>         <target dev="vda" bus="virtio" />
+>>       </disk>
+>
+> Are monitor addresses necessary in the above syntax for RBD?  I guess
+> the monitor addresses are parameters to create a rbd image, but not
+> ones to use a rbd image.  If so, we can make the syntax a bit simpler like
 
-It's an unfortunately rather big pile of bug fixes.  There's a revert to 
-fix a regression from 2.6.36, a problem with network reconnects, a 
-potential null deref, a series of small fixes that came up with clustered 
-MDS testing, a fix for non-page aligned direct IO, and a readdir fix that 
-turns up on 32bit arches.
+The monitors serve as gateways for RBD. All need to be specified
+so that RBD can still access the cluster if some monitors go down.
 
-Thanks!
-sage
+>       <disk type="network" device="disk">
+>         <driver name="qemu" type="raw" />
+>         <source protocol='rbd|sheepdog|nbd' name="..." host="hostname" port="6000" />
+>         <target dev="vda" bus="virtio" />
+>       </disk>
+>
+>
+> Thannks,
+>
+> Kazutaka
 
-
-Sage Weil (16):
-      Revert "ceph: update issue_seq on cap grant"
-      ceph: fix small seq message skipping
-      ceph: fix bad pointer dereference in ceph_fill_trace
-      ceph: fix open for write on clustered mds
-      ceph: only let auth caps update max_size
-      ceph: re-request max_size if cap auth changes
-      ceph: fix rdcache_gen usage and invalidate
-      ceph: fix uid/gid on resent mds requests
-      ceph: fix version check on racing inode updates
-      ceph: fix update of ctime from MDS
-      ceph: fix comment, remove extraneous args
-      ceph: make page alignment explicit in osd interface
-      ceph: explicitly specify page alignment in network messages
-      ceph: fix dangling pointer
-      ceph: fix frag offset for non-leftmost frags
-      ceph: fix readdir EOVERFLOW on 32-bit archs
-
- fs/ceph/addr.c                  |    6 ++--
- fs/ceph/caps.c                  |   17 +++++++-----
- fs/ceph/dir.c                   |   16 +++++++++---
- fs/ceph/file.c                  |   52 +++++++++++++++++++++++++-------------
- fs/ceph/inode.c                 |   49 +++++++++++++++++++++++-------------
- fs/ceph/mds_client.c            |    7 +++-
- fs/ceph/mds_client.h            |    2 +
- fs/ceph/super.h                 |    4 +--
- include/linux/ceph/libceph.h    |    3 +-
- include/linux/ceph/messenger.h  |    1 +
- include/linux/ceph/osd_client.h |    7 +++-
- net/ceph/messenger.c            |   13 ++++-----
- net/ceph/osd_client.c           |   25 ++++++++++++------
- net/ceph/pagevec.c              |    3 +-
- 14 files changed, 129 insertions(+), 76 deletions(-)
+Thanks,
+Josh
