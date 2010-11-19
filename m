@@ -1,60 +1,74 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Degraded objects on brand new file system?
-Date: Fri, 19 Nov 2010 13:41:30 -0700
-Message-ID: <1290199290.4782.20.camel@sale659.sandia.gov>
+From: Yehuda Sadeh Weinraub <yehuda@hq.newdream.net>
+Subject: Re: [PATCH] rbd: replace the rbd sysfs interface
+Date: Fri, 19 Nov 2010 12:42:51 -0800
+Message-ID: <AANLkTim4p=tpaQG_XDE5Vk0YAypYCegAguYNKRg-LeDF@mail.gmail.com>
+References: <1289953929-30896-1-git-send-email-yehuda@hq.newdream.net>
+	<20101117171924.GC12050@kroah.com>
+	<AANLkTims_MjBS1SdHkOjOWvGqg1aRABH23MWk8J-E+-Y@mail.gmail.com>
+	<20101118013002.GC8558@kroah.com>
+	<AANLkTi=7z40CNBUmfVUEa68J+1R=7nbn9d8vM7ETpajA@mail.gmail.com>
+	<20101119020820.GB18767@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:59734 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755315Ab0KSUlm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Nov 2010 15:41:42 -0500
-Received: from sentry.sandia.gov (sentry.sandia.gov [132.175.109.21])
-	by sentry-three.sandia.gov (Postfix) with ESMTP id 17D894FF57C
-	for <ceph-devel@vger.kernel.org>; Fri, 19 Nov 2010 13:41:37 -0700 (MST)
-Received: from mail.sandia.gov (cas2.sandia.gov [134.253.165.160]) by
- mailgate.sandia.gov (8.14.4/8.14.4) with ESMTP id oAJKfLDM006048 for
- <ceph-devel@vger.kernel.org>; Fri, 19 Nov 2010 13:41:21 -0700
+Received: from mail.hq.newdream.net ([66.33.206.127]:58864 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754057Ab0KSUmy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 19 Nov 2010 15:42:54 -0500
+In-Reply-To: <20101119020820.GB18767@kroah.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Greg KH <greg@kroah.com>
+Cc: sage@newdream.net, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi,
+On Thu, Nov 18, 2010 at 6:08 PM, Greg KH <greg@kroah.com> wrote:
+> On Thu, Nov 18, 2010 at 02:53:35PM -0800, Yehuda Sadeh Weinraub wrote=
+:
+>> Yes, pretty much. One problem that I do see is that if we define the
+>> snaps/ as a device (and not just as a kobj) as you suggested before,
+>> it'll automatically create a 'uevent' entry under it which can be a
+>> real issue in the case we have a snapshot named like that. Shouldn't
+>> we just create it as a kobj in that case?
+>
+> No. =A0Just use the subdirectory option of an attribute group to hand=
+le
+> that and you will not need to create any device or kobject with that
+> name, the driver core will handle it all automatically for you.
+>
 
-I've just created a brand-new filesystem using current unstable
-branch.
+One issue with using the groups name, is that it's not nested (unless
+I'm missing something), so we can't have it done for the entire
+planned hierarchy without holding a kobject on the way. Just a
+reminder, the device-specific hierarchy would look like this:
 
-ceph -w shows me this after I start it up and it settles down,:
+1. /sys/bus/rbd/devices/<id>/
+2. /sys/bus/rbd/devices/<id>/<device_attrs>
+3. /sys/bus/rbd/devices/<id>/snaps/
+4. /sys/bus/rbd/devices/<id>/snaps/<snap_name>/
+5. /sys/bus/rbd/devices/<id>/snaps/<snap_name>/<snap_attrs>
 
-2010-11-19 13:07:39.279045    pg v247: 3432 pgs: 3432 active; 54 KB data, 98200 KB used, 3032 GB / 3032 GB avail; 95/108 degraded (87.963%)
-2010-11-19 13:07:39.532174    pg v248: 3432 pgs: 3432 active; 54 KB data, 98232 KB used, 3032 GB / 3032 GB avail; 95/108 degraded (87.963%)
-2010-11-19 13:07:41.123789    pg v249: 3432 pgs: 3432 active; 54 KB data, 98416 KB used, 3032 GB / 3032 GB avail; 95/108 degraded (87.963%)
+One solution would be to create kobjects for (3) and for (4), without
+using a group name. Another way, we can create groups for (2), and (3)
+under (1), but that's about it, you can't create the snap specific
+directory this way without resorting to some internal sysfs directory
+creation, which will be horribly wrong. At that point we don't have
+anything for 'snaps', and we don't really need to do any operations
+under that directory, we just need it to exist so that it contains the
+snapshot-specific directories.
 
-That output seems to come from PGMap::print_summary().
-If so, it seems to be telling me I have 108 objects, 
-of which 95 are degraded.
+Another way would be to create a group for (2) under (1) and create a
+kobject for (3), for which you can create group per snapshot.
 
-If so, why would I have any degraded objects on
-a brand-new file system?  All my osds are up/in;
-shouldn't any degraded objects have been recovered?
+Am I missing something? We already have the first solution (kobjects
+only) implemented, is there some real benefit for using the third
+method? We'll have to manually add remove groups anyway, as snapshots
+can be removed and new snapshots can be added.
 
-Note that I haven't even mounted it anywhere yet.
-
-Also, the above result is after starting
-each of my 13 osds one at a time, waiting for
-the PGs for each osd to go active before
-starting up the next osd.
-
-If I start up all the cosds a newly created file system 
-roughly simultaneously, using pdsh, I get 7/108 objects
-degraded.
-
-What am I missing?
-
-How can I learn what objects are degraded?
-
-Thanks -- Jim
-
-
-
+Thanks,
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
