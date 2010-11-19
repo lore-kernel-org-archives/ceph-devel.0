@@ -1,98 +1,123 @@
-From: Greg KH <greg@kroah.com>
-Subject: Re: [PATCH] rbd: replace the rbd sysfs interface
-Date: Thu, 18 Nov 2010 18:08:20 -0800
-Message-ID: <20101119020820.GB18767@kroah.com>
-References: <1289953929-30896-1-git-send-email-yehuda@hq.newdream.net> <20101117171924.GC12050@kroah.com> <AANLkTims_MjBS1SdHkOjOWvGqg1aRABH23MWk8J-E+-Y@mail.gmail.com> <20101118013002.GC8558@kroah.com> <AANLkTi=7z40CNBUmfVUEa68J+1R=7nbn9d8vM7ETpajA@mail.gmail.com>
+From: Stefan Hajnoczi <stefanha@gmail.com>
+Subject: Re: [libvirt] rbd storage pool support for libvirt
+Date: Fri, 19 Nov 2010 09:27:40 +0000
+Message-ID: <AANLkTinNqTJ-BBvQTwD+1b5dTKHn2W8o-FEXASk4kgPj@mail.gmail.com>
+References: <Pine.LNX.4.64.1011012051190.28156@cobra.newdream.net>
+	<20101103135900.GQ29893@redhat.com>
+	<Pine.LNX.4.64.1011051530100.21692@cobra.newdream.net>
+	<20101108131634.GJ26714@redhat.com>
+	<4CE47443.4000503@hq.newdream.net>
+	<20101118104214.GW15851@redhat.com>
+	<Pine.LNX.4.64.1011180905001.2270@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from kroah.org ([198.145.64.141]:57715 "EHLO coco.kroah.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750708Ab0KSCHh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 18 Nov 2010 21:07:37 -0500
-Content-Disposition: inline
-In-Reply-To: <AANLkTi=7z40CNBUmfVUEa68J+1R=7nbn9d8vM7ETpajA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehuda@hq.newdream.net>
-Cc: sage@newdream.net, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <libvir-list-bounces@redhat.com>
+In-Reply-To: <Pine.LNX.4.64.1011180905001.2270@cobra.newdream.net>
+List-Unsubscribe: <https://www.redhat.com/mailman/options/libvir-list>,
+	<mailto:libvir-list-request@redhat.com?subject=unsubscribe>
+List-Archive: <https://www.redhat.com/archives/libvir-list>
+List-Post: <mailto:libvir-list@redhat.com>
+List-Help: <mailto:libvir-list-request@redhat.com?subject=help>
+List-Subscribe: <https://www.redhat.com/mailman/listinfo/libvir-list>,
+	<mailto:libvir-list-request@redhat.com?subject=subscribe>
+Sender: libvir-list-bounces@redhat.com
+Errors-To: libvir-list-bounces@redhat.com
+To: Sage Weil <sage@newdream.net>
+Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Nov 18, 2010 at 02:53:35PM -0800, Yehuda Sadeh Weinraub wrote:
-> On Wed, Nov 17, 2010 at 5:30 PM, Greg KH <greg@kroah.com> wrote:
-> > On Wed, Nov 17, 2010 at 03:00:17PM -0800, Yehuda Sadeh Weinraub wrote:
-> >> On Wed, Nov 17, 2010 at 9:19 AM, Greg KH <greg@kroah.com> wrote:
-> >> > On Tue, Nov 16, 2010 at 04:32:09PM -0800, Yehuda Sadeh wrote:
-> >> >> Hi Greg,
-> >> >>
-> >> >> Following is the new rbd sysfs interface. It lists devices in their own
-> >> >> subdirectories, as well as their underlying snapshots. Please let us
-> >> >> know if there's any issue you think we missed or did wrong.
-> >> >>
-> >> >> Thanks,
-> >> >> Yehuda
-> >> >>
-> >> >> ---
-> >> >>
-> >> >> The new interface creates directories per mapped image
-> >> >> and under each it creates a subdir per available snapshot.
-> >> >> This allows keeping a cleaner interface within the sysfs
-> >> >> guidelines. The ABI documentation was updated too.
-> >> >>
-> >> >> Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
-> >> >> ---
-> >> >> ?Documentation/ABI/testing/sysfs-class-rbd | ? 83 +++
-> >> >> ?drivers/block/rbd.c ? ? ? ? ? ? ? ? ? ? ? | ?775 +++++++++++++++++------------
-> >> >> ?2 files changed, 547 insertions(+), 311 deletions(-)
-> >> >>
-> >> >> diff --git a/Documentation/ABI/testing/sysfs-class-rbd b/Documentation/ABI/testing/sysfs-class-rbd
-> >> >> new file mode 100644
-> >> >> index 0000000..4d96618
-> >> >> --- /dev/null
-> >> >> +++ b/Documentation/ABI/testing/sysfs-class-rbd
-> >> >> @@ -0,0 +1,83 @@
-> >> >> +What: ? ? ? ? ? ? ? ?/sys/class/rbd/
-> >> >
-> >> > I thought I mentioned that you should not add new classes to the kernel.
-> >> > Please don't do that, make it a bus_type instead.
-> >>
-> >>
-> >> Ahmm.. apparently not in the rbd related threads. So moving things
-> >> around and having rbd under /sys/bus we'll have the following:
-> >>
-> >> /sys/bus/rbd/drivers/rbd/..
-> >> ? ? add - add a device
-> >> ? ? remove - remove a device
-> >
-> > These files could go in /sys/bus/rbd/ directly instead of burying under
-> > 2 more layers, right?
-> >
-> >>
-> >> /sys/bus/rbd/devices/<id>
-> >> ? ?name
-> >> ? ?pool
-> >> ? ?...
-> >>
-> >> /sys/bus/rbd/devices/<id>/snaps/<name>
-> >> ? ? id
-> >> ? ? size
-> >> ? ? ...
-> >>
-> >>
-> >> Would this work?
-> >
-> > With the change mentioned above, I think that seems sane, do you?
-> >
-> 
-> Yes, pretty much. One problem that I do see is that if we define the
-> snaps/ as a device (and not just as a kobj) as you suggested before,
-> it'll automatically create a 'uevent' entry under it which can be a
-> real issue in the case we have a snapshot named like that. Shouldn't
-> we just create it as a kobj in that case?
+On Thu, Nov 18, 2010 at 5:13 PM, Sage Weil <sage@newdream.net> wrote:
+> On Thu, 18 Nov 2010, Daniel P. Berrange wrote:
+>> On Wed, Nov 17, 2010 at 04:33:07PM -0800, Josh Durgin wrote:
+>> > Hi Daniel,
+>> >
+>> > On 11/08/2010 05:16 AM, Daniel P. Berrange wrote:
+>> > >>>>In any case, before someone goes off and implements something, doe=
+s this
+>> > >>>>look like the right general approach to adding rbd support to libv=
+irt?
+>> > >>>
+>> > >>>I think this looks reasonable. I'd be inclined to get the storage p=
+ool
+>> > >>>stuff working with the kernel RBD driver& =A0UDEV rules for stable =
+path
+>> > >>>names, since that avoids needing to make any changes to guest XML
+>> > >>>format. Support for QEMU with the native librados CEPH driver could
+>> > >>>be added as a second patch.
+>> > >>
+>> > >>Okay, that sounds reasonable. =A0Supporting the QEMU librados driver=
+ is
+>> > >>definitely something we want to target, though, and seems to be rout=
+e that
+>> > >>more users are interested in. =A0Is defining the XML syntax for a gu=
+est VM
+>> > >>something we can discuss now as well?
+>> > >>
+>> > >>(BTW this is biting NBD users too. =A0Presumably the guest VM XML sh=
+ould
+>> > >>look similar?
+>> > >
+>> > >And also Sheepdog storage volumes. To define a syntax for all these w=
+e need
+>> > >to determine what configuration metadata is required at a per-VM leve=
+l for
+>> > >each of them. Then try and decide how to represent that in the guest =
+XML.
+>> > >It looks like at a VM level we'd need a hostname, port number and a v=
+olume
+>> > >name (or path).
+>> >
+>> > It looks like that's what Sheepdog needs from the patch that was
+>> > submitted earlier today. For RBD, we would want to allow multiple host=
+s,
+>> > and specify the pool and image name when the QEMU librados driver is
+>> > used, e.g.:
+>> >
+>> > =A0 =A0 <disk type=3D"rbd" device=3D"disk">
+>> > =A0 =A0 =A0 <driver name=3D"qemu" type=3D"raw" />
+>> > =A0 =A0 =A0 <source vdi=3D"image_name" pool=3D"pool_name">
+>> > =A0 =A0 =A0 =A0 <host name=3D"mon1.example.org" port=3D"6000">
+>> > =A0 =A0 =A0 =A0 <host name=3D"mon2.example.org" port=3D"6000">
+>> > =A0 =A0 =A0 =A0 <host name=3D"mon3.example.org" port=3D"6000">
+>> > =A0 =A0 =A0 </source>
+>> > =A0 =A0 =A0 <target dev=3D"vda" bus=3D"virtio" />
+>> > =A0 =A0 </disk>
+>> >
+>> > Does this seem like a reasonable format for the VM XML? Any suggestion=
+s?
+>>
+>> I'm basically wondering whether we should be going for separate types for
+>> each of NBD, RBD & Sheepdog, as per your proposal & the sheepdog one ear=
+lier
+>> today. Or type to merge them into one type 'nework' which covers any kin=
+d of
+>> network block device, and list a protocol on the =A0source element, eg
+>>
+>> =A0 =A0 =A0<disk type=3D"network" device=3D"disk">
+>> =A0 =A0 =A0 =A0<driver name=3D"qemu" type=3D"raw" />
+>> =A0 =A0 =A0 =A0<source protocol=3D'rbd|sheepdog|nbd' name=3D"...some ima=
+ge identifier...">
+>> =A0 =A0 =A0 =A0 =A0<host name=3D"mon1.example.org" port=3D"6000">
+>> =A0 =A0 =A0 =A0 =A0<host name=3D"mon2.example.org" port=3D"6000">
+>> =A0 =A0 =A0 =A0 =A0<host name=3D"mon3.example.org" port=3D"6000">
+>> =A0 =A0 =A0 =A0</source>
+>> =A0 =A0 =A0 =A0<target dev=3D"vda" bus=3D"virtio" />
+>> =A0 =A0 =A0</disk>
+>
+> That would work...
+>
+> One thing that I think should be considered, though, is that both RBD and
+> NBD can be used for non-qemu instances by mapping a regular block device
+> via the host's kernel. =A0And in that case, there's some sysfs-fu (at lea=
+st
+> in the rbd case; I'm not familiar with how the nbd client works) required
+> to set up/tear down the block device.
 
-No.  Just use the subdirectory option of an attribute group to handle
-that and you will not need to create any device or kobject with that
-name, the driver core will handle it all automatically for you.
+An nbd block device is attached using the nbd-client(1) userspace tool:
+$ nbd-client my-server 1234 /dev/nbd0 # <host> <port> <nbd-device>
 
-hope this helps,
+That program will open the socket, grab /dev/nbd0, and poke it with a
+few ioctls so the kernel has the socket and can take it from there.
 
-greg k-h
+Stefan
