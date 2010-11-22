@@ -1,57 +1,25 @@
-From: Tracey Dent <tdent48227@gmail.com>
-Subject: [PATCH] Net: ceph: Makefile: Remove unnessary code
-Date: Sun, 21 Nov 2010 20:23:50 -0500
-Message-ID: <1290389030-2743-1-git-send-email-tdent48227@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: sage@newdream.net
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, netdev@vger.kernel.org, davem@davemloft.net, Tracey Dent <tdent48227@gmail.com>
+From: David Miller <davem@davemloft.net>
+Subject: Re: [PATCH 00/00] Remove deprecated items from Makefiles
+Date: Mon, 22 Nov 2010 08:17:31 -0800 (PST)
+Message-ID: <20101122.081731.226770168.davem@davemloft.net>
+References: <1290387808-2239-1-git-send-email-tdent48227@gmail.com>
+Mime-Version: 1.0
+Content-Type: Text/Plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <netfilter-devel-owner@vger.kernel.org>
+In-Reply-To: <1290387808-2239-1-git-send-email-tdent48227@gmail.com>
+Sender: netfilter-devel-owner@vger.kernel.org
+To: tdent48227@gmail.com
+Cc: marcel@holtmann.org, padovan@profusion.mobi, linux-bluetooth@vger.kernel.org, netdev@vger.kernel.org, sjur.brandeland@stericsson.com, socketcan@hartkopp.net, urs.thuermann@volkswagen.de, socketcan-core@lists.berlios.de, sage@newdream.net, ceph-devel@vger.kernel.org, wang840925@gmail.com, jlayton@redhat.com, kaber@trash.net, pekkas@netcore.fi, linux-kernel@vger.kernel.org, netfilter-devel@vger.kernel.org, netfilter@vger.kernel.org, samuel@sortiz.org
 List-Id: ceph-devel.vger.kernel.org
 
-Remove the if and else conditional because the code is in mainline and there
-is no need in it being there.
+From: Tracey Dent <tdent48227@gmail.com>
+Date: Sun, 21 Nov 2010 20:03:11 -0500
 
-Signed-off-by: Tracey Dent <tdent48227@gmail.com>
----
- net/ceph/Makefile |   22 ----------------------
- 1 files changed, 0 insertions(+), 22 deletions(-)
+> I changed Makefiles to use <modules>-y instead of <modules>-objs because -objs
+> is deprecated and not even mentioned in Documentation/kbuild/makefiles.txt.
+> 
+> Also, remove some if-conditional statments because I used the ccflags-$ flag 
+> instead of EXTRA_CFLAGS because EXTRA_CFLAGS.
 
-diff --git a/net/ceph/Makefile b/net/ceph/Makefile
-index 153bdec..e87ef43 100644
---- a/net/ceph/Makefile
-+++ b/net/ceph/Makefile
-@@ -1,9 +1,6 @@
- #
- # Makefile for CEPH filesystem.
- #
--
--ifneq ($(KERNELRELEASE),)
--
- obj-$(CONFIG_CEPH_LIB) += libceph.o
- 
- libceph-y := ceph_common.o messenger.o msgpool.o buffer.o pagelist.o \
-@@ -16,22 +13,3 @@ libceph-y := ceph_common.o messenger.o msgpool.o buffer.o pagelist.o \
- 	ceph_fs.o ceph_strings.o ceph_hash.o \
- 	pagevec.o
- 
--else
--#Otherwise we were called directly from the command
--# line; invoke the kernel build system.
--
--KERNELDIR ?= /lib/modules/$(shell uname -r)/build
--PWD := $(shell pwd)
--
--default: all
--
--all:
--	$(MAKE) -C $(KERNELDIR) M=$(PWD) CONFIG_CEPH_LIB=m modules
--
--modules_install:
--	$(MAKE) -C $(KERNELDIR) M=$(PWD) CONFIG_CEPH_LIB=m modules_install
--
--clean:
--	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
--
--endif
--- 
-1.7.3.2.245.g03276
+All applied, thanks Tracey.
