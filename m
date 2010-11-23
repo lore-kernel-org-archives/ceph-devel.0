@@ -1,223 +1,891 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: Restart of clustered mds file system fails?
-Date: Tue, 23 Nov 2010 16:18:58 -0700
-Message-ID: <1290554338.15814.63.camel@sale659.sandia.gov>
-References: <1290549046.15814.54.camel@sale659.sandia.gov>
- <AANLkTin_q0KeV2iwZzPk785wpXWnVxEmLfpjPSNU3LZD@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+From: =?utf-8?Q?Alex=E2=80=8E_Nelson?= <ajnelson@cs.ucsc.edu>
+Subject: [PATCH] Expose Ceph data location information to Hadoop
+Date: Tue, 23 Nov 2010 15:41:29 -0800
+Message-ID: <41ABF261-6D76-46A5-95BC-2C5461EDB0DD@cs.ucsc.edu>
+Mime-Version: 1.0 (Apple Message framework v1082)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:55949 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753109Ab0KWXTI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Nov 2010 18:19:08 -0500
-In-Reply-To: <AANLkTin_q0KeV2iwZzPk785wpXWnVxEmLfpjPSNU3LZD@mail.gmail.com>
+Received: from services.cse.ucsc.edu ([128.114.48.10]:40458 "EHLO
+	services.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753199Ab0KWXl3 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Nov 2010 18:41:29 -0500
+Received: from [192.168.50.242] (soenat3.cse.ucsc.edu [128.114.60.41])
+	(authenticated bits=0)
+	by services.cse.ucsc.edu (8.13.6/8.13.6) with ESMTP id oANNfTuZ001016
+	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Tue, 23 Nov 2010 15:41:29 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+
+Hello all,
+
+This patch is not a part of the Ceph code base, but is instead a part of HADOOP-6779 [1], which aims to bring Ceph to Hadoop as an underlying file system instead of HDFS.  I was part of the group that wrote the USENIX ;login: article comparing Ceph and HDFS, to which I will refer those wanting a comparison of the file systems [2].
+
+In a nutshell, this is the purpose of the patch:  Help Hadoop move the computation to the data, without incurring metadata traffic, and reducing data traffic from misplaced jobs.  Hadoop exposes an interface called RawLocalFileSystem, which uses any directory on the local Hadoop node for storage.  Ceph can easily act as a raw local file system, but if it does so Hadoop has no idea on which nodes data reside.  This patch produces a new file system that is basically RawLocalFileSystem with GetFileBlockLocations() implemented as a native method.  The method must be in JNI because Java explicitly does not support ioctl calls, and the data locations are retrieved solely through Ceph's ioctls designed to report data locations.
+
+I'm providing this patch here because it won't yet pass Hadoop submission guidelines, but it should get into the hands of the Hadoop community, eventually officially.  These issues will have to be resolved before the JIRA [1] process can finish:
+
+* Test suite:  From my own setups, I have not gotten Hadoop to pass the unit test suite, even unpatched.  Patched, and running  "ant -Dtest.build.data=/mnt/ceph test-core" has yet to finish successfully for me.
+* I am uncertain what the Hadoop ramifications are of modifying a unit test---that is, whether that should be broken out into its own patch.
+* For those concerned with debugging, I have some debug print statements commented out with "//debug//".  Obviously, those won't be going into Hadoop, but they can illustrate what's going on in some places if you find a weird corner case.
+* The JNI code probably leaks memory.  This was my first experience writing JNI, so that code needs to undergo review by someone more experienced with native C++ for JNI.
+* The code was developed against release-0.20.2, which is slightly out of date.  This happened to be the Hadoop version for which we had a working installation.  The code should change to trunk, but only after it's better evaluated on a stable build.
+* Less interesting:  I am inexperienced with automake, and was unable to integrate the native code into the ant and automake build process. Assistance on that would be greatly appreciated (even an email to a good reference article).  Until that is fixed, there are explicit instructions to compile the native component in the file README-HADOOP-6779.txt.
+
+The patch git-applies to release-0.20.2.  I hope this gets the Hadoop and Ceph communities talking more.  I think the two projects have a lot they can do for each other.
+
+--Alex
+
+[1] https://issues.apache.org/jira/browse/HADOOP-6779
+[2] http://www.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf
 
 
-On Tue, 2010-11-23 at 15:42 -0700, Gregory Farnum wrote:
-> Jim:
-> I've managed to reproduce this (or a similar problem) locally,
-> although I am getting core files. If you aren't I suspect your ulimit
-> has been reset or isn't high enough.
+diff --git a/.gitignore b/.gitignore
+index cecce34..330514f 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -18,6 +18,8 @@
+.project
+.settings
+.svn
++.idea
++*.iml
+build/
+conf/masters
+conf/slaves
+diff --git a/README-HADOOP-6779.txt b/README-HADOOP-6779.txt
+new file mode 100644
+index 0000000..65cbf66
+--- /dev/null
++++ b/README-HADOOP-6779.txt
+@@ -0,0 +1,46 @@
++= HADOOP-6779 =
++
++This document contains setup instructions for the Ceph Locality patch for Hadoop.  It describes compiling Hadoop and the native methods.
++
++== Environmental setup ==
++
++Must define at least these environment variables:
++HADOOP_HOME
++	Home of the Hadoop source.
++CEPH_HOME
++	$CEPH_HOME/src is the location of client/ioctl.h.
++JAVA_HOME
++	$JAVA_HOME/include or $JAVA_HOME/include/linux has jni.h.
++
++== Prerequisite software ==
++
++Ubuntu 10.10:
++apt-get install ant g++ #Hadoop
++apt-get install automake libtool libboost-dev libedit-dev libssl-dev #Ceph
++
++Fedora Core 14:
++yum install ant ant-junit gcc-c++ #Hadoop
++yum install autoconf automake libtool boost-devel libedit-devel openssl-devel #Ceph
++
++Fedora Core 14 comes with SELinux enabled.  This causes things like `touch /mnt/ceph/foo` to fail, so disabling SELinux could help.
++
++
++== Compiling ==
++
++To compile the JNI CPP code manually, first do the Ant build in Hadoop for the "jar" target:
++
++ant jar
++
++Then run these commands:
++
++cd $HADOOP_HOME/build/classes
++javah -jni org.apache.hadoop.fs.CephLocalityFileSystem
++cd $HADOOP_HOME/src/native/src/org/apache/hadoop/fs && g++ -shared -fPIC CephLocalityFileSystem.cpp -o libCephLocalityFileSystem.so -iquote$HADOOP_HOME/build/classes -iquote$CEPH_HOME/src -I$JAVA_HOME/include -I$JAVA_HOME/include/linux && cd $HADOOP_HOME
++
++
++== Testing ==
++
++To employ Ceph in the unit test suite, set up the Ceph system (assuming mounting at /mnt/ceph), and then run:
++ant -Dtest.build.data=/mnt/ceph/TestGetFileBlockLocations test-core
++
++The additional flag "-Dtestcase=TestGetFileBlockLocations" runs just the unit test modified for this patch.
+\ No newline at end of file
+diff --git a/bin/hadoop b/bin/hadoop
+index 273549f..c1e8f02 100755
+--- a/bin/hadoop
++++ b/bin/hadoop
+@@ -253,14 +253,19 @@ if $cygwin; then
+TOOL_PATH=`cygpath -p -w "$TOOL_PATH"`
+fi
+# setup 'java.library.path' for native-hadoop code if necessary
++#TODO Once ant compiles CephLocalityFileSystem properly, remove the third clause in this.
+JAVA_LIBRARY_PATH=''
+-if [ -d "${HADOOP_HOME}/build/native" -o -d "${HADOOP_HOME}/lib/native" ]; then
++if [ -d "${HADOOP_HOME}/build/native" -o -d "${HADOOP_HOME}/lib/native" -o -d "$HADOOP_HOME/src/native/src/org/apache/hadoop/fs" ]; then
+JAVA_PLATFORM=`CLASSPATH=${CLASSPATH} ${JAVA} -Xmx32m org.apache.hadoop.util.PlatformName | sed -e "s/ /_/g"`
+-  
++
+if [ -d "$HADOOP_HOME/build/native" ]; then
+ JAVA_LIBRARY_PATH=${HADOOP_HOME}/build/native/${JAVA_PLATFORM}/lib
+fi
+-  
++
++  if [ -d "$HADOOP_HOME/src/native/src/org/apache/hadoop/fs" ]; then
++    JAVA_LIBRARY_PATH=${HADOOP_HOME}/src/native/src/org/apache/hadoop/fs
++  fi
++
+if [ -d "${HADOOP_HOME}/lib/native" ]; then
+ if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
+   JAVA_LIBRARY_PATH=${JAVA_LIBRARY_PATH}:${HADOOP_HOME}/lib/native/${JAVA_PLATFORM}
+diff --git a/build.xml b/build.xml
+index 602fcfe..7c34f41 100644
+--- a/build.xml
++++ b/build.xml
+@@ -455,6 +455,7 @@
+	
+ <mkdir dir="${build.native}/lib"/>
+ <mkdir dir="${build.native}/src/org/apache/hadoop/io/compress/zlib"/>
++    <mkdir dir="${build.native}/src/org/apache/hadoop/fs"/>
 
-Doh!!  You're right, for some reason my
-root ulimit -c was zero.  Now it's not ;)
+	<javah
+	  classpath="${build.classes}"
+@@ -466,6 +467,15 @@
+   <class name="org.apache.hadoop.io.compress.zlib.ZlibDecompressor" />
+	</javah>
 
-> 
-> This is an error I introduced when making some changes to how we do
-> trimming. I forgot to account for how the root inode is different, so
-> all MDS instances that weren't the auth on the root inode should have
-> crashed during the resolve phase. (I'm not sure why you were only
-> having 5/7 crash before, it might be that two MDSes were sharing auth
-> or that one of the MDSes wasn't moving through the phases as quickly
-> as the others.)
-> I've pushed a fix to the testing branch in commit
-> d8652de61647ae19ad0f3ec90fad00930cdd5afd; it should cherry-pick to any
-> recent-ish unstable just fine. :)
++    <javah
++      classpath="${build.classes}"
++      destdir="${build.native}/src/org/apache/hadoop/fs"
++      force="yes"
++      verbose="yes"
++      >
++      <class name="org.apache.hadoop.fs.CephLocalityFileSystem" />
++    </javah>
++
+	<exec dir="${build.native}" executable="sh" failonerror="true">
+	  <env key="OS_NAME" value="${os.name}"/>
+	  <env key="OS_ARCH" value="${os.arch}"/>
+@@ -727,7 +737,7 @@
+   <sysproperty key="test.build.extraconf" value="${test.build.extraconf}" />
+   <sysproperty key="hadoop.policy.file" value="hadoop-policy.xml"/>
+   <sysproperty key="java.library.path"
+-       value="${build.native}/lib:${lib.dir}/native/${build.platform}"/>
++       value="${build.native}/lib:${lib.dir}/native/${build.platform}:${basedir}/src/native/src/org/apache/hadoop/fs"/>
+   <sysproperty key="install.c++.examples" value="${install.c++.examples}"/>
+   <!-- set io.compression.codec.lzo.class in the child jvm only if it is set -->
+	  <syspropertyset dynamic="no">
+diff --git a/src/core/core-default.xml b/src/core/core-default.xml
+index a26e733..9a055df 100644
+--- a/src/core/core-default.xml
++++ b/src/core/core-default.xml
+@@ -113,10 +113,17 @@
+<property>
+<name>fs.file.impl</name>
+<value>org.apache.hadoop.fs.LocalFileSystem</value>
++  <!--<value>org.apache.hadoop.fs.CephLocalityFileSystem</value>-->
+<description>The FileSystem for file: uris.</description>
+</property>
 
-I pulled current testing into current unstable, the result 
-works great on this test :)
+<property>
++  <name>fs.cephk.impl</name>
++  <value>org.apache.hadoop.fs.CephLocalityFileSystem</value>
++  <description>The FileSystem for cephk: uris, which should be the Ceph client's mount point.  (cephk used to distinguish from HADOOP-6253 Ceph userspace shim.)</description>
++</property>
++
++<property>
+<name>fs.hdfs.impl</name>
+<value>org.apache.hadoop.hdfs.DistributedFileSystem</value>
+<description>The FileSystem for hdfs: uris.</description>
+diff --git a/src/core/org/apache/hadoop/fs/CephLocalityFileSystem.java b/src/core/org/apache/hadoop/fs/CephLocalityFileSystem.java
+new file mode 100644
+index 0000000..11ef6d2
+--- /dev/null
++++ b/src/core/org/apache/hadoop/fs/CephLocalityFileSystem.java
+@@ -0,0 +1,149 @@
++/**
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements.  See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership.  The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License.  You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package org.apache.hadoop.fs;
++
++import java.io.*;
++import java.net.URI;
++import java.nio.ByteBuffer;
++import java.nio.channels.FileLock;
++import java.util.*;
++
++import org.apache.hadoop.conf.Configuration;
++import org.apache.hadoop.fs.permission.*;
++import org.apache.hadoop.util.Progressable;
++import org.apache.hadoop.util.StringUtils;
++import org.apache.hadoop.util.Shell;
++
++/****************************************************************
++ * Extend the RawFileSystem API for the Ceph filesystem.
++ *
++ * Presently, deployment must include manually-compiled C++ classes.
++ * Please see $HADOOP_HOME/README-HADOOP-6779.txt.
++ *
++ *****************************************************************/
++public class CephLocalityFileSystem extends RawLocalFileSystem {
++  /**
++   * Inherited from HADOOP-6253's CephFileSystem.java.
++   */
++  private boolean initialized = false;
++
++  /**
++   * Inherited from HADOOP-6253's CephFileSystem.java.
++   * //TODO Determine if it's possible to set the authority on this uri; there's no setter field.
++   */
++  private URI uri;
++
++  /**
++   * Inherited from RawLocalFileSystem.java.
++   */
++  static final URI NAME = URI.create("cephk:///");
++
++  public CephLocalityFileSystem() {
++    super();
++
++    //Debug
++    //System.out.println(String.format("CephLocalityFileSystem() called."));
++    //System.out.println("System.getProperty(\"user.dir\"):\t" + System.getProperty("user.dir"));
++    //System.out.println("new Path(System.getProperty(\"user.dir\")).makeQualified(this):\t" + (new Path(System.getProperty("user.dir")).makeQualified(this)));
++
++    //TODO Maybe we want to tweak the workingDir?
++    //this.workingDir =  new Path("file:///mnt/ceph");
++
++    //Debug
++    //System.out.println(String.format("CephLocalityFileSystem() finished."));
++  }
++
++  /**
++   * The default constructor for RawLocalFileSystem
++   * takes environment's cwd and makes that this file system's starting
++   * point.  With this constructor, specify your own starting point.
++   *
++   * @param startDir
++   */
++  public CephLocalityFileSystem(Path startDir) {
++    //Debug
++    //System.out.println(String.format("CephLocalityFileSystem(%s) called.", startDir.toString()));
++
++    this.workingDir = startDir;
++
++    //Debug
++    //System.out.println(String.format("CephLocalityFileSystem(%s) finished.", startDir.toString()));
++  }
++
++  /**
++   * Return an array containing hostnames, offset and size of
++   * portions of the given file.  For a nonexistent
++   * file or regions, null will be returned.
++   *
++   * For the Ceph file system, this employs ioctl() calls through JNI.
++   * The ioctl() data structures are not returned directly to Java space
++   * because running ioctl() requires an open file handle.  We operate
++   * the file handle logistics in local code for now; an alternative
++   * is to use a JNI call to open the file handle and another call to
++   * destroy it.
++   */
++  public native BlockLocation[] getFileBlockLocations(FileStatus file, long start, long len) throws IOException;
++
++  /**
++   * Convenience method for JNI, to save a few crossings between the
++   * C++/Java boundary.
++   *
++   * @param fs
++   * @return Returns the string of the path in fs.
++   */
++  public String getPathStringFromFileStatus(FileStatus fs) {
++    return fs.getPath().toUri().getRawPath();
++  }
++
++  //TODO Ceph exposes file block size through an ioctl.  getBlockSize is deprecated; overwrite getFileStatus() instead.
++
++  /**
++   * Code inherited and evolved from HADOOP-6253's CephFileSystem.java class.
++   * Probably doesn't need to bother with this.initialized member variable; 6253 used that for starting up Ceph.
++   */
++  @Override
++  public void initialize(URI uri, Configuration conf) throws IOException{
++    //Debug
++    //System.out.println("CephLocalityFileSystem.initialize() called.");
++    if (!this.initialized) {
++      super.initialize(uri, conf);
++      setConf(conf);
++      this.uri=uri;  //Note:  This is not set in the superclasses, must be set here.
++      //Debug
++      //System.out.println("uri:\t"+uri);
++      //System.out.println("uri.getScheme():\t"+uri.getScheme());
++      //System.out.println("uri.getAuthority():\t"+uri.getAuthority());
++      //System.out.println("this.uri:\t"+this.uri);
++      //System.out.println("this.uri.getAuthority():\t"+this.uri.getAuthority());
++      //System.out.println("Working directory:\t" + this.workingDir);
++      this.initialized = true;
++    }
++    //Debug
++    //System.out.println("CephLocalityFileSystem.initialize() finished.");
++  }
++
++  /**
++   * Overrides RawLocalFileSystem's "file:///".
++   */
++  public URI getUri() {
++    return NAME;
++  }
++
++  static{ System.loadLibrary("CephLocalityFileSystem"); }
++}
+diff --git a/src/core/org/apache/hadoop/fs/FileStatus.java b/src/core/org/apache/hadoop/fs/FileStatus.java
+index 1249846..e663514 100644
+--- a/src/core/org/apache/hadoop/fs/FileStatus.java
++++ b/src/core/org/apache/hadoop/fs/FileStatus.java
+@@ -249,4 +249,32 @@ public class FileStatus implements Writable, Comparable {
+public int hashCode() {
+ return getPath().hashCode();
+}
++
++  public String report() {
++    StringBuilder result = new StringBuilder();
++    result.append("Status of " + path + ":\n");
++
++    result.append("\tlength\t\t");
++    result.append(length);
++    result.append("\n");
++
++    result.append("\tblocksize\t\t");
++    result.append(blocksize);
++    result.append("\n");
++
++    result.append("\tblock_replication\t");
++    result.append(block_replication);
++    result.append("\n");
++
++    return result.toString();
++    /*
++  private boolean isdir;
++  private long modification_time;
++  private long access_time;
++  private FsPermission permission;
++  private String owner;
++  private String group;
++
++     */
++  }
+}
+diff --git a/src/core/org/apache/hadoop/fs/FileSystem.java b/src/core/org/apache/hadoop/fs/FileSystem.java
+index 304c136..4474051 100644
+--- a/src/core/org/apache/hadoop/fs/FileSystem.java
++++ b/src/core/org/apache/hadoop/fs/FileSystem.java
+@@ -1370,10 +1370,15 @@ public abstract class FileSystem extends Configured implements Closeable {
 
-Thanks for the quick turnaround!
+private static FileSystem createFileSystem(URI uri, Configuration conf
+   ) throws IOException {
++    //Debug:  Report the class of the file system
++    //LOG.info("java.library.path:\t" + System.getProperty("java.library.path") + "\n");
++    //LOG.info("uri:\t" + uri + "\n");
++    //LOG.info("uri.getScheme():\t" + uri.getScheme() + "\n");
+ Class<?> clazz = conf.getClass("fs." + uri.getScheme() + ".impl", null);
+ if (clazz == null) {
+   throw new IOException("No FileSystem for scheme: " + uri.getScheme());
+ }
++    //LOG.info("clazz.toString():\t" + clazz.toString() + "\n");
+ FileSystem fs = (FileSystem)ReflectionUtils.newInstance(clazz, conf);
+ fs.initialize(uri, conf);
+ return fs;
+diff --git a/src/core/org/apache/hadoop/fs/RawLocalFileSystem.java b/src/core/org/apache/hadoop/fs/RawLocalFileSystem.java
+index 8d439f9..5a4b65b 100644
+--- a/src/core/org/apache/hadoop/fs/RawLocalFileSystem.java
++++ b/src/core/org/apache/hadoop/fs/RawLocalFileSystem.java
+@@ -36,7 +36,7 @@ import org.apache.hadoop.util.Shell;
+*****************************************************************/
+public class RawLocalFileSystem extends FileSystem {
+static final URI NAME = URI.create("file:///");
+-  private Path workingDir;
++  protected Path workingDir;
 
--- Jim
+public RawLocalFileSystem() {
+ workingDir = new Path(System.getProperty("user.dir")).makeQualified(this);
+@@ -474,7 +474,7 @@ public class RawLocalFileSystem extends FileSystem {
+     String.format("%04o", permission.toShort()));
+}
 
-> -Greg
-> 
-> On Tue, Nov 23, 2010 at 1:50 PM, Jim Schutt <jaschut@sandia.gov> wrote:
-> >
-> > Hi,
-> >
-> > I've been working with a file system with 7 mon instances,
-> > and 7 mds instances, on current unstable (fc212548aea1).
-> >
-> > I start it up, let it stabilize (all the osds get to
-> > the same epoch), shut it down, then restart it.
-> >
-> > Not very long after the restart, 6 of the 7 mds instances
-> > disappear, with no core files and no stack trace in the logs.
-> >
-> > The last few lines of output from ceph -w look like this:
-> >
-> > 2010-11-23 14:37:20.504569    pg v88: 3432 pgs: 3432 active; 138 KB data, 177 MB used, 3032 GB / 3032 GB avail; 12/234 degraded (5.128%)
-> > 2010-11-23 14:37:20.739372    pg v89: 3432 pgs: 3432 active; 138 KB data, 167 MB used, 3032 GB / 3032 GB avail; 12/234 degraded (5.128%)
-> > 2010-11-23 14:37:21.033669    pg v90: 3432 pgs: 3432 active; 138 KB data, 154 MB used, 3032 GB / 3032 GB avail; 12/234 degraded (5.128%)
-> > 2010-11-23 14:37:21.353834    pg v91: 3432 pgs: 3432 active; 138 KB data, 139 MB used, 3032 GB / 3032 GB avail; 12/234 degraded (5.128%)
-> > 2010-11-23 14:37:21.478496   mds e33: 7/7/7 up {0=up:replay,1=up:replay,2=up:resolve,3=up:replay,4=up:resolve,5=up:resolve,6=up:replay}
-> > 2010-11-23 14:37:21.709432   log 2010-11-23 14:37:21.403836 mon0 172.17.40.34:6789/0 25 : [INF] mds2 172.17.40.34:6800/7571 up:resolve
-> > 2010-11-23 14:37:21.827792    pg v92: 3432 pgs: 3432 active; 138 KB data, 134 MB used, 3032 GB / 3032 GB avail; 10/234 degraded (4.274%)
-> > 2010-11-23 14:37:22.197558    pg v93: 3432 pgs: 3432 active; 139 KB data, 128 MB used, 3032 GB / 3032 GB avail; 10/234 degraded (4.274%)
-> > 2010-11-23 14:37:22.484411    pg v94: 3432 pgs: 3432 active; 139 KB data, 116 MB used, 3032 GB / 3032 GB avail; 10/234 degraded (4.274%)
-> > 2010-11-23 14:37:22.766665    pg v95: 3432 pgs: 3432 active; 139 KB data, 102316 KB used, 3032 GB / 3032 GB avail; 10/234 degraded (4.274%)
-> > 2010-11-23 14:37:25.261067   mds e34: 7/7/7 up {0=up:resolve,1=up:replay,2=up:resolve,3=up:replay,4=up:resolve,5=up:resolve,6=up:replay}
-> > 2010-11-23 14:37:25.398455   log 2010-11-23 14:37:25.236187 mon0 172.17.40.34:6789/0 26 : [INF] mds0 172.17.40.40:6800/7567 up:resolve
-> > 2010-11-23 14:37:25.592960   mds e35: 7/7/7 up {0=up:resolve,1=up:replay,2=up:resolve,3=up:replay,4=up:resolve,5=up:resolve,6=up:resolve}
-> > 2010-11-23 14:37:25.774941   log 2010-11-23 14:37:25.603505 mon0 172.17.40.34:6789/0 27 : [INF] mds6 172.17.40.35:6800/7935 up:resolve
-> > 2010-11-23 14:37:29.273125   mds e36: 7/7/7 up {0=up:resolve,1=up:replay,2=up:resolve,3=up:resolve,4=up:resolve,5=up:resolve,6=up:resolve}
-> > 2010-11-23 14:37:29.410528   log 2010-11-23 14:37:29.247681 mon0 172.17.40.34:6789/0 28 : [INF] mds3 172.17.40.37:6800/996 up:resolve
-> > 2010-11-23 14:37:29.612511   mds e37: 7/7/7 up {0=up:resolve,1=up:resolve,2=up:resolve,3=up:resolve,4=up:resolve,5=up:resolve,6=up:resolve}
-> > 2010-11-23 14:37:29.799629   mds e38: 7/7/7 up {0=up:reconnect,1=up:resolve,2=up:resolve,3=up:resolve,4=up:resolve,5=up:resolve,6=up:resolve}
-> > 2010-11-23 14:37:29.824094   log 2010-11-23 14:37:29.618299 mon0 172.17.40.34:6789/0 29 : [INF] mds1 172.17.40.39:6800/8550 up:resolve
-> > 2010-11-23 14:37:30.119613   log 2010-11-23 14:37:29.760648 mon0 172.17.40.34:6789/0 30 : [INF] mds0 172.17.40.40:6800/7567 up:reconnect
-> > 2010-11-23 14:37:30.216568   mds e39: 7/7/7 up {0=up:rejoin,1=up:resolve,2=up:resolve,3=up:resolve,4=up:resolve,5=up:resolve,6=up:resolve}
-> > 2010-11-23 14:37:30.434163   log 2010-11-23 14:37:30.208227 mon0 172.17.40.34:6789/0 31 : [INF] mds0 172.17.40.40:6800/7567 up:rejoin
-> > 2010-11-23 14:37:46.274801   mds e40: 7/7/7 up {0=up:rejoin,1=up:resolve,2=up:resolve(laggy or crashed),3=up:resolve(laggy or crashed),4=up:resolve(laggy or crashed),5=up:resolve,6=up:resolve}
-> > 2010-11-23 14:37:51.303591   mds e41: 7/7/7 up {0=up:rejoin,1=up:resolve(laggy or crashed),2=up:resolve(laggy or crashed),3=up:resolve(laggy or crashed),4=up:resolve(laggy or crashed),5=up:resolve(laggy or crashed),6=up:resolve(laggy or crashed)}
-> >
-> > The last few lines of the disappearing mds instance logs
-> > look like this; in particular 5 of the 6 that disappeared
-> > were all doing the "handle resolve from mds1"
-> >
-> > 2010-11-23 14:37:29.621030 41b7c940 -- 172.17.40.36:6800/7413 <== mds1 172.17.40.39:6800/8550 2 ==== mds_resolve(1+0 subtrees +0 slave requests) v1 ==== 28+0+0 (1837742466 0 0) 0x1a6eb60
-> > 2010-11-23 14:37:29.621046 41b7c940 mds4.cache handle_resolve from mds1
-> > 2010-11-23 14:37:29.621055 41b7c940 mds4.cache show_subtrees
-> > 2010-11-23 14:37:29.621065 41b7c940 mds4.cache |__ 4    auth [dir 104 ~mds4/ [2,head] auth v=1 cv=0/0 dir_auth=4 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1a76f10]
-> > 2010-11-23 14:37:29.621087 41b7c940 mds4.cache maybe_resolve_finish got all resolves+resolve_acks, done.
-> > 2010-11-23 14:37:29.621099 41b7c940 mds4.cache disambiguate_imports
-> > 2010-11-23 14:37:29.621109 41b7c940 mds4.cache show_subtrees
-> > 2010-11-23 14:37:29.621118 41b7c940 mds4.cache |__ 4    auth [dir 104 ~mds4/ [2,head] auth v=1 cv=0/0 dir_auth=4 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1a76f10]
-> > 2010-11-23 14:37:29.621136 41b7c940 mds4.cache trim_unlinked_inodes
-> > 2010-11-23 14:37:29.621147 41b7c940 mds4.cache recalc_auth_bits
-> > 2010-11-23 14:37:29.621157 41b7c940 mds4.cache  subtree auth=1 for [dir 104 ~mds4/ [2,head] auth v=1 cv=0/0 dir_auth=4 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1a76f10]
-> > 2010-11-23 14:37:29.621172 41b7c940 mds4.cache show_subtrees
-> > 2010-11-23 14:37:29.621182 41b7c940 mds4.cache |__ 4    auth [dir 104 ~mds4/ [2,head] auth v=1 cv=0/0 dir_auth=4 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1a76f10]
-> > 2010-11-23 14:37:29.621198 41b7c940 mds4.cache show_cache
-> > 2010-11-23 14:37:29.621205 41b7c940 mds4.cache  unlinked [inode 1 [...2,head] / rep@0.0 v1 snaprealm=0x7fa750010d90 f() n() (iversion lock) 0x7fa750015270]
-> > 2010-11-23 14:37:29.621222 41b7c940 mds4.cache  unlinked [inode 104 [...2,head] ~mds4/ auth v1 snaprealm=0x1a6f450 f() n() (iversion lock) | dirfrag 0x7fa750015b00]
-> > 2010-11-23 14:37:29.621239 41b7c940 mds4.cache   dirfrag [dir 104 ~mds4/ [2,head] auth v=1 cv=0/0 dir_auth=4 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1a76f10]
-> > 2010-11-23 14:37:29.621256 41b7c940 mds4.cache trim_non_auth
-> > 2010-11-23 14:37:29.621283 41b7c940 mds4.cache  ... [inode 1 [...2,head] / rep@0.0 v1 snaprealm=0x7fa750010d90 f() n() (iversion lock) 0x7fa750015270]
-> >
-> >
-> > The above behavior is repeatable, except usually it's just
-> > 5 of 7 mds instances that die, and the last thing in their
-> > logs is always a handle_resolve from the same peer mds.
-> >
-> > What's new in this case is that 6th instance disappearing;
-> > its log had this to say:
-> >
-> > 2010-11-23 14:37:29.621961 42aea940 mds1.cache handle_resolve from mds0
-> > 2010-11-23 14:37:29.621975 42aea940 mds1.cache show_subtrees
-> > 2010-11-23 14:37:29.621985 42aea940 mds1.cache |__ 1    auth [dir 101 ~mds1/ [2,head] auth v=1 cv=0/0 dir_auth=1 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1255140]
-> > 2010-11-23 14:37:29.622003 42aea940 mds1.cache maybe_resolve_finish still waiting for more resolves, got (0,6), need (0,2,3,4,5,6)
-> > 2010-11-23 14:37:29.622016 42aea940 -- 172.17.40.39:6800/8550 dispatch_throttle_release 44 to dispatch throttler 156/104857600
-> > 2010-11-23 14:37:29.622028 42aea940 -- 172.17.40.39:6800/8550 <== mds2 172.17.40.34:6800/7571 4 ==== mds_resolve(1+0 subtrees +0 slave requests) v1 ==== 28+0+0 (2796914913 0 0) 0x1265200
-> > 2010-11-23 14:37:29.622043 42aea940 mds1.cache handle_resolve from mds2
-> > 2010-11-23 14:37:29.622052 42aea940 mds1.cache show_subtrees
-> > 2010-11-23 14:37:29.622061 42aea940 mds1.cache |__ 1    auth [dir 101 ~mds1/ [2,head] auth v=1 cv=0/0 dir_auth=1 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1255140]
-> > 2010-11-23 14:37:29.622077 42aea940 mds1.cache maybe_resolve_finish still waiting for more resolves, got (0,2,6), need (0,2,3,4,5,6)
-> > 2010-11-23 14:37:29.622090 42aea940 -- 172.17.40.39:6800/8550 dispatch_throttle_release 28 to dispatch throttler 112/104857600
-> > 2010-11-23 14:37:29.622101 42aea940 -- 172.17.40.39:6800/8550 <== mds4 172.17.40.36:6800/7413 3 ==== mds_resolve(1+0 subtrees +0 slave requests) v1 ==== 28+0+0 (891395286 0 0) 0x1265c50
-> > 2010-11-23 14:37:29.622116 42aea940 mds1.cache handle_resolve from mds4
-> > 2010-11-23 14:37:29.622124 42aea940 mds1.cache show_subtrees
-> > 2010-11-23 14:37:29.622134 42aea940 mds1.cache |__ 1    auth [dir 101 ~mds1/ [2,head] auth v=1 cv=0/0 dir_auth=1 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1255140]
-> > 2010-11-23 14:37:29.622150 42aea940 mds1.cache maybe_resolve_finish still waiting for more resolves, got (0,2,4,6), need (0,2,3,4,5,6)
-> > 2010-11-23 14:37:29.622177 42aea940 -- 172.17.40.39:6800/8550 dispatch_throttle_release 28 to dispatch throttler 84/104857600
-> > 2010-11-23 14:37:29.622207 42aea940 -- 172.17.40.39:6800/8550 <== mds5 172.17.40.38:6800/7395 3 ==== mds_resolve(1+0 subtrees +0 slave requests) v1 ==== 28+0+0 (2406375000 0 0) 0x1264150
-> > 2010-11-23 14:37:29.622226 42aea940 mds1.cache handle_resolve from mds5
-> > 2010-11-23 14:37:29.622238 42aea940 mds1.cache show_subtrees
-> > 2010-11-23 14:37:29.622250 411d3940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=1 l=0).reader couldn't read tag, Success
-> > 2010-11-23 14:37:29.622272 411d3940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=1 l=0).fault 0: Success
-> > 2010-11-23 14:37:29.622290 452f6940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=1 l=0).writer: state = 2 policy.server=0
-> > 2010-11-23 14:37:29.622309 452f6940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=1 l=0).write_ack 3
-> > 2010-11-23 14:37:29.622326 411d3940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=1 l=0).requeue_sent mds_resolve(1+0 subtrees +0 slave requests) v1 for resend seq 2 (2)
-> > 2010-11-23 14:37:29.622347 411d3940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=1 l=0).fault initiating reconnect
-> > 2010-11-23 14:37:29.622364 452f6940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=1 l=0).writer: state = 2 policy.server=0
-> > 2010-11-23 14:37:29.622380 411d3940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).reader done
-> > 2010-11-23 14:37:29.622400 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).writer: state = 1 policy.server=0
-> > 2010-11-23 14:37:29.622419 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).connect 2
-> > 2010-11-23 14:37:29.622437 42aea940 mds1.cache |__ 1    auth [dir 101 ~mds1/ [2,head] auth v=1 cv=0/0 dir_auth=1 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1255140]
-> > 2010-11-23 14:37:29.622461 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).connecting to 172.17.40.34:6800/7571
-> > 2010-11-23 14:37:29.622482 42aea940 mds1.cache maybe_resolve_finish still waiting for more resolves, got (0,2,4,5,6), need (0,2,3,4,5,6)
-> > 2010-11-23 14:37:29.622499 42aea940 -- 172.17.40.39:6800/8550 dispatch_throttle_release 28 to dispatch throttler 56/104857600
-> > 2010-11-23 14:37:29.622512 42aea940 -- 172.17.40.39:6800/8550 <== mds3 172.17.40.37:6800/996 3 ==== mds_resolve(1+0 subtrees +0 slave requests) v1 ==== 28+0+0 (486165103 0 0) 0x1264390
-> > 2010-11-23 14:37:29.622528 42aea940 mds1.cache handle_resolve from mds3
-> > 2010-11-23 14:37:29.622537 42aea940 mds1.cache show_subtrees
-> > 2010-11-23 14:37:29.622547 42aea940 mds1.cache |__ 1    auth [dir 101 ~mds1/ [2,head] auth v=1 cv=0/0 dir_auth=1 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1255140]
-> > 2010-11-23 14:37:29.622566 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).connect error 172.17.40.34:6800/7571, 111: Connection refused
-> > 2010-11-23 14:37:29.622593 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).fault 111: Connection refused
-> > 2010-11-23 14:37:29.622611 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).fault first fault
-> > 2010-11-23 14:37:29.622626 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).writer: state = 1 policy.server=0
-> > 2010-11-23 14:37:29.622642 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).connect 2
-> > 2010-11-23 14:37:29.622662 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).connecting to 172.17.40.34:6800/7571
-> > 2010-11-23 14:37:29.622681 4033e940 -- 172.17.40.39:6800/8550 >> 172.17.40.36:6800/7413 pipe(0x12508b0 sd=15 pgs=8 cs=1 l=0).reader couldn't read tag, Success
-> > 2010-11-23 14:37:29.622717 42aea940 mds1.cache maybe_resolve_finish got all resolves+resolve_acks, done.
-> > 2010-11-23 14:37:29.622733 4033e940 -- 172.17.40.39:6800/8550 >> 172.17.40.36:6800/7413 pipe(0x12508b0 sd=15 pgs=8 cs=1 l=0).fault 0: Success
-> > 2010-11-23 14:37:29.622768 4033e940 -- 172.17.40.39:6800/8550 >> 172.17.40.36:6800/7413 pipe(0x12508b0 sd=15 pgs=8 cs=1 l=0).fault with nothing to send, going to standby
-> > 2010-11-23 14:37:29.622785 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).connect error 172.17.40.34:6800/7571, 111: Connection refused
-> > 2010-11-23 14:37:29.622806 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).fault 111: Connection refused
-> > 2010-11-23 14:37:29.622823 4053e940 -- 172.17.40.39:6800/8550 >> 172.17.40.34:6800/7571 pipe(0x1261690 sd=16 pgs=10 cs=2 l=0).fault waiting 0.200000
-> > 2010-11-23 14:37:29.622840 42aea940 mds1.cache disambiguate_imports
-> > 2010-11-23 14:37:29.622855 410d2940 -- 172.17.40.39:6800/8550 >> 172.17.40.36:6800/7413 pipe(0x12508b0 sd=15 pgs=8 cs=1 l=0).writer: state = 3 policy.server=0
-> > 2010-11-23 14:37:29.622909 44ff3940 -- 172.17.40.39:6800/8550 >> 172.17.40.35:6800/7935 pipe(0x1262680 sd=18 pgs=10 cs=1 l=0).reader couldn't read tag, Success
-> > 2010-11-23 14:37:29.622929 44ff3940 -- 172.17.40.39:6800/8550 >> 172.17.40.35:6800/7935 pipe(0x1262680 sd=18 pgs=10 cs=1 l=0).fault 0: Success
-> > 2010-11-23 14:37:29.622947 451f5940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=1 l=0).reader couldn't read tag, Success
-> > 2010-11-23 14:37:29.622965 44ff3940 -- 172.17.40.39:6800/8550 >> 172.17.40.35:6800/7935 pipe(0x1262680 sd=18 pgs=10 cs=1 l=0).fault with nothing to send, going to standby
-> > 2010-11-23 14:37:29.622988 40fd1940 -- 172.17.40.39:6800/8550 >> 172.17.40.38:6800/7395 pipe(0x124f070 sd=13 pgs=7 cs=1 l=0).reader couldn't read tag, Success
-> > 2010-11-23 14:37:29.623008 450f4940 -- 172.17.40.39:6800/8550 >> 172.17.40.35:6800/7935 pipe(0x1262680 sd=18 pgs=10 cs=1 l=0).writer: state = 3 policy.server=0
-> > 2010-11-23 14:37:29.623041 42aea940 mds1.cache show_subtrees
-> > 2010-11-23 14:37:29.623056 40fd1940 -- 172.17.40.39:6800/8550 >> 172.17.40.38:6800/7395 pipe(0x124f070 sd=13 pgs=7 cs=1 l=0).fault 0: Success
-> > 2010-11-23 14:37:29.623076 40fd1940 -- 172.17.40.39:6800/8550 >> 172.17.40.38:6800/7395 pipe(0x124f070 sd=13 pgs=7 cs=1 l=0).fault with nothing to send, going to standby
-> > 2010-11-23 14:37:29.623092 42aea940 mds1.cache |__ 1    auth [dir 101 ~mds1/ [2,head] auth v=1 cv=0/0 dir_auth=1 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1255140]
-> > 2010-11-23 14:37:29.623115 451f5940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=1 l=0).fault 0: Success
-> > 2010-11-23 14:37:29.623134 42aea940 mds1.cache trim_unlinked_inodes
-> > 2010-11-23 14:37:29.623149 40a03940 -- 172.17.40.39:6800/8550 >> 172.17.40.38:6800/7395 pipe(0x124f070 sd=13 pgs=7 cs=1 l=0).writer: state = 3 policy.server=0
-> > 2010-11-23 14:37:29.623168 451f5940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=1 l=0).requeue_sent mds_resolve(1+0 subtrees +0 slave requests) v1 for resend seq 2 (2)
-> > 2010-11-23 14:37:29.623188 451f5940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=1 l=0).fault initiating reconnect
-> > 2010-11-23 14:37:29.623205 42aea940 mds1.cache recalc_auth_bits
-> > 2010-11-23 14:37:29.623219 42aea940 mds1.cache  subtree auth=1 for [dir 101 ~mds1/ [2,head] auth v=1 cv=0/0 dir_auth=1 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1255140]
-> > 2010-11-23 14:37:29.623239 42aea940 mds1.cache show_subtrees
-> > 2010-11-23 14:37:29.623251 451f5940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=2 l=0).reader done
-> > 2010-11-23 14:37:29.623270 42aea940 mds1.cache |__ 1    auth [dir 101 ~mds1/ [2,head] auth v=1 cv=0/0 dir_auth=1 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1255140]
-> > 2010-11-23 14:37:29.623305 42aea940 mds1.cache show_cache
-> > 2010-11-23 14:37:29.623316 42aea940 mds1.cache  unlinked [inode 1 [...2,head] / rep@0.0 v1 snaprealm=0x7f5ec80084d0 f() n() (iversion lock) 0x7f5ec800a3b0]
-> > 2010-11-23 14:37:29.623336 42aea940 mds1.cache  unlinked [inode 101 [...2,head] ~mds1/ auth v1 snaprealm=0x1254f30 f() n() (iversion lock) | dirfrag 0x7f5ec800ac40]
-> > 2010-11-23 14:37:29.623356 42aea940 mds1.cache   dirfrag [dir 101 ~mds1/ [2,head] auth v=1 cv=0/0 dir_auth=1 state=1073741824 f(v0 2=1+1) n(v0 2=1+1) hs=0+0,ss=0+0 | subtree 0x1255140]
-> > 2010-11-23 14:37:29.623376 452f6940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=2 l=0).writer: state = 1 policy.server=0
-> > 2010-11-23 14:37:29.623395 452f6940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=2 l=0).connect 2
-> > 2010-11-23 14:37:29.623412 42aea940 mds1.cache trim_non_auth
-> > 2010-11-23 14:37:29.623426 452f6940 -- 172.17.40.39:6800/8550 >> 172.17.40.37:6800/996 pipe(0x1263980 sd=19 pgs=11 cs=2 l=0).connecting to 172.17.40.37:6800/996
-> > 2010-11-23 14:37:29.623448 42aea940 mds1.cache  ... [inode 1 [...2,head] / rep@0.0 v1 snaprealm=0x7f5ec80084d0 f() n() (iversion lock) 0x7f5ec800a3b0]
-> >
-> > -- Jim
-> >
-> >
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+-  private static String execCommand(File f, String... cmd) throws IOException {
++  protected static String execCommand(File f, String... cmd) throws IOException {
+ String[] args = new String[cmd.length + 1];
+ System.arraycopy(cmd, 0, args, 0, cmd.length);
+ args[cmd.length] = f.getCanonicalPath();
+diff --git a/src/mapred/org/apache/hadoop/mapred/JobTracker.java b/src/mapred/org/apache/hadoop/mapred/JobTracker.java
+index a8e86f9..1e91497 100644
+--- a/src/mapred/org/apache/hadoop/mapred/JobTracker.java
++++ b/src/mapred/org/apache/hadoop/mapred/JobTracker.java
+@@ -3465,7 +3465,9 @@ public class JobTracker implements MRConstants, InterTrackerProtocol,
+* @see org.apache.hadoop.mapred.JobSubmissionProtocol#getSystemDir()
+*/
+public String getSystemDir() {
+-    Path sysDir = new Path(conf.get("mapred.system.dir", "/tmp/hadoop/mapred/system"));  
++    String mapredsystemdir = conf.get("mapred.system.dir", "/tmp/hadoop/mapred/system");
++    LOG.info("mapred.system.dir configuration: " + mapredsystemdir);
++    Path sysDir = new Path(mapredsystemdir);
+ return fs.makeQualified(sysDir).toString();
+}
 
+diff --git a/src/native/Makefile.am b/src/native/Makefile.am
+index 3d44cbc..108775e 100644
+--- a/src/native/Makefile.am
++++ b/src/native/Makefile.am
+@@ -36,7 +36,7 @@
+export PLATFORM = $(shell echo $$OS_NAME | tr [A-Z] [a-z])
 
+# List the sub-directories here
+-SUBDIRS = src/org/apache/hadoop/io/compress/zlib lib
++SUBDIRS = src/org/apache/hadoop/io/compress/zlib src/org/apache/hadoop/fs lib
+
+# The following export is needed to build libhadoop.so in the 'lib' directory
+export SUBDIRS
+diff --git a/src/native/src/org/apache/hadoop/fs/CephLocalityFileSystem.cpp b/src/native/src/org/apache/hadoop/fs/CephLocalityFileSystem.cpp
+new file mode 100644
+index 0000000..5183314
+--- /dev/null
++++ b/src/native/src/org/apache/hadoop/fs/CephLocalityFileSystem.cpp
+@@ -0,0 +1,344 @@
++/**
++This file's main function was originally in
++$CEPH_HOME/src/client/test_ioctls.c .
++
++In the present form, it converts ceph_ioctl_dataloc to BlockLocations.
++
++BlockLocations require:
++String[] names, String[] hosts, long offset, long length
++
++The ceph_ioctl_dataloc supplies:
++struct ceph_ioctl_dataloc {
++	__u64 file_offset;           // in+out: file offset
++	__u64 object_offset;         // out: offset in object
++	__u64 object_no;             // out: object #
++	__u64 object_size;           // out: object size
++	char object_name[64];        // out: object name
++	__u64 block_offset;          // out: offset in block
++	__u64 block_size;            // out: block length
++	__s64 osd;                   // out: osd #
++	struct sockaddr_storage osd_addr; // out: osd address
++};
++
++
++The required items and the supplied items line up like so:
++String[] names     dataloc.osd_addr
++String[] hosts     dataloc.osd_addr
++long offset        start
++long length        len
++*/
++
++#include <stdlib.h>
++#include <stdio.h>
++#include <unistd.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++
++#include <sys/ioctl.h>
++#include <netinet/in.h>
++#include <sys/socket.h>
++#include <netdb.h>
++
++#include <string.h>  //memset
++
++#include <errno.h>
++
++#include <time.h>    //Debugging
++#include <iostream>  //Debugging
++#include <fstream>   //Debugging
++using namespace std; //Debugging
++
++//JNI include
++#include "org_apache_hadoop_fs_CephLocalityFileSystem.h"
++
++//Ceph includes
++#include "client/ioctl.h"
++
++/**
++ * Arguments:  (FileStatus file, long start, long len)
++  Exemplar code:  Java_org_apache_hadoop_fs_ceph_CephTalker_ceph_1getdir
++  Original Java function body:
++
++  public BlockLocation[] getFileBlockLocations(FileStatus file,
++      long start, long len) throws IOException {
++    if (file == null) {
++      return null;
++    }
++
++    if ( (start<0) || (len < 0) ) {
++      throw new IllegalArgumentException("Invalid start or len parameter");
++    }
++
++    if (file.getLen() < start) {
++      return new BlockLocation[0];
++
++    }
++    String[] name = { "localhost:50010" };
++    String[] host = { "localhost" };
++    return new BlockLocation[] { new BlockLocation(name, host, 0, file.getLen()) };
++  }
++
++   Reference for building new objects:
++   http://java.sun.com/docs/books/jni/html/fldmeth.html#26254
++
++   TODO Clean up memory.  Some reading is here:
++   http://java.sun.com/developer/onlineTraining/Programming/JDCBook/jniref.html
++ */
++JNIEXPORT jobjectArray JNICALL Java_org_apache_hadoop_fs_CephLocalityFileSystem_getFileBlockLocations
++  (JNIEnv *env, jobject obj, jobject j_file, jlong j_start, jlong j_len) {
++
++  ////Variables
++  //Native...
++  //debug//const char *logpath = "/home/alex/TestGetFileBlockLocations.txt";
++  const char *c_path = "";
++  int fd, err;
++  long c_start, c_len;
++  long blocksize, numblocks;
++  struct ceph_ioctl_layout ceph_layout;
++  struct ceph_ioctl_dataloc dl;
++  char errdesc[256];
++
++  //Java...
++  jmethodID constrid;              //This can probably be cached ( http://www.ibm.com/developerworks/java/library/j-jni/ )
++  jmethodID filelenid;
++  jmethodID methodid_getPathStringFromFileStatus;
++  jfieldID pathfieldid;
++  jclass BlockLocationClass, StringClass, FileStatusClass, CephLocalityFileSystemClass;
++  jobjectArray aryBlockLocations;  //Returning item
++  jstring j_path;
++  jlong fileLength;
++  jclass IllegalArgumentExceptionClass, IOExceptionClass, OutOfMemoryErrorClass;
++
++
++  ////Debugging
++  //Setup
++  time_t rawtime;
++  time(&rawtime);
++  struct tm *timeinfo = localtime(&rawtime);
++  //debug//ofstream debugstream(logpath, ios_base::app);
++  //debug//debugstream << "Starting.  Current time:  " << asctime(timeinfo) << "." << endl;
++  //debug//debugstream << "Arguments:  <j_file>, " << j_start << ", " << j_len << endl;
++  memset(errdesc, NULL, 256);
++
++
++  ////Grab the exception classes for all the little things that can go wrong.
++  IllegalArgumentExceptionClass = env->FindClass("java/lang/IllegalArgumentException");
++  IOExceptionClass = env->FindClass("java/io/IOException");
++  OutOfMemoryErrorClass = env->FindClass("java/lang/OutOfMemoryError");
++  if (IllegalArgumentExceptionClass == NULL || IOExceptionClass == NULL || OutOfMemoryErrorClass == NULL) {
++    //debug//debugstream << "Failed to get an exception to throw.  Giving up." << endl;
++    return NULL;
++  }
++
++
++  ////Sanity-check arguments (one more check comes after class declarations)
++  if (j_file == NULL) {
++    return NULL;
++  }
++
++
++  if (j_start < 0) {
++    env->ThrowNew(IllegalArgumentExceptionClass, "Invalid start parameter (negative).");
++    return NULL;
++  }
++  if (j_len <= 0) {
++    env->ThrowNew(IllegalArgumentExceptionClass, "Invalid len parameter (nonpositive).");
++    return NULL;
++  }
++
++
++  ////Grab the reference to the Java classes needed to set up end structure
++  StringClass = env->FindClass("java/lang/String");
++  if (StringClass == NULL) {
++    env->ThrowNew(IOExceptionClass, "Java String class not found; dying a horrible, painful death.");
++    return NULL;
++  }
++  BlockLocationClass = env->FindClass("org/apache/hadoop/fs/BlockLocation");
++  if (BlockLocationClass == NULL) {
++    env->ThrowNew(IOExceptionClass, "Hadoop BlockLocation class not found.");
++    return NULL;
++  }
++  FileStatusClass = env->GetObjectClass(j_file);
++  if (FileStatusClass == NULL) {
++    env->ThrowNew(IOExceptionClass, "Hadoop FileStatus class not found.");
++    return NULL;
++  }
++  CephLocalityFileSystemClass = env->GetObjectClass(obj);
++  if (CephLocalityFileSystemClass == NULL) {
++    env->ThrowNew(IOExceptionClass, "Hadoop CephLocalityFileSystemClass class not found.");
++    return NULL;
++  }
++
++  //debug//debugstream << "Classes retrieved." << endl;
++
++
++  ////Grab class methods and members
++  //(Type syntax reference: http://java.sun.com/javase/6/docs/technotes/guides/jni/spec/types.html#wp16432 )
++
++  //Grab the file length method
++  filelenid = env->GetMethodID(FileStatusClass, "getLen", "()J");
++  if (filelenid == NULL) {
++    env->ThrowNew(IOExceptionClass, "Could not get filelenid.");
++    return NULL;
++  }
++  //debug//debugstream << "filelenid retrieval complete." << endl;
++
++  //Grab the BlockLocation constructor
++  constrid = env->GetMethodID(BlockLocationClass, "<init>", "([Ljava/lang/String;[Ljava/lang/String;JJ)V");
++  if (constrid == NULL) {
++    env->ThrowNew(IOExceptionClass, "Could not get constructor id for BlockLocationClass.");
++    return NULL;
++  }
++  //debug//debugstream << "constrid retrieval complete." << endl;
++
++  //Grab the helper method for quick path conversion
++  methodid_getPathStringFromFileStatus = env->GetMethodID(CephLocalityFileSystemClass, "getPathStringFromFileStatus", "(Lorg/apache/hadoop/fs/FileStatus;)Ljava/lang/String;");
++  if (methodid_getPathStringFromFileStatus == NULL) {
++    env->ThrowNew(IOExceptionClass, "ERROR:  Could not get methodid_getPathStringFromFileStatus.");
++    return NULL;
++  }
++  //debug//debugstream << "methodid_getPathStringFromFileStatus retrieval complete." << endl;
++
++
++  ////Calling methods
++  //Grab the file length
++  fileLength = env->CallLongMethod(j_file, filelenid);
++  //debug//debugstream << "Called fileLen()." << endl;
++  //One last sanity check
++  if (fileLength < j_start) {
++    //debug//debugstream << "Starting point after end of file; returning 0 block locations." << endl;
++    aryBlockLocations = env->NewObjectArray(0, BlockLocationClass, NULL);
++    if (aryBlockLocations == NULL) {
++      env->ThrowNew(OutOfMemoryErrorClass,"Unable to allocate 0-length BlockLocation array.");
++      return NULL;
++    }
++    return aryBlockLocations;
++  }
++  //debug//debugstream << "File length according to FileStatus:  " << fileLength << endl;
++
++  //Grab the file name
++  j_path = (jstring) env->CallObjectMethod(obj, methodid_getPathStringFromFileStatus, j_file);
++  if (j_path == NULL) {
++    env->ThrowNew(IOExceptionClass, "j_path retrieval failed.");
++    return NULL;
++  }
++  //debug//debugstream << "j_path retrieval complete." << endl;
++
++  c_path = env->GetStringUTFChars(j_path, NULL);
++  if (c_path == NULL) {
++    env->ThrowNew(IOExceptionClass, "c_path is NULL.");
++    return NULL;
++  }
++  //debug//debugstream << "c_path path is " << c_path << endl;
++
++
++  ////Really-native code:  Start the file I/O.
++  //Open the file (need descriptor for ioctl())
++  fd = open(c_path , O_CREAT|O_RDWR, 0644);  //TODO Not sure why this opens RDRW and CREAT (code copied from Ceph test).  Necessary for ioctl?
++  if (fd <= 0) {
++    env->ThrowNew(IOExceptionClass, "Couldn't open file.");
++    //debug//debugstream << "ERROR:  Couldn't open file.  errno:  " << strerror(errno) << ".  fd:  " << strerror(fd) << endl;  //TODO Clean this up.
++    return NULL;
++  }
++  //debug//debugstream << "File opening complete." << endl;
++  //Cleanup:  Don't need file name characters anymore.
++  env->ReleaseStringUTFChars(j_path, c_path);
++
++  //Get layout
++  err = ioctl(fd, CEPH_IOC_GET_LAYOUT, (unsigned long)&ceph_layout);
++  if (err) {
++    env->ThrowNew(IOExceptionClass, "ioctl failed (layout).");
++    return NULL;
++  }
++  blocksize=ceph_layout.object_size;  //TODO (big) Expose this object size to the Java file system.
++  //debug//debugstream << "Block size is " << blocksize << endl;
++
++  //Determine the number of blocks we're looking for.  (The problem:  How many buckets.  Can't remember if there's a library call to find this quickly...)
++  numblocks = (j_start+j_len-1)/blocksize - j_start/blocksize + 1;
++  //debug//debugstream << "Expecting to work on " << numblocks << " blocks." << endl;
++
++  aryBlockLocations = (jobjectArray) env->NewObjectArray(numblocks, BlockLocationClass, NULL);
++  if (aryBlockLocations == NULL) {
++    env->ThrowNew(OutOfMemoryErrorClass, "Unable to allocate BlockLocation array.");
++    return NULL;
++  }
++
++  //Run an ioctl for each block.
++  //jthrowable exc;
++  char buf[80];
++  jlong blocklength;
++  jlong curoffset;
++  //TODO This loop test will very probably suffer data races with updates to the file.  Oh; is that why ioctl() gets RDRW?
++  jlong loopinit=j_start/blocksize;
++  jlong i=loopinit;
++  for (jlong imax=j_start+j_len; i*blocksize < imax; i++) {
++    //Note <=; we go through the last requested byte.
++    //Set up the data location object
++    curoffset = i*blocksize;
++    dl.file_offset = curoffset;
++    //debug//debugstream << "Running dataloc ioctl loop for dl.file_offset=" << dl.file_offset << " (curoffset=" << curoffset << ")" << endl;
++
++    //Run the ioctl to get block location()
++    err = ioctl(fd, CEPH_IOC_GET_DATALOC, (unsigned long)&dl);
++    if (err) {
++      sprintf(errdesc, "ioctl failed (dataloc); err=%d.", err);
++      env->ThrowNew(IOExceptionClass, errdesc);
++      return NULL;
++    }
++
++    //Create string object.
++    //TODO:  Check if freeing this causes a null pointer exception in Java.
++    //jstring j_tmpname = env->NewStringUTF("localhost:50010");
++    //jstring j_tmphost = env->NewStringUTF("localhost");
++    memset(buf, 0, 80);
++    getnameinfo((struct sockaddr *)&dl.osd_addr, sizeof(dl.osd_addr), buf, sizeof(buf), 0, 0, NI_NUMERICHOST);
++    //debug//debugstream << "Found host " << buf << endl;
++    jstring j_tmphost = env->NewStringUTF(buf);
++    //The names list should include the port number if following the example getFileBlockLocations from FileSystem;
++    //however, as of 0.20.2, nothing invokes BlockLocation.getNames().
++    jstring j_tmpname = env->NewStringUTF(buf);
++    if (j_tmphost == NULL || j_tmpname == NULL) {
++      env->ThrowNew(OutOfMemoryErrorClass, "Unable to convert String for name or host.");
++      return NULL;
++    }
++
++    //Define an array of strings for names, and one for hosts (only going to be one element long for now)
++    jobjectArray aryNames = (jobjectArray) env->NewObjectArray(1, StringClass, NULL);
++    jobjectArray aryHosts = (jobjectArray) env->NewObjectArray(1, StringClass, NULL);
++    if (aryHosts == NULL || aryNames == NULL) {
++      env->ThrowNew(OutOfMemoryErrorClass, "Unable to allocate String array for names or hosts.");
++      return NULL;
++    }
++
++    env->SetObjectArrayElement(aryNames, 0, j_tmpname);
++    ////TODO Hunt for ArrayIndex exceptions
++    //exc = env->ExceptionOccurred();
++    //if (exc) {
++    //  //debug//debugstream << "Exception occurred.";
++    //  return NULL;
++    //}
++    env->SetObjectArrayElement(aryHosts, 0, j_tmphost);
++    ////Probably safe if the above one worked.
++
++
++    //debug//debugstream << "imax:  " << imax << endl;
++    //debug//debugstream << "curoffset:  " << curoffset << endl;
++    //debug//debugstream << "blocksize:  " << blocksize << endl;
++    //debug//debugstream << "imax-curoffset:  " << imax-curoffset << endl;
++    blocklength = (imax-curoffset)<blocksize ? imax-curoffset : blocksize;  //TODO verify boundary condition on < vs. <=
++    //debug//debugstream << "Block length:  " << blocklength << endl;
++    jobject tmpBlockLocation = env->NewObject(BlockLocationClass, constrid, aryNames, aryHosts, curoffset, blocklength);
++    env->SetObjectArrayElement(aryBlockLocations, i-loopinit, tmpBlockLocation);
++    //TODO Hunt for ArrayIndex exceptions
++  }
++  //Reminder:  i will be 1 too large after the loop finishes.  No need to add another 1.
++  //debug//debugstream << "Finished looping over " << (i-loopinit) << " of " << numblocks << " blocks." << endl;
++  //debug//debugstream << "(Makes " << ((i-loopinit)==numblocks ? "" : "no ") << "sense.)" << endl;
++
++  //Cleanup
++  close(fd);
++  //debug//debugstream.close();
++
++  return aryBlockLocations;
++}
+diff --git a/src/test/org/apache/hadoop/fs/TestGetFileBlockLocations.java b/src/test/org/apache/hadoop/fs/TestGetFileBlockLocations.java
+index c85cc98..aa6a506 100644
+--- a/src/test/org/apache/hadoop/fs/TestGetFileBlockLocations.java
++++ b/src/test/org/apache/hadoop/fs/TestGetFileBlockLocations.java
+@@ -32,7 +32,7 @@ import org.apache.hadoop.conf.Configuration;
+public class TestGetFileBlockLocations extends TestCase {
+private static String TEST_ROOT_DIR =
+   System.getProperty("test.build.data", "/tmp/testGetFileBlockLocations");
+-  private static final int FileLength = 4 * 1024 * 1024; // 4MB
++  private static final int FileLength = 64 * 1024 * 1024; // 64MB
+private Configuration conf;
+private Path path;
+private FileSystem fs;
+@@ -47,6 +47,10 @@ public class TestGetFileBlockLocations extends TestCase {
+ Path rootPath = new Path(TEST_ROOT_DIR);
+ path = new Path(rootPath, "TestGetFileBlockLocations");
+ fs = rootPath.getFileSystem(conf);
++    //Debug:  Verify the class of the file system.
++    //System.out.println("TEST_ROOT_DIR:\t" + TEST_ROOT_DIR);
++    //System.out.println("rootPath:\t" + rootPath);
++    //System.out.println("fs.getClass().getName():\t" + fs.getClass().getName());
+ FSDataOutputStream fsdos = fs.create(path, true);
+ byte[] buffer = new byte[1024];
+ while (fsdos.getPos() < FileLength) {
+@@ -58,6 +62,7 @@ public class TestGetFileBlockLocations extends TestCase {
+
+private void oneTest(int offBegin, int offEnd, FileStatus status)
+   throws IOException {
++    //debug//System.out.println("oneTest(" + offBegin + ", " + offEnd + ") called.");
+ if (offBegin > offEnd) {
+   int tmp = offBegin;
+   offBegin = offEnd;
+@@ -65,6 +70,11 @@ public class TestGetFileBlockLocations extends TestCase {
+ }
+ BlockLocation[] locations =
+     fs.getFileBlockLocations(status, offBegin, offEnd - offBegin);
++    if (locations == null) {
++      //debug//System.out.println("Null result.");
++      return;
++    }
++    //debug//System.out.println("oneTest(" + offBegin + ", " + offEnd + ") returns " + locations.length + " locations.");
+ if (offBegin < status.getLen()) {
+   Arrays.sort(locations, new Comparator<BlockLocation>() {
+
+@@ -84,6 +94,9 @@ public class TestGetFileBlockLocations extends TestCase {
+   offEnd = (int) Math.min(offEnd, status.getLen());
+   BlockLocation first = locations[0];
+   BlockLocation last = locations[locations.length - 1];
++      //debug//for (int i=0, imax=locations.length; i<imax; i++) {
++      //debug//  System.out.println(i + ":\t" + locations[i]);
++      //debug//}
+   assertTrue(first.getOffset() <= offBegin);
+   assertTrue(offEnd <= last.getOffset() + last.getLength());
+ } else {
+@@ -101,6 +114,7 @@ public class TestGetFileBlockLocations extends TestCase {
+
+public void testFailureNegativeParameters() throws IOException {
+ FileStatus status = fs.getFileStatus(path);
++    //debug//System.out.println(status.report());
+ try {
+   BlockLocation[] locations = fs.getFileBlockLocations(status, -1, 100);
+   fail("Expecting exception being throw");
+@@ -117,8 +131,12 @@ public class TestGetFileBlockLocations extends TestCase {
+}
+
+public void testGetFileBlockLocations1() throws IOException {
++    //debug//System.out.println("Begin:  testGetFileBlockLocations1");
+ FileStatus status = fs.getFileStatus(path);
++    //debug//System.out.println(status.report());
++    oneTest(0, (int) status.getLen()-1, status);
+ oneTest(0, (int) status.getLen(), status);
++    oneTest(0, (int) status.getLen()+1, status);
+ oneTest(0, (int) status.getLen() * 2, status);
+ oneTest((int) status.getLen() * 2, (int) status.getLen() * 4, status);
+ oneTest((int) status.getLen() / 2, (int) status.getLen() * 3, status);
+@@ -130,6 +148,7 @@ public class TestGetFileBlockLocations extends TestCase {
+
+public void testGetFileBlockLocations2() throws IOException {
+ FileStatus status = fs.getFileStatus(path);
++    //debug//System.out.println(status.report());
+ for (int i = 0; i < 1000; ++i) {
+   int offBegin = random.nextInt((int) (2 * status.getLen()));
+   int offEnd = random.nextInt((int) (2 * status.getLen()));
