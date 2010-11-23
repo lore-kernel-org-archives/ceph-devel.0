@@ -1,112 +1,62 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Degraded objects on brand new file system?
-Date: Tue, 23 Nov 2010 14:05:50 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1011231405060.4650@cobra.newdream.net>
-References: <1290199290.4782.20.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1011222310560.17131@cobra.newdream.net>
- <1290531519.15814.32.camel@sale659.sandia.gov>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: patch for ceph linux kernel client bug #552 "Samba with kernel
+ oplocks=on produces lots of corrupt mds entries in dmesg" (fwd)
+Date: Tue, 23 Nov 2010 14:03:50 -0800
+Message-ID: <AANLkTinmq9WF61QUna1gdPCY8ZRZQ3_LjPEjHTpxftMg@mail.gmail.com>
+References: <Pine.LNX.4.64.1011230918060.26130@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45980 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751150Ab0KWWBb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Nov 2010 17:01:31 -0500
-In-Reply-To: <1290531519.15814.32.camel@sale659.sandia.gov>
+Received: from mail-px0-f174.google.com ([209.85.212.174]:35104 "EHLO
+	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750848Ab0KWWDw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Nov 2010 17:03:52 -0500
+Received: by pxi15 with SMTP id 15so2213167pxi.19
+        for <ceph-devel@vger.kernel.org>; Tue, 23 Nov 2010 14:03:52 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.64.1011230918060.26130@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Herb Shiu <herb_shiu@tcloudcomputing.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Henry C Chang <henry_c_chang@tcloudcomputing.com>
 
-On Tue, 23 Nov 2010, Jim Schutt wrote:
+Herb:
+Pulled these into our trees, although I broke up the client changes
+into a few commits.
+Hope it's okay that I added your signed-off-by. :)
+-Greg
+
+On Tue, Nov 23, 2010 at 9:18 AM, Sage Weil <sage@newdream.net> wrote:
+>
+>
+> ---------- Forwarded message ----------
+> Date: Tue, 23 Nov 2010 17:54:25 +0800
+> From: Herb Shiu <herb_shiu@tcloudcomputing.com>
+> To: sage@newdream.net
+> Cc: henry_c_chang@tcloudcomputing.com
+> Subject: patch for ceph linux kernel client bug #552
+> =A0 =A0"Samba with kernel oplocks=3Don produces lots of corrupt mds e=
+ntries in dmesg"
+>
 > Hi Sage,
-> 
-> On Tue, 2010-11-23 at 00:11 -0700, Sage Weil wrote:
-> > Hi Jim,
-> > 
-> > On Fri, 19 Nov 2010, Jim Schutt wrote:
-> > > I've just created a brand-new filesystem using current unstable
-> > > branch.
-> > > 
-> > > ceph -w shows me this after I start it up and it settles down,:
-> > > 
-> > > 2010-11-19 13:07:39.279045    pg v247: 3432 pgs: 3432 active; 54 KB data, 98200 KB used, 3032 GB / 3032 GB avail; 95/108 degraded (87.963%)
-> > > 2010-11-19 13:07:39.532174    pg v248: 3432 pgs: 3432 active; 54 KB data, 98232 KB used, 3032 GB / 3032 GB avail; 95/108 degraded (87.963%)
-> > > 2010-11-19 13:07:41.123789    pg v249: 3432 pgs: 3432 active; 54 KB data, 98416 KB used, 3032 GB / 3032 GB avail; 95/108 degraded (87.963%)
-> > 
-> > There were some issues in unstable that were preventing the recovery from 
-> > completing.  They should be sorted out in the current git. 
-> 
-> Thanks for taking a look.
-> 
-> FWIW, as of c327c6a2064f I can still reproduce this.
-> My recipe is: build a filesystem with 7 monitor instances,
-> 7 mds instances; 13 osd instances.  Start all the mon
-> instances with a pdsh; start all the mds instances with a pdsh;
-> start the osd instances one-by-one, with a few seconds between
-> starting instances.
-
-Okay, I just fixed a number of issues and have this working on 24 nodes.  
-Just pushed it all to the unstable branch.  Let us know if you see any 
-remaining osd recovery problems.
-
-Thanks!
-sage
-
-> 
-> Let me know if there's anything else I can do.
-> 
-> -- Jim
-> 
-> > 
-> > Thanks!
-> > sage
-> > 
-> > 
-> > > 
-> > > That output seems to come from PGMap::print_summary().
-> > > If so, it seems to be telling me I have 108 objects, 
-> > > of which 95 are degraded.
-> > > 
-> > > If so, why would I have any degraded objects on
-> > > a brand-new file system?  All my osds are up/in;
-> > > shouldn't any degraded objects have been recovered?
-> > > 
-> > > Note that I haven't even mounted it anywhere yet.
-> > > 
-> > > Also, the above result is after starting
-> > > each of my 13 osds one at a time, waiting for
-> > > the PGs for each osd to go active before
-> > > starting up the next osd.
-> > > 
-> > > If I start up all the cosds a newly created file system 
-> > > roughly simultaneously, using pdsh, I get 7/108 objects
-> > > degraded.
-> > > 
-> > > What am I missing?
-> > > 
-> > > How can I learn what objects are degraded?
-> > > 
-> > > Thanks -- Jim
-> > > 
-> > > 
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> The root cause is that we don't handle the fcntl F_GETLK request well=
+=2E
+> To correct it, we need to update MDS & ceph kclient.
+> Here are the two updates,
+>
+> MDS:
+> https://github.com/tcloud/ceph/commit/9e66d2ccb3af0800472404ce64abeb6=
+0aba0920f
+>
+> Ceph kclient:
+> https://github.com/tcloud/ceph-client-standalone/commit/f70702af442d6=
+1b356eab3e1572e115254e73a3a
+>
+> Sincerely,
+> - Herb
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
