@@ -1,891 +1,1171 @@
-From: =?utf-8?Q?Alex=E2=80=8E_Nelson?= <ajnelson@cs.ucsc.edu>
-Subject: [PATCH] Expose Ceph data location information to Hadoop
-Date: Tue, 23 Nov 2010 15:41:29 -0800
-Message-ID: <41ABF261-6D76-46A5-95BC-2C5461EDB0DD@cs.ucsc.edu>
-Mime-Version: 1.0 (Apple Message framework v1082)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Yehuda Sadeh <yehuda@hq.newdream.net>
+Subject: Re: [PATCH] rbd: replace the rbd sysfs interface
+Date: Tue, 23 Nov 2010 16:23:52 -0800
+Message-ID: <1290558233.1792.73.camel@yehudasa-desktop>
+References: <1289953929-30896-1-git-send-email-yehuda@hq.newdream.net>
+	 <20101117171924.GC12050@kroah.com>
+	 <AANLkTims_MjBS1SdHkOjOWvGqg1aRABH23MWk8J-E+-Y@mail.gmail.com>
+	 <20101118013002.GC8558@kroah.com>
+	 <AANLkTi=7z40CNBUmfVUEa68J+1R=7nbn9d8vM7ETpajA@mail.gmail.com>
+	 <20101119020820.GB18767@kroah.com>
+	 <AANLkTim4p=tpaQG_XDE5Vk0YAypYCegAguYNKRg-LeDF@mail.gmail.com>
+	 <20101123001410.GA31294@kroah.com>
+	 <AANLkTi=n9aJ_8VAcyOXQxxeprWzerZLf0H+ryHZs7O04@mail.gmail.com>
+	 <20101123005838.GB29289@kroah.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from services.cse.ucsc.edu ([128.114.48.10]:40458 "EHLO
-	services.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753199Ab0KWXl3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Nov 2010 18:41:29 -0500
-Received: from [192.168.50.242] (soenat3.cse.ucsc.edu [128.114.60.41])
-	(authenticated bits=0)
-	by services.cse.ucsc.edu (8.13.6/8.13.6) with ESMTP id oANNfTuZ001016
-	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Tue, 23 Nov 2010 15:41:29 -0800 (PST)
+Received: from mail.hq.newdream.net ([66.33.206.127]:49210 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755850Ab0KXAY3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Nov 2010 19:24:29 -0500
+In-Reply-To: <20101123005838.GB29289@kroah.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Greg KH <greg@kroah.com>
+Cc: sage@newdream.net, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hello all,
+On Mon, 2010-11-22 at 16:58 -0800, Greg KH wrote:
+On Mon, Nov 22, 2010 at 04:48:54PM -0800, Yehuda Sadeh Weinraub wrote:
+> > The reason we keep snapshots in a separate subdirectory is that they
+> > can have arbitrary name. So either we prefix them and put them in a
+> > common namespace with the devices, or we put them down the hierarchy.
+> 
+> Do either one.  I would suggest a prefix.
+> 
+> > In any case we don't do any operations on them, we just have them for
+> > informational use and we put them there so that we don't have one big
+> > file that lists them all.
+> 
+> But something cares about them, so treat them properly.
+> 
+> > >> Another way would be to create a group for (2) under (1) and create a
+> > >> kobject for (3), for which you can create group per snapshot.
+> > >>
+> > >> Am I missing something? We already have the first solution (kobjects
+> > >> only) implemented, is there some real benefit for using the third
+> > >> method? We'll have to manually add remove groups anyway, as snapshots
+> > >> can be removed and new snapshots can be added.
+> > >
+> > > Never add kobjects to a struct device, that is showing you that
+> > > something is wrong, and that userspace really will want to get that
+> > > create/destroy event of the sub child.
+> > >
+> > 
+> > But they're there as information device attributes, it's nothing like
+> > partitions in block devices. So we want to just be able to list them
+> > and their attributes easily (and nicely), without having to put them
+> > in one big file.
+> 
+> Then use a prefix and put everything in the same subdirectory underneath
+> the id and you should be fine, right?
+> 
 
-This patch is not a part of the Ceph code base, but is instead a part of HADOOP-6779 [1], which aims to bring Ceph to Hadoop as an underlying file system instead of HDFS.  I was part of the group that wrote the USENIX ;login: article comparing Ceph and HDFS, to which I will refer those wanting a comparison of the file systems [2].
+The following patch puts the snapshots as subdirs on the device directory.
+Each snapshot is in a different device structure, whereas its parent is
+the device. This works, however, not very pretty and/or not very
+convenient. Can we add another intermediate device that'll serve as a
+container for the snapshots?
 
-In a nutshell, this is the purpose of the patch:  Help Hadoop move the computation to the data, without incurring metadata traffic, and reducing data traffic from misplaced jobs.  Hadoop exposes an interface called RawLocalFileSystem, which uses any directory on the local Hadoop node for storage.  Ceph can easily act as a raw local file system, but if it does so Hadoop has no idea on which nodes data reside.  This patch produces a new file system that is basically RawLocalFileSystem with GetFileBlockLocations() implemented as a native method.  The method must be in JNI because Java explicitly does not support ioctl calls, and the data locations are retrieved solely through Ceph's ioctls designed to report data locations.
+Thanks,
+Yehuda
 
-I'm providing this patch here because it won't yet pass Hadoop submission guidelines, but it should get into the hands of the Hadoop community, eventually officially.  These issues will have to be resolved before the JIRA [1] process can finish:
+--
 
-* Test suite:  From my own setups, I have not gotten Hadoop to pass the unit test suite, even unpatched.  Patched, and running  "ant -Dtest.build.data=/mnt/ceph test-core" has yet to finish successfully for me.
-* I am uncertain what the Hadoop ramifications are of modifying a unit test---that is, whether that should be broken out into its own patch.
-* For those concerned with debugging, I have some debug print statements commented out with "//debug//".  Obviously, those won't be going into Hadoop, but they can illustrate what's going on in some places if you find a weird corner case.
-* The JNI code probably leaks memory.  This was my first experience writing JNI, so that code needs to undergo review by someone more experienced with native C++ for JNI.
-* The code was developed against release-0.20.2, which is slightly out of date.  This happened to be the Hadoop version for which we had a working installation.  The code should change to trunk, but only after it's better evaluated on a stable build.
-* Less interesting:  I am inexperienced with automake, and was unable to integrate the native code into the ant and automake build process. Assistance on that would be greatly appreciated (even an email to a good reference article).  Until that is fixed, there are explicit instructions to compile the native component in the file README-HADOOP-6779.txt.
+Yehuda Sadeh (1):
+  rbd: replace the rbd sysfs interface
 
-The patch git-applies to release-0.20.2.  I hope this gets the Hadoop and Ceph communities talking more.  I think the two projects have a lot they can do for each other.
-
---Alex
-
-[1] https://issues.apache.org/jira/browse/HADOOP-6779
-[2] http://www.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf
+ Documentation/ABI/testing/sysfs-bus-rbd |   84 ++++
+ drivers/block/rbd.c                     |  748 +++++++++++++++++++------------
+ 2 files changed, 555 insertions(+), 277 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-bus-rbd
 
 
-diff --git a/.gitignore b/.gitignore
-index cecce34..330514f 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -18,6 +18,8 @@
-.project
-.settings
-.svn
-+.idea
-+*.iml
-build/
-conf/masters
-conf/slaves
-diff --git a/README-HADOOP-6779.txt b/README-HADOOP-6779.txt
+--
+
+From: Yehuda Sadeh <yehuda@hq.newdream.net>
+Date: Fri, 19 Nov 2010 14:51:04 -0800
+Subject: [PATCH 1/1] rbd: replace the rbd sysfs interface
+
+The new interface creates directories per mapped image
+and under each it creates a subdir per available snapshot.
+This allows keeping a cleaner interface within the sysfs
+guidelines. The ABI documentation was updated too.
+
+Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
+---
+ Documentation/ABI/testing/sysfs-bus-rbd |   83 ++++
+ drivers/block/rbd.c                     |  748 +++++++++++++++++++------------
+ 2 files changed, 554 insertions(+), 277 deletions(-)
+
+diff --git a/Documentation/ABI/testing/sysfs-bus-rbd b/Documentation/ABI/testing/sysfs-bus-rbd
 new file mode 100644
-index 0000000..65cbf66
+index 0000000..90a87e2
 --- /dev/null
-+++ b/README-HADOOP-6779.txt
-@@ -0,0 +1,46 @@
-+= HADOOP-6779 =
++++ b/Documentation/ABI/testing/sysfs-bus-rbd
+@@ -0,0 +1,83 @@
++What:		/sys/bus/rbd/
++Date:		November 2010
++Contact:	Yehuda Sadeh <yehuda@hq.newdream.net>,
++		Sage Weil <sage@newdream.net>
++Description:
 +
-+This document contains setup instructions for the Ceph Locality patch for Hadoop.  It describes compiling Hadoop and the native methods.
++Being used for adding and removing rbd block devices.
 +
-+== Environmental setup ==
++Usage: <mon ip addr> <options> <pool name> <rbd image name> [snap name]
 +
-+Must define at least these environment variables:
-+HADOOP_HOME
-+	Home of the Hadoop source.
-+CEPH_HOME
-+	$CEPH_HOME/src is the location of client/ioctl.h.
-+JAVA_HOME
-+	$JAVA_HOME/include or $JAVA_HOME/include/linux has jni.h.
++ $ echo "192.168.0.1 name=admin rbd foo" > /sys/bus/rbd/add
 +
-+== Prerequisite software ==
++The snapshot name can be "-" or omitted to map the image read/write. A <dev-id>
++will be assigned for any registered block device. If snapshot is used, it will
++be mapped read-only.
 +
-+Ubuntu 10.10:
-+apt-get install ant g++ #Hadoop
-+apt-get install automake libtool libboost-dev libedit-dev libssl-dev #Ceph
++Removal of a device:
 +
-+Fedora Core 14:
-+yum install ant ant-junit gcc-c++ #Hadoop
-+yum install autoconf automake libtool boost-devel libedit-devel openssl-devel #Ceph
++  $ echo <dev-id> > /sys/bus/rbd/remove
 +
-+Fedora Core 14 comes with SELinux enabled.  This causes things like `touch /mnt/ceph/foo` to fail, so disabling SELinux could help.
++Entries under /sys/bus/rbd/devices/<dev-id>/
++--------------------------------------------
++
++client_id
++
++	The ceph unique client id that was assigned for this specific session.
++
++major
++
++	The block device major number.
++
++name
++
++	The name of the rbd image.
++
++pool
++
++	The pool where this rbd image resides. The pool-name pair is unique
++	per rados system.
++
++size
++
++	The size (in bytes) of the mapped block device.
++
++refresh
++
++	Writing to this file will reread the image header data and set
++	all relevant datastructures accordingly.
++
++current_snap
++
++	The current snapshot for which the device is mapped.
++
++create_snap
++
++	Create a snapshot:
++
++	 $ echo <snap-name> > /sys/bus/rbd/devices/<dev-id>/snap_create
++
++rollback_snap
++
++	Rolls back data to the specified snapshot. This goes over the entire
++	list of rados blocks and sends a rollback command to each.
++
++	 $ echo <snap-name> > /sys/bus/rbd/devices/<dev-id>/snap_rollback
++
++snap_*
++
++	A directory per each snapshot
 +
 +
-+== Compiling ==
++Entries under /sys/bus/rbd/devices/<dev-id>/snap_<snap-name>
++-------------------------------------------------------------
 +
-+To compile the JNI CPP code manually, first do the Ant build in Hadoop for the "jar" target:
++id
 +
-+ant jar
++	The rados internal snapshot id assigned for this snapshot
 +
-+Then run these commands:
++size
 +
-+cd $HADOOP_HOME/build/classes
-+javah -jni org.apache.hadoop.fs.CephLocalityFileSystem
-+cd $HADOOP_HOME/src/native/src/org/apache/hadoop/fs && g++ -shared -fPIC CephLocalityFileSystem.cpp -o libCephLocalityFileSystem.so -iquote$HADOOP_HOME/build/classes -iquote$CEPH_HOME/src -I$JAVA_HOME/include -I$JAVA_HOME/include/linux && cd $HADOOP_HOME
++	The size of the image when this snapshot was taken.
 +
 +
-+== Testing ==
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 6ec9d53..008d4a0 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -21,80 +21,9 @@
+ 
+ 
+ 
+-   Instructions for use
+-   --------------------
++   For usage instructions, please refer to:
+ 
+-   1) Map a Linux block device to an existing rbd image.
+-
+-      Usage: <mon ip addr> <options> <pool name> <rbd image name> [snap name]
+-
+-      $ echo "192.168.0.1 name=admin rbd foo" > /sys/class/rbd/add
+-
+-      The snapshot name can be "-" or omitted to map the image read/write.
+-
+-   2) List all active blkdev<->object mappings.
+-
+-      In this example, we have performed step #1 twice, creating two blkdevs,
+-      mapped to two separate rados objects in the rados rbd pool
+-
+-      $ cat /sys/class/rbd/list
+-      #id     major   client_name     pool    name    snap    KB
+-      0       254     client4143      rbd     foo     -      1024000
+-
+-      The columns, in order, are:
+-      - blkdev unique id
+-      - blkdev assigned major
+-      - rados client id
+-      - rados pool name
+-      - rados block device name
+-      - mapped snapshot ("-" if none)
+-      - device size in KB
+-
+-
+-   3) Create a snapshot.
+-
+-      Usage: <blkdev id> <snapname>
+-
+-      $ echo "0 mysnap" > /sys/class/rbd/snap_create
+-
+-
+-   4) Listing a snapshot.
+-
+-      $ cat /sys/class/rbd/snaps_list
+-      #id     snap    KB
+-      0       -       1024000 (*)
+-      0       foo     1024000
+-
+-      The columns, in order, are:
+-      - blkdev unique id
+-      - snapshot name, '-' means none (active read/write version)
+-      - size of device at time of snapshot
+-      - the (*) indicates this is the active version
+-
+-   5) Rollback to snapshot.
+-
+-      Usage: <blkdev id> <snapname>
+-
+-      $ echo "0 mysnap" > /sys/class/rbd/snap_rollback
+-
+-
+-   6) Mapping an image using snapshot.
+-
+-      A snapshot mapping is read-only. This is being done by passing
+-      snap=<snapname> to the options when adding a device.
+-
+-      $ echo "192.168.0.1 name=admin,snap=mysnap rbd foo" > /sys/class/rbd/add
+-
+-
+-   7) Remove an active blkdev<->rbd image mapping.
+-
+-      In this example, we remove the mapping with blkdev unique id 1.
+-
+-      $ echo 1 > /sys/class/rbd/remove
+-
+-
+-   NOTE:  The actual creation and deletion of rados objects is outside the scope
+-   of this driver.
++                 Documentation/ABI/testing/sysfs-bus-rbd
+ 
+  */
+ 
+@@ -163,6 +92,14 @@ struct rbd_request {
+ 	u64			len;
+ };
+ 
++struct rbd_snap {
++	struct	device		dev;
++	const char		*name;
++	size_t			size;
++	struct list_head	node;
++	u64			id;
++};
 +
-+To employ Ceph in the unit test suite, set up the Ceph system (assuming mounting at /mnt/ceph), and then run:
-+ant -Dtest.build.data=/mnt/ceph/TestGetFileBlockLocations test-core
+ /*
+  * a single device
+  */
+@@ -193,21 +130,60 @@ struct rbd_device {
+ 	int read_only;
+ 
+ 	struct list_head	node;
 +
-+The additional flag "-Dtestcase=TestGetFileBlockLocations" runs just the unit test modified for this patch.
-\ No newline at end of file
-diff --git a/bin/hadoop b/bin/hadoop
-index 273549f..c1e8f02 100755
---- a/bin/hadoop
-+++ b/bin/hadoop
-@@ -253,14 +253,19 @@ if $cygwin; then
-TOOL_PATH=`cygpath -p -w "$TOOL_PATH"`
-fi
-# setup 'java.library.path' for native-hadoop code if necessary
-+#TODO Once ant compiles CephLocalityFileSystem properly, remove the third clause in this.
-JAVA_LIBRARY_PATH=''
--if [ -d "${HADOOP_HOME}/build/native" -o -d "${HADOOP_HOME}/lib/native" ]; then
-+if [ -d "${HADOOP_HOME}/build/native" -o -d "${HADOOP_HOME}/lib/native" -o -d "$HADOOP_HOME/src/native/src/org/apache/hadoop/fs" ]; then
-JAVA_PLATFORM=`CLASSPATH=${CLASSPATH} ${JAVA} -Xmx32m org.apache.hadoop.util.PlatformName | sed -e "s/ /_/g"`
--  
++	/* list of snapshots */
++	struct list_head	snaps;
 +
-if [ -d "$HADOOP_HOME/build/native" ]; then
- JAVA_LIBRARY_PATH=${HADOOP_HOME}/build/native/${JAVA_PLATFORM}/lib
-fi
--  
++	/* sysfs related */
++	struct device		dev;
++};
 +
-+  if [ -d "$HADOOP_HOME/src/native/src/org/apache/hadoop/fs" ]; then
-+    JAVA_LIBRARY_PATH=${HADOOP_HOME}/src/native/src/org/apache/hadoop/fs
-+  fi
++static struct bus_type rbd_bus_type = {
++	.name		= "rbd",
+ };
+ 
+ static spinlock_t node_lock;      /* protects client get/put */
+ 
+-static struct class *class_rbd;	  /* /sys/class/rbd */
+ static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
+ static LIST_HEAD(rbd_dev_list);    /* devices */
+ static LIST_HEAD(rbd_client_list);      /* clients */
+ 
++static int __rbd_init_snaps_header(struct rbd_device *rbd_dev);
++static void rbd_dev_release(struct device *dev);
++static ssize_t rbd_snap_rollback(struct device *dev,
++				 struct device_attribute *attr,
++				 const char *buf,
++				 size_t size);
++static ssize_t rbd_snap_add(struct device *dev,
++			    struct device_attribute *attr,
++			    const char *buf,
++			    size_t count);
++static void __rbd_remove_snap_dev(struct rbd_device *rbd_dev,
++				  struct rbd_snap *snap);;
 +
-if [ -d "${HADOOP_HOME}/lib/native" ]; then
- if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
-   JAVA_LIBRARY_PATH=${JAVA_LIBRARY_PATH}:${HADOOP_HOME}/lib/native/${JAVA_PLATFORM}
-diff --git a/build.xml b/build.xml
-index 602fcfe..7c34f41 100644
---- a/build.xml
-+++ b/build.xml
-@@ -455,6 +455,7 @@
-	
- <mkdir dir="${build.native}/lib"/>
- <mkdir dir="${build.native}/src/org/apache/hadoop/io/compress/zlib"/>
-+    <mkdir dir="${build.native}/src/org/apache/hadoop/fs"/>
-
-	<javah
-	  classpath="${build.classes}"
-@@ -466,6 +467,15 @@
-   <class name="org.apache.hadoop.io.compress.zlib.ZlibDecompressor" />
-	</javah>
-
-+    <javah
-+      classpath="${build.classes}"
-+      destdir="${build.native}/src/org/apache/hadoop/fs"
-+      force="yes"
-+      verbose="yes"
-+      >
-+      <class name="org.apache.hadoop.fs.CephLocalityFileSystem" />
-+    </javah>
 +
-	<exec dir="${build.native}" executable="sh" failonerror="true">
-	  <env key="OS_NAME" value="${os.name}"/>
-	  <env key="OS_ARCH" value="${os.arch}"/>
-@@ -727,7 +737,7 @@
-   <sysproperty key="test.build.extraconf" value="${test.build.extraconf}" />
-   <sysproperty key="hadoop.policy.file" value="hadoop-policy.xml"/>
-   <sysproperty key="java.library.path"
--       value="${build.native}/lib:${lib.dir}/native/${build.platform}"/>
-+       value="${build.native}/lib:${lib.dir}/native/${build.platform}:${basedir}/src/native/src/org/apache/hadoop/fs"/>
-   <sysproperty key="install.c++.examples" value="${install.c++.examples}"/>
-   <!-- set io.compression.codec.lzo.class in the child jvm only if it is set -->
-	  <syspropertyset dynamic="no">
-diff --git a/src/core/core-default.xml b/src/core/core-default.xml
-index a26e733..9a055df 100644
---- a/src/core/core-default.xml
-+++ b/src/core/core-default.xml
-@@ -113,10 +113,17 @@
-<property>
-<name>fs.file.impl</name>
-<value>org.apache.hadoop.fs.LocalFileSystem</value>
-+  <!--<value>org.apache.hadoop.fs.CephLocalityFileSystem</value>-->
-<description>The FileSystem for file: uris.</description>
-</property>
-
-<property>
-+  <name>fs.cephk.impl</name>
-+  <value>org.apache.hadoop.fs.CephLocalityFileSystem</value>
-+  <description>The FileSystem for cephk: uris, which should be the Ceph client's mount point.  (cephk used to distinguish from HADOOP-6253 Ceph userspace shim.)</description>
-+</property>
-+
-+<property>
-<name>fs.hdfs.impl</name>
-<value>org.apache.hadoop.hdfs.DistributedFileSystem</value>
-<description>The FileSystem for hdfs: uris.</description>
-diff --git a/src/core/org/apache/hadoop/fs/CephLocalityFileSystem.java b/src/core/org/apache/hadoop/fs/CephLocalityFileSystem.java
-new file mode 100644
-index 0000000..11ef6d2
---- /dev/null
-+++ b/src/core/org/apache/hadoop/fs/CephLocalityFileSystem.java
-@@ -0,0 +1,149 @@
-+/**
-+ * Licensed to the Apache Software Foundation (ASF) under one
-+ * or more contributor license agreements.  See the NOTICE file
-+ * distributed with this work for additional information
-+ * regarding copyright ownership.  The ASF licenses this file
-+ * to you under the Apache License, Version 2.0 (the
-+ * "License"); you may not use this file except in compliance
-+ * with the License.  You may obtain a copy of the License at
-+ *
-+ *     http://www.apache.org/licenses/LICENSE-2.0
-+ *
-+ * Unless required by applicable law or agreed to in writing, software
-+ * distributed under the License is distributed on an "AS IS" BASIS,
-+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-+ * See the License for the specific language governing permissions and
-+ * limitations under the License.
-+ */
-+
-+package org.apache.hadoop.fs;
-+
-+import java.io.*;
-+import java.net.URI;
-+import java.nio.ByteBuffer;
-+import java.nio.channels.FileLock;
-+import java.util.*;
-+
-+import org.apache.hadoop.conf.Configuration;
-+import org.apache.hadoop.fs.permission.*;
-+import org.apache.hadoop.util.Progressable;
-+import org.apache.hadoop.util.StringUtils;
-+import org.apache.hadoop.util.Shell;
-+
-+/****************************************************************
-+ * Extend the RawFileSystem API for the Ceph filesystem.
-+ *
-+ * Presently, deployment must include manually-compiled C++ classes.
-+ * Please see $HADOOP_HOME/README-HADOOP-6779.txt.
-+ *
-+ *****************************************************************/
-+public class CephLocalityFileSystem extends RawLocalFileSystem {
-+  /**
-+   * Inherited from HADOOP-6253's CephFileSystem.java.
-+   */
-+  private boolean initialized = false;
-+
-+  /**
-+   * Inherited from HADOOP-6253's CephFileSystem.java.
-+   * //TODO Determine if it's possible to set the authority on this uri; there's no setter field.
-+   */
-+  private URI uri;
-+
-+  /**
-+   * Inherited from RawLocalFileSystem.java.
-+   */
-+  static final URI NAME = URI.create("cephk:///");
-+
-+  public CephLocalityFileSystem() {
-+    super();
-+
-+    //Debug
-+    //System.out.println(String.format("CephLocalityFileSystem() called."));
-+    //System.out.println("System.getProperty(\"user.dir\"):\t" + System.getProperty("user.dir"));
-+    //System.out.println("new Path(System.getProperty(\"user.dir\")).makeQualified(this):\t" + (new Path(System.getProperty("user.dir")).makeQualified(this)));
-+
-+    //TODO Maybe we want to tweak the workingDir?
-+    //this.workingDir =  new Path("file:///mnt/ceph");
-+
-+    //Debug
-+    //System.out.println(String.format("CephLocalityFileSystem() finished."));
-+  }
-+
-+  /**
-+   * The default constructor for RawLocalFileSystem
-+   * takes environment's cwd and makes that this file system's starting
-+   * point.  With this constructor, specify your own starting point.
-+   *
-+   * @param startDir
-+   */
-+  public CephLocalityFileSystem(Path startDir) {
-+    //Debug
-+    //System.out.println(String.format("CephLocalityFileSystem(%s) called.", startDir.toString()));
-+
-+    this.workingDir = startDir;
-+
-+    //Debug
-+    //System.out.println(String.format("CephLocalityFileSystem(%s) finished.", startDir.toString()));
-+  }
-+
-+  /**
-+   * Return an array containing hostnames, offset and size of
-+   * portions of the given file.  For a nonexistent
-+   * file or regions, null will be returned.
-+   *
-+   * For the Ceph file system, this employs ioctl() calls through JNI.
-+   * The ioctl() data structures are not returned directly to Java space
-+   * because running ioctl() requires an open file handle.  We operate
-+   * the file handle logistics in local code for now; an alternative
-+   * is to use a JNI call to open the file handle and another call to
-+   * destroy it.
-+   */
-+  public native BlockLocation[] getFileBlockLocations(FileStatus file, long start, long len) throws IOException;
-+
-+  /**
-+   * Convenience method for JNI, to save a few crossings between the
-+   * C++/Java boundary.
-+   *
-+   * @param fs
-+   * @return Returns the string of the path in fs.
-+   */
-+  public String getPathStringFromFileStatus(FileStatus fs) {
-+    return fs.getPath().toUri().getRawPath();
-+  }
-+
-+  //TODO Ceph exposes file block size through an ioctl.  getBlockSize is deprecated; overwrite getFileStatus() instead.
-+
-+  /**
-+   * Code inherited and evolved from HADOOP-6253's CephFileSystem.java class.
-+   * Probably doesn't need to bother with this.initialized member variable; 6253 used that for starting up Ceph.
-+   */
-+  @Override
-+  public void initialize(URI uri, Configuration conf) throws IOException{
-+    //Debug
-+    //System.out.println("CephLocalityFileSystem.initialize() called.");
-+    if (!this.initialized) {
-+      super.initialize(uri, conf);
-+      setConf(conf);
-+      this.uri=uri;  //Note:  This is not set in the superclasses, must be set here.
-+      //Debug
-+      //System.out.println("uri:\t"+uri);
-+      //System.out.println("uri.getScheme():\t"+uri.getScheme());
-+      //System.out.println("uri.getAuthority():\t"+uri.getAuthority());
-+      //System.out.println("this.uri:\t"+this.uri);
-+      //System.out.println("this.uri.getAuthority():\t"+this.uri.getAuthority());
-+      //System.out.println("Working directory:\t" + this.workingDir);
-+      this.initialized = true;
-+    }
-+    //Debug
-+    //System.out.println("CephLocalityFileSystem.initialize() finished.");
-+  }
-+
-+  /**
-+   * Overrides RawLocalFileSystem's "file:///".
-+   */
-+  public URI getUri() {
-+    return NAME;
-+  }
-+
-+  static{ System.loadLibrary("CephLocalityFileSystem"); }
++static struct rbd_device *dev_to_rbd(struct device *dev)
++{
++	return container_of(dev, struct rbd_device, dev);
 +}
-diff --git a/src/core/org/apache/hadoop/fs/FileStatus.java b/src/core/org/apache/hadoop/fs/FileStatus.java
-index 1249846..e663514 100644
---- a/src/core/org/apache/hadoop/fs/FileStatus.java
-+++ b/src/core/org/apache/hadoop/fs/FileStatus.java
-@@ -249,4 +249,32 @@ public class FileStatus implements Writable, Comparable {
-public int hashCode() {
- return getPath().hashCode();
-}
 +
-+  public String report() {
-+    StringBuilder result = new StringBuilder();
-+    result.append("Status of " + path + ":\n");
++static struct device *rbd_get_dev(struct rbd_device *rbd_dev)
++{
++	return get_device(&rbd_dev->dev);
++}
 +
-+    result.append("\tlength\t\t");
-+    result.append(length);
-+    result.append("\n");
++static void rbd_put_dev(struct rbd_device *rbd_dev)
++{
++	put_device(&rbd_dev->dev);
++}
+ 
+ static int rbd_open(struct block_device *bdev, fmode_t mode)
+ {
+ 	struct gendisk *disk = bdev->bd_disk;
+ 	struct rbd_device *rbd_dev = disk->private_data;
+ 
++	rbd_get_dev(rbd_dev);
 +
-+    result.append("\tblocksize\t\t");
-+    result.append(blocksize);
-+    result.append("\n");
-+
-+    result.append("\tblock_replication\t");
-+    result.append(block_replication);
-+    result.append("\n");
-+
-+    return result.toString();
-+    /*
-+  private boolean isdir;
-+  private long modification_time;
-+  private long access_time;
-+  private FsPermission permission;
-+  private String owner;
-+  private String group;
-+
-+     */
-+  }
-}
-diff --git a/src/core/org/apache/hadoop/fs/FileSystem.java b/src/core/org/apache/hadoop/fs/FileSystem.java
-index 304c136..4474051 100644
---- a/src/core/org/apache/hadoop/fs/FileSystem.java
-+++ b/src/core/org/apache/hadoop/fs/FileSystem.java
-@@ -1370,10 +1370,15 @@ public abstract class FileSystem extends Configured implements Closeable {
-
-private static FileSystem createFileSystem(URI uri, Configuration conf
-   ) throws IOException {
-+    //Debug:  Report the class of the file system
-+    //LOG.info("java.library.path:\t" + System.getProperty("java.library.path") + "\n");
-+    //LOG.info("uri:\t" + uri + "\n");
-+    //LOG.info("uri.getScheme():\t" + uri.getScheme() + "\n");
- Class<?> clazz = conf.getClass("fs." + uri.getScheme() + ".impl", null);
- if (clazz == null) {
-   throw new IOException("No FileSystem for scheme: " + uri.getScheme());
+ 	set_device_ro(bdev, rbd_dev->read_only);
+ 
+ 	if ((mode & FMODE_WRITE) && rbd_dev->read_only)
+@@ -216,9 +192,19 @@ static int rbd_open(struct block_device *bdev, fmode_t mode)
+ 	return 0;
  }
-+    //LOG.info("clazz.toString():\t" + clazz.toString() + "\n");
- FileSystem fs = (FileSystem)ReflectionUtils.newInstance(clazz, conf);
- fs.initialize(uri, conf);
- return fs;
-diff --git a/src/core/org/apache/hadoop/fs/RawLocalFileSystem.java b/src/core/org/apache/hadoop/fs/RawLocalFileSystem.java
-index 8d439f9..5a4b65b 100644
---- a/src/core/org/apache/hadoop/fs/RawLocalFileSystem.java
-+++ b/src/core/org/apache/hadoop/fs/RawLocalFileSystem.java
-@@ -36,7 +36,7 @@ import org.apache.hadoop.util.Shell;
-*****************************************************************/
-public class RawLocalFileSystem extends FileSystem {
-static final URI NAME = URI.create("file:///");
--  private Path workingDir;
-+  protected Path workingDir;
-
-public RawLocalFileSystem() {
- workingDir = new Path(System.getProperty("user.dir")).makeQualified(this);
-@@ -474,7 +474,7 @@ public class RawLocalFileSystem extends FileSystem {
-     String.format("%04o", permission.toShort()));
-}
-
--  private static String execCommand(File f, String... cmd) throws IOException {
-+  protected static String execCommand(File f, String... cmd) throws IOException {
- String[] args = new String[cmd.length + 1];
- System.arraycopy(cmd, 0, args, 0, cmd.length);
- args[cmd.length] = f.getCanonicalPath();
-diff --git a/src/mapred/org/apache/hadoop/mapred/JobTracker.java b/src/mapred/org/apache/hadoop/mapred/JobTracker.java
-index a8e86f9..1e91497 100644
---- a/src/mapred/org/apache/hadoop/mapred/JobTracker.java
-+++ b/src/mapred/org/apache/hadoop/mapred/JobTracker.java
-@@ -3465,7 +3465,9 @@ public class JobTracker implements MRConstants, InterTrackerProtocol,
-* @see org.apache.hadoop.mapred.JobSubmissionProtocol#getSystemDir()
-*/
-public String getSystemDir() {
--    Path sysDir = new Path(conf.get("mapred.system.dir", "/tmp/hadoop/mapred/system"));  
-+    String mapredsystemdir = conf.get("mapred.system.dir", "/tmp/hadoop/mapred/system");
-+    LOG.info("mapred.system.dir configuration: " + mapredsystemdir);
-+    Path sysDir = new Path(mapredsystemdir);
- return fs.makeQualified(sysDir).toString();
-}
-
-diff --git a/src/native/Makefile.am b/src/native/Makefile.am
-index 3d44cbc..108775e 100644
---- a/src/native/Makefile.am
-+++ b/src/native/Makefile.am
-@@ -36,7 +36,7 @@
-export PLATFORM = $(shell echo $$OS_NAME | tr [A-Z] [a-z])
-
-# List the sub-directories here
--SUBDIRS = src/org/apache/hadoop/io/compress/zlib lib
-+SUBDIRS = src/org/apache/hadoop/io/compress/zlib src/org/apache/hadoop/fs lib
-
-# The following export is needed to build libhadoop.so in the 'lib' directory
-export SUBDIRS
-diff --git a/src/native/src/org/apache/hadoop/fs/CephLocalityFileSystem.cpp b/src/native/src/org/apache/hadoop/fs/CephLocalityFileSystem.cpp
-new file mode 100644
-index 0000000..5183314
---- /dev/null
-+++ b/src/native/src/org/apache/hadoop/fs/CephLocalityFileSystem.cpp
-@@ -0,0 +1,344 @@
-+/**
-+This file's main function was originally in
-+$CEPH_HOME/src/client/test_ioctls.c .
+ 
++static int rbd_release(struct gendisk *disk, fmode_t mode)
++{
++	struct rbd_device *rbd_dev = disk->private_data;
 +
-+In the present form, it converts ceph_ioctl_dataloc to BlockLocations.
++	rbd_put_dev(rbd_dev);
 +
-+BlockLocations require:
-+String[] names, String[] hosts, long offset, long length
++	return 0;
++}
 +
-+The ceph_ioctl_dataloc supplies:
-+struct ceph_ioctl_dataloc {
-+	__u64 file_offset;           // in+out: file offset
-+	__u64 object_offset;         // out: offset in object
-+	__u64 object_no;             // out: object #
-+	__u64 object_size;           // out: object size
-+	char object_name[64];        // out: object name
-+	__u64 block_offset;          // out: offset in block
-+	__u64 block_size;            // out: block length
-+	__s64 osd;                   // out: osd #
-+	struct sockaddr_storage osd_addr; // out: osd address
+ static const struct block_device_operations rbd_bd_ops = {
+ 	.owner			= THIS_MODULE,
+ 	.open			= rbd_open,
++	.release		= rbd_release,
+ };
+ 
+ /*
+@@ -361,7 +347,6 @@ static int rbd_header_from_disk(struct rbd_image_header *header,
+ 	int ret = -ENOMEM;
+ 
+ 	init_rwsem(&header->snap_rwsem);
+-
+ 	header->snap_names_len = le64_to_cpu(ondisk->snap_names_len);
+ 	header->snapc = kmalloc(sizeof(struct ceph_snap_context) +
+ 				snap_count *
+@@ -1256,10 +1241,20 @@ bad:
+ 	return -ERANGE;
+ }
+ 
++static void __rbd_remove_all_snaps(struct rbd_device *rbd_dev)
++{
++	struct rbd_snap *snap;
++
++	while (!list_empty(&rbd_dev->snaps)) {
++		snap = list_first_entry(&rbd_dev->snaps, struct rbd_snap, node);
++		__rbd_remove_snap_dev(rbd_dev, snap);
++	}
++}
++
+ /*
+  * only read the first part of the ondisk header, without the snaps info
+  */
+-static int rbd_update_snaps(struct rbd_device *rbd_dev)
++static int __rbd_update_snaps(struct rbd_device *rbd_dev)
+ {
+ 	int ret;
+ 	struct rbd_image_header h;
+@@ -1280,12 +1275,15 @@ static int rbd_update_snaps(struct rbd_device *rbd_dev)
+ 	rbd_dev->header.total_snaps = h.total_snaps;
+ 	rbd_dev->header.snapc = h.snapc;
+ 	rbd_dev->header.snap_names = h.snap_names;
++	rbd_dev->header.snap_names_len = h.snap_names_len;
+ 	rbd_dev->header.snap_sizes = h.snap_sizes;
+ 	rbd_dev->header.snapc->seq = snap_seq;
+ 
++	ret = __rbd_init_snaps_header(rbd_dev);
++
+ 	up_write(&rbd_dev->header.snap_rwsem);
+ 
+-	return 0;
++	return ret;
+ }
+ 
+ static int rbd_init_disk(struct rbd_device *rbd_dev)
+@@ -1300,6 +1298,11 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 	if (rc)
+ 		return rc;
+ 
++	/* no need to lock here, as rbd_dev is not registered yet */
++	rc = __rbd_init_snaps_header(rbd_dev);
++	if (rc)
++		return rc;
++
+ 	rc = rbd_header_set_snap(rbd_dev, rbd_dev->snap_name, &total_size);
+ 	if (rc)
+ 		return rc;
+@@ -1343,54 +1346,360 @@ out:
+ 	return rc;
+ }
+ 
+-/********************************************************************
+- * /sys/class/rbd/
+- *                   add	map rados objects to blkdev
+- *                   remove	unmap rados objects
+- *                   list	show mappings
+- *******************************************************************/
++/*
++  sysfs
++*/
++
++static ssize_t rbd_size_show(struct device *dev,
++			     struct device_attribute *attr, char *buf)
++{
++	struct rbd_device *rbd_dev = dev_to_rbd(dev);
++
++	return sprintf(buf, "%llu\n", (unsigned long long)rbd_dev->header.image_size);
++}
++
++static ssize_t rbd_major_show(struct device *dev,
++			      struct device_attribute *attr, char *buf)
++{
++	struct rbd_device *rbd_dev = dev_to_rbd(dev);
+ 
+-static void class_rbd_release(struct class *cls)
++	return sprintf(buf, "%d\n", rbd_dev->major);
++}
++
++static ssize_t rbd_client_id_show(struct device *dev,
++				  struct device_attribute *attr, char *buf)
+ {
+-	kfree(cls);
++	struct rbd_device *rbd_dev = dev_to_rbd(dev);
++
++	return sprintf(buf, "client%lld\n", ceph_client_id(rbd_dev->client));
+ }
+ 
+-static ssize_t class_rbd_list(struct class *c,
+-			      struct class_attribute *attr,
+-			      char *data)
++static ssize_t rbd_pool_show(struct device *dev,
++			     struct device_attribute *attr, char *buf)
+ {
+-	int n = 0;
+-	struct list_head *tmp;
+-	int max = PAGE_SIZE;
++	struct rbd_device *rbd_dev = dev_to_rbd(dev);
++
++	return sprintf(buf, "%s\n", rbd_dev->pool_name);
++}
++
++static ssize_t rbd_name_show(struct device *dev,
++			     struct device_attribute *attr, char *buf)
++{
++	struct rbd_device *rbd_dev = dev_to_rbd(dev);
++
++	return sprintf(buf, "%s\n", rbd_dev->obj);
++}
++
++static ssize_t rbd_snap_show(struct device *dev,
++			     struct device_attribute *attr,
++			     char *buf)
++{
++	struct rbd_device *rbd_dev = dev_to_rbd(dev);
++
++	return sprintf(buf, "%s\n", rbd_dev->snap_name);
++}
++
++static ssize_t rbd_image_refresh(struct device *dev,
++				 struct device_attribute *attr,
++				 const char *buf,
++				 size_t size)
++{
++	struct rbd_device *rbd_dev = dev_to_rbd(dev);
++	int rc;
++	int ret = size;
+ 
+ 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+ 
+-	n += snprintf(data, max,
+-		      "#id\tmajor\tclient_name\tpool\tname\tsnap\tKB\n");
++	rc = __rbd_update_snaps(rbd_dev);
++	if (rc < 0)
++		ret = rc;
+ 
+-	list_for_each(tmp, &rbd_dev_list) {
+-		struct rbd_device *rbd_dev;
++	mutex_unlock(&ctl_mutex);
++	return ret;
++}
+ 
+-		rbd_dev = list_entry(tmp, struct rbd_device, node);
+-		n += snprintf(data+n, max-n,
+-			      "%d\t%d\tclient%lld\t%s\t%s\t%s\t%lld\n",
+-			      rbd_dev->id,
+-			      rbd_dev->major,
+-			      ceph_client_id(rbd_dev->client),
+-			      rbd_dev->pool_name,
+-			      rbd_dev->obj, rbd_dev->snap_name,
+-			      rbd_dev->header.image_size >> 10);
+-		if (n == max)
++static DEVICE_ATTR(size, S_IRUGO, rbd_size_show, NULL);
++static DEVICE_ATTR(major, S_IRUGO, rbd_major_show, NULL);
++static DEVICE_ATTR(client_id, S_IRUGO, rbd_client_id_show, NULL);
++static DEVICE_ATTR(pool, S_IRUGO, rbd_pool_show, NULL);
++static DEVICE_ATTR(name, S_IRUGO, rbd_name_show, NULL);
++static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
++static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
++static DEVICE_ATTR(create_snap, S_IWUSR, NULL, rbd_snap_add);
++static DEVICE_ATTR(rollback_snap, S_IWUSR, NULL, rbd_snap_rollback);
++
++static struct attribute *rbd_attrs[] = {
++	&dev_attr_size.attr,
++	&dev_attr_major.attr,
++	&dev_attr_client_id.attr,
++	&dev_attr_pool.attr,
++	&dev_attr_name.attr,
++	&dev_attr_current_snap.attr,
++	&dev_attr_refresh.attr,
++	&dev_attr_create_snap.attr,
++	&dev_attr_rollback_snap.attr,
++	NULL
++};
++
++static struct attribute_group rbd_attr_group = {
++	.attrs = rbd_attrs,
++};
++
++static const struct attribute_group *rbd_attr_groups[] = {
++	&rbd_attr_group,
++	NULL
++};
++
++static void rbd_sysfs_dev_release(struct device *dev)
++{
++}
++
++static struct device_type rbd_device_type = {
++	.name		= "rbd",
++	.groups		= rbd_attr_groups,
++	.release	= rbd_sysfs_dev_release,
 +};
 +
 +
-+The required items and the supplied items line up like so:
-+String[] names     dataloc.osd_addr
-+String[] hosts     dataloc.osd_addr
-+long offset        start
-+long length        len
++/*
++  sysfs - snapshots
 +*/
 +
-+#include <stdlib.h>
-+#include <stdio.h>
-+#include <unistd.h>
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include <fcntl.h>
++static ssize_t rbd_snap_size_show(struct device *dev,
++				  struct device_attribute *attr,
++				  char *buf)
++{
++	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
 +
-+#include <sys/ioctl.h>
-+#include <netinet/in.h>
-+#include <sys/socket.h>
-+#include <netdb.h>
-+
-+#include <string.h>  //memset
-+
-+#include <errno.h>
-+
-+#include <time.h>    //Debugging
-+#include <iostream>  //Debugging
-+#include <fstream>   //Debugging
-+using namespace std; //Debugging
-+
-+//JNI include
-+#include "org_apache_hadoop_fs_CephLocalityFileSystem.h"
-+
-+//Ceph includes
-+#include "client/ioctl.h"
-+
-+/**
-+ * Arguments:  (FileStatus file, long start, long len)
-+  Exemplar code:  Java_org_apache_hadoop_fs_ceph_CephTalker_ceph_1getdir
-+  Original Java function body:
-+
-+  public BlockLocation[] getFileBlockLocations(FileStatus file,
-+      long start, long len) throws IOException {
-+    if (file == null) {
-+      return null;
-+    }
-+
-+    if ( (start<0) || (len < 0) ) {
-+      throw new IllegalArgumentException("Invalid start or len parameter");
-+    }
-+
-+    if (file.getLen() < start) {
-+      return new BlockLocation[0];
-+
-+    }
-+    String[] name = { "localhost:50010" };
-+    String[] host = { "localhost" };
-+    return new BlockLocation[] { new BlockLocation(name, host, 0, file.getLen()) };
-+  }
-+
-+   Reference for building new objects:
-+   http://java.sun.com/docs/books/jni/html/fldmeth.html#26254
-+
-+   TODO Clean up memory.  Some reading is here:
-+   http://java.sun.com/developer/onlineTraining/Programming/JDCBook/jniref.html
-+ */
-+JNIEXPORT jobjectArray JNICALL Java_org_apache_hadoop_fs_CephLocalityFileSystem_getFileBlockLocations
-+  (JNIEnv *env, jobject obj, jobject j_file, jlong j_start, jlong j_len) {
-+
-+  ////Variables
-+  //Native...
-+  //debug//const char *logpath = "/home/alex/TestGetFileBlockLocations.txt";
-+  const char *c_path = "";
-+  int fd, err;
-+  long c_start, c_len;
-+  long blocksize, numblocks;
-+  struct ceph_ioctl_layout ceph_layout;
-+  struct ceph_ioctl_dataloc dl;
-+  char errdesc[256];
-+
-+  //Java...
-+  jmethodID constrid;              //This can probably be cached ( http://www.ibm.com/developerworks/java/library/j-jni/ )
-+  jmethodID filelenid;
-+  jmethodID methodid_getPathStringFromFileStatus;
-+  jfieldID pathfieldid;
-+  jclass BlockLocationClass, StringClass, FileStatusClass, CephLocalityFileSystemClass;
-+  jobjectArray aryBlockLocations;  //Returning item
-+  jstring j_path;
-+  jlong fileLength;
-+  jclass IllegalArgumentExceptionClass, IOExceptionClass, OutOfMemoryErrorClass;
-+
-+
-+  ////Debugging
-+  //Setup
-+  time_t rawtime;
-+  time(&rawtime);
-+  struct tm *timeinfo = localtime(&rawtime);
-+  //debug//ofstream debugstream(logpath, ios_base::app);
-+  //debug//debugstream << "Starting.  Current time:  " << asctime(timeinfo) << "." << endl;
-+  //debug//debugstream << "Arguments:  <j_file>, " << j_start << ", " << j_len << endl;
-+  memset(errdesc, NULL, 256);
-+
-+
-+  ////Grab the exception classes for all the little things that can go wrong.
-+  IllegalArgumentExceptionClass = env->FindClass("java/lang/IllegalArgumentException");
-+  IOExceptionClass = env->FindClass("java/io/IOException");
-+  OutOfMemoryErrorClass = env->FindClass("java/lang/OutOfMemoryError");
-+  if (IllegalArgumentExceptionClass == NULL || IOExceptionClass == NULL || OutOfMemoryErrorClass == NULL) {
-+    //debug//debugstream << "Failed to get an exception to throw.  Giving up." << endl;
-+    return NULL;
-+  }
-+
-+
-+  ////Sanity-check arguments (one more check comes after class declarations)
-+  if (j_file == NULL) {
-+    return NULL;
-+  }
-+
-+
-+  if (j_start < 0) {
-+    env->ThrowNew(IllegalArgumentExceptionClass, "Invalid start parameter (negative).");
-+    return NULL;
-+  }
-+  if (j_len <= 0) {
-+    env->ThrowNew(IllegalArgumentExceptionClass, "Invalid len parameter (nonpositive).");
-+    return NULL;
-+  }
-+
-+
-+  ////Grab the reference to the Java classes needed to set up end structure
-+  StringClass = env->FindClass("java/lang/String");
-+  if (StringClass == NULL) {
-+    env->ThrowNew(IOExceptionClass, "Java String class not found; dying a horrible, painful death.");
-+    return NULL;
-+  }
-+  BlockLocationClass = env->FindClass("org/apache/hadoop/fs/BlockLocation");
-+  if (BlockLocationClass == NULL) {
-+    env->ThrowNew(IOExceptionClass, "Hadoop BlockLocation class not found.");
-+    return NULL;
-+  }
-+  FileStatusClass = env->GetObjectClass(j_file);
-+  if (FileStatusClass == NULL) {
-+    env->ThrowNew(IOExceptionClass, "Hadoop FileStatus class not found.");
-+    return NULL;
-+  }
-+  CephLocalityFileSystemClass = env->GetObjectClass(obj);
-+  if (CephLocalityFileSystemClass == NULL) {
-+    env->ThrowNew(IOExceptionClass, "Hadoop CephLocalityFileSystemClass class not found.");
-+    return NULL;
-+  }
-+
-+  //debug//debugstream << "Classes retrieved." << endl;
-+
-+
-+  ////Grab class methods and members
-+  //(Type syntax reference: http://java.sun.com/javase/6/docs/technotes/guides/jni/spec/types.html#wp16432 )
-+
-+  //Grab the file length method
-+  filelenid = env->GetMethodID(FileStatusClass, "getLen", "()J");
-+  if (filelenid == NULL) {
-+    env->ThrowNew(IOExceptionClass, "Could not get filelenid.");
-+    return NULL;
-+  }
-+  //debug//debugstream << "filelenid retrieval complete." << endl;
-+
-+  //Grab the BlockLocation constructor
-+  constrid = env->GetMethodID(BlockLocationClass, "<init>", "([Ljava/lang/String;[Ljava/lang/String;JJ)V");
-+  if (constrid == NULL) {
-+    env->ThrowNew(IOExceptionClass, "Could not get constructor id for BlockLocationClass.");
-+    return NULL;
-+  }
-+  //debug//debugstream << "constrid retrieval complete." << endl;
-+
-+  //Grab the helper method for quick path conversion
-+  methodid_getPathStringFromFileStatus = env->GetMethodID(CephLocalityFileSystemClass, "getPathStringFromFileStatus", "(Lorg/apache/hadoop/fs/FileStatus;)Ljava/lang/String;");
-+  if (methodid_getPathStringFromFileStatus == NULL) {
-+    env->ThrowNew(IOExceptionClass, "ERROR:  Could not get methodid_getPathStringFromFileStatus.");
-+    return NULL;
-+  }
-+  //debug//debugstream << "methodid_getPathStringFromFileStatus retrieval complete." << endl;
-+
-+
-+  ////Calling methods
-+  //Grab the file length
-+  fileLength = env->CallLongMethod(j_file, filelenid);
-+  //debug//debugstream << "Called fileLen()." << endl;
-+  //One last sanity check
-+  if (fileLength < j_start) {
-+    //debug//debugstream << "Starting point after end of file; returning 0 block locations." << endl;
-+    aryBlockLocations = env->NewObjectArray(0, BlockLocationClass, NULL);
-+    if (aryBlockLocations == NULL) {
-+      env->ThrowNew(OutOfMemoryErrorClass,"Unable to allocate 0-length BlockLocation array.");
-+      return NULL;
-+    }
-+    return aryBlockLocations;
-+  }
-+  //debug//debugstream << "File length according to FileStatus:  " << fileLength << endl;
-+
-+  //Grab the file name
-+  j_path = (jstring) env->CallObjectMethod(obj, methodid_getPathStringFromFileStatus, j_file);
-+  if (j_path == NULL) {
-+    env->ThrowNew(IOExceptionClass, "j_path retrieval failed.");
-+    return NULL;
-+  }
-+  //debug//debugstream << "j_path retrieval complete." << endl;
-+
-+  c_path = env->GetStringUTFChars(j_path, NULL);
-+  if (c_path == NULL) {
-+    env->ThrowNew(IOExceptionClass, "c_path is NULL.");
-+    return NULL;
-+  }
-+  //debug//debugstream << "c_path path is " << c_path << endl;
-+
-+
-+  ////Really-native code:  Start the file I/O.
-+  //Open the file (need descriptor for ioctl())
-+  fd = open(c_path , O_CREAT|O_RDWR, 0644);  //TODO Not sure why this opens RDRW and CREAT (code copied from Ceph test).  Necessary for ioctl?
-+  if (fd <= 0) {
-+    env->ThrowNew(IOExceptionClass, "Couldn't open file.");
-+    //debug//debugstream << "ERROR:  Couldn't open file.  errno:  " << strerror(errno) << ".  fd:  " << strerror(fd) << endl;  //TODO Clean this up.
-+    return NULL;
-+  }
-+  //debug//debugstream << "File opening complete." << endl;
-+  //Cleanup:  Don't need file name characters anymore.
-+  env->ReleaseStringUTFChars(j_path, c_path);
-+
-+  //Get layout
-+  err = ioctl(fd, CEPH_IOC_GET_LAYOUT, (unsigned long)&ceph_layout);
-+  if (err) {
-+    env->ThrowNew(IOExceptionClass, "ioctl failed (layout).");
-+    return NULL;
-+  }
-+  blocksize=ceph_layout.object_size;  //TODO (big) Expose this object size to the Java file system.
-+  //debug//debugstream << "Block size is " << blocksize << endl;
-+
-+  //Determine the number of blocks we're looking for.  (The problem:  How many buckets.  Can't remember if there's a library call to find this quickly...)
-+  numblocks = (j_start+j_len-1)/blocksize - j_start/blocksize + 1;
-+  //debug//debugstream << "Expecting to work on " << numblocks << " blocks." << endl;
-+
-+  aryBlockLocations = (jobjectArray) env->NewObjectArray(numblocks, BlockLocationClass, NULL);
-+  if (aryBlockLocations == NULL) {
-+    env->ThrowNew(OutOfMemoryErrorClass, "Unable to allocate BlockLocation array.");
-+    return NULL;
-+  }
-+
-+  //Run an ioctl for each block.
-+  //jthrowable exc;
-+  char buf[80];
-+  jlong blocklength;
-+  jlong curoffset;
-+  //TODO This loop test will very probably suffer data races with updates to the file.  Oh; is that why ioctl() gets RDRW?
-+  jlong loopinit=j_start/blocksize;
-+  jlong i=loopinit;
-+  for (jlong imax=j_start+j_len; i*blocksize < imax; i++) {
-+    //Note <=; we go through the last requested byte.
-+    //Set up the data location object
-+    curoffset = i*blocksize;
-+    dl.file_offset = curoffset;
-+    //debug//debugstream << "Running dataloc ioctl loop for dl.file_offset=" << dl.file_offset << " (curoffset=" << curoffset << ")" << endl;
-+
-+    //Run the ioctl to get block location()
-+    err = ioctl(fd, CEPH_IOC_GET_DATALOC, (unsigned long)&dl);
-+    if (err) {
-+      sprintf(errdesc, "ioctl failed (dataloc); err=%d.", err);
-+      env->ThrowNew(IOExceptionClass, errdesc);
-+      return NULL;
-+    }
-+
-+    //Create string object.
-+    //TODO:  Check if freeing this causes a null pointer exception in Java.
-+    //jstring j_tmpname = env->NewStringUTF("localhost:50010");
-+    //jstring j_tmphost = env->NewStringUTF("localhost");
-+    memset(buf, 0, 80);
-+    getnameinfo((struct sockaddr *)&dl.osd_addr, sizeof(dl.osd_addr), buf, sizeof(buf), 0, 0, NI_NUMERICHOST);
-+    //debug//debugstream << "Found host " << buf << endl;
-+    jstring j_tmphost = env->NewStringUTF(buf);
-+    //The names list should include the port number if following the example getFileBlockLocations from FileSystem;
-+    //however, as of 0.20.2, nothing invokes BlockLocation.getNames().
-+    jstring j_tmpname = env->NewStringUTF(buf);
-+    if (j_tmphost == NULL || j_tmpname == NULL) {
-+      env->ThrowNew(OutOfMemoryErrorClass, "Unable to convert String for name or host.");
-+      return NULL;
-+    }
-+
-+    //Define an array of strings for names, and one for hosts (only going to be one element long for now)
-+    jobjectArray aryNames = (jobjectArray) env->NewObjectArray(1, StringClass, NULL);
-+    jobjectArray aryHosts = (jobjectArray) env->NewObjectArray(1, StringClass, NULL);
-+    if (aryHosts == NULL || aryNames == NULL) {
-+      env->ThrowNew(OutOfMemoryErrorClass, "Unable to allocate String array for names or hosts.");
-+      return NULL;
-+    }
-+
-+    env->SetObjectArrayElement(aryNames, 0, j_tmpname);
-+    ////TODO Hunt for ArrayIndex exceptions
-+    //exc = env->ExceptionOccurred();
-+    //if (exc) {
-+    //  //debug//debugstream << "Exception occurred.";
-+    //  return NULL;
-+    //}
-+    env->SetObjectArrayElement(aryHosts, 0, j_tmphost);
-+    ////Probably safe if the above one worked.
-+
-+
-+    //debug//debugstream << "imax:  " << imax << endl;
-+    //debug//debugstream << "curoffset:  " << curoffset << endl;
-+    //debug//debugstream << "blocksize:  " << blocksize << endl;
-+    //debug//debugstream << "imax-curoffset:  " << imax-curoffset << endl;
-+    blocklength = (imax-curoffset)<blocksize ? imax-curoffset : blocksize;  //TODO verify boundary condition on < vs. <=
-+    //debug//debugstream << "Block length:  " << blocklength << endl;
-+    jobject tmpBlockLocation = env->NewObject(BlockLocationClass, constrid, aryNames, aryHosts, curoffset, blocklength);
-+    env->SetObjectArrayElement(aryBlockLocations, i-loopinit, tmpBlockLocation);
-+    //TODO Hunt for ArrayIndex exceptions
-+  }
-+  //Reminder:  i will be 1 too large after the loop finishes.  No need to add another 1.
-+  //debug//debugstream << "Finished looping over " << (i-loopinit) << " of " << numblocks << " blocks." << endl;
-+  //debug//debugstream << "(Makes " << ((i-loopinit)==numblocks ? "" : "no ") << "sense.)" << endl;
-+
-+  //Cleanup
-+  close(fd);
-+  //debug//debugstream.close();
-+
-+  return aryBlockLocations;
++	return sprintf(buf, "%lld\n", (long long)snap->size);
 +}
-diff --git a/src/test/org/apache/hadoop/fs/TestGetFileBlockLocations.java b/src/test/org/apache/hadoop/fs/TestGetFileBlockLocations.java
-index c85cc98..aa6a506 100644
---- a/src/test/org/apache/hadoop/fs/TestGetFileBlockLocations.java
-+++ b/src/test/org/apache/hadoop/fs/TestGetFileBlockLocations.java
-@@ -32,7 +32,7 @@ import org.apache.hadoop.conf.Configuration;
-public class TestGetFileBlockLocations extends TestCase {
-private static String TEST_ROOT_DIR =
-   System.getProperty("test.build.data", "/tmp/testGetFileBlockLocations");
--  private static final int FileLength = 4 * 1024 * 1024; // 4MB
-+  private static final int FileLength = 64 * 1024 * 1024; // 64MB
-private Configuration conf;
-private Path path;
-private FileSystem fs;
-@@ -47,6 +47,10 @@ public class TestGetFileBlockLocations extends TestCase {
- Path rootPath = new Path(TEST_ROOT_DIR);
- path = new Path(rootPath, "TestGetFileBlockLocations");
- fs = rootPath.getFileSystem(conf);
-+    //Debug:  Verify the class of the file system.
-+    //System.out.println("TEST_ROOT_DIR:\t" + TEST_ROOT_DIR);
-+    //System.out.println("rootPath:\t" + rootPath);
-+    //System.out.println("fs.getClass().getName():\t" + fs.getClass().getName());
- FSDataOutputStream fsdos = fs.create(path, true);
- byte[] buffer = new byte[1024];
- while (fsdos.getPos() < FileLength) {
-@@ -58,6 +62,7 @@ public class TestGetFileBlockLocations extends TestCase {
-
-private void oneTest(int offBegin, int offEnd, FileStatus status)
-   throws IOException {
-+    //debug//System.out.println("oneTest(" + offBegin + ", " + offEnd + ") called.");
- if (offBegin > offEnd) {
-   int tmp = offBegin;
-   offBegin = offEnd;
-@@ -65,6 +70,11 @@ public class TestGetFileBlockLocations extends TestCase {
++
++static ssize_t rbd_snap_id_show(struct device *dev,
++				struct device_attribute *attr,
++				char *buf)
++{
++	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
++
++	return sprintf(buf, "%lld\n", (long long)snap->id);
++}
++
++static DEVICE_ATTR(snap_size, S_IRUGO, rbd_snap_size_show, NULL);
++static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
++
++static struct attribute *rbd_snap_attrs[] = {
++	&dev_attr_snap_size.attr,
++	&dev_attr_snap_id.attr,
++	NULL,
++};
++
++static struct attribute_group rbd_snap_attr_group = {
++	.attrs = rbd_snap_attrs,
++};
++
++static void rbd_snap_dev_release(struct device *dev)
++{
++	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
++	kfree(snap->name);
++	kfree(snap);
++}
++
++static const struct attribute_group *rbd_snap_attr_groups[] = {
++	&rbd_snap_attr_group,
++	NULL
++};
++
++static struct device_type rbd_snap_device_type = {
++	.groups		= rbd_snap_attr_groups,
++	.release	= rbd_snap_dev_release,
++};
++
++static void __rbd_remove_snap_dev(struct rbd_device *rbd_dev,
++				  struct rbd_snap *snap)
++{
++	list_del(&snap->node);
++	device_unregister(&snap->dev);
++}
++
++static int rbd_register_snap_dev(struct rbd_device *rbd_dev,
++				  struct rbd_snap *snap,
++				  struct device *parent)
++{
++	struct device *dev = &snap->dev;
++	int ret;
++
++	dev->type = &rbd_snap_device_type;
++	dev->parent = parent;
++	dev->release = rbd_snap_dev_release;
++	dev_set_name(dev, "snap_%s", snap->name);
++	ret = device_register(dev);
++
++	return ret;
++}
++
++static int __rbd_add_snap_dev(struct rbd_device *rbd_dev,
++			      int i, const char *name,
++			      struct rbd_snap **snapp)
++{
++	int ret;
++	struct rbd_snap *snap = kzalloc(sizeof(*snap), GFP_KERNEL);
++	if (!snap)
++		return -ENOMEM;
++	snap->name = kstrdup(name, GFP_KERNEL);
++	snap->size = rbd_dev->header.snap_sizes[i];
++	snap->id = rbd_dev->header.snapc->snaps[i];
++	if (device_is_registered(&rbd_dev->dev)) {
++		ret = rbd_register_snap_dev(rbd_dev, snap,
++					     &rbd_dev->dev);
++		if (ret < 0)
++			goto err;
++	}
++	*snapp = snap;
++	return 0;
++err:
++	kfree(snap->name);
++	kfree(snap);
++	return ret;
++}
++
++/*
++ * search for the previous snap in a null delimited string list
++ */
++const char *rbd_prev_snap_name(const char *name, const char *start)
++{
++	if (name < start + 2)
++		return NULL;
++
++	name -= 2;
++	while (*name) {
++		if (name == start)
++			return start;
++		name--;
++	}
++	return name + 1;
++}
++
++/*
++ * compare the old list of snapshots that we have to what's in the header
++ * and update it accordingly. Note that the header holds the snapshots
++ * in a reverse order (from newest to oldest) and we need to go from
++ * older to new so that we don't get a duplicate snap name when
++ * doing the process (e.g., removed snapshot and recreated a new
++ * one with the same name.
++ */
++static int __rbd_init_snaps_header(struct rbd_device *rbd_dev)
++{
++	const char *name, *first_name;
++	int i = rbd_dev->header.total_snaps;
++	struct rbd_snap *snap, *old_snap = NULL;
++	int ret;
++	struct list_head *p, *n;
++
++	first_name = rbd_dev->header.snap_names;
++	name = first_name + rbd_dev->header.snap_names_len;
++
++	list_for_each_prev_safe(p, n, &rbd_dev->snaps) {
++		u64 cur_id;
++
++		old_snap = list_entry(p, struct rbd_snap, node);
++
++		if (i)
++			cur_id = rbd_dev->header.snapc->snaps[i - 1];
++
++		if (!i || old_snap->id < cur_id) {
++			/* old_snap->id was skipped, thus was removed */
++			__rbd_remove_snap_dev(rbd_dev, old_snap);
++			continue;
++		}
++		if (old_snap->id == cur_id) {
++			/* we have this snapshot already */
++			i--;
++			name = rbd_prev_snap_name(name, first_name);
++			continue;
++		}
++		for (; i > 0;
++		     i--, name = rbd_prev_snap_name(name, first_name)) {
++			if (!name) {
++				WARN_ON(1);
++				return -EINVAL;
++			}
++			cur_id = rbd_dev->header.snapc->snaps[i];
++			/* snapshot removal? handle it above */
++			if (cur_id >= old_snap->id)
++				break;
++			/* a new snapshot */
++			ret = __rbd_add_snap_dev(rbd_dev, i - 1, name, &snap);
++			if (ret < 0)
++				return ret;
++
++			/* note that we add it backward so using n and not p */
++			list_add(&snap->node, n);
++			p = &snap->node;
++		}
++	}
++	/* we're done going over the old snap list, just add what's left */
++	for (; i > 0; i--) {
++		name = rbd_prev_snap_name(name, first_name);
++		if (!name) {
++			WARN_ON(1);
++			return -EINVAL;
++		}
++		ret = __rbd_add_snap_dev(rbd_dev, i - 1, name, &snap);
++		if (ret < 0)
++			return ret;
++		list_add(&snap->node, &rbd_dev->snaps);
++	}
++
++	return 0;
++}
++
++
++static void rbd_root_dev_release(struct device *dev)
++{
++}
++
++static struct device rbd_root_dev = {
++	.init_name =    "rbd",
++	.release =      rbd_root_dev_release,
++};
++
++static int rbd_bus_add_dev(struct rbd_device *rbd_dev)
++{
++	int ret = -ENOMEM;
++	struct device *dev;
++	struct rbd_snap *snap;
++
++	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
++	dev = &rbd_dev->dev;
++
++	dev->bus = &rbd_bus_type;
++	dev->type = &rbd_device_type;
++	dev->parent = &rbd_root_dev;
++	dev->release = rbd_dev_release;
++	dev_set_name(dev, "%d", rbd_dev->id);
++	ret = device_register(dev);
++	if (ret < 0)
++		goto done_free;
++
++	list_for_each_entry(snap, &rbd_dev->snaps, node) {
++		ret = rbd_register_snap_dev(rbd_dev, snap,
++					     &rbd_dev->dev);
++		if (ret < 0)
+ 			break;
+ 	}
+ 
+ 	mutex_unlock(&ctl_mutex);
+-	return n;
++	return 0;
++done_free:
++	mutex_unlock(&ctl_mutex);
++	return ret;
  }
- BlockLocation[] locations =
-     fs.getFileBlockLocations(status, offBegin, offEnd - offBegin);
-+    if (locations == null) {
-+      //debug//System.out.println("Null result.");
-+      return;
-+    }
-+    //debug//System.out.println("oneTest(" + offBegin + ", " + offEnd + ") returns " + locations.length + " locations.");
- if (offBegin < status.getLen()) {
-   Arrays.sort(locations, new Comparator<BlockLocation>() {
+ 
+-static ssize_t class_rbd_add(struct class *c,
+-			     struct class_attribute *attr,
+-			     const char *buf, size_t count)
++static void rbd_bus_del_dev(struct rbd_device *rbd_dev)
++{
++	device_unregister(&rbd_dev->dev);
++}
++
++static ssize_t rbd_add(struct bus_type *bus, const char *buf, size_t count)
+ {
+ 	struct ceph_osd_client *osdc;
+ 	struct rbd_device *rbd_dev;
+@@ -1419,6 +1728,7 @@ static ssize_t class_rbd_add(struct class *c,
+ 	/* static rbd_device initialization */
+ 	spin_lock_init(&rbd_dev->lock);
+ 	INIT_LIST_HEAD(&rbd_dev->node);
++	INIT_LIST_HEAD(&rbd_dev->snaps);
+ 
+ 	/* generate unique id: find highest unique id, add one */
+ 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+@@ -1478,6 +1788,9 @@ static ssize_t class_rbd_add(struct class *c,
+ 	}
+ 	rbd_dev->major = irc;
+ 
++	rc = rbd_bus_add_dev(rbd_dev);
++	if (rc)
++		goto err_out_disk;
+ 	/* set up and announce blkdev mapping */
+ 	rc = rbd_init_disk(rbd_dev);
+ 	if (rc)
+@@ -1487,6 +1800,8 @@ static ssize_t class_rbd_add(struct class *c,
+ 
+ err_out_blkdev:
+ 	unregister_blkdev(rbd_dev->major, rbd_dev->name);
++err_out_disk:
++	rbd_free_disk(rbd_dev);
+ err_out_client:
+ 	rbd_put_client(rbd_dev);
+ 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+@@ -1518,35 +1833,10 @@ static struct rbd_device *__rbd_get_dev(unsigned long id)
+ 	return NULL;
+ }
+ 
+-static ssize_t class_rbd_remove(struct class *c,
+-				struct class_attribute *attr,
+-				const char *buf,
+-				size_t count)
++static void rbd_dev_release(struct device *dev)
+ {
+-	struct rbd_device *rbd_dev = NULL;
+-	int target_id, rc;
+-	unsigned long ul;
+-
+-	rc = strict_strtoul(buf, 10, &ul);
+-	if (rc)
+-		return rc;
+-
+-	/* convert to int; abort if we lost anything in the conversion */
+-	target_id = (int) ul;
+-	if (target_id != ul)
+-		return -EINVAL;
+-
+-	/* remove object from list immediately */
+-	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+-
+-	rbd_dev = __rbd_get_dev(target_id);
+-	if (rbd_dev)
+-		list_del_init(&rbd_dev->node);
+-
+-	mutex_unlock(&ctl_mutex);
+-
+-	if (!rbd_dev)
+-		return -ENOENT;
++	struct rbd_device *rbd_dev =
++			container_of(dev, struct rbd_device, dev);
+ 
+ 	rbd_put_client(rbd_dev);
+ 
+@@ -1557,67 +1847,11 @@ static ssize_t class_rbd_remove(struct class *c,
+ 
+ 	/* release module ref */
+ 	module_put(THIS_MODULE);
+-
+-	return count;
+ }
+ 
+-static ssize_t class_rbd_snaps_list(struct class *c,
+-			      struct class_attribute *attr,
+-			      char *data)
+-{
+-	struct rbd_device *rbd_dev = NULL;
+-	struct list_head *tmp;
+-	struct rbd_image_header *header;
+-	int i, n = 0, max = PAGE_SIZE;
+-	int ret;
+-
+-	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+-
+-	n += snprintf(data, max, "#id\tsnap\tKB\n");
+-
+-	list_for_each(tmp, &rbd_dev_list) {
+-		char *names, *p;
+-		struct ceph_snap_context *snapc;
+-
+-		rbd_dev = list_entry(tmp, struct rbd_device, node);
+-		header = &rbd_dev->header;
+-
+-		down_read(&header->snap_rwsem);
+-
+-		names = header->snap_names;
+-		snapc = header->snapc;
+-
+-		n += snprintf(data + n, max - n, "%d\t%s\t%lld%s\n",
+-			      rbd_dev->id, RBD_SNAP_HEAD_NAME,
+-			      header->image_size >> 10,
+-			      (!rbd_dev->cur_snap ? " (*)" : ""));
+-		if (n == max)
+-			break;
+-
+-		p = names;
+-		for (i = 0; i < header->total_snaps; i++, p += strlen(p) + 1) {
+-			n += snprintf(data + n, max - n, "%d\t%s\t%lld%s\n",
+-			      rbd_dev->id, p, header->snap_sizes[i] >> 10,
+-			      (rbd_dev->cur_snap &&
+-			       (snap_index(header, i) == rbd_dev->cur_snap) ?
+-			       " (*)" : ""));
+-			if (n == max)
+-				break;
+-		}
+-
+-		up_read(&header->snap_rwsem);
+-	}
+-
+-
+-	ret = n;
+-	mutex_unlock(&ctl_mutex);
+-	return ret;
+-}
+-
+-static ssize_t class_rbd_snaps_refresh(struct class *c,
+-				struct class_attribute *attr,
+-				const char *buf,
+-				size_t count)
++static ssize_t rbd_remove(struct bus_type *bus,
++			  const char *buf,
++			  size_t count)
+ {
+ 	struct rbd_device *rbd_dev = NULL;
+ 	int target_id, rc;
+@@ -1641,95 +1875,70 @@ static ssize_t class_rbd_snaps_refresh(struct class *c,
+ 		goto done;
+ 	}
+ 
+-	rc = rbd_update_snaps(rbd_dev);
+-	if (rc < 0)
+-		ret = rc;
++	list_del_init(&rbd_dev->node);
++
++	__rbd_remove_all_snaps(rbd_dev);
++	rbd_bus_del_dev(rbd_dev);
+ 
+ done:
+ 	mutex_unlock(&ctl_mutex);
+ 	return ret;
+ }
+ 
+-static ssize_t class_rbd_snap_create(struct class *c,
+-				struct class_attribute *attr,
+-				const char *buf,
+-				size_t count)
++static ssize_t rbd_snap_add(struct device *dev,
++			    struct device_attribute *attr,
++			    const char *buf,
++			    size_t count)
+ {
+-	struct rbd_device *rbd_dev = NULL;
+-	int target_id, ret;
+-	char *name;
+-
+-	name = kmalloc(RBD_MAX_SNAP_NAME_LEN + 1, GFP_KERNEL);
++	struct rbd_device *rbd_dev = dev_to_rbd(dev);
++	int ret;
++	char *name = kmalloc(count + 1, GFP_KERNEL);
+ 	if (!name)
+ 		return -ENOMEM;
+ 
+-	/* parse snaps add command */
+-	if (sscanf(buf, "%d "
+-		   "%" __stringify(RBD_MAX_SNAP_NAME_LEN) "s",
+-		   &target_id,
+-		   name) != 2) {
+-		ret = -EINVAL;
+-		goto done;
+-	}
++	snprintf(name, count, "%s", buf);
+ 
+ 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+ 
+-	rbd_dev = __rbd_get_dev(target_id);
+-	if (!rbd_dev) {
+-		ret = -ENOENT;
+-		goto done_unlock;
+-	}
+-
+ 	ret = rbd_header_add_snap(rbd_dev,
+ 				  name, GFP_KERNEL);
+ 	if (ret < 0)
+ 		goto done_unlock;
+ 
+-	ret = rbd_update_snaps(rbd_dev);
++	ret = __rbd_update_snaps(rbd_dev);
+ 	if (ret < 0)
+ 		goto done_unlock;
+ 
+ 	ret = count;
+ done_unlock:
+ 	mutex_unlock(&ctl_mutex);
+-done:
+ 	kfree(name);
+ 	return ret;
+ }
+ 
+-static ssize_t class_rbd_rollback(struct class *c,
+-				struct class_attribute *attr,
+-				const char *buf,
+-				size_t count)
++static ssize_t rbd_snap_rollback(struct device *dev,
++				 struct device_attribute *attr,
++				 const char *buf,
++				 size_t count)
+ {
+-	struct rbd_device *rbd_dev = NULL;
+-	int target_id, ret;
++	struct rbd_device *rbd_dev = dev_to_rbd(dev);
++	int ret;
+ 	u64 snapid;
+-	char snap_name[RBD_MAX_SNAP_NAME_LEN];
+ 	u64 cur_ofs;
+-	char *seg_name;
++	char *seg_name = NULL;
++	char *snap_name = kmalloc(count + 1, GFP_KERNEL);
++	ret = -ENOMEM;
++	if (!snap_name)
++		return ret;
+ 
+ 	/* parse snaps add command */
+-	if (sscanf(buf, "%d "
+-		   "%" __stringify(RBD_MAX_SNAP_NAME_LEN) "s",
+-		   &target_id,
+-		   snap_name) != 2) {
+-		return -EINVAL;
+-	}
+-
+-	ret = -ENOMEM;
++	snprintf(snap_name, count, "%s", buf);
+ 	seg_name = kmalloc(RBD_MAX_SEG_NAME_LEN + 1, GFP_NOIO);
+ 	if (!seg_name)
+-		return ret;
++		goto done;
+ 
+ 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+ 
+-	rbd_dev = __rbd_get_dev(target_id);
+-	if (!rbd_dev) {
+-		ret = -ENOENT;
+-		goto done_unlock;
+-	}
+-
+ 	ret = snap_by_name(&rbd_dev->header, snap_name, &snapid, NULL);
+ 	if (ret < 0)
+ 		goto done_unlock;
+@@ -1750,7 +1959,7 @@ static ssize_t class_rbd_rollback(struct class *c,
+ 				   seg_name, ret);
+ 	}
+ 
+-	ret = rbd_update_snaps(rbd_dev);
++	ret = __rbd_update_snaps(rbd_dev);
+ 	if (ret < 0)
+ 		goto done_unlock;
+ 
+@@ -1758,57 +1967,42 @@ static ssize_t class_rbd_rollback(struct class *c,
+ 
+ done_unlock:
+ 	mutex_unlock(&ctl_mutex);
++done:
+ 	kfree(seg_name);
++	kfree(snap_name);
+ 
+ 	return ret;
+ }
+ 
+-static struct class_attribute class_rbd_attrs[] = {
+-	__ATTR(add,		0200, NULL, class_rbd_add),
+-	__ATTR(remove,		0200, NULL, class_rbd_remove),
+-	__ATTR(list,		0444, class_rbd_list, NULL),
+-	__ATTR(snaps_refresh,	0200, NULL, class_rbd_snaps_refresh),
+-	__ATTR(snap_create,	0200, NULL, class_rbd_snap_create),
+-	__ATTR(snaps_list,	0444, class_rbd_snaps_list, NULL),
+-	__ATTR(snap_rollback,	0200, NULL, class_rbd_rollback),
++static struct bus_attribute rbd_bus_attrs[] = {
++	__ATTR(add, S_IWUSR, NULL, rbd_add),
++	__ATTR(remove, S_IWUSR, NULL, rbd_remove),
+ 	__ATTR_NULL
+ };
+ 
+ /*
+  * create control files in sysfs
+- * /sys/class/rbd/...
++ * /sys/bus/rbd/...
+  */
+ static int rbd_sysfs_init(void)
+ {
+-	int ret = -ENOMEM;
++	int ret;
+ 
+-	class_rbd = kzalloc(sizeof(*class_rbd), GFP_KERNEL);
+-	if (!class_rbd)
+-		goto out;
++	rbd_bus_type.bus_attrs = rbd_bus_attrs;
+ 
+-	class_rbd->name = DRV_NAME;
+-	class_rbd->owner = THIS_MODULE;
+-	class_rbd->class_release = class_rbd_release;
+-	class_rbd->class_attrs = class_rbd_attrs;
++	ret = bus_register(&rbd_bus_type);
++	 if (ret < 0)
++		return ret;
+ 
+-	ret = class_register(class_rbd);
+-	if (ret)
+-		goto out_class;
+-	return 0;
++	ret = device_register(&rbd_root_dev);
+ 
+-out_class:
+-	kfree(class_rbd);
+-	class_rbd = NULL;
+-	pr_err(DRV_NAME ": failed to create class rbd\n");
+-out:
+ 	return ret;
+ }
+ 
+ static void rbd_sysfs_cleanup(void)
+ {
+-	if (class_rbd)
+-		class_destroy(class_rbd);
+-	class_rbd = NULL;
++	device_unregister(&rbd_root_dev);
++	bus_unregister(&rbd_bus_type);
+ }
+ 
+ int __init rbd_init(void)
+-- 
+1.5.6.5
 
-@@ -84,6 +94,9 @@ public class TestGetFileBlockLocations extends TestCase {
-   offEnd = (int) Math.min(offEnd, status.getLen());
-   BlockLocation first = locations[0];
-   BlockLocation last = locations[locations.length - 1];
-+      //debug//for (int i=0, imax=locations.length; i<imax; i++) {
-+      //debug//  System.out.println(i + ":\t" + locations[i]);
-+      //debug//}
-   assertTrue(first.getOffset() <= offBegin);
-   assertTrue(offEnd <= last.getOffset() + last.getLength());
- } else {
-@@ -101,6 +114,7 @@ public class TestGetFileBlockLocations extends TestCase {
 
-public void testFailureNegativeParameters() throws IOException {
- FileStatus status = fs.getFileStatus(path);
-+    //debug//System.out.println(status.report());
- try {
-   BlockLocation[] locations = fs.getFileBlockLocations(status, -1, 100);
-   fail("Expecting exception being throw");
-@@ -117,8 +131,12 @@ public class TestGetFileBlockLocations extends TestCase {
-}
 
-public void testGetFileBlockLocations1() throws IOException {
-+    //debug//System.out.println("Begin:  testGetFileBlockLocations1");
- FileStatus status = fs.getFileStatus(path);
-+    //debug//System.out.println(status.report());
-+    oneTest(0, (int) status.getLen()-1, status);
- oneTest(0, (int) status.getLen(), status);
-+    oneTest(0, (int) status.getLen()+1, status);
- oneTest(0, (int) status.getLen() * 2, status);
- oneTest((int) status.getLen() * 2, (int) status.getLen() * 4, status);
- oneTest((int) status.getLen() / 2, (int) status.getLen() * 3, status);
-@@ -130,6 +148,7 @@ public class TestGetFileBlockLocations extends TestCase {
-
-public void testGetFileBlockLocations2() throws IOException {
- FileStatus status = fs.getFileStatus(path);
-+    //debug//System.out.println(status.report());
- for (int i = 0; i < 1000; ++i) {
-   int offBegin = random.nextInt((int) (2 * status.getLen()));
-   int offEnd = random.nextInt((int) (2 * status.getLen()));
