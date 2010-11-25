@@ -1,1171 +1,524 @@
-From: Yehuda Sadeh <yehuda@hq.newdream.net>
-Subject: Re: [PATCH] rbd: replace the rbd sysfs interface
-Date: Tue, 23 Nov 2010 16:23:52 -0800
-Message-ID: <1290558233.1792.73.camel@yehudasa-desktop>
-References: <1289953929-30896-1-git-send-email-yehuda@hq.newdream.net>
-	 <20101117171924.GC12050@kroah.com>
-	 <AANLkTims_MjBS1SdHkOjOWvGqg1aRABH23MWk8J-E+-Y@mail.gmail.com>
-	 <20101118013002.GC8558@kroah.com>
-	 <AANLkTi=7z40CNBUmfVUEa68J+1R=7nbn9d8vM7ETpajA@mail.gmail.com>
-	 <20101119020820.GB18767@kroah.com>
-	 <AANLkTim4p=tpaQG_XDE5Vk0YAypYCegAguYNKRg-LeDF@mail.gmail.com>
-	 <20101123001410.GA31294@kroah.com>
-	 <AANLkTi=n9aJ_8VAcyOXQxxeprWzerZLf0H+ryHZs7O04@mail.gmail.com>
-	 <20101123005838.GB29289@kroah.com>
+From: MORITA Kazutaka <morita.kazutaka-Zyj7fXuS5i5L9jVzuh4AOg@public.gmane.org>
+Subject: [PATCH] add network disk support
+Date: Fri, 26 Nov 2010 05:49:56 +0900
+Message-ID: <1290718196-14080-1-git-send-email-morita.kazutaka@lab.ntt.co.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:49210 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755850Ab0KXAY3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 23 Nov 2010 19:24:29 -0500
-In-Reply-To: <20101123005838.GB29289@kroah.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Greg KH <greg@kroah.com>
-Cc: sage@newdream.net, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <sheepdog-bounces-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org>
+List-Unsubscribe: <http://lists.wpkg.org/mailman/options/sheepdog>,
+	<mailto:sheepdog-request-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.wpkg.org/pipermail/sheepdog>
+List-Post: <mailto:sheepdog-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org>
+List-Help: <mailto:sheepdog-request-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.wpkg.org/mailman/listinfo/sheepdog>,
+	<mailto:sheepdog-request-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org?subject=subscribe>
+Sender: sheepdog-bounces-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org
+Errors-To: sheepdog-bounces-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org
+To: berrange-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, libvir-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sheepdog-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 2010-11-22 at 16:58 -0800, Greg KH wrote:
-On Mon, Nov 22, 2010 at 04:48:54PM -0800, Yehuda Sadeh Weinraub wrote:
-> > The reason we keep snapshots in a separate subdirectory is that they
-> > can have arbitrary name. So either we prefix them and put them in a
-> > common namespace with the devices, or we put them down the hierarchy.
-> 
-> Do either one.  I would suggest a prefix.
-> 
-> > In any case we don't do any operations on them, we just have them for
-> > informational use and we put them there so that we don't have one big
-> > file that lists them all.
-> 
-> But something cares about them, so treat them properly.
-> 
-> > >> Another way would be to create a group for (2) under (1) and create a
-> > >> kobject for (3), for which you can create group per snapshot.
-> > >>
-> > >> Am I missing something? We already have the first solution (kobjects
-> > >> only) implemented, is there some real benefit for using the third
-> > >> method? We'll have to manually add remove groups anyway, as snapshots
-> > >> can be removed and new snapshots can be added.
-> > >
-> > > Never add kobjects to a struct device, that is showing you that
-> > > something is wrong, and that userspace really will want to get that
-> > > create/destroy event of the sub child.
-> > >
-> > 
-> > But they're there as information device attributes, it's nothing like
-> > partitions in block devices. So we want to just be able to list them
-> > and their attributes easily (and nicely), without having to put them
-> > in one big file.
-> 
-> Then use a prefix and put everything in the same subdirectory underneath
-> the id and you should be fine, right?
-> 
+This patch adds network disk support to libvirt/QEMU.  The currently
+supported protcols are nbd, rbd, and sheepdog.  The XML syntax is like
+this:
 
-The following patch puts the snapshots as subdirs on the device directory.
-Each snapshot is in a different device structure, whereas its parent is
-the device. This works, however, not very pretty and/or not very
-convenient. Can we add another intermediate device that'll serve as a
-container for the snapshots?
+    <disk type="network" device="disk">
+      <driver name="qemu" type="raw" />
+      <source protocol='rbd|sheepdog|nbd' name="...some image identifier...">
+        <host name="mon1.example.org" port="6000">
+        <host name="mon2.example.org" port="6000">
+        <host name="mon3.example.org" port="6000">
+      </source>
+      <target dev="vda" bus="virtio" />
+    </disk>
 
-Thanks,
-Yehuda
-
---
-
-Yehuda Sadeh (1):
-  rbd: replace the rbd sysfs interface
-
- Documentation/ABI/testing/sysfs-bus-rbd |   84 ++++
- drivers/block/rbd.c                     |  748 +++++++++++++++++++------------
- 2 files changed, 555 insertions(+), 277 deletions(-)
- create mode 100644 Documentation/ABI/testing/sysfs-bus-rbd
-
-
---
-
-From: Yehuda Sadeh <yehuda@hq.newdream.net>
-Date: Fri, 19 Nov 2010 14:51:04 -0800
-Subject: [PATCH 1/1] rbd: replace the rbd sysfs interface
-
-The new interface creates directories per mapped image
-and under each it creates a subdir per available snapshot.
-This allows keeping a cleaner interface within the sysfs
-guidelines. The ABI documentation was updated too.
-
-Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
+Signed-off-by: MORITA Kazutaka <morita.kazutaka-Zyj7fXuS5i5L9jVzuh4AOg@public.gmane.org>
 ---
- Documentation/ABI/testing/sysfs-bus-rbd |   83 ++++
- drivers/block/rbd.c                     |  748 +++++++++++++++++++------------
- 2 files changed, 554 insertions(+), 277 deletions(-)
 
-diff --git a/Documentation/ABI/testing/sysfs-bus-rbd b/Documentation/ABI/testing/sysfs-bus-rbd
-new file mode 100644
-index 0000000..90a87e2
---- /dev/null
-+++ b/Documentation/ABI/testing/sysfs-bus-rbd
-@@ -0,0 +1,83 @@
-+What:		/sys/bus/rbd/
-+Date:		November 2010
-+Contact:	Yehuda Sadeh <yehuda@hq.newdream.net>,
-+		Sage Weil <sage@newdream.net>
-+Description:
-+
-+Being used for adding and removing rbd block devices.
-+
-+Usage: <mon ip addr> <options> <pool name> <rbd image name> [snap name]
-+
-+ $ echo "192.168.0.1 name=admin rbd foo" > /sys/bus/rbd/add
-+
-+The snapshot name can be "-" or omitted to map the image read/write. A <dev-id>
-+will be assigned for any registered block device. If snapshot is used, it will
-+be mapped read-only.
-+
-+Removal of a device:
-+
-+  $ echo <dev-id> > /sys/bus/rbd/remove
-+
-+Entries under /sys/bus/rbd/devices/<dev-id>/
-+--------------------------------------------
-+
-+client_id
-+
-+	The ceph unique client id that was assigned for this specific session.
-+
-+major
-+
-+	The block device major number.
-+
-+name
-+
-+	The name of the rbd image.
-+
-+pool
-+
-+	The pool where this rbd image resides. The pool-name pair is unique
-+	per rados system.
-+
-+size
-+
-+	The size (in bytes) of the mapped block device.
-+
-+refresh
-+
-+	Writing to this file will reread the image header data and set
-+	all relevant datastructures accordingly.
-+
-+current_snap
-+
-+	The current snapshot for which the device is mapped.
-+
-+create_snap
-+
-+	Create a snapshot:
-+
-+	 $ echo <snap-name> > /sys/bus/rbd/devices/<dev-id>/snap_create
-+
-+rollback_snap
-+
-+	Rolls back data to the specified snapshot. This goes over the entire
-+	list of rados blocks and sends a rollback command to each.
-+
-+	 $ echo <snap-name> > /sys/bus/rbd/devices/<dev-id>/snap_rollback
-+
-+snap_*
-+
-+	A directory per each snapshot
-+
-+
-+Entries under /sys/bus/rbd/devices/<dev-id>/snap_<snap-name>
-+-------------------------------------------------------------
-+
-+id
-+
-+	The rados internal snapshot id assigned for this snapshot
-+
-+size
-+
-+	The size of the image when this snapshot was taken.
-+
-+
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 6ec9d53..008d4a0 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -21,80 +21,9 @@
+This patch addresses the discussion on
+  https://www.redhat.com/archives/libvir-list/2010-November/msg00759.html
+
+Josh mentioned that the monitor hostnames of RBD can be set through
+the environment variables, but I couldn't find any documentations
+about it, so the monitors are not set in this patch.  I hope someone
+who is familiar with RBD implements it.
+
+I appreciate any feedback.
+Thanks,
+
+Kazutaka
+
+
+ docs/schemas/domain.rng |   31 +++++++++
+ src/conf/domain_conf.c  |   68 +++++++++++++++++--
+ src/conf/domain_conf.h  |   20 ++++++
+ src/qemu/qemu_conf.c    |  169 +++++++++++++++++++++++++++++++++++++++++++++-
+ 4 files changed, 279 insertions(+), 9 deletions(-)
+
+diff --git a/docs/schemas/domain.rng b/docs/schemas/domain.rng
+index fb44335..81f4004 100644
+--- a/docs/schemas/domain.rng
++++ b/docs/schemas/domain.rng
+@@ -612,6 +612,37 @@
+             <ref name="diskspec"/>
+           </interleave>
+         </group>
++        <group>
++          <attribute name="type">
++            <value>network</value>
++          </attribute>
++          <interleave>
++            <optional>
++              <element name="source">
++                <attribute name="protocol">
++                  <choice>
++                    <value>nbd</value>
++                    <value>rbd</value>
++                    <value>sheepdog</value>
++                  </choice>
++                </attribute>
++                <attribute name="name"/>
++                <zeroOrMore>
++                  <element name="host">
++                    <attribute name="name">
++                      <ref name="genericName"/>
++                    </attribute>
++                    <attribute name="port">
++                      <ref name="unsignedInt"/>
++                    </attribute>
++                  </element>
++                </zeroOrMore>
++                <empty/>
++              </element>
++            </optional>
++            <ref name="diskspec"/>
++          </interleave>
++        </group>
+         <ref name="diskspec"/>
+       </choice>
+     </element>
+diff --git a/src/conf/domain_conf.c b/src/conf/domain_conf.c
+index 3f14cee..b9dbc61 100644
+--- a/src/conf/domain_conf.c
++++ b/src/conf/domain_conf.c
+@@ -113,7 +113,8 @@ VIR_ENUM_IMPL(virDomainDeviceAddress, VIR_DOMAIN_DEVICE_ADDRESS_TYPE_LAST,
+ VIR_ENUM_IMPL(virDomainDisk, VIR_DOMAIN_DISK_TYPE_LAST,
+               "block",
+               "file",
+-              "dir")
++              "dir",
++              "network")
  
+ VIR_ENUM_IMPL(virDomainDiskDevice, VIR_DOMAIN_DISK_DEVICE_LAST,
+               "disk",
+@@ -142,6 +143,11 @@ VIR_ENUM_IMPL(virDomainDiskErrorPolicy, VIR_DOMAIN_DISK_ERROR_POLICY_LAST,
+               "ignore",
+               "enospace")
  
++VIR_ENUM_IMPL(virDomainDiskProtocol, VIR_DOMAIN_DISK_PROTOCOL_LAST,
++              "nbd",
++              "rbd",
++              "sheepdog")
++
+ VIR_ENUM_IMPL(virDomainController, VIR_DOMAIN_CONTROLLER_TYPE_LAST,
+               "ide",
+               "fdc",
+@@ -508,6 +514,7 @@ void virDomainDiskDefFree(virDomainDiskDefPtr def)
  
--   Instructions for use
--   --------------------
-+   For usage instructions, please refer to:
+     VIR_FREE(def->serial);
+     VIR_FREE(def->src);
++    VIR_FREE(def->hosts);
+     VIR_FREE(def->dst);
+     VIR_FREE(def->driverName);
+     VIR_FREE(def->driverType);
+@@ -1574,13 +1581,15 @@ virDomainDiskDefParseXML(virCapsPtr caps,
+                          xmlNodePtr node,
+                          int flags) {
+     virDomainDiskDefPtr def;
+-    xmlNodePtr cur;
++    xmlNodePtr cur, host;
+     char *type = NULL;
+     char *device = NULL;
+     char *driverName = NULL;
+     char *driverType = NULL;
+     char *source = NULL;
+     char *target = NULL;
++    char *protocol = NULL;
++    virDomainDiskHostDefPtr hosts = NULL;
+     char *bus = NULL;
+     char *cachetag = NULL;
+     char *error_policy = NULL;
+@@ -1607,7 +1616,7 @@ virDomainDiskDefParseXML(virCapsPtr caps,
+     cur = node->children;
+     while (cur != NULL) {
+         if (cur->type == XML_ELEMENT_NODE) {
+-            if ((source == NULL) &&
++            if ((source == NULL && hosts == NULL) &&
+                 (xmlStrEqual(cur->name, BAD_CAST "source"))) {
  
--   1) Map a Linux block device to an existing rbd image.
--
--      Usage: <mon ip addr> <options> <pool name> <rbd image name> [snap name]
--
--      $ echo "192.168.0.1 name=admin rbd foo" > /sys/class/rbd/add
--
--      The snapshot name can be "-" or omitted to map the image read/write.
--
--   2) List all active blkdev<->object mappings.
--
--      In this example, we have performed step #1 twice, creating two blkdevs,
--      mapped to two separate rados objects in the rados rbd pool
--
--      $ cat /sys/class/rbd/list
--      #id     major   client_name     pool    name    snap    KB
--      0       254     client4143      rbd     foo     -      1024000
--
--      The columns, in order, are:
--      - blkdev unique id
--      - blkdev assigned major
--      - rados client id
--      - rados pool name
--      - rados block device name
--      - mapped snapshot ("-" if none)
--      - device size in KB
--
--
--   3) Create a snapshot.
--
--      Usage: <blkdev id> <snapname>
--
--      $ echo "0 mysnap" > /sys/class/rbd/snap_create
--
--
--   4) Listing a snapshot.
--
--      $ cat /sys/class/rbd/snaps_list
--      #id     snap    KB
--      0       -       1024000 (*)
--      0       foo     1024000
--
--      The columns, in order, are:
--      - blkdev unique id
--      - snapshot name, '-' means none (active read/write version)
--      - size of device at time of snapshot
--      - the (*) indicates this is the active version
--
--   5) Rollback to snapshot.
--
--      Usage: <blkdev id> <snapname>
--
--      $ echo "0 mysnap" > /sys/class/rbd/snap_rollback
--
--
--   6) Mapping an image using snapshot.
--
--      A snapshot mapping is read-only. This is being done by passing
--      snap=<snapname> to the options when adding a device.
--
--      $ echo "192.168.0.1 name=admin,snap=mysnap rbd foo" > /sys/class/rbd/add
--
--
--   7) Remove an active blkdev<->rbd image mapping.
--
--      In this example, we remove the mapping with blkdev unique id 1.
--
--      $ echo 1 > /sys/class/rbd/remove
--
--
--   NOTE:  The actual creation and deletion of rados objects is outside the scope
--   of this driver.
-+                 Documentation/ABI/testing/sysfs-bus-rbd
+                 switch (def->type) {
+@@ -1620,6 +1629,30 @@ virDomainDiskDefParseXML(virCapsPtr caps,
+                 case VIR_DOMAIN_DISK_TYPE_DIR:
+                     source = virXMLPropString(cur, "dir");
+                     break;
++                case VIR_DOMAIN_DISK_TYPE_NETWORK:
++                    protocol = virXMLPropString(cur, "protocol");
++                    if (protocol == NULL) {
++                        virDomainReportError(VIR_ERR_XML_ERROR,
++                                             "%s", _("missing protocol type"));
++                        break;
++                    }
++                    def->protocol = virDomainDiskProtocolTypeFromString(protocol);
++                    source = virXMLPropString(cur, "name");
++                    host = cur->children;
++                    while (host != NULL) {
++                        if (host->type == XML_ELEMENT_NODE &&
++                            xmlStrEqual(host->name, BAD_CAST "host")) {
++                            if (VIR_REALLOC_N(hosts, def->nhosts + 1) < 0) {
++                                virReportOOMError();
++                                goto error;
++                            }
++                            hosts[def->nhosts].name = virXMLPropString(host, "name");
++                            hosts[def->nhosts].port = virXMLPropString(host, "port");
++                            def->nhosts++;
++                        }
++                        host = host->next;
++                    }
++                    break;
+                 default:
+                     virDomainReportError(VIR_ERR_INTERNAL_ERROR,
+                                          _("unexpected disk type %s"),
+@@ -1685,7 +1718,7 @@ virDomainDiskDefParseXML(virCapsPtr caps,
  
-  */
+     /* Only CDROM and Floppy devices are allowed missing source path
+      * to indicate no media present */
+-    if (source == NULL &&
++    if (source == NULL && hosts == NULL &&
+         def->device != VIR_DOMAIN_DISK_DEVICE_CDROM &&
+         def->device != VIR_DOMAIN_DISK_DEVICE_FLOPPY) {
+         virDomainReportError(VIR_ERR_NO_SOURCE,
+@@ -1791,6 +1824,8 @@ virDomainDiskDefParseXML(virCapsPtr caps,
+     source = NULL;
+     def->dst = target;
+     target = NULL;
++    def->hosts = hosts;
++    hosts = NULL;
+     def->driverName = driverName;
+     driverName = NULL;
+     def->driverType = driverType;
+@@ -1819,6 +1854,8 @@ cleanup:
+     VIR_FREE(type);
+     VIR_FREE(target);
+     VIR_FREE(source);
++    VIR_FREE(hosts);
++    VIR_FREE(protocol);
+     VIR_FREE(device);
+     VIR_FREE(driverType);
+     VIR_FREE(driverName);
+@@ -5887,7 +5924,7 @@ virDomainDiskDefFormat(virBufferPtr buf,
+         virBufferVSprintf(buf, "/>\n");
+     }
  
-@@ -163,6 +92,14 @@ struct rbd_request {
- 	u64			len;
+-    if (def->src) {
++    if (def->src || def->nhosts > 0) {
+         switch (def->type) {
+         case VIR_DOMAIN_DISK_TYPE_FILE:
+             virBufferEscapeString(buf, "      <source file='%s'/>\n",
+@@ -5901,6 +5938,27 @@ virDomainDiskDefFormat(virBufferPtr buf,
+             virBufferEscapeString(buf, "      <source dir='%s'/>\n",
+                                   def->src);
+             break;
++        case VIR_DOMAIN_DISK_TYPE_NETWORK:
++            virBufferVSprintf(buf, "      <source protocol='%s'",
++                              virDomainDiskProtocolTypeToString(def->protocol));
++            if (def->src) {
++                virBufferEscapeString(buf, " name='%s'", def->src);
++            }
++            if (def->nhosts == 0) {
++                virBufferVSprintf(buf, "/>\n");
++            } else {
++                int i;
++
++                virBufferVSprintf(buf, ">\n");
++                for (i = 0; i < def->nhosts; i++) {
++                    virBufferEscapeString(buf, "        <host name='%s'",
++                                          def->hosts[i].name);
++                    virBufferEscapeString(buf, " port='%s'/>\n",
++                                          def->hosts[i].port);
++                }
++                virBufferVSprintf(buf, "      </source>\n");
++            }
++            break;
+         default:
+             virDomainReportError(VIR_ERR_INTERNAL_ERROR,
+                                  _("unexpected disk type %s"),
+diff --git a/src/conf/domain_conf.h b/src/conf/domain_conf.h
+index 899b19f..6c97289 100644
+--- a/src/conf/domain_conf.h
++++ b/src/conf/domain_conf.h
+@@ -120,6 +120,7 @@ enum virDomainDiskType {
+     VIR_DOMAIN_DISK_TYPE_BLOCK,
+     VIR_DOMAIN_DISK_TYPE_FILE,
+     VIR_DOMAIN_DISK_TYPE_DIR,
++    VIR_DOMAIN_DISK_TYPE_NETWORK,
+ 
+     VIR_DOMAIN_DISK_TYPE_LAST
+ };
+@@ -164,6 +165,21 @@ enum  virDomainDiskErrorPolicy {
+     VIR_DOMAIN_DISK_ERROR_POLICY_LAST
  };
  
-+struct rbd_snap {
-+	struct	device		dev;
-+	const char		*name;
-+	size_t			size;
-+	struct list_head	node;
-+	u64			id;
++enum virDomainDiskProtocol {
++    VIR_DOMAIN_DISK_PROTOCOL_NBD,
++    VIR_DOMAIN_DISK_PROTOCOL_RBD,
++    VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG,
++
++    VIR_DOMAIN_DISK_PROTOCOL_LAST
 +};
 +
- /*
-  * a single device
-  */
-@@ -193,21 +130,60 @@ struct rbd_device {
- 	int read_only;
- 
- 	struct list_head	node;
-+
-+	/* list of snapshots */
-+	struct list_head	snaps;
-+
-+	/* sysfs related */
-+	struct device		dev;
++typedef struct _virDomainDiskHostDef virDomainDiskHostDef;
++typedef virDomainDiskHostDef *virDomainDiskHostDefPtr;
++struct _virDomainDiskHostDef {
++    char *name;
++    char *port;
 +};
 +
-+static struct bus_type rbd_bus_type = {
-+	.name		= "rbd",
- };
+ /* Stores the virtual disk configuration */
+ typedef struct _virDomainDiskDef virDomainDiskDef;
+ typedef virDomainDiskDef *virDomainDiskDefPtr;
+@@ -173,6 +189,9 @@ struct _virDomainDiskDef {
+     int bus;
+     char *src;
+     char *dst;
++    int protocol;
++    int nhosts;
++    virDomainDiskHostDefPtr hosts;
+     char *driverName;
+     char *driverType;
+     char *serial;
+@@ -1237,6 +1256,7 @@ VIR_ENUM_DECL(virDomainDiskDevice)
+ VIR_ENUM_DECL(virDomainDiskBus)
+ VIR_ENUM_DECL(virDomainDiskCache)
+ VIR_ENUM_DECL(virDomainDiskErrorPolicy)
++VIR_ENUM_DECL(virDomainDiskProtocol)
+ VIR_ENUM_DECL(virDomainController)
+ VIR_ENUM_DECL(virDomainControllerModel)
+ VIR_ENUM_DECL(virDomainFS)
+diff --git a/src/qemu/qemu_conf.c b/src/qemu/qemu_conf.c
+index 35caccc..63abd75 100644
+--- a/src/qemu/qemu_conf.c
++++ b/src/qemu/qemu_conf.c
+@@ -2714,7 +2714,7 @@ qemuBuildDriveStr(virDomainDiskDefPtr disk,
+         break;
+     }
  
- static spinlock_t node_lock;      /* protects client get/put */
+-    if (disk->src) {
++    if (disk->src || disk->nhosts > 0) {
+         if (disk->type == VIR_DOMAIN_DISK_TYPE_DIR) {
+             /* QEMU only supports magic FAT format for now */
+             if (disk->driverType &&
+@@ -2733,6 +2733,24 @@ qemuBuildDriveStr(virDomainDiskDefPtr disk,
+                 virBufferVSprintf(&opt, "file=fat:floppy:%s,", disk->src);
+             else
+                 virBufferVSprintf(&opt, "file=fat:%s,", disk->src);
++        } else if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK) {
++            switch (disk->protocol) {
++            case VIR_DOMAIN_DISK_PROTOCOL_NBD:
++                virBufferVSprintf(&opt, "file=nbd:%s:%s,",
++                                  disk->hosts->name, disk->hosts->port);
++                break;
++            case VIR_DOMAIN_DISK_PROTOCOL_RBD:
++                virBufferVSprintf(&opt, "file=rbd:%s,", disk->src);
++                break;
++            case VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG:
++                if (disk->nhosts > 0)
++                    virBufferVSprintf(&opt, "file=sheepdog:%s:%s:%s,",
++                                      disk->hosts->name, disk->hosts->port,
++                                      disk->src);
++                else
++                    virBufferVSprintf(&opt, "file=sheepdog:%s,", disk->src);
++                break;
++            }
+         } else {
+             virBufferVSprintf(&opt, "file=%s,", disk->src);
+         }
+@@ -4722,6 +4740,24 @@ int qemudBuildCommandLine(virConnectPtr conn,
+                     snprintf(file, PATH_MAX, "fat:floppy:%s", disk->src);
+                 else
+                     snprintf(file, PATH_MAX, "fat:%s", disk->src);
++            } else if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK) {
++                switch (disk->protocol) {
++                case VIR_DOMAIN_DISK_PROTOCOL_NBD:
++                    snprintf(file, PATH_MAX, "nbd:%s:%s,",
++                             disk->hosts->name, disk->hosts->port);
++                    break;
++                case VIR_DOMAIN_DISK_PROTOCOL_RBD:
++                    snprintf(file, PATH_MAX, "rbd:%s,", disk->src);
++                    break;
++                case VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG:
++                    if (disk->nhosts > 0)
++                        snprintf(file, PATH_MAX, "sheepdog:%s:%s:%s,",
++                                 disk->hosts->name, disk->hosts->port,
++                                 disk->src);
++                    else
++                        snprintf(file, PATH_MAX, "sheepdog:%s,", disk->src);
++                    break;
++                }
+             } else {
+                 snprintf(file, PATH_MAX, "%s", disk->src);
+             }
+@@ -5794,7 +5830,67 @@ qemuParseCommandLineDisk(virCapsPtr caps,
+                 values[i] = NULL;
+                 if (STRPREFIX(def->src, "/dev/"))
+                     def->type = VIR_DOMAIN_DISK_TYPE_BLOCK;
+-                else
++                else if (STRPREFIX(def->src, "nbd:")) {
++                    char *host, *port;
++
++                    def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
++                    host = def->src + strlen("nbd:");
++                    port = strchr(host, ':');
++                    if (!port) {
++                        def = NULL;
++                        qemuReportError(VIR_ERR_INTERNAL_ERROR,
++                                        _("cannot parse nbd filename '%s'"), def->src);
++                        goto cleanup;
++                    }
++                    *port++ = '\0';
++                    if (VIR_ALLOC(def->hosts) < 0) {
++                        virReportOOMError();
++                        goto cleanup;
++                    }
++                    def->nhosts = 1;
++                    def->hosts->name = strdup(host);
++                    def->hosts->port = strdup(port);
++
++                    VIR_FREE(def->src);
++                    def->src = NULL;
++                } else if (STRPREFIX(def->src, "rbd:")) {
++                    char *p = def->src;
++
++                    def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
++                    def->src = strdup(p + strlen("rbd:"));
++
++                    VIR_FREE(p);
++                } else if (STRPREFIX(def->src, "sheepdog:")) {
++                    char *p = def->src;
++                    char *port, *vdi;
++
++                    def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
++                    def->src = strdup(p + strlen("sheepdog:"));
++
++                    /* def->src must be [vdiname] or [host]:[port]:[vdiname] */
++                    port = strchr(def->src, ':');
++                    if (port) {
++                        *port++ = '\0';
++                        vdi = strchr(port, ':');
++                        if (!vdi) {
++                            def = NULL;
++                            qemuReportError(VIR_ERR_INTERNAL_ERROR,
++                                            _("cannot parse sheepdog filename '%s'"), p);
++                            goto cleanup;
++                        }
++                        *vdi++ = '\0';
++                        if (VIR_ALLOC(def->hosts) < 0) {
++                            virReportOOMError();
++                            goto cleanup;
++                        }
++                        def->nhosts = 1;
++                        def->hosts->name = def->src;
++                        def->hosts->port = strdup(port);
++                        def->src = strdup(vdi);
++                    }
++
++                    VIR_FREE(p);
++                } else
+                     def->type = VIR_DOMAIN_DISK_TYPE_FILE;
+             } else {
+                 def->type = VIR_DOMAIN_DISK_TYPE_FILE;
+@@ -6731,7 +6827,19 @@ virDomainDefPtr qemuParseCommandLine(virCapsPtr caps,
  
--static struct class *class_rbd;	  /* /sys/class/rbd */
- static DEFINE_MUTEX(ctl_mutex);	  /* Serialize open/close/setup/teardown */
- static LIST_HEAD(rbd_dev_list);    /* devices */
- static LIST_HEAD(rbd_client_list);      /* clients */
- 
-+static int __rbd_init_snaps_header(struct rbd_device *rbd_dev);
-+static void rbd_dev_release(struct device *dev);
-+static ssize_t rbd_snap_rollback(struct device *dev,
-+				 struct device_attribute *attr,
-+				 const char *buf,
-+				 size_t size);
-+static ssize_t rbd_snap_add(struct device *dev,
-+			    struct device_attribute *attr,
-+			    const char *buf,
-+			    size_t count);
-+static void __rbd_remove_snap_dev(struct rbd_device *rbd_dev,
-+				  struct rbd_snap *snap);;
-+
-+
-+static struct rbd_device *dev_to_rbd(struct device *dev)
-+{
-+	return container_of(dev, struct rbd_device, dev);
-+}
-+
-+static struct device *rbd_get_dev(struct rbd_device *rbd_dev)
-+{
-+	return get_device(&rbd_dev->dev);
-+}
-+
-+static void rbd_put_dev(struct rbd_device *rbd_dev)
-+{
-+	put_device(&rbd_dev->dev);
-+}
- 
- static int rbd_open(struct block_device *bdev, fmode_t mode)
- {
- 	struct gendisk *disk = bdev->bd_disk;
- 	struct rbd_device *rbd_dev = disk->private_data;
- 
-+	rbd_get_dev(rbd_dev);
-+
- 	set_device_ro(bdev, rbd_dev->read_only);
- 
- 	if ((mode & FMODE_WRITE) && rbd_dev->read_only)
-@@ -216,9 +192,19 @@ static int rbd_open(struct block_device *bdev, fmode_t mode)
- 	return 0;
- }
- 
-+static int rbd_release(struct gendisk *disk, fmode_t mode)
-+{
-+	struct rbd_device *rbd_dev = disk->private_data;
-+
-+	rbd_put_dev(rbd_dev);
-+
-+	return 0;
-+}
-+
- static const struct block_device_operations rbd_bd_ops = {
- 	.owner			= THIS_MODULE,
- 	.open			= rbd_open,
-+	.release		= rbd_release,
- };
- 
- /*
-@@ -361,7 +347,6 @@ static int rbd_header_from_disk(struct rbd_image_header *header,
- 	int ret = -ENOMEM;
- 
- 	init_rwsem(&header->snap_rwsem);
--
- 	header->snap_names_len = le64_to_cpu(ondisk->snap_names_len);
- 	header->snapc = kmalloc(sizeof(struct ceph_snap_context) +
- 				snap_count *
-@@ -1256,10 +1241,20 @@ bad:
- 	return -ERANGE;
- }
- 
-+static void __rbd_remove_all_snaps(struct rbd_device *rbd_dev)
-+{
-+	struct rbd_snap *snap;
-+
-+	while (!list_empty(&rbd_dev->snaps)) {
-+		snap = list_first_entry(&rbd_dev->snaps, struct rbd_snap, node);
-+		__rbd_remove_snap_dev(rbd_dev, snap);
-+	}
-+}
-+
- /*
-  * only read the first part of the ondisk header, without the snaps info
-  */
--static int rbd_update_snaps(struct rbd_device *rbd_dev)
-+static int __rbd_update_snaps(struct rbd_device *rbd_dev)
- {
- 	int ret;
- 	struct rbd_image_header h;
-@@ -1280,12 +1275,15 @@ static int rbd_update_snaps(struct rbd_device *rbd_dev)
- 	rbd_dev->header.total_snaps = h.total_snaps;
- 	rbd_dev->header.snapc = h.snapc;
- 	rbd_dev->header.snap_names = h.snap_names;
-+	rbd_dev->header.snap_names_len = h.snap_names_len;
- 	rbd_dev->header.snap_sizes = h.snap_sizes;
- 	rbd_dev->header.snapc->seq = snap_seq;
- 
-+	ret = __rbd_init_snaps_header(rbd_dev);
-+
- 	up_write(&rbd_dev->header.snap_rwsem);
- 
--	return 0;
-+	return ret;
- }
- 
- static int rbd_init_disk(struct rbd_device *rbd_dev)
-@@ -1300,6 +1298,11 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 	if (rc)
- 		return rc;
- 
-+	/* no need to lock here, as rbd_dev is not registered yet */
-+	rc = __rbd_init_snaps_header(rbd_dev);
-+	if (rc)
-+		return rc;
-+
- 	rc = rbd_header_set_snap(rbd_dev, rbd_dev->snap_name, &total_size);
- 	if (rc)
- 		return rc;
-@@ -1343,54 +1346,360 @@ out:
- 	return rc;
- }
- 
--/********************************************************************
-- * /sys/class/rbd/
-- *                   add	map rados objects to blkdev
-- *                   remove	unmap rados objects
-- *                   list	show mappings
-- *******************************************************************/
-+/*
-+  sysfs
-+*/
-+
-+static ssize_t rbd_size_show(struct device *dev,
-+			     struct device_attribute *attr, char *buf)
-+{
-+	struct rbd_device *rbd_dev = dev_to_rbd(dev);
-+
-+	return sprintf(buf, "%llu\n", (unsigned long long)rbd_dev->header.image_size);
-+}
-+
-+static ssize_t rbd_major_show(struct device *dev,
-+			      struct device_attribute *attr, char *buf)
-+{
-+	struct rbd_device *rbd_dev = dev_to_rbd(dev);
- 
--static void class_rbd_release(struct class *cls)
-+	return sprintf(buf, "%d\n", rbd_dev->major);
-+}
-+
-+static ssize_t rbd_client_id_show(struct device *dev,
-+				  struct device_attribute *attr, char *buf)
- {
--	kfree(cls);
-+	struct rbd_device *rbd_dev = dev_to_rbd(dev);
-+
-+	return sprintf(buf, "client%lld\n", ceph_client_id(rbd_dev->client));
- }
- 
--static ssize_t class_rbd_list(struct class *c,
--			      struct class_attribute *attr,
--			      char *data)
-+static ssize_t rbd_pool_show(struct device *dev,
-+			     struct device_attribute *attr, char *buf)
- {
--	int n = 0;
--	struct list_head *tmp;
--	int max = PAGE_SIZE;
-+	struct rbd_device *rbd_dev = dev_to_rbd(dev);
-+
-+	return sprintf(buf, "%s\n", rbd_dev->pool_name);
-+}
-+
-+static ssize_t rbd_name_show(struct device *dev,
-+			     struct device_attribute *attr, char *buf)
-+{
-+	struct rbd_device *rbd_dev = dev_to_rbd(dev);
-+
-+	return sprintf(buf, "%s\n", rbd_dev->obj);
-+}
-+
-+static ssize_t rbd_snap_show(struct device *dev,
-+			     struct device_attribute *attr,
-+			     char *buf)
-+{
-+	struct rbd_device *rbd_dev = dev_to_rbd(dev);
-+
-+	return sprintf(buf, "%s\n", rbd_dev->snap_name);
-+}
-+
-+static ssize_t rbd_image_refresh(struct device *dev,
-+				 struct device_attribute *attr,
-+				 const char *buf,
-+				 size_t size)
-+{
-+	struct rbd_device *rbd_dev = dev_to_rbd(dev);
-+	int rc;
-+	int ret = size;
- 
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
- 
--	n += snprintf(data, max,
--		      "#id\tmajor\tclient_name\tpool\tname\tsnap\tKB\n");
-+	rc = __rbd_update_snaps(rbd_dev);
-+	if (rc < 0)
-+		ret = rc;
- 
--	list_for_each(tmp, &rbd_dev_list) {
--		struct rbd_device *rbd_dev;
-+	mutex_unlock(&ctl_mutex);
-+	return ret;
-+}
- 
--		rbd_dev = list_entry(tmp, struct rbd_device, node);
--		n += snprintf(data+n, max-n,
--			      "%d\t%d\tclient%lld\t%s\t%s\t%s\t%lld\n",
--			      rbd_dev->id,
--			      rbd_dev->major,
--			      ceph_client_id(rbd_dev->client),
--			      rbd_dev->pool_name,
--			      rbd_dev->obj, rbd_dev->snap_name,
--			      rbd_dev->header.image_size >> 10);
--		if (n == max)
-+static DEVICE_ATTR(size, S_IRUGO, rbd_size_show, NULL);
-+static DEVICE_ATTR(major, S_IRUGO, rbd_major_show, NULL);
-+static DEVICE_ATTR(client_id, S_IRUGO, rbd_client_id_show, NULL);
-+static DEVICE_ATTR(pool, S_IRUGO, rbd_pool_show, NULL);
-+static DEVICE_ATTR(name, S_IRUGO, rbd_name_show, NULL);
-+static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
-+static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
-+static DEVICE_ATTR(create_snap, S_IWUSR, NULL, rbd_snap_add);
-+static DEVICE_ATTR(rollback_snap, S_IWUSR, NULL, rbd_snap_rollback);
-+
-+static struct attribute *rbd_attrs[] = {
-+	&dev_attr_size.attr,
-+	&dev_attr_major.attr,
-+	&dev_attr_client_id.attr,
-+	&dev_attr_pool.attr,
-+	&dev_attr_name.attr,
-+	&dev_attr_current_snap.attr,
-+	&dev_attr_refresh.attr,
-+	&dev_attr_create_snap.attr,
-+	&dev_attr_rollback_snap.attr,
-+	NULL
-+};
-+
-+static struct attribute_group rbd_attr_group = {
-+	.attrs = rbd_attrs,
-+};
-+
-+static const struct attribute_group *rbd_attr_groups[] = {
-+	&rbd_attr_group,
-+	NULL
-+};
-+
-+static void rbd_sysfs_dev_release(struct device *dev)
-+{
-+}
-+
-+static struct device_type rbd_device_type = {
-+	.name		= "rbd",
-+	.groups		= rbd_attr_groups,
-+	.release	= rbd_sysfs_dev_release,
-+};
-+
-+
-+/*
-+  sysfs - snapshots
-+*/
-+
-+static ssize_t rbd_snap_size_show(struct device *dev,
-+				  struct device_attribute *attr,
-+				  char *buf)
-+{
-+	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
-+
-+	return sprintf(buf, "%lld\n", (long long)snap->size);
-+}
-+
-+static ssize_t rbd_snap_id_show(struct device *dev,
-+				struct device_attribute *attr,
-+				char *buf)
-+{
-+	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
-+
-+	return sprintf(buf, "%lld\n", (long long)snap->id);
-+}
-+
-+static DEVICE_ATTR(snap_size, S_IRUGO, rbd_snap_size_show, NULL);
-+static DEVICE_ATTR(snap_id, S_IRUGO, rbd_snap_id_show, NULL);
-+
-+static struct attribute *rbd_snap_attrs[] = {
-+	&dev_attr_snap_size.attr,
-+	&dev_attr_snap_id.attr,
-+	NULL,
-+};
-+
-+static struct attribute_group rbd_snap_attr_group = {
-+	.attrs = rbd_snap_attrs,
-+};
-+
-+static void rbd_snap_dev_release(struct device *dev)
-+{
-+	struct rbd_snap *snap = container_of(dev, struct rbd_snap, dev);
-+	kfree(snap->name);
-+	kfree(snap);
-+}
-+
-+static const struct attribute_group *rbd_snap_attr_groups[] = {
-+	&rbd_snap_attr_group,
-+	NULL
-+};
-+
-+static struct device_type rbd_snap_device_type = {
-+	.groups		= rbd_snap_attr_groups,
-+	.release	= rbd_snap_dev_release,
-+};
-+
-+static void __rbd_remove_snap_dev(struct rbd_device *rbd_dev,
-+				  struct rbd_snap *snap)
-+{
-+	list_del(&snap->node);
-+	device_unregister(&snap->dev);
-+}
-+
-+static int rbd_register_snap_dev(struct rbd_device *rbd_dev,
-+				  struct rbd_snap *snap,
-+				  struct device *parent)
-+{
-+	struct device *dev = &snap->dev;
-+	int ret;
-+
-+	dev->type = &rbd_snap_device_type;
-+	dev->parent = parent;
-+	dev->release = rbd_snap_dev_release;
-+	dev_set_name(dev, "snap_%s", snap->name);
-+	ret = device_register(dev);
-+
-+	return ret;
-+}
-+
-+static int __rbd_add_snap_dev(struct rbd_device *rbd_dev,
-+			      int i, const char *name,
-+			      struct rbd_snap **snapp)
-+{
-+	int ret;
-+	struct rbd_snap *snap = kzalloc(sizeof(*snap), GFP_KERNEL);
-+	if (!snap)
-+		return -ENOMEM;
-+	snap->name = kstrdup(name, GFP_KERNEL);
-+	snap->size = rbd_dev->header.snap_sizes[i];
-+	snap->id = rbd_dev->header.snapc->snaps[i];
-+	if (device_is_registered(&rbd_dev->dev)) {
-+		ret = rbd_register_snap_dev(rbd_dev, snap,
-+					     &rbd_dev->dev);
-+		if (ret < 0)
-+			goto err;
-+	}
-+	*snapp = snap;
-+	return 0;
-+err:
-+	kfree(snap->name);
-+	kfree(snap);
-+	return ret;
-+}
-+
-+/*
-+ * search for the previous snap in a null delimited string list
-+ */
-+const char *rbd_prev_snap_name(const char *name, const char *start)
-+{
-+	if (name < start + 2)
-+		return NULL;
-+
-+	name -= 2;
-+	while (*name) {
-+		if (name == start)
-+			return start;
-+		name--;
-+	}
-+	return name + 1;
-+}
-+
-+/*
-+ * compare the old list of snapshots that we have to what's in the header
-+ * and update it accordingly. Note that the header holds the snapshots
-+ * in a reverse order (from newest to oldest) and we need to go from
-+ * older to new so that we don't get a duplicate snap name when
-+ * doing the process (e.g., removed snapshot and recreated a new
-+ * one with the same name.
-+ */
-+static int __rbd_init_snaps_header(struct rbd_device *rbd_dev)
-+{
-+	const char *name, *first_name;
-+	int i = rbd_dev->header.total_snaps;
-+	struct rbd_snap *snap, *old_snap = NULL;
-+	int ret;
-+	struct list_head *p, *n;
-+
-+	first_name = rbd_dev->header.snap_names;
-+	name = first_name + rbd_dev->header.snap_names_len;
-+
-+	list_for_each_prev_safe(p, n, &rbd_dev->snaps) {
-+		u64 cur_id;
-+
-+		old_snap = list_entry(p, struct rbd_snap, node);
-+
-+		if (i)
-+			cur_id = rbd_dev->header.snapc->snaps[i - 1];
-+
-+		if (!i || old_snap->id < cur_id) {
-+			/* old_snap->id was skipped, thus was removed */
-+			__rbd_remove_snap_dev(rbd_dev, old_snap);
-+			continue;
-+		}
-+		if (old_snap->id == cur_id) {
-+			/* we have this snapshot already */
-+			i--;
-+			name = rbd_prev_snap_name(name, first_name);
-+			continue;
-+		}
-+		for (; i > 0;
-+		     i--, name = rbd_prev_snap_name(name, first_name)) {
-+			if (!name) {
-+				WARN_ON(1);
-+				return -EINVAL;
-+			}
-+			cur_id = rbd_dev->header.snapc->snaps[i];
-+			/* snapshot removal? handle it above */
-+			if (cur_id >= old_snap->id)
-+				break;
-+			/* a new snapshot */
-+			ret = __rbd_add_snap_dev(rbd_dev, i - 1, name, &snap);
-+			if (ret < 0)
-+				return ret;
-+
-+			/* note that we add it backward so using n and not p */
-+			list_add(&snap->node, n);
-+			p = &snap->node;
-+		}
-+	}
-+	/* we're done going over the old snap list, just add what's left */
-+	for (; i > 0; i--) {
-+		name = rbd_prev_snap_name(name, first_name);
-+		if (!name) {
-+			WARN_ON(1);
-+			return -EINVAL;
-+		}
-+		ret = __rbd_add_snap_dev(rbd_dev, i - 1, name, &snap);
-+		if (ret < 0)
-+			return ret;
-+		list_add(&snap->node, &rbd_dev->snaps);
-+	}
-+
-+	return 0;
-+}
-+
-+
-+static void rbd_root_dev_release(struct device *dev)
-+{
-+}
-+
-+static struct device rbd_root_dev = {
-+	.init_name =    "rbd",
-+	.release =      rbd_root_dev_release,
-+};
-+
-+static int rbd_bus_add_dev(struct rbd_device *rbd_dev)
-+{
-+	int ret = -ENOMEM;
-+	struct device *dev;
-+	struct rbd_snap *snap;
-+
-+	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
-+	dev = &rbd_dev->dev;
-+
-+	dev->bus = &rbd_bus_type;
-+	dev->type = &rbd_device_type;
-+	dev->parent = &rbd_root_dev;
-+	dev->release = rbd_dev_release;
-+	dev_set_name(dev, "%d", rbd_dev->id);
-+	ret = device_register(dev);
-+	if (ret < 0)
-+		goto done_free;
-+
-+	list_for_each_entry(snap, &rbd_dev->snaps, node) {
-+		ret = rbd_register_snap_dev(rbd_dev, snap,
-+					     &rbd_dev->dev);
-+		if (ret < 0)
- 			break;
- 	}
- 
- 	mutex_unlock(&ctl_mutex);
--	return n;
-+	return 0;
-+done_free:
-+	mutex_unlock(&ctl_mutex);
-+	return ret;
- }
- 
--static ssize_t class_rbd_add(struct class *c,
--			     struct class_attribute *attr,
--			     const char *buf, size_t count)
-+static void rbd_bus_del_dev(struct rbd_device *rbd_dev)
-+{
-+	device_unregister(&rbd_dev->dev);
-+}
-+
-+static ssize_t rbd_add(struct bus_type *bus, const char *buf, size_t count)
- {
- 	struct ceph_osd_client *osdc;
- 	struct rbd_device *rbd_dev;
-@@ -1419,6 +1728,7 @@ static ssize_t class_rbd_add(struct class *c,
- 	/* static rbd_device initialization */
- 	spin_lock_init(&rbd_dev->lock);
- 	INIT_LIST_HEAD(&rbd_dev->node);
-+	INIT_LIST_HEAD(&rbd_dev->snaps);
- 
- 	/* generate unique id: find highest unique id, add one */
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
-@@ -1478,6 +1788,9 @@ static ssize_t class_rbd_add(struct class *c,
- 	}
- 	rbd_dev->major = irc;
- 
-+	rc = rbd_bus_add_dev(rbd_dev);
-+	if (rc)
-+		goto err_out_disk;
- 	/* set up and announce blkdev mapping */
- 	rc = rbd_init_disk(rbd_dev);
- 	if (rc)
-@@ -1487,6 +1800,8 @@ static ssize_t class_rbd_add(struct class *c,
- 
- err_out_blkdev:
- 	unregister_blkdev(rbd_dev->major, rbd_dev->name);
-+err_out_disk:
-+	rbd_free_disk(rbd_dev);
- err_out_client:
- 	rbd_put_client(rbd_dev);
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
-@@ -1518,35 +1833,10 @@ static struct rbd_device *__rbd_get_dev(unsigned long id)
- 	return NULL;
- }
- 
--static ssize_t class_rbd_remove(struct class *c,
--				struct class_attribute *attr,
--				const char *buf,
--				size_t count)
-+static void rbd_dev_release(struct device *dev)
- {
--	struct rbd_device *rbd_dev = NULL;
--	int target_id, rc;
--	unsigned long ul;
--
--	rc = strict_strtoul(buf, 10, &ul);
--	if (rc)
--		return rc;
--
--	/* convert to int; abort if we lost anything in the conversion */
--	target_id = (int) ul;
--	if (target_id != ul)
--		return -EINVAL;
--
--	/* remove object from list immediately */
--	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
--
--	rbd_dev = __rbd_get_dev(target_id);
--	if (rbd_dev)
--		list_del_init(&rbd_dev->node);
--
--	mutex_unlock(&ctl_mutex);
--
--	if (!rbd_dev)
--		return -ENOENT;
-+	struct rbd_device *rbd_dev =
-+			container_of(dev, struct rbd_device, dev);
- 
- 	rbd_put_client(rbd_dev);
- 
-@@ -1557,67 +1847,11 @@ static ssize_t class_rbd_remove(struct class *c,
- 
- 	/* release module ref */
- 	module_put(THIS_MODULE);
--
--	return count;
- }
- 
--static ssize_t class_rbd_snaps_list(struct class *c,
--			      struct class_attribute *attr,
--			      char *data)
--{
--	struct rbd_device *rbd_dev = NULL;
--	struct list_head *tmp;
--	struct rbd_image_header *header;
--	int i, n = 0, max = PAGE_SIZE;
--	int ret;
--
--	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
--
--	n += snprintf(data, max, "#id\tsnap\tKB\n");
--
--	list_for_each(tmp, &rbd_dev_list) {
--		char *names, *p;
--		struct ceph_snap_context *snapc;
--
--		rbd_dev = list_entry(tmp, struct rbd_device, node);
--		header = &rbd_dev->header;
--
--		down_read(&header->snap_rwsem);
--
--		names = header->snap_names;
--		snapc = header->snapc;
--
--		n += snprintf(data + n, max - n, "%d\t%s\t%lld%s\n",
--			      rbd_dev->id, RBD_SNAP_HEAD_NAME,
--			      header->image_size >> 10,
--			      (!rbd_dev->cur_snap ? " (*)" : ""));
--		if (n == max)
--			break;
--
--		p = names;
--		for (i = 0; i < header->total_snaps; i++, p += strlen(p) + 1) {
--			n += snprintf(data + n, max - n, "%d\t%s\t%lld%s\n",
--			      rbd_dev->id, p, header->snap_sizes[i] >> 10,
--			      (rbd_dev->cur_snap &&
--			       (snap_index(header, i) == rbd_dev->cur_snap) ?
--			       " (*)" : ""));
--			if (n == max)
--				break;
--		}
--
--		up_read(&header->snap_rwsem);
--	}
--
--
--	ret = n;
--	mutex_unlock(&ctl_mutex);
--	return ret;
--}
--
--static ssize_t class_rbd_snaps_refresh(struct class *c,
--				struct class_attribute *attr,
--				const char *buf,
--				size_t count)
-+static ssize_t rbd_remove(struct bus_type *bus,
-+			  const char *buf,
-+			  size_t count)
- {
- 	struct rbd_device *rbd_dev = NULL;
- 	int target_id, rc;
-@@ -1641,95 +1875,70 @@ static ssize_t class_rbd_snaps_refresh(struct class *c,
- 		goto done;
- 	}
- 
--	rc = rbd_update_snaps(rbd_dev);
--	if (rc < 0)
--		ret = rc;
-+	list_del_init(&rbd_dev->node);
-+
-+	__rbd_remove_all_snaps(rbd_dev);
-+	rbd_bus_del_dev(rbd_dev);
- 
- done:
- 	mutex_unlock(&ctl_mutex);
- 	return ret;
- }
- 
--static ssize_t class_rbd_snap_create(struct class *c,
--				struct class_attribute *attr,
--				const char *buf,
--				size_t count)
-+static ssize_t rbd_snap_add(struct device *dev,
-+			    struct device_attribute *attr,
-+			    const char *buf,
-+			    size_t count)
- {
--	struct rbd_device *rbd_dev = NULL;
--	int target_id, ret;
--	char *name;
--
--	name = kmalloc(RBD_MAX_SNAP_NAME_LEN + 1, GFP_KERNEL);
-+	struct rbd_device *rbd_dev = dev_to_rbd(dev);
-+	int ret;
-+	char *name = kmalloc(count + 1, GFP_KERNEL);
- 	if (!name)
- 		return -ENOMEM;
- 
--	/* parse snaps add command */
--	if (sscanf(buf, "%d "
--		   "%" __stringify(RBD_MAX_SNAP_NAME_LEN) "s",
--		   &target_id,
--		   name) != 2) {
--		ret = -EINVAL;
--		goto done;
--	}
-+	snprintf(name, count, "%s", buf);
- 
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
- 
--	rbd_dev = __rbd_get_dev(target_id);
--	if (!rbd_dev) {
--		ret = -ENOENT;
--		goto done_unlock;
--	}
--
- 	ret = rbd_header_add_snap(rbd_dev,
- 				  name, GFP_KERNEL);
- 	if (ret < 0)
- 		goto done_unlock;
- 
--	ret = rbd_update_snaps(rbd_dev);
-+	ret = __rbd_update_snaps(rbd_dev);
- 	if (ret < 0)
- 		goto done_unlock;
- 
- 	ret = count;
- done_unlock:
- 	mutex_unlock(&ctl_mutex);
--done:
- 	kfree(name);
- 	return ret;
- }
- 
--static ssize_t class_rbd_rollback(struct class *c,
--				struct class_attribute *attr,
--				const char *buf,
--				size_t count)
-+static ssize_t rbd_snap_rollback(struct device *dev,
-+				 struct device_attribute *attr,
-+				 const char *buf,
-+				 size_t count)
- {
--	struct rbd_device *rbd_dev = NULL;
--	int target_id, ret;
-+	struct rbd_device *rbd_dev = dev_to_rbd(dev);
-+	int ret;
- 	u64 snapid;
--	char snap_name[RBD_MAX_SNAP_NAME_LEN];
- 	u64 cur_ofs;
--	char *seg_name;
-+	char *seg_name = NULL;
-+	char *snap_name = kmalloc(count + 1, GFP_KERNEL);
-+	ret = -ENOMEM;
-+	if (!snap_name)
-+		return ret;
- 
- 	/* parse snaps add command */
--	if (sscanf(buf, "%d "
--		   "%" __stringify(RBD_MAX_SNAP_NAME_LEN) "s",
--		   &target_id,
--		   snap_name) != 2) {
--		return -EINVAL;
--	}
--
--	ret = -ENOMEM;
-+	snprintf(snap_name, count, "%s", buf);
- 	seg_name = kmalloc(RBD_MAX_SEG_NAME_LEN + 1, GFP_NOIO);
- 	if (!seg_name)
--		return ret;
-+		goto done;
- 
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
- 
--	rbd_dev = __rbd_get_dev(target_id);
--	if (!rbd_dev) {
--		ret = -ENOENT;
--		goto done_unlock;
--	}
--
- 	ret = snap_by_name(&rbd_dev->header, snap_name, &snapid, NULL);
- 	if (ret < 0)
- 		goto done_unlock;
-@@ -1750,7 +1959,7 @@ static ssize_t class_rbd_rollback(struct class *c,
- 				   seg_name, ret);
- 	}
- 
--	ret = rbd_update_snaps(rbd_dev);
-+	ret = __rbd_update_snaps(rbd_dev);
- 	if (ret < 0)
- 		goto done_unlock;
- 
-@@ -1758,57 +1967,42 @@ static ssize_t class_rbd_rollback(struct class *c,
- 
- done_unlock:
- 	mutex_unlock(&ctl_mutex);
-+done:
- 	kfree(seg_name);
-+	kfree(snap_name);
- 
- 	return ret;
- }
- 
--static struct class_attribute class_rbd_attrs[] = {
--	__ATTR(add,		0200, NULL, class_rbd_add),
--	__ATTR(remove,		0200, NULL, class_rbd_remove),
--	__ATTR(list,		0444, class_rbd_list, NULL),
--	__ATTR(snaps_refresh,	0200, NULL, class_rbd_snaps_refresh),
--	__ATTR(snap_create,	0200, NULL, class_rbd_snap_create),
--	__ATTR(snaps_list,	0444, class_rbd_snaps_list, NULL),
--	__ATTR(snap_rollback,	0200, NULL, class_rbd_rollback),
-+static struct bus_attribute rbd_bus_attrs[] = {
-+	__ATTR(add, S_IWUSR, NULL, rbd_add),
-+	__ATTR(remove, S_IWUSR, NULL, rbd_remove),
- 	__ATTR_NULL
- };
- 
- /*
-  * create control files in sysfs
-- * /sys/class/rbd/...
-+ * /sys/bus/rbd/...
-  */
- static int rbd_sysfs_init(void)
- {
--	int ret = -ENOMEM;
-+	int ret;
- 
--	class_rbd = kzalloc(sizeof(*class_rbd), GFP_KERNEL);
--	if (!class_rbd)
--		goto out;
-+	rbd_bus_type.bus_attrs = rbd_bus_attrs;
- 
--	class_rbd->name = DRV_NAME;
--	class_rbd->owner = THIS_MODULE;
--	class_rbd->class_release = class_rbd_release;
--	class_rbd->class_attrs = class_rbd_attrs;
-+	ret = bus_register(&rbd_bus_type);
-+	 if (ret < 0)
-+		return ret;
- 
--	ret = class_register(class_rbd);
--	if (ret)
--		goto out_class;
--	return 0;
-+	ret = device_register(&rbd_root_dev);
- 
--out_class:
--	kfree(class_rbd);
--	class_rbd = NULL;
--	pr_err(DRV_NAME ": failed to create class rbd\n");
--out:
- 	return ret;
- }
- 
- static void rbd_sysfs_cleanup(void)
- {
--	if (class_rbd)
--		class_destroy(class_rbd);
--	class_rbd = NULL;
-+	device_unregister(&rbd_root_dev);
-+	bus_unregister(&rbd_bus_type);
- }
- 
- int __init rbd_init(void)
+             if (STRPREFIX(val, "/dev/"))
+                 disk->type = VIR_DOMAIN_DISK_TYPE_BLOCK;
+-            else
++            else if (STRPREFIX(val, "nbd:")) {
++                disk->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
++                disk->protocol = VIR_DOMAIN_DISK_PROTOCOL_NBD;
++                val += strlen("nbd:");
++            } else if (STRPREFIX(val, "rbd:")) {
++                disk->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
++                disk->protocol = VIR_DOMAIN_DISK_PROTOCOL_RBD;
++                val += strlen("rbd:");
++            } else if (STRPREFIX(val, "sheepdog:")) {
++                disk->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
++                disk->protocol = VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG;
++                val += strlen("sheepdog:");
++            } else
+                 disk->type = VIR_DOMAIN_DISK_TYPE_FILE;
+             if (STREQ(arg, "-cdrom")) {
+                 disk->device = VIR_DOMAIN_DISK_DEVICE_CDROM;
+@@ -6751,7 +6859,60 @@ virDomainDefPtr qemuParseCommandLine(virCapsPtr caps,
+                 disk->dst = strdup(arg + 1);
+             }
+             disk->src = strdup(val);
+-            if (!disk->src ||
++
++            if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK) {
++                char *host, *port;
++
++                switch (disk->protocol) {
++                case VIR_DOMAIN_DISK_PROTOCOL_NBD:
++                    host = disk->src;
++                    port = strchr(host, ':');
++                    if (!port) {
++                        def = NULL;
++                        qemuReportError(VIR_ERR_INTERNAL_ERROR,
++                                        _("cannot parse nbd filename '%s'"), disk->src);
++                        goto error;
++                    }
++                    *port++ = '\0';
++                    if (VIR_ALLOC(disk->hosts) < 0) {
++                        virReportOOMError();
++                        goto error;
++                    }
++                    disk->nhosts = 1;
++                    disk->hosts->name = host;
++                    disk->hosts->port = strdup(port);
++                    disk->src = NULL;
++                    break;
++                case VIR_DOMAIN_DISK_PROTOCOL_RBD:
++                    break;
++                case VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG:
++                    /* disk->src must be [vdiname] or [host]:[port]:[vdiname] */
++                    port = strchr(disk->src, ':');
++                    if (port) {
++                        char *vdi;
++
++                        *port++ = '\0';
++                        vdi = strchr(port, ':');
++                        if (!vdi) {
++                            qemuReportError(VIR_ERR_INTERNAL_ERROR,
++                                            _("cannot parse sheepdog filename '%s'"), val);
++                            goto error;
++                        }
++                        *vdi++ = '\0';
++                        if (VIR_ALLOC(disk->hosts) < 0) {
++                            virReportOOMError();
++                            goto error;
++                        }
++                        disk->nhosts = 1;
++                        disk->hosts->name = disk->src;
++                        disk->hosts->port = strdup(port);
++                        disk->src = strdup(vdi);
++                    }
++                    break;
++                }
++            }
++
++            if (!(disk->src || disk->nhosts > 0) ||
+                 !disk->dst) {
+                 virDomainDiskDefFree(disk);
+                 goto no_memory;
 -- 
-1.5.6.5
-
-
-
+1.7.1
