@@ -1,28 +1,29 @@
-From: Stefan Hajnoczi <stefanha@gmail.com>
-Subject: Re: [PATCH] ceph/rbd block driver for qemu-kvm (v8)
-Date: Sat, 27 Nov 2010 07:12:19 +0000
-Message-ID: <AANLkTimwfxz3D+MZQ7TH_DktMNzyN-=Q3AaZVsi+4rdO@mail.gmail.com>
-References: <20101117214223.GA31321@sir.home>
-	<AANLkTikLu0OJ3b+Ch7b0nnkOnF9wUGiUqZRcQgGeog73@mail.gmail.com>
-	<AANLkTikpvEQXc5iz-ii74XBshGrt0nNk5bCrHgteNXyA@mail.gmail.com>
+From: David Miller <davem@davemloft.net>
+Subject: Re: [PATCH] Net: ceph: Makefile: Remove unnessary code
+Date: Sat, 27 Nov 2010 17:39:58 -0800 (PST)
+Message-ID: <20101127.173958.71105674.davem@davemloft.net>
+References: <1290389030-2743-1-git-send-email-tdent48227@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:64100 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750939Ab0K0HMV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 27 Nov 2010 02:12:21 -0500
-In-Reply-To: <AANLkTikpvEQXc5iz-ii74XBshGrt0nNk5bCrHgteNXyA@mail.gmail.com>
+Received: from 74-93-104-97-Washington.hfc.comcastbusiness.net ([74.93.104.97]:35365
+	"EHLO sunset.davemloft.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750834Ab0K1Bjc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 27 Nov 2010 20:39:32 -0500
+In-Reply-To: <1290389030-2743-1-git-send-email-tdent48227@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <c.m.brunner@gmail.com>
-Cc: qemu-devel@nongnu.org, kvm@vger.kernel.org, ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>
+To: tdent48227@gmail.com
+Cc: sage@newdream.net, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, netdev@vger.kernel.org
 
-On Fri, Nov 26, 2010 at 9:59 PM, Christian Brunner
-<c.m.brunner@gmail.com> wrote:
-> Thanks for the review. What am I supposed to do now?
+From: Tracey Dent <tdent48227@gmail.com>
+Date: Sun, 21 Nov 2010 20:23:50 -0500
 
-Kevin is the block maintainer.  His review is the next step, I have
-CCed him.  After that rbd would be ready to merge.
+> Remove the if and else conditional because the code is in mainline and there
+> is no need in it being there.
+> 
+> Signed-off-by: Tracey Dent <tdent48227@gmail.com>
 
-Stefan
+Applied, thanks.
