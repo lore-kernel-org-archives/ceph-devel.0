@@ -1,60 +1,42 @@
-From: Kevin Wolf <kwolf@redhat.com>
-Subject: Re: [Qemu-devel] Re: [PATCH] ceph/rbd block driver for qemu-kvm (v8)
-Date: Mon, 29 Nov 2010 11:02:11 +0100
-Message-ID: <4CF37A23.8010202@redhat.com>
-References: <20101117214223.GA31321@sir.home>	<AANLkTikLu0OJ3b+Ch7b0nnkOnF9wUGiUqZRcQgGeog73@mail.gmail.com>	<AANLkTikpvEQXc5iz-ii74XBshGrt0nNk5bCrHgteNXyA@mail.gmail.com>	<AANLkTimwfxz3D+MZQ7TH_DktMNzyN-=Q3AaZVsi+4rdO@mail.gmail.com> <4CF36B79.4000008@redhat.com>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: Performence test on ceph v0.23 + EXT4 and Btrfs
+Date: Mon, 29 Nov 2010 09:07:49 -0800
+Message-ID: <AANLkTi=E=pjvixkronpD-ij0CxjFBVauN5bBrsbT8nqW@mail.gmail.com>
+References: <1291001135.1872.106.camel@cephhost>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:63042 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752526Ab0K2KBN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 29 Nov 2010 05:01:13 -0500
-In-Reply-To: <4CF36B79.4000008@redhat.com>
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:49993 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752763Ab0K2RHv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Nov 2010 12:07:51 -0500
+Received: by ewy5 with SMTP id 5so2100663ewy.19
+        for <ceph-devel@vger.kernel.org>; Mon, 29 Nov 2010 09:07:50 -0800 (PST)
+In-Reply-To: <1291001135.1872.106.camel@cephhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Hajnoczi <stefanha@gmail.com>
-Cc: Christian Brunner <c.m.brunner@gmail.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org
+To: cpwu@tnsoft.com.cn
+Cc: sage@newdream.net, yehuda@hq.newdream.net, colinm@hq.newdream.net, ceph-devel@vger.kernel.org, mllv <mllv@tnsoft.com.cn>
 
-Am 29.11.2010 09:59, schrieb Kevin Wolf:
-> Am 27.11.2010 08:12, schrieb Stefan Hajnoczi:
->> On Fri, Nov 26, 2010 at 9:59 PM, Christian Brunner
->> <c.m.brunner@gmail.com> wrote:
->>> Thanks for the review. What am I supposed to do now?
->>
->> Kevin is the block maintainer.  His review is the next step, I have
->> CCed him.  After that rbd would be ready to merge.
-> 
-> If I don't find anything really obvious and it doesn't break the build,
-> I'll merge it based on your review.
+On Sun, Nov 28, 2010 at 7:25 PM, Jeff Wu <cpwu@tnsoft.com.cn> wrote:
+>
+> Hi ,
+>
+> I've recently been using FFSB and iozone to do performance test with Ceph
+> v0.23 on my platform.
+> the attachment file are FFSB configuration file and ceph.conf.
+So you're not using OSD journals in either test configuration? You're
+going to get pretty terrible write results without a journal.
+The reads are clearly slower than they should be and you could
+probably get better results by adjusting the caching behaviors. We
+haven't done too much work on optimizing read behavior.
 
-Which librados version is this supposed to require? My F12 one seems to
-be too old, however configure still automatically enables it (so the
-build fails in the default configuration for me). I think you need to
-add some check there.
-
-$ rpm -q ceph-devel
-ceph-devel-0.20.2-1.fc12.x86_64
-
-$ LANG=C make
-  CC    block/rbd.o
-block/rbd.c: In function 'rbd_register_image':
-block/rbd.c:191: error: 'CEPH_OSD_TMAP_SET' undeclared (first use in
-this function)
-block/rbd.c:191: error: (Each undeclared identifier is reported only once
-block/rbd.c:191: error: for each function it appears in.)
-cc1: warnings being treated as errors
-block/rbd.c: In function 'rbd_set_snapc':
-block/rbd.c:468: error: implicit declaration of function
-'rados_set_snap_context'
-block/rbd.c:468: error: nested extern declaration of
-'rados_set_snap_context'
-block/rbd.c: In function 'rbd_snap_create':
-block/rbd.c:844: error: implicit declaration of function
-'rados_selfmanaged_snap_create'
-block/rbd.c:844: error: nested extern declaration of
-'rados_selfmanaged_snap_create'
-make: *** [block/rbd.o] Error 1
-
-Kevin
+Could you run "ceph osd tell * bench", then run "ceph -w", and report
+the results? (That'll just run local benchmarking on the OSD to report
+the approximate write speed it's capable of.)
+You can also run "rados -p data bench 60 write", and then "rados -p
+data bench 0 seq" to get a simpler (better understood) performance
+test.
+With this data as a baseline we can start looking at what might be
+causing trouble.
+-Greg
