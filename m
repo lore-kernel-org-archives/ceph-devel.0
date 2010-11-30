@@ -1,52 +1,38 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: Performence test on ceph v0.23 + EXT4 and Btrfs
-Date: Tue, 30 Nov 2010 09:07:12 -0800
-Message-ID: <AANLkTinkgBwzfESaQNs0VkLn+LGbd8wEccy6LNDSFM2Z@mail.gmail.com>
-References: <1291001135.1872.106.camel@cephhost>
-	<AANLkTi=E=pjvixkronpD-ij0CxjFBVauN5bBrsbT8nqW@mail.gmail.com>
-	<1291085741.1809.25.camel@cephhost>
-	<AANLkTikz_quAcoYL8VUoA4i87WczKCh0yM2TsCG6dQEz@mail.gmail.com>
-	<1291097975.1809.54.camel@cephhost>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: [PATCH] Expose Ceph data location information to Hadoop
+Date: Tue, 30 Nov 2010 09:17:01 -0800
+Message-ID: <3F84686D-FB7B-4D7E-A893-8FA35FF5080D@cs.ucsc.edu>
+References: <EEFC0BFD-BF42-4E7E-A905-AB7F53ECE77A@cs.ucsc.edu> <Pine.LNX.4.64.1011300852460.4337@cobra.newdream.net>
+Mime-Version: 1.0 (Apple Message framework v1081)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:33852 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753717Ab0K3RQm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Nov 2010 12:16:42 -0500
-Received: by ewy5 with SMTP id 5so2885417ewy.19
-        for <ceph-devel@vger.kernel.org>; Tue, 30 Nov 2010 09:16:41 -0800 (PST)
-In-Reply-To: <1291097975.1809.54.camel@cephhost>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:36338 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753752Ab0K3RRD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Nov 2010 12:17:03 -0500
+In-Reply-To: <Pine.LNX.4.64.1011300852460.4337@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: cpwu@tnsoft.com.cn
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andrew Lv <mllv@tnsoft.com.cn>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org, Joe Buck <buck@soe.ucsc.edu>, Carlos Maltzahn <carlosm@soe.ucsc.edu>
 
-On Mon, Nov 29, 2010 at 10:19 PM, Jeff Wu <cpwu@tnsoft.com.cn> wrote:
-> Is "40-50MB/s" the speed that it run bench at local btrfs disk ?
-> not the speed that run bench from client to osd server ?
-> with this speed ,run bench from client to osd server ,will which =A0g=
-et
-> about 20~25MB/s( 40~50MB /2 )speed ?
-Data on Ceph is replicated across 2 OSDs (by default; this is
-configurable). So while figuring out potential performance involves a
-lot of variables, in a simple case like this where you aren't bounded
-by network bandwidth you'll find that your read/write performance
-simply tracks the slower disk. I'd expect your Ceph tests (at least
-the streaming ones) to run at 40-50MB/s.
+> Well, the ioctl interface is fixed (Linux kernel ABI rules), so there is 
+> no danger in relying on it.  In the end it'll be more work to create a 
+> separate library that just wraps the ioctls, and any change in the layout 
+> scheme that would motivate e.g. a new v2 ioctl would also mean updating 
+> the library, leaving you with the same backward compatibility issues we 
+> started with.  In the end whether it's an ioctl(2) call or a shared 
+> library call is mostly a matter of syntax; the underlying data passed by 
+> the interface is the same.
 
-Given that everything else is okay, I cannot stress enough that
-running without a journal is going to cause significant performance
-degradations. I have a hard time believing that it's responsible for
-13-second latencies, but it's possible. So how about you set up a
-journal (it can just be a file or new partition on the drives you're
-already using) and report back your results after you do that. :)
-Adding a journal to the OSDs lets them turn all their random writes
-into streaming ones.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I agree that the stability of the ABI isn't an issue, but maybe I wasn't clear enough.
+
+Currently the data location IOCTL is used in Hadoop to map a offset to an object location, thus it is necessary for Hadoop to generate a set of offsets that fall into distinct object boundaries in order to collect a list of object locations that should run map tasks.
+
+The problem is that in order to generate this list of offsets, the striping strategy must be taken into consideration in Hadoop (as shown in the original version of this email). Currently this means that the logic of "ceph_calc_file_object_mapping(...)" in the client must be synchronized with the Hadoop code base, something that is unnecessary. Rather than duplicating this logic, a better solution seems to be to expand the Ceph IOCTL interface to include functionality for retrieving object locations or at the very least, a set of candidate offsets. This would allow the client to hide the striping strategy from Hadoop.
+
+Whether or not this is an IOCTL that expands the ABI, or a user-level library that contains the striping strategy logic seems to be a decision for someone else, but the important thing is that striping strategy logic doesn't get distributed into arbitrary code bases such as Hadoop, requiring synchronization.
+
+Thanks,
+Noah
