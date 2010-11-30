@@ -1,136 +1,88 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: [Qemu-devel] Re: [PATCH] ceph/rbd block driver for qemu-kvm
- (v8)
-Date: Mon, 29 Nov 2010 11:47:34 -0800
-Message-ID: <1291060054.1792.88.camel@yehudasa-desktop>
-References: <20101117214223.GA31321@sir.home>
-	 <AANLkTikLu0OJ3b+Ch7b0nnkOnF9wUGiUqZRcQgGeog73@mail.gmail.com>
-	 <AANLkTikpvEQXc5iz-ii74XBshGrt0nNk5bCrHgteNXyA@mail.gmail.com>
-	 <AANLkTimwfxz3D+MZQ7TH_DktMNzyN-=Q3AaZVsi+4rdO@mail.gmail.com>
-	 <4CF36B79.4000008@redhat.com>  <4CF37A23.8010202@redhat.com>
+From: Laszlo Boszormenyi <gcs@debian.hu>
+Subject: Bug#506040: Status of ceph ITP?
+Date: Tue, 30 Nov 2010 01:00:13 +0100
+Message-ID: <1291075213.14018.101.camel@julia.gcs.org.hu>
+References: <1290365977.9821.3.camel@clint-MacBookPro>
+	 <Pine.LNX.4.64.1011211521510.17131@cobra.newdream.net>
+	 <1290436452.9821.5.camel@clint-MacBookPro>
+	 <Pine.LNX.4.64.1011291120510.4337@cobra.newdream.net>
+Reply-To: Laszlo Boszormenyi <gcs@debian.hu>, 506040@bugs.debian.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:62006 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751074Ab0K2TsY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Nov 2010 14:48:24 -0500
-In-Reply-To: <4CF37A23.8010202@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Wolf <kwolf@redhat.com>
-Cc: Stefan Hajnoczi <stefanha@gmail.com>, Christian Brunner <c.m.brunner@gmail.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org
+Return-path: <bounce-debian-bugs-dist=glddb-debian-bugs-dist=m.gmane.org@lists.debian.org>
+Resent-To: debian-bugs-dist@lists.debian.org
+Resent-Message-ID: <handler.506040.B506040.12910752495988@bugs.debian.org>
+In-Reply-To: <Pine.LNX.4.64.1011291120510.4337@cobra.newdream.net>
+List-Post: <mailto:debian-bugs-dist@lists.debian.org>
+List-Help: <mailto:debian-bugs-dist-request@lists.debian.org?subject=help>
+List-Subscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=subscribe>
+List-Unsubscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=unsubscribe>
+To: Sage Weil <sage@newdream.net>
+Cc: Clint Byrum <clint@ubuntu.com>, asheesh@asheesh.org, 506040@bugs.debian.org, noel@debian.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 2010-11-29 at 11:02 +0100, Kevin Wolf wrote:
-> Am 29.11.2010 09:59, schrieb Kevin Wolf:
-> > Am 27.11.2010 08:12, schrieb Stefan Hajnoczi:
-> >> On Fri, Nov 26, 2010 at 9:59 PM, Christian Brunner
-> >> <c.m.brunner@gmail.com> wrote:
-> >>> Thanks for the review. What am I supposed to do now?
-> >>
-> >> Kevin is the block maintainer.  His review is the next step, I have
-> >> CCed him.  After that rbd would be ready to merge.
-> > 
-> > If I don't find anything really obvious and it doesn't break the build,
-> > I'll merge it based on your review.
-> 
-> Which librados version is this supposed to require? My F12 one seems to
-> be too old, however configure still automatically enables it (so the
-> build fails in the default configuration for me). I think you need to
-> add some check there.
-> 
-> $ rpm -q ceph-devel
-> ceph-devel-0.20.2-1.fc12.x86_64
-> 
-> $ LANG=C make
->   CC    block/rbd.o
-> block/rbd.c: In function 'rbd_register_image':
-> block/rbd.c:191: error: 'CEPH_OSD_TMAP_SET' undeclared (first use in
-> this function)
-> block/rbd.c:191: error: (Each undeclared identifier is reported only once
-> block/rbd.c:191: error: for each function it appears in.)
-> cc1: warnings being treated as errors
-> block/rbd.c: In function 'rbd_set_snapc':
-> block/rbd.c:468: error: implicit declaration of function
-> 'rados_set_snap_context'
-> block/rbd.c:468: error: nested extern declaration of
-> 'rados_set_snap_context'
-> block/rbd.c: In function 'rbd_snap_create':
-> block/rbd.c:844: error: implicit declaration of function
-> 'rados_selfmanaged_snap_create'
-> block/rbd.c:844: error: nested extern declaration of
-> 'rados_selfmanaged_snap_create'
-> make: *** [block/rbd.o] Error 1
-> 
+Hi all,
 
-Right. The CEPH_OSD_TMAP_SET can be fixed and in theory we can get it
-compiled without snapshots, but we're not sure that it is really a good
-idea at this point. The following patch disables rbd when librados is
-too old.
+On Mon, 2010-11-29 at 11:24 -0800, Sage Weil wrote:
+> On Mon, 22 Nov 2010, Clint Byrum wrote:
+> > Yes we'd much rather have a single package that works in both Debian and
+> > Ubuntu.
+ That would be an important goal. Feel free to contact me if you need
+any changes to be more suitable for Ubuntu.
 
-Thanks,
-Yehuda
+> > If you know exactly what package is being looked at for upload into
+> > Debian, I can at least start with that so that the merge when it finally
+> > does get uploaded is much simpler.
+ You can get the modified package from my site[1]. I don't say it's
+ready, but fixes most of the problems that Sage made.
 
---
-From: Yehuda Sadeh <yehuda@hq.newdream.net>
-Date: Mon, 29 Nov 2010 10:38:41 -0800
-Subject: [PATCH 1/1] rbd: disable rbd in configure if librados is too old
+> As I understand it, the current issues are:
+>  - whitespace in debian/rules
+ Yes, there was some extra whitespace, an extra and missing blank lines
+in debian/rules . It's cosmetic only of course.
 
-This checks for the existence of the certain function and other
-definition.
+>  - something with the .install files and installing into the source tree 
+> that I didn't understand.. can you clarify Laszlo?
+ Sure. The biggest problem was that you installed everything to
+$(CURDIR) , which is the source tree. Then you used dh_install to move
+out the files from there. make install was a bit nonsense this way, as
+the compiled binaries was already in the source tree; there was no need
+to install them the same place. I've changed it to the more common
+$(DESTDIR) which is debian/tmp/ . This way you can use --list-missing or
+the more aggressive --fail-missing to dh_install to see if you miss
+files.
+Yes, you do missed files. One is the radosacl binary, that I put into
+the radosgw package. You neither installed
+usr/share/ceph_tool/gui_resources/ (SVG and glade files) that went into
+the ceph package.
+Your cleaning process missed several points like the missing removal of
+src/.deps/ and some generated files. There are more you can find.
 
-Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
----
- configure |   27 ++++++++++++++++++++++++---
- 1 files changed, 24 insertions(+), 3 deletions(-)
+I've changed the way debug parts of the packages are handled. It may
+sound harsh and so I'm open to revert that back to your way.
 
-diff --git a/configure b/configure
-index 5d8f620..18ae07c 100755
---- a/configure
-+++ b/configure
-@@ -1770,15 +1770,36 @@ int main(void) { rados_initialize(0, NULL); return 0; }
- EOF
-   rbd_libs="-lrados -lcrypto"
-   if compile_prog "" "$rbd_libs" ; then
--    rbd=yes
--    libs_tools="$rbd_libs $libs_tools"
--    libs_softmmu="$rbd_libs $libs_softmmu"
-+    librados_too_old=no
-+    cat > $TMPC <<EOF
-+#include <stdio.h>
-+#include <rados/librados.h>
-+#ifndef CEPH_OSD_TMAP_SET
-+#error missing CEPH_OSD_TMAP_SET
-+#endif
-+int main(void) {
-+    int (*func)(const rados_pool_t pool, uint64_t *snapid) = rados_selfmanaged_snap_create;
-+    rados_initialize(0, NULL);
-+    return 0;
-+}
-+EOF
-+    if compile_prog "" "$rbd_libs" ; then
-+      rbd=yes
-+      libs_tools="$rbd_libs $libs_tools"
-+      libs_softmmu="$rbd_libs $libs_softmmu"
-+    else
-+      rbd=no
-+      librados_too_old=yes
-+    fi
-   else
-     if test "$rbd" = "yes" ; then
-       feature_not_found "rados block device"
-     fi
-     rbd=no
-   fi
-+  if test "$librados_too_old" = "yes" ; then
-+    echo "-> Your librados version is too old - upgrade needed to have rbd support"
-+  fi
- fi
- 
- ##########################################
--- 
-1.5.6.5
+Less important mistakes that debian/changes is for packaging changes,
+for upstream changes you can use ChangeLog ; it can be installed with
+dh_installdocs .
+Also implicitly noted that this is a first generation package (not
+converted to quilt as Sage said it should build on Lenny as well).
 
+Sage: may you let me handle the packaging for Debian and Ubuntu? So you
+can find more time working on ceph itself as it has some inconsistency
+as well. Binaries without manpages like cephfs and radosacl ; somewhere
+the manpage contains an example which is not a valid command (at least
+in v0.23 , it passed midnight and now I can't remember which one is it).
 
+Are you sure that ceph should depend on hdparm? What if my box has SCSI,
+SAS or other disk that isn't [sP]ATA? Yes, there's sdparm, but do you
+use it directly from ceph? Should it be a recommendation instead?
+Also uniformed *.install files, don't start them with a slash.
+Added a watch file and specific fields to debian/control .
 
+If others agree, I'll upload it in some days. It'll sit into the NEW
+queue and may take a while to be officially accepted.
+
+Regards,
+Laszlo/GCS
+[1] dget http://www.routers.hu/gcs/ceph_0.23.1-1.dsc
