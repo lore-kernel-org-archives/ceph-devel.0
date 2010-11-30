@@ -1,57 +1,69 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] Expose Ceph data location information to Hadoop
-Date: Tue, 30 Nov 2010 10:10:37 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1011300957080.30759@cobra.newdream.net>
-References: <EEFC0BFD-BF42-4E7E-A905-AB7F53ECE77A@cs.ucsc.edu>
- <E76027BB-6C82-45D7-813A-E5B850FB5E09@cs.ucsc.edu>
- <666B47ED-BD76-4344-9728-C95165BD8483@cs.ucsc.edu>
+Subject: Re: Status of ceph ITP?
+Date: Tue, 30 Nov 2010 10:21:00 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1011300922530.30759@cobra.newdream.net>
+References: <1290365977.9821.3.camel@clint-MacBookPro>
+ <Pine.LNX.4.64.1011211521510.17131@cobra.newdream.net>
+ <1290436452.9821.5.camel@clint-MacBookPro> <Pine.LNX.4.64.1011291120510.4337@cobra.newdream.net>
+ <1291075213.14018.101.camel@julia.gcs.org.hu>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36144 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:43612 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754162Ab0K3SGC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Nov 2010 13:06:02 -0500
-In-Reply-To: <666B47ED-BD76-4344-9728-C95165BD8483@cs.ucsc.edu>
+	with ESMTP id S1755592Ab0K3SQZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Nov 2010 13:16:25 -0500
+In-Reply-To: <1291075213.14018.101.camel@julia.gcs.org.hu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: =?utf-8?Q?Alex=E2=80=8E_Nelson?= <ajnelson@cs.ucsc.edu>, Noah Watkins <jayhawk@soe.ucsc.edu>, ceph-devel@vger.kernel.org, Joe Buck <buck@soe.ucsc.edu>, Carlos Maltzahn <carlosm@soe.ucsc.edu>
+To: Laszlo Boszormenyi <gcs@debian.hu>
+Cc: Clint Byrum <clint@ubuntu.com>, asheesh@asheesh.org, 506040@bugs.debian.org, noel@debian.org, ceph-devel@vger.kernel.org
 
-On Tue, 30 Nov 2010, Noah Watkins wrote:
-> > After writing this code, I do like seeing the words "scrap" and "JNI" 
-> > so close in the same sentence.  That's more up to the Hadoop 
-> > community, though; I don't know how well-accepted JNA is in their code 
-> > base.
-> One solution might be a lazily populated sysfs interface for retrieving 
-> object information for a given file, circumventing the problem Java has 
-> calling IOCTLs. But that's another conversation.
+Hey Laszlo,
 
-Yeah, not pretty.  A shared library wouldn't really help here either, 
-right?  And a command-line tool means additional overhead.  JNI (or 
-equivalent) calling an ioctl seems like the most appropriate tool.
+These changes are great!  I incorporated all of your changes into 
+ceph.git, and also fixed up the ceph.spec.in to include the missed gui 
+files.
 
-> > The ioctl struct ceph_ioctl_dataloc already returns the primary copy's 
-> > object offset for an input file offset, though I think it would be a 
-> > little more useful if it included replica offsets.
-> I can submit a patch for this. Sage, I remember you mentioning that 
-> reading from replicas might pose (scalability?) problems. Any thoughts 
-> on this?
+> I've changed the way debug parts of the packages are handled. It may
+> sound harsh and so I'm open to revert that back to your way.
 
-There are two things.  First, we'd need a DATALOC_V2 ioctl that would 
-return locations for all replicas of the object.  Is Hadoop smart about 
-scheduling jobs on the best replica?
+Yay, the old way was definitely a hack.
+ 
+> Sage: may you let me handle the packaging for Debian and Ubuntu? So you
+> can find more time working on ceph itself as it has some inconsistency
+> as well. Binaries without manpages like cephfs and radosacl ; somewhere
+> the manpage contains an example which is not a valid command (at least
+> in v0.23 , it passed midnight and now I can't remember which one is it).
 
-The second part is be able to read from them.  In general, sending any/all 
-reads to a random replica does bad things to your cache.  In principle, 
-it's possible, though, at least when a file is only opened for read (at 
-that point all replicas are known consistent on disk).  Someone suggested 
-on IRC a while back that in such a case we have a check to read from a 
-non-primary replica if that replica happens to be on the local node.  That 
-sort of optimization would work in this case.  A number of changes in the 
-OSD and client will be needed, but nothing too invasive (I think!).
+Whatever you think would work best.  I would like to keep the debian/ 
+files in some form or another (although whether they live in ceph.git is 
+an open question) since I build packages for sid, squeeze, and lenny for 
+the ceph.newdream.net site, and would like to do so immediately when a 
+release is made.  But if you can handle the packaging changes and 
+uploading to debian that would (continue to be) helpful.  Or if the 
+packaging stuff is managed by you separately, but still available 
+somewhere for me pull and build my packages against.  What do you suggest?
 
-Before going to the trouble, though, I want to make sure we'll really 
-benefit from all of that...
+> Are you sure that ceph should depend on hdparm? What if my box has SCSI,
+> SAS or other disk that isn't [sP]ATA? Yes, there's sdparm, but do you
+> use it directly from ceph? Should it be a recommendation instead?
 
+Currently it's only used by os/FileJournal.cc to check for a journal on a 
+block device with write caching off.  This is only a problem for kernels 
+prior to 2.6.33 (which unfortunately includes squeeze!), so I'm inclined 
+to keep it for now.  In any case, though, the code fails gracefully if 
+it's not found, so a recommendation would work.  And yeah, it doesn't try 
+sdparm if hdparm doesn't do the trick.  But it catches most administrator 
+error as is, which is the goal.
+
+> If others agree, I'll upload it in some days. It'll sit into the NEW
+> queue and may take a while to be officially accepted.
+
+Great!  There are a handful of bug fixes I'd like to roll into v0.23.2 
+first, if it isn't too much trouble.  I can do that today.  
+
+Clint, do you see any remaining issues I should fix first?
+
+Thanks!
 sage
