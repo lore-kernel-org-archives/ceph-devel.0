@@ -1,94 +1,85 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Performence test on ceph v0.23 + EXT4 and Btrfs
-Date: Wed, 1 Dec 2010 22:10:15 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1012012209140.606@cobra.newdream.net>
-References: <1291001135.1872.106.camel@cephhost>
- <AANLkTi=E=pjvixkronpD-ij0CxjFBVauN5bBrsbT8nqW@mail.gmail.com>
- <1291085741.1809.25.camel@cephhost> <AANLkTikz_quAcoYL8VUoA4i87WczKCh0yM2TsCG6dQEz@mail.gmail.com>
- <1291097975.1809.54.camel@cephhost> <AANLkTinkgBwzfESaQNs0VkLn+LGbd8wEccy6LNDSFM2Z@mail.gmail.com>
- <1291167344.1809.60.camel@cephhost> <1291186785.1809.91.camel@cephhost>
- <AANLkTinyWUoppSj9QjL+4qBUpKG0Nk5KJZuGN3rv0Vhe@mail.gmail.com>
- <1291253884.1757.10.camel@cephhost> <AANLkTikeuWA-MpDAgC3UEx=QsoAMHLzJem87P+X6dWRp@mail.gmail.com>
- <1291260179.1757.51.camel@cephhost>
+From: Clint Byrum <clint@ubuntu.com>
+Subject: Re: Status of ceph ITP?
+Date: Wed, 01 Dec 2010 23:19:17 -0800
+Message-ID: <1291274357.20409.171.camel@clint-MacBookPro>
+References: <1290365977.9821.3.camel@clint-MacBookPro>
+	 <Pine.LNX.4.64.1011211521510.17131@cobra.newdream.net>
+	 <1290436452.9821.5.camel@clint-MacBookPro>
+	 <Pine.LNX.4.64.1011291120510.4337@cobra.newdream.net>
+	 <1291075213.14018.101.camel@julia.gcs.org.hu>
+	 <Pine.LNX.4.64.1011300922530.30759@cobra.newdream.net>
+	 <1291221518.14018.564.camel@julia.gcs.org.hu>
+	 <Pine.LNX.4.64.1012011010570.29814@cobra.newdream.net>
+	 <1291249852.14018.611.camel@julia.gcs.org.hu>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1992840723-1291270215=:606"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51668 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756091Ab0LBGFg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 01:05:36 -0500
-In-Reply-To: <1291260179.1757.51.camel@cephhost>
+Received: from xenclint.srihosting.com ([65.98.207.160]:58231 "EHLO
+	xen.spamaps.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757228Ab0LBHTT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 02:19:19 -0500
+In-Reply-To: <1291249852.14018.611.camel@julia.gcs.org.hu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Wu <cpwu@tnsoft.com.cn>
-Cc: Gregory Farnum <gregf@hq.newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andrew Lv <mllv@tnsoft.com.cn>
+To: Laszlo Boszormenyi <gcs@debian.hu>
+Cc: Sage Weil <sage@newdream.net>, asheesh@asheesh.org, 506040@bugs.debian.org, noel@debian.org, ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Thu, 2010-12-02 at 01:30 +0100, Laszlo Boszormenyi wrote:
 
---557981400-1992840723-1291270215=:606
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On Thu, 2 Dec 2010, Jeff Wu wrote:
-> =FF=FF 2010-12-02=FF=FF=FF=FF 10:35 +0800=FF=FFGregory Farnum=FF=FF=FF=FF=
-=FF=FF
-> > On Wed, Dec 1, 2010 at 5:38 PM, Jeff Wu <cpwu@tnsoft.com.cn> wrote:
-> > >> > and i also detect a issue ,take the following steps:
-> > >> >
-> > >> > $. mckephfs -c ceph.conf -v --mkbtrfs -a
-> > >> > $  init-ceph - ceph.conf --btrfs -v -a start
-> > >> > then execute:
-> > >> > $  init-ceph - ceph.conf --btrfs -v -a stop
-> > >> >
-> > >> > this command can't stop OSD0 and OSD1 cosd process:
-> > >> > OSD0:
-> > >> > /usr/local/bin/cosd -i 0 -c ceph.conf
-> > >> > OSD1:
-> > >> > /usr/local/bin/cosd -i 1 -c ceph.conf
-> > >> Not sure I understand what you're doing here. Also, it looks like
-> > >> you've got a malformed command there -- you don't specify the "-c"
-> > >> option, just the nonexistent "-" option. ;)
-> > >
-> > > Oh,Sorry, i mean that , if i don't create folder "/var/run/ceph" at O=
-SD
-> > > hosts manually. Execute the command : "$init-ceph -c ceph.conf --btrf=
+> I'm not an ftp-master, but your package maybe rejected[2] for two
+> reasons. I think only debian/copyright is not enough, all source file=
 s
-> > > -v -a stop " ,which can't auto-kill OSD host cosd process, like this =
-:
-> > > OSD0 host:
-> > > $ ps -ef | grep cosd
-> > > root     13987     1  0 Dec01 ?        00:02:55 /usr/local/bin/cosd -=
-i 0
-> > > -c ceph.conf
-> > > OSD1 host:
-> > > $ ps -ef | grep cosd
-> > > root     14028     1  0 Dec01 ?        00:02:53 /usr/local/bin/cosd -=
-i 1
-> > > -c ceph.conf
-> > >
-> > > I have to execute "kill -9 13987 " and "kill -9 14028" to kill cosd
-> > > process manually, or ,next time , it will fail to execute "$ init-cep=
-h
-> > > -c ceph.conf --btrfs -v -a start " command.
-> > Ah. I think that /var/run/ceph is where init-ceph stores the PIDs. It
-> > ought to be created automatically; if it's not we should fix that.
-> > What version of Ceph are you running, and where from? I'd imagine it's
-> > being packaged wrong or something.
->=20
-> Hi ,
-> i download ceph 0.23 from=20
-> http://ceph.newdream.net/download/ceph-0.23.tar.gz
->=20
-> So , maybe , should i add=20
-> "
-> [global]
->        pid file =3D /var/run/ceph/$name.pid
+> should have a comment header about their license in short. You have i=
+t
 
-That's the default, so no...  I think the problem is that 'make install'=20
-does 'mkdir -p /var/run/ceph'.  The .deb and .rpm create the dir, but an=20
-install from source does not.  There is probably a similar problem with=20
-the osd class tmp dir.
+I don't see where this is a hard requirement in the reject faq.
+Essentially, as long as the files don't have a license that conflicts
+with COPYING, then there's no need for a license header. I DO think its
+a good idea to have a Copyright header in every file, but thats also
+probably ok to have in an AUTHORS file or something like that.
 
-sage
---557981400-1992840723-1291270215=:606--
+> in cephfs.cc , cfuse.cc , etc; but missing in barclass.cc , cconf.cc =
+,
+> cls_acl.cc and in others. Second is that you link with OpenSSL when y=
+our
+> license is (L)GPL. See their FAQ[3] and the fact that I can't find an=
+y
+> upstream license file permitting that nor it's mentioned in
+> debian/copyright . Also you may see the debian/copyright of my packag=
+es,
+> like neon27[4]: it has a pointer to the full license file
+> under /usr/share/common-licenses/ .
+> On the other hand, it went into Ubuntu without any problems. Clint,
+> No=C3=A8l? Feel free to post comment on what needs to be done with ce=
+ph
+> packaging to be accepted on the first round.
+>=20
+
+Laszlo, I did a thorough review of the licensing before working to get
+ceph uploaded to Ubuntu, but I wasn't aware of the incompatibility
+between the GPL/LGPL and OpenSSL. This page details it pretty well:
+
+http://people.gnome.org/~markmc/openssl-and-the-gpl.html
+
+Sage, I'd guess that you can work on getting an OK from the other
+authors on adding an exception. I've opened a bug against CEPH in ubunt=
+u
+here:
+
+https://bugs.launchpad.net/ubuntu/+source/ceph/+bug/684011
+
+Sage, if you can please update that bug's status when you have secured
+an exception, that would be ideal, as I'm going to mark it as Critical,
+so we'll probably have to drop ceph from Natty if there's no resolution
+before the release, and consider dropping it from Maverick as well.
+
+Also Sage, if the other authors (or you) are not comfortable with the
+OpenSSL advertising clause, there's always GNUTLS which exists in large
+part to address this sort of thing.
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
