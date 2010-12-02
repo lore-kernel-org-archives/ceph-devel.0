@@ -1,74 +1,193 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: questions about pg membership
-Date: Thu, 2 Dec 2010 11:37:37 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1012021130260.1982@cobra.newdream.net>
-References: <AANLkTin8d5xMoqvjt8YcS6NrCTEB=-L2Tyx4_96TckZd@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: [PATCH] msgr: Correctly handle half-open connections.
+Date: Thu,  2 Dec 2010 12:41:35 -0700
+Message-ID: <1291318895-11879-1-git-send-email-jaschut@sandia.gov>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41807 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757709Ab0LBTc4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 14:32:56 -0500
-In-Reply-To: <AANLkTin8d5xMoqvjt8YcS6NrCTEB=-L2Tyx4_96TckZd@mail.gmail.com>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:51988 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753792Ab0LBTlr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 14:41:47 -0500
+Received: from sentry.sandia.gov (sentry.sandia.gov [132.175.109.20])
+	by sentry-three.sandia.gov (Postfix) with ESMTP id 1C4AA478DA3
+	for <ceph-devel@vger.kernel.org>; Thu,  2 Dec 2010 12:41:42 -0700 (MST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry_c_chang@tcloudcomputing.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Jim Schutt <jaschut@sandia.gov>
 
-On Thu, 2 Dec 2010, Henry C Chang wrote:
-> Hi Sage,
-> 
-> I have some questions about the pg membership.
-> 
-> Suppose I have a ceph cluster of 3 osds (osd0, osd1, osd2) and the
-> replication number is 2. I observed that if osd2 failed and became
-> down and out, one pg's acting osds would changed from [0,2] to [1,0].
-> 
-> Does it mean that the primary of the pg changed from osd0 to osd1?
+If poll() says a socket is ready for reading, but zero bytes
+are read, that means that the peer has sent a FIN.  Handle that.
 
-Yeah.  Normally that shouldn't happen, though.  If you know the osdmap 
-epochs during which you saw those two mappings, can you send the map files 
-and the pgid for me to look at?  You can dump a specific epoch with
+One way the incorrect handling was manifesting is as follows:
 
- ceph osd dump <epoch> -o /tmp/foo
+Under a heavy write load, clients log many messages like this:
 
-and calculate a pg mapping using a specific map file with
+[19021.523192] libceph:  tid 876 timed out on osd6, will reset osd
+[19021.523328] libceph:  tid 866 timed out on osd10, will reset osd
+[19081.616032] libceph:  tid 841 timed out on osd0, will reset osd
+[19081.616121] libceph:  tid 826 timed out on osd2, will reset osd
+[19081.616176] libceph:  tid 806 timed out on osd3, will reset osd
+[19081.616226] libceph:  tid 875 timed out on osd9, will reset osd
+[19081.616275] libceph:  tid 834 timed out on osd12, will reset osd
+[19081.616326] libceph:  tid 874 timed out on osd10, will reset osd
 
- osdmaptool --test-map-gp 1.123 /tmp/foo
+After the clients are done writing and the file system should
+be quiet, osd hosts have a high load with many active threads:
 
-You can also see the current pg mapping with
+$ ps u -C cosd
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root      1383  162 11.5 1456248 943224 ?      Ssl  11:31 406:59 /usr/bin/cosd -i 7 -c /etc/ceph/ceph.conf
 
- ceph pg map 1.123
+$ for p in `ps -C cosd -o pid --no-headers`; do grep -nH State /proc/$p/task/*/status | grep -v sleep; done
+/proc/1383/task/10702/status:2:State:   R (running)
+/proc/1383/task/10710/status:2:State:   R (running)
+/proc/1383/task/10717/status:2:State:   R (running)
+/proc/1383/task/11396/status:2:State:   R (running)
+/proc/1383/task/27111/status:2:State:   R (running)
+/proc/1383/task/27117/status:2:State:   R (running)
+/proc/1383/task/27162/status:2:State:   R (running)
+/proc/1383/task/27694/status:2:State:   R (running)
+/proc/1383/task/27704/status:2:State:   R (running)
+/proc/1383/task/27728/status:2:State:   R (running)
 
-but unfortunately (iirc) that command doesn't let you specify an older 
-epoch (it probably should!).
+With this fix applied, a heavy load still causes many client
+resets of osds, but no runaway threads result.
 
-> If
-> the client wants to access the object in the pg at that time, would
-> the client's request be blocked until osd1 has acquired the missing
-> object from osd0?
-> 
-> If so, is there any way (e.g. a crush rule?) to choose osd0 as the new
-> primary since it was the replica and had the object already? Then, it
-> should be able to shorten the time the client has to wait.
+Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+---
+ src/msg/SimpleMessenger.cc |    2 +-
+ src/msg/tcp.cc             |   52 +++++++++++++++++++++++++++-----------------
+ src/msg/tcp.h              |    2 +-
+ 3 files changed, 34 insertions(+), 22 deletions(-)
 
-The client's request is blocked in a couple of ways.  First, when the pg 
-mapping changes, the client resends the request to the (same or different) 
-primary osd.  This is primarily for simplicity; it used to be smarter 
-about not resending if the primary didn't change but it was complicating 
-the code at a time when we were trying to make things really stable.  That 
-can be fixed later with a protocol feature bit.
+diff --git a/src/msg/SimpleMessenger.cc b/src/msg/SimpleMessenger.cc
+index 97ed4c3..0c9a0bd 100644
+--- a/src/msg/SimpleMessenger.cc
++++ b/src/msg/SimpleMessenger.cc
+@@ -1875,7 +1875,7 @@ int SimpleMessenger::Pipe::read_message(Message **pm)
+ 	
+     while (left > 0) {
+       // wait for data
+-      if (tcp_wait(sd, messenger->timeout) < 0)
++      if (tcp_read_wait(sd, messenger->timeout) < 0)
+ 	goto out_dethrottle;
+ 
+       // get a buffer
+diff --git a/src/msg/tcp.cc b/src/msg/tcp.cc
+index c1be756..71d85f1 100644
+--- a/src/msg/tcp.cc
++++ b/src/msg/tcp.cc
+@@ -13,9 +13,6 @@ int tcp_read(int sd, char *buf, int len, int timeout)
+   if (sd < 0)
+     return -1;
+ 
+-  struct pollfd pfd;
+-  pfd.fd = sd;
+-  pfd.events = POLLIN | POLLHUP | POLLRDHUP | POLLNVAL | POLLERR;
+   while (len > 0) {
+ 
+     if (g_conf.ms_inject_socket_failures && sd >= 0) {
+@@ -25,24 +22,14 @@ int tcp_read(int sd, char *buf, int len, int timeout)
+       }
+     }
+ 
+-    if (poll(&pfd, 1, timeout) <= 0)
++    if (tcp_read_wait(sd, timeout) < 0)
+       return -1;
+ 
+-    if (!(pfd.revents & POLLIN))
+-      return -1;
++    int got = tcp_read_nonblocking(sd, buf, len);
+ 
+-    /*
+-     * although we turn on the MSG_DONTWAIT flag, we don't expect
+-     * receivng an EAGAIN, as we polled on the socket, so there
+-     * should be data waiting for us.
+-     */
+-    int got = ::recv( sd, buf, len, MSG_DONTWAIT );
+-    if (got <= 0) {
+-      //char buf[100];
+-      //generic_dout(0) << "tcp_read socket " << sd << " returned " << got
+-      //<< " errno " << errno << " " << strerror_r(errno, buf, sizeof(buf)) << dendl;
++    if (got < 0)
+       return -1;
+-    }
++
+     len -= got;
+     buf += got;
+     //generic_dout(DBL) << "tcp_read got " << got << ", " << len << " left" << dendl;
+@@ -50,26 +37,51 @@ int tcp_read(int sd, char *buf, int len, int timeout)
+   return len;
+ }
+ 
+-int tcp_wait(int sd, int timeout) 
++int tcp_read_wait(int sd, int timeout) 
+ {
+   if (sd < 0)
+     return -1;
+   struct pollfd pfd;
+   pfd.fd = sd;
+-  pfd.events = POLLIN | POLLHUP | POLLRDHUP | POLLNVAL | POLLERR;
++  pfd.events = POLLIN | POLLRDHUP;
+ 
+   if (poll(&pfd, 1, timeout) <= 0)
+     return -1;
+ 
++  if (pfd.revents & (POLLERR | POLLHUP | POLLRDHUP | POLLNVAL))
++    return -1;
++
+   if (!(pfd.revents & POLLIN))
+     return -1;
+ 
+   return 0;
+ }
+ 
++/* This function can only be called if poll/select says there is
++ * data available.  Otherwise we cannot properly interpret a
++ * read of 0 bytes.
++ */
+ int tcp_read_nonblocking(int sd, char *buf, int len)
+ {
+-  return ::recv(sd, buf, len, MSG_DONTWAIT);
++again:
++  int got = ::recv( sd, buf, len, MSG_DONTWAIT );
++  if (got < 0) {
++    if (errno == EAGAIN || errno == EINTR) {
++      goto again;
++    } else {
++      char buf[100];
++      generic_dout(10) << "tcp_read_nonblocking socket " << sd << " returned "
++        << got << " errno " << errno << " " << strerror_r(errno, buf, sizeof(buf)) << dendl;
++      return -1;
++    }
++  } else if (got == 0) {
++    /* poll() said there was data, but we didn't read any - peer
++     * sent a FIN.  Maybe POLLRDHUP signals this, but this is
++     * standard socket behavior as documented by Stevens.
++     */
++    return -1;
++  }
++  return got;
+ }
+ 
+ int tcp_write(int sd, const char *buf, int len)
+diff --git a/src/msg/tcp.h b/src/msg/tcp.h
+index 31ae967..bccdbda 100644
+--- a/src/msg/tcp.h
++++ b/src/msg/tcp.h
+@@ -26,7 +26,7 @@ inline ostream& operator<<(ostream& out, const sockaddr_storage &ss)
+ }
+ 
+ extern int tcp_read(int sd, char *buf, int len, int timeout=-1);
+-extern int tcp_wait(int sd, int timeout);
++extern int tcp_read_wait(int sd, int timeout);
+ extern int tcp_read_nonblocking(int sd, char *buf, int len);
+ extern int tcp_write(int sd, const char *buf, int len);
+ 
+-- 
+1.6.6
 
-On reads, the primary has to have the object in question.  On writes, all 
-replicas need to have the object before modifying it.  In those cases, the 
-request waits on the primary while recovery on that happens (immediately).  
-There's not much way around that, unfortunately, although the write case 
-might possibly be optimized some as it currently waits for things to flush 
-to the fs and that maybe avoidable in certain cases.
-
-The primary changing nodes is more of a concern, though; the rest is small 
-optimizations.  Let's figure out why the mapping is changing like that!
-
-sage
 
