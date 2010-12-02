@@ -1,93 +1,154 @@
-From: Laszlo Boszormenyi <gcs@debian.hu>
-Subject: Re: Status of ceph ITP?
-Date: Thu, 02 Dec 2010 01:30:51 +0100
-Message-ID: <1291249852.14018.611.camel@julia.gcs.org.hu>
-References: <1290365977.9821.3.camel@clint-MacBookPro>
-	 <Pine.LNX.4.64.1011211521510.17131@cobra.newdream.net>
-	 <1290436452.9821.5.camel@clint-MacBookPro>
-	 <Pine.LNX.4.64.1011291120510.4337@cobra.newdream.net>
-	 <1291075213.14018.101.camel@julia.gcs.org.hu>
-	 <Pine.LNX.4.64.1011300922530.30759@cobra.newdream.net>
-	 <1291221518.14018.564.camel@julia.gcs.org.hu>
-	 <Pine.LNX.4.64.1012011010570.29814@cobra.newdream.net>
+From: Jeff Wu <cpwu@tnsoft.com.cn>
+Subject: Re: Performence test on ceph v0.23 + EXT4 and Btrfs
+Date: Thu, 2 Dec 2010 09:38:04 +0800
+Message-ID: <1291253884.1757.10.camel@cephhost>
+References: <1291001135.1872.106.camel@cephhost>
+	 <AANLkTi=E=pjvixkronpD-ij0CxjFBVauN5bBrsbT8nqW@mail.gmail.com>
+	 <1291085741.1809.25.camel@cephhost>
+	 <AANLkTikz_quAcoYL8VUoA4i87WczKCh0yM2TsCG6dQEz@mail.gmail.com>
+	 <1291097975.1809.54.camel@cephhost>
+	 <AANLkTinkgBwzfESaQNs0VkLn+LGbd8wEccy6LNDSFM2Z@mail.gmail.com>
+	 <1291167344.1809.60.camel@cephhost>	<1291186785.1809.91.camel@cephhost>
+	 <AANLkTinyWUoppSj9QjL+4qBUpKG0Nk5KJZuGN3rv0Vhe@mail.gmail.com>
+Reply-To: <cpwu@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature"; boundary="=-w26Vo0yGFtxoSta2UzTq"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.routers.hu ([212.40.96.82]:35258 "EHLO mail.routers.hu"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753656Ab0LBAbu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 1 Dec 2010 19:31:50 -0500
-In-Reply-To: <Pine.LNX.4.64.1012011010570.29814@cobra.newdream.net>
+Received: from [210.22.136.227] ([210.22.136.227]:58015 "EHLO
+	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756695Ab0LBBg5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Dec 2010 20:36:57 -0500
+In-Reply-To: <AANLkTinyWUoppSj9QjL+4qBUpKG0Nk5KJZuGN3rv0Vhe@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Clint Byrum <clint@ubuntu.com>, asheesh@asheesh.org, 506040@bugs.debian.org, noel@debian.org, ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregf@hq.newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andrew Lv <mllv@tnsoft.com.cn>
 
 
---=-w26Vo0yGFtxoSta2UzTq
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: quoted-printable
 
-Hi Sage,
+=E5=9C=A8 2010-12-02=E5=9B=9B=E7=9A=84 00:05 +0800=EF=BC=8CGregory Farn=
+um=E5=86=99=E9=81=93=EF=BC=9A
+> On Tue, Nov 30, 2010 at 10:57 PM, Jeff Wu <cpwu@tnsoft.com.cn> wrote:
+> > Hi ,greg,
+> >
+> > With your suggestions, i add the journal config:
+> > "
+> > osd data =3D /opt/ceph/data/osd$id
+> > osd journal =3D /home/transoft/data/osd$id/journal
+> > filestore journal writeahead =3D true
+> > osd journal size =3D 10000
+> > "
+> > to ceph.conf.  the  detail ceph.conf attached below.
+> >
+> > then , run six times for the commad: "$ sudo ceph osd tell 0/1 benc=
+h" ,get
+> > the results:
+> >
+> >
+> > $ sudo ceph -w
+> >
+> > osd0 172.16.10.42:6800/17347 1 : [INF] bench: wrote 1024 MB in bloc=
+ks of
+> > 4096 KB in 29.818194 sec at 28201 KB/sec
+> > osd0 172.16.10.42:6800/17347 2 : [INF] bench: wrote 1024 MB in bloc=
+ks of
+> > 4096 KB in 30.013058 sec at 34801 KB/sec
+> > osd0 172.16.10.42:6800/17347 3 : [INF] bench: wrote 1024 MB in bloc=
+ks of
+> > 4096 KB in 30.463511 sec at 30274 KB/sec
+> >
+> > osd1 172.16.10.65:6800/4845 1 : [INF] bench: wrote 1024 MB in block=
+s of 4096
+> > KB in 165.067603 sec at 6329 KB/sec
+> > osd1 172.16.10.65:6800/4845 2 : [INF] bench: wrote 1024 MB in block=
+s of 4096
+> > KB in 181.034333 sec at 5782 KB/sec
+> > osd1 172.16.10.65:6800/4845 3 : [INF] bench: wrote 1024 MB in block=
+s of 4096
+> > KB in 196.055812 sec at 5334 KB/sec
+> >
+> > and i also use "dd" to test raw drive, get the logs:
+> >
+> > 1. OSD0, mkfs.btrfs format /opt
+> >
+> > $ sudo dd if=3D/dev/zero of=3D/opt/dd.img bs=3D2M count=3D1024
+> > 1024+0 records in
+> > 1024+0 records out
+> > 2147483648 bytes transfered in 21.4497 secs(100 MB/sec)
+> >
+> > 2. OSD1 ,mkfs. btrfs format /opt
+> >
+> > ~$ sudo dd if=3D/dev/zero of=3D/opt/dd.img bs=3D2M count=3D1024
+> > 1024+0 records in
+> > 1024+0 records out
+> > 2147483648 bytes transfered in 48.2037 secs(44.6 MB/sec)
+> >
+> > with these logs, OSD1 disk speed might limit the  test performance.
+> Yes, it looks to me like your OSD1 disk isn't working properly.
+> Switching it from one streaming write to two streaming writes
+> shouldn't reduce it to 20% of its original performance (~45MB/s to
+> 5MB/s*2). The same change in tasks doesn't impact OSD0's disk at all.
+>=20
+Hi greg, thank you for your detail comments.
 
-On Wed, 2010-12-01 at 10:15 -0800, Sage Weil wrote:
-> Can you take a look at the 'testing' branch in git commit 5bdae2af? =20
-> That's how I've been doing releases, more or less.  Assuming packaging=
-=20
-> issues are sorted out prior to that point, that's all that should be=20
-> needed, right?=20
- I think I've noted that cephfs and radosacl are without manpages.
-Please write one for them. Do you have an upstream changelog somewhere?
-ChangeLog is still empty. Really minor that I write 'new upstream
-release' to debian/changelog . Otherwise it's OK for uploading.
 
-> I can also set you up with push access to update the=20
-> debian/ stuff at your leisure without sending patches over the list.
- Would be easier with push rights for debian/ if you trust me. I've my
-GnuPG key that you can check with any local or nearby Debian
-Developer(s) that I'm in the web of trust.
+> > and i also detect a issue ,take the following steps:
+> >
+> > $. mckephfs -c ceph.conf -v --mkbtrfs -a
+> > $  init-ceph - ceph.conf --btrfs -v -a start
+> > then execute:
+> > $  init-ceph - ceph.conf --btrfs -v -a stop
+> >
+> > this command can't stop OSD0 and OSD1 cosd process:
+> > OSD0:
+> > /usr/local/bin/cosd -i 0 -c ceph.conf
+> > OSD1:
+> > /usr/local/bin/cosd -i 1 -c ceph.conf
+> Not sure I understand what you're doing here. Also, it looks like
+> you've got a malformed command there -- you don't specify the "-c"
+> option, just the nonexistent "-" option. ;)
 
-> (BTW, the v0.23.2 bugfix release is mostly pointless as v0.24 is just a=
-=20
-> couple days away anyway.  Just for the sake of illustration...)
- There's no chance that ceph will be included in Squeeze and the next
-release of Ubuntu is several months away. You have time and it's your
-decision when should I first upload ceph. Please note that Debian is in
-freeze ATM, it may need even two weeks to be accepted to the archive[1];
-and even if it's in the NEW queue, I can upload new versions into it.
-I'm not an ftp-master, but your package maybe rejected[2] for two
-reasons. I think only debian/copyright is not enough, all source files
-should have a comment header about their license in short. You have it
-in cephfs.cc , cfuse.cc , etc; but missing in barclass.cc , cconf.cc ,
-cls_acl.cc and in others. Second is that you link with OpenSSL when your
-license is (L)GPL. See their FAQ[3] and the fact that I can't find any
-upstream license file permitting that nor it's mentioned in
-debian/copyright . Also you may see the debian/copyright of my packages,
-like neon27[4]: it has a pointer to the full license file
-under /usr/share/common-licenses/ .
-On the other hand, it went into Ubuntu without any problems. Clint,
-No=E8l? Feel free to post comment on what needs to be done with ceph
-packaging to be accepted on the first round.
+Oh,Sorry, i mean that , if i don't create folder "/var/run/ceph" at OSD
+hosts manually. Execute the command : "$init-ceph -c ceph.conf --btrfs
+-v -a stop " ,which can't auto-kill OSD host cosd process, like this :
+OSD0 host:
+$ ps -ef | grep cosd
+root     13987     1  0 Dec01 ?        00:02:55 /usr/local/bin/cosd -i =
+0
+-c ceph.conf
+OSD1 host:
+$ ps -ef | grep cosd
+root     14028     1  0 Dec01 ?        00:02:53 /usr/local/bin/cosd -i =
+1
+-c ceph.conf
 
-Regards,
-Laszlo/GCS
-[1] http://ftp-master.debian.org/new.html
-[2] http://ftp-master.debian.org/REJECT-FAQ.html
-[3] http://www.openssl.org/support/faq.html#LEGAL2
-[4] http://packages.debian.org/changelogs/pool/main/n/neon27/current/copyri=
-ght
+I have to execute "kill -9 13987 " and "kill -9 14028" to kill cosd
+process manually, or ,next time , it will fail to execute "$ init-ceph
+-c ceph.conf --btrfs -v -a start " command.
 
---=-w26Vo0yGFtxoSta2UzTq
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
+jeff,wu
 
-iEYEABECAAYFAkz26LMACgkQGkxvZbuqR8mS8gCcDKWy1MrwJnx0/QwTAcOekqCR
-/jQAoIEU0ycnxdkZaHLodu9gDTeeQUfO
-=So2W
------END PGP SIGNATURE-----
 
---=-w26Vo0yGFtxoSta2UzTq--
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
