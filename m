@@ -1,202 +1,68 @@
-From: "Daniel P. Berrange" <berrange@redhat.com>
-Subject: Re: [PATCH] add network disk support
-Date: Thu, 2 Dec 2010 13:19:28 +0000
-Message-ID: <20101202131928.GV2502@redhat.com>
-References: <1290718196-14080-1-git-send-email-morita.kazutaka@lab.ntt.co.jp>
-Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
+From: Christian Brunner <chb@muc.de>
+Subject: crashed+down+peering
+Date: Thu, 2 Dec 2010 16:28:19 +0100
+Message-ID: <AANLkTi=qVPB4ouEySHKAbRZLo7YgSyq6MdyY3LkT5JfS@mail.gmail.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42674 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757253Ab0LBNT6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 2 Dec 2010 08:19:58 -0500
-Content-Disposition: inline
-In-Reply-To: <1290718196-14080-1-git-send-email-morita.kazutaka@lab.ntt.co.jp>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:65023 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932118Ab0LBP2T (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 10:28:19 -0500
+Received: by iwn42 with SMTP id 42so1073168iwn.19
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Dec 2010 07:28:19 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
-Cc: libvir-list@redhat.com, sheepdog@lists.wpkg.org, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, Nov 26, 2010 at 05:49:56AM +0900, MORITA Kazutaka wrote:
-> This patch adds network disk support to libvirt/QEMU.  The currently
-> supported protcols are nbd, rbd, and sheepdog.  The XML syntax is like
-> this:
-> 
->     <disk type="network" device="disk">
->       <driver name="qemu" type="raw" />
->       <source protocol='rbd|sheepdog|nbd' name="...some image identifier...">
->         <host name="mon1.example.org" port="6000">
->         <host name="mon2.example.org" port="6000">
->         <host name="mon3.example.org" port="6000">
->       </source>
->       <target dev="vda" bus="virtio" />
->     </disk>
+We have simulated the simultanious crash of multiple osds in our
+environment. After starting all the cosd again, we have the following
+situation:
 
-This design looks good to me.
+2010-12-02 16:18:33.944436    pg v724432: 3712 pgs: 1 active, 3605
+active+clean, 1 crashed+peering, 46 down+peering, 56
+crashed+down+peering, 3 active+clean+inconsistent; 177 GB data, 365 GB
+used, 83437 GB / 83834 GB avail; 1/93704 degraded (0.001%)
 
-> 
-> Signed-off-by: MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
-> ---
-> 
-> This patch addresses the discussion on
->   https://www.redhat.com/archives/libvir-list/2010-November/msg00759.html
-> 
-> Josh mentioned that the monitor hostnames of RBD can be set through
-> the environment variables, but I couldn't find any documentations
-> about it, so the monitors are not set in this patch.  I hope someone
-> who is familiar with RBD implements it.
-> 
-> @@ -1620,6 +1629,30 @@ virDomainDiskDefParseXML(virCapsPtr caps,
->                  case VIR_DOMAIN_DISK_TYPE_DIR:
->                      source = virXMLPropString(cur, "dir");
->                      break;
-> +                case VIR_DOMAIN_DISK_TYPE_NETWORK:
-> +                    protocol = virXMLPropString(cur, "protocol");
-> +                    if (protocol == NULL) {
-> +                        virDomainReportError(VIR_ERR_XML_ERROR,
-> +                                             "%s", _("missing protocol type"));
-> +                        break;
-> +                    }
-> +                    def->protocol = virDomainDiskProtocolTypeFromString(protocol);
+When I set of an "rbd rm" command for one of our rbd volumes, it seems
+to hit the the "crashed+down+peering" pg. After that the command is
+stuck.
 
-Should check for def->protocal < 0 & raise an error, which
-would indicate that 'protocol' was not one of the expected
-values.
+When I turn on "debug ms = 1" on the client side I can see the
+following messages:
 
-> +                    source = virXMLPropString(cur, "name");
-> +                    host = cur->children;
-> +                    while (host != NULL) {
-> +                        if (host->type == XML_ELEMENT_NODE &&
-> +                            xmlStrEqual(host->name, BAD_CAST "host")) {
-> +                            if (VIR_REALLOC_N(hosts, def->nhosts + 1) < 0) {
-> +                                virReportOOMError();
-> +                                goto error;
-> +                            }
-> +                            hosts[def->nhosts].name = virXMLPropString(host, "name");
-> +                            hosts[def->nhosts].port = virXMLPropString(host, "port");
-> +                            def->nhosts++;
+2010-12-02 16:24:06.364081 7f7f67c887e0 -- 10.255.0.130:0/7505 -->
+osd14 10.255.0.63:6804/2175 -- osd_op(client97429.0:3
+rb.0.4b.000000000001 [delete] 3.2c79) v1 -- ?+0 0x191c720
+2010-12-02 16:24:21.358572 7f7f66683710 -- 10.255.0.130:0/7505 -->
+mon1 10.255.0.21:6789/0 -- mon_subscribe({monmap=2+,osdmap=1730}) v1
+-- ?+0 0x7f7f38000a90
+2010-12-02 16:24:21.358633 7f7f66683710 -- 10.255.0.130:0/7505 -->
+osd14 10.255.0.63:6804/2175 -- ping v1 -- ?+0 0x7f7f38000d30
+2010-12-02 16:24:21.359298 7f7f67c87710 -- 10.255.0.130:0/7505 <==
+mon1 10.255.0.21:6789/0 10 ==== mon_subscribe_ack(300s) v1 ==== 20+0+0
+(844714770 0 0) 0x7f7f58000d70
+2010-12-02 16:24:26.358836 7f7f66683710 -- 10.255.0.130:0/7505 -->
+osd14 10.255.0.63:6804/2175 -- ping v1 -- ?+0 0x7f7f38000d30
+[...]
 
-Ought to check for NULLs returned by virXMLPropString here
-I think.
+The "ping v1" continues forever. When I turn on "debug ms = 1" and
+"debug osd = 10" on the cosd side, I can see which pg causes the
+problem:
+
+2010-12-02 16:04:25.701914 7f024363c710 -- 10.255.0.63:6800/19612 <==
+client98231 10.255.0.130:0/7161 3 ==== osd_op(client9
+8231.0:41 rb.0.4a.000000000027 [delete] 3.2dab) v1 ==== 128+0+0
+(4170532710 0 0) 0x7f0154000e10
+2010-12-02 16:04:25.701954 7f024363c710 osd12 1718 request for pool=3
+(rbd) owner=0 perm=7 may_read=0 may_write=1 may_exec=
+0 require_exec_caps=0
+2010-12-02 16:04:25.701971 7f024363c710 osd12 1718 pg[3.1ab( v
+630'8247 (630'8241,630'8247] n=78 ec=2 les=814 1712/1712/1712) [12,10]
+r=0 lcod 0'0 mlcod 0'0 !hml crashed+down+peering] not active (yet)
 
 
-> +                        }
-> +                        host = host->next;
-> +                    }
-> +                    break;
->                  default:
->                      virDomainReportError(VIR_ERR_INTERNAL_ERROR,
->                                           _("unexpected disk type %s"),
-> @@ -1685,7 +1718,7 @@ virDomainDiskDefParseXML(virCapsPtr caps,
->  
->      /* Only CDROM and Floppy devices are allowed missing source path
->       * to indicate no media present */
-> -    if (source == NULL &&
-> +    if (source == NULL && hosts == NULL &&
->          def->device != VIR_DOMAIN_DISK_DEVICE_CDROM &&
->          def->device != VIR_DOMAIN_DISK_DEVICE_FLOPPY) {
->          virDomainReportError(VIR_ERR_NO_SOURCE,
-> @@ -1791,6 +1824,8 @@ virDomainDiskDefParseXML(virCapsPtr caps,
->      source = NULL;
->      def->dst = target;
->      target = NULL;
-> +    def->hosts = hosts;
-> +    hosts = NULL;
->      def->driverName = driverName;
->      driverName = NULL;
->      def->driverType = driverType;
-> @@ -1819,6 +1854,8 @@ cleanup:
->      VIR_FREE(type);
->      VIR_FREE(target);
->      VIR_FREE(source);
-> +    VIR_FREE(hosts);
+What would be the correct way to resolve this situation?
 
-I think you need to free the fields inside 'hosts' too, otherwise
-we'd leak memory for the port + host strings in the error path.
-
-> diff --git a/src/qemu/qemu_conf.c b/src/qemu/qemu_conf.c
-> index 35caccc..63abd75 100644
-> --- a/src/qemu/qemu_conf.c
-> +++ b/src/qemu/qemu_conf.c
-> @@ -2714,7 +2714,7 @@ qemuBuildDriveStr(virDomainDiskDefPtr disk,
->          break;
->      }
->  
-> -    if (disk->src) {
-> +    if (disk->src || disk->nhosts > 0) {
-
-If you check for nhosts > 0 here
-
->          if (disk->type == VIR_DOMAIN_DISK_TYPE_DIR) {
->              /* QEMU only supports magic FAT format for now */
->              if (disk->driverType &&
-> @@ -2733,6 +2733,24 @@ qemuBuildDriveStr(virDomainDiskDefPtr disk,
->                  virBufferVSprintf(&opt, "file=fat:floppy:%s,", disk->src);
->              else
->                  virBufferVSprintf(&opt, "file=fat:%s,", disk->src);
-> +        } else if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK) {
-> +            switch (disk->protocol) {
-> +            case VIR_DOMAIN_DISK_PROTOCOL_NBD:
-> +                virBufferVSprintf(&opt, "file=nbd:%s:%s,",
-> +                                  disk->hosts->name, disk->hosts->port);
-> +                break;
-> +            case VIR_DOMAIN_DISK_PROTOCOL_RBD:
-> +                virBufferVSprintf(&opt, "file=rbd:%s,", disk->src);
-> +                break;
-> +            case VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG:
-> +                if (disk->nhosts > 0)
-> +                    virBufferVSprintf(&opt, "file=sheepdog:%s:%s:%s,",
-> +                                      disk->hosts->name, disk->hosts->port,
-> +                                      disk->src);
-> +                else
-> +                    virBufferVSprintf(&opt, "file=sheepdog:%s,", disk->src);
-> +                break;
-
-This else branch for sheepdog will never execute. So I think
-it is better to check the nhosts value in each of these
-conditionals. eg We should report an error if nhosts == 0,
-or nhosts > 1 for NBD since it only wants 1 host. Likewise
-for other protocols as nedeed.
-
-> @@ -5794,7 +5830,67 @@ qemuParseCommandLineDisk(virCapsPtr caps,
->                  values[i] = NULL;
->                  if (STRPREFIX(def->src, "/dev/"))
->                      def->type = VIR_DOMAIN_DISK_TYPE_BLOCK;
-> -                else
-> +                else if (STRPREFIX(def->src, "nbd:")) {
-> +                    char *host, *port;
-> +
-> +                    def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
-> +                    host = def->src + strlen("nbd:");
-> +                    port = strchr(host, ':');
-> +                    if (!port) {
-> +                        def = NULL;
-> +                        qemuReportError(VIR_ERR_INTERNAL_ERROR,
-> +                                        _("cannot parse nbd filename '%s'"), def->src);
-> +                        goto cleanup;
-> +                    }
-> +                    *port++ = '\0';
-> +                    if (VIR_ALLOC(def->hosts) < 0) {
-> +                        virReportOOMError();
-> +                        goto cleanup;
-> +                    }
-> +                    def->nhosts = 1;
-> +                    def->hosts->name = strdup(host);
-> +                    def->hosts->port = strdup(port);
-
-Should check for NULL in both of these strdup cases.
-
-> +
-> +                    VIR_FREE(def->src);
-> +                    def->src = NULL;
-> +                } else if (STRPREFIX(def->src, "rbd:")) {
-> +                    char *p = def->src;
-> +
-> +                    def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
-> +                    def->src = strdup(p + strlen("rbd:"));
-
-And this one, and a few more strdup's later in the patch.
-
-Regards,
-Daniel
+Thanks, Christian
