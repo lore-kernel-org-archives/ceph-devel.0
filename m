@@ -1,85 +1,137 @@
-From: Clint Byrum <clint@ubuntu.com>
-Subject: Re: Status of ceph ITP?
-Date: Wed, 01 Dec 2010 23:19:17 -0800
-Message-ID: <1291274357.20409.171.camel@clint-MacBookPro>
-References: <1290365977.9821.3.camel@clint-MacBookPro>
-	 <Pine.LNX.4.64.1011211521510.17131@cobra.newdream.net>
-	 <1290436452.9821.5.camel@clint-MacBookPro>
-	 <Pine.LNX.4.64.1011291120510.4337@cobra.newdream.net>
-	 <1291075213.14018.101.camel@julia.gcs.org.hu>
-	 <Pine.LNX.4.64.1011300922530.30759@cobra.newdream.net>
-	 <1291221518.14018.564.camel@julia.gcs.org.hu>
-	 <Pine.LNX.4.64.1012011010570.29814@cobra.newdream.net>
-	 <1291249852.14018.611.camel@julia.gcs.org.hu>
+From: Jeff Wu <cpwu@tnsoft.com.cn>
+Subject: [BUG]  ceph 0.23 ,sudo /etc/init.d/init-ceph  cleanalllogs ,
+ delete /   folder
+Date: Thu, 2 Dec 2010 15:25:40 +0800
+Message-ID: <1291274740.1757.85.camel@cephhost>
+Reply-To: <cpwu@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from xenclint.srihosting.com ([65.98.207.160]:58231 "EHLO
-	xen.spamaps.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757228Ab0LBHTT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 02:19:19 -0500
-In-Reply-To: <1291249852.14018.611.camel@julia.gcs.org.hu>
+Received: from [210.22.136.227] ([210.22.136.227]:3001 "EHLO
+	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1757259Ab0LBHY1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 02:24:27 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laszlo Boszormenyi <gcs@debian.hu>
-Cc: Sage Weil <sage@newdream.net>, asheesh@asheesh.org, 506040@bugs.debian.org, noel@debian.org, ceph-devel@vger.kernel.org
+To: "sage@newdream.net" <sage@newdream.net>, "gregf@hq.newdream.net" <gregf@hq.newdream.net>, "yehuda@hq.newdream.net" <yehuda@hq.newdream.net>, "colinm@hq.newdream.net" <colinm@hq.newdream.net>
+Cc: ceph-devel@vger.kernel.org, mllv <mllv@tnsoft.com.cn>, wchen <wchen@tnsoft.com.cn>
 
-On Thu, 2010-12-02 at 01:30 +0100, Laszlo Boszormenyi wrote:
+Hi , 
 
-> I'm not an ftp-master, but your package maybe rejected[2] for two
-> reasons. I think only debian/copyright is not enough, all source file=
-s
-> should have a comment header about their license in short. You have i=
-t
+We refer to ceph wiki :
+http://ceph.newdream.net/wiki/Starting_and_stopping
 
-I don't see where this is a hard requirement in the reject faq.
-Essentially, as long as the files don't have a license that conflicts
-with COPYING, then there's no need for a license header. I DO think its
-a good idea to have a Copyright header in every file, but thats also
-probably ok to have in an AUTHORS file or something like that.
+,use the commands:
+start|stop -- start or stop the daemon(s)
+forcestop  -- force stop (kill -9)
+killall    -- kill all instance of daemon type on the host (useful is
+pid file is wrong or missing)
+cleanlogs  -- clean out log directory
+cleanalllogs -- clean out _everything_ from log directory
 
-> in cephfs.cc , cfuse.cc , etc; but missing in barclass.cc , cconf.cc =
-,
-> cls_acl.cc and in others. Second is that you link with OpenSSL when y=
-our
-> license is (L)GPL. See their FAQ[3] and the fact that I can't find an=
-y
-> upstream license file permitting that nor it's mentioned in
-> debian/copyright . Also you may see the debian/copyright of my packag=
-es,
-> like neon27[4]: it has a pointer to the full license file
-> under /usr/share/common-licenses/ .
-> On the other hand, it went into Ubuntu without any problems. Clint,
-> No=C3=A8l? Feel free to post comment on what needs to be done with ce=
-ph
-> packaging to be accepted on the first round.
->=20
 
-Laszlo, I did a thorough review of the licensing before working to get
-ceph uploaded to Ubuntu, but I wasn't aware of the incompatibility
-between the GPL/LGPL and OpenSSL. This page details it pretty well:
+If we execute the command : "init-ceph cleanalllogs" , which will
+delete / folder (logs,see below ):
 
-http://people.gnome.org/~markmc/openssl-and-the-gpl.html
+================================================
+1. cleanalllogs
 
-Sage, I'd guess that you can work on getting an OK from the other
-authors on adding an exception. I've opened a bug against CEPH in ubunt=
-u
-here:
+$ sudo /etc/init.d/init-ceph cleanalllogs
+=== mon.0 === 
+removing all logs
+rm: cannot remove `/var/log/ceph/stat': Is a directory
+rm: cannot remove `/bin': Is a directory
+rm: cannot remove `/boot': Is a directory
+rm: cannot remove `/cdrom': Is a directory
+rm: cannot remove `/dev': Is a directory
+rm: cannot remove `/etc': Is a directory
+rm: cannot remove `/home': Is a directory
+rm: cannot remove `/lib': Is a directory
+rm: cannot remove `/lost+found': Is 
+rm: cannot remove `/media': Is a directory
+rm: cannot remove `/mnt': Is a directory
+rm: cannot remove `/opt': Is a directory
+rm: cannot remove `/proc': Is a directory
+rm: cannot remove `/root': Is a directory
+rm: cannot remove `/sbin': Is a directory
+rm: cannot remove `/selinux': Is a directory
+rm: cannot remove `/srv': Is a directory
+rm: cannot remove `/sys': Is a directory
+rm: cannot remove `/tmp': Is a directory
+rm: cannot remove `/usr': Is a directory
+rm: cannot remove `/var': Is a directory
+/etc/init.d/init-ceph: 1: cut: not found
+/etc/init.d/init-ceph: 1: cut: not found
+/etc/init.d/init-ceph: 1: sed: not found
+/etc/init.d/init-ceph: 1: /usr/local/bin/cconf: not found
+/etc/init.d/init-ceph: 1: /usr/local/bin/cconf: not found
+/etc/init.d/init-ceph: 1: /usr/local/bin/cconf: not found
+=== . === 
+/etc/init.d/init-ceph: 1: /usr/local/bin/cconf: not found
+/etc/init.d/init-ceph: 1: /usr/local/bin/cconf: not found
+/etc/init.d/init-ceph: 1: /usr/local/bin/cconf: not found
+/etc/init.d/init-ceph: 1: grep: not found
+/etc/init.d/init-ceph: 1: /usr/local/bin/cconf: not found
+/etc/init.d/init-ceph: 1: dirname: not found
+removing all logs
+/etc/init.d/init-ceph: 1: whoami: not found
+/etc/init.d/init-ceph: 1: bash: not found
 
-https://bugs.launchpad.net/ubuntu/+source/ceph/+bug/684011
+=========================================================
 
-Sage, if you can please update that bug's status when you have secured
-an exception, that would be ideal, as I'm going to mark it as Critical,
-so we'll probably have to drop ceph from Natty if there's no resolution
-before the release, and consider dropping it from Maverick as well.
+2.init-ceph script
+	.................................
+	.................................
 
-Also Sage, if the other authors (or you) are not comfortable with the
-OpenSSL advertising clause, there's always GNUTLS which exists in large
-part to address this sort of thing.
+        force-reload | reload)
+            signal_daemon $name c$type $pid_file -1 "Reloading"
+            ;;
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+        restart)
+            $0 $options stop $name
+            $0 $options start $name
+            ;;
+
+        cleanlogs)
+            echo removing logs
+            do_cmd "for f in $log_sym_dir/$name*; do rm -f \`readlink \
+$f\` ; rm -f \$f ; done"
+            ;;
+
+        cleanalllogs)
+            echo removing all logs
+            do_cmd "rm -f $log_dir/* $log_sym_dir/* || true"
+            ;;
+
+        *)
+            usage_exit
+            ;;
+    esac
+done
+
+exit 0
+
+ =================================================        
+
+Look into init-ceph codes, should be "$log_sym_dir/* " equal to  "/*",
+"cleanlogs" command also exist this issue. init-ceph script might be add
+a check for "$log_dir" and "$log_sym_dir".
+
+and If we detect some of bugs ,does it update to 
+http://tracker.newdream.net/projects/ceph ?
+
+if yes ,how ?
+
+thanks.
+Jeff,wu
+
+
+
+
+
+
+
+
+
+
