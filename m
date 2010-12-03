@@ -1,8 +1,8 @@
 From: Jeff Wu <cpwu@tnsoft.com.cn>
 Subject: Re: [BUG]  ceph 0.23 ,sudo /etc/init.d/init-ceph  cleanalllogs ,
  delete /   folder
-Date: Fri, 3 Dec 2010 09:01:47 +0800
-Message-ID: <1291338107.1757.92.camel@cephhost>
+Date: Fri, 3 Dec 2010 09:22:34 +0800
+Message-ID: <1291339354.368.2.camel@cephhost>
 References: <1291274740.1757.85.camel@cephhost>
 	 <Pine.LNX.4.64.1012021121230.1982@cobra.newdream.net>
 Reply-To: <cpwu@tnsoft.com.cn>
@@ -10,10 +10,10 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [210.22.136.227] ([210.22.136.227]:18891 "EHLO
+Received: from [210.22.136.227] ([210.22.136.227]:31766 "EHLO
 	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1758209Ab0LCBAa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 20:00:30 -0500
+	with ESMTP id S1758299Ab0LCBVR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 20:21:17 -0500
 In-Reply-To: <Pine.LNX.4.64.1012021121230.1982@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -61,12 +61,11 @@ new=20
 > issue' button along the top.  In this case the issue is fixed for the=
  next=20
 > release though (I believe?) so we should be okay.
-
-Hi ,sage, thank you for your reply so quickly.
-
-
-
 >=20
+Hi, if i create a new issue ,who should the bug be assigned to ?=20
+
+
+
 > Thanks!
 > sage
 
