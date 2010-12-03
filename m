@@ -1,36 +1,45 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] msgr: Correctly handle half-open connections.
-Date: Fri, 3 Dec 2010 09:18:50 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1012030918120.1982@cobra.newdream.net>
-References: <1291318895-11879-1-git-send-email-jaschut@sandia.gov>
- <1291323999.4879.198.camel@sale659.sandia.gov> <1291394903.4879.206.camel@sale659.sandia.gov>
+Subject: Re: [BUG]  ceph 0.23 ,sudo /etc/init.d/init-ceph  cleanalllogs ,
+ delete /   folder
+Date: Fri, 3 Dec 2010 09:20:47 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1012030919330.1982@cobra.newdream.net>
+References: <1291274740.1757.85.camel@cephhost> <Pine.LNX.4.64.1012021121230.1982@cobra.newdream.net>
+ <1291339354.368.2.camel@cephhost>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35675 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44224 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752023Ab0LCROI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Dec 2010 12:14:08 -0500
-In-Reply-To: <1291394903.4879.206.camel@sale659.sandia.gov>
+	with ESMTP id S1752418Ab0LCRQE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Dec 2010 12:16:04 -0500
+In-Reply-To: <1291339354.368.2.camel@cephhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jeff Wu <cpwu@tnsoft.com.cn>
+Cc: "gregf@hq.newdream.net" <gregf@hq.newdream.net>, "yehuda@hq.newdream.net" <yehuda@hq.newdream.net>, "colinm@hq.newdream.net" <colinm@hq.newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Andrew Lv <mllv@tnsoft.com.cn>, Kevin Chen <wchen@tnsoft.com.cn>
 
-On Fri, 3 Dec 2010, Jim Schutt wrote:
-> FWIW, I've seen no sign of this client hung task issue 
-> since I started testing with server code built from 
-> current unstable branch (63fab458f625) + current
-> rc branch (39b42b21e980) + current testing branch
-> (1a4ad835de66) + my half-open connection patch.
-> 
-> This combination has survived the heaviest write loads
-> (64 clients against 13 osds) that I've tested with to date.
-> 
-> I still see lots of clients resetting osds, but it has no
-> ill effects now.
+On Fri, 3 Dec 2010, Jeff Wu wrote:
+> > Yes, please.  You can create an account, log in, and then click the 'new 
+> > issue' button along the top.  In this case the issue is fixed for the next 
+> > release though (I believe?) so we should be okay.
+> > 
+> Hi, if i create a new issue ,who should the bug be assigned to ? 
 
-Great to hear.  I've applied the msgr fix and pushed to the 'rc' branch.
+In the cleanlogs case, no need to enter a bug, as it's fixed in 
+the 'rc' branch.  In general for other bugs, just leave it unassigned.
 
-Thanks Jim!
+Thanks!
 sage
+
+> 
+> 
+> 
+> > Thanks!
+> > sage
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
