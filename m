@@ -1,256 +1,138 @@
-From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
-Subject: Re: questions about pg membership
-Date: Fri, 3 Dec 2010 12:23:12 +0800
-Message-ID: <AANLkTinY7ZAox9ZK3Ueo1TbPyMgRBw7YBTDCnxw4ucrr@mail.gmail.com>
-References: <AANLkTin8d5xMoqvjt8YcS6NrCTEB=-L2Tyx4_96TckZd@mail.gmail.com>
-	<Pine.LNX.4.64.1012021130260.1982@cobra.newdream.net>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: [PATCH] msgr: Correctly handle half-open connections.
+Date: Fri, 3 Dec 2010 09:48:23 -0700
+Message-ID: <1291394903.4879.206.camel@sale659.sandia.gov>
+References: <1291318895-11879-1-git-send-email-jaschut@sandia.gov>
+ <1291323999.4879.198.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=0016364eeacc87b6fd049679e56e
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:46394 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758338Ab0LCEXO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Dec 2010 23:23:14 -0500
-Received: by qwb7 with SMTP id 7so9166206qwb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Dec 2010 20:23:13 -0800 (PST)
-In-Reply-To: <Pine.LNX.4.64.1012021130260.1982@cobra.newdream.net>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:41192 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753098Ab0LCQsc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Dec 2010 11:48:32 -0500
+Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21])
+	by sentry-three.sandia.gov (Postfix) with ESMTP id 11B3E47CACC
+	for <ceph-devel@vger.kernel.org>; Fri,  3 Dec 2010 09:48:26 -0700 (MST)
+In-Reply-To: <1291323999.4879.198.camel@sale659.sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
---0016364eeacc87b6fd049679e56e
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-> The primary changing nodes is more of a concern, though; the rest is smal=
-l
-> optimizations. =C2=A0Let's figure out why the mapping is changing like th=
-at!
+I've got a testing update on this...
 
-Hi Sage,
+On Thu, 2010-12-02 at 14:06 -0700, Jim Schutt wrote:
+> 
+> Hi,
+> 
+> On Thu, 2010-12-02 at 12:41 -0700, Jim Schutt wrote:
+> > If poll() says a socket is ready for reading, but zero bytes
+> > are read, that means that the peer has sent a FIN.  Handle that.
+> >
+> > One way the incorrect handling was manifesting is as follows:
+> >
+> > Under a heavy write load, clients log many messages like this:
+> >
+> > [19021.523192] libceph:  tid 876 timed out on osd6, will reset osd
+> > [19021.523328] libceph:  tid 866 timed out on osd10, will reset osd
+> > [19081.616032] libceph:  tid 841 timed out on osd0, will reset osd
+> > [19081.616121] libceph:  tid 826 timed out on osd2, will reset osd
+> > [19081.616176] libceph:  tid 806 timed out on osd3, will reset osd
+> > [19081.616226] libceph:  tid 875 timed out on osd9, will reset osd
+> > [19081.616275] libceph:  tid 834 timed out on osd12, will reset osd
+> > [19081.616326] libceph:  tid 874 timed out on osd10, will reset osd
+> >
+> > After the clients are done writing and the file system should
+> > be quiet, osd hosts have a high load with many active threads:
+> >
+> > $ ps u -C cosd
+> > USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME
+> COMMAND
+> > root      1383  162 11.5 1456248 943224 ?      Ssl  11:31
+> 406:59 /usr/bin/cosd -i 7 -c /etc/ceph/ceph.conf
+> >
+> > $ for p in `ps -C cosd -o pid --no-headers`; do grep -nH
+> State /proc/$p/task/*/status | grep -v sleep; done
+> > /proc/1383/task/10702/status:2:State:   R (running)
+> > /proc/1383/task/10710/status:2:State:   R (running)
+> > /proc/1383/task/10717/status:2:State:   R (running)
+> > /proc/1383/task/11396/status:2:State:   R (running)
+> > /proc/1383/task/27111/status:2:State:   R (running)
+> > /proc/1383/task/27117/status:2:State:   R (running)
+> > /proc/1383/task/27162/status:2:State:   R (running)
+> > /proc/1383/task/27694/status:2:State:   R (running)
+> > /proc/1383/task/27704/status:2:State:   R (running)
+> > /proc/1383/task/27728/status:2:State:   R (running)
+> >
+> > With this fix applied, a heavy load still causes many client
+> > resets of osds, but no runaway threads result.
+> 
+> Hmmm, no runaway threads, but harder testing with
+>   dd conv=fdatasync
+> has at least one of my clients stuck -- not sure
+> if this patch caused the issue or exposed something
+> else:
+> 
+> [  982.608021] libceph:  tid 183 timed out on osd10, will reset osd
+> [  982.608119] libceph:  tid 114 timed out on osd12, will reset osd
+> [  982.608179] libceph:  tid 179 timed out on osd11, will reset osd
+> [  982.608237] libceph:  tid 162 timed out on osd1, will reset osd
+> [  982.608300] libceph:  tid 169 timed out on osd0, will reset osd
+> [  982.608357] libceph:  tid 204 timed out on osd4, will reset osd
+> [  982.608414] libceph:  tid 159 timed out on osd9, will reset osd
+> [ 1042.704025] libceph:  tid 114 timed out on osd12, will reset osd
+> [ 1042.704072] libceph:  tid 174 timed out on osd1, will reset osd
+> [ 1080.602058] INFO: task dd:3545 blocked for more than 120 seconds.
+> [ 1080.602063] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+> disables this message.
+> [ 1080.602067] dd            D ffff88018e161610     0  3545   3542
+> 0x00000000
+> [ 1080.602074]  ffff88018f647d18 0000000000000086 ffff88018f647e20
+> ffff88018e161610
+> [ 1080.602082]  ffff880199105840 000000008f647d78 0000000017c00000
+> ffff88018e090fa0
+> [ 1080.602088]  0000000000000000 0000000000018000 ffff88018f647c78
+> ffffffff81063032
+> [ 1080.602095] Call Trace:
+> [ 1080.602112]  [<ffffffff81063032>] ? timekeeping_get_ns+0x1b/0x3d
+> [ 1080.602117]  [<ffffffff810639cf>] ? ktime_get_ts+0x89/0x92
+> [ 1080.602121]  [<ffffffff81063032>] ? timekeeping_get_ns+0x1b/0x3d
+> [ 1080.602125]  [<ffffffff810639cf>] ? ktime_get_ts+0x89/0x92
+> [ 1080.602131]  [<ffffffff8136a76e>] io_schedule+0x3f/0x59
+> [ 1080.602136]  [<ffffffff810aaf1e>] sync_page+0x49/0x4d
+> [ 1080.602139]  [<ffffffff8136ac87>] __wait_on_bit+0x4a/0x7b
+> [ 1080.602143]  [<ffffffff810aaed5>] ? sync_page+0x0/0x4d
+> [ 1080.602147]  [<ffffffff810ab0cf>] wait_on_page_bit+0x74/0x7b
+> [ 1080.602152]  [<ffffffff8105b6c4>] ? wake_bit_function+0x0/0x2f
+> [ 1080.602156]  [<ffffffff810b3f18>] ? pagevec_lookup_tag+0x27/0x30
+> [ 1080.602161]  [<ffffffff810ab5d4>] filemap_fdatawait_range
+> +0x79/0x15d
+> [ 1080.602165]  [<ffffffff810ab786>] filemap_write_and_wait_range
+> +0x43/0x56
+> [ 1080.602171]  [<ffffffff8110b444>] vfs_fsync_range+0x35/0x7c
+> [ 1080.602174]  [<ffffffff8110b4f0>] vfs_fsync+0x1c/0x1e
+> [ 1080.602178]  [<ffffffff8110b525>] do_fsync+0x33/0x49
+> [ 1080.602181]  [<ffffffff8110b54e>] sys_fdatasync+0x13/0x17
+> [ 1080.602187]  [<ffffffff81002c2b>] system_call_fastpath+0x16/0x1b
+> [ 1102.800022] libceph:  tid 114 timed out on osd12, will reset osd
 
-Thanks for you explanation.
+FWIW, I've seen no sign of this client hung task issue 
+since I started testing with server code built from 
+current unstable branch (63fab458f625) + current
+rc branch (39b42b21e980) + current testing branch
+(1a4ad835de66) + my half-open connection patch.
 
-I use 'ceph pg dump -o -' to dump the pg stats before and after osd2
-got down and out.
-As shown in the attached files, pg 3.1p2 changed from [2,0] to [1.0].
+This combination has survived the heaviest write loads
+(64 clients against 13 osds) that I've tested with to date.
 
-What I meant to say (sorry for my bad English and bad example) is:
-Since osd0 is the replica before change, it should be able to shorten
-the client's waiting time (at least for read) if we can choose osd0 as
-the primary.
+I still see lots of clients resetting osds, but it has no
+ill effects now.
 
-Henry
+-- Jim
 
---0016364eeacc87b6fd049679e56e
-Content-Type: application/octet-stream; name=pgdump
-Content-Disposition: attachment; filename=pgdump
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gh8kihy80
 
-MjAxMC0xMi0wMSAxODoyNzozMC4xODA3MjYgbW9uIDwtIFtwZyxkdW1wXQoyMDEwLTEyLTAxIDE4
-OjI3OjMwLjE4MjMzNiBtb24wIC0+ICdvaycgKDApCnZlcnNpb24gMTk1Cmxhc3Rfb3NkbWFwX2Vw
-b2NoIDMwCmxhc3RfcGdfc2NhbiAxCmZ1bGxfcmF0aW8gMC45NQpuZWFyZnVsbF9yYXRpbyAwLjgK
-cGdfc3RhdAlvYmplY3RzCW1pcAlkZWdyCWtiCWJ5dGVzCWxvZwlkaXNrbG9nCXN0YXRlCXYJcmVw
-b3J0ZWQJdXAJYWN0aW5nCWxhc3Rfc2NydWIKMC4wCTMJMAkwCTEyMjg4CTEyNTgyOTEyCTI3Mwky
-NzMJYWN0aXZlK2NsZWFuCTI5JzMxCTIzJzU5CVswLDJdCVswLDJdCTAnMAkwLjAwMDAwMAowLjEJ
-MQkwCTAJNDA5Ngk0MTk0MzA0CTI3MwkyNzMJYWN0aXZlK2NsZWFuCTI5JzEzCTIzJzQwCVswLDJd
-CVswLDJdCTAnMAkwLjAwMDAwMAowLjIJMQkwCTAJNDA5Ngk0MTk0MzA0CTI3MwkyNzMJYWN0aXZl
-K2NsZWFuCTI5JzI1CTI0JzQ1CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAowLjMJMAkwCTAJMAkw
-CTI3MwkyNzMJYWN0aXZlK2NsZWFuCTI5JzE0CTIzJzQxCVswLDFdCVswLDFdCTAnMAkwLjAwMDAw
-MAowLjQJMgkwCTAJODE5Mgk4Mzg4NjA4CTI3MwkyNzMJYWN0aXZlK2NsZWFuCTI5JzU0CTI0Jzc0
-CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAowLjUJMgkwCTAJODE5Mgk4Mzg4NjA4CTM2NAkzNjQJ
-YWN0aXZlK2NsZWFuCTI5JzY5CTIzJzk3CVswLDFdCVswLDFdCTAnMAkwLjAwMDAwMAowLjYJNAkw
-CTAJMTYzODQJMTY3NzcyMTYJMjczCTI3MwlhY3RpdmUrY2xlYW4JMjknNTEJMjEnNzYJWzIsMV0J
-WzIsMV0JMCcwCTAuMDAwMDAwCjAuNwk1CTAJMAkyMDQ4MAkyMDk3MTUyMAkyNzMJMjczCWFjdGl2
-ZStjbGVhbgkyOSc3MQkyNCc5NAlbMSwyXQlbMSwyXQkwJzAJMC4wMDAwMDAKMC44CTAJMAkwCTAJ
-MAkyNzMJMjczCWFjdGl2ZStjbGVhbgkyOScyMAkyMSc0MglbMiwwXQlbMiwwXQkwJzAJMC4wMDAw
-MDAKMC45CTIJMAkwCTgxOTIJODM4ODYwOAkyNzMJMjczCWFjdGl2ZStjbGVhbgkyOScyMAkyMSc0
-NglbMiwxXQlbMiwxXQkwJzAJMC4wMDAwMDAKMC5hCTAJMAkwCTAJMAkzNjQJMzY0CWFjdGl2ZStj
-bGVhbgkyOScyMAkyMyc0OQlbMCwyXQlbMCwyXQkwJzAJMC4wMDAwMDAKMC5iCTAJMAkwCTAJMAkz
-NjQJMzY0CWFjdGl2ZStjbGVhbgkyOScxNAkyMyc0MglbMCwyXQlbMCwyXQkwJzAJMC4wMDAwMDAK
-MC4wcDAJMAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4JMCcwCTIzJzI1CVswLDJdCVswLDJdCTAn
-MAkwLjAwMDAwMAowLjFwMAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMjUJWzAs
-Ml0JWzAsMl0JMCcwCTAuMDAwMDAwCjAuMHAxCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAn
-MAkyNCcxNQlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMC4xcDEJMAkwCTAJMAkwCTAJMAlhY3Rp
-dmUrY2xlYW4JMCcwCTI0JzE1CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAowLjBwMgkwCTAJMAkw
-CTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjEnMjAJWzIsMF0JWzIsMF0JMCcwCTAuMDAwMDAwCjAu
-MXAyCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMScyMAlbMiwwXQlbMiwwXQkwJzAJ
-MC4wMDAwMDAKMS4wCTEJMAkwCTEJMjA1CTgzCTgzCWFjdGl2ZStjbGVhbgk4JzEJMjMnMjcJWzAs
-Ml0JWzAsMl0JMCcwCTAuMDAwMDAwCjEuMQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJ
-MjQnMTUJWzEsMF0JWzEsMF0JMCcwCTAuMDAwMDAwCjEuMgkwCTAJMAkwCTAJMAkwCWFjdGl2ZStj
-bGVhbgkwJzAJMjMnMjEJWzAsMV0JWzAsMV0JMCcwCTAuMDAwMDAwCjEuMwkyCTAJMAkyCTkxNgky
-NTAJMjUwCWFjdGl2ZStjbGVhbgk2JzMJMjQnMTgJWzEsMF0JWzEsMF0JMCcwCTAuMDAwMDAwCjEu
-NAkyCTAJMAkzMjMJMzI5NTE5CTI0OQkyNDkJYWN0aXZlK2NsZWFuCTI5JzIxOAkyMycyNDkJWzAs
-MV0JWzAsMV0JMCcwCTAuMDAwMDAwCjEuNQkxCTAJMAkxCTQxCTg0CTg0CWFjdGl2ZStjbGVhbgk5
-JzEJMjEnMjUJWzIsMV0JWzIsMV0JMCcwCTAuMDAwMDAwCjEuNgkwCTAJMAkwCTAJMAkwCWFjdGl2
-ZStjbGVhbgkwJzAJMjQnMTgJWzEsMl0JWzEsMl0JMCcwCTAuMDAwMDAwCjEuNwkzCTAJMAkzCTc3
-OQkzMjkJMzI5CWFjdGl2ZStjbGVhbgk5JzQJMjEnMjQJWzIsMF0JWzIsMF0JMCcwCTAuMDAwMDAw
-CjEuOAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjEnMjMJWzIsMV0JWzIsMV0JMCcw
-CTAuMDAwMDAwCjEuOQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMjUJWzAsMl0J
-WzAsMl0JMCcwCTAuMDAwMDAwCjEuYQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMn
-MjUJWzAsMl0JWzAsMl0JMCcwCTAuMDAwMDAwCjEuYgkxCTAJMAkxCTE3CTg2CTg2CWFjdGl2ZStj
-bGVhbgk4JzEJMjMnMjcJWzAsMl0JWzAsMl0JMCcwCTAuMDAwMDAwCjEuMHAwCTAJMAkwCTAJMAkw
-CTAJYWN0aXZlK2NsZWFuCTAnMAkyMycyNQlbMCwyXQlbMCwyXQkwJzAJMC4wMDAwMDAKMS4xcDAJ
-MAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4JMCcwCTIzJzIxCVswLDFdCVswLDFdCTAnMAkwLjAw
-MDAwMAoxLjBwMQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjQnMTUJWzEsMF0JWzEs
-MF0JMCcwCTAuMDAwMDAwCjEuMXAxCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyNCcx
-NQlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMS4wcDIJMAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xl
-YW4JMCcwCTIxJzIwCVsyLDBdCVsyLDBdCTAnMAkwLjAwMDAwMAoxLjFwMgkwCTAJMAkwCTAJMAkw
-CWFjdGl2ZStjbGVhbgkwJzAJMjEnMjMJWzIsMV0JWzIsMV0JMCcwCTAuMDAwMDAwCjIuMAkwCTAJ
-MAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjQnMTUJWzEsMF0JWzEsMF0JMCcwCTAuMDAwMDAw
-CjIuMQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMjEJWzAsMV0JWzAsMV0JMCcw
-CTAuMDAwMDAwCjIuMgkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjQnMTUJWzEsMF0J
-WzEsMF0JMCcwCTAuMDAwMDAwCjIuMwkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMn
-MjEJWzAsMV0JWzAsMV0JMCcwCTAuMDAwMDAwCjIuNAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVh
-bgkwJzAJMjEnMjMJWzIsMV0JWzIsMV0JMCcwCTAuMDAwMDAwCjIuNQkwCTAJMAkwCTAJMAkwCWFj
-dGl2ZStjbGVhbgkwJzAJMjQnMTgJWzEsMl0JWzEsMl0JMCcwCTAuMDAwMDAwCjIuNgkwCTAJMAkw
-CTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjEnMjAJWzIsMF0JWzIsMF0JMCcwCTAuMDAwMDAwCjIu
-NwkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjEnMjMJWzIsMV0JWzIsMV0JMCcwCTAu
-MDAwMDAwCjIuOAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMjUJWzAsMl0JWzAs
-Ml0JMCcwCTAuMDAwMDAwCjIuOQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMjUJ
-WzAsMl0JWzAsMl0JMCcwCTAuMDAwMDAwCjIuYQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkw
-JzAJMjMnMjUJWzAsMl0JWzAsMl0JMCcwCTAuMDAwMDAwCjIuYgkwCTAJMAkwCTAJMAkwCWFjdGl2
-ZStjbGVhbgkwJzAJMjMnMjEJWzAsMV0JWzAsMV0JMCcwCTAuMDAwMDAwCjIuMHAwCTAJMAkwCTAJ
-MAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMycyMQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMi4x
-cDAJMAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4JMCcwCTIzJzIxCVswLDFdCVswLDFdCTAnMAkw
-LjAwMDAwMAoyLjBwMQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjQnMTUJWzEsMF0J
-WzEsMF0JMCcwCTAuMDAwMDAwCjIuMXAxCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAky
-NCcxNQlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMi4wcDIJMAkwCTAJMAkwCTAJMAlhY3RpdmUr
-Y2xlYW4JMCcwCTIxJzIzCVsyLDFdCVsyLDFdCTAnMAkwLjAwMDAwMAoyLjFwMgkwCTAJMAkwCTAJ
-MAkwCWFjdGl2ZStjbGVhbgkwJzAJMjEnMjAJWzIsMF0JWzIsMF0JMCcwCTAuMDAwMDAwCjMuMAkw
-CTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMjEJWzAsMV0JWzAsMV0JMCcwCTAuMDAw
-MDAwCjMuMQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjQnMTUJWzEsMF0JWzEsMF0J
-MCcwCTAuMDAwMDAwCjMuMgkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMjEJWzAs
-MV0JWzAsMV0JMCcwCTAuMDAwMDAwCjMuMwkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJ
-MjEnMjMJWzIsMV0JWzIsMV0JMCcwCTAuMDAwMDAwCjMuNAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStj
-bGVhbgkwJzAJMjQnMTgJWzEsMl0JWzEsMl0JMCcwCTAuMDAwMDAwCjMuNQkwCTAJMAkwCTAJMAkw
-CWFjdGl2ZStjbGVhbgkwJzAJMjEnMjAJWzIsMF0JWzIsMF0JMCcwCTAuMDAwMDAwCjMuNgkwCTAJ
-MAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjEnMjMJWzIsMV0JWzIsMV0JMCcwCTAuMDAwMDAw
-CjMuNwkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMjUJWzAsMl0JWzAsMl0JMCcw
-CTAuMDAwMDAwCjMuOAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMjUJWzAsMl0J
-WzAsMl0JMCcwCTAuMDAwMDAwCjMuOQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMn
-MjUJWzAsMl0JWzAsMl0JMCcwCTAuMDAwMDAwCjMuYQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVh
-bgkwJzAJMjMnMjEJWzAsMV0JWzAsMV0JMCcwCTAuMDAwMDAwCjMuYgkwCTAJMAkwCTAJMAkwCWFj
-dGl2ZStjbGVhbgkwJzAJMjQnMTUJWzEsMF0JWzEsMF0JMCcwCTAuMDAwMDAwCjMuMHAwCTAJMAkw
-CTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMycyMQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAK
-My4xcDAJMAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4JMCcwCTIzJzI1CVswLDJdCVswLDJdCTAn
-MAkwLjAwMDAwMAozLjBwMQkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjQnMTUJWzEs
-MF0JWzEsMF0JMCcwCTAuMDAwMDAwCjMuMXAxCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAn
-MAkyNCcxNQlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMy4wcDIJMAkwCTAJMAkwCTAJMAlhY3Rp
-dmUrY2xlYW4JMCcwCTIxJzIwCVsyLDBdCVsyLDBdCTAnMAkwLjAwMDAwMAozLjFwMgkwCTAJMAkw
-CTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjEnMjAJWzIsMF0JWzIsMF0JMCcwCTAuMDAwMDAwCnBv
-b2wgMAkyMAkwCTAJODE5MjAJODM4ODYwODAJMzU0OQkzNTQ5CnBvb2wgMQkxMAkwCTAJMzMxCTMz
-MTQ3NwkxMDgxCTEwODEKcG9vbCAyCTAJMAkwCTAJMAkwCTAKcG9vbCAzCTAJMAkwCTAJMAkwCTAK
-IHN1bQkzMAkwCTAJODIyNTEJODQyMTc1NTcJNDYzMAk0NjMwCm9zZHN0YXQJa2J1c2VkCWtiYXZh
-aWwJa2IJaGIgaW4JaGIgb3V0CjAJMjg5OTgwCTc1NDQ5NjgJODI1NDI0MAlbMSwyXQlbMSwyXQox
-CTMxODUyMAk3NTE2NDI4CTgyNTQyNDAJWzAsMl0JWzAsMl0KMgkzMTQwOTIJNzUyMDg1Ngk4MjU0
-MjQwCVswLDFdCVswLDFdCiBzdW0JOTIyNTkyCTIyNTgyMjUyCTI0NzYyNzIwCgoyMDEwLTEyLTAx
-IDE4OjI3OjMwLjE4MjM5NCB3cm90ZSA1NDg4IGJ5dGUgcGF5bG9hZCB0byAtCg==
---0016364eeacc87b6fd049679e56e
-Content-Type: application/octet-stream; name=pgdump1
-Content-Disposition: attachment; filename=pgdump1
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gh8kihye1
 
-MjAxMC0xMi0wMSAxODo1NjowOS42OTMyNjIgbW9uIDwtIFtwZyxkdW1wXQoyMDEwLTEyLTAxIDE4
-OjU2OjA5LjY5NTExMCBtb24wIC0+ICdvaycgKDApCnZlcnNpb24gMjIwCmxhc3Rfb3NkbWFwX2Vw
-b2NoIDQxCmxhc3RfcGdfc2NhbiAxCmZ1bGxfcmF0aW8gMC45NQpuZWFyZnVsbF9yYXRpbyAwLjgK
-cGdfc3RhdAlvYmplY3RzCW1pcAlkZWdyCWtiCWJ5dGVzCWxvZwlkaXNrbG9nCXN0YXRlCXYJcmVw
-b3J0ZWQJdXAJYWN0aW5nCWxhc3Rfc2NydWIKMC4wCTMJMAkwCTEyMjg4CTEyNTgyOTEyCTM2NAkz
-NjQJYWN0aXZlK2NsZWFuCTI5JzMxCTIzJzc5CVswLDFdCVswLDFdCTAnMAkwLjAwMDAwMAowLjEJ
-MQkwCTAJNDA5Ngk0MTk0MzA0CTE4MgkxODIJYWN0aXZlK2NsZWFuCTI5JzEzCTIzJzU4CVswLDFd
-CVswLDFdCTAnMAkwLjAwMDAwMAowLjIJMQkwCTAJNDA5Ngk0MTk0MzA0CTI3MwkyNzMJYWN0aXZl
-K2NsZWFuCTI5JzI1CTI0JzU1CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAowLjMJMAkwCTAJMAkw
-CTI3MwkyNzMJYWN0aXZlK2NsZWFuCTI5JzE0CTIzJzUxCVswLDFdCVswLDFdCTAnMAkwLjAwMDAw
-MAowLjQJMgkwCTAJODE5Mgk4Mzg4NjA4CTI3MwkyNzMJYWN0aXZlK2NsZWFuCTI5JzU0CTI0Jzg0
-CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAowLjUJMgkwCTAJODE5Mgk4Mzg4NjA4CTM2NAkzNjQJ
-YWN0aXZlK2NsZWFuCTI5JzY5CTIzJzEwNwlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMC42CTQJ
-MAkwCTE2Mzg0CTE2Nzc3MjE2CTM2NAkzNjQJYWN0aXZlK2NsZWFuCTI5JzUxCTMxJzk1CVsxLDBd
-CVsxLDBdCTAnMAkwLjAwMDAwMAowLjcJNQkwCTAJMjA0ODAJMjA5NzE1MjAJNDU1CTQ1NQlhY3Rp
-dmUrY2xlYW4JMjknNzEJMjQnMTE2CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAowLjgJMAkwCTAJ
-MAkwCTE4MgkxODIJYWN0aXZlK2NsZWFuCTI5JzIwCTMxJzU3CVswLDFdCVswLDFdCTAnMAkwLjAw
-MDAwMAowLjkJMgkwCTAJODE5Mgk4Mzg4NjA4CTE4MgkxODIJYWN0aXZlK2NsZWFuCTI5JzIwCTMx
-JzYzCVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAowLmEJMAkwCTAJMAkwCTI3MwkyNzMJYWN0aXZl
-K2NsZWFuCTI5JzIwCTIzJzY2CVswLDFdCVswLDFdCTAnMAkwLjAwMDAwMAowLmIJMAkwCTAJMAkw
-CTI3MwkyNzMJYWN0aXZlK2NsZWFuCTI5JzE0CTIzJzU5CVswLDFdCVswLDFdCTAnMAkwLjAwMDAw
-MAowLjBwMAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnNDAJWzAsMV0JWzAsMV0J
-MCcwCTAuMDAwMDAwCjAuMXAwCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMyc0MAlb
-MCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMC4wcDEJMAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4J
-MCcwCTI0JzI1CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAowLjFwMQkwCTAJMAkwCTAJMAkwCWFj
-dGl2ZStjbGVhbgkwJzAJMjQnMjUJWzEsMF0JWzEsMF0JMCcwCTAuMDAwMDAwCjAuMHAyCTAJMAkw
-CTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkzMScyOQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAK
-MC4xcDIJMAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4JMCcwCTMxJzI5CVswLDFdCVswLDFdCTAn
-MAkwLjAwMDAwMAoxLjAJMQkwCTAJMQkyMDUJODMJODMJYWN0aXZlK2NsZWFuCTgnMQkyMyc0Mwlb
-MCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMS4xCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAn
-MAkyNCcyNQlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMS4yCTAJMAkwCTAJMAkwCTAJYWN0aXZl
-K2NsZWFuCTAnMAkyMyczMQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMS4zCTIJMAkwCTIJOTE2
-CTI1MAkyNTAJYWN0aXZlK2NsZWFuCTYnMwkyNCcyOAlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAK
-MS40CTIJMAkwCTMyMwkzMjk1MTkJMjQ5CTI0OQlhY3RpdmUrY2xlYW4JMjknMjE4CTIzJzI1OQlb
-MCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMS41CTEJMAkwCTEJNDEJODQJODQJYWN0aXZlK2NsZWFu
-CTknMQkzMScyNAlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMS42CTAJMAkwCTAJMAkwCTAJYWN0
-aXZlK2NsZWFuCTAnMAkyNCczMwlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMS43CTMJMAkwCTMJ
-Nzc5CTMyOQkzMjkJYWN0aXZlK2NsZWFuCTknNAkzMScyNQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAw
-MDAKMS44CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkzMSczMglbMSwwXQlbMSwwXQkw
-JzAJMC4wMDAwMDAKMS45CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMyc0MAlbMCwx
-XQlbMCwxXQkwJzAJMC4wMDAwMDAKMS5hCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAky
-Myc0MAlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMS5iCTEJMAkwCTEJMTcJODYJODYJYWN0aXZl
-K2NsZWFuCTgnMQkyMyc0MwlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMS4wcDAJMAkwCTAJMAkw
-CTAJMAlhY3RpdmUrY2xlYW4JMCcwCTIzJzQwCVswLDFdCVswLDFdCTAnMAkwLjAwMDAwMAoxLjFw
-MAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMzEJWzAsMV0JWzAsMV0JMCcwCTAu
-MDAwMDAwCjEuMHAxCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyNCcyNQlbMSwwXQlb
-MSwwXQkwJzAJMC4wMDAwMDAKMS4xcDEJMAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4JMCcwCTI0
-JzI1CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAoxLjBwMgkwCTAJMAkwCTAJMAkwCWFjdGl2ZStj
-bGVhbgkwJzAJMzEnMjkJWzAsMV0JWzAsMV0JMCcwCTAuMDAwMDAwCjEuMXAyCTAJMAkwCTAJMAkw
-CTAJYWN0aXZlK2NsZWFuCTAnMAkzMSczMglbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMi4wCTAJ
-MAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyNCcyNQlbMSwwXQlbMSwwXQkwJzAJMC4wMDAw
-MDAKMi4xCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMyczMQlbMCwxXQlbMCwxXQkw
-JzAJMC4wMDAwMDAKMi4yCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyNCcyNQlbMSww
-XQlbMSwwXQkwJzAJMC4wMDAwMDAKMi4zCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAky
-MyczMQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMi40CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2Ns
-ZWFuCTAnMAkzMSczMglbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMi41CTAJMAkwCTAJMAkwCTAJ
-YWN0aXZlK2NsZWFuCTAnMAkyNCczMwlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMi42CTAJMAkw
-CTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkzMScyOQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAK
-Mi43CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkzMSczMglbMSwwXQlbMSwwXQkwJzAJ
-MC4wMDAwMDAKMi44CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMyc0MAlbMCwxXQlb
-MCwxXQkwJzAJMC4wMDAwMDAKMi45CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMyc0
-MAlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMi5hCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFu
-CTAnMAkyMyc0MAlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMi5iCTAJMAkwCTAJMAkwCTAJYWN0
-aXZlK2NsZWFuCTAnMAkyMyczMQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMi4wcDAJMAkwCTAJ
-MAkwCTAJMAlhY3RpdmUrY2xlYW4JMCcwCTIzJzMxCVswLDFdCVswLDFdCTAnMAkwLjAwMDAwMAoy
-LjFwMAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnMzEJWzAsMV0JWzAsMV0JMCcw
-CTAuMDAwMDAwCjIuMHAxCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyNCcyNQlbMSww
-XQlbMSwwXQkwJzAJMC4wMDAwMDAKMi4xcDEJMAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4JMCcw
-CTI0JzI1CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAoyLjBwMgkwCTAJMAkwCTAJMAkwCWFjdGl2
-ZStjbGVhbgkwJzAJMzEnMzIJWzEsMF0JWzEsMF0JMCcwCTAuMDAwMDAwCjIuMXAyCTAJMAkwCTAJ
-MAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkzMScyOQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMy4w
-CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMyczMQlbMCwxXQlbMCwxXQkwJzAJMC4w
-MDAwMDAKMy4xCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyNCcyNQlbMSwwXQlbMSww
-XQkwJzAJMC4wMDAwMDAKMy4yCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMyczMQlb
-MCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMy4zCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAn
-MAkzMSczMglbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMy40CTAJMAkwCTAJMAkwCTAJYWN0aXZl
-K2NsZWFuCTAnMAkyNCczMwlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMy41CTAJMAkwCTAJMAkw
-CTAJYWN0aXZlK2NsZWFuCTAnMAkzMScyOQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMy42CTAJ
-MAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkzMSczMglbMSwwXQlbMSwwXQkwJzAJMC4wMDAw
-MDAKMy43CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMyc0MAlbMCwxXQlbMCwxXQkw
-JzAJMC4wMDAwMDAKMy44CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyMyc0MAlbMCwx
-XQlbMCwxXQkwJzAJMC4wMDAwMDAKMy45CTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAky
-Myc0MAlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMy5hCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2Ns
-ZWFuCTAnMAkyMyczMQlbMCwxXQlbMCwxXQkwJzAJMC4wMDAwMDAKMy5iCTAJMAkwCTAJMAkwCTAJ
-YWN0aXZlK2NsZWFuCTAnMAkyNCcyNQlbMSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMy4wcDAJMAkw
-CTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4JMCcwCTIzJzMxCVswLDFdCVswLDFdCTAnMAkwLjAwMDAw
-MAozLjFwMAkwCTAJMAkwCTAJMAkwCWFjdGl2ZStjbGVhbgkwJzAJMjMnNDAJWzAsMV0JWzAsMV0J
-MCcwCTAuMDAwMDAwCjMuMHAxCTAJMAkwCTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkyNCcyNQlb
-MSwwXQlbMSwwXQkwJzAJMC4wMDAwMDAKMy4xcDEJMAkwCTAJMAkwCTAJMAlhY3RpdmUrY2xlYW4J
-MCcwCTI0JzI1CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMAozLjBwMgkwCTAJMAkwCTAJMAkwCWFj
-dGl2ZStjbGVhbgkwJzAJMzEnMjkJWzAsMV0JWzAsMV0JMCcwCTAuMDAwMDAwCjMuMXAyCTAJMAkw
-CTAJMAkwCTAJYWN0aXZlK2NsZWFuCTAnMAkzNCc5CVsxLDBdCVsxLDBdCTAnMAkwLjAwMDAwMApw
-b29sIDAJMjAJMAkwCTgxOTIwCTgzODg2MDgwCTM0NTgJMzQ1OApwb29sIDEJMTAJMAkwCTMzMQkz
-MzE0NzcJMTA4MQkxMDgxCnBvb2wgMgkwCTAJMAkwCTAJMAkwCnBvb2wgMwkwCTAJMAkwCTAJMAkw
-CiBzdW0JMzAJMAkwCTgyMjUxCTg0MjE3NTU3CTQ1MzkJNDUzOQpvc2RzdGF0CWtidXNlZAlrYmF2
-YWlsCWtiCWhiIGluCWhiIG91dAowCTMzNTMwNAk3NDk5NjQ0CTgyNTQyNDAJWzFdCVsxXQoxCTMz
-NTMwMAk3NDk5NjQ4CTgyNTQyNDAJWzBdCVswXQogc3VtCTY3MDYwNAkxNDk5OTI5MgkxNjUwODQ4
-MAoKMjAxMC0xMi0wMSAxODo1NjowOS42OTUyMTEgd3JvdGUgNTQ0NCBieXRlIHBheWxvYWQgdG8g
-LQo=
---0016364eeacc87b6fd049679e56e--
+
