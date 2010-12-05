@@ -1,82 +1,141 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: crashed+down+peering
-Date: Sat, 4 Dec 2010 16:53:28 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1012041651160.28007@cobra.newdream.net>
-References: <AANLkTi=qVPB4ouEySHKAbRZLo7YgSyq6MdyY3LkT5JfS@mail.gmail.com>
- <Pine.LNX.4.64.1012021126270.1982@cobra.newdream.net>
- <AANLkTikQkU6xmcvQ52Z=xBZgXubZ67hGAaZfUrqUdaKd@mail.gmail.com>
- <AANLkTinTGHy-SPDNev0wXfgzU5-JR4RYe36fnnF4Pg60@mail.gmail.com>
+Subject: Re: Odd "data used" reporting behavior by ceph -w
+Date: Sat, 4 Dec 2010 20:59:18 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1012042048060.28007@cobra.newdream.net>
+References: <1291412399.4879.288.camel@sale659.sandia.gov>
+ <AANLkTi=3fJz8aoywUCMzBrOWtENfaqEJ__76PXHrmppQ@mail.gmail.com>
+ <1291418749.4879.319.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-971282018-1291510408=:28007"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52614 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:57973 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755025Ab0LEAsn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Dec 2010 19:48:43 -0500
-In-Reply-To: <AANLkTinTGHy-SPDNev0wXfgzU5-JR4RYe36fnnF4Pg60@mail.gmail.com>
+	with ESMTP id S1752899Ab0LEEyc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Dec 2010 23:54:32 -0500
+In-Reply-To: <1291418749.4879.319.camel@sale659.sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
-Cc: ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: Gregory Farnum <gregf@hq.newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Jim,
 
---557981400-971282018-1291510408=:28007
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+I think there are at least two different things going on here.
 
-On Sat, 4 Dec 2010, Christian Brunner wrote:
-> >> On Thu, 2 Dec 2010, Christian Brunner wrote:
-> >>> We have simulated the simultanious crash of multiple osds in our
-> >>> environment. After starting all the cosd again, we have the following
-> >>> situation:
-> >>>
-> >>> 2010-12-02 16:18:33.944436 =A0 =A0pg v724432: 3712 pgs: 1 active, 360=
-5
-> >>> active+clean, 1 crashed+peering, 46 down+peering, 56
-> >>> crashed+down+peering, 3 active+clean+inconsistent; 177 GB data, 365 G=
-B
-> >>> used, 83437 GB / 83834 GB avail; 1/93704 degraded (0.001%)
-> >>>
-> >>> When I set of an "rbd rm" command for one of our rbd volumes, it seem=
-s
-> >>> to hit the the "crashed+down+peering" pg. After that the command is
-> >>> stuck.
-> >>
-> >> The pg isn't active, so any IO will hang until peering completes. =A0W=
-hat
-> >> version of the code are you running? =A0If it's something from unstabl=
-e
-> >> from the last couple of weeks it's probably related to problems there;
-> >> please upgrade and restart the osds. =A0If it's the latest and greates=
-t
-> >> 'rc', we should look at the logs to see what's going on!
-> >
-> > We are running 0.23 - I will upgrade to the latest 'rc' tomorrow.
->=20
-> Upgrading to the latest rc version worked well. Everything is working
-> again and all, except one pg are "active+clean". However there is one
-> pg marked as "active+clean+inconsistent".
->=20
-> What can I do about an inconsistent group? I general a short
-> description of the possible pg states would be helpful.
+On Fri, 3 Dec 2010, Jim Schutt wrote:
+> On Fri, 2010-12-03 at 15:36 -0700, Gregory Farnum wrote:
+> > How are you generating these files? It sounds like maybe you're doing
+> > them concurrently on a bunch of clients?
+> 
+> When I created the files initially, I did it via one 
+> dd per client over 64 clients, all at the same time.
+> 
+> When I used echo to truncate them to zero length, I
+> did all files from one client.  Also, when I removed
+> the files, I did them all from a single client.
 
-If a scrub detects an issue it marks the PG inconsistent.  THe idea is you=
-=20
-can then do
+The MDS doesn't release objects on deleted files until all references to 
+the file go away (i.e. everyone closes the file handle).  The client make 
+a point of releasing it's capability on inodes it unlinks, but since the 
+unlink happened on a different node, the writer doesn't realize it's 
+unlinked and doesn't bother to release its capability (until it gets 
+pushed out of the inode cache due to normal cache pressure).  I suspect 
+this will need some additional messaging to get the client to drop it 
+sooner.
 
- # ceph pg repair 1.123
+http://tracker.newdream.net/issues/630
 
-to re-scrub and repair.  Make sure you have the latest 'rc' before you do=
-=20
-that, though, as I just fixed an issue there yesterday.  And keep in mind=
-=20
-the repair code is not well tested.  You may want to re-scrub first (ceph=
-=20
-pg scrub 1.123) and watch the log (ceph -w) to see what the inconsistency=
-=20
-actually is.
+That fix won't make it into 0.24, sorry!  Probably 0.24.1.
 
+> For all but one of the files, the recreate happened on a 
+> different client from the truncate.
+> 
+> Also, a possibly related behavior I've noticed is that
+> an 'ls' on a directory where I'm writing files
+> does not return until all the writers are finished.
+> 
+> I realize it's likely related to caps, but
+> I'm hoping that can be fixed up somehow?
+
+It depends.  If the clients "wrote" that data into the buffer cache and 
+it's just taking a long time to flush it out, then things are working as 
+intended (given current locking state machine).  That can be improved, but 
+hasn't been a priority (see #541).  If the dd's are still writing and they 
+don't stop, something is wrong, either on the mds or kclient.
+
+> > > 4) recreate files, same size/name as step 2);
+> > >
+> > > Note that this step takes _much_ longer: 1448 sec vs. 41 sec.
+> > > Maybe redirecting stdout onto a file from an echo of nothing
+> > > is a really stupid way to truncate a file, but still...
+> > > seems like something might not be right?
+
+When you say 'recreate', you mean you 0-truncate the file, and then reopen 
+and write new data, right?  It's not a _new_ file that happens to have the 
+same name?
+
+My first guess is that it's related to the fact that the truncate is done 
+on a different client and the 'wanted' caps aren't getting released, 
+forcing IO to be synchronous.  Can you repeat that experiment, but 
+write + truncate + rewrite all on the same node?
+
+It may also be that there is some contention on the OSDs due to the object 
+deletes going in parallel with the new data being written.  I wouldn't 
+expect that to be an issue though... :/
+
+Thanks!
 sage
---557981400-971282018-1291510408=:28007--
+
+
+
+
+> > >
+> > > At the end, ceph -w reports:
+> > >
+> > > 2010-12-03 13:59:18.031146    pg v3902: 3432 pgs: 3432 active+clean; 4097 MB data, 8574 MB used, 2978 GB / 3013 GB avail
+> > > (lots of scrub activity)
+> > > 2010-12-03 14:05:33.016532    pg v3971: 3432 pgs: 3432 active+clean; 4097 MB data, 8595 MB used, 2978 GB / 3013 GB avail
+> > >
+> > > 5) rm all files; ceph -w reports:
+> > >
+> > > 2010-12-03 14:06:08.287086    pg v3993: 3432 pgs: 3432 active+clean; 4033 MB data, 8596 MB used, 2978 GB / 3013 GB avail
+> > > (lots of scrub activity)
+> > > 2010-12-03 14:12:29.090263    pg v4139: 3432 pgs: 3432 active+clean; 4033 MB data, 8520 MB used, 2978 GB / 3013 GB avail
+> > >
+> > > Should the space reported as used here get returned
+> > > to the available pool eventually?  Should I have
+> > > waited longer?
+> > >
+> > > 6) unmount file system on all clients; ceph -w reports:
+> > >
+> > > (lots of scrub activity)
+> > > 2010-12-03 14:15:04.119015    pg v4232: 3432 pgs: 3432 active+clean; 1730 KB data, 4213 MB used, 2982 GB / 3013 GB avail
+> > >
+> > >
+> > > 7) remount file system on all clients; ceph -w reports:
+> > >
+> > > 2010-12-03 14:16:28.238805    pg v4271: 3432 pgs: 3432 active+clean; 1754 KB data, 1693 MB used, 2985 GB / 3013 GB avail
+> > >
+> > >
+> > > Hopefully the above is useful.  They were
+> > > generated on unstable (63fab458f625) + rc (378d13df9505)
+> > > + testing (1a4ad835de66) branches.
+> > >
+> > > -- Jim
+> > >
+> > >
+> > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > >
+> > 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
