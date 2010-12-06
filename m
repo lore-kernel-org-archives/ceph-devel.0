@@ -1,28 +1,25 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: Odd "data used" reporting behavior by ceph -w
-Date: Mon, 6 Dec 2010 16:21:11 -0700
-Message-ID: <1291677671.4879.337.camel@sale659.sandia.gov>
+Date: Mon, 6 Dec 2010 15:26:43 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1012061524210.23275@cobra.newdream.net>
 References: <1291412399.4879.288.camel@sale659.sandia.gov>
  <AANLkTi=3fJz8aoywUCMzBrOWtENfaqEJ__76PXHrmppQ@mail.gmail.com>
- <1291418749.4879.319.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1012042048060.28007@cobra.newdream.net>
+ <1291418749.4879.319.camel@sale659.sandia.gov> <Pine.LNX.4.64.1012042048060.28007@cobra.newdream.net>
  <1291677248.4879.334.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:48342 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751204Ab0LFXV2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Dec 2010 18:21:28 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:51219 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751204Ab0LFXVw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Dec 2010 18:21:52 -0500
 In-Reply-To: <1291677248.4879.334.camel@sale659.sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Jim Schutt <jaschut@sandia.gov>
 Cc: Gregory Farnum <gregf@hq.newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-On Mon, 2010-12-06 at 16:14 -0700, Jim Schutt wrote:
+On Mon, 6 Dec 2010, Jim Schutt wrote:
 > Hi Sage,
 > 
 > On Sat, 2010-12-04 at 21:59 -0700, Sage Weil wrote:
@@ -49,6 +46,22 @@ On Mon, 2010-12-06 at 16:14 -0700, Jim Schutt wrote:
 > In one window I launch the parallel dd commands;
 > in another window, on a client of my filesystem,
 > I do the ls.
+
+Can you retry it with 'ls -f' and 'ls -al'?  What I think is going on is 
+the default ls options also stat files to get a file mode and colorize, 
+and that's going slow.  It should be happening on the client, 
+file-by-file.  Either there is something broken that's blocking entirely, 
+or it's just slow enough per-file to do that that you don't make it 
+through before it's done.
+
+'ls -f' avoids statting files.  If that's fast it means there is no 
+problem with the readdir part of things.  'ls -al' output will tell us if 
+the stats are making slow progress or no progress.
+
+Thanks!
+sage
+
+
 > 
 > The date stamps are my attempt to show the ls
 > doesn't generate any output until the dd commands
@@ -67,23 +80,6 @@ On Mon, 2010-12-06 at 16:14 -0700, Jim Schutt wrote:
 > Total data:     4294.967 MB (4096 MiB)
 > Aggregate rate: 109.037 MB/s
 > Mon Dec  6 16:05:57 MST 2010
-
-So that's embarrassing; I did multiple trials, and
-grabbed the output for the wrong one.  Here's the
-one with the correct timestamps:
-
-$ date; ./do_pdd write 16; date
-Mon Dec  6 16:06:08 MST 2010
-
-On 64 clients:
-  dd conv=fdatasync if=/dev/zero of=/mnt/ceph/zero.`hostname -s` bs=4k
-count=16k
-
-Elapsed time:   37.03 seconds
-Total data:     4294.967 MB (4096 MiB)
-Aggregate rate: 115.986 MB/s
-Mon Dec  6 16:06:45 MST 2010
-
 > ---- window 2 ----
 > $ date;ls /mnt/ceph;date
 > Mon Dec  6 16:06:22 MST 2010
@@ -131,5 +127,6 @@ Mon Dec  6 16:06:45 MST 2010
 > 
 > Thanks -- Jim
 > 
-
-
+> 
+> 
+> 
