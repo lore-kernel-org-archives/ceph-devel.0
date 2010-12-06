@@ -1,77 +1,29 @@
-From: Kevin Wolf <kwolf@redhat.com>
-Subject: Re: [Qemu-devel] [PATCH] ceph/rbd block driver for qemu-kvm (v8)
-Date: Mon, 06 Dec 2010 13:48:49 +0100
-Message-ID: <4CFCDBB1.5000800@redhat.com>
-References: <20101117214223.GA31321@sir.home>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: ioctl compatibility
+Date: Mon, 6 Dec 2010 09:46:22 -0800
+Message-ID: <AANLkTikq8reF0zk_47LW1Q6nM3pPfv+JG-Hk7P_fi4+K@mail.gmail.com>
+References: <FB06A065-2077-41B8-9C55-74C5234DDFAC@cs.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:17618 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751200Ab0LFMrt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 6 Dec 2010 07:47:49 -0500
-In-Reply-To: <20101117214223.GA31321@sir.home>
+Received: from mail-ew0-f45.google.com ([209.85.215.45]:60311 "EHLO
+	mail-ew0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752049Ab0LFRqY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Dec 2010 12:46:24 -0500
+Received: by ewy10 with SMTP id 10so7250267ewy.4
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Dec 2010 09:46:22 -0800 (PST)
+In-Reply-To: <FB06A065-2077-41B8-9C55-74C5234DDFAC@cs.ucsc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
-Cc: qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, kvm@vger.kernel.org
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
+Cc: ceph-devel@vger.kernel.org
 
-Am 17.11.2010 22:42, schrieb Christian Brunner:
-> Here is another update for the ceph storage driver. It includes changes
-> for the annotations Stefan made last week and a bit more things Sage
-> discovered while looking over the driver again.
-> 
-> I really hope that this time we are not only close, but have reached
-> a quality that everyone is satisfied with. - Of course suggestions for 
-> further improvements are always welcome.
-> 
-> Regards,
-> Christian
-> 
-> 
-> RBD is an block driver for the distributed file system Ceph
-> (http://ceph.newdream.net/). This driver uses librados (which
-> is part of the Ceph server) for direct access to the Ceph object
-> store and is running entirely in userspace (Yehuda also
-> wrote a driver for the linux kernel, that can be used to access
-> rbd volumes as a block device).
-> ---
->  Makefile.objs     |    1 +
->  block/rbd.c       | 1059 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  block/rbd_types.h |   71 ++++
->  configure         |   31 ++
->  4 files changed, 1162 insertions(+), 0 deletions(-)
->  create mode 100644 block/rbd.c
->  create mode 100644 block/rbd_types.h
-
-This lacks a Signed-off-by. Please merge Yehuda's fix for configure when
-you resend the patch.
-
-What's the easiest way to try it out? I tried to use vstart.sh and copy
-the generated ceph.conf to /etc/ceph/ceph.conf so that qemu-img etc.
-find the monitor address. However, that leads to a hang when I try "rbd
-list" or "./qemu-img create -f rbd rbd:data/test.img 4G", so I seem to
-be missing something.
-
-The only thing I have achieved until now with my attempts of trying it
-out (and trying wrong things, of course) is that I stumbled over the the
-following segfault in librados:
-
-Program received signal SIGSEGV, Segmentation fault.
-Objecter::shutdown (this=0x0) at osdc/Objecter.cc:59
-59        assert(client_lock.is_locked());  // otherwise event
-cancellation is unsafe
-(gdb) bt
-#0  Objecter::shutdown (this=0x0) at osdc/Objecter.cc:59
-#1  0x00007ffff7ca5ce4 in RadosClient::shutdown (this=0xa58a90) at
-librados.cc:392
-#2  0x00007ffff7ca8ccc in rados_deinitialize () at librados.cc:1770
-#3  0x000000000043150c in rbd_create (filename=<value optimized out>,
-options=<value optimized out>) at block/rbd.c:304
-#4  0x0000000000405f10 in img_create (argc=5, argv=0x7fffffffde80) at
-qemu-img.c:409
-#5  0x0000003c9f01eb1d in __libc_start_main () from /lib64/libc.so.6
-#6  0x0000000000403999 in _start ()
-
-Kevin
+On Sat, Dec 4, 2010 at 3:17 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
+> Hi Greg,
+>
+> I noticed this patch changed the CEPH_IOCTL_MAGIC to 0x98, and is also synchronized with the user space Ceph tree, but the Ceph client that ships with Ubuntu 10.10 uses 0x97. There wasn't a change made by this patch to Documentation/ioctl/ioctl-numbers.txt, so I was curious if this was an oversight, and if not, how the userspace code could be made to adapt for the kernel shipping with 10.10.
+Oh, wow. This was an inappropriate change which we're reverting now
+and will make sure gets pushed upstream.
+Thanks for noticing! :)
+-Greg
