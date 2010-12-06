@@ -1,61 +1,96 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Status of ceph ITP?
-Date: Sat, 4 Dec 2010 21:09:37 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1012042108030.28007@cobra.newdream.net>
-References: <1290365977.9821.3.camel@clint-MacBookPro>
- <Pine.LNX.4.64.1011211521510.17131@cobra.newdream.net>
- <1290436452.9821.5.camel@clint-MacBookPro> <Pine.LNX.4.64.1011291120510.4337@cobra.newdream.net>
- <1291075213.14018.101.camel@julia.gcs.org.hu> <Pine.LNX.4.64.1011300922530.30759@cobra.newdream.net>
- <1291221518.14018.564.camel@julia.gcs.org.hu> <Pine.LNX.4.64.1012011010570.29814@cobra.newdream.net>
- <1291249852.14018.611.camel@julia.gcs.org.hu> <1291274357.20409.171.camel@clint-MacBookPro>
- <1291309051.14018.667.camel@julia.gcs.org.hu>
- <AANLkTikz6y6qT4Oqe+GvmdBmsRH-KVe9L_4OK8Jsy4n1@mail.gmail.com>
- <1291467221.25001.30.camel@julia.gcs.org.hu>
+From: Ravi Pinjala <pstatic@gmail.com>
+Subject: Re: persistent background write activity
+Date: Sun, 5 Dec 2010 20:01:03 -0800
+Message-ID: <AANLkTikbUCZndDUxB7MnMS143aekcemL7RDSOBwibscS@mail.gmail.com>
+References: <AANLkTinWULKcXLmkyqtVc2T38OTh7ZTWOhYa1hfm==By@mail.gmail.com>
+	<AANLkTin3eD80Q5=uu3EdgwM=8PQOy3e_jnDWiY1sSmQe@mail.gmail.com>
+	<AANLkTinTGVC3+pOFX33JMDp4YcbjAxvgPckKnd4T2+Ng@mail.gmail.com>
+	<AANLkTin-suY5HC4HzbkD8fxhPwDOYqKWpJAvRZ5uVbut@mail.gmail.com>
+	<AANLkTin-MdrFU7C6SgreEi21Kcj+LZpGhGHp18uo0DXG@mail.gmail.com>
+	<AANLkTindP5JYg2ZGm61VkFFUiqUji701XhyaK2VN2dz-@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42143 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750743Ab0LEFEx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Dec 2010 00:04:53 -0500
-In-Reply-To: <1291467221.25001.30.camel@julia.gcs.org.hu>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:65325 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752185Ab0LFEBF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Dec 2010 23:01:05 -0500
+Received: by bwz15 with SMTP id 15so10181923bwz.19
+        for <ceph-devel@vger.kernel.org>; Sun, 05 Dec 2010 20:01:04 -0800 (PST)
+In-Reply-To: <AANLkTindP5JYg2ZGm61VkFFUiqUji701XhyaK2VN2dz-@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laszlo Boszormenyi <gcs@debian.hu>
-Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Clint Byrum <clint@ubuntu.com>, asheesh@asheesh.org, 506040@bugs.debian.org, noel@debian.org, ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregf@hq.newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-Hey Laszlo,
+Hi Greg,
 
-On Sat, 4 Dec 2010, Laszlo Boszormenyi wrote:
-> On Fri, 2010-12-03 at 22:02 -0800, Yehuda Sadeh Weinraub wrote:
-> [ about OpenSSL license exception for ceph ]
-> > I removed all the openssl references in the ceph code and replaced it
-> > with crypto++, so hopefully all this discussion is now moot. It's all
-> > pushed to the ceph rc branch.
->  Does it mean that I shouldn't upload v0.23.2 [1] to Debian? Wait for
-> the v0.24.0 release and upload that one? I know v0.23.2 is not even
-> noted as a release on the homepage, but tagged in the git tree.
-> Main changes are that debian/source/format is re-added, the tree cleaned
-> as make distclean, backported cephfs.8 manpage as a patch, pristine
-> clean the source, noted myself as maintainer while Sage remains as an
-> uploader.
+I've tried to isolate the problem, and gotten a log from just writing
+to a single file. The MDS was the only thing that produced any
+significant logs, even with --debug_{mon,mds,osd} = 20.
 
-Yeah, let's just wait for 0.24.  BTW, I made radosacl only build 
---with-debug; it can be dropped from the package.
+http://p-static.net/mds.beta.log
 
-Thanks-
-sage
+This is from waiting until all other activity on the cluster quiesces
+(by watching gkrellm and ceph -w), then adding logging using "ceph mds
+injectargs", then creating and deleting a few files (echo "data" >
+foo; rm foo - that sort of thing), then disabling logging. gkrellm
+reported several bursts of I/O totaling around 1MB (though this is a
+complete guess, since gkrellm doesn't count disk bandwidth over time,
+only immediate data), which seems high. (Again, this is with no other
+activity on the fs at all).
 
+I have another issue, possibly related, with metadata operations being
+really laggy. While rsyncing into my cluster, large files saturate the
+(gigE) connection, but small files go really slowly (tens of kB/s).
+This is consistent with metadata ops having a high overhead.
 
-> 
-> Laszlo/GCS
-> Ps: Please delete parts of the email that not relevant to the
-> conversation.
-> [1] dget http://www.routers.hu/gcs/ceph_0.23.2-1.dsc
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--Ravi
+
+On Thu, Dec 2, 2010 at 11:29 AM, Gregory Farnum <gregf@hq.newdream.net> wrote:
+> Ravi:
+> Re-discovered this in my email today, sorry I didn't follow up sooner!
+> (Thanksgiving kinda got in the way. ;))
+> Are you still observing this behavior, and have you tried it with the
+> latest rc branch? If you're still seeing it, we'd appreciate if you
+> could turn on logging, zip them up, and post it somewhere for us to
+> look at. :)
+> Mimicking the debug settings in vstart (with debugging on, it'll have
+> stuff like debug mds = 20) should do the trick. :)
+> Thanks!
+> -Greg
+>
+> On Sun, Nov 21, 2010 at 2:25 PM, Ravi Pinjala <pstatic@gmail.com> wrote:
+>> On Sun, Nov 21, 2010 at 2:11 PM, Gregory Farnum <gregf@hq.newdream.net> wrote:
+>>> On Sun, Nov 21, 2010 at 1:44 PM, Ravi Pinjala <pstatic@gmail.com> wrote:
+>>>> Ah, that's good to know.
+>>>>
+>>>> How should I start isolating what's causing it? "ceph -w" doesn't
+>>>> indicate that anything's going on, and I'm not sure where to look for
+>>>> more detailed information about what ceph's up to.
+>>>>
+>>>> --Ravi
+>>> Well, if you have logging on you can look and see what they're doing
+>>> (at a pretty low level). If you don't have it on, you can start it by
+>>> using injectargs
+>>> (http://ceph.newdream.net/wiki/Monitor_commands#injectargs, you can
+>>> actually use it on all the systems even though the describes the mds)
+>>> and setting up the appropriate debug options. They're listed here (the
+>>> ones preceded by "debug" :) :
+>>> http://ceph.newdream.net/wiki/Ceph.conf#options_defined_in_src.2Fconfig.cc
+>>>
+>>> Looking at the PG map might also show you something, although that'd
+>>> probably be captured by changing amounts of data showing up via ceph
+>>> -w.
+>>>
+>>> What version of ceph are you running right now? I think there's some
+>>> background scrubbing stuff that got pushed in recently.
+>>> -Greg
+>>>
+>>
+>> Running the latest release (0.23), and the client is ubuntu kernel
+>> 2.6.35-22. I considered that it might be some kind of background
+>> scrubbing, but according to gkrellm it's mostly writes going on, so
+>> that didn't really fit.
+>>
+>
