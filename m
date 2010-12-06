@@ -1,77 +1,64 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: [Qemu-devel] [PATCH] ceph/rbd block driver for qemu-kvm (v8)
-Date: Mon, 6 Dec 2010 21:15:28 +0100
-Message-ID: <AANLkTimrzcjLTLrioN+HpPEXUqeCaVs_ut=h5+-tHy4N@mail.gmail.com>
-References: <20101117214223.GA31321@sir.home>
-	<4CFCDBB1.5000800@redhat.com>
-Reply-To: chb@muc.de
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: Odd "data used" reporting behavior by ceph -w
+Date: Mon, 6 Dec 2010 16:02:48 -0700
+Message-ID: <1291676568.4879.326.camel@sale659.sandia.gov>
+References: <1291412399.4879.288.camel@sale659.sandia.gov>
+ <AANLkTi=3fJz8aoywUCMzBrOWtENfaqEJ__76PXHrmppQ@mail.gmail.com>
+ <1291418749.4879.319.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1012042048060.28007@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:33989 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752580Ab0LFUP2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Dec 2010 15:15:28 -0500
-In-Reply-To: <4CFCDBB1.5000800@redhat.com>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:60216 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752389Ab0LFXDD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Dec 2010 18:03:03 -0500
+In-Reply-To: <Pine.LNX.4.64.1012042048060.28007@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Wolf <kwolf@redhat.com>
-Cc: qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, kvm@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Gregory Farnum <gregf@hq.newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-2010/12/6 Kevin Wolf <kwolf@redhat.com>:
+Hi Sage,
 
-Hi Kevin,
+On Sat, 2010-12-04 at 21:59 -0700, Sage Weil wrote:
+> 
+> > > > 4) recreate files, same size/name as step 2);
+> > > >
+> > > > Note that this step takes _much_ longer: 1448 sec vs. 41 sec.
+> > > > Maybe redirecting stdout onto a file from an echo of nothing
+> > > > is a really stupid way to truncate a file, but still...
+> > > > seems like something might not be right?
+> 
+> When you say 'recreate', you mean you 0-truncate the file, and then reopen 
+> and write new data, right?  It's not a _new_ file that happens to have the 
+> same name?
 
-> This lacks a Signed-off-by. Please merge Yehuda's fix for configure when
-> you resend the patch.
+Yes, I 0-truncate the file, then open that same file again.
 
-I've sent an updated patch.
+> 
+> My first guess is that it's related to the fact that the truncate is done 
+> on a different client and the 'wanted' caps aren't getting released, 
+> forcing IO to be synchronous.  Can you repeat that experiment, but 
+> write + truncate + rewrite all on the same node?
 
-> What's the easiest way to try it out? I tried to use vstart.sh and copy
-> the generated ceph.conf to /etc/ceph/ceph.conf so that qemu-img etc.
-> find the monitor address. However, that leads to a hang when I try "rbd
-> list" or "./qemu-img create -f rbd rbd:data/test.img 4G", so I seem to
-> be missing something.
+Yes, it definitely matters on which clients the operations
+occur.  If the create, 0-truncate, rewrite all happen on
+the same client, all is well.
 
-The most simple ceph.conf I can think about, is the following:
+If I truncate a file on a different client, I see the slowdown.
 
-[global]
-        auth supported = none
+-- Jim
 
-[mon]
-        mon data = /ceph/mon$id
-
-[mon0]
-        host = {hostname}
-        mon addr = 127.0.0.1:6789
-
-[osd]
-        osd data = /ceph/osd\$id
-
-[osd0]
-        host = {hostname}
-        btrfs devs = {devicename}
+> 
+> It may also be that there is some contention on the OSDs due to the object 
+> deletes going in parallel with the new data being written.  I wouldn't 
+> expect that to be an issue though... :/
+> 
+> Thanks!
+> sage
 
 
-Replace {hostname} with your `hostname -s` and {devicename} with the
-name of an empty volume. Create a directory for the monitor and a
-mountpoint for the osd volume:
 
-# mkdir -p /ceph/mon0
-# mkdir -p /ceph/osd0
 
-After you have created the ceph.conf file, you can create your
-ceph-filesystem with the following command (attention - this will
-format the configured volume):
-
-# mkcephfs -c /etc/ceph/ceph.conf --mkbtrfs -a
-
-Now you should be able to start ceph (assuming you are using the redhat rpm):
-
-# service ceph start
-
-Check if ceph is running with `ceph -w` or `rados df`. `qemu-img
-create -f rbd rbd:data/test.img 4G` should work now, too.
-
-Regards
-Christian
