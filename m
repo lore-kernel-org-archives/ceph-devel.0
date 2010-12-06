@@ -1,96 +1,79 @@
-From: Ravi Pinjala <pstatic@gmail.com>
-Subject: Re: persistent background write activity
-Date: Sun, 5 Dec 2010 20:01:03 -0800
-Message-ID: <AANLkTikbUCZndDUxB7MnMS143aekcemL7RDSOBwibscS@mail.gmail.com>
-References: <AANLkTinWULKcXLmkyqtVc2T38OTh7ZTWOhYa1hfm==By@mail.gmail.com>
-	<AANLkTin3eD80Q5=uu3EdgwM=8PQOy3e_jnDWiY1sSmQe@mail.gmail.com>
-	<AANLkTinTGVC3+pOFX33JMDp4YcbjAxvgPckKnd4T2+Ng@mail.gmail.com>
-	<AANLkTin-suY5HC4HzbkD8fxhPwDOYqKWpJAvRZ5uVbut@mail.gmail.com>
-	<AANLkTin-MdrFU7C6SgreEi21Kcj+LZpGhGHp18uo0DXG@mail.gmail.com>
-	<AANLkTindP5JYg2ZGm61VkFFUiqUji701XhyaK2VN2dz-@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: fsck
+Date: Sun, 5 Dec 2010 20:59:15 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1012052037510.2155@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:65325 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752185Ab0LFEBF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Dec 2010 23:01:05 -0500
-Received: by bwz15 with SMTP id 15so10181923bwz.19
-        for <ceph-devel@vger.kernel.org>; Sun, 05 Dec 2010 20:01:04 -0800 (PST)
-In-Reply-To: <AANLkTindP5JYg2ZGm61VkFFUiqUji701XhyaK2VN2dz-@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53369 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753042Ab0LFEy2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Dec 2010 23:54:28 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id B38B3BC715
+	for <ceph-devel@vger.kernel.org>; Sun,  5 Dec 2010 20:59:15 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 8B213BC715
+	for <ceph-devel@vger.kernel.org>; Sun,  5 Dec 2010 20:59:15 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Greg,
+Hi everyone,
 
-I've tried to isolate the problem, and gotten a log from just writing
-to a single file. The MDS was the only thing that produced any
-significant logs, even with --debug_{mon,mds,osd} = 20.
+Yehuda, Greg, and I talked for a while last week about how we're going to 
+approach disaster recovery/fsck for the MDS.  I'm going to try to 
+summarize what we came up with (and reference the relevant issues in the 
+tracker) so that people have some idea what the current plan is.
 
-http://p-static.net/mds.beta.log
+The first failure type is a corrupted, missing, or incomplete MDS journal.  
+Because of the complexity of the shared state between MDSs, the simplest 
+thing at this point when any single MDS has a journal corruption is to 
+simply throw out all of the journals and go into some sort of recovery 
+mode.  This results in the loss of some recent changes, but avoids the 
+complexity of unraveling the already complex dependencies of journal 
+events within and between MDS journals.  See #602.
 
-This is from waiting until all other activity on the cluster quiesces
-(by watching gkrellm and ceph -w), then adding logging using "ceph mds
-injectargs", then creating and deleting a few files (echo "data" >
-foo; rm foo - that sort of thing), then disabling logging. gkrellm
-reported several bursts of I/O totaling around 1MB (though this is a
-complete guess, since gkrellm doesn't count disk bandwidth over time,
-only immediate data), which seems high. (Again, this is with no other
-activity on the fs at all).
+One prerequisite for that to work is ordering the writeback of directory 
+contents when a file is renamed between directories (say from A to B).  
+The idea is to write B and then A, so that at worst (i.e. if the journal 
+is lost/discarded) we have two links to the file instead of zero.  What to 
+do if a file is renamed from B to A is an open issue.  See #601.
 
-I have another issue, possibly related, with metadata operations being
-really laggy. While rsyncing into my cluster, large files saturate the
-(gigE) connection, but small files go really slowly (tens of kB/s).
-This is consistent with metadata ops having a high overhead.
+The main failure type is then what to do when we have already 
+lost/discarded our journals, or we have encountered a missing or corrupt 
+directory object.  The current plan is for fsck to do a full traversal of 
+the directory hierarchy.  When a missing/corrupt/incomplete directory is 
+encountered, it's added to a missing list.  We then need to query the 
+object store to scan all directory objects to find any child directories 
+of the missing list.  To do this, we maintain an xattr on all directory 
+objects that includes all ancestors of that directory (name, inode, inode 
+version for each ancestor).  The version lets us disambiguate between 
+different paths to a directory when there have been renames but some attrs 
+are out of date.  Once we identify the children, we can reconstruct any 
+subdirectories in the missing/corrupt directory so that we don't lose that 
+whole piece of the namespace.  See #603.
 
---Ravi
+The trick is how to do that scan efficiently.  The plan is to extend the 
+OSD class mechanism to include per-pool methods (currently we only support 
+adding object methods) so that some special code on the OSDs can iterate 
+over objects in the pool PG, parse the ancestor xattrs, look for one or 
+more missing items, and return the result.  See #609.
 
-On Thu, Dec 2, 2010 at 11:29 AM, Gregory Farnum <gregf@hq.newdream.net> wrote:
-> Ravi:
-> Re-discovered this in my email today, sorry I didn't follow up sooner!
-> (Thanksgiving kinda got in the way. ;))
-> Are you still observing this behavior, and have you tried it with the
-> latest rc branch? If you're still seeing it, we'd appreciate if you
-> could turn on logging, zip them up, and post it somewhere for us to
-> look at. :)
-> Mimicking the debug settings in vstart (with debugging on, it'll have
-> stuff like debug mds = 20) should do the trick. :)
-> Thanks!
-> -Greg
->
-> On Sun, Nov 21, 2010 at 2:25 PM, Ravi Pinjala <pstatic@gmail.com> wrote:
->> On Sun, Nov 21, 2010 at 2:11 PM, Gregory Farnum <gregf@hq.newdream.net> wrote:
->>> On Sun, Nov 21, 2010 at 1:44 PM, Ravi Pinjala <pstatic@gmail.com> wrote:
->>>> Ah, that's good to know.
->>>>
->>>> How should I start isolating what's causing it? "ceph -w" doesn't
->>>> indicate that anything's going on, and I'm not sure where to look for
->>>> more detailed information about what ceph's up to.
->>>>
->>>> --Ravi
->>> Well, if you have logging on you can look and see what they're doing
->>> (at a pretty low level). If you don't have it on, you can start it by
->>> using injectargs
->>> (http://ceph.newdream.net/wiki/Monitor_commands#injectargs, you can
->>> actually use it on all the systems even though the describes the mds)
->>> and setting up the appropriate debug options. They're listed here (the
->>> ones preceded by "debug" :) :
->>> http://ceph.newdream.net/wiki/Ceph.conf#options_defined_in_src.2Fconfig.cc
->>>
->>> Looking at the PG map might also show you something, although that'd
->>> probably be captured by changing amounts of data showing up via ceph
->>> -w.
->>>
->>> What version of ceph are you running right now? I think there's some
->>> background scrubbing stuff that got pushed in recently.
->>> -Greg
->>>
->>
->> Running the latest release (0.23), and the client is ubuntu kernel
->> 2.6.35-22. I considered that it might be some kind of background
->> scrubbing, but according to gkrellm it's mostly writes going on, so
->> that didn't really fit.
->>
->
+As part of the namespace scan we could/should verify that we don't have 
+multiple primary links to the same file.  This is difficult as it 
+essentially requires maintaining a huge set of visited ino's.  Bloom 
+filters could be used here to speed things up, but memory will definitely 
+be an issue; some local temporary storage or something stored in the 
+object store.
+
+We can also verify the accuracy of the anchor table while doing the 
+hierarchy traversal.  See #605.
+
+That's a pretty rough sketch, but covers things at a high level.  The 
+preliminaries are targetted at 0.25 (maintaining ancestor attr, osd class 
+changes, and journal discard/recovery mode preliminaries).  The hierarchy 
+traversal will be the biggest bit, but work on that will start after the 
+holidays.
+
+sage
