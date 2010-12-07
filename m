@@ -1,396 +1,210 @@
-From: Josh Durgin <joshd-L5o5AL9CYN0tUFlbccrkMA@public.gmane.org>
-Subject: [PATCH 1/2] qemu: Add RBD support and some network disk
-	fixes
-Date: Tue, 07 Dec 2010 11:56:34 -0800
-Message-ID: <4CFE9172.6030302@hq.newdream.net>
-References: <20101202131928.GV2502@redhat.com>
-	<1291620249-19645-1-git-send-email-morita.kazutaka@lab.ntt.co.jp>
+From: Josh Durgin <joshd@hq.newdream.net>
+Subject: [PATCH 2/2] tests: Add tests for network disks
+Date: Tue, 07 Dec 2010 11:57:33 -0800
+Message-ID: <4CFE91AD.9050206@hq.newdream.net>
+References: <20101202131928.GV2502@redhat.com> <1291620249-19645-1-git-send-email-morita.kazutaka@lab.ntt.co.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <sheepdog-bounces-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org>
-In-Reply-To: <1291620249-19645-1-git-send-email-morita.kazutaka-Zyj7fXuS5i5L9jVzuh4AOg@public.gmane.org>
-List-Unsubscribe: <http://lists.wpkg.org/mailman/options/sheepdog>,
-	<mailto:sheepdog-request-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.wpkg.org/pipermail/sheepdog>
-List-Post: <mailto:sheepdog-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org>
-List-Help: <mailto:sheepdog-request-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.wpkg.org/mailman/listinfo/sheepdog>,
-	<mailto:sheepdog-request-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org?subject=subscribe>
-Sender: sheepdog-bounces-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org
-Errors-To: sheepdog-bounces-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org
-To: libvir-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sheepdog-CJ+3F33aHDCwRfvgX43A7Q@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:55039 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751706Ab0LGT5d (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Dec 2010 14:57:33 -0500
+In-Reply-To: <1291620249-19645-1-git-send-email-morita.kazutaka@lab.ntt.co.jp>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: libvir-list@redhat.com
+Cc: ceph-devel@vger.kernel.org, sheepdog@lists.wpkg.org
 
 
-Changes common to all network disks:
--Make source name optional in the domain schema, since NBD doesn't use it
--Add a hostName type to the domain schema, and use it instead of genericName, which doesn't include .
--Don't leak host names or ports
--Set the source protocol in qemuParseCommandline
-
-Signed-off-by: Josh Durgin <joshd-L5o5AL9CYN0tUFlbccrkMA@public.gmane.org>
+Signed-off-by: Josh Durgin <joshd@hq.newdream.net>
 ---
- docs/schemas/domain.rng |   11 +++-
- src/conf/domain_conf.c  |   25 +++++++-
- src/conf/domain_conf.h  |    1 +
- src/qemu/qemu_conf.c    |  143 ++++++++++++++++++++++++++++++++++++++++++++---
- 4 files changed, 165 insertions(+), 15 deletions(-)
+ tests/qemuargv2xmltest.c                           |    3 ++
+ .../qemuxml2argv-disk-drive-network-nbd.args       |    1 +
+ .../qemuxml2argv-disk-drive-network-nbd.xml        |   32 ++++++++++++++++++
+ .../qemuxml2argv-disk-drive-network-rbd.args       |    1 +
+ .../qemuxml2argv-disk-drive-network-rbd.xml        |   34 ++++++++++++++++++++
+ .../qemuxml2argv-disk-drive-network-sheepdog.args  |    1 +
+ .../qemuxml2argv-disk-drive-network-sheepdog.xml   |   32 ++++++++++++++++++
+ tests/qemuxml2argvtest.c                           |    6 +++
+ 8 files changed, 110 insertions(+), 0 deletions(-)
+ create mode 100644 tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-nbd.args
+ create mode 100644 tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-nbd.xml
+ create mode 100644 tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-rbd.args
+ create mode 100644 tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-rbd.xml
+ create mode 100644 tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-sheepdog.args
+ create mode 100644 tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-sheepdog.xml
 
-diff --git a/docs/schemas/domain.rng b/docs/schemas/domain.rng
-index 4463884..51aae14 100644
---- a/docs/schemas/domain.rng
-+++ b/docs/schemas/domain.rng
-@@ -626,11 +626,13 @@
-                     <value>sheepdog</value>
-                   </choice>
-                 </attribute>
--                <attribute name="name"/>
-+                <optional>
-+                  <attribute name="name"/>
-+                </optional>
-                 <zeroOrMore>
-                   <element name="host">
-                     <attribute name="name">
--                      <ref name="genericName"/>
-+                      <ref name="hostName"/>
-                     </attribute>
-                     <attribute name="port">
-                       <ref name="unsignedInt"/>
-@@ -2024,6 +2026,11 @@
-       <param name="minInclusive">1</param>
-     </data>
-   </define>
-+  <define name="hostName">
-+    <data type="string">
-+      <param name="pattern">[a-zA-Z0-9\.\-]+</param>
-+    </data>
-+  </define>
-   <define name="PortNumber">
-     <data type="short">
-       <param name="minInclusive">-1</param>
-diff --git a/src/conf/domain_conf.c b/src/conf/domain_conf.c
-index 5e2422b..6b4320a 100644
---- a/src/conf/domain_conf.c
-+++ b/src/conf/domain_conf.c
-@@ -508,21 +508,34 @@ void virDomainInputDefFree(virDomainInputDefPtr def)
+diff --git a/tests/qemuargv2xmltest.c b/tests/qemuargv2xmltest.c
+index d941b0b..adff05a 100644
+--- a/tests/qemuargv2xmltest.c
++++ b/tests/qemuargv2xmltest.c
+@@ -173,6 +173,9 @@ mymain(int argc, char **argv)
+     DO_TEST("disk-drive-cache-v2-wt");
+     DO_TEST("disk-drive-cache-v2-wb");
+     DO_TEST("disk-drive-cache-v2-none");
++    DO_TEST("disk-drive-network-nbd");
++    DO_TEST("disk-drive-network-rbd");
++    DO_TEST("disk-drive-network-sheepdog");
+     DO_TEST("disk-usb");
+     DO_TEST("graphics-vnc");
 
- void virDomainDiskDefFree(virDomainDiskDefPtr def)
- {
-+    unsigned int i;
-+
-     if (!def)
-         return;
-
-     VIR_FREE(def->serial);
-     VIR_FREE(def->src);
--    VIR_FREE(def->hosts);
-     VIR_FREE(def->dst);
-     VIR_FREE(def->driverName);
-     VIR_FREE(def->driverType);
-     virStorageEncryptionFree(def->encryption);
-     virDomainDeviceInfoClear(&def->info);
-
-+    for (i = 0 ; i < def->nhosts ; i++)
-+        virDomainDiskHostDefFree(&def->hosts[i]);
-+
-     VIR_FREE(def);
- }
-
-+void virDomainDiskHostDefFree(virDomainDiskHostDefPtr def)
-+{
-+    if (!def)
-+        return;
-+
-+    VIR_FREE(def->name);
-+    VIR_FREE(def->port);
-+}
-+
- void virDomainControllerDefFree(virDomainControllerDefPtr def)
- {
-     if (!def)
-@@ -1643,7 +1656,12 @@ virDomainDiskDefParseXML(virCapsPtr caps,
-                                              protocol);
-                         goto error;
-                     }
--                    source = virXMLPropString(cur, "name");
-+                    if (!(source = virXMLPropString(cur, "name")) &&
-+                        def->protocol != VIR_DOMAIN_DISK_PROTOCOL_NBD) {
-+                        virDomainReportError(VIR_ERR_INTERNAL_ERROR,
-+                                             _("missing name for disk source"));
-+                        goto error;
-+                    }
-                     host = cur->children;
-                     while (host != NULL) {
-                         if (host->type == XML_ELEMENT_NODE &&
-@@ -1876,8 +1894,7 @@ cleanup:
-     VIR_FREE(target);
-     VIR_FREE(source);
-     while (nhosts > 0) {
--        VIR_FREE(hosts[nhosts - 1].name);
--        VIR_FREE(hosts[nhosts - 1].port);
-+        virDomainDiskHostDefFree(&hosts[nhosts - 1]);
-         nhosts--;
-     }
-     VIR_FREE(hosts);
-diff --git a/src/conf/domain_conf.h b/src/conf/domain_conf.h
-index 6c97289..c1e39ba 100644
---- a/src/conf/domain_conf.h
-+++ b/src/conf/domain_conf.h
-@@ -1070,6 +1070,7 @@ virDomainObjPtr virDomainFindByName(const virDomainObjListPtr doms,
- void virDomainGraphicsDefFree(virDomainGraphicsDefPtr def);
- void virDomainInputDefFree(virDomainInputDefPtr def);
- void virDomainDiskDefFree(virDomainDiskDefPtr def);
-+void virDomainDiskHostDefFree(virDomainDiskHostDefPtr def);
- void virDomainControllerDefFree(virDomainControllerDefPtr def);
- void virDomainFSDefFree(virDomainFSDefPtr def);
- void virDomainNetDefFree(virDomainNetDefPtr def);
-diff --git a/src/qemu/qemu_conf.c b/src/qemu/qemu_conf.c
-index 55e193f..d1368dc 100644
---- a/src/qemu/qemu_conf.c
-+++ b/src/qemu/qemu_conf.c
-@@ -4010,6 +4010,8 @@ qemudBuildCommandLine(virConnectPtr conn,
-     int last_good_net = -1;
-     bool hasHwVirt = false;
-     virCommandPtr cmd;
-+    bool has_rbd_hosts = false;
-+    virBuffer rbd_hosts = VIR_BUFFER_INITIALIZER;
-
-     uname_normalize(&ut);
-
-@@ -4550,6 +4552,7 @@ qemudBuildCommandLine(virConnectPtr conn,
-             int bootable = 0;
-             virDomainDiskDefPtr disk = def->disks[i];
-             int withDeviceArg = 0;
-+            int j;
-
-             /* Unless we have -device, then USB disks need special
-                handling */
-@@ -4599,6 +4602,27 @@ qemudBuildCommandLine(virConnectPtr conn,
-             virCommandAddArg(cmd, optstr);
-             VIR_FREE(optstr);
-
-+            if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK &&
-+                disk->protocol == VIR_DOMAIN_DISK_PROTOCOL_RBD) {
-+                for (j = 0 ; j < disk->nhosts ; j++) {
-+                    if (!has_rbd_hosts) {
-+                        virBufferAddLit(&rbd_hosts, "-m ");
-+                        has_rbd_hosts = true;
-+                    } else {
-+                        virBufferAddLit(&rbd_hosts, ",");
-+                    }
-+                    virDomainDiskHostDefPtr host = &disk->hosts[j];
-+                    if (host->port) {
-+                        virBufferVSprintf(&rbd_hosts, "%s:%s",
-+                                          host->name,
-+                                          host->port);
-+                    } else {
-+                        virBufferVSprintf(&rbd_hosts, "%s",
-+                                          host->name);
-+                    }
-+                }
-+            }
-+
-             if (withDeviceArg) {
-                 if (disk->bus == VIR_DOMAIN_DISK_BUS_FDC) {
-                     virCommandAddArg(cmd, "-global");
-@@ -4621,6 +4645,7 @@ qemudBuildCommandLine(virConnectPtr conn,
-             char dev[NAME_MAX];
-             char file[PATH_MAX];
-             virDomainDiskDefPtr disk = def->disks[i];
-+            int j;
-
-             if (disk->bus == VIR_DOMAIN_DISK_BUS_USB) {
-                 if (disk->device == VIR_DOMAIN_DISK_DEVICE_DISK) {
-@@ -4684,6 +4709,23 @@ qemudBuildCommandLine(virConnectPtr conn,
-                     break;
-                 case VIR_DOMAIN_DISK_PROTOCOL_RBD:
-                     snprintf(file, PATH_MAX, "rbd:%s,", disk->src);
-+                    for (j = 0 ; j < disk->nhosts ; j++) {
-+                        if (!has_rbd_hosts) {
-+                            virBufferAddLit(&rbd_hosts, "-m ");
-+                            has_rbd_hosts = true;
-+                        } else {
-+                            virBufferAddLit(&rbd_hosts, ",");
-+                        }
-+                        virDomainDiskHostDefPtr host = &disk->hosts[j];
-+                        if (host->port) {
-+                            virBufferVSprintf(&rbd_hosts, "%s:%s",
-+                                              host->name,
-+                                              host->port);
-+                        } else {
-+                            virBufferVSprintf(&rbd_hosts, "%s",
-+                                              host->name);
-+                        }
-+                    }
-                     break;
-                 case VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG:
-                     if (disk->nhosts == 0)
-@@ -4703,6 +4745,13 @@ qemudBuildCommandLine(virConnectPtr conn,
-         }
-     }
-
-+    if (virBufferError(&rbd_hosts)) {
-+        virBufferFreeAndReset(&rbd_hosts);
-+        goto no_memory;
-+    }
-+    if (has_rbd_hosts)
-+        virCommandAddEnvPair(cmd, "CEPH_ARGS", virBufferContentAndReset(&rbd_hosts));
-+
-     if (qemuCmdFlags & QEMUD_CMD_FLAG_FSDEV) {
-         for (i = 0 ; i < def->nfss ; i++) {
-             char *optstr;
-@@ -5468,6 +5517,7 @@ static int qemuStringToArgvEnv(const char *args,
-     int envend;
-     int i;
-     const char *curr = args;
-+    const char *start;
-     const char **progenv = NULL;
-     const char **progargv = NULL;
-
-@@ -5475,14 +5525,22 @@ static int qemuStringToArgvEnv(const char *args,
-     while (curr && *curr != '\0') {
-         char *arg;
-         const char *next;
--        if (*curr == '\'') {
--            curr++;
--            next = strchr(curr, '\'');
--        } else if (*curr == '"') {
--            curr++;
--            next = strchr(curr, '"');
-+
-+        start = curr;
-+        /* accept a space in CEPH_ARGS */
-+        if (STRPREFIX(curr, "CEPH_ARGS=-m ")) {
-+            start += strlen("CEPH_ARGS=-m ");
-+        }
-+        if (*start == '\'') {
-+            if (start == curr)
-+                curr++;
-+            next = strchr(start + 1, '\'');
-+        } else if (*start == '"') {
-+            if (start == curr)
-+                curr++;
-+            next = strchr(start + 1, '"');
-         } else {
--            next = strchr(curr, ' ');
-+            next = strchr(start, ' ');
-         }
-         if (!next)
-             next = strchr(curr, '\n');
-@@ -5712,6 +5770,7 @@ qemuParseCommandLineDisk(virCapsPtr caps,
-                     char *host, *port;
-
-                     def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
-+                    def->protocol = VIR_DOMAIN_DISK_PROTOCOL_NBD;
-                     host = def->src + strlen("nbd:");
-                     port = strchr(host, ':');
-                     if (!port) {
-@@ -5743,6 +5802,7 @@ qemuParseCommandLineDisk(virCapsPtr caps,
-                     char *p = def->src;
-
-                     def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
-+                    def->protocol = VIR_DOMAIN_DISK_PROTOCOL_RBD;
-                     def->src = strdup(p + strlen("rbd:"));
-                     if (!def->src) {
-                         virReportOOMError();
-@@ -5755,6 +5815,7 @@ qemuParseCommandLineDisk(virCapsPtr caps,
-                     char *port, *vdi;
-
-                     def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
-+                    def->protocol = VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG;
-                     def->src = strdup(p + strlen("sheepdog:"));
-                     if (!def->src) {
-                         virReportOOMError();
-@@ -5870,7 +5931,8 @@ qemuParseCommandLineDisk(virCapsPtr caps,
-     }
-
-     if (!def->src &&
--        def->device == VIR_DOMAIN_DISK_DEVICE_DISK) {
-+        def->device == VIR_DOMAIN_DISK_DEVICE_DISK &&
-+        def->type != VIR_DOMAIN_DISK_TYPE_NETWORK) {
-         qemuReportError(VIR_ERR_INTERNAL_ERROR,
-                         _("missing file parameter in drive '%s'"), val);
-         virDomainDiskDefFree(def);
-@@ -6790,7 +6852,7 @@ virDomainDefPtr qemuParseCommandLine(virCapsPtr caps,
-                     disk->src = NULL;
-                     break;
-                 case VIR_DOMAIN_DISK_PROTOCOL_RBD:
--                    /* TODO: set monitor hostnames */
-+                    /* handled later since the hosts for all disks are in CEPH_ARGS */
-                     break;
-                 case VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG:
-                     /* disk->src must be [vdiname] or [host]:[port]:[vdiname] */
-@@ -7117,6 +7179,69 @@ virDomainDefPtr qemuParseCommandLine(virCapsPtr caps,
-     }
-
- #undef WANT_VALUE
-+    if (def->ndisks > 0) {
-+        const char *ceph_args = qemuFindEnv(progenv, "CEPH_ARGS");
-+        if (ceph_args) {
-+            char *hosts, *port, *saveptr, *token;
-+            virDomainDiskDefPtr first_rbd_disk = NULL;
-+            for (i = 0 ; i < def->ndisks ; i++) {
-+                virDomainDiskDefPtr disk = def->disks[i];
-+                if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK &&
-+                    disk->protocol == VIR_DOMAIN_DISK_PROTOCOL_RBD) {
-+                    first_rbd_disk = disk;
-+                    break;
-+                }
-+            }
-+
-+            if (!first_rbd_disk) {
-+                qemuReportError(VIR_ERR_INTERNAL_ERROR,
-+                                _("CEPH_ARGS was set without an rbd disk"));
-+                goto error;
-+            }
-+
-+            /* CEPH_ARGS should be: -m host1[:port1][,host2[:port2]]... */
-+            if (!STRPREFIX(ceph_args, "-m ")) {
-+                qemuReportError(VIR_ERR_INTERNAL_ERROR,
-+                                _("could not parse CEPH_ARGS '%s'"), ceph_args);
-+                goto error;
-+            }
-+            hosts = strdup(strchr(ceph_args, ' ') + 1);
-+            if (!hosts)
-+                goto no_memory;
-+            first_rbd_disk->nhosts = 0;
-+            token = strtok_r(hosts, ",", &saveptr);
-+            while (token != NULL) {
-+                if (VIR_REALLOC_N(first_rbd_disk->hosts, first_rbd_disk->nhosts + 1) < 0) {
-+                    VIR_FREE(hosts);
-+                    goto no_memory;
-+                }
-+                port = strchr(token, ':');
-+                if (port) {
-+                    *port++ = '\0';
-+                    port = strdup(port);
-+                    if (!port) {
-+                        VIR_FREE(hosts);
-+                        goto no_memory;
-+                    }
-+                }
-+                first_rbd_disk->hosts[first_rbd_disk->nhosts].port = port;
-+                first_rbd_disk->hosts[first_rbd_disk->nhosts].name = strdup(token);
-+                if (!first_rbd_disk->hosts[first_rbd_disk->nhosts].name) {
-+                    VIR_FREE(hosts);
-+                    goto no_memory;
-+                }
-+                first_rbd_disk->nhosts++;
-+                token = strtok_r(NULL, ",", &saveptr);
-+            }
-+            VIR_FREE(hosts);
-+
-+            if (first_rbd_disk->nhosts == 0) {
-+                qemuReportError(VIR_ERR_INTERNAL_ERROR,
-+                                _("found no rbd hosts in CEPH_ARGS '%s'"), ceph_args);
-+                goto error;
-+            }
-+        }
-+    }
-
-     if (!nographics && def->ngraphics == 0) {
-         virDomainGraphicsDefPtr sdl;
+diff --git a/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-nbd.args b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-nbd.args
+new file mode 100644
+index 0000000..75d74ab
+--- /dev/null
++++ b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-nbd.args
+@@ -0,0 +1 @@
++LC_ALL=C PATH=/bin HOME=/home/test USER=test LOGNAME=test /usr/bin/qemu -S -M pc -m 214 -smp 1 -nographic -monitor unix:/tmp/test-monitor,server,nowait -no-acpi -boot c -drive file=/dev/HostVG/QEMUGuest1,if=ide,bus=0,unit=0 -drive file=nbd:example.org:6000,if=virtio,format=raw -net none -serial none -parallel none -usb
+diff --git a/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-nbd.xml b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-nbd.xml
+new file mode 100644
+index 0000000..863165d
+--- /dev/null
++++ b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-nbd.xml
+@@ -0,0 +1,32 @@
++<domain type='qemu'>
++  <name>QEMUGuest1</name>
++  <uuid>c7a5fdbd-edaf-9455-926a-d65c16db1809</uuid>
++  <memory>219200</memory>
++  <currentMemory>219200</currentMemory>
++  <vcpu>1</vcpu>
++  <os>
++    <type arch='i686' machine='pc'>hvm</type>
++    <boot dev='hd'/>
++  </os>
++  <clock offset='utc'/>
++  <on_poweroff>destroy</on_poweroff>
++  <on_reboot>restart</on_reboot>
++  <on_crash>destroy</on_crash>
++  <devices>
++    <emulator>/usr/bin/qemu</emulator>
++    <disk type='block' device='disk'>
++      <source dev='/dev/HostVG/QEMUGuest1'/>
++      <target dev='hda' bus='ide'/>
++      <address type='drive' controller='0' bus='0' unit='0'/>
++    </disk>
++    <disk type='network' device='disk'>
++      <driver name='qemu' type='raw'/>
++      <source protocol='nbd'>
++        <host name='example.org' port='6000'/>
++      </source>
++      <target dev='vda' bus='virtio'/>
++    </disk>
++    <controller type='ide' index='0'/>
++    <memballoon model='virtio'/>
++  </devices>
++</domain>
+diff --git a/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-rbd.args b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-rbd.args
+new file mode 100644
+index 0000000..7e19beb
+--- /dev/null
++++ b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-rbd.args
+@@ -0,0 +1 @@
++LC_ALL=C PATH=/bin HOME=/home/test USER=test LOGNAME=test CEPH_ARGS=-m mon1.example.org:6321,mon2.example.org:6322,mon3.example.org:6322 /usr/bin/qemu -S -M pc -m 214 -smp 1 -nographic -monitor unix:/tmp/test-monitor,server,nowait -no-acpi -boot c -drive file=/dev/HostVG/QEMUGuest1,if=ide,bus=0,unit=0 -drive file=rbd:pool/image,if=virtio,format=raw -net none -serial none -parallel none -usb
+diff --git a/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-rbd.xml b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-rbd.xml
+new file mode 100644
+index 0000000..118d890
+--- /dev/null
++++ b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-rbd.xml
+@@ -0,0 +1,34 @@
++<domain type='qemu'>
++  <name>QEMUGuest1</name>
++  <uuid>c7a5fdbd-edaf-9455-926a-d65c16db1809</uuid>
++  <memory>219200</memory>
++  <currentMemory>219200</currentMemory>
++  <vcpu>1</vcpu>
++  <os>
++    <type arch='i686' machine='pc'>hvm</type>
++    <boot dev='hd'/>
++  </os>
++  <clock offset='utc'/>
++  <on_poweroff>destroy</on_poweroff>
++  <on_reboot>restart</on_reboot>
++  <on_crash>destroy</on_crash>
++  <devices>
++    <emulator>/usr/bin/qemu</emulator>
++    <disk type='block' device='disk'>
++      <source dev='/dev/HostVG/QEMUGuest1'/>
++      <target dev='hda' bus='ide'/>
++      <address type='drive' controller='0' bus='0' unit='0'/>
++    </disk>
++    <disk type='network' device='disk'>
++      <driver name='qemu' type='raw'/>
++      <source protocol='rbd' name='pool/image'>
++        <host name='mon1.example.org' port='6321'/>
++        <host name='mon2.example.org' port='6322'/>
++        <host name='mon3.example.org' port='6322'/>
++      </source>
++      <target dev='vda' bus='virtio'/>
++    </disk>
++    <controller type='ide' index='0'/>
++    <memballoon model='virtio'/>
++  </devices>
++</domain>
+diff --git a/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-sheepdog.args b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-sheepdog.args
+new file mode 100644
+index 0000000..147378f
+--- /dev/null
++++ b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-sheepdog.args
+@@ -0,0 +1 @@
++LC_ALL=C PATH=/bin HOME=/home/test USER=test LOGNAME=test /usr/bin/qemu -S -M pc -m 214 -smp 1 -nographic -monitor unix:/tmp/test-monitor,server,nowait -no-acpi -boot c -drive file=/dev/HostVG/QEMUGuest1,if=ide,bus=0,unit=0 -drive file=sheepdog:example.org:6000:image,if=virtio,format=raw -net none -serial none -parallel none -usb
+diff --git a/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-sheepdog.xml b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-sheepdog.xml
+new file mode 100644
+index 0000000..5313d75
+--- /dev/null
++++ b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-sheepdog.xml
+@@ -0,0 +1,32 @@
++<domain type='qemu'>
++  <name>QEMUGuest1</name>
++  <uuid>c7a5fdbd-edaf-9455-926a-d65c16db1809</uuid>
++  <memory>219200</memory>
++  <currentMemory>219200</currentMemory>
++  <vcpu>1</vcpu>
++  <os>
++    <type arch='i686' machine='pc'>hvm</type>
++    <boot dev='hd'/>
++  </os>
++  <clock offset='utc'/>
++  <on_poweroff>destroy</on_poweroff>
++  <on_reboot>restart</on_reboot>
++  <on_crash>destroy</on_crash>
++  <devices>
++    <emulator>/usr/bin/qemu</emulator>
++    <disk type='block' device='disk'>
++      <source dev='/dev/HostVG/QEMUGuest1'/>
++      <target dev='hda' bus='ide'/>
++      <address type='drive' controller='0' bus='0' unit='0'/>
++    </disk>
++    <disk type='network' device='disk'>
++      <driver name='qemu' type='raw'/>
++      <source protocol='sheepdog' name='image'>
++        <host name='example.org' port='6000'/>
++      </source>
++      <target dev='vda' bus='virtio'/>
++    </disk>
++    <controller type='ide' index='0'/>
++    <memballoon model='virtio'/>
++  </devices>
++</domain>
+diff --git a/tests/qemuxml2argvtest.c b/tests/qemuxml2argvtest.c
+index 5fe91f1..bb184fc 100644
+--- a/tests/qemuxml2argvtest.c
++++ b/tests/qemuxml2argvtest.c
+@@ -302,6 +302,12 @@ mymain(int argc, char **argv)
+             QEMUD_CMD_FLAG_DRIVE_CACHE_V2 | QEMUD_CMD_FLAG_DRIVE_FORMAT, false);
+     DO_TEST("disk-drive-cache-v2-none", QEMUD_CMD_FLAG_DRIVE |
+             QEMUD_CMD_FLAG_DRIVE_CACHE_V2 | QEMUD_CMD_FLAG_DRIVE_FORMAT, false);
++    DO_TEST("disk-drive-network-nbd", QEMUD_CMD_FLAG_DRIVE |
++            QEMUD_CMD_FLAG_DRIVE_FORMAT, false);
++    DO_TEST("disk-drive-network-rbd", QEMUD_CMD_FLAG_DRIVE |
++            QEMUD_CMD_FLAG_DRIVE_FORMAT, false);
++    DO_TEST("disk-drive-network-sheepdog", QEMUD_CMD_FLAG_DRIVE |
++            QEMUD_CMD_FLAG_DRIVE_FORMAT, false);
+     DO_TEST("disk-usb", 0, false);
+     DO_TEST("disk-usb-device", QEMUD_CMD_FLAG_DRIVE |
+             QEMUD_CMD_FLAG_DEVICE | QEMUD_CMD_FLAG_NODEFCONFIG, false);
 -- 
 1.5.6.5
+
+
