@@ -1,17 +1,17 @@
 From: Daniel Smith <viscous.liquid@gmail.com>
 Subject: SegFault using C binding for RADOS
-Date: Wed, 8 Dec 2010 09:55:22 -0500
-Message-ID: <AANLkTi=sHxL8jkzuJ81ffZtOqU=Kkb46248xpqa+mLzt@mail.gmail.com>
+Date: Wed, 8 Dec 2010 09:55:38 -0500
+Message-ID: <AANLkTik9bL9eTOKqUyu3jD7qzfL7uUBfzNnfLLQUygA1@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:43136 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751669Ab0LHOze convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Dec 2010 09:55:34 -0500
-Received: by wwa36 with SMTP id 36so1259100wwa.1
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Dec 2010 06:55:33 -0800 (PST)
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:60213 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752419Ab0LHOzk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Dec 2010 09:55:40 -0500
+Received: by yxt3 with SMTP id 3so690013yxt.19
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Dec 2010 06:55:39 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
