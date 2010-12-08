@@ -1,53 +1,65 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: installation: where do I start debugging this error?
-Date: Tue, 7 Dec 2010 21:32:49 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1012072132010.5044@cobra.newdream.net>
-References: <AANLkTinfNC1fXqynJ8abp8Ms8GpkLN806MgpCvGaJiCe@mail.gmail.com>
- <1291775597.1958.5.camel@cephhost>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: Re: packaging for RHEL6beta
+Date: Tue, 7 Dec 2010 21:23:33 -0800
+Message-ID: <AANLkTinLOF0oPjUO3G2UwdEeRRyvU9AipkP1Mc3ADWR4@mail.gmail.com>
+References: <AANLkTingoDPDi5xZtywVy5js687+4jmwnz4t+Mt1B0WP@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-425127044-1291786369=:5044"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53097 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751132Ab0LHF17 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Dec 2010 00:27:59 -0500
-In-Reply-To: <1291775597.1958.5.camel@cephhost>
+Received: from mail-fx0-f43.google.com ([209.85.161.43]:41119 "EHLO
+	mail-fx0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752417Ab0LHFaH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Dec 2010 00:30:07 -0500
+Received: by fxm18 with SMTP id 18so689691fxm.2
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Dec 2010 21:30:05 -0800 (PST)
+In-Reply-To: <AANLkTingoDPDi5xZtywVy5js687+4jmwnz4t+Mt1B0WP@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Wu <cpwu@tnsoft.com.cn>
-Cc: Brian Chrisman <brchrisman@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Brian Chrisman <brchrisman@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, Dec 7, 2010 at 2:43 PM, Brian Chrisman <brchrisman@gmail.com> w=
+rote:
+> I've built RPMs for RHEL6beta from the spec file in the rc (checked
+> out as of Monday) using the provided ceph.spec.
+> Thus far I've run into a few issues:
+> 1) Version: =A0 =A0 =A0 0.24~rc ... converted to 0.24.rc (doesn't lik=
+e the ~ symbol)
+> 2) =A0'gui_resources' not getting into BUILDROOT correctly.. I'm
+> commenting it out in my spec file for now figuring it's probably
+> non-essential?
 
---557981400-425127044-1291786369=:5044
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Hmm. I do see an entry in the %files section for gui_resources. I
+guess file a bug if it's not working.
 
-On Wed, 8 Dec 2010, Jeff Wu wrote:
-> Hi ,i take the followng steps , fail to mount,too.
->=20
-> ## save auth secret to a file:
-> $cauthtool --print-key /etc/ceph/keyring.bin > /etc/ceph/secret
-> chmod 600 /etc/ceph/secret
-> ## future ,support,read a secret from a file
-> $ mount -t ceph 172.16.50.10:6789:/foo /mnt/ceph =20
->    -o name=3Dadmin,secretfile=3Dsecret
->=20
-> but ,the following steps ,mount ceph is successful.
->=20
->=20
-> # enable cephx, add a user and secret
->     $ mount -t ceph -o name=3Dadmin,secret=3D<secret>=20
->        1.2.3.4:/ /mnt/ceph
-> $ mount -t ceph 172.16.50.10:6791:/foo /mnt/ceph=20
->     -o name=3Dadmin,secret=3D=FF=FFAQArWtdMiI1uDRAAVbNRMeiwsjK+DEMeB7ewLg=
-=3D=3D=FF=FF
+As you may have guessed, you only need this for the GUI, which is non-e=
+ssential.
 
-The 'secretfile=3D' option only works if /sbin/mount.ceph is present.  Mayb=
-e=20
-that didn't get installed by the rpm?  mount.ceph is also what lets you=20
-specify a hostname instead of an ip.
+Colin
 
-sage
---557981400-425127044-1291786369=:5044--
+> 3) /usr/lib/debug/usr/lib64/rados-classes/libcls_rbd.so.1.0.0.debug i=
+s
+> installed but unpackaged (In spec file I see this is being touched fo=
+r
+> a purpose that's not clearly apparent to me.. the path is mucked up
+> with the usr/lib/debug prepended to usr/lib64.. etc.. so I'm
+> commenting that section out too as it builds a separate directory
+> structure in what looks like the wrong place.)
+> 4) turned off RPATH checking (I'm not an rpm superhero...)
+>
+> With these caveats, the packages build and install on RHEL6beta.
+> Will test a cluster with these packages next.
+>
+> -Brian
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
