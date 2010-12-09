@@ -1,66 +1,40 @@
-From: Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
-Subject: [PATCH] Fix overflow in FileJournal::_open_file()
-Date: Thu, 9 Dec 2010 20:53:22 +0200
-Message-ID: <20101209185322.GD21271@daedalus.cslab.ece.ntua.gr>
+From: Christian Brunner <chb@muc.de>
+Subject: FAILED assert(!missing.is_missing(soid))
+Date: Thu, 9 Dec 2010 20:49:06 +0100
+Message-ID: <AANLkTin3eipR98c4B+g=bsGmTn4p3ncWpQ=N8y1uEx-W@mail.gmail.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-7
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from diomedes.noc.ntua.gr ([147.102.222.220]:62094 "EHLO
-	diomedes.noc.ntua.gr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752243Ab0LIThP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Dec 2010 14:37:15 -0500
-Received: from danaos.cslab.ece.ntua.gr (danaos.cslab.ece.ntua.gr [147.102.3.1])
-	by diomedes.noc.ntua.gr (8.14.4/8.14.4) with ESMTP id oB9IrMr6005878
-	for <ceph-devel@vger.kernel.org>; Thu, 9 Dec 2010 20:53:22 +0200 (EET)
-	(envelope-from vangelis@daedalus.cslab.ece.ntua.gr)
-Received: from daedalus.cslab.ece.ntua.gr (daedalus.cslab.ece.ntua.gr [147.102.3.98])
-	by danaos.cslab.ece.ntua.gr (Postfix) with ESMTP id 7F697B8199
-	for <ceph-devel@vger.kernel.org>; Thu,  9 Dec 2010 20:53:22 +0200 (EET)
-Content-Disposition: inline
+Received: from mail-iw0-f172.google.com ([209.85.214.172]:53517 "EHLO
+	mail-iw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751872Ab0LITtH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Dec 2010 14:49:07 -0500
+Received: by iwn40 with SMTP id 40so3961105iwn.3
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Dec 2010 11:49:06 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Running the unstable branch, mkcephfs fails when trying to create
-a 3GB journal file on the OSDs.
+Hi,
 
-Relevant messages from the osd logfile:
+while doing further stress testing one of our osds died with an assert:
 
-2010-12-09 19:03:54.419737 7fdde4d51720 journal _open_file: unable to extend journal to 18446744072560312320 bytes
-2010-12-09 19:03:54.419789 7fdde4d51720 filestore(/osd) mkjournal error creating journal on /osd/journal
+osd/ReplicatedPG.cc: In function 'void ReplicatedPG::sub_op_modify(MOSDSubOp*)':
+osd/ReplicatedPG.cc:2528: FAILED assert(!missing.is_missing(soid))
+ceph version 0.24~rc (commit:)
+ 1: (ReplicatedPG::sub_op_modify(MOSDSubOp*)+0xd08) [0x488358]
+ 2: (OSD::dequeue_op(PG*)+0x374) [0x4cc284]
+ 3: (ThreadPool::worker()+0x28f) [0x5bd04f]
+ 4: (ThreadPool::WorkThread::entry()+0xd) [0x4f4a1d]
+ 5: (Thread::_entry_func(void*)+0x7) [0x4723c7]
+ 6: (()+0x77e1) [0x7fb5e37327e1]
+ 7: (clone()+0x6d) [0x7fb5e275253d]
 
-The problem is that the calculation of the journal size in bytes
-overflows, in FileJournal::_open_file().
+The rc-version we are using is from Dec 3rd (approximately).
 
-Signed-off-by: Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
+I'm not sure if we can reproduce this, but if you need further debug
+output we will try to.
 
----
- src/os/FileJournal.cc |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/src/os/FileJournal.cc b/src/os/FileJournal.cc
-index 3bb38a8..cd0808f 100644
---- a/src/os/FileJournal.cc
-+++ b/src/os/FileJournal.cc
-@@ -223,7 +223,7 @@ int FileJournal::_open_file(int64_t oldsize, blksize_t blksize,
-   }
-
-   if (create && (oldsize < conf_journal_sz)) {
--    uint64_t newsize = g_conf.osd_journal_size << 20;
-+    uint64_t newsize = (uint64_t)g_conf.osd_journal_size << 20;
-     dout(10) << "_open extending to " << newsize << " bytes" << dendl;
-     ret = ::ftruncate(fd, newsize);
-     if (ret < 0) {
---
-1.7.2.3
-
--- 
-Vangelis Koukis
-vkoukis@cslab.ece.ntua.gr
-OpenPGP public key ID:
-pub  1024D/1D038E97 2003-07-13 Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
-     Key fingerprint = C5CD E02E 2C78 7C10 8A00  53D8 FBFC 3799 1D03 8E97
-
-Our greatest glory is not in never failing,
-but in rising up every time we fail.
-        -- Ralph Waldo Emerson
+Regards,
+Christian
