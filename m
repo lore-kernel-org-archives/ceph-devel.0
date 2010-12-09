@@ -1,95 +1,66 @@
-From: Eric Blake <eblake@redhat.com>
-Subject: Re: [libvirt] [PATCH v2] add network disk support
-Date: Thu, 09 Dec 2010 12:13:49 -0700
-Message-ID: <4D012A6D.3080602@redhat.com>
-References: <20101202131928.GV2502@redhat.com>	<1291620249-19645-1-git-send-email-morita.kazutaka@lab.ntt.co.jp> <20101209110925.GA5313@redhat.com>
+From: Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
+Subject: [PATCH] Fix overflow in FileJournal::_open_file()
+Date: Thu, 9 Dec 2010 20:53:22 +0200
+Message-ID: <20101209185322.GD21271@daedalus.cslab.ece.ntua.gr>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="------------enigB092871972F681C2B82E800A"
+Content-Type: text/plain; charset=iso-8859-7
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:25046 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755215Ab0LITOQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 9 Dec 2010 14:14:16 -0500
-In-Reply-To: <20101209110925.GA5313@redhat.com>
+Received: from diomedes.noc.ntua.gr ([147.102.222.220]:62094 "EHLO
+	diomedes.noc.ntua.gr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752243Ab0LIThP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Dec 2010 14:37:15 -0500
+Received: from danaos.cslab.ece.ntua.gr (danaos.cslab.ece.ntua.gr [147.102.3.1])
+	by diomedes.noc.ntua.gr (8.14.4/8.14.4) with ESMTP id oB9IrMr6005878
+	for <ceph-devel@vger.kernel.org>; Thu, 9 Dec 2010 20:53:22 +0200 (EET)
+	(envelope-from vangelis@daedalus.cslab.ece.ntua.gr)
+Received: from daedalus.cslab.ece.ntua.gr (daedalus.cslab.ece.ntua.gr [147.102.3.98])
+	by danaos.cslab.ece.ntua.gr (Postfix) with ESMTP id 7F697B8199
+	for <ceph-devel@vger.kernel.org>; Thu,  9 Dec 2010 20:53:22 +0200 (EET)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Daniel P. Berrange" <berrange@redhat.com>
-Cc: MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>, libvir-list@redhat.com, ceph-devel@vger.kernel.org, sheepdog@lists.wpkg.org
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigB092871972F681C2B82E800A
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Running the unstable branch, mkcephfs fails when trying to create
+a 3GB journal file on the OSDs.
 
-On 12/09/2010 04:09 AM, Daniel P. Berrange wrote:
-> On Mon, Dec 06, 2010 at 04:24:09PM +0900, MORITA Kazutaka wrote:
->> This patch adds network disk support to libvirt/QEMU.  The currently
->> supported protocols are nbd, rbd, and sheepdog.  The XML syntax is lik=
-e
->> this:
->>
->>     <disk type=3D"network" device=3D"disk">
->>       <driver name=3D"qemu" type=3D"raw" />
->>       <source protocol=3D'rbd|sheepdog|nbd' name=3D"...some image iden=
-tifier...">
->>         <host name=3D"mon1.example.org" port=3D"6000">
->>         <host name=3D"mon2.example.org" port=3D"6000">
->>         <host name=3D"mon3.example.org" port=3D"6000">
->>       </source>
->>       <target dev=3D"vda" bus=3D"virtio" />
->>     </disk>
->>
->>  docs/schemas/domain.rng |   31 +++++++
+Relevant messages from the osd logfile:
 
-Hmm; missing a corresponding update to docs/formatdomain.html.in to
-document the new XML.
+2010-12-09 19:03:54.419737 7fdde4d51720 journal _open_file: unable to extend journal to 18446744072560312320 bytes
+2010-12-09 19:03:54.419789 7fdde4d51720 filestore(/osd) mkjournal error creating journal on /osd/journal
 
-> ACK
+The problem is that the calculation of the journal size in bytes
+overflows, in FileJournal::_open_file().
 
-NACK.  After applying this patch, I get 'make check' failures:
+Signed-off-by: Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
 
-TEST: vmx2xmltest
-      /bin/sh: line 5: 15285 Segmentation fault      (core dumped)
-abs_top_builddir=3D`cd '..'; pwd` abs_top_srcdir=3D`cd '..'; pwd`
-abs_builddir=3D`cd '.'; pwd` abs_srcdir=3D`cd '.'; pwd` CONFIG_HEADER=3D"=
-`cd
-'..'; pwd`/config.h"
-PATH=3D"$abs_top_builddir/src:$abs_top_builddir/daemon:$abs_top_builddir/=
-tools:$PATH"
-SHELL=3D"/bin/sh"
-LIBVIRT_DRIVER_DIR=3D"/home/remote/eblake/libvirt/src/.libs" LC_ALL=3DC
-${dir}$tst
-FAIL: vmx2xmltest
-TEST: xml2vmxtest
-      ...!!!!!!!!!!...............!!!!!!!!!..  39  FAIL
+---
+ src/os/FileJournal.cc |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-I haven't looked into root cause.  Kazutaka, would you mind preparing a v=
-3?
+diff --git a/src/os/FileJournal.cc b/src/os/FileJournal.cc
+index 3bb38a8..cd0808f 100644
+--- a/src/os/FileJournal.cc
++++ b/src/os/FileJournal.cc
+@@ -223,7 +223,7 @@ int FileJournal::_open_file(int64_t oldsize, blksize_t blksize,
+   }
 
---=20
-Eric Blake   eblake@redhat.com    +1-801-349-2682
-Libvirt virtualization library http://libvirt.org
+   if (create && (oldsize < conf_journal_sz)) {
+-    uint64_t newsize = g_conf.osd_journal_size << 20;
++    uint64_t newsize = (uint64_t)g_conf.osd_journal_size << 20;
+     dout(10) << "_open extending to " << newsize << " bytes" << dendl;
+     ret = ::ftruncate(fd, newsize);
+     if (ret < 0) {
+--
+1.7.2.3
 
+-- 
+Vangelis Koukis
+vkoukis@cslab.ece.ntua.gr
+OpenPGP public key ID:
+pub  1024D/1D038E97 2003-07-13 Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
+     Key fingerprint = C5CD E02E 2C78 7C10 8A00  53D8 FBFC 3799 1D03 8E97
 
---------------enigB092871972F681C2B82E800A
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Public key at http://people.redhat.com/eblake/eblake.gpg
-Comment: Using GnuPG with Fedora - http://enigmail.mozdev.org/
-
-iQEcBAEBCAAGBQJNASptAAoJEKeha0olJ0Nq04AH/0PU0z5eEsQf0+7b0vz9ZLRh
-igJBzpfbG6qeNX4WOpmLsgjeYvyo6qBDvHCXbIGlsXFgRznD5Z7+Js3iK3N7nmO1
-9FbrviPS/nGhZdnhMwL+91/3oF4jAI5L5HUgExvUCPRlb1UfAzqlYPb6/RfXj5A/
-uQKje7PnYdnMiufWA/NpFmiqeBUfcjJv5sNPjW034k00/Za0pl8qXQdhQx7TwgjO
-HSfsx3q5sZGk1ygRhtNx08xoNUdD9wu2QjGkSsGypGe0Nk0oQof3GH+N6sbOlZ3g
-sZ79etglgX8lfeDEKR5JOctwEXi+CGJ0qh0CZvwfoKU2baVtj3GhPRBHZZ5/HwI=
-=+WE1
------END PGP SIGNATURE-----
-
---------------enigB092871972F681C2B82E800A--
+Our greatest glory is not in never failing,
+but in rising up every time we fail.
+        -- Ralph Waldo Emerson
