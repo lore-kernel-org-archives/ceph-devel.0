@@ -1,76 +1,74 @@
-From: Eric Blake <eblake@redhat.com>
-Subject: Re: [libvirt] [PATCH v2] add network disk support
-Date: Thu, 09 Dec 2010 14:31:22 -0700
-Message-ID: <4D014AAA.2070502@redhat.com>
-References: <20101202131928.GV2502@redhat.com>	<1291620249-19645-1-git-send-email-morita.kazutaka@lab.ntt.co.jp>	<20101209110925.GA5313@redhat.com> <4D012A6D.3080602@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH] Fix overflow in FileJournal::_open_file()
+Date: Thu, 9 Dec 2010 13:53:14 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1012091353100.29614@cobra.newdream.net>
+References: <20101209185322.GD21271@daedalus.cslab.ece.ntua.gr>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="------------enig417B3CE155CFEEBECF5E96D6"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:31257 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756915Ab0LIVbg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 9 Dec 2010 16:31:36 -0500
-In-Reply-To: <4D012A6D.3080602@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:35442 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757397Ab0LIVsR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Dec 2010 16:48:17 -0500
+In-Reply-To: <20101209185322.GD21271@daedalus.cslab.ece.ntua.gr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-Cc: "Daniel P. Berrange" <berrange@redhat.com>, libvir-list@redhat.com, ceph-devel@vger.kernel.org, sheepdog@lists.wpkg.org, MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
+To: Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig417B3CE155CFEEBECF5E96D6
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Applied, thanks!
 
-On 12/09/2010 12:13 PM, Eric Blake wrote:
-> On 12/09/2010 04:09 AM, Daniel P. Berrange wrote:
->> On Mon, Dec 06, 2010 at 04:24:09PM +0900, MORITA Kazutaka wrote:
->>> This patch adds network disk support to libvirt/QEMU.  The currently
->>> supported protocols are nbd, rbd, and sheepdog.  The XML syntax is li=
-ke
->>> this:
->>>
->=20
->> ACK
->=20
-> NACK.  After applying this patch, I get 'make check' failures:
->=20
-> TEST: vmx2xmltest
->       /bin/sh: line 5: 15285 Segmentation fault      (core dumped)
-
-Weird.  After 'make clean', I was no longer able to reproduce the
-failure; I then did a complete fresh checkout to verify on a pristine
-tree.  I must have had some bad cruft lying around in my tree, and
-wonder what it was about your patch to expose that cruft?
-
-At any rate, given that your patch does not fail after all, I will go
-ahead and push it.  However, we still need a follow-up patch:
-
-> Hmm; missing a corresponding update to docs/formatdomain.html.in to
-> document the new XML.
-
---=20
-Eric Blake   eblake@redhat.com    +1-801-349-2682
-Libvirt virtualization library http://libvirt.org
+sage
 
 
---------------enig417B3CE155CFEEBECF5E96D6
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+On Thu, 9 Dec 2010, Vangelis Koukis wrote:
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Public key at http://people.redhat.com/eblake/eblake.gpg
-Comment: Using GnuPG with Fedora - http://enigmail.mozdev.org/
-
-iQEcBAEBCAAGBQJNAUqqAAoJEKeha0olJ0NqU9UH/RUXrJr+BTNMfgEpCJ7pEO18
-Lk46kI4ndRhVaE+PIjASSYNKwFgOFh07bMZeXPI6PKq1YfFxAEvQcp1i3aeiJCaj
-cC3Cu/0lXx+QbeXwQo1jD4i+CwyumRK4GUUKwEQaYQJLPFYgIHu2m/ApaDgkKx9l
-Oyv52ZMz/jMotKXu0q/72aRzlXk/YpF0HjK4X7FyGA7CUjuUMB+idtqqA1QPPP7s
-nNsT3R2VA42V/KxA4b8RzXSPIvhXyAvrwPZre8QcKOujOWFSrfLSyvGPNJcm/etX
-avLRivoTpIU0LOyBExLoMTZRmEIVRH2p/BQPbYNLFAF3k7vs0aDqdzBSITJe2Qo=
-=0tIM
------END PGP SIGNATURE-----
-
---------------enig417B3CE155CFEEBECF5E96D6--
+> Running the unstable branch, mkcephfs fails when trying to create
+> a 3GB journal file on the OSDs.
+> 
+> Relevant messages from the osd logfile:
+> 
+> 2010-12-09 19:03:54.419737 7fdde4d51720 journal _open_file: unable to extend journal to 18446744072560312320 bytes
+> 2010-12-09 19:03:54.419789 7fdde4d51720 filestore(/osd) mkjournal error creating journal on /osd/journal
+> 
+> The problem is that the calculation of the journal size in bytes
+> overflows, in FileJournal::_open_file().
+> 
+> Signed-off-by: Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
+> 
+> ---
+>  src/os/FileJournal.cc |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/src/os/FileJournal.cc b/src/os/FileJournal.cc
+> index 3bb38a8..cd0808f 100644
+> --- a/src/os/FileJournal.cc
+> +++ b/src/os/FileJournal.cc
+> @@ -223,7 +223,7 @@ int FileJournal::_open_file(int64_t oldsize, blksize_t blksize,
+>    }
+> 
+>    if (create && (oldsize < conf_journal_sz)) {
+> -    uint64_t newsize = g_conf.osd_journal_size << 20;
+> +    uint64_t newsize = (uint64_t)g_conf.osd_journal_size << 20;
+>      dout(10) << "_open extending to " << newsize << " bytes" << dendl;
+>      ret = ::ftruncate(fd, newsize);
+>      if (ret < 0) {
+> --
+> 1.7.2.3
+> 
+> -- 
+> Vangelis Koukis
+> vkoukis@cslab.ece.ntua.gr
+> OpenPGP public key ID:
+> pub  1024D/1D038E97 2003-07-13 Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
+>      Key fingerprint = C5CD E02E 2C78 7C10 8A00  53D8 FBFC 3799 1D03 8E97
+> 
+> Our greatest glory is not in never failing,
+> but in rising up every time we fail.
+>         -- Ralph Waldo Emerson
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
