@@ -1,65 +1,76 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: FAILED assert(!missing.is_missing(soid))
-Date: Thu, 9 Dec 2010 12:16:12 -0800
-Message-ID: <AANLkTikOFkior_NR2sbC1y0Y9wWYPQRkNm=j8GNzZ-Jp@mail.gmail.com>
-References: <AANLkTin3eipR98c4B+g=bsGmTn4p3ncWpQ=N8y1uEx-W@mail.gmail.com>
+From: Eric Blake <eblake@redhat.com>
+Subject: Re: [libvirt] [PATCH v2] add network disk support
+Date: Thu, 09 Dec 2010 14:31:22 -0700
+Message-ID: <4D014AAA.2070502@redhat.com>
+References: <20101202131928.GV2502@redhat.com>	<1291620249-19645-1-git-send-email-morita.kazutaka@lab.ntt.co.jp>	<20101209110925.GA5313@redhat.com> <4D012A6D.3080602@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="------------enig417B3CE155CFEEBECF5E96D6"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f43.google.com ([209.85.161.43]:60216 "EHLO
-	mail-fx0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750789Ab0LIUQN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Dec 2010 15:16:13 -0500
-Received: by fxm18 with SMTP id 18so2880888fxm.2
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Dec 2010 12:16:12 -0800 (PST)
-In-Reply-To: <AANLkTin3eipR98c4B+g=bsGmTn4p3ncWpQ=N8y1uEx-W@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:31257 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756915Ab0LIVbg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 9 Dec 2010 16:31:36 -0500
+In-Reply-To: <4D012A6D.3080602@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chb@muc.de
-Cc: ceph-devel@vger.kernel.org
+Cc: "Daniel P. Berrange" <berrange@redhat.com>, libvir-list@redhat.com, ceph-devel@vger.kernel.org, sheepdog@lists.wpkg.org, MORITA Kazutaka <morita.kazutaka@lab.ntt.co.jp>
 
-Hi Christian,
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig417B3CE155CFEEBECF5E96D6
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-If you still have the logs for the OSD that had the problem, I'd like
-to take a look.
+On 12/09/2010 12:13 PM, Eric Blake wrote:
+> On 12/09/2010 04:09 AM, Daniel P. Berrange wrote:
+>> On Mon, Dec 06, 2010 at 04:24:09PM +0900, MORITA Kazutaka wrote:
+>>> This patch adds network disk support to libvirt/QEMU.  The currently
+>>> supported protocols are nbd, rbd, and sheepdog.  The XML syntax is li=
+ke
+>>> this:
+>>>
+>=20
+>> ACK
+>=20
+> NACK.  After applying this patch, I get 'make check' failures:
+>=20
+> TEST: vmx2xmltest
+>       /bin/sh: line 5: 15285 Segmentation fault      (core dumped)
 
-Colin
+Weird.  After 'make clean', I was no longer able to reproduce the
+failure; I then did a complete fresh checkout to verify on a pristine
+tree.  I must have had some bad cruft lying around in my tree, and
+wonder what it was about your patch to expose that cruft?
+
+At any rate, given that your patch does not fail after all, I will go
+ahead and push it.  However, we still need a follow-up patch:
+
+> Hmm; missing a corresponding update to docs/formatdomain.html.in to
+> document the new XML.
+
+--=20
+Eric Blake   eblake@redhat.com    +1-801-349-2682
+Libvirt virtualization library http://libvirt.org
 
 
-On Thu, Dec 9, 2010 at 11:49 AM, Christian Brunner <chb@muc.de> wrote:
-> Hi,
->
-> while doing further stress testing one of our osds died with an asser=
-t:
->
-> osd/ReplicatedPG.cc: In function 'void ReplicatedPG::sub_op_modify(MO=
-SDSubOp*)':
-> osd/ReplicatedPG.cc:2528: FAILED assert(!missing.is_missing(soid))
-> ceph version 0.24~rc (commit:)
-> =A01: (ReplicatedPG::sub_op_modify(MOSDSubOp*)+0xd08) [0x488358]
-> =A02: (OSD::dequeue_op(PG*)+0x374) [0x4cc284]
-> =A03: (ThreadPool::worker()+0x28f) [0x5bd04f]
-> =A04: (ThreadPool::WorkThread::entry()+0xd) [0x4f4a1d]
-> =A05: (Thread::_entry_func(void*)+0x7) [0x4723c7]
-> =A06: (()+0x77e1) [0x7fb5e37327e1]
-> =A07: (clone()+0x6d) [0x7fb5e275253d]
->
-> The rc-version we are using is from Dec 3rd (approximately).
->
-> I'm not sure if we can reproduce this, but if you need further debug
-> output we will try to.
->
-> Regards,
-> Christian
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--------------enig417B3CE155CFEEBECF5E96D6
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+Comment: Public key at http://people.redhat.com/eblake/eblake.gpg
+Comment: Using GnuPG with Fedora - http://enigmail.mozdev.org/
+
+iQEcBAEBCAAGBQJNAUqqAAoJEKeha0olJ0NqU9UH/RUXrJr+BTNMfgEpCJ7pEO18
+Lk46kI4ndRhVaE+PIjASSYNKwFgOFh07bMZeXPI6PKq1YfFxAEvQcp1i3aeiJCaj
+cC3Cu/0lXx+QbeXwQo1jD4i+CwyumRK4GUUKwEQaYQJLPFYgIHu2m/ApaDgkKx9l
+Oyv52ZMz/jMotKXu0q/72aRzlXk/YpF0HjK4X7FyGA7CUjuUMB+idtqqA1QPPP7s
+nNsT3R2VA42V/KxA4b8RzXSPIvhXyAvrwPZre8QcKOujOWFSrfLSyvGPNJcm/etX
+avLRivoTpIU0LOyBExLoMTZRmEIVRH2p/BQPbYNLFAF3k7vs0aDqdzBSITJe2Qo=
+=0tIM
+-----END PGP SIGNATURE-----
+
+--------------enig417B3CE155CFEEBECF5E96D6--
