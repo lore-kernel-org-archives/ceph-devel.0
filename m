@@ -1,38 +1,32 @@
-From: john@brightbox.co.uk
-Subject: [PATCH] debian: add libcrypto++-dev dependency, remove openssl dependency
-Date: Fri, 10 Dec 2010 18:23:44 +0000
-Message-ID: <1292005424-3821-1-git-send-email-john@brightbox.co.uk>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp181.iad.emailsrvr.com ([207.97.245.181]:60381 "EHLO
-	smtp181.iad.emailsrvr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752342Ab0LJSbr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Dec 2010 13:31:47 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: John Leach <john@brightbox.co.uk>
+From: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Subject: Re: [GIT PULL] Please pull xyzzy fixes
+Date: Sat, 11 Dec 2010 19:22:16 -0800
+Message-ID: <AANLkTim4Y+gG+tRdAivZMJ93e2hESvJed5vjkuzv63Rh@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Trond Myklebust <Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Liam Girdwood <lrg-kDsPt+C1G03kYMGBc/C6ZA@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Alex Elder <aelder@s>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-From: John Leach <john@brightbox.co.uk>
+On Fri, Dec 10, 2010 at 10:05 AM, Trond Myklebust
+<Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org> wrote:
+> Resending pull request after appending Chuck's fix for the nfs_umount() panic.
 
-Signed-off-by: John Leach <john@brightbox.co.uk>
----
- debian/control |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
+[ .. and other people have other similar pull requests - acpi, ceph,
+cifs, xfs etc ]
 
-diff --git a/debian/control b/debian/control
-index bc1247f..12e735d 100644
---- a/debian/control
-+++ b/debian/control
-@@ -4,8 +4,7 @@ Priority: optional
- Homepage: http://ceph.newdream.net/
- Vcs-Git: git://ceph.newdream.net/git/ceph.git
- Vcs-Browser: http://ceph.newdream.net/git/?p=ceph.git;a=summary
--Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.hu>
--Uploaders: Sage Weil <sage@newdream.net>
-+Maintainer: Sage Weil <sage@newdream.net>
- Build-Depends: debhelper (>= 6.0.7~), autotools-dev, autoconf, automake, cdbs, libfuse-dev, libboost-dev, libedit-dev, libcrypto++-dev, libtool, libexpat1-dev, libfcgi-dev, libatomic-ops-dev, libgoogle-perftools-dev, pkg-config, libgtkmm-2.4-dev
- Standards-Version: 3.9.1
- 
--- 
-1.7.1
+Right now I'm traveling without access to my laptop to actually do
+pulls. That was unintentional, but my laptop got co-opted for more
+important stuff (child needed it for school an my other laptop has a
+broken harddisk), so I've just been reading email with my cellphone.
+That allows me to keep up-to-date and mark the stuff that I'm
+scheduling for pulling, but I end up not replying a lot because typing
+is so painful and it does that silly html email thing.
 
+Anyway, this is just a reply to say that I've not lost your emails,
+I'm just effectively partly offline until Monday. I just stole Dirk's
+laptop just to write a reply-to-all (or at least a "reply-to-most").
+
+                                         Linus
