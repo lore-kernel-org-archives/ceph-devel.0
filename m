@@ -1,32 +1,90 @@
-From: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Subject: Re: [GIT PULL] Please pull xyzzy fixes
-Date: Sat, 11 Dec 2010 19:22:16 -0800
-Message-ID: <AANLkTim4Y+gG+tRdAivZMJ93e2hESvJed5vjkuzv63Rh@mail.gmail.com>
+From: Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
+Subject: [PATCH] Fix uninitialized pointer in
+ debug.cc:dout_handle_daemonize().
+Date: Mon, 13 Dec 2010 15:38:36 +0200
+Message-ID: <20101213133836.GH4783@daedalus.cslab.ece.ntua.gr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Trond Myklebust <Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Liam Girdwood <lrg-kDsPt+C1G03kYMGBc/C6ZA@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Alex Elder <aelder@s>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, xfs-VZNHf3L845pBDgjK7y7TUQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="o71xDhNo7p97+qVi"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from ulysses.noc.ntua.gr ([147.102.222.230]:64570 "EHLO
+	ulysses.noc.ntua.gr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932186Ab0LMNim (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Dec 2010 08:38:42 -0500
+Received: from danaos.cslab.ece.ntua.gr (danaos.cslab.ece.ntua.gr [147.102.3.1])
+	by ulysses.noc.ntua.gr (8.14.4/8.14.4) with ESMTP id oBDDcbsr061425
+	for <ceph-devel@vger.kernel.org>; Mon, 13 Dec 2010 15:38:37 +0200 (EET)
+	(envelope-from vangelis@daedalus.cslab.ece.ntua.gr)
+Content-Disposition: inline
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: cven@cslab.ece.ntua.gr
 
-On Fri, Dec 10, 2010 at 10:05 AM, Trond Myklebust
-<Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org> wrote:
-> Resending pull request after appending Chuck's fix for the nfs_umount() panic.
 
-[ .. and other people have other similar pull requests - acpi, ceph,
-cifs, xfs etc ]
+--o71xDhNo7p97+qVi
+Content-Type: text/plain; charset=iso-8859-7
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Right now I'm traveling without access to my laptop to actually do
-pulls. That was unintentional, but my laptop got co-opted for more
-important stuff (child needed it for school an my other laptop has a
-broken harddisk), so I've just been reading email with my cellphone.
-That allows me to keep up-to-date and mark the stuff that I'm
-scheduling for pulling, but I end up not replying a lot because typing
-is so painful and it does that silly html email thing.
+Hello,
 
-Anyway, this is just a reply to say that I've not lost your emails,
-I'm just effectively partly offline until Monday. I just stole Dirk's
-laptop just to write a reply-to-all (or at least a "reply-to-most").
+Starting the MDS from the unstable branch fails instantly with a
+SEGFAULT. The MDS works when started in nodaemon mode, using "-D".
 
-                                         Linus
+The segfault happens in common/debug.cc:dout_handle_daemonize(), which
+attempts to call _doss->handle_stdout_closed() with _doss being NULL.
+
+The following patch calls _dout_open_log() to initialize _doss
+before accessing it.
+
+Signed-off-by: Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
+Signed-off-by: Constantinos Venetsanopoulos <cven@cslab.ece.ntua.gr>
+---
+ src/common/debug.cc |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+diff --git a/src/common/debug.cc b/src/common/debug.cc
+index 10cd6ce..88780f0 100644
+--- a/src/common/debug.cc
++++ b/src/common/debug.cc
+@@ -38,6 +38,11 @@ void _dout_open_log()
+ int dout_handle_daemonize()
+ {
+   Mutex::Locker l(_dout_lock);
++
++  if (_dout_need_open)
++       _dout_open_log();
++
++  assert(_doss);
+   _doss->handle_stdout_closed();
+   _doss->handle_stderr_closed();
+   return _doss->handle_pid_change();
+--
+1.7.2.3
+
+--=20
+Vangelis Koukis
+vkoukis@cslab.ece.ntua.gr
+OpenPGP public key ID:
+pub  1024D/1D038E97 2003-07-13 Vangelis Koukis <vkoukis@cslab.ece.ntua.gr>
+     Key fingerprint =3D C5CD E02E 2C78 7C10 8A00  53D8 FBFC 3799 1D03 8E97
+
+Our greatest glory is not in never failing,
+but in rising up every time we fail.
+        -- Ralph Waldo Emerson
+
+--o71xDhNo7p97+qVi
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk0GIdwACgkQ+/w3mR0DjpfzvQCg+uSs9QhOXKnDeIlMfBsXQY6C
+osEAn2i/HlLopWasTv+g/0lFMzJkWX5Z
+=moAt
+-----END PGP SIGNATURE-----
+
+--o71xDhNo7p97+qVi--
