@@ -1,31 +1,37 @@
-From: Jeff Wu <cpwu@tnsoft.com.cn>
-Subject: How to submit PATCH to ceph ?
-Date: Wed, 15 Dec 2010 11:00:33 +0800
-Message-ID: <1292382033.2484.20.camel@cephhost>
-Reply-To: <cpwu@tnsoft.com.cn>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: How to submit PATCH to ceph ?
+Date: Tue, 14 Dec 2010 21:25:29 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1012142124300.564@cobra.newdream.net>
+References: <1292382033.2484.20.camel@cephhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [210.22.136.227] ([210.22.136.227]:51109 "EHLO
-	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753078Ab0LODEA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Dec 2010 22:04:00 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:47039 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750910Ab0LOFUT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Dec 2010 00:20:19 -0500
+In-Reply-To: <1292382033.2484.20.camel@cephhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Jeff Wu <cpwu@tnsoft.com.cn>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi Jeff,
 
-If we fixed some bugs of ceph and ceph-client-standalone,
-How do we submit the PATCH to ceph.git and ceph-client-standalone.git ?
-Need we register a user at http://ceph.newdream.net ?
+On Wed, 15 Dec 2010, Jeff Wu wrote:
+> If we fixed some bugs of ceph and ceph-client-standalone,
+> How do we submit the PATCH to ceph.git and ceph-client-standalone.git ?
+> Need we register a user at http://ceph.newdream.net ?
+> 
+> Could anybody tell me the detail steps ?
 
-Could anybody tell me the detail steps ?
+The -standalone.git is actually generated automatically based on 
+ceph-client.git (which has the full kernel tree).  Sending patches based 
+on that code is definitely preferred.
 
-Thanks ,
-Jeff C.P.Wu
+If you have found/fixed a bug, though, don't hesitate to send whatever you 
+have!
 
-
-
+Thanks-
+sage
 
