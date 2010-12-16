@@ -1,56 +1,53 @@
-From: Jeff Wu <cpwu@tnsoft.com.cn>
-Subject: Re: How to submit PATCH to ceph ?
-Date: Thu, 16 Dec 2010 09:19:00 +0800
-Message-ID: <1292462340.2484.26.camel@cephhost>
-References: <1292382033.2484.20.camel@cephhost>
-	 <Pine.LNX.4.64.1012142124300.564@cobra.newdream.net>
-Reply-To: <cpwu@tnsoft.com.cn>
+From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+Subject: Patch for 512-byte alignment support for direct I/O
+Date: Thu, 16 Dec 2010 11:24:39 +0800
+Message-ID: <AANLkTim9EGJtD12_XQM=4FgLfQ_eashggu4f4C_AffVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=00163630f8dd10a16004977e98d5
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [210.22.136.227] ([210.22.136.227]:11667 "EHLO
-	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752812Ab0LPBRP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Dec 2010 20:17:15 -0500
-In-Reply-To: <Pine.LNX.4.64.1012142124300.564@cobra.newdream.net>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:47160 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752690Ab0LPDYk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Dec 2010 22:24:40 -0500
+Received: by qwa26 with SMTP id 26so2742180qwa.19
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Dec 2010 19:24:39 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
+--00163630f8dd10a16004977e98d5
+Content-Type: text/plain; charset=UTF-8
 
+Hi Sage,
 
-=E5=9C=A8 2010-12-15=E4=B8=89=E7=9A=84 13:25 +0800=EF=BC=8CSage Weil=E5=
-=86=99=E9=81=93=EF=BC=9A
-> Hi Jeff,
->=20
-> On Wed, 15 Dec 2010, Jeff Wu wrote:
-> > If we fixed some bugs of ceph and ceph-client-standalone,
-> > How do we submit the PATCH to ceph.git and ceph-client-standalone.g=
-it ?
-> > Need we register a user at http://ceph.newdream.net ?
-> >=20
-> > Could anybody tell me the detail steps ?
->=20
-> The -standalone.git is actually generated automatically based on=20
-> ceph-client.git (which has the full kernel tree).  Sending patches ba=
-sed=20
-> on that code is definitely preferred.
->=20
-> If you have found/fixed a bug, though, don't hesitate to send whateve=
-r you=20
-> have!
->=20
-Hi ,sage,
-thanks.
+My direct I/O test still failed (and even crashed the whole system)
+when reading a file on ceph. Attached is my simple test program.
+I tried to fix it with the following patch:
+https://github.com/tcloud/ceph-client-standalone/commit/3e9c611b43a9e03e0a80582b2a3d81e5c8d5ff79
+Would you help to review it? :)
 
-> Thanks-
-> sage
->=20
+Thanks,
+Henry
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--00163630f8dd10a16004977e98d5
+Content-Type: text/x-c++src; charset=US-ASCII; name="directio_test.cpp"
+Content-Disposition: attachment; filename="directio_test.cpp"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_ghr2w4w50
+
+I2luY2x1ZGUgPHVuaXN0ZC5oPgojaW5jbHVkZSA8c3RkaW8uaD4KI2luY2x1ZGUgPHN0ZGxpYi5o
+PgojaW5jbHVkZSA8ZXJybm8uaD4KI2luY2x1ZGUgPGZjbnRsLmg+CiNpbmNsdWRlIDxzdHJpbmcu
+aD4KCmludCBtYWluKGludCBhcmdjLCBjaGFyICphcmd2W10pIHsKCWludCBpOwoJaW50IG4gPSAw
+OwoJdm9pZCAqYnVmID0gMDsKCWludCBmZCA9IG9wZW4oYXJndlsxXSwgT19SRE9OTFkgfCBPX0RJ
+UkVDVCk7CglpZiAoZmQgPCAwKSB7CgkJcHJpbnRmKCJmaWxlIG9wZW4gZXJyb3IgJWRcbiIsIGVy
+cm5vKTsKCQlyZXR1cm4gLTE7Cgl9CgoJbiA9IGxzZWVrKGZkLCAwLCBTRUVLX0VORCk7Cglwcmlu
+dGYoInNlZWsgJWRcbiIsIG4pOwoJbiA9IGxzZWVrKGZkLCAwLCBTRUVLX0NVUik7CglwcmludGYo
+InNlZWsgJWRcbiIsIG4pOwoJbiA9IGxzZWVrKGZkLCA2NjU2LCBTRUVLX1NFVCk7CglwcmludGYo
+InNlZWsgJWRcbiIsIG4pOwoKCW4gPSBwb3NpeF9tZW1hbGlnbigmYnVmLCA1MTIsIDgxOTIpOwoJ
+cHJpbnRmKCJwb3NpeF9tZW1hbGlnbiByZXQgJWQgYnVmICVwXG4iLCBuLCBidWYpOwoJbWVtc2V0
+KGJ1ZiwgMCwgbik7CgoJbiA9IHJlYWQoZmQsIGJ1ZiwgODE5Mik7CglwcmludGYoInJlYWQgJWQg
+Ynl0ZXMgKGVyciAlZClcbiIsIG4sIGVycm5vKTsKCWNoYXIqIGJ1ZjEgPSAoY2hhciopYnVmOwoJ
+Zm9yIChpID0gMDsgaSA8IG47ICsraSkKCQlwcmludGYoIiVjIiwgYnVmMVtpXSk7CglwcmludGYo
+IlxuIik7CglmcmVlKGJ1Zik7CgljbG9zZShmZCk7CglyZXR1cm4gMDsKfQo=
+--00163630f8dd10a16004977e98d5--
