@@ -1,16 +1,17 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 1/2] ceph: fix direct-io on non-page-aligned buffers
-Date: Wed, 15 Dec 2010 21:15:12 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1012152111270.13669@cobra.newdream.net>
+Subject: Re: [PATCH 2/2] ceph: mark user pages dirty on direct-io reads
+Date: Wed, 15 Dec 2010 21:18:40 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1012152115140.13669@cobra.newdream.net>
 References: <1292474959-2834-1-git-send-email-sage@newdream.net>
+ <1292474959-2834-2-git-send-email-sage@newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54702 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:37355 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750918Ab0LPFJ7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Dec 2010 00:09:59 -0500
-In-Reply-To: <1292474959-2834-1-git-send-email-sage@newdream.net>
+	with ESMTP id S1750755Ab0LPFN1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Dec 2010 00:13:27 -0500
+In-Reply-To: <1292474959-2834-2-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
@@ -19,129 +20,98 @@ Cc: Henry C Chang <henry_c_chang@tcloudcomputing.com>
 On Wed, 15 Dec 2010, Sage Weil wrote:
 > From: Henry C Chang <henry_c_chang@tcloudcomputing.com>
 > 
-> The user buffer may be 512-byte aligned, not page-aligned.  We were
-> assuming the buffer was page-aligned and only accounting for
-> non-page-aligned io offsets.
-> 
-> Signed-off-by: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+> For read operation, we have to set the argument _write_ of get_user_pages
+> to 1 since we will write data to pages. Also, we need to SetPageDirty before
+> releasing these pages.
 
-This is unchanged, except for some minor type changes (u64 to unsigned 
-long).  Unfortunately I can't seem to find the test I was using for the 
-other directio alignment bugs (which varied io but not buffer alignment).
+I made one small change from your version (see below).
 
-Anyway, it's in the master branch.  If it looks okay I can send this to 
-Linus for 2.6.37.
+That aside, I have no idea if this patch is the right thing to do.  I 
+thought the page bits were mainly important for the page cache... what do 
+we accomplish by marking user pages dirty this way?
 
 sage
 
-
-
-
+>
+> Signed-off-by: Henry C Chang <henry_c_chang@tcloudcomputing.com>
 > Signed-off-by: Sage Weil <sage@newdream.net>
 > ---
->  fs/ceph/file.c |   31 +++++++++++++++++++------------
->  1 files changed, 19 insertions(+), 12 deletions(-)
+>  fs/ceph/file.c               |    4 ++--
+>  include/linux/ceph/libceph.h |    3 ++-
+>  net/ceph/pagevec.c           |    6 +++---
+>  3 files changed, 7 insertions(+), 6 deletions(-)
 > 
 > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 8d79b89..e860d8f 100644
+> index e860d8f..e0f136d 100644
 > --- a/fs/ceph/file.c
 > +++ b/fs/ceph/file.c
-> @@ -282,7 +282,8 @@ int ceph_release(struct inode *inode, struct file *file)
->  static int striped_read(struct inode *inode,
->  			u64 off, u64 len,
->  			struct page **pages, int num_pages,
-> -			int *checkeof, bool align_to_pages)
-> +			int *checkeof, bool align_to_pages,
-> +			unsigned long buf_align)
->  {
->  	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
->  	struct ceph_inode_info *ci = ceph_inode(inode);
-> @@ -307,7 +308,7 @@ static int striped_read(struct inode *inode,
+> @@ -384,7 +384,7 @@ static ssize_t ceph_sync_read(struct file *file, char __user *data,
 >  
->  more:
->  	if (align_to_pages)
-> -		page_align = (pos - io_align) & ~PAGE_MASK;
-> +		page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
->  	else
->  		page_align = pos & ~PAGE_MASK;
->  	this_len = left;
-> @@ -376,16 +377,18 @@ static ssize_t ceph_sync_read(struct file *file, char __user *data,
->  	struct inode *inode = file->f_dentry->d_inode;
->  	struct page **pages;
->  	u64 off = *poff;
-> -	int num_pages = calc_pages_for(off, len);
-> -	int ret;
-> +	int num_pages, ret;
->  
->  	dout("sync_read on file %p %llu~%u %s\n", file, off, len,
->  	     (file->f_flags & O_DIRECT) ? "O_DIRECT" : "");
->  
-> -	if (file->f_flags & O_DIRECT)
-> +	if (file->f_flags & O_DIRECT) {
-> +		num_pages = calc_pages_for((unsigned long)data, len);
->  		pages = ceph_get_direct_page_vector(data, num_pages);
-> -	else
-> +	} else {
-> +		num_pages = calc_pages_for(off, len);
+>  	if (file->f_flags & O_DIRECT) {
+>  		num_pages = calc_pages_for((unsigned long)data, len);
+> -		pages = ceph_get_direct_page_vector(data, num_pages);
+> +		pages = ceph_get_direct_page_vector(data, num_pages, true);
+>  	} else {
+>  		num_pages = calc_pages_for(off, len);
 >  		pages = ceph_alloc_page_vector(num_pages, GFP_NOFS);
-> +	}
->  	if (IS_ERR(pages))
->  		return PTR_ERR(pages);
->  
-> @@ -400,7 +403,8 @@ static ssize_t ceph_sync_read(struct file *file, char __user *data,
->  		goto done;
->  
->  	ret = striped_read(inode, off, len, pages, num_pages, checkeof,
-> -			   file->f_flags & O_DIRECT);
-> +			   file->f_flags & O_DIRECT,
-> +			   (unsigned long)data & ~PAGE_MASK);
->  
->  	if (ret >= 0 && (file->f_flags & O_DIRECT) == 0)
->  		ret = ceph_copy_page_vector_to_user(pages, data, off, ret);
-> @@ -456,6 +460,7 @@ static ssize_t ceph_sync_write(struct file *file, const char __user *data,
->  	int do_sync = 0;
->  	int check_caps = 0;
->  	int page_align, io_align;
-> +	unsigned long buf_align;
->  	int ret;
->  	struct timespec mtime = CURRENT_TIME;
->  
-> @@ -471,6 +476,7 @@ static ssize_t ceph_sync_write(struct file *file, const char __user *data,
->  		pos = *offset;
->  
->  	io_align = pos & ~PAGE_MASK;
-> +	buf_align = (unsigned long)data & ~PAGE_MASK;
->  
->  	ret = filemap_write_and_wait_range(inode->i_mapping, pos, pos + left);
->  	if (ret < 0)
-> @@ -496,12 +502,15 @@ static ssize_t ceph_sync_write(struct file *file, const char __user *data,
->  	 */
->  more:
->  	len = left;
-> -	if (file->f_flags & O_DIRECT)
-> +	if (file->f_flags & O_DIRECT) {
->  		/* write from beginning of first page, regardless of
->  		   io alignment */
-> -		page_align = (pos - io_align) & ~PAGE_MASK;
-> -	else
-> +		page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
-> +		num_pages = calc_pages_for((unsigned long)data, len);
-> +	} else {
->  		page_align = pos & ~PAGE_MASK;
-> +		num_pages = calc_pages_for(pos, len);
-> +	}
->  	req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
->  				    ceph_vino(inode), pos, &len,
->  				    CEPH_OSD_OP_WRITE, flags,
-> @@ -512,8 +521,6 @@ more:
->  	if (!req)
+> @@ -522,7 +522,7 @@ more:
 >  		return -ENOMEM;
 >  
-> -	num_pages = calc_pages_for(pos, len);
-> -
 >  	if (file->f_flags & O_DIRECT) {
->  		pages = ceph_get_direct_page_vector(data, num_pages);
+> -		pages = ceph_get_direct_page_vector(data, num_pages);
+> +		pages = ceph_get_direct_page_vector(data, num_pages, false);
 >  		if (IS_ERR(pages)) {
+>  			ret = PTR_ERR(pages);
+>  			goto out;
+> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+> index 9e76d35..11992e8 100644
+> --- a/include/linux/ceph/libceph.h
+> +++ b/include/linux/ceph/libceph.h
+> @@ -227,7 +227,8 @@ extern int ceph_open_session(struct ceph_client *client);
+>  extern void ceph_release_page_vector(struct page **pages, int num_pages);
+>  
+>  extern struct page **ceph_get_direct_page_vector(const char __user *data,
+> -						 int num_pages);
+> +						 int num_pages,
+> +						 bool write_page);
+>  extern void ceph_put_page_vector(struct page **pages, int num_pages);
+>  extern void ceph_release_page_vector(struct page **pages, int num_pages);
+>  extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
+> diff --git a/net/ceph/pagevec.c b/net/ceph/pagevec.c
+> index ac34fee..128d5ba 100644
+> --- a/net/ceph/pagevec.c
+> +++ b/net/ceph/pagevec.c
+> @@ -13,18 +13,18 @@
+>   * build a vector of user pages
+>   */
+>  struct page **ceph_get_direct_page_vector(const char __user *data,
+> -					  int num_pages)
+> +					  int num_pages, bool write_page)
+>  {
+>  	struct page **pages;
+>  	int rc;
+>  
+> -	pages = kmalloc(sizeof(*pages) * num_pages, GFP_NOFS);
+> +	pages = kzalloc(sizeof(*pages) * num_pages, GFP_NOFS);
+>  	if (!pages)
+>  		return ERR_PTR(-ENOMEM);
+>  
+>  	down_read(&current->mm->mmap_sem);
+>  	rc = get_user_pages(current, current->mm, (unsigned long)data,
+> -			    num_pages, 0, 0, pages, NULL);
+> +			    num_pages, write_page, 0, pages, NULL);
+>  	up_read(&current->mm->mmap_sem);
+>  	if (rc < 0)
+
+Your version had this as
+	if (rc < num_pages)
+but as far as I can see get_user_pages always returns either the full 
+result, or nothing (the __get_user_pages fail path releases what it has so 
+far).  Hmm, that actually means the kzalloc change isn't needed too, 
+right?
+
+
+>  		goto fail;
 > -- 
 > 1.7.1
 > 
