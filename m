@@ -1,65 +1,94 @@
-From: Jeff Wu <cpwu@tnsoft.com.cn>
+From: Laszlo Boszormenyi <gcs@debian.hu>
 Subject: Re: stripping of ceph class objects
-Date: Fri, 17 Dec 2010 14:53:36 +0800
-Message-ID: <1292568816.1795.42.camel@cephhost>
+Date: Fri, 17 Dec 2010 11:49:02 +0100
+Message-ID: <1292582942.3920.273.camel@julia.gcs.org.hu>
 References: <AANLkTiko9b3h46WcQU_z8PMwMatmRc1Jh-OY4S6j0R=M@mail.gmail.com>
-Reply-To: <cpwu@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary="=-m66f4DKKRxTiEaajP/T8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [210.22.136.227] ([210.22.136.227]:3457 "EHLO
-	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751226Ab0LQH2X (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Dec 2010 02:28:23 -0500
+Received: from mail.routers.hu ([212.40.96.82]:60856 "EHLO mail.routers.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753683Ab0LQKtY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 17 Dec 2010 05:49:24 -0500
 In-Reply-To: <AANLkTiko9b3h46WcQU_z8PMwMatmRc1Jh-OY4S6j0R=M@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laszlo Boszormenyi <gcs@debian.hu>, Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: ceph-devel@vger.kernel.org, sage <sage@newdream.net>
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
 
+--=-m66f4DKKRxTiEaajP/T8
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 
-=E5=9C=A8 2010-12-17=E4=BA=94=E7=9A=84 07:35 +0800=EF=BC=8CYehuda Sadeh=
- Weinraub=E5=86=99=E9=81=93=EF=BC=9A
-> Hi Laszlo,
->=20
+Hi Yehuda,
+
+On Thu, 2010-12-16 at 15:35 -0800, Yehuda Sadeh Weinraub wrote:
 >  we just installed the latest ceph debian packages and it seems that
 > the class objects (that are installed in /usr/lib/rados-classes/) are
-> stripped. We need to keep a few symbols visible on those shared
-> objects, namely, all the symbols that start with '__cls_'. Our regula=
-r
+> stripped. [...] Our regular
 > automake resulted binaries keeps those symbols, but I guess that the
 > debian packaging strips them.
+ Indeed, the packaging stripped them. The attached patch fixes this
+issue. Also ceph.lintian should be ceph.lintian-overrides .
+I'm a bit confused, why ceph should depend explicitly on binutils? I may
+understand libedit2 as ceph build depends on its -dev counterpart; but I
+couldn't find a binary that is linked with it.
 
-Hi ,
-If only stripped debugging symbols and sections,
-Could which keep these symbols ?
+Sage, is it OK if I commit this patch?
 
-Like this:
-------------
-strip --strip--debug rados-classes/libcls_rbd.so.1.0.0
-strip --strip--debug libceph.so.1.0.0=20
-strip --strip--debug libcrush.so.1.0.0 =20
-strip --strip--debug librados.so.1.0.0 =20
+Cheers,
+Laszlo/GCS
 
+--=-m66f4DKKRxTiEaajP/T8
+Content-Disposition: attachment; filename="ceph-packaging.diff"
+Content-Type: text/x-patch; name="ceph-packaging.diff"; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 
-> These symbols have the class name and version in them, which helps us
-> in cases where the ceph installation is running on a cluster that
-> consists of multiple architectures. A script running on the monitor
-> thus should be able to identify the class name and version no matter
-> what its architecture is.
->=20
-> Thanks,
-> Yehuda
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/debian/ceph.lintian-overrides b/debian/ceph.lintian-overrides
+index 6463e89..566fc33 100644
+--- a/debian/ceph.lintian-overrides
++++ b/debian/ceph.lintian-overrides
+@@ -1,4 +1,5 @@
+ #
+ # the rados classes should NOT be stripped.
+ #
+-ceph binary: unstripped-binary-or-object ./usr/lib/rados-classes/libcls_rbd.so.1.0.0
++ceph: unstripped-binary-or-object ./usr/lib/rados-classes/libcls_rbd.so.1.0.0
++
+diff --git a/debian/control b/debian/control
+index bc1247f..d3dc2bf 100644
+--- a/debian/control
++++ b/debian/control
+@@ -11,7 +11,7 @@ Standards-Version: 3.9.1
+ 
+ Package: ceph
+ Architecture: any
+-Depends: ${shlibs:Depends}, ${misc:Depends}, libedit2, hdparm, binutils
++Depends: ${shlibs:Depends}, ${misc:Depends}, hdparm
+ Recommends: ceph-client-tools, ceph-fuse, libceph1, librados1, libcrush1, btrfs-tools
+ Description: distributed storage and file system
+  Ceph is a distributed storage and network file system designed to provide
+diff --git a/debian/rules b/debian/rules
+index 5b99834..1941750 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -61,14 +61,13 @@ binary-arch: build install
+ 	dh_lintian
+ 	dh_link
+ 
+-	dh_strip -pceph --dbg-package=ceph-dbg
++	dh_strip -pceph --dbg-package=ceph-dbg -k --exclude=libcls_
+ 	dh_strip -pceph-fuse --dbg-package=ceph-fuse-dbg
+ 	dh_strip -pceph-client-tools --dbg-package=ceph-client-tools-dbg
+ 	dh_strip -plibcrush1 --dbg-package=libcrush1-dbg
+ 	dh_strip -plibrados1 --dbg-package=librados1-dbg
+ 	dh_strip -plibceph1 --dbg-package=libceph1-dbg
+ 	dh_strip -pradosgw --dbg-package=radosgw-dbg
+-#	dh_strip -k --exclude=libcls_
+ 
+ 	dh_compress
+ 	dh_fixperms
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--=-m66f4DKKRxTiEaajP/T8--
+
