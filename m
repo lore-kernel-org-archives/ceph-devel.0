@@ -1,43 +1,35 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: stripping of ceph class objects
-Date: Fri, 17 Dec 2010 08:49:15 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1012170847360.10393@cobra.newdream.net>
-References: <AANLkTiko9b3h46WcQU_z8PMwMatmRc1Jh-OY4S6j0R=M@mail.gmail.com>
- <1292582942.3920.273.camel@julia.gcs.org.hu>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Tatsuya Kawano <tatsuya6502@gmail.com>
+Subject: Controlling placement groups via RADOS
+Date: Sun, 19 Dec 2010 20:05:09 +0900
+Message-ID: <7D359599-D49F-4F0E-B422-7CC745F12166@gmail.com>
+Mime-Version: 1.0 (Apple Message framework v1082)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49673 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753136Ab0LQQoA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Dec 2010 11:44:00 -0500
-In-Reply-To: <1292582942.3920.273.camel@julia.gcs.org.hu>
+Received: from mail-px0-f179.google.com ([209.85.212.179]:44207 "EHLO
+	mail-px0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753030Ab0LSLFO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Dec 2010 06:05:14 -0500
+Received: by pxi20 with SMTP id 20so566164pxi.10
+        for <ceph-devel@vger.kernel.org>; Sun, 19 Dec 2010 03:05:13 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laszlo Boszormenyi <gcs@debian.hu>
-Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, 17 Dec 2010, Laszlo Boszormenyi wrote:
-> Hi Yehuda,
-> 
-> On Thu, 2010-12-16 at 15:35 -0800, Yehuda Sadeh Weinraub wrote:
-> >  we just installed the latest ceph debian packages and it seems that
-> > the class objects (that are installed in /usr/lib/rados-classes/) are
-> > stripped. [...] Our regular
-> > automake resulted binaries keeps those symbols, but I guess that the
-> > debian packaging strips them.
->  Indeed, the packaging stripped them. The attached patch fixes this
-> issue. Also ceph.lintian should be ceph.lintian-overrides .
+Hi, 
 
-Thanks.
+When I use RADOS, is there any way to store a group of objects into the same placement group? What are the relationships between pool, object and placement group?
 
-> I'm a bit confused, why ceph should depend explicitly on binutils? I may
-> understand libedit2 as ceph build depends on its -dev counterpart; but I
-> couldn't find a binary that is linked with it.
+I'm a contributor of Apache HBase. HBase is a distributed, highly scalable database built on top of Hadoop Distributed File System (HDFS). I'd like to develop an adapter to store HBase's journals and data files onto RADOS instead of HDFS. Since HBase worker nodes (called Region Server) are collocated on the servers who are running OSDs, I'd like to take advantage of data locality. A Region Server writes journals and periodically flushes data files, and I want to store the primary copy of all these objects to the local OSD, so that the Region Server can read them from the OSD without wasting network bandwidth. 
 
-cclsinfo uses 'nm', which is in binutils.  And ceph is linked against 
--ledit.
+Thanks, 
+Tatsuya 
 
-I committed the rest.  Thanks!
-sage
+
+--
+Tatsuya Kawano (Mr.)
+Tokyo, Japan
+
+http://twitter.com/#!/tatsuya6502
+
 
