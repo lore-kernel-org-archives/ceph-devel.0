@@ -1,38 +1,43 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Example of RADOS AIO?
-Date: Sun, 19 Dec 2010 11:19:15 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1012191116560.10950@cobra.newdream.net>
-References: <7D2A2270-AEE9-4FE2-810F-E84BC0B2BD6A@gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: Controlling placement groups via RADOS
+Date: Sun, 19 Dec 2010 12:45:12 -0800
+Message-ID: <2F3AA09A-B624-4633-BD55-EC2C0B2016D9@cs.ucsc.edu>
+References: <7D359599-D49F-4F0E-B422-7CC745F12166@gmail.com> <Pine.LNX.4.64.1012191102170.10950@cobra.newdream.net>
+Mime-Version: 1.0 (Apple Message framework v1082)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45760 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932396Ab0LSTNx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Dec 2010 14:13:53 -0500
-In-Reply-To: <7D2A2270-AEE9-4FE2-810F-E84BC0B2BD6A@gmail.com>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:60762 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932471Ab0LSUpS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Dec 2010 15:45:18 -0500
+In-Reply-To: <Pine.LNX.4.64.1012191102170.10950@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tatsuya Kawano <tatsuya6502@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Tatsuya Kawano <tatsuya6502@gmail.com>, ceph-devel@vger.kernel.org
 
-On Sun, 19 Dec 2010, Tatsuya Kawano wrote:
-> Is there any example of asynchronous IO on RADOS (librados)? When I 
-> write some bytes to an object, I'm only interested on the ack, which 
-> means writes are applied to all the OSDs within the same placement group 
-> but not yet committed to the disks. I'll use this feature to write HBase 
-> journals.
+> There are also a couple FileSystem implementations that replace HDFS with 
+> Ceph.  One uses the libceph userspace client, and one relies on the 
+> kernel's support and uses a few ioctls to control/expose file placement.  
+> I wonder if that would also meet your needs?
 
-There is an example in the rados_bencher.h file, and in 
-testrados[pp].c[c].  
+The version that uses the native kernel Ceph client is available for
+Hadoop 0.21 in the following Git branch:
 
-One thing to keep in mind, though, is that in some cases commit is 
-actually faster.  Sometimes writing to the fs can be bursty (latency 
-spikes while btrfs is doing a commit).  If you have a writeahead journal, 
-the commit always comes first.  And if you have a fast journal device 
-(SSD, NVRAM, RAID card with NVRAM, etc.) it will also be predictably fast.
+    git://github.com/noahdesu/hadoop-common.git haceph/0.21-mimic-rawlocal
 
-And if it's a journal you rely on for consistency, I'd be very careful 
-about relaxing your safety guarantees!
+The JNI code that interfaces to the Ceph IOCTLs is integrated with
+the Hadoop native-code feature. To compile simply use:
 
-sage
+    ant -Dcompile.native=true -Dnative.ceph.srcdir=/path/to/ceph <targets>
+
+Note that by default Hadoop native code builds some compression libraries,
+thus you'll need to make sure that zlib development files are installed on the
+system (zlib1g-dev on Debian).
+
+Finally, the file system URI scheme to use is:
+
+    "ceph:/path/to/mount".
+
+- Noah
