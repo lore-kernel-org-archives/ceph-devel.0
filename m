@@ -1,43 +1,45 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: Controlling placement groups via RADOS
-Date: Sun, 19 Dec 2010 12:45:12 -0800
-Message-ID: <2F3AA09A-B624-4633-BD55-EC2C0B2016D9@cs.ucsc.edu>
-References: <7D359599-D49F-4F0E-B422-7CC745F12166@gmail.com> <Pine.LNX.4.64.1012191102170.10950@cobra.newdream.net>
-Mime-Version: 1.0 (Apple Message framework v1082)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Sage Weil <sage@newdream.net>
+Subject: [PATCH 1/5] ceph: fix msgr_init error path
+Date: Mon, 20 Dec 2010 11:15:27 -0800
+Message-ID: <1292872531-18396-2-git-send-email-sage@newdream.net>
+References: <1292872531-18396-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:60762 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932471Ab0LSUpS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Dec 2010 15:45:18 -0500
-In-Reply-To: <Pine.LNX.4.64.1012191102170.10950@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:41941 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932628Ab0LTTPe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Dec 2010 14:15:34 -0500
+In-Reply-To: <1292872531-18396-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Tatsuya Kawano <tatsuya6502@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@newdream.net>
 
-> There are also a couple FileSystem implementations that replace HDFS with 
-> Ceph.  One uses the libceph userspace client, and one relies on the 
-> kernel's support and uses a few ioctls to control/expose file placement.  
-> I wonder if that would also meet your needs?
+create_workqueue() returns NULL on failure.
 
-The version that uses the native kernel Ceph client is available for
-Hadoop 0.21 in the following Git branch:
+Signed-off-by: Sage Weil <sage@newdream.net>
+---
+ net/ceph/messenger.c |    8 +++-----
+ 1 files changed, 3 insertions(+), 5 deletions(-)
 
-    git://github.com/noahdesu/hadoop-common.git haceph/0.21-mimic-rawlocal
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 1c7a2ec..b6ff4a1 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -97,11 +97,9 @@ struct workqueue_struct *ceph_msgr_wq;
+ int ceph_msgr_init(void)
+ {
+ 	ceph_msgr_wq = create_workqueue("ceph-msgr");
+-	if (IS_ERR(ceph_msgr_wq)) {
+-		int ret = PTR_ERR(ceph_msgr_wq);
+-		pr_err("msgr_init failed to create workqueue: %d\n", ret);
+-		ceph_msgr_wq = NULL;
+-		return ret;
++	if (!ceph_msgr_wq) {
++		pr_err("msgr_init failed to create workqueue\n");
++		return -ENOMEM;
+ 	}
+ 	return 0;
+ }
+-- 
+1.6.6.1
 
-The JNI code that interfaces to the Ceph IOCTLs is integrated with
-the Hadoop native-code feature. To compile simply use:
-
-    ant -Dcompile.native=true -Dnative.ceph.srcdir=/path/to/ceph <targets>
-
-Note that by default Hadoop native code builds some compression libraries,
-thus you'll need to make sure that zlib development files are installed on the
-system (zlib1g-dev on Debian).
-
-Finally, the file system URI scheme to use is:
-
-    "ceph:/path/to/mount".
-
-- Noah
