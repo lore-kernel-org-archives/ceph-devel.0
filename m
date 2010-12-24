@@ -1,74 +1,47 @@
-From: "Franklin, Armelle S" <armelle.s.franklin@lmco.com>
-Subject: RE: EXTERNAL: Re: [ceph-commit] File System Security Labeling and Extended Attributes
-Date: Thu, 23 Dec 2010 17:48:55 -0500
-Message-ID: <28F38CD608CAC34EB06B28AD2046A57D958993F4@HVXMSP2.us.lmco.com>
-References: <28F38CD608CAC34EB06B28AD2046A57D95789028@HVXMSP2.us.lmco.com>
- <AANLkTikvf88Xyjki0c2BZYfLd+p4AsGD7SuEjn=6rk5j@mail.gmail.com>
+From: Jesper Juhl <jj@chaosbits.net>
+Subject: [PATCH] ceph: Always free allocated memory in osdmap_decode()
+Date: Fri, 24 Dec 2010 23:01:12 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1012242258160.28973@swampdragon.chaosbits.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailfo01.lmco.com ([192.31.106.12]:49935 "EHLO
-	mailfo01.lmco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751944Ab0LWWtF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Dec 2010 17:49:05 -0500
-In-reply-to: <AANLkTikvf88Xyjki0c2BZYfLd+p4AsGD7SuEjn=6rk5j@mail.gmail.com>
-Content-language: en-US
+Received: from swampdragon.chaosbits.net ([90.184.90.115]:22275 "EHLO
+	swampdragon.chaosbits.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753022Ab0LXWLE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Dec 2010 17:11:04 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, netdev@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-Thank you so much for your answers Greg.  That is exactly what I needed=
-=2E
+Always free memory allocated to 'pi' in 
+net/ceph/osdmap.c::osdmap_decode().
 
- - Armelle
+Signed-off-by: Jesper Juhl <jj@chaosbits.net>
+---
+ osdmap.c |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
------Original Message-----
-=46rom: gfarnum@gmail.com [mailto:gfarnum@gmail.com] On Behalf Of Grego=
-ry Farnum
-Sent: Wednesday, December 22, 2010 11:21 PM
-To: Franklin, Armelle S
-Cc: ceph-devel@vger.kernel.org
-Subject: EXTERNAL: Re: [ceph-commit] File System Security Labeling and =
-Extended Attributes
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index d73f3f6..71603ac 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -605,8 +605,10 @@ struct ceph_osdmap *osdmap_decode(void **p, void *end)
+ 			goto bad;
+ 		}
+ 		err = __decode_pool(p, end, pi);
+-		if (err < 0)
++		if (err < 0) {
++			kfree(pi);
+ 			goto bad;
++		}
+ 		__insert_pg_pool(&map->pg_pools, pi);
+ 	}
+ 
 
-On Wed, Dec 22, 2010 at 10:33 AM, Franklin, Armelle S
-<armelle.s.franklin@lmco.com> wrote:
-> My name is Armelle Franklin.=A0 I am a software engineer with the Cen=
-tralized
-> Supercomputer Facility.=A0 My team is writing a paper that identifies=
- the
-> various current, new and upcoming technologies in the High Performanc=
-e
-> Computing domain for our customer.=A0 I am focused on Storage Softwar=
-e (namely
-> File Systems for Supercomputers).=A0 We support a Multi-Level Securit=
-y
-> infrastructure and would like more information about whether your pro=
-duct,
-> Ceph, supports the following features:
->
-> -=A0=A0=A0=A0=A0=A0=A0=A0=A0 Extended Attributes (What sort of extend=
-ed attributes (file
-> metadata) does the file system support/offer?)
-Yes, it supports Linux xattrs. I think the limits are the same as
-btrfs offers, if not they're a superset.
->
-> -=A0=A0=A0=A0=A0=A0=A0=A0=A0 POSIX Compliant???
-Yep, 100% POSIX-y.
-> -=A0=A0=A0=A0=A0=A0=A0=A0=A0 Security Labeling (Can the user/administ=
-rator explicitly access
-> security labeling for files?)
-While the answer is a little complicated, if you're asking for
-specific labeling beyond what the kernel does by default (no SELinux)
-the answer is basically no.
-Depending on use case you can set up certain files to go into pools,
-though, and it is possible to deny access on pool granularity. If
-you're interested in this I suggest you take a look through the wiki.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Jesper Juhl <jj@chaosbits.net>            http://www.chaosbits.net/
+Don't top-post http://www.catb.org/~esr/jargon/html/T/top-post.html
+Plain text mails only, please.
+
