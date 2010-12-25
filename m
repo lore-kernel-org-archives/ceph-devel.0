@@ -1,74 +1,41 @@
-From: richard -rw- weinberger <richard.weinberger@gmail.com>
-Subject: Re: [PATCH] Ceph: Fix use-after-free in destroy_fs_client()
-Date: Sat, 25 Dec 2010 22:16:31 +0100
-Message-ID: <AANLkTikw_2ztHC4Q0e=QoJ7RjuAXGpX5u0nTjtbdECXa@mail.gmail.com>
-References: <alpine.LNX.2.00.1012251858190.10759@swampdragon.chaosbits.net>
+From: Jesper Juhl <jj@chaosbits.net>
+Subject: Re: [PATCH] Ceph: Fix a use-after-free bug in
+ ceph_destroy_client().
+Date: Sat, 25 Dec 2010 22:24:57 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1012252223380.10759@swampdragon.chaosbits.net>
+References: <alpine.LNX.2.00.1012251914370.10759@swampdragon.chaosbits.net> <AANLkTik+yrpY8T69w_RQ84ZbRqwkjvFhvxHLBvU14N3f@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:57585 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751637Ab0LYVQe convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Dec 2010 16:16:34 -0500
-In-Reply-To: <alpine.LNX.2.00.1012251858190.10759@swampdragon.chaosbits.net>
+Received: from swampdragon.chaosbits.net ([90.184.90.115]:16887 "EHLO
+	swampdragon.chaosbits.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751785Ab0LYVem (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Dec 2010 16:34:42 -0500
+In-Reply-To: <AANLkTik+yrpY8T69w_RQ84ZbRqwkjvFhvxHLBvU14N3f@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jesper Juhl <jj@chaosbits.net>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Sage Weil <sage@newdream.net>
+To: richard -rw- weinberger <richard.weinberger@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, netdev@vger.kernel.org, Sage Weil <sage@newdream.net>, "David S. Miller" <davem@davemloft.net>
 
-On Sat, Dec 25, 2010 at 7:01 PM, Jesper Juhl <jj@chaosbits.net> wrote:
-> Hi,
->
-> In fs/ceph/super.c::destroy_fs_client() the pointer 'fsc' is freed by
-> kfree() and subsequently used in a call to dout() - use after free bu=
-g.
-> Easily fixed by simply moving the kfree() call after the dout() call.
+On Sat, 25 Dec 2010, richard -rw- weinberger wrote:
 
-As I sad before, %p reads only the address.
+> On Sat, Dec 25, 2010 at 7:17 PM, Jesper Juhl <jj@chaosbits.net> wrote:
+> > Hello,
+> >
+> > In net/ceph/ceph_common.c::ceph_destroy_client() the pointer 'client' is
+> > freed by kfree() and subsequently used in a call to dout() - use after
+> > free bug.
+> 
+> Not really. %p reads only the address of "client".
+> kfree() does not alter this address.
+> 
 
-> Signed-off-by: Jesper Juhl <jj@chaosbits.net>
-> ---
-> =A0super.c | =A0 =A02 +-
-> =A01 file changed, 1 insertion(+), 1 deletion(-)
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 08b460a..7373594 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -498,8 +498,8 @@ void destroy_fs_client(struct ceph_fs_client *fsc=
-)
->
-> =A0 =A0 =A0 =A0ceph_destroy_client(fsc->client);
->
-> - =A0 =A0 =A0 kfree(fsc);
-> =A0 =A0 =A0 =A0dout("destroy_fs_client %p done\n", fsc);
-> + =A0 =A0 =A0 kfree(fsc);
-> =A0}
->
-> =A0/*
->
->
-> --
-> Jesper Juhl <jj@chaosbits.net> =A0 =A0 =A0 =A0 =A0 =A0http://www.chao=
-sbits.net/
-> Don't top-post http://www.catb.org/~esr/jargon/html/T/top-post.html
-> Plain text mails only, please.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kerne=
-l" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at =A0http://www.tux.org/lkml/
->
+Ok, I see your point and you are correct. But still, the patch does not 
+change behaviour and it makes it absolutely clear that there's no 
+use-after-free bug, so it might still have merit... or?
 
+-- 
+Jesper Juhl <jj@chaosbits.net>            http://www.chaosbits.net/
+Don't top-post http://www.catb.org/~esr/jargon/html/T/top-post.html
+Plain text mails only, please.
 
-
---=20
-Thanks,
-//richard
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
