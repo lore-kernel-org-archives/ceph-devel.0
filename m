@@ -1,44 +1,44 @@
 From: Jesper Juhl <jj@chaosbits.net>
-Subject: [PATCH] Ceph: Fix use-after-free in destroy_fs_client()
-Date: Sat, 25 Dec 2010 19:01:05 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1012251858190.10759@swampdragon.chaosbits.net>
+Subject: [PATCH] Ceph: Fix use-after-free bug in ceph_messenger_destroy()
+Date: Sat, 25 Dec 2010 19:11:41 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1012251908410.10759@swampdragon.chaosbits.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from swampdragon.chaosbits.net ([90.184.90.115]:14227 "EHLO
+Received: from swampdragon.chaosbits.net ([90.184.90.115]:14379 "EHLO
 	swampdragon.chaosbits.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750977Ab0LYSKv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Dec 2010 13:10:51 -0500
+	with ESMTP id S1750977Ab0LYSV1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Dec 2010 13:21:27 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Sage Weil <sage@newdream.net>
+Cc: netdev@vger.kernel.org, linux-kernel@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, Sage Weil <sage@newdream.net>
 
 Hi,
 
-In fs/ceph/super.c::destroy_fs_client() the pointer 'fsc' is freed by 
-kfree() and subsequently used in a call to dout() - use after free bug.
+In net/ceph/messenger.c::ceph_messenger_destroy() the pointer 'msgr' is 
+freed by kfree() and subsequently used in a call to dout() - use after 
+free bug.
 Easily fixed by simply moving the kfree() call after the dout() call.
 
 Signed-off-by: Jesper Juhl <jj@chaosbits.net>
 ---
- super.c |    2 +-
+ messenger.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 08b460a..7373594 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -498,8 +498,8 @@ void destroy_fs_client(struct ceph_fs_client *fsc)
- 
- 	ceph_destroy_client(fsc->client);
- 
--	kfree(fsc);
- 	dout("destroy_fs_client %p done\n", fsc);
-+	kfree(fsc);
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index b6ff4a1..26514a7 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -2131,8 +2131,8 @@ void ceph_messenger_destroy(struct ceph_messenger *msgr)
+ 	dout("destroy %p\n", msgr);
+ 	kunmap(msgr->zero_page);
+ 	__free_page(msgr->zero_page);
+-	kfree(msgr);
+ 	dout("destroyed messenger %p\n", msgr);
++	kfree(msgr);
  }
+ EXPORT_SYMBOL(ceph_messenger_destroy);
  
- /*
-
 
 -- 
 Jesper Juhl <jj@chaosbits.net>            http://www.chaosbits.net/
