@@ -1,49 +1,30 @@
-From: Dan Carpenter <error27@gmail.com>
-Subject: Re: [PATCH] Ceph: Fix a use-after-free bug in
- ceph_destroy_client().
-Date: Sun, 26 Dec 2010 01:46:58 +0300
-Message-ID: <20101225224658.GC19019@bicker>
-References: <alpine.LNX.2.00.1012251914370.10759@swampdragon.chaosbits.net>
- <AANLkTik+yrpY8T69w_RQ84ZbRqwkjvFhvxHLBvU14N3f@mail.gmail.com>
- <alpine.LNX.2.00.1012252223380.10759@swampdragon.chaosbits.net>
+From: "Peter W. Morreale" <pmorreale@novell.com>
+Subject: SUSE install/config issue...
+Date: Mon, 27 Dec 2010 16:13:56 -0700
+Message-ID: <1293491636.12960.8.camel@hermosa.morreale.net>
+Reply-To: pmorreale@novell.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.LNX.2.00.1012252223380.10759@swampdragon.chaosbits.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jesper Juhl <jj@chaosbits.net>
-Cc: richard -rw- weinberger <richard.weinberger@gmail.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, netdev@vger.kernel.org, Sage Weil <sage@newdream.net>, "David S. Miller" <davem@davemloft.net>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from charybdis-ext.suse.de ([195.135.221.2]:42865 "EHLO
+	nat.nue.novell.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751495Ab0L0XOJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Dec 2010 18:14:09 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, Dec 25, 2010 at 10:24:57PM +0100, Jesper Juhl wrote:
-> On Sat, 25 Dec 2010, richard -rw- weinberger wrote:
-> 
-> > On Sat, Dec 25, 2010 at 7:17 PM, Jesper Juhl <jj@chaosbits.net> wrote:
-> > > Hello,
-> > >
-> > > In net/ceph/ceph_common.c::ceph_destroy_client() the pointer 'client' is
-> > > freed by kfree() and subsequently used in a call to dout() - use after
-> > > free bug.
-> > 
-> > Not really. %p reads only the address of "client".
-> > kfree() does not alter this address.
-> > 
-> 
-> Ok, I see your point and you are correct. But still, the patch does not 
-> change behaviour and it makes it absolutely clear that there's no 
-> use-after-free bug, so it might still have merit... or?
-> 
 
-I see these with Smatch as well.  This type of usage is quite common.
-People do it deliberately and I guess they feel it's readable.  Don't
-change them.
+I'm attempting to install ceph for the first time on openSUSE 11.2,
+using the packages out of factory.  I used the wiki page: 
+http://ceph.newdream.net/wiki/Installing_on_SuSE under the "Complex
+System" part.  All appears to be fine other than I cannot seem to find
+the 'cfuse' comand/script.  A find of root failed to locate it as well.
 
-If it were something that a static checker couldn't figure out, then
-I'd say change it, but really the static checkers should just be made
-smarter.  Some day I'm going to make Smatch complain if it's a %s in
-the string instead of a %p, but for now I just ignore the false
-positives.
 
-regards,
-dan carpenter
+Where do I find the 'cfuse' command/script?
+
+Thx
+-PWM
+
