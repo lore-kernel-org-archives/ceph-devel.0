@@ -1,73 +1,38 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 22/32] ceph: fsc->*_wq's aren't used in memory reclaim
- path
-Date: Mon, 3 Jan 2011 09:58:39 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1101030958270.24679@cobra.newdream.net>
-References: <1294062595-30097-1-git-send-email-tj@kernel.org>
- <1294062595-30097-23-git-send-email-tj@kernel.org>
+Subject: Re: Errors on compiling master-backport of ceph-client-standalone
+Date: Mon, 3 Jan 2011 13:58:00 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1101031356280.7281@cobra.newdream.net>
+References: <AANLkTinCdTdR5Fk6EJO-C2VAnR_CiskqRX41DUp2QNjn@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1294062595-30097-23-git-send-email-tj@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tejun Heo <tj@kernel.org>
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:42555 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754635Ab1ACVwM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Jan 2011 16:52:12 -0500
+In-Reply-To: <AANLkTinCdTdR5Fk6EJO-C2VAnR_CiskqRX41DUp2QNjn@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Henry Chang <henry.cy.chang@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 3 Jan 2011, Tejun Heo wrote:
-> fsc->*_wq's aren't depended upon during memory reclaim.  Convert to
-> alloc_workqueue() w/o WQ_MEM_RECLAIM.
+On Wed, 29 Dec 2010, Henry Chang wrote:
+> > Sigh... this one is going to be a pain to surround with kernel version
+> > #ifdefs.  The commit that needs to be conditional on the version is Al's,
+> > ff8a8d20.  Any takers?
 > 
-> Signed-off-by: Tejun Heo <tj@kernel.org>
-> Cc: Sage Weil <sage@newdream.net>
-> Cc: ceph-devel@vger.kernel.org
-> ---
-> Only compile tested.  Please feel free to take it into the subsystem
-> tree or simply ack - I'll route it through the wq tree.
+> Fixed by two patches:
+> 1. include version.h for kernel version checking
+> https://github.com/tcloud/ceph-client-standalone/commit/c1696dc02658ae98f2d8c94f03624b18acc8a20a
+> 
+> 2. backport mount pre 2.6.37
+> https://github.com/tcloud/ceph-client-standalone/commit/704ba2ce3aac60fbdc7d10e229f8d93ffe87389f
 
-I'll take this one through the ceph tree as well.
+Thanks!  These are applied.
 
-Thanks!
+There are two new patches in unstable now that need backports, too :(... 
+the create_workqueue cleanups from Tejun.  The backport essentially needs 
+to revert the patch (keep the QUEUED/BUSY bits in place) for older 
+kernels.
+
 sage
-
-
-> 
-> Thanks.
-> 
->  fs/ceph/super.c |   10 +++++++---
->  1 files changed, 7 insertions(+), 3 deletions(-)
-> 
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 08b460a..1f6436e 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -443,13 +443,17 @@ struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
->  		goto fail_client;
->  
->  	err = -ENOMEM;
-> -	fsc->wb_wq = create_workqueue("ceph-writeback");
-> +	/*
-> +	 * The number of concurrent works can be high but they don't need
-> +	 * to be processed in parallel, limit concurrency.
-> +	 */
-> +	fsc->wb_wq = alloc_workqueue("ceph-writeback", 0, 1);
->  	if (fsc->wb_wq == NULL)
->  		goto fail_bdi;
-> -	fsc->pg_inv_wq = create_singlethread_workqueue("ceph-pg-invalid");
-> +	fsc->pg_inv_wq = alloc_workqueue("ceph-pg-invalid", 0, 1);
->  	if (fsc->pg_inv_wq == NULL)
->  		goto fail_wb_wq;
-> -	fsc->trunc_wq = create_singlethread_workqueue("ceph-trunc");
-> +	fsc->trunc_wq = alloc_workqueue("ceph-trunc", 0, 1);
->  	if (fsc->trunc_wq == NULL)
->  		goto fail_pg_inv_wq;
->  
-> -- 
-> 1.7.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
