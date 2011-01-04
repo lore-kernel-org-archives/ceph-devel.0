@@ -1,69 +1,71 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: GIT /testing branch current?
-Date: Mon, 3 Jan 2011 14:46:32 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1101031443550.7281@cobra.newdream.net>
-References: <AANLkTi=-JoVV9WWSE0kPQMkTZ1V=R5vmCkEW0iYzgYoA@mail.gmail.com>
- <1293792328.2732.1.camel@wido-desktop>
+From: Matthew Roy <imjustmatthew@gmail.com>
+Subject: mkcephfs "max osd in /etc/ceph/ceph.conf is 2, num osd is 3"
+Date: Tue, 4 Jan 2011 05:04:43 -0500
+Message-ID: <AANLkTike0z5eyVd-wY+hxtNv3wqEE_DmLxfA98CT5q=5@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36007 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750830Ab1ACWkf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Jan 2011 17:40:35 -0500
-In-Reply-To: <1293792328.2732.1.camel@wido-desktop>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:41635 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750755Ab1ADKEo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jan 2011 05:04:44 -0500
+Received: by qyk12 with SMTP id 12so15979154qyk.19
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Jan 2011 02:04:43 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: Matthew Roy <imjustmatthew@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Matthew Roy <matthew@royhousehold.net>
 
-Hi Matthew,
+When building a new cluster with 3 osd using mkcephfs I'm getting the
+message "max osd in /etc/ceph/ceph.conf is 2, num osd is 3". The
+ceph.conf initially didn't define a max osd line at all and adding
+"max osd = 4" or "osd max = 4" didn't seem to have any effect on the
+message, regardless of the section of the conf file. Looking in
+config.cc there doesn't seem to be any option field related to max osd
+at all.
 
-The testing branch is now updated.  Basically:
+After building the cluster anyway, the ceph command reports that
+maxosd is now 3 - a workable value, but not what I wanted.
 
- master - last release (currently v0.24)
- testing - last release + bugfixes, will become next bugfix release (v0.24.1)
- rc - next major release candidate
- unstable - random new stuff
+Looking at mkcephfs.in, line 120, where the message originates, it
+looks to me like the message is referring to the maximum id listed in
+the conf file without any relation to the maxosd parameter of the
+cluster. mkcephfs.in seems to be looking for the highest osd id and
+incrementing by one to figure out the number of configured osds.
 
-The only caveat is that 'rc' is only maintained when we get closer to 
-release and we start separating out bugfixes (rc) from features 
-(unstable).
-
-sage
+If my understanding is correct this patch will clarify the message and
+add a comment explaining what the block of script is doing - nothing
+having to do with the cluster maxosd parameter.
 
 
-On Fri, 31 Dec 2010, Wido den Hollander wrote:
 
-> Hi Matthew,
-> 
-> The unstable branch is the really unstable branch, that is where all the
-> new stuff goes in.
-> 
-> The rc branch has the code which has been tested a bit more.
-> 
-> I'm not sure what the testing branch is doing atm, but i'd stick with rc
-> or unstable.
-> 
-> Wido
-> 
-> On Fri, 2010-12-31 at 00:18 -0500, Matthew Roy wrote:
-> > Is the /testing branch in GIT still being used? It looks like it's
-> > pretty far from from HEAD and /rc (which seems like where things are
-> > being built from now).
-> > 
-> > I just want to be sure I'm not missing something before changing the
-> > docs on the wiki.
-> > 
-> > Matthew
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+From 4b0239b9e4d907ce0c3d1ab75b49fef8c1a708ac Mon Sep 17 00:00:00 2001
+From: Matthew Roy <matthew@royhousehold.net>
+Date: Fri, 31 Dec 2010 02:42:14 -0500
+Subject: [PATCH] mkcephfs: Clarified numosd message
+
+Signed-off-by: Matthew Roy <matthew@royhousehold.net>
+---
+ src/mkcephfs.in |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/src/mkcephfs.in b/src/mkcephfs.in
+index cac7c39..ee9764e 100644
+--- a/src/mkcephfs.in
++++ b/src/mkcephfs.in
+@@ -115,9 +115,10 @@ if true; then
+     # build osdmap
+     osdmap="/tmp/osdmap.$$"
+     if [ -z "$numosd" ]; then
++	# find highest osd id - assumes the conf file complies with osd
+numbering requirements
+ 	maxosd=`$CCONF -c $conf -l osd | egrep -v '^osd$' | cut -c 4- | sort
+-n | tail -1`
+ 	numosd=$(($maxosd + 1))
+-	echo max osd in $conf is $maxosd, num osd is $numosd
++	echo Highest osd in $conf is osd$maxosd, number of osd is $numosd.
+     fi
+     $BINDIR/osdmaptool --clobber --createsimple $numosd $osdmap || exit 1
+
+-- 
+1.7.1
