@@ -1,101 +1,56 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: unstable crushtool fails to open log file
-Date: Wed, 5 Jan 2011 16:30:20 -0800
-Message-ID: <AANLkTikGFgpu5OuLPZg27_o1CeTzB5uH=Q-Txyh1D80V@mail.gmail.com>
-References: <1294252746.4984.154.camel@sale659.sandia.gov>
-	<AANLkTiniHXyQ=vwnwfdNeO4P6+yWiJvZhAWm0FjOQfAB@mail.gmail.com>
-	<1294253392.4984.156.camel@sale659.sandia.gov>
+From: "Peter W. Morreale" <pmorreale@novell.com>
+Subject: Installing and configuring ceph
+Date: Thu, 06 Jan 2011 08:24:41 -0700
+Message-ID: <1294327481.3371.163.camel@hermosa.morreale.net>
+Reply-To: pmorreale@novell.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:58924 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754402Ab1AFAaW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jan 2011 19:30:22 -0500
-Received: by fxm20 with SMTP id 20so15595353fxm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Jan 2011 16:30:21 -0800 (PST)
-In-Reply-To: <1294253392.4984.156.camel@sale659.sandia.gov>
+Received: from charybdis-ext.suse.de ([195.135.221.2]:54573 "EHLO
+	nat.nue.novell.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753035Ab1AFPYt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jan 2011 10:24:49 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-Hi Jim,
-
-This should be fixed by 8adaa0478a94b5f731ee77e12a8dac29e3a7b46a
-
-Command line (non-daemon) programs should now log to stderr, always,
-rather than trying to open logfiles or syslog.
-
-cheers,
-Colin
+To: ceph-devel@vger.kernel.org
 
 
-On Wed, Jan 5, 2011 at 10:49 AM, Jim Schutt <jaschut@sandia.gov> wrote:
-> Hi Colin,
->
-> On Wed, 2011-01-05 at 11:46 -0700, Colin McCabe wrote:
->> Hi Jim,
->>
->> We should be defaulting to sending logs to stderr for command-line
->> tools like crushtool.
->>
->> I'll resolve this in a bit.
->
-> Cool, thanks.
->
-> -- Jim
->
->>
->> C.
->>
->>
->> On Wed, Jan 5, 2011 at 10:39 AM, Jim Schutt <jaschut@sandia.gov> wro=
-te:
->> > Hi,
->> >
->> > unstable branch crushtool is failing for me like this:
->> >
->> > # crushtool --num_osds 32 -o test.crushmap --build shelf uniform 8=
- host uniform 1 root straw 0
->> > failed to open log file '/var/log/ceph/': error 21: Is a directory
->> >
->> > This error seems to happen at crushtool.cc:925:
->> >
->> > 925 =A0 =A0 =A0 =A0 =A0 dout(0) << "layer " << type
->> > 926 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 << " =A0" << l.name
->> > 927 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 << " =A0bucket type " << l=
-=2Ebuckettype
->> > 928 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 << " =A0" << l.size
->> > 929 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 << dendl;
->> >
->> >
->> > AFAICS commit 986c2af4aeb switched dout to use DoutStreambuf,
->> > and by default (commit 952111451c3) everything now logs to a
->> > file.
->> >
->> > What's the right way to get crushtool to log to stdout or
->> > stderr? =A0Or, how to I get crushtool to use a log file
->> > of my choice?
->> >
->> > Thanks -- Jim
->> >
->> >
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.ht=
-ml
->> >
->>
->
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I'm having a difficult time installing ceph for the first time by
+following the newdream wiki site.  Can some kind soul help with the
+following?
+
+I've built ceph 0.24 from the tarball on a pristine OpenSUSE 11.3
+release, and performed:
+
+% make 
+% make install
+% make install-data (from reading the makefiles)
+
+The goal is to install ceph on 3 identical machines, each with a
+dedicated partition, using btrfs.  (yes, ssh access w/o passwords are
+configured among these machines)
+
+1) /etc/init.d/ceph is not installed, nor are the sample confs installed
+in /etc/ceph.  Is there some other make target I need to run?  The
+INSTALL file in the source is not very helpful.  Install manually?
+Where is the init.d script?  (.../src/ceph is a binary.)
+
+2) Do I need a kernel client?  Its not clear to me from the wiki what
+the role of the kernel module is.   Do I need the kernel client for
+client access only?  From a previous post I inferred that one could use
+fuse for client access, is that correct?
+
+3) I assume I need to install the user-space portion of ceph on all
+machines?  Or do we differentiate between ceph user-space servers on on
+"server" machines and the kernel client for 'client' access. 
+
+4) Is there some other documentation that explains bringing up ceph for
+the first time?  Everything I find is vectored to the wiki. 
+
+Clearly I am missing the larger picture on how to install.  Thanks in
+advance for any info.  
+
+Best,
+-PWM
+
