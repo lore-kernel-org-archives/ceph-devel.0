@@ -1,88 +1,60 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: Installing and configuring ceph
-Date: Thu, 6 Jan 2011 10:03:15 -0800
-Message-ID: <AANLkTi=hiEn8vOBvqjHaNqU=ETFpBeTZ=mHoOyE=V4Lc@mail.gmail.com>
-References: <1294327481.3371.163.camel@hermosa.morreale.net>
-	<Pine.LNX.4.64.1101060736150.3524@cobra.newdream.net>
-	<1294328892.3371.167.camel@hermosa.morreale.net>
+From: Ravi Pinjala <pstatic@gmail.com>
+Subject: cmds crash
+Date: Thu, 6 Jan 2011 21:35:50 -0800
+Message-ID: <AANLkTimqt5_6bWaLkPZ1FicyGL=yp6VNEKuL0e7X7rAD@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:64182 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751328Ab1AFSDQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jan 2011 13:03:16 -0500
-Received: by fxm20 with SMTP id 20so16238011fxm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Jan 2011 10:03:15 -0800 (PST)
-In-Reply-To: <1294328892.3371.167.camel@hermosa.morreale.net>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:33599 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751512Ab1AGFfv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Jan 2011 00:35:51 -0500
+Received: by bwz15 with SMTP id 15so17045912bwz.19
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Jan 2011 21:35:50 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: pmorreale@novell.com
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-I use
+I just upgraded to Ceph 0.24, and when I started up the cluster I got
+this crash.
 
-=2E/autogen.sh && CXXFLAGS=3D"-g -O2" ./configure --prefix=3D/usr
---sbindir=3D/sbin --localstatedir=3D/var --sysconfdir=3D/etc --with-deb=
-ug
+2011-01-06 21:23:48.744864 b6855b70 mds0.cache creating system inode
+with ino:601
+2011-01-06 21:23:48.745488 b6855b70 log [ERR] : unmatched fragstat
+size on single dirfrag 100, inode has f(v0 m2011-01-06 21:23:48.745063
+1=0+1), dirfrag has f(v0 m2011-01-06 21:23:48.745063 3=1+2)
+2011-01-06 21:23:49.293433 b6855b70  bad get [inode 600 [...2,head]
+~mds0/stray/ auth v26003 f(v8833 m2011-01-04 21:50:03.135177
+8846=8435+411) n(v11792 rc2011-01-04 21:50:03.135177 b25052311635 a-18
+8846=8435+411) (inest lock dirty) (ifile lock dirty) (iversion lock) |
+dirtyscattered dirfrag stray dirty 0x11102a68] by 19 stray was 5
+(-1005,-1005,-1,19,1001)
+mds/CInode.h: In function 'virtual void CInode::bad_get(int)':
+mds/CInode.h:1088: FAILED assert(ref_set.count(by) == 0)
+ ceph version 0.24 (commit:180a4176035521940390f4ce24ee3eb7aa290632)
+ 1: (CInode::bad_put(int)+0) [0x827b090]
+ 2: (MDSCacheObject::get(int)+0x153) [0x813e463]
+ 3: (MDCache::populate_mydir()+0x8a) [0x81a7e5a]
+ 4: (MDCache::_create_system_file_finish(Mutation*, CDentry*,
+Context*)+0x181) [0x819f501]
+ 5: (C_MDC_CreateSystemFile::finish(int)+0x29) [0x81d6c29]
+ 6: (finish_contexts(std::list<Context*, std::allocator<Context*> >&,
+int)+0x6b) [0x81d663b]
+ 7: (Journaler::_finish_flush(int, long long, utime_t, bool)+0x983) [0x82f2f53]
+ 8: (Journaler::C_Flush::finish(int)+0x3f) [0x82fb24f]
+ 9: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x801) [0x82d8e31]
+ 10: (MDS::_dispatch(Message*)+0x2ae5) [0x80eaa15]
+ 11: (MDS::ms_dispatch(Message*)+0x62) [0x80eb142]
+ 12: (SimpleMessenger::dispatch_entry()+0x899) [0x80b8649]
+ 13: (SimpleMessenger::DispatchThread::entry()+0x22) [0x80b30f2]
+ 14: (Thread::_entry_func(void*)+0x11) [0x80c9101]
+ 15: (()+0x5cc9) [0x6ffcc9]
+ 16: (clone()+0x5e) [0x7e669e]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
 
-Maybe we should put that into a 1-line script and check it in; I don't =
-know.
+(The objdump it mentions is attached.)
 
-automake is a little wacky sometimes (in my opinion)... for example, I
-think the default sysconf dir is /usr/etc, which most people don't
-expect
+Anybody seen this before?
 
-Colin
-
-
-On Thu, Jan 6, 2011 at 7:48 AM, Peter W. Morreale <pmorreale@novell.com=
-> wrote:
-> On Thu, 2011-01-06 at 07:39 -0800, Sage Weil wrote:
->> Hi Peter,
->>
->> On Thu, 6 Jan 2011, Peter W. Morreale wrote:
->> >
->> > I'm having a difficult time installing ceph for the first time by
->> > following the newdream wiki site. =A0Can some kind soul help with =
-the
->> > following?
-> ..
->> >
->> > Clearly I am missing the larger picture on how to install. =A0Than=
-ks in
->> > advance for any info.
->>
->> The wiki is it. =A0Any specific suggestions on what pieces of inform=
-ation
->> (beyond the above) that would make it more helpful are welcome!
->>
->
-> Thanks Sage. =A0I completely understand on where things stand and yes=
-, I
-> will make suggestions as I get further along.
->
-> Best,
-> -PWM
->
->
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--Ravi
