@@ -1,83 +1,45 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: cmds crash
-Date: Fri, 7 Jan 2011 09:09:10 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1101070908030.10949@cobra.newdream.net>
-References: <AANLkTimqt5_6bWaLkPZ1FicyGL=yp6VNEKuL0e7X7rAD@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: warning: btrfs warning while running cosd
+Date: Sat, 8 Jan 2011 18:01:34 -0800
+Message-ID: <A07D74FF-DE82-4670-BCFF-F5039A365636@cs.ucsc.edu>
+Mime-Version: 1.0 (Apple Message framework v1082)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50646 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754603Ab1AGRDE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Jan 2011 12:03:04 -0500
-In-Reply-To: <AANLkTimqt5_6bWaLkPZ1FicyGL=yp6VNEKuL0e7X7rAD@mail.gmail.com>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:58853 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751012Ab1AICBf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 8 Jan 2011 21:01:35 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ravi Pinjala <pstatic@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Noah Watkins <jayhawk@soe.ucsc.edu>
 
-Hi Ravi,
+This warning in btrfs was thrown in cosd's context. Has this been seen? Maybe this needs to go to the btrfs list...?
 
-Can you add 'debug mds = 20' to your [mds] section of ceph.conf and 
-reproduce this crash?  And attach to the resulting mds log (in 
-/var/log/ceph) to the bug?
+-----
 
-This looks like something we saw during the 0.24 development cycle, but I 
-thought it was fixed.  I'm not sure howing it's getting into this corner 
-of code...
+[156155.871399] WARNING: at /build/buildd/linux-2.6.35/fs/btrfs/inode.c:2116 btrfs_orphan_commit_root+0xb0/0xc0 [btrfs]()
+[156155.871402] Hardware name: H8DMR-82
+[156155.871404] Modules linked in: btrfs zlib_deflate crc32c libcrc32c nfsd exportfs nfs lockd fscache nfs_acl auth_rpcgss sunrpc radeon ttm ib_mthca drm_kms_helper ib_mad joydev amd64_edac_mod drm ib_core psmouse i2c_algo_bit shpchp serio_raw k8temp edac_core edac_mce_amd i2c_nforce2 lp parport usbhid hid floppy e1000 pata_amd sata_nv forcedeth
+[156155.871436] Pid: 23113, comm: cosd Not tainted 2.6.35-22-server #33-Ubuntu
+[156155.871438] Call Trace:
+[156155.871447]  [<ffffffff8106080f>] warn_slowpath_common+0x7f/0xc0
+[156155.871451]  [<ffffffff8106086a>] warn_slowpath_null+0x1a/0x20
+[156155.871464]  [<ffffffffa03e2990>] btrfs_orphan_commit_root+0xb0/0xc0 [btrfs]
+[156155.871476]  [<ffffffffa03de691>] commit_fs_roots+0xa1/0x140 [btrfs]
+[156155.871488]  [<ffffffffa03df8f8>] btrfs_commit_transaction+0x2e8/0x6f0 [btrfs]
+[156155.871500]  [<ffffffffa03cecf6>] ? btrfs_trans_reserve_metadata+0x66/0xa0 [btrfs]
+[156155.871504]  [<ffffffff8107f080>] ? autoremove_wake_function+0x0/0x40
+[156155.871517]  [<ffffffffa040cafd>] create_snapshot+0xed/0x150 [btrfs]
+[156155.871529]  [<ffffffffa040cca2>] btrfs_mksubvol+0x142/0x200 [btrfs]
+[156155.871541]  [<ffffffffa040ce73>] btrfs_ioctl_snap_create+0x113/0x160 [btrfs]
+[156155.871553]  [<ffffffffa040e43a>] btrfs_ioctl+0x2ea/0x4b0 [btrfs]
+[156155.871558]  [<ffffffff81090a62>] ? futex_wake+0x112/0x130
+[156155.871563]  [<ffffffff81083894>] ? hrtimer_start_range_ns+0x14/0x20
+[156155.871567]  [<ffffffff81162e1d>] vfs_ioctl+0x3d/0xd0
+[156155.871570]  [<ffffffff811635b1>] do_vfs_ioctl+0x81/0x3d0
+[156155.871574]  [<ffffffff81152f42>] ? vfs_write+0x132/0x1a0
+[156155.871577]  [<ffffffff81163981>] sys_ioctl+0x81/0xa0
+[156155.871582]  [<ffffffff8100a0f2>] system_call_fastpath+0x16/0x1b
 
-Thanks!
-sage
-
-
-On Thu, 6 Jan 2011, Ravi Pinjala wrote:
-
-> I just upgraded to Ceph 0.24, and when I started up the cluster I got
-> this crash.
-> 
-> 2011-01-06 21:23:48.744864 b6855b70 mds0.cache creating system inode
-> with ino:601
-> 2011-01-06 21:23:48.745488 b6855b70 log [ERR] : unmatched fragstat
-> size on single dirfrag 100, inode has f(v0 m2011-01-06 21:23:48.745063
-> 1=0+1), dirfrag has f(v0 m2011-01-06 21:23:48.745063 3=1+2)
-> 2011-01-06 21:23:49.293433 b6855b70  bad get [inode 600 [...2,head]
-> ~mds0/stray/ auth v26003 f(v8833 m2011-01-04 21:50:03.135177
-> 8846=8435+411) n(v11792 rc2011-01-04 21:50:03.135177 b25052311635 a-18
-> 8846=8435+411) (inest lock dirty) (ifile lock dirty) (iversion lock) |
-> dirtyscattered dirfrag stray dirty 0x11102a68] by 19 stray was 5
-> (-1005,-1005,-1,19,1001)
-> mds/CInode.h: In function 'virtual void CInode::bad_get(int)':
-> mds/CInode.h:1088: FAILED assert(ref_set.count(by) == 0)
->  ceph version 0.24 (commit:180a4176035521940390f4ce24ee3eb7aa290632)
->  1: (CInode::bad_put(int)+0) [0x827b090]
->  2: (MDSCacheObject::get(int)+0x153) [0x813e463]
->  3: (MDCache::populate_mydir()+0x8a) [0x81a7e5a]
->  4: (MDCache::_create_system_file_finish(Mutation*, CDentry*,
-> Context*)+0x181) [0x819f501]
->  5: (C_MDC_CreateSystemFile::finish(int)+0x29) [0x81d6c29]
->  6: (finish_contexts(std::list<Context*, std::allocator<Context*> >&,
-> int)+0x6b) [0x81d663b]
->  7: (Journaler::_finish_flush(int, long long, utime_t, bool)+0x983) [0x82f2f53]
->  8: (Journaler::C_Flush::finish(int)+0x3f) [0x82fb24f]
->  9: (Objecter::handle_osd_op_reply(MOSDOpReply*)+0x801) [0x82d8e31]
->  10: (MDS::_dispatch(Message*)+0x2ae5) [0x80eaa15]
->  11: (MDS::ms_dispatch(Message*)+0x62) [0x80eb142]
->  12: (SimpleMessenger::dispatch_entry()+0x899) [0x80b8649]
->  13: (SimpleMessenger::DispatchThread::entry()+0x22) [0x80b30f2]
->  14: (Thread::_entry_func(void*)+0x11) [0x80c9101]
->  15: (()+0x5cc9) [0x6ffcc9]
->  16: (clone()+0x5e) [0x7e669e]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
-> 
-> (The objdump it mentions is attached.)
-> 
-> Anybody seen this before?
-> 
-> --Ravi
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
