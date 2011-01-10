@@ -1,45 +1,65 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: thanks gregf,question about ceph
-Date: Sun, 9 Jan 2011 10:05:52 -0800
-Message-ID: <AANLkTik4mLKZkdG21xgeJFHwi61jgrD+ABB9B-C0FrN9@mail.gmail.com>
-References: <1b70d2f.20f3.12d6a85a669.Coremail.yueluck@163.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: [bug?] stat functions inconsistently
+Date: Sun, 9 Jan 2011 17:45:12 -0800
+Message-ID: <EE1B9791-D7B0-4518-A541-0F3A44C03BB1@cs.ucsc.edu>
+Mime-Version: 1.0 (Apple Message framework v1082)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:33255 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752048Ab1AISFx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Jan 2011 13:05:53 -0500
-Received: by ewy5 with SMTP id 5so8446691ewy.19
-        for <ceph-devel@vger.kernel.org>; Sun, 09 Jan 2011 10:05:52 -0800 (PST)
-In-Reply-To: <1b70d2f.20f3.12d6a85a669.Coremail.yueluck@163.com>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:38422 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752890Ab1AJBpN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Jan 2011 20:45:13 -0500
+Received: from [192.168.51.138] (soenat3.cse.ucsc.edu [128.114.60.41])
+	by mail-01.cse.ucsc.edu (Postfix) with ESMTPSA id D01BB1009BFC
+	for <ceph-devel@vger.kernel.org>; Sun,  9 Jan 2011 17:45:12 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: yueluck <yueluck@163.com>
 
-Moving this to the list where it belongs.
+I am seeing what looks like inconsistent reporting by stat (2).
 
-2011/1/9 yueluck <yueluck@163.com>:
-> 1.ceph-client-standalone.git ,ceph-client.git
-> what is the different of the client.git???i know ceph-client-standalone.git
-> is for ceph.ko,
-> what ceph-client.git do?
-ceph-client.git is the branch we do all our in-kernel development on.
-ceph-client-standalone is the fs/ceph tree of ceph-client with
-additional #ifdefs for backporting. If possible you should be using
-ceph-client as it's more tested and up-to-date.
+Below is the annotated trace that shows a successful stat of the
+file "part-m-00001", and then later a failed stat of the same file.
 
-> 2. what is different of scsi-osd,rados?
-> scsi-osd is in SCSI Architecture Model, they are object-based storage? if
-> rados depend on scsi-osd(osd.ko,libosd.ko.....)?
-Ceph OSDs are Object Storage Devices/Daemons. They are conceptually
-similar to SCSI OSDs but are not at all the same thing.
+This trace gathered with strace. The scenario can be fully reproduced, but so far
+not with any exemplary, concise code; this trace comes deep from within Java.
 
-> 3.do you have ceph call flow,document(except wiki),let me know ceph
-> architecture quickly.
-Unfortunately, no. However, Sage's thesis (which is available on the
-Ceph website) has a pretty good description of the protocols, if not
-the module architecture. You can check that out for a lot more
-information than is on the wiki. :)
--Greg
+Setup: two files exist under the Ceph mount point (/ceph):
+    /ceph/ts5-in/part-m-00000
+    /ceph/ts5-in/part-m-00001
+
+Link to full trace: http://www.cs.ucsc.edu/~jayhawk/log2-full.txt.tar.gz
+
+-------
+
+(1) In the first part of the trace a thread successfully stats both files,
+and performs an ioctl on both files:
+
+--> 10941 stat("/ceph/ts5-in/part-m-00000", {st_mode=S_IFREG|0644, st_size=2500000, ...}) = 0
+--> 10941 stat("/ceph/ts5-in/part-m-00001", {st_mode=S_IFREG|0644, st_size=2500000, ...}) = 0
+10941 open("/ceph/ts5-in/part-m-00000", O_RDONLY) = 55
+10941 ioctl(55, 0x80289701, 0x7fd7a7efd9e0) = 0
+10941 ioctl(55, 0xc0f89703, 0x7fd7a7efda10) = 0
+10941 close(55)                         = 0
+10941 open("/ceph/ts5-in/part-m-00001", O_RDONLY) = 55
+10941 ioctl(55, 0x80289701, 0x7fd7a7efd9e0) = 0
+10941 ioctl(55, 0xc0f89703, 0x7fd7a7efda10) = 0
+10941 close(55)                         = 0
+
+...
+
+(2) Later in the trace, a thread (10956) stats "part-m-00000" with success,
+while the thread (10957) stats "part-m-00001" and fails with ENOENT.
+
+10956 stat("/ceph/ts5-in/part-m-00000",  <unfinished ...>
+10950 <... futex resumed> )             = 0
+10957 write(2, "\n", 1)                 = 1
+10950 gettimeofday({1294621240, 685789}, NULL) = 0
+-->  10957 stat("/ceph/ts5-in/part-m-00001",  <unfinished ...>
+10950 gettimeofday( <unfinished ...>
+-->  10957 <... stat resumed> 0x7fd75db461f0) = -1 ENOENT (No such file or directory)
+10956 <... stat resumed> {st_mode=S_IFREG|0644, st_size=2500000, ...}) = 0
+
+Thanks,
+Noah
