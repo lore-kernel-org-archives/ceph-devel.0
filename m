@@ -1,45 +1,58 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.24.1 released
-Date: Sun, 9 Jan 2011 21:42:27 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1101092141550.28455@cobra.newdream.net>
+From: Yehuda Sadeh Weinraub <yehuda@hq.newdream.net>
+Subject: Re: Can you help me?
+Date: Mon, 10 Jan 2011 10:13:09 -0800
+Message-ID: <AANLkTi=YsBcvQC7BPH=keCrW+97KKTgfPMZ5OaavDcEE@mail.gmail.com>
+References: <201101102244418619138@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55811 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751011Ab1AJFgP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Jan 2011 00:36:15 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 22A52BC75B
-	for <ceph-devel@vger.kernel.org>; Sun,  9 Jan 2011 21:42:28 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id D482FBC75B
-	for <ceph-devel@vger.kernel.org>; Sun,  9 Jan 2011 21:42:27 -0800 (PST)
+Received: from mail.hq.newdream.net ([66.33.206.127]:36413 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751220Ab1AJSNL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Jan 2011 13:13:11 -0500
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 790E2C069
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Jan 2011 10:13:11 -0800 (PST)
+Received: from mail-wy0-f174.google.com (mail-wy0-f174.google.com [74.125.82.174])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 2566AC06A
+	for <ceph-devel@vger.kernel.org>; Mon, 10 Jan 2011 10:13:10 -0800 (PST)
+Received: by wyb28 with SMTP id 28so19674422wyb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Jan 2011 10:13:09 -0800 (PST)
+In-Reply-To: <201101102244418619138@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Qian Wei <hzqianwei@gmail.com>
+Cc: Greg Farnum <gregf@hq.newdream.net>, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-v0.24.1 has been released, with a number of bug fixes from v0.24.  These 
-include:
+On Mon, Jan 10, 2011 at 6:44 AM, Qian Wei <hzqianwei@gmail.com> wrote:
+>
+> Can=A0you=A0help=A0me? I am installing the ceph(the latest version v0=
+=2E23.1=A0). I finish the process of "make", and no error happens,=A0bu=
+t I can't find the file "keyring.bin" in anywhere of my Ubuntu 10.10. I=
+s there anything wrong may=A0cause=A0this problem like=A0 I am facing n=
+ow. Thank you! Thank you very much!!!
+>
 
- * msgr: fix races during connection teardown
- * mds: fix bug during directory removal
- * mds: fix replay issue when mds restarts immediately after mkfs
- * filestore: fix journal ordering problem (triggered under load)
- * osd: fix recovery issue
- * osd: several scrub bug fixes
+Moving this to the list.
 
-This is also the first time I've built Ubuntu packages (for lucid and 
-maverick), as the libcrypto++ dependency resolves to a different library 
-version on Ubuntu and Debian sid.  If anyone has any problems there, 
-please let us know.  libcrypto++ is unfortunately also a hassle under 
-Redhat, as it is not included in RHEL and was only recently added to 
-Fedora.  We plan to start building RHEL/CentOS and Fedora packages soon, 
-and will be updating the wiki with information on gathering all the 
-dependencies to build from source shortly.
+The keyring.bin isn't created by the makefile, and moreover, currently
+it is not required when using the default configuration. One easy way
+to create it is to start a simple test cluster from under ceph/src
+like this (don't run it if you already did it and don't want to
+clobber your data):
 
-Relevant URLs:
- * Direct download at: http://ceph.newdream.net/download/ceph-0.24.1.tar.gz
- * For Debian and Ubuntu packages, see http://ceph.newdream.net/wiki/Debian
+ ~/ceph/src$ ./vstart.sh -n -x
 
-sage
+This will generate a new filesystem, with a default ceph.conf and a
+newly generated keyring file. Another way to create a keyring file is
+by using the cauthtool command (there are examples in the cauthtool
+man page).
+
+
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
