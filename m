@@ -1,59 +1,46 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: [ceph-commit] ceph.git branch unstable updated. v0.24.1-327-gae47f3c
-Date: Tue, 18 Jan 2011 00:41:47 -0800
-Message-ID: <AANLkTi=12WSg3DZto8TZHDQOFNO5Vv_F_TgqxUL3tPB2@mail.gmail.com>
-References: <20110115001637.37E824366724@ceph-tracker.dreamhostps.com>
-	<AANLkTi=mKKJOnARspw+qUa8Zt0ZLO+0=HS8+DeNa8iRE@mail.gmail.com>
-	<AANLkTikN-sd=QLZCWYeL=YAz7+2xZFTZCYTy2Oz6te8N@mail.gmail.com>
+From: =?ISO-8859-2?Q?Maciej_Ga=B3kiewicz?=
+	<maciejgalkiewicz@ragnarson.com>
+Subject: can't read superblock
+Date: Tue, 18 Jan 2011 12:59:05 +0100
+Message-ID: <AANLkTim+oK0=_oK5DnsVwfR2mKndDTGpLBO-znwQfq8T@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:40633 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751433Ab1ARIls (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jan 2011 03:41:48 -0500
-Received: by fxm20 with SMTP id 20so6934076fxm.19
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Jan 2011 00:41:47 -0800 (PST)
-In-Reply-To: <AANLkTikN-sd=QLZCWYeL=YAz7+2xZFTZCYTy2Oz6te8N@mail.gmail.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:59745 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751662Ab1ARL7G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jan 2011 06:59:06 -0500
+Received: by pzk35 with SMTP id 35so957577pzk.19
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Jan 2011 03:59:06 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: Tommi Virtanen <tv42@ceph-tracker.dreamhostps.com>, Sage Weil <sage@newdream.net>, Yehuda Sadeh <yehuda@newdream.net>, Josh Durgin <joshd@newdream.net>, Samuel Just <samuelj@newdream.net>, Tommi Virtanen <tv@hq.newdream.net>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Moving to list.
+I could not report a bug in bug tracer (I am not allowed to or I just
+couldn't find appropriate button?) so I send it here. There is a
+problem on debian squeeze with kernel 2.6.32 and ceph kernel module.
+Ceph version 0.24.1-1~bpo60+1. I can not mount filesystem on client
+machine:
 
-On Mon, Jan 17, 2011 at 10:21 PM, Gregory Farnum <gregf@hq.newdream.net> wrote:
-> On Mon, Jan 17, 2011 at 9:42 PM, Colin McCabe <cmccabe@alumni.cmu.edu> wrote:
->> I guess the first question is a philosophical one. Do we want to allow
->> people to use things like the heap checker or valgrind on unit tests?
->> I think we should, since it will be add to the usefulness of unit
->> tests in general. The second question is, if we do want to do that,
->> how should we go about it? I think you have the right idea with making
->> common_init more granular, so that we can initialize just the heap
->> checker or signal handler without pulling in the whole thing. If you
->> agree, let's open a bug to get this taken care of, since you
->> apparently didn't like my "just call common_init" solution.
->
-> Unit tests probably ought to be simple enough that you don't need a
-> full backtrace handler. Certainly it doesn't need tcmalloc's heap
-> checker.
+client:
+# mount -t ceph 10.1.0.15:/ /ceph
+# mount: 10.1.0.15:/: can't read superblock
 
-Well, nobody needs a backtrace handler until his or her code has a
-bug. Then everyone needs one, whether the code is simple or not.
+mon0 log:
+2011-01-18 12:08:23.534637 7ff675d6d710 -- 10.1.0.15:6789/0 >>
+10.1.0.29:0/1783749524 pipe(0xd5b000 sd=8 pgs=0 cs=0 l=0).accept peer
+addr is really 10.1.0.29:0/1783749524 (socket is 10.1.0.29:48987/0)
+2011-01-18 12:10:27.338512 7ff675d6d710 -- 10.1.0.15:6789/0 >>
+10.1.0.29:0/4142445380 pipe(0xd5d260 sd=8 pgs=0 cs=0 l=0).accept peer
+addr is really 10.1.0.29:0/4142445380 (socket is 10.1.0.29:44569/0)
 
-I'm trying to think ahead to the future here, where we might see
-scenarios like "make check got a segfault on the continuous build
-server, but it runs just fine locally. Gee, I wonder what the problem
-is?" Unfortunately, stuff like this happens a lot. Uninitialized
-memory is often 0, and things may work "accidentally." malloc(<large
-random number>) may work-- if your computer is beefy enough.
-
-> If we do want some of our other advanced features, I think we
-> should add them in individually as otherwise it becomes too easy to
-> pollute our unit tests with unexpected setup bits.
-
-I agree completely. That's why I talked about "making common_init more
-granular."
-
-regards,
-Colin
+mon console:
+# ceph -s
+2011-01-18 12:50:54.083205    pg v287: 528 pgs: 528 active+clean; 0 KB
+data, 27640 KB used, 2021 MB / 2048 MB avail
+2011-01-18 12:50:54.084113   mds e6: 1/1/1 up {0=up:creating}, 1 up:standby
+2011-01-18 12:50:54.084188   osd e9: 2 osds: 2 up, 2 in
+2011-01-18 12:50:54.084286   log 2011-01-18 12:46:59.375405 osd0
+10.1.0.15:6801/14921 285 : [INF] 3.1p0 scrub ok
+2011-01-18 12:50:54.084432   mon e1: 2 mons at
+{0=10.1.0.15:6789/0,1=10.1.0.27:6789/0}
