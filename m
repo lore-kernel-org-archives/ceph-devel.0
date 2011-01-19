@@ -1,48 +1,43 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: Ceph on just two nodes being clients - reasonable?
-Date: Wed, 19 Jan 2011 13:09:58 -0800
-Message-ID: <AANLkTi=r5+wKgZ8yoDkFU2LM7_-+JZ-PKagTQ4wkhUV2@mail.gmail.com>
-References: <4D36BDF9.4030404@wpkg.org>
-	<1295437286.2255.25.camel@wido-desktop>
-	<4D36D5B3.4040601@wpkg.org>
-	<AANLkTimHi64ZB5_AY1_eQu5abHB+S+bvcSShL_NE3Me0@mail.gmail.com>
-	<AANLkTikFWk_p0=c1_o__2EmPS7t-=Ua68cLWGNS9badB@mail.gmail.com>
-	<20110119200349.GA753@dreamer>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: [PATCH 17/46] fs: Use rename lock and RCU for multi-step operations
+Date: Wed, 19 Jan 2011 14:27:24 -0800
+Message-ID: <AANLkTinVP=OuJ-3u9pHdDuuKJoVrP4Unr5Dx1x=qHtXC@mail.gmail.com>
+References: <cover.1290852958.git.npiggin@kernel.dk>
+	<d44ddcf1d1e0813b3ce2b3872c7c702a31b62894.1290852959.git.npiggin@kernel.dk>
+	<AANLkTi=pj-pLYVSrU+6+BtioCWLod2ueZecNaap619fw@mail.gmail.com>
+	<AANLkTik3ScP5rvR2bOXOEEH8SNZGg+xO6Gy32CW3XmU6@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:62198 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753885Ab1ASVKA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jan 2011 16:10:00 -0500
-Received: by fxm20 with SMTP id 20so1336083fxm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Jan 2011 13:09:59 -0800 (PST)
-In-Reply-To: <20110119200349.GA753@dreamer>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:59572 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753700Ab1ASW1Z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jan 2011 17:27:25 -0500
+In-Reply-To: <AANLkTik3ScP5rvR2bOXOEEH8SNZGg+xO6Gy32CW3XmU6@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Gregory Farnum <gregf@hq.newdream.net>, Tomasz Chmielewski <mangoo@wpkg.org>, Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+To: Nick Piggin <npiggin@gmail.com>
+Cc: Nick Piggin <npiggin@kernel.dk>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On Wed, Jan 19, 2011 at 12:03 PM, Tommi Virtanen
-<tommi.virtanen@dreamhost.com> wrote:
-> On Wed, Jan 19, 2011 at 09:55:27AM -0800, Colin McCabe wrote:
->> If you knew what the maximum memory consumption for the daemons would
->> be, you could use mlock to lock all those pages into memory (make them
->> unswappable.) Then you could use rlimit to ensure that if the daemon
->> ever tried to allocate more than that, it would be killed.
+On Tue, Jan 18, 2011 at 2:42 PM, Nick Piggin <npiggin@gmail.com> wrote:
+> On Wed, Jan 19, 2011 at 9:32 AM, Yehuda Sadeh Weinraub
+
+>> There's an issue with ceph as it references the
+>> dentry->d_parent(->d_inode) at dentry_release(), so setting
+>> dentry->d_parent to NULL here doesn't work with ceph. Though there is
+>> some workaround for it, we would like to be sure that this one is
+>> really required so that we don't exacerbate the ugliness. The
+>> workaround is to keep a pointer to the parent inode in the private
+>> dentry structure, which will be referenced only at the .release()
+>> callback. This is clearly not ideal.
 >
-> The classic nfs loopback mount deadlock is less about how much memory
-> the daemons are grabbing via malloc etc, and more about the buffer
-> cache management in kernel.
+> Hmm, I'll have to think about it. Probably we can check for
+> d_count == 0 rather than parent != NULL I think?
+>
 
-My understanding is that nfsd tries to allocate memory, which turns
-out to be impossible because the page cache is occupying that memory,
-and requires nfsd to drain.
+That'll solve ceph's problem, don't know about how'd affect other
+stuff. We'll need to know whether this is the solution, or whether
+we'd need to introduce some other band aid fix.
 
-I guess the question you are asking is whether nfsd just doing I/O
-requires kernel memory that might not be available. I'm not entirely
-sure about the answer to that. Unfortunately, none of those links has
-any information on the subject (I had high hopes for the lkml one, but
-it was about an unrelated race in NFS).
-
-Colin
+Thanks,
+Yehuda
