@@ -1,118 +1,42 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: cephfs set_layout on filesystem root?
-Date: Wed, 19 Jan 2011 09:46:46 -0700
-Message-ID: <1295455606.6777.23.camel@sale659.sandia.gov>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: cephfs set_layout on filesystem root?
+Date: Wed, 19 Jan 2011 09:00:56 -0800
+Message-ID: <AANLkTi=LNa0AyiT4UfyrJLQrUCrPDACBocsiQV=yw7GQ@mail.gmail.com>
+References: <1295455606.6777.23.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:34215 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754722Ab1ASQrd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jan 2011 11:47:33 -0500
-Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21])
-	by sentry-three.sandia.gov (Postfix) with ESMTP id 1F1BF4DC773
-	for <ceph-devel@vger.kernel.org>; Wed, 19 Jan 2011 09:47:29 -0700 (MST)
-Received: from mail.sandia.gov (cas1.sandia.gov [134.253.165.159]) by
- mailgate.sandia.gov (8.14.4/8.14.4) with ESMTP id p0JGlAPo031792 for
- <ceph-devel@vger.kernel.org>; Wed, 19 Jan 2011 09:47:12 -0700
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:61394 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752219Ab1ASRA6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jan 2011 12:00:58 -0500
+Received: by eye27 with SMTP id 27so553411eye.19
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Jan 2011 09:00:57 -0800 (PST)
+In-Reply-To: <1295455606.6777.23.camel@sale659.sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+On Wed, Jan 19, 2011 at 8:46 AM, Jim Schutt <jaschut@sandia.gov> wrote:
+> Hi,
+>
+> I've been experimenting with using cephfs to set
+> the object/stripe size on a Ceph filesystem root,
+> and it seems to not persist across a filesystem
+> restart. =A0Is that expected behavior?
+> ...
+> Am I missing something?
+Hmmm, not that I see. It should definitely be a persistent setting.
 
-I've been experimenting with using cephfs to set
-the object/stripe size on a Ceph filesystem root,
-and it seems to not persist across a filesystem
-restart.  Is that expected behavior?
-
-To reproduce on current testing branch (6d0dc4bf6):
-
----
-# create a new filesystem, mount it; then
-# from a client:
-
-[root@an1024 ~]# df -h /mnt/ceph
-Filesystem            Size  Used Avail Use% Mounted on
-172.17.40.34:/         13T  510M   13T   1% /ram/mnt/ceph
-
-[root@an1024 ~]# cephfs /mnt/ceph/ show_layout
-layout.data_pool:     0
-layout.object_size:   4194304
-layout.stripe_unit:   4194304
-layout.stripe_count:  1
-layout.preferred_osd: -1
-
-[root@an1024 ~]# cephfs /mnt/ceph set_layout -s 262144 -c 1 -u 262144
-[root@an1024 ~]# cephfs /mnt/ceph/ show_layout
-layout.data_pool:     0
-layout.object_size:   262144
-layout.stripe_unit:   262144
-layout.stripe_count:  1
-layout.preferred_osd: -1
-
-[root@an1024 ~]# touch /mnt/ceph/test1
-[root@an1024 ~]# cephfs /mnt/ceph/test1 show_layout
-layout.data_pool:     0
-layout.object_size:   262144
-layout.stripe_unit:   262144
-layout.stripe_count:  1
-layout.preferred_osd: -1
-
-[root@an1024 ~]# umount /mnt/ceph
-[root@an1024 ~]# mount.ceph an14-ib0:/ /mnt/ceph
-[root@an1024 ~]# df -h /mnt/ceph
-Filesystem            Size  Used Avail Use% Mounted on
-172.17.40.34:/         13T  178M   13T   1% /ram/mnt/ceph
-
-[root@an1024 ~]# cephfs /mnt/ceph/ show_layout
-layout.data_pool:     0
-layout.object_size:   262144
-layout.stripe_unit:   262144
-layout.stripe_count:  1
-layout.preferred_osd: -1
----
-
-OK, so far.  After filesystem unmount/shutdown/restart/mount:
-
----
-
-[root@an1024 ~]# df -h /mnt/ceph
-Filesystem            Size  Used Avail Use% Mounted on
-172.17.40.34:/         13T  450M   13T   1% /ram/mnt/ceph
-
-[root@an1024 ~]# cephfs /mnt/ceph/ show_layout
-layout not specified
-
----
-Hmmm, not what I was expecting.  Also:
----
-
-[root@an1024 ~]# cephfs /mnt/ceph/test1 show_layout
-layout.data_pool:     0
-layout.object_size:   262144
-layout.stripe_unit:   262144
-layout.stripe_count:  1
-layout.preferred_osd: -1
-
-[root@an1024 ~]# touch /mnt/ceph/test2
-[root@an1024 ~]# cephfs /mnt/ceph/test2 show_layout
-layout.data_pool:     0
-layout.object_size:   4194304
-layout.stripe_unit:   4194304
-layout.stripe_count:  1
-layout.preferred_osd: -1
-
----
-Also not what I was expecting.  I thought my
-256 KiB setting from before should still be in
-effect.
-
-Am I missing something?
-
-Thanks -- Jim
-
-
-
-
+<debug_mode>
+Have you tried this on non-root directories, and were results the same
+or different?
+</debug_mode>
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
