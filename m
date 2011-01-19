@@ -1,70 +1,118 @@
-From: Tomasz Chmielewski <mangoo@wpkg.org>
-Subject: Re: Ceph on just two nodes being clients - reasonable?
-Date: Wed, 19 Jan 2011 17:21:30 +0100
-Message-ID: <4D370F8A.3080601@wpkg.org>
-References: <4D36BDF9.4030404@wpkg.org>	<1295437286.2255.25.camel@wido-desktop>	<4D36D5B3.4040601@wpkg.org> <AANLkTimHi64ZB5_AY1_eQu5abHB+S+bvcSShL_NE3Me0@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: cephfs set_layout on filesystem root?
+Date: Wed, 19 Jan 2011 09:46:46 -0700
+Message-ID: <1295455606.6777.23.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.virtall.com ([178.63.195.102]:49836 "EHLO mail.virtall.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754221Ab1ASQVg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 19 Jan 2011 11:21:36 -0500
-In-Reply-To: <AANLkTimHi64ZB5_AY1_eQu5abHB+S+bvcSShL_NE3Me0@mail.gmail.com>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:34215 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754722Ab1ASQrd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jan 2011 11:47:33 -0500
+Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21])
+	by sentry-three.sandia.gov (Postfix) with ESMTP id 1F1BF4DC773
+	for <ceph-devel@vger.kernel.org>; Wed, 19 Jan 2011 09:47:29 -0700 (MST)
+Received: from mail.sandia.gov (cas1.sandia.gov [134.253.165.159]) by
+ mailgate.sandia.gov (8.14.4/8.14.4) with ESMTP id p0JGlAPo031792 for
+ <ceph-devel@vger.kernel.org>; Wed, 19 Jan 2011 09:47:12 -0700
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 19.01.2011 16:57, Gregory Farnum wrote:
+Hi,
 
->> Currently, I'm running glusterfs in such a scenario (two servers, each being
->> also clients), but I wanted to give ceph a try (glusterfs has some
->> performance issues with lots of small files), also because of its nice
->> features (snapshots, rbd etc.).
-> Rather than running 3 monitors you could just put a monitor on one of
-> the machines -- your cluster will go down if it fails, but in a 2-node
-> system it's not like resilience from one-node failure would be very
-> helpful anyway.
+I've been experimenting with using cephfs to set
+the object/stripe size on a Ceph filesystem root,
+and it seems to not persist across a filesystem
+restart.  Is that expected behavior?
 
-OK, I could imagine starting the monitor on just one node i.e. with the 
-help of heartbeat - so if the node with the monitor goes down, heartbeat 
-starts the monitor process on the other machine.
+To reproduce on current testing branch (6d0dc4bf6):
+
+---
+# create a new filesystem, mount it; then
+# from a client:
+
+[root@an1024 ~]# df -h /mnt/ceph
+Filesystem            Size  Used Avail Use% Mounted on
+172.17.40.34:/         13T  510M   13T   1% /ram/mnt/ceph
+
+[root@an1024 ~]# cephfs /mnt/ceph/ show_layout
+layout.data_pool:     0
+layout.object_size:   4194304
+layout.stripe_unit:   4194304
+layout.stripe_count:  1
+layout.preferred_osd: -1
+
+[root@an1024 ~]# cephfs /mnt/ceph set_layout -s 262144 -c 1 -u 262144
+[root@an1024 ~]# cephfs /mnt/ceph/ show_layout
+layout.data_pool:     0
+layout.object_size:   262144
+layout.stripe_unit:   262144
+layout.stripe_count:  1
+layout.preferred_osd: -1
+
+[root@an1024 ~]# touch /mnt/ceph/test1
+[root@an1024 ~]# cephfs /mnt/ceph/test1 show_layout
+layout.data_pool:     0
+layout.object_size:   262144
+layout.stripe_unit:   262144
+layout.stripe_count:  1
+layout.preferred_osd: -1
+
+[root@an1024 ~]# umount /mnt/ceph
+[root@an1024 ~]# mount.ceph an14-ib0:/ /mnt/ceph
+[root@an1024 ~]# df -h /mnt/ceph
+Filesystem            Size  Used Avail Use% Mounted on
+172.17.40.34:/         13T  178M   13T   1% /ram/mnt/ceph
+
+[root@an1024 ~]# cephfs /mnt/ceph/ show_layout
+layout.data_pool:     0
+layout.object_size:   262144
+layout.stripe_unit:   262144
+layout.stripe_count:  1
+layout.preferred_osd: -1
+---
+
+OK, so far.  After filesystem unmount/shutdown/restart/mount:
+
+---
+
+[root@an1024 ~]# df -h /mnt/ceph
+Filesystem            Size  Used Avail Use% Mounted on
+172.17.40.34:/         13T  450M   13T   1% /ram/mnt/ceph
+
+[root@an1024 ~]# cephfs /mnt/ceph/ show_layout
+layout not specified
+
+---
+Hmmm, not what I was expecting.  Also:
+---
+
+[root@an1024 ~]# cephfs /mnt/ceph/test1 show_layout
+layout.data_pool:     0
+layout.object_size:   262144
+layout.stripe_unit:   262144
+layout.stripe_count:  1
+layout.preferred_osd: -1
+
+[root@an1024 ~]# touch /mnt/ceph/test2
+[root@an1024 ~]# cephfs /mnt/ceph/test2 show_layout
+layout.data_pool:     0
+layout.object_size:   4194304
+layout.stripe_unit:   4194304
+layout.stripe_count:  1
+layout.preferred_osd: -1
+
+---
+Also not what I was expecting.  I thought my
+256 KiB setting from before should still be in
+effect.
+
+Am I missing something?
+
+Thanks -- Jim
 
 
-> However, there is a serious issue with running clients and servers on
-> one machine, which may or may not be a problem depending on your use
-> case: Deadlock becomes a significant possibility.
-
-Sounds like the "freezes" issue mentioned by Dong Jin Lee?
 
 
-> This isn't a problem
-> we've come up with a good solution for, unfortunately, but imagine
-> you're writing a lot of files to Ceph. Ceph dutifully writes them and
-> the kernel dutifully caches them. You also have a lot of write
-> activity so the Ceph kernel client is doing local caching. Then the
-> kernel comes along and says "I'm low on memory! Flush stuff to disk!"
-> and the kernel client tries to flush it out...which involves creating
-> another copy of the data in memory on the same machine. Uh-oh!
-
-Uh-oh, it doesn't sound encouraging, and will likely happen sooner or later.
-
-Would some sort of zero-copy help here? But perhaps it's not that easy 
-to solve, otherwise, we wouldn't be discussing it here.
-
-I think swapping over NFS (or, iSCSI) has a similar problem ("need to 
-write, but the network buffer is full, so we can't write over network -> 
-deadlock"), and there were some patches floating around some years ago 
-to solve it. Not sure what's the state of it and how similar it is to 
-Ceph though.
-
-
-Last I checked, 2 < 3, so having a budget HA solution which just needed 
-2 servers instead of 3 would be a great thing to have! ;)
-
-
--- 
-Tomasz Chmielewski
-http://wpkg.org
