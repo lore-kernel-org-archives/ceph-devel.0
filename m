@@ -1,51 +1,50 @@
-From: Nick Piggin <npiggin@gmail.com>
-Subject: Re: [PATCH 17/46] fs: Use rename lock and RCU for multi-step operations
-Date: Thu, 20 Jan 2011 09:32:24 +1100
-Message-ID: <AANLkTimUjC8B0=nn5+yDshzp0hy6Zk1wxYHWEZbk83Tf@mail.gmail.com>
-References: <cover.1290852958.git.npiggin@kernel.dk>
-	<d44ddcf1d1e0813b3ce2b3872c7c702a31b62894.1290852959.git.npiggin@kernel.dk>
-	<AANLkTi=pj-pLYVSrU+6+BtioCWLod2ueZecNaap619fw@mail.gmail.com>
-	<AANLkTik3ScP5rvR2bOXOEEH8SNZGg+xO6Gy32CW3XmU6@mail.gmail.com>
-	<AANLkTinVP=OuJ-3u9pHdDuuKJoVrP4Unr5Dx1x=qHtXC@mail.gmail.com>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: can't read the superbloack
+Date: Wed, 19 Jan 2011 20:50:03 -0800
+Message-ID: <AANLkTi=TWipdK19hJU-OL5EKkb-R49jxonqSCBaurPSm@mail.gmail.com>
+References: <AANLkTim8CMPTHE9nWOxoza9WZPwwJ3=ZU5T+Y6iKyXdv@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:64465 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754421Ab1ASWc0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jan 2011 17:32:26 -0500
-In-Reply-To: <AANLkTinVP=OuJ-3u9pHdDuuKJoVrP4Unr5Dx1x=qHtXC@mail.gmail.com>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:33075 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755031Ab1ATEuE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jan 2011 23:50:04 -0500
+Received: by eye27 with SMTP id 27so76882eye.19
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Jan 2011 20:50:03 -0800 (PST)
+In-Reply-To: <AANLkTim8CMPTHE9nWOxoza9WZPwwJ3=ZU5T+Y6iKyXdv@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: Nick Piggin <npiggin@kernel.dk>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Qian Wei <hzqianwei@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Jan 20, 2011 at 9:27 AM, Yehuda Sadeh Weinraub
-<yehudasa@gmail.com> wrote:
-> On Tue, Jan 18, 2011 at 2:42 PM, Nick Piggin <npiggin@gmail.com> wrote:
->> On Wed, Jan 19, 2011 at 9:32 AM, Yehuda Sadeh Weinraub
->
->>> There's an issue with ceph as it references the
->>> dentry->d_parent(->d_inode) at dentry_release(), so setting
->>> dentry->d_parent to NULL here doesn't work with ceph. Though there is
->>> some workaround for it, we would like to be sure that this one is
->>> really required so that we don't exacerbate the ugliness. The
->>> workaround is to keep a pointer to the parent inode in the private
->>> dentry structure, which will be referenced only at the .release()
->>> callback. This is clearly not ideal.
->>
->> Hmm, I'll have to think about it. Probably we can check for
->> d_count == 0 rather than parent != NULL I think?
->>
->
-> That'll solve ceph's problem, don't know about how'd affect other
-> stuff. We'll need to know whether this is the solution, or whether
-> we'd need to introduce some other band aid fix.
-
-No I think it will work fine. Basically we just need to know whether
-we have been deleted, and if so then we restart rather than walking
-back up the parent.
-
-I'll send a patch in a few days. For the meantime, it's a rathe
-small window for ceph to worry about. So we'll have something
-before -rc2 which should be OK.
+On Tue, Jan 18, 2011 at 6:38 PM, Qian Wei <hzqianwei@gmail.com> wrote:
+> Now the my client machine still can't mount the system, the error
+> message is "can't read the superblock ".Moreover, I can use
+> "init-ceph" command to start the system,and the =A0"cosd cmon cmds" i=
+s
+> on process table(so I think the system is running), but I can't =A0us=
+e
+> =93ceph=94 command to administrate the system, =932011-01-13 13:27:05=
+=2E800552
+> b5f41b70 -- :/4555 >> 192.168.178.160:0/0 pipe(0x8429c48 sd=3D3 pgs=3D=
+0
+> cs=3D0 l=3D0).fault first fault =94 is the error message.Do you know =
+what's
+> wrong may cause these problems?
+Well, that "fault first fault" message is very generic so doesn't tell
+us much. However, between that and the superblock error, there's
+clearly some issue about communicating with your monitor. There are a
+few ways to debug this, but let's check out your configuration file...
+> [mon0]
+> =A0 =A0 =A0 =A0host =3D cephosd
+> =A0 =A0 =A0 =A0mon addr =3D 192.168.178.160
+I'm pretty sure that's your problem. You need to specify a port as
+well. If that doesn't resolve your issues, we can take a deeper look.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
