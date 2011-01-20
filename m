@@ -1,50 +1,34 @@
-From: "Longguang Yue" <longguang_yue@tcloudcomputing.com>
-Subject: =?utf-8?B?562U5aSNOiBjYW4ndCByZWFkIHRoZSBzdXBlcmJsb2Fjaw==?=
-Date: Thu, 20 Jan 2011 13:11:29 +0800
-Message-ID: <D0C67741759ABD4BBD8D3A5CB815606E07E4A4@mail.cloud-valley.com.cn>
-References: <AANLkTim8CMPTHE9nWOxoza9WZPwwJ3=ZU5T+Y6iKyXdv@mail.gmail.com> <AANLkTi=TWipdK19hJU-OL5EKkb-R49jxonqSCBaurPSm@mail.gmail.com> <Pine.LNX.4.64.1101192102400.14234@cobra.newdream.net>
+From: tsuna <tsunanet@gmail.com>
+Subject: Re: Ceph 0.23.2 Consolidated questions
+Date: Thu, 20 Jan 2011 09:13:18 -0800
+Message-ID: <AANLkTim=Nk3HUwROkpCMZuL_vc_4mJt5dH8FkbMGM+Ci@mail.gmail.com>
+References: <AANLkTi=Xhqo1ASC6ddN4VL2wcjr2HsT+a=utKwjBoqF-@mail.gmail.com>
+ <AANLkTi=+L0EPKip8TuyeKGBAhEth8Fd-x0WPgfui_d+G@mail.gmail.com>
+ <AANLkTim6KkUoPY-c_kbcKvc80raG+6gDU4ouu7WBcf9n@mail.gmail.com>
+ <AANLkTi=E5mLSxwv9bxYj+wXyGsSa_MDev5aLFMMqtm4B@mail.gmail.com> <AANLkTimrXeUnWTPpOGvNFVFRNv=jb9g=Yn3hK=cBYwst@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [203.114.244.241] ([203.114.244.241]:31187 "EHLO
-	mail.cloud-valley.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751053Ab1ATFLe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 20 Jan 2011 00:11:34 -0500
-Content-class: urn:content-classes:message
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:64889 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752163Ab1ATROD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jan 2011 12:14:03 -0500
+Received: by wyb28 with SMTP id 28so838159wyb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 20 Jan 2011 09:14:01 -0800 (PST)
+In-Reply-To: <AANLkTimrXeUnWTPpOGvNFVFRNv=jb9g=Yn3hK=cBYwst@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Gregory Farnum <gregf@hq.newdream.net>
-Cc: Qian Wei <hzqianwei@gmail.com>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregf@hq.newdream.net>
+Cc: DongJin Lee <dongjin.lee@auckland.ac.nz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-Q2VwaCAgLW0gMTkyLjE2OC4xNzguMTYwOjY3ODkgLXMNCg0KTWFrZSBzdXJlIHlvdXIgbW9uIGlz
-IHJ1bm5pbmcNCg0KDQotLS0tLemCruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IGNlcGgtZGV2
-ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
-cm5lbC5vcmddIOS7o+ihqCBTYWdlIFdlaWwNCuWPkemAgeaXtumXtDogMjAxMeW5tDHmnIgyMOaX
-pSAxMzowNQ0K5pS25Lu25Lq6OiBHcmVnb3J5IEZhcm51bQ0K5oqE6YCBOiBRaWFuIFdlaTsgY2Vw
-aC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCuS4u+mimDogUmU6IGNhbid0IHJlYWQgdGhlIHN1cGVy
-YmxvYWNrDQoNCk9uIFdlZCwgMTkgSmFuIDIwMTEsIEdyZWdvcnkgRmFybnVtIHdyb3RlOg0KPiBP
-biBUdWUsIEphbiAxOCwgMjAxMSBhdCA2OjM4IFBNLCBRaWFuIFdlaSA8aHpxaWFud2VpQGdtYWls
-LmNvbT4gd3JvdGU6DQo+ID4gTm93IHRoZSBteSBjbGllbnQgbWFjaGluZSBzdGlsbCBjYW4ndCBt
-b3VudCB0aGUgc3lzdGVtLCB0aGUgZXJyb3INCj4gPiBtZXNzYWdlIGlzICJjYW4ndCByZWFkIHRo
-ZSBzdXBlcmJsb2NrICIuTW9yZW92ZXIsIEkgY2FuIHVzZQ0KPiA+ICJpbml0LWNlcGgiIGNvbW1h
-bmQgdG8gc3RhcnQgdGhlIHN5c3RlbSxhbmQgdGhlIMKgImNvc2QgY21vbiBjbWRzIiBpcw0KPiA+
-IG9uIHByb2Nlc3MgdGFibGUoc28gSSB0aGluayB0aGUgc3lzdGVtIGlzIHJ1bm5pbmcpLCBidXQg
-SSBjYW4ndCDCoHVzZQ0KPiA+ID9jZXBoPyBjb21tYW5kIHRvIGFkbWluaXN0cmF0ZSB0aGUgc3lz
-dGVtLCA/MjAxMS0wMS0xMyAxMzoyNzowNS44MDA1NTINCj4gPiBiNWY0MWI3MCAtLSA6LzQ1NTUg
-Pj4gMTkyLjE2OC4xNzguMTYwOjAvMCBwaXBlKDB4ODQyOWM0OCBzZD0zIHBncz0wDQo+ID4gY3M9
-MCBsPTApLmZhdWx0IGZpcnN0IGZhdWx0ID8gaXMgdGhlIGVycm9yIG1lc3NhZ2UuRG8geW91IGtu
-b3cgd2hhdCdzDQo+ID4gd3JvbmcgbWF5IGNhdXNlIHRoZXNlIHByb2JsZW1zPw0KPiBXZWxsLCB0
-aGF0ICJmYXVsdCBmaXJzdCBmYXVsdCIgbWVzc2FnZSBpcyB2ZXJ5IGdlbmVyaWMgc28gZG9lc24n
-dCB0ZWxsDQo+IHVzIG11Y2guIEhvd2V2ZXIsIGJldHdlZW4gdGhhdCBhbmQgdGhlIHN1cGVyYmxv
-Y2sgZXJyb3IsIHRoZXJlJ3MNCj4gY2xlYXJseSBzb21lIGlzc3VlIGFib3V0IGNvbW11bmljYXRp
-bmcgd2l0aCB5b3VyIG1vbml0b3IuIFRoZXJlIGFyZSBhDQo+IGZldyB3YXlzIHRvIGRlYnVnIHRo
-aXMsIGJ1dCBsZXQncyBjaGVjayBvdXQgeW91ciBjb25maWd1cmF0aW9uIGZpbGUuLi4NCj4gPiBb
-bW9uMF0NCj4gPiDCoCDCoCDCoCDCoGhvc3QgPSBjZXBob3NkDQo+ID4gwqAgwqAgwqAgwqBtb24g
-YWRkciA9IDE5Mi4xNjguMTc4LjE2MA0KPiBJJ20gcHJldHR5IHN1cmUgdGhhdCdzIHlvdXIgcHJv
-YmxlbS4gWW91IG5lZWQgdG8gc3BlY2lmeSBhIHBvcnQgYXMNCj4gd2VsbC4gSWYgdGhhdCBkb2Vz
-bid0IHJlc29sdmUgeW91ciBpc3N1ZXMsIHdlIGNhbiB0YWtlIGEgZGVlcGVyIGxvb2suDQoNCk5v
-dGUgdGhhdCB0aGUgZGVmYXVsdCBwb3J0IGlzIDY3ODkuLiB5b3Ugc2hvdWxkIHVzZSB0aGF0Og0K
-DQoJbW9uIGFkZHIgPSAxOTIuMTY4LjE3OC4xNjA6Njc4OQ0KDQpzYWdlDQo=
+On Tue, Jan 18, 2011 at 11:54 AM, Gregory Farnum <gregf@hq.newdream.net> wrote:
+> Are you running on 32-bit machines? It looks like we're accidentally
+> overflowing a 32-bit value, but I don't have any 32-bit machines handy
+> to test it on. Please apply the patch at http://pastebin.com/yahTxRzQ,
+> recompile, and let me know if you still have journal size issues. :)
+
+There's a typo in your patch, "newsize << 20;" should be "newsize <<= 20;"
+
+-- 
+Benoit "tsuna" Sigoure
+Software Engineer @ www.StumbleUpon.com
