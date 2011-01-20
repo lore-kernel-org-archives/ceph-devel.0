@@ -1,59 +1,53 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: ceph hang.this is my environment
-Date: Thu, 20 Jan 2011 10:45:45 -0800
-Message-ID: <AANLkTimebDN07EyEs9HN7kTsV77jXgUAD_i=F7EcL64o@mail.gmail.com>
-References: <1295455606.6777.23.camel@sale659.sandia.gov>
-	<AANLkTi=LNa0AyiT4UfyrJLQrUCrPDACBocsiQV=yw7GQ@mail.gmail.com>
-	<1295457888.6777.33.camel@sale659.sandia.gov>
-	<Pine.LNX.4.64.1101190929290.6864@cobra.newdream.net>
-	<D0C67741759ABD4BBD8D3A5CB815606E07E489@mail.cloud-valley.com.cn>
+From: Brian Chrisman <brchrisman@gmail.com>
+Subject: sparse file support
+Date: Thu, 20 Jan 2011 13:11:11 -0800
+Message-ID: <AANLkTik231Dz019ztWhJsMX0tnVKL-EdmkY8ROCSWLnV@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:44656 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752564Ab1ATSqB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jan 2011 13:46:01 -0500
-Received: by wwa36 with SMTP id 36so970626wwa.1
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Jan 2011 10:46:00 -0800 (PST)
-In-Reply-To: <D0C67741759ABD4BBD8D3A5CB815606E07E489@mail.cloud-valley.com.cn>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:34429 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753753Ab1ATVLM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jan 2011 16:11:12 -0500
+Received: by qwa26 with SMTP id 26so1087514qwa.19
+        for <ceph-devel@vger.kernel.org>; Thu, 20 Jan 2011 13:11:12 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Longguang Yue <longguang_yue@tcloudcomputing.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Based on what you've told us it looks like maybe you're running into a
-btrfs bug of some kind.
+I've performed some simple testing of sparse files on ceph.  Summary,
+ceph reports full file size to 'du' and 'ls', where it should return
+actual storage usage to 'du'.  Creating a sparse file on ceph does not
+actually use the full file size in storage (which is correct
+behavior).  Is this a known issue, or should I submit a bug?
 
-We're working on getting the most recent version of btrfs onto some
-nodes here to check it out as we've been hearing about sync issues
-with btrfs for a few days now, but we haven't managed it yet.
+dd if=/dev/urandom of=random.data bs=1024 count=1024
+dd if=random.data of=sparse_file.data
+dd if=random.data of=sparse_file.data bs=1024k seek=1024
+ls -l sparse_file.data
+du -sh sparse_file.data
 
-2011/1/19 Longguang Yue <longguang_yue@tcloudcomputing.com>:
-> 5 nodes,{mds0,mon0,osd0,osd1,client}
-> Because I update ceph-0.23 to 0.24.  client and osd? Also hang.  So I=
- mkfs.btrfs ,mkcephfs again.  Client and osd1 hang again!!!!!!!!!
->
-> 1. mkcephfs -a -c /etc/ceph/ceph.conf ; at highest debug level
-> 2. client#   mount mon0:/ /mnt/ceph
-> 3.client#   ls /mnt/ceph  ;   cp files /mnt/ceph  ; go to other node =
-,ls /data/osd? Ok.
-> 4.client#   ls /mnt/ceph =A1=BEok=A1=BF.    Now I cp newfile /mnt/cep=
-h ; sync ...........................hang,   ls /mnt/ceph  .............=
-=2E......   hang!!!!!!!
-> 5.osd1#    ls /data/osd1 .................hang
-> -------------osd1 dmesg-------------------------------------
-> Device : 'btrfs-4' device_add
-> PM:adding info for no bus : btrfs-4
-> Bad ordered accounting left 4096 size 262144
-> ----------------client dmesg,ceph -s ,umount  ---- attached ---------=
----------
->
-> II  how to locate this problem?  What should I do?
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+A reference output: ext3
+[root@test11 tmp]# ls -l sparse_file.data
+-rw-r-r- 1 root root 1074790400 Jan 19 18:43 sparse_file.data
+[root@test11 tmp]#
+[root@test11 tmp]# du -sh sparse_file.data
+2.1M sparse_file.data
+[root@test11 tmp]#
+
+Output from: ceph
+[root@test11 fs0]# ls -l sparse_file.data
+-rw-r-r- 1 root root 1074790400 Jan 19 18:45 sparse_file.data
+[root@test11 fs0]# du -sh sparse_file.data
+1.1Gsparse_file.data
+[root@test11 fs0]#
+
+However, df shows that 1GB of space is not actually used in the filesytem:
+
+[root@test11 fs0]# df -h
+Filesystem            Size  Used Avail Use% Mounted on
+...
+10.200.98.111:/        11T   30M   11T   1% /fs0
+[root@test11 fs0]#
+
+-Brian
