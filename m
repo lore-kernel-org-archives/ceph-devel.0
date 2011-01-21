@@ -1,48 +1,64 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: Ceph 0.23.2 Consolidated questions
-Date: Fri, 21 Jan 2011 14:14:41 -0800
-Message-ID: <AANLkTinixq_tnvSbMcOXEA=0=gDmG6wSSmRWZ_AOtAT1@mail.gmail.com>
-References: <AANLkTi=Xhqo1ASC6ddN4VL2wcjr2HsT+a=utKwjBoqF-@mail.gmail.com>
-	<AANLkTi=+L0EPKip8TuyeKGBAhEth8Fd-x0WPgfui_d+G@mail.gmail.com>
-	<AANLkTim6KkUoPY-c_kbcKvc80raG+6gDU4ouu7WBcf9n@mail.gmail.com>
-	<AANLkTi=E5mLSxwv9bxYj+wXyGsSa_MDev5aLFMMqtm4B@mail.gmail.com>
-	<AANLkTimrXeUnWTPpOGvNFVFRNv=jb9g=Yn3hK=cBYwst@mail.gmail.com>
-	<AANLkTim=Nk3HUwROkpCMZuL_vc_4mJt5dH8FkbMGM+Ci@mail.gmail.com>
+From: Matthias Urlichs <matthias@urlichs.de>
+Subject: Ceph distributed over slow link: possible?
+Date: Fri, 21 Jan 2011 19:55:33 +0000 (UTC)
+Message-ID: <ihcobl$bal$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:37864 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754148Ab1AUWOm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Jan 2011 17:14:42 -0500
-Received: by ewy5 with SMTP id 5so1201350ewy.19
-        for <ceph-devel@vger.kernel.org>; Fri, 21 Jan 2011 14:14:41 -0800 (PST)
-In-Reply-To: <AANLkTim=Nk3HUwROkpCMZuL_vc_4mJt5dH8FkbMGM+Ci@mail.gmail.com>
+Received: from lo.gmane.org ([80.91.229.12]:43558 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751724Ab1AVHpG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 22 Jan 2011 02:45:06 -0500
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1PgY9g-0007KE-IR
+	for ceph-devel@vger.kernel.org; Sat, 22 Jan 2011 08:45:04 +0100
+Received: from netz.smurf.noris.de ([213.95.21.43])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 22 Jan 2011 08:45:04 +0100
+Received: from matthias by netz.smurf.noris.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sat, 22 Jan 2011 08:45:04 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: DongJin Lee <dongjin.lee@auckland.ac.nz>, tsuna <tsunanet@gmail.com>
 
-On Thu, Jan 20, 2011 at 9:13 AM, tsuna <tsunanet@gmail.com> wrote:
-> On Tue, Jan 18, 2011 at 11:54 AM, Gregory Farnum <gregf@hq.newdream.net> wrote:
->> Are you running on 32-bit machines? It looks like we're accidentally
->> overflowing a 32-bit value, but I don't have any 32-bit machines handy
->> to test it on. Please apply the patch at http://pastebin.com/yahTxRzQ,
->> recompile, and let me know if you still have journal size issues. :)
->
-> There's a typo in your patch, "newsize << 20;" should be "newsize <<= 20;"
-Oh, yep. Thanks for that. It's fixed on the patch page and just got
-pushed into the testing branch.
+Hello ceph people,
 
-On Thu, Jan 20, 2011 at 8:40 PM, DongJin Lee <dongjin.lee@auckland.ac.nz> wrote:
-> Greg: Thanks for the various supports (just emailing you since it's
-> minor updates)
-> and sorry for late reply, we were thinking to do your recommended
-> updates, but we *always* used 64bit version..
-> we followed the debian installation guide and apt-get all once as
-> guided on the Wiki.
-Hmmm. Well, your final two journal sizes are definitely overflowing
-somehow, though I don't know why that would happen on a 64-bit
-machine. I'm still not sure what's going on in the middle ones. Let us
-know if they persist after .24.2 (which should be going out today). :)
--Greg
+My situation is this: my Ceph cluster is distributed over multiple
+sites. The links between sites are rather slow. :-/
+
+Storing one copy of a file at each site should not be a problem with
+a reasonable crushmap, but ..:
+
+* how can I verify on which devices a file is stored?
+
+* is it possible to teach clients to read/write from "their", i.e.
+  the local site's, copy of a file, instead of pulling stuff from
+  a remote site? Or does ceph notice the speed difference by itself?
+
+* My crushmap looks like this:
+type 0  device
+type 1  host
+type 2  site
+type 3  root
+... (root => 2 sites => 2 hosts each => 3 devices each)
+rule  data {
+        ruleset 0
+        type replicated
+        min_size 2
+        max_size 2
+        step take  root
+        step chooseleaf firstn 2 type site
+        step emit
+}
+
+but when only one site is reachable, will there be one or two
+copies of a file? If the former, how do I fix that? If the latter,
+will the copy be redistributed when (the link to) the second site
+comes back?
+
+-- 
+
