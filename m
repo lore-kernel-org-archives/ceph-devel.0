@@ -1,59 +1,42 @@
-From: John Leach <john@brightbox.co.uk>
-Subject: desperados: a Ruby library for RADOS
-Date: Sun, 23 Jan 2011 18:41:53 +0000
-Message-ID: <1295808113.24826.17.camel@dogen>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: desperados: a Ruby library for RADOS
+Date: Sun, 23 Jan 2011 20:19:33 +0100
+Message-ID: <1295810373.2561.23.camel@wido-laptop.pcextreme.nl>
+References: <1295808113.24826.17.camel@dogen>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp201.iad.emailsrvr.com ([207.97.245.201]:33606 "EHLO
-	smtp201.iad.emailsrvr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751639Ab1AWSml (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Jan 2011 13:42:41 -0500
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by smtp40.relay.iad1a.emailsrvr.com (SMTP Server) with ESMTP id 8800E350270
-	for <ceph-devel@vger.kernel.org>; Sun, 23 Jan 2011 13:41:55 -0500 (EST)
-Received: by smtp40.relay.iad1a.emailsrvr.com (Authenticated sender: john-AT-brightbox.co.uk) with ESMTPSA id 28CC43501DE
-	for <ceph-devel@vger.kernel.org>; Sun, 23 Jan 2011 13:41:55 -0500 (EST)
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:36010 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751447Ab1AWT6f (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Jan 2011 14:58:35 -0500
+In-Reply-To: <1295808113.24826.17.camel@dogen>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: John Leach <john@brightbox.co.uk>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+Hi John,
 
-I've just made the first release of my RADOS Ruby library, desperados.
+On Sun, 2011-01-23 at 18:41 +0000, John Leach wrote:
+> Hi all,
+> 
+> I've just made the first release of my RADOS Ruby library, desperados.
+> 
 
-It's dead easy to use:
+Sounds great! I'm no ruby user at all, but browsing through the
+sourcecode it seems very simple to attach external lib's to Ruby.
 
-  pool = Rados::Pool.create("mypool")
-  o = pool.objects.new("mykey")
-  o.write("Once upon")
-  o.write(" a time")
-  o.seek(0)
-  o.read == "Once upon a time"
-  o = pool.objects.find("mykey")
-  o.seek(5)
-  o.read == "upon a time"
+> Bug reports and contributions are welcomed!
+> 
 
-I've been using it to read and write thousands of pool and millions of
-objects whilst load testing ceph and it's behaved well.
+I found it a bit too much to create a patch for it, but browsing through
+your .spec file:
 
-Behind the scenes it just uses librados (via the Ruby FFI).
+  s.email       = ["john@johnleach.co.uk.co.uk"]
 
-The code is on github: https://github.com/johnl/desperados
+Isn't there a .co.uk too much?
 
-Documentation here: http://rdoc.info/gems/desperados/0.1/frames
-
-And there is a gem available: https://rubygems.org/gems/desperados
-
-You can file bugs or feature requests on github too:
-https://github.com/johnl/desperados/issues
-
-Bug reports and contributions are welcomed!
-
-Thanks,
-
-John.
---
-http://beta.brightbox.com/
+Wido
 
