@@ -1,42 +1,23 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: desperados: a Ruby library for RADOS
-Date: Sun, 23 Jan 2011 20:19:33 +0100
-Message-ID: <1295810373.2561.23.camel@wido-laptop.pcextreme.nl>
-References: <1295808113.24826.17.camel@dogen>
+From: "Longguang Yue" <longguang_yue@tcloudcomputing.com>
+Subject: how to do when data size big than osd disk.
+Date: Mon, 24 Jan 2011 12:28:28 +0800
+Message-ID: <D0C67741759ABD4BBD8D3A5CB815606E07E556@mail.cloud-valley.com.cn>
+References: <AANLkTik231Dz019ztWhJsMX0tnVKL-EdmkY8ROCSWLnV@mail.gmail.com> <Pine.LNX.4.64.1101201325570.25905@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:36010 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751447Ab1AWT6f (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Jan 2011 14:58:35 -0500
-In-Reply-To: <1295808113.24826.17.camel@dogen>
+Received: from [203.114.244.241] ([203.114.244.241]:3193 "EHLO
+	mail.cloud-valley.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751773Ab1AXE2i convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 23 Jan 2011 23:28:38 -0500
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Leach <john@brightbox.co.uk>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>, Brian Chrisman <brchrisman@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi John,
-
-On Sun, 2011-01-23 at 18:41 +0000, John Leach wrote:
-> Hi all,
-> 
-> I've just made the first release of my RADOS Ruby library, desperados.
-> 
-
-Sounds great! I'm no ruby user at all, but browsing through the
-sourcecode it seems very simple to attach external lib's to Ruby.
-
-> Bug reports and contributions are welcomed!
-> 
-
-I found it a bit too much to create a patch for it, but browsing through
-your .spec file:
-
-  s.email       = ["john@johnleach.co.uk.co.uk"]
-
-Isn't there a .co.uk too much?
-
-Wido
-
+2 out of 3 is down,so the live osd is full, data lose.
+How to solve the case? 
