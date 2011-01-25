@@ -1,55 +1,43 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: [PATCH 17/46] fs: Use rename lock and RCU for multi-step operations
-Date: Tue, 25 Jan 2011 14:10:38 -0800
-Message-ID: <AANLkTi=or1Ya21Am8Dr4KVHgqkwvNxFwgn407=wxRfVa@mail.gmail.com>
-References: <cover.1290852958.git.npiggin@kernel.dk>
-	<d44ddcf1d1e0813b3ce2b3872c7c702a31b62894.1290852959.git.npiggin@kernel.dk>
-	<AANLkTi=pj-pLYVSrU+6+BtioCWLod2ueZecNaap619fw@mail.gmail.com>
-	<AANLkTik3ScP5rvR2bOXOEEH8SNZGg+xO6Gy32CW3XmU6@mail.gmail.com>
-	<AANLkTinVP=OuJ-3u9pHdDuuKJoVrP4Unr5Dx1x=qHtXC@mail.gmail.com>
-	<AANLkTimUjC8B0=nn5+yDshzp0hy6Zk1wxYHWEZbk83Tf@mail.gmail.com>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: Ceph 0.23.2 Consolidated questions
+Date: Tue, 25 Jan 2011 14:36:51 -0800
+Message-ID: <AANLkTimo8y7tV6dbmSLTSREOs_TeUDq9aYkvvUAHNaSx@mail.gmail.com>
+References: <AANLkTi=Xhqo1ASC6ddN4VL2wcjr2HsT+a=utKwjBoqF-@mail.gmail.com>
+	<AANLkTi=+L0EPKip8TuyeKGBAhEth8Fd-x0WPgfui_d+G@mail.gmail.com>
+	<AANLkTim6KkUoPY-c_kbcKvc80raG+6gDU4ouu7WBcf9n@mail.gmail.com>
+	<AANLkTi=E5mLSxwv9bxYj+wXyGsSa_MDev5aLFMMqtm4B@mail.gmail.com>
+	<AANLkTimrXeUnWTPpOGvNFVFRNv=jb9g=Yn3hK=cBYwst@mail.gmail.com>
+	<AANLkTim=Nk3HUwROkpCMZuL_vc_4mJt5dH8FkbMGM+Ci@mail.gmail.com>
+	<AANLkTinixq_tnvSbMcOXEA=0=gDmG6wSSmRWZ_AOtAT1@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <AANLkTimUjC8B0=nn5+yDshzp0hy6Zk1wxYHWEZbk83Tf@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Nick Piggin <npiggin@gmail.com>
-Cc: Nick Piggin <npiggin@kernel.dk>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:63186 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752153Ab1AYWgx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jan 2011 17:36:53 -0500
+Received: by eye27 with SMTP id 27so222626eye.19
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Jan 2011 14:36:52 -0800 (PST)
+In-Reply-To: <AANLkTinixq_tnvSbMcOXEA=0=gDmG6wSSmRWZ_AOtAT1@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: DongJin Lee <dongjin.lee@auckland.ac.nz>, tsuna <tsunanet@gmail.com>
 
-On Wed, Jan 19, 2011 at 2:32 PM, Nick Piggin <npiggin@gmail.com> wrote:
-> On Thu, Jan 20, 2011 at 9:27 AM, Yehuda Sadeh Weinraub
-> <yehudasa@gmail.com> wrote:
->> On Tue, Jan 18, 2011 at 2:42 PM, Nick Piggin <npiggin@gmail.com> wrote:
->>> On Wed, Jan 19, 2011 at 9:32 AM, Yehuda Sadeh Weinraub
->>
->>>> There's an issue with ceph as it references the
->>>> dentry->d_parent(->d_inode) at dentry_release(), so setting
->>>> dentry->d_parent to NULL here doesn't work with ceph. Though there is
->>>> some workaround for it, we would like to be sure that this one is
->>>> really required so that we don't exacerbate the ugliness. The
->>>> workaround is to keep a pointer to the parent inode in the private
->>>> dentry structure, which will be referenced only at the .release()
->>>> callback. This is clearly not ideal.
->>>
->>> Hmm, I'll have to think about it. Probably we can check for
->>> d_count == 0 rather than parent != NULL I think?
->>>
->>
->> That'll solve ceph's problem, don't know about how'd affect other
->> stuff. We'll need to know whether this is the solution, or whether
->> we'd need to introduce some other band aid fix.
->
-> No I think it will work fine. Basically we just need to know whether
-> we have been deleted, and if so then we restart rather than walking
-> back up the parent.
->
-> I'll send a patch in a few days. For the meantime, it's a rathe
-> small window for ceph to worry about. So we'll have something
-> before -rc2 which should be OK.
->
+On Fri, Jan 21, 2011 at 2:14 PM, Gregory Farnum <gregf@hq.newdream.net> wrote:
+> On Thu, Jan 20, 2011 at 8:40 PM, DongJin Lee <dongjin.lee@auckland.ac.nz> wrote:
+>> Greg: Thanks for the various supports (just emailing you since it's
+>> minor updates)
+>> and sorry for late reply, we were thinking to do your recommended
+>> updates, but we *always* used 64bit version..
+>> we followed the debian installation guide and apt-get all once as
+>> guided on the Wiki.
+> Hmmm. Well, your final two journal sizes are definitely overflowing
+> somehow, though I don't know why that would happen on a 64-bit
+> machine. I'm still not sure what's going on in the middle ones. Let us
+> know if they persist after .24.2 (which should be going out today). :)
+> -Greg
 
-I guess that it's a bit late for -rc2, should we assume that it'll be on -rc3?
-
-Thanks,
-Yehuda
+I just checked this briefly on version .24.2 and was unable to
+reproduce any issues. Let me know if you encounter them again!
+-Greg
