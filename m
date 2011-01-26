@@ -1,31 +1,63 @@
-From: John Leach <john@brightbox.co.uk>
-Subject: master branch in git
-Date: Wed, 26 Jan 2011 21:16:07 +0000
-Message-ID: <1296076567.1802.16.camel@dogen>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: master branch in git
+Date: Wed, 26 Jan 2011 13:22:44 -0800
+Message-ID: <AANLkTimjgPj2wQhtw1zg8NK-jsLPk1RUHiRcjA0XH8RV@mail.gmail.com>
+References: <1296076567.1802.16.camel@dogen>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp121.iad.emailsrvr.com ([207.97.245.121]:45935 "EHLO
-	smtp121.iad.emailsrvr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752802Ab1AZVQK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Jan 2011 16:16:10 -0500
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by smtp42.relay.iad1a.emailsrvr.com (SMTP Server) with ESMTP id D8690148CF3
-	for <ceph-devel@vger.kernel.org>; Wed, 26 Jan 2011 16:16:09 -0500 (EST)
-Received: by smtp42.relay.iad1a.emailsrvr.com (Authenticated sender: john-AT-brightbox.co.uk) with ESMTPSA id 67E12148CAD
-	for <ceph-devel@vger.kernel.org>; Wed, 26 Jan 2011 16:16:09 -0500 (EST)
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:56467 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752932Ab1AZVWp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Jan 2011 16:22:45 -0500
+Received: by eye27 with SMTP id 27so780378eye.19
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Jan 2011 13:22:44 -0800 (PST)
+In-Reply-To: <1296076567.1802.16.camel@dogen>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: John Leach <john@brightbox.co.uk>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi, 
+You're talking about the userspace Ceph repository?
+I wasn't aware there was a master or stable branch (heh). I thought
+Sage had just recently cleaned up the old branches, but we may still
+have a bit of a mess as we adjusted to a larger team size and more
+formal releases. You're generally going to want one of testing,
+unstable, rc.
 
-what's the master branch used for in the git repository? It's currently
-at "v0.24". It's not had 0.24.1 or 0.24.2 merged into it so it doesn't
-seem to be stable.
+Unstable is the branch we do dev work on. It has the newest shiny
+stuff and is far more likely to be broken than the other branches, to
+get commits erased, etc.
+Testing is the previous release plus bugfixes, and will eventually
+become the next point release (eg, v.24.3).
+rc is maintained when we're approaching a major release (eg, v.25) and
+contains the features we expect to go into that branch. This branch
+comes off of unstable but once it branches it's a fairly stable
+branch.
 
-There is a stable branch but it's not been updated since September.
-
-John.
-
+On Wed, Jan 26, 2011 at 1:16 PM, John Leach <john@brightbox.co.uk> wrot=
+e:
+> Hi,
+>
+> what's the master branch used for in the git repository? It's current=
+ly
+> at "v0.24". It's not had 0.24.1 or 0.24.2 merged into it so it doesn'=
+t
+> seem to be stable.
+>
+> There is a stable branch but it's not been updated since September.
+>
+> John.
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
