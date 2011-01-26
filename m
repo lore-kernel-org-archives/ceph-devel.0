@@ -1,134 +1,115 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
 Subject: Re: btrfs BUG during cosd open() syscall
-Date: Wed, 26 Jan 2011 09:17:28 -0800
-Message-ID: <AANLkTimdgN3AEzD0gKMy13CgXrj49fZYBVazKQ08fMVC@mail.gmail.com>
+Date: Wed, 26 Jan 2011 10:55:37 -0700
+Message-ID: <1296064537.23762.68.camel@sale659.sandia.gov>
 References: <1296057606.23762.56.camel@sale659.sandia.gov>
+ <AANLkTimdgN3AEzD0gKMy13CgXrj49fZYBVazKQ08fMVC@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:41927 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752647Ab1AZRRs convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Jan 2011 12:17:48 -0500
-Received: by ewy5 with SMTP id 5so309050ewy.19
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Jan 2011 09:17:46 -0800 (PST)
-In-Reply-To: <1296057606.23762.56.camel@sale659.sandia.gov>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:52108 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753706Ab1AZRzr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Jan 2011 12:55:47 -0500
+In-Reply-To: <AANLkTimdgN3AEzD0gKMy13CgXrj49fZYBVazKQ08fMVC@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Jim:
-This looks to be a btrfs bug that Ceph isn't involved with at all.
-Please send it on to the btrfs list/bug tracker.
-(In future if you want to check btrfs bugs that you find while using
-Ceph with us that's fine; occasionally it's a bug in code that Sage
-contributed or a cooperative issue with ioctl usage.)
-Thanks!
--Greg
 
-On Wed, Jan 26, 2011 at 8:00 AM, Jim Schutt <jaschut@sandia.gov> wrote:
-> Hi,
->
-> I got this kernel BUG during a heavy write load, using
-> current ceph unstable kernel
-> (a3f5274e535 in git://git.kernel.org/pub/scm/linux/kernel/git/sage/ce=
-ph-client.git).
->
-> Please let me know what other information you need to make this usefu=
-l.
->
-> -- Jim
->
-> =A0BUG: unable to handle kernel NULL pointer dereference at 000000000=
-0000100
-> [97221.834832] IP: [<ffffffffa075b3ab>] btrfs_drop_inode+0x10/0x36 [b=
-trfs]
-> [97221.834832] PGD 198d6b067 PUD 13d79f067 PMD 0
-> [97221.834832] Oops: 0000 [#1] SMP
-> [97221.834832] last sysfs file: /sys/devices/pci0000:00/0000:00:1e.0/=
-0000:10:0d.0/local_cpus
-> [97221.834832] CPU 3
-> [97221.834832] Modules linked in: loop btrfs zlib_deflate ipt_MASQUER=
-ADE iptable_nat nf_nat nf_conntrack_ipv4 nf_defrag_ipv4 xt_state nf_con=
-ntrack ipt_REJECT xt_tcpudp iptable_filter ip_tables x_tables bridge ]
-> [97221.834832]
-> [97221.834832] Pid: 30295, comm: cosd Not tainted 2.6.37-00017-ga3f52=
-74 #4 0DT097/PowerEdge 1950
-> [97221.834832] RIP: 0010:[<ffffffffa075b3ab>] =A0[<ffffffffa075b3ab>]=
- btrfs_drop_inode+0x10/0x36 [btrfs]
-> [97221.834832] RSP: 0018:ffff8801cf205c08 =A0EFLAGS: 00010282
-> [97221.834832] RAX: ffffffffa075b39b RBX: ffff88018490a3a0 RCX: 00000=
-00000000001
-> [97221.834832] RDX: 0000000000000000 RSI: ffffffff819e7ea0 RDI: ffff8=
-8018490a3a0
-> [97221.834832] RBP: ffff8801cf205c08 R08: ffffe8ffffccefa8 R09: 00000=
-00000000000
-> [97221.834832] R10: ffff8801488e9658 R11: 0000000000000000 R12: ffff8=
-8021b5c6400
-> [97221.834832] R13: ffff8801fad145a0 R14: ffff8801faf8c440 R15: ffff8=
-8017bab9848
-> [97221.834832] FS: =A000007f0b011f9940(0000) GS:ffff8800cfcc0000(0000=
-) knlGS:0000000000000000
-> [97221.834832] CS: =A00010 DS: 0000 ES: 0000 CR0: 000000008005003b
-> [97221.834832] CR2: 0000000000000100 CR3: 00000001b8c89000 CR4: 00000=
-000000006e0
-> [97221.834832] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 00000=
-00000000000
-> [97221.834832] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 00000=
-00000000400
-> [97221.834832] Process cosd (pid: 30295, threadinfo ffff8801cf204000,=
- task ffff8801488e9610)
-> [97221.834832] Stack:
-> [97221.834832] =A0ffff8801cf205c28 ffffffff810fd714 00000000fffffffb =
-fffffffffffffffb
-> [97221.834832] =A0ffff8801cf205cd8 ffffffffa07587e8 ffff8801cf205c48 =
-0000000000000102
-> [97221.834832] =A00000000fcf205c58 ffff88022f5c46a0 ffff8801d1ef8800 =
-ffffffff8136a638
-> [97221.834832] Call Trace:
-> [97221.834832] =A0[<ffffffff810fd714>] iput+0x5c/0x1e0
-> [97221.834832] =A0[<ffffffffa07587e8>] btrfs_new_inode+0x2d3/0x2e5 [b=
-trfs]
-> [97221.834832] =A0[<ffffffff8136a638>] ? _cond_resched+0xe/0x22
-> [97221.834832] =A0[<ffffffff8136ae20>] ? mutex_lock+0x16/0x3a
-> [97221.834832] =A0[<ffffffffa0756da1>] ? start_transaction+0x176/0x1b=
-c [btrfs]
-> [97221.834832] =A0[<ffffffffa075d1fc>] btrfs_create+0xbb/0x1fa [btrfs=
-]
-> [97221.834832] =A0[<ffffffff810f49e2>] vfs_create+0x76/0x96
-> [97221.834832] =A0[<ffffffff810f56af>] do_last+0x24d/0x4d3
-> [97221.834832] =A0[<ffffffff810f5b16>] do_filp_open+0x1e1/0x4c5
-> [97221.834832] =A0[<ffffffff81031061>] ? should_resched+0xe/0x2f
-> [97221.834832] =A0[<ffffffff8136a638>] ? _cond_resched+0xe/0x22
-> [97221.834832] =A0[<ffffffff811aa669>] ? might_fault+0xe/0x10
-> [97221.834832] =A0[<ffffffff811aa753>] ? __strncpy_from_user+0x20/0x4=
-a
-> [97221.834832] =A0[<ffffffff810e9023>] do_sys_open+0x62/0xeb
-> [97221.834832] =A0[<ffffffff810e90df>] sys_open+0x20/0x22
-> [97221.834832] =A0[<ffffffff81002c2b>] system_call_fastpath+0x16/0x1b
-> [97221.834832] Code: 53 fc 94 e0 4c 89 e7 e8 f6 8a 95 e0 48 83 c4 18 =
-5b 41 5c 41 5d 41 5e 41 5f c9 c3 55 48 89 e5 0f 1f 44 00 00 48 8b 97 68=
- fe ff ff <83> ba 00 01 00 00 00 75 12 48 8b 82 28 01 00 00 b9 01 00
-> [97221.834832] RIP =A0[<ffffffffa075b3ab>] btrfs_drop_inode+0x10/0x36=
- [btrfs]
-> [97221.834832] =A0RSP <ffff8801cf205c08>
-> [97221.834832] CR2: 0000000000000100
-> [97222.207152] ---[ end trace 32eb8bbbb4782eb8 ]---
->
->
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi,
+
+On Wed, 2011-01-26 at 10:17 -0700, Gregory Farnum wrote:
+> Jim:
+> This looks to be a btrfs bug that Ceph isn't involved with at all.
+> Please send it on to the btrfs list/bug tracker.
+
+OK, thanks for taking a look.
+
+> (In future if you want to check btrfs bugs that you find while using
+> Ceph with us that's fine; occasionally it's a bug in code that Sage
+> contributed or a cooperative issue with ioctl usage.)
+
+Is it OK to Cc: ceph-devel on these types of things in the
+interest of keeping other ceph users informed?
+
+-- Jim
+
+
+> Thanks!
+> -Greg
+> 
+> On Wed, Jan 26, 2011 at 8:00 AM, Jim Schutt <jaschut@sandia.gov> wrote:
+> > Hi,
+> >
+> > I got this kernel BUG during a heavy write load, using
+> > current ceph unstable kernel
+> > (a3f5274e535 in git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git).
+> >
+> > Please let me know what other information you need to make this useful.
+> >
+> > -- Jim
+> >
+> >  BUG: unable to handle kernel NULL pointer dereference at 0000000000000100
+> > [97221.834832] IP: [<ffffffffa075b3ab>] btrfs_drop_inode+0x10/0x36 [btrfs]
+> > [97221.834832] PGD 198d6b067 PUD 13d79f067 PMD 0
+> > [97221.834832] Oops: 0000 [#1] SMP
+> > [97221.834832] last sysfs file: /sys/devices/pci0000:00/0000:00:1e.0/0000:10:0d.0/local_cpus
+> > [97221.834832] CPU 3
+> > [97221.834832] Modules linked in: loop btrfs zlib_deflate ipt_MASQUERADE iptable_nat nf_nat nf_conntrack_ipv4 nf_defrag_ipv4 xt_state nf_conntrack ipt_REJECT xt_tcpudp iptable_filter ip_tables x_tables bridge ]
+> > [97221.834832]
+> > [97221.834832] Pid: 30295, comm: cosd Not tainted 2.6.37-00017-ga3f5274 #4 0DT097/PowerEdge 1950
+> > [97221.834832] RIP: 0010:[<ffffffffa075b3ab>]  [<ffffffffa075b3ab>] btrfs_drop_inode+0x10/0x36 [btrfs]
+> > [97221.834832] RSP: 0018:ffff8801cf205c08  EFLAGS: 00010282
+> > [97221.834832] RAX: ffffffffa075b39b RBX: ffff88018490a3a0 RCX: 0000000000000001
+> > [97221.834832] RDX: 0000000000000000 RSI: ffffffff819e7ea0 RDI: ffff88018490a3a0
+> > [97221.834832] RBP: ffff8801cf205c08 R08: ffffe8ffffccefa8 R09: 0000000000000000
+> > [97221.834832] R10: ffff8801488e9658 R11: 0000000000000000 R12: ffff88021b5c6400
+> > [97221.834832] R13: ffff8801fad145a0 R14: ffff8801faf8c440 R15: ffff88017bab9848
+> > [97221.834832] FS:  00007f0b011f9940(0000) GS:ffff8800cfcc0000(0000) knlGS:0000000000000000
+> > [97221.834832] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+> > [97221.834832] CR2: 0000000000000100 CR3: 00000001b8c89000 CR4: 00000000000006e0
+> > [97221.834832] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+> > [97221.834832] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+> > [97221.834832] Process cosd (pid: 30295, threadinfo ffff8801cf204000, task ffff8801488e9610)
+> > [97221.834832] Stack:
+> > [97221.834832]  ffff8801cf205c28 ffffffff810fd714 00000000fffffffb fffffffffffffffb
+> > [97221.834832]  ffff8801cf205cd8 ffffffffa07587e8 ffff8801cf205c48 0000000000000102
+> > [97221.834832]  0000000fcf205c58 ffff88022f5c46a0 ffff8801d1ef8800 ffffffff8136a638
+> > [97221.834832] Call Trace:
+> > [97221.834832]  [<ffffffff810fd714>] iput+0x5c/0x1e0
+> > [97221.834832]  [<ffffffffa07587e8>] btrfs_new_inode+0x2d3/0x2e5 [btrfs]
+> > [97221.834832]  [<ffffffff8136a638>] ? _cond_resched+0xe/0x22
+> > [97221.834832]  [<ffffffff8136ae20>] ? mutex_lock+0x16/0x3a
+> > [97221.834832]  [<ffffffffa0756da1>] ? start_transaction+0x176/0x1bc [btrfs]
+> > [97221.834832]  [<ffffffffa075d1fc>] btrfs_create+0xbb/0x1fa [btrfs]
+> > [97221.834832]  [<ffffffff810f49e2>] vfs_create+0x76/0x96
+> > [97221.834832]  [<ffffffff810f56af>] do_last+0x24d/0x4d3
+> > [97221.834832]  [<ffffffff810f5b16>] do_filp_open+0x1e1/0x4c5
+> > [97221.834832]  [<ffffffff81031061>] ? should_resched+0xe/0x2f
+> > [97221.834832]  [<ffffffff8136a638>] ? _cond_resched+0xe/0x22
+> > [97221.834832]  [<ffffffff811aa669>] ? might_fault+0xe/0x10
+> > [97221.834832]  [<ffffffff811aa753>] ? __strncpy_from_user+0x20/0x4a
+> > [97221.834832]  [<ffffffff810e9023>] do_sys_open+0x62/0xeb
+> > [97221.834832]  [<ffffffff810e90df>] sys_open+0x20/0x22
+> > [97221.834832]  [<ffffffff81002c2b>] system_call_fastpath+0x16/0x1b
+> > [97221.834832] Code: 53 fc 94 e0 4c 89 e7 e8 f6 8a 95 e0 48 83 c4 18 5b 41 5c 41 5d 41 5e 41 5f c9 c3 55 48 89 e5 0f 1f 44 00 00 48 8b 97 68 fe ff ff <83> ba 00 01 00 00 00 75 12 48 8b 82 28 01 00 00 b9 01 00
+> > [97221.834832] RIP  [<ffffffffa075b3ab>] btrfs_drop_inode+0x10/0x36 [btrfs]
+> > [97221.834832]  RSP <ffff8801cf205c08>
+> > [97221.834832] CR2: 0000000000000100
+> > [97222.207152] ---[ end trace 32eb8bbbb4782eb8 ]---
+> >
+> >
+> >
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> 
+
+
