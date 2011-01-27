@@ -1,56 +1,68 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: master branch in git
-Date: Wed, 26 Jan 2011 15:21:42 -0800
-Message-ID: <AANLkTikVYf3vH65Ru1+27USE9eRE7LHc8wDJd9d-N+2N@mail.gmail.com>
-References: <1296076567.1802.16.camel@dogen>
-	<AANLkTimjgPj2wQhtw1zg8NK-jsLPk1RUHiRcjA0XH8RV@mail.gmail.com>
-	<1296078697.1802.37.camel@dogen>
-	<Pine.LNX.4.64.1101261357390.27034@cobra.newdream.net>
-	<AANLkTimPabH3A6uHUhpas4JtcBq2Ycw_UoxzX+FL4Vp+@mail.gmail.com>
+From: Nick Piggin <npiggin@gmail.com>
+Subject: Re: [PATCH 17/46] fs: Use rename lock and RCU for multi-step operations
+Date: Thu, 27 Jan 2011 16:18:25 +1100
+Message-ID: <AANLkTinmaojfNDYk1i4jMP33MmEQDur9XZvFp=qhV01e@mail.gmail.com>
+References: <cover.1290852958.git.npiggin@kernel.dk>
+	<d44ddcf1d1e0813b3ce2b3872c7c702a31b62894.1290852959.git.npiggin@kernel.dk>
+	<AANLkTi=pj-pLYVSrU+6+BtioCWLod2ueZecNaap619fw@mail.gmail.com>
+	<AANLkTik3ScP5rvR2bOXOEEH8SNZGg+xO6Gy32CW3XmU6@mail.gmail.com>
+	<AANLkTinVP=OuJ-3u9pHdDuuKJoVrP4Unr5Dx1x=qHtXC@mail.gmail.com>
+	<AANLkTimUjC8B0=nn5+yDshzp0hy6Zk1wxYHWEZbk83Tf@mail.gmail.com>
+	<AANLkTi=or1Ya21Am8Dr4KVHgqkwvNxFwgn407=wxRfVa@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:37824 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753328Ab1AZXVo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Jan 2011 18:21:44 -0500
-Received: by fxm20 with SMTP id 20so1527851fxm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Jan 2011 15:21:43 -0800 (PST)
-In-Reply-To: <AANLkTimPabH3A6uHUhpas4JtcBq2Ycw_UoxzX+FL4Vp+@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: Sage Weil <sage@newdream.net>, John Leach <john@brightbox.co.uk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <AANLkTi=or1Ya21Am8Dr4KVHgqkwvNxFwgn407=wxRfVa@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Cc: Nick Piggin <npiggin@kernel.dk>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jan 26, 2011 at 2:05 PM, Gregory Farnum
-<gregory.farnum@dreamhost.com> wrote:
-> On Wed, Jan 26, 2011 at 2:01 PM, Sage Weil <sage@newdream.net> wrote:
->> How about something like:
+On Wed, Jan 26, 2011 at 9:10 AM, Yehuda Sadeh Weinraub
+<yehudasa@gmail.com> wrote:
+> On Wed, Jan 19, 2011 at 2:32 PM, Nick Piggin <npiggin@gmail.com> wrote:
+>> On Thu, Jan 20, 2011 at 9:27 AM, Yehuda Sadeh Weinraub
+>> <yehudasa@gmail.com> wrote:
+>>> On Tue, Jan 18, 2011 at 2:42 PM, Nick Piggin <npiggin@gmail.com> wrote:
+>>>> On Wed, Jan 19, 2011 at 9:32 AM, Yehuda Sadeh Weinraub
+>>>
+>>>>> There's an issue with ceph as it references the
+>>>>> dentry->d_parent(->d_inode) at dentry_release(), so setting
+>>>>> dentry->d_parent to NULL here doesn't work with ceph. Though there is
+>>>>> some workaround for it, we would like to be sure that this one is
+>>>>> really required so that we don't exacerbate the ugliness. The
+>>>>> workaround is to keep a pointer to the parent inode in the private
+>>>>> dentry structure, which will be referenced only at the .release()
+>>>>> callback. This is clearly not ideal.
+>>>>
+>>>> Hmm, I'll have to think about it. Probably we can check for
+>>>> d_count == 0 rather than parent != NULL I think?
+>>>>
+>>>
+>>> That'll solve ceph's problem, don't know about how'd affect other
+>>> stuff. We'll need to know whether this is the solution, or whether
+>>> we'd need to introduce some other band aid fix.
 >>
->> =A0master - unstable (and get rid of 'unstable' branch)
->> =A0testing or stable - bug fixes to last release.
->> =A0rc or next - what will be the next major release
+>> No I think it will work fine. Basically we just need to know whether
+>> we have been deleted, and if so then we restart rather than walking
+>> back up the parent.
+>>
+>> I'll send a patch in a few days. For the meantime, it's a rathe
+>> small window for ceph to worry about. So we'll have something
+>> before -rc2 which should be OK.
+>>
 >
-> It seems a little weird/worrisome to me that the default branch would
-> be one that sees as much churn as unstable gets. Maybe that's not
-> actually an issue for people, but I'd naively rather see master be
-> what rc is right now than what unstable is right now.
+> I guess that it's a bit late for -rc2, should we assume that it'll be on -rc3?
 
-The mindset users have is something like this:
-Do I want something stable? If so, then download the source code
-tarball for the previous release (or RPM, or DPKG, or whatever.) If
-not, then get the code directly out of the source code repository.
+Yeah, I'm sorry I've been travelling and a bit disconnected.
 
-Theoretically, you could get the stable version out of the source code
-repository. But when was the last time you did that (for a project you
-weren't developing)? That's why the tradition is for master / SVN HEAD
-to be unstable.
+NFS folk are having a similar problem and looks like similar
+proposed fix will do it.
 
-cheers,
-Colin
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+http://marc.info/?l=linux-fsdevel&m=129599823927039&w=2
+
+So I think it is the best way to go to restore behaviour back to what
+filesystems already expect, to avoid more surprises in future.
+
+Thanks,
+Nick
