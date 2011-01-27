@@ -1,54 +1,42 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: =?UTF-8?B?UmU6IOetlOWkjTogcXVlc3Rpb24gYWJvdXQgbG9nZ2VyLmNj?=
-Date: Wed, 26 Jan 2011 21:28:07 -0800
-Message-ID: <AANLkTi=oNR8J=M2ShaJ2watNnC4s=oxHnXhe2TeTqnqi@mail.gmail.com>
-References: <Pine.LNX.4.64.1101250808480.3488@cobra.newdream.net>
-	<D0C67741759ABD4BBD8D3A5CB815606E07E64C@mail.cloud-valley.com.cn>
-	<AANLkTimHxjuKQVGkC=XGVh7bQgqDTyEKbuH98CNZkFrX@mail.gmail.com>
-	<D0C67741759ABD4BBD8D3A5CB815606E07E65E@mail.cloud-valley.com.cn>
+From: wchen <wchen@tnsoft.com.cn>
+Subject: QEMU RBD failed!
+Date: Thu, 27 Jan 2011 17:48:56 +0800
+Message-ID: <1296121736.25746.90.camel@node1>
+References: <FB06A065-2077-41B8-9C55-74C5234DDFAC@cs.ucsc.edu>
+	 <AANLkTikq8reF0zk_47LW1Q6nM3pPfv+JG-Hk7P_fi4+K@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:40806 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750866Ab1A0F2I convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jan 2011 00:28:08 -0500
-Received: by ewy5 with SMTP id 5so629141ewy.19
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Jan 2011 21:28:07 -0800 (PST)
-In-Reply-To: <D0C67741759ABD4BBD8D3A5CB815606E07E65E@mail.cloud-valley.com.cn>
+Received: from [210.22.136.227] ([210.22.136.227]:7429 "EHLO
+	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753522Ab1A0Jpo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jan 2011 04:45:44 -0500
+In-Reply-To: <AANLkTikq8reF0zk_47LW1Q6nM3pPfv+JG-Hk7P_fi4+K@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Longguang Yue <longguang_yue@tcloudcomputing.com>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregf@hq.newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 26, 2011 at 5:36 PM, Longguang Yue
-<longguang_yue@tcloudcomputing.com> wrote:
-> I update 0.23.1 =A0to 0.24.2. =A0 I do not success in running ceph 0.=
-24* version.!!!!!!
->
-> L meet lots of error. =A0 This is step:
-> 1.make ceph.rpm ---------------ok
-> 2.mkcephfs --------------------;first time is ok,but when run /etc/in=
-it.d/ceph -a start , lots of error occur!!!!!!
-> 3.mkcephfs second time ,
->> common/Mutex.h: In function 'void Mutex::Lock(bool)':
->> common/Mutex.h:118: FAILED assert(r =3D=3D 0)
->> =A0ceph version 0.24.2 (commit:f7572de5cb87eb7157217be4975ae66d90831=
-bb7)
->> =A01: (SafeTimer::shutdown()+0x6b1) [0x44a101]
->> =A02: (FlusherStopper::~FlusherStopper()+0x58) [0x444788]
->> =A03: (exit()+0xe1) [0x3716a379c1]
->> =A04: (__libc_start_main()+0x104) [0x3716a1ee84]
->> =A05: /usr/bin/cconf() [0x416769]
-You're going to need to be a little more clear about how you're
-encountering these errors. Let me make sure I've got this clear:
-1) You compile the code and make the RPM and that goes fine.
-2) You run mkcephfs (and the output from that is in your attached
-mkcephfs.txt?).
-3) You try and run etc/init.d/ceph -a start, and get errors. Which
-errors do you get?
-4) You run mkcephfs again?
+Hi Farnum,
+
+I follow the instructions on wiki to create a qemu image using qemu rbd=
+,
+but failed.
+
+According to wiki, after compiled qemu and input the following command:
+$ qemu-img create -f rbd rbd:data/foo 10G
+
+But system tell me that "unknown format 'rbd'".
+which step did I miss? how to register a 'rbd' format?
+BTW, I run these commands on ceph cluster.
+
+Thanks a lot!
+
+--=20
+best regards,
+Kevin Chen (=E9=99=88=E5=B7=8D)
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
