@@ -1,66 +1,47 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: btrfs BUG during Ceph cosd truncate() syscall
-Date: Thu, 27 Jan 2011 09:51:11 -0700
-Message-ID: <1296147071.23762.93.camel@sale659.sandia.gov>
-References: <1296057606.23762.56.camel@sale659.sandia.gov>
- <1296064793.23762.70.camel@sale659.sandia.gov>
- <1296067685.23762.74.camel@sale659.sandia.gov>
- <1296144315.23762.91.camel@sale659.sandia.gov>
- <1296146202.2186.25.camel@wido-laptop.pcextreme.nl>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph fixes for 2.6.38-rc3
+Date: Thu, 27 Jan 2011 14:02:24 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1101271358210.24057@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:55992 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751953Ab1A0QvW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jan 2011 11:51:22 -0500
-In-Reply-To: <1296146202.2186.25.camel@wido-laptop.pcextreme.nl>
+Received: from cobra.newdream.net ([66.33.216.30]:41233 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751426Ab1A0WBx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jan 2011 17:01:53 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Hi Wido,
+Hi Linus,
 
-On Thu, 2011-01-27 at 09:36 -0700, Wido den Hollander wrote:
-> Hi Jim,
-> 
-> On Thu, 2011-01-27 at 09:05 -0700, Jim Schutt wrote:
-> > Hi,
-> > 
-> > I got this kernel BUG on a server running multiple Ceph
-> > cosd instances.  I'm not sure what was going on at the
-> > time, as I just noticed this on my serial console for
-> > this node.
-> > 
-> > It looks like another example of the truncate issue in
-> > Matt Weil's report.
-> 
-> Yes, I saw the same. I've been mailing with Josef Bacik and he asked me
-> to try his latest btrfs with some patches: 
-> 
-> git://git.kernel.org/pub/scm/linux/kernel/git/josef/btrfs-work.git
+Please pull the following Ceph fixes from
 
-Sure, I'll give that a try.
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-> 
-> Could you try that (master branch) (Compiles against 2.6.38 btw)
-> 
-> I've been running it now for a few hours and seems to be stable, where
-> it would fail within 30 minutes yesterday.
+There is an xattr search/sort fix, a number of clustered MDS fixes (for a 
+sync hang, dup flushes, misdirected/lost request), and a fix for the 
+norbytes option with lets users avoid EOVERFLOW on 32-bit systems.
 
-Great!
-
--- Jim
-
-> 
-> Wido
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Thanks!
+sage
 
 
+Sage Weil (6):
+      ceph: fix xattr rbtree search
+      ceph: fix cap_wanted_delay_{min,max} mount option initialization
+      ceph: fix erroneous cap flush to non-auth mds
+      ceph: fix flushing of caps vs cap import
+      ceph: avoid immediate cap check after import
+      ceph: avoid picking MDS that is not active
+
+Yehuda Sadeh (1):
+      ceph: fix getattr on directory when using norbytes
+
+ fs/ceph/caps.c       |   43 +++++++++++++++++++++++++++++++++++++------
+ fs/ceph/inode.c      |   10 +++++-----
+ fs/ceph/mds_client.c |   10 +++++++---
+ fs/ceph/super.c      |    2 ++
+ fs/ceph/xattr.c      |    3 +++
+ 5 files changed, 54 insertions(+), 14 deletions(-)
