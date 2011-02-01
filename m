@@ -1,68 +1,116 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: Long time to start the ceph osd and mount
-Date: Tue, 1 Feb 2011 13:24:10 -0800
-Message-ID: <AANLkTinEJQC40mAdysTL_qZ+t0toHkJp=AbyBvJ2-rKC@mail.gmail.com>
-References: <AANLkTikmrQWpYL6PhqB9w29jD=TKQQ1-U5sr0JNe=x=r@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: Odd "data used" reporting behavior by ceph -w
+Date: Tue, 1 Feb 2011 14:31:06 -0700
+Message-ID: <1296595866.23762.226.camel@sale659.sandia.gov>
+References: <1291412399.4879.288.camel@sale659.sandia.gov>
+ <AANLkTi=3fJz8aoywUCMzBrOWtENfaqEJ__76PXHrmppQ@mail.gmail.com>
+ <1291418749.4879.319.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1012042048060.28007@cobra.newdream.net>
+ <1291734873.4879.347.camel@sale659.sandia.gov>
+ <AANLkTi=wo0LxhsKTSpRAMRc=Owb6wfV3D8=fYTxR+BMR@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:45771 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752950Ab1BAVYN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Feb 2011 16:24:13 -0500
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 93784C063
-	for <ceph-devel@vger.kernel.org>; Tue,  1 Feb 2011 13:24:12 -0800 (PST)
-Received: from mail-ew0-f46.google.com (mail-ew0-f46.google.com [209.85.215.46])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 4132227DE8
-	for <ceph-devel@vger.kernel.org>; Tue,  1 Feb 2011 13:24:12 -0800 (PST)
-Received: by ewy5 with SMTP id 5so3461788ewy.19
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Feb 2011 13:24:10 -0800 (PST)
-In-Reply-To: <AANLkTikmrQWpYL6PhqB9w29jD=TKQQ1-U5sr0JNe=x=r@mail.gmail.com>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:42530 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752300Ab1BAVbP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Feb 2011 16:31:15 -0500
+In-Reply-To: <AANLkTi=wo0LxhsKTSpRAMRc=Owb6wfV3D8=fYTxR+BMR@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: DongJin Lee <dongjin.lee@auckland.ac.nz>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregf@hq.newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 31, 2011 at 9:01 PM, DongJin Lee <dongjin.lee@auckland.ac.nz> wrote:
-> I'm using the unstable version dated 20th-Jan.
->
-> When I was starting up multiple OSDs, e.g., 3 or more.
-> iostat shows, after the start, the OSDs utilizes to 100% themselves
-> (there's not much of traffic going on)
->
-> If I tried to mount during this time, it fails; 'can't read superblock'
-> So I have to wait until all of the OSDs become 0% utilized.
-It looks like this is just because of how many PGs you have. With
-almost 6200 PGs it's going to take a while for them all to go through
-peering, and the initial peering process needs to complete before
-you'll be able to do anything. If your OSDs have spare CPU/memory
-during this time, you can let them peer more PGs simultaneously by
-adjusting the osd_recovery* options. These are listed in the config.h
-file and I believe you'll want to increase osd_recovery_threads and
-osd_recovery_max_active.
+Hi Greg,
 
-> I made sure before restarting ceph (using 'stop.sh all'), the the OSDs
-> are empty (deleted all files, remount clean), as well as cephlog
-> directories, anymore to clean.
-You mean you wanted a fresh ceph install? In that case you need to run
-mkcephfs again (not just manually delete files), or your OSDs are
-going to think that there's data they should have and lost. That would
-also make startup take much longer.
+On Fri, 2011-01-28 at 17:44 -0700, Gregory Farnum wrote:
+> Jim:
+> It's been a while, but I started looking into this again a couple days
+> ago. 
 
-> Also, Is there a way to increase some pagelimit or disk IO to max out
-> the performance? any known issue?
-> For example, just using 2 SSDs at 1x normal (no)replication, I can max
-> out the link (using dd), including all the way to 6 (all maxed) , but
-> when set at 2x, no increase I see, and slowly increases to max link
-> speed by 6 SSDs.
-> The SSDs are already fast enough to do all kinds of replication IO
-> workloads, and so I don't understand given that there's virtually no
-> CPU bottleneck I see.
-> It seems that there's a clear bottleneck somewhere in the system, more
-> like a system configuration issue.? I don't see MDS/MON use any
-> significant amount of process or memory.
-I'm not sure I quite understand your setup here. You mean that without
-replication you can max out a client's network connection using any
-number of OSDs, but with replication you need to get up to 6 OSDs
-before you max out the client's network connection?
+Great, thanks.
+
+> The file deletion being slow is something we've decided to push
+> back after 1.0, since it doesn't really seem like a serious issue. The
+> other two problems we wanted to solve, though, and I think we've
+> succeeded. I was unable to reproduce your problem with ls on recent
+> branches, and just pushed a fix for the slow dd-truncate-dd to both
+> the master and stable branches. When you get the chance, please test
+> one of those out and let me know if you still see issues like this.
+
+I've just lightly tested current stable branch, commit 0f3198e8c63.
+
+For me both problems seem to still exist.
+
+I'm running 4 osds per host on 4 hosts, 1 mon, 1 mds, 64 clients.
+
+For me a "ls" on the file system root from one of 
+the clients still doesn't complete until the dd commands
+running on each client complete.
+
+Also, it is still true for me if I truncate all the files 
+to zero from one of the clients, then write them again,
+one file per client, that second set of writes goes very
+slow.
+
+Am I maybe testing the wrong commit?
+
+-- Jim
+
+
+> Thanks!
+> -Greg
+> 
+> On Tue, Dec 7, 2010 at 7:14 AM, Jim Schutt <jaschut@sandia.gov> wrote:
+> >
+> > Hi Sage,
+> >
+> > On Sat, 2010-12-04 at 21:59 -0700, Sage Weil wrote:
+> >> Hi Jim,
+> >>
+> >> I think there are at least two different things going on here.
+> >>
+> >> On Fri, 3 Dec 2010, Jim Schutt wrote:
+> >> > On Fri, 2010-12-03 at 15:36 -0700, Gregory Farnum wrote:
+> >> > > How are you generating these files? It sounds like maybe you're
+> >> doing
+> >> > > them concurrently on a bunch of clients?
+> >> >
+> >> > When I created the files initially, I did it via one
+> >> > dd per client over 64 clients, all at the same time.
+> >> >
+> >> > When I used echo to truncate them to zero length, I
+> >> > did all files from one client.  Also, when I removed
+> >> > the files, I did them all from a single client.
+> >>
+> >> The MDS doesn't release objects on deleted files until all references
+> >> to
+> >> the file go away (i.e. everyone closes the file handle).  The client
+> >> make
+> >> a point of releasing it's capability on inodes it unlinks, but since
+> >> the
+> >> unlink happened on a different node, the writer doesn't realize it's
+> >> unlinked and doesn't bother to release its capability (until it gets
+> >> pushed out of the inode cache due to normal cache pressure).  I
+> >> suspect
+> >> this will need some additional messaging to get the client to drop it
+> >> sooner.
+> >>
+> >> http://tracker.newdream.net/issues/630
+> >>
+> >> That fix won't make it into 0.24, sorry!  Probably 0.24.1.
+> >>
+> >
+> > Thanks for tracking this!  Whatever priority you assign
+> > works great for me.
+> >
+> > -- Jim
+> >
+> >
+> >
+> >
+> >
+> 
+
+
