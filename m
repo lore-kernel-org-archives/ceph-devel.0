@@ -1,70 +1,39 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: Simple test system not working
-Date: Tue, 1 Feb 2011 06:56:01 +0000 (UTC)
-Message-ID: <loom.20110201T075137-33@post.gmane.org>
-References: <loom.20110201T072445-567@post.gmane.org>
+From: Henry Chang <henry.cy.chang@gmail.com>
+Subject: Re: some thoughts about scrub
+Date: Tue, 1 Feb 2011 17:20:34 +0800
+Message-ID: <AANLkTimkx4CuZqE2dHgS-9iKy9F=B-C+QDjQO_qAOnB8@mail.gmail.com>
+References: <AANLkTi=zk=cHU1YDDrFqq2gUmiDcxWpAX+mn3U-dP4fW@mail.gmail.com>
+	<20110131215819.f0537c57.ctpm@ist.utl.pt>
+	<AANLkTinJ7q5tFzQfoJaSvopaJpHrqxoBbKoxNMgKD70n@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:43334 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750849Ab1BAG4N (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 1 Feb 2011 01:56:13 -0500
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1PkA9s-00058v-8r
-	for ceph-devel@vger.kernel.org; Tue, 01 Feb 2011 07:56:12 +0100
-Received: from 180.148.179.26 ([180.148.179.26])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Feb 2011 07:56:12 +0100
-Received: from chris by 180.148.179.26 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Feb 2011 07:56:12 +0100
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:36868 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753868Ab1BAJUg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Feb 2011 04:20:36 -0500
+Received: by ewy5 with SMTP id 5so2977371ewy.19
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Feb 2011 01:20:34 -0800 (PST)
+In-Reply-To: <AANLkTinJ7q5tFzQfoJaSvopaJpHrqxoBbKoxNMgKD70n@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Chris Dunlop <chris <at> onthe.net.au> writes:
-> The ceph filesystem is created using the attached ceph.conf and:
+2011/2/1 Gregory Farnum <gregf@hq.newdream.net>:
+> I don't think scrub is ever going to go away. It can't do much to fix
+> errors right now, and it can't be certain about correctness, but all
+> these things can be added to it. It shouldn't be considered much more
+> than a stub right now; that was certainly what we said when we wrote
+> the code that exists right now. We will eventually add checksumming
+> (so we can make sure that files of the same size have the same data,
+> etc) and other features to make it more useful than it is right now.
+> -Greg
 
-Sorry, no attachments.
+Yeah. I expect that scrub can both detect disk errors and check data
+integrity (based on the checksum) in the background. For disk errors,
+I would like CEPH to mark the OSD down/failed and notify the sys
+admin immediately. For data errors, I expect that CEPH can repair
+them automatically (by fetching a right copy from other replicas).
 
-ceph.conf:
---------------------------------------------------
-[global]
-	pid file = /var/run/ceph/$name.pid
-	debug ms = 20
-	debug mon = 20
-[mon]
-	mon data = /data/mon$id
-	debug ms = 90
-	debug mon = 90
-	debug paxos = 90
-	debug auth = 90
-[mon0]
-	host = b3
-	mon addr = 10.200.63.129:6789
-[mds]
-	keyring = /data/keyring.$name
-[mds.b3]
-	host = b3
-[osd]
-	osd data = /data/osd$id
-	osd journal = /data/osd$id/journal
-	osd journal size = 1000 ; journal size, in megabytes
-	debug ms = 1
-	debug osd = 20
-	debug filestore = 20
-	debug journal = 20
-[osd0]
-	host = b3
-	btrfs devs = /dev/sdb1
---------------------------------------------------
-
-> The attached logs.zip has the full logs from one attempted start.
-
-Available at: http://www.onthe.net.au/private/logs.zip
-
-
+-- 
+Henry Chang
