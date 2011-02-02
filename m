@@ -1,58 +1,48 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Speling fixes
-Date: Wed, 2 Feb 2011 09:15:44 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102020913270.18507@cobra.newdream.net>
-References: <slrnikhrff.3cc.chris@chris.onthe.net.au>
+Subject: Re: rbd layering
+Date: Wed, 2 Feb 2011 09:47:18 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1102020942240.18507@cobra.newdream.net>
+References: <Pine.LNX.4.64.1101312141360.8040@cobra.newdream.net>
+ <AANLkTikk_pm2JHQy5+sqSPK_vi-NYaxhUSr=YNYsUSw=@mail.gmail.com>
+ <AANLkTimeL7W-1uz3m2HOJn-b-kGkLDBnOFYdhx56uFM3@mail.gmail.com>
+ <AANLkTi=sAOdCZ7KeS2RJ89a4Fzjoy+NPvGrWEfG6b+y0@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56692 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:60343 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754619Ab1BBRO7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Feb 2011 12:14:59 -0500
-In-Reply-To: <slrnikhrff.3cc.chris@chris.onthe.net.au>
+	with ESMTP id S1754764Ab1BBRqc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Feb 2011 12:46:32 -0500
+In-Reply-To: <AANLkTi=sAOdCZ7KeS2RJ89a4Fzjoy+NPvGrWEfG6b+y0@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
-Cc: ceph-devel@vger.kernel.org
+To: Colin McCabe <cmccabe@alumni.cmu.edu>
+Cc: Gregory Farnum <gregf@hq.newdream.net>, ceph-devel@vger.kernel.org
 
-Applied both of these, thanks!
+On Tue, 1 Feb 2011, Colin McCabe wrote:
+> Yehuda is probably right though... it's not 100% clear that the
+> benefits outweigh the disadvantages, given that it would need an extra
+> lookup for every operation. In the end it's something that probably
+> will take some experimentation to get right.
 
+Right.  The nice thing about RBD is it's simplicity: there is almost no 
+metadata.  Just the block size, image size, and object name prefix.  
+That's enough to name the object with the data you want, and that object 
+may or may not exist, depending on whether it's been written to.  There 
+are no consistency concerns.
 
-On Wed, 2 Feb 2011, Chris Dunlop wrote:
+When I mentioned allocation bitmap before, I meant simply a bitmap 
+specifying whether the block exists, that would let us avoid looking for 
+an object in the parent image.  In its simplest form, you would mark the 
+image read-only, then generate the bitmap once.  
 
-> Trivial spelling fixes...
-> 
-> diff --git a/man/mount.ceph.8 b/man/mount.ceph.8
-> index d5fe62a..cfcf8f8 100644
-> --- a/man/mount.ceph.8
-> +++ b/man/mount.ceph.8
-> @@ -134,7 +134,7 @@ Report rbytes for st_size on directories.  Default: on
->  
->  norbytes
->  .IP
-> -Do not report rbytse for st_size.
-> +Do not report rbytes for st_size.
->  .PP
->  
->  nocrc
-> diff --git a/src/mds/MDSMap.h b/src/mds/MDSMap.h
-> index 7bcdd27..6e8a9fa 100644
-> --- a/src/mds/MDSMap.h
-> +++ b/src/mds/MDSMap.h
-> @@ -59,7 +59,7 @@ extern CompatSet mdsmap_compat_base; // pre v0.20
->  #define MDS_FEATURE_INCOMPAT_BASE CompatSet::Feature(1, "base v0.20")
->  #define MDS_FEATURE_INCOMPAT_CLIENTRANGES CompatSet::Feature(2, "client writeable ranges")
->  #define MDS_FEATURE_INCOMPAT_FILELAYOUT CompatSet::Feature(3, "default file layouts on dirs")
-> -#define MDS_FEATURE_INCOMPAT_DIRINODE CompatSet::Feature(4, "dir inode in separate objec")
-> +#define MDS_FEATURE_INCOMPAT_DIRINODE CompatSet::Feature(4, "dir inode in separate object")
->  
->  class MDSMap {
->  public:
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Anything more complicated with that and you have to worry about keeping 
+the metadata consistent with the data.  CAS, for example, requires lots of 
+metadata: if I want to read block 1234, I have to look up in some table 
+that says 1234 has sha1 FOO, and then go read that object.  Then writing 
+is a whole other story.  Again, doing CAS on a read-only image simplifies 
+things greatly, but I don't think we should go down that road now.
+
+Mainly I'm interested in feedback on the simple layering use-case...
+
+sage
