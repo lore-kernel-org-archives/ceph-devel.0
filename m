@@ -1,47 +1,61 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: cmon: PGMonitor::encode_pending() assert failure
-Date: Thu, 3 Feb 2011 14:24:43 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102031424000.19855@cobra.newdream.net>
-References: <slrnikk2hd.jh1.chris@chris.onthe.net.au>
- <AANLkTi=SyqVD8MyCt+ybYrhoSHunYrchcdZUvW-nzOgw@mail.gmail.com>
- <Pine.LNX.4.64.1102031301550.19855@cobra.newdream.net> <20110203220245.GA6179@onthe.net.au>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Hard links (was: Fixing NFS)
+Date: Thu, 3 Feb 2011 23:09:18 +0000 (UTC)
+Message-ID: <slrnikmdd0.7pe.chris@chris.onthe.net.au>
+References: <AANLkTikdOsP-=YxwjRtPhso9asxZmYc09QgL_MwMux7f@mail.gmail.com>
+ <Pine.LNX.4.64.1102030917190.19855@cobra.newdream.net>
+Reply-To: chris@onthe.net.au
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36519 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751540Ab1BCWXz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Feb 2011 17:23:55 -0500
-In-Reply-To: <20110203220245.GA6179@onthe.net.au>
+Received: from lo.gmane.org ([80.91.229.12]:56533 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751916Ab1BCXJe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 3 Feb 2011 18:09:34 -0500
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Pl8Iv-0004C9-Rn
+	for ceph-devel@vger.kernel.org; Fri, 04 Feb 2011 00:09:33 +0100
+Received: from 180.148.179.26 ([180.148.179.26])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Feb 2011 00:09:33 +0100
+Received: from chris by 180.148.179.26 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Feb 2011 00:09:33 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Chris Dunlop <chris@onthe.net.au>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, 4 Feb 2011, Chris Dunlop wrote:
-> On Thu, Feb 03, 2011 at 01:03:17PM -0800, Sage Weil wrote:
-> > Hi Chris,
-> > 
-> > This is an interesting one.  Would it be possible for you to
-> > tar up your mondata directory on the failed node and post it
-> > somewhere I can get at it?  From the looks of things the pgmap
-> > incremental state file is truncated, but I'd like to confirm.
-> > 
-> > http://tracker.newdream.net/issues/762
-> 
-> Aw crap, sorry, I blew that fs away installing the latest master
-> to see what happened there ...whereupon overnight I've promptly
-> hit the "WARNING: at fs/btrfs/inode.c:2143" problem*.
-> 
-> I can revert back to my previous install and run the same
-> workload to see if it crops up again if that's useful (it took
-> about 12 hours of rsync'ing files into the fs to get there), or
-> I can try the workload using latest ceph with Josef Bacik's
-> btrfs-work** to see if either problem crops up again. Any
-> preference?
+On 2011-02-03, Sage Weil <sage@newdream.net> wrote:
+> There are a couple of levels of difficulty.  The main problem is that the 
+> only truly stable information in the NFS fh is the inode number, and 
+> Ceph's architecture simply doesn't support lookup-by-ino.  (It uses an 
+> extra table to support it for hard-linked files, under the assumption that 
+> these are relatively rare in the real world.)
 
-Let's go with latest master and latest bits from Josef.  It's the future!
+Sorry for the thread hijack, but just so this issue doesn't completely
+fall through the cracks...
 
-Thanks!
-sage
+There are different "real worlds" where hard links are very, very
+common. Although, admittedly, ceph may well not be targeted at those
+parallel universes.
+
+Backup servers are a classic example. It's very common to have
+hard-links between the files for each snapshot. In this situation *most*
+files have multiple hard links, and you can easily have almost all files
+with 60 or more hard links (for 60 or more snapshots). Rsnapshot,
+BackupPC and apparently OSX's Time Machine for instance work this way.
+
+Of course, apps like this would probably be far better off if they
+started using proper snapshots (and dedup, if/when that becomes
+available, praise the day) provided by file systems such as ceph and
+btrfs.
+
+But there are other apps which use significant numbers of hard links,
+some examples buried in this thread:
+
+http://thread.gmane.org/gmane.comp.file-systems.btrfs/3427
+
+Cheers,
+
+Chris
 
