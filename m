@@ -1,92 +1,112 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: rbd layering
-Date: Thu, 3 Feb 2011 21:36:29 +0100
-Message-ID: <AANLkTinVzfmuiAG0YZ9ULCABj0rPNdmB6xP1xLq-29WS@mail.gmail.com>
-References: <Pine.LNX.4.64.1101312141360.8040@cobra.newdream.net>
-	<AANLkTikk_pm2JHQy5+sqSPK_vi-NYaxhUSr=YNYsUSw=@mail.gmail.com>
-	<AANLkTimeL7W-1uz3m2HOJn-b-kGkLDBnOFYdhx56uFM3@mail.gmail.com>
-	<AANLkTi=sAOdCZ7KeS2RJ89a4Fzjoy+NPvGrWEfG6b+y0@mail.gmail.com>
-	<Pine.LNX.4.64.1102020942240.18507@cobra.newdream.net>
-	<AANLkTi=GPTzUCYNR72oDKQmc3maEmaVqRcP988Txx56N@mail.gmail.com>
-Reply-To: chb@muc.de
+From: Sage Weil <sage@newdream.net>
+Subject: Re: cmon: PGMonitor::encode_pending() assert failure
+Date: Thu, 3 Feb 2011 13:03:17 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1102031301550.19855@cobra.newdream.net>
+References: <slrnikk2hd.jh1.chris@chris.onthe.net.au>
+ <AANLkTi=SyqVD8MyCt+ybYrhoSHunYrchcdZUvW-nzOgw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-2106615332-1296766997=:19855"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:43332 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751640Ab1BCUga convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Feb 2011 15:36:30 -0500
-Received: by iyj18 with SMTP id 18so1450913iyj.19
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Feb 2011 12:36:30 -0800 (PST)
-In-Reply-To: <AANLkTi=GPTzUCYNR72oDKQmc3maEmaVqRcP988Txx56N@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:40827 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752407Ab1BCVC3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Feb 2011 16:02:29 -0500
+In-Reply-To: <AANLkTi=SyqVD8MyCt+ybYrhoSHunYrchcdZUvW-nzOgw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
+To: chris@onthe.net.au
+Cc: ceph-devel@vger.kernel.org
 
-2011/2/2 Gregory Farnum <gregf@hq.newdream.net>:
-> On Wed, Feb 2, 2011 at 9:47 AM, Sage Weil <sage@newdream.net> wrote:
->> When I mentioned allocation bitmap before, I meant simply a bitmap
->> specifying whether the block exists, that would let us avoid looking=
- for
->> an object in the parent image. =A0In its simplest form, you would ma=
-rk the
->> image read-only, then generate the bitmap once.
->> ...
->> Mainly I'm interested in feedback on the simple layering use-case...
-> So my thought with the bitmap was that it might make more sense for
-> rbd to maintain a bitmap specifying whether the child has overwritten
-> the parent block device. Then when doing a read in the parent region,
-> rbd defaults to reading the parent block device unless the bitmap say=
-s
-> the child has overwritten it.
-> This is reasonably fast in terms of failed reads and such: assuming
-> the bitmap is kept in-memory, you don't need to do multiple attempts
-> to do a read, and if the client wants to zero a block, or overwrites =
-a
-> block and then deletes it, there's no concern about preventing
-> inappropriate fall-through to the parent since the bitmap still has
-> that block set as overwritten.
->
-> The other advantage to something like this is that it could allow
-> overwriting at a finer level than the size of the child's blocks. For
-> instance, you might store in 4MB chunks, but that's a bit large for
-> some things that are going to commonly change between images like
-> config files. So with a bitmap with, say, 1KB resolution you could
-> change a config file and have rbd read the block from the parent and
-> then plug in the 1KB containing the config file that the child
-> overwrote. This doesn't require too much space: storing a
-> 1KB-granularity bitmap for a 1GB image only requires 1MB.
-> -Greg
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I would go for this kind of allocation bitmap, too. However I'm asking
-myself if we could add TRIM support this way as well.
+--557981400-2106615332-1296766997=:19855
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-In my scenario the bitmap would be available in every image and should
-have a 512 Byte resolution to match the block size of common hard
-disks and the bitmap needs to support three states:
+Hi Chris,
 
-0: Block is not allocated
-1: Block is allocated in this image (child)
-2: Block is allocated in the parent image
+This is an interesting one.  Would it be possible for you to tar up your=20
+mondata directory on the failed node and post it somewhere I can get at=20
+it?  From the looks of things the pgmap incremental state file is=20
+truncated, but I'd like to confirm.
 
-- When we create a new image the bitmap is filled with zero.
-- When we clone an image we have to copy the bitmap and switch every
-allocated block from state 1 to state 2.
-- When we are writing to a block in state 0 or state 2 we have to set
-it to state 1 and we will have to sync the bitmap to disk.
-- When a block is discarded we set the state to 0 and we will have to
-sync the bitmap to disk.
-- When all blocks of an object are set to 0 we can delete the object.
+http://tracker.newdream.net/issues/762
 
-This way the only performance impact would be at the first write to a b=
-lock.
+Thanks!
+sage
 
-Regards
-Christian
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+On Thu, 3 Feb 2011, Gregory Farnum wrote:
+
+> ---------- Forwarded message ----------
+> From: Chris Dunlop <chris@onthe.net.au>
+> Date: Wed, Feb 2, 2011 at 5:51 PM
+> Subject: cmon: PGMonitor::encode_pending() assert failure
+> To: ceph-devel@vger.kernel.org
+>=20
+>=20
+> G'day,
+>=20
+> I received this assert failure after copying about 110 GB of data into
+> a previously-empty ceph 0.24.2:
+>=20
+> ceph version 0.25~rc (commit:73e76723e35562c9391872e07cf314b4465f30af)
+> 2011-02-03 08:05:26.779951 409b9950 mon.0@0(leader).pg v19635
+> PGMonitor::update_from_paxos: error parsing incremental update:
+> buffer::end_of_buffer
+> 2011-02-03 08:05:28.651238 42b99950 mon.0@0(leader).pg v19635
+> PGMonitor::update_from_paxos: error parsing incremental update:
+> buffer::end_of_buffer
+> mon/PGMonitor.cc: In function 'virtual void
+> PGMonitor::encode_pending(ceph::bufferlist&)', In thread 409b9950
+> mon/PGMonitor.cc:178: FAILED assert(paxos->get_version() + 1 =3D=3D
+> pending_inc.version)
+> =A0ceph version 0.25~rc (commit:73e76723e35562c9391872e07cf314b4465f30af)
+> =A01: (PGMonitor::encode_pending(ceph::buffer::list&)+0x442) [0x4d4332]
+> =A02: (PaxosService::propose_pending()+0x26d) [0x4995ad]
+> =A03: (SafeTimer::timer_thread()+0x65f) [0x5602bf]
+> =A04: (SafeTimerThread::entry()+0xd) [0x563a3d]
+> =A05: (Thread::_entry_func(void*)+0xa) [0x46fe0a]
+> =A06: /lib/libpthread.so.0 [0x7f282fd87fc7]
+> =A07: (clone()+0x6d) [0x7f282ec6764d]
+> =A0NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+> *** Caught signal (Aborted) ***
+> in thread 409b9950
+> =A0ceph version 0.25~rc (commit:73e76723e35562c9391872e07cf314b4465f30af)
+> =A01: /usr/bin/cmon [0x58054e]
+> =A02: /lib/libpthread.so.0 [0x7f282fd8fa80]
+> =A03: (gsignal()+0x35) [0x7f282ebc9ed5]
+> =A04: (abort()+0x183) [0x7f282ebcb3f3]
+> =A05: (__gnu_cxx::__verbose_terminate_handler()+0x114) [0x7f282f44d294]
+> =A06: /usr/lib/libstdc++.so.6 [0x7f282f44b696]
+> =A07: /usr/lib/libstdc++.so.6 [0x7f282f44b6c3]
+> =A08: /usr/lib/libstdc++.so.6 [0x7f282f44b7aa]
+> =A09: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x3f4) [0x563f84]
+> =A0a: (PGMonitor::encode_pending(ceph::buffer::list&)+0x442) [0x4d4332]
+> =A0b: (PaxosService::propose_pending()+0x26d) [0x4995ad]
+> =A0c: (SafeTimer::timer_thread()+0x65f) [0x5602bf]
+> =A0d: (SafeTimerThread::entry()+0xd) [0x563a3d]
+> =A0e: (Thread::_entry_func(void*)+0xa) [0x46fe0a]
+> =A0f: /lib/libpthread.so.0 [0x7f282fd87fc7]
+> =A010: (clone()+0x6d) [0x7f282ec6764d]
+>=20
+> If needed, the cmon executable is available here:
+>=20
+> http://www.onthe.net.au/private/cmon.gz
+>=20
+> If you need any other info, just holler!
+>=20
+> Cheers,
+>=20
+> Chris
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-2106615332-1296766997=:19855--
