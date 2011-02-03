@@ -1,72 +1,74 @@
-From: Brian Chrisman <brchrisman@gmail.com>
-Subject: Re: NFS stale filehandles
-Date: Wed, 2 Feb 2011 11:12:57 -0800
-Message-ID: <AANLkTikD5D7nbG0Dnt56RAOYDwt=m_iqEXE6YDzEpuBm@mail.gmail.com>
-References: <AANLkTi=-oE5r54Km5HNCS5zL9FXSedfb=NDO4RbLsn-y@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: cmon: PGMonitor::encode_pending() assert failure
+Date: Thu, 3 Feb 2011 01:51:40 +0000 (UTC)
+Message-ID: <slrnikk2hd.jh1.chris@chris.onthe.net.au>
+Reply-To: chris@onthe.net.au
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:52895 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754792Ab1BBTNI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Feb 2011 14:13:08 -0500
-Received: by vws16 with SMTP id 16so166617vws.19
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Feb 2011 11:13:06 -0800 (PST)
-In-Reply-To: <AANLkTi=-oE5r54Km5HNCS5zL9FXSedfb=NDO4RbLsn-y@mail.gmail.com>
+Received: from lo.gmane.org ([80.91.229.12]:60883 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751521Ab1BCBvy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 2 Feb 2011 20:51:54 -0500
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1PkoMS-0006Fl-Rt
+	for ceph-devel@vger.kernel.org; Thu, 03 Feb 2011 02:51:52 +0100
+Received: from 180.148.179.26 ([180.148.179.26])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Feb 2011 02:51:52 +0100
+Received: from chris by 180.148.179.26 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Feb 2011 02:51:52 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Ahh from the module source... I'll add this to the wiki page:
-http://ceph.newdream.net/wiki/Re-exporting_NFS
+G'day,
 
-/*
- * NFS export support
- *
- * NFS re-export of a ceph mount is, at present, only semireliable.
- * The basic issue is that the Ceph architectures doesn't lend itself
- * well to generating filehandles that will remain valid forever.
- *
- * So, we do our best.  If you're lucky, your inode will be in the
- * client's cache.  If it's not, and you have a connectable fh, then
- * the MDS server may be able to find it for you.  Otherwise, you get
- * ESTALE.
- *
- * There are ways to this more reliable, but in the non-connectable fh
- * case, we won't every work perfectly, and in the connectable case,
- * some changes are needed on the MDS side to work better.
- */
+I received this assert failure after copying about 110 GB of data into
+a previously-empty ceph 0.24.2:
 
+ceph version 0.25~rc (commit:73e76723e35562c9391872e07cf314b4465f30af)
+2011-02-03 08:05:26.779951 409b9950 mon.0@0(leader).pg v19635 PGMonitor::update_from_paxos: error parsing incremental update: buffer::end_of_buffer
+2011-02-03 08:05:28.651238 42b99950 mon.0@0(leader).pg v19635 PGMonitor::update_from_paxos: error parsing incremental update: buffer::end_of_buffer
+mon/PGMonitor.cc: In function 'virtual void PGMonitor::encode_pending(ceph::bufferlist&)', In thread 409b9950
+mon/PGMonitor.cc:178: FAILED assert(paxos->get_version() + 1 == pending_inc.version)
+ ceph version 0.25~rc (commit:73e76723e35562c9391872e07cf314b4465f30af)
+ 1: (PGMonitor::encode_pending(ceph::buffer::list&)+0x442) [0x4d4332]
+ 2: (PaxosService::propose_pending()+0x26d) [0x4995ad]
+ 3: (SafeTimer::timer_thread()+0x65f) [0x5602bf]
+ 4: (SafeTimerThread::entry()+0xd) [0x563a3d]
+ 5: (Thread::_entry_func(void*)+0xa) [0x46fe0a]
+ 6: /lib/libpthread.so.0 [0x7f282fd87fc7]
+ 7: (clone()+0x6d) [0x7f282ec6764d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+*** Caught signal (Aborted) ***
+in thread 409b9950
+ ceph version 0.25~rc (commit:73e76723e35562c9391872e07cf314b4465f30af)
+ 1: /usr/bin/cmon [0x58054e]
+ 2: /lib/libpthread.so.0 [0x7f282fd8fa80]
+ 3: (gsignal()+0x35) [0x7f282ebc9ed5]
+ 4: (abort()+0x183) [0x7f282ebcb3f3]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x114) [0x7f282f44d294]
+ 6: /usr/lib/libstdc++.so.6 [0x7f282f44b696]
+ 7: /usr/lib/libstdc++.so.6 [0x7f282f44b6c3]
+ 8: /usr/lib/libstdc++.so.6 [0x7f282f44b7aa]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x3f4) [0x563f84]
+ a: (PGMonitor::encode_pending(ceph::buffer::list&)+0x442) [0x4d4332]
+ b: (PaxosService::propose_pending()+0x26d) [0x4995ad]
+ c: (SafeTimer::timer_thread()+0x65f) [0x5602bf]
+ d: (SafeTimerThread::entry()+0xd) [0x563a3d]
+ e: (Thread::_entry_func(void*)+0xa) [0x46fe0a]
+ f: /lib/libpthread.so.0 [0x7f282fd87fc7]
+ 10: (clone()+0x6d) [0x7f282ec6764d]
 
+If needed, the cmon executable is available here:
 
+http://www.onthe.net.au/private/cmon.gz
 
-On Wed, Feb 2, 2011 at 10:52 AM, Brian Chrisman <brchrisman@gmail.com> =
-wrote:
-> There seems to be a bug in the ceph kernel client NFS implementation.
-> Triage: =A0using the same cluster/servers and client
-> 1) export ceph filesystem via NFS, mount on client, copy over files
-> and build --> stale filehandle/corruption issues
-> 2) export ext filesystem via NFS (same server node as in #1), mount o=
-n
-> client, copy over files and build --> no problem
-> 3) mount ceph locally on build client, copy over files and build --> =
-no problem
->
-> From this, it seems most likely that the problem lies in the kernel
-> client NFS export code.
->
-> Kernel 2.6.37rc8
-> Mounting via NFSv4 (noticed other issues with directories disappearin=
-g
-> when previously testing with NFSv3 that I can retest after figuring
-> this out)
-> Other than kernel, systems are a rhel6 beta distro
-> I wanted to check whether/what testing has been done of the export
-> code thus far, and see whether this is a known issue.
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+If you need any other info, just holler!
+
+Cheers,
+
+Chris
+
