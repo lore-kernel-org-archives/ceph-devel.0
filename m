@@ -1,26 +1,25 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Bug #563 - osd: btrfs, warning at inode.c (
- btrfs_orphan_commit_root )
-Date: Fri, 04 Feb 2011 15:38:12 +0100
-Message-ID: <1296830292.2408.0.camel@wido-desktop>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Bug #563 - osd: btrfs, warning at inode.c ( btrfs_orphan_commit_root
+ )
+Date: Fri, 4 Feb 2011 09:22:53 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1102040920460.26364@cobra.newdream.net>
 References: <20110204084808.GA3814@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:59078 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751777Ab1BDOiM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Feb 2011 09:38:12 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:46227 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752974Ab1BDRWD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Feb 2011 12:22:03 -0500
 In-Reply-To: <20110204084808.GA3814@onthe.net.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Chris Dunlop <chris@onthe.net.au>
 Cc: ceph-devel@vger.kernel.org
 
-Hi,
+Hi Chris,
 
-On Fri, 2011-02-04 at 19:48 +1100, Chris Dunlop wrote:
+On Fri, 4 Feb 2011, Chris Dunlop wrote:
 > G'day,
 > 
 > http://tracker.newdream.net/issues/563
@@ -29,8 +28,71 @@ On Fri, 2011-02-04 at 19:48 +1100, Chris Dunlop wrote:
 > getting it on ceph-client 9aae8fa + btrfs-work bacae12 when I do a
 > mkcephfs on 3 x 2 GB OSDs, e.g.:
 
-From what I've heard they are working on it upstream (btrfs). Not sure
-what the state is though.
+I closed it because it seems to be a btrfs issue that's not specific to 
+Ceph.  Have you tried Josef's latest tree?  See
 
-Wido
+http://git.kernel.org/?p=linux/kernel/git/josef/btrfs-work.git;a=summary
 
+Chris should also be sending a pull request shortly that includes these 
+(and other fixes) to Linus.
+
+sage
+
+> 
+> Feb  4 19:09:04 b3 kernel: [16780.260695] ------------[ cut here ]------------
+> Feb  4 19:09:04 b3 kernel: [16780.260716] WARNING: at fs/btrfs/inode.c:2143 btrfs_orphan_commit_root+0x7f/0x9b [btrfs]()
+> Feb  4 19:09:04 b3 kernel: [16780.260724] Hardware name: System Product Name
+> Feb  4 19:09:04 b3 kernel: [16780.260729] Modules linked in: kvm_amd kvm loop btrfs zlib_deflate crc32c libcrc32c dm_mod tpm_tis tpm psmouse tpm_bios i2c_piix4 i2c_core button shpchp pci_hotplug processor nfs lockd nfs_acl auth_rpcgss sunrpc sd_mod ata_generic ahci libahci libata ehci_hcd r8169 mii ohci_hcd scsi_mod thermal fan thermal_sys [last unloaded: scsi_wait_scan]
+> Feb  4 19:09:04 b3 kernel: [16780.260783] Pid: 5233, comm: kworker/0:2 Tainted: G        W   2.6.37-otn1-33361-ga3f5274 #3
+> Feb  4 19:09:04 b3 kernel: [16780.260792] Call Trace:
+> Feb  4 19:09:04 b3 kernel: [16780.260805]  [<ffffffffa0215444>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
+> Feb  4 19:09:04 b3 kernel: [16780.260815]  [<ffffffff81044644>] ? warn_slowpath_common+0x78/0x8d
+> Feb  4 19:09:04 b3 kernel: [16780.260828]  [<ffffffffa0215444>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
+> Feb  4 19:09:04 b3 kernel: [16780.260842]  [<ffffffffa020adfe>] ? commit_fs_roots+0x87/0xef [btrfs]
+> Feb  4 19:09:04 b3 kernel: [16780.260855]  [<ffffffffa020ba71>] ? btrfs_commit_transaction+0x342/0x60f [btrfs]
+> Feb  4 19:09:04 b3 kernel: [16780.260869]  [<ffffffffa00aef5d>] ? xprt_release_xprt+0x41/0x73 [sunrpc]
+> Feb  4 19:09:04 b3 kernel: [16780.260877]  [<ffffffff8105df3a>] ? autoremove_wake_function+0x0/0x2e
+> Feb  4 19:09:04 b3 kernel: [16780.260886]  [<ffffffffa00ace70>] ? call_transmit+0x214/0x24f [sunrpc]
+> Feb  4 19:09:04 b3 kernel: [16780.260899]  [<ffffffffa020bd50>] ? do_async_commit+0x12/0x1b [btrfs]
+> Feb  4 19:09:04 b3 kernel: [16780.260906]  [<ffffffff8105903b>] ? process_one_work+0x22c/0x3a5
+> Feb  4 19:09:04 b3 kernel: [16780.260918]  [<ffffffffa020bd3e>] ? do_async_commit+0x0/0x1b [btrfs]
+> Feb  4 19:09:04 b3 kernel: [16780.260924]  [<ffffffff81059507>] ? worker_thread+0x1d5/0x353
+> Feb  4 19:09:04 b3 kernel: [16780.260930]  [<ffffffff81059332>] ? worker_thread+0x0/0x353
+> Feb  4 19:09:04 b3 kernel: [16780.260936]  [<ffffffff8105daf0>] ? kthread+0x7e/0x86
+> Feb  4 19:09:04 b3 kernel: [16780.260942]  [<ffffffff8100a7e4>] ? kernel_thread_helper+0x4/0x10
+> Feb  4 19:09:04 b3 kernel: [16780.260949]  [<ffffffff8105da72>] ? kthread+0x0/0x86
+> Feb  4 19:09:04 b3 kernel: [16780.260954]  [<ffffffff8100a7e0>] ? kernel_thread_helper+0x0/0x10
+> Feb  4 19:09:04 b3 kernel: [16780.260961] ---[ end trace e1f5276f9dfbd540 ]---
+> Feb  4 19:09:05 b3 kernel: [16782.127219] ------------[ cut here ]------------
+> Feb  4 19:09:05 b3 kernel: [16782.127241] WARNING: at fs/btrfs/inode.c:2143 btrfs_orphan_commit_root+0x7f/0x9b [btrfs]()
+> Feb  4 19:09:05 b3 kernel: [16782.127248] Hardware name: System Product Name
+> Feb  4 19:09:05 b3 kernel: [16782.127253] Modules linked in: kvm_amd kvm loop btrfs zlib_deflate crc32c libcrc32c dm_mod tpm_tis tpm psmouse tpm_bios i2c_piix4 i2c_core button shpchp pci_hotplug processor nfs lockd nfs_acl auth_rpcgss sunrpc sd_mod ata_generic ahci libahci libata ehci_hcd r8169 mii ohci_hcd scsi_mod thermal fan thermal_sys [last unloaded: scsi_wait_scan]
+> Feb  4 19:09:05 b3 kernel: [16782.127306] Pid: 5848, comm: kworker/1:2 Tainted: G        W   2.6.37-otn1-33361-ga3f5274 #3
+> Feb  4 19:09:05 b3 kernel: [16782.127314] Call Trace:
+> Feb  4 19:09:05 b3 kernel: [16782.127326]  [<ffffffffa0215444>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
+> Feb  4 19:09:05 b3 kernel: [16782.128628]  [<ffffffff81044644>] ? warn_slowpath_common+0x78/0x8d
+> Feb  4 19:09:05 b3 kernel: [16782.128642]  [<ffffffffa0215444>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
+> Feb  4 19:09:05 b3 kernel: [16782.128658]  [<ffffffffa020adfe>] ? commit_fs_roots+0x87/0xef [btrfs]
+> Feb  4 19:09:05 b3 kernel: [16782.128672]  [<ffffffffa020ba71>] ? btrfs_commit_transaction+0x342/0x60f [btrfs]
+> Feb  4 19:09:05 b3 kernel: [16782.128682]  [<ffffffff8105df3a>] ? autoremove_wake_function+0x0/0x2e
+> Feb  4 19:09:05 b3 kernel: [16782.128695]  [<ffffffffa020bd50>] ? do_async_commit+0x12/0x1b [btrfs]
+> Feb  4 19:09:05 b3 kernel: [16782.128701]  [<ffffffff8105903b>] ? process_one_work+0x22c/0x3a5
+> Feb  4 19:09:05 b3 kernel: [16782.128713]  [<ffffffffa020bd3e>] ? do_async_commit+0x0/0x1b [btrfs]
+> Feb  4 19:09:05 b3 kernel: [16782.128719]  [<ffffffff81059507>] ? worker_thread+0x1d5/0x353
+> Feb  4 19:09:05 b3 kernel: [16782.128725]  [<ffffffff81059332>] ? worker_thread+0x0/0x353
+> Feb  4 19:09:05 b3 kernel: [16782.128732]  [<ffffffff8105daf0>] ? kthread+0x7e/0x86
+> Feb  4 19:09:05 b3 kernel: [16782.128738]  [<ffffffff8100a7e4>] ? kernel_thread_helper+0x4/0x10
+> Feb  4 19:09:05 b3 kernel: [16782.128745]  [<ffffffff8105da72>] ? kthread+0x0/0x86
+> Feb  4 19:09:05 b3 kernel: [16782.128750]  [<ffffffff8100a7e0>] ? kernel_thread_helper+0x0/0x10
+> Feb  4 19:09:05 b3 kernel: [16782.128756] ---[ end trace e1f5276f9dfbd541 ]---
+> 
+> 
+> Cheers,
+> 
+> Chris.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
