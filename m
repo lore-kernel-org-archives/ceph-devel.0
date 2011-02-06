@@ -1,60 +1,38 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: kernel client debugging
-Date: Fri, 4 Feb 2011 12:48:35 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102041245070.26364@cobra.newdream.net>
-References: <AANLkTikp+VsT5Bbu8a2_Z4Crqnnwkawm7VDm8KPWVRYo@mail.gmail.com>
+From: Hannu Valtonen <me@ormod.com>
+Subject: Python-rados announcement
+Date: Sun, 06 Feb 2011 15:01:07 +0200
+Message-ID: <4D4E9B93.2070901@ormod.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42683 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751613Ab1BDUrp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Feb 2011 15:47:45 -0500
-In-Reply-To: <AANLkTikp+VsT5Bbu8a2_Z4Crqnnwkawm7VDm8KPWVRYo@mail.gmail.com>
+Received: from filtteri2.pp.htv.fi ([213.243.153.185]:39764 "EHLO
+	filtteri2.pp.htv.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752397Ab1BFNKG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 6 Feb 2011 08:10:06 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by filtteri2.pp.htv.fi (Postfix) with ESMTP id D28F019B476
+	for <ceph-devel@vger.kernel.org>; Sun,  6 Feb 2011 15:01:07 +0200 (EET)
+Received: from smtp4.welho.com ([213.243.153.38])
+	by localhost (filtteri2.pp.htv.fi [213.243.153.185]) (amavisd-new, port 10024)
+	with ESMTP id tgf8LS2pxfPV for <ceph-devel@vger.kernel.org>;
+	Sun,  6 Feb 2011 15:01:07 +0200 (EET)
+Received: from FSAPPLE12-2.local (cs181254100.pp.htv.fi [82.181.254.100])
+	by smtp4.welho.com (Postfix) with ESMTP id 5C3C35BC005
+	for <ceph-devel@vger.kernel.org>; Sun,  6 Feb 2011 15:01:07 +0200 (EET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brian Chrisman <brchrisman@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-You need
+Hello,
 
-CONFIG_DYNAMIC_DEBUG=y
+I wrote a basic Python ctypes librados wrapper:
+https://github.com/Ormod/python-rados
 
-Then, after you've loaded the module, you can manipulate which dout 
-callsites are activated.  To turn it all on:
+It's in very initial stages of development and only supports things like 
+write/read/deletes at this stage.
 
-echo 'module ceph +p' > /sys/kernel/debug/dynamic_debug/control
-echo 'module libceph +p' > /sys/kernel/debug/dynamic_debug/control
-echo 'module rbd +p' > /sys/kernel/debug/dynamic_debug/control
+Any patches/bugs/ideas are welcome and can be sent my way.
 
-I usually turn down the messenger logging so that I only see messages 
-coming in and going out:
-
-echo 'file net/ceph/messenger.c -p' > /sys/kernel/debug/dynamic_debug/control
-echo 'file' `grep -- --- /sys/kernel/debug/dynamic_debug/control | grep ceph \
-	| awk '{print $1}' | sed 's/:/ line /'` '+p' > /sys/kernel/debug/dynamic_debug/control
-echo 'file' `grep -- === /sys/kernel/debug/dynamic_debug/control | grep ceph \ 
-	| awk '{print $1}' | sed 's/:/ line /'` '+p' > /sys/kernel/debug/dynamic_debug/control
-
-In general, though, if you're hunting a specific bug you'll probably only 
-enable the output for the file or functions or whatever you're interested 
-in!
-
-sage
-
-
-
-On Fri, 4 Feb 2011, Brian Chrisman wrote:
-
-> I'm looking to capture some of the douts from the kernel client.
-> If someone can instruct me as to what kernel compile flags would be
-> needed and which /proc or /sys files need to be twiddled, I'd
-> appreciate it, use it, and document it on the wiki.
-> 
-> -Brian
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+- Hannu Valtonen
+hannu.valtonen@ormod.com
