@@ -1,59 +1,75 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fixing NFS
-Date: Mon, 7 Feb 2011 19:35:30 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102071933530.16784@cobra.newdream.net>
-References: <AANLkTikdOsP-=YxwjRtPhso9asxZmYc09QgL_MwMux7f@mail.gmail.com>
- <Pine.LNX.4.64.1102030917190.19855@cobra.newdream.net> <20110203175242.GA6348@dreamer>
- <AANLkTi=u6A539u3MV4irCrKG1gYgW+oMq7NoB=k4UxkZ@mail.gmail.com>
- <AANLkTikPRdsNFBws2wY1ZnngOoKLndCYO6Y+N05v01OG@mail.gmail.com>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Re: WARNING: at fs/btrfs/inode.c:2143
+ btrfs_orphan_commit_root+0x7f/0x9b
+Date: Tue, 8 Feb 2011 18:37:32 +1100
+Message-ID: <20110208073732.GA13060@onthe.net.au>
+References: <20110204084808.GA3814@onthe.net.au>
+ <1296830292.2408.0.camel@wido-desktop>
+ <20110207062306.GB25062@onthe.net.au>
+ <20110207063102.GD25062@onthe.net.au>
+ <20110207073911.GB16034@onthe.net.au>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1818780452-1297136130=:16784"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58050 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751106Ab1BHDec (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Feb 2011 22:34:32 -0500
-In-Reply-To: <AANLkTikPRdsNFBws2wY1ZnngOoKLndCYO6Y+N05v01OG@mail.gmail.com>
+Received: from smtp1.onthe.net.au ([203.22.196.249]:45837 "EHLO
+	smtp1.onthe.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751913Ab1BHHhd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Feb 2011 02:37:33 -0500
+Content-Disposition: inline
+In-Reply-To: <20110207073911.GB16034@onthe.net.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: Brian Chrisman <brchrisman@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: linux-btrfs@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Mon, Feb 07, 2011 at 06:39:11PM +1100, Chris Dunlop wrote:
+> On Mon, Feb 07, 2011 at 05:31:02PM +1100, Chris Dunlop wrote:
+>> G'day,
+>> 
+>> Using Josef's btrfs-work bacae123 (+ ceph-client 9aae8faf), I
+>> can consistently reproduce the following btrfs warning by simply
+>> creating and starting a new btrfs-based ceph file system:
+>> 
+>> [  549.767234] ------------[ cut here ]------------
+>> [  549.767276] WARNING: at fs/btrfs/inode.c:2143 btrfs_orphan_commit_root+0x7f/0x9b [btrfs]()
+> 
+> Sorry, just found I've been booting wrong kernel. I've been
+> seeing the warning *without* Josef's btrfs-work.  Will re-test
+> tomorrow.
 
---557981400-1818780452-1297136130=:16784
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+OK, the line number has changed slightly, but still getting the
+same thing with:
 
-On Mon, 7 Feb 2011, Gregory Farnum wrote:
-> On Mon, Feb 7, 2011 at 5:51 PM, Brian Chrisman <brchrisman@gmail.com> wro=
-te:
-> > I was playing around with implementing this. =A0I was trying to get the
-> > ceph client's export functions to return NFS4ERR_FHEXPIRED instead of
-> > ESTALE (hoping that my nfs4 clients would then attempt the full lookup
-> > again). =A0I noticed also that the mds itself can also return an ESTALE
-> > to the ceph kernel client, which seems to be getting propagated back
-> > to the NFS client. =A0I'm wondering where I could intercept that and
-> > send back an expiry notice?
->
-> I don't think you want to: the MDS only returns ESTALE to the client
-> if it can't find the inode, but that can happen normally if
-> responsibility for the inode has been moved to another MDS. The client
-> should be able to handle this circumstance and from a quick check
-> that's the only way you're going to get ESTALE back from the MDS
-> (unless something is horribly broken).
+git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git
 
-Normally, yes.  If the ceph client keeps the inode in its cache, it should=
-=20
-never get an ESTALE it can't mask (I think that'd only happen when a=20
-request races with a metadata migration between MDSs).  NFS reexport is=20
-the one case where that doesn't hold true, because the NFS client can hold=
-=20
-onto a file handle for as long as it wants and then present it back to the=
-=20
-server.
+commit cb5520f02c010e3cb974b9ac06f30aafa2eebc38
+Merge: eee4da2... 3a90983...
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Mon Feb 7 14:06:18 2011 -0800
 
-sage
+    Merge git://git.kernel.org/pub/scm/linux/kernel/git/mason/btrfs-unstable
 
---557981400-1818780452-1297136130=:16784--
+
+[ 129.524029] ------------[ cut here ]------------
+[ 129.524080] WARNING: at fs/btrfs/inode.c:2161 btrfs_orphan_commit_root+0x7f/0x9b [btrfs]()
+[ 129.524111] Hardware name: System Product Name
+[ 129.524140] Modules linked in: loop netconsole configfs dm_mod sd_mod i2c_piix4 k10temp i2c_core asus_atk0110 ata_generic ahci libahci libata scsi_mod shpchp button pci_hotplug processor nfs lockd nfs_acl auth_rpcgss sunrpc r8169 mii ohci_hcd ehci_hcd thermal fan thermal_sys btrfs zlib_deflate crc32c libcrc32c
+[ 129.525057] Pid: 10, comm: kworker/0:1 Tainted: G        W   2.6.38-rc3-otn1-00323-gc88f808 #5
+[ 129.525088] Call Trace:
+[ 129.525125]  [<ffffffffa003db51>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
+[ 129.525158]  [<ffffffff81043a20>] ? warn_slowpath_common+0x78/0x8d
+[ 129.525195]  [<ffffffffa003db51>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
+[ 129.525232]  [<ffffffffa0033729>] ? commit_fs_roots+0x87/0xef [btrfs]
+[ 129.525268]  [<ffffffffa00343a2>] ? btrfs_commit_transaction+0x348/0x615 [btrfs]
+[ 129.525300]  [<ffffffff8105d14a>] ? autoremove_wake_function+0x0/0x2e
+[ 129.525336]  [<ffffffffa00c8e49>] ? call_transmit+0x214/0x24f [sunrpc]
+[ 129.525372]  [<ffffffffa0034681>] ? do_async_commit+0x12/0x1b [btrfs]
+[ 129.525400]  [<ffffffff81057df4>] ? process_one_work+0x22c/0x3a5
+[ 129.525437]  [<ffffffffa003466f>] ? do_async_commit+0x0/0x1b [btrfs]
+[ 129.525465]  [<ffffffff810582c0>] ? worker_thread+0x1d5/0x353
+[ 129.525495]  [<ffffffff810580eb>] ? worker_thread+0x0/0x353
+[ 129.525526]  [<ffffffff8105cd08>] ? kthread+0x7e/0x86
+[ 129.525557]  [<ffffffff8100a764>] ? kernel_thread_helper+0x4/0x10
+[ 129.525588]  [<ffffffff8105cc8a>] ? kthread+0x0/0x86
+[ 129.525617]  [<ffffffff8100a760>] ? kernel_thread_helper+0x0/0x10
+[ 129.525649] ---[ end trace deccd3c0dec6c2ba ]---
