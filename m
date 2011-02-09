@@ -1,79 +1,118 @@
-From: Chris Dunlop <chris@onthe.net.au>
-Subject: Re: WARNING: at fs/btrfs/inode.c:2143
- btrfs_orphan_commit_root+0x7f/0x9b
-Date: Wed, 9 Feb 2011 14:58:55 +1100
-Message-ID: <20110209035855.GA32598@onthe.net.au>
-References: <20110204084808.GA3814@onthe.net.au>
- <1296830292.2408.0.camel@wido-desktop>
- <20110207062306.GB25062@onthe.net.au>
- <20110207063102.GD25062@onthe.net.au>
- <20110207073911.GB16034@onthe.net.au>
- <20110208073732.GA13060@onthe.net.au>
- <Pine.LNX.4.64.1102080716520.4825@cobra.newdream.net>
+From: Brian Chrisman <brchrisman@gmail.com>
+Subject: Re: Fixing NFS
+Date: Wed, 9 Feb 2011 10:42:51 -0800
+Message-ID: <AANLkTim=9b3OObGrsRybRNhd2x0-ropnsz-M66QZ_T5Y@mail.gmail.com>
+References: <AANLkTikdOsP-=YxwjRtPhso9asxZmYc09QgL_MwMux7f@mail.gmail.com>
+	<Pine.LNX.4.64.1102030917190.19855@cobra.newdream.net>
+	<20110203175242.GA6348@dreamer>
+	<AANLkTi=u6A539u3MV4irCrKG1gYgW+oMq7NoB=k4UxkZ@mail.gmail.com>
+	<AANLkTikPRdsNFBws2wY1ZnngOoKLndCYO6Y+N05v01OG@mail.gmail.com>
+	<Pine.LNX.4.64.1102071933530.16784@cobra.newdream.net>
+	<AANLkTik0jz_RXbrLz2m=+EvBwpBwesQ_Lr_iiCuQJHyF@mail.gmail.com>
+	<Pine.LNX.4.64.1102072059260.16784@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1102080716520.4825@cobra.newdream.net>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: Sage Weil <sage@newdream.net>
-Cc: linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:47014 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755642Ab1BISmw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Feb 2011 13:42:52 -0500
+Received: by vxb37 with SMTP id 37so227124vxb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Feb 2011 10:42:51 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.64.1102072059260.16784@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Feb 08, 2011 at 07:19:36AM -0800, Sage Weil wrote:
-> On Tue, 8 Feb 2011, Chris Dunlop wrote:
->> On Mon, Feb 07, 2011 at 06:39:11PM +1100, Chris Dunlop wrote:
->>> On Mon, Feb 07, 2011 at 05:31:02PM +1100, Chris Dunlop wrote:
->>>> 
->>>> [  549.767234] ------------[ cut here ]------------
->>>> [  549.767276] WARNING: at fs/btrfs/inode.c:2143 btrfs_orphan_commit_root+0x7f/0x9b [btrfs]()
->> 
->> OK, the line number has changed slightly, but still getting the
->> same thing with:
->> 
->> git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git
-> 
-> Can you try to reproduce this with the following patch applied to the 
-> server side?  This will disable the async snapshot ioctl.  It doesn't look 
-> like it's related to me, but let's be sure.
-> 
-> diff --git a/src/os/FileStore.cc b/src/os/FileStore.cc
-> index dc78451..d5530c5 100644
-> --- a/src/os/FileStore.cc
-> +++ b/src/os/FileStore.cc
-> @@ -865,7 +865,7 @@ int FileStore::_detect_fs()
->        dout(0) << "mount btrfs SNAP_CREATE_V2 got " << r << " " << strerror_r(-r, buf, sizeof(buf)) << dendl;
->        if (r == 0 || errno == EEXIST) {
->         dout(0) << "mount btrfs SNAP_CREATE_V2 is supported" << dendl;
-> -       btrfs_snap_create_v2 = true;
-> +       //btrfs_snap_create_v2 = true;
->        
->         // clean up
->         r = ::ioctl(fd, BTRFS_IOC_SNAP_DESTROY, &vol_args);
+On Mon, Feb 7, 2011 at 9:02 PM, Sage Weil <sage@newdream.net> wrote:
+> On Mon, 7 Feb 2011, Brian Chrisman wrote:
+>> My goal is merely to push this problem back on the NFSv4 client. =A0=
+If I
+>> can tell it "your filehandle is expired", it should request a full
+>> path lookup to re-establish the filehandle, as far as I can tell fro=
+m
+>> the specs.
+>
+> Oh I see...
+>
+>> I converted the ESTALE returns to NFS4ERR_FHEXPIRED in export.c to
+>> take a stab at accomplishing this, but there are still ESTALEs comin=
+g
+>> across the wire to the client. =A0That's why I was looking to see wh=
+ere
+>> other things could be going wrong.
+>
+> Hmm. =A0Generally speaking, the inode is in the ceph client's cache _=
+only_
+> if it has an MDS capability, and as long as it holds the capability i=
+t has
+> a stateful handle on it and will never get ESTALE. =A0So my guess is =
+it's
+> coming from somewhere else in export.c. =A0Can you crank up client de=
+bugging
+> (see below) and reproduce?
+>
+> sage
+>
+>
+>
+> Crank up debugging on just about everything. =A0Or you can just turn =
+up
+> export.c...
+>
+> $ cat /home/sage/ceph/src/script/kcon_most.sh
+> #!/bin/sh -x
 
-The patch (applied to ceph.git 778902b, with changed line
-numbers) didn't help, same warning message:
+Cranking up only export.c, I see mds communication troubles when I get
+the NFS stale fh.
+I also used your full-debug script and ran the same test (copying over
+my build environment, building, deleting), but the copy operation
+hosed the cluster with osds going down and all kinds of other stuff
+(this is probably an artifact of the kernel client being on the same
+node as osds etc).
+The previous messages (just export.c debugging):
 
-[73382.202774] ------------[ cut here ]------------
-[73382.202811] WARNING: at fs/btrfs/inode.c:2161 btrfs_orphan_commit_root+0x7f/0x9b [btrfs]()
-[73382.202820] Hardware name: System Product Name
-[73382.202827] Modules linked in: loop netconsole configfs dm_mod sd_mod i2c_piix4 k10temp i2c_core asus_atk0110 ata_generic ahci libahci libata scsi_mod shpchp button pci_hotplug processor nfs lockd nfs_acl auth_rpcgss sunrpc r8169 mii ohci_hcd ehci_hcd thermal fan thermal_sys btrfs zlib_deflate crc32c libcrc32c
-[73382.202936] Pid: 7092, comm: cosd Tainted: G        W   2.6.38-rc3-otn1-00323-gc88f808 #5
-[73382.202945] Call Trace:
-[73382.202960]  [<ffffffffa003db51>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
-[73382.202971]  [<ffffffff81043a20>] ? warn_slowpath_common+0x78/0x8d
-[73382.202985]  [<ffffffffa003db51>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
-[73382.203001]  [<ffffffffa0033729>] ? commit_fs_roots+0x87/0xef [btrfs]
-[73382.203015]  [<ffffffffa00343a2>] ? btrfs_commit_transaction+0x348/0x615 [btrfs]
-[73382.203026]  [<ffffffff8105d14a>] ? autoremove_wake_function+0x0/0x2e
-[73382.203038]  [<ffffffffa002073d>] ? block_rsv_add_bytes+0x15/0x3c [btrfs]
-[73382.203052]  [<ffffffffa0059520>] ? btrfs_mksubvol+0x1f4/0x308 [btrfs]
-[73382.203065]  [<ffffffffa0059732>] ? btrfs_ioctl_snap_create_transid+0xfe/0x11d [btrfs]
-[73382.203080]  [<ffffffffa0059856>] ? btrfs_ioctl_snap_create+0x49/0x5e [btrfs]
-[73382.203094]  [<ffffffffa005c36f>] ? btrfs_ioctl+0x471/0x90a [btrfs]
-[73382.203102]  [<ffffffff81114e79>] ? fsnotify+0x255/0x279
-[73382.203110]  [<ffffffff8100a36e>] ? invalidate_interrupt1+0xe/0x20
-[73382.203119]  [<ffffffff810f7e2a>] ? do_vfs_ioctl+0x40c/0x453
-[73382.203126]  [<ffffffff810f7eae>] ? sys_ioctl+0x3d/0x5c
-[73382.203134]  [<ffffffff81009952>] ? system_call_fastpath+0x16/0x1b
-[73382.203142] ---[ end trace deccd3c0dec6c2bd ]---
+ceph:         export.c:171  : __cfh_to_dentry 10000005a56
+ffff880004176850 dentry ffff88003b788a80
+ceph:         export.c:133  : __cfh_to_dentry 10000005a56 (1000000145a/=
+1c60f9f)
+ceph:         export.c:171  : __cfh_to_dentry 10000005a56
+ffff880004176850 dentry ffff88003b788a80
+ceph: mds0 reconnect start
+ceph: mds0 reconnect success
+ceph:         export.c:133  : __cfh_to_dentry 10000005a56 (1000000145a/=
+1c60f9f)
+ceph:         export.c:171  : __cfh_to_dentry 10000005a56
+ffff880004176850 dentry ffff88003b788a80
+ceph: mds0 recovery completed
+libceph: mds0 10.200.98.105:6800 socket closed
+libceph: mds0 10.200.98.105:6800 connection failed
+ceph: mds0 reconnect start
+ceph: mds0 reconnect success
+ceph: mds0 recovery completed
+libceph: mds0 10.200.98.111:6813 socket closed
+libceph: mds0 10.200.98.111:6813 connection failed
+libceph: mds0 10.200.98.111:6813 connection failed
+libceph: mds0 10.200.98.111:6813 connection failed
+libceph: mds0 10.200.98.111:6813 connection failed
+libceph: mds0 10.200.98.111:6813 connection failed
+libceph: mds0 10.200.98.111:6813 connection failed
+ceph:         export.c:133  : __cfh_to_dentry 10000005a56 (1000000145a/=
+1c60f9f)
+ceph:         export.c:171  : __cfh_to_dentry 10000005a56
+ffff880004176850 dentry ffff88003b788a80
+libceph: mds0 10.200.98.111:6813 connection failed
+ceph: mds0 caps stale
+ceph: mds0 caps stale
+libceph: mds0 10.200.98.111:6813 connection failed
+ceph:         export.c:133  : __cfh_to_dentry 10000005a56 (1000000145a/=
+1c60f9f)
+ceph:         export.c:171  : __cfh_to_dentry 10000005a56
+ffff880004176850 dentry ffff88003b788a80
+libceph: mds0 10.200.98.111:6813 connection failed
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
