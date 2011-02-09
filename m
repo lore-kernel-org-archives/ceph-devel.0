@@ -1,87 +1,79 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: Odd "data used" reporting behavior by ceph -w
-Date: Tue, 8 Feb 2011 11:23:02 -0700
-Message-ID: <1297189382.15475.80.camel@sale659.sandia.gov>
-References: <1291412399.4879.288.camel@sale659.sandia.gov>
- <AANLkTi=3fJz8aoywUCMzBrOWtENfaqEJ__76PXHrmppQ@mail.gmail.com>
- <1291418749.4879.319.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1012042048060.28007@cobra.newdream.net>
- <1291734873.4879.347.camel@sale659.sandia.gov>
- <AANLkTi=wo0LxhsKTSpRAMRc=Owb6wfV3D8=fYTxR+BMR@mail.gmail.com>
- <1296595866.23762.226.camel@sale659.sandia.gov>
- <AANLkTinJ6RWM6L9hF6yJ5KYEs3qYEwvY0EaZFCcHL-t1@mail.gmail.com>
+From: Chris Dunlop <chris@onthe.net.au>
+Subject: Re: WARNING: at fs/btrfs/inode.c:2143
+ btrfs_orphan_commit_root+0x7f/0x9b
+Date: Wed, 9 Feb 2011 14:58:55 +1100
+Message-ID: <20110209035855.GA32598@onthe.net.au>
+References: <20110204084808.GA3814@onthe.net.au>
+ <1296830292.2408.0.camel@wido-desktop>
+ <20110207062306.GB25062@onthe.net.au>
+ <20110207063102.GD25062@onthe.net.au>
+ <20110207073911.GB16034@onthe.net.au>
+ <20110208073732.GA13060@onthe.net.au>
+ <Pine.LNX.4.64.1102080716520.4825@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:41229 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755173Ab1BHSXV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Feb 2011 13:23:21 -0500
-In-Reply-To: <AANLkTinJ6RWM6L9hF6yJ5KYEs3qYEwvY0EaZFCcHL-t1@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-btrfs-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1102080716520.4825@cobra.newdream.net>
+Sender: linux-btrfs-owner@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-
-Hi Greg,
-
-On Tue, 2011-02-01 at 14:44 -0700, Gregory Farnum wrote:
-> On Tue, Feb 1, 2011 at 1:31 PM, Jim Schutt <jaschut@sandia.gov> wrote:
-> > I've just lightly tested current stable branch, commit 0f3198e8c63.
-> >
-> > For me both problems seem to still exist.
-> Well that's a bummer.
+On Tue, Feb 08, 2011 at 07:19:36AM -0800, Sage Weil wrote:
+> On Tue, 8 Feb 2011, Chris Dunlop wrote:
+>> On Mon, Feb 07, 2011 at 06:39:11PM +1100, Chris Dunlop wrote:
+>>> On Mon, Feb 07, 2011 at 05:31:02PM +1100, Chris Dunlop wrote:
+>>>> 
+>>>> [  549.767234] ------------[ cut here ]------------
+>>>> [  549.767276] WARNING: at fs/btrfs/inode.c:2143 btrfs_orphan_commit_root+0x7f/0x9b [btrfs]()
+>> 
+>> OK, the line number has changed slightly, but still getting the
+>> same thing with:
+>> 
+>> git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git
 > 
-> > I'm running 4 osds per host on 4 hosts, 1 mon, 1 mds, 64 clients.
-> >
-> > For me a "ls" on the file system root from one of
-> > the clients still doesn't complete until the dd commands
-> > running on each client complete.
-> >
-> > Also, it is still true for me if I truncate all the files
-> > to zero from one of the clients, then write them again,
-> > one file per client, that second set of writes goes very
-> > slow.
-> >
-> > Am I maybe testing the wrong commit?
-> Nope, that commit should do it.
+> Can you try to reproduce this with the following patch applied to the 
+> server side?  This will disable the async snapshot ioctl.  It doesn't look 
+> like it's related to me, but let's be sure.
 > 
-> What version of the client software are you running? I'll have to look
-> over the change logs to see if maybe there are changes in there that
-> would impact this as well. Also my test environment is smaller than
-> yours; I'll endeavor to look this over again on a larger one with more
-> clients and see if I can spot any extra interactions causing problems.
+> diff --git a/src/os/FileStore.cc b/src/os/FileStore.cc
+> index dc78451..d5530c5 100644
+> --- a/src/os/FileStore.cc
+> +++ b/src/os/FileStore.cc
+> @@ -865,7 +865,7 @@ int FileStore::_detect_fs()
+>        dout(0) << "mount btrfs SNAP_CREATE_V2 got " << r << " " << strerror_r(-r, buf, sizeof(buf)) << dendl;
+>        if (r == 0 || errno == EEXIST) {
+>         dout(0) << "mount btrfs SNAP_CREATE_V2 is supported" << dendl;
+> -       btrfs_snap_create_v2 = true;
+> +       //btrfs_snap_create_v2 = true;
+>        
+>         // clean up
+>         r = ::ioctl(fd, BTRFS_IOC_SNAP_DESTROY, &vol_args);
 
-FWIW, I've got a little bit more data on the problem
-of 'ls' not completing until writes to a filesystem 
-all complete.
+The patch (applied to ceph.git 778902b, with changed line
+numbers) didn't help, same warning message:
 
-For me it depends on the number of osd instances.
-
-With just 4 cosds, 'ls' with active writing returns
-immediately.
-
-At 16 cosds, 'ls' with active writing doesn't
-return until the writes complete.
-
-This is with current stable (commit d7af21020).
-
-Also FWIW, I'm currently unable to reproduce the slow
-write after truncate issue, using stable branch
-on server side and 2.6.38-rc4 + ceph-client 
-master branch (commit 1afeac8b0) on client side.
-I'm not sure what was going on with my above
-report; sorry for the noise.
-
--- Jim
-
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
+[73382.202774] ------------[ cut here ]------------
+[73382.202811] WARNING: at fs/btrfs/inode.c:2161 btrfs_orphan_commit_root+0x7f/0x9b [btrfs]()
+[73382.202820] Hardware name: System Product Name
+[73382.202827] Modules linked in: loop netconsole configfs dm_mod sd_mod i2c_piix4 k10temp i2c_core asus_atk0110 ata_generic ahci libahci libata scsi_mod shpchp button pci_hotplug processor nfs lockd nfs_acl auth_rpcgss sunrpc r8169 mii ohci_hcd ehci_hcd thermal fan thermal_sys btrfs zlib_deflate crc32c libcrc32c
+[73382.202936] Pid: 7092, comm: cosd Tainted: G        W   2.6.38-rc3-otn1-00323-gc88f808 #5
+[73382.202945] Call Trace:
+[73382.202960]  [<ffffffffa003db51>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
+[73382.202971]  [<ffffffff81043a20>] ? warn_slowpath_common+0x78/0x8d
+[73382.202985]  [<ffffffffa003db51>] ? btrfs_orphan_commit_root+0x7f/0x9b [btrfs]
+[73382.203001]  [<ffffffffa0033729>] ? commit_fs_roots+0x87/0xef [btrfs]
+[73382.203015]  [<ffffffffa00343a2>] ? btrfs_commit_transaction+0x348/0x615 [btrfs]
+[73382.203026]  [<ffffffff8105d14a>] ? autoremove_wake_function+0x0/0x2e
+[73382.203038]  [<ffffffffa002073d>] ? block_rsv_add_bytes+0x15/0x3c [btrfs]
+[73382.203052]  [<ffffffffa0059520>] ? btrfs_mksubvol+0x1f4/0x308 [btrfs]
+[73382.203065]  [<ffffffffa0059732>] ? btrfs_ioctl_snap_create_transid+0xfe/0x11d [btrfs]
+[73382.203080]  [<ffffffffa0059856>] ? btrfs_ioctl_snap_create+0x49/0x5e [btrfs]
+[73382.203094]  [<ffffffffa005c36f>] ? btrfs_ioctl+0x471/0x90a [btrfs]
+[73382.203102]  [<ffffffff81114e79>] ? fsnotify+0x255/0x279
+[73382.203110]  [<ffffffff8100a36e>] ? invalidate_interrupt1+0xe/0x20
+[73382.203119]  [<ffffffff810f7e2a>] ? do_vfs_ioctl+0x40c/0x453
+[73382.203126]  [<ffffffff810f7eae>] ? sys_ioctl+0x3d/0x5c
+[73382.203134]  [<ffffffff81009952>] ? system_call_fastpath+0x16/0x1b
+[73382.203142] ---[ end trace deccd3c0dec6c2bd ]---
