@@ -1,37 +1,31 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.24.3
-Date: Fri, 11 Feb 2011 11:35:21 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102111129160.15922@cobra.newdream.net>
+From: Daniel Friesen <lists@nadir-seen-fire.com>
+Subject: The Ceph wiki?
+Date: Sun, 13 Feb 2011 05:43:23 -0800
+Message-ID: <4D57DFFB.5080703@nadir-seen-fire.com>
+Reply-To: daniel@nadir-seen-fire.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57009 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757513Ab1BKTeR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Feb 2011 14:34:17 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 379E9BC69F
-	for <ceph-devel@vger.kernel.org>; Fri, 11 Feb 2011 11:35:23 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id D3A4ABC69F
-	for <ceph-devel@vger.kernel.org>; Fri, 11 Feb 2011 11:35:22 -0800 (PST)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:61566 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754485Ab1BMNnL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 13 Feb 2011 08:43:11 -0500
+Received: by iyj8 with SMTP id 8so3955391iyj.19
+        for <ceph-devel@vger.kernel.org>; Sun, 13 Feb 2011 05:43:10 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-We've released v0.24.3 with more bug fixes, including one that loses data 
-in certain cases when OSDs restart during recovery.  It's pretty much all 
-OSD stuff, which is where we're focusing our testing efforts currently.
+I noticed the Ceph wiki is fairly out of date, and wrought with the 
+usual spam (well, having .pdf enabled entitles a type of spam I haven't 
+seen before).
+Which felt a little concerning, since the wiki appears to be the primary 
+source of documentation, and Ceph looks like an active project with a 
+lot of potential.
 
- * osd: misc crashes, slowness
- * osd: fix bug that loses backlog (and potentially data)
- * osd: scrub fixes
- * osd: snap_trimmer fixes
- * mds: fix bug with multi-client interaction/slowness
+Could the Ceph group use my help maintaining the wiki?
 
-Relevant URLs:
- * Direct download at: http://ceph.newdream.net/download/ceph-0.24.3.tar.gz
- * For Debian and Ubuntu packages, see http://ceph.newdream.net/wiki/Debian
-
-sage
+-- 
+~Daniel Friesen (Dantman, Nadir-Seen-Fire) [http://daniel.friesen.name]
 
