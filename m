@@ -1,51 +1,96 @@
-From: "Longguang Yue" <longguang_yue@tcloudcomputing.com>
-Subject: =?utf-8?B?562U5aSNOiBxdWVzdGlvbiBhYm91dCBzb2NrZXQgY29uZWN0?=
-	=?utf-8?B?aW9uIGFtb25nIG9zZCxtZHMsbW9u?=
-Date: Mon, 14 Feb 2011 21:37:38 +0800
-Message-ID: <D0C67741759ABD4BBD8D3A5CB815606E07E986@mail.cloud-valley.com.cn>
-References: <4D57DFFB.5080703@nadir-seen-fire.com><Pine.LNX.4.64.1102131028450.27567@cobra.newdream.net><D0C67741759ABD4BBD8D3A5CB815606E07E935@mail.cloud-valley.com.cn> <AANLkTikW4cmB5pDKGk=_W49NhTkgmY-0eP0ZGtfEWf=d@mail.gmail.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: question about socket conection among osd,mds,mon
+Date: Mon, 14 Feb 2011 09:12:49 -0800
+Message-ID: <F7AC6D547FA64F7EB1230167F17B99A9@gmail.com>
+References: <4D57DFFB.5080703@nadir-seen-fire.com>
+ <Pine.LNX.4.64.1102131028450.27567@cobra.newdream.net>
+ <D0C67741759ABD4BBD8D3A5CB815606E07E935@mail.cloud-valley.com.cn>
+ <AANLkTikW4cmB5pDKGk=_W49NhTkgmY-0eP0ZGtfEWf=d@mail.gmail.com>
+ <D0C67741759ABD4BBD8D3A5CB815606E07E986@mail.cloud-valley.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [203.114.244.241] ([203.114.244.241]:55476 "EHLO
-	mail.cloud-valley.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754293Ab1BNNhn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 14 Feb 2011 08:37:43 -0500
-Content-class: urn:content-classes:message
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:38597 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753914Ab1BNRNH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Feb 2011 12:13:07 -0500
+Received: by gxk9 with SMTP id 9so2155198gxk.19
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Feb 2011 09:13:07 -0800 (PST)
+In-Reply-To: <D0C67741759ABD4BBD8D3A5CB815606E07E986@mail.cloud-valley.com.cn>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Longguang Yue <longguang_yue@tcloudcomputing.com>
+Cc: ceph-devel@vger.kernel.org
 
-ISEhISAgICBvc2QgZTM1OiAzIG9zZHM6IDMgdXAsIDMgaW4gLS0gMiBibGFja2xpc3RlZCBNRFNl
-cw0KDQpjZXBoIGNhbiByZWNvdmVyIGJsYWNrbGlzdGVkIG9zZHMgYnkgaXRzZWxmLCBidXQgSSB3
-YW50IHRvIHJlY292ZXIgYmxhY2tsaXN0IG9zZHMgYXMgc29vbiBhcyBwb3NzaWJsZS4NCg0KSG93
-IHRvIHVzZSB0aGUgY29tbWFuZCwJCSdjZXBoIG9zZCBibGFja2xpc3Qgcm0gaG9zdDpwb3J0JyA/
-Pz8/DQoNCnRoYW5rcw0KDQotLS0tLemCruS7tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IHJhcmVj
-YWN0dXNAZ21haWwuY29tIFttYWlsdG86cmFyZWNhY3R1c0BnbWFpbC5jb21dIOS7o+ihqCBDb2xp
-biBNY0NhYmUNCuWPkemAgeaXtumXtDogMjAxMeW5tDLmnIgxNOaXpSAxODoyMQ0K5pS25Lu25Lq6
-OiBMb25nZ3VhbmcgWXVlDQrmioTpgIE6IFNhZ2UgV2VpbDsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
-bC5vcmcNCuS4u+mimDogUmU6IHF1ZXN0aW9uIGFib3V0IHNvY2tldCBjb25lY3Rpb24gYW1vbmcg
-b3NkLG1kcyxtb24NCg0KSGkgTG9uZ2d1YW5nLA0KDQpUaGUgYmxhY2tsaXN0IHN0b3BzIE1EU2Vz
-IGZyb20gdGFsa2luZyB0byBPU0RzLiBZb3UgY2Fubm90IGJsYWNrbGlzdA0KYW4gT1NEIGl0c2Vs
-Zi4NCg0KV2hhdCBpcyBpdCB0aGF0IHlvdSdyZSB0cnlpbmcgdG8gZG8/DQoNCnNpbmNlcmVseSwN
-CkNvbGluDQoNCg0KT24gU3VuLCBGZWIgMTMsIDIwMTEgYXQgNzoxMyBQTSwgTG9uZ2d1YW5nIFl1
-ZQ0KPGxvbmdndWFuZ195dWVAdGNsb3VkY29tcHV0aW5nLmNvbT4gd3JvdGU6DQo+IDEuTmV0c3Rh
-dCBpbmZvOg0KPiAxMC4xMC4xLjEwMDo2ODAwIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgPC0tLSAx
-MC4xMC4xLjEwNjozNDU4NSwgMTAuMTAuMS45ODo0NjYyNQ0KPiAxMC4xMC4xLjEwMDo2ODAxIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgPC0tLSAxMC4xMC4xLjEwNjo1OTI4NCwgMTAuMTAuMS45ODoz
-NTEwMQ0KPiBXaGVuIG9zZCBuZWVkIDIobW9yZSkgbGlzdGVuIHNvY2tldHM/IFdoeSDCoG90aGVy
-cyBvc2QgY29ubmVjdCBhcyBtYW55DQo+IHRpbWVzIGFzIGl0cyBsaXN0ZW4gc29ja2V0Pw0KPg0K
-Pg0KPiAyLmhvdyB0byBkZWFsIHdpdGggYmxhY2tsaXN0IG9zZHMNCj4gb3NkIGUzNTogMyBvc2Rz
-OiAzIHVwLCAzIGluIC0tIDIgYmxhY2tsaXN0ZWQgTURTZXMNCj4NCj4gYWNjb3JkaW5nIHRvIDEg
-Y2FzZSwgaG93IHRvIGRlYWwgd2l0aCBibGFja2xpc3QuDQo+IElmIEkgbmVlZCDCoHJ1biDCoCdj
-ZXBoIG9zZCBibGFja2xpc3Qgcm0gwqAxMC4xMC4xLjEwNjozNDU4NSAmJg0KPiAxMC4xMC4xLjk4
-OjQ2NjI1ICcgPz8/Pz8/DQo+DQo+IEkgdGhpbmsganVzdCBvbmx5IG9uZSBvc2QgbGlzdGVuIHNv
-Y2tldCBleGlzdHMhISEhISENCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
-IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+IHRoZSBib2R5IG9m
-IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+IE1vcmUgbWFqb3Jkb21v
-IGluZm8gYXQgwqBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4N
-Cg==
+
+On Monday, February 14, 2011 at 5:37 AM, Longguang Yue wrote:=20
+> !!!! osd e35: 3 osds: 3 up, 3 in -- 2 blacklisted MDSes
+>=20
+> ceph can recover blacklisted osds by itself, but I want to recover bl=
+acklist osds as soon as possible.
+>=20
+> How to use the command, 'ceph osd blacklist rm host:port' ????
+>=20
+> thanks
+None of your OSDs have been blacklisted. 2 of your MDSes have been, but=
+ that means that they either went down or were so laggy as to be useles=
+s. If they were laggy, then they will eventually find out and restart t=
+hemselves, at which point they will be identified as a different MDS an=
+d won't be blacklisted.
+This doesn't mean there's anything wrong with your OSDs, though!
+-Greg=20
+
+> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
+> =E5=8F=91=E4=BB=B6=E4=BA=BA: rarecactus@gmail.com [mailto:rarecactus@=
+gmail.com] =E4=BB=A3=E8=A1=A8 Colin McCabe
+> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2011=E5=B9=B42=E6=9C=8814=E6=97=
+=A5 18:21
+> =E6=94=B6=E4=BB=B6=E4=BA=BA: Longguang Yue
+> =E6=8A=84=E9=80=81: Sage Weil; ceph-devel@vger.kernel.org
+> =E4=B8=BB=E9=A2=98: Re: question about socket conection among osd,mds=
+,mon
+>=20
+> Hi Longguang,
+>=20
+> The blacklist stops MDSes from talking to OSDs. You cannot blacklist
+> an OSD itself.
+>=20
+> What is it that you're trying to do?
+>=20
+> sincerely,
+> Colin
+>=20
+>=20
+> On Sun, Feb 13, 2011 at 7:13 PM, Longguang Yue
+> <longguang_yue@tcloudcomputing.com> wrote:
+> > 1.Netstat info:
+> > 10.10.1.100:6800 <--- 10.10.1.106:34585, 10.10.1.98:46625
+> > 10.10.1.100:6801 <--- 10.10.1.106:59284, 10.10.1.98:35101
+> > When osd need 2(more) listen sockets? Why others osd connect as man=
+y
+> > times as its listen socket?
+> >=20
+> >=20
+> > 2.how to deal with blacklist osds
+> > osd e35: 3 osds: 3 up, 3 in -- 2 blacklisted MDSes
+> >=20
+> > according to 1 case, how to deal with blacklist.
+> > If I need run 'ceph osd blacklist rm 10.10.1.106:34585 &&
+> > 10.10.1.98:46625 ' ??????
+> >=20
+> > I think just only one osd listen socket exists!!!!!!
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at http://vger.kernel.org/majordomo-info.html
+> ??{.n?+???????+%??lzwm??b?=EB=A7=B2??r??y=C7=A9?=D7=AFzX????=DC=A8}??=
+?=C6=A0z?&j:+v???????zZ+??+zf???h???~????i???z??w?????????&?)=DF=A2f?
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
