@@ -1,96 +1,79 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: question about socket conection among osd,mds,mon
-Date: Mon, 14 Feb 2011 09:12:49 -0800
-Message-ID: <F7AC6D547FA64F7EB1230167F17B99A9@gmail.com>
-References: <4D57DFFB.5080703@nadir-seen-fire.com>
- <Pine.LNX.4.64.1102131028450.27567@cobra.newdream.net>
- <D0C67741759ABD4BBD8D3A5CB815606E07E935@mail.cloud-valley.com.cn>
- <AANLkTikW4cmB5pDKGk=_W49NhTkgmY-0eP0ZGtfEWf=d@mail.gmail.com>
- <D0C67741759ABD4BBD8D3A5CB815606E07E986@mail.cloud-valley.com.cn>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: [PATCH 17/46] fs: Use rename lock and RCU for multi-step operations
+Date: Mon, 14 Feb 2011 09:57:04 -0800
+Message-ID: <AANLkTimuGihJsCQ_LwWWyX-PJdqxtzKK_7ZbgcHZAatg@mail.gmail.com>
+References: <cover.1290852958.git.npiggin@kernel.dk>
+	<d44ddcf1d1e0813b3ce2b3872c7c702a31b62894.1290852959.git.npiggin@kernel.dk>
+	<AANLkTi=pj-pLYVSrU+6+BtioCWLod2ueZecNaap619fw@mail.gmail.com>
+	<AANLkTik3ScP5rvR2bOXOEEH8SNZGg+xO6Gy32CW3XmU6@mail.gmail.com>
+	<AANLkTinVP=OuJ-3u9pHdDuuKJoVrP4Unr5Dx1x=qHtXC@mail.gmail.com>
+	<AANLkTimUjC8B0=nn5+yDshzp0hy6Zk1wxYHWEZbk83Tf@mail.gmail.com>
+	<AANLkTi=or1Ya21Am8Dr4KVHgqkwvNxFwgn407=wxRfVa@mail.gmail.com>
+	<AANLkTinmaojfNDYk1i4jMP33MmEQDur9XZvFp=qhV01e@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:38597 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753914Ab1BNRNH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Feb 2011 12:13:07 -0500
-Received: by gxk9 with SMTP id 9so2155198gxk.19
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Feb 2011 09:13:07 -0800 (PST)
-In-Reply-To: <D0C67741759ABD4BBD8D3A5CB815606E07E986@mail.cloud-valley.com.cn>
-Content-Disposition: inline
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:60831 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751026Ab1BNR5I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Feb 2011 12:57:08 -0500
+In-Reply-To: <AANLkTinmaojfNDYk1i4jMP33MmEQDur9XZvFp=qhV01e@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Longguang Yue <longguang_yue@tcloudcomputing.com>
-Cc: ceph-devel@vger.kernel.org
+To: Nick Piggin <npiggin@gmail.com>
+Cc: Nick Piggin <npiggin@kernel.dk>, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, jaschut@sandia.gov
 
+On Wed, Jan 26, 2011 at 9:18 PM, Nick Piggin <npiggin@gmail.com> wrote:
+> On Wed, Jan 26, 2011 at 9:10 AM, Yehuda Sadeh Weinraub
+> <yehudasa@gmail.com> wrote:
+>> On Wed, Jan 19, 2011 at 2:32 PM, Nick Piggin <npiggin@gmail.com> wrote:
+>>> On Thu, Jan 20, 2011 at 9:27 AM, Yehuda Sadeh Weinraub
+>>> <yehudasa@gmail.com> wrote:
+>>>> On Tue, Jan 18, 2011 at 2:42 PM, Nick Piggin <npiggin@gmail.com> wrote:
+>>>>> On Wed, Jan 19, 2011 at 9:32 AM, Yehuda Sadeh Weinraub
+>>>>
+>>>>>> There's an issue with ceph as it references the
+>>>>>> dentry->d_parent(->d_inode) at dentry_release(), so setting
+>>>>>> dentry->d_parent to NULL here doesn't work with ceph. Though there is
+>>>>>> some workaround for it, we would like to be sure that this one is
+>>>>>> really required so that we don't exacerbate the ugliness. The
+>>>>>> workaround is to keep a pointer to the parent inode in the private
+>>>>>> dentry structure, which will be referenced only at the .release()
+>>>>>> callback. This is clearly not ideal.
+>>>>>
+>>>>> Hmm, I'll have to think about it. Probably we can check for
+>>>>> d_count == 0 rather than parent != NULL I think?
+>>>>>
+>>>>
+>>>> That'll solve ceph's problem, don't know about how'd affect other
+>>>> stuff. We'll need to know whether this is the solution, or whether
+>>>> we'd need to introduce some other band aid fix.
+>>>
+>>> No I think it will work fine. Basically we just need to know whether
+>>> we have been deleted, and if so then we restart rather than walking
+>>> back up the parent.
+>>>
+>>> I'll send a patch in a few days. For the meantime, it's a rathe
+>>> small window for ceph to worry about. So we'll have something
+>>> before -rc2 which should be OK.
+>>>
+>>
+>> I guess that it's a bit late for -rc2, should we assume that it'll be on -rc3?
+>
+> Yeah, I'm sorry I've been travelling and a bit disconnected.
+>
+> NFS folk are having a similar problem and looks like similar
+> proposed fix will do it.
+>
+> http://marc.info/?l=linux-fsdevel&m=129599823927039&w=2
+>
+> So I think it is the best way to go to restore behaviour back to what
+> filesystems already expect, to avoid more surprises in future.
+>
 
-On Monday, February 14, 2011 at 5:37 AM, Longguang Yue wrote:=20
-> !!!! osd e35: 3 osds: 3 up, 3 in -- 2 blacklisted MDSes
->=20
-> ceph can recover blacklisted osds by itself, but I want to recover bl=
-acklist osds as soon as possible.
->=20
-> How to use the command, 'ceph osd blacklist rm host:port' ????
->=20
-> thanks
-None of your OSDs have been blacklisted. 2 of your MDSes have been, but=
- that means that they either went down or were so laggy as to be useles=
-s. If they were laggy, then they will eventually find out and restart t=
-hemselves, at which point they will be identified as a different MDS an=
-d won't be blacklisted.
-This doesn't mean there's anything wrong with your OSDs, though!
--Greg=20
+Hi Nick,
+   -rc4 is out and that issue is still broken. Do you have that patch
+ready or should we push our workaround?
 
-> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
-> =E5=8F=91=E4=BB=B6=E4=BA=BA: rarecactus@gmail.com [mailto:rarecactus@=
-gmail.com] =E4=BB=A3=E8=A1=A8 Colin McCabe
-> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2011=E5=B9=B42=E6=9C=8814=E6=97=
-=A5 18:21
-> =E6=94=B6=E4=BB=B6=E4=BA=BA: Longguang Yue
-> =E6=8A=84=E9=80=81: Sage Weil; ceph-devel@vger.kernel.org
-> =E4=B8=BB=E9=A2=98: Re: question about socket conection among osd,mds=
-,mon
->=20
-> Hi Longguang,
->=20
-> The blacklist stops MDSes from talking to OSDs. You cannot blacklist
-> an OSD itself.
->=20
-> What is it that you're trying to do?
->=20
-> sincerely,
-> Colin
->=20
->=20
-> On Sun, Feb 13, 2011 at 7:13 PM, Longguang Yue
-> <longguang_yue@tcloudcomputing.com> wrote:
-> > 1.Netstat info:
-> > 10.10.1.100:6800 <--- 10.10.1.106:34585, 10.10.1.98:46625
-> > 10.10.1.100:6801 <--- 10.10.1.106:59284, 10.10.1.98:35101
-> > When osd need 2(more) listen sockets? Why others osd connect as man=
-y
-> > times as its listen socket?
-> >=20
-> >=20
-> > 2.how to deal with blacklist osds
-> > osd e35: 3 osds: 3 up, 3 in -- 2 blacklisted MDSes
-> >=20
-> > according to 1 case, how to deal with blacklist.
-> > If I need run 'ceph osd blacklist rm 10.10.1.106:34585 &&
-> > 10.10.1.98:46625 ' ??????
-> >=20
-> > I think just only one osd listen socket exists!!!!!!
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at http://vger.kernel.org/majordomo-info.html
-> ??{.n?+???????+%??lzwm??b?=EB=A7=B2??r??y=C7=A9?=D7=AFzX????=DC=A8}??=
-?=C6=A0z?&j:+v???????zZ+??+zf???h???~????i???z??w?????????&?)=DF=A2f?
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Yehuda
