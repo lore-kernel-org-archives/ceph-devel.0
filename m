@@ -1,57 +1,57 @@
-From: cclien <cclien@gmail.com>
-Subject: [PATCH] rgw: Lighttpd compatibity.
-Date: Thu, 17 Feb 2011 19:20:02 +0800
-Message-ID: <AANLkTikEd8UUyy3ncf2DiDqR1Aa0UNDy3AVVGnVSyCxK@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
+Date: Thu, 17 Feb 2011 08:46:14 -0700
+Message-ID: <1297957574.25491.152.camel@sale659.sandia.gov>
+References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com>
+ <1297893011.25491.124.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
+ <Pine.LNX.4.64.1102161651380.11150@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:60452 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753015Ab1BQLUD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Feb 2011 06:20:03 -0500
-Received: by vxb37 with SMTP id 37so1017425vxb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Feb 2011 03:20:02 -0800 (PST)
+Received: from sentry-three.sandia.gov ([132.175.109.17]:47083 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756656Ab1BQPqo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Feb 2011 10:46:44 -0500
+In-Reply-To: <Pine.LNX.4.64.1102161651380.11150@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi all
+Hi Sage,
 
-I just tried to deploy a rados gateway with Lighttpd.
-But it have some trouble parsing object names.
+On Wed, 2011-02-16 at 17:54 -0700, Sage Weil wrote:
+> On Wed, 16 Feb 2011, Sage Weil wrote:
+> > shouldn't affect anything.  We may have missed something.. do you have a 
+> > log showing this in action?
+> 
+> Obviously yes, looking at your original email.  :)  At the beginning of 
+> each log line we include a thread id.  What would be really helpful would 
+> be to narrow down where in OSD::heartbeat_entry() and heartbeat() things 
+> are blocking, either based on the existing output, or by adding additional 
+> dout lines at interesting points in time.
 
-Here's what I found in debug log on the non-working copy:
-    RADOS S3 Gateway: SCRIPT_NAME=/mybucket
-    RADOS S3 Gateway: REQUEST_URI=/mybucket/ceph.tgz
+I'll take a deeper look at my existing logs with
+that in mind; let me know if you'd like me to
+send you some.
 
-I think it will be better to retrive user's request from REQUEST_URI.
+I have also been looking at map_lock, as it seems
+to be shared between the heartbeat and map update
+threads.
 
-So I took some advantage on some unused variable, and then made this
-patch (maybe a workaround).
+Would instrumenting acquiring/releasing that lock
+be helpful?  Is there some other lock that may
+be more fruitful to instrument?  I can reproduce 
+pretty reliably, so adding instrumentation is 
+no problem.
 
-Please help to review this, hope this patch helps.
+-- Jim
 
-Happy Hacking!
+> 
+> sage
+> 
 
--CC
 
-
----
- src/rgw/rgw_rest.cc |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/src/rgw/rgw_rest.cc b/src/rgw/rgw_rest.cc
-index b923c42..1669e6f 100644
---- a/src/rgw/rgw_rest.cc
-+++ b/src/rgw/rgw_rest.cc
-@@ -493,7 +493,7 @@ void init_entities_from_header(struct req_state *s)
-     }
-   } else s->host_bucket = NULL;
-
--  const char *req_name = s->path_name;
-+  const char *req_name = s->path_name_url.c_str();
-   const char *p;
-
-   if (*req_name == '?') {
--- 
-1.7.0.4
