@@ -1,60 +1,68 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: problem with ceph init scripts
-Date: Wed, 16 Feb 2011 14:01:51 -0800
-Message-ID: <AANLkTin8AtFLV4euxMr9PS0Xfd6fonXmSaVPmHgoVdFg@mail.gmail.com>
-References: <AANLkTi=kvS=Oxou=1ZKeN+NW-0jMcYOtTQS-rzTZf2-9@mail.gmail.com>
-	<AANLkTikuEbwkmaPDKiMALRvzoxGzx9a86xejzx3TjHfi@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
+Date: Wed, 16 Feb 2011 16:50:58 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
+References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com> <1297893011.25491.124.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:38997 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755120Ab1BPWCI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Feb 2011 17:02:08 -0500
-Received: by fxm20 with SMTP id 20so1911332fxm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Feb 2011 14:02:07 -0800 (PST)
-In-Reply-To: <AANLkTikuEbwkmaPDKiMALRvzoxGzx9a86xejzx3TjHfi@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:57219 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751873Ab1BQAtj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Feb 2011 19:49:39 -0500
+In-Reply-To: <1297893011.25491.124.camel@sale659.sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Upendra Moturi <upendra.m@hexagrid.com>
-Cc: sage@newdream.net, ceph-devel@vger.kernel.org, Suresh Mandava <suresh@hexagrid.com>
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Feb 16, 2011 at 1:41 PM, Colin McCabe <cmccabe@alumni.cmu.edu> =
-wrote:
-> On Wed, Feb 16, 2011 at 6:44 AM, Upendra Moturi <upendra.m@hexagrid.c=
-om> wrote:
->> But if we want to start a particular osd or mon or mds ,its not
->> working and there is no error
->> eg:/etc/init.d/ceph start osd1 =A0does not start osd1 and don't get =
-any error
->
-> That is expected, unless you are running init-ceph on the same node a=
-s
-> osd1 is on.
->
-> It might be nice to have some kind of interface like "run command X o=
-n
-> osd1", but init-ceph is not that.
->
->> /etc/init.d/ceph -a stop also does not stop ceph on all nodes.It sto=
-ps
->> on current node only
->> where as
->> /etc/init.d/ceph -a killall works fine.
->
-> That sounds like a bug. I'll see if I can fix it.
+On Wed, 16 Feb 2011, Jim Schutt wrote:
+> On Wed, 2011-02-16 at 14:40 -0700, Gregory Farnum wrote:
+> > On Wednesday, February 16, 2011 at 1:25 PM, Jim Schutt wrote:
+> > > Hi,
+> > >
+> > > I've been testing v0.24.3 w/ 64 clients against
+> > > 1 mon, 1 mds, 96 osds. Under heavy write load I
+> > > see:
+> > >  [WRN] map e7 wrongly marked me down or wrong addr
+> > >
+> > > I was able to sort through the logs and discover that when
+> > > this happens I have large gaps (10 seconds or more) in osd
+> > > heatbeat processing. In those heartbeat gaps I've discovered
+> > > long periods (5-15 seconds) where an osd logs nothing, even
+> > > though I am running with debug osd/filestore/journal = 20.
+> > >
+> > > Is this a known issue?
+> > 
+> > You're running on btrfs? 
+> 
+> Yep.
 
-I'm afraid I can't reproduce this.
+Are the cosd log files on the same btrfs volume as the btrfs data, or 
+elsewhere?  The heartbeat thread takes some pains to avoid any locks that 
+may be contented and do avoid any disk io, so in theory a btrfs stall 
+shouldn't affect anything.  We may have missed something.. do you have a 
+log showing this in action?
 
-I ran /etc/init.d/ceph -a stop
+sage
 
-and it stopped ceph daemons running on remote nodes too. Looking at
-the code, it looks correct.
 
-Colin
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> > We've come across some issues involving very long sync times that I believe manifest like this. Sage is looking into them, although it's delayed at the moment thanks to FAST 11. :)
+> 
+> OK, great.
+> 
+> -- Jim
+> 
+> > -Greg
+> > 
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
