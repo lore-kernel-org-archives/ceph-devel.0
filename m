@@ -1,68 +1,55 @@
-From: Sage Weil <sage@newdream.net>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
 Subject: Re: librados api cleanup
-Date: Fri, 18 Feb 2011 13:36:54 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102181334100.13848@cobra.newdream.net>
+Date: Fri, 18 Feb 2011 14:49:37 -0800
+Message-ID: <AANLkTimPR94_wEGZmvWt=X5kzYnKafDn5sUXfJdOOgKZ@mail.gmail.com>
 References: <Pine.LNX.4.64.1102141453450.20210@cobra.newdream.net>
- <AANLkTim0kgb3LfhdpxXzjfxZ55eyhfWg1BtZ7RyzusQN@mail.gmail.com>
+	<AANLkTim0kgb3LfhdpxXzjfxZ55eyhfWg1BtZ7RyzusQN@mail.gmail.com>
+	<Pine.LNX.4.64.1102181334100.13848@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1298255716-1298064851=:13848"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54158 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754181Ab1BRVfa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Feb 2011 16:35:30 -0500
-In-Reply-To: <AANLkTim0kgb3LfhdpxXzjfxZ55eyhfWg1BtZ7RyzusQN@mail.gmail.com>
-Content-ID: <Pine.LNX.4.64.1102181334180.16662@cobra.newdream.net>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:49329 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753687Ab1BRWtj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Feb 2011 17:49:39 -0500
+Received: by fxm20 with SMTP id 20so4317553fxm.19
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Feb 2011 14:49:37 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.64.1102181334100.13848@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Fri, Feb 18, 2011 at 1:36 PM, Sage Weil <sage@newdream.net> wrote:
+> [config example]
 
---557981400-1298255716-1298064851=:13848
-Content-Type: TEXT/PLAIN; CHARSET=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Content-ID: <Pine.LNX.4.64.1102181334181.16662@cobra.newdream.net>
+Looks good.
 
-On Mon, 14 Feb 2011, Colin McCabe wrote:
+> const char *rados_conf_get(rados_t cluster, const char *option);
 
-> On Mon, Feb 14, 2011 at 3:00 PM, Sage Weil <sage@newdream.net> wrote:
-> > There are a few problems with the current librados api (at least the C
-> > bindings). =A0The main one is that there is an implicit assumption that=
- you
-> > can only interact with a single cluster from the same process.
-> > rados_initalize() takes argc/argv, allowing you to pass in configuratio=
+I would prefer something like
+int rados_conf_get(rados_t cluster, const char *option, char **buf, int=
+ len);
+
+We have a lot of configuration options that are ints and floats. You
+can't really return a const char* pointer to an int-- you need to make
+a temporary string somewhere, and that won't be const...
+
+We should also provide some feature like "pass -1 as length, and we'll
+malloc it for you."
+
+> I think the (short term) trick will be supporting this immediately be=
+fore
+> the config refactoring is in place. =A0Should be possible with a hidd=
+en
+> argv vector and the existing internal framework, I think.
+
+Yeah, it should be do-able.
+
+Colin
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-> > options and/or a config file location, and it is assume that is the
-> > cluster that is referenced when you open up a pool.
->=20
-> One idea would be to have a C API like this:
->=20
-> rados_cluster_t ctx;
-> rados_initialize(&ctx);
-> rados_read_configuration(ctx, "my_ceph_config.conf");
-> rados_set_conf("log dir", "/my/log/dir");
-
-How about:
-
----
-/* initialization */
-int rados_open(rados_t *cluster);
-void rados_close(rados_t cluster);
-
-/* config */
-int rados_conf_parse_argv(rados_t cluster, int argc, char **argv);
-int rados_conf_readfile(rados_t cluster, const char *path);
-int rados_conf_set(rados_t cluster, const char *option, const char *value);
-const char *rados_conf_get(rados_t cluster, const char *option);
----
-
-I think the (short term) trick will be supporting this immediately before=
-=20
-the config refactoring is in place.  Should be possible with a hidden=20
-argv vector and the existing internal framework, I think.=20
-
-sage
---557981400-1298255716-1298064851=:13848--
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
