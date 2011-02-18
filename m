@@ -1,70 +1,105 @@
-From: Stefan Majer <stefan.majer@gmail.com>
-Subject: Re: dedupe and compression in ceph
-Date: Fri, 18 Feb 2011 19:02:00 +0100
-Message-ID: <AANLkTinJEmyw--BR0z7P+-PnWhaof842O0PV810O4=Aw@mail.gmail.com>
-References: <AANLkTinTbdiV56oYWf7CL7dr6xLSYG==01TDRvqDgrux@mail.gmail.com>
-	<AANLkTimQcd9ViH=r9jxu_zCNQH_RJvGd2uef3BubEinN@mail.gmail.com>
-	<230A55CC1BE841CCB6DE1BD9DFB367CD@gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
+Date: Fri, 18 Feb 2011 11:41:19 -0700
+Message-ID: <1298054479.25491.197.camel@sale659.sandia.gov>
+References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com>
+ <1297893011.25491.124.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
+ <Pine.LNX.4.64.1102161651380.11150@cobra.newdream.net>
+ <1297957574.25491.152.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102170805080.22514@cobra.newdream.net>
+ <1297985503.25491.175.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102172312550.26016@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:63709 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756028Ab1BRSHv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Feb 2011 13:07:51 -0500
-Received: by wyb28 with SMTP id 28so3935229wyb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Feb 2011 10:07:50 -0800 (PST)
-In-Reply-To: <230A55CC1BE841CCB6DE1BD9DFB367CD@gmail.com>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:40836 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753461Ab1BRSla (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Feb 2011 13:41:30 -0500
+In-Reply-To: <Pine.LNX.4.64.1102172312550.26016@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: Kiran Patil <kirantpatil@gmail.com>, ceph-devel@vger.kernel.org
-
-Hi,
-
-i can confirm that in our environment we use the later option with lzo
-compression turned on. So far we are happy with that configuration as
-we see an average space saving rate of more or less 50% .
-
-greetings
-
-Stefan
+To: Sage Weil <sage@newdream.net>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 
-On Fri, Feb 18, 2011 at 6:29 PM, Gregory Farnum
-<gregory.farnum@dreamhost.com> wrote:
-> On Friday, February 18, 2011 at 5:30 AM, Kiran Patil wrote:
-> Hello,
->>
->> May I know when would it be possible to use the underlying btrfs
->> features such as dedupe(offline) and compression for ceph cosds ?
->>
->> Is it possible to access btrfs features in cosd seamlessly ?
-> Well, there are two ways to run Ceph on btrfs. One is to give it a ra=
-w partition and tell it to set up the partition itself. I'm not sure ho=
-w difficult it would be to enable these features under that situation, =
-although I think it would be pretty simple.
-> The other way is to just create a btrfs filesystem and point the OSD =
-at a directory on that filesystem as its backend storage. In that scena=
-rio you can set whatever mount options etc that you like. I'm not perso=
-nally that familiar with btrfs but I imagine this should let you enable=
- whatever options you like. :)
->
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+On Fri, 2011-02-18 at 00:13 -0700, Sage Weil wrote:
+> On Thu, 17 Feb 2011, Jim Schutt wrote:
+> > Check out the result:
+> >
+> > osd.68.log:256027:2011-02-17 15:44:50.141378 7fd42ad57940 osd68 5 tick
+> > osd.68.log:256028:2011-02-17 15:44:50.141464 7fd42ad57940 osd68 5 tick getting read lock on map_lock
+> > osd.68.log:256029:2011-02-17 15:44:50.141472 7fd42ad57940 osd68 5 tick got read lock on map_lock
+> > osd.68.log:256031:2011-02-17 15:44:50.141612 7fd42ad57940 osd68 5 tick sending mon report
+> > osd.68.log:256032:2011-02-17 15:44:50.141619 7fd42ad57940 osd68 5 tick removing stray pgs
+> > osd.68.log:256033:2011-02-17 15:44:50.141626 7fd42ad57940 osd68 5 tick sending log to logclient
+> > osd.68.log:256034:2011-02-17 15:44:50.141633 7fd42ad57940 osd68 5 tick arming timer for next tick     <==
+> > osd.68.log:256277:2011-02-17 15:45:18.481656 7fd42ad57940 osd68 5 tick checking dispatch queue status <== 28 second gap
+> > osd.68.log:256278:2011-02-17 15:45:18.481669 7fd42ad57940 osd68 5 tick done
+> > osd.68.log:256279:2011-02-17 15:45:18.481691 7fd42ad57940 osd68 5 tick
+> > osd.68.log:256280:2011-02-17 15:45:18.481705 7fd42ad57940 osd68 5 tick getting read lock on map_lock
+> > osd.68.log:256281:2011-02-17 15:45:18.481712 7fd42ad57940 osd68 5 tick got read lock on map_lock
+> > osd.68.log:256688:2011-02-17 15:45:20.010705 7fd42ad57940 osd68 5 tick sending mon report
+> > osd.68.log:256753:2011-02-17 15:45:20.012950 7fd42ad57940 osd68 5 tick removing stray pgs
+> > osd.68.log:256754:2011-02-17 15:45:20.012959 7fd42ad57940 osd68 5 tick sending log to logclient
+> > osd.68.log:256755:2011-02-17 15:45:20.012965 7fd42ad57940 osd68 5 tick arming timer for next tick
+> > osd.68.log:256756:2011-02-17 15:45:20.012976 7fd42ad57940 osd68 5 tick checking dispatch queue status
+> > osd.68.log:256757:2011-02-17 15:45:20.012993 7fd42ad57940 osd68 5 tick done
+> >
+> > Why should it take 28 seconds to add a new timer event?
+> 
+> Huh.. that is pretty weird.  I see multiple sync in there, too, so it's
+> not like something was somehow blocking on a btrfs commit.
+
+Here's another run; the tick gap is in a different place:
+
+osd.91.log:354239:2011-02-18 10:21:49.391986 7f012c6d7940 osd91 5 tick
+osd.91.log:354240:2011-02-18 10:21:49.392059 7f012c6d7940 osd91 5 tick getting read lock on map_lock
+osd.91.log:354241:2011-02-18 10:21:49.392067 7f012c6d7940 osd91 5 tick got read lock on map_lock
+osd.91.log:354243:2011-02-18 10:21:49.392210 7f012c6d7940 osd91 5 tick sending mon report
+osd.91.log:354244:2011-02-18 10:21:49.392217 7f012c6d7940 osd91 5 tick removing stray pgs
+osd.91.log:354245:2011-02-18 10:21:49.392225 7f012c6d7940 osd91 5 tick sending log to logclient
+osd.91.log:354246:2011-02-18 10:21:49.392231 7f012c6d7940 osd91 5 tick arming timer for next tick
+osd.91.log:354247:2011-02-18 10:21:49.392241 7f012c6d7940 osd91 5 tick checking dispatch queue status
+osd.91.log:354248:2011-02-18 10:21:49.392247 7f012c6d7940 osd91 5 tick done                              <==
+osd.91.log:355120:2011-02-18 10:22:14.948941 7f012c6d7940 osd91 5 tick                                   <== 25 second gap
+osd.91.log:355121:2011-02-18 10:22:14.948952 7f012c6d7940 osd91 5 tick getting read lock on map_lock
+osd.91.log:355122:2011-02-18 10:22:14.948959 7f012c6d7940 osd91 5 tick got read lock on map_lock
+osd.91.log:355338:2011-02-18 10:22:14.956905 7f012c6d7940 osd91 5 tick sending mon report
+osd.91.log:355398:2011-02-18 10:22:14.958590 7f012c6d7940 osd91 5 tick removing stray pgs
+osd.91.log:355399:2011-02-18 10:22:14.958598 7f012c6d7940 osd91 5 tick sending log to logclient
+osd.91.log:355400:2011-02-18 10:22:14.958605 7f012c6d7940 osd91 5 tick arming timer for next tick
+osd.91.log:355401:2011-02-18 10:22:14.958615 7f012c6d7940 osd91 5 tick checking dispatch queue status
+osd.91.log:355402:2011-02-18 10:22:14.958625 7f012c6d7940 osd91 5 tick done
 
 
+> Anybody else have ideas?  :/
 
---=20
-Stefan Majer
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hmmm, when I started using 2.6.28-rc kernels I enabled cgroups:
+
+CONFIG_CGROUPS=y
+# CONFIG_CGROUP_DEBUG is not set
+# CONFIG_CGROUP_NS is not set
+# CONFIG_CGROUP_FREEZER is not set
+# CONFIG_CGROUP_DEVICE is not set
+# CONFIG_CGROUP_CPUACCT is not set
+CONFIG_CGROUP_SCHED=y
+CONFIG_FAIR_GROUP_SCHED=y
+# CONFIG_RT_GROUP_SCHED is not set
+# CONFIG_BLK_CGROUP is not set
+CONFIG_SCHED_AUTOGROUP=y
+# CONFIG_NET_CLS_CGROUP is not set
+
+Since I can't think of anything else to try, I'll
+try turning them off.....
+
+-- Jim
+
+> 
+> sage
+> 
+
+
