@@ -1,45 +1,96 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: A Few Questions about Ceph
-Date: Fri, 18 Feb 2011 21:42:14 +0100
-Message-ID: <1298061734.2423.22.camel@wido-laptop.pcextreme.nl>
-References: <loom.20110218T053907-813@post.gmane.org>
-	 <1298039091.2366.65.camel@wido-desktop>
-	 <AANLkTik1x1pcNK4PMCwkAvHBrPdn9t=xemmG+0Oyu+VN@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
+Date: Fri, 18 Feb 2011 13:48:30 -0700
+Message-ID: <1298062110.25491.211.camel@sale659.sandia.gov>
+References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com>
+ <1297893011.25491.124.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
+ <Pine.LNX.4.64.1102161651380.11150@cobra.newdream.net>
+ <1297957574.25491.152.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102170805080.22514@cobra.newdream.net>
+ <1297985503.25491.175.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102172312550.26016@cobra.newdream.net>
+ <AANLkTimC0eTX7NjLLPjWGOpa0FYiTiO0TsG3B5A1Waht@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:39553 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752891Ab1BRUmS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Feb 2011 15:42:18 -0500
-In-Reply-To: <AANLkTik1x1pcNK4PMCwkAvHBrPdn9t=xemmG+0Oyu+VN@mail.gmail.com>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:35262 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751732Ab1BRUsl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Feb 2011 15:48:41 -0500
+In-Reply-To: <AANLkTimC0eTX7NjLLPjWGOpa0FYiTiO0TsG3B5A1Waht@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: tsuna <tsunanet@gmail.com>
-Cc: Mark Nigh <mnigh@netelligent.com>, ceph-devel@vger.kernel.org
+To: Colin McCabe <cmccabe@alumni.cmu.edu>
+Cc: Sage Weil <sage@newdream.net>, Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
 
-On Fri, 2011-02-18 at 10:00 -0800, tsuna wrote:
-> On Fri, Feb 18, 2011 at 6:24 AM, Wido den Hollander <wido@widodh.nl> wrote:
-> > While every new user is welcome to Ceph, please do understand that is
-> > still under heavy development and is NOT production ready.
+On Fri, 2011-02-18 at 12:07 -0700, Colin McCabe wrote:
+> > Anybody else have ideas?  :/
+> >
 > 
-> > I'm just going to repeat myself. Ceph is great, but it is still under
-> > heavy development. Testing and feedback is needed and very welcome, but
-> > right now it's not suitable for production.
+> At the risk of asking a dumb question, does syslog have messages from
+> ntpd about date/time adjustments?
+
+No, just a few messages like this:
+
+Feb 18 08:34:43 an12 ntpd[4939]: kernel time sync enabled 0001
+Feb 18 09:08:53 an12 ntpd[4939]: kernel time sync enabled 4001
+Feb 18 10:34:16 an12 ntpd[4939]: kernel time sync enabled 0001
+Feb 18 11:25:30 an12 ntpd[4939]: kernel time sync enabled 4001
+Feb 18 11:42:36 an12 ntpd[4939]: kernel time sync enabled 0001
+Feb 18 12:33:52 an12 ntpd[4939]: kernel time sync enabled 4001
+Feb 18 13:08:00 an12 ntpd[4939]: kernel time sync enabled 0001
+
 > 
-> Hi Wido,
-> what exactly is missing in Ceph to be considered suitable for production?
+> Also, what is the load on the system like? dout will write to a
+> logfile using write(2), which of course is a blocking system call. 28
+> seconds is a long time for a write to block, but things can get weird
+> under heavy I/O.
 
-Ofcourse, it depends on your demands, but right now Ceph still
-experiences some crashes, so does btrfs, this combination can be
-dangerous for your data.
+During my tests my systems have high iowait  (40-80%), but CPU
+utilization is relatively low.  However, my ceph logs are going 
+to a dedicated disk via a dedicated I/O controller; i.e. my 
+ceph data disks are FC and my log disk is a local SATA disk.
 
-I'd recommend everybody to test Ceph, run if for some time and make your
-own decision, but I personally think that at this point, Ceph is not
-ready for production in terms of stability and data safety.
+-- Jim
 
-Wido
+> 
+> A more general problem is priority inversion through the dout lock.
+> For example, some other piece of code could be doing something like this
+> 
+> dout << my_happy_printer_function() << dendl
+> 
+> If my_happy_printer_function takes some heavily contended locks, this
+> will turn into
+> 1. lock dout lock
+> 2. lock heavily contended locks
+> 3. write(2) to logfile
+> 4. unlock ""
+> 5. unlock dout lock
+> 
+> This is one reason why I want to get rid of the dout lock (although
+> not the only one.)
+> 
+> Colin
+> 
+> 
+> On Thu, Feb 17, 2011 at 11:13 PM, Sage Weil <sage@newdream.net> wrote:
+> > On Thu, 17 Feb 2011, Jim Schutt wrote:
+> >> Check out the result:
+> >>
+> >> osd.68.log:256027:2011-02-17 15:44:50.141378 7fd42ad57940 osd68 5 tick
+> >> osd.68.log:256028:2011-02-17 15:44:50.141464 7fd42ad57940 osd68 5 tick getting read lock on map_lock
+> >> osd.68.log:256029:2011-02-17 15:44:50.141472 7fd42ad57940 osd68 5 tick got read lock on map_lock
+> >> osd.68.log:256031:2011-02-17 15:44:50.141612 7fd42ad57940 osd68 5 tick sending mon report
+> >> osd.68.log:256032:2011-02-17 15:44:50.141619 7fd42ad57940 osd68 5 tick removing stray pgs
+> >> osd.68.log:256033:2011-02-17 15:44:50.141626 7fd42ad57940 osd68 5 tick sending log to logclient
+> >> osd.68.log:256034:2011-02-17 15:44:50.141633 7fd42ad57940 osd68 5 tick arming timer for next tick     <==
+> >> osd.68.log:256277:2011-02-17 15:45:18.481656 7fd42ad57940 osd68 5 tick checking dispatch queue status <== 28 second gap
+> >> osd.68.log:256278:2011-02-17 15:45:18.481669 7fd42ad57940 osd68 5 tick done
+> >> osd.68.log:256279:2011-02-17 15:45:18.481691 7fd42ad57940 osd68 5 tick
+> 
+
 
