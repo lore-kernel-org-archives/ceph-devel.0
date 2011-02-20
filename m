@@ -1,74 +1,87 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: deadlock problem of client + osd
-Date: Sat, 19 Feb 2011 12:37:09 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102191233120.30637@cobra.newdream.net>
-References: <AANLkTik7ouc8vKZROLf2kvcNOtzYi+toa_xHNfwR+cq3@mail.gmail.com>
+From: Mark Nigh <mnigh@netelligent.com>
+Subject: RE: A Few Questions about Ceph
+Date: Sat, 19 Feb 2011 22:52:05 -0600
+Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C6788420D549@NC-SVR-09.netelligent.com>
+References: <loom.20110218T053907-813@post.gmane.org>
+ <1298039091.2366.65.camel@wido-desktop>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33162 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752569Ab1BSUfn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Feb 2011 15:35:43 -0500
-In-Reply-To: <AANLkTik7ouc8vKZROLf2kvcNOtzYi+toa_xHNfwR+cq3@mail.gmail.com>
+Received: from smtp.netelligent.com ([199.255.228.141]:59085 "EHLO
+	NC-SVR-11.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751187Ab1BTE61 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 19 Feb 2011 23:58:27 -0500
+In-Reply-To: <1298039091.2366.65.camel@wido-desktop>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry Chang <henry.cy.chang@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sun, 20 Feb 2011, Henry Chang wrote:
-> Hi all,
-> 
-> I have a ceph cluster of 3 mons,  2 mdses and 6 osds. The ceph clients
-> live along with 3 of the 6 osds.
-> I was running iozone on each client to generate the workload. After
-> hours, I found that one osd (with the client on it) hung.
-> 
-> The call stacks of three most suspicious threads of the cosd are:
-> 
-> [<ffffffff813abeec>] sock_common_recvmsg+0x39/0x4a
-> [<ffffffff813a9853>] __sock_recvmsg+0x71/0x7c
-> [<ffffffff813a9e11>] sock_recvmsg+0xcf/0xe8
-> [<ffffffff813ab189>] sys_recvfrom+0xd7/0x141
-> [<ffffffff81012d32>] system_call_fastpath+0x16/0x1b
-> [<ffffffffffffffff>] 0xffffffffffffffff
-> 
-> [<ffffffffa01634e7>] ceph_osdc_wait_request+0x22/0xc7 [libceph]
-> [<ffffffffa0164851>] ceph_osdc_writepages+0xf8/0x169 [libceph]
-> [<ffffffffa018f34d>] writepage_nounlock+0x262/0x3df [ceph]
-> [<ffffffffa0190292>] ceph_writepage+0x3b/0x58 [ceph]
-> [<ffffffff810e24ed>] pageout+0x137/0x203
-> [<ffffffff810e29d0>] shrink_page_list+0x265/0x483
-> [<ffffffff810e2fb4>] shrink_inactive_list+0x3c6/0x6ee
-> [<ffffffff810e3393>] shrink_list+0xb7/0xc3
-> [<ffffffff810e3678>] shrink_zone+0x2d9/0x37a
-> [<ffffffff810e393f>] do_try_to_free_pages+0x226/0x3a0
-> [<ffffffff810e3bb3>] try_to_free_pages+0x6e/0x70
-> [<ffffffff810ddb75>] __alloc_pages_nodemask+0x3e4/0x62d
-> [<ffffffff81106e0f>] alloc_pages_current+0x95/0x9e
-> [<ffffffff813f3890>] tcp_sendmsg+0x3e7/0x876
-> [<ffffffff813a97d7>] __sock_sendmsg+0x61/0x6c
-> [<ffffffff813a9f3c>] sock_sendmsg+0xcc/0xe5
-> [<ffffffff813aa176>] sys_sendmsg+0x221/0x2a5
-> [<ffffffff81012d32>] system_call_fastpath+0x16/0x1b
-> [<ffffffffffffffff>] 0xffffffffffffffff
-
-This random process was trying to allocate memory, and memory was low, so 
-it started (and is waiting on) some writeback...
-
-> [<ffffffff813aca66>] lock_sock_nested+0x94/0xca
-> [<ffffffff8140eb7e>] inet_shutdown+0x3e/0xe9
-> [<ffffffff813a990f>] sys_shutdown+0x45/0x61
-> [<ffffffff81012d32>] system_call_fastpath+0x16/0x1b
-> [<ffffffffffffffff>] 0
-> 
-> I wonder if it is the so-called "deadlock" problem when the client and
-> the osd are running on the same node?
-
-I haven't actually ever seen this in practice, but this sure looks like 
-it.  You have at least half of the deadlock cycle, a process waiting on 
-writeback.  The second part of the loop would be the local cosd process 
-blocking (probably trying to allocate memory, maybe even in sock_recvmsg 
-above?) while trying to complete that write.
-
-sage
+V2lkbywNCg0KVGhhbmtzIGZvciB0aGUgZ3JlYXQgaW5mb3JtYXRpb24uIEkgZG8gaGF2ZSBhIGZv
+bGxvdyB1cCBxdWVzdGlvbi4gV2hlbiBJIGNyZWF0ZSBteSAzcmQgYW5kIDR0aCBPU0Qgbm9kZXMs
+IGhvdyBkbyBJIGdvIGFib3V0IG1vdW50aW5nIHRoYXQgZGF0YT8gU28gZm9yIGV4YW1wbGUsIEkg
+YW0gb24gYSBjbGllbnQgYW5kIHdhbnQgdG8gbW91bnQgdGhlIGRhdGEgb24gdGhlIDMgYW5kIDR0
+aCBub2RlcyAoZGlmZmVyZW50IHBsYWNlbWVudCBncm91cHMpIGFuZCBub3QgdGhlIGRhdGEgb24g
+dGhlIDFzdCBhbmQgMm5kIE9TRHMuDQoNCkFtIEkgbG9va2luZyBhdCB0aGlzIGluY29ycmVjdGx5
+PyBUbyBkbyB3aGF0IEkgYW0gbG9va2luZyBmb3IsIEkgd291bGQgcHJvYmFibHkgaGF2ZSB0byBj
+cmVhdGUgYSBuZXcgRlMgd2l0aCBhIG1zZCBhbmQgbW9uLCBldGM/DQoNCkkgd2FzIGFibGUgdG8g
+bW91bnQgdGhlIHN1YmRpcmVjdG9yeSBhcyB5b3Ugc3VnZ2VzdGVkIG9uIGEgRmVkb3JhIDE0IGJv
+eCAobW91bnQgLXQgY2VwaCB4LngueC54Oi9zdWJkaXIxIC9tbnQvY2VwaCksIGJ1dCB3aGVuIEkg
+ZG8gYSBscyBJIGdldCBwZXJtaXNzaW9uIGRlbmllZC4NCg0KVGhhbmsgeW91LA0KDQpNYXJrIE5p
+Z2gNCg0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBXaWRvIGRlbiBIb2xs
+YW5kZXIgW21haWx0bzp3aWRvQHdpZG9kaC5ubF0NClNlbnQ6IEZyaWRheSwgRmVicnVhcnkgMTgs
+IDIwMTEgODoyNSBBTQ0KVG86IE1hcmsgTmlnaA0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnDQpTdWJqZWN0OiBSZTogQSBGZXcgUXVlc3Rpb25zIGFib3V0IENlcGgNCg0KSGkgTWFyaywN
+Cg0KT24gRnJpLCAyMDExLTAyLTE4IGF0IDA0OjM5ICswMDAwLCBNYXJrIE5pZ2ggd3JvdGU6DQo+
+IEkgaGF2ZSBiZWVuIGRvaW5nIHNpZ25pZmljYW50IHJlc2VhcmNoIGFuZCB0ZXN0aW5nIG9mIENl
+cGggYXMgYSBsb25nLXRlcm0NCj4gc29sdXRpb24gZm9yIG91ciBDbG91ZCBTdG9yYWdlIFNvbHV0
+aW9uLg0KPg0KDQpXaGlsZSBldmVyeSBuZXcgdXNlciBpcyB3ZWxjb21lIHRvIENlcGgsIHBsZWFz
+ZSBkbyB1bmRlcnN0YW5kIHRoYXQgaXMNCnN0aWxsIHVuZGVyIGhlYXZ5IGRldmVsb3BtZW50IGFu
+ZCBpcyBOT1QgcHJvZHVjdGlvbiByZWFkeS4NCg0KPiAxLiBJIGhhdmUgYSAzIG5vZGUgY2x1c3Rl
+ci4gdGhlIGZpcnN0IGNsdXN0ZXIgaXMgcnVubmluZyB0aGUgbW9uLCBtc2QgYW5kIG9zZDANCj4g
+ZGFlbW9ucy4gVGhlIHNlY29uZCBub2RlIGlzIHJ1bm5pbmcgdGhlIG9zZDEgZGFlbW9uIG9ubHku
+IEkgYW0gYWJsZSB0byBtb3VudCB0aGUNCj4geC54LngueDovIC9tbnQvY2VwaCBqdXN0IGZpbmUu
+IEkgaGF2ZSBhZGRlZCBhIDMgbm9kZSBhbmQgYW0gcnVubmluZyB0aGUgb3NkDQo+IGRhZW1vbiBv
+bmx5LiBJIGRvbid0IHdhbnQgdG8gYWRkIHRoaXMgbm9kZSB0byB0aGUgcGxhY2VtZW50IGdyb3Vw
+IG9mIHRoZSAxc3QgMg0KPiBub2RlcywgYnV0IHJhdGhlciBhZGQgYSA0dGggYW5kIGhhdmUgdGhl
+IDNyZCBhbmQgNHRoIGluIGEgcGxhY2VtZW50IGdyb3VwLiBUaGlzDQo+IHdvdWxkIGJlIGhlbHBm
+dWwgZm9yIGRpZmZlcmVudCBjdXN0b21lcnMgb3IgZGlmZmVyZW50IGFwcGxpY2F0aW9ucyB0aGF0
+IG1heSBvcg0KPiBtYXkgbm90IG5lZWQgcmVwbGljYXRpb24gdG8gYSBzZWNvbmQgZGF0YSBjZW50
+ZXIuDQoNClllcywgdGhhdCBpcyBwb3NzaWJsZS4gWW91IGNhbiBjcmVhdGUgYSBDUlVTSC1tYXAN
+CiggaHR0cDovL2NlcGgubmV3ZHJlYW0ubmV0L3dpa2kvQ3VzdG9tX2RhdGFfcGxhY2VtZW50X3dp
+dGhfQ1JVU0ggKS4NCkV2ZXJ5IFJBRE9TIHBvb2wgaGFzIGEgY3J1aHNydWxlIGF0dHJpYnV0ZSwg
+aGVyZSB5b3UgY2FuIGRldmljZSB3aGljaA0KcnVsZSB0byB1c2UuDQoNCldoZW4gdXNpbmcgdGhl
+IENlcGggZmlsZXN5c3RlbSB5b3UgY2FuIGFsc28gc3BlY2lmeSBhIENSVVNIIHJ1bGUgcGVyDQpk
+aXJlY3RvcnksIHRoaXMgY2FuIGJlIGRvbmUgd2l0aCB0aGUgImNlcGhmcyIgY29tbWFuZDoNCg0K
+SSBoYXZlbid0IHVzZWQgdGhlIHRvb2wgbXlzZWxmIHlldCwgYnV0IEkgdGhpbmsgc29tZXRoaW5n
+IGxpa2UgdGhpcw0Kc2hvdWxkIGJlIHBvc3NpYmxlOg0KDQokIGNlcGhmcyAtcCBkYXRhLW9uLXNz
+ZCAvbW50L2NlcGgvZGlyMS9zdWIyDQoNClRoZSAiZGF0YS1vbi1zc2QiIHBvb2wgdGhlbiBoYXMg
+YSBDUlVTSCBydWxlIHdoaWNoIG9ubHkgdXNlcyBPU0QncyB3aXRoDQpTU0QncyBpbiB0IGhlbS4N
+Cg0KPg0KPiAyLiBJcyB0aGVyZSBhbnl3YXkgdG8gY3JlYXRlIHN1Yi1kaXJlY3RvcmllcyBpbiB0
+aGUgY2xpZW50IG1vdW50IGZvciBleGFtcGxlLA0KPiBtb3VudCAtdCBjZXBoIHgueC54Lng6L3N1
+YmRpcmVjdG9yeSAvbW50L2NlcGgNCg0KWWVzLCB5b3UgY2FuIG1vdW50IGV2ZXJ5IHN1YmRpcmVj
+dG9yeSB5b3Ugd2FudC4gU2ltcGx5IG1vdW50IHRoZSByb290DQpmaXJzdCwgY3JlYXRlIHRoZSBk
+aXJlY3RvcmllcyB5b3Ugd2FudCBhbmQgdGhlbiBzdGFydCBtb3VudGluZyB0aG9zZSBuZXcNCnN1
+YmRpcmVjdG9yaWVzLg0KDQo+DQo+IEkgYW0gbG9va2luZyBmb3J3YXJkIHRvIHBsYWNpbmcgY2Vw
+aCBpbnRvIG91ciBwcm9kdWN0aW9uIG5ldHdvcmsgYXMgb3VyIGJhY2t1cA0KPiB0YXJnZXQuDQoN
+CkknbSBqdXN0IGdvaW5nIHRvIHJlcGVhdCBteXNlbGYuIENlcGggaXMgZ3JlYXQsIGJ1dCBpdCBp
+cyBzdGlsbCB1bmRlcg0KaGVhdnkgZGV2ZWxvcG1lbnQuIFRlc3RpbmcgYW5kIGZlZWRiYWNrIGlz
+IG5lZWRlZCBhbmQgdmVyeSB3ZWxjb21lLCBidXQNCnJpZ2h0IG5vdyBpdCdzIG5vdCBzdWl0YWJs
+ZSBmb3IgcHJvZHVjdGlvbi4NCg0KUmVnYXJkcywNCg0KV2lkbw0KDQo+DQo+IFRoYW5rIHlvdSwN
+Cj4NCj4gTWFyayBOaWdoDQo+DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
+OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KPiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBNb3JlIG1ham9yZG9t
+byBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0K
+DQpUaGlzIHRyYW5zbWlzc2lvbiBhbmQgYW55IGF0dGFjaGVkIGZpbGVzIGFyZSBwcml2aWxlZ2Vk
+LCBjb25maWRlbnRpYWwgb3Igb3RoZXJ3aXNlIHRoZSBleGNsdXNpdmUgcHJvcGVydHkgb2YgdGhl
+IGludGVuZGVkIHJlY2lwaWVudCBvciBOZXRlbGxpZ2VudCBDb3Jwb3JhdGlvbi4gSWYgeW91IGFy
+ZSBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgYW55IGRpc2Nsb3N1cmUsIGNvcHlpbmcsIGRp
+c3RyaWJ1dGlvbiBvciB1c2Ugb2YgYW55IG9mIHRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4g
+b3IgYXR0YWNoZWQgdG8gdGhpcyB0cmFuc21pc3Npb24gaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4g
+SWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyB0cmFuc21pc3Npb24gaW4gZXJyb3IsIHBsZWFzZSBj
+b250YWN0IHVzIGltbWVkaWF0ZWx5IGJ5IHJlc3BvbmRpbmcgdG8gdGhpcyBtZXNzYWdlIG9yIGJ5
+IHRlbGVwaG9uZSAoMzE0LTM5Mi02OTAwKSBhbmQgcHJvbXB0bHkgZGVzdHJveSB0aGUgb3JpZ2lu
+YWwgdHJhbnNtaXNzaW9uIGFuZCBpdHMgYXR0YWNobWVudHMuDQo=
