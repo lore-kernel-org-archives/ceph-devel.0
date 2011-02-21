@@ -1,41 +1,49 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: How should I read the ceph code
-Date: Mon, 21 Feb 2011 12:36:56 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102211235280.30637@cobra.newdream.net>
-References: <4D6250C4.50901@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 2.6.38-rc6
+Date: Mon, 21 Feb 2011 12:52:35 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1102202115490.4468@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42169 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751251Ab1BUUfZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Feb 2011 15:35:25 -0500
-In-Reply-To: <4D6250C4.50901@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: andy <nxilei@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 21 Feb 2011, andy wrote:
-> Hi Sage:
->             I'm a newer to ceph, I read some part of ceph code. but I can't
-> understand very clearly. the docs of the code are very old, for example, when
-> I want to install the last version of ceph, even the program names changes!
+Hi Linus,
 
-Can you point us toward any documentation you find that is out of date?
- 
-> can you give me some suggestion to study ceph
-> 
-> 1. which part of code should I begain to read?
+Please pull the following Ceph fixes from
 
-It really depends on which part of the system you're interested in.  It's 
-a reasonably large code base...
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-> 2. where to find the new docs?
+The main item here is a workaround for a regression caused by the dcache 
+RCU stuff.  d_kill now clears d_parent prior to the release dentry op, 
+which causes a NULL pointer dereference in the ceph code.  Nick said this 
+should be easy enough to fix[1], but he's offline and it seems a bit late 
+to futz with the core dcache code.  This patch basically just makes a copy 
+of d_parent in the private d_fsdata struct.  We can revert it once the 
+d_kill/d_parent thing gets fixed up, presumably during the next merge 
+window.
 
-The most up to date docs should be found in the wiki, 
+There are also some error handling fixes and a fix for an possible 
+infinite loop in the snapshot notification handler.
 
-	http://ceph.newdream.net/wiki
-
-Thanks!
+Thanks-
 sage
+
+[1] http://marc.info/?l=linux-fsdevel&m=129610552517424&w=2
+
+
+Sage Weil (3):
+      libceph: fix socket read error handling
+      libceph: fix socket write error handling
+      ceph: queue cap_snaps once per realm
+
+Yehuda Sadeh (1):
+      ceph: keep reference to parent inode on ceph_dentry
+
+ fs/ceph/dir.c        |    5 +++-
+ fs/ceph/snap.c       |   14 ++++++++---
+ fs/ceph/super.h      |    1 +
+ net/ceph/messenger.c |   62 +++++++++++++++++++++++++-------------------------
+ 4 files changed, 46 insertions(+), 36 deletions(-)
