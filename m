@@ -1,38 +1,30 @@
-From: Jeff Wu <cpwu@tnsoft.com.cn>
-Subject: Questions about PG ID to OSDs
-Date: Mon, 21 Feb 2011 17:05:35 +0800
-Message-ID: <1298279135.1867.34.camel@cephhost>
-Reply-To: <cpwu@tnsoft.com.cn>
+From: andy <nxilei@gmail.com>
+Subject: How should I read the ceph code
+Date: Mon, 21 Feb 2011 19:47:16 +0800
+Message-ID: <4D6250C4.50901@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [210.22.136.227] ([210.22.136.227]:38491 "EHLO
-	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753026Ab1BUJGh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Feb 2011 04:06:37 -0500
+Received: from mail-px0-f174.google.com ([209.85.212.174]:46633 "EHLO
+	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755056Ab1BULr1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Feb 2011 06:47:27 -0500
+Received: by pxi15 with SMTP id 15so63470pxi.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Feb 2011 03:47:26 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@newdream.net>
 
+Hi Sage:
+             I'm a newer to ceph, I read some part of ceph code. but I 
+can't understand very clearly. the docs of the code are very old, for 
+example, when I want to install the last version of ceph, even the 
+program names changes!
 
-Hi ,
-I'm reading CRUSH and RADOS thesis,from these thesis , 
-i can get the algorithms:
+can you give me some suggestion to study ceph
 
-object_id = <object_number,inode_number>;
-pg_id = (r,hash(object_id) & mask)  ;   // closely resembles consistent
-hashing
+1. which part of code should I begain to read?
+2. where to find the new docs?
 
-but i am wondering how to map a pg_id to OSDs by CRUSH .
-Example , 
-if pg_id = 1.12,exist osd0,osd1,osd2,osd3,
-then how to map pg_id = 1.12 to these osds ?  the algorithms ? the
-detail steps ?
-
-Thanks a lot.
-
-Jeff .C.P.Wu
-
-
+thanks very much
