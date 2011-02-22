@@ -1,49 +1,35 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph fixes for 2.6.38-rc6
-Date: Mon, 21 Feb 2011 12:52:35 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102202115490.4468@cobra.newdream.net>
+From: Jeff Wu <cpwu@tnsoft.com.cn>
+Subject: Questions about ceph mount dir subdirectory max size limit
+Date: Tue, 22 Feb 2011 17:37:37 +0800
+Message-ID: <1298367457.1879.33.camel@cephhost>
+Reply-To: <cpwu@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from [210.22.136.227] ([210.22.136.227]:25012 "EHLO
+	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753385Ab1BVJh3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Feb 2011 04:37:29 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+Hi ,
+Resemble quota,
+is there a way to limit per subdirectory max size under ceph mount
+directory  ? 
 
-Please pull the following Ceph fixes from
+For instance :
+mount.ceph cephserver:6789:/ /mnt/ceph
+/mnt/ceph     max size    300G 
+/mnt/ceph/user1     max size limit   30G 
+/mnt/ceph/user2     max size limit   50G 
+/mnt/ceph/user3     max size limit   10G 
+................
+................
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+Thanks
 
-The main item here is a workaround for a regression caused by the dcache 
-RCU stuff.  d_kill now clears d_parent prior to the release dentry op, 
-which causes a NULL pointer dereference in the ceph code.  Nick said this 
-should be easy enough to fix[1], but he's offline and it seems a bit late 
-to futz with the core dcache code.  This patch basically just makes a copy 
-of d_parent in the private d_fsdata struct.  We can revert it once the 
-d_kill/d_parent thing gets fixed up, presumably during the next merge 
-window.
+Jeff C.P.Wu
 
-There are also some error handling fixes and a fix for an possible 
-infinite loop in the snapshot notification handler.
-
-Thanks-
-sage
-
-[1] http://marc.info/?l=linux-fsdevel&m=129610552517424&w=2
-
-
-Sage Weil (3):
-      libceph: fix socket read error handling
-      libceph: fix socket write error handling
-      ceph: queue cap_snaps once per realm
-
-Yehuda Sadeh (1):
-      ceph: keep reference to parent inode on ceph_dentry
-
- fs/ceph/dir.c        |    5 +++-
- fs/ceph/snap.c       |   14 ++++++++---
- fs/ceph/super.h      |    1 +
- net/ceph/messenger.c |   62 +++++++++++++++++++++++++-------------------------
- 4 files changed, 46 insertions(+), 36 deletions(-)
