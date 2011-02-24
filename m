@@ -1,40 +1,35 @@
-From: Sage Weil <sage@newdream.net>
+From: Josh Durgin <josh.durgin@dreamhost.com>
 Subject: Re: C++ api for librados 0.25
-Date: Thu, 24 Feb 2011 10:30:49 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1102241029350.12531@cobra.newdream.net>
-References: <AANLkTin3gXaBv1y+MPEvJVxNYVhtJdkqtzf+1vp=XApw@mail.gmail.com>
- <4D669D48.6060202@dreamhost.com> <AANLkTi=RW=AWkDoZsM8TsKdZP+6AJNCfwdJ2SKtU3oVV@mail.gmail.com>
+Date: Thu, 24 Feb 2011 10:38:33 -0800
+Message-ID: <4D66A5A9.4050107@dreamhost.com>
+References: <AANLkTin3gXaBv1y+MPEvJVxNYVhtJdkqtzf+1vp=XApw@mail.gmail.com>	<4D669D48.6060202@dreamhost.com> <AANLkTi=RW=AWkDoZsM8TsKdZP+6AJNCfwdJ2SKtU3oVV@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45327 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754106Ab1BXS3L (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Feb 2011 13:29:11 -0500
+Received: from mail.hq.newdream.net ([66.33.206.127]:51140 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755601Ab1BXSid (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Feb 2011 13:38:33 -0500
 In-Reply-To: <AANLkTi=RW=AWkDoZsM8TsKdZP+6AJNCfwdJ2SKtU3oVV@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: Josh Durgin <josh.durgin@dreamhost.com>, ceph-devel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, 24 Feb 2011, Colin McCabe wrote:
-> > Also, what is the constructor Pool(Rados *rados_, pool_t *pool_)
-> > intended to be used for? I don't see a method to get a pool_t from
-> > this API.
+On 02/24/2011 10:13 AM, Colin McCabe wrote:
+> On Thu, Feb 24, 2011 at 10:02 AM, Josh Durgin <josh.durgin@dreamhost.com> wrote:
+>> - aio_create_completion could be moved into Pool since it's only
+>>  used within the context of a pool. (librbd would need this unless
+>>  Pool had a get_rados method).
 > 
-> Rados has to create Pools somehow, and that means they need a constructor.
-> 
-> It could be hidden deeper using the usual C++ bag of tricks (like
-> private constructors and friend functions), but it didn't seem
-> necessary.
+> Hmm. I'm not seeing the pool dependency for aio_create_completion. It
+> looks like this has nothing to do with any particular pool. It's just
+> a callback?
 
-What about a private constructor, and then in Rados have
+My thinking was that the only reason for creating one is for doing aio, which is done on a pool.
 
-	Pool *pool_open(const char *name);
+Looking at the implementation, however, there's no dependency on the RadosClient at all.
+These could just be constructors of AioCompletion (in the interface and implementation).
 
-IMO that's less weird than
-
-	Rados::Pool *p = new Rados::Pool(...);
-	rados->pool_open(name, p);
-
-sage
+-Josh Durgin
