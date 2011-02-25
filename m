@@ -1,7 +1,7 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
 Subject: Re: [ceph-commit] ceph.git branch librados_api updated. v0.24.3-788-gd15fe7f
-Date: Fri, 25 Feb 2011 12:50:50 -0800
-Message-ID: <AANLkTimQDB=--AwvqGAt7Fvj996coUUPNGkb114NnQxY@mail.gmail.com>
+Date: Fri, 25 Feb 2011 12:49:45 -0800
+Message-ID: <AANLkTi=XvPve25vPewN_37rbJVM8QauqU9Os9oEZpu2M@mail.gmail.com>
 References: <20110225021914.ED8EE485C515@ceph-tracker.dreamhostps.com>
 	<87AD89F7CCC04A709286360DDD9F65F1@gmail.com>
 	<Pine.LNX.4.64.1102250904540.21533@cobra.newdream.net>
@@ -13,17 +13,23 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:34577 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754899Ab1BYUuw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Feb 2011 15:50:52 -0500
-Received: by wyg36 with SMTP id 36so1994871wyg.19
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Feb 2011 12:50:51 -0800 (PST)
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:46510 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754899Ab1BYUvQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Feb 2011 15:51:16 -0500
+Received: by fxm17 with SMTP id 17so2073735fxm.19
+        for <ceph-devel@vger.kernel.org>; Fri, 25 Feb 2011 12:51:14 -0800 (PST)
 In-Reply-To: <AANLkTimbiWABVRxffKz6XwzojtJAy2zpaX2LwL0npHMm@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
-Cc: Sage Weil <sage@newdream.net>, Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Another idea: pool_t -> pool_context_t, PoolHandle -> PoolContext
+?
+
+C.
+
 
 On Fri, Feb 25, 2011 at 12:24 PM, Colin Patrick McCabe
 <colin.mccabe@dreamhost.com> wrote:
@@ -54,18 +60,8 @@ ne more
 > same file, but one with O_RDONLY, and the other with O_WRONLY. etc. A
 > handle to a thing is not the same as the thing itself.
 >
-But in the case of two different files, it is clear that you're
-opening a specific file. A pool handle is similar to a file, however,
-when you're using a file handle you can write to a specific file,
-whereas with a pool handle you can (though not necessarily supposed
-to) write to different objects. That is, a pool is more of a partition
-than a single file, so the analogy is not quite right.
-The pool handle should only be used with objects that share the same
-context, but there's nothing in the infrastructure that prevents users
-to misuse it, and the penalty for using the wrong snap context can be
-very high (loss of data).
-
-Yehuda
+> Colin
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
