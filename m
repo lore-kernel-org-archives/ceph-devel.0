@@ -1,69 +1,39 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
+From: Laszlo Boszormenyi <gcs@debian.hu>
 Subject: Re: building Ceph on various architectures
-Date: Sat, 26 Feb 2011 10:28:47 -0800
-Message-ID: <C0A35234378B4D3A90BDEF41E55AF4A3@gmail.com>
+Date: Sat, 26 Feb 2011 20:40:21 +0100
+Message-ID: <1298749221.16174.29.camel@julia.gcs.org.hu>
 References: <1298720478.16174.14.camel@julia.gcs.org.hu>
+	 <C0A35234378B4D3A90BDEF41E55AF4A3@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:57519 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752319Ab1BZS2y (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Feb 2011 13:28:54 -0500
-Received: by pzk35 with SMTP id 35so417218pzk.19
-        for <ceph-devel@vger.kernel.org>; Sat, 26 Feb 2011 10:28:53 -0800 (PST)
-In-Reply-To: <1298720478.16174.14.camel@julia.gcs.org.hu>
-Content-Disposition: inline
+Received: from mail.routers.hu ([212.40.96.82]:33080 "EHLO mail.routers.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752520Ab1BZTkW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 26 Feb 2011 14:40:22 -0500
+In-Reply-To: <C0A35234378B4D3A90BDEF41E55AF4A3@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laszlo Boszormenyi <gcs@debian.hu>
-Cc: ceph-devel@vger.kernel.org, yehudasa@gmail.com
+To: ceph-devel@vger.kernel.org, yehudasa@gmail.com
 
-On Saturday, February 26, 2011 at 3:41 AM, Laszlo Boszormenyi wrote:
-Hi List,
-> 
-> Being the Debian packager of Ceph, I ask for help about building 0.24.3
-> on armel. It fails with:
-> g++ -DHAVE_CONFIG_H -I. -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=64
-> -D_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT AuthAuthorizeHandler.o
-> -MD -MP -MF .deps/AuthAuthorizeHandler.Tpo -c -o AuthAuthorizeHandler.o
-> `test -f 'auth/AuthAuthorizeHandler.cc' || echo
-> './'`auth/AuthAuthorizeHandler.cc
-> In file included from ./include/buffer.h:55,
->  from ./include/encoding.h:20,
->  from ./include/object.h:29,
->  from ./include/types.h:64,
->  from auth/Crypto.h:17,
->  from auth/Auth.h:18,
->  from auth/AuthAuthorizeHandler.cc:1:
-> ./include/atomic.h: In member function 'void ceph::atomic_t::inc()':
-> ./include/atomic.h:33: error: 'AO_fetch_and_add1' was not declared in this scope
-> ./include/atomic.h: In member function 'size_t ceph::atomic_t::dec()':
-> ./include/atomic.h:36: error: 'AO_fetch_and_sub1_write' was not declared in this scope
-> ./include/atomic.h: In member function 'void ceph::atomic_t::add(size_t)':
-> ./include/atomic.h:39: error: 'AO_fetch_and_add' was not declared in this scope
-> ./include/atomic.h: In member function 'void ceph::atomic_t::sub(int)':
-> ./include/atomic.h:43: error: 'AO_fetch_and_add_write' was not declared in this scope
-> make[3]: *** [AuthAuthorizeHandler.o] Error 1
+On Sat, 2011-02-26 at 10:28 -0800, Gregory Farnum wrote:
+> On Saturday, February 26, 2011 at 3:41 AM, Laszlo Boszormenyi wrote:
+> This looks like an error that came up (and got fixed) on Ubuntu several months ago:
+> https://bugs.launchpad.net/ubuntu/+source/ceph/+bug/635388
+ Yes, it looks similar. But please note two things. The counterpart of
+#635388 in Ubuntu is #597193 [1] in Debian. It was fixed on the 20th of
+September, last year. Also, that bugs was:
+'AO_fetch_and_sub1_write' was not declared in this scope
+Compared to this one:
+'AO_fetch_and_add_write' was not declared in this scope
 
-This looks like an error that came up (and got fixed) on Ubuntu several months ago:
-https://bugs.launchpad.net/ubuntu/+source/ceph/+bug/635388
+I don't say it completely different, but doesn't look the exact same.
 
-> You can read the full build log on the web[1].
-> 
-> It also fails on s390, on the same file but with a different error
-> message:
-> g++ -DHAVE_CONFIG_H -I. -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -rdynamic -g -O2 -MT AuthAuthorizeHandler.o -MD -MP -MF .deps/AuthAuthorizeHandler.Tpo -c -o AuthAuthorizeHandler.o `test -f 'auth/AuthAuthorizeHandler.cc' || echo './'`auth/AuthAuthorizeHandler.cc
-> In file included from ./msg/msg_types.h:19,
->  from auth/Auth.h:19,
->  from auth/AuthAuthorizeHandler.cc:1:
-> ./include/blobhash.h: In member function 'size_t blobhash::operator()(const char*, unsigned int)':
-> ./include/blobhash.h:42: error: no match for call to '(rjhash<long unsigned int>) (size_t&)'
-> make[3]: *** [AuthAuthorizeHandler.o] Error 1
+[ about the build failure on s390 ]
+> This isn't one I'm familiar with -- I'll look into it on Monday if nobody's got it before then. :)
+ OK, let it be. I may try to look into it, but please don't count on me.
 
-This isn't one I'm familiar with -- I'll look into it on Monday if nobody's got it before then. :)
--Greg
-
-
+Laszlo/GCS
+[1] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=597193
 
