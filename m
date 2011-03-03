@@ -1,8 +1,11 @@
 From: "Jim Schutt" <jaschut@sandia.gov>
 Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
-Date: Thu, 3 Mar 2011 15:34:31 -0700
-Message-ID: <1299191671.4750.144.camel@sale659.sandia.gov>
+Date: Thu, 3 Mar 2011 16:06:12 -0700
+Message-ID: <1299193572.4750.148.camel@sale659.sandia.gov>
 References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com>
+ <1297893011.25491.124.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
  <Pine.LNX.4.64.1102161651380.11150@cobra.newdream.net>
  <1297957574.25491.152.camel@sale659.sandia.gov>
  <Pine.LNX.4.64.1102170805080.22514@cobra.newdream.net>
@@ -20,44 +23,93 @@ References: <1297891508.25491.120.camel@sale659.sandia.gov>
  <1299182603.4750.128.camel@sale659.sandia.gov>
  <1299185234.4750.137.camel@sale659.sandia.gov>
  <AANLkTikmVL8soYOR3nQyD3=FXjv-aurcydAVvJVvAOJR@mail.gmail.com>
- <1299188722.4750.140.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1103031421410.8512@cobra.newdream.net>
+ <AANLkTik_SOJ_NcvNsQYDQ8_xRDnK3m7oVKXUbt1pPGiO@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:47145 "EHLO
+Received: from sentry-three.sandia.gov ([132.175.109.17]:55925 "EHLO
 	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759013Ab1CCWel (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Mar 2011 17:34:41 -0500
-In-Reply-To: <Pine.LNX.4.64.1103031421410.8512@cobra.newdream.net>
+	with ESMTP id S1759069Ab1CCXGX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Mar 2011 18:06:23 -0500
+In-Reply-To: <AANLkTik_SOJ_NcvNsQYDQ8_xRDnK3m7oVKXUbt1pPGiO@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Colin McCabe <cmccabe@alumni.cmu.edu>, Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Colin McCabe <cmccabe@alumni.cmu.edu>
+Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Sage Weil <sage@newdream.net>, Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Hi Colin,
 
-On Thu, 2011-03-03 at 15:22 -0700, Sage Weil wrote:
-> On Thu, 3 Mar 2011, Jim Schutt wrote:
-> > That seems to have fixed this issue.  At least, before
-> > OSDs would start dying within a few minutes of starting
-> > up a new file system; it's been over a half hour since
-> > I started one up with this patch, and all OSDs are still
-> > running.
+On Thu, 2011-03-03 at 14:53 -0700, Colin McCabe wrote:
+> Oh, SIGPIPE, my old nemesis. I should have guessed!
 > 
-> That's good news; good catch with SIGPIPE!
-> 
-> Does that mean the original problem with the OSDs getting marked down has 
-> also gone away for you too?
+> I think it's time to block SIGPIPE everywhere... It's much better to
+> get EPIPE than to use a signal handler for this.
 
-I don't know yet - I'm just starting to retest that.
+I saw your commit d1fce13f9855.
 
-I'll let you know as soon as I know something.
+It seems like a41865e323 can be reverted, and
+everything should work correctly?
 
-Thanks -- Jim
+-- Jim
 
 > 
-> sage
+> regards,
+> Colin
+> 
+> 
+> On Thu, Mar 3, 2011 at 12:55 PM, Yehuda Sadeh Weinraub
+> <yehudasa@gmail.com> wrote:
+> > On Thu, Mar 3, 2011 at 12:47 PM, Jim Schutt <jaschut@sandia.gov> wrote:
+> >> Has something maybe changed in signal handling recently?
+> >>
+> >> Maybe SIGPIPE used to be blocked, and sendmsg() would
+> >> return -EPIPE, but now it's not blocked and not handled?
+> >>
+> >> This bit in linux-2.6.git/net/core/stream.c is what made
+> >> me wonder, but maybe it's a red herring:
+> >>
+> >> int sk_stream_error(struct sock *sk, int flags, int err)
+> >> {
+> >>        if (err == -EPIPE)
+> >>                err = sock_error(sk) ? : -EPIPE;
+> >>        if (err == -EPIPE && !(flags & MSG_NOSIGNAL))
+> >>                send_sig(SIGPIPE, current, 0);
+> >>        return err;
+> >> }
+> >
+> > It was actually just changed at
+> > 35c4a9ffeadfe202b247c8e23719518a874f54e6, so if you're on latest
+> > master then it might be it. You can try reverting that commit, or can
+> > try this:
+> >
+> > index da22c7c..6f746d4 100644
+> > --- a/src/msg/SimpleMessenger.cc
+> > +++ b/src/msg/SimpleMessenger.cc
+> > @@ -1991,7 +1991,7 @@ int SimpleMessenger::Pipe::do_sendmsg(int sd,
+> > struct msghdr *msg, int len, bool
+> >       assert(l == len);
+> >     }
+> >
+> > -    int r = ::sendmsg(sd, msg, more ? MSG_MORE : 0);
+> > +    int r = ::sendmsg(sd, msg, MSG_NOSIGNAL | (more ? MSG_MORE : 0));
+> >     if (r == 0)
+> >       dout(10) << "do_sendmsg hmm do_sendmsg got r==0!" << dendl;
+> >     if (r < 0) {
+> >
+> >
+> > Yehuda
+> >>
+> >> -- Jim
+> >>
+> >>
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >
 > 
 
 
