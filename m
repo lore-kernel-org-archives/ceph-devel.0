@@ -1,123 +1,72 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
-Date: Thu, 3 Mar 2011 13:03:23 -0700
-Message-ID: <1299182603.4750.128.camel@sale659.sandia.gov>
-References: <1297891508.25491.120.camel@sale659.sandia.gov>
- <75157CFDA63D45458FC47FB7BA6CB974@gmail.com>
- <1297893011.25491.124.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
- <Pine.LNX.4.64.1102161651380.11150@cobra.newdream.net>
- <1297957574.25491.152.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1102170805080.22514@cobra.newdream.net>
- <1298483538.25491.233.camel@sale659.sandia.gov>
- <460F770CEB1C499F8B87593762171483@gmail.com>
- <1298489031.25491.250.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1103011646140.32424@cobra.newdream.net>
- <1299079262.4750.19.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1103020909170.27567@cobra.newdream.net>
- <1299099295.4750.41.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1103021342540.27567@cobra.newdream.net>
- <1299103144.4750.49.camel@sale659.sandia.gov>
- <1299106628.4750.62.camel@sale659.sandia.gov>
- <AANLkTikU_F_mRaYC6xE5V9OHaDbyjWJ7fnpVCXkz=tK=@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+From: Sage Weil <sage@newdream.net>
+Subject: [PATCH 1/8] Revert "ceph: keep reference to parent inode on ceph_dentry"
+Date: Thu,  3 Mar 2011 12:40:03 -0800
+Message-ID: <1299184810-19125-2-git-send-email-sage@newdream.net>
+References: <1299184810-19125-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:54211 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932130Ab1CCUDf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Mar 2011 15:03:35 -0500
-In-Reply-To: <AANLkTikU_F_mRaYC6xE5V9OHaDbyjWJ7fnpVCXkz=tK=@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:52158 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752628Ab1CCUj6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Mar 2011 15:39:58 -0500
+In-Reply-To: <1299184810-19125-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: Sage Weil <sage@newdream.net>, Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@newdream.net>
 
+This reverts commit 97d79b403ef03f729883246208ef5d8a2ebc4d68.
 
-On Wed, 2011-03-02 at 19:26 -0700, Colin McCabe wrote:
-> Hi Jim,
-> 
-> We have seen this problem before. The usual suspects are the oom
-> killer (grep for "out of memory" in syslog).
-> Unfortunately, SIGKILL is uncatchable and that's what the OOM killer sends.
-> 
-> Another problem that can prevent core files from being generated is
-> bad ulimit -c settings or a bad setting for core_pattern and friends.
-> One problem I have a lot too is that the partition I'm writing core
-> files to fills up.
-> 
-> If none of that works, it's possible that someone is calling exit()
-> somewhere. You can attach a gdb to the process and put a breakpoint on
-> exit() to see if this is going on. There's a lot of "your foo is not
-> bar enough, I hate your config, exit(1)" type code that gets executed
-> while the daemon is starting up. It sounds like you should be past
-> that point, though.
+This fails to account for d_parent changes due to rename or disconnected
+dentries due to submounts or NFS reexports.
 
-I've finally gotten a little info, using a variant of
-your gdb idea: I waited until many of the OSD instances
-had died, then I attached gdb to several that were left,
-and waited.
+Signed-off-by: Sage Weil <sage@newdream.net>
+---
+ fs/ceph/dir.c   |    5 +----
+ fs/ceph/super.h |    1 -
+ 2 files changed, 1 insertions(+), 5 deletions(-)
 
-Two of them died the same way, like this:
-
-Program received signal SIGPIPE, Broken pipe.
-[Switching to Thread 0x7fd7888c8940 (LWP 28693)]
-0x00007fd7a9b82f2b in sendmsg () from /lib64/libpthread.so.0
-(gdb) bt
-#0  0x00007fd7a9b82f2b in sendmsg () from /lib64/libpthread.so.0
-#1  0x0000000000672e0b in SimpleMessenger::Pipe::do_sendmsg (
-    this=0x7fd799b67c20, sd=13, msg=0x7fd7888c7f20, len=251237, more=false)
-    at msg/SimpleMessenger.cc:1994
-#2  0x00000000006739d3 in SimpleMessenger::Pipe::write_message (
-    this=0x7fd799b67c20, m=0x7fd79b2dcb70) at msg/SimpleMessenger.cc:2217
-#3  0x000000000067e74a in SimpleMessenger::Pipe::writer (this=0x7fd799b67c20)
-    at msg/SimpleMessenger.cc:1734
-#4  0x000000000066fa2b in SimpleMessenger::Pipe::Writer::entry (
-    this=0x7fd799b67e70) at msg/SimpleMessenger.h:204
-#5  0x000000000068282e in Thread::_entry_func (arg=0x7fd799b67e70)
-    at ./common/Thread.h:41
-#6  0x00007fd7a9b7b73d in start_thread (arg=<value optimized out>)
-    at pthread_create.c:301
-#7  0x00007fd7a8a91f6d in clone () from /lib64/libc.so.6
-(gdb) 
-
-
-Program received signal SIGPIPE, Broken pipe.
-[Switching to Thread 0x7f1aed7f3940 (LWP 28726)]
-0x00007f1b01238f2b in sendmsg () from /lib64/libpthread.so.0
-(gdb) bt
-#0  0x00007f1b01238f2b in sendmsg () from /lib64/libpthread.so.0
-#1  0x0000000000672e0b in SimpleMessenger::Pipe::do_sendmsg (
-    this=0x7f1af15c94d0, sd=114, msg=0x7f1aed7f2f20, len=126728, more=false)
-    at msg/SimpleMessenger.cc:1994
-#2  0x00000000006739d3 in SimpleMessenger::Pipe::write_message (
-    this=0x7f1af15c94d0, m=0x23d3010) at msg/SimpleMessenger.cc:2217
-#3  0x000000000067e74a in SimpleMessenger::Pipe::writer (this=0x7f1af15c94d0)
-    at msg/SimpleMessenger.cc:1734
-#4  0x000000000066fa2b in SimpleMessenger::Pipe::Writer::entry (
-    this=0x7f1af15c9720) at msg/SimpleMessenger.h:204
-#5  0x000000000068282e in Thread::_entry_func (arg=0x7f1af15c9720)
-    at ./common/Thread.h:41
-#6  0x00007f1b0123173d in start_thread (arg=<value optimized out>)
-    at pthread_create.c:301
-#7  0x00007f1b00147f6d in clone () from /lib64/libc.so.6
-
-The third also got 
-
-Program received signal SIGPIPE, Broken pipe.
-[Switching to Thread 0x7f531fefe940 (LWP 28700)]
-0x00007f533ffeaf2b in sendmsg () from /lib64/libpthread.so.0
-(gdb) 
-
-but something was a little different and I didn't get a 
-backtrace from it.
-
--- Jim
-
-
-> 
-> Colin
-> 
-
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index f0aef78..0bc68de 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -60,7 +60,6 @@ int ceph_init_dentry(struct dentry *dentry)
+ 	}
+ 	di->dentry = dentry;
+ 	di->lease_session = NULL;
+-	di->parent_inode = igrab(dentry->d_parent->d_inode);
+ 	dentry->d_fsdata = di;
+ 	dentry->d_time = jiffies;
+ 	ceph_dentry_lru_add(dentry);
+@@ -1034,7 +1033,7 @@ static void ceph_dentry_release(struct dentry *dentry)
+ 	u64 snapid = CEPH_NOSNAP;
+ 
+ 	if (!IS_ROOT(dentry)) {
+-		parent_inode = di->parent_inode;
++		parent_inode = dentry->d_parent->d_inode;
+ 		if (parent_inode)
+ 			snapid = ceph_snap(parent_inode);
+ 	}
+@@ -1059,8 +1058,6 @@ static void ceph_dentry_release(struct dentry *dentry)
+ 		kmem_cache_free(ceph_dentry_cachep, di);
+ 		dentry->d_fsdata = NULL;
+ 	}
+-	if (parent_inode)
+-		iput(parent_inode);
+ }
+ 
+ static int ceph_snapdir_d_revalidate(struct dentry *dentry,
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 88fcaa2..20b907d 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -207,7 +207,6 @@ struct ceph_dentry_info {
+ 	struct dentry *dentry;
+ 	u64 time;
+ 	u64 offset;
+-	struct inode *parent_inode;
+ };
+ 
+ struct ceph_inode_xattrs_info {
+-- 
+1.7.0
 
