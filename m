@@ -1,145 +1,68 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: monitor dispatch queue seems backed up?
-Date: Fri, 4 Mar 2011 11:48:45 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1103041137050.25280@cobra.newdream.net>
-References: <1299258853.4750.191.camel@sale659.sandia.gov>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: about cpu_profiler
+Date: Fri, 4 Mar 2011 12:08:15 -0800
+Message-ID: <AANLkTimYykJpXQF3qUPYA7OF2jUf55WruXje1q0xJTet@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42462 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760112Ab1CDTqs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2011 14:46:48 -0500
-In-Reply-To: <1299258853.4750.191.camel@sale659.sandia.gov>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:46168 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760077Ab1CDUIQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2011 15:08:16 -0500
+Received: by fxm17 with SMTP id 17so2510833fxm.19
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2011 12:08:15 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-> Hi,
-> 
-> I'm continuing my testing of the master branch
-> (commit 1ed2d8c587) against 96 osds.
-> 
-> I'm having trouble getting a new filesystem to
-> start up.  FWIW this size filesystem starts up
-> in a minute or two at most under the stable branch.
+tl;dr: cpu_profiler may randomly crash your program on x86_64.
+The problem "should" be resolved in the "future".
 
-The main thing that's changed since then is the default number of PGs has 
-gone up.  Can you try changing the osd_pg_bits to 6 in common/config.cc, 
-rebuild, and re-mkcephfs, and see if that gives you behavior similar to 
-stable?  (mkcephfs isn't currently letting you adjust that yet.)
+Full text from google-perftools-1.7/README:
 
-I suspect this is just a problem with the size of the various pg map<>s on 
-the monitor (they're O(log n) for most operations).
-
-Thanks!
-sage
-
-
-
-On Fri, 4 Mar 2011, Jim Schutt wrote:
-
-> I'm using the attached patch to log message
-> queue wait times.  I'm seeing excessive queuing times,
-> and the message dispatch queue is really backed up as
-> a result:
-> 
-> 2011-03-04 10:03:47.144090 7fd7849ea940 -- 172.17.40.34:6789/0 dispatch_throttle_release 52 to dispatch throttler 104760196/104857600
-> 2011-03-04 10:03:47.147846 7fd7849ea940 -- 172.17.40.34:6789/0 >> 172.17.40.21:6812/28404 pipe(0x7fd768586d30 sd=73 pgs=89 cs=1 l=1).reader wants 52 from dispatch throttler 104760144/104857600
-> 2011-03-04 10:03:47.250609 7fd77a6a6940 -- 172.17.40.34:6789/0 dispatch_throttle_release 53 to dispatch throttler 104760196/104857600
-> 2011-03-04 10:03:47.254636 7fd77a6a6940 -- 172.17.40.34:6789/0 >> 172.17.40.29:6818/26733 pipe(0x7fd7685870f0 sd=7 pgs=110 cs=1 l=1).reader wants 53 from dispatch throttler 104760143/104857600
-> 2011-03-04 10:03:47.291575 7fd787b0d940 mon.an14@0(leader) e1 ms_dispatch existing session MonSession: osd78 172.17.40.31:6818/30346 is open for osd78 172.17.40.31:6818/30346
-> 2011-03-04 10:03:47.327148 7fd787b0d940 -- 172.17.40.34:6789/0 dispatch_throttle_release 270286 to dispatch throttler 104760196/104857600
-> 2011-03-04 10:03:47.327186 7fd787b0d940 -- 172.17.40.34:6789/0 dispatch_entry done with 0x2767540 que_et 694.609439 op_et 18.173758 tot_et 712.783197
-> 2011-03-04 10:03:47.334681 7fd787b0d940 mon.an14@0(leader) e1 ms_dispatch existing session MonSession: osd22 172.17.40.23:6818/25413 is open for osd22 172.17.40.23:6818/25413
-> 2011-03-04 10:03:47.340074 7fd779f9f940 -- 172.17.40.34:6789/0 >> 172.17.40.33:6815/10175 pipe(0x7fd7806f94e0 sd=53 pgs=29 cs=1 l=1).reader wants 22 from dispatch throttler 104705742/104857600
-> 2011-03-04 10:03:47.340586 7fd779f9f940 -- 172.17.40.34:6789/0 >> 172.17.40.33:6815/10175 pipe(0x7fd7806f94e0 sd=53 pgs=29 cs=1 l=1).reader wants 215832 from dispatch throttler 104705764/104857600
-> 2011-03-04 10:03:47.369077 7fd73fdfd940 -- 172.17.40.34:6789/0 dispatch_throttle_release 53 to dispatch throttler 104705764/104857600
-> 2011-03-04 10:03:47.373492 7fd73fdfd940 -- 172.17.40.34:6789/0 >> 172.17.40.31:6821/30438 pipe(0x7fd76858a430 sd=75 pgs=93 cs=1 l=1).reader wants 53 from dispatch throttler 104705711/104857600
-> 2011-03-04 10:03:47.379362 7fd787b0d940 -- 172.17.40.34:6789/0 dispatch_throttle_release 326202 to dispatch throttler 104705764/104857600
-> 2011-03-04 10:03:47.379401 7fd787b0d940 -- 172.17.40.34:6789/0 dispatch_entry done with 0x7fd75d9d2cb0 que_et 714.277852 op_et 0.044714 tot_et 714.322566
-> 2011-03-04 10:03:47.395951 7fd77e0e0940 -- 172.17.40.34:6789/0 >> 172.17.40.29:6800/26109 pipe(0x7fd7806decb0 sd=41 pgs=30 cs=1 l=1).reader wants 22 from dispatch throttler 104644280/104857600
-> 2011-03-04 10:03:47.396294 7fd77e0e0940 -- 172.17.40.34:6789/0 >> 172.17.40.29:6800/26109 pipe(0x7fd7806decb0 sd=41 pgs=30 cs=1 l=1).reader wants 184 from dispatch throttler 104644302/104857600
-> 2011-03-04 10:03:47.396818 7fd77e0e0940 -- 172.17.40.34:6789/0 >> 172.17.40.29:6800/26109 pipe(0x7fd7806decb0 sd=41 pgs=30 cs=1 l=1).reader wants 184 from dispatch throttler 104644486/104857600
-> 2011-03-04 10:03:47.397276 7fd77e0e0940 -- 172.17.40.34:6789/0 >> 172.17.40.29:6800/26109 pipe(0x7fd7806decb0 sd=41 pgs=30 cs=1 l=1).reader wants 184 from dispatch throttler 104644670/104857600
-> 2011-03-04 10:03:47.397499 7fd77e0e0940 -- 172.17.40.34:6789/0 >> 172.17.40.29:6800/26109 pipe(0x7fd7806decb0 sd=41 pgs=30 cs=1 l=1).reader wants 184 from dispatch throttler 104644854/104857600
-> 2011-03-04 10:03:47.397698 7fd77e0e0940 -- 172.17.40.34:6789/0 >> 172.17.40.29:6800/26109 pipe(0x7fd7806decb0 sd=41 pgs=30 cs=1 l=1).reader wants 184 from dispatch throttler 104645038/104857600
-> 2011-03-04 10:03:47.397954 7fd77e0e0940 -- 172.17.40.34:6789/0 >> 172.17.40.29:6800/26109 pipe(0x7fd7806decb0 sd=41 pgs=30 cs=1 l=1).reader wants 184 from dispatch throttler 104645222/104857600
-> 
-> 
-> I'm still digging to see if I can isolate what's happening;
-> I've got full logs available on request, and can reproduce 
-> with more debugging as needed.
-> 
-> -- Jim
-> 
-> >From 8eb5f27bdc3bee7ab8c7af58717fad9f313dca42 Mon Sep 17 00:00:00 2001
-> From: Jim Schutt <jaschut@sandia.gov>
-> Date: Thu, 24 Feb 2011 16:42:50 -0700
-> Subject: [PATCH] Refine debug printing for handling message dispatch.
-> 
-> 
-> Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+> 2) On x86-64 64-bit systems, while tcmalloc itself works fine, the
+> cpu-profiler tool is unreliable: it will sometimes work, but sometimes
+> cause a segfault.  I'll explain the problem first, and then some
+> workarounds.
+>
+> Note that this only affects the cpu-profiler, which is a
+> google-perftools feature you must turn on manually by setting the
+> CPUPROFILE environment variable.  If you do not turn on cpu-profiling,
+> you shouldn't see any crashes due to perftools.
+>
+> The gory details: The underlying problem is in the backtrace()
+> function, which is a built-in function in libc.
+> Backtracing is fairly straightforward in the normal case, but can run
+> into problems when having to backtrace across a signal frame.
+> Unfortunately, the cpu-profiler uses signals in order to register a
+> profiling event, so every backtrace that the profiler does crosses a
+> signal frame.
+>
+> In our experience, the only time there is trouble is when the signal
+> fires in the middle of pthread_mutex_lock.  pthread_mutex_lock is
+> called quite a bit from system libraries, particularly at program
+> startup and when creating a new thread.
+>
+> The solution: The dwarf debugging format has support for 'cfi
+> annotations', which make it easy to recognize a signal frame.  Some OS
+> distributions, such as Fedora and gentoo 2007.0, already have added
+> cfi annotations to their libc.  A future version of libunwind should
+> recognize these annotations; these systems should not see any
+> crashses.
+>
+> Workarounds: If you see problems with crashes when running the
+> cpu-profiler, consider inserting ProfilerStart()/ProfilerStop() into
+> your code, rather than setting CPUPROFILE.  This will profile only
+> those sections of the codebase.  Though we haven't done much testing,
+> in theory this should reduce the chance of crashes by limiting the
+> signal generation to only a small part of the codebase.  Ideally, you
+> would not use ProfilerStart()/ProfilerStop() around code that spawns
+> new threads, or is otherwise likely to cause a call to
+> pthread_mutex_lock!
+>
 > ---
->  src/msg/SimpleMessenger.cc |   17 ++++++++++++++---
->  src/osd/OSD.cc             |    3 +++
->  2 files changed, 17 insertions(+), 3 deletions(-)
-> 
-> diff --git a/src/msg/SimpleMessenger.cc b/src/msg/SimpleMessenger.cc
-> index 23e6b29..96e74e9 100644
-> --- a/src/msg/SimpleMessenger.cc
-> +++ b/src/msg/SimpleMessenger.cc
-> @@ -352,17 +352,26 @@ void SimpleMessenger::dispatch_entry()
->  		  << " " << m->get_footer().data_crc << ")"
->  		  << " " << m << " con " << m->get_connection()
->  		  << dendl;
-> +	  utime_t recv_stamp = m->get_recv_stamp();
-> +	  utime_t disp_stamp = g_clock.now();
->  	  ms_deliver_dispatch(m);
->  
->  	  dispatch_throttle_release(msize);
->  
-> -	  dout(20) << "done calling dispatch on " << m << dendl;
-> +	  utime_t done_stamp = g_clock.now();
-> +	  dout(20) << "dispatch_entry done with " << m
-> +		   << " que_et " << disp_stamp - recv_stamp
-> +		   << " op_et " << done_stamp - disp_stamp
-> +		   << " tot_et " << done_stamp - recv_stamp << dendl;
->  	}
->        }
->        dispatch_queue.lock.Lock();
->      }
-> -    if (!dispatch_queue.stop)
-> +    if (!dispatch_queue.stop) {
-> +      dout(20) << " Waiting for new work on SimpleMessenger dispatch queue" << dendl;
->        dispatch_queue.cond.Wait(dispatch_queue.lock); //wait for something to be put on queue
-> +      dout(20) << " Got new work on SimpleMessenger dispatch queue" << dendl;
-> +    }
->    }
->    dispatch_queue.lock.Unlock();
->  
-> @@ -553,8 +562,10 @@ void SimpleMessenger::Pipe::queue_received(Message *m, int priority)
->        dout(20) << "queue_received queuing pipe" << dendl;
->        if (!queue_items.count(priority)) 
->  	queue_items[priority] = new xlist<Pipe *>::item(this);
-> -      if (messenger->dispatch_queue.queued_pipes.empty())
-> +      if (messenger->dispatch_queue.queued_pipes.empty()) {
-> +	dout(20) << " Waking up SimpleMessenger dispatch queue" << dendl;
->  	messenger->dispatch_queue.cond.Signal();
-> +      }
->        messenger->dispatch_queue.queued_pipes[priority].push_back(queue_items[priority]);
->      }
->  
-> -- 
-> 1.6.6
-> 
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> 11 January 2011
+
+I'm hoping that this is out of date?
+
+Colin
