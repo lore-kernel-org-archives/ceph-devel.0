@@ -1,36 +1,62 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
 Subject: Re: monitor dispatch queue seems backed up?
-Date: Fri, 4 Mar 2011 13:00:45 -0800
-Message-ID: <192085D5D2EB46F1B37A801063082AFD@gmail.com>
+Date: Fri, 4 Mar 2011 15:47:47 -0700
+Message-ID: <1299278867.4750.209.camel@sale659.sandia.gov>
 References: <1299258853.4750.191.camel@sale659.sandia.gov>
  <Pine.LNX.4.64.1103041137050.25280@cobra.newdream.net>
- <1C3F2964F2314471949A0E8F6C807216@gmail.com>
- <AANLkTinndgwjSdyZCucUa=rDBXTDOcd0_L3B=8AZisNj@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:47116 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932437Ab1CDVAt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2011 16:00:49 -0500
-Received: by ywj3 with SMTP id 3so907454ywj.19
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2011 13:00:49 -0800 (PST)
-In-Reply-To: <AANLkTinndgwjSdyZCucUa=rDBXTDOcd0_L3B=8AZisNj@mail.gmail.com>
-Content-Disposition: inline
+Received: from sentry-three.sandia.gov ([132.175.109.17]:52122 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932603Ab1CDWrx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2011 17:47:53 -0500
+In-Reply-To: <Pine.LNX.4.64.1103041137050.25280@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Sage Weil <sage@newdream.net>, Jim Schutt <jaschut@sandia.gov>
-Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Friday, March 4, 2011 at 12:53 PM, Yehuda Sadeh Weinraub wrote:
 
-> you mean 'osd pg bits' in the ceph.conf?
+On Fri, 2011-03-04 at 12:48 -0700, Sage Weil wrote:
+> > Hi,
+> > 
+> > I'm continuing my testing of the master branch
+> > (commit 1ed2d8c587) against 96 osds.
+> > 
+> > I'm having trouble getting a new filesystem to
+> > start up.  FWIW this size filesystem starts up
+> > in a minute or two at most under the stable branch.
 > 
-Sorry, yes.
+> The main thing that's changed since then is the default number of PGs has 
+> gone up.  Can you try changing the osd_pg_bits to 6 in common/config.cc, 
+> rebuild, and re-mkcephfs, and see if that gives you behavior similar to 
+> stable?  (mkcephfs isn't currently letting you adjust that yet.)
 
-Jim, that 3 second gap is a configurable timeout/retry period; I don't remember exactly where it's set up. I suspect this failed reads problem is some kind of fallout from the activity with SIGPIPE yesterday (and signals in general the last few days), but couldn't say for sure on my own...
--Greg
+OK, I tried osd_pg_bits = 6 as you suggested.
 
+The startup behavior is much like stable, except my "ceph -w"
+seems to have some trouble connecting - it often needs to 
+try multiple times before it is successful.
+
+Unfortunately, the behavior under my 64-client write
+test is also much like stable - I'm still getting
+osds wrongly marked down.
+
+I didn't dig into it enough yet to see if this is due to 
+the same type of mysterious delays as I was finding
+on stable.
+
+-- Jim
+
+> 
+> I suspect this is just a problem with the size of the various pg map<>s on 
+> the monitor (they're O(log n) for most operations).
+> 
+> Thanks!
+> sage
+> 
+> 
 
 
