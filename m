@@ -1,69 +1,58 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: monitor dispatch queue seems backed up?
-Date: Fri, 4 Mar 2011 15:56:29 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1103041552040.25280@cobra.newdream.net>
-References: <1299258853.4750.191.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1103041137050.25280@cobra.newdream.net>
- <1299278867.4750.209.camel@sale659.sandia.gov>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: Re: about cpu_profiler
+Date: Fri, 4 Mar 2011 18:17:50 -0800
+Message-ID: <AANLkTi=RWv809C7DU+4YxUVb3TYxsbD30h3BTNArC31h@mail.gmail.com>
+References: <AANLkTimYykJpXQF3qUPYA7OF2jUf55WruXje1q0xJTet@mail.gmail.com>
+	<00BB198CFBE347429653477BED3AA89B@gmail.com>
+	<AANLkTinNO-U_E-Z76obnTJ+Ciz9VqWfBJr24J9-bBdGJ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42232 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759751Ab1CDXyb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2011 18:54:31 -0500
-In-Reply-To: <1299278867.4750.209.camel@sale659.sandia.gov>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:48586 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752049Ab1CECRv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2011 21:17:51 -0500
+Received: by fxm17 with SMTP id 17so2724766fxm.19
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2011 18:17:50 -0800 (PST)
+In-Reply-To: <AANLkTinNO-U_E-Z76obnTJ+Ciz9VqWfBJr24J9-bBdGJ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, 4 Mar 2011, Jim Schutt wrote:
-> On Fri, 2011-03-04 at 12:48 -0700, Sage Weil wrote:
-> > > Hi,
-> > > 
-> > > I'm continuing my testing of the master branch
-> > > (commit 1ed2d8c587) against 96 osds.
-> > > 
-> > > I'm having trouble getting a new filesystem to
-> > > start up.  FWIW this size filesystem starts up
-> > > in a minute or two at most under the stable branch.
-> > 
-> > The main thing that's changed since then is the default number of PGs has 
-> > gone up.  Can you try changing the osd_pg_bits to 6 in common/config.cc, 
-> > rebuild, and re-mkcephfs, and see if that gives you behavior similar to 
-> > stable?  (mkcephfs isn't currently letting you adjust that yet.)
-> 
-> OK, I tried osd_pg_bits = 6 as you suggested.
-> 
-> The startup behavior is much like stable, except my "ceph -w"
-> seems to have some trouble connecting - it often needs to 
-> try multiple times before it is successful.
+I wrote a wiki page about using oprofile with Ceph. It's at:
 
-Okay.  We'll have more nodes up next week so hopefully I'll be able to 
-reproduce this behavior.
+http://ceph.newdream.net/wiki/Cpu_profiling
 
-> Unfortunately, the behavior under my 64-client write
-> test is also much like stable - I'm still getting
-> osds wrongly marked down.
-> 
-> I didn't dig into it enough yet to see if this is due to 
-> the same type of mysterious delays as I was finding
-> on stable.
+I guess we should give this a try next time we have a CPU load problem.
 
-I just pushed something to master that sprinkles debug prints all through 
-the heartbeat thread.  Let's try to figure out where it is blocking.
+Apparently you can get really detailed with oprofile and measure
+things like number of CPU pipeline stalls and cache line misses. I
+didn't do any of that-- just used the simple counter.
 
-My worry is that this is all the VM's fault: we're writing data, hit the 
-dirty page limit, and thereafter any memory allocations or writes block.  
-I've been assuming that only the thread that does the write gets blocked, 
-but it may be that the VM blocks all threads in the process, or that it is 
-a memory allocation (in the heartbeat thread) that is hitting the limit 
-(balance_dirty_pages() IIRC).  We may need to make sure the heartbeat 
-thread uses preallocated/locked memory or something.. :(
+Colin
 
-Anyway, getting more detailed logs will tell us which thread(s) are 
-blocking when.  
 
-Thanks!
-sage
+On Fri, Mar 4, 2011 at 12:47 PM, Colin McCabe <cmccabe@alumni.cmu.edu> wrote:
+> I'm testing out oprofile now. So far, it seems relatively painless,
+> and it is a system-wide profiler. It seems to have some kernel hooks
+> too...
+>
+> Colin
+>
+>
+> On Fri, Mar 4, 2011 at 12:40 PM, Gregory Farnum
+> <gregory.farnum@dreamhost.com> wrote:
+>>
+>> On Friday, March 4, 2011 at 12:08 PM, Colin McCabe wrote:
+>>> tl;dr: cpu_profiler may randomly crash your program on x86_64.
+>>> The problem "should" be resolved in the "future".
+>>
+>> From what I've read, it's unfortunately not out of date. However, it manifests itself as a crash so it's not the reason that we can't get debugging output, unless there's something I'm missing. :)
+>> And even if it turns out to be very unstable on x86-64, the value of a good cpu profiler is high enough that we can set up x86 boxes or VMs...
+>> -Greg
+>>
+>>
+>>
+>>
+>
