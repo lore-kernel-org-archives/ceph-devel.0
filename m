@@ -1,58 +1,55 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: about cpu_profiler
-Date: Fri, 4 Mar 2011 18:17:50 -0800
-Message-ID: <AANLkTi=RWv809C7DU+4YxUVb3TYxsbD30h3BTNArC31h@mail.gmail.com>
-References: <AANLkTimYykJpXQF3qUPYA7OF2jUf55WruXje1q0xJTet@mail.gmail.com>
-	<00BB198CFBE347429653477BED3AA89B@gmail.com>
-	<AANLkTinNO-U_E-Z76obnTJ+Ciz9VqWfBJr24J9-bBdGJ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph fixes for 2.6.38-rc8
+Date: Sat, 5 Mar 2011 10:24:51 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1103041650420.3063@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:48586 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752049Ab1CECRv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Mar 2011 21:17:51 -0500
-Received: by fxm17 with SMTP id 17so2724766fxm.19
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Mar 2011 18:17:50 -0800 (PST)
-In-Reply-To: <AANLkTinNO-U_E-Z76obnTJ+Ciz9VqWfBJr24J9-bBdGJ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46774 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752748Ab1CESWw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Mar 2011 13:22:52 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-I wrote a wiki page about using oprofile with Ceph. It's at:
+Hi Linus,
 
-http://ceph.newdream.net/wiki/Cpu_profiling
+Please pull the following Ceph fixes from
 
-I guess we should give this a try next time we have a CPU load problem.
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-Apparently you can get really detailed with oprofile and measure
-things like number of CPU pipeline stalls and cache line misses. I
-didn't do any of that-- just used the simple counter.
+There are a couple of patches reverting the broken NULL d_parent 
+workaround, a couple patches disabling the "complete" flag behavior that 
+depended on it, and some bugfixes.  Those include socket error handling 
+fixups due to a switch to WQ_NON_REENTRANT workqueue behavior, a fix for 
+short returns from get_user_pages, and a trivial fix to prevent the magic 
+.snap directory from appearing within snapshots.
 
-Colin
+I should have sent these sooner.  Proper testing this time around got off 
+to a slow start due to the d_parent regression and confusion about Nick's 
+availability.
+
+Thanks!
+sage
 
 
-On Fri, Mar 4, 2011 at 12:47 PM, Colin McCabe <cmccabe@alumni.cmu.edu> wrote:
-> I'm testing out oprofile now. So far, it seems relatively painless,
-> and it is a system-wide profiler. It seems to have some kernel hooks
-> too...
->
-> Colin
->
->
-> On Fri, Mar 4, 2011 at 12:40 PM, Gregory Farnum
-> <gregory.farnum@dreamhost.com> wrote:
->>
->> On Friday, March 4, 2011 at 12:08 PM, Colin McCabe wrote:
->>> tl;dr: cpu_profiler may randomly crash your program on x86_64.
->>> The problem "should" be resolved in the "future".
->>
->> From what I've read, it's unfortunately not out of date. However, it manifests itself as a crash so it's not the reason that we can't get debugging output, unless there's something I'm missing. :)
->> And even if it turns out to be very unstable on x86-64, the value of a good cpu profiler is high enough that we can set up x86 boxes or VMs...
->> -Greg
->>
->>
->>
->>
->
+Sage Weil (9):
+      Revert "ceph: keep reference to parent inode on ceph_dentry"
+      ceph: do not set I_COMPLETE
+      ceph: do not clear I_COMPLETE from d_release
+      libceph: fix handling of short returns from get_user_pages
+      libceph: retry after authorization failure
+      libceph: fix msgr backoff
+      libceph: fix msgr keepalive flag
+      libceph: fix msgr standby handling
+      ceph: no .snap inside of snapped namespace
+
+ fs/ceph/dir.c                  |   28 ++--------------
+ fs/ceph/inode.c                |    2 +-
+ fs/ceph/super.h                |    1 -
+ include/linux/ceph/messenger.h |    2 +-
+ net/ceph/messenger.c           |   71 ++++++++++++++++++++++++++++++---------
+ net/ceph/pagevec.c             |   18 +++++++---
+ 6 files changed, 72 insertions(+), 50 deletions(-)
