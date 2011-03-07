@@ -1,59 +1,37 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.25 released
-Date: Sat, 5 Mar 2011 21:00:36 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1103041524260.20043@cobra.newdream.net>
+From: Sylar <kimulaaa@gmail.com>
+Subject: Proporttions of each role in a cluster
+Date: Mon, 07 Mar 2011 21:59:01 +0800
+Message-ID: <1299506341.17468.2.camel@ceph>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58243 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752872Ab1CFE6g (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Mar 2011 23:58:36 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 037FDBC692
-	for <ceph-devel@vger.kernel.org>; Sat,  5 Mar 2011 21:00:37 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id D59DDBC692
-	for <ceph-devel@vger.kernel.org>; Sat,  5 Mar 2011 21:00:36 -0800 (PST)
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:39998 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753127Ab1CGOAZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2011 09:00:25 -0500
+Received: by vws12 with SMTP id 12so3655590vws.19
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Mar 2011 06:00:24 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-We've just tagged the v0.25 release.  Most of the work here is in the OSD 
-cluster, a new librbd library (refactoring existing RBD infrastructure), 
-and a librados API refresh.
+Hi,
+Recently I want to build an environment of 20 servers(2U) to test Ceph.
+Each 2U server has 4 cores, 16GB RAM and 4 TeraBytes for storage.
+I would like to know how many MDSs, OSDes and MONs should I set for the
+best performance?
+Now I set 1 MDS, 19 OSDes and 5 MONs out of 19 OSDes.
+I am not sure whether 1 MDS is enough for 19 OSDes or not, maybe I need
+to set 2 MDSs?
+As for the Monitors, I am not sure whether 5 is OK or not.(Maybe I need
+to set more to ensure that the environment is always being monitored?)
 
-The librados changes are an attempt to clean up the API warts sooner 
-rather than later.  If there are any issues with the new interface, we'd 
-like to hear about them!
+And I would like to know the proportions of each role(MDS,OSD,MON) in a
+cluster. Because in the future, we will have more servers to build and
+test.
+Thanks in advance!
+--
+Best Regards,
+Sylar Shen
 
-The new librbd library sits on top of librados and captures the RBD 
-striping, snapshotting, and other functionality, presenting a simple 
-block device-like interface.  The qemu/KVM driver is being rewritten in 
-terms of librbd, which will vastly simplify the upstream qemu code and 
-allow us to fix bugs and add functionality without being tied to a 
-specific version of qemu/KVM.
-
-Other changes since v0.24 include:
-
- * osd: fix map churn while peering
- * osd: "watch/notify" framework for RBD synchronization
- * osd: ability to read from closest replica
- * osd: many bug fixes
- * osd: improved recovery behavior (tolerate missing objects)
- * mds: misc clustering fixes
- * mds: fix respawn
- * mds: misc bug fixes
- * mds: "hot standby" behavior
- * /etc/ceph/keyring instead of keyring.bin
- * ability to log to syslog
-
-The focus for v0.26 will remain on stability, primary with the OSD 
-cluster, RBD, and radosgw.  Internally, we're focusing on building out our 
-QA and performance testing infrastructure.
-
-Relevant URLs:
- * Direct download at: http://ceph.newdream.net/download/ceph-0.25.tar.gz
- * For Debian and Ubuntu packages, see http://ceph.newdream.net/wiki/Debian
-
-sage
