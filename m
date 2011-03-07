@@ -1,50 +1,171 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Proporttions of each role in a cluster
-Date: Mon, 7 Mar 2011 09:40:03 -0800
-Message-ID: <AANLkTin+kZzp4Z9JokFgqBq=n89B6mDHymLpgBvOUajX@mail.gmail.com>
-References: <1299506341.17468.2.camel@ceph>
-	<1299509895.2433.87.camel@wido-desktop>
-	<AANLkTinsKr9H5drfEBLfL0+Zd=4hVBOtQSfbtBDLWXW8@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [RFC] d_prune
+Date: Mon, 7 Mar 2011 09:53:05 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1103070947370.11152@cobra.newdream.net>
+References: <Pine.LNX.4.64.1103041443290.29012@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:42741 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753888Ab1CGRkG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2011 12:40:06 -0500
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id E1148C064
-	for <ceph-devel@vger.kernel.org>; Mon,  7 Mar 2011 09:40:05 -0800 (PST)
-Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 8BC72C062
-	for <ceph-devel@vger.kernel.org>; Mon,  7 Mar 2011 09:40:05 -0800 (PST)
-Received: by eyx24 with SMTP id 24so1563643eyx.19
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Mar 2011 09:40:04 -0800 (PST)
-In-Reply-To: <AANLkTinsKr9H5drfEBLfL0+Zd=4hVBOtQSfbtBDLWXW8@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:39023 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755950Ab1CGRvA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2011 12:51:00 -0500
+In-Reply-To: <Pine.LNX.4.64.1103041443290.29012@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylar Shen <kimulaaa@gmail.com>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+To: Al Viro <viro@ZenIV.linux.org.uk>, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: mszeredi@suse.cz
 
-On Monday, March 7, 2011 at 7:57 AM, Sylar Shen wrote:
-Yes, an odd number is the best practice.
-> What I concerned is that the numbers of monitors when the scalability
-> gets bigger.
-> For now, I think 3 is OK, too. But I will have more servers to be
-> added in the future(more than 100 servers).
+On Fri, 4 Mar 2011, Sage Weil wrote:
+> The rcu path walk changes for 2.6.38 shone light in some dark corners 
+> where Ceph was using the dcache in racy ways.  The main problem is this:
+> 
+>  * The Ceph MDS server gives us lease information such that we know the
+>    contents for a directory won't change.
+>  * We want to do lookup on non-existant items without interacting with the
+>    server.  (We also want to do readdir, but that's a more complicated
+>    case.)
+>  * The existing hooks (d_release is what we were using) do not give us
+>    the opportunity to clear our "this directory is completely cached" flag
+>    prior to the dentry being unhashed.
+>  * d_lookup can't look at the "complete" flag and conclude a dentry 
+>    doesn't exist without worrying about a race with the pruner.
+> 
+> There are two cases where this matters:
+> 
+>  * The VFS does a lookup prior to any create, which means we do two server 
+>    requests instead of one.  Some VFS refactoring could probably fix that 
+>    (and Al has some ideas there).
+>  * A user looks up a non-existent file.  This should not require a server
+>    request at all.
+> 
+> The race we care about is with the pruner (shrink_dentry_list and 
+> shrink_dcache_for_umount_subtree).  Dropping dentries due to actual 
+> changes (rename, unlink, rmdir) all go through the usual d_ops where we 
+> have ample opportunity to the right thing (with the exception of one 
+> dentry_unhash in vfs_rename_dir() :/).
 
-That's unlikely to be a problem for you. The monitors don't have too
-handle too many messages; they handle the cluster state but generally
-each OSD is going to send them (small) messages a couple times a
-second -- or possibly much less often.
+Unless there are other (non-pruner) cases where the VFS randomly unhashes 
+things, I think vfs_rename_dir() is the main problem with the d_prune 
+method approach.  Specifically, vfs_rename_dir() does
 
-> And I would like to know the proportions of each role(MDS,OSD,MON) in a cluster. Because in the future, we will have more servers to build and test.
+                if (target)
+                        dentry_unhash(new_dentry);
 
-3 monitors should be sufficient for any cluster you are likely to
-build (I don't know what he maximum is, but it's a lot).
-Configurations with 1 MDS are a lot more stable than configurations
-with multiple MDSes, so I'd start with that and if you find that you
-need to handle more metadata ops, you can add more -- adding MDSes to
-a running cluster is fairly simple. And put in all the OSDs you need
-to handle your storage size and bandwidth needs! :)
--Greg
+prior to calling ->rename().  It's not clear to me why vfs_rename_dir() 
+does this but vfs_rename_other() does not.  Could it be pushed down into 
+the ->rename() method?
+
+Also, the 
+
+                if (d_unhashed(new_dentry))
+                        d_rehash(new_dentry);
+
+after ->rename() has always looked fishy/buggy to me.  See
+
+        http://lkml.org/lkml/2008/7/30/165
+
+Thanks-
+sage
+
+
+
+> Is something like the patch below sane?  It notifies the fs prior to 
+> unhashing the dentry, giving Ceph the chance to clear its "complete" bit.  
+> Are there other reasons the VFS would drop dentries that I'm missing?
+> 
+> Some alternatives we've considered:
+> 
+>  * Double-caching.  We could keep a copy of directory contents in the fs
+>    layer and use that to do the lookup.  Yuck.
+>  * Put the "complete" bit in the dcache.  The problem is it's a flag on 
+>    the parent, d_flags is protected by d_lock, and we can't take the parent's
+>    d_lock while holding the child's d_lock (which we do while pruning).  
+>    Extra work that most fs's don't need.
+>  * Serializing lookups against the pruner in some other way.
+> 
+> Any thoughts or suggestions?
+> 
+> Thanks! 
+> sage
+> 
+> 
+> diff --git a/Documentation/filesystems/Locking b/Documentation/filesystems/Locking
+> index 4471a41..180e14b 100644
+> --- a/Documentation/filesystems/Locking
+> +++ b/Documentation/filesystems/Locking
+> @@ -28,6 +28,7 @@ d_revalidate: no              no              yes (ref-walk)  maybe
+>  d_hash         no              no              no              maybe
+>  d_compare:     yes             no              no              maybe
+>  d_delete:      no              yes             no              no
+> +d_prune:        no              yes             no              no
+>  d_release:     no              no              yes             no
+>  d_iput:                no              no              yes             no
+>  d_dname:       no              no              no              no
+> diff --git a/fs/dcache.c b/fs/dcache.c
+> index 2a6bd9a..cdb5d81 100644
+> --- a/fs/dcache.c
+> +++ b/fs/dcache.c
+> @@ -690,6 +690,8 @@ static void try_prune_one_dentry(struct dentry *dentry)
+>                         spin_unlock(&dentry->d_lock);
+>                         return;
+>                 }
+> +               if (dentry->d_op->d_flags & DCACHE_OP_PRUNE)
+> +                       dentry->d_op->d_prune(dentry);
+>                 dentry = dentry_kill(dentry, 1);
+>         }
+>  }
+> @@ -896,6 +898,8 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
+>  
+>         /* detach this root from the system */
+>         spin_lock(&dentry->d_lock);
+> +       if (dentry->d_op->d_flags & DCACHE_OP_PRUNE)
+> +               dentry->d_op->d_prune(dentry);
+>         dentry_lru_del(dentry);
+>         __d_drop(dentry);
+>         spin_unlock(&dentry->d_lock);
+> @@ -912,6 +916,8 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
+>                                             d_u.d_child) {
+>                                 spin_lock_nested(&loop->d_lock,
+>                                                 DENTRY_D_LOCK_NESTED);
+> +                               if (dentry->d_op->d_flags & DCACHE_OP_PRUNE)
+> +                                       dentry->d_op->d_prune(dentry);
+>                                 dentry_lru_del(loop);
+>                                 __d_drop(loop);
+>                                 spin_unlock(&loop->d_lock);
+> @@ -1375,6 +1381,8 @@ void d_set_d_op(struct dentry *dentry, const struct dentry_operations *op)
+>                 dentry->d_flags |= DCACHE_OP_REVALIDATE;
+>         if (op->d_delete)
+>                 dentry->d_flags |= DCACHE_OP_DELETE;
+> +       if (op->d_prune)
+> +               dentry->d_flags |= DCACHE_OP_PRUNE;
+>  
+>  }
+>  EXPORT_SYMBOL(d_set_d_op);
+> diff --git a/include/linux/dcache.h b/include/linux/dcache.h
+> index f958c19..1e83bd8 100644
+> --- a/include/linux/dcache.h
+> +++ b/include/linux/dcache.h
+> @@ -165,6 +165,7 @@ struct dentry_operations {
+>                         unsigned int, const char *, const struct qstr *);
+>         int (*d_delete)(const struct dentry *);
+>         void (*d_release)(struct dentry *);
+> +       void (*d_prune)(struct dentry *);
+>         void (*d_iput)(struct dentry *, struct inode *);
+>         char *(*d_dname)(struct dentry *, char *, int);
+>         struct vfsmount *(*d_automount)(struct path *);
+> @@ -219,6 +220,8 @@ struct dentry_operations {
+>  #define DCACHE_MANAGED_DENTRY \
+>         (DCACHE_MOUNTED|DCACHE_NEED_AUTOMOUNT|DCACHE_MANAGE_TRANSIT)
+>  
+> +#define DCACHE_OP_PRUNE         0x80000
+> +
+>  extern seqlock_t rename_lock;
+>  
+>  static inline int dname_external(struct dentry *dentry)
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
