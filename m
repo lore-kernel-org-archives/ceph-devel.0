@@ -1,39 +1,91 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: Proporttions of each role in a cluster
-Date: Mon, 07 Mar 2011 22:52:02 +0100
-Message-ID: <4D755382.6030303@tuxadero.com>
-References: <1299506341.17468.2.camel@ceph> <1299509895.2433.87.camel@wido-desktop>
-Reply-To: martin@tuxadero.com
+From: Upendra Moturi <upendra.m@hexagrid.com>
+Subject: Issue with replication level.
+Date: Tue, 8 Mar 2011 14:22:21 +0530
+Message-ID: <AANLkTin_M1Bx878=Avkm5+p1mhvJoYg1R87xjZSc4e=b@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:51355 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755246Ab1CGVwK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Mar 2011 16:52:10 -0500
-In-Reply-To: <1299509895.2433.87.camel@wido-desktop>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:43654 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756681Ab1CHIwW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Mar 2011 03:52:22 -0500
+Received: by bwz15 with SMTP id 15so4398107bwz.19
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Mar 2011 00:52:21 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, Suresh Mandava <suresh@hexagrid.com>, Saurav Lahiri <saurav.lahiri@hexagrid.com>
 
-> I'm running a Ceph cluster at the moment on Atom CPU's with 4GB of RAM,
-> each machine has 4x2TB (4 OSD's in total) and uses about ~800MB of RAM,
-> the other 3.2GB is used for caching.
-> 
+Hi
 
-Hi Wido,
-would you recommend a Atom CPU for an OSD? At the moment I'm looking at 
-this mainboard 
-http://www.supermicro.com/products/motherboard/ATOM/ICH9/X7SPA.cfm?typ=H&IPMI=Y, 
-I want to use it with 6 disks.
-The 800MB your machine uses is for all 4 OSD's together? Do you have any 
-numbers for the CPU utilization?
-I'm looking for the sweetspot of max IO-OPs/s per watt.
+I am having issue witrh replication levels.
+Even though i have set data @2x and mds@1x replication,the data copied
+is occupying 4x space
 
-Thanks in advance.
+I have used default crush map rules.
 
-martin
+2) how to see how much space does a mon,mds,data,casdata and rbd
+occupied individually.
+
+My ceph.conf
+
+    [global]
+       pid file = /var/run/ceph/$name.pid
+       debug ms = 1
+[mon]
+        mon data = /data/mon$id
+[mon.0]
+        host = ceph1
+        mon addr = 192.168.155.5:6789
+[mon.1]
+        host = ceph2
+        mon addr = 192.168.155.6:6789
+[mon.2]
+        host = ceph3
+        mon addr = 192.168.155.7:6789
+[mds]
+
+[mds0]
+        host = ceph1
+[mds1]
+        host = ceph2
+
+[osd]
+        sudo = true
+        osd data = /data/osd$id
+        osd journal = /data/osd$id/journal
+        osd journal size = 512
+        osd use stale snap = true
+[osd0]
+        host = ceph1
+        btrfs devs = /dev/sdb
+[osd1]
+        host = ceph2
+        btrfs devs = /dev/sdb
+[osd2]
+        host = ceph3
+        btrfs devs = /dev/sdb
 
 
+
+My pg_data settings
+
+pg_pool 0 'data' pg_pool(rep pg_size 2 crush_ruleset 0 object_hash
+rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 1
+owner 0)
+pg_pool 1 'metadata' pg_pool(rep pg_size 1 crush_ruleset 1 object_hash
+rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 10
+owner 0)
+pg_pool 2 'casdata' pg_pool(rep pg_size 1 crush_ruleset 2 object_hash
+rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 12
+owner 0)
+pg_pool 3 'rbd' pg_pool(rep pg_size 1 crush_ruleset 3 object_hash
+rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 15
+owner 0)
+
+
+
+
+
+--
+Thanks and Regards,
+Upendra.M
