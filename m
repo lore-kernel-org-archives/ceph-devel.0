@@ -1,91 +1,80 @@
-From: Upendra Moturi <upendra.m@hexagrid.com>
-Subject: Issue with replication level.
-Date: Tue, 8 Mar 2011 14:22:21 +0530
-Message-ID: <AANLkTin_M1Bx878=Avkm5+p1mhvJoYg1R87xjZSc4e=b@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Proporttions of each role in a cluster
+Date: Tue, 08 Mar 2011 10:43:21 +0100
+Message-ID: <1299577401.2629.6.camel@wido-laptop.pcextreme.nl>
+References: <1299506341.17468.2.camel@ceph>
+	 <1299509895.2433.87.camel@wido-desktop>  <4D755382.6030303@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:43654 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756681Ab1CHIwW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Mar 2011 03:52:22 -0500
-Received: by bwz15 with SMTP id 15so4398107bwz.19
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Mar 2011 00:52:21 -0800 (PST)
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:38331 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753861Ab1CHJnc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Mar 2011 04:43:32 -0500
+In-Reply-To: <4D755382.6030303@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, Suresh Mandava <suresh@hexagrid.com>, Saurav Lahiri <saurav.lahiri@hexagrid.com>
+To: martin@tuxadero.com
+Cc: ceph-devel@vger.kernel.org
 
-Hi
+Hi,
 
-I am having issue witrh replication levels.
-Even though i have set data @2x and mds@1x replication,the data copied
-is occupying 4x space
+On Mon, 2011-03-07 at 22:52 +0100, Martin Mailand wrote:
+> > I'm running a Ceph cluster at the moment on Atom CPU's with 4GB of RAM,
+> > each machine has 4x2TB (4 OSD's in total) and uses about ~800MB of RAM,
+> > the other 3.2GB is used for caching.
+> > 
+> 
+> Hi Wido,
+> would you recommend a Atom CPU for an OSD? At the moment I'm looking at 
+> this mainboard 
+> http://www.supermicro.com/products/motherboard/ATOM/ICH9/X7SPA.cfm?typ=H&IPMI=Y, 
+> I want to use it with 6 disks.
 
-I have used default crush map rules.
+I'm using the same board. Currently I have on running with 4 OSD's on
+it, but I hope to have 9 of them (each with 4 OSD's) running by the end
+of next week.
 
-2) how to see how much space does a mon,mds,data,casdata and rbd
-occupied individually.
+> The 800MB your machine uses is for all 4 OSD's together? Do you have any 
+> numbers for the CPU utilization?
 
-My ceph.conf
+There are my current stats:
 
-    [global]
-       pid file = /var/run/ceph/$name.pid
-       debug ms = 1
-[mon]
-        mon data = /data/mon$id
-[mon.0]
-        host = ceph1
-        mon addr = 192.168.155.5:6789
-[mon.1]
-        host = ceph2
-        mon addr = 192.168.155.6:6789
-[mon.2]
-        host = ceph3
-        mon addr = 192.168.155.7:6789
-[mds]
+root@atom:~# free -m
+             total       used       free     shared    buffers
+cached
+Mem:          3963       3871         92          0         34
+3247
+-/+ buffers/cache:        590       3373
+Swap:         7627          2       7625
+root@atom:~#
 
-[mds0]
-        host = ceph1
-[mds1]
-        host = ceph2
+root@atom:~# pidof cosd
+9314 8201 8101 8028
+root@atom:~#
 
-[osd]
-        sudo = true
-        osd data = /data/osd$id
-        osd journal = /data/osd$id/journal
-        osd journal size = 512
-        osd use stale snap = true
-[osd0]
-        host = ceph1
-        btrfs devs = /dev/sdb
-[osd1]
-        host = ceph2
-        btrfs devs = /dev/sdb
-[osd2]
-        host = ceph3
-        btrfs devs = /dev/sdb
+> I'm looking for the sweetspot of max IO-OPs/s per watt.
 
+Although I haven't been benchmarking it really hard, I don't think the
+CPU will be a bottleneck. I did a expansion from 4 to 8 OSD's where the
+Atom machine hosts the new OSD's, about 500GB of data had to be copied
+to the box. The recovery pushed about 40MB/sec to the OSD's, where the
+CPU utilization was about 40%
 
+I hope to have the 9 Atom machines running by next, that will give me
+some more information.
 
-My pg_data settings
+Wido
 
-pg_pool 0 'data' pg_pool(rep pg_size 2 crush_ruleset 0 object_hash
-rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 1
-owner 0)
-pg_pool 1 'metadata' pg_pool(rep pg_size 1 crush_ruleset 1 object_hash
-rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 10
-owner 0)
-pg_pool 2 'casdata' pg_pool(rep pg_size 1 crush_ruleset 2 object_hash
-rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 12
-owner 0)
-pg_pool 3 'rbd' pg_pool(rep pg_size 1 crush_ruleset 3 object_hash
-rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 15
-owner 0)
+> 
+> Thanks in advance.
+> 
+> martin
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-
-
-
-
---
-Thanks and Regards,
-Upendra.M
