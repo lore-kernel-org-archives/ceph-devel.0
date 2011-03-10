@@ -1,69 +1,67 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: osd cannot find cosd process after reboot
-Date: Thu, 10 Mar 2011 10:08:58 -0800
-Message-ID: <B0304C5EE27C431CA5C86CBBD4514472@gmail.com>
-References: <AANLkTi=1uDMuN18kOjLm7ysttx3nN9MdMp-7Gdni2S0W@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Another question about PG::do_peer
+Date: Thu, 10 Mar 2011 10:17:39 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1103101006030.986@cobra.newdream.net>
+References: <AANLkTikWHRrOJom30_CFi2jqdZ3YP41AZqCE4_nM4Jk_@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:43147 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751664Ab1CJSJD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2011 13:09:03 -0500
-Received: by qwd7 with SMTP id 7so1450210qwd.19
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2011 10:09:01 -0800 (PST)
-In-Reply-To: <AANLkTi=1uDMuN18kOjLm7ysttx3nN9MdMp-7Gdni2S0W@mail.gmail.com>
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:55803 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752030Ab1CJSP1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2011 13:15:27 -0500
+In-Reply-To: <AANLkTikWHRrOJom30_CFi2jqdZ3YP41AZqCE4_nM4Jk_@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
+To: Henry Chang <henry.cy.chang@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hmm, this does seem odd. How do you have Ceph installed and configured?
+On Thu, 10 Mar 2011, Henry Chang wrote:
+> Hi,
+> 
+> Another question is about PG::do_peer. I wonder if we should modify
+> the condition of inferring no missing as follows:
+> 
+> diff --git a/src/osd/PG.cc b/src/osd/PG.cc
+> index e634296..4ce3336 100644
+> --- a/src/osd/PG.cc
+> +++ b/src/osd/PG.cc
+> @@ -1632,7 +1632,7 @@ void PG::do_peer(ObjectStore::Transaction& t,
+> list<Context*>& tfin,
+>      if (pi.is_empty())
+>        continue;
+>      if (peer_missing.find(peer) == peer_missing.end()) {
+> -      if (pi.last_update == pi.last_complete) {
+> +      if (pi.last_update == pi.last_complete && pi.last_update >= log.tail) {
+>         dout(10) << " infering no missing (last_update==last_complete)
+> for osd" << peer << dendl;
+>         peer_missing[peer].num_missing();  // just create the entry.
+>         search_for_missing(peer_info[peer], &peer_missing[peer], peer);
+>
+> If pi.last_update < log.tail, we cannot know if the peer has any
+> missing. Shouldn't we try to pull the peer's missing+backlog first
+> before inferring no missing and go ahead activating the pg?
 
-Just to be clear:
-You have one machine hosting a monitor, MDS, and OSD. You reboot that m=
-achine and the MDS and monitor come back up, but the OSD doesn't. And y=
-ou appear to have an OSD running somewhere else?
-This doesn't make a lot of sense to me, but maybe I'm misunderstanding =
-or there's something strange with your config file -- can you show us, =
-please?
--Greg
-On Wednesday, March 9, 2011 at 10:37 PM, huang jun wrote:=20
-> Hi:
-> With ceph 0.24.3 and Linux 2.6.35.9, i face problems
-> after we reboot osd0=EF=BC=88osd0 and mon=E3=80=81mds on same host0=EF=
-=BC=89
-> Check cmon\cmds\cosd process
-> $pidof cmon
-> 2538
-> $pidof cmds
->  2537
-> $pidof cosd
-> =EF=BC=88here is no display=EF=BC=89
-> $cat /var/run/ceph/osd.0.pid
-> 2620
-> But
-> $ ceph osd dump -o -
-> Get follows:
-> max_osd 1
-> osd0 up in weight 1 up_from 15 up_thru 15 down_at 14
-> last_clean_interval2-13 192.168.1.106:6801/5386
-> 192.168.1.106:6802/5386 192.168.1.106:6803/5386
-> (here cosd pid of osd0 is 5387 ,and not equals 2620)
-> can you give me some advices about this?
->=20
-> Thanks!
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
->=20
+Yeah, this is definitely broken, but I think it's broken even beyond that 
+specific case.  It looks like it's just an ill-conceived optimization.  
+The problem is that peer_missing needs to have missing in terms of the 
+master log (on the primary), not the peer's log, and in order to 
+calculate that we need pull the log+missing.  (In the 
+last_update==last_complete case I was trying to optimize, the missing set 
+will just be empty.)  The current code missing the case where the replica 
+has a divergent log or and older last_update (even one > log.tail).
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I think this shortcut _only_ makes sense when the replica is perfectly up 
+to date, i.e.
+
+      if (pi.last_update == pi.last_complete &&
+	  pi.last_update == info.last_update) {
+
+Does that sound right?
+
+> Sorry for separating my questions into multiple emails.
+
+No problem, it's easier that way.  :)
+
+Thanks!
+sage
