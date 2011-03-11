@@ -1,82 +1,83 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
-Date: Fri, 11 Mar 2011 07:51:37 -0700
-Message-ID: <1299855097.4750.382.camel@sale659.sandia.gov>
-References: <1297891508.25491.120.camel@sale659.sandia.gov>
- <75157CFDA63D45458FC47FB7BA6CB974@gmail.com>
- <1297893011.25491.124.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
- <Pine.LNX.4.64.1102161651380.11150@cobra.newdream.net>
- <1297957574.25491.152.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1102170805080.22514@cobra.newdream.net>
- <1297985503.25491.175.camel@sale659.sandia.gov>
- <1299686572.4750.329.camel@sale659.sandia.gov>
- <2E7A0FAAE7EA416896A1990C7A96D59A@gmail.com>
- <1299695809.4750.346.camel@sale659.sandia.gov>
- <144B52A5BA504DCB992CD253287A397A@gmail.com>
- <1299798589.4750.372.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1103101515430.20133@cobra.newdream.net>
- <1299799936.4750.378.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1103101538100.20133@cobra.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Facing some basic stability issues
+Date: Fri, 11 Mar 2011 09:10:59 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1103110909070.23902@cobra.newdream.net>
+References: <1299755096.9697.325.camel@indica.cc.iitb.ac.in>
+ <Pine.LNX.4.64.1103100927310.27049@cobra.newdream.net>
+ <1299853519.15120.14.camel@indica.cc.iitb.ac.in>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:40705 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752625Ab1CKOvs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Mar 2011 09:51:48 -0500
-In-Reply-To: <Pine.LNX.4.64.1103101538100.20133@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:52777 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750819Ab1CKRIp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Mar 2011 12:08:45 -0500
+In-Reply-To: <1299853519.15120.14.camel@indica.cc.iitb.ac.in>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ajit K Jena <ajit@iitb.ac.in>
+Cc: ceph-devel@vger.kernel.org
 
-
-On Thu, 2011-03-10 at 16:40 -0700, Sage Weil wrote:
-> > > Hmm, maybe.  I wouldn't expect this behavior from any allocator,
-> though!
-> > >
-> > > Can you drill down a bit further and see if either of these is
-> > > responsible?
-> > >
-> > >   virtual ~Message() {
-> > >     assert(nref.read() == 0);
-> > >     if (connection)
-> > >       connection->put();
-> > >     if (throttler)
-> > >       throttler->put(payload.length() + middle.length() +
-> data.length());
-> > >   }
-> > >
-> > > (msg/Message.h)
-> >
-> > Hmmm, this is the patch I'm running to produce above.
-> > It seems pretty definitive to me; am I missing something?
+On Fri, 11 Mar 2011, Ajit K Jena wrote:
+> Hi Sage,
 > 
->         delete this;
+> We use kernel version 2.6.37. I made a mistake though.
+> The clients are FC13 and all others (mon-mds, osd1, osd2)
+> are all running FC14.
 > 
-> is calling the virtual destructor ~MOSDPing(), and then ~Message(),
-> and
-> only then releasing the memory to the allocator. 
+> Do u feel the difference in OS level (between the client
+> and others) could cause such behavior during untar ?
 
-Doh!!!  Sorry, I should have been doing more thinking
-and less typing last night.
+No, it shouldn't matter.
 
->  ~MOSDPing doesn't do
-> anything, but ~Message adjusts the throttler (which involves a mutex
-> that
-> *shouldn't* be contended :) and a connection->put(), which calls
-> ~Connection() and then releases memory.
-> 
-> My money is on the throttler, but let's see!
+The first question is whether the client is stalling or the servers are.  
+On the client, can you
 
-OK, I see what you're after.....
+ mount -t debugfs none /sys/kernel/debug
+ cat /sys/kernel/debug/ceph/*/mdsc
+ cat /sys/kernel/debug/ceph/*/osdc
 
--- Jim
+to see if there are osd or mds requests hanging?  
+
+On the server side, post the output from
+
+ ceph -s
+
+Also, see if a simple test like
+
+ rados -p casdata bench 60 write
+
+completes successfully (just to verify the object store is working).
+
+Thanks-
+sage
+
+
+
 
 > 
-> sage
+> Thanks.
 > 
-
-
+> --ajit
+>  
+> On Thu, 2011-03-10 at 09:27 -0800, Sage Weil wrote:
+> > On Thu, 10 Mar 2011, Ajit K Jena wrote:
+> > >     Operating System: All the participating systems
+> > >                  have Fedora core 14 as the operating
+> > >                  system.
+> > 
+> > Which kernel version is this?
+> > 
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
