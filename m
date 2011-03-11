@@ -1,58 +1,53 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: osd cannot find cosd process after reboot
-Date: Thu, 10 Mar 2011 18:05:09 -0800
-Message-ID: <AANLkTimqkQONiZ9e6UFgvfrvoo7A=5hZ1W4JntQvFw80@mail.gmail.com>
-References: <AANLkTi=1uDMuN18kOjLm7ysttx3nN9MdMp-7Gdni2S0W@mail.gmail.com>
-	<B0304C5EE27C431CA5C86CBBD4514472@gmail.com>
-	<AANLkTi=jygN2sjPSceAwyk+=EP3P4AnavxBSGdNiNCZv@mail.gmail.com>
+From: Henry Chang <henry.cy.chang@gmail.com>
+Subject: Re: Another question about PG::do_peer
+Date: Fri, 11 Mar 2011 10:36:32 +0800
+Message-ID: <AANLkTi=Q0iFNMagR=2-dmfW441dp=s6U_NEEfS09cT-8@mail.gmail.com>
+References: <AANLkTikWHRrOJom30_CFi2jqdZ3YP41AZqCE4_nM4Jk_@mail.gmail.com>
+	<Pine.LNX.4.64.1103101006030.986@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:42361 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754043Ab1CKCFM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2011 21:05:12 -0500
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id E72C5C064
-	for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2011 18:05:11 -0800 (PST)
-Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 97523C062
-	for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2011 18:05:11 -0800 (PST)
-Received: by eyx24 with SMTP id 24so783500eyx.19
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2011 18:05:10 -0800 (PST)
-In-Reply-To: <AANLkTi=jygN2sjPSceAwyk+=EP3P4AnavxBSGdNiNCZv@mail.gmail.com>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:60391 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751750Ab1CKCgc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Mar 2011 21:36:32 -0500
+Received: by gyh20 with SMTP id 20so920768gyh.19
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Mar 2011 18:36:32 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.64.1103101006030.986@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-2011/3/10 huang jun <hjwsm1989@gmail.com>:
-> hi Greg:
-> here is my configure file:
-<snip>
-> and i find something wrong =A0in /var/log/ceph/osd.0.log
-> 2011-03-11 08:42:23.888496 7f207255d6f0 osd0 0 mounting /data/osd0
-> 2011-03-11 08:42:23.888517 7f207255d6f0 filestore(/data/osd0) basedir
-> /data/osd0 journal
-> 2011-03-11 08:42:23.888576 7f207255d6f0 filestore(/data/osd0) x =3D
-> 1804289383 =A0 y =3D 1804289384
-> 2011-03-11 08:42:23.888621 7f207255d6f0 filestore(/data/osd0) xattrs
-> don't appear to work (Operation not supported) on /data/osd0/fsid, be
-> sure to mount underlying file system with 'user_xattr' option
-> 2011-03-11 08:42:23.888632 7f207255d6f0 osd0 0 =A0unable to mount obj=
-ect store
+> Yeah, this is definitely broken, but I think it's broken even beyond =
+that
+> specific case. =C2=A0It looks like it's just an ill-conceived optimiz=
+ation.
+> The problem is that peer_missing needs to have missing in terms of th=
+e
+> master log (on the primary), not the peer's log, and in order to
+> calculate that we need pull the log+missing. =C2=A0(In the
+> last_update=3D=3Dlast_complete case I was trying to optimize, the mis=
+sing set
+> will just be empty.) =C2=A0The current code missing the case where th=
+e replica
+> has a divergent log or and older last_update (even one > log.tail).
 >
-> i don't know why "x !=3D y"
-> thanks!
-Aha! It looks like the filesystem you are attempting to use as the
-OSD's data store doesn't have user xattr support enabled. This is a
-required feature for Ceph to work, so when the OSD boots up, it
-discovers the xattrs are broken and shuts itself back down again.
-If you had this working previously, it's possible that you didn't put
-user xattrs into the default mount options, so the setting was lost on
-reboot.
--Greg
+> I think this shortcut _only_ makes sense when the replica is perfectl=
+y up
+> to date, i.e.
+>
+> =C2=A0 =C2=A0 =C2=A0if (pi.last_update =3D=3D pi.last_complete &&
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0pi.last_update =3D=3D info.last_upd=
+ate) {
+>
+> Does that sound right?
+
+Yeah, thanks for the clarification. :)
+
+--=20
+Henry Chang
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
