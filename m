@@ -1,69 +1,82 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: about non-virtual destructors...
-Date: Fri, 11 Mar 2011 13:29:15 -0800
-Message-ID: <AANLkTimgK9KtqjZcMKLPz+m9tDUqhSE0T1sY+=D1j6HJ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
+Date: Fri, 11 Mar 2011 13:37:20 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1103111333190.23902@cobra.newdream.net>
+References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com> <1297893011.25491.124.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
+ <Pine.LNX.4.64.1102161651380.11150@cobra.newdream.net>
+ <1297957574.25491.152.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102170805080.22514@cobra.newdream.net>
+ <1297985503.25491.175.camel@sale659.sandia.gov> <1299686572.4750.329.camel@sale659.sandia.gov>
+ <2E7A0FAAE7EA416896A1990C7A96D59A@gmail.com> <1299695809.4750.346.camel@sale659.sandia.gov>
+ <144B52A5BA504DCB992CD253287A397A@gmail.com> <1299798589.4750.372.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1103101515430.20133@cobra.newdream.net>
+ <1299799936.4750.378.camel@sale659.sandia.gov> <Pine.LNX.4.64.1103101538100.20133@cobra.newdream.net>
+ <1299867988.4750.394.camel@sale659.sandia.gov> <Pine.LNX.4.64.1103111036450.23902@cobra.newdream.net>
+ <1299877982.4750.415.camel@sale659.sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:33326 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754244Ab1CKVbd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Mar 2011 16:31:33 -0500
-Received: by fxm17 with SMTP id 17so1412377fxm.19
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Mar 2011 13:31:32 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:36892 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755523Ab1CKVfG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Mar 2011 16:35:06 -0500
+In-Reply-To: <1299877982.4750.415.camel@sale659.sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi guys,
+On Fri, 11 Mar 2011, Jim Schutt wrote:
+> 
+> On Fri, 2011-03-11 at 11:37 -0700, Sage Weil wrote:
+> > On Fri, 11 Mar 2011, Jim Schutt wrote:
+> > > So none of those were osd_ping messages.
+> > > 
+> > > But, I still had lots of delayed acks.  Here's a couple more examples:
+> > > 
+> > > osd.0.log:960713:2011-03-11 10:55:32.117721 7fc4cb7fe940 -- 172.17.40.21:6802/28363 --> osd74 172.17.40.31:6808/24916 -- osd_ping(e14 as_of 14) v1 -- ?+0 0x7fc4cc16f270
+> > > osd.0.log:960756:2011-03-11 10:55:32.118395 7fc4c96eb940 -- 172.17.40.21:6802/28363 >> 172.17.40.31:6808/24916 pipe(0x28fb580 sd=53 pgs=47 cs=1 l=0).writer encoding 289 0x7fc4cc16f270 osd_ping(e14 as_of 14) v1
+> > > osd.0.log:960757:2011-03-11 10:55:32.118409 7fc4c96eb940 -- 172.17.40.21:6802/28363 >> 172.17.40.31:6808/24916 pipe(0x28fb580 sd=53 pgs=47 cs=1 l=0).writer sending 289 0x7fc4cc16f270
+> > > osd.0.log:960758:2011-03-11 10:55:32.118422 7fc4c96eb940 -- 172.17.40.21:6802/28363 >> 172.17.40.31:6808/24916 pipe(0x28fb580 sd=53 pgs=47 cs=1 l=0).write_message 0x7fc4cc16f270 osd_ping(e14 as_of 14) v1
+> > 
+> > This bit has me confused:
+> > 
+> > > osd.0.log:963163:2011-03-11 10:55:32.941413 7fc4c61b6940 -- 172.17.40.21:6802/28363 >> 172.17.40.31:6808/24916 pipe(0x28fb580 sd=53 pgs=47 cs=1 l=0).reader got ack seq 289 >= 289 on 0x7fc4cc16f270 osd_ping(e14 as_of 14) v1
+> > > osd.0.log:964273:2011-03-11 10:55:33.447526 7fc4c61b6940 RefCountedObject::put delete 0x7fc4cc16f270 took 5.06013 secs!
+> > > osd.0.log:964274:2011-03-11 10:55:33.447538 7fc4c61b6940 -- 172.17.40.21:6802/28363 >> 172.17.40.31:6808/24916 pipe(0x28fb580 sd=53 pgs=47 cs=1 l=0).handle_ack finished put on 0x7fc4cc16f270
+> > 
+> > It looks like ~ .5 seconds has gone by for that thread, but the ::put 
+> > debug says 5 seconds.  It happens between the 'got ack seq' and 'finished 
+> > put' lines, though, right?  
+> 
+> OK, with Greg's utime_t double fix, I git no hits on
+> 
+> # egrep -Hn --color -e "->put took" osd.*.log
+> 
+> 
+> But, I still get lots of stalled :RefCountedObject::put delete:
+> 
+> # grep -Hn RefCountedObject::put osd.*.log | egrep "took [1-9]\." | wc -l
+> 8911
+> 
+> # grep -Hn RefCountedObject::put osd.*.log | egrep "took [0-9][0-9]\." | wc -l
+> 415
 
-I'm adding a flag to the makefile called -Wnon-virtual-dtors. This
-flag will warn you if you try to create a class which has virtual
-functions but a non-virtual destructor.
+Hmm!  That does seem to point at the allocator, doesn't it.
 
-Non-virtual destructors are generated by default for all classes
-unless you specify otherwise. The problem with having a non-virtual
-destructor for a virtual class is that if that class is deleted
-through a pointer-to-base, a memory leak will be created because the
-derived constructor will not be called.
+Other threads are doing work during this long interval?  Including freeing 
+memory, presumably, since basically everything uses the heap one way or 
+another.  If it's the allocator, it's somehow affecting one thread only, 
+which is pretty crazy.
 
-Example mistake:
-class Base {
-~Base() { cout << "~Base" << endl; }
-virtual void foo() { }
-};
-class Derived : public Base {
-~Derived() { cout << "~Derived" << endl; }
-void foo() { }
-int extra_stuff;
-};
-Base *b = new Derived;
-delete b; // memory leak!
+Is it difficult for you to try this with tcmalloc?  That'll tell us 
+something.
 
-Another thing: please ***don't specify destructors in header files***.
-This greatly increases compile times because gcc uses the location of
-the destructor to determine where to put the vtable of a class. So all
-the N places that include a header with inline destructors will
-generate a vtable for all of those classes in the .o. Then the linker
-must eliminate all but one of those later. Also remember that virtual
-functions cannot be inlined anyway, so you will not gain any
-efficiency by putting a virtual destructor in the header file.
+One other possibility would be to try to catch this "in the act" and send 
+it a SIGABRT to get a core dump.  Then we can look in more detail at what 
+this (and other) threads are up to.  I'm not sure how easy this is to 
+catch on a particular node...
 
-Finally, consider the advice from Joshua Bloch in Effective Java:
-prefer composition over inheritance. Rather than having something like
-this:
-class MyCallback {
-virtual ~MyCallback();
-virtual int handle_callback() = 0;
-};
-
-You can have something like this:
-template <typename T>
-class MyCallBack {
-int handle_callback();
-T user_data;
-}
-
-There are no vtables in the second example.
-
-Colin
+sage
