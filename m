@@ -1,94 +1,84 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: [Qemu] Passing config options to librados
-Date: Tue, 15 Mar 2011 13:20:18 +0100
-Message-ID: <1300191618.2434.27.camel@wido-desktop>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH 1/2] ceph: remove request from unsafe list if it is
+ canceled/timed out
+Date: Tue, 15 Mar 2011 09:53:55 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1103150953280.24223@cobra.newdream.net>
+References: <1300180682-18749-1-git-send-email-henry_c_chang@tcloudcomputing.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:49010 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757548Ab1COMUV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Mar 2011 08:20:21 -0400
-Received: from [IPv6:2a00:f10:113:1:224:1dff:fedd:9061] (unknown [IPv6:2a00:f10:113:1:224:1dff:fedd:9061])
-	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id 7CDDF4267C
-	for <ceph-devel@vger.kernel.org>; Tue, 15 Mar 2011 13:20:19 +0100 (CET)
+Received: from cobra.newdream.net ([66.33.216.30]:55752 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932333Ab1COQvb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Mar 2011 12:51:31 -0400
+In-Reply-To: <1300180682-18749-1-git-send-email-henry_c_chang@tcloudcomputing.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Henry C Chang <henry.cy.chang@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+Hi Henry,
 
-While testing with Qemu-KVM and RBD I got:
+I've applied these both, and queued them for 2.6.39-rc1.
 
-Unable to find any monitors in the configuration file, because there is
-no configuration file. Please specify monitors via -m monaddr or -c
-ceph.conf
-qemu-system-x86_64: -drive file=rbd:rbd/beta,format=rbd: error
-connecting
-qemu: could not open disk image rbd:rbd/beta: No such file or directory
-
-Some searching through the source-code showed me that ceph.conf isn't
-read by librados anymore, but you have to force this with
-rados_conf_read_file
-
-The current RBD code doesn't do this, thus leaving librados
-unconfigured.
-
-I'm using the patch below to force reading the ceph.conf, but imho that
-is not flexible enough.
-
-The current RBD code has no way of reading config options from Qemu and
-converting them into librados options by rados_conf_set() nor specifying
-a conf file to be read by rados_conf_read_file().
-
-Something that still has to be implemented or am I missing something?
-
-Wido
+Thanks!
+sage
 
 
-From 03cfbebf1363b89bca6c97beb90e30e04add5db9 Mon Sep 17 00:00:00 2001
-From: Wido den Hollander <wido@widodh.nl>
-Date: Tue, 15 Mar 2011 13:11:24 +0100
-Subject: [PATCH] librados: Force reading ceph.conf
+On Tue, 15 Mar 2011, Henry C Chang wrote:
 
-
-Signed-off-by: Wido den Hollander <wido@widodh.nl>
----
- block/rbd.c |   10 ++++++++++
- 1 files changed, 10 insertions(+), 0 deletions(-)
-
-diff --git a/block/rbd.c b/block/rbd.c
-index f722cb4..7cd12f4 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -222,6 +222,11 @@ static int qemu_rbd_create(const char *filename,
-QEMUOptionParameter *options)
-         return -EIO;
-     }
- 
-+    if (rados_conf_read_file(cluster, "/etc/ceph/ceph.conf") < 0) {
-+        error_report("error reading configuration file");
-+        return -EIO;
-+    }
-+
-     if (rados_connect(cluster) < 0) {
-         error_report("error connecting");
-         rados_shutdown(cluster);
-@@ -351,6 +356,11 @@ static int qemu_rbd_open(BlockDriverState *bs,
-const char *filename, int flags)
-         return r;
-     }
- 
-+    if ((r = rados_conf_read_file(s->cluster, "/etc/ceph/ceph.conf")) <
-0) {
-+        error_report("error reading configuration file");
-+        return r;
-+    }
-+
-     if ((r = rados_connect(s->cluster)) < 0) {
-         error_report("error connecting");
-         rados_shutdown(s->cluster);
--- 
-1.7.0.4
-
+> This fixes the list corruption warning like this:
+> 
+> ------------[ cut here ]------------
+> WARNING: at lib/list_debug.c:30 __list_add+0x68/0x81()
+> Hardware name: X8DTU
+> list_add corruption. prev->next should be next (ffff880618931250), but was (null). (prev=ffff880c188b9130).
+> Modules linked in: nfsd lockd nfs_acl auth_rpcgss exportfs ceph libceph libcrc32c sunrpc ipv6 fuse igb i2c_i801 ioatdma i2c_core iTCO_wdt iTCO_vendor_support joydev dca serio_raw usb_storage [last unloaded: scsi_wait_scan]
+> Pid: 10977, comm: smbd Tainted: G        W  2.6.32.23-170.Elaster.xendom0.fc12.x86_64 #1
+> Call Trace:
+> [<ffffffff8105753c>] warn_slowpath_common+0x7c/0x94
+> [<ffffffff810575ab>] warn_slowpath_fmt+0x41/0x43
+> [<ffffffff812351a3>] __list_add+0x68/0x81
+> [<ffffffffa014799d>] ceph_aio_write+0x614/0x8a2 [ceph]
+> [<ffffffff8111d2a0>] do_sync_write+0xe8/0x125
+> [<ffffffff81075a1f>] ? autoremove_wake_function+0x0/0x39
+> [<ffffffff811f21ec>] ? selinux_file_permission+0x5c/0xb3
+> [<ffffffff811e8521>] ? security_file_permission+0x16/0x18
+> [<ffffffff8111d864>] vfs_write+0xae/0x10b
+> [<ffffffff8111d91b>] sys_pwrite64+0x5a/0x76
+> [<ffffffff81012d32>] system_call_fastpath+0x16/0x1b
+> ---[ end trace 08573eb9f07ff6f4 ]---
+> 
+> Signed-off-by: Henry C Chang <henry_c_chang@tcloudcomputing.com>
+> ---
+>  fs/ceph/file.c |    7 +++++++
+>  1 files changed, 7 insertions(+), 0 deletions(-)
+> 
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 7d0e4a8..db5d863 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -568,7 +568,14 @@ more:
+>  			spin_unlock(&ci->i_unsafe_lock);
+>  			ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
+>  		}
+> +		
+>  		ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
+> +		if (ret < 0 && req->r_safe_callback) {
+> +			spin_lock(&ci->i_unsafe_lock);
+> +			list_del_init(&req->r_unsafe_item);
+> +			spin_unlock(&ci->i_unsafe_lock);
+> +			ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
+> +		}
+>  	}
+>  
+>  	if (file->f_flags & O_DIRECT)
+> -- 
+> 1.7.2.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
