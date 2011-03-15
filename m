@@ -1,84 +1,41 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 1/2] ceph: remove request from unsafe list if it is
- canceled/timed out
-Date: Tue, 15 Mar 2011 09:53:55 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1103150953280.24223@cobra.newdream.net>
-References: <1300180682-18749-1-git-send-email-henry_c_chang@tcloudcomputing.com>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: [Qemu] Passing config options to librados
+Date: Tue, 15 Mar 2011 14:37:13 -0700
+Message-ID: <4D7FDC09.9040309@dreamhost.com>
+References: <1300191618.2434.27.camel@wido-desktop>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55752 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932333Ab1COQvb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Mar 2011 12:51:31 -0400
-In-Reply-To: <1300180682-18749-1-git-send-email-henry_c_chang@tcloudcomputing.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:37648 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752243Ab1COVhN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Mar 2011 17:37:13 -0400
+In-Reply-To: <1300191618.2434.27.camel@wido-desktop>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry.cy.chang@gmail.com>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Henry,
+On 03/15/2011 05:20 AM, Wido den Hollander wrote:
+> I'm using the patch below to force reading the ceph.conf, but imho that
+> is not flexible enough.
 
-I've applied these both, and queued them for 2.6.39-rc1.
+rados_conf_read_file(cluster, NULL) will use the default
+locations now (/etc/ceph/ceph.conf, ~/.ceph/config, and
+ceph.conf). I applied a patch like yours that uses the default
+locations instead.
 
-Thanks!
-sage
+> The current RBD code has no way of reading config options from Qemu and
+> converting them into librados options by rados_conf_set() nor specifying
+> a conf file to be read by rados_conf_read_file().
+>
+> Something that still has to be implemented or am I missing something?
 
+We plan to allow a config file to be specified for each rbd
+drive -- something like rbd:pool/image:path/to/conf like you
+suggested in IRC. This will let you use disks from multiple
+clusters in one VM as well.
 
-On Tue, 15 Mar 2011, Henry C Chang wrote:
-
-> This fixes the list corruption warning like this:
-> 
-> ------------[ cut here ]------------
-> WARNING: at lib/list_debug.c:30 __list_add+0x68/0x81()
-> Hardware name: X8DTU
-> list_add corruption. prev->next should be next (ffff880618931250), but was (null). (prev=ffff880c188b9130).
-> Modules linked in: nfsd lockd nfs_acl auth_rpcgss exportfs ceph libceph libcrc32c sunrpc ipv6 fuse igb i2c_i801 ioatdma i2c_core iTCO_wdt iTCO_vendor_support joydev dca serio_raw usb_storage [last unloaded: scsi_wait_scan]
-> Pid: 10977, comm: smbd Tainted: G        W  2.6.32.23-170.Elaster.xendom0.fc12.x86_64 #1
-> Call Trace:
-> [<ffffffff8105753c>] warn_slowpath_common+0x7c/0x94
-> [<ffffffff810575ab>] warn_slowpath_fmt+0x41/0x43
-> [<ffffffff812351a3>] __list_add+0x68/0x81
-> [<ffffffffa014799d>] ceph_aio_write+0x614/0x8a2 [ceph]
-> [<ffffffff8111d2a0>] do_sync_write+0xe8/0x125
-> [<ffffffff81075a1f>] ? autoremove_wake_function+0x0/0x39
-> [<ffffffff811f21ec>] ? selinux_file_permission+0x5c/0xb3
-> [<ffffffff811e8521>] ? security_file_permission+0x16/0x18
-> [<ffffffff8111d864>] vfs_write+0xae/0x10b
-> [<ffffffff8111d91b>] sys_pwrite64+0x5a/0x76
-> [<ffffffff81012d32>] system_call_fastpath+0x16/0x1b
-> ---[ end trace 08573eb9f07ff6f4 ]---
-> 
-> Signed-off-by: Henry C Chang <henry_c_chang@tcloudcomputing.com>
-> ---
->  fs/ceph/file.c |    7 +++++++
->  1 files changed, 7 insertions(+), 0 deletions(-)
-> 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 7d0e4a8..db5d863 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -568,7 +568,14 @@ more:
->  			spin_unlock(&ci->i_unsafe_lock);
->  			ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
->  		}
-> +		
->  		ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
-> +		if (ret < 0 && req->r_safe_callback) {
-> +			spin_lock(&ci->i_unsafe_lock);
-> +			list_del_init(&req->r_unsafe_item);
-> +			spin_unlock(&ci->i_unsafe_lock);
-> +			ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
-> +		}
->  	}
->  
->  	if (file->f_flags & O_DIRECT)
-> -- 
-> 1.7.2.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Thanks,
+Josh
