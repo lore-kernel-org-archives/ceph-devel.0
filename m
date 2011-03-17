@@ -1,134 +1,56 @@
-From: Samuel Just <samuelj@hq.newdream.net>
-Subject: Re: crushmap problem
-Date: Thu, 17 Mar 2011 16:12:14 -0700
-Message-ID: <4D82954E.4050508@hq.newdream.net>
-References: <AANLkTimjPG41SSSFvCqEqVVqo9Z78=bnb8f51b3y7hd-@mail.gmail.com>
-Reply-To: samuel.just@dreamhost.com
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: vstart -d -n not working in 0.25.1
+Date: Thu, 17 Mar 2011 16:54:56 -0700
+Message-ID: <20110317235456.GA23005@dreamer>
+References: <24DF3893-B686-4B01-AA71-BB249BBF5625@cs.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:50962 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:32866 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755555Ab1CQXNe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Mar 2011 19:13:34 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 8E4BCC06F
-	for <ceph-devel@vger.kernel.org>; Thu, 17 Mar 2011 16:13:33 -0700 (PDT)
-Received: from [10.0.1.162] (ip-66-33-206-8.dreamhost.com [66.33.206.8])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 8AFEDC065
-	for <ceph-devel@vger.kernel.org>; Thu, 17 Mar 2011 16:13:33 -0700 (PDT)
-In-Reply-To: <AANLkTimjPG41SSSFvCqEqVVqo9Z78=bnb8f51b3y7hd-@mail.gmail.com>
+	with ESMTP id S1755723Ab1CQXzA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Mar 2011 19:55:00 -0400
+Content-Disposition: inline
+In-Reply-To: <24DF3893-B686-4B01-AA71-BB249BBF5625@cs.ucsc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
 Cc: ceph-devel@vger.kernel.org
 
-  Actually, the problem does seem to be in the crushmap:
+On Thu, Mar 17, 2011 at 04:01:13PM -0700, Noah Watkins wrote:
+> I am having difficulties getting the standalone "test setup" working
+> with 0.25.1, which was working with 0.24. Here is the following
+> output from "./vstart -d -n".
+> 
+> The logs don't seem to have anything interesting, and no cmon,cmds,
+> or cosd is running after this startup script runs.
+...
+> ./monmaptool --create --clobber --add a ::1 127.0.1.1 128.114.52.36:6789 --add b ::1 127.0.1.1 128.114.52.36:6790 --add c ::1 127.0.1.1 128.114.52.36:6791 --print /tmp/ceph_monmap.13428
 
-On 03/16/2011 03:08 PM, Ben De Luca wrote:
-> Hi there, am setting up a new ceph cluster.
-> I wondered if there was a problem with the following crushmap, my
-> clients immediately lock up when I use this.
-> I have 4 nodes each with 2 disks and 2 osd's
->
->
-> # devices
-> device 0 device0
-> device 1 device1
-> device 2 device2
-> device 3 device3
-> device 4 device4
-> device 5 device5
-> device 6 device6
-> device 7 device7
-> # types
-> type 0 device
-> type 1 host
-> type 2 root
-> # buckets
-> host host0 {
-> id -1 # do not change unnecessarily
-> alg straw
-> hash 0 # rjenkins1
-> item device0 weight 1.000
-> item device1 weight 1.000
-> }
-> host host1 {
-> id -2 # do not change unnecessarily
-> alg straw
-> hash 0 # rjenkins1
-> item device2 weight 1.000
-> item device3 weight 1.000
-> }
-> host host2 {
-> id -3 # do not change unnecessarily
-> alg straw
-> hash 0 # rjenkins1
-> item device4 weight 1.000
-> item device5 weight 1.000
-> }
-> host host3 {
-> id -4 # do not change unnecessarily
-> alg straw
-> hash 0 # rjenkins1
-> item device6 weight 1.000
-> item device7 weight 1.000
-> }
-> root root {
-> id -5 # do not change unnecessarily
-> alg straw
-> hash 0 # rjenkins1
-> item host0 weight 2.000
-> item host1 weight 2.000
-> item host2 weight 2.000
-> item host3 weight 2.000
-> }
-> # rules
-> rule data {
-> ruleset 1
-> type replicated
-> min_size 2
-> max_size 2
-> step take root
-> step chooseleaf firstn 0 type host
-> step emit
-> }
-> # end crush map
-Here, ruleset 1 indicates that this rule applies only to pools with that 
-ruleset.  e.g.
+vstart.sh can't handle hosts with IPv6 right now -- in fact, it can't
+even handle some IPv4 configurations of /etc/resolv.conf. A simple
+test is to run: hostname --ip-address
 
-samuelj@slider:~/ceph/src$ ./ceph osd dump -o -
-2011-03-17 16:27:40.889793 mon <- [osd,dump]
-2011-03-17 16:27:40.890768 mon2 -> 'dumped osdmap epoch 5' (0)
-epoch 5
-fsid 45f39057-30cb-fc3c-8184-9aae0a07897b
-created 2011-03-17 16:10:16.479195
-modifed 2011-03-17 16:10:27.458120
-flags
+If it outputs more than one IP address, vstart.sh won't work for you
+right now. On this Ubuntu 10.04 box, I get "::1 127.0.1.1 10.0.1.102".
+My /etc/hosts is
 
-pg_pool 0 'data' pg_pool(rep pg_size 2 crush_ruleset 0 object_hash 
-rjenkins pg_num 8 pgp_num 8 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
-pg_pool 1 'metadata' pg_pool(rep pg_size 2 crush_ruleset 1 object_hash 
-rjenkins pg_num 8 pgp_num 8 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
-pg_pool 2 'casdata' pg_pool(rep pg_size 2 crush_ruleset 2 object_hash 
-rjenkins pg_num 8 pgp_num 8 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
-pg_pool 3 'rbd' pg_pool(rep pg_size 2 crush_ruleset 3 object_hash 
-rjenkins pg_num 8 pgp_num 8 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
+10.0.1.102	dreamer	# Added by NetworkManager
+127.0.0.1	localhost.localdomain	localhost
+::1	dreamer	localhost6.localdomain6	localhost6
+127.0.1.1	dreamer
 
-max_osd 2
-osd0 up   in  weight 1 up_from 2 up_thru 3 down_at 0 last_clean_interval 
-0-0 10.0.1.204:6800/13842 10.0.1.204:6801/13842 10.0.1.204:6802/13842
-osd1 up   in  weight 1 up_from 3 up_thru 3 down_at 0 last_clean_interval 
-0-0 10.0.1.204:6803/14185 10.0.1.204:6804/14185 10.0.1.204:6805/14185
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
 
-Here, only pool 1 has been assigned to use this rule (crush_ruleset is 
-1).  A quick fix would be to duplicate that rule for rulesets 0,2, and 3.
+I don't have a good solution right now.
 
-Sorry for the confusion!
--Sam
+I'd file a ticket, but the tracker is down currently :(
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+-- 
+:(){ :|:&};:
