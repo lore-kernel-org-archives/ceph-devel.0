@@ -1,125 +1,146 @@
-From: Samuel Just <samuelj@hq.newdream.net>
-Subject: Re: adding/removing osd problem
-Date: Thu, 17 Mar 2011 15:50:25 -0700
-Message-ID: <4D829031.5090701@hq.newdream.net>
-References: <AANLkTimXAypm-DXDu6RC_VzPRE2K-Jx_RYZCRunAdwNP@mail.gmail.com>	<4D8152EC.5010200@hq.newdream.net> <AANLkTik7ePGrLbvk1E4Sjotpj6dZ86nZooZZS-vfCwKN@mail.gmail.com>
-Reply-To: samuel.just@dreamhost.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: vstart -d -n not working in 0.25.1
+Date: Thu, 17 Mar 2011 16:01:13 -0700
+Message-ID: <24DF3893-B686-4B01-AA71-BB249BBF5625@cs.ucsc.edu>
+Mime-Version: 1.0 (Apple Message framework v1082)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:54225 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753435Ab1CQWvo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Mar 2011 18:51:44 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 343BEC066
-	for <ceph-devel@vger.kernel.org>; Thu, 17 Mar 2011 15:51:44 -0700 (PDT)
-Received: from [10.0.1.162] (ip-66-33-206-8.dreamhost.com [66.33.206.8])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 31A39C065
-	for <ceph-devel@vger.kernel.org>; Thu, 17 Mar 2011 15:51:44 -0700 (PDT)
-In-Reply-To: <AANLkTik7ePGrLbvk1E4Sjotpj6dZ86nZooZZS-vfCwKN@mail.gmail.com>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:52082 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754971Ab1CQXBR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Mar 2011 19:01:17 -0400
+Received: from [192.168.51.138] (soenat3.cse.ucsc.edu [128.114.60.41])
+	by mail-01.cse.ucsc.edu (Postfix) with ESMTPSA id D307A1009C5C
+	for <ceph-devel@vger.kernel.org>; Thu, 17 Mar 2011 16:01:16 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
- Ah, that seems to be a bug in the init script. Are you using a recent
-master branch?
--Sam
+I am having difficulties getting the standalone "test setup" working with 0.25.1, which was working with 0.24. Here is the following output from "./vstart -d -n".
 
-On 03/17/2011 12:20 AM, Upendra Moturi wrote:
-> I too had the same problem.
-> Only one option i found(just for testing)i had to stop the cluster an=
-d
-> start it again.
->
-> /etc/init.d/ceph start osd<n> does not do anything as this not even
-> going into start case .
->
->
-> 2011/3/17 Samuel Just <samuelj@hq.newdream.net
-> <mailto:samuelj@hq.newdream.net>>
->
->     From the looks of the fdisk output, it seems that the disk was no=
-t
->     recognized by the OS when it was reinserted? The OSD daemon won't=
- be
->     able to start if the disk is not found.
->     -Sam
->
->     On 03/16/2011 05:08 PM, huang jun wrote:
->     > Hi=A3=AC
->     > Recently, I try to do =A1=B0adding/removing osds =A1=B1 in ceph=
- wiki
->     > Here is what I ave done
->     > <1> build a cluster with mon/mds/osd0 in the same machine =A1=B0=
-host0=A1=B1
->     > And start it,everything is ok
->     > <2> follow the wiki ceph ,add a disk (/dev/sdb4)into host0
->     > It=A1=AFs ok ,=A1=B1ceph osd dump =A8Co =A8C =A1=B0show that th=
-ere are two osds and
->     > state are in/up
->     > <3> write a 4G file
->     > pull out the osd1 when it about writes 2G ,the osd1 was marked =
-down
->     > and 5 mins laster
->     > it was marked out,but use =A1=B0df =A8Chl =A1=B1
->     > I find =A1=B0/dev/sdb4 885G 2.7M 885G 1% /data/osd1=A1=B1 (it=A1=
-=AFs right?)
->     > so when re-insert the disk ,=A1=B1 fdisk =A8Cl=A1=B0 show me:
->     >
->     > Disk /dev/sda: 1000.2 GB, 1000204886016 bytes
->     > 255 heads, 63 sectors/track, 121601 cylinders
->     > Units =3D cylinders of 16065 * 512 =3D 8225280 bytes
->     > Disk identifier: 0x000d6542
->     > Device Boot Start End Blocks Id System
->     > /dev/sda1 * 1 3263 26210016 83 Linux
->     > /dev/sda2 3264 6134 23061307+ f W95 Ext'd (LBA)
->     > /dev/sda3 6135 121601 927488677+ 83 Linux
->     > /dev/sda5 3264 4307 8385898+ 82 Linux swap / Solaris
->     > /dev/sda6 4308 5612 10482381 83 Linux
->     > /dev/sda7 5613 6134 4192933+ 83 Linux
->     >
->     > Disk /dev/sdc: 1000.2 GB, 1000204886016 bytes
->     > 255 heads, 63 sectors/track, 121601 cylinders
->     > Units =3D cylinders of 16065 * 512 =3D 8225280 bytes
->     > Disk identifier: 0x000549cb
->     > Device Boot Start End Blocks Id System
->     > /dev/sdc1 * 1 3263 26210016 83 Linux
->     > /dev/sdc2 3264 6134 23061307+ f W95 Ext'd (LBA)
->     > /dev/sdc4 6135 121601 927488677+ 83 Linux
->     > /dev/sdc5 3264 4307 8385898+ 82 Linux swap / Solaris
->     > /dev/sdc6 4308 5612 10482381 83 Linux
->     > /dev/sdc7 5613 6134 4192933+ 83 Linux
->     >
->     > And finally I can not start osd1
->     > Because =A1=B0/etc/init.d/ceph start osd1 =A1=B1 do nothing
->     > Where is my problem?can you find it out for me?
->     > thanks
->     > --
->     > To unsubscribe from this list: send the line "unsubscribe
->     ceph-devel" in
->     > the body of a message to majordomo@vger.kernel.org
->     <mailto:majordomo@vger.kernel.org>
->     > More majordomo info at http://vger.kernel.org/majordomo-info.ht=
-ml
->
->     --
->     To unsubscribe from this list: send the line "unsubscribe
->     ceph-devel" in
->     the body of a message to majordomo@vger.kernel.org
->     <mailto:majordomo@vger.kernel.org>
->     More majordomo info at http://vger.kernel.org/majordomo-info.html
->
->
->
->
-> --=20
-> Thanks and Regards,
-> Upendra.M
+The logs don't seem to have anything interesting, and no cmon,cmds, or cosd is running after this startup script runs.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Noah
+
+nwatkins@kyoto:~/Projects/ceph/src$ ./vstart.sh -d -n
+** going verbose **
+=== mon.a === 
+Stopping Ceph mon.a on kyoto...done
+=== mon.b === 
+Stopping Ceph mon.b on kyoto...done
+=== mon.c === 
+Stopping Ceph mon.c on kyoto...done
+=== mds.a === 
+Stopping Ceph mds.a on kyoto...done
+=== mds.b === 
+Stopping Ceph mds.b on kyoto...done
+=== mds.c === 
+Stopping Ceph mds.c on kyoto...done
+=== osd.0 === 
+Stopping Ceph osd0 on kyoto...done
+hostname kyoto
+ip ::1 127.0.1.1 128.114.52.36
+./osdmaptool: osdmap file '/tmp/ceph_osdmap.13428'
+./osdmaptool: writing epoch 1 to /tmp/ceph_osdmap.13428
+./monmaptool --create --clobber --add a ::1 127.0.1.1 128.114.52.36:6789 --add b ::1 127.0.1.1 128.114.52.36:6790 --add c ::1 127.0.1.1 128.114.52.36:6791 --print /tmp/ceph_monmap.13428
+./monmaptool: invalid ip:port '::1'
+./cmon --mkfs -c ceph.conf -i a --monmap=/tmp/ceph_monmap.13428 --osdmap=/tmp/ceph_osdmap.13428
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+2011-03-17 15:58:24.828602 7f24aa4f6720 can't open /tmp/ceph_monmap.13428: error 2: No such file or directory
+./cmon --mkfs -c ceph.conf -i b --monmap=/tmp/ceph_monmap.13428 --osdmap=/tmp/ceph_osdmap.13428
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+2011-03-17 15:58:24.837414 7fd5396dc720 can't open /tmp/ceph_monmap.13428: error 2: No such file or directory
+./cmon --mkfs -c ceph.conf -i c --monmap=/tmp/ceph_monmap.13428 --osdmap=/tmp/ceph_osdmap.13428
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+2011-03-17 15:58:24.843145 7fc9858a5720 can't open /tmp/ceph_monmap.13428: error 2: No such file or directory
+rm: cannot remove `/tmp/ceph_monmap.13428': No such file or directory
+./cmon -i a -c ceph.conf
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+problem opening monitor store in dev/mon.a: No such file or directory
+./cmon -i b -c ceph.conf
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+problem opening monitor store in dev/mon.b: No such file or directory
+./cmon -i c -c ceph.conf
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+problem opening monitor store in dev/mon.c: No such file or directory
+Loading class: .libs/libcls_rbd.so.1.0.0: rbd 1.3 x86-64
+2011-03-17 15:58:25.899218 7f3e5b64d720 read 201250 bytes from .libs/libcls_rbd.so.1.0.0
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+2011-03-17 15:58:25.899496 7f3e5b64d720 ceph_tool_common_init failed.
+mkfs osd0
+./cosd -i 0 -c ceph.conf --mkfs
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+start osd0
+./cosd -i 0 -c ceph.conf
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+creating dev/mds.a.keyring
+2011-03-17 15:58:25.939144 7f0b91296720 read 149 bytes from dev/mds.a.keyring
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+2011-03-17 15:58:25.939304 7f0b91296720 ceph_tool_common_init failed.
+./cmds -i a -c ceph.conf
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+creating dev/mds.b.keyring
+2011-03-17 15:58:25.960736 7fcecc22a720 read 149 bytes from dev/mds.b.keyring
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+2011-03-17 15:58:25.960898 7fcecc22a720 ceph_tool_common_init failed.
+./cmds -i b -c ceph.conf
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+creating dev/mds.c.keyring
+2011-03-17 15:58:25.982370 7ffbe4871720 read 149 bytes from dev/mds.c.keyring
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+2011-03-17 15:58:25.982534 7ffbe4871720 ceph_tool_common_init failed.
+./cmds -i c -c ceph.conf
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+./ceph -c ceph.conf mds set_max_mds 3
+unable to ceph.conf mon addr for mon.a (::1)
+unable to ceph.conf mon addr for mon.b (::1)
+unable to ceph.conf mon addr for mon.c (::1)
+unable to find any monitors in conf
+2011-03-17 15:58:25.997401 7f3031f33720 ceph_tool_common_init failed.
+started.  stop.sh to stop.  see out/* (e.g. 'tail -f out/????') for debug output.
+
