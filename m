@@ -1,146 +1,134 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: vstart -d -n not working in 0.25.1
-Date: Thu, 17 Mar 2011 16:01:13 -0700
-Message-ID: <24DF3893-B686-4B01-AA71-BB249BBF5625@cs.ucsc.edu>
-Mime-Version: 1.0 (Apple Message framework v1082)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Samuel Just <samuelj@hq.newdream.net>
+Subject: Re: crushmap problem
+Date: Thu, 17 Mar 2011 16:12:14 -0700
+Message-ID: <4D82954E.4050508@hq.newdream.net>
+References: <AANLkTimjPG41SSSFvCqEqVVqo9Z78=bnb8f51b3y7hd-@mail.gmail.com>
+Reply-To: samuel.just@dreamhost.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:52082 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754971Ab1CQXBR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Mar 2011 19:01:17 -0400
-Received: from [192.168.51.138] (soenat3.cse.ucsc.edu [128.114.60.41])
-	by mail-01.cse.ucsc.edu (Postfix) with ESMTPSA id D307A1009C5C
-	for <ceph-devel@vger.kernel.org>; Thu, 17 Mar 2011 16:01:16 -0700 (PDT)
+Received: from mail.hq.newdream.net ([66.33.206.127]:50962 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755555Ab1CQXNe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Mar 2011 19:13:34 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 8E4BCC06F
+	for <ceph-devel@vger.kernel.org>; Thu, 17 Mar 2011 16:13:33 -0700 (PDT)
+Received: from [10.0.1.162] (ip-66-33-206-8.dreamhost.com [66.33.206.8])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 8AFEDC065
+	for <ceph-devel@vger.kernel.org>; Thu, 17 Mar 2011 16:13:33 -0700 (PDT)
+In-Reply-To: <AANLkTimjPG41SSSFvCqEqVVqo9Z78=bnb8f51b3y7hd-@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org
 
-I am having difficulties getting the standalone "test setup" working with 0.25.1, which was working with 0.24. Here is the following output from "./vstart -d -n".
+  Actually, the problem does seem to be in the crushmap:
 
-The logs don't seem to have anything interesting, and no cmon,cmds, or cosd is running after this startup script runs.
+On 03/16/2011 03:08 PM, Ben De Luca wrote:
+> Hi there, am setting up a new ceph cluster.
+> I wondered if there was a problem with the following crushmap, my
+> clients immediately lock up when I use this.
+> I have 4 nodes each with 2 disks and 2 osd's
+>
+>
+> # devices
+> device 0 device0
+> device 1 device1
+> device 2 device2
+> device 3 device3
+> device 4 device4
+> device 5 device5
+> device 6 device6
+> device 7 device7
+> # types
+> type 0 device
+> type 1 host
+> type 2 root
+> # buckets
+> host host0 {
+> id -1 # do not change unnecessarily
+> alg straw
+> hash 0 # rjenkins1
+> item device0 weight 1.000
+> item device1 weight 1.000
+> }
+> host host1 {
+> id -2 # do not change unnecessarily
+> alg straw
+> hash 0 # rjenkins1
+> item device2 weight 1.000
+> item device3 weight 1.000
+> }
+> host host2 {
+> id -3 # do not change unnecessarily
+> alg straw
+> hash 0 # rjenkins1
+> item device4 weight 1.000
+> item device5 weight 1.000
+> }
+> host host3 {
+> id -4 # do not change unnecessarily
+> alg straw
+> hash 0 # rjenkins1
+> item device6 weight 1.000
+> item device7 weight 1.000
+> }
+> root root {
+> id -5 # do not change unnecessarily
+> alg straw
+> hash 0 # rjenkins1
+> item host0 weight 2.000
+> item host1 weight 2.000
+> item host2 weight 2.000
+> item host3 weight 2.000
+> }
+> # rules
+> rule data {
+> ruleset 1
+> type replicated
+> min_size 2
+> max_size 2
+> step take root
+> step chooseleaf firstn 0 type host
+> step emit
+> }
+> # end crush map
+Here, ruleset 1 indicates that this rule applies only to pools with that 
+ruleset.  e.g.
 
-Thanks,
-Noah
+samuelj@slider:~/ceph/src$ ./ceph osd dump -o -
+2011-03-17 16:27:40.889793 mon <- [osd,dump]
+2011-03-17 16:27:40.890768 mon2 -> 'dumped osdmap epoch 5' (0)
+epoch 5
+fsid 45f39057-30cb-fc3c-8184-9aae0a07897b
+created 2011-03-17 16:10:16.479195
+modifed 2011-03-17 16:10:27.458120
+flags
 
-nwatkins@kyoto:~/Projects/ceph/src$ ./vstart.sh -d -n
-** going verbose **
-=== mon.a === 
-Stopping Ceph mon.a on kyoto...done
-=== mon.b === 
-Stopping Ceph mon.b on kyoto...done
-=== mon.c === 
-Stopping Ceph mon.c on kyoto...done
-=== mds.a === 
-Stopping Ceph mds.a on kyoto...done
-=== mds.b === 
-Stopping Ceph mds.b on kyoto...done
-=== mds.c === 
-Stopping Ceph mds.c on kyoto...done
-=== osd.0 === 
-Stopping Ceph osd0 on kyoto...done
-hostname kyoto
-ip ::1 127.0.1.1 128.114.52.36
-./osdmaptool: osdmap file '/tmp/ceph_osdmap.13428'
-./osdmaptool: writing epoch 1 to /tmp/ceph_osdmap.13428
-./monmaptool --create --clobber --add a ::1 127.0.1.1 128.114.52.36:6789 --add b ::1 127.0.1.1 128.114.52.36:6790 --add c ::1 127.0.1.1 128.114.52.36:6791 --print /tmp/ceph_monmap.13428
-./monmaptool: invalid ip:port '::1'
-./cmon --mkfs -c ceph.conf -i a --monmap=/tmp/ceph_monmap.13428 --osdmap=/tmp/ceph_osdmap.13428
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-2011-03-17 15:58:24.828602 7f24aa4f6720 can't open /tmp/ceph_monmap.13428: error 2: No such file or directory
-./cmon --mkfs -c ceph.conf -i b --monmap=/tmp/ceph_monmap.13428 --osdmap=/tmp/ceph_osdmap.13428
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-2011-03-17 15:58:24.837414 7fd5396dc720 can't open /tmp/ceph_monmap.13428: error 2: No such file or directory
-./cmon --mkfs -c ceph.conf -i c --monmap=/tmp/ceph_monmap.13428 --osdmap=/tmp/ceph_osdmap.13428
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-2011-03-17 15:58:24.843145 7fc9858a5720 can't open /tmp/ceph_monmap.13428: error 2: No such file or directory
-rm: cannot remove `/tmp/ceph_monmap.13428': No such file or directory
-./cmon -i a -c ceph.conf
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-problem opening monitor store in dev/mon.a: No such file or directory
-./cmon -i b -c ceph.conf
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-problem opening monitor store in dev/mon.b: No such file or directory
-./cmon -i c -c ceph.conf
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-problem opening monitor store in dev/mon.c: No such file or directory
-Loading class: .libs/libcls_rbd.so.1.0.0: rbd 1.3 x86-64
-2011-03-17 15:58:25.899218 7f3e5b64d720 read 201250 bytes from .libs/libcls_rbd.so.1.0.0
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-2011-03-17 15:58:25.899496 7f3e5b64d720 ceph_tool_common_init failed.
-mkfs osd0
-./cosd -i 0 -c ceph.conf --mkfs
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-start osd0
-./cosd -i 0 -c ceph.conf
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-creating dev/mds.a.keyring
-2011-03-17 15:58:25.939144 7f0b91296720 read 149 bytes from dev/mds.a.keyring
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-2011-03-17 15:58:25.939304 7f0b91296720 ceph_tool_common_init failed.
-./cmds -i a -c ceph.conf
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-creating dev/mds.b.keyring
-2011-03-17 15:58:25.960736 7fcecc22a720 read 149 bytes from dev/mds.b.keyring
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-2011-03-17 15:58:25.960898 7fcecc22a720 ceph_tool_common_init failed.
-./cmds -i b -c ceph.conf
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-creating dev/mds.c.keyring
-2011-03-17 15:58:25.982370 7ffbe4871720 read 149 bytes from dev/mds.c.keyring
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-2011-03-17 15:58:25.982534 7ffbe4871720 ceph_tool_common_init failed.
-./cmds -i c -c ceph.conf
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-./ceph -c ceph.conf mds set_max_mds 3
-unable to ceph.conf mon addr for mon.a (::1)
-unable to ceph.conf mon addr for mon.b (::1)
-unable to ceph.conf mon addr for mon.c (::1)
-unable to find any monitors in conf
-2011-03-17 15:58:25.997401 7f3031f33720 ceph_tool_common_init failed.
-started.  stop.sh to stop.  see out/* (e.g. 'tail -f out/????') for debug output.
+pg_pool 0 'data' pg_pool(rep pg_size 2 crush_ruleset 0 object_hash 
+rjenkins pg_num 8 pgp_num 8 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
+pg_pool 1 'metadata' pg_pool(rep pg_size 2 crush_ruleset 1 object_hash 
+rjenkins pg_num 8 pgp_num 8 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
+pg_pool 2 'casdata' pg_pool(rep pg_size 2 crush_ruleset 2 object_hash 
+rjenkins pg_num 8 pgp_num 8 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
+pg_pool 3 'rbd' pg_pool(rep pg_size 2 crush_ruleset 3 object_hash 
+rjenkins pg_num 8 pgp_num 8 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
+
+max_osd 2
+osd0 up   in  weight 1 up_from 2 up_thru 3 down_at 0 last_clean_interval 
+0-0 10.0.1.204:6800/13842 10.0.1.204:6801/13842 10.0.1.204:6802/13842
+osd1 up   in  weight 1 up_from 3 up_thru 3 down_at 0 last_clean_interval 
+0-0 10.0.1.204:6803/14185 10.0.1.204:6804/14185 10.0.1.204:6805/14185
+
+Here, only pool 1 has been assigned to use this rule (crush_ruleset is 
+1).  A quick fix would be to duplicate that rule for rulesets 0,2, and 3.
+
+Sorry for the confusion!
+-Sam
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
