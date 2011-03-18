@@ -1,60 +1,66 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Building the Ceph client on Lucid Lynx
-Date: Fri, 18 Mar 2011 15:56:59 -0700
-Message-ID: <5981E16F90B045E8BEA32AF41BEA2E80@gmail.com>
-References: <loom.20110318T232227-447@post.gmane.org>
- <20110318224516.GA5086@dreamer>
- <AFA905E8B6AC4E459A4E2913D853BE3B@gmail.com>
+From: Brian Chrisman <brchrisman@gmail.com>
+Subject: cfuse crash stack trace
+Date: Fri, 18 Mar 2011 16:11:06 -0700
+Message-ID: <AANLkTimzePYGQfTRHONB7LdSncjXn_EPcuCUjwAFniQm@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:42358 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752488Ab1CRW5D (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2011 18:57:03 -0400
-Received: by iyb26 with SMTP id 26so4486538iyb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Mar 2011 15:57:02 -0700 (PDT)
-In-Reply-To: <AFA905E8B6AC4E459A4E2913D853BE3B@gmail.com>
-Content-Disposition: inline
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:41529 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754690Ab1CRXLI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Mar 2011 19:11:08 -0400
+Received: by vws1 with SMTP id 1so4089288vws.19
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Mar 2011 16:11:06 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Steena Monteiro <steena.m@aggiemail.usu.edu>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
+
+I'm doing some testing via cfuse (technically via samba-over-cfuse).
+I caught the core dump and pulled a stack trace.  This is the thread
+that seems to be initiating the core dump.
+I can provide the rest if it'll help identify what's going on.
 
 
-On Friday, March 18, 2011 at 3:50 PM, Gregory Farnum wrote:=20
->=20
-> On Friday, March 18, 2011 at 3:45 PM, Tommi Virtanen wrote:=20
-> > On Fri, Mar 18, 2011 at 10:23:37PM +0000, Steena Monteiro wrote:
-> > > I'm trying to build the Ceph client on Ubuntu 10.04.2 with kernel
-> > > 2.6.32-28-generic. make -C install gives:
-> > >=20
-> > > /usr/src/ceph-client-standalone/ceph/super.c:870: error: unknown =
-field =E2=80=98mount=E2=80=99
-> > > specified in initializer
-> >=20
-> > That changed in ceph-client-standalone.git commit
-> > ff8a8d2006dca58f71b5dc5df0c95b8f837a0a4e, which mirrors linux.git
-> > commit a7f9fb205a88ab9af675a68fc554cf51dafc8b60, which was a VFS
-> > refactoring by Al Viro for Linux 2.6.37-rc1.
-> >=20
-> > You'll need to build an older version of ceph-client-standalone, or
-> > perhaps try reverting that one commit (git revert ff8a8d). Good luc=
-k.
->=20
-> FYI: ceph-client-standalone is supposed to build on older kernels, al=
-though it's only loosely maintained. Let us know how it goes -- if it d=
-oesn't work we'll put at least a few developer hours into it!
-> -Greg
->  Correction: The backports branch of ceph-client-standalone is suppos=
-ed to build on older kernels. Have you tried that one?=20
--Greg
+My cfuse crashing thread:
 
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thread 1 (Thread 1696):
+#0  0x00007f14ede7d38b in raise () from /lib64/libpthread.so.0
+No symbol table info available.
+#1  0x0000000000553fe9 in handle_fatal_signal(int) ()
+No symbol table info available.
+#2  <signal handler called>
+No symbol table info available.
+#3  0x00007f14eccb29b5 in raise () from /lib64/libc.so.6
+No symbol table info available.
+#4  0x00007f14eccb4195 in abort () from /lib64/libc.so.6
+No symbol table info available.
+#5  0x00007f14ed557aad in __gnu_cxx::__verbose_terminate_handler() ()
+from /usr/lib64/libstdc++.so.6
+No symbol table info available.
+#6  0x00007f14ed555c36 in ?? () from /usr/lib64/libstdc++.so.6
+---Type <return> to continue, or q <return> to quit---
+No symbol table info available.
+#7  0x00007f14ed555c63 in std::terminate() () from /usr/lib64/libstdc++.so.6
+No symbol table info available.
+#8  0x00007f14ed555d5e in __cxa_throw () from /usr/lib64/libstdc++.so.6
+No symbol table info available.
+#9  0x00000000005400c3 in ceph::__ceph_assert_fail(char const*, char
+const*, int, char const*) ()
+No symbol table info available.
+#10 0x00000000004ef5a0 in ObjectCacher::bh_write_ack(int, sobject_t,
+long, unsigned long, unsigned long) ()
+No symbol table info available.
+#11 0x00000000004fe30a in ObjectCacher::C_WriteAck::finish(int) ()
+No symbol table info available.
+#12 0x00000000004d0d6c in Objecter::handle_osd_op_reply(MOSDOpReply*) ()
+No symbol table info available.
+#13 0x00000000004a4e43 in Client::ms_dispatch(Message*) ()
+No symbol table info available.
+#14 0x0000000000454b32 in SimpleMessenger::dispatch_entry() ()
+No symbol table info available.
+#15 0x000000000044d0ac in SimpleMessenger::DispatchThread::entry() ()
+No symbol table info available.
+#16 0x00007f14ede757e1 in start_thread () from /lib64/libpthread.so.0
+No symbol table info available.
+#17 0x00007f14ecd6151d in clone () from /lib64/libc.so.6
+No symbol table info available.
