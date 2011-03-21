@@ -1,49 +1,71 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: RE: A Few Questions about Ceph
-Date: Mon, 21 Mar 2011 16:51:30 -0700
-Message-ID: <20DF9680A408453FAC892F5D23D24B9A@gmail.com>
-References: <loom.20110218T053907-813@post.gmane.org>
- <1298039091.2366.65.camel@wido-desktop>
- <B828A4C02BE12543ACDFCF7EB0C693C6788420D549@NC-SVR-09.netelligent.com>
- <1298291286.20766.50.camel@wido-desktop>
- <B828A4C02BE12543ACDFCF7EB0C693C678843DFA46@NC-SVR-09.netelligent.com>
- <1300707799.2572.11.camel@wido-laptop.pcextreme.nl>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: Re: RPM issues
+Date: Mon, 21 Mar 2011 16:52:48 -0700
+Message-ID: <AANLkTi=xkHU6avpnZNj_P-zPNjsmCvb+MSCTMoWCG-zi@mail.gmail.com>
+References: <AANLkTikBxKTBz8OM+gjO5Mx0JJ3TLSxXkLYf=uioBYC1@mail.gmail.com>
+	<AANLkTikPLyPNroVBQGD5fVYZvjatN3erN2Y1xz6zWGnK@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:44737 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755197Ab1CUXve (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Mar 2011 19:51:34 -0400
-Received: by iwn34 with SMTP id 34so6891648iwn.19
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Mar 2011 16:51:33 -0700 (PDT)
-In-Reply-To: <1300707799.2572.11.camel@wido-laptop.pcextreme.nl>
-Content-Disposition: inline
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:51139 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756007Ab1CUXww (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Mar 2011 19:52:52 -0400
+Received: by fxm17 with SMTP id 17so5969758fxm.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Mar 2011 16:52:50 -0700 (PDT)
+In-Reply-To: <AANLkTikPLyPNroVBQGD5fVYZvjatN3erN2Y1xz6zWGnK@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nigh <mnigh@netelligent.com>
-Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
+To: Ruben Kerkhof <ruben@rubenkerkhof.com>
+Cc: Brian Chrisman <brchrisman@gmail.com>, Terrance Hutchinson <terrance.hutchinson@gmail.com>, Jim Schutt <jaschut@sandia.gov>, ceph-devel@vger.kernel.org
 
-On Monday, March 21, 2011 at 4:43 AM, Wido den Hollander wrote:
-Hi,
-> 
-> On Sun, 2011-03-20 at 13:51 -0500, Mark Nigh wrote:
-> > Wido,
-> > 
-> > Thanks for your input. Has there be any talk/discussions around support on the upcoming release of v1.0. I see in the roadmap that is slated for April. I have been testing Ceph for about 1 month now with limited issues and would like to place this file system into our production environment as a backup target. We would be willing to purchase a reasonable fee-based support contract to augment our limited staff here.
-> 
-> Currently there is no commercial support available. There have been
-> discussions about this, but I'm not sure what the state is.
-> 
-> I'm not Ceph developer not am I a member of the team, I'm just someone
-> who is very enthusiastic about Ceph.
+On Sat, Mar 19, 2011 at 6:08 AM, Ruben Kerkhof <ruben@rubenkerkhof.com> wrote:
+>> 2. What is the best way to bundle the python bindings? Currently I am
+>> getting this error when building the RPM:
+>>> error: Installed (but unpackaged) file(s) found:
+>>> /usr/lib/python2.4/site-packages/rados.py
+>>> /usr/lib/python2.4/site-packages/rados.pyc
+>>> /usr/lib/python2.4/site-packages/rados.pyo
+>> However, I need to find an RPM variable that has a path to the python
+>> site-packages directory. automake knows this, but so far I haven't
+>> figured out where this information lives in RPM.
+>>
+>> This guy suggests a workaround:
+>> http://www.linux-archive.org/centos/171366-python-sybase-centos-5-x86_64-a.html
+>> But his workaround seems kind of clumsy, and in fact doesn't work for
+>> me on CentOS 5.5. Surely there is a standard way to refer to the
+>> sit-packages directory in RPM without hacks?
+>
+> There are standard macros in recent versions of Fedora and RHEL6, but
+> this should work:
+>
+> %if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
+> %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from
+> distutils.sysconfig import get_python_lib; print(get_python_lib())")}
+> %{!?python_sitearch: %global python_sitearch %(%{__python} -c "from
+> distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
+> %endif
 
-There was an announcement about this recently:
-http://blog.dreamhost.com/2011/03/09/support-for-ceph-is-coming/
+Thanks for this workaround, Ruben. I committed it as
+f2e146aa86f595b9acc1829e394abcd6570ce222
 
-See http://cephsupport.com/ to get on the mailing list. :)
--Greg
+>
+> If you add that to the top of your spec you can use %{python_sitearch}
+> in your %files section.
+> There are more tips at http://fedoraproject.org/wiki/Packaging:Python
+>
+>> 3. How should we handle tcmalloc, if at all? Google-perftools is not
+>> bundled for 64 bit on CentOS. (It seems like this decision was made
+>> because some of the stuff in this package is buggy on 64 bit x86.
+>> However, tcmalloc itself is not buggy on 64 bit.).
+>
+> Is google-perftool an EPEL package? If so can you report a bug against
+> that package at bugzilla.redhat.com?
+> An option would be to split out tcmalloc into it's own rpm.
 
+Filed as https://bugzilla.redhat.com/show_bug.cgi?id=689630
 
+Hopefully we'll get a tcmalloc package!
 
+cheers,
+Colin
