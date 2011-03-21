@@ -1,60 +1,52 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: RE: A Few Questions about Ceph
-Date: Mon, 21 Mar 2011 12:43:19 +0100
-Message-ID: <1300707799.2572.11.camel@wido-laptop.pcextreme.nl>
-References: <loom.20110218T053907-813@post.gmane.org>
-	 <1298039091.2366.65.camel@wido-desktop>
-	 <B828A4C02BE12543ACDFCF7EB0C693C6788420D549@NC-SVR-09.netelligent.com>
-	 <1298291286.20766.50.camel@wido-desktop>
-	 <B828A4C02BE12543ACDFCF7EB0C693C678843DFA46@NC-SVR-09.netelligent.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: Disk allocation
+Date: Mon, 21 Mar 2011 08:17:31 -0700
+Message-ID: <AANLkTimo+LohYdZdF4SSEar3HHfuHf8tqn5FCvee620B@mail.gmail.com>
+References: <1449881494.12831.1300600065210.JavaMail.root@mail.linserv.se>
+	<51655650.12833.1300603409038.JavaMail.root@mail.linserv.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:49134 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751551Ab1CULnW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Mar 2011 07:43:22 -0400
-In-Reply-To: <B828A4C02BE12543ACDFCF7EB0C693C678843DFA46@NC-SVR-09.netelligent.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:39966 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751287Ab1CUPRf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Mar 2011 11:17:35 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id BD8C4C068
+	for <ceph-devel@vger.kernel.org>; Mon, 21 Mar 2011 08:17:33 -0700 (PDT)
+Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 6E05CC066
+	for <ceph-devel@vger.kernel.org>; Mon, 21 Mar 2011 08:17:33 -0700 (PDT)
+Received: by eyx24 with SMTP id 24so1539791eyx.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Mar 2011 08:17:32 -0700 (PDT)
+In-Reply-To: <51655650.12833.1300603409038.JavaMail.root@mail.linserv.se>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nigh <mnigh@netelligent.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Martin Wilderoth <martin.wilderoth@linserv.se>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
-
-On Sun, 2011-03-20 at 13:51 -0500, Mark Nigh wrote:
-> Wido,
-> 
-> Thanks for your input. Has there be any talk/discussions around support on the upcoming release of v1.0. I see in the roadmap that is slated for April. I have been testing Ceph for about 1 month now with limited issues and would like to place this file system into our production environment as a backup target. We would be willing to purchase a reasonable fee-based support contract to augment our limited staff here.
-
-Currently there is no commercial support available. There have been
-discussions about this, but I'm not sure what the state is.
-
-I'm not Ceph developer not am I a member of the team, I'm just someone
-who is very enthusiastic about Ceph.
-
-From what I've heard/read is that they are thinking about setting up a
-support program when v1.0 is out.
-
-If Ceph is meeting your demands at this point in time it's up to you if
-you want to take it into semi-production.
-
-During the day there will be people hanging around in the IRC (I'm
-online between 09:00 and 19:00 GMT +1), so you are free to ask around
-when you run into troubles.
-
-Feedback from (semi-)production env's is needed to make Ceph even
-better, so please, do so!
-
-But, like I always, make sure you have a good backup of your data!
-
-> 
-> My apologies if this is the incorrect forum for discussions like this, but I am not aware of any others.
-> 
-
-Currently this is the right place, when the volume of the list becomes
-to high there will be a -users and -dev list (I guess).
-
-Wido
-
+On Sat, Mar 19, 2011 at 11:43 PM, Martin Wilderoth
+<martin.wilderoth@linserv.se> wrote:
+> I have a small ceph cluster with 4 osd ( 2 disks on 2 hosts).
+>
+> I have been adding and removing files from the file system, mounted as ceph on an other host.
+>
+> Now I have removed most of the data on the file system, so I only have 300 MB left plus two snapshots.
+>
+> The problem is that looking at the disks the are allocating 88G of data
+> on the ceph filesystem.
+There are a few possibilities:
+1) You've hosted your OSDs on a partition that's shared with the rest
+of the computer. In that case the reported used space will include
+whatever else is on the partition, not just the Ceph files. (This can
+include Ceph debug logs, so even if nothing used to be there but you
+were logging on that partition that can build up pretty quickly.)
+2) You deleted the files quickly and just haven't given enough time
+for the file deletion to propagate to the OSDs. Because the POSIX
+filesystem is layered over an object store, this can take some time.
+3) Your snapshots contain a lot of files, so nothing (or very little)
+actually got deleted. Snapshots are pretty cool but they aren't
+miraculous disk space!
+Given the uneven distribution of disk space I suspect option #2, but I
+could be mistaken. :) Let us know!
+-Greg
