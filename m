@@ -1,71 +1,112 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: RPM issues
-Date: Mon, 21 Mar 2011 16:52:48 -0700
-Message-ID: <AANLkTi=xkHU6avpnZNj_P-zPNjsmCvb+MSCTMoWCG-zi@mail.gmail.com>
-References: <AANLkTikBxKTBz8OM+gjO5Mx0JJ3TLSxXkLYf=uioBYC1@mail.gmail.com>
-	<AANLkTikPLyPNroVBQGD5fVYZvjatN3erN2Y1xz6zWGnK@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Sage Weil <sage@newdream.net>
+Subject: [PATCH 2/4] ceph: clear parent D_COMPLETE flag when on dentry prune
+Date: Mon, 21 Mar 2011 17:48:19 -0700
+Message-ID: <1300754901-4284-3-git-send-email-sage@newdream.net>
+References: <1300754901-4284-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:51139 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756007Ab1CUXww (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Mar 2011 19:52:52 -0400
-Received: by fxm17 with SMTP id 17so5969758fxm.19
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Mar 2011 16:52:50 -0700 (PDT)
-In-Reply-To: <AANLkTikPLyPNroVBQGD5fVYZvjatN3erN2Y1xz6zWGnK@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54378 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750894Ab1CVAnN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Mar 2011 20:43:13 -0400
+In-Reply-To: <1300754901-4284-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ruben Kerkhof <ruben@rubenkerkhof.com>
-Cc: Brian Chrisman <brchrisman@gmail.com>, Terrance Hutchinson <terrance.hutchinson@gmail.com>, Jim Schutt <jaschut@sandia.gov>, ceph-devel@vger.kernel.org
+To: linux-fsdevel@vger.kernel.org, viro@ZenIV.linux.org.uk
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-On Sat, Mar 19, 2011 at 6:08 AM, Ruben Kerkhof <ruben@rubenkerkhof.com> wrote:
->> 2. What is the best way to bundle the python bindings? Currently I am
->> getting this error when building the RPM:
->>> error: Installed (but unpackaged) file(s) found:
->>> /usr/lib/python2.4/site-packages/rados.py
->>> /usr/lib/python2.4/site-packages/rados.pyc
->>> /usr/lib/python2.4/site-packages/rados.pyo
->> However, I need to find an RPM variable that has a path to the python
->> site-packages directory. automake knows this, but so far I haven't
->> figured out where this information lives in RPM.
->>
->> This guy suggests a workaround:
->> http://www.linux-archive.org/centos/171366-python-sybase-centos-5-x86_64-a.html
->> But his workaround seems kind of clumsy, and in fact doesn't work for
->> me on CentOS 5.5. Surely there is a standard way to refer to the
->> sit-packages directory in RPM without hacks?
->
-> There are standard macros in recent versions of Fedora and RHEL6, but
-> this should work:
->
-> %if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
-> %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from
-> distutils.sysconfig import get_python_lib; print(get_python_lib())")}
-> %{!?python_sitearch: %global python_sitearch %(%{__python} -c "from
-> distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
-> %endif
+When the VFS prunes a dentry from the cache, clear the D_COMPLETE flag
+on the parent dentry.  Do this for the live and snapshotted namespaces. Do
+not bother for the .snap dir contents, since we do not cache that.
 
-Thanks for this workaround, Ruben. I committed it as
-f2e146aa86f595b9acc1829e394abcd6570ce222
+Signed-off-by: Sage Weil <sage@newdream.net>
+---
+ fs/ceph/dir.c   |   28 ++++++++++++++++++++++++++++
+ fs/ceph/super.h |   13 +++++++++++++
+ 2 files changed, 41 insertions(+), 0 deletions(-)
 
->
-> If you add that to the top of your spec you can use %{python_sitearch}
-> in your %files section.
-> There are more tips at http://fedoraproject.org/wiki/Packaging:Python
->
->> 3. How should we handle tcmalloc, if at all? Google-perftools is not
->> bundled for 64 bit on CentOS. (It seems like this decision was made
->> because some of the stuff in this package is buggy on 64 bit x86.
->> However, tcmalloc itself is not buggy on 64 bit.).
->
-> Is google-perftool an EPEL package? If so can you report a bug against
-> that package at bugzilla.redhat.com?
-> An option would be to split out tcmalloc into it's own rpm.
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 1a867a3..e2005fa 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1053,7 +1053,33 @@ static int ceph_snapdir_d_revalidate(struct dentry *dentry,
+ 	return 1;
+ }
+ 
++/*
++ * When the VFS prunes a dentry from the cache, we need to clear the
++ * complete flag on the parent directory.
++ *
++ * Called under dentry->d_lock.
++ */
++static void ceph_d_prune(struct dentry *dentry)
++{
++	struct ceph_dentry_info *di;
++
++	dout("d_release %p\n", dentry);
++
++	/* do we have a valid parent? */
++	if (!dentry->d_parent || IS_ROOT(dentry))
++		return;
++
++	/* if we are not hashed, we don't affect D_COMPLETE */
++	if (d_unhashed(dentry))
++		return;
+ 
++	/*
++	 * we hold d_lock, so d_parent is stable, and d_fsdata is never
++	 * cleared until d_release
++	 */
++	di = ceph_dentry(dentry->d_parent);
++	clear_bit(CEPH_D_COMPLETE, &di->flags);
++}
+ 
+ /*
+  * read() on a dir.  This weird interface hack only works if mounted
+@@ -1259,6 +1285,7 @@ const struct inode_operations ceph_dir_iops = {
+ const struct dentry_operations ceph_dentry_ops = {
+ 	.d_revalidate = ceph_d_revalidate,
+ 	.d_release = ceph_d_release,
++	.d_prune = ceph_d_prune,
+ };
+ 
+ const struct dentry_operations ceph_snapdir_dentry_ops = {
+@@ -1268,4 +1295,5 @@ const struct dentry_operations ceph_snapdir_dentry_ops = {
+ 
+ const struct dentry_operations ceph_snap_dentry_ops = {
+ 	.d_release = ceph_d_release,
++	.d_prune = ceph_d_prune,
+ };
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 619fe71..b6bf098 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -201,6 +201,7 @@ struct ceph_inode_xattr {
+  * Ceph dentry state
+  */
+ struct ceph_dentry_info {
++	unsigned long flags;
+ 	struct ceph_mds_session *lease_session;
+ 	u32 lease_gen, lease_shared_gen;
+ 	u32 lease_seq;
+@@ -211,6 +212,18 @@ struct ceph_dentry_info {
+ 	u64 offset;
+ };
+ 
++/*
++ * dentry flags
++ *
++ * The locking for D_COMPLETE is a bit odd:
++ *  - we can clear it at almost any time (see ceph_d_prune)
++ *  - it is only meaningful if:
++ *    - we hold dir inode i_lock
++ *    - we hold dir FILE_SHARED caps
++ *    - the dentry D_COMPLETE is set
++ */
++#define CEPH_D_COMPLETE 1  /* if set, d_u.d_subdirs is complete directory */
++
+ struct ceph_inode_xattrs_info {
+ 	/*
+ 	 * (still encoded) xattr blob. we avoid the overhead of parsing
+-- 
+1.7.0
 
-Filed as https://bugzilla.redhat.com/show_bug.cgi?id=689630
-
-Hopefully we'll get a tcmalloc package!
-
-cheers,
-Colin
