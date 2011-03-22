@@ -1,112 +1,90 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 2/4] ceph: clear parent D_COMPLETE flag when on dentry prune
-Date: Mon, 21 Mar 2011 17:48:19 -0700
-Message-ID: <1300754901-4284-3-git-send-email-sage@newdream.net>
+Subject: [PATCH 3/4] ceph: compensate for dentry_unhash() calls in vfs_rmdir() and vfs_rename_dir()
+Date: Mon, 21 Mar 2011 17:48:20 -0700
+Message-ID: <1300754901-4284-4-git-send-email-sage@newdream.net>
 References: <1300754901-4284-1-git-send-email-sage@newdream.net>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54378 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750894Ab1CVAnN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Mar 2011 20:43:13 -0400
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 In-Reply-To: <1300754901-4284-1-git-send-email-sage@newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 To: linux-fsdevel@vger.kernel.org, viro@ZenIV.linux.org.uk
 Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
+List-Id: ceph-devel.vger.kernel.org
 
-When the VFS prunes a dentry from the cache, clear the D_COMPLETE flag
-on the parent dentry.  Do this for the live and snapshotted namespaces. Do
-not bother for the .snap dir contents, since we do not cache that.
+The VFS unhashes the dentry prior to calling the ->rmdir and ->rename
+(directory) inode operations.  This is contrary to what the ->d_prune
+d_op aims to provide: fs notification prior to dentries being unhashed.
+Because it is done under the directory i_mutex and is thus serialized
+against ->lookup() and ->readdir(), we can safely compensate by clearing
+the flag in those methods.
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- fs/ceph/dir.c   |   28 ++++++++++++++++++++++++++++
- fs/ceph/super.h |   13 +++++++++++++
- 2 files changed, 41 insertions(+), 0 deletions(-)
+ fs/ceph/dir.c |   23 ++++++++++++++++++-----
+ 1 files changed, 18 insertions(+), 5 deletions(-)
 
 diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 1a867a3..e2005fa 100644
+index e2005fa..2072f62 100644
 --- a/fs/ceph/dir.c
 +++ b/fs/ceph/dir.c
-@@ -1053,7 +1053,33 @@ static int ceph_snapdir_d_revalidate(struct dentry *dentry,
- 	return 1;
+@@ -825,7 +825,7 @@ static int ceph_unlink(struct inode *dir, struct dentry *dentry)
+ 	struct inode *inode = dentry->d_inode;
+ 	struct ceph_mds_request *req;
+ 	int err = -EROFS;
+-	int op;
++	int op = 0;
+ 
+ 	if (ceph_snap(dir) == CEPH_SNAPDIR) {
+ 		/* rmdir .snap/foo is RMSNAP */
+@@ -855,6 +855,9 @@ static int ceph_unlink(struct inode *dir, struct dentry *dentry)
+ 		d_delete(dentry);
+ 	ceph_mdsc_put_request(req);
+ out:
++	if (err && op != CEPH_MDS_OP_UNLINK)
++		/* vfs_rmdir calls dentry_unhash(), grr */
++		ceph_dir_clear_complete(dir);
+ 	return err;
  }
  
-+/*
-+ * When the VFS prunes a dentry from the cache, we need to clear the
-+ * complete flag on the parent directory.
-+ *
-+ * Called under dentry->d_lock.
-+ */
-+static void ceph_d_prune(struct dentry *dentry)
-+{
-+	struct ceph_dentry_info *di;
-+
-+	dout("d_release %p\n", dentry);
-+
-+	/* do we have a valid parent? */
-+	if (!dentry->d_parent || IS_ROOT(dentry))
-+		return;
-+
-+	/* if we are not hashed, we don't affect D_COMPLETE */
-+	if (d_unhashed(dentry))
-+		return;
+@@ -864,18 +867,24 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(old_dir->i_sb);
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_mds_request *req;
++	int is_dir = new_dentry->d_inode &&
++		(new_dentry->d_inode->i_mode & S_IFMT) == S_IFDIR;
+ 	int err;
  
-+	/*
-+	 * we hold d_lock, so d_parent is stable, and d_fsdata is never
-+	 * cleared until d_release
-+	 */
-+	di = ceph_dentry(dentry->d_parent);
-+	clear_bit(CEPH_D_COMPLETE, &di->flags);
-+}
++	err = -EXDEV;
+ 	if (ceph_snap(old_dir) != ceph_snap(new_dir))
+-		return -EXDEV;
++		goto out;
++	err = -EROFS;
+ 	if (ceph_snap(old_dir) != CEPH_NOSNAP ||
+ 	    ceph_snap(new_dir) != CEPH_NOSNAP)
+-		return -EROFS;
++		goto out;
+ 	dout("rename dir %p dentry %p to dir %p dentry %p\n",
+ 	     old_dir, old_dentry, new_dir, new_dentry);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_RENAME, USE_AUTH_MDS);
+-	if (IS_ERR(req))
+-		return PTR_ERR(req);
++	if (IS_ERR(req)) {
++		err = PTR_ERR(req);
++		goto out;
++	}
+ 	req->r_dentry = dget(new_dentry);
+ 	req->r_num_caps = 2;
+ 	req->r_old_dentry = dget(old_dentry);
+@@ -906,6 +915,10 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
+ 		ceph_invalidate_dentry_lease(new_dentry);
+ 	}
+ 	ceph_mdsc_put_request(req);
++out:
++	if (err && is_dir)
++		/* vfs_rename_dir calls dentry_unhash(), grr */
++		ceph_dir_clear_complete(new_dir);
+ 	return err;
+ }
  
- /*
-  * read() on a dir.  This weird interface hack only works if mounted
-@@ -1259,6 +1285,7 @@ const struct inode_operations ceph_dir_iops = {
- const struct dentry_operations ceph_dentry_ops = {
- 	.d_revalidate = ceph_d_revalidate,
- 	.d_release = ceph_d_release,
-+	.d_prune = ceph_d_prune,
- };
- 
- const struct dentry_operations ceph_snapdir_dentry_ops = {
-@@ -1268,4 +1295,5 @@ const struct dentry_operations ceph_snapdir_dentry_ops = {
- 
- const struct dentry_operations ceph_snap_dentry_ops = {
- 	.d_release = ceph_d_release,
-+	.d_prune = ceph_d_prune,
- };
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 619fe71..b6bf098 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -201,6 +201,7 @@ struct ceph_inode_xattr {
-  * Ceph dentry state
-  */
- struct ceph_dentry_info {
-+	unsigned long flags;
- 	struct ceph_mds_session *lease_session;
- 	u32 lease_gen, lease_shared_gen;
- 	u32 lease_seq;
-@@ -211,6 +212,18 @@ struct ceph_dentry_info {
- 	u64 offset;
- };
- 
-+/*
-+ * dentry flags
-+ *
-+ * The locking for D_COMPLETE is a bit odd:
-+ *  - we can clear it at almost any time (see ceph_d_prune)
-+ *  - it is only meaningful if:
-+ *    - we hold dir inode i_lock
-+ *    - we hold dir FILE_SHARED caps
-+ *    - the dentry D_COMPLETE is set
-+ */
-+#define CEPH_D_COMPLETE 1  /* if set, d_u.d_subdirs is complete directory */
-+
- struct ceph_inode_xattrs_info {
- 	/*
- 	 * (still encoded) xattr blob. we avoid the overhead of parsing
 -- 
 1.7.0
 
