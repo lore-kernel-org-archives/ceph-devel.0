@@ -1,35 +1,74 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Autotest results from 2011-03-22
-Date: Tue, 22 Mar 2011 11:17:45 -0700
-Message-ID: <20110322181745.GC8083@dreamer>
-References: <20110322172419.GB8083@dreamer>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph updates for 2.6.39-rc1
+Date: Tue, 22 Mar 2011 12:21:25 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1103211602260.15400@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:57623 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752489Ab1CVSRr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2011 14:17:47 -0400
-Received: from dreamer (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 2648C2C173
-	for <ceph-devel@vger.kernel.org>; Tue, 22 Mar 2011 11:17:47 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20110322172419.GB8083@dreamer>
+Received: from cobra.newdream.net ([66.33.216.30]:52223 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751573Ab1CVTSp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Mar 2011 15:18:45 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-And here are the results of the re-reruns:
+Hi Linus,
 
-* autotest summary 2011-03-22 #2
-** ceph_tiobench (job 265) SUCCESS
-captures performance info but does not analyze it
-http://autotest.ceph.newdream.net/results/265-tv/group0/sepia78.ceph.dreamhost.com/tiobench/results/raw_output_1
-** ceph_direct_io_test (job 266)
-exact same symptoms as with earlier run
-it seems direct_io_test hoses a ceph installation bad enough that exec segfaults reliably
-http://tracker.newdream.net/issues/915
-earlier ceph_bonnie hang (job 263) might be the same bug
+Please pull the following Ceph and RBD updates from
 
--- 
-:(){ :|:&};:
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git master
+
+The biggest item is support for the object watch/notify framework that 
+allows an RBD block device to get/send notifications about snapshot 
+creation.  There is also some code refactoring in the osd_client that 
+cleans things up and improves failure handling.  A few bug fixes for 
+synchronous IO came in from Henry, there's an ino32 mount option to expose 
+32 bit inos to 32 bit userspace, and there's some miscellaneous code 
+cleanup.
+
+The other piece of pending work is the dentry caching stuff, but that 
+needs an ack on the d_prune dentry_operation.
+
+Thanks!
+sage
+
+
+Henry C Chang (2):
+      ceph: remove request from unsafe list if it is canceled/timed out
+      ceph: add request to the tail of unsafe write list
+
+Sage Weil (6):
+      ceph: preserve I_COMPLETE across rename
+      libceph: fix osd request queuing on osdmap updates
+      ceph: remove debugfs debug cruft
+      ceph: move readahead default to fs/ceph from libceph
+      ceph: rename dentry_release -> d_release, fix comment
+      rbd: update email address in Documentation
+
+Tommi Virtanen (1):
+      libceph: Fix base64-decoding when input ends in newline.
+
+Yehuda Sadeh (4):
+      ceph: update common header files
+      ceph: add ino32 mount option
+      libceph: add lingering request and watch/notify event framework
+      rbd: use watch/notify for changes in rbd header
+
+ Documentation/ABI/testing/sysfs-bus-rbd |    2 +-
+ drivers/block/rbd.c                     |  361 +++++++++++++++++--
+ fs/ceph/debugfs.c                       |    6 -
+ fs/ceph/dir.c                           |   24 +-
+ fs/ceph/file.c                          |   10 +-
+ fs/ceph/inode.c                         |   25 +-
+ fs/ceph/super.c                         |    9 +-
+ fs/ceph/super.h                         |   66 +++-
+ include/linux/ceph/ceph_fs.h            |   19 +-
+ include/linux/ceph/libceph.h            |    1 -
+ include/linux/ceph/osd_client.h         |   57 +++-
+ include/linux/ceph/rados.h              |   39 ++-
+ net/ceph/armor.c                        |    4 +-
+ net/ceph/ceph_common.c                  |    1 +
+ net/ceph/osd_client.c                   |  624 ++++++++++++++++++++++++-------
+ 15 files changed, 1018 insertions(+), 230 deletions(-)
