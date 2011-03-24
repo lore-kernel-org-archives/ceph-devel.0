@@ -1,54 +1,67 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Object storage service beta
-Date: Wed, 23 Mar 2011 16:08:31 -0700
-Message-ID: <5BDDDCED47BE441BBAE8289CAA058E49@gmail.com>
-References: <AANLkTi=_bK36h8oJg1phBfcjsQ6oOC9e5SzcOSEgy6Be@mail.gmail.com>
- <AANLkTikWDONK-YTKx+7Uxmp40QE=FvgjMj_2=XigoMf-@mail.gmail.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: a question about laggy mds
+Date: Thu, 24 Mar 2011 10:18:37 +0800
+Message-ID: <AANLkTikFcmEcyEjoVcT_s-3dTvqLsiy8MhmXW-ZSD6to@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:35624 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933037Ab1CWXIg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Mar 2011 19:08:36 -0400
-Received: by iwn34 with SMTP id 34so9058682iwn.19
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Mar 2011 16:08:36 -0700 (PDT)
-In-Reply-To: <AANLkTikWDONK-YTKx+7Uxmp40QE=FvgjMj_2=XigoMf-@mail.gmail.com>
-Content-Disposition: inline
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:40737 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754915Ab1CXCSi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Mar 2011 22:18:38 -0400
+Received: by vws1 with SMTP id 1so6154994vws.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Mar 2011 19:18:37 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wilfrid Allembrand <wilfrid.allembrand@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Wilfrid,
-If you used a promo code you should be able to create a Ceph Object Storage user. This will give you access to the playground via our S3 lookalike service, which you can set up to serve images the same way you set up Amazon S3 to do so.
+Hi all=A3=AC
+There are two mds in the ceph cluster=A3=ACone is active and the other =
+is
+standby.  In my test,  I found the mds0 was marked as laggy, and it
+was taken over by the standby soon. And it will take a long time for
+the standby to become active if there are a great many of requests
+from the client. I want to know under what circumstances mds would be
+marked as laggy.
+Here is my software version and ceph.conf.
+Ceph version 0.24.3
+Linux kernel 2.6.35.9
 
-You can also create users to use the Ceph filesystem via rsync, sftp, scp and play around with snapshots and things a bit.
+ Ceph.conf
+    [global]
+       pid file =3D  ar/run/ceph/$name.pid
+       debug ms =3D 1
+[mon]
+        mon data =3D /data/mon$id
+[mon.0]
+       host =3D ceph1
+        mon addr =3D 192.168.1.101:6789
+[mds]
+      debug ms =3D 1
+      debug mds =3D 10
+      debug mds balancer =3D 10
+      debug mds log =3D 10
+      debug mds_migrator =3D 10
+      debug monc =3D 10
+[mds0]
+        host =3D ceph1
+[mds1]
+        host =3D ceph2
+ [osd]
+        sudo =3D true
+        osd data =3D /data/osd$id
+        osd journal =3D /data/osd$id/journal
+[osd0]
+        host =3D ceph3
+        btrfs devs =3D /dev/sda3
+[osd1]
+        host =3D ceph4
+        btrfs devs =3D /dev/sda3
 
-This has been running for a while though and I'm not sure how much longer it's going to remain available as we've made a lot of progress since opening the cluster up. :)
--Greg
-On Wednesday, March 23, 2011 at 2:59 PM, Wilfrid Allembrand wrote: 
-> Hi all,
-> 
-> I downloaded the ODP file "Ceph: a scalable distributed storage system
-> for Linux (January 20, 2010)" and read on the last slide that it was
-> possible to test a storage service/free test cluster on dreamhost.com
-> I used the promo code from the slide and I setup a test website +
-> installed Gallery in order to manipulate binary files like images.
-> 
-> I'd like to know how I could use a free test cluster as an image
-> repository ? With that test cluster, I'd like to test scalability
-> (add, remove capacity) & failure scenarios.
-> 
-> Is it possible ? Can I find somewhere some documentation/how to on
-> that free test cluster ?
-> 
-> Best regards,
-> Wilfrid
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
-> 
-
+ Thanks
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
