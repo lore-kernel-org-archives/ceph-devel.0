@@ -1,74 +1,59 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: The stability of OSD
-Date: Mon, 28 Mar 2011 08:38:48 -0600
-Message-ID: <4D909D78.90803@sandia.gov>
-References: <AANLkTinCNSuWXPQVaSOD82eXaRCtT5FKA=-0JFFTc51p@mail.gmail.com>
- <Pine.LNX.4.64.1103272132240.6107@cobra.newdream.net>
+From: Steena Monteiro <steena.m@aggiemail.usu.edu>
+Subject: Creating the filesystem and tweaking configurations
+Date: Mon, 28 Mar 2011 19:54:13 +0000 (UTC)
+Message-ID: <loom.20110328T213028-664@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-three.sandia.gov ([132.175.109.17]:45133 "EHLO
-	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754082Ab1C1OjI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 10:39:08 -0400
-In-Reply-To: <Pine.LNX.4.64.1103272132240.6107@cobra.newdream.net>
+Received: from lo.gmane.org ([80.91.229.12]:47109 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753310Ab1C1Tyd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 28 Mar 2011 15:54:33 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Q4IWC-00054u-Q1
+	for ceph-devel@vger.kernel.org; Mon, 28 Mar 2011 21:54:28 +0200
+Received: from 129.123.7.74 ([129.123.7.74])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Mar 2011 21:54:28 +0200
+Received: from steena.m by 129.123.7.74 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Mar 2011 21:54:28 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Sylar Shen <kimulaaa@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+1) I used apt-get to procure and install Ceph excluding the standalone 
+client on
+Lucid Lynx. I obtained built the  client using instructions 
+on the Ceph wiki and
+it worked fine after I reverted certain commits. However, mkcephfs (from: $
+/usr/sbin/mkcephfs -c /etc/ceph/ceph.conf --allhosts -v) has been breaking:
 
-Sage Weil wrote:
-> On Mon, 28 Mar 2011, Sylar Shen wrote:
->> Hi,
->> I set an environment of 20 servers which include 2 MDSs, 3 MONs and 18
->> OSDes(3 monitors on 18 OSDes)
->> My version is 0.24.3 and OS is Fedora 14.
->> There's a problem when I was doing the writing tests.
->> Whether I was writing the data or not, some OSDes were randomly marked
->> down and out one by one after a period of time.
->> And when that happened, the whole performance soon got worse and worse.
->> I checked the /var/log/ceph/osd.log but found nothing.
->> So I am curious that is there anyone who has the same problem with me?
->> Or maybe it's just a problem of my hardware......><
-> 
-> Hi Sylar,
-> 
-> This is/was a known problem.  There's a long thread from a couple weeks 
-> back with Jim Schutt debugging the issue.  We've fixed a few different 
-> things that have significantly improved the situation, but the heartbeats 
-> are still failing from time to time.
+2011-03-28 13:23:23.596948 b77b16d0 OSD::mkfs: 
+couldn't mount FileStore: error -95
+2011-03-28 13:23:23.597008 b77b16d0  ** ERROR: 
+error creating empty object store
+in /data/osd0: error 95: Operation not supported
+failed: '/usr/bin/cosd -c /etc/ceph/ceph.conf --monmap
+/tmp/mkcephfs.DZdhzxPY5k/monmap.24380 -i 0 --mkfs --osd-data /data/osd0'
 
-I'm about ready to test the master branch again, built
-against tcmalloc and libatomic_ops - I had to add those
-things into my RHEL 5 environment.  I'll be reporting
-results for that soon; sorry for the delay.
+Additionally, I checked and /data/osd0 does exist...
 
--- Jim
+2) I want to be able to tune Ceph's configuration 
+parameters (located in
+config.cc within the Ceph source) and see how each 
+configuration change impacts Ceph's performance.
+However, I am not certain how changes in the ceph source
+code will be reflected in the standalone-client in terms of 
+Ceph's performance.
+Is there a suggested way I could work to accomplish changing parameters in the
+source in order to have the file system impacted by these changes?
 
-> 
-> I suspect using a more recent release will be sufficient at your scale, 
-> either 0.25.2 or the latest 'next' branch from git (there are autobuilt 
-> debs for that too).  You can also increase the 'osd heartbeat grace' to 
-> make the system less sensitive to the transient hangs that are preventing 
-> the heartbeats from going out.
-> 
-> Please let us know what you find, either here or on #ceph.
-> 
-> Thanks!
-> sage
-> 
-> 	
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+I'd appreciate your help!
 
+Thanks in advance,
+Steena
 
