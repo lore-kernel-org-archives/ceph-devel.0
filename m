@@ -1,50 +1,60 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Creating the filesystem and tweaking configurations
-Date: Mon, 28 Mar 2011 16:49:56 -0700
-Message-ID: <20110328234956.GA32587@dreamer>
-References: <loom.20110328T213028-664@post.gmane.org>
- <Pine.LNX.4.64.1103281340050.20362@cobra.newdream.net>
- <AANLkTimJn0kp4e=CKKdx2g=fDD-JpDPgXwvMqCxFJc8F@mail.gmail.com>
- <20110328212124.GC10768@dreamer>
- <AANLkTinjhwqzLs8PLUdnJLAPXwvT-6yRE=6QAx1eE9Xk@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: librados compound operations
+Date: Mon, 28 Mar 2011 16:53:20 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1103281647520.17288@cobra.newdream.net>
+References: <Pine.LNX.4.64.1103281539580.17288@cobra.newdream.net>
+ <20110328234104.GD10768@dreamer>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:38595 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751869Ab1C1XuB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 19:50:01 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTinjhwqzLs8PLUdnJLAPXwvT-6yRE=6QAx1eE9Xk@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:34023 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751869Ab1C1Xu0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 19:50:26 -0400
+In-Reply-To: <20110328234104.GD10768@dreamer>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Steena Monteiro <steena.m@aggiemail.usu.edu>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Mar 28, 2011 at 04:33:57PM -0600, Steena Monteiro wrote:
-> Thanks, that worked. However, I'm getting a mount error now when I'm finally
-> trying to mount the ceph file system.
+On Mon, 28 Mar 2011, Tommi Virtanen wrote:
+> On Mon, Mar 28, 2011 at 03:46:21PM -0700, Sage Weil wrote:
+> > One weird thing I noticed is with the constructor.  In Rados:: did
+> > 
+> > +    static ObjectOperation *operation_create();
+> > 
+> > and the user then deletes it when they're done (after using it for one or 
+> > more calls to operate() or aio_operate()).  Is that the the approach we 
+> > want?  Because right above that in the header is
+> > 
+> >      int ioctx_create(const char *name, IoCtx &pioctx);
+> > 
+> > which is a totally different convention.  It does match
 > 
-> sudo mount -t ceph 127.0.0.1:/ /ceph
-> mount error 5 = Input/output error
+> The usual argument about that is that returning a pointer is only good
+> when the only possible failure, now and forever, is running out of
+> memory. The int can communicate more reasons for failure.
 > 
-> Inspite of this, I can still see data move around with ceph -w ...
+> So the real question to ask is, how guaranteed is that to work? For
+> example, in the case of ioctx, the extra name argument might need to
+> be unique among concurrent operations, etc.
 
-Input/output error is the generic "I couldn't talk to the server"
-error message from Ceph mounts, there are multiple reasons for it.
-Perhaps there is something useful in the kernel logs, see
-/var/log/kern.log. You may have for example configured the server to
-demand authentication, and the above mount line is without
-authentication.
+In this case, yeah.. like the completion.  All we're doing is calling new 
+on the hidden type.
 
-What you see with ceph -w is the clusters internal heartbeat etc
-traffic.
+> > +void librados::ObjectOperation::write(uint64_t off, const bufferlist& bl)
+> > +{
+> > +  ::ObjectOperation *o = (::ObjectOperation *)impl;
+> > +  bufferlist c = bl;
+> > +  o->write(off, c);
+> > +}
+> 
+> Losing constness always makes me a bit sad.
 
+Yeah... in this case it's because the internal methods are stealing the 
+bufferlist contents (instead of copying).  That's pretty unfriendly 
+because the argument is clobbered... the pain probably shouldn't be shared 
+with librados users.  This is where the std::list<> copy happens instead.  
 
-Also, note that we don't recommend using the kernel client on the same
-machine that is serving the Ceph cluster -- there are known deadlocks
-there, under memory pressure, unrelated to Ceph (NFS would trigger the
-same problem). Cfuse should be safe.
+sage
 
--- 
-:(){ :|:&};:
