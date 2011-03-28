@@ -1,23 +1,22 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: Creating the filesystem and tweaking configurations
-Date: Mon, 28 Mar 2011 13:46:56 -0700
-Message-ID: <20110328204656.GB10768@dreamer>
+Date: Mon, 28 Mar 2011 13:52:59 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1103281340050.20362@cobra.newdream.net>
 References: <loom.20110328T213028-664@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:42945 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751432Ab1C1Uq7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 16:46:59 -0400
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:35258 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754077Ab1C1UuE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 16:50:04 -0400
 In-Reply-To: <loom.20110328T213028-664@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Steena Monteiro <steena.m@aggiemail.usu.edu>
 Cc: ceph-devel@vger.kernel.org
 
-On Mon, Mar 28, 2011 at 07:54:13PM +0000, Steena Monteiro wrote:
+On Mon, 28 Mar 2011, Steena Monteiro wrote:
 > 1) I used apt-get to procure and install Ceph excluding the standalone 
 > client on
 > Lucid Lynx. I obtained built the  client using instructions 
@@ -35,10 +34,8 @@ On Mon, Mar 28, 2011 at 07:54:13PM +0000, Steena Monteiro wrote:
 > 
 > Additionally, I checked and /data/osd0 does exist...
 
-Just to eliminate possible causes, can you please list the kernel
-version and the ceph version you are using?
-
-Can you show us your config file, and any logs that were written?
+That usually means that /data/osd0 is on ext3 and you didn't mount with 
+user_xattr.  The osd log should have a detailed error.
 
 > 2) I want to be able to tune Ceph's configuration 
 > parameters (located in
@@ -50,14 +47,15 @@ Can you show us your config file, and any logs that were written?
 > Is there a suggested way I could work to accomplish changing parameters in the
 > source in order to have the file system impacted by these changes?
 
-Anything you see in src/common/config.cc as OPTION(...) is editable
-via the config file, you don't need to change the source.
+Everything in config.cc can be set via ceph.conf, so that should save you 
+some compile time.
 
-If you change the config file (across all nodes), unmount the client,
-restart the whole cluster (maybe even reboot for even more predictable
-benchmark results), and then mount the client again, changes will have
-very definitely been forced into effect; that should give you good,
-benchmarkable, numbers.
+Which tunables affect what will depend pretty heavily on the workload 
+you're testing.  The things I would look at first would probably be with 
+the OSD thread counts,r kernel client readahead, or some of the cache 
+tunables.  IIRC I sent an annotated list of the config options with 
+comments on which would be good candidates for testing.  I suspect 
+focusing on something specific (say, OSD) would help get the process 
+sorted out without too many variables.
 
--- 
-:(){ :|:&};:
+sage
