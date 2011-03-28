@@ -1,79 +1,92 @@
-From: Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>
-Subject: Re: [RFC PATCH 0/2] Introduce unlocked version of igrab
-Date: Mon, 28 Mar 2011 17:01:57 +1100
-Message-ID: <20110328060157.GA3008@dastard>
-References: <1301277361-9453-1-git-send-email-ryan@bluewatersys.com>
- <20110328044334.GA1022@dastard>
- <4D9012C5.8070401@bluewatersys.com>
- <4D9016B7.1080505@bluewatersys.com>
+From: Sylar Shen <kimulaaa@gmail.com>
+Subject: Re: The stability of OSD
+Date: Mon, 28 Mar 2011 14:19:02 +0800
+Message-ID: <AANLkTinNko9h-qkQ8PgpSrJ1aXn=OhUyrZR5tDAQZukK@mail.gmail.com>
+References: <AANLkTinCNSuWXPQVaSOD82eXaRCtT5FKA=-0JFFTc51p@mail.gmail.com>
+	<Pine.LNX.4.64.1103272132240.6107@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <4D9016B7.1080505-7Wk5F4Od5/oYd5yxfr4S2w@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ryan Mallon <ryan-7Wk5F4Od5/oYd5yxfr4S2w@public.gmane.org>
-Cc: sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, dchinner-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Trond.Myklebust-HgOvQuBEEgTQT0dZR+AlfA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:63152 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751856Ab1C1GTE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 02:19:04 -0400
+Received: by bwz15 with SMTP id 15so2176184bwz.19
+        for <ceph-devel@vger.kernel.org>; Sun, 27 Mar 2011 23:19:02 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1103272132240.6107@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Mar 28, 2011 at 06:03:51PM +1300, Ryan Mallon wrote:
-> On 03/28/2011 05:47 PM, Ryan Mallon wrote:
-> > On 03/28/2011 05:43 PM, Dave Chinner wrote:
-> >> On Mon, Mar 28, 2011 at 02:55:59PM +1300, Ryan Mallon wrote:
-> >>> Commit 250df6ed274d767da844a5d9f05720b804240197 "fs: protect 
-> >>> inode->i_state with inode->i_lock" introduces a change to igrab to acquire
-> >>> inode->i_lock. 
-> >>>
-> >>> This change causes a panic on boot on my ARM EP93xx board when the rootfs
-> >>> uses NFS. The problem occurs because nfs_inode_add_request acquires
-> >>> inode->i_lock and then calls igrab, resulting in the following panic:
-> >>>
-> >>> BUG: spinlock recursion on CPU#0, getty/262
-> >>>  lock: cc421cb4, .magic: dead4ead, .owner: getty/262, .owner_cpu: 0
-> >>> [<c0031b0c>] (unwind_backtrace+0x0/0xe4) from [<c015f16c>] (do_raw_spin_lock+0x40/0x13c)
-> >>> [<c015f16c>] (do_raw_spin_lock+0x40/0x13c) from [<c00a938c>] (igrab+0x14/0x48)
-> >>> [<c00a938c>] (igrab+0x14/0x48) from [<c01186bc>] (nfs_updatepage+0x2e0/0x524)
-> >>> [<c01186bc>] (nfs_updatepage+0x2e0/0x524) from [<c010b19c>] (nfs_write_end+0x23c/0x270)
-> >>> [<c010b19c>] (nfs_write_end+0x23c/0x270) from [<c006b484>] (generic_file_buffered_write+0x180/0x248)
-> >>> [<c006b484>] (generic_file_buffered_write+0x180/0x248) from [<c006d060>] (__generic_file_aio_write+0x3b8/0x3f4)
-> >>> [<c006d060>] (__generic_file_aio_write+0x3b8/0x3f4) from [<c006d108>] (generic_file_aio_write+0x6c/0xdc)
-> >>> [<c006d108>] (generic_file_aio_write+0x6c/0xdc) from [<c010bce0>] (nfs_file_write+0xec/0x178)
-> >>> [<c010bce0>] (nfs_file_write+0xec/0x178) from [<c00956ac>] (do_sync_write+0xa4/0xe4)
-> >>> [<c00956ac>] (do_sync_write+0xa4/0xe4) from [<c00960c8>] (vfs_write+0xb4/0x12c)
-> >>> [<c00960c8>] (vfs_write+0xb4/0x12c) from [<c00961f0>] (sys_write+0x3c/0x68)
-> >>> [<c00961f0>] (sys_write+0x3c/0x68) from [<c002c8e0>] (ret_fast_syscall+0x0/0x2c)
-> >>>
-> >>> This series introduces a new function called __igrab, which is an unlocked
-> >>> version of igrab and modifies nfs_inode_add_request to use the unlocked
-> >>> version.
-> >> It's called ihold() and already exists.
-> > Thanks. Missed that one.
-> >
-> > Is ihold the correct replacement for the fs/ceph cases I mentioned in my
-> > other email?
-> >
-> > ~Ryan
-> >
-> 
-> i.e. this:
-> ---
-> 
-> fs/ceph: Use ihold instead of igrab when i_lock is already held
-> 
-> Signed-off-by: Ryan Mallon <ryan-7Wk5F4Od5/oYd5yxfr4S2w@public.gmane.org>
+Hi Sage,
+Thanks for your information and let me know at least my hardwares are O=
+K...:)
+I will upgrade my ceph version to the latest one and see what I can fin=
+d.
 
-In essence, yes, though the NFS case (nfs4state.c) also needs the
-same treatment. I posted a patch that fixes all the cases you
-reported so you can continue to work without needing Tronnnd's
-bigger fix for the initial problem.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org
+By the way, could you tell me how to set "osd heartbeat grace" ?
+Because I can't find how to do it in the ceph wiki.
+Thanks!
 --
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Best Regards,
+Sylar Shen
+
+2011/3/28 Sage Weil <sage@newdream.net>:
+> On Mon, 28 Mar 2011, Sylar Shen wrote:
+>> Hi,
+>> I set an environment of 20 servers which include 2 MDSs, 3 MONs and =
+18
+>> OSDes(3 monitors on 18 OSDes)
+>> My version is 0.24.3 and OS is Fedora 14.
+>> There's a problem when I was doing the writing tests.
+>> Whether I was writing the data or not, some OSDes were randomly mark=
+ed
+>> down and out one by one after a period of time.
+>> And when that happened, the whole performance soon got worse and wor=
+se.
+>> I checked the /var/log/ceph/osd.log but found nothing.
+>> So I am curious that is there anyone who has the same problem with m=
+e?
+>> Or maybe it's just a problem of my hardware......><
+>
+> Hi Sylar,
+>
+> This is/was a known problem. =C2=A0There's a long thread from a coupl=
+e weeks
+> back with Jim Schutt debugging the issue. =C2=A0We've fixed a few dif=
+ferent
+> things that have significantly improved the situation, but the heartb=
+eats
+> are still failing from time to time.
+>
+> I suspect using a more recent release will be sufficient at your scal=
+e,
+> either 0.25.2 or the latest 'next' branch from git (there are autobui=
+lt
+> debs for that too). =C2=A0You can also increase the 'osd heartbeat gr=
+ace' to
+> make the system less sensitive to the transient hangs that are preven=
+ting
+> the heartbeats from going out.
+>
+> Please let us know what you find, either here or on #ceph.
+>
+> Thanks!
+> sage
+>
+>
+>
+>
+
+
+
+--=20
+Best Regards,
+Sylar Shen
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
