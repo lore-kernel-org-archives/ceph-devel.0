@@ -1,24 +1,51 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: [Qemu-devel] Re: [PATCH 1/2] rbd: use the higher level librbd
- instead of just librados
-Date: Mon, 28 Mar 2011 16:32:55 -0700
-Message-ID: <4D911AA7.5030902@dreamhost.com>
-References: <4D8BCAF8.1010702@dreamhost.com> <20110328210849.GB11316@stefanha-thinkpad.localdomain>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: librados compound operations
+Date: Mon, 28 Mar 2011 16:41:05 -0700
+Message-ID: <20110328234104.GD10768@dreamer>
+References: <Pine.LNX.4.64.1103281539580.17288@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20110328210849.GB11316@stefanha-thinkpad.localdomain>
-Sender: kvm-owner@vger.kernel.org
-To: Stefan Hajnoczi <stefanha@gmail.com>
-Cc: ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:32846 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753105Ab1C1XlK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 19:41:10 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1103281539580.17288@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-On 03/28/2011 02:08 PM, Stefan Hajnoczi wrote:
-> You have sent a malformed patch.  Please send patches that follow the
-> guidelines at http://wiki.qemu.org/Contribute/SubmitAPatch and test that
-> your mail client is not line wrapping or mangling whitespace.
+On Mon, Mar 28, 2011 at 03:46:21PM -0700, Sage Weil wrote:
+> One weird thing I noticed is with the constructor.  In Rados:: did
+> 
+> +    static ObjectOperation *operation_create();
+> 
+> and the user then deletes it when they're done (after using it for one or 
+> more calls to operate() or aio_operate()).  Is that the the approach we 
+> want?  Because right above that in the header is
+> 
+>      int ioctx_create(const char *name, IoCtx &pioctx);
+> 
+> which is a totally different convention.  It does match
 
-Sorry about that. I've fixed the style issues found by checkpatch.pl and used git-send-email to submit a v2.
+The usual argument about that is that returning a pointer is only good
+when the only possible failure, now and forever, is running out of
+memory. The int can communicate more reasons for failure.
 
--Josh
+So the real question to ask is, how guaranteed is that to work? For
+example, in the case of ioctx, the extra name argument might need to
+be unique among concurrent operations, etc.
+
+> +void librados::ObjectOperation::write(uint64_t off, const bufferlist& bl)
+> +{
+> +  ::ObjectOperation *o = (::ObjectOperation *)impl;
+> +  bufferlist c = bl;
+> +  o->write(off, c);
+> +}
+
+Losing constness always makes me a bit sad.
+
+-- 
+:(){ :|:&};:
