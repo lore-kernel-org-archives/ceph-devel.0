@@ -1,38 +1,74 @@
-From: Henry Chang <henry.cy.chang@gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
 Subject: Re: The stability of OSD
-Date: Mon, 28 Mar 2011 17:11:56 +0800
-Message-ID: <AANLkTi=q+YmoMeMkjCh0Zgdqm+LEmL-sf8HfxkV5i4ck@mail.gmail.com>
+Date: Mon, 28 Mar 2011 08:38:48 -0600
+Message-ID: <4D909D78.90803@sandia.gov>
 References: <AANLkTinCNSuWXPQVaSOD82eXaRCtT5FKA=-0JFFTc51p@mail.gmail.com>
-	<Pine.LNX.4.64.1103272132240.6107@cobra.newdream.net>
-	<AANLkTinNko9h-qkQ8PgpSrJ1aXn=OhUyrZR5tDAQZukK@mail.gmail.com>
+ <Pine.LNX.4.64.1103272132240.6107@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:55060 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750759Ab1C1JL6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 05:11:58 -0400
-Received: by fxm17 with SMTP id 17so2462652fxm.19
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Mar 2011 02:11:56 -0700 (PDT)
-In-Reply-To: <AANLkTinNko9h-qkQ8PgpSrJ1aXn=OhUyrZR5tDAQZukK@mail.gmail.com>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:45133 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754082Ab1C1OjI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 10:39:08 -0400
+In-Reply-To: <Pine.LNX.4.64.1103272132240.6107@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylar Shen <kimulaaa@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Sylar Shen <kimulaaa@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-2011/3/28 Sylar Shen <kimulaaa@gmail.com>:
-> Hi Sage,
-> Thanks for your information and let me know at least my hardwares are OK...:)
-> I will upgrade my ceph version to the latest one and see what I can find.
->
-> By the way, could you tell me how to set "osd heartbeat grace" ?
-> Because I can't find how to do it in the ceph wiki.
+Hi,
 
-It is a configuration option (default to 20). You can change it by
-adding a line to the osd section of your ceph configuration file:
+Sage Weil wrote:
+> On Mon, 28 Mar 2011, Sylar Shen wrote:
+>> Hi,
+>> I set an environment of 20 servers which include 2 MDSs, 3 MONs and 18
+>> OSDes(3 monitors on 18 OSDes)
+>> My version is 0.24.3 and OS is Fedora 14.
+>> There's a problem when I was doing the writing tests.
+>> Whether I was writing the data or not, some OSDes were randomly marked
+>> down and out one by one after a period of time.
+>> And when that happened, the whole performance soon got worse and worse.
+>> I checked the /var/log/ceph/osd.log but found nothing.
+>> So I am curious that is there anyone who has the same problem with me?
+>> Or maybe it's just a problem of my hardware......><
+> 
+> Hi Sylar,
+> 
+> This is/was a known problem.  There's a long thread from a couple weeks 
+> back with Jim Schutt debugging the issue.  We've fixed a few different 
+> things that have significantly improved the situation, but the heartbeats 
+> are still failing from time to time.
 
-[osd]
-osd heartbeat grace = 30
+I'm about ready to test the master branch again, built
+against tcmalloc and libatomic_ops - I had to add those
+things into my RHEL 5 environment.  I'll be reporting
+results for that soon; sorry for the delay.
 
-----
-Henry
+-- Jim
+
+> 
+> I suspect using a more recent release will be sufficient at your scale, 
+> either 0.25.2 or the latest 'next' branch from git (there are autobuilt 
+> debs for that too).  You can also increase the 'osd heartbeat grace' to 
+> make the system less sensitive to the transient hangs that are preventing 
+> the heartbeats from going out.
+> 
+> Please let us know what you find, either here or on #ceph.
+> 
+> Thanks!
+> sage
+> 
+> 	
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+
+
