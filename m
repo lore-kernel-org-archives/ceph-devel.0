@@ -1,60 +1,41 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph updates pt 2
-Date: Tue, 29 Mar 2011 14:33:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1103291426070.22956@cobra.newdream.net>
+Subject: Re: What ports do each of the ceph daemons listen on?
+Date: Tue, 29 Mar 2011 14:36:09 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1103291434460.24826@cobra.newdream.net>
+References: <AANLkTik7Q6B2mDApjWTq_AvLNhbEUTA2Ojr-gq9s=FFq@mail.gmail.com>
+ <1301432126.2364.17.camel@wido-laptop.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40884 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:40887 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752615Ab1C2Va7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2011 17:30:59 -0400
+	with ESMTP id S1753077Ab1C2VdL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2011 17:33:11 -0400
+In-Reply-To: <1301432126.2364.17.camel@wido-laptop.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Jay Hacker <jayqhacker@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi Linus,
+On Tue, 29 Mar 2011, Wido den Hollander wrote:
+> Hi,
+> 
+> On Tue, 2011-03-29 at 16:27 -0400, Jay Hacker wrote:
+> > I'd like to be able to open just the required ports in my firewall.
+> 
+> The monitor by default binds on 6789, the mds on 6800.
+> 
+> OSD's bind on 6800 (if available) and increment from there, but I think
+> the MDS'es do the same.
+> 
+> For example, if you have 3 OSD's on one host, the first OSD will bind on
+> 6800, the second on 6801, etc, etc.
 
-Please pull this second set of Ceph updates/fixes from
+Basically the MDS and OSD search for an open port starting at 6800.  The 
+MDS uses one port, the OSD uses 3.  Be sure to open up a sufficiently wide 
+range.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git master
+Also, be aware there hasn't been any time spent on hardening the servers 
+from a security standpoint.
 
-The main thing is a patchset to use the keys api to pass the security key 
-from mount.ceph to the client.  There are also a few bug fixes that have 
-come in over the past week.
-
-Thanks!
 sage
-
-
-Dan Carpenter (1):
-      ceph: unlock on error in ceph_osdc_start_request()
-
-Mariusz Kozlowski (1):
-      ceph: fix possible NULL pointer dereference
-
-Sage Weil (2):
-      ceph: flush msgr_wq during mds_client shutdown
-      libceph: fix null dereference when unregistering linger requests
-
-Tommi Virtanen (3):
-      ceph: Move secret key parsing earlier.
-      libceph: Get secret from the kernel keys api when mounting with key=NAME.
-      libceph: Create a new key type "ceph".
-
- fs/ceph/mds_client.c         |    6 ++
- fs/ceph/super.c              |    2 +-
- include/keys/ceph-type.h     |    8 +++
- include/linux/ceph/auth.h    |    4 +-
- include/linux/ceph/libceph.h |    2 +-
- net/ceph/Kconfig             |    1 +
- net/ceph/auth.c              |    8 ++--
- net/ceph/auth_x.c            |    8 ++-
- net/ceph/ceph_common.c       |  112 ++++++++++++++++++++++++++++++++++++++----
- net/ceph/crypto.c            |   73 +++++++++++++++++++++++++++
- net/ceph/crypto.h            |    4 ++
- net/ceph/mon_client.c        |    2 +-
- net/ceph/osd_client.c        |   12 +++--
- 13 files changed, 215 insertions(+), 27 deletions(-)
- create mode 100644 include/keys/ceph-type.h
