@@ -1,42 +1,60 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: What ports do each of the ceph daemons listen on?
-Date: Tue, 29 Mar 2011 22:55:26 +0200
-Message-ID: <1301432126.2364.17.camel@wido-laptop.pcextreme.nl>
-References: <AANLkTik7Q6B2mDApjWTq_AvLNhbEUTA2Ojr-gq9s=FFq@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph updates pt 2
+Date: Tue, 29 Mar 2011 14:33:56 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1103291426070.22956@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:36379 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751975Ab1C2Uz3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2011 16:55:29 -0400
-In-Reply-To: <AANLkTik7Q6B2mDApjWTq_AvLNhbEUTA2Ojr-gq9s=FFq@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:40884 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752615Ab1C2Va7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2011 17:30:59 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jay Hacker <jayqhacker@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Hi,
+Hi Linus,
 
-On Tue, 2011-03-29 at 16:27 -0400, Jay Hacker wrote:
-> I'd like to be able to open just the required ports in my firewall.
+Please pull this second set of Ceph updates/fixes from
 
-The monitor by default binds on 6789, the mds on 6800.
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git master
 
-OSD's bind on 6800 (if available) and increment from there, but I think
-the MDS'es do the same.
+The main thing is a patchset to use the keys api to pass the security key 
+from mount.ceph to the client.  There are also a few bug fixes that have 
+come in over the past week.
 
-For example, if you have 3 OSD's on one host, the first OSD will bind on
-6800, the second on 6801, etc, etc.
-
-Wido
-
-> 
-> Thanks.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks!
+sage
 
 
+Dan Carpenter (1):
+      ceph: unlock on error in ceph_osdc_start_request()
+
+Mariusz Kozlowski (1):
+      ceph: fix possible NULL pointer dereference
+
+Sage Weil (2):
+      ceph: flush msgr_wq during mds_client shutdown
+      libceph: fix null dereference when unregistering linger requests
+
+Tommi Virtanen (3):
+      ceph: Move secret key parsing earlier.
+      libceph: Get secret from the kernel keys api when mounting with key=NAME.
+      libceph: Create a new key type "ceph".
+
+ fs/ceph/mds_client.c         |    6 ++
+ fs/ceph/super.c              |    2 +-
+ include/keys/ceph-type.h     |    8 +++
+ include/linux/ceph/auth.h    |    4 +-
+ include/linux/ceph/libceph.h |    2 +-
+ net/ceph/Kconfig             |    1 +
+ net/ceph/auth.c              |    8 ++--
+ net/ceph/auth_x.c            |    8 ++-
+ net/ceph/ceph_common.c       |  112 ++++++++++++++++++++++++++++++++++++++----
+ net/ceph/crypto.c            |   73 +++++++++++++++++++++++++++
+ net/ceph/crypto.h            |    4 ++
+ net/ceph/mon_client.c        |    2 +-
+ net/ceph/osd_client.c        |   12 +++--
+ 13 files changed, 215 insertions(+), 27 deletions(-)
+ create mode 100644 include/keys/ceph-type.h
