@@ -1,153 +1,80 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: librados compound operations
-Date: Tue, 29 Mar 2011 09:27:18 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1103290915160.19819@cobra.newdream.net>
-References: <Pine.LNX.4.64.1103281539580.17288@cobra.newdream.net>
- <AANLkTin9P9UMSmKPmVwMCSBjPMQ6zGKVamzUbQaPmkVJ@mail.gmail.com>
+Subject: Re: rbd: null pointer dereferenced during osd_reset
+Date: Tue, 29 Mar 2011 11:04:25 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1103291103240.19819@cobra.newdream.net>
+References: <AANLkTikr09GsB49N0dSOyvfY63CkTx9CBj4iSG460_BN@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1446060823-1301416038=:19819"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48069 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:47076 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753793Ab1C2QYV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2011 12:24:21 -0400
-In-Reply-To: <AANLkTin9P9UMSmKPmVwMCSBjPMQ6zGKVamzUbQaPmkVJ@mail.gmail.com>
+	with ESMTP id S1753920Ab1C2SB2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2011 14:01:28 -0400
+In-Reply-To: <AANLkTikr09GsB49N0dSOyvfY63CkTx9CBj4iSG460_BN@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: ceph-devel@vger.kernel.org
+To: Henry Chang <henry.cy.chang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, 29 Mar 2011, Henry Chang wrote:
+> Hi,
+> 
+> I got the NULL pointer dereference exception (see below) when I
+> restarted one of my osd during rbd testing. After digging into
+> osd_client.c, it seems that when osd_reset() is called, the req->r_osd
+> will be set to NULL in __unregister_linger_request(). Then, in
+> send_queued(), req->r_osd (NULL pointer) will be dereferenced in
+> __send_request().
 
---557981400-1446060823-1301416038=:19819
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+The patch below (also pushed to ceph-client.git master) should fix this. 
+Can you give it a test?
 
-On Mon, 28 Mar 2011, Colin McCabe wrote:
-> On Mon, Mar 28, 2011 at 3:46 PM, Sage Weil <sage@newdream.net> wrote:
-> > Below is a patch that wraps the internal Objecter compound ObjectOperat=
-ion
-> > so that we can send compound operations to the OSDs via librados.
-> >
-> > The internal ObjectOperationImpl ends up being unnecessary; I just cast=
- it
-> > to the internal type directly.
-> >
-> > One weird thing I noticed is with the constructor. =A0In Rados:: did
-> >
-> > + =A0 =A0static ObjectOperation *operation_create();
-> >
-> > and the user then deletes it when they're done (after using it for one =
-or
-> > more calls to operate() or aio_operate()). =A0Is that the the approach =
-we
-> > want? =A0Because right above that in the header is
-> >
-> > =A0 =A0 int ioctx_create(const char *name, IoCtx &pioctx);
-> >
->=20
-> I second TV's argument that returning a detailed error code is better
-> than returning NULL or not-NULL.
->=20
-> I also don't like calling conventions that always use dynamic memory
-> allocation. Even on a shiny new 16-core system, there is still a
-> global mutex around new()/free(). I also like putting stuff on the
-> stack and using RAII. (I haven't looked at this new code enough to see
-> whether RAII makes sense here though.)
-
-Hmm.  Well, pushing the work into the construct lets you just do=20
-something like
-
-  ObjectOperation o;
-  o.write_full(bl);
-  o.setxattr("foo", bl2);
-  int r =3D io_ctx.operate(oid, &o, &outbl);
-
-which is cleaner IMO, but you don't get an error code.  For that, you need=
-=20
-something like
-
-  ObjectOperation o;
-  if (rados.operation_init(o) < 0)
-=09...
-  o.write_full(bl);
-  o.setxattr("foo", bl2);
-  int r =3D io_ctx.operate(oid, &o, &outbl);
-
-I prefer the former, myself.
-
+Thanks!
 sage
 
 
-diff --git a/src/include/rados/librados.hpp b/src/include/rados/librados.hp=
-p
-index 58e1fb6..a44a68a 100644
---- a/src/include/rados/librados.hpp
-+++ b/src/include/rados/librados.hpp
-@@ -98,6 +98,7 @@ namespace librados
-   class ObjectOperation
-   {
-   public:
-+    ObjectOperation();
-     ~ObjectOperation();
-=20
-     void write(uint64_t off, const bufferlist& bl);
-@@ -114,7 +115,6 @@ namespace librados
-=20
-   private:
-     ObjectOperationImpl *impl;
--    ObjectOperation(ObjectOperationImpl *impl_) : impl(impl_) {}
-     ObjectOperation(const ObjectOperation& rhs);
-     ObjectOperation& operator=3D(const ObjectOperation& rhs);
-     friend class IoCtx;
-@@ -263,8 +263,6 @@ namespace librados
-=20
-     int ioctx_create(const char *name, IoCtx &pioctx);
-=20
--    static ObjectOperation *operation_create();
--
-     /* listing objects */
-     int pool_list(std::list<std::string>& v);
-     int get_pool_stats(std::list<std::string>& v,
-diff --git a/src/librados.cc b/src/librados.cc
-index 788e1cc..2fd093f 100644
---- a/src/librados.cc
-+++ b/src/librados.cc
-@@ -2729,9 +2729,10 @@ aio_create_completion(void *cb_arg, callback_t cb_co=
-mplete, callback_t cb_safe)
-   return new AioCompletion(c);
+From 83c52219ff0f4581f1affe577a34ea7d3ba7b59d Mon Sep 17 00:00:00 2001
+From: Sage Weil <sage@newdream.net>
+Date: Tue, 29 Mar 2011 10:14:26 -0700
+Subject: [PATCH] libceph: fix null dereference when unregistering linger requests
+
+We should only clear r_osd if we are neither registered as a linger or a
+regular request.  We may unregister as a linger while still registered as
+a regular request (e.g., in reset_osd).  Incorrectly clearing r_osd there
+leads to a null pointer dereference in __send_request.
+
+Also simplify the parallel check in __unregister_request() where we just
+removed r_osd_item and know it's empty.
+
+Signed-off-by: Sage Weil <sage@newdream.net>
+---
+ net/ceph/osd_client.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 03740e8..3f957a6 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -837,8 +837,7 @@ static void __unregister_request(struct ceph_osd_client *osdc,
+ 			dout("moving osd to %p lru\n", req->r_osd);
+ 			__move_osd_to_lru(osdc, req->r_osd);
+ 		}
+-		if (list_empty(&req->r_osd_item) &&
+-		    list_empty(&req->r_linger_item))
++		if (list_empty(&req->r_linger_item))
+ 			req->r_osd = NULL;
+ 	}
+ 
+@@ -883,7 +882,8 @@ static void __unregister_linger_request(struct ceph_osd_client *osdc,
+ 			dout("moving osd to %p lru\n", req->r_osd);
+ 			__move_osd_to_lru(osdc, req->r_osd);
+ 		}
+-		req->r_osd = NULL;
++		if (list_empty(&req->r_osd_item))
++			req->r_osd == NULL;
+ 	}
  }
-=20
--librados::ObjectOperation *librados::Rados::operation_create()
-+
-+librados::ObjectOperation::ObjectOperation()
- {
--  return new librados::ObjectOperation((ObjectOperationImpl *)new ::Object=
-Operation);
-+  impl =3D (ObjectOperationImpl *)new ::ObjectOperation;
- }
-=20
- librados::ObjectOperation::~ObjectOperation()
-diff --git a/src/testradospp.cc b/src/testradospp.cc
-index 971549a..1caa075 100644
---- a/src/testradospp.cc
-+++ b/src/testradospp.cc
-@@ -204,12 +204,11 @@ int main(int argc, const char **argv)
-   }
-=20
-   cout << "compound operation..." << std::endl;
--  ObjectOperation *o =3D rados.operation_create();
--  o->write(0, bl);
--  o->setxattr("foo", bl2);
--  r =3D io_ctx.operate(oid, o, &bl2);
-+  ObjectOperation o;
-+  o.write(0, bl);
-+  o.setxattr("foo", bl2);
-+  r =3D io_ctx.operate(oid, &o, &bl2);
-   cout << "operate result=3D" << r << std::endl;
--  delete o;
-=20
-   cout << "iterating over objects..." << std::endl;
-   int num_objs =3D 0;
---557981400-1446060823-1301416038=:19819--
+ 
+-- 
+1.7.0
+
