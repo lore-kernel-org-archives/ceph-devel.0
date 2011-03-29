@@ -1,63 +1,39 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: librados compound operations
-Date: Mon, 28 Mar 2011 18:29:30 -0700
-Message-ID: <AANLkTin9P9UMSmKPmVwMCSBjPMQ6zGKVamzUbQaPmkVJ@mail.gmail.com>
-References: <Pine.LNX.4.64.1103281539580.17288@cobra.newdream.net>
+From: Dan Carpenter <error27@gmail.com>
+Subject: [patch 1/2] ceph: null deref on allocation failure
+Date: Tue, 29 Mar 2011 06:25:29 +0300
+Message-ID: <20110329032529.GE9856@bicker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:46967 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:53173 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752295Ab1C2B3c convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 21:29:32 -0400
-Received: by fxm17 with SMTP id 17so3119737fxm.19
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Mar 2011 18:29:31 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1103281539580.17288@cobra.newdream.net>
+	with ESMTP id S1753450Ab1C2DZp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Mar 2011 23:25:45 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
 
-On Mon, Mar 28, 2011 at 3:46 PM, Sage Weil <sage@newdream.net> wrote:
-> Below is a patch that wraps the internal Objecter compound ObjectOper=
-ation
-> so that we can send compound operations to the OSDs via librados.
->
-> The internal ObjectOperationImpl ends up being unnecessary; I just ca=
-st it
-> to the internal type directly.
->
-> One weird thing I noticed is with the constructor. =A0In Rados:: did
->
-> + =A0 =A0static ObjectOperation *operation_create();
->
-> and the user then deletes it when they're done (after using it for on=
-e or
-> more calls to operate() or aio_operate()). =A0Is that the the approac=
-h we
-> want? =A0Because right above that in the header is
->
-> =A0 =A0 int ioctx_create(const char *name, IoCtx &pioctx);
->
+The original code checked "event_work" for allocation failures, but only
+after it had already use it.
 
-I second TV's argument that returning a detailed error code is better
-than returning NULL or not-NULL.
+Signed-off-by: Dan Carpenter <error27@gmail.com>
 
-I also don't like calling conventions that always use dynamic memory
-allocation. Even on a shiny new 16-core system, there is still a
-global mutex around new()/free(). I also like putting stuff on the
-stack and using RAII. (I haven't looked at this new code enough to see
-whether RAII makes sense here though.)
-
-If we do go with the new/free based approach, I guess we need another
-function to call free() on it, because the library user might be using
-a different libc.
-
-cheers,
-Colin
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 02212ed..b6776cb 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1602,11 +1602,11 @@ void handle_watch_notify(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 	     cookie, ver, event);
+ 	if (event) {
+ 		event_work = kmalloc(sizeof(*event_work), GFP_NOIO);
+-		INIT_WORK(&event_work->work, do_event_work);
+ 		if (!event_work) {
+ 			dout("ERROR: could not allocate event_work\n");
+ 			goto done_err;
+ 		}
++		INIT_WORK(&event_work->work, do_event_work);
+ 		event_work->event = event;
+ 		event_work->ver = ver;
+ 		event_work->notify_id = notify_id;
