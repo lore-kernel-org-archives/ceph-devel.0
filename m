@@ -1,37 +1,42 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: libkeyutils is now required
-Date: Tue, 29 Mar 2011 13:36:33 -0700
-Message-ID: <20110329203633.GA25743@dreamer>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: What ports do each of the ceph daemons listen on?
+Date: Tue, 29 Mar 2011 22:55:26 +0200
+Message-ID: <1301432126.2364.17.camel@wido-laptop.pcextreme.nl>
+References: <AANLkTik7Q6B2mDApjWTq_AvLNhbEUTA2Ojr-gq9s=FFq@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:37775 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751459Ab1C2Ugg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2011 16:36:36 -0400
-Received: from dreamer (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 438ED2C173
-	for <ceph-devel@vger.kernel.org>; Tue, 29 Mar 2011 13:36:36 -0700 (PDT)
-Content-Disposition: inline
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:36379 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751975Ab1C2Uz3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Mar 2011 16:55:29 -0400
+In-Reply-To: <AANLkTik7Q6B2mDApjWTq_AvLNhbEUTA2Ojr-gq9s=FFq@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jay Hacker <jayqhacker@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hello. I recently pushed commit bee85518 to master; it makes Ceph use
-the Linux kernel key retention service[1], instead of passing crypto
-secrets in mount options.
+Hi,
 
-However, to be able to use this API, I needed to add a dependency:
-libkeyutils. On Debian-based systems, run:
+On Tue, 2011-03-29 at 16:27 -0400, Jay Hacker wrote:
+> I'd like to be able to open just the required ports in my firewall.
 
-   sudo apt-get install libkeyutils-dev
+The monitor by default binds on 6789, the mds on 6800.
 
-./configure will complain if this library is not found.
+OSD's bind on 6800 (if available) and increment from there, but I think
+the MDS'es do the same.
 
-Debian Build-Dependencies have been updated.
+For example, if you have 3 OSD's on one host, the first OSD will bind on
+6800, the second on 6801, etc, etc.
+
+Wido
+
+> 
+> Thanks.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
-[1]: http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=blob;f=Documentation/keys.txt;h=6523a9e6f293675a104ce77d78a896d0e9d190e5;hb=HEAD
-
--- 
-:(){ :|:&};:
