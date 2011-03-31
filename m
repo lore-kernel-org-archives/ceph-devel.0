@@ -1,29 +1,36 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: vstart problem in master branch
-Date: Thu, 31 Mar 2011 11:06:52 -0700
-Message-ID: <20110331180652.GA12850@dreamer>
-References: <B6DAFB0C-A321-499A-A21E-7CA59EFCDA5B@cs.ucsc.edu>
- <054B710EFF18497CB0B964DC9819B556@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Wido den Hollander <wido@widodh.nl>
+Subject: [PATCH] mkcephfs: Actually do a mkfs.btrfs
+Date: Thu, 31 Mar 2011 19:59:40 +0200
+Message-ID: <1301594380-27512-1-git-send-email-wido@widodh.nl>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:33634 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752454Ab1CaSGy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2011 14:06:54 -0400
-Content-Disposition: inline
-In-Reply-To: <054B710EFF18497CB0B964DC9819B556@gmail.com>
+Received: from hosted.by.pcextreme ([109.72.90.196]:47971 "EHLO
+	logger.ceph.widodh.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1752527Ab1CaSHl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2011 14:07:41 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Wido den Hollander <wido@widodh.nl>
 
-On Thu, Mar 31, 2011 at 11:04:36AM -0700, Gregory Farnum wrote:
-> I think that's the user_xattr error (if you don't have user xattrs enabled on the mount).
 
-Yup, I agree with this diagnosis.
+Signed-off-by: Wido den Hollander <wido@widodh.nl>
+---
+ src/mkcephfs.in |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-We should make that error more obvious: http://tracker.newdream.net/issues/952
-
+diff --git a/src/mkcephfs.in b/src/mkcephfs.in
+index b193528..834d776 100644
+--- a/src/mkcephfs.in
++++ b/src/mkcephfs.in
+@@ -273,7 +273,7 @@ if [ -n "$prepareosdfs" ]; then
+     done
+ 
+     modprobe btrfs || true
+-    echo mkfs.btrfs $btrfs_devs
++    mkfs.btrfs $btrfs_devs
+     btrfsctl -a
+     mount -t btrfs $btrfs_opt $first_dev $btrfs_path
+     chown $osd_user $btrfs_path
 -- 
-:(){ :|:&};:
+1.7.0.4
+
