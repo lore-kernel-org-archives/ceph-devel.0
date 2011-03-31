@@ -1,78 +1,36 @@
-From: Jim Schutt <jaschut@sandia.gov>
-Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
-Date: Thu, 31 Mar 2011 12:08:02 -0600
-Message-ID: <4D94C302.5000004@sandia.gov>
-References: <4D939FF7.1070104@sandia.gov> <Pine.LNX.4.64.1103301449400.18670@cobra.newdream.net> <4D948CAC.6040709@sandia.gov> <Pine.LNX.4.64.1103310920460.13796@cobra.newdream.net> <4D94B333.4060700@sandia.gov> <4D94B573.7070505@sandia.gov> <Pine.LNX.4.64.1103311022500.13796@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: vstart problem in master branch
+Date: Thu, 31 Mar 2011 11:08:59 -0700
+Message-ID: <0A340955-01D3-4E72-AC72-0F9EFBC94227@cs.ucsc.edu>
+References: <B6DAFB0C-A321-499A-A21E-7CA59EFCDA5B@cs.ucsc.edu> <054B710EFF18497CB0B964DC9819B556@gmail.com> <20110331180652.GA12850@dreamer>
+Mime-Version: 1.0 (Apple Message framework v1082)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:59118 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964921Ab1CaSIK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2011 14:08:10 -0400
-In-Reply-To: <Pine.LNX.4.64.1103311022500.13796@cobra.newdream.net>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:43775 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758798Ab1CaSJA convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2011 14:09:00 -0400
+In-Reply-To: <20110331180652.GA12850@dreamer>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
 
-Sage Weil wrote:
-> On Thu, 31 Mar 2011, Jim Schutt wrote:
->> Jim Schutt wrote:
->>> Sage Weil wrote:
->>>> On Thu, 31 Mar 2011, Jim Schutt wrote:
->>>>>> I was actually suggesting we try to make it core dump inside the
->>>>>> "delete
->>>>>> this" and watching for a stall in progress and then sending SIGABRT to
->>>>>> dump
->>>>>> core in the act.  That way we verify it really is in the allocator
->>>>>> (and
->>>>>> maybe even see where).  That's a bit harder to set up, though!  
->>>>> Right, I couldn't think of how to automate that stall detection
->>>>> during the stall, rather than after.  At least, I couldn't
->>>>> think of how to do it without incurring possibly excessive
->>>>> overhead, say by starting a timer on every "delete this".
->>>> Yeah.  I wonder if dumping core on a cosd right when it gets marked down
->>>> would do the trick?  That should catch it ~20 seconds or whatever in the
->>>> stall.  By watching for the "osdfoo marked down" messages from ceph -w?
->>> What about making Cond::Wait() use pthread_cond_timedwait()
->>> with a suitable timeout value, say 10 seconds, and asserting
->>> on timeout?  Do you think there would be many legitimate 10
->>> second delays in OSD processing?
->>>
->> Or, I could make a Cond::WaitIntervalOrAbort(), and
->> use it just on the pipe lock, since that's the source
->> of the trouble.  Sound useful?
+That was it (/me adds to fstab).
+
+Thanks,
+Noah
+
+On Mar 31, 2011, at 11:06 AM, Tommi Virtanen wrote:
+
+> On Thu, Mar 31, 2011 at 11:04:36AM -0700, Gregory Farnum wrote:
+>> I think that's the user_xattr error (if you don't have user xattrs enabled on the mount).
 > 
-> Yeah that sounds like the way to go.. then you can hand pick the site(s) 
-> that is/are waiting a long time in this case and switch those to 
-> WaitIntervalOrAbort?  Hopefully the cond timer will go off despite 
-> whatever badness is going on in delete this...
-
-Actually, it occurs to me Wait() isn't what I'm after:
-that is used to wait some unknown time for some event.
-
-I think instead I need to use TryLock() on the pipe_lock
-in submit_message(), in a loop with a suitable sleep,
-say 100us, and assert when it takes too long to acquire
-the lock.
-
-So, maybe add a Mutex::LockOrAbort(), and use it in
-submit_message()?
-
-submit_message() is intended to return immediately, no?
-And the issue is caused by heartbeat() being unable to
-queue messages, so this sounds to me to be a useful
-test.
-
-Does that seem to have low enough overhead to
-be useful?
-
--- Jim
-
+> Yup, I agree with this diagnosis.
 > 
-> sage
+> We should make that error more obvious: http://tracker.newdream.net/issues/952
 > 
-> 
+> -- 
+> :(){ :|:&};:
 
