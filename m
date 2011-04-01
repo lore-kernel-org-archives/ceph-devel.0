@@ -1,55 +1,45 @@
-From: Sage Weil <sage@newdream.net>
-Subject: lookuphash
-Date: Thu, 31 Mar 2011 18:23:26 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1103311819510.28788@cobra.newdream.net>
+From: =?Big5?B?s6++5cGo?= <doki74216@gmail.com>
+Subject: The installation: When we start Ceph, the system stops running.
+Date: Fri, 1 Apr 2011 14:53:55 +0800
+Message-ID: <AANLkTinV864-rE6HERpmL-DBtx_eqp2DNRGqiZWatWtA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37394 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752587Ab1DABUY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Mar 2011 21:20:24 -0400
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:42314 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754512Ab1DAGx4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Apr 2011 02:53:56 -0400
+Received: by vws1 with SMTP id 1so2482336vws.19
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Mar 2011 23:53:55 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: brchrisman@gmail.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hey Brian,
+Hi,
+I set an environment of 20 servers which include 2 MDSs, 3 MONs and 15
+OSDes.
+My version is 0.25.2 and OS is Fedora 14.
+There's a problem when I was installing the Ceph.
+When I finished "mkcephfs -c /etc/ceph/ceph.conf --allhosts --mkbtrfs
+-k keyring.bin" .
+I start the whole Ceph system.
+But here is the problem I met:
+The system stops running and it shows the error messages as shown below:
 
-I just pushed some improvements to the MDS lookuphash that should fix the 
-NFS issues.  The first piece will search for an ino in other MDS's caches 
-(this actually needed for cross-mds unlink/rename as well).  The other 
-piece looks at the on-disk directory objects to discover the ino path and 
-then does a traverse.  Both methods are now wired up to lookuphash.
+=== mon.0 ===
+Starting Ceph mon0 on Ceph1...already running
+=== mon.1 ===
+Starting Ceph mon1 on Ceph2...
+ ** WARNING: Ceph is still under heavy development, and is only suitable for **
+ **          testing and review.  Do not trust it with important data.       **
+starting mon.1 rank 1 at 192.168.200.202:6789/0 mon_data /data1/mon1
+fsid f1eb5c4c-5127-5038-6ea9-0cf47e6536c2
+accepter.bind unable to bind to 192.168.200.202:6789: Address already in use
+failed: 'ssh Ceph2  /usr/local/bin/cmon -i 1 -c /tmp/ceph.conf.29519 '
 
-Once you have a test case that can reliably reproduce the NFS ESTALE, 
-let's see if this fixes it!  (You may have to disable it with something 
-like the below to get the test case right.  The improvements are now in 
-the master branch of ceph.git.)
-
-Thanks!
-sage
-
-
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index 58be710..0b36011 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -2065,8 +2065,9 @@ void Server::handle_client_lookup_hash(MDRequest 
-*mdr)
-     // try the directory
-     CInode *diri = mdcache->get_inode(req->get_filepath2().get_ino());
-     if (!diri) {
--      mdcache->find_ino_peers(req->get_filepath2().get_ino(),
--                             new C_MDS_LookupHash(this, mdr), -1);
-+      reply_request(mdr, -ESTALE);
-+      /*      mdcache->find_ino_peers(req->get_filepath2().get_ino(),
-+             new C_MDS_LookupHash(this, mdr), -1);*/
-       return;
-     }
-     if (diri->state_test(CInode::STATE_PURGING)) {
+I want to know why  the system cannot run smoothly.
 
 
-
-
-
+--
+Best Regards,
+Stefanie Chen
