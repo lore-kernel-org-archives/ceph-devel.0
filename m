@@ -1,81 +1,95 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Question about librados
-Date: Tue, 5 Apr 2011 09:57:59 -0700
-Message-ID: <20110405165759.GA1710@dreamer>
-References: <incab7$gnn$1@dough.gmane.org>
- <BANLkTi=-9ESbE5uaMZYBH2X9Q5y-gPtW7w@mail.gmail.com>
- <inedo0$3v2$1@dough.gmane.org>
+From: Martin Wilderoth <martin.wilderoth@linserv.se>
+Subject: Re: HEALTH_WARNING
+Date: Tue, 5 Apr 2011 21:07:52 +0200 (CEST)
+Message-ID: <617102443.13876.1302030472004.JavaMail.root@mail.linserv.se>
+References: <290366553.13874.1302029956409.JavaMail.root@mail.linserv.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:51285 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754500Ab1DEQ6C (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2011 12:58:02 -0400
-Content-Disposition: inline
-In-Reply-To: <inedo0$3v2$1@dough.gmane.org>
+Received: from 194-17-14-101.customer.telia.com ([194.17.14.101]:59498 "EHLO
+	mail.linserv.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753501Ab1DETOl convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2011 15:14:41 -0400
+In-Reply-To: <290366553.13874.1302029956409.JavaMail.root@mail.linserv.se>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Rutger ter Borg <rutger@terborg.net>
+To: Gregory Farnum <gregf@hq.newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, Apr 05, 2011 at 08:44:15AM +0200, Rutger ter Borg wrote:
-> >>I'm in the progress of evaluating librados as an object store. I'm using
-> >>Debian's latest packages as of today, and noted that I need to define
-> >>NO_ATOMIC_OPS to get something compiled that includes librados.hpp.
-> >Hmmm, that's not right! Can you elaborate? It just doesn't build
-> >librados.hpp unless you define NO_ATOMIC_OPS? Is there a build error
-> >at some point?
-> thanks for the elaborate answer! With respect to the compile error,
-> I got this in an empty file with just including rados/librados.hpp
-> 
-> $ g++ ./rados.cpp
-> In file included from /usr/include/rados/buffer.h:55:0,
->                  from /usr/include/rados/librados.hpp:10,
->                  from ./rados.cpp:6:
-> /usr/include/rados/atomic.h:25:24: fatal error: atomic_ops.h: No
-> such file or directory
-> 
-> compilation terminated.
+I did clear some data and the restart but the osd didn't go online agai=
+n. Instead The osd was running for some time and then they became dead =
+one by one.
 
-Ahhh, now I got it. You're not trying to compile Ceph, you're trying
-to build software using librados.
+I was re-creating the filesystem and transfering data again with a simi=
+lar result. This time the filesystem was not filled up.
+It seems as the filesystem is hanginging and I can't get any respons fr=
+om it.
 
-The problem here is that whatever our autoconf setup detects, and
-whatever libraries it decides to use, might not be available at the
-time the external software using librados is compiles. That is, Ceph
-compilation environment is different from the end user compilation
-environment.
+I have done same process again, during the creation it complained on jo=
+urnaling
+hdparm -W 0 /dev/sda2. This time I made sure it didn't complain on the =
+hdparam of the SSD disks, while I was creating the filesystem
 
-And, even more so, we don't use the autoconfig results at all in the
-include files; nothing defines __CEPH__ in this case.
+on my host where the filesystem is mounted i have seen some dmesg conec=
+tion filed
 
-     18 #ifdef __CEPH__
-     19 # include "acconfig.h"
-     20 #endif
+[16143.534936] libceph: client4428 fsid 19be9ae7-cdf8-cb03-4178-568342d=
+30fa5
+[16143.535092] libceph: mon0 10.0.6.10:6789 session established
+[16224.427969] libceph: mon0 10.0.6.10:6789 socket closed
+[16224.427975] libceph: mon0 10.0.6.10:6789 session lost, hunting for n=
+ew mon
+[16224.429637] libceph: mon0 10.0.6.10:6789 connection failed
+[16233.700478] libceph: mon1 10.0.6.11:6789 connection failed
+[16243.716405] libceph: mon2 10.0.6.12:6789 connection failed
+[16253.728529] libceph: mon2 10.0.6.12:6789 connection failed
+[17008.794981] libceph: client4107 fsid 2c3fefe7-3362-f541-27b4-64176ad=
+b3f22
+[17008.795127] libceph: mon0 10.0.6.10:6789 session established
 
-So when atomic.h says:
+Not sure I have everything configured corectly ?
 
-     23 #ifndef NO_ATOMIC_OPS
-     24 //libatomic_ops implementation
-     25 #include <atomic_ops.h>
-     26 namespace ceph {
-     27 
+Regards Martin
 
-Yup, that'll fail if you don't have atomic-ops development libraries
-available.
+----- Ursprungligt meddelande -----=20
+=46r=C3=A5n: "Gregory Farnum" <gregf@hq.newdream.net>=20
+Till: "Martin Wilderoth" <martin.wilderoth@linserv.se>=20
+Kopia: ceph-devel@vger.kernel.org=20
+Skickat: m=C3=A5ndag, 4 apr 2011 1:38:48=20
+=C3=84mne: Re: HEALTH_WARNING=20
 
-And even if it compiles, there's no quarantee it works right! Because
-what if the actual Ceph compilation really was *without* atomic-ops.
-
-I need to file a few more bug reports next, but after that I'll look
-into this more and try to come up with a better recommendation.
-
-Short term, your best bet is to try to match the environment where the
-Deb was compiled; install the packages listed on the Build-Depends
-line at
-http://ceph.newdream.net/git/?p=ceph.git;a=blob;f=debian/control;hb=HEAD
--- you can do that quickly with "sudo apt-get build-dep ceph"
-
--- 
-:(){ :|:&};:
+On Sat, Apr 2, 2011 at 3:55 AM, Martin Wilderoth=20
+<martin.wilderoth@linserv.se> wrote:=20
+> Hello,=20
+>=20
+> I have seperate partitions for my osd and the btrfs file system.=20
+> I also use SSD-disk for journaling.=20
+>=20
+> But I got problem when the root system was filled up with logfiles on=
+ one host,=20
+> the file system reported out of diskspace.=20
+>=20
+> But the osd's were not filled to 100%. Later I realised that the root=
+ system on one of the osd hosts (osd2 and osd3) had no space left, to m=
+uch logging.=20
+>=20
+> The only way I know to recover is to create a new filesystem in the c=
+luster :-)=20
+> But it's bad fot the data :-)=20
+>=20
+> When i get problems with one osd it seems as if they are crashing one=
+ by one.=20
+> And i dont know how to get them up again whitout deleting all the dat=
+a.=20
+You should be able to simply clear up some space (don't remove any of=20
+the actual OSD data though!) and then start up the OSD daemon, at=20
+which point it ought to automatically rejoin the cluster.=20
+Is this not working? If not, please start up the daemon with higher=20
+levels of debug logging and put the logs somewhere accessible.=20
+-Greg=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
