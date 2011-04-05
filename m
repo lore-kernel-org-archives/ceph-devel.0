@@ -1,54 +1,68 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: increase duplication level decrease performance
-Date: Mon, 4 Apr 2011 16:36:27 -0700
-Message-ID: <A1F4CC5EAF434ADC898D1B8019BD0E79@gmail.com>
-References: <loom.20110404T235336-22@post.gmane.org>
- <056A9574715F491489130619CBB23989@gmail.com> <4D9A5436.50706@ufm.su>
+From: Rutger ter Borg <rutger@terborg.net>
+Subject: Re: Question about librados
+Date: Tue, 05 Apr 2011 08:44:15 +0200
+Message-ID: <inedo0$3v2$1@dough.gmane.org>
+References: <incab7$gnn$1@dough.gmane.org> <BANLkTi=-9ESbE5uaMZYBH2X9Q5y-gPtW7w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:35304 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755591Ab1DDXgd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Apr 2011 19:36:33 -0400
-Received: by iwn34 with SMTP id 34so6255170iwn.19
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Apr 2011 16:36:32 -0700 (PDT)
-In-Reply-To: <4D9A5436.50706@ufm.su>
-Content-Disposition: inline
+Received: from lo.gmane.org ([80.91.229.12]:50200 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752129Ab1DEGo2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 Apr 2011 02:44:28 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Q7003-0002hG-1f
+	for ceph-devel@vger.kernel.org; Tue, 05 Apr 2011 08:44:27 +0200
+Received: from 233-250-103-145.static.glaslokaal.nl ([145.103.250.233])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2011 08:44:27 +0200
+Received: from rutger by 233-250-103-145.static.glaslokaal.nl with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2011 08:44:27 +0200
+In-Reply-To: <BANLkTi=-9ESbE5uaMZYBH2X9Q5y-gPtW7w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+
+On 04/04/2011 06:09 PM, Gregory Farnum wrote:
+> On Mon, Apr 4, 2011 at 4:33 AM, Rutger ter Borg<rutger@terborg.net>  wrote:
+>>
+>> Hello,
+>>
+>> I'm in the progress of evaluating librados as an object store. I'm using
+>> Debian's latest packages as of today, and noted that I need to define
+>> NO_ATOMIC_OPS to get something compiled that includes librados.hpp.
+> Hmmm, that's not right! Can you elaborate? It just doesn't build
+> librados.hpp unless you define NO_ATOMIC_OPS? Is there a build error
+> at some point?
+
+[snip]
+
+Hello Greg,
+
+thanks for the elaborate answer! With respect to the compile error, I 
+got this in an empty file with just including rados/librados.hpp
+
+$ g++ ./rados.cpp
+In file included from /usr/include/rados/buffer.h:55:0,
+                  from /usr/include/rados/librados.hpp:10,
+                  from ./rados.cpp:6:
+/usr/include/rados/atomic.h:25:24: fatal error: atomic_ops.h: No such 
+file or directory 
+
+compilation terminated.
+
+Maybe it has to do with the .deb, apt pulled in librados2,
+
+$ dpkg --status librados-dev
+Version: 0.25.2-1 
 
 
-On Monday, April 4, 2011 at 4:28 PM, Fyodor Ustinov wrote: 
-> On 04/05/2011 01:52 AM, Gregory Farnum wrote:
-> > Data replicas don't service reads unless you specifically configure it for that (it doesn't provide POSIX semantics if you do that), and each replica needs to get the data written before it's considered safe. In your case you're doing a dd, which is a write to disk, so you're increasing how much data needs to get sent over the network and written to disk by increasing replication.
-> > 
-> > Without knowing more about your setup though we can't tell exactly why the performance is dropping as it is. Some possibilities:
-> > 1) You have a very small number of OSDs, so you're saturating the NIC on the primaries
-> > 2) You have a very small number of OSDs, so you're saturating the disk on all of them (this is particularly likely if you've got the journal on the same drive as the main store, since that's an automatic 50% cut in disk throughput).
-> > 3) Everything is connected via one cheap switch, which can't handle the traffic.
-> > 4) You've got some very slow OSDs, which will slow down each Placement Group they're a member of (and with higher replication levels you will hit them more often).
-> > etc
-> Many thanks for your reply.
-> 
-> If I correct understood - the maximum write speed to the file system in 
-> the ideal case is the network bandwidth from the client? Or bandwidth 
-> divided by the number of copies?
+Cheers,
 
-In ideal case it would be the network bandwidth from the client, as it only sends data once, to the placement group primary. The primary OSDs send out the data to the replicas. The one thing here is that the primary OSD sends out the data to each replica, but with enough OSDs that shouldn't be the limiting factor since the primaries will be spread out all over the cluster.
-
-> 
-> How much OSDs recommended for 3 replicas?
-
-Hmm, haven't looked at that too much. As many as you need for acceptable performance, I suppose. ;)
-
-> P.S. without documentation have to ask stupid questions.:)
-> 
-Yeah -- there is some information in the wiki, which we encourage everybody to edit; there is lots more in the academic papers if you're up for those; but we hope to be generating more documentation in various forms over the coming months.
--Greg
-
+Rutger
 
 
