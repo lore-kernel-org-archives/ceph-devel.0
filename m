@@ -1,68 +1,53 @@
-From: Rutger ter Borg <rutger@terborg.net>
+From: Gregory Farnum <gregf@hq.newdream.net>
 Subject: Re: Question about librados
-Date: Tue, 05 Apr 2011 08:44:15 +0200
-Message-ID: <inedo0$3v2$1@dough.gmane.org>
-References: <incab7$gnn$1@dough.gmane.org> <BANLkTi=-9ESbE5uaMZYBH2X9Q5y-gPtW7w@mail.gmail.com>
+Date: Tue, 5 Apr 2011 06:42:25 -0700
+Message-ID: <BANLkTik1OakYf7aqeUd6AW=wVXB87T72eg@mail.gmail.com>
+References: <incab7$gnn$1@dough.gmane.org>
+	<BANLkTi=-9ESbE5uaMZYBH2X9Q5y-gPtW7w@mail.gmail.com>
+	<inedo0$3v2$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:50200 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752129Ab1DEGo2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 5 Apr 2011 02:44:28 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Q7003-0002hG-1f
-	for ceph-devel@vger.kernel.org; Tue, 05 Apr 2011 08:44:27 +0200
-Received: from 233-250-103-145.static.glaslokaal.nl ([145.103.250.233])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2011 08:44:27 +0200
-Received: from rutger by 233-250-103-145.static.glaslokaal.nl with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2011 08:44:27 +0200
-In-Reply-To: <BANLkTi=-9ESbE5uaMZYBH2X9Q5y-gPtW7w@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:56441 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752374Ab1DENm2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2011 09:42:28 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 7B2EAC066
+	for <ceph-devel@vger.kernel.org>; Tue,  5 Apr 2011 06:42:27 -0700 (PDT)
+Received: from mail-ww0-f42.google.com (mail-ww0-f42.google.com [74.125.82.42])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 2B743C063
+	for <ceph-devel@vger.kernel.org>; Tue,  5 Apr 2011 06:42:27 -0700 (PDT)
+Received: by wwk4 with SMTP id 4so2754308wwk.1
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2011 06:42:25 -0700 (PDT)
+In-Reply-To: <inedo0$3v2$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Rutger ter Borg <rutger@terborg.net>
+Cc: ceph-devel@vger.kernel.org
 
-On 04/04/2011 06:09 PM, Gregory Farnum wrote:
-> On Mon, Apr 4, 2011 at 4:33 AM, Rutger ter Borg<rutger@terborg.net>  wrote:
->>
->> Hello,
->>
->> I'm in the progress of evaluating librados as an object store. I'm using
->> Debian's latest packages as of today, and noted that I need to define
->> NO_ATOMIC_OPS to get something compiled that includes librados.hpp.
-> Hmmm, that's not right! Can you elaborate? It just doesn't build
-> librados.hpp unless you define NO_ATOMIC_OPS? Is there a build error
-> at some point?
-
-[snip]
-
-Hello Greg,
-
-thanks for the elaborate answer! With respect to the compile error, I 
-got this in an empty file with just including rados/librados.hpp
-
-$ g++ ./rados.cpp
-In file included from /usr/include/rados/buffer.h:55:0,
-                  from /usr/include/rados/librados.hpp:10,
-                  from ./rados.cpp:6:
-/usr/include/rados/atomic.h:25:24: fatal error: atomic_ops.h: No such 
-file or directory 
-
-compilation terminated.
-
-Maybe it has to do with the .deb, apt pulled in librados2,
-
-$ dpkg --status librados-dev
-Version: 0.25.2-1 
-
-
-Cheers,
-
-Rutger
-
-
+On Mon, Apr 4, 2011 at 11:44 PM, Rutger ter Borg <rutger@terborg.net> w=
+rote:
+> thanks for the elaborate answer! With respect to the compile error, I=
+ got
+> this in an empty file with just including rados/librados.hpp
+>
+> $ g++ ./rados.cpp
+> In file included from /usr/include/rados/buffer.h:55:0,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 from /usr/include/rados/librados.hpp:=
+10,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 from ./rados.cpp:6:
+> /usr/include/rados/atomic.h:25:24: fatal error: atomic_ops.h: No such=
+ file
+> or directory
+> compilation terminated.
+Have you tried using the full make system (go to src dir,
+=2E/autogen.sh; ./configure; make)? All the required headers should get
+pulled in when you install the package, but they might not be in your
+default include paths.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
