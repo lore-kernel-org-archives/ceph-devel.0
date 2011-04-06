@@ -1,118 +1,37 @@
-From: "doki74216@gmail.com" <doki74216@gmail.com>
-Subject: The installation: "terminate called after throwing an instance of 'ceph::buffer::end_of_buffer'"
-Date: Wed, 6 Apr 2011 11:11:25 +0800
-Message-ID: <BANLkTi=Bq8qpjzKpxMds8-KHobNpO=hr4g@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: =?Big5?Q?Re=3A_=B5=AA=CE=60=3A_The_installation=3A_When_we_start_Ceph=2C_th?=
+ =?Big5?Q?e_system_stops_running=2E?=
+Date: Wed, 6 Apr 2011 08:58:13 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1104060857210.18205@cobra.newdream.net>
+References: <AANLkTinV864-rE6HERpmL-DBtx_eqp2DNRGqiZWatWtA@mail.gmail.com>
+ <000001cbf047$332925b0$997b7110$@com> <BANLkTi=cGkuCS_X_PLL8k_JNPZNxZf7-bA@mail.gmail.com>
+ <BANLkTimGBT6dVz9cS4YAzLLGvpvvt8sqWA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:55879 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752049Ab1DFDL0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2011 23:11:26 -0400
-Received: by vws1 with SMTP id 1so802553vws.19
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2011 20:11:25 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:37292 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756430Ab1DFPy5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2011 11:54:57 -0400
+In-Reply-To: <BANLkTimGBT6dVz9cS4YAzLLGvpvvt8sqWA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph <ceph-devel@vger.kernel.org>
+To: "doki74216@gmail.com" <doki74216@gmail.com>
+Cc: Yuki <chengmao2010@gmail.com>, ceph-devel@vger.kernel.org, henry.cy.chang@gmail.com, tommi.virtanen@dreamhost.com
 
-Hi,
-I set an environment of 7 servers which include 3 MONs(host1 host2
-host3), 2 MDSs(host4 host5) and 2 OSDes(host6 host7).
-My version is 0.25.2 and OS is Fedora 14.
-There's a problem when I was installing the Ceph.
-When I finished "mkcephfs -c /etc/ceph/ceph.conf --allhosts --mkbtrfs
--k keyring.bin" .
-I start the whole Ceph system.
-But here is the problem I met:
-The system stops running and it shows the error messages as shown below:
+On Wed, 6 Apr 2011, doki74216@gmail.com wrote:
+>  Thanks for your help!!
+>  But I have the other question:
+>  If  I do "/etc/init.d/ceph -a stop "
+>  the system doesn't stop all the deamon which include cmon and cosd.
+>  Therefore I have to enter each host to close the deamon seperatly.
+>  Finally, there is no deamon running in the system.
+>  I want to know why we cannot stop the deamon by "/etc/init.d/ceph -a stop "???
+>  What's wrong with my system??
+> [...]
+>         host = Ceph1
 
-=== mds.0 ===
-Starting Ceph mds0 on Ceph4...
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-terminate called after throwing an instance of 'ceph::buffer::end_of_buffer'
-  what():  buffer::end_of_buffer
-bash: line 1: 24409 Segmentation fault      (core dumped)
-/usr/local/bin/cmds -i 0 -c /tmp/ceph.conf.5135
-failed: 'ssh Ceph4  /usr/local/bin/cmds -i 0 -c /tmp/ceph.conf.5135 '
+My guess is it is doing a case-sensitive comparison of Ceph1 and 
+`hostname` output.  Try switching to lower case and see if that fixes it.
 
-The ceph.conf is shown below:
-
-[global]
-      pid file = /var/run/ceph/$name.pid
-     debug ms =1
-     auth supported = cephx
-
- [mon]
-       mon data = /data1/mon$id
-
-       ;debug ms = 1
-       ;debug mon = 20
-      ;debug paxos = 20
-       ;debug auth = 20
-
- [mon0]
-       host = host1
-       mon addr = 192.168.200.201:6789
-
- [mon1]
-        host = host2
-        mon addr = 192.168.200.202:6789
-
- [mon2]
-       host = host3
-       mon addr = 192.168.200.203:6789
-
-[mds]
-       keyring = /etc/ceph/keyring.$name
-       ;debug ms = 1
-       ;debug mds = 20
-
- [mds0]
-       host = host4
- [mds1]
-       host = host5
-
- [osd]
-       keyring = /etc/ceph/keyring.$name
-       osd data = /mnt/btrfs/osd$id
-       osd journal = /opt/osd/osd$id/journal
-      ;osd journal = /data/osd$id/journal
-        osd journal size = 512
-      ;debug ms = 1
-       ;debug osd = 20
-       ;debug filestore = 20
-       ;debug journal = 20
-
- [osd0]
-       host = host6
-       btrfs devs = /dev/sdb1
-
- [osd1]
-       host = host6
-       btrfs devs = /dev/sdc1
-
- [osd2]
-       host = host6
-       btrfs devs = /dev/sdd1
-
- [osd3]
-       host = host7
-       btrfs devs = /dev/sdb1
-
- [osd4]
-       host = host7
-       btrfs devs = /dev/sdc1
-
- [osd5]
-       host = host7
-       btrfs devs = /dev/sdd1
-
-
-I want to know why  the system cannot run smoothly.
-Thank you!!!!!!!!!!!!!!!
-
-
---
-Best Regards,
-Stefanie Chen
+sage
