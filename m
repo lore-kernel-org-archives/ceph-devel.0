@@ -1,46 +1,163 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.26 released
-Date: Tue, 5 Apr 2011 16:29:58 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104051628450.3702@cobra.newdream.net>
+From: "doki74216@gmail.com" <doki74216@gmail.com>
+Subject: =?Big5?Q?Re=3A_=B5=AA=CE=60=3A_The_installation=3A_When_we_start_Ceph=2C_th?=
+	=?Big5?Q?e_system_stops_running=2E?=
+Date: Wed, 6 Apr 2011 09:40:53 +0800
+Message-ID: <BANLkTimGBT6dVz9cS4YAzLLGvpvvt8sqWA@mail.gmail.com>
+References: <AANLkTinV864-rE6HERpmL-DBtx_eqp2DNRGqiZWatWtA@mail.gmail.com>
+	<000001cbf047$332925b0$997b7110$@com>
+	<BANLkTi=cGkuCS_X_PLL8k_JNPZNxZf7-bA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59120 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751941Ab1DEX0o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2011 19:26:44 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id ACC84BC7A9
-	for <ceph-devel@vger.kernel.org>; Tue,  5 Apr 2011 16:29:58 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 72C00BC7A9
-	for <ceph-devel@vger.kernel.org>; Tue,  5 Apr 2011 16:29:58 -0700 (PDT)
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:40935 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752743Ab1DFBky convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Apr 2011 21:40:54 -0400
+Received: by pwi15 with SMTP id 15so395094pwi.19
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Apr 2011 18:40:53 -0700 (PDT)
+In-Reply-To: <BANLkTi=cGkuCS_X_PLL8k_JNPZNxZf7-bA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Yuki <chengmao2010@gmail.com>, ceph-devel@vger.kernel.org, henry.cy.chang@gmail.com, tommi.virtanen@dreamhost.com
 
-We tagged v0.26 a few days ago.  Changes since the last release include:
+ Thanks for your help!!
+ But I have the other question:
+ If  I do "/etc/init.d/ceph -a stop "
+ the system doesn't stop all the deamon which include cmon and cosd.
+ Therefore I have to enter each host to close the deamon seperatly.
+ Finally, there is no deamon running in the system.
+ I want to know why we cannot stop the deamon by "/etc/init.d/ceph -a s=
+top "???
+ What's wrong with my system??
 
- * misc build, configure, rpm build fixes
- * crypto: support for libnss (which exists in RHEL environments)
- * osd: improved throttling
- * osd: scrub no longer blocks requests
- * osd: vastly improved map update performance
- * osd: recovery fixes
- * librados, osd: support for object locator strings
- * librados: API fixes, extensions
- * mds: recovery fix for large directories
- * mds: journaling fixes
- * mds: rstats fixes
- * radosgw: Swift API support.  many fixes
+ The ceph.conf as shown below:
 
-For v0.27 we're continuing to focus on stabilizing the OSD and radosgw.  
-There have also been a flurry of bugs found (and fixed!) in the MDS with 
-fsstress from LTP (which, BTW, is a pretty great tool).  As part of this 
-we're chipping away at the clustered MDS problems as well.  See the 
-current roadmap for the next few intermediate releases and current set of 
-desired 1.0 features.
 
-Relevant URLs:
- * Direct download at: http://ceph.newdream.net/download/ceph-0.26.tar.gz
- * For Debian and Ubuntu packages, see http://ceph.newdream.net/wiki/Debian
+ [global]
+       pid file =3D /var/run/ceph/$name.pid
+      debug ms =3D1
+      auth supported =3D cephx
+
+ [mon]
+        mon data =3D /data1/mon$id
+
+        ;debug ms =3D 1
+        ;debug mon =3D 20
+       ;debug paxos =3D 20
+        ;debug auth =3D 20
+
+ [mon0]
+        host =3D Ceph1
+        mon addr =3D 192.168.200.201:6789
+
+ [mon1]
+         host =3D Ceph2
+         mon addr =3D 192.168.200.202:6789
+
+ [mon2]
+        host =3D Ceph3
+        mon addr =3D 192.168.200.203:6789
+
+[mds]
+        keyring =3D /etc/ceph/keyring.$name
+        ;debug ms =3D 1
+        ;debug mds =3D 20
+
+ [mds0]
+        host =3D Ceph4
+ [mds1]
+        host =3D Ceph5
+
+ [osd]
+        keyring =3D /etc/ceph/keyring.$name
+        osd data =3D /mnt/btrfs/osd$id
+        osd journal =3D /opt/osd/osd$id/journal
+       ;osd journal =3D /data/osd$id/journal
+         osd journal size =3D 512
+       ;debug ms =3D 1
+        ;debug osd =3D 20
+        ;debug filestore =3D 20
+        ;debug journal =3D 20
+
+ [osd0]
+        host =3D Ceph6
+        btrfs devs =3D /dev/sdb1
+
+ [osd1]
+        host =3D Ceph6
+        btrfs devs =3D /dev/sdc1
+
+ [osd2]
+        host =3D Ceph6
+        btrfs devs =3D /dev/sdd1
+
+ [osd3]
+        host =3D Ceph7
+        btrfs devs =3D /dev/sdb1
+
+ [osd4]
+        host =3D Ceph7
+        btrfs devs =3D /dev/sdc1
+
+ [osd5]
+        host =3D Ceph7
+        btrfs devs =3D /dev/sdd1
+
+
+
+>
+> =D4=DA 2011=C4=EA4=D4=C21=C8=D5=CF=C2=CE=E74:31=A3=ACYuki <chengmao20=
+10@gmail.com> =8C=91=B5=C0=A3=BA
+>> The cmon deamon is already running=A3=ACyou should stop it first=A1=A3=
+do
+>> "/etc/init.d/ceph -a stop " first ,than mkcephfs ,finally start the =
+whole
+>> ceph system
+>>
+>> -----=D3=CA=BC=FE=D4=AD=BC=FE-----
+>> =B7=A2=BC=FE=C8=CB: ceph-devel-owner@vger.kernel.org
+>> [mailto:ceph-devel-owner@vger.kernel.org] =B4=FA=B1=ED =EA=90=95=D4=DE=
+=B1
+>> =B7=A2=CB=CD=CA=B1=BC=E4: 2011=C4=EA4=D4=C21=C8=D5 14:54
+>> =CA=D5=BC=FE=C8=CB: ceph-devel@vger.kernel.org
+>> =D6=F7=CC=E2: The installation: When we start Ceph, the system stops=
+ running.
+>>
+>> Hi,
+>> I set an environment of 20 servers which include 2 MDSs, 3 MONs and =
+15
+>> OSDes.
+>> My version is 0.25.2 and OS is Fedora 14.
+>> There's a problem when I was installing the Ceph.
+>> When I finished "mkcephfs -c /etc/ceph/ceph.conf --allhosts --mkbtrf=
+s
+>> -k keyring.bin" .
+>> I start the whole Ceph system.
+>> But here is the problem I met:
+>> The system stops running and it shows the error messages as shown be=
+low:
+>>
+>> =3D=3D=3D mon.0 =3D=3D=3D
+>> Starting Ceph mon0 on Ceph1...already running
+>> =3D=3D=3D mon.1 =3D=3D=3D
+>> Starting Ceph mon1 on Ceph2...
+>>  ** WARNING: Ceph is still under heavy development, and is only suit=
+able for
+>> **
+>>  **          testing and review.  Do not trust it with important dat=
+a.
+>> **
+>> starting mon.1 rank 1 at 192.168.200.202:6789/0 mon_data /data1/mon1
+>> fsid f1eb5c4c-5127-5038-6ea9-0cf47e6536c2
+>> accepter.bind unable to bind to 192.168.200.202:6789: Address alread=
+y in use
+>> failed: 'ssh Ceph2  /usr/local/bin/cmon -i 1 -c /tmp/ceph.conf.29519=
+ '
+>>
+>> I want to know why  the system cannot run smoothly.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
