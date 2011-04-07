@@ -1,121 +1,25 @@
-From: "doki74216@gmail.com" <doki74216@gmail.com>
-Subject: Re: The installation: "terminate called after throwing an instance of 'ceph::buffer::end_of_buffer'"
-Date: Thu, 7 Apr 2011 11:58:51 +0800
-Message-ID: <BANLkTimPYn9A+nOjtGNLA6MpnRWUfALbug@mail.gmail.com>
-References: <BANLkTi=Bq8qpjzKpxMds8-KHobNpO=hr4g@mail.gmail.com>
+From: Jeff Wu <cpwu@tnsoft.com.cn>
+Subject: ceph-client-standalone.git
+Date: Thu, 7 Apr 2011 16:21:28 +0800
+Message-ID: <1302164488.1922.11.camel@cephhost>
+Reply-To: <cpwu@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:50095 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755441Ab1DGD6w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Apr 2011 23:58:52 -0400
-Received: by pwi15 with SMTP id 15so815055pwi.19
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Apr 2011 20:58:51 -0700 (PDT)
-In-Reply-To: <BANLkTi=Bq8qpjzKpxMds8-KHobNpO=hr4g@mail.gmail.com>
+Received: from [210.22.136.227] ([210.22.136.227]:46927 "EHLO
+	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751069Ab1DGIYu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 04:24:50 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph <ceph-devel@vger.kernel.org>, sage@cs.ucsc.edu
+To: ceph-devel@vger.kernel.org
 
-Hi, Sage
+Hi ,
+we are using ceph-client-standalone.git,
+i have seen that some bugs had been fixed at ceph-client.git ,
+then, could you update these patchs to ceph-client-standalone.git ? 
+Thanks .
 
-I set an environment of 7 servers which include 3 MONs(host1 host2
-host3), 2 MDSs(host4 host5) and 2 OSDes(host6 host7).
-My version is 0.25.2 and OS is Fedora 14.
-There's a problem when I was installing the Ceph.
-When I finished "mkcephfs -c /etc/ceph/ceph.conf --allhosts --mkbtrfs
--k keyring.bin" .
-I start the whole Ceph system.
-But here is the problem I met:
-The system stops running and it shows the error messages as shown below:
+Jeff ,Wu
 
-=== mds.0 ===
-Starting Ceph mds0 on Ceph4...
- ** WARNING: Ceph is still under heavy development, and is only suitable for **
- **          testing and review.  Do not trust it with important data.       **
-terminate called after throwing an instance of 'ceph::buffer::end_of_buffer'
- what():  buffer::end_of_buffer
-bash: line 1: 24409 Segmentation fault      (core dumped)
-/usr/local/bin/cmds -i 0 -c /tmp/ceph.conf.5135
-failed: 'ssh Ceph4  /usr/local/bin/cmds -i 0 -c /tmp/ceph.conf.5135 '
-
-The ceph.conf is shown below:
-
-[global]
-     pid file = /var/run/ceph/$name.pid
-    debug ms =1
-    auth supported = cephx
-
- [mon]
-      mon data = /data1/mon$id
-
-      ;debug ms = 1
-      ;debug mon = 20
-     ;debug paxos = 20
-      ;debug auth = 20
-
- [mon0]
-      host = host1
-      mon addr = 192.168.200.201:6789
-
- [mon1]
-       host = host2
-       mon addr = 192.168.200.202:6789
-
- [mon2]
-      host = host3
-      mon addr = 192.168.200.203:6789
-
-[mds]
-      keyring = /etc/ceph/keyring.$name
-      ;debug ms = 1
-      ;debug mds = 20
-
- [mds0]
-      host = host4
- [mds1]
-      host = host5
-
- [osd]
-      keyring = /etc/ceph/keyring.$name
-      osd data = /mnt/btrfs/osd$id
-      osd journal = /opt/osd/osd$id/journal
-     ;osd journal = /data/osd$id/journal
-       osd journal size = 512
-     ;debug ms = 1
-      ;debug osd = 20
-      ;debug filestore = 20
-      ;debug journal = 20
-
- [osd0]
-      host = host6
-      btrfs devs = /dev/sdb1
-
- [osd1]
-      host = host6
-      btrfs devs = /dev/sdc1
-
- [osd2]
-      host = host6
-      btrfs devs = /dev/sdd1
-
- [osd3]
-      host = host7
-      btrfs devs = /dev/sdb1
-
- [osd4]
-      host = host7
-      btrfs devs = /dev/sdc1
-
- [osd5]
-      host = host7
-      btrfs devs = /dev/sdd1
-
-
-I want to know why  the system cannot run smoothly.
-Thank you!!!!!!!!!!!!!!!
-
-
---
-Best Regards,
-Stefanie Chen
