@@ -1,59 +1,81 @@
-From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-Subject: [PATCH] Don't crash during initialization when working without an osd journal.
-Date: Thu, 07 Apr 2011 10:49:49 -0300
-Message-ID: <ortyeayxvm.fsf@livre.localdomain>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: [PATCH v2 2/2] rbd: allow configuration of rados from the rbd filename
+Date: Thu, 7 Apr 2011 09:16:02 -0700
+Message-ID: <BANLkTingpiVSTt6DpSwP-6hydGWDx8E=ag@mail.gmail.com>
+References: <6f9466b6098b5159aca9c789f9fce45f409e684f.1301354138.git.josh.durgin@dreamhost.com>
+	<99252a76de350c8123eebfe4fc01fc6a1c9b2383.1301354138.git.josh.durgin@dreamhost.com>
+	<BANLkTinZa+_FfZcyO54QE9W37PB___+m1g@mail.gmail.com>
+	<20110407084707.GA21871@stefanha-thinkpad.localdomain>
+	<BANLkTin=YxkHTz6Z-sQ00gyhHxghRXZQpg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:54748 "EHLO
-	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751087Ab1DGN7N (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 09:59:13 -0400
-Received: from freie.oliva.athome.lsd.ic.unicamp.br (gw-to-emilia.oliva.athome.lsd.ic.unicamp.br [172.31.160.17] (may be forged))
-	by boneca.lsd.ic.unicamp.br (8.14.4/8.14.4) with ESMTP id p37DnqBF025533
-	for <ceph-devel@vger.kernel.org>; Thu, 7 Apr 2011 10:49:54 -0300
-Received: from livre.localdomain (livre-to-gw.oliva.athome.lsd.ic.unicamp.br [172.31.160.19])
-	by freie.oliva.athome.lsd.ic.unicamp.br (8.14.4/8.14.4) with ESMTP id p37DnpWo005873
-	for <ceph-devel@vger.kernel.org>; Thu, 7 Apr 2011 10:49:51 -0300
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:37644 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751913Ab1DGQQE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 12:16:04 -0400
+In-Reply-To: <BANLkTin=YxkHTz6Z-sQ00gyhHxghRXZQpg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Yoshiaki Tamura <tamura.yoshiaki@gmail.com>
+Cc: Stefan Hajnoczi <stefanha@gmail.com>, Josh Durgin <josh.durgin@dreamhost.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
 
-Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
----
- src/os/FileStore.cc |    6 ++++--
- 1 files changed, 4 insertions(+), 2 deletions(-)
+On Thu, Apr 7, 2011 at 2:54 AM, Yoshiaki Tamura
+<tamura.yoshiaki@gmail.com> wrote:
+> 2011/4/7 Stefan Hajnoczi <stefanha@gmail.com>:
+>> On Thu, Apr 07, 2011 at 10:14:03AM +0900, Yoshiaki Tamura wrote:
+>>> 2011/3/29 Josh Durgin <josh.durgin@dreamhost.com>:
+>>> > The new format is rbd:pool/image[@snapshot][:option1=3Dvalue1[:op=
+tion2=3Dvalue2...]]
+>>> > Each option is used to configure rados, and may be any Ceph optio=
+n, or "conf".
+>>> > The "conf" option specifies a Ceph configuration file to read.
+>>> >
+>>> > This allows rbd volumes from more than one Ceph cluster to be use=
+d by
+>>> > specifying different monitor addresses, as well as having differe=
+nt
+>>> > logging levels or locations for different volumes.
+>>> >
+>>> > Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
+>>> > ---
+>>> > =A0block/rbd.c | =A0119 +++++++++++++++++++++++++++++++++++++++++=
++++++++++--------
+>>> > =A01 files changed, 102 insertions(+), 17 deletions(-)
+>>> >
+>>> > diff --git a/block/rbd.c b/block/rbd.c
+>>> > index cb76dd3..bc3323d 100644
+>>> > --- a/block/rbd.c
+>>> > +++ b/block/rbd.c
+>>> > @@ -22,13 +22,17 @@
+>>> > =A0/*
+>>> > =A0* When specifying the image filename use:
+>>> > =A0*
+>>> > - * rbd:poolname/devicename
+>>> > + * rbd:poolname/devicename[@snapshotname][:option1=3Dvalue1[:opt=
+ion2=3Dvalue2...]]
+>>>
+>>> I'm not sure IIUC, but currently this @snapshotname seems to be
+>>> meaningless; it doesn't allow you to boot from a snapshot because i=
+t's
+>>> read only. =A0Am I misunderstanding or tested incorrectly?
+>>
+>> Read-only block devices are supported by QEMU and can be useful.
+>
+> I agree. =A0My expectation was that @snapshotname is introduced to ha=
+ve
+> writable snapshot.
+>
+The RADOS backend doesn't support writable snapshots. However, down
+the rbd roadmap we plan to have layering which in a sense is writable
+snapshots. The whole shift to librbd was done so that introducing such
+new functionality will be transparent and will not require much or any
+changes in the qemu code.
 
-diff --git a/src/os/FileStore.cc b/src/os/FileStore.cc
-index 940662c..0fb99e6 100644
---- a/src/os/FileStore.cc
-+++ b/src/os/FileStore.cc
-@@ -1471,7 +1471,8 @@ void FileStore::start_logger(int whoami, utime_t tare)
-   char name[80];
-   snprintf(name, sizeof(name), "osd.%d.fs.log", whoami);
-   logger = new ProfLogger(name, (ProfLogType*)&fs_logtype);
--  journal->logger = logger;
-+  if (journal)
-+    journal->logger = logger;
-   logger_add(logger);  
-   logger_tare(tare);
-   logger_start();
-@@ -1481,7 +1482,8 @@ void FileStore::stop_logger()
- {
-   dout(10) << "stop_logger" << dendl;
-   if (logger) {
--    journal->logger = NULL;
-+    if (journal)
-+      journal->logger = NULL;
-     logger_remove(logger);
-     delete logger;
-     logger = NULL;
--- 
-1.7.4.2
-
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
