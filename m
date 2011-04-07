@@ -1,81 +1,52 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: [PATCH v2 2/2] rbd: allow configuration of rados from the rbd filename
-Date: Thu, 7 Apr 2011 09:16:02 -0700
-Message-ID: <BANLkTingpiVSTt6DpSwP-6hydGWDx8E=ag@mail.gmail.com>
-References: <6f9466b6098b5159aca9c789f9fce45f409e684f.1301354138.git.josh.durgin@dreamhost.com>
-	<99252a76de350c8123eebfe4fc01fc6a1c9b2383.1301354138.git.josh.durgin@dreamhost.com>
-	<BANLkTinZa+_FfZcyO54QE9W37PB___+m1g@mail.gmail.com>
-	<20110407084707.GA21871@stefanha-thinkpad.localdomain>
-	<BANLkTin=YxkHTz6Z-sQ00gyhHxghRXZQpg@mail.gmail.com>
+From: Josef Bacik <josef@redhat.com>
+Subject: Re: 2.6.39-rc1: btrfs "WARNING: at fs/btrfs/inode.c:2177"
+Date: Thu, 07 Apr 2011 12:20:15 -0400
+Message-ID: <4D9DE43F.3000809@redhat.com>
+References: <1302169286.1922.19.camel@cephhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed;
+ boundary="------------040507060007050700090606"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:37644 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751913Ab1DGQQE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 12:16:04 -0400
-In-Reply-To: <BANLkTin=YxkHTz6Z-sQ00gyhHxghRXZQpg@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:46700 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751606Ab1DGQX4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Apr 2011 12:23:56 -0400
+In-Reply-To: <1302169286.1922.19.camel@cephhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yoshiaki Tamura <tamura.yoshiaki@gmail.com>
-Cc: Stefan Hajnoczi <stefanha@gmail.com>, Josh Durgin <josh.durgin@dreamhost.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: cpwu@tnsoft.com.cn
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, linux-btrfs@vger.kernel.org
 
-On Thu, Apr 7, 2011 at 2:54 AM, Yoshiaki Tamura
-<tamura.yoshiaki@gmail.com> wrote:
-> 2011/4/7 Stefan Hajnoczi <stefanha@gmail.com>:
->> On Thu, Apr 07, 2011 at 10:14:03AM +0900, Yoshiaki Tamura wrote:
->>> 2011/3/29 Josh Durgin <josh.durgin@dreamhost.com>:
->>> > The new format is rbd:pool/image[@snapshot][:option1=3Dvalue1[:op=
-tion2=3Dvalue2...]]
->>> > Each option is used to configure rados, and may be any Ceph optio=
-n, or "conf".
->>> > The "conf" option specifies a Ceph configuration file to read.
->>> >
->>> > This allows rbd volumes from more than one Ceph cluster to be use=
-d by
->>> > specifying different monitor addresses, as well as having differe=
-nt
->>> > logging levels or locations for different volumes.
->>> >
->>> > Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
->>> > ---
->>> > =A0block/rbd.c | =A0119 +++++++++++++++++++++++++++++++++++++++++=
-+++++++++--------
->>> > =A01 files changed, 102 insertions(+), 17 deletions(-)
->>> >
->>> > diff --git a/block/rbd.c b/block/rbd.c
->>> > index cb76dd3..bc3323d 100644
->>> > --- a/block/rbd.c
->>> > +++ b/block/rbd.c
->>> > @@ -22,13 +22,17 @@
->>> > =A0/*
->>> > =A0* When specifying the image filename use:
->>> > =A0*
->>> > - * rbd:poolname/devicename
->>> > + * rbd:poolname/devicename[@snapshotname][:option1=3Dvalue1[:opt=
-ion2=3Dvalue2...]]
->>>
->>> I'm not sure IIUC, but currently this @snapshotname seems to be
->>> meaningless; it doesn't allow you to boot from a snapshot because i=
-t's
->>> read only. =A0Am I misunderstanding or tested incorrectly?
->>
->> Read-only block devices are supported by QEMU and can be useful.
->
-> I agree. =A0My expectation was that @snapshotname is introduced to ha=
-ve
-> writable snapshot.
->
-The RADOS backend doesn't support writable snapshots. However, down
-the rbd roadmap we plan to have layering which in a sense is writable
-snapshots. The whole shift to librbd was done so that introducing such
-new functionality will be transparent and will not require much or any
-changes in the qemu code.
+This is a multi-part message in MIME format.
+--------------040507060007050700090606
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 04/07/2011 05:41 AM, Jeff Wu wrote:
+> Hi ,
+> I run iozone stress test on a ceph client for x86_64, ceph 0.26 +
+> linux-2.6.39-rc1 server,
+> printk "WARNING: at fs/btrfs/inode.c:2177"
+>
+Crap I was hoping I had fixed this, could you run with this debug patch 
+and get me the output so I can figure out what's going on?  Thanks,
+
+Josef
+
+
+
+--------------040507060007050700090606
+Content-Type: text/plain;
+ name="debug.patch"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="debug.patch"
+
+ZGlmZiAtLWdpdCBhL2ZzL2J0cmZzL2V4dGVudC10cmVlLmMgYi9mcy9idHJmcy9leHRlbnQt
+dHJlZS5jCmluZGV4IGY2MTljM2MuLjc5ZWM5MzMgMTAwNjQ0Ci0tLSBhL2ZzL2J0cmZzL2V4
+dGVudC10cmVlLmMKKysrIGIvZnMvYnRyZnMvZXh0ZW50LXRyZWUuYwpAQCAtMzY5Niw2ICsz
+Njk2LDcgQEAgaW50IGJ0cmZzX2Jsb2NrX3Jzdl9hZGQoc3RydWN0IGJ0cmZzX3RyYW5zX2hh
+bmRsZSAqdHJhbnMsCiB7CiAJaW50IHJldDsKIAorCVdBUk5fT04oYmxvY2tfcnN2ID09IHJv
+b3QtPm9ycGhhbl9ibG9ja19yc3YpOwogCWlmIChudW1fYnl0ZXMgPT0gMCkKIAkJcmV0dXJu
+IDA7CiAK
+--------------040507060007050700090606--
