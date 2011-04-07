@@ -1,39 +1,34 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Where I can find the definition/meanings of options parameter
- in /src/common/config.cc
-Date: Thu, 7 Apr 2011 14:45:57 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104071444540.18507@cobra.newdream.net>
-References: <BANLkTi=WToqoND0BwkH-VMbC+muYSen3aQ@mail.gmail.com>
- <BANLkTikJXmVe08qzVDryXye9VAS71xwnsg@mail.gmail.com>
- <BANLkTinJ2dbPLnp8yP6eS2tPDXNC0as7cw@mail.gmail.com>
+Subject: Re: ceph-client-standalone.git
+Date: Thu, 7 Apr 2011 15:11:37 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1104071510220.18507@cobra.newdream.net>
+References: <1302164488.1922.11.camel@cephhost>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50580 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:51812 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753817Ab1DGVmi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 17:42:38 -0400
-In-Reply-To: <BANLkTinJ2dbPLnp8yP6eS2tPDXNC0as7cw@mail.gmail.com>
+	with ESMTP id S1755024Ab1DGWIS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 18:08:18 -0400
+In-Reply-To: <1302164488.1922.11.camel@cephhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: Colin McCabe <cmccabe@alumni.cmu.edu>, AnnyRen <annyren6@gmail.com>, ceph-devel@vger.kernel.org
+To: Jeff Wu <cpwu@tnsoft.com.cn>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, 7 Apr 2011, Yehuda Sadeh Weinraub wrote:
-> On Thu, Apr 7, 2011 at 9:33 AM, Colin McCabe <cmccabe@alumni.cmu.edu> wrote:
-> > Hi AnnyRen,
-> ...
-> > Also, after using injectargs to change a setting related to logging,
-> > you must send the process a SIGHUP to get it to re-read its logging
-> > settings.
-> 
-> I assume this is a relatively new requirement? Usually you'd send HUP
-> signal to re-read the conf file. When using injectargs, one would
-> assume that the new configuration was already updated. Moreover,
-> sending HUP signal to all your osds/mds/mons is awfully inconvenient.
-> Maybe we can just send the HUP signal in the appropriate handlers?
+Hi Jeff,
 
-It's just for logging parameters.  If you change log_file, for example, it 
-won't take effect until you SIGHUP and reopen the log.
+On Thu, 7 Apr 2011, Jeff Wu wrote:
+> Hi ,
+> we are using ceph-client-standalone.git,
+> i have seen that some bugs had been fixed at ceph-client.git ,
+> then, could you update these patchs to ceph-client-standalone.git ? 
 
+I've updated the tree to the latest ceph-client.git.  I haven't backported 
+the recent changes to old kernels, though.. that's a much more painful 
+process I don't have time for at the moment.  (Patches for that would be 
+welcome, of course!)
+
+Thanks!
 sage
+
