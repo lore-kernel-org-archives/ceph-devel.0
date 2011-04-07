@@ -1,35 +1,99 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: [PATCH] radosgw: Remove PHP setting from VirtualHost documentation
-Date: Thu,  7 Apr 2011 12:23:34 +0200
-Message-ID: <1302171814-7959-1-git-send-email-wido@widodh.nl>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: how to increase small file writes performance in ceph
+Date: Thu, 7 Apr 2011 21:55:20 +0800
+Message-ID: <BANLkTinj4RYa0gQ5Nyshv2_oKEei-kaU+Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary=20cf3071cd5ccb944104a0547565
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from hosted.by.pcextreme ([109.72.90.196]:32895 "EHLO
-	logger.ceph.widodh.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1752346Ab1DGKZL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 06:25:11 -0400
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:44053 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751661Ab1DGNzV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 09:55:21 -0400
+Received: by vxi39 with SMTP id 39so1933462vxi.19
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Apr 2011 06:55:21 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Wido den Hollander <wido@widodh.nl>
 
+--20cf3071cd5ccb944104a0547565
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Wido den Hollander <wido@widodh.nl>
----
- man/radosgw.8 |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
+hi=A3=ACdevelopers
+     Recently=A3=ACi test ceph's performance of writing small files,but the=
+ result
+seems not so good.
 
-diff --git a/man/radosgw.8 b/man/radosgw.8
-index 3eab509..316f5f2 100644
---- a/man/radosgw.8
-+++ b/man/radosgw.8
-@@ -33,7 +33,6 @@ An apache example configuration for using the RADOS gateway:
- 
-   <IfModule mod_fcgid.c>
-     SuexecUserGroup web1 web1
--    PHP_Fix_Pathinfo_Enable 1
-     <Directory /var/www/web1/web/>
-       Options +ExecCGI
-       AllowOverride All
--- 
-1.7.0.4
+i have 4 OSDs (on two hosts,each have two cosd process), and 4 clients,
+3 of them execute the zq.sh script,and 1 writes small files :
+ for i in {1..30000}; do
+         dd if=3D/dev/zero of=3D$i.txt bs=3D10M count=3D1
+     done
+and write speed is  about 7MB/s~12MB/s
+my ceph version 0.24.3
+linux kernel version 2.6.35
+i want to know that does the cluster size matters our write speed?
+does our filesystem good at small files writing?
 
+thanks!
+
+--20cf3071cd5ccb944104a0547565
+Content-Type: application/x-sh; name="zq.sh"
+Content-Disposition: attachment; filename="zq.sh"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gm7qvy4a0
+
+bWtkaXIgdDAKY2QgdDAKc3RyZGlyPSRQV0QKCmZvciBpIGluICQoc2VxIDEgOTk5OTkpCmRvCgog
+ICBzZXEgMTAgfCB4YXJncyAtaSBkZCBpZj0vZGV2L3plcm8gb2Y9JGl7fS5mJGkgYnM9MU0gY291
+bnQ9MTAKICAgZm9yIGogaW4gJChzZXEgMSAyMDApCiAgIGRvCiAgICAgIHNlcSAxMCB8IHhhcmdz
+IC1pIG1rZGlyICRpJGp7fS5kMQogICAgICBzZXEgMjAgfCB4YXJncyAtaSBta2RpciAkaSRqe30u
+ZDIKICAgICAgc2VxIDMwIHwgeGFyZ3MgLWkgbWtkaXIgJGkkant9LmQzCiAgICAgIHNlcSA0MCB8
+IHhhcmdzIC1pIG1rZGlyICRpJGp7fS5kNAogICAgICBzZXEgNTAgfCB4YXJncyAtaSBta2RpciAk
+aSRqe30uZDUKICAgICAgc2VxIDYwIHwgeGFyZ3MgLWkgbWtkaXIgJGkkant9LmQ2CiAgICAgIHNl
+cSA3MCB8IHhhcmdzIC1pIG1rZGlyICRpJGp7fS5kOAogICAgICBzZXEgNzAgfCB4YXJncyAtaSBk
+ZCBpZj0vZGV2L3plcm8gb2Y9JGkkant9LmYyIGJzPTFrIGNvdW50PTIKICAgICAgc2VxIDEwIHwg
+eGFyZ3MgLWkgZGQgaWY9L2Rldi96ZXJvIG9mPSRpJGp7fS5mMSBicz0xayBjb3VudD0xMAogICAg
+ICBzZXEgNjAgfCB4YXJncyAtaSBkZCBpZj0vZGV2L3plcm8gb2Y9JGkkant9LmYzIGJzPTFrIGNv
+dW50PTMKICAgICAgc2VxIDUwIHwgeGFyZ3MgLWkgZGQgaWY9L2Rldi96ZXJvIG9mPSRpJGp7fS5m
+NCBicz0xayBjb3VudD00MAogICAgICBzZXEgNDAgfCB4YXJncyAtaSBkZCBpZj0vZGV2L3plcm8g
+b2Y9JGkkant9LmY1IGJzPTFrIGNvdW50PTUKICAgICAgc2VxIDMwIHwgeGFyZ3MgLWkgZGQgaWY9
+L2Rldi96ZXJvIG9mPSRpJGp7fS5mNiBicz0xayBjb3VudD02CiAgICAgIHNlcSAyMCB8IHhhcmdz
+IC1pIGRkIGlmPS9kZXYvemVybyBvZj0kaSRqe30uZjcgYnM9MWsgY291bnQ9NwogICAgICBzZXEg
+MTAgfCB4YXJncyAtaSBkZCBpZj0vZGV2L3plcm8gb2Y9JGkkant9LmY4IGJzPTFrIGNvdW50PTgK
+ICAgZG9uZQogCiAgIGZvciBqIGluICQoc2VxIDEgOTk5KQogICBkbwogICAgICBta2RpciBkJGkk
+agogICAgICBjZCBkJGkkagogICAgICBzZXEgMTAgfCB4YXJncyAtaSBta2RpciAkaSRqe30uZDEK
+ICAgICAgc2VxIDIwIHwgeGFyZ3MgLWkgbWtkaXIgJGkkant9LmQyCiAgICAgIHNlcSAzMCB8IHhh
+cmdzIC1pIG1rZGlyICRpJGp7fS5kMwogICAgICBzZXEgNDAgfCB4YXJncyAtaSBta2RpciAkaSRq
+e30uZDQKICAgICAgc2VxIDUwIHwgeGFyZ3MgLWkgbWtkaXIgJGkkant9LmQ1CiAgICAgIHNlcSA2
+MCB8IHhhcmdzIC1pIG1rZGlyICRpJGp7fS5kNgogICAgICBzZXEgNzAgfCB4YXJncyAtaSBta2Rp
+ciAkaSRqe30uZDgKICAgICAgc2VxIDgwIHwgeGFyZ3MgLWkgZGQgaWY9L2Rldi96ZXJvIG9mPSRp
+JGp7fS5mMSBicz0xayBjb3VudD0xCiAgICAgIHNlcSA3MCB8IHhhcmdzIC1pIGRkIGlmPS9kZXYv
+emVybyBvZj0kaSRqe30uZjIgYnM9MU0gY291bnQ9MgogICAgICBzZXEgNjAgfCB4YXJncyAtaSBk
+ZCBpZj0vZGV2L3plcm8gb2Y9JGkkant9LmYzIGJzPTFrIGNvdW50PTMKICAgICAgc2VxIDUwIHwg
+eGFyZ3MgLWkgZGQgaWY9L2Rldi96ZXJvIG9mPSRpJGp7fS5mNCBicz0xayBjb3VudD00CiAgICAg
+IHNlcSA0MCB8IHhhcmdzIC1pIGRkIGlmPS9kZXYvemVybyBvZj0kaSRqe30uZjUgYnM9MU0gY291
+bnQ9NQogICAgICBzZXEgMzAgfCB4YXJncyAtaSBkZCBpZj0vZGV2L3plcm8gb2Y9JGkkant9LmY2
+IGJzPTFrIGNvdW50PTYKICAgICAgc2VxIDIwIHwgeGFyZ3MgLWkgZGQgaWY9L2Rldi96ZXJvIG9m
+PSRpJGp7fS5mNyBicz0xayBjb3VudD03CiAgICAgIHNlcSAxMCB8IHhhcmdzIC1pIGRkIGlmPS9k
+ZXYvemVybyBvZj0kaSRqe30uZjggYnM9MU0gY291bnQ9OAogICBkb25lCiAgIGNkICRzdHJkaXIK
+ICAgCiAgIGRkIGlmPS9kZXYvemVybyBvZj0kaS5hZGRmaWxlIGJzPTFNIGNvdW50PTEwCiAgIGZv
+ciBrIGluICQoc2VxIDEgOTk5OTkpCiAgIGRvCiAgICAgICBlY2hvICIxMjM0NTY3ODkwYWJjZGVm
+Z2hpamtsbW5vcHFyc3R1dnd4eXoiID4+ICRpLmFkZGZpbGUKICAgZG9uZQoKICAgc2VxIDkwIHwg
+eGFyZ3MgLWkgbWtkaXIgenEkaXt9LmRpcgogICBzZXEgOTAgfCB4YXJncyAtaSBkZCBpZj0vZGV2
+L3plcm8gb2Y9enEkaS5maWxlIGJzPTFrIGNvdW50PTEKICAgZGQgaWY9L2Rldi96ZXJvIG9mPXpx
+dGVzdCBicz0xTSBjb3VudD01MAogICBjaG1vZCA3NzcgenF0ZXN0CiAgIGZvciBsIGluICQoc2Vx
+IDEgMjAwKQogICBkbwogICAgICBta2RpciB6cTEkaSRsCiAgICAgIGNkIHpxMSRpJGwKICAgICAg
+c2VxIDEwIHwgeGFyZ3MgLWkgbWtkaXIgenEye30uZDEKICAgICAgc2VxIDIwIHwgeGFyZ3MgLWkg
+bWtkaXIgenEye30uZDIKICAgICAgc2VxIDMwIHwgeGFyZ3MgLWkgbWtkaXIgenEye30uZDMKICAg
+ICAgc2VxIDQwIHwgeGFyZ3MgLWkgbWtkaXIgenEye30uZDQKICAgICAgc2VxIDUwIHwgeGFyZ3Mg
+LWkgbWtkaXIgenEye30uZDUKICAgICAgc2VxIDcwIHwgeGFyZ3MgLWkgZGQgaWY9L2Rldi96ZXJv
+IG9mPXpxM3t9LmYxIGJzPTFrIGNvdW50PTEKICAgICAgc2VxIDYwIHwgeGFyZ3MgLWkgZGQgaWY9
+L2Rldi96ZXJvIG9mPXpxM3t9LmYyIGJzPTFrIGNvdW50PTEwCiAgICAgIHNlcSA1MCB8IHhhcmdz
+IC1pIGRkIGlmPS9kZXYvemVybyBvZj16cTN7fS5mMyBicz0xayBjb3VudD0yMAogICAgICBzZXEg
+NDAgfCB4YXJncyAtaSBkZCBpZj0vZGV2L3plcm8gb2Y9enEze30uZjQgYnM9MWsgY291bnQ9MzAK
+ICAgICAgc2VxIDMwIHwgeGFyZ3MgLWkgZGQgaWY9L2Rldi96ZXJvIG9mPXpxM3t9LmY1IGJzPTFN
+IGNvdW50PTEKICAgICAgc2VxIDIwIHwgeGFyZ3MgLWkgZGQgaWY9L2Rldi96ZXJvIG9mPXpxM3t9
+LmY2IGJzPTFNIGNvdW50PTEwCiAgICAgIHNlcSAxMCB8IHhhcmdzIC1pIGRkIGlmPS9kZXYvemVy
+byBvZj16cTN7fS5mNyBicz0xTSBjb3VudD0yMAogICBkb25lCiAgIGNkICRzdHJkaXIKICAgcm0g
+LXJmIHpxKgpkb25lICAgCg==
+--20cf3071cd5ccb944104a0547565--
