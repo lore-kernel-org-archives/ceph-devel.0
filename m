@@ -1,48 +1,67 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] radosgw: Remove PHP setting from VirtualHost documentation
-Date: Thu, 7 Apr 2011 14:36:13 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104071436070.18507@cobra.newdream.net>
-References: <1302171814-7959-1-git-send-email-wido@widodh.nl>
+Subject: Re: [PATCH] Don't crash during initialization when working without
+ an osd journal.
+Date: Thu, 7 Apr 2011 14:40:47 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1104071440420.18507@cobra.newdream.net>
+References: <ortyeayxvm.fsf@livre.localdomain>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47994 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46679 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752003Ab1DGVcy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 17:32:54 -0400
-In-Reply-To: <1302171814-7959-1-git-send-email-wido@widodh.nl>
+	with ESMTP id S1752450Ab1DGVh1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Apr 2011 17:37:27 -0400
+In-Reply-To: <ortyeayxvm.fsf@livre.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
+To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 Cc: ceph-devel@vger.kernel.org
 
 Applied, thanks!
 
 sage
 
-On Thu, 7 Apr 2011, Wido den Hollander wrote:
 
-> 
-> Signed-off-by: Wido den Hollander <wido@widodh.nl>
+On Thu, 7 Apr 2011, Alexandre Oliva wrote:
+
+> Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 > ---
->  man/radosgw.8 |    1 -
->  1 files changed, 0 insertions(+), 1 deletions(-)
+>  src/os/FileStore.cc |    6 ++++--
+>  1 files changed, 4 insertions(+), 2 deletions(-)
 > 
-> diff --git a/man/radosgw.8 b/man/radosgw.8
-> index 3eab509..316f5f2 100644
-> --- a/man/radosgw.8
-> +++ b/man/radosgw.8
-> @@ -33,7 +33,6 @@ An apache example configuration for using the RADOS gateway:
->  
->    <IfModule mod_fcgid.c>
->      SuexecUserGroup web1 web1
-> -    PHP_Fix_Pathinfo_Enable 1
->      <Directory /var/www/web1/web/>
->        Options +ExecCGI
->        AllowOverride All
+> diff --git a/src/os/FileStore.cc b/src/os/FileStore.cc
+> index 940662c..0fb99e6 100644
+> --- a/src/os/FileStore.cc
+> +++ b/src/os/FileStore.cc
+> @@ -1471,7 +1471,8 @@ void FileStore::start_logger(int whoami, utime_t tare)
+>    char name[80];
+>    snprintf(name, sizeof(name), "osd.%d.fs.log", whoami);
+>    logger = new ProfLogger(name, (ProfLogType*)&fs_logtype);
+> -  journal->logger = logger;
+> +  if (journal)
+> +    journal->logger = logger;
+>    logger_add(logger);  
+>    logger_tare(tare);
+>    logger_start();
+> @@ -1481,7 +1482,8 @@ void FileStore::stop_logger()
+>  {
+>    dout(10) << "stop_logger" << dendl;
+>    if (logger) {
+> -    journal->logger = NULL;
+> +    if (journal)
+> +      journal->logger = NULL;
+>      logger_remove(logger);
+>      delete logger;
+>      logger = NULL;
 > -- 
-> 1.7.0.4
+> 1.7.4.2
 > 
+> 
+> -- 
+> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+> You must be the change you wish to see in the world. -- Gandhi
+> Be Free! -- http://FSFLA.org/   FSF Latin America board member
+> Free Software Evangelist      Red Hat Brazil Compiler Engineer
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
