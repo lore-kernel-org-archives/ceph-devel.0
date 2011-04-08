@@ -1,101 +1,167 @@
-From: Mark Nigh <mnigh@netelligent.com>
+From: Wido den Hollander <wido@widodh.nl>
 Subject: RE: PGs Degraded
-Date: Fri, 8 Apr 2011 14:41:06 -0500
-Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCBA@NC-SVR-09.netelligent.com>
+Date: Fri, 08 Apr 2011 22:14:25 +0200
+Message-ID: <1302293665.1597.2.camel@Nokia-N900-02-8>
 References: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCA2@NC-SVR-09.netelligent.com>
- <1302287897.2444.4.camel@wido-laptop.pcextreme.nl>
+	 <1302287897.2444.4.camel@wido-laptop.pcextreme.nl>
+	  <B828A4C02BE12543ACDFCF7EB0C693C6788452CCBA@NC-SVR-09.netelligent.com>
+Reply-To: Wido den Hollander <wido@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.netelligent.com ([199.255.228.152]:29044 "EHLO
-	NC-SVR-132.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1757775Ab1DHTlT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 15:41:19 -0400
-In-Reply-To: <1302287897.2444.4.camel@wido-laptop.pcextreme.nl>
-Content-Language: en-US
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:48795 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757779Ab1DHUP6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 16:15:58 -0400
+In-Reply-To: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCBA@NC-SVR-09.netelligent.com>
+Content-ID: <1302293665.1597.1.camel@Nokia-N900-02-8>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nigh <mnigh@netelligent.com>
+Cc: ceph-devel@vger.kernel.org
 
-SGVyZSBpcyB0aGUgb3V0cHV0IGZyb20gY2VwaCBvc2QgZHVtcCAtbyAtDQoNCmVwb2NoIDE5DQpm
-c2lkIGMyYWU3YWIyLWQxYjItYTQ2Ny1iZTZlLWY5YTAwMzE4NDBmNQ0KY3JlYXRlZCAyMDExLTA0
-LTA0IDEzOjI3OjA2Ljg1Nzk1MA0KbW9kaWZlZCAyMDExLTA0LTA4IDE0OjExOjA1Ljg5OTU5Ng0K
-ZmxhZ3MNCg0KcGdfcG9vbCAwICdkYXRhJyBwZ19wb29sKHJlcCBwZ19zaXplIDIgY3J1c2hfcnVs
-ZXNldCAwIG9iamVjdF9oYXNoIHJqZW5raW5zIHBnX251bSA2NCBwZ3BfbnVtIDY0IGxwZ19udW0g
-MiBscGdwX251bSAyIGxhc3RfY2hhbmdlIDEgb3duZXIgMCkNCnBnX3Bvb2wgMSAnbWV0YWRhdGEn
-IHBnX3Bvb2wocmVwIHBnX3NpemUgMiBjcnVzaF9ydWxlc2V0IDEgb2JqZWN0X2hhc2ggcmplbmtp
-bnMgcGdfbnVtIDY0IHBncF9udW0gNjQgbHBnX251bSAyIGxwZ3BfbnVtIDIgbGFzdF9jaGFuZ2Ug
-MSBvd25lciAwKQ0KcGdfcG9vbCAyICdjYXNkYXRhJyBwZ19wb29sKHJlcCBwZ19zaXplIDIgY3J1
-c2hfcnVsZXNldCAyIG9iamVjdF9oYXNoIHJqZW5raW5zIHBnX251bSA2NCBwZ3BfbnVtIDY0IGxw
-Z19udW0gMiBscGdwX251bSAyIGxhc3RfY2hhbmdlIDEgb3duZXIgMCkNCnBnX3Bvb2wgMyAncmJk
-JyBwZ19wb29sKHJlcCBwZ19zaXplIDIgY3J1c2hfcnVsZXNldCAzIG9iamVjdF9oYXNoIHJqZW5r
-aW5zIHBnX251bSA2NCBwZ3BfbnVtIDY0IGxwZ19udW0gMiBscGdwX251bSAyIGxhc3RfY2hhbmdl
-IDEgb3duZXIgMCkNCg0KbWF4X29zZCA2DQpvc2QwIHVwICAgaW4gIHdlaWdodCAxIHVwX2Zyb20g
-MTQgdXBfdGhydSAwIGRvd25fYXQgMTMgbGFzdF9jbGVhbl9pbnRlcnZhbCAxMC0xMiAxMC42LjEu
-OTI6NjgwMC8xNzY0MSAxMC42LjEuOTI6NjgwMS8xNzY0MSAxMC42LjEuOTI6NjgwMi8xNzY0MQ0K
-b3NkMSB1cCAgIGluICB3ZWlnaHQgMSB1cF9mcm9tIDQgdXBfdGhydSA2IGRvd25fYXQgMCBsYXN0
-X2NsZWFuX2ludGVydmFsIDAtMCAxMC42LjEuOTM6NjgwMC8zMTEwNiAxMC42LjEuOTM6NjgwMS8z
-MTEwNiAxMC42LjEuOTM6NjgwMi8zMTEwNg0Kb3NkMiB1cCAgIGluICB3ZWlnaHQgMSB1cF9mcm9t
-IDE3IHVwX3RocnUgMCBkb3duX2F0IDE2IGxhc3RfY2xlYW5faW50ZXJ2YWwgMTUtMTYgMTAuNi4x
-Ljk0OjY4MDAvMjc0MCAxMC42LjEuOTQ6NjgwMy8yNzQwIDEwLjYuMS45NDo2ODA0LzI3NDANCm9z
-ZDMgdXAgICBpbiAgd2VpZ2h0IDEgdXBfZnJvbSAxOCB1cF90aHJ1IDAgZG93bl9hdCAwIGxhc3Rf
-Y2xlYW5faW50ZXJ2YWwgMC0wIDEwLjYuMS45NTo2ODAwLzMyMDM4IDEwLjYuMS45NTo2ODAxLzMy
-MDM4IDEwLjYuMS45NTo2ODAyLzMyMDM4DQoNCkkgaGF2ZSBub3QgcmVtb3ZlZCBhbnkgT1NEcyBm
-cm9tIHRoZSBjbHVzdGVyLiBJIGNyZWF0ZWQgdGhlIGNsdXN0ZXIgd2l0aCBhIHNpbmdsZSBtZHMv
-bW9uIGFuZCB0aGV5IGhhdmUgYmVlbiBhZGRpbmcgb3NkIHNsb3dseS4NCg0KTWFyayBOaWdoDQpT
-eXN0ZW1zIEFyY2hpdGVjdA0KbW5pZ2hAbmV0ZWxsaWdlbnQuY29tDQogKHApIDMxNC4zOTIuNjky
-Ng0KDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFdpZG8gZGVuIEhvbGxh
-bmRlciBbbWFpbHRvOndpZG9Ad2lkb2RoLm5sXQ0KU2VudDogRnJpZGF5LCBBcHJpbCAwOCwgMjAx
-MSAxOjM4IFBNDQpUbzogTWFyayBOaWdoDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
-ClN1YmplY3Q6IFJlOiBQR3MgRGVncmFkZWQNCg0KSGkgTWFyaywNCg0KT24gRnJpLCAyMDExLTA0
-LTA4IGF0IDEyOjA5IC0wNTAwLCBNYXJrIE5pZ2ggd3JvdGU6DQo+IEkgaGF2ZSByZWNlbnRseSBi
-dWlsdCBhIGNlcGggY2x1c3RlciB3aXRoIHRoZSBmb2xsb3dpbmcgbm9kZXM6DQo+DQo+IDIwMTEt
-MDQtMDggMTE6NTQ6MDguMDM4ODQxICAgIHBnIHYzNjYxOiAyNjQgcGdzOiAyNjQgYWN0aXZlK2Ns
-ZWFuK2RlZ3JhZGVkOyA5MDc5IE1CIGRhdGEsIDkyMzQgTUIgdXNlZCwgODExIEdCIC8gODIwIEdC
-IGF2YWlsOyAyMzE5LzQ2MzggZGVncmFkZWQgKDUwLjAwMCUpDQo+IDIwMTEtMDQtMDggMTE6NTQ6
-MDguMDM5NDkyICAgbWRzIGUxNzogMi8yLzIgdXAgezA9dXA6YWN0aXZlLDE9dXA6YWN0aXZlfQ0K
-PiAyMDExLTA0LTA4IDExOjU0OjA4LjAzOTUyOSAgIG9zZCBlMTg6IDQgb3NkczogNCB1cCwgNCBp
-bg0KPiAyMDExLTA0LTA4IDExOjU0OjA4LjAzOTU5MiAgIGxvZyAyMDExLTA0LTA4IDEwOjA4OjA5
-LjEzNTk5NCBtZHMwIDEwLjYuMS45MDo2ODAwLzE2NzYxIDQgOiBbSU5GXSBjbG9zaW5nIHN0YWxl
-IHNlc3Npb24gY2xpZW50NDE0MiAxMC42LjEuNjI6MC82NjcxNDM3NjMgYWZ0ZXIgMzA0LjUyNDg2
-OQ0KPiAyMDExLTA0LTA4IDExOjU0OjA4LjAzOTY3MyAgIG1vbiBlMTogMSBtb25zIGF0IHswPTEw
-LjYuMS45MDo2Nzg5LzB9DQo+DQoNClRoYXQgc2VlbXMgb2RkLCB5b3VyICAiZGF0YSIgaXMgb25s
-eSAyMDBNQiBsZXNzIHRoZW4gInVzZWQiLiBXaGF0IGlzIHRoZQ0KcmVwbGljYXRpb24gc2l6ZSBm
-b3IgdGhlICJkYXRhIiBhbmQgIm1ldGFkYXRhIiBwb29sPw0KDQokIGNlcGggb3NkIGR1bXAgLW8g
-LSAocmVwIHBnX3NpemUpDQoNCj4gSSBoYXZlIGEgZmV3IGZpbGVzIGluIHRoZSBjbHVzdGVyIChu
-b3QgbXVjaCBkYXRhKSBidXQgaGF2ZSBub3RpY2VkIGZyb20gdGhlIGJlZ2lubmluZyBvZiB0aGUg
-YnVpbGQgKGFmdGVyIHRoZSAyIG9zZCkgdGhhdCBzb21lIG9mIG15IFBHcyBhcmUgZGVncmFkZWQu
-DQo+DQo+IEhvdyBkbyBJIGZpeCB0aGlzIGFuZCBpcyB0aGVyZSBhIHRvb2wvY29tbWFuZCB0byBh
-c3Npc3QgaW4gZGV0ZXJtaW5pbmcgd2hhdCBQR3MgYXJlIGRlZ3JhZGVkPw0KDQpZb3UgY2FuIHZp
-ZXcgeW91ciBkZWdyYWRlZCBwZydzIHdpdGg6DQoNCiQgY2VwaCBwZyBkdW1wIC1vIC0NCg0KVGhp
-cyB3aWxsIHRlbGwgeW91IHRoZSBkZWdyYWRlZCBQRydzIGFuZCBvbiB3aGljaCBPU0QncyB0aGV5
-IGFyZS4NCg0KRGlkIHlvdSByZW1vdmUgYW55IE9TRCdzIGZyb20gdGhpcyBjbHVzdGVyPyBJdCBz
-ZWVtcyB2ZXJ5IG9kZCB0aGF0IHRoZQ0KY2x1c3RlciBpcyBpbiBhIDUwJSBkZWdyYWRlZCBzdGF0
-ZS4NCg0KV2lkbw0KDQo+DQo+IENlcGggLXYgaXMgYXMgZm9sbG93czoNCj4NCj4gY2VwaCB2ZXJz
-aW9uIDAuMjYgKGNvbW1pdDo5OTgxZmY5MDk2ODM5OGRhNDNjNjMxMDY2OTRkNjYxZjVlM2QwN2Q1
-KQ0KPg0KPiBJIGFwcHJlY2lhdGUgdGhlIGhlbHAuDQo+DQo+IE1hcmsgTmlnaA0KPg0KPiBUaGlz
-IHRyYW5zbWlzc2lvbiBhbmQgYW55IGF0dGFjaGVkIGZpbGVzIGFyZSBwcml2aWxlZ2VkLCBjb25m
-aWRlbnRpYWwgb3Igb3RoZXJ3aXNlIHRoZSBleGNsdXNpdmUgcHJvcGVydHkgb2YgdGhlIGludGVu
-ZGVkIHJlY2lwaWVudCBvciBOZXRlbGxpZ2VudCBDb3Jwb3JhdGlvbi4gSWYgeW91IGFyZSBub3Qg
-dGhlIGludGVuZGVkIHJlY2lwaWVudCwgYW55IGRpc2Nsb3N1cmUsIGNvcHlpbmcsIGRpc3RyaWJ1
-dGlvbiBvciB1c2Ugb2YgYW55IG9mIHRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gb3IgYXR0
-YWNoZWQgdG8gdGhpcyB0cmFuc21pc3Npb24gaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91
-IGhhdmUgcmVjZWl2ZWQgdGhpcyB0cmFuc21pc3Npb24gaW4gZXJyb3IsIHBsZWFzZSBjb250YWN0
-IHVzIGltbWVkaWF0ZWx5IGJ5IHJlc3BvbmRpbmcgdG8gdGhpcyBtZXNzYWdlIG9yIGJ5IHRlbGVw
-aG9uZSAoMzE0LTM5Mi02OTAwKSBhbmQgcHJvbXB0bHkgZGVzdHJveSB0aGUgb3JpZ2luYWwgdHJh
-bnNtaXNzaW9uIGFuZCBpdHMgYXR0YWNobWVudHMuDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0K
-PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBN
-b3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwNCg0KDQoNClRoaXMgdHJhbnNtaXNzaW9uIGFuZCBhbnkgYXR0YWNoZWQgZmlsZXMg
-YXJlIHByaXZpbGVnZWQsIGNvbmZpZGVudGlhbCBvciBvdGhlcndpc2UgdGhlIGV4Y2x1c2l2ZSBw
-cm9wZXJ0eSBvZiB0aGUgaW50ZW5kZWQgcmVjaXBpZW50IG9yIE5ldGVsbGlnZW50IENvcnBvcmF0
-aW9uLiBJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCBhbnkgZGlzY2xvc3Vy
-ZSwgY29weWluZywgZGlzdHJpYnV0aW9uIG9yIHVzZSBvZiBhbnkgb2YgdGhlIGluZm9ybWF0aW9u
-IGNvbnRhaW5lZCBpbiBvciBhdHRhY2hlZCB0byB0aGlzIHRyYW5zbWlzc2lvbiBpcyBzdHJpY3Rs
-eSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIHRyYW5zbWlzc2lvbiBpbiBl
-cnJvciwgcGxlYXNlIGNvbnRhY3QgdXMgaW1tZWRpYXRlbHkgYnkgcmVzcG9uZGluZyB0byB0aGlz
-IG1lc3NhZ2Ugb3IgYnkgdGVsZXBob25lICgzMTQtMzkyLTY5MDApIGFuZCBwcm9tcHRseSBkZXN0
-cm95IHRoZSBvcmlnaW5hbCB0cmFuc21pc3Npb24gYW5kIGl0cyBhdHRhY2htZW50cy4NCg==
+Hi,
+----- Original message -----
+> Here is the output from ceph osd dump -o -
+>=20
+> epoch 19
+> fsid c2ae7ab2-d1b2-a467-be6e-f9a0031840f5
+> created 2011-04-04 13:27:06.857950
+> modifed 2011-04-08 14:11:05.899596
+> flags
+>=20
+> pg_pool 0 'data' pg_pool(rep pg_size 2 crush_ruleset 0 object_hash
+> rjenkins pg_num 64 pgp_num 64 lpg_num 2 lpgp_num 2 last_change 1 owne=
+r
+> 0) pg_pool 1 'metadata' pg_pool(rep pg_size 2 crush_ruleset 1
+> object_hash rjenkins pg_num 64 pgp_num 64 lpg_num 2 lpgp_num 2
+> last_change 1 owner 0) pg_pool 2 'casdata' pg_pool(rep pg_size 2
+> crush_ruleset 2 object_hash rjenkins pg_num 64 pgp_num 64 lpg_num 2
+> lpgp_num 2 last_change 1 owner 0) pg_pool 3 'rbd' pg_pool(rep pg_size=
+ 2
+> crush_ruleset 3 object_hash rjenkins pg_num 64 pgp_num 64 lpg_num 2
+> lpgp_num 2 last_change 1 owner 0)
+>=20
+> max_osd 6
+
+Did you change the max_osd yourself? The replication size seem correct.
+
+> I have not removed any OSDs from the cluster. I created the cluster w=
+ith
+> a single mds/mon and they have been adding osd slowly.
+
+Did you start with one osd initially? Did you add the new OSD's to the =
+crushmap after adding them to the cluster.
+
+Wido
+
+>=20
+> Mark Nigh
+> Systems Architect
+> mnigh@netelligent.com
+>=C2=A0  (p) 314.392.6926
+>=20
+>=20
+>=20
+> -----Original Message-----
+> From: Wido den Hollander [mailto:wido@widodh.nl]
+> Sent: Friday, April 08, 2011 1:38 PM
+> To: Mark Nigh
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: PGs Degraded
+>=20
+> Hi Mark,
+>=20
+> On Fri, 2011-04-08 at 12:09 -0500, Mark Nigh wrote:
+> > I have recently built a ceph cluster with the following nodes:
+> >=20
+> > 2011-04-08 11:54:08.038841=C2=A0 =C2=A0 =C2=A0  pg v3661: 264 pgs: =
+264
+> > active+clean+degraded; 9079 MB data, 9234 MB used, 811 GB / 820 GB
+> > avail; 2319/4638 degraded (50.000%) 2011-04-08 11:54:08.039492=C2=A0=
+ =C2=A0  mds
+> > e17: 2/2/2 up {0=3Dup:active,1=3Dup:active} 2011-04-08 11:54:08.039=
+529=C2=A0 =20
+> > osd e18: 4 osds: 4 up, 4 in 2011-04-08 11:54:08.039592=C2=A0 =C2=A0=
+  log
+> > 2011-04-08 10:08:09.135994 mds0 10.6.1.90:6800/16761 4 : [INF] clos=
+ing
+> > stale session client4142 10.6.1.62:0/667143763 after 304.524869
+> > 2011-04-08 11:54:08.039673=C2=A0 =C2=A0  mon e1: 1 mons at {0=3D10.=
+6.1.90:6789/0}
+> >=20
+>=20
+> That seems odd, your=C2=A0  "data" is only 200MB less then "used". Wh=
+at is the
+> replication size for the "data" and "metadata" pool?
+>=20
+> $ ceph osd dump -o - (rep pg_size)
+>=20
+> > I have a few files in the cluster (not much data) but have noticed
+> > from the beginning of the build (after the 2 osd) that some of my P=
+Gs
+> > are degraded.
+> >=20
+> > How do I fix this and is there a tool/command to assist in determin=
+ing
+> > what PGs are degraded?
+>=20
+> You can view your degraded pg's with:
+>=20
+> $ ceph pg dump -o -
+>=20
+> This will tell you the degraded PG's and on which OSD's they are.
+>=20
+> Did you remove any OSD's from this cluster? It seems very odd that th=
+e
+> cluster is in a 50% degraded state.
+>=20
+> Wido
+>=20
+> >=20
+> > Ceph -v is as follows:
+> >=20
+> > ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+> >=20
+> > I appreciate the help.
+> >=20
+> > Mark Nigh
+> >=20
+> > This transmission and any attached files are privileged, confidenti=
+al
+> > or otherwise the exclusive property of the intended recipient or
+> > Netelligent Corporation. If you are not the intended recipient, any
+> > disclosure, copying, distribution or use of any of the information
+> > contained in or attached to this transmission is strictly prohibite=
+d.
+> > If you have received this transmission in error, please contact us
+> > immediately by responding to this message or by telephone
+> > (314-392-6900) and promptly destroy the original transmission and i=
+ts
+> > attachments. -- To unsubscribe from this list: send the line
+> > "unsubscribe ceph-devel" in the body of a message to
+> > majordomo@vger.kernel.org More majordomo info at=20
+> > http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+>=20
+> This transmission and any attached files are privileged, confidential=
+ or
+> otherwise the exclusive property of the intended recipient or
+> Netelligent Corporation. If you are not the intended recipient, any
+> disclosure, copying, distribution or use of any of the information
+> contained in or attached to this transmission is strictly prohibited.=
+ If
+> you have received this transmission in error, please contact us
+> immediately by responding to this message or by telephone (314-392-69=
+00)
+> and promptly destroy the original transmission and its attachments.
+> NrybX=C7=A7v^)=DE=BA{.n+z]z{ay=1D=CA=87=DA=99,jfhz=1Ew j:+vwjmzZ+=DD=A2=
+j"!
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
