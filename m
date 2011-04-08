@@ -1,120 +1,152 @@
-From: Mark Nigh <mnigh@netelligent.com>
-Subject: RE: PGs Degraded
-Date: Fri, 8 Apr 2011 15:20:53 -0500
-Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCC8@NC-SVR-09.netelligent.com>
-References: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCA2@NC-SVR-09.netelligent.com>
-	 <1302287897.2444.4.camel@wido-laptop.pcextreme.nl>
-	  <B828A4C02BE12543ACDFCF7EB0C693C6788452CCBA@NC-SVR-09.netelligent.com>
- <1302293665.1597.2.camel@Nokia-N900-02-8>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
+Date: Fri, 8 Apr 2011 13:50:53 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1104081343460.15928@cobra.newdream.net>
+References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com> <1297893011.25491.124.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net> <4D9F367B.1070904@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.netelligent.com ([199.255.228.152]:29225 "EHLO
-	NC-SVR-132.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1757799Ab1DHUVN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 16:21:13 -0400
-In-Reply-To: <1302293665.1597.2.camel@Nokia-N900-02-8>
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:54934 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757867Ab1DHUrc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 16:47:32 -0400
+In-Reply-To: <4D9F367B.1070904@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SSBmb3VuZCB0aGUgcHJvYmxlbS4gTXkgY3J1c2ggbWFwIGhhZCBvbmx5IG9uZSAoMSkgZGV2aWNl
-ICh0aGUgZmlyc3Qgb3NkKSBpbiBpdC4gSSBoYXZlIGFkZGVkIHRoZSBvdGhlciB0aHJlZSAoMykg
-YW5kIG5vdyBJIGFtIGFjdGl2ZStjbGVhbg0KDQpNYXJrIE5pZ2gNClN5c3RlbXMgQXJjaGl0ZWN0
-DQptbmlnaEBuZXRlbGxpZ2VudC5jb20NCiAocCkgMzE0LjM5Mi42OTI2DQoNCg0KDQotLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogV2lkbyBkZW4gSG9sbGFuZGVyIFttYWlsdG86d2lk
-b0B3aWRvZGgubmxdDQpTZW50OiBGcmlkYXksIEFwcmlsIDA4LCAyMDExIDM6MTQgUE0NClRvOiBN
-YXJrIE5pZ2gNCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUkU6IFBH
-cyBEZWdyYWRlZA0KDQpIaSwNCi0tLS0tIE9yaWdpbmFsIG1lc3NhZ2UgLS0tLS0NCj4gSGVyZSBp
-cyB0aGUgb3V0cHV0IGZyb20gY2VwaCBvc2QgZHVtcCAtbyAtDQo+DQo+IGVwb2NoIDE5DQo+IGZz
-aWQgYzJhZTdhYjItZDFiMi1hNDY3LWJlNmUtZjlhMDAzMTg0MGY1DQo+IGNyZWF0ZWQgMjAxMS0w
-NC0wNCAxMzoyNzowNi44NTc5NTANCj4gbW9kaWZlZCAyMDExLTA0LTA4IDE0OjExOjA1Ljg5OTU5
-Ng0KPiBmbGFncw0KPg0KPiBwZ19wb29sIDAgJ2RhdGEnIHBnX3Bvb2wocmVwIHBnX3NpemUgMiBj
-cnVzaF9ydWxlc2V0IDAgb2JqZWN0X2hhc2gNCj4gcmplbmtpbnMgcGdfbnVtIDY0IHBncF9udW0g
-NjQgbHBnX251bSAyIGxwZ3BfbnVtIDIgbGFzdF9jaGFuZ2UgMSBvd25lcg0KPiAwKSBwZ19wb29s
-IDEgJ21ldGFkYXRhJyBwZ19wb29sKHJlcCBwZ19zaXplIDIgY3J1c2hfcnVsZXNldCAxDQo+IG9i
-amVjdF9oYXNoIHJqZW5raW5zIHBnX251bSA2NCBwZ3BfbnVtIDY0IGxwZ19udW0gMiBscGdwX251
-bSAyDQo+IGxhc3RfY2hhbmdlIDEgb3duZXIgMCkgcGdfcG9vbCAyICdjYXNkYXRhJyBwZ19wb29s
-KHJlcCBwZ19zaXplIDINCj4gY3J1c2hfcnVsZXNldCAyIG9iamVjdF9oYXNoIHJqZW5raW5zIHBn
-X251bSA2NCBwZ3BfbnVtIDY0IGxwZ19udW0gMg0KPiBscGdwX251bSAyIGxhc3RfY2hhbmdlIDEg
-b3duZXIgMCkgcGdfcG9vbCAzICdyYmQnIHBnX3Bvb2wocmVwIHBnX3NpemUgMg0KPiBjcnVzaF9y
-dWxlc2V0IDMgb2JqZWN0X2hhc2ggcmplbmtpbnMgcGdfbnVtIDY0IHBncF9udW0gNjQgbHBnX251
-bSAyDQo+IGxwZ3BfbnVtIDIgbGFzdF9jaGFuZ2UgMSBvd25lciAwKQ0KPg0KPiBtYXhfb3NkIDYN
-Cg0KRGlkIHlvdSBjaGFuZ2UgdGhlIG1heF9vc2QgeW91cnNlbGY/IFRoZSByZXBsaWNhdGlvbiBz
-aXplIHNlZW0gY29ycmVjdC4NCg0KPiBJIGhhdmUgbm90IHJlbW92ZWQgYW55IE9TRHMgZnJvbSB0
-aGUgY2x1c3Rlci4gSSBjcmVhdGVkIHRoZSBjbHVzdGVyIHdpdGgNCj4gYSBzaW5nbGUgbWRzL21v
-biBhbmQgdGhleSBoYXZlIGJlZW4gYWRkaW5nIG9zZCBzbG93bHkuDQoNCkRpZCB5b3Ugc3RhcnQg
-d2l0aCBvbmUgb3NkIGluaXRpYWxseT8gRGlkIHlvdSBhZGQgdGhlIG5ldyBPU0QncyB0byB0aGUg
-Y3J1c2htYXAgYWZ0ZXIgYWRkaW5nIHRoZW0gdG8gdGhlIGNsdXN0ZXIuDQoNCldpZG8NCg0KPg0K
-PiBNYXJrIE5pZ2gNCj4gU3lzdGVtcyBBcmNoaXRlY3QNCj4gbW5pZ2hAbmV0ZWxsaWdlbnQuY29t
-DQo+ICAgKHApIDMxNC4zOTIuNjkyNg0KPg0KPg0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KPiBGcm9tOiBXaWRvIGRlbiBIb2xsYW5kZXIgW21haWx0bzp3aWRvQHdpZG9kaC5ubF0N
-Cj4gU2VudDogRnJpZGF5LCBBcHJpbCAwOCwgMjAxMSAxOjM4IFBNDQo+IFRvOiBNYXJrIE5pZ2gN
-Cj4gQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBQR3MgRGVn
-cmFkZWQNCj4NCj4gSGkgTWFyaywNCj4NCj4gT24gRnJpLCAyMDExLTA0LTA4IGF0IDEyOjA5IC0w
-NTAwLCBNYXJrIE5pZ2ggd3JvdGU6DQo+ID4gSSBoYXZlIHJlY2VudGx5IGJ1aWx0IGEgY2VwaCBj
-bHVzdGVyIHdpdGggdGhlIGZvbGxvd2luZyBub2RlczoNCj4gPg0KPiA+IDIwMTEtMDQtMDggMTE6
-NTQ6MDguMDM4ODQxICAgICAgIHBnIHYzNjYxOiAyNjQgcGdzOiAyNjQNCj4gPiBhY3RpdmUrY2xl
-YW4rZGVncmFkZWQ7IDkwNzkgTUIgZGF0YSwgOTIzNCBNQiB1c2VkLCA4MTEgR0IgLyA4MjAgR0IN
-Cj4gPiBhdmFpbDsgMjMxOS80NjM4IGRlZ3JhZGVkICg1MC4wMDAlKSAyMDExLTA0LTA4IDExOjU0
-OjA4LjAzOTQ5MiAgICAgbWRzDQo+ID4gZTE3OiAyLzIvMiB1cCB7MD11cDphY3RpdmUsMT11cDph
-Y3RpdmV9IDIwMTEtMDQtMDggMTE6NTQ6MDguMDM5NTI5DQo+ID4gb3NkIGUxODogNCBvc2RzOiA0
-IHVwLCA0IGluIDIwMTEtMDQtMDggMTE6NTQ6MDguMDM5NTkyICAgICBsb2cNCj4gPiAyMDExLTA0
-LTA4IDEwOjA4OjA5LjEzNTk5NCBtZHMwIDEwLjYuMS45MDo2ODAwLzE2NzYxIDQgOiBbSU5GXSBj
-bG9zaW5nDQo+ID4gc3RhbGUgc2Vzc2lvbiBjbGllbnQ0MTQyIDEwLjYuMS42MjowLzY2NzE0Mzc2
-MyBhZnRlciAzMDQuNTI0ODY5DQo+ID4gMjAxMS0wNC0wOCAxMTo1NDowOC4wMzk2NzMgICAgIG1v
-biBlMTogMSBtb25zIGF0IHswPTEwLjYuMS45MDo2Nzg5LzB9DQo+ID4NCj4NCj4gVGhhdCBzZWVt
-cyBvZGQsIHlvdXIgICAiZGF0YSIgaXMgb25seSAyMDBNQiBsZXNzIHRoZW4gInVzZWQiLiBXaGF0
-IGlzIHRoZQ0KPiByZXBsaWNhdGlvbiBzaXplIGZvciB0aGUgImRhdGEiIGFuZCAibWV0YWRhdGEi
-IHBvb2w/DQo+DQo+ICQgY2VwaCBvc2QgZHVtcCAtbyAtIChyZXAgcGdfc2l6ZSkNCj4NCj4gPiBJ
-IGhhdmUgYSBmZXcgZmlsZXMgaW4gdGhlIGNsdXN0ZXIgKG5vdCBtdWNoIGRhdGEpIGJ1dCBoYXZl
-IG5vdGljZWQNCj4gPiBmcm9tIHRoZSBiZWdpbm5pbmcgb2YgdGhlIGJ1aWxkIChhZnRlciB0aGUg
-MiBvc2QpIHRoYXQgc29tZSBvZiBteSBQR3MNCj4gPiBhcmUgZGVncmFkZWQuDQo+ID4NCj4gPiBI
-b3cgZG8gSSBmaXggdGhpcyBhbmQgaXMgdGhlcmUgYSB0b29sL2NvbW1hbmQgdG8gYXNzaXN0IGlu
-IGRldGVybWluaW5nDQo+ID4gd2hhdCBQR3MgYXJlIGRlZ3JhZGVkPw0KPg0KPiBZb3UgY2FuIHZp
-ZXcgeW91ciBkZWdyYWRlZCBwZydzIHdpdGg6DQo+DQo+ICQgY2VwaCBwZyBkdW1wIC1vIC0NCj4N
-Cj4gVGhpcyB3aWxsIHRlbGwgeW91IHRoZSBkZWdyYWRlZCBQRydzIGFuZCBvbiB3aGljaCBPU0Qn
-cyB0aGV5IGFyZS4NCj4NCj4gRGlkIHlvdSByZW1vdmUgYW55IE9TRCdzIGZyb20gdGhpcyBjbHVz
-dGVyPyBJdCBzZWVtcyB2ZXJ5IG9kZCB0aGF0IHRoZQ0KPiBjbHVzdGVyIGlzIGluIGEgNTAlIGRl
-Z3JhZGVkIHN0YXRlLg0KPg0KPiBXaWRvDQo+DQo+ID4NCj4gPiBDZXBoIC12IGlzIGFzIGZvbGxv
-d3M6DQo+ID4NCj4gPiBjZXBoIHZlcnNpb24gMC4yNiAoY29tbWl0Ojk5ODFmZjkwOTY4Mzk4ZGE0
-M2M2MzEwNjY5NGQ2NjFmNWUzZDA3ZDUpDQo+ID4NCj4gPiBJIGFwcHJlY2lhdGUgdGhlIGhlbHAu
-DQo+ID4NCj4gPiBNYXJrIE5pZ2gNCj4gPg0KPiA+IFRoaXMgdHJhbnNtaXNzaW9uIGFuZCBhbnkg
-YXR0YWNoZWQgZmlsZXMgYXJlIHByaXZpbGVnZWQsIGNvbmZpZGVudGlhbA0KPiA+IG9yIG90aGVy
-d2lzZSB0aGUgZXhjbHVzaXZlIHByb3BlcnR5IG9mIHRoZSBpbnRlbmRlZCByZWNpcGllbnQgb3IN
-Cj4gPiBOZXRlbGxpZ2VudCBDb3Jwb3JhdGlvbi4gSWYgeW91IGFyZSBub3QgdGhlIGludGVuZGVk
-IHJlY2lwaWVudCwgYW55DQo+ID4gZGlzY2xvc3VyZSwgY29weWluZywgZGlzdHJpYnV0aW9uIG9y
-IHVzZSBvZiBhbnkgb2YgdGhlIGluZm9ybWF0aW9uDQo+ID4gY29udGFpbmVkIGluIG9yIGF0dGFj
-aGVkIHRvIHRoaXMgdHJhbnNtaXNzaW9uIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuDQo+ID4gSWYg
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyB0cmFuc21pc3Npb24gaW4gZXJyb3IsIHBsZWFzZSBjb250
-YWN0IHVzDQo+ID4gaW1tZWRpYXRlbHkgYnkgcmVzcG9uZGluZyB0byB0aGlzIG1lc3NhZ2Ugb3Ig
-YnkgdGVsZXBob25lDQo+ID4gKDMxNC0zOTItNjkwMCkgYW5kIHByb21wdGx5IGRlc3Ryb3kgdGhl
-IG9yaWdpbmFsIHRyYW5zbWlzc2lvbiBhbmQgaXRzDQo+ID4gYXR0YWNobWVudHMuIC0tIFRvIHVu
-c3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lDQo+ID4gInVuc3Vic2NyaWJl
-IGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0bw0KPiA+IG1ham9yZG9tb0B2
-Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiA+IGh0dHA6Ly92Z2VyLmtl
-cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPg0KPg0KPg0KPiBUaGlzIHRyYW5zbWlzc2lv
-biBhbmQgYW55IGF0dGFjaGVkIGZpbGVzIGFyZSBwcml2aWxlZ2VkLCBjb25maWRlbnRpYWwgb3IN
-Cj4gb3RoZXJ3aXNlIHRoZSBleGNsdXNpdmUgcHJvcGVydHkgb2YgdGhlIGludGVuZGVkIHJlY2lw
-aWVudCBvcg0KPiBOZXRlbGxpZ2VudCBDb3Jwb3JhdGlvbi4gSWYgeW91IGFyZSBub3QgdGhlIGlu
-dGVuZGVkIHJlY2lwaWVudCwgYW55DQo+IGRpc2Nsb3N1cmUsIGNvcHlpbmcsIGRpc3RyaWJ1dGlv
-biBvciB1c2Ugb2YgYW55IG9mIHRoZSBpbmZvcm1hdGlvbg0KPiBjb250YWluZWQgaW4gb3IgYXR0
-YWNoZWQgdG8gdGhpcyB0cmFuc21pc3Npb24gaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYNCj4g
-eW91IGhhdmUgcmVjZWl2ZWQgdGhpcyB0cmFuc21pc3Npb24gaW4gZXJyb3IsIHBsZWFzZSBjb250
-YWN0IHVzDQo+IGltbWVkaWF0ZWx5IGJ5IHJlc3BvbmRpbmcgdG8gdGhpcyBtZXNzYWdlIG9yIGJ5
-IHRlbGVwaG9uZSAoMzE0LTM5Mi02OTAwKQ0KPiBhbmQgcHJvbXB0bHkgZGVzdHJveSB0aGUgb3Jp
-Z2luYWwgdHJhbnNtaXNzaW9uIGFuZCBpdHMgYXR0YWNobWVudHMuDQo+IE5yeWJYx6d2Xineunsu
-bit6XXp7YXkdyofamSxqZmh6HncgajordndqbXpaK92iaiIhDQoNCg0KVGhpcyB0cmFuc21pc3Np
-b24gYW5kIGFueSBhdHRhY2hlZCBmaWxlcyBhcmUgcHJpdmlsZWdlZCwgY29uZmlkZW50aWFsIG9y
-IG90aGVyd2lzZSB0aGUgZXhjbHVzaXZlIHByb3BlcnR5IG9mIHRoZSBpbnRlbmRlZCByZWNpcGll
-bnQgb3IgTmV0ZWxsaWdlbnQgQ29ycG9yYXRpb24uIElmIHlvdSBhcmUgbm90IHRoZSBpbnRlbmRl
-ZCByZWNpcGllbnQsIGFueSBkaXNjbG9zdXJlLCBjb3B5aW5nLCBkaXN0cmlidXRpb24gb3IgdXNl
-IG9mIGFueSBvZiB0aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIG9yIGF0dGFjaGVkIHRvIHRo
-aXMgdHJhbnNtaXNzaW9uIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2Vp
-dmVkIHRoaXMgdHJhbnNtaXNzaW9uIGluIGVycm9yLCBwbGVhc2UgY29udGFjdCB1cyBpbW1lZGlh
-dGVseSBieSByZXNwb25kaW5nIHRvIHRoaXMgbWVzc2FnZSBvciBieSB0ZWxlcGhvbmUgKDMxNC0z
-OTItNjkwMCkgYW5kIHByb21wdGx5IGRlc3Ryb3kgdGhlIG9yaWdpbmFsIHRyYW5zbWlzc2lvbiBh
-bmQgaXRzIGF0dGFjaG1lbnRzLg0K
+On Fri, 8 Apr 2011, Jim Schutt wrote:
+> Hi Sage,
+> 
+> Sage Weil wrote:
+> > On Wed, 16 Feb 2011, Jim Schutt wrote:
+> > > On Wed, 2011-02-16 at 14:40 -0700, Gregory Farnum wrote:
+> > > > On Wednesday, February 16, 2011 at 1:25 PM, Jim Schutt wrote:
+> > > > > Hi,
+> > > > > 
+> > > > > I've been testing v0.24.3 w/ 64 clients against
+> > > > > 1 mon, 1 mds, 96 osds. Under heavy write load I
+> > > > > see:
+> > > > >  [WRN] map e7 wrongly marked me down or wrong addr
+> > > > > 
+> > > > > I was able to sort through the logs and discover that when
+> > > > > this happens I have large gaps (10 seconds or more) in osd
+> > > > > heatbeat processing. In those heartbeat gaps I've discovered
+> > > > > long periods (5-15 seconds) where an osd logs nothing, even
+> > > > > though I am running with debug osd/filestore/journal = 20.
+> > > > > 
+> > > > > Is this a known issue?
+> > > > You're running on btrfs? 
+> > > Yep.
+> > 
+> > Are the cosd log files on the same btrfs volume as the btrfs data, or
+> > elsewhere?  The heartbeat thread takes some pains to avoid any locks that
+> > may be contented and do avoid any disk io, so in theory a btrfs stall
+> > shouldn't affect anything.  We may have missed something.. do you have a log
+> > showing this in action?
+> 
+> In the end, after all the various things I've tried, I think
+> that the root cause of this is relatively simple: I don't
+> have enough CPU cycles available on my servers to do the
+> amount of OSD processing required to service my client
+> load, given the number of OSDs per server I'm running.
+> 
+> With too much work and not enough cycles to do it, the
+> one real-time component of Ceph, heartbeat processing,
+> eventually must miss its deadline (no heartbeat "observed"
+> in osd_heartbeat_grace seconds), since it requires work
+> done by components (messengers, memory allocation system)
+> that don't provide real-time guarantees.
+> 
+> All of my experiences on this make perfect sense when
+> viewed from this perspective.
+> 
+> For example, when working with tcmalloc, I learned I
+> could compile it with CXXFLAGS=-DTCMALLOC_LARGE_PAGES,
+> which causes tcmalloc to allow objects up to 256k in
+> its thread caches, rather than the default 32k.  So I
+> used that in combination with a 256k stripe width, on
+> the theory that deallocating messages would mostly only
+> interact with the thread cache, but it didn't help.
+> 
+> When looking at thread stacks generated by my
+> Mutex::LockOrAbort trick with a 5 sec wait to acquire
+> the pipe_lock, I often saw threads waiting on the
+> DoutLocker mutex.  Since lots of Ceph debugging output
+> happens with other locks being held, debugging might
+> thus slow things down out of proportion to the processing
+> required to generate the log messages.  Yet, when I
+> configured no debugging, I saw no improvement; it might
+> be that things got a little worse.  This now makes sense
+> to me in light of my above hypothesis about not enough
+> available CPU cycles - there's still too much work to
+> do, even with no cycles spent on debugging output.
+> 
+> What I didn't see very often in my thread stacks were
+> stack frames from tcmalloc.  This doesn't make sense
+> to me if the memory allocation subsystem is the root
+> cause of my problem, but makes perfect sense if there's
+> not enough CPU cycles: not so much time is spent
+> deallocating memory, so it is caught in the act less
+> often by LockOrAbort.
+> 
+> What finally seemed to help at avoiding missed heartbeats
+> in my configuration was the following combination:
+> turning off debugging, running with these throttling paramters:
+>         osd client message size cap = 14000000
+>         client oc size =              14000000
+>         client oc max dirty =         35000000
+>         filestore queue max bytes =   35000000
+>         journal queue max bytes =     35000000
+>         ms dispatch throttle bytes =  14000000
+>         objector inflight op bytes =  35000000
+> and using a 512k stripe width.
+> 
+> Evidently keeping a relatively small amount of data in
+> flight, in smaller chunks, allowed heartbeat processing to
+> hit its mark more often.  But, it only delayed things, it
+> didn't solve the problem.  This makes sense to me if the
+> root cause is that I don't have enough CPU cycles available
+> per OSD, because I didn't change the offered load.
+> 
+> So, in the short term I guess I need to run fewer cosd
+> instances per server.
+
+There is one other thing to look at, and that's the number of threads used 
+by each cosd process.  Have you tried setting
+
+	osd op threads = 1
+
+(or even 0, although I haven't tested that recently).  That will limit the 
+number of concurrent IOs in flight to the fs.  Setting it to 0 will avoid 
+using a thread pool at all and will process the IO in the message dispatch 
+thread (though we haven't tested that recently so there may be issues).
+
+I would also be interested in seeing a system level profile (oprofile?) to 
+see where CPU time is being spent.  There are likely low hanging fruit in 
+the OSD that would reduce CPU overhead.
+
+I guess the other thing that would help to confirm this is to just halve 
+the number of OSDs on your machines in a test and see if the problem goes 
+away.
+
+> If my analysis above is correct, do you think anything
+> can be gained by running the heartbeat and heartbeat
+> dispatcher threads as SCHED_RR threads?  Since tick() runs
+> heartbeat_check(), that would also need to be SCHED_RR,
+> or the heartbeats could arrive on time, but not checked
+> until it was too late.
+
+That sounds worth trying.  I don't care much about the tick() thread, 
+though... if the machine is loady and we can't check heartbeats that is at 
+least fail-safe.  And hopefully other nodes are able to catch the slow 
+guy.
+
+In the meantime, it may also be prudent for us to lower our queue size 
+thresholds.  The current numbers were all pulled out of a hat (100MB? 
+Sure!).
+
+sage
