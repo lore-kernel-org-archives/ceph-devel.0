@@ -1,74 +1,101 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Management of radosgw
-Date: Fri, 08 Apr 2011 20:44:54 +0200
-Message-ID: <1302288294.2444.9.camel@wido-laptop.pcextreme.nl>
-References: <BANLkTikFSByoz-BNQFaw7WSh5R0aZEcWew@mail.gmail.com>
+From: Mark Nigh <mnigh@netelligent.com>
+Subject: RE: PGs Degraded
+Date: Fri, 8 Apr 2011 14:41:06 -0500
+Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCBA@NC-SVR-09.netelligent.com>
+References: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCA2@NC-SVR-09.netelligent.com>
+ <1302287897.2444.4.camel@wido-laptop.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:46328 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756293Ab1DHSoz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 14:44:55 -0400
-In-Reply-To: <BANLkTikFSByoz-BNQFaw7WSh5R0aZEcWew@mail.gmail.com>
+Received: from smtp2.netelligent.com ([199.255.228.152]:29044 "EHLO
+	NC-SVR-132.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1757775Ab1DHTlT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 15:41:19 -0400
+In-Reply-To: <1302287897.2444.4.camel@wido-laptop.pcextreme.nl>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylar Shen <kimulaaa@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-
-On Fri, 2011-04-08 at 21:18 +0800, Sylar Shen wrote:
-> Hi,
-> Recently I am testing radosgw and there are some questions that came
-> up in my mind.
-> I observed that radosgw stores the records of user accounts or
-> metadata of files in MDS.
-
-The radosgw does not use the MDS at all, the MDS is only used for the
-Ceph POSIX filesystem.
-
-> But it seems that radosgw stores them in the form of pieces which I
-> cannot get a readable information by typing a command.
-
-Indeed, user information is stored in the .rgw, .users and .users.email
-pools.
-
-> I am curious that is there a way I can manage the records of radosgw?
-> For example, if I want to know how many users are there in radosgw and
-> the detail information of each user(ID, access key, secret key).
-> Or if I want to know a user about the information of directories or
-> files he created.
-> Are there some commands that I can use to see the information that I
-> want to see?
-
-For now the "radosgw_admin" is the tool for the job, it still lacks some
-functionality, but it's a work-in-progress.
-
-But what you could do for example:
-
-root@gateway:~# rados -p .users ls
-EQCZHQ0KW2GPG8HKCS82
-EQCZHQ0KW2GPG8HKCS82.buckets
-root@gateway:~# radosgw_admin user info --uid=EQCZHQ0KW2GPG8HKCS82
-RADOS S3 Gateway: rados->read ofs=0 len=16384
-RADOS S3 Gateway: rados->read r=128
-User ID: EQCZHQ0KW2GPG8HKCS82
-Secret Key: dA0WHJIIKANaft7qBqL1GfPKAufgx49czYtzggLH
-Display Name: Wido den Hollander
-OpenStack User: <undefined>
-OpenStack Key: <undefined>
-root@gateway:~#
-
-If you have suggestions for the radosgw, please add them to the issue
-tracker as a feature request: http://tracker.newdream.net/projects/ceph
-
-Thank you,
-
-Wido
-
-> Thank in advance!
-> ps: please correct me if I said something wrong about radosgw.
-
-
+SGVyZSBpcyB0aGUgb3V0cHV0IGZyb20gY2VwaCBvc2QgZHVtcCAtbyAtDQoNCmVwb2NoIDE5DQpm
+c2lkIGMyYWU3YWIyLWQxYjItYTQ2Ny1iZTZlLWY5YTAwMzE4NDBmNQ0KY3JlYXRlZCAyMDExLTA0
+LTA0IDEzOjI3OjA2Ljg1Nzk1MA0KbW9kaWZlZCAyMDExLTA0LTA4IDE0OjExOjA1Ljg5OTU5Ng0K
+ZmxhZ3MNCg0KcGdfcG9vbCAwICdkYXRhJyBwZ19wb29sKHJlcCBwZ19zaXplIDIgY3J1c2hfcnVs
+ZXNldCAwIG9iamVjdF9oYXNoIHJqZW5raW5zIHBnX251bSA2NCBwZ3BfbnVtIDY0IGxwZ19udW0g
+MiBscGdwX251bSAyIGxhc3RfY2hhbmdlIDEgb3duZXIgMCkNCnBnX3Bvb2wgMSAnbWV0YWRhdGEn
+IHBnX3Bvb2wocmVwIHBnX3NpemUgMiBjcnVzaF9ydWxlc2V0IDEgb2JqZWN0X2hhc2ggcmplbmtp
+bnMgcGdfbnVtIDY0IHBncF9udW0gNjQgbHBnX251bSAyIGxwZ3BfbnVtIDIgbGFzdF9jaGFuZ2Ug
+MSBvd25lciAwKQ0KcGdfcG9vbCAyICdjYXNkYXRhJyBwZ19wb29sKHJlcCBwZ19zaXplIDIgY3J1
+c2hfcnVsZXNldCAyIG9iamVjdF9oYXNoIHJqZW5raW5zIHBnX251bSA2NCBwZ3BfbnVtIDY0IGxw
+Z19udW0gMiBscGdwX251bSAyIGxhc3RfY2hhbmdlIDEgb3duZXIgMCkNCnBnX3Bvb2wgMyAncmJk
+JyBwZ19wb29sKHJlcCBwZ19zaXplIDIgY3J1c2hfcnVsZXNldCAzIG9iamVjdF9oYXNoIHJqZW5r
+aW5zIHBnX251bSA2NCBwZ3BfbnVtIDY0IGxwZ19udW0gMiBscGdwX251bSAyIGxhc3RfY2hhbmdl
+IDEgb3duZXIgMCkNCg0KbWF4X29zZCA2DQpvc2QwIHVwICAgaW4gIHdlaWdodCAxIHVwX2Zyb20g
+MTQgdXBfdGhydSAwIGRvd25fYXQgMTMgbGFzdF9jbGVhbl9pbnRlcnZhbCAxMC0xMiAxMC42LjEu
+OTI6NjgwMC8xNzY0MSAxMC42LjEuOTI6NjgwMS8xNzY0MSAxMC42LjEuOTI6NjgwMi8xNzY0MQ0K
+b3NkMSB1cCAgIGluICB3ZWlnaHQgMSB1cF9mcm9tIDQgdXBfdGhydSA2IGRvd25fYXQgMCBsYXN0
+X2NsZWFuX2ludGVydmFsIDAtMCAxMC42LjEuOTM6NjgwMC8zMTEwNiAxMC42LjEuOTM6NjgwMS8z
+MTEwNiAxMC42LjEuOTM6NjgwMi8zMTEwNg0Kb3NkMiB1cCAgIGluICB3ZWlnaHQgMSB1cF9mcm9t
+IDE3IHVwX3RocnUgMCBkb3duX2F0IDE2IGxhc3RfY2xlYW5faW50ZXJ2YWwgMTUtMTYgMTAuNi4x
+Ljk0OjY4MDAvMjc0MCAxMC42LjEuOTQ6NjgwMy8yNzQwIDEwLjYuMS45NDo2ODA0LzI3NDANCm9z
+ZDMgdXAgICBpbiAgd2VpZ2h0IDEgdXBfZnJvbSAxOCB1cF90aHJ1IDAgZG93bl9hdCAwIGxhc3Rf
+Y2xlYW5faW50ZXJ2YWwgMC0wIDEwLjYuMS45NTo2ODAwLzMyMDM4IDEwLjYuMS45NTo2ODAxLzMy
+MDM4IDEwLjYuMS45NTo2ODAyLzMyMDM4DQoNCkkgaGF2ZSBub3QgcmVtb3ZlZCBhbnkgT1NEcyBm
+cm9tIHRoZSBjbHVzdGVyLiBJIGNyZWF0ZWQgdGhlIGNsdXN0ZXIgd2l0aCBhIHNpbmdsZSBtZHMv
+bW9uIGFuZCB0aGV5IGhhdmUgYmVlbiBhZGRpbmcgb3NkIHNsb3dseS4NCg0KTWFyayBOaWdoDQpT
+eXN0ZW1zIEFyY2hpdGVjdA0KbW5pZ2hAbmV0ZWxsaWdlbnQuY29tDQogKHApIDMxNC4zOTIuNjky
+Ng0KDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IFdpZG8gZGVuIEhvbGxh
+bmRlciBbbWFpbHRvOndpZG9Ad2lkb2RoLm5sXQ0KU2VudDogRnJpZGF5LCBBcHJpbCAwOCwgMjAx
+MSAxOjM4IFBNDQpUbzogTWFyayBOaWdoDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcN
+ClN1YmplY3Q6IFJlOiBQR3MgRGVncmFkZWQNCg0KSGkgTWFyaywNCg0KT24gRnJpLCAyMDExLTA0
+LTA4IGF0IDEyOjA5IC0wNTAwLCBNYXJrIE5pZ2ggd3JvdGU6DQo+IEkgaGF2ZSByZWNlbnRseSBi
+dWlsdCBhIGNlcGggY2x1c3RlciB3aXRoIHRoZSBmb2xsb3dpbmcgbm9kZXM6DQo+DQo+IDIwMTEt
+MDQtMDggMTE6NTQ6MDguMDM4ODQxICAgIHBnIHYzNjYxOiAyNjQgcGdzOiAyNjQgYWN0aXZlK2Ns
+ZWFuK2RlZ3JhZGVkOyA5MDc5IE1CIGRhdGEsIDkyMzQgTUIgdXNlZCwgODExIEdCIC8gODIwIEdC
+IGF2YWlsOyAyMzE5LzQ2MzggZGVncmFkZWQgKDUwLjAwMCUpDQo+IDIwMTEtMDQtMDggMTE6NTQ6
+MDguMDM5NDkyICAgbWRzIGUxNzogMi8yLzIgdXAgezA9dXA6YWN0aXZlLDE9dXA6YWN0aXZlfQ0K
+PiAyMDExLTA0LTA4IDExOjU0OjA4LjAzOTUyOSAgIG9zZCBlMTg6IDQgb3NkczogNCB1cCwgNCBp
+bg0KPiAyMDExLTA0LTA4IDExOjU0OjA4LjAzOTU5MiAgIGxvZyAyMDExLTA0LTA4IDEwOjA4OjA5
+LjEzNTk5NCBtZHMwIDEwLjYuMS45MDo2ODAwLzE2NzYxIDQgOiBbSU5GXSBjbG9zaW5nIHN0YWxl
+IHNlc3Npb24gY2xpZW50NDE0MiAxMC42LjEuNjI6MC82NjcxNDM3NjMgYWZ0ZXIgMzA0LjUyNDg2
+OQ0KPiAyMDExLTA0LTA4IDExOjU0OjA4LjAzOTY3MyAgIG1vbiBlMTogMSBtb25zIGF0IHswPTEw
+LjYuMS45MDo2Nzg5LzB9DQo+DQoNClRoYXQgc2VlbXMgb2RkLCB5b3VyICAiZGF0YSIgaXMgb25s
+eSAyMDBNQiBsZXNzIHRoZW4gInVzZWQiLiBXaGF0IGlzIHRoZQ0KcmVwbGljYXRpb24gc2l6ZSBm
+b3IgdGhlICJkYXRhIiBhbmQgIm1ldGFkYXRhIiBwb29sPw0KDQokIGNlcGggb3NkIGR1bXAgLW8g
+LSAocmVwIHBnX3NpemUpDQoNCj4gSSBoYXZlIGEgZmV3IGZpbGVzIGluIHRoZSBjbHVzdGVyIChu
+b3QgbXVjaCBkYXRhKSBidXQgaGF2ZSBub3RpY2VkIGZyb20gdGhlIGJlZ2lubmluZyBvZiB0aGUg
+YnVpbGQgKGFmdGVyIHRoZSAyIG9zZCkgdGhhdCBzb21lIG9mIG15IFBHcyBhcmUgZGVncmFkZWQu
+DQo+DQo+IEhvdyBkbyBJIGZpeCB0aGlzIGFuZCBpcyB0aGVyZSBhIHRvb2wvY29tbWFuZCB0byBh
+c3Npc3QgaW4gZGV0ZXJtaW5pbmcgd2hhdCBQR3MgYXJlIGRlZ3JhZGVkPw0KDQpZb3UgY2FuIHZp
+ZXcgeW91ciBkZWdyYWRlZCBwZydzIHdpdGg6DQoNCiQgY2VwaCBwZyBkdW1wIC1vIC0NCg0KVGhp
+cyB3aWxsIHRlbGwgeW91IHRoZSBkZWdyYWRlZCBQRydzIGFuZCBvbiB3aGljaCBPU0QncyB0aGV5
+IGFyZS4NCg0KRGlkIHlvdSByZW1vdmUgYW55IE9TRCdzIGZyb20gdGhpcyBjbHVzdGVyPyBJdCBz
+ZWVtcyB2ZXJ5IG9kZCB0aGF0IHRoZQ0KY2x1c3RlciBpcyBpbiBhIDUwJSBkZWdyYWRlZCBzdGF0
+ZS4NCg0KV2lkbw0KDQo+DQo+IENlcGggLXYgaXMgYXMgZm9sbG93czoNCj4NCj4gY2VwaCB2ZXJz
+aW9uIDAuMjYgKGNvbW1pdDo5OTgxZmY5MDk2ODM5OGRhNDNjNjMxMDY2OTRkNjYxZjVlM2QwN2Q1
+KQ0KPg0KPiBJIGFwcHJlY2lhdGUgdGhlIGhlbHAuDQo+DQo+IE1hcmsgTmlnaA0KPg0KPiBUaGlz
+IHRyYW5zbWlzc2lvbiBhbmQgYW55IGF0dGFjaGVkIGZpbGVzIGFyZSBwcml2aWxlZ2VkLCBjb25m
+aWRlbnRpYWwgb3Igb3RoZXJ3aXNlIHRoZSBleGNsdXNpdmUgcHJvcGVydHkgb2YgdGhlIGludGVu
+ZGVkIHJlY2lwaWVudCBvciBOZXRlbGxpZ2VudCBDb3Jwb3JhdGlvbi4gSWYgeW91IGFyZSBub3Qg
+dGhlIGludGVuZGVkIHJlY2lwaWVudCwgYW55IGRpc2Nsb3N1cmUsIGNvcHlpbmcsIGRpc3RyaWJ1
+dGlvbiBvciB1c2Ugb2YgYW55IG9mIHRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gb3IgYXR0
+YWNoZWQgdG8gdGhpcyB0cmFuc21pc3Npb24gaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91
+IGhhdmUgcmVjZWl2ZWQgdGhpcyB0cmFuc21pc3Npb24gaW4gZXJyb3IsIHBsZWFzZSBjb250YWN0
+IHVzIGltbWVkaWF0ZWx5IGJ5IHJlc3BvbmRpbmcgdG8gdGhpcyBtZXNzYWdlIG9yIGJ5IHRlbGVw
+aG9uZSAoMzE0LTM5Mi02OTAwKSBhbmQgcHJvbXB0bHkgZGVzdHJveSB0aGUgb3JpZ2luYWwgdHJh
+bnNtaXNzaW9uIGFuZCBpdHMgYXR0YWNobWVudHMuDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZy
+b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0K
+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBN
+b3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwNCg0KDQoNClRoaXMgdHJhbnNtaXNzaW9uIGFuZCBhbnkgYXR0YWNoZWQgZmlsZXMg
+YXJlIHByaXZpbGVnZWQsIGNvbmZpZGVudGlhbCBvciBvdGhlcndpc2UgdGhlIGV4Y2x1c2l2ZSBw
+cm9wZXJ0eSBvZiB0aGUgaW50ZW5kZWQgcmVjaXBpZW50IG9yIE5ldGVsbGlnZW50IENvcnBvcmF0
+aW9uLiBJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCBhbnkgZGlzY2xvc3Vy
+ZSwgY29weWluZywgZGlzdHJpYnV0aW9uIG9yIHVzZSBvZiBhbnkgb2YgdGhlIGluZm9ybWF0aW9u
+IGNvbnRhaW5lZCBpbiBvciBhdHRhY2hlZCB0byB0aGlzIHRyYW5zbWlzc2lvbiBpcyBzdHJpY3Rs
+eSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIHRyYW5zbWlzc2lvbiBpbiBl
+cnJvciwgcGxlYXNlIGNvbnRhY3QgdXMgaW1tZWRpYXRlbHkgYnkgcmVzcG9uZGluZyB0byB0aGlz
+IG1lc3NhZ2Ugb3IgYnkgdGVsZXBob25lICgzMTQtMzkyLTY5MDApIGFuZCBwcm9tcHRseSBkZXN0
+cm95IHRoZSBvcmlnaW5hbCB0cmFuc21pc3Npb24gYW5kIGl0cyBhdHRhY2htZW50cy4NCg==
