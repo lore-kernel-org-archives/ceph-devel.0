@@ -1,47 +1,136 @@
-From: Stefan Hajnoczi <stefanha@gmail.com>
-Subject: Re: [PATCH v2 1/2] rbd: use the higher level librbd instead of just librados
-Date: Fri, 8 Apr 2011 17:14:52 +0100
-Message-ID: <BANLkTi=-th8edQf7gaciMAqM3652KPffnw@mail.gmail.com>
-References: <6f9466b6098b5159aca9c789f9fce45f409e684f.1301354138.git.josh.durgin@dreamhost.com>
-	<20110408084334.GA28360@stefanha-thinkpad.localdomain>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
+Date: Fri, 8 Apr 2011 10:23:23 -0600
+Message-ID: <4D9F367B.1070904@sandia.gov>
+References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com>
+ <1297893011.25491.124.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <kvm-owner@vger.kernel.org>
-In-Reply-To: <20110408084334.GA28360@stefanha-thinkpad.localdomain>
-Sender: kvm-owner@vger.kernel.org
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Yehuda Sadeh <yehuda@hq.newdream.net>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from sentry-three.sandia.gov ([132.175.109.17]:41135 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752739Ab1DHQXr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 12:23:47 -0400
+In-Reply-To: <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 8, 2011 at 9:43 AM, Stefan Hajnoczi <stefanha@gmail.com> wr=
-ote:
-> On Mon, Mar 28, 2011 at 04:15:57PM -0700, Josh Durgin wrote:
->> librbd stacks on top of librados to provide access
->> to rbd images.
->>
->> Using librbd simplifies the qemu code, and allows
->> qemu to use new versions of the rbd format
->> with few (if any) changes.
->>
->> Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
->> Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
->> ---
->> =A0block/rbd.c =A0 =A0 =A0 | =A0785 +++++++++++++++-----------------=
----------------------
->> =A0block/rbd_types.h | =A0 71 -----
->> =A0configure =A0 =A0 =A0 =A0 | =A0 33 +--
->> =A03 files changed, 221 insertions(+), 668 deletions(-)
->> =A0delete mode 100644 block/rbd_types.h
->
-> Hi Josh,
-> I have applied your patches onto qemu.git/master and am running
-> ceph.git/master.
->
-> Unfortunately qemu-iotests fails for me.
+Hi Sage,
 
-I forgot to mention that qemu-iotests lives at:
+Sage Weil wrote:
+> On Wed, 16 Feb 2011, Jim Schutt wrote:
+>> On Wed, 2011-02-16 at 14:40 -0700, Gregory Farnum wrote:
+>>> On Wednesday, February 16, 2011 at 1:25 PM, Jim Schutt wrote:
+>>>> Hi,
+>>>>
+>>>> I've been testing v0.24.3 w/ 64 clients against
+>>>> 1 mon, 1 mds, 96 osds. Under heavy write load I
+>>>> see:
+>>>>  [WRN] map e7 wrongly marked me down or wrong addr
+>>>>
+>>>> I was able to sort through the logs and discover that when
+>>>> this happens I have large gaps (10 seconds or more) in osd
+>>>> heatbeat processing. In those heartbeat gaps I've discovered
+>>>> long periods (5-15 seconds) where an osd logs nothing, even
+>>>> though I am running with debug osd/filestore/journal = 20.
+>>>>
+>>>> Is this a known issue?
+>>> You're running on btrfs? 
+>> Yep.
+> 
+> Are the cosd log files on the same btrfs volume as the btrfs data, or 
+> elsewhere?  The heartbeat thread takes some pains to avoid any locks that 
+> may be contented and do avoid any disk io, so in theory a btrfs stall 
+> shouldn't affect anything.  We may have missed something.. do you have a 
+> log showing this in action?
 
-git://git.kernel.org/pub/scm/linux/kernel/git/hch/qemu-iotests.git
+In the end, after all the various things I've tried, I think
+that the root cause of this is relatively simple: I don't
+have enough CPU cycles available on my servers to do the
+amount of OSD processing required to service my client
+load, given the number of OSDs per server I'm running.
 
-Stefan
+With too much work and not enough cycles to do it, the
+one real-time component of Ceph, heartbeat processing,
+eventually must miss its deadline (no heartbeat "observed"
+in osd_heartbeat_grace seconds), since it requires work
+done by components (messengers, memory allocation system)
+that don't provide real-time guarantees.
+
+All of my experiences on this make perfect sense when
+viewed from this perspective.
+
+For example, when working with tcmalloc, I learned I
+could compile it with CXXFLAGS=-DTCMALLOC_LARGE_PAGES,
+which causes tcmalloc to allow objects up to 256k in
+its thread caches, rather than the default 32k.  So I
+used that in combination with a 256k stripe width, on
+the theory that deallocating messages would mostly only
+interact with the thread cache, but it didn't help.
+
+When looking at thread stacks generated by my
+Mutex::LockOrAbort trick with a 5 sec wait to acquire
+the pipe_lock, I often saw threads waiting on the
+DoutLocker mutex.  Since lots of Ceph debugging output
+happens with other locks being held, debugging might
+thus slow things down out of proportion to the processing
+required to generate the log messages.  Yet, when I
+configured no debugging, I saw no improvement; it might
+be that things got a little worse.  This now makes sense
+to me in light of my above hypothesis about not enough
+available CPU cycles - there's still too much work to
+do, even with no cycles spent on debugging output.
+
+What I didn't see very often in my thread stacks were
+stack frames from tcmalloc.  This doesn't make sense
+to me if the memory allocation subsystem is the root
+cause of my problem, but makes perfect sense if there's
+not enough CPU cycles: not so much time is spent
+deallocating memory, so it is caught in the act less
+often by LockOrAbort.
+
+What finally seemed to help at avoiding missed heartbeats
+in my configuration was the following combination:
+turning off debugging, running with these throttling paramters:
+         osd client message size cap = 14000000
+         client oc size =              14000000
+         client oc max dirty =         35000000
+         filestore queue max bytes =   35000000
+         journal queue max bytes =     35000000
+         ms dispatch throttle bytes =  14000000
+         objector inflight op bytes =  35000000
+and using a 512k stripe width.
+
+Evidently keeping a relatively small amount of data in
+flight, in smaller chunks, allowed heartbeat processing to
+hit its mark more often.  But, it only delayed things, it
+didn't solve the problem.  This makes sense to me if the
+root cause is that I don't have enough CPU cycles available
+per OSD, because I didn't change the offered load.
+
+So, in the short term I guess I need to run fewer cosd
+instances per server.
+
+If my analysis above is correct, do you think anything
+can be gained by running the heartbeat and heartbeat
+dispatcher threads as SCHED_RR threads?  Since tick() runs
+heartbeat_check(), that would also need to be SCHED_RR,
+or the heartbeats could arrive on time, but not checked
+until it was too late.
+
+Anyway, please let me know what you think of the above.
+
+Thanks -- Jim
+
+> 
+> sage
+> 
+> 
+
