@@ -1,39 +1,47 @@
-From: Mark Nigh <mnigh@netelligent.com>
-Subject: PGs Degraded
-Date: Fri, 8 Apr 2011 12:09:04 -0500
-Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCA2@NC-SVR-09.netelligent.com>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: [PATCH v2 1/2] rbd: use the higher level librbd instead of just
+ librados
+Date: Fri, 08 Apr 2011 11:36:08 -0700
+Message-ID: <4D9F5598.10007@dreamhost.com>
+References: <6f9466b6098b5159aca9c789f9fce45f409e684f.1301354138.git.josh.durgin@dreamhost.com> <20110408084334.GA28360@stefanha-thinkpad.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.netelligent.com ([199.255.228.141]:24844 "EHLO
-	NC-SVR-11.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1756139Ab1DHRJR convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 8 Apr 2011 13:09:17 -0400
-Content-Language: en-US
+Received: from mail.hq.newdream.net ([66.33.206.127]:43397 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752550Ab1DHSgJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 14:36:09 -0400
+In-Reply-To: <20110408084334.GA28360@stefanha-thinkpad.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Hajnoczi <stefanha@gmail.com>
+Cc: kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Yehuda Sadeh <yehuda@hq.newdream.net>
 
-I have recently built a ceph cluster with the following nodes:
+On 04/08/2011 01:43 AM, Stefan Hajnoczi wrote:
+> On Mon, Mar 28, 2011 at 04:15:57PM -0700, Josh Durgin wrote:
+>> librbd stacks on top of librados to provide access
+>> to rbd images.
+>>
+>> Using librbd simplifies the qemu code, and allows
+>> qemu to use new versions of the rbd format
+>> with few (if any) changes.
+>>
+>> Signed-off-by: Josh Durgin<josh.durgin@dreamhost.com>
+>> Signed-off-by: Yehuda Sadeh<yehuda@hq.newdream.net>
+>> ---
+>>   block/rbd.c       |  785 +++++++++++++++--------------------------------------
+>>   block/rbd_types.h |   71 -----
+>>   configure         |   33 +--
+>>   3 files changed, 221 insertions(+), 668 deletions(-)
+>>   delete mode 100644 block/rbd_types.h
+>
+> Hi Josh,
+> I have applied your patches onto qemu.git/master and am running
+> ceph.git/master.
+>
+> Unfortunately qemu-iotests fails for me.
 
-2011-04-08 11:54:08.038841    pg v3661: 264 pgs: 264 active+clean+degraded; 9079 MB data, 9234 MB used, 811 GB / 820 GB avail; 2319/4638 degraded (50.000%)
-2011-04-08 11:54:08.039492   mds e17: 2/2/2 up {0=up:active,1=up:active}
-2011-04-08 11:54:08.039529   osd e18: 4 osds: 4 up, 4 in
-2011-04-08 11:54:08.039592   log 2011-04-08 10:08:09.135994 mds0 10.6.1.90:6800/16761 4 : [INF] closing stale session client4142 10.6.1.62:0/667143763 after 304.524869
-2011-04-08 11:54:08.039673   mon e1: 1 mons at {0=10.6.1.90:6789/0}
+Thanks for testing and the detailed instructions! I'm looking into this now.
 
-I have a few files in the cluster (not much data) but have noticed from the beginning of the build (after the 2 osd) that some of my PGs are degraded.
-
-How do I fix this and is there a tool/command to assist in determining what PGs are degraded?
-
-Ceph -v is as follows:
-
-ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
-
-I appreciate the help.
-
-Mark Nigh
-
-This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
+Josh Durgin
