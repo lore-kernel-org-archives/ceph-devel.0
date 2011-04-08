@@ -1,67 +1,74 @@
 From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: PGs Degraded
-Date: Fri, 08 Apr 2011 20:38:17 +0200
-Message-ID: <1302287897.2444.4.camel@wido-laptop.pcextreme.nl>
-References: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCA2@NC-SVR-09.netelligent.com>
+Subject: Re: Management of radosgw
+Date: Fri, 08 Apr 2011 20:44:54 +0200
+Message-ID: <1302288294.2444.9.camel@wido-laptop.pcextreme.nl>
+References: <BANLkTikFSByoz-BNQFaw7WSh5R0aZEcWew@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:54659 "EHLO
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:46328 "EHLO
 	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757314Ab1DHSiT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 14:38:19 -0400
-In-Reply-To: <B828A4C02BE12543ACDFCF7EB0C693C6788452CCA2@NC-SVR-09.netelligent.com>
+	with ESMTP id S1756293Ab1DHSoz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Apr 2011 14:44:55 -0400
+In-Reply-To: <BANLkTikFSByoz-BNQFaw7WSh5R0aZEcWew@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nigh <mnigh@netelligent.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sylar Shen <kimulaaa@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Mark,
+Hi,
 
-On Fri, 2011-04-08 at 12:09 -0500, Mark Nigh wrote:
-> I have recently built a ceph cluster with the following nodes:
-> 
-> 2011-04-08 11:54:08.038841    pg v3661: 264 pgs: 264 active+clean+degraded; 9079 MB data, 9234 MB used, 811 GB / 820 GB avail; 2319/4638 degraded (50.000%)
-> 2011-04-08 11:54:08.039492   mds e17: 2/2/2 up {0=up:active,1=up:active}
-> 2011-04-08 11:54:08.039529   osd e18: 4 osds: 4 up, 4 in
-> 2011-04-08 11:54:08.039592   log 2011-04-08 10:08:09.135994 mds0 10.6.1.90:6800/16761 4 : [INF] closing stale session client4142 10.6.1.62:0/667143763 after 304.524869
-> 2011-04-08 11:54:08.039673   mon e1: 1 mons at {0=10.6.1.90:6789/0}
-> 
+On Fri, 2011-04-08 at 21:18 +0800, Sylar Shen wrote:
+> Hi,
+> Recently I am testing radosgw and there are some questions that came
+> up in my mind.
+> I observed that radosgw stores the records of user accounts or
+> metadata of files in MDS.
 
-That seems odd, your  "data" is only 200MB less then "used". What is the
-replication size for the "data" and "metadata" pool?
+The radosgw does not use the MDS at all, the MDS is only used for the
+Ceph POSIX filesystem.
 
-$ ceph osd dump -o - (rep pg_size)
+> But it seems that radosgw stores them in the form of pieces which I
+> cannot get a readable information by typing a command.
 
-> I have a few files in the cluster (not much data) but have noticed from the beginning of the build (after the 2 osd) that some of my PGs are degraded.
-> 
-> How do I fix this and is there a tool/command to assist in determining what PGs are degraded?
+Indeed, user information is stored in the .rgw, .users and .users.email
+pools.
 
-You can view your degraded pg's with:
+> I am curious that is there a way I can manage the records of radosgw?
+> For example, if I want to know how many users are there in radosgw and
+> the detail information of each user(ID, access key, secret key).
+> Or if I want to know a user about the information of directories or
+> files he created.
+> Are there some commands that I can use to see the information that I
+> want to see?
 
-$ ceph pg dump -o -
+For now the "radosgw_admin" is the tool for the job, it still lacks some
+functionality, but it's a work-in-progress.
 
-This will tell you the degraded PG's and on which OSD's they are.
+But what you could do for example:
 
-Did you remove any OSD's from this cluster? It seems very odd that the
-cluster is in a 50% degraded state.
+root@gateway:~# rados -p .users ls
+EQCZHQ0KW2GPG8HKCS82
+EQCZHQ0KW2GPG8HKCS82.buckets
+root@gateway:~# radosgw_admin user info --uid=EQCZHQ0KW2GPG8HKCS82
+RADOS S3 Gateway: rados->read ofs=0 len=16384
+RADOS S3 Gateway: rados->read r=128
+User ID: EQCZHQ0KW2GPG8HKCS82
+Secret Key: dA0WHJIIKANaft7qBqL1GfPKAufgx49czYtzggLH
+Display Name: Wido den Hollander
+OpenStack User: <undefined>
+OpenStack Key: <undefined>
+root@gateway:~#
+
+If you have suggestions for the radosgw, please add them to the issue
+tracker as a feature request: http://tracker.newdream.net/projects/ceph
+
+Thank you,
 
 Wido
 
-> 
-> Ceph -v is as follows:
-> 
-> ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
-> 
-> I appreciate the help.
-> 
-> Mark Nigh
-> 
-> This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Thank in advance!
+> ps: please correct me if I said something wrong about radosgw.
 
 
