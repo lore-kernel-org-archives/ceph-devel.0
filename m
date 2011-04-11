@@ -1,38 +1,54 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Dead code removal
-Date: Mon, 11 Apr 2011 11:13:01 -0700
-Message-ID: <20110411181301.GB2099@dreamer>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
+Date: Mon, 11 Apr 2011 14:14:25 -0600
+Message-ID: <4DA36121.40808@sandia.gov>
+References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com>
+ <1297893011.25491.124.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net>
+ <4D9F367B.1070904@sandia.gov>
+ <Pine.LNX.4.64.1104081343460.15928@cobra.newdream.net>
+ <4D9F87F7.6090203@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:54518 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754236Ab1DKSNB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2011 14:13:01 -0400
-Received: from dreamer (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 002B42C173
-	for <ceph-devel@vger.kernel.org>; Mon, 11 Apr 2011 11:13:00 -0700 (PDT)
-Content-Disposition: inline
+Received: from sentry-three.sandia.gov ([132.175.109.17]:49964 "EHLO
+	sentry-three.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756000Ab1DKUOp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2011 16:14:45 -0400
+In-Reply-To: <4D9F87F7.6090203@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: Sage Weil <sage@newdream.net>, Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi. Last week, I was chasing some confusing things with both Automake
-and Ceph internals. Both lead me to a land of dead, rotting code.
-I.. ahem.. may have overreacted a bit ;) I just pushed a branch called
-"dead-code", that does this:
+Jim Schutt wrote:
+> Sage Weil wrote:
 
- 95 files changed, 257 insertions(+), 23366 deletions(-)
+> 
+>>
+>> I guess the other thing that would help to confirm this is to just 
+>> halve the number of OSDs on your machines in a test and see if the 
+>> problem goes away.
+> 
+> I was going to try this first, exactly because it seems like
+> a definitive test.
+> 
 
-There's no reason to keep code around that has never compiled, or
-hasn't compiled in years, or isn't even attempted to compile, or is
-never used, etc etc. If you need it a year from now, it's easy to dig
-back out from the version control.
+FWIW, I've done some testing on a file system using 48 OSDs
+rather than 96.
 
-And no, this is not all of the dead code, just the low hanging fruit.
+With the 96-OSD version of this test (12 servers, 8 OSD/server),
+with 64 clients writing a total of 128 GiB data, I usually see
+multiple instances (5-6, or more, is common) of OSDs getting
+marked down, noticing they were wrongly marked down, and coming back.
 
-Let me know what you think. If I get encouraging noises, that goes
-into master.
+With the 48-OSD version of the file system (12 servers, 4 OSD/server)
+I ran multiple tests, totaling several TiB data, and experienced
+exactly one instance on an OSD being wrongly marked down.
 
--- 
-:(){ :|:&};:
+-- Jim
+
