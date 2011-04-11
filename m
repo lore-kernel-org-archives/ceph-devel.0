@@ -1,47 +1,56 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: How to test HA(HighAvailability) of MDS
-Date: Mon, 11 Apr 2011 09:00:19 -0700
-Message-ID: <829AB31292094B63835DEEE38D76A232@gmail.com>
-References: <BANLkTiknehGsu-2UE65j8QM=zRsJnG6AYQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
+Date: Mon, 11 Apr 2011 09:25:18 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1104110924090.7812@cobra.newdream.net>
+References: <1297891508.25491.120.camel@sale659.sandia.gov>
+ <75157CFDA63D45458FC47FB7BA6CB974@gmail.com> <1297893011.25491.124.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net> <4D9F367B.1070904@sandia.gov>
+ <Pine.LNX.4.64.1104081343460.15928@cobra.newdream.net> <4D9F87F7.6090203@sandia.gov>
+ <BANLkTimUZJhzCcC1AGTC73vi4ELVdy5H3w@mail.gmail.com> <4DA31312.4060206@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:43950 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751877Ab1DKQAX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2011 12:00:23 -0400
-Received: by ywj3 with SMTP id 3so2209353ywj.19
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Apr 2011 09:00:22 -0700 (PDT)
-In-Reply-To: <BANLkTiknehGsu-2UE65j8QM=zRsJnG6AYQ@mail.gmail.com>
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:37594 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751524Ab1DKQVu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2011 12:21:50 -0400
+In-Reply-To: <4DA31312.4060206@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: AnnyRen <annyren6@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: Colin McCabe <cmccabe@alumni.cmu.edu>, Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Monday, April 11, 2011 at 8:35 AM, AnnyRen wrote:
-Hi,
+On Mon, 11 Apr 2011, Jim Schutt wrote:
+> > > > I guess the other thing that would help to confirm this is to just halve
+> > > > the number of OSDs on your machines in a test and see if the problem
+> > > > goes
+> > > > away.
+> > > I was going to try this first, exactly because it seems like
+> > > a definitive test.
+> > > 
+> > > > > If my analysis above is correct, do you think anything
+> > > > > can be gained by running the heartbeat and heartbeat
+> > > > > dispatcher threads as SCHED_RR threads?  Since tick() runs
+> > > > > heartbeat_check(), that would also need to be SCHED_RR,
+> > > > > or the heartbeats could arrive on time, but not checked
+> > > > > until it was too late.
+> > 
+> > Thanks for the ideas. However, I doubt that making the OSD::tick()
+> > thread SCHED_RR would really work.
+> > 
+> > The OSD::tick() code is taking locks all over the place. Since a bunch
+> > of other threads besides the tick thread can be holding those locks,
+> > this would soon result in priority inversion. Not to mention,
+> > heartbeat_messenger has its own thread(s) which actually perform the
+> > work of sending the heartbeat messages.
 > 
-> I want to test the reliability of MDS in Ceph File System,
-> there are three MONs, two MDSes and three OSD in my test environment.
-> 
-> With "ceph -s", I saw the MDS's status is
-> 2011-04-11 23:30:38.001177 mds e5: 1/1/1 up {0=up:active}, 1 up:standby
-> 
-> Could you tell me how to set the standby MDS to active? What is the
-> instruction? ^_^
-> and how can I test the reliability of MDS ?
-> May I turn off the active one and see the standby MDS takes over?
+> Yes, I think I understand.
 
-So if you just want to see the standby MDS take over, then all you have to do is kill the active MDS process. After a configurable timeout period, the standby MDS will go into replay, which should take a few seconds, then rejoin and reconnect (which should go very quickly), and then back to active.
-It sounds like that's all you're after right now.
+We could set the priority for those threads as well, but I'm not sure that 
+really addresses the problem: we may end up with a situation where cosd is 
+responding to heartbeats but not doing useful work.  At some point you 
+have to consider highly degraded service a failure.
 
-If you want to increase the number of active MDSes (to deal with a high metadata load), there are some wiki pages about it and similar things:
-http://ceph.newdream.net/wiki/Main_Page#Expanding_your_cluster
+Let's see if we can fix it without adjusting priorities first!
 
-Hope this helps!
--Greg
-
-
-
+sage
