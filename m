@@ -1,56 +1,64 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
-Date: Mon, 11 Apr 2011 09:25:18 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104110924090.7812@cobra.newdream.net>
-References: <1297891508.25491.120.camel@sale659.sandia.gov>
- <75157CFDA63D45458FC47FB7BA6CB974@gmail.com> <1297893011.25491.124.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net> <4D9F367B.1070904@sandia.gov>
- <Pine.LNX.4.64.1104081343460.15928@cobra.newdream.net> <4D9F87F7.6090203@sandia.gov>
- <BANLkTimUZJhzCcC1AGTC73vi4ELVdy5H3w@mail.gmail.com> <4DA31312.4060206@sandia.gov>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: Fw: re-exporting nfs
+Date: Mon, 11 Apr 2011 10:29:34 -0700
+Message-ID: <7F19EF1A73CE4484873F71CBB2CFB16F@gmail.com>
+References: <19ABB379BFC8469C8A53FD5B3E4BD875@PC201010310710>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37594 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751524Ab1DKQVu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2011 12:21:50 -0400
-In-Reply-To: <4DA31312.4060206@sandia.gov>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:52702 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754131Ab1DKR3i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2011 13:29:38 -0400
+Received: by iyb14 with SMTP id 14so5814248iyb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Apr 2011 10:29:38 -0700 (PDT)
+In-Reply-To: <19ABB379BFC8469C8A53FD5B3E4BD875@PC201010310710>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: Colin McCabe <cmccabe@alumni.cmu.edu>, Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yuki <chengmao2010@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 11 Apr 2011, Jim Schutt wrote:
-> > > > I guess the other thing that would help to confirm this is to just halve
-> > > > the number of OSDs on your machines in a test and see if the problem
-> > > > goes
-> > > > away.
-> > > I was going to try this first, exactly because it seems like
-> > > a definitive test.
-> > > 
-> > > > > If my analysis above is correct, do you think anything
-> > > > > can be gained by running the heartbeat and heartbeat
-> > > > > dispatcher threads as SCHED_RR threads?  Since tick() runs
-> > > > > heartbeat_check(), that would also need to be SCHED_RR,
-> > > > > or the heartbeats could arrive on time, but not checked
-> > > > > until it was too late.
-> > 
-> > Thanks for the ideas. However, I doubt that making the OSD::tick()
-> > thread SCHED_RR would really work.
-> > 
-> > The OSD::tick() code is taking locks all over the place. Since a bunch
-> > of other threads besides the tick thread can be holding those locks,
-> > this would soon result in priority inversion. Not to mention,
-> > heartbeat_messenger has its own thread(s) which actually perform the
-> > work of sending the heartbeat messages.
-> 
-> Yes, I think I understand.
+On Saturday, April 9, 2011 at 11:45 PM, Yuki wrote:
+Hi=EF=BC=8C
+> I know ceph can re-export nfs protocol,but there are something confus=
+e me during the test. Here is the command I used.
+> "dd if=3D/dev/zeof of=3D/mnt/ceph/test.bat bs=3D4M count=3D1000"
+> The results are as follows:
+> ceph:62 MB/s
+> nfs:26MB/s
+> There are 3 OSDs,1 MON and 1 MDS in the ceph cluster. And I do this t=
+est using the in-kernel client.
+> I was confused by two things during the test on nfs.
+> 1. The "dd" command will call mknod to create a file,but mknod will c=
+reates a FIFO, character special file, or block special file with the s=
+pecified name.(It will call lookup_open to create a file during the tes=
+t on ceph,)
 
-We could set the priority for those threads as well, but I'm not sure that 
-really addresses the problem: we may end up with a situation where cosd is 
-responding to heartbeats but not doing useful work.  At some point you 
-have to consider highly degraded service a failure.
+I'm not quite sure what you're asking here? We don't have anything to d=
+o with maintaing dd so if you're asking about that program I really can=
+'t help you. ;)
 
-Let's see if we can fix it without adjusting priorities first!
+> 2.There are sometimes no network traffic during the test on nfs.(I us=
+e the command "sar" to monitor the local LAN network traffic )
 
-sage
+I'm not personally very familiar with the nfs exporting, but my guess i=
+s that maybe some of the writes are being buffered up on the export mac=
+hine and then streamed out from there when it gets a commit from the NF=
+S client.
+In general it wouldn't surprise me if NFS re-export is a little slower =
+than native Ceph since NFS routes everything through a single machine w=
+hile Ceph talks directly to a lot of the servers. You might experiment =
+with a few of the other dd settings (to adjust data sync, etc) and see =
+how that changes your results.
+-Greg
+
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
