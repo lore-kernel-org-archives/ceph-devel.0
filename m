@@ -1,96 +1,62 @@
-From: Stefan Hajnoczi <stefanha@gmail.com>
-Subject: Re: [PATCH v2 1/2] rbd: use the higher level librbd instead of just librados
-Date: Tue, 12 Apr 2011 09:54:19 +0100
-Message-ID: <BANLkTin8oB-1bz3rDdPU8sozmA_+Qqyb7w@mail.gmail.com>
-References: <6f9466b6098b5159aca9c789f9fce45f409e684f.1301354138.git.josh.durgin@dreamhost.com>
-	<20110408084334.GA28360@stefanha-thinkpad.localdomain>
-	<4DA39A6A.7020403@dreamhost.com>
+From: Christoph Raible <c.raible@science-computing.de>
+Subject: Re: Searching for right tcmalloc Packages on CentOS 5.5
+Date: Tue, 12 Apr 2011 13:36:54 +0000 (UTC)
+Message-ID: <loom.20110412T153347-688@post.gmane.org>
+References: <4DA40BAF.2070404@science-computing.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:55914 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753944Ab1DLIyU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2011 04:54:20 -0400
-In-Reply-To: <4DA39A6A.7020403@dreamhost.com>
+Received: from lo.gmane.org ([80.91.229.12]:59004 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754503Ab1DLNuI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Apr 2011 09:50:08 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Q9dyn-0003BB-8E
+	for ceph-devel@vger.kernel.org; Tue, 12 Apr 2011 15:50:07 +0200
+Received: from HSI-KBW-095-208-113-104.hsi5.kabel-badenwuerttemberg.de ([95.208.113.104])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Apr 2011 15:50:05 +0200
+Received: from c.raible by HSI-KBW-095-208-113-104.hsi5.kabel-badenwuerttemberg.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Apr 2011 15:50:05 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Yehuda Sadeh <yehuda@hq.newdream.net>
+To: ceph-devel@vger.kernel.org
 
-On Tue, Apr 12, 2011 at 1:18 AM, Josh Durgin <josh.durgin@dreamhost.com=
-> wrote:
-> On 04/08/2011 01:43 AM, Stefan Hajnoczi wrote:
->>
->> On Mon, Mar 28, 2011 at 04:15:57PM -0700, Josh Durgin wrote:
->>>
->>> librbd stacks on top of librados to provide access
->>> to rbd images.
->>>
->>> Using librbd simplifies the qemu code, and allows
->>> qemu to use new versions of the rbd format
->>> with few (if any) changes.
->>>
->>> Signed-off-by: Josh Durgin<josh.durgin@dreamhost.com>
->>> Signed-off-by: Yehuda Sadeh<yehuda@hq.newdream.net>
->>> ---
->>> =A0block/rbd.c =A0 =A0 =A0 | =A0785
->>> +++++++++++++++--------------------------------------
->>> =A0block/rbd_types.h | =A0 71 -----
->>> =A0configure =A0 =A0 =A0 =A0 | =A0 33 +--
->>> =A03 files changed, 221 insertions(+), 668 deletions(-)
->>> =A0delete mode 100644 block/rbd_types.h
->>
->> Hi Josh,
->> I have applied your patches onto qemu.git/master and am running
->> ceph.git/master.
->>
->> Unfortunately qemu-iotests fails for me.
->>
->>
->> Test 016 seems to hang in qemu-io -g -c write -P 66 128M 512
->> rbd:rbd/t.raw. =A0I can reproduce this consistently. =A0Here is the
->> backtrace of the hung process (not consuming CPU, probably deadlocke=
-d):
->
-> This hung because it wasn't checking the return value of rbd_aio_writ=
-e.
-> I've fixed this in the for-qemu branch of
-> http://ceph.newdream.net/git/qemu-kvm.git. Also, the existing rbd
-> implementation is not 'growable' - writing to a large offset will not=
- expand
-> the rbd image correctly. Should we implement bdrv_truncate to support=
- this
-> (librbd has a resize operation)? Is bdrv_truncate useful outside of q=
-emu-img
-> and qemu-io?
+Christoph Raible <c.raible <at> science-computing.de> writes:
 
-If librbd has a resize operation then it would be nice to wire up
-bdrv_truncate() for completeness.  Note that bdrv_truncate() can also
-be called online using the block_resize monitor command.
+> I'm searching for the right tcmalloc package to configure Ceph on
+> CentOS 5.5 x86_64.
+> 
+> I tried the following packages described in Mailinglist and other Howto's:
+> 
+>      google-perftools-1.3-3.el5.kb.x86_64,
+>      google-perftools-1.7-1.el5.i386.rpm,
+>      google-perftools-devel-1.7-1.el5.i386.rpm
+> 
+> But none of them works...  I always get the following error:
+> 
+>      checking for malloc in -ltcmalloc... no
+> 
+>      configure: error: no tcmalloc found (use --without-tcmallo to 
+>     disable)
+> 
+>      See `config.log' for more details.
+> 
+> Can anyone help me with my problem?
 
-Since rbd devices are not growable we should fix qemu-iotests to skip
-016 for rbd.
 
->> Test 008 failed with an assertion but succeeded when run again. =A0I=
- think
->> this is a race condition:
->
-> This is likely a use-after-free, but I haven't been able to find the =
-race
-> condition yet (or reproduce it). Could you get a backtrace from the c=
-ore
-> file?
+I got the solution, i forgot in version 1.3.3  to install the devel-package.
 
-Unfortunately I have no core file and wasn't able to reproduce it again=
-=2E
+google-perftools-devel-1.3-3.el5.kb.x86_64,
 
-Is qemu-iotests passing for you now?
+After that configuring an compiling Ceph works fine.
 
-Stefan
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards,
+
+Christoph Raible
+
+
