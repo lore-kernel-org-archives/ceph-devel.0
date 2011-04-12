@@ -1,79 +1,109 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] Relax journal trim_finish assertion to pass when (to ==
- trimmed_pos).
-Date: Tue, 12 Apr 2011 08:40:44 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104120839390.12198@cobra.newdream.net>
-References: <or62qjxzq3.fsf@livre.localdomain>
+From: Martin Wilderoth <martin.wilderoth@linserv.se>
+Subject: osd stops
+Date: Tue, 12 Apr 2011 18:26:51 +0200 (CEST)
+Message-ID: <2040040255.14467.1302625611658.JavaMail.root@mail.linserv.se>
+References: <1608788961.14465.1302625479260.JavaMail.root@mail.linserv.se>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46755 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757585Ab1DLPhN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2011 11:37:13 -0400
-In-Reply-To: <or62qjxzq3.fsf@livre.localdomain>
+Received: from 194-17-14-101.customer.telia.com ([194.17.14.101]:42300 "EHLO
+	mail.linserv.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754445Ab1DLQdv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2011 12:33:51 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.linserv.se (Postfix) with ESMTP id 58A151204E8
+	for <ceph-devel@vger.kernel.org>; Tue, 12 Apr 2011 18:26:52 +0200 (CEST)
+Received: from mail.linserv.se ([127.0.0.1])
+	by localhost (mail.linserv.se [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id TIOovNDsnzPF for <ceph-devel@vger.kernel.org>;
+	Tue, 12 Apr 2011 18:26:51 +0200 (CEST)
+Received: from mail.linserv.se (mail.linserv.se [194.17.14.101])
+	by mail.linserv.se (Postfix) with ESMTP id BAD5B12002A
+	for <ceph-devel@vger.kernel.org>; Tue, 12 Apr 2011 18:26:51 +0200 (CEST)
+In-Reply-To: <1608788961.14465.1302625479260.JavaMail.root@mail.linserv.se>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, 12 Apr 2011, Alexandre Oliva wrote:
-> I'm getting relatively frequent MDS crashes.  I believe this happens as
-> a replay-standby node is about to take over once the MDS it follows is
-> restarted, most often because it stopped making progress for a long
-> time.  In the core files I checked, waitfor_trim was empty, so this
-> shouldn't have ill effects.  Since I'm not sure how to trigger this
-> particular assertion failure, I can't say that I've tested this patch
-> thoroughly, but unless the purpose of the assertion is to catch the ==
-> case, I think it's safe to put it in.
+I have been done some tests and it seems as I always get the same problem.
+I have been transfering data and suddenly I get I/O error and superblock problem.
+This occurs when the filesystem is filled to aprox 80%
 
-The assertion is that way on purpose.. we shouldn't be trimming to a 
-offset we've already trimmed to.  Looking at the code it's not obvious how 
-we're getting into that particular corner, though.  Can you reproduce the 
-problem with
+ceph health reports no error. I restart the system -a stop -a start
+after that the system is degraded and the osd stopes.
 
-	debug journaler = 20
+The log shows of the fist failing osd
 
-?  That should have enough information to track down exactly where things 
-are going awry.
+2011-04-12 17:51:07.716513 7f02365b8700 -- 0.0.0.0:6802/20180 >> 10.0.6.12:6802/13633 pipe(0x2e1da00 sd=22 pgs=0 cs=0 l=0).fault first fault
+2011-04-12 17:51:07.716868 7f02365b8700 -- 0.0.0.0:6802/20180 >> 10.0.6.12:6802/13633 pipe(0x2e1da00 sd=22 pgs=0 cs=0 l=0).connect claims to be 0.0.0.0:6802/15976 not 10.0.6.12:6802/13633 - wrong node!
+os/FileStore.cc: In function 'void FileStore::sync_entry()', in thread '0x7f023f9ce700'
+os/FileStore.cc: 2674: FAILED assert(r == 0)
+ ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+ 1: (FileStore::sync_entry()+0x1975) [0x59f165]
+ 2: (FileStore::SyncThread::entry()+0xd) [0x5a8a7d]
+ 3: (()+0x68ba) [0x7f024602b8ba]
+ 4: (clone()+0x6d) [0x7f0244cc002d]
+ ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+ 1: (FileStore::sync_entry()+0x1975) [0x59f165]
+ 2: (FileStore::SyncThread::entry()+0xd) [0x5a8a7d]
+ 3: (()+0x68ba) [0x7f024602b8ba]
+ 4: (clone()+0x6d) [0x7f0244cc002d]
+*** Caught signal (Aborted) **
+ in thread 0x7f023f9ce700
+ ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+ 1: /usr/bin/cosd() [0x61e42c]
+ 2: (()+0xef60) [0x7f0246033f60]
+ 3: (gsignal()+0x35) [0x7f0244c23165]
+ 4: (abort()+0x180) [0x7f0244c25f70]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f02454b6dc5]
+ 6: (()+0xcb166) [0x7f02454b5166]
+ 7: (()+0xcb193) [0x7f02454b5193]
+ 8: (()+0xcb28e) [0x7f02454b528e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x373) [0x6061e3]
+ 10: (FileStore::sync_entry()+0x1975) [0x59f165]
+ 11: (FileStore::SyncThread::entry()+0xd) [0x5a8a7d]
+ 12: (()+0x68ba) [0x7f024602b8ba]
+ 13: (clone()+0x6d) [0x7f0244cc002d]
 
-Thanks!
-sage
+the second failing osd
 
+2011-04-12 18:03:36.036420 7f39c6ce7700 FileStore: sync_entry timed out after 600 seconds.
+ ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+2011-04-12 18:03:36.036494 1: (SafeTimer::timer_thread()+0x36b) [0x601afb]
+2011-04-12 18:03:36.036509 2: (SafeTimerThread::entry()+0xd) [0x6042cd]
+2011-04-12 18:03:36.036528 3: (()+0x68ba) [0x7f39d034a8ba]
+2011-04-12 18:03:36.036541 4: (clone()+0x6d) [0x7f39cefdf02d]
+2011-04-12 18:03:36.036551 os/FileStore.cc: In function 'virtual void SyncEntryTimeout::finish(int)', in thread '0x7f39c6ce7700'
+os/FileStore.cc: 2573: FAILED assert(0)
+ ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+ 1: (SyncEntryTimeout::finish(int)+0xf4) [0x5a0b34]
+ 2: (SafeTimer::timer_thread()+0x36b) [0x601afb]
+ 3: (SafeTimerThread::entry()+0xd) [0x6042cd]
+ 4: (()+0x68ba) [0x7f39d034a8ba]
+ 5: (clone()+0x6d) [0x7f39cefdf02d]
+ ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+ 1: (SyncEntryTimeout::finish(int)+0xf4) [0x5a0b34]
+ 2: (SafeTimer::timer_thread()+0x36b) [0x601afb]
+ 3: (SafeTimerThread::entry()+0xd) [0x6042cd]
+ 4: (()+0x68ba) [0x7f39d034a8ba]
+ 5: (clone()+0x6d) [0x7f39cefdf02d]
+*** Caught signal (Aborted) **
+ in thread 0x7f39c6ce7700
+ ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+ 1: /usr/bin/cosd() [0x61e42c]
+ 2: (()+0xef60) [0x7f39d0352f60]
+ 3: (gsignal()+0x35) [0x7f39cef42165]
+ 4: (abort()+0x180) [0x7f39cef44f70]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f39cf7d5dc5]
+ 6: (()+0xcb166) [0x7f39cf7d4166]
+ 7: (()+0xcb193) [0x7f39cf7d4193]
+ 8: (()+0xcb28e) [0x7f39cf7d428e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x373) [0x6061e3]
+ 10: (SyncEntryTimeout::finish(int)+0xf4) [0x5a0b34]
+ 11: (SafeTimer::timer_thread()+0x36b) [0x601afb]
+ 12: (SafeTimerThread::entry()+0xd) [0x6042cd]
+ 13: (()+0x68ba) [0x7f39d034a8ba]
+ 14: (clone()+0x6d) [0x7f39cefdf02d]
 
-> 
-> ---
-> Relax journal trim_finish assertion to pass when (to == trimmed_pos).
-> 
-> Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-> ---
->  src/osdc/Journaler.cc |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/src/osdc/Journaler.cc b/src/osdc/Journaler.cc
-> index f3241c4..4f4811c 100644
-> --- a/src/osdc/Journaler.cc
-> +++ b/src/osdc/Journaler.cc
-> @@ -960,7 +960,7 @@ void Journaler::_trim_finish(int r, uint64_t to)
->    assert(r >= 0);
->    
->    assert(to <= trimming_pos);
-> -  assert(to > trimmed_pos);
-> +  assert(to >= trimmed_pos);
->    trimmed_pos = to;
->  
->    // finishers?
-> -- 
-> 1.7.4.2
-> 
-> -- 
-> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-> You must be the change you wish to see in the world. -- Gandhi
-> Be Free! -- http://FSFLA.org/   FSF Latin America board member
-> Free Software Evangelist      Red Hat Brazil Compiler Engineer
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+regards Martin
