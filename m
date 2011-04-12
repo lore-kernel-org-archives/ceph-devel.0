@@ -1,59 +1,66 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: cosd multi-second stalls cause "wrongly marked me down"
-Date: Mon, 11 Apr 2011 16:23:20 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104111618130.7812@cobra.newdream.net>
-References: <1297891508.25491.120.camel@sale659.sandia.gov>
- <75157CFDA63D45458FC47FB7BA6CB974@gmail.com> <1297893011.25491.124.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1102161649560.11150@cobra.newdream.net> <4D9F367B.1070904@sandia.gov>
- <Pine.LNX.4.64.1104081343460.15928@cobra.newdream.net> <4D9F87F7.6090203@sandia.gov>
- <4DA3702B.4010808@sandia.gov>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: [PATCH v2 1/2] rbd: use the higher level librbd instead of just
+ librados
+Date: Mon, 11 Apr 2011 17:18:50 -0700
+Message-ID: <4DA39A6A.7020403@dreamhost.com>
+References: <6f9466b6098b5159aca9c789f9fce45f409e684f.1301354138.git.josh.durgin@dreamhost.com> <20110408084334.GA28360@stefanha-thinkpad.localdomain>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34333 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756350Ab1DKXTv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2011 19:19:51 -0400
-In-Reply-To: <4DA3702B.4010808@sandia.gov>
+Received: from mail.hq.newdream.net ([66.33.206.127]:51499 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756467Ab1DLASu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Apr 2011 20:18:50 -0400
+In-Reply-To: <20110408084334.GA28360@stefanha-thinkpad.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Hajnoczi <stefanha@gmail.com>
+Cc: kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Yehuda Sadeh <yehuda@hq.newdream.net>
 
-On Mon, 11 Apr 2011, Jim Schutt wrote:
-> Jim Schutt wrote:
-> > Sage Weil wrote:
-> > > On Fri, 8 Apr 2011, Jim Schutt wrote:
-> 
-> > > > So, in the short term I guess I need to run fewer cosd
-> > > > instances per server.
-> > > 
-> > > There is one other thing to look at, and that's the number of threads used
-> > > by each cosd process.  Have you tried setting
-> > > 
-> > >     osd op threads = 1
-> > > 
-> > > (or even 0, although I haven't tested that recently).  That will limit the
-> > > number of concurrent IOs in flight to the fs.  Setting it to 0 will avoid
-> > > using a thread pool at all and will process the IO in the message dispatch
-> > > thread (though we haven't tested that recently so there may be issues).
-> > 
-> > I'll try this 2nd, since it's easy.
-> > 
->      osd op threads = 0
-> 
-> didn't work for me at all - 20 of 96 OSDs aborted almost
-> immediately after startup.
-> 
->      osd op threads = 1
-> 
-> didn't work very well either - one of my servers went OOM,
-> which hasn't happened since I started using my restricted
-> buffering parameters.
+On 04/08/2011 01:43 AM, Stefan Hajnoczi wrote:
+> On Mon, Mar 28, 2011 at 04:15:57PM -0700, Josh Durgin wrote:
+>> librbd stacks on top of librados to provide access
+>> to rbd images.
+>>
+>> Using librbd simplifies the qemu code, and allows
+>> qemu to use new versions of the rbd format
+>> with few (if any) changes.
+>>
+>> Signed-off-by: Josh Durgin<josh.durgin@dreamhost.com>
+>> Signed-off-by: Yehuda Sadeh<yehuda@hq.newdream.net>
+>> ---
+>>   block/rbd.c       |  785 +++++++++++++++--------------------------------------
+>>   block/rbd_types.h |   71 -----
+>>   configure         |   33 +--
+>>   3 files changed, 221 insertions(+), 668 deletions(-)
+>>   delete mode 100644 block/rbd_types.h
+>
+> Hi Josh,
+> I have applied your patches onto qemu.git/master and am running
+> ceph.git/master.
+>
+> Unfortunately qemu-iotests fails for me.
+>
+>
+> Test 016 seems to hang in qemu-io -g -c write -P 66 128M 512
+> rbd:rbd/t.raw.  I can reproduce this consistently.  Here is the
+> backtrace of the hung process (not consuming CPU, probably deadlocked):
 
-Debugging this turned up a refcounting leak that meant PGs were never 
-freed.  That's fixed (and osd op threads = 0 and 1 work in my limited 
-tests), but there may be other PG lifecycle related issues now that 
-refcounting actually works.  :)
+This hung because it wasn't checking the return value of rbd_aio_write.
+I've fixed this in the for-qemu branch of 
+http://ceph.newdream.net/git/qemu-kvm.git. Also, the existing rbd 
+implementation is not 'growable' - writing to a large offset will not 
+expand the rbd image correctly. Should we implement bdrv_truncate to 
+support this (librbd has a resize operation)? Is bdrv_truncate useful 
+outside of qemu-img and qemu-io?
 
-sage
+> Test 008 failed with an assertion but succeeded when run again.  I think
+> this is a race condition:
+
+This is likely a use-after-free, but I haven't been able to find the 
+race condition yet (or reproduce it). Could you get a backtrace from the 
+core file?
+
+Thanks,
+Josh
