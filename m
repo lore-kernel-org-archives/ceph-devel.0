@@ -1,26 +1,31 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
 Subject: Re: osd stops
-Date: Tue, 12 Apr 2011 18:57:25 +0200
-Message-ID: <1302627445.2482.21.camel@wido-laptop.pcextreme.nl>
+Date: Tue, 12 Apr 2011 10:24:27 -0700
+Message-ID: <DE88E60AE99F460EB70B4D1D0706643B@gmail.com>
 References: <2040040255.14467.1302625611658.JavaMail.root@mail.linserv.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:47680 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757917Ab1DLQ52 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2011 12:57:28 -0400
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:34060 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755624Ab1DLRYc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2011 13:24:32 -0400
+Received: by iwn34 with SMTP id 34so6834391iwn.19
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Apr 2011 10:24:31 -0700 (PDT)
 In-Reply-To: <2040040255.14467.1302625611658.JavaMail.root@mail.linserv.se>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Martin Wilderoth <martin.wilderoth@linserv.se>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Martin,
+Ah. It looks like you're running btrfs and you have a very full disk. Unfortunately btrfs doesn't handle low-disk situations (above ~80% utilization -- yes, it's annoying) very well and so it's failing to perform pretty basic tasks and is propagating those failures up to the OSD. If you really need to run that close to full utilization you're going to need to use another underlying filesystem, or add more disks/nodes to spread the data across.
+Sorry. :(
 
-On Tue, 2011-04-12 at 18:26 +0200, Martin Wilderoth wrote:
-> I have been done some tests and it seems as I always get the same problem.
+-Greg
+On Tuesday, April 12, 2011 at 9:26 AM, Martin Wilderoth wrote:
+I have been done some tests and it seems as I always get the same problem.
 > I have been transfering data and suddenly I get I/O error and superblock problem.
 > This occurs when the filesystem is filled to aprox 80%
 > 
@@ -99,19 +104,11 @@ On Tue, 2011-04-12 at 18:26 +0200, Martin Wilderoth wrote:
 >  12: (SafeTimerThread::entry()+0xd) [0x6042cd]
 >  13: (()+0x68ba) [0x7f39d034a8ba]
 >  14: (clone()+0x6d) [0x7f39cefdf02d]
-
-This seems to me that you have a disk I/O problem, where the OSD can't
-commit it's data fast enough and exits.
-
-Does "dmesg" show any disk errors?
-
-Wido
-
 > 
 > regards Martin
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
+> 
 
