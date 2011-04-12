@@ -1,95 +1,79 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH v2 1/2] rbd: use the higher level librbd instead of just
- librados
-Date: Tue, 12 Apr 2011 08:38:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104120835380.12198@cobra.newdream.net>
-References: <6f9466b6098b5159aca9c789f9fce45f409e684f.1301354138.git.josh.durgin@dreamhost.com>
- <20110408084334.GA28360@stefanha-thinkpad.localdomain> <4DA39A6A.7020403@dreamhost.com>
- <BANLkTin8oB-1bz3rDdPU8sozmA_+Qqyb7w@mail.gmail.com>
+Subject: Re: [PATCH] Relax journal trim_finish assertion to pass when (to ==
+ trimmed_pos).
+Date: Tue, 12 Apr 2011 08:40:44 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1104120839390.12198@cobra.newdream.net>
+References: <or62qjxzq3.fsf@livre.localdomain>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-854140964-1302622736=:12198"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54449 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46755 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757526Ab1DLPfZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2011 11:35:25 -0400
-In-Reply-To: <BANLkTin8oB-1bz3rDdPU8sozmA_+Qqyb7w@mail.gmail.com>
+	with ESMTP id S1757585Ab1DLPhN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2011 11:37:13 -0400
+In-Reply-To: <or62qjxzq3.fsf@livre.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Hajnoczi <stefanha@gmail.com>
-Cc: Josh Durgin <josh.durgin@dreamhost.com>, kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Yehuda Sadeh <yehuda@hq.newdream.net>
+To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, 12 Apr 2011, Alexandre Oliva wrote:
+> I'm getting relatively frequent MDS crashes.  I believe this happens as
+> a replay-standby node is about to take over once the MDS it follows is
+> restarted, most often because it stopped making progress for a long
+> time.  In the core files I checked, waitfor_trim was empty, so this
+> shouldn't have ill effects.  Since I'm not sure how to trigger this
+> particular assertion failure, I can't say that I've tested this patch
+> thoroughly, but unless the purpose of the assertion is to catch the ==
+> case, I think it's safe to put it in.
 
---557981400-854140964-1302622736=:12198
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+The assertion is that way on purpose.. we shouldn't be trimming to a 
+offset we've already trimmed to.  Looking at the code it's not obvious how 
+we're getting into that particular corner, though.  Can you reproduce the 
+problem with
 
-On Tue, 12 Apr 2011, Stefan Hajnoczi wrote:
-> On Tue, Apr 12, 2011 at 1:18 AM, Josh Durgin <josh.durgin@dreamhost.com> =
-wrote:
-> > On 04/08/2011 01:43 AM, Stefan Hajnoczi wrote:
-> >>
-> >> On Mon, Mar 28, 2011 at 04:15:57PM -0700, Josh Durgin wrote:
-> >>>
-> >>> librbd stacks on top of librados to provide access
-> >>> to rbd images.
-> >>>
-> >>> Using librbd simplifies the qemu code, and allows
-> >>> qemu to use new versions of the rbd format
-> >>> with few (if any) changes.
-> >>>
-> >>> Signed-off-by: Josh Durgin<josh.durgin@dreamhost.com>
-> >>> Signed-off-by: Yehuda Sadeh<yehuda@hq.newdream.net>
-> >>> ---
-> >>> =A0block/rbd.c =A0 =A0 =A0 | =A0785
-> >>> +++++++++++++++--------------------------------------
-> >>> =A0block/rbd_types.h | =A0 71 -----
-> >>> =A0configure =A0 =A0 =A0 =A0 | =A0 33 +--
-> >>> =A03 files changed, 221 insertions(+), 668 deletions(-)
-> >>> =A0delete mode 100644 block/rbd_types.h
-> >>
-> >> Hi Josh,
-> >> I have applied your patches onto qemu.git/master and am running
-> >> ceph.git/master.
-> >>
-> >> Unfortunately qemu-iotests fails for me.
-> >>
-> >>
-> >> Test 016 seems to hang in qemu-io -g -c write -P 66 128M 512
-> >> rbd:rbd/t.raw. =A0I can reproduce this consistently. =A0Here is the
-> >> backtrace of the hung process (not consuming CPU, probably deadlocked)=
-:
-> >
-> > This hung because it wasn't checking the return value of rbd_aio_write.
-> > I've fixed this in the for-qemu branch of
-> > http://ceph.newdream.net/git/qemu-kvm.git. Also, the existing rbd
-> > implementation is not 'growable' - writing to a large offset will not e=
-xpand
-> > the rbd image correctly. Should we implement bdrv_truncate to support t=
-his
-> > (librbd has a resize operation)? Is bdrv_truncate useful outside of qem=
-u-img
-> > and qemu-io?
->=20
-> If librbd has a resize operation then it would be nice to wire up
-> bdrv_truncate() for completeness.  Note that bdrv_truncate() can also
-> be called online using the block_resize monitor command.
->=20
-> Since rbd devices are not growable we should fix qemu-iotests to skip
-> 016 for rbd.
+	debug journaler = 20
 
-There is a resize operation, but it's expected that you'll use it for any=
-=20
-bdev size change (grow or shrink).  Does qemu grow a device by writing to=
-=20
-the (new) highest offset, or is there another operation that should be=20
-wired up?  We want to avoid a situation where RBD isn't aware of the qemu=
-=20
-bdev resize and has to grow a bit each time we write to a larger offset,=20
-as resize is a somewhat expensive operation...
+?  That should have enough information to track down exactly where things 
+are going awry.
 
 Thanks!
 sage
---557981400-854140964-1302622736=:12198--
+
+
+> 
+> ---
+> Relax journal trim_finish assertion to pass when (to == trimmed_pos).
+> 
+> Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+> ---
+>  src/osdc/Journaler.cc |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/src/osdc/Journaler.cc b/src/osdc/Journaler.cc
+> index f3241c4..4f4811c 100644
+> --- a/src/osdc/Journaler.cc
+> +++ b/src/osdc/Journaler.cc
+> @@ -960,7 +960,7 @@ void Journaler::_trim_finish(int r, uint64_t to)
+>    assert(r >= 0);
+>    
+>    assert(to <= trimming_pos);
+> -  assert(to > trimmed_pos);
+> +  assert(to >= trimmed_pos);
+>    trimmed_pos = to;
+>  
+>    // finishers?
+> -- 
+> 1.7.4.2
+> 
+> -- 
+> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+> You must be the change you wish to see in the world. -- Gandhi
+> Be Free! -- http://FSFLA.org/   FSF Latin America board member
+> Free Software Evangelist      Red Hat Brazil Compiler Engineer
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
