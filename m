@@ -1,42 +1,67 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: osd stops
-Date: Wed, 13 Apr 2011 12:43:49 -0700
-Message-ID: <3AE15F9815FE45D48B7B46056037E9BE@gmail.com>
-References: <174374365.14569.1302696771139.JavaMail.root@mail.linserv.se>
- <FF91E350E7D94E96808037434D4914C0@gmail.com>
+From: Zenon Panoussis <oracle@provocation.net>
+Subject: dkms client module
+Date: Thu, 14 Apr 2011 00:04:49 +0200
+Message-ID: <4DA61E01.9050505@provocation.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:58840 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932228Ab1DMTnx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2011 15:43:53 -0400
-Received: by iwn34 with SMTP id 34so837365iwn.19
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Apr 2011 12:43:52 -0700 (PDT)
-In-Reply-To: <FF91E350E7D94E96808037434D4914C0@gmail.com>
-Content-Disposition: inline
+Received: from host-88-80-6-138.cust.prq.se ([88.80.6.138]:60961 "EHLO
+	mail.nettheatre.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933068Ab1DMWKE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2011 18:10:04 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Wilderoth <martin.wilderoth@linserv.se>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
 
-On Wednesday, April 13, 2011 at 12:38 PM, Gregory Farnum wrote: 
-> On Wednesday, April 13, 2011 at 5:12 AM, Martin Wilderoth wrote:
-> The statistics of the disks, this is after the crash of osd2 and osd4.
-> > 
-> > /dev/sdc 143373312 124954676 18418636 88% /data/osd0
-> > /dev/sdd 143373312 137639524 5733788 97% /data/osd1
-> > 
-> > /dev/sdc 143373312 120350584 23022728 84% /data/osd2
-> > /dev/sdd 143373312 141986188 1387124 100% /data/osd3
-> > 
-> > /dev/sdc 143373312 112025716 31347596 79% /data/osd4
-> > /dev/sdd 143373312 115163124 28210188 81% /data/osd5
-> > 
-> > I will send some statistic of the ext3 as well
-> 
-> Am I reading this right, each of those disks is ~137MB? Those are some very small disks; I actually don't think you'll have much luck with the OSDs on something that small just because random balancing on disks that small won't work out very well -- there's too much variation when the total disk is only ~30 times larger than the default stripe size.
-> -Greg
->  Never mind, just realized that default df outputs in 1KB blocks -- was thinking it was bytes for some reason. 
+Hello all
+
+I'm new to ceph and I'm having troubles with the client module.
+
+I'm testing on SL6. RHEL6 and all its derivatives use kernel 2.6.32 and
+will continue doing so for the next seven years. Therefore, the only
+reasonable way to get ceph into RHEL6 is dkms. Luckily, that's already
+supported.
+
+I got ceph-client-standalone from git and fixed the specific 2.6.32
+problems according to http://marc.info/?l=ceph-devel&m=129813044300561&w=2 .
+
+Then I run into this:
+
+ ./dkms/add-to-dkms-and-build
+
+ Creating symlink /var/lib/dkms/ceph/2.6.37/source ->
+                 /usr/src/ceph-2.6.37
+
+ DKMS: add Completed.
+
+ Kernel preparation unnecessary for this kernel.  Skipping...
+
+ Building module:
+ cleaning build area....
+ make KERNELRELEASE=2.6.32-71.24.1.el6.x86_64 -C ceph/....(bad exit status: 2)
+
+ Error! Bad return status for module build on kernel: 2.6.32-71.24.1.el6.x86_64 (x86_64)
+ Consult the make.log in the build directory
+ /var/lib/dkms/ceph/2.6.37/build/ for more information.
+ 0
+ 0
+
+make.log says:
+
+ DKMS make.log for ceph-2.6.37 for kernel 2.6.32-71.24.1.el6.x86_64 (x86_64)
+ Wed Apr 13 23:47:41 CEST 2011
+ make: Entering directory `/var/lib/dkms/ceph/2.6.37/build/ceph'
+ make: *** No targets.  Stop.
+ make: Leaving directory `/var/lib/dkms/ceph/2.6.37/build/ceph'
+
+It seems to me there should be a Makefile in the root of ceph-client-standalone
+that points make to the Makefiles of the subdirectories, but I'm an ignorant
+wrt to make, so I'm not sure about anything.
+
+Suggestions anyone how to get around this?
+
+Z
+
+
