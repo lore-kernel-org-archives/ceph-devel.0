@@ -1,33 +1,32 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: It's not a bug of ceph, but
-Date: Wed, 13 Apr 2011 09:22:42 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104130922120.13408@cobra.newdream.net>
-References: <4DA58180.7090701@ufm.su> <BANLkTim_rn4uzJSBp+oNVst7nYyVrU3Q=g@mail.gmail.com>
+From: "riecheal" <riechealag@yahoo.co.uk>
+Subject: Hello dear
+Date: Wed, 13 Apr 2011 19:42:57 +0300 (EEST)
+Message-ID: <21196.41.208.133.52.1302712977.squirrel@pismo.bg>
+Reply-To: riechealag@yahoo.co.uk
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;charset=windows-1251
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47418 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932928Ab1DMQTI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2011 12:19:08 -0400
-In-Reply-To: <BANLkTim_rn4uzJSBp+oNVst7nYyVrU3Q=g@mail.gmail.com>
+Received: from mail.pismo.bg ([217.75.128.20]:42999 "EHLO pismo.bg"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757396Ab1DMQzO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 13 Apr 2011 12:55:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry Chang <henry.cy.chang@gmail.com>
-Cc: Fyodor Ustinov <ufm@ufm.su>, ceph-devel@vger.kernel.org
+To: riechealag@yahoo.co.uk
 
-On Wed, 13 Apr 2011, Henry Chang wrote:
-> Hi,
-> 
-> 2011/4/13 Fyodor Ustinov <ufm@ufm.su>:
-> > Hi!
-> >
-> > may be anyone seen this trouble?
-> 
-> I have seen this when running OSD with ext3 and never seen it after
-> switching to ext4.
+Hello dear
 
-Yeah.  We've seen it on ext3 prior to 2.6.34 or so... ext3 on newer 
-kernels (or ext4) seem to be okay.
+My name is miss Riecheal,I am a beautiful young and charming girl looking
+for real love and protection,I have gone through your profile,and am very
+happy to contact you for us to know ourselves.You know that distance, age
+and indeed color cannot stop true love. Please,I would appreciate if you
+send Email to my private Email box:
+(riechealag@yahoo.co.uk)So that i can send my pictures and more
+information about my self to you.and i will like to see your picture too
+okay, and know you more
 
-sage
+Miss Riecheam
+
+PLS SEND AM EMAIL TO MY BOX (riechealag@yahoo.co.uk)OK I LOVE U  KSSSSSSSSSSS
+
