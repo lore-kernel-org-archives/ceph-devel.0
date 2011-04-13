@@ -1,78 +1,59 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: [PATCH v3 3/4] rbd: check return values when scheduling aio
-Date: Tue, 12 Apr 2011 17:45:25 -0700
-Message-ID: <c5962037945a72d2e8a027aaf770f957cd48984b.1302653035.git.josh.durgin@dreamhost.com>
+Subject: [PATCH v3 4/4] rbd: Add bdrv_truncate implementation
+Date: Tue, 12 Apr 2011 17:45:26 -0700
+Message-ID: <a1fea03a15d0d9b4ecf26cb7b9af7a8ddee96851.1302653035.git.josh.durgin@dreamhost.com>
 References: <cover.1302653035.git.josh.durgin@dreamhost.com>
-Return-path: <kvm-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:49715 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932693Ab1DMArF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Apr 2011 20:47:05 -0400
 In-Reply-To: <cover.1302653035.git.josh.durgin@dreamhost.com>
 In-Reply-To: <cover.1302653035.git.josh.durgin@dreamhost.com>
 References: <cover.1302653035.git.josh.durgin@dreamhost.com>
-Sender: kvm-owner@vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: kvm@vger.kernel.org, qemu-devel@nongnu.org
 Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
 
-If scheduling fails, the number of outstanding I/Os must be correct,
-or there will be a hang when waiting for everything to be flushed.
-
-Reported-by: Stefan Hajnoczi <stefanha@gmail.com>
 Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
 ---
- block/rbd.c |   24 ++++++++++++++++++++----
- 1 files changed, 20 insertions(+), 4 deletions(-)
+ block/rbd.c |   15 +++++++++++++++
+ 1 files changed, 15 insertions(+), 0 deletions(-)
 
 diff --git a/block/rbd.c b/block/rbd.c
-index 19014fb..ac20282 100644
+index ac20282..4514dbd 100644
 --- a/block/rbd.c
 +++ b/block/rbd.c
-@@ -579,10 +579,14 @@ static BlockDriverAIOCB *rbd_aio_rw_vector(BlockDriverState *bs,
-     rbd_completion_t c;
-     int64_t off, size;
-     char *buf;
-+    int r;
- 
-     BDRVRBDState *s = bs->opaque;
- 
-     acb = qemu_aio_get(&rbd_aio_pool, bs, cb, opaque);
-+    if (!acb) {
-+        return NULL;
-+    }
-     acb->write = write;
-     acb->qiov = qiov;
-     acb->bounce = qemu_blockalign(bs, qiov->size);
-@@ -609,16 +613,28 @@ static BlockDriverAIOCB *rbd_aio_rw_vector(BlockDriverState *bs,
-     rcb->buf = buf;
-     rcb->s = acb->s;
-     rcb->size = size;
-+    r = rbd_aio_create_completion(rcb, (rbd_callback_t) rbd_finish_aiocb, &c);
-+    if (r < 0) {
-+        goto failed;
-+    }
- 
-     if (write) {
--        rbd_aio_create_completion(rcb, (rbd_callback_t) rbd_finish_aiocb, &c);
--        rbd_aio_write(s->image, off, size, buf, c);
-+        r = rbd_aio_write(s->image, off, size, buf, c);
-     } else {
--        rbd_aio_create_completion(rcb, (rbd_callback_t) rbd_finish_aiocb, &c);
--        rbd_aio_read(s->image, off, size, buf, c);
-+        r = rbd_aio_read(s->image, off, size, buf, c);
-+    }
-+
-+    if (r < 0) {
-+        goto failed;
-     }
- 
-     return &acb->common;
-+
-+failed:
-+    qemu_free(rcb);
-+    s->qemu_aio_count--;
-+    qemu_aio_release(acb);
-+    return NULL;
+@@ -686,6 +686,20 @@ static int64_t qemu_rbd_getlength(BlockDriverState *bs)
+     return info.size;
  }
  
- static BlockDriverAIOCB *qemu_rbd_aio_readv(BlockDriverState *bs,
++static int qemu_rbd_truncate(BlockDriverState *bs, int64_t offset)
++{
++    BDRVRBDState *s = bs->opaque;
++    int r;
++
++    r = rbd_resize(s->image, offset);
++    if (r < 0) {
++        error_report("failed to resize rbd image");
++        return -EIO;
++    }
++
++    return 0;
++}
++
+ static int qemu_rbd_snap_create(BlockDriverState *bs,
+                                 QEMUSnapshotInfo *sn_info)
+ {
+@@ -784,6 +798,7 @@ static BlockDriver bdrv_rbd = {
+     .bdrv_get_info      = qemu_rbd_getinfo,
+     .create_options     = qemu_rbd_create_options,
+     .bdrv_getlength     = qemu_rbd_getlength,
++    .bdrv_truncate      = qemu_rbd_truncate,
+     .protocol_name      = "rbd",
+ 
+     .bdrv_aio_readv     = qemu_rbd_aio_readv,
 -- 
 1.7.2.3
 
