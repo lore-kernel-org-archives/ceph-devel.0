@@ -1,67 +1,29 @@
-From: Zenon Panoussis <oracle@provocation.net>
-Subject: dkms client module
-Date: Thu, 14 Apr 2011 00:04:49 +0200
-Message-ID: <4DA61E01.9050505@provocation.net>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: Re: It's not a bug of ceph, but
+Date: Thu, 14 Apr 2011 03:09:53 +0300
+Message-ID: <4DA63B51.6030601@ufm.su>
+References: <4DA58180.7090701@ufm.su>	<BANLkTim_rn4uzJSBp+oNVst7nYyVrU3Q=g@mail.gmail.com> <Pine.LNX.4.64.1104130922120.13408@cobra.newdream.net> <4DA5FA4C.7030205@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from host-88-80-6-138.cust.prq.se ([88.80.6.138]:60961 "EHLO
-	mail.nettheatre.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933068Ab1DMWKE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Apr 2011 18:10:04 -0400
+Received: from mail.ufm.su ([77.120.103.19]:45164 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751991Ab1DNAJ4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 13 Apr 2011 20:09:56 -0400
+In-Reply-To: <4DA5FA4C.7030205@ufm.su>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Henry Chang <henry.cy.chang@gmail.com>, ceph-devel@vger.kernel.org
 
+On 04/13/2011 10:32 PM, Fyodor Ustinov wrote:
+>
+> May be md. I test now without md.
+It's not md.
 
-Hello all
+Excellent. It seems that ubuntu 11.04 (or, may be, kernel 2.6.38?) do 
+not have a working fs for ceph?
 
-I'm new to ceph and I'm having troubles with the client module.
-
-I'm testing on SL6. RHEL6 and all its derivatives use kernel 2.6.32 and
-will continue doing so for the next seven years. Therefore, the only
-reasonable way to get ceph into RHEL6 is dkms. Luckily, that's already
-supported.
-
-I got ceph-client-standalone from git and fixed the specific 2.6.32
-problems according to http://marc.info/?l=ceph-devel&m=129813044300561&w=2 .
-
-Then I run into this:
-
- ./dkms/add-to-dkms-and-build
-
- Creating symlink /var/lib/dkms/ceph/2.6.37/source ->
-                 /usr/src/ceph-2.6.37
-
- DKMS: add Completed.
-
- Kernel preparation unnecessary for this kernel.  Skipping...
-
- Building module:
- cleaning build area....
- make KERNELRELEASE=2.6.32-71.24.1.el6.x86_64 -C ceph/....(bad exit status: 2)
-
- Error! Bad return status for module build on kernel: 2.6.32-71.24.1.el6.x86_64 (x86_64)
- Consult the make.log in the build directory
- /var/lib/dkms/ceph/2.6.37/build/ for more information.
- 0
- 0
-
-make.log says:
-
- DKMS make.log for ceph-2.6.37 for kernel 2.6.32-71.24.1.el6.x86_64 (x86_64)
- Wed Apr 13 23:47:41 CEST 2011
- make: Entering directory `/var/lib/dkms/ceph/2.6.37/build/ceph'
- make: *** No targets.  Stop.
- make: Leaving directory `/var/lib/dkms/ceph/2.6.37/build/ceph'
-
-It seems to me there should be a Makefile in the root of ceph-client-standalone
-that points make to the Makefiles of the subdirectories, but I'm an ignorant
-wrt to make, so I'm not sure about anything.
-
-Suggestions anyone how to get around this?
-
-Z
-
-
+WBR,
+     Fyodor.
