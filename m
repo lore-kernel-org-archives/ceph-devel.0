@@ -1,28 +1,33 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: can mds prepare inodes?
-Date: Thu, 14 Apr 2011 17:46:32 +0800
-Message-ID: <BANLkTiniJAbPZpbGZEpucN4O1sWQKvjyvQ@mail.gmail.com>
+From: Zenon Panoussis <oracle@provocation.net>
+Subject: Re: Can't start Ceph with CentOS 5.6
+Date: Thu, 14 Apr 2011 12:24:42 +0200
+Message-ID: <4DA6CB6A.60106@provocation.net>
+References: <4DA69AB6.9050508@science-computing.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:35265 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757922Ab1DNJqd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2011 05:46:33 -0400
-Received: by vws1 with SMTP id 1so1140998vws.19
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Apr 2011 02:46:32 -0700 (PDT)
+Received: from host-88-80-6-138.cust.prq.se ([88.80.6.138]:48142 "EHLO
+	mail.nettheatre.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753964Ab1DNKYq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2011 06:24:46 -0400
+In-Reply-To: <4DA69AB6.9050508@science-computing.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-hi developers,
-   I have a question about the prealloc_inos variable in SessionMap.h
-   when the client first request to allocate an inode,
-prepare_new_inode function will prepare new inodes to the session. so
-if  the client's first request is to make a dir, the MDS always
-return  a  safe message to the client, but why it  do not answer
-unsafe to th client?
-  i want to  prepare new inodes to the session in
-handle_client_stat,can i do that? in other words, should i allocate
-inodes when client mounted on the ceph cluster?
-thanks!
+
+On 04/14/2011 08:56 AM, Christoph Raible wrote:
+
+> ...i want to start ceph with  /etc/init.d/ceph -a start  oder service 
+> ceph -a start   but the service is unknown and in /etc/init.d  there 
+> is noch such file!
+
+You will find it in the sources, src/init-ceph. Copy it to /etc/init.d/ceph
+or /etc/rc.d/init.d/ceph and register it if need be with chkconfig -add ceph.
+
+Note that you can build rpm and deb packages directly from the source and
+they put stuff automatically where it belongs, depending on your distro.
+
+Z
+
