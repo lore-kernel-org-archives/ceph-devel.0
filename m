@@ -1,121 +1,72 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: The cache problem of re-export NFS test
-Date: Thu, 14 Apr 2011 10:12:16 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104141008470.9026@cobra.newdream.net>
-References: <BANLkTim_34TkwKzTpwnciW41Dn9Bq1Zskw@mail.gmail.com>
- <Pine.LNX.4.64.1104120834100.12198@cobra.newdream.net>
- <BANLkTinV8T5Vq8P5grvLtuwxB2BO-T=vLg@mail.gmail.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: It's not a bug of ceph, but
+Date: Thu, 14 Apr 2011 10:08:29 -0700
+Message-ID: <2B548686BA1D4CDD996A068F689C1B0A@gmail.com>
+References: <4DA58180.7090701@ufm.su>
+ <BANLkTim_rn4uzJSBp+oNVst7nYyVrU3Q=g@mail.gmail.com>
+ <Pine.LNX.4.64.1104130922120.13408@cobra.newdream.net>
+ <4DA5FA4C.7030205@ufm.su>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-52260151-1302801136=:9026"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39198 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758416Ab1DNRIk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2011 13:08:40 -0400
-In-Reply-To: <BANLkTinV8T5Vq8P5grvLtuwxB2BO-T=vLg@mail.gmail.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:65369 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758277Ab1DNRId (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2011 13:08:33 -0400
+Received: by iwn34 with SMTP id 34so1581472iwn.19
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Apr 2011 10:08:33 -0700 (PDT)
+In-Reply-To: <4DA5FA4C.7030205@ufm.su>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylar Shen <kimulaaa@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Fyodor Ustinov <ufm@ufm.su>
+Cc: Sage Weil <sage@newdream.net>, Henry Chang <henry.cy.chang@gmail.com>, ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wednesday, April 13, 2011 at 12:32 PM, Fyodor Ustinov wrote:
+On this kernel (2.6.38-8-server ubuntu 11.04) i have trouble with ext4 also.
+> 
+> I mount fresh ceph partition on client, test by bonnie++, unmount, stop 
+> ceph cluster, umount osd ext4 partition and forced fsck this partition.
+> 
+> Mount string on OSD:
+> 
+> /dev/md127 /mfs auto rw,noatime,nodiratime,async,noexec,nodev,user_xattr 0 0
+> 
+> No any messages in kernel log. But:
+> 
+> root@stc1:/home/ufm# umount /mfs
+> root@stc1:/home/ufm# fsck /dev/md127
+> fsck from util-linux-ng 2.17.2
+> e2fsck 1.41.14 (22-Dec-2010)
+> /dev/md127: clean, 29779/59834368 files, 3887821/239314496 blocks
+> 
+> root@stc1:/home/ufm# fsck -f /dev/md127
+> fsck from util-linux-ng 2.17.2
+> e2fsck 1.41.14 (22-Dec-2010)
+> Pass 1: Checking inodes, blocks, and sizes
+> Inode 4456487, i_blocks is 8200, should be 8208. Fix<y>? yes
+> 
+> Inode 4456499, i_blocks is 8208, should be 8200. Fix<y>? yes
+> 
+> Inode 4456549, i_blocks is 24, should be 16. Fix<y>? yes
+> 
+> Inode 4456579, i_blocks is 24, should be 16. Fix<y>? yes
+> 
+> Inode 4456580, i_blocks is 8, should be 16. Fix<y>? yes
+> 
+> Inode 4456591, i_blocks is 8, should be 16. Fix<y>? yes
+> 
+> Inode 4456601, i_blocks is 24, should be 16. Fix<y>? /dev/md127: e2fsck 
+> canceled.
+> 
+> /dev/md127: ***** FILE SYSTEM WAS MODIFIED *****
+> 
+> May be md. I test now without md.
 
---557981400-52260151-1302801136=:9026
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On Thu, 14 Apr 2011, Sylar Shen wrote:
-> Hi Sage,
-> Thanks for your reply. I really appreciated.
-> I tried what you suggested to set the argument "sync" in /etc/exports.
-> I also checked "man 5 exports" and it showed that sync means reply to
-> requests only after the changes have been committed to stable storage.
-> It didn't mention that the export server won't do the cache task.
-> However, after I did the experiment, I found that the memory usage of
-> Ceph-client still went up to maximum value while writing the data
-> which means Ceph-client did the cache task.
-
-Right: 'sync' will make it write-through and flush the data to disk, but=20
-it will still keep a copy in the page cache.
-
-> So...are there other possible ways to solve my problem?
-
-Are you sure it's a problem?  Caching is usually a good thing.  If you're=
-=20
-worried about safety, 'sync' solves that.  If you're worried about memory=
-=20
-usage, you may not need to be.  The kernel will always use as much free=20
-ram as is available for caching fs data.  That's a normal and good thing. =
-=20
-It will throw it out as soon as it needs the memory for something else.
-
-I think the only case where that might be problematic is if you have other=
-=20
-local file systems and want to make sure the memory is used for those=20
-instead of ceph.  I'm not aware of a way to do that...
-
-sage
+So Ceph worked fine and you got no complaints until you ran fsck? That's odd but I don't think we've gotten any reports of data corruption or anything with Ceph on ext4. You should probably report this to the ext4 devs as Ceph doesn't do anything that should be able to break that stuff, but it does use some less-common code paths in a lot of filesystems.
+-Greg
 
 
 
 
-> Thanks~~
->=20
-> Best Regards,
-> Sylar Shen
->=20
-> 2011/4/12 Sage Weil <sage@newdream.net>:
-> > On Tue, 12 Apr 2011, Sylar Shen wrote:
-> >> Hi developers,
-> >> I know that the following question may not be relative to Ceph but
-> >> this confuses me a lot.
-> >> I am testing the function of re-exporting nfs by command "dd" without
-> >> using buffer.
-> >> That means I would like my data to be written to Ceph DFS directly
-> >> without passing by the buffer of client or nfs-client.
-> >> Here is my test architecture. Hope you could understand what I am
-> >> trying to express.....:p
-> >> ----------------------------------------------------------------------=
---------
-> >> =A0 =A0 =A0 =A0 =A0 =A0    =A0nfs =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 ceph protocol
-> >> Client <------------>Ceph-Client <-------------------> Ceph DFS
-> >> ----------------------------------------------------------------------=
---------
-> >> I used the command "dd if=3D/dev/zero of=3D/mnt/ceph/test bs=3D64k
-> >> count=3D10000 oflag=3Ddsync"
-> >> My purpose was to write the data from the client to Ceph DFS through
-> >> Ceph-client.
-> >> Ceph DFS was mounted by Ceph-client using Ceph protocol and
-> >> Ceph-client was mounted by client using nfs protocol.
-> >> I know that my dd command with argument oflag=3Ddsync would write the
-> >> data to Ceph-client without using buffer on the client.
-> >> But I want my Ceph-client could also just pass the data to Ceph DFS
-> >> without using its buffer.
-> >> So.....is there any way I can run my scenario?
-> >> Or in other words, is there any method I can assure that Ceph-client
-> >> won't do the buffer task itself?
-> >
-> > I think what you're looking for is the 'sync' option in /etc/exports on
-> > the ceph-client machine. =A0See 'man 5 exports'. =A0That will slow thin=
-gs down
-> > considerably but will give you the consistency and safety you're lookin=
-g
-> > for.
-> >
-> > sage
-> >
->=20
->=20
->=20
-> --=20
-> Best Regards,
-> Sylar Shen
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-52260151-1302801136=:9026--
