@@ -1,30 +1,24 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Mounting
-Date: Thu, 14 Apr 2011 20:40:58 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104142039570.32417@cobra.newdream.net>
-References: <4DA786E7.9060305@provocation.net> <20110415000027.GG30604@dreamer>
- <4DA794B2.2010302@provocation.net>
+From: Qian Wei <hzqianwei@gmail.com>
+Subject: can anyone give me some advice
+Date: Fri, 15 Apr 2011 11:47:23 +0800
+Message-ID: <BANLkTi=DW6Go2gOqiJsDLJa8ObiuSHQMjQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58643 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754161Ab1DODhV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2011 23:37:21 -0400
-In-Reply-To: <4DA794B2.2010302@provocation.net>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:33892 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755350Ab1DODrY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Apr 2011 23:47:24 -0400
+Received: by vxi39 with SMTP id 39so1809690vxi.19
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Apr 2011 20:47:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zenon Panoussis <oracle@provocation.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-> I tried them all:
-> 
-> # cauthtool -l /etc/ceph/admin.keyring
-> [client.admin]
-> 	key = AQATSKdNGBnwLhAAnNDKnH65FmVKpXZJVasUeQ==
-> 	auid = 18446744073709551615
-> # mount.ceph 192.168.178.100:6789:/ /vol -v -o name=18446744073709551615,secret=AQATSKdNGBnwLhAAnNDKnH65FmVKpXZJVasUeQ==
+Hello everyonel:
+	Recently, I have put up a simple test platform. Now I want to test
+the MDS cluster's performance,but I don't how to get it. Can anyone
+give me some advices or some tools may help me get it.
 
-The client 'name' to use for this key is 'admin'.
 
-sage
+	Thank you very much and best wishes.
