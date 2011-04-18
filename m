@@ -1,154 +1,193 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: Suicide
-Date: Mon, 18 Apr 2011 09:40:00 -0700
-Message-ID: <BANLkTi=rdcyUu_7PwFc0nRbYs-V=tr+V8Q@mail.gmail.com>
-References: <4DA85AA6.8050707@provocation.net>
-	<3704E18884CB47E081E09984151ACC7B@gmail.com>
-	<4DA8C8FB.5050106@provocation.net>
-	<161F0A2E50F1465996C6A9075A508C85@gmail.com>
-	<4DA8D4EF.8090006@provocation.net>
-	<25103BE141804650A169B6444F0D6D21@gmail.com>
-	<4DAA2B38.1090706@provocation.net>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: Re: [PATCH 2/4] config: Update sample configuration to new naming scheme
+Date: Mon, 18 Apr 2011 10:07:16 -0700
+Message-ID: <BANLkTimLYdfzV3Jodyy8HLtm0VosKRd5tQ@mail.gmail.com>
+References: <1303032724-13456-1-git-send-email-wido@widodh.nl>
+	<1303032724-13456-2-git-send-email-wido@widodh.nl>
+	<BANLkTikdn5JmByEum8Phz_0nK0G7f5W7vQ@mail.gmail.com>
+	<1303110111.5322.223.camel@wido-laptop.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:34292 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755733Ab1DRQkF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2011 12:40:05 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 7B4B5C066
-	for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2011 09:40:02 -0700 (PDT)
-Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
-	by mail.hq.newdream.net (Postfix) with ESMTP id E5447C063
-	for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2011 09:40:01 -0700 (PDT)
-Received: by eyx24 with SMTP id 24so1427443eyx.19
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2011 09:40:00 -0700 (PDT)
-In-Reply-To: <4DAA2B38.1090706@provocation.net>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:43741 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754420Ab1DRRHS convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2011 13:07:18 -0400
+Received: by bwz15 with SMTP id 15so3997312bwz.19
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2011 10:07:16 -0700 (PDT)
+In-Reply-To: <1303110111.5322.223.camel@wido-laptop.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zenon Panoussis <oracle@provocation.net>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
-On Sat, Apr 16, 2011 at 2:53 AM, Zenon Panoussis <oracle@provocation.ne=
-t> wrote:
-> http://ceph.newdream.net/wiki/Debugging puts "debug journal" in the o=
-sd
-> section and "debug journaler" in the userspace clients section, but I=
- don't
-> have any userspace clients; only the kernel modules. Just to make 100=
-% sure
-> that I get it right, which debug levels should I put in which section=
-(s)?
-In this case it's referring to the client for the OSD, and the MDS is
-an OSD client like any other. So it goes in the MDS section. :)
-
-> The two most probable causes of death were (a) irresponsivness becaus=
-e of
-> the load and (b) the filling up of the log partition.
+On Mon, Apr 18, 2011 at 12:01 AM, Wido den Hollander <wido@widodh.nl> w=
+rote:
+> Hi,
 >
-> Now, if it was the filling up of the logs and I now put them where th=
-ey won't
-> fill up, then the error won't be reproduced. Then again, if I put the=
-m where
-> they will fill up, we won't have any node02 logs after they fill up, =
-which is
-> precisely those we need.
->
-> On the other hand, if it was irresponsiveness that caused it, more lo=
-gging
-> will lead to more I/O, more trashing of that poor 2,5" drive and yet =
-higher
-> load, so we might run into the error before the logs fill up.
-You're right, but if the cause of the problem was the disk filling up
-then we're basically screwed anyway. Also, the debug output is done
-well enough that that's not really possible. So I don't think
-providing enough space for the debug output will change anything in
-those terms. :)
-
-
-
-On Sat, Apr 16, 2011 at 4:50 PM, Zenon Panoussis <oracle@provocation.ne=
-t> wrote:
->
->
-> On 04/16/2011 02:00 AM, Gregory Farnum wrote:
->
->> If you want to try to reproduce it for us in a useful fashion we'd
->> love that.
->
-> I think I reproduced it, kind of. I got the hang and "error 5" on mou=
-nt,
-> but not the journal corruption. This is the timeline:
-Okay. I don't think you'll get the journal corruption again as it
-really is quite rare. Though we still want to handle all the other
-problems too, of course! ;)
-
-
-> A couple of minutes later the osd partitions stabilized at the same s=
-ize
-> and mounting ceph succeeded without problems.
->
-> I'm speculating that something deadlocked unrecoverably at 19:56, lea=
-ving
-> different data in the journals. Restarting ceph removed the deadlock =
-and
-> allowed the journals to flush, restoring proper operation.
-Some operations got hung for some reason. I'll check out your logs to
-see if I can figure out what. That's why you couldn't umount -- due to
-the hanging request the client couldn't flush out all its data so it
-couldn't umount safely. It's also why you saw that some of the rsync
-didn't complete -- you probably lost everything that was cached in
-client-side buffers.
-
-> I no longer remember exactly what I did last time, but it's very like=
-ly
-> that I unmounted and stopped ceph before switching off the machines o=
+> On Sun, 2011-04-17 at 17:37 -0700, Colin McCabe wrote:
+>> I don't think we want log to syslog to be in the sample configuratio=
 n
-> Thursday night, but kept restarting it on Friday when I couldn't moun=
-t it,
-> not giving it enough time to flush its journals between each failed m=
-ount
-> attempt and the next restart, until somehow the journals got corrupte=
-d.
-That's probably basically correct -- we have no idea how the invariant
-got broken but unsuccessful restarts are the most likely scenario in
-terms of what modifies the appropriate data.
+>> file. Maybe we could include it, but commented out. Most users will
+>> want to enable logging to a file or to syslog, but not both.
+>>
+>
+> Ah yes, I see. The syslog was my bad, my idea was to have it commente=
+d
+> out, but have it just as a reference in there, didn't check that good
+> enough.
+>
+> But right now you can only disable logging to a file by setting:
+>
+> log file =3D
+>
+> That seems a bit odd, "log file =3D false" would be easier.
 
-> You see above that the last file that appeared to be successfully tra=
-nsferred
-> by rsync this evening was feednews/time-00/40/05/7bb3-4696, which sho=
-ws up
-> in the logs at 19:55:45.746146. However, the logs also say that anoth=
-er ~4000
-> files were transferred between rsync's apparent hang and my ^C. Those=
- must be
-> the ones that ended up lingering in the journal. If they were written=
- to the
-> journal but not to the OSD, I believe rsync should still have gotten =
-a "write
-> OK" back from ceph, but it seems it didn't.
-I think you're misunderstanding the journal here -- there is an OSD
-journal which is part of the OSD, and there's an MDS log which records
-metadata changes but not full file data.
-Anyway, if what you mean is you see 4k files transferred in the Ceph
-logs then that's probably data being flushed out from client-side
-buffers.
+Disabling the log file with an empty string seems pretty intuitive to
+me. We used to have a separate boolean controlling this, and it was
+very confusing to users.
 
-> Anyway, trying to read and understand huge logs when you don't even k=
-now
-> what the log entries mean or what you're looking for, is very tiring =
-and
-> not very efficient, so I'll call it a day for now. =A0I'd appreciate =
-it if
-> you could give me some hints on what to look for, so I can go hunting=
- again
-> in a more focused manner. In the meanwhile I've put the new logs at
-> http://www.provocation.net/tmp/logs_take_2.tar.bz2 for you.
-Yep, I'm checking these out today. :)
-Thanks!
--Greg
+>
+> Imho the current sample config is still broken.
+>
+> Monitors names are only numeric, shouldn't we encourage users to give
+> them a full name? mon.alpha, mon.beta, etc?
+>
+> osd journal =3D /data/osd$id/journal
+>
+> That will result in: /data/osd0/journal
+>
+> When the osd's name is osd.0, that also seems a bit weird, would $nam=
+e
+> be better there then osd$id (see my patch).
+>
+> Same goes for data btw
+
+It would be nice to have all of $name, $type and $id somewhere in
+there so that users know they exist. Aside from that, I don't really
+have a strong opinion...
+
+cheers,
+Colin
+
+>
+> Wido
+>
+>> Colin
+>>
+>>
+>> On Sun, Apr 17, 2011 at 2:32 AM, Wido den Hollander <wido@widodh.nl>=
+ wrote:
+>> >
+>> > Signed-off-by: Wido den Hollander <wido@widodh.nl>
+>> > ---
+>> > =A0src/sample.ceph.conf | =A0 23 +++++++++++++----------
+>> > =A01 files changed, 13 insertions(+), 10 deletions(-)
+>> >
+>> > diff --git a/src/sample.ceph.conf b/src/sample.ceph.conf
+>> > index bb874e7..31674f6 100644
+>> > --- a/src/sample.ceph.conf
+>> > +++ b/src/sample.ceph.conf
+>> > @@ -24,6 +24,9 @@
+>> > =A0 =A0 =A0 =A0 ; set up pid files
+>> > =A0 =A0 =A0 =A0 pid file =3D /var/run/ceph/$name.pid
+>> >
+>> > + =A0 =A0 =A0 =A0; Also log to syslog
+>> > + =A0 =A0 =A0 =A0log to syslog =3D true
+>> > +
+>> > =A0; monitors
+>> > =A0; =A0You need at least one. =A0You need at least three if you w=
+ant to
+>> > =A0; =A0tolerate any node failures. =A0Always create an odd number=
+=2E
+>> > @@ -37,15 +40,15 @@
+>> > =A0 =A0 =A0 =A0;debug paxos =3D 20
+>> > =A0 =A0 =A0 =A0;debug auth =3D 20
+>> >
+>> > -[mon0]
+>> > +[mon.alpha]
+>> > =A0 =A0 =A0 =A0host =3D alpha
+>> > =A0 =A0 =A0 =A0mon addr =3D 192.168.0.10:6789
+>> >
+>> > -[mon1]
+>> > +[mon.beta]
+>> > =A0 =A0 =A0 =A0host =3D beta
+>> > =A0 =A0 =A0 =A0mon addr =3D 192.168.0.11:6789
+>> >
+>> > -[mon2]
+>> > +[mon.gamma]
+>> > =A0 =A0 =A0 =A0host =3D gamma
+>> > =A0 =A0 =A0 =A0mon addr =3D 192.168.0.12:6789
+>> >
+>> > @@ -70,16 +73,16 @@
+>> > =A0; =A0Define as many as you like.
+>> > =A0[osd]
+>> > =A0 =A0 =A0 =A0; This is where the btrfs volume will be mounted.
+>> > - =A0 =A0 =A0 osd data =3D /data/osd$id
+>> > + =A0 =A0 =A0 osd data =3D /data/$name
+>> >
+>> > =A0 =A0 =A0 =A0; Ideally, make this a separate disk or partition. =
+=A0A few
+>> > =A0 =A0 =A0 =A0; hundred MB should be enough; more if you have fas=
+t or many
+>> > =A0 =A0 =A0 =A0; disks. =A0You can use a file under the osd data d=
+ir if need be
+>> > - =A0 =A0 =A0 ; (e.g. /data/osd$id/journal), but it will be slower=
+ than a
+>> > + =A0 =A0 =A0 ; (e.g. /data/$name/journal), but it will be slower =
+than a
+>> > =A0 =A0 =A0 =A0; separate disk or partition.
+>> >
+>> > =A0 =A0 =A0 =A0 ; This is an example of a file-based journal.
+>> > - =A0 =A0 =A0 osd journal =3D /data/osd$id/journal
+>> > + =A0 =A0 =A0 osd journal =3D /data/$name/journal
+>> > =A0 =A0 =A0 =A0osd journal size =3D 1000 ; journal size, in megaby=
+tes
+>> >
+>> > =A0 =A0 =A0 =A0; osd logging to debug osd issues, in order of like=
+lihood of being
+>> > @@ -89,7 +92,7 @@
+>> > =A0 =A0 =A0 =A0;debug filestore =3D 20
+>> > =A0 =A0 =A0 =A0;debug journal =3D 20
+>> >
+>> > -[osd0]
+>> > +[osd.0]
+>> > =A0 =A0 =A0 =A0host =3D delta
+>> >
+>> > =A0 =A0 =A0 =A0; if 'btrfs devs' is not specified, you're responsi=
+ble for
+>> > @@ -98,14 +101,14 @@
+>> > =A0 =A0 =A0 =A0; usually fine for basic testing).
+>> > =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdx
+>> >
+>> > -[osd1]
+>> > +[osd.1]
+>> > =A0 =A0 =A0 =A0host =3D epsilon
+>> > =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdy
+>> >
+>> > -[osd2]
+>> > +[osd.2]
+>> > =A0 =A0 =A0 =A0host =3D zeta
+>> > =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdx
+>> >
+>> > -[osd3]
+>> > +[osd.3]
+>> > =A0 =A0 =A0 =A0host =3D eta
+>> > =A0 =A0 =A0 =A0btrfs devs =3D /dev/sdy
+>> > --
+>> > 1.7.0.4
+>> >
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.ht=
+ml
+>> >
+>
+>
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
