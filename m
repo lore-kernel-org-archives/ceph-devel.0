@@ -1,130 +1,156 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [Regression,bisected] 2.6.39-rc3 ceph client write hangs
-Date: Sun, 17 Apr 2011 22:52:40 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104172249540.18433@cobra.newdream.net>
-References: <4DA879CA.8060305@sandia.gov> <201104172017.15090.maciej.rutecki@gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: [PATCH 2/4] config: Update sample configuration to new naming
+ scheme
+Date: Mon, 18 Apr 2011 09:01:51 +0200
+Message-ID: <1303110111.5322.223.camel@wido-laptop.pcextreme.nl>
+References: <1303032724-13456-1-git-send-email-wido@widodh.nl>
+	 <1303032724-13456-2-git-send-email-wido@widodh.nl>
+	 <BANLkTikdn5JmByEum8Phz_0nK0G7f5W7vQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-31607930-1303105960=:18433"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45779 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751911Ab1DRFs5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2011 01:48:57 -0400
-In-Reply-To: <201104172017.15090.maciej.rutecki@gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:52044 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751923Ab1DRHBy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2011 03:01:54 -0400
+In-Reply-To: <BANLkTikdn5JmByEum8Phz_0nK0G7f5W7vQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: Maciej Rutecki <maciej.rutecki@gmail.com>, dchinner@redhat.com, viro@zeniv.linux.org.uk, linux-kernel@vger.kernel.org, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Colin McCabe <cmccabe@alumni.cmu.edu>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi,
 
---557981400-31607930-1303105960=:18433
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+On Sun, 2011-04-17 at 17:37 -0700, Colin McCabe wrote:
+> I don't think we want log to syslog to be in the sample configuration
+> file. Maybe we could include it, but commented out. Most users will
+> want to enable logging to a file or to syslog, but not both.
+> 
 
-This was a simple s/igrab/ihold/ fix.  See
+Ah yes, I see. The syslog was my bad, my idea was to have it commented
+out, but have it just as a reference in there, didn't check that good
+enough.
 
-283a85dc6e670083adb1e5437bd93d163f4f801a
+But right now you can only disable logging to a file by setting:
 
-in the for-linus branch of ceph-client.git.  I'll push to Linus in the=20
-next few days.
+log file = 
 
-Thanks!
-sage
+That seems a bit odd, "log file = false" would be easier.
 
+Imho the current sample config is still broken.
 
+Monitors names are only numeric, shouldn't we encourage users to give
+them a full name? mon.alpha, mon.beta, etc?
 
+osd journal = /data/osd$id/journal
 
-On Sun, 17 Apr 2011, Maciej Rutecki wrote:
+That will result in: /data/osd0/journal
 
-> I created a Bugzilla entry at=20
-> https://bugzilla.kernel.org/show_bug.cgi?id=3D33452
-> for your bug report, please add your address to the CC list in there, tha=
-nks!
->=20
-> On pi=FF=FFtek, 15 kwietnia 2011 o 19:00:58 Jim Schutt wrote:
-> > Hi,
-> >=20
-> > This command is hanging on 2.6.39-rc3, where /mnt/ceph is
-> > a ceph file system:
-> >    dd conv=3Dfdatasync if=3D/dev/zero of=3D/mnt/ceph/zero.`hostname -s`=
- bs=3D4k
-> > count=3D4k
-> >=20
-> > It works on 2.6.38.  As of commit e38f5b745075 in Linus'
-> > tree it still doesn't work.
-> >=20
-> > I bisected this to:
-> >=20
-> > 250df6ed274d767da844a5d9f05720b804240197 is the first bad commit
-> > commit 250df6ed274d767da844a5d9f05720b804240197
-> > Author: Dave Chinner <dchinner@redhat.com>
-> > Date:   Tue Mar 22 22:23:36 2011 +1100
-> >=20
-> >      fs: protect inode->i_state with inode->i_lock
-> >=20
-> > In the early stages of the bisection, bad commits would show this
-> > in dmesg:
-> >=20
-> > [  137.004963] libceph: loaded (mon/osd proto 15/24, osdmap 5/6 5/6)
-> > [  137.056431] ceph: loaded (mds proto 32)
-> > [  137.063213] libceph: client4283 fsid
-> > 950217ad-499e-eab1-03f7-f6d245f42751 [  137.063826] libceph: mon0
-> > 172.17.40.34:6789 session established [  219.658002] INFO: rcu_sched_st=
-ate
-> > detected stall on CPU 0 (t=3D60000 jiffies)
-> >=20
-> > For the last couple of bad commits during the bisection, the
-> > client box would just hang and I'd have to power-cycle it.
-> >=20
-> > When I reboot/remount after a hang, the file I was trying
-> > to write is there, with size and date both zero:
-> >=20
-> > # ls -l --time-style=3D+%s /mnt/ceph/zero.an1024
-> > -rw-r--r-- 1 jaschut jaschut 0 0 /mnt/ceph/zero.an1024
-> >=20
-> > strace suggests it's the write that hangs:
-> >=20
-> > close(3)                                =3D 0
-> > close(0)                                =3D 0
-> > open("/dev/zero", O_RDONLY)             =3D 0
-> > lseek(0, 0, SEEK_CUR)                   =3D 0
-> > close(1)                                =3D 0
-> > open("/mnt/ceph/zero.an1024", O_WRONLY|O_CREAT|O_TRUNC, 0666) =3D 1
-> > rt_sigaction(SIGUSR1, NULL, {SIG_DFL, [], 0}, 8) =3D 0
-> > rt_sigaction(SIGINT, NULL, {SIG_DFL, [], 0}, 8) =3D 0
-> > rt_sigaction(SIGUSR1, {0x401a20, [INT USR1], SA_RESTORER, 0x7f3a97f292d=
-0},
-> > NULL, 8) =3D 0 rt_sigaction(SIGINT, {0x401a10, [INT USR1],
-> > SA_RESTORER|SA_NODEFER|SA_RESETHAND, 0x7f3a97f292d0}, NULL, 8) =3D 0
-> > clock_gettime(CLOCK_MONOTONIC, {216, 671807533}) =3D 0
-> > read(0,
-> > "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"...,
-> > 4096) =3D 4096 write(1,
-> > "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"...,
-> > 4096
-> >=20
-> > Let me know if I can do anything else to help sort this out.
-> >=20
-> > -- Jim
-> >=20
-> > (Please Cc: me as I am not subscribed to lkml.)
-> >=20
+When the osd's name is osd.0, that also seems a bit weird, would $name
+be better there then osd$id (see my patch).
+
+Same goes for data btw
+
+Wido
+
+> Colin
+> 
+> 
+> On Sun, Apr 17, 2011 at 2:32 AM, Wido den Hollander <wido@widodh.nl> wrote:
+> >
+> > Signed-off-by: Wido den Hollander <wido@widodh.nl>
+> > ---
+> >  src/sample.ceph.conf |   23 +++++++++++++----------
+> >  1 files changed, 13 insertions(+), 10 deletions(-)
+> >
+> > diff --git a/src/sample.ceph.conf b/src/sample.ceph.conf
+> > index bb874e7..31674f6 100644
+> > --- a/src/sample.ceph.conf
+> > +++ b/src/sample.ceph.conf
+> > @@ -24,6 +24,9 @@
+> >         ; set up pid files
+> >         pid file = /var/run/ceph/$name.pid
+> >
+> > +        ; Also log to syslog
+> > +        log to syslog = true
+> > +
+> >  ; monitors
+> >  ;  You need at least one.  You need at least three if you want to
+> >  ;  tolerate any node failures.  Always create an odd number.
+> > @@ -37,15 +40,15 @@
+> >        ;debug paxos = 20
+> >        ;debug auth = 20
+> >
+> > -[mon0]
+> > +[mon.alpha]
+> >        host = alpha
+> >        mon addr = 192.168.0.10:6789
+> >
+> > -[mon1]
+> > +[mon.beta]
+> >        host = beta
+> >        mon addr = 192.168.0.11:6789
+> >
+> > -[mon2]
+> > +[mon.gamma]
+> >        host = gamma
+> >        mon addr = 192.168.0.12:6789
+> >
+> > @@ -70,16 +73,16 @@
+> >  ;  Define as many as you like.
+> >  [osd]
+> >        ; This is where the btrfs volume will be mounted.
+> > -       osd data = /data/osd$id
+> > +       osd data = /data/$name
+> >
+> >        ; Ideally, make this a separate disk or partition.  A few
+> >        ; hundred MB should be enough; more if you have fast or many
+> >        ; disks.  You can use a file under the osd data dir if need be
+> > -       ; (e.g. /data/osd$id/journal), but it will be slower than a
+> > +       ; (e.g. /data/$name/journal), but it will be slower than a
+> >        ; separate disk or partition.
+> >
+> >         ; This is an example of a file-based journal.
+> > -       osd journal = /data/osd$id/journal
+> > +       osd journal = /data/$name/journal
+> >        osd journal size = 1000 ; journal size, in megabytes
+> >
+> >        ; osd logging to debug osd issues, in order of likelihood of being
+> > @@ -89,7 +92,7 @@
+> >        ;debug filestore = 20
+> >        ;debug journal = 20
+> >
+> > -[osd0]
+> > +[osd.0]
+> >        host = delta
+> >
+> >        ; if 'btrfs devs' is not specified, you're responsible for
+> > @@ -98,14 +101,14 @@
+> >        ; usually fine for basic testing).
+> >        btrfs devs = /dev/sdx
+> >
+> > -[osd1]
+> > +[osd.1]
+> >        host = epsilon
+> >        btrfs devs = /dev/sdy
+> >
+> > -[osd2]
+> > +[osd.2]
+> >        host = zeta
+> >        btrfs devs = /dev/sdx
+> >
+> > -[osd3]
+> > +[osd.3]
+> >        host = eta
+> >        btrfs devs = /dev/sdy
 > > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-kernel"=
- in
+> > 1.7.0.4
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > > the body of a message to majordomo@vger.kernel.org
 > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > Please read the FAQ at  http://www.tux.org/lkml/
->=20
-> --=20
-> Maciej Rutecki
-> http://www.maciek.unixy.pl
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-31607930-1303105960=:18433--
+> >
+
+
