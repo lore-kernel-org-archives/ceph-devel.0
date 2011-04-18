@@ -1,74 +1,40 @@
-From: Christoph Raible <c.raible@science-computing.de>
-Subject: Re: mount.ceph: modprobe failed, exit status 127
-Date: Mon, 18 Apr 2011 11:50:51 +0000 (UTC)
-Message-ID: <loom.20110418T134530-94@post.gmane.org>
-References: <4DA82A9E.5010504@science-computing.de> <4DA8409E.9000808@provocation.net> <20110415164315.GA31400@dreamer>
+From: Maciej Rutecki <maciej.rutecki@gmail.com>
+Subject: Re: [Regression,bisected] 2.6.39-rc3 ceph client write hangs
+Date: Mon, 18 Apr 2011 16:05:54 +0200
+Message-ID: <201104181605.54981.maciej.rutecki@gmail.com>
+References: <4DA879CA.8060305@sandia.gov> <201104172017.15090.maciej.rutecki@gmail.com> <Pine.LNX.4.64.1104172249540.18433@cobra.newdream.net>
+Reply-To: maciej.rutecki@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: Text/Plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:45589 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752033Ab1DRLvH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 18 Apr 2011 07:51:07 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1QBmyt-0006vK-A4
-	for ceph-devel@vger.kernel.org; Mon, 18 Apr 2011 13:51:03 +0200
-Received: from HSI-KBW-095-208-113-104.hsi5.kabel-badenwuerttemberg.de ([95.208.113.104])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2011 13:51:03 +0200
-Received: from c.raible by HSI-KBW-095-208-113-104.hsi5.kabel-badenwuerttemberg.de with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Apr 2011 13:51:03 +0200
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:49196 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753177Ab1DROGB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Apr 2011 10:06:01 -0400
+In-Reply-To: <Pine.LNX.4.64.1104172249540.18433@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Jim Schutt <jaschut@sandia.gov>, dchinner@redhat.com, viro@zeniv.linux.org.uk, linux-kernel@vger.kernel.org, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Tommi Virtanen <tommi.virtanen <at> dreamhost.com> writes:
+On poniedzia=C5=82ek, 18 kwietnia 2011 o 07:52:40 Sage Weil wrote:
+> This was a simple s/igrab/ihold/ fix.  See
+>=20
+> 283a85dc6e670083adb1e5437bd93d163f4f801a
+>=20
+> in the for-linus branch of ceph-client.git.  I'll push to Linus in th=
+e
+> next few days.
+>=20
 
-> 
-> On Fri, Apr 15, 2011 at 02:57:02PM +0200, Zenon Panoussis wrote:
-> > > Now when I want to mount a Ceph filesystem with
-> > >     mount -t ceph 10.1.9.46:/ /mnt/ceph
-> > > I got following error:
-> > >     "mount.ceph: modprobe failed, exit status 127"
-> > 
-> > Since ceph and libceph are already in the kernel, it seems logical that
- loading
-> > them would fail; after all, there are no modules to be loaded. Then again,
- it
-> > doesn't make sense that mount tries to load them anyway and fails.
-> 
-> If modprobe didn't find the module, he'd be getting exit status 1.
-> 
-> If ceph was built-in to the kernel, modprobe would see that and claim
-> success.
-> 
-> Exit status 127 means the command was not found; for some reason, the
-> executable "modprobe" is not in PATH when mount.ceph is run.
-> 
-> Are you perhaps trying to mount as non-root? That's not going to work.
-> 
+Thanks, closing.
 
-
-Hi I tried both with root and with a "normal" user.
-
-Both had the same fault. My PATH-Variable looks like this:
-
-/usr/kerberos/sbin:/usr/kerberos/bin:/usr/local/sbin:/usr/local/bin:/sbin:
-/bin:/usr/sbin:/usr/bin:/root/bin
-
-Is there something missing? When I do "modprobe ceph"  this works fine...
-
-Is it possible that my ceph.conf has an error? 
-
-http://pastebin.com/bhk1EvWm
-
-
-Best regards,
-
-Christoph
-
-
+--=20
+Maciej Rutecki
+http://www.maciek.unixy.pl
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
