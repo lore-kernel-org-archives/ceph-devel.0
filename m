@@ -1,92 +1,67 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: Logging
-Date: Sun, 17 Apr 2011 17:53:41 -0700
-Message-ID: <BANLkTinntanBQLag+8hC+FSfpxz8iib1uA@mail.gmail.com>
-References: <4DAB77FD.4010804@provocation.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Java-rados announcement
+Date: Sun, 17 Apr 2011 18:34:23 -0700
+Message-ID: <D20F8B6A-0A44-41BA-B98C-5956E8CBA55E@cs.ucsc.edu>
+Mime-Version: 1.0 (Apple Message framework v1084)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:38991 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753534Ab1DRAxo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Apr 2011 20:53:44 -0400
-Received: by fxm17 with SMTP id 17so2702818fxm.19
-        for <ceph-devel@vger.kernel.org>; Sun, 17 Apr 2011 17:53:43 -0700 (PDT)
-In-Reply-To: <4DAB77FD.4010804@provocation.net>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:43495 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752811Ab1DRBeY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Apr 2011 21:34:24 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zenon Panoussis <oracle@provocation.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Noah Watkins <noahwatkins@gmail.com>
 
-On Sun, Apr 17, 2011 at 4:30 PM, Zenon Panoussis <oracle@provocation.ne=
-t> wrote:
->
-> Question: what's the "do not log at all" syntax in ceph.conf? I tried
-> putting everything on "debug xyz =3D 0", but ceph (osd in this case) =
-is
-> still logging plenty. According to this, I think it shouldn't:
+I've put together Java bindings for RADOS available at:
 
-Hi Zenon,
+  git://github.com/noahdesu/ceph.git java-rados
 
-Messages that are output at log level 0 or -1 will always be
-displayed. I'm not sure if this message belongs at that log level or
-not-- I haven't dealt with the OSD repop code in a while.
+Contains:
+  - Bindings with JNI
+  - Full set of unit tests
+  - JavaDoc markup
 
-In general, I don't think that anyone will ever want to turn off
-logging completely. That would be a little bit like running your
-server without syslog. It just doesn't happen in the real world. Also,
-Ceph is not stable yet, and logs are the main (only?) diagnostic tool
-we have for most problems. I guess sometimes there is a core file if
-you've set up your system for that.
+Thanks,
+Noah
 
-That being said, we do need to be a lot less verbose in some places.
-If you find any log messages you think are mis-prioritized, patches
-are welcome!
+ .gitignore                                         |    1 +
+ configure.ac                                       |    1 +
+ src/bindings/java/.gitignore                       |    4 +
+ src/bindings/java/README                           |   45 ++
+ src/bindings/java/build.xml                        |   83 +++
+ .../java/java/net/newdream/ceph/rados/Cluster.java |  249 +++++++++
+ .../java/net/newdream/ceph/rados/ClusterStats.java |   75 +++
+ .../java/net/newdream/ceph/rados/IOContext.java    |  332 +++++++++++
+ .../net/newdream/ceph/rados/ObjectIterator.java    |   77 +++
+ .../java/net/newdream/ceph/rados/PoolStats.java    |  130 +++++
+ .../net/newdream/ceph/rados/RadosException.java    |   28 +
+ .../java/net/newdream/ceph/rados/RadosObject.java  |  169 ++++++
+ .../java/net/newdream/ceph/rados/RadosVersion.java |   54 ++
+ src/bindings/java/native/Makefile.am               |   30 +
+ src/bindings/java/native/common.h                  |   19 +
+ src/bindings/java/native/exceptions.c              |   78 +++
+ .../java/native/net_newdream_ceph_rados_Cluster.c  |  520 +++++++++++++++++
+ .../java/native/net_newdream_ceph_rados_Cluster.h  |  125 +++++
+ .../native/net_newdream_ceph_rados_ClusterStats.c  |   41 ++
+ .../native/net_newdream_ceph_rados_ClusterStats.h  |   21 +
+ .../native/net_newdream_ceph_rados_IOContext.c     |  588 ++++++++++++++++++++
+ .../native/net_newdream_ceph_rados_IOContext.h     |  125 +++++
+ .../net_newdream_ceph_rados_ObjectIterator.c       |   63 +++
+ .../net_newdream_ceph_rados_ObjectIterator.h       |   37 ++
+ .../native/net_newdream_ceph_rados_PoolStats.c     |   50 ++
+ .../native/net_newdream_ceph_rados_PoolStats.h     |   21 +
+ .../native/net_newdream_ceph_rados_RadosVersion.c  |   31 +
+ .../native/net_newdream_ceph_rados_RadosVersion.h  |   21 +
+ src/bindings/java/test/ClusterStatsTest.java       |   31 +
+ src/bindings/java/test/ClusterTest.java            |  139 +++++
+ src/bindings/java/test/IOContextTest.java          |  190 +++++++
+ src/bindings/java/test/PoolStatsTest.java          |   47 ++
+ src/bindings/java/test/RadosObjectTest.java        |  105 ++++
+ src/bindings/java/test/RadosTestUtils.java         |   11 +
+ src/bindings/java/test/RadosVersionTest.java       |   14 +
+ 35 files changed, 3555 insertions(+), 0 deletions(-)
 
-Colin
 
-
->
-> # grep debug /etc/ceph/ceph.conf
-> =A0 =A0 =A0 =A0; logging, for debugging monitor crashes, in order of
-> =A0 =A0 =A0 =A0debug ms =3D 0
-> =A0 =A0 =A0 =A0debug mon =3D 0
-> =A0 =A0 =A0 =A0debug paxos =3D 0
-> =A0 =A0 =A0 =A0debug auth =3D 0
-> =A0 =A0 =A0 =A0; mds logging to debug issues.
-> =A0 =A0 =A0 =A0debug ms =3D 0
-> =A0 =A0 =A0 =A0debug mds =3D 0
-> =A0 =A0 =A0 =A0debug mds balancer =3D 0
-> =A0 =A0 =A0 =A0debug mds log =3D 0
-> =A0 =A0 =A0 =A0debug mds_migrator =3D 0
-> =A0 =A0 =A0 =A0debug monc =3D 0
-> =A0 =A0 =A0 =A0; osd logging to debug osd issues, in order of likelih=
-ood of being
-> =A0 =A0 =A0 =A0debug ms =3D 0
-> =A0 =A0 =A0 =A0debug osd =3D 0
-> =A0 =A0 =A0 =A0debug filestore =3D 0
-> =A0 =A0 =A0 =A0debug journal =3D 0
->
-> Log example:
->
-> 2011-04-18 01:28:56.787046 7f7976fd8700 osd0 5 pg[1.3d( v 5'186 (5'18=
-4,5'186] n=3D1 ec=3D2 les=3D5 3/3/2) [0,1] r=3D0 mlcod 5'184 active+cle=
-an] =A0sending commit on repgather(0x7f794827fb70 applying 5'186 rep_ti=
-d=3D49196 wfack=3D0 wfdisk=3D op=3Dosd_op(mds0.1:27067 200.00000058 [wr=
-ite 3241176~1615] 1.fbbd) v2) 0x7f794811b630
->
-> Z
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
