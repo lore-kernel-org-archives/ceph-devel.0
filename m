@@ -1,103 +1,91 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: mds crash
-Date: Tue, 19 Apr 2011 09:17:41 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104190917010.3238@cobra.newdream.net>
-References: <B828A4C02BE12543ACDFCF7EB0C693C6788452D627@NC-SVR-09.netelligent.com>
+Subject: Re: Logging
+Date: Tue, 19 Apr 2011 09:27:58 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1104190921350.3238@cobra.newdream.net>
+References: <4DAB77FD.4010804@provocation.net> <BANLkTinntanBQLag+8hC+FSfpxz8iib1uA@mail.gmail.com>
+ <4DAC0EE7.4080001@provocation.net> <BANLkTikCO-pgBfNtvpMVn5HEG2ujhsSgxQ@mail.gmail.com>
+ <4DAC8021.6000701@provocation.net> <BANLkTimPP2epqVTPwiXMubB_q_Rf+3Ro4w@mail.gmail.com>
+ <4DACA57E.2040609@provocation.net> <BANLkTi=MsnZnmZuace=bzRhGo8sP2QjKLw@mail.gmail.com>
+ <4DACD304.4010000@provocation.net> <Pine.LNX.4.64.1104182154160.13931@cobra.newdream.net>
+ <4DAD6FCD.5070105@provocation.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55661 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:47001 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752205Ab1DSQNx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Apr 2011 12:13:53 -0400
-In-Reply-To: <B828A4C02BE12543ACDFCF7EB0C693C6788452D627@NC-SVR-09.netelligent.com>
+	with ESMTP id S1752353Ab1DSQYL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Apr 2011 12:24:11 -0400
+In-Reply-To: <4DAD6FCD.5070105@provocation.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nigh <mnigh@netelligent.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Zenon Panoussis <oracle@provocation.net>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Mark,
+> > This is really interesting.  This is on the partitions that have _just_ 
+> > the OSD data? 
+> 
+> Yes, with a couple of extra layers. node01 keeps its OSD data on an ext4
+> filesystem on top of a dm-crypt encrypted native disk partition. node02
+> on the other hand has an mdadm RAID0 of two partitions on separate disks
+> with dm-crypt and ext4 on top of that. This layering - in particular the
+> encryption - consumes CPU and can slow down things, but for the rest it's
+> rock-solid; I've been running systems with these setups for years and
+> never had a problem with them even once.
+> 
+> Here's an example from this morning:
+> 
+> node01:
+> /dev/mapper/sda6        232003      5914    212830   3% /mnt/osd
+> 
+> node02:
+> /dev/mapper/md4         225716      5704    207112   3% /mnt/osd
+> 
+> client:
+> 192.168.178.100:6789:/
+>                         232002      5913    212829   3% /mnt/n01
 
-This should be fixed by d55399ffec224206ea324e83bb8ead1e9ca1eddc in the 
-'next' branch of ceph.git.  Can you test it out and see if that allows 
-journal replay to complete?
+Oh... I suspect that only one of the OSDs is active.  The ceph client's 
+df/statfs result is really just a sum over the statfs results on all of 
+the OSDs.  The fact that is corresponds to node01 suggests that node02 
+isn't part of the cluster.  Can you post the output from
+
+	ceph osd dump -o -
+
+> At this point I unmounted ceph on the client and restarted ceph. A few minutes
+> later I see this:
+> 
+> node01:
+> /dev/mapper/sda6        232003      5907    212837   3% /mnt/osd
+> 
+> node02:
+> /dev/mapper/md4         225716      5626    207190   3% /mnt/osd
+> 
+> Note how disk usage went down on both nodes, considerably on node02.
+> 
+> Then they start exchanging data and an hour later or so they're back in sync:
+> 
+> node01:
+> /dev/mapper/sda6        232003      5906    212838   3% /mnt/osd
+> 
+> node02:
+> /dev/mapper/md4         225716      5906    206910   3% /mnt/osd
+
+I wouldn't read into the disk utilizations too closely.  There is logging 
+going on at a couple of different levels that can make the utilization 
+fluctuate depending on the timing of trimming.
+
+> > Do you see any OSD flapping (down/up cycles) during this 
+> > period?
+> 
+> I've been running without logs since yesterday, but my experience is that
+> they don't flap; once an OSD goes down it stays down until ceph is restarted.
+
+Also, one thing you should do during these tests is keep a 
+
+	ceph -w
+
+running to monitor changes in the cluster state (to see, for example, if 
+it's marking either osd down).
 
 Thanks!
 sage
-
-http://tracker.newdream.net/issues/1019
-
-
-
-On Tue, 19 Apr 2011, Mark Nigh wrote:
-
-> I recently have been working with exporting ceph to NFS. I have had stability problems with NFS (ceph is working but NFS crashes). But most recently, my mds0 will not start after one of these instances with NFS.
-> 
-> My setup. 2 mds, 1 mon (located on mds0), 5 osds. All running Ubuntu v10.10.
-> 
-> Here is the output when I try to start the mds0. Is there other debugging I can turn on?
-> 
-> /etc/init.d/ceph start mds0
-> 
-> 2011-04-19 10:06:58.602640 7fb202fe4700 mds0.11 ms_handle_connect on 10.6.1.93:6800/945
-> ./include/elist.h: In function 'elist<T>::item::~item() [with T = MDSlaveUpdate*]', in thread '0x7fb2004d5700'
-> ./include/elist.h: 39: FAILED assert(!is_on_list())
->  ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
->  1: (MDSlaveUpdate::~MDSlaveUpdate()+0x59) [0x4d9fe9]
->  2: (ESlaveUpdate::replay(MDS*)+0x422) [0x4d2772]
->  3: (MDLog::_replay_thread()+0xb90) [0x67f850]
->  4: (MDLog::ReplayThread::entry()+0xd) [0x4b89ed]
->  5: (()+0x7971) [0x7fb20564a971]
->  6: (clone()+0x6d) [0x7fb2042e692d]
->  ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
->  1: (MDSlaveUpdate::~MDSlaveUpdate()+0x59) [0x4d9fe9]
->  2: (ESlaveUpdate::replay(MDS*)+0x422) [0x4d2772]
->  3: (MDLog::_replay_thread()+0xb90) [0x67f850]
->  4: (MDLog::ReplayThread::entry()+0xd) [0x4b89ed]
->  5: (()+0x7971) [0x7fb20564a971]
->  6: (clone()+0x6d) [0x7fb2042e692d]
-> *** Caught signal (Aborted) **
->  in thread 0x7fb2004d5700
->  ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
->  1: /usr/bin/cmds() [0x70fc38]
->  2: (()+0xfb40) [0x7fb205652b40]
->  3: (gsignal()+0x35) [0x7fb204233ba5]
->  4: (abort()+0x180) [0x7fb2042376b0]
->  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fb204ad76bd]
->  6: (()+0xb9906) [0x7fb204ad5906]
->  7: (()+0xb9933) [0x7fb204ad5933]
->  8: (()+0xb9a3e) [0x7fb204ad5a3e]
->  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x36a) [0x6f5eaa]
->  10: (MDSlaveUpdate::~MDSlaveUpdate()+0x59) [0x4d9fe9]
->  11: (ESlaveUpdate::replay(MDS*)+0x422) [0x4d2772]
->  12: (MDLog::_replay_thread()+0xb90) [0x67f850]
->  13: (MDLog::ReplayThread::entry()+0xd) [0x4b89ed]
->  14: (()+0x7971) [0x7fb20564a971]
->  15: (clone()+0x6d) [0x7fb2042e692d]
-> 
-> I am not sure why the IP address of 0.0.0.0 shows up with starting the mds0.
-> 
-> root@mds0:/var/log/ceph# /etc/init.d/ceph start mds0
-> === mds.0 ===
-> Starting Ceph mds.0 on mds0...
->  ** WARNING: Ceph is still under heavy development, and is only suitable for **
->  **          testing and review.  Do not trust it with important data.       **
-> starting mds.0 at 0.0.0.0:6800/2994
-> 
-> Thanks for your assistance.
-> 
-> Mark Nigh
-> Systems Architect
-> mnigh@netelligent.com
->  (p) 314.392.6926
-> 
-> 
-> 
-> 
-> This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
