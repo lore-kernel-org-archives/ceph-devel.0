@@ -1,89 +1,120 @@
 From: Zenon Panoussis <oracle@provocation.net>
-Subject: Re: Suicide
-Date: Tue, 19 Apr 2011 12:45:17 +0200
-Message-ID: <4DAD67BD.1010901@provocation.net>
-References: <4DA85AA6.8050707@provocation.net> <3704E18884CB47E081E09984151ACC7B@gmail.com> <4DA8C8FB.5050106@provocation.net> <161F0A2E50F1465996C6A9075A508C85@gmail.com> <4DA8D4EF.8090006@provocation.net> <25103BE141804650A169B6444F0D6D21@gmail.com> <4DAA2B38.1090706@provocation.net> <BANLkTi=rdcyUu_7PwFc0nRbYs-V=tr+V8Q@mail.gmail.com> <CB9E56C259C44656B7B9DD670A548B8A@gmail.com> <4DACBD77.9020600@provocation.net> <FF1D1635C657408E9A7F6275AB23DD61@gmail.com>
+Subject: Re: Logging
+Date: Tue, 19 Apr 2011 13:19:41 +0200
+Message-ID: <4DAD6FCD.5070105@provocation.net>
+References: <4DAB77FD.4010804@provocation.net> <BANLkTinntanBQLag+8hC+FSfpxz8iib1uA@mail.gmail.com> <4DAC0EE7.4080001@provocation.net> <BANLkTikCO-pgBfNtvpMVn5HEG2ujhsSgxQ@mail.gmail.com> <4DAC8021.6000701@provocation.net> <BANLkTimPP2epqVTPwiXMubB_q_Rf+3Ro4w@mail.gmail.com> <4DACA57E.2040609@provocation.net> <BANLkTi=MsnZnmZuace=bzRhGo8sP2QjKLw@mail.gmail.com> <4DACD304.4010000@provocation.net> <Pine.LNX.4.64.1104182154160.13931@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from host-88-80-6-138.cust.prq.se ([88.80.6.138]:50499 "EHLO
+Received: from host-88-80-6-138.cust.prq.se ([88.80.6.138]:43747 "EHLO
 	mail.nettheatre.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754423Ab1DSKpZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Apr 2011 06:45:25 -0400
-In-Reply-To: <FF1D1635C657408E9A7F6275AB23DD61@gmail.com>
+	with ESMTP id S1754571Ab1DSLTo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Apr 2011 07:19:44 -0400
+In-Reply-To: <Pine.LNX.4.64.1104182154160.13931@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
 
 
-On 04/19/2011 01:02 AM, Gregory Farnum wrote:
+On 04/19/2011 07:02 AM, Sage Weil wrote:
 
-> It's a bit more complicated than that. While we could probably do a better 
-> job of controlling bandwidths, there are a lot of pieces devoted to handling 
-> changes in disk performance and preventing the OSD from accepting more data 
-> than it can handle -- much of this is tunable (it's not well-documented but 
-> off the top of my head the ones to look at are osd_client_message_size_cap, 
-> for how much client data to hold in-memory waiting on disk [defaults to 200MB], 
-> and filestore_op_threads, which defaults to 2 but might be better at 1 or 0 
-> for a very slow disk) . 
+>> The relation between OSD partitions (/dev/mapper/sda6 in the example above)
+>> is another interesting factor. As long as the load is under 100%, the
+>> partitions on both nodes grow in almost perfect sync. When the load exceeds
+>> 100%, one node starts lagging behind the other. If that continues long enough,
+>> the lagging node falls out completely while the other node keeps growing.
 
-Indeed, I've seen cosd threads fighting each-other to write to disk. Do
-I understand it correctly that OPTION(filestore_op_threads, 0, OPT_INT, 0)
-in src/config.cc and recompile is the only way to change this?
+> This is really interesting.  This is on the partitions that have _just_ 
+> the OSD data? 
 
-> The specific crash that I saw here meant that the OSD called sync on its 
-> underlying filesystem and 6 minutes later the sync hadn't completed! The 
-> system can handle slow disks but it became basically unresponsive, at which 
-> point the proper response in a replicated scenario is to kill itself (the 
-> data should all exist elsewhere). 
+Yes, with a couple of extra layers. node01 keeps its OSD data on an ext4
+filesystem on top of a dm-crypt encrypted native disk partition. node02
+on the other hand has an mdadm RAID0 of two partitions on separate disks
+with dm-crypt and ext4 on top of that. This layering - in particular the
+encryption - consumes CPU and can slow down things, but for the rest it's
+rock-solid; I've been running systems with these setups for years and
+never had a problem with them even once.
 
-It seems the right thing to do, provided that the data does exist elsewhere
-in sufficient replicas. This touches something that Colin wrote in this same
-thread, so I'll merge it in:
+Here's an example from this morning:
 
-> If we let
-> unresponsive OSDs linger forever, we could get in a situation where
-> the upper layer (the Ceph filesystem) continues to wait forever for an
-> unresponsive OSD, even though there are lots of other OSDs that could
-> easily take up the slack.
+node01:
+/dev/mapper/sda6        232003      5914    212830   3% /mnt/osd
 
-The requirements and availability of OSDs at any given moment are known,
-so the reaction to an unresponsive OSD can be calculated. Let's say,
-given 20 OSDs and a CRUSH rule that says data {min_data 3; max_data 10},
-ceph could acknowledge a write as long as committed to replicas =< 3 .
-If, on the other hand, it can't commit the data to at least 3 OSDs (or
-3 journals, as the case might be), it should throw an error back and tell
-the application that it can't write to disk, so that the application can
-react appropriately.
+node02:
+/dev/mapper/md4         225716      5704    207112   3% /mnt/osd
 
-I have to admit though that I'm still rather confused as to how and in
-which order data and metadata are passed around through memory and journal
-to disk. The wiki says "The OSD does not acknowledge a write until it is
-committed (stable) on disk" but does that mean "committed once" or "committed
-on as many copies as data min_data"? I suspect the former, because that would
-explain how the bottlenecks I'm seeing can build up. On the other hand, a
-stricter flush-min_data-before-acknowledging strategy as I describe above
-would automatically solve most network and disk bandwidth calculation problems
-by blocking writes unless and until there is sufficient bandwidth to commit
-all required copies to disk.
+client:
+192.168.178.100:6789:/
+                        232002      5913    212829   3% /mnt/n01
 
-Of course these are design considerations that I'm sure you must have gone
-through time and over again, so I could very well be missing some essential
-point. I hope you bear with me.
+You can see that the total space on the client corresponds to that of node01,
+so the osd of node02 has gone belly up. The load on node01 is creeping upwards
+of 200% while rsync on the client keeps smiling and pushing data.
 
-> This is like starving to death at the
-> all-you-can-eat buffet, just because they're out of jell-o.
+node01 top:
+PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
+24793 root      20   0 1679m 510m 1756 S  9.2 25.7  29:23.11 cosd
+30235 root      20   0     0    0    0 S  1.0  0.0   0:01.10 kworker/0:1
+  637 root      20   0     0    0    0 S  0.7  0.0   4:56.26 jbd2/sda2-8
+30468 root      20   0 14988 1152  864 R  0.7  0.1   0:00.14 top
+21748 root      20   0  104m  796  504 S  0.3  0.0   1:04.27 watch
+29418 root      20   0     0    0    0 S  0.3  0.0   0:02.12 kworker/0:2
 
-:)) That's the funniest comparison I've seen in a long time, but I'm not
-sure it fully applies. Yes, waiting forever for an unresponsive OSD when
-there are others around would be exactly that, so ceph should (quickly)
-time out and try elsewhere. But acknowledging a write before it knows
-for sure whether it can meet its min_data requirements is another story;
-that's stuffing data and hoping that some OSDs somewhere will accept it,
-when in fact they might all have called it a day and gone fishing.
+node01 iotop:
+  TID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN     IO>    COMMAND
+24933 be/4 root      109.97 K/s    7.12 K/s  0.00 % 95.49 % cosd -i 0 -c ~ceph/ceph.conf
+24934 be/4 root       94.15 K/s    7.12 K/s  0.00 % 92.45 % cosd -i 0 -c ~ceph/ceph.conf
+24830 be/4 root        0.00 B/s   36.39 K/s  0.00 % 81.10 % cosd -i 0 -c ~ceph/ceph.conf
+  637 be/3 root        0.00 B/s    0.00 B/s  0.00 % 80.27 % [jbd2/sda2-8]
+  256 be/3 root        0.00 B/s    2.37 K/s  0.00 % 72.93 % [jbd2/sda1-8]
+24831 be/4 root        0.00 B/s    0.00 B/s  0.00 % 27.85 % cosd -i 0 -c ~ceph/ceph.conf
+24826 be/4 root        0.00 B/s  272.94 K/s  0.00 % 19.28 % cosd -i 0 -c ~ceph/ceph.conf
+24829 be/4 root        0.00 B/s   45.89 K/s  0.00 % 18.03 % cosd -i 0 -c ~ceph/ceph.conf
+24632 be/4 root        0.00 B/s   26.90 K/s  0.00 %  5.99 % cmon -i 0 -c ~ceph/ceph.conf
+24556 be/3 root        0.00 B/s    5.54 K/s  0.00 %  2.95 % [jbd2/dm-0-8]
+  639 be/3 root        0.00 B/s    0.00 B/s  0.00 %  2.32 % [jbd2/sda5-8]
+24833 be/4 root        0.00 B/s   10.28 K/s  0.00 %  0.00 % cosd -i 0 -c ~ceph/ceph.conf
+
+
+At this point I unmounted ceph on the client and restarted ceph. A few minutes
+later I see this:
+
+node01:
+/dev/mapper/sda6        232003      5907    212837   3% /mnt/osd
+
+node02:
+/dev/mapper/md4         225716      5626    207190   3% /mnt/osd
+
+Note how disk usage went down on both nodes, considerably on node02.
+
+Then they start exchanging data and an hour later or so they're back in sync:
+
+node01:
+/dev/mapper/sda6        232003      5906    212838   3% /mnt/osd
+
+node02:
+/dev/mapper/md4         225716      5906    206910   3% /mnt/osd
+
+
+> Do you see any OSD flapping (down/up cycles) during this 
+> period?
+
+I've been running without logs since yesterday, but my experience is that
+they don't flap; once an OSD goes down it stays down until ceph is restarted.
+
+> It's possible that the MDS is getting ahead of the OSDs, as there isn't 
+> currently any throttling of metadata request processing when the 
+> journaling is slow.  (We should fix this.)  I don't see how that would 
+> explain the variance in disk usage, though, unless you are also seeing the 
+> difference in disk usage reflected in the cosd memory usage on the 
+> less-disk-used node?
+
+I didn't pay attention to memory usage, but I think I can rule this out
+anyway. node01 has 2 GB RAM and 2 GB swap, node02 has 4 GB RAM and no
+swap. Since I saw 11 GB on the node02 OSD the other day and 4 GB on the
+node01 OSD, the difference could not have been in memory.
 
 Z
-
 
