@@ -1,125 +1,151 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: Suicide
-Date: Tue, 19 Apr 2011 09:29:06 -0700
-Message-ID: <BANLkTimwUNDi6s1QLWrH4JxDrRzeazW2Fw@mail.gmail.com>
-References: <4DA85AA6.8050707@provocation.net>
-	<3704E18884CB47E081E09984151ACC7B@gmail.com>
-	<4DA8C8FB.5050106@provocation.net>
-	<161F0A2E50F1465996C6A9075A508C85@gmail.com>
-	<4DA8D4EF.8090006@provocation.net>
-	<25103BE141804650A169B6444F0D6D21@gmail.com>
-	<4DAA2B38.1090706@provocation.net>
-	<BANLkTi=rdcyUu_7PwFc0nRbYs-V=tr+V8Q@mail.gmail.com>
-	<CB9E56C259C44656B7B9DD670A548B8A@gmail.com>
-	<4DACBD77.9020600@provocation.net>
-	<FF1D1635C657408E9A7F6275AB23DD61@gmail.com>
-	<4DAD67BD.1010901@provocation.net>
+From: Mark Nigh <mnigh@netelligent.com>
+Subject: RE: mds crash
+Date: Wed, 20 Apr 2011 09:00:34 -0500
+Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C6788452D75C@NC-SVR-09.netelligent.com>
+References: <B828A4C02BE12543ACDFCF7EB0C693C6788452D627@NC-SVR-09.netelligent.com>
+ <Pine.LNX.4.64.1104190917010.3238@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:43055 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753060Ab1DSQ3K (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Apr 2011 12:29:10 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id BAFEEC064
-	for <ceph-devel@vger.kernel.org>; Tue, 19 Apr 2011 09:29:08 -0700 (PDT)
-Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 46E0FC062
-	for <ceph-devel@vger.kernel.org>; Tue, 19 Apr 2011 09:29:08 -0700 (PDT)
-Received: by eyx24 with SMTP id 24so1747984eyx.19
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Apr 2011 09:29:06 -0700 (PDT)
-In-Reply-To: <4DAD67BD.1010901@provocation.net>
+Received: from smtp2.netelligent.com ([199.255.228.152]:27126 "EHLO
+	NC-SVR-132.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753649Ab1DTOAg convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 20 Apr 2011 10:00:36 -0400
+In-Reply-To: <Pine.LNX.4.64.1104190917010.3238@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zenon Panoussis <oracle@provocation.net>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Sage,
+
+Thanks for the quick response.
+
+That seems to fix the problem. Both of my mds are up and active.
+
+mds e1838: 2/2/2 up {0=up:active,1=up:active}
+
+The only thing that doesn't seem right to me (I am not a developer so my understanding of git is limited) is that my version is of the following....
+
+ceph version 0.26-303-g36f0068 (commit:36f00685633a6f953b046106f5dd31a9169c82d4)
+
+I don't think this is correct?
+
+I do have a few questions for the group as well.
+
+1. What is the proper way to upgrade from version to version. Has anyone documentation the proper procedure?
+
+2. If I just want to test out the file system capabilities, do I need to install all the packages or is there some I can do without. I have been currently installing the following packages (Ubuntu v10.10) in this order.
+
+sudo dpkg -i libcrush1_0.26-1_amd64.deb
+sudo dpkg -i libceph1_0.26-1_amd64.deb
+sudo dpkg -i ceph-fuse_0.26-1_amd64.deb
+sudo dpkg -i librados2_0.26-1_amd64.deb
+sudo dpkg -i librbd1_0.26-1_amd64.deb
+sudo dpkg -i ceph_0.26-1_amd64.deb
+
+Thanks for everyone's help.
+
+Mark Nigh
+Systems Architect
+mnigh@netelligent.com
+ (p) 314.392.6926
+
+
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net]
+Sent: Tuesday, April 19, 2011 11:18 AM
+To: Mark Nigh
 Cc: ceph-devel@vger.kernel.org
+Subject: Re: mds crash
 
-On Tue, Apr 19, 2011 at 3:45 AM, Zenon Panoussis <oracle@provocation.net> wrote:
->> It's a bit more complicated than that. While we could probably do a better
->> job of controlling bandwidths, there are a lot of pieces devoted to handling
->> changes in disk performance and preventing the OSD from accepting more data
->> than it can handle -- much of this is tunable (it's not well-documented but
->> off the top of my head the ones to look at are osd_client_message_size_cap,
->> for how much client data to hold in-memory waiting on disk [defaults to 200MB],
->> and filestore_op_threads, which defaults to 2 but might be better at 1 or 0
->> for a very slow disk) .
+Hi Mark,
+
+This should be fixed by d55399ffec224206ea324e83bb8ead1e9ca1eddc in the
+'next' branch of ceph.git.  Can you test it out and see if that allows
+journal replay to complete?
+
+Thanks!
+sage
+
+http://tracker.newdream.net/issues/1019
+
+
+
+On Tue, 19 Apr 2011, Mark Nigh wrote:
+
+> I recently have been working with exporting ceph to NFS. I have had stability problems with NFS (ceph is working but NFS crashes). But most recently, my mds0 will not start after one of these instances with NFS.
 >
-> Indeed, I've seen cosd threads fighting each-other to write to disk. Do
-> I understand it correctly that OPTION(filestore_op_threads, 0, OPT_INT, 0)
-> in src/config.cc and recompile is the only way to change this?
-Heavens no! You can set any of those options in your config file:
-filestore op threads = 0
-or on the command line when starting the osd:
-cosd -i osd.a -c ceph.conf --filestore_op_threads 0
-
-
->> The specific crash that I saw here meant that the OSD called sync on its
->> underlying filesystem and 6 minutes later the sync hadn't completed! The
->> system can handle slow disks but it became basically unresponsive, at which
->> point the proper response in a replicated scenario is to kill itself (the
->> data should all exist elsewhere).
+> My setup. 2 mds, 1 mon (located on mds0), 5 osds. All running Ubuntu v10.10.
 >
-> It seems the right thing to do, provided that the data does exist elsewhere
-> in sufficient replicas. This touches something that Colin wrote in this same
-> thread, so I'll merge it in:
+> Here is the output when I try to start the mds0. Is there other debugging I can turn on?
 >
->> If we let
->> unresponsive OSDs linger forever, we could get in a situation where
->> the upper layer (the Ceph filesystem) continues to wait forever for an
->> unresponsive OSD, even though there are lots of other OSDs that could
->> easily take up the slack.
+> /etc/init.d/ceph start mds0
 >
-> The requirements and availability of OSDs at any given moment are known,
-> so the reaction to an unresponsive OSD can be calculated. Let's say,
-> given 20 OSDs and a CRUSH rule that says data {min_data 3; max_data 10},
-> ceph could acknowledge a write as long as committed to replicas =< 3 .
-> If, on the other hand, it can't commit the data to at least 3 OSDs (or
-> 3 journals, as the case might be), it should throw an error back and tell
-> the application that it can't write to disk, so that the application can
-> react appropriately.
-Mmm. There are problems with that too: applications often don't deal
-well with the filesystem spitting back errors; you don't want errors
-to propagate back to the application based on which OSD they're trying
-to access, etc.
-In general Ceph behaves about like a RAID array in recovery under
-these kinds of situations. It counts on the replication for safety and
-we could maybe add more smarts to prevent kicking out the last copy of
-data but that would be complex and error-prone without a big gain (ie,
-not appropriate at this stage of development). If at any point it
-can't commit the data to disk then after a timeout the mapping of data
-to OSDs will change and the write will get redirected to an active
-OSD.
+> 2011-04-19 10:06:58.602640 7fb202fe4700 mds0.11 ms_handle_connect on 10.6.1.93:6800/945
+> ./include/elist.h: In function 'elist<T>::item::~item() [with T = MDSlaveUpdate*]', in thread '0x7fb2004d5700'
+> ./include/elist.h: 39: FAILED assert(!is_on_list())
+>  ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+>  1: (MDSlaveUpdate::~MDSlaveUpdate()+0x59) [0x4d9fe9]
+>  2: (ESlaveUpdate::replay(MDS*)+0x422) [0x4d2772]
+>  3: (MDLog::_replay_thread()+0xb90) [0x67f850]
+>  4: (MDLog::ReplayThread::entry()+0xd) [0x4b89ed]
+>  5: (()+0x7971) [0x7fb20564a971]
+>  6: (clone()+0x6d) [0x7fb2042e692d]
+>  ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+>  1: (MDSlaveUpdate::~MDSlaveUpdate()+0x59) [0x4d9fe9]
+>  2: (ESlaveUpdate::replay(MDS*)+0x422) [0x4d2772]
+>  3: (MDLog::_replay_thread()+0xb90) [0x67f850]
+>  4: (MDLog::ReplayThread::entry()+0xd) [0x4b89ed]
+>  5: (()+0x7971) [0x7fb20564a971]
+>  6: (clone()+0x6d) [0x7fb2042e692d]
+> *** Caught signal (Aborted) **
+>  in thread 0x7fb2004d5700
+>  ceph version 0.26 (commit:9981ff90968398da43c63106694d661f5e3d07d5)
+>  1: /usr/bin/cmds() [0x70fc38]
+>  2: (()+0xfb40) [0x7fb205652b40]
+>  3: (gsignal()+0x35) [0x7fb204233ba5]
+>  4: (abort()+0x180) [0x7fb2042376b0]
+>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fb204ad76bd]
+>  6: (()+0xb9906) [0x7fb204ad5906]
+>  7: (()+0xb9933) [0x7fb204ad5933]
+>  8: (()+0xb9a3e) [0x7fb204ad5a3e]
+>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x36a) [0x6f5eaa]
+>  10: (MDSlaveUpdate::~MDSlaveUpdate()+0x59) [0x4d9fe9]
+>  11: (ESlaveUpdate::replay(MDS*)+0x422) [0x4d2772]
+>  12: (MDLog::_replay_thread()+0xb90) [0x67f850]
+>  13: (MDLog::ReplayThread::entry()+0xd) [0x4b89ed]
+>  14: (()+0x7971) [0x7fb20564a971]
+>  15: (clone()+0x6d) [0x7fb2042e692d]
+>
+> I am not sure why the IP address of 0.0.0.0 shows up with starting the mds0.
+>
+> root@mds0:/var/log/ceph# /etc/init.d/ceph start mds0
+> === mds.0 ===
+> Starting Ceph mds.0 on mds0...
+>  ** WARNING: Ceph is still under heavy development, and is only suitable for **
+>  **          testing and review.  Do not trust it with important data.       **
+> starting mds.0 at 0.0.0.0:6800/2994
+>
+> Thanks for your assistance.
+>
+> Mark Nigh
+> Systems Architect
+> mnigh@netelligent.com
+>  (p) 314.392.6926
+>
+>
+>
+>
+> This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
 
-> I have to admit though that I'm still rather confused as to how and in
-> which order data and metadata are passed around through memory and journal
-> to disk. The wiki says "The OSD does not acknowledge a write until it is
-> committed (stable) on disk" but does that mean "committed once" or "committed
-> on as many copies as data min_data"? I suspect the former, because that would
-> explain how the bottlenecks I'm seeing can build up. On the other hand, a
-> stricter flush-min_data-before-acknowledging strategy as I describe above
-> would automatically solve most network and disk bandwidth calculation problems
-> by blocking writes unless and until there is sufficient bandwidth to commit
-> all required copies to disk.
-Actually it's neither. All data is mapped to a placement group for
-reading and writing. The placement group is made up of a certain
-number of OSDs which is set by the pool/CRUSH rules (by default, 2).
-The data is sent to the first OSD and that then replicates it to the
-other OSDs in its placement group and a write is considered safe when
-it's on-disk on each OSD. However, there are complications. Because we
-don't want to start moving data around when an OSD gets rebooted,
-there's a distinction between an OSD being up or down (ie, accessible
-or not accessible) and an OSD being in or out (ie, included in the
-placement group). So the placement group might temporarily have only
-one up OSD in which case the data is considered safe after that OSD
-gets it.
-In the typical case though then all the OSDs are up, and all of them
-need to have the data before it's acked in any way.
-
-I believe you're experiencing difficulty because (IIRC) you have an
-OSD and a monitor both using the same (very slow) disk. Both of these
-daemons call fsync et al *very frequently* for safety purposes and
-that all on its own can really kill performance on a slow disk. It's
-just a compounding cycle in your case which I suspect would be helped
-a lot by putting your OSD and your monitor on separate disks.
--Greg
+This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
