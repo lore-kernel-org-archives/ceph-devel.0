@@ -1,68 +1,121 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
 Subject: Re: long object names
-Date: Thu, 21 Apr 2011 16:04:09 -0700
-Message-ID: <BANLkTi=m5=Cwi64Sacgb7GiAmdEG408LJg@mail.gmail.com>
+Date: Thu, 21 Apr 2011 16:07:44 -0700
+Message-ID: <20110421230744.GC26545@dreamer>
 References: <Pine.LNX.4.64.1104202117520.14154@cobra.newdream.net>
-	<20110421185606.GC9431@dreamer>
-	<BANLkTi=SOKMdSZu3B_+6TS_8-tSJDeu98g@mail.gmail.com>
-	<20110421193240.GA26545@dreamer>
-	<99672323C62444DFA181A0659E4D37FC@gmail.com>
-	<BANLkTimvdNXA+F6sTS0HqkdUqE1uqFNkJA@mail.gmail.com>
-	<BANLkTikVQcMKsR1WY8uBQOk1KQ+tO+ezXA@mail.gmail.com>
-	<BANLkTikfqcYyiqirZ9zY+ZMiLbc-=BodRg@mail.gmail.com>
-	<BANLkTi=Nx2=mC0C_70vjwxuJ94UKB93xhw@mail.gmail.com>
-	<BANLkTikdCJUxcO6yDjCTANonftqgRZD51w@mail.gmail.com>
-	<4DB0B690.4060104@provocation.net>
+ <20110421185606.GC9431@dreamer>
+ <BANLkTi=SOKMdSZu3B_+6TS_8-tSJDeu98g@mail.gmail.com>
+ <20110421193240.GA26545@dreamer>
+ <99672323C62444DFA181A0659E4D37FC@gmail.com>
+ <20110421220044.GB26545@dreamer>
+ <BANLkTikCG487GB=n+9eT+66hxBVk_gfwqw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:46144 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753381Ab1DUXEK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 19:04:10 -0400
-Received: by iwn34 with SMTP id 34so142627iwn.19
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Apr 2011 16:04:09 -0700 (PDT)
-In-Reply-To: <4DB0B690.4060104@provocation.net>
+Received: from mail.hq.newdream.net ([66.33.206.127]:34525 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753658Ab1DUXHm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 19:07:42 -0400
+Content-Disposition: inline
+In-Reply-To: <BANLkTikCG487GB=n+9eT+66hxBVk_gfwqw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zenon Panoussis <oracle@provocation.net>
-Cc: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
 
-On Thu, Apr 21, 2011 at 3:58 PM, Zenon Panoussis <oracle@provocation.net> wrote:
->
->>> It needs to be populated first before being efficient. And it'll be
->>> less efficient now that you populate it with extra entries.
->
-> At the risk of being run out of town covered in tar and feathers, I'll
-> venture voicing the opinion of an end-user who doesn't know ceph, is not
-> a developer, and doesn't even understand half of the technicalities of
-> this discussion.
->
-> From my end-user point of view, efficiency is great and very desirable,
-> but is still secondary. Simplicity of code and the reduction of bugs that
-> comes with it is great and adds elegance to intelligence, but is still
-> secondary. The safety of data though, now, that is primary and above
-> everything else when it comes to a file system. A file system's *only*
-> purpose is to store and retrieve data. Efficiency and speed are features,
-> positive qualities that make a file system better, but only as long as
-> it actually can fulfil its purpose of storing and retrieving data without
-> losing or corrupting them.
->
-> Looking at it this way, the potential of a hash collision is catastrophic
-> no matter how small it might be. The measure of this problem is not the
-> objective likelihood that it will occur, but the subjective level of worry
-> that it might occur. Simply put, even if there's one chance of a hash
-> collision in 10 billion and I only have a couple of million files, I still
-> end up being unable to trust the integrity of *any* of them.
->
-> One might argue here that no file system in this world offers a 100% file
-> integrity guarantee. That's absolutely true, but it is and should remain
-> a shortcoming and not be elevated to an intentional design feature.
->
+On Thu, Apr 21, 2011 at 03:25:35PM -0700, Yehuda Sadeh Weinraub wrote:
+> Yeah, we're well aware of those races. Note that splitting to
+> subdirectories is racey too. Imagine one thread/process creating an
+> object, while the other one removing a similar object with the same
+> prefix. The first one tries to create a subtree, while the other is
+> trying to remove the same subtree. I've seen these issues before,
+> they're real.
 
-We fully understand your worry, and in any case with the hashing
-solution it doesn't mean that when there's a collision you lose the
-data, just that the data lookup needs to traverse more objects.
+Yup, that's why I said there's a rmdir/mkdir race. You can fix that
+two ways:
 
-HTH,
-Yehuda
+1. Don't rmdir; there's not going to be that much junk there
+   (punting it, but not badly; no harm done, just littering).
+
+2. Make the mkdir & create file case just handle the race; all you
+   need is a simple retry loop, there's no problems and the races
+   can't cause actual harm.
+
+   And more to the point, this is the only kind of race there is.
+   If FileStore needs to support arbitrary rename etc operations,
+   they all need this same retry loop, but it's still just the
+   same retry loop, and can probably put in a nice utility function.
+
+   *There are no other kinds of races*, and it seems FileStore doesn't
+   really do renames etc anyway.
+
+
+
+// try to create a file, using the dynamic dirs trick for long
+// filenames. note that this is only needed for file creation; opening
+// an existing file needs no mkdir trickery. overwrites pathname,
+// returns fd or <0 on errors. pathname is relative to dirfd.
+int really_create(int dirfd, char *pathname, int flags, mode_t mode) {
+  int ret;
+
+  // split into leading path and base filename
+  const char *filename = strrchr(pathname, '/');
+
+  if (!filename) {
+    // pathname has no slashes, safe to just open
+    return openat(dirfd, pathname, flags, mode);
+  }
+
+  // nul terminate leading path
+  filename = '\0';
+  // move from slash to actual filename
+  filename++;
+
+  // go through leading prefixes and mkdir them
+ retry:
+  char *cursor = pathname;
+  while (1) {
+    printf("cursor=%p %s\n", cursor, cursor);
+    cursor = strchr(cursor, '/');
+    if (!cursor)
+      break;
+    // terminate the string here temporarily, mkdir that
+    *cursor = '\0';
+    ret = mkdirat(dirfd, pathname, 0755);
+    // restore the slash so we don't forget
+    *cursor = '/';
+    // and nudge us past the slash
+    cursor++;
+    if (ret < 0) {
+      switch (errno) {
+      case EEXIST:
+	// it already exists; ignore
+	break;
+      case ENOENT:
+	// somebody rmdir'd a parent path; retry from the top
+	goto retry;
+      default:
+	return -errno;
+      }
+    }
+    // loop back to find the next slash and mkdir that
+  }
+
+  // leading path is created (unless we lost a race just now); now do
+  // the file operation
+  ret = openat(dirfd, pathname, flags, mode);
+  if (ret<0) {
+    switch (errno) {
+    case ENOENT:
+      // it seems we lost a race at the last second; do mkdirs again
+      goto retry;
+    default:
+      return -errno;
+    }
+  }
+  return ret;
+}
+
+
+-- 
+:(){ :|:&};:
