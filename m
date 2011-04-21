@@ -1,158 +1,65 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: [PATCH] config: Update sample config with more examples
-Date: Thu, 21 Apr 2011 22:07:39 +0200
-Message-ID: <1303416459-29471-1-git-send-email-wido@widodh.nl>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: Re: long object names
+Date: Thu, 21 Apr 2011 14:09:00 -0700
+Message-ID: <BANLkTimvdNXA+F6sTS0HqkdUqE1uqFNkJA@mail.gmail.com>
+References: <Pine.LNX.4.64.1104202117520.14154@cobra.newdream.net>
+	<20110421185606.GC9431@dreamer>
+	<BANLkTi=SOKMdSZu3B_+6TS_8-tSJDeu98g@mail.gmail.com>
+	<20110421193240.GA26545@dreamer>
+	<99672323C62444DFA181A0659E4D37FC@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from hosted.by.pcextreme ([109.72.90.196]:41942 "EHLO
-	logger.ceph.widodh.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1751381Ab1DUUHr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 16:07:47 -0400
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:57193 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754663Ab1DUVJC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 17:09:02 -0400
+Received: by fxm17 with SMTP id 17so73574fxm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Apr 2011 14:09:01 -0700 (PDT)
+In-Reply-To: <99672323C62444DFA181A0659E4D37FC@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Wido den Hollander <wido@widodh.nl>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
+On Thu, Apr 21, 2011 at 1:03 PM, Gregory Farnum
+<gregory.farnum@dreamhost.com> wrote:
+> I really don't see how pushing the naming complexity into the local filesystem,
+> where it adds lots of otherwise-useless inodes and dentries, is going to help us.
 
-Signed-off-by: Wido den Hollander <wido@widodh.nl>
----
- src/sample.ceph.conf |   77 ++++++++++++++++++++++++++++++++++++++++++--------
- 1 files changed, 65 insertions(+), 12 deletions(-)
+Here is a quick summary of how the TV's proposal would help us.
+1. it avoids collisions entirely
+2. You don't ever have do an extra xattr lookup, no matter how short
+or long the object name is.
 
-diff --git a/src/sample.ceph.conf b/src/sample.ceph.conf
-index 473114b..67cb5ae 100644
---- a/src/sample.ceph.conf
-+++ b/src/sample.ceph.conf
-@@ -10,6 +10,22 @@
- ; the current host (e.g., in a setup with a startup.conf on each
- ; node).
- 
-+; The variables $type, $id and $name are available to use in paths
-+; $type = The type of daemon, possible values: mon, mds and osd
-+; $id = The ID of the daemon, for mon.alpha, $id will be alpha
-+; $name = $type.$id
-+
-+; For example:
-+; osd.0
-+;  $type = osd
-+;  $id = 0
-+;  $name = osd.0
-+
-+; mon.beta
-+;  $type = mon
-+;  $id = beta
-+;  $name = mon.beta
-+
- ; global
- [global]
- 	; enable secure authentication
-@@ -18,17 +34,42 @@
-         ; allow ourselves to open a lot of files
-         max open files = 131072
- 
--        ; set up logging
--        log file = /var/log/ceph/$name.log
-+        ; You can change the default log location if you want to
-+        ;log dir = /var/log/ceph	
-+        ;log file = $name.log
-+
-+        ; Logging to syslog is also possible
-+        ; If you want to disable logging to files, you should empty log dir and file
-+        ;log to syslog = true
-+        ;log dir =
-+        ;log file = 
-+
-+        ; This is the default pid file location
-+        ;pid file = /var/run/ceph/$name.pid
- 
--        ; set up pid files
--        pid file = /var/run/ceph/$name.pid
-+        ; If you want to run a IPv6 cluster, set this to true. Dual-stack isn't possible
-+        ;ms bind ipv6 = true
- 
- ; monitors
- ;  You need at least one.  You need at least three if you want to
- ;  tolerate any node failures.  Always create an odd number.
- [mon]
--	mon data = /data/mon$id
-+	mon data = /data/$name
-+
-+        ; If you are using for example the RADOS Gateway and want to have your newly created
-+        ; pools a higher replication level, you can set a default
-+        ;osd pool default size = 3
-+
-+        ; You can also specify a CRUSH rule for new pools
-+        ; Wiki: http://ceph.newdream.net/wiki/Custom_data_placement_with_CRUSH
-+        ;osd pool default crush rule = 0
-+
-+        ; Timing is critical for monitors, but if you want to allow the clocks to drift a 
-+        ; bit more, you can specify the max drift.
-+        ;mon clock drift allowed = 1
-+
-+        ; Tell the monitor to backoff from this warning for 30 seconds
-+        ;mon clock drift warn backoff = 30
- 
- 	; logging, for debugging monitor crashes, in order of
- 	; their likelihood of being helpful :)
-@@ -37,15 +78,15 @@
- 	;debug paxos = 20
- 	;debug auth = 20
- 
--[mon.0]
-+[mon.alpha]
- 	host = alpha
- 	mon addr = 192.168.0.10:6789
- 
--[mon.1]
-+[mon.beta]
- 	host = beta
- 	mon addr = 192.168.0.11:6789
- 
--[mon.2]
-+[mon.gamma]
- 	host = gamma
- 	mon addr = 192.168.0.12:6789
- 
-@@ -70,17 +111,25 @@
- ;  Define as many as you like.
- [osd]
- 	; This is where the btrfs volume will be mounted.
--	osd data = /data/osd$id
-+	osd data = /data/$name
- 
- 	; Ideally, make this a separate disk or partition.  A few
-  	; hundred MB should be enough; more if you have fast or many
-  	; disks.  You can use a file under the osd data dir if need be
-- 	; (e.g. /data/osd$id/journal), but it will be slower than a
-+ 	; (e.g. /data/$name/journal), but it will be slower than a
-  	; separate disk or partition.
- 
-         ; This is an example of a file-based journal.
--	osd journal = /data/osd$id/journal
--	osd journal size = 1000 ; journal size, in megabytes
-+	osd journal = /data/$name/journal
-+        ; Journal size, in megabytes
-+	osd journal size = 1000
-+
-+        ; If you want to run the journal on a tmpfs, disable DirectIO
-+        ;journal dio = false
-+
-+        ; You can change the number of recovery operations to speed up recovery
-+        ; or slow it down if your machines can't handle it
-+        ;osd recovery max active = 3
- 
- 	; osd logging to debug osd issues, in order of likelihood of being
- 	; helpful
-@@ -98,6 +147,10 @@
- 	; usually fine for basic testing).
- 	btrfs devs = /dev/sdx
- 
-+        ; If you want to specify some other mount options, you can do so.
-+        ; The default values are rw,noatime
-+        ;btrfs options = rw,noatime
-+
- [osd.1]
- 	host = epsilon
- 	btrfs devs = /dev/sdy
--- 
-1.7.0.4
+My add-on proposal helps us:
+3. get reasonable prefix search performance (with those supposedly
+"useless" dentries)
 
+> I like what Yehuda has here for its relative simplicity -- though I think we should just up
+> the hash size enough that we don't need to handle collisions,
+
+Personally, I think the xattr proposal is more complex. I guess that
+is a matter of taste.
+
+No matter how big your hash table will be, there are still collisions!
+That is the nature of hashing. And since the code is open source, it's
+pretty easy for an attacker to read the source and then create two
+objects whose names collide.
+
+So far, the only disadvantage that has been pointed out to TV's scheme
+is that it creates extra dentries. But those extra dentries only
+affect long object names, not the ones that (for example) the Ceph FS
+creates. Also, when long object names occur in S3, they don't tend to
+come out of the blue. They come about because the organization has a
+sort of directory structure like this:
+
+foocorp/business_data/business_reports/year_2008/input/foo
+foocorp/business_data/business_reports/year_2008/input/bar
+
+Of course we "know" that there are no such things as directories in
+S3. But people like to structure their object names as if there were.
+In cases like that, TV's scheme only incurs the cost of creating the
+extra dentries once per long prefix.
+
+Colin
