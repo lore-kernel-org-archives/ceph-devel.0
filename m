@@ -1,127 +1,79 @@
 From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: long object names
-Date: Thu, 21 Apr 2011 11:56:06 -0700
-Message-ID: <20110421185606.GC9431@dreamer>
-References: <Pine.LNX.4.64.1104202117520.14154@cobra.newdream.net>
+Subject: Re: mds crash
+Date: Thu, 21 Apr 2011 12:08:04 -0700
+Message-ID: <20110421190804.GD9431@dreamer>
+References: <B828A4C02BE12543ACDFCF7EB0C693C6788452D627@NC-SVR-09.netelligent.com>
+ <Pine.LNX.4.64.1104190917010.3238@cobra.newdream.net>
+ <B828A4C02BE12543ACDFCF7EB0C693C6788452D75C@NC-SVR-09.netelligent.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:48903 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:34596 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750829Ab1DUS4F (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 14:56:05 -0400
+	with ESMTP id S1750829Ab1DUTID (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 15:08:03 -0400
 Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1104202117520.14154@cobra.newdream.net>
+In-Reply-To: <B828A4C02BE12543ACDFCF7EB0C693C6788452D75C@NC-SVR-09.netelligent.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Mark Nigh <mnigh@netelligent.com>
+Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Apr 20, 2011 at 09:42:48PM -0700, Sage Weil wrote:
-> I think the lfn_open/_get type interface below all of the operation 
-> methods will allow all of those things.  I think it'll be simpler to push 
-> as much of the filename rendering into that layer as possible, though 
-> (possibly including the sobject_t mangling).  Having all the 
-> mangling/rendering done in one place will also make it easy to extend 
-> without making multiple passes in different layers...
+On Wed, Apr 20, 2011 at 09:00:34AM -0500, Mark Nigh wrote:
+> That seems to fix the problem. Both of my mds are up and active.
+> 
+> mds e1838: 2/2/2 up {0=up:active,1=up:active}
+> 
+> The only thing that doesn't seem right to me (I am not a developer
+> so my understanding of git is limited) is that my version is of the
+> following....
+> 
+> ceph version 0.26-303-g36f0068 (commit:36f00685633a6f953b046106f5dd31a9169c82d4)
+> 
+> I don't think this is correct?
 
-So apparently, this email confused many. Let's try to clarify, to the
-best of my understanding:
+I can confirm that your ceph build now includes the commit
+d55399ffec224206ea324e83bb8ead1e9ca1eddc Sage asked you to test, so
+all should be good.
 
-- Yehuda's code would currently write this:
+> 1. What is the proper way to upgrade from version to version. Has
+> anyone documentation the proper procedure?
 
-  ./rados mkpool kitties
-  ./rados create --pool=foo "longcatisl$(python -c 'print 300*"o"')ng"
+We try pretty hard not to break anything, so you should be able just
+grab new releases, either as tarballs or via git (for git, run
+something like "git fetch && git checkout v0.26"), build them, and
+restart your cluster. However, Ceph is still going through rapid
+changes, read the release notes carefully.
 
-  >>> FILENAME_SHORT_LEN=16
-  >>> FILENAME_HASH_LEN=3
-  >>> FILENAME_COOKIE="cLFN"
-  >>> FILENAME_PREFIX_LEN = (FILENAME_SHORT_LEN - FILENAME_HASH_LEN - 1 - (len(FILENAME_COOKIE) - 1) - 1)
-  >>> orig = "longcatisl"+300*"o"+"ng"
-  >>> storable = orig + "_head"  # plus backslash escaping, but let's ignore that now
-  >>> munged = orig[:FILENAME_PREFIX_LEN] + "_" + FILENAME_COOKIE + "_%s_%d" % ("zzz", 42)
-  >>> munged
-  'longcati_cLFN_zzz_42'
+> 2. If I just want to test out the file system capabilities, do I
+> need to install all the packages or is there some I can do
+> without. I have been currently installing the following packages
+> (Ubuntu v10.10) in this order.
+> 
+> sudo dpkg -i libcrush1_0.26-1_amd64.deb
+> sudo dpkg -i libceph1_0.26-1_amd64.deb
+> sudo dpkg -i ceph-fuse_0.26-1_amd64.deb
+> sudo dpkg -i librados2_0.26-1_amd64.deb
+> sudo dpkg -i librbd1_0.26-1_amd64.deb
+> sudo dpkg -i ceph_0.26-1_amd64.deb
 
-  So it loses the _head suffix, and all such things.
+The server side needs ceph.deb.
 
-- Sage wanted (as far as I understand) to have the munging be where
-  the backslash escaping is, so the end result would look like
-  'longcati_cLFN_zzz_42_head'. Note the suffix.
+For in-kernel client side, you need a fresh enough kernel, and
+mount.ceph in ceph-client-tools makes it nicer to use.
 
-  I hope I got that right.
+For FUSE client side, you need libfuse.
 
+librados is a client library for the object store, you don't seem to
+be using it.
 
+librbd is a client library for things like QEMU/KVM, you don't seem to
+be using it.
 
-As for Yehuda's approach, I'm not very happy to see layers upon layers
-of rewriting the filenames.. It just seems more brittle. So Sage's
-version looks nicer to me, can do all the work it needs to do in a
-single pass, and lets us see the _head etc suffixes without reading
-xattrs, which might be useful for fsck-style things.
-
-As for both, I'm especially not fond of the very limited hashing, and
-the loops that keep calling build_filename. I fear collisions and
-races. Bumping up the hash size significantly will help the common
-case, but I still fear the races.
-
-I also think that Ceph, and especially the RGW bits, needs to be
-written to be fairly robust against DoS attacks. Nasty things happen
-out there, and having somebody able to trigger a "slow mode" on your
-server with fairly cheap operations is bad.
-
-
-Here's a concrete proposal: split the filename into subdirs if needed,
-and map the names 1:1, just to avoid the unpredictability of the above
-approach. And to get significantly less code and branching in the fast
-path. That is, I think I'd go for something like (Python written in C
-style to make it more direct to translate):
-
-	# how much overhead to reserve in filenames to always have
-	# prefix/suffix not split by slashes
-	LONGEST_PREFIX_SUFFIX_LEN = len("_head")
-	SAFE_FILENAME_LEN = 255 - LONGEST_PREFIX_SUFFIX_LEN
-
-	def munge(path):
-	    dirprefix = None
-	    while len(path) > SAFE_FILENAME_LEN:
-	        head = path[:SAFE_FILENAME_LEN]
-	        if dirprefix is None:
-	            dirprefix = head
-	        else:
-	            dirprefix = dirprefix + '/' + head
-	        path = path[SAFE_FILENAME_LEN:]
-	    return dirprefix + '/' + path
-
-and now
-
->>> munged = munge(orig)
->>> munged
-'longcatisloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo/oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong'
->>> munged + '_head'
-'longcatisloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo/oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong_head'
-
-And the caller would just mkdir all the leading dirs (ignore EEXIST
-errors). They can either be left around, or with a small loop handling
-a race between mkdir & rmdir, can be cleaned up either on unlink or in
-fsck/scrub/etc.
-
-
-
-
-Also, I'm not thrilled to have something this core, *and* being string
-manipulation in C, go without unit tests that exercise the corner
-cases.
-
-
-
-Finally, here's some misc notes on the existing code that are probably
-obvious, I just wanted to make sure:
-
-- hash is always "zzz"
-- xattr user.ceph._lfn conflicts with actual end-user xattrs "_lfn"?
-- escaping can lengthen the filename, does it handle that (I guess yes
-  because this is a layer after that, but I can't tell without reading
-  a lot of code)
+I don't see any of our packages actually needing libcrush or libceph
+(I guess that means they bundle the library in the binary directly),
+so you shouldn't need those either (at least right now; some day we
+may wish to wrestle the Automake monster and change that).
 
 -- 
 :(){ :|:&};:
