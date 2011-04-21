@@ -1,79 +1,51 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: mds crash
-Date: Thu, 21 Apr 2011 12:08:04 -0700
-Message-ID: <20110421190804.GD9431@dreamer>
-References: <B828A4C02BE12543ACDFCF7EB0C693C6788452D627@NC-SVR-09.netelligent.com>
- <Pine.LNX.4.64.1104190917010.3238@cobra.newdream.net>
- <B828A4C02BE12543ACDFCF7EB0C693C6788452D75C@NC-SVR-09.netelligent.com>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: Re: long object names
+Date: Thu, 21 Apr 2011 12:27:01 -0700
+Message-ID: <BANLkTi=SOKMdSZu3B_+6TS_8-tSJDeu98g@mail.gmail.com>
+References: <Pine.LNX.4.64.1104202117520.14154@cobra.newdream.net>
+	<20110421185606.GC9431@dreamer>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:34596 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750829Ab1DUTID (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 15:08:03 -0400
-Content-Disposition: inline
-In-Reply-To: <B828A4C02BE12543ACDFCF7EB0C693C6788452D75C@NC-SVR-09.netelligent.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:56919 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752223Ab1DUT1D (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 15:27:03 -0400
+Received: by fxm17 with SMTP id 17so36118fxm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Apr 2011 12:27:01 -0700 (PDT)
+In-Reply-To: <20110421185606.GC9431@dreamer>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nigh <mnigh@netelligent.com>
-Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On Wed, Apr 20, 2011 at 09:00:34AM -0500, Mark Nigh wrote:
-> That seems to fix the problem. Both of my mds are up and active.
-> 
-> mds e1838: 2/2/2 up {0=up:active,1=up:active}
-> 
-> The only thing that doesn't seem right to me (I am not a developer
-> so my understanding of git is limited) is that my version is of the
-> following....
-> 
-> ceph version 0.26-303-g36f0068 (commit:36f00685633a6f953b046106f5dd31a9169c82d4)
-> 
-> I don't think this is correct?
+On Thu, Apr 21, 2011 at 11:56 AM, Tommi Virtanen
+<tommi.virtanen@dreamhost.com> wrote:
+> I also think that Ceph, and especially the RGW bits, needs to be
+> written to be fairly robust against DoS attacks. Nasty things happen
+> out there, and having somebody able to trigger a "slow mode" on your
+> server with fairly cheap operations is bad.
 
-I can confirm that your ceph build now includes the commit
-d55399ffec224206ea324e83bb8ead1e9ca1eddc Sage asked you to test, so
-all should be good.
+Yeah.
 
-> 1. What is the proper way to upgrade from version to version. Has
-> anyone documentation the proper procedure?
+> Here's a concrete proposal: split the filename into subdirs if needed,
+> and map the names 1:1, just to avoid the unpredictability of the above
+> approach. And to get significantly less code and branching in the fast
+> path. That is, I think I'd go for something like (Python written in C
+> style to make it more direct to translate):
 
-We try pretty hard not to break anything, so you should be able just
-grab new releases, either as tarballs or via git (for git, run
-something like "git fetch && git checkout v0.26"), build them, and
-restart your cluster. However, Ceph is still going through rapid
-changes, read the release notes carefully.
+I like this idea a lot. It does involve extra expense, but only for
+long file names. It also avoids object name collisions completely.
 
-> 2. If I just want to test out the file system capabilities, do I
-> need to install all the packages or is there some I can do
-> without. I have been currently installing the following packages
-> (Ubuntu v10.10) in this order.
-> 
-> sudo dpkg -i libcrush1_0.26-1_amd64.deb
-> sudo dpkg -i libceph1_0.26-1_amd64.deb
-> sudo dpkg -i ceph-fuse_0.26-1_amd64.deb
-> sudo dpkg -i librados2_0.26-1_amd64.deb
-> sudo dpkg -i librbd1_0.26-1_amd64.deb
-> sudo dpkg -i ceph_0.26-1_amd64.deb
+One additional idea: can we make the chunking configurable?
+If we did a translation like this:
+abcdefg -> abc/def/g
+123456789 -> 123/456/789
 
-The server side needs ceph.deb.
+prefix search would become a *lot* more efficient for rgw.
+On the other hand, the filesystem layer doesn't care about prefix
+search, so it could just configure the chunking to be after 200
+characters or something (at which point it's basically a no-op.)
 
-For in-kernel client side, you need a fresh enough kernel, and
-mount.ceph in ceph-client-tools makes it nicer to use.
-
-For FUSE client side, you need libfuse.
-
-librados is a client library for the object store, you don't seem to
-be using it.
-
-librbd is a client library for things like QEMU/KVM, you don't seem to
-be using it.
-
-I don't see any of our packages actually needing libcrush or libceph
-(I guess that means they bundle the library in the binary directly),
-so you shouldn't need those either (at least right now; some day we
-may wish to wrestle the Automake monster and change that).
-
--- 
-:(){ :|:&};:
+cheers,
+Colin
