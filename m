@@ -1,61 +1,158 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: long object names
-Date: Thu, 21 Apr 2011 13:03:57 -0700
-Message-ID: <99672323C62444DFA181A0659E4D37FC@gmail.com>
-References: <Pine.LNX.4.64.1104202117520.14154@cobra.newdream.net>
- <20110421185606.GC9431@dreamer>
- <BANLkTi=SOKMdSZu3B_+6TS_8-tSJDeu98g@mail.gmail.com>
- <20110421193240.GA26545@dreamer>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+From: Wido den Hollander <wido@widodh.nl>
+Subject: [PATCH] config: Update sample config with more examples
+Date: Thu, 21 Apr 2011 22:07:39 +0200
+Message-ID: <1303416459-29471-1-git-send-email-wido@widodh.nl>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:35486 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751499Ab1DUUEK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 16:04:10 -0400
-Received: by pzk9 with SMTP id 9so35710pzk.19
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Apr 2011 13:04:10 -0700 (PDT)
-In-Reply-To: <20110421193240.GA26545@dreamer>
-Content-Disposition: inline
+Received: from hosted.by.pcextreme ([109.72.90.196]:41942 "EHLO
+	logger.ceph.widodh.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1751381Ab1DUUHr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Apr 2011 16:07:47 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Wido den Hollander <wido@widodh.nl>
 
-I really don't see how pushing the naming complexity into the local filesystem, where it adds lots of otherwise-useless inodes and dentries, is going to help us.
 
-I like what Yehuda has here for its relative simplicity -- though I think we should just up the hash size enough that we don't need to handle collisions, and leave out the retry looping so as to make it simpler still -- but given the relative simplicity I think it might be nice to push all the name mangling into a flat space so that we can preserve the prefix- and post-fixing -- this would keep snapshots of one object more identifiable than hashing over the entire name like it's doing right now.
--Greg
-On Thursday, April 21, 2011 at 12:32 PM, Tommi Virtanen wrote: 
-> On Thu, Apr 21, 2011 at 12:27:01PM -0700, Colin McCabe wrote:
-> > I like this idea a lot. It does involve extra expense, but only for
-> > long file names. It also avoids object name collisions completely.
-> > 
-> > One additional idea: can we make the chunking configurable?
-> > If we did a translation like this:
-> > abcdefg -> abc/def/g
-> > 123456789 -> 123/456/789
-> > 
-> > prefix search would become a *lot* more efficient for rgw.
-> > On the other hand, the filesystem layer doesn't care about prefix
-> > search, so it could just configure the chunking to be after 200
-> > characters or something (at which point it's basically a no-op.)
-> 
-> The one big downside is that with configurable chunking, you no longer
-> have an always correct 1:1 mapping between object and file.
-> 
-> You might argue for always (not configurably) chunking at some
-> smaller, fixed boundary, so on the average you'd need to readdir()
-> less to serve a prefix search. I think this is what your last sentence
-> refers to. But that means more overhead with the directories.
-> 
-> The only real answers are available via benchmarks.
-> 
-> -- 
-> :(){ :|:&};:
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
-> 
+Signed-off-by: Wido den Hollander <wido@widodh.nl>
+---
+ src/sample.ceph.conf |   77 ++++++++++++++++++++++++++++++++++++++++++--------
+ 1 files changed, 65 insertions(+), 12 deletions(-)
+
+diff --git a/src/sample.ceph.conf b/src/sample.ceph.conf
+index 473114b..67cb5ae 100644
+--- a/src/sample.ceph.conf
++++ b/src/sample.ceph.conf
+@@ -10,6 +10,22 @@
+ ; the current host (e.g., in a setup with a startup.conf on each
+ ; node).
+ 
++; The variables $type, $id and $name are available to use in paths
++; $type = The type of daemon, possible values: mon, mds and osd
++; $id = The ID of the daemon, for mon.alpha, $id will be alpha
++; $name = $type.$id
++
++; For example:
++; osd.0
++;  $type = osd
++;  $id = 0
++;  $name = osd.0
++
++; mon.beta
++;  $type = mon
++;  $id = beta
++;  $name = mon.beta
++
+ ; global
+ [global]
+ 	; enable secure authentication
+@@ -18,17 +34,42 @@
+         ; allow ourselves to open a lot of files
+         max open files = 131072
+ 
+-        ; set up logging
+-        log file = /var/log/ceph/$name.log
++        ; You can change the default log location if you want to
++        ;log dir = /var/log/ceph	
++        ;log file = $name.log
++
++        ; Logging to syslog is also possible
++        ; If you want to disable logging to files, you should empty log dir and file
++        ;log to syslog = true
++        ;log dir =
++        ;log file = 
++
++        ; This is the default pid file location
++        ;pid file = /var/run/ceph/$name.pid
+ 
+-        ; set up pid files
+-        pid file = /var/run/ceph/$name.pid
++        ; If you want to run a IPv6 cluster, set this to true. Dual-stack isn't possible
++        ;ms bind ipv6 = true
+ 
+ ; monitors
+ ;  You need at least one.  You need at least three if you want to
+ ;  tolerate any node failures.  Always create an odd number.
+ [mon]
+-	mon data = /data/mon$id
++	mon data = /data/$name
++
++        ; If you are using for example the RADOS Gateway and want to have your newly created
++        ; pools a higher replication level, you can set a default
++        ;osd pool default size = 3
++
++        ; You can also specify a CRUSH rule for new pools
++        ; Wiki: http://ceph.newdream.net/wiki/Custom_data_placement_with_CRUSH
++        ;osd pool default crush rule = 0
++
++        ; Timing is critical for monitors, but if you want to allow the clocks to drift a 
++        ; bit more, you can specify the max drift.
++        ;mon clock drift allowed = 1
++
++        ; Tell the monitor to backoff from this warning for 30 seconds
++        ;mon clock drift warn backoff = 30
+ 
+ 	; logging, for debugging monitor crashes, in order of
+ 	; their likelihood of being helpful :)
+@@ -37,15 +78,15 @@
+ 	;debug paxos = 20
+ 	;debug auth = 20
+ 
+-[mon.0]
++[mon.alpha]
+ 	host = alpha
+ 	mon addr = 192.168.0.10:6789
+ 
+-[mon.1]
++[mon.beta]
+ 	host = beta
+ 	mon addr = 192.168.0.11:6789
+ 
+-[mon.2]
++[mon.gamma]
+ 	host = gamma
+ 	mon addr = 192.168.0.12:6789
+ 
+@@ -70,17 +111,25 @@
+ ;  Define as many as you like.
+ [osd]
+ 	; This is where the btrfs volume will be mounted.
+-	osd data = /data/osd$id
++	osd data = /data/$name
+ 
+ 	; Ideally, make this a separate disk or partition.  A few
+  	; hundred MB should be enough; more if you have fast or many
+  	; disks.  You can use a file under the osd data dir if need be
+- 	; (e.g. /data/osd$id/journal), but it will be slower than a
++ 	; (e.g. /data/$name/journal), but it will be slower than a
+  	; separate disk or partition.
+ 
+         ; This is an example of a file-based journal.
+-	osd journal = /data/osd$id/journal
+-	osd journal size = 1000 ; journal size, in megabytes
++	osd journal = /data/$name/journal
++        ; Journal size, in megabytes
++	osd journal size = 1000
++
++        ; If you want to run the journal on a tmpfs, disable DirectIO
++        ;journal dio = false
++
++        ; You can change the number of recovery operations to speed up recovery
++        ; or slow it down if your machines can't handle it
++        ;osd recovery max active = 3
+ 
+ 	; osd logging to debug osd issues, in order of likelihood of being
+ 	; helpful
+@@ -98,6 +147,10 @@
+ 	; usually fine for basic testing).
+ 	btrfs devs = /dev/sdx
+ 
++        ; If you want to specify some other mount options, you can do so.
++        ; The default values are rw,noatime
++        ;btrfs options = rw,noatime
++
+ [osd.1]
+ 	host = epsilon
+ 	btrfs devs = /dev/sdy
+-- 
+1.7.0.4
 
