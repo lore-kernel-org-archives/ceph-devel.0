@@ -1,40 +1,79 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+From: Stefan Majer <stefan.majer@gmail.com>
 Subject: Re: v0.27 released
-Date: Mon, 25 Apr 2011 09:56:54 -0700
-Message-ID: <20110425165654.GC23965@dreamer>
+Date: Mon, 25 Apr 2011 19:05:44 +0200
+Message-ID: <BANLkTincA2E++BG0RaV1G0URoYCqed9BWw@mail.gmail.com>
 References: <Pine.LNX.4.64.1104232136330.9549@cobra.newdream.net>
- <BANLkTikwGrOX1SHLgcC4RPJ=n7OFQfajCg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:60650 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756061Ab1DYQ4V (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Apr 2011 12:56:21 -0400
-Content-Disposition: inline
-In-Reply-To: <BANLkTikwGrOX1SHLgcC4RPJ=n7OFQfajCg@mail.gmail.com>
+Received: from mail-ww0-f42.google.com ([74.125.82.42]:42418 "EHLO
+	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756220Ab1DYRFq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Apr 2011 13:05:46 -0400
+Received: by wwk4 with SMTP id 4so1501111wwk.1
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Apr 2011 10:05:45 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1104232136330.9549@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: DongJin Lee <dongjin.lee@auckland.ac.nz>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-On Sun, Apr 24, 2011 at 11:55:33PM +1200, DongJin Lee wrote:
-> In v0.27
-> When I run mkcephfs -c -a, I get
-> 
-> temp dir is /tmp/mkcephfs.Mts3TZhEwG
-> preparing monmap in /tmp/mkcephfs.Mts3TZhEwG/monmap
-> /usr/local/bin/monmaptool --create --clobber --add 0 --print
-> /tmp/mkcephfs.Mts3TZhEwG/monmap
-> /usr/local/bin/monmaptool: invalid ip:port '--print'
-> rm: cannot remove `/tmp/mkcephfs.Mts3TZhEwG/*': No such file or directory
-> 
-> and so I cannot start ceph up. But It was working till v0.26. Thanks
+Hi Sage,
 
-It seems you have a monitor defined without "mon addr" set in the
-config file.
+=2E..
+> For v0.28 we're focusing on the OSD cluster, radosgw, and continuing =
+with
+> the MDS clustering fixes. =A0Sam and Josh are working on a refactor i=
+n the
+> OSD peering code that will make peering more understandable, verifiab=
+le,
+> and (we hope) less buggy.
 
-mkcephfs could use better error handling; I'll add that.
+Im using ceph since a while an follow the mailinglist since more than a=
+ year.
+In the same project as we use ceph, we also use a messaging api called
+zeromq (http://www.zeromq.org/) for messaging between our other
+components.
+And i thought this might be a proper replacement for your messaging
+implementation, which causes some trouble.
 
--- 
-:(){ :|:&};:
+ZeroMQ was developed to speed up stock trading and is now widely used
+in many high performance messaging applications.
+It offers a lot of different messaging pattern implementations
+(publish/subscribe, fanout, ..) as well as different transport
+mechanisms (tcp, multicast (pgm), inprocess ..).
+It has a brokerless design and has many language bindings, but is
+entirely written in c/c++.
+There is a very active community.
+
+It is also very well documented: http://zguide.zeromq.org/page:all
+
+I was thinking since some time to point the ceph development team to
+this piece of code, now with your announcement of the 0.28 work i
+decided to do so.
+
+So if you want to spend some spare time to read through the basic
+concepts, enjoy.
+
+Greetings from Munich
+
+Stefan Majer
+
+>
+> Relevant URLs:
+> =A0* Direct download at: http://ceph.newdream.net/download/ceph-0.27.=
+tar.gz
+> =A0* For Debian and Ubuntu packages, see http://ceph.newdream.net/wik=
+i/Debian
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
