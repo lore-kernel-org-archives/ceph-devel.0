@@ -1,36 +1,78 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: Java-rados announcement
-Date: Wed, 27 Apr 2011 14:22:46 -0700
-Message-ID: <82250CCC-5986-4167-90D3-BBC0A2549872@cs.ucsc.edu>
-References: <D20F8B6A-0A44-41BA-B98C-5956E8CBA55E@cs.ucsc.edu> <BANLkTimWCgtkpMfLX3HsMCAqacYkF=oydg@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Better debug log levels for autotest jobs
+Date: Wed, 27 Apr 2011 16:25:16 -0700
+Message-ID: <20110427232516.GB6405@dreamer>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:51767 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751010Ab1D0VW6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2011 17:22:58 -0400
-In-Reply-To: <BANLkTimWCgtkpMfLX3HsMCAqacYkF=oydg@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:49189 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757155Ab1D0XZO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2011 19:25:14 -0400
+Received: from dreamer (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 262D62C166
+	for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2011 16:25:14 -0700 (PDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Apr 26, 2011, at 4:22 PM, Colin McCabe wrote:
+Hi. Our autotest runs log just way too much debug stuff. A 20-minute
+run often creates >10GB uncompressed data. That's enough that
+compressing & transporting it for archival slows down the test
+significantly.
 
-> PHPRados has its own wiki page and a separate repo. It's at:
-> http://ceph.newdream.net/wiki/Phprados
-> 
-> We should set up something similar for this, I think.
+Ceph devs, I need your help in determining what debug logs can be
+turned down a notch or two without losing anything really valuable.
 
-Sounds good to me. Plus, it makes things a bit simpler. I'll get this repo put together later in the week.
+The base config is at ceph-autotests.git teuthology/ceph.conf,
+relevant lines pasted below:
 
-> P.S. 
-> functions. That's what ceph-pybind-test.py. Is it possible to make
-> something like that for the Java and PHP bindings?
+[mon]
+        lockdep = 1
+	debug mon = 20
+        debug paxos = 20
+        debug auth = 20
+        debug ms = 1
 
-Yes, this is definitely possible. I checked out ceph-pybind-test.py, and the unit tests I included with the Java bindings behave similarly--verifying basic functionality of each wrapped function. Driving the test suite from a script should be trivial.
+[osd]
+        lockdep = 1
+        debug ms = 1
+        debug osd = 25
+        debug monc = 20
+        debug journal = 20
+        debug filestore = 20
 
-Thanks for the feedback,
-Noah
+[mds]
+        lockdep = 1
+        debug ms = 1
+        debug mds = 20
+        debug auth = 20
+        debug monc = 20
+        mds debug scatterstat = true
+        mds verify scatter = true
+        mds log max segments = 2
+	mds cache size = 10000
+        mds debug frag = true
+
+What can I turn down? If I don't get helpful suggestions, everything
+20 goes down to 10 ;)
+
+
+The worst that happens if we have the defaults not include some debug
+you wanted see is you make your test override it and re-run; for
+example,
+
+class ceph_dbench(skeleton.CephTest):
+    ...
+    @skeleton.role('client')
+    def init_025_moar_debug(self):
+        self.ceph_conf['osd']['debug osd'] = 9000
+
+should do it just fine.
+
+(We can make that even easier, if it becomes commonplace enough. My
+motto is to first feel the pain. YAGNI and all that.)
+
+-- 
+:(){ :|:&};:
