@@ -1,54 +1,117 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: why client change "max_size" when writting?
-Date: Thu, 28 Apr 2011 08:50:27 +0800
-Message-ID: <BANLkTimfspbrgaTRoW+_rMH1ko3GEOZsHg@mail.gmail.com>
-References: <BANLkTin4dUrh0J6TMjTv=w6bjC=dk7Gppw@mail.gmail.com>
-	<Pine.LNX.4.64.1104270840190.27415@cobra.newdream.net>
+From: Ajit K Jena <ajit@iitb.ac.in>
+Subject: Data replication not working
+Date: Thu, 28 Apr 2011 14:12:01 +0530
+Message-ID: <1303980121.11285.3.camel@indica.cc.iitb.ac.in>
+Reply-To: ajit@iitb.ac.in
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary="=-XJhXQi4Srqy6kl8wB/zN"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:61254 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751905Ab1D1Au3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Apr 2011 20:50:29 -0400
-Received: by wwa36 with SMTP id 36so2508940wwa.1
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Apr 2011 17:50:28 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1104270840190.27415@cobra.newdream.net>
+Received: from smtp1.iitb.ac.in ([59.162.23.13]:54314 "HELO smtp1.iitb.ac.in"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1757280Ab1D1Iso (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 28 Apr 2011 04:48:44 -0400
+Received: from [10.100.106.210] (indica.cc.iitb.ac.in [10.100.106.210])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp-auth.iitb.ac.in (Postfix) with ESMTP id 6502713900
+	for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 14:12:01 +0530 (IST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-hi,sage
-thanks for you answer. I have another problem, if i didn't set "max_siz=
-e" ?
-does that means i won't recvoery any data if client crashes?
 
-2011/4/27 Sage Weil <sage@newdream.net>:
-> On Wed, 27 Apr 2011, huang jun wrote:
->> hi,developers
->> =A0 when write a file, why did client send a message to mds to chang=
-e
->> the variable "max_size" in inode =A0? so, if we don't change the
->> "max_size", what =A0consequence we =A0will get? and why the client w=
-ill
->> not write if the mds didn't return the changed "max_size" to client?
->
-> The max_size sets a bound on the number of data objects the client is
-> allowed to write to, which in turn bounds the amount of work probing
-> objects that MDS has to do if the client crashes to recover the file =
-size
-> and mtime.
->
-> Setting it larger will let the client write more data faster, but wil=
-l
-> mean more work if the client crashes.
->
-> sage
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--=-XJhXQi4Srqy6kl8wB/zN
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+
+Hi All,
+
+We have been experimenting with ceph since version 0.24 and
+found one important issue that is not resolved (or may be
+we don't know how to configure properly).
+
+I will talk about 0.27 since that is the latest release:
+
+  We have a one mon, one mds, and two osd setup. The data
+  stored goes to both the osds. We introduce a third osd.
+  the ceph status shows "osd: 3 up, 3 in" but no data goes
+  into the third osd. This remains the case even if we
+  power off one of the original osds.
+
+Data reliability thru replication is one of the major goals
+of ceph. I am wondering as to what we might be missing to
+get this feature going. I am attaching the configuration
+file.
+
+Pl help us solve this problem.
+
+Regards.
+
+--ajit
+
+--=-XJhXQi4Srqy6kl8wB/zN
+Content-Disposition: attachment; filename="ceph.conf"
+Content-Type: text/plain; name="ceph.conf"; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+
+[global]
+    user = root
+    ; where the mdses and osds keep their secret encryption keys
+    keyring = /home/ceph/keyring.bin
+    pid file = /var/run/ceph/$name.pid
+
+; monitors
+[mon]
+    ;Directory for monitor files
+    
+    mon data = /home/ceph/$name
+    mon lease wiggle room = 1 
+    paxos observer timeout = 1
+    debug mon = 5 
+
+[mon.five]
+    host = mon-mds
+    mon addr = 10.200.120.65:6789
+
+[mds]
+    
+    keyring = /home/ceph/keyring.$name
+    
+    debug ms = 1 
+    debug mds = 10 
+    debug mds balancer = 10
+    debug mds log = 10
+    debug mds_migrator = 10
+    debug monc = 10
+
+[mds.0]
+    host = mon-mds
+
+; OSDs
+[osd]
+    osd data = /export.osd$id
+    osd journal = /dev/export/journal
+    osd heartbeat grace = 30
+    filestore journal writeahead = true
+    journaler_allow_split_entries = true
+
+    keyring = /home/ceph/keyring.$name
+    
+    ;debug osd = 20
+    ;debug filestore = 20
+
+[osd.1]
+    host = osd1
+    btrfs devs=/dev/export/osd1.p1 
+
+[osd.2]
+   host = osd2
+   btrfs devs = /dev/export/osd2.p1 
+
+[osd.3]
+   host = osd3
+   btrfs devs = /dev/export/osd3.p1 
+
+
+--=-XJhXQi4Srqy6kl8wB/zN--
+
