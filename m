@@ -1,97 +1,52 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: libceph API
-Date: Thu, 28 Apr 2011 12:20:54 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104281219250.1187@cobra.newdream.net>
-References: <BANLkTim22eFcMzxL0sB4GRpUZfu7FL3x4A@mail.gmail.com>
- <Pine.LNX.4.64.1104202200100.26241@cobra.newdream.net>
- <BANLkTi=DB7sqb9aHmigGiQZWzFAp-jugAA@mail.gmail.com>
- <BANLkTik6+NewTgWodk01NceXVmZW1qpfAg@mail.gmail.com>
- <BANLkTi=w+vwA1Xx0qUx0QXsB8+=nJ0=U+g@mail.gmail.com> <20110427192827.GA6405@dreamer>
- <BANLkTi=g1tJTAuQDm4VaMNhj-f72DTKDrA@mail.gmail.com>
- <Pine.LNX.4.64.1104281022200.1187@cobra.newdream.net>
- <BANLkTinJpnMj0ryhFF1ucVjkPs5NeZ1taQ@mail.gmail.com>
- <Pine.LNX.4.64.1104281047060.1187@cobra.newdream.net>
- <BANLkTikVT0oSB2kcdXrZN58d_BybLY97BA@mail.gmail.com>
- <BANLkTin5eMEyQb=KWL0T5ah1cQ0N0hDARQ@mail.gmail.com>
- <BANLkTimYqRs_FxtgLAi1Qac7dYcmN_i-rg@mail.gmail.com>
- <BANLkTi=auEDiyH=VKZ2HSuW9PO2VvMYj+Q@mail.gmail.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: Object size
+Date: Thu, 28 Apr 2011 13:02:39 -0700
+Message-ID: <1C8C3185A0EB4376832E44733D45DD77@gmail.com>
+References: <4DB9B74A.10806@provocation.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59711 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933110Ab1D1TUg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2011 15:20:36 -0400
-In-Reply-To: <BANLkTi=auEDiyH=VKZ2HSuW9PO2VvMYj+Q@mail.gmail.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:39948 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933316Ab1D1UCm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2011 16:02:42 -0400
+Received: by pzk9 with SMTP id 9so1829873pzk.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 13:02:42 -0700 (PDT)
+In-Reply-To: <4DB9B74A.10806@provocation.net>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Tommi Virtanen <tommi.virtanen@dreamhost.com>, Brian Chrisman <brchrisman@gmail.com>, ceph-devel@vger.kernel.org
+To: Zenon Panoussis <oracle@provocation.net>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, 28 Apr 2011, Colin McCabe wrote:
-> On Thu, Apr 28, 2011 at 11:27 AM, Yehuda Sadeh Weinraub
-> <yehudasa@gmail.com> wrote:
-> > On Thu, Apr 28, 2011 at 11:24 AM, Yehuda Sadeh Weinraub
-> > <yehudasa@gmail.com> wrote:
-> >>>
-> >>> What do you guys think of changing struct ceph_mount_t to struct
-> >>> ceph_mount_info_t?
-> >>>
-> >> I personally don't like sticking a _t prefix to a struct. It's either
-> >> a typedef or a struct.
-> >>
-> > Ahrm.. *postfix*
-> >
-> 
-> I'm ok with removing the _t stuff from our library APIs. But it we'd
-> have to bump up the revision numbers on everything :P
-> 
-> I'm just going to leave this here:
-> 
-> http://ceph.newdream.net/git/?p=ceph-client.git;a=blob;f=Documentation/CodingStyle;h=8bb37237ebd25b19759cc47874c63155406ea28f;hb=HEAD
+On Thursday, April 28, 2011 at 11:51 AM, Zenon Panoussis wrote:
+> What is the current default object size? A paper from 2004 by Sage
+> et al speaks of 1 MB, a later one of 8 MB and
+> http://diaspora.gen.nz/~rodgerd/archives/1219-Ceph.html says 4 MB.
+> Is there a way to configure it? And is there any point in configuring
+> it (I am using ceph to store millions of small files) or would it
+> make no difference?
 
-Ok, I'll bite.  ceph_mount_info_t -> struct ceph_mount_info *, etc.
+The default at this point is 4MB objects, but it's configurable during mkcephfs, and you can change it on new subtrees and files by using the cephfs tool. However, those objects will only be as large as the actual disk space used on them -- if you've got a 2KB file, it will take up 2 KB on disk.
 
-If we do the same on librados it'd be a rev change, yep.  It would also 
-improve compiler warnings.. I was bit last night by
+> I'm trying to understand the relation between data size and actual
+> disk usage. With replication x2 I am seeing a 1:4.4 ratio according
+> to ceph (12222 MB data, 53579 MB used) and even more according to
+> 'du -m' on the ext3 source of the ceph data (9791 MB instead of
+> 12222 MB).
 
-  rados_aio_create_completion(0, 0, 0, &a);
-  rados_aio_write(io_ctx, "a", a, buf, 100, 0);
-vs
-  rados_aio_write(io_ctx, "a", &a, buf, 100, 0);
+The relation between these reports and your data can be a bit fuzzy, though. When looking at the disk space used the OSD is just relying on a df for the mount it's on -- if it's sharing that mount with anything else (eg, the node OS) then it's not distinguishing between OSD data, and data on the disk. Something like that must be going on if you've got a 4.4x ratio. (An example is below. [1]) Based on what you're giving us here:
+1) You have 9791 MB of data in the filesystem.
+2) You have (12222MB - 9791 MB=) 2431MB of metadata maintaining the Ceph tree.
+3) RADOS is using 24444MB of disk space amongst all your OSDs to store this.
+4) Your nodes have other stuff installed to the tune of (29135MB/2=)14567MB or (29135/3=)9711MB per OSD.
 
-because the typedefs are all void*.
+-Greg
 
-sage
+[1]: If I use the vstart script to start up a 1-mon, 1-MDS, 1-OSD cluster on my dev machine, ceph -s on a clean tree gives me the following output:
+2011-04-28 13:24:29.669534 pg v5: 18 pgs: 18 active+clean+degraded; 43 KB data, 12149 MB used, 919 GB / 931 GB avail; 37/74 degraded (50.000%))
 
-> 
-> > 		Chapter 5: Typedefs
-> >
-> > Please don't use things like "vps_t".
-> >
-> > It's a _mistake_ to use typedef for structures and pointers. When you see a
-> >
-> > 	vps_t a;
-> >
-> > in the source, what does it mean?
-> >
-> > In contrast, if it says
-> >
-> > 	struct virtual_container *a;
-> >
-> > you can actually tell what "a" is.
-> >
-> > Lots of people think that typedefs "help readability". Not so. They are
-> > useful only for:
-> > [...]
-> >
-> 
-> I'll come back once the flamewar has settled down :)
-> 
-> Colin
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
+
+
