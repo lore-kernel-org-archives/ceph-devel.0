@@ -1,42 +1,77 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: Data replication not working
-Date: Thu, 28 Apr 2011 09:41:40 -0700
-Message-ID: <BANLkTi=wcxddJTS_yk+7_UEU+_JGEh4qPA@mail.gmail.com>
-References: <1303980121.11285.3.camel@indica.cc.iitb.ac.in>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: Re: libceph API
+Date: Thu, 28 Apr 2011 10:02:15 -0700
+Message-ID: <BANLkTi=g1tJTAuQDm4VaMNhj-f72DTKDrA@mail.gmail.com>
+References: <BANLkTim22eFcMzxL0sB4GRpUZfu7FL3x4A@mail.gmail.com>
+	<Pine.LNX.4.64.1104202200100.26241@cobra.newdream.net>
+	<BANLkTi=DB7sqb9aHmigGiQZWzFAp-jugAA@mail.gmail.com>
+	<BANLkTik6+NewTgWodk01NceXVmZW1qpfAg@mail.gmail.com>
+	<BANLkTi=w+vwA1Xx0qUx0QXsB8+=nJ0=U+g@mail.gmail.com>
+	<20110427192827.GA6405@dreamer>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:33608 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756581Ab1D1Qln convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2011 12:41:43 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id C9700C065
-	for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 09:41:42 -0700 (PDT)
-Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 78CBBC068
-	for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 09:41:42 -0700 (PDT)
-Received: by eyx24 with SMTP id 24so882790eyx.19
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 09:41:40 -0700 (PDT)
-In-Reply-To: <1303980121.11285.3.camel@indica.cc.iitb.ac.in>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:51941 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753956Ab1D1RCQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2011 13:02:16 -0400
+Received: by fxm17 with SMTP id 17so1951700fxm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 10:02:15 -0700 (PDT)
+In-Reply-To: <20110427192827.GA6405@dreamer>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ajit@iitb.ac.in
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Brian Chrisman <brchrisman@gmail.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On Thu, Apr 28, 2011 at 1:42 AM, Ajit K Jena <ajit@iitb.ac.in> wrote:
-> =A0We have a one mon, one mds, and two osd setup. The data
-> =A0stored goes to both the osds. We introduce a third osd.
-> =A0the ceph status shows "osd: 3 up, 3 in" but no data goes
-> =A0into the third osd. This remains the case even if we
-> =A0power off one of the original osds.
-What are you looking at to measure this? Just the OSD diskspace used,
-or something else?
+On Wed, Apr 27, 2011 at 12:28 PM, Tommi Virtanen
+<tommi.virtanen@dreamhost.com> wrote:
+> On Wed, Apr 27, 2011 at 11:49:11AM -0700, Brian Chrisman wrote:
+>> ceph_mount_t is forward declared as a struct in libceph.h.
+>> When referencing that within libceph.h, gcc barfs:
+>> client/libceph.h:32: error: expected =91)=92 before =91*=92 token
+>>
+>> Is libceph.h intended to be used in C-programs, and if so, am I usin=
+g
+>> it incorrectly?
+>> ceph_mount_t is defined as a class in libceph.cc, and I'm unclear on
+>> how that would be translated into a struct for C-programs linking to
+>> libceph.
+>
+> We talked about this on IRC, replying here for others & historical
+> records.
+>
+> The problem is this:
+>
+> struct ceph_mount_t;
+>
+> int ceph_create(ceph_mount_t **cmount, const char * const id);
+>
+> There is no ceph_mount_t. Changing the prototype to
+>
+> int ceph_create(struct ceph_mount_t **cmount, const char * const id);
+>
+> should get things going nicely (as long as you fix up the
+> implementation also).
 
-Did you follow the instructions on the wiki page carefully? Specifying
-the new max_osd?
--Greg
+Yeah, the struct keyword needs to be added for the benefit of C
+clients. Sorry for any confusion.
+
+regards,
+Colin
+
+
+>
+>
+>
+> (And in case someone is thinking about suggesting a typedef, I'm with
+> the other Finn on this one:
+> http://lkml.indiana.edu/hypermail/linux/kernel/0206.1/0402.html
+> )
+>
+> --
+> :(){ :|:&};:
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
