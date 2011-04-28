@@ -1,35 +1,44 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: [PATCH] config: Remove debug output in conf_get
-Date: Thu, 28 Apr 2011 15:03:08 +0200
-Message-ID: <1303995788-31867-1-git-send-email-wido@widodh.nl>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: Data replication not working
+Date: Thu, 28 Apr 2011 09:41:40 -0700
+Message-ID: <BANLkTi=wcxddJTS_yk+7_UEU+_JGEh4qPA@mail.gmail.com>
+References: <1303980121.11285.3.camel@indica.cc.iitb.ac.in>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from hosted.by.pcextreme ([109.72.90.196]:54708 "EHLO
-	logger.ceph.widodh.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1752014Ab1D1NDP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2011 09:03:15 -0400
+Received: from mail.hq.newdream.net ([66.33.206.127]:33608 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756581Ab1D1Qln convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2011 12:41:43 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id C9700C065
+	for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 09:41:42 -0700 (PDT)
+Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 78CBBC068
+	for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 09:41:42 -0700 (PDT)
+Received: by eyx24 with SMTP id 24so882790eyx.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 09:41:40 -0700 (PDT)
+In-Reply-To: <1303980121.11285.3.camel@indica.cc.iitb.ac.in>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Wido den Hollander <wido@widodh.nl>
+To: ajit@iitb.ac.in
+Cc: ceph-devel@vger.kernel.org
 
+On Thu, Apr 28, 2011 at 1:42 AM, Ajit K Jena <ajit@iitb.ac.in> wrote:
+> =A0We have a one mon, one mds, and two osd setup. The data
+> =A0stored goes to both the osds. We introduce a third osd.
+> =A0the ceph status shows "osd: 3 up, 3 in" but no data goes
+> =A0into the third osd. This remains the case even if we
+> =A0power off one of the original osds.
+What are you looking at to measure this? Just the OSD diskspace used,
+or something else?
 
-Signed-off-by: Wido den Hollander <wido@widodh.nl>
----
- src/common/config.cc |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
-
-diff --git a/src/common/config.cc b/src/common/config.cc
-index 695e039..8b4ce85 100644
---- a/src/common/config.cc
-+++ b/src/common/config.cc
-@@ -734,7 +734,6 @@ get_val(const char *key, char **buf, int len) const
-   // In key names, leading and trailing whitespace are not significant.
-   string k(ConfFile::normalize_key_name(key));
- 
--  cout << "get_val(key='" << key << "'): k = '" << k << "'" << std::endl;
-   for (int i = 0; i < NUM_CONFIG_OPTIONS; ++i) {
-     const config_option *opt = &config_optionsp[i];
-     if (strcmp(opt->name, k.c_str()))
--- 
-1.7.0.4
-
+Did you follow the instructions on the wiki page carefully? Specifying
+the new max_osd?
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
