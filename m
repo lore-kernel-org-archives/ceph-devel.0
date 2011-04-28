@@ -1,79 +1,265 @@
 From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: libceph API
-Date: Thu, 28 Apr 2011 10:02:15 -0700
-Message-ID: <BANLkTi=g1tJTAuQDm4VaMNhj-f72DTKDrA@mail.gmail.com>
-References: <BANLkTim22eFcMzxL0sB4GRpUZfu7FL3x4A@mail.gmail.com>
-	<Pine.LNX.4.64.1104202200100.26241@cobra.newdream.net>
-	<BANLkTi=DB7sqb9aHmigGiQZWzFAp-jugAA@mail.gmail.com>
-	<BANLkTik6+NewTgWodk01NceXVmZW1qpfAg@mail.gmail.com>
-	<BANLkTi=w+vwA1Xx0qUx0QXsB8+=nJ0=U+g@mail.gmail.com>
-	<20110427192827.GA6405@dreamer>
+Subject: Re: [PATCH] config: Update sample config with more examples
+Date: Thu, 28 Apr 2011 10:03:09 -0700
+Message-ID: <BANLkTinNV=uif5zpp4tfn9xCro1iN8TBrw@mail.gmail.com>
+References: <1303416459-29471-1-git-send-email-wido@widodh.nl>
+	<BANLkTimWpd6b9+74FTtkOihLbdVPuNu73w@mail.gmail.com>
+	<1303468755.5322.291.camel@wido-laptop.pcextreme.nl>
+	<BANLkTimJHK=J+Arf4jg_JatogfY4sHeTCw@mail.gmail.com>
+	<1303916251.2932.83.camel@wido-desktop>
+	<BANLkTi=r=WQn3ZyEfCJEg5VPyQoz_NWafw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:51941 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:43796 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753956Ab1D1RCQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2011 13:02:16 -0400
-Received: by fxm17 with SMTP id 17so1951700fxm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 10:02:15 -0700 (PDT)
-In-Reply-To: <20110427192827.GA6405@dreamer>
+	with ESMTP id S1753956Ab1D1RDK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Apr 2011 13:03:10 -0400
+Received: by fxm17 with SMTP id 17so1952201fxm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Apr 2011 10:03:09 -0700 (PDT)
+In-Reply-To: <BANLkTi=r=WQn3ZyEfCJEg5VPyQoz_NWafw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Brian Chrisman <brchrisman@gmail.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Colin McCabe <cmccabe@alumni.cmu.edu>, ceph-devel@vger.kernel.org
 
-On Wed, Apr 27, 2011 at 12:28 PM, Tommi Virtanen
-<tommi.virtanen@dreamhost.com> wrote:
-> On Wed, Apr 27, 2011 at 11:49:11AM -0700, Brian Chrisman wrote:
->> ceph_mount_t is forward declared as a struct in libceph.h.
->> When referencing that within libceph.h, gcc barfs:
->> client/libceph.h:32: error: expected =91)=92 before =91*=92 token
+Resending to the list. My previous message bounced because of phone
+email client silliness.
+
+C.
+
+On Wed, Apr 27, 2011 at 11:53 AM, Colin McCabe <cmccabe@alumni.cmu.edu> wrote:
+> Very good point. I think that default could be changed (with a little care),
+> so that log file = "" will work as expected.
+>
+> I'll take a look in a bit.
+>
+> C.
+>
+> On Apr 27, 2011 7:57 AM, "Wido den Hollander" <wido@widodh.nl> wrote:
+>> Hi Colin,
 >>
->> Is libceph.h intended to be used in C-programs, and if so, am I usin=
-g
->> it incorrectly?
->> ceph_mount_t is defined as a class in libceph.cc, and I'm unclear on
->> how that would be translated into a struct for C-programs linking to
->> libceph.
+>> On Fri, 2011-04-22 at 10:42 -0700, Colin McCabe wrote:
+>>> On Fri, Apr 22, 2011 at 3:39 AM, Wido den Hollander <wido@widodh.nl>
+>>> wrote:
+>>> > Hi,
+>>> >
+>>> > On Thu, 2011-04-21 at 14:14 -0700, Colin McCabe wrote:
+>>> >> Looks good. I would leave out the "log dir" stuff, though. That thing
+>>> >> has been deprecated since forever in favor of "log file".
+>>> >
+>>> > Is it really deprecated? A quick search through the code shows it is
+>>> > still there.
+>>> >
+>>> > DoutStreamBuff shows:
+>>> >
+>>> > // If conf->log_file was specified, that takes the highest priority
+>>> > if (!conf->log_file.empty()) {
+>>> > string log_file(normalize_relative(conf->log_file.c_str()));
+>>> > if (conf->log_per_instance) {
+>>> >
+>>> > But why is log_dir still there?
+>>> >
+>>> > But you're right, for regular logging log file should be used. Still,
+>>> > why is log dir still there?
+>>>
+>>> Mainly because of a desire not to break old configuration files. At
+>>> some point we should try to get rid of it, though. Maybe the first
+>>> step is to have a phase where we issue a warning about it.
+>>>
+>>
+>> The "log dir" is still a bit of a pain when you want to fully disable
+>> logging to a file. Although 'log dir' is deprecated, this won't work:
+>>
+>> [global]
+>> log to syslog = true
+>> log file =
+>>
+>> This will result in a fallback to 'log dir' and would keep logging to
+>> files enabled.
+>>
+>> My first patch was correct in that case, if you want to turn of logging
+>> to files, you have to set both to NULL.
+>>
+>> Wido
+>>
+>>> sincerely,
+>>> Colin
+>>>
+>>>
+>>> >
+>>> >>
+>>> >> cheers,
+>>> >> Colin
+>>> >>
+>>> >>
+>>> >> On Thu, Apr 21, 2011 at 1:07 PM, Wido den Hollander <wido@widodh.nl>
+>>> >> wrote:
+>>> >> >
+>>> >> > Signed-off-by: Wido den Hollander <wido@widodh.nl>
+>>> >> > ---
+>>> >> > src/sample.ceph.conf | 77
+>>> >> > ++++++++++++++++++++++++++++++++++++++++++--------
+>>> >> > 1 files changed, 65 insertions(+), 12 deletions(-)
+>>> >> >
+>>> >> > diff --git a/src/sample.ceph.conf b/src/sample.ceph.conf
+>>> >> > index 473114b..67cb5ae 100644
+>>> >> > --- a/src/sample.ceph.conf
+>>> >> > +++ b/src/sample.ceph.conf
+>>> >> > @@ -10,6 +10,22 @@
+>>> >> > ; the current host (e.g., in a setup with a startup.conf on each
+>>> >> > ; node).
+>>> >> >
+>>> >> > +; The variables $type, $id and $name are available to use in paths
+>>> >> > +; $type = The type of daemon, possible values: mon, mds and osd
+>>> >> > +; $id = The ID of the daemon, for mon.alpha, $id will be alpha
+>>> >> > +; $name = $type.$id
+>>> >> > +
+>>> >> > +; For example:
+>>> >> > +; osd.0
+>>> >> > +; $type = osd
+>>> >> > +; $id = 0
+>>> >> > +; $name = osd.0
+>>> >> > +
+>>> >> > +; mon.beta
+>>> >> > +; $type = mon
+>>> >> > +; $id = beta
+>>> >> > +; $name = mon.beta
+>>> >> > +
+>>> >> > ; global
+>>> >> > [global]
+>>> >> > ; enable secure authentication
+>>> >> > @@ -18,17 +34,42 @@
+>>> >> > ; allow ourselves to open a lot of files
+>>> >> > max open files = 131072
+>>> >> >
+>>> >> > - ; set up logging
+>>> >> > - log file = /var/log/ceph/$name.log
+>>> >> > + ; You can change the default log location if you want to
+>>> >> > + ;log dir = /var/log/ceph
+>>> >> > + ;log file = $name.log
+>>> >> > +
+>>> >> > + ; Logging to syslog is also possible
+>>> >> > + ; If you want to disable logging to files, you should empty log
+>>> >> > dir and file
+>>> >> > + ;log to syslog = true
+>>> >> > + ;log dir =
+>>> >> > + ;log file =
+>>> >> > +
+>>> >> > + ; This is the default pid file location
+>>> >> > + ;pid file = /var/run/ceph/$name.pid
+>>> >> >
+>>> >> > - ; set up pid files
+>>> >> > - pid file = /var/run/ceph/$name.pid
+>>> >> > + ; If you want to run a IPv6 cluster, set this to true. Dual-stack
+>>> >> > isn't possible
+>>> >> > + ;ms bind ipv6 = true
+>>> >> >
+>>> >> > ; monitors
+>>> >> > ; You need at least one. You need at least three if you want to
+>>> >> > ; tolerate any node failures. Always create an odd number.
+>>> >> > [mon]
+>>> >> > - mon data = /data/mon$id
+>>> >> > + mon data = /data/$name
+>>> >> > +
+>>> >> > + ; If you are using for example the RADOS Gateway and want to have
+>>> >> > your newly created
+>>> >> > + ; pools a higher replication level, you can set a default
+>>> >> > + ;osd pool default size = 3
+>>> >> > +
+>>> >> > + ; You can also specify a CRUSH rule for new pools
+>>> >> > + ; Wiki:
+>>> >> > http://ceph.newdream.net/wiki/Custom_data_placement_with_CRUSH
+>>> >> > + ;osd pool default crush rule = 0
+>>> >> > +
+>>> >> > + ; Timing is critical for monitors, but if you want to allow the
+>>> >> > clocks to drift a
+>>> >> > + ; bit more, you can specify the max drift.
+>>> >> > + ;mon clock drift allowed = 1
+>>> >> > +
+>>> >> > + ; Tell the monitor to backoff from this warning for 30 seconds
+>>> >> > + ;mon clock drift warn backoff = 30
+>>> >> >
+>>> >> > ; logging, for debugging monitor crashes, in order of
+>>> >> > ; their likelihood of being helpful :)
+>>> >> > @@ -37,15 +78,15 @@
+>>> >> > ;debug paxos = 20
+>>> >> > ;debug auth = 20
+>>> >> >
+>>> >> > -[mon.0]
+>>> >> > +[mon.alpha]
+>>> >> > host = alpha
+>>> >> > mon addr = 192.168.0.10:6789
+>>> >> >
+>>> >> > -[mon.1]
+>>> >> > +[mon.beta]
+>>> >> > host = beta
+>>> >> > mon addr = 192.168.0.11:6789
+>>> >> >
+>>> >> > -[mon.2]
+>>> >> > +[mon.gamma]
+>>> >> > host = gamma
+>>> >> > mon addr = 192.168.0.12:6789
+>>> >> >
+>>> >> > @@ -70,17 +111,25 @@
+>>> >> > ; Define as many as you like.
+>>> >> > [osd]
+>>> >> > ; This is where the btrfs volume will be mounted.
+>>> >> > - osd data = /data/osd$id
+>>> >> > + osd data = /data/$name
+>>> >> >
+>>> >> > ; Ideally, make this a separate disk or partition. A few
+>>> >> > ; hundred MB should be enough; more if you have fast or many
+>>> >> > ; disks. You can use a file under the osd data dir if need be
+>>> >> > - ; (e.g. /data/osd$id/journal), but it will be slower than a
+>>> >> > + ; (e.g. /data/$name/journal), but it will be slower than a
+>>> >> > ; separate disk or partition.
+>>> >> >
+>>> >> > ; This is an example of a file-based journal.
+>>> >> > - osd journal = /data/osd$id/journal
+>>> >> > - osd journal size = 1000 ; journal size, in megabytes
+>>> >> > + osd journal = /data/$name/journal
+>>> >> > + ; Journal size, in megabytes
+>>> >> > + osd journal size = 1000
+>>> >> > +
+>>> >> > + ; If you want to run the journal on a tmpfs, disable DirectIO
+>>> >> > + ;journal dio = false
+>>> >> > +
+>>> >> > + ; You can change the number of recovery operations to speed up
+>>> >> > recovery
+>>> >> > + ; or slow it down if your machines can't handle it
+>>> >> > + ;osd recovery max active = 3
+>>> >> >
+>>> >> > ; osd logging to debug osd issues, in order of likelihood of being
+>>> >> > ; helpful
+>>> >> > @@ -98,6 +147,10 @@
+>>> >> > ; usually fine for basic testing).
+>>> >> > btrfs devs = /dev/sdx
+>>> >> >
+>>> >> > + ; If you want to specify some other mount options, you can do so.
+>>> >> > + ; The default values are rw,noatime
+>>> >> > + ;btrfs options = rw,noatime
+>>> >> > +
+>>> >> > [osd.1]
+>>> >> > host = epsilon
+>>> >> > btrfs devs = /dev/sdy
+>>> >> > --
+>>> >> > 1.7.0.4
+>>> >> >
+>>> >> > --
+>>> >> > To unsubscribe from this list: send the line "unsubscribe
+>>> >> > ceph-devel" in
+>>> >> > the body of a message to majordomo@vger.kernel.org
+>>> >> > More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>> >> >
+>>> >
+>>> >
+>>> > --
+>>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> > in
+>>> > the body of a message to majordomo@vger.kernel.org
+>>> > More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>> >
+>>
+>>
 >
-> We talked about this on IRC, replying here for others & historical
-> records.
->
-> The problem is this:
->
-> struct ceph_mount_t;
->
-> int ceph_create(ceph_mount_t **cmount, const char * const id);
->
-> There is no ceph_mount_t. Changing the prototype to
->
-> int ceph_create(struct ceph_mount_t **cmount, const char * const id);
->
-> should get things going nicely (as long as you fix up the
-> implementation also).
-
-Yeah, the struct keyword needs to be added for the benefit of C
-clients. Sorry for any confusion.
-
-regards,
-Colin
-
-
->
->
->
-> (And in case someone is thinking about suggesting a typedef, I'm with
-> the other Finn on this one:
-> http://lkml.indiana.edu/hypermail/linux/kernel/0206.1/0402.html
-> )
->
-> --
-> :(){ :|:&};:
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
