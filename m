@@ -1,30 +1,39 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Ideas on NSS vs fork?
-Date: Fri, 29 Apr 2011 09:15:31 -0700
-Message-ID: <20110429161531.GB30051@dreamer>
-References: <20110428212902.GA3932@dreamer>
- <BANLkTimF1sLvLuw3tztW8Ee6eLV6vP1-8w@mail.gmail.com>
- <20110429161424.GA30051@dreamer>
+From: Henry Chang <henry.cy.chang@gmail.com>
+Subject: Re: Data replication not working
+Date: Sat, 30 Apr 2011 00:42:09 +0800
+Message-ID: <BANLkTinSNHACNkVQe-VTqZ39yHo1hDHByg@mail.gmail.com>
+References: <1303980121.11285.3.camel@indica.cc.iitb.ac.in>
+	<BANLkTik5CCdVnLhQZGRiig9sZwsnCDzyjg@mail.gmail.com>
+	<1303987194.12689.4.camel@indica.cc.iitb.ac.in>
+	<BANLkTin1UkKe7P4ZDjMsmoMNekCFJum5BA@mail.gmail.com>
+	<BANLkTikuhGnsH2Xr2C4dAPGgvfkS2TW6cQ@mail.gmail.com>
+	<1304065325.27812.24.camel@indica.cc.iitb.ac.in>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:43392 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754891Ab1D2QPb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Apr 2011 12:15:31 -0400
-Content-Disposition: inline
-In-Reply-To: <20110429161424.GA30051@dreamer>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:40727 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759988Ab1D2QmL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Apr 2011 12:42:11 -0400
+Received: by fxm17 with SMTP id 17so2600659fxm.19
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Apr 2011 09:42:09 -0700 (PDT)
+In-Reply-To: <1304065325.27812.24.camel@indica.cc.iitb.ac.in>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
+To: ajit@iitb.ac.in
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, Apr 29, 2011 at 09:14:24AM -0700, Tommi Virtanen wrote:
-> (The Ceph daemons before commit c9825f08 follow #1, that commits makes
-> them follow #2.)
+2011/4/29 Ajit K Jena <ajit@iitb.ac.in>:
+> Hi Henry,
+>
+> Where can I find out about the semantics of the different
+> fields in different maps ? Is there any formal documentation ?
+>
 
-I mean 6eb7e1c0dc6ca6df7e59f813f392a50c728b474e, in branch
-wip-nss-vs-fork currently.
+Hi Ajit,
+I guess there is no formal documentation describing the fields of the
+various maps outside the source code. You may ask the particular ones
+you are interested on IRC or here. :)
 
--- 
-:(){ :|:&};:
+Cheers,
+Henry
