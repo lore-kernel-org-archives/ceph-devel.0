@@ -1,69 +1,48 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] hadoop: cleanups for libceph type update
-Date: Fri, 29 Apr 2011 08:51:44 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1104290851410.31733@cobra.newdream.net>
-References: <1304090039-14246-1-git-send-email-jaschut@sandia.gov>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: Ideas on NSS vs fork?
+Date: Fri, 29 Apr 2011 09:14:24 -0700
+Message-ID: <20110429161424.GA30051@dreamer>
+References: <20110428212902.GA3932@dreamer>
+ <BANLkTimF1sLvLuw3tztW8Ee6eLV6vP1-8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51222 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753993Ab1D2PvY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Apr 2011 11:51:24 -0400
-In-Reply-To: <1304090039-14246-1-git-send-email-jaschut@sandia.gov>
+Received: from mail.hq.newdream.net ([66.33.206.127]:44670 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753493Ab1D2QOY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Apr 2011 12:14:24 -0400
+Content-Disposition: inline
+In-Reply-To: <BANLkTimF1sLvLuw3tztW8Ee6eLV6vP1-8w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
+To: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-Applied, thanks!
+On Thu, Apr 28, 2011 at 11:02:57PM -0700, Colin Patrick McCabe wrote:
+> The question we need to answer is really whether forking somehow
+> destroys the state of the parent process, even if the child thread
+> never runs any libNSS code. If the answer is no, which is very likely,
+> then essentially our situation is unchanged.
 
-On Fri, 29 Apr 2011, Jim Schutt wrote:
+For NSS, only the pid that ran ceph::crypto::init() has a working
+crypto library.
 
-> 
-> Signed-off-by: Jim Schutt <jaschut@sandia.gov>
-> ---
->  src/client/hadoop/CephFSInterface.cc |    6 +++---
->  1 files changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/src/client/hadoop/CephFSInterface.cc b/src/client/hadoop/CephFSInterface.cc
-> index 38c9be9..dea082b 100644
-> --- a/src/client/hadoop/CephFSInterface.cc
-> +++ b/src/client/hadoop/CephFSInterface.cc
-> @@ -13,7 +13,7 @@ union ceph_mount_union_t {
->    jlong cjlong;
->  };
->  
-> -static void set_struct ceph_mount_info(JNIEnv *env, jobject obj, struct ceph_mount_info *cmount)
-> +static void set_ceph_mount_info(JNIEnv *env, jobject obj, struct ceph_mount_info *cmount)
->  {
->    jclass cls = env->GetObjectClass(obj);
->    jfieldID fid = env->GetFieldID(cls, "cmount", "Ljava/lang/Long;");
-> @@ -105,7 +105,7 @@ JNIEXPORT jboolean JNICALL Java_org_apache_hadoop_fs_ceph_CephTalker_ceph_1initi
->      ceph_set_default_preferred_pg(cmount, ceph_get_local_osd(cmount));
->    }
->  
-> -  set_ceph_mount_t(env, obj, cmount);
-> +  set_ceph_mount_info(env, obj, cmount);
->    return true;
->  }
->  
-> @@ -609,7 +609,7 @@ JNIEXPORT jboolean JNICALL Java_org_apache_hadoop_fs_ceph_CephTalker_ceph_1kill_
->    if (!cmount)
->      return true;
->    ceph_shutdown(cmount);
-> -  set_ceph_mount_t(env, obj, NULL);
-> +  set_ceph_mount_info(env, obj, NULL);
->    return true;
->  }
->  
-> -- 
-> 1.6.6
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+1. If you init before forking, any forked processes will have their
+   NSS return errors, with no way to fix that. The parent keeps
+   working.
+
+2. If you init after forking, the parent never even tries to init crypto,
+   the child does and gets a perfectly working crypto library.
+
+2b. As an extension of above, the parent *could* init crypto after it
+    has already forked off the child. We just have no need for that.
+
+
+None of these make it possible for the child to wreck the NSS state in
+the parent.
+
+(The Ceph daemons before commit c9825f08 follow #1, that commits makes
+them follow #2.)
+
+-- 
+:(){ :|:&};:
