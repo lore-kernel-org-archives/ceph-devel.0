@@ -1,242 +1,116 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: All osd are marked down and out...
-Date: Fri, 29 Apr 2011 10:21:54 +0200
-Message-ID: <1304065314.2932.102.camel@wido-desktop>
-References: <BANLkTikmS+PesggpexM+MDnzVE6R2c8pEA@mail.gmail.com>
+From: Ajit K Jena <ajit@iitb.ac.in>
+Subject: Re: Data replication not working
+Date: Fri, 29 Apr 2011 13:52:05 +0530
+Message-ID: <1304065325.27812.24.camel@indica.cc.iitb.ac.in>
+References: <1303980121.11285.3.camel@indica.cc.iitb.ac.in>
+	 <BANLkTik5CCdVnLhQZGRiig9sZwsnCDzyjg@mail.gmail.com>
+	 <1303987194.12689.4.camel@indica.cc.iitb.ac.in>
+	 <BANLkTin1UkKe7P4ZDjMsmoMNekCFJum5BA@mail.gmail.com>
+	 <BANLkTikuhGnsH2Xr2C4dAPGgvfkS2TW6cQ@mail.gmail.com>
+Reply-To: ajit@iitb.ac.in
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:48820 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757563Ab1D2IVn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Apr 2011 04:21:43 -0400
-In-Reply-To: <BANLkTikmS+PesggpexM+MDnzVE6R2c8pEA@mail.gmail.com>
+Received: from smtp1.iitb.ac.in ([59.162.23.13]:57431 "HELO smtp1.iitb.ac.in"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1753927Ab1D2IWI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 29 Apr 2011 04:22:08 -0400
+In-Reply-To: <BANLkTikuhGnsH2Xr2C4dAPGgvfkS2TW6cQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: AnnyRen <annyren6@gmail.com>
+To: Henry Chang <henry.cy.chang@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi,
+Hi Henry,
 
-On Fri, 2011-04-29 at 15:20 +0800, AnnyRen wrote:
-> Hi,
-> 
-> I Set up a Ceph environment with 3 mon, 2 mds and 30 osd,
-> Recently, we are testing the stalibility of mon,
-> 
-> The following are my test steps:
-> 1. on MON1(where mon.0 running):
->     -> ceph mon remove 0
-> 
-> 2. on MON2 (where mon.1 running)
->     --> ceph mon add 0 192.268.200.181:6789 (mon.0 ip:port)
-> 
-> 3. on MON2:  rsync
->     --> rsync -av /data1/mon1/ MON1:/data1/mon0
-> 
-> 4. on MON1: start mon.0 daemon
->    --> cmon -i 0 -c /etc/ceph/ceph.conf
+Where can I find out about the semantics of the different
+fields in different maps ? Is there any formal documentation ?
 
-I'm missing what you did here? You say you have 3 monitors, but here you
-see to have two monitors?
+Pl suggest.
 
-And why did you rsync your data from MON2 to MON1? If a monitor has been
-down for a while you don't have to sync the data.
+--ajit
 
-What were you trying to achieve here? Expand the number of monitors? If
-so, please refer to
-http://ceph.newdream.net/wiki/Monitor_cluster_expansion
-
+On Fri, 2011-04-29 at 10:56 +0800, Henry Chang wrote:
+> Ahh... After checking your ceph.conf, I think I see the problem. The
+> osd ids in your ceph.conf are 1,2,3 but in your crushmap, they are
+> 0,1,2. That's why the data never go to osd3.
 > 
-> 5. Using 'ceph -w' to watch the message
-> 
-> I saw osd 30 , 30 up, 30 in...
-> 
-> 
-> but later, all the osd are marked down and out....
-
-Are you sure the OSD processes are still running?
-
-If I read your command sequence correctly it could be that all your
-OSD's got cut off from the cluster if not all three monitors were in the
-monmap from the time the OSD's started. By removing the first monitor
-and adding the second one afterwards it could be that you cut off the
-monitors.
-
-Could you sent your ceph.conf?
-
-Wido
-
-> 
-> 2011-04-29 06:51:57.309468 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 0.
-> Marking down!
-> 2011-04-29 06:51:57.309499 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 1.
-> Marking down!
-> 2011-04-29 06:51:57.309513 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 2.
-> Marking down!
-> 2011-04-29 06:51:57.309523 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 3.
-> Marking down!
-> 2011-04-29 06:51:57.309532 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 4.
-> Marking down!
-> 2011-04-29 06:51:57.309541 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 5.
-> Marking down!
-> 2011-04-29 06:51:57.309550 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 6.
-> Marking down!
-> 2011-04-29 06:51:57.309558 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 7.
-> Marking down!
-> 2011-04-29 06:51:57.309567 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 8.
-> Marking down!
-> 2011-04-29 06:51:57.309576 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd 9.
-> Marking down!
-> 2011-04-29 06:51:57.309585 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 10. Marking down!
-> 2011-04-29 06:51:57.309594 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 11. Marking down!
-> 2011-04-29 06:51:57.309603 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 12. Marking down!
-> 2011-04-29 06:51:57.309613 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 13. Marking down!
-> 2011-04-29 06:51:57.309622 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 14. Marking down!
-> 2011-04-29 06:51:57.309631 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 15. Marking down!
-> 2011-04-29 06:51:57.309648 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 16. Marking down!
-> 2011-04-29 06:51:57.309657 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 17. Marking down!
-> 2011-04-29 06:51:57.309666 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 18. Marking down!
-> 2011-04-29 06:51:57.309674 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 19. Marking down!
-> 2011-04-29 06:51:57.309682 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 20. Marking down!
-> 2011-04-29 06:51:57.309691 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 21. Marking down!
-> 2011-04-29 06:51:57.309699 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 22. Marking down!
-> 2011-04-29 06:51:57.309707 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 23. Marking down!
-> 2011-04-29 06:51:57.309716 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 24. Marking down!
-> 2011-04-29 06:51:57.309724 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 25. Marking down!
-> 2011-04-29 06:51:57.309732 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 26. Marking down!
-> 2011-04-29 06:51:57.309741 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 27. Marking down!
-> 2011-04-29 06:51:57.309749 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 28. Marking down!
-> 2011-04-29 06:51:57.309757 7fb17da56710 mon.0@0(leader).osd e148
-> OSDMonitor::handle_osd_timeouts: never got MOSDPGStat info from osd
-> 29. Marking down!
-> 
-> 2011-04-29 06:57:02.359021 7fb17da56710 log [INF] : osd0 out (down for
-> 304.884685)
-> 2011-04-29 06:57:02.359070 7fb17da56710 log [INF] : osd1 out (down for
-> 304.884684)
-> 2011-04-29 06:57:02.359090 7fb17da56710 log [INF] : osd2 out (down for
-> 304.884684)
-> 2011-04-29 06:57:02.359109 7fb17da56710 log [INF] : osd3 out (down for
-> 304.884683)
-> 2011-04-29 06:57:02.359126 7fb17da56710 log [INF] : osd4 out (down for
-> 304.884683)
-> 2011-04-29 06:57:02.359145 7fb17da56710 log [INF] : osd5 out (down for
-> 304.884682)
-> 2011-04-29 06:57:02.359162 7fb17da56710 log [INF] : osd6 out (down for
-> 304.884682)
-> 2011-04-29 06:57:02.359179 7fb17da56710 log [INF] : osd7 out (down for
-> 304.884682)
-> 2011-04-29 06:57:02.359197 7fb17da56710 log [INF] : osd8 out (down for
-> 304.884682)
-> 2011-04-29 06:57:02.359215 7fb17da56710 log [INF] : osd9 out (down for
-> 304.884682)
-> 2011-04-29 06:57:02.359234 7fb17da56710 log [INF] : osd10 out (down
-> for 304.884681)
-> 2011-04-29 06:57:02.359252 7fb17da56710 log [INF] : osd11 out (down
-> for 304.884681)
-> 2011-04-29 06:57:02.359270 7fb17da56710 log [INF] : osd12 out (down
-> for 304.884681)
-> 2011-04-29 06:57:02.359289 7fb17da56710 log [INF] : osd13 out (down
-> for 304.884680)
-> 2011-04-29 06:57:02.359308 7fb17da56710 log [INF] : osd14 out (down
-> for 304.884680)
-> 2011-04-29 06:57:02.359328 7fb17da56710 log [INF] : osd15 out (down
-> for 304.884680)
-> 2011-04-29 06:57:02.359347 7fb17da56710 log [INF] : osd16 out (down
-> for 304.884679)
-> 2011-04-29 06:57:02.359367 7fb17da56710 log [INF] : osd17 out (down
-> for 304.884679)
-> 2011-04-29 06:57:02.359386 7fb17da56710 log [INF] : osd18 out (down
-> for 304.884679)
-> 2011-04-29 06:57:02.359406 7fb17da56710 log [INF] : osd19 out (down
-> for 304.884679)
-> 2011-04-29 06:57:02.359425 7fb17da56710 log [INF] : osd20 out (down
-> for 304.884678)
-> 2011-04-29 06:57:02.359458 7fb17da56710 log [INF] : osd21 out (down
-> for 304.884678)
-> 2011-04-29 06:57:02.359480 7fb17da56710 log [INF] : osd22 out (down
-> for 304.884678)
-> 2011-04-29 06:57:02.359499 7fb17da56710 log [INF] : osd23 out (down
-> for 304.884677)
-> 2011-04-29 06:57:02.359518 7fb17da56710 log [INF] : osd24 out (down
-> for 304.884677)
-> 2011-04-29 06:57:02.359538 7fb17da56710 log [INF] : osd25 out (down
-> for 304.884677)
-> 2011-04-29 06:57:02.359557 7fb17da56710 log [INF] : osd26 out (down
-> for 304.884676)
-> 2011-04-29 06:57:02.359577 7fb17da56710 log [INF] : osd27 out (down
-> for 304.884676)
-> 2011-04-29 06:57:02.359596 7fb17da56710 log [INF] : osd28 out (down
-> for 304.884676)
-> 2011-04-29 06:57:02.359616 7fb17da56710 log [INF] : osd29 out (down
-> for 304.884675)
+> 2011/4/29 Henry Chang <henry.cy.chang@gmail.com>:
+> > Hmm...... The crushmap looks fine to me. Could you have a pg dump (by
+> > ceph pg dump -o -) and check the pg membership to see if the third osd
+> > is responsible for some pgs? And as Greg asked, it would be more
+> > helpful if you could provide more info/description about this problem.
+> >
+> > Thanks,
+> > Henry
+> >
+> > 2011/4/28 Ajit K Jena <ajit@iitb.ac.in>:
+> >> Hi Henry,
+> >>
+> >> Thanks for your quick reply. I believe our crushmap is
+> >> updated correctly to take care of osd node failures. I
+> >> am attaching the text version of the crushmap with this
+> >> mail. Pl help us find the mistake if any.
+> >>
+> >> Regards.
+> >>
+> >> --ajit
+> >>
+> >>
+> >> On Thu, 2011-04-28 at 17:10 +0800, Henry Chang wrote:
+> >>> 2011/4/28 Ajit K Jena <ajit@iitb.ac.in>:
+> >>> > Hi All,
+> >>> >
+> >>> > We have been experimenting with ceph since version 0.24 and
+> >>> > found one important issue that is not resolved (or may be
+> >>> > we don't know how to configure properly).
+> >>> >
+> >>> > I will talk about 0.27 since that is the latest release:
+> >>> >
+> >>> >  We have a one mon, one mds, and two osd setup. The data
+> >>> >  stored goes to both the osds. We introduce a third osd.
+> >>> >  the ceph status shows "osd: 3 up, 3 in" but no data goes
+> >>> >  into the third osd. This remains the case even if we
+> >>> >  power off one of the original osds.
+> >>> >
+> >>> > Data reliability thru replication is one of the major goals
+> >>> > of ceph. I am wondering as to what we might be missing to
+> >>> > get this feature going. I am attaching the configuration
+> >>> > file.
+> >>> >
+> >>> > Pl help us solve this problem.
+> >>> >
+> >>> > Regards.
+> >>> >
+> >>> > --ajit
+> >>> >
+> >>>
+> >>> Hi Ajit,
+> >>>
+> >>> The symptom looks like the crushmap has not been updated after you
+> >>> introduced the third osd, so the data never goes into it. If that is
+> >>> the case, you may refer to the wiki page
+> >>> (http://ceph.newdream.net/wiki/OSD_cluster_expansion/contraction#Include_the_new_OSD_in_the_data_placement)
+> >>> to adjust the crushmap of your cluster.
+> >>>
+> >>> Cheers,
+> >>> --
+> >>> Henry
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >>> the body of a message to majordomo@vger.kernel.org
+> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> >
+> >
+> >
+> > --
+> > Henry Chang
+> >
 > 
 > 
-> root@MON1:~# ceph -s
-> 2011-04-29 07:17:00.226534    pg v3025: 7920 pgs: 7920 active+clean;
-> 3650 MB data, 0 KB used, 0 KB / 0 KB avail
-> 2011-04-29 07:17:00.239044   mds e42: 1/1/1 up {0=up:active}, 1 up:standby
-> 2011-04-29 07:17:00.239080   osd e151: 30 osds: 0 up, 0 in
-> 2011-04-29 07:17:00.239175   log 2011-04-29 06:57:02.359625 mon0
-> 192.168.200.181:6789/0 71 : [INF] osd29 out (down for 304.884675)
-> 2011-04-29 07:17:00.239233   mon e3: 3 mons at
-> {0=192.168.200.181:6789/0,1=192.168.200.182:6789/0,2=192.168.200.183:6789/0}
 > 
-> 
-> Anyone knows how to fix my environment to make ceph be health?
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
