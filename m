@@ -1,142 +1,86 @@
 From: "doki74216@gmail.com" <doki74216@gmail.com>
-Subject: Re: The stability of MDS
-Date: Mon, 2 May 2011 11:35:36 +0800
-Message-ID: <BANLkTim6yAcM-3q6pRCjd95b6DDyxGQWkQ@mail.gmail.com>
-References: <BANLkTik8uQeKVD-h2kQiVkdDc+_pf9PYZQ@mail.gmail.com>
-	<Pine.LNX.4.64.1104270858300.27415@cobra.newdream.net>
+Subject: Re: To upgrade the ceph version(v0.26)
+Date: Mon, 2 May 2011 11:36:49 +0800
+Message-ID: <BANLkTikW-bunLzZiogBJMBSL-EqX+fLTnA@mail.gmail.com>
+References: <BANLkTin3Cqw0=_yy2EQjNgk41_GAT6KQZA@mail.gmail.com>
+	<BANLkTinaXFoHmdYaMr8iH-RgSqyFv=jz0A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:47143 "EHLO
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:49969 "EHLO
 	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752082Ab1EBDfh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 May 2011 23:35:37 -0400
-Received: by pzk9 with SMTP id 9so2881591pzk.19
-        for <ceph-devel@vger.kernel.org>; Sun, 01 May 2011 20:35:36 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1104270858300.27415@cobra.newdream.net>
+	with ESMTP id S1752082Ab1EBDnR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 May 2011 23:43:17 -0400
+Received: by pzk9 with SMTP id 9so2883178pzk.19
+        for <ceph-devel@vger.kernel.org>; Sun, 01 May 2011 20:43:17 -0700 (PDT)
+In-Reply-To: <BANLkTinaXFoHmdYaMr8iH-RgSqyFv=jz0A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: Ceph <ceph-devel@vger.kernel.org>
 
-Thanks for your help!^^
-I am very appreciate.
+Thanks for your help!
+I am very appreciate^^
 
-
-2011/4/28 Sage Weil <sage@newdream.net>:
-> On Wed, 27 Apr 2011, doki74216@gmail.com wrote:
->> Dear developers
+2011/4/11 Gregory Farnum <gregory.farnum@dreamhost.com>:
+> On Thu, Apr 7, 2011 at 7:16 PM, doki74216@gmail.com <doki74216@gmail.=
+com> wrote:
+>> Hi,
 >>
->> I am testing the reliability of MDS in Ceph File System.
->> As we know, the default setting, there are one active MDS and one st=
-andby MDS.
->> I want to test the reliability of MDS.
->> Here is my testing scenario:
->> As easy to understand, here I assume the active MDS as mds0 and the
->> standby one is mds1.
->> I write =A0data and =A0stop the mds0 daemon by "ceph mds stop 0" at =
-the same time.
->> Will the standby mds1 change its status to active?
->> I think the system should be normal and the data should not loss eve=
-n
->> though there is just one MDS.
->> But there are many problem I met....><
+>> MY current version is v0.24.3, I want to upgrade version to v 0.26.
+>> And my =A0Linux OS is Fedora 14.
 >>
->> (1) I want to know which mds is active and standby.
->> =A0 =A0 =A0But there are different answer when I type different comm=
-ands.
+>> I want to know my step is correctly or not?
+>> Here is my upgraded steps:
+>> 1) We stop the current system (v0.24.3)by "/etc/init.d/ceph -a stop =
+"
+>> 2) We start to download the newest version(v0.26) and install it.
+>> 3) Then we mkcephfs (by "mkcephfs -c /etc/ceph/ceph.conf --allhosts =
+--mkbtrfs
+>> -k keyring.bin") and start it(by " /etc/init.d/init-ceph -a -c
+>> /etc/ceph/ceph.conf start").
 >>
->> 1. When I type "ceph mds stat".
->> =A0 =A0 It shows: (0=3Dup: active), 1 up: standby
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0^^^^^^^^^^^^^^^^^^^^^^^^^^^^^=
-^^ Does it means mds0
+>> But there's a problem I met when I was started the Ceph.
+>> The system stops running and it shows the error messages as shown be=
+low:
+>>
+>>
+>> =3D=3D=3D mds.0 =3D=3D=3D
+>> Starting Ceph mds0 on host4...
+>> =A0** WARNING: Ceph is still under heavy development, and is only su=
+itable for **
+>> =A0** =A0 =A0 =A0 =A0 =A0testing and review. =A0Do not trust it with=
+ important data. =A0 =A0 =A0 **
+>> terminate called after throwing an instance of 'ceph::buffer::end_of=
+_buffer'
+>> =A0what(): =A0buffer::end_of_buffer
+>> bash: line 1: 24409 Segmentation fault =A0 =A0 =A0(core dumped)
+>> /usr/local/bin/cmds -i 0 -c /tmp/ceph.conf.5135
+>> failed: 'ssh host4 =A0/usr/local/bin/cmds -i 0 -c /tmp/ceph.conf.513=
+5 '
 >
-> Right, the 0 means mds0.
+> Hmm. That's not something I'd expect to see on startup, especially
+> with a fresh filesystem. Can you get the backtrace from gdb?
 >
->> is active and mds1 is standby ?
->> 2.When I type "ceph mds dump -o -"
->> =A0 =A0 It shows: =A0mds0 is standby and mds1 is active.
->>
->> My question is: Why there are different status about mds0 and mds1?
->> Which one is correct?
+>> The second question is when we upgrate the ceph successfully.
+>> Is there any tool to transfer the existing data (which from the old
+>> ceph system) to the newest system?
+>> Because we thought the data in the older version(eg. 0.24.3) is
+>> slightly different from the newer version(eg. 0.26)?
+>> I want to know the data will be still correctly?
+> The on-disk format doesn't change too often and we try and keep it
+> backwards compatible -- you should be able to start up new daemons on
+> old data and in the worst case they will slowly upgrade it. If this
+> doesn't work then there's a bug somewhere.
+> So, no, you should not lose your data.
 >
-> It sounds like you named the MDS's with numeric identifiers. =A0You s=
-hould
-> use non-numeric names to avoid this confusion, like mds.a and mds.b. =
-=A0The
-> numeric role/rank (mds0, mds1) is assigned to cmds instances dynamica=
-lly
-> based on who is up and needed in which role at the time.
->
->> (2) I want to know the issue about stoping the active mds.
->> =A0 =A0 =A0If the command which =A0"ceph mds stat" can show the acti=
-ve mds correctly,
->> =A0 =A0 =A0the active mds must be mds0 and the other mds1 is standby=
-=2E
->> =A0 =A0 =A0So I type"ceph mds stop 0".
->> =A0 =A0 =A0It shows: =A0?telling mds0 192.168.200.185:6800/14819 to =
-stop?(0)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0^^^^^^^^^^^^^^^^^^ mds1's IP.
->> 1. Why it shows the system stoping mds0 but mds1's IP ?
->
-> The 'stop' command takes the dynamic role, not the name.
->
-> Hope this clears it up!
-> sage
->
->
->>
->> 2. When I type "ceph -w", here is the log:
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> mds e43: 1/1/1 up {0=3Dup:active}, 1 up standby
->> mds e44: 1/1/1 up {0=3Dup:stoping}, 1 up standby
->> mds e45: 1/1/1 up {0=3Dup:replay}
->> mds e46: 1/1/1 up {0=3Dup:reconnect}
->> mds e47: 1/1/1 up {0=3Dup:rejoin}
->> mds e44: 1/1/1 up {0=3Dup:active}
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> >From the log, which MDS does the system stop?
->> My command =A0which is"ceph mds stop 0", but the log should not be {=
-1=3Dup:active}?
->> It really confuse me...
->>
->> 3. When I type"ceph mds dump ?o ?", here is the log:
->> =A0 =A0 4920: =A0 192.168.200.184:6800/30000 ?0? mds0.12 up:active s=
-eq 40828
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0^^^^^^^^^^^^^^^^^^^ mds0's IP
->> Why does the system leave the mds0?
->>
->> Please help me solving these problem, I am very confused...
->> Thanks a lot~~~^^
->>
->>
->> By the way, this is my testing =A0environment :
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> I set 7 servers which include 3 MONs(host1 host2 host3), 2 MDSs(host=
-4
->> host5) and 2 OSDes(host6 host7).
->> The version ceph 0.26 is in my system.
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> --
->> Best Regards,
->> Stefanie Chen
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
->>
+> However, in the list of steps you took, you ran mkcephfs, and that di=
+d
+> kill all your data (I thought there were several warnings about this
+> when using the tool?). Running mkcephfs is only necessary when
+> creating the filesystem, not when upgrading it!
+> -Greg
 >
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
