@@ -1,87 +1,95 @@
-From: "doki74216@gmail.com" <doki74216@gmail.com>
-Subject: Re: To upgrade the ceph version(v0.26)
-Date: Mon, 2 May 2011 11:36:49 +0800
-Message-ID: <BANLkTikW-bunLzZiogBJMBSL-EqX+fLTnA@mail.gmail.com>
-References: <BANLkTin3Cqw0=_yy2EQjNgk41_GAT6KQZA@mail.gmail.com>
-	<BANLkTinaXFoHmdYaMr8iH-RgSqyFv=jz0A@mail.gmail.com>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: Object size
+Date: Mon, 2 May 2011 09:09:36 -0700
+Message-ID: <BANLkTimJVO281ou=G3y-SR7CHW54qH4iyQ@mail.gmail.com>
+References: <4DB9B74A.10806@provocation.net>
+	<1C8C3185A0EB4376832E44733D45DD77@gmail.com>
+	<4DB9FE83.4090102@provocation.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:49969 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752082Ab1EBDnR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 May 2011 23:43:17 -0400
-Received: by pzk9 with SMTP id 9so2883178pzk.19
-        for <ceph-devel@vger.kernel.org>; Sun, 01 May 2011 20:43:17 -0700 (PDT)
-In-Reply-To: <BANLkTinaXFoHmdYaMr8iH-RgSqyFv=jz0A@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:43876 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754250Ab1EBQJi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2011 12:09:38 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 596A3C065
+	for <ceph-devel@vger.kernel.org>; Mon,  2 May 2011 09:09:38 -0700 (PDT)
+Received: from mail-ew0-f46.google.com (mail-ew0-f46.google.com [209.85.215.46])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 08723C063
+	for <ceph-devel@vger.kernel.org>; Mon,  2 May 2011 09:09:37 -0700 (PDT)
+Received: by ewy4 with SMTP id 4so1800347ewy.19
+        for <ceph-devel@vger.kernel.org>; Mon, 02 May 2011 09:09:36 -0700 (PDT)
+In-Reply-To: <4DB9FE83.4090102@provocation.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: Ceph <ceph-devel@vger.kernel.org>
+To: Zenon Panoussis <oracle@provocation.net>
+Cc: ceph-devel@vger.kernel.org
 
-Thanks for your help!
-I am very appreciate^^
+On Thu, Apr 28, 2011 at 4:55 PM, Zenon Panoussis <oracle@provocation.ne=
+t> wrote:
+>
+> On 04/28/2011 10:02 PM, Gregory Farnum wrote:
+>
+> [various explanations]
+>
+> Thanks Greg, that's very helpful towards graspings ceph's workings. I=
+'ll
+> put it in the wiki.
+>
+>> The relation between these reports and your data can be a bit fuzzy,
+>> though. When looking at the disk space used the OSD is just relying =
+on
+>> a df for the mount it's on -- if it's sharing that mount with anythi=
+ng
+>> else (eg, the node OS) then it's not distinguishing between OSD data=
+,
+>> and data on the disk. Something like that must be going on if you've
+>> got a 4.4x ratio. (An example is below. [1]) Based on what you're gi=
+ving
+>> us here:
+>
+>> 1) You have 9791 MB of data in the filesystem.
+>> 2) You have (12222MB - 9791 MB=3D) 2431MB of metadata maintaining th=
+e Ceph tree.
+>> 3) RADOS is using 24444MB of disk space amongst all your OSDs to sto=
+re this.
+>> 4) Your nodes have other stuff installed to the tune of (29135MB/2=3D=
+)14567MB or (29135/3=3D)9711MB per OSD.
+>
+> 1 and 3 are correct. 2 is presumably correct; it makes perfect sense =
+and
+> there's no reason to question it. 4 is not correct:
+>
+> # df -m
+> [...]
+> /dev/mapper/sda6 =A0 =A0 =A0 =A0232003 =A0 =A0 26913 =A0 =A0191832 =A0=
+13% /mnt/osd
+>
+> # grep /mnt/osd /etc/ceph/ceph.conf
+> =A0 =A0 =A0 =A0osd data =3D /mnt/osd
+>
+> # ls -a /mnt/osd/
+> . =A0.. =A0ceph_fsid =A0current =A0fsid =A0lost+found =A0magic =A0who=
+ami
+>
+> So the OSD lives in its own exclusive partition and nothing else uses=
+ that
+> partition. The other node is done the same way. The "53579 MB used" r=
+eported
+> by ceph matches the aggregated "Used" output of df -m on both nodes. =
+And
+> I checked, lost+found is empty on both. Something here is trying to b=
+e elusive
+> (and is succeeding).
 
-2011/4/11 Gregory Farnum <gregory.farnum@dreamhost.com>:
-> On Thu, Apr 7, 2011 at 7:16 PM, doki74216@gmail.com <doki74216@gmail.=
-com> wrote:
->> Hi,
->>
->> MY current version is v0.24.3, I want to upgrade version to v 0.26.
->> And my =A0Linux OS is Fedora 14.
->>
->> I want to know my step is correctly or not?
->> Here is my upgraded steps:
->> 1) We stop the current system (v0.24.3)by "/etc/init.d/ceph -a stop =
-"
->> 2) We start to download the newest version(v0.26) and install it.
->> 3) Then we mkcephfs (by "mkcephfs -c /etc/ceph/ceph.conf --allhosts =
---mkbtrfs
->> -k keyring.bin") and start it(by " /etc/init.d/init-ceph -a -c
->> /etc/ceph/ceph.conf start").
->>
->> But there's a problem I met when I was started the Ceph.
->> The system stops running and it shows the error messages as shown be=
-low:
->>
->>
->> =3D=3D=3D mds.0 =3D=3D=3D
->> Starting Ceph mds0 on host4...
->> =A0** WARNING: Ceph is still under heavy development, and is only su=
-itable for **
->> =A0** =A0 =A0 =A0 =A0 =A0testing and review. =A0Do not trust it with=
- important data. =A0 =A0 =A0 **
->> terminate called after throwing an instance of 'ceph::buffer::end_of=
-_buffer'
->> =A0what(): =A0buffer::end_of_buffer
->> bash: line 1: 24409 Segmentation fault =A0 =A0 =A0(core dumped)
->> /usr/local/bin/cmds -i 0 -c /tmp/ceph.conf.5135
->> failed: 'ssh host4 =A0/usr/local/bin/cmds -i 0 -c /tmp/ceph.conf.513=
-5 '
->
-> Hmm. That's not something I'd expect to see on startup, especially
-> with a fresh filesystem. Can you get the backtrace from gdb?
->
->> The second question is when we upgrate the ceph successfully.
->> Is there any tool to transfer the existing data (which from the old
->> ceph system) to the newest system?
->> Because we thought the data in the older version(eg. 0.24.3) is
->> slightly different from the newer version(eg. 0.26)?
->> I want to know the data will be still correctly?
-> The on-disk format doesn't change too often and we try and keep it
-> backwards compatible -- you should be able to start up new daemons on
-> old data and in the worst case they will slowly upgrade it. If this
-> doesn't work then there's a bug somewhere.
-> So, no, you should not lose your data.
->
-> However, in the list of steps you took, you ran mkcephfs, and that di=
-d
-> kill all your data (I thought there were several warnings about this
-> when using the tool?). Running mkcephfs is only necessary when
-> creating the filesystem, not when upgrading it!
-> -Greg
->
+All right, a few other things.
+1) Are you using snapshots? And what's the backing filesystem?
+2) Can you run 'ceph pg dump -o -' and give us the output? That's
+where the numbers are collated from, so hopefully we can see something
+useful in there.
+-Greg
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
