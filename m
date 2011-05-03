@@ -1,55 +1,86 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: rbd export from corrupted cluster
-Date: Mon, 2 May 2011 14:49:26 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1105021445460.14270@cobra.newdream.net>
-References: <BANLkTi=nkcY5FYi2DGPP-aE3S8z457C8Pw@mail.gmail.com>
+From: "doki74216@gmail.com" <doki74216@gmail.com>
+Subject: Re: How to reduce active mds number
+Date: Tue, 3 May 2011 10:07:01 +0800
+Message-ID: <BANLkTi=BR6tDMjm_cZD6beBQ_VB4Ojj1gw@mail.gmail.com>
+References: <BANLkTikGYbYnWQfPPMFo3spsuzOq315m=Q@mail.gmail.com>
+	<Pine.LNX.4.64.1104220845110.15351@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54794 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756698Ab1EBVs6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2011 17:48:58 -0400
-In-Reply-To: <BANLkTi=nkcY5FYi2DGPP-aE3S8z457C8Pw@mail.gmail.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:49752 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751592Ab1ECCHC convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 May 2011 22:07:02 -0400
+Received: by pzk9 with SMTP id 9so3294964pzk.19
+        for <ceph-devel@vger.kernel.org>; Mon, 02 May 2011 19:07:02 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1104220845110.15351@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, 2 May 2011, Christian Brunner wrote:
-> Hi,
-> 
-> after a series of hardware defects, I have a corrupted ceph cluster:
-> 
-> 2011-05-02 18:12:31.038446    pg v8171648: 3712 pgs: 26 active, 3663
-> active+clean, 5 crashed+peering, 18 active+clean+inconsistent; 547 GB
-> data, 388 GB used, 51922 GB / 78245 GB avail; 2410/284300 degraded
-> (0.848%)
-> 
-> Now I wanted to export an rbd-image with "rbd export" and run a
-> filesystem-check on the image. The only problem is, that the export is
-> blocking on the first corrupted object. I think it would be better to
-> detect the failure and return some blocks filled with zero.
-> 
-> Is there a way to accomplish this?
+Hi,
+I am testing the same case.
+My system is 1 MON , 2 MDS, 3OSD.
+Here is my steps:
 
-Not currently.  There are a couple ways to approach it.
+1) First, I set the max number of MDS to 2 , so there are two active MD=
+Ss.
+192.168.200.184:6800/2095 '0' mds0.1 up:active seq 66
+192.168.200.185:6800/1911 '1' mds1.1 up:active seq 25635
+2) I want to set the active one to standby. I excute"ceph mds
+set_max_mds 1" and "ceph mds stop 0".
+    But here is why I confuse:
+    mds0 becomes stopping not standby.??
+    It shows:
+192.138.200.185:6800/14465 =911=92mds0.6 up:stopping seq 14
+192.138.200.184:6800/15442 =910=92mds1.1 up:active seq 210
 
-One would be to a timeout (either in librados or in the rados tool) so 
-that it can move past unresponsive blocks (or error out).  Maybe a 'skip 
-this block range' option would be a piece of that.
+3) When I excute"ceph mds set_max_mds 2", mds0 doesn't become active,
+    I type"ceph mds dump -o -"
+    But it shows:
+192.138.200.185:6800/14465 =911=92mds0.6 up:stopping seq 14 export_targ=
+ets=3D1
+192.138.200.184:6800/15442 =910=92mds1.1 up:active seq 210
+   There is no two active MDSes, why?
 
-The other is to give the client explicit feedback when the pg it is 
-attempting to access is not available (in your case, it's the peering pgs 
-that are blocking progress).  Currently those requests block at the OSD 
-until peering completes, but a peering bug is preventing progress.
+4) Therefore, I still hope that there are one active mds and one
+standby mds(by default).
+    I restart the system. I execute" /etc/init.d/ceph -a stop" and "
+/etc/init.d/ceph -a start"
+    I type"ceph -s"
+    But it shows:
+mds e52:  2/2/1 up {0=3Dup:rejoin, 1=3Dup:resolve}
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  what means?
+    After awhile I execue=94ceph mds stat=94 , it shows:
+=91e61: 2/2/1 up {o=3Dup:relay, 1=3Dup:relay}=92 (0)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ what means?
 
-Of course, we also need to fix the peering issue itself (any logs you can 
-provide showing it blocking would help).  If you ceph pg dump and look at 
-which ones are in peering, and restart those osds with full logs, we can 
-see where things are getting hung up. 
+5) I set the man active number to one because I still want the system
+by default value(one active and one standby).
+    I execute"ceph mds set_max_mds 1"
+    It shows:
+mds e80: 2/2/1 up {0=3Dup:rejoin, 1=3Dup:rejoin}, 1:up:standby
+mds e80: 2/2/1 up {0=3Dup:active, 1=3Dup:rejoin}, 1:up:standby
+mds e80: 2/2/1 up {0=3Dup:active, 1=3Dup:active}, 1:up:standby
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    I don't know what it means.
+    Why there are three statuses? Aren't there just 2 MDSes in my syste=
+m?
+    I execue"ceph -s"
+    It shows:
+mds e94: 2/2/1 up {0=3Dup:active,1=3Dup:active}, 1 up:standby
 
-Probably, though, we still want a way to do useful work 
-(partial/incomplete export) even when things are half-broken.
+Please help me to solve these questions..
+And teach me how to set the MDS by the default(1 active & 1 standby)?
+Thank you very much  ^^
 
-sage
+
+Best regards
+
+Stefanie Chen
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
