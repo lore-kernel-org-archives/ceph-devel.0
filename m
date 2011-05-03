@@ -1,52 +1,47 @@
-From: Zenon Panoussis <oracle@provocation.net>
-Subject: Re: kernel errors, timeouts and qemu-img usage
-Date: Tue, 03 May 2011 18:14:28 +0200
-Message-ID: <4DC029E4.3@provocation.net>
-References: <4DBFEC14.1040102@science-computing.de>
+From: ken leo <kenleocompany01@gmail.com>
+Subject: (unknown)
+Date: Tue, 3 May 2011 09:05:03 -0700
+Message-ID: <BANLkTi=O637dQzFeHVmd427TYmL_wy5bbA__32948.1420144022$1304439610$gmane$org@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-13
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from host-88-80-6-138.cust.prq.se ([88.80.6.138]:51079 "EHLO
-	mail.nettheatre.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751680Ab1ECQOf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2011 12:14:35 -0400
-In-Reply-To: <4DBFEC14.1040102@science-computing.de>
+Received: from mail-bw0-f66.google.com ([209.85.214.66]:46842 "EHLO
+	mail-bw0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751680Ab1ECQUB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2011 12:20:01 -0400
+Received: by bwz7 with SMTP id 7so45146bwz.1
+        for <ceph-devel@vger.kernel.org>; Tue, 03 May 2011 09:20:00 -0700 (PDT)
+Subject: 
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
 
+Gera diena
 
-On 05/03/2011 01:50 PM, Christoph Raible wrote:
+Mes si=FBlome paskolas atskiroms bendrov=EBms ir pig=FBs
+3% norma, asmenini=F8 ir investicijas, mes si=FBlome paskola
+$ 5,000.00 iki $ 100,000,000.00 doleri=F8 mus gr=E1=FEti prie m=FBs=F8 =
+su tikslios sumos
+jums reikia.
+Pra=F0ome u=FEpildyti ir gr=E0=FEinti =F0i=E0 form=E0 nor=EBdami t=E6st=
+i.
 
-> First I alwas get on  ceph -w following "error":
-> "[WRN] message from mon2 was stamped 12.271440s in the future clocks not synchronized"
-> But i have synchronized my clocks 1 min befor with the same ntp-server..
+Vardas, pavard=EB: _
+Kredito paskirtis: _
+Am=FEius: _
+Lytis: _
+Adresas: _
+=D0alis: _
+=C1mon=EBs pavadinimas: _
+Pareigos: _
+Telefonas: _
+reikalinga suma, kaip paskola: _
+Trukm=EB: _
 
-But are they really in sync?
-
-> The second error is, that I can't create / start an qemu-image on the ceph-filesystem. 
-> I want to start a kvm virtual machine with the virt-manager.
-> I create an image with
-
->   "qemu-img create -f qcow2 Platte-qcow2.img 10G"
-
-> The virtual machine never starts. It hangs on look for the "harddisk" 
-
-The image file has to appear as a block device; I suspect you need
-http://ceph.newdream.net/wiki/QEMU-RBD .
-
-I have no clue about the third error; what were you doing when you got it?
-
-The fourth error is a timeout too. The file you are trying to write is 2.4
-GiB in size (dd defaults to 512 bytes, so 512*5000000 bytes). Your journal
-is only 500 MB and you are replicating the data and you are logging 20 on
-the same physical hard drive, so I suspect very serious I/O saturation.
-
-Try bs= together with count= for better dd control and write a much smaller
-file. Try disabling hung_task_timeout as the error message suggested. Try
-also nice and ionice on dd. The problem might be something unrelated, but
-this is a quick way to start figuring what's happening.
-
-Z
-
+Jei esate interested.contact su mumis =FEemiau
+E-mail: Brucefastfunds09@gmail.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
