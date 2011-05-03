@@ -1,148 +1,112 @@
-From: Christoph Raible <c.raible@science-computing.de>
-Subject: kernel errors, timeouts and qemu-img usage
-Date: Tue, 03 May 2011 13:50:44 +0200
-Message-ID: <4DBFEC14.1040102@science-computing.de>
+From: Josef Bacik <josef@redhat.com>
+Subject: Re: btrfs warnings from 2.6.39-rc5
+Date: Tue, 03 May 2011 10:52:49 -0400
+Message-ID: <4DC016C1.2070505@redhat.com>
+References: <4DB863B4.3070900@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
-	format=flowed
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.belwue.de ([129.143.2.15]:55740 "EHLO smtp2.belwue.de"
+Received: from mx1.redhat.com ([209.132.183.28]:21384 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752520Ab1ECLur convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 May 2011 07:50:47 -0400
-Received: from mx3.science-computing.de (mx3.science-computing.de [193.197.16.20])
-	by smtp2.belwue.de with ESMTP id p43Bojp4006257
-	for <ceph-devel@vger.kernel.org>; Tue, 3 May 2011 13:50:45 +0200 (MEST)
-	env-from (prvs=097125fec=c.raible@science-computing.de)
-Received: from localhost (localhost [127.0.0.1])
-	by scmail.science-computing.de (Postfix) with ESMTP id E3A65AC002
-	for <ceph-devel@vger.kernel.org>; Tue,  3 May 2011 13:50:44 +0200 (CEST)
-Received: from scmail.science-computing.de ([127.0.0.1])
-	by localhost (guinesstest.science-computing.de [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id rmZ1Z4hZloKN for <ceph-devel@vger.kernel.org>;
-	Tue,  3 May 2011 13:50:44 +0200 (CEST)
-Received: from nerva.science-computing.de (nerva.science-computing.de [10.10.16.94])
-	by scmail.science-computing.de (Postfix) with ESMTP id 55461AC001
-	for <ceph-devel@vger.kernel.org>; Tue,  3 May 2011 13:50:44 +0200 (CEST)
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-	by nerva.science-computing.de (Postfix) with ESMTP id 43BA7A3424
-	for <ceph-devel@vger.kernel.org>; Tue,  3 May 2011 13:50:44 +0200 (CEST)
+	id S1752625Ab1ECO4r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 3 May 2011 10:56:47 -0400
+In-Reply-To: <4DB863B4.3070900@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: linux-btrfs@vger.kernel.org, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi @all,
+On 04/27/2011 02:43 PM, Jim Schutt wrote:
+> Hi,
+>
+> I'm not sure if they matter, but I got these warnings on
+> one of the machines I'm using as a Ceph OSD server:
+>
+> [ 1806.549469] ------------[ cut here ]------------
+> [ 1806.554593] WARNING: at fs/btrfs/extent-tree.c:5790
+> use_block_rsv+0xa7/0x101 [btrfs]()
+> [ 1806.562903] Hardware name: PowerEdge 1950
+> [ 1806.567126] Modules linked in: loop btrfs zlib_deflate lzo_compress
+> ipt_MASQUERADE iptable_nat nf_nat nf_conntrack_ipv4 nf_defrag_ipv4
+> xt_state nf_conntrack ipt_REJECT xt_tcpudp iptable_filter ip_tables
+> x_tables bridge stp i2c_dev i2c_core ext3 jbd ib_iser libi]
+> [ 1806.689084] Pid: 12025, comm: cosd Not tainted
+> 2.6.39-rc5-00006-g7b0bd4b #2
+> [ 1806.697425] Call Trace:
+> [ 1806.700332] [<ffffffffa06fe816>] ? use_block_rsv+0xa7/0x101 [btrfs]
+> [ 1806.707032] [<ffffffff810494d8>] ? warn_slowpath_common+0x85/0x9e
+> [ 1806.713502] [<ffffffff8104950b>] ? warn_slowpath_null+0x1a/0x1c
+> [ 1806.720755] [<ffffffffa06fe816>] ? use_block_rsv+0xa7/0x101 [btrfs]
+> [ 1806.731488] [<ffffffffa070590b>] ? btrfs_alloc_free_block+0x30/0x198
+> [btrfs]
+> [ 1806.743858] [<ffffffffa072ae8a>] ?
+> map_private_extent_buffer+0xb2/0xd9 [btrfs]
+> [ 1806.752600] [<ffffffffa072a4b8>] ? __kmap_atomic+0x12/0x47 [btrfs]
+> [ 1806.760057] [<ffffffffa072b036>] ? read_extent_buffer+0xc2/0xd4 [btrfs]
+> [ 1806.770897] [<ffffffffa06f84ac>] ? __btrfs_cow_block+0x10e/0x2f5 [btrfs]
+> [ 1806.779552] [<ffffffffa0709dbe>] ? btrfs_header_generation+0x1f/0x25
+> [btrfs]
+> [ 1806.788994] [<ffffffffa06f878f>] ? btrfs_cow_block+0xfc/0x121 [btrfs]
+> [ 1806.798434] [<ffffffffa06fa746>] ? btrfs_search_slot+0x144/0x3ae [btrfs]
+> [ 1806.806444] [<ffffffffa0709877>] ? btrfs_lookup_inode+0x31/0x86 [btrfs]
+> [ 1806.813611] [<ffffffffa071618b>] ? btrfs_update_inode+0x52/0xc1 [btrfs]
+> [ 1806.820904] [<ffffffffa071668c>] ? btrfs_truncate+0x239/0x297 [btrfs]
+> [ 1806.829290] [<ffffffffa071bb23>] ? btrfs_setsize+0x8c/0x9b [btrfs]
+> [ 1806.835962] [<ffffffffa071bb93>] ? btrfs_setattr+0x61/0x9d [btrfs]
+> [ 1806.842892] [<ffffffff81127ea4>] ? notify_change+0x174/0x1bc
+> [ 1806.850878] [<ffffffff81110c4f>] ? do_truncate+0x6e/0x8a
+> [ 1806.857374] [<ffffffff8111b126>] ? generic_permission+0x1c/0x8e
+> [ 1806.868498] [<ffffffff81110e42>] ? do_sys_truncate+0xf8/0x10a
+> [ 1806.877746] [<ffffffff81110e62>] ? sys_truncate+0xe/0x10
+> [ 1806.902751] [<ffffffff813b6deb>] ? system_call_fastpath+0x16/0x1b
+> [ 1806.909736] ---[ end trace cd0ae33f1a4433d9 ]---
+> [ 1812.142333] ------------[ cut here ]------------
+> [ 1812.146996] WARNING: at fs/btrfs/inode.c:2180
+> btrfs_orphan_commit_root+0x8c/0xab [btrfs]()
+> [ 1812.155275] Hardware name: PowerEdge 1950
+> [ 1812.159280] Modules linked in: loop btrfs zlib_deflate lzo_compress
+> ipt_MASQUERADE iptable_nat nf_nat nf_conntrack_ipv4 nf_defrag_ipv4
+> xt_state nf_conntrack ipt_REJECT xt_tcpudp iptable_filter ip_tables
+> x_tables bridge stp i2c_dev i2c_core ext3 jbd ib_iser libi]
+> [ 1812.240872] Pid: 7923, comm: kworker/3:2 Tainted: G W
+> 2.6.39-rc5-00006-g7b0bd4b #2
+> [ 1812.249216] Call Trace:
+> [ 1812.251712] [<ffffffffa0715048>] ? btrfs_orphan_commit_root+0x8c/0xab
+> [btrfs]
+> [ 1812.258976] [<ffffffff810494d8>] ? warn_slowpath_common+0x85/0x9e
+> [ 1812.265199] [<ffffffff8104950b>] ? warn_slowpath_null+0x1a/0x1c
+> [ 1812.271420] [<ffffffffa0715048>] ? btrfs_orphan_commit_root+0x8c/0xab
+> [btrfs]
+> [ 1812.278704] [<ffffffffa070f5e0>] ? commit_fs_roots+0x95/0xfd [btrfs]
+> [ 1812.285220] [<ffffffffa07039b3>] ? btrfs_run_delayed_refs+0x112/0x15e
+> [btrfs]
+> [ 1812.292459] [<ffffffff810367bf>] ? need_resched+0x23/0x2d
+> [ 1812.297961] [<ffffffff810367d7>] ? should_resched+0xe/0x2f
+> [ 1812.303604] [<ffffffffa07105e3>] ?
+> btrfs_commit_transaction+0x349/0x5a3 [btrfs]
+> [ 1812.310999] [<ffffffff8106622c>] ? list_del_init+0x21/0x21
+> [ 1812.316615] [<ffffffffa071085c>] ? do_async_commit+0x1f/0x2c [btrfs]
+> [ 1812.323055] [<ffffffff8106076b>] ? process_one_work+0x124/0x1e0
+> [ 1812.329083] [<ffffffffa071083d>] ?
+> btrfs_commit_transaction+0x5a3/0x5a3 [btrfs]
+> [ 1812.336526] [<ffffffff81061dd8>] ? workqueue_congested+0x1e/0x1e
+> [ 1812.342636] [<ffffffff81061e67>] ? worker_thread+0x8f/0x124
+> [ 1812.348353] [<ffffffff81065d26>] ? kthread+0x72/0x7a
+> [ 1812.353439] [<ffffffff813b7ed4>] ? kernel_thread_helper+0x4/0x10
+> [ 1812.359555] [<ffffffff813b07ad>] ? retint_restore_args+0xe/0xe
+> [ 1812.365484] [<ffffffff81065cb4>] ? kthread_bind+0x64/0x64
+> [ 1812.370986] [<ffffffff813b7ed0>] ? gs_change+0xb/0xb
+> [ 1812.376047] ---[ end trace cd0ae33f1a4433da ]---
+>
+> Please let me know if I can do anything to help sort these out.
+>
 
-I got some errors after compiling an configuring ceph on Scientific 
-Linux 6. ( This works all fine with no errors)
+I just posted a patch for this problem, it's titled
 
-First of all I want to explain my Systems:
+     Btrfs: fix how we do space reservation for truncate
 
-Server0-3:
+Please apply it and test it and see if it makes this problem go away. 
+Thanks,
 
-- Scientific Linux 6:
-   - Self compiled Kernel 2.6.38.4 from Kernel.org with ceph-modules
-   - 4 partitions:
-     - /           <---  20 GB - ext4
-     - /srv/cloud  <---  20 GB - ext4
-     - /dev/sda5   <---   1 GB - ext4   ceph journaling system
-     - /dev sda6   <---  50 GB - ext4   ceph fs mounted to /mnt/data
-
-I didn't use brtfs, because ext4 is an requirement of my professor (I'm 
-writing my bachelor thesis)
-
-
-My ceph.conf:  http://pastebin.com/vdwfHNy3
-
-- 3 OSD
-- 2 MDS
-- 3 Monitors
-
-
-
-
----------------------------
-
-Now to my errors I got.
-
-
-
-First I alwas get on  ceph -w following "error":
-
-"[WRN] message from mon2 was stamped 12.271440s in the future clocks 
-not synchronized"
-
-But i have synchronized my clocks 1 min befor with the same ntp-server..
-
-
-
-----------------------------
-
-The second error is, that I can't create / start an qemu-image on the 
-ceph-filesystem. I want to start a kvm virtual machine with the 
-virt-manager.
-
-I create an image with
-
-   "qemu-img create -f qcow2 Platte-qcow2.img 10G"
-
-When I chose those image an want to start a virtual machine with that 
-image. The virtual machine never starts. It hangs on look for the "harddisk"
-
-Creating an Image with virt-manager doesn't work. There is after 2-3 
-minutes a timout and I have to kill the virt-manager job.
-
-Are there some experiences with this?
-
-
-
------------------------------
-
-
-The third error I got is the following shown in the /var/log/messages file:
-
-http://pastebin.com/dnwVRf5F
-
-Are those timeouts normal?
-
-
-
------------------------------
-
-
-The last error I got for today is the following:
-
-http://pastebin.com/UmrCRuhq
-
-
-This happend when I was creating a dummy file with:
-
-   dd if=/dev/zero of=meineDatei count=5000000
-
-
-
-
-I hope it's not too much errors in one message, but I want to show them 
-all in one email for the better look if depending to each other ;)
-
-
-
-Thanks for you help.
-
-With best regards,
-
-Christoph Raible
-
--- 
-Vorstand/Board of Management:
-Dr. Bernd Finkbeiner, Dr. Roland Niemeier, 
-Dr. Arno Steitz, Dr. Ingrid Zech
-Vorsitzender des Aufsichtsrats/
-Chairman of the Supervisory Board:
-Philippe Miltin
-Sitz/Registered Office: Tuebingen
-Registergericht/Registration Court: Stuttgart
-Registernummer/Commercial Register No.: HRB 382196 
-
-
+Josef
