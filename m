@@ -1,49 +1,53 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph fixes for 2.6.39-rc7
-Date: Wed, 4 May 2011 13:18:34 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1105041316490.748@cobra.newdream.net>
+From: Zenon Panoussis <oracle@provocation.net>
+Subject: Re: crush rule definitions
+Date: Wed, 04 May 2011 22:34:54 +0200
+Message-ID: <4DC1B86E.5070704@provocation.net>
+References: <4DC197F3.3050200@provocation.net> <Pine.LNX.4.64.1105041119310.648@cobra.newdream.net> <4DC1A706.1000205@provocation.net> <Pine.LNX.4.64.1105041225010.648@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42656 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752327Ab1EDUSC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 May 2011 16:18:02 -0400
+Received: from host-88-80-6-138.cust.prq.se ([88.80.6.138]:49116 "EHLO
+	mail.nettheatre.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753327Ab1EDUe5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 May 2011 16:34:57 -0400
+In-Reply-To: <Pine.LNX.4.64.1105041225010.648@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-
-Hi Linus,
-
-Please pull the following Ceph fixes from
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-There are some error paths that weren't handling ENOMEM properly, and a 
-few more locking fixes that are fallout from Dave's inode_lock->i_lock 
-changes.
-
-Thanks!
-sage
+To: ceph-devel@vger.kernel.org
 
 
-Henry C Chang (2):
-      libceph: fix ceph_msg_new error path
-      ceph: handle ceph_osdc_new_request failure in ceph_writepages_start
+On 05/04/2011 09:28 PM, Sage Weil wrote:
 
-Sage Weil (3):
-      ceph: use ihold() when i_lock is held
-      libceph: fix ceph_osdc_alloc_request error checks
-      ceph: do not call __mark_dirty_inode under i_lock
+>> As an aside, I think that, to a certain extent, improving the 
+>> documentation could contribute more to the code base...
 
- drivers/block/rbd.c   |    4 ++--
- fs/ceph/addr.c        |    7 +++++++
- fs/ceph/caps.c        |   14 +++++++-------
- fs/ceph/file.c        |    5 ++++-
- fs/ceph/inode.c       |    6 +++++-
- fs/ceph/super.h       |    2 +-
- fs/ceph/xattr.c       |   12 ++++++++----
- net/ceph/messenger.c  |   26 +++++++++++++-------------
- net/ceph/osd_client.c |    4 ++--
- 9 files changed, 49 insertions(+), 31 deletions(-)
+> The replication is covered by
+> http://ceph.newdream.net/wiki/Adjusting_replication_level
+
+> Any specific suggestions on how that should be improved?
+
+The wiki is a reasonably good instruction in getting ceph up and running,
+but it could do a lot better in explaining the hows and whys of the system.
+
+http://ceph.newdream.net/wiki/Adjusting_replication_level is a good example
+of this. It tells you exactly how to adjust the overall replication level,
+but it doesn't tell you how to control where the replicas are put. So you
+go searching and you find http://ceph.newdream.net/wiki/Custom_data_placement_with_CRUSH
+and it explains pretty well how to implement crush rules, but it doesn't
+tell what each rule parametre actually does, nor does it (appear to) give
+an exhaustive list of all parametres that are available.
+
+So, all in all, I think that what is mostly needed in the wiki is a general
+introduction to ceph, an explanation and diagram of how it works and how
+its internals relate to each-other. All of this is in your thesis, I know,
+but it is very difficult to connect an abstract academic paper to a concrete
+configuration problem and configuration parametre.
+
+I happily contribute to the wiki when I'm 100% sure that what I'm writing is
+correct, but most of the time when I see a potential improvent of the wiki,
+I lack the solid understanding that's needed for me to make that improvement
+myself.
+
+Z
+
