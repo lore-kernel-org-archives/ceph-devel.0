@@ -1,163 +1,90 @@
-From: Christoph Raible <c.raible@science-computing.de>
-Subject: Re: kernel errors, timeouts and qemu-img usage
-Date: Wed, 04 May 2011 11:33:51 +0200
-Message-ID: <4DC11D7F.2000306@science-computing.de>
-References: <4DBFEC14.1040102@science-computing.de> <20110503164334.GC20739@dreamer>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: How to deal with a single host with several harddisks
+Date: Wed, 04 May 2011 12:10:40 +0200
+Message-ID: <1304503840.4036.84.camel@wido-laptop.pcextreme.nl>
+References: <BANLkTi=_sbPhhtmBBXmmFrR5kM6NVTDayg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
-	format=flowed
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.belwue.de ([129.143.2.12]:44822 "EHLO smtp1.belwue.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751691Ab1EDJqE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 May 2011 05:46:04 -0400
-Received: from mx3.science-computing.de (mx3.science-computing.de [193.197.16.20])
-	by smtp1.belwue.de with ESMTP id p449XrEM021909
-	for <ceph-devel@vger.kernel.org>; Wed, 4 May 2011 11:33:53 +0200 (MEST)
-	env-from (prvs=098264eeb=c.raible@science-computing.de)
-In-Reply-To: <20110503164334.GC20739@dreamer>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:37550 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753137Ab1EDKKm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 May 2011 06:10:42 -0400
+In-Reply-To: <BANLkTi=_sbPhhtmBBXmmFrR5kM6NVTDayg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+To: tsk <aixt2006@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-Am 03.05.2011 18:43, schrieb Tommi Virtanen:
-> On Tue, May 03, 2011 at 01:50:44PM +0200, Christoph Raible wrote:
->> First I alwas get on  ceph -w following "error":
->>
->> "[WRN] message from mon2 was stamped 12.271440s in the future clocks
->> not synchronized"
->>
->> But i have synchronized my clocks 1 min befor with the same
->> ntp-server..
->
-> Just running ntp doesn't mean your clocks are synced. For example, it
-> will refuse to synchronize automatically if the gap is too large.
->
-> Here's how you demonstrate your clocks are good:
->
-> [0 tv@dreamer ~]$ host pool.ntp.org
-> pool.ntp.org has address 204.235.61.9
-> pool.ntp.org has address 66.219.59.208
-> pool.ntp.org has address 169.229.70.95
-> [0 tv@dreamer ~]$ ssh sepia32.ceph.dreamhost.com ntpdate -q 204.235.61.9
-> server 204.235.61.9, stratum 2, offset -31.351031, delay 0.09187
->   3 May 09:25:27 ntpdate[8303]: step time server 204.235.61.9 offset -31.351031 sec
-> [0 tv@dreamer ~]$ ssh sepia80.ceph.dreamhost.com ntpdate -q 204.235.61.9
-> server 204.235.61.9, stratum 2, offset 0.000159, delay 0.09181
->   3 May 09:24:59 ntpdate[373]: adjust time server 204.235.61.9 offset 0.000159 sec
-> [0 tv@dreamer ~]$
->
-> See how one of the clocks is more than 30 seconds off, and the other
-> one is near-perfect.
+Hi,
 
-I synchronized with ntpdate but there is an other error. I will look at 
-this. If i got a solution I will report ;)
+On Wed, 2011-05-04 at 17:37 +0800, tsk wrote:
+> Hi folks,
+> 
+> 
+> May I know that,  if there is 6 harddisk available for btrfs in just a
+> single host,  there should be 6 cosd process in the host when the
+> disks are all working?
 
->
->> ----------------------------
->>
->> The second error is, that I can't create / start an qemu-image on
->> the ceph-filesystem. I want to start a kvm virtual machine with the
->> virt-manager.
->>
->> I create an image with
->>
->>    "qemu-img create -f qcow2 Platte-qcow2.img 10G"
->>
->> When I chose those image an want to start a virtual machine with
->> that image. The virtual machine never starts. It hangs on look for
->> the "harddisk"
->>
->> Creating an Image with virt-manager doesn't work. There is after 2-3
->> minutes a timout and I have to kill the virt-manager job.
->>
->> Are there some experiences with this?
->
-> Are you using rbd, or just qcow2 images in files stored in a Ceph
-> mount?
+Yes, that is the way common way.
 
+> 
+> A single cosd process can not manage several disks?
+> 
 
-I only use qcow2 Images stored in a Ceph mount. I can't use rbd because 
-I have to copy Images from one location to Ceph mount.
+Yes and no. A single cosd process simply wants a mount point. If you
+look closer, the init script simply mounts the device specified by
+'btrfs devs' in the configuration.
 
+You could run LVM, mdadm or even a btrfs multi-disk volume under a
+mountpoint, this way you could have on cosd process per disk.
 
-> If rbd, please provide more details on what exactly you did.
->
-> If just qcow2 files on ceph, then this seems to be very similar to the
-> problems you reported below; your setup seems unable to handle heavy
-> IO, for some reason.
+I would recommend running one cosd process per disk, it takes a bit more
+memory (about 800M per cosd), but this way Ceph can take the full
+advantage of all the available diskspace.
 
-No that's not the problem after I resolved the problem with the I/O I 
-also can't connect / use any qemu / kvm images. I tested with following 
-image types qcow2, raw & img
+If you have multiple hosts I would recommend making a CRUSH map which
+makes sure your data replicas are not stored within the same physical
+machine: http://ceph.newdream.net/wiki/Custom_data_placement_with_CRUSH
 
+The newer versions of Ceph will make a basic CRUSH map based on the
+ceph.conf, as far as I know it will prevent saving replicas on the same
+node. However, I would recommended checking your CRUSH map to make sure
+it does.
 
+> How should the ceph.conf be configured for this scenario?
 
->> -----------------------------
->>
->> The third error I got is the following shown in the /var/log/messages file:
->>
->> http://pastebin.com/dnwVRf5F
->>
->> Are those timeouts normal?
->
-> They look somewhat similar to the issues I've seen with more than MDS
-> and a write-heavy workload. At this point you probably don't want two
-> MDSes active. All of my problems went away when I started testing
-> against clusters with just one MDS.
->
+For example:
 
-I have now testet with only one MDS and it works fine :D that's strange, 
-it looks like a Problem between the MDS synchronisation.
+[osd.0]
+   host = node01
+   btrfs devs = /dev/sda
 
+[osd.1]
+   host = node01
+   btrfs devs = /dev/sdb
 
->> -----------------------------
->>
->> The last error I got for today is the following:
->>
->> http://pastebin.com/UmrCRuhq
->>
->>
->> This happend when I was creating a dummy file with:
->>
->>    dd if=/dev/zero of=meineDatei count=5000000
->
-> This one looks like the underlying filesystem cannot handle the write
-> load, and makes the OSD daemon hang.
->
-> Your ceph.conf says "osd data = /data/osd$id", but your partition list
-> earlier claimed /dev/sda6 is "ceph fs mounted to /mnt/data". I'm
-> assuming you these are supposed to be the same, and you're using ext4.
+[osd.2]
+   host = node01
+   btrfs devs = /dev/sdc
 
-I'm sorry I have posted the wrong link to my ceph.conf :( This is the 
-right (I updated both ;) )
+etc, etc
 
-http://pastebin.com/VanmWmX5
+The init script and mkcephfs will then format the specified drives with
+btrfs and mount it when the OSD starts.
 
->
-> I don't recall seeing many people having this kind of problems with
-> ext4. You might want to check what happens if you shut off ceph,
-> and try that dd directly to the underlying disk. If that works well,
-> please check back and we can continue figuring that one out.
+I would also recommend running your journal on a separate drive:
+http://ceph.newdream.net/wiki/Troubleshooting#Performance
 
-This works fine  with an average speed of 40 MB/s (not full speed ;) )
+Wido
 
-
-> BTW, your config says "devs = /dev/sda1".. The actual config option is
-> "btrfs devs", so that should be ignored completely, but it seems
-> there's some confusion in the air.
-
--- 
-Vorstand/Board of Management:
-Dr. Bernd Finkbeiner, Dr. Roland Niemeier, 
-Dr. Arno Steitz, Dr. Ingrid Zech
-Vorsitzender des Aufsichtsrats/
-Chairman of the Supervisory Board:
-Philippe Miltin
-Sitz/Registered Office: Tuebingen
-Registergericht/Registration Court: Stuttgart
-Registernummer/Commercial Register No.: HRB 382196 
+> 
+> 
+> Thx!
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
