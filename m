@@ -1,276 +1,378 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: Client reconnect failing: reader gets bad tag
-Date: Thu, 5 May 2011 14:23:18 -0600
-Message-ID: <4DC30736.60100@sandia.gov>
-References: <4DC1D2CA.3060708@sandia.gov>
- <Pine.LNX.4.64.1105051215050.26811@cobra.newdream.net>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: Trouble with rbd
+Date: Fri, 06 May 2011 00:33:22 +0300
+Message-ID: <4DC317A2.6080806@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:51208 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752223Ab1EEUXu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 May 2011 16:23:50 -0400
-In-Reply-To: <Pine.LNX.4.64.1105051215050.26811@cobra.newdream.net>
+Received: from mail.ufm.su ([77.120.103.19]:53550 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751331Ab1EEVdZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 5 May 2011 17:33:25 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id E3C0060059C
+	for <ceph-devel@vger.kernel.org>; Fri,  6 May 2011 00:33:22 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id Bm5d2Xq3KDTk for <ceph-devel@vger.kernel.org>;
+	Fri,  6 May 2011 00:33:22 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id 9B95860059A
+	for <ceph-devel@vger.kernel.org>; Fri,  6 May 2011 00:33:22 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Sage Weil wrote:
-> On Wed, 4 May 2011, Jim Schutt wrote:
->> Hi,
->>
->> I'm seeing clients having trouble reconnecting after timed-out
->> requests.  When they get in this state, sometimes they manage
->> to reconnect after several attempts; sometimes they never seem
->> to be able to reconnect.
-> 
-> Hmm, the interesting line is
-> 
->> 2011-05-04 16:00:59.710971 7f15d6948940 -- 172.17.40.30:6806/12583 >>
->> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).reader bad
->> tag 0
-> 
-> That _should_ mean the server side (osd) closes out the connection 
-> immediately, which should generate a disconnect error on the client and an 
-> immediate reconnect.  So it's strange that you're also seeing timeouts.
+Hi!
 
-Here's the file server-side log for the connection
-attempts - i.e. everything in the logs for that client IP,
-once I noticed the timeouts and reconnect failures:
+Latest 64 bit kernel (2.6.39-rc6, but with latest ubuntu 2.6.38-8 - the 
+same).
 
-# tail -f osd.34.log | grep 172\.17\.40\.49
-2011-05-04 16:00:59.710605 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=0 cs=0 l=0).accept peer addr is really 172.17.40.49:0/302440129 (socket is 172.17.40.49:42695/0)
-2011-05-04 16:00:59.710630 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=0 cs=0 l=0).accept got peer connect_seq 0 global_seq 430
-2011-05-04 16:00:59.710646 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=0 cs=0 l=1).accept of host_type 8, policy.lossy=1
-2011-05-04 16:00:59.710667 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=0 cs=0 l=1).accept my proto 24, their proto 24
-2011-05-04 16:00:59.710703 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=0 cs=0 l=1).accept new session
-2011-05-04 16:00:59.710712 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).accept success, connect_seq = 1, sending READY
-2011-05-04 16:00:59.710721 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).accept features 138
-2011-05-04 16:00:59.710730 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).register_pipe
-2011-05-04 16:00:59.710764 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).accept starting writer, state=2
-2011-05-04 16:00:59.710813 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).accept done
-2011-05-04 16:00:59.710832 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).reader reading tag...
-2011-05-04 16:00:59.710870 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).writer: state = 2 policy.server=1
-2011-05-04 16:00:59.710917 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).writer sleeping
-2011-05-04 16:00:59.710971 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).reader bad tag 0
-2011-05-04 16:00:59.711013 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).fault 0: Success
-2011-05-04 16:00:59.711075 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).fault on lossy channel, failing
-2011-05-04 16:00:59.711089 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).fail
-2011-05-04 16:00:59.711102 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).stop
-2011-05-04 16:00:59.711116 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).discard_queue
-2011-05-04 16:00:59.711136 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1). dequeued pipe
-2011-05-04 16:00:59.711184 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).writer finishing
-2011-05-04 16:00:59.711238 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).writer done
-2011-05-04 16:00:59.711397 7f15f9dbe940 -- 172.17.40.30:6806/12583 reaper reaping pipe 0x213fa000 172.17.40.49:0/302440129
-2011-05-04 16:00:59.711422 7f15f9dbe940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).discard_queue
-2011-05-04 16:00:59.711443 7f15f9dbe940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1). dequeued pipe
-2011-05-04 16:00:59.711465 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).reader done
-2011-05-04 16:00:59.711488 7f15f9dbe940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa000 sd=91 pgs=430 cs=1 l=1).unregister_pipe
-2011-05-04 16:00:59.711639 7f15f9dbe940 -- 172.17.40.30:6806/12583 reaper reaped pipe 0x213fa000 172.17.40.49:0/302440129
-2011-05-04 16:09:33.761370 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=0 cs=0 l=0).accept peer addr is really 172.17.40.49:0/302440129 (socket is 172.17.40.49:37202/0)
-2011-05-04 16:09:33.761408 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=0 cs=0 l=0).accept got peer connect_seq 0 global_seq 432
-2011-05-04 16:09:33.761421 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=0 cs=0 l=1).accept of host_type 8, policy.lossy=1
-2011-05-04 16:09:33.761430 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=0 cs=0 l=1).accept my proto 24, their proto 24
-2011-05-04 16:09:33.761465 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=0 cs=0 l=1).accept new session
-2011-05-04 16:09:33.761475 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).accept success, connect_seq = 1, sending READY
-2011-05-04 16:09:33.761484 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).accept features 138
-2011-05-04 16:09:33.761493 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).register_pipe
-2011-05-04 16:09:33.761518 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).accept starting writer, state=2
-2011-05-04 16:09:33.761572 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).accept done
-2011-05-04 16:09:33.761586 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).reader reading tag...
-2011-05-04 16:09:33.761607 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).writer: state = 2 policy.server=1
-2011-05-04 16:09:33.761650 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).reader bad tag 0
-2011-05-04 16:09:33.761675 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).writer sleeping
-2011-05-04 16:09:33.761730 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).fault 0: Success
-2011-05-04 16:09:33.761824 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).fault on lossy channel, failing
-2011-05-04 16:09:33.761839 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).fail
-2011-05-04 16:09:33.761852 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).stop
-2011-05-04 16:09:33.761866 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).discard_queue
-2011-05-04 16:09:33.761886 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1). dequeued pipe
-2011-05-04 16:09:33.761944 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).writer finishing
-2011-05-04 16:09:33.761997 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).writer done
-2011-05-04 16:09:33.762133 7f15f9dbe940 -- 172.17.40.30:6806/12583 reaper reaping pipe 0x213fac80 172.17.40.49:0/302440129
-2011-05-04 16:09:33.762154 7f15f9dbe940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).discard_queue
-2011-05-04 16:09:33.762173 7f15f9dbe940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1). dequeued pipe
-2011-05-04 16:09:33.762197 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).reader done
-2011-05-04 16:09:33.762234 7f15f9dbe940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fac80 sd=91 pgs=432 cs=1 l=1).unregister_pipe
-2011-05-04 16:09:33.762305 7f15f9dbe940 -- 172.17.40.30:6806/12583 reaper reaped pipe 0x213fac80 172.17.40.49:0/302440129
-2011-05-04 16:18:07.809562 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=0 cs=0 l=0).accept peer addr is really 172.17.40.49:0/302440129 (socket is 172.17.40.49:53236/0)
-2011-05-04 16:18:07.809606 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=0 cs=0 l=0).accept got peer connect_seq 0 global_seq 434
-2011-05-04 16:18:07.809631 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=0 cs=0 l=1).accept of host_type 8, policy.lossy=1
-2011-05-04 16:18:07.809640 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=0 cs=0 l=1).accept my proto 24, their proto 24
-2011-05-04 16:18:07.809674 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=0 cs=0 l=1).accept new session
-2011-05-04 16:18:07.809683 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).accept success, connect_seq = 1, sending READY
-2011-05-04 16:18:07.809692 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).accept features 138
-2011-05-04 16:18:07.809700 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).register_pipe
-2011-05-04 16:18:07.809728 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).accept starting writer, state=2
-2011-05-04 16:18:07.809782 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).accept done
-2011-05-04 16:18:07.809796 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).reader reading tag...
-2011-05-04 16:18:07.809816 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).writer: state = 2 policy.server=1
-2011-05-04 16:18:07.809859 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).reader bad tag 0
-2011-05-04 16:18:07.809894 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).writer sleeping
-2011-05-04 16:18:07.809940 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).fault 0: Success
-2011-05-04 16:18:07.810021 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).fault on lossy channel, failing
-2011-05-04 16:18:07.810035 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).fail
-2011-05-04 16:18:07.810048 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).stop
-2011-05-04 16:18:07.810062 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).discard_queue
-2011-05-04 16:18:07.810082 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1). dequeued pipe
-2011-05-04 16:18:07.810130 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).writer finishing
-2011-05-04 16:18:07.810176 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).writer done
-2011-05-04 16:18:07.810312 7f15f9dbe940 -- 172.17.40.30:6806/12583 reaper reaping pipe 0x213fa280 172.17.40.49:0/302440129
-2011-05-04 16:18:07.810332 7f15f9dbe940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).discard_queue
-2011-05-04 16:18:07.810352 7f15f9dbe940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1). dequeued pipe
-2011-05-04 16:18:07.810375 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).reader done
-2011-05-04 16:18:07.810405 7f15f9dbe940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x213fa280 sd=91 pgs=434 cs=1 l=1).unregister_pipe
-2011-05-04 16:18:07.810488 7f15f9dbe940 -- 172.17.40.30:6806/12583 reaper reaped pipe 0x213fa280 172.17.40.49:0/302440129
-2011-05-04 16:18:07.816016 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=0 cs=0 l=0).accept peer addr is really 172.17.40.49:0/302440129 (socket is 172.17.40.49:53237/0)
-2011-05-04 16:18:07.816032 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=0 cs=0 l=0).accept got peer connect_seq 0 global_seq 435
-2011-05-04 16:18:07.816041 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=0 cs=0 l=1).accept of host_type 8, policy.lossy=1
-2011-05-04 16:18:07.816050 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=0 cs=0 l=1).accept my proto 24, their proto 24
-2011-05-04 16:18:07.816067 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=0 cs=0 l=1).accept new session
-2011-05-04 16:18:07.816076 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).accept success, connect_seq = 1, sending READY
-2011-05-04 16:18:07.816085 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).accept features 138
-2011-05-04 16:18:07.816093 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).register_pipe
-2011-05-04 16:18:07.816116 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).accept starting writer, state=2
-2011-05-04 16:18:07.816147 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).accept done
-2011-05-04 16:18:07.816164 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).reader reading tag...
-2011-05-04 16:18:07.816197 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).writer: state = 2 policy.server=1
-2011-05-04 16:18:07.816289 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).reader got MSG
-2011-05-04 16:18:07.816343 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).reader got envelope type=42 src client4153 front=128 data=524288 off 0
-2011-05-04 16:18:07.816407 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).reader wants 524416 from policy throttler 0/15000000
-2011-05-04 16:18:07.816422 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).reader wants 524416 from dispatch throttler 0/28000000
-2011-05-04 16:18:07.816500 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).reader got front 128
-2011-05-04 16:18:07.816533 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).reader allocating new rx buffer at offset 0
-2011-05-04 16:18:07.816547 7f15d5837940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).writer sleeping
-2011-05-04 16:18:07.816574 7f15d6948940 -- 172.17.40.30:6806/12583 >> 172.17.40.49:0/302440129 pipe(0x2771c80 sd=91 pgs=435 cs=1 l=1).reader reading nonblocking into 0x2fcd8000 len 524288
+Very similar to that rbd or libceph ruin the memory.
 
-Here's the client-side logs for the same time window:
+1. Make rbd.
 
-May  4 16:00:30 an361 [ 2423.312190] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:00:59 an361 [ 2452.449206] libceph: osd34 172.17.40.30:6806 connection failed
-May  4 16:00:59 an361 [ 2452.455980] libceph: osd9 172.17.40.23:6809 connection failed
-May  4 16:02:00 an361 [ 2513.456232] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:02:09 an361 [ 2521.938104] INFO: task dd:3680 blocked for more than 120 seconds.
-May  4 16:02:09 an361 [ 2521.944206] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-May  4 16:02:09 an361 [ 2521.952039] dd              D ffff88019fc51f40     0  3680   3677 0x00000000
-May  4 16:02:09 an361 [ 2521.952046]  ffff88018f859cc8 0000000000000082 ffffffff81033836 ffff880198931690
-May  4 16:02:09 an361 [ 2521.959556]  ffff88018dbead20 ffff88018dbead20 0000000000011f40 ffff880198931690
-May  4 16:02:09 an361 [ 2521.967087]  ffff88018dbeb0d0 0000000000000002 ffff88018f859cf8 ffffffff813aa5a7
-May  4 16:02:09 an361 [ 2521.974616] Call Trace:
-May  4 16:02:09 an361 [ 2521.977078]  [<ffffffff81033836>] ? calc_load_account_idle+0xe/0x1d
-May  4 16:02:09 an361 [ 2521.983358]  [<ffffffff813aa5a7>] schedule+0x159/0x193
-May  4 16:02:09 an361 [ 2521.988503]  [<ffffffff813aa628>] io_schedule+0x47/0x61
-May  4 16:02:09 an361 [ 2521.993738]  [<ffffffff810c5afc>] sleep_on_page+0xe/0x12
-May  4 16:02:09 an361 [ 2521.999060]  [<ffffffff813aac0f>] __wait_on_bit+0x4a/0x7c
-May  4 16:02:09 an361 [ 2522.004471]  [<ffffffff810c5aee>] ? lock_page+0x2d/0x2d
-May  4 16:02:09 an361 [ 2522.009704]  [<ffffffff810c5d10>] wait_on_page_bit+0x74/0x7b
-May  4 16:02:09 an361 [ 2522.015373]  [<ffffffff810660df>] ? autoremove_wake_function+0x2b/0x2b
-May  4 16:02:09 an361 [ 2522.021905]  [<ffffffff810c5d3e>] wait_on_page_writeback+0x27/0x2b
-May  4 16:02:09 an361 [ 2522.028090]  [<ffffffff810c67d8>] filemap_fdatawait_range+0x68/0x147
-May  4 16:02:09 an361 [ 2522.034450]  [<ffffffff810c6988>] filemap_write_and_wait_range+0x43/0x56
-May  4 16:02:09 an361 [ 2522.041155]  [<ffffffff811357b8>] vfs_fsync_range+0x35/0x76
-May  4 16:02:09 an361 [ 2522.046735]  [<ffffffff81135858>] vfs_fsync+0x1c/0x1e
-May  4 16:02:09 an361 [ 2522.051794]  [<ffffffff8113588d>] do_fsync+0x33/0x49
-May  4 16:02:09 an361 [ 2522.056767]  [<ffffffff811358b6>] sys_fdatasync+0x13/0x17
-May  4 16:02:09 an361 [ 2522.062175]  [<ffffffff813b23ab>] system_call_fastpath+0x16/0x1b
-May  4 16:03:00 an361 [ 2573.552054] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:04:00 an361 [ 2633.648092] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:04:09 an361 [ 2642.068130] INFO: task dd:3680 blocked for more than 120 seconds.
-May  4 16:04:09 an361 [ 2642.074231] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-May  4 16:04:09 an361 [ 2642.082065] dd              D ffff88019fc51f40     0  3680   3677 0x00000000
-May  4 16:04:09 an361 [ 2642.082073]  ffff88018f859cc8 0000000000000082 ffffffff81033836 ffff880198931690
-May  4 16:04:09 an361 [ 2642.089587]  ffff88018dbead20 ffff88018dbead20 0000000000011f40 ffff880198931690
-May  4 16:04:09 an361 [ 2642.097117]  ffff88018dbeb0d0 0000000000000002 ffff88018f859cf8 ffffffff813aa5a7
-May  4 16:04:09 an361 [ 2642.104628] Call Trace:
-May  4 16:04:09 an361 [ 2642.107091]  [<ffffffff81033836>] ? calc_load_account_idle+0xe/0x1d
-May  4 16:04:09 an361 [ 2642.113368]  [<ffffffff813aa5a7>] schedule+0x159/0x193
-May  4 16:04:09 an361 [ 2642.118514]  [<ffffffff813aa628>] io_schedule+0x47/0x61
-May  4 16:04:09 an361 [ 2642.123748]  [<ffffffff810c5afc>] sleep_on_page+0xe/0x12
-May  4 16:04:09 an361 [ 2642.129066]  [<ffffffff813aac0f>] __wait_on_bit+0x4a/0x7c
-May  4 16:04:09 an361 [ 2642.134473]  [<ffffffff810c5aee>] ? lock_page+0x2d/0x2d
-May  4 16:04:09 an361 [ 2642.139705]  [<ffffffff810c5d10>] wait_on_page_bit+0x74/0x7b
-May  4 16:04:09 an361 [ 2642.145375]  [<ffffffff810660df>] ? autoremove_wake_function+0x2b/0x2b
-May  4 16:04:09 an361 [ 2642.151904]  [<ffffffff810c5d3e>] wait_on_page_writeback+0x27/0x2b
-May  4 16:04:09 an361 [ 2642.158090]  [<ffffffff810c67d8>] filemap_fdatawait_range+0x68/0x147
-May  4 16:04:09 an361 [ 2642.164451]  [<ffffffff810c6988>] filemap_write_and_wait_range+0x43/0x56
-May  4 16:04:09 an361 [ 2642.171158]  [<ffffffff811357b8>] vfs_fsync_range+0x35/0x76
-May  4 16:04:09 an361 [ 2642.176737]  [<ffffffff81135858>] vfs_fsync+0x1c/0x1e
-May  4 16:04:09 an361 [ 2642.181796]  [<ffffffff8113588d>] do_fsync+0x33/0x49
-May  4 16:04:09 an361 [ 2642.186768]  [<ffffffff811358b6>] sys_fdatasync+0x13/0x17
-May  4 16:04:09 an361 [ 2642.192176]  [<ffffffff813b23ab>] system_call_fastpath+0x16/0x1b
-May  4 16:05:01 an361 [ 2693.744036] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:06:01 an361 [ 2753.840079] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:06:09 an361 [ 2762.198150] INFO: task dd:3680 blocked for more than 120 seconds.
-May  4 16:06:09 an361 [ 2762.204251] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-May  4 16:06:09 an361 [ 2762.212084] dd              D ffff88019fc51f40     0  3680   3677 0x00000000
-May  4 16:06:09 an361 [ 2762.212090]  ffff88018f859cc8 0000000000000082 ffffffff81033836 ffff880198931690
-May  4 16:06:09 an361 [ 2762.219608]  ffff88018dbead20 ffff88018dbead20 0000000000011f40 ffff880198931690
-May  4 16:06:09 an361 [ 2762.227104]  ffff88018dbeb0d0 0000000000000002 ffff88018f859cf8 ffffffff813aa5a7
-May  4 16:06:09 an361 [ 2762.234623] Call Trace:
-May  4 16:06:09 an361 [ 2762.237082]  [<ffffffff81033836>] ? calc_load_account_idle+0xe/0x1d
-May  4 16:06:09 an361 [ 2762.243354]  [<ffffffff813aa5a7>] schedule+0x159/0x193
-May  4 16:06:09 an361 [ 2762.248500]  [<ffffffff813aa628>] io_schedule+0x47/0x61
-May  4 16:06:09 an361 [ 2762.253734]  [<ffffffff810c5afc>] sleep_on_page+0xe/0x12
-May  4 16:06:09 an361 [ 2762.259054]  [<ffffffff813aac0f>] __wait_on_bit+0x4a/0x7c
-May  4 16:06:09 an361 [ 2762.264461]  [<ffffffff810c5aee>] ? lock_page+0x2d/0x2d
-May  4 16:06:09 an361 [ 2762.269695]  [<ffffffff810c5d10>] wait_on_page_bit+0x74/0x7b
-May  4 16:06:09 an361 [ 2762.275360]  [<ffffffff810660df>] ? autoremove_wake_function+0x2b/0x2b
-May  4 16:06:09 an361 [ 2762.281894]  [<ffffffff810c5d3e>] wait_on_page_writeback+0x27/0x2b
-May  4 16:06:09 an361 [ 2762.288080]  [<ffffffff810c67d8>] filemap_fdatawait_range+0x68/0x147
-May  4 16:06:09 an361 [ 2762.294438]  [<ffffffff810c6988>] filemap_write_and_wait_range+0x43/0x56
-May  4 16:06:09 an361 [ 2762.301143]  [<ffffffff811357b8>] vfs_fsync_range+0x35/0x76
-May  4 16:06:09 an361 [ 2762.306724]  [<ffffffff81135858>] vfs_fsync+0x1c/0x1e
-May  4 16:06:09 an361 [ 2762.311784]  [<ffffffff8113588d>] do_fsync+0x33/0x49
-May  4 16:06:09 an361 [ 2762.316757]  [<ffffffff811358b6>] sys_fdatasync+0x13/0x17
-May  4 16:06:09 an361 [ 2762.322163]  [<ffffffff813b23ab>] system_call_fastpath+0x16/0x1b
-May  4 16:07:01 an361 [ 2813.936115] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:08:01 an361 [ 2874.032097] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:09:01 an361 [ 2934.128133] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:09:33 an361 [ 2966.497102] libceph: osd34 172.17.40.30:6806 connection failed
-May  4 16:09:33 an361 [ 2966.571124] libceph: skipping osd9 172.17.40.23:6809 seq 1 expected 2
-May  4 16:10:36 an361 [ 3029.280179] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:11:36 an361 [ 3089.392225] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:12:36 an361 [ 3149.488096] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:13:36 an361 [ 3209.584074] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:14:36 an361 [ 3269.680098] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:15:37 an361 [ 3329.776047] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:16:37 an361 [ 3389.872029] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:17:37 an361 [ 3449.968039] libceph:  tid 8536 timed out on osd34, will reset osd
-May  4 16:18:07 an361 [ 3480.545137] libceph: osd34 172.17.40.30:6806 socket closed
-May  4 16:18:12 an361 [ 3485.024036] libceph:  tid 8545 timed out on osd9, will reset osd
+rbd create tmt --size 102400
 
 
-> 
-> Of course, we should be getting bad tags anyway, so something else is 
-> clearly wrong and may be contributing to both problems.  
-> 
-> How easy is this to reproduce?  It's right after a fresh connection, so 
-> the number of possibly offending code paths is pretty small, at least!
 
-I can reproduce this few times in an hour.  It feels racy; I.e.
-I can run the exact same test several times in a row, and sometimes
-I see this and other times I don't.
+2. Attach and make disk
 
-> 
-> There is client side debugging to turn on, but it's very chatty.  Maybe 
-> you can just enable a few key lines, like the connect handshake ones, and 
-> any point where we queue/send a tag.  It's a bit tedious to enable 
-> the individual dout lines in messenger.c, sadly, but unless you have a 
-> very fast netconsole or something that's probably the only way to go...
+modprobe rbd
 
-I'm happy to give this a try if you think it will help - can you
-point me at some instructions for what you'd like to see?
+echo "xx.xx.xx.xx name=admin rbd tmt" > /sys/bus/rbd/add
 
-Thanks -- Jim
+mkfs.ext4 -E lazy_itable_init=0 /dev/rbd0
 
-> 
-> sage
-> 
-> 
+mount /dev/rbd0 /mnt
 
+
+
+3. start test - start iozone + bonnie++ + rsync.
+
+root@stb1:/mnt# iozone -a -n4g -g20g
+         Iozone: Performance Test of File I/O
+                 Version $Revision: 3.373 $
+                 Compiled for 64 bit mode.
+                 Build: linux-AMD64
+[...]
+
+         Auto Mode
+         Using minimum file size of 4194304 kilobytes.
+         Using maximum file size of 20971520 kilobytes.
+         Command line used: iozone -a -n4g -g20g
+         Output is in Kbytes/sec
+         Time Resolution = 0.000001 seconds.
+         Processor cache size set to 1024 Kbytes.
+         Processor cache line size set to 32 bytes.
+         File stride size set to 17 * record size.
+                                                             random  
+random    bkwd   record   stride
+               KB  reclen   write rewrite    read    reread    read   
+write    read  rewrite     read   fwrite frewrite   fread  freread
+          4194304      64  120955   66607    25500    28465   14384   
+89028   42840  5504993    84387   111439   124649
+
+Error in file: Found ?170aba407000ffc? Expecting ?3a3a3a3a3a3a3a3a? addr 
+7fb85eb06000
+Error in file: Position 3984547840
+Record # 60799 Record size 64 kb
+where 7fb85eb06000 loop 24576
+root@stb1:/mnt#
+
+umount /mnt
+
+root@stb1:~# fsck -f /dev/rbd0
+fsck from util-linux-ng 2.17.2
+e2fsck 1.41.14 (22-Dec-2010)
+Pass 1: Checking inodes, blocks, and sizes
+Inode 1850570 is in use, but has dtime set.  Fix<y>? /dev/rbd0: e2fsck 
+canceled.
+root@stb1:~#
+
+
+
+So.
+
+No errors in logs on stb1
+
+But format /dev/rbd0 by ocfs2 and the same test make nice show in syslog 
+- very nicely fluttering out in all directions errors in all that you 
+can imagine. Like that:
+May  5 22:36:57 stb1 kernel: [13683.907928] BUG: Bad page state in 
+process iozone  pfn:5ba7e
+May  5 22:36:57 stb1 kernel: [13683.907936] page:ffffea000140cb90 
+count:1 mapcount:0 mapping:          (null) index:0xa0f63
+May  5 22:36:57 stb1 kernel: [13683.907941] page flags: 0x100000000000000()
+May  5 22:36:57 stb1 kernel: [13683.907945] Pid: 2752, comm: iozone Not 
+tainted 2.6.39-rc6-ufm #1
+May  5 22:36:57 stb1 kernel: [13683.907947] Call Trace:
+May  5 22:36:57 stb1 kernel: [13683.907953]  [<ffffffff8110e90b>] ? 
+dump_page+0x9b/0xd0
+May  5 22:36:57 stb1 kernel: [13683.907956]  [<ffffffff8110ea09>] 
+bad_page+0xc9/0x120
+May  5 22:36:57 stb1 kernel: [13683.907959]  [<ffffffff8110f258>] 
+get_page_from_freelist+0x6f8/0x7a0
+May  5 22:36:57 stb1 kernel: [13683.907963]  [<ffffffff8118dd74>] ? 
+__find_get_block_slow.clone.11+0x44/0x140
+May  5 22:36:57 stb1 kernel: [13683.907967]  [<ffffffff8110fb28>] 
+__alloc_pages_nodemask+0x118/0x8a0
+May  5 22:36:57 stb1 kernel: [13683.907971]  [<ffffffff81084517>] ? 
+bit_waitqueue+0x17/0xd0
+May  5 22:36:57 stb1 kernel: [13683.907973]  [<ffffffff8108463f>] ? 
+wake_up_bit+0x2f/0x40
+May  5 22:36:57 stb1 kernel: [13683.907976]  [<ffffffff8123dfa4>] ? 
+do_get_write_access+0x2e4/0x490
+May  5 22:36:57 stb1 kernel: [13683.907979]  [<ffffffff8123c807>] ? 
+start_this_handle.clone.7+0x417/0x4a0
+May  5 22:36:57 stb1 kernel: [13683.908000]  [<ffffffffa02b2492>] ? 
+ocfs2_inode_cache_unlock+0x12/0x20 [ocfs2]
+May  5 22:36:57 stb1 kernel: [13683.908004]  [<ffffffff81144b05>] 
+alloc_pages_current+0xa5/0x110
+May  5 22:36:57 stb1 kernel: [13683.908006]  [<ffffffff81107eef>] 
+__page_cache_alloc+0x8f/0xa0
+May  5 22:36:57 stb1 kernel: [13683.908009]  [<ffffffff8110895c>] 
+find_or_create_page+0x4c/0xb0
+May  5 22:36:57 stb1 kernel: [13683.908019]  [<ffffffffa0291c1d>] 
+ocfs2_write_begin_nolock+0x15dd/0x1bf0 [ocfs2]
+May  5 22:36:57 stb1 kernel: [13683.908032]  [<ffffffffa02b21e0>] ? 
+ocfs2_find_actor+0x140/0x140 [ocfs2]
+May  5 22:36:57 stb1 kernel: [13683.908043]  [<ffffffffa0292326>] 
+ocfs2_write_begin+0xf6/0x210 [ocfs2]
+May  5 22:36:57 stb1 kernel: [13683.908046]  [<ffffffff81107489>] 
+generic_file_buffered_write+0x109/0x250
+May  5 22:36:57 stb1 kernel: [13683.908059]  [<ffffffffa02b1d44>] 
+ocfs2_file_aio_write+0x7c4/0x810 [ocfs2]
+May  5 22:36:57 stb1 kernel: [13683.908070]  [<ffffffffa0292663>] ? 
+ocfs2_write_end_nolock+0x223/0x380 [ocfs2]
+May  5 22:36:57 stb1 kernel: [13683.908073]  [<ffffffff8115fcb2>] 
+do_sync_write+0xd2/0x110
+May  5 22:36:57 stb1 kernel: [13683.908077]  [<ffffffff812ab318>] ? 
+apparmor_file_permission+0x18/0x20
+May  5 22:36:57 stb1 kernel: [13683.908080]  [<ffffffff812770dc>] ? 
+security_file_permission+0x2c/0xb0
+May  5 22:36:57 stb1 kernel: [13683.908111]  [<ffffffff811600e1>] ? 
+rw_verify_area+0x61/0xf0
+May  5 22:36:57 stb1 kernel: [13683.908115]  [<ffffffff81160426>] 
+vfs_write+0xc6/0x180
+May  5 22:36:57 stb1 kernel: [13683.908117]  [<ffffffff81160741>] 
+sys_write+0x51/0x90
+May  5 22:36:57 stb1 kernel: [13683.908120]  [<ffffffff815d5b8e>] ? 
+common_interrupt+0xe/0x13
+May  5 22:36:57 stb1 kernel: [13683.908125]  [<ffffffff815dd902>] 
+system_call_fastpath+0x16/0x1b
+
+May  5 22:37:39 stb1 kernel: [13726.005858] BUG: Bad page state in 
+process swapper  pfn:22eff
+May  5 22:37:39 stb1 kernel: [13726.005866] page:ffffea00007a47c8 
+count:0 mapcount:-127 mapping:          (null) index:0xd9772
+May  5 22:37:39 stb1 kernel: [13726.005871] page flags: 0x100000000000000()
+May  5 22:37:39 stb1 kernel: [13726.005882] Pid: 0, comm: swapper 
+Tainted: G    B       2.6.39-rc6-ufm #1
+May  5 22:37:39 stb1 kernel: [13726.005884] Call Trace:
+May  5 22:37:39 stb1 kernel: [13726.005885] <IRQ>  [<ffffffff8110e90b>] 
+? dump_page+0x9b/0xd0
+May  5 22:37:39 stb1 kernel: [13726.005894]  [<ffffffff8110ea09>] 
+bad_page+0xc9/0x120
+May  5 22:37:39 stb1 kernel: [13726.005897]  [<ffffffff8110eb4f>] 
+free_pages_prepare+0xef/0x100
+May  5 22:37:39 stb1 kernel: [13726.005900]  [<ffffffff81110419>] 
+free_hot_cold_page+0x49/0x470
+May  5 22:37:39 stb1 kernel: [13726.005902]  [<ffffffff81113770>] 
+__put_single_page+0x20/0x30
+May  5 22:37:39 stb1 kernel: [13726.005904]  [<ffffffff811138bd>] 
+put_page+0x2d/0x40
+May  5 22:37:39 stb1 kernel: [13726.005909]  [<ffffffff8152a0d1>] 
+__pskb_trim_head+0xd1/0x120
+May  5 22:37:39 stb1 kernel: [13726.005911]  [<ffffffff8152ad70>] 
+tcp_trim_head+0x70/0x120
+May  5 22:37:39 stb1 kernel: [13726.005914]  [<ffffffff81526b47>] 
+tcp_ack+0x547/0x1de0
+May  5 22:37:39 stb1 kernel: [13726.005916]  [<ffffffff8152c100>] ? 
+tcp_write_xmit+0x1d0/0x990
+May  5 22:37:39 stb1 kernel: [13726.005920]  [<ffffffff8114fd60>] ? 
+kmem_cache_free+0x20/0x110
+May  5 22:37:39 stb1 kernel: [13726.005923]  [<ffffffff8152940d>] 
+tcp_rcv_established+0x44d/0x830
+May  5 22:37:39 stb1 kernel: [13726.005926]  [<ffffffff81530af9>] 
+tcp_v4_do_rcv+0x189/0x430
+May  5 22:37:39 stb1 kernel: [13726.005928]  [<ffffffff8153315c>] ? 
+tcp_v4_rcv+0x65c/0x900
+May  5 22:37:39 stb1 kernel: [13726.005932]  [<ffffffff8107d05f>] ? 
+queue_work+0x1f/0x30
+May  5 22:37:39 stb1 kernel: [13726.005935]  [<ffffffff81533149>] 
+tcp_v4_rcv+0x649/0x900
+May  5 22:37:39 stb1 kernel: [13726.005939]  [<ffffffff8150f72d>] 
+ip_local_deliver_finish+0xdd/0x2a0
+May  5 22:37:39 stb1 kernel: [13726.005941]  [<ffffffff8150fab8>] 
+ip_local_deliver+0x88/0x90
+May  5 22:37:39 stb1 kernel: [13726.005944]  [<ffffffff8150f401>] 
+ip_rcv_finish+0x141/0x390
+May  5 22:37:39 stb1 kernel: [13726.005946]  [<ffffffff8150fcdc>] 
+ip_rcv+0x21c/0x2e0
+May  5 22:37:39 stb1 kernel: [13726.005950]  [<ffffffff814dbe7b>] 
+__netif_receive_skb+0x55b/0x680
+May  5 22:37:39 stb1 kernel: [13726.005953]  [<ffffffff814dc308>] 
+netif_receive_skb+0x58/0x80
+May  5 22:37:39 stb1 kernel: [13726.005955]  [<ffffffff814dc470>] 
+napi_skb_finish+0x50/0x70
+May  5 22:37:39 stb1 kernel: [13726.005957]  [<ffffffff814dc9e5>] 
+napi_gro_receive+0xb5/0xc0
+May  5 22:37:39 stb1 kernel: [13726.005976]  [<ffffffffa003e3eb>] 
+e1000_receive_skb+0x5b/0x90 [e1000]
+May  5 22:37:39 stb1 kernel: [13726.005980]  [<ffffffffa0040c3e>] 
+e1000_clean_rx_irq+0x25e/0x4b0 [e1000]
+May  5 22:37:39 stb1 kernel: [13726.005983]  [<ffffffffa00417a9>] 
+e1000_clean+0x229/0x620 [e1000]
+May  5 22:37:39 stb1 kernel: [13726.005986]  [<ffffffff814dd41d>] ? 
+dev_hard_start_xmit+0x2cd/0x6d0
+May  5 22:37:39 stb1 kernel: [13726.005990]  [<ffffffff81036e39>] ? 
+default_spin_lock_flags+0x9/0x10
+May  5 22:37:39 stb1 kernel: [13726.005993]  [<ffffffff814dcbe8>] 
+net_rx_action+0x128/0x270
+May  5 22:37:39 stb1 kernel: [13726.005996]  [<ffffffff81069ea8>] 
+__do_softirq+0xa8/0x1c0
+May  5 22:37:39 stb1 kernel: [13726.005999]  [<ffffffff8102dc72>] ? 
+ack_apic_level+0x72/0x1a0
+May  5 22:37:39 stb1 kernel: [13726.006003]  [<ffffffff815deb1c>] 
+call_softirq+0x1c/0x30
+May  5 22:37:39 stb1 kernel: [13726.006006]  [<ffffffff8100d385>] 
+do_softirq+0x65/0xa0
+May  5 22:37:39 stb1 kernel: [13726.006008]  [<ffffffff8106a23e>] 
+irq_exit+0x8e/0xa0
+May  5 22:37:39 stb1 kernel: [13726.006010]  [<ffffffff815df376>] 
+do_IRQ+0x66/0xe0
+May  5 22:37:39 stb1 kernel: [13726.006013]  [<ffffffff815d5b93>] 
+common_interrupt+0x13/0x13
+May  5 22:37:39 stb1 kernel: [13726.006014] <EOI>  [<ffffffff810360cb>] 
+? native_safe_halt+0xb/0x10
+May  5 22:37:39 stb1 kernel: [13726.006020]  [<ffffffff81012f31>] 
+default_idle+0x41/0xe0
+May  5 22:37:39 stb1 kernel: [13726.006023]  [<ffffffff8100a266>] 
+cpu_idle+0xa6/0xf0
+May  5 22:37:39 stb1 kernel: [13726.006027]  [<ffffffff815b4dc5>] 
+rest_init+0x75/0x80
+May  5 22:37:39 stb1 kernel: [13726.006031]  [<ffffffff81adfc38>] 
+start_kernel+0x3e1/0x3ec
+May  5 22:37:39 stb1 kernel: [13726.006034]  [<ffffffff81adf347>] 
+x86_64_start_reservations+0x132/0x136
+May  5 22:37:39 stb1 kernel: [13726.006036]  [<ffffffff81adf44c>] 
+x86_64_start_kernel+0x101/0x110
+
+May  5 22:37:39 stb1 kernel: [13726.049368] BUG: Bad page state in 
+process rs:main Q:Reg  pfn:7b6e2
+May  5 22:37:39 stb1 kernel: [13726.049376] page:ffffea0001b00170 
+count:0 mapcount:-127 mapping:          (null) index:0xda771
+May  5 22:37:39 stb1 kernel: [13726.049381] page flags: 0x100000000000000()
+May  5 22:37:39 stb1 kernel: [13726.049385] Pid: 2683, comm: rs:main 
+Q:Reg Tainted: G    B       2.6.39-rc6-ufm #1
+May  5 22:37:39 stb1 kernel: [13726.049387] Call Trace:
+May  5 22:37:39 stb1 kernel: [13726.049388] <IRQ>  [<ffffffff8110e90b>] 
+? dump_page+0x9b/0xd0
+May  5 22:37:39 stb1 kernel: [13726.049397]  [<ffffffff8110ea09>] 
+bad_page+0xc9/0x120
+May  5 22:37:39 stb1 kernel: [13726.049399]  [<ffffffff8110eb4f>] 
+free_pages_prepare+0xef/0x100
+May  5 22:37:39 stb1 kernel: [13726.049403]  [<ffffffff81110419>] 
+free_hot_cold_page+0x49/0x470
+May  5 22:37:39 stb1 kernel: [13726.049405]  [<ffffffff81113770>] 
+__put_single_page+0x20/0x30
+May  5 22:37:39 stb1 kernel: [13726.049407]  [<ffffffff811138bd>] 
+put_page+0x2d/0x40
+May  5 22:37:39 stb1 kernel: [13726.049411]  [<ffffffff814cecc4>] 
+skb_release_data+0xb4/0xe0
+May  5 22:37:39 stb1 kernel: [13726.049413]  [<ffffffff814ced0e>] 
+__kfree_skb+0x1e/0xa0
+May  5 22:37:39 stb1 kernel: [13726.049417]  [<ffffffff81526a44>] 
+tcp_ack+0x444/0x1de0
+May  5 22:37:39 stb1 kernel: [13726.049420]  [<ffffffff8152bfa6>] ? 
+tcp_write_xmit+0x76/0x990
+May  5 22:37:39 stb1 kernel: [13726.049429]  [<ffffffffa014f001>] ? 
+put_osd_con+0x11/0x20 [libceph]
+May  5 22:37:39 stb1 kernel: [13726.049431]  [<ffffffff8152940d>] 
+tcp_rcv_established+0x44d/0x830
+May  5 22:37:39 stb1 kernel: [13726.049435]  [<ffffffff81530af9>] 
+tcp_v4_do_rcv+0x189/0x430
+May  5 22:37:39 stb1 kernel: [13726.049438]  [<ffffffff8153315c>] ? 
+tcp_v4_rcv+0x65c/0x900
+May  5 22:37:39 stb1 kernel: [13726.049441]  [<ffffffff81533149>] 
+tcp_v4_rcv+0x649/0x900
+May  5 22:37:39 stb1 kernel: [13726.049445]  [<ffffffff8150f72d>] 
+ip_local_deliver_finish+0xdd/0x2a0
+May  5 22:37:39 stb1 kernel: [13726.049448]  [<ffffffff8150fab8>] 
+ip_local_deliver+0x88/0x90
+May  5 22:37:39 stb1 kernel: [13726.049450]  [<ffffffff8150f401>] 
+ip_rcv_finish+0x141/0x390
+May  5 22:37:39 stb1 kernel: [13726.049452]  [<ffffffff8150fcdc>] 
+ip_rcv+0x21c/0x2e0
+May  5 22:37:39 stb1 kernel: [13726.049456]  [<ffffffff814dbe7b>] 
+__netif_receive_skb+0x55b/0x680
+May  5 22:37:39 stb1 kernel: [13726.049459]  [<ffffffff814dc308>] 
+netif_receive_skb+0x58/0x80
+May  5 22:37:39 stb1 kernel: [13726.049461]  [<ffffffff814dc470>] 
+napi_skb_finish+0x50/0x70
+May  5 22:37:39 stb1 kernel: [13726.049463]  [<ffffffff814dc9e5>] 
+napi_gro_receive+0xb5/0xc0
+May  5 22:37:39 stb1 kernel: [13726.049470]  [<ffffffffa003e3eb>] 
+e1000_receive_skb+0x5b/0x90 [e1000]
+May  5 22:37:39 stb1 kernel: [13726.049474]  [<ffffffffa0040c3e>] 
+e1000_clean_rx_irq+0x25e/0x4b0 [e1000]
+May  5 22:37:39 stb1 kernel: [13726.049477]  [<ffffffffa00417a9>] 
+e1000_clean+0x229/0x620 [e1000]
+May  5 22:37:39 stb1 kernel: [13726.049482]  [<ffffffff81053412>] ? 
+update_shares+0xc2/0x110
+May  5 22:37:39 stb1 kernel: [13726.049484]  [<ffffffff814dcbe8>] 
+net_rx_action+0x128/0x270
+May  5 22:37:39 stb1 kernel: [13726.049488]  [<ffffffff81069ea8>] 
+__do_softirq+0xa8/0x1c0
+May  5 22:37:39 stb1 kernel: [13726.049491]  [<ffffffff8102dc72>] ? 
+ack_apic_level+0x72/0x1a0
+May  5 22:37:39 stb1 kernel: [13726.049495]  [<ffffffff815deb1c>] 
+call_softirq+0x1c/0x30
+May  5 22:37:39 stb1 kernel: [13726.049497]  [<ffffffff8100d385>] 
+do_softirq+0x65/0xa0
+May  5 22:37:39 stb1 kernel: [13726.049500]  [<ffffffff8106a23e>] 
+irq_exit+0x8e/0xa0
+May  5 22:37:39 stb1 kernel: [13726.049502]  [<ffffffff815df376>] 
+do_IRQ+0x66/0xe0
+May  5 22:37:39 stb1 kernel: [13726.049505]  [<ffffffff815d5b93>] 
+common_interrupt+0x13/0x13
+May  5 22:37:39 stb1 kernel: [13726.049506] <EOI>  [<ffffffff811fdece>] 
+? ext4_mark_iloc_dirty+0xae/0x5c0
+May  5 22:37:39 stb1 kernel: [13726.049512]  [<ffffffff811fdea8>] ? 
+ext4_mark_iloc_dirty+0x88/0x5c0
+May  5 22:37:39 stb1 kernel: [13726.049515]  [<ffffffff812035ed>] ? 
+ext4_dirty_inode+0x3d/0x60
+May  5 22:37:39 stb1 kernel: [13726.049517]  [<ffffffff811fe501>] 
+ext4_mark_inode_dirty+0x81/0x210
+May  5 22:37:39 stb1 kernel: [13726.049521]  [<ffffffff81218f59>] ? 
+ext4_journal_start_sb+0x69/0x170
+May  5 22:37:39 stb1 kernel: [13726.049525]  [<ffffffff8118cefe>] ? 
+__block_commit_write.clone.12+0x8e/0xd0
+May  5 22:37:39 stb1 kernel: [13726.049528]  [<ffffffff812035ed>] 
+ext4_dirty_inode+0x3d/0x60
+May  5 22:37:39 stb1 kernel: [13726.049530]  [<ffffffff81186580>] 
+__mark_inode_dirty+0x40/0x210
+May  5 22:37:39 stb1 kernel: [13726.049533]  [<ffffffff8118f1ab>] 
+generic_write_end+0x6b/0xa0
+May  5 22:37:39 stb1 kernel: [13726.049535]  [<ffffffff8120216b>] 
+ext4_da_write_end+0xdb/0x340
+May  5 22:37:39 stb1 kernel: [13726.049538]  [<ffffffff811074fb>] 
+generic_file_buffered_write+0x17b/0x250
+May  5 22:37:39 stb1 kernel: [13726.049541]  [<ffffffff810685f6>] ? 
+current_fs_time+0x16/0x60
+May  5 22:37:39 stb1 kernel: [13726.049544]  [<ffffffff81109159>] 
+__generic_file_aio_write+0x229/0x440
+May  5 22:37:39 stb1 kernel: [13726.049546]  [<ffffffff811093df>] 
+generic_file_aio_write+0x6f/0xe0
+May  5 22:37:39 stb1 kernel: [13726.049549]  [<ffffffff811f7739>] 
+ext4_file_write+0x69/0x280
+May  5 22:37:39 stb1 kernel: [13726.049553]  [<ffffffff8115fcb2>] 
+do_sync_write+0xd2/0x110
+[...]
+and so on.
+
+WBR,
+     Fyodor.
 
