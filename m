@@ -1,49 +1,62 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: Kernel 2.6.38.6 page allocation failure (ixgbe)
-Date: Tue, 10 May 2011 07:26:13 -0700
-Message-ID: <BANLkTimjVsfWg1Anz44ek-Stsgvu=1f36A@mail.gmail.com>
-References: <BANLkTinr34qmAE8RWVY0Wq_XMfOc0jTUzg@mail.gmail.com>
-	<BANLkTi=4DNyWaqqjK5sG5O9cNdfpuAqHWA@mail.gmail.com>
+From: Simon Tian <aixt2006@gmail.com>
+Subject: Re: rbd create error with 0.26
+Date: Tue, 10 May 2011 22:29:07 +0800
+Message-ID: <BANLkTi=Qo2_MKVuZPtTWp8NK6sj=hrJ_Og@mail.gmail.com>
+References: <BANLkTim4GDuiVLaX2khWqRF310VJnSEG4Q@mail.gmail.com>
+	<BANLkTik7eFyp_7X=U5dZ=O5KdCQvyWQ+Sw@mail.gmail.com>
+	<BANLkTing1pYepM0F9nrewq9vyfF77Z8yJg@mail.gmail.com>
+	<BANLkTinNS5Zhnccwgxt2SBwjS+c18cr4jg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BANLkTi=4DNyWaqqjK5sG5O9cNdfpuAqHWA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Majer <stefan.majer@gmail.com>
-Cc: linux-net@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:41633 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751655Ab1EJO3J convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2011 10:29:09 -0400
+Received: by wwa36 with SMTP id 36so6936432wwa.1
+        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 07:29:07 -0700 (PDT)
+In-Reply-To: <BANLkTinNS5Zhnccwgxt2SBwjS+c18cr4jg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, May 10, 2011 at 7:20 AM, Yehuda Sadeh Weinraub
-<yehudasa@gmail.com> wrote:
-> On Tue, May 10, 2011 at 7:04 AM, Stefan Majer <stefan.majer@gmail.com> wrote:
->> Hi,
+YES!! After try several times if I create a rbd, one of the cosd will c=
+oredump.
+
+
+2011/5/10 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
+> On Tue, May 10, 2011 at 6:39 AM, Simon Tian <aixt2006@gmail.com> wrot=
+e:
+>> Sorry, I didn't learn the wiki carefullllllly..
 >>
->> im running 4 nodes with ceph on top of btrfs with a dualport Intel
->> X520 10Gb Ethernet Card with the latest 3.3.9 ixgbe driver.
->> during benchmarks i get the following stack.
->> I can easily reproduce this by simply running rados bench from a fast
->> machine using this 4 nodes as ceph cluster.
->> We saw this with stock ixgbe driver from 2.6.38.6 and with the latest
->> 3.3.9 ixgbe.
->> This kernel is tainted because we use fusion-io iodrives as journal
->> devices for btrfs.
->>
->> Any hints to nail this down are welcome.
->>
->> Greetings Stefan Majer
->>
->> May 10 15:26:40 os02 kernel: [ 3652.485219] cosd: page allocation
->> failure. order:2, mode:0x4020
+>> There is another problem:
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
+>> [root@mon-00 ~]# rbd create foo --size 1024
+>> 2011-05-11 02:37:15.400313 42d6a940 -- 10.250.6.98:0/1010326 >>
+>> 10.250.6.30:6801/3051 pipe(0x63f140 sd=3D6 pgs=3D0 cs=3D0 l=3D0).fau=
+lt first
+>> fault
 >
-> It looks like the machine running the cosd is crashing, is that the case?
-> Are you running both ceph kernel module on the same machine by any
-
-that should be "both the osd and the kernel module"
-
-> chance? If not, it can be some other fs bug (e.g., the underlying
-> btrfs). Also, the stack here is quite deep, there's a chance for a
-> stack overflow.
+> This looks like your osd is not reachable, might have crashed?
+>
+>> terminate called after throwing an instance of 'ceph::buffer::end_of=
+_buffer'
+>> =C2=A0what(): =C2=A0buffer::end_of_buffer
+>> *** Caught signal (Aborted) **
+>
+> This shouldn't happen anyway, but probably bad error handling. Can yo=
+u
+> verify whether one of the daemons went down?
 >
 > Thanks,
 > Yehuda
 >
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
