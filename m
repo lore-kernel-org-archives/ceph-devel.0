@@ -1,57 +1,53 @@
-From: Simon Tian <aixt2006@gmail.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 Subject: Re: rbd create error with 0.26
-Date: Tue, 10 May 2011 21:50:10 +0800
-Message-ID: <BANLkTimfL1TafAmGHNx11otRzPQynMjrOQ@mail.gmail.com>
+Date: Tue, 10 May 2011 06:59:56 -0700
+Message-ID: <BANLkTinNS5Zhnccwgxt2SBwjS+c18cr4jg@mail.gmail.com>
 References: <BANLkTim4GDuiVLaX2khWqRF310VJnSEG4Q@mail.gmail.com>
-	<loom.20110510T134503-22@post.gmane.org>
+	<BANLkTik7eFyp_7X=U5dZ=O5KdCQvyWQ+Sw@mail.gmail.com>
+	<BANLkTing1pYepM0F9nrewq9vyfF77Z8yJg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:53090 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932246Ab1EJNuL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2011 09:50:11 -0400
-Received: by wwa36 with SMTP id 36so6894337wwa.1
-        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 06:50:10 -0700 (PDT)
-In-Reply-To: <loom.20110510T134503-22@post.gmane.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:53597 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932246Ab1EJN75 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2011 09:59:57 -0400
+Received: by bwz15 with SMTP id 15so4857607bwz.19
+        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 06:59:56 -0700 (PDT)
+In-Reply-To: <BANLkTing1pYepM0F9nrewq9vyfF77Z8yJg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
+To: Simon Tian <aixt2006@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-2011/5/10 Fyodor Ustinov <ufm@ufm.su>:
-> Simon Tian <aixt2006 <at> gmail.com> writes:
+On Tue, May 10, 2011 at 6:39 AM, Simon Tian <aixt2006@gmail.com> wrote:
+> Sorry, I didn't learn the wiki carefullllllly..
 >
->> [root <at> mon-00 ~]# cclass -a
->> [root <at> mon-00 ~]# ceph class list
->
-> Do you forget "ceph class activate rbd 1.3" ?
->
+> There is another problem:
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
+> [root@mon-00 ~]# rbd create foo --size 1024
+> 2011-05-11 02:37:15.400313 42d6a940 -- 10.250.6.98:0/1010326 >>
+> 10.250.6.30:6801/3051 pipe(0x63f140 sd=3D6 pgs=3D0 cs=3D0 l=3D0).faul=
+t first
+> fault
 
-As the log show, the rbd 1.3 is already active:
+This looks like your osd is not reachable, might have crashed?
 
-[root@mon-00 ~]# rbd create foo --size 1024
-2011-05-11 05:46:59.074470 42fb0940 -- 10.250.6.98:0/1014581 >>
-10.250.6.30:6801/3240 pipe(0x63ee70 sd=5 pgs=0 cs=0 l=0).fault first
-fault
+> terminate called after throwing an instance of 'ceph::buffer::end_of_=
+buffer'
+> =A0what(): =A0buffer::end_of_buffer
+> *** Caught signal (Aborted) **
 
+This shouldn't happen anyway, but probably bad error handling. Can you
+verify whether one of the daemons went down?
 
-Thx!
-
-Simon
-
-
-[root@mon-00 ~]# cclass -a
-Loading class: /usr/local/lib/rados-classes/libcls_rbd.so.1.0.0: rbd 1.3 x86-64
-2011-05-10 17:36:37.657254 7eff9cfc36f0 read 184650 bytes from
-/usr/local/lib/rados-classes/libcls_rbd.so.1.0.0
-2011-05-10 17:36:37.658820 mon <- [class,add,rbd,1.3,x86-64,changed]
-2011-05-10 17:36:37.749791 mon0 -> 'updated' (0)
-[root@mon-00 ~]# ceph class list
-2011-05-10 17:36:45.176860 mon <- [class,list]
-2011-05-10 17:36:45.177511 mon1 -> 'installed classes:
-rbd (v1.3 [x86-64]) [active]
-                            ^^^^^^^
-' (0)
-
-After I done "ceph class activate rbd 1.3" , It
+Thanks,
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
