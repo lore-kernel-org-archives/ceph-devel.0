@@ -1,36 +1,158 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: rbd create error with 0.26
-Date: Tue, 10 May 2011 11:47:01 +0000 (UTC)
-Message-ID: <loom.20110510T134503-22@post.gmane.org>
-References: <BANLkTim4GDuiVLaX2khWqRF310VJnSEG4Q@mail.gmail.com>
+From: Mark Nigh <mnigh@netelligent.com>
+Subject: RE: Unable to Add Monitor
+Date: Tue, 10 May 2011 08:24:48 -0500
+Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C67886112890@NC-SVR-09.netelligent.com>
+References: <B828A4C02BE12543ACDFCF7EB0C693C67885FC7D23@NC-SVR-09.netelligent.com>
+ <BANLkTik5FbaysoFYV-XzKX1T+K8gPAsWzQ@mail.gmail.com>
+ <B828A4C02BE12543ACDFCF7EB0C693C67885FC7DC9@NC-SVR-09.netelligent.com>
+ <BANLkTim9qp_pgi0H9a93vQtUWrp4eY0H2g@mail.gmail.com>
+ <B828A4C02BE12543ACDFCF7EB0C693C6788611286A@NC-SVR-09.netelligent.com>
+ <Pine.LNX.4.64.1105092138440.32068@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:51603 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753264Ab1EJLrR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 10 May 2011 07:47:17 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1QJlPH-00037S-NV
-	for ceph-devel@vger.kernel.org; Tue, 10 May 2011 13:47:15 +0200
-Received: from 94.232.181.14 ([94.232.181.14])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 13:47:15 +0200
-Received: from ufm by 94.232.181.14 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 13:47:15 +0200
+Received: from smtp2.netelligent.com ([199.255.228.152]:57592 "EHLO
+	NC-SVR-132.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754036Ab1EJNZM convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 10 May 2011 09:25:12 -0400
+In-Reply-To: <Pine.LNX.4.64.1105092138440.32068@cobra.newdream.net>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Gregory Farnum <gregf@hq.newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Simon Tian <aixt2006 <at> gmail.com> writes:
+Thanks, that did it. I didn't realize that the osd's were that full, so I have deleted some redundant data I had in the file system so that I can test.
 
-> [root <at> mon-00 ~]# cclass -a
-> [root <at> mon-00 ~]# ceph class list
+I will now trying adding the second and third monitors to the cluster.
 
-Do you forget "ceph class activate rbd 1.3" ?
+On Mon, 9 May 2011, Mark Nigh wrote:
+> I was able to get the monitor back up and working (I think) under the
+> old name but when I issue the ceph -s I receive the following and my
+> clients are not able to mount ceph.
+>
+> 2011-05-09 22:59:00.052600    pg v75444: 2112 pgs: 2112 active+clean; 628 GB data, 1280 GB used, 315 GB / 1640 GB avail
+> 2011-05-09 22:59:00.056777   mds e32: 1/1/1 up {0=up:replay}, 1 up:standby
+> 2011-05-09 22:59:00.056823   osd e240: 24 osds: 24 up, 24 in full
+                                                               ^^^^
 
+means the object store is flaggd as "full."  This is done by the monitor
+one utilization crosses a threshold, 95% by default.  You can change this
+by setting
 
+        mon osd full ratio = 98   ; for 98%
+
+and restarting the monitor.  I would be extremely wary of running that
+close to full, though: the data balancing is probabilitistic, not
+explicit, and you will start to get failed writes and osd failures if any
+one of fills up an gets a write it can't honor.  You can either remove
+some data or add more OSDs to balance out the data.
+
+(The MDS sticks in the replay state because it's osd requests look like
+writes (in v0.26) to ensure they order against the failed MDS; that
+behavior is a bit different in the latest code and it gets past replay,
+but the MDS will still fail to fully recover if it can't write.)
+
+> 2011-05-09 22:59:00.056930   log 2011-05-09 22:49:17.882048 mon0 10.6.1.90:6789/0 6 : [INF] mds? 10.6.1.91:6800/726 up:boot
+> 2011-05-09 22:59:00.057025   mon e8: 1 mons at {0=10.6.1.90:6789/0}
+
+>
+> The mds log since the start of the replay (I don't have much debugging turned on)
+>
+> 2011-05-09 22:47:10.201131 7f38da8ad700 mds0.8 handle_mds_map i am now mds0.8
+> 2011-05-09 22:47:10.201152 7f38da8ad700 mds0.8 handle_mds_map state change up:standby --> up:replay
+> 2011-05-09 22:47:10.201160 7f38da8ad700 mds0.8 replay_start
+> 2011-05-09 22:47:10.201173 7f38da8ad700 mds0.8  recovery set is
+> 2011-05-09 22:47:10.201182 7f38da8ad700 mds0.8  need osdmap epoch 240, have 240
+> 2011-05-09 22:47:10.210009 7f38da8ad700 mds0.cache handle_mds_failure mds0 : recovery peers are
+> 2011-05-09 22:47:10.210048 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.95:6806/10444
+> 2011-05-09 22:47:10.210058 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.97:6809/4059
+> 2011-05-09 22:47:10.210067 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.93:6800/12578
+> 2011-05-09 22:47:10.210077 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.96:6806/10012
+> 2011-05-09 22:47:10.216643 7f38da8ad700 mds0.objecter  FULL, paused modify 0x1f73480 tid 6
+> 2011-05-09 22:47:10.216697 7f38da8ad700 mds0.objecter  FULL, paused modify 0x1f73360 tid 7
+> 2011-05-09 22:47:10.217153 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.95:6809/10765
+> 2011-05-09 22:47:10.217310 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.94:6803/13715
+> 2011-05-09 23:02:10.223265 7f38da8ad700 mds0.8 ms_handle_reset on 10.6.1.97:6809/4059
+> 2011-05-09 23:02:10.223960 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.97:6809/4059
+> 2011-05-09 23:02:10.226830 7f38da8ad700 mds0.8 ms_handle_reset on 10.6.1.95:6806/10444
+> 2011-05-09 23:02:10.226878 7f38da8ad700 mds0.8 ms_handle_reset on 10.6.1.96:6806/10012
+> 2011-05-09 23:02:10.227404 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.95:6806/10444
+> 2011-05-09 23:02:10.227478 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.96:6806/10012
+> 2011-05-09 23:02:10.286778 7f38da8ad700 mds0.8 ms_handle_reset on 10.6.1.93:6800/12578
+> 2011-05-09 23:02:10.287377 7f38da8ad700 mds0.8 ms_handle_connect on 10.6.1.93:6800/12578
+>
+> Thanks for your assistance.
+>
+> Ah, yeah, it sounds like you broke your mon map by trying to change
+> the name of your active monitor. I'm pretty sure to make that work you
+> would need to add the monitor under the new name and then remove the
+> old name!
+>
+> Let us know if you run into any other trouble, you're probably
+> touching a lot of failure conditions here that we don't normally run
+> into. :)
+> -Greg
+>
+> On Mon, May 9, 2011 at 11:27 AM, Mark Nigh <mnigh@netelligent.com> wrote:
+> >
+> > On Mon, May 9, 2011 at 7:22 AM, Mark Nigh <mnigh@netelligent.com> wrote:
+> >> I have been testing Ceph for several months now but with only 2 mds and 1 mon. I would like to test failover between mon so I am trying to add the first (1st) of two (2) mon on the other mds in the cluster.
+> >>
+> >> I also noticed that the mon naming has been changed from numerics to names so I am trying to change that also.
+> >>
+> >> My Process:
+> >>
+> >> On the first mon, I get an error when issuing this command "ceph mon add beta 10.6.1.91:6789"
+> >>
+> >> I receive the following error as it repeats:
+> >>
+> >> 2011-05-09 09:17:05.500353 7f9248ab0700 -- :/28272 >> 10.6.1.91:6789/0 pipe(0x2167010 sd=3 pgs=0 cs=0 l=0).fault first fault
+> > This error generally means that the daemon can't communicate with its
+> > target -- in this case, 10.6.1.91:6789. Do you already have mon.beta
+> > in your ceph.conf? It looks like ceph tool is trying to issue its
+> > commands to that monitor.
+> > You can specify which monitor to connect to using the -m switch:
+> > ceph -m 10.6.1.90:6789 mon add beta 10.6.1.91:6789
+> > (assuming there that mon.alpha is using address 10.6.1.90:6789).
+> >
+> > When I run this command on the original monitor it just hangs. If I run the command, "ceph mon add msd1 10.6.1.91:6789, I receive the following message:
+> >
+> > Mds1 is the hostname of the second monitor.
+> >
+> > 2011-05-09 12:28:01.823280 7ff64926d700 -- 10.6.1.90:0/26252 >> 10.6.1.91:6789/0 pipe(0x16168f0 sd=3 pgs=0 cs=0 l=0).fault first fault
+> > 2011-05-09 12:28:07.823488 7ff64d242700 -- 10.6.1.90:0/26252 >> 10.6.1.91:6789/0 pipe(0x16168f0 sd=3 pgs=0 cs=0 l=0).fault first fault
+> >
+> > When I try to run the service ceph start mon.1 command on the 2nd monitor:
+> >
+> > mon.1 does not exist in monmap
+> >
+> >> When I try to start the monitor service on beta I get the following error:
+> >>
+> >> === mon.beta ===
+> >> Starting Ceph mon.beta on mds1...
+> >>  ** WARNING: Ceph is still under heavy development, and is only suitable for **
+> >>  **          testing and review.  Do not trust it with important data.       **
+> >> unable to read magic from mon data.. did you run mkcephfs?
+> >> failed: ' /usr/bin/cmon -i beta -c /etc/ceph/ceph.conf '
+> > Did you follow the directions at
+> > http://ceph.newdream.net/wiki/Monitor_cluster_expansion?
+> >
+> > Yes, I believe it maybe that I tried to change the ceph.conf file from mon.0 and mon.1 to mon.alpha and mon.beta as the wiki states. For now, I thought I would revert back to the mon.0 and mon.1 naming convention to eliminate the number of changes.
+> >
+> > -Greg
+> >
+> > This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
+> >
+>
+> This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+
+This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
