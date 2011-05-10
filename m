@@ -1,190 +1,289 @@
-From: Brian Chrisman <brchrisman@gmail.com>
-Subject: [PATCH 2/2] expand testceph to check xattrs
-Date: Tue, 10 May 2011 12:38:49 -0700
-Message-ID: <1305056329-482-3-git-send-email-brchrisman@gmail.com>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: [PATCH 1/2] support for xattrs in libceph
+Date: Tue, 10 May 2011 12:44:50 -0700
+Message-ID: <BANLkTin=Pmsb2v5J+OPS_f5kW6ZCyN=xSQ@mail.gmail.com>
 References: <1305056329-482-1-git-send-email-brchrisman@gmail.com>
+	<1305056329-482-2-git-send-email-brchrisman@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:47790 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750986Ab1EJTlj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2011 15:41:39 -0400
-Received: by mail-pz0-f46.google.com with SMTP id 9so2966074pzk.19
-        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 12:41:39 -0700 (PDT)
-In-Reply-To: <1305056329-482-1-git-send-email-brchrisman@gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:39333 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750792Ab1EJTox convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2011 15:44:53 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id F2B2DC068
+	for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 12:44:52 -0700 (PDT)
+Received: from mail-ew0-f46.google.com (mail-ew0-f46.google.com [209.85.215.46])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 7C165C066
+	for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 12:44:52 -0700 (PDT)
+Received: by ewy4 with SMTP id 4so1932557ewy.19
+        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 12:44:50 -0700 (PDT)
+In-Reply-To: <1305056329-482-2-git-send-email-brchrisman@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Brian Chrisman <brchrisman@gmail.com>
+To: Brian Chrisman <brchrisman@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
+What are the 'l'-prefixed functions for? They look like they're just
+duplicates except for the prefix.
+-Greg
 
-Signed-off-by: Brian Chrisman <brchrisman@gmail.com>
----
- src/client/testceph.cc |   74 +++++++++++++++++++++++++++++++++++++++++++++++-
- 1 files changed, 73 insertions(+), 1 deletions(-)
-
-diff --git a/src/client/testceph.cc b/src/client/testceph.cc
-index 1bbd81d..da4b7a2 100644
---- a/src/client/testceph.cc
-+++ b/src/client/testceph.cc
-@@ -14,9 +14,13 @@
- 
- #include "common/errno.h"
- #include "include/ceph/libceph.h"
-+#include <stdlib.h>
- 
- #include <errno.h>
- #include <iostream>
-+#include <fcntl.h>
-+#include <sys/xattr.h>
-+#include <string.h>
- 
- using std::cout;
- using std::cerr;
-@@ -24,16 +28,19 @@ using std::cerr;
- int main(int argc, const char **argv)
- {
-   struct ceph_mount_info *cmount;
-+    cout << "calling ceph_create..." << std::endl;
-   int ret = ceph_create(&cmount, NULL);
-   if (ret) {
-     cerr << "ceph_create failed with error: " << ret << std::endl;
-     return 1;
-   }
--
-+    cout << "calling ceph_conf_read_file..." << ret << std::endl;
-   ceph_conf_read_file(cmount, NULL);
-+    cout << "calling ceph_conf_parse_argv..." << ret << std::endl;
-   ceph_conf_parse_argv(cmount, argc, argv);
- 
-   char buf[128];
-+    cout << "calling ceph_conf_get..." << ret << std::endl;
-   ret = ceph_conf_get(cmount, "log file", buf, sizeof(buf));
-   if (ret) {
-     cerr << "ceph_conf_get(\"log file\") failed with error " << ret << std::endl;
-@@ -49,18 +56,23 @@ int main(int argc, const char **argv)
-   }
-   cout << "Successfully mounted Ceph!" << std::endl;
- 
-+  // what if foo is already there???
-   struct ceph_dir_result *foo_dir;
-   ret = ceph_opendir(cmount, "foo", &foo_dir);
-   if (ret != -ENOENT) {
-     cerr << "ceph_opendir error: unexpected result from trying to open foo: "
- 	 << cpp_strerror(ret) << std::endl;
-     return 1;
-+  } else {
-+    cout << "ceph_opendir: success" << std::endl;
-   }
- 
-   ret = ceph_mkdir(cmount, "foo",  0777);
-   if (ret) {
-     cerr << "ceph_mkdir error: " << cpp_strerror(ret) << std::endl;
-     return 1;
-+  } else {
-+    cout << "ceph_mkdir: success" << std::endl;
-   }
- 
-   struct stat stbuf;
-@@ -68,39 +80,99 @@ int main(int argc, const char **argv)
-   if (ret) {
-     cerr << "ceph_lstat error: " << cpp_strerror(ret) << std::endl;
-     return 1;
-+  } else {
-+    cout << "ceph_lstat: success" << std::endl;
-   }
- 
-   if (!S_ISDIR(stbuf.st_mode)) {
-     cerr << "ceph_lstat(foo): foo is not a directory? st_mode = "
- 	 << stbuf.st_mode << std::endl;
-     return 1;
-+  } else {
-+    cout << "ceph_lstat: mode success" << std::endl;
-   }
- 
-   ret = ceph_rmdir(cmount, "foo");
-   if (ret) {
-     cerr << "ceph_rmdir error: " << cpp_strerror(ret) << std::endl;
-     return 1;
-+  } else {
-+    cout << "ceph_rmdir: success" << std::endl;
-   }
- 
-   ret = ceph_mkdirs(cmount, "foo/bar/baz",  0777);
-   if (ret) {
-     cerr << "ceph_mkdirs error: " << cpp_strerror(ret) << std::endl;
-     return 1;
-+  } else {
-+    cout << "ceph_mkdirs: success" << std::endl;
-   }
-   ret = ceph_rmdir(cmount, "foo/bar/baz");
-   if (ret) {
-     cerr << "ceph_rmdir error: " << cpp_strerror(ret) << std::endl;
-     return 1;
-+  } else {
-+    cout << "ceph_rmdir: success" << std::endl;
-   }
-   ret = ceph_rmdir(cmount, "foo/bar");
-   if (ret) {
-     cerr << "ceph_rmdir error: " << cpp_strerror(ret) << std::endl;
-     return 1;
-+  } else {
-+    cout << "ceph_rmdir: success" << std::endl;
-   }
-   ret = ceph_rmdir(cmount, "foo");
-   if (ret) {
-     cerr << "ceph_rmdir error: " << cpp_strerror(ret) << std::endl;
-     return 1;
-+  } else {
-+    cout << "ceph_rmdir: success" << std::endl;
-+  }
-+  ret = ceph_open(cmount, "barfile", O_CREAT, 0666);
-+  if (ret < 0) {
-+    cerr << "ceph_open O_CREAT error: " << cpp_strerror(ret) << std::endl;
-+    return 1;
-+  } else {
-+    cout << "ceph_open: success" << std::endl;
-+  }
-+  ret = ceph_setxattr(cmount, "barfile", "user.testxattr", (void *) "AYBABTU", 7, XATTR_CREATE);
-+  if (ret < 0) {
-+    cerr << "ceph_setxattr error: " << cpp_strerror(ret) << std::endl;
-+    return 1;
-+  } else {
-+    cout << "ceph_setxattr: success" << std::endl;
-+  }
-+  char *outlist;
-+  outlist = (char *) malloc(256);
-+  ret = ceph_listxattr(cmount, "barfile", outlist, 0);
-+  free(outlist);
-+  if (ret < 1) {
-+    cerr << "ceph_listxattr error (a): should have returned > 0" << cpp_strerror(ret) << std::endl;
-+    return 1;
-+  } else {
-+    cout << "ceph_listxattr: success" << std::endl;
-+  }
-+  
-+  outlist = (char *) malloc(ret);
-+  ret = ceph_listxattr(cmount, "barfile", outlist, ret);
-+  if (ret < 1) {
-+    cerr << "ceph_listxattr error (b): should have returned > 0" << cpp_strerror(ret) << std::endl;
-+    return 1;
-+  } else {
-+    cout << "ceph_listxattr: success" << std::endl;
-+  }
-+  void *aybabtu;
-+  aybabtu = malloc(8);
-+  ret = ceph_getxattr(cmount, "barfile", "user.testxattr", aybabtu, 7);
-+  if (ret < 1) {
-+    cerr << "ceph_getxattr error: " << cpp_strerror(ret) << std::endl;
-+    return 1;
-+  } else {
-+    cout << "ceph_getxattr: success" << std::endl;
-+  }
-+  char aybabtu_reference[]="AYBABTU";
-+  if (strncmp((char *) aybabtu, aybabtu_reference,7)) {
-+    cerr << "ceph_getxattr error: no match (" << aybabtu << ") should be (" << aybabtu_reference << cpp_strerror(ret) << std::endl;
-   }
- 
-   ceph_shutdown(cmount);
--- 
-1.7.1
-
+On Tue, May 10, 2011 at 12:38 PM, Brian Chrisman <brchrisman@gmail.com>=
+ wrote:
+> From: Brian Chrisman <bchrisman@gmail.com>
+>
+>
+> Signed-off-by: Brian Chrisman <brchrisman@gmail.com>
+> ---
+> =A0src/client/Client.cc =A0 =A0 =A0 | =A0 67 ++++++++++++++++++++++++=
++++++++++++++++++++-
+> =A0src/client/Client.h =A0 =A0 =A0 =A0| =A0 10 ++++++
+> =A0src/include/ceph/libceph.h | =A0 15 ++++++++++
+> =A0src/libceph.cc =A0 =A0 =A0 =A0 =A0 =A0 | =A0 42 ++++++++++++++++++=
++++++++++
+> =A04 files changed, 133 insertions(+), 1 deletions(-)
+>
+> diff --git a/src/client/Client.cc b/src/client/Client.cc
+> index 6a27273..5083e99 100644
+> --- a/src/client/Client.cc
+> +++ b/src/client/Client.cc
+> @@ -5563,6 +5563,71 @@ int Client::ll_setattr(vinodeno_t vino, struct=
+ stat *attr, int mask, int uid, in
+> =A0// ----------
+> =A0// xattrs
+>
+> +int Client::getxattr(const char *path, const char *name, void *value=
+, size_t size)
+> +{
+> + =A0Mutex::Locker lock(client_lock);
+> + =A0Inode *ceph_inode;
+> + =A0Client::path_walk(path, &ceph_inode, true);
+> + =A0return Client::_getxattr(ceph_inode, name, value, size, getuid()=
+, getgid());
+> +}
+> +
+> +int Client::lgetxattr(const char *path, const char *name, void *valu=
+e, size_t size)
+> +{
+> + =A0Mutex::Locker lock(client_lock);
+> + =A0Inode *ceph_inode;
+> + =A0Client::path_walk(path, &ceph_inode, false);
+> + =A0return Client::_getxattr(ceph_inode, name, value, size, getuid()=
+, getgid());
+> +}
+> +
+> +int Client::listxattr(const char *path, char *list, size_t size)
+> +{
+> + =A0Mutex::Locker lock(client_lock);
+> + =A0Inode *ceph_inode;
+> + =A0Client::path_walk(path, &ceph_inode, true);
+> + =A0return Client::_listxattr(ceph_inode, list, size, getuid(), getg=
+id());
+> +}
+> +
+> +int Client::llistxattr(const char *path, char *list, size_t size)
+> +{
+> + =A0Mutex::Locker lock(client_lock);
+> + =A0Inode *ceph_inode;
+> + =A0Client::path_walk(path, &ceph_inode, false);
+> + =A0return Client::_listxattr(ceph_inode, list, size, getuid(), getg=
+id());
+> +}
+> +
+> +int Client::removexattr(const char *path, const char *name)
+> +{
+> + =A0Mutex::Locker lock(client_lock);
+> + =A0Inode *ceph_inode;
+> + =A0Client::path_walk(path, &ceph_inode, true);
+> + =A0return Client::_removexattr(ceph_inode, name, getuid(), getgid()=
+);
+> +}
+> +
+> +int Client::lremovexattr(const char *path, const char *name)
+> +{
+> + =A0Mutex::Locker lock(client_lock);
+> + =A0Inode *ceph_inode;
+> + =A0Client::path_walk(path, &ceph_inode, false);
+> + =A0return Client::_removexattr(ceph_inode, name, getuid(), getgid()=
+);
+> +}
+> +
+> +int Client::setxattr(const char *path, const char *name, const void =
+*value, size_t size, int flags)
+> +{
+> + =A0Mutex::Locker lock(client_lock);
+> + =A0Inode *ceph_inode;
+> + =A0Client::path_walk(path, &ceph_inode, true);
+> + =A0return Client::_setxattr(ceph_inode, name, value, size, flags, g=
+etuid(), getgid());
+> +}
+> +
+> +int Client::lsetxattr(const char *path, const char *name, const void=
+ *value, size_t size, int flags)
+> +{
+> + =A0Mutex::Locker lock(client_lock);
+> + =A0Inode *ceph_inode;
+> + =A0Client::path_walk(path, &ceph_inode, false);
+> + =A0return Client::_setxattr(ceph_inode, name, value, size, flags, g=
+etuid(), getgid());
+> +}
+> +
+> +
+> =A0int Client::_getxattr(Inode *in, const char *name, void *value, si=
+ze_t size,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int uid, int gid)
+> =A0{
+> @@ -5708,7 +5773,7 @@ int Client::ll_removexattr(vinodeno_t vino, con=
+st char *name, int uid, int gid)
+> =A0 tout << name << std::endl;
+>
+> =A0 // only user xattrs, for now
+> - =A0if (strncmp(name, "user.", 5))
+> + =A0if (strncmp(name, "user.", 5) && strncmp(name, "security.", 9) &=
+& strncmp(name, "trusted.", 8))
+> =A0 =A0 return -EOPNOTSUPP;
+>
+> =A0 Inode *in =3D _ll_get_inode(vino);
+> diff --git a/src/client/Client.h b/src/client/Client.h
+> index ab21dc8..b36621d 100644
+> --- a/src/client/Client.h
+> +++ b/src/client/Client.h
+> @@ -1258,6 +1258,16 @@ public:
+> =A0 int fsync(int fd, bool syncdataonly);
+> =A0 int fstat(int fd, struct stat *stbuf);
+>
+> + =A0// full path xattr ops
+> + =A0int getxattr(const char *path, const char *name, void *value, si=
+ze_t size);
+> + =A0int lgetxattr(const char *path, const char *name, void *value, s=
+ize_t size);
+> + =A0int listxattr(const char *path, char *list, size_t size);
+> + =A0int llistxattr(const char *path, char *list, size_t size);
+> + =A0int removexattr(const char *path, const char *name);
+> + =A0int lremovexattr(const char *path, const char *name);
+> + =A0int setxattr(const char *path, const char *name, const void *val=
+ue, size_t size, int flags);
+> + =A0int lsetxattr(const char *path, const char *name, const void *va=
+lue, size_t size, int flags);
+> +
+> =A0 int sync_fs();
+> =A0 int64_t drop_caches();
+>
+> diff --git a/src/include/ceph/libceph.h b/src/include/ceph/libceph.h
+> index 3ed3369..f9fc29e 100644
+> --- a/src/include/ceph/libceph.h
+> +++ b/src/include/ceph/libceph.h
+> @@ -121,6 +121,21 @@ int ceph_fstat(struct ceph_mount_info *cmount, i=
+nt fd, struct stat *stbuf);
+>
+> =A0int ceph_sync_fs(struct ceph_mount_info *cmount);
+>
+> +/* xattr support */
+> +int ceph_getxattr(struct ceph_mount_info *cmount, const char *path, =
+const char *name,
+> + =A0 =A0 =A0 void *value, size_t size);
+> +int ceph_lgetxattr(struct ceph_mount_info *cmount, const char *path,=
+ const char *name,
+> + =A0 =A0 =A0 void *value, size_t size);
+> +int ceph_listxattr(struct ceph_mount_info *cmount, const char *path,=
+ char *list, size_t size);
+> +int ceph_llistxattr(struct ceph_mount_info *cmount, const char *path=
+, char *list, size_t size);
+> +int ceph_removexattr(struct ceph_mount_info *cmount, const char *pat=
+h, const char *name);
+> +int ceph_lremovexattr(struct ceph_mount_info *cmount, const char *pa=
+th, const char *name);
+> +int ceph_setxattr(struct ceph_mount_info *cmount, const char *path, =
+const char *name,
+> + =A0 =A0 =A0 const void *value, size_t size, int flags);
+> +int ceph_lsetxattr(struct ceph_mount_info *cmount, const char *path,=
+ const char *name,
+> + =A0 =A0 =A0 const void *value, size_t size, int flags);
+> +
+> +
+>
+> =A0/* expose file layout */
+> =A0int ceph_get_file_stripe_unit(struct ceph_mount_info *cmount, int =
+fh);
+> diff --git a/src/libceph.cc b/src/libceph.cc
+> index d1143d6..6388bde 100644
+> --- a/src/libceph.cc
+> +++ b/src/libceph.cc
+> @@ -416,6 +416,48 @@ extern "C" int ceph_setattr(struct ceph_mount_in=
+fo *cmount, const char *relpath,
+> =A0 return cmount->get_client()->setattr(relpath, attr, mask);
+> =A0}
+>
+> +// *xattr() calls supporting samba/vfs
+> +extern "C" int ceph_getxattr(struct ceph_mount_info *cmount, const c=
+har *path, const char *name, void *value, size_t size)
+> +{
+> + =A0return cmount->get_client()->getxattr(path, name, value, size);
+> +}
+> +
+> +extern "C" int ceph_lgetxattr(struct ceph_mount_info *cmount, const =
+char *path, const char *name, void *value, size_t size)
+> +{
+> + =A0return cmount->get_client()->lgetxattr(path, name, value, size);
+> +}
+> +
+> +extern "C" int ceph_listxattr(struct ceph_mount_info *cmount, const =
+char *path, char *list, size_t size)
+> +{
+> + =A0return cmount->get_client()->listxattr(path, list, size);
+> +}
+> +
+> +extern "C" int ceph_llistxattr(struct ceph_mount_info *cmount, const=
+ char *path, char *list, size_t size)
+> +{
+> + =A0return cmount->get_client()->llistxattr(path, list, size);
+> +}
+> +
+> +extern "C" int ceph_removexattr(struct ceph_mount_info *cmount, cons=
+t char *path, const char *name)
+> +{
+> + =A0return cmount->get_client()->removexattr(path, name);
+> +}
+> +
+> +extern "C" int ceph_lremovexattr(struct ceph_mount_info *cmount, con=
+st char *path, const char *name)
+> +{
+> + =A0return cmount->get_client()->lremovexattr(path, name);
+> +}
+> +
+> +extern "C" int ceph_setxattr(struct ceph_mount_info *cmount, const c=
+har *path, const char *name, const void *value, size_t size, int flags)
+> +{
+> + =A0return cmount->get_client()->setxattr(path, name, value, size, f=
+lags);
+> +}
+> +
+> +extern "C" int ceph_lsetxattr(struct ceph_mount_info *cmount, const =
+char *path, const char *name, const void *value, size_t size, int flags=
+)
+> +{
+> + =A0return cmount->get_client()->lsetxattr(path, name, value, size, =
+flags);
+> +}
+> +/* end xattr support */
+> +
+> =A0extern "C" int ceph_chmod(struct ceph_mount_info *cmount, const ch=
+ar *path, mode_t mode)
+> =A0{
+> =A0 return cmount->get_client()->chmod(path, mode);
+> --
+> 1.7.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
