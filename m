@@ -1,132 +1,125 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Unable to Add Monitor
-Date: Mon, 9 May 2011 16:57:29 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1105091656030.32068@cobra.newdream.net>
-References: <B828A4C02BE12543ACDFCF7EB0C693C67885FC7D23@NC-SVR-09.netelligent.com>
- <BANLkTik5FbaysoFYV-XzKX1T+K8gPAsWzQ@mail.gmail.com>
- <B828A4C02BE12543ACDFCF7EB0C693C67885FC7DC9@NC-SVR-09.netelligent.com>
- <BANLkTim9qp_pgi0H9a93vQtUWrp4eY0H2g@mail.gmail.com>
+From: Simon Tian <aixt2006@gmail.com>
+Subject: Re: replication write speed
+Date: Tue, 10 May 2011 10:25:56 +0800
+Message-ID: <BANLkTikVupTZLnrbXBttEAxCoa5g+Yx_Tw@mail.gmail.com>
+References: <BANLkTimPZ0rNe2-edtahK4RHRMQZH52qBw@mail.gmail.com>
+	<BANLkTi=gkJcs9yxXVAMo9nrvz2J1yGhQ4w@mail.gmail.com>
+	<BANLkTinznnde+t8sLSMT3rMmN6tyQ5Z-Bw@mail.gmail.com>
+	<BANLkTinaWG5W+HzvF9G=0U7Q48jk9fCkCw@mail.gmail.com>
+	<BANLkTi=5JynhL3V_AJ9iCP=Fjz8b2eVKuw@mail.gmail.com>
+	<BANLkTinZLKcRhdui7Ct94_qWDBmYHGEHsQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1409950804-1304985449=:32068"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55449 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755845Ab1EIX4p (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 May 2011 19:56:45 -0400
-In-Reply-To: <BANLkTim9qp_pgi0H9a93vQtUWrp4eY0H2g@mail.gmail.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:50736 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752018Ab1EJCZ6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 May 2011 22:25:58 -0400
+Received: by wya21 with SMTP id 21so4330594wya.19
+        for <ceph-devel@vger.kernel.org>; Mon, 09 May 2011 19:25:56 -0700 (PDT)
+In-Reply-To: <BANLkTinZLKcRhdui7Ct94_qWDBmYHGEHsQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: Mark Nigh <mnigh@netelligent.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-1409950804-1304985449=:32068
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On thing to keep in mind (you may already be, I didn't read this thread=20
-carefully) is that adding the second monitor will destroy its quorum. =20
-Nothing new will happen until the new one is also brought online. =20
-
-I don't think this should cause the disconnect message you see,=20
-though--usually that's a monitor crash.  Was there a stack dump in the=20
-logs?
-
-sage
+Thx a lot!  I've got it!
+You really pull me into ceph deeply! haha
 
 
-On Mon, 9 May 2011, Gregory Farnum wrote:
-
-> Ah, yeah, it sounds like you broke your mon map by trying to change
-> the name of your active monitor. I'm pretty sure to make that work you
-> would need to add the monitor under the new name and then remove the
-> old name!
->=20
-> Let us know if you run into any other trouble, you're probably
-> touching a lot of failure conditions here that we don't normally run
-> into. :)
+2011/5/10 Gregory Farnum <gregf@hq.newdream.net>:
+> On Mon, May 9, 2011 at 12:01 AM, Simon Tian <aixt2006@gmail.com> wrot=
+e:
+>> 2011/5/9 Gregory Farnum <gregf@hq.newdream.net>:
+>>> On Sun, May 8, 2011 at 8:04 PM, Simon Tian <aixt2006@gmail.com> wro=
+te:
+>>>> For primary copy, I think when the replication size is 3, 4, or ev=
+en
+>>>> more, the writing speed should also near with 2 replication. Becau=
+se
+>>>> the 2nd, 3rd, 4th, ... replication are written parallelly. =C2=A0T=
+he speed
+>>>> I got for 3, 4 replication is not near with the speed of 2, in fac=
+t,
+>>>> like linear reduce.
+>>> You're hitting your network limits there. With primary copy then th=
+e
+>>> primary needs to send out the data to each of the replicas, which c=
+aps
+>>> the write speed at (network bandwidth) / (num replicas). Presumably
+>>> you're using a gigabit network (or at least your nodes have gigabit
+>>> connections):
+>>> 1 replica: ~125MB/s (really a bit less due to protocol overhead)
+>>> 2 replicas:~62MB/s
+>>> 3 replicas: ~40MB/s
+>>> 4 replicas: ~31MB/s
+>>> etc.
+>>> Of course, you can also be limited by the speed of your disks (don'=
+t
+>>> forget to take journaling into account); and your situation is furt=
+her
+>>> complicated by having multiple daemons per physical node. But I
+>>> suspect you get the idea. :)
+>>
+>>
+>> =C2=A0Yes, you are very right! =C2=A0 The client throughput with dif=
+ferent replication
+>> size will be limited by the network bandwidth of the primary copy.
+>>
+>>
+>> I have some other questions:
+>> 1. =C2=A0If I have to write or read a sparse file randomly, will the
+>> performance reduce much?
+> That depends on how large your random IOs are, how much of the file i=
+s
+> cached in-memory on the OSDs, etc. In general, random IO does not loo=
+k
+> a lot different than sequential IO to the OSDs -- since the OSDs stor=
+e
+> files in 4MB blocks then any large file read will involve retrieving
+> random 4MB blocks from the OSD anyway. On the client you might see a
+> bigger difference, though -- there is a limited amount of prefetching
+> going on client-side and it will work much better with sequential tha=
+n
+> random reads.
+>
+> But behavior under different workloads is an area that still needs
+> more study and refinement.
+>
+>> 2. Is a rbd image sparse file?
+> Yes! As with files in the POSIX-compatible Ceph layer, RBD images are
+> stored in blocks (4MB by default) on the OSDs. Only those chunks with
+> data actually exist, and depending on your options and the backing
+> filesystem, only the piece of the chunk with data is actually stored.
+>
+>> 3. As the attachment showed, =C2=A0the read throughput will increase=
+ when
+>> I/O size increasing.
+>> =C2=A0 What is this I/O size mean? Is there any relationship between=
+ I/O
+>> size and object size?
+>> =C2=A0 In the latest ceph, what will the read throughput of differen=
+t file
+>> system like with different I/O size?
+> Is that one of the illustrations from Sage's thesis?
+> In general larger IOs will have higher throughput for many of the sam=
+e
+> reasons that larger IOs have higher throughput on hard drives: the OS=
+D
+> still needs to retrieve the data from off-disk, and a larger IO size
+> will minimize the impact of the seek latency there. With very large
+> IOs, the client can dispatch multiple read requests at once, allowing
+> the seek latency on the OSDs to happen simultaneously rather than
+> sequentially.
+> You can obviously do IOs of any size without regard fro the size of
+> the object; the client layers handle all the necessary translation.
+> In all versions of Ceph, you can expect higher throughput with larger
+> IO sizes. I'm not sure if that's what you mean?
 > -Greg
->=20
-> On Mon, May 9, 2011 at 11:27 AM, Mark Nigh <mnigh@netelligent.com> wrote:
-> >
-> > On Mon, May 9, 2011 at 7:22 AM, Mark Nigh <mnigh@netelligent.com> wrote=
-:
-> >> I have been testing Ceph for several months now but with only 2 mds an=
-d 1 mon. I would like to test failover between mon so I am trying to add th=
-e first (1st) of two (2) mon on the other mds in the cluster.
-> >>
-> >> I also noticed that the mon naming has been changed from numerics to n=
-ames so I am trying to change that also.
-> >>
-> >> My Process:
-> >>
-> >> On the first mon, I get an error when issuing this command "ceph mon a=
-dd beta 10.6.1.91:6789"
-> >>
-> >> I receive the following error as it repeats:
-> >>
-> >> 2011-05-09 09:17:05.500353 7f9248ab0700 -- :/28272 >> 10.6.1.91:6789/0=
- pipe(0x2167010 sd=3D3 pgs=3D0 cs=3D0 l=3D0).fault first fault
-> > This error generally means that the daemon can't communicate with its
-> > target -- in this case, 10.6.1.91:6789. Do you already have mon.beta
-> > in your ceph.conf? It looks like ceph tool is trying to issue its
-> > commands to that monitor.
-> > You can specify which monitor to connect to using the -m switch:
-> > ceph -m 10.6.1.90:6789 mon add beta 10.6.1.91:6789
-> > (assuming there that mon.alpha is using address 10.6.1.90:6789).
-> >
-> > When I run this command on the original monitor it just hangs. If I run=
- the command, "ceph mon add msd1 10.6.1.91:6789, I receive the following me=
-ssage:
-> >
-> > Mds1 is the hostname of the second monitor.
-> >
-> > 2011-05-09 12:28:01.823280 7ff64926d700 -- 10.6.1.90:0/26252 >> 10.6.1.=
-91:6789/0 pipe(0x16168f0 sd=3D3 pgs=3D0 cs=3D0 l=3D0).fault first fault
-> > 2011-05-09 12:28:07.823488 7ff64d242700 -- 10.6.1.90:0/26252 >> 10.6.1.=
-91:6789/0 pipe(0x16168f0 sd=3D3 pgs=3D0 cs=3D0 l=3D0).fault first fault
-> >
-> > When I try to run the service ceph start mon.1 command on the 2nd monit=
-or:
-> >
-> > mon.1 does not exist in monmap
-> >
-> >> When I try to start the monitor service on beta I get the following er=
-ror:
-> >>
-> >> =3D=3D=3D mon.beta =3D=3D=3D
-> >> Starting Ceph mon.beta on mds1...
-> >> =A0** WARNING: Ceph is still under heavy development, and is only suit=
-able for **
-> >> =A0** =A0 =A0 =A0 =A0 =A0testing and review. =A0Do not trust it with i=
-mportant data. =A0 =A0 =A0 **
-> >> unable to read magic from mon data.. did you run mkcephfs?
-> >> failed: ' /usr/bin/cmon -i beta -c /etc/ceph/ceph.conf '
-> > Did you follow the directions at
-> > http://ceph.newdream.net/wiki/Monitor_cluster_expansion?
-> >
-> > Yes, I believe it maybe that I tried to change the ceph.conf file from =
-mon.0 and mon.1 to mon.alpha and mon.beta as the wiki states. For now, I th=
-ought I would revert back to the mon.0 and mon.1 naming convention to elimi=
-nate the number of changes.
-> >
-> > -Greg
-> >
-> > This transmission and any attached files are privileged, confidential o=
-r otherwise the exclusive property of the intended recipient or Netelligent=
- Corporation. If you are not the intended recipient, any disclosure, copyin=
-g, distribution or use of any of the information contained in or attached t=
-o this transmission is strictly prohibited. If you have received this trans=
-mission in error, please contact us immediately by responding to this messa=
-ge or by telephone (314-392-6900) and promptly destroy the original transmi=
-ssion and its attachments.
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-1409950804-1304985449=:32068--
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
