@@ -1,50 +1,36 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+From: Fyodor Ustinov <ufm@ufm.su>
 Subject: Re: rbd create error with 0.26
-Date: Tue, 10 May 2011 02:35:44 -0700
-Message-ID: <BANLkTik7eFyp_7X=U5dZ=O5KdCQvyWQ+Sw@mail.gmail.com>
+Date: Tue, 10 May 2011 11:47:01 +0000 (UTC)
+Message-ID: <loom.20110510T134503-22@post.gmane.org>
 References: <BANLkTim4GDuiVLaX2khWqRF310VJnSEG4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:58266 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751026Ab1EJJfq convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2011 05:35:46 -0400
-Received: by bwz15 with SMTP id 15so4669545bwz.19
-        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 02:35:45 -0700 (PDT)
-In-Reply-To: <BANLkTim4GDuiVLaX2khWqRF310VJnSEG4Q@mail.gmail.com>
+Received: from lo.gmane.org ([80.91.229.12]:51603 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753264Ab1EJLrR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 10 May 2011 07:47:17 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1QJlPH-00037S-NV
+	for ceph-devel@vger.kernel.org; Tue, 10 May 2011 13:47:15 +0200
+Received: from 94.232.181.14 ([94.232.181.14])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 13:47:15 +0200
+Received: from ufm by 94.232.181.14 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 13:47:15 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Simon Tian <aixt2006@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, May 9, 2011 at 7:30 PM, Simon Tian <aixt2006@gmail.com> wrote:
-> [root@mon-00 ~]# rbd create foo --size 1024
-> 2011-05-10 17:42:44.227398 7fa9411866f0 librbd: failed to assign a
-> block name for image
-> create error: Input/output error
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-> I just done as this tracker said: =A0http://tracker.newdream.net/issu=
-es/263
->
-> I found that the return value of io_ctx.exec function is bellow zero:
->
-> =A0r =3D io_ctx.exec(info_oid, "rbd", "assign_bid", bl, out);
-> =A0if (r < 0)
-> =A0 =A0return r;
->
+Simon Tian <aixt2006 <at> gmail.com> writes:
 
-Can you verify that the osd has a /var/lib/ceph/tmp directory, which
-is writable by the cosd daemon, and that it doesn't have a noexec
-mount option?
+> [root <at> mon-00 ~]# cclass -a
+> [root <at> mon-00 ~]# ceph class list
 
-Thanks,
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Do you forget "ceph class activate rbd 1.3" ?
+
+
