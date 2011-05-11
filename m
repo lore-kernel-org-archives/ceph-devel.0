@@ -1,82 +1,39 @@
-From: Mark Nigh <mnigh@netelligent.com>
-Subject: OSD Crash
-Date: Wed, 11 May 2011 08:12:01 -0500
-Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C67886112A0F@NC-SVR-09.netelligent.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: [PATCH 2/3] ceph: fix list_add in ceph_put_snap_realm
+Date: Wed, 11 May 2011 10:29:53 +0000
+Message-ID: <1305109794-7967-2-git-send-email-henry.cy.chang@gmail.com>
+References: <1305109794-7967-1-git-send-email-henry.cy.chang@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.netelligent.com ([199.255.228.141]:35267 "EHLO
-	NC-SVR-11.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751892Ab1EKPhG convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 May 2011 11:37:06 -0400
-Content-Language: en-US
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:44975 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753898Ab1EKPil (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 May 2011 11:38:41 -0400
+Received: by pwi15 with SMTP id 15so296924pwi.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 May 2011 08:38:40 -0700 (PDT)
+In-Reply-To: <1305109794-7967-1-git-send-email-henry.cy.chang@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Henry C Chang <henry.cy.chang@gmail.com>
 
-I was performing a few failure test with the osd by removing a HDD from one of the osd host. All was well, the cluster noticed the failure and re-balanced data but when I replace the HDD into the host, the cosd crashed.
+Signed-off-by: Henry C Chang <henry.cy.chang@gmail.com>
+---
+ fs/ceph/snap.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Here is my setup. 6 osd host with 4 HDDs each (4 cosd daemons running for each host). 1 mon and 2 mds (separate host).
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index e86ec11..24067d6 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -206,7 +206,7 @@ void ceph_put_snap_realm(struct ceph_mds_client *mdsc,
+ 		up_write(&mdsc->snap_rwsem);
+ 	} else {
+ 		spin_lock(&mdsc->snap_empty_lock);
+-		list_add(&mdsc->snap_empty, &realm->empty_item);
++		list_add(&realm->empty_item, &mdsc->snap_empty);
+ 		spin_unlock(&mdsc->snap_empty_lock);
+ 	}
+ }
+-- 
+1.7.2.3
 
-Here is the log from the osd0
-
-2011-05-10 16:25:02.776151 7f9e16d36700 -- 10.6.1.92:6800/15566 >> 10.6.1.63:0/2322371038 pipe(0x4315a00 sd=14 pgs=0 cs=0 l=0).accept peer addr is really 10.6.1.63:0/2322371038 (socket is 10.6.1.63:42299/0)
-os/FileStore.cc: In function 'unsigned int FileStore::_do_transaction(ObjectStore::Transaction&)', in thread '0x7f9e22577700'
-os/FileStore.cc: 2120: FAILED assert(0 == "EIO handling not implemented")
- ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
- 1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
- 2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
- 3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
- 4: (ThreadPool::worker()+0x2a2) [0x626fa2]
- 5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
- 6: (()+0x6d8c) [0x7f9e29434d8c]
- 7: (clone()+0x6d) [0x7f9e2808204d]
- ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
- 1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
- 2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
- 3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
- 4: (ThreadPool::worker()+0x2a2) [0x626fa2]
- 5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
- 6: (()+0x6d8c) [0x7f9e29434d8c]
- 7: (clone()+0x6d) [0x7f9e2808204d]
-os/FileStore.cc: In function 'unsigned int FileStore::_do_transaction(ObjectStore::Transaction&)', in thread '0x7f9e21d76700'
-os/FileStore.cc: 2120: FAILED assert(0 == "EIO handling not implemented")
- ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
- 1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
- 2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
- 3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
- 4: (ThreadPool::worker()+0x2a2) [0x626fa2]
- 5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
- 6: (()+0x6d8c) [0x7f9e29434d8c]
- 7: (clone()+0x6d) [0x7f9e2808204d]
- ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
- 1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
- 2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
- 3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
- 4: (ThreadPool::worker()+0x2a2) [0x626fa2]
- 5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
- 6: (()+0x6d8c) [0x7f9e29434d8c]
- 7: (clone()+0x6d) [0x7f9e2808204d]
-*** Caught signal (Aborted) **
- in thread 0x7f9e22577700
-ceph version 0.27.commit: 793034c62c8e9ffab4af675ca97135fd1b193c9c. process: cosd. pid: 1414
-2011-05-10 22:01:13.762083 7f0620492760 filestore(/mnt/osd0) mount FIEMAP ioctl is NOT supported
-2011-05-10 22:01:13.762276 7f0620492760 filestore(/mnt/osd0) mount detected btrfs
-2011-05-10 22:01:13.762288 7f0620492760 filestore(/mnt/osd0) mount btrfs CLONE_RANGE ioctl is supported
-*** Caught signal (Terminated) **
- in thread 0x7f061e7b4700. Shutting down.
-
-As you can see with the attached log, I try to restart the cosd at 22:01. The service is started but ceph -s doesn't include the osd.
-
-Thanks for your help.
-
-Mark Nigh
-Systems Architect
-Netelligent Corporation
-mnigh@netelligent.com
-
-
-
-This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
