@@ -1,79 +1,230 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: [ceph-commit] ceph.git branch master updated. v0.27.1-331-gd9ea95f
-Date: Tue, 10 May 2011 14:20:08 -0700
-Message-ID: <BANLkTimEBjoidJuu4_+NVPRMdK1jUcEcmA@mail.gmail.com>
-References: <20110509222127.2B4DA485C521@ceph-tracker.dreamhostps.com>
-	<BANLkTikviXrv_LHTnJ0QmsB0DtqKYoaoaQ@mail.gmail.com>
-	<BANLkTikz-ZWCrAVu7E1c-3udHVdCb=fasA@mail.gmail.com>
+From: Simon Tian <aixt2006@gmail.com>
+Subject: Re: rbd create error with 0.26
+Date: Wed, 11 May 2011 09:54:34 +0800
+Message-ID: <BANLkTikiCLGiEgNzkuaj0cnrxo9+Mw_x8w@mail.gmail.com>
+References: <BANLkTim4GDuiVLaX2khWqRF310VJnSEG4Q@mail.gmail.com>
+	<BANLkTik7eFyp_7X=U5dZ=O5KdCQvyWQ+Sw@mail.gmail.com>
+	<BANLkTing1pYepM0F9nrewq9vyfF77Z8yJg@mail.gmail.com>
+	<BANLkTinNS5Zhnccwgxt2SBwjS+c18cr4jg@mail.gmail.com>
+	<BANLkTinO=rYk8wOvO50EKyzbHTjrjk_dvQ@mail.gmail.com>
+	<BANLkTikRzuukqpwkEceMB9ZiRY-SUPFxuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:41982 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751030Ab1EJVUJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2011 17:20:09 -0400
-Received: by fxm17 with SMTP id 17so4595998fxm.19
-        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 14:20:08 -0700 (PDT)
-In-Reply-To: <BANLkTikz-ZWCrAVu7E1c-3udHVdCb=fasA@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:34257 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752718Ab1EKByg convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2011 21:54:36 -0400
+Received: by wwa36 with SMTP id 36so60714wwa.1
+        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 18:54:35 -0700 (PDT)
+In-Reply-To: <BANLkTikRzuukqpwkEceMB9ZiRY-SUPFxuA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: Colin McCabe <cmccabe@ceph-tracker.dreamhostps.com>, ceph-devel@vger.kernel.org
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all.
+Hope this help:
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D
+GNU gdb (GDB) Fedora (7.0.50.20100203-15.el5)
+Copyright (C) 2010 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl=
+=2Ehtml>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copyi=
+ng"
+and "show warranty" for details.
+This GDB was configured as "x86_64-redhat-linux-gnu".
+=46or bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /usr/local/bin/cosd...done.
+[New Thread 15605]
+[New Thread 15366]
+[New Thread 15365]
+[New Thread 15228]
+[New Thread 15469]
+[New Thread 15226]
+[New Thread 15233]
+[New Thread 15607]
+[New Thread 15227]
+[New Thread 15240]
+[New Thread 15254]
+[New Thread 15229]
+[New Thread 15243]
+[New Thread 15255]
+[New Thread 15253]
+[New Thread 15230]
+[New Thread 15247]
+[New Thread 15256]
+[New Thread 15231]
+[New Thread 15252]
+[New Thread 15232]
+[New Thread 15311]
+[New Thread 15302]
+[New Thread 15234]
+[New Thread 15470]
+[New Thread 17426]
+[New Thread 15237]
+[New Thread 15473]
+[New Thread 15299]
+[New Thread 15475]
+[New Thread 15303]
+[New Thread 15246]
+[New Thread 15304]
+[New Thread 15245]
+[New Thread 15606]
+[New Thread 15307]
+[New Thread 15241]
+[New Thread 15309]
+[New Thread 15251]
+[New Thread 15242]
+[New Thread 15239]
+[New Thread 15308]
+[New Thread 15244]
+[New Thread 15236]
+[New Thread 15248]
+[New Thread 17425]
+[New Thread 15235]
+[New Thread 15250]
+[New Thread 15609]
+[New Thread 15238]
+[New Thread 15249]
+Error while mapping shared library sections:
+/opt/ceph_var/tmp/class-AVGRjS: No such file or directory.
+Reading symbols from /usr/lib64/libnss3.so...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib64/libnss3.so
+Reading symbols from /usr/lib64/libnspr4.so...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib64/libnspr4.so
+Reading symbols from /lib64/libpthread.so.0...(no debugging symbols
+found)...done.
+Loaded symbols for /lib64/libpthread.so.0
+Reading symbols from /lib64/libdl.so.2...(no debugging symbols found)..=
+=2Edone.
+Loaded symbols for /lib64/libdl.so.2
+Reading symbols from /usr/lib64/libstdc++.so.6...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib64/libstdc++.so.6
+Reading symbols from /lib64/libm.so.6...(no debugging symbols found)...=
+done.
+Loaded symbols for /lib64/libm.so.6
+Reading symbols from /lib64/libgcc_s.so.1...(no debugging symbols found=
+)...done.
+Loaded symbols for /lib64/libgcc_s.so.1
+Reading symbols from /lib64/libc.so.6...(no debugging symbols found)...=
+done.
+Loaded symbols for /lib64/libc.so.6
+Reading symbols from /usr/lib64/libnssutil3.so...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib64/libnssutil3.so
+Reading symbols from /usr/lib64/libplc4.so...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib64/libplc4.so
+Reading symbols from /usr/lib64/libplds4.so...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib64/libplds4.so
+Reading symbols from /lib64/ld-linux-x86-64.so.2...(no debugging
+symbols found)...done.
+Loaded symbols for /lib64/ld-linux-x86-64.so.2
+Reading symbols from /usr/lib64/libsoftokn3.so...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib64/libsoftokn3.so
+Reading symbols from /usr/lib64/libfreebl3.so...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib64/libfreebl3.so
+Symbol file not found for /opt/ceph_var/tmp/class-AVGRjS
+Core was generated by `/usr/local/bin/cosd -i 2 -c /tmp/ceph.conf.23025=
+'.
+Program terminated with signal 11, Segmentation fault.
+#0  0x0000003681a075c8 in ?? () from /lib64/libgcc_s.so.1
+(gdb) bt
+#0  0x0000003681a075c8 in ?? () from /lib64/libgcc_s.so.1
+#1  0x0000003681a0882b in _Unwind_Backtrace () from /lib64/libgcc_s.so.=
+1
+#2  0x000000367fae5eb8 in backtrace () from /lib64/libc.so.6
+#3  0x0000000000661318 in BackTrace (signum=3D11) at ./common/BackTrace=
+=2Eh:19
+#4  handle_fatal_signal (signum=3D11) at common/signal.cc:72
+#5  <signal handler called>
+#6  0x0000000000000031 in ?? ()
+#7  0x00007fbda871e390 in ?? ()
+#8  0x0000000000000000 in ?? ()
+(gdb)
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
 
-As we noted earlier, "rados get" and "rados put" do gets and puts,
-respectively. This is different from "export" and "import" which have
-always synchronized whole pools.
-
-I guess we can have syntax like this for the import and export:
-rados sync [import|export] <options> <src> <dst>
-
-I will implement that in a branch called
-wip-merge-radostool-with-radossync and you can evaluate whether you
-like it better than having a separate binary or not.
-
-Colin
+If helpless, I will got more trace info.
+BTW, where could I get the debug packages?
 
 
-On Mon, May 9, 2011 at 4:29 PM, Gregory Farnum
-<gregory.farnum@dreamhost.com> wrote:
-> On Mon, May 9, 2011 at 4:24 PM, Gregory Farnum
-> <gregory.farnum@dreamhost.com> wrote:
->> Ermm, doesn't rados sync do a whole tree sync or something? I think =
-we
->> want to maintain a simple get/set object capability and the rados to=
-ol
->> is a pretty logical place for that.
->> -Greg
-> Sorry, Gmail got confused so I resent! :(
->
->
-> On Mon, May 9, 2011 at 4:25 PM, Sage Weil <sage@newdream.net> wrote:
->> On Mon, 9 May 2011, Gregory Farnum wrote:
->>> Ermm, doesn't rados sync do a whole tree sync or something? I think=
- we
->>> want to maintain a simple get/set object capability and the rados t=
-ool
->>> is a pretty logical place for that.
+2011/5/10 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
+> On Tue, May 10, 2011 at 7:15 AM, Simon Tian <aixt2006@gmail.com> wrot=
+e:
+>> Hi,
 >>
->> The main difference with sync is that it does incremental updates (s=
-kips
->> dup items).
+>> =C2=A0 =C2=A0As you said, one of the osds crashed:
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D log =3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> 2011-05-10 21:46:38.990311 4bc90940 osd2 8 pg[3.13a( v 8'1 (0'0,8'1]
+>> n=3D1 ec=3D2 les=3D6 5/5/4) [2,3] r=3D0 mlcod 0'0 active+clean]
+>> oi.user_version=3D8'2 is_modify=3D0
+>> 2011-05-10 21:46:38.990386 4bc90940 osd2 8 pg[3.13a( v 8'1 (0'0,8'1]
+>> n=3D1 ec=3D2 les=3D6 5/5/4) [2,3] r=3D0 mlcod 0'0 active+clean]
+>> oi.user_version=3D8'2 is_modify=3D1
+>> *** Caught signal (Segmentation fault) **
+>> =C2=A0in thread 0x45382940
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
 >>
->> As an aside I we should move that into the rados tool, though ('rado=
-s
->> sync' instead of 'rados_sync')...
-> If it's that simple a syntax change, I agree. I thought rados_sync
-> would require an empty directory if you just want to pull an object
-> out, which was my main concern.
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>> I tried again, this time, i done "rbd create foo --size 1024"
+>> successfully, but when I run the code of testlibrbd.c, one of the os=
+ds
+>> crash again:
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D log =3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> 2011-05-10 22:08:20.008871 4c115940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
+>> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean
+>> snaptrimq=3D[1~1]] dump_watchers testimg.rbd/head testimg.rbd/head(9=
+'4
+>> client4107.0:14 wrlock_by=3Dunknown0.0:0)
+>> 2011-05-10 22:08:20.008903 4c115940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
+>> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean
+>> snaptrimq=3D[1~1]] =C2=A0* obc->watcher: client4107 session=3D0xc809=
+90
+>> 2011-05-10 22:08:20.008925 4c115940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
+>> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean
+>> snaptrimq=3D[1~1]] =C2=A0* oi->watcher: client4107 cookie=3D2
+>> 2011-05-10 22:08:20.009232 4b914940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
+>> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean]
+>> oi.user_version=3D10'5 is_modify=3D1
+>> 2011-05-10 22:08:20.009267 4b914940 expires 2011-05-10 23:08:19.8900=
+32
+>> now 2011-05-10 22:08:20.009260
+>> 2011-05-10 22:08:20.009284 napshots_list
+>> 2011-05-10 22:08:20.009307 4b914940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
+>> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean]
+>> oi.user_version=3D10'5 is_modify=3D0
+>> 2011-05-10 22:08:20.009375 4b914940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
+>> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean]
+>> oi.user_version=3D10'5 is_modify=3D1
+>> *** Caught signal (Segmentation fault) **
+>> =C2=A0in thread 0x4eb1c940
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>>
+> Can you by any chance get backtrace for that crash (gdb cosd core;
+> bt)? You might need to have the debug packages installed.
+> Also, note that you're not running the latest version so you might be
+> hitting something that was already fixed (not that I remember anythin=
+g
+> specific, but it might be worth a try).
+>
+> Thanks,
+> Yehuda
 >
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
