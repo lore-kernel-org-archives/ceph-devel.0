@@ -1,233 +1,82 @@
-From: Simon Tian <aixt2006@gmail.com>
-Subject: Re: rbd create error with 0.26
-Date: Wed, 11 May 2011 09:54:34 +0800
-Message-ID: <BANLkTikiCLGiEgNzkuaj0cnrxo9+Mw_x8w@mail.gmail.com>
-References: <BANLkTim4GDuiVLaX2khWqRF310VJnSEG4Q@mail.gmail.com>
-	<BANLkTik7eFyp_7X=U5dZ=O5KdCQvyWQ+Sw@mail.gmail.com>
-	<BANLkTing1pYepM0F9nrewq9vyfF77Z8yJg@mail.gmail.com>
-	<BANLkTinNS5Zhnccwgxt2SBwjS+c18cr4jg@mail.gmail.com>
-	<BANLkTinO=rYk8wOvO50EKyzbHTjrjk_dvQ@mail.gmail.com>
-	<BANLkTikRzuukqpwkEceMB9ZiRY-SUPFxuA@mail.gmail.com>
+From: Mark Nigh <mnigh@netelligent.com>
+Subject: OSD Crash
+Date: Wed, 11 May 2011 08:12:01 -0500
+Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C67886112A0F@NC-SVR-09.netelligent.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:34257 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752718Ab1EKByg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 May 2011 21:54:36 -0400
-Received: by wwa36 with SMTP id 36so60714wwa.1
-        for <ceph-devel@vger.kernel.org>; Tue, 10 May 2011 18:54:35 -0700 (PDT)
-In-Reply-To: <BANLkTikRzuukqpwkEceMB9ZiRY-SUPFxuA@mail.gmail.com>
+Received: from smtp.netelligent.com ([199.255.228.141]:35267 "EHLO
+	NC-SVR-11.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751892Ab1EKPhG convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 May 2011 11:37:06 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hope this help:
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D
-GNU gdb (GDB) Fedora (7.0.50.20100203-15.el5)
-Copyright (C) 2010 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl=
-=2Ehtml>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.  Type "show copyi=
-ng"
-and "show warranty" for details.
-This GDB was configured as "x86_64-redhat-linux-gnu".
-=46or bug reporting instructions, please see:
-<http://www.gnu.org/software/gdb/bugs/>...
-Reading symbols from /usr/local/bin/cosd...done.
-[New Thread 15605]
-[New Thread 15366]
-[New Thread 15365]
-[New Thread 15228]
-[New Thread 15469]
-[New Thread 15226]
-[New Thread 15233]
-[New Thread 15607]
-[New Thread 15227]
-[New Thread 15240]
-[New Thread 15254]
-[New Thread 15229]
-[New Thread 15243]
-[New Thread 15255]
-[New Thread 15253]
-[New Thread 15230]
-[New Thread 15247]
-[New Thread 15256]
-[New Thread 15231]
-[New Thread 15252]
-[New Thread 15232]
-[New Thread 15311]
-[New Thread 15302]
-[New Thread 15234]
-[New Thread 15470]
-[New Thread 17426]
-[New Thread 15237]
-[New Thread 15473]
-[New Thread 15299]
-[New Thread 15475]
-[New Thread 15303]
-[New Thread 15246]
-[New Thread 15304]
-[New Thread 15245]
-[New Thread 15606]
-[New Thread 15307]
-[New Thread 15241]
-[New Thread 15309]
-[New Thread 15251]
-[New Thread 15242]
-[New Thread 15239]
-[New Thread 15308]
-[New Thread 15244]
-[New Thread 15236]
-[New Thread 15248]
-[New Thread 17425]
-[New Thread 15235]
-[New Thread 15250]
-[New Thread 15609]
-[New Thread 15238]
-[New Thread 15249]
-Error while mapping shared library sections:
-/opt/ceph_var/tmp/class-AVGRjS: No such file or directory.
-Reading symbols from /usr/lib64/libnss3.so...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib64/libnss3.so
-Reading symbols from /usr/lib64/libnspr4.so...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib64/libnspr4.so
-Reading symbols from /lib64/libpthread.so.0...(no debugging symbols
-found)...done.
-Loaded symbols for /lib64/libpthread.so.0
-Reading symbols from /lib64/libdl.so.2...(no debugging symbols found)..=
-=2Edone.
-Loaded symbols for /lib64/libdl.so.2
-Reading symbols from /usr/lib64/libstdc++.so.6...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib64/libstdc++.so.6
-Reading symbols from /lib64/libm.so.6...(no debugging symbols found)...=
-done.
-Loaded symbols for /lib64/libm.so.6
-Reading symbols from /lib64/libgcc_s.so.1...(no debugging symbols found=
-)...done.
-Loaded symbols for /lib64/libgcc_s.so.1
-Reading symbols from /lib64/libc.so.6...(no debugging symbols found)...=
-done.
-Loaded symbols for /lib64/libc.so.6
-Reading symbols from /usr/lib64/libnssutil3.so...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib64/libnssutil3.so
-Reading symbols from /usr/lib64/libplc4.so...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib64/libplc4.so
-Reading symbols from /usr/lib64/libplds4.so...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib64/libplds4.so
-Reading symbols from /lib64/ld-linux-x86-64.so.2...(no debugging
-symbols found)...done.
-Loaded symbols for /lib64/ld-linux-x86-64.so.2
-Reading symbols from /usr/lib64/libsoftokn3.so...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib64/libsoftokn3.so
-Reading symbols from /usr/lib64/libfreebl3.so...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib64/libfreebl3.so
-Symbol file not found for /opt/ceph_var/tmp/class-AVGRjS
-Core was generated by `/usr/local/bin/cosd -i 2 -c /tmp/ceph.conf.23025=
-'.
-Program terminated with signal 11, Segmentation fault.
-#0  0x0000003681a075c8 in ?? () from /lib64/libgcc_s.so.1
-(gdb) bt
-#0  0x0000003681a075c8 in ?? () from /lib64/libgcc_s.so.1
-#1  0x0000003681a0882b in _Unwind_Backtrace () from /lib64/libgcc_s.so.=
-1
-#2  0x000000367fae5eb8 in backtrace () from /lib64/libc.so.6
-#3  0x0000000000661318 in BackTrace (signum=3D11) at ./common/BackTrace=
-=2Eh:19
-#4  handle_fatal_signal (signum=3D11) at common/signal.cc:72
-#5  <signal handler called>
-#6  0x0000000000000031 in ?? ()
-#7  0x00007fbda871e390 in ?? ()
-#8  0x0000000000000000 in ?? ()
-(gdb)
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
+I was performing a few failure test with the osd by removing a HDD from one of the osd host. All was well, the cluster noticed the failure and re-balanced data but when I replace the HDD into the host, the cosd crashed.
 
-If helpless, I will got more trace info.
-BTW, where could I get the debug packages?
+Here is my setup. 6 osd host with 4 HDDs each (4 cosd daemons running for each host). 1 mon and 2 mds (separate host).
+
+Here is the log from the osd0
+
+2011-05-10 16:25:02.776151 7f9e16d36700 -- 10.6.1.92:6800/15566 >> 10.6.1.63:0/2322371038 pipe(0x4315a00 sd=14 pgs=0 cs=0 l=0).accept peer addr is really 10.6.1.63:0/2322371038 (socket is 10.6.1.63:42299/0)
+os/FileStore.cc: In function 'unsigned int FileStore::_do_transaction(ObjectStore::Transaction&)', in thread '0x7f9e22577700'
+os/FileStore.cc: 2120: FAILED assert(0 == "EIO handling not implemented")
+ ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
+ 1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
+ 2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
+ 3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
+ 4: (ThreadPool::worker()+0x2a2) [0x626fa2]
+ 5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
+ 6: (()+0x6d8c) [0x7f9e29434d8c]
+ 7: (clone()+0x6d) [0x7f9e2808204d]
+ ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
+ 1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
+ 2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
+ 3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
+ 4: (ThreadPool::worker()+0x2a2) [0x626fa2]
+ 5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
+ 6: (()+0x6d8c) [0x7f9e29434d8c]
+ 7: (clone()+0x6d) [0x7f9e2808204d]
+os/FileStore.cc: In function 'unsigned int FileStore::_do_transaction(ObjectStore::Transaction&)', in thread '0x7f9e21d76700'
+os/FileStore.cc: 2120: FAILED assert(0 == "EIO handling not implemented")
+ ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
+ 1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
+ 2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
+ 3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
+ 4: (ThreadPool::worker()+0x2a2) [0x626fa2]
+ 5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
+ 6: (()+0x6d8c) [0x7f9e29434d8c]
+ 7: (clone()+0x6d) [0x7f9e2808204d]
+ ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
+ 1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
+ 2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
+ 3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
+ 4: (ThreadPool::worker()+0x2a2) [0x626fa2]
+ 5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
+ 6: (()+0x6d8c) [0x7f9e29434d8c]
+ 7: (clone()+0x6d) [0x7f9e2808204d]
+*** Caught signal (Aborted) **
+ in thread 0x7f9e22577700
+ceph version 0.27.commit: 793034c62c8e9ffab4af675ca97135fd1b193c9c. process: cosd. pid: 1414
+2011-05-10 22:01:13.762083 7f0620492760 filestore(/mnt/osd0) mount FIEMAP ioctl is NOT supported
+2011-05-10 22:01:13.762276 7f0620492760 filestore(/mnt/osd0) mount detected btrfs
+2011-05-10 22:01:13.762288 7f0620492760 filestore(/mnt/osd0) mount btrfs CLONE_RANGE ioctl is supported
+*** Caught signal (Terminated) **
+ in thread 0x7f061e7b4700. Shutting down.
+
+As you can see with the attached log, I try to restart the cosd at 22:01. The service is started but ceph -s doesn't include the osd.
+
+Thanks for your help.
+
+Mark Nigh
+Systems Architect
+Netelligent Corporation
+mnigh@netelligent.com
 
 
-2011/5/10 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
-> On Tue, May 10, 2011 at 7:15 AM, Simon Tian <aixt2006@gmail.com> wrot=
-e:
->> Hi,
->>
->> =C2=A0 =C2=A0As you said, one of the osds crashed:
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D log =3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> 2011-05-10 21:46:38.990311 4bc90940 osd2 8 pg[3.13a( v 8'1 (0'0,8'1]
->> n=3D1 ec=3D2 les=3D6 5/5/4) [2,3] r=3D0 mlcod 0'0 active+clean]
->> oi.user_version=3D8'2 is_modify=3D0
->> 2011-05-10 21:46:38.990386 4bc90940 osd2 8 pg[3.13a( v 8'1 (0'0,8'1]
->> n=3D1 ec=3D2 les=3D6 5/5/4) [2,3] r=3D0 mlcod 0'0 active+clean]
->> oi.user_version=3D8'2 is_modify=3D1
->> *** Caught signal (Segmentation fault) **
->> =C2=A0in thread 0x45382940
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>
->> I tried again, this time, i done "rbd create foo --size 1024"
->> successfully, but when I run the code of testlibrbd.c, one of the os=
-ds
->> crash again:
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D log =3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> 2011-05-10 22:08:20.008871 4c115940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
->> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean
->> snaptrimq=3D[1~1]] dump_watchers testimg.rbd/head testimg.rbd/head(9=
-'4
->> client4107.0:14 wrlock_by=3Dunknown0.0:0)
->> 2011-05-10 22:08:20.008903 4c115940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
->> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean
->> snaptrimq=3D[1~1]] =C2=A0* obc->watcher: client4107 session=3D0xc809=
-90
->> 2011-05-10 22:08:20.008925 4c115940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
->> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean
->> snaptrimq=3D[1~1]] =C2=A0* oi->watcher: client4107 cookie=3D2
->> 2011-05-10 22:08:20.009232 4b914940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
->> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean]
->> oi.user_version=3D10'5 is_modify=3D1
->> 2011-05-10 22:08:20.009267 4b914940 expires 2011-05-10 23:08:19.8900=
-32
->> now 2011-05-10 22:08:20.009260
->> 2011-05-10 22:08:20.009284 napshots_list
->> 2011-05-10 22:08:20.009307 4b914940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
->> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean]
->> oi.user_version=3D10'5 is_modify=3D0
->> 2011-05-10 22:08:20.009375 4b914940 osd3 10 pg[4.1( v 9'4 (9'2,9'4]
->> n=3D1 ec=3D9 les=3D9 9/9/9) [3,0] r=3D0 mlcod 9'3 active+clean]
->> oi.user_version=3D10'5 is_modify=3D1
->> *** Caught signal (Segmentation fault) **
->> =C2=A0in thread 0x4eb1c940
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>
-> Can you by any chance get backtrace for that crash (gdb cosd core;
-> bt)? You might need to have the debug packages installed.
-> Also, note that you're not running the latest version so you might be
-> hitting something that was already fixed (not that I remember anythin=
-g
-> specific, but it might be worth a try).
->
-> Thanks,
-> Yehuda
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
