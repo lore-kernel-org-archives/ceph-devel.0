@@ -1,164 +1,82 @@
-From: Mark Nigh <mnigh@netelligent.com>
-Subject: RE: OSD Crash
-Date: Fri, 13 May 2011 12:03:36 -0500
-Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C67886112DE7@NC-SVR-09.netelligent.com>
-References: <B828A4C02BE12543ACDFCF7EB0C693C67886112B1F@NC-SVR-09.netelligent.com>
- <BANLkTi=YHhuXAj5MyuWQiF5qCMu7o=5s-g@mail.gmail.com>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: Re: ceph fs
+Date: Fri, 13 May 2011 20:47:36 +0300
+Message-ID: <201105132047.36395.ufm@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.netelligent.com ([199.255.228.152]:36410 "EHLO
-	NC-SVR-132.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1759652Ab1EMRD7 convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 13 May 2011 13:03:59 -0400
-In-Reply-To: <BANLkTi=YHhuXAj5MyuWQiF5qCMu7o=5s-g@mail.gmail.com>
-Content-Language: en-US
+Received: from mail.ufm.su ([77.120.103.19]:33323 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753539Ab1EMRrj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 13 May 2011 13:47:39 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id D73466005A9
+	for <ceph-devel@vger.kernel.org>; Fri, 13 May 2011 20:47:37 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 4Gab6zMdhKIx for <ceph-devel@vger.kernel.org>;
+	Fri, 13 May 2011 20:47:37 +0300 (EEST)
+Received: from amd.localnet (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id B01D26005A6
+	for <ceph-devel@vger.kernel.org>; Fri, 13 May 2011 20:47:37 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Great information. I appreciate it. Actually, I am running SAS RAID controllers (probably not what I will do in production). Each disk is configured as raid 0 so that it shows up in Linux as a single drive each. I think 100% of the problem is with the RAID controller re-insertion of a disk in a RAID 0 group.
+On Friday 13 May 2011 18:53:58 you wrote:
+> On Thu, 12 May 2011, Fyodor Ustinov wrote:
+> > Hi!
+> > 
+> > Like previous, but ceph fs instead of rbd.
+> > (i.e. iozone with 4G file).
+> > 
+> > [  783.295035] ceph: loaded (mds proto 32)
+> > [  783.300122] libceph: client4125 fsid
+> > ff352dfd-078c-e65f-a769-d25abb384d92 [  783.300642] libceph: mon0
+> > 77.120.112.193:6789 session established [  941.278185] libceph: msg_new
+> > can't create type 0 front 4096
+> > [  941.278456] libceph: msgpool osd_op alloc failed
+> > [  941.278539] libceph: msg_new can't create type 0 front 512
+> > [  941.278606] libceph: msgpool osd_op_reply alloc failed
+> > [  941.278670] libceph: msg_new can't create type 0 front 4096
+> > [  941.278737] libceph: msgpool osd_op alloc failed
+> > [  941.278808] libceph: msg_new can't create type 0 front 512
+> > [  941.278875] libceph: msgpool osd_op_reply alloc failed
+> > [  941.279011] libceph: msg_new can't create type 0 front 4096
+> > [  941.279079] libceph: msgpool osd_op alloc failed
+> > [  941.279153] libceph: msg_new can't create type 0 front 512
+> > [  941.279220] libceph: msgpool osd_op_reply alloc failed
+> > [  941.279286] libceph: msg_new can't create type 0 front 4096
+> > [  941.279352] libceph: msgpool osd_op alloc failed
+> > [  941.279422] libceph: msg_new can't create type 0 front 512
+> > [  941.279623] libceph: msgpool osd_op_reply alloc failed
+> > [  941.279692] libceph: msg_new can't create type 0 front 4096
+> > [  941.279897] libceph: msgpool osd_op alloc failed
+> > [  941.280042] libceph: msg_new can't create type 0 front 512
+> > [  941.280300] libceph: msgpool osd_op_reply alloc failed
+> > [  941.280418] libceph: msg_new can't create type 0 front 4096
+> > [  941.280534] libceph: msgpool osd_op alloc failed
+> > [  941.280793] libceph: msg_new can't create type 0 front 512
+> > [  941.280958] libceph: msgpool osd_op_reply alloc failed
+> > [  941.281074] libceph: msg_new can't create type 0 front 4096
+> > [  941.281236] libceph: msgpool osd_op alloc failed
+> 
+> The ceph memory allocations are definitely not bulletproof and low memory
+> situations can still cause problems. 
 
-Would it be better to use a HBA (without RAID) for SATA/SAS2 16 port? Does anyone know how a failure and an a reinsertion of a new drive will be handled with these type of HBAs? I assume that a manual --mkfs --mkjournal for the osd is required in addition to the a restart of the particular cosd?
+Lack of memory is not the worst. The worst thing is that after some time the 
+server crashed with a Kernel panic.
 
-Mark Nigh
-Systems Architect
-mnigh@netelligent.com
-Netelligent Corporation
+> I'm not sure that that is what is
+> going on here, but you might try adjusting vm.min_free_kbytes and see if
+> that has an effect.  e.g.,
+> 
+> 	sysctl -w vm.min_free_kbytes=262144
+Old value  - vm.min_free_kbytes = 5752
 
+Seem to be helped. But 260M "minimum free" - looks scary. :)
 
------Original Message-----
-From: rarecactus@gmail.com [mailto:rarecactus@gmail.com] On Behalf Of Colin McCabe
-Sent: Wednesday, May 11, 2011 4:39 PM
-To: Mark Nigh
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: OSD Crash
-
-On Wed, May 11, 2011 at 1:47 PM, Mark Nigh <mnigh@netelligent.com> wrote:
-> Some additional testing shows that the underlying filesystem btrfs does fail thus the daemon appropriately fails.
->
-> The way I am simulating a failed HDD is by removing the HDD. The failure is working,
-> but the problem is when I reinsert the HDD. I think I see the BTRFS filesystem
-> recovery (btrfs filesystem show) and I can start the correct osd daemon that corresponds
-> to the mount point but I do not see the osd come up and in (ceph -s).
-
-I am assuming that you are using serial ATA (SATA), because that is
-what comes standard on most PCs these days. The last time I used SATA
-hotplug, which was in 2009, the driver support was still pretty flaky
-at the chipset level. Things may have improved since then, but I
-suspect that SATA hotplug is still an uncommon and poorly tested
-operation.
-
-If you really want to get hotplug working, start with the basics--
-just see whether it works at the driver and block device level. Then
-get btrfs involved, and finally if all that works, try Ceph.
-
-However, it might be simpler just to simulate failures by randomly
-killing cosd processes.
-When cosd hangs on a sync for too long, it will deliver a SIGABRT to
-itself anyway. So the only part of the proecss you would be bypassing
-is the hang. You're putting your SATA driver and btrfs's error
-handling paths through a workout, but not really testing Ceph per se.
-
-Colin
-
-
->
->  ceph version 0.27.commit: 793034c62c8e9ffab4af675ca97135fd1b193c9c. process: cosd. pid: 2702
-> 2011-05-11 15:13:58.650515 7fc6a349d760 filestore(/mnt/osd2) mount FIEMAP ioctl is NOT supported
-> 2011-05-11 15:13:58.650754 7fc6a349d760 filestore(/mnt/osd2) mount detected btrfs
-> 2011-05-11 15:13:58.650768 7fc6a349d760 filestore(/mnt/osd2) mount btrfs CLONE_RANGE ioctl is supported
->
-> If I try to restart the osd daemon, it is unable to kill the process and repeats trying to kill it.
->
-> Is the underlying file system not recovery like I think? I guess removing and inserting the HDD isn't the correct way to simulate a dead HDD.? Show I following the process of removing the osd, initializing the osd data dir and then restart the osd daemon?
->
-> Thanks.
->
-> Mark Nigh
-> Systems Architect
-> Netelligent Corporation
-> mnigh@netelligent.com
->
->
->
-> -----Original Message-----
-> From: Mark Nigh
-> Sent: Wednesday, May 11, 2011 8:12 AM
-> To: 'ceph-devel@vger.kernel.org'
-> Subject: OSD Crash
->
-> I was performing a few failure test with the osd by removing a HDD from one of the osd host. All was well, the cluster noticed the failure and re-balanced data but when I replace the HDD into the host, the cosd crashed.
->
-> Here is my setup. 6 osd host with 4 HDDs each (4 cosd daemons running for each host). 1 mon and 2 mds (separate host).
->
-> Here is the log from the osd0
->
-> 2011-05-10 16:25:02.776151 7f9e16d36700 -- 10.6.1.92:6800/15566 >> 10.6.1.63:0/2322371038 pipe(0x4315a00 sd=14 pgs=0 cs=0 l=0).accept peer addr is really 10.6.1.63:0/2322371038 (socket is 10.6.1.63:42299/0)
-> os/FileStore.cc: In function 'unsigned int FileStore::_do_transaction(ObjectStore::Transaction&)', in thread '0x7f9e22577700'
-> os/FileStore.cc: 2120: FAILED assert(0 == "EIO handling not implemented")
->  ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
->  1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
->  2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
->  3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
->  4: (ThreadPool::worker()+0x2a2) [0x626fa2]
->  5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
->  6: (()+0x6d8c) [0x7f9e29434d8c]
->  7: (clone()+0x6d) [0x7f9e2808204d]
->  ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
->  1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
->  2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
->  3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
->  4: (ThreadPool::worker()+0x2a2) [0x626fa2]
->  5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
->  6: (()+0x6d8c) [0x7f9e29434d8c]
->  7: (clone()+0x6d) [0x7f9e2808204d]
-> os/FileStore.cc: In function 'unsigned int FileStore::_do_transaction(ObjectStore::Transaction&)', in thread '0x7f9e21d76700'
-> os/FileStore.cc: 2120: FAILED assert(0 == "EIO handling not implemented")
->  ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
->  1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
->  2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
->  3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
->  4: (ThreadPool::worker()+0x2a2) [0x626fa2]
->  5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
->  6: (()+0x6d8c) [0x7f9e29434d8c]
->  7: (clone()+0x6d) [0x7f9e2808204d]
->  ceph version 0.27 (commit:793034c62c8e9ffab4af675ca97135fd1b193c9c)
->  1: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x194) [0x5a0c84]
->  2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*, std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x156) [0x5a3536]
->  3: (FileStore::_do_op(FileStore::OpSequencer*)+0x13e) [0x598ebe]
->  4: (ThreadPool::worker()+0x2a2) [0x626fa2]
->  5: (ThreadPool::WorkThread::entry()+0xd) [0x529f1d]
->  6: (()+0x6d8c) [0x7f9e29434d8c]
->  7: (clone()+0x6d) [0x7f9e2808204d]
-> *** Caught signal (Aborted) **
->  in thread 0x7f9e22577700
-> ceph version 0.27.commit: 793034c62c8e9ffab4af675ca97135fd1b193c9c. process: cosd. pid: 1414
-> 2011-05-10 22:01:13.762083 7f0620492760 filestore(/mnt/osd0) mount FIEMAP ioctl is NOT supported
-> 2011-05-10 22:01:13.762276 7f0620492760 filestore(/mnt/osd0) mount detected btrfs
-> 2011-05-10 22:01:13.762288 7f0620492760 filestore(/mnt/osd0) mount btrfs CLONE_RANGE ioctl is supported
-> *** Caught signal (Terminated) **
->  in thread 0x7f061e7b4700. Shutting down.
->
-> As you can see with the attached log, I try to restart the cosd at 22:01. The service is started but ceph -s doesn't include the osd.
->
-> Thanks for your help.
->
-> Mark Nigh
-> Systems Architect
-> Netelligent Corporation
-> mnigh@netelligent.com
->
->
->
-> This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
+WBR,
+    Fyodor.
