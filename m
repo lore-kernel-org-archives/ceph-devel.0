@@ -1,79 +1,103 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: ceph fs
-Date: Fri, 13 May 2011 12:28:02 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1105131226530.6634@cobra.newdream.net>
-References: <201105132047.36395.ufm@ufm.su>
+From: Simon Tian <aixt2006@gmail.com>
+Subject: Re: rbd create error with 0.26
+Date: Sat, 14 May 2011 11:26:17 +0800
+Message-ID: <BANLkTim9vg_TkakNnnTHDgHL8xAMbvqGng@mail.gmail.com>
+References: <BANLkTim4GDuiVLaX2khWqRF310VJnSEG4Q@mail.gmail.com>
+	<BANLkTik7eFyp_7X=U5dZ=O5KdCQvyWQ+Sw@mail.gmail.com>
+	<BANLkTing1pYepM0F9nrewq9vyfF77Z8yJg@mail.gmail.com>
+	<BANLkTinNS5Zhnccwgxt2SBwjS+c18cr4jg@mail.gmail.com>
+	<BANLkTinO=rYk8wOvO50EKyzbHTjrjk_dvQ@mail.gmail.com>
+	<BANLkTikRzuukqpwkEceMB9ZiRY-SUPFxuA@mail.gmail.com>
+	<BANLkTikPk32SMy0-bNrto8+6tSajciZ4pw@mail.gmail.com>
+	<Pine.LNX.4.64.1105130854110.12286@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41669 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751087Ab1EMT1I (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 May 2011 15:27:08 -0400
-In-Reply-To: <201105132047.36395.ufm@ufm.su>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:37615 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759617Ab1END0T convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 May 2011 23:26:19 -0400
+Received: by wya21 with SMTP id 21so2316055wya.19
+        for <ceph-devel@vger.kernel.org>; Fri, 13 May 2011 20:26:17 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1105130854110.12286@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, ceph-devel@vger.kernel.org
 
-On Fri, 13 May 2011, Fyodor Ustinov wrote:
-> On Friday 13 May 2011 18:53:58 you wrote:
-> > On Thu, 12 May 2011, Fyodor Ustinov wrote:
-> > > Hi!
-> > > 
-> > > Like previous, but ceph fs instead of rbd.
-> > > (i.e. iozone with 4G file).
-> > > 
-> > > [  783.295035] ceph: loaded (mds proto 32)
-> > > [  783.300122] libceph: client4125 fsid
-> > > ff352dfd-078c-e65f-a769-d25abb384d92 [  783.300642] libceph: mon0
-> > > 77.120.112.193:6789 session established [  941.278185] libceph: msg_new
-> > > can't create type 0 front 4096
-> > > [  941.278456] libceph: msgpool osd_op alloc failed
-> > > [  941.278539] libceph: msg_new can't create type 0 front 512
-> > > [  941.278606] libceph: msgpool osd_op_reply alloc failed
-> > > [  941.278670] libceph: msg_new can't create type 0 front 4096
-> > > [  941.278737] libceph: msgpool osd_op alloc failed
-> > > [  941.278808] libceph: msg_new can't create type 0 front 512
-> > > [  941.278875] libceph: msgpool osd_op_reply alloc failed
-> > > [  941.279011] libceph: msg_new can't create type 0 front 4096
-> > > [  941.279079] libceph: msgpool osd_op alloc failed
-> > > [  941.279153] libceph: msg_new can't create type 0 front 512
-> > > [  941.279220] libceph: msgpool osd_op_reply alloc failed
-> > > [  941.279286] libceph: msg_new can't create type 0 front 4096
-> > > [  941.279352] libceph: msgpool osd_op alloc failed
-> > > [  941.279422] libceph: msg_new can't create type 0 front 512
-> > > [  941.279623] libceph: msgpool osd_op_reply alloc failed
-> > > [  941.279692] libceph: msg_new can't create type 0 front 4096
-> > > [  941.279897] libceph: msgpool osd_op alloc failed
-> > > [  941.280042] libceph: msg_new can't create type 0 front 512
-> > > [  941.280300] libceph: msgpool osd_op_reply alloc failed
-> > > [  941.280418] libceph: msg_new can't create type 0 front 4096
-> > > [  941.280534] libceph: msgpool osd_op alloc failed
-> > > [  941.280793] libceph: msg_new can't create type 0 front 512
-> > > [  941.280958] libceph: msgpool osd_op_reply alloc failed
-> > > [  941.281074] libceph: msg_new can't create type 0 front 4096
-> > > [  941.281236] libceph: msgpool osd_op alloc failed
-> > 
-> > The ceph memory allocations are definitely not bulletproof and low memory
-> > situations can still cause problems. 
-> 
-> Lack of memory is not the worst. The worst thing is that after some time the 
-> server crashed with a Kernel panic.
+>> BTW, I have 2 question:
+>> 1. =C2=A0 In these scenario, after I execute "cclass -a" and "ceph c=
+lass
+>> activate rbd 1.3", =C2=A0I need to wait for several second before cr=
+eate
+>> rbd, otherwise, "librbd: failed to assign a block name for image" wi=
+ll
+>> come out. Is this all right?
+>
+> For 0.27 and previous, yes. =C2=A0The class distribution has removed =
+in v0.28
+> and it is now the administrator's (make install's, dpkg's, rpm's)
+> responsibility to put the .so in the right directory. =C2=A0This is m=
+uch
+> simpler all around and easier to debug. =C2=A0If you are still having=
+ any class
+> loading problems you should try the 'next' branch which will soon bec=
+ome
+> v0.28.
 
-Do you mean the ext3 xattr bug?  We've never seen it with ext4 (or btrfs, 
-obviously).  The server side is all userland so generally speaking you 
-should never see a panic there unless there is a btrfs bug...
+OK,  I'll try v0.28.
+How to enable the debug of the libs (librbd, librados....)? I debug
+testlibrbd in gdb to see the backtrace, but can't got the context in
+the libs.
 
-> > I'm not sure that that is what is
-> > going on here, but you might try adjusting vm.min_free_kbytes and see if
-> > that has an effect.  e.g.,
-> > 
-> > 	sysctl -w vm.min_free_kbytes=262144
-> Old value  - vm.min_free_kbytes = 5752
-> 
-> Seem to be helped. But 260M "minimum free" - looks scary. :)
 
-Yeah that number came from someone else on this list, adjust as needed!
+>> 2. =C2=A0 I run some test with a modified testlibrbd.c, code add lik=
+e:
+>>
+>> gettimeofday(&tv1, NULL);
+>> =C2=A0 for (i =3D 0; i < num_test; i++)
+>> =C2=A0 =C2=A0 write_test_data(image, test_data, TEST_IO_SIZE * i, TE=
+ST_IO_SIZE);
+>> gettimeofday(&tv2, NULL);
+>> t1 =3D tv2.tv_sec-tv1.tv_sec;
+>> temp =3D (float)t1 + (tv2.tv_usec-tv1.tv_usec)/1000000.0;
+>> speed =3D 1.0*TEST_IO_SIZE*num_test/temp/1024/1024;
+>> printf("time used: temp=3D%.3f\n", temp);
+>> printf("write speed: %.2f MB/s\n", speed);
+>>
+>> The result I got is so slowly:
+>> time used: temp=3D46.611
+>> write speed: 0.21 MB/s
+>> time used: temp=3D14.706
+>> read speed: 0.68 MB/s
+>> time used: temp=3D45.453
+>> aio write speed: 0.22 MB/s
+>> time used: temp=3D14.759
+>> aio read speed: 0.68 MB/s
+>>
+>> But while the test, some cosd process is running with high CPU usage=
+=2E
+>
+> What is the IO size? =C2=A0Is write_test_data synchronous?
+>
+> For simple write benchmarking you can also use
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0rados mkpool foo
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0rados -p foo bench <seconds> write -b <blo=
+cksize> -t <threads>
+>
+> and you'll see latency and throughput. =C2=A0Blocksize defaults to 4M=
+ and
+> "threads" (parallel IOs) default to 16, IIRC.
 
-sage
+The IO size is TEST_IO_SIZE=3D512,  write_test_data is just synchronous=
+,
+it call the rbd_write( ) function.
+aio write speed is 0.22 MB/s which called rbd_aio_write() function.
+aio read speed is 0.68 MB/s which called  rbd_aio_read() function.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
