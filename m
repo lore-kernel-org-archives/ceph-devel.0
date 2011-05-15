@@ -1,91 +1,85 @@
-From: Dyweni - Ceph-Devel <YS3fpFE2ykfB@dyweni.com>
-Subject: Segfault when creating new cluster
-Date: Sat, 14 May 2011 19:17:42 -0500
-Message-ID: <ec24b6e7f09a0ceec38a82e9e0165c40@pl1.haspere.com>
-Reply-To: <YS3fpFE2ykfB@dyweni.com>
+From: Simon Tian <aixt2006@gmail.com>
+Subject: Re: rbd create error with 0.26
+Date: Sun, 15 May 2011 17:39:18 +0800
+Message-ID: <BANLkTimr+Ov=s=He5eKFmb6QFspDU=YmHQ@mail.gmail.com>
+References: <BANLkTim4GDuiVLaX2khWqRF310VJnSEG4Q@mail.gmail.com>
+	<BANLkTik7eFyp_7X=U5dZ=O5KdCQvyWQ+Sw@mail.gmail.com>
+	<BANLkTing1pYepM0F9nrewq9vyfF77Z8yJg@mail.gmail.com>
+	<BANLkTinNS5Zhnccwgxt2SBwjS+c18cr4jg@mail.gmail.com>
+	<BANLkTinO=rYk8wOvO50EKyzbHTjrjk_dvQ@mail.gmail.com>
+	<BANLkTikRzuukqpwkEceMB9ZiRY-SUPFxuA@mail.gmail.com>
+	<BANLkTikPk32SMy0-bNrto8+6tSajciZ4pw@mail.gmail.com>
+	<Pine.LNX.4.64.1105130854110.12286@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from pl1.haspere.com ([208.111.35.220]:49219 "EHLO pl1.haspere.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755867Ab1EOAZ2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 14 May 2011 20:25:28 -0400
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:49309 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753069Ab1EOJjT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 May 2011 05:39:19 -0400
+Received: by wya21 with SMTP id 21so2783852wya.19
+        for <ceph-devel@vger.kernel.org>; Sun, 15 May 2011 02:39:18 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1105130854110.12286@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, ceph-devel@vger.kernel.org
 
- Hi List!
-
- When creating a brand new cluster, I get the following segmentation 
- fault:
-
- === osd.2 ===
- pushing conf and monmap to ceph2
- Warning: Permanently added 'ceph2' (ECDSA) to the list of known hosts.
- umount: /data/osd2: not mounted
- umount: /dev/sda: not mounted
-
- WARNING! - Btrfs Btrfs v0.19 IS EXPERIMENTAL
- WARNING! - see http://btrfs.wiki.kernel.org before using
-
- fs created label (null) on /dev/sda
-         nodesize 4096 leafsize 4096 sectorsize 4096 size 74.53GB
- Btrfs Btrfs v0.19
- Scanning for Btrfs filesystems
-  ** WARNING: Ceph is still under development.  Any feedback can be 
- directed  **
-  **          at ceph-devel@vger.kernel.org or 
- http://ceph.newdream.net/.     **
- *** Caught signal (Segmentation fault) **
-  in thread 0xb70f2b30
-  ceph version 0.27.1-401-g6af0379 
- (commit:6af0379e27ac71a7abd8c9ebb0145ae8b9f66cc4)
-  1: (ceph::BackTrace::BackTrace(int)+0x1f) [0x8465fcf]
-  2: /usr/bin/cosd() [0x84d8844]
-  3: [0xb77f1400]
-  4: (pthread_spin_lock()+0x6) [0xb77c38d6]
-  5: (ceph::Spinlock::lock()+0x20) [0x82e42e8]
-  6: (ceph::atomic_t::dec()+0x12) [0x82e4418]
-  7: (RefCountedObject::put()+0x15) [0x82e48d9]
-  8: (MonClient::get_monmap_privately()+0x5f2) [0x84c81ec]
-  9: (main()+0x976) [0x82e0cce]
-  10: (__libc_start_main()+0xd9) [0xb7109ba9]
-  11: /usr/bin/cosd() [0x82e0101]
- /usr/sbin/mkcephfs: line 239:   859 Segmentation fault      (core 
- dumped) $BINDIR/cosd -c $conf --monmap $dir/monmap -i $id --mkfs
- failed: 'ssh ceph2 /usr/sbin/mkcephfs -d /tmp/mkcephfs.6ySmaVjdFm 
- --init-daemon osd.2'
-
-
-
- Here is the GDB backtrace:
-
- (gdb) bt
- #0  0xb77c6d6f in raise () from /lib/libpthread.so.0
- #1  0x084d870f in reraise_fatal (signum=11) at common/signal.cc:63
- #2  0x084d88ce in handle_fatal_signal (signum=11) at 
- common/signal.cc:110
- #3  <signal handler called>
- #4  0xb77c38d6 in pthread_spin_lock () from /lib/libpthread.so.0
- #5  0x082e42e8 in ceph::Spinlock::lock (this=0x4) at 
- include/Spinlock.h:97
- #6  0x082e4418 in ceph::atomic_t::dec (this=0x4) at include/atomic.h:75
- #7  0x082e48d9 in RefCountedObject::put (this=0x0) at msg/Message.h:160
- #8  0x084c81ec in MonClient::get_monmap_privately (this=0xbf81baf4) at 
- mon/MonClient.cc:230
- #9  0x082e0cce in main (argc=8, argv=0xbf81c1f4) at cosd.cc:130
-
-
-
- My kernel is:
- Linux version 2.6.39-rc7-git5-20110514-0905 (root@phenom) (gcc version 
- 4.4.5 (Gentoo 4.4.5 p1.2, pie-0.4.5) ) #1 SMP Sat May 14 09:07:07 CDT 
- 2011
-
-
--- 
- Thanks,
- Dyweni
-
+PiBXaGF0IGlzIHRoZSBJTyBzaXplPyDCoElzIHdyaXRlX3Rlc3RfZGF0YSBzeW5jaHJvbm91cz8K
+Pgo+IEZvciBzaW1wbGUgd3JpdGUgYmVuY2htYXJraW5nIHlvdSBjYW4gYWxzbyB1c2UKPiDCoCDC
+oCDCoCDCoHJhZG9zIG1rcG9vbCBmb28KPiDCoCDCoCDCoCDCoHJhZG9zIC1wIGZvbyBiZW5jaCA8
+c2Vjb25kcz4gd3JpdGUgLWIgPGJsb2Nrc2l6ZT4gLXQgPHRocmVhZHM+Cj4KPiBhbmQgeW91J2xs
+IHNlZSBsYXRlbmN5IGFuZCB0aHJvdWdocHV0LiDCoEJsb2Nrc2l6ZSBkZWZhdWx0cyB0byA0TSBh
+bmQKPiAidGhyZWFkcyIgKHBhcmFsbGVsIElPcykgZGVmYXVsdCB0byAxNiwgSUlSQy4KCgpIaSwg
+U2FnZToKCkkganVzdCBkaWQgdGhlIGJlbmNoOgpyYWRvcyAtcCByYmQgYmVuY2ggNjAgd3JpdGUg
+LXQgNjQgwqAgYW5kIMKgIMKgcmFkb3MgLXAgZGF0YSBiZW5jaCA2MCB3cml0ZSAtdCA2NAp0aGUg
+YXZnIHRocm91Z2hwdXQgaXMgYWJvdXQgNDZNQi9zLCBvbmUgb2YgdGhlIHJlc3VsdCBpcyBhcyBm
+b2xsb3cuCkJ1dCB3aHkgaXQncyBzbG93IHdpdGggcmJkIGFwaSBmcm9tIDxyYmQvbGlicmJkLmg+
+PwpBbmQgSSB0cmllZCB0ZXN0bGlicmJkcHAuY2MsIHRoZSByZXN1bHQgaXMgbW9yZSBvciBsZXNz
+IHRoZSBzYW1lLgpUaGUgYXR0YWNobWVudHMgYXJlIHRoZSB0ZXN0IGNvZGVzLiBDb3VsZCB5b3Ug
+cnVuIGl0IG9uIHlvdXIgcGxhdGZvcm0gcGxlYXNlPwoKwqBzZWMgQ3VyIG9wcyDCoCBzdGFydGVk
+IMKgZmluaXNoZWQgwqBhdmcgTUIvcyDCoGN1ciBNQi9zIMKgbGFzdCBsYXQgwqAgYXZnIGxhdArC
+oCA0MCDCoCDCoCDCoDYzIMKgIMKgIMKgIDQ4MiDCoCDCoCDCoCA0MTkgwqAgNDEuODg4NCDCoCDC
+oCDCoCDCoDQ0IMKgIDIuNDAwNDQgwqAgMi40MDk3OQrCoCA0MSDCoCDCoCDCoDYzIMKgIMKgIMKg
+IDQ5NCDCoCDCoCDCoCA0MzEgwqAgNDIuMDM3MiDCoCDCoCDCoCDCoDQ4IMKgIDIuMTEwNDQgwqAg
+wqAgMi40MDYKwqAgNDIgwqAgwqAgwqA2NCDCoCDCoCDCoCA1MDYgwqAgwqAgwqAgNDQyIMKgIDQy
+LjA4MzcgwqAgwqAgwqAgwqA0NCDCoCAyLjExMjY2IMKgIDIuNDAyMjkKwqAgNDMgwqAgwqAgwqA2
+MyDCoCDCoCDCoCA1MTggwqAgwqAgwqAgNDU1IMKgIDQyLjMxMzkgwqAgwqAgwqAgwqA1MiDCoCAy
+LjMzNDY4IMKgIMKgMi4zOTgyCsKgIDQ0IMKgIMKgIMKgNjMgwqAgwqAgwqAgNTI3IMKgIMKgIMKg
+IDQ2NCDCoCA0Mi4xNzAzIMKgIMKgIMKgIMKgMzYgwqAgwqAyLjQ0MDMgwqAgMi4zOTU1OQrCoCA0
+NSDCoCDCoCDCoDYzIMKgIMKgIMKgIDUzOSDCoCDCoCDCoCA0NzYgwqAgNDIuMjk5NSDCoCDCoCDC
+oCDCoDQ4IMKgIDIuMTk3NjggwqAgMi4zOTQxMwrCoCA0NiDCoCDCoCDCoDYzIMKgIMKgIMKgIDU1
+MSDCoCDCoCDCoCA0ODggwqAgNDIuNDIzMiDCoCDCoCDCoCDCoDQ4IMKgIDIuNTEyMzIgwqAgwqAy
+LjM5MjgKwqAgNDcgwqAgwqAgwqA2MyDCoCDCoCDCoCA1NjMgwqAgwqAgwqAgNTAwIMKgIDQyLjU0
+MTYgwqAgwqAgwqAgwqA0OCDCoCAyLjE4MDI1IMKgIDIuMzg5NTgKwqAgNDggwqAgwqAgwqA2MyDC
+oCDCoCDCoCA1NzIgwqAgwqAgwqAgNTA5IMKgIDQyLjQwNTEgwqAgwqAgwqAgwqAzNiDCoCAyLjI3
+MTExIMKgIDIuMzg3OTEKwqAgNDkgwqAgwqAgwqA2MyDCoCDCoCDCoCA1ODQgwqAgwqAgwqAgNTIx
+IMKgIMKgNDIuNTE5IMKgIMKgIMKgIMKgNDggwqAgMi40MTY4NCDCoCAyLjM4Njk1CsKgIDUwIMKg
+IMKgIMKgNjMgwqAgwqAgwqAgNTk2IMKgIMKgIMKgIDUzMyDCoCA0Mi42Mjg0IMKgIMKgIMKgIMKg
+NDggwqAgMi4xMTA4NyDCoCDCoCAyLjM4NArCoCA1MSDCoCDCoCDCoDYzIMKgIMKgIMKgIDYwOCDC
+oCDCoCDCoCA1NDUgwqAgNDIuNzMzNSDCoCDCoCDCoCDCoDQ4IMKgIDIuMTgxNDcgwqAgMi4zNzky
+NQrCoCA1MiDCoCDCoCDCoDYzIMKgIMKgIMKgIDYyMCDCoCDCoCDCoCA1NTcgwqAgNDIuODM0NSDC
+oCDCoCDCoCDCoDQ4IMKgIDIuNDUyODcgwqAgMi4zNzc4NwrCoCA1MyDCoCDCoCDCoDYzIMKgIMKg
+IMKgIDYyOSDCoCDCoCDCoCA1NjYgwqAgNDIuNzA1NCDCoCDCoCDCoCDCoDM2IMKgIDIuNDUxODcg
+wqAgMi4zNzgwMQrCoCA1NCDCoCDCoCDCoDYzIMKgIMKgIMKgIDY0NCDCoCDCoCDCoCA1ODEgwqAg
+NDMuMDI1NSDCoCDCoCDCoCDCoDYwIMKgIDIuMjI0MDMgwqAgMi4zNzQ3NwrCoCA1NSDCoCDCoCDC
+oDYzIMKgIMKgIMKgIDY1MyDCoCDCoCDCoCA1OTAgwqAgNDIuODk3NiDCoCDCoCDCoCDCoDM2IMKg
+IDIuMjI3ODIgwqAgMi4zNzE1NwrCoCA1NiDCoCDCoCDCoDYzIMKgIMKgIMKgIDY2OCDCoCDCoCDC
+oCA2MDUgwqAgNDMuMjAyNiDCoCDCoCDCoCDCoDYwIMKgIDIuMjA2MzggwqAgMi4zNjU5NwrCoCA1
+NyDCoCDCoCDCoDYzIMKgIMKgIMKgIDY3NyDCoCDCoCDCoCA2MTQgwqAgNDMuMDc2MSDCoCDCoCDC
+oCDCoDM2IMKgIDIuMTk2MjggwqAgMi4zNjIwOQrCoCA1OCDCoCDCoCDCoDYzIMKgIMKgIMKgIDY4
+OSDCoCDCoCDCoCA2MjYgwqAgNDMuMTYwOCDCoCDCoCDCoCDCoDQ4IMKgIDIuMTgyNjIgwqAgMi4z
+NTc2MgrCoCA1OSDCoCDCoCDCoDYzIMKgIMKgIMKgIDcwNCDCoCDCoCDCoCA2NDEgwqAgNDMuNDQ1
+OSDCoCDCoCDCoCDCoDYwIMKgIDIuMjcwMjkgwqAgMi4zNTM1MgptaW4gbGF0OiAxLjg3OTgxIG1h
+eCBsYXQ6IDUuNTYxOTQgYXZnIGxhdDogMi4zNDk0NArCoHNlYyBDdXIgb3BzIMKgIHN0YXJ0ZWQg
+wqBmaW5pc2hlZCDCoGF2ZyBNQi9zIMKgY3VyIE1CL3MgwqBsYXN0IGxhdCDCoCBhdmcgbGF0CsKg
+IDYwIMKgIMKgIMKgNjMgwqAgwqAgwqAgNzE2IMKgIMKgIMKgIDY1MyDCoCA0My41MjE1IMKgIMKg
+IMKgIMKgNDggwqAgMi4yNzgzNSDCoCAyLjM0OTQ0CsKgIDYxIMKgIMKgIMKgNjQgwqAgwqAgwqAg
+NzE3IMKgIMKgIMKgIDY1MyDCoCDCoDQyLjgwOCDCoCDCoCDCoCDCoCAwIMKgIMKgIMKgIMKgIC0g
+wqAgMi4zNDk0NArCoCA2MiDCoCDCoCDCoDYzIMKgIMKgIMKgIDcxNyDCoCDCoCDCoCA2NTQgwqAg
+NDIuMTgyMSDCoCDCoCDCoCDCoCAyIMKgIDIuMjU2OTQgwqAgMi4zNDkyOQpUb3RhbCB0aW1lIHJ1
+bjogwqAgwqAgwqAgwqA2Mi4yNzQ3MTkKVG90YWwgd3JpdGVzIG1hZGU6IMKgIMKgIDcxNwpXcml0
+ZSBzaXplOiDCoCDCoCDCoCDCoCDCoCDCoDQxOTQzMDQKQmFuZHdpZHRoIChNQi9zZWMpOiDCoCDC
+oDQ2LjA1NAoKQXZlcmFnZSBMYXRlbmN5OiDCoCDCoCDCoCA1LjQ1MwpNYXggbGF0ZW5jeTogwqAg
+wqAgwqAgwqAgwqAgNjIuMDMzOQpNaW4gbGF0ZW5jeTogwqAgwqAgwqAgwqAgwqAgMS44Nzk4MQo=
