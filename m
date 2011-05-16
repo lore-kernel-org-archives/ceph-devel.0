@@ -1,57 +1,45 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
+From: Josef Bacik <josef@redhat.com>
 Subject: Re: btrfs warnings from 2.6.39-rc5
-Date: Mon, 16 May 2011 08:28:57 -0600
-Message-ID: <4DD134A9.8010008@sandia.gov>
-References: <4DB863B4.3070900@sandia.gov> <4DC016C1.2070505@redhat.com>
+Date: Mon, 16 May 2011 10:56:15 -0400
+Message-ID: <4DD13B0F.2000403@redhat.com>
+References: <4DB863B4.3070900@sandia.gov> <4DC016C1.2070505@redhat.com> <4DD134A9.8010008@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:53131 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755553Ab1EPO3U (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 May 2011 10:29:20 -0400
-In-Reply-To: <4DC016C1.2070505@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Josef Bacik <josef@redhat.com>
+Return-path: <linux-btrfs-owner@vger.kernel.org>
+In-Reply-To: <4DD134A9.8010008@sandia.gov>
+Sender: linux-btrfs-owner@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
 Cc: linux-btrfs@vger.kernel.org, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Josef Bacik wrote:
-> On 04/27/2011 02:43 PM, Jim Schutt wrote:
->> Hi,
+On 05/16/2011 10:28 AM, Jim Schutt wrote:
+> Josef Bacik wrote:
+>> On 04/27/2011 02:43 PM, Jim Schutt wrote:
+>>> Hi,
+>>>
+>>> I'm not sure if they matter, but I got these warnings on
+>>> one of the machines I'm using as a Ceph OSD server:
+>>>
+>>> [ 1806.549469] ------------[ cut here ]------------
+>>> [ 1806.554593] WARNING: at fs/btrfs/extent-tree.c:5790
+>>> use_block_rsv+0xa7/0x101 [btrfs]()
+>
+>>> Please let me know if I can do anything to help sort these out.
+>>>
 >>
->> I'm not sure if they matter, but I got these warnings on
->> one of the machines I'm using as a Ceph OSD server:
+>> I just posted a patch for this problem, it's titled
 >>
->> [ 1806.549469] ------------[ cut here ]------------
->> [ 1806.554593] WARNING: at fs/btrfs/extent-tree.c:5790
->> use_block_rsv+0xa7/0x101 [btrfs]()
-
->> Please let me know if I can do anything to help sort these out.
+>> Btrfs: fix how we do space reservation for truncate
 >>
-> 
-> I just posted a patch for this problem, it's titled
-> 
->     Btrfs: fix how we do space reservation for truncate
-> 
-> Please apply it and test it and see if it makes this problem go away. 
+>> Please apply it and test it and see if it makes this problem go away.
+>
+> This patch has been working very well for me, thanks.
+> I've had no sign of truncate trouble since I started using it.
+>
+> -- Jim
+>
 
-This patch has been working very well for me, thanks.
-I've had no sign of truncate trouble since I started using it.
+Fantastic, thank you for testing.
 
--- Jim
-
-> Thanks,
-> 
-> Josef
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-
-
+Josef
