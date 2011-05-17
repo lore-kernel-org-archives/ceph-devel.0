@@ -1,240 +1,207 @@
-From: Simon Tian <aixt2006@gmail.com>
+From: Jeff Wu <cpwu@tnsoft.com.cn>
 Subject: Re: IOZone Performance is very Strange
-Date: Tue, 17 May 2011 16:19:33 +0800
-Message-ID: <BANLkTikL+Tb6hkD+DRHh-6rr=2fQnVapaw@mail.gmail.com>
+Date: Tue, 17 May 2011 17:05:42 +0000
+Message-ID: <1305651942.1674.17.camel@localhost>
 References: <BANLkTiktOCMyP4opCvST_130TotXvSvuyQ@mail.gmail.com>
-	<1305638639.1606.4.camel@localhost>
-	<BANLkTik7u+WAeztCGYG8yT3Vqv_TUCk+ZA@mail.gmail.com>
+	 <1305638639.1606.4.camel@localhost>
+	 <BANLkTik7u+WAeztCGYG8yT3Vqv_TUCk+ZA@mail.gmail.com>
+Reply-To: <cpwu@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:46630 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751188Ab1EQITf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2011 04:19:35 -0400
-Received: by wya21 with SMTP id 21so178942wya.19
-        for <ceph-devel@vger.kernel.org>; Tue, 17 May 2011 01:19:33 -0700 (PDT)
+Received: from [210.22.136.227] ([210.22.136.227]:46034 "EHLO
+	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752294Ab1EQJFk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2011 05:05:40 -0400
 In-Reply-To: <BANLkTik7u+WAeztCGYG8yT3Vqv_TUCk+ZA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: AnnyRen <annyren6@gmail.com>
-Cc: cpwu@tnsoft.com.cn, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
-        The throughput of EXT4 is nice.... How about btrfs?
 
-Thx!
-Simon
+Hi AnnyRen,
 
-2011/5/17 AnnyRen <annyren6@gmail.com>:
+with the test results ,  run a 1G data at your ceph cluster ,
+should be about 100M/sec.
+maybe,iozone test results didn't include iozone flush time.
+
+Could you list your hardware platform infos ?
+network:1G,4G,8G,FC ...?,cpu,memory:size ? ,disk:PATA,SATA,SAS,SSD ??
+and
+could you try other iozone commands ,for instance :
+
+1)
+add "-e" param to include flush(fsync,fflush) in the timing
+calculations.
+
+/usr/bin/iozone -azcR -e -f /mnt/ceph/test0516.dbf  \
+-g 1G -b /exceloutput0516.xls 
+
+2)run a large data which size is your host memory size*2:
+
+$./iozone -z -c -e -a -n 512M -g {memory_size}*2M -i 0 -i 1 -i 2  \
+-f /mnt/ceph/fio -Rb ./iozone.xls 
+
+or 
+2)
+!/bin/sh
+
+for i in 32 64 128 256
+do
+./iozone -r ${i}k -t 10 -s 4096M -i 0 -i 1 -i 2   \
+-F /mnt/ceph/F1 /mnt/ceph/F2 /mnt/ceph/F3 /mnt/ceph/F4 /mnt/ceph/F5 /mnt/ceph/F6 /mnt/ceph/F7 /mnt/ceph/F8 /mnt/ceph/F9 /mnt/ceph/F10 
+done
+
+
+
+
+Jeff
+
+
+
+
+
+
+On Tue, 2011-05-17 at 15:34 +0800, AnnyRen wrote:
 > Hi, Jeff:
->
+> 
 > I run "ceph osd tell osd_num bench" with 1 times per osd
->
+> 
 > and use ceph -w to observe every osd performance,
->
-> osd0: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 10.875=
-844
+> 
+> osd0:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 10.875844
 > sec at 96413 KB/sec
-> osd1: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.784=
-985
+> osd1:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.784985
 > sec at 88975 KB/sec
-> osd2: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.161=
-067
+> osd2:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.161067
 > sec at 93949 KB/sec
-> osd3: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 10.798=
-796
+> osd3:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 10.798796
 > sec at 97101 KB/sec
-> osd4: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.437=
-141
+> osd4:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.437141
 > sec at 72630 KB/sec
-> osd5: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.451=
-444
+> osd5:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.451444
 > sec at 72558 KB/sec
-> osd6: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.083=
-872
+> osd6:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.083872
 > sec at 94603 KB/sec
-> osd7: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.062=
-728
+> osd7:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.062728
 > sec at 94784 KB/sec
-> osd8: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.137=
-312
+> osd8:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.137312
 > sec at 74170 KB/sec
-> osd9: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 13.489=
-992
+> osd9:  [INF] bench: wrote 1024 MB in blocks of 4096 KB in 13.489992
 > sec at 77729 KB/sec
->
->
+> 
+> 
 > and I run
 > root@MDS2:/mnt/ceph# rados bench 60 write -p data
->
+> 
 > the result is
->
-> Total time run: =C2=A0 =C2=A0 =C2=A0 =C2=A060.553247
-> Total writes made: =C2=A0 =C2=A0 1689
-> Write size: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A04194304
-> Bandwidth (MB/sec): =C2=A0 =C2=A0111.571
->
-> Average Latency: =C2=A0 =C2=A0 =C2=A0 0.573209
-> Max latency: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 2.25691
-> Min latency: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 0.218494
->
->
->
+> 
+> Total time run:        60.553247
+> Total writes made:     1689
+> Write size:            4194304
+> Bandwidth (MB/sec):    111.571
+> 
+> Average Latency:       0.573209
+> Max latency:           2.25691
+> Min latency:           0.218494
+> 
+> 
+> 
 > 2011/5/17 Jeff Wu <cpwu@tnsoft.com.cn>:
->> Hi AnnyRen
->>
->> Could you run the following commands and give us the test results?
->>
->> $ceph osd tell OSD-N bench =C2=A0 =C2=A0// OSD-N : osd number : 0,1,=
-2 ....
->> $ceph -w
->>
->> $rados bench 60 write -p data =C2=A0 =C2=A0// refer to "rados -h "
->>
->> Jeff
->>
->>
->>
->> On Tue, 2011-05-17 at 11:53 +0800, AnnyRen wrote:
->>> I'm running iozone on EXT4 with Ceph v0.26.
->>> But I got the weird result, most write performance exceed 1GB/s, ev=
-en
->>> up to 3GB/s
->>> I think it's not normal to get the performance outpupt.
->>>
->>> Command line I used is: /usr/bin/iozone -azcR -f
->>> /mnt/ceph/test0516.dbf -g 1G -b /exceloutput0516.xls
->>> Attachment is the output file...
->>>
->>> and my environment is composed of 15 physical machines with
->>>
->>> 3 MON, 2MDS (1 active, 1 standby), 10 OSD (1 osd daemon (3T) /host)
->>> EXT4 format
->>> data replication size: 3
->>>
->>>
->>>
->>> "Writer report"
->>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 "4" =C2=A0"8" =C2=A0"16" =C2=A0"32" =C2=
-=A0"64" =C2=A0"128" =C2=A0"256" =C2=A0"512" =C2=A0"1024"
->>> "2048" =C2=A0"4096" =C2=A0"8192" =C2=A0"16384"
->>> "64" =C2=A0 983980 =C2=A01204796 =C2=A01210227 =C2=A01143223 =C2=A0=
-1357066
->>> "128" =C2=A0 1007629 =C2=A01269781 =C2=A01406136 =C2=A01391557 =C2=A0=
-1436229 =C2=A01521718
->>> "256" =C2=A0 1112909 =C2=A01430119 =C2=A01523457 =C2=A01652404 =C2=A0=
-1514860 =C2=A01639786 =C2=A01729594
->>> "512" =C2=A0 1150351 =C2=A01475116 =C2=A01605228 =C2=A01723770 =C2=A0=
-1797349 =C2=A01712772 =C2=A01783912 =C2=A01854787
->>> "1024" =C2=A0 1213334 =C2=A01471481 =C2=A01679160 =C2=A01828574 =C2=
-=A01888889 =C2=A01899750 =C2=A01885572
->>> =C2=A01865912 =C2=A01875690
->>> "2048" =C2=A0 1229274 =C2=A01540849 =C2=A01708146 =C2=A01843410 =C2=
-=A01903457 =C2=A01980705 =C2=A01930406
->>> =C2=A01913634 =C2=A01906837 =C2=A01815744
->>> "4096" =C2=A0 1213284 =C2=A01528348 =C2=A01674646 =C2=A01762434 =C2=
-=A01872096 =C2=A01882352 =C2=A01881528
->>> =C2=A01903416 =C2=A01897949 =C2=A01835102 =C2=A01731177
->>> "8192" =C2=A0 204560 =C2=A0155186 =C2=A0572387 =C2=A0238548 =C2=A01=
-86597 =C2=A0429036 =C2=A0187327
->>> 157205 =C2=A0553771 =C2=A0416512 =C2=A0299810 =C2=A0405842
->>> "16384" =C2=A0 699749 =C2=A0559255 =C2=A0687450 =C2=A0541030 =C2=A0=
-828776 =C2=A0555296 =C2=A0742561
->>> 525483 =C2=A0604910 =C2=A0452423 =C2=A0564557 =C2=A0670539 =C2=A097=
-0616
->>> "32768" =C2=A0 532414 =C2=A0829610 =C2=A0812215 =C2=A0879441 =C2=A0=
-863159 =C2=A0864794 =C2=A0865938
->>> 804951 =C2=A0916352 =C2=A0879582 =C2=A0608132 =C2=A0860732 =C2=A012=
-39475
->>> "65536" =C2=A0 994824 =C2=A01096543 =C2=A01095791 =C2=A01317968 =C2=
-=A01280277 =C2=A01390267 =C2=A01259868
->>> =C2=A01205214 =C2=A01339111 =C2=A01346927 =C2=A01267888 =C2=A086323=
-4 =C2=A01190221
->>> "131072" =C2=A0 1063429 =C2=A01165115 =C2=A01102650 =C2=A01554828 =C2=
-=A01182128 =C2=A01185731
->>> 1190752 =C2=A01195792 =C2=A01277441 =C2=A01211063 =C2=A01237567 =C2=
-=A01226999 =C2=A01336961
->>> "262144" =C2=A0 1280619 =C2=A01368554 =C2=A01497837 =C2=A01633397 =C2=
-=A01598255 =C2=A01609212
->>> 1607504 =C2=A01665019 =C2=A01590515 =C2=A01548307 =C2=A01591258 =C2=
-=A01505267 =C2=A01625679
->>> "524288" =C2=A0 1519583 =C2=A01767928 =C2=A01738523 =C2=A01883151 =C2=
-=A02011216 =C2=A01993877
->>> 2023543 =C2=A01867440 =C2=A02106124 =C2=A02055064 =C2=A01906668 =C2=
-=A01778645 =C2=A01838988
->>> "1048576" =C2=A0 1580851 =C2=A01887530 =C2=A02044131 =C2=A02166133 =
-=C2=A02236379 =C2=A02283578
->>> 2257454 =C2=A02296612 =C2=A02271066 =C2=A02101274 =C2=A01905829 =C2=
-=A01605923 =C2=A02158238
->>>
->>>
->>>
->>> "Reader report"
->>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 "4" =C2=A0"8" =C2=A0"16" =C2=A0"32" =C2=
-=A0"64" =C2=A0"128" =C2=A0"256" =C2=A0"512" =C2=A0"1024"
->>> "2048" =C2=A0"4096" =C2=A0"8192" =C2=A0"16384"
->>> "64" =C2=A0 1933893 =C2=A02801873 =C2=A03057153 =C2=A03363612 =C2=A0=
-3958892
->>> "128" =C2=A0 2286447 =C2=A03053774 =C2=A02727923 =C2=A03468030 =C2=A0=
-4104338 =C2=A04557257
->>> "256" =C2=A0 2903529 =C2=A03236056 =C2=A03245838 =C2=A03705040 =C2=A0=
-3654598 =C2=A04496299 =C2=A05117791
->>> "512" =C2=A0 2906696 =C2=A03437042 =C2=A03628697 =C2=A03431550 =C2=A0=
-4871723 =C2=A04296637 =C2=A06246213 =C2=A06395018
->>> "1024" =C2=A0 3229770 =C2=A03483896 =C2=A04609294 =C2=A03791442 =C2=
-=A04614246 =C2=A05536137 =C2=A04550690
->>> =C2=A05048117 =C2=A04966395
->>> "2048" =C2=A0 3554251 =C2=A04310472 =C2=A03885431 =C2=A04096676 =C2=
-=A06401772 =C2=A04842658 =C2=A05080379
->>> =C2=A05184636 =C2=A05596757 =C2=A05735012
->>> "4096" =C2=A0 3416292 =C2=A04691638 =C2=A04321103 =C2=A05728903 =C2=
-=A05475122 =C2=A05171846 =C2=A04819300
->>> =C2=A05258919 =C2=A06408472 =C2=A05044289 =C2=A04079948
->>> "8192" =C2=A0 3233004 =C2=A04615263 =C2=A04536055 =C2=A05618186 =C2=
-=A05414558 =C2=A05025700 =C2=A05553712
->>> =C2=A04926264 =C2=A05634770 =C2=A05281396 =C2=A04659702 =C2=A036522=
-58
->>> "16384" =C2=A0 3141058 =C2=A03704193 =C2=A04567654 =C2=A04395850 =C2=
-=A04568869 =C2=A05387732
->>> 4436432 =C2=A05808029 =C2=A05578420 =C2=A04675810 =C2=A03913007 =C2=
-=A03911225 =C2=A03961277
->>> "32768" =C2=A0 3704273 =C2=A04598957 =C2=A04088278 =C2=A05133719 =C2=
-=A05896692 =C2=A05537024
->>> 5234412 =C2=A05398271 =C2=A04942992 =C2=A04118662 =C2=A03729099 =C2=
-=A03511757 =C2=A03481511
->>> "65536" =C2=A0 4131091 =C2=A04210184 =C2=A05341188 =C2=A04647619 =C2=
-=A06077765 =C2=A05852474
->>> 5379762 =C2=A05259330 =C2=A05488249 =C2=A05246682 =C2=A04342682 =C2=
-=A03549202 =C2=A03286487
->>> "131072" =C2=A0 3582876 =C2=A05251082 =C2=A05332216 =C2=A05269908 =C2=
-=A05303512 =C2=A05574440
->>> 5635064 =C2=A05796372 =C2=A05406363 =C2=A04958839 =C2=A04435918 =C2=
-=A03673443 =C2=A03647874
->>> "262144" =C2=A0 3659283 =C2=A04551414 =C2=A05746231 =C2=A05433824 =C2=
-=A05876196 =C2=A06011650
->>> 5552000 =C2=A05629260 =C2=A05298830 =C2=A04982226 =C2=A04628902 =C2=
-=A04065823 =C2=A03421924
->>> "524288" =C2=A0 3905973 =C2=A05488778 =C2=A05219963 =C2=A06047356 =C2=
-=A05916811 =C2=A06180455
->>> 5495733 =C2=A05925628 =C2=A05637512 =C2=A05537123 =C2=A03517132 =C2=
-=A03550861 =C2=A03047013
->>> "1048576" =C2=A0 3855595 =C2=A05634571 =C2=A05410298 =C2=A06001809 =
-=C2=A06464713 =C2=A06299610
->>> 5894249 =C2=A05516031 =C2=A05800161 =C2=A05209203 =C2=A04295840 =C2=
-=A03724983 =C2=A03641623
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > Hi AnnyRen
+> >
+> > Could you run the following commands and give us the test results?
+> >
+> > $ceph osd tell OSD-N bench    // OSD-N : osd number : 0,1,2 ....
+> > $ceph -w
+> >
+> > $rados bench 60 write -p data    // refer to "rados -h "
+> >
+> > Jeff
+> >
+> >
+> >
+> > On Tue, 2011-05-17 at 11:53 +0800, AnnyRen wrote:
+> >> I'm running iozone on EXT4 with Ceph v0.26.
+> >> But I got the weird result, most write performance exceed 1GB/s, even
+> >> up to 3GB/s
+> >> I think it's not normal to get the performance outpupt.
+> >>
+> >> Command line I used is: /usr/bin/iozone -azcR -f
+> >> /mnt/ceph/test0516.dbf -g 1G -b /exceloutput0516.xls
+> >> Attachment is the output file...
+> >>
+> >> and my environment is composed of 15 physical machines with
+> >>
+> >> 3 MON, 2MDS (1 active, 1 standby), 10 OSD (1 osd daemon (3T) /host)
+> >> EXT4 format
+> >> data replication size: 3
+> >>
+> >>
+> >>
+> >> "Writer report"
+> >>         "4"  "8"  "16"  "32"  "64"  "128"  "256"  "512"  "1024"
+> >> "2048"  "4096"  "8192"  "16384"
+> >> "64"   983980  1204796  1210227  1143223  1357066
+> >> "128"   1007629  1269781  1406136  1391557  1436229  1521718
+> >> "256"   1112909  1430119  1523457  1652404  1514860  1639786  1729594
+> >> "512"   1150351  1475116  1605228  1723770  1797349  1712772  1783912  1854787
+> >> "1024"   1213334  1471481  1679160  1828574  1888889  1899750  1885572
+> >>  1865912  1875690
+> >> "2048"   1229274  1540849  1708146  1843410  1903457  1980705  1930406
+> >>  1913634  1906837  1815744
+> >> "4096"   1213284  1528348  1674646  1762434  1872096  1882352  1881528
+> >>  1903416  1897949  1835102  1731177
+> >> "8192"   204560  155186  572387  238548  186597  429036  187327
+> >> 157205  553771  416512  299810  405842
+> >> "16384"   699749  559255  687450  541030  828776  555296  742561
+> >> 525483  604910  452423  564557  670539  970616
+> >> "32768"   532414  829610  812215  879441  863159  864794  865938
+> >> 804951  916352  879582  608132  860732  1239475
+> >> "65536"   994824  1096543  1095791  1317968  1280277  1390267  1259868
+> >>  1205214  1339111  1346927  1267888  863234  1190221
+> >> "131072"   1063429  1165115  1102650  1554828  1182128  1185731
+> >> 1190752  1195792  1277441  1211063  1237567  1226999  1336961
+> >> "262144"   1280619  1368554  1497837  1633397  1598255  1609212
+> >> 1607504  1665019  1590515  1548307  1591258  1505267  1625679
+> >> "524288"   1519583  1767928  1738523  1883151  2011216  1993877
+> >> 2023543  1867440  2106124  2055064  1906668  1778645  1838988
+> >> "1048576"   1580851  1887530  2044131  2166133  2236379  2283578
+> >> 2257454  2296612  2271066  2101274  1905829  1605923  2158238
+> >>
+> >>
+> >>
+> >> "Reader report"
+> >>         "4"  "8"  "16"  "32"  "64"  "128"  "256"  "512"  "1024"
+> >> "2048"  "4096"  "8192"  "16384"
+> >> "64"   1933893  2801873  3057153  3363612  3958892
+> >> "128"   2286447  3053774  2727923  3468030  4104338  4557257
+> >> "256"   2903529  3236056  3245838  3705040  3654598  4496299  5117791
+> >> "512"   2906696  3437042  3628697  3431550  4871723  4296637  6246213  6395018
+> >> "1024"   3229770  3483896  4609294  3791442  4614246  5536137  4550690
+> >>  5048117  4966395
+> >> "2048"   3554251  4310472  3885431  4096676  6401772  4842658  5080379
+> >>  5184636  5596757  5735012
+> >> "4096"   3416292  4691638  4321103  5728903  5475122  5171846  4819300
+> >>  5258919  6408472  5044289  4079948
+> >> "8192"   3233004  4615263  4536055  5618186  5414558  5025700  5553712
+> >>  4926264  5634770  5281396  4659702  3652258
+> >> "16384"   3141058  3704193  4567654  4395850  4568869  5387732
+> >> 4436432  5808029  5578420  4675810  3913007  3911225  3961277
+> >> "32768"   3704273  4598957  4088278  5133719  5896692  5537024
+> >> 5234412  5398271  4942992  4118662  3729099  3511757  3481511
+> >> "65536"   4131091  4210184  5341188  4647619  6077765  5852474
+> >> 5379762  5259330  5488249  5246682  4342682  3549202  3286487
+> >> "131072"   3582876  5251082  5332216  5269908  5303512  5574440
+> >> 5635064  5796372  5406363  4958839  4435918  3673443  3647874
+> >> "262144"   3659283  4551414  5746231  5433824  5876196  6011650
+> >> 5552000  5629260  5298830  4982226  4628902  4065823  3421924
+> >> "524288"   3905973  5488778  5219963  6047356  5916811  6180455
+> >> 5495733  5925628  5637512  5537123  3517132  3550861  3047013
+> >> "1048576"   3855595  5634571  5410298  6001809  6464713  6299610
+> >> 5894249  5516031  5800161  5209203  4295840  3724983  3641623
+> >
+> >
+
