@@ -1,66 +1,107 @@
-From: Simon Tian <aixt2006@gmail.com>
-Subject: operate one file in multi clients with libceph
-Date: Tue, 17 May 2011 21:00:27 +0800
-Message-ID: <BANLkTi=wd0+u774vRNDJZoXW_EoE9OP67Q@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: [PATCH 2/2] libceph: fix handle_timeout() racing with
+ con_work()/try_write()
+Date: Tue, 17 May 2011 16:32:19 -0600
+Message-ID: <4DD2F773.30508@sandia.gov>
+References: <Pine.LNX.4.64.1105051215050.26811@cobra.newdream.net>
+ <1305235954-9860-2-git-send-email-jaschut@sandia.gov>
+ <Pine.LNX.4.64.1105161033150.12367@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:47259 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754624Ab1EQNA3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2011 09:00:29 -0400
-Received: by wya21 with SMTP id 21so354986wya.19
-        for <ceph-devel@vger.kernel.org>; Tue, 17 May 2011 06:00:27 -0700 (PDT)
+Received: from sentry-two.sandia.gov ([132.175.109.14]:33132 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756695Ab1EQWcw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2011 18:32:52 -0400
+In-Reply-To: <Pine.LNX.4.64.1105161033150.12367@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-Hi folks,
+Hi Sage,
 
-       When I write and read a file in client A, open with
-ceph_open(test_path, O_RDWR|O_CREAT,0 ), and read the same file in
-client B, with ceph_open(test_path, O_RDONLY, 0).  Client A and B are
-running on different host.
-       After a while, client A will throw a exception. This exception
-appear every time.
+Sage Weil wrote:
+> Hi Jim,
 
-       The back trace in ceph is:
+> This picks up the second resent message.  But and OPENING is set.. so how 
+> is it that we were in try_write but we didn't pass through the OPENING 
+> test in con_work?
+> 
+>>>> con_work()/try_write() start again on new message.
+>>>> Note that con_work() did not notice that the connection was marked to
+>>>> be closed/reopened!  This is where things went bad.
+>>>> Note the connection state: 8220 = 0x201c, and 0x2000 is OPENING.
+>> [ 2412.643178] libceph:   messenger.c:1969 : con_work ffff8801955c0030 OPENING
+>> [ 2412.643182] libceph:   messenger.c:292  : con_close_socket on ffff8801955c0030 sock ffff8801825a8c00
+>> [ 2412.643197] libceph:   messenger.c:162  : ceph_state_change ffff8801955c0030 state = 2076 sk_state = 4
+> 
+> Ok, now we see it, but this should have executed before we ever got to 
+> try_write!
+> 
+> There are a handful of places that drop and re-take con->mutex... I think 
+> it has to be one of those.  They are:
+> 
+> - prepare_connect_authorizer (before calling ->prepare_authorizer 
+> callback)
+> - fail_protocol (before calling ->bad_proto callback)
+> - process_connect RESETSESSION case (before calling ->reset callback)
+> - process_message (before calling ->dispatch callback)
+> 
+> I think after retaking the lock in each of these cases we need to test for 
+> the CLOSED or OPENING bits and, if set, bail out so that con_work can 
+> restart.
+> 
+> Does that make sense?  Can you confirm which case of lock droppage inside 
+> con_work is at fault?  (Maybe adding a printk at the top of con_work after 
+> taking the lock too would make it more clear what's going on; currently it 
+> only prints in all the random test_bit cases).
 
-(gdb) bt
-#0  0x000000367fa30265 in raise () from /lib64/libc.so.6
-#1  0x000000367fa31d10 in abort () from /lib64/libc.so.6
-#2  0x0000003682ebec44 in __gnu_cxx::__verbose_terminate_handler() ()
-from /usr/lib64/libstdc++.so.6
-#3  0x0000003682ebcdb6 in ?? () from /usr/lib64/libstdc++.so.6
-#4  0x0000003682ebcde3 in std::terminate() () from /usr/lib64/libstdc++.so.6
-#5  0x0000003682ebceca in __cxa_throw () from /usr/lib64/libstdc++.so.6
-#6  0x00007ffff7c51a78 in ceph::__ceph_assert_fail
-(assertion=0x7ffff7ce0a1c "r == 0", file=0x7ffff7ce0a02
-"common/Mutex.h", line=118,
-    func=0x7ffff7ce0ca0 "void Mutex::Lock(bool)") at common/assert.cc:86
-#7  0x00007ffff7b1ee1c in Mutex::Lock (this=0x6293f0,
-no_lockdep=false) at common/Mutex.h:118
-#8  0x00007ffff7b395f4 in Client::sync_write_commit (this=0x629090,
-in=0x7ffff0001b50) at client/Client.cc:4979
-#9  0x00007ffff7baf304 in C_Client_SyncCommit::finish
-(this=0x7ffff3206300) at client/Client.cc:4973
-#10 0x00007ffff7c951d5 in Objecter::handle_osd_op_reply
-(this=0x62b420, m=0x632190) at osdc/Objecter.cc:806
-#11 0x00007ffff7b56038 in Client::ms_dispatch (this=0x629090,
-m=0x632190) at client/Client.cc:1414
-#12 0x00007ffff7bcb01d in Messenger::ms_deliver_dispatch
-(this=0x628350, m=0x632190) at msg/Messenger.h:98
-#13 0x00007ffff7bb262b in SimpleMessenger::dispatch_entry
-(this=0x628350) at msg/SimpleMessenger.cc:352
-#14 0x00007ffff7b22641 in SimpleMessenger::DispatchThread::entry
-(this=0x6287d8) at msg/SimpleMessenger.h:533
-#15 0x00007ffff7b5aa28 in Thread::_entry_func (arg=0x6287d8) at
-./common/Thread.h:41
-#16 0x00000036802064a7 in start_thread () from /lib64/libpthread.so.0
-#17 0x000000367fad3c2d in clone () from /lib64/libc.so.6
+So I've got logs now that show that connection state changes
+across a call to process_message.  That seems like it proves
+the concept.
 
-So is there any way to avoid this?
+> 
+> I'm thinking something like the below... does that seem reasonable?  I 
+> only did the prepare_authorizer case to start, but the others should be 
+> fixed up too.  Compile tested only.
+> 
+
+Is there any reason not to fix all the cases at once, in try_read?
+It's less code, but far away from where the mutex dropping occurs,
+so we add a comment:
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index a9bd424..11d6a61 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1816,10 +1820,19 @@ static int try_read(struct ceph_connection *con)
+  	dout("try_read start on %p state %lu\n", con, con->state);
+
+  more:
+  	dout("try_read %p state %lu tag %d in_base_pos %d\n", con,
+  	     con->state, (int)con->in_tag, con->in_base_pos);
++
++	/* process_connect, process_message need to drop con->mutex,
++	 * so connection state might have changed on us.  Check it,
++	 * leave if necessary so new state can be processed.
++	 */
++	if (test_bit(CLOSED, &con->state) ||
++	    test_bit(OPENING, &con->state))
++		goto out;
++
+  	if (test_bit(CONNECTING, &con->state)) {
+  		if (!test_bit(NEGOTIATING, &con->state)) {
+  			dout("try_read %p connecting\n", con);
+  			ret = read_partial_banner(con);
+  			if (ret <= 0)
 
 
-Thx!
-Simon
+What am I missing?
+
+-- Jim
+
+
