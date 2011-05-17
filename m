@@ -1,49 +1,44 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
+From: AnnyRen <annyren6@gmail.com>
 Subject: Re: IOZone Performance is very Strange
-Date: Tue, 17 May 2011 17:14:38 +0800
-Message-ID: <BANLkTim0+VPeOPcuQMrR+2zECq9jwK1hSg@mail.gmail.com>
+Date: Tue, 17 May 2011 17:37:20 +0800
+Message-ID: <BANLkTinnBxwEHK5VW4n3h0qva1fcfPiSxw@mail.gmail.com>
 References: <BANLkTiktOCMyP4opCvST_130TotXvSvuyQ@mail.gmail.com>
 	<1305638639.1606.4.camel@localhost>
 	<BANLkTik7u+WAeztCGYG8yT3Vqv_TUCk+ZA@mail.gmail.com>
 	<1305651942.1674.17.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:34963 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752535Ab1EQJOk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2011 05:14:40 -0400
-Received: by fxm17 with SMTP id 17so275466fxm.19
-        for <ceph-devel@vger.kernel.org>; Tue, 17 May 2011 02:14:39 -0700 (PDT)
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:42873 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753769Ab1EQJhW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2011 05:37:22 -0400
+Received: by ewy4 with SMTP id 4so81537ewy.19
+        for <ceph-devel@vger.kernel.org>; Tue, 17 May 2011 02:37:20 -0700 (PDT)
 In-Reply-To: <1305651942.1674.17.camel@localhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: cpwu@tnsoft.com.cn
-Cc: AnnyRen <annyren6@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Anny,
+Hi, Jeff:
 
-As Jeff mentioned, you need to add the following option for iozone test=
-ing:
--e: include flush in the timing calculation to remedy the cache effect
+Thanks for your quickly suggestion and response~
+We will add -e param to include flush time in the calculation, and
+write a larger file to avoid using
+the machine's memory.
 
-and may add:
--n: set the minimum size for auto mode (e.g., -n 256M) to skip testing
-of small file sizes
+Thank you very much!  :)
 
-and drop -z if you want to omit testing small record sizes. (starting
-from 64K instead of 4K)
-
---
-Henry
-
+Best Regards,
+Anny
 
 2011/5/18 Jeff Wu <cpwu@tnsoft.com.cn>:
 >
 > Hi AnnyRen,
 >
-> with the test results , =C2=A0run a 1G data at your ceph cluster ,
+> with the test results , =A0run a 1G data at your ceph cluster ,
 > should be about 100M/sec.
 > maybe,iozone test results didn't include iozone flush time.
 >
@@ -56,13 +51,12 @@ Henry
 > add "-e" param to include flush(fsync,fflush) in the timing
 > calculations.
 >
-> /usr/bin/iozone -azcR -e -f /mnt/ceph/test0516.dbf =C2=A0\
+> /usr/bin/iozone -azcR -e -f /mnt/ceph/test0516.dbf =A0\
 > -g 1G -b /exceloutput0516.xls
 >
 > 2)run a large data which size is your host memory size*2:
 >
-> $./iozone -z -c -e -a -n 512M -g {memory_size}*2M -i 0 -i 1 -i 2 =C2=A0=
-\
+> $./iozone -z -c -e -a -n 512M -g {memory_size}*2M -i 0 -i 1 -i 2 =A0\
 > -f /mnt/ceph/fio -Rb ./iozone.xls
 >
 > or
@@ -71,7 +65,7 @@ Henry
 >
 > for i in 32 64 128 256
 > do
-> ./iozone -r ${i}k -t 10 -s 4096M -i 0 -i 1 -i 2 =C2=A0 \
+> ./iozone -r ${i}k -t 10 -s 4096M -i 0 -i 1 -i 2 =A0 \
 > -F /mnt/ceph/F1 /mnt/ceph/F2 /mnt/ceph/F3 /mnt/ceph/F4 /mnt/ceph/F5 /=
 mnt/ceph/F6 /mnt/ceph/F7 /mnt/ceph/F8 /mnt/ceph/F9 /mnt/ceph/F10
 > done
@@ -93,35 +87,35 @@ mnt/ceph/F6 /mnt/ceph/F7 /mnt/ceph/F8 /mnt/ceph/F9 /mnt/ceph/F10
 >>
 >> and use ceph -w to observe every osd performance,
 >>
->> osd0: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 10.87=
-5844
+>> osd0: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 10.87584=
+4
 >> sec at 96413 KB/sec
->> osd1: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.78=
-4985
+>> osd1: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.78498=
+5
 >> sec at 88975 KB/sec
->> osd2: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.16=
-1067
+>> osd2: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.16106=
+7
 >> sec at 93949 KB/sec
->> osd3: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 10.79=
-8796
+>> osd3: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 10.79879=
+6
 >> sec at 97101 KB/sec
->> osd4: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.43=
-7141
+>> osd4: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.43714=
+1
 >> sec at 72630 KB/sec
->> osd5: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.45=
-1444
+>> osd5: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.45144=
+4
 >> sec at 72558 KB/sec
->> osd6: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.08=
-3872
+>> osd6: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.08387=
+2
 >> sec at 94603 KB/sec
->> osd7: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.06=
-2728
+>> osd7: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 11.06272=
+8
 >> sec at 94784 KB/sec
->> osd8: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.13=
-7312
+>> osd8: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 14.13731=
+2
 >> sec at 74170 KB/sec
->> osd9: =C2=A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 13.48=
-9992
+>> osd9: =A0[INF] bench: wrote 1024 MB in blocks of 4096 KB in 13.48999=
+2
 >> sec at 77729 KB/sec
 >>
 >>
@@ -130,14 +124,14 @@ mnt/ceph/F6 /mnt/ceph/F7 /mnt/ceph/F8 /mnt/ceph/F9 /mnt/ceph/F10
 >>
 >> the result is
 >>
->> Total time run: =C2=A0 =C2=A0 =C2=A0 =C2=A060.553247
->> Total writes made: =C2=A0 =C2=A0 1689
->> Write size: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A04194304
->> Bandwidth (MB/sec): =C2=A0 =C2=A0111.571
+>> Total time run: =A0 =A0 =A0 =A060.553247
+>> Total writes made: =A0 =A0 1689
+>> Write size: =A0 =A0 =A0 =A0 =A0 =A04194304
+>> Bandwidth (MB/sec): =A0 =A0111.571
 >>
->> Average Latency: =C2=A0 =C2=A0 =C2=A0 0.573209
->> Max latency: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 2.25691
->> Min latency: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 0.218494
+>> Average Latency: =A0 =A0 =A0 0.573209
+>> Max latency: =A0 =A0 =A0 =A0 =A0 2.25691
+>> Min latency: =A0 =A0 =A0 =A0 =A0 0.218494
 >>
 >>
 >>
@@ -146,11 +140,11 @@ mnt/ceph/F6 /mnt/ceph/F7 /mnt/ceph/F8 /mnt/ceph/F9 /mnt/ceph/F10
 >> >
 >> > Could you run the following commands and give us the test results?
 >> >
->> > $ceph osd tell OSD-N bench =C2=A0 =C2=A0// OSD-N : osd number : 0,=
-1,2 ....
+>> > $ceph osd tell OSD-N bench =A0 =A0// OSD-N : osd number : 0,1,2 ..=
+=2E.
 >> > $ceph -w
 >> >
->> > $rados bench 60 write -p data =C2=A0 =C2=A0// refer to "rados -h "
+>> > $rados bench 60 write -p data =A0 =A0// refer to "rados -h "
 >> >
 >> > Jeff
 >> >
@@ -177,122 +171,110 @@ t)
 >> >>
 >> >>
 >> >> "Writer report"
->> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0 "4" =C2=A0"8" =C2=A0"16" =C2=A0"32" =C2=
-=A0"64" =C2=A0"128" =C2=A0"256" =C2=A0"512" =C2=A0"1024"
->> >> "2048" =C2=A0"4096" =C2=A0"8192" =C2=A0"16384"
->> >> "64" =C2=A0 983980 =C2=A01204796 =C2=A01210227 =C2=A01143223 =C2=A0=
-1357066
->> >> "128" =C2=A0 1007629 =C2=A01269781 =C2=A01406136 =C2=A01391557 =C2=
-=A01436229 =C2=A01521718
->> >> "256" =C2=A0 1112909 =C2=A01430119 =C2=A01523457 =C2=A01652404 =C2=
-=A01514860 =C2=A01639786 =C2=A01729594
->> >> "512" =C2=A0 1150351 =C2=A01475116 =C2=A01605228 =C2=A01723770 =C2=
-=A01797349 =C2=A01712772 =C2=A01783912 =C2=A01854787
->> >> "1024" =C2=A0 1213334 =C2=A01471481 =C2=A01679160 =C2=A01828574 =C2=
-=A01888889 =C2=A01899750 =C2=A01885572
->> >> =C2=A01865912 =C2=A01875690
->> >> "2048" =C2=A0 1229274 =C2=A01540849 =C2=A01708146 =C2=A01843410 =C2=
-=A01903457 =C2=A01980705 =C2=A01930406
->> >> =C2=A01913634 =C2=A01906837 =C2=A01815744
->> >> "4096" =C2=A0 1213284 =C2=A01528348 =C2=A01674646 =C2=A01762434 =C2=
-=A01872096 =C2=A01882352 =C2=A01881528
->> >> =C2=A01903416 =C2=A01897949 =C2=A01835102 =C2=A01731177
->> >> "8192" =C2=A0 204560 =C2=A0155186 =C2=A0572387 =C2=A0238548 =C2=A0=
-186597 =C2=A0429036 =C2=A0187327
->> >> 157205 =C2=A0553771 =C2=A0416512 =C2=A0299810 =C2=A0405842
->> >> "16384" =C2=A0 699749 =C2=A0559255 =C2=A0687450 =C2=A0541030 =C2=A0=
-828776 =C2=A0555296 =C2=A0742561
->> >> 525483 =C2=A0604910 =C2=A0452423 =C2=A0564557 =C2=A0670539 =C2=A0=
-970616
->> >> "32768" =C2=A0 532414 =C2=A0829610 =C2=A0812215 =C2=A0879441 =C2=A0=
-863159 =C2=A0864794 =C2=A0865938
->> >> 804951 =C2=A0916352 =C2=A0879582 =C2=A0608132 =C2=A0860732 =C2=A0=
-1239475
->> >> "65536" =C2=A0 994824 =C2=A01096543 =C2=A01095791 =C2=A01317968 =C2=
-=A01280277 =C2=A01390267 =C2=A01259868
->> >> =C2=A01205214 =C2=A01339111 =C2=A01346927 =C2=A01267888 =C2=A0863=
-234 =C2=A01190221
->> >> "131072" =C2=A0 1063429 =C2=A01165115 =C2=A01102650 =C2=A01554828=
- =C2=A01182128 =C2=A01185731
->> >> 1190752 =C2=A01195792 =C2=A01277441 =C2=A01211063 =C2=A01237567 =C2=
-=A01226999 =C2=A01336961
->> >> "262144" =C2=A0 1280619 =C2=A01368554 =C2=A01497837 =C2=A01633397=
- =C2=A01598255 =C2=A01609212
->> >> 1607504 =C2=A01665019 =C2=A01590515 =C2=A01548307 =C2=A01591258 =C2=
-=A01505267 =C2=A01625679
->> >> "524288" =C2=A0 1519583 =C2=A01767928 =C2=A01738523 =C2=A01883151=
- =C2=A02011216 =C2=A01993877
->> >> 2023543 =C2=A01867440 =C2=A02106124 =C2=A02055064 =C2=A01906668 =C2=
-=A01778645 =C2=A01838988
->> >> "1048576" =C2=A0 1580851 =C2=A01887530 =C2=A02044131 =C2=A0216613=
-3 =C2=A02236379 =C2=A02283578
->> >> 2257454 =C2=A02296612 =C2=A02271066 =C2=A02101274 =C2=A01905829 =C2=
-=A01605923 =C2=A02158238
+>> >> =A0 =A0 =A0 =A0 "4" =A0"8" =A0"16" =A0"32" =A0"64" =A0"128" =A0"2=
+56" =A0"512" =A0"1024"
+>> >> "2048" =A0"4096" =A0"8192" =A0"16384"
+>> >> "64" =A0 983980 =A01204796 =A01210227 =A01143223 =A01357066
+>> >> "128" =A0 1007629 =A01269781 =A01406136 =A01391557 =A01436229 =A0=
+1521718
+>> >> "256" =A0 1112909 =A01430119 =A01523457 =A01652404 =A01514860 =A0=
+1639786 =A01729594
+>> >> "512" =A0 1150351 =A01475116 =A01605228 =A01723770 =A01797349 =A0=
+1712772 =A01783912 =A01854787
+>> >> "1024" =A0 1213334 =A01471481 =A01679160 =A01828574 =A01888889 =A0=
+1899750 =A01885572
+>> >> =A01865912 =A01875690
+>> >> "2048" =A0 1229274 =A01540849 =A01708146 =A01843410 =A01903457 =A0=
+1980705 =A01930406
+>> >> =A01913634 =A01906837 =A01815744
+>> >> "4096" =A0 1213284 =A01528348 =A01674646 =A01762434 =A01872096 =A0=
+1882352 =A01881528
+>> >> =A01903416 =A01897949 =A01835102 =A01731177
+>> >> "8192" =A0 204560 =A0155186 =A0572387 =A0238548 =A0186597 =A04290=
+36 =A0187327
+>> >> 157205 =A0553771 =A0416512 =A0299810 =A0405842
+>> >> "16384" =A0 699749 =A0559255 =A0687450 =A0541030 =A0828776 =A0555=
+296 =A0742561
+>> >> 525483 =A0604910 =A0452423 =A0564557 =A0670539 =A0970616
+>> >> "32768" =A0 532414 =A0829610 =A0812215 =A0879441 =A0863159 =A0864=
+794 =A0865938
+>> >> 804951 =A0916352 =A0879582 =A0608132 =A0860732 =A01239475
+>> >> "65536" =A0 994824 =A01096543 =A01095791 =A01317968 =A01280277 =A0=
+1390267 =A01259868
+>> >> =A01205214 =A01339111 =A01346927 =A01267888 =A0863234 =A01190221
+>> >> "131072" =A0 1063429 =A01165115 =A01102650 =A01554828 =A01182128 =
+=A01185731
+>> >> 1190752 =A01195792 =A01277441 =A01211063 =A01237567 =A01226999 =A0=
+1336961
+>> >> "262144" =A0 1280619 =A01368554 =A01497837 =A01633397 =A01598255 =
+=A01609212
+>> >> 1607504 =A01665019 =A01590515 =A01548307 =A01591258 =A01505267 =A0=
+1625679
+>> >> "524288" =A0 1519583 =A01767928 =A01738523 =A01883151 =A02011216 =
+=A01993877
+>> >> 2023543 =A01867440 =A02106124 =A02055064 =A01906668 =A01778645 =A0=
+1838988
+>> >> "1048576" =A0 1580851 =A01887530 =A02044131 =A02166133 =A02236379=
+ =A02283578
+>> >> 2257454 =A02296612 =A02271066 =A02101274 =A01905829 =A01605923 =A0=
+2158238
 >> >>
 >> >>
 >> >>
 >> >> "Reader report"
->> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0 "4" =C2=A0"8" =C2=A0"16" =C2=A0"32" =C2=
-=A0"64" =C2=A0"128" =C2=A0"256" =C2=A0"512" =C2=A0"1024"
->> >> "2048" =C2=A0"4096" =C2=A0"8192" =C2=A0"16384"
->> >> "64" =C2=A0 1933893 =C2=A02801873 =C2=A03057153 =C2=A03363612 =C2=
-=A03958892
->> >> "128" =C2=A0 2286447 =C2=A03053774 =C2=A02727923 =C2=A03468030 =C2=
-=A04104338 =C2=A04557257
->> >> "256" =C2=A0 2903529 =C2=A03236056 =C2=A03245838 =C2=A03705040 =C2=
-=A03654598 =C2=A04496299 =C2=A05117791
->> >> "512" =C2=A0 2906696 =C2=A03437042 =C2=A03628697 =C2=A03431550 =C2=
-=A04871723 =C2=A04296637 =C2=A06246213 =C2=A06395018
->> >> "1024" =C2=A0 3229770 =C2=A03483896 =C2=A04609294 =C2=A03791442 =C2=
-=A04614246 =C2=A05536137 =C2=A04550690
->> >> =C2=A05048117 =C2=A04966395
->> >> "2048" =C2=A0 3554251 =C2=A04310472 =C2=A03885431 =C2=A04096676 =C2=
-=A06401772 =C2=A04842658 =C2=A05080379
->> >> =C2=A05184636 =C2=A05596757 =C2=A05735012
->> >> "4096" =C2=A0 3416292 =C2=A04691638 =C2=A04321103 =C2=A05728903 =C2=
-=A05475122 =C2=A05171846 =C2=A04819300
->> >> =C2=A05258919 =C2=A06408472 =C2=A05044289 =C2=A04079948
->> >> "8192" =C2=A0 3233004 =C2=A04615263 =C2=A04536055 =C2=A05618186 =C2=
-=A05414558 =C2=A05025700 =C2=A05553712
->> >> =C2=A04926264 =C2=A05634770 =C2=A05281396 =C2=A04659702 =C2=A0365=
-2258
->> >> "16384" =C2=A0 3141058 =C2=A03704193 =C2=A04567654 =C2=A04395850 =
-=C2=A04568869 =C2=A05387732
->> >> 4436432 =C2=A05808029 =C2=A05578420 =C2=A04675810 =C2=A03913007 =C2=
-=A03911225 =C2=A03961277
->> >> "32768" =C2=A0 3704273 =C2=A04598957 =C2=A04088278 =C2=A05133719 =
-=C2=A05896692 =C2=A05537024
->> >> 5234412 =C2=A05398271 =C2=A04942992 =C2=A04118662 =C2=A03729099 =C2=
-=A03511757 =C2=A03481511
->> >> "65536" =C2=A0 4131091 =C2=A04210184 =C2=A05341188 =C2=A04647619 =
-=C2=A06077765 =C2=A05852474
->> >> 5379762 =C2=A05259330 =C2=A05488249 =C2=A05246682 =C2=A04342682 =C2=
-=A03549202 =C2=A03286487
->> >> "131072" =C2=A0 3582876 =C2=A05251082 =C2=A05332216 =C2=A05269908=
- =C2=A05303512 =C2=A05574440
->> >> 5635064 =C2=A05796372 =C2=A05406363 =C2=A04958839 =C2=A04435918 =C2=
-=A03673443 =C2=A03647874
->> >> "262144" =C2=A0 3659283 =C2=A04551414 =C2=A05746231 =C2=A05433824=
- =C2=A05876196 =C2=A06011650
->> >> 5552000 =C2=A05629260 =C2=A05298830 =C2=A04982226 =C2=A04628902 =C2=
-=A04065823 =C2=A03421924
->> >> "524288" =C2=A0 3905973 =C2=A05488778 =C2=A05219963 =C2=A06047356=
- =C2=A05916811 =C2=A06180455
->> >> 5495733 =C2=A05925628 =C2=A05637512 =C2=A05537123 =C2=A03517132 =C2=
-=A03550861 =C2=A03047013
->> >> "1048576" =C2=A0 3855595 =C2=A05634571 =C2=A05410298 =C2=A0600180=
-9 =C2=A06464713 =C2=A06299610
->> >> 5894249 =C2=A05516031 =C2=A05800161 =C2=A05209203 =C2=A04295840 =C2=
-=A03724983 =C2=A03641623
+>> >> =A0 =A0 =A0 =A0 "4" =A0"8" =A0"16" =A0"32" =A0"64" =A0"128" =A0"2=
+56" =A0"512" =A0"1024"
+>> >> "2048" =A0"4096" =A0"8192" =A0"16384"
+>> >> "64" =A0 1933893 =A02801873 =A03057153 =A03363612 =A03958892
+>> >> "128" =A0 2286447 =A03053774 =A02727923 =A03468030 =A04104338 =A0=
+4557257
+>> >> "256" =A0 2903529 =A03236056 =A03245838 =A03705040 =A03654598 =A0=
+4496299 =A05117791
+>> >> "512" =A0 2906696 =A03437042 =A03628697 =A03431550 =A04871723 =A0=
+4296637 =A06246213 =A06395018
+>> >> "1024" =A0 3229770 =A03483896 =A04609294 =A03791442 =A04614246 =A0=
+5536137 =A04550690
+>> >> =A05048117 =A04966395
+>> >> "2048" =A0 3554251 =A04310472 =A03885431 =A04096676 =A06401772 =A0=
+4842658 =A05080379
+>> >> =A05184636 =A05596757 =A05735012
+>> >> "4096" =A0 3416292 =A04691638 =A04321103 =A05728903 =A05475122 =A0=
+5171846 =A04819300
+>> >> =A05258919 =A06408472 =A05044289 =A04079948
+>> >> "8192" =A0 3233004 =A04615263 =A04536055 =A05618186 =A05414558 =A0=
+5025700 =A05553712
+>> >> =A04926264 =A05634770 =A05281396 =A04659702 =A03652258
+>> >> "16384" =A0 3141058 =A03704193 =A04567654 =A04395850 =A04568869 =A0=
+5387732
+>> >> 4436432 =A05808029 =A05578420 =A04675810 =A03913007 =A03911225 =A0=
+3961277
+>> >> "32768" =A0 3704273 =A04598957 =A04088278 =A05133719 =A05896692 =A0=
+5537024
+>> >> 5234412 =A05398271 =A04942992 =A04118662 =A03729099 =A03511757 =A0=
+3481511
+>> >> "65536" =A0 4131091 =A04210184 =A05341188 =A04647619 =A06077765 =A0=
+5852474
+>> >> 5379762 =A05259330 =A05488249 =A05246682 =A04342682 =A03549202 =A0=
+3286487
+>> >> "131072" =A0 3582876 =A05251082 =A05332216 =A05269908 =A05303512 =
+=A05574440
+>> >> 5635064 =A05796372 =A05406363 =A04958839 =A04435918 =A03673443 =A0=
+3647874
+>> >> "262144" =A0 3659283 =A04551414 =A05746231 =A05433824 =A05876196 =
+=A06011650
+>> >> 5552000 =A05629260 =A05298830 =A04982226 =A04628902 =A04065823 =A0=
+3421924
+>> >> "524288" =A0 3905973 =A05488778 =A05219963 =A06047356 =A05916811 =
+=A06180455
+>> >> 5495733 =A05925628 =A05637512 =A05537123 =A03517132 =A03550861 =A0=
+3047013
+>> >> "1048576" =A0 3855595 =A05634571 =A05410298 =A06001809 =A06464713=
+ =A06299610
+>> >> 5894249 =A05516031 =A05800161 =A05209203 =A04295840 =A03724983 =A0=
+3641623
 >> >
 >> >
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
 >
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
