@@ -1,233 +1,113 @@
-From: Dyweni - Ceph-Devel <YS3fpFE2ykfB@dyweni.com>
-Subject: Re: How to enable the debug symbols
-Date: Tue, 17 May 2011 00:00:40 -0500
-Message-ID: <a0a2c4260f9ec3397d8e2242169c0fdb@pl1.haspere.com>
-References: <BANLkTi=aKfr4ZpqsnhCpzREin8c5Y_sbpg@mail.gmail.com>
- <10709e0d5db695dae3ba2d07c2fe73ff.squirrel@pl1.haspere.com>
- <BANLkTikCB1gAL-WPGv1u8AZk_OjD4TLgyA@mail.gmail.com>
- <77a86a15068ca287fcc7343f071f093e@pl1.haspere.com>
- <BANLkTimcMtBi0HpqxsrbJ_oQ-mkNCZctZQ@mail.gmail.com>
- <BANLkTi=Y4E2_6gjo9z0-H104GXspG1Kpng@mail.gmail.com>
- <Pine.LNX.4.64.1105160939350.12367@cobra.newdream.net>
- <BANLkTinC5dbZi9TKRSjSTm5forSXsE-GMw@mail.gmail.com>
-Reply-To: <YS3fpFE2ykfB@dyweni.com>
+From: Jeff Wu <cpwu@tnsoft.com.cn>
+Subject: Re: IOZone Performance is very Strange
+Date: Tue, 17 May 2011 13:23:59 +0000
+Message-ID: <1305638639.1606.4.camel@localhost>
+References: <BANLkTiktOCMyP4opCvST_130TotXvSvuyQ@mail.gmail.com>
+Reply-To: <cpwu@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from pl1.haspere.com ([208.111.35.220]:34597 "EHLO pl1.haspere.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751625Ab1EQFAl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 17 May 2011 01:00:41 -0400
-In-Reply-To: <BANLkTinC5dbZi9TKRSjSTm5forSXsE-GMw@mail.gmail.com>
+Received: from [210.22.136.227] ([210.22.136.227]:17240 "EHLO
+	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751944Ab1EQFXz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 May 2011 01:23:55 -0400
+In-Reply-To: <BANLkTiktOCMyP4opCvST_130TotXvSvuyQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Simon Tian <aixt2006@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, Gregory Farnum <gregf@hq.newdream.net>, ceph-devel@vger.kernel.org
+To: AnnyRen <annyren6@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
- Hi Simon!
+Hi AnnyRen
 
- A couple things come to mind:
- 1. Are you using the same prefix now as you had when=20
- /usr/local/lib/libceph.so.1 was built?
- 2. Does the timestamp of the /usr/local/lib/libceph.so.1 change after=20
- you ran make install?
- 3. Try deleting /usr/local/lib/libceph.so.1 (or move it to some other=20
- folder) and then ./configure, make, make install.
+Could you run the following commands and give us the test results? 
 
+$ceph osd tell OSD-N bench    // OSD-N : osd number : 0,1,2 ....
+$ceph -w
 
- Thanks,
- Dyweni
+$rados bench 60 write -p data    // refer to "rados -h "
+
+Jeff
 
 
 
- On Tue, 17 May 2011 11:29:37 +0800, Simon Tian wrote:
+On Tue, 2011-05-17 at 11:53 +0800, AnnyRen wrote:
+> I'm running iozone on EXT4 with Ceph v0.26.
+> But I got the weird result, most write performance exceed 1GB/s, even
+> up to 3GB/s
+> I think it's not normal to get the performance outpupt.
+> 
+> Command line I used is: /usr/bin/iozone -azcR -f
+> /mnt/ceph/test0516.dbf -g 1G -b /exceloutput0516.xls
+> Attachment is the output file...
+> 
+> and my environment is composed of 15 physical machines with
+> 
+> 3 MON, 2MDS (1 active, 1 standby), 10 OSD (1 osd daemon (3T) /host)
+> EXT4 format
+> data replication size: 3
+> 
+> 
+> 
+> "Writer report"
+>         "4"  "8"  "16"  "32"  "64"  "128"  "256"  "512"  "1024"
+> "2048"  "4096"  "8192"  "16384"
+> "64"   983980  1204796  1210227  1143223  1357066
+> "128"   1007629  1269781  1406136  1391557  1436229  1521718
+> "256"   1112909  1430119  1523457  1652404  1514860  1639786  1729594
+> "512"   1150351  1475116  1605228  1723770  1797349  1712772  1783912  1854787
+> "1024"   1213334  1471481  1679160  1828574  1888889  1899750  1885572
+>  1865912  1875690
+> "2048"   1229274  1540849  1708146  1843410  1903457  1980705  1930406
+>  1913634  1906837  1815744
+> "4096"   1213284  1528348  1674646  1762434  1872096  1882352  1881528
+>  1903416  1897949  1835102  1731177
+> "8192"   204560  155186  572387  238548  186597  429036  187327
+> 157205  553771  416512  299810  405842
+> "16384"   699749  559255  687450  541030  828776  555296  742561
+> 525483  604910  452423  564557  670539  970616
+> "32768"   532414  829610  812215  879441  863159  864794  865938
+> 804951  916352  879582  608132  860732  1239475
+> "65536"   994824  1096543  1095791  1317968  1280277  1390267  1259868
+>  1205214  1339111  1346927  1267888  863234  1190221
+> "131072"   1063429  1165115  1102650  1554828  1182128  1185731
+> 1190752  1195792  1277441  1211063  1237567  1226999  1336961
+> "262144"   1280619  1368554  1497837  1633397  1598255  1609212
+> 1607504  1665019  1590515  1548307  1591258  1505267  1625679
+> "524288"   1519583  1767928  1738523  1883151  2011216  1993877
+> 2023543  1867440  2106124  2055064  1906668  1778645  1838988
+> "1048576"   1580851  1887530  2044131  2166133  2236379  2283578
+> 2257454  2296612  2271066  2101274  1905829  1605923  2158238
+> 
+> 
+> 
+> "Reader report"
+>         "4"  "8"  "16"  "32"  "64"  "128"  "256"  "512"  "1024"
+> "2048"  "4096"  "8192"  "16384"
+> "64"   1933893  2801873  3057153  3363612  3958892
+> "128"   2286447  3053774  2727923  3468030  4104338  4557257
+> "256"   2903529  3236056  3245838  3705040  3654598  4496299  5117791
+> "512"   2906696  3437042  3628697  3431550  4871723  4296637  6246213  6395018
+> "1024"   3229770  3483896  4609294  3791442  4614246  5536137  4550690
+>  5048117  4966395
+> "2048"   3554251  4310472  3885431  4096676  6401772  4842658  5080379
+>  5184636  5596757  5735012
+> "4096"   3416292  4691638  4321103  5728903  5475122  5171846  4819300
+>  5258919  6408472  5044289  4079948
+> "8192"   3233004  4615263  4536055  5618186  5414558  5025700  5553712
+>  4926264  5634770  5281396  4659702  3652258
+> "16384"   3141058  3704193  4567654  4395850  4568869  5387732
+> 4436432  5808029  5578420  4675810  3913007  3911225  3961277
+> "32768"   3704273  4598957  4088278  5133719  5896692  5537024
+> 5234412  5398271  4942992  4118662  3729099  3511757  3481511
+> "65536"   4131091  4210184  5341188  4647619  6077765  5852474
+> 5379762  5259330  5488249  5246682  4342682  3549202  3286487
+> "131072"   3582876  5251082  5332216  5269908  5303512  5574440
+> 5635064  5796372  5406363  4958839  4435918  3673443  3647874
+> "262144"   3659283  4551414  5746231  5433824  5876196  6011650
+> 5552000  5629260  5298830  4982226  4628902  4065823  3421924
+> "524288"   3905973  5488778  5219963  6047356  5916811  6180455
+> 5495733  5925628  5637512  5537123  3517132  3550861  3047013
+> "1048576"   3855595  5634571  5410298  6001809  6464713  6299610
+> 5894249  5516031  5800161  5209203  4295840  3724983  3641623
 
-> Well, I tried all these:
-> 1) ./configure #(with desired environment settings)
-> 2) ./autogen.sh
-> 2.5) make clean
-> 3) make -j 14
->
-> 1) ./configure #(with desired environment settings)
-> 2) ./autogen.sh
-> 2.5) make clean
-> 2.6=EF=BC=89make uninstall
-> 3) make -j 14
->
-> 1) ./autogen.sh
-> 2) ./configure #(with desired environment settings)
-> 2.5) make clean
-> 2.6=EF=BC=89make uninstall
-> 3) make -j 14
->
-> 0.5)tar zxvf ceph-0.27.1.tar.gz
-> 1) ./configure #(with desired environment settings)
-> 2) ./autogen.sh
-> 2.6=EF=BC=89make uninstall
-> 3) make -j 14
->
-> The result is all the same:
->
- =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D
-> Breakpoint 1, ceph_write (fd=3D10, buf=3D0x7fff76bf0120 "", size=3D20=
-97152,
-> offset=3D0) at libceph.cc:322
-> 322 return client->write(fd, buf, size, offset);
-> (gdb)
-> (gdb) c
-> Continuing.
->
-> Breakpoint 3, 0x00007fa7a61f8c32 in ?? () from
-> /usr/local/lib/libceph.so.1
-> ^^^^^
-> (gdb) info b
-> Num Type Disp Enb Address What
-> 1 breakpoint keep y 0x00007fa7a61ca20f in ceph_write at
-> libceph.cc:322
-> breakpoint already hit 1 time
-> 2 breakpoint keep y 0x00007fa7a61ca20f in ceph_write at
-> libceph.cc:321
-> breakpoint already hit 1 time
-> 3 breakpoint keep y 0x00007fa7a61f8c32 client/Client.cc:4999
-> breakpoint already hit 1 time
-> (gdb)
->
- =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D
->
-> Seem like no symbol for client/Client.cc.... Hmm, what do you think?
-> Makefile attached. FYI
->
-> 2011/5/17 Sage Weil :
->> On Mon, 16 May 2011, Gregory Farnum wrote:
->>
->>> Did you actually re-build the code? Configure just sets up some of
->>> the scripts: 1) ./configure #(with desired environment settings) 2)
->>> ./autogen.sh
->> 2.5) make clean
->>
->>> 3) make #(hopefully -j8 or something)
->> sage
->>
->>> Then you'll need to make sure that the built library is the one
->>> you're linking with -- how to do this varies a bit depending on=20
->>> your
->>> environment but probably the easiest way to do it is to run "make
->>> install". -Greg On Mon, May 16, 2011 at 5:45 AM, Simon Tian wrote:
->>>
->>>> Hi, I tried ( CFLAGS=3D"-march=3Dx86_64 -pipe -ggdb"
->>>> CXXFLAGS=3D"${CFLAGS}" ), but error comes:
->>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D
->>>> root@houyi-vm06.dev.sd.aliyun.com [1] # ./configure checking build
->>>> system type... x86_64-unknown-linux-gnu checking host system
->>>> type... x86_64-unknown-linux-gnu checking target system type...
->>>> x86_64-unknown-linux-gnu checking for a BSD-compatible install...
->>>> /usr/bin/install -c checking whether build environment is sane...
->>>> yes checking for a thread-safe mkdir -p... /bin/mkdir -p checking
->>>> for gawk... gawk checking whether make sets $(MAKE)... yes=20
->>>> checking
->>>> for style of include used by make... GNU checking for gcc... gcc
->>>> checking for C compiler default output file name... configure:
->>>> error: C compiler cannot create executables See `config.log' for
->>>> more details.
->>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D So I tried
->>>> ( CFLAGS=3D"-pipe -ggdb" CXXFLAGS=3D"${CFLAGS}" ), all the FLAGS i=
-n=20
->>>> the
->>>> Makefile was set to "-pipe -ggdb", as the attachment showed.. Hmm,
->>>> but there was still "??" in the back trace: (gdb) bt #0
->>>> 0x00007fd007491c32 in ?? () from /usr/local/lib/libceph.so.1 #1
->>>> 0x00007fd00746322d in ceph_write (fd=3D10, buf=3D0x7fff4ffe2210 ""=
-,
->>>> size=3D2097152, offset=3D0) at libceph.cc:322 #2 0x0000000000400fd=
-3 in
->>>> main (argc=3D1, argv=3D0x7fff501e23d8) at testceph.cc:72 There is =
-a
->>>> exception when running my application with libceph, so I need the
->>>> stack in the libceph to point the problem. It's a little
->>>> URGENT...But I don't know what happened in the libceph, so
->>>> unlucky.....Here is my stack:
->>>>
->>>
->>
->
- =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>> (gdb) c Continuing. Program received signal SIGABRT, Aborted.
->>>> [Switching to Thread 0x40838940 (LWP 9118)] 0x000000312b630265 in
->>>> raise () from /lib64/libc.so.6 (gdb) bt #0 0x000000312b630265 in
->>>> raise () from /lib64/libc.so.6 #1 0x000000312b631d10 in abort ()
->>>> from /lib64/libc.so.6 #2 0x000000312debec44 in
->>>> __gnu_cxx::__verbose_terminate_handler () from
->>>> /usr/lib64/libstdc++.so.6 #3 0x000000312debcdb6 in ?? () from
->>>> /usr/lib64/libstdc++.so.6 #4 0x000000312debcde3 in std::terminate
->>>> () from /usr/lib64/libstdc++.so.6 #5 0x000000312debceca in
->>>> __cxa_throw () from /usr/lib64/libstdc++.so.6 #6=20
->>>> 0x00007fdb4cce7a78
->>>> in ?? () from /usr/local/lib/libceph.so.1 #7 0x00007fdb4cbb4e1c in
->>>> Mutex::Lock (this=3D0x66d790, no_lockdep=3Dfalse) at
->>>> ./common/Mutex.h:118 #8 0x00007fdb4cbcf5f4 in ?? () from
->>>> /usr/local/lib/libceph.so.1 #9 0x00007fdb4cc45304 in ?? () from
->>>> /usr/local/lib/libceph.so.1 #10 0x00007fdb4cd2b1d5 in ?? () from
->>>> /usr/local/lib/libceph.so.1 #11 0x00007fdb4cbec038 in ?? () from
->>>> /usr/local/lib/libceph.so.1 #12 0x00007fdb4cc6101d in ?? () from
->>>> /usr/local/lib/libceph.so.1 #13 0x00007fdb4cc4862b in ?? () from
->>>> /usr/local/lib/libceph.so.1 #14 0x00007fdb4cbb8641 in ?? () from
->>>> /usr/local/lib/libceph.so.1 #15 0x00007fdb4cbf0a28 in ?? () from
->>>> /usr/local/lib/libceph.so.1 #16 0x000000312be064a7 in start_thread
->>>> () from /lib64/libpthread.so.0 #17 0x000000312b6d3c2d in clone ()
->>>> from /lib64/libc.so.6 (gdb)
->>>>
->>>
->>
->
- =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>> Thx! Simon 2011/5/15 Dyweni - Ceph-Devel :
->>>>
->>>>> Hi Simon! Set your CFLAGS and CXXFLAGS environment variables
->>>>> before calling configure and make. Example: CFLAGS=3D"-march=3Dna=
-tive
->>>>> -pipe -ggdb" CXXFLAGS=3D"${CFLAGS}" ./configure
->>>>> CFLAGS=3D"-march=3Dnative -pipe -ggdb" CXXFLAGS=3D"${CFLAGS}" mak=
-e etc
->>>>> Thanks, Dyweni On Sun, 15 May 2011 20:37:16 +0800, Simon Tian
->>>>> wrote:
->>>>>
->>>>>> Hi Dyweni, Can I do this by any options of "./configure"? or
->>>>>> JUST modify the Makefile manually? Thx! Simon
->>> -- To unsubscribe from this list: send the line "unsubscribe
->>> ceph-devel" in the body of a message to majordomo@vger.kernel.org=20
->>> [4]
->>> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
->>> [5]
-
-
- Links:
- ------
- [1] mailto:root@houyi-vm06.dev.sd.aliyun.com
- [2] mailto:YS3fpFE2ykfB@dyweni.com
- [3] mailto:aixt2006@gmail.com
- [4] mailto:majordomo@vger.kernel.org
- [5] http://vger.kernel.org/majordomo-info.html
- [6] mailto:sage@newdream.net
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
