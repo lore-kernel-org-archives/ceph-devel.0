@@ -1,42 +1,59 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: librados dependency
-Date: Wed, 18 May 2011 10:15:14 -0700
-Message-ID: <BANLkTikU53ZzycKLVxSugFkMXcbZ9A956A@mail.gmail.com>
-References: <BANLkTin4zPSHQ7afkXRStuDJWbzZUCe9ew@mail.gmail.com>
-	<Pine.LNX.4.64.1105180903510.1988@cobra.newdream.net>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: [PATCH 2/2] libceph: fix handle_timeout() racing with
+ con_work()/try_write()
+Date: Wed, 18 May 2011 14:27:59 -0600
+Message-ID: <4DD42BCF.8070909@sandia.gov>
+References: <Pine.LNX.4.64.1105051215050.26811@cobra.newdream.net>
+ <1305235954-9860-2-git-send-email-jaschut@sandia.gov>
+ <Pine.LNX.4.64.1105161033150.12367@cobra.newdream.net>
+ <4DD2F773.30508@sandia.gov>
+ <Pine.LNX.4.64.1105171613120.30781@cobra.newdream.net>
+ <Pine.LNX.4.64.1105171637300.30781@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:35699 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932791Ab1ERRPQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2011 13:15:16 -0400
-Received: by bwz15 with SMTP id 15so1611451bwz.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 May 2011 10:15:14 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1105180903510.1988@cobra.newdream.net>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:34249 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752532Ab1ERU2c (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2011 16:28:32 -0400
+In-Reply-To: <Pine.LNX.4.64.1105171637300.30781@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, May 18, 2011 at 9:04 AM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 18 May 2011, Yehuda Sadeh Weinraub wrote:
->> The ceph master branch was broken today, as librados was using some
->> undefined symbols (that are defined in libcrush). At the moment I
->> worked around the issue by adding libcrush to the linkage where
->> appropriate, however, we should definitely want to remove this
->> dependency.
->
-> Which symbols?
+Sage Weil wrote:
 
-Hmm.. had trouble reproducing it, but here it is:
+> 
+> I pushed a patch to the msgr_race branch that catches all four cases (I 
+> think).  Does the fix make sense given what you saw?
 
-./.libs/librados.so: undefined reference to `crush_bucket_adjust_item_weight'
-./.libs/librados.so: undefined reference to `crush_bucket_add_item'
-./.libs/librados.so: undefined reference to `crush_reweight_bucket'
+Sorry, I haven't completed much testing; it took me a while
+to figure out the fix needs this:
 
-I had to revert the two commits I pushed today and build from scratch,
-so it might be some transient error related to the original issue, I'm
-not too sure though.
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 9c0a9bd..b140dd3 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -2013,6 +2013,7 @@ done:
+  	mutex_unlock(&con->mutex);
+  done_unlocked:
+  	con->ops->put(con);
++	return;
 
-Yehuda
+  fault:
+  	mutex_unlock(&con->mutex);
+
+
+Still testing....
+
+Thanks -- Jim
+
+> 
+> Thanks!
+> sage
+> 
+
