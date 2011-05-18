@@ -1,103 +1,100 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: [PATCH 2/2] libceph: fix handle_timeout() racing with
- con_work()/try_write()
-Date: Wed, 18 May 2011 08:34:12 -0600
-Message-ID: <4DD3D8E4.1080004@sandia.gov>
-References: <Pine.LNX.4.64.1105051215050.26811@cobra.newdream.net>
- <1305235954-9860-2-git-send-email-jaschut@sandia.gov>
- <Pine.LNX.4.64.1105161033150.12367@cobra.newdream.net>
- <4DD2F773.30508@sandia.gov>
- <Pine.LNX.4.64.1105171613120.30781@cobra.newdream.net>
- <Pine.LNX.4.64.1105171637300.30781@cobra.newdream.net>
+From: Simon Tian <aixt2006@gmail.com>
+Subject: Re: operate one file in multi clients with libceph
+Date: Wed, 18 May 2011 22:40:06 +0800
+Message-ID: <BANLkTinaHaWSpm81LeOHSSpkoqjDyqB5Nw@mail.gmail.com>
+References: <BANLkTi=wd0+u774vRNDJZoXW_EoE9OP67Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:43069 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756876Ab1EROen (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2011 10:34:43 -0400
-In-Reply-To: <Pine.LNX.4.64.1105171637300.30781@cobra.newdream.net>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:50545 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752856Ab1EROkH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2011 10:40:07 -0400
+Received: by wwa36 with SMTP id 36so1793486wwa.1
+        for <ceph-devel@vger.kernel.org>; Wed, 18 May 2011 07:40:06 -0700 (PDT)
+In-Reply-To: <BANLkTi=wd0+u774vRNDJZoXW_EoE9OP67Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Sage Weil wrote:
-> On Tue, 17 May 2011, Sage Weil wrote:
->> On Tue, 17 May 2011, Jim Schutt wrote:
->>> Hi Sage,
->>>
->>> Sage Weil wrote:
->>>> Hi Jim,
->>>> This picks up the second resent message.  But and OPENING is set.. so how is
->>>> it that we were in try_write but we didn't pass through the OPENING test in
->>>> con_work?
->>>>
->>>>>>> con_work()/try_write() start again on new message.
->>>>>>> Note that con_work() did not notice that the connection was marked to
->>>>>>> be closed/reopened!  This is where things went bad.
->>>>>>> Note the connection state: 8220 = 0x201c, and 0x2000 is OPENING.
->>>>> [ 2412.643178] libceph:   messenger.c:1969 : con_work ffff8801955c0030
->>>>> OPENING
->>>>> [ 2412.643182] libceph:   messenger.c:292  : con_close_socket on
->>>>> ffff8801955c0030 sock ffff8801825a8c00
->>>>> [ 2412.643197] libceph:   messenger.c:162  : ceph_state_change
->>>>> ffff8801955c0030 state = 2076 sk_state = 4
->>>> Ok, now we see it, but this should have executed before we ever got to
->>>> try_write!
->>>>
->>>> There are a handful of places that drop and re-take con->mutex... I think it
->>>> has to be one of those.  They are:
->>>>
->>>> - prepare_connect_authorizer (before calling ->prepare_authorizer callback)
->>>> - fail_protocol (before calling ->bad_proto callback)
->>>> - process_connect RESETSESSION case (before calling ->reset callback)
->>>> - process_message (before calling ->dispatch callback)
->>>>
->>>> I think after retaking the lock in each of these cases we need to test for
->>>> the CLOSED or OPENING bits and, if set, bail out so that con_work can
->>>> restart.
->>>>
->>>> Does that make sense?  Can you confirm which case of lock droppage inside
->>>> con_work is at fault?  (Maybe adding a printk at the top of con_work after
->>>> taking the lock too would make it more clear what's going on; currently it
->>>> only prints in all the random test_bit cases).
->>> So I've got logs now that show that connection state changes
->>> across a call to process_message.  That seems like it proves
->>> the concept.
->>>
->>>> I'm thinking something like the below... does that seem reasonable?  I only
->>>> did the prepare_authorizer case to start, but the others should be fixed up
->>>> too.  Compile tested only.
->>>>
->>> Is there any reason not to fix all the cases at once, in try_read?
->>> It's less code, but far away from where the mutex dropping occurs,
->>> so we add a comment:
->> That covers the process_message and process_connect cases, provided you 
->> also set ret properly, and do the con_close_socket work that the con_work 
->> checks would have done.  e.g.,
-> 
-> I pushed a patch to the msgr_race branch that catches all four cases (I 
-> think).  Does the fix make sense given what you saw?
+Hi,
 
-Yes, I think so.
+    Could any one give me an answer?
 
-In every case I logged I saw that prepare_write_message was
-getting called at the wrong time - I finally am understanding
-that happened because reset_connection was able to run when
-con->mutex was dropped, and it thus resets con->out_msg at
-the wrong time.
+   My application need to open one file with two clients in different
+hosts. One for write/read and one for read only. The client could be
+developed based on libceph or librbd.
+   I tried librbd, exception appear too.
 
-I'll test your fix out today and let you know if I see
-any more of this.
 
--- Jim
+Thx very much! Really need your help...
 
-> 
-> Thanks!
-> sage
-> 
+Simon
 
+
+
+2011/5/17 Simon Tian <aixt2006@gmail.com>:
+> Hi folks,
+>
+> =C2=A0 =C2=A0 =C2=A0 When I write and read a file in client A, open w=
+ith
+> ceph_open(test_path, O_RDWR|O_CREAT,0 ), and read the same file in
+> client B, with ceph_open(test_path, O_RDONLY, 0). =C2=A0Client A and =
+B are
+> running on different host.
+> =C2=A0 =C2=A0 =C2=A0 After a while, client A will throw a exception. =
+This exception
+> appear every time.
+>
+> =C2=A0 =C2=A0 =C2=A0 The back trace in ceph is:
+>
+> (gdb) bt
+> #0 =C2=A00x000000367fa30265 in raise () from /lib64/libc.so.6
+> #1 =C2=A00x000000367fa31d10 in abort () from /lib64/libc.so.6
+> #2 =C2=A00x0000003682ebec44 in __gnu_cxx::__verbose_terminate_handler=
+() ()
+> from /usr/lib64/libstdc++.so.6
+> #3 =C2=A00x0000003682ebcdb6 in ?? () from /usr/lib64/libstdc++.so.6
+> #4 =C2=A00x0000003682ebcde3 in std::terminate() () from /usr/lib64/li=
+bstdc++.so.6
+> #5 =C2=A00x0000003682ebceca in __cxa_throw () from /usr/lib64/libstdc=
+++.so.6
+> #6 =C2=A00x00007ffff7c51a78 in ceph::__ceph_assert_fail
+> (assertion=3D0x7ffff7ce0a1c "r =3D=3D 0", file=3D0x7ffff7ce0a02
+> "common/Mutex.h", line=3D118,
+> =C2=A0 =C2=A0func=3D0x7ffff7ce0ca0 "void Mutex::Lock(bool)") at commo=
+n/assert.cc:86
+> #7 =C2=A00x00007ffff7b1ee1c in Mutex::Lock (this=3D0x6293f0,
+> no_lockdep=3Dfalse) at common/Mutex.h:118
+> #8 =C2=A00x00007ffff7b395f4 in Client::sync_write_commit (this=3D0x62=
+9090,
+> in=3D0x7ffff0001b50) at client/Client.cc:4979
+> #9 =C2=A00x00007ffff7baf304 in C_Client_SyncCommit::finish
+> (this=3D0x7ffff3206300) at client/Client.cc:4973
+> #10 0x00007ffff7c951d5 in Objecter::handle_osd_op_reply
+> (this=3D0x62b420, m=3D0x632190) at osdc/Objecter.cc:806
+> #11 0x00007ffff7b56038 in Client::ms_dispatch (this=3D0x629090,
+> m=3D0x632190) at client/Client.cc:1414
+> #12 0x00007ffff7bcb01d in Messenger::ms_deliver_dispatch
+> (this=3D0x628350, m=3D0x632190) at msg/Messenger.h:98
+> #13 0x00007ffff7bb262b in SimpleMessenger::dispatch_entry
+> (this=3D0x628350) at msg/SimpleMessenger.cc:352
+> #14 0x00007ffff7b22641 in SimpleMessenger::DispatchThread::entry
+> (this=3D0x6287d8) at msg/SimpleMessenger.h:533
+> #15 0x00007ffff7b5aa28 in Thread::_entry_func (arg=3D0x6287d8) at
+> ./common/Thread.h:41
+> #16 0x00000036802064a7 in start_thread () from /lib64/libpthread.so.0
+> #17 0x000000367fad3c2d in clone () from /lib64/libc.so.6
+>
+> So is there any way to avoid this?
+>
+>
+> Thx!
+> Simon
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
