@@ -1,52 +1,83 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 2/2] libceph: fix handle_timeout() racing with
- con_work()/try_write()
-Date: Wed, 18 May 2011 16:36:17 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1105181635580.1988@cobra.newdream.net>
-References: <Pine.LNX.4.64.1105051215050.26811@cobra.newdream.net>
- <1305235954-9860-2-git-send-email-jaschut@sandia.gov>
- <Pine.LNX.4.64.1105161033150.12367@cobra.newdream.net> <4DD2F773.30508@sandia.gov>
- <Pine.LNX.4.64.1105171613120.30781@cobra.newdream.net>
- <Pine.LNX.4.64.1105171637300.30781@cobra.newdream.net> <4DD42BCF.8070909@sandia.gov>
+From: Dyweni - Ceph-Devel <YS3fpFE2ykfB@dyweni.com>
+Subject: Minimum Recommended Hardware
+Date: Thu, 19 May 2011 00:27:51 -0500
+Message-ID: <b792daeb0cd450e18e6c275abb595dcd@pl1.haspere.com>
+Reply-To: <YS3fpFE2ykfB@dyweni.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37034 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756170Ab1ERXfL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 May 2011 19:35:11 -0400
-In-Reply-To: <4DD42BCF.8070909@sandia.gov>
+Received: from pl1.haspere.com ([208.111.35.220]:39748 "EHLO pl1.haspere.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754088Ab1ESF1w (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 May 2011 01:27:52 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Wed, 18 May 2011, Jim Schutt wrote:
-> Sage Weil wrote:
-> 
-> > 
-> > I pushed a patch to the msgr_race branch that catches all four cases (I
-> > think).  Does the fix make sense given what you saw?
-> 
-> Sorry, I haven't completed much testing; it took me a while
-> to figure out the fix needs this:
-> 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 9c0a9bd..b140dd3 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -2013,6 +2013,7 @@ done:
->  	mutex_unlock(&con->mutex);
->  done_unlocked:
->  	con->ops->put(con);
-> +	return;
-> 
->  fault:
->  	mutex_unlock(&con->mutex);
-> 
-> 
-> Still testing....
+ Hi!
 
-Good catch.  Let us know how it goes!
+ I've been doing some casual testing of Ceph (GIT Master) and am seeing 
+ some really slow speeds:
+  - rados bench:  5-6MB/s
+  - QEMU-KVM:  1-2MB/s
 
-sge
+ As part of my performance troubleshooting plan, I'd like to find out 
+ what the list considers the "minimum recommended" hardware configuration 
+ to be in order to run Ceph and achieve a reasonably good transfer rate 
+ (I'm thinking 50MB/s+?).
+
+ My current setup is this:
+
+ All machines PXE boot and run their OS from a customized initramfs 
+ image.  Hard drives are used solely for data storage.  All machines run 
+ the 2.6.39-rc7-git13 Linux Kernel.  OSD Journal lives in the OSD Data 
+ partition and is 1000 MB.  I use the default (2) number of replicas for 
+ all pools.  No iptables or Ceph authentication being used.  All machines 
+ are connected by an 8 port Linksys Gigabit switch.
+
+ I use a set of custom shell scripts to build and start the Ceph cluster 
+ from bare metal (once the machines are booted from PXE).
+
+ I've tried both EXT4 and BTRFS file systems on the OSDs, but both give 
+ the same speeds.
+
+ 1 x MON
+   Dual P3 930Mhz, 256K Cache
+   512MB RAM
+   No HD
+   100Mb NIC
+
+ 1 x MDS
+   Dual Athlon 64 X2 3800+, 512K Cache
+   4GB RAM
+   No HD
+   100Mb NIC
+
+ 4 x OSD
+   OSD1 =
+     P3 1Ghz, 256K Cache
+     2GB RAM
+     80GB IDE (dd_rescue can read about 45MB/s sustained)
+     1Gb NIC (e1000 driver)
+   OSD2 =
+     P3 550Mhz, 512K Cache
+     768MB RAM
+     40GB IDE (dd_rescue can read about 30MB/s sustained)
+     1Gb NIC (e1000 driver)
+   OSD3 =
+     Celeron 1Ghz, 128K Cache
+     512MB RAM
+     18GB IDE (dd_rescue can read about 15MB/s sustained)
+     1Gb NIC (e1000 driver)
+   OSD4 =
+     P3 1Ghz, 256K Cache
+     512MB RAM
+     20GB IDE (dd_rescue can read about 40MB/s sustained)
+     1Gb NIC (e1000 driver)
+
+
+ Thanks,
+ Dyweni
+
