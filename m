@@ -1,98 +1,123 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: [PATCH 2/2] libceph: fix handle_timeout() racing with
- con_work()/try_write()
-Date: Thu, 19 May 2011 11:31:31 -0600
-Message-ID: <4DD553F3.4020201@sandia.gov>
-References: <Pine.LNX.4.64.1105051215050.26811@cobra.newdream.net>
- <1305235954-9860-2-git-send-email-jaschut@sandia.gov>
- <Pine.LNX.4.64.1105161033150.12367@cobra.newdream.net>
- <4DD2F773.30508@sandia.gov>
- <Pine.LNX.4.64.1105171613120.30781@cobra.newdream.net>
- <Pine.LNX.4.64.1105171637300.30781@cobra.newdream.net>
- <4DD42BCF.8070909@sandia.gov>
- <Pine.LNX.4.64.1105181635580.1988@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+From: Brian Chrisman <brchrisman@gmail.com>
+Subject: [PATCH 1/2] add ceph_readdir() to libceph
+Date: Thu, 19 May 2011 13:22:32 -0700
+Message-ID: <1305836553-393-2-git-send-email-brchrisman@gmail.com>
+References: <1305836553-393-1-git-send-email-brchrisman@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:60437 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933494Ab1ESRbx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2011 13:31:53 -0400
-In-Reply-To: <Pine.LNX.4.64.1105181635580.1988@cobra.newdream.net>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:36203 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933926Ab1ESUW4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2011 16:22:56 -0400
+Received: by pvg12 with SMTP id 12so1349946pvg.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 May 2011 13:22:55 -0700 (PDT)
+In-Reply-To: <1305836553-393-1-git-send-email-brchrisman@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Brian Chrisman <brchrisman@gmail.com>
 
-Hi Sage,
 
-Sage Weil wrote:
-> On Wed, 18 May 2011, Jim Schutt wrote:
->> Sage Weil wrote:
->>
->>> I pushed a patch to the msgr_race branch that catches all four cases (I
->>> think).  Does the fix make sense given what you saw?
->> Sorry, I haven't completed much testing; it took me a while
->> to figure out the fix needs this:
->>
->> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->> index 9c0a9bd..b140dd3 100644
->> --- a/net/ceph/messenger.c
->> +++ b/net/ceph/messenger.c
->> @@ -2013,6 +2013,7 @@ done:
->>  	mutex_unlock(&con->mutex);
->>  done_unlocked:
->>  	con->ops->put(con);
->> +	return;
->>
->>  fault:
->>  	mutex_unlock(&con->mutex);
->>
->>
->> Still testing....
-> 
-> Good catch.  Let us know how it goes!
+Signed-off-by: Brian Chrisman <brchrisman@gmail.com>
+---
+ src/client/Client.cc       |   35 +++++++++++++++++++++++++++++++++--
+ src/client/Client.h        |    1 +
+ src/include/ceph/libceph.h |    1 +
+ src/libceph.cc             |    5 +++++
+ 4 files changed, 40 insertions(+), 2 deletions(-)
 
-I've been testing commit a30413af363 from your msgr_race
-branch, and I think it is ready.  In my testing of it I've
-found none of the signs that I recognize as indicators of
-the race we were trying to fix.
-
-However, with that issue fixed I'm now running into a
-different type of stall under a heavy write load.
-
-If the load is heavy enough to trigger that issue where
-heartbeat processing is delayed, and an osd is wrongly
-marked down, then I see a flurry of messages with bad
-tags.
-
-So far I can't generate a high enough load with much client
-debugging enabled, but what I have done is turn on client
-debugging after I see the "wrongly marked me down" from
-ceph -w, and the bad message tags in the osd logs.
-
-When I do that I see some clients with a few messages
-queued up to send.  Sending of the first message
-starts as expected, but before it completes it stalls,
-as though the socket buffer fills up and isn't being
-emptied.  Then the message times out, the socket is
-closed/reopened, and the partially-sent message is
-resent from the beginning.  And then sending stalls again.
-
-I'll let you know when I've got some logs that suggest
-what the problem might be...
-
-FWIW, on the server side I'm running the stable branch
-(commit b6cccc741a3).
-
--- Jim
-
-> 
-> sge
-> 
-> 
-
+diff --git a/src/client/Client.cc b/src/client/Client.cc
+index e4b400c..0284c03 100644
+--- a/src/client/Client.cc
++++ b/src/client/Client.cc
+@@ -4298,8 +4298,6 @@ int Client::readdir_r_cb(dir_result_t *d, add_dirent_cb_t cb, void *p)
+ }
+ 
+ 
+-
+-
+ int Client::readdir_r(dir_result_t *d, struct dirent *de)
+ {  
+   return readdirplus_r(d, de, 0, 0);
+@@ -4337,6 +4335,39 @@ static int _readdir_single_dirent_cb(void *p, struct dirent *de, struct stat *st
+   return 0;  
+ }
+ 
++struct dirent * Client::readdir(dir_result_t *d)
++{
++  int ret;
++  static int stmask;
++  static struct dirent de;
++  static struct stat st;
++  single_readdir sr;
++  sr.de = &de;
++  sr.st = &st;
++  sr.stmask = &stmask;
++  sr.full = false;
++
++  /*
++   * Return mechanisms are non-obvious (callback appears intended for multi-read mechanism like cfuse)
++   * readdir_r_cb=0 end of directory reached on prior call
++   * readdir_r_cb=0 entry filled and offset now at end of the directory
++   * readdir_r_cb=-1 entry is filled successfully, not end of dir
++   * readdir_r_cb=-(other) on error
++   * callback leaves sr.full=false when 'offset is at end of directory'
++   * callback may leave sr.full=false on error
++   * callback sets sr.full=true on 'successfully read dirent'
++   */
++  ret = readdir_r_cb(d, _readdir_single_dirent_cb, (void *)&sr);
++  if (ret < -1) {
++    errno = -ret;
++    return (dirent *) NULL;
++  }
++  if (sr.full) {
++    return &de;
++  }
++  return (dirent *) NULL;
++}
++
+ int Client::readdirplus_r(dir_result_t *d, struct dirent *de, struct stat *st, int *stmask)
+ {  
+   single_readdir sr;
+diff --git a/src/client/Client.h b/src/client/Client.h
+index b36621d..e10979d 100644
+--- a/src/client/Client.h
++++ b/src/client/Client.h
+@@ -1204,6 +1204,7 @@ public:
+ 
+   int readdir_r_cb(dir_result_t *dirp, add_dirent_cb_t cb, void *p);
+ 
++  struct dirent * readdir(dir_result_t *d);
+   int readdir_r(dir_result_t *dirp, struct dirent *de);
+   int readdirplus_r(dir_result_t *dirp, struct dirent *de, struct stat *st, int *stmask);
+ 
+diff --git a/src/include/ceph/libceph.h b/src/include/ceph/libceph.h
+index f9fc29e..bf28402 100644
+--- a/src/include/ceph/libceph.h
++++ b/src/include/ceph/libceph.h
+@@ -76,6 +76,7 @@ int ceph_chdir(struct ceph_mount_info *cmount, const char *s);
+ 
+ int ceph_opendir(struct ceph_mount_info *cmount, const char *name, struct ceph_dir_result **dirpp);
+ int ceph_closedir(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp);
++struct dirent * ceph_readdir(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp);
+ int ceph_readdir_r(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp, struct dirent *de);
+ int ceph_readdirplus_r(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp, struct dirent *de,
+ 		       struct stat *st, int *stmask);
+diff --git a/src/libceph.cc b/src/libceph.cc
+index 6388bde..54993ac 100644
+--- a/src/libceph.cc
++++ b/src/libceph.cc
+@@ -319,6 +319,11 @@ extern "C" int ceph_closedir(struct ceph_mount_info *cmount, struct ceph_dir_res
+   return cmount->get_client()->closedir((dir_result_t*)dirp);
+ }
+ 
++extern "C" struct dirent * ceph_readdir(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp)
++{
++  return cmount->get_client()->readdir((dir_result_t*)dirp);
++}
++
+ extern "C" int ceph_readdir_r(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp, struct dirent *de)
+ {
+   return cmount->get_client()->readdir_r((dir_result_t*)dirp, de);
+-- 
+1.7.1
 
