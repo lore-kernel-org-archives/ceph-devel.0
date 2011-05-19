@@ -1,138 +1,219 @@
-From: Udo Waechter <udo.waechter@uni-osnabrueck.de>
-Subject: (un)stability of ceph
-Date: Thu, 19 May 2011 18:04:12 +0200
-Message-ID: <C424A186-75DB-4CC5-A662-A538E7D5BA4C@uni-osnabrueck.de>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: multipart/signed; boundary=Apple-Mail-9--1051145035; protocol="application/pkcs7-signature"; micalg=sha1
+From: Sage Weil <sage@newdream.net>
+Subject: Re: operate one file in multi clients with libceph
+Date: Thu, 19 May 2011 10:11:52 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1105191011180.9218@cobra.newdream.net>
+References: <BANLkTi=wd0+u774vRNDJZoXW_EoE9OP67Q@mail.gmail.com>
+ <BANLkTinaHaWSpm81LeOHSSpkoqjDyqB5Nw@mail.gmail.com>
+ <Pine.LNX.4.64.1105180858360.1988@cobra.newdream.net>
+ <BANLkTin+D66OuXUbiRkDBNiLx--8eu2hkw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-753220676-1305825112=:9218"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from vm135.rz.uni-osnabrueck.de ([131.173.16.10]:43764 "EHLO
-	smtp-auth.serv.Uni-Osnabrueck.DE" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932850Ab1ESQ3g (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 May 2011 12:29:36 -0400
-Received: from slick.chaos (xdslbi135.osnanet.de [85.8.89.135] (may be forged))
-	(authenticated bits=0)
-	by smtp-auth.serv.Uni-Osnabrueck.DE (8.13.8/8.13.8) with ESMTP id p4JG4DFK009275
-	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Thu, 19 May 2011 18:04:14 +0200
+Received: from cobra.newdream.net ([66.33.216.30]:46007 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756209Ab1ESRKo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 May 2011 13:10:44 -0400
+In-Reply-To: <BANLkTin+D66OuXUbiRkDBNiLx--8eu2hkw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Developers <ceph-devel@vger.kernel.org>
+To: Simon Tian <aixt2006@gmail.com>
+Cc: ceph-devel@vger.kernel.org
+
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--557981400-753220676-1305825112=:9218
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+
+On Thu, 19 May 2011, Simon Tian wrote:
+> Hi Sage,
+>=20
+>     I've test this patch.
+> With 8 times test, only 1 (the first time) got a thread assert fail.As
+> back trace 1 showed:
+
+Do you have a simple reproducer for this?
+
+sage
 
 
---Apple-Mail-9--1051145035
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=iso-8859-1
-
-Hi there.
-I'm new to the list, but am following the development of ceph for a =
-while now. Great project. It really looks like the next big things.
-
-After researching parallel/shared filesystems for a last year, we tried =
-to implement lustre. This project basically died for us with Oracle's =
-aquirement of sun and all the confusion that came afterwards. Anyway, we =
-then decided for another FS, which now turns out to be an error of the =
-big kind. Its unstable und unreliable.
-
-Now, I am in the bad position to quickly have to switch to another FS. =
-Before I start implementing another FS, I would like to ask about the =
-status of ceph.
-I know that it is not supposed to be used in an production environment. =
-Nevertheless, I am inclined to give ceph a try. Our plans were to switch =
-to ceph anyway as soon as it is considered stable.
-Our usage scenarios are these:
-
-* multiple OSDs, multiple MDs.
-* shared storage for KVM and XEN (does not need to be Rados Block =
-device, can be images as we have it now)
-** the VM-servers are interconnected via internal 2x1Gbit nics and also =
-have 1Gbit nic to the external LAN.
-** traffic for vm-images or RBD should go over internal NICS (can ceph =
-handle such a scenario?).
-* shared storage for user data. workloads are not very high, but =
-potentially many clients (currently 100-200)
-** POSIX compatibity is a must (directory permissions, primary and =
-secondary group access, for personal files and working group files)
-** speed is not of great importance, our LAN is 1Gbit.
-** Workstations are Debian/Ubuntu Linux (most of them) and OS X, the =
-fewest are Windows. Is it possible (without great hassle) to reexport =
-ceph volumes via nfs/samba (for OS X, windows)
-
-Our storage server currenlty are: 2x Dell R510 with 12x1TB (one of =
-them), 12x2TB (the second), 16Gbs ram and a i7QuadCore. A third (with =
-12x2Tb) and fourth are on their way. These would make OSDs and MDses, I =
-guess.
-
-What are your opinions? Is ceph considered unstable in all use-cases, or =
-would a moderate work-load work even in production environments? Are =
-there any compatibility-breaking updates on their way?
-
-I would rather start using ceph now, even if it is not 100% performant. =
-As long as it is 99% stable and data-loss or corruption is not really =
-expected....=20
-
-Thanks for your thoughts,
-udo.
---=20
-:: udo waechter - root@zoide.net :: N 52=BA16'30.5" E 8=BA3'10.1"
-:: genuine input for your ears: http://auriculabovinari.de=20
-::                          your eyes: http://ezag.zoide.net
-::                          your brain: http://zoide.net
-
-
-
-
-
---Apple-Mail-9--1051145035
-Content-Disposition: attachment;
-	filename=smime.p7s
-Content-Type: application/pkcs7-signature;
-	name=smime.p7s
-Content-Transfer-Encoding: base64
-
-MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIIFvDCCBbgw
-ggSgoAMCAQICBBFL38MwDQYJKoZIhvcNAQEFBQAwgZExCzAJBgNVBAYTAkRFMSAwHgYDVQQKExdV
-bml2ZXJzaXRhZXQgT3NuYWJydWVjazEWMBQGA1UECxMNUmVjaGVuemVudHJ1bTEjMCEGA1UEAxMa
-VW5pLU9zbmFicnVlY2sgUlotQ0EgRy0wMDIxIzAhBgkqhkiG9w0BCQEWFGNhQHVuaS1vc25hYnJ1
-ZWNrLmRlMB4XDTExMDExMTEzNTkxNloXDTE0MDExMDEzNTkxNlowdTELMAkGA1UEBhMCREUxIDAe
-BgNVBAoTF1VuaXZlcnNpdGFldCBPc25hYnJ1ZWNrMS0wKwYDVQQLEyRJbnN0aXR1dCBmdWVyIEtv
-Z25pdGlvbnN3aXNzZW5zY2hhZnQxFTATBgNVBAMTDFVkbyBXYWVjaHRlcjCCASIwDQYJKoZIhvcN
-AQEBBQADggEPADCCAQoCggEBAMzwGDb1f+gvEgItMj+Lm5fT9BECvgDFEhx7XxJGlNxkr0buUKMa
-/A2wpQ1yw5Gl4ggdwbtVxrPcLdKHoHf+KQH59tx8Ji9/1qJTjjIYIHxMYXOd6R1SmP92kyiS4kpK
-QDy6Xm26fdeahLX5RSjxbpZ6oQXQ7RShlwLUtuVZvOtGQ03R3uRtRlVuUKSd/7pRG6sknv/P7VRJ
-yy+D9btr43++37+wWIjfdVppaPw8Nf3IND8SaJb4stKjLMeK4Lpd/kVZVMT15UPYT39P9DHg7ujM
-6eXvm4BwW/DNgwQ1ua8Bi6IJBskyZpnekicPG5rSP60o8++mY/p1RvgXKx2JhMcCAwEAAaOCAjEw
-ggItMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgXgMCkGA1UdJQQiMCAGCCsGAQUFBwMCBggrBgEFBQcD
-BAYKKwYBBAGCNxQCAjAdBgNVHQ4EFgQUsvYGd06HCiDO6mL2Mt5Jpdwzm/0wHwYDVR0jBBgwFoAU
-qh/YdxVumeRfkNbsYyZOGepnFFAwawYDVR0RBGQwYoEedWRvLndhZWNodGVyQHVuaS1vc25hYnJ1
-ZWNrLmRlgRN1ZG8ud2FlY2h0ZXJAdW9zLmRlgRp1d2FlY2h0ZUB1bmktb3NuYWJydWVjay5kZYEP
-dXdhZWNodGVAdW9zLmRlMIGPBgNVHR8EgYcwgYQwQKA+oDyGOmh0dHA6Ly9jZHAxLnBjYS5kZm4u
-ZGUvdW5pLW9zbmFicnVlY2stY2EvcHViL2NybC9jYWNybC5jcmwwQKA+oDyGOmh0dHA6Ly9jZHAy
-LnBjYS5kZm4uZGUvdW5pLW9zbmFicnVlY2stY2EvcHViL2NybC9jYWNybC5jcmwwgagGCCsGAQUF
-BwEBBIGbMIGYMEoGCCsGAQUFBzAChj5odHRwOi8vY2RwMS5wY2EuZGZuLmRlL3VuaS1vc25hYnJ1
-ZWNrLWNhL3B1Yi9jYWNlcnQvY2FjZXJ0LmNydDBKBggrBgEFBQcwAoY+aHR0cDovL2NkcDIucGNh
-LmRmbi5kZS91bmktb3NuYWJydWVjay1jYS9wdWIvY2FjZXJ0L2NhY2VydC5jcnQwDQYJKoZIhvcN
-AQEFBQADggEBAAMO/VwWkb3a+5x2XVHvVqIZehBXnXgYXYOt8okm7YPj9yS2BgPmHTzSRGREDagi
-/Bd/sSW0mXGJ+xXPX2EkT2oBNVqFiL+ZeCF62KPcro7q0wkp5/YnRZ1m2b04PpQ7FT5mUKgeiyk6
-JUE68xnDGAdJghqqJag4511291FdBHQ/4i/0EodFX5Jax4Ie8s5XslhLbsbatqb0k/Dz8FTXsby1
-55RwvLTOEj4EqHeNVw8XfO43SCwupXNTzaQ/O3zfeTP8CD/8vXNQwVzcW6x/hf2gQH13huchqb6+
-LcKY1Lcn1JffUyxO+/cIKTG5VDGGEp6u+DmyrNZUU35qkblfFUkxggOBMIIDfQIBATCBmjCBkTEL
-MAkGA1UEBhMCREUxIDAeBgNVBAoTF1VuaXZlcnNpdGFldCBPc25hYnJ1ZWNrMRYwFAYDVQQLEw1S
-ZWNoZW56ZW50cnVtMSMwIQYDVQQDExpVbmktT3NuYWJydWVjayBSWi1DQSBHLTAwMjEjMCEGCSqG
-SIb3DQEJARYUY2FAdW5pLW9zbmFicnVlY2suZGUCBBFL38MwCQYFKw4DAhoFAKCCAbswGAYJKoZI
-hvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTEwNTE5MTYwNDEzWjAjBgkqhkiG
-9w0BCQQxFgQUXCPZy4fNGSeY9E2p15KstXyvf/UwgasGCSsGAQQBgjcQBDGBnTCBmjCBkTELMAkG
-A1UEBhMCREUxIDAeBgNVBAoTF1VuaXZlcnNpdGFldCBPc25hYnJ1ZWNrMRYwFAYDVQQLEw1SZWNo
-ZW56ZW50cnVtMSMwIQYDVQQDExpVbmktT3NuYWJydWVjayBSWi1DQSBHLTAwMjEjMCEGCSqGSIb3
-DQEJARYUY2FAdW5pLW9zbmFicnVlY2suZGUCBBFL38Mwga0GCyqGSIb3DQEJEAILMYGdoIGaMIGR
-MQswCQYDVQQGEwJERTEgMB4GA1UEChMXVW5pdmVyc2l0YWV0IE9zbmFicnVlY2sxFjAUBgNVBAsT
-DVJlY2hlbnplbnRydW0xIzAhBgNVBAMTGlVuaS1Pc25hYnJ1ZWNrIFJaLUNBIEctMDAyMSMwIQYJ
-KoZIhvcNAQkBFhRjYUB1bmktb3NuYWJydWVjay5kZQIEEUvfwzANBgkqhkiG9w0BAQEFAASCAQCJ
-4ZE0CL1BDpJDXOHaldU9SoEFknhnqJwuJiQnyGKZRHNAcGfnNrapDjcanMD47pDH5fRJxoH14anN
-PMd26mdqPwSAt3aFXZFFWhqK6cu2ASJXW4usScbzde/h6fEXza0bR5TfjAwjd8HasQJrTZVgjjHg
-lFkehX1PZGux50FbHx0sdbpuf6VwfkiCAfbM/swuGBpifh4plgHd4p1LUOyAEFj+5xAGrzXhpmjg
-kSehA4me38rKj+ta3COz17Grz/tDe74vFzEYC0OCArKExkFlQvm2CXb+A7BuPIOk3pJvFtNxXzsk
-H1XirvT8RO6AsrRrN29+GitPYcmVVCCtikB6AAAAAAAA
-
---Apple-Mail-9--1051145035--
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D  back trace 1   =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> (gdb) bt
+> #0  0x000000367fa30265 in raise () from /lib64/libc.so.6
+> #1  0x000000367fa31d10 in abort () from /lib64/libc.so.6
+> #2  0x0000003682ebec44 in __gnu_cxx::__verbose_terminate_handler() ()
+> from /usr/lib64/libstdc++.so.6
+> #3  0x0000003682ebcdb6 in ?? () from /usr/lib64/libstdc++.so.6
+> #4  0x0000003682ebcde3 in std::terminate() () from /usr/lib64/libstdc++.s=
+o.6
+> #5  0x0000003682ebceca in __cxa_throw () from /usr/lib64/libstdc++.so.6
+> #6  0x00007ffff7c51a54 in ceph::__ceph_assert_fail
+> (assertion=3D0x7ffff7ce31f1 "in->cap_refs[(32 << 8)] =3D=3D 1",
+>     file=3D0x7ffff7ce1431 "client/Client.cc", line=3D2190,
+> func=3D0x7ffff7ce5fc0 "void Client::_flush(Inode*, Context*)")
+>     at common/assert.cc:86
+> #7  0x00007ffff7b39bb0 in Client::_flush (this=3D0x629090, in=3D0x630f50,
+> onfinish=3D0x7fffe8000b60) at client/Client.cc:2190
+> #8  0x00007ffff7b52426 in Client::handle_cap_grant (this=3D0x629090,
+> in=3D0x630f50, mds=3D0, cap=3D0x62ee50, m=3D0x631fc0)
+>     at client/Client.cc:2930
+> #9  0x00007ffff7b52d2a in Client::handle_caps (this=3D0x629090,
+> m=3D0x631fc0) at client/Client.cc:2711
+> #10 0x00007ffff7b560a0 in Client::ms_dispatch (this=3D0x629090,
+> m=3D0x631fc0) at client/Client.cc:1444
+> #11 0x00007ffff7bcaff9 in Messenger::ms_deliver_dispatch
+> (this=3D0x628350, m=3D0x631fc0) at msg/Messenger.h:98
+> #12 0x00007ffff7bb2607 in SimpleMessenger::dispatch_entry
+> (this=3D0x628350) at msg/SimpleMessenger.cc:352
+> #13 0x00007ffff7b22641 in SimpleMessenger::DispatchThread::entry
+> (this=3D0x6287d8) at msg/SimpleMessenger.h:533
+> #14 0x00007ffff7b5aa04 in Thread::_entry_func (arg=3D0x6287d8) at
+> ./common/Thread.h:41
+> #15 0x00000036802064a7 in start_thread () from /lib64/libpthread.so.0
+> #16 0x000000367fad3c2d in clone () from /lib64/libc.so.6
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> In addition, when writing data for a long time, the write thread will
+> hang on a pthread_cond_wait, as back trace 2 showed:
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D  back trace 2  =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> Thread 10 (Thread 0x43f87940 (LWP 19986)):
+> #0  0x000000312be0ab99 in pthread_cond_wait@@GLIBC_2.3.2 () from
+> /lib64/libpthread.so.0
+> #1  0x00007f147a8e763b in Cond::Wait (this=3D0x43f86b00,
+> mutex=3D@0x66d790) at ./common/Cond.h:46
+> #2  0x00007f147a86630d in Client::wait_on_list (this=3D0x66d430,
+> ls=3D@0x674df0) at client/Client.cc:2140
+> #3  0x00007f147a8771ff in Client::get_caps (this=3D0x66d430,
+> in=3D0x6749d0, need=3D4096, want=3D8192, got=3D0x43f86e8c, endoff=3D23547=
+0848)
+>     at client/Client.cc:1827
+> #4  0x00007f147a886003 in Client::_write (this=3D0x66d430, f=3D0x671510,
+> offset=3D235470336, size=3D512,
+>     buf=3D0x6452b0 '=FF=FF' <repeats 33 times>, ".001", '=FF=FF' <repeats=
+ 165
+> times>...) at client/Client.cc:5055
+> #5  0x00007f147a886d73 in Client::write (this=3D0x66d430, fd=3D10,
+>     buf=3D0x6452b0 '=FF=FF' <repeats 33 times>, ".001", '=FF=FF' <repeats=
+ 165
+> times>..., size=3D512, offset=3D235470336) at client/Client.cc:5007
+> #6  0x00007f147a85822d in ceph_write (fd=3D10, buf=3D0x6452b0 '=FF=FF' <r=
+epeats
+> 33 times>, ".001", '=FF=FF' <repeats 165 times>..., size=3D512,
+>     offset=3D235470336) at libceph.cc:322
+> #7  0x000000000042fa27 in TdcCephImpl::AsyncWrite (this=3D0x647c30,
+> offset=3D235470336, length=3D512,
+>     buf=3D0x6452b0 '=FF=FF' <repeats 33 times>, ".001", '=FF=FF' <repeats=
+ 165
+> times>..., queue=3D@0x644b60, io=3D0x6456a0)
+>     at /opt/tsk/tdc-tapdisk/td-connector2.0/common/tdc_ceph_impl.cpp:191
+> #8  0x000000000042ffc5 in TdcCephImpl::AsyncProcess (this=3D0x647c30,
+> io=3D0x6456a0, queue=3D@0x644b60, netfd=3D5)
+>     at /opt/tsk/tdc-tapdisk/td-connector2.0/common/tdc_ceph_impl.cpp:268
+> #9  0x00000000004192be in SubmitRequest_Intra (arg=3D0x644b00) at
+> /opt/tsk/tdc-tapdisk/td-connector2.0/td_connector_server.cpp:390
+> #10 0x000000312be064a7 in start_thread () from /lib64/libpthread.so.0
+> #11 0x000000312b6d3c2d in clone () from /lib64/libc.so.6
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> Seem not very safe with the patch.
+>=20
+> So I applied this patch:
+> diff --git a/src/client/Client.cc b/src/client/Client.cc
+> index 7f7fb08..bf0997a 100644
+> --- a/src/client/Client.cc
+> +++ b/src/client/Client.cc
+> @@ -4934,7 +4934,6 @@ public:
+>=20
+>  void Client::sync_write_commit(Inode *in)
+>  {
+> -  client_lock.Lock();
+> + int r =3D client_lock.Lock();
+>   assert(unsafe_sync_write > 0);
+>   unsafe_sync_write--;
+>=20
+> @@ -4947,8 +4946,6 @@ void Client::sync_write_commit(Inode *in)
+>   }
+>=20
+>   put_inode(in);
+> + if (r)
+>   client_lock.Unlock();
+>  }
+>=20
+>  int Client::write(int fd, const char *buf, loff_t size, loff_t offset)
+>=20
+>=20
+> After some test, back trace 1 didn't appear, but back trace 2 still appea=
+r.
+> Hmm,, not safe also.
+>=20
+> Thx!
+> Simon
+>=20
+>=20
+>=20
+> 2011/5/19 Sage Weil <sage@newdream.net>:
+> > Hi Simon,
+> >
+> > On Wed, 18 May 2011, Simon Tian wrote:
+> >
+> >> Hi,
+> >>
+> >> =A0 =A0 Could any one give me an answer?
+> >>
+> >> =A0 =A0My application need to open one file with two clients in differ=
+ent
+> >> hosts. One for write/read and one for read only. The client could be
+> >> developed based on libceph or librbd.
+> >> =A0 =A0I tried librbd, exception appear too.
+> >
+> > I opened a bug for this, http://tracker.newdream.net/issues/1097.
+> >
+> > Can you try the patch below? =A0I this may just be something missed in =
+a
+> > locking rewrite way back when in a rare code path:
+> >
+> > Thanks!
+> > sage
+> >
+> >
+> >
+> > diff --git a/src/client/Client.cc b/src/client/Client.cc
+> > index 7f7fb08..bf0997a 100644
+> > --- a/src/client/Client.cc
+> > +++ b/src/client/Client.cc
+> > @@ -4934,7 +4934,6 @@ public:
+> >
+> > =A0void Client::sync_write_commit(Inode *in)
+> > =A0{
+> > - =A0client_lock.Lock();
+> > =A0 assert(unsafe_sync_write > 0);
+> > =A0 unsafe_sync_write--;
+> >
+> > @@ -4947,8 +4946,6 @@ void Client::sync_write_commit(Inode *in)
+> > =A0 }
+> >
+> > =A0 put_inode(in);
+> > -
+> > - =A0client_lock.Unlock();
+> > =A0}
+> >
+> > =A0int Client::write(int fd, const char *buf, loff_t size, loff_t offse=
+t)
+> >
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-753220676-1305825112=:9218--
