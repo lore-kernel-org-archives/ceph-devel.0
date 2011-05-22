@@ -1,39 +1,45 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: different osds
-Date: Sun, 22 May 2011 22:50:58 +0300
-Message-ID: <4DD96922.2080409@ufm.su>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: different osds
+Date: Sun, 22 May 2011 16:29:15 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1105221615550.9483@cobra.newdream.net>
+References: <4DD96922.2080409@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:35135 "EHLO mail.ufm.su"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752237Ab1EVTvE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 22 May 2011 15:51:04 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by mail.ufm.su (Postfix) with ESMTP id 9F9BB600485
-	for <ceph-devel@vger.kernel.org>; Sun, 22 May 2011 22:51:00 +0300 (EEST)
-Received: from mail.ufm.su ([127.0.0.1])
-	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id OBYigXUgaKSI for <ceph-devel@vger.kernel.org>;
-	Sun, 22 May 2011 22:51:00 +0300 (EEST)
-Received: from [192.168.2.22] (unknown [94.232.181.14])
-	by mail.ufm.su (Postfix) with ESMTPSA id 6C3B2600483
-	for <ceph-devel@vger.kernel.org>; Sun, 22 May 2011 22:51:00 +0300 (EEST)
+Received: from cobra.newdream.net ([66.33.216.30]:58622 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753853Ab1EVX2A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 May 2011 19:28:00 -0400
+In-Reply-To: <4DD96922.2080409@ufm.su>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Fyodor Ustinov <ufm@ufm.su>
+Cc: ceph-devel@vger.kernel.org
 
-Hi!
+On Sun, 22 May 2011, Fyodor Ustinov wrote:
+> Hi!
+> 
+> Let's say I have 6 osd. 5 of them are the same, 6 - has twice the amount of
+> disk size.
+> 
+> Should I somehow specifically describe it in CRUSH mapor seph will understand
+> without it?
 
-Let's say I have 6 osd. 5 of them are the same, 6 - has twice the amount 
-of disk size.
+Right, you just need to weight it 2x that of the other nodes, and it'll 
+get twice the data (and IO traffic).  I just pushed a patch to master that 
+will let you do it with something like
 
-Should I somehow specifically describe it in CRUSH mapor seph will 
-understand without it?
+ ceph osd getcrushmap -o orig
+ crushtool -i orig --reweight-item <name> <weight> -o new
+ ceph osd setcrushmap -i new
 
-WBR,
-    Fyodor.
+I usually set the weights in terms of some real units, like TB, so that 
+the map dumps make sense.  You probably want to 
 
-P.S. I'd like to receive "secret knowledge" about the "weight" in crush 
-map. :)
+ crushtool -d orig > orig.txt
+ crushtool -d new > new.txt
+ diff orig.txt new.txt
+
+to verify all is well before reinserting the updated map into the cluster.
+
+sage
