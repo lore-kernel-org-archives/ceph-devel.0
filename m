@@ -1,48 +1,39 @@
-From: "western101@algish.com" <bybrasil@ism.com.br>
-Subject: (unknown)
-Date: Sat, 21 May 2011 09:54:34 -0300
-Message-ID: <20110521095434.194452lz8ijjxecc__25865.1250311688$1305987519$gmane$org@webmail.ism.com.br>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: different osds
+Date: Sun, 22 May 2011 22:50:58 +0300
+Message-ID: <4DD96922.2080409@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=ISO-8859-1;
- DelSp="Yes";
- format="flowed"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from raptor.ism.com.br ([200.215.129.13]:37037 "EHLO
-	ocelot.ism.com.br" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750862Ab1EUOS1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 21 May 2011 10:18:27 -0400
-Subject: 
-Content-Disposition: inline
+Received: from mail.ufm.su ([77.120.103.19]:35135 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752237Ab1EVTvE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 22 May 2011 15:51:04 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id 9F9BB600485
+	for <ceph-devel@vger.kernel.org>; Sun, 22 May 2011 22:51:00 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id OBYigXUgaKSI for <ceph-devel@vger.kernel.org>;
+	Sun, 22 May 2011 22:51:00 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id 6C3B2600483
+	for <ceph-devel@vger.kernel.org>; Sun, 22 May 2011 22:51:00 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
+Hi!
 
-My associate has helped me to send your first payment
-of $7,500 USD to you as instructed by Mr. David Cameron
-the United Kingdom prime minister after the last G20
-meeting that was held in United Kingdom, making you one
-of the beneficiaries. Here is the information below.
+Let's say I have 6 osd. 5 of them are the same, 6 - has twice the amount 
+of disk size.
 
-MTCN Numbers: 6096147516
-Sender First Name Is = Johannes
-Second Name = Davis
+Should I somehow specifically describe it in CRUSH mapor seph will 
+understand without it?
 
-I told him to keep sending you $7,500 USD twice a week
-until the FULL payment of ($820000.00 United State Dollars)
-is completed.
+WBR,
+    Fyodor.
 
-A certificate will be made to change the Receiver Name as
-stated by the British prime minister, send your Full Names
-and address via Email to: Mr Garry Moore
-
-You cannot pickup the money until the certificate is issued to you.
-
-Regards
-Mr. Garry Moore.
-
-
-
-
-
+P.S. I'd like to receive "secret knowledge" about the "weight" in crush 
+map. :)
