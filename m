@@ -1,135 +1,111 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Fwd: [Qemu-devel] [PATCH] block/rbd: Remove unused local variable
-Date: Mon, 23 May 2011 20:57:52 +0200
-Message-ID: <BANLkTikstu9ULcreDOOqspK=1_1BcHQjXw@mail.gmail.com>
-References: <1304799357-19281-1-git-send-email-weil@mail.berlios.de>
-	<4DD8FC9D.3090200@mail.berlios.de>
-	<BANLkTimP0C2Tesxwbai+8ofjdLGbN521cQ@mail.gmail.com>
-	<4DDA3646.404@redhat.com>
-Reply-To: chb@muc.de
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: MDS crash
+Date: Tue, 24 May 2011 00:21:52 +0300
+Message-ID: <4DDACFF0.5060902@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:38828 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756143Ab1EWS5x convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2011 14:57:53 -0400
-Received: by vxi39 with SMTP id 39so4332686vxi.19
-        for <ceph-devel@vger.kernel.org>; Mon, 23 May 2011 11:57:52 -0700 (PDT)
-In-Reply-To: <4DDA3646.404@redhat.com>
+Received: from mail.ufm.su ([77.120.103.19]:49189 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757317Ab1EWVVz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 23 May 2011 17:21:55 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id D1479600485
+	for <ceph-devel@vger.kernel.org>; Tue, 24 May 2011 00:21:52 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id QH4YC7v56AZY for <ceph-devel@vger.kernel.org>;
+	Tue, 24 May 2011 00:21:52 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id 9FA2A600484
+	for <ceph-devel@vger.kernel.org>; Tue, 24 May 2011 00:21:52 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi Josh,
+Hi.
 
-I don't know if you followed this thread on the qemu list. I would
-sugest, that you resend the current patchset. I will review it and
-send an ack afterwards.
+2011-05-24 00:17:45.490684 7f45415e1740 ceph version 0.28.commit: 
+071881d7e5599571e46bda17094bb4b48691e89a. process: cmds. pid: 4424
+2011-05-24 00:17:45.492293 7f453ef81700 mds-1.0 ms_handle_connect on 
+77.120.112.193:6789/0
+2011-05-24 00:17:49.497862 7f453ef81700 mds-1.0 handle_mds_map standby
+2011-05-24 00:17:53.274911 7f453ef81700 mds0.5 handle_mds_map i am now 
+mds0.5
+2011-05-24 00:17:53.274939 7f453ef81700 mds0.5 handle_mds_map state 
+change up:standby --> up:replay
+2011-05-24 00:17:53.274951 7f453ef81700 mds0.5 replay_start
+2011-05-24 00:17:53.274962 7f453ef81700 mds0.5  recovery set is
+2011-05-24 00:17:53.274969 7f453ef81700 mds0.5  need osdmap epoch 104, 
+have 103
+2011-05-24 00:17:53.274985 7f453ef81700 mds0.5  waiting for osdmap 104 
+(which blacklists prior instance)
+2011-05-24 00:17:53.275016 7f453ef81700 mds0.cache handle_mds_failure 
+mds0 : recovery peers are
+2011-05-24 00:17:53.276145 7f453ef81700 mds0.5 ms_handle_connect on 
+77.120.112.201:6800/29765
+2011-05-24 00:17:53.276223 7f453ef81700 mds0.5 ms_handle_connect on 
+82.144.220.71:6800/5210
+2011-05-24 00:17:53.276785 7f453ef81700 mds0.5 ms_handle_connect on 
+82.144.220.72:6800/3960
+2011-05-24 00:17:53.301249 7f453ef81700 mds0.5 ms_handle_connect on 
+82.144.220.70:6800/25341
+2011-05-24 00:17:53.307286 7f453ef81700 mds0.cache creating system inode 
+with ino:100
+2011-05-24 00:17:53.307441 7f453ef81700 mds0.cache creating system inode 
+with ino:1
+2011-05-24 00:17:53.308273 7f453ef81700 mds0.5 ms_handle_connect on 
+77.120.112.200:6800/9187
+2011-05-24 00:17:54.506400 7f4537fff700 mds0.5 replay_done
+2011-05-24 00:17:54.506431 7f4537fff700 mds0.5 making mds journal writeable
+2011-05-24 00:17:54.511104 7f453ef81700 mds0.5 handle_mds_map i am now 
+mds0.5
+2011-05-24 00:17:54.511127 7f453ef81700 mds0.5 handle_mds_map state 
+change up:replay --> up:reconnect
+2011-05-24 00:17:54.511138 7f453ef81700 mds0.5 reconnect_start
+2011-05-24 00:17:54.511144 7f453ef81700 mds0.5 reopen_log
+2011-05-24 00:17:54.511163 7f453ef81700 mds0.server reconnect_clients -- 
+1 sessions
+2011-05-24 00:17:54.511832 7f453c472700 -- 77.120.112.193:6800/4424 >> 
+77.120.112.209:0/3638704563 pipe(0x10f8370 sd=11 pgs=0 cs=0 l=0).accept 
+peer addr is really 77.120.112.209:0/3638704563 (socket is 
+77.120.112.209:38599/0)
+2011-05-24 00:17:54.512859 7f453ef81700 log [DBG] : reconnect by 
+client4404 77.120.112.209:0/3638704563 after 0.001651
+2011-05-24 00:17:54.513057 7f453ef81700 mds0.server missing 1000000860a 
+#10000008019/vtapes/drive0/data (mine), will load later
+2011-05-24 00:17:54.513091 7f453ef81700 mds0.5 reconnect_done
+2011-05-24 00:17:54.515176 7f453ef81700 mds0.5 handle_mds_map i am now 
+mds0.5
+2011-05-24 00:17:54.515193 7f453ef81700 mds0.5 handle_mds_map state 
+change up:reconnect --> up:rejoin
+2011-05-24 00:17:54.515201 7f453ef81700 mds0.5 rejoin_joint_start
+2011-05-24 00:17:54.522602 7f453ef81700 mds0.5 rejoin_done
+2011-05-24 00:17:54.528794 7f453ef81700 mds0.5 handle_mds_map i am now 
+mds0.5
+2011-05-24 00:17:54.528812 7f453ef81700 mds0.5 handle_mds_map state 
+change up:rejoin --> up:active
+2011-05-24 00:17:54.528819 7f453ef81700 mds0.5 recovery_done -- 
+successful recovery!
+2011-05-24 00:17:54.529315 7f453ef81700 mds0.5 active_start
+2011-05-24 00:17:54.531405 7f453ef81700 mds0.5 cluster recovered.
+*** Caught signal (Segmentation fault) **
+  in thread 0x7f453ef81700
+  ceph version 0.28 (commit:071881d7e5599571e46bda17094bb4b48691e89a)
+  1: /usr/bin/cmds() [0x712c5e]
+  2: (()+0xfc60) [0x7f45411c0c60]
+  3: (MDCache::get_or_create_stray_dentry(CInode*)+0x25) [0x5356f5]
+  4: (Server::handle_client_unlink(MDRequest*)+0x997) [0x508857]
+  5: (Server::handle_client_request(MClientRequest*)+0x522) [0x520852]
+  6: (MDS::handle_deferrable_message(Message*)+0x9af) [0x4a266f]
+  7: (MDS::_dispatch(Message*)+0x173e) [0x4b617e]
+  8: (MDS::_dispatch(Message*)+0x427) [0x4b4e67]
+  9: (MDS::ms_dispatch(Message*)+0x59) [0x4b66c9]
+  10: (SimpleMessenger::dispatch_entry()+0x7ea) [0x4838aa]
+  11: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x47b26c]
+  12: (()+0x6d8c) [0x7f45411b7d8c]
+  13: (clone()+0x6d) [0x7f454006a04d]
 
-Please feel free to add your name to the header and the copyright.
-
-Regards,
-Christian
-
----------- Forwarded message ----------
-=46rom: Kevin Wolf <kwolf@redhat.com>
-Date: 2011/5/23
-Subject: Re: [Qemu-devel] [PATCH] block/rbd: Remove unused local variab=
-le
-To: chb@muc.de
-Cc: QEMU Developers <qemu-devel@nongnu.org>
-
-
-Am 23.05.2011 11:01, schrieb Christian Brunner:
-> 2011/5/22 Stefan Weil <weil@mail.berlios.de>:
->> Am 07.05.2011 22:15, schrieb Stefan Weil:
->>>
->>> cppcheck report:
->>> rbd.c:246: style: Variable 'snap' is assigned a value that is never=
- used
->>>
->>> Remove snap and the related code.
->>>
->>> Cc: Christian Brunner<chb@muc.de>
->>> Cc: Kevin Wolf<kwolf@redhat.com>
->>> Signed-off-by: Stefan Weil<weil@mail.berlios.de>
->>> ---
->>> =A0block/rbd.c | =A0 =A04 ----
->>> =A01 files changed, 0 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/block/rbd.c b/block/rbd.c
->>> index 249a590..5c7d44e 100644
->>> --- a/block/rbd.c
->>> +++ b/block/rbd.c
->>> @@ -524,7 +524,6 @@ static int rbd_open(BlockDriverState *bs, const=
- char
->>> *filename, int flags)
->>> =A0 =A0 =A0RbdHeader1 *header;
->>> =A0 =A0 =A0char pool[RBD_MAX_SEG_NAME_SIZE];
->>> =A0 =A0 =A0char snap_buf[RBD_MAX_SEG_NAME_SIZE];
->>> - =A0 =A0char *snap =3D NULL;
->>> =A0 =A0 =A0char *hbuf =3D NULL;
->>> =A0 =A0 =A0int r;
->>>
->>> @@ -533,9 +532,6 @@ static int rbd_open(BlockDriverState *bs, const=
- char
->>> *filename, int flags)
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0s->name, sizeof(s->n=
-ame))< =A00) {
->>> =A0 =A0 =A0 =A0 =A0return -EINVAL;
->>> =A0 =A0 =A0}
->>> - =A0 =A0if (snap_buf[0] !=3D '\0') {
->>> - =A0 =A0 =A0 =A0snap =3D snap_buf;
->>> - =A0 =A0}
->>>
->>> =A0 =A0 =A0if ((r =3D rados_initialize(0, NULL))< =A00) {
->>> =A0 =A0 =A0 =A0 =A0error_report("error initializing");
->>>
->>
->> What about this patch? Can it be applied to the block branch?
->>
->> Regards,
->> Stefan W.
->
-> No objections on my side. You can add:
->
-> Reviewed-by: Christian Brunner <chb@muc.de>
->
-> The questions is how we continue with the rbd driver. Recent ceph
-> versions had some changes in librados that are incompatible with the
-> current driver. We have to options now:
->
-> 1. Change the function calls for new librados versions (I could
-> provide a patch for this).
-> 2. Use librbd (see Josh's patches).
->
-> Using librbd simplifies the qemu driver a lot and gives us consistenc=
-y
-> with the kernel driver. - I would prefer this. (Please note that ther=
-e
-> is a race condition in the current librbd versions, that crashes qemu
-> under high i/o load, but I'm fairly confident, that Josh will have
-> sorted this out by the time 0.15 is released).
-
-The problem with Josh's patches (or basically anything related to the
-rbd driver) is that it hasn't received any review. I'm not familiar wit=
-h
-librados and librbd, so reviewing rbd is even harder than other patches
-of the same size for me. Additionally, it's not a test environment that
-I have set up.
-
-So going forward with it, I think we need a separate rbd maintainer. So
-Christian, I think it would be helpful if you at least reviewed any rbd
-patch and either comment on it or send an Acked-by, which basically
-tells me to commit it without any further checks. Or maybe we should
-consider that you send pull requests yourself if the patches touch only
-rbd code.
-
-Kevin
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+WBR,
+     Fyodor.
