@@ -1,219 +1,59 @@
-From: biyan chen <riby.chen@gmail.com>
-Subject: ceph authenticate problem
-Date: Mon, 23 May 2011 15:48:41 +0800
-Message-ID: <BANLkTinpu+Gq4CeXzpbZ-V8t8UzOH2trhQ@mail.gmail.com>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: Re: (un)stability of ceph
+Date: Mon, 23 May 2011 08:55:50 +0000 (UTC)
+Message-ID: <loom.20110523T103350-311@post.gmane.org>
+References: <C424A186-75DB-4CC5-A662-A538E7D5BA4C@uni-osnabrueck.de> <Pine.LNX.4.64.1105201238250.25242@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:34779 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753412Ab1EWHsm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2011 03:48:42 -0400
-Received: by gyd10 with SMTP id 10so1979916gyd.19
-        for <ceph-devel@vger.kernel.org>; Mon, 23 May 2011 00:48:41 -0700 (PDT)
+Received: from lo.gmane.org ([80.91.229.12]:53692 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751548Ab1EWI4D (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 23 May 2011 04:56:03 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1QOQvh-0008K4-CR
+	for ceph-devel@vger.kernel.org; Mon, 23 May 2011 10:56:01 +0200
+Received: from 94.232.181.14 ([94.232.181.14])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 23 May 2011 10:56:01 +0200
+Received: from ufm by 94.232.181.14 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 23 May 2011 10:56:01 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-;
-; Sample ceph ceph.conf file.
-;
-; This file defines cluster membership, the various locations
-; that Ceph stores data, and any other runtime options.
+Sage Weil <sage <at> newdream.net> writes:
 
-; If a 'host' is defined for a daemon, the start/stop script will
-; verify that it matches the hostname (or else ignore it).  If it is
-; not defined, it is assumed that the daemon is intended to start on
-; the current host (e.g., in a setup with a startup.conf on each
-; node).
+> Based on your requirements, it sounds like Ceph is a good fit.  As for 
+> status, here is the latest update:
+> 
+> - Ceph is not yet ready for production however, we are confident that we 
+>   are only a few months away
+> - We have not experienced any data loss on our pseudo-production 
+>   test clusters for quite some time now.
+> - We (DreamHost) have expanded the core team on Ceph to 7 people who are
+>   primarily working on stability and performance
+> - Each month more and more people are digging in and getting involved in 
+>   the project which we hope will accelerate development further
+> - We are very close to launching a hosted beta of the object store layer 
+>   which will help us identify foundational issues
 
-; global
-[global]
-        ; enable secure authentication
-        auth supported =3D cephx
-        keyring =3D /use/local/etc/ceph/keyring.bin
+Requests from "user" :)
 
+1. Stop "featuring". ceph does all what need. :)
+2. Fix a bugs. 
+And most important:
+3. Please, please, please, make documentation. I get along without the
+"crushtool: add --reweight-item" - I know how to use the "vi". But I do not know
+the meaning of the secret parameter "weight".
 
-        ; allow ourselves to open a lot of files
-        max open files =3D 131072
-
-        ; set up logging
-"/usr/local/etc/ceph/ceph.conf" 98L, 2601C
-;
-; Sample ceph ceph.conf file.
-;
-; This file defines cluster membership, the various locations
-; that Ceph stores data, and any other runtime options.
-
-; If a 'host' is defined for a daemon, the start/stop script will
-; verify that it matches the hostname (or else ignore it).  If it is
-; not defined, it is assumed that the daemon is intended to start on
-; the current host (e.g., in a setup with a startup.conf on each
-; node).
-
-; global
-[global]
-        ; enable secure authentication
-        auth supported =3D cephx
-        keyring =3D /use/local/etc/ceph/keyring.bin
+I like ceph and I want it quickly became a "ready for production" :)
 
 
-        ; allow ourselves to open a lot of files
-        max open files =3D 131072
+WBR,
+    Fyodor.
 
-        ; set up logging
-        log file =3D /var/log/ceph/$name.log
-
-        ; set up pid files
-        pid file =3D /var/run/ceph/$name.pid
-
-; monitors
-;  You need at least one.  You need at least three if you want to
-;  tolerate any node failures.  Always create an odd number.
-[mon]
-        mon data =3D /data/mon$id
-
-        ; logging, for debugging monitor crashes, in order of
-        ; their likelihood of being helpful :)
-        ;debug ms =3D 1
-        ;debug mon =3D 20
-        ;debug paxos =3D 20
-        ;debug auth =3D 20
-
-[mon.0]
-        host =3D ceph_mon0
-        mon addr =3D 192.168.0.211:6789
-
-; mds
-;  You need at least one.  Define two to get a standby.
-[mds]
-        ; where the mds keeps it's secret encryption keys
-        keyring =3D /usr/local/etc/ceph/keyring.$name
-
-        ; mds logging to debug issues.
-        ;debug ms =3D 1
-        ;debug mds =3D 20
-
-[mds.alpha]
-        host =3D ceph_mds0
-
-; osd
-;  You need at least one.  Two if you want data to be replicated.
-;  Define as many as you like.
-[osd]
-        ; This is where the btrfs volume will be mounted.
-        osd data =3D /data/osd$id
-        keyring =3D /usr/local/etc/ceph/keyring.$name
-
-
-        ; Ideally, make this a separate disk or partition.  A few
-        ; hundred MB should be enough; more if you have fast or many
-        ; disks.  You can use a file under the osd data dir if need be
-        ; (e.g. /data/osd$id/journal), but it will be slower than a
-        ; separate disk or partition.
-
-        ; This is an example of a file-based journal.
-        osd journal =3D /data/osd$id/journal
-        osd journal size =3D 1000 ; journal size, in megabytes
-
-        ; osd logging to debug osd issues, in order of likelihood of be=
-ing
-        ; helpful
-        ;debug ms =3D 1
-        ;debug osd =3D 20
-        ;debug filestore =3D 20
-        ;debug journal =3D 20
-
-[osd.0]
-        host =3D ceph_osd0
-
-        ; if 'btrfs devs' is not specified, you're responsible for
-        ; setting up the 'osd data' dir.  if it is not btrfs, things
-        ; will behave up until you try to recover from a crash (which
-        ; usually fine for basic testing).
-        btrfs devs =3D /dev/sda7
-
-
-[osd.1]
-        host =3D ceph_osd1
-        btrfs devs =3D /dev/sda7
-
-
-
-log:
-[root@ceph_mon0 ~]# ceph mon stat -c /usr/local/etc/ceph/ceph.conf
-2011-05-23 11:44:47.078662 7fb266bf8720 unable to authenticate as clien=
-t.admin
-2011-05-23 11:44:47.079037 7fb266bf8720 ceph_tool_common_init failed.
-
-[root@ceph_mds0 ~]# tail /var/log/ceph/mds.alpha.log -f
-2011-05-23 23:44:53.464262 7fb0ce956710 -- 192.168.0.207:6800/29302 >>
-192.168.0.211:6789/0 pipe(0x26c1a00 sd=3D5 pgs=3D0 cs=3D0 l=3D0).fault =
-first
-fault
-2011-05-23 23:44:56.464402 7fb0ce855710 -- 192.168.0.207:6800/29302 >>
-192.168.0.211:6789/0 pipe(0x26d3280 sd=3D5 pgs=3D0 cs=3D0 l=3D0).fault =
-first
-fault
-2011-05-23 23:44:59.464492 7fb0ce956710 -- 192.168.0.207:6800/29302 >>
-192.168.0.211:6789/0 pipe(0x26c3c80 sd=3D5 pgs=3D0 cs=3D0 l=3D0).fault =
-first
-fault
-2011-05-23 23:45:02.464787 7fb0ce855710 -- 192.168.0.207:6800/29302 >>
-192.168.0.211:6789/0 pipe(0x26cec80 sd=3D6 pgs=3D0 cs=3D0 l=3D0).fault =
-first
-fault
-2011-05-23 23:45:05.464941 7fb0cfd58710 mds-1.0 ms_handle_connect on
-192.168.0.211:6789/0
-2011-05-23 23:45:05.465405 7fb0cfd58710 cannot convert AES key for NSS:=
- -8023
-2011-05-23 23:45:05.465946 7fb0cfd58710 cannot convert AES key for NSS:=
- -8023
-2011-05-23 23:45:05.465969 7fb0cfd58710 error from decrypt -22
-2011-05-23 23:45:05.465998 7fb0cfd58710 cephx:
-verify_service_ticket_reply failed decode_decrypt with secret
-AQB4R9pNEJ/lFRAAdsRa+EFMA00acC28x9Fj7A=3D=3D
-2011-05-23 23:45:05.466010 7fb0cfd58710 cephx client: could not verify
-service_ticket reply
-
-[root@ceph_osd0 ~]# tail /var/log/ceph/osd.0.log -f
-2011-05-23 23:43:45.583183 7f5b2f383710 -- 192.168.0.208:6800/30745 >>
-192.168.0.211:6789/0 pipe(0xf79280 sd=3D12 pgs=3D0 cs=3D0 l=3D0).fault =
-first
-fault
-2011-05-23 23:43:48.583357 7f5b32689710 -- 192.168.0.208:6800/30745 >>
-192.168.0.211:6789/0 pipe(0xf79000 sd=3D12 pgs=3D0 cs=3D0 l=3D0).fault =
-first
-fault
-2011-05-23 23:43:51.583412 7f5b2f383710 -- 192.168.0.208:6800/30745 >>
-192.168.0.211:6789/0 pipe(0xf79280 sd=3D13 pgs=3D0 cs=3D0 l=3D0).fault =
-first
-fault
-2011-05-23 23:43:54.583548 7f5b32689710 -- 192.168.0.208:6800/30745 >>
-192.168.0.211:6789/0 pipe(0xf79000 sd=3D12 pgs=3D0 cs=3D0 l=3D0).fault =
-first
-fault
-2011-05-23 23:43:57.583842 7f5b2f383710 -- 192.168.0.208:6800/30745 >>
-192.168.0.211:6789/0 pipe(0xf79280 sd=3D12 pgs=3D0 cs=3D0 l=3D0).fault =
-first
-fault
-2011-05-23 23:44:00.584629 7f5b34f8e710 cannot convert AES key for NSS:=
- -8023
-2011-05-23 23:44:00.585262 7f5b34f8e710 cannot convert AES key for NSS:=
- -8023
-2011-05-23 23:44:00.585290 7f5b34f8e710 error from decrypt -22
-2011-05-23 23:44:00.585312 7f5b34f8e710 cephx:
-verify_service_ticket_reply failed decode_decrypt with secret
-AQAqR9pNUNJ2IBAAp16KszdsZHCwEf5IOcoSdw=3D=3D
-2011-05-23 23:44:00.585322 7f5b34f8e710 cephx client: could not verify
-service_ticket reply
-
-Do we have such problems? If you give me some help,
-
-thank you=A3=A1
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
