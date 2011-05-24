@@ -1,26 +1,26 @@
 From: biyan chen <riby.chen@gmail.com>
 Subject: Re: ceph authenticate problem
-Date: Tue, 24 May 2011 11:25:10 +0800
-Message-ID: <BANLkTin6QjvAkWqMEU-X30=WxUMGNQtKuQ@mail.gmail.com>
+Date: Tue, 24 May 2011 11:25:54 +0800
+Message-ID: <BANLkTikq=nY0-CbGgEk_qSgmBVWMkCfNOw@mail.gmail.com>
 References: <BANLkTinpu+Gq4CeXzpbZ-V8t8UzOH2trhQ@mail.gmail.com>
 	<20110523155631.GA7495@dreamer>
 	<BANLkTimzNEbURVnjHFN_NmoBu_tJDi4aFA@mail.gmail.com>
-	<BANLkTinWBurx+J10u063sPRnkqYp1BZHOQ@mail.gmail.com>
+	<BANLkTinsrPxZrwbe9rEYpLOKtAvKaOfRGg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=GB2312
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:62447 "EHLO
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:61585 "EHLO
 	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751832Ab1EXDZK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2011 23:25:10 -0400
-Received: by gxk21 with SMTP id 21so2474102gxk.19
-        for <ceph-devel@vger.kernel.org>; Mon, 23 May 2011 20:25:10 -0700 (PDT)
-In-Reply-To: <BANLkTinWBurx+J10u063sPRnkqYp1BZHOQ@mail.gmail.com>
+	with ESMTP id S1753893Ab1EXDZz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 May 2011 23:25:55 -0400
+Received: by gxk21 with SMTP id 21so2474277gxk.19
+        for <ceph-devel@vger.kernel.org>; Mon, 23 May 2011 20:25:55 -0700 (PDT)
+In-Reply-To: <BANLkTinsrPxZrwbe9rEYpLOKtAvKaOfRGg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Tommi Virtanen <tommi.virtanen@dreamhost.com>
+To: huang jun <hjwsm1989@gmail.com>
+Cc: Tommi Virtanen <tommi.virtanen@dreamhost.com>, ceph-devel@vger.kernel.org
 
 Thank Yehuda ,Tommi Virtanen  huang jun
 
@@ -56,14 +56,12 @@ drwxr-xr-x. 2 root root 4096 May 24 11:18 pgmap
 [root@ceph_mon0 mon0]#
 
 
-=D4=DA 2011=C4=EA5=D4=C224=C8=D5 =C9=CF=CE=E710:03=A3=ACYehuda Sadeh We=
-inraub <yehudasa@gmail.com> =D0=B4=B5=C0=A3=BA
-> I think he was pointing at a typo (/use instead of /usr)
+=D4=DA 2011=C4=EA5=D4=C224=C8=D5 =C9=CF=CE=E710:30=A3=AChuang jun <hjws=
+m1989@gmail.com> =D0=B4=B5=C0=A3=BA
+> try "cp /data/mon0/admin_keyring.bin /usr/local/etc/ceph/keyring.bin"
 >
-> Yehuda
->
-> On May 23, 2011 6:50 PM, "biyan chen" <riby.chen@gmail.com> wrote:
->>
+> =D4=DA 2011=C4=EA5=D4=C224=C8=D5 =C9=CF=CE=E79:50=A3=ACbiyan chen <ri=
+by.chen@gmail.com> =D0=B4=B5=C0=A3=BA
 >> My steps =A3=BA
 >> mkcephfs -c /usr/local/etc/ceph/ceph.conf --allhosts --mkbtrfs -k
 >> /usr/local/etc/ceph/keyring.bin
@@ -73,14 +71,14 @@ inraub <yehudasa@gmail.com> =D0=B4=B5=C0=A3=BA
 >>
 >>
 >> 2011/5/23 Tommi Virtanen <tommi.virtanen@dreamhost.com>:
->> > On Mon, May 23, 2011 at 03:48:41PM +0800, biyan chen wrote:
->> >>         keyring =3D /use/local/etc/ceph/keyring.bin
->> >
->> > This might be your problem..
->> >
->> > --
->> > :(){ :|:&};:
->> >
+>>> On Mon, May 23, 2011 at 03:48:41PM +0800, biyan chen wrote:
+>>>>         keyring =3D /use/local/etc/ceph/keyring.bin
+>>>
+>>> This might be your problem..
+>>>
+>>> --
+>>> :(){ :|:&};:
+>>>
 >>
 >>
 >>
@@ -93,6 +91,7 @@ inraub <yehudasa@gmail.com> =D0=B4=B5=C0=A3=BA
 " in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >
 
 
