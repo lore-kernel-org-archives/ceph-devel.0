@@ -1,31 +1,44 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: dnl status in mds rejoin operation
-Date: Tue, 24 May 2011 16:32:09 +0800
-Message-ID: <BANLkTikG1C1WDEvSmpA+QEaxvY-o5ruf1g@mail.gmail.com>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: ceph and network
+Date: Tue, 24 May 2011 13:05:51 +0300
+Message-ID: <4DDB82FF.4070100@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:59913 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754442Ab1EXIcL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 May 2011 04:32:11 -0400
-Received: by wwa36 with SMTP id 36so7056348wwa.1
-        for <ceph-devel@vger.kernel.org>; Tue, 24 May 2011 01:32:10 -0700 (PDT)
+Received: from mail.ufm.su ([77.120.103.19]:55090 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753572Ab1EXKFx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 24 May 2011 06:05:53 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id 02DD660048A
+	for <ceph-devel@vger.kernel.org>; Tue, 24 May 2011 13:05:52 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id ncKjzSmLCV6u for <ceph-devel@vger.kernel.org>;
+	Tue, 24 May 2011 13:05:51 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id D62A6600484
+	for <ceph-devel@vger.kernel.org>; Tue, 24 May 2011 13:05:51 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-hi,all
-   There is an assert(dnl->is_primary()) in function "rejoin_walk()".
-why should the dnl must be primary if we want to  continue rejoin
-operation? or the assert() crashed.
-   I want to know whether the status of the replica subtree root
-directory's dentry should be primary?
-   And  we assume one dentry in directory is a remote link ,then place
-this dentry in a fragment, can we create the replicas of this fragment
-in other MDSs?
+Hi!
 
+I need to implement this scheme of servers connections:
 
+All servers of ceph cluster have 2 network addresses in different nets.
+One net - for ceph interconnect. I.e. for traffic between ceph servers 
+(Suppose called "internal").
+One - for traffic between clients and cluster ("external").
 
+As I understand it - the client receives the address of the ceph servers 
+frommon. And mon server needs to know about that it is necessary give 
+out "external" address, not "internal".
 
-thanks!
+How can I do?
+
+WBR,
+    Fyodor.
+
