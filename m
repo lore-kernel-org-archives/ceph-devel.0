@@ -1,62 +1,39 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: fuse vs kernel client
-Date: Wed, 25 May 2011 22:35:39 +0200
-Message-ID: <1306355739.3556.2.camel@Nokia-N900-02-8>
-References: <4DDD646E.4090105@ufm.su>
-Reply-To: Wido den Hollander <wido@widodh.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:52095 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932237Ab1EYUhb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2011 16:37:31 -0400
-In-Reply-To: <4DDD646E.4090105@ufm.su>
-Content-ID: <1306355738.3556.1.camel@Nokia-N900-02-8>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>, ceph-devel@vger.kernel.org
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: [PATCH v5 0/4] rbd improvements
+Date: Wed, 25 May 2011 13:34:43 -0700
+Message-ID: <1306355687-4647-1-git-send-email-josh.durgin@dreamhost.com>
+Return-path: <kvm-owner@vger.kernel.org>
+Sender: kvm-owner@vger.kernel.org
+To: kvm@vger.kernel.org, qemu-devel@nongnu.orgkvm@vger.kernel.orgqemu-devel@nongnu.org
+Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>, Christian Brunner <chb@muc.de>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+This patchset moves the complexity of the rbd format into librbd and
+adds truncation support.
 
------ Original message -----
-> Hi!
->=20
-> It's me again (I feel like that I'm here soon banned :)
->=20
-> ceph have fuse client and kernel client.
->=20
-> Why are two of them?
+Changes since v4:
+ * fixed cosmetic issues pointed out by Christian Brunner
 
-The kernel client runs as a kernel module and will generaly give you mo=
-re performance en functionality, but it in some situations you might wa=
-nt to run the user-space FUSE client.
+Changes since v3:
+ * trivially rebased
+ * updated copyright header
 
-If the kernel client crashes you'll end up with a kernel panic and you =
-also need root privs.
+Changes since v2:
+ * return values are checked in rbd_aio_rw_vector
+ * bdrv_truncate added
 
-> Which is better?
+Josh Durgin (4):
+  rbd: use the higher level librbd instead of just librados
+  rbd: allow configuration of rados from the rbd filename
+  rbd: check return values when scheduling aio
+  rbd: Add bdrv_truncate implementation
 
-That is up to you, but I prefer the kernel client, I think most users d=
-o.
+ block/rbd.c       |  897 +++++++++++++++++++----------------------------------
+ block/rbd_types.h |   71 -----
+ configure         |   33 +--
+ 3 files changed, 335 insertions(+), 666 deletions(-)
+ delete mode 100644 block/rbd_types.h
 
-The FUSE client is useful for fast and simple testing though.
+-- 
+1.7.2.3
 
-Wido
-
->=20
-> WBR,
->=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0  Fyodor.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at=C2=A0  http://vger.kernel.org/majordomo-info.h=
-tml
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
