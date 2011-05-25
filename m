@@ -1,71 +1,54 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph updates for -rc1
-Date: Wed, 25 May 2011 10:49:39 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1105251031510.9500@cobra.newdream.net>
+Subject: Re: unstable branch: ls -l hang after write by 64 clients
+Date: Wed, 25 May 2011 10:52:58 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1105251050030.29945@cobra.newdream.net>
+References: <1288117260.10847.93.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1010261224450.20055@cobra.newdream.net>
+ <1288128642.10847.95.camel@sale659.sandia.gov> <Pine.LNX.4.64.1010272200340.14714@cobra.newdream.net>
+ <20110525110118.GA6872@systemlinux.org> <Pine.LNX.4.64.1105250913340.29945@cobra.newdream.net>
+ <20110525173338.GI20417@systemlinux.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58379 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35770 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751819Ab1EYRsR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2011 13:48:17 -0400
+	with ESMTP id S1750757Ab1EYRvg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2011 13:51:36 -0400
+In-Reply-To: <20110525173338.GI20417@systemlinux.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Andre Noll <maan@systemlinux.org>
+Cc: Jim Schutt <jaschut@sandia.gov>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+On Wed, 25 May 2011, Andre Noll wrote:
+> On Wed, May 25, 09:16, Sage Weil wrote:
+> > > It's trivial to reproduce: Executing "ls -l" on one client while
+> > > another client is writing causes the ls command to hang indefinitely.
+> > 
+> > This was recently fixed in the master branch, commit
+> > ee7fa813ef29890557f0b03bd3950d422484215d.  It hasn't made it into any  
+> > releases yet.  I'll cherry-pick it into stable for 0.28.2.
+> > 
+> > Please let me know if you continue to see this problem with that fix in 
+> > place.
+> 
+> Nope. I'm now running the ceph master branch (fe955881) on all nodes
+> but the problem remains. Even after stopping the writer, the "ls -l"
+> hangs. Linux kernel version is plain 2.6.38.7 everywhere and the ceph
+> setup is fairly simple: 6 cosds, one cmon and one cmds.
 
-Please pull the following Ceph updates for 3.0.0-rc1 (or whatever it ends 
-up being) from
+I created a new bug (http://tracker.newdream.net/issues/1110) for this. 
+Can you generate an mds log for this and attach it to the bug?
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+	debug mds = 20
+	debug ms = 1
 
-Most of this is a pile of small, rare bugs that the coverity run 
-turned up.  There are also several bug fixes that came up in the real 
-world, including a messenger race, looping with concurrent syncs, and a 
-dangling pointer under directory rename thrashing (fsstress).  RBD now 
-notices when the image size changes out from underneath it, and there are 
-a few improvements in the NFS reexport code to make it more robust.
+in the [mds] section and restart, or if the cluster is already up just
+
+	ceph mds tell 0 injectargs '--debug-mds 20 --debug-ms 1'
+
+and then reproduce the problem.  Should be at /var/log/ceph/mds.a.log or 
+similar.
 
 Thanks!
 sage
-
-
-Sage Weil (23):
-      ceph: take reference on mds request r_unsafe_dir
-      libceph: handle connection reopen race with callbacks
-      libceph: remove unused variable
-      libceph: fix uninitialized value when no get_authorizer method is set
-      ceph: use snprintf for dirstat content
-      libceph: use snprintf for formatting object name
-      libceph: use snprintf for unknown addrs
-      ceph: fix rare potential cap leak
-      libceph: fix osdmap timestamp assignment
-      ceph: fix broken comparison in readdir loop
-      libceph: fix TAG_WAIT case
-      libceph: add missing breaks in addr_set_port
-      ceph: remove useless check
-      ceph: check return value for start_request in writepages
-      rbd: warn on update_snaps failure on notify
-      rbd: cleanup: make kfree match kmalloc
-      rbd: use snprintf for disk->disk_name
-      ceph: use LOOKUPINO to make unconnected nfs fh more reliable
-      ceph: avoid inode lookup on nfs fh reconnect
-      rbd: handle online resize of underlying rbd image
-      libceph: handle new osdmap down/state change encoding
-      libceph: subscribe to osdmap when cluster is full
-      ceph: fix cap flush race reentrancy
-
- drivers/block/rbd.c          |   27 +++++++++-----
- fs/ceph/addr.c               |    5 +--
- fs/ceph/caps.c               |   61 ++++++++++++++++---------------
- fs/ceph/dir.c                |    7 ++--
- fs/ceph/export.c             |   25 +++++++++++--
- fs/ceph/mds_client.c         |    7 +++-
- fs/ceph/mds_client.h         |    1 +
- include/linux/ceph/ceph_fs.h |    1 +
- net/ceph/messenger.c         |   82 ++++++++++++++++++++++++++++++++----------
- net/ceph/osd_client.c        |   19 +++++++++-
- net/ceph/osdmap.c            |   13 +++++--
- 11 files changed, 173 insertions(+), 75 deletions(-)
