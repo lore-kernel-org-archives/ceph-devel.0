@@ -1,18 +1,23 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: [PATCH v5 3/4] rbd: check return values when scheduling aio
+Subject: [PATCH v5 3/4] rbd: check return values when
+	scheduling aio
 Date: Wed, 25 May 2011 13:34:46 -0700
-Message-ID: <1306355687-4647-4-git-send-email-josh.durgin@dreamhost.com>
+Message-ID: <1306355687-4647-4-git-send-email-josh.durgin__2739.82739677212$1306355974$gmane$org@dreamhost.com>
 References: <1306355687-4647-1-git-send-email-josh.durgin@dreamhost.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:48235 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755053Ab1EYUjR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2011 16:39:17 -0400
+Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
 In-Reply-To: <1306355687-4647-1-git-send-email-josh.durgin@dreamhost.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
+List-Archive: </archive/html/qemu-devel>
+List-Post: <mailto:qemu-devel@nongnu.org>
+List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
+Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
 To: kvm@vger.kernel.org, qemu-devel@nongnu.orgkvm@vger.kernel.orgqemu-devel@nongnu.org
-Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>, Christian Brunner <chb@muc.de>
+Cc: Kevin Wolf <kwolf@redhat.com>, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>
+List-Id: ceph-devel.vger.kernel.org
 
 If scheduling fails, the number of outstanding I/Os must be correct,
 or there will be a hang when waiting for everything to be flushed.
@@ -77,4 +82,3 @@ index d346a21..a44d160 100644
  static BlockDriverAIOCB *qemu_rbd_aio_readv(BlockDriverState *bs,
 -- 
 1.7.2.3
-
