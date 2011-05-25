@@ -1,40 +1,67 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: MDS crash
-Date: Tue, 24 May 2011 16:54:53 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1105241654290.9499@cobra.newdream.net>
-References: <4DDACFF0.5060902@ufm.su>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: dnl status in mds rejoin operation
+Date: Wed, 25 May 2011 09:01:32 +0800
+Message-ID: <BANLkTiny0VEjq_1K7J-TiNDFSVc73BiXzg@mail.gmail.com>
+References: <BANLkTikG1C1WDEvSmpA+QEaxvY-o5ruf1g@mail.gmail.com>
+	<Pine.LNX.4.64.1105241651140.9499@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38982 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932094Ab1EXXxc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 May 2011 19:53:32 -0400
-In-Reply-To: <4DDACFF0.5060902@ufm.su>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:36059 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751360Ab1EYBBd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 May 2011 21:01:33 -0400
+Received: by wwa36 with SMTP id 36so7907233wwa.1
+        for <ceph-devel@vger.kernel.org>; Tue, 24 May 2011 18:01:32 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1105241651140.9499@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 24 May 2011, Fyodor Ustinov wrote:
-> *** Caught signal (Segmentation fault) **
->  in thread 0x7f453ef81700
->  ceph version 0.28 (commit:071881d7e5599571e46bda17094bb4b48691e89a)
->  1: /usr/bin/cmds() [0x712c5e]
->  2: (()+0xfc60) [0x7f45411c0c60]
->  3: (MDCache::get_or_create_stray_dentry(CInode*)+0x25) [0x5356f5]
->  4: (Server::handle_client_unlink(MDRequest*)+0x997) [0x508857]
->  5: (Server::handle_client_request(MClientRequest*)+0x522) [0x520852]
->  6: (MDS::handle_deferrable_message(Message*)+0x9af) [0x4a266f]
->  7: (MDS::_dispatch(Message*)+0x173e) [0x4b617e]
->  8: (MDS::_dispatch(Message*)+0x427) [0x4b4e67]
->  9: (MDS::ms_dispatch(Message*)+0x59) [0x4b66c9]
->  10: (SimpleMessenger::dispatch_entry()+0x7ea) [0x4838aa]
->  11: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x47b26c]
->  12: (()+0x6d8c) [0x7f45411b7d8c]
->  13: (clone()+0x6d) [0x7f454006a04d]
+thanks,sage
+I will look into it soon
 
-In case anyone else was seeing this problem, it's now fixed in the
-stable branch.
-
-sage
+2011/5/25 Sage Weil <sage@newdream.net>:
+> On Tue, 24 May 2011, huang jun wrote:
+>> hi,all
+>> =A0 =A0There is an assert(dnl->is_primary()) in function "rejoin_wal=
+k()".
+>> why should the dnl must be primary if we want to =A0continue rejoin
+>> operation? or the assert() crashed.
+>
+> The rejoin_walk() method traverse subtrees for which we are _not_ aut=
+h,
+> and the only dentries and inodes we should have in those subtrees aft=
+er
+> recovery are ancestors of subtrees that we are auth for, which implie=
+s
+> they are primary. =A0If it encounters a non-primary dentry here, ther=
+e is
+> a bug earlier in recovery.. probably in trim_non_auth()?
+>
+>> =A0 =A0I want to know whether the status of the replica subtree root
+>> directory's dentry should be primary?
+>
+> Directory inode parent dentries will always be primary; multiple hard
+> links to a directory are not allowed.
+>
+>> =A0 =A0And =A0we assume one dentry in directory is a remote link ,th=
+en place
+>> this dentry in a fragment, can we create the replicas of this fragme=
+nt
+>> in other MDSs?
+>
+> Any dentry can be replicated (primary, remote, or null) once the MDS =
+is
+> active.
+>
+> Does that answer your question?
+> sage
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
