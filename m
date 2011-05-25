@@ -1,62 +1,40 @@
-From: Andre Noll <maan@systemlinux.org>
-Subject: Re: unstable branch: ls -l hang after write by 64 clients
-Date: Wed, 25 May 2011 13:01:18 +0200
-Message-ID: <20110525110118.GA6872@systemlinux.org>
-References: <1288117260.10847.93.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1010261224450.20055@cobra.newdream.net>
- <1288128642.10847.95.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1010272200340.14714@cobra.newdream.net>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: CRUSH again
+Date: Wed, 25 May 2011 15:17:57 +0300
+Message-ID: <4DDCF375.7010109@ufm.su>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="OXfL5xGRrasGEqWY"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from systemlinux.org ([79.140.41.46]:58199 "EHLO
-	v3-1046.systemlinux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751336Ab1EYLHJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2011 07:07:09 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1010272200340.14714@cobra.newdream.net>
+Received: from mail.ufm.su ([77.120.103.19]:37223 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756612Ab1EYMSA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 25 May 2011 08:18:00 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id 7172E600484
+	for <ceph-devel@vger.kernel.org>; Wed, 25 May 2011 15:17:58 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id eLEXWVJQPqKb for <ceph-devel@vger.kernel.org>;
+	Wed, 25 May 2011 15:17:58 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id 551DE600447
+	for <ceph-devel@vger.kernel.org>; Wed, 25 May 2011 15:17:58 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Jim Schutt <jaschut@sandia.gov>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
+Hi!
 
---OXfL5xGRrasGEqWY
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Again few questions.
 
-On Wed, Oct 27, 22:06, Sage Weil wrote:
+1. What is the difference between "uniform | list | tree | straw" bucket 
+type?
 
-> It turns out Henry's problem was actually cause by a bad fix on my part,=
-=20
-> d91f2438 in ceph-client.git.  (Unfortunately that made it into 2.6.36!) =
-=20
-> Reverting that commit fixed things for him.
+2. Replication chunk can not be placed on different devices on the same 
+host and on different hosts on the same rack? Or only rack? Or only host?
 
-FWIW, I've been seeing this with all versions I tried lately,
-including 0.28. Maybe the bug has been reintroduced or we have a
-similar bug elsewhere.
+3. What isthe difference between host and rack except nesting levels?
 
-It's trivial to reproduce: Executing "ls -l" on one client while
-another client is writing causes the ls command to hang indefinitely.
-
-Andre
---=20
-The only person who always got his work done by Friday was Robinson Crusoe
-
---OXfL5xGRrasGEqWY
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk3c4X4ACgkQWto1QDEAkw8tWgCeKSKJmZEx4OZamY6g9WCtpjjM
-lWsAnR8TvEoRO9b/Spfd5mA9FaD9y2bL
-=MVTa
------END PGP SIGNATURE-----
-
---OXfL5xGRrasGEqWY--
+WBR,
+     Fyodor.
