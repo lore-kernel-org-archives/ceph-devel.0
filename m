@@ -1,67 +1,71 @@
-From: Andre Noll <maan@systemlinux.org>
-Subject: Re: unstable branch: ls -l hang after write by 64 clients
-Date: Wed, 25 May 2011 19:33:38 +0200
-Message-ID: <20110525173338.GI20417@systemlinux.org>
-References: <1288117260.10847.93.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1010261224450.20055@cobra.newdream.net>
- <1288128642.10847.95.camel@sale659.sandia.gov>
- <Pine.LNX.4.64.1010272200340.14714@cobra.newdream.net>
- <20110525110118.GA6872@systemlinux.org>
- <Pine.LNX.4.64.1105250913340.29945@cobra.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph updates for -rc1
+Date: Wed, 25 May 2011 10:49:39 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1105251031510.9500@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="jQIvE3yXcK9X9HBh"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from systemlinux.org ([79.140.41.46]:44626 "EHLO
-	v3-1046.systemlinux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752441Ab1EYRdE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2011 13:33:04 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1105250913340.29945@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:58379 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751819Ab1EYRsR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2011 13:48:17 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Jim Schutt <jaschut@sandia.gov>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+
+Hi Linus,
+
+Please pull the following Ceph updates for 3.0.0-rc1 (or whatever it ends 
+up being) from
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+
+Most of this is a pile of small, rare bugs that the coverity run 
+turned up.  There are also several bug fixes that came up in the real 
+world, including a messenger race, looping with concurrent syncs, and a 
+dangling pointer under directory rename thrashing (fsstress).  RBD now 
+notices when the image size changes out from underneath it, and there are 
+a few improvements in the NFS reexport code to make it more robust.
+
+Thanks!
+sage
 
 
---jQIvE3yXcK9X9HBh
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Sage Weil (23):
+      ceph: take reference on mds request r_unsafe_dir
+      libceph: handle connection reopen race with callbacks
+      libceph: remove unused variable
+      libceph: fix uninitialized value when no get_authorizer method is set
+      ceph: use snprintf for dirstat content
+      libceph: use snprintf for formatting object name
+      libceph: use snprintf for unknown addrs
+      ceph: fix rare potential cap leak
+      libceph: fix osdmap timestamp assignment
+      ceph: fix broken comparison in readdir loop
+      libceph: fix TAG_WAIT case
+      libceph: add missing breaks in addr_set_port
+      ceph: remove useless check
+      ceph: check return value for start_request in writepages
+      rbd: warn on update_snaps failure on notify
+      rbd: cleanup: make kfree match kmalloc
+      rbd: use snprintf for disk->disk_name
+      ceph: use LOOKUPINO to make unconnected nfs fh more reliable
+      ceph: avoid inode lookup on nfs fh reconnect
+      rbd: handle online resize of underlying rbd image
+      libceph: handle new osdmap down/state change encoding
+      libceph: subscribe to osdmap when cluster is full
+      ceph: fix cap flush race reentrancy
 
-On Wed, May 25, 09:16, Sage Weil wrote:
-> > It's trivial to reproduce: Executing "ls -l" on one client while
-> > another client is writing causes the ls command to hang indefinitely.
->=20
-> This was recently fixed in the master branch, commit
-> ee7fa813ef29890557f0b03bd3950d422484215d.  It hasn't made it into any =20
-> releases yet.  I'll cherry-pick it into stable for 0.28.2.
->=20
-> Please let me know if you continue to see this problem with that fix in=
-=20
-> place.
-
-Nope. I'm now running the ceph master branch (fe955881) on all nodes
-but the problem remains. Even after stopping the writer, the "ls -l"
-hangs. Linux kernel version is plain 2.6.38.7 everywhere and the ceph
-setup is fairly simple: 6 cosds, one cmon and one cmds.
-
-Thanks
-Andre
---=20
-The only person who always got his work done by Friday was Robinson Crusoe
-
---jQIvE3yXcK9X9HBh
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk3dPXIACgkQWto1QDEAkw8VWQCbBDk2KOBbRWuoiAUUBpbPS6UG
-7ccAnj4BklsxwlUSfgtmSyYNmnaPjm7z
-=xdwg
------END PGP SIGNATURE-----
-
---jQIvE3yXcK9X9HBh--
+ drivers/block/rbd.c          |   27 +++++++++-----
+ fs/ceph/addr.c               |    5 +--
+ fs/ceph/caps.c               |   61 ++++++++++++++++---------------
+ fs/ceph/dir.c                |    7 ++--
+ fs/ceph/export.c             |   25 +++++++++++--
+ fs/ceph/mds_client.c         |    7 +++-
+ fs/ceph/mds_client.h         |    1 +
+ include/linux/ceph/ceph_fs.h |    1 +
+ net/ceph/messenger.c         |   82 ++++++++++++++++++++++++++++++++----------
+ net/ceph/osd_client.c        |   19 +++++++++-
+ net/ceph/osdmap.c            |   13 +++++--
+ 11 files changed, 173 insertions(+), 75 deletions(-)
