@@ -1,12 +1,16 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
 Subject: [PATCH v5 0/4] rbd improvements
 Date: Wed, 25 May 2011 13:34:43 -0700
-Message-ID: <1306355687-4647-1-git-send-email-josh.durgin@dreamhost.com>
-Return-path: <kvm-owner@vger.kernel.org>
-Sender: kvm-owner@vger.kernel.org
+Message-ID: <1306355687-4647-1-git-send-email-josh.durgin__26519.2180792384$1306355963$gmane$org@dreamhost.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:48211 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752130Ab1EYUjL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2011 16:39:11 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: kvm@vger.kernel.org, qemu-devel@nongnu.orgkvm@vger.kernel.orgqemu-devel@nongnu.org
 Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>, Christian Brunner <chb@muc.de>
-List-Id: ceph-devel.vger.kernel.org
 
 This patchset moves the complexity of the rbd format into librbd and
 adds truncation support.
