@@ -1,48 +1,62 @@
-From: Michal Humpula <michal.humpula@hudrydum.cz>
-Subject: v0.28.1 still seeing "wrongly marked me down"
-Date: Wed, 25 May 2011 12:36:08 +0200
-Message-ID: <201105251236.08622.michal.humpula@hudrydum.cz>
+From: Andre Noll <maan@systemlinux.org>
+Subject: Re: unstable branch: ls -l hang after write by 64 clients
+Date: Wed, 25 May 2011 13:01:18 +0200
+Message-ID: <20110525110118.GA6872@systemlinux.org>
+References: <1288117260.10847.93.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1010261224450.20055@cobra.newdream.net>
+ <1288128642.10847.95.camel@sale659.sandia.gov>
+ <Pine.LNX.4.64.1010272200340.14714@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="OXfL5xGRrasGEqWY"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp3.web4u.cz ([81.91.87.13]:45556 "EHLO smtp3.web4u.cz"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751573Ab1EYKmv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 25 May 2011 06:42:51 -0400
+Received: from systemlinux.org ([79.140.41.46]:58199 "EHLO
+	v3-1046.systemlinux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751336Ab1EYLHJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 May 2011 07:07:09 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1010272200340.14714@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Jim Schutt <jaschut@sandia.gov>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi, 
 
-I've just compiled the recent version of ceph v0.28.1. I wanted to give it a 
-try on a setup of 8 machines (1 core Opterons). The design is 3 mons, 2 mds 
-and 10 osds. Running latest vanilla kernel 2.6.29 with btrfs as a filestore.
+--OXfL5xGRrasGEqWY
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-After initial setup, ceph -w is printing a lot of these
+On Wed, Oct 27, 22:06, Sage Weil wrote:
 
-2011-05-25 12:19:38.720110   log 2011-05-25 12:19:37.671620 osd5 
-192.168.0.23:6803/18299 151 : [WRN] map e3577 wrongly marked me down or wrong 
-addr
-2011-05-25 12:19:18.398004   log 2011-05-25 12:19:18.333978 mon0 
-192.168.0.10:6789/0 3968 : [INF] osd6 192.168.0.24:6800/2830 failed (by osd7 
-192.168.0.24:6801/3064)
+> It turns out Henry's problem was actually cause by a bad fix on my part,=
+=20
+> d91f2438 in ceph-client.git.  (Unfortunately that made it into 2.6.36!) =
+=20
+> Reverting that commit fixed things for him.
 
-I've tried to setup
+FWIW, I've been seeing this with all versions I tried lately,
+including 0.28. Maybe the bug has been reintroduced or we have a
+similar bug elsewhere.
 
-osd op threads = 1
+It's trivial to reproduce: Executing "ls -l" on one client while
+another client is writing causes the ls command to hang indefinitely.
 
-and
+Andre
+--=20
+The only person who always got his work done by Friday was Robinson Crusoe
 
-osd op threads = 0
+--OXfL5xGRrasGEqWY
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
 
-but it doesn't seem to have any impact on a number of cosd daemon threads. 
-Still seeing +20 of them and still seeing messages about degradation. 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
 
-Any hint, what to setup differently, would be appreciated.
+iEYEARECAAYFAk3c4X4ACgkQWto1QDEAkw8tWgCeKSKJmZEx4OZamY6g9WCtpjjM
+lWsAnR8TvEoRO9b/Spfd5mA9FaD9y2bL
+=MVTa
+-----END PGP SIGNATURE-----
 
-Cheers
-
-Michael
+--OXfL5xGRrasGEqWY--
