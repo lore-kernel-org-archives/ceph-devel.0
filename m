@@ -1,50 +1,234 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: [PATCH v6 0/4] rbd improvements
-Date: Thu, 26 May 2011 16:07:30 -0700
-Message-ID: <1306451254-25864-1-git-send-email-josh.durgin__32229.4009187774$1306451522$gmane$org@dreamhost.com>
-Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: </archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+Subject: [PATCH v6 2/4] rbd: allow configuration of rados from the rbd filename
+Date: Thu, 26 May 2011 16:07:32 -0700
+Message-ID: <1306451254-25864-3-git-send-email-josh.durgin@dreamhost.com>
+References: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
+Return-path: <kvm-owner@vger.kernel.org>
+In-Reply-To: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
+Sender: kvm-owner@vger.kernel.org
 To: kvm@vger.kernel.org, qemu-devel@nongnu.orgkvm@vger.kernel.orgqemu-devel@nongnu.org
-Cc: Kevin Wolf <kwolf@redhat.com>, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>
+Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>, Christian Brunner <chb@muc.de>
 List-Id: ceph-devel.vger.kernel.org
 
-This patchset moves the complexity of the rbd format into librbd and
-adds truncation support.
+The new format is rbd:pool/image[@snapshot][:option1=value1[:option2=value2...]]
+Each option is used to configure rados, and may be any Ceph option, or "conf".
+The "conf" option specifies a Ceph configuration file to read.
 
-Changes since v5:
- * compare full string, not prefix, with "conf" in 2/4
- * when truncate fails, just return librbd's error
+This allows rbd volumes from more than one Ceph cluster to be used by
+specifying different monitor addresses, as well as having different
+logging levels or locations for different volumes.
 
-Changes since v4:
- * fixed cosmetic issues pointed out by Christian Brunner
+Reviewed-by: Christian Brunner <chb@muc.de>
+Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
+---
+ block/rbd.c |  119 ++++++++++++++++++++++++++++++++++++++++++++++++++--------
+ 1 files changed, 102 insertions(+), 17 deletions(-)
 
-Changes since v3:
- * trivially rebased
- * updated copyright header
-
-Changes since v2:
- * return values are checked in rbd_aio_rw_vector
- * bdrv_truncate added
-
-Josh Durgin (4):
-  rbd: use the higher level librbd instead of just librados
-  rbd: allow configuration of rados from the rbd filename
-  rbd: check return values when scheduling aio
-  rbd: Add bdrv_truncate implementation
-
- block/rbd.c       |  896 +++++++++++++++++++----------------------------------
- block/rbd_types.h |   71 -----
- configure         |   33 +--
- 3 files changed, 334 insertions(+), 666 deletions(-)
- delete mode 100644 block/rbd_types.h
-
+diff --git a/block/rbd.c b/block/rbd.c
+index 2cee70d..edf1086 100644
+--- a/block/rbd.c
++++ b/block/rbd.c
+@@ -23,13 +23,17 @@
+ /*
+  * When specifying the image filename use:
+  *
+- * rbd:poolname/devicename
++ * rbd:poolname/devicename[@snapshotname][:option1=value1[:option2=value2...]]
+  *
+  * poolname must be the name of an existing rados pool
+  *
+  * devicename is the basename for all objects used to
+  * emulate the raw device.
+  *
++ * Each option given is used to configure rados, and may be
++ * any Ceph option, or "conf". The "conf" option specifies
++ * a Ceph configuration file to read.
++ *
+  * Metadata information (image size, ...) is stored in an
+  * object with the name "devicename.rbd".
+  *
+@@ -123,7 +127,8 @@ static int qemu_rbd_next_tok(char *dst, int dst_len,
+ static int qemu_rbd_parsename(const char *filename,
+                               char *pool, int pool_len,
+                               char *snap, int snap_len,
+-                              char *name, int name_len)
++                              char *name, int name_len,
++                              char *conf, int conf_len)
+ {
+     const char *start;
+     char *p, *buf;
+@@ -135,28 +140,84 @@ static int qemu_rbd_parsename(const char *filename,
+ 
+     buf = qemu_strdup(start);
+     p = buf;
++    *snap = '\0';
++    *conf = '\0';
+ 
+     ret = qemu_rbd_next_tok(pool, pool_len, p, '/', "pool name", &p);
+     if (ret < 0 || !p) {
+         ret = -EINVAL;
+         goto done;
+     }
+-    ret = qemu_rbd_next_tok(name, name_len, p, '@', "object name", &p);
+-    if (ret < 0) {
+-        goto done;
++
++    if (strchr(p, '@')) {
++        ret = qemu_rbd_next_tok(name, name_len, p, '@', "object name", &p);
++        if (ret < 0) {
++            goto done;
++        }
++        ret = qemu_rbd_next_tok(snap, snap_len, p, ':', "snap name", &p);
++    } else {
++        ret = qemu_rbd_next_tok(name, name_len, p, ':', "object name", &p);
+     }
+-    if (!p) {
+-        *snap = '\0';
++    if (ret < 0 || !p) {
+         goto done;
+     }
+ 
+-    ret = qemu_rbd_next_tok(snap, snap_len, p, '\0', "snap name", &p);
++    ret = qemu_rbd_next_tok(conf, conf_len, p, '\0', "configuration", &p);
+ 
+ done:
+     qemu_free(buf);
+     return ret;
+ }
+ 
++static int qemu_rbd_set_conf(rados_t cluster, const char *conf)
++{
++    char *p, *buf;
++    char name[RBD_MAX_CONF_NAME_SIZE];
++    char value[RBD_MAX_CONF_VAL_SIZE];
++    int ret = 0;
++
++    buf = qemu_strdup(conf);
++    p = buf;
++
++    while (p) {
++        ret = qemu_rbd_next_tok(name, sizeof(name), p,
++                                '=', "conf option name", &p);
++        if (ret < 0) {
++            break;
++        }
++
++        if (!p) {
++            error_report("conf option %s has no value", name);
++            ret = -EINVAL;
++            break;
++        }
++
++        ret = qemu_rbd_next_tok(value, sizeof(value), p,
++                                ':', "conf option value", &p);
++        if (ret < 0) {
++            break;
++        }
++
++        if (strcmp(name, "conf")) {
++            ret = rados_conf_set(cluster, name, value);
++            if (ret < 0) {
++                error_report("invalid conf option %s", name);
++                ret = -EINVAL;
++                break;
++            }
++        } else {
++            ret = rados_conf_read_file(cluster, value);
++            if (ret < 0) {
++                error_report("error reading conf file %s", value);
++                break;
++            }
++        }
++    }
++
++    qemu_free(buf);
++    return ret;
++}
++
+ static int qemu_rbd_create(const char *filename, QEMUOptionParameter *options)
+ {
+     int64_t bytes = 0;
+@@ -165,6 +226,7 @@ static int qemu_rbd_create(const char *filename, QEMUOptionParameter *options)
+     char pool[RBD_MAX_POOL_NAME_SIZE];
+     char name[RBD_MAX_IMAGE_NAME_SIZE];
+     char snap_buf[RBD_MAX_SNAP_NAME_SIZE];
++    char conf[RBD_MAX_CONF_SIZE];
+     char *snap = NULL;
+     rados_t cluster;
+     rados_ioctx_t io_ctx;
+@@ -172,7 +234,8 @@ static int qemu_rbd_create(const char *filename, QEMUOptionParameter *options)
+ 
+     if (qemu_rbd_parsename(filename, pool, sizeof(pool),
+                            snap_buf, sizeof(snap_buf),
+-                           name, sizeof(name)) < 0) {
++                           name, sizeof(name),
++                           conf, sizeof(conf)) < 0) {
+         return -EINVAL;
+     }
+     if (snap_buf[0] != '\0') {
+@@ -205,8 +268,17 @@ static int qemu_rbd_create(const char *filename, QEMUOptionParameter *options)
+         return -EIO;
+     }
+ 
+-    if (rados_conf_read_file(cluster, NULL) < 0) {
+-        error_report("error reading config file");
++    if (strstr(conf, "conf=") == NULL) {
++        if (rados_conf_read_file(cluster, NULL) < 0) {
++            error_report("error reading config file");
++            rados_shutdown(cluster);
++            return -EIO;
++        }
++    }
++
++    if (conf[0] != '\0' &&
++        qemu_rbd_set_conf(cluster, conf) < 0) {
++        error_report("error setting config options");
+         rados_shutdown(cluster);
+         return -EIO;
+     }
+@@ -316,11 +388,13 @@ static int qemu_rbd_open(BlockDriverState *bs, const char *filename, int flags)
+     BDRVRBDState *s = bs->opaque;
+     char pool[RBD_MAX_POOL_NAME_SIZE];
+     char snap_buf[RBD_MAX_SNAP_NAME_SIZE];
++    char conf[RBD_MAX_CONF_SIZE];
+     int r;
+ 
+     if (qemu_rbd_parsename(filename, pool, sizeof(pool),
+                            snap_buf, sizeof(snap_buf),
+-                           s->name, sizeof(s->name)) < 0) {
++                           s->name, sizeof(s->name),
++                           conf, sizeof(conf)) < 0) {
+         return -EINVAL;
+     }
+     s->snap = NULL;
+@@ -334,11 +408,22 @@ static int qemu_rbd_open(BlockDriverState *bs, const char *filename, int flags)
+         return r;
+     }
+ 
+-    r = rados_conf_read_file(s->cluster, NULL);
+-    if (r < 0) {
+-        error_report("error reading config file");
+-        rados_shutdown(s->cluster);
+-        return r;
++    if (strstr(conf, "conf=") == NULL) {
++        r = rados_conf_read_file(s->cluster, NULL);
++        if (r < 0) {
++            error_report("error reading config file");
++            rados_shutdown(s->cluster);
++            return r;
++        }
++    }
++
++    if (conf[0] != '\0') {
++        r = qemu_rbd_set_conf(s->cluster, conf);
++        if (r < 0) {
++            error_report("error setting config options");
++            rados_shutdown(s->cluster);
++            return r;
++        }
+     }
+ 
+     r = rados_connect(s->cluster);
 -- 
 1.7.2.3
+
