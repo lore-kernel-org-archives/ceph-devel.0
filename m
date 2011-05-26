@@ -1,65 +1,47 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: [PATCH v5 4/4] rbd: Add bdrv_truncate
-	implementation
-Date: Thu, 26 May 2011 16:09:36 -0700
-Message-ID: <4DDEDDB0.3010501@dreamhost.com>
-References: <1306355687-4647-1-git-send-email-josh.durgin@dreamhost.com>
-	<1306355687-4647-5-git-send-email-josh.durgin@dreamhost.com>
-	<4DDE09D4.6020705@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
-In-Reply-To: <4DDE09D4.6020705@redhat.com>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: </archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-To: Kevin Wolf <kwolf@redhat.com>
-Cc: ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org, Christian Brunner <chb@muc.de>
-List-Id: ceph-devel.vger.kernel.org
+Subject: [PATCH v6 0/4] rbd improvements
+Date: Thu, 26 May 2011 16:07:30 -0700
+Message-ID: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:49504 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754820Ab1EZXLt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2011 19:11:49 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: kvm@vger.kernel.org, qemu-devel@nongnu.orgkvm@vger.kernel.orgqemu-devel@nongnu.org
+Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>, Christian Brunner <chb@muc.de>
 
-On 05/26/2011 01:05 AM, Kevin Wolf wrote:
-> Am 25.05.2011 22:34, schrieb Josh Durgin:
->> Signed-off-by: Josh Durgin<josh.durgin@dreamhost.com>
->> ---
->>   block/rbd.c |   15 +++++++++++++++
->>   1 files changed, 15 insertions(+), 0 deletions(-)
->>
->> diff --git a/block/rbd.c b/block/rbd.c
->> index a44d160..b95b1eb 100644
->> --- a/block/rbd.c
->> +++ b/block/rbd.c
->> @@ -688,6 +688,20 @@ static int64_t qemu_rbd_getlength(BlockDriverState *bs)
->>       return info.size;
->>   }
->>
->> +static int qemu_rbd_truncate(BlockDriverState *bs, int64_t offset)
->> +{
->> +    BDRVRBDState *s = bs->opaque;
->> +    int r;
->> +
->> +    r = rbd_resize(s->image, offset);
->> +    if (r<  0) {
->> +        error_report("failed to resize rbd image");
->> +        return -EIO;
->> +    }
->
-> Don't print an error message here. The caller will do it, too, so we end
-> up with two error messages saying the same.
+This patchset moves the complexity of the rbd format into librbd and
+adds truncation support.
 
-Fixed.
+Changes since v5:
+ * compare full string, not prefix, with "conf" in 2/4
+ * when truncate fails, just return librbd's error
 
-> What kind of error code does rbd_resize return? If it is a valid errno
-> value, you should return r instead of turning it into EIO.
->
-> Kevin
+Changes since v4:
+ * fixed cosmetic issues pointed out by Christian Brunner
 
-The error code is a standard errno value.
+Changes since v3:
+ * trivially rebased
+ * updated copyright header
 
-Josh
+Changes since v2:
+ * return values are checked in rbd_aio_rw_vector
+ * bdrv_truncate added
+
+Josh Durgin (4):
+  rbd: use the higher level librbd instead of just librados
+  rbd: allow configuration of rados from the rbd filename
+  rbd: check return values when scheduling aio
+  rbd: Add bdrv_truncate implementation
+
+ block/rbd.c       |  896 +++++++++++++++++++----------------------------------
+ block/rbd_types.h |   71 -----
+ configure         |   33 +--
+ 3 files changed, 334 insertions(+), 666 deletions(-)
+ delete mode 100644 block/rbd_types.h
+
+-- 
+1.7.2.3
+
