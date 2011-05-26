@@ -1,140 +1,43 @@
-From: Kevin Wolf <kwolf@redhat.com>
-Subject: Re: [PATCH v5 2/4] rbd: allow configuration of rados from the rbd
- filename
-Date: Thu, 26 May 2011 10:13:51 +0200
-Message-ID: <4DDE0BBF.9010502@redhat.com>
-References: <1306355687-4647-1-git-send-email-josh.durgin@dreamhost.com> <1306355687-4647-3-git-send-email-josh.durgin@dreamhost.com>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: cluster status information
+Date: Thu, 26 May 2011 15:18:57 +0300
+Message-ID: <4DDE4531.6060703@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:20823 "EHLO mx1.redhat.com"
+Received: from mail.ufm.su ([77.120.103.19]:34682 "EHLO mail.ufm.su"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756411Ab1EZILF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 May 2011 04:11:05 -0400
-In-Reply-To: <1306355687-4647-3-git-send-email-josh.durgin@dreamhost.com>
+	id S1757470Ab1EZMTB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 May 2011 08:19:01 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id C6411600485
+	for <ceph-devel@vger.kernel.org>; Thu, 26 May 2011 15:18:58 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id xjxcrjc1XyJw for <ceph-devel@vger.kernel.org>;
+	Thu, 26 May 2011 15:18:58 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id 517DE600483
+	for <ceph-devel@vger.kernel.org>; Thu, 26 May 2011 15:18:58 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>
+To: ceph-devel@vger.kernel.org
 
-Am 25.05.2011 22:34, schrieb Josh Durgin:
-> The new format is rbd:pool/image[@snapshot][:option1=value1[:option2=value2...]]
-> Each option is used to configure rados, and may be any Ceph option, or "conf".
-> The "conf" option specifies a Ceph configuration file to read.
-> 
-> This allows rbd volumes from more than one Ceph cluster to be used by
-> specifying different monitor addresses, as well as having different
-> logging levels or locations for different volumes.
-> 
-> Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
-> ---
->  block/rbd.c |  119 ++++++++++++++++++++++++++++++++++++++++++++++++++--------
->  1 files changed, 102 insertions(+), 17 deletions(-)
-> 
-> diff --git a/block/rbd.c b/block/rbd.c
-> index 2cee70d..d346a21 100644
-> --- a/block/rbd.c
-> +++ b/block/rbd.c
-> @@ -23,13 +23,17 @@
->  /*
->   * When specifying the image filename use:
->   *
-> - * rbd:poolname/devicename
-> + * rbd:poolname/devicename[@snapshotname][:option1=value1[:option2=value2...]]
->   *
->   * poolname must be the name of an existing rados pool
->   *
->   * devicename is the basename for all objects used to
->   * emulate the raw device.
->   *
-> + * Each option given is used to configure rados, and may be
-> + * any Ceph option, or "conf". The "conf" option specifies
-> + * a Ceph configuration file to read.
-> + *
->   * Metadata information (image size, ...) is stored in an
->   * object with the name "devicename.rbd".
->   *
-> @@ -123,7 +127,8 @@ static int qemu_rbd_next_tok(char *dst, int dst_len,
->  static int qemu_rbd_parsename(const char *filename,
->                                char *pool, int pool_len,
->                                char *snap, int snap_len,
-> -                              char *name, int name_len)
-> +                              char *name, int name_len,
-> +                              char *conf, int conf_len)
->  {
->      const char *start;
->      char *p, *buf;
-> @@ -135,28 +140,84 @@ static int qemu_rbd_parsename(const char *filename,
->  
->      buf = qemu_strdup(start);
->      p = buf;
-> +    *snap = '\0';
-> +    *conf = '\0';
->  
->      ret = qemu_rbd_next_tok(pool, pool_len, p, '/', "pool name", &p);
->      if (ret < 0 || !p) {
->          ret = -EINVAL;
->          goto done;
->      }
-> -    ret = qemu_rbd_next_tok(name, name_len, p, '@', "object name", &p);
-> -    if (ret < 0) {
-> -        goto done;
-> +
-> +    if (strchr(p, '@')) {
-> +        ret = qemu_rbd_next_tok(name, name_len, p, '@', "object name", &p);
-> +        if (ret < 0) {
-> +            goto done;
-> +        }
-> +        ret = qemu_rbd_next_tok(snap, snap_len, p, ':', "snap name", &p);
-> +    } else {
-> +        ret = qemu_rbd_next_tok(name, name_len, p, ':', "object name", &p);
->      }
-> -    if (!p) {
-> -        *snap = '\0';
-> +    if (ret < 0 || !p) {
->          goto done;
->      }
->  
-> -    ret = qemu_rbd_next_tok(snap, snap_len, p, '\0', "snap name", &p);
-> +    ret = qemu_rbd_next_tok(conf, conf_len, p, '\0', "configuration", &p);
->  
->  done:
->      qemu_free(buf);
->      return ret;
->  }
->  
-> +static int qemu_rbd_set_conf(rados_t cluster, const char *conf)
-> +{
-> +    char *p, *buf;
-> +    char name[RBD_MAX_CONF_NAME_SIZE];
-> +    char value[RBD_MAX_CONF_VAL_SIZE];
-> +    int ret = 0;
-> +
-> +    buf = qemu_strdup(conf);
-> +    p = buf;
-> +
-> +    while (p) {
-> +        ret = qemu_rbd_next_tok(name, sizeof(name), p,
-> +                                '=', "conf option name", &p);
-> +        if (ret < 0) {
-> +            break;
-> +        }
-> +
-> +        if (!p) {
-> +            error_report("conf option %s has no value", name);
-> +            ret = -EINVAL;
-> +            break;
-> +        }
-> +
-> +        ret = qemu_rbd_next_tok(value, sizeof(value), p,
-> +                                ':', "conf option value", &p);
-> +        if (ret < 0) {
-> +            break;
-> +        }
-> +
-> +        if (strncmp(name, "conf", strlen("conf"))) {
+Hi!
 
-Do you really only want to check if name _starts_ with "conf"?
+How to get information about status of each server in cluster?
 
-Kevin
+#ceph osd stat
+2011-05-26 15:07:05.103621 mon <- [osd,stat]
+2011-05-26 15:07:05.104201 mon0 -> 'e413: 6 osds: 5 up, 5 in' (0)
+
+I see - in cluster 6 osd servers and now up only 5.  How do I know which 
+server is down?
+
+More global question - how to monitor the state of servers in a cluster?
+
+WBR,
+     Fyodor.
+
+P.S. JFYI: key "-s" do not described in manual page about ceph command.
