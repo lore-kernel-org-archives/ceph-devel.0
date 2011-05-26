@@ -1,18 +1,23 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: [PATCH v6 2/4] rbd: allow configuration of rados from the rbd filename
+Subject: [PATCH v6 2/4] rbd: allow configuration of rados from
+	the rbd filename
 Date: Thu, 26 May 2011 16:07:32 -0700
-Message-ID: <1306451254-25864-3-git-send-email-josh.durgin__6949.66054657034$1306451532$gmane$org@dreamhost.com>
+Message-ID: <1306451254-25864-3-git-send-email-josh.durgin__16890.8763830133$1306451535$gmane$org@dreamhost.com>
 References: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:49521 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758578Ab1EZXLv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2011 19:11:51 -0400
+Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
 In-Reply-To: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
+List-Archive: </archive/html/qemu-devel>
+List-Post: <mailto:qemu-devel@nongnu.org>
+List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
+Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
 To: kvm@vger.kernel.org, qemu-devel@nongnu.orgkvm@vger.kernel.orgqemu-devel@nongnu.org
-Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>, Christian Brunner <chb@muc.de>
+Cc: Kevin Wolf <kwolf@redhat.com>, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>
+List-Id: ceph-devel.vger.kernel.org
 
 The new format is rbd:pool/image[@snapshot][:option1=value1[:option2=value2...]]
 Each option is used to configure rados, and may be any Ceph option, or "conf".
@@ -235,4 +240,3 @@ index 2cee70d..edf1086 100644
      r = rados_connect(s->cluster);
 -- 
 1.7.2.3
-
