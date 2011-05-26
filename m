@@ -1,52 +1,141 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: libceph: get_reply unknown tid
-Date: Thu, 26 May 2011 22:49:52 +0300
-Message-ID: <4DDEAEE0.4030502@ufm.su>
-References: <4DD681C8.1060003@ufm.su>	<BANLkTimva3_LFr5q3T9UvpfOysS69VzrYA@mail.gmail.com>	<4DDEAA61.5030201@ufm.su> <BANLkTinZxJj4CsA6cpz+a18F3QLKE7Rrsw@mail.gmail.com>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: [PATCH v5 2/4] rbd: allow configuration of rados from the rbd
+ filename
+Date: Thu, 26 May 2011 16:06:26 -0700
+Message-ID: <4DDEDCF2.90804@dreamhost.com>
+References: <1306355687-4647-1-git-send-email-josh.durgin@dreamhost.com> <1306355687-4647-3-git-send-email-josh.durgin@dreamhost.com> <4DDE0BBF.9010502@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:49542 "EHLO mail.ufm.su"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758350Ab1EZTtz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 26 May 2011 15:49:55 -0400
-In-Reply-To: <BANLkTinZxJj4CsA6cpz+a18F3QLKE7Rrsw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <kvm-owner@vger.kernel.org>
+In-Reply-To: <4DDE0BBF.9010502@redhat.com>
+Sender: kvm-owner@vger.kernel.org
+To: Kevin Wolf <kwolf@redhat.com>
+Cc: kvm@vger.kernel.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Christian Brunner <chb@muc.de>
+List-Id: ceph-devel.vger.kernel.org
 
-On 05/26/2011 10:41 PM, Gregory Farnum wrote:
-> On Thu, May 26, 2011 at 3:30 PM, Fyodor Ustinov<ufm@ufm.su>  wrote:
->> On 05/26/2011 08:37 PM, Gregory Farnum wrote:
->>> That means something in the messaging layers got a bit busted, and you
->>> should generally respond by filing bug reports.:)  What version are
->>> you on right now? I think we fixed some issues with this a couple
->>> weeks ago.
->> [72845.480649] libceph: get_reply unknown tid 475665 from osd0
->> [72845.481518] libceph: get_reply unknown tid 475622 from osd0
->> [72845.482140] libceph: get_reply unknown tid 475618 from osd0
->> [72845.482725] libceph: get_reply unknown tid 475592 from osd0
->> [72845.483164] libceph: get_reply unknown tid 475587 from osd0
->> [72845.483753] libceph: get_reply unknown tid 475570 from osd0
->> [72846.838239] libceph: get_reply unknown tid 475660 from osd4
->> [72846.839034] libceph: get_reply unknown tid 475649 from osd4
->> [72846.840702] libceph: get_reply unknown tid 475610 from osd4
->> [72846.841548] libceph: get_reply unknown tid 475608 from osd4
->> [72846.842243] libceph: get_reply unknown tid 475598 from osd4
+On 05/26/2011 01:13 AM, Kevin Wolf wrote:
+> Am 25.05.2011 22:34, schrieb Josh Durgin:
+>> The new format is rbd:pool/image[@snapshot][:option1=value1[:option2=value2...]]
+>> Each option is used to configure rados, and may be any Ceph option, or "conf".
+>> The "conf" option specifies a Ceph configuration file to read.
 >>
+>> This allows rbd volumes from more than one Ceph cluster to be used by
+>> specifying different monitor addresses, as well as having different
+>> logging levels or locations for different volumes.
 >>
->> Ie it happens regularly.
+>> Signed-off-by: Josh Durgin<josh.durgin@dreamhost.com>
+>> ---
+>>   block/rbd.c |  119 ++++++++++++++++++++++++++++++++++++++++++++++++++--------
+>>   1 files changed, 102 insertions(+), 17 deletions(-)
 >>
->> Messages on client (kernel) 2.6.29
-2.6.39 even.
->> ceph - 0.28.1
-> Sage reminded me that this can also happen if the OSD configuration
-> changes and the kernel client has to resend ops to a different OSD. Is
-> your cluster changing while this happens?
-May be. Ok, Gregory, I understand that this message should pay attention 
-and try next time to gather all the information.
+>> diff --git a/block/rbd.c b/block/rbd.c
+>> index 2cee70d..d346a21 100644
+>> --- a/block/rbd.c
+>> +++ b/block/rbd.c
+>> @@ -23,13 +23,17 @@
+>>   /*
+>>    * When specifying the image filename use:
+>>    *
+>> - * rbd:poolname/devicename
+>> + * rbd:poolname/devicename[@snapshotname][:option1=value1[:option2=value2...]]
+>>    *
+>>    * poolname must be the name of an existing rados pool
+>>    *
+>>    * devicename is the basename for all objects used to
+>>    * emulate the raw device.
+>>    *
+>> + * Each option given is used to configure rados, and may be
+>> + * any Ceph option, or "conf". The "conf" option specifies
+>> + * a Ceph configuration file to read.
+>> + *
+>>    * Metadata information (image size, ...) is stored in an
+>>    * object with the name "devicename.rbd".
+>>    *
+>> @@ -123,7 +127,8 @@ static int qemu_rbd_next_tok(char *dst, int dst_len,
+>>   static int qemu_rbd_parsename(const char *filename,
+>>                                 char *pool, int pool_len,
+>>                                 char *snap, int snap_len,
+>> -                              char *name, int name_len)
+>> +                              char *name, int name_len,
+>> +                              char *conf, int conf_len)
+>>   {
+>>       const char *start;
+>>       char *p, *buf;
+>> @@ -135,28 +140,84 @@ static int qemu_rbd_parsename(const char *filename,
+>>
+>>       buf = qemu_strdup(start);
+>>       p = buf;
+>> +    *snap = '\0';
+>> +    *conf = '\0';
+>>
+>>       ret = qemu_rbd_next_tok(pool, pool_len, p, '/', "pool name",&p);
+>>       if (ret<  0 || !p) {
+>>           ret = -EINVAL;
+>>           goto done;
+>>       }
+>> -    ret = qemu_rbd_next_tok(name, name_len, p, '@', "object name",&p);
+>> -    if (ret<  0) {
+>> -        goto done;
+>> +
+>> +    if (strchr(p, '@')) {
+>> +        ret = qemu_rbd_next_tok(name, name_len, p, '@', "object name",&p);
+>> +        if (ret<  0) {
+>> +            goto done;
+>> +        }
+>> +        ret = qemu_rbd_next_tok(snap, snap_len, p, ':', "snap name",&p);
+>> +    } else {
+>> +        ret = qemu_rbd_next_tok(name, name_len, p, ':', "object name",&p);
+>>       }
+>> -    if (!p) {
+>> -        *snap = '\0';
+>> +    if (ret<  0 || !p) {
+>>           goto done;
+>>       }
+>>
+>> -    ret = qemu_rbd_next_tok(snap, snap_len, p, '\0', "snap name",&p);
+>> +    ret = qemu_rbd_next_tok(conf, conf_len, p, '\0', "configuration",&p);
+>>
+>>   done:
+>>       qemu_free(buf);
+>>       return ret;
+>>   }
+>>
+>> +static int qemu_rbd_set_conf(rados_t cluster, const char *conf)
+>> +{
+>> +    char *p, *buf;
+>> +    char name[RBD_MAX_CONF_NAME_SIZE];
+>> +    char value[RBD_MAX_CONF_VAL_SIZE];
+>> +    int ret = 0;
+>> +
+>> +    buf = qemu_strdup(conf);
+>> +    p = buf;
+>> +
+>> +    while (p) {
+>> +        ret = qemu_rbd_next_tok(name, sizeof(name), p,
+>> +                                '=', "conf option name",&p);
+>> +        if (ret<  0) {
+>> +            break;
+>> +        }
+>> +
+>> +        if (!p) {
+>> +            error_report("conf option %s has no value", name);
+>> +            ret = -EINVAL;
+>> +            break;
+>> +        }
+>> +
+>> +        ret = qemu_rbd_next_tok(value, sizeof(value), p,
+>> +                                ':', "conf option value",&p);
+>> +        if (ret<  0) {
+>> +            break;
+>> +        }
+>> +
+>> +        if (strncmp(name, "conf", strlen("conf"))) {
+>
+> Do you really only want to check if name _starts_ with "conf"?
+>
+> Kevin
 
-WBR,
-    Fyodor.
+That should just be strcmp.
+
+Josh
