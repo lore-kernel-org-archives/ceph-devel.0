@@ -1,14 +1,18 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
 Subject: [PATCH v6 3/4] rbd: check return values when scheduling aio
 Date: Thu, 26 May 2011 16:07:33 -0700
-Message-ID: <1306451254-25864-4-git-send-email-josh.durgin@dreamhost.com>
+Message-ID: <1306451254-25864-4-git-send-email-josh.durgin__16584.1671209366$1306451526$gmane$org@dreamhost.com>
 References: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
-Return-path: <kvm-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:49527 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758533Ab1EZXLw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2011 19:11:52 -0400
 In-Reply-To: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
-Sender: kvm-owner@vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: kvm@vger.kernel.org, qemu-devel@nongnu.orgkvm@vger.kernel.orgqemu-devel@nongnu.org
 Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>, Christian Brunner <chb@muc.de>
-List-Id: ceph-devel.vger.kernel.org
 
 If scheduling fails, the number of outstanding I/Os must be correct,
 or there will be a hang when waiting for everything to be flushed.
