@@ -1,18 +1,14 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
 Subject: [PATCH v6 4/4] rbd: Add bdrv_truncate implementation
 Date: Thu, 26 May 2011 16:07:34 -0700
-Message-ID: <1306451254-25864-5-git-send-email-josh.durgin@dreamhost.com>
+Message-ID: <1306451254-25864-5-git-send-email-josh.durgin__19313.2012420849$1306451530$gmane$org@dreamhost.com>
 References: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:49532 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758578Ab1EZXLy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2011 19:11:54 -0400
+Return-path: <kvm-owner@vger.kernel.org>
 In-Reply-To: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Sender: kvm-owner@vger.kernel.org
 To: kvm@vger.kernel.org, qemu-devel@nongnu.orgkvm@vger.kernel.orgqemu-devel@nongnu.org
 Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>, Christian Brunner <chb@muc.de>
+List-Id: ceph-devel.vger.kernel.org
 
 Reviewed-by: Christian Brunner <chb@muc.de>
 Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
