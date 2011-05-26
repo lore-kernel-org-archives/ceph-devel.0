@@ -1,18 +1,14 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
 Subject: [PATCH v6 1/4] rbd: use the higher level librbd instead of just librados
 Date: Thu, 26 May 2011 16:07:31 -0700
-Message-ID: <1306451254-25864-2-git-send-email-josh.durgin@dreamhost.com>
+Message-ID: <1306451254-25864-2-git-send-email-josh.durgin__13034.2951896184$1306451535$gmane$org@dreamhost.com>
 References: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:49512 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758533Ab1EZXLv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2011 19:11:51 -0400
+Return-path: <kvm-owner@vger.kernel.org>
 In-Reply-To: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Sender: kvm-owner@vger.kernel.org
 To: kvm@vger.kernel.org, qemu-devel@nongnu.orgkvm@vger.kernel.orgqemu-devel@nongnu.org
 Cc: ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>, Christian Brunner <chb@muc.de>
+List-Id: ceph-devel.vger.kernel.org
 
 librbd stacks on top of librados to provide access
 to rbd images.
