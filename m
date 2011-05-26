@@ -1,58 +1,70 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: rbd write rate
-Date: Thu, 26 May 2011 09:42:00 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1105260933550.3034@cobra.newdream.net>
-References: <BANLkTimsL17LUHPg4F_TO5y3qnMcPeQOYA@mail.gmail.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: Minimum Recommended Hardware
+Date: Thu, 26 May 2011 13:30:49 -0400
+Message-ID: <BANLkTi=Q-Tm1i1eUDhuKEpSp+2+hKJvZdQ@mail.gmail.com>
+References: <b792daeb0cd450e18e6c275abb595dcd@pl1.haspere.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39437 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751748Ab1EZQkf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2011 12:40:35 -0400
-In-Reply-To: <BANLkTimsL17LUHPg4F_TO5y3qnMcPeQOYA@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:41722 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757672Ab1EZRaw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 May 2011 13:30:52 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 690AAC401
+	for <ceph-devel@vger.kernel.org>; Thu, 26 May 2011 10:30:52 -0700 (PDT)
+Received: from mail-ew0-f46.google.com (mail-ew0-f46.google.com [209.85.215.46])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 165C6C3E9
+	for <ceph-devel@vger.kernel.org>; Thu, 26 May 2011 10:30:51 -0700 (PDT)
+Received: by ewy4 with SMTP id 4so339662ewy.19
+        for <ceph-devel@vger.kernel.org>; Thu, 26 May 2011 10:30:50 -0700 (PDT)
+In-Reply-To: <b792daeb0cd450e18e6c275abb595dcd@pl1.haspere.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: YS3fpFE2ykfB@dyweni.com
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Thu, 26 May 2011, huang jun wrote:
-> hi,all
-> i have another rbd question,when i use rbd to wite a file to OSD
-> my configuration is : 4 OSDs 1MON 1MDS,linux kernel version is 2.6.37.6
-> and the average write rate is about 5MB/s.
-> when i look into the log in /var/log/kernel.log, and find that the
-> client get items from request_queue
-> with the write size between 1 page and 31 pages.
-> i think it results in the low write rate.am i right?
+On Thu, May 19, 2011 at 1:27 AM, Dyweni - Ceph-Devel
+<YS3fpFE2ykfB@dyweni.com> wrote:
+> 4 x OSD
+> =A0OSD1 =3D
+> =A0 =A0P3 1Ghz, 256K Cache
+> =A0 =A02GB RAM
+> =A0 =A080GB IDE (dd_rescue can read about 45MB/s sustained)
+> =A0 =A01Gb NIC (e1000 driver)
+> =A0OSD2 =3D
+> =A0 =A0P3 550Mhz, 512K Cache
+> =A0 =A0768MB RAM
+> =A0 =A040GB IDE (dd_rescue can read about 30MB/s sustained)
+> =A0 =A01Gb NIC (e1000 driver)
+> =A0OSD3 =3D
+> =A0 =A0Celeron 1Ghz, 128K Cache
+> =A0 =A0512MB RAM
+> =A0 =A018GB IDE (dd_rescue can read about 15MB/s sustained)
+> =A0 =A01Gb NIC (e1000 driver)
+> =A0OSD4 =3D
+> =A0 =A0P3 1Ghz, 256K Cache
+> =A0 =A0512MB RAM
+> =A0 =A020GB IDE (dd_rescue can read about 40MB/s sustained)
+> =A0 =A01Gb NIC (e1000 driver)
 
-What are you using to measure throughput?
+I'm pretty sure these drives are your problem -- they're just not very
+fast. Remember that in general, each write to Ceph is going to write
+to both the journal and the data store -- which cuts your drives down
+to 22.5, 15, 7.5, 20 MB/s in the best case (and likely a lot worse --
+the journal will be a streaming write but the data store will be
+random writes, and everything's slower at random writes). On top of
+that, we've found that the slowest drives in a cluster can have a
+pretty large impact on performance since the faster OSDs end up
+consistently waiting on the slow drives.
 
-The request size is determined by something in the block layer above RBD; 
-I typically see 128k reads/writes.  I'm not sure offhand if/how that is 
-adjusted.
-
-There is a larger problem with RBD performance in general that frequently 
-comes up and we haven't had time to address.  Overall, read and write 
-latency is comparable to that of a standard disk (although it can vary 
-depending on the hardware you're using for the rados cluster).  On average 
-RBD write latencies are probably a bit higher, although with the right 
-hardware they can be much lower.  The big difference, though, is that a 
-normal disk has a write cache of several megabytes and acknowledges writes 
-before they are stable.  Modern sane file systems issue flush commands at 
-critical points to ensure that previous writes really hit disk.  RBD does 
-no such thing; every write goes all the way to disk (on all replicas) 
-before it is acknowledges.  For many (most?) workloads this makes the 
-storage appear very slow, even though the overall throughput may be much 
-higher.
-
-We think the solution is to make the rbd layer have some tunable that puts 
-a cap on the number of written bytes that will be acknowledged before 
-they are actually written, more or less simulating a write cache, and make 
-it behave more like a disk.  There are open issues for this in teh tracker 
-for both librbd (for qemu) and the kernel implementation, but we haven't 
-had time to look at it yet.  Anyone on the list who is interested in this 
-is more than welcome to take a stab at it!
-
-sage
-
+We have seen other issues with slow CPUs, but those generally only
+manifest themselves during recovery and are getting active improvement
+as we come across them. :)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
