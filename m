@@ -1,71 +1,57 @@
-From: Michal Humpula <michal.humpula@hudrydum.cz>
-Subject: Re: v0.28.1 still seeing "wrongly marked me down"
-Date: Fri, 27 May 2011 08:38:38 +0200
-Message-ID: <201105270838.39140.michal.humpula@hudrydum.cz>
-References: <201105251236.08622.michal.humpula@hudrydum.cz> <Pine.LNX.4.64.1105250857580.29945@cobra.newdream.net>
+From: Kevin Wolf <kwolf@redhat.com>
+Subject: Re: [PATCH v6 0/4] rbd improvements
+Date: Fri, 27 May 2011 08:45:37 +0200
+Message-ID: <4DDF4891.8070402@redhat.com>
+References: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp3.web4u.cz ([81.91.87.13]:57237 "EHLO smtp3.web4u.cz"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753827Ab1E0Gim (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 27 May 2011 02:38:42 -0400
-In-Reply-To: <Pine.LNX.4.64.1105250857580.29945@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
+In-Reply-To: <1306451254-25864-1-git-send-email-josh.durgin@dreamhost.com>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
+List-Archive: </archive/html/qemu-devel>
+List-Post: <mailto:qemu-devel@nongnu.org>
+List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
+	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
+Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
+To: Josh Durgin <josh.durgin@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org, qemu-devel@nongnu.org, kvm@vger.kernel.org, Christian Brunner <chb@muc.de>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wednesday 25 of May 2011 17:58:24 Sage Weil wrote:
-> On Wed, 25 May 2011, Michal Humpula wrote:
-> > Hi,
-> > 
-> > I've just compiled the recent version of ceph v0.28.1. I wanted to give
-> > it a try on a setup of 8 machines (1 core Opterons). The design is 3
-> > mons, 2 mds and 10 osds. Running latest vanilla kernel 2.6.29 with btrfs
-> > as a filestore.
-> > 
-> > After initial setup, ceph -w is printing a lot of these
-> > 
-> > 2011-05-25 12:19:38.720110   log 2011-05-25 12:19:37.671620 osd5
-> > 192.168.0.23:6803/18299 151 : [WRN] map e3577 wrongly marked me down or
-> > wrong addr
-> > 2011-05-25 12:19:18.398004   log 2011-05-25 12:19:18.333978 mon0
-> > 192.168.0.10:6789/0 3968 : [INF] osd6 192.168.0.24:6800/2830 failed (by
-> > osd7 192.168.0.24:6801/3064)
-> > 
-> > I've tried to setup
-> > 
-> > osd op threads = 1
-> > 
-> > and
-> > 
-> > osd op threads = 0
-> > 
-> > but it doesn't seem to have any impact on a number of cosd daemon
-> > threads. Still seeing +20 of them and still seeing messages about
-> > degradation.
-> > 
-> > Any hint, what to setup differently, would be appreciated.
+Am 27.05.2011 01:07, schrieb Josh Durgin:
+> This patchset moves the complexity of the rbd format into librbd and
+> adds truncation support.
 > 
-> If you can reproduce this behavior with
+> Changes since v5:
+>  * compare full string, not prefix, with "conf" in 2/4
+>  * when truncate fails, just return librbd's error
 > 
-> 	debug osd = 10
-> 	debug ms = 10
+> Changes since v4:
+>  * fixed cosmetic issues pointed out by Christian Brunner
 > 
-> in your [osd] section it should have enough information for us to identify
-> the problem.
+> Changes since v3:
+>  * trivially rebased
+>  * updated copyright header
 > 
-> Thanks!
-> sage
+> Changes since v2:
+>  * return values are checked in rbd_aio_rw_vector
+>  * bdrv_truncate added
+> 
+> Josh Durgin (4):
+>   rbd: use the higher level librbd instead of just librados
+>   rbd: allow configuration of rados from the rbd filename
+>   rbd: check return values when scheduling aio
+>   rbd: Add bdrv_truncate implementation
+> 
+>  block/rbd.c       |  896 +++++++++++++++++++----------------------------------
+>  block/rbd_types.h |   71 -----
+>  configure         |   33 +--
+>  3 files changed, 334 insertions(+), 666 deletions(-)
+>  delete mode 100644 block/rbd_types.h
 
-I've got a little problem to harvest the logs, but here they come. The nodes 
-are PXE booting, so I had to store them directly on the data disks, because it 
-was not possible to transfer them over NFS at this rate. 
+Thanks, applied to the block branch.
 
-Logs are accessible at http://81.91.83.58/ceph/. There is also a config which 
-was used and few lines from "ceph -w". At the time of testing node4 was down.
-
-Michael
+Kevin
