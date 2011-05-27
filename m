@@ -1,60 +1,47 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: Quota function of radosgw
-Date: Fri, 27 May 2011 09:13:50 -0700
-Message-ID: <BANLkTikaeMSQ1PVoAopSxeqB5pmELuzGow@mail.gmail.com>
-References: <BANLkTikpoxS6ZzPJ6q9iUD9etawm24rApQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: fs selection.
+Date: Fri, 27 May 2011 09:29:56 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1105270929100.10685@cobra.newdream.net>
+References: <4DDF9207.4090008@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:55872 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753040Ab1E0QNw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 May 2011 12:13:52 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 6A36CC47B
-	for <ceph-devel@vger.kernel.org>; Fri, 27 May 2011 09:13:52 -0700 (PDT)
-Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 16D31C458
-	for <ceph-devel@vger.kernel.org>; Fri, 27 May 2011 09:13:51 -0700 (PDT)
-Received: by eyx24 with SMTP id 24so713781eyx.19
-        for <ceph-devel@vger.kernel.org>; Fri, 27 May 2011 09:13:50 -0700 (PDT)
-In-Reply-To: <BANLkTikpoxS6ZzPJ6q9iUD9etawm24rApQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:57184 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754210Ab1E0Q2a (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 May 2011 12:28:30 -0400
+In-Reply-To: <4DDF9207.4090008@ufm.su>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylar Shen <kimulaaa@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Fyodor Ustinov <ufm@ufm.su>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, May 27, 2011 at 9:06 AM, Sylar Shen <kimulaaa@gmail.com> wrote:
-> Hi developers,
-> Recently I am testing radosgw about its functions.
-> Then I am curious that will radosgw implement the function or API of
-> quota in the future?
-> I've checked the mail archives and found that the quota issue had been
-> discussed.
-> And also, I know this may affect the performance of write ability.
-> But in most cases, administrator may want to set the quota of a bucket
-> for every user.
-> So would this function be implemented in the future?
-We're unlikely to implement quotas in the gateway. It's an
-S3-compatible implementation and S3 has no concept of limits -- the
-more space users take up, the more money the provider can charge them!
-;)
-Previous discussions of quotas have centered more on the full
-filesystem, which is technically challenging for a number of reasons,
-although I think the Tcloud guys have done some work on that.
-I don't think it would be too difficult to implement a working
-solution for the *gateway* layer on your own, though...
+On Fri, 27 May 2011, Fyodor Ustinov wrote:
+> it kills ext3:
+> 
+> [49531.320004]  [<ffffffff811d3c4c>] ext3_new_blocks+0x40c/0x6b0
+> [49531.320004]  [<ffffffff811d3f11>] ext3_new_block+0x21/0x30
+> [49531.320004]  [<ffffffff811e798e>] ext3_xattr_block_set+0x2ae/0x790
+> [49531.320004]  [<ffffffff811e86ba>] ext3_xattr_set_handle+0x30a/0x4c0
+> [49531.320004]  [<ffffffff811e88f5>] ext3_xattr_set+0x85/0xe0
+> [49531.320004]  [<ffffffff81277053>] ?
+> security_inode_exec_permission+0x23/0x30
+> [49531.320004]  [<ffffffff811e8ae9>] ext3_xattr_user_set+0x49/0x50
+> [49531.320004]  [<ffffffff811818e4>] generic_setxattr+0x74/0x90
+> [49531.320004]  [<ffffffff811820c0>] __vfs_setxattr_noperm+0x50/0x1a0
+> [49531.320004]  [<ffffffff8116adb8>] ? inode_permission+0xa8/0xd0
+> [49531.320004]  [<ffffffff811822cc>] vfs_setxattr+0xbc/0xc0
+> [49531.320004]  [<ffffffff81182392>] setxattr+0xc2/0x150
+> [49531.320004]  [<ffffffff8114fec0>] ? kmem_cache_free+0x20/0x110
+> [49531.320004]  [<ffffffff8116ae33>] ? putname+0x33/0x50
+> [49531.320004]  [<ffffffff8116ef84>] ? user_path_at+0x64/0xa0
+> [49531.320004]  [<ffffffff815d3493>] ? schedule+0x3d3/0xa00
+> [49531.320004]  [<ffffffff81099c7b>] ? sys_futex+0x7b/0x180
+> [49531.320004]  [<ffffffff811824b5>] sys_setxattr+0x95/0xb0
+> [49531.320004]  [<ffffffff815ddec2>] system_call_fastpath+0x16/0x1b
 
-
-> On another hand, I know that the kernel of Ceph upgrades gradually.
-> I would like to know that will the performance of Ceph client and
-> re-exporting NFS become better if I upgrade the kernel to the latest
-> version?
-The kernel client hasn't gone through a lot of updating lately, but
-the current rc release will be faster than recent kernels since it
-re-enables local dentry lookups (at last!).
-NFS re-export is getting more attention lately so it's better than it
-used to be, but there aren't a lot of users yet and there are still
-some weird performance issues that you'll run across in any version of
+Which kernel version is this?  I've only seen this on older (<.26?) 
+kernels.  If this is on the latest, we need to tell the extN guys about 
 it.
--Greg
+
+sage
