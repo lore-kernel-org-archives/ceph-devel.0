@@ -1,81 +1,209 @@
-From: Sylar Shen <kimulaaa@gmail.com>
-Subject: Re: Quota function of radosgw
-Date: Sun, 29 May 2011 10:45:45 +0800
-Message-ID: <BANLkTimMsGNtOABRXFd24YeNumLM0gQzKw@mail.gmail.com>
-References: <BANLkTikpoxS6ZzPJ6q9iUD9etawm24rApQ@mail.gmail.com>
-	<BANLkTikaeMSQ1PVoAopSxeqB5pmELuzGow@mail.gmail.com>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: CRUSH. What wrong?
+Date: Sun, 29 May 2011 16:21:38 +0300
+Message-ID: <4DE24862.5080109@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:41112 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750961Ab1E2Cpr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 May 2011 22:45:47 -0400
-Received: by bwz15 with SMTP id 15so2131802bwz.19
-        for <ceph-devel@vger.kernel.org>; Sat, 28 May 2011 19:45:46 -0700 (PDT)
-In-Reply-To: <BANLkTikaeMSQ1PVoAopSxeqB5pmELuzGow@mail.gmail.com>
+Received: from mail.ufm.su ([77.120.103.19]:34770 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752139Ab1E2NVm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 29 May 2011 09:21:42 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id 117F9600485
+	for <ceph-devel@vger.kernel.org>; Sun, 29 May 2011 16:21:40 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 8XM3IUUfIbaW for <ceph-devel@vger.kernel.org>;
+	Sun, 29 May 2011 16:21:39 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id CF09F600484
+	for <ceph-devel@vger.kernel.org>; Sun, 29 May 2011 16:21:39 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Gregory,
-Thanks for your information very much!
-Dropbox could limit the quota value of each user.
-Does Dropbox implement the quota function by recording every size of
-file in its own database?
-Or Dropbox just controls the quota of each user by the client application?
-If Dropbox did neither of the two approaches above, how did they do?
-Sorry it may be a little stupid question but I am curious about that......:p
+Hi!
 
-By the way, the test of re-exporting NFS I did worked not bad.
-And I am wondering since Ceph can re-export NFS, then can Ceph
-re-export SAMBA that connects to windows?
-Thanks~~^^
+Now, I made an attempt to create my own CRUSH.
 
---
-Best Regards,
-Sylar Shen
+After I applied it to existing cluster everything stopped (rebalance not 
+start, unable to mount cluster)
 
-2011/5/28 Gregory Farnum <gregf@hq.newdream.net>:
-> On Fri, May 27, 2011 at 9:06 AM, Sylar Shen <kimulaaa@gmail.com> wrote:
->> Hi developers,
->> Recently I am testing radosgw about its functions.
->> Then I am curious that will radosgw implement the function or API of
->> quota in the future?
->> I've checked the mail archives and found that the quota issue had been
->> discussed.
->> And also, I know this may affect the performance of write ability.
->> But in most cases, administrator may want to set the quota of a bucket
->> for every user.
->> So would this function be implemented in the future?
-> We're unlikely to implement quotas in the gateway. It's an
-> S3-compatible implementation and S3 has no concept of limits -- the
-> more space users take up, the more money the provider can charge them!
-> ;)
-> Previous discussions of quotas have centered more on the full
-> filesystem, which is technically challenging for a number of reasons,
-> although I think the Tcloud guys have done some work on that.
-> I don't think it would be too difficult to implement a working
-> solution for the *gateway* layer on your own, though...
->
->
->> On another hand, I know that the kernel of Ceph upgrades gradually.
->> I would like to know that will the performance of Ceph client and
->> re-exporting NFS become better if I upgrade the kernel to the latest
->> version?
-> The kernel client hasn't gone through a lot of updating lately, but
-> the current rc release will be faster than recent kernels since it
-> re-enables local dentry lookups (at last!).
-> NFS re-export is getting more attention lately so it's better than it
-> used to be, but there aren't a lot of users yet and there are still
-> some weird performance issues that you'll run across in any version of
-> it.
-> -Greg
->
+"Ok", I said and created new cluster with this crush.
 
+Cluster turned out as the real thing. But id did not work (initial 
+scrubbing not start, unable to mount).
 
+What I did wrong?
 
--- 
-Best Regards,
-Sylar Shen
+My crush map:
+
+# begin crush map
+
+# devices
+device 0 device0
+device 1 device1
+device 2 device2
+device 3 device3
+device 4 device4
+device 5 device5
+device 6 device6
+device 7 device7
+device 8 device8
+device 9 device9
+device 10 device10
+
+# types
+type 0 device
+type 1 host
+type 2 rack
+type 3 root
+
+# buckets
+host host0 {
+         id -1           # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item device0 weight 3.842
+}
+host host1 {
+         id -2           # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item device1 weight 3.842
+}
+host host2 {
+         id -3           # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item device2 weight 3.842
+}
+host host3 {
+         id -4           # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item device3 weight 3.842
+}
+host host4 {
+         id -5           # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item device4 weight 3.842
+}
+host host5 {
+         id -6           # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item device5 weight 3.842
+}
+host host6 {
+         id -7           # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+}
+host host7 {
+         id -8           # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item device7 weight 3.842
+         item device8 weight 3.905
+         item device9 weight 3.905
+         item device10 weight 3.905
+}
+rack rack0 {
+         id -9           # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item host0 weight 3.844
+}
+rack rack1 {
+         id -10          # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item host1 weight 3.844
+}
+rack rack2 {
+         id -11          # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item host2 weight 3.842
+}
+rack rack3 {
+         id -12          # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item host3 weight 3.842
+}
+rack rack4 {
+         id -13          # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item host4 weight 3.842
+}
+rack rack5 {
+         id -14          # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item host5 weight 3.842
+}
+rack rack6 {
+         id -15          # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item host6 weight 3.842
+}
+rack rack7 {
+         id -16          # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item host7 weight 15.557
+}
+root root {
+         id -17          # do not change unnecessarily
+         alg straw
+         hash 0  # rjenkins1
+         item rack0 weight 3.844
+         item rack1 weight 3.844
+         item rack2 weight 3.842
+         item rack3 weight 3.842
+         item rack4 weight 3.842
+         item rack5 weight 3.842
+         item rack6 weight 3.842
+         item rack7 weight 15.557
+}
+
+# rules
+rule data {
+         ruleset 0
+         type replicated
+         min_size 1
+         max_size 10
+         step take root
+         step choose firstn 0 type rack
+         step emit
+}
+rule metadata {
+         ruleset 1
+         type replicated
+         min_size 1
+         max_size 10
+         step take root
+         step choose firstn 0 type rack
+         step emit
+}
+rule rbd {
+         ruleset 2
+         type replicated
+         min_size 1
+         max_size 10
+         step take root
+         step choose firstn 0 type rack
+         step emit
+}
+
+# end crush map
+
+WBR,
+     Fyodor.
