@@ -1,75 +1,51 @@
-From: Brian Chrisman <brchrisman@gmail.com>
-Subject: Re: Quota function of radosgw
-Date: Tue, 31 May 2011 10:20:14 -0700
-Message-ID: <BANLkTiniUg5njfxiOneg0Z6MZp19iHZ9qg@mail.gmail.com>
-References: <BANLkTikpoxS6ZzPJ6q9iUD9etawm24rApQ@mail.gmail.com>
-	<BANLkTikaeMSQ1PVoAopSxeqB5pmELuzGow@mail.gmail.com>
-	<BANLkTimMsGNtOABRXFd24YeNumLM0gQzKw@mail.gmail.com>
-	<BANLkTim8bUttOc-RLZ2XHe7e+5mreXOaBw@mail.gmail.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: compile error for ceph-0.28.*.tar.gz
+Date: Tue, 31 May 2011 10:24:59 -0700
+Message-ID: <20110531172458.GA12733@dreamer>
+References: <BANLkTinCKuhzaRLKaBmJXJJCsNNHeDFuPA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:54224 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752606Ab1EaRUP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2011 13:20:15 -0400
-Received: by vws1 with SMTP id 1so3433253vws.19
-        for <ceph-devel@vger.kernel.org>; Tue, 31 May 2011 10:20:14 -0700 (PDT)
-In-Reply-To: <BANLkTim8bUttOc-RLZ2XHe7e+5mreXOaBw@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:39760 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757866Ab1EaRZA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2011 13:25:00 -0400
+Content-Disposition: inline
+In-Reply-To: <BANLkTinCKuhzaRLKaBmJXJJCsNNHeDFuPA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: Sylar Shen <kimulaaa@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Simon Tian <aixt2006@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, May 31, 2011 at 9:17 AM, Gregory Farnum <gregf@hq.newdream.net>=
- wrote:
-> On Sat, May 28, 2011 at 7:45 PM, Sylar Shen <kimulaaa@gmail.com> wrot=
-e:
->> Hi Gregory,
->> Thanks for your information very much!
->> Dropbox could limit the quota value of each user.
->> Does Dropbox implement the quota function by recording every size of
->> file in its own database?
->> Or Dropbox just controls the quota of each user by the client applic=
-ation?
->> If Dropbox did neither of the two approaches above, how did they do?
->> Sorry it may be a little stupid question but I am curious about that=
-=2E.....:p
-> I really have no idea how Dropbox works; it's got no relation to Ceph
-> except that I use it. ;)
->
->> By the way, the test of re-exporting NFS I did worked not bad.
->> And I am wondering since Ceph can re-export NFS, then can Ceph
->> re-export SAMBA that connects to windows?
-> We don't have a samba re-export functionality, although you can just
-> run samba on a Ceph mount if you like. And I think bchrisman is
-> working on one, but you'd have to ask him about that. :)
+On Tue, May 31, 2011 at 02:23:10PM +0800, Simon Tian wrote:
+> hi  folks,
+> 
+>     When I make ceph after ./configure,  error comes both in 0.28.1
+> and 0.28.2 like bellow:
+> 
+> ./include/encoding.h:294: error: no matching function for call to
+> ?.ecode(PG::Log::Entry&, ceph::buffer::list::iterator&)?
+> ./include/encoding.h:42: note: candidates are: void decode(__u8&,
+> ceph::buffer::list::iterator&)
+> ... ...
+> 
+> ./include/encoding.h:406: error: no matching function for call to
+> ?.ncode(const PG::Missing::item&, ceph::buffer::list&)?
+> ./include/encoding.h:42: note: candidates are: void encode(const
+> __u8&, ceph::bufferlist&)
+> ... ...
+> 
+> 
+> I just download them from http://ceph.newdream.net/download/ceph-0.28.*.tar.gz
 
+I just built ceph-0.28.2 from the tarball, with ./configure && make,
+and had no problems.
 
-Richard Sharpe and I have a VFS layer integrating Ceph (libceph) with
-Samba that is just a stone's throw from basic functionality.
-Current status:
-mount/init, stat, opendir, readdir, and a few other operations are work=
-ing.
-We're chasing down what appears to be a few smaller problems related
-to read/write.
-We've also used to the acl_xattr module to avoid doing a bunch of acl
-translations, though we could probably hit that in a second pass.
-One future critical issue here is going to be the caching mechanism
-and how it works with Samba's process model (process per connection).
-This merits a discussion about how multiple libceph clients will work
-together when run on the same host.
+What operating system and version are you trying to build it on?
 
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Does the output really say "?.ecode" and "?.ncode"? Those seem really
+odd. Can this machine successfully compile bigger projects, e.g. the
+Linux kernel? That's a good general test of hardware reliability..
+
+-- 
+:(){ :|:&};:
