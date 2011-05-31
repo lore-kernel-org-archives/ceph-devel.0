@@ -1,68 +1,47 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: read and write speed.
-Date: Tue, 31 May 2011 18:05:59 +0300
-Message-ID: <4DE503D7.8080703@ufm.su>
-References: <4DE41F34.8020504@ufm.su>	<4DE4BC76.1080906@ufm.su> <BANLkTimPzWufFvxQ_AiyHoJrE7b-+3an3w@mail.gmail.com>
+From: Gregory Farnum <gregf@hq.newdream.net>
+Subject: Re: Quota function of radosgw
+Date: Tue, 31 May 2011 09:17:35 -0700
+Message-ID: <BANLkTim8bUttOc-RLZ2XHe7e+5mreXOaBw@mail.gmail.com>
+References: <BANLkTikpoxS6ZzPJ6q9iUD9etawm24rApQ@mail.gmail.com>
+	<BANLkTikaeMSQ1PVoAopSxeqB5pmELuzGow@mail.gmail.com>
+	<BANLkTimMsGNtOABRXFd24YeNumLM0gQzKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:39835 "EHLO mail.ufm.su"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751055Ab1EaPGB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 31 May 2011 11:06:01 -0400
-In-Reply-To: <BANLkTimPzWufFvxQ_AiyHoJrE7b-+3an3w@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:58548 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756994Ab1EaQRh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2011 12:17:37 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 78308C457
+	for <ceph-devel@vger.kernel.org>; Tue, 31 May 2011 09:17:37 -0700 (PDT)
+Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 2861FC243
+	for <ceph-devel@vger.kernel.org>; Tue, 31 May 2011 09:17:37 -0700 (PDT)
+Received: by eyx24 with SMTP id 24so1713018eyx.19
+        for <ceph-devel@vger.kernel.org>; Tue, 31 May 2011 09:17:35 -0700 (PDT)
+In-Reply-To: <BANLkTimMsGNtOABRXFd24YeNumLM0gQzKw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregf@hq.newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Sylar Shen <kimulaaa@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 05/31/2011 05:51 PM, Gregory Farnum wrote:
-> Sage created an issue to track this:
-> http://tracker.newdream.net/issues/1122
->
-> Based on the differences between the FUSE and kernel clients, it's
-> probably just readahead settings. :)
-> -Greg
-I'm not sure.
+On Sat, May 28, 2011 at 7:45 PM, Sylar Shen <kimulaaa@gmail.com> wrote:
+> Hi Gregory,
+> Thanks for your information very much!
+> Dropbox could limit the quota value of each user.
+> Does Dropbox implement the quota function by recording every size of
+> file in its own database?
+> Or Dropbox just controls the quota of each user by the client application?
+> If Dropbox did neither of the two approaches above, how did they do?
+> Sorry it may be a little stupid question but I am curious about that......:p
+I really have no idea how Dropbox works; it's got no relation to Ceph
+except that I use it. ;)
 
-rsize 10 times more than the default:
-
-root@gate0:~# mount -t ceph -o rsize=5242880 10.5.51.230:/ /mnt
-root@gate0:~# cd /mnt/
-root@gate0:/mnt# dd if=bbb of=/dev/null bs=1024000
-10000+0 records in
-10000+0 records out
-10240000000 bytes (10 GB) copied, 126.168 s, 81.2 MB/s
-root@gate0:/mnt# cd
-root@gate0:~# umount /mnt
-
-rsize 100 times more
-
-root@gate0:~# mount -t ceph -o rsize=52428800 10.5.51.230:/ /mnt
-root@gate0:~# cd /mnt/
-root@gate0:/mnt# dd if=bbb of=/dev/null bs=1024000
-10000+0 records in
-10000+0 records out
-10240000000 bytes (10 GB) copied, 123.432 s, 83.0 MB/s
-root@gate0:/mnt# cd
-root@gate0:~# umount /mnt
-
-cfuse
-
-root@gate0:~# cfuse -m 10.5.51.230:/ /mnt
-  ** WARNING: Ceph is still under development.  Any feedback can be 
-directed  **
-  **          at ceph-devel@vger.kernel.org or 
-http://ceph.newdream.net/.     **
-cfuse[1686]: starting ceph client
-cfuse[1686]: starting fuse
-root@gate0:~# cd /mnt
-root@gate0:/mnt# dd if=bbb of=/dev/null bs=1024000
-10000+0 records in
-10000+0 records out
-10240000000 bytes (10 GB) copied, 93.3285 s, 110 MB/s
-root@gate0:/mnt#
-
-WBR,
-     Fyodor.
+> By the way, the test of re-exporting NFS I did worked not bad.
+> And I am wondering since Ceph can re-export NFS, then can Ceph
+> re-export SAMBA that connects to windows?
+We don't have a samba re-export functionality, although you can just
+run samba on a Ceph mount if you like. And I think bchrisman is
+working on one, but you'd have to ask him about that. :)
+-Greg
