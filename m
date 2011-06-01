@@ -1,112 +1,60 @@
-From: Jeff Wu <cpwu@tnsoft.com.cn>
-Subject: Re: I can't ceph file system in writing on file
-Date: Wed, 1 Jun 2011 15:48:27 +0000
-Message-ID: <1306943307.1527.23.camel@localhost>
-References: <BANLkTik4K1we2z85ob-2Bmx1zNETkTj5Jw@mail.gmail.com>
-	 <BANLkTikho0M2BS3SztA=BN5i3gY=yBq0-A@mail.gmail.com>
-Reply-To: <cpwu@tnsoft.com.cn>
+From: Almond <almond1778@gmail.com>
+Subject: questions about monmap and command
+Date: Wed, 1 Jun 2011 16:01:29 +0800
+Message-ID: <BANLkTimoMQEKLRFOonKDvaBLYNMcfsSU+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [210.22.136.227] ([210.22.136.227]:24467 "EHLO
-	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S933031Ab1FAHsP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Jun 2011 03:48:15 -0400
-In-Reply-To: <BANLkTikho0M2BS3SztA=BN5i3gY=yBq0-A@mail.gmail.com>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:42840 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932929Ab1FAIB3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Jun 2011 04:01:29 -0400
+Received: by pwi15 with SMTP id 15so2433222pwi.19
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Jun 2011 01:01:29 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: biyan chen <riby.chen@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+
+Hi
+
+I have 2 questions about monitor.
+The test environment contains 3 mon(mona<--leader, monb and monc), 2
+mds ,11 osd and ceph v0.26 .
+
+(1)
+I killed the cmon process on mona.
+Both log and 'ceph mon stat' showed the latest mon's stat(mon.b@1 won
+leader election with quorum 1,2).
+
+Then I dump monmap to check, but it didn't record the latest mons' state.
+Can someone tell me what the purpose of monmap is?
+
+root@MON2:/mnt/ext4/monb/monmap# ceph mon getmap -o lmonmpa
+2011-06-01 07:17:35.669787 mon <- [mon,getmap]
+2011-06-01 07:17:35.670964 mon1 -> 'got latest monmap' (0)
+2011-06-01 07:17:35.671058 7fa86a776720  wrote 465 byte payload to lmonmpa
+root@MON2:/mnt/ext4/monb/monmap# monmaptool --print lmonmpa
+monmaptool: monmap file lmonmpa
+epoch 1
+fsid 73277084-b580-e4f8-da6d-3179bd7a0f0b
+last_changed 2011-05-11 11:16:28.730170
+created 2011-05-11 11:16:28.730170
+0: 192.168.200.181:6789/0 mon.a
+1: 192.168.200.182:6789/0 mon.b
+2: 192.168.200.183:6789/0 mon.c
+
+(2)
+root@MON2:/var/log/ceph# ceph mon stat
+2011-06-01 07:21:39.228470 7f3aab8c4710 -- 192.168.200.182:0/14828 >>
+192.168.200.181:6789/0 pipe(0x1a70d60 sd=5 pgs=0 cs=0 l=0).fault first
+fault
+2011-06-01 07:21:45.230389 mon <- [mon,stat]
+2011-06-01 07:21:45.230988 mon1 -> 'e1: 3 mons at
+{a=192.168.200.181:6789/0,b=192.168.200.182:6789/0,c=192.168.200.183:6789/0},
+election epoch 24, quorum 1,2' (0)
+                   ^^^^^
+What does (0) in the last line mean?
 
 
-Hi,
 
-Are the other write commands also printf "Permission denied" ?
-
-Could you try to run:
-
-dd if=3D/dev/zero of=3D/1/512M bs=3D1M count=3D512=20
-
-If you detect a bug ,you can file it at
-
-http://tracker.newdream.net
-
-Jeff ,Wu
-
-
-On Wed, 2011-06-01 at 15:19 +0800, biyan chen wrote:
-> 2011-06-01 15:20:23.258669 7fee67a8c710 -- 192.168.0.211:6789/0 <=3D=3D
-> mds0 192.168.0.207:6800/7272 193 =3D=3D=3D=3D mdsbeacon(4297/alpha up=
-:active
-> seq 180 v14) v2 =3D=3D=3D=3D 244+0+0 (3951961624 0 0) 0x8e1a00 con 0x=
-8efb40
-> 2011-06-01 15:20:23.258706 7fee67a8c710 mon.0@0(leader) e1 have conne=
-ction
-> 2011-06-01 15:20:23.258720 7fee67a8c710 mon.0@0(leader) e1 ms_dispatc=
-h
-> existing session MonSession: mds? 192.168.0.207:6800/7272 is openallo=
-w
-> rwx for mds? 192.168.0.207:6800/7272
-> 2011-06-01 15:20:23.258728 7fee67a8c710 mon.0@0(leader) e1  caps allo=
-w rwx
-> 2011-06-01 15:20:23.258748 7fee67a8c710
-> mon.0@0(leader).paxosservice(mdsmap) dispatch mdsbeacon(4297/alpha
-> up:active seq 180 v14) v2 from mds0 192.168.0.207:6800/7272
-> 2011-06-01 15:20:23.258763 7fee67a8c710 mon.0@0(leader).paxos(mdsmap
-> active lc 14) is_readable now=3D2011-06-01 15:20:23.258758
-> lease_expire=3D0.000000 has v14 lc 14
-> 2011-06-01 15:20:23.258777 7fee67a8c710 mon.0@0(leader).mds e14
-> preprocess_query mdsbeacon(4297/alpha up:active seq 180 v14) v2 from
-> mds0 192.168.0.207:6800/7272
-> 2011-06-01 15:20:23.258792 7fee67a8c710 mon.0@0(leader).mds e14
-> preprocess_beacon mdsbeacon(4297/alpha up:active seq 180 v14) v2 from
-> mds0 192.168.0.207:6800/7272 compat=3D{},rocompat=3D{},incompat=3D{1=3D=
-base
-> v0.20,2=3Dclient writeable ranges,3=3Ddefault file layouts on dirs,4=3D=
-dir
-> inode in separate object}
-> 2011-06-01 15:20:23.258806 7fee67a8c710 mon.0@0(leader).mds e14
-> _note_beacon mdsbeacon(4297/alpha up:active seq 180 v14) v2 noting
-> time
-> 2011-06-01 15:20:23.258821 7fee67a8c710 -- 192.168.0.211:6789/0 -->
-> 192.168.0.207:6800/7272 -- mdsbeacon(4297/alpha up:active seq 180 v14=
-)
-> v1 -- ?+0 0x9b4c80 con 0x8efb40
-> ^C
->=20
-> [root@ceph_mon0 ceph]# tail /var/log/ceph/mon.0.log -f
-> Display the above information =EF=BC=81
->=20
-> Thanks!
->=20
-> 2011/6/1 biyan chen <riby.chen@gmail.com>:
-> > When I mount ceph after the file system. I want to go to create a
-> > file, but hint permissions problem, cannot write
-> >
-> > In /var/log/ceph log information inside, didn't see more informatio=
-n
-> >
-> > [root@ceph_client /]# df
-> > Filesystem           1K-blocks      Used Available Use% Mounted on
-> > /dev/sda1            472658192  20199408 428449108   5% /
-> > tmpfs                  1984548         0   1984548   0% /dev/shm
-> > /dev/loop0             3351190   3351190         0 100% /mnt/cdrom
-> > 192.168.0.211:6789:/ 158047232     81920 155843584   1% /1
-> > [root@ceph_client /]# cd /1
-> > [root@ceph_client 1]# echo "1">>1.txt
-> > -bash: 1.txt: Permission denied
-> > [root@ceph_client 1]# cd ..
-> > [root@ceph_client /]# ll
-> > total 112
-> > drwxr-xr-x.  1 root root     0 Jun  1 20:05 1
-> >
->=20
->=20
->=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks!
