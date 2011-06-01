@@ -1,46 +1,35 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: cfuse and ceph.conf
-Date: Tue, 31 May 2011 16:11:55 -0700
-Message-ID: <20110531231155.GC12733@dreamer>
-References: <4DE5613E.4010602@ufm.su>
+From: biyan chen <riby.chen@gmail.com>
+Subject: ceph lock
+Date: Wed, 1 Jun 2011 10:26:03 +0800
+Message-ID: <BANLkTinzNqrd97WnAbBOE_t0bo-KO-2pOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:45496 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932878Ab1EaXL5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2011 19:11:57 -0400
-Content-Disposition: inline
-In-Reply-To: <4DE5613E.4010602@ufm.su>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:43034 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933137Ab1FAC0E convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 May 2011 22:26:04 -0400
+Received: by yxs7 with SMTP id 7so2042531yxs.19
+        for <ceph-devel@vger.kernel.org>; Tue, 31 May 2011 19:26:03 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wed, Jun 01, 2011 at 12:44:30AM +0300, Fyodor Ustinov wrote:
-> As I understand with -m key cfuse should not require ceph.conf.
+HI
 
-It does need a config, to even know whether it should attempt
-cryptographic authentication or not (and where to find the key, etc).
+Everybody!
 
-It could be changed to do things more like the kernel client,
-but as is, it always requires a config file.
+Who can give me some information about CEPH file locks
 
-> root@st8:~# cfuse -c /dev/null -m 10.5.51.230:6789 /stor01
-...
-> root@st8:~# ls -al /stor01/
-> total 1
-> drwxr-xr-x 1 root root 0 2011-06-01 00:22 .
-> drwxr-xr-x 1 root root 0 2011-05-31 01:27 bbb
-> root@st8:~#
-> 
-> P.S. BTW, where ".." directory?
+CEPH files lock mechanism is how
 
-Oh, heh, that's interesting.
-
-It seems "." and ".." are optional, according to POSIX:
-
-http://sourceforge.net/mailarchive/forum.php?thread_name=E1O3s82-0008BY-MW%40pomaz-ex.szeredi.hu&forum_name=fuse-devel
-
--- 
-:(){ :|:&};:
+--=20
+name:Riby
+mobile:+86 15280267642
+company: =B0=D9=B4=F3=C1=FA=D2=BB
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
