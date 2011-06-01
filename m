@@ -1,40 +1,62 @@
-From: Simon Tian <aixt2006@gmail.com>
-Subject: Re: compile error for ceph-0.28.*.tar.gz
-Date: Wed, 1 Jun 2011 17:46:30 +0800
-Message-ID: <BANLkTi=RFMvVLUnuMrm-f_3XTCq+EXyf+A@mail.gmail.com>
-References: <BANLkTinCKuhzaRLKaBmJXJJCsNNHeDFuPA@mail.gmail.com>
-	<20110531172458.GA12733@dreamer>
-	<4DE52AE3.9020900@sandia.gov>
-	<20110531184821.GB12733@dreamer>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: read vs write. Some tests.
+Date: Wed, 01 Jun 2011 17:58:14 +0300
+Message-ID: <4DE65386.90209@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f42.google.com ([74.125.82.42]:56717 "EHLO
-	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757316Ab1FAJqc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Jun 2011 05:46:32 -0400
-Received: by wwk4 with SMTP id 4so3263551wwk.1
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Jun 2011 02:46:31 -0700 (PDT)
-In-Reply-To: <20110531184821.GB12733@dreamer>
+Received: from mail.ufm.su ([77.120.103.19]:52033 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757985Ab1FAO6S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 1 Jun 2011 10:58:18 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id 860E7600485
+	for <ceph-devel@vger.kernel.org>; Wed,  1 Jun 2011 17:58:15 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id LjsC8oQHsEq1 for <ceph-devel@vger.kernel.org>;
+	Wed,  1 Jun 2011 17:58:15 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id 5BAFB600484
+	for <ceph-devel@vger.kernel.org>; Wed,  1 Jun 2011 17:58:15 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Jim Schutt <jaschut@sandia.gov>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-I found it is difficult to update boost on all my rhel5.4 hosts, is
-there any way to make ceph-0.28.* successfully on rhel5.4 with old
-boost?
 
-2011/6/1 Tommi Virtanen <tommi.virtanen@dreamhost.com>:
-> On Tue, May 31, 2011 at 11:52:35AM -0600, Jim Schutt wrote:
->> FWIW, I believe I saw such errors on RHEL 5 due to it having
->> boost v1.33.1, while Ceph needs v1.34 or newer to get statechart.
->
-> It seems we don't have a versioned dependency on libboost. I created a
-> ticket to make it so. Like a captain.
->
-> http://tracker.newdream.net/issues/1124
->
-> --
-> :(){ :|:&};:
->
+ceph - 0.28.2 from repository
+
+client - linux 2.6.39/64
+
+All osd servers have 4G RAM. Journal on 1G tempfs. 2*1G ethernet 
+(etherchannel)
+
+client server have 2G RAM. 2*1G ethernet (etherchannel)
+
+In tests used "dd if=/dev/zero of=file bs=8M count=3000" for write and 
+"dd if=file of=/dev/null bs=8M count=3000" for read. For rbd instead 
+"file" used "/dev/rbd0".
+In "ceph fs" additionaly used "iozone -a -y 8M -i 0 -i 1 -i 2 -n25g -g25g"
+
+Tests results:
+
+kernel ceph fs:
+dd write:  149.748 s, 168 MB/s
+dd read:  451.835 s, 55.7 MB/s
+iozone write: 165 MB/s
+iozone rewrite:  165 MB/s
+iozone randow write: 165 MB/s
+iozone read: 53 MB/s
+iozone reread: 55 MB/s
+iozone random read: 41 MB/s
+
+rbd:
+dd wite: 212.583 s, 118 MB/s
+dd read: 480.374 s, 52.4 MB/s
+
+
+Frankly I do not quite understand what was happening.
+
+WBR,
+     Fyodor.
