@@ -1,54 +1,122 @@
-From: biyan chen <riby.chen@gmail.com>
-Subject: Re: write file problems
-Date: Thu, 2 Jun 2011 17:36:43 +0800
-Message-ID: <BANLkTinZLaESH6pMkb7PAoKDaW9b72S-YA@mail.gmail.com>
-References: <BANLkTimbwCo1yJ3vJ5qc6QbELAdZdwZGHg@mail.gmail.com>
+From: Lalit Bhasin <lkb@one.com>
+Subject: Re: Error while creating ceph cluster
+Date: Thu, 02 Jun 2011 17:33:32 +0530
+Message-ID: <1307016212.13031.15.camel@lb>
+References: <1306997996.2518.4.camel@lb> <1307027655.1760.2.camel@localhost>
+	 <1307000504.13031.6.camel@lb>  <1307030136.1760.9.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:60039 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932883Ab1FBJgp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2011 05:36:45 -0400
-Received: by gwaa18 with SMTP id a18so257683gwa.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2011 02:36:44 -0700 (PDT)
-In-Reply-To: <BANLkTimbwCo1yJ3vJ5qc6QbELAdZdwZGHg@mail.gmail.com>
+Received: from kontorsmtp2.one.com ([195.47.247.17]:55462 "EHLO
+	kontorsmtp2.one.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757259Ab1FBMDk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2011 08:03:40 -0400
+In-Reply-To: <1307030136.1760.9.camel@localhost>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: cpwu@tnsoft.com.cn
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Sorry!
+On Thu, 2011-06-02 at 15:55 +0000, Jeff Wu wrote:
+> Hi ,
+> 
+> Could you create the folder 
+> node0: /data/osd0/osd0 /data/osd0/osd1
+> node1: /data/osd1/osd0 /data/osd1/osd1
+> 
+> or
+> try to modify  " osd data = /data" at your ceph.conf,
+> then create /data/osd0 and /data/osd1  at your node0&&node1.
+> 
+> I had filed the issue at :
+> 
+> http://tracker.newdream.net/issues/1015
+> 
+> 
+> but Greg Farnum added  the Comment :"
+> 
+> You need to create the directory yourself and this is deliberate. It
+> prevents administrators from not fully setting up their cluster and
+> accidentally having the OSD use the root partition when they meant to
+> use a separate drive mounted at /osd."
+> 
+> Jeff ,Wu
+> 
+Thanks Jeff. This helped. I now used single ceph.conf file on both the
+nodes, and used $i substitution for osd and mon, and it worked ( so
+kept /data/osd1 and /data/osd0 in node1 and node0 respectively).
 
-command:
-   time dd if=3D/dev/zero of=3Dmmm bs=3D8k count=3D100
 
-
-2011/6/2 biyan chen <riby.chen@gmail.com>:
-> Ceph file systems, write file will be no reaction, namely dead state
->
-> For example:
->
-> Dd if =3D / a dev/zero of =3D MMM bs =3D 8k =3D 100 count
->
->
-> Will have been waiting!
->
->
-> And then other SSH window using command "ls -al" is no  reaction!
->
->
-> Thanks!
->
-
-
-
---=20
-name:Riby
-mobile:+86 15280267642
-company: =B0=D9=B4=F3=C1=FA=D2=BB
+Subsequently file system creation worked fine, and all ceph daemons
+started fine. But mount gives error as below:
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+lalitb@node0:/data/osd0$ sudo mount -t ceph 192.168.230.12:/ /ceph
+[sudo] password for lalitb: 
+mount error 5 = Input/output error
+lalitb@node0:/data/osd0$ 
+---
+
+Where 192.168.230.12 is IP address of node0. Cannot see any error in
+syslog.
+
+- Lalit
+
+> 
+> 
+> 
+> 
+> On Thu, 2011-06-02 at 15:41 +0800, Lalit Bhasin wrote:
+> > On Thu, 2011-06-02 at 15:14 +0000, Jeff Wu wrote:
+> > > Hi ,
+> > > try the steps:
+> > > 1. use root user;
+> > > 2. manually create /data/osd${N} folder.
+> > Jeff, I ensured that /data/osd0 ( on node0) and /data/osd1 ( on node1)
+> > existed before shooting this command on node1. Got same error using root
+> > user also ( ofcourse this time there was no permission denied error
+> > while writing to error logs). 
+> > mkcephfs is failing while trying to execute below command on node0:
+> > 
+> > ssh node0 /sbin/mkcephfs -d /tmp/mkcephfs.e3FNLexFkx --init-daemon osd.0
+> > 
+> > And it is reporting error as:
+> > 
+> >  ** ERROR: error creating empty object store in /data/osd1: error 2: No
+> > such file or directory
+> > 
+> > Which is somewhat true since /data/osd1 only exists in node1, and not
+> > node0. Does it means there are some error in ceph.conf. 
+> > 
+> > - Lalit
+> > 
+> > 
+> > 
+> > > 
+> > > Jeff ,Wu
+> > > 
+> > > On Thu, 2011-06-02 at 14:59 +0800, Lalit Bhasin wrote:
+> > > > Guys, I am new to ceph. Trying to create a 2 node cluster setup of ceph.
+> > > > Getting errors during mk file system : http://dpaste.com/hold/549518/.
+> > > > Any idea what's going wrong?
+> > > > 
+> > > > 
+> > > > - Lalit
+> > > > 
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
