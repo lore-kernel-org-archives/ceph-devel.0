@@ -1,40 +1,39 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: write file problems
-Date: Thu, 2 Jun 2011 08:56:05 -0700
-Message-ID: <20110602155605.GB11721@dreamer>
-References: <BANLkTimbwCo1yJ3vJ5qc6QbELAdZdwZGHg@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph_tool_common_init failed
+Date: Thu, 2 Jun 2011 09:39:17 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1106020936580.19146@cobra.newdream.net>
+References: <BANLkTinhA3T3F3+ocVrr9vzckJoWZRtXZg@mail.gmail.com>
+ <BANLkTimK72kHioovQ=9Jaz0neiBzq+5LNQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:37334 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752160Ab1FBP4G (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2011 11:56:06 -0400
-Content-Disposition: inline
-In-Reply-To: <BANLkTimbwCo1yJ3vJ5qc6QbELAdZdwZGHg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:58370 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752316Ab1FBQhg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2011 12:37:36 -0400
+In-Reply-To: <BANLkTimK72kHioovQ=9Jaz0neiBzq+5LNQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: biyan chen <riby.chen@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregf@hq.newdream.net>
+Cc: biyan chen <riby.chen@gmail.com>, ceph-devel@vger.kernel.org
 
-On Thu, Jun 02, 2011 at 05:35:59PM +0800, biyan chen wrote:
-> Ceph file systems, write file will be no reaction, namely dead state
+On Thu, 2 Jun 2011, Gregory Farnum wrote:
+> 2011/6/2 biyan chen <riby.chen@gmail.com>:
+> > 2011-06-02 16:27:35.010776 7f3f53940720 unable to authenticate as client.admin
 > 
-> For example:
+> That's your problem. You don't have your keys set up properly to
+> authenticate as the admin on those nodes. :)
 > 
-> Dd if = / a dev/zero of = MMM bs = 8k = 100 count
-> 
-> Will have been waiting!
-> 
-> And then other SSH window using command "ls -al" is no  reaction!
+> I suspect permissions problems are the cause of your other issues with
+> file writing as well. How did you set up this cluster? Try recreating
+> your cluster by carefully following the instructions at
+> http://ceph.newdream.net/wiki/Creating_a_new_file_system
 
-Is this perhaps the same as http://tracker.newdream.net/issues/1110
-as seen by Andre Noll?
+First you should probably verify that there is a keyring file (usually 
+/etc/ceph/keyring) that has a client.admin key in it (it's plaintext; cat 
+it to see) and that it is readable.  It's written to /etc/ceph/keyring by 
+mkcephfs by default but that may have been on a different node, or the 
+permissions might be off.  If the file is in a different location, you can 
+explicitly specify that on the command line with '-k path/to/keyring'.
 
-In either case, you need to give us more information; what version of
-ceph are you running, what does your cluster look like, do you use
-kclient or cfuse, what kernel version; and then, we probably need to
-see the logs created when this problem starts happening.
-
--- 
-:(){ :|:&};:
+sage
