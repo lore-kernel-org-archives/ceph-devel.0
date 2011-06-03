@@ -1,69 +1,132 @@
-From: biyan chen <riby.chen@gmail.com>
-Subject: Re: ceph_tool_common_init failed
-Date: Fri, 3 Jun 2011 10:24:00 +0800
-Message-ID: <BANLkTinitqf3ZDFo_DoPt=9VS6poLqyZcw@mail.gmail.com>
-References: <BANLkTinhA3T3F3+ocVrr9vzckJoWZRtXZg@mail.gmail.com>
-	<BANLkTimK72kHioovQ=9Jaz0neiBzq+5LNQ@mail.gmail.com>
-	<Pine.LNX.4.64.1106020936580.19146@cobra.newdream.net>
+From: Lalit Bhasin <lkb@one.com>
+Subject: Re: Error while creating ceph cluster
+Date: Fri, 03 Jun 2011 12:30:29 +0530
+Message-ID: <1307084429.3791.2.camel@lb>
+References: <1306997996.2518.4.camel@lb> <1307027655.1760.2.camel@localhost>
+	 <1307000504.13031.6.camel@lb>  <1307030136.1760.9.camel@localhost>
+	 <1307016212.13031.15.camel@lb>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:45802 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751541Ab1FCCYC convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2011 22:24:02 -0400
-Received: by gxk21 with SMTP id 21so596520gxk.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2011 19:24:01 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1106020936580.19146@cobra.newdream.net>
+Received: from kontorsmtp2.one.com ([195.47.247.17]:37808 "EHLO
+	kontorsmtp2.one.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751271Ab1FCHAh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Jun 2011 03:00:37 -0400
+In-Reply-To: <1307016212.13031.15.camel@lb>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Gregory Farnum <gregf@hq.newdream.net>, ceph-devel@vger.kernel.org
+To: cpwu@tnsoft.com.cn
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I think this is my questions, thank you!
+On Thu, 2011-06-02 at 17:33 +0530, Lalit Bhasin wrote:
+> On Thu, 2011-06-02 at 15:55 +0000, Jeff Wu wrote:
+> > Hi ,
+> > 
+> > Could you create the folder 
+> > node0: /data/osd0/osd0 /data/osd0/osd1
+> > node1: /data/osd1/osd0 /data/osd1/osd1
+> > 
+> > or
+> > try to modify  " osd data = /data" at your ceph.conf,
+> > then create /data/osd0 and /data/osd1  at your node0&&node1.
+> > 
+> > I had filed the issue at :
+> > 
+> > http://tracker.newdream.net/issues/1015
+> > 
+> > 
+> > but Greg Farnum added  the Comment :"
+> > 
+> > You need to create the directory yourself and this is deliberate. It
+> > prevents administrators from not fully setting up their cluster and
+> > accidentally having the OSD use the root partition when they meant to
+> > use a separate drive mounted at /osd."
+> > 
+> > Jeff ,Wu
+> > 
+> Thanks Jeff. This helped. I now used single ceph.conf file on both the
+> nodes, and used $i substitution for osd and mon, and it worked ( so
+> kept /data/osd1 and /data/osd0 in node1 and node0 respectively).
+> 
+> 
+> Subsequently file system creation worked fine, and all ceph daemons
+> started fine. But mount gives error as below:
+> --
+> lalitb@node0:/data/osd0$ sudo mount -t ceph 192.168.230.12:/ /ceph
+> [sudo] password for lalitb: 
+> mount error 5 = Input/output error
+> lalitb@node0:/data/osd0$ 
+> ---
+> 
+> Where 192.168.230.12 is IP address of node0. Cannot see any error in
+> syslog.
+> 
+> - Lalit
+> 
+
+Ok, I modified ceph.conf file to create osd journal on writehead mode,
+and mount was successful after this. It seems this is requirement for
+non-brtfs.
+
+- Lalit
+
+> > 
+> > 
+> > 
+> > 
+> > On Thu, 2011-06-02 at 15:41 +0800, Lalit Bhasin wrote:
+> > > On Thu, 2011-06-02 at 15:14 +0000, Jeff Wu wrote:
+> > > > Hi ,
+> > > > try the steps:
+> > > > 1. use root user;
+> > > > 2. manually create /data/osd${N} folder.
+> > > Jeff, I ensured that /data/osd0 ( on node0) and /data/osd1 ( on node1)
+> > > existed before shooting this command on node1. Got same error using root
+> > > user also ( ofcourse this time there was no permission denied error
+> > > while writing to error logs). 
+> > > mkcephfs is failing while trying to execute below command on node0:
+> > > 
+> > > ssh node0 /sbin/mkcephfs -d /tmp/mkcephfs.e3FNLexFkx --init-daemon osd.0
+> > > 
+> > > And it is reporting error as:
+> > > 
+> > >  ** ERROR: error creating empty object store in /data/osd1: error 2: No
+> > > such file or directory
+> > > 
+> > > Which is somewhat true since /data/osd1 only exists in node1, and not
+> > > node0. Does it means there are some error in ceph.conf. 
+> > > 
+> > > - Lalit
+> > > 
+> > > 
+> > > 
+> > > > 
+> > > > Jeff ,Wu
+> > > > 
+> > > > On Thu, 2011-06-02 at 14:59 +0800, Lalit Bhasin wrote:
+> > > > > Guys, I am new to ceph. Trying to create a 2 node cluster setup of ceph.
+> > > > > Getting errors during mk file system : http://dpaste.com/hold/549518/.
+> > > > > Any idea what's going wrong?
+> > > > > 
+> > > > > 
+> > > > > - Lalit
+> > > > > 
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
 
-2011/6/3 Sage Weil <sage@newdream.net>:
-> On Thu, 2 Jun 2011, Gregory Farnum wrote:
->> 2011/6/2 biyan chen <riby.chen@gmail.com>:
->> > 2011-06-02 16:27:35.010776 7f3f53940720 unable to authenticate as =
-client.admin
->>
->> That's your problem. You don't have your keys set up properly to
->> authenticate as the admin on those nodes. :)
->>
->> I suspect permissions problems are the cause of your other issues wi=
-th
->> file writing as well. How did you set up this cluster? Try recreatin=
-g
->> your cluster by carefully following the instructions at
->> http://ceph.newdream.net/wiki/Creating_a_new_file_system
->
-> First you should probably verify that there is a keyring file (usuall=
-y
-> /etc/ceph/keyring) that has a client.admin key in it (it's plaintext;=
- cat
-> it to see) and that it is readable.  It's written to /etc/ceph/keyrin=
-g by
-> mkcephfs by default but that may have been on a different node, or th=
-e
-> permissions might be off.  If the file is in a different location, yo=
-u can
-> explicitly specify that on the command line with '-k path/to/keyring'=
-=2E
->
-> sage
->
-
-
-
---=20
-name:Riby
-mobile:+86 15280267642
-company: =B0=D9=B4=F3=C1=FA=D2=BB
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
