@@ -1,41 +1,69 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: Ceph code coverage integration proposal
-Date: Thu, 02 Jun 2011 14:32:40 -0700
-Message-ID: <4DE80178.5050305@dreamhost.com>
-References: <20110602180508.GC11721@dreamer> <4DE7FC06.9020704@dreamhost.com> <20110602211801.GD11721@dreamer>
+From: biyan chen <riby.chen@gmail.com>
+Subject: Re: ceph_tool_common_init failed
+Date: Fri, 3 Jun 2011 10:24:00 +0800
+Message-ID: <BANLkTinitqf3ZDFo_DoPt=9VS6poLqyZcw@mail.gmail.com>
+References: <BANLkTinhA3T3F3+ocVrr9vzckJoWZRtXZg@mail.gmail.com>
+	<BANLkTimK72kHioovQ=9Jaz0neiBzq+5LNQ@mail.gmail.com>
+	<Pine.LNX.4.64.1106020936580.19146@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:51540 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754396Ab1FBVcl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2011 17:32:41 -0400
-In-Reply-To: <20110602211801.GD11721@dreamer>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:45802 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751541Ab1FCCYC convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Jun 2011 22:24:02 -0400
+Received: by gxk21 with SMTP id 21so596520gxk.19
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Jun 2011 19:24:01 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1106020936580.19146@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Gregory Farnum <gregf@hq.newdream.net>, ceph-devel@vger.kernel.org
 
-On 06/02/2011 02:18 PM, Tommi Virtanen wrote:
-> On Thu, Jun 02, 2011 at 02:09:26PM -0700, Josh Durgin wrote:
->> On 06/02/2011 11:05 AM, Tommi Virtanen wrote:
->> <snip>
->>> Proposal:
->>>
->>> - add autoconf flag --enable-coverage, or some such (afaik Josh has
->>>    this already), that compiles with coverage recording
+I think this is my questions, thank you!
+
+
+2011/6/3 Sage Weil <sage@newdream.net>:
+> On Thu, 2 Jun 2011, Gregory Farnum wrote:
+>> 2011/6/2 biyan chen <riby.chen@gmail.com>:
+>> > 2011-06-02 16:27:35.010776 7f3f53940720 unable to authenticate as =
+client.admin
 >>
->> This is in the wip_gcov branch as --with-gcov.
+>> That's your problem. You don't have your keys set up properly to
+>> authenticate as the admin on those nodes. :)
+>>
+>> I suspect permissions problems are the cause of your other issues wi=
+th
+>> file writing as well. How did you set up this cluster? Try recreatin=
+g
+>> your cluster by carefully following the instructions at
+>> http://ceph.newdream.net/wiki/Creating_a_new_file_system
 >
-> Sweet.
+> First you should probably verify that there is a keyring file (usuall=
+y
+> /etc/ceph/keyring) that has a client.admin key in it (it's plaintext;=
+ cat
+> it to see) and that it is readable.  It's written to /etc/ceph/keyrin=
+g by
+> mkcephfs by default but that may have been on a different node, or th=
+e
+> permissions might be off.  If the file is in a different location, yo=
+u can
+> explicitly specify that on the command line with '-k path/to/keyring'=
+=2E
 >
-> BTW, I know this has been going on for a while, but autoconf wasn't
-> meant to be used like that.. --with-foo is supposed to be about
-> external libraries and such, --enable-foo is supposed to be about
-> features. So --with-debug should have been --enable-debug. I didn't
-> change that the last time I was working on autoconf, because I wanted
-> to limit the size of the crater I was creating, but for new stuff we
-> probably should do it the "right way".
+> sage
+>
 
-Good to know - I'll rename it --enable-coverage.
+
+
+--=20
+name:Riby
+mobile:+86 15280267642
+company: =B0=D9=B4=F3=C1=FA=D2=BB
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
