@@ -1,24 +1,44 @@
-From: "Barr. Michail Hamilakis" <mliebreich@pol.net>
-Subject: Proposition
-Date: Sat, 4 Jun 2011 17:30:51 -0400
-Message-ID: <512334705.3880761307223051739.JavaMail.root@zmcs02l-pol-08.portal.webmd.com>
-References: <1578773382.3880541307222992515.JavaMail.root@zmcs02l-pol-08.portal.webmd.com>
-Reply-To: <michailschamber@live.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: ceph rados.py packaging help
+Date: Mon, 6 Jun 2011 10:50:55 -0700
+Message-ID: <20110606175055.GA2569@dreamer>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:53798
-	"EHLO VA3EHSOBE009.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753346Ab1FDVaz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Jun 2011 17:30:55 -0400
-In-Reply-To: <1578773382.3880541307222992515.JavaMail.root@zmcs02l-pol-08.portal.webmd.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:39819 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753635Ab1FFRuz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Jun 2011 13:50:55 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Laszlo Boszormenyi <gcs@debian.hu>
+Cc: ceph-devel@vger.kernel.org
 
+Hi Laszlo! (And hi Cc'ed ceph-dev.)
 
+As you probably know, the Ceph project tries to provide debs for
+Debian lenny, squeeze and sid, and Ubuntu lucid, maverick and natty.
 
-My name is Barr.Michail Hamilakis Esq, personal Attorney to Late Mr. 
-Clifford Dahler.I have a secured business suggestion for you with a 
-value of $7.5Million.Kindly contact me for more details.
+We're starting to add Python bindings to libceph, librados etc,
+and ran into a case where not 100% sure how to handle. That is,
+how should we package e.g. rados.py so that the packaging works
+across as many releases as we can?
 
+There is the Debian Python Policy, but that usually only documents the
+current best behavior; how do we target more than squeeze/sid?
+http://www.debian.org/doc/packaging-manuals/python-policy/ e.g. should
+we use python-central, python-support, put the files ourselves into
+/usr/lib/pythonX.Y/dist-packages (or site-packages, for <2.6), or
+what?
+
+(I heard Sage was perhaps willing to drop some of the oldest releases,
+if this proves insurmountable to do with just one style of packaging.
+Our internal needs may dictate that we must support some older
+versions, but I think those setups are going to need a virtualenv
+anyway, soon..)
+
+Any guidance you can provide would be very welcome. Thanks!
+
+-- 
+:(){ :|:&};:
