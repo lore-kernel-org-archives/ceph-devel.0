@@ -1,106 +1,95 @@
-From: =?iso-8859-1?q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
-Subject: Degraded PGs blocking open()?
-Date: Tue, 7 Jun 2011 02:37:34 +0200
-Message-ID: <201106070237.34854.szekelyi@niif.hu>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: Degraded PGs blocking open()?
+Date: Mon, 6 Jun 2011 19:15:31 -0700
+Message-ID: <BANLkTimt0MKyd9ZOqxYm=z91HNS+5B=a1g@mail.gmail.com>
+References: <201106070237.34854.szekelyi@niif.hu>
 Mime-Version: 1.0
-Content-Type: Multipart/Mixed;
-  boundary="Boundary-00=_OLX7NXluUjBCbex"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ki.iif.hu ([193.6.222.241]:54065 "EHLO mail.ki.iif.hu"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754288Ab1FGAoU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 6 Jun 2011 20:44:20 -0400
-Received: from bolha.lvs.iif.hu (bolha.lvs.iif.hu [193.225.14.181])
-	by mail.ki.iif.hu (Postfix) with ESMTP id 0E8CB87557
-	for <ceph-devel@vger.kernel.org>; Tue,  7 Jun 2011 02:37:39 +0200 (CEST)
-Received: from mail.ki.iif.hu ([IPv6:::ffff:193.6.222.241])
-	by bolha.lvs.iif.hu (bolha.lvs.iif.hu [::ffff:193.225.14.72]) (amavisd-new, port 10024)
-	with ESMTP id VQ5Z4v3XMbWf for <ceph-devel@vger.kernel.org>;
-	Tue,  7 Jun 2011 02:37:36 +0200 (CEST)
-Received: from mranderson.localnet (adsl166.adsl.hungarnet.hu [193.6.17.166])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by mail.ki.iif.hu (Postfix) with ESMTPSA id 2D53A87558
-	for <ceph-devel@vger.kernel.org>; Tue,  7 Jun 2011 02:37:35 +0200 (CEST)
+Received: from mail.hq.newdream.net ([66.33.206.127]:53464 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754406Ab1FGCPd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Jun 2011 22:15:33 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 8BB84C2C8
+	for <ceph-devel@vger.kernel.org>; Mon,  6 Jun 2011 19:15:33 -0700 (PDT)
+Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 3A21BC2C6
+	for <ceph-devel@vger.kernel.org>; Mon,  6 Jun 2011 19:15:33 -0700 (PDT)
+Received: by eyx24 with SMTP id 24so1571529eyx.19
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Jun 2011 19:15:31 -0700 (PDT)
+In-Reply-To: <201106070237.34854.szekelyi@niif.hu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?ISO-8859-1?Q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
+Cc: ceph-devel@vger.kernel.org
 
---Boundary-00=_OLX7NXluUjBCbex
-Content-Type: text/plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+2011/6/6 Sz=E9kelyi Szabolcs <szekelyi@niif.hu>:
+> Hi all,
+>
+> I have a three node ceph setup, two nodes playing all three roles (OS=
+D, MDS,
+> MON), and one being just a monitor (which happens to be the client I'=
+m using
+> the filesystem from).
+>
+> I want to achieve high availablity by mirroring all data between the =
+OSDs and
+> being able to still access everything even if one of them goes down. =
+The
+> mirroring works fine, I see the space being consumed on both nodes as=
+ I copy
+> data on the file system. According to `ceph -s`, all PGs are in activ=
+e+clean
+> state. If I start reading a big file and shut down one of the (OSD+MD=
+S+MON)
+> nodes, the file can still be read until the end, that's fine. Moreove=
+r, the
+> contents read back seem correct when compared to the original file. V=
+ery nice.
+> But if I start reading the file while one of the nodes is down, it bl=
+ocks until
+> the node comes up again. I can't even kill the reading process with K=
+ILL,
+> TERM, or INT.
+>
+> Am I doing something wrong, or was not careful enough reading the doc=
+s, or may
+> this be a bug? My ceph.conf is attached.
+The problem isn't in the OSD, it's the MDS. :)
 
-Hi all,
+The MDS system is *slightly* less resilient than the OSD system is.
+You can set up "standby" MDSes that will take over if the system
+detects that an MDS has died; you can even set up "standby-replay"
+MDSes that follow a specific MDS and keep all its data cached in
+memory so they can take over right when a failure is detected. But if
+you lose one MDS its data won't automatically be imported into the
+remaining MDSes. (Because the MDS keeps all its data on the OSDs,
+there's no danger of losing data -- it's a matter of how the data is
+segregated that requires a new daemon. And generally the process is
+dominated by the timeout, not the time it takes the new MDS to take
+over.)
+So in your case, you're trying to open a file that is controlled by
+the MDS that you killed, and the client can't get the "capability"
+bits that it needs in order to look at the file. So you've got a few
+options:
+1) Kill the OSD, but not the MDS.
+2) Create an extra MDS daemon, perhaps on your monitor node. When the
+system detects that one of your MDSes has died (a configurable
+timeout, IIRC in the neighborhood of 30-60 seconds), this extra daemon
+will take over.
+(Or you can just start up the new daemon after you kill the old one,
+doesn't matter.)
+3) Create a new system with only one MDS and don't kill that one.
+(Eventually you will be able to shrink the number of MDSes, but this
+isn't well-tested or documented so I'm not sure what state it's in
+right now.)
 
-I have a three node ceph setup, two nodes playing all three roles (OSD, MDS, 
-MON), and one being just a monitor (which happens to be the client I'm using 
-the filesystem from).
-
-I want to achieve high availablity by mirroring all data between the OSDs and 
-being able to still access everything even if one of them goes down. The 
-mirroring works fine, I see the space being consumed on both nodes as I copy 
-data on the file system. According to `ceph -s`, all PGs are in active+clean 
-state. If I start reading a big file and shut down one of the (OSD+MDS+MON) 
-nodes, the file can still be read until the end, that's fine. Moreover, the 
-contents read back seem correct when compared to the original file. Very nice. 
-But if I start reading the file while one of the nodes is down, it blocks until 
-the node comes up again. I can't even kill the reading process with KILL, 
-TERM, or INT.
-
-Am I doing something wrong, or was not careful enough reading the docs, or may 
-this be a bug? My ceph.conf is attached.
-
-Thanks,
--- 
-cc
-
-
---Boundary-00=_OLX7NXluUjBCbex
-Content-Type: text/plain;
-  name="ceph.conf"
-Content-Transfer-Encoding: 7bit
-
-[global]
-auth supported = cephx
-keyring = /etc/ceph/keyring.$name
-
-
-
-[mds]
-
-[mds.0]
-host = iscsigw1
-
-[mds.1]
-host = iscsigw2
-
-
-
-[osd]
-osd data = /srv/ceph/osd.$id
-
-[osd.0]
-host = iscsigw1
-
-[osd.1]
-host = iscsigw2
-
-
-
-[mon]
-mon data = /srv/ceph/mon.$id
-
-[mon.0]
-host = iscsigw1
-mon addr = <node1_ip>:6789
-
-[mon.1]
-host = iscsigw2
-mon addr = <node2_ip>:6789
-
-[mon.cc]
-host = cc
-mon addr = <node3_ip>:6789
-
---Boundary-00=_OLX7NXluUjBCbex--
+I recommend option 2 for maximum wow. ;)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
