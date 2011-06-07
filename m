@@ -1,95 +1,107 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Degraded PGs blocking open()?
-Date: Mon, 6 Jun 2011 19:15:31 -0700
-Message-ID: <BANLkTimt0MKyd9ZOqxYm=z91HNS+5B=a1g@mail.gmail.com>
-References: <201106070237.34854.szekelyi@niif.hu>
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: Re: O_DIRECT change
+Date: Tue, 7 Jun 2011 17:39:42 +0800
+Message-ID: <BANLkTi=-opE84qCKbzw0+3mjiJGP+Nzp6A@mail.gmail.com>
+References: <Pine.LNX.4.64.1106030939020.27322@cobra.newdream.net>
+	<BANLkTimgt0aW800==OCj72ocrAizJSfFjw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:53464 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754406Ab1FGCPd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Jun 2011 22:15:33 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 8BB84C2C8
-	for <ceph-devel@vger.kernel.org>; Mon,  6 Jun 2011 19:15:33 -0700 (PDT)
-Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 3A21BC2C6
-	for <ceph-devel@vger.kernel.org>; Mon,  6 Jun 2011 19:15:33 -0700 (PDT)
-Received: by eyx24 with SMTP id 24so1571529eyx.19
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Jun 2011 19:15:31 -0700 (PDT)
-In-Reply-To: <201106070237.34854.szekelyi@niif.hu>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:46076 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752482Ab1FGJjn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2011 05:39:43 -0400
+Received: by fxm17 with SMTP id 17so2951229fxm.19
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2011 02:39:42 -0700 (PDT)
+In-Reply-To: <BANLkTimgt0aW800==OCj72ocrAizJSfFjw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-2011/6/6 Sz=E9kelyi Szabolcs <szekelyi@niif.hu>:
-> Hi all,
->
-> I have a three node ceph setup, two nodes playing all three roles (OS=
-D, MDS,
-> MON), and one being just a monitor (which happens to be the client I'=
-m using
-> the filesystem from).
->
-> I want to achieve high availablity by mirroring all data between the =
-OSDs and
-> being able to still access everything even if one of them goes down. =
-The
-> mirroring works fine, I see the space being consumed on both nodes as=
- I copy
-> data on the file system. According to `ceph -s`, all PGs are in activ=
-e+clean
-> state. If I start reading a big file and shut down one of the (OSD+MD=
-S+MON)
-> nodes, the file can still be read until the end, that's fine. Moreove=
-r, the
-> contents read back seem correct when compared to the original file. V=
-ery nice.
-> But if I start reading the file while one of the nodes is down, it bl=
-ocks until
-> the node comes up again. I can't even kill the reading process with K=
-ILL,
-> TERM, or INT.
->
-> Am I doing something wrong, or was not careful enough reading the doc=
-s, or may
-> this be a bug? My ceph.conf is attached.
-The problem isn't in the OSD, it's the MDS. :)
+Hi Sage,
 
-The MDS system is *slightly* less resilient than the OSD system is.
-You can set up "standby" MDSes that will take over if the system
-detects that an MDS has died; you can even set up "standby-replay"
-MDSes that follow a specific MDS and keep all its data cached in
-memory so they can take over right when a failure is detected. But if
-you lose one MDS its data won't automatically be imported into the
-remaining MDSes. (Because the MDS keeps all its data on the OSDs,
-there's no danger of losing data -- it's a matter of how the data is
-segregated that requires a new daemon. And generally the process is
-dominated by the timeout, not the time it takes the new MDS to take
-over.)
-So in your case, you're trying to open a file that is controlled by
-the MDS that you killed, and the client can't get the "capability"
-bits that it needs in order to look at the file. So you've got a few
-options:
-1) Kill the OSD, but not the MDS.
-2) Create an extra MDS daemon, perhaps on your monitor node. When the
-system detects that one of your MDSes has died (a configurable
-timeout, IIRC in the neighborhood of 30-60 seconds), this extra daemon
-will take over.
-(Or you can just start up the new daemon after you kill the old one,
-doesn't matter.)
-3) Create a new system with only one MDS and don't kill that one.
-(Eventually you will be able to shrink the number of MDSes, but this
-isn't well-tested or documented so I'm not sure what state it's in
-right now.)
+I checked the stripe_read function and think the following two patches
+are needed:
 
-I recommend option 2 for maximum wow. ;)
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+1. Move hit_stripe/was_short checking after the adjustment of
+ceph_osdc_readpages return code
+
+    Fix the following case:
+    (i) Create a sparse file
+        dd if=/dev/zero of=/mnt/fs_depot/dd3 bs=1 seek=1048576 count=0
+
+    (ii) Read the file
+        dd if=/mnt/fs_depot/dd3 of=/root/ddout1 skip=8 bs=500 count=2
+iflag=direct
+
+diff --git a/ceph/file.c b/ceph/file.c
+index 1f36e2c..6e6297a 100644
+--- a/ceph/file.c
++++ b/ceph/file.c
+@@ -313,16 +313,18 @@ more:
+                page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
+        else
+                page_align = pos & ~PAGE_MASK;
++
+        this_len = left;
+        ret = ceph_osdc_readpages(&fsc->client->osdc, ceph_vino(inode),
+                                  &ci->i_layout, pos, &this_len,
+                                  ci->i_truncate_seq,
+                                  ci->i_truncate_size,
+                                  page_pos, pages_left, page_align);
+-       hit_stripe = this_len < left;
+-       was_short = ret >= 0 && ret < this_len;
+        if (ret == -ENOENT)
+                ret = 0;
++
++       hit_stripe = this_len < left;
++       was_short = ret >= 0 && ret < this_len;
+        dout("striped_read %llu~%u (read %u) got %d%s%s\n", pos, left, read,
+             ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
+
+
+2. Fix didpages and the starting position of ceph_zero_page_vector_range
+
+    This fixes segfault caused by the following scenario:
+    (i) generate a sparse file by
+        dd if=/dev/urandom of=/mnt/fs_depot/dd10 bs=500 seek=8388 count=1
+    (ii) read the file from offset 4194300~500
+        dd if=/mnt/fs_depot/dd10 of=/root/dd10out bs=500 skip=8388 count=1
+
+diff --git a/ceph/file.c b/ceph/file.c
+index 6e6297a..d7932bc 100644
+--- a/ceph/file.c
++++ b/ceph/file.c
+@@ -291,7 +291,6 @@ static int striped_read(struct inode *inode,
+        struct ceph_inode_info *ci = ceph_inode(inode);
+        u64 pos, this_len;
+        int io_align, page_align;
+-       int page_off = off & ~PAGE_CACHE_MASK; /* first byte's offset in page */
+        int left, pages_left;
+        int read;
+        struct page **page_pos;
+@@ -329,12 +328,11 @@ more:
+             ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
+
+        if (ret > 0) {
+-               int didpages =
+-                       ((pos & ~PAGE_CACHE_MASK) + ret) >> PAGE_CACHE_SHIFT;
++               int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
+
+                if (read < pos - off) {
+                        dout(" zero gap %llu to %llu\n", off + read, pos);
+-                       ceph_zero_page_vector_range(page_off + read,
++                       ceph_zero_page_vector_range(page_align + read,
+                                                    pos - off - read, pages);
+                }
+                pos += ret;
+@@ -359,7 +357,7 @@ more:
+                                left = inode->i_size - pos;
+
+                        dout("zero tail %d\n", left);
+-                       ceph_zero_page_vector_range(page_off + read, left,
++                       ceph_zero_page_vector_range(page_align + read, left,
+                                                    pages);
+                        read += left;
+                }
