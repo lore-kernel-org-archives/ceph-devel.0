@@ -1,131 +1,32 @@
-From: Jeff Wu <cpwu@tnsoft.com.cn>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 Subject: Re: libceph: osd0 down
-Date: Wed, 8 Jun 2011 13:49:04 +0800
-Message-ID: <1307512144.9098.4.camel@cephclient0>
+Date: Tue, 7 Jun 2011 23:12:26 -0700
+Message-ID: <BANLkTinc4PMMzw3CV_4-kkGjLk5B_ENbHw@mail.gmail.com>
 References: <BANLkTim6cJxoxqXJaRhoca5HSmuad6p2SQ@mail.gmail.com>
-Reply-To: <cpwu@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [210.22.136.227] ([210.22.136.227]:12305 "EHLO
-	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750898Ab1FHGB6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2011 02:01:58 -0400
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:46121 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752429Ab1FHGM2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2011 02:12:28 -0400
+Received: by bwz15 with SMTP id 15so145979bwz.19
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2011 23:12:27 -0700 (PDT)
 In-Reply-To: <BANLkTim6cJxoxqXJaRhoca5HSmuad6p2SQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: biyan chen <riby.chen@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-
-Hi=EF=BC=8C
-
-If you detected a bug ,you can register a user account at=20
-
-http://tracker.newdream.net/projects/ceph
-
-and list the detail platform infos and the detail reproducing steps ,
-then file the bug at the bug tracker.=20
-
-Regards,
-Jeff ,Wu
-
-
-
-On Wed, 2011-06-08 at 13:16 +0800, biyan chen wrote:
-> command :time dd if=3D/dev/zero bs=3D5k count=3D512 of=3Dfile
->=20
-> [root@ceph_osd0 ~]# tail /var/log/ceph/osd.0.log -f
-> 2011-06-08 20:53:26.541053 7f57c7cee710 log [INF] : 0.3d scrub ok
-> 2011-06-08 20:53:27.541216 7f57c7cee710 log [INF] : 0.3e scrub ok
-> 2011-06-08 20:53:29.541794 7f57c7cee710 log [INF] : 0.41 scrub ok
-> 2011-06-08 20:53:31.541977 7f57c7cee710 log [INF] : 0.42 scrub ok
-> 2011-06-08 20:54:22.169841 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 20:54:22.169898 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x3701120
-> 2011-06-08 20:54:22.170133 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x255fa00 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:59462/0)
-> 2011-06-08 20:55:22.272944 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 20:55:22.272995 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x3701240
-> 2011-06-08 20:55:22.273295 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x255f780 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:59464/0)
->=20
-> 2011-06-08 20:56:22.375928 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 20:56:22.375999 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x3701360
-> 2011-06-08 20:56:22.376256 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x362a500 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:52424/0)
-> 2011-06-08 20:57:22.478977 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 20:57:22.479043 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x3701480
-> 2011-06-08 20:57:22.479343 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x362a280 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:52425/0)
-> 2011-06-08 20:58:22.582096 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 20:58:22.582161 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x37015a0
-> 2011-06-08 20:58:22.582407 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x255fa00 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:52426/0)
-> 2011-06-08 20:59:22.685227 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 20:59:22.685295 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x37016c0
-> 2011-06-08 20:59:22.685597 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x255f780 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:52427/0)
-> 2011-06-08 21:00:22.788255 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 21:00:22.788330 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x37017e0
-> 2011-06-08 21:00:22.788575 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x362a780 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:52428/0)
-> 2011-06-08 21:01:22.891341 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 21:01:22.891401 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x3701900
-> 2011-06-08 21:01:22.891638 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x362a500 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:35491/0)
-> 2011-06-08 21:02:22.994417 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 21:02:22.994472 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x3701a20
-> 2011-06-08 21:02:22.994721 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x362a280 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:35492/0)
-> 2011-06-08 21:03:23.097481 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-08 21:03:23.097541 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
-> s=3D0x3701b40
-> 2011-06-08 21:03:23.097794 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
-> 192.168.0.210:0/1260740138 pipe(0x255fa00 sd=3D16 pgs=3D0 cs=3D0 l=3D=
-0).accept
-> peer addr is really 192.168.0.210:0/1260740138 (socket is
-> 192.168.0.210:35493/0)
+On Tue, Jun 7, 2011 at 10:16 PM, biyan chen <riby.chen@gmail.com> wrote=
+:
+>
+<snip>
 > 2011-06-08 21:03:24.460849 7f57cc5f8710 FileStore: sync_entry timed
 > out after 600 seconds.
->  ceph version 0.28.2 (commit:23242045db6b0ec87400441acbe0ea14eedbe6cc=
-)
+> =A0ceph version 0.28.2 (commit:23242045db6b0ec87400441acbe0ea14eedbe6=
+cc)
 > 2011-06-08 21:03:24.460919 1: (SafeTimer::timer_thread()+0x35e) [0x61=
 bbbe]
 > 2011-06-08 21:03:24.460936 2: (SafeTimerThread::entry()+0xd) [0x61e76=
@@ -133,29 +34,30 @@ d]
 > 2011-06-08 21:03:24.460947 3: /lib64/libpthread.so.0() [0x3f724077e1]
 > 2011-06-08 21:03:24.460960 4: (clone()+0x6d) [0x3f718e153d]
 > 2011-06-08 21:03:24.460971 *** Caught signal (Aborted) **
->  in thread 0x7f57cc5f8710
->  ceph version 0.28.2 (commit:23242045db6b0ec87400441acbe0ea14eedbe6cc=
-)
->  1: /usr/local/bin/cosd() [0x639d12]
->  2: /lib64/libpthread.so.0() [0x3f7240f4c0]
->  3: (gsignal()+0x35) [0x3f718329a5]
->  4: (abort()+0x175) [0x3f71834185]
->  5: (__assert_fail()+0xf5) [0x3f7182b935]
->  6: (SyncEntryTimeout::finish(int)+0xf4) [0x5c2454]
->  7: (SafeTimer::timer_thread()+0x35e) [0x61bbbe]
->  8: (SafeTimerThread::entry()+0xd) [0x61e76d]
->  9: /lib64/libpthread.so.0() [0x3f724077e1]
->  10: (clone()+0x6d) [0x3f718e153d]
->=20
->=20
+> =A0in thread 0x7f57cc5f8710
+> =A0ceph version 0.28.2 (commit:23242045db6b0ec87400441acbe0ea14eedbe6=
+cc)
+> =A01: /usr/local/bin/cosd() [0x639d12]
+> =A02: /lib64/libpthread.so.0() [0x3f7240f4c0]
+> =A03: (gsignal()+0x35) [0x3f718329a5]
+> =A04: (abort()+0x175) [0x3f71834185]
+> =A05: (__assert_fail()+0xf5) [0x3f7182b935]
+> =A06: (SyncEntryTimeout::finish(int)+0xf4) [0x5c2454]
+> =A07: (SafeTimer::timer_thread()+0x35e) [0x61bbbe]
+> =A08: (SafeTimerThread::entry()+0xd) [0x61e76d]
+> =A09: /lib64/libpthread.so.0() [0x3f724077e1]
+> =A010: (clone()+0x6d) [0x3f718e153d]
+>
+>
 > Why did the osd dead?,
-> Thanks all!
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+The osd committed suicide, giving up after waiting for 10 minutes for
+the underlying file system to flush an operation. Might be that btrfs
+(or any other filesystem you're using) died. Could it be that you have
+some kernel oops in dmesg?
+
+Thanks,
+Yehuda
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
