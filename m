@@ -1,107 +1,41 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
-Subject: Re: O_DIRECT change
-Date: Tue, 7 Jun 2011 17:39:42 +0800
-Message-ID: <BANLkTi=-opE84qCKbzw0+3mjiJGP+Nzp6A@mail.gmail.com>
-References: <Pine.LNX.4.64.1106030939020.27322@cobra.newdream.net>
-	<BANLkTimgt0aW800==OCj72ocrAizJSfFjw@mail.gmail.com>
+From: biyan chen <riby.chen@gmail.com>
+Subject: Ceph write large files
+Date: Wed, 8 Jun 2011 12:48:52 +0800
+Message-ID: <BANLkTins_SvqwmJ3vKBpWTpwcSeNKB8bAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:46076 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752482Ab1FGJjn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Jun 2011 05:39:43 -0400
-Received: by fxm17 with SMTP id 17so2951229fxm.19
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2011 02:39:42 -0700 (PDT)
-In-Reply-To: <BANLkTimgt0aW800==OCj72ocrAizJSfFjw@mail.gmail.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:51085 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751060Ab1FHEsw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2011 00:48:52 -0400
+Received: by ywe9 with SMTP id 9so48679ywe.19
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2011 21:48:52 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Sage,
+command in client:
 
-I checked the stripe_read function and think the following two patches
-are needed:
-
-1. Move hit_stripe/was_short checking after the adjustment of
-ceph_osdc_readpages return code
-
-    Fix the following case:
-    (i) Create a sparse file
-        dd if=/dev/zero of=/mnt/fs_depot/dd3 bs=1 seek=1048576 count=0
-
-    (ii) Read the file
-        dd if=/mnt/fs_depot/dd3 of=/root/ddout1 skip=8 bs=500 count=2
-iflag=direct
-
-diff --git a/ceph/file.c b/ceph/file.c
-index 1f36e2c..6e6297a 100644
---- a/ceph/file.c
-+++ b/ceph/file.c
-@@ -313,16 +313,18 @@ more:
-                page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
-        else
-                page_align = pos & ~PAGE_MASK;
-+
-        this_len = left;
-        ret = ceph_osdc_readpages(&fsc->client->osdc, ceph_vino(inode),
-                                  &ci->i_layout, pos, &this_len,
-                                  ci->i_truncate_seq,
-                                  ci->i_truncate_size,
-                                  page_pos, pages_left, page_align);
--       hit_stripe = this_len < left;
--       was_short = ret >= 0 && ret < this_len;
-        if (ret == -ENOENT)
-                ret = 0;
-+
-+       hit_stripe = this_len < left;
-+       was_short = ret >= 0 && ret < this_len;
-        dout("striped_read %llu~%u (read %u) got %d%s%s\n", pos, left, read,
-             ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
+time dd if=3D/dev/zero bs=3D5k count=3D5120 of=3Dfile
 
 
-2. Fix didpages and the starting position of ceph_zero_page_vector_range
+The file system is dead,Cannot use command =93ls -al=94
 
-    This fixes segfault caused by the following scenario:
-    (i) generate a sparse file by
-        dd if=/dev/urandom of=/mnt/fs_depot/dd10 bs=500 seek=8388 count=1
-    (ii) read the file from offset 4194300~500
-        dd if=/mnt/fs_depot/dd10 of=/root/dd10out bs=500 skip=8388 count=1
+I have two osd
 
-diff --git a/ceph/file.c b/ceph/file.c
-index 6e6297a..d7932bc 100644
---- a/ceph/file.c
-+++ b/ceph/file.c
-@@ -291,7 +291,6 @@ static int striped_read(struct inode *inode,
-        struct ceph_inode_info *ci = ceph_inode(inode);
-        u64 pos, this_len;
-        int io_align, page_align;
--       int page_off = off & ~PAGE_CACHE_MASK; /* first byte's offset in page */
-        int left, pages_left;
-        int read;
-        struct page **page_pos;
-@@ -329,12 +328,11 @@ more:
-             ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
+=46ound in a osd error log :
 
-        if (ret > 0) {
--               int didpages =
--                       ((pos & ~PAGE_CACHE_MASK) + ret) >> PAGE_CACHE_SHIFT;
-+               int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
+2011-06-08 08:24:33.035240 7f5bd786d710 -- 0.0.0.0:6801/2697 >>
+192.168.0.208:6801/2887 pipe(0x1217280 sd=3D13 pgs=3D1 cs=3D1 l=3D0).fa=
+ult
+with nothing to send, going to standby
 
-                if (read < pos - off) {
-                        dout(" zero gap %llu to %llu\n", off + read, pos);
--                       ceph_zero_page_vector_range(page_off + read,
-+                       ceph_zero_page_vector_range(page_align + read,
-                                                    pos - off - read, pages);
-                }
-                pos += ret;
-@@ -359,7 +357,7 @@ more:
-                                left = inode->i_size - pos;
 
-                        dout("zero tail %d\n", left);
--                       ceph_zero_page_vector_range(page_off + read, left,
-+                       ceph_zero_page_vector_range(page_align + read, left,
-                                                    pages);
-                        read += left;
-                }
+Thanks
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
