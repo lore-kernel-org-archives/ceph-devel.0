@@ -1,135 +1,119 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: O_DIRECT change
-Date: Tue, 7 Jun 2011 22:07:36 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1106072133560.31726@cobra.newdream.net>
-References: <Pine.LNX.4.64.1106030939020.27322@cobra.newdream.net>
- <BANLkTimgt0aW800==OCj72ocrAizJSfFjw@mail.gmail.com>
- <BANLkTi=-opE84qCKbzw0+3mjiJGP+Nzp6A@mail.gmail.com>
+From: biyan chen <riby.chen@gmail.com>
+Subject: libceph: osd0 down
+Date: Wed, 8 Jun 2011 13:16:49 +0800
+Message-ID: <BANLkTim6cJxoxqXJaRhoca5HSmuad6p2SQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56861 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751406Ab1FHFFl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2011 01:05:41 -0400
-In-Reply-To: <BANLkTi=-opE84qCKbzw0+3mjiJGP+Nzp6A@mail.gmail.com>
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:51133 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750898Ab1FHFQu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2011 01:16:50 -0400
+Received: by gwaa18 with SMTP id a18so53091gwa.19
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Jun 2011 22:16:50 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry.cy.chang@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, 7 Jun 2011, Henry C Chang wrote:
-> Hi Sage,
-> 
-> I checked the stripe_read function and think the following two patches
-> are needed:
-> 
-> 1. Move hit_stripe/was_short checking after the adjustment of
-> ceph_osdc_readpages return code
-> 
->     Fix the following case:
->     (i) Create a sparse file
->         dd if=/dev/zero of=/mnt/fs_depot/dd3 bs=1 seek=1048576 count=0
-> 
->     (ii) Read the file
->         dd if=/mnt/fs_depot/dd3 of=/root/ddout1 skip=8 bs=500 count=2
-> iflag=direct
-> 
-> diff --git a/ceph/file.c b/ceph/file.c
-> index 1f36e2c..6e6297a 100644
-> --- a/ceph/file.c
-> +++ b/ceph/file.c
-> @@ -313,16 +313,18 @@ more:
->                 page_align = (pos - io_align + buf_align) & ~PAGE_MASK;
->         else
->                 page_align = pos & ~PAGE_MASK;
-> +
->         this_len = left;
->         ret = ceph_osdc_readpages(&fsc->client->osdc, ceph_vino(inode),
->                                   &ci->i_layout, pos, &this_len,
->                                   ci->i_truncate_seq,
->                                   ci->i_truncate_size,
->                                   page_pos, pages_left, page_align);
-> -       hit_stripe = this_len < left;
-> -       was_short = ret >= 0 && ret < this_len;
->         if (ret == -ENOENT)
->                 ret = 0;
-> +
-> +       hit_stripe = this_len < left;
-> +       was_short = ret >= 0 && ret < this_len;
->         dout("striped_read %llu~%u (read %u) got %d%s%s\n", pos, left, read,
->              ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
+command :time dd if=/dev/zero bs=5k count=512 of=file
 
-Good catch.  Applied.
- 
-> 2. Fix didpages and the starting position of ceph_zero_page_vector_range
-> 
->     This fixes segfault caused by the following scenario:
->     (i) generate a sparse file by
->         dd if=/dev/urandom of=/mnt/fs_depot/dd10 bs=500 seek=8388 count=1
->     (ii) read the file from offset 4194300~500
->         dd if=/mnt/fs_depot/dd10 of=/root/dd10out bs=500 skip=8388 count=1
-> 
-> diff --git a/ceph/file.c b/ceph/file.c
-> index 6e6297a..d7932bc 100644
-> --- a/ceph/file.c
-> +++ b/ceph/file.c
-> @@ -291,7 +291,6 @@ static int striped_read(struct inode *inode,
->         struct ceph_inode_info *ci = ceph_inode(inode);
->         u64 pos, this_len;
->         int io_align, page_align;
-> -       int page_off = off & ~PAGE_CACHE_MASK; /* first byte's offset in page */
->         int left, pages_left;
->         int read;
->         struct page **page_pos;
-> @@ -329,12 +328,11 @@ more:
->              ret, hit_stripe ? " HITSTRIPE" : "", was_short ? " SHORT" : "");
-> 
->         if (ret > 0) {
-> -               int didpages =
-> -                       ((pos & ~PAGE_CACHE_MASK) + ret) >> PAGE_CACHE_SHIFT;
-> +               int didpages = (page_align + ret) >> PAGE_CACHE_SHIFT;
-> 
->                 if (read < pos - off) {
->                         dout(" zero gap %llu to %llu\n", off + read, pos);
-> -                       ceph_zero_page_vector_range(page_off + read,
-> +                       ceph_zero_page_vector_range(page_align + read,
->                                                     pos - off - read, pages);
->                 }
->                 pos += ret;
-> @@ -359,7 +357,7 @@ more:
->                                 left = inode->i_size - pos;
-> 
->                         dout("zero tail %d\n", left);
-> -                       ceph_zero_page_vector_range(page_off + read, left,
-> +                       ceph_zero_page_vector_range(page_align + read, left,
->                                                     pages);
->                         read += left;
->                 }
+[root@ceph_osd0 ~]# tail /var/log/ceph/osd.0.log -f
+2011-06-08 20:53:26.541053 7f57c7cee710 log [INF] : 0.3d scrub ok
+2011-06-08 20:53:27.541216 7f57c7cee710 log [INF] : 0.3e scrub ok
+2011-06-08 20:53:29.541794 7f57c7cee710 log [INF] : 0.41 scrub ok
+2011-06-08 20:53:31.541977 7f57c7cee710 log [INF] : 0.42 scrub ok
+2011-06-08 20:54:22.169841 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 20:54:22.169898 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x3701120
+2011-06-08 20:54:22.170133 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x255fa00 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:59462/0)
+2011-06-08 20:55:22.272944 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 20:55:22.272995 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x3701240
+2011-06-08 20:55:22.273295 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x255f780 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:59464/0)
 
-Sigh, the alignment adjustments still make my head hurt... Did you test 
-this with O_DIRECT as well?  IIRC, the last time I worked on this code the 
-problem was with O_DIRECT when the memory alignment didn't match the file 
-offset.  Something like
-  - allocate buffer with page + 512 alignment
-  - read from offset 1024
-
-I think what we really need is a series of tests that verify we get 
-correct data with all combinations of file alignment, buffer alignment, 
-O_DIRECT and sync (multiclient) io.  Probably that means writing with 
-O_DIRECT, reading with buffered IO, and then writing with buffered IO and 
-reading with O_DIRECT. We should also test the same thing across object 
-boundaries.  I wonder if xfstests has something?
-
-Unfortunately it's somewhat annoying to force the client into normal sync 
-mode with a single client (you have to mount -o sync).  I wonder if it's 
-worth adding an ioctl to set a flag on the fd to do this.
-
-I can't find the test program I was using before, although I also remember 
-not being happy with it... :/
-
-Anyway, opening up an item in the tracker for this, #1147.
-
-sage
+2011-06-08 20:56:22.375928 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 20:56:22.375999 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x3701360
+2011-06-08 20:56:22.376256 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x362a500 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:52424/0)
+2011-06-08 20:57:22.478977 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 20:57:22.479043 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x3701480
+2011-06-08 20:57:22.479343 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x362a280 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:52425/0)
+2011-06-08 20:58:22.582096 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 20:58:22.582161 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x37015a0
+2011-06-08 20:58:22.582407 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x255fa00 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:52426/0)
+2011-06-08 20:59:22.685227 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 20:59:22.685295 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x37016c0
+2011-06-08 20:59:22.685597 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x255f780 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:52427/0)
+2011-06-08 21:00:22.788255 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 21:00:22.788330 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x37017e0
+2011-06-08 21:00:22.788575 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x362a780 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:52428/0)
+2011-06-08 21:01:22.891341 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 21:01:22.891401 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x3701900
+2011-06-08 21:01:22.891638 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x362a500 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:35491/0)
+2011-06-08 21:02:22.994417 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 21:02:22.994472 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x3701a20
+2011-06-08 21:02:22.994721 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x362a280 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:35492/0)
+2011-06-08 21:03:23.097481 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+2011-06-08 21:03:23.097541 7f57cbbf7710 osd0 4 OSD::ms_handle_reset()
+s=0x3701b40
+2011-06-08 21:03:23.097794 7f57c45e4710 -- 192.168.0.208:6800/2373 >>
+192.168.0.210:0/1260740138 pipe(0x255fa00 sd=16 pgs=0 cs=0 l=0).accept
+peer addr is really 192.168.0.210:0/1260740138 (socket is
+192.168.0.210:35493/0)
+2011-06-08 21:03:24.460849 7f57cc5f8710 FileStore: sync_entry timed
+out after 600 seconds.
+ ceph version 0.28.2 (commit:23242045db6b0ec87400441acbe0ea14eedbe6cc)
+2011-06-08 21:03:24.460919 1: (SafeTimer::timer_thread()+0x35e) [0x61bbbe]
+2011-06-08 21:03:24.460936 2: (SafeTimerThread::entry()+0xd) [0x61e76d]
+2011-06-08 21:03:24.460947 3: /lib64/libpthread.so.0() [0x3f724077e1]
+2011-06-08 21:03:24.460960 4: (clone()+0x6d) [0x3f718e153d]
+2011-06-08 21:03:24.460971 *** Caught signal (Aborted) **
+ in thread 0x7f57cc5f8710
+ ceph version 0.28.2 (commit:23242045db6b0ec87400441acbe0ea14eedbe6cc)
+ 1: /usr/local/bin/cosd() [0x639d12]
+ 2: /lib64/libpthread.so.0() [0x3f7240f4c0]
+ 3: (gsignal()+0x35) [0x3f718329a5]
+ 4: (abort()+0x175) [0x3f71834185]
+ 5: (__assert_fail()+0xf5) [0x3f7182b935]
+ 6: (SyncEntryTimeout::finish(int)+0xf4) [0x5c2454]
+ 7: (SafeTimer::timer_thread()+0x35e) [0x61bbbe]
+ 8: (SafeTimerThread::entry()+0xd) [0x61e76d]
+ 9: /lib64/libpthread.so.0() [0x3f724077e1]
+ 10: (clone()+0x6d) [0x3f718e153d]
 
 
+Why did the osd dead?,
+Thanks all!
