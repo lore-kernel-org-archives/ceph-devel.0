@@ -1,41 +1,33 @@
-From: Sam Lang <samlang@gmail.com>
-Subject: [PATCH 2/2] Fix typo in usage output for --num-osds
-Date: Wed,  8 Jun 2011 12:59:12 -0500
-Message-ID: <1307555952-10340-2-git-send-email-samlang@gmail.com>
-References: <1307555952-10340-1-git-send-email-samlang@gmail.com>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: How to create new empty journal?
+Date: Thu, 09 Jun 2011 01:30:28 +0300
+Message-ID: <4DEFF804.9010606@ufm.su>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:44462 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751051Ab1FHR7U (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Jun 2011 13:59:20 -0400
-Received: by qyg14 with SMTP id 14so411224qyg.19
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Jun 2011 10:59:20 -0700 (PDT)
-In-Reply-To: <1307555952-10340-1-git-send-email-samlang@gmail.com>
+Received: from mail.ufm.su ([77.120.103.19]:53772 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751660Ab1FHWab (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 8 Jun 2011 18:30:31 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id 85089600483
+	for <ceph-devel@vger.kernel.org>; Thu,  9 Jun 2011 01:30:29 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 7Kbwp0NCo+ej for <ceph-devel@vger.kernel.org>;
+	Thu,  9 Jun 2011 01:30:29 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id 5B240600447
+	for <ceph-devel@vger.kernel.org>; Thu,  9 Jun 2011 01:30:29 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Sam Lang <samlang@gmail.com>
 
-This patch fixes the typo in the usage description to match the actual argument string.
+Hi!
 
-Signed-off-by: Sam Lang <samlang@gmail.com>
----
- src/crushtool.cc |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+I need to create new fresh journal for OSD server without removing data.
+How?
 
-diff --git a/src/crushtool.cc b/src/crushtool.cc
-index 64b2b4f..4ea7e79 100644
---- a/src/crushtool.cc
-+++ b/src/crushtool.cc
-@@ -750,7 +750,7 @@ void usage()
-   cout << "   --compile|-c map.txt  compile a map from source\n";
-   cout << "   [-o outfile [--clobber]]\n";
-   cout << "                         specify output for for (de)compilation\n";
--  cout << "   --build --num_osd N layer1 ...\n";
-+  cout << "   --build --num_osds N layer1 ...\n";
-   cout << "                         build a new map, where each 'layer' is\n";
-   cout << "                           'name (uniform|straw|list|tree) size'\n";
-   cout << "   --test mapfn          test a range of inputs on the map\n";
--- 
-1.7.1
-
+WBR,
+     Fyodor.
