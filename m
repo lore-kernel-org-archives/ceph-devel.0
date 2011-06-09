@@ -1,46 +1,52 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Fyodor Ustinov <ufm@ufm.su>
 Subject: Re: How to create new empty journal?
-Date: Thu, 09 Jun 2011 12:09:05 +0200
-Message-ID: <1307614145.2906.2.camel@wido-desktop>
-References: <4DEFF804.9010606@ufm.su>
+Date: Thu, 09 Jun 2011 13:19:04 +0300
+Message-ID: <4DF09E18.5090006@ufm.su>
+References: <4DEFF804.9010606@ufm.su> <1307614145.2906.2.camel@wido-desktop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:60269 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752447Ab1FIKJI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2011 06:09:08 -0400
-In-Reply-To: <4DEFF804.9010606@ufm.su>
+Received: from mail.ufm.su ([77.120.103.19]:40897 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752827Ab1FIKTH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 9 Jun 2011 06:19:07 -0400
+In-Reply-To: <1307614145.2906.2.camel@wido-desktop>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On 06/09/2011 01:09 PM, Wido den Hollander wrote:
+> Hi,
+>
+> On Thu, 2011-06-09 at 01:30 +0300, Fyodor Ustinov wrote:
+>> Hi!
+>>
+>> I need to create new fresh journal for OSD server without removing data.
+>> How?
+> This can be done with:
+>
+> $ cosd -i<osdnum>  -c /etc/ceph/ceph.conf --mkjournal
+Thanx!
 
-On Thu, 2011-06-09 at 01:30 +0300, Fyodor Ustinov wrote:
-> Hi!
-> 
-> I need to create new fresh journal for OSD server without removing data.
-> How?
+> This will reset your journal.
+>
+> Why do you want to do this?
+>
 
-This can be done with:
+Many cases:
 
-$ cosd -i <osdnum> -c /etc/ceph/ceph.conf --mkjournal
+1. I have journal on tempfs and want to stop ceph cluster and restart 
+servers. After that I lose journal.
 
-This will reset your journal.
+2. I want to increase journal size.
 
-Why do you want to do this?
+3. I want to decrease journal size.
 
-Wido 
+4. I want replace journal device.
 
-> 
-> WBR,
->      Fyodor.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+And so on.
 
-
+WBR,
+     Fyodor.
