@@ -1,32 +1,33 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
 Subject: Re: Bug while creating new cluster
-Date: Thu, 9 Jun 2011 18:23:57 -0700
-Message-ID: <BANLkTikTp-hDEHtMmqnxp6Y2K8tBJXVRiQ@mail.gmail.com>
+Date: Thu, 9 Jun 2011 18:46:30 -0700
+Message-ID: <BANLkTimt4O47H4Lmwh55pbEcLtiPuWqGDw@mail.gmail.com>
 References: <0a039c525aee33b4199342fb05256aa8@pl1.haspere.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:45864 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756448Ab1FJBX7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2011 21:23:59 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 4AFF4C692
-	for <ceph-devel@vger.kernel.org>; Thu,  9 Jun 2011 18:23:59 -0700 (PDT)
-Received: from mail-ey0-f174.google.com (mail-ey0-f174.google.com [209.85.215.174])
-	by mail.hq.newdream.net (Postfix) with ESMTP id C6AC2C12E
-	for <ceph-devel@vger.kernel.org>; Thu,  9 Jun 2011 18:23:58 -0700 (PDT)
-Received: by eyx24 with SMTP id 24so737184eyx.19
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Jun 2011 18:23:57 -0700 (PDT)
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:53442 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756527Ab1FJBqc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Jun 2011 21:46:32 -0400
+Received: by fxm17 with SMTP id 17so1349264fxm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Jun 2011 18:46:30 -0700 (PDT)
 In-Reply-To: <0a039c525aee33b4199342fb05256aa8@pl1.haspere.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: YS3fpFE2ykfB@dyweni.com
 Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-What version of the code are you using? Master was broken for a couple
-hours today but should be fixed now.
+Hi Dyweni,
+
+This looks like a bug that cropped up in master earlier today but
+should be fixed now. You can try updating to the latest in master, or
+switching to the stable branch, which is more-- er-- stable.
+
+sincerely,
+Colin
+
 
 On Thu, Jun 9, 2011 at 6:17 PM, Dyweni - Ceph-Devel
 <YS3fpFE2ykfB@dyweni.com> wrote:
