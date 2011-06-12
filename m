@@ -1,88 +1,93 @@
-From: Wilfrid Allembrand <wilfrid.allembrand@gmail.com>
-Subject: Don't understand why space usage keeps growing
-Date: Sun, 12 Jun 2011 01:24:47 +0200
-Message-ID: <BANLkTiny=PO5eq=ok_ad6T94YfAK-Tk=CA@mail.gmail.com>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: Re: OSD wrongly marked up (well, half up)
+Date: Sat, 11 Jun 2011 21:20:38 -0700
+Message-ID: <BANLkTinf3vucv+=+Xpj1G=ocTEOQbqO-CA@mail.gmail.com>
+References: <BANLkTimJZ=zpr0VoiSDK34Dkc4sVZeqX=w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=000e0cd719dafa75e104a577fd02
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:51068 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751715Ab1FKXYs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Jun 2011 19:24:48 -0400
-Received: by ywe9 with SMTP id 9so1485001ywe.19
-        for <ceph-devel@vger.kernel.org>; Sat, 11 Jun 2011 16:24:47 -0700 (PDT)
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:44055 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750714Ab1FLEUk convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Jun 2011 00:20:40 -0400
+Received: by fxm17 with SMTP id 17so2197751fxm.19
+        for <ceph-devel@vger.kernel.org>; Sat, 11 Jun 2011 21:20:39 -0700 (PDT)
+In-Reply-To: <BANLkTimJZ=zpr0VoiSDK34Dkc4sVZeqX=w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wilfrid Allembrand <wilfrid.allembrand@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
---000e0cd719dafa75e104a577fd02
-Content-Type: text/plain; charset=ISO-8859-1
+On Sat, Jun 11, 2011 at 2:08 PM, Wilfrid Allembrand
+<wilfrid.allembrand@gmail.com> wrote:
+> Hi all,
+>
+> On my test cluster I have 3 MON, 2 MDS and 2 OSD. I'm doing some
+> failover test on OSD and got a strange thing on the status.
+> The 2 nodes hosting the OSDs have been shutdown but the status contin=
+u
+> to 'see' one alive :
 
-Hi,
+Hi Wilfrid,
 
-So I have my small test cluster with 2 OSD nodes. In each OSD node,
-there is one disk (5 GB) and one cosd.
-When I mount the FS on a client, I see it's 10 GB in total. Fine.
-I copied a small set of multimedia files (135 MB) and that's all. So
-why do I see the space used is getting higher and higher ?
+Usually OSDMaps are propagated peer-to-peer amongst the OSDs. This
+means that OSDs that go down are rapidly detected. However, when all
+OSDs go down, there are no more OSDs to send OSDmaps. In this case, we
+rely on a timeout in the monitor to determine that all the OSDs are
+down.
 
-root@client:/mnt/osd$ df -h .
-Filesystem            Size  Used Avail Use% Mounted on
-10.1.56.232:6789:/     10G  5.2G  3.9G  57% /mnt/osd
+After mon_osd_report_timeout seconds elapse without an osdmap being
+sent from an OSD, the monitor marks it down. The default is 900
+seconds or 15 minutes. So once you wait for 15 minutes, all the OSDs
+should be marked as down.
 
-and like 2 hours later :
-
-root@client:/mnt/osd$ df -h .
-Filesystem            Size  Used Avail Use% Mounted on
-10.1.56.232:6789:/     10G  6.8G  2.3G  76% /mnt/osd
-
-
-I'm using btrfs to store the files and I made no creation/modification
-of files; i just run some bench with "ceph osd tell [12] bench"
-Does the bench create files and do note delete them ?
-
-Extract of ceph -w :
-root@test2:/data/mon1# ceph -w
-2011-06-11 19:16:09.186416 7fbefd01e700 -- :/14931 >>
-10.1.56.233:6789/0 pipe(0x1e58540 sd=4 pgs=0 cs=0 l=0).fault first
-fault
-2011-06-11 19:16:12.191439    pg v1990: 594 pgs: 594 active+clean;
-2066 MB data, 6906 MB used, 2286 MB / 10240 MB avail
-2011-06-11 19:16:12.193479   mds e48: 1/1/1 up {0=test4=up:active}, 1 up:standby
-2011-06-11 19:16:12.193551   osd e44: 2 osds: 2 up, 2 in
-2011-06-11 19:16:12.193658   log 2011-06-12 00:55:42.389017 osd2
-10.1.56.237:6800/1744 307 : [INF] bench: wrote 1024 MB in blocks of
-4096 KB in 12.438478 sec at 84300 KB/sec
-2011-06-11 19:16:12.193757   mon e1: 3 mons at
-{0=10.1.56.231:6789/0,1=10.1.56.232:6789/0,2=10.1.56.233:6789/0}
+sincerely,
+Colin
 
 
-Attached is my ceph.conf
-
-Thanks !
-Wilfrid
-
---000e0cd719dafa75e104a577fd02
-Content-Type: application/octet-stream; name="ceph.conf"
-Content-Disposition: attachment; filename="ceph.conf"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_got6xw4x0
-
-W2dsb2JhbF0NCiAgICB1c2VyID0gcm9vdA0KICAgIGxvZyBmaWxlID0gL3Zhci9sb2cvY2VwaC8k
-bmFtZS5sb2cNCiAgICBwaWQgZmlsZSA9IC92YXIvcnVuL2NlcGgvJG5hbWUucGlkDQoNCg0KDQpb
-bW9uXQ0KICAgICAgICBtb24gZGF0YSA9IC9kYXRhL21vbiRpZA0KDQogICAgICAgIDsgc29tZSBt
-aW5pbWFsIGxvZ2dpbmcgKGp1c3QgbWVzc2FnZSB0cmFmZmljKSB0byBhaWQgZGVidWdnaW5nDQog
-ICAgICAgIGRlYnVnIG1zID0gMQ0KDQpbbW9uLjBdDQogICAgICAgIGhvc3QgPSB0ZXN0MQ0KICAg
-ICAgICBtb24gYWRkciA9IDEwLjEuNTYuMjMxOjY3ODkNCg0KW21vbi4xXQ0KICAgICAgICBob3N0
-ID0gdGVzdDINCiAgICAgICAgbW9uIGFkZHIgPSAxMC4xLjU2LjIzMjo2Nzg5DQoNClttb24uMl0N
-CiAgICAgICAgaG9zdCA9IHRlc3QzDQogICAgICAgIG1vbiBhZGRyID0gMTAuMS41Ni4yMzM6Njc4
-OQ0KDQoNCg0KW21kc10NCg0KW21kcy50ZXN0NF0NCiAgICAgICAgaG9zdCA9IHRlc3Q0DQoNCltt
-ZHMudGVzdDVdDQogICAgICAgIGhvc3QgPSB0ZXN0NQ0KDQoNCg0KW29zZF0NCiAgICBvc2QgZGF0
-YSA9IC9kYXRhL29zZCRpZA0KICAgIG9zZCBqb3VybmFsID0gL2RhdGEvb3NkJGlkL2pvdXJuYWwN
-CiAgICBvc2Qgam91cm5hbCBzaXplID0gNTEyDQogICAgb3NkIGhlYXJ0YmVhdCBncmFjZSA9IDMw
-DQogICAgZmlsZXN0b3JlIGpvdXJuYWwgd3JpdGVhaGVhZCA9IHRydWUNCiAgICBqb3VybmFsZXJf
-YWxsb3dfc3BsaXRfZW50cmllcyA9IHRydWUNCg0KICAgIDtkZWJ1ZyBvc2QgPSAyMA0KICAgIDtk
-ZWJ1ZyBmaWxlc3RvcmUgPSAyMA0KDQpbb3NkLjFdDQogICAgaG9zdCA9IHRlc3Q2DQogICAgYnRy
-ZnMgZGV2cz0vZGV2L3NkYg0KDQpbb3NkLjJdDQogICBob3N0ID0gdGVzdDcNCiAgICBidHJmcyBk
-ZXZzPS9kZXYvc2RiDQo=
---000e0cd719dafa75e104a577fd02--
+>
+> # ceph -v
+> ceph version 0.29 (commit:8e69c39f69936e2912a887247c6e268d1c9059ed)
+> # uname -a
+> Linux test2 2.6.38-8-server #42-Ubuntu SMP Mon Apr 11 03:49:04 UTC
+> 2011 x86_64 x86_64 x86_64 GNU/Linux
+>
+> root@test2:~# ceph health
+> 2011-06-11 17:03:38.492734 mon <- [health]
+> 2011-06-11 17:03:38.493913 mon1 -> 'HEALTH_WARN 594 pgs degraded,
+> 551/1102 degraded (50.000%); 1/2 osds down, 1/2 osds out' (0)
+>
+> root@test2:~# ceph osd stat
+> 2011-06-11 17:03:48.071885 mon <- [osd,stat]
+> 2011-06-11 17:03:48.073290 mon1 -> 'e31: 2 osds: 1 up, 1 in' (0)
+>
+> root@test2:~# ceph mds stat
+> 2011-06-11 17:03:54.868986 mon <- [mds,stat]
+> 2011-06-11 17:03:54.870418 mon1 -> 'e48: 1/1/1 up {0=3Dtest4=3Dup:act=
+ive},
+> 1 up:standby' (0)
+>
+> root@test2:~# ceph mon stat
+> 2011-06-11 17:04:09.638549 mon <- [mon,stat]
+> 2011-06-11 17:04:09.639994 mon0 -> 'e1: 3 mons at
+> {0=3D10.1.56.231:6789/0,1=3D10.1.56.232:6789/0,2=3D10.1.56.233:6789/0=
+},
+> election epoch 508, quorum 0,1,2' (0)
+>
+> How could it be, is it a bug ?
+> (be sure I triple checked that my 2 osd nodes are really shutdown)
+>
+> Thanks !
+> Wilfrid
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
