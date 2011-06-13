@@ -1,437 +1,174 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: OSD crashing unexpectedly within ~1 minute of being up
-Date: Mon, 13 Jun 2011 12:42:04 -0700
-Message-ID: <D813E087-470F-4783-9EAD-CFAF705260EC@dreamhost.com>
-References: <BANLkTi=GPtNQM1TLOGsqAZ+rqONWCr2cxg@mail.gmail.com> <BANLkTi=GFbDZFg0tZRyDcOQsPDA1T1Hxvw@mail.gmail.com> <BANLkTiktR4+aWjv41vPhmvwLnpmjceiwGQ@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: stalls with latest btrfs merge into 3.0-rc2
+Date: Mon, 13 Jun 2011 15:07:18 -0600
+Message-ID: <4DF67C06.4000307@sandia.gov>
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:33960 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751141Ab1FMTmF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jun 2011 15:42:05 -0400
-In-Reply-To: <BANLkTiktR4+aWjv41vPhmvwLnpmjceiwGQ@mail.gmail.com>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:43770 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752815Ab1FMVHo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jun 2011 17:07:44 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Teodor Yantchev <teodor.yantchev@gmail.com>
+To: linux-btrfs@vger.kernel.org
 Cc: ceph-devel@vger.kernel.org
 
-Looks like you're running your OSDs out of disk space and they're crashing:
-> 2011-06-13 12:41:14.983458 abcf7b70 filestore(/mnt/osd.1) write
-> temp/1000000003b.00000007/head 2097152~1048576 = -28
+Hi,
 
+On a system under a heavy write load from multiple ceph OSDs,
+I'm running into the following hung tasks where btrfs is implicated.
+I'm running commit 3c25fa740e2 from Linus' tree merged with
+commit cb9b41c92fa from git://ceph.newdream.net/git/ceph-client.git.
 
-It could probably handle this more elegantly and print out a nice error message before shutting down, but the effect won't be too much different: you're out of disk space, and that scenario isn't handled well.
--Greg
+Let me know what else I can do to help sort this out.
 
-On Jun 13, 2011, at 7:52 AM, Teodor Yantchev wrote:
+[  961.318047] INFO: task kworker/1:2:2346 blocked for more than 120 seconds.
+[  961.324993] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[  961.332891]  ffff8802253dbcd0 0000000000000046 ffff8802253dbcb0 ffff88021c138000
+[  961.340398]  ffff880222c3dac0 ffff880222c3dac0 00000000000108c0 ffff88021c138000
+[  961.347893]  ffff880222c3de80 0000000000000001 ffff8802253dbd00 ffffffff813b0f69
+[  961.355384] Call Trace:
+[  961.357838]  [<ffffffff813b0f69>] schedule+0x164/0x19e
+[  961.363041]  [<ffffffffa066069c>] btrfs_start_ordered_extent+0xa8/0xc4 [btrfs]
+[  961.370268]  [<ffffffff81066544>] ? list_del_init+0x21/0x21
+[  961.376075]  [<ffffffffa0660f93>] btrfs_wait_ordered_extents+0xd8/0x143 [btrfs]
+[  961.383387]  [<ffffffffa0647065>] btrfs_commit_transaction+0x20b/0x5a4 [btrfs]
+[  961.390642]  [<ffffffff81066544>] ? list_del_init+0x21/0x21
+[  961.396284]  [<ffffffffa064741d>] do_async_commit+0x1f/0x2c [btrfs]
+[  961.402638]  [<ffffffff81060bba>] process_one_work+0x124/0x1e0
+[  961.408478]  [<ffffffffa06473fe>] ? btrfs_commit_transaction+0x5a4/0x5a4 [btrfs]
+[  961.415917]  [<ffffffff81062219>] ? destroy_workqueue+0x161/0x161
+[  961.422155]  [<ffffffff810622a8>] worker_thread+0x8f/0x124
+[  961.427642]  [<ffffffff8106603f>] kthread+0x72/0x7a
+[  961.432636]  [<ffffffff813b9e94>] kernel_thread_helper+0x4/0x10
+[  961.438561]  [<ffffffff813b272d>] ? retint_restore_args+0xe/0xe
+[  961.444530]  [<ffffffff81065fcd>] ? kthread_bind+0x53/0x53
+[  961.450100]  [<ffffffff813b9e90>] ? gs_change+0xb/0xb
+[  961.455188] INFO: task btrfs-transacti:7653 blocked for more than 120 seconds.
+[  961.462506] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[  961.477512]  ffff88021c24fd90 0000000000000046 ffff88021c24fd70 ffff880190a65ac0
+[  961.491735]  ffff8802246cad60 ffff8802246cad60 00000000000108c0 ffff880190a65ac0
+[  961.505853]  ffff8802246cb120 0000000000000001 ffff88021c24fdc0 ffffffff813b0f69
+[  961.521106] Call Trace:
+[  961.526052]  [<ffffffff813b0f69>] schedule+0x164/0x19e
+[  961.531910]  [<ffffffffa06460b4>] wait_current_trans+0xb8/0xec [btrfs]
+[  961.544101]  [<ffffffff81066544>] ? list_del_init+0x21/0x21
+[  961.550394]  [<ffffffffa0645cd2>] ? spin_lock+0xe/0x10 [btrfs]
+[  961.556471]  [<ffffffffa0647970>] start_transaction+0xd1/0x206 [btrfs]
+[  961.563023]  [<ffffffffa0643ec7>] ? btree_readpage_end_io_hook+0x192/0x192 [btrfs]
+[  961.570597]  [<ffffffffa0647ae8>] btrfs_join_transaction+0x15/0x17 [btrfs]
+[  961.577609]  [<ffffffffa064401b>] transaction_kthread+0x154/0x22d [btrfs]
+[  961.584465]  [<ffffffff81036a33>] ? need_resched+0x23/0x2d
+[  961.589967]  [<ffffffff8106603f>] kthread+0x72/0x7a
+[  961.594843]  [<ffffffff813b9e94>] kernel_thread_helper+0x4/0x10
+[  961.600777]  [<ffffffff813b272d>] ? retint_restore_args+0xe/0xe
+[  961.606702]  [<ffffffff81065fcd>] ? kthread_bind+0x53/0x53
+[  961.612206]  [<ffffffff813b9e90>] ? gs_change+0xb/0xb
+[  961.617322] INFO: task cosd:16719 blocked for more than 120 seconds.
+[  961.623702] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[  961.631542]  ffff8801bf163cb8 0000000000000086 ffff8801bf163c98 ffff880226db16b0
+[  961.639072]  ffff8801df4f5ac0 ffff8801df4f5ac0 00000000000108c0 ffff880226db16b0
+[  961.646516]  ffff8801df4f5e80 0000000000000001 ffff8801bf163ce8 ffffffff813b0f69
+[  961.653955] Call Trace:
+[  961.656483]  [<ffffffff813b0f69>] schedule+0x164/0x19e
+[  961.661725]  [<ffffffffa0645dbd>] wait_current_trans_commit_start_and_unblock+0xa9/0xce [btrfs]
+[  961.670461]  [<ffffffff81066544>] ? list_del_init+0x21/0x21
+[  961.676028]  [<ffffffff81061512>] ? queue_work+0x1f/0x21
+[  961.681436]  [<ffffffffa0647bbd>] btrfs_commit_transaction_async+0xd3/0x115 [btrfs]
+[  961.689118]  [<ffffffffa066d8b3>] create_snapshot+0xe5/0x177 [btrfs]
+[  961.695546]  [<ffffffffa0671559>] btrfs_mksubvol+0xfa/0x167 [btrfs]
+[  961.702416]  [<ffffffffa06716c5>] btrfs_ioctl_snap_create_transid+0xff/0x121 [btrfs]
+[  961.710454]  [<ffffffffa067176f>] btrfs_ioctl_snap_create_v2+0x88/0xea [btrfs]
+[  961.718000]  [<ffffffffa0671a40>] btrfs_ioctl+0x208/0x358 [btrfs]
+[  961.724088]  [<ffffffff8112221a>] vfs_ioctl+0x1d/0x34
+[  961.729159]  [<ffffffff81122895>] do_vfs_ioctl+0x171/0x17a
+[  961.734732]  [<ffffffff811154bb>] ? fget_light+0x69/0x81
+[  961.740057]  [<ffffffff811228fa>] sys_ioctl+0x5c/0x7c
+[  961.745333]  [<ffffffffa0534af5>] ? jbd_free_handle+0x1b/0x1d [jbd]
+[  961.752028]  [<ffffffff813b8dab>] system_call_fastpath+0x16/0x1b
+[  961.758429] INFO: task cosd:16720 blocked for more than 120 seconds.
+[  961.765416] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[  961.776419]  ffff8801bf123bb8 0000000000000086 ffff8801bf123b98 ffff8801664bad60
+[  961.792604]  ffff8801df4f2d60 ffff8801df4f2d60 00000000000108c0 ffff8801664bad60
+[  961.814250]  ffff8801df4f3120 0000000000000000 ffff8801bf123be8 ffffffff813b0f69
+[  961.825356] Call Trace:
+[  961.830932]  [<ffffffff813b0f69>] schedule+0x164/0x19e
+[  961.837403]  [<ffffffffa06460b4>] wait_current_trans+0xb8/0xec [btrfs]
+[  961.844413]  [<ffffffff81066544>] ? list_del_init+0x21/0x21
+[  961.850203]  [<ffffffff81109fe6>] ? kmem_cache_alloc+0xad/0xb9
+[  961.856255]  [<ffffffffa0647970>] start_transaction+0xd1/0x206 [btrfs]
+[  961.863351]  [<ffffffffa0647c12>] btrfs_start_transaction+0x13/0x15 [btrfs]
+[  961.870549]  [<ffffffffa064dc24>] btrfs_create+0x3b/0x197 [btrfs]
+[  961.876889]  [<ffffffff8111edd8>] vfs_create+0x72/0x92
+[  961.882115]  [<ffffffff8111f024>] do_last+0x22c/0x40b
+[  961.887195]  [<ffffffff8111fd02>] path_openat+0xc0/0x2ef
+[  961.892581]  [<ffffffff81121011>] do_filp_open+0x3d/0x87
+[  961.897888]  [<ffffffff811e070c>] ? strncpy_from_user+0x43/0x4d
+[  961.903880]  [<ffffffff8111e78d>] ? getname_flags+0x2e/0x80
+[  961.909463]  [<ffffffff8111e711>] ? do_getname+0x14b/0x173
+[  961.915472]  [<ffffffff8111e74f>] ? audit_getname+0x16/0x26
+[  961.921259]  [<ffffffff8112a743>] ? spin_lock+0xe/0x10
+[  961.926480]  [<ffffffff811122d1>] do_sys_open+0x69/0xae
+[  961.931759]  [<ffffffff81112349>] sys_open+0x20/0x22
+[  961.936730]  [<ffffffff813b8dab>] system_call_fastpath+0x16/0x1b
+[  961.942878] INFO: task cosd:16721 blocked for more than 120 seconds.
+[  961.949231] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[  961.957398]  ffff8801502dfb38 0000000000000086 ffff8801502dfb18 ffff8801dd19c410
+[  961.965782]  ffff880150314410 ffff880150314410 00000000000108c0 ffff8801dd19c410
+[  961.973784]  ffff8801503147d0 0000000000400000 ffff8801502dfb68 ffffffff813b0f69
+[  961.981702] Call Trace:
+[  961.984239]  [<ffffffff813b0f69>] schedule+0x164/0x19e
+[  961.989445]  [<ffffffffa06460b4>] wait_current_trans+0xb8/0xec [btrfs]
+[  961.995993]  [<ffffffff81066544>] ? list_del_init+0x21/0x21
+[  962.001781]  [<ffffffffa0647692>] btrfs_throttle+0x1f/0x21 [btrfs]
+[  962.008040]  [<ffffffffa0655672>] __btrfs_buffered_write+0x29e/0x2dd [btrfs]
+[  962.015217]  [<ffffffffa06559df>] btrfs_file_aio_write+0x203/0x2df [btrfs]
+[  962.022152]  [<ffffffffa06557dc>] ? __btrfs_direct_write+0x12b/0x12b [btrfs]
+[  962.029240]  [<ffffffff81113a17>] do_sync_readv_writev+0xc1/0x109
+[  962.035448]  [<ffffffff8112c187>] ? mnt_dec_count+0x11/0x13
+[  962.041016]  [<ffffffff81036a33>] ? need_resched+0x23/0x2d
+[  962.046796]  [<ffffffff81036a4b>] ? should_resched+0xe/0x2f
+[  962.057128]  [<ffffffff811986c3>] ? security_file_permission+0x2c/0x31
+[  962.068078]  [<ffffffff81113d21>] ? rw_verify_area+0xac/0xdb
+[  962.073949]  [<ffffffff811140a6>] do_readv_writev+0xbf/0x127
+[  962.079741]  [<ffffffff8111e78d>] ? getname_flags+0x2e/0x80
+[  962.096720]  [<ffffffff81106005>] ? compound_head+0x12/0x20
+[  962.103380]  [<ffffffff81036a33>] ? need_resched+0x23/0x2d
+[  962.109497]  [<ffffffff81036a4b>] ? should_resched+0xe/0x2f
+[  962.119919]  [<ffffffff813b117f>] ? _cond_resched+0xe/0x22
+[  962.131022]  [<ffffffff813b1895>] ? mutex_lock+0x16/0x34
+[  962.137370]  [<ffffffff81114151>] vfs_writev+0x43/0x4e
+[  962.142531]  [<ffffffff81114729>] sys_writev+0x4c/0x71
+[  962.148853]  [<ffffffff813b8dab>] system_call_fastpath+0x16/0x1b
+[  962.155452] INFO: task btrfs-endio-wri:23430 blocked for more than 120 seconds.
+[  962.162885] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[  962.170846]  ffff8801dd943c20 0000000000000046 ffff8801dd943c00 ffff8801df4f5ac0
+[  962.178326]  ffff880182060000 ffff880182060000 00000000000108c0 ffff8801df4f5ac0
+[  962.185821]  ffff8801820603c0 0000000000000001 ffff8801dd943c50 ffffffff813b0f69
+[  962.193386] Call Trace:
+[  962.195837]  [<ffffffff813b0f69>] schedule+0x164/0x19e
+[  962.201044]  [<ffffffffa06460b4>] wait_current_trans+0xb8/0xec [btrfs]
+[  962.208020]  [<ffffffff81066544>] ? list_del_init+0x21/0x21
+[  962.213751]  [<ffffffffa0645cd2>] ? spin_lock+0xe/0x10 [btrfs]
+[  962.219713]  [<ffffffffa0647970>] start_transaction+0xd1/0x206 [btrfs]
+[  962.226247]  [<ffffffffa0647ae8>] btrfs_join_transaction+0x15/0x17 [btrfs]
+[  962.233127]  [<ffffffffa064ec90>] btrfs_finish_ordered_io+0x135/0x2c1 [btrfs]
+[  962.240308]  [<ffffffffa064ee59>] btrfs_writepage_end_io_hook+0x3d/0x45 [btrfs]
+[  962.247648]  [<ffffffffa0665e20>] end_bio_extent_writepage+0xaa/0x15a [btrfs]
+[  962.255291]  [<ffffffff8113d194>] bio_endio+0x2d/0x2f
+[  962.260613]  [<ffffffffa0642c2c>] end_workqueue_fn+0x72/0x7b [btrfs]
+[  962.267510]  [<ffffffffa066cd4f>] worker_loop+0x60/0x1f6 [btrfs]
+[  962.273543]  [<ffffffff81033dad>] ? calc_load_account_idle+0xe/0x1d
+[  962.279841]  [<ffffffffa066ccef>] ? run_ordered_completions+0x99/0x99 [btrfs]
+[  962.286968]  [<ffffffff8106603f>] kthread+0x72/0x7a
+[  962.291965]  [<ffffffff813b9e94>] kernel_thread_helper+0x4/0x10
+[  962.297888]  [<ffffffff813b272d>] ? retint_restore_args+0xe/0xe
+[  962.303801]  [<ffffffff81065fcd>] ? kthread_bind+0x53/0x53
+[  962.309278]  [<ffffffff813b9e90>] ? gs_change+0xb/0xb
 
-> Hi All,
-> We are trying to setup a ceph cluster of 4 machines set-up as follows:
-> osd.0/mon.0/mds.0:
-> 
-> root@cs-pc-1:/mnt# uname -a
-> Linux cs-pc-1 2.6.35-28-generic #50-Ubuntu SMP Fri Mar 18 19:00:26 UTC
-> 2011 i686 GNU/Linux
-> 
-> osd.1 :
-> 
-> root@nikola-pc:~# uname -a
-> Linux nikola-pc 2.6.35-28-generic #49-Ubuntu SMP Tue Mar 1 14:40:58
-> UTC 2011 i686 GNU/Linux
-> 
-> osd.2
-> 
-> root@work:/var/log/ceph# uname -a
-> Linux work 2.6.38-8-generic #42-Ubuntu SMP Mon Apr 11 03:31:24 UTC
-> 2011 x86_64 x86_64 x86_64 GNU/Linux
-> 
-> [osd.0/mon.0/mds.0] and [osd.1] are P4s with 3G of RAM and [osd.2] is
-> a Core2Duo G6950 with 4G RAM.
-> All disks are setup on loopback devices (/dev/loop0) with osd.1 and
-> osd.2 using 1 Gig files (partitions) and osd.0 using 2 Gig FS. All
-> formatted with btrfs.
-> ceph version (identical on all hosts):
-> 
-> ceph version 0.29 (commit:8e69c39f69936e2912a887247c6e268d1c9059ed)
-> 
-> /etc/ceph/ceph.conf (same on all hosts):
-> 
-> [global]
->        pid file = /var/run/ceph/$name.pid
->        debug ms = 10
->        debug filestore = 20
-> [mon]
->        mon data = /data/mon.$id
-> [mon.0]
->        host = cs-pc-1.local
->        mon addr = 10.10.10.99:6789
-> [mds]
->       keyring = /data/keyring.$name
-> [mds.0]
->        host = cs-pc-1.local
-> [osd]
->        sudo = true
-> [osd.0]
->        host = cs-pc-1.local
->        brtfs devs = /dev/loop0
->        osd data = /mnt/osd.0
-> ;       osd journal = /dev/loop2
-> ;       osd journal size = 16384000
->        keyring = /mnt/osd.0/keyring
-> [osd.1]
->        host = nikola-pc.local
->        brtfs devs = /dev/loop0
->        osd data = /mnt/osd.1
->        keyring = /mnt/osd.1/keyring
-> [osd.2]
->        host = work.local ; Alex
->        brtfs devs = /dev/loop0
->        osd data = /mnt/osd.2
->        keyring = /mnt/osd.2/keyring
-> 
-> CRUSH maps as follows :
-> 
-> root@cs-pc-1:/mnt# cat /tmp/crush.txt
-> # begin crush map
-> # devices
-> device 0 device0
-> device 1 device1
-> device 2 device2
-> # types
-> type 0 osd
-> type 1 domain
-> type 2 pool
-> # buckets
-> domain root {
-> id -1 # do not change unnecessarily
-> # weight 3.000
-> alg straw
-> hash 0 # rjenkins1
-> item device0 weight 1.000
-> item device1 weight 1.000
-> item device2 weight 1.000
-> }
-> # rules
-> rule data {
-> ruleset 0
-> type replicated
-> min_size 1
-> max_size 10
-> step take root
-> step choose firstn 0 type osd
-> step emit
-> }
-> rule metadata {
-> ruleset 1
-> type replicated
-> min_size 1
-> max_size 10
-> step take root
-> step choose firstn 0 type osd
-> step emit
-> }
-> rule rbd {
-> ruleset 2
-> type replicated
-> min_size 1
-> max_size 10
-> step take root
-> step choose firstn 0 type osd
-> step emit
-> }
-> # end crush map
-> 
-> ceph is setup and starts properly, the filesystem is mountable and
-> files can be read from and written to it.
-> The problem is that both osd.1 and osd.2 drop out of the cluster
-> within 1-2 minutes (not simultaneously though) of being started and we
-> have no idea why. osd.0 seems to work ok all the time and never
-> crashes.
-> This is what we have in the crashing OSDs logs :
-> osd.1.log :
-> 
-> 2011-06-13 12:41:14.789775 a91feb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).reader
-> wants 165 from dispatch throttler 3158098/104857600
-> 2011-06-13 12:41:14.789821 a8ffcb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 12:41:14.789861 a91feb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).aborted =
-> 0
-> 2011-06-13 12:41:14.789912 a91feb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).reader
-> got message 2902 0xa8a16b60 osd_sub_op_reply(unknown0.0:0 0.20
-> 1000000002e.00000001/head [push] ack = 0) v1
-> 2011-06-13 12:41:14.789974 a8ffcb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 12:41:14.790013 a8ffcb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).write_ack
-> 2902
-> 2011-06-13 12:41:14.790053 a91feb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).reader
-> wants 165 from dispatch throttler 3158263/104857600
-> 2011-06-13 12:41:14.790099 a8ffcb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 12:41:14.790138 a91feb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).aborted =
-> 0
-> 2011-06-13 12:41:14.790191 a91feb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).reader
-> got message 2903 0xa8a18160 osd_sub_op_reply(unknown0.0:0 0.21
-> 10000000039.00000017/head [push] ack = 0) v1
-> 2011-06-13 12:41:14.790269 a8ffcb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 12:41:14.790314 a8ffcb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).write_ack
-> 2903
-> 2011-06-13 12:41:14.790358 a8ffcb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 12:41:14.921092 a9cf3b70 -- 0.0.0.0:6802/6566 -->
-> 10.10.10.99:6803/5672 -- osd_ping(e272 as_of 272 heartbeat) v1 -- ?+0
-> 0xa89002e8 con 0x9663698
-> 2011-06-13 12:41:14.921210 a90fdb70 -- 0.0.0.0:6802/6566 >>
-> 10.10.10.99:6803/5672 pipe(0x96634e0 sd=12 pgs=222 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 12:41:14.921344 a90fdb70 -- 0.0.0.0:6802/6566 >>
-> 10.10.10.99:6803/5672 pipe(0x96634e0 sd=12 pgs=222 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 12:41:14.965400 a91feb70 -- 0.0.0.0:6801/6566 >>
-> 10.10.10.99:6802/5672 pipe(0x9663870 sd=13 pgs=545 cs=1 l=0).reader
-> wants 898211 from dispatch throttler 3158428/104857600
-> 2011-06-13 12:41:14.983377 abcf7b70 filestore(/mnt/osd.1)
-> queue_flusher ep 10 fd 14 2097152~1048576 qlen 1
-> 2011-06-13 12:41:14.983458 abcf7b70 filestore(/mnt/osd.1) write
-> temp/1000000003b.00000007/head 2097152~1048576 = -28
-> 2011-06-13 12:41:14.983542 b0f03b70 filestore(/mnt/osd.1) flusher_entry awoke
-> *** Caught signal (Aborted) **
->  in thread 0xabcf7b70
-> 2011-06-13 12:41:14.983584 b0f03b70 filestore(/mnt/osd.1)
-> flusher_entry flushing+closing 14 ep 10
-> 2011-06-13 12:41:14.983627 b0f03b70 filestore(/mnt/osd.1) flusher_entry sleeping
->  ceph version 0.29 (commit:8e69c39f69936e2912a887247c6e268d1c9059ed)
->  1: cosd() [0x828dbff]
->  2: [0x79d400]
->  3: [0x79d416]
->  4: (gsignal()+0x51) [0x7c8941]
->  5: (abort()+0x182) [0x7cbe42]
->  6: (__assert_fail()+0xf8) [0x7c18e8]
->  7: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x3f6b) [0x821403b]
->  8: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
-> std::allocator<ObjectStore::Transaction*> >&, unsigned long
-> long)+0x9d) [0x821445d]
->  9: (FileStore::queue_transactions(ObjectStore::Sequencer*,
-> std::list<ObjectStore::Transaction*,
-> std::allocator<ObjectStore::Transaction*> >&, Context*, Context*,
-> Context*)+0x38a) [0x81f88aa]
->  10: (ObjectStore::queue_transaction(ObjectStore::Sequencer*,
-> ObjectStore::Transaction*, Context*, Context*, Context*)+0x60)
-> [0x82194a0]
->  11: (ReplicatedPG::sub_op_push(MOSDSubOp*)+0x1a79) [0x80fb3e9]
->  12: (OSD::dequeue_op(PG*)+0x402) [0x8152622]
->  13: (ThreadPool::worker()+0x2a7) [0x8254ee7]
->  14: (ThreadPool::WorkThread::entry()+0x14) [0x816ea94]
->  15: (()+0x5cc9) [0xe72cc9]
->  16: (clone()+0x5e) [0x86e69e]
-> 
-> and in osd.2.log:
-> 
-> 2011-06-13 17:32:28.259790 7f2d9d326700 -- 0.0.0.0:6801/6975 <== osd0
-> 10.10.10.99:6802/5672 2913 ==== osd_sub_op(unknown0.0:0 0.2
-> 10000000040.00000001/head [push] first v 25'1 snapset=0=[]:[]
-> snapc=0=[] subset [0~1048576]) v3 ==== 702+0+1048576 (2328257847 0
-> 1809860682) 0x7f2d940d23a0 con 0x1f4f8b0
-> 2011-06-13 17:32:28.259898 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).reader
-> wants 1049278 from dispatch throttler 1049278/104857600
-> 2011-06-13 17:32:28.259987 7f2d9d326700 -- 0.0.0.0:6801/6975
-> dispatch_throttle_release 1049278 to dispatch throttler
-> 2098556/104857600
-> 2011-06-13 17:32:28.260023 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.260051 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).write_ack
-> 2913
-> 2011-06-13 17:32:28.260075 7f2d9b221700 filestore(/mnt/osd.2)
-> queue_transactions existing osr 0x7f2d940e4eb0/0x7f2d94107790
-> 2011-06-13 17:32:28.260094 7f2d9b221700 filestore(/mnt/osd.2)
-> queue_transactions (trailing journal) 37123 0x1fab630
-> 2011-06-13 17:32:28.260105 7f2d9b221700 filestore(/mnt/osd.2)
-> _do_transaction on 0x1fab630
-> 2011-06-13 17:32:28.260118 7f2d9b221700 filestore(/mnt/osd.2) remove
-> temp/10000000040.00000001/head
-> 2011-06-13 17:32:28.260138 7f2d9b221700 filestore(/mnt/osd.2) lfn_get
-> cid=temp oid=10000000040.00000001/head
-> pathname=/mnt/osd.2/current/temp/10000000040.00000001_head
-> lfn=10000000040.00000001_head is_lfn=0
-> 2011-06-13 17:32:28.260222 7f2d9b221700 filestore(/mnt/osd.2) remove
-> temp/10000000040.00000001/head = -1
-> 2011-06-13 17:32:28.260241 7f2d9b221700 filestore(/mnt/osd.2) write
-> temp/10000000040.00000001/head 0~1048576
-> 2011-06-13 17:32:28.260254 7f2d9b221700 filestore(/mnt/osd.2) lfn_get
-> cid=temp oid=10000000040.00000001/head
-> pathname=/mnt/osd.2/current/temp/10000000040.00000001_head
-> lfn=10000000040.00000001_head is_lfn=0
-> 2011-06-13 17:32:28.263061 7f2d9b221700 filestore(/mnt/osd.2)
-> queue_flusher ep 10 fd 14 0~1048576 qlen 1
-> 2011-06-13 17:32:28.263100 7f2d9b221700 filestore(/mnt/osd.2) write
-> temp/10000000040.00000001/head 0~1048576 = 1048576
-> 2011-06-13 17:32:28.263140 7f2da0b2d700 filestore(/mnt/osd.2)
-> flusher_entry awoke
-> 2011-06-13 17:32:28.263180 7f2da0b2d700 filestore(/mnt/osd.2)
-> flusher_entry flushing+closing 14 ep 10
-> 2011-06-13 17:32:28.263312 7f2d9b221700 -- 0.0.0.0:6801/6975 -->
-> 10.10.10.99:6802/5672 -- osd_sub_op_reply(unknown0.0:0 0.2
-> 10000000040.00000001/head [push] ack = 0) v1 -- ?+0 0x208fcd0 con
-> 0x1f4f8b0
-> 2011-06-13 17:32:28.263642 7f2da0b2d700 filestore(/mnt/osd.2)
-> flusher_entry sleeping
-> 2011-06-13 17:32:28.264521 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.347002 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).aborted =
-> 0
-> 2011-06-13 17:32:28.348874 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).reader
-> got message 2914 0x7f2d940d23a0 osd_sub_op(unknown0.0:0 0.2
-> 10000000042.00000008/head [push] first v 25'2 snapset=0=[]:[]
-> snapc=0=[] subset [0~1048576]) v3
-> 2011-06-13 17:32:28.348934 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.348971 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).write_ack
-> 2914
-> 2011-06-13 17:32:28.349028 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).reader
-> wants 1049278 from dispatch throttler 1049278/104857600
-> 2011-06-13 17:32:28.349076 7f2d9d326700 -- 0.0.0.0:6801/6975 <== osd0
-> 10.10.10.99:6802/5672 2914 ==== osd_sub_op(unknown0.0:0 0.2
-> 10000000042.00000008/head [push] first v 25'2 snapset=0=[]:[]
-> snapc=0=[] subset [0~1048576]) v3 ==== 702+0+1048576 (199080187 0
-> 4236989312) 0x7f2d940d23a0 con 0x1f4f8b0
-> 2011-06-13 17:32:28.349116 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.349249 7f2d9d326700 -- 0.0.0.0:6801/6975
-> dispatch_throttle_release 1049278 to dispatch throttler
-> 2098556/104857600
-> 2011-06-13 17:32:28.349291 7f2d9ba22700 filestore(/mnt/osd.2)
-> queue_transactions existing osr 0x7f2d940e4eb0/0x7f2d94107790
-> 2011-06-13 17:32:28.349313 7f2d9ba22700 filestore(/mnt/osd.2)
-> queue_transactions (trailing journal) 37124 0x1f3d750
-> 2011-06-13 17:32:28.349327 7f2d9ba22700 filestore(/mnt/osd.2)
-> _do_transaction on 0x1f3d750
-> 2011-06-13 17:32:28.349344 7f2d9ba22700 filestore(/mnt/osd.2) remove
-> temp/10000000042.00000008/head
-> 2011-06-13 17:32:28.349363 7f2d9ba22700 filestore(/mnt/osd.2) lfn_get
-> cid=temp oid=10000000042.00000008/head
-> pathname=/mnt/osd.2/current/temp/10000000042.00000008_head
-> lfn=10000000042.00000008_head is_lfn=0
-> 2011-06-13 17:32:28.349471 7f2d9ba22700 filestore(/mnt/osd.2) remove
-> temp/10000000042.00000008/head = -1
-> 2011-06-13 17:32:28.349493 7f2d9ba22700 filestore(/mnt/osd.2) write
-> temp/10000000042.00000008/head 0~1048576
-> 2011-06-13 17:32:28.349510 7f2d9ba22700 filestore(/mnt/osd.2) lfn_get
-> cid=temp oid=10000000042.00000008/head
-> pathname=/mnt/osd.2/current/temp/10000000042.00000008_head
-> lfn=10000000042.00000008_head is_lfn=0
-> 2011-06-13 17:32:28.373229 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
-> 10.10.10.99:6789/0 pipe(0x18b08e0 sd=11 pgs=1980 cs=1 l=1).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.373279 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
-> 10.10.10.99:6789/0 pipe(0x18b08e0 sd=11 pgs=1980 cs=1
-> l=1).write_keepalive
-> 2011-06-13 17:32:28.373323 7f2d9c324700 -- 10.10.10.112:6800/6975 -->
-> 10.10.10.99:6789/0 -- log(1 entries) v1 -- ?+0 0x1fabbe0 con 0x18b0b50
-> 2011-06-13 17:32:28.373395 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
-> 10.10.10.99:6789/0 pipe(0x18b08e0 sd=11 pgs=1980 cs=1 l=1).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.373439 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
-> 10.10.10.99:6789/0 pipe(0x18b08e0 sd=11 pgs=1980 cs=1 l=1).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.373506 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
-> 10.10.10.99:6789/0 pipe(0x18b08e0 sd=11 pgs=1980 cs=1 l=1).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.436348 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).aborted =
-> 0
-> 2011-06-13 17:32:28.437221 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).reader
-> got message 2915 0x7f2d940ce9a0 osd_sub_op(unknown0.0:0 0.3
-> 1000000000a.00000008/head [push] first v 25'1 snapset=0=[]:[]
-> snapc=0=[] subset [0~1048576]) v3
-> 2011-06-13 17:32:28.437256 7f2d9d326700 -- 0.0.0.0:6801/6975 <== osd0
-> 10.10.10.99:6802/5672 2915 ==== osd_sub_op(unknown0.0:0 0.3
-> 1000000000a.00000008/head [push] first v 25'1 snapset=0=[]:[]
-> snapc=0=[] subset [0~1048576]) v3 ==== 702+0+1048576 (2538818211 0
-> 2577587947) 0x7f2d940ce9a0 con 0x1f4f8b0
-> 2011-06-13 17:32:28.437284 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).reader
-> wants 1049278 from dispatch throttler 1049278/104857600
-> 2011-06-13 17:32:28.437358 7f2d9d326700 -- 0.0.0.0:6801/6975
-> dispatch_throttle_release 1049278 to dispatch throttler
-> 2098556/104857600
-> 2011-06-13 17:32:28.437390 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.437403 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).write_ack
-> 2915
-> 2011-06-13 17:32:28.437414 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
-> 10.10.10.99:6802/5672 pipe(0x1f4f640 sd=12 pgs=561 cs=1 l=0).writer:
-> state = 2 policy.server=0
-> 2011-06-13 17:32:28.437421 7f2d9b221700 filestore(/mnt/osd.2)
-> queue_transactions existing osr 0x2026df0/0x1f0cb70
-> 2011-06-13 17:32:28.496529 7f2d9ba22700 filestore(/mnt/osd.2)
-> queue_flusher ep 10 fd 14 0~1048576 qlen 1
-> 2011-06-13 17:32:28.496563 7f2d9ba22700 filestore(/mnt/osd.2) write
-> temp/10000000042.00000008/head 0~1048576 = -28
-> 2011-06-13 17:32:28.496594 7f2da0b2d700 filestore(/mnt/osd.2)
-> flusher_entry awoke
-> 2011-06-13 17:32:28.496616 7f2da0b2d700 filestore(/mnt/osd.2)
-> flusher_entry flushing+closing 14 ep 10
-> 2011-06-13 17:32:28.496637 7f2da0b2d700 filestore(/mnt/osd.2)
-> flusher_entry sleeping
-> *** Caught signal (Aborted) **
->  in thread 0x7f2d9ba22700
->  ceph version 0.29 (commit:8e69c39f69936e2912a887247c6e268d1c9059ed)
->  1: cosd() [0x62b4ce]
->  2: (()+0xfc60) [0x7f2da8577c60]
->  3: (gsignal()+0x35) [0x7f2da736ed05]
->  4: (abort()+0x186) [0x7f2da7372ab6]
->  5: (__assert_fail()+0xf5) [0x7f2da73677c5]
->  6: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x39df) [0x5b8e6f]
->  7: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
-> std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x75)
-> [0x5b9675]
->  8: (FileStore::queue_transactions(ObjectStore::Sequencer*,
-> std::list<ObjectStore::Transaction*,
-> std::allocator<ObjectStore::Transaction*> >&, Context*, Context*,
-> Context*)+0x2d7) [0x5a1bd7]
->  9: (ObjectStore::queue_transaction(ObjectStore::Sequencer*,
-> ObjectStore::Transaction*, Context*, Context*, Context*)+0x6b)
-> [0x5bebbb]
->  10: (ReplicatedPG::sub_op_push(MOSDSubOp*)+0x15d9) [0x4a9569]
->  11: (OSD::dequeue_op(PG*)+0x3b5) [0x50ae45]
->  12: (ThreadPool::worker()+0x50f) [0x5f69bf]
->  13: (ThreadPool::WorkThread::entry()+0xd) [0x5235ad]
->  14: (()+0x6d8c) [0x7f2da856ed8c]
->  15: (clone()+0x6d) [0x7f2da742104d]
-> 
-> Please advice and thanks in advance :)
-> --
-> Teodor Yantchev
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- Jim
 
