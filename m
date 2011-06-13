@@ -1,175 +1,473 @@
-From: biyan chen <riby.chen@gmail.com>
-Subject: Re: Ceph to copy files. 500000 "journal throttle: waited for ops" and
- "fault with nothing to send"
-Date: Mon, 13 Jun 2011 14:26:48 +0800
-Message-ID: <BANLkTinqeX4Lu490=nCxa5HzoK+QX7iv+w@mail.gmail.com>
-References: <BANLkTiky1sE2Jj9xcraaMZbc8Xqmwu2SgA@mail.gmail.com>
-	<0839802B-37DB-4B97-AD2C-3B679AE98B58@dreamhost.com>
+From: Teodor Yantchev <teodor.yantchev@gmail.com>
+Subject: Fwd: OSD crashing unexpectedly within ~1 minute of being up
+Date: Mon, 13 Jun 2011 17:52:26 +0300
+Message-ID: <BANLkTiktR4+aWjv41vPhmvwLnpmjceiwGQ@mail.gmail.com>
+References: <BANLkTi=GPtNQM1TLOGsqAZ+rqONWCr2cxg@mail.gmail.com>
+	<BANLkTi=GFbDZFg0tZRyDcOQsPDA1T1Hxvw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yi0-f46.google.com ([209.85.218.46]:41544 "EHLO
-	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750695Ab1FMG0u convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jun 2011 02:26:50 -0400
-Received: by yia27 with SMTP id 27so815523yia.19
-        for <ceph-devel@vger.kernel.org>; Sun, 12 Jun 2011 23:26:48 -0700 (PDT)
-In-Reply-To: <0839802B-37DB-4B97-AD2C-3B679AE98B58@dreamhost.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:34918 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753614Ab1FMOw1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jun 2011 10:52:27 -0400
+Received: by iwn34 with SMTP id 34so3855537iwn.19
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Jun 2011 07:52:26 -0700 (PDT)
+In-Reply-To: <BANLkTi=GFbDZFg0tZRyDcOQsPDA1T1Hxvw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-I just copying some files. I check the flow of the network card only a
-few hundred K
+Hi All,
+We are trying to setup a ceph cluster of 4 machines set-up as follows:
+osd.0/mon.0/mds.0:
 
-Suppose I have some 500000 small file, how to copy a file system into c=
-eph?
+root@cs-pc-1:/mnt# uname -a
+Linux cs-pc-1 2.6.35-28-generic #50-Ubuntu SMP Fri Mar 18 19:00:26 UTC
+2011 i686 GNU/Linux
 
-Thanks!
+osd.1 :
 
-2011/6/13 Gregory Farnum <gregory.farnum@dreamhost.com>:
->> 192.168.0.208:6801/26514 pipe(0x1281280 sd=3D13 pgs=3D4 cs=3D5 l=3D0=
-).fault
->> with nothing to send, going to standby
-> This message generally means that the other daemon has died, so it lo=
-oks like maybe your OSDs are crashing?
->
->> 2011-06-11 00:26:56.654530 7f19f221c710 journal throttle: waited for=
- ops
-> And this message means that the journal is throttling itself to wait =
-for the on-disk store. You might be overloading your OSD disks?
-> -Greg
->
-> On Jun 10, 2011, at 7:55 PM, biyan chen wrote:
->
->> hi,all
->>
->> When I copy a contains about 500000 files folder to ceph file system=
-!
->> All files size is under 2 M !
->>
->> In the executive to half of the time
->>
->> I found that the error log :
->>
->> [root@ceph_osd1 ~]# tail /var/log/ceph/osd.1.log -f
->> 2011-06-11 00:26:56.654530 7f19f221c710 journal throttle: waited for=
- ops
->> 2011-06-11 00:26:56.845956 7f19f2a1d710 journal throttle: waited for=
- ops
->> 2011-06-11 00:27:22.378345 7f19f2a1d710 journal throttle: waited for=
- ops
->> 2011-06-11 00:27:22.561483 7f19f221c710 journal throttle: waited for=
- ops
->> 2011-06-11 00:42:35.491143 7f19ef216710 -- 192.168.0.209:6801/31773 =
->>
->> 192.168.0.208:6801/26514 pipe(0x1281280 sd=3D13 pgs=3D4 cs=3D5 l=3D0=
-).fault
->> with nothing to send, going to standby
->> 2011-06-11 06:03:07.834786 7f19ef216710 -- 192.168.0.209:6801/31773 =
->>
->> 192.168.0.208:6801/26514 pipe(0x4c20780 sd=3D16 pgs=3D0 cs=3D0 l=3D0=
-).accept
->> connect_seq 6 vs existing 6 state 1
->> 2011-06-11 06:03:08.513372 7f19f2a1d710 osd1 4 pg[1.70( v 4'3143
->> (4'3141,4'3143] n=3D385 ec=3D2 les/c 4/4 3/3/3) [1,0] r=3D0 mlcod 4'=
-3141
->> !hml active+clean]  sending commit on repgather(0x281df4b0 applied
->> 4'3143 rep_tid=3D256248 wfack=3D wfdisk=3D op=3Dosd_op(mds0.1:334034
->> 200.000002a6 [write 702932~3164] 1.a9f0) v2) 0x30140540
->> 2011-06-11 06:04:02.963002 7f19f221c710 osd1 4 pg[1.70( v 4'3144
->> (4'3142,4'3144] n=3D385 ec=3D2 les/c 4/4 3/3/3) [1,0] r=3D0 mlcod 4'=
-3142
->> !hml active+clean]  sending commit on repgather(0x281df4b0 applied
->> 4'3144 rep_tid=3D256249 wfack=3D wfdisk=3D op=3Dosd_op(mds0.1:334037
->> 200.000002a6 [write 706096~1232] 1.a9f0) v2) 0x30140380
->> 2011-06-11 06:04:09.489288 7f19f2a1d710 osd1 4 pg[1.70( v 4'3145
->> (4'3143,4'3145] n=3D385 ec=3D2 les/c 4/4 3/3/3) [1,0] r=3D0 mlcod 4'=
-3143
->> !hml active+clean]  sending commit on repgather(0x281df5a0 applied
->> 4'3145 rep_tid=3D256250 wfack=3D wfdisk=3D op=3Dosd_op(mds0.1:334039
->> 200.000002a6 [write 707328~1196] 1.a9f0) v2) 0x30140700
->> 2011-06-11 06:19:34.799410 7f19eea0e710 -- 192.168.0.209:6801/31773 =
->>
->> 192.168.0.208:6801/26514 pipe(0x1281280 sd=3D13 pgs=3D6 cs=3D7 l=3D0=
-).fault
->> with nothing to send, going to standby
->>
->> [root@ceph_osd0 ~]# tail /var/log/ceph/osd.0.log -f
->> 2011-06-11 12:26:05.366366 7fbfe3ae8710 osd0 4 OSD::ms_handle_reset(=
-)
->> s=3D0x3eebc60
->> 2011-06-11 12:39:55.959237 7fbfe08e0710 -- 192.168.0.208:6801/26514 =
->>
->> 192.168.0.209:6801/31773 pipe(0x2de2280 sd=3D13 pgs=3D3 cs=3D5 l=3D0=
-).fault
->> with nothing to send, going to standby
->> 2011-06-11 18:00:28.570888 7fbfdd7d2710 -- 192.168.0.208:6801/26514 =
->>
->> 192.168.0.209:6801/31773 pipe(0x2769780 sd=3D14 pgs=3D0 cs=3D0 l=3D0=
-).accept
->> connect_seq 6 vs existing 6 state 6
->> 2011-06-11 18:00:29.140549 7fbfe7af0710 osd0 4 pg[1.14( v 4'4797
->> (4'4795,4'4797] n=3D416 ec=3D2 les/c 4/4 3/3/2) [0,1] r=3D0 mlcod 4'=
-4795
->> !hml active+clean]  sending commit on repgather(0x2107d4b0 applied
->> 4'4797 rep_tid=3D315438 wfack=3D wfdisk=3D op=3Dosd_op(mds0.1:334035
->> 200.00000000 [writefull 0~84] 1.3494) v2) 0x1d347000
->> 2011-06-11 18:01:23.652245 7fbfe07df710 osd0 4 pg[1.14( v 4'4798
->> (4'4796,4'4798] n=3D416 ec=3D2 les/c 4/4 3/3/2) [0,1] r=3D0 mlcod 4'=
-4796
->> !hml active+clean]  sending commit on repgather(0x2107d3c0 applied
->> 4'4798 rep_tid=3D315439 wfack=3D wfdisk=3D op=3Dosd_op(mds0.1:334038
->> 200.00000000 [writefull 0~84] 1.3494) v2) 0x21659700
->> 2011-06-11 18:01:55.254019 7fbfe08e0710 -- 192.168.0.208:6800/26514 =
->>
->> 192.168.0.210:0/605992965 pipe(0xcf9d000 sd=3D13 pgs=3D0 cs=3D0 l=3D=
-0).accept
->> peer addr is really 192.168.0.210:0/605992965 (socket is
->> 192.168.0.210:39797/0)
->> 2011-06-11 18:01:55.378638 7fbfe07df710 osd0 4 pg[0.60( v 4'1853
->> (4'1851,4'1853] n=3D1853 ec=3D2 les/c 4/4 3/3/2) [0,1] r=3D0 mlcod 4=
-'1851
->> !hml active+clean]  sending commit on repgather(0x2107d3c0 applied
->> 4'1853 rep_tid=3D315440 wfack=3D wfdisk=3D op=3Dosd_op(client4101.1:=
-237118
->> 100000474b9.00000000 [write 0~2560 [1@-1]] 0.c60 snapc 1=3D[]))
->> 0x1df74c40
->> 2011-06-11 18:03:05.460675 7fbfe3ae8710 osd0 4 OSD::ms_handle_reset(=
-)
->> 2011-06-11 18:03
->>
->> And unable to carry out writing data, such as: time dd if=3D/dev/zer=
-o
->> bs=3D5 count=3D512 of=3Dfile
->>
->>
->> My operating system is redhat6.0 kernel 2.6.38.6 x86_64
->> 4 a home computer
->>
->>
->> If you can give me some Suggestions? thank you
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+root@nikola-pc:~# uname -a
+Linux nikola-pc 2.6.35-28-generic #49-Ubuntu SMP Tue Mar 1 14:40:58
+UTC 2011 i686 GNU/Linux
 
+osd.2
 
+root@work:/var/log/ceph# uname -a
+Linux work 2.6.38-8-generic #42-Ubuntu SMP Mon Apr 11 03:31:24 UTC
+2011 x86_64 x86_64 x86_64 GNU/Linux
 
---=20
-name:Riby
-mobile:+86 15280267642
-company: =B0=D9=B4=F3=C1=FA=D2=BB
+[osd.0/mon.0/mds.0] and [osd.1] are P4s with 3G of RAM and [osd.2] is
+a Core2Duo=A0G6950 with 4G RAM.
+All disks are setup on loopback devices (/dev/loop0) with osd.1 and
+osd.2 using 1 Gig files (partitions) and osd.0 using 2 Gig FS. All
+formatted with btrfs.
+ceph version (identical on all hosts):
+
+ceph version 0.29 (commit:8e69c39f69936e2912a887247c6e268d1c9059ed)
+
+/etc/ceph/ceph.conf (same on all hosts):
+
+[global]
+=A0 =A0 =A0 =A0pid file =3D /var/run/ceph/$name.pid
+=A0 =A0 =A0 =A0debug ms =3D 10
+=A0 =A0 =A0 =A0debug filestore =3D 20
+[mon]
+=A0 =A0 =A0 =A0mon data =3D /data/mon.$id
+[mon.0]
+=A0 =A0 =A0 =A0host =3D cs-pc-1.local
+=A0 =A0 =A0 =A0mon addr =3D=A010.10.10.99:6789
+[mds]
+=A0 =A0 =A0 keyring =3D /data/keyring.$name
+[mds.0]
+=A0 =A0 =A0 =A0host =3D cs-pc-1.local
+[osd]
+=A0 =A0 =A0 =A0sudo =3D true
+[osd.0]
+=A0 =A0 =A0 =A0host =3D cs-pc-1.local
+=A0 =A0 =A0 =A0brtfs devs =3D /dev/loop0
+=A0 =A0 =A0 =A0osd data =3D /mnt/osd.0
+; =A0 =A0 =A0 osd journal =3D /dev/loop2
+; =A0 =A0 =A0 osd journal size =3D 16384000
+=A0 =A0 =A0 =A0keyring =3D /mnt/osd.0/keyring
+[osd.1]
+=A0 =A0 =A0 =A0host =3D nikola-pc.local
+=A0 =A0 =A0 =A0brtfs devs =3D /dev/loop0
+=A0 =A0 =A0 =A0osd data =3D /mnt/osd.1
+=A0 =A0 =A0 =A0keyring =3D /mnt/osd.1/keyring
+[osd.2]
+=A0 =A0 =A0 =A0host =3D work.local ; Alex
+=A0 =A0 =A0 =A0brtfs devs =3D /dev/loop0
+=A0 =A0 =A0 =A0osd data =3D /mnt/osd.2
+=A0 =A0 =A0 =A0keyring =3D /mnt/osd.2/keyring
+
+CRUSH maps as follows :
+
+root@cs-pc-1:/mnt# cat /tmp/crush.txt
+# begin crush map
+# devices
+device 0 device0
+device 1 device1
+device 2 device2
+# types
+type 0 osd
+type 1 domain
+type 2 pool
+# buckets
+domain root {
+id -1 # do not change unnecessarily
+# weight 3.000
+alg straw
+hash 0 # rjenkins1
+item device0 weight 1.000
+item device1 weight 1.000
+item device2 weight 1.000
+}
+# rules
+rule data {
+ruleset 0
+type replicated
+min_size 1
+max_size 10
+step take root
+step choose firstn 0 type osd
+step emit
+}
+rule metadata {
+ruleset 1
+type replicated
+min_size 1
+max_size 10
+step take root
+step choose firstn 0 type osd
+step emit
+}
+rule rbd {
+ruleset 2
+type replicated
+min_size 1
+max_size 10
+step take root
+step choose firstn 0 type osd
+step emit
+}
+# end crush map
+
+ceph is setup and starts properly, the filesystem is mountable and
+files can be read from and written to it.
+The problem is that both osd.1 and osd.2 drop out of the cluster
+within 1-2 minutes (not simultaneously though) of being started and we
+have no idea why. osd.0 seems to work ok all the time and never
+crashes.
+This is what we have in the crashing OSDs logs :
+osd.1.log :
+
+2011-06-13 12:41:14.789775 a91feb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+reader
+wants 165 from dispatch throttler 3158098/104857600
+2011-06-13 12:41:14.789821 a8ffcb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+writer:
+state =3D 2 policy.server=3D0
+2011-06-13 12:41:14.789861 a91feb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+aborted =3D
+0
+2011-06-13 12:41:14.789912 a91feb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+reader
+got message 2902 0xa8a16b60 osd_sub_op_reply(unknown0.0:0 0.20
+1000000002e.00000001/head [push] ack =3D 0) v1
+2011-06-13 12:41:14.789974 a8ffcb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+writer:
+state =3D 2 policy.server=3D0
+2011-06-13 12:41:14.790013 a8ffcb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+write_ack
+2902
+2011-06-13 12:41:14.790053 a91feb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+reader
+wants 165 from dispatch throttler 3158263/104857600
+2011-06-13 12:41:14.790099 a8ffcb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+writer:
+state =3D 2 policy.server=3D0
+2011-06-13 12:41:14.790138 a91feb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+aborted =3D
+0
+2011-06-13 12:41:14.790191 a91feb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+reader
+got message 2903 0xa8a18160 osd_sub_op_reply(unknown0.0:0 0.21
+10000000039.00000017/head [push] ack =3D 0) v1
+2011-06-13 12:41:14.790269 a8ffcb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+writer:
+state =3D 2 policy.server=3D0
+2011-06-13 12:41:14.790314 a8ffcb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+write_ack
+2903
+2011-06-13 12:41:14.790358 a8ffcb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+writer:
+state =3D 2 policy.server=3D0
+2011-06-13 12:41:14.921092 a9cf3b70 --=A00.0.0.0:6802/6566=A0-->
+10.10.10.99:6803/5672=A0-- osd_ping(e272 as_of 272 heartbeat) v1 -- ?+0
+0xa89002e8 con 0x9663698
+2011-06-13 12:41:14.921210 a90fdb70 --=A00.0.0.0:6802/6566=A0>>
+10.10.10.99:6803/5672=A0pipe(0x96634e0 sd=3D12 pgs=3D222 cs=3D1 l=3D0).=
+writer:
+state =3D 2 policy.server=3D0
+2011-06-13 12:41:14.921344 a90fdb70 --=A00.0.0.0:6802/6566=A0>>
+10.10.10.99:6803/5672=A0pipe(0x96634e0 sd=3D12 pgs=3D222 cs=3D1 l=3D0).=
+writer:
+state =3D 2 policy.server=3D0
+2011-06-13 12:41:14.965400 a91feb70 --=A00.0.0.0:6801/6566=A0>>
+10.10.10.99:6802/5672=A0pipe(0x9663870 sd=3D13 pgs=3D545 cs=3D1 l=3D0).=
+reader
+wants 898211 from dispatch throttler 3158428/104857600
+2011-06-13 12:41:14.983377 abcf7b70 filestore(/mnt/osd.1)
+queue_flusher ep 10 fd 14 2097152~1048576 qlen 1
+2011-06-13 12:41:14.983458 abcf7b70 filestore(/mnt/osd.1) write
+temp/1000000003b.00000007/head 2097152~1048576 =3D -28
+2011-06-13 12:41:14.983542 b0f03b70 filestore(/mnt/osd.1) flusher_entry=
+ awoke
+*** Caught signal (Aborted) **
+=A0in thread 0xabcf7b70
+2011-06-13 12:41:14.983584 b0f03b70 filestore(/mnt/osd.1)
+flusher_entry flushing+closing 14 ep 10
+2011-06-13 12:41:14.983627 b0f03b70 filestore(/mnt/osd.1) flusher_entry=
+ sleeping
+=A0ceph version 0.29 (commit:8e69c39f69936e2912a887247c6e268d1c9059ed)
+=A01: cosd() [0x828dbff]
+=A02: [0x79d400]
+=A03: [0x79d416]
+=A04: (gsignal()+0x51) [0x7c8941]
+=A05: (abort()+0x182) [0x7cbe42]
+=A06: (__assert_fail()+0xf8) [0x7c18e8]
+=A07: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x3f6b) [0=
+x821403b]
+=A08: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
+std::allocator<ObjectStore::Transaction*> >&, unsigned long
+long)+0x9d) [0x821445d]
+=A09: (FileStore::queue_transactions(ObjectStore::Sequencer*,
+std::list<ObjectStore::Transaction*,
+std::allocator<ObjectStore::Transaction*> >&, Context*, Context*,
+Context*)+0x38a) [0x81f88aa]
+=A010: (ObjectStore::queue_transaction(ObjectStore::Sequencer*,
+ObjectStore::Transaction*, Context*, Context*, Context*)+0x60)
+[0x82194a0]
+=A011: (ReplicatedPG::sub_op_push(MOSDSubOp*)+0x1a79) [0x80fb3e9]
+=A012: (OSD::dequeue_op(PG*)+0x402) [0x8152622]
+=A013: (ThreadPool::worker()+0x2a7) [0x8254ee7]
+=A014: (ThreadPool::WorkThread::entry()+0x14) [0x816ea94]
+=A015: (()+0x5cc9) [0xe72cc9]
+=A016: (clone()+0x5e) [0x86e69e]
+
+and in osd.2.log:
+
+2011-06-13 17:32:28.259790 7f2d9d326700 -- 0.0.0.0:6801/6975 <=3D=3D os=
+d0
+10.10.10.99:6802/5672 2913 =3D=3D=3D=3D osd_sub_op(unknown0.0:0 0.2
+10000000040.00000001/head [push] first v 25'1 snapset=3D0=3D[]:[]
+snapc=3D0=3D[] subset [0~1048576]) v3 =3D=3D=3D=3D 702+0+1048576 (23282=
+57847 0
+1809860682) 0x7f2d940d23a0 con 0x1f4f8b0
+2011-06-13 17:32:28.259898 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).re=
+ader
+wants 1049278 from dispatch throttler 1049278/104857600
+2011-06-13 17:32:28.259987 7f2d9d326700 -- 0.0.0.0:6801/6975
+dispatch_throttle_release 1049278 to dispatch throttler
+2098556/104857600
+2011-06-13 17:32:28.260023 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).wr=
+iter:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.260051 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).wr=
+ite_ack
+2913
+2011-06-13 17:32:28.260075 7f2d9b221700 filestore(/mnt/osd.2)
+queue_transactions existing osr 0x7f2d940e4eb0/0x7f2d94107790
+2011-06-13 17:32:28.260094 7f2d9b221700 filestore(/mnt/osd.2)
+queue_transactions (trailing journal) 37123 0x1fab630
+2011-06-13 17:32:28.260105 7f2d9b221700 filestore(/mnt/osd.2)
+_do_transaction on 0x1fab630
+2011-06-13 17:32:28.260118 7f2d9b221700 filestore(/mnt/osd.2) remove
+temp/10000000040.00000001/head
+2011-06-13 17:32:28.260138 7f2d9b221700 filestore(/mnt/osd.2) lfn_get
+cid=3Dtemp oid=3D10000000040.00000001/head
+pathname=3D/mnt/osd.2/current/temp/10000000040.00000001_head
+lfn=3D10000000040.00000001_head is_lfn=3D0
+2011-06-13 17:32:28.260222 7f2d9b221700 filestore(/mnt/osd.2) remove
+temp/10000000040.00000001/head =3D -1
+2011-06-13 17:32:28.260241 7f2d9b221700 filestore(/mnt/osd.2) write
+temp/10000000040.00000001/head 0~1048576
+2011-06-13 17:32:28.260254 7f2d9b221700 filestore(/mnt/osd.2) lfn_get
+cid=3Dtemp oid=3D10000000040.00000001/head
+pathname=3D/mnt/osd.2/current/temp/10000000040.00000001_head
+lfn=3D10000000040.00000001_head is_lfn=3D0
+2011-06-13 17:32:28.263061 7f2d9b221700 filestore(/mnt/osd.2)
+queue_flusher ep 10 fd 14 0~1048576 qlen 1
+2011-06-13 17:32:28.263100 7f2d9b221700 filestore(/mnt/osd.2) write
+temp/10000000040.00000001/head 0~1048576 =3D 1048576
+2011-06-13 17:32:28.263140 7f2da0b2d700 filestore(/mnt/osd.2)
+flusher_entry awoke
+2011-06-13 17:32:28.263180 7f2da0b2d700 filestore(/mnt/osd.2)
+flusher_entry flushing+closing 14 ep 10
+2011-06-13 17:32:28.263312 7f2d9b221700 -- 0.0.0.0:6801/6975 -->
+10.10.10.99:6802/5672 -- osd_sub_op_reply(unknown0.0:0 0.2
+10000000040.00000001/head [push] ack =3D 0) v1 -- ?+0 0x208fcd0 con
+0x1f4f8b0
+2011-06-13 17:32:28.263642 7f2da0b2d700 filestore(/mnt/osd.2)
+flusher_entry sleeping
+2011-06-13 17:32:28.264521 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).wr=
+iter:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.347002 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).ab=
+orted =3D
+0
+2011-06-13 17:32:28.348874 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).re=
+ader
+got message 2914 0x7f2d940d23a0 osd_sub_op(unknown0.0:0 0.2
+10000000042.00000008/head [push] first v 25'2 snapset=3D0=3D[]:[]
+snapc=3D0=3D[] subset [0~1048576]) v3
+2011-06-13 17:32:28.348934 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).wr=
+iter:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.348971 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).wr=
+ite_ack
+2914
+2011-06-13 17:32:28.349028 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).re=
+ader
+wants 1049278 from dispatch throttler 1049278/104857600
+2011-06-13 17:32:28.349076 7f2d9d326700 -- 0.0.0.0:6801/6975 <=3D=3D os=
+d0
+10.10.10.99:6802/5672 2914 =3D=3D=3D=3D osd_sub_op(unknown0.0:0 0.2
+10000000042.00000008/head [push] first v 25'2 snapset=3D0=3D[]:[]
+snapc=3D0=3D[] subset [0~1048576]) v3 =3D=3D=3D=3D 702+0+1048576 (19908=
+0187 0
+4236989312) 0x7f2d940d23a0 con 0x1f4f8b0
+2011-06-13 17:32:28.349116 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).wr=
+iter:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.349249 7f2d9d326700 -- 0.0.0.0:6801/6975
+dispatch_throttle_release 1049278 to dispatch throttler
+2098556/104857600
+2011-06-13 17:32:28.349291 7f2d9ba22700 filestore(/mnt/osd.2)
+queue_transactions existing osr 0x7f2d940e4eb0/0x7f2d94107790
+2011-06-13 17:32:28.349313 7f2d9ba22700 filestore(/mnt/osd.2)
+queue_transactions (trailing journal) 37124 0x1f3d750
+2011-06-13 17:32:28.349327 7f2d9ba22700 filestore(/mnt/osd.2)
+_do_transaction on 0x1f3d750
+2011-06-13 17:32:28.349344 7f2d9ba22700 filestore(/mnt/osd.2) remove
+temp/10000000042.00000008/head
+2011-06-13 17:32:28.349363 7f2d9ba22700 filestore(/mnt/osd.2) lfn_get
+cid=3Dtemp oid=3D10000000042.00000008/head
+pathname=3D/mnt/osd.2/current/temp/10000000042.00000008_head
+lfn=3D10000000042.00000008_head is_lfn=3D0
+2011-06-13 17:32:28.349471 7f2d9ba22700 filestore(/mnt/osd.2) remove
+temp/10000000042.00000008/head =3D -1
+2011-06-13 17:32:28.349493 7f2d9ba22700 filestore(/mnt/osd.2) write
+temp/10000000042.00000008/head 0~1048576
+2011-06-13 17:32:28.349510 7f2d9ba22700 filestore(/mnt/osd.2) lfn_get
+cid=3Dtemp oid=3D10000000042.00000008/head
+pathname=3D/mnt/osd.2/current/temp/10000000042.00000008_head
+lfn=3D10000000042.00000008_head is_lfn=3D0
+2011-06-13 17:32:28.373229 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
+10.10.10.99:6789/0 pipe(0x18b08e0 sd=3D11 pgs=3D1980 cs=3D1 l=3D1).writ=
+er:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.373279 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
+10.10.10.99:6789/0 pipe(0x18b08e0 sd=3D11 pgs=3D1980 cs=3D1
+l=3D1).write_keepalive
+2011-06-13 17:32:28.373323 7f2d9c324700 -- 10.10.10.112:6800/6975 -->
+10.10.10.99:6789/0 -- log(1 entries) v1 -- ?+0 0x1fabbe0 con 0x18b0b50
+2011-06-13 17:32:28.373395 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
+10.10.10.99:6789/0 pipe(0x18b08e0 sd=3D11 pgs=3D1980 cs=3D1 l=3D1).writ=
+er:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.373439 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
+10.10.10.99:6789/0 pipe(0x18b08e0 sd=3D11 pgs=3D1980 cs=3D1 l=3D1).writ=
+er:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.373506 7f2da8b7d700 -- 10.10.10.112:6800/6975 >>
+10.10.10.99:6789/0 pipe(0x18b08e0 sd=3D11 pgs=3D1980 cs=3D1 l=3D1).writ=
+er:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.436348 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).ab=
+orted =3D
+0
+2011-06-13 17:32:28.437221 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).re=
+ader
+got message 2915 0x7f2d940ce9a0 osd_sub_op(unknown0.0:0 0.3
+1000000000a.00000008/head [push] first v 25'1 snapset=3D0=3D[]:[]
+snapc=3D0=3D[] subset [0~1048576]) v3
+2011-06-13 17:32:28.437256 7f2d9d326700 -- 0.0.0.0:6801/6975 <=3D=3D os=
+d0
+10.10.10.99:6802/5672 2915 =3D=3D=3D=3D osd_sub_op(unknown0.0:0 0.3
+1000000000a.00000008/head [push] first v 25'1 snapset=3D0=3D[]:[]
+snapc=3D0=3D[] subset [0~1048576]) v3 =3D=3D=3D=3D 702+0+1048576 (25388=
+18211 0
+2577587947) 0x7f2d940ce9a0 con 0x1f4f8b0
+2011-06-13 17:32:28.437284 7f2d9921d700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).re=
+ader
+wants 1049278 from dispatch throttler 1049278/104857600
+2011-06-13 17:32:28.437358 7f2d9d326700 -- 0.0.0.0:6801/6975
+dispatch_throttle_release 1049278 to dispatch throttler
+2098556/104857600
+2011-06-13 17:32:28.437390 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).wr=
+iter:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.437403 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).wr=
+ite_ack
+2915
+2011-06-13 17:32:28.437414 7f2d9901b700 -- 0.0.0.0:6801/6975 >>
+10.10.10.99:6802/5672 pipe(0x1f4f640 sd=3D12 pgs=3D561 cs=3D1 l=3D0).wr=
+iter:
+state =3D 2 policy.server=3D0
+2011-06-13 17:32:28.437421 7f2d9b221700 filestore(/mnt/osd.2)
+queue_transactions existing osr 0x2026df0/0x1f0cb70
+2011-06-13 17:32:28.496529 7f2d9ba22700 filestore(/mnt/osd.2)
+queue_flusher ep 10 fd 14 0~1048576 qlen 1
+2011-06-13 17:32:28.496563 7f2d9ba22700 filestore(/mnt/osd.2) write
+temp/10000000042.00000008/head 0~1048576 =3D -28
+2011-06-13 17:32:28.496594 7f2da0b2d700 filestore(/mnt/osd.2)
+flusher_entry awoke
+2011-06-13 17:32:28.496616 7f2da0b2d700 filestore(/mnt/osd.2)
+flusher_entry flushing+closing 14 ep 10
+2011-06-13 17:32:28.496637 7f2da0b2d700 filestore(/mnt/osd.2)
+flusher_entry sleeping
+*** Caught signal (Aborted) **
+=A0in thread 0x7f2d9ba22700
+=A0ceph version 0.29 (commit:8e69c39f69936e2912a887247c6e268d1c9059ed)
+=A01: cosd() [0x62b4ce]
+=A02: (()+0xfc60) [0x7f2da8577c60]
+=A03: (gsignal()+0x35) [0x7f2da736ed05]
+=A04: (abort()+0x186) [0x7f2da7372ab6]
+=A05: (__assert_fail()+0xf5) [0x7f2da73677c5]
+=A06: (FileStore::_do_transaction(ObjectStore::Transaction&)+0x39df) [0=
+x5b8e6f]
+=A07: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
+std::allocator<ObjectStore::Transaction*> >&, unsigned long)+0x75)
+[0x5b9675]
+=A08: (FileStore::queue_transactions(ObjectStore::Sequencer*,
+std::list<ObjectStore::Transaction*,
+std::allocator<ObjectStore::Transaction*> >&, Context*, Context*,
+Context*)+0x2d7) [0x5a1bd7]
+=A09: (ObjectStore::queue_transaction(ObjectStore::Sequencer*,
+ObjectStore::Transaction*, Context*, Context*, Context*)+0x6b)
+[0x5bebbb]
+=A010: (ReplicatedPG::sub_op_push(MOSDSubOp*)+0x15d9) [0x4a9569]
+=A011: (OSD::dequeue_op(PG*)+0x3b5) [0x50ae45]
+=A012: (ThreadPool::worker()+0x50f) [0x5f69bf]
+=A013: (ThreadPool::WorkThread::entry()+0xd) [0x5235ad]
+=A014: (()+0x6d8c) [0x7f2da856ed8c]
+=A015: (clone()+0x6d) [0x7f2da742104d]
+
+Please advice and thanks in advance :)
+--
+Teodor Yantchev
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
