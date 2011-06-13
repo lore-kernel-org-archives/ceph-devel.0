@@ -1,114 +1,79 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Ceph to copy files. 500000 "journal throttle: waited for ops" and "fault with nothing to send"
-Date: Sun, 12 Jun 2011 17:03:50 -0700
-Message-ID: <0839802B-37DB-4B97-AD2C-3B679AE98B58@dreamhost.com>
-References: <BANLkTiky1sE2Jj9xcraaMZbc8Xqmwu2SgA@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Simon Tian <aixt2006@gmail.com>
+Subject: Re: snapshot of rbd
+Date: Mon, 13 Jun 2011 13:43:36 +0800
+Message-ID: <BANLkTim0a_vrdfg=W0kJAhvARj3BmY1AAQ@mail.gmail.com>
+References: <BANLkTimpfh-oMyhVJLj6Pry74kFEKJG7nA@mail.gmail.com>
+	<BANLkTikF2rO2Ot8wV6pRNsMLHcJ3NucfTg@mail.gmail.com>
+	<BANLkTin8UmqhWD4nyDfKb4feRATagFEwow@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:48261 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754238Ab1FMADv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Jun 2011 20:03:51 -0400
-In-Reply-To: <BANLkTiky1sE2Jj9xcraaMZbc8Xqmwu2SgA@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:43577 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751365Ab1FMFni convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jun 2011 01:43:38 -0400
+Received: by wwa36 with SMTP id 36so4486048wwa.1
+        for <ceph-devel@vger.kernel.org>; Sun, 12 Jun 2011 22:43:37 -0700 (PDT)
+In-Reply-To: <BANLkTin8UmqhWD4nyDfKb4feRATagFEwow@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: biyan chen <riby.chen@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-> 192.168.0.208:6801/26514 pipe(0x1281280 sd=13 pgs=4 cs=5 l=0).fault
-> with nothing to send, going to standby
-This message generally means that the other daemon has died, so it looks like maybe your OSDs are crashing?
+---------- Forwarded message ----------
+=46rom: Simon Tian <aixt2006@gmail.com>
+Date: 2011/6/13
+Subject: Re: snapshot of rbd
+To: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
 
-> 2011-06-11 00:26:56.654530 7f19f221c710 journal throttle: waited for ops
-And this message means that the journal is throttling itself to wait for the on-disk store. You might be overloading your OSD disks?
--Greg
 
-On Jun 10, 2011, at 7:55 PM, biyan chen wrote:
+2011/6/13 Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>:
+> On Sun, Jun 12, 2011 at 7:02 AM, Simon Tian <aixt2006@gmail.com> wrot=
+e:
+>>
+>> hi guys,
+>>
+>> =C2=A0 =C2=A0I have some questions about librbd snapshot:
+>>
+>> =C2=A0int snap_create(const char *snapname);
+>> =C2=A0int snap_remove(const char *snapname);
+>> =C2=A0int snap_rollback(const char *snap_name);
+>> =C2=A0int snap_set(const char *snap_name);
+>>
+>> =C2=A0int copy(IoCtx& src_io_ctx, const char *srcname, IoCtx& dest_i=
+o_ctx,
+>> const char *destname);
+>>
+>> If I create a snapshot S1, and then write 10GB data, and then I want
+>> to create a snapshot S2. About how long time will the "snap_create"
+>> take? =C2=A0May take just several seconds?
+>
+> Yes. It updates the header, and sends notifications (through the osd)
+> to the other clients.
 
-> hi,all
-> 
-> When I copy a contains about 500000 files folder to ceph file system!
-> All files size is under 2 M !
-> 
-> In the executive to half of the time
-> 
-> I found that the error log :
-> 
-> [root@ceph_osd1 ~]# tail /var/log/ceph/osd.1.log -f
-> 2011-06-11 00:26:56.654530 7f19f221c710 journal throttle: waited for ops
-> 2011-06-11 00:26:56.845956 7f19f2a1d710 journal throttle: waited for ops
-> 2011-06-11 00:27:22.378345 7f19f2a1d710 journal throttle: waited for ops
-> 2011-06-11 00:27:22.561483 7f19f221c710 journal throttle: waited for ops
-> 2011-06-11 00:42:35.491143 7f19ef216710 -- 192.168.0.209:6801/31773 >>
-> 192.168.0.208:6801/26514 pipe(0x1281280 sd=13 pgs=4 cs=5 l=0).fault
-> with nothing to send, going to standby
-> 2011-06-11 06:03:07.834786 7f19ef216710 -- 192.168.0.209:6801/31773 >>
-> 192.168.0.208:6801/26514 pipe(0x4c20780 sd=16 pgs=0 cs=0 l=0).accept
-> connect_seq 6 vs existing 6 state 1
-> 2011-06-11 06:03:08.513372 7f19f2a1d710 osd1 4 pg[1.70( v 4'3143
-> (4'3141,4'3143] n=385 ec=2 les/c 4/4 3/3/3) [1,0] r=0 mlcod 4'3141
-> !hml active+clean]  sending commit on repgather(0x281df4b0 applied
-> 4'3143 rep_tid=256248 wfack= wfdisk= op=osd_op(mds0.1:334034
-> 200.000002a6 [write 702932~3164] 1.a9f0) v2) 0x30140540
-> 2011-06-11 06:04:02.963002 7f19f221c710 osd1 4 pg[1.70( v 4'3144
-> (4'3142,4'3144] n=385 ec=2 les/c 4/4 3/3/3) [1,0] r=0 mlcod 4'3142
-> !hml active+clean]  sending commit on repgather(0x281df4b0 applied
-> 4'3144 rep_tid=256249 wfack= wfdisk= op=osd_op(mds0.1:334037
-> 200.000002a6 [write 706096~1232] 1.a9f0) v2) 0x30140380
-> 2011-06-11 06:04:09.489288 7f19f2a1d710 osd1 4 pg[1.70( v 4'3145
-> (4'3143,4'3145] n=385 ec=2 les/c 4/4 3/3/3) [1,0] r=0 mlcod 4'3143
-> !hml active+clean]  sending commit on repgather(0x281df5a0 applied
-> 4'3145 rep_tid=256250 wfack= wfdisk= op=osd_op(mds0.1:334039
-> 200.000002a6 [write 707328~1196] 1.a9f0) v2) 0x30140700
-> 2011-06-11 06:19:34.799410 7f19eea0e710 -- 192.168.0.209:6801/31773 >>
-> 192.168.0.208:6801/26514 pipe(0x1281280 sd=13 pgs=6 cs=7 l=0).fault
-> with nothing to send, going to standby
-> 
-> [root@ceph_osd0 ~]# tail /var/log/ceph/osd.0.log -f
-> 2011-06-11 12:26:05.366366 7fbfe3ae8710 osd0 4 OSD::ms_handle_reset()
-> s=0x3eebc60
-> 2011-06-11 12:39:55.959237 7fbfe08e0710 -- 192.168.0.208:6801/26514 >>
-> 192.168.0.209:6801/31773 pipe(0x2de2280 sd=13 pgs=3 cs=5 l=0).fault
-> with nothing to send, going to standby
-> 2011-06-11 18:00:28.570888 7fbfdd7d2710 -- 192.168.0.208:6801/26514 >>
-> 192.168.0.209:6801/31773 pipe(0x2769780 sd=14 pgs=0 cs=0 l=0).accept
-> connect_seq 6 vs existing 6 state 6
-> 2011-06-11 18:00:29.140549 7fbfe7af0710 osd0 4 pg[1.14( v 4'4797
-> (4'4795,4'4797] n=416 ec=2 les/c 4/4 3/3/2) [0,1] r=0 mlcod 4'4795
-> !hml active+clean]  sending commit on repgather(0x2107d4b0 applied
-> 4'4797 rep_tid=315438 wfack= wfdisk= op=osd_op(mds0.1:334035
-> 200.00000000 [writefull 0~84] 1.3494) v2) 0x1d347000
-> 2011-06-11 18:01:23.652245 7fbfe07df710 osd0 4 pg[1.14( v 4'4798
-> (4'4796,4'4798] n=416 ec=2 les/c 4/4 3/3/2) [0,1] r=0 mlcod 4'4796
-> !hml active+clean]  sending commit on repgather(0x2107d3c0 applied
-> 4'4798 rep_tid=315439 wfack= wfdisk= op=osd_op(mds0.1:334038
-> 200.00000000 [writefull 0~84] 1.3494) v2) 0x21659700
-> 2011-06-11 18:01:55.254019 7fbfe08e0710 -- 192.168.0.208:6800/26514 >>
-> 192.168.0.210:0/605992965 pipe(0xcf9d000 sd=13 pgs=0 cs=0 l=0).accept
-> peer addr is really 192.168.0.210:0/605992965 (socket is
-> 192.168.0.210:39797/0)
-> 2011-06-11 18:01:55.378638 7fbfe07df710 osd0 4 pg[0.60( v 4'1853
-> (4'1851,4'1853] n=1853 ec=2 les/c 4/4 3/3/2) [0,1] r=0 mlcod 4'1851
-> !hml active+clean]  sending commit on repgather(0x2107d3c0 applied
-> 4'1853 rep_tid=315440 wfack= wfdisk= op=osd_op(client4101.1:237118
-> 100000474b9.00000000 [write 0~2560 [1@-1]] 0.c60 snapc 1=[]))
-> 0x1df74c40
-> 2011-06-11 18:03:05.460675 7fbfe3ae8710 osd0 4 OSD::ms_handle_reset()
-> 2011-06-11 18:03
-> 
-> And unable to carry out writing data, such as: time dd if=/dev/zero
-> bs=5 count=512 of=file
-> 
-> 
-> My operating system is redhat6.0 kernel 2.6.38.6 x86_64
-> 4 a home computer
-> 
-> 
-> If you can give me some Suggestions? thank you
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+
+>> And how long will it task when remove S2?
+>
+> Same as creating it.
+>
+>
+>> How long when rollback to S1?
+>
+> Rollback is (currently) is in the order of the number of object of
+> that image. It needs to go through all the objects and execute an
+> explicit request of each. For very large images it can be quite long.
+
+When a VM is running based on rbd image, and need to rollback to S1.
+During rollback, seem like that data written by the VM is not allowed?
+Is there any way to rollback without affecting the user experience of t=
+he VM?
+
+
+Thx
+Simon
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
