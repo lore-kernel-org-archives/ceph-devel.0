@@ -1,63 +1,48 @@
-From: Simon Tian <aixt2006@gmail.com>
-Subject: Re: snapshot of rbd
-Date: Tue, 14 Jun 2011 10:35:13 +0800
-Message-ID: <BANLkTikRCFCBoOm30eTCPUDq56dvm=ndVA@mail.gmail.com>
-References: <BANLkTimpfh-oMyhVJLj6Pry74kFEKJG7nA@mail.gmail.com>
-	<BANLkTikF2rO2Ot8wV6pRNsMLHcJ3NucfTg@mail.gmail.com>
-	<BANLkTin8UmqhWD4nyDfKb4feRATagFEwow@mail.gmail.com>
-	<BANLkTim0a_vrdfg=W0kJAhvARj3BmY1AAQ@mail.gmail.com>
-	<BANLkTik04D23tN9YZY-GJeJAy9gFB-z=eg@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: stalls with latest btrfs merge into 3.0-rc2
+Date: Tue, 14 Jun 2011 09:13:31 -0600
+Message-ID: <4DF77A9B.9050901@sandia.gov>
+References: <4DF67C06.4000307@sandia.gov> <4DF6B301.90904@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:40700 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750899Ab1FNCfO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Jun 2011 22:35:14 -0400
-Received: by wya21 with SMTP id 21so3581898wya.19
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Jun 2011 19:35:13 -0700 (PDT)
-In-Reply-To: <BANLkTik04D23tN9YZY-GJeJAy9gFB-z=eg@mail.gmail.com>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:52737 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751686Ab1FNPNw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Jun 2011 11:13:52 -0400
+In-Reply-To: <4DF6B301.90904@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Josef Bacik <josef@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Hi Yehuda,
-
-    So I list a table which describe the VM status and time needed
-during rbd snapshot operation:
-
-operation  |   VM status                  |    time needed
------------------------------------------------------------------------------------------------------------------------
-create      |   could be running          |    instant
-delete      |   could be running          |    instant
-rollback    |   need to be shutdown   |    needs to go through all the objects
-list           |   could be running          |    instant
-set           |   need to be shutdown    |    instant
-
-Could you check this table, hope to get your correction or supplement.
-Thx very much!
-
-Simon
-
-
-2011/6/14 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
-> On Sun, Jun 12, 2011 at 10:43 PM, Simon Tian <aixt2006@gmail.com> wrote:
->> 2011/6/13 Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>:
->>> Rollback is (currently) is in the order of the number of object of
->>> that image. It needs to go through all the objects and execute an
->>> explicit request of each. For very large images it can be quite long.
+Josef Bacik wrote:
+> On 06/13/2011 05:07 PM, Jim Schutt wrote:
+>> Hi,
 >>
->> When a VM is running based on rbd image, and need to rollback to S1.
->> During rollback, seem like that data written by the VM is not allowed?
->> Is there any way to rollback without affecting the user experience of the VM?
+>> On a system under a heavy write load from multiple ceph OSDs,
+>> I'm running into the following hung tasks where btrfs is implicated.
+>> I'm running commit 3c25fa740e2 from Linus' tree merged with
+>> commit cb9b41c92fa from git://ceph.newdream.net/git/ceph-client.git.
 >>
-> Data written by the vm to the image is not recommended as it'll most
-> likely corrupt it. It is recommended that you unmount any relevant
-> partition while doing it. Currently there's not much to do to avoid
-> the relatively long rollback. We do have on our roadmap the layering
-> feature that will allow having some sort of writable snapshots, but
-> we're not there yet.
->
-> Yehuda
->
+> 
+> Please try this patch and verify it fixes the problem.  If it does I'll 
+> make it less crappy and send it along.  Thanks,
+
+I saw no stalls with your patch applied after 30 minutes of writing,
+whereas without it the stalls would trigger after a few minutes.
+
+Let me know if you get a new version you'd like me to test, otherwise
+
+Tested-by: Jim Schutt <jaschut@sandia.gov>
+
+Thanks -- Jim
+
+> 
+> Josef
+> 
+
+
