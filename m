@@ -1,62 +1,45 @@
-From: Josef Bacik <josef@redhat.com>
-Subject: Re: stalls with latest btrfs merge into 3.0-rc2
-Date: Mon, 13 Jun 2011 21:01:53 -0400
-Message-ID: <4DF6B301.90904@redhat.com>
-References: <4DF67C06.4000307@sandia.gov>
-Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------000509000600020601030608"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:5860 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753888Ab1FNBBw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 13 Jun 2011 21:01:52 -0400
-In-Reply-To: <4DF67C06.4000307@sandia.gov>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
+From: Joe Perches <joe@perches.com>
+Subject: [PATCH net-next 0/2] net: remove casts of void *
+Date: Mon, 13 Jun 2011 19:21:25 -0700
+Message-ID: <cover.1308017857.git.joe@perches.com>
+Return-path: <netfilter-devel-owner@vger.kernel.org>
+Sender: netfilter-devel-owner@vger.kernel.org
+To: netdev@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, ebtables-user@lists.sourceforge.net, ebtables-devel@lists.sourceforge.net, netfilter-devel@vger.kernel.org, netfilter@vger.kernel.org, coreteam@netfilter.org, bridge@lists.linux-foundation.org, ceph-devel@vger.kernel.org, linux-decnet-user@lists.sourceforge.net, linux-sctp@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------000509000600020601030608
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Joe Perches (2):
+  net: Remove casts of void *
+  net: netfilter: Remove casts of void *
 
-On 06/13/2011 05:07 PM, Jim Schutt wrote:
-> Hi,
->
-> On a system under a heavy write load from multiple ceph OSDs,
-> I'm running into the following hung tasks where btrfs is implicated.
-> I'm running commit 3c25fa740e2 from Linus' tree merged with
-> commit cb9b41c92fa from git://ceph.newdream.net/git/ceph-client.git.
->
+ net/8021q/vlanproc.c                |    2 +-
+ net/atm/mpc.c                       |    2 +-
+ net/bridge/netfilter/ebtables.c     |    2 +-
+ net/ceph/crypto.c                   |    2 +-
+ net/decnet/dn_dev.c                 |    2 +-
+ net/ipv4/netfilter/arp_tables.c     |   16 ++++++----------
+ net/ipv4/netfilter/ip_tables.c      |   13 +++++--------
+ net/ipv6/netfilter/ip6_tables.c     |   13 +++++--------
+ net/irda/af_irda.c                  |    4 ++--
+ net/irda/ircomm/ircomm_tty_attach.c |    2 +-
+ net/irda/irda_device.c              |    2 +-
+ net/irda/iriap.c                    |    8 ++++----
+ net/irda/irlan/irlan_client.c       |   10 +++++-----
+ net/irda/irlan/irlan_common.c       |   10 +++++-----
+ net/irda/irlan/irlan_eth.c          |    2 +-
+ net/irda/irlan/irlan_provider.c     |   10 +++++-----
+ net/irda/irqueue.c                  |    4 ++--
+ net/irda/irttp.c                    |   18 +++++++++---------
+ net/key/af_key.c                    |   20 ++++++++++----------
+ net/netfilter/ipset/ip_set_core.c   |    2 +-
+ net/netfilter/nf_conntrack_proto.c  |    2 +-
+ net/netlabel/netlabel_unlabeled.c   |   10 ++++------
+ net/sctp/bind_addr.c                |    2 +-
+ net/sctp/input.c                    |    3 +--
+ net/sctp/sm_make_chunk.c            |   26 ++++++++++----------------
+ net/sctp/sm_sideeffect.c            |    2 +-
+ net/sctp/socket.c                   |   16 ++++++++--------
+ 27 files changed, 93 insertions(+), 112 deletions(-)
 
-Please try this patch and verify it fixes the problem.  If it does I'll 
-make it less crappy and send it along.  Thanks,
-
-Josef
-
---------------000509000600020601030608
-Content-Type: text/plain;
- name="test-fix.patch"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename="test-fix.patch"
-
-ZGlmZiAtLWdpdCBhL2ZzL2J0cmZzL3RyYW5zYWN0aW9uLmMgYi9mcy9idHJmcy90cmFuc2Fj
-dGlvbi5jCmluZGV4IDdhOWY1MTcuLjUzMjEzOWUgMTAwNjQ0Ci0tLSBhL2ZzL2J0cmZzL3Ry
-YW5zYWN0aW9uLmMKKysrIGIvZnMvYnRyZnMvdHJhbnNhY3Rpb24uYwpAQCAtMTIzNiwxMiAr
-MTIzNiwxNiBAQCBpbnQgYnRyZnNfY29tbWl0X3RyYW5zYWN0aW9uKHN0cnVjdCBidHJmc190
-cmFuc19oYW5kbGUgKnRyYW5zLAogCQkJc2NoZWR1bGVfdGltZW91dCgxKTsKIAogCQlmaW5p
-c2hfd2FpdCgmY3VyX3RyYW5zLT53cml0ZXJfd2FpdCwgJndhaXQpOwotCQlzcGluX2xvY2so
-JnJvb3QtPmZzX2luZm8tPnRyYW5zX2xvY2spOwotCQlyb290LT5mc19pbmZvLT50cmFuc19u
-b19qb2luID0gMTsKLQkJc3Bpbl91bmxvY2soJnJvb3QtPmZzX2luZm8tPnRyYW5zX2xvY2sp
-OwogCX0gd2hpbGUgKGF0b21pY19yZWFkKCZjdXJfdHJhbnMtPm51bV93cml0ZXJzKSA+IDEg
-fHwKIAkJIChzaG91bGRfZ3JvdyAmJiBjdXJfdHJhbnMtPm51bV9qb2luZWQgIT0gam9pbmVk
-KSk7CiAKKwlzcGluX2xvY2soJnJvb3QtPmZzX2luZm8tPnRyYW5zX2xvY2spOworCXJvb3Qt
-PmZzX2luZm8tPnRyYW5zX25vX2pvaW4gPSAxOworCXNwaW5fdW5sb2NrKCZyb290LT5mc19p
-bmZvLT50cmFuc19sb2NrKTsKKworCXdoaWxlIChhdG9taWNfcmVhZCgmY3VyX3RyYW5zLT5u
-dW1fd3JpdGVycykgPiAxKQorCQlzY2hlZHVsZV90aW1lb3V0KDEpOworCiAJcmV0ID0gY3Jl
-YXRlX3BlbmRpbmdfc25hcHNob3RzKHRyYW5zLCByb290LT5mc19pbmZvKTsKIAlCVUdfT04o
-cmV0KTsKIAo=
---------------000509000600020601030608--
+-- 
+1.7.6.rc0
