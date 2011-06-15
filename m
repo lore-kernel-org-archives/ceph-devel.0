@@ -1,105 +1,176 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Don't understand why space usage keeps growing
-Date: Wed, 15 Jun 2011 10:10:24 -0700
-Message-ID: <4916DCEB-9044-4C6C-9E46-FC8865C5DBAC@dreamhost.com>
-References: <BANLkTiny=PO5eq=ok_ad6T94YfAK-Tk=CA@mail.gmail.com> <F635901F-428A-4CE4-B478-085234F80281@dreamhost.com> <BANLkTik_c6F+UvHoETfFxsoONbNiSW1X0w@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: syslog problems
+Date: Wed, 15 Jun 2011 21:23:31 +0200
+Message-ID: <1308165811.2805.2.camel@wido-laptop.pcextreme.nl>
+References: <4DF8C122.5050506@gmail.com>
+	 <1308149436.2611.17.camel@wido-laptop.pcextreme.nl>
+	 <4DF8CA41.3020905@drwholdings.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:43228 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751963Ab1FORKZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Jun 2011 13:10:25 -0400
-In-Reply-To: <BANLkTik_c6F+UvHoETfFxsoONbNiSW1X0w@mail.gmail.com>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:50631 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753368Ab1FOTXg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Jun 2011 15:23:36 -0400
+Received: from [IPv6:2001:7b8:3cb:0:219:d2ff:fec0:b754] (unknown [IPv6:2001:7b8:3cb:0:219:d2ff:fec0:b754])
+	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPA id 341B7DEC26
+	for <ceph-devel@vger.kernel.org>; Wed, 15 Jun 2011 21:23:32 +0200 (CEST)
+In-Reply-To: <4DF8CA41.3020905@drwholdings.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wilfrid Allembrand <wilfrid.allembrand@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
+Hi,
 
-On Jun 14, 2011, at 11:25 AM, Wilfrid Allembrand wrote:
-
-> Hi Greg,
+On Wed, 2011-06-15 at 10:05 -0500, Sam Lang wrote:
+> On 06/15/2011 09:50 AM, Wido den Hollander wrote:
+> > Hi,
+> >
+> > On Wed, 2011-06-15 at 09:26 -0500, Sam Lang wrote:
+> >> In my ceph setup, I had logs being written to the default location
+> >> (/var/log/ceph/) and eventually would get monitor or osd crashes because
+> >> the disk would fill up with logs.  So I started writing the logs to
+> >> syslog, and now the local disk doesn't fill up, but I still get similar
+> >> errors to those of before.  For example:
+> > How did you configure your syslogging? I'm using syslog as well with my
+> > OSD's and that is working fine.
+> >
+> > [global]
+> >      auth supported = cephx
+> >      debug ms = 0
+> >      debug auth = 0
+> >      debug rados = 0
+> >      ms bind ipv6 = true
+> >      keyring = /etc/ceph/keyring.bin
+> >      log to syslog = true
+> >      clog to syslog = true
+> >      log file =
+> >      log dir =
 > 
-> Thank you for your answer. Yes, I'm sure that nothing else is writing
-> on the mount point but you are right for the bench, I also used this
-> rados bench : rados bench 30 write -p data in order to test the write
-> speed.
+> Hi Wido,  I had just enabled the syslog setting from the default config:
 > 
-> So I think I have the suspect ! :)
-> Can I clean it with a special command ?
-Unfortunately there's not an included way to clean up after it. (We should probably do that at some point!) For now you can either make a clean fs, or create a shell script to dump the object listing and then rm each object.
+>          ; set log file
+>          ; log file = /data/cephdata/$name.log
+>          log_to_syslog = true        ; uncomment this line to log to syslog
 
-(More specifically, it doesn't clean up after itself because the read benchmark depends on the objects created by the write benchmark, and nobody thought to include a clean up phase.)
--Greg
+Ah, you haven't disabled "log file", this makes the monitor log to
+syslog AND to file.
 
+That's why you're still seeing the crash you described.
 
-> Regards,
-> Wilfrid
+Wido
+
 > 
-> 2011/6/14 Gregory Farnum <gregory.farnum@dreamhost.com>:
->> On Jun 11, 2011, at 4:24 PM, Wilfrid Allembrand wrote:
->> 
->>> Hi,
->>> 
->>> So I have my small test cluster with 2 OSD nodes. In each OSD node,
->>> there is one disk (5 GB) and one cosd.
->>> When I mount the FS on a client, I see it's 10 GB in total. Fine.
->>> I copied a small set of multimedia files (135 MB) and that's all. So
->>> why do I see the space used is getting higher and higher ?
->>> 
->>> root@client:/mnt/osd$ df -h .
->>> Filesystem            Size  Used Avail Use% Mounted on
->>> 10.1.56.232:6789:/     10G  5.2G  3.9G  57% /mnt/osd
->>> 
->>> and like 2 hours later :
->>> 
->>> root@client:/mnt/osd$ df -h .
->>> Filesystem            Size  Used Avail Use% Mounted on
->>> 10.1.56.232:6789:/     10G  6.8G  2.3G  76% /mnt/osd
->>> 
->>> 
->>> I'm using btrfs to store the files and I made no creation/modification
->>> of files; i just run some bench with "ceph osd tell [12] bench"
->>> Does the bench create files and do note delete them ?
->> The OSD bench that you're invoking definitely does delete files. You shouldn't be seeing large growth like that with your ceph.conf, though.
->> 
->> Are you sure there's nothing else accessing your mount and doing writes to it? What I'd expect to see from 135MB of writes is ~570MB used (135MB written on each OSD, for the replication, doubled because you've got a 512MB journal recording the data too; and then plus a little bit extra for the MDS journaling and data).
->> 
->> You're not using the rados bench, are you? That one doesn't clean up after itself.
->> 
->> 
->>> 
->>> Extract of ceph -w :
->>> root@test2:/data/mon1# ceph -w
->>> 2011-06-11 19:16:09.186416 7fbefd01e700 -- :/14931 >>
->>> 10.1.56.233:6789/0 pipe(0x1e58540 sd=4 pgs=0 cs=0 l=0).fault first
->>> fault
->>> 2011-06-11 19:16:12.191439    pg v1990: 594 pgs: 594 active+clean;
->>> 2066 MB data, 6906 MB used, 2286 MB / 10240 MB avail
->>> 2011-06-11 19:16:12.193479   mds e48: 1/1/1 up {0=test4=up:active}, 1 up:standby
->>> 2011-06-11 19:16:12.193551   osd e44: 2 osds: 2 up, 2 in
->>> 2011-06-11 19:16:12.193658   log 2011-06-12 00:55:42.389017 osd2
->>> 10.1.56.237:6800/1744 307 : [INF] bench: wrote 1024 MB in blocks of
->>> 4096 KB in 12.438478 sec at 84300 KB/sec
->>> 2011-06-11 19:16:12.193757   mon e1: 3 mons at
->>> {0=10.1.56.231:6789/0,1=10.1.56.232:6789/0,2=10.1.56.233:6789/0}
->>> 
->>> 
->>> Attached is my ceph.conf
->>> 
->>> Thanks !
->>> Wilfrid
->>> <ceph.conf>
->> 
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> 
+> >> Also, I've seen a monitor process get killed by the OOM killer (see
+> >> below).  Are these known issues?  In practice, do folks just disable all
+> >> logging right now and hope for the best?
+> > Now that is interesting! See: http://tracker.newdream.net/issues/1152
+> >
+> > I've got the same issue, my MON keeps eating memory until the OOM-killer
+> > kills it. I'm using syslog as well with high debugging set on the
+> > monitor.
+> 
+> I hadn't seen the OOM errors with the monitor until I started logging to
+> syslog.  Can't say for certain if that's the cause though.
+> 
+> > Btw, what syslogging daemon are you using? I'm using rsyslogd, had to
+> > switch to TCP though, since with high debugging turned on, UDP would
+> > loose messages.
+> 
+> I'm using rsyslogd, but with just the default config, so the messages
+> are being written to /var/log/syslog
+> -sam
+> 
+> > root@atom0:~# cat /etc/rsyslog.d/30-ceph.conf
+> > # Sent all message to the remote syslog machine, then discard them to
+> > prevent local logging
+> > # Use TCP (@@) for transmission to prevent packet loss
+> > :rawmsg,contains,"osd." @@noisy.ceph.widodh.nl
+> > &  ~
+> > :rawmsg,contains,"mon." @@noisy.ceph.widodh.nl
+> > &  ~
+> > :rawmsg,contains,"mds." @@noisy.ceph.widodh.nl
+> > &  ~
+> > root@atom0:~#
+> >
+> > Wido
+> >
+> >> Thanks,
+> >> -sam
+> >>
+> >> OOM killer messages:
+> >>
+> >> [364540.080818] Node 0 DMA free:7992kB min:348kB low:432kB high:520kB
+> >> active_anon:3632kB inactive
+> >> _anon:3744kB active_file:0kB inactive_file:0kB unevictable:0kB
+> >> isolated(anon):0kB isolated(file):
+> >> 0kB present:15664kB mlocked:0kB dirty:0kB writeback:0kB mapped:0kB
+> >> shmem:0kB slab_reclaimable:56k
+> >> B slab_unreclaimable:384kB kernel_stack:64kB pagetables:16kB
+> >> unstable:0kB bounce:0kB writeback_tm
+> >> p:0kB pages_scanned:0 all_unreclaimable? yes
+> >> [364540.080831] lowmem_reserve[]: 0 1963 1963 1963
+> >> [364540.080837] Node 0 DMA32 free:44672kB min:44704kB low:55880kB
+> >> high:67056kB active_anon:138704
+> >> 4kB inactive_anon:462364kB active_file:520kB inactive_file:2780kB
+> >> unevictable:0kB isolated(anon):
+> >> 0kB isolated(file):0kB present:2010592kB mlocked:0kB dirty:4kB
+> >> writeback:8kB mapped:396kB shmem:5
+> >> 920kB slab_reclaimable:7928kB slab_unreclaimable:18600kB
+> >> kernel_stack:7560kB pagetables:11992kB u
+> >> nstable:0kB bounce:0kB writeback_tmp:0kB pages_scanned:2860
+> >> all_unreclaimable? yes
+> >> [364540.080850] lowmem_reserve[]: 0 0 0 0
+> >> [364540.080856] Node 0 DMA: 14*4kB 14*8kB 7*16kB 3*32kB 3*64kB 2*128kB
+> >> 4*256kB 4*512kB 2*1024kB 1
+> >> *2048kB 0*4096kB = 7992kB
+> >> [364540.080869] Node 0 DMA32: 9632*4kB 0*8kB 0*16kB 0*32kB 0*64kB
+> >> 0*128kB 0*256kB 0*512kB 0*1024k
+> >> B 1*2048kB 1*4096kB = 44672kB
+> >> [364540.080882] 4870 total pagecache pages
+> >> [364540.080884] 2596 pages in swap cache
+> >> [364540.080887] Swap cache stats: add 501808, delete 499212, find 6734/8216
+> >> [364540.080889] Free swap  = 0kB
+> >> [364540.080891] Total swap = 1953040kB
+> >> [364540.087324] 513696 pages RAM
+> >> [364540.087327] 10085 pages reserved
+> >> [364540.087329] 1907 pages shared
+> >> [364540.087330] 487503 pages non-shared
+> >> ...
+> >> [364540.087475] [ 5998]     0  5975   851179   444043   0
+> >> 0             0 cmon
+> >> [364540.087480] [ 6188]     0  6188    49938      145   1
+> >> 0             0 cmds
+> >> [364540.087484] [ 6396]     0  6396   150647     1359   1
+> >> 0             0 cosd
+> >> [364540.087489] [ 6485]     0  6485   176420     7324   0
+> >> 0             0 cosd
+> >> [364540.087494] [ 7076]     0  7076   168333     1561   1
+> >> 0             0 cosd
+> >> [364540.087499] [ 7660]     0  7660   167456     1571   1
+> >> 0             0 cosd
+> >> [364540.087503] [ 7747]     0  7747   149214     1497   0
+> >> 0             0 cosd
+> >> [364540.087515] Out of memory: Kill process 5998 (cmon) score 776 or
+> >> sacrifice child
+> >> [364540.087570] Killed process 5998 (cmon) total-vm:3404716kB,
+> >> anon-rss:1776172kB, file-rss:0kB
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> This e-mail and any attachments may contain information that is confidential and proprietary and otherwise protected from disclosure. If you are not the intended recipient of this e-mail, do not read, duplicate or redistribute it by any means. Please immediately delete it and any attachments and notify the sender that you have received it in error. Unintended recipients are prohibited from taking action on the basis of information in this e-mail or any attachments. The DRW Companies make no representations that this e-mail or any attachments are free of computer viruses or other defects.
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 
