@@ -1,42 +1,54 @@
 From: Sage Weil <sage@newdream.net>
-Subject: autobuilt debian/ubuntu packages
-Date: Thu, 16 Jun 2011 12:09:48 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1106161207250.29922@cobra.newdream.net>
+Subject: v0.29.1 released
+Date: Thu, 16 Jun 2011 15:28:09 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1106161525360.29922@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47308 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44338 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752041Ab1FPTHc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2011 15:07:32 -0400
+	with ESMTP id S1756547Ab1FPWZx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2011 18:25:53 -0400
 Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 67840BC887
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2011 12:09:48 -0700 (PDT)
+	by cobra.newdream.net (Postfix) with ESMTP id 35593BC77D
+	for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2011 15:28:09 -0700 (PDT)
 Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 4090DBC887
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2011 12:09:48 -0700 (PDT)
+	by cobra.newdream.net (Postfix) with ESMTP id 12E36BC77D
+	for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2011 15:28:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hey,
+We've released 0.29.1 with a few fixes.  The main thing is a fix for a 
+race condition in librbd that was biting people using rbd with qemu/kvm.  
+There was also a fixed memory leak in the OSD.  The shortlog is below.
 
-The URLs for the autobuilt debian/ubuntu packages have changed up a bit, 
-and we're now building Ubuntu packages for natty instead of maverick.  
-The new info is
+Relevant URLs:
+ * Direct download at: http://ceph.newdream.net/downloads/ceph-0.29.1.tar.gz
+ * Debian/Ubuntu packages: see http://ceph.newdream.net/wiki/Debian
 
-	http://ceph.newdream.net/wiki/Debian#Autobuilt_unstable_packages
 
-Basically,
- deb http://ceph.newdream.net/debian-snapshot-amd64/BRANCH/ DISTRIBUTION main
 
-So, for example, to get the latest 'stable' branch for squeeze,
- deb http://ceph.newdream.net/debian-snapshot-amd64/stable/ squeeze main
+Greg Farnum (1):
+      man: update cosd man page to include info on flush-journal option.
 
-The latest development packages for natty would be
- deb http://ceph.newdream.net/debian-snapshot-amd64/master/ natty main
+Josh Durgin (3):
+      librbd: fix AioCompletion race condition
+      librbd: add AioCompletion debugging
+      librbd: fix block_completion race condition
 
-If anyone wants different distributions or architectures, let me know!
+Sage Weil (5):
+      moncaps: whitespace
+      mon: weaken pool creation caps check
+      Makefile: remove ancient comment
+      mkcephfs: fix ceph.conf reference
+      v0.29.1
 
-sage
+Sam Lang (2):
+      Fix segfault caused by invalid argument string.
+      Fix typo in usage output for --num-osds
+
+Samuel Just (2):
+      ReplicatedPG: make_writeable, use correct size for clone_size entry
+      PG: clear scrub_received_maps in scrub_clear_state
 
