@@ -1,54 +1,78 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.29.1 released
-Date: Thu, 16 Jun 2011 15:28:09 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1106161525360.29922@cobra.newdream.net>
+From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
+Subject: Does anyone know if Automake has a way of expressing dependencies?
+Date: Thu, 16 Jun 2011 17:31:44 -0700
+Message-ID: <BANLkTikD=VCqf+JDK=21yhMwx6mir0mN6Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44338 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756547Ab1FPWZx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2011 18:25:53 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 35593BC77D
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2011 15:28:09 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 12E36BC77D
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2011 15:28:09 -0700 (PDT)
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:65435 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752416Ab1FQAbp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Jun 2011 20:31:45 -0400
+Received: by fxm17 with SMTP id 17so1451911fxm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Jun 2011 17:31:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-We've released 0.29.1 with a few fixes.  The main thing is a fix for a 
-race condition in librbd that was biting people using rbd with qemu/kvm.  
-There was also a fixed memory leak in the OSD.  The shortlog is below.
+Does anyone know if Automake has a way of expressing dependencies between
+libraries?
 
-Relevant URLs:
- * Direct download at: http://ceph.newdream.net/downloads/ceph-0.29.1.tar.gz
- * Debian/Ubuntu packages: see http://ceph.newdream.net/wiki/Debian
+For instance, currently our code has this set of (logical) dependencies:
+rbd -> librbd -> librados -> libcommon
 
+Where a -> b means "a depends on symbols found in b".
 
+Unfortunately, the problem that I've run into is that automake seems to have
+no way of expressing dependencies between libraries.
 
-Greg Farnum (1):
-      man: update cosd man page to include info on flush-journal option.
+You can do:
+> librbd_la_LIBADD += librados.la
 
-Josh Durgin (3):
-      librbd: fix AioCompletion race condition
-      librbd: add AioCompletion debugging
-      librbd: fix block_completion race condition
+This line does seem to take care of the business of making the final librbd.so
+depend on librados.so.
 
-Sage Weil (5):
-      moncaps: whitespace
-      mon: weaken pool creation caps check
-      Makefile: remove ancient comment
-      mkcephfs: fix ceph.conf reference
-      v0.29.1
+But you'll still get undefined symbols if you try to use librbd.la later in
+the Makefile.am without also remembering to include librados. So remembering
+the dependencies is up to the developer, which could be a problem if we decide
+to create more libraries (say, by splitting libcommon.) Is there a workaround
+for this?
 
-Sam Lang (2):
-      Fix segfault caused by invalid argument string.
-      Fix typo in usage output for --num-osds
+Another problem that I've experienced is that Automake seems to view a
+particular library as either 'shared' or 'static' inherently, and can't handle
+mixing the two. For example, if you do:
 
-Samuel Just (2):
-      ReplicatedPG: make_writeable, use correct size for clone_size entry
-      PG: clear scrub_received_maps in scrub_clear_state
+> librbd_la_LIBADD += libcommon.a
 
+You'll get this strange message:
+
+> *** Warning: Linking the shared library librgw.la against the
+> *** static library libcommon.a is not portable!
+
+I was afraid to go with this solution because I'm worried it's not setting
+-fPIC correctly.
+
+I really view the whole -fPIC situation as something that should be handled by
+the build system. If I say that librbd depends on libcommon, and gceph depends
+on libcommon, it should figure out what flags to use where, and build
+libcommon with those flags. If it needs to build libcommon once with -fPIC and
+once without, it should handle that internally.
+
+This is how you would write that in CMake:
+> add_library(libcommon ...)
+> add_library(librados ...)
+> target_link_libraries(librados libcommon)
+> add_library(librbd ...)
+> target_link_libraries(librbd librados)
+> add_program(rbd rbd.c)
+> target_link_libraries(rbd librbd)
+> target_link_libraries(gceph libcommon)
+
+Does anyone know if there is a way to get an equivalent level of functionality
+in automake? Currently we're directly injecting the sources of libcommon into
+the other libraries. libcommon doesn't even really exist from the perspective
+of the build system, except as an m4 macro which contains a list of file names.
+I don't think this approach will scale very well if we start adding more
+libraries.
+
+Colin
