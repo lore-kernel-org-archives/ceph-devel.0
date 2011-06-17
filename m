@@ -1,41 +1,66 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: inconsistent chunk
-Date: Fri, 17 Jun 2011 09:27:10 -0700
-Message-ID: <E58F9FF9-B13F-45D7-86D3-5C1940A919C7@dreamhost.com>
-References: <4DFAE436.9060606@ufm.su>
-Mime-Version: 1.0 (Apple Message framework v1084)
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: Does anyone know if Automake has a way of expressing
+ dependencies?
+Date: Fri, 17 Jun 2011 11:58:57 -0700
+Message-ID: <20110617185857.GA25210@dreamer>
+References: <BANLkTikD=VCqf+JDK=21yhMwx6mir0mN6Q@mail.gmail.com>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:33249 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:37857 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756793Ab1FQQ11 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jun 2011 12:27:27 -0400
-In-Reply-To: <4DFAE436.9060606@ufm.su>
+	with ESMTP id S1751880Ab1FQS66 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Jun 2011 14:58:58 -0400
+Content-Disposition: inline
+In-Reply-To: <BANLkTikD=VCqf+JDK=21yhMwx6mir0mN6Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
-Cc: ceph-devel@vger.kernel.org, samuel.just@dreamhost.com
+To: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Jun 16, 2011, at 10:20 PM, Fyodor Ustinov wrote:
-
-> Hi!
+On Thu, Jun 16, 2011 at 05:31:44PM -0700, Colin Patrick McCabe wrote:
+> Does anyone know if Automake has a way of expressing dependencies between
+> libraries?
 > 
-> I have inconsistent chunk:
+> For instance, currently our code has this set of (logical) dependencies:
+> rbd -> librbd -> librados -> libcommon
 > 
-> 2011-06-17 08:11:33.844030    pg v26069: 2376 pgs: 2375 active+clean, 1 active+clean+inconsistent; 285 GB data, 572 GB used, 24180 GB / 25494 GB avail
+> Where a -> b means "a depends on symbols found in b".
 > 
-> Questions:
-> 1. What does this mean?
-This isn't actually an inconsistent chunk. It's an inconsistent "placement group", which is a logical grouping of RADOS objects which are moved between OSDs and share the same RADOS metadata. It being labeled inconsistent means that the background scrub has identified a difference in the PG's contents. Right now, I think that means a difference in the file contents, or in one of their sizes or modification times.
+> Unfortunately, the problem that I've run into is that automake seems to have
+> no way of expressing dependencies between libraries.
+> 
+> You can do:
+> > librbd_la_LIBADD += librados.la
+> 
+> This line does seem to take care of the business of making the final librbd.so
+> depend on librados.so.
+> 
+> But you'll still get undefined symbols if you try to use librbd.la later in
+> the Makefile.am without also remembering to include librados. So remembering
+> the dependencies is up to the developer, which could be a problem if we decide
+> to create more libraries (say, by splitting libcommon.) Is there a workaround
+> for this?
 
-> 2. How to learn what kind of file is damaged?
-That's not readily-available data, I'm afraid. There may be a way to find out which objects caused it to get flagged inconsistent (which would tell you the inode of the damaged files), Sam would be able to tell you more about this...
+This (and the next sections from there on) seem to talk exactly about
+this:
 
-> 3. Delete damaged file should fix it?
-You're unlikely to be able to delete things that are marked inconsistent, since the system wants to resolve the inconsistency before it does anything else with them.
+http://sources.redhat.com/autobook/autobook/autobook_76.html#SEC76
 
-> 4. Can I recover the data without backup?
-Possibly. If the inconsistency is just that one of the OSDs is storing the object and another OSD says the object shouldn't exist, that can be recovered from by working out which one is correct.
+The Autobook is heavy reading, but is very very good. Later sections
+cover automate integration.
 
-Have you manually adjusted the contents of any OSDs? Can you think of anything you've done that might have triggered this?
+http://sources.redhat.com/autobook/autobook/autobook_toc.html
+
+> Another problem that I've experienced is that Automake seems to view a
+> particular library as either 'shared' or 'static' inherently, and can't handle
+> mixing the two. For example, if you do:
+> 
+> > librbd_la_LIBADD += libcommon.a
+
+As explained in Autobook, libtool does *both*, I think that automake
+snippet is just trying to cram a static library in a place that only
+expects shared a one.
+
+-- 
+:(){ :|:&};:
