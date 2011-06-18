@@ -1,31 +1,47 @@
 From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: inconsistent chunk
-Date: Sat, 18 Jun 2011 18:27:42 +0300
-Message-ID: <4DFCC3EE.2090700@ufm.su>
-References: <4DFAE436.9060606@ufm.su> <E58F9FF9-B13F-45D7-86D3-5C1940A919C7@dreamhost.com>
+Subject: cfuse vs kernel mount. differences.
+Date: Sat, 18 Jun 2011 18:44:36 +0300
+Message-ID: <4DFCC7E4.70307@ufm.su>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:48325 "EHLO mail.ufm.su"
+Received: from mail.ufm.su ([77.120.103.19]:52056 "EHLO mail.ufm.su"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752873Ab1FRP1r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sat, 18 Jun 2011 11:27:47 -0400
-In-Reply-To: <E58F9FF9-B13F-45D7-86D3-5C1940A919C7@dreamhost.com>
+	id S1752908Ab1FRPoj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 18 Jun 2011 11:44:39 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id 15A7C600485
+	for <ceph-devel@vger.kernel.org>; Sat, 18 Jun 2011 18:44:38 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id wSeufhazb6RR for <ceph-devel@vger.kernel.org>;
+	Sat, 18 Jun 2011 18:44:37 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id E6DE5600484
+	for <ceph-devel@vger.kernel.org>; Sat, 18 Jun 2011 18:44:37 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org, samuel.just@dreamhost.com
+To: ceph-devel@vger.kernel.org
 
-On 06/17/2011 07:27 PM, Gregory Farnum wrote:
-> 4. Can I recover the data without backup?
-> Possibly. If the inconsistency is just that one of the OSDs is storing the object and another OSD says the object shouldn't exist, that can be recovered from by working out which one is correct.
->
-> Have you manually adjusted the contents of any OSDs? Can you think of anything you've done that might have triggered this?
-  I step by step down osd servers until only one remains (hmm, it is not 
-clear how this is consistent with "pg_size 2"). After one day I step by 
-step up osd servers.
+Hi!
+
+1-st. Mount by kernel:
+
+root@stb1:~# df /mnt
+Filesystem           1K-blocks      Used Available Use% Mounted on
+10.5.51.230:/        51409168384 799601664 49637535744   2% /mnt
+
+2-nd. Mount by cfuse:
+
+root@stb1:~# df /mnt
+Filesystem           1K-blocks      Used Available Use% Mounted on
+cfuse                51409169084 1771587996 49637581088   4% /mnt
+
+Hmm... All different. It's correct? Who should I believe?
+
+kernel 3.0.0-rc3
+ceph - 0.29.1
 
 WBR,
      Fyodor.
-
