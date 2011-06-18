@@ -1,34 +1,31 @@
-From: Sage Weil <sage@newdream.net>
-Subject: metablob fix
-Date: Fri, 17 Jun 2011 22:17:58 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1106172215440.4755@cobra.newdream.net>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: Re: inconsistent chunk
+Date: Sat, 18 Jun 2011 18:27:42 +0300
+Message-ID: <4DFCC3EE.2090700@ufm.su>
+References: <4DFAE436.9060606@ufm.su> <E58F9FF9-B13F-45D7-86D3-5C1940A919C7@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54949 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750738Ab1FRFPj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 18 Jun 2011 01:15:39 -0400
+Received: from mail.ufm.su ([77.120.103.19]:48325 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752873Ab1FRP1r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 18 Jun 2011 11:27:47 -0400
+In-Reply-To: <E58F9FF9-B13F-45D7-86D3-5C1940A919C7@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: samlang@gmail.com
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org, samuel.just@dreamhost.com
 
-Hi Sam-
+On 06/17/2011 07:27 PM, Gregory Farnum wrote:
+> 4. Can I recover the data without backup?
+> Possibly. If the inconsistency is just that one of the OSDs is storing the object and another OSD says the object shouldn't exist, that can be recovered from by working out which one is correct.
+>
+> Have you manually adjusted the contents of any OSDs? Can you think of anything you've done that might have triggered this?
+  I step by step down osd servers until only one remains (hmm, it is not 
+clear how this is consistent with "pg_size 2"). After one day I step by 
+step up osd servers.
 
-I pushed a fix for the valgrind error you were seeing to mds_metablob_fix.  
-There was a class used in an STL container that wasn't copyable.  As far 
-as I can tell, you can't actually put items in a container (map<> in this 
-case) that aren't copyable, so I used a boost::smart_ptr.  
-
-Maybe someone with better C++-fu than I has a way to avoid the copies 
-entirely?  Adding
-
-	fullbit(const fullbit& other);
-	const fullbit operator=(const fullbit& other);
-
-fails to link, and if I assert in there I can't get past inserting the 
-initial element.  :/
-
-sage
+WBR,
+     Fyodor.
 
