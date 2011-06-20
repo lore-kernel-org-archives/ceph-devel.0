@@ -1,36 +1,58 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: inconsistent chunk
-Date: Mon, 20 Jun 2011 20:19:40 +0300
-Message-ID: <4DFF812C.70900@ufm.su>
-References: <4DFAE436.9060606@ufm.su>	<E58F9FF9-B13F-45D7-86D3-5C1940A919C7@dreamhost.com>	<4DFCC3EE.2090700@ufm.su> <7CF4E65F-BFA1-429D-BE72-CE86ED79992F@dreamhost.com>
+From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
+Subject: Re: metablob fix
+Date: Mon, 20 Jun 2011 10:40:49 -0700
+Message-ID: <BANLkTimox5NBpELSFiSOF007Qs_m_DeR9Q@mail.gmail.com>
+References: <Pine.LNX.4.64.1106172215440.4755@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:55531 "EHLO mail.ufm.su"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755523Ab1FTRTn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Jun 2011 13:19:43 -0400
-In-Reply-To: <7CF4E65F-BFA1-429D-BE72-CE86ED79992F@dreamhost.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:47389 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755841Ab1FTRku convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Jun 2011 13:40:50 -0400
+Received: by fxm17 with SMTP id 17so1123407fxm.19
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Jun 2011 10:40:49 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1106172215440.4755@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org, samuel.just@dreamhost.com
+To: Sage Weil <sage@newdream.net>
+Cc: samlang@gmail.com, ceph-devel@vger.kernel.org
 
-On 06/20/2011 08:16 PM, Gregory Farnum wrote:
->>> 4. Can I recover the data without backup?
->>> Possibly. If the inconsistency is just that one of the OSDs is storing the object and another OSD says the object shouldn't exist, that can be recovered from by working out which one is correct.
->>>
->>> Have you manually adjusted the contents of any OSDs? Can you think of anything you've done that might have triggered this?
->> I step by step down osd servers until only one remains (hmm, it is not clear how this is consistent with "pg_size 2"). After one day I step by step up osd servers.
-> Well if you've got enough space and step down slowly enough all the data will simply exist on the one up OSD in a degraded form. :)
+On Fri, Jun 17, 2011 at 10:17 PM, Sage Weil <sage@newdream.net> wrote:
+> Hi Sam-
 >
-> Is it still marked as inconsistent? If that's really all you did it shouldn't be, but maybe restarting the cluster would let it fix itself. :/
-> -Greg
+> I pushed a fix for the valgrind error you were seeing to mds_metablob=
+_fix.
+> There was a class used in an STL container that wasn't copyable. =A0A=
+s far
+> as I can tell, you can't actually put items in a container (map<> in =
+this
+> case) that aren't copyable, so I used a boost::smart_ptr.
+>
+> Maybe someone with better C++-fu than I has a way to avoid the copies
+> entirely? =A0Adding
+>
+> =A0 =A0 =A0 =A0fullbit(const fullbit& other);
+> =A0 =A0 =A0 =A0const fullbit operator=3D(const fullbit& other);
+>
+> fails to link, and if I assert in there I can't get past inserting th=
+e
+> initial element. =A0:/
 
-Yes, I restarted osd server with inconsistent pg and cluster now in 
-consistent state.
+I'm afraid not. You can't put something into an STL container unless
+it has a working copy constructor.
 
-WBR,
-     Fyodor.
+By using std::insert instead of operator[], you avoid the need for a
+default constructor, but you can't avoid the copy.
 
+By the way, tr1::shared_ptr is the shiny new, standardized version of
+boost::smart_ptr.
+
+cheers,
+Colin
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
