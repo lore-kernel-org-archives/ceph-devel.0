@@ -1,253 +1,326 @@
-From: Gregory Farnum <gregf@hq.newdream.net>
-Subject: Re: MDS Stuck In Replay
-Date: Tue, 21 Jun 2011 21:27:03 -0700
-Message-ID: <18981DE9-A820-44EF-B5F7-B18C14C16C96@hq.newdream.net>
-References: <B828A4C02BE12543ACDFCF7EB0C693C67886252F0F@NC-SVR-09.netelligent.com> <Pine.LNX.4.64.1106211545340.28760@cobra.newdream.net> <B828A4C02BE12543ACDFCF7EB0C693C67886252F3B@NC-SVR-09.netelligent.com>
-Mime-Version: 1.0 (iPad Mail 8J3)
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Miao Xie <miaox@cn.fujitsu.com>
+Subject: Re: kernel BUG at fs/btrfs/delayed-inode.c:1301!
+Date: Wed, 22 Jun 2011 12:35:10 +0800
+Message-ID: <4E0170FE.7040505@cn.fujitsu.com>
+References: <4DFB7C77.6010807@sandia.gov> <4DFF1CFA.7060201@cn.fujitsu.com> <20110621000854.GJ12709@twin.jikos.cz>
+Reply-To: miaox@cn.fujitsu.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:34343 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750817Ab1FVEZ4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Jun 2011 00:25:56 -0400
-In-Reply-To: <B828A4C02BE12543ACDFCF7EB0C693C67886252F3B@NC-SVR-09.netelligent.com>
+Received: from cn.fujitsu.com ([222.73.24.84]:51530 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1751063Ab1FVE1N (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 22 Jun 2011 00:27:13 -0400
+In-Reply-To: <20110621000854.GJ12709@twin.jikos.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nigh <mnigh@netelligent.com>
-Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jim Schutt <jaschut@sandia.gov>, linux-btrfs@vger.kernel.org, Josef Bacik <josef@redhat.com>, ceph-devel@vger.kernel.org
 
-This looks like a bug we had in our master branch for about 12 hours. Assuming you built from source, pull the latest master and try again. :)
+On Tue, 21 Jun 2011 02:08:54 +0200, David Sterba wrote:
+> On Mon, Jun 20, 2011 at 06:12:10PM +0800, Miao Xie wrote:
+>> >From 457f39393b2e3d475fbba029b90b6a4e17b94d43 Mon Sep 17 00:00:00 2001
+>> From: Miao Xie <miaox@cn.fujitsu.com>
+>> Date: Mon, 20 Jun 2011 17:21:51 +0800
+>> Subject: [PATCH] btrfs: fix inconsonant inode information
+>>
+>> When iputting the inode, We may leave the delayed nodes if they have some
+>> delayed items that have not been dealt with. So when the inode is read again,
+>> we must look up the relative delayed node, and use the information in it to
+>> initialize the inode. Or we will get inconsonant inode information.
+>>
+>> Signed-off-by: Miao Xie <miaox@cn.fujitsu.com>
+>> ---
+>>  fs/btrfs/delayed-inode.c |  104 +++++++++++++++++++++++++++++++++++-----------
+>>  fs/btrfs/delayed-inode.h |    1 +
+>>  fs/btrfs/inode.c         |   12 ++++-
+>>  3 files changed, 91 insertions(+), 26 deletions(-)
+>>
+>> diff --git a/fs/btrfs/delayed-inode.c b/fs/btrfs/delayed-inode.c
+>> index f1cbd02..280755e 100644
+>> --- a/fs/btrfs/delayed-inode.c
+>> +++ b/fs/btrfs/delayed-inode.c
+>> @@ -82,19 +82,16 @@ static inline struct btrfs_delayed_root *btrfs_get_delayed_root(
+>>  	return root->fs_info->delayed_root;
+>>  }
+>>  
+>> -static struct btrfs_delayed_node *btrfs_get_or_create_delayed_node(
+>> -							struct inode *inode)
+>> +static struct btrfs_delayed_node *btrfs_get_delayed_node(struct inode *inode)
+>>  {
+>> -	struct btrfs_delayed_node *node;
+>>  	struct btrfs_inode *btrfs_inode = BTRFS_I(inode);
+>>  	struct btrfs_root *root = btrfs_inode->root;
+>>  	u64 ino = btrfs_ino(inode);
+>> -	int ret;
+>> +	struct btrfs_delayed_node *node;
+>>  
+>> -again:
+>>  	node = ACCESS_ONCE(btrfs_inode->delayed_node);
+> 
+> do you still need the volatile access here, after the again: label has
+> been removed? it does not break things if it's there, but it raises
+> questions ...
 
--Greg 
+The rule of ACCESS_ONCE said by Linus is:
 
-On Jun 21, 2011, at 5:26 PM, Mark Nigh <mnigh@netelligent.com> wrote:
+  if you access unlocked values, you use ACCESS_ONCE().
 
-> As you can see, two (2) of the OSDs are down and out. They weren't when I first wrote the post.
+(See: http://yarchive.net/comp/linux/ACCESS_ONCE.html)
+So I think it is still needed.
 > 
-> root@ceph001:~# ceph osd dump -o -
-> 2011-06-21 19:20:52.025776 mon <- [osd,dump]
-> 2011-06-21 19:20:52.026506 mon0 -> 'dumped osdmap epoch 612' (0)
-> epoch 612
-> fsid f1082578-eb4d-cdd7-4da2-5e6293396315
-> created 2011-06-20 16:05:04.711991
-> modifed 2011-06-21 18:15:33.498931
-> flags
+>>  	if (node) {
+>> -		atomic_inc(&node->refs);	/* can be accessed */
+>> +		atomic_inc(&node->refs);
+>>  		return node;
+>>  	}
+>>  
+>> @@ -103,7 +100,9 @@ again:
+>>  	if (node) {
+>>  		if (btrfs_inode->delayed_node) {
+>>  			spin_unlock(&root->inode_lock);
+>> -			goto again;
+>> +			BUG_ON(btrfs_inode->delayed_node != node);
+>> +			atomic_inc(&node->refs);	/* can be accessed */
+>> +			return node;
+>>  		}
+>>  		btrfs_inode->delayed_node = node;
+>>  		atomic_inc(&node->refs);	/* can be accessed */
+>> @@ -113,6 +112,23 @@ again:
+>>  	}
+>>  	spin_unlock(&root->inode_lock);
+>>  
+>> +	return NULL;
+>> +}
+>> +
+>> +static struct btrfs_delayed_node *btrfs_get_or_create_delayed_node(
+>> +							struct inode *inode)
+>> +{
+>> +	struct btrfs_delayed_node *node;
+>> +	struct btrfs_inode *btrfs_inode = BTRFS_I(inode);
+>> +	struct btrfs_root *root = btrfs_inode->root;
+>> +	u64 ino = btrfs_ino(inode);
+>> +	int ret;
+>> +
+>> +again:
+>> +	node = btrfs_get_delayed_node(inode);
 > 
-> pg_pool 0 'data' pg_pool(rep pg_size 2 crush_ruleset 0 object_hash rjenkins pg_num 128 pgp_num 128 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
-> pg_pool 1 'metadata' pg_pool(rep pg_size 2 crush_ruleset 1 object_hash rjenkins pg_num 128 pgp_num 128 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
-> pg_pool 2 'rbd' pg_pool(rep pg_size 2 crush_ruleset 2 object_hash rjenkins pg_num 128 pgp_num 128 lpg_num 2 lpgp_num 2 last_change 1 owner 0)
+> ... aha, it's been somehow moved here, which copies the original logic.
+> Now reading inode->delayed_node is inside a function and I do not think
+> that compiler could optimize reading value of btrfs_inode->delayed_node
+> that it would require ACCESS_ONCE.
+
+The reason that I rewrote btrfs_get_delayed_node() is:
+The old btrfs_get_delayed_node() may ignore the old delayed node which holds the
+up-to-date information (such as: new directory indexes, up-to-date inode information),
+considers there is no relative delayed node. And then btrfs will use the max index number
+in the fs tree to initialize ->index_cnt, but in fact, this number is not right,
+perhaps there are some directory indexes in the delayed node, the index number of them
+is greater than the one in the fs tree. In this way, the same index number may be allocated
+twice, and hit EEXIST error.
+
 > 
-> max_osd 4
-> osd0 up   in  weight 1 up_from 597 up_thru 611 down_at 596 last_clean_interval 2-595 10.6.1.80:6801/1891 10.6.1.80:6802/1891 10.6.1.80:6803/1891
-> osd1 up   in  weight 1 up_from 597 up_thru 611 down_at 596 last_clean_interval 3-595 10.6.1.80:6804/1982 10.6.1.80:6805/1982 10.6.1.80:6806/1982
-> osd2 down out up_from 596 up_thru 597 down_at 605 last_clean_interval 590-594
-> osd3 down out up_from 596 up_thru 597 down_at 605 last_clean_interval 593-594
+> And there is another ACCESS_ONCE in btrfs_remove_delayed_node. I wonder
+> what's the reason for that. Sorry to abuse this thread, but I'd like to
+> be sure about protection of the ->delayed_node members inside
+> btrfs_inode. Can you please comment on that?
+
+OK, I'll write some comment.
+
+> If you recall one message from the original report:
 > 
-> They start up fine.
+> [ 5447.554187] err add delayed dir index item(name: pglog_0.965_0)
+> into the insertion tree of the delayed node(root id:
+> 262, inode id: 258, errno: -17)
 > 
-> root@ceph002:~# /etc/init.d/ceph start osd2
-> === osd.2 ===
-> Mounting Btrfs on ceph002:/mnt/osd2
-> Scanning for Btrfs filesystems
-> failed to read /dev/sr0
-> Starting Ceph osd.2 on ceph002...
-> ** WARNING: Ceph is still under development.  Any feedback can be directed  **
-> **          at ceph-devel@vger.kernel.org or http://ceph.newdream.net/.     **
-> starting osd2 at 0.0.0.0:6800/8620 osd_data /mnt/osd2 /data/osd2/journal
-> root@ceph002:~# /etc/init.d/ceph start osd3
-> === osd.3 ===
-> Mounting Btrfs on ceph002:/mnt/osd3
-> Scanning for Btrfs filesystems
-> failed to read /dev/sr0
-> Starting Ceph osd.3 on ceph002...
-> ** WARNING: Ceph is still under development.  Any feedback can be directed  **
-> **          at ceph-devel@vger.kernel.org or http://ceph.newdream.net/.     **
-> starting osd3 at 0.0.0.0:6803/8769 osd_data /mnt/osd3 /data/osd3/journal
+> (-17 == -EEXIST)
 > 
-> But I do get these messages in the osd logs
-> 
-> 2011-06-21 19:24:27.937179 7f93df30d700 -- 10.6.1.81:6801/8620 >> 10.6.1.81:6806/8769 pipe(0x30f7a00 sd=19 pgs=0 cs=0 l=0).accept bad authorizer
-> 2011-06-21 19:24:27.937254 7f93df30d700 AuthNoneAuthorizeHandle::verify_authorizer() failed to decode
-> 2011-06-21 19:24:27.937270 7f93df30d700 -- 10.6.1.81:6801/8620 >> 10.6.1.81:6806/8769 pipe(0x30f7a00 sd=19 pgs=0 cs=0 l=0).accept bad authorizer
-> 
-> Here are the rule output.
-> 
-> root@ceph001:~# crushtool -i cm --test --rule 0
-> devices weights (hex): [10000,10000,10000,10000]
-> rule 0 (data), x = 0..9999
-> device 0:      5013
-> device 1:      4987
-> device 2:      4963
-> device 3:      5037
-> num results 2: 10000
-> 
-> root@ceph001:~# crushtool -i cm --test --rule 1
-> devices weights (hex): [10000,10000,10000,10000]
-> rule 1 (metadata), x = 0..9999
-> device 0:      5010
-> device 1:      5037
-> device 2:      4975
-> device 3:      4978
-> num results 2: 10000
-> 
-> 
-> Thanks for your assistance.
-> 
-> Mark Nigh
-> Systems Architect
-> mnigh@netelligent.com
-> (p) 314.392.6926
-> 
-> 
-> 
-> -----Original Message-----
-> From: Sage Weil [mailto:sage@newdream.net]
-> Sent: Tuesday, June 21, 2011 5:49 PM
-> To: Mark Nigh
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: MDS Stuck In Replay
-> 
-> On Tue, 21 Jun 2011, Mark Nigh wrote:
->> I am currently testing Ceph on Debian v6.0 (2.6.32) on the following system:
->> 
->> 2 servers each with 2 HDD and 1 osd per HDD for a total of 4 OSD
->> The 1st server has a one (1) mds and mon.
->> 
->> Ceph gets built and functioning correctly but I think it is when I
->> change my crushmap so that no data is stored on a single server that I
->> get my mds in replay. I also get some pgs in peering. See below.
-> 
-> If there are PGs in peering it will block MDS replay, so that's the core
-> issue.
-> 
-> Can you include the 'ceph osd dump -o -' output so we can verify the
-> object pools are using the data and metadata crush rules?
-> 
-> You can also verify that the individual crush rules are working with
-> something like
-> 
-> $ ceph osd getcrushmap -o cm
-> 2011-06-21 15:44:09.434742 mon <- [osd,getcrushmap]
-> 2011-06-21 15:44:09.435168 mon0 -> 'got crush map from osdmap epoch 2' (0)
-> 2011-06-21 15:44:09.435370 7f8fd5b22720  wrote 320 byte payload to cm
-> $ crushtool -i cm --test --rule 0
-> devices weights (hex): [10000]
-> rule 0 (data), x = 0..9999
-> device 0:      10000
-> num results 1: 10000
-> $ crushtool -i cm --test --rule 1
-> devices weights (hex): [10000]
-> rule 1 (metadata), x = 0..9999
-> device 0:      10000
-> num results 1: 10000
-> 
-> In your case you should see the objects split between 4 OSDs, not the 1 I
-> currently have running on my dev box.
-> 
-> sage
+> a printk after return from __btrfs_add_delayed_item (which is
+> able to return -EEXIST) in btrfs_insert_delayed_dir_index. I haven't
+> looked farther, but it seems that the item is being inserted (at least)
+> twice and I suspect missing locking or other type of protection.
+
+I don't think.
+The reason is above.
+
+Thanks
+Miao
+
 > 
 > 
->> 
->> 2011-06-21 16:49:01.551129    pg v1497: 396 pgs: 272 active+clean, 124 peering; 374 MB data, 773 MB used, 11117 GB / 11118 GB avail
->> 2011-06-21 16:49:01.551817   mds e10: 1/1/1 up {0=0=up:replay}
->> 2011-06-21 16:49:01.551836   osd e602: 4 osds: 4 up, 4 in
->> 2011-06-21 16:49:01.551898   log 2011-06-21 16:41:46.966074 mon0 10.6.1.80:6789/0 1 : [INF] mon.0@0 won leader election with quorum 0
->> 2011-06-21 16:49:01.551947   mon e1: 1 mons at {0=10.6.1.80:6789/0}
->> 
->> My crushmap is as follows:
->> 
->> # begin crush map
->> 
->> # devices
->> device 0 device0
->> device 1 device1
->> device 2 device2
->> device 3 device3
->> 
->> # types
->> type 0 device
->> type 1 host
->> type 2 root
->> 
->> # buckets
->> host host0 {
->>        id -1           # do not change unnecessarily
->>        # weight 2.000
->>        alg straw
->>        hash 0  # rjenkins1
->>        item device0 weight 1.000
->>        item device1 weight 1.000
->> }
->> host host1 {
->>        id -2           # do not change unnecessarily
->>        # weight 2.000
->>        alg straw
->>        hash 0  # rjenkins1
->>        item device2 weight 1.000
->>        item device3 weight 1.000
->> }
->> root root {
->>        id -3           # do not change unnecessarily
->>        # weight 2.000
->>        alg straw
->>        hash 0  # rjenkins1
->>        item host0 weight 1.000
->>        item host1 weight 1.000
->> }
->> 
->> # rules
->> rule data {
->>        ruleset 0
->>        type replicated
->>        min_size 1
->>        max_size 10
->>        step take root
->>        step chooseleaf firstn 0 type host
->>        step emit
->> }
->> rule metadata {
->>        ruleset 1
->>        type replicated
->>        min_size 1
->>        max_size 10
->>        step take root
->>        step choose firstn 0 type device
->>        step emit
->> }
->> 
->> I tried to restart the mds daemon with no luck. Here are a few lines of the mds log. Let me know if there is anything else I can provide.
->> 
->> 2011-06-21 16:50:44.047829 7f2fa8483700 -- 10.6.1.80:6800/19997 >> 10.6.1.80:6789/0 pipe(0x281d280 sd=10 pgs=1 cs=1 l=1).reader got message 141 0x283e780 mdsbeacon(4221/0 up:replay seq 141 v10) v2
->> 2011-06-21 16:50:44.047892 7f2fac6fe700 -- 10.6.1.80:6800/19997 >> 10.6.1.80:6789/0 pipe(0x281d280 sd=10 pgs=1 cs=1 l=1).writer: state = 2 policy.server=0
->> 2011-06-21 16:50:44.047918 7f2fac6fe700 -- 10.6.1.80:6800/19997 >> 10.6.1.80:6789/0 pipe(0x281d280 sd=10 pgs=1 cs=1 l=1).write_ack 141
->> 2011-06-21 16:50:44.047944 7f2fac6fe700 -- 10.6.1.80:6800/19997 >> 10.6.1.80:6789/0 pipe(0x281d280 sd=10 pgs=1 cs=1 l=1).writer: state = 2 policy.server=0
->> 2011-06-21 16:50:44.047969 7f2fa9485700 -- 10.6.1.80:6800/19997 <== mon0 10.6.1.80:6789/0 141 ==== mdsbeacon(4221/0 up:replay seq 141 v10) v2 ==== 103+0+0 (2350252520 0 0) 0x283e780 con 0x283d140
->> 2011-06-21 16:50:44.047986 7f2fa9485700 -- 10.6.1.80:6800/19997 dispatch_throttle_release 103 to dispatch throttler 103/104857600
->> 2011-06-21 16:50:44.058654 7f2fa8382700 -- 10.6.1.80:6800/19997 --> osd2 10.6.1.81:6800/1826 -- ping v1 -- ?+0 0x2841300
->> 2011-06-21 16:50:44.058677 7f2fa8382700 -- 10.6.1.80:6800/19997 --> osd0 10.6.1.80:6801/1891 -- ping v1 -- ?+0 0x2841180
->> 2011-06-21 16:50:44.058701 7f2fa6d7a700 -- 10.6.1.80:6800/19997 >> 10.6.1.81:6800/1826 pipe(0x2836a00 sd=9 pgs=7 cs=1 l=1).writer: state = 2 policy.server=0
->> 2011-06-21 16:50:44.058730 7f2fa6d7a700 -- 10.6.1.80:6800/19997 >> 10.6.1.81:6800/1826 pipe(0x2836a00 sd=9 pgs=7 cs=1 l=1).writer: state = 2 policy.server=0
->> 2011-06-21 16:50:44.058765 7f2fa727f700 -- 10.6.1.80:6800/19997 >> 10.6.1.80:6801/1891 pipe(0x281dc80 sd=7 pgs=6 cs=1 l=1).writer: state = 2 policy.server=0
->> 2011-06-21 16:50:44.058810 7f2fa727f700 -- 10.6.1.80:6800/19997 >> 10.6.1.80:6801/1891 pipe(0x281dc80 sd=7 pgs=6 cs=1 l=1).writer: state = 2 policy.server=0
->> 
->> Mark Nigh
->> Systems Architect
->> Netelligent Corporation
->> 
->> 
->> 
->> This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> 
->> 
+> thanks,
+> david
 > 
-> This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> +	if (node)
+>> +		return node;
+>> +
+>>  	node = kmem_cache_alloc(delayed_node_cache, GFP_NOFS);
+>>  	if (!node)
+>>  		return ERR_PTR(-ENOMEM);
+>> @@ -548,19 +564,6 @@ struct btrfs_delayed_item *__btrfs_next_delayed_item(
+>>  	return next;
+>>  }
+>>  
+>> -static inline struct btrfs_delayed_node *btrfs_get_delayed_node(
+>> -							struct inode *inode)
+>> -{
+>> -	struct btrfs_inode *btrfs_inode = BTRFS_I(inode);
+>> -	struct btrfs_delayed_node *delayed_node;
+>> -
+>> -	delayed_node = btrfs_inode->delayed_node;
+>> -	if (delayed_node)
+>> -		atomic_inc(&delayed_node->refs);
+>> -
+>> -	return delayed_node;
+>> -}
+>> -
+>>  static inline struct btrfs_root *btrfs_get_fs_root(struct btrfs_root *root,
+>>  						   u64 root_id)
+>>  {
+>> @@ -1404,8 +1407,7 @@ end:
+>>  
+>>  int btrfs_inode_delayed_dir_index_count(struct inode *inode)
+>>  {
+>> -	struct btrfs_delayed_node *delayed_node = BTRFS_I(inode)->delayed_node;
+>> -	int ret = 0;
+>> +	struct btrfs_delayed_node *delayed_node = btrfs_get_delayed_node(inode);
+>>  
+>>  	if (!delayed_node)
+>>  		return -ENOENT;
+>> @@ -1415,11 +1417,14 @@ int btrfs_inode_delayed_dir_index_count(struct inode *inode)
+>>  	 * a new directory index is added into the delayed node and index_cnt
+>>  	 * is updated now. So we needn't lock the delayed node.
+>>  	 */
+>> -	if (!delayed_node->index_cnt)
+>> +	if (!delayed_node->index_cnt) {
+>> +		btrfs_release_delayed_node(delayed_node);
+>>  		return -EINVAL;
+>> +	}
+>>  
+>>  	BTRFS_I(inode)->index_cnt = delayed_node->index_cnt;
+>> -	return ret;
+>> +	btrfs_release_delayed_node(delayed_node);
+>> +	return 0;
+>>  }
+>>  
+>>  void btrfs_get_delayed_items(struct inode *inode, struct list_head *ins_list,
+>> @@ -1613,6 +1618,57 @@ static void fill_stack_inode_item(struct btrfs_trans_handle *trans,
+>>  				      inode->i_ctime.tv_nsec);
+>>  }
+>>  
+>> +int btrfs_fill_inode(struct inode *inode, u32 *rdev)
+>> +{
+>> +	struct btrfs_delayed_node *delayed_node;
+>> +	struct btrfs_inode_item *inode_item;
+>> +	struct btrfs_timespec *tspec;
+>> +
+>> +	delayed_node = btrfs_get_delayed_node(inode);
+>> +	if (!delayed_node)
+>> +		return -ENOENT;
+>> +
+>> +	mutex_lock(&delayed_node->mutex);
+>> +	if (!delayed_node->inode_dirty) {
+>> +		mutex_unlock(&delayed_node->mutex);
+>> +		btrfs_release_delayed_node(delayed_node);
+>> +		return -ENOENT;
+>> +	}
+>> +
+>> +	inode_item = &delayed_node->inode_item;
+>> +
+>> +	inode->i_uid = btrfs_stack_inode_uid(inode_item);
+>> +	inode->i_gid = btrfs_stack_inode_gid(inode_item);
+>> +	btrfs_i_size_write(inode, btrfs_stack_inode_size(inode_item));
+>> +	inode->i_mode = btrfs_stack_inode_mode(inode_item);
+>> +	inode->i_nlink = btrfs_stack_inode_nlink(inode_item);
+>> +	inode_set_bytes(inode, btrfs_stack_inode_nbytes(inode_item));
+>> +	BTRFS_I(inode)->generation = btrfs_stack_inode_generation(inode_item);
+>> +	BTRFS_I(inode)->sequence = btrfs_stack_inode_sequence(inode_item);
+>> +	inode->i_rdev = 0;
+>> +	*rdev = btrfs_stack_inode_rdev(inode_item);
+>> +	BTRFS_I(inode)->flags = btrfs_stack_inode_flags(inode_item);
+>> +
+>> +	tspec = btrfs_inode_atime(inode_item);
+>> +	inode->i_atime.tv_sec = btrfs_stack_timespec_sec(tspec);
+>> +	inode->i_atime.tv_nsec = btrfs_stack_timespec_nsec(tspec);
+>> +
+>> +	tspec = btrfs_inode_mtime(inode_item);
+>> +	inode->i_mtime.tv_sec = btrfs_stack_timespec_sec(tspec);
+>> +	inode->i_mtime.tv_nsec = btrfs_stack_timespec_nsec(tspec);
+>> +
+>> +	tspec = btrfs_inode_ctime(inode_item);
+>> +	inode->i_ctime.tv_sec = btrfs_stack_timespec_sec(tspec);
+>> +	inode->i_ctime.tv_nsec = btrfs_stack_timespec_nsec(tspec);
+>> +
+>> +	inode->i_generation = BTRFS_I(inode)->generation;
+>> +	BTRFS_I(inode)->index_cnt = (u64)-1;
+>> +
+>> +	mutex_unlock(&delayed_node->mutex);
+>> +	btrfs_release_delayed_node(delayed_node);
+>> +	return 0;
+>> +}
+>> +
+>>  int btrfs_delayed_update_inode(struct btrfs_trans_handle *trans,
+>>  			       struct btrfs_root *root, struct inode *inode)
+>>  {
+>> diff --git a/fs/btrfs/delayed-inode.h b/fs/btrfs/delayed-inode.h
+>> index d1a6a29..8d27af4 100644
+>> --- a/fs/btrfs/delayed-inode.h
+>> +++ b/fs/btrfs/delayed-inode.h
+>> @@ -119,6 +119,7 @@ void btrfs_kill_delayed_inode_items(struct inode *inode);
+>>  
+>>  int btrfs_delayed_update_inode(struct btrfs_trans_handle *trans,
+>>  			       struct btrfs_root *root, struct inode *inode);
+>> +int btrfs_fill_inode(struct inode *inode, u32 *rdev);
+>>  
+>>  /* Used for drop dead root */
+>>  void btrfs_kill_all_delayed_nodes(struct btrfs_root *root);
+>> diff --git a/fs/btrfs/inode.c b/fs/btrfs/inode.c
+>> index 5813dec..1d25a04 100644
+>> --- a/fs/btrfs/inode.c
+>> +++ b/fs/btrfs/inode.c
+>> @@ -2509,6 +2509,11 @@ static void btrfs_read_locked_inode(struct inode *inode)
+>>  	int maybe_acls;
+>>  	u32 rdev;
+>>  	int ret;
+>> +	bool filled = false;
+>> +
+>> +	ret = btrfs_fill_inode(inode, &rdev);
+>> +	if (!ret)
+>> +		filled = true;
+>>  
+>>  	path = btrfs_alloc_path();
+>>  	BUG_ON(!path);
+>> @@ -2520,6 +2525,10 @@ static void btrfs_read_locked_inode(struct inode *inode)
+>>  		goto make_bad;
+>>  
+>>  	leaf = path->nodes[0];
+>> +
+>> +	if (filled)
+>> +		goto cache_acl;
+>> +
+>>  	inode_item = btrfs_item_ptr(leaf, path->slots[0],
+>>  				    struct btrfs_inode_item);
+>>  	if (!leaf->map_token)
+>> @@ -2556,7 +2565,7 @@ static void btrfs_read_locked_inode(struct inode *inode)
+>>  
+>>  	BTRFS_I(inode)->index_cnt = (u64)-1;
+>>  	BTRFS_I(inode)->flags = btrfs_inode_flags(leaf, inode_item);
+>> -
+>> +cache_acl:
+>>  	/*
+>>  	 * try to precache a NULL acl entry for files that don't have
+>>  	 * any xattrs or acls
+>> @@ -2572,7 +2581,6 @@ static void btrfs_read_locked_inode(struct inode *inode)
+>>  	}
+>>  
+>>  	btrfs_free_path(path);
+>> -	inode_item = NULL;
+>>  
+>>  	switch (inode->i_mode & S_IFMT) {
+>>  	case S_IFREG:
+>> -- 
+>> 1.7.4
+>>
+> 
+> 
+
