@@ -1,162 +1,162 @@
-From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
-Subject: Re: [PATCH 2/3] common/Throttle: Add timed_wait().
-Date: Thu, 23 Jun 2011 10:14:16 -0700
-Message-ID: <BANLkTinc1cD6AmkkwyjpOsGtiLP2HKHZsw@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: [PATCH 0/3] RFC: Enable clients to distinguish busy and
+ unreachable OSDs
+Date: Thu, 23 Jun 2011 13:05:21 -0600
+Message-ID: <4E038E71.1010404@sandia.gov>
 References: <1308767187-10376-1-git-send-email-jaschut@sandia.gov>
-	<1308767187-10376-4-git-send-email-jaschut@sandia.gov>
-	<BANLkTi=ehh8uK_8Zj08jFZGPH7nGU3AFsg@mail.gmail.com>
-	<4E036165.4000400@sandia.gov>
+ <Pine.LNX.4.64.1106221316310.16816@cobra.newdream.net>
+ <Pine.LNX.4.64.1106221354140.16816@cobra.newdream.net>
+ <4E034C24.6020103@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:57968 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932625Ab1FWROR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2011 13:14:17 -0400
-Received: by fxm17 with SMTP id 17so1396718fxm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Jun 2011 10:14:16 -0700 (PDT)
-In-Reply-To: <4E036165.4000400@sandia.gov>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:59355 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932595Ab1FWTFm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2011 15:05:42 -0400
+In-Reply-To: <4E034C24.6020103@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Jim Schutt <jaschut@sandia.gov>
-Cc: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On Thu, Jun 23, 2011 at 8:53 AM, Jim Schutt <jaschut@sandia.gov> wrote:
-> Hi Colin,
->
-> Colin McCabe wrote:
+Jim Schutt wrote:
+> Hi Sage,
+> 
+> Sage Weil wrote:
+>> Hey Jim-
 >>
->> On Wed, Jun 22, 2011 at 11:26 AM, Jim Schutt <jaschut@sandia.gov> wr=
-ote:
->>>
->>> This will enable SimpleMessenger to send keepalives to clients whil=
-e
->>> blocked in the policy throttler.
->>>
->>> Signed-off-by: Jim Schutt <jaschut@sandia.gov>
->>> ---
->>> =A0src/common/Throttle.h | =A0 40 +++++++++++++++++++++++++++++++++=
-+++++++
->>> =A01 files changed, 40 insertions(+), 0 deletions(-)
+>> I wonder if the below is sufficient, actually.  This avoids any change 
+>> on the server side, and just changes the client to start the 
+>> per-message timeout "clock" when the message is actually received by 
+>> the server...
+>> This way we still time out if the request gets stuck in cosd's request 
+>> queues somewhere, or if the disk blocks up, or something.  Any 
+>> requests that didn't get received don't time out, though.
 >>
->> This looks good. Only a small nitpick-- it's better not to pass
->> utime_t by value, since it's a struct. There's a bunch of other code
->> doing it, but it's better to pass a const reference. Also, I guess w=
-e
->> need to rebase this because g_clock has been replaced by
->> ceph_clock_now() in master. Should be easy though.
->
-> Given Sage's much cleaner approach to fixing the osd reset
-> issue, is this change useful on its own? =A0If so, I'm happy
-> to fix it up and resubmit.
+>> What do you think?
+> 
+> I like it.  I'm pretty sure you've addressed the
+> case I'm after.  Let me give it a try.
 
-I have a feeling that adding timeouts to the Throttler would be useful
-in general. I guess we'll probably wait until we have a user for the
-function first, though.
-We should definitely pull the first (cleanup) patch for Throttle.h, tho=
-ugh.
+Please consider queuing this patch up.
 
-sincerely,
-Colin
+It has greatly increased the S/N ratio in those resets -
+I'm still getting a few, and the ones I've looked at
+so far don't make sense to me yet.  Probably as I learn
+more I'll understand why they should be happening, but
+maybe they're the result of bugs; in any event I would
+never have noticed them without this patch.
 
+Thanks -- Jim
 
->
-> Let me know.
->
+> 
+> Thanks!
+> 
 > -- Jim
->
+> 
+> 
 >>
->> cheers,
->> Colin
->>
->>
->>> diff --git a/src/common/Throttle.h b/src/common/Throttle.h
->>> index 8fd2625..5a028cc 100644
->>> --- a/src/common/Throttle.h
->>> +++ b/src/common/Throttle.h
->>> @@ -27,6 +27,9 @@ private:
->>> =A0 =A0 =A0((c < max && count + c > max) || =A0 // normally stay un=
-der max
->>> =A0 =A0 =A0 (c >=3D max && count > max)); =A0 =A0 =A0 // except for=
- large c
->>> =A0}
->>> +
->>> + =A0/* Returns true if it had to block/wait, false otherwise.
->>> + =A0 */
->>> =A0bool _wait(int64_t c) {
->>> =A0 =A0bool waited =3D false;
->>> =A0 =A0if (_should_wait(c)) {
->>> @@ -44,6 +47,28 @@ private:
->>> =A0 =A0return waited;
->>> =A0}
->>>
->>> + =A0/* Returns true if it timed out while blocked/waiting,
->>> + =A0 * false otherwise.
->>> + =A0 */
->>> + =A0bool _timed_wait(utime_t interval, int64_t c) {
->>> + =A0 =A0if (_should_wait(c)) {
->>> + =A0 =A0 =A0utime_t timeout_at =3D g_clock.now() + interval;
->>> + =A0 =A0 =A0waiting +=3D c;
->>> + =A0 =A0 =A0do {
->>> + =A0 =A0 =A0 if (cond.WaitUntil(lock, timeout_at)) {
->>> + =A0 =A0 =A0 =A0 waiting -=3D c;
->>> + =A0 =A0 =A0 =A0 return true;
->>> + =A0 =A0 =A0 }
->>> + =A0 =A0 =A0} while (_should_wait(c));
->>> + =A0 =A0 =A0waiting -=3D c;
->>> +
->>> + =A0 =A0 =A0// wake up the next guy
->>> + =A0 =A0 =A0if (waiting)
->>> + =A0 =A0 =A0 cond.SignalOne();
->>> + =A0 =A0}
->>> + =A0 =A0return false;
->>> + =A0}
->>> +
->>> =A0public:
->>> =A0int64_t get_current() {
->>> =A0 =A0Mutex::Locker l(lock);
->>> @@ -79,6 +104,21 @@ public:
->>> =A0 =A0count +=3D c;
->>> =A0}
->>>
->>> + =A0/* Returns true if it got the requested amount within
->>> + =A0 * the specified interval, false otherwise.
->>> + =A0 */
->>> + =A0bool timed_get(utime_t interval, int64_t c =3D 1, int64_t m =3D=
- 0) {
->>> + =A0 =A0assert(c >=3D 0);
->>> + =A0 =A0Mutex::Locker l(lock);
->>> + =A0 =A0if (m) {
->>> + =A0 =A0 =A0assert(m > 0);
->>> + =A0 =A0 =A0_reset_max(m);
->>> + =A0 =A0}
->>> + =A0 =A0if (_timed_wait(interval, c)) return false;
->>> + =A0 =A0count +=3D c;
->>> + =A0 =A0return true;
->>> + =A0}
->>> +
->>> =A0/* Returns true if it successfully got the requested amount,
->>> =A0 * or false if it would block.
->>> =A0 */
->>> --
->>> 1.7.1
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
-l
->>>
+>> sage
 >>
 >>
->
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>> From e129e4f3f500f4e77cd1a7c64ff64edc54a9a9ea Mon Sep 17 00:00:00 2001
+>> From: Sage Weil <sage@newdream.net>
+>> Date: Wed, 22 Jun 2011 13:43:06 -0700
+>> Subject: [PATCH] libceph: don't time out osd requests that haven't 
+>> been received
+>>
+>> Keep track of when an outgoing message is ACKed (i.e., the server fully
+>> received it and, presumably, queued it for processing).  Time out OSD
+>> requests only if it's been too long since they've been received.
+>>
+>> This prevents timeouts and connection thrashing when the OSDs are simply
+>> busy and are throttling the requests they read off the network.
+>>
+>> Signed-off-by: Sage Weil <sage@newdream.net>
+>> ---
+>>  include/linux/ceph/messenger.h |    1 +
+>>  net/ceph/messenger.c           |   12 +++++-------
+>>  net/ceph/osd_client.c          |    6 ++++++
+>>  3 files changed, 12 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/include/linux/ceph/messenger.h 
+>> b/include/linux/ceph/messenger.h
+>> index 31d91a6..d7adf15 100644
+>> --- a/include/linux/ceph/messenger.h
+>> +++ b/include/linux/ceph/messenger.h
+>> @@ -94,6 +94,7 @@ struct ceph_msg {
+>>      bool more_to_follow;
+>>      bool needs_out_seq;
+>>      int front_max;
+>> +    unsigned long ack_stamp;        /* tx: when we were acked */
+>>  
+>>      struct ceph_msgpool *pool;
+>>  };
+>> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+>> index 78b55f4..c340e2e 100644
+>> --- a/net/ceph/messenger.c
+>> +++ b/net/ceph/messenger.c
+>> @@ -486,13 +486,10 @@ static void prepare_write_message(struct 
+>> ceph_connection *con)
+>>      m = list_first_entry(&con->out_queue,
+>>                 struct ceph_msg, list_head);
+>>      con->out_msg = m;
+>> -    if (test_bit(LOSSYTX, &con->state)) {
+>> -        list_del_init(&m->list_head);
+>> -    } else {
+>> -        /* put message on sent list */
+>> -        ceph_msg_get(m);
+>> -        list_move_tail(&m->list_head, &con->out_sent);
+>> -    }
+>> +
+>> +    /* put message on sent list */
+>> +    ceph_msg_get(m);
+>> +    list_move_tail(&m->list_head, &con->out_sent);
+>>  
+>>      /*
+>>       * only assign outgoing seq # if we haven't sent this message
+>> @@ -1399,6 +1396,7 @@ static void process_ack(struct ceph_connection 
+>> *con)
+>>              break;
+>>          dout("got ack for seq %llu type %d at %p\n", seq,
+>>               le16_to_cpu(m->hdr.type), m);
+>> +        m->ack_stamp = jiffies;
+>>          ceph_msg_remove(m);
+>>      }
+>>      prepare_read_tag(con);
+>> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> index 7330c27..ce310ee 100644
+>> --- a/net/ceph/osd_client.c
+>> +++ b/net/ceph/osd_client.c
+>> @@ -1085,9 +1085,15 @@ static void handle_timeout(struct work_struct 
+>> *work)
+>>          req = list_entry(osdc->req_lru.next, struct ceph_osd_request,
+>>                   r_req_lru_item);
+>>  
+>> +        /* hasn't been long enough since we sent it? */
+>>          if (time_before(jiffies, req->r_stamp + timeout))
+>>              break;
+>>  
+>> +        /* hasn't been long enough since it was acked? */
+>> +        if (req->r_request->ack_stamp == 0 ||
+>> +            time_before(jiffies, req->r_request->ack_stamp + timeout))
+>> +            break;
+>> +
+>>          BUG_ON(req == last_req && req->r_stamp == last_stamp);
+>>          last_req = req;
+>>          last_stamp = req->r_stamp;
+> 
+> 
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+
+
