@@ -1,132 +1,162 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
+From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
 Subject: Re: [PATCH 2/3] common/Throttle: Add timed_wait().
-Date: Thu, 23 Jun 2011 09:53:09 -0600
-Message-ID: <4E036165.4000400@sandia.gov>
+Date: Thu, 23 Jun 2011 10:14:16 -0700
+Message-ID: <BANLkTinc1cD6AmkkwyjpOsGtiLP2HKHZsw@mail.gmail.com>
 References: <1308767187-10376-1-git-send-email-jaschut@sandia.gov>
- <1308767187-10376-4-git-send-email-jaschut@sandia.gov>
- <BANLkTi=ehh8uK_8Zj08jFZGPH7nGU3AFsg@mail.gmail.com>
+	<1308767187-10376-4-git-send-email-jaschut@sandia.gov>
+	<BANLkTi=ehh8uK_8Zj08jFZGPH7nGU3AFsg@mail.gmail.com>
+	<4E036165.4000400@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:54183 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758428Ab1FWPxo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2011 11:53:44 -0400
-In-Reply-To: <BANLkTi=ehh8uK_8Zj08jFZGPH7nGU3AFsg@mail.gmail.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:57968 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932625Ab1FWROR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2011 13:14:17 -0400
+Received: by fxm17 with SMTP id 17so1396718fxm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Jun 2011 10:14:16 -0700 (PDT)
+In-Reply-To: <4E036165.4000400@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
+To: Jim Schutt <jaschut@sandia.gov>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Colin,
-
-Colin McCabe wrote:
-> On Wed, Jun 22, 2011 at 11:26 AM, Jim Schutt <jaschut@sandia.gov> wrote:
->> This will enable SimpleMessenger to send keepalives to clients while
->> blocked in the policy throttler.
+On Thu, Jun 23, 2011 at 8:53 AM, Jim Schutt <jaschut@sandia.gov> wrote:
+> Hi Colin,
+>
+> Colin McCabe wrote:
 >>
->> Signed-off-by: Jim Schutt <jaschut@sandia.gov>
->> ---
->>  src/common/Throttle.h |   40 ++++++++++++++++++++++++++++++++++++++++
->>  1 files changed, 40 insertions(+), 0 deletions(-)
-> 
-> This looks good. Only a small nitpick-- it's better not to pass
-> utime_t by value, since it's a struct. There's a bunch of other code
-> doing it, but it's better to pass a const reference. Also, I guess we
-> need to rebase this because g_clock has been replaced by
-> ceph_clock_now() in master. Should be easy though.
-
-Given Sage's much cleaner approach to fixing the osd reset
-issue, is this change useful on its own?  If so, I'm happy
-to fix it up and resubmit.
-
-Let me know.
-
--- Jim
-
-> 
-> cheers,
-> Colin
-> 
-> 
->> diff --git a/src/common/Throttle.h b/src/common/Throttle.h
->> index 8fd2625..5a028cc 100644
->> --- a/src/common/Throttle.h
->> +++ b/src/common/Throttle.h
->> @@ -27,6 +27,9 @@ private:
->>       ((c < max && count + c > max) ||   // normally stay under max
->>        (c >= max && count > max));       // except for large c
->>   }
->> +
->> +  /* Returns true if it had to block/wait, false otherwise.
->> +   */
->>   bool _wait(int64_t c) {
->>     bool waited = false;
->>     if (_should_wait(c)) {
->> @@ -44,6 +47,28 @@ private:
->>     return waited;
->>   }
+>> On Wed, Jun 22, 2011 at 11:26 AM, Jim Schutt <jaschut@sandia.gov> wr=
+ote:
+>>>
+>>> This will enable SimpleMessenger to send keepalives to clients whil=
+e
+>>> blocked in the policy throttler.
+>>>
+>>> Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+>>> ---
+>>> =A0src/common/Throttle.h | =A0 40 +++++++++++++++++++++++++++++++++=
++++++++
+>>> =A01 files changed, 40 insertions(+), 0 deletions(-)
 >>
->> +  /* Returns true if it timed out while blocked/waiting,
->> +   * false otherwise.
->> +   */
->> +  bool _timed_wait(utime_t interval, int64_t c) {
->> +    if (_should_wait(c)) {
->> +      utime_t timeout_at = g_clock.now() + interval;
->> +      waiting += c;
->> +      do {
->> +       if (cond.WaitUntil(lock, timeout_at)) {
->> +         waiting -= c;
->> +         return true;
->> +       }
->> +      } while (_should_wait(c));
->> +      waiting -= c;
->> +
->> +      // wake up the next guy
->> +      if (waiting)
->> +       cond.SignalOne();
->> +    }
->> +    return false;
->> +  }
->> +
->>  public:
->>   int64_t get_current() {
->>     Mutex::Locker l(lock);
->> @@ -79,6 +104,21 @@ public:
->>     count += c;
->>   }
+>> This looks good. Only a small nitpick-- it's better not to pass
+>> utime_t by value, since it's a struct. There's a bunch of other code
+>> doing it, but it's better to pass a const reference. Also, I guess w=
+e
+>> need to rebase this because g_clock has been replaced by
+>> ceph_clock_now() in master. Should be easy though.
+>
+> Given Sage's much cleaner approach to fixing the osd reset
+> issue, is this change useful on its own? =A0If so, I'm happy
+> to fix it up and resubmit.
+
+I have a feeling that adding timeouts to the Throttler would be useful
+in general. I guess we'll probably wait until we have a user for the
+function first, though.
+We should definitely pull the first (cleanup) patch for Throttle.h, tho=
+ugh.
+
+sincerely,
+Colin
+
+
+>
+> Let me know.
+>
+> -- Jim
+>
 >>
->> +  /* Returns true if it got the requested amount within
->> +   * the specified interval, false otherwise.
->> +   */
->> +  bool timed_get(utime_t interval, int64_t c = 1, int64_t m = 0) {
->> +    assert(c >= 0);
->> +    Mutex::Locker l(lock);
->> +    if (m) {
->> +      assert(m > 0);
->> +      _reset_max(m);
->> +    }
->> +    if (_timed_wait(interval, c)) return false;
->> +    count += c;
->> +    return true;
->> +  }
->> +
->>   /* Returns true if it successfully got the requested amount,
->>    * or false if it would block.
->>    */
->> --
->> 1.7.1
+>> cheers,
+>> Colin
 >>
 >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> diff --git a/src/common/Throttle.h b/src/common/Throttle.h
+>>> index 8fd2625..5a028cc 100644
+>>> --- a/src/common/Throttle.h
+>>> +++ b/src/common/Throttle.h
+>>> @@ -27,6 +27,9 @@ private:
+>>> =A0 =A0 =A0((c < max && count + c > max) || =A0 // normally stay un=
+der max
+>>> =A0 =A0 =A0 (c >=3D max && count > max)); =A0 =A0 =A0 // except for=
+ large c
+>>> =A0}
+>>> +
+>>> + =A0/* Returns true if it had to block/wait, false otherwise.
+>>> + =A0 */
+>>> =A0bool _wait(int64_t c) {
+>>> =A0 =A0bool waited =3D false;
+>>> =A0 =A0if (_should_wait(c)) {
+>>> @@ -44,6 +47,28 @@ private:
+>>> =A0 =A0return waited;
+>>> =A0}
+>>>
+>>> + =A0/* Returns true if it timed out while blocked/waiting,
+>>> + =A0 * false otherwise.
+>>> + =A0 */
+>>> + =A0bool _timed_wait(utime_t interval, int64_t c) {
+>>> + =A0 =A0if (_should_wait(c)) {
+>>> + =A0 =A0 =A0utime_t timeout_at =3D g_clock.now() + interval;
+>>> + =A0 =A0 =A0waiting +=3D c;
+>>> + =A0 =A0 =A0do {
+>>> + =A0 =A0 =A0 if (cond.WaitUntil(lock, timeout_at)) {
+>>> + =A0 =A0 =A0 =A0 waiting -=3D c;
+>>> + =A0 =A0 =A0 =A0 return true;
+>>> + =A0 =A0 =A0 }
+>>> + =A0 =A0 =A0} while (_should_wait(c));
+>>> + =A0 =A0 =A0waiting -=3D c;
+>>> +
+>>> + =A0 =A0 =A0// wake up the next guy
+>>> + =A0 =A0 =A0if (waiting)
+>>> + =A0 =A0 =A0 cond.SignalOne();
+>>> + =A0 =A0}
+>>> + =A0 =A0return false;
+>>> + =A0}
+>>> +
+>>> =A0public:
+>>> =A0int64_t get_current() {
+>>> =A0 =A0Mutex::Locker l(lock);
+>>> @@ -79,6 +104,21 @@ public:
+>>> =A0 =A0count +=3D c;
+>>> =A0}
+>>>
+>>> + =A0/* Returns true if it got the requested amount within
+>>> + =A0 * the specified interval, false otherwise.
+>>> + =A0 */
+>>> + =A0bool timed_get(utime_t interval, int64_t c =3D 1, int64_t m =3D=
+ 0) {
+>>> + =A0 =A0assert(c >=3D 0);
+>>> + =A0 =A0Mutex::Locker l(lock);
+>>> + =A0 =A0if (m) {
+>>> + =A0 =A0 =A0assert(m > 0);
+>>> + =A0 =A0 =A0_reset_max(m);
+>>> + =A0 =A0}
+>>> + =A0 =A0if (_timed_wait(interval, c)) return false;
+>>> + =A0 =A0count +=3D c;
+>>> + =A0 =A0return true;
+>>> + =A0}
+>>> +
+>>> =A0/* Returns true if it successfully got the requested amount,
+>>> =A0 * or false if it would block.
+>>> =A0 */
+>>> --
+>>> 1.7.1
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
+>>>
 >>
-> 
-> 
-
-
+>>
+>
+>
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
