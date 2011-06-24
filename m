@@ -1,40 +1,108 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Assistance in Troubleshooting and Fixing MDS in Replay
-Date: Fri, 24 Jun 2011 12:25:30 -0700
-Message-ID: <1433E7D0-5F44-4640-BB99-CFFA0482C1B3@dreamhost.com>
-References: <B828A4C02BE12543ACDFCF7EB0C693C6788625320F@NC-SVR-09.netelligent.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Andy Walls <awalls@md.metrocast.net>
+Subject: Re: [RFC] Don't use linux/version.h anymore to indicate a
+ per-driver version - Was: Re: [PATCH 03/37] Remove unneeded version.h
+ includes from include/
+Date: Fri, 24 Jun 2011 17:04:08 -0400
+Message-ID: <1308949448.2093.20.camel@morgan.silverblock.net>
+References: <alpine.LNX.2.00.1106232344480.17688@swampdragon.chaosbits.net>
+	 <4E04912A.4090305@infradead.org>
+	 <BANLkTim9cBiiK_GsZaspxpPJQDBvAcKCWg@mail.gmail.com>
+	 <201106241554.10751.hverkuil@xs4all.nl> <4E04A122.2080002@infradead.org>
+	 <20110624203404.7a3f6f6a@stein>
+	 <BANLkTimj-oEDvWxMao6zJ_sudUntEVjO1w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:47265 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754691Ab1FXTZb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2011 15:25:31 -0400
-In-Reply-To: <B828A4C02BE12543ACDFCF7EB0C693C6788625320F@NC-SVR-09.netelligent.com>
+Received: from proofpoint-cluster.metrocast.net ([65.175.128.136]:40286 "EHLO
+	proofpoint-cluster.metrocast.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752761Ab1FXVKG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 24 Jun 2011 17:10:06 -0400
+In-Reply-To: <BANLkTimj-oEDvWxMao6zJ_sudUntEVjO1w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nigh <mnigh@netelligent.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Devin Heitmueller <dheitmueller@kernellabs.com>
+Cc: Stefan Richter <stefanr@s5r6.in-berlin.de>, Mauro Carvalho Chehab <mchehab@infradead.org>, Hans Verkuil <hverkuil@xs4all.nl>, Jesper Juhl <jj@chaosbits.net>, LKML <linux-kernel@vger.kernel.org>, trivial@kernel.org, linux-media@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-
-On Jun 23, 2011, at 9:17 PM, Mark Nigh wrote:
-
-> I would like some assistance in troubleshooting and fixes the issue of a MDS in replay.
+On Fri, 2011-06-24 at 14:48 -0400, Devin Heitmueller wrote:
+> On Fri, Jun 24, 2011 at 2:34 PM, Stefan Richter
+> <stefanr@s5r6.in-berlin.de> wrote:
+> > If the "driver version" is in fact an ABI version, then the driver author
+> > should really increase it only when ABI behavior is changed (and only if
+> > the behavior change can only be communicated by version number --- e.g.
+> > addition of an ioctl is not among such reasons).  And the author should
+> > commit behavior changing implementation and version number change in a
+> > single changeset.
+> >
+> > And anybody who backmerges such an ABI behavior change into another kernel
+> > branch (stable, longterm, distro...) must backmerge the associated version
+> > number change too.
+> >
+> > Of course sometimes people realize this only after the fact.  Or driver
+> > authors don't have a clear understanding of ABI versioning to begin with.
+> > I am saying so because I had to learn it too; I certainly wasn't born
+> > with an instinct knowledge how to do it properly.
+> >
+> > (Disclaimer:  I have no stake in drivers/media/ ABIs.  But I am involved
+> > in maintaining a userspace ABI elsewhere in drivers/firewire/, and one of
+> > the userspace libraries that use this ABI.)
 > 
-> root@ceph001:/var/log/ceph#  ceph -s
-> 2011-06-23 23:07:43.945503    pg v2802: 396 pgs: 328 active+clean, 50 down+degraded+peering, 18 crashed+down+degraded+peering; 1155 MB data, 2575 MB used, 11115 GB / 11118 GB avail; 8/5958 degraded (0.134%)
-> 2011-06-23 23:07:43.946151   mds e1458: 1/1/1 up {0=0=up:replay}
-> 2011-06-23 23:07:43.946170   osd e808: 4 osds: 4 up, 4 in
-> 2011-06-23 23:07:43.946205   log 2011-06-23 23:06:34.284905 osd2 10.6.1.81:6800/3611 1 : [WRN] map e803 wrongly marked me down or wrong addr
-> 2011-06-23 23:07:43.946245   mon e1: 1 mons at {0=10.6.1.80:6789/0}
-> root@ceph001:/var/log/ceph#  ceph -v
-> ceph version 0.29.1-466-g86b41ff (commit:86b41ff96e0f6a9efb9553790efbb3c89a5ab080)
+> Hi Stefan,
 > 
-> I wish I could tell you how this happen but I did open another post earlier in the week that was solved with consistent version of ceph throughout my 2 node cluster. I have one (1) mds and one (1) mon located on the 1st node. The four (4) osd are spread across the two (2) nodes evenly. The version are consistent.
-> 
-> Please let me know what I can provide to fix this problem. Thank you.
+> To be clear, I don't think anyone is actually proposing that the
+> driver version number really be used as any form of formal "ABI
+> versioning" scheme.  In almost all cases, it's so the application can
+> know to *not* do something is the driver is older than X.
 
-I don't think this is an MDS issue -- you've got a lot of PGs which aren't currently active and the MDS is probably blocked on reading from one of them.
-Have your PGs sorted themselves out? If not, are they at least making progress? (Not that it should take them this long...)
--Greg
+MythTV, for example, used to use the driver version to work around old
+VBI bugs and MPEG encoder quirks that the older version of the driver
+may not have known how to handle:
+
+https://github.com/MythTV/mythtv/blob/b98d3a98e3187000ae652df5ffebe2beb5221ba7/mythtv/libs/libmythtv/mpegrecorder.cpp#L335
+
+But for newer versions, MythTV could avoid using its own odd hacks.
+The bleeding edge MythTV now has most of these removed.
+
+
+> Given all the cases I've seen, it doesn't really hurt anything if the
+> driver contains a fix from newer than X, aside from the fact that the
+> application won't take advantage of whatever feature/functionality the
+> fix made work.  In other words, I think from a backport standpoint, it
+> usually doesn't *hurt* anything if a fix is backported without the
+> version being incremented, aside from applications not knowing that
+> the feature/fix is present.
+
+That seems to be the case to me.
+
+
+> Really, this is all about applications being able to jam a hack into
+> their code that translates to "don't call this ioctl() with some
+> particular argument if it's driver W less than version X, because the
+> driver had a bug that is likely to panic the guy's PC".
+
+Well, not even panics per se, but some thing like the VBI is broken, or
+the volume control doesn't work, IR blaster is works for this version,
+or something else stupid that is very visible to the end user.
+
+I also use the driver version for troubleshooting problem with users.  I
+roughly know what wasn't working in what version of the cx18 and ivtv
+drivers.  If the end user can tell me the driver version (using v4l2-ctl
+--log-status) along with his symptoms, it makes my life easier.  Being
+able to efficiently help the end user is a win for both me and the end
+user.
+
+
+>   Sure, it's a
+> crummy solution, but at this point it's the best that we have got
+
+Yup.  We do have crummier solutions:
+
+Telling the end user to read their kernel source code to figure out what
+bugs their driver release has, and to then adjust their application
+command line arguments accordingly. ;)
+
+
+Regards,
+Andy
+
