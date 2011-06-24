@@ -1,52 +1,54 @@
-From: Devin Heitmueller <dheitmueller@kernellabs.com>
+From: Mauro Carvalho Chehab <mchehab@infradead.org>
 Subject: Re: [RFC] Don't use linux/version.h anymore to indicate a per-driver
- version - Was: Re: [PATCH 03/37] Remove unneeded version.h includes from include/
-Date: Fri, 24 Jun 2011 08:20:28 -0400
-Message-ID: <BANLkTinXymR_2A2Mr+UbhK63s2xjtK=B=g@mail.gmail.com>
-References: <alpine.LNX.2.00.1106232344480.17688@swampdragon.chaosbits.net>
-	<alpine.LNX.2.00.1106232356530.17688@swampdragon.chaosbits.net>
-	<4E04732A.3060305@infradead.org>
-	<201106241326.27593.hverkuil@xs4all.nl>
+ version - Was: Re: [PATCH 03/37] Remove unneeded version.h includes from
+ include/
+Date: Fri, 24 Jun 2011 10:29:14 -0300
+Message-ID: <4E04912A.4090305@infradead.org>
+References: <alpine.LNX.2.00.1106232344480.17688@swampdragon.chaosbits.net>	<alpine.LNX.2.00.1106232356530.17688@swampdragon.chaosbits.net>	<4E04732A.3060305@infradead.org>	<201106241326.27593.hverkuil@xs4all.nl> <BANLkTinXymR_2A2Mr+UbhK63s2xjtK=B=g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:35607 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752641Ab1FXMUa convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2011 08:20:30 -0400
-In-Reply-To: <201106241326.27593.hverkuil@xs4all.nl>
+Received: from casper.infradead.org ([85.118.1.10]:54523 "EHLO
+	casper.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753237Ab1FXN3W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2011 09:29:22 -0400
+In-Reply-To: <BANLkTinXymR_2A2Mr+UbhK63s2xjtK=B=g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Hans Verkuil <hverkuil@xs4all.nl>
-Cc: Mauro Carvalho Chehab <mchehab@infradead.org>, Jesper Juhl <jj@chaosbits.net>, LKML <linux-kernel@vger.kernel.org>, trivial@kernel.org, linux-media@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
+To: Devin Heitmueller <dheitmueller@kernellabs.com>
+Cc: Hans Verkuil <hverkuil@xs4all.nl>, Jesper Juhl <jj@chaosbits.net>, LKML <linux-kernel@vger.kernel.org>, trivial@kernel.org, linux-media@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-> Applications are certainly using it. I know this for a fact for the i=
-vtv driver where
-> feature improvements are marked that way.
->
-> Without more research on how this is used I am not comfortable with t=
-his.
->
-> Regards,
->
-> =A0 =A0 =A0 =A0Hans
+Em 24-06-2011 09:20, Devin Heitmueller escreveu:
+>> Applications are certainly using it. I know this for a fact for the ivtv driver where
+>> feature improvements are marked that way.
+>>
+>> Without more research on how this is used I am not comfortable with this.
+>>
+>> Regards,
+>>
+>>        Hans
+> 
+> MythTV has a bunch of these too (mainly so the code can adapt to
+> driver bugs that are fixed in later revisions).  Putting Mauro's patch
+> upstream will definitely cause breakage.
 
-MythTV has a bunch of these too (mainly so the code can adapt to
-driver bugs that are fixed in later revisions).  Putting Mauro's patch
-upstream will definitely cause breakage.
+It shouldn't, as ivtv driver version is lower than 3.0.0. All the old bug fixes
+aren't needed if version is >= 3.0.0.
 
-Also, it screws up the ability for users to get fixes through the
-media_build tree (unless you are increasing the revision constantly
-with every merge you do).
+Besides that, trusting on a driver revision number to detect that a bug is
+there is not the right thing to do, as version numbers are never increased at
+the stable kernels (nor distro modified kernels take care of increasing revision
+number as patches are backported there).
 
-Devin
+In other words, relying on it doesn't work fine.
 
---=20
-Devin J. Heitmueller - Kernel Labs
-http://www.kernellabs.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Also, it screws up the ability for users to get fixes through the
+> media_build tree (unless you are increasing the revision constantly
+> with every merge you do).
+
+Why? Developers don't increase version numbers on every applied patch
+(with is great, as it avoids merge conflicts).
+
+Mauro
+
