@@ -2,62 +2,84 @@ From: Mauro Carvalho Chehab <mchehab@infradead.org>
 Subject: Re: [RFC] Don't use linux/version.h anymore to indicate a per-driver
  version - Was: Re: [PATCH 03/37] Remove unneeded version.h includes from
  include/
-Date: Fri, 24 Jun 2011 18:52:58 -0300
-Message-ID: <4E05073A.3030209@infradead.org>
-References: <alpine.LNX.2.00.1106232344480.17688@swampdragon.chaosbits.net>	<4E04912A.4090305@infradead.org>	<BANLkTim9cBiiK_GsZaspxpPJQDBvAcKCWg@mail.gmail.com>	<201106241554.10751.hverkuil@xs4all.nl>	<4E04A122.2080002@infradead.org>	<20110624203404.7a3f6f6a@stein>	<BANLkTimj-oEDvWxMao6zJ_sudUntEVjO1w@mail.gmail.com> <20110624231028.7f03dcae@stein>
+Date: Fri, 24 Jun 2011 19:16:30 -0300
+Message-ID: <4E050CBE.2030103@infradead.org>
+References: <alpine.LNX.2.00.1106232344480.17688@swampdragon.chaosbits.net>	 <4E04912A.4090305@infradead.org>	 <BANLkTim9cBiiK_GsZaspxpPJQDBvAcKCWg@mail.gmail.com>	 <201106241554.10751.hverkuil@xs4all.nl> <4E04A122.2080002@infradead.org>	 <20110624203404.7a3f6f6a@stein>	 <BANLkTimj-oEDvWxMao6zJ_sudUntEVjO1w@mail.gmail.com> <1308949448.2093.20.camel@morgan.silverblock.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from casper.infradead.org ([85.118.1.10]:46798 "EHLO
+Received: from casper.infradead.org ([85.118.1.10]:34863 "EHLO
 	casper.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752785Ab1FXVx0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2011 17:53:26 -0400
-In-Reply-To: <20110624231028.7f03dcae@stein>
+	with ESMTP id S1753881Ab1FXWQo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2011 18:16:44 -0400
+In-Reply-To: <1308949448.2093.20.camel@morgan.silverblock.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Richter <stefanr@s5r6.in-berlin.de>
-Cc: Devin Heitmueller <dheitmueller@kernellabs.com>, Hans Verkuil <hverkuil@xs4all.nl>, Jesper Juhl <jj@chaosbits.net>, LKML <linux-kernel@vger.kernel.org>, trivial@kernel.org, linux-media@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
+To: Andy Walls <awalls@md.metrocast.net>
+Cc: Devin Heitmueller <dheitmueller@kernellabs.com>, Stefan Richter <stefanr@s5r6.in-berlin.de>, Hans Verkuil <hverkuil@xs4all.nl>, Jesper Juhl <jj@chaosbits.net>, LKML <linux-kernel@vger.kernel.org>, trivial@kernel.org, linux-media@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-Em 24-06-2011 18:10, Stefan Richter escreveu:
-> On Jun 24 Devin Heitmueller wrote:
+Em 24-06-2011 18:04, Andy Walls escreveu:
+> On Fri, 2011-06-24 at 14:48 -0400, Devin Heitmueller wrote:
+>> On Fri, Jun 24, 2011 at 2:34 PM, Stefan Richter
+>> <stefanr@s5r6.in-berlin.de> wrote:
+>>> If the "driver version" is in fact an ABI version, then the driver author
+>>> should really increase it only when ABI behavior is changed (and only if
+>>> the behavior change can only be communicated by version number --- e.g.
+>>> addition of an ioctl is not among such reasons).  And the author should
+>>> commit behavior changing implementation and version number change in a
+>>> single changeset.
+>>>
+>>> And anybody who backmerges such an ABI behavior change into another kernel
+>>> branch (stable, longterm, distro...) must backmerge the associated version
+>>> number change too.
+>>>
+>>> Of course sometimes people realize this only after the fact.  Or driver
+>>> authors don't have a clear understanding of ABI versioning to begin with.
+>>> I am saying so because I had to learn it too; I certainly wasn't born
+>>> with an instinct knowledge how to do it properly.
+>>>
+>>> (Disclaimer:  I have no stake in drivers/media/ ABIs.  But I am involved
+>>> in maintaining a userspace ABI elsewhere in drivers/firewire/, and one of
+>>> the userspace libraries that use this ABI.)
+>>
+>> Hi Stefan,
+>>
+>> To be clear, I don't think anyone is actually proposing that the
+>> driver version number really be used as any form of formal "ABI
+>> versioning" scheme.  In almost all cases, it's so the application can
+>> know to *not* do something is the driver is older than X.
+> 
+> MythTV, for example, used to use the driver version to work around old
+> VBI bugs and MPEG encoder quirks that the older version of the driver
+> may not have known how to handle:
+> 
+> https://github.com/MythTV/mythtv/blob/b98d3a98e3187000ae652df5ffebe2beb5221ba7/mythtv/libs/libmythtv/mpegrecorder.cpp#L335
+> 
+> But for newer versions, MythTV could avoid using its own odd hacks.
+> The bleeding edge MythTV now has most of these removed.
+
+Removing it is a good thing.
+
 >> Really, this is all about applications being able to jam a hack into
 >> their code that translates to "don't call this ioctl() with some
->> particular argument if it's driver W less than version X, because th=
-e
->> driver had a bug that is likely to panic the guy's PC".  Sure, it's =
-a
->> crummy solution, but at this point it's the best that we have got.
->=20
-> The second best.  The best that we have got is that the user runs a f=
-ixed
-> kernel.
->=20
-> Anyway; if this is the only purpose that this interface version=C2=B9=
- serves,
-> then Mauro's subsystem-centralized solution has the benefit that it
-> eliminates mistakes due to oversight by individual driver authors.
-> Especially because the kind of implementation behavior changes that a=
-re
-> tracked by this type of version datum are sometimes just discovered o=
-r
-> documented in hindsight.  On the other hand, Mauro's solution is redu=
-ndant
-> to the uname(2) syscall.
+>> particular argument if it's driver W less than version X, because the
+>> driver had a bug that is likely to panic the guy's PC".
+> 
+> Well, not even panics per se, but some thing like the VBI is broken, or
+> the volume control doesn't work, IR blaster is works for this version,
+> or something else stupid that is very visible to the end user.
+> 
+> I also use the driver version for troubleshooting problem with users.  I
+> roughly know what wasn't working in what version of the cx18 and ivtv
+> drivers.  If the end user can tell me the driver version (using v4l2-ctl
+> --log-status) along with his symptoms, it makes my life easier.  Being
+> able to efficiently help the end user is a win for both me and the end
+> user.
 
-Yes. That's why my initial proposal were to add some value to it by not=
- associating
-it with the kernel version, but with a number that will be incremented =
-only if
-the V4L2 API changes.
+If you add it to MODULE_VERSION, you can get the version with:
 
->=20
-> =C2=B9) Yes, it is still an ABI version, nothing less.  With all its =
-backwards
-> and forwards compatibility ramifications.
+$ modinfo -F version vivi
+0.8.1
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Mauro.
