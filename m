@@ -1,77 +1,70 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 03/37] Remove unneeded version.h includes from include/
-Date: Thu, 23 Jun 2011 15:15:11 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1106231514530.6417@cobra.newdream.net>
-References: <alpine.LNX.2.00.1106232344480.17688@swampdragon.chaosbits.net>
- <alpine.LNX.2.00.1106232356530.17688@swampdragon.chaosbits.net>
+From: mowang da <whooya.xxl@gmail.com>
+Subject: O_RDWR bug
+Date: Fri, 24 Jun 2011 10:45:09 +0800
+Message-ID: <BANLkTi=cFLrrAUhSjVduvt48HD2CO-MA_g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33575 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759896Ab1FWWMi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2011 18:12:38 -0400
-In-Reply-To: <alpine.LNX.2.00.1106232356530.17688@swampdragon.chaosbits.net>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:44453 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751271Ab1FXCpL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Jun 2011 22:45:11 -0400
+Received: by pwj7 with SMTP id 7so1566842pwj.19
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Jun 2011 19:45:10 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jesper Juhl <jj@chaosbits.net>
-Cc: LKML <linux-kernel@vger.kernel.org>, trivial@kernel.org, linux-media@vger.kernel.org, ceph-devel@vger.kernel.org, Mauro Carvalho Chehab <mchehab@infradead.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, 23 Jun 2011, Jesper Juhl wrote:
+I am currently testing Ceph , l write some code like this:
 
-> It was pointed out by 'make versioncheck' that some includes of
-> linux/version.h were not needed in include/.
-> This patch removes them.
-> 
-> Signed-off-by: Jesper Juhl <jj@chaosbits.net>
+             size_t fd =3D open("/mnt/aaa", O_CREAT | O_RDWR | O_APPEND=
+ , 0755);
 
-Acked-by: Sage Weil <sage@newdream.net>
+then l can not write buffer to the fd, 1 think there is something wrong=
+ in :
 
-for the ceph bit.
+int ceph_flags_to_mode(int flags)
 
-sage
+{
 
-> ---
->  include/linux/ceph/messenger.h |    1 -
->  include/media/pwc-ioctl.h      |    1 -
->  2 files changed, 0 insertions(+), 2 deletions(-)
-> 
-> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 31d91a6..291aa6e 100644
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -6,7 +6,6 @@
->  #include <linux/net.h>
->  #include <linux/radix-tree.h>
->  #include <linux/uio.h>
-> -#include <linux/version.h>
->  #include <linux/workqueue.h>
->  
->  #include "types.h"
-> diff --git a/include/media/pwc-ioctl.h b/include/media/pwc-ioctl.h
-> index 0f19779..1ed1e61 100644
-> --- a/include/media/pwc-ioctl.h
-> +++ b/include/media/pwc-ioctl.h
-> @@ -53,7 +53,6 @@
->   */
->  
->  #include <linux/types.h>
-> -#include <linux/version.h>
->  
->  /* Enumeration of image sizes */
->  #define PSZ_SQCIF	0x00
-> -- 
-> 1.7.5.2
-> 
-> 
-> -- 
-> Jesper Juhl <jj@chaosbits.net>       http://www.chaosbits.net/
-> Don't top-post http://www.catb.org/jargon/html/T/top-post.html
-> Plain text mails only, please.
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+          ...
+
+         if ((flags & O_ACCMODE) =3D=3D O_RDWR)
+		mode =3D CEPH_FILE_MODE_RDWR;
+	 else if ((flags & O_ACCMODE) =3D=3D O_WRONLY) //?
+		mode =3D CEPH_FILE_MODE_WR;
+	 else
+		mode =3D CEPH_FILE_MODE_RD;
+
+          ...
+
+}
+
+if change the "(flags & O_ACCMODE) =3D=3D O_WRONLY" to "(flags &
+O_ACCMODE) =3D=3D O_ACCMODE", l can write success!
+
+another problem, I am trying to use a Ceph cfuse client to mount Ceph
+DFS(/mnt/) and
+
+set up a samba server to share the mount point(/mnt),l find it not so
+fast as expected=A3=AC l  analyse the log :
+
+                   2011-06-24 09:25:43.677606 7f11cdecd700 --
+192.168.1.110:0/7088 dispatch_queue.cond.Wait
+
+                  2011-06-24 09:25:43.738812 7f11d130a720 client
+method:getxattr path:security.capability
+
+the SimpleMessenger thread  replyed the osd ,it wait ,the problem is
+the next FUSE operation is very slowly,
+
+why the fuse thread  and SimpleMessenger thread can not work in paralle=
+l
+
+anybody have the same problem with me?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
