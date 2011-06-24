@@ -2,8 +2,8 @@ From: Stefan Richter <stefanr@s5r6.in-berlin.de>
 Subject: Re: [RFC] Don't use linux/version.h anymore to indicate a
  per-driver version - Was: Re: [PATCH 03/37] Remove unneeded version.h
  includes from include/
-Date: Fri, 24 Jun 2011 23:10:28 +0200
-Message-ID: <20110624231028.7f03dcae@stein>
+Date: Fri, 24 Jun 2011 23:20:48 +0200
+Message-ID: <20110624232048.66f1f98c@stein>
 References: <alpine.LNX.2.00.1106232344480.17688@swampdragon.chaosbits.net>
 	<4E04912A.4090305@infradead.org>
 	<BANLkTim9cBiiK_GsZaspxpPJQDBvAcKCWg@mail.gmail.com>
@@ -11,50 +11,37 @@ References: <alpine.LNX.2.00.1106232344480.17688@swampdragon.chaosbits.net>
 	<4E04A122.2080002@infradead.org>
 	<20110624203404.7a3f6f6a@stein>
 	<BANLkTimj-oEDvWxMao6zJ_sudUntEVjO1w@mail.gmail.com>
+	<1308949448.2093.20.camel@morgan.silverblock.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:38543 "EHLO
+Received: from einhorn.in-berlin.de ([192.109.42.8]:38622 "EHLO
 	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752761Ab1FXVKq convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2011 17:10:46 -0400
-In-Reply-To: <BANLkTimj-oEDvWxMao6zJ_sudUntEVjO1w@mail.gmail.com>
+	with ESMTP id S1753228Ab1FXVVB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Jun 2011 17:21:01 -0400
+In-Reply-To: <1308949448.2093.20.camel@morgan.silverblock.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Devin Heitmueller <dheitmueller@kernellabs.com>
-Cc: Mauro Carvalho Chehab <mchehab@infradead.org>, Hans Verkuil <hverkuil@xs4all.nl>, Jesper Juhl <jj@chaosbits.net>, LKML <linux-kernel@vger.kernel.org>, trivial@kernel.org, linux-media@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
+To: Andy Walls <awalls@md.metrocast.net>
+Cc: Devin Heitmueller <dheitmueller@kernellabs.com>, Mauro Carvalho Chehab <mchehab@infradead.org>, Hans Verkuil <hverkuil@xs4all.nl>, Jesper Juhl <jj@chaosbits.net>, LKML <linux-kernel@vger.kernel.org>, trivial@kernel.org, linux-media@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-On Jun 24 Devin Heitmueller wrote:
-> Really, this is all about applications being able to jam a hack into
-> their code that translates to "don't call this ioctl() with some
-> particular argument if it's driver W less than version X, because the
-> driver had a bug that is likely to panic the guy's PC".  Sure, it's a
-> crummy solution, but at this point it's the best that we have got.
+On Jun 24 Andy Walls wrote:
+> I also use the driver version for troubleshooting problem with users.  I
+> roughly know what wasn't working in what version of the cx18 and ivtv
+> drivers.  If the end user can tell me the driver version (using v4l2-ctl
+> --log-status) along with his symptoms, it makes my life easier.
 
-The second best.  The best that we have got is that the user runs a fix=
-ed
-kernel.
+Easier:
+  "I run Ubuntu 10.4".
+  "I run kernel 2.6.32."
+One of these is usually already included in the first post or IRC message
+from the user.
 
-Anyway; if this is the only purpose that this interface version=C2=B9 s=
-erves,
-then Mauro's subsystem-centralized solution has the benefit that it
-eliminates mistakes due to oversight by individual driver authors.
-Especially because the kind of implementation behavior changes that are
-tracked by this type of version datum are sometimes just discovered or
-documented in hindsight.  On the other hand, Mauro's solution is redund=
-ant
-to the uname(2) syscall.
-
-=C2=B9) Yes, it is still an ABI version, nothing less.  With all its ba=
-ckwards
-and forwards compatibility ramifications.
---=20
+Separate driver versions are only needed on platforms where drivers are
+not distributed by the operating system distributor, or driver source code
+is not released within kernel source code.
+-- 
 Stefan Richter
--=3D=3D=3D=3D=3D-=3D=3D-=3D=3D -=3D=3D- =3D=3D---
+-=====-==-== -==- ==---
 http://arcgraph.de/sr/
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
