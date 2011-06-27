@@ -1,41 +1,33 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH] [media] Stop using linux/version.h on most drivers
-Date: Mon, 27 Jun 2011 02:59:38 +0200
-Message-ID: <201106270259.38405.laurent.pinchart@ideasonboard.com>
-References: <alpine.LNX.2.00.1106232344480.17688@swampdragon.chaosbits.net> <201106251209.21228.hverkuil@xs4all.nl> <4E05D13A.6030209@redhat.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: workload balance
+Date: Mon, 27 Jun 2011 17:34:21 +0800
+Message-ID: <BANLkTikHkttLd6vMeZxVm4FNeGJ+-E9uTg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-media-owner@vger.kernel.org>
-In-Reply-To: <4E05D13A.6030209@redhat.com>
-Sender: linux-media-owner@vger.kernel.org
-To: Mauro Carvalho Chehab <mchehab@redhat.com>
-Cc: Hans Verkuil <hverkuil@xs4all.nl>, LKML <linux-kernel@vger.kernel.org>, Devin Heitmueller <dheitmueller@kernellabs.com>, Jesper Juhl <jj@chaosbits.net>, trivial@kernel.org, linux-media@vger.kernel.org, ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>, Mike Isely <isely@isely.net>, Hans De Goede <hdegoede@redhat.com>, Jean-Francois Moine <moinejf@free.fr>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:54458 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756744Ab1F0JeX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Jun 2011 05:34:23 -0400
+Received: by wyg8 with SMTP id 8so946703wyg.19
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Jun 2011 02:34:21 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Mauro,
+hi=A3=ACall
+Here is a problem confused me a lot. Some OSD's workload will be very h=
+igh
+when the client read a file continuously. So i think the cluster must
+have a strategy to balance workload
+there are two classes "MovingAverager and  IATAverager ",but i can not
+figure out what the class IATAverager mean here?
+and futhermore, can we bring tiered storage theory in ceph?
 
-On Saturday 25 June 2011 14:14:50 Mauro Carvalho Chehab wrote:
-> Em 25-06-2011 07:09, Hans Verkuil escreveu:
-> > On Friday, June 24, 2011 20:25:26 Mauro Carvalho Chehab wrote:
-
-[snip]
-
-> 	- uvcvideo: not sure about its current status about its migration to
-> video_ioctl2. If Laurent is not doing a migration to video_ioctl2 any time
-> soon, a simple patch for it could make it act consistently. In any case, I
-> don't think we should create a include/media/version.h just due to
-> uvcvideo.
-
-That's not on my todo-list for now, -EBUSY :-)
-
-I bump the uvcvideo driver version whenever the userspace API changes. Using 
-the kernel version number applications could find out whether the API they 
-need is implemented, but detecting API changes would become more difficult. 
-That might not be a real issue though, as applications usually don't care.
-
--- 
-Regards,
-
-Laurent Pinchart
+thanks!
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
