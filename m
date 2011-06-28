@@ -1,43 +1,30 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.30 released
-Date: Tue, 28 Jun 2011 10:00:25 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1106280959460.24993@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Wido den Hollander <wido@widodh.nl>
+Subject: [PATCH 0/3] Add BASH completion for various tools
+Date: Tue, 28 Jun 2011 20:28:11 +0200
+Message-ID: <1309285694-12399-1-git-send-email-wido@widodh.nl>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59078 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759182Ab1F1Q5m (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2011 12:57:42 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 9958CBC6C2
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2011 10:00:25 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 747A3BC6C2
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Jun 2011 10:00:25 -0700 (PDT)
+Received: from hosted.by.pcextreme ([109.72.90.196]:33197 "EHLO
+	logger.ceph.widodh.nl" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1759734Ab1F1SdY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Jun 2011 14:33:24 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-We're pushing out v0.30.  Highlights include:
+Hi,
 
- * librbd: Fixed race/crash
- * mds: misc clustered mds fixes
- * mds: misc rename journaling/replay fixes
- * mds: fixed flock deadlock when processes die during lock wait
- * osd: snaptrimmer fixes, misc races, recovery bugs
- * auth: fixed cephx race/crash
- * librados: rados bench fix
- * librados: flush
- * radosgw: multipart uploads
- * debian: gceph moved to separate package
- * lots of g_conf refactoring, removing of globals, and related cleanup
- * qa: lots
+BASH completion is very useful when working with the common Ceph tools on a regular basis.
 
-The focus this time around continues to be with QA, bug fixes, and 
-cleanup.
+It also makes it easier for new users to quickly find out some "hidden" commands the "ceph" tool has.
 
-Relevant URLs:
- * Direct download at: http://ceph.newdream.net/download/ceph-0.30.tar.gz
- * Debian/Ubuntu packages: see http://ceph.newdream.net/wiki/Debian
+I made a start with the BASH completion for the most used tools, ceph, rados, radosgw_admin and rbd.
+
+They are not complete yet, they'll have to take shape over time.
+
+I've been playing with complementing pool names to the -p argument of the rados and rbd tool, but this causes "rados lspools" to be ran in the background.
+I'm not sure yet what kind of performance impact this could have when you have a large amount of pools.
+
+Let me know what you guys think of it.
+
+Wido
 
