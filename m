@@ -1,107 +1,54 @@
-From: Martin Wilderoth <martin.wilderoth@linserv.se>
-Subject: Fwd: Data distribution
-Date: Thu, 30 Jun 2011 21:27:08 +0200 (CEST)
-Message-ID: <936851145.17887.1309462028038.JavaMail.root@mail.linserv.se>
-References: <1266837122.17885.1309461874884.JavaMail.root@mail.linserv.se>
+From: Mark Nigh <mnigh@netelligent.com>
+Subject: MDS Replay Issues
+Date: Thu, 30 Jun 2011 16:41:34 -0500
+Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C678862E5C65@NC-SVR-09.netelligent.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 194-17-14-101.customer.telia.com ([194.17.14.101]:43928 "EHLO
-	mail.linserv.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752131Ab1F3Tf5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2011 15:35:57 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mail.linserv.se (Postfix) with ESMTP id 2852A1204D6
-	for <ceph-devel@vger.kernel.org>; Thu, 30 Jun 2011 21:27:12 +0200 (CEST)
-Received: from mail.linserv.se ([127.0.0.1])
-	by localhost (mail.linserv.se [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id GtaTfS6zpfDx for <ceph-devel@vger.kernel.org>;
-	Thu, 30 Jun 2011 21:27:08 +0200 (CEST)
-Received: from mail.linserv.se (mail.linserv.se [194.17.14.101])
-	by mail.linserv.se (Postfix) with ESMTP id 3C578120029
-	for <ceph-devel@vger.kernel.org>; Thu, 30 Jun 2011 21:27:08 +0200 (CEST)
-In-Reply-To: <1266837122.17885.1309461874884.JavaMail.root@mail.linserv.se>
+Received: from smtp.netelligent.com ([199.255.228.141]:2690 "EHLO
+	NC-SVR-11.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752597Ab1F3Vlk convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 30 Jun 2011 17:41:40 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello, 
+I build a new cluster today with the latest commit
 
-I have made a new test with a new filesystem and it seems as if host3 osd5/osd6 is getting less data. I have check the distribution over time. At the end i got some I/O error as some of the disk are quite full. Can't read superblock when mounting
-I guess there ar no tools to cerrect that yet ?
+ceph version 0.30-222-g310032e (commit:310032ee8128f6417ac302c0f5ecd27c691cbcc7)
 
-Start
+I had a working file system until I created another mds on my second node. At that time, both mds were in active (which I think is incorrect) so I rebooted the second mds in the hopes it would go to standby, but it went into replay. I rebooted the first mds and that is now in replay.
 
-/dev/sdc              137G  2.3M  135G   1% /data/osd0
-/dev/sdd              137G  2.4M  135G   1% /data/osd1
-/dev/sdc              137G  2.6M  135G   1% /data/osd2
-/dev/sdd              137G  2.1M  135G   1% /data/osd3
-/dev/sdb              137G  2.0M  135G   1% /data/osd4
-/dev/sdc              137G  1.7M  135G   1% /data/osd5
+root@ceph00:/var/log/ceph# ceph -s
+2011-06-30 16:40:10.000802    pg v613: 1188 pgs: 1188 active+clean; 43 KB data, 22160 KB used, 33442 GB / 33466 GB avail
+2011-06-30 16:40:10.003563   mds e22: 2/2/2 up {0=0=up:replay,1=1=up:replay}
+2011-06-30 16:40:10.003602   osd e44: 12 osds: 12 up, 12 in
+2011-06-30 16:40:10.003686   log 2011-06-30 16:13:54.782061 mon0 10.6.1.80:6789/0 5 : [INF] mds? 10.6.1.80:6800/6886 up:boot
+2011-06-30 16:40:10.003770   mon e1: 1 mons at {0=10.6.1.80:6789/0}
 
-later
-/dev/sdc              137G  8.9G  126G   7% /data/osd0
-/dev/sdd              137G  8.9G  126G   7% /data/osd1
-/dev/sdc              137G  7.9G  126G   6% /data/osd2
-/dev/sdd              137G  9.2G  125G   7% /data/osd3
-/dev/sdb              137G  7.5G  127G   6% /data/osd4
-/dev/sdc              137G  7.1G  127G   6% /data/osd5
+The replay has been happening a lot lately so I expect I am doing something wrong. Here is the end of the mds logs.
 
-later
-/dev/sdc              137G   56G   78G  42% /data/osd0
-/dev/sdd              137G   60G   75G  45% /data/osd1
-/dev/sdc              137G   53G   81G  40% /data/osd2
-/dev/sdd              137G   61G   74G  46% /data/osd3
-/dev/sdb              137G   51G   84G  38% /data/osd4
-/dev/sdc              137G   46G   88G  35% /data/osd5
+2011-06-30 16:13:50.650812 7f199aa27760 ceph version 0.30-222-g310032e.commit: 310032ee8128f6417ac302c0f5ecd27c691cbcc7. process: cmds. pid: 6886
+2011-06-30 16:13:50.652738 7f199774a700 mds-1.0 ms_handle_connect on 10.6.1.80:6789/0
+2011-06-30 16:13:54.782292 7f199774a700 mds-1.0 handle_mds_map standby
+2011-06-30 16:14:02.580014 7f199774a700 mds0.3 handle_mds_map i am now mds0.3
+2011-06-30 16:14:02.580035 7f199774a700 mds0.3 handle_mds_map state change up:standby --> up:replay
+2011-06-30 16:14:02.580042 7f199774a700 mds0.3 replay_start
+2011-06-30 16:14:02.580055 7f199774a700 mds0.3  recovery set is 1
+2011-06-30 16:14:02.580063 7f199774a700 mds0.3  need osdmap epoch 43, have 42
+2011-06-30 16:14:02.580070 7f199774a700 mds0.3  waiting for osdmap 43 (which blacklists prior instance)
+2011-06-30 16:14:02.580100 7f199774a700 mds0.cache handle_mds_failure mds0 : recovery peers are 1
 
-last
-/dev/sdc              137G  126G  7.7G  95% /data/osd0
-/dev/sdd              137G  130G  3.2G  98% /data/osd1
-/dev/sdc              137G  113G   22G  85% /data/osd2
-/dev/sdd              137G  126G  7.3G  95% /data/osd3
-/dev/sdb              137G  110G   24G  83% /data/osd4
-/dev/sdc              137G   70G   64G  53% /data/osd5
+Thanks for your help.
+
+Mark Nigh
+Systems Architect
+mnigh@netelligent.com
+ (p) 314.392.6926
 
 
->On Jun 27, 2011, at 12:19 PM, Josh Durgin wrote: 
 
->> On 06/25/2011 08:48 PM, Martin Wilderoth wrote: 
->>> Hello 
->>> 
->>> I have a ceph cluster of 6 osd 146gb each. I have copied a lot of data 
->>> filling to 87%. Between the osd's the data is not evenly distributed 
->>> 
->>> host1 
->>> /dev/sdb 137G 119G 15G 90% /data/osd0 
->>> /dev/sdc 137G 126G 7.4G 95% /data/osd1 
->>> 
->>> host2 
->>> /dev/sdc 137G 114G 21G 85% /data/osd2 
->>> /dev/sdd 137G 130G 3.6G 98% /data/osd3 
->>> 
->>> host3 
->>> /dev/sdb 137G 107G 27G 81% /data/osd4 
->>> /dev/sdc 137G 98G 36G 74% /data/osd5 
->>> 
->>> During the copy i got I/O error, but after restarting the cluster it seems >>>fine. 
->>> 
->>> By some reason osd3 seems to have much more data than osd5. Is there a way of geting the data distributed better ?. 
->> 
->> Hi Martin, 
->> 
->> Since the distribution is pseudo-random, you'll get some variance from an even >split. You can reweight the osds manually with: 
->> 
->> ceph osd reweight osd3 new_weight 
->> 
->> or use the more automatic: 
->> 
->> ceph osd reweight-by-utilization 110 
->> 
->> This reduces the weight of all osds that have a utilization that is more than 110% of the average utilization. 
->> 
->> Josh 
-
->That said if the data is this unevenly distributed something odd is going on. Are >you using anything besides the filesystem on this cluster? If not we probably need >to figure out if there's a problem with the hashing. 
->-Greg 
+This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
