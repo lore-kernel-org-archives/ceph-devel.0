@@ -1,50 +1,42 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] obsync: Depend on python-lxml on Debian derived platforms
-Date: Thu, 30 Jun 2011 10:03:03 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1106301002590.8563@cobra.newdream.net>
-References: <1309432032-12859-1-git-send-email-wido@widodh.nl>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: workload balance
+Date: Thu, 30 Jun 2011 11:04:21 -0700
+Message-ID: <4E0CBAA5.50804@dreamhost.com>
+References: <BANLkTikHkttLd6vMeZxVm4FNeGJ+-E9uTg@mail.gmail.com>	<4E08F0E5.4080501@dreamhost.com> <BANLkTi=rSvuawL_VqVYZqpif=GEj+iivmQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53915 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750988Ab1F3RAP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2011 13:00:15 -0400
-In-Reply-To: <1309432032-12859-1-git-send-email-wido@widodh.nl>
+Received: from mail.hq.newdream.net ([66.33.206.127]:54719 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751027Ab1F3SEV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2011 14:04:21 -0400
+In-Reply-To: <BANLkTi=rSvuawL_VqVYZqpif=GEj+iivmQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+To: huang jun <hjwsm1989@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks, applied!
+On 06/27/2011 05:25 PM, huang jun wrote:
+> thanks=A3=ACJosh
+> By default=A3=ACwe set two replicas for each PG,so if we use ceph
+> as back-end storage of a website, you know, some files will be freque=
+ntly read,
+> if then of thousands clients do this, some osd's workload will be ver=
+y high.
+> so in this circumstance, how to balance the whole  cluster's workload=
+?
 
-On Thu, 30 Jun 2011, Wido den Hollander wrote:
+If the files don't change often, they can be cached by the clients. If
+there really is one object that is being updated and read frequently,
+there's not much you can do currently. To reduce the load on the primar=
+y
+OSD, we could add a flag to the MDS to tell clients to read from
+replicas based on the usage.
 
-> 
-> Signed-off-by: Wido den Hollander <wido@widodh.nl>
-> ---
->  debian/control |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/debian/control b/debian/control
-> index aba948c..612870b 100644
-> --- a/debian/control
-> +++ b/debian/control
-> @@ -289,7 +289,7 @@ Description: debugging symbols for radosgw
->  
->  Package: obsync
->  Architecture: linux-any
-> -Depends: ${misc:Depends}, python, python-boto, python-ceph, python-xattr
-> +Depends: ${misc:Depends}, python, python-boto, python-ceph, python-xattr, python-lxml
->  Description: synchronize data between cloud object storage providers or a local directory
->   obsync is a tool to synchronize objects between cloud object
->   storage providers, such as Amazon S3 (or compatible services), a
-> -- 
-> 1.7.0.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Josh
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
