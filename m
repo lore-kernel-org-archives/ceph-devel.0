@@ -1,29 +1,48 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: mds sync wrlock
-Date: Wed, 29 Jun 2011 15:33:42 -0700
-Message-ID: <57F6F997-D0E8-448F-AEDB-8FCE26F182CC@dreamhost.com>
-References: <BANLkTin9SkuYVnatyXoKCjHiJevCizKwVA@mail.gmail.com> <B0DF7127-A5BF-4DAE-A22C-1FD9C284172B@dreamhost.com> <BANLkTim_k-8Wqqx6e6W+R0LdaNvCGPUNng@mail.gmail.com> <D948AD56-6ADE-4D6C-BC2D-627D73C79663@dreamhost.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: Add OSD and hard drives
+Date: Wed, 29 Jun 2011 18:25:06 -0700
+Message-ID: <4E0BD072.30109@dreamhost.com>
+References: <ED302AD9DFBE5045BC354B53A8AD5FB10332831071@its-hcwnem05.ds.Vanderbilt.edu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:36342 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:60862 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753215Ab1F2Wdn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2011 18:33:43 -0400
-In-Reply-To: <D948AD56-6ADE-4D6C-BC2D-627D73C79663@dreamhost.com>
+	with ESMTP id S1753661Ab1F3BZH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Jun 2011 21:25:07 -0400
+In-Reply-To: <ED302AD9DFBE5045BC354B53A8AD5FB10332831071@its-hcwnem05.ds.Vanderbilt.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: huang jun <hjwsm1989@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Hemingway, Graham Stuart" <graham.hemingway@Vanderbilt.Edu>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Hi Graham,
 
-On Jun 29, 2011, at 1:01 PM, Gregory Farnum wrote:
-> Ah. Each directory has a lot of different locks protecting different pieces of state. Here, the only write lock that is being held for the creates in dir b is the nestlock, which protects the rstats (recursive stats). Generally that lock shouldn't block creates though. How long does your test take to run?
-> Since the lock says it's flushing I wonder if there's something else going on that's hurting your OSD performance and stalling it out.
-> 
-> I'll see if I can reproduce it locally.
+On 06/29/2011 12:23 PM, Hemingway, Graham Stuart wrote:
+> Hello,
+>
+> I have a simple ceph installation working.  My cluster has 7 hardware nodes.  5 OSDs (1 2TB drive each) and two MDSs.  I have one monitor which is on the same machine as one of the MDSs.  Running on Ubuntu 10.10 and v0.30 I have things working.  Yeah.
+> So, my questions are:
+>
+> 1) Would you recommend adding a second monitor on the same machine as the other MDS?  Therefore two nodes each with MON and MDS.  Does ceph still want monitors in odd numbers?
 
+Generally the monitors don't need much cpu or memory, and it's a good 
+idea to run 3, so your cluster continues working if one fails. An even 
+number doesn't improve reliability since a majority of monitors need to 
+be active to make progress.
 
-I reproduced this locally and talked it over with Sage. The problem was just an unwise strategy for dealing with cache coherency that we applied a fairly simple fix for. It's in master on commit 310032ee8128f6417ac302c0f5ecd27c691cbcc7, which you should be able to cherry-pick if you wish. :)
--Greg
+> 2) What is the procedure for adding an additional hard drive to each OSD?  I have a second 2TB drive physically on each OSD node that I would like to bring up and I did not find ready documentation on just adding drives.
+
+The simplest way to add a drive is to start a new OSD for the new drive. 
+Instructions for this are on the wiki:
+
+http://ceph.newdream.net/wiki/OSD_cluster_expansion/contraction
+
+Since your new drive is the same size as the others, you wouldn't need 
+to adjust your crush map to get an even distribution of data.
+
+The downside of running one OSD per disk is increased memory and cpu 
+usage, but this shouldn't be a problem with a small cluster and few PGs.
+
+Josh
