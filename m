@@ -1,61 +1,32 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: workload balance
-Date: Fri, 1 Jul 2011 08:13:08 +0800
-Message-ID: <BANLkTikV9pv0V0QQ+md94MHy7SYioneP-A@mail.gmail.com>
-References: <BANLkTikHkttLd6vMeZxVm4FNeGJ+-E9uTg@mail.gmail.com>
-	<4E08F0E5.4080501@dreamhost.com>
-	<BANLkTi=rSvuawL_VqVYZqpif=GEj+iivmQ@mail.gmail.com>
-	<4E0CBAA5.50804@dreamhost.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: MDS Replay Issues
+Date: Fri, 1 Jul 2011 09:03:27 -0700
+Message-ID: <BANLkTimFgvG2JhTuABwnpt8qWgwAp4vDaQ@mail.gmail.com>
+References: <B828A4C02BE12543ACDFCF7EB0C693C678862E5C9A@NC-SVR-09.netelligent.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:34060 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752346Ab1GAANK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Jun 2011 20:13:10 -0400
-Received: by wyg8 with SMTP id 8so1882045wyg.19
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Jun 2011 17:13:08 -0700 (PDT)
-In-Reply-To: <4E0CBAA5.50804@dreamhost.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:53182 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751788Ab1GAQD1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jul 2011 12:03:27 -0400
+Received: by yxi11 with SMTP id 11so1006982yxi.19
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Jul 2011 09:03:27 -0700 (PDT)
+In-Reply-To: <B828A4C02BE12543ACDFCF7EB0C693C678862E5C9A@NC-SVR-09.netelligent.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nigh <mnigh@netelligent.com>, ceph-devel@vger.kernel.org
 
-thank you Josh
-Currently,we can reduce the primary workload by distributing read
-requests to replicas,
-but once a object becomes a extremly hot point, this stratey does not
-make much difference, so can we bring Tiered Storage into ceph, just
-like to use HSM or ILM? In this way, client can got data more
-effeciently.
+On Thu, Jun 30, 2011 at 5:54 PM, Mark Nigh <mnigh@netelligent.com> wrote:
+> Yes, I did increase the max_mds prior to starting the cmds on the second node. Should I have started the daemon and then increase the mds?
+Well if you increase the max_mds that tells the system to make more
+active MDSes. "Active" means that the MDS is authoritative for part of
+the namespace hierarchy, will be serving clients, etc.
+If you just want standbys then you simply need to start up extra cmds processes.
 
-best regards!
-
-=D4=DA 2011=C4=EA7=D4=C21=C8=D5 =C9=CF=CE=E72:04=A3=ACJosh Durgin <josh=
-=2Edurgin@dreamhost.com> =D0=B4=B5=C0=A3=BA
-> On 06/27/2011 05:25 PM, huang jun wrote:
->> thanks=A3=ACJosh
->> By default=A3=ACwe set two replicas for each PG,so if we use ceph
->> as back-end storage of a website, you know, some files will be frequ=
-ently read,
->> if then of thousands clients do this, some osd's workload will be ve=
-ry high.
->> so in this circumstance, how to balance the whole  cluster's workloa=
-d?
->
-> If the files don't change often, they can be cached by the clients. I=
-f
-> there really is one object that is being updated and read frequently,
-> there's not much you can do currently. To reduce the load on the prim=
-ary
-> OSD, we could add a flag to the MDS to tell clients to read from
-> replicas based on the usage.
->
-> Josh
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I decrease it to one (1) and rebooted both cmds and they are still in replay. Is there a way to get them into active?
+Unfortunately we don't have a way right now to reduce the number of
+active MDSes. Most of the machinery is there but it's not complete or
+well-tested. You've probably confused the system by telling it to have
+fewer MDSes than it's already got, so you're going to have to put
+max_mds back to 2 to get this cluster back up.
