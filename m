@@ -1,53 +1,752 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Missing kernel client install instructions on wiki?
-Date: Mon, 04 Jul 2011 10:06:47 +0200
-Message-ID: <1309766807.14552.4.camel@wido-desktop>
-References: <CAG_bnfzsj6o6DOgfg9fryu7x4nDJ5ajmaER7_=k30ZdiVxrjLQ@mail.gmail.com>
+From: Wilfrid Allembrand <wilfrid.allembrand@gmail.com>
+Subject: GCEPH error
+Date: Mon, 4 Jul 2011 16:56:30 +0200
+Message-ID: <CAJ_6VAeC4z0GWmkw6JVWN1dG9yEmYOX7788_=KAgM08wukKMEA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:40166 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754557Ab1GDIGc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jul 2011 04:06:32 -0400
-In-Reply-To: <CAG_bnfzsj6o6DOgfg9fryu7x4nDJ5ajmaER7_=k30ZdiVxrjLQ@mail.gmail.com>
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:49787 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755882Ab1GDO4b (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jul 2011 10:56:31 -0400
+Received: by gwaa18 with SMTP id a18so2009095gwa.19
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Jul 2011 07:56:30 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vineet Jain <vinjvinj@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi,
+Hello,
 
-On Sun, 2011-07-03 at 13:33 -0400, Vineet Jain wrote:
-> I'm following the steps on the wiki on ubuntu 11.04 (natty).
-> 
-> I added the package:
-> 
-> deb http://ceph.newdream.net/debian-snapshot-amd64/master/ natty main
-> 
-> and was able to install the ceph module but I'm stuck on how to
-> install the kernel client module. The wiki says that the kernel module
-> install instructions are outdated and should not be used. I tried them
-> and they failed. Can someone point me to the steps I need to do
-> install the latest ceph kernel client.
-
-Since you are running Ubuntu I'd take the easy way and grab a kernel
-from Ubuntu with Ceph in it:
-http://kernel.ubuntu.com/~kernel-ppa/mainline/v2.6.39.2-oneiric/
-
-That will give you 2.6.39.2, that has recent enough code to run the
-kernel client.
-
-Wido
-
-> 
-> Also, I have several servers in my cluster. Is it ok to have the ceph
-> kernel client and ceph store nodes running on the same machine. Since
-> I have 4 cores on each box?
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+When trying to launch gceph (gceph -v : ceph version 0.30
+(commit:64b1b2c70f0cde39c72d5d724c65ea8afaaa00b9)), I get the folowing
+errors and I'm unable to get the GUI.
+Im using ubuntu server 11.04. Do I need to install specific dependencies ?
 
 
+2011-07-04 16:52:38.953237 7f228404c960 Problem making graphic from
+/usr/share/ceph_tool/gui_resources//blacklist.svg; error code: 3:
+Couldn't recognize the image file format for file
+'/usr/share/ceph_tool/gui_resources//blacklist.svg'
+2011-07-04 16:52:38.953361 7f228404c960 There was a problem with
+initializing the GUI.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkWindow'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkMenu'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkImage'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkAccelLabel'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkWindow'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkMenu'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkImage'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkAccelLabel'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkWindow'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkWindow'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkMenu'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkAccelLabel'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkMenu'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkAccelLabel'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkWindow'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkMenu'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkImage'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkAccelLabel'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkVBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkScrolledWindow'. Hint: this error is commonly caused by
+failing to call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkVBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkScrolledWindow'. Hint: this error is commonly caused by
+failing to call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkVBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkScrolledWindow'. Hint: this error is commonly caused by
+failing to call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkVBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkVBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkScrolledWindow'. Hint: this error is commonly caused by
+failing to call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkLabel'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: gtk_bin_remove: assertion `bin->child
+== child' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkScrolledWindow'. Hint: this error is commonly caused by
+failing to call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkVBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkFrame'. Hint: this error is commonly caused by failing to call a
+library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GtkCellView'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): Gtk-CRITICAL **: IA__gtk_widget_unparent: assertion
+`GTK_IS_WIDGET (widget)' failed
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkHBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'GdkScreenX11'. Hint: this error is commonly caused by failing to call
+a library init() function.
+
+(gceph:30555): glibmm-CRITICAL **: Glib::ObjectBase*
+Glib::wrap_create_new_wrapper(GObject*): assertion `wrap_func_table !=
+0' failed
+
+(gceph:30555): glibmm-WARNING **: Failed to wrap object of type
+'gtkmm__GtkVBox'. Hint: this error is commonly caused by failing to
+call a library init() function.
