@@ -1,74 +1,59 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] Move stat/*.log to the end of logrotate.conf
-Date: Tue, 5 Jul 2011 09:23:36 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107050923340.5150@cobra.newdream.net>
-References: <ory60e3se2.fsf@livre.localdomain>
+From: Vasilakakos Giorgos <sugoruyo@gmail.com>
+Subject: Re: Question: How does Ceph go from filename to object?
+Date: Tue, 5 Jul 2011 21:58:36 +0300
+Message-ID: <CANJmCG+5HQfO2Z2bPVGDksrhSo1WryRwZq1fuf3a6aYuB9afrQ@mail.gmail.com>
+References: <CANJmCGLt2hPjETaa5bGt71Ewyo4Z-q6XXYsegRUAZNZb-h7J3A@mail.gmail.com>
+ <CANJmCG+HZWWnEmpJ+pY4fjweBckRMPh+b6OiD=kk1egwT9B3=Q@mail.gmail.com> <CAF3hT9BNouh83fQiJ4qMHRX6H7bbJ5sd879SE9-Dd2BwWUontA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34571 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753770Ab1GEQUf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jul 2011 12:20:35 -0400
-In-Reply-To: <ory60e3se2.fsf@livre.localdomain>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:45074 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751124Ab1GES7R (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jul 2011 14:59:17 -0400
+Received: by qyk9 with SMTP id 9so3631998qyk.19
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Jul 2011 11:59:16 -0700 (PDT)
+In-Reply-To: <CAF3hT9BNouh83fQiJ4qMHRX6H7bbJ5sd879SE9-Dd2BwWUontA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-Applied, thanks!
+OK thanks, I think you've answered my question between this message
+and the links you provided.
 
-On Mon, 4 Jul 2011, Alexandre Oliva wrote:
-
-> Logrotate ignores entries after a rule that doesn't match any files.
-> 
-> Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-> ---
->  src/logrotate.conf |   19 ++++++++++---------
->  1 files changed, 10 insertions(+), 9 deletions(-)
-> 
-> diff --git a/src/logrotate.conf b/src/logrotate.conf
-> index 14bc02c..a4fb73f 100644
-> --- a/src/logrotate.conf
-> +++ b/src/logrotate.conf
-> @@ -1,12 +1,3 @@
-> -# Separate stat/*.log into a different rule because sometimes
-> -# it doesn't exist, and logrotate will ignore the entire rule
-> -# if any part of the file list isn't found.
-> -/var/log/ceph/stat/*.log {
-> -    rotate 7
-> -    daily
-> -    compress
-> -}
-> -
->  /var/log/ceph/*.log {
->      rotate 7
->      daily
-> @@ -16,3 +7,13 @@
->          invoke-rc.d ceph reload >/dev/null || service ceph reload >/dev/null
->      endscript
->  }
-> +
-> +# Separate stat/*.log into a different rule because sometimes
-> +# it doesn't exist, and logrotate will ignore the entire rule
-> +# and the remainder of the file if any part of the file list
-> +# isn't found.
-> +/var/log/ceph/stat/*.log {
-> +    rotate 7
-> +    daily
-> +    compress
-> +}
-> -- 
-> 1.7.4.4
-> 
-> -- 
-> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-> You must be the change you wish to see in the world. -- Gandhi
-> Be Free! -- http://FSFLA.org/   FSF Latin America board member
-> Free Software Evangelist      Red Hat Brazil Compiler Engineer
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Tue, Jul 5, 2011 at 18:29, Gregory Farnum
+<gregory.farnum@dreamhost.com> wrote:
+> On Mon, Jul 4, 2011 at 10:17 AM, Vasilakakos Giorgos <sugoruyo@gmail.com> wrote:
+>> Hello folks, I have a question:
+>> I know files get mapped to objects and those objects to OSDs but how
+>> exactly do we go from one to the other?
+>> What I mean is, given the filename I want to access how does Ceph find
+>> the relevant objects? What exactly does CRUSH do?
+> The mapping between files and objects is by inode number and doesn't
+> involve the filename at all (if it did you'd have to move objects just
+> because you'd renamed a file!).
+>> Supposedly, the client first asks the MDS for an inode number, what then?
+>> How are the object and PG IDs constructed and where exactly does CRUSH come in?
+>> My impression is that the OID is made from the name, inode and
+>> probably some kind of information about the striping of the file,
+>> what about the mapping of an object to a PG?
+>> Are PGs mapped to OSDs by means of CRUSH, or are objects mapped to PGs
+>> by CRUSH? How are PGs assigned to OSDs then?
+> The object name is just the inode number postfixed by a sequence
+> counter for each object included in the file. (If it included the file
+> name, you'd have to rename objects and move them just because you
+> renamed the file. Not good.) The information about striping is
+> contained in object metadata that the OSDs keep.
+> I believe that by default the striping is just linear, so if your
+> object is less than 4MB it will take one object; if it is more than
+> 4MB it will take (ceiling(size/4MB)) objects named 2000000001.0,
+> 2000000001.1, 2000000001.2....
+> You could set up other striping strategies though, so that it striped
+> eg 1MB over each object and did 4 stripes per object, but the objects
+> would still be named the same.
+> CRUSH then maps the OID onto a PG and maps the PG onto an OSD. (So,
+> objects are mapped by CRUSH into PGs, and PGs are mapped by CRUSH onto
+> OSDs.)
+> -Greg
+>
