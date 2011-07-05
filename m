@@ -1,92 +1,137 @@
-From: Fusheng Han <fsh.han@gmail.com>
-Subject: Re: Availability question of RADOS
-Date: Tue, 5 Jul 2011 10:10:48 +0800
-Message-ID: <CAHq6muHbwob+a1KfsEeJZwGM6UVxAvEH+AJyjk+Ez4RqxfzE7w@mail.gmail.com>
-References: <CAHq6muEghn-efzzgQLrkdRjsi40OhmeK9iN2nwB3OR_3AAJJ0g@mail.gmail.com>
-	<1309802050.2518.16.camel@wido-laptop.pcextreme.nl>
+From: Mark Nigh <mnigh@netelligent.com>
+Subject: Verification of Crush Rules
+Date: Tue, 5 Jul 2011 09:34:37 -0500
+Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C678862E5E48@NC-SVR-09.netelligent.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:53514 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751426Ab1GECKt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jul 2011 22:10:49 -0400
-Received: by ywe9 with SMTP id 9so2117986ywe.19
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Jul 2011 19:10:48 -0700 (PDT)
-In-Reply-To: <1309802050.2518.16.camel@wido-laptop.pcextreme.nl>
+Received: from smtp2.netelligent.com ([199.255.228.152]:32381 "EHLO
+	NC-SVR-132.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752941Ab1GEOem convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 Jul 2011 10:34:42 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello, Wido
+I have created a cluster with 2 nodes and 6 osds each.
 
-I appreciate your answer.
-And some more discussion goes below.
+I would like to verify if my pgs are being placed on the correct nodes based on my crushmap. I would like to make sure that my replication (x2, default) is not placed on the same host. Osd.0 through 5 is on host0 and osd.6 through osd.11 is on host1.
 
-On Tue, Jul 5, 2011 at 1:54 AM, Wido den Hollander <wido@widodh.nl> wro=
-te:
-> Hi,
->
-> On Tue, 2011-07-05 at 00:25 +0800, Fusheng Han wrote:
->> Hi, all
->>
->> After reading the RADOS paper, I have some questions about
->> availability of RADOS. Nowhere I can find to discuss, so I'm here.
->> When adding new host to the cluster, some placement group will be
->> mapped to the new one. After the cluster info incremental propagates
->> to all the OSDs and clients, the client write operation will be
->> directed to the PG whose primary is at the new host. Before the new
->> host get the data migration down, it can not service these requests.
->> And due to the limitation of network bandwidth, the data migration m=
-ay
->> take long. There is a long time that the new host can not service. I
->> got confused.
->
-> Yes, during migration a PG will become unavailable for a short period=
- of
-> time. In a large cluster you have a large number of PGs where each PG
-> doesn't contain that much data, which makes this period short.
->
-> What kind of bandwith are you talking about? Ceph/RADOS is intended t=
-o
-> run in datacenters where you have low latency high bandwith (1G)
-> networks. Migrating a PG would take that much time in such environmen=
-ts.
+Here is my crushmap.
 
-What I mentioned is the network bandwidth limitation even with 1Gbps NI=
-C.
-Taking an imagine cluster for example:
-Node: 10
-Disk: 10TB per node (1TB per disk, 10 disks per node)
-Utilization: 80% (i.e. totally 80TB data, 8TB data per node)
+# begin crush map
 
-While adding a new node, 7.2TB (=3D 80TB / 11) data will be migrated to
-the new one. With 1Gbps bandwidth, for best case, it will cost 7200
-seconds (=3D 7.2TB / 1Gbps) to complete migration. For the last
-placement group migrated to the new node, it will become unavailable
-for 7200 seconds.
+# devices
+device 0 device0
+device 1 device1
+device 2 device2
+device 3 device3
+device 4 device4
+device 5 device5
+device 6 device6
+device 7 device7
+device 8 device8
+device 9 device9
+device 10 device10
+device 11 device11
 
-=46usheng Han
+# types
+type 0 device
+type 1 host
+type 2 root
 
->
-> Wido
->
->> Do I miss something important in this paper?
->>
->> Thank you all
->> Fusheng Han
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+# buckets
+host host0 {
+        id -1           # do not change unnecessarily
+        # weight 6.000
+        alg straw
+        hash 0  # rjenkins1
+        item device0 weight 1.000
+        item device1 weight 1.000
+        item device2 weight 1.000
+        item device3 weight 1.000
+        item device4 weight 1.000
+        item device5 weight 1.000
+}
+host host1 {
+        id -2           # do not change unnecessarily
+        # weight 6.000
+        alg straw
+        hash 0  # rjenkins1
+        item device6 weight 1.000
+        item device7 weight 1.000
+        item device8 weight 1.000
+        item device9 weight 1.000
+        item device10 weight 1.000
+        item device11 weight 1.000
+}
+root root {
+        id -3           # do not change unnecessarily
+        # weight 6.000
+        alg straw
+        hash 0  # rjenkins1
+        item host0 weight 1.000
+        item host1 weight 1.000
+}
+
+# rules
+rule data {
+        ruleset 0
+        type replicated
+        min_size 1
+        max_size 10
+        step take root
+        step chooseleaf firstn 0 type host
+        step emit
+}
+rule metadata {
+        ruleset 1
+        type replicated
+        min_size 1
+        max_size 10
+        step take root
+        step choose firstn 0 type host
+        step emit
+}
+rule rbd {
+        ruleset 2
+        type replicated
+        min_size 1
+        max_size 10
+        step take root
+        step choose firstn 0 type host
+        step emit
+}
+
+# end crush map
+
+The end of "ceph pg dump -o -" shows the following which doesn't look correct.
+
+osdstat kbused  kbavail kb      hb in   hb out
+0       0       0       0       []      []
+1       393884  2927750484      2930265540      [0,2,3,4,5]     [0,2,3,4,5]
+2       304580  2927838884      2930265540      [0,1,3,4,5]     [0,1,3,4,5]
+3       0       0       0       []      []
+4       0       0       0       []      []
+5       158908  2927983588      2930265540      [0,1,2,3,4]     [0,1,2,3,4]
+6       496     2892788952      2894914980      []      []
+7       504     2928139544      2930265540      []      []
+8       504     2928139544      2930265540      []      []
+9       504     2928139544      2930265540      []      []
+10      504     2928139544      2930265540      []      []
+11      504     2928139544      2930265540      []      []
+ sum    860388  26317059628     26337039300
+
+Which brings me to a couple of questions.
+
+1. what is "hb in" and "hb out"?
+2. The original crush map examples shows "type device". The new versions of ceph show the first type as osds? I changed my back to device, but how do you define an osd or this automatically done for you. I mean by "define" is the section in the crush map that shows all the devices, device 0 device0.
+3. In the new default crushmap, there is a domain bucket. What is that intended for? Host?
+
+Thank you.
+
+
+This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
