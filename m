@@ -1,33 +1,28 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph fixes for 3.0
-Date: Tue, 5 Jul 2011 12:54:07 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107051250370.5147@cobra.newdream.net>
+Subject: Re: ceph lock
+Date: Tue, 5 Jul 2011 12:54:55 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1107051254290.5150@cobra.newdream.net>
+References: <CACR322iwXcEs6JwQtYaLb0KS7d-bY=kZo6eLvnToV0RaL4QGHA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:34478 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753855Ab1GETvx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jul 2011 15:51:53 -0400
+In-Reply-To: <CACR322iwXcEs6JwQtYaLb0KS7d-bY=kZo6eLvnToV0RaL4QGHA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: biyan chen <riby.chen@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Linus,
+On Wed, 6 Jul 2011, biyan chen wrote:
+> HI everyone, I want to consult everybody ceph file system, whether to
+> support the PHP flock ()?
+> 
+> If that is not like NFS flock () support?
 
-Please pull the following Ceph fixes from
+flock() and fcntl() locks are support with the kernel client, but not yet 
+with the fuse-based client.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
-
-These are all related to issues with O_DIRECT when the pointer and IO 
-alignments do not match, and/or when there are holes in the file.
-
-Thanks!
 sage
-
-
-Sage Weil (3):
-      ceph: fix page alignment corrections
-      libceph: fix page calculation for non-page-aligned io
-      ceph: fix sync and dio writes across stripe boundaries
-
- fs/ceph/file.c        |   14 ++++++--------
- net/ceph/osd_client.c |   10 ++++++----
- 2 files changed, 12 insertions(+), 12 deletions(-)
