@@ -1,137 +1,64 @@
-From: Mark Nigh <mnigh@netelligent.com>
-Subject: Verification of Crush Rules
-Date: Tue, 5 Jul 2011 09:34:37 -0500
-Message-ID: <B828A4C02BE12543ACDFCF7EB0C693C678862E5E48@NC-SVR-09.netelligent.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: Servers with 40+ disks : to group or not to group ?
+Date: Tue, 5 Jul 2011 08:06:38 -0700
+Message-ID: <CAF3hT9BgT16+Bdex9BD5PwDjfN2SoDtcOXig9oizyu+QHuCo9w@mail.gmail.com>
+References: <CAJ_6VAejmSA+c61Q5Uj0NNJcTZs0vS=k7VQcEG_VPdD5W4bu5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp2.netelligent.com ([199.255.228.152]:32381 "EHLO
-	NC-SVR-132.netelligent.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752941Ab1GEOem convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 5 Jul 2011 10:34:42 -0400
-Content-Language: en-US
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:53980 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755251Ab1GEPGk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jul 2011 11:06:40 -0400
+Received: by yxi11 with SMTP id 11so1919930yxi.19
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Jul 2011 08:06:39 -0700 (PDT)
+In-Reply-To: <CAJ_6VAejmSA+c61Q5Uj0NNJcTZs0vS=k7VQcEG_VPdD5W4bu5Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wilfrid Allembrand <wilfrid.allembrand@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-I have created a cluster with 2 nodes and 6 osds each.
+On Sat, Jul 2, 2011 at 6:30 AM, Wilfrid Allembrand
+<wilfrid.allembrand@gmail.com> wrote:
+> Hi everyone,
+>
+> I'm trying to figure out what is the best OSD solution with an
+> infrastructure made up of servers with a lot a disks in each. Say, for
+> exemple you have 4+ nodes like Sun Fire X4500 (code-named Thumper).
+> Each node is 48 disks.
+>
+> What are the pros and cons to build a ceph cluster with btrfs on that
+> kind of high density hardware, considering the different scenarios for
+> each server :
+> - 1 OSD daemon per disk, so 48 osd daemons per server
+> - make 3 btrfs pools of 16 disks, so 3 osd daemons per server
+> - make 3 raid 5 or 6 volumes, so 3 osd daemons per server
+As Wido said, you certainly can run in groups. I think what we're
+seeing so far is that you want more on the order of a half-core per
+cosd (it will usually take much more than that, but CPU usage can get
+higher during group recovery situations) than a tenth of a core. :)
+More generally though, there just aren't enough large long-lived
+clusters for us to have the relevant experience to know what's best.
+:(
 
-I would like to verify if my pgs are being placed on the correct nodes based on my crushmap. I would like to make sure that my replication (x2, default) is not placed on the same host. Osd.0 through 5 is on host0 and osd.6 through osd.11 is on host1.
+> But as the data will be replicated to another node, we can run the
+> recovery in background, isn't it ? Does the recovery occurs when we
+> replace the failed node with a new valid one or does it occur on the
+> "surviving nodes of the cluster" immediatly after the failure ?
+> Perhaps we could be able to set the recovery/smartfail process with a
+> priority (low/normal/high) and thus controlling the CPU+IO impact ?
+Yes, recovery does run in the background, but he's talking about the
+sheer amount of data to transfer. If you have 48 OSDs/node (which I
+think is probably too many) and you lose a disk, that's 1 disk that
+needs to be transferred across the network. If you lose 2, that's 2
+disks. If you're running a btrfs pool of 12 disks and you lose a disk,
+that's 12 disks that need to be transferred. If you're running a
+12-disk RAID and lose 2 disks (or 3 for RAID6, I guess), that's 12
+disks that need to be transferred.
 
-Here is my crushmap.
-
-# begin crush map
-
-# devices
-device 0 device0
-device 1 device1
-device 2 device2
-device 3 device3
-device 4 device4
-device 5 device5
-device 6 device6
-device 7 device7
-device 8 device8
-device 9 device9
-device 10 device10
-device 11 device11
-
-# types
-type 0 device
-type 1 host
-type 2 root
-
-# buckets
-host host0 {
-        id -1           # do not change unnecessarily
-        # weight 6.000
-        alg straw
-        hash 0  # rjenkins1
-        item device0 weight 1.000
-        item device1 weight 1.000
-        item device2 weight 1.000
-        item device3 weight 1.000
-        item device4 weight 1.000
-        item device5 weight 1.000
-}
-host host1 {
-        id -2           # do not change unnecessarily
-        # weight 6.000
-        alg straw
-        hash 0  # rjenkins1
-        item device6 weight 1.000
-        item device7 weight 1.000
-        item device8 weight 1.000
-        item device9 weight 1.000
-        item device10 weight 1.000
-        item device11 weight 1.000
-}
-root root {
-        id -3           # do not change unnecessarily
-        # weight 6.000
-        alg straw
-        hash 0  # rjenkins1
-        item host0 weight 1.000
-        item host1 weight 1.000
-}
-
-# rules
-rule data {
-        ruleset 0
-        type replicated
-        min_size 1
-        max_size 10
-        step take root
-        step chooseleaf firstn 0 type host
-        step emit
-}
-rule metadata {
-        ruleset 1
-        type replicated
-        min_size 1
-        max_size 10
-        step take root
-        step choose firstn 0 type host
-        step emit
-}
-rule rbd {
-        ruleset 2
-        type replicated
-        min_size 1
-        max_size 10
-        step take root
-        step choose firstn 0 type host
-        step emit
-}
-
-# end crush map
-
-The end of "ceph pg dump -o -" shows the following which doesn't look correct.
-
-osdstat kbused  kbavail kb      hb in   hb out
-0       0       0       0       []      []
-1       393884  2927750484      2930265540      [0,2,3,4,5]     [0,2,3,4,5]
-2       304580  2927838884      2930265540      [0,1,3,4,5]     [0,1,3,4,5]
-3       0       0       0       []      []
-4       0       0       0       []      []
-5       158908  2927983588      2930265540      [0,1,2,3,4]     [0,1,2,3,4]
-6       496     2892788952      2894914980      []      []
-7       504     2928139544      2930265540      []      []
-8       504     2928139544      2930265540      []      []
-9       504     2928139544      2930265540      []      []
-10      504     2928139544      2930265540      []      []
-11      504     2928139544      2930265540      []      []
- sum    860388  26317059628     26337039300
-
-Which brings me to a couple of questions.
-
-1. what is "hb in" and "hb out"?
-2. The original crush map examples shows "type device". The new versions of ceph show the first type as osds? I changed my back to device, but how do you define an osd or this automatically done for you. I mean by "define" is the section in the crush map that shows all the devices, device 0 device0.
-3. In the new default crushmap, there is a domain bucket. What is that intended for? Host?
-
-Thank you.
-
-
-This transmission and any attached files are privileged, confidential or otherwise the exclusive property of the intended recipient or Netelligent Corporation. If you are not the intended recipient, any disclosure, copying, distribution or use of any of the information contained in or attached to this transmission is strictly prohibited. If you have received this transmission in error, please contact us immediately by responding to this message or by telephone (314-392-6900) and promptly destroy the original transmission and its attachments.
+How you judge these risks versus the cost of running more daemons is
+up to you. I think right now I'd create 2 OSDs/core you have and split
+the disks up evenly between them on either a RAID array or btrfs pool,
+depending on how cutting-edge you want to be. :) But that's my
+judgement and isn't based on any risk calculations or whatever.
+-Greg
