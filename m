@@ -1,23 +1,33 @@
-From: biyan chen <riby.chen@gmail.com>
-Subject: ceph lock
-Date: Wed, 6 Jul 2011 03:49:01 +0800
-Message-ID: <CACR322iwXcEs6JwQtYaLb0KS7d-bY=kZo6eLvnToV0RaL4QGHA@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph fixes for 3.0
+Date: Tue, 5 Jul 2011 12:54:07 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1107051250370.5147@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:51581 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752115Ab1GETtC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jul 2011 15:49:02 -0400
-Received: by ywe9 with SMTP id 9so2404697ywe.19
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jul 2011 12:49:01 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-HI everyone, I want to consult everybody ceph file system, whether to
-support the PHP flock ()?
+Hi Linus,
 
-If that is not like NFS flock () support?
+Please pull the following Ceph fixes from
 
-thanks!
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+
+These are all related to issues with O_DIRECT when the pointer and IO 
+alignments do not match, and/or when there are holes in the file.
+
+Thanks!
+sage
+
+
+Sage Weil (3):
+      ceph: fix page alignment corrections
+      libceph: fix page calculation for non-page-aligned io
+      ceph: fix sync and dio writes across stripe boundaries
+
+ fs/ceph/file.c        |   14 ++++++--------
+ net/ceph/osd_client.c |   10 ++++++----
+ 2 files changed, 12 insertions(+), 12 deletions(-)
