@@ -1,64 +1,53 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Servers with 40+ disks : to group or not to group ?
-Date: Tue, 5 Jul 2011 08:06:38 -0700
-Message-ID: <CAF3hT9BgT16+Bdex9BD5PwDjfN2SoDtcOXig9oizyu+QHuCo9w@mail.gmail.com>
-References: <CAJ_6VAejmSA+c61Q5Uj0NNJcTZs0vS=k7VQcEG_VPdD5W4bu5Q@mail.gmail.com>
+Subject: Re: Question: How does Ceph go from filename to object?
+Date: Tue, 5 Jul 2011 08:29:57 -0700
+Message-ID: <CAF3hT9BNouh83fQiJ4qMHRX6H7bbJ5sd879SE9-Dd2BwWUontA@mail.gmail.com>
+References: <CANJmCGLt2hPjETaa5bGt71Ewyo4Z-q6XXYsegRUAZNZb-h7J3A@mail.gmail.com>
+	<CANJmCG+HZWWnEmpJ+pY4fjweBckRMPh+b6OiD=kk1egwT9B3=Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:53980 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755251Ab1GEPGk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jul 2011 11:06:40 -0400
-Received: by yxi11 with SMTP id 11so1919930yxi.19
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jul 2011 08:06:39 -0700 (PDT)
-In-Reply-To: <CAJ_6VAejmSA+c61Q5Uj0NNJcTZs0vS=k7VQcEG_VPdD5W4bu5Q@mail.gmail.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:44631 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753838Ab1GEP36 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jul 2011 11:29:58 -0400
+Received: by ywe9 with SMTP id 9so2306002ywe.19
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Jul 2011 08:29:57 -0700 (PDT)
+In-Reply-To: <CANJmCG+HZWWnEmpJ+pY4fjweBckRMPh+b6OiD=kk1egwT9B3=Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wilfrid Allembrand <wilfrid.allembrand@gmail.com>
+To: Vasilakakos Giorgos <sugoruyo@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Sat, Jul 2, 2011 at 6:30 AM, Wilfrid Allembrand
-<wilfrid.allembrand@gmail.com> wrote:
-> Hi everyone,
->
-> I'm trying to figure out what is the best OSD solution with an
-> infrastructure made up of servers with a lot a disks in each. Say, for
-> exemple you have 4+ nodes like Sun Fire X4500 (code-named Thumper).
-> Each node is 48 disks.
->
-> What are the pros and cons to build a ceph cluster with btrfs on that
-> kind of high density hardware, considering the different scenarios for
-> each server :
-> - 1 OSD daemon per disk, so 48 osd daemons per server
-> - make 3 btrfs pools of 16 disks, so 3 osd daemons per server
-> - make 3 raid 5 or 6 volumes, so 3 osd daemons per server
-As Wido said, you certainly can run in groups. I think what we're
-seeing so far is that you want more on the order of a half-core per
-cosd (it will usually take much more than that, but CPU usage can get
-higher during group recovery situations) than a tenth of a core. :)
-More generally though, there just aren't enough large long-lived
-clusters for us to have the relevant experience to know what's best.
-:(
-
-> But as the data will be replicated to another node, we can run the
-> recovery in background, isn't it ? Does the recovery occurs when we
-> replace the failed node with a new valid one or does it occur on the
-> "surviving nodes of the cluster" immediatly after the failure ?
-> Perhaps we could be able to set the recovery/smartfail process with a
-> priority (low/normal/high) and thus controlling the CPU+IO impact ?
-Yes, recovery does run in the background, but he's talking about the
-sheer amount of data to transfer. If you have 48 OSDs/node (which I
-think is probably too many) and you lose a disk, that's 1 disk that
-needs to be transferred across the network. If you lose 2, that's 2
-disks. If you're running a btrfs pool of 12 disks and you lose a disk,
-that's 12 disks that need to be transferred. If you're running a
-12-disk RAID and lose 2 disks (or 3 for RAID6, I guess), that's 12
-disks that need to be transferred.
-
-How you judge these risks versus the cost of running more daemons is
-up to you. I think right now I'd create 2 OSDs/core you have and split
-the disks up evenly between them on either a RAID array or btrfs pool,
-depending on how cutting-edge you want to be. :) But that's my
-judgement and isn't based on any risk calculations or whatever.
+On Mon, Jul 4, 2011 at 10:17 AM, Vasilakakos Giorgos <sugoruyo@gmail.com> wrote:
+> Hello folks, I have a question:
+> I know files get mapped to objects and those objects to OSDs but how
+> exactly do we go from one to the other?
+> What I mean is, given the filename I want to access how does Ceph find
+> the relevant objects? What exactly does CRUSH do?
+The mapping between files and objects is by inode number and doesn't
+involve the filename at all (if it did you'd have to move objects just
+because you'd renamed a file!).
+> Supposedly, the client first asks the MDS for an inode number, what then?
+> How are the object and PG IDs constructed and where exactly does CRUSH come in?
+> My impression is that the OID is made from the name, inode and
+> probably some kind of information about the striping of the file,
+> what about the mapping of an object to a PG?
+> Are PGs mapped to OSDs by means of CRUSH, or are objects mapped to PGs
+> by CRUSH? How are PGs assigned to OSDs then?
+The object name is just the inode number postfixed by a sequence
+counter for each object included in the file. (If it included the file
+name, you'd have to rename objects and move them just because you
+renamed the file. Not good.) The information about striping is
+contained in object metadata that the OSDs keep.
+I believe that by default the striping is just linear, so if your
+object is less than 4MB it will take one object; if it is more than
+4MB it will take (ceiling(size/4MB)) objects named 2000000001.0,
+2000000001.1, 2000000001.2....
+You could set up other striping strategies though, so that it striped
+eg 1MB over each object and did 4 stripes per object, but the objects
+would still be named the same.
+CRUSH then maps the OID onto a PG and maps the PG onto an OSD. (So,
+objects are mapped by CRUSH into PGs, and PGs are mapped by CRUSH onto
+OSDs.)
 -Greg
