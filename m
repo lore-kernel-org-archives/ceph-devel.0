@@ -1,101 +1,83 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: scrub loadavg too high
-Date: Thu, 7 Jul 2011 08:36:09 +0800
-Message-ID: <CABAwU-aZMr5FO0h=sizfpEXyNLas4XS7H1EHPLSyUbcLgvj2iQ@mail.gmail.com>
-References: <CABAwU-aaJE10=ZtbkXn-OyEmMpO3Nz8BvpS=x39mSr6y0JZQyQ@mail.gmail.com>
-	<CAORUGqBVzN2dYdBcPJ8s9qMfYW5GQeLROmwKe2KHRpT9xz4z9w@mail.gmail.com>
-	<CABAwU-Yf_oUvKbtbbnDiRB-cXQbOVh+RepAT2XkEjOsErqiauA@mail.gmail.com>
-	<CAORUGqAFXOrbRQE5DOUnfr0oVks4VEkVX318LbQkSUNWLkCOLw@mail.gmail.com>
+From: AnnyRen <annyren6@gmail.com>
+Subject: Ceph didn't migrate data when I kill one osd daemon
+Date: Thu, 7 Jul 2011 17:35:04 +0800
+Message-ID: <CADF7qQWnfLKkAFbWeq2FwGD1sRRZiqzwikV+urhKOVbRM4B7kg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=90e6ba6e86ae941c8804a7776edd
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:53154 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755569Ab1GGAgL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jul 2011 20:36:11 -0400
-Received: by wyg8 with SMTP id 8so309385wyg.19
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Jul 2011 17:36:10 -0700 (PDT)
-In-Reply-To: <CAORUGqAFXOrbRQE5DOUnfr0oVks4VEkVX318LbQkSUNWLkCOLw@mail.gmail.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:36560 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752104Ab1GGJfF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jul 2011 05:35:05 -0400
+Received: by iwn6 with SMTP id 6so681343iwn.19
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Jul 2011 02:35:05 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-thank you Tommi
-we know we should use journal if we want keep  data integrity, but it r=
-eally
-influence the performance even we use btrfs as osd low-level fs, not
-fs for journal.
-in the debug log, find that :
-    journal prepare_single_write 1 will write 3649536 : seq 445 len
-4195462 -> 4202496    (head 40 pre_pad 3895 ebl 4195462 post_pad 3059
-tail 40) (ebl alignment 3935)
+--90e6ba6e86ae941c8804a7776edd
+Content-Type: text/plain; charset=ISO-8859-1
 
-it will generate 4195462 bytes journal of writing  4MB data from client=
-=2E
-that means we will write 8MB when it actually write 4MB data,
-so what advices you can give if we want to lower the overhead of journa=
-l?
+Hi all,
 
-best regards!
+I have one questions about osd degraded.
 
-2011/7/7 Tommi Virtanen <tommi.virtanen@dreamhost.com>:
-> [Re-added ceph-devel to Cc, it got dropped accidentally.]
->
-> 2011/7/5 huang jun <hjwsm1989@gmail.com>
->>
->> thanks=A3=ACTommi
->> now, we have solved this problem, but another occurs.
->> if use osd_journal, the performance goes down heavily.
->> we use rados to bench write performance.
->>  rados -p data bench 30 write
->> use osd journal on ext3 :
->> Total time run:        32.213428
->> Total writes made:     216
->> Write size:            4194304
->> Bandwidth (MB/sec):    26.821
->>
->> Average Latency:       2.32526
->> Max latency:           3.6743
->> Min latency:           0.105108
->>
->> and not use osd journal:
->>  Total time run:        31.057457
->> Total writes made:     452
->> Write size:            4194304
->> Bandwidth (MB/sec):    58.215
->>
->> Average Latency:       1.07141
->> Max latency:           1.23193
->> Min latency:           0.927193
->>
->> i can not figure out what slow down the write procedure,
->> so can you give some direction/tips to find it out.
->
-> Journal mode means you end up doing twice as many writes (once in the
-> journal, once in the final location). The writes to the journal will =
-be
-> streaming writes, the writes to the final locations are most likely s=
-eeking
-> around the disk. In average use, the journal can consume a burst of w=
-rites,
-> and then do the final location writes at a more idle time. When your =
-write
-> burst exceeds the size of the journal, you end up bottlenecked by the
-> writes, but now you have the writes to the journal in addition. The
-> abilities of different disk systems to handle this kind of writing va=
-ries a
-> lot.
-> Note that you need the journal for data integrity purposes, either wa=
-y.
-> We are not yet focused on this kind of performance tuning, but it's h=
-ighly
-> likely you will get better performance with btrfs. On btrfs, we can u=
-se the
-> internals of the filesystem to do the journaling for us.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+My environment was set up with 3 mon, 2 mds and 25 osd, all daemon are
+running on physical machines.
+Ceph Version:  0.30
+File system format: EXT4
+
+Q1.   When I'm testing osd stability, I kill an osd daemon (osd2) to
+observe the behavior of data migration.
+    For all I know, I could see the pg degraded ratio down to zero,
+and all pgs become active+clean.
+    but Ceph file system didn't migrate the data on the osd (which I
+already killed its daemon) to other osds.
+    The degraded ratio still remain at 4.xxx%.
+    After then, I run "cosd -i 2 -c /etc/ceph/ceph.conf"and then run "ceph -w",
+    I saw all pgs suddenly become active+clean.
+
+  Could anyone tell me why Ceph didn't migrate data when I kill one osd daemon?
+
+
+Thanks a lot~  ^__^
+
+Best Regards,
+Anny
+
+--90e6ba6e86ae941c8804a7776edd
+Content-Type: text/plain; charset=US-ASCII; name="ceph.conf.txt"
+Content-Disposition: attachment; filename="ceph.conf.txt"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gptiseye0
+
+W2dsb2JhbF0NCiAgICAgICAgcGlkIGZpbGUgPSAvdmFyL3J1bi9jZXBoLyRuYW1lLnBpZA0KICAg
+ICAgICA7IGRlYnVnIG1zID0xDQoNCiAgICAgICAgOyBlbmFibGUgc2VjdXJlIGF1dGhlbnRpY2F0
+aW9uDQogICAgICAgIDsgYXV0aCBzdXBwb3J0ZWQgPSBjZXBoeA0KDQoNClttb25dDQogICAgICAg
+IG1vbiBkYXRhID0gL21vbi9tb24kaWQNCiAgICAgICAgZGVidWcgbW9uID0gMA0KDQoNClttb24u
+YV0NCiAgICAgICAgaG9zdCA9IE1PTjENCiAgICAgICAgbW9uIGFkZHIgPSAxOTIuMTY4LjEwLjE6
+Njc4OQ0KDQpbbW9uLmJdDQogICAgICAgIGhvc3QgPSBNT04yDQogICAgICAgIG1vbiBhZGRyID0g
+MTkyLjE2OC4xMC4yOjY3ODkNCg0KW21vbi5jXQ0KICAgICAgICBob3N0ID0gTU9OMw0KICAgICAg
+ICBtb24gYWRkciA9IDE5Mi4xNjguMTAuMzo2Nzg5DQoNCg0KW21kc10NCg0KICAgICAgICBkZWJ1
+ZyBtZHMgPSAwDQoNCg0KW21kcy5hXQ0KICAgICAgICBob3N0ID0gTURTMQ0KW21kcy5iXQ0KICAg
+ICAgICBob3N0ID0gTURTMg0KDQpbb3NkXQ0KDQogICAgICAgIG9zZCBkYXRhID0gL21udC9leHQ0
+L29zZCRpZA0KDQogICAgICAgIG9zZCBqb3VybmFsID0gL2RhdGEvb3NkJGlkL2pvdXJuYWwNCiAg
+ICAgICAgb3NkIGpvdXJuYWwgc2l6ZSA9IDUxMiA7IGpvdXJuYWwgc2l6ZSwgaW4gbWVnYWJ5dGVz
+DQoNCiAgICAgICAgZmlsZXN0b3JlIGJ0cmZzIHNuYXAgPSBmYWxzZQ0KICAgICAgICBmaWxlc3Rv
+cmUgZnN5bmMgZmx1c2hlcyBqb3VybmFsIGRhdGEgPSB0cnVlDQoNCiAgICAgICAgZGVidWcgb3Nk
+ID0gMA0KDQoNCltvc2QuMF0NCiAgICAgICAgaG9zdCA9IE9TRDENCg0KW29zZC4xXQ0KICAgICAg
+ICBob3N0ID0gT1NEMg0KDQpbb3NkLjJdDQogICAgICAgIGhvc3QgPSBPU0QzDQoNCltvc2QuM10N
+CiAgICAgICAgaG9zdCA9IE9TRDQNCg0KW29zZC40XQ0KICAgICAgICBob3N0ID0gT1NENQ0KDQpb
+b3NkLjVdDQogICAgICAgIGhvc3QgPSBPU0Q2DQoNCltvc2QuNl0NCiAgICAgICAgaG9zdCA9IE9T
+RDcNCg0KW29zZC43XQ0KICAgICAgICBob3N0ID0gT1NEOA0KDQpbb3NkLjhdDQogICAgICAgIGhv
+c3QgPSBPU0Q5DQoNCltvc2QuOV0NCiAgICAgICAgaG9zdCA9IE9TRDEwDQoNCltvc2QuMTBdDQog
+ICAgICAgIGhvc3QgPSBPU0QxMQ0KDQpbb3NkLjExXQ0KICAgICAgICBob3N0ID0gT1NEMTINCg0K
+W29zZC4xMl0NCiAgICAgICAgaG9zdCA9IE9TRDEzDQoNCltvc2QuMTNdDQogICAgICAgIGhvc3Qg
+PSBPU0QxNA0KDQpbb3NkLjE0XQ0KICAgICAgICBob3N0ID0gT1NEMTUNCg0KW29zZC4xNV0NCiAg
+ICAgICAgaG9zdCA9IE9TRDE2DQoNCltvc2QuMTZdDQogICAgICAgIGhvc3QgPSBPU0QxNw0KDQpb
+b3NkLjE3XQ0KICAgICAgICBob3N0ID0gT1NEMTgNCg0KW29zZC4xOF0NCiAgICAgICAgaG9zdCA9
+IE9TRDE5DQoNCltvc2QuMTldDQogICAgICAgIGhvc3QgPSBPU0QyMA0KDQpbb3NkLjIwXQ0KICAg
+ICAgICBob3N0ID0gT1NEMjENCg0KW29zZC4yMV0NCiAgICAgICAgaG9zdCA9IE9TRDIyDQoNCltv
+c2QuMjJdDQogICAgICAgIGhvc3QgPSBPU0QyMw0KDQpbb3NkLjIzXQ0KICAgICAgICBob3N0ID0g
+T1NEMjQNCg0KW29zZC4yNF0NCiAgICAgICAgaG9zdCA9IE9TRDI1
+--90e6ba6e86ae941c8804a7776edd--
