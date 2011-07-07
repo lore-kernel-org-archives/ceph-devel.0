@@ -1,46 +1,58 @@
 From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: samba write performance
-Date: Thu, 7 Jul 2011 09:28:11 -0700
-Message-ID: <CAORUGqCe=C4h3=0CGMpfbOBiUWEJ0rB_ohG+aGaZZnk9vJ4ZkA@mail.gmail.com>
-References: <CAMwsgzMq94tL-OwvB_=TefAxzsmAdAyxv02N46i3tyK2-8ok9w@mail.gmail.com>
+Subject: Re: scrub loadavg too high
+Date: Thu, 7 Jul 2011 09:35:16 -0700
+Message-ID: <CAORUGqB2jsmHB4dk9OjgpwNM+YNKXjApZ3tO-r8A-ADd2Y0R+A@mail.gmail.com>
+References: <CABAwU-aaJE10=ZtbkXn-OyEmMpO3Nz8BvpS=x39mSr6y0JZQyQ@mail.gmail.com>
+ <CAORUGqBVzN2dYdBcPJ8s9qMfYW5GQeLROmwKe2KHRpT9xz4z9w@mail.gmail.com>
+ <CABAwU-Yf_oUvKbtbbnDiRB-cXQbOVh+RepAT2XkEjOsErqiauA@mail.gmail.com>
+ <CAORUGqAFXOrbRQE5DOUnfr0oVks4VEkVX318LbQkSUNWLkCOLw@mail.gmail.com> <CABAwU-aZMr5FO0h=sizfpEXyNLas4XS7H1EHPLSyUbcLgvj2iQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:52570 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750830Ab1GGQ2c convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jul 2011 12:28:32 -0400
-Received: by ewy4 with SMTP id 4so377152ewy.19
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Jul 2011 09:28:31 -0700 (PDT)
-In-Reply-To: <CAMwsgzMq94tL-OwvB_=TefAxzsmAdAyxv02N46i3tyK2-8ok9w@mail.gmail.com>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:47808 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752666Ab1GGQfh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jul 2011 12:35:37 -0400
+Received: by eyx24 with SMTP id 24so376283eyx.19
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Jul 2011 09:35:36 -0700 (PDT)
+In-Reply-To: <CABAwU-aZMr5FO0h=sizfpEXyNLas4XS7H1EHPLSyUbcLgvj2iQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: mowang da <whooya.xxl@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: huang jun <hjwsm1989@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Jul 7, 2011 at 04:06, mowang da <whooya.xxl@gmail.com> wrote:
-> I am trying to use a Ceph kernel =C2=A0client to mount Ceph DFS(/) an=
-d
-> set up a samba server to share the mount point(/mnt/) to Windows 7.
-> when l write a large file to the shared directory ., I found that:
+2011/7/6 huang jun <hjwsm1989@gmail.com>:
+> we know we should use journal if we want keep =C2=A0data integrity, b=
+ut it really
+> influence the performance even we use btrfs as osd low-level fs, not
+> fs for journal.
+> in the debug log, find that :
+> =C2=A0 =C2=A0journal prepare_single_write 1 will write 3649536 : seq =
+445 len
+> 4195462 -> 4202496 =C2=A0 =C2=A0(head 40 pre_pad 3895 ebl 4195462 pos=
+t_pad 3059
+> tail 40) (ebl alignment 3935)
+>
+> it will generate 4195462 bytes journal of writing =C2=A04MB data from=
+ client.
+> that means we will write 8MB when it actually write 4MB data,
+> so what advices you can give if we want to lower the overhead of jour=
+nal?
 
-[cpu time spent in kernelspace in the 50-90% range a lot]
+Journals pretty much by definition mean you write the data twice;
+that's inherent in their design.
 
-It's hard to tell just from this information what's really going on.
-Is this host an OSD, or the one mounting Ceph? Using kclient or cfuse?
+As far as I know, if you want good performance, you should use btrfs
+and a recent kernel. If you insist on using ext3, different mount
+options may bring you performance improvements, but we have not had
+the time to explore those yet -- and in any case, I expect our efforts
+would focus on btrfs first.
 
-The host those measurements were taking from is spending an awful lot
-of time in the kernelspace, which in case of OSD might imply btrfs
-issues; for kclient I guess either it's just doing a *lot* of work, or
-you have something like ethernet cards device drivers misbehaving.
-
-If this is on an OSD, I would recommend turning off samba and ceph,
-and benchmarking just the local filesystem (that the osd would be
-using), to see how it performs. If this is on a client machine, I
-would recommend verifying that the ethernet driver is able to perform
-at those rates with minimal CPU use. It's hard to help you much
-without a lot more information about your setup.
+We are building tools for better benchmarking of Ceph right now, but
+the truth is that most of the performance work is still ahead of us.
+Current wisdom is pretty much "if it's slow, add machines". Right now,
+we're hard at work on correctness.
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
