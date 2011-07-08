@@ -1,41 +1,33 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: btrfs devs
-Date: Fri, 8 Jul 2011 10:58:38 -0700
-Message-ID: <CAORUGqANLLzppGTJ+1aWgA0S78UxRzHq+ee1_3MQWJDX=cYu2Q@mail.gmail.com>
-References: <CAG_bnfx-mR0-2KtMGgYcfW9hA5TKn+TFqKmOPRSYfOwSn2=vcQ@mail.gmail.com>
+From: Brian Chrisman <brchrisman@gmail.com>
+Subject: exploration hooking RBD into SCST-iSCSI
+Date: Fri, 8 Jul 2011 14:42:21 -0700
+Message-ID: <CAN4=B2=QkFCzG0iSqpQPzJt=K-Ln4W1Za23HXgtpz=OKG6=kAw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:44999 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750757Ab1GHR67 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jul 2011 13:58:59 -0400
-Received: by eyx24 with SMTP id 24so745068eyx.19
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Jul 2011 10:58:58 -0700 (PDT)
-In-Reply-To: <CAG_bnfx-mR0-2KtMGgYcfW9hA5TKn+TFqKmOPRSYfOwSn2=vcQ@mail.gmail.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:62672 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754888Ab1GHVmW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jul 2011 17:42:22 -0400
+Received: by vws1 with SMTP id 1so1699970vws.19
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Jul 2011 14:42:21 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vineet Jain <vinjvinj@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Jul 8, 2011 at 07:09, Vineet Jain <vinjvinj@gmail.com> wrote:
-> you define a btrfs device as:
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0btrfs devs =3D /dev/sdx
->
-> Is there any way to change the device to use UUID instead since sdx
-> can change between boots or when you replace hard drives.
+I was able to hook rbd up through SCST's iSCSI driver to export a lun,
+through which I was able to discover and perform some I/O via the
+open-iscsi drivers.
+Looks like it's basically working, but I wanted to check who else
+might have been testing this and whether anybody's been integrating
+either SCST or the mainline kernel iSCSI target driver with ceph/rbd?
+One subject I was hoping to hear more about was how we can manage
+persistent reservations in the ceph environment, as vmware/hyperv
+applications require it for I/O fencing purposes among others.  It'd
+be nice to have a seamless failover with PR in the case where a client
+is accessing a lun via a node which fails.
+I'll try to formalize what I've done and put a page up on the ceph
+wiki regarding integrating at least the SCST side with RBD.
 
-Any path to a block device is good enough. udev gives you symlinks
-based on the UUID of the partition.
-
-ubuntu@sepia70:~$ ls -l /dev/disk/by-uuid/cef77500-29cf-472f-b068-2344f=
-1cc59e4
-lrwxrwxrwx 1 root root 10 2011-05-17 13:48
-/dev/disk/by-uuid/cef77500-29cf-472f-b068-2344f1cc59e4 -> ../../sda5
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-Brian Chrisman (PS, my prev email was rejected as spam, trying again
+with gmail's plain text formatting)
