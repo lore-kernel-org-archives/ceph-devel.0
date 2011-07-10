@@ -1,89 +1,54 @@
 From: Fyodor Ustinov <ufm@ufm.su>
-Subject: 0.31
-Date: Sun, 10 Jul 2011 13:48:29 +0300
-Message-ID: <4E19837D.7030702@ufm.su>
+Subject: Re: 0.31
+Date: Sun, 10 Jul 2011 16:24:59 +0300
+Message-ID: <4E19A82B.6020001@ufm.su>
+References: <4E19837D.7030702@ufm.su>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:42838 "EHLO mail.ufm.su"
+Received: from mail.ufm.su ([77.120.103.19]:60447 "EHLO mail.ufm.su"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753857Ab1GJKse (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 10 Jul 2011 06:48:34 -0400
+	id S1753384Ab1GJNZD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 10 Jul 2011 09:25:03 -0400
 Received: from localhost (localhost.localdomain [127.0.0.1])
-	by mail.ufm.su (Postfix) with ESMTP id 63829600483
-	for <ceph-devel@vger.kernel.org>; Sun, 10 Jul 2011 13:48:31 +0300 (EEST)
+	by mail.ufm.su (Postfix) with ESMTP id 29493600485
+	for <ceph-devel@vger.kernel.org>; Sun, 10 Jul 2011 16:25:01 +0300 (EEST)
 Received: from mail.ufm.su ([127.0.0.1])
 	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id 9+ODVcSV6XEL for <ceph-devel@vger.kernel.org>;
-	Sun, 10 Jul 2011 13:48:31 +0300 (EEST)
+	with ESMTP id 8vEEjwBHbb49 for <ceph-devel@vger.kernel.org>;
+	Sun, 10 Jul 2011 16:25:01 +0300 (EEST)
 Received: from [192.168.2.22] (unknown [94.232.181.14])
-	by mail.ufm.su (Postfix) with ESMTPSA id 40150600447
-	for <ceph-devel@vger.kernel.org>; Sun, 10 Jul 2011 13:48:31 +0300 (EEST)
+	by mail.ufm.su (Postfix) with ESMTPSA id F2B9E600484
+	for <ceph-devel@vger.kernel.org>; Sun, 10 Jul 2011 16:25:00 +0300 (EEST)
+In-Reply-To: <4E19837D.7030702@ufm.su>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi!
+Hi again.
 
-I upgraded my cluster and  got these messages after upgrade mon/mds:
+I start to fear.
 
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:40.891614 mds0 
-10.5.51.230:6801/23511 1 : [DBG] reconnect by client4705 
-10.5.51.242:0/8975 after 0.005341
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:40.929079 mds0 
-10.5.51.230:6801/23511 2 : [DBG] reconnect by client4605 
-10.5.51.240:0/1543 after 0.042807
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:41.008309 mds0 
-10.5.51.230:6801/23511 3 : [DBG] reconnect by client4710 
-10.5.51.241:0/1492286317 after 0.122038
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:41.273756 mds0 
-10.5.51.230:6801/23511 4 : [DBG] reconnect by client4525 
-10.5.51.188:0/263432158 after 0.387484
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:41.586636 mds0 
-10.5.51.230:6801/23511 5 : [ERR] loaded dup inode 1000000a5e9 [2,head] 
+After deleting one of file I got:
+
+2011-07-10 16:23:00.062754   log 2011-07-10 16:22:51.410099 mds0 
+10.5.51.230:6800/24957 5 : [ERR] loaded dup inode 1000000a5e9 [2,head] 
 v244 at 
 /dcvolia/amanda/state/servers/index/ticket.dcv/_/20110708000502_7.gz, 
-but inode 1000000a5e9.head v238 already exists at 
-/dcvolia/amanda/state/servers/index/ticket.dcv/_/20110708000502_7.gz.tmp
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:41.587066 mds0 
-10.5.51.230:6801/23511 6 : [ERR] loaded dup inode 1000000a5e6 [2,head] 
-v429 at 
-/dcvolia/amanda/state/servers/index/mail.naperehresti.info/_usr/20110708000502_0.gz, 
-but inode 1000000a5e6.head v421 already exists at 
-/dcvolia/amanda/state/servers/index/mail.naperehresti.info/_usr/20110708000502_0.gz.tmp
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:41.587313 mds0 
-10.5.51.230:6801/23511 7 : [ERR] loaded dup inode 1000000a5ec [2,head] 
-v244 at 
-/dcvolia/amanda/state/servers/index/iprit.dcv/_/20110708000502_6.gz, but 
-inode 1000000a5ec.head v238 already exists at 
-/dcvolia/amanda/state/servers/index/iprit.dcv/_/20110708000502_6.gz.tmp
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:41.588392 mds0 
-10.5.51.230:6801/23511 8 : [ERR] loaded dup inode 1000000a5e8 [2,head] 
-v244 at 
-/dcvolia/amanda/state/servers/index/butan.dcv/_/20110708000502_7.gz, but 
-inode 1000000a5e8.head v238 already exists at 
-/dcvolia/amanda/state/servers/index/butan.dcv/_/20110708000502_7.gz.tmp
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:41.588509 mds0 
-10.5.51.230:6801/23511 9 : [ERR] loaded dup inode 1000000a5f2 [2,head] 
-v274 at 
-/dcvolia/amanda/state/servers/index/tmg.net.ua/_/20110708000502_6.gz, 
-but inode 1000000a5f2.head v270 already exists at 
-/dcvolia/amanda/state/servers/index/tmg.net.ua/_/20110708000502_6.gz.tmp
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:41.592042 mds0 
-10.5.51.230:6801/23511 10 : [ERR] loaded dup inode 1000000a5e7 [2,head] 
-v244 at 
-/dcvolia/amanda/state/servers/index/zoman.dcv/_/20110708000502_7.gz, but 
-inode 1000000a5e7.head v238 already exists at 
-/dcvolia/amanda/state/servers/index/zoman.dcv/_/20110708000502_7.gz.tmp
-2011-07-10 13:41:42.950622   log 2011-07-10 13:41:41.592998 mds0 
-10.5.51.230:6801/23511 11 : [ERR] loaded dup inode 1000000a5f1 [2,head] 
-v204 at 
-/dcvolia/amanda/state/servers/index/ns4.dc.volia.com/_/20110708000502_0.gz, 
-but inode 1000000a5f1.head v198 already exists at 
-/dcvolia/amanda/state/servers/index/ns4.dc.volia.com/_/20110708000502_0.gz.tmp
+but inode 1000000a5e9.head v1011 already exists at ~mds0/stray0/1000000a5e9
 
-I can not pay attention or do I need start to fear?
+P.S. What is it?
+
+2011-07-10 16:21:51.188911   log 2011-07-10 16:21:50.024355 mds0 
+10.5.51.230:6801/24695 11 : [ERR] unmatched fragstat size on single 
+dirfrag 600, inode has f(v5 m2011-07-10 16:21:50.023759 21=18+3), 
+dirfrag has f(v5 m2011-07-10 16:21:50.023759 1=1+0)
+2011-07-10 16:21:51.188911   log 2011-07-10 16:21:50.024373 mds0 
+10.5.51.230:6801/24695 12 : [ERR] unmatched rstat rbytes on single 
+dirfrag 600, inode has n(v5 rc2011-07-10 16:21:50.023759 b12892122 
+21=18+3), dirfrag has n(v5 rc2011-07-10 16:21:50.023759 1=1+0)
 
 WBR,
      Fyodor.
+
