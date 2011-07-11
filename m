@@ -1,53 +1,45 @@
 From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: problem of operation "rm -rf "
-Date: Mon, 11 Jul 2011 08:24:55 -0700
-Message-ID: <CAORUGqCSWpO6A9dj94VUZqf4mjVo_xai8EDvzUKV3577s3wrkw@mail.gmail.com>
-References: <CABAwU-ZLw2GTGb4pHUxMttnO23fpwDT_uHWoUE8OVoAaYmpoKA@mail.gmail.com>
+Subject: Re: Struggling with mds. It seems very fragile.
+Date: Mon, 11 Jul 2011 09:24:59 -0700
+Message-ID: <CAORUGqD-jfn6uJe8sa6e-GRzxWA5XkAh75+OMMOzCYjd8Y9wnQ@mail.gmail.com>
+References: <CAG_bnfw72QOihdK9UWg5wbVht2dmO7-dJQCsFUAuESo=YNbrTg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:54135 "EHLO
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:43363 "EHLO
 	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757922Ab1GKPZQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jul 2011 11:25:16 -0400
-Received: by ewy4 with SMTP id 4so1396410ewy.19
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Jul 2011 08:25:15 -0700 (PDT)
-In-Reply-To: <CABAwU-ZLw2GTGb4pHUxMttnO23fpwDT_uHWoUE8OVoAaYmpoKA@mail.gmail.com>
+	with ESMTP id S1757945Ab1GKQZU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jul 2011 12:25:20 -0400
+Received: by ewy4 with SMTP id 4so1417190ewy.19
+        for <ceph-devel@vger.kernel.org>; Mon, 11 Jul 2011 09:25:19 -0700 (PDT)
+In-Reply-To: <CAG_bnfw72QOihdK9UWg5wbVht2dmO7-dJQCsFUAuESo=YNbrTg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Vineet Jain <vinjvinj@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Jul 11, 2011 at 03:21, huang jun <hjwsm1989@gmail.com> wrote:
-> hi, developers
-> we use ceph v0.30, kernel client 2.6.37
-> mount ceph on /mnt
-> $ mkdir /mnt/a
-> $ cd a
-> $ seq 10 | xargs -i =C2=A0mkdir {}
-> $ cd ..
-> $ rm -rf a
-> from the debug log of mds.we find
-> if we want remove one subdirectory in "a", we must execute readdir " =
-a
-> " operation each time
-> so we need read dir "a" 10 times.
-> but in normal way, it should readdir "a" once, and remove all the
-> subdirectories if we use "rm -rf a".
+On Fri, Jul 8, 2011 at 20:39, Vineet Jain <vinjvinj@gmail.com> wrote:
+> Using ceph version 0.3 and the ceph kernel that comes with ubuntu 11.04.
 >
-> we'd like to know how did =C2=A0ceph parse command "rm -rf " ?
+> I've setup 5 osds and one one mon and mds on one machine. When I first
+> started, without writing any data to the ceph fs my mds would keep
+> crashing. I fixed that problem by deleting the mod data directory and
+> the ceph data directories and restarting ceph. I then started copying
+> test data from a 2tb external drive to my ceph fs. I left my computer
+> and came back and could not login to my machine. I saw that the
+> external drive light was blinking so something was going on. I did a
+> hard power off thinking I would just delete the last file that was
+> copied over and start over.
+>
+> As expected, I could not start up ceph again. I had to delete all the
+> data directories again to get ceph up again. Is there any way to flush
+> whatever to get ceph back to some sort of stage where you can enter
+> back into the fs without having to purge everything a start over?
 
-Was there an actual error from "rm -rf a"? What was the message? What
-did the mds debug log say? Please provide more detail.
+Can you please provide core dumps and log messages from those MDS
+crashes? Getting tickets filed at
+http://tracker.newdream.net/projects/ceph with the relevant
+information is what will help us fix your problems.
 
-Ceph does not parse "rm -rf"; rm does a
-opendir(3)/readdir(3)/closedir(3) loop and within it, unlink(2)s the
-files (or recurses into subdirectories); Ceph receives these
-filesystem manipulation system calls via the Linux kernel's VFS
-subsystem.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Recovery, where not automatic, depends very much on the crash you saw.
+We'd be glad to help, but need more information to do so.
