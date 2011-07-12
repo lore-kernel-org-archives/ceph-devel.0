@@ -1,80 +1,131 @@
-From: Josef Bacik <josef@redhat.com>
-Subject: Re: Delayed inode operations not doing the right thing with enospc
-Date: Tue, 12 Jul 2011 11:25:51 -0400
-Message-ID: <4E1C677F.1030704@redhat.com>
-References: <4DE92BF2.1060905@redhat.com>	<4DED8143.3090803@cn.fujitsu.com>	<4DEE9263.1000802@redhat.com> <CAO47_--zux0kiKsY9Edinj98ihoXP4n2ton+j5LgdpNJv9hLbQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Replacing a failed disk/OSD: unfound object
+Date: Tue, 12 Jul 2011 09:06:14 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1107120904210.30805@cobra.newdream.net>
+References: <739109542484ec419c72b1a0f941a54d@carbonite.cn>
+ <CAORUGqDHG9k-o_VwWTGo3UtimfyYnrisKnEAt7nf6+B1Q5q1uw@mail.gmail.com>
+ <CAORUGqD=XxjRLL6j75yg8gQkKOuuNE=ybt2wVP37cKBZcX1y8Q@mail.gmail.com>
+ <620ab7bc3254ca105a1b91930afce314@carbonite.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1676533080-1310486774=:30805"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:18793 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751203Ab1GLP0A (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 12 Jul 2011 11:26:00 -0400
-In-Reply-To: <CAO47_--zux0kiKsY9Edinj98ihoXP4n2ton+j5LgdpNJv9hLbQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:57510 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753153Ab1GLQC6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jul 2011 12:02:58 -0400
+In-Reply-To: <620ab7bc3254ca105a1b91930afce314@carbonite.cn>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chb@muc.de
-Cc: miaox@cn.fujitsu.com, linux-btrfs <linux-btrfs@vger.kernel.org>, ceph-devel@vger.kernel.org
+To: Meng Zhao <mzhao@carbonite.cn>
+Cc: Tommi Virtanen <tommi.virtanen@dreamhost.com>, Ceph devel <ceph-devel@vger.kernel.org>
 
-On 07/12/2011 11:20 AM, Christian Brunner wrote:
-> 2011/6/7 Josef Bacik <josef@redhat.com>:
->> On 06/06/2011 09:39 PM, Miao Xie wrote:
->>> On fri, 03 Jun 2011 14:46:10 -0400, Josef Bacik wrote:
->>>> I got a lot of these when running stress.sh on my test box
->>>>
->>>>
->>>>
->>>> This is because use_block_rsv() is having to do a
->>>> reserve_metadata_bytes(), which shouldn't happen as we should have
->>>> reserved enough space for those operations to complete.  This is
->>>> happening because use_block_rsv() will call get_block_rsv(), which if
->>>> root->ref_cows is set (which is the case on all fs roots) we will use
->>>> trans->block_rsv, which will only have what the current transaction
->>>> starter had reserved.
->>>>
->>>> What needs to be done instead is we need to have a block reserve that
->>>> any reservation that is done at create time for these inodes is migrated
->>>> to this special reserve, and then when you run the delayed inode items
->>>> stuff you set trans->block_rsv to the special block reserve so the
->>>> accounting is all done properly.
->>>>
->>>> This is just off the top of my head, there may be a better way to do it,
->>>> I've not actually looked that the delayed inode code at all.
->>>>
->>>> I would do this myself but I have a ever increasing list of shit to do
->>>> so will somebody pick this up and fix it please?  Thanks,
->>>
->>> Sorry, it's my miss.
->>> I forgot to set trans->block_rsv to global_block_rsv, since we have migrated
->>> the space from trans_block_rsv to global_block_rsv.
->>>
->>> I'll fix it soon.
->>>
->>
->> There is another problem, we're failing xfstest 204.  I tried making
->> reserve_metadata_bytes commit the transaction regardless of whether or
->> not there were pinned bytes but the test just hung there.  Usually it
->> takes 7 seconds to run and I ctrl+c'ed it after a couple of minutes.
->> 204 just creates a crap ton of files, which is what is killing us.
->> There needs to be a way to start flushing delayed inode items so we can
->> reclaim the space they are holding onto so we don't get enospc, and it
->> needs to be better than just committing the transaction because that is
->> dog slow.  Thanks,
->>
->> Josef
-> 
-> Is there a solution for this?
-> 
-> I'm running a 2.6.38.8 kernel with all the btrfs patches from 3.0rc7
-> (except the pluging). When starting a ceph rebuild on the btrfs
-> volumes I get a lot of warnings from block_rsv_use_bytes in
-> use_block_rsv:
-> 
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Yeah there is something wonky going on here, I meant to take a look this
-week but I will go ahead and look into it now.  I have a way to
-reproduce it thankfully, but I may have you run my patches when I get
-somewhere.  Thanks,
+--557981400-1676533080-1310486774=:30805
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Josef
+On Tue, 12 Jul 2011, Meng Zhao wrote:
+> Thanks Tommi.  I rebuilt the ceph cluster a few times just to reproduce t=
+he
+> situation. The result seems mixed, more likely btrfs failed (after power
+> reset). But it does happen anyway.
+>=20
+> The big question is: However rare, unfound object situation makes the *en=
+tire*
+> ceph file system not mountable, leads to a total lost of all data. That i=
+s
+> quite a risk to take for production system.  Is there a way to recover fr=
+om
+> such situation ?(e.g. remove the file associated with the missing object)
+
+There isn't an easy way to do this currently, but it is very easy to add. =
+=20
+I've added an issue to the tracker.
+
+The real question is whether the lost object is file data or namespace=20
+metadata.  If it's namespace metadata, you may lose part of the directory=
+=20
+hierarchy (until the fsck/namespace rebuild work is done).  For file data,=
+=20
+it's easy enough to just mark the unfound object as deleted.
+
+sage
+
+
+>=20
+>=20
+> On Fri, 8 Jul 2011 10:08:46 -0700, Tommi Virtanen wrote:
+> > [It seems I dropped the Cc: to ceph-devel, added it back.. Please
+> > reply to this message instead, and sorry about that. I'm starting to
+> > dislike Google Apps for mailing list traffic :( ]
+> >=20
+> > On Fri, Jul 8, 2011 at 10:07, Tommi Virtanen
+> > <tommi.virtanen@dreamhost.com> wrote:
+> > > On Fri, Jul 8, 2011 at 01:23, Meng Zhao <mzhao@carbonite.cn> wrote:
+> > > > I was trying to replace a disk for an osd by following instruction =
+at:
+> > > > http://ceph.newdream.net/wiki/Replacing_a_failed_disk/OSD
+> > > >=20
+> > > > Now, ceph -w getting
+> > > > 2011-07-08 15:52:39.702881 =A0 =A0pg v1602: 602 pgs: 49 active+degr=
+aded, 553
+> > > > active+clean+degraded; 349 MB data, 333 MB used, 566 MB / 1023 MB a=
+vail;
+> > > > 167/224 degraded (74.554%); 55/112 unfound (49.107%)
+> > > >=20
+> > > > and a copy operation hang on the ceph client forever. I cannot kill=
+ (-9)
+> > > > the
+> > > > cp process. Is there any hope to recover my ceph filesystem?
+> > >=20
+> > > I'm pretty sure that the cp is hanging because Ceph chooses to wait i=
+n
+> > > case the unfound objects do come back (e.g. an OSD comes back online)=
+=2E
+> > >=20
+> > > Now, in the default configuration, losing a single OSD should not hav=
+e
+> > > caused unfound objects in the first place. Can you provide any more
+> > > information on how you got to that point?
+> > >=20
+> > > > My general question is: How are objects distributed among OSDs? Doe=
+s
+> > > > duplication (2x) guarantee that a failure of a single OSD would not=
+ lose
+> > > > data? =A0It appears to me that the objects are statistically redist=
+ributed
+> > > > and
+> > > > does not guarantee physical separation of replication data location=
+=2E
+> > >=20
+> > > The CRUSH logic has a special case for that: when picking replicas, i=
+f
+> > > it would pick an already used bucket, it tries again.
+> > >=20
+> > > My understanding is that with the default crushmap, replicas will go
+> > > to different OSDs, and this is what I see in practice. If you did
+> > > construct your crushmap, it's possible that you made one that allows
+> > > multiple replicas on the same drive. Or even configured Ceph to
+> > > maintain no replicas.
+> > >=20
+> > > It is also possible you got hit by a bug, most likely one not in the
+> > > placement rules but in the OSDs code.
+> > >=20
+> > > Can you provide more information on your setup and the steps you took=
+?
+> > >=20
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-1676533080-1310486774=:30805--
