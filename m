@@ -1,122 +1,189 @@
-From: Sage Weil <sage@newdream.net>
+From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
 Subject: Re: coding style document
-Date: Wed, 13 Jul 2011 12:22:51 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107131215360.8865@cobra.newdream.net>
+Date: Wed, 13 Jul 2011 12:54:26 -0700
+Message-ID: <CA+qbEUO9XRPaWnSjv3Exh1TppD7OLNZa=TsZdQKyju+G07x_Bg@mail.gmail.com>
 References: <CAC-hyiF3UNPoFCzYQD9V5UnvB6Y+gAKSi271U5sU-JgJvAG_Mw@mail.gmail.com>
- <CAC-hyiFm3Ua_ADTqquK2bsU-5fO3Y-s3jXt2badsdPksZDxJCg@mail.gmail.com>
- <CAC-hyiGzUR=nm8TokMwkztGWFFYG2+M-F9Ey6A_ePFf4MxVpYA@mail.gmail.com>
- <4E1DDCEA.9010107@hq.newdream.net> <CAC-hyiEsL2yw83pELy8-XdGqxMst_XZX4RGCW4-S6GCFjRRiZQ@mail.gmail.com>
- <CA+qbEUMSDOrCGPB4YO0ysAs_VzXzHUJNKSe2a9fKoDLjVOEOtQ@mail.gmail.com>
- <CAC-hyiGOjPhNfrq11Tfwe=S_FTm+2dGncJZ8oEmOisvg55Cb1A@mail.gmail.com>
+	<CAC-hyiFm3Ua_ADTqquK2bsU-5fO3Y-s3jXt2badsdPksZDxJCg@mail.gmail.com>
+	<CAC-hyiGzUR=nm8TokMwkztGWFFYG2+M-F9Ey6A_ePFf4MxVpYA@mail.gmail.com>
+	<CA+qbEUOvPqv8r1+LG5ygi8dH5-Cw0+FJnVsnSfamW0N6R1kkUA@mail.gmail.com>
+	<CAC-hyiE9XDTE99wox3e3-hL+eF40TyRUhfJ=kv4R_UtZcggG+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1119994446-1310584971=:8865"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54327 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750823Ab1GMTTb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2011 15:19:31 -0400
-In-Reply-To: <CAC-hyiGOjPhNfrq11Tfwe=S_FTm+2dGncJZ8oEmOisvg55Cb1A@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:44482 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750810Ab1GMTy2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2011 15:54:28 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 675C9C067
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 12:54:29 -0700 (PDT)
+Received: from mail-fx0-f52.google.com (mail-fx0-f52.google.com [209.85.161.52])
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id E4605C065
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 12:54:28 -0700 (PDT)
+Received: by fxd18 with SMTP id 18so6292394fxd.11
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 12:54:26 -0700 (PDT)
+In-Reply-To: <CAC-hyiE9XDTE99wox3e3-hL+eF40TyRUhfJ=kv4R_UtZcggG+g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: Colin McCabe <cmccabe@alumni.cmu.edu>, samuel.just@dreamhost.com, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wed, Jul 13, 2011 at 11:59 AM, Yehuda Sadeh Weinraub
+<yehudasa@gmail.com> wrote:
+> On Wed, Jul 13, 2011 at 11:21 AM, Colin McCabe <cmccabe@alumni.cmu.ed=
+u> wrote:
+>> On Wed, Jul 13, 2011 at 10:52 AM, Yehuda Sadeh Weinraub
+[snip class variable naming discussion]
 
---557981400-1119994446-1310584971=:8865
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+You seem to have two objections to the proposed naming. One is that
+you don't like the trailing underscore. That is fine-- I like the "m_"
+prefix better myself.
 
-On Wed, 13 Jul 2011, Yehuda Sadeh Weinraub wrote:
-> On Wed, Jul 13, 2011 at 11:08 AM, Colin McCabe <cmccabe@alumni.cmu.edu> w=
-rote:
-> > On Wed, Jul 13, 2011 at 11:04 AM, Yehuda Sadeh Weinraub
-> > <yehudasa@gmail.com> wrote:
-> >> On Wed, Jul 13, 2011 at 10:59 AM, Samuel Just <samuelj@hq.newdream.net=
-> wrote:
-> >>> On 07/13/2011 10:52 AM, Yehuda Sadeh Weinraub wrote:
-> >>>>>
-> >>>>> * Naming> =A0Type Names:
-> >>>>>
-> >>>>> =A0 =A0Google uses CamelCaps for all type names. =A0We use two nami=
-ng schemes:
-> >>>>>
-> >>>>> =A0 =A0- for structs (simple data containers), lower case with _t s=
-uffix:
-> >>>>> =A0 =A0 =A0 =A0struct my_type_t {
-> >>>>> =A0 =A0 =A0 =A0 =A0int a, b;
-> >>>>> =A0 =A0 =A0 =A0 =A0my_type_t() : a(0), b(0) {}
-> >>>>> =A0 =A0 =A0 =A0};
-> >>>>
-> >>>> I'd rather have the struct naming without the _t suffix (as with the=
- C
-> >>>> code), and typedef to add _t, e.g.:
-> >>>>
-> >>>> typedef struct my_type {
-> >>>> =A0...
-> >>>> } my_type_t;
-> >>>>
-> >>> What is the advantage of the typedef?
-> >>
-> >> Being consistent. That's what we do in C. The _t suffix denotes a
-> >> typedef, so it should be defined as one. We also mix C and C++ from
-> >> time to time (e.g., we have code that is common to both userspace side
-> >> and kernel side and/or links with other projects like qemu), so
-> >> keeping the same notation is crucial.
-> >>
-> >
-> > Actually, using typedef that way is *inconsistent*, since we claim to
-> > follow the kernel coding style document. And this is what it has to
-> > say about that:
-> >
-> >> Please don't use things like "vps_t".
-> >>
-> >> It's a _mistake_ to use typedef for structures and pointers. When you =
-see a
-> >>
-> >> =A0 =A0 =A0 vps_t a;
-> >>
-> >> in the source, what does it mean?
-> >>
-> >> In contrast, if it says
-> >>
-> >> =A0 =A0 =A0 struct virtual_container *a;
-> >>
-> >> you can actually tell what "a" is.
->=20
-> Whether to typedef or not is a different issue. If you want a _t
-> suffix, use typedef.
+The second is that you don't want "mixed code." I really don't
+understand this objection. We have "mixed code" right now... there are
+some classes currently use m_ prefixes, some that use underscore
+prefixes, and some that use none of the above. There are some people
+using the exact same variable names for class variables and local
+variable names-- like the example that I gave-- and relying on the C++
+shadowing rules. I don't see how any reasonable person can read that
+kind of code and not feel confused and frustrated.
 
-Yeah, I'm not suggesting a typedef.  It's only useful in C if you want to=
-=20
-exclude the 'struct' prefix which isn't needed in C++ anyway.
+>
+>>
+>>>
+>>>>
+>>>> * Naming > Constant Names:
+>>>>
+>>>> =A0 Google uses kSomeThing for constants. =A0We prefere SOME_THING=
+=2E
+>>>>
+>>>> * Naming > Function Names:
+>>>>
+>>>> =A0 Google uses CamelCaps. =A0We use_function_names_with_underscor=
+es().
+>>>>
+>>>> =A0 Accessors are the same, {get,set}_field().
+>>>>
+>>>> * Naming > Enumerator Names:
+>>>>
+>>>> =A0 Name them like constants, as above (SOME_THING).
+>>>>
+>>>> * Comments > File Comments:
+>>>>
+>>>> =A0 Don't sweat it, unless the license varies from that of the pro=
+ject (LGPL2) or
+>>>> the code origin isn't reflected by the git history.
+>>>>
+>>>> * Formatting > Conditionals:
+>>>>
+>>>> =A0 - No spaces inside conditionals please, e.g.
+>>>>
+>>>> =A0 =A0 =A0 =A0if (foo) { =A0 // okay
+>>>>
+>>>> =A0 =A0 =A0 =A0if ( foo ) { // no
+>>>>
+>>>> =A0 - Always use newline following if:
+>>>>
+>>>> =A0 =A0 =A0 =A0if (foo)
+>>>> =A0 =A0 =A0 =A0 =A0bar; =A0 =A0 =A0 =A0 // okay
+>>>>
+>>>> =A0 =A0 =A0 =A0if (foo) bar; =A0// no, usually hardler to visually=
+ parse
+>>>>
+>>>>
+>>>>
+>>>>
+>>>> The following guidelines have not been followed in the legacy code=
+,
+>>>> but are worth mentioning and should be followed strictly for new c=
+ode:
+>>>>
+>>>> * Header Files > Function Parameter Ordering:
+>>>>
+>>>> =A0 =A0Inputs, then outputs.
+>>>
+>>> I generally agree, just that there's a class of strcpy like functio=
+ns
+>>> that put the destination first. This usually makes sense when you h=
+ave
+>>> multiple functions that do similar things with varied input
+>>> parameters:
+>>>
+>>> =A0char *strcpy(char *dest, const char *src);
+>>>
+>>> =A0char *strncpy(char *dest, const char *src, size_t n);
+>>>
+>>> So in both cases, dest and src are the first and second parameters,
+>>> which looks more consistent.
+>>
+>> Well, nothing is set in stone. There are always exceptions if it
+>> really makes sense. If you are designing a function patterned after
+>> strcpy or whatever, making it "look like" strcpy probably makes a lo=
+t
+>> of sense.
+>>
+>>>
+>>> And there's also the case of using default values, which usually
+>>> (though not always) applies to the input parameters. Enforcing stri=
+ct
+>>> input before output ordering wouldn't work there.
+>>
+>> Well, the Google document says not to use default parameters because
+>> "they obscure the interface."
+>> So that is a non-issue.
+>>
+>> Check out commit 6e2b594b3329cb08bf54cd325776b236f2e6c4f1 for an
+>> example of how default parameters can really bite.
+>>
+>
+> The same goes here. Default parameters *may* bite, yes. But they're
+> also an important tool that can ease up development and make code loo=
+k
+> much more concise and readable.
 
-The key distinction I want to make is between things like struct inode_t,=
-=20
-which is essentially a glorified struct with initializers/constructor, is=
-=20
-encodable, and has a few helper methods, versus something like SimpleLock,=
-=20
-which is not copyable, not encodable, has pointers to parent objects,=20
-exists on specific lists, etc.  Currently the former "struct" type is=20
-named_like_this_t and the latter "class" is NamedLikeThis.
+I want to quote the discussion included in the Google coding standard
+here, because it's very well-thought-out:
+> Pros:
+> Often you have a function that uses lots of default values, but
+> occasionally you want to override the defaults. Default parameters al=
+low
+> an easy way to do this without having to define many functions for th=
+e
+> rare exceptions.
+>
+> Cons:
+> People often figure out how to use an API by looking at existing code=
+ that
+> uses it. Default parameters are more difficult to maintain because
+> copy-and-paste from previous code may not reveal all the parameters.
+> Copy-and-pasting of code segments can cause major problems when the
+> default arguments are not appropriate for the new code.
+>
+> Decision:
+> Except as described below, we require all arguments to be explicitly
+> specified, to force programmers to consider the API and the values th=
+ey
+> are passing for each argument rather than silently accepting defaults=
+ they
+> may not be aware of.
 
-In C, the no typedef rule makes a lot of sense, since you know it is a=20
-struct.  In C++, it doesn't matter if it's a struct becaue the=20
-initialization and such (which you tend to screw up in C) is hidden from=20
-you anyway. =20
+On Wed, Jul 13, 2011 at 11:59 AM, Yehuda Sadeh Weinraub
+<yehudasa@gmail.com> wrote:
+> As usual, I don't think that
+> restricting your use of the language because of potential errors is
+> the better idea. And please, please don't add a compile flag that'll
+> prevent it.
 
-The nice thing about _t and CamelCaps both is that they don't collide with=
-=20
-variable names.  My concern is that
+The whole point of coding standards is to restrict your use of the
+language to prevent potential errors. Obviously, we don't want the
+standard to be too rigid. But dismissing the idea of a standard is not
+helpful.
 
- inode *in;
-
-isn't as clear as
-
- inode_t *in;  // clearly a type
- Inode *in;    // clearly a type
-
-sage
---557981400-1119994446-1310584971=:8865--
+regards,
+Colin
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
