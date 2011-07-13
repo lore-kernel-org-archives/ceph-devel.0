@@ -1,54 +1,62 @@
-From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
-Subject: Re: Radosgw cannot output Chinese file names
-Date: Wed, 13 Jul 2011 11:03:59 -0700
-Message-ID: <CA+qbEUOmruR-MOQptaR=fwU6XWv8Ub-OEMhxoUCe4XQukhR4Vg@mail.gmail.com>
-References: <CAPE_nyKQz0AR8H6HFe-BiGGoG=+uJpzRT_LfFNhn4OMr5ARH6w@mail.gmail.com>
-	<CAC-hyiGeKnCEFXQq_F=2HWRmA7cRiv=uF6+sDCB2TyHYiTXavA@mail.gmail.com>
-	<CA+qbEUPYHsJRPY-_ouCDCGLBxCcsy9cvDtwQ3hwuONNtp3ta2g@mail.gmail.com>
-	<CAORUGqAPK9Op_hQ6D0fT_x1EsH4YDX2xHyHx+xa0s_UBf-_YEw@mail.gmail.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: coding style document
+Date: Wed, 13 Jul 2011 11:04:50 -0700
+Message-ID: <CAC-hyiEsL2yw83pELy8-XdGqxMst_XZX4RGCW4-S6GCFjRRiZQ@mail.gmail.com>
+References: <CAC-hyiF3UNPoFCzYQD9V5UnvB6Y+gAKSi271U5sU-JgJvAG_Mw@mail.gmail.com>
+	<CAC-hyiFm3Ua_ADTqquK2bsU-5fO3Y-s3jXt2badsdPksZDxJCg@mail.gmail.com>
+	<CAC-hyiGzUR=nm8TokMwkztGWFFYG2+M-F9Ey6A_ePFf4MxVpYA@mail.gmail.com>
+	<4E1DDCEA.9010107@hq.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:37426 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756996Ab1GMSEC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2011 14:04:02 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id E918FC062
-	for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 11:04:01 -0700 (PDT)
-Received: from mail-fx0-f52.google.com (mail-fx0-f52.google.com [209.85.161.52])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 61F77C065
-	for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 11:04:01 -0700 (PDT)
-Received: by fxd18 with SMTP id 18so6219064fxd.11
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 11:03:59 -0700 (PDT)
-In-Reply-To: <CAORUGqAPK9Op_hQ6D0fT_x1EsH4YDX2xHyHx+xa0s_UBf-_YEw@mail.gmail.com>
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:46539 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757237Ab1GMSEw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2011 14:04:52 -0400
+Received: by ewy4 with SMTP id 4so2296904ewy.19
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 11:04:50 -0700 (PDT)
+In-Reply-To: <4E1DDCEA.9010107@hq.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Sylar Shen <kimulaaa@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: samuel.just@dreamhost.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 13, 2011 at 10:47 AM, Tommi Virtanen
-<tommi.virtanen@dreamhost.com> wrote:
-> On Wed, Jul 13, 2011 at 10:45, Colin McCabe <cmccabe@alumni.cmu.edu> wrote:
->> I guess this means that XML escaping needs to be utf-8-aware, which it
->> isn't now. Probably it's just a matter of recognizing when we are
->> inside a utf-8 character and skipping the bytes comprising that
->> character. JSON escaping probably also needs that change.
->
-> Not using standard libraries for standard data formats makes me sad.
->
+On Wed, Jul 13, 2011 at 10:59 AM, Samuel Just <samuelj@hq.newdream.net>=
+ wrote:
+> On 07/13/2011 10:52 AM, Yehuda Sadeh Weinraub wrote:
+>>>
+>>> * Naming> =A0Type Names:
+>>>
+>>> =A0 =A0Google uses CamelCaps for all type names. =A0We use two nami=
+ng schemes:
+>>>
+>>> =A0 =A0- for structs (simple data containers), lower case with _t s=
+uffix:
+>>> =A0 =A0 =A0 =A0struct my_type_t {
+>>> =A0 =A0 =A0 =A0 =A0int a, b;
+>>> =A0 =A0 =A0 =A0 =A0my_type_t() : a(0), b(0) {}
+>>> =A0 =A0 =A0 =A0};
+>>
+>> I'd rather have the struct naming without the _t suffix (as with the=
+ C
+>> code), and typedef to add _t, e.g.:
+>>
+>> typedef struct my_type {
+>> =A0...
+>> } my_type_t;
+>>
+> What is the advantage of the typedef?
 
-Well, there are plenty of options for outputting XML:
+Being consistent. That's what we do in C. The _t suffix denotes a
+typedef, so it should be defined as one. We also mix C and C++ from
+time to time (e.g., we have code that is common to both userspace side
+and kernel side and/or links with other projects like qemu), so
+keeping the same notation is crucial.
 
-http://www.nongnu.org/scew/
-http://www.grinninglizard.com/tinyxmldocs/index.html
-http://xerces.apache.org/
-
-I would like to see RGW converted over to use one of those for
-outputting XML. I somehow doubt that it's going to happen any time
-soon, though.
-Anyway, it looks like the signed/unsigned problem was the cause of the
-bug, and fixing that will resolve it.
-
-regards,
-Colin
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
