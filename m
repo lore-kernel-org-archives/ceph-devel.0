@@ -1,70 +1,122 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: Radosgw cannot output Chinese file names
-Date: Wed, 13 Jul 2011 10:58:11 -0700
-Message-ID: <CAC-hyiHFVWCzhNhXRgXRo8GwP2Cxfay1vxoNTzCPV0GMJK-Ydg@mail.gmail.com>
-References: <CAPE_nyKQz0AR8H6HFe-BiGGoG=+uJpzRT_LfFNhn4OMr5ARH6w@mail.gmail.com>
-	<CAC-hyiGeKnCEFXQq_F=2HWRmA7cRiv=uF6+sDCB2TyHYiTXavA@mail.gmail.com>
-	<CA+qbEUPYHsJRPY-_ouCDCGLBxCcsy9cvDtwQ3hwuONNtp3ta2g@mail.gmail.com>
+From: Samuel Just <samuelj@hq.newdream.net>
+Subject: Re: coding style document
+Date: Wed, 13 Jul 2011 10:59:06 -0700
+Message-ID: <4E1DDCEA.9010107@hq.newdream.net>
+References: <CAC-hyiF3UNPoFCzYQD9V5UnvB6Y+gAKSi271U5sU-JgJvAG_Mw@mail.gmail.com>	<CAC-hyiFm3Ua_ADTqquK2bsU-5fO3Y-s3jXt2badsdPksZDxJCg@mail.gmail.com> <CAC-hyiGzUR=nm8TokMwkztGWFFYG2+M-F9Ey6A_ePFf4MxVpYA@mail.gmail.com>
+Reply-To: samuel.just@dreamhost.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f52.google.com ([209.85.161.52]:52329 "EHLO
-	mail-fx0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754661Ab1GMR6M convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2011 13:58:12 -0400
-Received: by fxd18 with SMTP id 18so6213702fxd.11
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 10:58:11 -0700 (PDT)
-In-Reply-To: <CA+qbEUPYHsJRPY-_ouCDCGLBxCcsy9cvDtwQ3hwuONNtp3ta2g@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:41457 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754661Ab1GMR7G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2011 13:59:06 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id A540FC066
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 10:59:05 -0700 (PDT)
+Received: from [192.168.107.170] (ip-64-111-111-107.dreamhost.com [64.111.111.107])
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 97951C062
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 10:59:05 -0700 (PDT)
+In-Reply-To: <CAC-hyiGzUR=nm8TokMwkztGWFFYG2+M-F9Ey6A_ePFf4MxVpYA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: Sylar Shen <kimulaaa@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 13, 2011 at 10:45 AM, Colin McCabe <cmccabe@alumni.cmu.edu>=
- wrote:
-> On Wed, Jul 13, 2011 at 9:59 AM, Yehuda Sadeh Weinraub
-> <yehudasa@gmail.com> wrote:
->> On Wed, Jul 13, 2011 at 12:48 AM, Sylar Shen <kimulaaa@gmail.com> wr=
-ote:
->>> Hi developers,
->>> I installed ceph and radosgw v0.3 and got 1 server with =A0MON and
->>> radosgw , 2 OSDs server. (without MDS)
->>> The environment started successfully and I wanted to test
->>> upload/download file via radosgw.
->>> It all went well if I uploaded/downloaded English file names.
->>> But It went wrong when I tried Chinese file names.
->>> Radowgw can receive files normally, but Chinese file names were tur=
-ned
->>> into unrecognized codes.
->>> Therefore, radosgw cannot show the file list in a bucket normally.
->>> It turned out to show nothing when I wanted to list files in a buck=
-et.
->>> But the Chinese file did exist in the bucket.
->>>
->>> I am curious that if I did something wrong to result in such kind o=
-f problems
->>> Does anyone who has the same problem as I did?
+On 07/13/2011 10:52 AM, Yehuda Sadeh Weinraub wrote:
+>> * Naming>  Type Names:
 >>
->> That's a bug. It appears that the xml escaping doesn't work correctl=
-y
->> with unicode characters. I just opened issue #1301 for that, we'll
->> look at it.
+>>     Google uses CamelCaps for all type names.  We use two naming schemes:
+>>
+>>     - for structs (simple data containers), lower case with _t suffix:
+>>         struct my_type_t {
+>>           int a, b;
+>>           my_type_t() : a(0), b(0) {}
+>>         };
+> I'd rather have the struct naming without the _t suffix (as with the C
+> code), and typedef to add _t, e.g.:
 >
-> I guess this means that XML escaping needs to be utf-8-aware, which i=
-t
-> isn't now. Probably it's just a matter of recognizing when we are
-> inside a utf-8 character and skipping the bytes comprising that
-> character. JSON escaping probably also needs that change.
+> typedef struct my_type {
+>   ...
+> } my_type_t;
 >
-Might be, though our specific issue here was just a bad test (actually
-using char instead of unsigned char) in which we clobbered all utf8
-characters. Whether we need to translate utf8 into UCS is a different
-question.
+What is the advantage of the typedef?
+>>     - for regular classes, CamelCaps, private: section, etc.
+>>
+>> * Naming>  Variable Names:
+>>
+>>    Google uses _ suffix for class members.  We haven't up until now.  Should we?
+> No.
+>
+>> * Naming>  Constant Names:
+>>
+>>    Google uses kSomeThing for constants.  We prefere SOME_THING.
+>>
+>> * Naming>  Function Names:
+>>
+>>    Google uses CamelCaps.  We use_function_names_with_underscores().
+>>
+>>    Accessors are the same, {get,set}_field().
+>>
+>> * Naming>  Enumerator Names:
+>>
+>>    Name them like constants, as above (SOME_THING).
+>>
+>> * Comments>  File Comments:
+>>
+>>    Don't sweat it, unless the license varies from that of the project (LGPL2) or
+>> the code origin isn't reflected by the git history.
+>>
+>> * Formatting>  Conditionals:
+>>
+>>    - No spaces inside conditionals please, e.g.
+>>
+>>         if (foo) {   // okay
+>>
+>>         if ( foo ) { // no
+>>
+>>    - Always use newline following if:
+>>
+>>         if (foo)
+>>           bar;         // okay
+>>
+>>         if (foo) bar;  // no, usually hardler to visually parse
+>>
+>>
+>>
+>>
+>> The following guidelines have not been followed in the legacy code,
+>> but are worth mentioning and should be followed strictly for new code:
+>>
+>> * Header Files>  Function Parameter Ordering:
+>>
+>>     Inputs, then outputs.
+> I generally agree, just that there's a class of strcpy like functions
+> that put the destination first. This usually makes sense when you have
+> multiple functions that do similar things with varied input
+> parameters:
+>
+>    char *strcpy(char *dest, const char *src);
+>
+>    char *strncpy(char *dest, const char *src, size_t n);
+>
+> So in both cases, dest and src are the first and second parameters,
+> which looks more consistent.
+>
+> And there's also the case of using default values, which usually
+> (though not always) applies to the input parameters. Enforcing strict
+> input before output ordering wouldn't work there.
+>
+>
+>> * Classes>  Explicit Constructors:
+>>
+>>     You should normally mark constructors explicit to avoid getting silent
+>> type conversions.
+>>
+>
+> Yehuda
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
