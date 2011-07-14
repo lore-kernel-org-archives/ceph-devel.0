@@ -1,89 +1,84 @@
-From: Josef Bacik <josef@redhat.com>
-Subject: Re: Delayed inode operations not doing the right thing with enospc
-Date: Thu, 14 Jul 2011 13:57:49 -0400
-Message-ID: <4E1F2E1D.80106@redhat.com>
-References: <4DE92BF2.1060905@redhat.com>	<4DED8143.3090803@cn.fujitsu.com>	<4DEE9263.1000802@redhat.com>	<CAO47_--zux0kiKsY9Edinj98ihoXP4n2ton+j5LgdpNJv9hLbQ@mail.gmail.com>	<4E1DB22F.1060405@redhat.com> <CAO47_-9qn31AfGQksLnRAreMudBcOQz0UnXxmhFC4cSQW5ZHFQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: coding style document
+Date: Thu, 14 Jul 2011 11:02:58 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1107141056250.29636@cobra.newdream.net>
+References: <CAC-hyiF3UNPoFCzYQD9V5UnvB6Y+gAKSi271U5sU-JgJvAG_Mw@mail.gmail.com>
+ <CAC-hyiFm3Ua_ADTqquK2bsU-5fO3Y-s3jXt2badsdPksZDxJCg@mail.gmail.com>
+ <CAC-hyiGzUR=nm8TokMwkztGWFFYG2+M-F9Ey6A_ePFf4MxVpYA@mail.gmail.com>
+ <CA+qbEUOvPqv8r1+LG5ygi8dH5-Cw0+FJnVsnSfamW0N6R1kkUA@mail.gmail.com>
+ <CAC-hyiE9XDTE99wox3e3-hL+eF40TyRUhfJ=kv4R_UtZcggG+g@mail.gmail.com>
+ <CA+qbEUO9XRPaWnSjv3Exh1TppD7OLNZa=TsZdQKyju+G07x_Bg@mail.gmail.com>
+ <CAC-hyiEx2itZ5_RtZ1XhPsPtnF7w0aockQ9+5ZDnzUGooVVdqA@mail.gmail.com>
+ <CA+qbEUM7HPo9DdjyS_7Dnmq74u_gKVCJjXEf8G=_VVfiX_sJ-Q@mail.gmail.com>
+ <CAC-hyiFxqSEVm5r54hitYWNaHr3DMZ1jyC4FdnCPVDqgFWdULQ@mail.gmail.com>
+ <Pine.LNX.4.64.1107131518300.11118@cobra.newdream.net>
+ <CAF3hT9CPjOoup+UsWq4MsvxCD4zZPSL1Wu1wWnL1u=G=fJ3e9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57793 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754942Ab1GNR54 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 14 Jul 2011 13:57:56 -0400
-In-Reply-To: <CAO47_-9qn31AfGQksLnRAreMudBcOQz0UnXxmhFC4cSQW5ZHFQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:47350 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755431Ab1GNR7h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2011 13:59:37 -0400
+In-Reply-To: <CAF3hT9CPjOoup+UsWq4MsvxCD4zZPSL1Wu1wWnL1u=G=fJ3e9w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chb@muc.de
-Cc: miaox@cn.fujitsu.com, linux-btrfs <linux-btrfs@vger.kernel.org>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Colin Patrick McCabe <colin.mccabe@dreamhost.com>, ceph-devel@vger.kernel.org
 
-On 07/14/2011 03:27 AM, Christian Brunner wrote:
-> 2011/7/13 Josef Bacik <josef@redhat.com>:
->> On 07/12/2011 11:20 AM, Christian Brunner wrote:
->>> 2011/6/7 Josef Bacik <josef@redhat.com>:
->>>> On 06/06/2011 09:39 PM, Miao Xie wrote:
->>>>> On fri, 03 Jun 2011 14:46:10 -0400, Josef Bacik wrote:
->>>>>> I got a lot of these when running stress.sh on my test box
->>>>>>
->>>>>>
->>>>>>
->>>>>> This is because use_block_rsv() is having to do a
->>>>>> reserve_metadata_bytes(), which shouldn't happen as we should have
->>>>>> reserved enough space for those operations to complete.  This is
->>>>>> happening because use_block_rsv() will call get_block_rsv(), which if
->>>>>> root->ref_cows is set (which is the case on all fs roots) we will use
->>>>>> trans->block_rsv, which will only have what the current transaction
->>>>>> starter had reserved.
->>>>>>
->>>>>> What needs to be done instead is we need to have a block reserve that
->>>>>> any reservation that is done at create time for these inodes is migrated
->>>>>> to this special reserve, and then when you run the delayed inode items
->>>>>> stuff you set trans->block_rsv to the special block reserve so the
->>>>>> accounting is all done properly.
->>>>>>
->>>>>> This is just off the top of my head, there may be a better way to do it,
->>>>>> I've not actually looked that the delayed inode code at all.
->>>>>>
->>>>>> I would do this myself but I have a ever increasing list of shit to do
->>>>>> so will somebody pick this up and fix it please?  Thanks,
->>>>>
->>>>> Sorry, it's my miss.
->>>>> I forgot to set trans->block_rsv to global_block_rsv, since we have migrated
->>>>> the space from trans_block_rsv to global_block_rsv.
->>>>>
->>>>> I'll fix it soon.
->>>>>
->>>>
->>>> There is another problem, we're failing xfstest 204.  I tried making
->>>> reserve_metadata_bytes commit the transaction regardless of whether or
->>>> not there were pinned bytes but the test just hung there.  Usually it
->>>> takes 7 seconds to run and I ctrl+c'ed it after a couple of minutes.
->>>> 204 just creates a crap ton of files, which is what is killing us.
->>>> There needs to be a way to start flushing delayed inode items so we can
->>>> reclaim the space they are holding onto so we don't get enospc, and it
->>>> needs to be better than just committing the transaction because that is
->>>> dog slow.  Thanks,
->>>>
->>>> Josef
->>>
->>> Is there a solution for this?
->>>
->>> I'm running a 2.6.38.8 kernel with all the btrfs patches from 3.0rc7
->>> (except the pluging). When starting a ceph rebuild on the btrfs
->>> volumes I get a lot of warnings from block_rsv_use_bytes in
->>> use_block_rsv:
->>>
->>
->> Ok I think I've got this nailed down.  Will you run with this patch and make sure the warnings go away?  Thanks,
-> 
-> I'm sorry, I'm still getting a lot of warnings like the one below.
-> 
-> I've also noticed, that I'm not getting these messages when the
-> free_space_cache is disabled.
-> 
->
+We just talked about this and the decisions seem to be:
 
-Actually scratch that last note, it's wrong.  I'll send you an updated
-patch when I've got this mess all sorted out.  Thanks,
+- for naked classes/structs (simple data containers), use a _d suffix 
+instead of _t.  e.g.,
 
-Josef
+struct my_thing_d {
+  uint64_t foo;
+  uint32_t bar;
+  string name;
+
+  my_thing_d() : foo(0), bar(0) {}
+
+  void encode(bufferlist& bl) const {
+    ::encode(foo, bl);
+    ::encode(bar, bl);
+    ::encode(name, bl);
+  }
+  void decode(bufferlist::iterator& bl) {
+    ::decode(foo, bl);
+    ::decode(bar, bl);
+    ::decode(name, bl);
+  }
+};
+WRITE_CLASS_ENCODER(my_thing_d)
+
+- for full-blown classes with private members, use m_ prefix.  e.g.
+
++        class Foo {
++	 public:
++          int get_foo() const { return m_foo; }
++          void set_foo(int foo) { m_foo = foo; }
++
++         private:
++          int m_foo;
++   	};
+
+- for simple ifs,
+
+if (foo) bar;    // bad
+
+if (foo)
+  bar;           // better
+
+if (foo) {
+  bar;           // best
+}
+
+The docuemnt is in wip-codingstyle, see
+
+    http://ceph.newdream.net/git/?p=ceph.git;a=blob;f=CodingStyle;h=fee53b8c5565f570da9298172c770a33138757d1;hb=refs/heads/wip-codingstyle
+
+Earth shattering, I know.  Any final comments/objections before we move 
+on?  I'm planning a big cleanup of the userspace Client code next week and 
+will be apply the style there.
+
+sage
