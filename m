@@ -1,44 +1,105 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: about clientreplay with lots of clients
-Date: Thu, 14 Jul 2011 09:16:27 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107140913030.29636@cobra.newdream.net>
-References: <CAKbx_ij_vMEfz88UQXHUa5Kyp83ZRG0pjswm-6YL4q4XZU16FQ@mail.gmail.com>
+From: Samuel Just <samuelj@hq.newdream.net>
+Subject: Re: rejoin mds daemon, 17 osd are suddenly down and out
+Date: Thu, 14 Jul 2011 10:11:56 -0700
+Message-ID: <4E1F235C.3000207@hq.newdream.net>
+References: <CADF7qQWkza=j_dapnRqJdPX-2i9HnEqpJ6aQ10CGFCDmU5KZCg@mail.gmail.com>
+Reply-To: samuel.just@dreamhost.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33430 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755196Ab1GNQNE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2011 12:13:04 -0400
-In-Reply-To: <CAKbx_ij_vMEfz88UQXHUa5Kyp83ZRG0pjswm-6YL4q4XZU16FQ@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:58927 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932113Ab1GNRL4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2011 13:11:56 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 53A0AC064
+	for <ceph-devel@vger.kernel.org>; Thu, 14 Jul 2011 10:12:00 -0700 (PDT)
+Received: from [192.168.107.170] (ip-64-111-111-107.dreamhost.com [64.111.111.107])
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 4F7B6C062
+	for <ceph-devel@vger.kernel.org>; Thu, 14 Jul 2011 10:12:00 -0700 (PDT)
+In-Reply-To: <CADF7qQWkza=j_dapnRqJdPX-2i9HnEqpJ6aQ10CGFCDmU5KZCg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: na an <luckyfirea@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, 14 Jul 2011, na an wrote:
-> hi all:
-> 
->       when MDS is to restart , it will replay journal, and client will
-> replay 'unsafe requests' that have replyed from that MDS while the
-> metadata change maybe have not been writen to disk actually.
->       I have a question that if there are many clients, how ceph keeps
-> consistence? because multiple clients may operate on the same file,
-> just like one to create a file and another to delete it.
->       And how the ceph deal with such a situation that one or more
-> clients fail in the process of clientsreplay ? once it happen, the
-> whole system may be untrusty.
->       if we have hundreds and thousands of clients , does it may take
-> a long time to recover?
+Not sure about the lack of logs, is something rotating the logs?  There 
+could have been a bug that caused the osds to crash, but I'll need the 
+logs to hazard a guess as to what caused it.  Starting the mds that way 
+should not have killed the osds.  Do the running osds produce logs?  The 
+logging should default to /var/log/ceph/.
+-Sam
 
-The MDS locking operates such that no side-effect of one client's actions 
-are exposed to any other client until they have committed to the journal. 
-That means you won't have dependent operations being replayed by the 
-clients (unless they also committed on the MDS and the client just didn't 
-know that yet, in which case the replay is a no-op).
+On 07/13/2011 08:54 PM, AnnyRen wrote:
+> Hi, developers:
+>
+> My environment is 3 mons, 2 mds, 25 osds, and ceph version is v0.30.
+> This morning, I found one mds(standby one) lost when I run "ceph -w"
+>
+> The original mds info should be  {mds e42: 1/1/1 up {0=b=up:active}, 1
+> up:standby}
+> but I found the standby one lost
+>
+> so I ssh to mds1 to run "cmds -i a -c /etc/ceph/ceph.conf" , and check
+> the mds daemon run correctly.
+>
+> After then, I found 17 osds suddenly down and out,
+> ---------------------------------------------------------------------------------------------------------
+> osd0 up   in  weight 1 up_from 139 up_thru 229 down_at 138
+> last_clean_interval 120-137 192.168.10.10:6800/11191
+> 192.168.10.10:6801/11191 192.168.10.10:6802/11191
+> osd1 down out up_from 141 up_thru 160 down_at 166 last_clean_interval 117-139
+> osd2 up   in  weight 1 up_from 147 up_thru 222 down_at 146
+> last_clean_interval 125-145 192.168.10.12:6800/10173
+> 192.168.10.12:6801/10173 192.168.10.12:6802/10173
+> osd3 down out up_from 154 up_thru 160 down_at 166 last_clean_interval 130-152
+> osd4 down out up_from 155 up_thru 160 down_at 166 last_clean_interval 130-153
+> osd5 down out up_from 153 up_thru 160 down_at 166 last_clean_interval 134-151
+> osd6 down out up_from 153 up_thru 160 down_at 170 last_clean_interval 135-151
+> osd7 down out up_from 157 up_thru 160 down_at 162 last_clean_interval 133-155
+> osd8 down out up_from 154 up_thru 160 down_at 166 last_clean_interval 134-152
+> osd9 down out up_from 155 up_thru 160 down_at 168 last_clean_interval 133-153
+> osd10 down out up_from 141 up_thru 160 down_at 168 last_clean_interval 118-139
+> osd11 down out up_from 145 up_thru 160 down_at 168 last_clean_interval 119-143
+> osd12 down out up_from 142 up_thru 160 down_at 166 last_clean_interval 123-140
+> osd13 down out up_from 147 up_thru 160 down_at 166 last_clean_interval 123-145
+> osd14 up   in  weight 1 up_from 143 up_thru 223 down_at 142
+> last_clean_interval 124-141 192.168.10.24:6800/10122
+> 192.168.10.24:6801/10122 192.168.10.24:6802/10122
+> osd15 down out up_from 147 up_thru 160 down_at 164 last_clean_interval 121-145
+> osd16 up   in  weight 1 up_from 148 up_thru 222 down_at 147
+> last_clean_interval 124-146 192.168.10.26:6800/9881
+> 192.168.10.26:6801/9881 192.168.10.26:6802/9881
+> osd17 up   in  weight 1 up_from 148 up_thru 223 down_at 147
+> last_clean_interval 122-146 192.168.10.27:6800/9986
+> 192.168.10.27:6801/9986 192.168.10.27:6802/9986
+> osd18 down out up_from 146 up_thru 160 down_at 168 last_clean_interval 124-144
+> osd19 down out up_from 147 up_thru 160 down_at 166 last_clean_interval 125-145
+> osd20 up   in  weight 1 up_from 148 up_thru 222 down_at 147
+> last_clean_interval 126-146 192.168.10.30:6800/9816
+> 192.168.10.30:6801/9816 192.168.10.30:6802/9816
+> osd21 down out up_from 148 up_thru 160 down_at 168 last_clean_interval 126-146
+> osd22 up   in  weight 1 up_from 149 up_thru 220 down_at 148
+> last_clean_interval 127-147 192.168.10.32:6800/9640
+> 192.168.10.32:6801/9640 192.168.10.32:6802/9640
+> osd23 down out up_from 153 up_thru 160 down_at 166 last_clean_interval 128-151
+> osd24 up   in  weight 1 up_from 150 up_thru 225 down_at 149
+> last_clean_interval 132-148 192.168.10.34:6800/10581
+> 192.168.10.34:6801/10581 192.168.10.34:6802/10581
+> ---------------------------------------------------------------------------------------------------------
+>
+> Many pgs are degraded, I ssh to every down and out osd host to see log
+> (/var/log/ceph/osd.x.log), but there is nothing recorded in logs...
+> Why the logs stopped logging anything?
+>
+> So I run "cosd -i x -c /etc/ceph/ceph.conf" on every down osd
+> individually to make them up and in, and then I can read/write files
+> form ceph....
+At this point, did the osds go down again?
+>
+> Could anyone tell me what's going on in my environment?
+> 1. OSD Stability problem?
+> 2. Ceph didn't write logs unexpectedly.
+>
+>   Thanks a lot!  :)
 
-There is currently an annoyance with the clientreplay that forces a log 
-flush on each operation due to a subtle interaction with the locking/caps 
-code, but it's fixable.  See #90.
-
-sage
