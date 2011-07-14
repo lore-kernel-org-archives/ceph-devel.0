@@ -1,86 +1,64 @@
-From: biyan chen <riby.chen@gmail.com>
-Subject: Re: As with ceph database to store
-Date: Thu, 14 Jul 2011 11:11:52 +0800
-Message-ID: <CACR322iX8DWSVn2=r4MjFQRLooJv0b-RrfS0VC3AxmGTnysEbA@mail.gmail.com>
-References: <CACR322gm8Zz8ZNTN+ks5GYPod131MnygEzUQtEBJEhO2uxwVDA@mail.gmail.com>
-	<ivk42l$6o2$1@dough.gmane.org>
+From: Meng Zhao <mzhao@carbonite.cn>
+Subject: Re: Replacing a failed disk/OSD: unfound object
+Date: Thu, 14 Jul 2011 11:28:36 +0800
+Message-ID: <c9a4cdd1f6262de92299415a2dd78d0d@carbonite.cn>
+References: <739109542484ec419c72b1a0f941a54d@carbonite.cn>
+ <CAORUGqDHG9k-o_VwWTGo3UtimfyYnrisKnEAt7nf6+B1Q5q1uw@mail.gmail.com>
+ <CAORUGqD=XxjRLL6j75yg8gQkKOuuNE=ybt2wVP37cKBZcX1y8Q@mail.gmail.com>
+ <620ab7bc3254ca105a1b91930afce314@carbonite.cn>
+ <Pine.LNX.4.64.1107120904210.30805@cobra.newdream.net>
+ <4b7beb00f8799e7ddd8bdd7e9f94fa84@carbonite.cn>
+ <CAORUGqAoJyip9gKhhaN4J5uHMe8vhnzjkOPKGPa7nXE62xwx=A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:44461 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752259Ab1GNDLy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2011 23:11:54 -0400
-Received: by ywe9 with SMTP id 9so2689865ywe.19
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 20:11:53 -0700 (PDT)
-In-Reply-To: <ivk42l$6o2$1@dough.gmane.org>
+Received: from [218.240.156.147] ([218.240.156.147]:41368 "EHLO
+	mail.carbonite.cn" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1753431Ab1GND2w (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jul 2011 23:28:52 -0400
+In-Reply-To: <CAORUGqAoJyip9gKhhaN4J5uHMe8vhnzjkOPKGPa7nXE62xwx=A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Rutger ter Borg <rutger@terborg.net>
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Sage Weil <sage@newdream.net>, Ceph devel <ceph-devel@vger.kernel.org>
 
-Thanks a lot.
-I now want to do is for each user assigned a sqlite database, and put
-each database to store in ceph file system. Each of the user data in 1
-G the following. The restrictions
-
-Then countless client to update!!!!!
-
-I will go to try..
-
-
-
-
-2011/7/13 Rutger ter Borg <rutger@terborg.net>:
-> On 07/13/2011 12:39 PM, biyan chen wrote:
->>
->> Hi everyone, I want to ask next ceph whether can be used as a mass
->> sqlite small database of storage?
->>
->> Ceph direct sharing as the database of storage space is whether
->> foreseeable problem?
->>
->> Thanks! I haven't made specific test!!!!! Was underway
+On Wed, 13 Jul 2011 09:19:40 -0700, Tommi Virtanen wrote:
+> On Wed, Jul 13, 2011 at 03:15, Meng Zhao <mzhao@carbonite.cn> wrote:
+>> active+clean; 349 MB data, 1394 MB used, 408 MB / 2046 MB avail; 
+>> 49/224
+>> degraded (21.875%)
+>> =>for some reason osd2 failed during object replication
 >
->
-> As it happens to be, I have been investigating the same thing in the =
-past
-> few days. Sqlite and rados seems to be a very natural combination. Sq=
-lite's
-> and rados' architecture seem to provide hooks to make it possible. Th=
-ings to
-> consider / look into:
->
-> * where to put the "backend" split, i.e., at the btree or pager level=
-, or
-> just implement a rados-sqlite's vfs.
-> * increase the max #pages in a DB "file" to 48 or 64 bits (otherwise =
-it's
-> limited to "just" 140 TB)
-> * how to improve concurrency (distributed shared-memory, etc.)
-> * a distributed locking service (chubby-like)
->
-> Cheers,
->
-> Rutger
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> If you lose osds while in degraded mode, you very much can lose
+> objects permanently. Degraded means the replication has not 
+> completed.
+> It's like losing a second disk in a RAID5 before it has healed, 
+> though
+> the scope of the loss is individual objects not the whole filesystem.
 >
 
+Thanks for going through the long log.
+
+Please note that the system was considered clean (by ceph -w) before 
+osd0 shutdown.
+2011-07-13 15:01:17.355846    pg v1099: 602 pgs: 602 active+clean; 349 
+MB data, 1778 MB used, 920 MB / 3069 MB avail
+The degrading happens after 5min time out when osd0 is considered out.
+2011-07-13 16:18:03.746935    pg v1104: 602 pgs: 233 active+clean, 369 
+active+clean+degraded; 349 MB data, 1795 MB used, 910 MB / 3069 MB 
+avail; 67/224 degraded (29.911%)
+and halfway into the replication, osd2 is considered out.
+But the osd2 log show that, it was in a bad stated half an hour ago, 
+but the ceph system did not escalate that info and take any action until 
+replication action start and eventually crash.
+In other words, its too late when cumulatively more than one ods fail.  
+It seems that a self-diagnose mechanism is needed for osd to self check 
+periodically.
 
 
---=20
-name:Riby
-mobile:+86 15280267642
-company: =B0=D9=B4=F3=C1=FA=D2=BB
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+
