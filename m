@@ -1,164 +1,165 @@
-From: AnnyRen <annyren6@gmail.com>
-Subject: Re: rejoin mds daemon, 17 osd are suddenly down and out
-Date: Thu, 14 Jul 2011 14:07:26 +0800
-Message-ID: <CADF7qQXN2Ebv1VJQxCjCLwMWf84pb4zBfDx7yqoEN508WKic-g@mail.gmail.com>
-References: <CADF7qQWkza=j_dapnRqJdPX-2i9HnEqpJ6aQ10CGFCDmU5KZCg@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: Delayed inode operations not doing the right thing with enospc
+Date: Thu, 14 Jul 2011 09:27:24 +0200
+Message-ID: <CAO47_-9qn31AfGQksLnRAreMudBcOQz0UnXxmhFC4cSQW5ZHFQ@mail.gmail.com>
+References: <4DE92BF2.1060905@redhat.com>
+	<4DED8143.3090803@cn.fujitsu.com>
+	<4DEE9263.1000802@redhat.com>
+	<CAO47_--zux0kiKsY9Edinj98ihoXP4n2ton+j5LgdpNJv9hLbQ@mail.gmail.com>
+	<4E1DB22F.1060405@redhat.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:57428 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752651Ab1GNGH1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2011 02:07:27 -0400
-Received: by iyb12 with SMTP id 12so6206858iyb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Jul 2011 23:07:26 -0700 (PDT)
-In-Reply-To: <CADF7qQWkza=j_dapnRqJdPX-2i9HnEqpJ6aQ10CGFCDmU5KZCg@mail.gmail.com>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:50735 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753708Ab1GNH1Z convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2011 03:27:25 -0400
+In-Reply-To: <4E1DB22F.1060405@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Josef Bacik <josef@redhat.com>
+Cc: miaox@cn.fujitsu.com, linux-btrfs <linux-btrfs@vger.kernel.org>, ceph-devel@vger.kernel.org
 
-attached the log when I boot a mds up (cmds -i a -c /etc/ceph/ceph.conf=
-)
+2011/7/13 Josef Bacik <josef@redhat.com>:
+> On 07/12/2011 11:20 AM, Christian Brunner wrote:
+>> 2011/6/7 Josef Bacik <josef@redhat.com>:
+>>> On 06/06/2011 09:39 PM, Miao Xie wrote:
+>>>> On fri, 03 Jun 2011 14:46:10 -0400, Josef Bacik wrote:
+>>>>> I got a lot of these when running stress.sh on my test box
+>>>>>
+>>>>>
+>>>>>
+>>>>> This is because use_block_rsv() is having to do a
+>>>>> reserve_metadata_bytes(), which shouldn't happen as we should hav=
+e
+>>>>> reserved enough space for those operations to complete. =A0This i=
+s
+>>>>> happening because use_block_rsv() will call get_block_rsv(), whic=
+h if
+>>>>> root->ref_cows is set (which is the case on all fs roots) we will=
+ use
+>>>>> trans->block_rsv, which will only have what the current transacti=
+on
+>>>>> starter had reserved.
+>>>>>
+>>>>> What needs to be done instead is we need to have a block reserve =
+that
+>>>>> any reservation that is done at create time for these inodes is m=
+igrated
+>>>>> to this special reserve, and then when you run the delayed inode =
+items
+>>>>> stuff you set trans->block_rsv to the special block reserve so th=
+e
+>>>>> accounting is all done properly.
+>>>>>
+>>>>> This is just off the top of my head, there may be a better way to=
+ do it,
+>>>>> I've not actually looked that the delayed inode code at all.
+>>>>>
+>>>>> I would do this myself but I have a ever increasing list of shit =
+to do
+>>>>> so will somebody pick this up and fix it please? =A0Thanks,
+>>>>
+>>>> Sorry, it's my miss.
+>>>> I forgot to set trans->block_rsv to global_block_rsv, since we hav=
+e migrated
+>>>> the space from trans_block_rsv to global_block_rsv.
+>>>>
+>>>> I'll fix it soon.
+>>>>
+>>>
+>>> There is another problem, we're failing xfstest 204. =A0I tried mak=
+ing
+>>> reserve_metadata_bytes commit the transaction regardless of whether=
+ or
+>>> not there were pinned bytes but the test just hung there. =A0Usuall=
+y it
+>>> takes 7 seconds to run and I ctrl+c'ed it after a couple of minutes=
+=2E
+>>> 204 just creates a crap ton of files, which is what is killing us.
+>>> There needs to be a way to start flushing delayed inode items so we=
+ can
+>>> reclaim the space they are holding onto so we don't get enospc, and=
+ it
+>>> needs to be better than just committing the transaction because tha=
+t is
+>>> dog slow. =A0Thanks,
+>>>
+>>> Josef
+>>
+>> Is there a solution for this?
+>>
+>> I'm running a 2.6.38.8 kernel with all the btrfs patches from 3.0rc7
+>> (except the pluging). When starting a ceph rebuild on the btrfs
+>> volumes I get a lot of warnings from block_rsv_use_bytes in
+>> use_block_rsv:
+>>
+>
+> Ok I think I've got this nailed down. =A0Will you run with this patch=
+ and make sure the warnings go away? =A0Thanks,
 
-2011-07-14 10:07:22.080571 mon0 192.168.10.1:6789/0 75 : [INF] mds?
-192.168.10.4:6800/20883 up:boot
-2011-07-14 10:14:59.182202 mon0 192.168.10.1:6789/0 76 : [INF] osd7
-out (down for 300.007145)
-2011-07-14 10:15:04.182906 mon0 192.168.10.1:6789/0 77 : [INF] osd15
-out (down for 300.007564)
-2011-07-14 10:15:09.183510 mon0 192.168.10.1:6789/0 78 : [INF] osd1
-out (down for 300.007286)
-2011-07-14 10:15:09.183553 mon0 192.168.10.1:6789/0 79 : [INF] osd3
-out (down for 300.007285)
-2011-07-14 10:15:09.183576 mon0 192.168.10.1:6789/0 80 : [INF] osd4
-out (down for 300.007285)
-2011-07-14 10:15:09.183593 mon0 192.168.10.1:6789/0 81 : [INF] osd5
-out (down for 300.007284)
-2011-07-14 10:15:09.183609 mon0 192.168.10.1:6789/0 82 : [INF] osd8
-out (down for 300.007284)
-2011-07-14 10:15:09.183627 mon0 192.168.10.1:6789/0 83 : [INF] osd12
-out (down for 300.007284)
-2011-07-14 10:15:09.183644 mon0 192.168.10.1:6789/0 84 : [INF] osd13
-out (down for 300.007283)
-2011-07-14 10:15:09.183660 mon0 192.168.10.1:6789/0 85 : [INF] osd19
-out (down for 300.007283)
-2011-07-14 10:15:09.183675 mon0 192.168.10.1:6789/0 86 : [INF] osd23
-out (down for 300.007282)
-2011-07-14 10:15:14.184369 mon0 192.168.10.1:6789/0 87 : [INF] osd9
-out (down for 300.007294)
-2011-07-14 10:15:14.184410 mon0 192.168.10.1:6789/0 88 : [INF] osd10
-out (down for 300.007294)
-2011-07-14 10:15:14.184431 mon0 192.168.10.1:6789/0 89 : [INF] osd11
-out (down for 300.007293)
-2011-07-14 10:15:14.184446 mon0 192.168.10.1:6789/0 90 : [INF] osd18
-out (down for 300.007293)
-2011-07-14 10:15:14.184465 mon0 192.168.10.1:6789/0 91 : [INF] osd21
-out (down for 300.007292)
-2011-07-14 10:16:09.188393 mon0 192.168.10.1:6789/0 92 : [INF] osd6
-out (down for 300.009465)
+I'm sorry, I'm still getting a lot of warnings like the one below.
 
+I've also noticed, that I'm not getting these messages when the
+free_space_cache is disabled.
 
-Did I operate incorrectly when starting up a mds ?
-Does anyone know why I start up a mds and most osds are out and down  :=
-(
-Thank you.
+Christian
 
-2011/7/14 AnnyRen <annyren6@gmail.com>:
-> Hi, developers:
->
-> My environment is 3 mons, 2 mds, 25 osds, and ceph version is v0.30.
-> This morning, I found one mds(standby one) lost when I run "ceph -w"
->
-> The original mds info should be =A0{mds e42: 1/1/1 up {0=3Db=3Dup:act=
-ive}, 1
-> up:standby}
-> but I found the standby one lost
->
-> so I ssh to mds1 to run "cmds -i a -c /etc/ceph/ceph.conf" , and chec=
-k
-> the mds daemon run correctly.
->
-> After then, I found 17 osds suddenly down and out,
-> ---------------------------------------------------------------------=
-------------------------------------
-> osd0 up =A0 in =A0weight 1 up_from 139 up_thru 229 down_at 138
-> last_clean_interval 120-137 192.168.10.10:6800/11191
-> 192.168.10.10:6801/11191 192.168.10.10:6802/11191
-> osd1 down out up_from 141 up_thru 160 down_at 166 last_clean_interval=
- 117-139
-> osd2 up =A0 in =A0weight 1 up_from 147 up_thru 222 down_at 146
-> last_clean_interval 125-145 192.168.10.12:6800/10173
-> 192.168.10.12:6801/10173 192.168.10.12:6802/10173
-> osd3 down out up_from 154 up_thru 160 down_at 166 last_clean_interval=
- 130-152
-> osd4 down out up_from 155 up_thru 160 down_at 166 last_clean_interval=
- 130-153
-> osd5 down out up_from 153 up_thru 160 down_at 166 last_clean_interval=
- 134-151
-> osd6 down out up_from 153 up_thru 160 down_at 170 last_clean_interval=
- 135-151
-> osd7 down out up_from 157 up_thru 160 down_at 162 last_clean_interval=
- 133-155
-> osd8 down out up_from 154 up_thru 160 down_at 166 last_clean_interval=
- 134-152
-> osd9 down out up_from 155 up_thru 160 down_at 168 last_clean_interval=
- 133-153
-> osd10 down out up_from 141 up_thru 160 down_at 168 last_clean_interva=
-l 118-139
-> osd11 down out up_from 145 up_thru 160 down_at 168 last_clean_interva=
-l 119-143
-> osd12 down out up_from 142 up_thru 160 down_at 166 last_clean_interva=
-l 123-140
-> osd13 down out up_from 147 up_thru 160 down_at 166 last_clean_interva=
-l 123-145
-> osd14 up =A0 in =A0weight 1 up_from 143 up_thru 223 down_at 142
-> last_clean_interval 124-141 192.168.10.24:6800/10122
-> 192.168.10.24:6801/10122 192.168.10.24:6802/10122
-> osd15 down out up_from 147 up_thru 160 down_at 164 last_clean_interva=
-l 121-145
-> osd16 up =A0 in =A0weight 1 up_from 148 up_thru 222 down_at 147
-> last_clean_interval 124-146 192.168.10.26:6800/9881
-> 192.168.10.26:6801/9881 192.168.10.26:6802/9881
-> osd17 up =A0 in =A0weight 1 up_from 148 up_thru 223 down_at 147
-> last_clean_interval 122-146 192.168.10.27:6800/9986
-> 192.168.10.27:6801/9986 192.168.10.27:6802/9986
-> osd18 down out up_from 146 up_thru 160 down_at 168 last_clean_interva=
-l 124-144
-> osd19 down out up_from 147 up_thru 160 down_at 166 last_clean_interva=
-l 125-145
-> osd20 up =A0 in =A0weight 1 up_from 148 up_thru 222 down_at 147
-> last_clean_interval 126-146 192.168.10.30:6800/9816
-> 192.168.10.30:6801/9816 192.168.10.30:6802/9816
-> osd21 down out up_from 148 up_thru 160 down_at 168 last_clean_interva=
-l 126-146
-> osd22 up =A0 in =A0weight 1 up_from 149 up_thru 220 down_at 148
-> last_clean_interval 127-147 192.168.10.32:6800/9640
-> 192.168.10.32:6801/9640 192.168.10.32:6802/9640
-> osd23 down out up_from 153 up_thru 160 down_at 166 last_clean_interva=
-l 128-151
-> osd24 up =A0 in =A0weight 1 up_from 150 up_thru 225 down_at 149
-> last_clean_interval 132-148 192.168.10.34:6800/10581
-> 192.168.10.34:6801/10581 192.168.10.34:6802/10581
-> ---------------------------------------------------------------------=
-------------------------------------
->
-> Many pgs are degraded, I ssh to every down and out osd host to see lo=
-g
-> (/var/log/ceph/osd.x.log), but there is nothing recorded in logs...
-> Why the logs stopped logging anything?
->
-> So I run "cosd -i x -c /etc/ceph/ceph.conf" on every down osd
-> individually to make them up and in, and then I can read/write files
-> form ceph....
->
->
-> Could anyone tell me what's going on in my environment?
-> 1. OSD Stability problem?
-> 2. Ceph didn't write logs unexpectedly.
->
-> =A0Thanks a lot! =A0:)
->
+[  697.398097] ------------[ cut here ]------------
+[  697.398109] WARNING: at fs/btrfs/extent-tree.c:5693
+btrfs_alloc_free_block+0x1f8/0x360 [btrfs]()
+[  697.398111] Hardware name: ProLiant DL180 G6
+[  697.398112] Modules linked in: btrfs zlib_deflate libcrc32c bonding
+ipv6 serio_raw pcspkr ghes hed iTCO_wdt iTCO_vendor_support
+i7core_edac edac_core ixgbe dca mdio iomemory_vsl(P) hpsa squashfs
+usb_storage [last unloaded: scsi_wait_scan]
+[  697.398122] Pid: 6591, comm: btrfs-freespace Tainted: P        W
+3.0.0-1.fits.1.el6.x86_64 #1
+[  697.398124] Call Trace:
+[  697.398128]  [<ffffffff810630af>] warn_slowpath_common+0x7f/0xc0
+[  697.398131]  [<ffffffff8106310a>] warn_slowpath_null+0x1a/0x20
+[  697.398142]  [<ffffffffa022cb88>] btrfs_alloc_free_block+0x1f8/0x360=
+ [btrfs]
+[  697.398156]  [<ffffffffa025ae08>] ? read_extent_buffer+0xd8/0x1d0 [b=
+trfs]
+[  697.398316]  [<ffffffffa021d112>] split_leaf+0x142/0x8c0 [btrfs]
+[  697.398325]  [<ffffffffa021629b>] ? generic_bin_search+0x19b/0x210 [=
+btrfs]
+[  697.398334]  [<ffffffffa0218a1a>] ? btrfs_leaf_free_space+0x8a/0xe0 =
+[btrfs]
+[  697.398344]  [<ffffffffa021df63>] btrfs_search_slot+0x6d3/0x7a0 [btr=
+fs]
+[  697.398355]  [<ffffffffa0230942>] btrfs_csum_file_blocks+0x632/0x830=
+ [btrfs]
+[  697.398369]  [<ffffffffa025c03a>] ? clear_extent_bit+0x17a/0x440 [bt=
+rfs]
+[  697.398382]  [<ffffffffa023c009>] add_pending_csums+0x49/0x70 [btrfs=
+]
+[  697.398395]  [<ffffffffa023ef5d>] btrfs_finish_ordered_io+0x22d/0x36=
+0 [btrfs]
+[  697.398408]  [<ffffffffa023f0dc>]
+btrfs_writepage_end_io_hook+0x4c/0xa0 [btrfs]
+[  697.398422]  [<ffffffffa025c4fb>]
+end_bio_extent_writepage+0x13b/0x180 [btrfs]
+[  697.398425]  [<ffffffff81558b5b>] ? schedule_timeout+0x17b/0x2e0
+[  697.398436]  [<ffffffffa02336d9>] ? end_workqueue_fn+0xe9/0x130 [btr=
+fs]
+[  697.398439]  [<ffffffff8118f24d>] bio_endio+0x1d/0x40
+[  697.398451]  [<ffffffffa02336e4>] end_workqueue_fn+0xf4/0x130 [btrfs=
+]
+[  697.398464]  [<ffffffffa02671de>] worker_loop+0x13e/0x540 [btrfs]
+[  697.398477]  [<ffffffffa02670a0>] ? btrfs_queue_worker+0x2d0/0x2d0 [=
+btrfs]
+[  697.398490]  [<ffffffffa02670a0>] ? btrfs_queue_worker+0x2d0/0x2d0 [=
+btrfs]
+[  697.398493]  [<ffffffff81085896>] kthread+0x96/0xa0
+[  697.398496]  [<ffffffff81563844>] kernel_thread_helper+0x4/0x10
+[  697.398499]  [<ffffffff81085800>] ? kthread_worker_fn+0x1a0/0x1a0
+[  697.398502]  [<ffffffff81563840>] ? gs_change+0x13/0x13
+[  697.398503] ---[ end trace 8c77269b0de3f0fb ]---
+[  697.432225] ------------[ cut here ]------------
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
