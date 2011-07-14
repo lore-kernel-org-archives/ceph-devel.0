@@ -1,166 +1,89 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: rejoin mds daemon, 17 osd are suddenly down and out
-Date: Thu, 14 Jul 2011 10:46:06 -0700
-Message-ID: <CAF3hT9ACaCNGa9pH4LrHz2rTGHEoCcdaroLkNLWU-H=GGi6=ZQ@mail.gmail.com>
-References: <CADF7qQWkza=j_dapnRqJdPX-2i9HnEqpJ6aQ10CGFCDmU5KZCg@mail.gmail.com>
-	<4E1F235C.3000207@hq.newdream.net>
+From: Josef Bacik <josef@redhat.com>
+Subject: Re: Delayed inode operations not doing the right thing with enospc
+Date: Thu, 14 Jul 2011 13:57:49 -0400
+Message-ID: <4E1F2E1D.80106@redhat.com>
+References: <4DE92BF2.1060905@redhat.com>	<4DED8143.3090803@cn.fujitsu.com>	<4DEE9263.1000802@redhat.com>	<CAO47_--zux0kiKsY9Edinj98ihoXP4n2ton+j5LgdpNJv9hLbQ@mail.gmail.com>	<4E1DB22F.1060405@redhat.com> <CAO47_-9qn31AfGQksLnRAreMudBcOQz0UnXxmhFC4cSQW5ZHFQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yi0-f46.google.com ([209.85.218.46]:46605 "EHLO
-	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932168Ab1GNRqH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jul 2011 13:46:07 -0400
-Received: by yia27 with SMTP id 27so208522yia.19
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Jul 2011 10:46:06 -0700 (PDT)
-In-Reply-To: <4E1F235C.3000207@hq.newdream.net>
+Received: from mx1.redhat.com ([209.132.183.28]:57793 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754942Ab1GNR54 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 Jul 2011 13:57:56 -0400
+In-Reply-To: <CAO47_-9qn31AfGQksLnRAreMudBcOQz0UnXxmhFC4cSQW5ZHFQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: annyren6@gmail.com, ceph-devel@vger.kernel.org
+To: chb@muc.de
+Cc: miaox@cn.fujitsu.com, linux-btrfs <linux-btrfs@vger.kernel.org>, ceph-devel@vger.kernel.org
 
-I do notice that (unless mds.a is configured to be a standby in the
-config file) you're starting up another MDS and claiming it's the same
-as the already-running one. This shouldn't cause the OSDc to crash but
-might be revealing a bug.
+On 07/14/2011 03:27 AM, Christian Brunner wrote:
+> 2011/7/13 Josef Bacik <josef@redhat.com>:
+>> On 07/12/2011 11:20 AM, Christian Brunner wrote:
+>>> 2011/6/7 Josef Bacik <josef@redhat.com>:
+>>>> On 06/06/2011 09:39 PM, Miao Xie wrote:
+>>>>> On fri, 03 Jun 2011 14:46:10 -0400, Josef Bacik wrote:
+>>>>>> I got a lot of these when running stress.sh on my test box
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> This is because use_block_rsv() is having to do a
+>>>>>> reserve_metadata_bytes(), which shouldn't happen as we should have
+>>>>>> reserved enough space for those operations to complete.  This is
+>>>>>> happening because use_block_rsv() will call get_block_rsv(), which if
+>>>>>> root->ref_cows is set (which is the case on all fs roots) we will use
+>>>>>> trans->block_rsv, which will only have what the current transaction
+>>>>>> starter had reserved.
+>>>>>>
+>>>>>> What needs to be done instead is we need to have a block reserve that
+>>>>>> any reservation that is done at create time for these inodes is migrated
+>>>>>> to this special reserve, and then when you run the delayed inode items
+>>>>>> stuff you set trans->block_rsv to the special block reserve so the
+>>>>>> accounting is all done properly.
+>>>>>>
+>>>>>> This is just off the top of my head, there may be a better way to do it,
+>>>>>> I've not actually looked that the delayed inode code at all.
+>>>>>>
+>>>>>> I would do this myself but I have a ever increasing list of shit to do
+>>>>>> so will somebody pick this up and fix it please?  Thanks,
+>>>>>
+>>>>> Sorry, it's my miss.
+>>>>> I forgot to set trans->block_rsv to global_block_rsv, since we have migrated
+>>>>> the space from trans_block_rsv to global_block_rsv.
+>>>>>
+>>>>> I'll fix it soon.
+>>>>>
+>>>>
+>>>> There is another problem, we're failing xfstest 204.  I tried making
+>>>> reserve_metadata_bytes commit the transaction regardless of whether or
+>>>> not there were pinned bytes but the test just hung there.  Usually it
+>>>> takes 7 seconds to run and I ctrl+c'ed it after a couple of minutes.
+>>>> 204 just creates a crap ton of files, which is what is killing us.
+>>>> There needs to be a way to start flushing delayed inode items so we can
+>>>> reclaim the space they are holding onto so we don't get enospc, and it
+>>>> needs to be better than just committing the transaction because that is
+>>>> dog slow.  Thanks,
+>>>>
+>>>> Josef
+>>>
+>>> Is there a solution for this?
+>>>
+>>> I'm running a 2.6.38.8 kernel with all the btrfs patches from 3.0rc7
+>>> (except the pluging). When starting a ceph rebuild on the btrfs
+>>> volumes I get a lot of warnings from block_rsv_use_bytes in
+>>> use_block_rsv:
+>>>
+>>
+>> Ok I think I've got this nailed down.  Will you run with this patch and make sure the warnings go away?  Thanks,
+> 
+> I'm sorry, I'm still getting a lot of warnings like the one below.
+> 
+> I've also noticed, that I'm not getting these messages when the
+> free_space_cache is disabled.
+> 
+>
 
-On Thu, Jul 14, 2011 at 10:11 AM, Samuel Just <samuelj@hq.newdream.net>=
- wrote:
-> Not sure about the lack of logs, is something rotating the logs? =A0T=
-here
-> could have been a bug that caused the osds to crash, but I'll need th=
-e logs
-> to hazard a guess as to what caused it. =A0Starting the mds that way =
-should
-> not have killed the osds. =A0Do the running osds produce logs? =A0The=
- logging
-> should default to /var/log/ceph/.
-> -Sam
->
-> On 07/13/2011 08:54 PM, AnnyRen wrote:
->>
->> Hi, developers:
->>
->> My environment is 3 mons, 2 mds, 25 osds, and ceph version is v0.30.
->> This morning, I found one mds(standby one) lost when I run "ceph -w"
->>
->> The original mds info should be =A0{mds e42: 1/1/1 up {0=3Db=3Dup:ac=
-tive}, 1
->> up:standby}
->> but I found the standby one lost
->>
->> so I ssh to mds1 to run "cmds -i a -c /etc/ceph/ceph.conf" , and che=
-ck
->> the mds daemon run correctly.
->>
->> After then, I found 17 osds suddenly down and out,
->>
->> --------------------------------------------------------------------=
--------------------------------------
->> osd0 up =A0 in =A0weight 1 up_from 139 up_thru 229 down_at 138
->> last_clean_interval 120-137 192.168.10.10:6800/11191
->> 192.168.10.10:6801/11191 192.168.10.10:6802/11191
->> osd1 down out up_from 141 up_thru 160 down_at 166 last_clean_interva=
-l
->> 117-139
->> osd2 up =A0 in =A0weight 1 up_from 147 up_thru 222 down_at 146
->> last_clean_interval 125-145 192.168.10.12:6800/10173
->> 192.168.10.12:6801/10173 192.168.10.12:6802/10173
->> osd3 down out up_from 154 up_thru 160 down_at 166 last_clean_interva=
-l
->> 130-152
->> osd4 down out up_from 155 up_thru 160 down_at 166 last_clean_interva=
-l
->> 130-153
->> osd5 down out up_from 153 up_thru 160 down_at 166 last_clean_interva=
-l
->> 134-151
->> osd6 down out up_from 153 up_thru 160 down_at 170 last_clean_interva=
-l
->> 135-151
->> osd7 down out up_from 157 up_thru 160 down_at 162 last_clean_interva=
-l
->> 133-155
->> osd8 down out up_from 154 up_thru 160 down_at 166 last_clean_interva=
-l
->> 134-152
->> osd9 down out up_from 155 up_thru 160 down_at 168 last_clean_interva=
-l
->> 133-153
->> osd10 down out up_from 141 up_thru 160 down_at 168 last_clean_interv=
-al
->> 118-139
->> osd11 down out up_from 145 up_thru 160 down_at 168 last_clean_interv=
-al
->> 119-143
->> osd12 down out up_from 142 up_thru 160 down_at 166 last_clean_interv=
-al
->> 123-140
->> osd13 down out up_from 147 up_thru 160 down_at 166 last_clean_interv=
-al
->> 123-145
->> osd14 up =A0 in =A0weight 1 up_from 143 up_thru 223 down_at 142
->> last_clean_interval 124-141 192.168.10.24:6800/10122
->> 192.168.10.24:6801/10122 192.168.10.24:6802/10122
->> osd15 down out up_from 147 up_thru 160 down_at 164 last_clean_interv=
-al
->> 121-145
->> osd16 up =A0 in =A0weight 1 up_from 148 up_thru 222 down_at 147
->> last_clean_interval 124-146 192.168.10.26:6800/9881
->> 192.168.10.26:6801/9881 192.168.10.26:6802/9881
->> osd17 up =A0 in =A0weight 1 up_from 148 up_thru 223 down_at 147
->> last_clean_interval 122-146 192.168.10.27:6800/9986
->> 192.168.10.27:6801/9986 192.168.10.27:6802/9986
->> osd18 down out up_from 146 up_thru 160 down_at 168 last_clean_interv=
-al
->> 124-144
->> osd19 down out up_from 147 up_thru 160 down_at 166 last_clean_interv=
-al
->> 125-145
->> osd20 up =A0 in =A0weight 1 up_from 148 up_thru 222 down_at 147
->> last_clean_interval 126-146 192.168.10.30:6800/9816
->> 192.168.10.30:6801/9816 192.168.10.30:6802/9816
->> osd21 down out up_from 148 up_thru 160 down_at 168 last_clean_interv=
-al
->> 126-146
->> osd22 up =A0 in =A0weight 1 up_from 149 up_thru 220 down_at 148
->> last_clean_interval 127-147 192.168.10.32:6800/9640
->> 192.168.10.32:6801/9640 192.168.10.32:6802/9640
->> osd23 down out up_from 153 up_thru 160 down_at 166 last_clean_interv=
-al
->> 128-151
->> osd24 up =A0 in =A0weight 1 up_from 150 up_thru 225 down_at 149
->> last_clean_interval 132-148 192.168.10.34:6800/10581
->> 192.168.10.34:6801/10581 192.168.10.34:6802/10581
->>
->> --------------------------------------------------------------------=
--------------------------------------
->>
->> Many pgs are degraded, I ssh to every down and out osd host to see l=
-og
->> (/var/log/ceph/osd.x.log), but there is nothing recorded in logs...
->> Why the logs stopped logging anything?
->>
->> So I run "cosd -i x -c /etc/ceph/ceph.conf" on every down osd
->> individually to make them up and in, and then I can read/write files
->> form ceph....
->
-> At this point, did the osds go down again?
->>
->> Could anyone tell me what's going on in my environment?
->> 1. OSD Stability problem?
->> 2. Ceph didn't write logs unexpectedly.
->>
->> =A0Thanks a lot! =A0:)
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Actually scratch that last note, it's wrong.  I'll send you an updated
+patch when I've got this mess all sorted out.  Thanks,
+
+Josef
