@@ -1,43 +1,49 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: looks like a bug
-Date: Tue, 19 Jul 2011 19:28:52 +0300
-Message-ID: <4E25B0C4.70105@ufm.su>
-References: <4E254135.70603@ufm.su>	<Pine.LNX.4.64.1107190729150.5656@cobra.newdream.net>	<4E259728.8050908@ufm.su> <Pine.LNX.4.64.1107190848360.24443@cobra.newdream.net>
+From: Brian Chrisman <brchrisman@gmail.com>
+Subject: Re: RBD performance poor
+Date: Tue, 19 Jul 2011 10:02:35 -0700
+Message-ID: <CAN4=B2k+L-im-p17L3CoFHwy7QYy3QcKSGthcfEebEpCjOQghQ@mail.gmail.com>
+References: <loom.20110719T132334-607@post.gmane.org>
+	<CAF3hT9DcGSA8=vbGj3ibpwDRP2hZvEOgq9ru7PPcrYuUWRMHbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:57799 "EHLO mail.ufm.su"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751164Ab1GSQ24 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 19 Jul 2011 12:28:56 -0400
-In-Reply-To: <Pine.LNX.4.64.1107190848360.24443@cobra.newdream.net>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:54596 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751001Ab1GSRCg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jul 2011 13:02:36 -0400
+Received: by vxh35 with SMTP id 35so2511837vxh.19
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Jul 2011 10:02:35 -0700 (PDT)
+In-Reply-To: <CAF3hT9DcGSA8=vbGj3ibpwDRP2hZvEOgq9ru7PPcrYuUWRMHbA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: Christian Gramsch <christian.gramsch@gmail.com>, ceph-devel@vger.kernel.org
 
-On 07/19/2011 06:49 PM, Sage Weil wrote:
+On Tue, Jul 19, 2011 at 9:11 AM, Gregory Farnum
+<gregory.farnum@dreamhost.com> wrote:
+> RBD presently does absolutely no client-side caching of writes. If a
+> write is issued, it goes out to the network and doesn't return from
+> the write until it's been committed on-disk to the OSDs.
+> This is the simplest and safest implementation, but it's not quite
+> what many things expect from their disk devices: they think a write
+> should be fast (and land in the disk's cache) and expect that a sync
+> might be slow. If you run an actual OS on RBD you should find it
+> performing reasonably well since the VFS and page cache will hide all
+> this latency from you, but if you're accessing it directly your
+> application is likely to issue a bunch of serialized 4KB writes with a
+> per-write latency of ~10 milliseconds, which obviously severely limits
+> total write bandwidth.
+> Implementing client-side caching is in the future for RBD but not
+> something we're working on right now.
 >
-> Okay, I found the problem (file mode calculation when O_APPEND is
-> present).  There is a fix pushed to the stable branch of ceph.git (for
-> mds) and to the for-linus branch of the kernel ceph-client.git.  You need
-> both to behave.
+> So most (all, I think) reports of slow RBD behavior have been because
+> of this (certainly the one you reference). But with the commands
+> you're running, you're doing dd in file mode rather than raw disk, so
+> the VFS ought to be coalescing those writes and giving you much higher
+> bandwidth. Are you using any special mount options? What result do you
+> get doing a dd directly to the device?
+> -Greg
 
-Ok, I wait this. :)
-> What workload turned this up?
-I try restore from bacula backup system and got return error.
 
-strace show:
-
-open("/bacula/amanda.servers.dcv-sd.Restore-hvds0.servers.dcv.2011-07-19_10.59.12_09.6.bootstrap", 
-O_RDWR|O_CREAT|O_APPEND, 0666) = 5
-fstat(5, {st_mode=S_IFREG|0640, st_size=0, ...}) = 0
-write(5, 
-"Storage=\"File-hvds0.servers.dcv\"\nVolume=\"hvds0.servers.dcv-daily-20110716-000509\"\nMediaType=\"File-hvds0.servers.dcv\"\nDevice=\"FileStorage-hvds0.servers.dcv\"\nVolSessionId=6\nVolSessionTime=1310991740\nVolAddr=46902909-47361240\nFileIndex=17\nCount=1\n", 
-244) = -1 EBADF (Bad file descriptor)
-
-After that I wrote test and saw the same.
-
-WBR,
-     Fyodor.
+So what would be the throughput-optimal block size for writing to RBD
+with the default configuration? 4MB?
