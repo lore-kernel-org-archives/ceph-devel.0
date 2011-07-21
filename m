@@ -1,51 +1,54 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Consistency vs efficiency
-Date: Thu, 21 Jul 2011 09:49:34 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107210944550.5868@cobra.newdream.net>
-References: <CAJD3hpW_WjumjD1P1bOhwXWPZieQxyay0HOCH8AFpXfQCT4HMg@mail.gmail.com>
+Subject: Re: [PATCH] Add line break after add_key() failure message.
+Date: Thu, 21 Jul 2011 08:49:20 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1107210849180.5868@cobra.newdream.net>
+References: <oraac882c5.fsf@livre.localdomain>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52020 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36430 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751191Ab1GUQpy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jul 2011 12:45:54 -0400
-In-Reply-To: <CAJD3hpW_WjumjD1P1bOhwXWPZieQxyay0HOCH8AFpXfQCT4HMg@mail.gmail.com>
+	with ESMTP id S1752137Ab1GUPpl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jul 2011 11:45:41 -0400
+In-Reply-To: <oraac882c5.fsf@livre.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jojy Varghese <jojy.varghese@gmail.com>
+To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, 21 Jul 2011, Jojy Varghese wrote:
-> Hi
->   I just started looking at the ceph code in kernel and had a question
-> about performance considerations for lookup operations. I noticed that
-> for every operation (say copying a directory), the root dentry is
-> "looked" up multiple times and since they all go to MDS for the actual
-> lookup operation, it effects the performance. I am sure consistency is
-> the winner here. Is there any plan to improve this, maybe by having
-> MDS push the capability down to the clients when the dentry is
-> updated. So say from CAP_EXCL to CAP_SHARED when the dentry is
-> modified. This was the client node can cache the lookup operation and
-> does not have to make a round trip to the MDS.
+Applied, thanks!
 
-In general, the MDS has two ways of keeping a client's cached dentry 
-consistent:
+On Thu, 21 Jul 2011, Alexandre Oliva wrote:
 
- - it can issue the FILE_SHARED capability bit on the parent directory, 
-which means the entire directory is static and the client can cache 
-dentry.
- - if it can't do that, it will issue a per-dentry lease
-
-There is an additional 'complete' bit that is used to indicate on the 
-client that it has the _entire_ directory in cache.  If set, it can do 
-negative lookups and readdir without hitting the MDS.  That's currently 
-broken, pending the addition of a d_prune dentry_operation (see 
-linux-fsdevel email from July 8).
-
-Anyway, long story short, if you're seeing repeated lookups on a dentry 
-that isn't changing, something is broken.  Can you describe the workload 
-in more detail?  Which versions of the client and mds are you running?
-
-sage
-
+> Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+> ---
+>  src/common/secret.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/src/common/secret.c b/src/common/secret.c
+> index f90f478..158343e 100644
+> --- a/src/common/secret.c
+> +++ b/src/common/secret.c
+> @@ -66,7 +66,7 @@ static int add_secret_to_kernel(const char *secret, const char *key_name)
+>    serial = add_key("ceph", key_name, payload, sizeof(payload), KEY_SPEC_USER_KEYRING);
+>    if (serial < 0) {
+>      ret = -errno;
+> -    fprintf(stderr, "error adding secret to kernel, key name %s: %s", key_name, strerror(-ret));
+> +    fprintf(stderr, "error adding secret to kernel, key name %s: %s.\n", key_name, strerror(-ret));
+>    }
+>  
+>    return ret;
+> -- 
+> 1.7.4.4
+> 
+> -- 
+> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+> You must be the change you wish to see in the world. -- Gandhi
+> Be Free! -- http://FSFLA.org/   FSF Latin America board member
+> Free Software Evangelist      Red Hat Brazil Compiler Engineer
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
