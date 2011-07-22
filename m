@@ -1,55 +1,50 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: My favorite question
-Date: Fri, 22 Jul 2011 18:27:25 +0300
-Message-ID: <4E2996DD.8040809@ufm.su>
-References: <4E25646C.4000909@ufm.su> <Pine.LNX.4.64.1107190728370.5656@cobra.newdream.net>
+From: Marcus Sorensen <shadowsor@gmail.com>
+Subject: [PATCH] Fix compile error when using nss libs:
+Date: Fri, 22 Jul 2011 13:13:12 -0600
+Message-ID: <CALFpzo4Nc3y1zps9tct5BMjHa2kYSEQyPpK=66XSRtLK7WqzBA@mail.gmail.com>
+References: <1311356967-1797-1-git-send-email-shadowsor@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:50578 "EHLO mail.ufm.su"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754524Ab1GVP13 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 Jul 2011 11:27:29 -0400
-In-Reply-To: <Pine.LNX.4.64.1107190728370.5656@cobra.newdream.net>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:37100 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754859Ab1GVTNN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 15:13:13 -0400
+Received: by wyg8 with SMTP id 8so1693542wyg.19
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jul 2011 12:13:12 -0700 (PDT)
+In-Reply-To: <1311356967-1797-1-git-send-email-shadowsor@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 07/19/2011 05:29 PM, Sage Weil wrote:
-> On Tue, 19 Jul 2011, Fyodor Ustinov wrote:
->> Hi!
->>
->> 2011-07-19 14:00:39.509391   log 2011-07-19 14:00:34.185718 osd5
->> 10.5.51.145:6803/19737 1563 : [ERR] 0.f8 scrub stat mismatch, got 2074/2074
->> objects, 0/0 clones, 8624991435/8590119115 bytes, 8422853/8388798 kb.
->> 2011-07-19 14:00:39.509391   log 2011-07-19 14:00:34.185732 osd5
->> 10.5.51.145:6803/19737 1564 : [ERR] 0.f8 scrub 1 errors
->>
->> How to respond to this message?
-> $ ceph pg repair 0.f8
->
-> should do the trick!
->
-> sage
-Hmm... But today I seen again:
+auth/Crypto.cc:218: error: expected primary-expression before =91}=92 t=
+oken
+auth/Crypto.cc:218: error: expected =91;=92 before =91}=92 token
 
-2011-07-22 17:26:51.134596   log 2011-07-22 17:26:51.010146 osd5 
-10.5.51.145:6803/19737 2120 : [ERR] 0.f8 scrub stat mismatch, got 
-2095/2095 objects, 0/0 clones, 8678199499/8713071819 bytes, 
-8474814/8508869 kb.
-2011-07-22 17:26:51.134596   log 2011-07-22 17:26:51.010159 osd5 
-10.5.51.145:6803/19737 2121 : [ERR] 0.f8 scrub 1 errors
+Perhaps something more is missing here but this gets things going...
+apparently not used much?
+---
+=A0src/auth/Crypto.cc | =A0 =A01 +
+=A01 files changed, 1 insertions(+), 0 deletions(-)
 
-And 'ceph pg repair 0.f8' again fix:
+diff --git a/src/auth/Crypto.cc b/src/auth/Crypto.cc
+index 7251d09..ad256bb 100644
+--- a/src/auth/Crypto.cc
++++ b/src/auth/Crypto.cc
+@@ -215,6 +215,7 @@ static void nss_aes_operation(CK_ATTRIBUTE_TYPE
+op, const bufferptr& secret,
+=A0err_slot:
+=A0 PK11_FreeSlot(slot);
+=A0err:
++ =A0;
+=A0}
 
-2011-07-22 18:18:31.158248   log 2011-07-22 18:18:24.316646 osd5 
-10.5.51.145:6803/19737 2122 : [ERR] 0.f8 repair stat mismatch, got 
-2095/2095 objects, 0/0 clones, 8678199499/8713071819 bytes, 
-8474814/8508869 kb.
-2011-07-22 18:18:31.158248   log 2011-07-22 18:18:24.316680 osd5 
-10.5.51.145:6803/19737 2123 : [ERR] 0.f8 repair 1 errors, 1 fixed
-
-WBR,
-     Fyodor.
+=A0#else
+--
+1.7.4.1
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
