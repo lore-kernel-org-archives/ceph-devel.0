@@ -1,79 +1,71 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 13/23] rbd: cancel watch request when releasing the device
-Date: Fri, 22 Jul 2011 17:02:52 -0700
-Message-ID: <1311379382-9218-14-git-send-email-sage@newdream.net>
+Subject: [PATCH 17/23] ceph: handle racing calls to ceph_init_dentry
+Date: Fri, 22 Jul 2011 17:02:56 -0700
+Message-ID: <1311379382-9218-18-git-send-email-sage@newdream.net>
 References: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44315 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44329 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754024Ab1GWAFz (ORCPT
+	with ESMTP id S1751379Ab1GWAFz (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:55 -0400
 In-Reply-To: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Yehuda Sadeh <yehuda@hq.newdream.net>
+Cc: Sage Weil <sage@newdream.net>
 
-From: Yehuda Sadeh <yehuda@hq.newdream.net>
+The ->lookup() and prepopulate_readdir() callers are working with unhashed
+dentries, so we don't have to worry.  The export.c callers, though, need
+to initialize something they got back from d_obtain_alias() and are
+potentially racing with other callers.  Make sure we don't return unless
+the dentry is properly initialized (by us or someone else).
 
-We were missing this cleanup, so when a device was released
-the osd didn't clean up its watchers list, so following notifications
-could be slow as osd needed to timeout on the client.
-
-Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
+Reported-by: Al Viro <viro@ZenIV.linux.org.uk>
+Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- drivers/block/rbd.c |   31 ++++++++++++++++++++++++++++++-
- 1 files changed, 30 insertions(+), 1 deletions(-)
+ fs/ceph/dir.c |   19 ++++++++++---------
+ 1 files changed, 10 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 1278098..7392d7a 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -1253,6 +1253,35 @@ fail:
- 	return ret;
- }
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index f39a409..58ec879 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -40,14 +40,6 @@ int ceph_init_dentry(struct dentry *dentry)
+ 	if (dentry->d_fsdata)
+ 		return 0;
  
-+/*
-+ * Request sync osd unwatch
-+ */
-+static int rbd_req_sync_unwatch(struct rbd_device *dev,
-+				const char *obj)
-+{
-+	struct ceph_osd_req_op *ops;
+-	if (dentry->d_parent == NULL ||   /* nfs fh_to_dentry */
+-	    ceph_snap(dentry->d_parent->d_inode) == CEPH_NOSNAP)
+-		d_set_d_op(dentry, &ceph_dentry_ops);
+-	else if (ceph_snap(dentry->d_parent->d_inode) == CEPH_SNAPDIR)
+-		d_set_d_op(dentry, &ceph_snapdir_dentry_ops);
+-	else
+-		d_set_d_op(dentry, &ceph_snap_dentry_ops);
+-
+ 	di = kmem_cache_alloc(ceph_dentry_cachep, GFP_NOFS | __GFP_ZERO);
+ 	if (!di)
+ 		return -ENOMEM;          /* oh well */
+@@ -58,10 +50,19 @@ int ceph_init_dentry(struct dentry *dentry)
+ 		kmem_cache_free(ceph_dentry_cachep, di);
+ 		goto out_unlock;
+ 	}
 +
-+	int ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_WATCH, 0);
-+	if (ret < 0)
-+		return ret;
++	if (dentry->d_parent == NULL ||   /* nfs fh_to_dentry */
++	    ceph_snap(dentry->d_parent->d_inode) == CEPH_NOSNAP)
++		d_set_d_op(dentry, &ceph_dentry_ops);
++	else if (ceph_snap(dentry->d_parent->d_inode) == CEPH_SNAPDIR)
++		d_set_d_op(dentry, &ceph_snapdir_dentry_ops);
++	else
++		d_set_d_op(dentry, &ceph_snap_dentry_ops);
 +
-+	ops[0].watch.ver = 0;
-+	ops[0].watch.cookie = cpu_to_le64(dev->watch_event->cookie);
-+	ops[0].watch.flag = 0;
-+
-+	ret = rbd_req_sync_op(dev, NULL,
-+			      CEPH_NOSNAP,
-+			      0,
-+			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
-+			      ops,
-+			      1, obj, 0, 0, NULL, NULL, NULL);
-+
-+	rbd_destroy_ops(ops);
-+	ceph_osdc_cancel_event(dev->watch_event);
-+	dev->watch_event = NULL;
-+	return ret;
-+}
-+
- struct rbd_notify_info {
- 	struct rbd_device *dev;
- };
-@@ -2290,7 +2319,7 @@ static void rbd_dev_release(struct device *dev)
- 		ceph_osdc_unregister_linger_request(&rbd_dev->client->osdc,
- 						    rbd_dev->watch_request);
- 	if (rbd_dev->watch_event)
--		ceph_osdc_cancel_event(rbd_dev->watch_event);
-+		rbd_req_sync_unwatch(rbd_dev, rbd_dev->obj_md_name);
- 
- 	rbd_put_client(rbd_dev);
- 
+ 	di->dentry = dentry;
+ 	di->lease_session = NULL;
+-	dentry->d_fsdata = di;
+ 	dentry->d_time = jiffies;
++	dentry->d_fsdata = di; /* almost last so that d_fsdata check is safe */
+ 	ceph_dentry_lru_add(dentry);
+ out_unlock:
+ 	spin_unlock(&dentry->d_lock);
 -- 
 1.7.0
 
