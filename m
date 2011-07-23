@@ -1,128 +1,201 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 22/23] ceph: explicitly reference rename old_dentry parent dir in request
-Date: Fri, 22 Jul 2011 17:03:01 -0700
-Message-ID: <1311379382-9218-23-git-send-email-sage@newdream.net>
+Subject: [PATCH 18/23] ceph: protect access to d_parent
+Date: Fri, 22 Jul 2011 17:02:57 -0700
+Message-ID: <1311379382-9218-19-git-send-email-sage@newdream.net>
 References: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44322 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44331 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754073Ab1GWAF4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:56 -0400
+	with ESMTP id S1754044Ab1GWAFz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:55 -0400
 In-Reply-To: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@newdream.net>
 
-We carry a pin on the parent directory for the rename source and dest
-dentries.  For the source it's r_locked_dir; we need to explicitly
-reference the old_dentry parent as well, since the dentry's d_parent may
-change between when the request was created and pinned and when it is
-freed.
+d_parent is protected by d_lock: use it when looking up a dentry's parent
+directory inode.  Also take a reference and drop it in the caller to avoid
+a use-after-free.
 
+Reported-by: Al Viro <viro@ZenIV.linux.org.uk>
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- fs/ceph/debugfs.c    |    2 +-
- fs/ceph/dir.c        |    2 ++
- fs/ceph/mds_client.c |   23 +++++++++++++----------
- fs/ceph/mds_client.h |    1 +
- 4 files changed, 17 insertions(+), 11 deletions(-)
+ fs/ceph/dir.c   |   15 +++++++++++++++
+ fs/ceph/file.c  |    8 +++++---
+ fs/ceph/inode.c |    4 +++-
+ fs/ceph/ioctl.c |    4 +++-
+ fs/ceph/super.h |    9 +--------
+ fs/ceph/xattr.c |    8 ++++++--
+ 6 files changed, 33 insertions(+), 15 deletions(-)
 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 0dba691..fb962ef 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -102,7 +102,7 @@ static int mdsc_show(struct seq_file *s, void *p)
- 				path = NULL;
- 			spin_lock(&req->r_old_dentry->d_lock);
- 			seq_printf(s, " #%llx/%.*s (%s)",
--			   ceph_ino(req->r_old_dentry->d_parent->d_inode),
-+			   ceph_ino(req->r_old_dentry_dir),
- 				   req->r_old_dentry->d_name.len,
- 				   req->r_old_dentry->d_name.name,
- 				   path ? path : "");
 diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 1d6aef4..32359cc 100644
+index 58ec879..e90315b 100644
 --- a/fs/ceph/dir.c
 +++ b/fs/ceph/dir.c
-@@ -809,6 +809,7 @@ static int ceph_link(struct dentry *old_dentry, struct inode *dir,
- 	req->r_dentry = dget(dentry);
- 	req->r_num_caps = 2;
- 	req->r_old_dentry = dget(old_dentry); /* or inode? hrm. */
-+	req->r_old_dentry_dir = ceph_get_dentry_parent_inode(old_dentry);
- 	req->r_locked_dir = dir;
- 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
- 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
-@@ -907,6 +908,7 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
- 	req->r_dentry = dget(new_dentry);
- 	req->r_num_caps = 2;
- 	req->r_old_dentry = dget(old_dentry);
-+	req->r_old_dentry_dir = ceph_get_dentry_parent_inode(old_dentry);
- 	req->r_locked_dir = new_dir;
- 	req->r_old_dentry_drop = CEPH_CAP_FILE_SHARED;
- 	req->r_old_dentry_unless = CEPH_CAP_FILE_EXCL;
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 8a09cd5..66a8939 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -483,22 +483,26 @@ void ceph_mdsc_release_request(struct kref *kref)
- 		destroy_reply_info(&req->r_reply_info);
- 	}
- 	if (req->r_inode) {
--		ceph_put_cap_refs(ceph_inode(req->r_inode),
--				  CEPH_CAP_PIN);
-+		ceph_put_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
- 		iput(req->r_inode);
- 	}
- 	if (req->r_locked_dir)
--		ceph_put_cap_refs(ceph_inode(req->r_locked_dir),
--				  CEPH_CAP_PIN);
-+		ceph_put_cap_refs(ceph_inode(req->r_locked_dir), CEPH_CAP_PIN);
- 	if (req->r_target_inode)
- 		iput(req->r_target_inode);
- 	if (req->r_dentry)
- 		dput(req->r_dentry);
- 	if (req->r_old_dentry) {
--		ceph_put_cap_refs(
--			ceph_inode(req->r_old_dentry->d_parent->d_inode),
--			CEPH_CAP_PIN);
-+		/*
-+		 * track (and drop pins for) r_old_dentry_dir
-+		 * separately, since r_old_dentry's d_parent may have
-+		 * changed between the dir mutex being dropped and
-+		 * this request being freed.
-+		 */
-+		ceph_put_cap_refs(ceph_inode(req->r_old_dentry_dir),
-+				  CEPH_CAP_PIN);
- 		dput(req->r_old_dentry);
-+		iput(req->r_old_dentry_dir);
- 	}
- 	kfree(req->r_path1);
- 	kfree(req->r_path2);
-@@ -1931,9 +1935,8 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
- 	if (req->r_locked_dir)
- 		ceph_get_cap_refs(ceph_inode(req->r_locked_dir), CEPH_CAP_PIN);
- 	if (req->r_old_dentry)
--		ceph_get_cap_refs(
--			ceph_inode(req->r_old_dentry->d_parent->d_inode),
--			CEPH_CAP_PIN);
-+		ceph_get_cap_refs(ceph_inode(req->r_old_dentry_dir),
-+				  CEPH_CAP_PIN);
+@@ -69,6 +69,21 @@ out_unlock:
+ 	return 0;
+ }
  
- 	/* issue */
- 	mutex_lock(&mdsc->mutex);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 8a40f06..4bb2399 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -171,6 +171,7 @@ struct ceph_mds_request {
- 	struct inode *r_inode;              /* arg1 */
- 	struct dentry *r_dentry;            /* arg1 */
- 	struct dentry *r_old_dentry;        /* arg2: rename from or link from */
-+	struct inode *r_old_dentry_dir;     /* arg2: old dentry's parent dir */
- 	char *r_path1, *r_path2;
- 	struct ceph_vino r_ino1, r_ino2;
++struct inode *ceph_get_dentry_parent_inode(struct dentry *dentry)
++{
++	struct inode *inode = NULL;
++
++	if (!dentry)
++		return NULL;
++
++	spin_lock(&dentry->d_lock);
++	if (dentry->d_parent) {
++		inode = dentry->d_parent->d_inode;
++		ihold(inode);
++	}
++	spin_unlock(&dentry->d_lock);
++	return inode;
++}
  
+ 
+ /*
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index f34d47d..45fbd69 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -122,7 +122,7 @@ int ceph_open(struct inode *inode, struct file *file)
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct ceph_mds_request *req;
+ 	struct ceph_file_info *cf = file->private_data;
+-	struct inode *parent_inode = file->f_dentry->d_parent->d_inode;
++	struct inode *parent_inode = NULL;
+ 	int err;
+ 	int flags, fmode, wanted;
+ 
+@@ -194,8 +194,10 @@ int ceph_open(struct inode *inode, struct file *file)
+ 	req->r_inode = inode;
+ 	ihold(inode);
+ 	req->r_num_caps = 1;
+-	err = ceph_mdsc_do_request(mdsc, (flags & (O_CREAT|O_TRUNC)) ?
+-				   parent_inode : NULL, req);
++	if (flags & (O_CREAT|O_TRUNC))
++		parent_inode = ceph_get_dentry_parent_inode(file->f_dentry);
++	err = ceph_mdsc_do_request(mdsc, parent_inode, req);
++	iput(parent_inode);
+ 	if (!err)
+ 		err = ceph_init_file(inode, file, req->r_fmode);
+ 	ceph_mdsc_put_request(req);
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 2717dc4..a7db56f 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1562,7 +1562,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+ {
+ 	struct inode *inode = dentry->d_inode;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+-	struct inode *parent_inode = dentry->d_parent->d_inode;
++	struct inode *parent_inode;
+ 	const unsigned int ia_valid = attr->ia_valid;
+ 	struct ceph_mds_request *req;
+ 	struct ceph_mds_client *mdsc = ceph_sb_to_client(dentry->d_sb)->mdsc;
+@@ -1745,7 +1745,9 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
+ 		req->r_inode_drop = release;
+ 		req->r_args.setattr.mask = cpu_to_le32(mask);
+ 		req->r_num_caps = 1;
++		parent_inode = ceph_get_dentry_parent_inode(dentry);
+ 		err = ceph_mdsc_do_request(mdsc, parent_inode, req);
++		iput(parent_inode);
+ 	}
+ 	dout("setattr %p result=%d (%s locally, %d remote)\n", inode, err,
+ 	     ceph_cap_string(dirtied), mask);
+diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+index a757a56..3b256b5 100644
+--- a/fs/ceph/ioctl.c
++++ b/fs/ceph/ioctl.c
+@@ -38,7 +38,7 @@ static long ceph_ioctl_get_layout(struct file *file, void __user *arg)
+ static long ceph_ioctl_set_layout(struct file *file, void __user *arg)
+ {
+ 	struct inode *inode = file->f_dentry->d_inode;
+-	struct inode *parent_inode = file->f_dentry->d_parent->d_inode;
++	struct inode *parent_inode;
+ 	struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
+ 	struct ceph_mds_request *req;
+ 	struct ceph_ioctl_layout l;
+@@ -87,7 +87,9 @@ static long ceph_ioctl_set_layout(struct file *file, void __user *arg)
+ 	req->r_args.setlayout.layout.fl_pg_preferred =
+ 		cpu_to_le32(l.preferred_osd);
+ 
++	parent_inode = ceph_get_dentry_parent_inode(file->f_dentry);
+ 	err = ceph_mdsc_do_request(mdsc, parent_inode, req);
++	iput(parent_inode);
+ 	ceph_mdsc_put_request(req);
+ 	return err;
+ }
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index c24891a..c1eb9a0 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -801,6 +801,7 @@ extern void ceph_dentry_lru_touch(struct dentry *dn);
+ extern void ceph_dentry_lru_del(struct dentry *dn);
+ extern void ceph_invalidate_dentry_lease(struct dentry *dentry);
+ extern unsigned ceph_dentry_hash(struct dentry *dn);
++extern struct inode *ceph_get_dentry_parent_inode(struct dentry *dentry);
+ 
+ /*
+  * our d_ops vary depending on whether the inode is live,
+@@ -823,14 +824,6 @@ extern int ceph_encode_locks(struct inode *i, struct ceph_pagelist *p,
+ 			     int p_locks, int f_locks);
+ extern int lock_to_ceph_filelock(struct file_lock *fl, struct ceph_filelock *c);
+ 
+-static inline struct inode *get_dentry_parent_inode(struct dentry *dentry)
+-{
+-	if (dentry && dentry->d_parent)
+-		return dentry->d_parent->d_inode;
+-
+-	return NULL;
+-}
+-
+ /* debugfs.c */
+ extern int ceph_fs_debugfs_init(struct ceph_fs_client *client);
+ extern void ceph_fs_debugfs_cleanup(struct ceph_fs_client *client);
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index f42d730..96c6739 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -629,7 +629,7 @@ static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
+ 	struct inode *inode = dentry->d_inode;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+-	struct inode *parent_inode = dentry->d_parent->d_inode;
++	struct inode *parent_inode;
+ 	struct ceph_mds_request *req;
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	int err;
+@@ -677,7 +677,9 @@ static int ceph_sync_setxattr(struct dentry *dentry, const char *name,
+ 	req->r_data_len = size;
+ 
+ 	dout("xattr.ver (before): %lld\n", ci->i_xattrs.version);
++	parent_inode = ceph_get_dentry_parent_inode(dentry);
+ 	err = ceph_mdsc_do_request(mdsc, parent_inode, req);
++	iput(parent_inode);
+ 	ceph_mdsc_put_request(req);
+ 	dout("xattr.ver (after): %lld\n", ci->i_xattrs.version);
+ 
+@@ -788,7 +790,7 @@ static int ceph_send_removexattr(struct dentry *dentry, const char *name)
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	struct inode *inode = dentry->d_inode;
+-	struct inode *parent_inode = dentry->d_parent->d_inode;
++	struct inode *parent_inode;
+ 	struct ceph_mds_request *req;
+ 	int err;
+ 
+@@ -802,7 +804,9 @@ static int ceph_send_removexattr(struct dentry *dentry, const char *name)
+ 	req->r_num_caps = 1;
+ 	req->r_path2 = kstrdup(name, GFP_NOFS);
+ 
++	parent_inode = ceph_get_dentry_parent_inode(dentry);
+ 	err = ceph_mdsc_do_request(mdsc, parent_inode, req);
++	iput(parent_inode);
+ 	ceph_mdsc_put_request(req);
+ 	return err;
+ }
 -- 
 1.7.0
 
