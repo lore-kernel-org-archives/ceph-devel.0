@@ -1,12 +1,12 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 07/23] libceph: don't time out osd requests that haven't been received
-Date: Fri, 22 Jul 2011 17:02:46 -0700
-Message-ID: <1311379382-9218-8-git-send-email-sage@newdream.net>
+Subject: [PATCH 08/23] ceph: avoid carrying Fw cap during write into page cache
+Date: Fri, 22 Jul 2011 17:02:47 -0700
+Message-ID: <1311379382-9218-9-git-send-email-sage@newdream.net>
 References: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44315 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44317 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753946Ab1GWAFy (ORCPT
+	with ESMTP id S1754009Ab1GWAFy (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:54 -0400
 In-Reply-To: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -14,82 +14,77 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@newdream.net>
 
-Keep track of when an outgoing message is ACKed (i.e., the server fully
-received it and, presumably, queued it for processing).  Time out OSD
-requests only if it's been too long since they've been received.
-
-This prevents timeouts and connection thrashing when the OSDs are simply
-busy and are throttling the requests they read off the network.
+The generic_file_aio_write call may block on balance_dirty_pages while we
+flush data to the OSDs.  If we hold a reference to the FILE_WR cap during
+that interval revocation by the MDS (e.g., to do a stat(2)) may be very
+slow.
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- include/linux/ceph/messenger.h |    1 +
- net/ceph/messenger.c           |   12 +++++-------
- net/ceph/osd_client.c          |    6 ++++++
- 3 files changed, 12 insertions(+), 7 deletions(-)
+ fs/ceph/file.c |   22 +++++++++++++++++++---
+ 1 files changed, 19 insertions(+), 3 deletions(-)
 
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index 31d91a6..d7adf15 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -94,6 +94,7 @@ struct ceph_msg {
- 	bool more_to_follow;
- 	bool needs_out_seq;
- 	int front_max;
-+	unsigned long ack_stamp;        /* tx: when we were acked */
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 44e4fe9..6c90cf0 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -713,7 +713,7 @@ retry_snap:
+ 		want = CEPH_CAP_FILE_BUFFER;
+ 	ret = ceph_get_caps(ci, CEPH_CAP_FILE_WR, want, &got, endoff);
+ 	if (ret < 0)
+-		goto out;
++		goto out_put;
  
- 	struct ceph_msgpool *pool;
- };
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 78b55f4..c340e2e 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -486,13 +486,10 @@ static void prepare_write_message(struct ceph_connection *con)
- 	m = list_first_entry(&con->out_queue,
- 		       struct ceph_msg, list_head);
- 	con->out_msg = m;
--	if (test_bit(LOSSYTX, &con->state)) {
--		list_del_init(&m->list_head);
--	} else {
--		/* put message on sent list */
--		ceph_msg_get(m);
--		list_move_tail(&m->list_head, &con->out_sent);
--	}
+ 	dout("aio_write %p %llx.%llx %llu~%u  got cap refs on %s\n",
+ 	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+@@ -726,8 +726,18 @@ retry_snap:
+ 		ret = ceph_sync_write(file, iov->iov_base, iov->iov_len,
+ 			&iocb->ki_pos);
+ 	} else {
+-		ret = generic_file_aio_write(iocb, iov, nr_segs, pos);
++		/*
++		 * buffered write; drop Fw early to avoid slow
++		 * revocation if we get stuck on balance_dirty_pages
++		 */
++		int dirty;
 +
-+	/* put message on sent list */
-+	ceph_msg_get(m);
-+	list_move_tail(&m->list_head, &con->out_sent);
++		spin_lock(&inode->i_lock);
++		dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_FILE_WR);
++		spin_unlock(&inode->i_lock);
++		ceph_put_cap_refs(ci, got);
  
- 	/*
- 	 * only assign outgoing seq # if we haven't sent this message
-@@ -1399,6 +1396,7 @@ static void process_ack(struct ceph_connection *con)
- 			break;
- 		dout("got ack for seq %llu type %d at %p\n", seq,
- 		     le16_to_cpu(m->hdr.type), m);
-+		m->ack_stamp = jiffies;
- 		ceph_msg_remove(m);
++		ret = generic_file_aio_write(iocb, iov, nr_segs, pos);
+ 		if ((ret >= 0 || ret == -EIOCBQUEUED) &&
+ 		    ((file->f_flags & O_SYNC) || IS_SYNC(file->f_mapping->host)
+ 		     || ceph_osdmap_flag(osdc->osdmap, CEPH_OSDMAP_NEARFULL))) {
+@@ -735,7 +745,12 @@ retry_snap:
+ 			if (err < 0)
+ 				ret = err;
+ 		}
++
++		if (dirty)
++			__mark_inode_dirty(inode, dirty);
++		goto out;
  	}
- 	prepare_read_tag(con);
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 7330c27..ce310ee 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1085,9 +1085,15 @@ static void handle_timeout(struct work_struct *work)
- 		req = list_entry(osdc->req_lru.next, struct ceph_osd_request,
- 				 r_req_lru_item);
- 
-+		/* hasn't been long enough since we sent it? */
- 		if (time_before(jiffies, req->r_stamp + timeout))
- 			break;
- 
-+		/* hasn't been long enough since it was acked? */
-+		if (req->r_request->ack_stamp == 0 ||
-+		    time_before(jiffies, req->r_request->ack_stamp + timeout))
-+			break;
 +
- 		BUG_ON(req == last_req && req->r_stamp == last_stamp);
- 		last_req = req;
- 		last_stamp = req->r_stamp;
+ 	if (ret >= 0) {
+ 		int dirty;
+ 		spin_lock(&inode->i_lock);
+@@ -745,12 +760,13 @@ retry_snap:
+ 			__mark_inode_dirty(inode, dirty);
+ 	}
+ 
+-out:
++out_put:
+ 	dout("aio_write %p %llx.%llx %llu~%u  dropping cap refs on %s\n",
+ 	     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len,
+ 	     ceph_cap_string(got));
+ 	ceph_put_cap_refs(ci, got);
+ 
++out:
+ 	if (ret == -EOLDSNAPC) {
+ 		dout("aio_write %p %llx.%llx %llu~%u got EOLDSNAPC, retrying\n",
+ 		     inode, ceph_vinop(inode), pos, (unsigned)iov->iov_len);
 -- 
 1.7.0
 
