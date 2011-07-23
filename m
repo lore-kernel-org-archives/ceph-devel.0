@@ -1,61 +1,80 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 15/23] rbd: set blk_queue request sizes to object size
-Date: Fri, 22 Jul 2011 17:02:54 -0700
-Message-ID: <1311379382-9218-16-git-send-email-sage@newdream.net>
+Subject: [PATCH 23/23] ceph: document unlocked d_parent accesses
+Date: Fri, 22 Jul 2011 17:03:02 -0700
+Message-ID: <1311379382-9218-24-git-send-email-sage@newdream.net>
 References: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44319 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44313 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754025Ab1GWAFz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:55 -0400
+	with ESMTP id S1754093Ab1GWAF4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:56 -0400
 In-Reply-To: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Josh Durgin <josh.durgin@dreamhost.com>
+Cc: Sage Weil <sage@newdream.net>
 
-From: Josh Durgin <josh.durgin@dreamhost.com>
+For the most part we don't care about racing with rename when directing
+MDS requests; either the old or new parent is fine.  Document that, and
+do some minor cleanup.
 
-This improves performance since more requests can be merged.
-
-Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
+Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- drivers/block/rbd.c |   15 +++++++++++++++
- 1 files changed, 15 insertions(+), 0 deletions(-)
+ fs/ceph/dir.c        |    2 +-
+ fs/ceph/mds_client.c |   13 ++++++++++---
+ 2 files changed, 11 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 7392d7a..15f65b5 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -630,6 +630,14 @@ static int rbd_get_num_segments(struct rbd_image_header *header,
- }
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 32359cc..8d7f52f 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -504,7 +504,7 @@ int ceph_handle_snapdir(struct ceph_mds_request *req,
+ 			struct dentry *dentry, int err)
+ {
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
+-	struct inode *parent = dentry->d_parent->d_inode;
++	struct inode *parent = dentry->d_parent->d_inode; /* we hold i_mutex */
  
- /*
-+ * returns the size of an object in the image
-+ */
-+static u64 rbd_obj_bytes(struct rbd_image_header *header)
-+{
-+	return 1 << header->obj_order;
-+}
-+
-+/*
-  * bio helpers
+ 	/* .snap dir? */
+ 	if (err == -ENOENT &&
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 66a8939..fee028b 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -621,6 +621,12 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
   */
+ struct dentry *get_nonsnap_parent(struct dentry *dentry)
+ {
++	/*
++	 * we don't need to worry about protecting the d_parent access
++	 * here because we never renaming inside the snapped namespace
++	 * except to resplice to another snapdir, and either the old or new
++	 * result is a valid result.
++	 */
+ 	while (!IS_ROOT(dentry) && ceph_snap(dentry->d_inode) != CEPH_NOSNAP)
+ 		dentry = dentry->d_parent;
+ 	return dentry;
+@@ -656,7 +662,9 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+ 	if (req->r_inode) {
+ 		inode = req->r_inode;
+ 	} else if (req->r_dentry) {
+-		struct inode *dir = req->r_dentry->d_parent->d_inode;
++		/* ignore race with rename; old or new d_parent is okay */
++		struct dentry *parent = req->r_dentry->d_parent;
++		struct inode *dir = parent->d_inode;
  
-@@ -1765,6 +1773,13 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
- 	q = blk_init_queue(rbd_rq_fn, &rbd_dev->lock);
- 	if (!q)
- 		goto out_disk;
-+
-+	/* set io sizes to object size */
-+	blk_queue_max_hw_sectors(q, rbd_obj_bytes(&rbd_dev->header) / 512ULL);
-+	blk_queue_max_segment_size(q, rbd_obj_bytes(&rbd_dev->header));
-+	blk_queue_io_min(q, rbd_obj_bytes(&rbd_dev->header));
-+	blk_queue_io_opt(q, rbd_obj_bytes(&rbd_dev->header));
-+
- 	blk_queue_merge_bvec(q, rbd_merge_bvec);
- 	disk->queue = q;
- 
+ 		if (dir->i_sb != mdsc->fsc->sb) {
+ 			/* not this fs! */
+@@ -664,8 +672,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+ 		} else if (ceph_snap(dir) != CEPH_NOSNAP) {
+ 			/* direct snapped/virtual snapdir requests
+ 			 * based on parent dir inode */
+-			struct dentry *dn =
+-				get_nonsnap_parent(req->r_dentry->d_parent);
++			struct dentry *dn = get_nonsnap_parent(parent);
+ 			inode = dn->d_inode;
+ 			dout("__choose_mds using nonsnap parent %p\n", inode);
+ 		} else if (req->r_dentry->d_inode) {
 -- 
 1.7.0
 
