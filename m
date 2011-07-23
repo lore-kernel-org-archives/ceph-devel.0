@@ -1,12 +1,12 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 03/23] ceph: use flag bit for at_end readdir flag
-Date: Fri, 22 Jul 2011 17:02:42 -0700
-Message-ID: <1311379382-9218-4-git-send-email-sage@newdream.net>
+Subject: [PATCH 02/23] ceph: add F_SYNC file flag to force sync (non-O_DIRECT) io
+Date: Fri, 22 Jul 2011 17:02:41 -0700
+Message-ID: <1311379382-9218-3-git-send-email-sage@newdream.net>
 References: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44307 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44303 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753986Ab1GWAFx (ORCPT
+	with ESMTP id S1753981Ab1GWAFx (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:53 -0400
 In-Reply-To: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -14,83 +14,96 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@newdream.net>
 
-This saves us a word of memory per file.
+This allows us to force IO through the sync path which you normally only
+get when multiple clients are reading/writing to the same file or by
+mounting with -o sync.  Among other things, this lets test programs verify
+correctness with a single mount.
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- fs/ceph/dir.c   |   10 +++++-----
- fs/ceph/super.h |    2 +-
- 2 files changed, 6 insertions(+), 6 deletions(-)
+ fs/ceph/file.c  |    6 ++++--
+ fs/ceph/ioctl.c |   11 +++++++++++
+ fs/ceph/ioctl.h |    1 +
+ fs/ceph/super.h |    2 ++
+ 4 files changed, 18 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index ef8f08c..53b441f 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -133,7 +133,7 @@ more:
- 		     d_unhashed(dentry) ? "!hashed" : "hashed",
- 		     parent->d_subdirs.prev, parent->d_subdirs.next);
- 		if (p == &parent->d_subdirs) {
--			fi->at_end = 1;
-+			fi->flags |= CEPH_F_ATEND;
- 			goto out_unlock;
- 		}
- 		spin_lock_nested(&dentry->d_lock, DENTRY_D_LOCK_NESTED);
-@@ -234,7 +234,7 @@ static int ceph_readdir(struct file *filp, void *dirent, filldir_t filldir)
- 	const int max_bytes = fsc->mount_options->max_readdir_bytes;
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 4698a5c..44e4fe9 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -643,7 +643,8 @@ again:
  
- 	dout("readdir %p filp %p frag %u off %u\n", inode, filp, frag, off);
--	if (fi->at_end)
-+	if (fi->flags & CEPH_F_ATEND)
- 		return 0;
+ 	if ((got & (CEPH_CAP_FILE_CACHE|CEPH_CAP_FILE_LAZYIO)) == 0 ||
+ 	    (iocb->ki_filp->f_flags & O_DIRECT) ||
+-	    (inode->i_sb->s_flags & MS_SYNCHRONOUS))
++	    (inode->i_sb->s_flags & MS_SYNCHRONOUS) ||
++	    (fi->flags & CEPH_F_SYNC))
+ 		/* hmm, this isn't really async... */
+ 		ret = ceph_sync_read(filp, base, len, ppos, &checkeof);
+ 	else
+@@ -720,7 +721,8 @@ retry_snap:
  
- 	/* always start with . and .. */
-@@ -403,7 +403,7 @@ more:
- 		dout("readdir next frag is %x\n", frag);
- 		goto more;
- 	}
--	fi->at_end = 1;
-+	fi->flags |= CEPH_F_ATEND;
- 
- 	/*
- 	 * if dir_release_count still matches the dir, no dentries
-@@ -435,7 +435,7 @@ static void reset_readdir(struct ceph_file_info *fi)
- 		dput(fi->dentry);
- 		fi->dentry = NULL;
- 	}
--	fi->at_end = 0;
-+	fi->flags &= ~CEPH_F_ATEND;
+ 	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
+ 	    (iocb->ki_filp->f_flags & O_DIRECT) ||
+-	    (inode->i_sb->s_flags & MS_SYNCHRONOUS)) {
++	    (inode->i_sb->s_flags & MS_SYNCHRONOUS) ||
++	    (fi->flags & CEPH_F_SYNC)) {
+ 		ret = ceph_sync_write(file, iov->iov_base, iov->iov_len,
+ 			&iocb->ki_pos);
+ 	} else {
+diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+index ef0b5f4..a757a56 100644
+--- a/fs/ceph/ioctl.c
++++ b/fs/ceph/ioctl.c
+@@ -231,6 +231,14 @@ static long ceph_ioctl_lazyio(struct file *file)
+ 	return 0;
  }
  
- static loff_t ceph_dir_llseek(struct file *file, loff_t offset, int origin)
-@@ -458,7 +458,7 @@ static loff_t ceph_dir_llseek(struct file *file, loff_t offset, int origin)
- 		if (offset != file->f_pos) {
- 			file->f_pos = offset;
- 			file->f_version = 0;
--			fi->at_end = 0;
-+			fi->flags &= ~CEPH_F_ATEND;
- 		}
- 		retval = offset;
++static long ceph_ioctl_syncio(struct file *file)
++{
++	struct ceph_file_info *fi = file->private_data;
++
++	fi->flags |= CEPH_F_SYNC;
++	return 0;
++}
++
+ long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+ {
+ 	dout("ioctl file %p cmd %u arg %lu\n", file, cmd, arg);
+@@ -249,6 +257,9 @@ long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
  
+ 	case CEPH_IOC_LAZYIO:
+ 		return ceph_ioctl_lazyio(file);
++
++	case CEPH_IOC_SYNCIO:
++		return ceph_ioctl_syncio(file);
+ 	}
+ 
+ 	return -ENOTTY;
+diff --git a/fs/ceph/ioctl.h b/fs/ceph/ioctl.h
+index 52e8fd7..0c5167e 100644
+--- a/fs/ceph/ioctl.h
++++ b/fs/ceph/ioctl.h
+@@ -40,5 +40,6 @@ struct ceph_ioctl_dataloc {
+ 				   struct ceph_ioctl_dataloc)
+ 
+ #define CEPH_IOC_LAZYIO _IO(CEPH_IOCTL_MAGIC, 4)
++#define CEPH_IOC_SYNCIO _IO(CEPH_IOCTL_MAGIC, 5)
+ 
+ #endif
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index cdb17d3..a8a2733 100644
+index 8febe6f..cdb17d3 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -544,6 +544,7 @@ extern void ceph_reservation_status(struct ceph_fs_client *client,
+@@ -543,6 +543,8 @@ extern void ceph_reservation_status(struct ceph_fs_client *client,
+ /*
   * we keep buffered readdir results attached to file->private_data
   */
- #define CEPH_F_SYNC     1
-+#define CEPH_F_ATEND    2
- 
++#define CEPH_F_SYNC     1
++
  struct ceph_file_info {
  	short fmode;     /* initialized on open */
-@@ -552,7 +553,6 @@ struct ceph_file_info {
- 	/* readdir: position within the dir */
- 	u32 frag;
- 	struct ceph_mds_request *last_readdir;
--	int at_end;
- 
- 	/* readdir: position within a frag */
- 	unsigned offset;       /* offset of last chunk, adjusted for . and .. */
+ 	short flags;     /* CEPH_F_* */
 -- 
 1.7.0
 
