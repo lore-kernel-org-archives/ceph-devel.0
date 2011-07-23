@@ -1,79 +1,86 @@
-From: Marcus Sorensen <shadowsor@gmail.com>
-Subject: Re: [PATCH] Fix compile error when using nss libs:
-Date: Fri, 22 Jul 2011 15:35:00 -0600
-Message-ID: <CALFpzo6K6va2AANqOR1YXB8mj5-FbL9qyYY8FiBdx-pmeKXxAQ@mail.gmail.com>
-References: <1311356967-1797-1-git-send-email-shadowsor@gmail.com>
-	<CALFpzo4Nc3y1zps9tct5BMjHa2kYSEQyPpK=66XSRtLK7WqzBA@mail.gmail.com>
-	<Pine.LNX.4.64.1107221324050.25773@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Sage Weil <sage@newdream.net>
+Subject: [PATCH 00/23] Ceph queue for v3.0
+Date: Fri, 22 Jul 2011 17:02:39 -0700
+Message-ID: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:53840 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932200Ab1GVVfE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 17:35:04 -0400
-Received: by wyg8 with SMTP id 8so1751999wyg.19
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Jul 2011 14:35:02 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1107221324050.25773@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:44305 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753985Ab1GWAFx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:53 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@newdream.net>
 
-Yeah, sorry. This was a CentOS 6 system, didn't seem to have any
-immediate provider of libcrypto++, so just skipped to nss.  I figured
-that not many people are probably using the nss path, so I'm not sure
-if this is just untested or something wonky on the compiler... at any
-rate an extra semicolon shouldn't break others :-)
+Here is the current queue of patches for v3.0.  There are a few things 
+worth nothing here:
 
-On Fri, Jul 22, 2011 at 2:25 PM, Sage Weil <sage@newdream.net> wrote:
-> On Fri, 22 Jul 2011, Marcus Sorensen wrote:
->> auth/Crypto.cc:218: error: expected primary-expression before ?}? to=
-ken
->> auth/Crypto.cc:218: error: expected ?;? before ?}? token
->>
->> Perhaps something more is missing here but this gets things going...
->> apparently not used much?
->
-> Looks right. =A0Maybe only some compiler versions bork on that? =A0We
-> also usually build with crypto++ when we can (libnss sucks a
-> several ways).
->
-> Can I add your signed-off-by?
->
-> Thanks-
-> sage
->
->
->> ---
->> =A0src/auth/Crypto.cc | =A0 =A01 +
->> =A01 files changed, 1 insertions(+), 0 deletions(-)
->>
->> diff --git a/src/auth/Crypto.cc b/src/auth/Crypto.cc
->> index 7251d09..ad256bb 100644
->> --- a/src/auth/Crypto.cc
->> +++ b/src/auth/Crypto.cc
->> @@ -215,6 +215,7 @@ static void nss_aes_operation(CK_ATTRIBUTE_TYPE
->> op, const bufferptr& secret,
->> =A0err_slot:
->> =A0 PK11_FreeSlot(slot);
->> =A0err:
->> + =A0;
->> =A0}
->>
->> =A0#else
->> --
->> 1.7.4.1
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ - rbd requests will be a bit larger now (512kb), which should improve 
+   performance
+ - readahead size is begin set properly, which helps read performance 
+   (but is not the complete solution)
+ - There was an audit of all d_parent accesses that resulted in a whole 
+   bunch of patches.  Basically any d_parent use needs to be proteted by 
+   the parent directory i_mutex or d_lock or suffer the consequences of 
+   a race with rename.
+ - open intents are fixed
+
+I hope to send this to Linus in a few days.  Let me know if you see any 
+problems here!
+
+Thanks-
+sage
+
+ 
+Greg Farnum (1):
+  ceph: report f_bfree based on kb_avail rather than diffing.
+
+Josh Durgin (1):
+  rbd: set blk_queue request sizes to object size
+
+Sage Weil (19):
+  ceph: add flags field to file_info
+  ceph: add F_SYNC file flag to force sync (non-O_DIRECT) io
+  ceph: use flag bit for at_end readdir flag
+  ceph: fix snap writeback when racing with writes
+  ceph: only queue capsnap if caps are dirty
+  libceph: don't time out osd requests that haven't been received
+  ceph: avoid carrying Fw cap during write into page cache
+  ceph: fix bad parent_inode calc in ceph_lookup_open
+  ceph: only link open operations to directory unsafe list if
+    O_CREAT|O_TRUNC
+  ceph: fix ceph_lookup_open intent usage
+  ceph: ignore lease mask
+  ceph: set dir complete frag after adding capability
+  ceph: handle racing calls to ceph_init_dentry
+  ceph: protect access to d_parent
+  ceph: protect d_parent access in ceph_d_revalidate
+  ceph: avoid d_parent in ceph_dentry_hash; fix ceph_encode_fh()
+    hashing bug
+  ceph: document locking for ceph_set_dentry_offset
+  ceph: explicitly reference rename old_dentry parent dir in request
+  ceph: document unlocked d_parent accesses
+
+Yehuda Sadeh (2):
+  rbd: cancel watch request when releasing the device
+  ceph: set up readahead size when rsize is not passed
+
+ drivers/block/rbd.c            |   46 ++++++++++++++++-
+ fs/ceph/debugfs.c              |    2 +-
+ fs/ceph/dir.c                  |  114 +++++++++++++++++++++++++---------------
+ fs/ceph/export.c               |   23 +++++---
+ fs/ceph/file.c                 |   61 ++++++++++++++++------
+ fs/ceph/inode.c                |   48 +++++++++-------
+ fs/ceph/ioctl.c                |   15 +++++-
+ fs/ceph/ioctl.h                |    1 +
+ fs/ceph/mds_client.c           |   56 +++++++++++---------
+ fs/ceph/mds_client.h           |    3 +-
+ fs/ceph/snap.c                 |   25 +++++++--
+ fs/ceph/super.c                |    7 ++-
+ fs/ceph/super.h                |   20 +++----
+ fs/ceph/xattr.c                |    8 ++-
+ include/linux/ceph/messenger.h |    1 +
+ net/ceph/messenger.c           |   12 ++---
+ net/ceph/osd_client.c          |    6 ++
+ 17 files changed, 304 insertions(+), 144 deletions(-)
+
