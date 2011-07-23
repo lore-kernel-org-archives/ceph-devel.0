@@ -1,55 +1,85 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 05/23] ceph: only queue capsnap if caps are dirty
-Date: Fri, 22 Jul 2011 17:02:44 -0700
-Message-ID: <1311379382-9218-6-git-send-email-sage@newdream.net>
+Subject: [PATCH 19/23] ceph: protect d_parent access in ceph_d_revalidate
+Date: Fri, 22 Jul 2011 17:02:58 -0700
+Message-ID: <1311379382-9218-20-git-send-email-sage@newdream.net>
 References: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44311 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44333 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753995Ab1GWAFx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:53 -0400
+	with ESMTP id S1754054Ab1GWAFz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:55 -0400
 In-Reply-To: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@newdream.net>
 
-We used to go into this branch if i_wrbuffer_ref_head was non-zero.  This
-was an ancient check from before we were careful about dealing with all
-kinds of caps (and not just dirty pages).  It is cleaner to only queue a
-capsnap if there is an actual dirty cap.  If we are racing with...
-something...we will end up here with ci->i_wrbuffer_refs but no dirty
-caps.
+Protect d_parent with d_lock.  Carry a reference.  Simplify the flow so
+that there is a single exit point and cleanup.
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- fs/ceph/snap.c |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
+ fs/ceph/dir.c |   32 +++++++++++++++++---------------
+ 1 files changed, 17 insertions(+), 15 deletions(-)
 
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index ac030c9..e264371 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -465,9 +465,8 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
- 		   cap_snap.  lucky us. */
- 		dout("queue_cap_snap %p already pending\n", inode);
- 		kfree(capsnap);
--	} else if (ci->i_wrbuffer_ref_head ||
--		   (dirty & (CEPH_CAP_AUTH_EXCL|CEPH_CAP_XATTR_EXCL|
--			     CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR))) {
-+	} else if (dirty & (CEPH_CAP_AUTH_EXCL|CEPH_CAP_XATTR_EXCL|
-+			    CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR)) {
- 		struct ceph_snap_context *snapc = ci->i_head_snapc;
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index e90315b..4f7c30e 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1022,36 +1022,38 @@ static int dir_lease_is_valid(struct inode *dir, struct dentry *dentry)
+  */
+ static int ceph_d_revalidate(struct dentry *dentry, struct nameidata *nd)
+ {
++	int valid = 0;
+ 	struct inode *dir;
  
- 		/*
-@@ -480,7 +479,6 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
- 		dout("queue_cap_snap %p cap_snap %p queuing under %p %s\n",
- 		     inode, capsnap, snapc, ceph_cap_string(dirty));
- 		ihold(inode);
--		BUG_ON(dirty == 0);
+ 	if (nd && nd->flags & LOOKUP_RCU)
+ 		return -ECHILD;
  
- 		atomic_set(&capsnap->nref, 1);
- 		capsnap->ci = ci;
+-	dir = dentry->d_parent->d_inode;
+-
+ 	dout("d_revalidate %p '%.*s' inode %p offset %lld\n", dentry,
+ 	     dentry->d_name.len, dentry->d_name.name, dentry->d_inode,
+ 	     ceph_dentry(dentry)->offset);
+ 
++	dir = ceph_get_dentry_parent_inode(dentry);
++
+ 	/* always trust cached snapped dentries, snapdir dentry */
+ 	if (ceph_snap(dir) != CEPH_NOSNAP) {
+ 		dout("d_revalidate %p '%.*s' inode %p is SNAPPED\n", dentry,
+ 		     dentry->d_name.len, dentry->d_name.name, dentry->d_inode);
+-		goto out_touch;
++		valid = 1;
++	} else if (dentry->d_inode &&
++		   ceph_snap(dentry->d_inode) == CEPH_SNAPDIR) {
++		valid = 1;
++	} else if (dentry_lease_is_valid(dentry) ||
++		   dir_lease_is_valid(dir, dentry)) {
++		valid = 1;
+ 	}
+-	if (dentry->d_inode && ceph_snap(dentry->d_inode) == CEPH_SNAPDIR)
+-		goto out_touch;
+ 
+-	if (dentry_lease_is_valid(dentry) ||
+-	    dir_lease_is_valid(dir, dentry))
+-		goto out_touch;
+-
+-	dout("d_revalidate %p invalid\n", dentry);
+-	d_drop(dentry);
+-	return 0;
+-out_touch:
+-	ceph_dentry_lru_touch(dentry);
+-	return 1;
++	dout("d_revalidate %p %s\n", dentry, valid ? "valid" : "invalid");
++	if (valid)
++		ceph_dentry_lru_touch(dentry);
++	else
++		d_drop(dentry);
++	iput(dir);
++	return valid;
+ }
+ 
+ /*
 -- 
 1.7.0
 
