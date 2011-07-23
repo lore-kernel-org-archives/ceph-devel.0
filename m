@@ -1,131 +1,133 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 20/23] ceph: avoid d_parent in ceph_dentry_hash; fix ceph_encode_fh() hashing bug
-Date: Fri, 22 Jul 2011 17:02:59 -0700
-Message-ID: <1311379382-9218-21-git-send-email-sage@newdream.net>
-References: <1311379382-9218-1-git-send-email-sage@newdream.net>
+From: Jojy Varghese <jojy.varghese@gmail.com>
+Subject: Re: Consistency vs efficiency
+Date: Fri, 22 Jul 2011 18:34:38 -0700
+Message-ID: <CAJD3hpW3JLB+VH3Kg5JouSoDG0-fpXO-g=kMBJPx_1bWDgauNQ@mail.gmail.com>
+References: <CAJD3hpW_WjumjD1P1bOhwXWPZieQxyay0HOCH8AFpXfQCT4HMg@mail.gmail.com>
+	<Pine.LNX.4.64.1107210944550.5868@cobra.newdream.net>
+	<CAJD3hpUw_AW-w3pK-GUSHY92U9=SvL5xdtMqC4rUUK+fnnO6mw@mail.gmail.com>
+	<Pine.LNX.4.64.1107211047280.5868@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44335 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754068Ab1GWAF4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:56 -0400
-In-Reply-To: <1311379382-9218-1-git-send-email-sage@newdream.net>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:50464 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751067Ab1GWBek convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 21:34:40 -0400
+Received: by gxk21 with SMTP id 21so1587545gxk.19
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jul 2011 18:34:39 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1107211047280.5868@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@newdream.net>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-Have caller pass in a safely-obtained reference to the parent directory
-for calculating a dentry's hash valud.
+Sage would the latest patches fix the lookup issue?
 
-While we're here, simpify the flow through ceph_encode_fh() so that there
-is a single exit point and cleanup.
-
-Also fix a bug with the dentry hash calculation: calculate the hash for the
-dentry we were given, not its parent.
-
-Signed-off-by: Sage Weil <sage@newdream.net>
----
- fs/ceph/dir.c        |    3 +--
- fs/ceph/export.c     |   23 +++++++++++++++--------
- fs/ceph/mds_client.c |    2 +-
- fs/ceph/super.h      |    2 +-
- 4 files changed, 18 insertions(+), 12 deletions(-)
-
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index 4f7c30e..1d6aef4 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -1242,9 +1242,8 @@ void ceph_dentry_lru_del(struct dentry *dn)
-  * Return name hash for a given dentry.  This is dependent on
-  * the parent directory's hash function.
-  */
--unsigned ceph_dentry_hash(struct dentry *dn)
-+unsigned ceph_dentry_hash(struct inode *dir, struct dentry *dn)
- {
--	struct inode *dir = dn->d_parent->d_inode;
- 	struct ceph_inode_info *dci = ceph_inode(dir);
- 
- 	switch (dci->i_dir_layout.dl_dir_hash) {
-diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-index f67b687..54757ed 100644
---- a/fs/ceph/export.c
-+++ b/fs/ceph/export.c
-@@ -46,7 +46,7 @@ static int ceph_encode_fh(struct dentry *dentry, u32 *rawfh, int *max_len,
- 	int type;
- 	struct ceph_nfs_fh *fh = (void *)rawfh;
- 	struct ceph_nfs_confh *cfh = (void *)rawfh;
--	struct dentry *parent = dentry->d_parent;
-+	struct dentry *parent;
- 	struct inode *inode = dentry->d_inode;
- 	int connected_handle_length = sizeof(*cfh)/4;
- 	int handle_length = sizeof(*fh)/4;
-@@ -55,26 +55,33 @@ static int ceph_encode_fh(struct dentry *dentry, u32 *rawfh, int *max_len,
- 	if (ceph_snap(inode) != CEPH_NOSNAP)
- 		return -EINVAL;
- 
-+	spin_lock(&dentry->d_lock);
-+	parent = dget(dentry->d_parent);
-+	spin_unlock(&dentry->d_lock);
-+
- 	if (*max_len >= connected_handle_length) {
- 		dout("encode_fh %p connectable\n", dentry);
- 		cfh->ino = ceph_ino(dentry->d_inode);
- 		cfh->parent_ino = ceph_ino(parent->d_inode);
--		cfh->parent_name_hash = ceph_dentry_hash(parent);
-+		cfh->parent_name_hash = ceph_dentry_hash(parent->d_inode,
-+							 dentry);
- 		*max_len = connected_handle_length;
- 		type = 2;
- 	} else if (*max_len >= handle_length) {
- 		if (connectable) {
- 			*max_len = connected_handle_length;
--			return 255;
-+			type = 255;
-+		} else {
-+			dout("encode_fh %p\n", dentry);
-+			fh->ino = ceph_ino(dentry->d_inode);
-+			*max_len = handle_length;
-+			type = 1;
- 		}
--		dout("encode_fh %p\n", dentry);
--		fh->ino = ceph_ino(dentry->d_inode);
--		*max_len = handle_length;
--		type = 1;
- 	} else {
- 		*max_len = handle_length;
--		return 255;
-+		type = 255;
- 	}
-+	dput(parent);
- 	return type;
- }
- 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 3b1e743..8a09cd5 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -670,7 +670,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 		} else {
- 			/* dir + name */
- 			inode = dir;
--			hash = ceph_dentry_hash(req->r_dentry);
-+			hash = ceph_dentry_hash(dir, req->r_dentry);
- 			is_hash = true;
- 		}
- 	}
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index c1eb9a0..35dc965 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -800,7 +800,7 @@ extern void ceph_dentry_lru_add(struct dentry *dn);
- extern void ceph_dentry_lru_touch(struct dentry *dn);
- extern void ceph_dentry_lru_del(struct dentry *dn);
- extern void ceph_invalidate_dentry_lease(struct dentry *dentry);
--extern unsigned ceph_dentry_hash(struct dentry *dn);
-+extern unsigned ceph_dentry_hash(struct inode *dir, struct dentry *dn);
- extern struct inode *ceph_get_dentry_parent_inode(struct dentry *dentry);
- 
- /*
--- 
-1.7.0
-
+On Thu, Jul 21, 2011 at 10:55 AM, Sage Weil <sage@newdream.net> wrote:
+> On Thu, 21 Jul 2011, Jojy Varghese wrote:
+>> Thanks for the response Sage. We are using 2.6.39 kernel and in the
+>> "ceph_lookup" method, i see that there is a shortcut for deciding
+>> ENOENT but after the MDS lookup, i dont see a d_add. I am sure i am
+>> missing something here.
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0dout(" dir %p complete, -ENOENT\n", dir);
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0d_add(dentry, NULL);
+>
+> ...but that is only for the negative lookup in a directory with the
+> 'complete' flag set. =C2=A0And it's never set currently because we do=
+n't have
+> d_prune yet (and the old use of d_release was racy). =C2=A0So ignore =
+this part
+> for now!
+>
+> You have an existing, unchanging, directory that you're seeing repeat=
+ed
+> lookups on, right? =C2=A0Like the top-level directory in the heirarch=
+y you're
+> copying? =C2=A0And the client is doing repeated lookups on the same n=
+ame?
+>
+> The way to debug this is probably to start with the messages passing =
+to
+> the MDS and verifying that lookups are duplicated. =C2=A0Then enable =
+the
+> logging on the kernel client and see why the client isn't uses leases=
+ or
+> the FILE_SHARED cap to avoid them. =C2=A0We can help you through that=
+ on #ceph
+> if you like.
+>
+> sage
+>
+>
+>>
+>> thanks again
+>> Jojy
+>>
+>> On Thu, Jul 21, 2011 at 9:49 AM, Sage Weil <sage@newdream.net> wrote=
+:
+>> > On Thu, 21 Jul 2011, Jojy Varghese wrote:
+>> >> Hi
+>> >> =C2=A0 I just started looking at the ceph code in kernel and had =
+a question
+>> >> about performance considerations for lookup operations. I noticed=
+ that
+>> >> for every operation (say copying a directory), the root dentry is
+>> >> "looked" up multiple times and since they all go to MDS for the a=
+ctual
+>> >> lookup operation, it effects the performance. I am sure consisten=
+cy is
+>> >> the winner here. Is there any plan to improve this, maybe by havi=
+ng
+>> >> MDS push the capability down to the clients when the dentry is
+>> >> updated. So say from CAP_EXCL to CAP_SHARED when the dentry is
+>> >> modified. This was the client node can cache the lookup operation=
+ and
+>> >> does not have to make a round trip to the MDS.
+>> >
+>> > In general, the MDS has two ways of keeping a client's cached dent=
+ry
+>> > consistent:
+>> >
+>> > =C2=A0- it can issue the FILE_SHARED capability bit on the parent =
+directory,
+>> > which means the entire directory is static and the client can cach=
+e
+>> > dentry.
+>> > =C2=A0- if it can't do that, it will issue a per-dentry lease
+>> >
+>> > There is an additional 'complete' bit that is used to indicate on =
+the
+>> > client that it has the _entire_ directory in cache. =C2=A0If set, =
+it can do
+>> > negative lookups and readdir without hitting the MDS. =C2=A0That's=
+ currently
+>> > broken, pending the addition of a d_prune dentry_operation (see
+>> > linux-fsdevel email from July 8).
+>> >
+>> > Anyway, long story short, if you're seeing repeated lookups on a d=
+entry
+>> > that isn't changing, something is broken. =C2=A0Can you describe t=
+he workload
+>> > in more detail? =C2=A0Which versions of the client and mds are you=
+ running?
+>> >
+>> > sage
+>> >
+>> >
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
+>>
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
