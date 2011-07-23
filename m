@@ -1,44 +1,55 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 14/23] ceph: set up readahead size when rsize is not passed
-Date: Fri, 22 Jul 2011 17:02:53 -0700
-Message-ID: <1311379382-9218-15-git-send-email-sage@newdream.net>
+Subject: [PATCH 05/23] ceph: only queue capsnap if caps are dirty
+Date: Fri, 22 Jul 2011 17:02:44 -0700
+Message-ID: <1311379382-9218-6-git-send-email-sage@newdream.net>
 References: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44317 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44311 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753985Ab1GWAFz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:55 -0400
+	with ESMTP id S1753995Ab1GWAFx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:53 -0400
 In-Reply-To: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Yehuda Sadeh <yehuda@hq.newdream.net>
+Cc: Sage Weil <sage@newdream.net>
 
-From: Yehuda Sadeh <yehuda@hq.newdream.net>
+We used to go into this branch if i_wrbuffer_ref_head was non-zero.  This
+was an ancient check from before we were careful about dealing with all
+kinds of caps (and not just dirty pages).  It is cleaner to only queue a
+capsnap if there is an actual dirty cap.  If we are racing with...
+something...we will end up here with ci->i_wrbuffer_refs but no dirty
+caps.
 
-This should improve the default read performance, as without it
-readahead is practically disabled.
-
-Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
+Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- fs/ceph/super.c |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
+ fs/ceph/snap.c |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index d4757c9..d47c5ec 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -779,6 +779,10 @@ static int ceph_register_bdi(struct super_block *sb,
- 		fsc->backing_dev_info.ra_pages =
- 			(fsc->mount_options->rsize + PAGE_CACHE_SIZE - 1)
- 			>> PAGE_SHIFT;
-+	else
-+		fsc->backing_dev_info.ra_pages =
-+			default_backing_dev_info.ra_pages;
-+
- 	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%d",
- 			   atomic_long_inc_return(&bdi_seq));
- 	if (!err)
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index ac030c9..e264371 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -465,9 +465,8 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
+ 		   cap_snap.  lucky us. */
+ 		dout("queue_cap_snap %p already pending\n", inode);
+ 		kfree(capsnap);
+-	} else if (ci->i_wrbuffer_ref_head ||
+-		   (dirty & (CEPH_CAP_AUTH_EXCL|CEPH_CAP_XATTR_EXCL|
+-			     CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR))) {
++	} else if (dirty & (CEPH_CAP_AUTH_EXCL|CEPH_CAP_XATTR_EXCL|
++			    CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR)) {
+ 		struct ceph_snap_context *snapc = ci->i_head_snapc;
+ 
+ 		/*
+@@ -480,7 +479,6 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
+ 		dout("queue_cap_snap %p cap_snap %p queuing under %p %s\n",
+ 		     inode, capsnap, snapc, ceph_cap_string(dirty));
+ 		ihold(inode);
+-		BUG_ON(dirty == 0);
+ 
+ 		atomic_set(&capsnap->nref, 1);
+ 		capsnap->ci = ci;
 -- 
 1.7.0
 
