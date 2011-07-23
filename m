@@ -1,79 +1,151 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 04/23] ceph: fix snap writeback when racing with writes
-Date: Fri, 22 Jul 2011 17:02:43 -0700
-Message-ID: <1311379382-9218-5-git-send-email-sage@newdream.net>
+Subject: [PATCH 11/23] ceph: fix ceph_lookup_open intent usage
+Date: Fri, 22 Jul 2011 17:02:50 -0700
+Message-ID: <1311379382-9218-12-git-send-email-sage@newdream.net>
 References: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44309 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44322 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753993Ab1GWAFx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:53 -0400
+	with ESMTP id S1754016Ab1GWAFy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jul 2011 20:05:54 -0400
 In-Reply-To: <1311379382-9218-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@newdream.net>
 
-There are two problems that come up when we try to queue a capsnap while a
-write is in progress:
+We weren't properly calling lookup_instantiate_filp when setting up the
+lookup intent, which could lead to file leakage on errors.  So:
 
- - The FILE_WR cap is held, but not yet dirty, so we may queue a capsnap
-   with dirty == 0.  That will crash later in __ceph_flush_snaps().  Or
-   on the FILE_WR cap if a write is in progress.
- - We may not have i_head_snapc set, which causes problems pretty quickly.
-   Look to the snaprealm in this case.
+ - use separate helper for the hidden snapdir translation, immediately
+   following the mds request
+ - use ceph_finish_lookup for the final dentry/return value dance in the
+   exit path
+ - lookup_instantiate_filp on success
 
+Reported-by: Al Viro <viro@ZenIV.linux.org.uk>
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- fs/ceph/snap.c |   23 ++++++++++++++++++++---
- 1 files changed, 20 insertions(+), 3 deletions(-)
+ fs/ceph/dir.c   |   31 ++++++++++++++++++++-----------
+ fs/ceph/file.c  |   23 +++++++++++++++--------
+ fs/ceph/super.h |    2 ++
+ 3 files changed, 37 insertions(+), 19 deletions(-)
 
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 54b14de..ac030c9 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -449,6 +449,15 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
- 	spin_lock(&inode->i_lock);
- 	used = __ceph_caps_used(ci);
- 	dirty = __ceph_caps_dirty(ci);
-+
-+	/*
-+	 * If there is a write in progress, treat that as a dirty Fw,
-+	 * even though it hasn't completed yet; by the time we finish
-+	 * up this capsnap it will be.
-+	 */
-+	if (used & CEPH_CAP_FILE_WR)
-+		dirty |= CEPH_CAP_FILE_WR;
-+
- 	if (__ceph_have_pending_cap_snap(ci)) {
- 		/* there is no point in queuing multiple "pending" cap_snaps,
- 		   as no new writes are allowed to start when pending, so any
-@@ -456,14 +465,22 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
- 		   cap_snap.  lucky us. */
- 		dout("queue_cap_snap %p already pending\n", inode);
- 		kfree(capsnap);
--	} else if (ci->i_wrbuffer_ref_head || (used & CEPH_CAP_FILE_WR) ||
-+	} else if (ci->i_wrbuffer_ref_head ||
- 		   (dirty & (CEPH_CAP_AUTH_EXCL|CEPH_CAP_XATTR_EXCL|
- 			     CEPH_CAP_FILE_EXCL|CEPH_CAP_FILE_WR))) {
- 		struct ceph_snap_context *snapc = ci->i_head_snapc;
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 53b441f..f39a409 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -482,18 +482,10 @@ static loff_t ceph_dir_llseek(struct file *file, loff_t offset, int origin)
+ }
  
--		dout("queue_cap_snap %p cap_snap %p queuing under %p\n", inode,
--		     capsnap, snapc);
-+		/*
-+		 * if we are a sync write, we may need to go to the snaprealm
-+		 * to get the current snapc.
-+		 */
-+		if (!snapc)
-+			snapc = ci->i_snap_realm->cached_context;
-+
-+		dout("queue_cap_snap %p cap_snap %p queuing under %p %s\n",
-+		     inode, capsnap, snapc, ceph_cap_string(dirty));
- 		ihold(inode);
-+		BUG_ON(dirty == 0);
+ /*
+- * Process result of a lookup/open request.
+- *
+- * Mainly, make sure we return the final req->r_dentry (if it already
+- * existed) in place of the original VFS-provided dentry when they
+- * differ.
+- *
+- * Gracefully handle the case where the MDS replies with -ENOENT and
+- * no trace (which it may do, at its discretion, e.g., if it doesn't
+- * care to issue a lease on the negative dentry).
++ * Handle lookups for the hidden .snap directory.
+  */
+-struct dentry *ceph_finish_lookup(struct ceph_mds_request *req,
+-				  struct dentry *dentry, int err)
++int ceph_handle_snapdir(struct ceph_mds_request *req,
++			struct dentry *dentry, int err)
+ {
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(dentry->d_sb);
+ 	struct inode *parent = dentry->d_parent->d_inode;
+@@ -510,7 +502,23 @@ struct dentry *ceph_finish_lookup(struct ceph_mds_request *req,
+ 		d_add(dentry, inode);
+ 		err = 0;
+ 	}
++	return err;
++}
  
- 		atomic_set(&capsnap->nref, 1);
- 		capsnap->ci = ci;
++/*
++ * Figure out final result of a lookup/open request.
++ *
++ * Mainly, make sure we return the final req->r_dentry (if it already
++ * existed) in place of the original VFS-provided dentry when they
++ * differ.
++ *
++ * Gracefully handle the case where the MDS replies with -ENOENT and
++ * no trace (which it may do, at its discretion, e.g., if it doesn't
++ * care to issue a lease on the negative dentry).
++ */
++struct dentry *ceph_finish_lookup(struct ceph_mds_request *req,
++				  struct dentry *dentry, int err)
++{
+ 	if (err == -ENOENT) {
+ 		/* no trace? */
+ 		err = 0;
+@@ -605,6 +613,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+ 	req->r_args.getattr.mask = cpu_to_le32(CEPH_STAT_CAP_INODE);
+ 	req->r_locked_dir = dir;
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
++	err = ceph_handle_snapdir(req, dentry, err);
+ 	dentry = ceph_finish_lookup(req, dentry, err);
+ 	ceph_mdsc_put_request(req);  /* will dput(dentry) */
+ 	dout("lookup result=%p\n", dentry);
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index e0115eb..f34d47d 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -223,8 +223,9 @@ struct dentry *ceph_lookup_open(struct inode *dir, struct dentry *dentry,
+ {
+ 	struct ceph_fs_client *fsc = ceph_sb_to_client(dir->i_sb);
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+-	struct file *file = nd->intent.open.file;
++	struct file *file;
+ 	struct ceph_mds_request *req;
++	struct dentry *ret;
+ 	int err;
+ 	int flags = nd->intent.open.flags - 1;  /* silly vfs! */
+ 
+@@ -245,15 +246,21 @@ struct dentry *ceph_lookup_open(struct inode *dir, struct dentry *dentry,
+ 	err = ceph_mdsc_do_request(mdsc,
+ 				   (flags & (O_CREAT|O_TRUNC)) ? dir : NULL,
+ 				   req);
+-	dentry = ceph_finish_lookup(req, dentry, err);
+-	if (!err && (flags & O_CREAT) && !req->r_reply_info.head->is_dentry)
++	err = ceph_handle_snapdir(req, dentry, err);
++	if (err)
++		goto out;
++	if ((flags & O_CREAT) && !req->r_reply_info.head->is_dentry)
+ 		err = ceph_handle_notrace_create(dir, dentry);
+-	if (!err)
+-		err = ceph_init_file(req->r_dentry->d_inode, file,
+-				     req->r_fmode);
++	if (err)
++		goto out;
++	file = lookup_instantiate_filp(nd, req->r_dentry, ceph_open);
++	if (IS_ERR(file))
++		err = PTR_ERR(file);
++out:
++	ret = ceph_finish_lookup(req, dentry, err);
+ 	ceph_mdsc_put_request(req);
+-	dout("ceph_lookup_open result=%p\n", dentry);
+-	return dentry;
++	dout("ceph_lookup_open result=%p\n", ret);
++	return ret;
+ }
+ 
+ int ceph_release(struct inode *inode, struct file *file)
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index a8a2733..c24891a 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -791,6 +791,8 @@ extern const struct dentry_operations ceph_dentry_ops, ceph_snap_dentry_ops,
+ 	ceph_snapdir_dentry_ops;
+ 
+ extern int ceph_handle_notrace_create(struct inode *dir, struct dentry *dentry);
++extern int ceph_handle_snapdir(struct ceph_mds_request *req,
++			       struct dentry *dentry, int err);
+ extern struct dentry *ceph_finish_lookup(struct ceph_mds_request *req,
+ 					 struct dentry *dentry, int err);
+ 
 -- 
 1.7.0
 
