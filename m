@@ -1,93 +1,102 @@
 From: Andrej Podzimek <andrej@podzimek.org>
 Subject: Re: Btrfs slowdown
-Date: Mon, 25 Jul 2011 10:51:09 +0200
-Message-ID: <4E2D2E7D.3040303@podzimek.org>
-References: <CAO47_-9BLKWUGDEuzaLqHSq9tZkAUaO8FMQEy1pPk9A2Hb+5AQ@mail.gmail.com>
+Date: Mon, 25 Jul 2011 11:45:49 +0200
+Message-ID: <4E2D3B4D.8050301@podzimek.org>
+References: <CAO47_-9BLKWUGDEuzaLqHSq9tZkAUaO8FMQEy1pPk9A2Hb+5AQ@mail.gmail.com> <4E2D2E7D.3040303@podzimek.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha1; boundary="=_charon-31312-1311583869-0001-2"
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-In-Reply-To: <CAO47_-9BLKWUGDEuzaLqHSq9tZkAUaO8FMQEy1pPk9A2Hb+5AQ@mail.gmail.com>
-Sender: linux-btrfs-owner@vger.kernel.org
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha1; boundary="=_charon-32260-1311587150-0001-2"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from charon.podzimek.org ([83.240.93.232]:33671 "EHLO podzimek.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751074Ab1GYJpw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 25 Jul 2011 05:45:52 -0400
+In-Reply-To: <4E2D2E7D.3040303@podzimek.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: chb@muc.de
 Cc: linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
 
 This is a MIME-formatted message.  If you see this text it means that your
 E-mail software does not support MIME-formatted messages.
 
---=_charon-31312-1311583869-0001-2
+--=_charon-32260-1311587150-0001-2
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: quoted-printable
 
-Hello,
-
-I can see something similar on the machines I maintain, mostly single-dis=
-k setups with a 2.6.39 kernel:
-
-	1) Heavy and frequent disk thrashing, although less than 20% of RAM is u=
-sed and no swap usage is reported.
-	2) During the disk thrashing, some processors (usually 2 or 3) spend 100=
-% of their time busy waiting, according to htop.
-	3) Some userspace applications freeze for tens of seconds during the thr=
-ashing and busy waiting, sometimes even htop itself...
-
-The problem has only been observed on 64-bit multiprocessors (Core i7 lap=
-top and Nehalem class server Xeons). A 32-bit multiprocessor (Intel Core =
-Duo) and a 64-bit uniprocessor (Intel Core 2 Duo class Celeron) do not se=
-em to have any issues.
-
-Furthermore, none of the machines had this problem with 2.6.38 and earlie=
-r kernels. Btrfs "just worked" before 2.6.39. I'll test 3.0 today to see =
-whether some of these issues disappear.
-
-Neither ceph nor any other remote/distributed filesystem (not even NFS) r=
-uns on the machines.
-
-The second problem listed above looks like illegal blocking of a vital sp=
-inlock during a long disk operation, which freezes some kernel subsystems=
- for an inordinate amount of time and causes a number of processors to wa=
-it actively for tens of seconds. (Needless to say that this is not accept=
-able on a laptop...)
-
-Web browsers (Firefox and Chromium) seem to trigger this issue slightly m=
-ore often than other applications, but I have no detailed statistics to p=
-rove this. ;-)
-
-Two Core i7 class multiprocessors work 100% flawlessly with ext4, althoug=
-h their kernel configuration is otherwise identical to the machines that =
-use Btrfs.
+Just a quick note: The issue seems to be gone in 3.0.0. But that's just a=
+ wild guess based on 1/2 hour without thrashing. :-)
 
 Andrej
 
-> Hi,
+> Hello,
 >
-> we are running a ceph cluster with btrfs as it's base filesystem
-> (kernel 3.0). At the beginning everything worked very well, but after
-> a few days (2-3) things are getting very slow.
+> I can see something similar on the machines I maintain, mostly single-d=
+isk setups with a 2.6.39 kernel:
 >
-> When I look at the object store servers I see heavy disk-i/o on the
-> btrfs filesystems (disk utilization is between 60% and 100%). I also
-> did some tracing on the Cepp-Object-Store-Daemon, but I'm quite
-> certain, that the majority of the disk I/O is not caused by ceph or
-> any other userland process.
+> 1) Heavy and frequent disk thrashing, although less than 20% of RAM is =
+used and no swap usage is reported.
+> 2) During the disk thrashing, some processors (usually 2 or 3) spend 10=
+0% of their time busy waiting, according to htop.
+> 3) Some userspace applications freeze for tens of seconds during the th=
+rashing and busy waiting, sometimes even htop itself...
 >
-> When reboot the system(s) the problems go away for another 2-3 days,
-> but after that, it starts again. I'm not sure if the problem is
-> related to the kernel warning I've reported last week. At least there
-> is no temporal relationship between the warning and the slowdown.
+> The problem has only been observed on 64-bit multiprocessors (Core i7 l=
+aptop and Nehalem class server Xeons). A 32-bit multiprocessor (Intel Cor=
+e Duo) and a 64-bit uniprocessor (Intel Core 2 Duo class Celeron) do not =
+seem to have any issues.
 >
-> Any hints on how to trace this would be welcome.
+> Furthermore, none of the machines had this problem with 2.6.38 and earl=
+ier kernels. Btrfs "just worked" before 2.6.39. I'll test 3.0 today to se=
+e whether some of these issues disappear.
 >
-> Thanks,
-> Christian
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Neither ceph nor any other remote/distributed filesystem (not even NFS)=
+ runs on the machines.
+>
+> The second problem listed above looks like illegal blocking of a vital =
+spinlock during a long disk operation, which freezes some kernel subsyste=
+ms for an inordinate amount of time and causes a number of processors to =
+wait actively for tens of seconds. (Needless to say that this is not acce=
+ptable on a laptop...)
+>
+> Web browsers (Firefox and Chromium) seem to trigger this issue slightly=
+ more often than other applications, but I have no detailed statistics to=
+ prove this. ;-)
+>
+> Two Core i7 class multiprocessors work 100% flawlessly with ext4, altho=
+ugh their kernel configuration is otherwise identical to the machines tha=
+t use Btrfs.
+>
+> Andrej
+>
+>> Hi,
+>>
+>> we are running a ceph cluster with btrfs as it's base filesystem
+>> (kernel 3.0). At the beginning everything worked very well, but after
+>> a few days (2-3) things are getting very slow.
+>>
+>> When I look at the object store servers I see heavy disk-i/o on the
+>> btrfs filesystems (disk utilization is between 60% and 100%). I also
+>> did some tracing on the Cepp-Object-Store-Daemon, but I'm quite
+>> certain, that the majority of the disk I/O is not caused by ceph or
+>> any other userland process.
+>>
+>> When reboot the system(s) the problems go away for another 2-3 days,
+>> but after that, it starts again. I'm not sure if the problem is
+>> related to the kernel warning I've reported last week. At least there
+>> is no temporal relationship between the warning and the slowdown.
+>>
+>> Any hints on how to trace this would be welcome.
+>>
+>> Thanks,
+>> Christian
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-btrfs"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html
 
 
---=_charon-31312-1311583869-0001-2
+--=_charon-32260-1311587150-0001-2
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -186,8 +195,8 @@ XYg+flS0kxPSubBbEfEUCVOHNcm4TAdyKwYehI9N8PD+MYIDuzCCA7cCAQEwgZMwgYwxCzAJ
 BgNVBAYTAklMMRYwFAYDVQQKEw1TdGFydENvbSBMdGQuMSswKQYDVQQLEyJTZWN1cmUgRGln
 aXRhbCBDZXJ0aWZpY2F0ZSBTaWduaW5nMTgwNgYDVQQDEy9TdGFydENvbSBDbGFzcyAyIFBy
 aW1hcnkgSW50ZXJtZWRpYXRlIENsaWVudCBDQQICC0YwCQYFKw4DAhoFAKCCAfwwGAYJKoZI
-hvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTEwNzI1MDg1MTA5WjAjBgkq
-hkiG9w0BCQQxFgQUPgv9aAWX+t84F59dPHHdSOmvEF0wXwYJKoZIhvcNAQkPMVIwUDALBglg
+hvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTEwNzI1MDk0NTQ5WjAjBgkq
+hkiG9w0BCQQxFgQUTPn70GoscT18SOVzVzJzpme3RIIwXwYJKoZIhvcNAQkPMVIwUDALBglg
 hkgBZQMEAQIwCgYIKoZIhvcNAwcwDgYIKoZIhvcNAwICAgCAMA0GCCqGSIb3DQMCAgFAMAcG
 BSsOAwIHMA0GCCqGSIb3DQMCAgEoMIGbBgkrBgEEAYI3EAQxgY0wgYowgYQxFDASBgNVBAMM
 C1BvZHppbWVrIENBMQswCQYDVQQGEwJDWjEOMAwGA1UEBwwFWmzDrW4xFTATBgNVBAoMDHBv
@@ -195,10 +204,10 @@ ZHppbWVrLm9yZzEVMBMGA1UECwwMcG9kemltZWsub3JnMSEwHwYJKoZIhvcNAQkBFhJhZG1p
 bkBwb2R6aW1lay5vcmcCAT0wgZ0GCyqGSIb3DQEJEAILMYGNoIGKMIGEMRQwEgYDVQQDDAtQ
 b2R6aW1layBDQTELMAkGA1UEBhMCQ1oxDjAMBgNVBAcMBVpsw61uMRUwEwYDVQQKDAxwb2R6
 aW1lay5vcmcxFTATBgNVBAsMDHBvZHppbWVrLm9yZzEhMB8GCSqGSIb3DQEJARYSYWRtaW5A
-cG9kemltZWsub3JnAgE9MA0GCSqGSIb3DQEBAQUABIIBABMaaDLV9BM3ffqpATcIoZWTYCwH
-Rj0h59AsOfxBmQ+yKyGo2vNNCLxKKE6Y2jl265hIr8tkliWmJ3NieZmqT6WkqxchLh7nUQ1F
-Fi54RLOjSKpAVLcYwRgQp1Nwdhs2yw3Lb98JR3gUe4zl/qo4fsItv+VLnQcxVEe5HJOdp6X0
-0Fby2/uL92hvbbfjPXL2lilnInsj6FT+MMSMEvpBdQUuwj9hTLztpLwGQFajhOree2fOia88
-k54yvZmhXq8lPtJDoOb1Yq8mYxIeoCUn+qifspkJq9BMbcTjQLvjL9yMXhiL7OIEnOOcPU6n
-USH3HaHqz8c6aYMRTr0BdXyK5wMAAAAAAAA=
---=_charon-31312-1311583869-0001-2--
+cG9kemltZWsub3JnAgE9MA0GCSqGSIb3DQEBAQUABIIBABVrsAADhbWQuNSbqTsQCxsnQJ/5
+xIfbZwg0BOotfoyqU5NiwrAh7Sx/mAlHuwEPh1I6DRbULYUNysH/AjAiho1iO8WXtURmP8pp
+TOqVFnvmEK7aDNawEtf/7Y8Wf6yHo61IPgFh/R84qGvEdAkvRuci01L7Jh8i7lc6D16EspzR
+0zeJMlJ0gMcP0cUgS9pA8FTIDw4lo1pSeM1T48NRmDLOECRLH3ovexMS+el7LBrA/MraRaRB
+2iKZmD80Hw+1BUfuH8Qq148NgXQ8zQp2eGUkn+ysSD2S5sf494IQw7+DaAkGPAno6YxQzWoO
+GO9R6nY/OyNiQ99D9Uc9fipFC+MAAAAAAAA=
+--=_charon-32260-1311587150-0001-2--
