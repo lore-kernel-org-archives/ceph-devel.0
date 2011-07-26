@@ -1,150 +1,240 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: peering PGs
-Date: Tue, 26 Jul 2011 08:00:43 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107260756160.5718@cobra.newdream.net>
-References: <CAO47_-87BvxVrgAXEqX6y59Mv_fmNZ9b=BK056OUiCSrt9Dwng@mail.gmail.com>
- <CAO47_-_UMAs5sgcV+iMa8dnV4JkrHSi9x+q54vPRac2Xwo1taQ@mail.gmail.com>
+From: Jojy Varghese <jojy.varghese@gmail.com>
+Subject: Re: Consistency vs efficiency
+Date: Tue, 26 Jul 2011 10:48:58 -0700
+Message-ID: <CAJD3hpX_9=1CQ0Lbgsbq9HQR_8p1FYeJ7KQfAGsi849yGr-2vg@mail.gmail.com>
+References: <CAJD3hpW_WjumjD1P1bOhwXWPZieQxyay0HOCH8AFpXfQCT4HMg@mail.gmail.com>
+	<Pine.LNX.4.64.1107210944550.5868@cobra.newdream.net>
+	<CAJD3hpUw_AW-w3pK-GUSHY92U9=SvL5xdtMqC4rUUK+fnnO6mw@mail.gmail.com>
+	<Pine.LNX.4.64.1107211047280.5868@cobra.newdream.net>
+	<CAJD3hpW3JLB+VH3Kg5JouSoDG0-fpXO-g=kMBJPx_1bWDgauNQ@mail.gmail.com>
+	<Pine.LNX.4.64.1107222049100.30052@cobra.newdream.net>
+	<CAJD3hpW6o9snd1UiLBLEewAxmKz3xi2Rer4E7X6m6wbwPV=byA@mail.gmail.com>
+	<Pine.LNX.4.64.1107231455180.15589@cobra.newdream.net>
+	<CAJD3hpWrEdjjM2ua2jOy7DSbyOnVhNAM1uZz+7N2sbDsMxZavg@mail.gmail.com>
+	<Pine.LNX.4.64.1107252109130.25672@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-18660101-1311692443=:5718"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57371 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753364Ab1GZO4v (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2011 10:56:51 -0400
-In-Reply-To: <CAO47_-_UMAs5sgcV+iMa8dnV4JkrHSi9x+q54vPRac2Xwo1taQ@mail.gmail.com>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:40485 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751202Ab1GZRs7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2011 13:48:59 -0400
+Received: by gxk21 with SMTP id 21so429194gxk.19
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2011 10:48:58 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1107252109130.25672@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-18660101-1311692443=:5718
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On Tue, 26 Jul 2011, Christian Brunner wrote:
-> OK  I've solved this by myself.
->=20
-> Since I knew that ther is replication between
->=20
-> osd001 and osd005,
->=20
-> as well as
->=20
-> osd001 and osd015,
-> osd001 and osd012,
->=20
-> I decided to take osd005, osd012 and osd015 offline. After that ceph
-> started to rebuild the PGs on other nodes.
-
-At the same time you mean?  Or just restarted them?
-
-The usual way to debug these situations is:
-
- - identify a stuck pg
- - figure out what osds it maps to.  [15,1]
- - turn on logs on those nodes:
-    ceph osd tell 15 injectargs '--debug-osd 20 --debug-ms 1'
-    ceph osd tell 1 injectargs '--debug-osd 20 --debug-ms 1'
- - restart peering by togging the primary (first osd, 15)
-    ceph osd down 15
- - send us the resulting logs (for all nodes)
-
-Even better if you also include other (old) osds that include pg data=20
-(osd1 in your case) in this.
-
-We definitely want to fix the core issue, so any help gathering the logs=20
-would be appreciated!  It's also possible that the above will 'fix' it=20
-because the peering issue is hard to hit.  In that case, cranking up the=20
-debug level after the initial crash but before you restart everything=20
-might be a good idea.
-
-Thanks!
-sage
+Sage
+ I tried the simple use case of mkdir on the ceph mounted dir but
+still see the issue. So i am wondering if our setup has anything to do
+with it (although ideally it should not). Anything i should be looking
+at given this behavior?'
 
 
->=20
-> Everything is fine now.
->=20
-> Regards,
-> Christian
->=20
-> 2011/7/26 Christian Brunner <chb@muc.de>:
-> > Another kernel crash another invalid ceph state...
-> >
-> > A memory allocation failure in the kernel (ixgbe) of one OSD-Server
-> > lead to a domino effect in our ceph cluster with "0 up, 0 in".
-> >
-> > When I restarted the cluster everything came up again. But I still
-> > have 6 peering PGs:
-> >
-> > pg v5898472: 3712 pgs: 3706 active+clean, 6 peering; 745 GB data, 775
-> > GB used, 57642 GB / 59615 GB avail
-> >
-> > # ceph pg dump -o - | grep peering
-> > 0.190 =A0 22 =A0 =A0 =A00 =A0 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 90112=
- =A0 92274688 =A0 =A0 =A0 =A0200
-> > =A0200 =A0 =A0 peering 6500'1256 =A0 =A0 =A0 7167'1063 =A0 =A0 =A0 [15,=
-1] =A0[15,1]
-> > 6500'1256 =A0 =A0 =A0 2011-07-22 11:22:55.798745
-> > 3.18d =A0 385 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 1529498=
- 1566204928 =A0 =A0 =A0300
-> > =A0300 =A0 =A0 peering 7013'134376 =A0 =A0 7167'20162 =A0 =A0 =A0[15,1]=
- =A0[15,1]
-> > 6933'132427 =A0 =A0 2011-07-22 11:22:56.488471
-> > 0.4c =A0 =A09 =A0 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 368=
-64 =A0 37748736 =A0 =A0 =A0 =A0200
-> > =A0200 =A0 =A0 peering 6500'673 =A0 =A0 =A0 =A07163'1095 =A0 =A0 =A0 [1=
-2,1] =A0[12,1]
-> > 6500'673 =A0 =A0 =A0 =A02011-07-22 11:22:20.226119
-> > 3.49 =A0 =A0171 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 67146=
-7 =A0687580272 =A0 =A0 =A0 295
-> > =A0295 =A0 =A0 peering 7013'10276 =A0 =A0 =A07163'2879 =A0 =A0 =A0 [12,=
-1] =A0[12,1]
-> > 6933'9455 =A0 =A0 =A0 2011-07-22 11:22:20.701854
-> > 0.35e =A0 6 =A0 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 24576=
- =A0 25165824 =A0 =A0 =A0 =A0200
-> > =A0200 =A0 =A0 peering 6500'628 =A0 =A0 =A0 =A07163'1142 =A0 =A0 =A0 [1=
-2,1] =A0[12,1]
-> > 6500'628 =A0 =A0 =A0 =A02011-07-22 11:22:19.267804
-> > 3.35b =A0 198 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 0 =A0 =A0 =A0 791800 =
-=A0810803200 =A0 =A0 =A0 297
-> > =A0297 =A0 =A0 peering 7013'66727 =A0 =A0 =A07163'5759 =A0 =A0 =A0 [12,=
-1] =A0[12,1]
-> > 6933'65715 =A0 =A0 =A02011-07-22 11:22:20.035265
-> >
-> >
-> > "ceph pg map" is consistent with "ceph pg dump":
-> >
-> > # ceph pg map 0.190
-> > 2011-07-26 08:46:19.330981 mon <- [pg,map,0.190]
-> > 2011-07-26 08:46:19.331981 mon1 -> 'osdmap e7273 pg 0.190 (0.190) ->
-> > up [15,1] acting [15,1]' (0)
-> >
-> >
-> > But directorys of the PGs are present on multiple nodes (for example
-> > on osd005 for 0.190):
-> >
-> > /ceph/osd.001/current/0.190_head
-> > /ceph/osd.001/snap_1650435/0.190_head
-> > /ceph/osd.001/snap_1650445/0.190_head
-> > /ceph/osd.005/current/0.190_head
-> > /ceph/osd.005/snap_1572317/0.190_head
-> > /ceph/osd.005/snap_1572323/0.190_head
-> > /ceph/osd.015/current/0.190_head
-> > /ceph/osd.015/snap_1467152/0.190_head
-> >
-> > Any hint on how to proceed yould be great.
-> >
-> > Thanks,
-> > Christian
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-18660101-1311692443=:5718--
+
+thx
+Jojy
+
+On Mon, Jul 25, 2011 at 9:12 PM, Sage Weil <sage@newdream.net> wrote:
+> On Mon, 25 Jul 2011, Jojy Varghese wrote:
+>> What i observe is that after a mkdir, the inode CAPS loses the
+>> lease(FILE_SHARED). I would have thought that the owing client shoul=
+d
+>> have a FILE_EXCL on the files/dirs it creates.
+>>
+>> Since it doesnt have a lease, the dentry(after splicing) is not cach=
+ed.
+>
+> Can you describe the specific sequence of operations you're doing? =C2=
+=A0I'm
+> not seeing this behavior. =C2=A0I see
+>
+> $ mkdir foo
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0client->mds lookup #1/foo
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0client->mds mkdir #1/foo
+> $ mkdir foo/a
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0client->mds lookup #100000000/a
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0client->mds mkdir #100000000/a
+>
+> with no repeated lookup on foo.
+>
+> sage
+>
+>
+>>
+>> thanks
+>> Jojy
+>>
+>> On Sat, Jul 23, 2011 at 2:56 PM, Sage Weil <sage@newdream.net> wrote=
+:
+>> > On Fri, 22 Jul 2011, Jojy Varghese wrote:
+>> >> Not sure how it is designed to work but I assume that some kind o=
+f
+>> >> async RPC mechanism exists from the MDCs to the clients to update=
+ the
+>> >> CAP for a file from "exclusive" to "shared". This will allow the
+>> >> cached dentries to be pruned/dropped when another client updates =
+the
+>> >> file.
+>> >
+>> > Right. =C2=A0If the MDS needs to modify a dentry, it revoke any is=
+sued client
+>> > leases before granting the write/exclusive lock to process the req=
+uest.
+>> >
+>> > sage
+>> >
+>> >>
+>> >> -Jojy
+>> >>
+>> >> On Fri, Jul 22, 2011 at 8:51 PM, Sage Weil <sage@newdream.net> wr=
+ote:
+>> >> > On Fri, 22 Jul 2011, Jojy Varghese wrote:
+>> >> >> Sage would the latest patches fix the lookup issue?
+>> >> >
+>> >> > No, the blocker there is the '[PATCH] vfs: add d_prune dentry o=
+peration'
+>> >> > email on Jul 8 to linux-fsdevel and lkml. =C2=A0Once this set g=
+oes in (and
+>> >> > cleans up a bunch of stuff Al found in a code audit last weeken=
+d) I'll be
+>> >> > bugging him about it again.
+>> >> >
+>> >> > sage
+>> >> >
+>> >> >
+>> >> >
+>> >> >>
+>> >> >> On Thu, Jul 21, 2011 at 10:55 AM, Sage Weil <sage@newdream.net=
+> wrote:
+>> >> >> > On Thu, 21 Jul 2011, Jojy Varghese wrote:
+>> >> >> >> Thanks for the response Sage. We are using 2.6.39 kernel an=
+d in the
+>> >> >> >> "ceph_lookup" method, i see that there is a shortcut for de=
+ciding
+>> >> >> >> ENOENT but after the MDS lookup, i dont see a d_add. I am s=
+ure i am
+>> >> >> >> missing something here.
+>> >> >> >
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0dout(" dir %p complete, -ENOENT\n", dir);
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0d_add(dentry, NULL);
+>> >> >> >
+>> >> >> > ...but that is only for the negative lookup in a directory w=
+ith the
+>> >> >> > 'complete' flag set. =C2=A0And it's never set currently beca=
+use we don't have
+>> >> >> > d_prune yet (and the old use of d_release was racy). =C2=A0S=
+o ignore this part
+>> >> >> > for now!
+>> >> >> >
+>> >> >> > You have an existing, unchanging, directory that you're seei=
+ng repeated
+>> >> >> > lookups on, right? =C2=A0Like the top-level directory in the=
+ heirarchy you're
+>> >> >> > copying? =C2=A0And the client is doing repeated lookups on t=
+he same name?
+>> >> >> >
+>> >> >> > The way to debug this is probably to start with the messages=
+ passing to
+>> >> >> > the MDS and verifying that lookups are duplicated. =C2=A0The=
+n enable the
+>> >> >> > logging on the kernel client and see why the client isn't us=
+es leases or
+>> >> >> > the FILE_SHARED cap to avoid them. =C2=A0We can help you thr=
+ough that on #ceph
+>> >> >> > if you like.
+>> >> >> >
+>> >> >> > sage
+>> >> >> >
+>> >> >> >
+>> >> >> >>
+>> >> >> >> thanks again
+>> >> >> >> Jojy
+>> >> >> >>
+>> >> >> >> On Thu, Jul 21, 2011 at 9:49 AM, Sage Weil <sage@newdream.n=
+et> wrote:
+>> >> >> >> > On Thu, 21 Jul 2011, Jojy Varghese wrote:
+>> >> >> >> >> Hi
+>> >> >> >> >> =C2=A0 I just started looking at the ceph code in kernel=
+ and had a question
+>> >> >> >> >> about performance considerations for lookup operations. =
+I noticed that
+>> >> >> >> >> for every operation (say copying a directory), the root =
+dentry is
+>> >> >> >> >> "looked" up multiple times and since they all go to MDS =
+for the actual
+>> >> >> >> >> lookup operation, it effects the performance. I am sure =
+consistency is
+>> >> >> >> >> the winner here. Is there any plan to improve this, mayb=
+e by having
+>> >> >> >> >> MDS push the capability down to the clients when the den=
+try is
+>> >> >> >> >> updated. So say from CAP_EXCL to CAP_SHARED when the den=
+try is
+>> >> >> >> >> modified. This was the client node can cache the lookup =
+operation and
+>> >> >> >> >> does not have to make a round trip to the MDS.
+>> >> >> >> >
+>> >> >> >> > In general, the MDS has two ways of keeping a client's ca=
+ched dentry
+>> >> >> >> > consistent:
+>> >> >> >> >
+>> >> >> >> > =C2=A0- it can issue the FILE_SHARED capability bit on th=
+e parent directory,
+>> >> >> >> > which means the entire directory is static and the client=
+ can cache
+>> >> >> >> > dentry.
+>> >> >> >> > =C2=A0- if it can't do that, it will issue a per-dentry l=
+ease
+>> >> >> >> >
+>> >> >> >> > There is an additional 'complete' bit that is used to ind=
+icate on the
+>> >> >> >> > client that it has the _entire_ directory in cache. =C2=A0=
+If set, it can do
+>> >> >> >> > negative lookups and readdir without hitting the MDS. =C2=
+=A0That's currently
+>> >> >> >> > broken, pending the addition of a d_prune dentry_operatio=
+n (see
+>> >> >> >> > linux-fsdevel email from July 8).
+>> >> >> >> >
+>> >> >> >> > Anyway, long story short, if you're seeing repeated looku=
+ps on a dentry
+>> >> >> >> > that isn't changing, something is broken. =C2=A0Can you d=
+escribe the workload
+>> >> >> >> > in more detail? =C2=A0Which versions of the client and md=
+s are you running?
+>> >> >> >> >
+>> >> >> >> > sage
+>> >> >> >> >
+>> >> >> >> >
+>> >> >> >> --
+>> >> >> >> To unsubscribe from this list: send the line "unsubscribe c=
+eph-devel" in
+>> >> >> >> the body of a message to majordomo@vger.kernel.org
+>> >> >> >> More majordomo info at =C2=A0http://vger.kernel.org/majordo=
+mo-info.html
+>> >> >> >>
+>> >> >> >>
+>> >> >>
+>> >> >>
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-inf=
+o.html
+>> >>
+>> >>
+>>
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
