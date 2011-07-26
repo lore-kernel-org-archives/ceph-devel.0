@@ -1,78 +1,201 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: My favorite question
-Date: Tue, 26 Jul 2011 03:05:22 +0300
-Message-ID: <4E2E04C2.2050000@ufm.su>
-References: <4E25646C.4000909@ufm.su>	<Pine.LNX.4.64.1107190728370.5656@cobra.newdream.net>	<4E2996DD.8040809@ufm.su>	<CAF3hT9CpsEE5bnyaPiS6hv-Y+4VbwP-1uQ2CWVePXFcSKphkYA@mail.gmail.com>	<4E2DDD1D.2040003@ufm.su> <CAF3hT9CZZAn7+bV02TNtSunj4zDTvfwpMkDc-NyRJMXAh85hJg@mail.gmail.com>
+From: Jojy Varghese <jojy.varghese@gmail.com>
+Subject: Re: Consistency vs efficiency
+Date: Mon, 25 Jul 2011 17:37:01 -0700
+Message-ID: <CAJD3hpWrEdjjM2ua2jOy7DSbyOnVhNAM1uZz+7N2sbDsMxZavg@mail.gmail.com>
+References: <CAJD3hpW_WjumjD1P1bOhwXWPZieQxyay0HOCH8AFpXfQCT4HMg@mail.gmail.com>
+	<Pine.LNX.4.64.1107210944550.5868@cobra.newdream.net>
+	<CAJD3hpUw_AW-w3pK-GUSHY92U9=SvL5xdtMqC4rUUK+fnnO6mw@mail.gmail.com>
+	<Pine.LNX.4.64.1107211047280.5868@cobra.newdream.net>
+	<CAJD3hpW3JLB+VH3Kg5JouSoDG0-fpXO-g=kMBJPx_1bWDgauNQ@mail.gmail.com>
+	<Pine.LNX.4.64.1107222049100.30052@cobra.newdream.net>
+	<CAJD3hpW6o9snd1UiLBLEewAxmKz3xi2Rer4E7X6m6wbwPV=byA@mail.gmail.com>
+	<Pine.LNX.4.64.1107231455180.15589@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:39235 "EHLO mail.ufm.su"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752062Ab1GZAFY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 25 Jul 2011 20:05:24 -0400
-In-Reply-To: <CAF3hT9CZZAn7+bV02TNtSunj4zDTvfwpMkDc-NyRJMXAh85hJg@mail.gmail.com>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:47508 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751694Ab1GZAhD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Jul 2011 20:37:03 -0400
+Received: by gyh3 with SMTP id 3so2577457gyh.19
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Jul 2011 17:37:01 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1107231455180.15589@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-On 07/26/2011 01:55 AM, Gregory Farnum wrote:
-> On Mon, Jul 25, 2011 at 2:16 PM, Fyodor Ustinov<ufm@ufm.su>  wrote:
->> On 07/25/2011 11:54 PM, Gregory Farnum wrote:
->>> Hmmm, what are you doing with this PG? Have you been doing any snapshots?
->> I'm not use snapshot in ceph. Only as simple file system. And I'm not doing
->> anything "special" or "unnatural" :)
-> Drat. In that case this isn't the bug we hoped/thought it was.
-> How old is this filesystem, what version of the code are you running
-> now, and do you have OSD logging?
+What i observe is that after a mkdir, the inode CAPS loses the
+lease(FILE_SHARED). I would have thought that the owing client should
+have a FILE_EXCL on the files/dirs it creates.
 
-I'm using the latest available official version for ubuntu (now - 0.31, look forward to 0.32 :) from yours aptitude repository.
-FS created 2011-06-09 (I do not remember version number).
+Since it doesnt have a lease, the dentry(after splicing) is not cached.
 
-I do not have "full" log.
+thanks
+Jojy
 
-
-osd.5.log.7.gz:2011-07-18 14:00:25.520178 7f3b30884700 log [ERR] : 0.f8 scrub stat mismatch, got 2067/2067 objects, 0/0 clones, 8595631307/8560758987 bytes, 8394181/8360126 kb.
-osd.5.log.7.gz:2011-07-18 14:00:25.520229 7f3b30884700 log [ERR] : 0.f8 scrub 1 errors
-osd.5.log.6.gz:2011-07-19 14:00:34.185655 7f3b31085700 log [ERR] : 0.f8 scrub stat mismatch, got 2074/2074 objects, 0/0 clones, 8624991435/8590119115 bytes, 8422853/8388798 kb.
-osd.5.log.6.gz:2011-07-19 14:00:34.185726 7f3b31085700 log [ERR] : 0.f8 scrub 1 errors
-
-mon.0.log.6.gz:2011-07-19 17:26:38.478032 7fb3877d4700 mon.0@0(leader) e1 handle_command mon_command(pg repair 0.f8 v 0) v1
-
-osd.5.log.6.gz:2011-07-19 17:26:38.588817 7f3b30884700 log [ERR] : 0.f8 repair stat mismatch, got 2074/2074 objects, 0/0 clones, 8624991435/8590119115 bytes, 8422853/8388798 kb.
-osd.5.log.6.gz:2011-07-19 17:26:38.588900 7f3b30884700 log [ERR] : 0.f8 repair 1 errors, 1 fixed
-
-osd.5.log.5.gz:2011-07-20 17:26:44.616686 7f3b30884700 log [ERR] : 0.f8 scrub stat mismatch, got 2082/2082 objects, 0/0 clones, 8623673547/8658545867 bytes, 8421566/8455621 kb.
-osd.5.log.5.gz:2011-07-20 17:26:44.616740 7f3b30884700 log [ERR] : 0.f8 scrub 1 errors
-osd.5.log.5.gz:2011-07-20 17:26:44.616686 7f3b30884700 log [ERR] : 0.f8 scrub stat mismatch, got 2082/2082 objects, 0/0 clones, 8623673547/8658545867 bytes, 8421566/8455621 kb.
-osd.5.log.5.gz:2011-07-20 17:26:44.616740 7f3b30884700 log [ERR] : 0.f8 scrub 1 errors
-osd.5.log.3.gz:2011-07-22 17:26:51.010097 7f3b30884700 log [ERR] : 0.f8 scrub stat mismatch, got 2095/2095 objects, 0/0 clones, 8678199499/8713071819 bytes, 8474814/8508869 kb.
-osd.5.log.3.gz:2011-07-22 17:26:51.010153 7f3b30884700 log [ERR] : 0.f8 scrub 1 errors
-
-mon.0.log.3.gz:2011-07-22 18:18:24.207401 7fb3877d4700 mon.0@0(leader) e1 handle_command mon_command(pg repair 0.f8 v 0) v1
-
-osd.5.log.3.gz:2011-07-22 18:18:24.316597 7f3b30884700 log [ERR] : 0.f8 repair stat mismatch, got 2095/2095 objects, 0/0 clones, 8678199499/8713071819 bytes, 8474814/8508869 kb.
-osd.5.log.3.gz:2011-07-22 18:18:24.316673 7f3b30884700 log [ERR] : 0.f8 repair 1 errors, 1 fixed
-
-mon.0.log.3.gz:2011-07-22 18:26:00.897319 7fb3877d4700 mon.0@0(leader) e1 handle_command mon_command(pg repair 0.f8 v 0) v1
-
-osd.5.log.3.gz:2011-07-22 18:26:00.997632 7f3b30884700 log [INF] : 0.f8 repair ok, 0 fixed
-
-osd.5.log.2.gz:2011-07-23 08:25:44.516668 7f3b31085700 osd5 705 pg[0.f8( v 705'2782 (705'2772,705'2782] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2772 !hml active+clean]  sending commit on repgather(0x7f3b1d12fe80 applied 705'2774 rep_tid=58199 wfack= wfdisk= op=osd_op(client4814.0:525313 1000000b013.00000007 [write 0~2203648] 0.f8 snapc 1=[]) v2) 0x7f3b1c7cdd30
-osd.5.log.2.gz:2011-07-23 08:25:44.516939 7f3b30884700 osd5 705 pg[0.f8( v 705'2782 (705'2772,705'2782] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2773 !hml active+clean]  sending commit on repgather(0x7f3b0d5d9270 applied 705'2775 rep_tid=58200 wfack= wfdisk= op=osd_op(client4814.0:525314 1000000b013.00000007 [write 2203648~6144] 0.f8 snapc 1=[]) v2) 0x7f3b0d5d94b0
-osd.5.log.2.gz:2011-07-23 08:25:44.517044 7f3b31085700 osd5 705 pg[0.f8( v 705'2782 (705'2772,705'2782] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2774 !hml active+clean]  sending commit on repgather(0x7f3b1c071ed0 applied 705'2776 rep_tid=58201 wfack= wfdisk= op=osd_op(client4814.0:525315 1000000b013.00000007 [write 2209792~288768] 0.f8 snapc 1=[]) v2) 0x7f3b1c351c10
-osd.5.log.2.gz:2011-07-23 08:25:44.517144 7f3b31085700 osd5 705 pg[0.f8( v 705'2782 (705'2772,705'2782] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2775 !hml active+clean]  sending commit on repgather(0x7f3b0ce8db70 applied 705'2777 rep_tid=58202 wfack= wfdisk= op=osd_op(client4814.0:525316 1000000b013.00000007 [write 2498560~8192] 0.f8 snapc 1=[]) v2) 0x7f3b0d5d9840
-osd.5.log.2.gz:2011-07-23 08:25:44.517596 7f3b30884700 osd5 705 pg[0.f8( v 705'2782 (705'2772,705'2782] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2776 !hml active+clean]  sending commit on repgather(0x7f3b1ceab010 applied 705'2778 rep_tid=58203 wfack= wfdisk= op=osd_op(client4814.0:525317 1000000b013.00000007 [write 2506752~8192] 0.f8 snapc 1=[]) v2) 0x7f3b1c351980
-osd.5.log.2.gz:2011-07-23 08:25:44.517666 7f3b31085700 osd5 705 pg[0.f8( v 705'2782 (705'2772,705'2782] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2777 !hml active+clean]  sending commit on repgather(0x7f3b0d5dac70 applied 705'2779 rep_tid=58204 wfack= wfdisk= op=osd_op(client4814.0:525318 1000000b013.00000007 [write 2514944~8192] 0.f8 snapc 1=[]) v2) 0x7f3b0ceaeb50
-osd.5.log.2.gz:2011-07-23 08:25:44.517731 7f3b30884700 osd5 705 pg[0.f8( v 705'2782 (705'2772,705'2782] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2778 !hml active+clean]  sending commit on repgather(0x7f3b1cc216a0 applied 705'2780 rep_tid=58205 wfack= wfdisk= op=osd_op(client4814.0:525319 1000000b013.00000007 [write 2523136~16384] 0.f8 snapc 1=[]) v2) 0x7f3b1c79dd50
-osd.5.log.2.gz:2011-07-23 08:25:44.517794 7f3b31085700 osd5 705 pg[0.f8( v 705'2782 (705'2772,705'2782] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2779 !hml active+clean]  sending commit on repgather(0x7f3b0d5e2370 applied 705'2781 rep_tid=58206 wfack= wfdisk= op=osd_op(client4814.0:525320 1000000b013.00000007 [write 2539520~16384] 0.f8 snapc 1=[]) v2) 0x7f3b0ce917f0
-osd.5.log.2.gz:2011-07-23 08:25:44.517887 7f3b30884700 osd5 705 pg[0.f8( v 705'2782 (705'2772,705'2782] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2780 !hml active+clean]  sending commit on repgather(0x7f3b1dcdb3f0 applied 705'2782 rep_tid=58207 wfack= wfdisk= op=osd_op(client4814.0:525321 1000000b013.00000007 [write 2555904~16384] 0.f8 snapc 1=[]) v2) 0x7f3b1c356ad0
-osd.5.log.2.gz:2011-07-23 08:25:44.560037 7f3b30884700 osd5 705 pg[0.f8( v 705'2783 (705'2781,705'2783] n=2099 ec=2 les/c 705/705 704/704/700) [5,4] r=0 mlcod 705'2781 !hml active+clean]  sending commit on repgather(0x7f3b0d5d9d90 applied 705'2783 rep_tid=58208 wfack= wfdisk= op=osd_op(client4814.0:525322 1000000b013.00000007 [write 2572288~1622016] 0.f8 snapc 1=[]) v2) 0x7f3b0ceb2050
-osd.5.log.2.gz:2011-07-23 18:26:07.421820 7f3b31085700 log [INF] : 0.f8 scrub ok
-
-
-WBR,
-     Fyodor.
-
-
+On Sat, Jul 23, 2011 at 2:56 PM, Sage Weil <sage@newdream.net> wrote:
+> On Fri, 22 Jul 2011, Jojy Varghese wrote:
+>> Not sure how it is designed to work but I assume that some kind of
+>> async RPC mechanism exists from the MDCs to the clients to update th=
+e
+>> CAP for a file from "exclusive" to "shared". This will allow the
+>> cached dentries to be pruned/dropped when another client updates the
+>> file.
+>
+> Right. =C2=A0If the MDS needs to modify a dentry, it revoke any issue=
+d client
+> leases before granting the write/exclusive lock to process the reques=
+t.
+>
+> sage
+>
+>>
+>> -Jojy
+>>
+>> On Fri, Jul 22, 2011 at 8:51 PM, Sage Weil <sage@newdream.net> wrote=
+:
+>> > On Fri, 22 Jul 2011, Jojy Varghese wrote:
+>> >> Sage would the latest patches fix the lookup issue?
+>> >
+>> > No, the blocker there is the '[PATCH] vfs: add d_prune dentry oper=
+ation'
+>> > email on Jul 8 to linux-fsdevel and lkml. =C2=A0Once this set goes=
+ in (and
+>> > cleans up a bunch of stuff Al found in a code audit last weekend) =
+I'll be
+>> > bugging him about it again.
+>> >
+>> > sage
+>> >
+>> >
+>> >
+>> >>
+>> >> On Thu, Jul 21, 2011 at 10:55 AM, Sage Weil <sage@newdream.net> w=
+rote:
+>> >> > On Thu, 21 Jul 2011, Jojy Varghese wrote:
+>> >> >> Thanks for the response Sage. We are using 2.6.39 kernel and i=
+n the
+>> >> >> "ceph_lookup" method, i see that there is a shortcut for decid=
+ing
+>> >> >> ENOENT but after the MDS lookup, i dont see a d_add. I am sure=
+ i am
+>> >> >> missing something here.
+>> >> >
+>> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0dout(" dir %p complete, -ENOENT\n", dir);
+>> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0d_add(dentry, NULL);
+>> >> >
+>> >> > ...but that is only for the negative lookup in a directory with=
+ the
+>> >> > 'complete' flag set. =C2=A0And it's never set currently because=
+ we don't have
+>> >> > d_prune yet (and the old use of d_release was racy). =C2=A0So i=
+gnore this part
+>> >> > for now!
+>> >> >
+>> >> > You have an existing, unchanging, directory that you're seeing =
+repeated
+>> >> > lookups on, right? =C2=A0Like the top-level directory in the he=
+irarchy you're
+>> >> > copying? =C2=A0And the client is doing repeated lookups on the =
+same name?
+>> >> >
+>> >> > The way to debug this is probably to start with the messages pa=
+ssing to
+>> >> > the MDS and verifying that lookups are duplicated. =C2=A0Then e=
+nable the
+>> >> > logging on the kernel client and see why the client isn't uses =
+leases or
+>> >> > the FILE_SHARED cap to avoid them. =C2=A0We can help you throug=
+h that on #ceph
+>> >> > if you like.
+>> >> >
+>> >> > sage
+>> >> >
+>> >> >
+>> >> >>
+>> >> >> thanks again
+>> >> >> Jojy
+>> >> >>
+>> >> >> On Thu, Jul 21, 2011 at 9:49 AM, Sage Weil <sage@newdream.net>=
+ wrote:
+>> >> >> > On Thu, 21 Jul 2011, Jojy Varghese wrote:
+>> >> >> >> Hi
+>> >> >> >> =C2=A0 I just started looking at the ceph code in kernel an=
+d had a question
+>> >> >> >> about performance considerations for lookup operations. I n=
+oticed that
+>> >> >> >> for every operation (say copying a directory), the root den=
+try is
+>> >> >> >> "looked" up multiple times and since they all go to MDS for=
+ the actual
+>> >> >> >> lookup operation, it effects the performance. I am sure con=
+sistency is
+>> >> >> >> the winner here. Is there any plan to improve this, maybe b=
+y having
+>> >> >> >> MDS push the capability down to the clients when the dentry=
+ is
+>> >> >> >> updated. So say from CAP_EXCL to CAP_SHARED when the dentry=
+ is
+>> >> >> >> modified. This was the client node can cache the lookup ope=
+ration and
+>> >> >> >> does not have to make a round trip to the MDS.
+>> >> >> >
+>> >> >> > In general, the MDS has two ways of keeping a client's cache=
+d dentry
+>> >> >> > consistent:
+>> >> >> >
+>> >> >> > =C2=A0- it can issue the FILE_SHARED capability bit on the p=
+arent directory,
+>> >> >> > which means the entire directory is static and the client ca=
+n cache
+>> >> >> > dentry.
+>> >> >> > =C2=A0- if it can't do that, it will issue a per-dentry leas=
+e
+>> >> >> >
+>> >> >> > There is an additional 'complete' bit that is used to indica=
+te on the
+>> >> >> > client that it has the _entire_ directory in cache. =C2=A0If=
+ set, it can do
+>> >> >> > negative lookups and readdir without hitting the MDS. =C2=A0=
+That's currently
+>> >> >> > broken, pending the addition of a d_prune dentry_operation (=
+see
+>> >> >> > linux-fsdevel email from July 8).
+>> >> >> >
+>> >> >> > Anyway, long story short, if you're seeing repeated lookups =
+on a dentry
+>> >> >> > that isn't changing, something is broken. =C2=A0Can you desc=
+ribe the workload
+>> >> >> > in more detail? =C2=A0Which versions of the client and mds a=
+re you running?
+>> >> >> >
+>> >> >> > sage
+>> >> >> >
+>> >> >> >
+>> >> >> --
+>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph=
+-devel" in
+>> >> >> the body of a message to majordomo@vger.kernel.org
+>> >> >> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-=
+info.html
+>> >> >>
+>> >> >>
+>> >>
+>> >>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
+>>
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
