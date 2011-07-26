@@ -1,80 +1,36 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: peering PGs
-Date: Tue, 26 Jul 2011 20:46:02 +0200
-Message-ID: <CAO47_-8veR6AzSngmKxNi0uadp9K9_fyw2aGr8nGFcDLhY4ZQA@mail.gmail.com>
-References: <CAO47_-87BvxVrgAXEqX6y59Mv_fmNZ9b=BK056OUiCSrt9Dwng@mail.gmail.com>
-	<CAO47_-_UMAs5sgcV+iMa8dnV4JkrHSi9x+q54vPRac2Xwo1taQ@mail.gmail.com>
-	<Pine.LNX.4.64.1107260756160.5718@cobra.newdream.net>
-Reply-To: chb@muc.de
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: Re: My favorite question
+Date: Tue, 26 Jul 2011 22:19:56 +0300
+Message-ID: <4E2F135C.5010306@ufm.su>
+References: <4E25646C.4000909@ufm.su>	<Pine.LNX.4.64.1107190728370.5656@cobra.newdream.net>	<4E2996DD.8040809@ufm.su>	<CAF3hT9CpsEE5bnyaPiS6hv-Y+4VbwP-1uQ2CWVePXFcSKphkYA@mail.gmail.com>	<4E2DDD1D.2040003@ufm.su>	<CAF3hT9CZZAn7+bV02TNtSunj4zDTvfwpMkDc-NyRJMXAh85hJg@mail.gmail.com>	<4E2E04C2.2050000@ufm.su>	<CAF3hT9AMrbtu051uQaBAAMnfnUWrSFdBHix9FFYgzLrg42YV5g@mail.gmail.com>	<4E2F0981.50504@ufm.su> <CAF3hT9AD+f6gEbzihUpNFKSfhALvMoPpudHDXxnmL5PRyOPZ0Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:59098 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753103Ab1GZSqE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2011 14:46:04 -0400
-Received: by vxh35 with SMTP id 35so539243vxh.19
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2011 11:46:03 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1107260756160.5718@cobra.newdream.net>
+Received: from mail.ufm.su ([77.120.103.19]:39208 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751373Ab1GZTT7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 26 Jul 2011 15:19:59 -0400
+In-Reply-To: <CAF3hT9AD+f6gEbzihUpNFKSfhALvMoPpudHDXxnmL5PRyOPZ0Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-2011/7/26 Sage Weil <sage@newdream.net>:
-> On Tue, 26 Jul 2011, Christian Brunner wrote:
->> OK =A0I've solved this by myself.
->>
->> Since I knew that ther is replication between
->>
->> osd001 and osd005,
->>
->> as well as
->>
->> osd001 and osd015,
->> osd001 and osd012,
->>
->> I decided to take osd005, osd012 and osd015 offline. After that ceph
->> started to rebuild the PGs on other nodes.
->
-> At the same time you mean? =A0Or just restarted them?
+On 07/26/2011 09:40 PM, Gregory Farnum wrote:
+> On Tue, Jul 26, 2011 at 11:37 AM, Fyodor Ustinov<ufm@ufm.su>  wrote:
+>> On 07/26/2011 09:07 PM, Gregory Farnum wrote:
+>>> The log is giving me some very strange information. Can you attach all
+>>> the logs that you have to tracker issue #1340?
+>>> (http://tracker.newdream.net/issues/1340)
+>>> Thanks!
+>>> -Greg
+>>>
+>> "All" - all available? Or only osd5?
+> osd5 for now. Maybe the other daemon logs later. :)
 
-At the same time.
+Done!
 
-> The usual way to debug these situations is:
->
-> =A0- identify a stuck pg
-> =A0- figure out what osds it maps to. =A0[15,1]
-> =A0- turn on logs on those nodes:
-> =A0 =A0ceph osd tell 15 injectargs '--debug-osd 20 --debug-ms 1'
-> =A0 =A0ceph osd tell 1 injectargs '--debug-osd 20 --debug-ms 1'
-> =A0- restart peering by togging the primary (first osd, 15)
-> =A0 =A0ceph osd down 15
-> =A0- send us the resulting logs (for all nodes)
->
-> Even better if you also include other (old) osds that include pg data
-> (osd1 in your case) in this.
->
-> We definitely want to fix the core issue, so any help gathering the l=
-ogs
-> would be appreciated! =A0It's also possible that the above will 'fix'=
- it
-> because the peering issue is hard to hit. =A0In that case, cranking u=
-p the
-> debug level after the initial crash but before you restart everything
-> might be a good idea.
+WBR,
+     Fyodor.
 
-I will turn on debuging next time.
-
-I think it is possible to hit the issue, when an osd that is the
-destination of a rebuild, fails at the time a rebuild is performed.
-But I have not verified this.
-
-Regards,
-Christian
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
