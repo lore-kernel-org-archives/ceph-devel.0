@@ -1,84 +1,74 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph updates for 3.1-rc1
-Date: Tue, 26 Jul 2011 13:36:37 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107261152440.2593@cobra.newdream.net>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: My favorite question
+Date: Tue, 26 Jul 2011 15:24:14 -0700
+Message-ID: <CAF3hT9CtaCi8S56+hGpU0mn-tH1WJob081J4Bb0_Z7asPZcXdA@mail.gmail.com>
+References: <4E25646C.4000909@ufm.su>
+	<Pine.LNX.4.64.1107190728370.5656@cobra.newdream.net>
+	<4E2996DD.8040809@ufm.su>
+	<CAF3hT9CpsEE5bnyaPiS6hv-Y+4VbwP-1uQ2CWVePXFcSKphkYA@mail.gmail.com>
+	<4E2DDD1D.2040003@ufm.su>
+	<CAF3hT9CZZAn7+bV02TNtSunj4zDTvfwpMkDc-NyRJMXAh85hJg@mail.gmail.com>
+	<4E2E04C2.2050000@ufm.su>
+	<CAF3hT9AMrbtu051uQaBAAMnfnUWrSFdBHix9FFYgzLrg42YV5g@mail.gmail.com>
+	<4E2F0981.50504@ufm.su>
+	<CAF3hT9AD+f6gEbzihUpNFKSfhALvMoPpudHDXxnmL5PRyOPZ0Q@mail.gmail.com>
+	<4E2F135C.5010306@ufm.su>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44176 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753248Ab1GZUcp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2011 16:32:45 -0400
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:44219 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754045Ab1GZWYQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jul 2011 18:24:16 -0400
+Received: by gxk21 with SMTP id 21so646211gxk.19
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jul 2011 15:24:15 -0700 (PDT)
+In-Reply-To: <4E2F135C.5010306@ufm.su>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Fyodor Ustinov <ufm@ufm.su>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Linus,
+Hmm, I'm afraid I can't see anything useful in these logs right now --
+just confusion!
 
-Please pull the following Ceph updates from
+The only thing I can think of that might provide useful information
+now is to turn off osd5, update its config file to have heavy
+debugging information (debug osd =3D 20, at a minimum), and then start
+the OSD back up again. Then we can see if pg 0.256 is still having any
+issues (it is in the logs you sent me).
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+If not I'll have to mark this as "Can't reproduce" and hope we see it
+again from somebody with higher log levels on. :(
+-Greg
 
-Lots of different things here.  There is some code cleanup with the file 
-flags, a few snapshot metadata writeback fixes, a fix for unnecessary 
-timeouts on heavily loaded clusters, and a fix for dentry leases.  There 
-are many fixes for bugs Al turned up: a fix and cleanup in the open intent 
-code, and several fixes for d_parent use without the appropriate locks (a 
-full code audit caught a few more).  RBD devices now clean up on the 
-server when they are unmapped, rbd request sizes are now larger, and the 
-ceph readahead window is set up properly.
-
-Thanks!
-sage
-
-
-Greg Farnum (1):
-      ceph: report f_bfree based on kb_avail rather than diffing.
-
-Josh Durgin (1):
-      rbd: set blk_queue request sizes to object size
-
-Sage Weil (19):
-      ceph: add flags field to file_info
-      ceph: add F_SYNC file flag to force sync (non-O_DIRECT) io
-      ceph: use flag bit for at_end readdir flag
-      ceph: fix snap writeback when racing with writes
-      ceph: only queue capsnap if caps are dirty
-      libceph: don't time out osd requests that haven't been received
-      ceph: avoid carrying Fw cap during write into page cache
-      ceph: fix bad parent_inode calc in ceph_lookup_open
-      ceph: only link open operations to directory unsafe list if O_CREAT|O_TRUNC
-      ceph: fix ceph_lookup_open intent usage
-      ceph: ignore lease mask
-      ceph: set dir complete frag after adding capability
-      ceph: handle racing calls to ceph_init_dentry
-      ceph: protect access to d_parent
-      ceph: protect d_parent access in ceph_d_revalidate
-      ceph: avoid d_parent in ceph_dentry_hash; fix ceph_encode_fh() hashing bug
-      ceph: document locking for ceph_set_dentry_offset
-      ceph: explicitly reference rename old_dentry parent dir in request
-      ceph: document unlocked d_parent accesses
-
-Yehuda Sadeh (2):
-      rbd: cancel watch request when releasing the device
-      ceph: set up readahead size when rsize is not passed
-
- drivers/block/rbd.c            |   46 +++++++++++++++-
- fs/ceph/debugfs.c              |    2 +-
- fs/ceph/dir.c                  |  116 +++++++++++++++++++++++++---------------
- fs/ceph/export.c               |   24 +++++---
- fs/ceph/file.c                 |   61 +++++++++++++++------
- fs/ceph/inode.c                |   48 +++++++++-------
- fs/ceph/ioctl.c                |   15 +++++-
- fs/ceph/ioctl.h                |    1 +
- fs/ceph/mds_client.c           |   56 +++++++++++---------
- fs/ceph/mds_client.h           |    3 +-
- fs/ceph/snap.c                 |   25 +++++++--
- fs/ceph/super.c                |    7 ++-
- fs/ceph/super.h                |   20 +++----
- fs/ceph/xattr.c                |    8 ++-
- include/linux/ceph/messenger.h |    1 +
- net/ceph/messenger.c           |   12 ++---
- net/ceph/osd_client.c          |    6 ++
- 17 files changed, 306 insertions(+), 145 deletions(-)
+On Tue, Jul 26, 2011 at 12:19 PM, Fyodor Ustinov <ufm@ufm.su> wrote:
+> On 07/26/2011 09:40 PM, Gregory Farnum wrote:
+>>
+>> On Tue, Jul 26, 2011 at 11:37 AM, Fyodor Ustinov<ufm@ufm.su> =A0wrot=
+e:
+>>>
+>>> On 07/26/2011 09:07 PM, Gregory Farnum wrote:
+>>>>
+>>>> The log is giving me some very strange information. Can you attach=
+ all
+>>>> the logs that you have to tracker issue #1340?
+>>>> (http://tracker.newdream.net/issues/1340)
+>>>> Thanks!
+>>>> -Greg
+>>>>
+>>> "All" - all available? Or only osd5?
+>>
+>> osd5 for now. Maybe the other daemon logs later. :)
+>
+> Done!
+>
+> WBR,
+> =A0 =A0Fyodor.
+>
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
