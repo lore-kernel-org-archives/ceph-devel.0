@@ -1,88 +1,60 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: My favorite question
-Date: Wed, 27 Jul 2011 08:57:19 -0700
-Message-ID: <CAF3hT9D8NnywKNFd43zHdrMC-bHXdaaESEnRfPWn=g4Qgw8UHA@mail.gmail.com>
-References: <4E25646C.4000909@ufm.su>
-	<Pine.LNX.4.64.1107190728370.5656@cobra.newdream.net>
-	<4E2996DD.8040809@ufm.su>
-	<CAF3hT9CpsEE5bnyaPiS6hv-Y+4VbwP-1uQ2CWVePXFcSKphkYA@mail.gmail.com>
-	<4E2DDD1D.2040003@ufm.su>
-	<CAF3hT9CZZAn7+bV02TNtSunj4zDTvfwpMkDc-NyRJMXAh85hJg@mail.gmail.com>
-	<4E2E04C2.2050000@ufm.su>
-	<CAF3hT9AMrbtu051uQaBAAMnfnUWrSFdBHix9FFYgzLrg42YV5g@mail.gmail.com>
-	<4E2F0981.50504@ufm.su>
-	<CAF3hT9AD+f6gEbzihUpNFKSfhALvMoPpudHDXxnmL5PRyOPZ0Q@mail.gmail.com>
-	<4E2F135C.5010306@ufm.su>
-	<CAF3hT9CtaCi8S56+hGpU0mn-tH1WJob081J4Bb0_Z7asPZcXdA@mail.gmail.com>
-	<4E2FE2D1.8040902@ufm.su>
+Subject: Re: OSD questions
+Date: Wed, 27 Jul 2011 09:05:19 -0700
+Message-ID: <CAF3hT9DHLsmWpL0jrrC+bm=Dq4m4+ohu2u2nL_NGhAxWM1TC2A@mail.gmail.com>
+References: <CABAwU-YsTz8WjPLzVZrhwJs64fYTPdAHbA2J1S1pdzMULuBM_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:58621 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754427Ab1G0P5U convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2011 11:57:20 -0400
-Received: by gwaa18 with SMTP id a18so1140583gwa.19
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2011 08:57:19 -0700 (PDT)
-In-Reply-To: <4E2FE2D1.8040902@ufm.su>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:41753 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753570Ab1G0QFT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2011 12:05:19 -0400
+Received: by gyh3 with SMTP id 3so1141331gyh.19
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2011 09:05:19 -0700 (PDT)
+In-Reply-To: <CABAwU-YsTz8WjPLzVZrhwJs64fYTPdAHbA2J1S1pdzMULuBM_w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
-Cc: ceph-devel@vger.kernel.org
+To: huang jun <hjwsm1989@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 27, 2011 at 3:05 AM, Fyodor Ustinov <ufm@ufm.su> wrote:
-> On 07/27/2011 01:24 AM, Gregory Farnum wrote:
->>
->> Hmm, I'm afraid I can't see anything useful in these logs right now =
---
->> just confusion!
->>
->> The only thing I can think of that might provide useful information
->> now is to turn off osd5, update its config file to have heavy
->> debugging information (debug osd =3D 20, at a minimum), and then sta=
-rt
->> the OSD back up again. Then we can see if pg 0.256 is still having a=
-ny
->> issues (it is in the logs you sent me).
->>
->> If not I'll have to mark this as "Can't reproduce" and hope we see i=
-t
->> again from somebody with higher log levels on. :(
->> -Greg
->
-> I started manual scrubbing on osd5 and got next message:
->
-> 2011-07-27 11:38:30.360812 =A0 log 2011-07-27 11:38:28.540559 osd5
-> 10.5.51.145:6803/19737 2842 : [ERR] 0.256 scrub stat mismatch, got 21=
-96/2196
-> objects, 0/0 clones, 9046200695/9046200817 bytes, 8834197/8834197 kb.
-> 2011-07-27 11:38:30.360812 =A0 log 2011-07-27 11:38:28.540571 osd5
-> 10.5.51.145:6803/19737 2843 : [ERR] 0.256 scrub 1 errors
->
-> "Hmmm" I said to myself.
->
-> stop osd5
-> fsck -fy /dev/sdb1
->
-> And got:
->
-> Inode 230558734, i_blocks is 8, should be 16. =A0Fix? yes
-> Inode 230559279, i_blocks is 8208, should be 8200. =A0Fix? yes
-> Inode 230559410, i_blocks is 40, should be 32. =A0Fix? yes
-> Inode 230559527, i_blocks is 24, should be 32. =A0Fix? yes
-> Inode 231342174, i_blocks is 40, should be 32. =A0Fix? yes
-> Inode 231342209, i_blocks is 24, should be 32. =A0Fix? yes
->
-> Ups. Familiar message. :(
->
-> I login to different node and got the same.
->
-> Greg, I think to catch any errors no sense. 2.6.39 have broken ext4. =
-I will
-> try 3.0.0 (or 3.1.0) and tell about result.
-Ah, I think that would explain the errors. We'll have to get better at
-identifying such things!
+On Wed, Jul 27, 2011 at 7:39 AM, huang jun <hjwsm1989@gmail.com> wrote:
+> Hello
+> I have two questions about OSD.
+> 1) From the current READ ops, whether the OSD can provide the
+> readahead strategy? that is : the clients send MOSDOp msg =A0to read
+> some objects of a file, the msg =A0includes many read ops(we can defi=
+ne
+> the first Op as to read the object we wan at this time, and other Ops
+> is going to do readahead work), these Ops ask OSD to read some object=
+s
+> ahead and OSD don't =A0reply to those Ops, they only need to reply th=
+e
+> client when got the wanted object. So, at the next time to read the
+> different objects of that file, it can got data from OSDs' cache,that
+> will promote read performance. =A0All the readahead work was done
+> internal OSD cluster.
+Not right now -- all readahead has to be initiated by the client. Note
+that in cases where readahead is useful the relative on-disk lookup
+time isn't going to be that large since it's using 4MB objects.
+I don't think that in general you'd gain anything by trying to manage
+the OSD cache from the client anyway!
+
+> 2) ceph use osd journal to keep perfect stability, but that decrease
+> the write performance as we see, can we =A0record just metadata of th=
+e
+> WRITE op in journal write item, but not the whole data buffer,in that
+> way we can reponse client quickly. If the OSD crashed, we can replay
+> the journal, but at this time we need to request data from CLIENT,
+> which increase the complexity.
+Trying to request data from the client like this would not work out
+well -- how would the client know when it was safe to drop the data
+out of memory? What happens if the OSD sends back a success message,
+then crashes, and the client shuts down or crashes too?
+The doubled writes can be annoying, but it's really the only safe
+thing to do. Perhaps we could do something with btrfs and snapshots to
+avoid using a journal, but I'd have to look into it some more.
 -Greg
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
