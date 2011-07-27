@@ -1,42 +1,44 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Primary mds failure
-Date: Wed, 27 Jul 2011 13:35:08 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107271332420.29985@cobra.newdream.net>
-References: <CAJD3hpXvxQD94MO+RHrtXcHV5sFxXvarJdOxEs3o-U0NyD4eqQ@mail.gmail.com>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: Re: Filesystems for ceph
+Date: Wed, 27 Jul 2011 22:21:21 +0000 (UTC)
+Message-ID: <loom.20110728T001529-856@post.gmane.org>
+References: <CAO47_-8nD4XLgBP9+nDxasO548ZXcTzMm3M+P=ewdQR3EwoqUw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34561 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751838Ab1G0UbN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2011 16:31:13 -0400
-In-Reply-To: <CAJD3hpXvxQD94MO+RHrtXcHV5sFxXvarJdOxEs3o-U0NyD4eqQ@mail.gmail.com>
+Received: from lo.gmane.org ([80.91.229.12]:36450 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755393Ab1G0WVd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 27 Jul 2011 18:21:33 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1QmCTr-000797-NJ
+	for ceph-devel@vger.kernel.org; Thu, 28 Jul 2011 00:21:31 +0200
+Received: from 94.232.181.14 ([94.232.181.14])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 00:21:31 +0200
+Received: from ufm by 94.232.181.14 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 00:21:31 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jojy Varghese <jojy.varghese@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wed, 27 Jul 2011, Jojy Varghese wrote:
-> Hi
->    We are observing that when the primary mds goes away(say OOM killer
-> victim), the client keeps on trying (forever) to write to it(try_write
-> method in the messenger) and eventually results in filesystem hang. So
-> the question is :
+Christian Brunner <chb <at> muc.de> writes:
+
 > 
->  - Why does the kernel client attempt another mds?
+> From what I read in Fyodors emails ext4 in 2.6.39 isn't much better.
+> 
+> So, what filesystem would you recommend?
+> 
 
-As soon as another mds takes over for it the client will connect to them.  
-(Unless there's a bug in the old ceph_connection cleanup.)
+Christian, IMHO ext3/ext4/btrfs unusable for ceph. I tested some time xfs, and 
+think to use it again. But I think that the ceph developers do not like xfs:)
 
->  - Is replication (mds) guaranteed to take place before the primary
-> mds goes down? In other words, is replication done preemtively or due
-> to a trigger (scheduled or event based)?
+WBR,
+    Fyodor.
 
-The MDS journals updates to the object store (where the objects are 
-replicated by multiple osds).  The MDS is careful to inform the client 
-which operations have committed and to prevent leakage of uncommitted 
-information from one client to another.  On reconnect, clients replay 
-their uncommitted state (by resending requests and re-writing back dirty 
-cap/inode metadata).
 
-sage
+
