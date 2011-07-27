@@ -1,44 +1,34 @@
-From: Fyodor Ustinov <ufm@ufm.su>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: Filesystems for ceph
-Date: Wed, 27 Jul 2011 22:21:21 +0000 (UTC)
-Message-ID: <loom.20110728T001529-856@post.gmane.org>
+Date: Wed, 27 Jul 2011 16:33:22 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1107271633110.29985@cobra.newdream.net>
 References: <CAO47_-8nD4XLgBP9+nDxasO548ZXcTzMm3M+P=ewdQR3EwoqUw@mail.gmail.com>
+ <loom.20110728T001529-856@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:36450 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755393Ab1G0WVd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 27 Jul 2011 18:21:33 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1QmCTr-000797-NJ
-	for ceph-devel@vger.kernel.org; Thu, 28 Jul 2011 00:21:31 +0200
-Received: from 94.232.181.14 ([94.232.181.14])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 00:21:31 +0200
-Received: from ufm by 94.232.181.14 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 00:21:31 +0200
+Received: from cobra.newdream.net ([66.33.216.30]:47775 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752125Ab1G0X31 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2011 19:29:27 -0400
+In-Reply-To: <loom.20110728T001529-856@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Fyodor Ustinov <ufm@ufm.su>
+Cc: ceph-devel@vger.kernel.org
 
-Christian Brunner <chb <at> muc.de> writes:
-
+On Wed, 27 Jul 2011, Fyodor Ustinov wrote:
+> Christian Brunner <chb <at> muc.de> writes:
 > 
-> From what I read in Fyodors emails ext4 in 2.6.39 isn't much better.
+> > 
+> > From what I read in Fyodors emails ext4 in 2.6.39 isn't much better.
+> > 
+> > So, what filesystem would you recommend?
+> > 
 > 
-> So, what filesystem would you recommend?
-> 
+> Christian, IMHO ext3/ext4/btrfs unusable for ceph. I tested some time xfs, and 
+> think to use it again. But I think that the ceph developers do not like xfs:)
 
-Christian, IMHO ext3/ext4/btrfs unusable for ceph. I tested some time xfs, and 
-think to use it again. But I think that the ceph developers do not like xfs:)
+What problems have you seen with ext4?
 
-WBR,
-    Fyodor.
-
-
-
+sage
