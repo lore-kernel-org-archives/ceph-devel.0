@@ -1,63 +1,74 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: OSD questions
-Date: Wed, 27 Jul 2011 09:05:19 -0700
-Message-ID: <CAF3hT9DHLsmWpL0jrrC+bm=Dq4m4+ohu2u2nL_NGhAxWM1TC2A@mail.gmail.com>
-References: <CABAwU-YsTz8WjPLzVZrhwJs64fYTPdAHbA2J1S1pdzMULuBM_w@mail.gmail.com>
+Subject: Re: Two questions
+Date: Wed, 27 Jul 2011 09:15:36 -0700
+Message-ID: <CAF3hT9BbWvztQE=Mn3NW5OQ9ktHAe0AoW6m0aC9WqfyY1b7jBQ@mail.gmail.com>
+References: <8685614628192678277@unknownmsgid>
+	<1311750865.2751.4.camel@wido-laptop.pcextreme.nl>
+	<CAMwB3Ti66BpfdfwPx3XgmVQv2GAQ_Gc2beHRc6pBcWwphf_bhQ@mail.gmail.com>
+	<1311763628.2751.34.camel@wido-laptop.pcextreme.nl>
+	<CAMwB3Tgyo1ug7tUUkHJAyoct_T6O=pZY1P78_z5FJiO2D10M7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-2
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:41753 "EHLO
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:59601 "EHLO
 	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753570Ab1G0QFT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2011 12:05:19 -0400
-Received: by gyh3 with SMTP id 3so1141331gyh.19
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2011 09:05:19 -0700 (PDT)
-In-Reply-To: <CABAwU-YsTz8WjPLzVZrhwJs64fYTPdAHbA2J1S1pdzMULuBM_w@mail.gmail.com>
+	with ESMTP id S1754345Ab1G0QPg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2011 12:15:36 -0400
+Received: by gyh3 with SMTP id 3so1149940gyh.19
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2011 09:15:36 -0700 (PDT)
+In-Reply-To: <CAMwB3Tgyo1ug7tUUkHJAyoct_T6O=pZY1P78_z5FJiO2D10M7g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 27, 2011 at 7:39 AM, huang jun <hjwsm1989@gmail.com> wrote:
-> Hello
-> I have two questions about OSD.
-> 1) From the current READ ops, whether the OSD can provide the
-> readahead strategy? that is : the clients send MOSDOp msg =A0to read
-> some objects of a file, the msg =A0includes many read ops(we can defi=
-ne
-> the first Op as to read the object we wan at this time, and other Ops
-> is going to do readahead work), these Ops ask OSD to read some object=
-s
-> ahead and OSD don't =A0reply to those Ops, they only need to reply th=
-e
-> client when got the wanted object. So, at the next time to read the
-> different objects of that file, it can got data from OSDs' cache,that
-> will promote read performance. =A0All the readahead work was done
-> internal OSD cluster.
-Not right now -- all readahead has to be initiated by the client. Note
-that in cases where readahead is useful the relative on-disk lookup
-time isn't going to be that large since it's using 4MB objects.
-I don't think that in general you'd gain anything by trying to manage
-the OSD cache from the client anyway!
-
-> 2) ceph use osd journal to keep perfect stability, but that decrease
-> the write performance as we see, can we =A0record just metadata of th=
-e
-> WRITE op in journal write item, but not the whole data buffer,in that
-> way we can reponse client quickly. If the OSD crashed, we can replay
-> the journal, but at this time we need to request data from CLIENT,
-> which increase the complexity.
-Trying to request data from the client like this would not work out
-well -- how would the client know when it was safe to drop the data
-out of memory? What happens if the OSD sends back a success message,
-then crashes, and the client shuts down or crashes too?
-The doubled writes can be annoying, but it's really the only safe
-thing to do. Perhaps we could do something with btrfs and snapshots to
-avoid using a journal, but I'd have to look into it some more.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+MjAxMS83LzI3IFOzYXdvbWlyIFNrb3dyb24gPHN6aWJpc0BnbWFpbC5jb20+Ogo+IE9rLCBJIHdp
+bGwgc2hvdyBleGFtcGxlOgo+Cj4gcmFkb3MgZGYKPiBwb29sIG5hbWUgoCCgIKAgoCCgIKAgoCCg
+IEtCIKAgoCCgb2JqZWN0cyCgIKAgoCBjbG9uZXMgoCCgIGRlZ3JhZGVkCj4goHVuZm91bmQgoCCg
+IKAgoCCgIHJkIKAgoCCgIKByZCBLQiCgIKAgoCCgIKAgd3IgoCCgIKAgoHdyIEtCCj4gLmxvZyCg
+IKAgoCCgIKAgoCCgIKAgoDU1ODIxMiCgIKAgoCCgIKAgoDUgoCCgIKAgoCCgIKAwIKAgoCCgIKAg
+oCCgMAo+IKAgoCCgIDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMCCgIKAgoDI4NDQ4ODggoCCg
+IKAyODQ0ODg4Cj4gLnBvb2wgoCCgIKAgoCCgIKAgoCCgIKAgoCCgMSCgIKAgoCCgIKAgoDEgoCCg
+IKAgoCCgIKAwIKAgoCCgIKAgoCCgMAo+IKAgoCCgIDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCg
+MCCgIKAgoCCgIKAgoDggoCCgIKAgoCCgIKA4Cj4gLnJndyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
+MCCgIKAgoCCgIKAgoDYgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMAo+IKAgoCCgIDAgoCCgIKAg
+oCCgIKAwIKAgoCCgIKAgoCCgMCCgIKAgoCCgIKAgoDEgoCCgIKAgoCCgIKAwCj4gLnVzZXJzIKAg
+oCCgIKAgoCCgIKAgoCCgIKAgMSCgIKAgoCCgIKAgoDEgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCg
+MAo+IKAgoCCgIDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMCCgIKAgoCCgIKAgoDEgoCCgIKAg
+oCCgIKAxCj4gLnVzZXJzLmVtYWlsIKAgoCCgIKAgoCCgIKAgMSCgIKAgoCCgIKAgoDEgoCCgIKAg
+oCCgIKAwIKAgoCCgIKAgoCCgMAo+IKAgoCCgIDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMCCg
+IKAgoCCgIKAgoDEgoCCgIKAgoCCgIKAxCj4gLnVzZXJzLnVpZCCgIKAgoCCgIKAgoCCgIKAgMiCg
+IKAgoCCgIKAgoDIgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMAo+IKAgoCCgIDAgoCCgIKAgoCCg
+IKAxIKAgoCCgIKAgoCCgMCCgIKAgoCCgIKAgoDIgoCCgIKAgoCCgIKAyCj4gZGF0YSCgIKAgoCCg
+IKAgoCCgIKAgoCCgIKAgMCCgIKAgoCCgIKAgoDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMAo+
+IKAgoCCgIDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMCCgIKAgoCCgIKAgoDAgoCCgIKAgoCCg
+IKAwCj4gbWV0YWRhdGEgoCCgIKAgoCCgIKAgoCCgIKAgMCCgIKAgoCCgIKAgoDAgoCCgIKAgoCCg
+IKAwIKAgoCCgIKAgoCCgMAo+IKAgoCCgIDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMCCgIKAg
+oCCgIKAgoDAgoCCgIKAgoCCgIKAwCj4gcmJkIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgMCCgIKAg
+oCCgIKAgoDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMAo+IKAgoCCgIDAgoCCgIKAgoCCgIKAw
+IKAgoCCgIKAgoCCgMCCgIKAgoCCgIKAgoDAgoCCgIKAgoCCgIKAwCj4gc3N0ZXN0IKAgoCCgIKAg
+oCCgIKAzMjI0NDIyNiCgIKAgoDI4NDEwNTUgoCCgIKAgoCCgIKAwIKAgoCCgIDY1MzM1Mwo+IKAg
+oCCgIDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCCgMCCgIKAgMTcwNjY3MjQgoCCgIDMyMzcwMzkx
+Cj4goHRvdGFsIHVzZWQgoCCgIKAgMzI0NzkyOTk2IKAgoCCgMjg0MTA3MQo+IKB0b3RhbCBhdmFp
+bCCgIKAzMTA4MzQ1MjE3Ngo+IKB0b3RhbCBzcGFjZSCgIKAzMzA0MzI0NDQ2MAo+Cj4gSXQgbWVh
+bnMgSSBoYXZlIGFsbW9zdCAzbWxuIG9mIG9iamVjdHMgaW4gc3N0ZXN0Lgo+Cj4gcGdfcG9vbCA3
+ICdzc3Rlc3QnIHBnX3Bvb2wocmVwIHBnX3NpemUgMyBjcnVzaF9ydWxlc2V0IDAgb2JqZWN0X2hh
+c2gKPiByamVua2lucyBwZ19udW0gOCBwZ3BfbnVtIDggbHBnX251bSAwIGxwZ3BfbnVtIDAgbGFz
+dF9jaGFuZ2UgMjEgb3duZXIKPiAwKQo+Cj4gMyBjb3BpZXMgaW4gdGhpcyBwb29sLgo+Cj4gc3N0
+ZXN0IHVzZWQgMzIuMjQ0LjIyNiBLQiArIGxvZyA1NTguMjEyIEtCID0gMzIuODAyLjQzOCBLQgo+
+Cj4gVG90YWwgdXNlZCBpcyAzMjQuNzkyLjk5NiBLQiBhbmQgaXQncyBhbG1vc3QgMTB4IG1vcmUu
+Cj4KPiAyMDExLTA3LTI3IDEyOjU3OjM1LjU0MTU1NiCgIKBwZyB2NTQxNTg6IDY5ODYgcGdzOiA4
+IGFjdGl2ZSwgNjk3OAo+IGFjdGl2ZStjbGVhbjsgMzIxMDQgTUIgZGF0YSwgMzEwIEdCIHVzZWQs
+IDI5NjQyIEdCIC8gMzE1MTIgR0IgYXZhaWw7Cj4KPiBJJ2FtIHB1dHRpbmcgZmlsZXMgYmVldHdl
+biA0LTUwS0Igb24gUkFET1MgdmlhIHMzIGNsaWxlbnQsIGFuZCByYWRvc2d3Lgo+Cj4KPiBDYW4g
+eW91IGV4cGxhaW4gdGhhdCB0byBtZSBvbiB0aGlzIGV4YW1wbGUgZnJvbSByZWFsIGxpZmUgPz8K
+CkhtbSwgd2hhdCB1bmRlcmx5aW5nIGZpbGVzeXN0ZW0gYXJlIHlvdSB1c2luZz8gRG8geW91IGhh
+dmUgYW55IGxvZ2dpbmcKZW5hYmxlZCwgYW5kIHdoYXQgZGlzayBpcyBpdCBsb2dnaW5nIHRvPyBB
+cmUgYWxsIHlvdXIgT1NEcyBydW5uaW5nCnVuZGVyIHRoZSBzYW1lIE9TLCBvciBhcmUgdGhleSBp
+biB2aXJ0dWFsIG1hY2hpbmVzPwpJZiBJIHJlbWVtYmVyIGNvcnJlY3RseSwgdGhhdCAidG90YWwg
+dXNlZCIgY291bnQgaXMgZ2VuZXJhdGVkIGJ5Cmxvb2tpbmcgYXQgZGYgb3Igc29tZXRoaW5nIGZv
+ciB0aGUgZHJpdmVzIGluIHF1ZXN0aW9uIC0tIGlmIHRoZXJlJ3MKb3RoZXIgZGF0YSBvbiB0aGUg
+c2FtZSBkcml2ZSBhcyB0aGUgT1NELCBpdCdsbCBnZXQgKGFkbWl0dGVkbHkKaW5jb3JyZWN0bHkp
+IGNvdW50ZWQgYXMgcGFydCBvZiB0aGUgInRvdGFsIHVzZWQiIGJ5IFJBRE9TIGV2ZW4gaWYKUkFE
+T1MgY2FuJ3QgdG91Y2ggaXQuCi1HcmVnCg==
