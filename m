@@ -1,41 +1,83 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Filesystems for ceph
-Date: Thu, 28 Jul 2011 09:00:18 -0700
-Message-ID: <CAF3hT9Cm2opst2NGb4+tPfb0ENog=J3pFL+HADoJwC7jSqk44g@mail.gmail.com>
-References: <CAO47_-8nD4XLgBP9+nDxasO548ZXcTzMm3M+P=ewdQR3EwoqUw@mail.gmail.com>
-	<Pine.LNX.4.64.1107272136110.29447@cobra.newdream.net>
-	<CAMjNe_fxSP+tjLsOtu30NRza=SfFkOGQZ8M3ypCr1maUa2O2Jw@mail.gmail.com>
+Subject: Re: Two questions
+Date: Thu, 28 Jul 2011 09:36:53 -0700
+Message-ID: <CAF3hT9C0BBD+qs4JKxisA=1XQh-juhGrgHX7GgjZQWGmyyY08g@mail.gmail.com>
+References: <8685614628192678277@unknownmsgid>
+	<1311750865.2751.4.camel@wido-laptop.pcextreme.nl>
+	<CAMwB3Ti66BpfdfwPx3XgmVQv2GAQ_Gc2beHRc6pBcWwphf_bhQ@mail.gmail.com>
+	<1311763628.2751.34.camel@wido-laptop.pcextreme.nl>
+	<CAMwB3Tgyo1ug7tUUkHJAyoct_T6O=pZY1P78_z5FJiO2D10M7g@mail.gmail.com>
+	<CAF3hT9BbWvztQE=Mn3NW5OQ9ktHAe0AoW6m0aC9WqfyY1b7jBQ@mail.gmail.com>
+	<-4123305127044475997@unknownmsgid>
+	<CAMwB3TgHx1f_dWWGbDg4uEJyFEZc5vNgPsKVYELaK_X5nKez=Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yi0-f46.google.com ([209.85.218.46]:52939 "EHLO
-	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755147Ab1G1QAS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 12:00:18 -0400
-Received: by mail-yi0-f46.google.com with SMTP id 27so1908157yia.19
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 09:00:18 -0700 (PDT)
-In-Reply-To: <CAMjNe_fxSP+tjLsOtu30NRza=SfFkOGQZ8M3ypCr1maUa2O2Jw@mail.gmail.com>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:54864 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754906Ab1G1Qgy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 12:36:54 -0400
+Received: by gyh3 with SMTP id 3so1937808gyh.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 09:36:53 -0700 (PDT)
+In-Reply-To: <CAMwB3TgHx1f_dWWGbDg4uEJyFEZc5vNgPsKVYELaK_X5nKez=Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: srimugunthan dhandapani <srimugunthan.dhandapani@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Jul 28, 2011 at 12:35 AM, srimugunthan dhandapani
-<srimugunthan.dhandapani@gmail.com> wrote:
-> I thought that ext3/4 and btrfs are the only recommended underlying
-> filesystem for ceph. I didnt know we can use xfs.
-> With Glusterfs, theoretically, we can use any filesystem with extended
-> attributes support as backend filesystem. Is that the same case with
-> ceph too?
-> Though it may not be optimal, theoretically can i use a "filesystem X"
-> with extended attributes support for ceph?
-> thanks,
-> Mugunthan
-
-These days you can use any filesystem with xattr support as the
-backing store for Ceph, yes. btrfs is our primary target for a few
-reasons (unlimited xattrs, built-in snapshots make snapshots and
-consistency easier, etc) but you can stick whatever you like back
-there and Ceph will handle it with writeahead journaling, manual
-copying for snapshots, etc etc. :)
--Greg
+MjAxMS83LzI4IFPFgmF3b21pciBTa293cm9uIDxzemliaXNAZ21haWwuY29tPjoKPiBCZWNhdXNl
+IG9mIG15IHRlc3QgYmVmb3JlIGkgbW91bnQgZXh0NCBmaWxlc3lzdGVtcyBpbiAvZGF0YS9vc2Qu
+KG9zZAo+IGlkKSwgYnV0IC9kYXRhIHdhcyBhIHN5bWxpbmsgdG8gL3Zhci9kYXRhLyBhbmQgaSB0
+aGluayB0b3RhbCB1c2VkCj4gc3BhY2Ugd2FzIGhpZ2hlciBieSBhIHNpemUgb2YgdmFyLCBhbmQg
+dGhlcmUgYXJlIGxvZ3MsIGxvdHMgb2YgbG9ncwo+IDopLiBDZXBoIHByb2R1Y2UgbWFueSBsb2dz
+IGluIHN1Y2ggdmVyYm9zaXR5LiBUZWxsIG1lIGlmIGltIHdyb25nLgo+Cj4gTm93IGl0cyBsb29r
+IGxpa2UgdGhpcywgYW5kIGl0J3MgbG9va3MgYmV0dGVyIDopCj4KPiAyMDExLTA3LTI4IDExOjQ0
+OjA4LjIyNzI3OCDCoCDCoHBnIHYxMTA5Mzk6IDY5ODYgcGdzOiA4IGFjdGl2ZSwgNjk3OAo+IGFj
+dGl2ZStjbGVhbjsgNDI0NDEgTUIgZGF0YSwgMjIzIEdCIHVzZWQsIDI5NDU3IEdCIC8gMzEyNDAg
+R0IgYXZhaWwKPgo+IHJhZG9zIGRmCj4gcG9vbCBuYW1lIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IEtCIMKgIMKgIMKgb2JqZWN0cyDCoCDCoCDCoCBjbG9uZXMgwqAgwqAgZGVncmFkZWQKPiDCoHVu
+Zm91bmQgwqAgwqAgwqAgwqAgwqAgcmQgwqAgwqAgwqAgwqByZCBLQiDCoCDCoCDCoCDCoCDCoCB3
+ciDCoCDCoCDCoCDCoHdyIEtCCj4gLmxvZyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDY5NDI3
+MyDCoCDCoCDCoCDCoCDCoCDCoDYgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKg
+MAo+IMKgIMKgIMKgIDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDC
+oCDCoDM1Mzk5MDkgwqAgwqAgwqAzNTM5OTA5Cj4gLnBvb2wgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAxIMKgIMKgIMKgIMKgIMKgIMKgMSDCoCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAg
+wqAgwqAgwqAgwqAwCj4gwqAgwqAgwqAgMCDCoCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAgwqAgwqAg
+wqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgOCDCoCDCoCDCoCDCoCDCoCDCoDgKPiAucmd3IMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDAgwqAgwqAgwqAgwqAgwqAgwqA2IMKgIMKgIMKg
+IMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDCoCDCoDAKPiDCoCDCoCDCoCAwIMKgIMKgIMKgIMKgIMKg
+IMKgMCDCoCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAgwqAgwqAgwqAgwqAxIMKgIMKgIMKgIMKgIMKg
+IMKgMAo+IC51c2VycyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAxIMKgIMKgIMKgIMKg
+IMKgIMKgMSDCoCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAgwqAgwqAgwqAgwqAwCj4gwqAgwqAgwqAg
+MCDCoCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKg
+MSDCoCDCoCDCoCDCoCDCoCDCoDEKPiAudXNlcnMuZW1haWwgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+MSDCoCDCoCDCoCDCoCDCoCDCoDEgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKg
+MAo+IMKgIMKgIMKgIDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDC
+oCDCoCDCoCDCoCDCoDEgwqAgwqAgwqAgwqAgwqAgwqAxCj4gLnVzZXJzLnVpZCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCAyIMKgIMKgIMKgIMKgIMKgIMKgMiDCoCDCoCDCoCDCoCDCoCDCoDAgwqAg
+wqAgwqAgwqAgwqAgwqAwCj4gwqAgwqAgwqAgMCDCoCDCoCDCoCDCoCDCoCDCoDEgwqAgwqAgwqAg
+wqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMiDCoCDCoCDCoCDCoCDCoCDCoDIKPiBkYXRhIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKg
+IMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDCoCDCoDAKPiDCoCDCoCDCoCAwIMKgIMKgIMKgIMKg
+IMKgIMKgMCDCoCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKg
+IMKgIMKgMAo+IG1ldGFkYXRhIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDAgwqAgwqAgwqAg
+wqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDCoCDCoDAKPiDCoCDCoCDC
+oCAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAgwqAgwqAgwqAg
+wqAwIMKgIMKgIMKgIMKgIMKgIMKgMAo+IHJiZCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDC
+oCDCoCDCoDAKPiDCoCDCoCDCoCAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDCoCDC
+oDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMAo+IHNzdGVzdCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoDQyNzY2MzE4IMKgIMKgIMKgMzQ4MzY5MCDCoCDCoCDCoCDCoCDCoCDCoDAg
+wqAgwqAgwqAgwqAgwqAgwqAwCj4gwqAgwqAgwqAgMCDCoCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAg
+wqAgwqAgwqAgwqAwIMKgIMKgIDIwOTIyNzM2IMKgIMKgIDQyODkyNTQ2Cj4gwqB0b3RhbCB1c2Vk
+IMKgIMKgIMKgIDIzNDQxNTQwOCDCoCDCoCDCoDM0ODM3MDcKPiDCoHRvdGFsIGF2YWlsIMKgIMKg
+MzA4ODgzNjUzNzYKPiDCoHRvdGFsIHNwYWNlIMKgIMKgMzI3NTc3ODAwNzIKCk9rYXksIHNvIG5v
+dyB5b3UndmUgZ290ICg0Mjc2NjMxOCs2OTQyNzMpKjNLQj0xMjRHQiBvZiBkYXRhLCBhbmQgMjIz
+R0IKdXNlZC4gSSBndWVzcyB5b3VyIE9TRCBqb3VybmFscyBhcmUgNTEyTUIgZWFjaCwgc28gdGhh
+dCdzIGFub3RoZXIKMTZHQiwgd2hpY2ggc3RpbGwgbGVhdmVzIG1vcmUgdW5leHBsYWluZWQgc3Bh
+Y2UgdXNhZ2UgdGhhbiBJIHdvdWxkCmV4cGVjdC4KQnV0IGl0J3MgcHJvYmFibHkganVzdCBzb21l
+IHBlY3VsaWFyaXR5IG9mIGhvdyB5b3VyIHN5c3RlbSBpcyBzZXQgdXA7CnlvdSBjb3VsZCBjaGVj
+ayBhbmQgc2VlIGhvdyB0aGUgbnVtYmVycyBjaGFuZ2Ugd2hlbiB5b3UgYWRkIG5ldwpvYmplY3Rz
+IHRvIHRoZSBzeXN0ZW0gdG8gbWFrZSBzdXJlIGl0J3MganVzdCBhIGJhc2UgY2FzZSByYXRoZXIg
+dGhhbgpzb21ldGhpbmcgdG8gd29ycnkgYWJvdXQuIDopCi1HcmVnCg==
