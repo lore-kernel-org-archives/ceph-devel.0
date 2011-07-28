@@ -1,34 +1,71 @@
-From: Sage Weil <sage@newdream.net>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
 Subject: Re: Filesystems for ceph
-Date: Wed, 27 Jul 2011 16:33:22 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107271633110.29985@cobra.newdream.net>
+Date: Wed, 27 Jul 2011 17:04:11 -0700
+Message-ID: <CAF3hT9C4EEyr+=Sq5_SS46_Cni39FOGN_nEvBztuZye3_N7Liw@mail.gmail.com>
 References: <CAO47_-8nD4XLgBP9+nDxasO548ZXcTzMm3M+P=ewdQR3EwoqUw@mail.gmail.com>
- <loom.20110728T001529-856@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47775 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752125Ab1G0X31 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2011 19:29:27 -0400
-In-Reply-To: <loom.20110728T001529-856@post.gmane.org>
+Received: from mail-gw0-f43.google.com ([74.125.83.43]:46314 "EHLO
+	mail-gw0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751435Ab1G1AJ5 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jul 2011 20:09:57 -0400
+Received: by gwm11 with SMTP id 11so1874108gwm.2
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Jul 2011 17:09:56 -0700 (PDT)
+In-Reply-To: <CAO47_-8nD4XLgBP9+nDxasO548ZXcTzMm3M+P=ewdQR3EwoqUw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
+To: chb@muc.de
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, 27 Jul 2011, Fyodor Ustinov wrote:
-> Christian Brunner <chb <at> muc.de> writes:
-> 
-> > 
-> > From what I read in Fyodors emails ext4 in 2.6.39 isn't much better.
-> > 
-> > So, what filesystem would you recommend?
-> > 
-> 
-> Christian, IMHO ext3/ext4/btrfs unusable for ceph. I tested some time xfs, and 
-> think to use it again. But I think that the ceph developers do not like xfs:)
+Our largest installation hasn't seen any problems with btrfs on
+2.6.38.6, although it may not be as busy as the clusters you're
+running on.
 
-What problems have you seen with ext4?
+I would recommend trying to use a newish stable release though, since
+the major releases I think are still introducing new features into
+btrfs, and code churn always creates bugs.
+-Greg
 
-sage
+On Wed, Jul 27, 2011 at 10:52 AM, Christian Brunner <chb@muc.de> wrote:
+> We are having quite some problems with the underlying filesystem for
+> the cosd's and I would like to hear about other experiences. Here is
+> what we have gone through so far:
+>
+> btrfs with 2.6.38:
+>
+> - good performance
+> - frequently hitting of various BUG_ON conditions
+>
+> btrfs with 2.6.39:
+>
+> - big performance problems after a few days uptime
+> - occasionally hitting BUG_ON conditions
+>
+> btrfs with 3.0:
+>
+> - big performance problems after a few days uptime
+> - occasionally hitting a deadlock in the btrfs filesystem (cosd is in=
+ D-state)
+>
+> ext4 with a RHEL6.0 kernel (don't remember exactly):
+>
+> - almost immediate blowup of the kernel (OOPS)
+>
+> From what I read in Fyodors emails ext4 in 2.6.39 isn't much better.
+>
+> So, what filesystem would you recommend?
+>
+> Thanks,
+> Christian
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
