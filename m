@@ -1,45 +1,46 @@
 From: Sage Weil <sage@newdream.net>
 Subject: Re: Filesystems for ceph
-Date: Wed, 27 Jul 2011 21:35:39 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107272133000.29447@cobra.newdream.net>
+Date: Wed, 27 Jul 2011 21:39:37 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1107272136110.29447@cobra.newdream.net>
 References: <CAO47_-8nD4XLgBP9+nDxasO548ZXcTzMm3M+P=ewdQR3EwoqUw@mail.gmail.com>
- <loom.20110728T001529-856@post.gmane.org> <Pine.LNX.4.64.1107271633110.29985@cobra.newdream.net>
- <4E30E42E.30101@ufm.su>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37720 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54855 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751102Ab1G1Ebn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 00:31:43 -0400
-In-Reply-To: <4E30E42E.30101@ufm.su>
+	with ESMTP id S1751102Ab1G1Efl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 00:35:41 -0400
+In-Reply-To: <CAO47_-8nD4XLgBP9+nDxasO548ZXcTzMm3M+P=ewdQR3EwoqUw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
+To: Christian Brunner <chb@muc.de>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, 28 Jul 2011, Fyodor Ustinov wrote:
-> On 07/28/2011 02:33 AM, Sage Weil wrote:
-> > On Wed, 27 Jul 2011, Fyodor Ustinov wrote:
-> > > Christian Brunner<chb<at>  muc.de>  writes:
-> > > 
-> > > >  From what I read in Fyodors emails ext4 in 2.6.39 isn't much better.
-> > > > 
-> > > > So, what filesystem would you recommend?
-> > > > 
-> > > Christian, IMHO ext3/ext4/btrfs unusable for ceph. I tested some time xfs,
-> > > and
-> > > think to use it again. But I think that the ceph developers do not like
-> > > xfs:)
-> > What problems have you seen with ext4?
->
-> Look to my message to Greg. In a nutshell - I again have broken ext4 fs 
-> on OSD servers with 2.6.39 kernel.
+On Wed, 27 Jul 2011, Christian Brunner wrote:
+> We are having quite some problems with the underlying filesystem for
+> the cosd's and I would like to hear about other experiences. Here is
+> what we have gone through so far:
+> 
+> btrfs with 2.6.38:
+> 
+> - good performance
+> - frequently hitting of various BUG_ON conditions
+> 
+> btrfs with 2.6.39:
+> 
+> - big performance problems after a few days uptime
+> - occasionally hitting BUG_ON conditions
+> 
+> btrfs with 3.0:
+> 
+> - big performance problems after a few days uptime
+> - occasionally hitting a deadlock in the btrfs filesystem (cosd is in D-state)
 
-Oh, you mean the fsck errors?  Got it.  If you see it again (on another 
-disk/machine, with a reasonably fresh fs) the ext4 guys will be interested 
-in hearing about it.  It's probably in the xattr code, which ceph uses 
-heavily but most people only set once per file (for selinux labels), if 
-at all.
+You might try 3.0 + the latest stuff Chris just sent to Linus (at least 
+for the D-state problem).  I'm eager to see whether the latencytop info 
+you sent is helpful for the rest.
+
+FWIW we're running 2.6.38+ at the moment.  We get some warnings with the 
+orphan code (fixed in .39), but it's otherwise been reasonably stable.  
 
 sage
