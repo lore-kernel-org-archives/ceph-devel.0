@@ -1,118 +1,57 @@
 From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
 Subject: Re: Two questions
-Date: Thu, 28 Jul 2011 09:17:12 +0200
-Message-ID: <-4123305127044475997@unknownmsgid>
-References: <8685614628192678277@unknownmsgid> <1311750865.2751.4.camel@wido-laptop.pcextreme.nl>
- <CAMwB3Ti66BpfdfwPx3XgmVQv2GAQ_Gc2beHRc6pBcWwphf_bhQ@mail.gmail.com>
- <1311763628.2751.34.camel@wido-laptop.pcextreme.nl> <CAMwB3Tgyo1ug7tUUkHJAyoct_T6O=pZY1P78_z5FJiO2D10M7g@mail.gmail.com>
- <CAF3hT9BbWvztQE=Mn3NW5OQ9ktHAe0AoW6m0aC9WqfyY1b7jBQ@mail.gmail.com>
+Date: Thu, 28 Jul 2011 09:18:52 +0200
+Message-ID: <680021437521473788@unknownmsgid>
+References: <8685614628192678277@unknownmsgid> <Pine.LNX.4.64.1107270854580.23984@cobra.newdream.net>
 Mime-Version: 1.0 (iPhone Mail 8G4)
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:48431 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:47039 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750782Ab1G1HRa convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 03:17:30 -0400
-Received: by fxh19 with SMTP id 19so984964fxh.19
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 00:17:28 -0700 (PDT)
-In-Reply-To: <CAF3hT9BbWvztQE=Mn3NW5OQ9ktHAe0AoW6m0aC9WqfyY1b7jBQ@mail.gmail.com>
+	with ESMTP id S1750782Ab1G1HTC convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 03:19:02 -0400
+Received: by fxh19 with SMTP id 19so986104fxh.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 00:19:01 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1107270854580.23984@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
+To: Sage Weil <sage@newdream.net>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Dnia 27 lip 2011 o godz. 18:15 Gregory Farnum
-<gregory.farnum@dreamhost.com> napisa=C5=82(a):
+Dnia 27 lip 2011 o godz. 17:52 Sage Weil <sage@newdream.net> napisa=C5=82=
+(a):
 
-> 2011/7/27 S=C5=82awomir Skowron <szibis@gmail.com>:
->> Ok, I will show example:
+> On Wed, 27 Jul 2011, S?awomir Skowron wrote:
+>> Hello. I have some questions.
 >>
->> rados df
->> pool name                 KB      objects       clones     degraded
->>  unfound           rd        rd KB           wr        wr KB
->> .log                  558212            5            0            0
->>       0            0            0      2844888      2844888
->> .pool                      1            1            0            0
->>       0            0            0            8            8
->> .rgw                       0            6            0            0
->>       0            0            0            1            0
->> .users                     1            1            0            0
->>       0            0            0            1            1
->> .users.email               1            1            0            0
->>       0            0            0            1            1
->> .users.uid                 2            2            0            0
->>       0            1            0            2            2
->> data                       0            0            0            0
->>       0            0            0            0            0
->> metadata                   0            0            0            0
->>       0            0            0            0            0
->> rbd                        0            0            0            0
->>       0            0            0            0            0
->> sstest              32244226      2841055            0       653353
->>       0            0            0     17066724     32370391
->>  total used       324792996      2841071
->>  total avail    31083452176
->>  total space    33043244460
->>
->> It means I have almost 3mln of objects in sstest.
->>
->> pg_pool 7 'sstest' pg_pool(rep pg_size 3 crush_ruleset 0 object_hash
->> rjenkins pg_num 8 pgp_num 8 lpg_num 0 lpgp_num 0 last_change 21 owne=
-r
->> 0)
->>
->> 3 copies in this pool.
->>
->> sstest used 32.244.226 KB + log 558.212 KB =3D 32.802.438 KB
->>
->> Total used is 324.792.996 KB and it's almost 10x more.
->>
->> 2011-07-27 12:57:35.541556    pg v54158: 6986 pgs: 8 active, 6978
->> active+clean; 32104 MB data, 310 GB used, 29642 GB / 31512 GB avail;
->>
->> I'am putting files beetwen 4-50KB on RADOS via s3 clilent, and rados=
-gw.
->>
->>
->> Can you explain that to me on this example from real life ??
+>> 1. Is there any chance to change default 4MB object size to for
+>> example 1MB or less ??
 >
-> Hmm, what underlying filesystem are you using? Do you have any loggin=
-g
-> enabled, and what disk is it logging to? Are all your OSDs running
-> under the same OS, or are they in virtual machines?
+> Yeah.  You can use the cephfs to set the default layout on the root
+> directory, which will apply to any new files.  See 'man cephfs'.
 
-I use ext4. I have loging enabled in osd and mon for most everything in=
- 20.
-Every osd is running on same version of debian 6 booted from network.
-In my testing case i use two machines and they are using the same
-configuration and system.
-They are not a VM's.
+Ok. Thanks.
 
-> If I remember correctly, that "total used" count is generated by
-> looking at df or something for the drives in question -- if there's
-> other data on the same drive as the OSD, it'll get (admittedly
-> incorrectly) counted as part of the "total used" by RADOS even if
-> RADOS can't touch it.
-> -Greg
+>> 2. I have create cluster of two mons, and 32 osd (1TB each) on two
+>> machines. At this radosgw with apache2 for test. When i putting data
+>> from s3 client to rados, everything is ok, but when one of osd is
+>> going down all s3 clients going to be freeze for some seconds, befor=
+e
+>> ceph sign this osd as down, and then everything is starting working
+>> again wit degraded osd. How can i tune this marking as a down for ms
+>> or 0 :) and not for seconds freeze ??
+>
+> The 'osd heartbeat grace' defualt is 20.  Stick something like
+>
+>    osd heartbeat grace =3D 5
+>
+> in the [osd] section of your ceph.conf
 
-Every machine setup is same and looks like this:
+Thanks, i will check this in work.
 
-2 x 300GB SAS -> hardware RAID1 -> root filesystem and ceph logs in
-/var/log/(osd,mon)
-12 x 2TB SATA -> hardware RAID5 + 1 Spare -> 16 x 1TB (raid usable
-space is bigger) ceph osd mounted as ext4 in /data/osd.(osd id)
-
-=46or test only i run journal in the same lun as the osd, because two
-SAS drives is not enough, but in real scenario system will run on one
-SAS drive for OS, journals on one SSD, and rest on SATA drives, or
-system and journals on RAID 1 SSD drives.
-
-If i count journals on two machines it 32 x 512MB, and its only 16GB
-more in rados df in calculation. Where is more ??
-
-With regards
-Slawomir Skowron
+> sage
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
