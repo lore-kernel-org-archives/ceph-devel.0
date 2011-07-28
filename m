@@ -1,57 +1,67 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Re: Two questions
-Date: Thu, 28 Jul 2011 09:18:52 +0200
-Message-ID: <680021437521473788@unknownmsgid>
-References: <8685614628192678277@unknownmsgid> <Pine.LNX.4.64.1107270854580.23984@cobra.newdream.net>
-Mime-Version: 1.0 (iPhone Mail 8G4)
-Content-Type: text/plain; charset=UTF-8
+From: srimugunthan dhandapani <srimugunthan.dhandapani@gmail.com>
+Subject: Re: Filesystems for ceph
+Date: Thu, 28 Jul 2011 13:05:32 +0530
+Message-ID: <CAMjNe_fxSP+tjLsOtu30NRza=SfFkOGQZ8M3ypCr1maUa2O2Jw@mail.gmail.com>
+References: <CAO47_-8nD4XLgBP9+nDxasO548ZXcTzMm3M+P=ewdQR3EwoqUw@mail.gmail.com>
+	<Pine.LNX.4.64.1107272136110.29447@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:47039 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750782Ab1G1HTC convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 03:19:02 -0400
-Received: by fxh19 with SMTP id 19so986104fxh.19
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 00:19:01 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1107270854580.23984@cobra.newdream.net>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:52633 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750782Ab1G1Hfd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 03:35:33 -0400
+Received: by wwe5 with SMTP id 5so2179297wwe.1
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 00:35:32 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1107272136110.29447@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Christian Brunner <chb@muc.de>, ceph-devel@vger.kernel.org
 
-Dnia 27 lip 2011 o godz. 17:52 Sage Weil <sage@newdream.net> napisa=C5=82=
-(a):
-
-> On Wed, 27 Jul 2011, S?awomir Skowron wrote:
->> Hello. I have some questions.
+On Thu, Jul 28, 2011 at 10:09 AM, Sage Weil <sage@newdream.net> wrote:
+> On Wed, 27 Jul 2011, Christian Brunner wrote:
+>> We are having quite some problems with the underlying filesystem for
+>> the cosd's and I would like to hear about other experiences. Here is
+>> what we have gone through so far:
 >>
->> 1. Is there any chance to change default 4MB object size to for
->> example 1MB or less ??
+>> btrfs with 2.6.38:
+>>
+>> - good performance
+>> - frequently hitting of various BUG_ON conditions
+>>
+>> btrfs with 2.6.39:
+>>
+>> - big performance problems after a few days uptime
+>> - occasionally hitting BUG_ON conditions
+>>
+>> btrfs with 3.0:
+>>
+>> - big performance problems after a few days uptime
+>> - occasionally hitting a deadlock in the btrfs filesystem (cosd is i=
+n D-state)
 >
-> Yeah.  You can use the cephfs to set the default layout on the root
-> directory, which will apply to any new files.  See 'man cephfs'.
+> You might try 3.0 + the latest stuff Chris just sent to Linus (at lea=
+st
+> for the D-state problem). =A0I'm eager to see whether the latencytop =
+info
+> you sent is helpful for the rest.
+>
+> FWIW we're running 2.6.38+ at the moment. =A0We get some warnings wit=
+h the
+> orphan code (fixed in .39), but it's otherwise been reasonably stable=
+=2E
 
-Ok. Thanks.
-
->> 2. I have create cluster of two mons, and 32 osd (1TB each) on two
->> machines. At this radosgw with apache2 for test. When i putting data
->> from s3 client to rados, everything is ok, but when one of osd is
->> going down all s3 clients going to be freeze for some seconds, befor=
-e
->> ceph sign this osd as down, and then everything is starting working
->> again wit degraded osd. How can i tune this marking as a down for ms
->> or 0 :) and not for seconds freeze ??
->
-> The 'osd heartbeat grace' defualt is 20.  Stick something like
->
->    osd heartbeat grace =3D 5
->
-> in the [osd] section of your ceph.conf
-
-Thanks, i will check this in work.
-
-> sage
->
+I thought that ext3/4 and btrfs are the only recommended underlying
+filesystem for ceph. I didnt know we can use xfs.
+With Glusterfs, theoretically, we can use any filesystem with extended
+attributes support as backend filesystem. Is that the same case with
+ceph too?
+Though it may not be optimal, theoretically can i use a "filesystem X"
+with extended attributes support for ceph?
+thanks,
+Mugunthan
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
