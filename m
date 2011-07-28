@@ -1,38 +1,47 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Btrfs slowdown
-Date: Thu, 28 Jul 2011 09:01:19 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1107280853590.13306@cobra.newdream.net>
-References: <CAO47_-9BLKWUGDEuzaLqHSq9tZkAUaO8FMQEy1pPk9A2Hb+5AQ@mail.gmail.com>
- <1311623446-sup-8105@shiny> <CAO47_--KOyMdS-OP06cLpD+qTQ+gqGcw_DCPUrLOeypt5j_G4g@mail.gmail.com>
- <CALFpzo4aNPmypyHXbK9YnxuQxNcDXv7wf+KPxakkcJVuZN5eaw@mail.gmail.com>
- <CAO47_-9r86Bbfzh7VpmUCP8BQgE4ciPAgDapJmxMsoTWz4PE3w@mail.gmail.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: osd down
+Date: Thu, 28 Jul 2011 08:59:35 -0700
+Message-ID: <CAORUGqBybLLSu7qg0hZwa69HrvVHJ9gPYfO12CR1pE3+zJezQA@mail.gmail.com>
+References: <CABAwU-ZrsJjXSX+2VV_1qbOJ7+4jeNzvThd6PC_CSOLBoG70RA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40819 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755740Ab1G1P5W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 11:57:22 -0400
-In-Reply-To: <CAO47_-9r86Bbfzh7VpmUCP8BQgE4ciPAgDapJmxMsoTWz4PE3w@mail.gmail.com>
+Received: from mail-yi0-f46.google.com ([209.85.218.46]:52939 "EHLO
+	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755463Ab1G1P75 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jul 2011 11:59:57 -0400
+Received: by yia27 with SMTP id 27so1908157yia.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jul 2011 08:59:56 -0700 (PDT)
+In-Reply-To: <CABAwU-ZrsJjXSX+2VV_1qbOJ7+4jeNzvThd6PC_CSOLBoG70RA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
-Cc: Marcus Sorensen <shadowsor@gmail.com>, Chris Mason <chris.mason@oracle.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>
+To: huang jun <hjwsm1989@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 28 Jul 2011, Christian Brunner wrote:
-> When I look at the latencytop results, there is a high latency when
-> calling "btrfs_commit_transaction_async". Isn't "async" supposed to
-> return immediately?
+On Thu, Jul 28, 2011 at 06:16, huang jun <hjwsm1989@gmail.com> wrote:
+> after reboot it manually, from the kern.log of the down OSD in below
+> =E2=80=A6=E2=80=A6=E2=80=A6=E2=80=A6
+> Jul 28 11:26:00 T02-OSD152 kernel: [ 4413.426215] r8169 0000:01:00.0:
+> eth0: link up
+> ^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^=
+@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@=
+^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^=
+@^@^@^@^@^@^@^@
+=2E..
+> ^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^=
+@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@=
+^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@^@6802/3615
+> took stat stat(2011-07-23 13:45:26.302800 oprate=3D0 qlen=3D0
 
-It depends.  That function has to block until the commit has started 
-before returning in the case where it creates a new btrfs root (i.e., 
-snapshot creation).  Otherwise a subsequent operation (after the ioctl 
-returns) can sneak in before the snapshot is taken.  (IIRC there was also 
-another problem with keeping internal structures consistent, tho I'm 
-forgetting the details.)  And there are a bunch of things 
-btrfs_commit_transaction() does before setting blocked = 1 that can be 
-slow.  There is a fair bit of transaction commit optimization work that 
-should eventually be done here that we sadly haven't had the resources to 
-look at yet.
+Zeroed bytes and content from unrelated files are classic examples of
+what happens when your filesystem gets corrupted. It really sounds
+like you encountered a kernel/hardware bug.
 
-sage
+What filesystem is your /var/log on? Are you using ceph's kclient on
+the OSD node (you shouldn't be, just checking)?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
