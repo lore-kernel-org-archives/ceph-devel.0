@@ -1,28 +1,24 @@
 From: Brian Chrisman <brchrisman@gmail.com>
 Subject: Re: userland nfs server
-Date: Fri, 29 Jul 2011 10:21:42 -0700
-Message-ID: <CAN4=B2=KQT498tVPoMGNe5fjK6VT-QEXk4j56pg1O8V1sJdRXw@mail.gmail.com>
+Date: Fri, 29 Jul 2011 11:43:58 -0700
+Message-ID: <CAN4=B2n6NyFj1TBU52+4cdwEfh+q_fkZf_rUwUd7c1xZJwFqRQ@mail.gmail.com>
 References: <1766745211.75.1311956818895.JavaMail.root@thunderbeast.private.linuxbox.com>
 	<1843323934.77.1311957032511.JavaMail.root@thunderbeast.private.linuxbox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:34835 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751504Ab1G2RVn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jul 2011 13:21:43 -0400
-Received: by vxh35 with SMTP id 35so2842315vxh.19
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Jul 2011 10:21:43 -0700 (PDT)
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:55210 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752402Ab1G2Sn7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jul 2011 14:43:59 -0400
+Received: by vws1 with SMTP id 1so3182593vws.19
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Jul 2011 11:43:59 -0700 (PDT)
 In-Reply-To: <1843323934.77.1311957032511.JavaMail.root@thunderbeast.private.linuxbox.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Matt W. Benjamin" <matt@linuxbox.com>
 Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
-
-Interesting... I'll pull your Ganesha code and do some testing... I
-don't see any docs, should I assume there's little difference with
-Ganesha?
 
 On Fri, Jul 29, 2011 at 9:30 AM, Matt W. Benjamin <matt@linuxbox.com> w=
 rote:
@@ -31,6 +27,12 @@ rote:
 > We (Linux Box) have built and published a native FSAL for Ceph, which=
  is pretty advanced, and we've submitted the FSAL driver code upstream =
 for review Philippe Deniel.
+
+Looking at the FSAL_CEPH, is this expecting the filesystem to be
+mounted via the ceph kernel client?  Have you considered building out
+an FSAL using libceph as opposed as to writing directly to OSDs
+(assumedly via libRADOS or librbd).
+
 >
 > In addition, we're working on pNFS support in Ganesha and Ceph, and h=
 ave a prototype file-based pNFS layout driver for the FSAL that takes a=
