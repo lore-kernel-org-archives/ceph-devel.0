@@ -1,44 +1,27 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Java-rados announcement (Version 2)
-Date: Mon, 1 Aug 2011 08:40:04 -0700
-Message-ID: <CAORUGqBvU=5Gh9V8kuPWr9_3o1eYB+w2AV40noZppsEJuJNKPA@mail.gmail.com>
-References: <82250CCC-5986-4167-90D3-BBC0A2549872@cs.ucsc.edu> <1372568026.24766.1312084695685.JavaMail.root@mail-01.cse.ucsc.edu>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: rados callbacks
+Date: Mon, 1 Aug 2011 08:59:52 -0700
+Message-ID: <CAF3hT9C1HqWPBOvRESB2Na7xs6ECKD_WV0XFHi5H5Fy_JfLOUw@mail.gmail.com>
+References: <CAO47_-9LwTQFfzZko=8oKz+nM5OKrcfW6ch0A9ZX6hqedhieTw@mail.gmail.com>
+	<CAC-hyiH8QWYNNbxb6d8CDr3dkFVHX=VwdcijJjRHLfv+pV=QEw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:58965 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753092Ab1HAPkZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Aug 2011 11:40:25 -0400
-Received: by vxh35 with SMTP id 35so4241124vxh.19
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Aug 2011 08:40:24 -0700 (PDT)
-In-Reply-To: <1372568026.24766.1312084695685.JavaMail.root@mail-01.cse.ucsc.edu>
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:55249 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752464Ab1HAP7x (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Aug 2011 11:59:53 -0400
+Received: by gwaa12 with SMTP id a12so1481421gwa.19
+        for <ceph-devel@vger.kernel.org>; Mon, 01 Aug 2011 08:59:52 -0700 (PDT)
+In-Reply-To: <CAC-hyiH8QWYNNbxb6d8CDr3dkFVHX=VwdcijJjRHLfv+pV=QEw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@soe.ucsc.edu>
-Cc: Colin McCabe <cmccabe@alumni.cmu.edu>, ceph-devel@vger.kernel.org, Noah Watkins <jayhawk@cs.ucsc.edu>
+To: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
+Cc: chb@muc.de, ceph-devel@vger.kernel.org
 
-On Sat, Jul 30, 2011 at 20:58, Noah Watkins <jayhawk@soe.ucsc.edu> wrot=
-e:
-> Howdy,
->
-> Updated Java bindings (Version 2) for RADOS are
-> available in a standalone repository located at:
->
-> =C2=A0 =C2=A0git://github.com/noahdesu/java-rados.git
->
-> Java Docs for the API are available at:
->
-> =C2=A0 =C2=A0http://noahdesu.github.com/java-rados/
->
-> The bindings cover a large majority of the RADOS API,
-> and there are basic unit tests for the entire API.
+On Mon, Aug 1, 2011 at 8:23 AM, Yehuda Sadeh Weinraub
+<yehuda.sadeh@dreamhost.com> wrote:
+> The osd first sends the ack when it receives the request
 
-Thanks! I added a link on http://ceph.newdream.net/wiki/Ceph#RADOS ,
-feel free to expand on the differences between rados4j and java-rados.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Actually it sends an ack when the request is applied in-memory to all
+the up OSDs in the PG. :)
