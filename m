@@ -1,51 +1,45 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: JSON generation in C/C++
-Date: Mon, 1 Aug 2011 13:14:40 -0700
-Message-ID: <CAORUGqAVM=d1wz_U7wt5X2ueq9JO_BrcXgD1b_RqrXnHOHGfZw@mail.gmail.com>
-References: <CAORUGqA91fXDjUSB-YT+5_C6d0Ap8SE7kqcKKZvt4or-VxuTPw@mail.gmail.com>
- <CA+qbEUPiy5equ8Y2PmY-Ua28eFiaWjEAAdWc52CgOe73oYYCkg@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: v0.32 released
+Date: Mon, 1 Aug 2011 13:30:12 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1108011329280.5415@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:36910 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752821Ab1HAUPA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Aug 2011 16:15:00 -0400
-Received: by vxh35 with SMTP id 35so4458868vxh.19
-        for <ceph-devel@vger.kernel.org>; Mon, 01 Aug 2011 13:15:00 -0700 (PDT)
-In-Reply-To: <CA+qbEUPiy5equ8Y2PmY-Ua28eFiaWjEAAdWc52CgOe73oYYCkg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:43067 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753134Ab1HAU0F (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 1 Aug 2011 16:26:05 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 7A59FBC764
+	for <ceph-devel@vger.kernel.org>; Mon,  1 Aug 2011 13:30:12 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 2E2DABC764
+	for <ceph-devel@vger.kernel.org>; Mon,  1 Aug 2011 13:30:12 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Aug 1, 2011 at 11:04, Colin Patrick McCabe
-<colin.mccabe@dreamhost.com> wrote:
-> One thing that neither Jansson nor JSON-C offer, to my knowledge, is
-> the ability to do SAX-style parsing of a JSON document. In other
-> words, to set up a bunch of function pointers and have them called at
-> various points during parsing. I did not personally feel the need for
-> this, since my JSON data was small enough that memory consumption was
-> a non-issue, but I guess someone else might. If Jansson wants to do
-> something to differentiate itself from the competition, that could be
-> it.
+We've released v0.32. Notable in this release:
 
-As far as my experience with various JSON encoders/decoders goes,
-that's the typical case. Most libraries cater for the simple case of
-being able to hold the full object in memory, and if that is not
-possible, it's more typical to go for an approach where the input is a
-stream of objects, one per line (e.g. Twitter streaming and all kinds
-of mapreduce solutions do this).
+ * common: perfcounter instrumentation now accessible via unix domain 
+   socket
+ * mon: dump cluster state in json format
+ * client: fix a few stalls, ref count links, clustered mds misbehaviors
+ * mds: many many clustering fixes, getting closer
+ * mds: fix for O_APPEND behavior
+ * osd: bug fixes in clone overlap tracking, accounting
+ * osd: bug fixes in recovery code when clones/snapshots are present
+ * radosgw: multithreaded fastcgi mode
+ * radosgw: many small fixes
+ * radosgw: consistent cache of bucket objects (ACLs)
+ * CodingStyle document
 
-Jansson's differentiating factor is that it's significantly simpler
-than json-c. My buddies use it for embedded development.
+For v0.33, we are working on more MDS clustering issues, collectd plugins 
+(for per-daemon and cluster stats), better management of the internal 
+directory structure on OSDs to facilitate PG splitting (scaling of object 
+pools), the radosgw, and of course teuthology, our qa framework.
 
-> I am not sure how I feel about using libraries to output (as opposed
-> to parse) JSON. There is a point where a task becomes simple enough
-> that using more libraries is an anti-pattern. For example, would you
-> use a library to output CSV? Probably not. The only thing you have to
-> remember is to properly do escaping.
+v0.32 can be found in the usual places:
+ * Direct download at: http://ceph.newdream.net/download/ceph-0.32.tar.gz
+ * For Debian/Ubuntu packages see: http://ceph.newdream.net/wiki/Debian
 
-I would. The doublequote rules of CSV are a pain to get right, and I
-don't want to keep rewriting unit tests for that particular wheel.
-Ceph has already had multiple bugs of this kind.
