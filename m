@@ -1,153 +1,282 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Strange.
-Date: Tue, 02 Aug 2011 11:19:46 +0300
-Message-ID: <4E37B322.6040301@ufm.su>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: osd recovery failed
+Date: Tue, 2 Aug 2011 21:46:00 +0800
+Message-ID: <CABAwU-ZgVQuEMTbbM=cn9t3cdzoe-XwMKYfuXT4s4f3hRz0eQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary=bcaec5171f99d4d10e04a985f7df
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:39571 "EHLO mail.ufm.su"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752419Ab1HBITu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 2 Aug 2011 04:19:50 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by mail.ufm.su (Postfix) with ESMTP id 1A197600248
-	for <ceph-devel@vger.kernel.org>; Tue,  2 Aug 2011 11:19:48 +0300 (EEST)
-Received: from mail.ufm.su ([127.0.0.1])
-	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id LRxYUjN61OGh for <ceph-devel@vger.kernel.org>;
-	Tue,  2 Aug 2011 11:19:48 +0300 (EEST)
-Received: from [192.168.2.22] (unknown [94.232.181.14])
-	by mail.ufm.su (Postfix) with ESMTPSA id EB519600247
-	for <ceph-devel@vger.kernel.org>; Tue,  2 Aug 2011 11:19:47 +0300 (EEST)
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:39154 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754432Ab1HBNqB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2011 09:46:01 -0400
+Received: by vws1 with SMTP id 1so5192515vws.19
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Aug 2011 06:46:00 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi!
+--bcaec5171f99d4d10e04a985f7df
+Content-Type: text/plain; charset=ISO-8859-1
 
-I'm not sure that makes sense with errors on ext4 complain about errors 
-in ceph.fs, but maybe it will be interesting:
+hi,all
+A strange problem.
+we use ceph v0.30 and linux 2.6.37.
+we build a cluster with 20 OSDs.But not all the OSDs are started. at
+first we just start 10 osds.
+and then we use 10 kernel clients to write 40GB data in total.
+now we start another 10 osds(almost at same time), then unusual things happened.
+a few osd down, we can show the debug file here.and there are many
+crashed PGs in pg dump.
 
-root@stb1:/mnt/dcvolia/amanda# rm -rf *
-rm: cannot remove `state/servers/index/butan.dcv/_': Directory not empty
-rm: cannot remove `state/servers/index/iprit.dcv/_': Directory not empty
-rm: cannot remove `state/servers/index/mail.naperehresti.info/_usr': 
-Directory not empty
-rm: cannot remove `state/servers/index/ns4.dc.volia.com/_': Directory 
-not empty
-rm: cannot remove `state/servers/index/ticket.dcv/_': Directory not empty
-rm: cannot remove `state/servers/index/tmg.net.ua/_': Directory not empty
-rm: cannot remove `state/servers/index/zoman.dcv/_': Directory not empty
+1) infos about "handle_pg_log"
+see attach file "handle_pg_log assert failed"
 
-and got in mds:
+2) infos about "PG::_activate_committed"
+2011-08-02 10:23:02.738366 460ff950 filestore(/data/osd.11) sync_entry
+commit took 0.066092
+2011-08-02 10:23:02.738497 458fe950 osd11 36 pg[0.277( v 7'1 lc 0'0
+(0'0,7'1] n=1 ec=2 les/c 7/7 36/36/36) [13] r=-1 stray m=1]
+_activate_committed 9, that was an old interval
+2011-08-02 10:23:02.738522 458fe950 osd11 36 pg[1.39b( empty n=0 ec=2
+les/c 7/28 36/36/3) [1] r=-1 stray] _activate_committed 9, that was an
+old interval
+2011-08-02 10:23:02.738547 458fe950 osd11 36 pg[1.276( empty n=0 ec=2
+les/c 7/34 36/36/36) [13] r=-1 stray] _activate_committed 9, that was
+an old interval
+2011-08-02 10:23:02.738564 458fe950 osd11 36 pg[1.276( empty n=0 ec=2
+les/c 7/34 36/36/36) [13] r=-1 stray] _finish_recovery -- stale
+2011-08-02 10:23:02.738584 458fe950 osd11 36 pg[1.320( empty n=0 ec=2
+les/c 7/29 36/36/9) [15] r=-1 stray] _activate_committed 9, that was
+an old interval
+*** Caught signal (Segmentation fault) **
+ in thread 0x458fe950
+ 1: /bin/cosd [0x6473a8]
+ 2: /lib/libpthread.so.0 [0x7f2a2bf9ba80]
+ 3: (PG::_activate_committed(unsigned int)+0x98) [0x572fe8]
+ 4: (C_Contexts::finish(int)+0xcc) [0x4dc74c]
+ 5: (Finisher::finisher_thread_entry()+0x1ab) [0x61167b]
 
+where do we go wrong? i can not point it out. maybe the recovery
+workload is very high, we shouldn't add more to it. but the ceph
+v0.24.3 works fluently.so why the PG was marked CRASHED? i have never
+saw it before.
+is their anybody meet the same problem?
 
-2011-08-02 11:04:52.046169    pg v540175: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:04:52.408819   log 2011-08-02 11:04:46.433515 mds0 
-10.5.51.230:6801/23145 10 : [ERR] unmatched fragstat size on single 
-dirfrag 609, inode has f(v3 m2011-08-02 11:04:46.433412 2=2+0), dirfrag 
-has f(v3 m2011-08-02 11:04:46.433412 1=1+0)
-2011-08-02 11:04:52.408819   log 2011-08-02 11:04:46.433555 mds0 
-10.5.51.230:6801/23145 11 : [ERR] unmatched rstat rbytes on single 
-dirfrag 609, inode has n(v7 rc2011-08-02 11:04:46.433412 b43119 2=2+0), 
-dirfrag has n(v7 rc2011-08-02 11:04:46.433412 b40923 1=1+0)
-2011-08-02 11:04:52.408819   log 2011-08-02 11:04:52.225521 mds0 
-10.5.51.230:6801/23145 12 : [ERR] rfiles underflow -1 on [inode 
-10000000444 [...2,head] /dcvolia/amanda/state/servers/index/butan.dcv/ 
-auth v4244 pv4303 ap=1+0 f(v7 m2011-06-09 03:27:48.159602 1=0+1) n(v79 
-rc2011-07-18 00:10:13.483555 b748540 39=37+2) (inest lock->sync w=1 
-dirty) (iversion lock) caps={4525=pAsLsXsFs/-@0,5107=pAsLsXs/p@4} | 
-dirtyscattered lock dirfrag caps authpin 0xbac78c0]
-2011-08-02 11:04:52.408819   log 2011-08-02 11:04:52.225868 mds0 
-10.5.51.230:6801/23145 13 : [ERR] rfiles underflow -1 on [inode 
-10000000446 [...2,head] /dcvolia/amanda/state/servers/index/iprit.dcv/ 
-auth v4246 pv4305 ap=1+0 f(v7 m2011-06-09 03:27:48.170333 1=0+1) n(v85 
-rc2011-07-18 00:10:41.619778 b727904 39=37+2) (inest lock->sync w=1 
-dirty) (iversion lock) caps={4525=pAsLsXsFs/-@0,5107=pAsLsXs/p@4} | 
-dirtyscattered lock dirfrag caps authpin 0xbac9a40]
-2011-08-02 11:04:52.408819   log 2011-08-02 11:04:52.226004 mds0 
-10.5.51.230:6801/23145 14 : [ERR] rfiles underflow -1 on [inode 
-1000000042f [...2,head] 
-/dcvolia/amanda/state/servers/index/mail.naperehresti.info/ auth v4286 
-pv4307 ap=1+0 f(v7 m2011-08-02 11:04:46.712436 1=0+1) n(v297 
-rc2011-08-02 11:04:46.712436 1=-1+2) (inest lock->sync w=1 dirty) 
-(iversion lock) caps={4525=pAsLsXs/-@1,5107=pAsLsXs/p@10} | 
-dirtyscattered lock dirfrag caps dirty authpin 0xbaca2a0]
-2011-08-02 11:04:52.408819   log 2011-08-02 11:04:52.226170 mds0 
-10.5.51.230:6801/23145 15 : [ERR] rfiles underflow -1 on [inode 
-10000000358 [...2,head] 
-/dcvolia/amanda/state/servers/index/ns4.dc.volia.com/ auth v4238 pv4309 
-ap=1+0 f(v5 m2011-06-20 00:05:09.195242 1=0+1) n(v77 rc2011-07-18 
-00:06:13.112554 b2354733 28=26+2) (inest lock->sync w=1 dirty) (iversion 
-lock) caps={4525=pAsLsXsFs/-@0,5107=pAsLsXs/p@4} | dirtyscattered lock 
-dirfrag caps authpin 0xbacab00]
-2011-08-02 11:04:52.408819   log 2011-08-02 11:04:52.226307 mds0 
-10.5.51.230:6801/23145 16 : [ERR] rfiles underflow -1 on [inode 
-10000000438 [...2,head] /dcvolia/amanda/state/servers/index/ticket.dcv/ 
-auth v4148 pv4311 ap=1+0 f(v8 m2011-06-09 03:27:48.035056 1=0+1) n(v104 
-rc2011-07-16 00:18:38.420661 b2372408 38=36+2) (inest lock->sync w=1 
-dirty) (iversion lock) caps={4525=pAsLsXsFs/-@0,5107=pAsLsXs/p@4} | 
-dirtyscattered lock dirfrag caps authpin 0xbacb360]
-2011-08-02 11:04:53.050029    pg v540176: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:04:57.046842    pg v540177: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:04:58.050471    pg v540178: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:04:59.053677    pg v540179: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:05:00.298567    pg v540180: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:05:02.408930   log 2011-08-02 11:04:57.225360 mds0 
-10.5.51.230:6801/23145 17 : [ERR] rfiles underflow -1 on [inode 
-1000000042d [...2,head] /dcvolia/amanda/state/servers/index/tmg.net.ua/ 
-auth v4200 pv4319 ap=1+0 f(v7 m2011-06-09 03:27:47.988225 1=0+1) n(v121 
-rc2011-07-17 00:05:13.012245 b7548498 38=36+2) (inest lock->sync w=1 
-dirty) (iversion lock) caps={4525=pAsLsXsFs/-@0,5107=pAsLsXs/p@4} | 
-dirtyscattered lock dirfrag caps authpin 0xbacbbc0]
-2011-08-02 11:05:02.408930   log 2011-08-02 11:04:57.225726 mds0 
-10.5.51.230:6801/23145 18 : [ERR] rfiles underflow -1 on [inode 
-1000000043e [...2,head] /dcvolia/amanda/state/servers/index/zoman.dcv/ 
-auth v4240 pv4321 ap=1+0 f(v7 m2011-06-09 03:27:48.130542 1=0+1) n(v82 
-rc2011-07-18 00:07:40.208712 b721925 39=37+2) (inest lock->sync w=1 
-dirty) (iversion lock) caps={4525=pAsLsXsFs/-@0,5107=pAsLsXs/p@4} | 
-dirtyscattered lock dirfrag caps authpin 0xbacdd40]
-2011-08-02 11:05:05.299638    pg v540181: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:05:10.303368    pg v540182: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:05:15.302671    pg v540183: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:05:18.423366    pg v540184: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:05:20.303675    pg v540185: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:06:02.994535    pg v540186: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
-2011-08-02 11:06:57.057322    pg v540187: 2376 pgs: 2376 active+clean; 
-8432 GB data, 16884 GB used, 30847 GB / 49027 GB avail
+Best Regards!
 
-root@stb1:/mnt/dcvolia/amanda# ls -al state/servers/index/butan.dcv/_/
-total 0
-drwxr-xr-x 1 1002 disk 0 2011-08-02 11:04 .
-drwxr-xr-x 1 1002 disk 0 2011-06-09 03:27 ..
-root@stb1:/mnt/dcvolia/amanda#
+--bcaec5171f99d4d10e04a985f7df
+Content-Type: application/octet-stream; name=handle_pg_log assert failed
+Content-Disposition: attachment; filename=handle_pg_log assert failed
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gquwyb830
 
-root@stb1:/mnt/dcvolia/amanda# cd ..
-root@stb1:/mnt/dcvolia# ls -alh
-total 0
-drwxr-xr-x 1 root root 7.3T 2011-07-09 14:50 .
-drwxrwxrwx 1 root root 7.3T 2011-08-02 11:04 ..
-drwxr-xr-x 1 1002 disk  16E 2011-08-02 11:05 amanda
-drwxr-xr-x 1  107  115 222G 2011-08-02 01:32 bacula
-drwxrwxrwx 1 root root    0 2011-06-18 18:22 hvds
-drwxrwxrwx 1 root root 7.1T 2011-08-02 08:25 noc
-root@stb1:/mnt/dcvolia#
-
-I think it is time to make fsck.ceph
-
-WBR,
-     Fyodor.
-
+MjAxMS0wOC0wMiAxMDoyMzozOC42MDIwMzYgNGEyODY5NTAgLS0gMTkyLjE2OC4wLjExOTo2ODAz
+LzQ5NDAgPD09IG9zZDAgMTkyLjE2OC4wLjEwMTo2ODAxLzUyNDMgMTEyID09PT0gcGdfaW5mbygx
+IHBncyBlNjIpIHYxID09PT0gDQozMTYrMCswICgyNjIzNzEwMDAzIDAgMCkgMHgxYjE1YTgwIGNv
+biAweDEzNTI4YzANCjIwMTEtMDgtMDIgMTA6MjM6MzguNjAyMDQxIDRhMjg2OTUwIG9zZDE4IDcx
+IGhhbmRsZV9wZ19pbmZvIHBnX2luZm8oMSBwZ3MgZTYyKSB2MSBmcm9tIG9zZDANCjIwMTEtMDgt
+MDIgMTA6MjM6MzguNjAyMDUzIDRhMjg2OTUwIG9zZDE4IDcxIHBnWzIuNGUoIGVtcHR5IG49MCBl
+Yz0yIGxlcy9jIDUyLzYxIDQzLzQzLzIpIFswLDE4XSByPTEgYWN0aXZlXSBoYW5kbGVfaW5mbyAy
+LjRlKCBlbXB0eQ0KIG49MCBlYz0yIGxlcy9jIDUyLzYyIDQzLzQzLzIpIGZyb20gb3NkMA0KMjAx
+MS0wOC0wMiAxMDoyMzozOC42MDIwNjggNGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29zZC4xOCkg
+cXVldWVfdHJhbnNhY3Rpb25zIGV4aXN0aW5nIG9zciAweDE3MzMzYzAvMHgxY2I1YjY4DQoyMDEx
+LTA4LTAyIDEwOjIzOjM4LjYwMjA4MSA0YTI4Njk1MCBmaWxlc3RvcmUoL2RhdGEvb3NkLjE4KSBx
+dWV1ZV90cmFuc2FjdGlvbnMgKHRyYWlsaW5nIGpvdXJuYWwpIDEyNzA3IDB4MTNhMWRjMA0KMjAx
+MS0wOC0wMiAxMDoyMzozOC42MDIwODUgNGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29zZC4xOCkg
+X2RvX3RyYW5zYWN0aW9uIG9uIDB4MTNhMWRjMA0KMjAxMS0wOC0wMiAxMDoyMzozOC42MDIwOTEg
+NGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29zZC4xOCkgY29sbGVjdGlvbl9zZXRhdHRyIC9kYXRh
+L29zZC4xOC9jdXJyZW50LzIuNGVfaGVhZCAnaW5mbycgbGVuIDMwOQ0KMjAxMS0wOC0wMiAxMDoy
+MzozOC42MDIxMTMgNGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29zZC4xOCkgY29sbGVjdGlvbl9z
+ZXRhdHRyIC9kYXRhL29zZC4xOC9jdXJyZW50LzIuNGVfaGVhZCAnaW5mbycgbGVuIDMwOSA9IDMw
+OQ0KMjAxMS0wOC0wMiAxMDoyMzozOC42MDIxNDUgNGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29z
+ZC4xOCkgdHJ1bmNhdGUgbWV0YS9wZ2luZm9fMi40ZS8wIHNpemUgMCA9IDANCjIwMTEtMDgtMDIg
+MTA6MjM6MzguNjAyMTc0IDRhMjg2OTUwIGZpbGVzdG9yZSgvZGF0YS9vc2QuMTgpIHF1ZXVlX2Zs
+dXNoZXIgZXAgNjAgZmQgNDUgMH43NiBxbGVuIDENCjIwMTEtMDgtMDIgMTA6MjM6MzguNjAyMTg4
+IDRhMjg2OTUwIGZpbGVzdG9yZSgvZGF0YS9vc2QuMTgpIHdyaXRlIG1ldGEvcGdpbmZvXzIuNGUv
+MCAwfjc2ID0gNzYNCjIwMTEtMDgtMDIgMTA6MjM6MzguNjAyMTk2IDQ3YTgxOTUwIGZpbGVzdG9y
+ZSgvZGF0YS9vc2QuMTgpIGZsdXNoZXJfZW50cnkgZmx1c2hpbmcrY2xvc2luZyA0NSBlcCA2MA0K
+MjAxMS0wOC0wMiAxMDoyMzozOC42MDIyMTIgNGEyODY5NTAgLS0gMTkyLjE2OC4wLjExOTo2ODAz
+LzQ5NDAgPD09IG9zZDEgMTkyLjE2OC4wLjEwMjo2ODAxLzUyODQgNTYgPT09PSBwZ19sb2coMS4z
+ZGEgZTYxKSB2MSA9PT09IDM0DQo3KzArMCAoMTkwOTg2NjAwMyAwIDApIDB4MjEzNjAwMCBjb24g
+MHgxMzMyNTAwDQoyMDExLTA4LTAyIDEwOjIzOjM4LjYwMjIxOSA0YTI4Njk1MCBvc2QxOCA3MSBo
+YW5kbGVfcGdfbG9nIHBnX2xvZygxLjNkYSBlNjEpIHYxIGZyb20gb3NkMQ0KMjAxMS0wOC0wMiAx
+MDoyMzozOC42MDIyMzIgNGEyODY5NTAgb3NkMTggNzEgcGdbMS4zZGEoIGVtcHR5IG49MCBlYz0y
+IGxlcy9jIDcvNDAgNDMvNDMvNDMpIFsxOCwyXSByPTAgbWxjb2QgMCcwICFobWwgcGVlcmluZ10g
+aGFuZGxlDQpfbG9nIHBnX2xvZygxLjNkYSBlNjEpIHYxIGZyb20gb3NkMQ0KMjAxMS0wOC0wMiAx
+MDoyMzozOC42MDIyNDQgNGEyODY5NTAgb3NkMTggNzEgcGdbMS4zZGEoIGVtcHR5IG49MCBlYz0y
+IGxlcy9jIDcvNDAgNDMvNDMvNDMpIFsxOCwyXSByPTAgbWxjb2QgMCcwICFobWwgcGVlcmluZ10g
+c3RhdGU8DQpTdGFydGVkL1ByaW1hcnkvUGVlcmluZz46IExlYXZpbmcgUGVlcmluZw0Kb3NkL1BH
+LmNjOiBJbiBmdW5jdGlvbiAnUEc6OlJlY292ZXJ5U3RhdGU6OkNyYXNoZWQ6OkNyYXNoZWQoYm9v
+c3Q6OnN0YXRlY2hhcnQ6OnN0YXRlPFBHOjpSZWNvdmVyeVN0YXRlOjpDcmFzaGVkLCBQRzo6UmVj
+b3ZlcnlTdGF0ZTo6DQpSZWNvdmVyeU1hY2hpbmUsIGJvb3N0OjptcGw6Omxpc3Q8bXBsXzo6bmEs
+IG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6
+bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmENCiwgbXBsXzo6bmEsIG1wbF86Om5hLCBt
+cGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5h
+LCBtcGxfOjpuYSwgbXBsXzo6bmE+LCBoYXNfbm9faGlzdG9yeT46Om15X2NvbnRleHQpJw0KLCBp
+biB0aHJlYWQgJzB4NGEyODY5NTAnDQpvc2QvUEcuY2M6IDM4ODI6IEZBSUxFRCBhc3NlcnQoMCA9
+PSAid2UgZ290IGEgYmFkIHN0YXRlIG1hY2hpbmUgZXZlbnQiKQ0KIDE6IChQRzo6UmVjb3ZlcnlT
+dGF0ZTo6Q3Jhc2hlZDo6Q3Jhc2hlZChib29zdDo6c3RhdGVjaGFydDo6c3RhdGU8UEc6OlJlY292
+ZXJ5U3RhdGU6OkNyYXNoZWQsIFBHOjpSZWNvdmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIGJv
+DQpvc3Q6Om1wbDo6bGlzdDxtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwg
+bXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpu
+YSwgbXBsXzo6bmEsIG1wbF86Om4NCmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1w
+bF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYT4sIChib29zdDo6
+c3RhdGVjaGFydDo6aGlzdG9yeV9tb2RlKTA+OjpteV9jb250ZXh0KQ0KKzB4YjYpIFsweDU2ZDI5
+Nl0NCiAyOiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OmRldGFpbDo6aW5uZXJfY29uc3RydWN0b3I8Ym9v
+c3Q6Om1wbDo6bF9pdGVtPG1wbF86OmxvbmdfPDFsPiwgUEc6OlJlY292ZXJ5U3RhdGU6OkNyYXNo
+ZWQsIGJvb3N0OjptcGw6OmxfZW5kPg0KLCBib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGlu
+ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6
+SW5pdGlhbCwgc3RkOjphbGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0DQplY2hhcnQ6Om51bGxf
+ZXhjZXB0aW9uX3RyYW5zbGF0b3I+ID46OmNvbnN0cnVjdChib29zdDo6c3RhdGVjaGFydDo6c3Rh
+dGVfbWFjaGluZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3Zl
+cnlTdGENCnRlOjpJbml0aWFsLCBzdGQ6OmFsbG9jYXRvcjx2b2lkPiwgYm9vc3Q6OnN0YXRlY2hh
+cnQ6Om51bGxfZXhjZXB0aW9uX3RyYW5zbGF0b3I+KiBjb25zdCYsIGJvb3N0OjpzdGF0ZWNoYXJ0
+OjpzdGF0ZV9tYWNoaW5lPFBHOjpSZWNvdg0KZXJ5U3RhdGU6OlJlY292ZXJ5TWFjaGluZSwgUEc6
+OlJlY292ZXJ5U3RhdGU6OkluaXRpYWwsIHN0ZDo6YWxsb2NhdG9yPHZvaWQ+LCBib29zdDo6c3Rh
+dGVjaGFydDo6bnVsbF9leGNlcHRpb25fdHJhbnNsYXRvcj4mKSsweDJkKSBbDQoweDVhZGNkZF0N
+CiAzOiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBsZV9zdGF0ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6
+U3RhcnRlZCwgUEc6OlJlY292ZXJ5U3RhdGU6OlJlY292ZXJ5TWFjaGluZSwgUEc6OlJlY292ZXJ5
+U3RhdGU6OlN0YXJ0LCANCiAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVh
+Y3RfaW1wbChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3Qq
+KSsweGM5KSBbMHg1YWVjNzldDQogIDQ6IChib29zdDo6c3RhdGVjaGFydDo6c2ltcGxlX3N0YXRl
+PFBHOjpSZWNvdmVyeVN0YXRlOjpQcmltYXJ5LCBQRzo6UmVjb3ZlcnlTdGF0ZTo6U3RhcnRlZCwg
+UEc6OlJlY292ZXJ5U3RhdGU6OlBlZXJpbmcsIChib29zdDo6c3RhdGVjaGFydDo6aGlzdG9yeV9t
+b2RlKTA+OjpyZWFjdF9pbXBsKGJvb3N0OjpzdGF0ZWNoYXJ0OjpldmVudF9iYXNlIGNvbnN0Jiwg
+dm9pZCBjb25zdCopKzB4MTAxKSBbMHg1YWY0NjFdDQogNTogKGJvb3N0OjpzdGF0ZWNoYXJ0Ojpz
+aW1wbGVfc3RhdGU8UEc6OlJlY292ZXJ5U3RhdGU6OlBlZXJpbmcsIFBHOjpSZWNvdmVyeVN0YXRl
+OjpQcmltYXJ5LCBQRzo6UmVjb3ZlcnlTdGF0ZTo6R2V0SW5mbywgKGJvb3N0OjpzdGF0ZWNoYXJ0
+OjpoaXN0b3J5X21vZGUpMD46OnJlYWN0X2ltcGwoYm9vc3Q6OnN0YXRlY2hhcnQ6OmV2ZW50X2Jh
+c2UgY29uc3QmLCB2b2lkIGNvbnN0KikrMHg5NSkgWzB4NWIyNjg1XQ0KIDY6IChib29zdDo6c3Rh
+dGVjaGFydDo6c2ltcGxlX3N0YXRlPFBHOjpSZWNvdmVyeVN0YXRlOjpHZXRJbmZvLCBQRzo6UmVj
+b3ZlcnlTdGF0ZTo6UGVlcmluZywgYm9vc3Q6Om1wbDo6bGlzdDxtcGxfOjpuYSwgbXBsXzo6bmEs
+IG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6
+bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBs
+Xzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwg
+bXBsXzo6bmE+LCAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1w
+bChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweDk1
+KSBbMHg1YjQwMDVdDQogNzogKGJvb3N0OjpzdGF0ZWNoYXJ0OjpzdGF0ZV9tYWNoaW5lPFBHOjpS
+ZWNvdmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIFBHOjpSZWNvdmVyeVN0YXRlOjpJbml0aWFs
+LCBzdGQ6OmFsbG9jYXRvcjx2b2lkPiwgYm9vc3Q6OnN0YXRlY2hhcnQ6Om51bGxfZXhjZXB0aW9u
+X3RyYW5zbGF0b3I+Ojpwcm9jZXNzX2V2ZW50KGJvb3N0OjpzdGF0ZWNoYXJ0OjpldmVudF9iYXNl
+IGNvbnN0JikrMHg0YikgWzB4NWFmNjRiXQ0KIDg6IChQRzo6UmVjb3ZlcnlTdGF0ZTo6aGFuZGxl
+X2xvZyhpbnQsIE1PU0RQR0xvZyosIFBHOjpSZWNvdmVyeUN0eCopKzB4MTQyKSBbMHg1N2Q1OTJd
+DQogOTogKE9TRDo6aGFuZGxlX3BnX2xvZyhNT1NEUEdMb2cqKSsweDM0YSkgWzB4NTJkOWVhXQ0K
+IDEwOiAoT1NEOjpfZGlzcGF0Y2goTWVzc2FnZSopKzB4NTE1KSBbMHg1MmU0ZDVdDQogMTE6IChP
+U0Q6Om1zX2Rpc3BhdGNoKE1lc3NhZ2UqKSsweGQ5KSBbMHg1MmVlZjldDQogMTI6IChTaW1wbGVN
+ZXNzZW5nZXI6OmRpc3BhdGNoX2VudHJ5KCkrMHg5MDcpIFsweDYyYTU3N10NCiAxMzogKFNpbXBs
+ZU1lc3Nlbmdlcjo6RGlzcGF0Y2hUaHJlYWQ6OmVudHJ5KCkrMHgxZikgWzB4NDlhZjFmXQ0KIDE0
+OiAvbGliL2xpYnB0aHJlYWQuc28uMCBbMHg3ZjdmYWFkZGZmYzddDQogMTU6IChjbG9uZSgpKzB4
+NmQpIFsweDdmN2ZhOWE1MDY0ZF0NCiAxOiAoUEc6OlJlY292ZXJ5U3RhdGU6OkNyYXNoZWQ6OkNy
+YXNoZWQoYm9vc3Q6OnN0YXRlY2hhcnQ6OnN0YXRlPFBHOjpSZWNvdmVyeVN0YXRlOjpDcmFzaGVk
+LCBQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBib29zdDo6bXBsOjpsaXN0PG1w
+bF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEs
+IG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6
+bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBs
+Xzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYT4sIChib29zdDo6c3RhdGVjaGFydDo6aGlzdG9yeV9t
+b2RlKTA+OjpteV9jb250ZXh0KSsweGI2KSBbMHg1NmQyOTZdDQogMjogKGJvb3N0OjpzdGF0ZWNo
+YXJ0OjpkZXRhaWw6OmlubmVyX2NvbnN0cnVjdG9yPGJvb3N0OjptcGw6OmxfaXRlbTxtcGxfOjps
+b25nXzwxbD4sIFBHOjpSZWNvdmVyeVN0YXRlOjpDcmFzaGVkLCBib29zdDo6bXBsOjpsX2VuZD4s
+IGJvb3N0OjpzdGF0ZWNoYXJ0OjpzdGF0ZV9tYWNoaW5lPFBHOjpSZWNvdmVyeVN0YXRlOjpSZWNv
+dmVyeU1hY2hpbmUsIFBHOjpSZWNvdmVyeVN0YXRlOjpJbml0aWFsLCBzdGQ6OmFsbG9jYXRvcjx2
+b2lkPiwgYm9vc3Q6OnN0YXRlY2hhcnQ6Om51bGxfZXhjZXB0aW9uX3RyYW5zbGF0b3I+ID46OmNv
+bnN0cnVjdChib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGluZTxQRzo6UmVjb3ZlcnlTdGF0
+ZTo6UmVjb3ZlcnlNYWNoaW5lLCANCiBQRzo6UmVjb3ZlcnlTdGF0ZTo6SW5pdGlhbCwgc3RkOjph
+bGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpudWxsX2V4Y2VwdGlvbl90cmFuc2xh
+dG9yPiogY29uc3QmLCBib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGluZTxQRzo6UmVjb3Zl
+cnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6SW5pdGlhbCwgc3Rk
+OjphbGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpudWxsX2V4Y2VwdGlvbl90cmFu
+c2xhdG9yPiYpKzB4MmQpIFsweDVhZGNkZF0NCiAzOiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBs
+ZV9zdGF0ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6U3RhcnRlZCwgUEc6OlJlY292ZXJ5U3RhdGU6OlJl
+Y292ZXJ5TWFjaGluZSwgUEc6OlJlY292ZXJ5U3RhdGU6OlN0YXJ0LCAoYm9vc3Q6OnN0YXRlY2hh
+cnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1wbChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRf
+YmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweGM5KSBbMHg1YWVjNzldDQogNDogKGJvb3N0Ojpz
+dGF0ZWNoYXJ0OjpzaW1wbGVfc3RhdGU8UEc6OlJlY292ZXJ5U3RhdGU6OlByaW1hcnksIFBHOjpS
+ZWNvdmVyeVN0YXRlOjpTdGFydGVkLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6UGVlcmluZywgKGJvb3N0
+OjpzdGF0ZWNoYXJ0OjpoaXN0b3J5X21vZGUpMD46OnJlYWN0X2ltcGwoYm9vc3Q6OnN0YXRlY2hh
+cnQ6OmV2ZW50X2Jhc2UgY29uc3QmLCB2b2lkIGNvbnN0KikrMHgxMDEpIFsweDVhZjQ2MV0NCiA1
+OiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBsZV9zdGF0ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UGVl
+cmluZywgUEc6OlJlY292ZXJ5U3RhdGU6OlByaW1hcnksIFBHOjpSZWNvdmVyeVN0YXRlOjpHZXRJ
+bmZvLCAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1wbChib29z
+dDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweDk1KSBbMHg1
+YjI2ODVdDQogNjogKGJvb3N0OjpzdGF0ZWNoYXJ0OjpzaW1wbGVfc3RhdGU8UEc6OlJlY292ZXJ5
+U3RhdGU6OkdldEluZm8sIFBHOjpSZWNvdmVyeVN0YXRlOjpQZWVyaW5nLCBib29zdDo6bXBsOjps
+aXN0PG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBs
+Xzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwg
+bXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpu
+YSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYT4sIChib29zdDo6c3RhdGVjaGFydDo6aGlz
+dG9yeV9tb2RlKTA+OjpyZWFjdF9pbXBsKGJvb3N0OjpzdGF0ZWNoYXJ0OjpldmVudF9iYXNlIGNv
+bnN0Jiwgdm9pZCBjb25zdCopKzB4OTUpIFsweDViNDAwNV0NCiA3OiAoYm9vc3Q6OnN0YXRlY2hh
+cnQ6OnN0YXRlX21hY2hpbmU8UEc6OlJlY292ZXJ5U3RhdGU6OlJlY292ZXJ5TWFjaGluZSwgUEc6
+OlJlY292ZXJ5U3RhdGU6OkluaXRpYWwsIHN0ZDo6YWxsb2NhdG9yPHZvaWQ+LCBib29zdDo6c3Rh
+dGVjaGFydDo6bnVsbF9leGNlcHRpb25fdHJhbnNsYXRvcj46OnByb2Nlc3NfZXZlbnQoYm9vc3Q6
+OnN0YXRlY2hhcnQ6OmV2ZW50X2Jhc2UgY29uc3QmKSsweDRiKSBbMHg1YWY2NGJdDQogODogKFBH
+OjpSZWNvdmVyeVN0YXRlOjpoYW5kbGVfbG9nKGludCwgTU9TRFBHTG9nKiwgUEc6OlJlY292ZXJ5
+Q3R4KikrMHgxNDIpIFsweDU3ZDU5Ml0NCiA5OiAoT1NEOjpoYW5kbGVfcGdfbG9nKE1PU0RQR0xv
+ZyopKzB4MzRhKSBbMHg1MmQ5ZWFdDQogMTA6IChPU0Q6Ol9kaXNwYXRjaChNZXNzYWdlKikrMHg1
+MTUpIFsweDUyZTRkNV0NCiAxMTogKE9TRDo6bXNfZGlzcGF0Y2goTWVzc2FnZSopKzB4ZDkpIFsw
+eDUyZWVmOV0NCiAxMjogKFNpbXBsZU1lc3Nlbmdlcjo6ZGlzcGF0Y2hfZW50cnkoKSsweDkwNykg
+WzB4NjJhNTc3XQ0KIDEzOiAoU2ltcGxlTWVzc2VuZ2VyOjpEaXNwYXRjaFRocmVhZDo6ZW50cnko
+KSsweDFmKSBbMHg0OWFmMWZdDQogMTQ6IC9saWIvbGlicHRocmVhZC5zby4wIFsweDdmN2ZhYWRk
+ZmZjN10NCiAxNTogKGNsb25lKCkrMHg2ZCkgWzB4N2Y3ZmE5YTUwNjRkXQ0KKioqIENhdWdodCBz
+aWduYWwgKEFib3J0ZWQpICoqDQogaW4gdGhyZWFkIDB4NGEyODY5NTANCiAxOiAvYmluL2Nvc2Qg
+WzB4NjQ3M2E4XQ0KIDI6IC9saWIvbGlicHRocmVhZC5zby4wIFsweDdmN2ZhYWRlN2E4MF0NCiAz
+OiAoZ3NpZ25hbCgpKzB4MzUpIFsweDdmN2ZhOTliMmVkNV0NCiA0OiAoYWJvcnQoKSsweDE4Mykg
+WzB4N2Y3ZmE5OWI0M2YzXQ0KIDU6IChfX2dudV9jeHg6Ol9fdmVyYm9zZV90ZXJtaW5hdGVfaGFu
+ZGxlcigpKzB4MTE1KSBbMHg3ZjdmYWEyM2FkYzVdDQogNjogL3Vzci9saWIvbGlic3RkYysrLnNv
+LjYgWzB4N2Y3ZmFhMjM5MTY2XQ0KIDc6IC91c3IvbGliL2xpYnN0ZGMrKy5zby42IFsweDdmN2Zh
+YTIzOTE5M10NCiA4OiAvdXNyL2xpYi9saWJzdGRjKysuc28uNiBbMHg3ZjdmYWEyMzkyOGVdDQog
+OTogKGNlcGg6Ol9fY2VwaF9hc3NlcnRfZmFpbChjaGFyIGNvbnN0KiwgY2hhciBjb25zdCosIGlu
+dCwgY2hhciBjb25zdCopKzB4MzdkKSBbMHg2MTJhNGRdDQogMTA6IChQRzo6UmVjb3ZlcnlTdGF0
+ZTo6Q3Jhc2hlZDo6Q3Jhc2hlZChib29zdDo6c3RhdGVjaGFydDo6c3RhdGU8UEc6OlJlY292ZXJ5
+U3RhdGU6OkNyYXNoZWQsIFBHOjpSZWNvdmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIGJvb3N0
+OjptcGw6Omxpc3Q8bXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86
+Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1w
+bF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEs
+IG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hPiwgKGJvb3N0OjpzdGF0ZWNo
+YXJ0OjpoaXN0b3J5X21vZGUpMD46Om15X2NvbnRleHQpKzB4YjYpIFsweDU2ZDI5Nl0NCiAxMTog
+KGJvb3N0OjpzdGF0ZWNoYXJ0OjpkZXRhaWw6OmlubmVyX2NvbnN0cnVjdG9yPGJvb3N0OjptcGw6
+OmxfaXRlbTxtcGxfOjpsb25nXzwxbD4sIFBHOjpSZWNvdmVyeVN0YXRlOjpDcmFzaGVkLCBib29z
+dDo6bXBsOjpsX2VuZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpzdGF0ZV9tYWNoaW5lPFBHOjpSZWNv
+dmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIFBHOjpSZWNvdmVyeVN0YXRlOjpJbml0aWFsLCBz
+dGQ6OmFsbG9jYXRvcjx2b2lkPiwgYm9vc3Q6OnN0YXRlY2hhcnQ6Om51bGxfZXhjZXB0aW9uX3Ry
+YW5zbGF0b3I+ID46OmNvbnN0cnVjdChib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGluZTxQ
+Rzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6SW5p
+dGlhbCwgc3RkOjphbGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpudWxsX2V4Y2Vw
+dGlvbl90cmFuc2xhdG9yPiogY29uc3QmLCBib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGlu
+ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6
+SW5pdGlhbCwgc3RkOjphbGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpudWxsX2V4
+Y2VwdGlvbl90cmFuc2xhdG9yPiYpKzB4MmQpIFsweDVhZGNkZF0NCiAxMjogKGJvb3N0OjpzdGF0
+ZWNoYXJ0OjpzaW1wbGVfc3RhdGU8UEc6OlJlY292ZXJ5U3RhdGU6OlN0YXJ0ZWQsIFBHOjpSZWNv
+dmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIFBHOjpSZWNvdmVyeVN0YXRlOjpTdGFydCwgKGJv
+b3N0OjpzdGF0ZWNoYXJ0OjpoaXN0b3J5X21vZGUpMD46OnJlYWN0X2ltcGwoYm9vc3Q6OnN0YXRl
+Y2hhcnQ6OmV2ZW50X2Jhc2UgY29uc3QmLCB2b2lkIGNvbnN0KikrMHhjOSkgWzB4NWFlYzc5XQ0K
+IDEzOiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBsZV9zdGF0ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6
+UHJpbWFyeSwgUEc6OlJlY292ZXJ5U3RhdGU6OlN0YXJ0ZWQsIFBHOjpSZWNvdmVyeVN0YXRlOjpQ
+ZWVyaW5nLCAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1wbChi
+b29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweDEwMSkg
+WzB4NWFmNDYxXQ0KIDE0OiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBsZV9zdGF0ZTxQRzo6UmVj
+b3ZlcnlTdGF0ZTo6UGVlcmluZywgUEc6OlJlY292ZXJ5U3RhdGU6OlByaW1hcnksIFBHOjpSZWNv
+dmVyeVN0YXRlOjpHZXRJbmZvLCAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6
+cmVhY3RfaW1wbChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29u
+c3QqKSsweDk1KSBbMHg1YjI2ODVdDQogMTU6IChib29zdDo6c3RhdGVjaGFydDo6c2ltcGxlX3N0
+YXRlPFBHOjpSZWNvdmVyeVN0YXRlOjpHZXRJbmZvLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6UGVlcmlu
+ZywgYm9vc3Q6Om1wbDo6bGlzdDxtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpu
+YSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxf
+OjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBt
+cGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmE+LCAoYm9vc3Q6
+OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1wbChib29zdDo6c3RhdGVjaGFy
+dDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweDk1KSBbMHg1YjQwMDVdDQogMTY6
+IChib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGluZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVj
+b3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6SW5pdGlhbCwgc3RkOjphbGxvY2F0b3I8
+dm9pZD4sIGJvb3N0OjoNCiBzdGF0ZWNoYXJ0OjpudWxsX2V4Y2VwdGlvbl90cmFuc2xhdG9yPjo6
+cHJvY2Vzc19ldmVudChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYpKzB4NGIp
+IFsweDVhZjY0Yl0NCiAxNzogKFBHOjpSZWNvdmVyeVN0YXRlOjpoYW5kbGVfbG9nKGludCwgTU9T
+RFBHTG9nKiwgUEc6OlJlY292ZXJ5Q3R4KikrMHgxNDIpIFsweDU3ZDU5Ml0NCiAxODogKE9TRDo6
+aGFuZGxlX3BnX2xvZyhNT1NEUEdMb2cqKSsweDM0YSkgWzB4NTJkOWVhXQ0KIDE5OiAoT1NEOjpf
+ZGlzcGF0Y2goTWVzc2FnZSopKzB4NTE1KSBbMHg1MmU0ZDVdDQogMjA6IChPU0Q6Om1zX2Rpc3Bh
+dGNoKE1lc3NhZ2UqKSsweGQ5KSBbMHg1MmVlZjldDQogMjE6IChTaW1wbGVNZXNzZW5nZXI6OmRp
+c3BhdGNoX2VudHJ5KCkrMHg5MDcpIFsweDYyYTU3N10NCiAyMjogKFNpbXBsZU1lc3Nlbmdlcjo6
+RGlzcGF0Y2hUaHJlYWQ6OmVudHJ5KCkrMHgxZikgWzB4NDlhZjFmXQ0KIDIzOiAvbGliL2xpYnB0
+aHJlYWQuc28uMCBbMHg3ZjdmYWFkZGZmYzddDQogMjQ6IChjbG9uZSgpKzB4NmQpIFsweDdmN2Zh
+OWE1MDY0ZF0=
+--bcaec5171f99d4d10e04a985f7df--
