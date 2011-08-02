@@ -1,282 +1,100 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: osd recovery failed
-Date: Tue, 2 Aug 2011 21:46:00 +0800
-Message-ID: <CABAwU-ZgVQuEMTbbM=cn9t3cdzoe-XwMKYfuXT4s4f3hRz0eQA@mail.gmail.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: one question about cephfs disk usage
+Date: Tue, 2 Aug 2011 09:05:00 -0700
+Message-ID: <CAF3hT9AEtR1jRppaxtZCnb09o=AoNE1FHJX5P_YmvQZTFNfY1Q@mail.gmail.com>
+References: <CADF7qQV1gcaKiuTHt9fY3jpOYZRBUx6X-bn_SCp-0th2VrDeNQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=bcaec5171f99d4d10e04a985f7df
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:39154 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754432Ab1HBNqB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2011 09:46:01 -0400
-Received: by vws1 with SMTP id 1so5192515vws.19
-        for <ceph-devel@vger.kernel.org>; Tue, 02 Aug 2011 06:46:00 -0700 (PDT)
+Received: from mail-yi0-f46.google.com ([209.85.218.46]:36924 "EHLO
+	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754224Ab1HBQFA convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 2 Aug 2011 12:05:00 -0400
+Received: by yia27 with SMTP id 27so4168988yia.19
+        for <ceph-devel@vger.kernel.org>; Tue, 02 Aug 2011 09:05:00 -0700 (PDT)
+In-Reply-To: <CADF7qQV1gcaKiuTHt9fY3jpOYZRBUx6X-bn_SCp-0th2VrDeNQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: AnnyRen <annyren6@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
---bcaec5171f99d4d10e04a985f7df
-Content-Type: text/plain; charset=ISO-8859-1
+On Tue, Aug 2, 2011 at 12:30 AM, AnnyRen <annyren6@gmail.com> wrote:
+> Total data size in cephfs is 15.5 GB.
+>
+> I run "ceph -s" to check the file system usage, it shows:
+>
+> root@MON1:~# ceph -s
+> 2011-08-02 15:12:03.476151 =A0 =A0pg v946: 1782 pgs: 1782 active+clea=
+n;
+> 15995 MB data, 33880 MB used, 38859 GB / 40974 GB avail
+> 2011-08-02 15:12:03.480076 =A0 mds e10: 1/1/1 up {0=3Da=3Dup:active}
+> 2011-08-02 15:12:03.480113 =A0 osd e7: 9 osds: 9 up, 9 in
+> 2011-08-02 15:12:03.480183 =A0 log 2011-08-02 14:12:32.391116 mon0
+> 192.168.10.1:6789/0 13 : [INF] mds0 192.168.10.2:6800/1716 up:act
+> 2011-08-02 15:12:03.480263 =A0 mon e1: 1 mons at {a=3D192.168.10.1:67=
+89/0}
+>
+>
+> but when I remove all the file in ceph FS using
+>
+> root@MON1:~# rm -rf /mnt/ceph/0802_*
+>
+>
+> I check ceph data used again with ceph -s
+>
+> root@MON1:~# ceph -s
+> 2011-08-02 15:20:05.265826 =A0 =A0pg v958: 1782 pgs: 1782 active+clea=
+n;
+> 6779 MB data, 15428 MB used, 38877 GB / 40974 GB avail
+> 2011-08-02 15:20:05.269863 =A0 mds e10: 1/1/1 up {0=3Da=3Dup:active}
+> 2011-08-02 15:20:05.269900 =A0 osd e7: 9 osds: 9 up, 9 in
+> 2011-08-02 15:20:05.269965 =A0 log 2011-08-02 14:12:32.391116 mon0
+> 192.168.10.1:6789/0 13 : [INF] mds0 192.168.10.2:6800/1716 up:act
+> 2011-08-02 15:20:05.270045 =A0 mon e1: 1 mons at {a=3D192.168.10.1:67=
+89/0}
+>
+> Make sure that all files are deleted....
+>
+> root@MON1:~# ls -lh /mnt/ceph/
+> total 0
+>
+>
+> Is there anyone know why it still shows {6779 MB data, 15428 MB used}=
+ =A0?
+> 6779 MB data means?
+>
+> Thanks for your help. :-)
+>
+> Best Regard,
+> Anny
 
-hi,all
-A strange problem.
-we use ceph v0.30 and linux 2.6.37.
-we build a cluster with 20 OSDs.But not all the OSDs are started. at
-first we just start 10 osds.
-and then we use 10 kernel clients to write 40GB data in total.
-now we start another 10 osds(almost at same time), then unusual things happened.
-a few osd down, we can show the debug file here.and there are many
-crashed PGs in pg dump.
-
-1) infos about "handle_pg_log"
-see attach file "handle_pg_log assert failed"
-
-2) infos about "PG::_activate_committed"
-2011-08-02 10:23:02.738366 460ff950 filestore(/data/osd.11) sync_entry
-commit took 0.066092
-2011-08-02 10:23:02.738497 458fe950 osd11 36 pg[0.277( v 7'1 lc 0'0
-(0'0,7'1] n=1 ec=2 les/c 7/7 36/36/36) [13] r=-1 stray m=1]
-_activate_committed 9, that was an old interval
-2011-08-02 10:23:02.738522 458fe950 osd11 36 pg[1.39b( empty n=0 ec=2
-les/c 7/28 36/36/3) [1] r=-1 stray] _activate_committed 9, that was an
-old interval
-2011-08-02 10:23:02.738547 458fe950 osd11 36 pg[1.276( empty n=0 ec=2
-les/c 7/34 36/36/36) [13] r=-1 stray] _activate_committed 9, that was
-an old interval
-2011-08-02 10:23:02.738564 458fe950 osd11 36 pg[1.276( empty n=0 ec=2
-les/c 7/34 36/36/36) [13] r=-1 stray] _finish_recovery -- stale
-2011-08-02 10:23:02.738584 458fe950 osd11 36 pg[1.320( empty n=0 ec=2
-les/c 7/29 36/36/9) [15] r=-1 stray] _activate_committed 9, that was
-an old interval
-*** Caught signal (Segmentation fault) **
- in thread 0x458fe950
- 1: /bin/cosd [0x6473a8]
- 2: /lib/libpthread.so.0 [0x7f2a2bf9ba80]
- 3: (PG::_activate_committed(unsigned int)+0x98) [0x572fe8]
- 4: (C_Contexts::finish(int)+0xcc) [0x4dc74c]
- 5: (Finisher::finisher_thread_entry()+0x1ab) [0x61167b]
-
-where do we go wrong? i can not point it out. maybe the recovery
-workload is very high, we shouldn't add more to it. but the ceph
-v0.24.3 works fluently.so why the PG was marked CRASHED? i have never
-saw it before.
-is their anybody meet the same problem?
-
-Best Regards!
-
---bcaec5171f99d4d10e04a985f7df
-Content-Type: application/octet-stream; name=handle_pg_log assert failed
-Content-Disposition: attachment; filename=handle_pg_log assert failed
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gquwyb830
-
-MjAxMS0wOC0wMiAxMDoyMzozOC42MDIwMzYgNGEyODY5NTAgLS0gMTkyLjE2OC4wLjExOTo2ODAz
-LzQ5NDAgPD09IG9zZDAgMTkyLjE2OC4wLjEwMTo2ODAxLzUyNDMgMTEyID09PT0gcGdfaW5mbygx
-IHBncyBlNjIpIHYxID09PT0gDQozMTYrMCswICgyNjIzNzEwMDAzIDAgMCkgMHgxYjE1YTgwIGNv
-biAweDEzNTI4YzANCjIwMTEtMDgtMDIgMTA6MjM6MzguNjAyMDQxIDRhMjg2OTUwIG9zZDE4IDcx
-IGhhbmRsZV9wZ19pbmZvIHBnX2luZm8oMSBwZ3MgZTYyKSB2MSBmcm9tIG9zZDANCjIwMTEtMDgt
-MDIgMTA6MjM6MzguNjAyMDUzIDRhMjg2OTUwIG9zZDE4IDcxIHBnWzIuNGUoIGVtcHR5IG49MCBl
-Yz0yIGxlcy9jIDUyLzYxIDQzLzQzLzIpIFswLDE4XSByPTEgYWN0aXZlXSBoYW5kbGVfaW5mbyAy
-LjRlKCBlbXB0eQ0KIG49MCBlYz0yIGxlcy9jIDUyLzYyIDQzLzQzLzIpIGZyb20gb3NkMA0KMjAx
-MS0wOC0wMiAxMDoyMzozOC42MDIwNjggNGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29zZC4xOCkg
-cXVldWVfdHJhbnNhY3Rpb25zIGV4aXN0aW5nIG9zciAweDE3MzMzYzAvMHgxY2I1YjY4DQoyMDEx
-LTA4LTAyIDEwOjIzOjM4LjYwMjA4MSA0YTI4Njk1MCBmaWxlc3RvcmUoL2RhdGEvb3NkLjE4KSBx
-dWV1ZV90cmFuc2FjdGlvbnMgKHRyYWlsaW5nIGpvdXJuYWwpIDEyNzA3IDB4MTNhMWRjMA0KMjAx
-MS0wOC0wMiAxMDoyMzozOC42MDIwODUgNGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29zZC4xOCkg
-X2RvX3RyYW5zYWN0aW9uIG9uIDB4MTNhMWRjMA0KMjAxMS0wOC0wMiAxMDoyMzozOC42MDIwOTEg
-NGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29zZC4xOCkgY29sbGVjdGlvbl9zZXRhdHRyIC9kYXRh
-L29zZC4xOC9jdXJyZW50LzIuNGVfaGVhZCAnaW5mbycgbGVuIDMwOQ0KMjAxMS0wOC0wMiAxMDoy
-MzozOC42MDIxMTMgNGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29zZC4xOCkgY29sbGVjdGlvbl9z
-ZXRhdHRyIC9kYXRhL29zZC4xOC9jdXJyZW50LzIuNGVfaGVhZCAnaW5mbycgbGVuIDMwOSA9IDMw
-OQ0KMjAxMS0wOC0wMiAxMDoyMzozOC42MDIxNDUgNGEyODY5NTAgZmlsZXN0b3JlKC9kYXRhL29z
-ZC4xOCkgdHJ1bmNhdGUgbWV0YS9wZ2luZm9fMi40ZS8wIHNpemUgMCA9IDANCjIwMTEtMDgtMDIg
-MTA6MjM6MzguNjAyMTc0IDRhMjg2OTUwIGZpbGVzdG9yZSgvZGF0YS9vc2QuMTgpIHF1ZXVlX2Zs
-dXNoZXIgZXAgNjAgZmQgNDUgMH43NiBxbGVuIDENCjIwMTEtMDgtMDIgMTA6MjM6MzguNjAyMTg4
-IDRhMjg2OTUwIGZpbGVzdG9yZSgvZGF0YS9vc2QuMTgpIHdyaXRlIG1ldGEvcGdpbmZvXzIuNGUv
-MCAwfjc2ID0gNzYNCjIwMTEtMDgtMDIgMTA6MjM6MzguNjAyMTk2IDQ3YTgxOTUwIGZpbGVzdG9y
-ZSgvZGF0YS9vc2QuMTgpIGZsdXNoZXJfZW50cnkgZmx1c2hpbmcrY2xvc2luZyA0NSBlcCA2MA0K
-MjAxMS0wOC0wMiAxMDoyMzozOC42MDIyMTIgNGEyODY5NTAgLS0gMTkyLjE2OC4wLjExOTo2ODAz
-LzQ5NDAgPD09IG9zZDEgMTkyLjE2OC4wLjEwMjo2ODAxLzUyODQgNTYgPT09PSBwZ19sb2coMS4z
-ZGEgZTYxKSB2MSA9PT09IDM0DQo3KzArMCAoMTkwOTg2NjAwMyAwIDApIDB4MjEzNjAwMCBjb24g
-MHgxMzMyNTAwDQoyMDExLTA4LTAyIDEwOjIzOjM4LjYwMjIxOSA0YTI4Njk1MCBvc2QxOCA3MSBo
-YW5kbGVfcGdfbG9nIHBnX2xvZygxLjNkYSBlNjEpIHYxIGZyb20gb3NkMQ0KMjAxMS0wOC0wMiAx
-MDoyMzozOC42MDIyMzIgNGEyODY5NTAgb3NkMTggNzEgcGdbMS4zZGEoIGVtcHR5IG49MCBlYz0y
-IGxlcy9jIDcvNDAgNDMvNDMvNDMpIFsxOCwyXSByPTAgbWxjb2QgMCcwICFobWwgcGVlcmluZ10g
-aGFuZGxlDQpfbG9nIHBnX2xvZygxLjNkYSBlNjEpIHYxIGZyb20gb3NkMQ0KMjAxMS0wOC0wMiAx
-MDoyMzozOC42MDIyNDQgNGEyODY5NTAgb3NkMTggNzEgcGdbMS4zZGEoIGVtcHR5IG49MCBlYz0y
-IGxlcy9jIDcvNDAgNDMvNDMvNDMpIFsxOCwyXSByPTAgbWxjb2QgMCcwICFobWwgcGVlcmluZ10g
-c3RhdGU8DQpTdGFydGVkL1ByaW1hcnkvUGVlcmluZz46IExlYXZpbmcgUGVlcmluZw0Kb3NkL1BH
-LmNjOiBJbiBmdW5jdGlvbiAnUEc6OlJlY292ZXJ5U3RhdGU6OkNyYXNoZWQ6OkNyYXNoZWQoYm9v
-c3Q6OnN0YXRlY2hhcnQ6OnN0YXRlPFBHOjpSZWNvdmVyeVN0YXRlOjpDcmFzaGVkLCBQRzo6UmVj
-b3ZlcnlTdGF0ZTo6DQpSZWNvdmVyeU1hY2hpbmUsIGJvb3N0OjptcGw6Omxpc3Q8bXBsXzo6bmEs
-IG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6
-bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmENCiwgbXBsXzo6bmEsIG1wbF86Om5hLCBt
-cGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5h
-LCBtcGxfOjpuYSwgbXBsXzo6bmE+LCBoYXNfbm9faGlzdG9yeT46Om15X2NvbnRleHQpJw0KLCBp
-biB0aHJlYWQgJzB4NGEyODY5NTAnDQpvc2QvUEcuY2M6IDM4ODI6IEZBSUxFRCBhc3NlcnQoMCA9
-PSAid2UgZ290IGEgYmFkIHN0YXRlIG1hY2hpbmUgZXZlbnQiKQ0KIDE6IChQRzo6UmVjb3ZlcnlT
-dGF0ZTo6Q3Jhc2hlZDo6Q3Jhc2hlZChib29zdDo6c3RhdGVjaGFydDo6c3RhdGU8UEc6OlJlY292
-ZXJ5U3RhdGU6OkNyYXNoZWQsIFBHOjpSZWNvdmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIGJv
-DQpvc3Q6Om1wbDo6bGlzdDxtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwg
-bXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpu
-YSwgbXBsXzo6bmEsIG1wbF86Om4NCmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1w
-bF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYT4sIChib29zdDo6
-c3RhdGVjaGFydDo6aGlzdG9yeV9tb2RlKTA+OjpteV9jb250ZXh0KQ0KKzB4YjYpIFsweDU2ZDI5
-Nl0NCiAyOiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OmRldGFpbDo6aW5uZXJfY29uc3RydWN0b3I8Ym9v
-c3Q6Om1wbDo6bF9pdGVtPG1wbF86OmxvbmdfPDFsPiwgUEc6OlJlY292ZXJ5U3RhdGU6OkNyYXNo
-ZWQsIGJvb3N0OjptcGw6OmxfZW5kPg0KLCBib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGlu
-ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6
-SW5pdGlhbCwgc3RkOjphbGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0DQplY2hhcnQ6Om51bGxf
-ZXhjZXB0aW9uX3RyYW5zbGF0b3I+ID46OmNvbnN0cnVjdChib29zdDo6c3RhdGVjaGFydDo6c3Rh
-dGVfbWFjaGluZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3Zl
-cnlTdGENCnRlOjpJbml0aWFsLCBzdGQ6OmFsbG9jYXRvcjx2b2lkPiwgYm9vc3Q6OnN0YXRlY2hh
-cnQ6Om51bGxfZXhjZXB0aW9uX3RyYW5zbGF0b3I+KiBjb25zdCYsIGJvb3N0OjpzdGF0ZWNoYXJ0
-OjpzdGF0ZV9tYWNoaW5lPFBHOjpSZWNvdg0KZXJ5U3RhdGU6OlJlY292ZXJ5TWFjaGluZSwgUEc6
-OlJlY292ZXJ5U3RhdGU6OkluaXRpYWwsIHN0ZDo6YWxsb2NhdG9yPHZvaWQ+LCBib29zdDo6c3Rh
-dGVjaGFydDo6bnVsbF9leGNlcHRpb25fdHJhbnNsYXRvcj4mKSsweDJkKSBbDQoweDVhZGNkZF0N
-CiAzOiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBsZV9zdGF0ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6
-U3RhcnRlZCwgUEc6OlJlY292ZXJ5U3RhdGU6OlJlY292ZXJ5TWFjaGluZSwgUEc6OlJlY292ZXJ5
-U3RhdGU6OlN0YXJ0LCANCiAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVh
-Y3RfaW1wbChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3Qq
-KSsweGM5KSBbMHg1YWVjNzldDQogIDQ6IChib29zdDo6c3RhdGVjaGFydDo6c2ltcGxlX3N0YXRl
-PFBHOjpSZWNvdmVyeVN0YXRlOjpQcmltYXJ5LCBQRzo6UmVjb3ZlcnlTdGF0ZTo6U3RhcnRlZCwg
-UEc6OlJlY292ZXJ5U3RhdGU6OlBlZXJpbmcsIChib29zdDo6c3RhdGVjaGFydDo6aGlzdG9yeV9t
-b2RlKTA+OjpyZWFjdF9pbXBsKGJvb3N0OjpzdGF0ZWNoYXJ0OjpldmVudF9iYXNlIGNvbnN0Jiwg
-dm9pZCBjb25zdCopKzB4MTAxKSBbMHg1YWY0NjFdDQogNTogKGJvb3N0OjpzdGF0ZWNoYXJ0Ojpz
-aW1wbGVfc3RhdGU8UEc6OlJlY292ZXJ5U3RhdGU6OlBlZXJpbmcsIFBHOjpSZWNvdmVyeVN0YXRl
-OjpQcmltYXJ5LCBQRzo6UmVjb3ZlcnlTdGF0ZTo6R2V0SW5mbywgKGJvb3N0OjpzdGF0ZWNoYXJ0
-OjpoaXN0b3J5X21vZGUpMD46OnJlYWN0X2ltcGwoYm9vc3Q6OnN0YXRlY2hhcnQ6OmV2ZW50X2Jh
-c2UgY29uc3QmLCB2b2lkIGNvbnN0KikrMHg5NSkgWzB4NWIyNjg1XQ0KIDY6IChib29zdDo6c3Rh
-dGVjaGFydDo6c2ltcGxlX3N0YXRlPFBHOjpSZWNvdmVyeVN0YXRlOjpHZXRJbmZvLCBQRzo6UmVj
-b3ZlcnlTdGF0ZTo6UGVlcmluZywgYm9vc3Q6Om1wbDo6bGlzdDxtcGxfOjpuYSwgbXBsXzo6bmEs
-IG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6
-bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBs
-Xzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwg
-bXBsXzo6bmE+LCAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1w
-bChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweDk1
-KSBbMHg1YjQwMDVdDQogNzogKGJvb3N0OjpzdGF0ZWNoYXJ0OjpzdGF0ZV9tYWNoaW5lPFBHOjpS
-ZWNvdmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIFBHOjpSZWNvdmVyeVN0YXRlOjpJbml0aWFs
-LCBzdGQ6OmFsbG9jYXRvcjx2b2lkPiwgYm9vc3Q6OnN0YXRlY2hhcnQ6Om51bGxfZXhjZXB0aW9u
-X3RyYW5zbGF0b3I+Ojpwcm9jZXNzX2V2ZW50KGJvb3N0OjpzdGF0ZWNoYXJ0OjpldmVudF9iYXNl
-IGNvbnN0JikrMHg0YikgWzB4NWFmNjRiXQ0KIDg6IChQRzo6UmVjb3ZlcnlTdGF0ZTo6aGFuZGxl
-X2xvZyhpbnQsIE1PU0RQR0xvZyosIFBHOjpSZWNvdmVyeUN0eCopKzB4MTQyKSBbMHg1N2Q1OTJd
-DQogOTogKE9TRDo6aGFuZGxlX3BnX2xvZyhNT1NEUEdMb2cqKSsweDM0YSkgWzB4NTJkOWVhXQ0K
-IDEwOiAoT1NEOjpfZGlzcGF0Y2goTWVzc2FnZSopKzB4NTE1KSBbMHg1MmU0ZDVdDQogMTE6IChP
-U0Q6Om1zX2Rpc3BhdGNoKE1lc3NhZ2UqKSsweGQ5KSBbMHg1MmVlZjldDQogMTI6IChTaW1wbGVN
-ZXNzZW5nZXI6OmRpc3BhdGNoX2VudHJ5KCkrMHg5MDcpIFsweDYyYTU3N10NCiAxMzogKFNpbXBs
-ZU1lc3Nlbmdlcjo6RGlzcGF0Y2hUaHJlYWQ6OmVudHJ5KCkrMHgxZikgWzB4NDlhZjFmXQ0KIDE0
-OiAvbGliL2xpYnB0aHJlYWQuc28uMCBbMHg3ZjdmYWFkZGZmYzddDQogMTU6IChjbG9uZSgpKzB4
-NmQpIFsweDdmN2ZhOWE1MDY0ZF0NCiAxOiAoUEc6OlJlY292ZXJ5U3RhdGU6OkNyYXNoZWQ6OkNy
-YXNoZWQoYm9vc3Q6OnN0YXRlY2hhcnQ6OnN0YXRlPFBHOjpSZWNvdmVyeVN0YXRlOjpDcmFzaGVk
-LCBQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBib29zdDo6bXBsOjpsaXN0PG1w
-bF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEs
-IG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6
-bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBs
-Xzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYT4sIChib29zdDo6c3RhdGVjaGFydDo6aGlzdG9yeV9t
-b2RlKTA+OjpteV9jb250ZXh0KSsweGI2KSBbMHg1NmQyOTZdDQogMjogKGJvb3N0OjpzdGF0ZWNo
-YXJ0OjpkZXRhaWw6OmlubmVyX2NvbnN0cnVjdG9yPGJvb3N0OjptcGw6OmxfaXRlbTxtcGxfOjps
-b25nXzwxbD4sIFBHOjpSZWNvdmVyeVN0YXRlOjpDcmFzaGVkLCBib29zdDo6bXBsOjpsX2VuZD4s
-IGJvb3N0OjpzdGF0ZWNoYXJ0OjpzdGF0ZV9tYWNoaW5lPFBHOjpSZWNvdmVyeVN0YXRlOjpSZWNv
-dmVyeU1hY2hpbmUsIFBHOjpSZWNvdmVyeVN0YXRlOjpJbml0aWFsLCBzdGQ6OmFsbG9jYXRvcjx2
-b2lkPiwgYm9vc3Q6OnN0YXRlY2hhcnQ6Om51bGxfZXhjZXB0aW9uX3RyYW5zbGF0b3I+ID46OmNv
-bnN0cnVjdChib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGluZTxQRzo6UmVjb3ZlcnlTdGF0
-ZTo6UmVjb3ZlcnlNYWNoaW5lLCANCiBQRzo6UmVjb3ZlcnlTdGF0ZTo6SW5pdGlhbCwgc3RkOjph
-bGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpudWxsX2V4Y2VwdGlvbl90cmFuc2xh
-dG9yPiogY29uc3QmLCBib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGluZTxQRzo6UmVjb3Zl
-cnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6SW5pdGlhbCwgc3Rk
-OjphbGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpudWxsX2V4Y2VwdGlvbl90cmFu
-c2xhdG9yPiYpKzB4MmQpIFsweDVhZGNkZF0NCiAzOiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBs
-ZV9zdGF0ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6U3RhcnRlZCwgUEc6OlJlY292ZXJ5U3RhdGU6OlJl
-Y292ZXJ5TWFjaGluZSwgUEc6OlJlY292ZXJ5U3RhdGU6OlN0YXJ0LCAoYm9vc3Q6OnN0YXRlY2hh
-cnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1wbChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRf
-YmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweGM5KSBbMHg1YWVjNzldDQogNDogKGJvb3N0Ojpz
-dGF0ZWNoYXJ0OjpzaW1wbGVfc3RhdGU8UEc6OlJlY292ZXJ5U3RhdGU6OlByaW1hcnksIFBHOjpS
-ZWNvdmVyeVN0YXRlOjpTdGFydGVkLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6UGVlcmluZywgKGJvb3N0
-OjpzdGF0ZWNoYXJ0OjpoaXN0b3J5X21vZGUpMD46OnJlYWN0X2ltcGwoYm9vc3Q6OnN0YXRlY2hh
-cnQ6OmV2ZW50X2Jhc2UgY29uc3QmLCB2b2lkIGNvbnN0KikrMHgxMDEpIFsweDVhZjQ2MV0NCiA1
-OiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBsZV9zdGF0ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UGVl
-cmluZywgUEc6OlJlY292ZXJ5U3RhdGU6OlByaW1hcnksIFBHOjpSZWNvdmVyeVN0YXRlOjpHZXRJ
-bmZvLCAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1wbChib29z
-dDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweDk1KSBbMHg1
-YjI2ODVdDQogNjogKGJvb3N0OjpzdGF0ZWNoYXJ0OjpzaW1wbGVfc3RhdGU8UEc6OlJlY292ZXJ5
-U3RhdGU6OkdldEluZm8sIFBHOjpSZWNvdmVyeVN0YXRlOjpQZWVyaW5nLCBib29zdDo6bXBsOjps
-aXN0PG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBs
-Xzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwg
-bXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpu
-YSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYT4sIChib29zdDo6c3RhdGVjaGFydDo6aGlz
-dG9yeV9tb2RlKTA+OjpyZWFjdF9pbXBsKGJvb3N0OjpzdGF0ZWNoYXJ0OjpldmVudF9iYXNlIGNv
-bnN0Jiwgdm9pZCBjb25zdCopKzB4OTUpIFsweDViNDAwNV0NCiA3OiAoYm9vc3Q6OnN0YXRlY2hh
-cnQ6OnN0YXRlX21hY2hpbmU8UEc6OlJlY292ZXJ5U3RhdGU6OlJlY292ZXJ5TWFjaGluZSwgUEc6
-OlJlY292ZXJ5U3RhdGU6OkluaXRpYWwsIHN0ZDo6YWxsb2NhdG9yPHZvaWQ+LCBib29zdDo6c3Rh
-dGVjaGFydDo6bnVsbF9leGNlcHRpb25fdHJhbnNsYXRvcj46OnByb2Nlc3NfZXZlbnQoYm9vc3Q6
-OnN0YXRlY2hhcnQ6OmV2ZW50X2Jhc2UgY29uc3QmKSsweDRiKSBbMHg1YWY2NGJdDQogODogKFBH
-OjpSZWNvdmVyeVN0YXRlOjpoYW5kbGVfbG9nKGludCwgTU9TRFBHTG9nKiwgUEc6OlJlY292ZXJ5
-Q3R4KikrMHgxNDIpIFsweDU3ZDU5Ml0NCiA5OiAoT1NEOjpoYW5kbGVfcGdfbG9nKE1PU0RQR0xv
-ZyopKzB4MzRhKSBbMHg1MmQ5ZWFdDQogMTA6IChPU0Q6Ol9kaXNwYXRjaChNZXNzYWdlKikrMHg1
-MTUpIFsweDUyZTRkNV0NCiAxMTogKE9TRDo6bXNfZGlzcGF0Y2goTWVzc2FnZSopKzB4ZDkpIFsw
-eDUyZWVmOV0NCiAxMjogKFNpbXBsZU1lc3Nlbmdlcjo6ZGlzcGF0Y2hfZW50cnkoKSsweDkwNykg
-WzB4NjJhNTc3XQ0KIDEzOiAoU2ltcGxlTWVzc2VuZ2VyOjpEaXNwYXRjaFRocmVhZDo6ZW50cnko
-KSsweDFmKSBbMHg0OWFmMWZdDQogMTQ6IC9saWIvbGlicHRocmVhZC5zby4wIFsweDdmN2ZhYWRk
-ZmZjN10NCiAxNTogKGNsb25lKCkrMHg2ZCkgWzB4N2Y3ZmE5YTUwNjRkXQ0KKioqIENhdWdodCBz
-aWduYWwgKEFib3J0ZWQpICoqDQogaW4gdGhyZWFkIDB4NGEyODY5NTANCiAxOiAvYmluL2Nvc2Qg
-WzB4NjQ3M2E4XQ0KIDI6IC9saWIvbGlicHRocmVhZC5zby4wIFsweDdmN2ZhYWRlN2E4MF0NCiAz
-OiAoZ3NpZ25hbCgpKzB4MzUpIFsweDdmN2ZhOTliMmVkNV0NCiA0OiAoYWJvcnQoKSsweDE4Mykg
-WzB4N2Y3ZmE5OWI0M2YzXQ0KIDU6IChfX2dudV9jeHg6Ol9fdmVyYm9zZV90ZXJtaW5hdGVfaGFu
-ZGxlcigpKzB4MTE1KSBbMHg3ZjdmYWEyM2FkYzVdDQogNjogL3Vzci9saWIvbGlic3RkYysrLnNv
-LjYgWzB4N2Y3ZmFhMjM5MTY2XQ0KIDc6IC91c3IvbGliL2xpYnN0ZGMrKy5zby42IFsweDdmN2Zh
-YTIzOTE5M10NCiA4OiAvdXNyL2xpYi9saWJzdGRjKysuc28uNiBbMHg3ZjdmYWEyMzkyOGVdDQog
-OTogKGNlcGg6Ol9fY2VwaF9hc3NlcnRfZmFpbChjaGFyIGNvbnN0KiwgY2hhciBjb25zdCosIGlu
-dCwgY2hhciBjb25zdCopKzB4MzdkKSBbMHg2MTJhNGRdDQogMTA6IChQRzo6UmVjb3ZlcnlTdGF0
-ZTo6Q3Jhc2hlZDo6Q3Jhc2hlZChib29zdDo6c3RhdGVjaGFydDo6c3RhdGU8UEc6OlJlY292ZXJ5
-U3RhdGU6OkNyYXNoZWQsIFBHOjpSZWNvdmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIGJvb3N0
-OjptcGw6Omxpc3Q8bXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86
-Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1w
-bF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEs
-IG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hPiwgKGJvb3N0OjpzdGF0ZWNo
-YXJ0OjpoaXN0b3J5X21vZGUpMD46Om15X2NvbnRleHQpKzB4YjYpIFsweDU2ZDI5Nl0NCiAxMTog
-KGJvb3N0OjpzdGF0ZWNoYXJ0OjpkZXRhaWw6OmlubmVyX2NvbnN0cnVjdG9yPGJvb3N0OjptcGw6
-OmxfaXRlbTxtcGxfOjpsb25nXzwxbD4sIFBHOjpSZWNvdmVyeVN0YXRlOjpDcmFzaGVkLCBib29z
-dDo6bXBsOjpsX2VuZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpzdGF0ZV9tYWNoaW5lPFBHOjpSZWNv
-dmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIFBHOjpSZWNvdmVyeVN0YXRlOjpJbml0aWFsLCBz
-dGQ6OmFsbG9jYXRvcjx2b2lkPiwgYm9vc3Q6OnN0YXRlY2hhcnQ6Om51bGxfZXhjZXB0aW9uX3Ry
-YW5zbGF0b3I+ID46OmNvbnN0cnVjdChib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGluZTxQ
-Rzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6SW5p
-dGlhbCwgc3RkOjphbGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpudWxsX2V4Y2Vw
-dGlvbl90cmFuc2xhdG9yPiogY29uc3QmLCBib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGlu
-ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVjb3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6
-SW5pdGlhbCwgc3RkOjphbGxvY2F0b3I8dm9pZD4sIGJvb3N0OjpzdGF0ZWNoYXJ0OjpudWxsX2V4
-Y2VwdGlvbl90cmFuc2xhdG9yPiYpKzB4MmQpIFsweDVhZGNkZF0NCiAxMjogKGJvb3N0OjpzdGF0
-ZWNoYXJ0OjpzaW1wbGVfc3RhdGU8UEc6OlJlY292ZXJ5U3RhdGU6OlN0YXJ0ZWQsIFBHOjpSZWNv
-dmVyeVN0YXRlOjpSZWNvdmVyeU1hY2hpbmUsIFBHOjpSZWNvdmVyeVN0YXRlOjpTdGFydCwgKGJv
-b3N0OjpzdGF0ZWNoYXJ0OjpoaXN0b3J5X21vZGUpMD46OnJlYWN0X2ltcGwoYm9vc3Q6OnN0YXRl
-Y2hhcnQ6OmV2ZW50X2Jhc2UgY29uc3QmLCB2b2lkIGNvbnN0KikrMHhjOSkgWzB4NWFlYzc5XQ0K
-IDEzOiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBsZV9zdGF0ZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6
-UHJpbWFyeSwgUEc6OlJlY292ZXJ5U3RhdGU6OlN0YXJ0ZWQsIFBHOjpSZWNvdmVyeVN0YXRlOjpQ
-ZWVyaW5nLCAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1wbChi
-b29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweDEwMSkg
-WzB4NWFmNDYxXQ0KIDE0OiAoYm9vc3Q6OnN0YXRlY2hhcnQ6OnNpbXBsZV9zdGF0ZTxQRzo6UmVj
-b3ZlcnlTdGF0ZTo6UGVlcmluZywgUEc6OlJlY292ZXJ5U3RhdGU6OlByaW1hcnksIFBHOjpSZWNv
-dmVyeVN0YXRlOjpHZXRJbmZvLCAoYm9vc3Q6OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6
-cmVhY3RfaW1wbChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29u
-c3QqKSsweDk1KSBbMHg1YjI2ODVdDQogMTU6IChib29zdDo6c3RhdGVjaGFydDo6c2ltcGxlX3N0
-YXRlPFBHOjpSZWNvdmVyeVN0YXRlOjpHZXRJbmZvLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6UGVlcmlu
-ZywgYm9vc3Q6Om1wbDo6bGlzdDxtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpu
-YSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxf
-OjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBt
-cGxfOjpuYSwgbXBsXzo6bmEsIG1wbF86Om5hLCBtcGxfOjpuYSwgbXBsXzo6bmE+LCAoYm9vc3Q6
-OnN0YXRlY2hhcnQ6Omhpc3RvcnlfbW9kZSkwPjo6cmVhY3RfaW1wbChib29zdDo6c3RhdGVjaGFy
-dDo6ZXZlbnRfYmFzZSBjb25zdCYsIHZvaWQgY29uc3QqKSsweDk1KSBbMHg1YjQwMDVdDQogMTY6
-IChib29zdDo6c3RhdGVjaGFydDo6c3RhdGVfbWFjaGluZTxQRzo6UmVjb3ZlcnlTdGF0ZTo6UmVj
-b3ZlcnlNYWNoaW5lLCBQRzo6UmVjb3ZlcnlTdGF0ZTo6SW5pdGlhbCwgc3RkOjphbGxvY2F0b3I8
-dm9pZD4sIGJvb3N0OjoNCiBzdGF0ZWNoYXJ0OjpudWxsX2V4Y2VwdGlvbl90cmFuc2xhdG9yPjo6
-cHJvY2Vzc19ldmVudChib29zdDo6c3RhdGVjaGFydDo6ZXZlbnRfYmFzZSBjb25zdCYpKzB4NGIp
-IFsweDVhZjY0Yl0NCiAxNzogKFBHOjpSZWNvdmVyeVN0YXRlOjpoYW5kbGVfbG9nKGludCwgTU9T
-RFBHTG9nKiwgUEc6OlJlY292ZXJ5Q3R4KikrMHgxNDIpIFsweDU3ZDU5Ml0NCiAxODogKE9TRDo6
-aGFuZGxlX3BnX2xvZyhNT1NEUEdMb2cqKSsweDM0YSkgWzB4NTJkOWVhXQ0KIDE5OiAoT1NEOjpf
-ZGlzcGF0Y2goTWVzc2FnZSopKzB4NTE1KSBbMHg1MmU0ZDVdDQogMjA6IChPU0Q6Om1zX2Rpc3Bh
-dGNoKE1lc3NhZ2UqKSsweGQ5KSBbMHg1MmVlZjldDQogMjE6IChTaW1wbGVNZXNzZW5nZXI6OmRp
-c3BhdGNoX2VudHJ5KCkrMHg5MDcpIFsweDYyYTU3N10NCiAyMjogKFNpbXBsZU1lc3Nlbmdlcjo6
-RGlzcGF0Y2hUaHJlYWQ6OmVudHJ5KCkrMHgxZikgWzB4NDlhZjFmXQ0KIDIzOiAvbGliL2xpYnB0
-aHJlYWQuc28uMCBbMHg3ZjdmYWFkZGZmYzddDQogMjQ6IChjbG9uZSgpKzB4NmQpIFsweDdmN2Zh
-OWE1MDY0ZF0=
---bcaec5171f99d4d10e04a985f7df--
+When you delete a file, it doesn't actually clear out the data right
+away for a couple reasons[1]. Instead, it's marked as deleted on the
+MDS and the MDS goes through and removes the objects storing it as
+time is available. If you clear out the whole FS, this can naturally
+take awhile since it requires a number of messages proportional to
+amount of data in the cluster. If you look at your data usage again
+you'll probably see it's lower now.
+Some of the space is also used by the MDS journals (generally 100MB
+for each MDS), and depending on how your storage is set up you might
+also be seeing OSD journals in that space used (along with any other
+files you have on the same partition as your OSD data store). This
+should explain why you've got a bit of extra used space that isn't
+just for replicating the FS data. :)
+-Greg
+[1] Two important reasons. First one is that there might be other
+references to the objects in question due to snapshots, in which case
+you don't want to erase the data -- especially since the client doing
+the erasing might not know about these snapshots.
+Second one is that to delete the data you need to send out a message
+for each object -- ie, for every file you get one object and for every
+file >4MB you get an object for each 4MB (and it's replicated, so
+multiply by two or three for everything!). On a large tree this can
+take awhile and you might not want the client to be spending its time
+and bandwidth on such a user-useless activity.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
