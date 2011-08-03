@@ -1,55 +1,116 @@
-From: =?iso-8859-1?q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
-Subject: Monitors fallen apart
-Date: Wed, 3 Aug 2011 11:16:37 +0200
-Message-ID: <201108031116.37824.szekelyi@niif.hu>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: Kernel 3.0.0 + ext4 + ceph == ...
+Date: Wed, 3 Aug 2011 16:16:55 +0200
+Message-ID: <CAO47_-9DmxqfBsBF2K_8ScX_4d-HPz01QeQ-2FFwZS-nCDEOsw@mail.gmail.com>
+References: <4E33D101.1050504@ufm.su>
+	<9BF9E529-C532-4A94-8362-93C2D1B778DB@mit.edu>
+	<4E3432FC.9030204@ufm.su>
+	<20110730165001.GI7361@thunk.org>
+	<Pine.LNX.4.64.1107301016120.23447@cobra.newdream.net>
+	<20110730221900.GK7361@thunk.org>
+	<Pine.LNX.4.64.1107302149430.23447@cobra.newdream.net>
+	<4E353D9E.5080802@ufm.su>
+	<Pine.LNX.4.64.1107310951550.2348@cobra.newdream.net>
+	<4E35B833.6070304@ufm.su>
+	<Pine.LNX.4.64.1107311339530.23447@cobra.newdream.net>
+	<80E3795B-C981-492F-9312-DC91D57E4017@mit.edu>
+	<Pine.LNX.4.64.1108010918580.6290@cobra.newdream.net>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ki.iif.hu ([193.6.222.241]:58095 "EHLO mail.ki.iif.hu"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752629Ab1HCJXh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 3 Aug 2011 05:23:37 -0400
-Received: from bolha.lvs.iif.hu (bolha.lvs.iif.hu [193.225.14.181])
-	by mail.ki.iif.hu (Postfix) with ESMTP id 7235E875F3
-	for <ceph-devel@vger.kernel.org>; Wed,  3 Aug 2011 11:16:41 +0200 (CEST)
-Received: from mail.ki.iif.hu ([IPv6:::ffff:193.6.222.241])
-	by bolha.lvs.iif.hu (bolha.lvs.iif.hu [::ffff:193.225.14.72]) (amavisd-new, port 10024)
-	with ESMTP id f-solWUCpt+d for <ceph-devel@vger.kernel.org>;
-	Wed,  3 Aug 2011 11:16:39 +0200 (CEST)
-Received: from mranderson.localnet (dhcp112.ki.iif.hu [193.6.223.112])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by mail.ki.iif.hu (Postfix) with ESMTPSA id 39780875D7
-	for <ceph-devel@vger.kernel.org>; Wed,  3 Aug 2011 11:16:38 +0200 (CEST)
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:63519 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754001Ab1HCOQ4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 3 Aug 2011 10:16:56 -0400
+Received: by qyk38 with SMTP id 38so181324qyk.19
+        for <ceph-devel@vger.kernel.org>; Wed, 03 Aug 2011 07:16:56 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1108010918580.6290@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Theodore Tso <tytso@mit.edu>, Fyodor Ustinov <ufm@ufm.su>, ceph-devel@vger.kernel.org
 
-Hello,
+2011/8/1 Sage Weil <sage@newdream.net>:
+> On Mon, 1 Aug 2011, Theodore Tso wrote:
+>> On Jul 31, 2011, at 4:42 PM, Sage Weil wrote:
+>>
+>> > This is link(2)
+>> >
+>> >> 2011-07-31 23:06:50.114316 7f23c048c700 filestore(/osd.0) collect=
+ion_remove
+>> >> temp/10000000483.000005d6/head =3D 0
+>> >
+>> > This is unlink(2)
+>> >
+>> >> 2011-07-31 23:06:50.114384 7f23c048c700 filestore(/osd.0) setattr=
+s
+>> >> 0.69_head/10000000483.000005d6/head '_' len 161 =3D 161
+>> >
+>> > The xattr names are prefixed with 'user.ceph.'
+>> >
+>> >> 2011-07-31 23:06:50.114406 7f23c048c700 filestore(/osd.0) setattr=
+s
+>> >> 0.69_head/10000000483.000005d6/head 'snapset' len 26 =3D 26
+>> >> 2011-07-31 23:06:50.114413 7f23c048c700 filestore(/osd.0) setattr=
+s
+>> >> 0.69_head/10000000483.000005d6/head =3D 26
+>> >
+>> > Does that tell you what to need, Ted?
+>>
+>> So let me make sure I understand what happened. =A0Ceph made sure no=
+ file existed with this name, and created with the first write log entr=
+y:
+>>
+>> 2011-07-31 23:06:49.173941 7f23c048c700 filestore(/osd.0) write temp=
+/10000000483.000005d6/head 0~1048576 =3D 1048576
+>
+> The fd was actually closed here.
+>
+>> It then linked it into this directory:
+>>
+>> 2011-07-31 23:06:50.114287 7f23c048c700 filestore(/osd.0) collection=
+_add 0.69_head/10000000483.000005d6/head temp/10000000483.000005d6/head=
+ =3D 0
+>>
+>> ? and removed it from the temp directory:
+>>
+>> 2011-07-31 23:06:50.114316 7f23c048c700 filestore(/osd.0) collection=
+_remove temp/10000000483.000005d6/head =3D 0
+>>
+>> and then created three inodes that totaled approximately 240 bytes i=
+n length or so (including the name and headers)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 xattrs
+>>
+>> 2011-07-31 23:06:50.114384 7f23c048c700 filestore(/osd.0) setattrs 0=
+=2E69_head/10000000483.000005d6/head '_' len 161 =3D 161
+>> 2011-07-31 23:06:50.114406 7f23c048c700 filestore(/osd.0) setattrs 0=
+=2E69_head/10000000483.000005d6/head 'snapset' len 26 =3D 26
+>> 2011-07-31 23:06:50.114413 7f23c048c700 filestore(/osd.0) setattrs 0=
+=2E69_head/10000000483.000005d6/head =3D 26
+>>
+>> ? and then presumably the file was closed and that would have been t=
+he
+>> end of this file being touched by ceph, correct?
+>
+> Yep!
 
-I'm running ceph 0.32, and since a while it looks like if a monitor fails, 
-then the cluster doesn't find a new one.
+I tried to reproduce this without ceph, but wasn't able to...
 
-I have three nodes, two with cmds+cosd+cmon, and one with cmds+cmon, which is 
-also running the client. If I stop one of the cmds+cosd+cmon nodes, ceph -w 
-run on the cmds+cmon node tells nothing but
+In the meantime it seams, that I can also see the side effects on the
+librbd side: I get an "librbd: data error!" when I do an "rbd copy".
 
-2011-08-03 11:10:47.291875 7f4f043d5700 -- <client_ip>:0/14633 >> 
-<killed_node_ip>:6789/0 pipe(0x1a7f9c0 sd=4 pgs=0 cs=0 l=0).fault first fault
+When I look at the librbd code this is related to a sparse_read not
+returning the right size of the object.
 
-infinitely and the filesystem stops working (processes using files in it block 
-forever). Looks like it rties to connect to the killed monitor instead of 
-failing over to a working one.
+I don't know if it helps, but I think that the problem is also related
+to sparse file usage.
 
-The first message after killing the node was:
-
-2011-08-03 10:57:40.687871 7f4f01563700 monclient: hunting for new mon
-
-Do you have any idea what I'm doing wrong?
-
-Thanks,
--- 
-cc
-
+Regards,
+Christian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
