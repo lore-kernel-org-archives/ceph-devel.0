@@ -1,62 +1,114 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: Monitors fallen apart
-Date: Thu, 4 Aug 2011 11:14:54 -0700
-Message-ID: <CAC-hyiG0zsd1LZGnWhqAfbwgotz7p3SuU+j=doLyC035rq-V3g@mail.gmail.com>
-References: <201108031116.37824.szekelyi@niif.hu>
+From: Sam Lang <samlang@gmail.com>
+Subject: Re: heartbeat logic
+Date: Thu, 04 Aug 2011 13:18:46 -0500
+Message-ID: <4E3AE286.6010203@gmail.com>
+References: <4E3A0DA7.8090409@gmail.com> <Pine.LNX.4.64.1108032113270.4869@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:60536 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753870Ab1HDSO4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Aug 2011 14:14:56 -0400
-Received: by ewy4 with SMTP id 4so1049776ewy.19
-        for <ceph-devel@vger.kernel.org>; Thu, 04 Aug 2011 11:14:55 -0700 (PDT)
-In-Reply-To: <201108031116.37824.szekelyi@niif.hu>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:44655 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755458Ab1HDSTc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 4 Aug 2011 14:19:32 -0400
+Received: by gyh3 with SMTP id 3so1230243gyh.19
+        for <ceph-devel@vger.kernel.org>; Thu, 04 Aug 2011 11:19:31 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1108032113270.4869@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-2011/8/3 Sz=E9kelyi Szabolcs <szekelyi@niif.hu>:
-> Hello,
+On 08/03/2011 11:28 PM, Sage Weil wrote:
+> On Wed, 3 Aug 2011, Sam Lang wrote:
+>> During startup of an osd cluster with 37 osds, within the first few seconds I
+>> see osds getting marked down, even though the osd processes remain running and
+>> seem to be just fine.  The up count fluctuates for a while but seems to
+>> stabilize eventually at around 30 up osds, while 7 or so remain down, and
+>> eventually get marked out.
+>>
+>> With debugging enabled, I've tracked it down to this bit of logic in
+>> OSD.cc:1502 (stable branch):
+>>
+>> ------snip------
+>>    // ignore (and mark down connection for) old messages
+>>    epoch_t e = m->map_epoch;
+>>    if (!e)
+>>      e = m->peer_as_of_epoch;
+>>    if (e<= osdmap->get_epoch()&&
+>>        ((heartbeat_to.count(from) == 0&&  heartbeat_from.count(from) == 0) ||
+>>         heartbeat_con[from] != m->get_connection())) {
+>>      dout(5)<<  "handle_osd_ping marking down peer "<<  m->get_source_inst()
+>> <<  " after old message from epoch "<<  e
+>> <<  "<= current "<<  osdmap->get_epoch()<<  dendl;
+>>      heartbeat_messenger->mark_down(m->get_connection());
+>>      goto out;
+>>    }
+>> --------------------
+>>
+>> It looks as though the osd getting marked down is sending a heartbeat ping to
+>> another osd, at which point, that osd marks it as down.  Its not clear to me
+>> why that happens.  Is it because connections are getting dropped and ports are
+>> changing?
+>>
+>> In any case, that if conditional succeeds, resulting in the osd marking down
+>> the osd that just sent it a ping heartbeat.
+>>
+>> I modified the debug output to show the values for heartbeat_to.count(from)
+>> and heartbeat_from.count(from), as well as heartbeat_con[from] and
+>> m->get_connection().  The cases where osds are marked down are when the ping
+>> message's epoch and the osdmap epoch are the same (usually around 16), and the
+>> counts are always zero, suggesting that this is the first heartbeat from osdA
+>> to osdB.  Even if they weren't zero, the heartbeat_con[from] is null, and
+>> doesn't get set till later, so the conditional would succeed anyway.  Can
+>> someone explain the purpose and reasoning behind this bit of code?  If I just
+>> whack the second part of the conditional will bad things happen?  Any help is
+>> greatly appreciated.
+> Ha, Sam (Just) was just asking me about this bit of code at lunch today.
+> It looks like it's the problem.
 >
-> I'm running ceph 0.32, and since a while it looks like if a monitor f=
-ails,
-> then the cluster doesn't find a new one.
+> There are a couple different types of heartbeat messages, the
+> important ones being heartbeats and heartbeat requests.  The requests are
+> sent whenever a node starts expecting to receive heartbeats.  This keeps
+> everyone happy even when the sender is behind in processing map updates.
+> The above check is correct for heartbeats, but not the requests.
 >
-> I have three nodes, two with cmds+cosd+cmon, and one with cmds+cmon, =
-which is
-> also running the client. If I stop one of the cmds+cosd+cmon nodes, c=
-eph -w
-> run on the cmds+cmon node tells nothing but
+> There is a bit of work that needs to be done here.  It looks like the
+> logic is sound in the case where the OSDs have all the relevant PGs, but
+> doesn't work when they do not (there are new ones, or PGs are quickly
+> shifting around).
 >
-> 2011-08-03 11:10:47.291875 7f4f043d5700 -- <client_ip>:0/14633 >>
-> <killed_node_ip>:6789/0 pipe(0x1a7f9c0 sd=3D4 pgs=3D0 cs=3D0 l=3D0).f=
-ault first fault
->
-> infinitely and the filesystem stops working (processes using files in=
- it block
-> forever). Looks like it rties to connect to the killed monitor instea=
-d of
-> failing over to a working one.
->
-> The first message after killing the node was:
->
-> 2011-08-03 10:57:40.687871 7f4f01563700 monclient: hunting for new mo=
-n
->
-> Do you have any idea what I'm doing wrong?
->
+> In the meantime, you should be able to just comment out that whole block.
+> The old connections won't get cleaned up, but it's a tiny resource leak,
+> and if I'm remembering correctly nothing bad should come of it.
+Commenting out that bit of code fixes most of the problems I was seeing, 
+but I still see osds getting marked down.  It looks like I'm hitting the 
+case you described where PGs are shifting around.  OSDs are getting 
+marked down by other osds that no longer including it in its list of 
+heartbeat_to peers or heartbeat_from peers.  Lines 1429 and 1453 of 
+OSD.cc (stable) in update_heartbeat_peers() are the next bits of code 
+that are marking down peers.  Initially, the 
+heartbeat_to.count(p->first) value is always 0, resulting in those old 
+peers getting marked down.  Eventually the count is non-zero, but there 
+are cases where the old connection ptr is not equal to the new heartbeat 
+connection ptr, even though the peer addr/port/nonce remain equal.  I 
+can't tell if we see follow on downings because the initial downings 
+close connections that get reset, resulting in different connection 
+pointers later on.  Is there a better way to do the comparison than with 
+the connection pointers?
 
-Do you have the mon logs, or any core files?
+I'm not sure there's a quick and dirty solution in this case.  I can 
+comment out the lines that mark those osds as down, but when I do, other 
+nodes get marked down anyway (it looks like OSDMap::apply_incremental is 
+marking them down).
 
+If I can provide more info/debugging/logs etc, please let me know.
 
 Thanks,
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-sam
+
+
+> Sam (other Sam!), let's go over this in the morning!
+>
+> sage
+
