@@ -1,23 +1,41 @@
-From: Qian Wei <hzqianwei@gmail.com>
-Subject: ceph native client for windows
-Date: Fri, 5 Aug 2011 16:56:39 +0800
-Message-ID: <CAHtqZOf_O9vWeT7Qve=zwsozf37TN0f0OB0sNtWXMCaPPUavfQ@mail.gmail.com>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: Re: ceph native client for windows
+Date: Fri, 5 Aug 2011 11:29:58 +0000 (UTC)
+Message-ID: <loom.20110805T132832-48@post.gmane.org>
+References: <CAHtqZOf_O9vWeT7Qve=zwsozf37TN0f0OB0sNtWXMCaPPUavfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:37899 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753183Ab1HEI4k (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Aug 2011 04:56:40 -0400
-Received: by vxi9 with SMTP id 9so814686vxi.19
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Aug 2011 01:56:39 -0700 (PDT)
+Received: from lo.gmane.org ([80.91.229.12]:47791 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753374Ab1HELaQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 5 Aug 2011 07:30:16 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1QpIbW-0003aA-Hu
+	for ceph-devel@vger.kernel.org; Fri, 05 Aug 2011 13:30:14 +0200
+Received: from 94.232.181.14 ([94.232.181.14])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Aug 2011 13:30:14 +0200
+Received: from ufm by 94.232.181.14 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 05 Aug 2011 13:30:14 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi friends
-   Anyone has plan to develop a CEPH native client for  Windows, or
-give effective way to provide stroage to Windows user,if you do,
-please share your idea how to design it with us.It's very  meaningful
-to promote ceph developing, and can attract more people to use ceph.
-I'm  really interested in this field, and strive to make it true.
+Qian Wei <hzqianwei <at> gmail.com> writes:
+
+> 
+> Hi friends
+>    Anyone has plan to develop a CEPH native client for  Windows, or
+> give effective way to provide stroage to Windows user
+
+Reshare via samba or nfs?
+
+WBR,
+    Fyodor.
+
+
