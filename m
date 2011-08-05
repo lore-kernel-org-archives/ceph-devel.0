@@ -1,41 +1,126 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: ceph native client for windows
-Date: Fri, 5 Aug 2011 11:29:58 +0000 (UTC)
-Message-ID: <loom.20110805T132832-48@post.gmane.org>
-References: <CAHtqZOf_O9vWeT7Qve=zwsozf37TN0f0OB0sNtWXMCaPPUavfQ@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Repeated messages of "heartbeat_check: no heartbeat from"
+Date: Fri, 05 Aug 2011 14:11:50 +0200
+Message-ID: <1312546310.2754.41.camel@wido-laptop.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:47791 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753374Ab1HELaQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 5 Aug 2011 07:30:16 -0400
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1QpIbW-0003aA-Hu
-	for ceph-devel@vger.kernel.org; Fri, 05 Aug 2011 13:30:14 +0200
-Received: from 94.232.181.14 ([94.232.181.14])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Aug 2011 13:30:14 +0200
-Received: from ufm by 94.232.181.14 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 05 Aug 2011 13:30:14 +0200
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:43702 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754935Ab1HEMLx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 5 Aug 2011 08:11:53 -0400
+Received: from [IPv6:2a00:f10:119:0:219:d2ff:fec0:b754] (unknown [IPv6:2a00:f10:119:0:219:d2ff:fec0:b754])
+	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPA id DCB887620F
+	for <ceph-devel@vger.kernel.org>; Fri,  5 Aug 2011 14:11:51 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Qian Wei <hzqianwei <at> gmail.com> writes:
+Hi,
 
-> 
-> Hi friends
->    Anyone has plan to develop a CEPH native client for  Windows, or
-> give effective way to provide stroage to Windows user
+I'm seeing something weird which I don't want to report in a issue yet
+in the tracker.
 
-Reshare via samba or nfs?
+I suffered a pretty big crash which caused me to loose 15 of my 40 OSDs.
+Some died because my WD Green 2TB disks failed, others since btrfs
+didn't survive the hard reboot I had to give them.
 
-WBR,
-    Fyodor.
+When watching 'ceph -w' I noticed this:
 
+2011-08-05 13:32:03.209958    pg v504313: 8008 pgs: 1 inactive, 334
+active+clean, 10 peering, 1 crashed+peering, 14 down+peering, 7 active
++clean+degraded, 7624 crashed+down+peering, 8 down+degraded+peering, 9
+crashed+down+degraded+peering; 4417 GB data, 13121 GB used, 32504 GB /
+46575 GB avail; 8255/3391107 degraded (0.243%)
+2011-08-05 13:32:03.225712   mds e6033: 1/1/1 up {0=dga=up:replay(laggy
+or crashed)}
+2011-08-05 13:32:03.225747   osd e9934: 40 osds: 25 up, 25 in
+2011-08-05 13:32:03.225874   log 2011-08-05 13:32:01.646596 mon0
+[2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 29796 : [INF] osd37
+[2a00:f10:113:1:225:90ff:fe33:49a4]:6803/17881 failed (by osd7
+[2a00:f10:113:1:225:90ff:fe32:cf64]:6806/2746)
+2011-08-05 13:32:03.225964   mon e1: 1 mons at
+{dga=[2a00:f10:113:1:230:48ff:fed3:b086]:6789/0}
+2011-08-05 13:32:03.929650   log 2011-08-05 13:32:03.603681 mon0
+[2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 29797 : [INF] osd19
+[2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 failed (by osd5
+[2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506)
+
+Here you see that osd5 is reporting that osd37 is down and osd7 is
+reporting that osd19 is down.
+
+These messages keep being repeated, over and over. My 'debug ms' is at
+1, so I took a look at the logs:
+
+Aug  5 13:32:41 atom1 osd.5[2507]: 7f75227fc700 osd5 9963
+heartbeat_check: no heartbeat from osd19 since 2011-08-04
+17:01:02.504942 (cutoff 2011-08-05 13:32:21.916364)
+Aug  5 13:32:42 atom1 osd.5[2507]: 7f7531579700 osd5 9963
+heartbeat_check: no heartbeat from osd19 since 2011-08-04
+17:01:02.504942 (cutoff 2011-08-05 13:32:22.381632)
+Aug  5 13:32:43 atom1 osd.5[2507]: 7f7531579700 osd5 9965
+heartbeat_check: no heartbeat from osd19 since 2011-08-04
+17:01:02.504942 (cutoff 2011-08-05 13:32:23.474198)
+Aug  5 13:32:44 atom1 osd.5[2507]: 7f75227fc700 osd5 9965
+heartbeat_check: no heartbeat from osd19 since 2011-08-04
+17:01:02.504942 (cutoff 2011-08-05 13:32:24.027161)
+
+osd5 keeps claiming that osd19 is down, but when I check the logs I see
+that osd19 is running and exchanging heartbeat messages with the other
+OSDs in the cluster.
+
+What seems odd to me is that there are no log messages about osd7
+claiming that osd37 is down, although it keeps being repeated by 'ceph
+-w'.
+
+$ ceph osd injectargs 7 '--debug-ms 1'
+$ ceph osd injectargs 37 '--debug-ms 1'
+
+I made sure that was injected, but still, no log messages.
+
+Going through the logs a bit further (after setting the logging to 20) I
+saw osd.19 reporting:
+
+Aug  5 13:48:23 atom4 osd.19[2741]: 7f634ca8e700 --
+[2a00:f10:113:1:225:90ff:fe33:49cc]:6810/2740 >>
+[2a00:f10:113:1:225:90ff:fe32:cf64]:6808/2506 pipe(0x7f64e4193ec0 sd=56
+pgs=1530 cs=1 l=0).reader got envelope type=70 src osd5 front=61 data=0
+off 0
+
+It seems that it is communicating with osd5, but osd5 does not seem to
+communicate with osd19?
+
+The log also confirms that:
+
+Aug  5 14:10:05 atom1 osd.5[2507]: 7f7531579700 --
+[2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506 -->
+[2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 -- osd_failure(osd19
+[2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 e10020 v10020) v1 -- ?+0
+0x6948000 con 0x1cd7710
+Aug  5 14:10:05 atom1 osd.5[2507]: 7f7531579700 --
+[2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506 submit_message
+osd_failure(osd19 [2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 e10020
+v10020) v1 remote [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0
+Aug  5 14:10:05 atom1 osd.5[2507]: 7f75365a1700 --
+[2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506 >>
+[2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 pipe(0x1cd74a0 sd=13 pgs=178
+cs=1 l=1).writer encoding 17093 0x6948000 osd_failure(osd19
+[2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 e10020 v10020) v1
+
+Now, to prevent (I tried...) my cluster from bouncing around I placed
+this in the OSD section:
+
+    osd min down reporters = 3
+    osd min down reports = 5
+
+Since only osd5 and osd7 are sending out these messages osd19 nor osd37
+get marked down, but what is going on here?
+
+I haven't restarted the OSDs yet.
+
+I noticed that the OSD heartbeat process is being revised currently, but
+I thought it might be helpful to report this.
+
+Wido
 
