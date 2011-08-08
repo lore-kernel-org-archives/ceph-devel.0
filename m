@@ -1,52 +1,45 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Monitors calling for elections all the time under load
-Date: Mon, 8 Aug 2011 08:22:53 -0700
-Message-ID: <CAF3hT9AyfqLeoJmPH5F_5KeNOkTexQ53NGYVi6Sw8xpfnsOx7g@mail.gmail.com>
-References: <201108081127.12810.szekelyi@niif.hu>
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: Re: read performance not perfect
+Date: Mon, 08 Aug 2011 20:52:39 +0300
+Message-ID: <4E402267.3010401@ufm.su>
+References: <CABAwU-YJ8DFjphavMQ+NjqPU7=fFBtwsEMzE7xT1G8gp4LywSA@mail.gmail.com>	<Pine.LNX.4.64.1107181012540.22215@cobra.newdream.net>	<CABAwU-YKmEC=umFLzDb-ykPbzQ9s3sKoUmQbkumExrXEwyveNA@mail.gmail.com>	<Pine.LNX.4.64.1108040846500.17151@cobra.newdream.net>	<loom.20110804T213454-854@post.gmane.org>	<Pine.LNX.4.64.1108041252230.26398@cobra.newdream.net>	<4E3B2D78.5060605@ufm.su>	<Pine.LNX.4.64.1108041825230.29841@cobra.newdream.net>	<4E3B8F0E.20606@ufm.su>	<Pine.LNX.4.64.1108050905350.12301@cobra.newdream.net>	<4E3C44DC.9090906@ufm.su> <Pine.LNX.4.64.1108051315420.12301@cobra.newdream.net> <4E3C5CD0.6060100@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:56711 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751159Ab1HHPWy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Aug 2011 11:22:54 -0400
-Received: by gxk21 with SMTP id 21so740694gxk.19
-        for <ceph-devel@vger.kernel.org>; Mon, 08 Aug 2011 08:22:53 -0700 (PDT)
-In-Reply-To: <201108081127.12810.szekelyi@niif.hu>
+Received: from mail.ufm.su ([77.120.103.19]:40565 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753106Ab1HHRwm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 8 Aug 2011 13:52:42 -0400
+In-Reply-To: <4E3C5CD0.6060100@ufm.su>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-2011/8/8 Sz=E9kelyi Szabolcs <szekelyi@niif.hu>:
-> Hello,
->
-> when I put my cluster under a little stress (doing performance measur=
-ements
-> with fio from one client), I see messages like this when watching the=
- cluster
-> with ceph -w:
->
-> My setup consists of three machines:
-> 1. iscsigw1: OSD+MDS+MON
-> 2. iscsigw2: OSD+MDS(standby-replay)+MON
-> 3. cc: MON+client+control utility
+On 08/06/2011 12:12 AM, Fyodor Ustinov wrote:
+> On 08/05/2011 11:17 PM, Sage Weil wrote:
+>> On Fri, 5 Aug 2011, Fyodor Ustinov wrote:
+>>> On 08/05/2011 07:07 PM, Sage Weil wrote:
+>>>> This is the problem.  The readahead patches in the master branch of
+>>>> git://ceph.newdream.net/git/ceph-client.git.  They're not upstream 
+>>>> yet.
+>>>> Sorry that wasn't clear!
+>>> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=commit;h=e9852227431a0ed6ceda064f33e4218757acab6c 
+>>>
+>>> - it's not this patch?
+>> Nope, it's ebd62c49c0a71a9af6b92b4f0cedfd2b1d46c16e, in ceph-client.git.
+>> Then d0a287e18a81a0314a9aa82b6f54eb7f5ecabd60 bumps up the default 
+>> rasize
+>> window.
+>>
+>> FWIW I saw a big jump in read spead on my cluster (now fully 
+>> saturates the
+>> client interface).
+>>
+>> sage
+> Well. I wait net kernel. :)
+Sage, 3.1-rc1 released. This release has the necessary patches?
 
-It's not normal, precisely, but it's unlikely to be hurting anything.
-The monitors have to call sync() to save every map, so my guess is
-that the monitor on your 'cc' node, with the Ceph client, is simply
-taking forever on its sync calls since they try and flush out data
-over the network -- and that makes the other monitors think it's down.
-Then a new election is called, and since mon.0 (on 'cc') is still
-actually alive, it wins the election.
-
-Perhaps we should adjust the election code so that if there's a
-complain they don't resolve back to the same leader, although doing
-that and still ending up with a result quickly might take some doing.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+WBR,
+     Fyodor.
