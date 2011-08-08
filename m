@@ -1,52 +1,117 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: read performance not perfect
-Date: Mon, 8 Aug 2011 12:14:44 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1108081209100.6896@cobra.newdream.net>
-References: <CABAwU-YJ8DFjphavMQ+NjqPU7=fFBtwsEMzE7xT1G8gp4LywSA@mail.gmail.com>
- <Pine.LNX.4.64.1107181012540.22215@cobra.newdream.net>
- <CABAwU-YKmEC=umFLzDb-ykPbzQ9s3sKoUmQbkumExrXEwyveNA@mail.gmail.com>
- <Pine.LNX.4.64.1108040846500.17151@cobra.newdream.net>
- <loom.20110804T213454-854@post.gmane.org> <Pine.LNX.4.64.1108041252230.26398@cobra.newdream.net>
- <4E3B2D78.5060605@ufm.su> <Pine.LNX.4.64.1108041825230.29841@cobra.newdream.net>
- <4E3B8F0E.20606@ufm.su> <Pine.LNX.4.64.1108050905350.12301@cobra.newdream.net>
- <4E3C44DC.9090906@ufm.su> <Pine.LNX.4.64.1108051315420.12301@cobra.newdream.net>
- <4E3C5CD0.6060100@ufm.su> <4E402267.3010401@ufm.su>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: Kernel 3.0.0 + ext4 + ceph == ...
+Date: Mon, 8 Aug 2011 22:07:58 +0200
+Message-ID: <CAO47_-9N0k_OjgUooBtTjGdvTqbAoUTJ-vbqVy8q4=f6YkV_og@mail.gmail.com>
+References: <4E33D101.1050504@ufm.su>
+	<9BF9E529-C532-4A94-8362-93C2D1B778DB@mit.edu>
+	<4E3432FC.9030204@ufm.su>
+	<20110730165001.GI7361@thunk.org>
+	<Pine.LNX.4.64.1107301016120.23447@cobra.newdream.net>
+	<20110730221900.GK7361@thunk.org>
+	<Pine.LNX.4.64.1107302149430.23447@cobra.newdream.net>
+	<4E353D9E.5080802@ufm.su>
+	<Pine.LNX.4.64.1107310951550.2348@cobra.newdream.net>
+	<4E35B833.6070304@ufm.su>
+	<Pine.LNX.4.64.1107311339530.23447@cobra.newdream.net>
+	<80E3795B-C981-492F-9312-DC91D57E4017@mit.edu>
+	<Pine.LNX.4.64.1108010918580.6290@cobra.newdream.net>
+	<CAO47_-9DmxqfBsBF2K_8ScX_4d-HPz01QeQ-2FFwZS-nCDEOsw@mail.gmail.com>
+	<CAC-hyiHzmn25ryJkNUdzQvk7c7chwVDfmwDeo8X2+4zTbDuFGQ@mail.gmail.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41673 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750954Ab1HHTKV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Aug 2011 15:10:21 -0400
-In-Reply-To: <4E402267.3010401@ufm.su>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:56312 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751626Ab1HHUH7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 8 Aug 2011 16:07:59 -0400
+In-Reply-To: <CAC-hyiHzmn25ryJkNUdzQvk7c7chwVDfmwDeo8X2+4zTbDuFGQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Fyodor Ustinov <ufm@ufm.su>
-Cc: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
+Cc: Sage Weil <sage@newdream.net>, Theodore Tso <tytso@mit.edu>, Fyodor Ustinov <ufm@ufm.su>, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org
 
-On Mon, 8 Aug 2011, Fyodor Ustinov wrote:
-> On 08/06/2011 12:12 AM, Fyodor Ustinov wrote:
-> > On 08/05/2011 11:17 PM, Sage Weil wrote:
-> > > On Fri, 5 Aug 2011, Fyodor Ustinov wrote:
-> > > > On 08/05/2011 07:07 PM, Sage Weil wrote:
-> > > > > This is the problem.  The readahead patches in the master branch of
-> > > > > git://ceph.newdream.net/git/ceph-client.git.  They're not upstream
-> > > > > yet.
-> > > > > Sorry that wasn't clear!
-> > > > http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=commit;h=e9852227431a0ed6ceda064f33e4218757acab6c 
-> > > > - it's not this patch?
-> > > Nope, it's ebd62c49c0a71a9af6b92b4f0cedfd2b1d46c16e, in ceph-client.git.
-> > > Then d0a287e18a81a0314a9aa82b6f54eb7f5ecabd60 bumps up the default rasize
-> > > window.
-> > > 
-> > > FWIW I saw a big jump in read spead on my cluster (now fully saturates the
-> > > client interface).
-> > > 
-> > > sage
-> > Well. I wait net kernel. :)
-> Sage, 3.1-rc1 released. This release has the necessary patches?
+I tried 3.0.1 today, which contains the commit Theodore suggested and
+was no longer able to reproduce the problem.
 
-Not readahead, no.  I didn't have the patches done and tested in time.  
-That'll go into 3.2.
+So I think the corruption we have seen is indeed related to:
 
-sage
+commit 7132de744ba76930d13033061018ddd7e3e8cd91
+Author: Maxim Patlasov <maxim.patlasov@gmail.com>
+Date:   Sun Jul 10 19:37:48 2011 -0400
+
+   ext4: fix i_blocks/quota accounting when extent insertion fails
+
+
+I will now try to apply this patch to the RHEL6.1 kernel and see what
+happens...
+
+Thanks for your help.
+
+Christian
+
+
+2011/8/3 Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>:
+> On Wed, Aug 3, 2011 at 7:16 AM, Christian Brunner <chb@muc.de> wrote:
+> ...
+>> I tried to reproduce this without ceph, but wasn't able to...
+>>
+>> In the meantime it seams, that I can also see the side effects on th=
+e
+>> librbd side: I get an "librbd: data error!" when I do an "rbd copy".
+>>
+>> When I look at the librbd code this is related to a sparse_read not
+>> returning the right size of the object.
+>>
+>> I don't know if it helps, but I think that the problem is also relat=
+ed
+>> to sparse file usage.
+>>
+>
+> There were a few sparse-read issues that we fixed not too long ago,
+> but should have been fixed for at least the previous ceph version. I'=
+m
+> not sure what version you're using.
+> There was a ext4 fiemap issue that I was hitting on specific
+> environments but couldn't determine whether it was fixed in later
+> kernel versions (I was using 2.6.32). Now is a good time to try and
+> get to the bottom of it. Here's a script I was using to reproduce it:
+>
+> #!/bin/sh
+> dd if=3D/dev/urandom of=3Dbla bs=3D1 seek=3D$((0x6f000)) count=3D$((0=
+x1000)); sync
+> dd if=3D/dev/urandom of=3Dbla bs=3D1 seek=3D$((0x70000)) count=3D$((0=
+x1000)); sync
+> dd if=3D/dev/urandom of=3Dbla bs=3D1 seek=3D$((0x71000)) count=3D$((0=
+x1000)); sync
+> dd if=3D/dev/urandom of=3Dbla bs=3D1 seek=3D$((0x72000)) count=3D$((0=
+x1000)); sync
+> dd if=3D/dev/urandom of=3Dbla bs=3D1 seek=3D$((0x73000)) count=3D$((0=
+x1000)); sync
+> dd if=3D/dev/urandom of=3Dbla bs=3D1 seek=3D$((0x74000)) count=3D$((0=
+x2000)); sync
+> dd if=3D/dev/urandom of=3Dbla bs=3D1 seek=3D$((0x2ae000)) count=3D$((=
+0x2000)); sync
+>
+> You can compile and run the following utility to dump all the extents=
+:
+> http://pastebin.com/h2Cnpk2Q
+>
+> Thanks,
+> Yehuda
+>
+> Oh, btw, You can effectively disable the use of fiemap by setting the
+> 'filestore fiemap threshold' config option with large enough value
+> (e.g., anything bigger than 4 MB should be enough for rbd).
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
