@@ -1,60 +1,42 @@
-From: Fyodor Ustinov <ufm@ufm.su>
-Subject: Re: cfuse memory leak?
-Date: Tue, 09 Aug 2011 20:00:10 +0300
-Message-ID: <4E41679A.8020807@ufm.su>
-References: <4E415FAE.3050808@ufm.su>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: osd down after adding OSDs
+Date: Tue, 09 Aug 2011 10:15:10 -0700
+Message-ID: <4E416B1E.5040904@dreamhost.com>
+References: <CABAwU-amM1mTyyquDFyc+BQsh21D6vkw-ER+X4ZPNm7_CH5PPQ@mail.gmail.com>	<4E407BB0.1020409@dreamhost.com> <CABAwU-ZVhwSRyZgy9n1EG7gUWpxgcH97YnKjPjQn4C+TvomALQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.ufm.su ([77.120.103.19]:57058 "EHLO mail.ufm.su"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753011Ab1HIRAO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 9 Aug 2011 13:00:14 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by mail.ufm.su (Postfix) with ESMTP id 017E6600247
-	for <ceph-devel@vger.kernel.org>; Tue,  9 Aug 2011 20:00:12 +0300 (EEST)
-Received: from mail.ufm.su ([127.0.0.1])
-	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id TXHvSgu+oKAj for <ceph-devel@vger.kernel.org>;
-	Tue,  9 Aug 2011 20:00:11 +0300 (EEST)
-Received: from [192.168.2.22] (unknown [94.232.181.14])
-	by mail.ufm.su (Postfix) with ESMTPSA id CB439600245
-	for <ceph-devel@vger.kernel.org>; Tue,  9 Aug 2011 20:00:11 +0300 (EEST)
-In-Reply-To: <4E415FAE.3050808@ufm.su>
+Received: from mail.hq.newdream.net ([66.33.206.127]:57483 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753893Ab1HIRPK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Aug 2011 13:15:10 -0400
+In-Reply-To: <CABAwU-ZVhwSRyZgy9n1EG7gUWpxgcH97YnKjPjQn4C+TvomALQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: huang jun <hjwsm1989@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 08/09/2011 07:26 PM, Fyodor Ustinov wrote:
-> Hi!
->
-> root@backup-ext:/etc/pure-ftpd/conf# ps v -C cfuse
->   PID TTY      STAT   TIME  MAJFL   TRS   DRS   RSS %MEM COMMAND
->   916 ?        Sl    86:35  21025  2260 1514931 645632 63.1 
-> /usr/bin/cfuse -m 10.5.51.230 -r /clients /clients
->
-> WBR,
->     Fyodor.
-root@backup-ext:/etc/pure-ftpd/conf# ps v -C cfuse
-   PID TTY      STAT   TIME  MAJFL   TRS   DRS   RSS %MEM COMMAND
-   916 ?        Sl    88:22  21052  2260 1514995 633112 61.9 
-/usr/bin/cfuse -m 10.5.51.230 -r /clients /clients
-   916 ?        Sl    88:33  21053  2260 1514999 631228 61.7 
-/usr/bin/cfuse -m 10.5.51.230 -r /clients /clients
-   916 ?        Sl    90:16  21278  2260 1515063 623672 60.9 
-/usr/bin/cfuse -m 10.5.51.230 -r /clients /clients
-   916 ?        Sl    90:52  21318  2260 1515083 620620 60.6 
-/usr/bin/cfuse -m 10.5.51.230 -r /clients /clients
-   916 ?        Sl    91:56  24599  2260 1548275 652880 63.8 
-/usr/bin/cfuse -m 10.5.51.230 -r /clients /clients
-   916 ?        Sl    95:20  27244  2260 1589003 659076 64.4 
-/usr/bin/cfuse -m 10.5.51.230 -r /clients /clients
+On 08/08/2011 06:29 PM, huang jun wrote:
+> thanks=A3=ACJosh
+> Here the osd.10.log for the second condition.
+> and osd.15-tail.log for the first, because osd.15.log is about 130MB,
+> i'm not permitted to upload it, so i tail 70000 lines of it.
+> btw if the recovery statechart in GetInfo state, what will happened i=
+f
+> we recept a MOSDPGLog message, the statechart going to Crashed state?
 
-DRS memory more and more....
+It depends on when the message was sent. If it was sent during a
+previous peering, it is ignored before it reaches the state machine by
+checking pg->old_peering_msg in OSD::handle_pg_log.
 
-WBR,
-     Fyodor
-
-P.S. rsync from nfs to ceph in background.
-
+Otherwise, if the log was sent after the current peering attempt
+started, the primary does enter the Crashed state. It's a bug that a lo=
+g
+was received in this case, since GetInfo is the first stage of peering,
+and no logs were requested yet.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
