@@ -1,107 +1,35 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: Btrfs slowdown
-Date: Tue, 9 Aug 2011 15:33:10 +0200
-Message-ID: <CAO47_-8YSD_N5AMXhvFOvT6UBwdn355+qGZ+qqLZuNtXr870Lg@mail.gmail.com>
-References: <CAO47_-9BLKWUGDEuzaLqHSq9tZkAUaO8FMQEy1pPk9A2Hb+5AQ@mail.gmail.com>
-	<1311623446-sup-8105@shiny>
-	<CAO47_--KOyMdS-OP06cLpD+qTQ+gqGcw_DCPUrLOeypt5j_G4g@mail.gmail.com>
-	<Pine.LNX.4.64.1108081456290.6895@cobra.newdream.net>
-Reply-To: chb@muc.de
+From: Fyodor Ustinov <ufm@ufm.su>
+Subject: cfuse memory leak?
+Date: Tue, 09 Aug 2011 19:26:22 +0300
+Message-ID: <4E415FAE.3050808@ufm.su>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:33562 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750779Ab1HINdK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 9 Aug 2011 09:33:10 -0400
-In-Reply-To: <Pine.LNX.4.64.1108081456290.6895@cobra.newdream.net>
+Received: from mail.ufm.su ([77.120.103.19]:46334 "EHLO mail.ufm.su"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752149Ab1HIQ0Z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 9 Aug 2011 12:26:25 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.ufm.su (Postfix) with ESMTP id 3FD2C600248
+	for <ceph-devel@vger.kernel.org>; Tue,  9 Aug 2011 19:26:23 +0300 (EEST)
+Received: from mail.ufm.su ([127.0.0.1])
+	by localhost (mail.ufm.su [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id MGu4XgPdUIQz for <ceph-devel@vger.kernel.org>;
+	Tue,  9 Aug 2011 19:26:23 +0300 (EEST)
+Received: from [192.168.2.22] (unknown [94.232.181.14])
+	by mail.ufm.su (Postfix) with ESMTPSA id 131A2600245
+	for <ceph-devel@vger.kernel.org>; Tue,  9 Aug 2011 19:26:22 +0300 (EEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Chris Mason <chris.mason@oracle.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Sage,
+Hi!
 
-I did some testing with btrfs-unstable yesterday. With the recent
-commit from Chris it looks quite good:
+root@backup-ext:/etc/pure-ftpd/conf# ps v -C cfuse
+   PID TTY      STAT   TIME  MAJFL   TRS   DRS   RSS %MEM COMMAND
+   916 ?        Sl    86:35  21025  2260 1514931 645632 63.1 
+/usr/bin/cfuse -m 10.5.51.230 -r /clients /clients
 
-"Btrfs: force unplugs when switching from high to regular priority bios=
-"
-
-
-However I can't test it extensively, because our main environment is
-on ext4 at the moment.
-
-Regards
-Christian
-
-2011/8/8 Sage Weil <sage@newdream.net>:
-> Hi Christian,
->
-> Are you still seeing this slowness?
->
-> sage
->
->
-> On Wed, 27 Jul 2011, Christian Brunner wrote:
->> 2011/7/25 Chris Mason <chris.mason@oracle.com>:
->> > Excerpts from Christian Brunner's message of 2011-07-25 03:54:47 -=
-0400:
->> >> Hi,
->> >>
->> >> we are running a ceph cluster with btrfs as it's base filesystem
->> >> (kernel 3.0). At the beginning everything worked very well, but a=
-fter
->> >> a few days (2-3) things are getting very slow.
->> >>
->> >> When I look at the object store servers I see heavy disk-i/o on t=
-he
->> >> btrfs filesystems (disk utilization is between 60% and 100%). I a=
-lso
->> >> did some tracing on the Cepp-Object-Store-Daemon, but I'm quite
->> >> certain, that the majority of the disk I/O is not caused by ceph =
-or
->> >> any other userland process.
->> >>
->> >> When reboot the system(s) the problems go away for another 2-3 da=
-ys,
->> >> but after that, it starts again. I'm not sure if the problem is
->> >> related to the kernel warning I've reported last week. At least t=
-here
->> >> is no temporal relationship between the warning and the slowdown.
->> >>
->> >> Any hints on how to trace this would be welcome.
->> >
->> > The easiest way to trace this is with latencytop.
->> >
->> > Apply this patch:
->> >
->> > http://oss.oracle.com/~mason/latencytop.patch
->> >
->> > And then use latencytop -c for a few minutes while the system is s=
-low.
->> > Send the output here and hopefully we'll be able to figure it out.
->>
->> I've now installed latencytop. Attached are two output files: The
->> first is from yesterday and was created aproxematly half an hour aft=
-er
->> the boot. The second on is from today, uptime is 19h. The load on th=
-e
->> system is already rising. Disk utilization is approximately at 50%.
->>
->> Thanks for your help.
->>
->> Christian
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs=
-" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+WBR,
+     Fyodor.
