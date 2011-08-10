@@ -1,144 +1,45 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Repeated messages of "heartbeat_check: no heartbeat from"
-Date: Wed, 10 Aug 2011 12:30:46 +0200
-Message-ID: <1312972246.2742.7.camel@wido-desktop>
-References: <1312546310.2754.41.camel@wido-laptop.pcextreme.nl>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: write and read error handling problems
+Date: Wed, 10 Aug 2011 20:11:07 +0800
+Message-ID: <CABAwU-ao6=DfMEeJZLZnYniVnzs+Gp7BYLoGv-36oUUPCR77Qg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:48988 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751951Ab1HJKas (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2011 06:30:48 -0400
-Received: from [IPv6:2a00:f10:113:1:224:1dff:fedd:9061] (unknown [IPv6:2a00:f10:113:1:224:1dff:fedd:9061])
-	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id AD62241580
-	for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2011 12:30:45 +0200 (CEST)
-In-Reply-To: <1312546310.2754.41.camel@wido-laptop.pcextreme.nl>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:41974 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753816Ab1HJMLI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 10 Aug 2011 08:11:08 -0400
+Received: by vxi9 with SMTP id 9so753817vxi.19
+        for <ceph-devel@vger.kernel.org>; Wed, 10 Aug 2011 05:11:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+hi,all
+About OSD read ops, if osd got errors, it just return,
+that may lead memory leak. we patched it.
+diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
+index 2ab21bb..21fbca7 100644
+--- a/src/osd/ReplicatedPG.cc
++++ b/src/osd/ReplicatedPG.cc
+@@ -588,8 +588,18 @@ void ReplicatedPG::do_op(MOSDOp *op)
+     obc->ondisk_read_unlock();
+   }
 
-I tried reproducing this today with the new heartbeat code, couldn't.
+-  if (result == -EAGAIN)
++  if (result == -EAGAIN) {
++    delete ctx;
+     return;
++  }
+please have a check!
 
-The new heartbeat code seems to work much better under load, I haven't
-seen any bouncing like I saw before.
+So i'm confused about the Error handling strategy of write/read
+operations in OSD.
+If the ceph just return when encountered errors, pass the work to client?
+Let's take an example of writing files. Client send request to write 4MB file,
+and OSD first write the osd journal, then return commit msg to Client.
+But, if the write file op was interrupted by the borken disk sector or
+other errors, that means write ops failed. What does the OSD going to
+do? Replay it from the former writen journal item? or other methods?
 
-Wido
-
-On Fri, 2011-08-05 at 14:11 +0200, Wido den Hollander wrote:
-> Hi,
-> 
-> I'm seeing something weird which I don't want to report in a issue yet
-> in the tracker.
-> 
-> I suffered a pretty big crash which caused me to loose 15 of my 40 OSDs.
-> Some died because my WD Green 2TB disks failed, others since btrfs
-> didn't survive the hard reboot I had to give them.
-> 
-> When watching 'ceph -w' I noticed this:
-> 
-> 2011-08-05 13:32:03.209958    pg v504313: 8008 pgs: 1 inactive, 334
-> active+clean, 10 peering, 1 crashed+peering, 14 down+peering, 7 active
-> +clean+degraded, 7624 crashed+down+peering, 8 down+degraded+peering, 9
-> crashed+down+degraded+peering; 4417 GB data, 13121 GB used, 32504 GB /
-> 46575 GB avail; 8255/3391107 degraded (0.243%)
-> 2011-08-05 13:32:03.225712   mds e6033: 1/1/1 up {0=dga=up:replay(laggy
-> or crashed)}
-> 2011-08-05 13:32:03.225747   osd e9934: 40 osds: 25 up, 25 in
-> 2011-08-05 13:32:03.225874   log 2011-08-05 13:32:01.646596 mon0
-> [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 29796 : [INF] osd37
-> [2a00:f10:113:1:225:90ff:fe33:49a4]:6803/17881 failed (by osd7
-> [2a00:f10:113:1:225:90ff:fe32:cf64]:6806/2746)
-> 2011-08-05 13:32:03.225964   mon e1: 1 mons at
-> {dga=[2a00:f10:113:1:230:48ff:fed3:b086]:6789/0}
-> 2011-08-05 13:32:03.929650   log 2011-08-05 13:32:03.603681 mon0
-> [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 29797 : [INF] osd19
-> [2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 failed (by osd5
-> [2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506)
-> 
-> Here you see that osd5 is reporting that osd37 is down and osd7 is
-> reporting that osd19 is down.
-> 
-> These messages keep being repeated, over and over. My 'debug ms' is at
-> 1, so I took a look at the logs:
-> 
-> Aug  5 13:32:41 atom1 osd.5[2507]: 7f75227fc700 osd5 9963
-> heartbeat_check: no heartbeat from osd19 since 2011-08-04
-> 17:01:02.504942 (cutoff 2011-08-05 13:32:21.916364)
-> Aug  5 13:32:42 atom1 osd.5[2507]: 7f7531579700 osd5 9963
-> heartbeat_check: no heartbeat from osd19 since 2011-08-04
-> 17:01:02.504942 (cutoff 2011-08-05 13:32:22.381632)
-> Aug  5 13:32:43 atom1 osd.5[2507]: 7f7531579700 osd5 9965
-> heartbeat_check: no heartbeat from osd19 since 2011-08-04
-> 17:01:02.504942 (cutoff 2011-08-05 13:32:23.474198)
-> Aug  5 13:32:44 atom1 osd.5[2507]: 7f75227fc700 osd5 9965
-> heartbeat_check: no heartbeat from osd19 since 2011-08-04
-> 17:01:02.504942 (cutoff 2011-08-05 13:32:24.027161)
-> 
-> osd5 keeps claiming that osd19 is down, but when I check the logs I see
-> that osd19 is running and exchanging heartbeat messages with the other
-> OSDs in the cluster.
-> 
-> What seems odd to me is that there are no log messages about osd7
-> claiming that osd37 is down, although it keeps being repeated by 'ceph
-> -w'.
-> 
-> $ ceph osd injectargs 7 '--debug-ms 1'
-> $ ceph osd injectargs 37 '--debug-ms 1'
-> 
-> I made sure that was injected, but still, no log messages.
-> 
-> Going through the logs a bit further (after setting the logging to 20) I
-> saw osd.19 reporting:
-> 
-> Aug  5 13:48:23 atom4 osd.19[2741]: 7f634ca8e700 --
-> [2a00:f10:113:1:225:90ff:fe33:49cc]:6810/2740 >>
-> [2a00:f10:113:1:225:90ff:fe32:cf64]:6808/2506 pipe(0x7f64e4193ec0 sd=56
-> pgs=1530 cs=1 l=0).reader got envelope type=70 src osd5 front=61 data=0
-> off 0
-> 
-> It seems that it is communicating with osd5, but osd5 does not seem to
-> communicate with osd19?
-> 
-> The log also confirms that:
-> 
-> Aug  5 14:10:05 atom1 osd.5[2507]: 7f7531579700 --
-> [2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506 -->
-> [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 -- osd_failure(osd19
-> [2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 e10020 v10020) v1 -- ?+0
-> 0x6948000 con 0x1cd7710
-> Aug  5 14:10:05 atom1 osd.5[2507]: 7f7531579700 --
-> [2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506 submit_message
-> osd_failure(osd19 [2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 e10020
-> v10020) v1 remote [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0
-> Aug  5 14:10:05 atom1 osd.5[2507]: 7f75365a1700 --
-> [2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506 >>
-> [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 pipe(0x1cd74a0 sd=13 pgs=178
-> cs=1 l=1).writer encoding 17093 0x6948000 osd_failure(osd19
-> [2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 e10020 v10020) v1
-> 
-> Now, to prevent (I tried...) my cluster from bouncing around I placed
-> this in the OSD section:
-> 
->     osd min down reporters = 3
->     osd min down reports = 5
-> 
-> Since only osd5 and osd7 are sending out these messages osd19 nor osd37
-> get marked down, but what is going on here?
-> 
-> I haven't restarted the OSDs yet.
-> 
-> I noticed that the OSD heartbeat process is being revised currently, but
-> I thought it might be helpful to report this.
-> 
-> Wido
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+thanks!
