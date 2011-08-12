@@ -1,42 +1,29 @@
-From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
-Subject: Proposed changes to librados API for version 0.34
-Date: Fri, 12 Aug 2011 09:57:57 -0700
-Message-ID: <CA+qbEUNTpaar+-_h_9mGV1c8otgT+iijZBwb6eEFS_x3fvD0Xg@mail.gmail.com>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: rbd copy progress
+Date: Fri, 12 Aug 2011 10:16:14 -0700
+Message-ID: <4E455FDE.8080207@dreamhost.com>
+References: <CAFtEh-dpiebifi31NXNoGYpzawvWNR0T5qc8DO-XLivXbw8HCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:47013 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:53579 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751066Ab1HLQ57 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2011 12:57:59 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id DC1F3C064
-	for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2011 09:59:57 -0700 (PDT)
-Received: from mail-fx0-f46.google.com (mail-fx0-f46.google.com [209.85.161.46])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 8C531C063
-	for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2011 09:59:57 -0700 (PDT)
-Received: by fxh19 with SMTP id 19so2422480fxh.19
-        for <ceph-devel@vger.kernel.org>; Fri, 12 Aug 2011 09:57:57 -0700 (PDT)
+	with ESMTP id S1751272Ab1HLRQO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 12 Aug 2011 13:16:14 -0400
+In-Reply-To: <CAFtEh-dpiebifi31NXNoGYpzawvWNR0T5qc8DO-XLivXbw8HCQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Damien Churchill <damoxc@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Proposed changes to librados API:
+On 08/12/2011 07:59 AM, Damien Churchill wrote:
+> Hi,
+>
+> I was wondering if it's possible to get copy progress statistics some
+> how when doing a rbd copy<image>  <dest>? I could check the disk usage
+> for Ceph but that seems rather unclean and also prone to errors,
+> especially if there are multiple copies going on at once.
 
-rados_write_full: get rid of the uint64_t off parameter. It looks like
-a copy-paste error left over from rados_write.
-It is unused by the actual implementation. The C++ API doesn't have an
-offset parameter, and it's not clear what one would do for write_full.
-
-rados_setxattr / Rados::set_xattr: Return 0 on success, rather than
-the length of the xattr that was set.
-The user knows how many bytes are in the xattr he asked us to set, and
-it's not like we can set a partial one.
-POSIX returns 0 or negative, and we should too.
-
-selfmanaged snap API: we use uint64_t for the snap id in some places,
-and rados_snap_t in others. We should pick one or the other and use it
-consistently.
-
-sincerely,
-Colin
+Good point! It was an oversight. Added in 
+361997af37620d80a95a969addd60f734748ac37.
