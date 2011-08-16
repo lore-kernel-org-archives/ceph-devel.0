@@ -1,102 +1,87 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
+From: =?iso-8859-1?q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
 Subject: Re: Logging to syslog from clients
-Date: Mon, 15 Aug 2011 21:10:32 -0700
-Message-ID: <CA+qbEUPB_XQ352aL1FaH=LkacJzqa9iHJuFc1ppFyDofRYFNpQ@mail.gmail.com>
-References: <201108160231.53287.szekelyi@niif.hu>
-	<CA+qbEUNRwy6c7kDG4rY0mxB1pGKuHJOj5sLacXcWhCgJo+uYPw@mail.gmail.com>
+Date: Tue, 16 Aug 2011 13:58:00 +0200
+Message-ID: <201108161358.00552.szekelyi@niif.hu>
+References: <201108160231.53287.szekelyi@niif.hu> <CA+qbEUNRwy6c7kDG4rY0mxB1pGKuHJOj5sLacXcWhCgJo+uYPw@mail.gmail.com> <CA+qbEUPB_XQ352aL1FaH=LkacJzqa9iHJuFc1ppFyDofRYFNpQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:50158 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750902Ab1HPEKe convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2011 00:10:34 -0400
-Received: by fxh19 with SMTP id 19so3967076fxh.19
-        for <ceph-devel@vger.kernel.org>; Mon, 15 Aug 2011 21:10:33 -0700 (PDT)
-In-Reply-To: <CA+qbEUNRwy6c7kDG4rY0mxB1pGKuHJOj5sLacXcWhCgJo+uYPw@mail.gmail.com>
+Received: from mail.ki.iif.hu ([193.6.222.241]:59842 "EHLO mail.ki.iif.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751888Ab1HPL6G convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2011 07:58:06 -0400
+In-Reply-To: <CA+qbEUPB_XQ352aL1FaH=LkacJzqa9iHJuFc1ppFyDofRYFNpQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Colin McCabe <cmccabe@alumni.cmu.edu>
 
-2011/8/15 Colin McCabe <cmccabe@alumni.cmu.edu>:
-> 2011/8/15 Sz=E9kelyi Szabolcs <szekelyi@niif.hu>:
->> Hi all,
->>
->> I'm running a Ceph cluster with a number of read-only ramdisk based =
-clients
->> mounting the filesystem. I'd like to get the logs of the client out =
-via syslog.
->> I've seen some posts dealing with logging to syslog, namely the thre=
-ad
->> starting at http://www.spinics.net/lists/ceph-devel/msg02876.html . =
-I see
->> options like "log to syslog" and "clog to syslog". It's not clear wh=
-at they
->> mean, could someone tell me the difference?
->
-> "clog" is the center logger, which is a separate subsystem from the
-> regular logger. The central log is maintained by the monitors rather
-> than being a per-daemon thing like the regular log.
->
->>
->> Anyway, currently my logging settings on the client are
->>
->> [global]
->> log file =3D
->> log dir =3D
->> log to syslog =3D true
->> clog to syslog =3D true
->>
->> But when the filesystem is mounted with the FUSE client, I still get
->>
->> failed to open log file '/var/log/ceph/client.admin.log': error 2: N=
-o such file
->> or directory
->>
->> which is surprising. I thought that the above options should have di=
-sabled
->> logging to file, but it looks like it still tries to open it. Is thi=
-s a bug, or
->> me doing something wrong?
->
-> This looks like an actual bug :(
-> I'm testing out a fix that will allow users to turn off log files for
-> daemons again.
+Hi Colin,
 
-This should be fixed in master by
-8072bdcaa4445359051fed443be3d702f20807e0
+On 2011. August 16. 06:10:32 Colin McCabe wrote:
+> 2011/8/15 Colin McCabe <cmccabe@alumni.cmu.edu>:
+> > 2011/8/15 Sz=E9kelyi Szabolcs <szekelyi@niif.hu>:
+> >> Hi all,
+> >>=20
+> >> I'm running a Ceph cluster with a number of read-only ramdisk base=
+d
+> >> clients mounting the filesystem. I'd like to get the logs of the c=
+lient
+> >> out via syslog. I've seen some posts dealing with logging to syslo=
+g,
+> >> namely the thread starting at
+> >> http://www.spinics.net/lists/ceph-devel/msg02876.html . I see opti=
+ons
+> >> like "log to syslog" and "clog to syslog". It's not clear what the=
+y
+> >> mean, could someone tell me the difference?
+> >=20
+> > "clog" is the center logger, which is a separate subsystem from the
+> > regular logger. The central log is maintained by the monitors rathe=
+r
+> > than being a per-daemon thing like the regular log.
 
-This should fix it for you.
+My would have gone to clog =3D client log. Thanks for the clarification=
+=2E
 
-cheers,
-Colin
+> >> Anyway, currently my logging settings on the client are
+> >>=20
+> >> [global]
+> >> log file =3D
+> >> log dir =3D
+> >> log to syslog =3D true
+> >> clog to syslog =3D true
+> >>=20
+> >> But when the filesystem is mounted with the FUSE client, I still g=
+et
+> >>=20
+> >> failed to open log file '/var/log/ceph/client.admin.log': error 2:=
+ No
+> >> such file or directory
+> >>=20
+> >> which is surprising. I thought that the above options should have
+> >> disabled logging to file, but it looks like it still tries to open=
+ it.
+> >> Is this a bug, or me doing something wrong?
+> >=20
+> > This looks like an actual bug :(
+> > I'm testing out a fix that will allow users to turn off log files f=
+or
+> > daemons again.
+>=20
+> This should be fixed in master by
+> 8072bdcaa4445359051fed443be3d702f20807e0
+>=20
+> This should fix it for you.
 
+Thanks, Colin. Since I don't compile sources myself, I'll wait for the =
+next=20
+release to roll this out.
 
->
-> On an unrelated note: when you log to syslog, you may need to turn
-> down the logging a little bit. Syslog tends to drop log messages when
-> the load gets heavy, and this makes it harder to figure out what is
-> going on.
->
-> regards,
-> Colin
->
->
->
->>
->> Thanks,
->> --
->> cc
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
->
+--=20
+cc
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
