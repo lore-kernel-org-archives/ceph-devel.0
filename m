@@ -1,120 +1,69 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Logging to syslog from clients
-Date: Tue, 16 Aug 2011 19:46:26 +0200
-Message-ID: <1313516786.3059.1.camel@wido-laptop>
-References: <201108160231.53287.szekelyi@niif.hu>
-	 <CA+qbEUNRwy6c7kDG4rY0mxB1pGKuHJOj5sLacXcWhCgJo+uYPw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: mds locker debugging
+Date: Tue, 16 Aug 2011 21:38:41 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1108162137230.24116@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:60126 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751528Ab1HPRqa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 16 Aug 2011 13:46:30 -0400
-In-Reply-To: <CA+qbEUNRwy6c7kDG4rY0mxB1pGKuHJOj5sLacXcWhCgJo+uYPw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:35656 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750923Ab1HQEln (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2011 00:41:43 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
-Cc: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>, ceph-devel@vger.kernel.org
+To: bchrisman@gmail.com
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+(03:51:58 PM) bchrisman: can we control the mds logging to perhaps only 
+output locking requests?
+(03:52:05 PM) bchrisman: or rather.. any lock activity?
+(03:52:31 PM) bchrisman: trying to debug an issue where it looks like we 
+have a bum lock# but putting mds=20 spams our logfiles
+(04:01:35 PM) cmccabe: bchrisman: I don't see any configuration setting 
+that directly corresponds to that
+(04:02:26 PM) bchrisman: I guess I'll check whether lockign has a specific 
+debug level, or if 20 is the only way to get it.
+(04:03:36 PM) cmccabe: I see some log output in Locker.cc
+(04:03:43 PM) cmccabe: perhaps you will want to change the levels of that
 
-On Mon, 2011-08-15 at 21:00 -0700, Colin McCabe wrote:
-> 2011/8/15 Sz=C3=A9kelyi Szabolcs <szekelyi@niif.hu>:
-> > Hi all,
-> >
-> > I'm running a Ceph cluster with a number of read-only ramdisk based=
- clients
-> > mounting the filesystem. I'd like to get the logs of the client out=
- via syslog.
-> > I've seen some posts dealing with logging to syslog, namely the thr=
-ead
-> > starting at http://www.spinics.net/lists/ceph-devel/msg02876.html .=
- I see
-> > options like "log to syslog" and "clog to syslog". It's not clear w=
-hat they
-> > mean, could someone tell me the difference?
->=20
-> "clog" is the center logger, which is a separate subsystem from the
-> regular logger. The central log is maintained by the monitors rather
-> than being a per-daemon thing like the regular log.
->=20
-> >
-> > Anyway, currently my logging settings on the client are
-> >
-> > [global]
-> > log file =3D
-> > log dir =3D
-> > log to syslog =3D true
-> > clog to syslog =3D true
-> >
-> > But when the filesystem is mounted with the FUSE client, I still ge=
-t
-> >
-> > failed to open log file '/var/log/ceph/client.admin.log': error 2: =
-No such file
-> > or directory
-> >
-> > which is surprising. I thought that the above options should have d=
-isabled
-> > logging to file, but it looks like it still tries to open it. Is th=
-is a bug, or
-> > me doing something wrong?
->=20
-> This looks like an actual bug :(
-> I'm testing out a fix that will allow users to turn off log files for
-> daemons again.
->=20
-> On an unrelated note: when you log to syslog, you may need to turn
-> down the logging a little bit. Syslog tends to drop log messages when
-> the load gets heavy, and this makes it harder to figure out what is
-> going on.
+This should do the trick.  We do the same for MDLog.cc and MDBalancer.cc 
+already.
 
-I also had that issue, but when using rsyslogd and using TCP for
-transport instead of UDP I wasn't able to see any dropped packets.
+diff --git a/src/common/config.cc b/src/common/config.cc
+index 7649286..6c277fe 100644
+--- a/src/common/config.cc
++++ b/src/common/config.cc
+@@ -145,6 +145,7 @@ struct config_option config_optionsp[] = {
+   OPTION(debug_context, OPT_INT, 0),
+   OPTION(debug_mds, OPT_INT, 1),
+   OPTION(debug_mds_balancer, OPT_INT, 1),
++  OPTION(debug_mds_locker, OPT_INT, 1),
+   OPTION(debug_mds_log, OPT_INT, 1),
+   OPTION(debug_mds_log_expire, OPT_INT, 1),
+   OPTION(debug_mds_migrator, OPT_INT, 1),
+diff --git a/src/common/config.h b/src/common/config.h
+index 0fffae8..dc56152 100644
+--- a/src/common/config.h
++++ b/src/common/config.h
+@@ -198,6 +198,7 @@ public:
+   int debug_context;
+   int debug_mds;
+   int debug_mds_balancer;
++  int debug_mds_locker;
+   int debug_mds_log;
+   int debug_mds_log_expire;
+   int debug_mds_migrator;
+diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
+index 4eb3a5a..7d1b5a2 100644
+--- a/src/mds/Locker.cc
++++ b/src/mds/Locker.cc
+@@ -57,6 +57,8 @@
+ 
+ #define DOUT_SUBSYS mds
+ #undef dout_prefix
++#undef DOUT_COND
++#define DOUT_COND(cct, l) l<=cct->_conf->debug_mds || l <= cct->_conf->debug_mds_locker
+ #define dout_prefix _prefix(_dout, mds)
+ static ostream& _prefix(std::ostream *_dout, MDS *mds) {
+   return *_dout << "mds" << mds->get_nodeid() << ".locker ";
 
-To my experience it's not syslog dropping the packets, but UDP packets
-which get lost due to buffers being full at the kernel.
-
-# Sent all message to the remote syslog machine, then discard them to
-prevent local logging
-# Use TCP (@@) for transmission to prevent packet loss
-:rawmsg,contains,"osd." @@loghost
-& ~
-:rawmsg,contains,"mon." @@loghost
-& ~
-:rawmsg,contains,"mds." @@loghost
-& ~
-
-Wido
-
->=20
-> regards,
-> Colin
->=20
->=20
->=20
-> >
-> > Thanks,
-> > --
-> > cc
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
