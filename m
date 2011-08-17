@@ -1,69 +1,36 @@
-From: Sage Weil <sage@newdream.net>
-Subject: mds locker debugging
-Date: Tue, 16 Aug 2011 21:38:41 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1108162137230.24116@cobra.newdream.net>
+From: Christian Brunner <chb@muc.de>
+Subject: RBD write-performance
+Date: Wed, 17 Aug 2011 13:25:44 +0200
+Message-ID: <CAO47_-9r5BgLkcn2SWriS64P5FgkHrT4Oy1jZfN7s0c36O4zMA@mail.gmail.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35656 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750923Ab1HQEln (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2011 00:41:43 -0400
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:39170 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751119Ab1HQLZp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2011 07:25:45 -0400
+Received: by vxi9 with SMTP id 9so754580vxi.19
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2011 04:25:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: bchrisman@gmail.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-(03:51:58 PM) bchrisman: can we control the mds logging to perhaps only 
-output locking requests?
-(03:52:05 PM) bchrisman: or rather.. any lock activity?
-(03:52:31 PM) bchrisman: trying to debug an issue where it looks like we 
-have a bum lock# but putting mds=20 spams our logfiles
-(04:01:35 PM) cmccabe: bchrisman: I don't see any configuration setting 
-that directly corresponds to that
-(04:02:26 PM) bchrisman: I guess I'll check whether lockign has a specific 
-debug level, or if 20 is the only way to get it.
-(04:03:36 PM) cmccabe: I see some log output in Locker.cc
-(04:03:43 PM) cmccabe: perhaps you will want to change the levels of that
+We are using ceph exclusively as a storage backend for our KVM-hosting
+environment. The number of virtual machines has increased now, but the
+machines are idle most of the time. However the OSes of the VMs tend
+to do regular small writes on the disks (I suspect journal commits).
 
-This should do the trick.  We do the same for MDLog.cc and MDBalancer.cc 
-already.
+As we don't have a lot of disks (only 16 at the moment), this adds up
+to a high number of write IOPS on the OSD disks with a negligible
+throughput.
 
-diff --git a/src/common/config.cc b/src/common/config.cc
-index 7649286..6c277fe 100644
---- a/src/common/config.cc
-+++ b/src/common/config.cc
-@@ -145,6 +145,7 @@ struct config_option config_optionsp[] = {
-   OPTION(debug_context, OPT_INT, 0),
-   OPTION(debug_mds, OPT_INT, 1),
-   OPTION(debug_mds_balancer, OPT_INT, 1),
-+  OPTION(debug_mds_locker, OPT_INT, 1),
-   OPTION(debug_mds_log, OPT_INT, 1),
-   OPTION(debug_mds_log_expire, OPT_INT, 1),
-   OPTION(debug_mds_migrator, OPT_INT, 1),
-diff --git a/src/common/config.h b/src/common/config.h
-index 0fffae8..dc56152 100644
---- a/src/common/config.h
-+++ b/src/common/config.h
-@@ -198,6 +198,7 @@ public:
-   int debug_context;
-   int debug_mds;
-   int debug_mds_balancer;
-+  int debug_mds_locker;
-   int debug_mds_log;
-   int debug_mds_log_expire;
-   int debug_mds_migrator;
-diff --git a/src/mds/Locker.cc b/src/mds/Locker.cc
-index 4eb3a5a..7d1b5a2 100644
---- a/src/mds/Locker.cc
-+++ b/src/mds/Locker.cc
-@@ -57,6 +57,8 @@
- 
- #define DOUT_SUBSYS mds
- #undef dout_prefix
-+#undef DOUT_COND
-+#define DOUT_COND(cct, l) l<=cct->_conf->debug_mds || l <= cct->_conf->debug_mds_locker
- #define dout_prefix _prefix(_dout, mds)
- static ostream& _prefix(std::ostream *_dout, MDS *mds) {
-   return *_dout << "mds" << mds->get_nodeid() << ".locker ";
+What we have in our OSDs are very fast SSD-disks for the ceph journal
+and I wonder if it would be possible, to delay writes on the disks,
+until a number of IOPS has been collected in the journal. I think this
+would improve the situation a lot.
 
+Are there any tuning parameters we could use? What would be your suggestion?
+
+Thanks,
+Christian
