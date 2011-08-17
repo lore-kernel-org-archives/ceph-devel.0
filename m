@@ -1,41 +1,72 @@
 From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Separating clients data
-Date: Wed, 17 Aug 2011 09:47:20 -0700
-Message-ID: <CAORUGqCk9SnOLGaz=iS7rABYdEHMrXamOCF1JdHPHJaP_vcREQ@mail.gmail.com>
-References: <CAGqxmDOGnrRPgyRFBW28f6zm7Fy-mrhSbBERceZD=KeU3P4GvA@mail.gmail.com>
- <CAORUGqCz=ba9HuJCc4FEqFq87S0xW0Jxqz2szBsPd-w4wZnsjw@mail.gmail.com>
+Subject: Re: RBD write-performance
+Date: Wed, 17 Aug 2011 11:25:18 -0700
+Message-ID: <CAORUGqB0pViC9uyRAMym_NZe70_ZJA2iAAUzcN+W5NeCYsHTvg@mail.gmail.com>
+References: <CAO47_-9r5BgLkcn2SWriS64P5FgkHrT4Oy1jZfN7s0c36O4zMA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yi0-f46.google.com ([209.85.218.46]:33670 "EHLO
-	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754342Ab1HQQrl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2011 12:47:41 -0400
-Received: by yie30 with SMTP id 30so895041yie.19
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2011 09:47:40 -0700 (PDT)
-In-Reply-To: <CAORUGqCz=ba9HuJCc4FEqFq87S0xW0Jxqz2szBsPd-w4wZnsjw@mail.gmail.com>
+Received: from mail-iy0-f170.google.com ([209.85.210.170]:43355 "EHLO
+	mail-iy0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751798Ab1HQSZi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2011 14:25:38 -0400
+Received: by iye16 with SMTP id 16so2355312iye.1
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2011 11:25:38 -0700 (PDT)
+In-Reply-To: <CAO47_-9r5BgLkcn2SWriS64P5FgkHrT4Oy1jZfN7s0c36O4zMA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Maciej_Ga=C5=82kiewicz?= <maciejgalkiewicz@ragnarson.com>
+To: chb@muc.de
 Cc: ceph-devel@vger.kernel.org
 
-2011/8/17 Tommi Virtanen <tommi.virtanen@dreamhost.com>:
-> This seems to be possible with Ceph as it is now, but it is definitely
-> not the normal setup. As in, test carefully and understand you're
-> going off the beaten path.
+On Wed, Aug 17, 2011 at 04:25, Christian Brunner <chb@muc.de> wrote:
+> We are using ceph exclusively as a storage backend for our KVM-hosting
+> environment.
 
-This feature combo is now in the tracker as
-http://tracker.newdream.net/issues/1401
+Neat!
 
-Summarizing the IRC conversation that came up after the initial email:
+> The number of virtual machines has increased now, but the
+> machines are idle most of the time. However the OSes of the VMs tend
+> to do regular small writes on the disks (I suspect journal commits).
+>
+> As we don't have a lot of disks (only 16 at the moment), this adds up
+> to a high number of write IOPS on the OSD disks with a negligible
+> throughput.
+>
+> What we have in our OSDs are very fast SSD-disks for the ceph journal
+> and I wonder if it would be possible, to delay writes on the disks,
+> until a number of IOPS has been collected in the journal. I think this
+> would improve the situation a lot.
+>
+> Are there any tuning parameters we could use? What would be your suggestion?
 
-- MISSING functionality: nothing currently prevents customerA from
-running find /customerB and seeing all the file metadata, or even
-root@customerA from running rm -rf /customerB; the pool access control
-only protects the file contents, and if the uids overlap, the files
-are really considered to have the same owner
+Have you looked at "noatime" and "relatime" mount options for your
+vms? That might avoid the unnecessary journal commits, in the first
+place.
 
-- there's also a concept of "auid" that may be relevant; it is used
-for e.g. noting rados pool owners, and can be used in the caps to do a
-bit of abstraction like 'read and write any pool with owner=my_auid',
-instead of needing to list the pools explicitly
+OSD journaling behavior differs a bit for btrfs vs others, but my
+understanding is this:
+
+OSD records writes to the journal, and then writes to the actual disk.
+The OS already buffers those writes, and as far as I know Ceph doesn't
+do any operation coalescing itself; that is, if the journal says to
+update X with value 42, and then update X with value 34, those two
+writes get both done to disk. The OSD will sync the writes every now
+and then, and once that sync completes, mark that part of the journal
+as complete. OS buffering may catch & combine the writes there, and
+that I see is what would help with your IO operation count.
+
+So increasing the sync interval sounds like the way to go. This will
+make your journal consume more space, but it sounds like your SSDs can
+take it. The relevant tunables would be
+
+src/common/config.cc:382:  OPTION(filestore_max_sync_interval,
+OPT_DOUBLE, 5),    // seconds
+src/common/config.cc:383:  OPTION(filestore_min_sync_interval,
+OPT_DOUBLE, .01),  // seconds
+
+which you should be able to just put in ceph.conf.
+
+You might also want to look at whatever kernel-level options you have
+for tuning the page cache, most likely under /proc/sys/vm, to make
+sure the OS actually buffers & combines the writes within that sync
+interval.
