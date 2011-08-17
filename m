@@ -1,36 +1,46 @@
-From: Christian Brunner <chb@muc.de>
-Subject: RBD write-performance
-Date: Wed, 17 Aug 2011 13:25:44 +0200
-Message-ID: <CAO47_-9r5BgLkcn2SWriS64P5FgkHrT4Oy1jZfN7s0c36O4zMA@mail.gmail.com>
-Reply-To: chb@muc.de
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: Logging to syslog from clients
+Date: Wed, 17 Aug 2011 08:35:15 -0700
+Message-ID: <CAORUGqAU=PVTZDHpHwfbRE-6raC4nThLACyMXZmjNeKvFECWOQ@mail.gmail.com>
+References: <201108160231.53287.szekelyi@niif.hu> <CA+qbEUNRwy6c7kDG4rY0mxB1pGKuHJOj5sLacXcWhCgJo+uYPw@mail.gmail.com>
+ <1313516786.3059.1.camel@wido-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:39170 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751119Ab1HQLZp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2011 07:25:45 -0400
-Received: by vxi9 with SMTP id 9so754580vxi.19
-        for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2011 04:25:44 -0700 (PDT)
+Received: from mail-iy0-f170.google.com ([209.85.210.170]:40371 "EHLO
+	mail-iy0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753539Ab1HQPfg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 17 Aug 2011 11:35:36 -0400
+Received: by iye16 with SMTP id 16so2093775iye.1
+        for <ceph-devel@vger.kernel.org>; Wed, 17 Aug 2011 08:35:36 -0700 (PDT)
+In-Reply-To: <1313516786.3059.1.camel@wido-laptop>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Colin McCabe <cmccabe@alumni.cmu.edu>, =?UTF-8?Q?Sz=C3=A9kelyi_Szabolcs?= <szekelyi@niif.hu>, ceph-devel@vger.kernel.org
 
-We are using ceph exclusively as a storage backend for our KVM-hosting
-environment. The number of virtual machines has increased now, but the
-machines are idle most of the time. However the OSes of the VMs tend
-to do regular small writes on the disks (I suspect journal commits).
+On Tue, Aug 16, 2011 at 10:46, Wido den Hollander <wido@widodh.nl> wrote:
+> I also had that issue, but when using rsyslogd and using TCP for
+> transport instead of UDP I wasn't able to see any dropped packets.
+>
+> To my experience it's not syslog dropping the packets, but UDP packets
+> which get lost due to buffers being full at the kernel.
 
-As we don't have a lot of disks (only 16 at the moment), this adds up
-to a high number of write IOPS on the OSD disks with a negligible
-throughput.
+A TCP syslog connection will drop messages if the kernel's outgoing
+TCP buffer gets full. You can see this in "ss --tcp" (old school:
+"netstat -nt") output column Send-Q.
 
-What we have in our OSDs are very fast SSD-disks for the ceph journal
-and I wonder if it would be possible, to delay writes on the disks,
-until a number of IOPS has been collected in the journal. I think this
-would improve the situation a lot.
+UDP loses messages even faster because it effectively doesn't have an
+outgoing buffer (it does, but it'll blast the contents on the wire
+ASAP). That is, UDP syslog loses messages easily if the bottleneck is
+anywhere else than in the outgoing network interface; TCP syslog gives
+you a TCP window size of grace to handle peaks.
 
-Are there any tuning parameters we could use? What would be your suggestion?
+Even syslog over UNIX domain sockets can lose messages, if the
+receiving process is too slow and the buffers fill up.
 
-Thanks,
-Christian
+
+Basically, in logging, you have two choices when buffers get full:
+pause the program/thread until buffer space is available (using e.g.
+straight writes to file, or runit/daemontools-style logging to
+stdout), or lose log messages (decision made by glibc/POSIX for you).
