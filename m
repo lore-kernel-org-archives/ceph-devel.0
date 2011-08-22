@@ -1,66 +1,80 @@
-From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
-Subject: Re: ceph-0.33 make
-Date: Mon, 22 Aug 2011 12:26:22 -0700
-Message-ID: <CA+qbEUMxSwtNVGJmeixfaNuQz4+mCryE=+NcyAbnKpqLxzG35w@mail.gmail.com>
-References: <CADSLUZkRr4rs1nxGJ04bY50mrQOykANLifxpS5QEFmDw+cNxBg@mail.gmail.com>
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: [PATCH 1/2] ceph: replace leading spaces with tabs
+Date: Mon, 22 Aug 2011 13:49:23 -0600
+Message-ID: <CAB2gnbXbufVxXHbuW6fg+ivF0ODSjZr-q7FvNyQA0Xr6VBT_Kw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:56990 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753362Ab1HVT0Y convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2011 15:26:24 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id B39F8C06E
-	for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2011 12:29:02 -0700 (PDT)
-Received: from mail-fx0-f46.google.com (mail-fx0-f46.google.com [209.85.161.46])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 61928C06A
-	for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2011 12:29:02 -0700 (PDT)
-Received: by fxh19 with SMTP id 19so3467362fxh.19
-        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2011 12:26:22 -0700 (PDT)
-In-Reply-To: <CADSLUZkRr4rs1nxGJ04bY50mrQOykANLifxpS5QEFmDw+cNxBg@mail.gmail.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:64081 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753108Ab1HVTtY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2011 15:49:24 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?5p6X55Sx5riF?= <linyouqing7@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: LKML <linux-kernel@vger.kernel.org>, sage@newdream.net, noahwatkins@gmail.com
 
-Hi,
+Trivial formatting fix.
 
-This should be resolved by change
-abe5cd28d1e1e1e1684cd227cf9f9272202bea8d in the master branch.
+Signed-off-by: Noah Watkins <noahwatkins@gmail.com>
+---
+ fs/ceph/super.c |   40 ++++++++++++++++++++--------------------
+ 1 files changed, 20 insertions(+), 20 deletions(-)
 
-Give it a try and see if you can compile with the new code.
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index e0a6a06..733674d 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -294,29 +294,29 @@ static int parse_mount_options(struct
+ceph_mount_options **pfsopt,
 
-cheers,
-Colin
+ 	dout("parse_mount_options %p, dev_name '%s'\n", fsopt, dev_name);
 
+-        fsopt->sb_flags = flags;
+-        fsopt->flags = CEPH_MOUNT_OPT_DEFAULT;
++	fsopt->sb_flags = flags;
++	fsopt->flags = CEPH_MOUNT_OPT_DEFAULT;
 
-On Fri, Aug 19, 2011 at 11:32 PM, =E6=9E=97=E7=94=B1=E6=B8=85 <linyouqi=
-ng7@gmail.com> wrote:
-> centos5.5 i386 , ceph-0.33
->
-> #./autogen.sh&&./configure
-> # make
->
-> then , I meet some =C2=A0problems:
->
-> common/admin_socket.cc: In static member function ?.tatic std::string
-> AdminSocket::create_shutdown_pipe(int*, int*)?.
-> common/admin_socket.cc:113: error: ?._CLOEXEC?.was not declared in th=
-is scope
-> common/admin_socket.cc:113: error: ?.ipe2?.was not declared in this s=
-cope
-> make[3]: *** [libcommon_la-admin_socket.lo] Error 1
-> make[3]: Leaving directory `/usr/src/lyq/ceph-0.33/src'
-> make[2]: *** [all-recursive] Error 1
-> make[2]: Leaving directory `/usr/src/lyq/ceph-0.33/src'
-> make[1]: *** [all] Error 2
-> make[1]: Leaving directory `/usr/src/lyq/ceph-0.33/src'
-> make: *** [all-recursive] Error 1
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-        fsopt->rsize = CEPH_RSIZE_DEFAULT;
+-        fsopt->rasize = CEPH_RASIZE_DEFAULT;
+-        fsopt->snapdir_name = kstrdup(CEPH_SNAPDIRNAME_DEFAULT, GFP_KERNEL);
++	fsopt->rsize = CEPH_RSIZE_DEFAULT;
++	fsopt->rasize = CEPH_RASIZE_DEFAULT;
++	fsopt->snapdir_name = kstrdup(CEPH_SNAPDIRNAME_DEFAULT, GFP_KERNEL);
+ 	fsopt->caps_wanted_delay_min = CEPH_CAPS_WANTED_DELAY_MIN_DEFAULT;
+ 	fsopt->caps_wanted_delay_max = CEPH_CAPS_WANTED_DELAY_MAX_DEFAULT;
+-        fsopt->cap_release_safety = CEPH_CAP_RELEASE_SAFETY_DEFAULT;
+-        fsopt->max_readdir = CEPH_MAX_READDIR_DEFAULT;
+-        fsopt->max_readdir_bytes = CEPH_MAX_READDIR_BYTES_DEFAULT;
+-        fsopt->congestion_kb = default_congestion_kb();
+-	
+-        /* ip1[:port1][,ip2[:port2]...]:/subdir/in/fs */
+-        err = -EINVAL;
+-        if (!dev_name)
+-                goto out;
+-        *path = strstr(dev_name, ":/");
+-        if (*path == NULL) {
+-                pr_err("device name is missing path (no :/ in %s)\n",
+-                       dev_name);
+-                goto out;
+-        }
++	fsopt->cap_release_safety = CEPH_CAP_RELEASE_SAFETY_DEFAULT;
++	fsopt->max_readdir = CEPH_MAX_READDIR_DEFAULT;
++	fsopt->max_readdir_bytes = CEPH_MAX_READDIR_BYTES_DEFAULT;
++	fsopt->congestion_kb = default_congestion_kb();
++
++	/* ip1[:port1][,ip2[:port2]...]:/subdir/in/fs */
++	err = -EINVAL;
++	if (!dev_name)
++		goto out;
++	*path = strstr(dev_name, ":/");
++	if (*path == NULL) {
++		pr_err("device name is missing path (no :/ in %s)\n",
++				dev_name);
++		goto out;
++	}
+ 	dev_name_end = *path;
+ 	dout("device name '%.*s'\n", (int)(dev_name_end - dev_name), dev_name);
+
+-- 
+1.7.6
