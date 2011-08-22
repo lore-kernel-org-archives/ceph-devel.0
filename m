@@ -1,80 +1,38 @@
 From: Noah Watkins <noahwatkins@gmail.com>
-Subject: [PATCH 1/2] ceph: replace leading spaces with tabs
-Date: Mon, 22 Aug 2011 13:49:23 -0600
-Message-ID: <CAB2gnbXbufVxXHbuW6fg+ivF0ODSjZr-q7FvNyQA0Xr6VBT_Kw@mail.gmail.com>
+Subject: [PATCH 2/2] ceph: fix memory leak
+Date: Mon, 22 Aug 2011 13:49:41 -0600
+Message-ID: <CAB2gnbWqq4qDh0qmK8tC1-q5KY2H0rf_fNX_kVcFUEM6ZhYo5w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:64081 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753108Ab1HVTtY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2011 15:49:24 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: ceph-devel@vger.kernel.org
 Cc: LKML <linux-kernel@vger.kernel.org>, sage@newdream.net, noahwatkins@gmail.com
+List-Id: ceph-devel.vger.kernel.org
 
-Trivial formatting fix.
+kfree does not clean up indirect allocations in
+ceph_fs_client and ceph_options (e.g. snapdir_name).
 
 Signed-off-by: Noah Watkins <noahwatkins@gmail.com>
 ---
- fs/ceph/super.c |   40 ++++++++++++++++++++--------------------
- 1 files changed, 20 insertions(+), 20 deletions(-)
+ fs/ceph/super.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index e0a6a06..733674d 100644
+index 733674d..788f5ad 100644
 --- a/fs/ceph/super.c
 +++ b/fs/ceph/super.c
-@@ -294,29 +294,29 @@ static int parse_mount_options(struct
-ceph_mount_options **pfsopt,
-
- 	dout("parse_mount_options %p, dev_name '%s'\n", fsopt, dev_name);
-
--        fsopt->sb_flags = flags;
--        fsopt->flags = CEPH_MOUNT_OPT_DEFAULT;
-+	fsopt->sb_flags = flags;
-+	fsopt->flags = CEPH_MOUNT_OPT_DEFAULT;
-
--        fsopt->rsize = CEPH_RSIZE_DEFAULT;
--        fsopt->rasize = CEPH_RASIZE_DEFAULT;
--        fsopt->snapdir_name = kstrdup(CEPH_SNAPDIRNAME_DEFAULT, GFP_KERNEL);
-+	fsopt->rsize = CEPH_RSIZE_DEFAULT;
-+	fsopt->rasize = CEPH_RASIZE_DEFAULT;
-+	fsopt->snapdir_name = kstrdup(CEPH_SNAPDIRNAME_DEFAULT, GFP_KERNEL);
- 	fsopt->caps_wanted_delay_min = CEPH_CAPS_WANTED_DELAY_MIN_DEFAULT;
- 	fsopt->caps_wanted_delay_max = CEPH_CAPS_WANTED_DELAY_MAX_DEFAULT;
--        fsopt->cap_release_safety = CEPH_CAP_RELEASE_SAFETY_DEFAULT;
--        fsopt->max_readdir = CEPH_MAX_READDIR_DEFAULT;
--        fsopt->max_readdir_bytes = CEPH_MAX_READDIR_BYTES_DEFAULT;
--        fsopt->congestion_kb = default_congestion_kb();
--	
--        /* ip1[:port1][,ip2[:port2]...]:/subdir/in/fs */
--        err = -EINVAL;
--        if (!dev_name)
--                goto out;
--        *path = strstr(dev_name, ":/");
--        if (*path == NULL) {
--                pr_err("device name is missing path (no :/ in %s)\n",
--                       dev_name);
--                goto out;
--        }
-+	fsopt->cap_release_safety = CEPH_CAP_RELEASE_SAFETY_DEFAULT;
-+	fsopt->max_readdir = CEPH_MAX_READDIR_DEFAULT;
-+	fsopt->max_readdir_bytes = CEPH_MAX_READDIR_BYTES_DEFAULT;
-+	fsopt->congestion_kb = default_congestion_kb();
-+
-+	/* ip1[:port1][,ip2[:port2]...]:/subdir/in/fs */
-+	err = -EINVAL;
-+	if (!dev_name)
-+		goto out;
-+	*path = strstr(dev_name, ":/");
-+	if (*path == NULL) {
-+		pr_err("device name is missing path (no :/ in %s)\n",
-+				dev_name);
-+		goto out;
-+	}
- 	dev_name_end = *path;
- 	dout("device name '%.*s'\n", (int)(dev_name_end - dev_name), dev_name);
+@@ -824,8 +824,8 @@ static struct dentry *ceph_mount(struct
+file_system_type *fs_type,
+ 	fsc = create_fs_client(fsopt, opt);
+ 	if (IS_ERR(fsc)) {
+ 		res = ERR_CAST(fsc);
+-		kfree(fsopt);
+-		kfree(opt);
++		destroy_mount_options(fsopt);
++		ceph_destroy_options(opt);
+ 		goto out_final;
+ 	}
 
 -- 
 1.7.6
