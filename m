@@ -1,56 +1,25 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 2/2] ceph: fix memory leak
-Date: Mon, 22 Aug 2011 13:19:17 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1108221317320.17780@cobra.newdream.net>
-References: <CAB2gnbWqq4qDh0qmK8tC1-q5KY2H0rf_fNX_kVcFUEM6ZhYo5w@mail.gmail.com>
+From: Jojy Varghese <jojy.varghese@gmail.com>
+Subject: mount errors
+Date: Mon, 22 Aug 2011 18:08:48 -0700
+Message-ID: <CAJD3hpWa7VXDNcEc7sOCZWUfm84Uo4vDxZ4OceNf+6OKt7RFGA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47067 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752588Ab1HVUOU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2011 16:14:20 -0400
-In-Reply-To: <CAB2gnbWqq4qDh0qmK8tC1-q5KY2H0rf_fNX_kVcFUEM6ZhYo5w@mail.gmail.com>
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:53623 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751719Ab1HWBIt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 22 Aug 2011 21:08:49 -0400
+Received: by gwaa12 with SMTP id a12so3423950gwa.19
+        for <ceph-devel@vger.kernel.org>; Mon, 22 Aug 2011 18:08:49 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noahwatkins@gmail.com>
-Cc: ceph-devel@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks, applied both of these!
+Hi
+ I am getting "libceph: bad fsid, had
+e49ae577-0f7b-24e0-1c75-10ae17d9f86b got
+3c9b15ef-c2d0-1318-4d12-3508025ccd97" on attempting to mount the fs.
+Any quick fixes?
 
-sage
-
-On Mon, 22 Aug 2011, Noah Watkins wrote:
-
-> kfree does not clean up indirect allocations in
-> ceph_fs_client and ceph_options (e.g. snapdir_name).
-> 
-> Signed-off-by: Noah Watkins <noahwatkins@gmail.com>
-> ---
->  fs/ceph/super.c |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 733674d..788f5ad 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -824,8 +824,8 @@ static struct dentry *ceph_mount(struct
-> file_system_type *fs_type,
->  	fsc = create_fs_client(fsopt, opt);
->  	if (IS_ERR(fsc)) {
->  		res = ERR_CAST(fsc);
-> -		kfree(fsopt);
-> -		kfree(opt);
-> +		destroy_mount_options(fsopt);
-> +		ceph_destroy_options(opt);
->  		goto out_final;
->  	}
-> 
-> -- 
-> 1.7.6
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+thanks
+-Jojy
