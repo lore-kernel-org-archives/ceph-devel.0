@@ -1,44 +1,64 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: 'log dir' directive respected no longer?
-Date: Thu, 25 Aug 2011 09:12:07 +0200
-Message-ID: <1314256327.3223.37.camel@wido-laptop>
-References: <CAN4=B2mqHxzhDLh9R_yzstsuCcaBCK78MeZZFomzCkWowUqbdQ@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: [PATCH 1/2] extended crypto classes
+Date: Thu, 25 Aug 2011 13:02:31 +0200
+Message-ID: <20110825110231.GA6517@sir.fritz.box>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:41510 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753061Ab1HYHMK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2011 03:12:10 -0400
-In-Reply-To: <CAN4=B2mqHxzhDLh9R_yzstsuCcaBCK78MeZZFomzCkWowUqbdQ@mail.gmail.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:45277 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753035Ab1HYLD7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 25 Aug 2011 07:03:59 -0400
+Received: by bke11 with SMTP id 11so1624173bke.19
+        for <ceph-devel@vger.kernel.org>; Thu, 25 Aug 2011 04:03:58 -0700 (PDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brian Chrisman <brchrisman@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+This patch extends the ceph crypto classes:
 
-On Wed, 2011-08-24 at 23:16 -0700, Brian Chrisman wrote:
-> I've noticed the 'log dir' directive in my ceph.conf no longer tells
-> logs where to go.
-> Am I missing something?
+- map CryptoPP::HashTransformation to ceph::crypto::Digest (for cryptopp)
+- add DigestSize() to ceph::crypto::Digest (for libnss)
 
-You probably are. The 'log dir' directive has become obsolete a few
-versions back (not sure which one though).
+Thanks,
+Christian
+---
+ src/common/ceph_crypto.h |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
 
-There have been some discussions about this on IRC:
-* http://irclogs.ceph.widodh.nl/index.php?date=2011-04-05
-* http://irclogs.ceph.widodh.nl/index.php?date=2011-04-14
-
-Anyway, stick with 'log file = /var/log/ceph/$name.$id.log', that should
-work.
-
-Wido
-
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/src/common/ceph_crypto.h b/src/common/ceph_crypto.h
+index 23a0589..7082317 100644
+--- a/src/common/ceph_crypto.h
++++ b/src/common/ceph_crypto.h
+@@ -11,6 +11,7 @@
+ #ifdef USE_CRYPTOPP
+ # define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+ #include <string.h>
++# include <cryptopp/cryptlib.h>
+ # include <cryptopp/md5.h>
+ # include <cryptopp/sha.h>
+ # include <cryptopp/hmac.h>
+@@ -32,6 +33,8 @@ namespace ceph {
+ 	}
+       ~HMACSHA1();
+     };
++
++    class Digest : public CryptoPP::HashTransformation { };
+   }
+ }
+ #elif USE_NSS
+@@ -86,6 +89,9 @@ namespace ceph {
+ 	assert(dummy == digest_size);
+ 	Restart();
+       }
++      size_t DigestSize() {
++        return digest_size;
++      }
+     };
+     class MD5 : public Digest {
+     public:
+-- 
+1.7.1
 
 
