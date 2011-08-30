@@ -1,35 +1,28 @@
-From: Marcus Sorensen <shadowsor@gmail.com>
+From: Damien Churchill <damoxc@gmail.com>
 Subject: Re: projects
-Date: Mon, 29 Aug 2011 17:50:42 -0600
-Message-ID: <CALFpzo6xOWwwErjgHtSZ9yX5_oaqZhRf5BrRcNnLNeo0aePQAg@mail.gmail.com>
+Date: Tue, 30 Aug 2011 14:07:50 +0100
+Message-ID: <CAFtEh-dZbDiF7sfXpVfpcrJKy2=E+Moo+grzU1Lh_AFCkATz1A@mail.gmail.com>
 References: <Pine.LNX.4.64.1108291206370.14548@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:41639 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755176Ab1H2Xun convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 29 Aug 2011 19:50:43 -0400
-Received: by wyg24 with SMTP id 24so4496060wyg.19
-        for <ceph-devel@vger.kernel.org>; Mon, 29 Aug 2011 16:50:42 -0700 (PDT)
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:43532 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752045Ab1H3NHv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 30 Aug 2011 09:07:51 -0400
+Received: by gya6 with SMTP id 6so5592329gya.19
+        for <ceph-devel@vger.kernel.org>; Tue, 30 Aug 2011 06:07:50 -0700 (PDT)
 In-Reply-To: <Pine.LNX.4.64.1108291206370.14548@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-I've been thinking about whipping up some perl bindings for librados.
-Not sure how useful it would be to others but from a sysadmin
-standpoint it would probably be a fairly common management method.
-I've spent only a little time on this, have most of the rados_pool
-functions working. It would be nice to know if there's already work in
-progress or something.
-
-On Mon, Aug 29, 2011 at 1:08 PM, Sage Weil <sage@newdream.net> wrote:
+On 29 August 2011 20:08, Sage Weil <sage@newdream.net> wrote:
 > I started to make a list of smallish projects that are reasonably eas=
 y for
-> new developers to approach. =A0The list is at
+> new developers to approach. =C2=A0The list is at
 >
 > http://ceph.newdream.net/wiki/Projects
 >
@@ -37,12 +30,16 @@ y for
 >
 > sage
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+
+I've been working on some alternative python bindings [0], using
+Cython instead of ctypes to wrap the libraries. It's still early days
+but they're in a reasonably usable state. When I have the time I'm
+going to look at wrapping the C++ headers instead of the C ones. I
+started it as there weren't any py bindings for librbd and figured may
+as well wrap the others whilst I'm at it. No idea if it'll be useful
+for anyone else.
+
+[0] http://github.com/ukplc/pyceph
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
