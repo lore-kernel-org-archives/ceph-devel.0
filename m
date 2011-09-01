@@ -1,144 +1,101 @@
-From: "Matt W. Benjamin" <matt@linuxbox.com>
-Subject: Re: userland nfs server
-Date: Tue, 30 Aug 2011 18:07:59 -0400 (EDT)
-Message-ID: <1255412388.94.1314742079622.JavaMail.root@thunderbeast.private.linuxbox.com>
-References: <Pine.LNX.4.64.1108301458300.16289@cobra.newdream.net>
+From: "Daniel P. Berrange" <berrange@redhat.com>
+Subject: Re: [libvirt] specifying rbd images in libvirt
+Date: Thu, 1 Sep 2011 13:46:35 +0100
+Message-ID: <20110901124635.GD14462@redhat.com>
+References: <Pine.LNX.4.64.1108271207100.14206@cobra.newdream.net>
+Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aa.linuxbox.com ([134.215.213.37]:2370 "EHLO aa.linuxbox.com"
+Received: from mx1.redhat.com ([209.132.183.28]:63522 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752165Ab1H3WIF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 30 Aug 2011 18:08:05 -0400
-In-Reply-To: <Pine.LNX.4.64.1108301458300.16289@cobra.newdream.net>
+	id S1757370Ab1IAMqn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 1 Sep 2011 08:46:43 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1108271207100.14206@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-Hi Sage,
+On Sat, Aug 27, 2011 at 12:19:33PM -0700, Sage Weil wrote:
+> Hi all,
+> 
+> Currently, you can specify an rbd (or nbd, sheepdog) image with xml 
+> that looks like so:
+> 
+>     <disk type='network' device='disk'>
+>       <driver name='qemu' type='raw' cache='writeback'/>
+>       <source protocol='rbd' name='mypool/myimage'>
+>         <host name='monhost1.mydomain.com' port='6789'/>
+>         <host name='monhost2.mydomain.com' port='6789'/>
+>         <host name='monhost3.mydomain.com' port='6789'/>
+>       </source>
+>       <target dev='vda' bus='virtio'/>
+>     </disk>
+> 
+> This works okay if you have authentication disabled and all of the default 
+> settings are okay.  Usually, though, there are other options you need to 
+> specify to librbd to make it do what you want.  
+> 
+> The current schema can be abused by adding options after the image name 
+> like so:
+> 
+>     <disk type='network' device='disk'>
+>       <driver name='qemu' type='raw' cache='writeback'/>
+>       <source protocol='rbd' name='mypool/myimage:conf=/etc/ceph/ceph.conf:id=admin:this=that:foo=bar'>
+>         <host name='monhost1.mydomain.com' port='6789'/>
+>         <host name='monhost2.mydomain.com' port='6789'/>
+>         <host name='monhost3.mydomain.com' port='6789'/>
+>       </source>
+>       <target dev='vda' bus='virtio'/>
+>     </disk>
+> 
+> This works only because that's what the qemu incantation looks like.  In 
+> general, though, this is ugly.  I also doesn't generalize well to the 
+> kernel-level rbd driver, which we'd like to also support, as that will 
+> work with hypervisors other than qemu.
 
-Yes, we're actively working on this.  We'd very much like assistance adapting the libceph changes for inclusion.  We can start by updating for recent Ceph.
+Also, we should be doing some validation on the content of
+the 'name' attribute to prevent abuse like that.
 
-FSAL_CEPH will definitely merge in Ganesha mainline in the next month or two.
+> What about something more like this?
+> 
+>     <disk type='network' device='disk'>
+>       <driver name='qemu' type='raw' cache='writeback'/>
+>       <source protocol='rbd' name='mypool/myimage'>
+>         <option name='conf'>/etc/ceph/ceph.conf</option>
+>         <option name='id'>myusername</option>
+>         <option name='foo'>bar</option>
+>         <host name='monhost1.mydomain.com' port='6789'/>
+>         <host name='monhost2.mydomain.com' port='6789'/>
+>         <host name='monhost3.mydomain.com' port='6789'/>
+>       </source>
+>       <target dev='vda' bus='virtio'/>
+>     </disk>
+> 
+> I'm not married to any particular syntax/schema, as long as there is a 
+> generic way to specify name/value pairs to configure the driver.  I think 
+> the above would generalize well to other network block devices as well, 
+> which presumably also want a way to feed in information other than a 
+> server address (e.g. for authentication).
+> 
+> Does that look reasonable?  If there are no objections we can work up some 
+> patches and send them along!
 
-Matt
+We generally prefer to add explicit models for attributes, rather than
+just do a generic key/value passthrough.
 
------ "Sage Weil" <sage@newdream.net> wrote:
+For authentication credentials, we also need to consider security
+implications of keeping them in the XML. For qcow2 encryption
+keys, we leverage the separate libvirt secrets management APIs
+to provide the keys outside the XML. IMHO we should likely do the
+same for any keys required to login to network block devices.
 
-> Hi Matt,
-> 
-> On Fri, 29 Jul 2011, Matt W. Benjamin wrote:
-> > Hi Sage,
-> > 
-> > We (Linux Box) have built and published a native FSAL for Ceph,
-> which is 
-> > pretty advanced, and we've submitted the FSAL driver code upstream
-> for 
-> > review Philippe Deniel.
-> 
-> Not sure if I said this before, but this is awesome!
-> 
-> > In addition, we're working on pNFS support in Ganesha and Ceph, and
-> have 
-> > a prototype file-based pNFS layout driver for the FSAL that takes 
-> > advantage of Ceph OSDs for parallel IO.
-> > 
-> > We're actively extending these efforts and there should be some 
-> > publication forthcoming.
-> > 
-> > We have an external git repository here:
-> > 
-> >     git://github.com/aemerson-linuxbox/ganesha.git
-> 
-> I just took a look at your ceph.git and it looks like there are
-> several 
-> changes you need to make to libceph.  It also looks like it's based on
-> 
-> v0.27 or thereabouts, which is pretty old now.  There seems to be a
-> mix of 
-> pretty simple/straighforward things that are easily merged upstream,
-> and 
-> some larger API additions that I have some questions about.
-> 
-> Are you guys actively working on this?  Can we work together to get
-> these 
-> libceph API changes merged into the mainline?  I would love to see
-> this 
-> run against the packaged libceph (and get the ceph FSAL upstream into
-> 
-> ganesha).
-> 
-> Thanks!
-> sage
-> 
-> 
-> 
-> > 
-> > We would really appreciate your feedback--and guidance on how to 
-> > participate in Ceph, we'd like to.
-> > 
-> > Matt
-> > 
-> > ----- "Sage Weil" <sage@newdream.net> wrote:
-> > 
-> > > Has anyone looked at Genesha?
-> > > 
-> > > 	http://sourceforge.net/apps/trac/nfs-ganesha/
-> > > 
-> > > In principle it would probably be pretty straightforward to wire
-> that
-> > > up 
-> > > to libceph and avoid the kernel NFS server for reexporting ceph
-> via
-> > > NFS...
-> > > 
-> > > sage
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel"
-> > > in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at 
-> http://vger.kernel.org/majordomo-info.html
-> > 
-> > -- 
-> > 
-> > Matt Benjamin
-> > 
-> > The Linux Box
-> > 206 South Fifth Ave. Suite 150
-> > Ann Arbor, MI  48104
-> > 
-> > http://linuxbox.com
-> > 
-> > tel. 734-761-4689
-> > fax. 734-769-8938
-> > cel. 734-216-5309
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe
-> ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+Daniel
 -- 
-
-Matt Benjamin
-
-The Linux Box
-206 South Fifth Ave. Suite 150
-Ann Arbor, MI  48104
-
-http://linuxbox.com
-
-tel. 734-761-4689
-fax. 734-769-8938
-cel. 734-216-5309
+|: http://berrange.com      -o-    http://www.flickr.com/photos/dberrange/ :|
+|: http://libvirt.org              -o-             http://virt-manager.org :|
+|: http://autobuild.org       -o-         http://search.cpan.org/~danberr/ :|
+|: http://entangle-photo.org       -o-       http://live.gnome.org/gtk-vnc :|
