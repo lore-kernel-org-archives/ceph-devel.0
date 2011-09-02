@@ -1,92 +1,45 @@
-From: Colin Patrick McCabe <colin.mccabe@dreamhost.com>
-Subject: Re: pg number question
-Date: Fri, 2 Sep 2011 10:08:48 -0700
-Message-ID: <CA+qbEUOhcoPLSqYDVWZEckyGmVJ870Z2yF99s2j5_hE=-XN=ww@mail.gmail.com>
-References: <CABAwU-bwnScFKRf--bvBTBBZLF45uO4A610Z1imSfcH6Df=o_A@mail.gmail.com>
+From: Brian Chrisman <brchrisman@gmail.com>
+Subject: [PATCH] spec: add /var/run/ceph
+Date: Fri, 2 Sep 2011 11:40:52 -0700
+Message-ID: <CAN4=B2m+t2Hq1j9BL8EzQ=ncV_Mu_fN9jrmXxnDaWAu+6GQdiw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=20cf307f381276f6c804abf9b3eb
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:47405 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753563Ab1IBRIw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Sep 2011 13:08:52 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 38645C066
-	for <ceph-devel@vger.kernel.org>; Fri,  2 Sep 2011 10:12:14 -0700 (PDT)
-Received: from mail-fx0-f46.google.com (mail-fx0-f46.google.com [209.85.161.46])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id DEB49C068
-	for <ceph-devel@vger.kernel.org>; Fri,  2 Sep 2011 10:12:13 -0700 (PDT)
-Received: by fxh19 with SMTP id 19so1815311fxh.19
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Sep 2011 10:08:50 -0700 (PDT)
-In-Reply-To: <CABAwU-bwnScFKRf--bvBTBBZLF45uO4A610Z1imSfcH6Df=o_A@mail.gmail.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:33843 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754284Ab1IBSkx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Sep 2011 14:40:53 -0400
+Received: by vxi9 with SMTP id 9so2332018vxi.19
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Sep 2011 11:40:53 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Sep 2, 2011 at 4:35 AM, huang jun <hjwsm1989@gmail.com> wrote:
-> hi,all
-> we test osd adding
-> at first there is only one osd , and we add an osd online, at the ste=
-p:
-> $ osdmaptool --createsimple 2 --clobber /tmp/osdmap.junk
-> --export-crush /tmp/crush.new
-> we look into the source code, and a few things confused us.
-> the pg_num is based on osd_num, but now we have 2 osds, i think=A0pg_=
-num
-> should be 128.
-> but the "ceph osd dump -o -" outputs:
-> pg_pool 0 'data' pg_pool(rep pg_size 2 crush_ruleset 0 object_hash
-> rjenkins=A0pg_num 64=A0pgp_num 64 lpg_num 2 lpgp_num 2 last_change 1 =
-owner
-> 0)
-> pg_pool 1 'metadata' pg_pool(rep pg_size 2 crush_ruleset 1 object_has=
-h
-> rjenkins=A0pg_num 64 pgp_num 64 lpg_num 2 lpgp_num 2 last_change 1 ow=
-ner
-> 0)
-> pg_pool 2 'rbd' pg_pool(rep pg_size 2 crush_ruleset 2 object_hash
-> rjenkins=A0pg_num 64 pgp_num 64 lpg_num 2 lpgp_num 2 last_change 1 ow=
-ner
-> 0)
->
-> max_osd 2
-> osd0 up =A0 in =A0weight 1 up_from 2 up_thru 5 down_at 0 last_clean_i=
-nterval 0-0
-> osd1 up =A0 in =A0weight 1 up_from 5 up_thru 6 down_at 0 last_clean_i=
-nterval 0-0
-> we test many other situations, and a common result we got is:
-> 1) if we add osds on line the total pg don't change, only move some
-> new pgs to the new osd.
-> 2) if we remove osds, total pg don't change too, just move the pg fro=
-m
-> the dead osd to the the exist osds in current osdmap.
-> so, did the "osd dump -o -" =A0depends on the very first time when we
-> start the ceph cluster?
-> then, we are interesting in situation that add 130 osds online one by
-> one, the pg_num doesn't change too?always stay 64?
-> and the most confusing question is: when should we split pg??
-> thank you !
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+--20cf307f381276f6c804abf9b3eb
+Content-Type: text/plain; charset=ISO-8859-1
 
-Hi Huang,
+spec file should be creating /var/run/ceph
 
-The number of PGs is set when you run mkcephfs.
+--20cf307f381276f6c804abf9b3eb
+Content-Type: application/octet-stream;
+	name="0001-spec-add-var-run-ceph.patch"
+Content-Disposition: attachment; filename="0001-spec-add-var-run-ceph.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gs3idzw50
 
-The number of PGs can be changed later by the administrator. The code
-for changing the number of PGs is under development, and it's unstable
-at the moment.
-
-sincerely,
-Colin
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ClNpZ25lZC1vZmYtYnk6IEJ1aWxkIEFjY291bnQgPGJ1aWxkQHNjYWxlY29tcHV0aW5nLmNvbT4K
+LS0tCiBjZXBoLnNwZWMuaW4gfCAgICAyICsrCiAxIGZpbGVzIGNoYW5nZWQsIDIgaW5zZXJ0aW9u
+cygrKSwgMCBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9jZXBoLnNwZWMuaW4gYi9jZXBoLnNw
+ZWMuaW4KaW5kZXggMmIwZmM5Ni4uZTczMjY5NCAxMDA2NDQKLS0tIGEvY2VwaC5zcGVjLmluCisr
+KyBiL2NlcGguc3BlYy5pbgpAQCAtMTE2LDYgKzExNiw3IEBAIGNobW9kIDA2NDQgJFJQTV9CVUlM
+RF9ST09UJXtfZG9jZGlyfS9jZXBoL3NhbXBsZS5jZXBoLmNvbmYKIGluc3RhbGwgLW0gMDY0NCAt
+RCBzcmMvbG9ncm90YXRlLmNvbmYgJFJQTV9CVUlMRF9ST09UJXtfc3lzY29uZmRpcn0vbG9ncm90
+YXRlLmQvY2VwaAogbWtkaXIgLXAgJFJQTV9CVUlMRF9ST09UJXtfbG9jYWxzdGF0ZWRpcn0vbGli
+L2NlcGgvdG1wLwogbWtkaXIgLXAgJFJQTV9CVUlMRF9ST09UJXtfbG9jYWxzdGF0ZWRpcn0vbG9n
+L2NlcGgvCitta2RpciAtcCAkUlBNX0JVSUxEX1JPT1Qle19sb2NhbHN0YXRlZGlyfS9ydW4vY2Vw
+aC8KCiAlY2xlYW4KIHJtIC1yZiAkUlBNX0JVSUxEX1JPT1QKQEAgLTE5NCw2ICsxOTUsNyBAQCBm
+aQogJWRpciAle19sb2NhbHN0YXRlZGlyfS9saWIvY2VwaC8KICVkaXIgJXtfbG9jYWxzdGF0ZWRp
+cn0vbGliL2NlcGgvdG1wLwogJWRpciAle19sb2NhbHN0YXRlZGlyfS9sb2cvY2VwaC8KKyVkaXIg
+JXtfbG9jYWxzdGF0ZWRpcn0vcnVuL2NlcGgvCgogJWZpbGVzIGZ1c2UKICVkZWZhdHRyKC0scm9v
+dCxyb290LC0pCi0tIAoxLjcuMQoK
+--20cf307f381276f6c804abf9b3eb--
