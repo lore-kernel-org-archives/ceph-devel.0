@@ -1,45 +1,59 @@
-From: Brian Chrisman <brchrisman@gmail.com>
-Subject: [PATCH] spec: add /var/run/ceph
-Date: Fri, 2 Sep 2011 11:40:52 -0700
-Message-ID: <CAN4=B2m+t2Hq1j9BL8EzQ=ncV_Mu_fN9jrmXxnDaWAu+6GQdiw@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: [PATCH] osd: nss build of OSD.cc needs CRYPTO_CXXFLAGS since
+ commit d59f34ab
+Date: Fri,  2 Sep 2011 14:50:45 -0600
+Message-ID: <1314996645-19678-1-git-send-email-jaschut@sandia.gov>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=20cf307f381276f6c804abf9b3eb
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:33843 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754284Ab1IBSkx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Sep 2011 14:40:53 -0400
-Received: by vxi9 with SMTP id 9so2332018vxi.19
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Sep 2011 11:40:53 -0700 (PDT)
+Received: from sentry-two.sandia.gov ([132.175.109.14]:51073 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755791Ab1IBUvL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Sep 2011 16:51:11 -0400
+Received: from interceptor1.sandia.gov (interceptor1.sandia.gov [132.175.109.5])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by sentry-two.sandia.gov (Postfix) with ESMTP id 166FC1897CF
+	for <ceph-devel@vger.kernel.org>; Fri,  2 Sep 2011 14:51:08 -0600 (MDT)
+Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21]) by interceptor1.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Fri, 2 Sep 2011 14:51:00 -0600
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Jim Schutt <jaschut@sandia.gov>
 
---20cf307f381276f6c804abf9b3eb
-Content-Type: text/plain; charset=ISO-8859-1
+nss build fails like this:
 
-spec file should be creating /var/run/ceph
+if /bin/sh ../libtool --tag=CXX --mode=compile g++ -DHAVE_CONFIG_H -I. -I. -I.   -D__KERNEL_STRICT_NAMES -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -rdynamic   -Winit-self -Wpointer-arith -fno-strict-aliasing -Wnon-virtual-dtor -Wno-invalid-offsetof -Wstrict-null-sentinel   -g -MT OSD.lo -MD -MP -MF ".deps/OSD.Tpo" -c -o OSD.lo `test -f 'osd/OSD.cc' || echo './'`osd/OSD.cc; \
+        then mv -f ".deps/OSD.Tpo" ".deps/OSD.Plo"; else rm -f ".deps/OSD.Tpo"; exit 1; fi
+ g++ -DHAVE_CONFIG_H -I. -I. -I. -D__KERNEL_STRICT_NAMES -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -rdynamic -Winit-self -Wpointer-arith -fno-strict-aliasing -Wnon-virtual-dtor -Wno-invalid-offsetof -Wstrict-null-sentinel -g -MT OSD.lo -MD -MP -MF .deps/OSD.Tpo -c osd/OSD.cc  -fPIC -DPIC -o .libs/OSD.o
+In file included from ./os/LFNIndex.h:27,
+                 from ./os/HashIndex.h:20,
+                 from ./os/FileStore.h:26,
+                 from osd/OSD.cc:25:
+./common/ceph_crypto.h:44:22: error: pk11pub.h: No such file or directory
 
---20cf307f381276f6c804abf9b3eb
-Content-Type: application/octet-stream;
-	name="0001-spec-add-var-run-ceph.patch"
-Content-Disposition: attachment; filename="0001-spec-add-var-run-ceph.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gs3idzw50
+Commit d59f34ab made FileStore.h include HashIndex.h, which ultimately
+results in OSD.cc including ceph_crypto.h.
 
-ClNpZ25lZC1vZmYtYnk6IEJ1aWxkIEFjY291bnQgPGJ1aWxkQHNjYWxlY29tcHV0aW5nLmNvbT4K
-LS0tCiBjZXBoLnNwZWMuaW4gfCAgICAyICsrCiAxIGZpbGVzIGNoYW5nZWQsIDIgaW5zZXJ0aW9u
-cygrKSwgMCBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9jZXBoLnNwZWMuaW4gYi9jZXBoLnNw
-ZWMuaW4KaW5kZXggMmIwZmM5Ni4uZTczMjY5NCAxMDA2NDQKLS0tIGEvY2VwaC5zcGVjLmluCisr
-KyBiL2NlcGguc3BlYy5pbgpAQCAtMTE2LDYgKzExNiw3IEBAIGNobW9kIDA2NDQgJFJQTV9CVUlM
-RF9ST09UJXtfZG9jZGlyfS9jZXBoL3NhbXBsZS5jZXBoLmNvbmYKIGluc3RhbGwgLW0gMDY0NCAt
-RCBzcmMvbG9ncm90YXRlLmNvbmYgJFJQTV9CVUlMRF9ST09UJXtfc3lzY29uZmRpcn0vbG9ncm90
-YXRlLmQvY2VwaAogbWtkaXIgLXAgJFJQTV9CVUlMRF9ST09UJXtfbG9jYWxzdGF0ZWRpcn0vbGli
-L2NlcGgvdG1wLwogbWtkaXIgLXAgJFJQTV9CVUlMRF9ST09UJXtfbG9jYWxzdGF0ZWRpcn0vbG9n
-L2NlcGgvCitta2RpciAtcCAkUlBNX0JVSUxEX1JPT1Qle19sb2NhbHN0YXRlZGlyfS9ydW4vY2Vw
-aC8KCiAlY2xlYW4KIHJtIC1yZiAkUlBNX0JVSUxEX1JPT1QKQEAgLTE5NCw2ICsxOTUsNyBAQCBm
-aQogJWRpciAle19sb2NhbHN0YXRlZGlyfS9saWIvY2VwaC8KICVkaXIgJXtfbG9jYWxzdGF0ZWRp
-cn0vbGliL2NlcGgvdG1wLwogJWRpciAle19sb2NhbHN0YXRlZGlyfS9sb2cvY2VwaC8KKyVkaXIg
-JXtfbG9jYWxzdGF0ZWRpcn0vcnVuL2NlcGgvCgogJWZpbGVzIGZ1c2UKICVkZWZhdHRyKC0scm9v
-dCxyb290LC0pCi0tIAoxLjcuMQoK
---20cf307f381276f6c804abf9b3eb--
+Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+---
+ src/Makefile.am |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index e53b68d..f3ca34b 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -928,6 +928,7 @@ libosd_la_SOURCES = \
+ 	osd/OSDCaps.cc \
+ 	osd/Watch.cc \
+         osd/ClassHandler.cc
++libosd_la_CXXFLAGS= ${CRYPTO_CXXFLAGS} ${AM_CXXFLAGS}
+ libosd_la_LIBADD = libglobal.la
+ noinst_LTLIBRARIES += libosd.la
+ 
+-- 
+1.7.1
+
+
