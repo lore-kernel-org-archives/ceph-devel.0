@@ -1,39 +1,54 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: the messenger to send osd write ack|ondisk
-Date: Tue, 6 Sep 2011 22:15:48 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1109062214560.7331@cobra.newdream.net>
-References: <Pine.LNX.4.64.1109062058240.7748@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Subject: [PATCH 2/3] rbd: clean up, fix style
+Date: Wed,  7 Sep 2011 09:28:05 -0700
+Message-ID: <1315412886-21092-2-git-send-email-sage@newdream.net>
+References: <1315412886-21092-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51723 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:38875 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751270Ab1IGFKP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Sep 2011 01:10:15 -0400
-In-Reply-To: <Pine.LNX.4.64.1109062058240.7748@cobra.newdream.net>
+	with ESMTP id S1753276Ab1IGQzz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Sep 2011 12:55:55 -0400
+In-Reply-To: <1315412886-21092-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: qemu-devel@nongnu.org, kwolf@redhat.com
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-On Tue, 6 Sep 2011, Sage Weil wrote:
-> Ah, nice catch.  This fixes it:
-> 
-> diff --git a/src/osd/ReplicatedPG.cc b/src/osd/ReplicatedPG.cc
-> index 73b42ac..48ee6bb 100644
-> --- a/src/osd/ReplicatedPG.cc
-> +++ b/src/osd/ReplicatedPG.cc
-> @@ -2817,7 +2817,7 @@ void ReplicatedPG::eval_repop(RepGather *repop)
->           reply = new MOSDOpReply(op, 0, osd->osdmap->get_epoch(), 0);
->         reply->add_flags(CEPH_OSD_FLAG_ACK);
->         dout(10) << " sending ack on " << *repop << " " << reply << dendl;
-> -       osd->cluster_messenger->send_message(reply, op->get_connection());
-> +       osd->client_messenger->send_message(reply, op->get_connection());
->         repop->sent_ack = true;
->        }
-> 
-> Pushing to master.
+No assignment in condition.  Remove duplicate ret > 0 check.
 
-Er, looks like Greg already pushed this fix on Sunday!
+Signed-off-by: Sage Weil <sage@newdream.net>
+---
+ block/rbd.c |   17 ++++++++---------
+ 1 files changed, 8 insertions(+), 9 deletions(-)
 
-sage
+diff --git a/block/rbd.c b/block/rbd.c
+index 6135fc1..2763092 100644
+--- a/block/rbd.c
++++ b/block/rbd.c
+@@ -391,15 +391,14 @@ static void qemu_rbd_aio_event_reader(void *opaque)
+         char *p = (char *)&s->event_rcb;
+ 
+         /* now read the rcb pointer that was sent from a non qemu thread */
+-        if ((ret = read(s->fds[RBD_FD_READ], p + s->event_reader_pos,
+-                        sizeof(s->event_rcb) - s->event_reader_pos)) > 0) {
+-            if (ret > 0) {
+-                s->event_reader_pos += ret;
+-                if (s->event_reader_pos == sizeof(s->event_rcb)) {
+-                    s->event_reader_pos = 0;
+-                    qemu_rbd_complete_aio(s->event_rcb);
+-                    s->qemu_aio_count--;
+-                }
++        ret = read(s->fds[RBD_FD_READ], p + s->event_reader_pos,
++                   sizeof(s->event_rcb) - s->event_reader_pos);
++        if (ret > 0) {
++            s->event_reader_pos += ret;
++            if (s->event_reader_pos == sizeof(s->event_rcb)) {
++                s->event_reader_pos = 0;
++                qemu_rbd_complete_aio(s->event_rcb);
++                s->qemu_aio_count--;
+             }
+         }
+     } while (ret < 0 && errno == EINTR);
+-- 
+1.7.2.5
+
