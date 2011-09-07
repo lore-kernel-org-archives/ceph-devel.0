@@ -1,61 +1,132 @@
-From: Yehuda Sadeh <yehuda@hq.newdream.net>
-Subject: [PATCH 2/2] qemu-img: don't skip writing small holes
-Date: Wed,  7 Sep 2011 16:06:53 -0700
-Message-ID: <92a5407ccc0617e43a4bf7d2a74fe1887382dd75.1315436097.git.yehuda@hq.newdream.net>
-References: <cover.1315436097.git.yehuda@hq.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [libvirt] specifying rbd images in libvirt
+Date: Wed, 7 Sep 2011 16:54:37 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1109071635040.13143@cobra.newdream.net>
+References: <Pine.LNX.4.64.1108271207100.14206@cobra.newdream.net>
+ <20110901124635.GD14462@redhat.com> <Pine.LNX.4.64.1109011321420.1621@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:51830 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755535Ab1IGW6i (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Sep 2011 18:58:38 -0400
-In-Reply-To: <cover.1315436097.git.yehuda@hq.newdream.net>
-In-Reply-To: <cover.1315436097.git.yehuda@hq.newdream.net>
-References: <cover.1315436097.git.yehuda@hq.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:39914 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756647Ab1IGXtF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Sep 2011 19:49:05 -0400
+In-Reply-To: <Pine.LNX.4.64.1109011321420.1621@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
-Cc: sage@newdream.net, yehudasa@gmail.com, Yehuda Sadeh <yehuda@hq.newdream.net>
+To: "Daniel P. Berrange" <berrange@redhat.com>
+Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-When doing convert, we check that the sectors that are written
-are not empty. When holes are small, and interleaved with data
-it can lead to a significant performance issue.
+On Thu, 1 Sep 2011, Sage Weil wrote:
+> On Thu, 1 Sep 2011, Daniel P. Berrange wrote:
+> > On Sat, Aug 27, 2011 at 12:19:33PM -0700, Sage Weil wrote:
+> > > Hi all,
+> > > 
+> > > Currently, you can specify an rbd (or nbd, sheepdog) image with xml 
+> > > that looks like so:
+> > > 
+> > >     <disk type='network' device='disk'>
+> > >       <driver name='qemu' type='raw' cache='writeback'/>
+> > >       <source protocol='rbd' name='mypool/myimage'>
+> > >         <host name='monhost1.mydomain.com' port='6789'/>
+> > >         <host name='monhost2.mydomain.com' port='6789'/>
+> > >         <host name='monhost3.mydomain.com' port='6789'/>
+> > >       </source>
+> > >       <target dev='vda' bus='virtio'/>
+> > >     </disk>
+> > > 
+> > > This works okay if you have authentication disabled and all of the default 
+> > > settings are okay.  Usually, though, there are other options you need to 
+> > > specify to librbd to make it do what you want.  
+> > > 
+> > > The current schema can be abused by adding options after the image name 
+> > > like so:
+> > > 
+> > >     <disk type='network' device='disk'>
+> > >       <driver name='qemu' type='raw' cache='writeback'/>
+> > >       <source protocol='rbd' name='mypool/myimage:conf=/etc/ceph/ceph.conf:id=admin:this=that:foo=bar'>
+> > >         <host name='monhost1.mydomain.com' port='6789'/>
+> > >         <host name='monhost2.mydomain.com' port='6789'/>
+> > >         <host name='monhost3.mydomain.com' port='6789'/>
+> > >       </source>
+> > >       <target dev='vda' bus='virtio'/>
+> > >     </disk>
+> > > 
+> > > This works only because that's what the qemu incantation looks like.  In 
+> > > general, though, this is ugly.  I also doesn't generalize well to the 
+> > > kernel-level rbd driver, which we'd like to also support, as that will 
+> > > work with hypervisors other than qemu.
+> > 
+> > Also, we should be doing some validation on the content of
+> > the 'name' attribute to prevent abuse like that.
+> > 
+> > > What about something more like this?
+> > > 
+> > >     <disk type='network' device='disk'>
+> > >       <driver name='qemu' type='raw' cache='writeback'/>
+> > >       <source protocol='rbd' name='mypool/myimage'>
+> > >         <option name='conf'>/etc/ceph/ceph.conf</option>
+> > >         <option name='id'>myusername</option>
+> > >         <option name='foo'>bar</option>
+> > >         <host name='monhost1.mydomain.com' port='6789'/>
+> > >         <host name='monhost2.mydomain.com' port='6789'/>
+> > >         <host name='monhost3.mydomain.com' port='6789'/>
+> > >       </source>
+> > >       <target dev='vda' bus='virtio'/>
+> > >     </disk>
+> > > 
+> > > I'm not married to any particular syntax/schema, as long as there is a 
+> > > generic way to specify name/value pairs to configure the driver.  I think 
+> > > the above would generalize well to other network block devices as well, 
+> > > which presumably also want a way to feed in information other than a 
+> > > server address (e.g. for authentication).
+> > > 
+> > > Does that look reasonable?  If there are no objections we can work up some 
+> > > patches and send them along!
+> > 
+> > We generally prefer to add explicit models for attributes, rather than
+> > just do a generic key/value passthrough.
+> 
+> Fair enough.  For the qemu/librbd and kernel drivers, the key fields we 
+> need are:
+> 
+>  id - ceph userid to authenticate as
+>  snap - snapshot name (optional; used if mapping a read-only snapshot)
+> 
+> The goal would be to have libvirt describe rbd images in a generic way, 
+> and let you managed them as a storage pool via librbd.  Then, when it 
+> comes time to spin up an actual VM, either use the native qemu support or 
+> map a kernel block device.  To control that it might make sense to have an 
+> option like
+> 
+>  driver - librbd (qemu-only), kernel, or auto (default)
+> 
+> to let users control which driver to use in the qemu case.
+> 
+> > For authentication credentials, we also need to consider security
+> > implications of keeping them in the XML. For qcow2 encryption
+> > keys, we leverage the separate libvirt secrets management APIs
+> > to provide the keys outside the XML. IMHO we should likely do the
+> > same for any keys required to login to network block devices.
+> 
+> Usually we keep secrets in a file on disk and reference the file when 
+> starting up librbd or mapping a kernel rbd device.  It's possible to 
+> specify it explicitly but that is discouraged.  So by specifying id=foo 
+> above, librbd would normally look for a key called foo in its default 
+> keyring file.
+> 
+> We can definitely use the libvirt secrets API to store these keys there, 
+> too.  In that case, we would need something like
+> 
+>  keyname - name of the libvirt secret to use for authentication
+> 
+> What do you think?
 
-Signed-off-by: Yehuda Sadeh <yehuda@hq.newdream.net>
----
- qemu-img.c |    6 ++++--
- 1 files changed, 4 insertions(+), 2 deletions(-)
+Shall I take silence as general agreement and start putting together 
+patches?
 
-diff --git a/qemu-img.c b/qemu-img.c
-index 0552746..757fc3a 100644
---- a/qemu-img.c
-+++ b/qemu-img.c
-@@ -623,6 +623,7 @@ static int compare_sectors(const uint8_t *buf1, const uint8_t *buf2, int n,
- 
- #define IO_BUF_SIZE (2 * 1024 * 1024)
- #define IO_WRITE_WINDOW_THRESHOLD (32 * 1024 * 1024)
-+#define IO_WRITE_MIN_SIZE (128 * 1024)
- 
- static int write_window = 0;
- 
-@@ -991,6 +992,7 @@ static int img_convert(int argc, char **argv)
-                should add a specific call to have the info to go faster */
-             buf1 = buf;
-             while (n > 0) {
-+                int is_allocated = is_allocated_sectors(buf1, n, &n1);
-                 while (write_window > IO_WRITE_WINDOW_THRESHOLD / 512) {
-                     qemu_aio_wait();
-                 }
-@@ -1001,8 +1003,8 @@ static int img_convert(int argc, char **argv)
-                    If the output is to a host device, we also write out
-                    sectors that are entirely 0, since whatever data was
-                    already there is garbage, not 0s. */
--                if (!has_zero_init || out_baseimg ||
--                    is_allocated_sectors(buf1, n, &n1)) {
-+                if (is_allocated || n != n1 || !has_zero_init || out_baseimg) {
-+                    n1 = MAX(n1, MIN(n, IO_WRITE_MIN_SIZE / 512));
-                     QEMUIOVector *qiov = qemu_mallocz(sizeof(QEMUIOVector));
- 		    qemu_iovec_init(qiov, 1);
- 		    qemu_iovec_add(qiov, (void *)buf1, n1 * 512);
--- 
-1.7.5.1
+I don't think there's anything controversial here.  I suspect the main 
+concern is that these fields are named in a sufficiently general fashion 
+so that they can be used for other backend storage types.
 
+sage
