@@ -1,33 +1,45 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
-Subject: output file not truncated
-Date: Thu, 8 Sep 2011 12:13:57 +0800
-Message-ID: <CANExM-M8+-i8f38vGkv2ivQkZGu5U7ba+6S5uxpRB8jOxWOkMw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: output file not truncated
+Date: Wed, 7 Sep 2011 21:41:42 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1109072122580.5347@cobra.newdream.net>
+References: <CANExM-M8+-i8f38vGkv2ivQkZGu5U7ba+6S5uxpRB8jOxWOkMw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:42086 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750902Ab1IHEN6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2011 00:13:58 -0400
-Received: by gxk21 with SMTP id 21so649036gxk.5
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Sep 2011 21:13:57 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:34950 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751685Ab1IHEgH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2011 00:36:07 -0400
+In-Reply-To: <CANExM-M8+-i8f38vGkv2ivQkZGu5U7ba+6S5uxpRB8jOxWOkMw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Henry C Chang <henry.cy.chang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+On Thu, 8 Sep 2011, Henry C Chang wrote:
+> Hi,
+> 
+> Finally got some time to play around ceph.
+> I found that: when I dumped osd status by: ceph osd dump -o
+> /tmp/dump.json --format=json, I got some garbage data in the end of
+> file.
+> Thus, I checked the code. I noticed that the output file was not
+> truncated in ceph_tool_cli_input:
+> 
+>   // Write to a file. Don't truncate the file.
+>   int fd = TEMP_FAILURE_RETRY(::open(outfile, O_WRONLY|O_CREAT|O_TRUNC, 0644));
+> 
+> Since it seems intended, I was wondering why. After all, in my case, I
+> found it causing problems.
 
-Finally got some time to play around ceph.
-I found that: when I dumped osd status by: ceph osd dump -o
-/tmp/dump.json --format=json, I got some garbage data in the end of
-file.
-Thus, I checked the code. I noticed that the output file was not
-truncated in ceph_tool_cli_input:
+There was a recent change that lets you stack up commands, separated 
+by ';':
 
-  // Write to a file. Don't truncate the file.
-  int fd = TEMP_FAILURE_RETRY(::open(outfile, O_WRONLY|O_CREAT|O_TRUNC, 0644));
+ $ ceph pg stat \; osd stat
 
-Since it seems intended, I was wondering why. After all, in my case, I
-found it causing problems.
+Basically we were lazy and reopened the output file inside the loop.
 
-Henry
+Just pushed a patch cleaning it up some!
+
+sage
+
