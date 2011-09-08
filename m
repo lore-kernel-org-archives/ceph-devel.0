@@ -1,63 +1,53 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
-Subject: Re: output file not truncated
-Date: Thu, 8 Sep 2011 12:50:03 +0800
-Message-ID: <CANExM-OCJoHavXh=OqsORm=-2EJdn4J7j+h3h8pUmPVNJewQvw@mail.gmail.com>
-References: <CANExM-M8+-i8f38vGkv2ivQkZGu5U7ba+6S5uxpRB8jOxWOkMw@mail.gmail.com>
-	<Pine.LNX.4.64.1109072122580.5347@cobra.newdream.net>
+From: Stefan Hajnoczi <stefanha@gmail.com>
+Subject: Re: [Qemu-devel] [PATCH 0/2] improve qemu-img conversion performance
+Date: Thu, 8 Sep 2011 08:56:28 +0100
+Message-ID: <20110908075628.GA23849@stefanha-thinkpad.localdomain>
+References: <cover.1315436097.git.yehuda@hq.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:58831 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751367Ab1IHEuF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2011 00:50:05 -0400
-Received: by ywf7 with SMTP id 7so339968ywf.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Sep 2011 21:50:03 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1109072122580.5347@cobra.newdream.net>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:57799 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932192Ab1IHH4e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2011 03:56:34 -0400
+Received: by mail-fx0-f46.google.com with SMTP id 19so1231076fxh.19
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Sep 2011 00:56:33 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <cover.1315436097.git.yehuda@hq.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@hq.newdream.net>
+Cc: qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, sage@newdream.net, yehudasa@gmail.com
 
-2011/9/8 Sage Weil <sage@newdream.net>:
-> On Thu, 8 Sep 2011, Henry C Chang wrote:
->> Hi,
->>
->> Finally got some time to play around ceph.
->> I found that: when I dumped osd status by: ceph osd dump -o
->> /tmp/dump.json --format=3Djson, I got some garbage data in the end o=
-f
->> file.
->> Thus, I checked the code. I noticed that the output file was not
->> truncated in ceph_tool_cli_input:
->>
->> =C2=A0 // Write to a file. Don't truncate the file.
->> =C2=A0 int fd =3D TEMP_FAILURE_RETRY(::open(outfile, O_WRONLY|O_CREA=
-T|O_TRUNC, 0644));
->>
->> Since it seems intended, I was wondering why. After all, in my case,=
- I
->> found it causing problems.
->
-> There was a recent change that lets you stack up commands, separated
-> by ';':
->
-> =C2=A0$ ceph pg stat \; osd stat
+On Wed, Sep 07, 2011 at 04:06:51PM -0700, Yehuda Sadeh wrote:
+> The following set of patches improve the qemu-img conversion process
+> performance. When using a higher latency backend, small writes have a
+> severe impact on the time it takes to do image conversion. 
+> We switch to using async writes, and we avoid splitting writes due to
+> holes when the holes are small enough.
+> 
+> Yehuda Sadeh (2):
+>   qemu-img: async write to block device when converting image
+>   qemu-img: don't skip writing small holes
+> 
+>  qemu-img.c |   34 +++++++++++++++++++++++++++-------
+>  1 files changed, 27 insertions(+), 7 deletions(-)
+> 
+> -- 
+> 2.7.5.1
 
-Cool. It's quite useful.
+This has nothing to do with the patch itself, but I've been curious
+about the existence of both a QEMU and a Linux kernel rbd block driver.
 
->
-> Basically we were lazy and reopened the output file inside the loop.
->
-> Just pushed a patch cleaning it up some!
->
+The I/O latency with qemu-img has been an issue for rbd users.  But they
+have the option of using the Linux kernel rbd block driver, where
+qemu-img can take advantage of the page cache instead of performing
+direct I/O.
 
-Thanks.
+Does this mean you intend to support both QEMU block/rbd.c and Linux
+drivers/block/rbd.c?  As a user I would go with the Linux kernel driver
+instead of the QEMU block driver because it offers page cache and host
+block device features.  On the other hand a userspace driver is nice
+because it does not require privileges.
 
-Henry
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Stefan
