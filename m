@@ -1,51 +1,46 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: [RFC] rados perl bindings
-Date: Thu, 8 Sep 2011 17:34:48 -0700
-Message-ID: <CAF3hT9AGd_TNjxsa0w4iXA_h3Fr-ngb0oBBsECfuivGhhUbKwg@mail.gmail.com>
-References: <CALFpzo6ioZYdY3cu2LhaKtywvQPt25-cOCmc2kbpW8f_2_ktHw@mail.gmail.com>
+Subject: Re: questions of pg scrub
+Date: Thu, 8 Sep 2011 17:35:46 -0700
+Message-ID: <CAF3hT9CxANXA4M79QsXKuipWDN_rOE4WKoq=t9U1Wd8-iVPbGg@mail.gmail.com>
+References: <CABAwU-Zfvy_Un1YQirpiDhontLDPi4DRjJDBK=Z4KutA2dpOOw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f42.google.com ([209.85.210.42]:51901 "EHLO
-	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756821Ab1IIAet convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2011 20:34:49 -0400
-Received: by pzk37 with SMTP id 37so1871726pzk.1
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Sep 2011 17:34:48 -0700 (PDT)
-In-Reply-To: <CALFpzo6ioZYdY3cu2LhaKtywvQPt25-cOCmc2kbpW8f_2_ktHw@mail.gmail.com>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:61131 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757450Ab1IIAfr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2011 20:35:47 -0400
+Received: by gxk21 with SMTP id 21so607432gxk.5
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Sep 2011 17:35:46 -0700 (PDT)
+In-Reply-To: <CABAwU-Zfvy_Un1YQirpiDhontLDPi4DRjJDBK=Z4KutA2dpOOw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-[Resend due to vger failing earlier]
-I guess it's safe to say that nobody's concerned about this. :)
-I'm with you that RADOS bindings shouldn't live under Filesys, so
-unless anybody thinks that libceph is going to get Perl bindings as
-well, and that that would need to go under Filesys (I don't know what
-the namespace rules are), you should go for it! :)
+[resend to list]
+
+2011/9/7 huang jun <hjwsm1989@gmail.com>:
+> hi,all
+> Recently,i read the source code of PG scrub.The ceph periodically
+> shed_scrub if the system load is not too high. And adminstrator can
+> manually scrub the specified OSD or PG using cmds.
+> but many questions come along with me when i got thourgh .
+> why did ceph need scrub?
+> what scrub used for?
+Scrubbing is intended to do a few things. First, any large storage
+system needs to periodically look at the data it's holding in order to
+make sure the data stays safe -- that the underlying hardware is still
+working (and the sectors are good), that cosmic rays haven't flipped
+bits, etc. Right now, Ceph's scrubbing is primitive: it only looks at
+the file sizes and a few other metadata attributes, and compares them
+to the ones it thinks the file should have and to what other storage
+nodes have. Eventually, it will be a great deal more involved than
+that, though!
+> because the OSD use three threads to handle the scrub transactions,
+> maybe it has a great effect on the stablity or performance of ceph?
+Well, background scrubbing (which the OSDs do automatically) is
+careful to only initiate scrubs when it won't impact users. If the
+administrator starts a scrub, it might. The number of threads involved
+isn't going to cause a problem, though -- they're used for synchronous
+IO and don't create a lot of CPU usage.
 -Greg
-
-On Thu, Sep 1, 2011 at 8:22 PM, Marcus Sorensen <shadowsor@gmail.com> w=
-rote:
-> As mentioned earlier, I'm working on gluing perl onto the back of
-> librados (or at least giving it a good duct-taping). As part of
-> registering the namespace for the module in CPAN, I just need to get
-> some feedback and show that others involved with Ceph development are
-> aware and are ok with the namespace being used. =A0I was going to try=
- to
-> register "Ceph::RADOS", not quite sure if it would fit under
-> "Filesys::Ceph::RADOS" as it's not really anything to do with
-> manipulating the filesystem per se, and did not see any other root
-> namespaces that would be an obvious fit. Let me know what you think.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
