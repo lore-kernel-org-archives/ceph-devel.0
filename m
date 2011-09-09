@@ -1,55 +1,23 @@
-From: Dyweni - Ceph-Devel <YS3fpFE2ykfB@dyweni.com>
-Subject: Re: questions of pg scrub
-Date: Fri, 09 Sep 2011 06:52:28 -0500
-Message-ID: <6d1d94168ce096e5bff3f51c98c0b8b4@pl1.haspere.com>
-References: <CABAwU-Zfvy_Un1YQirpiDhontLDPi4DRjJDBK=Z4KutA2dpOOw@mail.gmail.com>
- <CAF3hT9CxANXA4M79QsXKuipWDN_rOE4WKoq=t9U1Wd8-iVPbGg@mail.gmail.com>
-Reply-To: <YS3fpFE2ykfB@dyweni.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Debs must not contain /var/run
+Date: Fri, 9 Sep 2011 09:04:40 -0700
+Message-ID: <CAORUGqDWnPYmDpXqjpMitdDV7bAKnrHKFFu2zqzD4cT-X90UmQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from pl1.haspere.com ([208.111.35.220]:35880 "EHLO pl1.haspere.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933390Ab1IIL55 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 9 Sep 2011 07:57:57 -0400
-In-Reply-To: <CAF3hT9CxANXA4M79QsXKuipWDN_rOE4WKoq=t9U1Wd8-iVPbGg@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:45967 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750958Ab1IIQFB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Sep 2011 12:05:01 -0400
+Received: by wwf5 with SMTP id 5so1334162wwf.1
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Sep 2011 09:05:00 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
- On Thu, 8 Sep 2011 17:35:46 -0700, Gregory Farnum wrote:
+Hi. Commit a73d5 is bad. Debs must not contain /var/run; the FHS
+defines /var/run as being emptied at boot, so there is no permanent
+storage there. Any subdirectories you need there must be re-created by
+the init scripts.
 
-> [resend to list]
->
-> 2011/9/7 huang jun :
->> hi,all Recently,i read the source code of PG scrub.The ceph
->> periodically shed_scrub if the system load is not too high. And
->> adminstrator can manually scrub the specified OSD or PG using cmds. 
->> but
->> many questions come along with me when i got thourgh . why did ceph
->> need scrub? what scrub used for?
-> Scrubbing is intended to do a few things. First, any large storage 
-> system
-> needs to periodically look at the data it's holding in order to make 
-> sure
-> the data stays safe -- that the underlying hardware is still working 
-> (and
-> the sectors are good), that cosmic rays haven't flipped bits, etc. 
-> Right
-> now, Ceph's scrubbing is primitive: it only looks at the file sizes 
-> and a
-> few other metadata attributes, and compares them to the ones it 
-> thinks
-> the file should have and to what other storage nodes have. 
-> Eventually, it
-> will be a great deal more involved than that, though!
-
- Will there be some kind of cryptographic checksum used to validate the 
- data has not changed (i.e. Something like what GIT does internally)?
-
- Dyweni
-
-
+http://ceph.newdream.net/gitbuilder-deb-amd64/log.cgi?log=a73d53fdcb2a0734812bc3159e929dde7ae9089f
