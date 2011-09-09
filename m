@@ -1,49 +1,55 @@
-From: Kevin Wolf <kwolf@redhat.com>
-Subject: Re: [Qemu-devel] [PATCH 0/2] improve qemu-img conversion performance
-Date: Fri, 09 Sep 2011 10:18:35 +0200
-Message-ID: <4E69CBDB.1000401@redhat.com>
-References: <cover.1315436097.git.yehuda@hq.newdream.net> <4E68CD7E.2050704@redhat.com> <Pine.LNX.4.64.1109080933150.9266@cobra.newdream.net>
+From: Dyweni - Ceph-Devel <YS3fpFE2ykfB@dyweni.com>
+Subject: Re: questions of pg scrub
+Date: Fri, 09 Sep 2011 06:52:28 -0500
+Message-ID: <6d1d94168ce096e5bff3f51c98c0b8b4@pl1.haspere.com>
+References: <CABAwU-Zfvy_Un1YQirpiDhontLDPi4DRjJDBK=Z4KutA2dpOOw@mail.gmail.com>
+ <CAF3hT9CxANXA4M79QsXKuipWDN_rOE4WKoq=t9U1Wd8-iVPbGg@mail.gmail.com>
+Reply-To: <YS3fpFE2ykfB@dyweni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:6625 "EHLO mx1.redhat.com"
+Received: from pl1.haspere.com ([208.111.35.220]:35880 "EHLO pl1.haspere.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758478Ab1IIIPm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 9 Sep 2011 04:15:42 -0400
-In-Reply-To: <Pine.LNX.4.64.1109080933150.9266@cobra.newdream.net>
+	id S933390Ab1IIL55 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 9 Sep 2011 07:57:57 -0400
+In-Reply-To: <CAF3hT9CxANXA4M79QsXKuipWDN_rOE4WKoq=t9U1Wd8-iVPbGg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, yehudasa@gmail.com
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-Am 08.09.2011 18:36, schrieb Sage Weil:
-> On Thu, 8 Sep 2011, Kevin Wolf wrote:
->> Am 08.09.2011 01:06, schrieb Yehuda Sadeh:
->>> The following set of patches improve the qemu-img conversion process
->>> performance. When using a higher latency backend, small writes have a
->>> severe impact on the time it takes to do image conversion. 
->>> We switch to using async writes, and we avoid splitting writes due to
->>> holes when the holes are small enough.
->>>
->>> Yehuda Sadeh (2):
->>>   qemu-img: async write to block device when converting image
->>>   qemu-img: don't skip writing small holes
->>>
->>>  qemu-img.c |   34 +++++++++++++++++++++++++++-------
->>>  1 files changed, 27 insertions(+), 7 deletions(-)
->>>
->>
->> This doesn't seem to be against git master or the block tree. Please rebase.
->>
->> I think that commit a22f123c may obsolete your patch 2/2.
-> 
-> With git.kernel.org down, where should I be looking for the latest 
-> upstream?
+ On Thu, 8 Sep 2011 17:35:46 -0700, Gregory Farnum wrote:
 
-qemu has never been on kernel.org. The interesting repositories for you are:
+> [resend to list]
+>
+> 2011/9/7 huang jun :
+>> hi,all Recently,i read the source code of PG scrub.The ceph
+>> periodically shed_scrub if the system load is not too high. And
+>> adminstrator can manually scrub the specified OSD or PG using cmds. 
+>> but
+>> many questions come along with me when i got thourgh . why did ceph
+>> need scrub? what scrub used for?
+> Scrubbing is intended to do a few things. First, any large storage 
+> system
+> needs to periodically look at the data it's holding in order to make 
+> sure
+> the data stays safe -- that the underlying hardware is still working 
+> (and
+> the sectors are good), that cosmic rays haven't flipped bits, etc. 
+> Right
+> now, Ceph's scrubbing is primitive: it only looks at the file sizes 
+> and a
+> few other metadata attributes, and compares them to the ones it 
+> thinks
+> the file should have and to what other storage nodes have. 
+> Eventually, it
+> will be a great deal more involved than that, though!
 
-* Upstream: git://git.qemu.org/qemu.git master
-* Block development branch: git://repo.or.cz/qemu/kevin.git block
+ Will there be some kind of cryptographic checksum used to validate the 
+ data has not changed (i.e. Something like what GIT does internally)?
 
-Kevin
+ Dyweni
+
+
