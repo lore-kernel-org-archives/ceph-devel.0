@@ -1,48 +1,51 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 0/2] improve qemu-img conversion performance
-Date: Thu, 8 Sep 2011 09:36:26 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1109080933150.9266@cobra.newdream.net>
-References: <cover.1315436097.git.yehuda@hq.newdream.net>
-	<4E68CD7E.2050704@redhat.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: [RFC] rados perl bindings
+Date: Thu, 8 Sep 2011 17:34:48 -0700
+Message-ID: <CAF3hT9AGd_TNjxsa0w4iXA_h3Fr-ngb0oBBsECfuivGhhUbKwg@mail.gmail.com>
+References: <CALFpzo6ioZYdY3cu2LhaKtywvQPt25-cOCmc2kbpW8f_2_ktHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
-In-Reply-To: <4E68CD7E.2050704@redhat.com>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: </archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-Sender: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-To: Kevin Wolf <kwolf@redhat.com>
-Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, ceph-devel@vger.kernel.org, yehudasa@gmail.com, qemu-devel@nongnu.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:51901 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756821Ab1IIAet convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Sep 2011 20:34:49 -0400
+Received: by pzk37 with SMTP id 37so1871726pzk.1
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Sep 2011 17:34:48 -0700 (PDT)
+In-Reply-To: <CALFpzo6ioZYdY3cu2LhaKtywvQPt25-cOCmc2kbpW8f_2_ktHw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 8 Sep 2011, Kevin Wolf wrote:
-> Am 08.09.2011 01:06, schrieb Yehuda Sadeh:
-> > The following set of patches improve the qemu-img conversion process
-> > performance. When using a higher latency backend, small writes have a
-> > severe impact on the time it takes to do image conversion. 
-> > We switch to using async writes, and we avoid splitting writes due to
-> > holes when the holes are small enough.
-> > 
-> > Yehuda Sadeh (2):
-> >   qemu-img: async write to block device when converting image
-> >   qemu-img: don't skip writing small holes
-> > 
-> >  qemu-img.c |   34 +++++++++++++++++++++++++++-------
-> >  1 files changed, 27 insertions(+), 7 deletions(-)
-> > 
-> 
-> This doesn't seem to be against git master or the block tree. Please rebase.
-> 
-> I think that commit a22f123c may obsolete your patch 2/2.
+[Resend due to vger failing earlier]
+I guess it's safe to say that nobody's concerned about this. :)
+I'm with you that RADOS bindings shouldn't live under Filesys, so
+unless anybody thinks that libceph is going to get Perl bindings as
+well, and that that would need to go under Filesys (I don't know what
+the namespace rules are), you should go for it! :)
+-Greg
 
-With git.kernel.org down, where should I be looking for the latest 
-upstream?
-
-Thanks!
-sage
+On Thu, Sep 1, 2011 at 8:22 PM, Marcus Sorensen <shadowsor@gmail.com> w=
+rote:
+> As mentioned earlier, I'm working on gluing perl onto the back of
+> librados (or at least giving it a good duct-taping). As part of
+> registering the namespace for the module in CPAN, I just need to get
+> some feedback and show that others involved with Ceph development are
+> aware and are ok with the namespace being used. =A0I was going to try=
+ to
+> register "Ceph::RADOS", not quite sure if it would fit under
+> "Filesys::Ceph::RADOS" as it's not really anything to do with
+> manipulating the filesystem per se, and did not see any other root
+> namespaces that would be an obvious fit. Let me know what you think.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
