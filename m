@@ -1,41 +1,49 @@
-From: David Sterba <dave@jikos.cz>
-Subject: Re: WARNING: at fs/btrfs/inode.c:2193 btrfs_orphan_commit_root+0xb0/0xc0 [btrfs]()
-Date: Thu, 15 Sep 2011 21:55:56 +0200
-Message-ID: <20110915195556.GI22205@twin.jikos.cz>
-References: <4E6BDAEB.7020206@tuxadero.com> <4E6EABAF.9010903@cn.fujitsu.com> <Pine.LNX.4.64.1109151137420.17623@cobra.newdream.net>
-Reply-To: dave@jikos.cz
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph kernel bug
+Date: Thu, 15 Sep 2011 13:06:41 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1109151302160.17623@cobra.newdream.net>
+References: <4E6BD2B4.7050709@tuxadero.com> <Pine.LNX.4.64.1109101546370.19147@cobra.newdream.net>
+ <4E6BF6C3.5010202@tuxadero.com> <4E7254D6.9020509@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1109151137420.17623@cobra.newdream.net>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: Sage Weil <sage@newdream.net>
-Cc: Liu Bo <liubo2009@cn.fujitsu.com>, martin@tuxadero.com, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, josef@redhat.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:52884 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934532Ab1IOUAr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Sep 2011 16:00:47 -0400
+In-Reply-To: <4E7254D6.9020509@tuxadero.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Martin Mailand <martin@tuxadero.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Sep 15, 2011 at 11:44:09AM -0700, Sage Weil wrote:
-> On Tue, 13 Sep 2011, Liu Bo wrote:
-> > On 09/11/2011 05:47 AM, Martin Mailand wrote:
-> > > Hi
-> > > I am hitting this Warning reproducible, the workload is a ceph osd,
-> > > kernel ist 3.1.0-rc5.
-> > > 
-> > 
-> > Have posted a patch for this:
-> > 
-> > http://marc.info/?l=linux-btrfs&m=131547325515336&w=2
-> 
-> We're still seeing this with -rc6, which includes 98c9942 and 65450aa.
+On Thu, 15 Sep 2011, Martin Mailand wrote:
+> Hi Sage,
+> I am still hitting this in -rc6. It happeneds every time I stop an OSD.
+> Do you need more information to reproduce it?
 
-Me too, for the 
+Oh, great to hear it's easy to reproduce!  I was trying (in my uml 
+environment) and failing.
 
-WARNING: at fs/btrfs/extent-tree.c:5711 btrfs_alloc_free_block+0x180/0x350 [btrfs]()
+Can run the script below right before stopping the osd, and send the dmesg 
+output along?  (Or attach to http://tracker.newdream.net/issues/1382)
 
-case mentioned in the changelog. I optimistically dropped the ratelimit
-patch for that WARN_ON, but had to add it quickly back. Unfortunatelly I
-do not have a reliable reproducer. It justs starts sometime during
-xfstests, maybe after a few rounds.
+Thanks!
+sage
 
 
-david
+#!/bin/sh -x
+
+p() {
+ echo "$*" > /sys/kernel/debug/dynamic_debug/control
+}
+
+p 'module ceph +p'
+p 'module libceph +p'
+p 'module rbd +p'
+p 'file net/ceph/messenger.c -p'
+p 'file' `grep -- --- /sys/kernel/debug/dynamic_debug/control | grep ceph \
+	| awk '{print $1}' | sed 's/:/ line /'` '+p'
+p 'file' `grep -- === /sys/kernel/debug/dynamic_debug/control | grep ceph \
+	| awk '{print $1}' | sed 's/:/ line /'` '+p'
+
