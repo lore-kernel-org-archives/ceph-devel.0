@@ -1,35 +1,62 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: WARNING: at fs/btrfs/inode.c:2193 btrfs_orphan_commit_root+0xb0/0xc0
- [btrfs]()
-Date: Thu, 15 Sep 2011 13:29:39 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1109151329110.27715@cobra.newdream.net>
-References: <4E6BDAEB.7020206@tuxadero.com> <4E6EABAF.9010903@cn.fujitsu.com>
- <Pine.LNX.4.64.1109151137420.17623@cobra.newdream.net>
- <20110915195029.GD25179@dhcp231-156.rdu.redhat.com> <20110915201242.GJ22205@twin.jikos.cz>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-In-Reply-To: <20110915201242.GJ22205@twin.jikos.cz>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: David Sterba <dave@jikos.cz>
-Cc: Josef Bacik <josef@redhat.com>, Liu Bo <liubo2009@cn.fujitsu.com>, martin@tuxadero.com, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Subject: [PATCH 0/5] Improve Ceph Qemu+RBD support
+Date: Thu, 15 Sep 2011 13:52:19 -0700
+Message-ID: <1316119944-25201-1-git-send-email-sage@newdream.net>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:49117 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934775Ab1IOUw2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Sep 2011 16:52:28 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: libvir-list@redhat.com
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-On Thu, 15 Sep 2011, David Sterba wrote:
-> On Thu, Sep 15, 2011 at 03:50:29PM -0400, Josef Bacik wrote:
-> > > We're still seeing this with -rc6, which includes 98c9942 and 65450aa.
-> > > 
-> > > I haven't looked at the reservation code in much detail.  Is there 
-> > > anything I can do to help track this down?
-> > > 
-> > 
-> > This should be taken care of with all my enospc changes.  You can pull them down
-> > from my btrfs-work tree as soon as kernel.org comes back from the dead :).
-> 
-> should you need it earlier, here's a copy:
-> 
-> git://repo.or.cz/linux-2.6/btrfs-unstable.git #git.kernel.org/josef/master
+The current support for qemu and Ceph RBD (rados block device) has two 
+main deficiencies: authentication doesn't work, and it relies on 
+environment variables (which don't work with latest upstream).
 
-Thanks!  We'll do some testing today and see if it behaves better.  :)
+This patch set addresses both those problems, while trying to integrate as
+cleanly as possible with the rest of libvirt.
 
+The first few patches make some changes to libvirt itself: adding a CEPH 
+secret type (for Ceph/RBD authentication), adding authentication fields 
+to the XML schema, passing the virConnectPtr into the 
+Domain{Attach,Detach} methods (needed to access secrets while building 
+the qemu command), a helper that will escape arbitrary characters, and 
+finally a patch that replaces the current RBD qemu code.
+
+Comments on this approach?
+
+Thanks!
 sage
+
+
+Sage Weil (5):
+  secret: add Ceph secret type
+  storage: add authId, authDomain to virDomainDiskDef
+  qemu: pass virConnectPtr into Domain{Attach,Detach}*
+  buf: implement generic virBufferEscape
+  qemu/rbd: improve rbd device specification
+
+ include/libvirt/libvirt.h.in                       |    3 +
+ src/conf/domain_conf.c                             |   43 +++-
+ src/conf/domain_conf.h                             |    2 +
+ src/conf/secret_conf.c                             |   45 ++++-
+ src/conf/secret_conf.h                             |    1 +
+ src/libvirt_private.syms                           |    1 +
+ src/qemu/qemu_command.c                            |  273 +++++++++++---------
+ src/qemu/qemu_command.h                            |    3 +-
+ src/qemu/qemu_driver.c                             |   17 +-
+ src/qemu/qemu_hotplug.c                            |   15 +-
+ src/qemu/qemu_hotplug.h                            |    9 +-
+ src/secret/secret_driver.c                         |    8 +
+ src/util/buf.c                                     |   33 ++-
+ src/util/buf.h                                     |    1 +
+ .../qemuxml2argv-disk-drive-network-rbd.args       |    6 +-
+ .../qemuxml2argv-disk-drive-network-rbd.xml        |    1 +
+ 16 files changed, 305 insertions(+), 156 deletions(-)
+
+-- 
+1.7.4.1
+
