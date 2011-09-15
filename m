@@ -1,12 +1,12 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 1/5] secret: add Ceph secret type
-Date: Thu, 15 Sep 2011 13:52:20 -0700
-Message-ID: <1316119944-25201-2-git-send-email-sage@newdream.net>
+Subject: [PATCH 4/5] buf: implement generic virBufferEscape
+Date: Thu, 15 Sep 2011 13:52:23 -0700
+Message-ID: <1316119944-25201-5-git-send-email-sage@newdream.net>
 References: <1316119944-25201-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49121 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:49131 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934883Ab1IOUw2 (ORCPT
+	with ESMTP id S934898Ab1IOUw2 (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Sep 2011 16:52:28 -0400
 In-Reply-To: <1316119944-25201-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -14,161 +14,95 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: libvir-list@redhat.com
 Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-Add a new secret type to store a Ceph authentication key.  The ceph_id
-field contains the name of the key (e.g. 'admin' for the ceph superuser).
+Implement a generic helper to escape a given set of characters with a
+leading '\'.  Generalizes virBufferEscapeSexpr().
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- include/libvirt/libvirt.h.in |    3 ++
- src/conf/secret_conf.c       |   45 +++++++++++++++++++++++++++++++++++++++++-
- src/conf/secret_conf.h       |    1 +
- src/secret/secret_driver.c   |    8 +++++++
- 4 files changed, 56 insertions(+), 1 deletions(-)
+ src/libvirt_private.syms |    1 +
+ src/util/buf.c           |   33 ++++++++++++++++++++++++++-------
+ src/util/buf.h           |    1 +
+ 3 files changed, 28 insertions(+), 7 deletions(-)
 
-diff --git a/include/libvirt/libvirt.h.in b/include/libvirt/libvirt.h.in
-index b1bda31..51fd044 100644
---- a/include/libvirt/libvirt.h.in
-+++ b/include/libvirt/libvirt.h.in
-@@ -2257,7 +2257,10 @@ typedef virSecret *virSecretPtr;
- typedef enum {
-     VIR_SECRET_USAGE_TYPE_NONE = 0,
-     VIR_SECRET_USAGE_TYPE_VOLUME = 1,
-+    VIR_SECRET_USAGE_TYPE_CEPH = 2,
-     /* Expect more owner types later... */
-+
-+    VIR_SECRET_USAGE_TYPE_LAST
- } virSecretUsageType;
- 
- virConnectPtr           virSecretGetConnect     (virSecretPtr secret);
-diff --git a/src/conf/secret_conf.c b/src/conf/secret_conf.c
-index 105afbe..8f11a51 100644
---- a/src/conf/secret_conf.c
-+++ b/src/conf/secret_conf.c
-@@ -35,7 +35,8 @@
- 
- #define VIR_FROM_THIS VIR_FROM_SECRET
- 
--VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_VOLUME + 1, "none", "volume")
-+VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_LAST,
-+              "none", "volume", "ceph")
- 
- void
- virSecretDefFree(virSecretDefPtr def)
-@@ -52,6 +53,10 @@ virSecretDefFree(virSecretDefPtr def)
-         VIR_FREE(def->usage.volume);
-         break;
- 
-+    case VIR_SECRET_USAGE_TYPE_CEPH:
-+        VIR_FREE(def->usage.authIdDomain);
-+        break;
-+
-     default:
-         VIR_ERROR(_("unexpected secret usage type %d"), def->usage_type);
-         break;
-@@ -65,6 +70,8 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
+diff --git a/src/libvirt_private.syms b/src/libvirt_private.syms
+index 830222b..d230fab 100644
+--- a/src/libvirt_private.syms
++++ b/src/libvirt_private.syms
+@@ -25,6 +25,7 @@ virBufferAddChar;
+ virBufferAsprintf;
+ virBufferContentAndReset;
+ virBufferError;
++virBufferEscape;
+ virBufferEscapeSexpr;
+ virBufferEscapeString;
+ virBufferFreeAndReset;
+diff --git a/src/util/buf.c b/src/util/buf.c
+index 5002486..7d0d2d3 100644
+--- a/src/util/buf.c
++++ b/src/util/buf.c
+@@ -383,9 +383,29 @@ virBufferEscapeSexpr(const virBufferPtr buf,
+                      const char *format,
+                      const char *str)
  {
-     char *type_str;
-     int type;
-+    char *authId, *authDomain;
-+    int ret;
++    virBufferEscape(buf, "\\\'", format, str);
++}
++
++/**
++ * virBufferEscape:
++ * @buf:  the buffer to dump
++ * @toescape: NULL-terminated list of characters to escape
++ * @format: a printf like format string but with only one %s parameter
++ * @str:  the string argument which need to be escaped
++ *
++ * Do a formatted print with a single string to a buffer.  Any characters
++ * in the provided list are escaped with a preceeding \.
++ */
++void
++virBufferEscape(const virBufferPtr buf,
++                const char *toescape,
++                const char *format,
++                const char *str)
++{
+     int len;
+     char *escaped, *out;
+     const char *cur;
++    const char *p;
  
-     type_str = virXPathString("string(./usage/@type)", ctxt);
-     if (type_str == NULL) {
-@@ -94,6 +101,27 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
+     if ((format == NULL) || (buf == NULL) || (str == NULL))
+         return;
+@@ -408,14 +428,13 @@ virBufferEscapeSexpr(const virBufferPtr buf,
+     cur = str;
+     out = escaped;
+     while (*cur != 0) {
+-        switch (*cur) {
+-        case '\\':
+-        case '\'':
+-            *out++ = '\\';
+-            /* fallthrough */
+-        default:
+-            *out++ = *cur;
++        for (p = toescape; *p; ++p) {
++            if (*cur == *p) {
++                *out++ = '\\';
++                break;
++            }
          }
-         break;
- 
-+    case VIR_SECRET_USAGE_TYPE_CEPH:
-+        authId = virXPathString("string(./usage/auth/@id)", ctxt);
-+        if (!authId) {
-+            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
-+                                 _("ceph usage specified, but auth id is missing"));
-+            return -1;
-+        }
-+        authDomain = virXPathString("string(./usage/auth/@domain)", ctxt);
-+        if (!authDomain) {
-+            VIR_FREE(authId);
-+            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
-+                                 _("ceph usage specified, but auth domain is missing"));
-+            return -1;
-+        }
-+        ret = virAlloc(&def->usage.authIdDomain, strlen(authId) +
-+                       strlen(authDomain) + 2);
-+        sprintf(def->usage.authIdDomain, "%s/%s", authId, authDomain);
-+        VIR_FREE(authId);
-+        VIR_FREE(authDomain);
-+        break;
-+
-     default:
-         virSecretReportError(VIR_ERR_INTERNAL_ERROR,
-                              _("unexpected secret usage type %d"),
-@@ -220,6 +248,9 @@ virSecretDefFormatUsage(virBufferPtr buf,
-                         const virSecretDefPtr def)
- {
-     const char *type;
-+    char *p;
-+    char idAuth[80];
-+    int len;
- 
-     type = virSecretUsageTypeTypeToString(def->usage_type);
-     if (type == NULL) {
-@@ -239,6 +270,18 @@ virSecretDefFormatUsage(virBufferPtr buf,
-                                   def->usage.volume);
-         break;
- 
-+    case VIR_SECRET_USAGE_TYPE_CEPH:
-+        if (def->usage.authIdDomain != NULL) {
-+            p = strchr(def->usage.authIdDomain, '/');
-+            len = p - def->usage.authIdDomain;
-+            strncpy(idAuth, def->usage.authIdDomain, len);
-+            idAuth[len] = '\0';
-+            p++;
-+            virBufferEscapeString(buf, "    <auth id='%s'", idAuth);
-+            virBufferEscapeString(buf, " domain='%s'/>\n", p);
-+        }
-+        break;
-+
-     default:
-         virSecretReportError(VIR_ERR_INTERNAL_ERROR,
-                              _("unexpected secret usage type %d"),
-diff --git a/src/conf/secret_conf.h b/src/conf/secret_conf.h
-index 4b47c52..294e7ab 100644
---- a/src/conf/secret_conf.h
-+++ b/src/conf/secret_conf.h
-@@ -42,6 +42,7 @@ struct _virSecretDef {
-     int usage_type;
-     union {
-         char *volume;               /* May be NULL */
-+        char *authIdDomain;
-     } usage;
- };
- 
-diff --git a/src/secret/secret_driver.c b/src/secret/secret_driver.c
-index 59dc687..7ea8a49 100644
---- a/src/secret/secret_driver.c
-+++ b/src/secret/secret_driver.c
-@@ -144,6 +144,11 @@ secretFindByUsage(virSecretDriverStatePtr driver, int usageType, const char *usa
-             if (STREQ(s->def->usage.volume, usageID))
-                 return s;
-             break;
-+
-+        case VIR_SECRET_USAGE_TYPE_CEPH:
-+            if (STREQ(s->def->usage.authIdDomain, usageID))
-+                return s;
-+            break;
-         }
++        *out++ = *cur;
+         cur++;
      }
-     return NULL;
-@@ -607,6 +612,9 @@ secretUsageIDForDef(virSecretDefPtr def)
-     case VIR_SECRET_USAGE_TYPE_VOLUME:
-         return def->usage.volume;
+     *out = 0;
+diff --git a/src/util/buf.h b/src/util/buf.h
+index 06d01ba..e545ed9 100644
+--- a/src/util/buf.h
++++ b/src/util/buf.h
+@@ -50,6 +50,7 @@ void virBufferStrcat(const virBufferPtr buf, ...)
+   ATTRIBUTE_SENTINEL;
+ void virBufferEscapeString(const virBufferPtr buf, const char *format, const char *str);
+ void virBufferEscapeSexpr(const virBufferPtr buf, const char *format, const char *str);
++void virBufferEscape(const virBufferPtr buf, const char *toescape, const char *format, const char *str);
+ void virBufferURIEncodeString (const virBufferPtr buf, const char *str);
  
-+    case VIR_SECRET_USAGE_TYPE_CEPH:
-+        return def->usage.authIdDomain;
-+
-     default:
-         return NULL;
-     }
+ # define virBufferAddLit(buf_, literal_string_) \
 -- 
 1.7.4.1
 
