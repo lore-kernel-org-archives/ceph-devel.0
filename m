@@ -1,12 +1,12 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 4/5] buf: implement generic virBufferEscape
-Date: Thu, 15 Sep 2011 13:52:23 -0700
-Message-ID: <1316119944-25201-5-git-send-email-sage@newdream.net>
+Subject: [PATCH 2/5] storage: add authId, authDomain to virDomainDiskDef
+Date: Thu, 15 Sep 2011 13:52:21 -0700
+Message-ID: <1316119944-25201-3-git-send-email-sage@newdream.net>
 References: <1316119944-25201-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49131 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:49124 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934898Ab1IOUw2 (ORCPT
+	with ESMTP id S934896Ab1IOUw2 (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Sep 2011 16:52:28 -0400
 In-Reply-To: <1316119944-25201-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -14,95 +14,143 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: libvir-list@redhat.com
 Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-Implement a generic helper to escape a given set of characters with a
-leading '\'.  Generalizes virBufferEscapeSexpr().
+Add additional fields to let you specify the how to authenticate with a
+network disk type.  The authId is the name to authenticate as, and the
+authDomain optionally describes the domain that user exists in.  The latter
+allows us to locate a secret in using the libvirt secrets API, as the user
+is may not unique if libvirt is talking to multiple backend clusters.
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- src/libvirt_private.syms |    1 +
- src/util/buf.c           |   33 ++++++++++++++++++++++++++-------
- src/util/buf.h           |    1 +
- 3 files changed, 28 insertions(+), 7 deletions(-)
+ src/conf/domain_conf.c |   43 ++++++++++++++++++++++++++++++++++---------
+ src/conf/domain_conf.h |    2 ++
+ 2 files changed, 36 insertions(+), 9 deletions(-)
 
-diff --git a/src/libvirt_private.syms b/src/libvirt_private.syms
-index 830222b..d230fab 100644
---- a/src/libvirt_private.syms
-+++ b/src/libvirt_private.syms
-@@ -25,6 +25,7 @@ virBufferAddChar;
- virBufferAsprintf;
- virBufferContentAndReset;
- virBufferError;
-+virBufferEscape;
- virBufferEscapeSexpr;
- virBufferEscapeString;
- virBufferFreeAndReset;
-diff --git a/src/util/buf.c b/src/util/buf.c
-index 5002486..7d0d2d3 100644
---- a/src/util/buf.c
-+++ b/src/util/buf.c
-@@ -383,9 +383,29 @@ virBufferEscapeSexpr(const virBufferPtr buf,
-                      const char *format,
-                      const char *str)
+diff --git a/src/conf/domain_conf.c b/src/conf/domain_conf.c
+index 010ce57..5b80a9e 100644
+--- a/src/conf/domain_conf.c
++++ b/src/conf/domain_conf.c
+@@ -2066,7 +2066,7 @@ virDomainDiskDefParseXML(virCapsPtr caps,
+                          unsigned int flags)
  {
-+    virBufferEscape(buf, "\\\'", format, str);
-+}
-+
-+/**
-+ * virBufferEscape:
-+ * @buf:  the buffer to dump
-+ * @toescape: NULL-terminated list of characters to escape
-+ * @format: a printf like format string but with only one %s parameter
-+ * @str:  the string argument which need to be escaped
-+ *
-+ * Do a formatted print with a single string to a buffer.  Any characters
-+ * in the provided list are escaped with a preceeding \.
-+ */
-+void
-+virBufferEscape(const virBufferPtr buf,
-+                const char *toescape,
-+                const char *format,
-+                const char *str)
-+{
-     int len;
-     char *escaped, *out;
-     const char *cur;
-+    const char *p;
+     virDomainDiskDefPtr def;
+-    xmlNodePtr cur, host;
++    xmlNodePtr cur, child;
+     char *type = NULL;
+     char *device = NULL;
+     char *driverName = NULL;
+@@ -2084,6 +2084,8 @@ virDomainDiskDefParseXML(virCapsPtr caps,
+     char *devaddr = NULL;
+     virStorageEncryptionPtr encryption = NULL;
+     char *serial = NULL;
++    char *authId = NULL;
++    char *authDomain = NULL;
  
-     if ((format == NULL) || (buf == NULL) || (str == NULL))
-         return;
-@@ -408,14 +428,13 @@ virBufferEscapeSexpr(const virBufferPtr buf,
-     cur = str;
-     out = escaped;
-     while (*cur != 0) {
--        switch (*cur) {
--        case '\\':
--        case '\'':
--            *out++ = '\\';
--            /* fallthrough */
--        default:
--            *out++ = *cur;
-+        for (p = toescape; *p; ++p) {
-+            if (*cur == *p) {
-+                *out++ = '\\';
-+                break;
-+            }
-         }
-+        *out++ = *cur;
-         cur++;
-     }
-     *out = 0;
-diff --git a/src/util/buf.h b/src/util/buf.h
-index 06d01ba..e545ed9 100644
---- a/src/util/buf.h
-+++ b/src/util/buf.h
-@@ -50,6 +50,7 @@ void virBufferStrcat(const virBufferPtr buf, ...)
-   ATTRIBUTE_SENTINEL;
- void virBufferEscapeString(const virBufferPtr buf, const char *format, const char *str);
- void virBufferEscapeSexpr(const virBufferPtr buf, const char *format, const char *str);
-+void virBufferEscape(const virBufferPtr buf, const char *toescape, const char *format, const char *str);
- void virBufferURIEncodeString (const virBufferPtr buf, const char *str);
+     if (VIR_ALLOC(def) < 0) {
+         virReportOOMError();
+@@ -2137,10 +2139,10 @@ virDomainDiskDefParseXML(virCapsPtr caps,
+                                              _("missing name for disk source"));
+                         goto error;
+                     }
+-                    host = cur->children;
+-                    while (host != NULL) {
+-                        if (host->type == XML_ELEMENT_NODE &&
+-                            xmlStrEqual(host->name, BAD_CAST "host")) {
++                    child = cur->children;
++                    while (child != NULL) {
++                        if (child->type == XML_ELEMENT_NODE &&
++                            xmlStrEqual(child->name, BAD_CAST "host")) {
+                             if (VIR_REALLOC_N(hosts, nhosts + 1) < 0) {
+                                 virReportOOMError();
+                                 goto error;
+@@ -2149,20 +2151,30 @@ virDomainDiskDefParseXML(virCapsPtr caps,
+                             hosts[nhosts].port = NULL;
+                             nhosts++;
  
- # define virBufferAddLit(buf_, literal_string_) \
+-                            hosts[nhosts - 1].name = virXMLPropString(host, "name");
++                            hosts[nhosts - 1].name = virXMLPropString(child, "name");
+                             if (!hosts[nhosts - 1].name) {
+                                 virDomainReportError(VIR_ERR_INTERNAL_ERROR,
+                                                      "%s", _("missing name for host"));
+                                 goto error;
+                             }
+-                            hosts[nhosts - 1].port = virXMLPropString(host, "port");
++                            hosts[nhosts - 1].port = virXMLPropString(child, "port");
+                             if (!hosts[nhosts - 1].port) {
+                                 virDomainReportError(VIR_ERR_INTERNAL_ERROR,
+                                                      "%s", _("missing port for host"));
+                                 goto error;
+                             }
+                         }
+-                        host = host->next;
++                        if (child->type == XML_ELEMENT_NODE &&
++                            xmlStrEqual(child->name, BAD_CAST "auth")) {
++                            authId = virXMLPropString(child, "id");
++                            if (!authId) {
++                                virDomainReportError(VIR_ERR_INTERNAL_ERROR,
++                                                     "%s", _("missing id for auth"));
++                                goto error;
++                            }
++                            authDomain = virXMLPropString(child, "domain");
++                        }
++                        child = child->next;
+                     }
+                     break;
+                 default:
+@@ -2373,6 +2385,10 @@ virDomainDiskDefParseXML(virCapsPtr caps,
+     hosts = NULL;
+     def->nhosts = nhosts;
+     nhosts = 0;
++    def->authId = authId;
++    authId = NULL;
++    def->authDomain = authDomain;
++    authDomain = NULL;
+     def->driverName = driverName;
+     driverName = NULL;
+     def->driverType = driverType;
+@@ -2408,6 +2424,8 @@ cleanup:
+     VIR_FREE(hosts);
+     VIR_FREE(protocol);
+     VIR_FREE(device);
++    VIR_FREE(authDomain);
++    VIR_FREE(authId);
+     VIR_FREE(driverType);
+     VIR_FREE(driverName);
+     VIR_FREE(cachetag);
+@@ -8645,12 +8663,19 @@ virDomainDiskDefFormat(virBufferPtr buf,
+             if (def->src) {
+                 virBufferEscapeString(buf, " name='%s'", def->src);
+             }
+-            if (def->nhosts == 0) {
++            if (def->nhosts == 0 && def->authId == NULL) {
+                 virBufferAsprintf(buf, "/>\n");
+             } else {
+                 int i;
+ 
+                 virBufferAsprintf(buf, ">\n");
++                if (def->authId) {
++                    virBufferAsprintf(buf, "        <auth id='%s'",
++                                      def->authId);
++                    if (def->authDomain)
++                        virBufferAsprintf(buf, " domain='%s'", def->authDomain);
++                    virBufferStrcat(buf, "/>\n", NULL);
++                }
+                 for (i = 0; i < def->nhosts; i++) {
+                     virBufferEscapeString(buf, "        <host name='%s'",
+                                           def->hosts[i].name);
+diff --git a/src/conf/domain_conf.h b/src/conf/domain_conf.h
+index abf9cbd..8a997e1 100644
+--- a/src/conf/domain_conf.h
++++ b/src/conf/domain_conf.h
+@@ -221,6 +221,8 @@ struct _virDomainDiskDef {
+     int protocol;
+     int nhosts;
+     virDomainDiskHostDefPtr hosts;
++    char *authDomain;     /* ceph cluster name */
++    char *authId;         /* ceph auth id */
+     char *driverName;
+     char *driverType;
+     char *serial;
 -- 
 1.7.4.1
 
