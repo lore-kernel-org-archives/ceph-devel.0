@@ -1,149 +1,104 @@
-From: Daniel Veillard <veillard@redhat.com>
-Subject: Re: [libvirt] specifying rbd images in libvirt
-Date: Fri, 16 Sep 2011 18:28:56 +0800
-Message-ID: <20110916102856.GJ4190@redhat.com>
-References: <Pine.LNX.4.64.1108271207100.14206@cobra.newdream.net>
- <20110901124635.GD14462@redhat.com>
- <Pine.LNX.4.64.1109011321420.1621@cobra.newdream.net>
- <Pine.LNX.4.64.1109071635040.13143@cobra.newdream.net>
-Reply-To: veillard@redhat.com
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Re: WARNING: at fs/btrfs/inode.c:2193 btrfs_orphan_commit_root+0xb0/0xc0
+ [btrfs]()
+Date: Fri, 16 Sep 2011 16:09:26 +0200
+Message-ID: <4E735896.3000608@tuxadero.com>
+References: <4E6BDAEB.7020206@tuxadero.com> <4E6EABAF.9010903@cn.fujitsu.com> <Pine.LNX.4.64.1109151137420.17623@cobra.newdream.net> <20110915195029.GD25179@dhcp231-156.rdu.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:11627 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751469Ab1IPK3R (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 16 Sep 2011 06:29:17 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1109071635040.13143@cobra.newdream.net>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:39467 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753822Ab1IPOJo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 10:09:44 -0400
+In-Reply-To: <20110915195029.GD25179@dhcp231-156.rdu.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "Daniel P. Berrange" <berrange@redhat.com>, libvir-list@redhat.com, ceph-devel@vger.kernel.org
+To: Josef Bacik <josef@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, Liu Bo <liubo2009@cn.fujitsu.com>, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
 
-On Wed, Sep 07, 2011 at 04:54:37PM -0700, Sage Weil wrote:
-> On Thu, 1 Sep 2011, Sage Weil wrote:
-> > On Thu, 1 Sep 2011, Daniel P. Berrange wrote:
-> > > On Sat, Aug 27, 2011 at 12:19:33PM -0700, Sage Weil wrote:
-> > > > Hi all,
-> > > > 
-> > > > Currently, you can specify an rbd (or nbd, sheepdog) image with xml 
-> > > > that looks like so:
-> > > > 
-> > > >     <disk type='network' device='disk'>
-> > > >       <driver name='qemu' type='raw' cache='writeback'/>
-> > > >       <source protocol='rbd' name='mypool/myimage'>
-> > > >         <host name='monhost1.mydomain.com' port='6789'/>
-> > > >         <host name='monhost2.mydomain.com' port='6789'/>
-> > > >         <host name='monhost3.mydomain.com' port='6789'/>
-> > > >       </source>
-> > > >       <target dev='vda' bus='virtio'/>
-> > > >     </disk>
-> > > > 
-> > > > This works okay if you have authentication disabled and all of the default 
-> > > > settings are okay.  Usually, though, there are other options you need to 
-> > > > specify to librbd to make it do what you want.  
-> > > > 
-> > > > The current schema can be abused by adding options after the image name 
-> > > > like so:
-> > > > 
-> > > >     <disk type='network' device='disk'>
-> > > >       <driver name='qemu' type='raw' cache='writeback'/>
-> > > >       <source protocol='rbd' name='mypool/myimage:conf=/etc/ceph/ceph.conf:id=admin:this=that:foo=bar'>
-> > > >         <host name='monhost1.mydomain.com' port='6789'/>
-> > > >         <host name='monhost2.mydomain.com' port='6789'/>
-> > > >         <host name='monhost3.mydomain.com' port='6789'/>
-> > > >       </source>
-> > > >       <target dev='vda' bus='virtio'/>
-> > > >     </disk>
-> > > > 
-> > > > This works only because that's what the qemu incantation looks like.  In 
-> > > > general, though, this is ugly.  I also doesn't generalize well to the 
-> > > > kernel-level rbd driver, which we'd like to also support, as that will 
-> > > > work with hypervisors other than qemu.
-> > > 
-> > > Also, we should be doing some validation on the content of
-> > > the 'name' attribute to prevent abuse like that.
-> > > 
-> > > > What about something more like this?
-> > > > 
-> > > >     <disk type='network' device='disk'>
-> > > >       <driver name='qemu' type='raw' cache='writeback'/>
-> > > >       <source protocol='rbd' name='mypool/myimage'>
-> > > >         <option name='conf'>/etc/ceph/ceph.conf</option>
-> > > >         <option name='id'>myusername</option>
-> > > >         <option name='foo'>bar</option>
-> > > >         <host name='monhost1.mydomain.com' port='6789'/>
-> > > >         <host name='monhost2.mydomain.com' port='6789'/>
-> > > >         <host name='monhost3.mydomain.com' port='6789'/>
-> > > >       </source>
-> > > >       <target dev='vda' bus='virtio'/>
-> > > >     </disk>
-> > > > 
-> > > > I'm not married to any particular syntax/schema, as long as there is a 
-> > > > generic way to specify name/value pairs to configure the driver.  I think 
-> > > > the above would generalize well to other network block devices as well, 
-> > > > which presumably also want a way to feed in information other than a 
-> > > > server address (e.g. for authentication).
-> > > > 
-> > > > Does that look reasonable?  If there are no objections we can work up some 
-> > > > patches and send them along!
-> > > 
-> > > We generally prefer to add explicit models for attributes, rather than
-> > > just do a generic key/value passthrough.
-> > 
-> > Fair enough.  For the qemu/librbd and kernel drivers, the key fields we 
-> > need are:
-> > 
-> >  id - ceph userid to authenticate as
-> >  snap - snapshot name (optional; used if mapping a read-only snapshot)
-> > 
-> > The goal would be to have libvirt describe rbd images in a generic way, 
-> > and let you managed them as a storage pool via librbd.  Then, when it 
-> > comes time to spin up an actual VM, either use the native qemu support or 
-> > map a kernel block device.  To control that it might make sense to have an 
-> > option like
-> > 
-> >  driver - librbd (qemu-only), kernel, or auto (default)
-> > 
-> > to let users control which driver to use in the qemu case.
-> > 
-> > > For authentication credentials, we also need to consider security
-> > > implications of keeping them in the XML. For qcow2 encryption
-> > > keys, we leverage the separate libvirt secrets management APIs
-> > > to provide the keys outside the XML. IMHO we should likely do the
-> > > same for any keys required to login to network block devices.
-> > 
-> > Usually we keep secrets in a file on disk and reference the file when 
-> > starting up librbd or mapping a kernel rbd device.  It's possible to 
-> > specify it explicitly but that is discouraged.  So by specifying id=foo 
-> > above, librbd would normally look for a key called foo in its default 
-> > keyring file.
-> > 
-> > We can definitely use the libvirt secrets API to store these keys there, 
-> > too.  In that case, we would need something like
-> > 
-> >  keyname - name of the libvirt secret to use for authentication
-> > 
-> > What do you think?
-> 
-> Shall I take silence as general agreement and start putting together 
-> patches?
+Hi Josef,
+after a quick test it seems that I do not hit this Warning any longer.
+But I got a new one.
 
-  I would think so, yes :-)
+[ 5241.839951] ------------[ cut here ]------------
+[ 5241.839974] WARNING: at fs/btrfs/extent-tree.c:5715 
+btrfs_alloc_free_block+0xac/0x330 [btrfs]()
+[ 5241.839979] Hardware name: MS-96B3
+[ 5241.839982] Modules linked in: radeon ttm drm_kms_helper drm 
+i2c_algo_bit psmouse k8temp sp5100_tco edac_core edac_mce_amd serio_raw 
+shpchp i2c_piix4 lp parport ahci pata_atiixp libahci btrfs e1000e 
+zlib_deflate libcrc32c
+[ 5241.840068] Pid: 1568, comm: kworker/0:1 Tainted: G        W 
+3.1.0-rc6 #1
+[ 5241.840072] Call Trace:
+[ 5241.840084]  [<ffffffff81063d0f>] warn_slowpath_common+0x7f/0xc0
+[ 5241.840101]  [<ffffffff81063d6a>] warn_slowpath_null+0x1a/0x20
+[ 5241.840133]  [<ffffffffa002a9cc>] btrfs_alloc_free_block+0xac/0x330 
+[btrfs]
+[ 5241.840152]  [<ffffffff8110d35a>] ? unlock_page+0x2a/0x40
+[ 5241.840188]  [<ffffffffa0059268>] ? read_extent_buffer+0xa8/0x180 [btrfs]
+[ 5241.840222]  [<ffffffffa0031c00>] ? verify_parent_transid+0x160/0x160 
+[btrfs]
+[ 5241.840252]  [<ffffffffa001a0d2>] __btrfs_cow_block+0x122/0x4b0 [btrfs]
+[ 5241.840283]  [<ffffffffa001a552>] btrfs_cow_block+0xf2/0x1f0 [btrfs]
+[ 5241.840314]  [<ffffffffa001cb88>] push_leaf_left+0x108/0x180 [btrfs]
+[ 5241.840344]  [<ffffffffa001fb78>] btrfs_del_items+0x2b8/0x440 [btrfs]
+[ 5241.840379]  [<ffffffffa00300c2>] btrfs_del_csums+0x2d2/0x310 [btrfs]
+[ 5241.840415]  [<ffffffffa00677a8>] ? btrfs_tree_unlock+0x28/0xb0 [btrfs]
+[ 5241.840447]  [<ffffffffa002597a>] __btrfs_free_extent+0x48a/0x6f0 [btrfs]
+[ 5241.840480]  [<ffffffffa0028c8d>] run_clustered_refs+0x21d/0x840 [btrfs]
+[ 5241.840514]  [<ffffffffa002937a>] btrfs_run_delayed_refs+0xca/0x220 
+[btrfs]
+[ 5241.840551]  [<ffffffffa0053576>] ? 
+btrfs_run_ordered_operations+0x1d6/0x200 [btrfs]
+[ 5241.840587]  [<ffffffffa0038fa3>] btrfs_commit_transaction+0x83/0x870 
+[btrfs]
+[ 5241.840605]  [<ffffffff81012871>] ? __switch_to+0x261/0x2f0
+[ 5241.840622]  [<ffffffff81086d70>] ? wake_up_bit+0x40/0x40
+[ 5241.840656]  [<ffffffffa0039790>] ? 
+btrfs_commit_transaction+0x870/0x870 [btrfs]
+[ 5241.840691]  [<ffffffffa00397af>] do_async_commit+0x1f/0x30 [btrfs]
+[ 5241.840708]  [<ffffffff8108110d>] process_one_work+0x11d/0x430
+[ 5241.840724]  [<ffffffff81081dd9>] worker_thread+0x169/0x360
+[ 5241.840741]  [<ffffffff81081c70>] ? manage_workers.clone.21+0x240/0x240
+[ 5241.840758]  [<ffffffff81086616>] kthread+0x96/0xa0
+[ 5241.840775]  [<ffffffff815f2434>] kernel_thread_helper+0x4/0x10
+[ 5241.840792]  [<ffffffff81086580>] ? flush_kthread_worker+0xb0/0xb0
+[ 5241.840808]  [<ffffffff815f2430>] ? gs_change+0x13/0x13
+[ 5241.840819] ---[ end trace c8a580615cad6cb5 ]---
 
-> I don't think there's anything controversial here.  I suspect the main 
-> concern is that these fields are named in a sufficiently general fashion 
-> so that they can be used for other backend storage types.
 
-  I guess the best is to start with the patches with the XML changes as
-an RFC and then add the code to wire the backend as a second step. Even
-if both are likely to be applied as a batch, the XML code review is
-likely to be the most controversial :-)
+Best Regards,
+  Martin
 
-Daniel
+Am 15.09.2011 21:50, schrieb Josef Bacik:
+> On Thu, Sep 15, 2011 at 11:44:09AM -0700, Sage Weil wrote:
+>> On Tue, 13 Sep 2011, Liu Bo wrote:
+>>> On 09/11/2011 05:47 AM, Martin Mailand wrote:
+>>>> Hi
+>>>> I am hitting this Warning reproducible, the workload is a ceph osd,
+>>>> kernel ist 3.1.0-rc5.
+>>>>
+>>>
+>>> Have posted a patch for this:
+>>>
+>>> http://marc.info/?l=linux-btrfs&m=131547325515336&w=2
+>>
+>> We're still seeing this with -rc6, which includes 98c9942 and 65450aa.
+>>
+>> I haven't looked at the reservation code in much detail.  Is there
+>> anything I can do to help track this down?
+>>
+>
+> This should be taken care of with all my enospc changes.  You can pull them down
+> from my btrfs-work tree as soon as kernel.org comes back from the dead :).
+> Thanks,
+>
+> Josef
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
--- 
-Daniel Veillard      | libxml Gnome XML XSLT toolkit  http://xmlsoft.org/
-daniel@veillard.com  | Rpmfind RPM search engine http://rpmfind.net/
-http://veillard.com/ | virtualization library  http://libvirt.org/
