@@ -1,50 +1,25 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: rbd snap
-Date: Sat, 17 Sep 2011 00:36:33 +0200
-Message-ID: <4E73CF71.9090708@tuxadero.com>
-References: <4E736107.4050309@tuxadero.com> <Pine.LNX.4.64.1109160928170.11043@cobra.newdream.net> <4E73C064.7020104@tuxadero.com> <4E73CC58.9070503@dreamhost.com>
-Reply-To: martin@tuxadero.com
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: [PATCH 1/2] doc: Add section about changing config values
+Date: Fri, 16 Sep 2011 15:47:10 -0700
+Message-ID: <CAORUGqD_sLuvymZdK8p+Mdw+H-ehsJ=xpYLhhHUt6-qoenVVAA@mail.gmail.com>
+References: <1316210308-13560-1-git-send-email-cmccabe@alumni.cmu.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:41290 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751780Ab1IPWgn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 18:36:43 -0400
-In-Reply-To: <4E73CC58.9070503@dreamhost.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:50022 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754865Ab1IPWrb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 18:47:31 -0400
+Received: by wwf22 with SMTP id 22so5659565wwf.1
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2011 15:47:30 -0700 (PDT)
+In-Reply-To: <1316210308-13560-1-git-send-email-cmccabe@alumni.cmu.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: Colin Patrick McCabe <cmccabe@alumni.cmu.edu>
+Cc: ceph-devel@vger.kernel.org, Colin McCabe <colin.mccabe@dreamhost.com>
 
-Hi Josh,
-right, that's my mistake, I will try it with the right commandline tomorrow.
+On Fri, Sep 16, 2011 at 14:58, Colin Patrick McCabe
+<cmccabe@alumni.cmu.edu> wrote:
+> Signed-off-by: Colin McCabe <colin.mccabe@dreamhost.com>
 
-Best Regards,
-  martin
-
-Josh Durgin schrieb:
-> On 09/16/2011 02:32 PM, Martin Mailand wrote:
->> root@c-brick-001:~# rbd rm --snap=2011091601 test
->> *** Caught signal (Segmentation fault) **
->> in thread 0x7f203d749740
->> ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
->> 1: rbd() [0x457062]
->> 2: (()+0xfc60) [0x7f203ccf6c60]
->> 3: (librbd::snap_set(librbd::ImageCtx*, char const*)+0x10) 
->> [0x7f203d32ecd0]
->> 4: (main()+0x59f) [0x4518ff]
->> 5: (__libc_start_main()+0xff) [0x7f203b6cdeff]
->> 6: rbd() [0x44d569]
->> Segmentation fault
-> 
-> I added a bug to the tracker for this 
-> (http://tracker.newdream.net/issues/1545). It shouldn't crash the way 
-> you ran it, but if you're trying to remove a snapshot you need to use 
-> the 'snap rm' command, i.e.:
-> $ rbd snap rm --snap=2011091601 test
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Applied both, thanks.
