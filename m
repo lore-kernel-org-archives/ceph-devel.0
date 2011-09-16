@@ -1,50 +1,38 @@
-From: Jim Schutt <jaschut@sandia.gov>
-Subject: [PATCH] libceph: initialize ack_stamp to avoid unnecessary connection reset
-Date: Fri, 16 Sep 2011 08:27:31 -0600
-Message-ID: <1316183251-18945-1-git-send-email-jaschut@sandia.gov>
+From: Josef Bacik <josef@redhat.com>
+Subject: Re: WARNING: at fs/btrfs/inode.c:2193 btrfs_orphan_commit_root+0xb0/0xc0
+ [btrfs]()
+Date: Fri, 16 Sep 2011 10:37:10 -0400
+Message-ID: <4E735F16.7000303@redhat.com>
+References: <4E6BDAEB.7020206@tuxadero.com> <4E6EABAF.9010903@cn.fujitsu.com> <Pine.LNX.4.64.1109151137420.17623@cobra.newdream.net> <20110915195029.GD25179@dhcp231-156.rdu.redhat.com> <4E735896.3000608@tuxadero.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:36127 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752616Ab1IPO1q (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 10:27:46 -0400
-Received: from interceptor2.sandia.gov (interceptor2.sandia.gov [132.175.109.18])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by sentry-two.sandia.gov (Postfix) with ESMTP id 1A635269CBD
-	for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2011 08:27:43 -0600 (MDT)
-Received: from mailgate.sandia.gov (mailgate.sandia.gov [132.175.109.1]) by interceptor2.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2011 08:27:34 -0600
+Received: from mx1.redhat.com ([209.132.183.28]:3870 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754582Ab1IPOh0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 16 Sep 2011 10:37:26 -0400
+In-Reply-To: <4E735896.3000608@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Jim Schutt <jaschut@sandia.gov>
+To: Martin Mailand <martin@tuxadero.com>
+Cc: Sage Weil <sage@newdream.net>, Liu Bo <liubo2009@cn.fujitsu.com>, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
 
-Commit 4cf9d544631c recorded when an outgoing ceph message was ACKed,
-in order to avoid unnecessary connection resets when an OSD is busy.
+On 09/16/2011 10:09 AM, Martin Mailand wrote:
+> Hi Josef,
+> after a quick test it seems that I do not hit this Warning any longer.
+> But I got a new one.
+> 
 
-However, ack_stamp is uninitialized, so there is a window between
-when the message is sent and when it is ACKed in which handle_timeout()
-interprets the unitialized value as an expired timeout, and resets
-the connection unnecessarily.
+Hmm looks like that may not be my newest stuff, is commit
 
-Close the window by initializing ack_stamp.
+57f499e1bb76ba3ebeb09cd12e9dac84baa5812b
 
-Signed-off-by: Jim Schutt <jaschut@sandia.gov>
----
- net/ceph/messenger.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+in there?  Specifically look at __btrfs_end_transaction in transaction.c
+and see if the line
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index e6d4857..f56aca3 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -2308,6 +2308,7 @@ struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
- 	m->front_max = front_len;
- 	m->front_is_vmalloc = false;
- 	m->more_to_follow = false;
-+	m->ack_stamp = 0;
- 	m->pool = NULL;
- 
- 	/* middle */
--- 
-1.7.1
+trans->block_rsv = NULL;
 
+is before the first while() loop.  Thanks,
+
+Josef
