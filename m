@@ -1,198 +1,87 @@
-From: Osier Yang <jyang@redhat.com>
-Subject: Re: [libvirt] [PATCH 1/5] secret: add Ceph secret type
-Date: Fri, 16 Sep 2011 16:18:14 +0800
-Message-ID: <4E730646.5080906@redhat.com>
-References: <1316119944-25201-1-git-send-email-sage@newdream.net> <1316119944-25201-2-git-send-email-sage@newdream.net>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Re: ceph kernel bug
+Date: Fri, 16 Sep 2011 11:05:11 +0200
+Message-ID: <4E731147.6010405@tuxadero.com>
+References: <4E6BD2B4.7050709@tuxadero.com> <Pine.LNX.4.64.1109101546370.19147@cobra.newdream.net> <4E6BF6C3.5010202@tuxadero.com> <4E7254D6.9020509@tuxadero.com> <Pine.LNX.4.64.1109151302160.17623@cobra.newdream.net> <4E7269D1.6010804@tuxadero.com> <Pine.LNX.4.64.1109151551250.27715@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:26009 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754363Ab1IPITT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 16 Sep 2011 04:19:19 -0400
-In-Reply-To: <1316119944-25201-2-git-send-email-sage@newdream.net>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:37682 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754968Ab1IPJFU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 05:05:20 -0400
+In-Reply-To: <Pine.LNX.4.64.1109151551250.27715@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org
 
-=E4=BA=8E 2011=E5=B9=B409=E6=9C=8816=E6=97=A5 04:52, Sage Weil =E5=86=99=
-=E9=81=93:
-> Add a new secret type to store a Ceph authentication key.  The ceph_i=
-d
-> field contains the name of the key (e.g. 'admin' for the ceph superus=
-er).
->
-> Signed-off-by: Sage Weil<sage@newdream.net>
-> ---
->   include/libvirt/libvirt.h.in |    3 ++
->   src/conf/secret_conf.c       |   45 +++++++++++++++++++++++++++++++=
-++++++++++-
->   src/conf/secret_conf.h       |    1 +
->   src/secret/secret_driver.c   |    8 +++++++
->   4 files changed, 56 insertions(+), 1 deletions(-)
->
-> diff --git a/include/libvirt/libvirt.h.in b/include/libvirt/libvirt.h=
-=2Ein
-> index b1bda31..51fd044 100644
-> --- a/include/libvirt/libvirt.h.in
-> +++ b/include/libvirt/libvirt.h.in
-> @@ -2257,7 +2257,10 @@ typedef virSecret *virSecretPtr;
->   typedef enum {
->       VIR_SECRET_USAGE_TYPE_NONE =3D 0,
->       VIR_SECRET_USAGE_TYPE_VOLUME =3D 1,
-> +    VIR_SECRET_USAGE_TYPE_CEPH =3D 2,
->       /* Expect more owner types later... */
-> +
-> +    VIR_SECRET_USAGE_TYPE_LAST
->   } virSecretUsageType;
->
->   virConnectPtr           virSecretGetConnect     (virSecretPtr secre=
-t);
-> diff --git a/src/conf/secret_conf.c b/src/conf/secret_conf.c
-> index 105afbe..8f11a51 100644
-> --- a/src/conf/secret_conf.c
-> +++ b/src/conf/secret_conf.c
-> @@ -35,7 +35,8 @@
->
->   #define VIR_FROM_THIS VIR_FROM_SECRET
->
-> -VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_VOLUME + 1, =
-"none", "volume")
-> +VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_LAST,
-> +              "none", "volume", "ceph")
->
->   void
->   virSecretDefFree(virSecretDefPtr def)
-> @@ -52,6 +53,10 @@ virSecretDefFree(virSecretDefPtr def)
->           VIR_FREE(def->usage.volume);
->           break;
->
-> +    case VIR_SECRET_USAGE_TYPE_CEPH:
-> +        VIR_FREE(def->usage.authIdDomain);
-> +        break;
-> +
->       default:
->           VIR_ERROR(_("unexpected secret usage type %d"), def->usage_=
-type);
->           break;
-> @@ -65,6 +70,8 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
->   {
->       char *type_str;
->       int type;
-> +    char *authId, *authDomain;
-> +    int ret;
->
->       type_str =3D virXPathString("string(./usage/@type)", ctxt);
->       if (type_str =3D=3D NULL) {
-> @@ -94,6 +101,27 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
->           }
->           break;
->
-> +    case VIR_SECRET_USAGE_TYPE_CEPH:
-> +        authId =3D virXPathString("string(./usage/auth/@id)", ctxt);
-> +        if (!authId) {
-> +            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
-> +                                 _("ceph usage specified, but auth i=
-d is missing"));
-> +            return -1;
-> +        }
-> +        authDomain =3D virXPathString("string(./usage/auth/@domain)"=
-, ctxt);
-> +        if (!authDomain) {
-> +            VIR_FREE(authId);
-> +            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
-> +                                 _("ceph usage specified, but auth d=
-omain is missing"));
-> +            return -1;
-> +        }
-> +        ret =3D virAlloc(&def->usage.authIdDomain, strlen(authId) +
-> +                       strlen(authDomain) + 2);
+Hi Sage,
+I rerun the test and I think I triggered the first bug again.
+http://pastebin.com/ydNm0pff
 
-Should use VIR_ALLOC/VIR_ALLOC_N here.
+I did also the dumps for you.
+http://tuxadero.com/multistorage/ceph.ko_dump
+http://tuxadero.com/multistorage/libceph.ko_dump
 
-> +        sprintf(def->usage.authIdDomain, "%s/%s", authId, authDomain=
-);
-> +        VIR_FREE(authId);
-> +        VIR_FREE(authDomain);
-> +        break;
-> +
->       default:
->           virSecretReportError(VIR_ERR_INTERNAL_ERROR,
->                                _("unexpected secret usage type %d"),
-> @@ -220,6 +248,9 @@ virSecretDefFormatUsage(virBufferPtr buf,
->                           const virSecretDefPtr def)
->   {
->       const char *type;
-> +    char *p;
-> +    char idAuth[80];
-> +    int len;
+Best Regards,
+  martin
+Am 16.09.2011 00:54, schrieb Sage Weil:
+> On Thu, 15 Sep 2011, Martin Mailand wrote:
+>> Hi Sage,
+>> that's quite a bit of output, I put it in a pastebin.
+>> http://pastebin.com/9CNJk0Pw.
+> Any chance you can include the output of 'objdump -rdS libceph.ko'?
+> ceph.ko too, for good measure.
 >
->       type =3D virSecretUsageTypeTypeToString(def->usage_type);
->       if (type =3D=3D NULL) {
-> @@ -239,6 +270,18 @@ virSecretDefFormatUsage(virBufferPtr buf,
->                                     def->usage.volume);
->           break;
+> This looks like a sightly different crash than the one on that bug!
 >
-> +    case VIR_SECRET_USAGE_TYPE_CEPH:
-> +        if (def->usage.authIdDomain !=3D NULL) {
-> +            p =3D strchr(def->usage.authIdDomain, '/');
-> +            len =3D p - def->usage.authIdDomain;
-> +            strncpy(idAuth, def->usage.authIdDomain, len);
-> +            idAuth[len] =3D '\0';
-> +            p++;
-> +            virBufferEscapeString(buf, "<auth id=3D'%s'", idAuth);
-> +            virBufferEscapeString(buf, " domain=3D'%s'/>\n", p);
-> +        }
-> +        break;
-> +
->       default:
->           virSecretReportError(VIR_ERR_INTERNAL_ERROR,
->                                _("unexpected secret usage type %d"),
-> diff --git a/src/conf/secret_conf.h b/src/conf/secret_conf.h
-> index 4b47c52..294e7ab 100644
-> --- a/src/conf/secret_conf.h
-> +++ b/src/conf/secret_conf.h
-> @@ -42,6 +42,7 @@ struct _virSecretDef {
->       int usage_type;
->       union {
->           char *volume;               /* May be NULL */
-> +        char *authIdDomain;
->       } usage;
->   };
+> Thanks!
+> sage
 >
-> diff --git a/src/secret/secret_driver.c b/src/secret/secret_driver.c
-> index 59dc687..7ea8a49 100644
-> --- a/src/secret/secret_driver.c
-> +++ b/src/secret/secret_driver.c
-> @@ -144,6 +144,11 @@ secretFindByUsage(virSecretDriverStatePtr driver=
-, int usageType, const char *usa
->               if (STREQ(s->def->usage.volume, usageID))
->                   return s;
->               break;
-> +
-> +        case VIR_SECRET_USAGE_TYPE_CEPH:
-> +            if (STREQ(s->def->usage.authIdDomain, usageID))
-> +                return s;
-> +            break;
->           }
->       }
->       return NULL;
-> @@ -607,6 +612,9 @@ secretUsageIDForDef(virSecretDefPtr def)
->       case VIR_SECRET_USAGE_TYPE_VOLUME:
->           return def->usage.volume;
 >
-> +    case VIR_SECRET_USAGE_TYPE_CEPH:
-> +        return def->usage.authIdDomain;
-> +
->       default:
->           return NULL;
->       }
+>> Best Regards,
+>>   martin
+>>
+>> Sage Weil schrieb:
+>>> On Thu, 15 Sep 2011, Martin Mailand wrote:
+>>>> Hi Sage,
+>>>> I am still hitting this in -rc6. It happeneds every time I stop an OSD.
+>>>> Do you need more information to reproduce it?
+>>> Oh, great to hear it's easy to reproduce!  I was trying (in my uml
+>>> environment) and failing.
+>>>
+>>> Can run the script below right before stopping the osd, and send the dmesg
+>>> output along?  (Or attach to http://tracker.newdream.net/issues/1382)
+>>>
+>>> Thanks!
+>>> sage
+>>>
+>>>
+>>> #!/bin/sh -x
+>>>
+>>> p() {
+>>>   echo "$*">  /sys/kernel/debug/dynamic_debug/control
+>>> }
+>>>
+>>> p 'module ceph +p'
+>>> p 'module libceph +p'
+>>> p 'module rbd +p'
+>>> p 'file net/ceph/messenger.c -p'
+>>> p 'file' `grep -- --- /sys/kernel/debug/dynamic_debug/control | grep ceph \
+>>> 	| awk '{print $1}' | sed 's/:/ line /'` '+p'
+>>> p 'file' `grep -- === /sys/kernel/debug/dynamic_debug/control | grep ceph \
+>>> 	| awk '{print $1}' | sed 's/:/ line /'` '+p'
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
