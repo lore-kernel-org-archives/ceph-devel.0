@@ -1,59 +1,37 @@
-From: Colin Patrick McCabe <cmccabe@alumni.cmu.edu>
-Subject: [PATCH 2/2] doc/dev/logs.rst: Add performance counter writeup
-Date: Fri, 16 Sep 2011 14:58:59 -0700
-Message-ID: <1316210339-13659-1-git-send-email-cmccabe@alumni.cmu.edu>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: rbd snap
+Date: Fri, 16 Sep 2011 15:23:20 -0700
+Message-ID: <4E73CC58.9070503@dreamhost.com>
+References: <4E736107.4050309@tuxadero.com> <Pine.LNX.4.64.1109160928170.11043@cobra.newdream.net> <4E73C064.7020104@tuxadero.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f42.google.com ([209.85.210.42]:34909 "EHLO
-	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754949Ab1IPWNN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 18:13:13 -0400
-Received: by pzk1 with SMTP id 1so3159712pzk.1
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2011 15:13:12 -0700 (PDT)
+Received: from mail.hq.newdream.net ([66.33.206.127]:38348 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753549Ab1IPWXU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 18:23:20 -0400
+In-Reply-To: <4E73C064.7020104@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Colin Patrick McCabe <cmccabe@alumni.cmu.edu>, Colin McCabe <colin.mccabe@dreamhost.com>
+To: martin@tuxadero.com
+Cc: ceph-devel@vger.kernel.org
 
-Signed-off-by: Colin McCabe <colin.mccabe@dreamhost.com>
----
- doc/dev/logs.rst |   27 +++++++++++++++++++++++++++
- 1 files changed, 27 insertions(+), 0 deletions(-)
+On 09/16/2011 02:32 PM, Martin Mailand wrote:
+> root@c-brick-001:~# rbd rm --snap=2011091601 test
+> *** Caught signal (Segmentation fault) **
+> in thread 0x7f203d749740
+> ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
+> 1: rbd() [0x457062]
+> 2: (()+0xfc60) [0x7f203ccf6c60]
+> 3: (librbd::snap_set(librbd::ImageCtx*, char const*)+0x10) [0x7f203d32ecd0]
+> 4: (main()+0x59f) [0x4518ff]
+> 5: (__libc_start_main()+0xff) [0x7f203b6cdeff]
+> 6: rbd() [0x44d569]
+> Segmentation fault
 
-diff --git a/doc/dev/logs.rst b/doc/dev/logs.rst
-index f4bef84..9532763 100644
---- a/doc/dev/logs.rst
-+++ b/doc/dev/logs.rst
-@@ -29,3 +29,30 @@ the best performance.
- 
- Sometimes, enabling logging can hide race conditions and other bugs by changing
- the timing of events. Keep this in mind when debugging.
-+
-+============
-+ Performance Counters
-+============
-+
-+Ceph daemons use performance counters to track key statistics like number of
-+inodes pinned. Performance counters are essentially sets of integers and floats
-+which can be set, incremented, and read using the PerfCounters api.
-+
-+A PerfCounters object is usually associated with a single subsystem.  It
-+contains multiple counters. This object is thread-safe because it is protected
-+by an internal mutex. You can create multiple PerfCounters objects.
-+
-+Currently, three types of performance counters are supported: u64 counters,
-+float counters, and long-run floating-point average counters. These are created
-+by PerfCountersBuilder::add_u64, PerfCountersBuilder::add_fl, and
-+PerfCountersBuilder::add_fl_avg, respectively. u64 and float counters simply
-+provide a single value which can be updated, incremented, and read atomically.
-+floating-pointer average counters provide two values: the current total, and
-+the number of times the total has been changed. This is intended to provide a
-+long-run average value.
-+
-+Performance counter information can be read in JSON format from the
-+administrative socket (admin_sock). This is implemented as a UNIX domain
-+socket. The Ceph peformance counter plugin for collectd shows an example of how
-+to access this information. Another example can be found in the unit tests for
-+the administrative sockets.
--- 
-1.7.2.5
-
+I added a bug to the tracker for this 
+(http://tracker.newdream.net/issues/1545). It shouldn't crash the way 
+you ran it, but if you're trying to remove a snapshot you need to use 
+the 'snap rm' command, i.e.:
+$ rbd snap rm --snap=2011091601 test
