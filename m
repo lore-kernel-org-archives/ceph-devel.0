@@ -1,62 +1,34 @@
-From: Sage Weil <sage@newdream.net>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
 Subject: Re: [PATCH 5/5] qemu/rbd: improve rbd device specification
-Date: Fri, 16 Sep 2011 10:01:30 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1109161000260.11043@cobra.newdream.net>
+Date: Fri, 16 Sep 2011 10:11:51 -0700
+Message-ID: <CAORUGqBCbSNnpWK67b90-9ppnL5GbKmaF5fwYtAu9hARHnkTLg@mail.gmail.com>
 References: <1316119944-25201-1-git-send-email-sage@newdream.net>
- <1316119944-25201-6-git-send-email-sage@newdream.net>
- <CAORUGqB9aAPTiRHKsuz5Rn-qcSy6JwT_5foMTu4q4GmA8FMW4A@mail.gmail.com>
+ <1316119944-25201-6-git-send-email-sage@newdream.net> <CAORUGqB9aAPTiRHKsuz5Rn-qcSy6JwT_5foMTu4q4GmA8FMW4A@mail.gmail.com>
+ <Pine.LNX.4.64.1109161000260.11043@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-701576161-1316192490=:11043"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58563 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751027Ab1IPQzd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 12:55:33 -0400
-In-Reply-To: <CAORUGqB9aAPTiRHKsuz5Rn-qcSy6JwT_5foMTu4q4GmA8FMW4A@mail.gmail.com>
+Received: from mail-wy0-f180.google.com ([74.125.82.180]:56907 "EHLO
+	mail-wy0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755423Ab1IPRMM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 13:12:12 -0400
+Received: by wyj26 with SMTP id 26so4998110wyj.11
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Sep 2011 10:12:11 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1109161000260.11043@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+To: Sage Weil <sage@newdream.net>
 Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Fri, Sep 16, 2011 at 10:01, Sage Weil <sage@newdream.net> wrote:
+>> If I'm reading this right, that puts the ceph secret on the kvm
+>> command line. That's not good, that makes it visible to anyone on the
+>> host.
+> Yeah, we definitely want something better, but I wanted to make sure the
+> overall approach is fine before doing something too annoying with
+> temporary unlinked files or environment variables or something.
 
---557981400-701576161-1316192490=:11043
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On Fri, 16 Sep 2011, Tommi Virtanen wrote:
-> On Thu, Sep 15, 2011 at 13:52, Sage Weil <sage@newdream.net> wrote:
-> > +static int buildRBDString(virConnectPtr conn,
-> ...
-> > + =A0 =A0 =A0 =A0/* look up secret */
-> > + =A0 =A0 =A0 =A0snprintf(idDomain, sizeof(idDomain), "%s/%s", disk->au=
-thId,
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 disk->authDomain);
-> > + =A0 =A0 =A0 =A0sec =3D virSecretLookupByUsage(conn,
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 VIR_SECRET_USAGE_TYPE_CEPH,
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 idDomain);
-> ...
-> > + =A0 =A0 =A0 =A0 =A0 =A0secret =3D (char *)conn->secretDriver->getValu=
-e(sec, &secret_size, 0,
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 V=
-IR_SECRET_GET_VALUE_INTERNAL_CALL);
-> > + =A0 =A0 =A0 =A0 =A0 =A0/* qemu/librbd wants it base64 encoded */
-> > + =A0 =A0 =A0 =A0 =A0 =A0base64_encode_alloc(secret, secret_size, &base=
-64);
-> > + =A0 =A0 =A0 =A0 =A0 =A0virBufferEscape(opt, ":", ":key=3D%s:auth_supp=
-orted=3Dcephx\\;none",
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0base64);
->=20
-> If I'm reading this right, that puts the ceph secret on the kvm
-> command line. That's not good, that makes it visible to anyone on the
-> host.
-
-Yeah, we definitely want something better, but I wanted to make sure the=20
-overall approach is fine before doing something too annoying with=20
-temporary unlinked files or environment variables or something.
-
-sage
---557981400-701576161-1316192490=:11043--
+That sounds good. Except for the environment variables part; while
+some effort is put into guarding the environment, there have been
+several ways of reading other processes' environment, historically. I
+wouldn't rely on environment to stay secret, ever.
