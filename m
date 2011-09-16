@@ -1,87 +1,149 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: ceph kernel bug
-Date: Fri, 16 Sep 2011 11:05:11 +0200
-Message-ID: <4E731147.6010405@tuxadero.com>
-References: <4E6BD2B4.7050709@tuxadero.com> <Pine.LNX.4.64.1109101546370.19147@cobra.newdream.net> <4E6BF6C3.5010202@tuxadero.com> <4E7254D6.9020509@tuxadero.com> <Pine.LNX.4.64.1109151302160.17623@cobra.newdream.net> <4E7269D1.6010804@tuxadero.com> <Pine.LNX.4.64.1109151551250.27715@cobra.newdream.net>
+From: Daniel Veillard <veillard@redhat.com>
+Subject: Re: [libvirt] specifying rbd images in libvirt
+Date: Fri, 16 Sep 2011 18:28:56 +0800
+Message-ID: <20110916102856.GJ4190@redhat.com>
+References: <Pine.LNX.4.64.1108271207100.14206@cobra.newdream.net>
+ <20110901124635.GD14462@redhat.com>
+ <Pine.LNX.4.64.1109011321420.1621@cobra.newdream.net>
+ <Pine.LNX.4.64.1109071635040.13143@cobra.newdream.net>
+Reply-To: veillard@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:37682 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754968Ab1IPJFU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Sep 2011 05:05:20 -0400
-In-Reply-To: <Pine.LNX.4.64.1109151551250.27715@cobra.newdream.net>
+Received: from mx1.redhat.com ([209.132.183.28]:11627 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751469Ab1IPK3R (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 16 Sep 2011 06:29:17 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1109071635040.13143@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+Cc: "Daniel P. Berrange" <berrange@redhat.com>, libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-Hi Sage,
-I rerun the test and I think I triggered the first bug again.
-http://pastebin.com/ydNm0pff
+On Wed, Sep 07, 2011 at 04:54:37PM -0700, Sage Weil wrote:
+> On Thu, 1 Sep 2011, Sage Weil wrote:
+> > On Thu, 1 Sep 2011, Daniel P. Berrange wrote:
+> > > On Sat, Aug 27, 2011 at 12:19:33PM -0700, Sage Weil wrote:
+> > > > Hi all,
+> > > > 
+> > > > Currently, you can specify an rbd (or nbd, sheepdog) image with xml 
+> > > > that looks like so:
+> > > > 
+> > > >     <disk type='network' device='disk'>
+> > > >       <driver name='qemu' type='raw' cache='writeback'/>
+> > > >       <source protocol='rbd' name='mypool/myimage'>
+> > > >         <host name='monhost1.mydomain.com' port='6789'/>
+> > > >         <host name='monhost2.mydomain.com' port='6789'/>
+> > > >         <host name='monhost3.mydomain.com' port='6789'/>
+> > > >       </source>
+> > > >       <target dev='vda' bus='virtio'/>
+> > > >     </disk>
+> > > > 
+> > > > This works okay if you have authentication disabled and all of the default 
+> > > > settings are okay.  Usually, though, there are other options you need to 
+> > > > specify to librbd to make it do what you want.  
+> > > > 
+> > > > The current schema can be abused by adding options after the image name 
+> > > > like so:
+> > > > 
+> > > >     <disk type='network' device='disk'>
+> > > >       <driver name='qemu' type='raw' cache='writeback'/>
+> > > >       <source protocol='rbd' name='mypool/myimage:conf=/etc/ceph/ceph.conf:id=admin:this=that:foo=bar'>
+> > > >         <host name='monhost1.mydomain.com' port='6789'/>
+> > > >         <host name='monhost2.mydomain.com' port='6789'/>
+> > > >         <host name='monhost3.mydomain.com' port='6789'/>
+> > > >       </source>
+> > > >       <target dev='vda' bus='virtio'/>
+> > > >     </disk>
+> > > > 
+> > > > This works only because that's what the qemu incantation looks like.  In 
+> > > > general, though, this is ugly.  I also doesn't generalize well to the 
+> > > > kernel-level rbd driver, which we'd like to also support, as that will 
+> > > > work with hypervisors other than qemu.
+> > > 
+> > > Also, we should be doing some validation on the content of
+> > > the 'name' attribute to prevent abuse like that.
+> > > 
+> > > > What about something more like this?
+> > > > 
+> > > >     <disk type='network' device='disk'>
+> > > >       <driver name='qemu' type='raw' cache='writeback'/>
+> > > >       <source protocol='rbd' name='mypool/myimage'>
+> > > >         <option name='conf'>/etc/ceph/ceph.conf</option>
+> > > >         <option name='id'>myusername</option>
+> > > >         <option name='foo'>bar</option>
+> > > >         <host name='monhost1.mydomain.com' port='6789'/>
+> > > >         <host name='monhost2.mydomain.com' port='6789'/>
+> > > >         <host name='monhost3.mydomain.com' port='6789'/>
+> > > >       </source>
+> > > >       <target dev='vda' bus='virtio'/>
+> > > >     </disk>
+> > > > 
+> > > > I'm not married to any particular syntax/schema, as long as there is a 
+> > > > generic way to specify name/value pairs to configure the driver.  I think 
+> > > > the above would generalize well to other network block devices as well, 
+> > > > which presumably also want a way to feed in information other than a 
+> > > > server address (e.g. for authentication).
+> > > > 
+> > > > Does that look reasonable?  If there are no objections we can work up some 
+> > > > patches and send them along!
+> > > 
+> > > We generally prefer to add explicit models for attributes, rather than
+> > > just do a generic key/value passthrough.
+> > 
+> > Fair enough.  For the qemu/librbd and kernel drivers, the key fields we 
+> > need are:
+> > 
+> >  id - ceph userid to authenticate as
+> >  snap - snapshot name (optional; used if mapping a read-only snapshot)
+> > 
+> > The goal would be to have libvirt describe rbd images in a generic way, 
+> > and let you managed them as a storage pool via librbd.  Then, when it 
+> > comes time to spin up an actual VM, either use the native qemu support or 
+> > map a kernel block device.  To control that it might make sense to have an 
+> > option like
+> > 
+> >  driver - librbd (qemu-only), kernel, or auto (default)
+> > 
+> > to let users control which driver to use in the qemu case.
+> > 
+> > > For authentication credentials, we also need to consider security
+> > > implications of keeping them in the XML. For qcow2 encryption
+> > > keys, we leverage the separate libvirt secrets management APIs
+> > > to provide the keys outside the XML. IMHO we should likely do the
+> > > same for any keys required to login to network block devices.
+> > 
+> > Usually we keep secrets in a file on disk and reference the file when 
+> > starting up librbd or mapping a kernel rbd device.  It's possible to 
+> > specify it explicitly but that is discouraged.  So by specifying id=foo 
+> > above, librbd would normally look for a key called foo in its default 
+> > keyring file.
+> > 
+> > We can definitely use the libvirt secrets API to store these keys there, 
+> > too.  In that case, we would need something like
+> > 
+> >  keyname - name of the libvirt secret to use for authentication
+> > 
+> > What do you think?
+> 
+> Shall I take silence as general agreement and start putting together 
+> patches?
 
-I did also the dumps for you.
-http://tuxadero.com/multistorage/ceph.ko_dump
-http://tuxadero.com/multistorage/libceph.ko_dump
+  I would think so, yes :-)
 
-Best Regards,
-  martin
-Am 16.09.2011 00:54, schrieb Sage Weil:
-> On Thu, 15 Sep 2011, Martin Mailand wrote:
->> Hi Sage,
->> that's quite a bit of output, I put it in a pastebin.
->> http://pastebin.com/9CNJk0Pw.
-> Any chance you can include the output of 'objdump -rdS libceph.ko'?
-> ceph.ko too, for good measure.
->
-> This looks like a sightly different crash than the one on that bug!
->
-> Thanks!
-> sage
->
->
->> Best Regards,
->>   martin
->>
->> Sage Weil schrieb:
->>> On Thu, 15 Sep 2011, Martin Mailand wrote:
->>>> Hi Sage,
->>>> I am still hitting this in -rc6. It happeneds every time I stop an OSD.
->>>> Do you need more information to reproduce it?
->>> Oh, great to hear it's easy to reproduce!  I was trying (in my uml
->>> environment) and failing.
->>>
->>> Can run the script below right before stopping the osd, and send the dmesg
->>> output along?  (Or attach to http://tracker.newdream.net/issues/1382)
->>>
->>> Thanks!
->>> sage
->>>
->>>
->>> #!/bin/sh -x
->>>
->>> p() {
->>>   echo "$*">  /sys/kernel/debug/dynamic_debug/control
->>> }
->>>
->>> p 'module ceph +p'
->>> p 'module libceph +p'
->>> p 'module rbd +p'
->>> p 'file net/ceph/messenger.c -p'
->>> p 'file' `grep -- --- /sys/kernel/debug/dynamic_debug/control | grep ceph \
->>> 	| awk '{print $1}' | sed 's/:/ line /'` '+p'
->>> p 'file' `grep -- === /sys/kernel/debug/dynamic_debug/control | grep ceph \
->>> 	| awk '{print $1}' | sed 's/:/ line /'` '+p'
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I don't think there's anything controversial here.  I suspect the main 
+> concern is that these fields are named in a sufficiently general fashion 
+> so that they can be used for other backend storage types.
 
+  I guess the best is to start with the patches with the XML changes as
+an RFC and then add the code to wire the backend as a second step. Even
+if both are likely to be applied as a batch, the XML code review is
+likely to be the most controversial :-)
+
+Daniel
+
+-- 
+Daniel Veillard      | libxml Gnome XML XSLT toolkit  http://xmlsoft.org/
+daniel@veillard.com  | Rpmfind RPM search engine http://rpmfind.net/
+http://veillard.com/ | virtualization library  http://libvirt.org/
