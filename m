@@ -1,50 +1,50 @@
-From: Kevin Wolf <kwolf@redhat.com>
-Subject: Re: [Qemu-devel] [PATCH 0/4] More RBD updates
-Date: Mon, 19 Sep 2011 16:09:17 +0200
-Message-ID: <4E774D0D.2010406@redhat.com>
-References: <1316121071-7690-1-git-send-email-sage@newdream.net>
+From: Josef Bacik <josef@redhat.com>
+Subject: Re: WARNING: at fs/btrfs/inode.c:2193 btrfs_orphan_commit_root+0xb0/0xc0
+ [btrfs]()
+Date: Mon, 19 Sep 2011 11:49:40 -0400
+Message-ID: <4E776494.6050706@redhat.com>
+References: <4E6BDAEB.7020206@tuxadero.com> <4E6EABAF.9010903@cn.fujitsu.com> <Pine.LNX.4.64.1109151137420.17623@cobra.newdream.net> <20110915195556.GI22205@twin.jikos.cz> <4E73788F.3060906@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:17273 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:24051 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751328Ab1ISOGV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 19 Sep 2011 10:06:21 -0400
-In-Reply-To: <1316121071-7690-1-git-send-email-sage@newdream.net>
+	id S1751114Ab1ISPuB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 19 Sep 2011 11:50:01 -0400
+In-Reply-To: <4E73788F.3060906@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: dave@jikos.cz, Sage Weil <sage@newdream.net>, Liu Bo <liubo2009@cn.fujitsu.com>, martin@tuxadero.com, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
 
-Am 15.09.2011 23:11, schrieb Sage Weil:
-> Hi,
+On 09/16/2011 12:25 PM, Jim Schutt wrote:
+> David Sterba wrote:
+>> On Thu, Sep 15, 2011 at 11:44:09AM -0700, Sage Weil wrote:
+>>> On Tue, 13 Sep 2011, Liu Bo wrote:
+>>>> On 09/11/2011 05:47 AM, Martin Mailand wrote:
+>>>>> Hi
+>>>>> I am hitting this Warning reproducible, the workload is a ceph osd,
+>>>>> kernel ist 3.1.0-rc5.
+>>>>>
+>>>> Have posted a patch for this:
+>>>>
+>>>> http://marc.info/?l=linux-btrfs&m=131547325515336&w=2
+>>> We're still seeing this with -rc6, which includes 98c9942 and 65450aa.
+>>
+>> Me too, for the
+>> WARNING: at fs/btrfs/extent-tree.c:5711
+>> btrfs_alloc_free_block+0x180/0x350 [btrfs]()
+>>
 > 
-> Here are a few more improvements to the qemu rbd support.  The first 
-> patch makes the configuration file handling cleaner (do not error out if 
-> /etc/ceph/ceph.conf doesn't exist).  One allows characters in the conf 
-> string to be escaped, so you can (for example) specify an ip\:port (':' 
-> is used as a delimiter).
-> 
-> The last patch implements flush when rbd_flush() is available.  This lets 
-> us take advantage of write buffering in newer versions of librbd, which 
-> improves performance significantly for many workloads (including the 
-> trivial qemu-img convert).
-> 
-> Thanks!
-> sage
-> 
-> 
-> Sage Weil (4):
->   rbd: ignore failures when reading from default conf location
->   rbd: allow escaping in config string
->   rbd: update comment heading
->   rbd: call flush, if available
-> 
->  block/rbd.c |   83 +++++++++++++++++++++++++++++++++++++++-------------------
->  1 files changed, 56 insertions(+), 27 deletions(-)
+> FWIW, I'm seeing a slightly different case, while testing branch
+> integration/btrfs-next (commit 2828cbd9620e03) from
+> git://repo.or.cz/linux-2.6/btrfs-unstable.git merged into branch
+> master (commit c455ea4f122d21) from git://github.com/torvalds/linux.git
 > 
 
-Thanks, applied patches 1/3/4, commented on patch 2.
+Ah yeah sorry I see what's going on here, I just missed a few places we
+call run_delayed_refs() where we can still have trans->block_rsv set.  I
+will fix this and send a patch soon.  Thanks,
 
-Kevin
+Josef
