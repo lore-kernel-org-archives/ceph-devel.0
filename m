@@ -1,105 +1,38 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [PATCH] rbd: allow escaping in config string
-Date: Mon, 19 Sep 2011 13:35:26 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1109191334080.7703@cobra.newdream.net>
+From: Noah Watkins <jayhawk@soe.ucsc.edu>
+Subject: New inode parent information needed for ACL
+Date: Mon, 19 Sep 2011 16:05:23 -0700 (PDT)
+Message-ID: <1832752224.18125.1316473523050.JavaMail.root@mail-01.cse.ucsc.edu>
+References: <48893356.18105.1316473250315.JavaMail.root@mail-01.cse.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60881 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755777Ab1ISU3W (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Sep 2011 16:29:22 -0400
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:55196 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932513Ab1ISXLv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Sep 2011 19:11:51 -0400
+Received: from mail-01.cse.ucsc.edu (mail-01.cse.ucsc.edu [128.114.48.32])
+	by mail-01.cse.ucsc.edu (Postfix) with ESMTP id 2AA341008091
+	for <ceph-devel@vger.kernel.org>; Mon, 19 Sep 2011 16:05:23 -0700 (PDT)
+In-Reply-To: <48893356.18105.1316473250315.JavaMail.root@mail-01.cse.ucsc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: qemu-devel@nongnu.org, kwolf@redhat.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-The config string is variously delimited by =, @, and /, depending on the
-field.  Allow these characters to be escaped by preceeding them with \.
+Hi,
 
-Signed-off-by: Sage Weil <sage@newdream.net>
----
- block/rbd.c |   29 +++++++++++++++++++++++++++--
- 1 files changed, 27 insertions(+), 2 deletions(-)
+I've been hacking a bit on xattr-based ACLs for Ceph. It's all working
+fine, but I'm having some trouble wiring up the default ACL init code
+for new inodes (mknod, create, mkdir, and symlink): New ACLs depend on
+the the ACL of the parent. The ideal location seems to be in fill_inode,
+but it is unclear how to access the parent inode of the original request
+from fill_inode because it is receiving the filler information just from a
+mds reply. Is getting the parent information in fill_inode possible?
 
-diff --git a/block/rbd.c b/block/rbd.c
-index 98efd2c..3068c82 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -102,8 +102,15 @@ static int qemu_rbd_next_tok(char *dst, int dst_len,
-     *p = NULL;
- 
-     if (delim != '\0') {
--        end = strchr(src, delim);
--        if (end) {
-+        for (end = src; *end; ++end) {
-+            if (*end == delim) {
-+                break;
-+            }
-+            if (*end == '\\' && end[1] != '\0') {
-+                end++;
-+            }
-+        }
-+        if (*end == delim) {
-             *p = end + 1;
-             *end = '\0';
-         }
-@@ -122,6 +129,19 @@ static int qemu_rbd_next_tok(char *dst, int dst_len,
-     return 0;
- }
- 
-+static void qemu_rbd_unescape(char *src)
-+{
-+    char *p;
-+
-+    for (p = src; *src; ++src, ++p) {
-+        if (*src == '\\' && src[1] != '\0') {
-+            src++;
-+        }
-+        *p = *src;
-+    }
-+    *p = '\0';
-+}
-+
- static int qemu_rbd_parsename(const char *filename,
-                               char *pool, int pool_len,
-                               char *snap, int snap_len,
-@@ -146,6 +166,7 @@ static int qemu_rbd_parsename(const char *filename,
-         ret = -EINVAL;
-         goto done;
-     }
-+    qemu_rbd_unescape(pool);
- 
-     if (strchr(p, '@')) {
-         ret = qemu_rbd_next_tok(name, name_len, p, '@', "object name", &p);
-@@ -153,9 +174,11 @@ static int qemu_rbd_parsename(const char *filename,
-             goto done;
-         }
-         ret = qemu_rbd_next_tok(snap, snap_len, p, ':', "snap name", &p);
-+        qemu_rbd_unescape(snap);
-     } else {
-         ret = qemu_rbd_next_tok(name, name_len, p, ':', "object name", &p);
-     }
-+    qemu_rbd_unescape(name);
-     if (ret < 0 || !p) {
-         goto done;
-     }
-@@ -211,6 +234,7 @@ static int qemu_rbd_set_conf(rados_t cluster, const char *conf)
-         if (ret < 0) {
-             break;
-         }
-+        qemu_rbd_unescape(name);
- 
-         if (!p) {
-             error_report("conf option %s has no value", name);
-@@ -223,6 +247,7 @@ static int qemu_rbd_set_conf(rados_t cluster, const char *conf)
-         if (ret < 0) {
-             break;
-         }
-+        qemu_rbd_unescape(value);
- 
-         if (strcmp(name, "conf") == 0) {
-             ret = rados_conf_read_file(cluster, value);
--- 
-1.7.4.1
+Alternatively, in each of ceph_mknod, ceph_symlink, etc..., the problem would
+be solved trivially if the new inode is available because the parent information
+is provided. For example, in ceph_mknod, on success will dentry->d_inode alway point
+to the new inode, or is there more async stuff going on?
 
+Thanks,
+Noah
