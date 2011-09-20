@@ -1,42 +1,35 @@
-From: Atish Kathpal <atish.kathpal@gmail.com>
-Subject: Using RADOS
-Date: Tue, 20 Sep 2011 13:14:56 +0530
-Message-ID: <CAMiHsJ+XqtaBJVAzf3NBPTp3Con-5R0tneyadKB9Nvb9wvWJVQ@mail.gmail.com>
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: radosgw question
+Date: Tue, 20 Sep 2011 16:36:33 +0800
+Message-ID: <CANExM-Mfy4braUiwMp1GC29d4fAeH933X_oLhJ2hd+AigukbFA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:40920 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750986Ab1ITHpR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2011 03:45:17 -0400
-Received: by bkbzt4 with SMTP id zt4so206272bkb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2011 00:45:16 -0700 (PDT)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:41775 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754314Ab1ITIge (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2011 04:36:34 -0400
+Received: by iaqq3 with SMTP id q3so378299iaq.19
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2011 01:36:34 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello friends
+Hi,
 
-Since there is no Ceph User's mailing list, I am posting my doubt here.
+I have a question about the radosgw.
 
-I want to use the Ceph object store capabilities. I have already
-installed and setup a Ceph cluster.
+The radosgw uses an object to record the buckets owned by one user
+account. However, suppose that the user account is shared by multiple
+users, and these users connect to the radosgw concurrently. If, say,
+user A creates bucket B1 and user B deletes bucket B2 at the same
+time, they will both update the object. Since it seems radosgw has no
+lock mechanism for object update, the problems would occurs - either
+the created bucket will be lost or the deleted bucket can still be
+listed but dne actually.
 
-As a first step, I want to be able to GET/PUT or read/write to the
-object store of my cluster. I would prefer a HTTP/REST interface but
-please let me know of other interfaces that exist for performing
-read/writes to ceph object store/RADOS.
+I know it may be a rare case, just wondering if there is away to
+handle this situation.
 
-Final goal: Besides normal read/writes, I also want to be able to have
-some objects, which point to no data. That is, I want to have a
-special flag, which if set, would mean there is no data pointed to by
-this Object ID. If its unset, it means its like a normal object
-pointing to some data file(s). I want to have the freedom to be able
-to set/unset this flag and hence be able to delete/re-insert the
-corresponding data file(s) against the same object ID. Do we have an
-API which could allow me such functionality?
-
-Please point me to suitable links/starting points.
-
-Thanks
-Atish
+Thanks,
+Henry
