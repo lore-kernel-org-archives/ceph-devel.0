@@ -1,210 +1,215 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 1/5] secret: add Ceph secret type
-Date: Mon, 19 Sep 2011 21:13:39 -0700
-Message-ID: <1316492023-17749-2-git-send-email-sage@newdream.net>
+Subject: [PATCH 3/5] qemu: pass virConnectPtr into Domain{Attach,Detach}*
+Date: Mon, 19 Sep 2011 21:13:41 -0700
+Message-ID: <1316492023-17749-4-git-send-email-sage@newdream.net>
 References: <1316492023-17749-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36843 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36852 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750986Ab1ITENv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2011 00:13:51 -0400
+	with ESMTP id S1750730Ab1ITENz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2011 00:13:55 -0400
 In-Reply-To: <1316492023-17749-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: libvir-list@redhat.com
 Cc: ceph-devel@vger.kernel.org, veillard@redhat.com, Sage Weil <sage@newdream.net>
 
-Add a new secret type to store a Ceph authentication key.  The ceph_id
-field contains the name of the key (e.g. 'admin' for the ceph superuser).
+The qemu RBD driver needs access to the conn in order to get the secret
+needed for connecting to the ceph cluster.
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- docs/schemas/secret.rng      |   17 +++++++++++++++
- include/libvirt/libvirt.h.in |    3 ++
- src/conf/secret_conf.c       |   45 +++++++++++++++++++++++++++++++++++++++++-
- src/conf/secret_conf.h       |    1 +
- src/secret/secret_driver.c   |    8 +++++++
- 5 files changed, 73 insertions(+), 1 deletions(-)
+ src/qemu/qemu_command.c |    5 +++--
+ src/qemu/qemu_command.h |    3 ++-
+ src/qemu/qemu_driver.c  |   17 ++++++++---------
+ src/qemu/qemu_hotplug.c |   15 +++++++++------
+ src/qemu/qemu_hotplug.h |    9 ++++++---
+ 5 files changed, 28 insertions(+), 21 deletions(-)
 
-diff --git a/docs/schemas/secret.rng b/docs/schemas/secret.rng
-index 80270ae..c3da8b3 100644
---- a/docs/schemas/secret.rng
-+++ b/docs/schemas/secret.rng
-@@ -37,6 +37,7 @@
-           <element name='usage'>
-             <choice>
-               <ref name='usagevolume'/>
-+              <ref name='cephauth'/>
-               <!-- More choices later -->
-             </choice>
-           </element>
-@@ -54,6 +55,22 @@
-     </element>
-   </define>
+diff --git a/src/qemu/qemu_command.c b/src/qemu/qemu_command.c
+index 76df0aa..32dcb79 100644
+--- a/src/qemu/qemu_command.c
++++ b/src/qemu/qemu_command.c
+@@ -1336,7 +1336,8 @@ qemuSafeSerialParamValue(const char *value)
  
-+  <define name='cephauth'>
-+    <attribute name='type'>
-+      <value>ceph</value>
-+    </attribute>
-+    <element name='auth'>
-+      <attribute name='id'>
-+	<text/>
-+      </attribute>
-+      <optional>
-+        <attribute name='domain'>
-+	  <text/>
-+	</attribute>
-+      </optional>
-+    </element>
-+  </define>
-+
-   <define name="UUID">
-     <choice>
-       <data type="string">
-diff --git a/include/libvirt/libvirt.h.in b/include/libvirt/libvirt.h.in
-index b1bda31..51fd044 100644
---- a/include/libvirt/libvirt.h.in
-+++ b/include/libvirt/libvirt.h.in
-@@ -2257,7 +2257,10 @@ typedef virSecret *virSecretPtr;
- typedef enum {
-     VIR_SECRET_USAGE_TYPE_NONE = 0,
-     VIR_SECRET_USAGE_TYPE_VOLUME = 1,
-+    VIR_SECRET_USAGE_TYPE_CEPH = 2,
-     /* Expect more owner types later... */
-+
-+    VIR_SECRET_USAGE_TYPE_LAST
- } virSecretUsageType;
  
- virConnectPtr           virSecretGetConnect     (virSecretPtr secret);
-diff --git a/src/conf/secret_conf.c b/src/conf/secret_conf.c
-index 105afbe..8f11a51 100644
---- a/src/conf/secret_conf.c
-+++ b/src/conf/secret_conf.c
-@@ -35,7 +35,8 @@
- 
- #define VIR_FROM_THIS VIR_FROM_SECRET
- 
--VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_VOLUME + 1, "none", "volume")
-+VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_LAST,
-+              "none", "volume", "ceph")
- 
- void
- virSecretDefFree(virSecretDefPtr def)
-@@ -52,6 +53,10 @@ virSecretDefFree(virSecretDefPtr def)
-         VIR_FREE(def->usage.volume);
-         break;
- 
-+    case VIR_SECRET_USAGE_TYPE_CEPH:
-+        VIR_FREE(def->usage.authIdDomain);
-+        break;
-+
-     default:
-         VIR_ERROR(_("unexpected secret usage type %d"), def->usage_type);
-         break;
-@@ -65,6 +70,8 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
+ char *
+-qemuBuildDriveStr(virDomainDiskDefPtr disk,
++qemuBuildDriveStr(virConnectPtr conn,
++                  virDomainDiskDefPtr disk,
+                   bool bootable,
+                   virBitmapPtr qemuCaps)
  {
-     char *type_str;
-     int type;
-+    char *authId, *authDomain;
-+    int ret;
+@@ -3460,7 +3461,7 @@ qemuBuildCommandLine(virConnectPtr conn,
+                     deviceFlagMasked = true;
+                 }
+             }
+-            optstr = qemuBuildDriveStr(disk,
++            optstr = qemuBuildDriveStr(conn, disk,
+                                        emitBootindex ? false : !!bootindex,
+                                        qemuCaps);
+             if (deviceFlagMasked)
+diff --git a/src/qemu/qemu_command.h b/src/qemu/qemu_command.h
+index 87660f2..4a90544 100644
+--- a/src/qemu/qemu_command.h
++++ b/src/qemu/qemu_command.h
+@@ -75,7 +75,8 @@ char *qemuDeviceDriveHostAlias(virDomainDiskDefPtr disk,
+                                virBitmapPtr qemuCaps);
  
-     type_str = virXPathString("string(./usage/@type)", ctxt);
-     if (type_str == NULL) {
-@@ -94,6 +101,27 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
-         }
-         break;
+ /* Both legacy & current support */
+-char *qemuBuildDriveStr(virDomainDiskDefPtr disk,
++char *qemuBuildDriveStr(virConnectPtr conn,
++                        virDomainDiskDefPtr disk,
+                         bool bootable,
+                         virBitmapPtr qemuCaps);
+ char *qemuBuildFSStr(virDomainFSDefPtr fs,
+diff --git a/src/qemu/qemu_driver.c b/src/qemu/qemu_driver.c
+index ce19be7..a1b73e7 100644
+--- a/src/qemu/qemu_driver.c
++++ b/src/qemu/qemu_driver.c
+@@ -4773,7 +4773,8 @@ qemudDomainUndefine(virDomainPtr dom)
+ }
  
-+    case VIR_SECRET_USAGE_TYPE_CEPH:
-+        authId = virXPathString("string(./usage/auth/@id)", ctxt);
-+        if (!authId) {
-+            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
-+                                 _("ceph usage specified, but auth id is missing"));
-+            return -1;
-+        }
-+        authDomain = virXPathString("string(./usage/auth/@domain)", ctxt);
-+        if (!authDomain) {
-+            VIR_FREE(authId);
-+            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
-+                                 _("ceph usage specified, but auth domain is missing"));
-+            return -1;
-+        }
-+        ret = virAlloc(&def->usage.authIdDomain, strlen(authId) +
-+                       strlen(authDomain) + 2);
-+        sprintf(def->usage.authIdDomain, "%s/%s", authId, authDomain);
-+        VIR_FREE(authId);
-+        VIR_FREE(authDomain);
-+        break;
-+
-     default:
-         virSecretReportError(VIR_ERR_INTERNAL_ERROR,
-                              _("unexpected secret usage type %d"),
-@@ -220,6 +248,9 @@ virSecretDefFormatUsage(virBufferPtr buf,
-                         const virSecretDefPtr def)
+ static int
+-qemuDomainAttachDeviceDiskLive(struct qemud_driver *driver,
++qemuDomainAttachDeviceDiskLive(virConnectPtr conn,
++                               struct qemud_driver *driver,
+                                virDomainObjPtr vm,
+                                virDomainDeviceDefPtr dev)
  {
-     const char *type;
-+    char *p;
-+    char idAuth[80];
-+    int len;
- 
-     type = virSecretUsageTypeTypeToString(def->usage_type);
-     if (type == NULL) {
-@@ -239,6 +270,18 @@ virSecretDefFormatUsage(virBufferPtr buf,
-                                   def->usage.volume);
+@@ -4805,12 +4806,12 @@ qemuDomainAttachDeviceDiskLive(struct qemud_driver *driver,
          break;
+     case VIR_DOMAIN_DISK_DEVICE_DISK:
+         if (disk->bus == VIR_DOMAIN_DISK_BUS_USB)
+-            ret = qemuDomainAttachUsbMassstorageDevice(driver, vm,
++            ret = qemuDomainAttachUsbMassstorageDevice(conn, driver, vm,
+                                                        disk);
+         else if (disk->bus == VIR_DOMAIN_DISK_BUS_VIRTIO)
+-            ret = qemuDomainAttachPciDiskDevice(driver, vm, disk);
++            ret = qemuDomainAttachPciDiskDevice(conn, driver, vm, disk);
+         else if (disk->bus == VIR_DOMAIN_DISK_BUS_SCSI)
+-            ret = qemuDomainAttachSCSIDisk(driver, vm, disk);
++            ret = qemuDomainAttachSCSIDisk(conn, driver, vm, disk);
+         else
+             qemuReportError(VIR_ERR_CONFIG_UNSUPPORTED,
+                             _("disk bus '%s' cannot be hotplugged."),
+@@ -4866,7 +4867,7 @@ qemuDomainAttachDeviceLive(virDomainObjPtr vm,
+     switch (dev->type) {
+     case VIR_DOMAIN_DEVICE_DISK:
+         qemuDomainObjCheckDiskTaint(driver, vm, dev->data.disk, -1);
+-        ret = qemuDomainAttachDeviceDiskLive(driver, vm, dev);
++        ret = qemuDomainAttachDeviceDiskLive(dom->conn, driver, vm, dev);
+         if (!ret)
+             dev->data.disk = NULL;
+         break;
+@@ -5396,8 +5397,7 @@ static int qemuDomainAttachDeviceFlags(virDomainPtr dom, const char *xml,
  
-+    case VIR_SECRET_USAGE_TYPE_CEPH:
-+        if (def->usage.authIdDomain != NULL) {
-+            p = strchr(def->usage.authIdDomain, '/');
-+            len = p - def->usage.authIdDomain;
-+            strncpy(idAuth, def->usage.authIdDomain, len);
-+            idAuth[len] = '\0';
-+            p++;
-+            virBufferEscapeString(buf, "    <auth id='%s'", idAuth);
-+            virBufferEscapeString(buf, " domain='%s'/>\n", p);
-+        }
-+        break;
-+
-     default:
-         virSecretReportError(VIR_ERR_INTERNAL_ERROR,
-                              _("unexpected secret usage type %d"),
-diff --git a/src/conf/secret_conf.h b/src/conf/secret_conf.h
-index 4b47c52..294e7ab 100644
---- a/src/conf/secret_conf.h
-+++ b/src/conf/secret_conf.h
-@@ -42,6 +42,7 @@ struct _virSecretDef {
-     int usage_type;
-     union {
-         char *volume;               /* May be NULL */
-+        char *authIdDomain;
-     } usage;
- };
+ static int qemuDomainAttachDevice(virDomainPtr dom, const char *xml)
+ {
+-    return qemuDomainAttachDeviceFlags(dom, xml,
+-                                       VIR_DOMAIN_AFFECT_LIVE);
++    return qemuDomainAttachDeviceFlags(dom, xml, VIR_DOMAIN_AFFECT_LIVE);
+ }
  
-diff --git a/src/secret/secret_driver.c b/src/secret/secret_driver.c
-index 59dc687..7ea8a49 100644
---- a/src/secret/secret_driver.c
-+++ b/src/secret/secret_driver.c
-@@ -144,6 +144,11 @@ secretFindByUsage(virSecretDriverStatePtr driver, int usageType, const char *usa
-             if (STREQ(s->def->usage.volume, usageID))
-                 return s;
-             break;
-+
-+        case VIR_SECRET_USAGE_TYPE_CEPH:
-+            if (STREQ(s->def->usage.authIdDomain, usageID))
-+                return s;
-+            break;
-         }
+ 
+@@ -5416,8 +5416,7 @@ static int qemuDomainDetachDeviceFlags(virDomainPtr dom, const char *xml,
+ 
+ static int qemuDomainDetachDevice(virDomainPtr dom, const char *xml)
+ {
+-    return qemuDomainDetachDeviceFlags(dom, xml,
+-                                       VIR_DOMAIN_AFFECT_LIVE);
++    return qemuDomainDetachDeviceFlags(dom, xml, VIR_DOMAIN_AFFECT_LIVE);
+ }
+ 
+ static int qemudDomainGetAutostart(virDomainPtr dom,
+diff --git a/src/qemu/qemu_hotplug.c b/src/qemu/qemu_hotplug.c
+index 5f449fb..3568609 100644
+--- a/src/qemu/qemu_hotplug.c
++++ b/src/qemu/qemu_hotplug.c
+@@ -151,7 +151,8 @@ error:
+ }
+ 
+ 
+-int qemuDomainAttachPciDiskDevice(struct qemud_driver *driver,
++int qemuDomainAttachPciDiskDevice(virConnectPtr conn,
++                                  struct qemud_driver *driver,
+                                   virDomainObjPtr vm,
+                                   virDomainDiskDefPtr disk)
+ {
+@@ -187,7 +188,7 @@ int qemuDomainAttachPciDiskDevice(struct qemud_driver *driver,
+         if (qemuAssignDeviceDiskAlias(disk, priv->qemuCaps) < 0)
+             goto error;
+ 
+-        if (!(drivestr = qemuBuildDriveStr(disk, false, priv->qemuCaps)))
++        if (!(drivestr = qemuBuildDriveStr(conn, disk, false, priv->qemuCaps)))
+             goto error;
+ 
+         if (!(devstr = qemuBuildDriveDevStr(disk, 0, priv->qemuCaps)))
+@@ -372,7 +373,8 @@ qemuDomainFindOrCreateSCSIDiskController(struct qemud_driver *driver,
+ }
+ 
+ 
+-int qemuDomainAttachSCSIDisk(struct qemud_driver *driver,
++int qemuDomainAttachSCSIDisk(virConnectPtr conn,
++                             struct qemud_driver *driver,
+                              virDomainObjPtr vm,
+                              virDomainDiskDefPtr disk)
+ {
+@@ -416,7 +418,7 @@ int qemuDomainAttachSCSIDisk(struct qemud_driver *driver,
+             goto error;
      }
-     return NULL;
-@@ -607,6 +612,9 @@ secretUsageIDForDef(virSecretDefPtr def)
-     case VIR_SECRET_USAGE_TYPE_VOLUME:
-         return def->usage.volume;
  
-+    case VIR_SECRET_USAGE_TYPE_CEPH:
-+        return def->usage.authIdDomain;
-+
-     default:
-         return NULL;
-     }
+-    if (!(drivestr = qemuBuildDriveStr(disk, false, priv->qemuCaps)))
++    if (!(drivestr = qemuBuildDriveStr(conn, disk, false, priv->qemuCaps)))
+         goto error;
+ 
+     for (i = 0 ; i <= disk->info.addr.drive.controller ; i++) {
+@@ -495,7 +497,8 @@ error:
+ }
+ 
+ 
+-int qemuDomainAttachUsbMassstorageDevice(struct qemud_driver *driver,
++int qemuDomainAttachUsbMassstorageDevice(virConnectPtr conn,
++                                         struct qemud_driver *driver,
+                                          virDomainObjPtr vm,
+                                          virDomainDiskDefPtr disk)
+ {
+@@ -532,7 +535,7 @@ int qemuDomainAttachUsbMassstorageDevice(struct qemud_driver *driver,
+     if (qemuCapsGet(priv->qemuCaps, QEMU_CAPS_DEVICE)) {
+         if (qemuAssignDeviceDiskAlias(disk, priv->qemuCaps) < 0)
+             goto error;
+-        if (!(drivestr = qemuBuildDriveStr(disk, false, priv->qemuCaps)))
++        if (!(drivestr = qemuBuildDriveStr(conn, disk, false, priv->qemuCaps)))
+             goto error;
+         if (!(devstr = qemuBuildDriveDevStr(disk, 0, priv->qemuCaps)))
+             goto error;
+diff --git a/src/qemu/qemu_hotplug.h b/src/qemu/qemu_hotplug.h
+index 009f1f6..14017bf 100644
+--- a/src/qemu/qemu_hotplug.h
++++ b/src/qemu/qemu_hotplug.h
+@@ -31,16 +31,19 @@ int qemuDomainChangeEjectableMedia(struct qemud_driver *driver,
+                                    virDomainObjPtr vm,
+                                    virDomainDiskDefPtr disk,
+                                    bool force);
+-int qemuDomainAttachPciDiskDevice(struct qemud_driver *driver,
++int qemuDomainAttachPciDiskDevice(virConnectPtr conn,
++                                  struct qemud_driver *driver,
+                                   virDomainObjPtr vm,
+                                   virDomainDiskDefPtr disk);
+ int qemuDomainAttachPciControllerDevice(struct qemud_driver *driver,
+                                         virDomainObjPtr vm,
+                                         virDomainControllerDefPtr controller);
+-int qemuDomainAttachSCSIDisk(struct qemud_driver *driver,
++int qemuDomainAttachSCSIDisk(virConnectPtr conn,
++                             struct qemud_driver *driver,
+                              virDomainObjPtr vm,
+                              virDomainDiskDefPtr disk);
+-int qemuDomainAttachUsbMassstorageDevice(struct qemud_driver *driver,
++int qemuDomainAttachUsbMassstorageDevice(virConnectPtr conn,
++                                         struct qemud_driver *driver,
+                                          virDomainObjPtr vm,
+                                          virDomainDiskDefPtr disk);
+ int qemuDomainAttachNetDevice(virConnectPtr conn,
 -- 
 1.7.4.1
 
