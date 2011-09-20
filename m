@@ -1,28 +1,42 @@
-From: Kevin Wolf <kwolf@redhat.com>
-Subject: Re: [PATCH] rbd: allow escaping in config string
-Date: Tue, 20 Sep 2011 09:44:55 +0200
-Message-ID: <4E784477.2030000@redhat.com>
-References: <Pine.LNX.4.64.1109191334080.7703@cobra.newdream.net>
+From: Atish Kathpal <atish.kathpal@gmail.com>
+Subject: Using RADOS
+Date: Tue, 20 Sep 2011 13:14:56 +0530
+Message-ID: <CAMiHsJ+XqtaBJVAzf3NBPTp3Con-5R0tneyadKB9Nvb9wvWJVQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51663 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750986Ab1ITHmA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 20 Sep 2011 03:42:00 -0400
-In-Reply-To: <Pine.LNX.4.64.1109191334080.7703@cobra.newdream.net>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:40920 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750986Ab1ITHpR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2011 03:45:17 -0400
+Received: by bkbzt4 with SMTP id zt4so206272bkb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2011 00:45:16 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Am 19.09.2011 22:35, schrieb Sage Weil:
-> The config string is variously delimited by =, @, and /, depending on the
-> field.  Allow these characters to be escaped by preceeding them with \.
-> 
-> Signed-off-by: Sage Weil <sage@newdream.net>
+Hello friends
 
-Thanks, applied to the block branch.
+Since there is no Ceph User's mailing list, I am posting my doubt here.
 
-Kevin
+I want to use the Ceph object store capabilities. I have already
+installed and setup a Ceph cluster.
+
+As a first step, I want to be able to GET/PUT or read/write to the
+object store of my cluster. I would prefer a HTTP/REST interface but
+please let me know of other interfaces that exist for performing
+read/writes to ceph object store/RADOS.
+
+Final goal: Besides normal read/writes, I also want to be able to have
+some objects, which point to no data. That is, I want to have a
+special flag, which if set, would mean there is no data pointed to by
+this Object ID. If its unset, it means its like a normal object
+pointing to some data file(s). I want to have the freedom to be able
+to set/unset this flag and hence be able to delete/re-insert the
+corresponding data file(s) against the same object ID. Do we have an
+API which could allow me such functionality?
+
+Please point me to suitable links/starting points.
+
+Thanks
+Atish
