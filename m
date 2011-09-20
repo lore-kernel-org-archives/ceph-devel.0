@@ -1,125 +1,210 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 0/5 v2] Improve Ceph Qemu+RBD support
-Date: Mon, 19 Sep 2011 21:13:38 -0700
-Message-ID: <1316492023-17749-1-git-send-email-sage@newdream.net>
+Subject: [PATCH 1/5] secret: add Ceph secret type
+Date: Mon, 19 Sep 2011 21:13:39 -0700
+Message-ID: <1316492023-17749-2-git-send-email-sage@newdream.net>
+References: <1316492023-17749-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36840 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36843 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750724Ab1ITENt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2011 00:13:49 -0400
+	with ESMTP id S1750986Ab1ITENv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2011 00:13:51 -0400
+In-Reply-To: <1316492023-17749-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: libvir-list@redhat.com
 Cc: ceph-devel@vger.kernel.org, veillard@redhat.com, Sage Weil <sage@newdream.net>
 
-The current support for qemu and Ceph RBD (rados block device) has two 
-main deficiencies: authentication doesn't work, and it relies on 
-environment variables (which don't work with latest upstream). This 
-patch set addresses both those problems.
+Add a new secret type to store a Ceph authentication key.  The ceph_id
+field contains the name of the key (e.g. 'admin' for the ceph superuser).
 
-The first two patches update the xml schemas and conf to add a Ceph 
-secret type and to specify authentication information along with the rbd 
-disk.
+Signed-off-by: Sage Weil <sage@newdream.net>
+---
+ docs/schemas/secret.rng      |   17 +++++++++++++++
+ include/libvirt/libvirt.h.in |    3 ++
+ src/conf/secret_conf.c       |   45 +++++++++++++++++++++++++++++++++++++++++-
+ src/conf/secret_conf.h       |    1 +
+ src/secret/secret_driver.c   |    8 +++++++
+ 5 files changed, 73 insertions(+), 1 deletions(-)
 
-The next two patches make some libvirt changes.  We pass virConnectPtr 
-down into the Domain{Attach,Detach} methods (needed to access secrets 
-while building the qemu command), and add a helper that will escape 
-arbitrary characters.
-
-The final patch replaces the current RBD qemu code and uses the new conf 
-info to do authentication properly.  (We still need to make a change 
-there to avoid having the authentication key show up on qemu command 
-line; I'll clean that up shortly.)
-
-Comments on this approach?
-
-Thanks!
-sage
-
-
-Changes from v1:
-  update docs/schemas/{domain,secret}.rng
-
-Sage Weil (5):
-  secret: add Ceph secret type
-  storage: add authId, authDomain to virDomainDiskDef
-  qemu: pass virConnectPtr into Domain{Attach,Detach}*
-  buf: implement generic virBufferEscape
-  qemu/rbd: improve rbd device specification
-
- docs/schemas/domain.rng                            |    6 +
- docs/schemas/secret.rng                            |   17 ++
- include/libvirt/libvirt.h.in                       |    3 +
- src/conf/domain_conf.c                             |   43 +++-
- src/conf/domain_conf.h                             |    2 +
- src/conf/secret_conf.c                             |   45 ++++-
- src/conf/secret_conf.h                             |    1 +
- src/libvirt_private.syms                           |    1 +
- src/qemu/qemu_command.c                            |  273 +++++++++++---------
- src/qemu/qemu_command.h                            |    3 +-
- src/qemu/qemu_driver.c                             |   17 +-
- src/qemu/qemu_hotplug.c                            |   15 +-
- src/qemu/qemu_hotplug.h                            |    9 +-
- src/secret/secret_driver.c                         |    8 +
- src/util/buf.c                                     |   33 ++-
- src/util/buf.h                                     |    1 +
- .../qemuxml2argv-disk-drive-network-rbd.args       |    6 +-
- .../qemuxml2argv-disk-drive-network-rbd.xml        |    1 +
- 18 files changed, 328 insertions(+), 156 deletions(-)
-
--- 
-1.7.4.1
-
-From 498cd06b76bbb4415a2f81f9d169f267ff99329c Mon Sep 17 00:00:00 2001
-From: Sage Weil <sage@newdream.net>
-Date: Thu, 15 Sep 2011 13:47:40 -0700
-Subject: [PATCH 0/5] Improve Ceph Qemu+RBD support
-
-The current support for qemu and Ceph RBD (rados block device) has two 
-main deficiencies: authentication doesn't work, and it relies on 
-environment variables (which don't work with latest upstream).
-
-This patch set addresses both those problems, while trying to integrate as
-cleanly as possible with the rest of libvirt.
-
-The first few patches make some changes to libvirt itself: adding a CEPH 
-secret type (for Ceph/RBD authentication), adding authentication fields 
-to the XML schema, passing the virConnectPtr into the 
-Domain{Attach,Detach} methods (needed to access secrets while building 
-the qemu command), a helper that will escape arbitrary characters, and 
-finally a patch that replaces the current RBD qemu code.
-
-Comments on this approach?
-
-Thanks!
-sage
-
-
-Sage Weil (5):
-  secret: add Ceph secret type
-  storage: add authId, authDomain to virDomainDiskDef
-  qemu: pass virConnectPtr into Domain{Attach,Detach}*
-  buf: implement generic virBufferEscape
-  qemu/rbd: improve rbd device specification
-
- include/libvirt/libvirt.h.in                       |    3 +
- src/conf/domain_conf.c                             |   43 +++-
- src/conf/domain_conf.h                             |    2 +
- src/conf/secret_conf.c                             |   45 ++++-
- src/conf/secret_conf.h                             |    1 +
- src/libvirt_private.syms                           |    1 +
- src/qemu/qemu_command.c                            |  273 +++++++++++---------
- src/qemu/qemu_command.h                            |    3 +-
- src/qemu/qemu_driver.c                             |   17 +-
- src/qemu/qemu_hotplug.c                            |   15 +-
- src/qemu/qemu_hotplug.h                            |    9 +-
- src/secret/secret_driver.c                         |    8 +
- src/util/buf.c                                     |   33 ++-
- src/util/buf.h                                     |    1 +
- .../qemuxml2argv-disk-drive-network-rbd.args       |    6 +-
- .../qemuxml2argv-disk-drive-network-rbd.xml        |    1 +
- 16 files changed, 305 insertions(+), 156 deletions(-)
-
+diff --git a/docs/schemas/secret.rng b/docs/schemas/secret.rng
+index 80270ae..c3da8b3 100644
+--- a/docs/schemas/secret.rng
++++ b/docs/schemas/secret.rng
+@@ -37,6 +37,7 @@
+           <element name='usage'>
+             <choice>
+               <ref name='usagevolume'/>
++              <ref name='cephauth'/>
+               <!-- More choices later -->
+             </choice>
+           </element>
+@@ -54,6 +55,22 @@
+     </element>
+   </define>
+ 
++  <define name='cephauth'>
++    <attribute name='type'>
++      <value>ceph</value>
++    </attribute>
++    <element name='auth'>
++      <attribute name='id'>
++	<text/>
++      </attribute>
++      <optional>
++        <attribute name='domain'>
++	  <text/>
++	</attribute>
++      </optional>
++    </element>
++  </define>
++
+   <define name="UUID">
+     <choice>
+       <data type="string">
+diff --git a/include/libvirt/libvirt.h.in b/include/libvirt/libvirt.h.in
+index b1bda31..51fd044 100644
+--- a/include/libvirt/libvirt.h.in
++++ b/include/libvirt/libvirt.h.in
+@@ -2257,7 +2257,10 @@ typedef virSecret *virSecretPtr;
+ typedef enum {
+     VIR_SECRET_USAGE_TYPE_NONE = 0,
+     VIR_SECRET_USAGE_TYPE_VOLUME = 1,
++    VIR_SECRET_USAGE_TYPE_CEPH = 2,
+     /* Expect more owner types later... */
++
++    VIR_SECRET_USAGE_TYPE_LAST
+ } virSecretUsageType;
+ 
+ virConnectPtr           virSecretGetConnect     (virSecretPtr secret);
+diff --git a/src/conf/secret_conf.c b/src/conf/secret_conf.c
+index 105afbe..8f11a51 100644
+--- a/src/conf/secret_conf.c
++++ b/src/conf/secret_conf.c
+@@ -35,7 +35,8 @@
+ 
+ #define VIR_FROM_THIS VIR_FROM_SECRET
+ 
+-VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_VOLUME + 1, "none", "volume")
++VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_LAST,
++              "none", "volume", "ceph")
+ 
+ void
+ virSecretDefFree(virSecretDefPtr def)
+@@ -52,6 +53,10 @@ virSecretDefFree(virSecretDefPtr def)
+         VIR_FREE(def->usage.volume);
+         break;
+ 
++    case VIR_SECRET_USAGE_TYPE_CEPH:
++        VIR_FREE(def->usage.authIdDomain);
++        break;
++
+     default:
+         VIR_ERROR(_("unexpected secret usage type %d"), def->usage_type);
+         break;
+@@ -65,6 +70,8 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
+ {
+     char *type_str;
+     int type;
++    char *authId, *authDomain;
++    int ret;
+ 
+     type_str = virXPathString("string(./usage/@type)", ctxt);
+     if (type_str == NULL) {
+@@ -94,6 +101,27 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
+         }
+         break;
+ 
++    case VIR_SECRET_USAGE_TYPE_CEPH:
++        authId = virXPathString("string(./usage/auth/@id)", ctxt);
++        if (!authId) {
++            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
++                                 _("ceph usage specified, but auth id is missing"));
++            return -1;
++        }
++        authDomain = virXPathString("string(./usage/auth/@domain)", ctxt);
++        if (!authDomain) {
++            VIR_FREE(authId);
++            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
++                                 _("ceph usage specified, but auth domain is missing"));
++            return -1;
++        }
++        ret = virAlloc(&def->usage.authIdDomain, strlen(authId) +
++                       strlen(authDomain) + 2);
++        sprintf(def->usage.authIdDomain, "%s/%s", authId, authDomain);
++        VIR_FREE(authId);
++        VIR_FREE(authDomain);
++        break;
++
+     default:
+         virSecretReportError(VIR_ERR_INTERNAL_ERROR,
+                              _("unexpected secret usage type %d"),
+@@ -220,6 +248,9 @@ virSecretDefFormatUsage(virBufferPtr buf,
+                         const virSecretDefPtr def)
+ {
+     const char *type;
++    char *p;
++    char idAuth[80];
++    int len;
+ 
+     type = virSecretUsageTypeTypeToString(def->usage_type);
+     if (type == NULL) {
+@@ -239,6 +270,18 @@ virSecretDefFormatUsage(virBufferPtr buf,
+                                   def->usage.volume);
+         break;
+ 
++    case VIR_SECRET_USAGE_TYPE_CEPH:
++        if (def->usage.authIdDomain != NULL) {
++            p = strchr(def->usage.authIdDomain, '/');
++            len = p - def->usage.authIdDomain;
++            strncpy(idAuth, def->usage.authIdDomain, len);
++            idAuth[len] = '\0';
++            p++;
++            virBufferEscapeString(buf, "    <auth id='%s'", idAuth);
++            virBufferEscapeString(buf, " domain='%s'/>\n", p);
++        }
++        break;
++
+     default:
+         virSecretReportError(VIR_ERR_INTERNAL_ERROR,
+                              _("unexpected secret usage type %d"),
+diff --git a/src/conf/secret_conf.h b/src/conf/secret_conf.h
+index 4b47c52..294e7ab 100644
+--- a/src/conf/secret_conf.h
++++ b/src/conf/secret_conf.h
+@@ -42,6 +42,7 @@ struct _virSecretDef {
+     int usage_type;
+     union {
+         char *volume;               /* May be NULL */
++        char *authIdDomain;
+     } usage;
+ };
+ 
+diff --git a/src/secret/secret_driver.c b/src/secret/secret_driver.c
+index 59dc687..7ea8a49 100644
+--- a/src/secret/secret_driver.c
++++ b/src/secret/secret_driver.c
+@@ -144,6 +144,11 @@ secretFindByUsage(virSecretDriverStatePtr driver, int usageType, const char *usa
+             if (STREQ(s->def->usage.volume, usageID))
+                 return s;
+             break;
++
++        case VIR_SECRET_USAGE_TYPE_CEPH:
++            if (STREQ(s->def->usage.authIdDomain, usageID))
++                return s;
++            break;
+         }
+     }
+     return NULL;
+@@ -607,6 +612,9 @@ secretUsageIDForDef(virSecretDefPtr def)
+     case VIR_SECRET_USAGE_TYPE_VOLUME:
+         return def->usage.volume;
+ 
++    case VIR_SECRET_USAGE_TYPE_CEPH:
++        return def->usage.authIdDomain;
++
+     default:
+         return NULL;
+     }
 -- 
 1.7.4.1
 
