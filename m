@@ -1,79 +1,118 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Using RADOS
-Date: Tue, 20 Sep 2011 10:50:09 +0200
-Message-ID: <1316508609.2671.4.camel@wido-desktop>
-References: <CAMiHsJ+XqtaBJVAzf3NBPTp3Con-5R0tneyadKB9Nvb9wvWJVQ@mail.gmail.com>
+From: Upendra Moturi <upendra.m@hexagrid.com>
+Subject: ceph cluster with rbd
+Date: Tue, 20 Sep 2011 14:23:23 +0530
+Message-ID: <CAHbZLqRnsZTovW_LfVEEnNP2XwpcZXeDsPvgOim1PTem6vS_QQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:56903 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752387Ab1ITIuM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2011 04:50:12 -0400
-In-Reply-To: <CAMiHsJ+XqtaBJVAzf3NBPTp3Con-5R0tneyadKB9Nvb9wvWJVQ@mail.gmail.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:64593 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754820Ab1ITIxY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Sep 2011 04:53:24 -0400
+Received: by wyg34 with SMTP id 34so270855wyg.19
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Sep 2011 01:53:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Atish Kathpal <atish.kathpal@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, sage@newdream.net, Saurav Lahiri <saurav.lahiri@hexagrid.com>
 
-Hi,
+Hi
 
-On Tue, 2011-09-20 at 13:14 +0530, Atish Kathpal wrote:
-> Hello friends
-> 
-> Since there is no Ceph User's mailing list, I am posting my doubt here.
-> 
-> I want to use the Ceph object store capabilities. I have already
-> installed and setup a Ceph cluster.
-> 
-> As a first step, I want to be able to GET/PUT or read/write to the
-> object store of my cluster. I would prefer a HTTP/REST interface but
-> please let me know of other interfaces that exist for performing
-> read/writes to ceph object store/RADOS.
+I trying to create rbd image with ceph cluster.
+I am able to start ceph cluster and mount to a client .
+But not able to create rbd image.
 
-You mean the radosgw? See: http://ceph.newdream.net/wiki/RADOS_Gateway
+I am using Linux ubuntu 3.0.0-11-server=A0 kernel
+qemu version : qemu-kvm-0.14.0
+ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
 
-That should give you a nice HTTP interface to your RADOS objects. Almost
-fully S3 compatible.
+As this a test environment i am trying it on a single machine.
 
-There is also a command-line tool "rados" which you could use, but you
-can also write something against librados (C/C++).
+Here is my ceph.conf
 
-> 
-> Final goal: Besides normal read/writes, I also want to be able to have
-> some objects, which point to no data. That is, I want to have a
-> special flag, which if set, would mean there is no data pointed to by
-> this Object ID. If its unset, it means its like a normal object
-> pointing to some data file(s). I want to have the freedom to be able
-> to set/unset this flag and hence be able to delete/re-insert the
-> corresponding data file(s) against the same object ID. Do we have an
-> API which could allow me such functionality?
+[global]
+=A0=A0=A0=A0=A0=A0=A0 pid file =3D /var/run/ceph/$name.pid
+=A0=A0=A0=A0=A0=A0=A0 debug ms =3D 1
+[mon]
+=A0=A0=A0=A0=A0=A0=A0 mon data =3D /data/mon$id
+[mon.0]
+=A0=A0=A0=A0=A0=A0=A0 host =3D ceph1
+=A0=A0=A0=A0=A0=A0=A0 mon addr =3D 192.168.123.148:6789
+[mds]
 
-No, RADOS is a pretty straight forward API. You have pools where you
-place objects in. Objects can have xattrs and that's about it.
+[mds.0]
+=A0=A0=A0=A0=A0=A0=A0 host =3D ceph1
+[osd]
+=A0=A0=A0=A0=A0=A0=A0 sudo =3D true
+=A0=A0=A0=A0=A0=A0=A0 osd data =3D /data/osd$id
+=A0=A0=A0=A0=A0=A0=A0 osd journal =3D /data/osd$id/journal
+=A0=A0=A0=A0=A0=A0=A0 osd journal size =3D 512
+=A0=A0=A0=A0=A0=A0=A0 osd use stale snap =3D true
+[osd.0]
+=A0=A0=A0=A0=A0=A0=A0 host =3D ceph1
+=A0=A0=A0=A0=A0=A0=A0 btrfs devs =3D /dev/sdb
+[osd.1]
+=A0=A0=A0=A0=A0=A0=A0 host =3D ceph1
+=A0=A0=A0=A0=A0=A0=A0 btrfs devs =3D /dev/sdc
 
-If you want these kinds of logic you'd have to write your own layer over
-librados.
+Using
+mkcephfs -c /etc/ceph/ceph.conf -a --mkbtrfs -k /etc/ceph/keyring.bin
+able to create ceph file system and mount to client
+but not able to create a rbd image on it.
 
-You could set xattr telling a object is empty.
+=46ollowed the url
+http://ceph.newdream.net/wiki/Rbd
+and was not able to check out.
+but when i did
 
-RADOS is pretty low-level and straight forward. There is not much logic
-in it, no locking or other fancy stuff. Just store objects in pools and
-make sure they are safe.
+depmod -a
+modprobe rbd
+i am able to see /sys/bus/rbd directory.
 
-Any other logic should be done by yourself.
+ceph class list
+did not show me rbd
+Instead it said me
+mon0 -> 'class distribution is no longer handled by the monitor' (-22)
 
-Wido
+Not able to check out qemu-rbd
+$ git clone git://git.qemu.org/qemu.git
+$ cd qemu
+$ ./configure --enable-rbd
+$ make; make install
 
-> 
-> Please point me to suitable links/starting points.
-> 
-> Thanks
-> Atish
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+=46rom linux-kvm url
+(http://www.linux-kvm.com/content/cephrbd-block-driver-patches-qemu-kvm=
+)
+$ git clone git://ceph.newdream.net/git/qemu-kvm.git
+$ cd qemu-kvm
+$ git checkout -b rbd origin/rbd
+$ ./configure --enable-rbd
+$ make; make install
+
+I was able to check out using above url but configure gave me following=
+ error
+
+     ./configure --enable-rbd
+     ERROR
+     ERROR: User requested feature rados block device
+     ERROR: configure was not able to find it
+     ERROR
+
+Please guide me in the right direction.
 
 
+
+
+
+
+
+
+
+--
+Thanks and Regards,
+Upendra.M
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
