@@ -1,70 +1,62 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: async+direct IO in osd journal write
-Date: Wed, 21 Sep 2011 10:49:19 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1109211048130.22692@cobra.newdream.net>
-References: <CABAwU-bcnVUn3d3HytywkEYdzZySxtBFT6=-nXOGA+ppNhCg0Q@mail.gmail.com>
- <Pine.LNX.4.64.1108192101160.17629@cobra.newdream.net>
- <CABAwU-ZUxH3q=kQck8Evcn-ifvaRxA3Bd+-Fy5_6psCyVVyEdw@mail.gmail.com>
+Subject: v0.35 released
+Date: Wed, 21 Sep 2011 13:41:58 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1109211340000.22692@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-326915126-1316627359=:22692"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33757 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:40232 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751103Ab1IURtU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2011 13:49:20 -0400
-In-Reply-To: <CABAwU-ZUxH3q=kQck8Evcn-ifvaRxA3Bd+-Fy5_6psCyVVyEdw@mail.gmail.com>
+	with ESMTP id S1750711Ab1IUUl7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Sep 2011 16:41:59 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id A7BA8BC783
+	for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2011 13:41:58 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 81D26BC783
+	for <ceph-devel@vger.kernel.org>; Wed, 21 Sep 2011 13:41:58 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+WARNING: There is a disk format change in this release that requires a bit 
+of extra care to upgrade safely.  Please see below.
 
---557981400-326915126-1316627359=:22692
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Notable changes since v0.34 include:
 
-Hi,
+ * osd: large collections of objects are pre-hashed into directories
+ * radosgw: pools are preallocated
+ * librbd: asynchronous api for many operations
+ * rbd: show progress for long-running operations
+ * rados export: parallelized, much faster
+ * collectd: track historical health
+ * teuthology: valgrind support
+ * teuthology: improved osd thrashing
 
-On Sat, 20 Aug 2011, huang jun wrote:
+The big change this time around is the way the OSD is storing objects on 
+the local machine.  When directories of objects get large, they are 
+'pre-hashed' into subdirectories.  This is necessary groundwork that will 
+facilitate splitting and merging of PGs when pools grow or shrink 
+dramatically in size.  There is an on disk format change to do this, so a 
+bit of care is needed to upgrade.
 
-> 2011/8/20 Sage Weil <sage@newdream.net>:
-> > On Sat, 20 Aug 2011, huang jun wrote:
-> >> hi,all
-> >> Recently,we have a test to compare =A0async i/o and sync i/o in OSD.
-> >> The osd jounral was written in sync + direct io mode now, that heavily
-> >> infuluenced the write performance.
-> >> we use linux aio API. test file size is 40MB,and disk isn't busy.
-> >> here is the test result:
-> >> =A0 =A0 =A0 =A0 =A0 type =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext3
-> >> sync write+direct io =A0 =A0 =A04.441s
-> >>
-> >> async write +direct io =A0 0.462s
-> >>
-> >> we are glad to see that, so we want to affirm that :
-> >> 1) can we use async+direct io to achieve better write performance if
-> >> we used osd journal?
-> >
-> > Do you mean changing the writes in os/FileJournal.cc to be async? =A0As=
- long
-> > as the journal does not acknowledge a write until it is stable on disk,
-> > that is fine. =A0Async IO would be a nice improvement here; I think
-> > currently it's a single sync O_DIRECT io in flight at a time.
-> yes, we'd like to change FileJournal.cc to async.
-> > The test is to write a 40MB file via which interface? =A0Via a kernel c=
-lient
-> > mount?
-> At persent, we just separately tested the async io,and found that
-> would be useful.
-> now, we are doing the work to add async code in filejournal.cc, and it
-> should be finished next week. and then we'll have a test.
+Please follow this basic procedure:
 
-Have you had any luck with this?  This is definitely a change we'd like to=
-=20
-make.  We suspect the sync journal writes are hurting latency under a lot=
-=20
-of workloads.
+ 1. Make sure all PGs are healthy ('ceph pg stat' should show everything 
+    'active+clean').
 
-sage
---557981400-326915126-1316627359=:22692--
+ 2. Upgrade the monitors to the new version.
+
+ 3. Upgrade everything else (OSDs, MDSs, etc.).  Please note that when 
+    cosd starts for the first time it will convert the existing data, so 
+    it may take longer than you're used to. We've done a lot of testing
+    to make sure this works properly, but there are some awkward changes 
+    that make it difficult to test every scenario.  If you have important 
+    data in your cluster, make a backup before upgrading.
+
+Where to get v0.35:
+
+ * Git at git://github.com/NewDreamNetwork/ceph.git
+ * Tarball at http://ceph.newdream.net/downloads/ceph-0.35.tar.gz
+ * For Debian/Ubuntu packages see http://ceph.newdream.net/wiki/Debian
+
