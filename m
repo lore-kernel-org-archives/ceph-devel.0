@@ -1,87 +1,215 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: rbd snap
-Date: Fri, 23 Sep 2011 20:48:03 +0200
-Message-ID: <4E7CD463.9000303@tuxadero.com>
-References: <4E736107.4050309@tuxadero.com> <Pine.LNX.4.64.1109160928170.11043@cobra.newdream.net> <4E73C064.7020104@tuxadero.com> <4E73CC58.9070503@dreamhost.com> <4E74C653.6080404@tuxadero.com> <4E7CCB3B.7080606@tuxadero.com> <Pine.LNX.4.64.1109231120360.8231@cobra.newdream.net>
-Reply-To: martin@tuxadero.com
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: [PATCH v2] ceph: use kernel DNS resolver
+Date: Fri, 23 Sep 2011 11:48:42 -0700
+Message-ID: <CAB2gnbUSnTmLkUoPFQJBTSh4PSMPmD_ud9fr2zAS3afxJf5LPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:33775 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750736Ab1IWSsL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2011 14:48:11 -0400
-In-Reply-To: <Pine.LNX.4.64.1109231120360.8231@cobra.newdream.net>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:40655 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750736Ab1IWSso (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2011 14:48:44 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 
-Hi,
-that's great, and it is safe to start diffrent vms with diffrent 
-snapshots of the same image at the same time?
+Change ceph_parse_ips to take either names given as
+IP addresses or standard hostnames (e.g. localhost).
+The DNS lookup is done using the dns_resolver facility
+similar to its use in AFS, NFS, and CIFS.
 
-Best Regards,
-  Martin
+This patch defines CONFIG_CEPH_LIB_USE_DNS_RESOLVER
+that controls if this feature is on or off.
 
-Sage Weil schrieb:
-> On Fri, 23 Sep 2011, Martin Mailand wrote:
->> Hi,
->> is it possible to access snapshots without to rollback the head of the rbd
->> volumen?
->> Because I want to do a snapshot of a vm running via librbd and qemu, and use
->> the snapshot to make a offsite backup of the vm.
-> 
-> $ rbd export foo --snap=mysnap /path/to/foo.dump
-> 
-> You can also map the snapshot via qemu with a string like 
-> rbd:rbd/foo@mysnap.
-> 
-> sage
-> 
-> 
->> Best Regards,
->>  Martin
->>
->>
->> Martin Mailand schrieb:
->>> Okay, with the btrfs patch and the right commandline snapshotting works like
->>> a charm.
->>>
->>> best regards,
->>>  martin
->>>
->>> Josh Durgin schrieb:
->>>> On 09/16/2011 02:32 PM, Martin Mailand wrote:
->>>>> root@c-brick-001:~# rbd rm --snap=2011091601 test
->>>>> *** Caught signal (Segmentation fault) **
->>>>> in thread 0x7f203d749740
->>>>> ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
->>>>> 1: rbd() [0x457062]
->>>>> 2: (()+0xfc60) [0x7f203ccf6c60]
->>>>> 3: (librbd::snap_set(librbd::ImageCtx*, char const*)+0x10)
->>>>> [0x7f203d32ecd0]
->>>>> 4: (main()+0x59f) [0x4518ff]
->>>>> 5: (__libc_start_main()+0xff) [0x7f203b6cdeff]
->>>>> 6: rbd() [0x44d569]
->>>>> Segmentation fault
->>>> I added a bug to the tracker for this
->>>> (http://tracker.newdream.net/issues/1545). It shouldn't crash the way you
->>>> ran it, but if you're trying to remove a snapshot you need to use the
->>>> 'snap rm' command, i.e.:
->>>> $ rbd snap rm --snap=2011091601 test
->>>> -- 
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> -- 
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+Signed-off-by: Noah Watkins <noahwatkins@gmail.com>
+---
+ net/ceph/Kconfig     |   14 ++++++
+ net/ceph/messenger.c |  114 ++++++++++++++++++++++++++++++++++++++++++++-----
+ 2 files changed, 116 insertions(+), 12 deletions(-)
+
+diff --git a/net/ceph/Kconfig b/net/ceph/Kconfig
+index be683f2..cc04dd6 100644
+--- a/net/ceph/Kconfig
++++ b/net/ceph/Kconfig
+@@ -27,3 +27,17 @@ config CEPH_LIB_PRETTYDEBUG
+
+ 	  If unsure, say N.
+
++config CEPH_LIB_USE_DNS_RESOLVER
++	bool "Use in-kernel support for DNS lookup"
++	depends on CEPH_LIB
++	select DNS_RESOLVER
++	default n
++	help
++	  If you say Y here, hostnames (e.g. monitor addresses) will
++	  be resolved using the CONFIG_DNS_RESOLVER facility.
++
++	  For information on how to use CONFIG_DNS_RESOLVER consult
++	  Documentation/networking/dns_resolver.txt
++
++	  If unsure, say N.
++
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index c340e2e..947a6f3 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -11,6 +11,7 @@
+ #include <linux/string.h>
+ #include <linux/bio.h>
+ #include <linux/blkdev.h>
++#include <linux/dns_resolver.h>
+ #include <net/tcp.h>
+
+ #include <linux/ceph/libceph.h>
+@@ -1078,6 +1079,101 @@ static void addr_set_port(struct
+sockaddr_storage *ss, int p)
+ }
+
+ /*
++ * Unlike other *_pton function semantics, zero indicates success.
++ */
++static int ceph_pton(const char *str, size_t len, struct sockaddr_storage *ss,
++		char delim, const char **ipend)
++{
++	struct sockaddr_in *in4 = (void *)ss;
++	struct sockaddr_in6 *in6 = (void *)ss;
++
++	memset(ss, 0, sizeof(*ss));
++
++	if (in4_pton(str, len, (u8 *)&in4->sin_addr.s_addr, delim, ipend)) {
++		ss->ss_family = AF_INET;
++		return 0;
++	}
++
++	if (in6_pton(str, len, (u8 *)&in6->sin6_addr.s6_addr, delim, ipend)) {
++		ss->ss_family = AF_INET6;
++		return 0;
++	}
++
++	return -EINVAL;
++}
++
++/*
++ * Extract hostname string and resolve using kernel DNS facility.
++ */
++#ifdef CONFIG_CEPH_LIB_USE_DNS_RESOLVER
++static int ceph_dns_resolve_name(const char *name, size_t namelen,
++		struct sockaddr_storage *ss, char delim, const char **ipend)
++{
++	const char *end, *delim_p;
++	char *colon_p, *ip_addr = NULL;
++	int ip_len, ret;
++
++	/*
++	 * The end of the hostname occurs immediately preceding the delimiter or
++	 * the port marker (':') where the delimiter takes precedence.
++	 */
++	delim_p = memchr(name, delim, namelen);
++	colon_p = memchr(name, ':', namelen);
++
++	if (delim_p && colon_p)
++		end = delim_p < colon_p ? delim_p : colon_p;
++	else if (!delim_p && colon_p)
++		end = colon_p;
++	else {
++		end = delim_p;
++		if (!end) /* case: hostname:/ */
++			end = name + namelen;
++	}
++
++	if (end <= name)
++		return -EINVAL;
++
++	/* do dns_resolve upcall */
++	ip_len = dns_query(NULL, name, end - name, NULL, &ip_addr, NULL);
++	if (ip_len > 0)
++		ret = ceph_pton(ip_addr, ip_len, ss, -1, NULL);
++	else
++		ret = -ESRCH;
++
++	kfree(ip_addr);
++
++	*ipend = end;
++
++	pr_info("resolve '%.*s' (ret=%d): %s\n", (int)(end - name), name,
++			ret, ret ? "failed" : ceph_pr_addr(ss));
++
++	return ret;
++}
++#else
++static inline int ceph_dns_resolve_name(const char *name, size_t namelen,
++		struct sockaddr_storage *ss, char delim, const char **ipend)
++{
++	return -EINVAL;
++}
++#endif
++
++/*
++ * Parse a server name (IP or hostname). If a valid IP address is not found
++ * then try to extract a hostname to resolve using userspace DNS upcall.
++ */
++static int ceph_parse_server_name(const char *name, size_t namelen,
++			struct sockaddr_storage *ss, char delim, const char **ipend)
++{
++	int ret;
++
++	ret = ceph_pton(name, namelen, ss, delim, ipend);
++	if (ret)
++		ret = ceph_dns_resolve_name(name, namelen, ss, delim, ipend);
++
++	return ret;
++}
++
++/*
+  * Parse an ip[:port] list into an addr array.  Use the default
+  * monitor port if a port isn't specified.
+  */
+@@ -1085,15 +1181,13 @@ int ceph_parse_ips(const char *c, const char *end,
+ 		   struct ceph_entity_addr *addr,
+ 		   int max_count, int *count)
+ {
+-	int i;
++	int i, ret = -EINVAL;
+ 	const char *p = c;
+
+ 	dout("parse_ips on '%.*s'\n", (int)(end-c), c);
+ 	for (i = 0; i < max_count; i++) {
+ 		const char *ipend;
+ 		struct sockaddr_storage *ss = &addr[i].in_addr;
+-		struct sockaddr_in *in4 = (void *)ss;
+-		struct sockaddr_in6 *in6 = (void *)ss;
+ 		int port;
+ 		char delim = ',';
+
+@@ -1102,15 +1196,11 @@ int ceph_parse_ips(const char *c, const char *end,
+ 			p++;
+ 		}
+
+-		memset(ss, 0, sizeof(*ss));
+-		if (in4_pton(p, end - p, (u8 *)&in4->sin_addr.s_addr,
+-			     delim, &ipend))
+-			ss->ss_family = AF_INET;
+-		else if (in6_pton(p, end - p, (u8 *)&in6->sin6_addr.s6_addr,
+-				  delim, &ipend))
+-			ss->ss_family = AF_INET6;
+-		else
++		ret = ceph_parse_server_name(p, end - p, ss, delim, &ipend);
++		if (ret)
+ 			goto bad;
++		ret = -EINVAL;
++
+ 		p = ipend;
+
+ 		if (delim == ']') {
+@@ -1155,7 +1245,7 @@ int ceph_parse_ips(const char *c, const char *end,
+
+ bad:
+ 	pr_err("parse_ips bad ip '%.*s'\n", (int)(end - c), c);
+-	return -EINVAL;
++	return ret;
+ }
+ EXPORT_SYMBOL(ceph_parse_ips);
+
+-- 
+1.7.6.1
