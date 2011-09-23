@@ -1,38 +1,104 @@
-From: Noah Watkins <noahwatkins@gmail.com>
-Subject: Re: [PATCH] ceph: use kernel DNS resolver
-Date: Fri, 23 Sep 2011 11:51:27 -0700
-Message-ID: <CAB2gnbVaS=x9hurY0P8x4Ltqh11foOpsMBy2MNt662T2X9+BLQ@mail.gmail.com>
-References: <CAB2gnbVw2_FSWVVmUA1OobE1Ti9Q1w3AP_67=Vo4zwZtQ=gHYg@mail.gmail.com>
-	<Pine.LNX.4.64.1109221426310.19558@cobra.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: rbd snap
+Date: Fri, 23 Sep 2011 11:52:32 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1109231152220.26399@cobra.newdream.net>
+References: <4E736107.4050309@tuxadero.com> <Pine.LNX.4.64.1109160928170.11043@cobra.newdream.net>
+ <4E73C064.7020104@tuxadero.com> <4E73CC58.9070503@dreamhost.com>
+ <4E74C653.6080404@tuxadero.com> <4E7CCB3B.7080606@tuxadero.com>
+ <Pine.LNX.4.64.1109231120360.8231@cobra.newdream.net> <4E7CD463.9000303@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:57200 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751511Ab1IWSv3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2011 14:51:29 -0400
-In-Reply-To: <Pine.LNX.4.64.1109221426310.19558@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:59831 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751514Ab1IWSwd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2011 14:52:33 -0400
+In-Reply-To: <4E7CD463.9000303@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: Martin Mailand <martin@tuxadero.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Sep 22, 2011 at 14:29, Sage Weil <sage@newdream.net> wrote:
-> Currently the dns resolution is handled by mount.ceph and 'rbd map/unmap'.
-> I don't think that will go away (at the very least need to support old
-> kernels).
+On Fri, 23 Sep 2011, Martin Mailand wrote:
+> Hi,
+> that's great, and it is safe to start diffrent vms with diffrent snapshots of
+> the same image at the same time?
 
-This is good to know. I never encountered the DNS lookup because I've
-always used a non-standard installation path, avoiding mount.ceph.
+Yeah. Just remember they're read-only...
 
-> Allowing this in the raw kernel interface would be nice, but I don't think
-> we want make DNS_RESOLVER a strict dependency, since it's new, kind of
-> kludgey, and a ripe target for compiling out of small or secure kernels.
-> Can you make it build either with or without it?
+sage
 
-I sent out a new version of the patch that defines a libceph specific
-configuration
-option to use the in-kernel dns resolver.
-
-Thanks for the feedback!
--Noah
+> 
+> Best Regards,
+>  Martin
+> 
+> Sage Weil schrieb:
+> > On Fri, 23 Sep 2011, Martin Mailand wrote:
+> > > Hi,
+> > > is it possible to access snapshots without to rollback the head of the rbd
+> > > volumen?
+> > > Because I want to do a snapshot of a vm running via librbd and qemu, and
+> > > use
+> > > the snapshot to make a offsite backup of the vm.
+> > 
+> > $ rbd export foo --snap=mysnap /path/to/foo.dump
+> > 
+> > You can also map the snapshot via qemu with a string like
+> > rbd:rbd/foo@mysnap.
+> > 
+> > sage
+> > 
+> > 
+> > > Best Regards,
+> > >  Martin
+> > > 
+> > > 
+> > > Martin Mailand schrieb:
+> > > > Okay, with the btrfs patch and the right commandline snapshotting works
+> > > > like
+> > > > a charm.
+> > > > 
+> > > > best regards,
+> > > >  martin
+> > > > 
+> > > > Josh Durgin schrieb:
+> > > > > On 09/16/2011 02:32 PM, Martin Mailand wrote:
+> > > > > > root@c-brick-001:~# rbd rm --snap=2011091601 test
+> > > > > > *** Caught signal (Segmentation fault) **
+> > > > > > in thread 0x7f203d749740
+> > > > > > ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
+> > > > > > 1: rbd() [0x457062]
+> > > > > > 2: (()+0xfc60) [0x7f203ccf6c60]
+> > > > > > 3: (librbd::snap_set(librbd::ImageCtx*, char const*)+0x10)
+> > > > > > [0x7f203d32ecd0]
+> > > > > > 4: (main()+0x59f) [0x4518ff]
+> > > > > > 5: (__libc_start_main()+0xff) [0x7f203b6cdeff]
+> > > > > > 6: rbd() [0x44d569]
+> > > > > > Segmentation fault
+> > > > > I added a bug to the tracker for this
+> > > > > (http://tracker.newdream.net/issues/1545). It shouldn't crash the way
+> > > > > you
+> > > > > ran it, but if you're trying to remove a snapshot you need to use the
+> > > > > 'snap rm' command, i.e.:
+> > > > > $ rbd snap rm --snap=2011091601 test
+> > > > > -- 
+> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > > > > in
+> > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > -- 
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
