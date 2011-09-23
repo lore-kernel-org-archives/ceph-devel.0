@@ -1,56 +1,39 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: New inode parent information needed for ACL
-Date: Thu, 22 Sep 2011 21:53:30 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1109222149410.8663@cobra.newdream.net>
-References: <1832752224.18125.1316473523050.JavaMail.root@mail-01.cse.ucsc.edu>
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: Re: [PATCH] crushtool: fix args parsing
+Date: Fri, 23 Sep 2011 13:07:07 +0800
+Message-ID: <CANExM-N58pk1EtjD26ANBwUfbE3YfCa0yF-d9j2vO0ExXFZLfw@mail.gmail.com>
+References: <1316709560-6521-1-git-send-email-henry.cy.chang@gmail.com>
+	<Pine.LNX.4.64.1109220943590.17520@cobra.newdream.net>
+	<CANExM-OrCz8S5R6XAkwERoNDcqBVPc6VU_OhyJ1hqjq8_eFhdg@mail.gmail.com>
+	<Pine.LNX.4.64.1109222139590.8663@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60461 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750802Ab1IWExa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2011 00:53:30 -0400
-In-Reply-To: <1832752224.18125.1316473523050.JavaMail.root@mail-01.cse.ucsc.edu>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:33715 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751380Ab1IWFHI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2011 01:07:08 -0400
+Received: by iaqq3 with SMTP id q3so3523883iaq.19
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Sep 2011 22:07:08 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1109222139590.8663@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@soe.ucsc.edu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-Hey Noah,
+> Yep, those were both broken. =C2=A0Fixed it in the stable branch, and=
+ added a
+> simple unit test to make sure it stays that way. =C2=A0Please let me =
+know it if
+> gives you any further problems.
+>
 
-Sorry for the slow reply!
+I can't see your commit on github. Have you pushed it on?
 
-On Mon, 19 Sep 2011, Noah Watkins wrote:
-> I've been hacking a bit on xattr-based ACLs for Ceph. It's all working
-> fine, but I'm having some trouble wiring up the default ACL init code
-> for new inodes (mknod, create, mkdir, and symlink): New ACLs depend on
-> the the ACL of the parent. The ideal location seems to be in fill_inode,
-> but it is unclear how to access the parent inode of the original request
-> from fill_inode because it is receiving the filler information just from a
-> mds reply. Is getting the parent information in fill_inode possible?
-> 
-> Alternatively, in each of ceph_mknod, ceph_symlink, etc..., the problem would
-> be solved trivially if the new inode is available because the parent information
-> is provided. For example, in ceph_mknod, on success will dentry->d_inode alway point
-> to the new inode, or is there more async stuff going on?
-
-Let me make sure I understand this: when you create a file, the generic 
-linux ACL code gives you a new ACL based on the parent directory.  Is that 
-right?
-
-I see two options:
- 1- in mknod/mkdir/create/symlink, we generate the new acl and pass it to 
-the MDS along with the create request.  "trust the client."
- 2- the MDS generates the ACL based on the parent directory.  "trust the 
-server."
-
-I think #2 is a more "right" answer, but it also means duplicating 
-whatever the ACL logic is on the MDS.  I also suspect #1 is what labeled 
-NFS does... :/
-
-In any case, I don't think anything in the reply processing path will be 
-right.  The client should only be presenting what the ACL actually is (on 
-the server), which means it needs to be part of the request, or generated 
-on the MDS...
-
-sage
+Henry
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
