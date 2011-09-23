@@ -1,65 +1,66 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Ceph hangs when accessed
-Date: Fri, 23 Sep 2011 13:20:14 -0400
-Message-ID: <1316798414.2822.33.camel@wido-laptop>
-References: <1801183894.301109.1316793492464.JavaMail.root@zmbs4.inria.fr>
+From: Atish Kathpal <atish.kathpal@gmail.com>
+Subject: Authentication error
+Date: Fri, 23 Sep 2011 23:15:44 +0530
+Message-ID: <CAMiHsJJTrCerY+J71-dMpam081wecCxYLVoc55woVDhfohBpcw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:55888 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750826Ab1IWRUS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2011 13:20:18 -0400
-In-Reply-To: <1801183894.301109.1316793492464.JavaMail.root@zmbs4.inria.fr>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:60486 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751206Ab1IWRqG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Sep 2011 13:46:06 -0400
+Received: by bkbzt4 with SMTP id zt4so3725309bkb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Sep 2011 10:46:05 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Cedric Morandin <cedric.morandin@inria.fr>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi.
+Hello
 
-Could you sent us your ceph.conf and the output of "ceph -s" ?
+<Ceph usage problem>
 
-Wido
+I have setup ceph (all components on a single node) successfully,
+however I am not able to use any of the features. There seem to be
+some=A0authentication=A0issue. Please throw some light on how to rectif=
+y
+the same.
 
-On Fri, 2011-09-23 at 17:58 +0200, Cedric Morandin wrote:
-> Hi everybody,
-> 
-> I didn't find any ceph-users list so I post here. If this is not the right place to do it please let me know.
-> I'm currently trying to test ceph but I'm probably doing something wrong because I have a really strange behavior.
-> 
-> Context:
-> Ceph compiled and installed on five Centos6 machines.
-> A BTRFS partition is available on each machine.
-> This partition is mounted under /data/osd.[0-3]
-> Clients are using cfuse compiled for FC11 ( 2.6.29.4-167.fc11.x86_64 )
-> 
-> What happen:
-> I configured everything in ceph.conf, started ceph daemons on all nodes.
-> When I issue ceph health, I have a HEALTH_OK answer.
-> I can access the filesystem through cfuse and create some files on it, but when I try to create files bigger than 2 or 3 Mo, the filesystem hangs.
-> When I try to copy an entire directory ( ceph sources for instance) I have the same problem.
-> When the system is in this state, the cosd daemon die on OSD machines: [INF] osd0 out (down for 304.836218)
-> Even killing it doesn't release the mountpoint :
-> cosd       9170      root   10uW     REG                8,6          8    2506754 /data/osd.0/fsid
-> cosd       9170      root   11r      DIR                8,6       4096    2506753 /data/osd.0
-> cosd       9170      root   12r      DIR                8,6      24576    2506755 /data/osd.0/current
-> cosd       9170      root   13u      REG                8,6          4    2506757 /data/osd.0/current/commit_op_seq
-> 
-> 
-> I tried to change some parameters but it results in the same problem:
-> Tried both with the 0.34 and 0.35 releases and using both BTRFS or EXTR3 with user_attr attribute.
-> I tried the cfuse client on one of the Centos 6 machine.
-> 
-> I read everything on  http://ceph.newdream.net/wiki but I can't figure out the problem.
-> Does somebody have any clue of the problem's origin ?
-> 
-> Regards,
-> 
-> Cedric Morandin 
-> 
-> 
-> 
+Error example1:-
+atish@atish-virtual-machine:/etc/ceph$ sudo rados put object1 bitmapspp=
+t4.bin
+2011-09-23 23:06:00.774172 b7865b50 librados: client.admin
+authentication error Operation not permitted
+couldn't connect to cluster! error -1
+Error example2:-
+atish@atish-virtual-machine:/etc/ceph$ ceph -s
+2011-09-23 23:08:01.525547 b788c6d0 unable to authenticate as client.ad=
+min
+2011-09-23 23:08:01.526487 b788c6d0 ceph_tool_common_init failed.
 
+ceph.conf file:-
+[global]
+=A0 =A0 =A0 =A0 auth supported =3D cephx
+=A0 =A0 =A0 =A0 keyring =3D /etc/ceph/ceph.keyring
+[mon]
+=A0 =A0 =A0 =A0 mon data =3D /ceph_data/mon.$id
+[mds]
+[osd]
+=A0 =A0 =A0 =A0 osd data =3D /ceph_data/osd.$id
+=A0 =A0 =A0 =A0 osd journal =3D /ceph_data/osd.$id.journal
+=A0 =A0 =A0 =A0 osd journal size =3D 1000
+[mon.alpha]
+=A0 =A0 =A0 =A0 host =3D atish-virtual-machine
+=A0 =A0 =A0 =A0 mon addr =3D 10.72.147.207:6789
+[osd.0]
+=A0 =A0 =A0 =A0 host =3D atish-virtual-machine
+[mds.0]
+=A0 =A0 =A0 =A0 host =3D atish-virtual-machine
 
+Thanks
+Atish
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
