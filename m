@@ -1,60 +1,61 @@
-From: mowang da <whooya.xxl@gmail.com>
-Subject: ping_pong test of ceph
-Date: Wed, 28 Sep 2011 15:33:53 +0800
-Message-ID: <CAMwsgzPBzcwnJTkhDPAanQemwUirHe-yTHVHE4hMpjc4sgVkKw@mail.gmail.com>
+From: Hannes Reinecke <hare@suse.de>
+Subject: [PATCH] Use LIBEDIT_LIBS in Makefile.am
+Date: Wed, 28 Sep 2011 10:47:34 +0200
+Message-ID: <201109280847.p8S8lYS9003894@pentland.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:35251 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753397Ab1I1Hdz convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Sep 2011 03:33:55 -0400
-Received: by bkbzt4 with SMTP id zt4so7727474bkb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Sep 2011 00:33:53 -0700 (PDT)
+Received: from cantor2.suse.de ([195.135.220.15]:42282 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750978Ab1I1Irj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 28 Sep 2011 04:47:39 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-hi all:
 
-l used ping_pong tool to test ceph, as shown below :
-1.If it supports coherent byte range locks between cluster nodes
-2.How fast it handles lock contention
-3.If it supports coherent read/write IO between nodes
-4.How fast it handles contended IO between nodes
-5.If it supports coherent mmap between nodes
-6.How fast the mmap coherence works
+The editline library might require some additional libs, so
+instead of hardcoding '-ledit' we should be using LIBEDIT_LIBS
+in Makefile.am
 
-the ping_pong code is here:
-http://junkcode.samba.org/ftp/unpacked/junkcode/ping_pong.c
+Signed-off-by: Hannes Reinecke <hare@suse.de>
+---
+ src/Makefile.am |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
 
-l start by running ping_pong on just one of the kernel client mount
-point like this:
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 704f1fa..b7ab7ae 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -49,7 +49,7 @@ ceph_SOURCES = \
+ 	tools/ceph.cc \
+ 	tools/common.cc \
+ 	mon/PGMap.cc
+-ceph_LDADD = $(LIBGLOBAL_LDA) -ledit
++ceph_LDADD = $(LIBGLOBAL_LDA) $(LIBEDIT_LIBS)
+ ceph_CXXFLAGS = ${AM_CXXFLAGS}
+ 
+ if WITH_GTK2
+@@ -77,7 +77,7 @@ gceph_SOURCES = \
+ 	mon/PGMap.cc \
+ 	tools/gceph.cc \
+ 	tools/gui.cc
+-gceph_LDADD = $(LIBGLOBAL_LDA) -ledit $(GTKMM_LIBS)
++gceph_LDADD = $(LIBGLOBAL_LDA) $(LIBEDIT_LIBS) $(GTKMM_LIBS)
+ gceph_CXXFLAGS = ${AM_CXXFLAGS} $(GTKMM_CFLAGS) \
+ 	-DCEPH_TOOL_GUIDIR="\"${ceph_tool_guidir}\""
+ bin_PROGRAMS += gceph
+@@ -955,7 +955,7 @@ libclient_la_SOURCES = \
+ 	client/Inode.cc \
+ 	client/MetaRequest.cc \
+ 	client/Trace.cc
+-libclient_la_LIBADD = libcommon.la
++libclient_la_LIBADD = libcommon.la $(LIBEDIT_LIBS)
+ noinst_LTLIBRARIES += libclient.la
+ 
+ dist-hook:
+-- 
+1.6.0.2
 
-ping_pong /mnt/test.dat 3
-
-it lock very fast :
-
-T02-OSD161:/usr/src/ping_pong# ./ping_pong /mnt/test.dat 3
-=A0 =A01664 locks/sec
-
-but when l start a second copy of ping_pong on another kernel client
-node in my cluster, there have been some errors:
-
-T02-OSD186:/usr/src/getosd# ./ping_pong /mnt/test.dat 3
-lock at 0 failed! - Interrupted system call
-lock at 0 failed! - Interrupted system call
-lock at 0 failed! - Interrupted system call
-lock at 2 failed! - Interrupted system call
-lock at 1 failed! - Interrupted system call
-lock at 2 failed! - Interrupted system call
-
-ls this a bug of ceph ,or l do something wrong?
-
-thanks!
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
