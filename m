@@ -1,57 +1,60 @@
-From: Stephen Rothwell <sfr@canb.auug.org.au>
-Subject: Re: ceph tree in linux-next
-Date: Wed, 28 Sep 2011 09:01:04 +1000
-Message-ID: <20110928090104.59784063b2e7259503575cf2@canb.auug.org.au>
-References: <Pine.LNX.4.64.1109270935080.23719@cobra.newdream.net>
+From: mowang da <whooya.xxl@gmail.com>
+Subject: ping_pong test of ceph
+Date: Wed, 28 Sep 2011 15:33:53 +0800
+Message-ID: <CAMwsgzPBzcwnJTkhDPAanQemwUirHe-yTHVHE4hMpjc4sgVkKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pgp-signature";
- micalg="PGP-SHA1";
- boundary="Signature=_Wed__28_Sep_2011_09_01_04_+1000_HBgywDAKfipmiIY6"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from calzone.tip.net.au ([203.10.76.15]:37805 "EHLO
-	calzone.tip.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753150Ab1I0XBM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Sep 2011 19:01:12 -0400
-In-Reply-To: <Pine.LNX.4.64.1109270935080.23719@cobra.newdream.net>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:35251 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753397Ab1I1Hdz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Sep 2011 03:33:55 -0400
+Received: by bkbzt4 with SMTP id zt4so7727474bkb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Sep 2011 00:33:53 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
---Signature=_Wed__28_Sep_2011_09_01_04_+1000_HBgywDAKfipmiIY6
-Content-Type: text/plain; charset=US-ASCII
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+hi all:
 
-Hi Sage,
+l used ping_pong tool to test ceph, as shown below :
+1.If it supports coherent byte range locks between cluster nodes
+2.How fast it handles lock contention
+3.If it supports coherent read/write IO between nodes
+4.How fast it handles contended IO between nodes
+5.If it supports coherent mmap between nodes
+6.How fast the mmap coherence works
 
-On Tue, 27 Sep 2011 09:38:24 -0700 (PDT) Sage Weil <sage@newdream.net> wrot=
-e:
->
-> Can you add the new Ceph tree location to linux-next? =20
->=20
-> 	git://github.com/NewDreamNetwork/ceph-client.git for-next
+the ping_pong code is here:
+http://junkcode.samba.org/ftp/unpacked/junkcode/ping_pong.c
 
-I will switch to that from today.
+l start by running ping_pong on just one of the kernel client mount
+point like this:
 
---=20
-Cheers,
-Stephen Rothwell                    sfr@canb.auug.org.au
-http://www.canb.auug.org.au/~sfr/
+ping_pong /mnt/test.dat 3
 
---Signature=_Wed__28_Sep_2011_09_01_04_+1000_HBgywDAKfipmiIY6
-Content-Type: application/pgp-signature
+it lock very fast :
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
+T02-OSD161:/usr/src/ping_pong# ./ping_pong /mnt/test.dat 3
+=A0 =A01664 locks/sec
 
-iQEcBAEBAgAGBQJOglWwAAoJEDMEi1NhKgbse4QH/34QvG2FDUmvKoqlQpqBFJT7
-HMlSUVW0I6GPfrTWDBCCY7sU7VFsSazWAsKRVYA9hLd9V17nfMR9qazj8dHtjl9S
-UT3i1A7X4G7VM8ZynBApxn6jr55OtC2faKiHZiwuP0zcx7sFYGtLAAJpUbHGWF/2
-gZtpSyJa7XrkgUjD9ta//NRUtVdBqQ+OnBiLRelUD72mdLuWIheO/NmLfGmomUJe
-OIwDPjyP1QLU9VV4R6HaOALpfBE98QAIXqsmHbu4gizOU7vRlj8e/+1gGrsH6ZUl
-RRgIchFo5TBWOJvsSU7uhYCjI5P7FcKgRPv53rrt7V7uYRPAJFYh3wNLJ6qXsLQ=
-=+/Sb
------END PGP SIGNATURE-----
+but when l start a second copy of ping_pong on another kernel client
+node in my cluster, there have been some errors:
 
---Signature=_Wed__28_Sep_2011_09_01_04_+1000_HBgywDAKfipmiIY6--
+T02-OSD186:/usr/src/getosd# ./ping_pong /mnt/test.dat 3
+lock at 0 failed! - Interrupted system call
+lock at 0 failed! - Interrupted system call
+lock at 0 failed! - Interrupted system call
+lock at 2 failed! - Interrupted system call
+lock at 1 failed! - Interrupted system call
+lock at 2 failed! - Interrupted system call
+
+ls this a bug of ceph ,or l do something wrong?
+
+thanks!
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
