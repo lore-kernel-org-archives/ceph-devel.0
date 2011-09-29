@@ -1,41 +1,36 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
-Subject: [PATCH] rgw: set xmlns on ListBucketResult element
-Date: Thu, 29 Sep 2011 15:35:23 +0800
-Message-ID: <1317281723-3928-1-git-send-email-henry.cy.chang@gmail.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: Radosgw: multipart upload problem
+Date: Thu, 29 Sep 2011 07:24:49 -0700
+Message-ID: <CAC-hyiFUf0JVm04mGOVX8uRah2KvoR1E-0Z0dJgadayQ3+7zow@mail.gmail.com>
+References: <CANExM-PqDrbWp7bPDh9NjJ-QwYC-yd2emh4aBNFf0HSgqS=9Yg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:45912 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754131Ab1I2Hfj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Sep 2011 03:35:39 -0400
-Received: by ggnv2 with SMTP id v2so22662ggn.19
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Sep 2011 00:35:38 -0700 (PDT)
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:38964 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753227Ab1I2OYv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Sep 2011 10:24:51 -0400
+Received: by bkbzt4 with SMTP id zt4so712738bkb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 29 Sep 2011 07:24:50 -0700 (PDT)
+In-Reply-To: <CANExM-PqDrbWp7bPDh9NjJ-QwYC-yd2emh4aBNFf0HSgqS=9Yg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Henry C Chang <henry.cy.chang@gmail.com>
+To: Henry C Chang <henry.cy.chang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Certain S3 clients (e.g., s3fs) require the xmlns to parse the
-results correctly.
+What version are you running?
 
-Signed-off-by: Henry C Chang <henry.cy.chang@gmail.com>
----
- src/rgw/rgw_rest_s3.cc |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
-
-diff --git a/src/rgw/rgw_rest_s3.cc b/src/rgw/rgw_rest_s3.cc
-index 38dcff1..666e831 100644
---- a/src/rgw/rgw_rest_s3.cc
-+++ b/src/rgw/rgw_rest_s3.cc
-@@ -125,7 +125,8 @@ void RGWListBucket_REST_S3::send_response()
-   if (ret < 0)
-     return;
-  
--  s->formatter->open_object_section("ListBucketResult");
-+  s->formatter->open_object_section_in_ns("ListBucketResult",
-+                  "http://s3.amazonaws.com/doc/2006-03-01/");
-   s->formatter->dump_format("Name", s->bucket_name);
-   if (!prefix.empty())
-     s->formatter->dump_format("Prefix", prefix.c_str());
--- 
-1.7.4.1
-
+On Thu, Sep 29, 2011 at 12:26 AM, Henry C Chang
+<henry.cy.chang@gmail.com> wrote:
+> Hi,
+>
+> I got errors while multipart uploading a large file to radosgw. Please
+> check the attached log.
+>
+> The log shows:
+> 1. "Initiate multipart upload" finished sucessfully.
+> 2. "Upload part" failed with error 409.
+> 3. "Complete multipart upload" failed with error 400.
+>
+> Henry
+>
