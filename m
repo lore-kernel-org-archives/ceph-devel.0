@@ -1,101 +1,35 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [PATCH] vfs: add d_prune dentry operation
-Date: Wed,  5 Oct 2011 21:26:10 -0700
-Message-ID: <1317875170-9349-2-git-send-email-sage@newdream.net>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH] vfs: add d_prune dentry operation
+Date: Thu, 6 Oct 2011 17:21:18 -0400
+Message-ID: <20111006212118.GA24109@infradead.org>
 References: <1317875170-9349-1-git-send-email-sage@newdream.net>
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <1317875170-9349-1-git-send-email-sage@newdream.net>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: linux-fsdevel@vger.kernel.org, viro@ZenIV.linux.org.uk
-Cc: hch@infradead.org, ceph-devel@vger.kernel.org, rwheeler@redhat.com, linux-kernel@vger.kernel.org, Sage Weil <sage@newdream.net>
-List-Id: ceph-devel.vger.kernel.org
+ <1317875170-9349-2-git-send-email-sage@newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from 173-166-109-252-newengland.hfc.comcastbusiness.net ([173.166.109.252]:33183
+	"EHLO bombadil.infradead.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1759174Ab1JFVVW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2011 17:21:22 -0400
+Content-Disposition: inline
+In-Reply-To: <1317875170-9349-2-git-send-email-sage@newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: linux-fsdevel@vger.kernel.org, viro@ZenIV.linux.org.uk, hch@infradead.org, ceph-devel@vger.kernel.org, rwheeler@redhat.com, linux-kernel@vger.kernel.org
 
-This adds a d_prune dentry operation that is called by the VFS prior to
-pruning (i.e. unhashing and killing) a hashed dentry from the dcache.  This
-will be used by Ceph to maintain a flag indicating whether the complete
-contents of a directory are contained in the dcache, allowing it to satisfy
-lookups and readdir without addition server communication.
+On Wed, Oct 05, 2011 at 09:26:10PM -0700, Sage Weil wrote:
+> This adds a d_prune dentry operation that is called by the VFS prior to
+> pruning (i.e. unhashing and killing) a hashed dentry from the dcache.  This
+> will be used by Ceph to maintain a flag indicating whether the complete
+> contents of a directory are contained in the dcache, allowing it to satisfy
+> lookups and readdir without addition server communication.
 
-Signed-off-by: Sage Weil <sage@newdream.net>
----
- Documentation/filesystems/Locking |    1 +
- fs/dcache.c                       |    8 ++++++++
- include/linux/dcache.h            |    3 +++
- 3 files changed, 12 insertions(+), 0 deletions(-)
+What tree is the patch against?  I seems to fail to apply against Linus'
+latests.  
 
-diff --git a/Documentation/filesystems/Locking b/Documentation/filesystems/Locking
-index 57d827d..b3fa7c8 100644
---- a/Documentation/filesystems/Locking
-+++ b/Documentation/filesystems/Locking
-@@ -29,6 +29,7 @@ d_hash		no		no		no		maybe
- d_compare:	yes		no		no		maybe
- d_delete:	no		yes		no		no
- d_release:	no		no		yes		no
-+d_prune:        no              yes             no              no
- d_iput:		no		no		yes		no
- d_dname:	no		no		no		no
- d_automount:	no		no		yes		no
-diff --git a/fs/dcache.c b/fs/dcache.c
-index fbdcbca..84e1756 100644
---- a/fs/dcache.c
-+++ b/fs/dcache.c
-@@ -673,6 +673,8 @@ static void try_prune_one_dentry(struct dentry *dentry)
- 			spin_unlock(&dentry->d_lock);
- 			return;
- 		}
-+		if (dentry->d_flags & DCACHE_OP_PRUNE)
-+			dentry->d_op->d_prune(dentry);
- 		dentry = dentry_kill(dentry, 1);
- 	}
- }
-@@ -879,6 +881,8 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
- 
- 	/* detach this root from the system */
- 	spin_lock(&dentry->d_lock);
-+	if (dentry->d_flags & DCACHE_OP_PRUNE)
-+		dentry->d_op->d_prune(dentry);
- 	dentry_lru_del(dentry);
- 	__d_drop(dentry);
- 	spin_unlock(&dentry->d_lock);
-@@ -895,6 +899,8 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
- 					    d_u.d_child) {
- 				spin_lock_nested(&loop->d_lock,
- 						DENTRY_D_LOCK_NESTED);
-+				if (dentry->d_flags & DCACHE_OP_PRUNE)
-+					dentry->d_op->d_prune(dentry);
- 				dentry_lru_del(loop);
- 				__d_drop(loop);
- 				spin_unlock(&loop->d_lock);
-@@ -1363,6 +1369,8 @@ void d_set_d_op(struct dentry *dentry, const struct dentry_operations *op)
- 		dentry->d_flags |= DCACHE_OP_REVALIDATE;
- 	if (op->d_delete)
- 		dentry->d_flags |= DCACHE_OP_DELETE;
-+	if (op->d_prune)
-+		dentry->d_flags |= DCACHE_OP_PRUNE;
- 
- }
- EXPORT_SYMBOL(d_set_d_op);
-diff --git a/include/linux/dcache.h b/include/linux/dcache.h
-index 19d90a5..681f46f 100644
---- a/include/linux/dcache.h
-+++ b/include/linux/dcache.h
-@@ -165,6 +165,7 @@ struct dentry_operations {
- 			unsigned int, const char *, const struct qstr *);
- 	int (*d_delete)(const struct dentry *);
- 	void (*d_release)(struct dentry *);
-+	void (*d_prune)(struct dentry *);
- 	void (*d_iput)(struct dentry *, struct inode *);
- 	char *(*d_dname)(struct dentry *, char *, int);
- 	struct vfsmount *(*d_automount)(struct path *);
-@@ -219,6 +220,8 @@ struct dentry_operations {
- #define DCACHE_MANAGED_DENTRY \
- 	(DCACHE_MOUNTED|DCACHE_NEED_AUTOMOUNT|DCACHE_MANAGE_TRANSIT)
- 
-+#define DCACHE_OP_PRUNE         0x80000
-+
- extern seqlock_t rename_lock;
- 
- static inline int dname_external(struct dentry *dentry)
--- 
-1.7.2.5
+It also seem like it basically should not be be opencoded but in a
+wrapper around dentry_lru_del for all cases but the lazy removal from
+LRU in case that is referenced, with some comments explaining the whole
+thing.
 
