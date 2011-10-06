@@ -1,24 +1,44 @@
-From: AHMMAD YOUNIS <ahmygfdd@virgilio.it>
-Subject: Go through this:
-Date: Tue, 4 Oct 2011 12:53:22 +0200 (CEST)
-Message-ID: <132ce91048d.ahmygfdd@virgilio.it>
-Reply-To: ahmmadyounisf@virgilio.it
-Mime-Version: 1.0
-Content-Type: text/plain;charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Sage Weil <sage@newdream.net>
+Subject: [PATCH] d_prune dentry_operation
+Date: Wed,  5 Oct 2011 21:26:09 -0700
+Message-ID: <1317875170-9349-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp3web.tin.it ([212.216.176.237]:51024 "EHLO smtp3web.tin.it"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756085Ab1JDK5l (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 4 Oct 2011 06:57:41 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:55751 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750780Ab1JFEye (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2011 00:54:34 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: linux-fsdevel@vger.kernel.org, viro@ZenIV.linux.org.uk
+Cc: hch@infradead.org, ceph-devel@vger.kernel.org, rwheeler@redhat.com, linux-kernel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-Go through this:
-http://en.wikipedia.org/wiki/Abdul_Fatah_Younis
-Pls help me 
-safegaurd this $42M USD currently loged in a security company in Switzerland by 
-my late father Abdul Fatah Younis, who was arrested and killed by rebel force 
-(NFSL). I will give you more detail upon ur acceptance.
-Ahmmad Younis
-Libya
+Ceph goes to great lengths to keep its client-side cache coherent, 
+allowing many operations (lookup, creations, readdir) to be performed 
+without any server interaction when the client has the proper leases. 
+
+Sadly, this functionality is all currently disabled because we cannot 
+handle races between dcache pruning and any of those activities with the 
+current VFS interface.
+
+This patch adds a d_prune hook that allows the filesystem to be informed 
+before a dentry is removed from the cache.  Merging this for 3.2-rc1 
+will make Ceph users and their metadata-intensive workload very happy.
+
+If anybody has any issues at all with this, please tell me, so I can 
+make my case or revise my approach.
+
+Thanks!
+sage
+
+
+Sage Weil (1):
+  vfs: add d_prune dentry operation
+
+ Documentation/filesystems/Locking |    1 +
+ fs/dcache.c                       |    8 ++++++++
+ include/linux/dcache.h            |    3 +++
+ 3 files changed, 12 insertions(+), 0 deletions(-)
+
+-- 
+1.7.2.5
+
