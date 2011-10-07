@@ -1,175 +1,143 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] vfs: add d_prune dentry operation
-Date: Thu, 6 Oct 2011 15:20:37 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110061507550.29500@cobra.newdream.net>
-References: <1317875170-9349-1-git-send-email-sage@newdream.net>
- <1317875170-9349-2-git-send-email-sage@newdream.net> <20111006212118.GA24109@infradead.org>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: [PATCH 0/5 v2] Improve Ceph Qemu+RBD support
+Date: Fri, 07 Oct 2011 13:39:50 +0200
+Message-ID: <1317987590.3149.5.camel@wido-desktop>
+References: <1316492023-17749-1-git-send-email-sage@newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51925 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965292Ab1JFWUi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Oct 2011 18:20:38 -0400
-In-Reply-To: <20111006212118.GA24109@infradead.org>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:54035 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965366Ab1JGLjz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Oct 2011 07:39:55 -0400
+In-Reply-To: <1316492023-17749-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: linux-fsdevel@vger.kernel.org, viro@ZenIV.linux.org.uk, ceph-devel@vger.kernel.org, rwheeler@redhat.com, linux-kernel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org, veillard@redhat.com
 
-On Thu, 6 Oct 2011, Christoph Hellwig wrote:
-> On Wed, Oct 05, 2011 at 09:26:10PM -0700, Sage Weil wrote:
-> > This adds a d_prune dentry operation that is called by the VFS prior to
-> > pruning (i.e. unhashing and killing) a hashed dentry from the dcache.  This
-> > will be used by Ceph to maintain a flag indicating whether the complete
-> > contents of a directory are contained in the dcache, allowing it to satisfy
-> > lookups and readdir without addition server communication.
+Hi,
+
+On Mon, 2011-09-19 at 21:13 -0700, Sage Weil wrote:
+> The current support for qemu and Ceph RBD (rados block device) has two 
+> main deficiencies: authentication doesn't work, and it relies on 
+> environment variables (which don't work with latest upstream). This 
+> patch set addresses both those problems.
 > 
-> What tree is the patch against?  I seems to fail to apply against Linus'
-> latests.  
 
-Whoops, I rebased against v3.0 instead of latest master.
+Authentication is something that is really needed in the libvirt
+implementation of RBD.
 
-> It also seem like it basically should not be be opencoded but in a
-> wrapper around dentry_lru_del for all cases but the lazy removal from
-> LRU in case that is referenced, with some comments explaining the whole
-> thing.
+The interest in RBD is growing rapidly, but without auth support it's
+kind of useless.
 
-Yeah, that's a bit better.  There are four dentry_lru_del() callers, two 
-where we there is a reference, and two where we want to ->d_prune too.
+Would like to see this implemented!
 
-How does the below look?
+Wido
 
-Thanks!
-sage
+> The first two patches update the xml schemas and conf to add a Ceph 
+> secret type and to specify authentication information along with the rbd 
+> disk.
+> 
+> The next two patches make some libvirt changes.  We pass virConnectPtr 
+> down into the Domain{Attach,Detach} methods (needed to access secrets 
+> while building the qemu command), and add a helper that will escape 
+> arbitrary characters.
+> 
+> The final patch replaces the current RBD qemu code and uses the new conf 
+> info to do authentication properly.  (We still need to make a change 
+> there to avoid having the authentication key show up on qemu command 
+> line; I'll clean that up shortly.)
+> 
+> Comments on this approach?
+> 
+> Thanks!
+> sage
+> 
+> 
+> Changes from v1:
+>   update docs/schemas/{domain,secret}.rng
+> 
+> Sage Weil (5):
+>   secret: add Ceph secret type
+>   storage: add authId, authDomain to virDomainDiskDef
+>   qemu: pass virConnectPtr into Domain{Attach,Detach}*
+>   buf: implement generic virBufferEscape
+>   qemu/rbd: improve rbd device specification
+> 
+>  docs/schemas/domain.rng                            |    6 +
+>  docs/schemas/secret.rng                            |   17 ++
+>  include/libvirt/libvirt.h.in                       |    3 +
+>  src/conf/domain_conf.c                             |   43 +++-
+>  src/conf/domain_conf.h                             |    2 +
+>  src/conf/secret_conf.c                             |   45 ++++-
+>  src/conf/secret_conf.h                             |    1 +
+>  src/libvirt_private.syms                           |    1 +
+>  src/qemu/qemu_command.c                            |  273 +++++++++++---------
+>  src/qemu/qemu_command.h                            |    3 +-
+>  src/qemu/qemu_driver.c                             |   17 +-
+>  src/qemu/qemu_hotplug.c                            |   15 +-
+>  src/qemu/qemu_hotplug.h                            |    9 +-
+>  src/secret/secret_driver.c                         |    8 +
+>  src/util/buf.c                                     |   33 ++-
+>  src/util/buf.h                                     |    1 +
+>  .../qemuxml2argv-disk-drive-network-rbd.args       |    6 +-
+>  .../qemuxml2argv-disk-drive-network-rbd.xml        |    1 +
+>  18 files changed, 328 insertions(+), 156 deletions(-)
+> 
+> -- 
+> 1.7.4.1
+> 
+> >From 498cd06b76bbb4415a2f81f9d169f267ff99329c Mon Sep 17 00:00:00 2001
+> From: Sage Weil <sage@newdream.net>
+> Date: Thu, 15 Sep 2011 13:47:40 -0700
+> Subject: [PATCH 0/5] Improve Ceph Qemu+RBD support
+> 
+> The current support for qemu and Ceph RBD (rados block device) has two 
+> main deficiencies: authentication doesn't work, and it relies on 
+> environment variables (which don't work with latest upstream).
+> 
+> This patch set addresses both those problems, while trying to integrate as
+> cleanly as possible with the rest of libvirt.
+> 
+> The first few patches make some changes to libvirt itself: adding a CEPH 
+> secret type (for Ceph/RBD authentication), adding authentication fields 
+> to the XML schema, passing the virConnectPtr into the 
+> Domain{Attach,Detach} methods (needed to access secrets while building 
+> the qemu command), a helper that will escape arbitrary characters, and 
+> finally a patch that replaces the current RBD qemu code.
+> 
+> Comments on this approach?
+> 
+> Thanks!
+> sage
+> 
+> 
+> Sage Weil (5):
+>   secret: add Ceph secret type
+>   storage: add authId, authDomain to virDomainDiskDef
+>   qemu: pass virConnectPtr into Domain{Attach,Detach}*
+>   buf: implement generic virBufferEscape
+>   qemu/rbd: improve rbd device specification
+> 
+>  include/libvirt/libvirt.h.in                       |    3 +
+>  src/conf/domain_conf.c                             |   43 +++-
+>  src/conf/domain_conf.h                             |    2 +
+>  src/conf/secret_conf.c                             |   45 ++++-
+>  src/conf/secret_conf.h                             |    1 +
+>  src/libvirt_private.syms                           |    1 +
+>  src/qemu/qemu_command.c                            |  273 +++++++++++---------
+>  src/qemu/qemu_command.h                            |    3 +-
+>  src/qemu/qemu_driver.c                             |   17 +-
+>  src/qemu/qemu_hotplug.c                            |   15 +-
+>  src/qemu/qemu_hotplug.h                            |    9 +-
+>  src/secret/secret_driver.c                         |    8 +
+>  src/util/buf.c                                     |   33 ++-
+>  src/util/buf.h                                     |    1 +
+>  .../qemuxml2argv-disk-drive-network-rbd.args       |    6 +-
+>  .../qemuxml2argv-disk-drive-network-rbd.xml        |    1 +
+>  16 files changed, 305 insertions(+), 156 deletions(-)
+> 
 
-
-From 182e20331b9b2be15dbecdff7465be26ac00a81c Mon Sep 17 00:00:00 2001
-From: Sage Weil <sage@newdream.net>
-Date: Thu, 6 Oct 2011 15:18:21 -0700
-Subject: [PATCH] vfs: add d_prune dentry operation
-
-This adds a d_prune dentry operation that is called by the VFS prior to
-pruning (i.e. unhashing and killing) a hashed dentry from the dcache.
-Wrap dentry_lru_del() and use the new _prune() helper in the cases where we
-are about to unhash and kill the dentry.
-
-This will be used by Ceph to maintain a flag indicating whether the
-complete contents of a directory are contained in the dcache, allowing it
-to satisfy lookups and readdir without addition server communication.
-
-Signed-off-by: Sage Weil <sage@newdream.net>
----
- Documentation/filesystems/Locking |    1 +
- fs/dcache.c                       |   33 ++++++++++++++++++++++++++++-----
- include/linux/dcache.h            |    3 +++
- 3 files changed, 32 insertions(+), 5 deletions(-)
-
-diff --git a/Documentation/filesystems/Locking b/Documentation/filesystems/Locking
-index 6533807..d819ba1 100644
---- a/Documentation/filesystems/Locking
-+++ b/Documentation/filesystems/Locking
-@@ -29,6 +29,7 @@ d_hash		no		no		no		maybe
- d_compare:	yes		no		no		maybe
- d_delete:	no		yes		no		no
- d_release:	no		no		yes		no
-+d_prune:        no              yes             no              no
- d_iput:		no		no		yes		no
- d_dname:	no		no		no		no
- d_automount:	no		no		yes		no
-diff --git a/fs/dcache.c b/fs/dcache.c
-index a88948b..a348f64 100644
---- a/fs/dcache.c
-+++ b/fs/dcache.c
-@@ -225,7 +225,7 @@ static void dentry_unlink_inode(struct dentry * dentry)
- }
- 
- /*
-- * dentry_lru_(add|del|move_tail) must be called with d_lock held.
-+ * dentry_lru_(add|del|prune|move_tail) must be called with d_lock held.
-  */
- static void dentry_lru_add(struct dentry *dentry)
- {
-@@ -254,6 +254,24 @@ static void dentry_lru_del(struct dentry *dentry)
- 	}
- }
- 
-+static void dentry_lru_prune(struct dentry *dentry)
-+{
-+	if (!list_empty(&dentry->d_lru)) {
-+		/*
-+		 * Notify the fs this dentry is about to be pruned
-+		 * before removing from the LRU.  This should happen
-+		 * before we unhash it (if it was hashed to begin
-+		 * with).
-+		 */
-+		if (dentry->d_flags & DCACHE_OP_PRUNE)
-+			dentry->d_op->d_prune(dentry);
-+
-+		spin_lock(&dcache_lru_lock);
-+		__dentry_lru_del(dentry);
-+		spin_unlock(&dcache_lru_lock);
-+	}
-+}
-+
- static void dentry_lru_move_tail(struct dentry *dentry)
- {
- 	spin_lock(&dcache_lru_lock);
-@@ -403,8 +421,11 @@ relock:
- 
- 	if (ref)
- 		dentry->d_count--;
--	/* if dentry was on the d_lru list delete it from there */
--	dentry_lru_del(dentry);
-+	/*
-+	 * if dentry was on the d_lru list delete it from there and
-+	 * inform the fs via d_prune.
-+	 */
-+	dentry_lru_prune(dentry);
- 	/* if it was on the hash then remove it */
- 	__d_drop(dentry);
- 	return d_kill(dentry, parent);
-@@ -854,8 +875,8 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
- 		do {
- 			struct inode *inode;
- 
--			/* detach from the system */
--			dentry_lru_del(dentry);
-+			/* detach from the system, inform the fs via d_prune */
-+			dentry_lru_prune(dentry);
- 			__d_shrink(dentry);
- 
- 			if (dentry->d_count != 0) {
-@@ -1283,6 +1304,8 @@ void d_set_d_op(struct dentry *dentry, const struct dentry_operations *op)
- 		dentry->d_flags |= DCACHE_OP_REVALIDATE;
- 	if (op->d_delete)
- 		dentry->d_flags |= DCACHE_OP_DELETE;
-+	if (op->d_prune)
-+		dentry->d_flags |= DCACHE_OP_PRUNE;
- 
- }
- EXPORT_SYMBOL(d_set_d_op);
-diff --git a/include/linux/dcache.h b/include/linux/dcache.h
-index 62157c0..69ee43a 100644
---- a/include/linux/dcache.h
-+++ b/include/linux/dcache.h
-@@ -165,6 +165,7 @@ struct dentry_operations {
- 			unsigned int, const char *, const struct qstr *);
- 	int (*d_delete)(const struct dentry *);
- 	void (*d_release)(struct dentry *);
-+	void (*d_prune)(struct dentry *);
- 	void (*d_iput)(struct dentry *, struct inode *);
- 	char *(*d_dname)(struct dentry *, char *, int);
- 	struct vfsmount *(*d_automount)(struct path *);
-@@ -216,6 +217,8 @@ struct dentry_operations {
- #define DCACHE_MANAGED_DENTRY \
- 	(DCACHE_MOUNTED|DCACHE_NEED_AUTOMOUNT|DCACHE_MANAGE_TRANSIT)
- 
-+#define DCACHE_OP_PRUNE         0x80000
-+
- extern seqlock_t rename_lock;
- 
- static inline int dname_external(struct dentry *dentry)
--- 
-1.7.0
 
