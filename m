@@ -1,80 +1,78 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: OSD::disk_tp timeout
-Date: Sat, 8 Oct 2011 15:44:58 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110081544270.26432@cobra.newdream.net>
-References: <CAO47_-_x3QqP4qmTUAFB5SrObaBuzaJUa4dh+p+mdTHzKGeojg@mail.gmail.com>
- <Pine.LNX.4.64.1110081427160.26432@cobra.newdream.net> <4E90CB7C.3010304@tuxadero.com>
+Subject: Re: [PATCH 1/2] mds:Interval tree
+Date: Sat, 8 Oct 2011 17:02:57 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1110081700050.26432@cobra.newdream.net>
+References: <CAJD3hpWY0F-qg05Tgzy5twpcqJSQXAcAEs_yv7qTzFTxAWW33w@mail.gmail.com>
+ <CAJD3hpU=n3E7TU07L4JWUXajaDoZ5bKdo37Q3jNebsomJQd82g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1380903209-1318118577=:26432"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54106 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:42202 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752025Ab1JHWo7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 8 Oct 2011 18:44:59 -0400
-In-Reply-To: <4E90CB7C.3010304@tuxadero.com>
+	with ESMTP id S1750923Ab1JIAC5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 8 Oct 2011 20:02:57 -0400
+In-Reply-To: <CAJD3hpU=n3E7TU07L4JWUXajaDoZ5bKdo37Q3jNebsomJQd82g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Mailand <martin@tuxadero.com>
+To: Jojy Varghese <jojy.varghese@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Sun, 9 Oct 2011, Martin Mailand wrote:
-> Hi,
-> I am using v3.1-rc9, so the fix in there. Maybe I can nail it down a bit more
-> specific.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-You might try sysrq-t or -w to see what the spinning CPUs are doing.
+--557981400-1380903209-1318118577=:26432
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Thanks!
+On Sat, 8 Oct 2011, Jojy Varghese wrote:
+> Hi Sage
+>   Wondering about the status of this patch.
+
+Oh yeah, I pushed it to a wip-intervaltree branch.  We haven't had time to=
+=20
+use it for the MDS locking code yet, so it's sitting there waiting for=20
+that.
+
+It would also be good to integrate your unit tests to the gtest framework=
+=20
+(i.e. move it to the src/test/ directory, use gtest to run the tests, and=
+=20
+add to the check_PROGRAMS list in the Makefile so it runs with 'make=20
+check').
+
 sage
 
-
-> 
-> Best Regards,
->  martin
-> 
-> Sage Weil schrieb:
-> > Hi Christian,
-> > 
-> > On Sat, 8 Oct 2011, Christian Brunner wrote:
-> > > Hi,
-> > > 
-> > > I've upgraded ceph from 0.32 to 0.36 yesterday. Now I have a totaly
-> > > screwed ceph cluster. :(
-> > > 
-> > > What bugs me most is the fact, that OSDs become unresponsive
-> > > frequently. The process is eating a lot of cpu and I can see the
-> > 
-> > What version of btrfs are you running?  This sound a bit like the bug fixed
-> > by this patch:
-> > 
-> > http://www.spinics.net/lists/linux-btrfs/msg12627.html
-> > 
-> > (That was just merged into mainline this week.)
-> > 
-> > > following messages in the log:
-> > > 
-> > > Oct  8 22:30:05 os00 osd.000[31688]: 7fe0f3b9c700 heartbeat_map
-> > > is_healthy 'OSD::disk_tp thread 0x7fe0e527e700' had timed out after 60
-> > > Oct  8 22:30:10 os00 osd.000[31688]: 7fe0f3b9c700 heartbeat_map
-> > > is_healthy 'OSD::disk_tp thread 0x7fe0e527e700' had timed out after 60
-> > > Oct  8 22:30:15 os00 osd.000[31688]: 7fe0f3b9c700 heartbeat_map
-> > > is_healthy 'OSD::disk_tp thread 0x7fe0e527e700' had timed out after 60
-> > > Oct  8 22:30:20 os00 osd.000[31688]: 7fe0f3b9c700 heartbeat_map
-> > > is_healthy 'OSD::disk_tp thread 0x7fe0e527e700' had timed out after 60
-> > > Oct  8 22:30:25 os00 osd.000[31688]: 7fe0f3b9c700 heartbeat_map
-> > > is_healthy 'OSD::disk_tp thread 0x7fe0e527e700' had timed out after 60
-> > > Oct  8 22:30:30 os00 osd.000[31688]: 7fe0f3b9c700 heartbeat_map
-> > > is_healthy 'OSD::disk_tp thread 0x7fe0e527e700' had timed out after 60
-> > > 
-> > > Do you have any idea, what to do about that?
-> > 
-> > Those messages just mean that a thread in the disk threadpool (which is
-> > doing all the writes to btrfs) is blocked/stopped.
-> > 
-> > sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>=20
+> thanks
+> Jojy
+>=20
+> On Sat, Sep 24, 2011 at 3:23 PM, Jojy Varghese <jojy.varghese@gmail.com> =
+wrote:
+> > Hi
+> > =A0 This patch-set of 2 patches has following changes:
+> > =A0 =A0 =A0 =A0- Interval tree implementation
+> > =A0 =A0 =A0 =A0- Unit test cases for the implementation
+> >
+> > Interval tree is an optimized data structure for =A0representing and
+> > querying intervals. Elementary intervals are
+> > represented as nodes of an avl tree and the corresponding data =A0is
+> > stored on these nodes based on a concept of span.
+> > =A0 =A0 =A0 =A0 This representation allows log(n) (where n is the numbe=
+r of
+> > data) storage. The balanced avl tree allows a log(n) query.
+> >
+> > =A0 =A0 =A0 =A0 The implementation is a template class that is instanti=
+ated
+> > based on parameters :
+> > =A0 =A0 =A0 =A0 - Interval type
+> > =A0 =A0 =A0 =A0 - Data type
+> >
+> > =A0 This is a basic component which can be used to store byte range loc=
+ks.
+> >
+> >
+> > -Jojy
+> >
+>=20
+>=20
+--557981400-1380903209-1318118577=:26432--
