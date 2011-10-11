@@ -1,55 +1,107 @@
 From: Sage Weil <sage@newdream.net>
-Subject: RBD status update
-Date: Mon, 10 Oct 2011 09:40:33 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110100920460.26361@cobra.newdream.net>
+Subject: Re: RPMs on build.opensuse.org
+Date: Mon, 10 Oct 2011 19:41:55 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1110101937300.7288@cobra.newdream.net>
+References: <Pine.LNX.4.64.1110041025030.23052@cobra.newdream.net>
+ <201110071216.12793.cndegen@suse.de> <Pine.LNX.4.64.1110092117360.26432@cobra.newdream.net>
+ <4E928DFD.40803@suse.de>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56313 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54859 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752177Ab1JJQke (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2011 12:40:34 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id E865ABC952
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Oct 2011 09:40:33 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id C742ABC952
-	for <ceph-devel@vger.kernel.org>; Mon, 10 Oct 2011 09:40:33 -0700 (PDT)
+	with ESMTP id S1750826Ab1JKCmF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2011 22:42:05 -0400
+In-Reply-To: <4E928DFD.40803@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Hannes Reinecke <hare@suse.de>
+Cc: ceph-devel@vger.kernel.org, Christian Degen <cndegen@suse.de>, PChadwick@suse.com, dona.holmberg@dreamhost.com, Bryan Bogensberger <bryan@newdream.net>
 
-Just a quick update on the current status of RBD.
+Hi Hannes!
 
-The main recent development is that librbd (the userspace library) can ack 
-writes immediately (instead of waiting for them to actually commit), to 
-better mimic the behavior of a normal disk.  
+On Mon, 10 Oct 2011, Hannes Reinecke wrote:
+> Hi Sage,
+> On 10/10/2011 06:39 AM, Sage Weil wrote:
+> > Hey everyone,
+> > 
+> > Over the last few days I've wasted far more hours than I care to
+> > remember/admit futzing around with the ceph.spec file.  The goal is to use
+> > build.opensuse.org (or maybe a private instance) to build RPMs for
+> > multiple platforms, including opensuse, sles, fedora, rhel, and centos.
+> > 
+> > 	https://build.opensuse.org/package/show?package=ceph&project=home%3Aliewegas
+> > 
+> > A few things:
+> >   - I can't build packages in the actual RHEL environments because some
+> >     legal thing makes the -devel packages unavailable, so you need to look
+> >     at the CentOS ones instead.
+> >   - A bunch of debian targets are listed, but I didn't pull the debian/ dir
+> >     out of the tarball, so those show up as excluded currently.
+> >   - The tarball that in the build.opensuse.org repo is a snapshot from
+> >     recent master, not the actual ceph-0.36.tar.gz.  The .spec file also
+> >     has several changes that aren't in ceph.git yet.  Work from the
+> >     openbuild versions and I'll integrate back into the upstream once
+> >     things actually work.
+> > 	https://build.opensuse.org/package/files?package=ceph&project=home%3Aliewegas
+> > 
+> > Here is where things currently stand:
+> > 
+> >   - openSUSE_Tumbleweed, openSUSE_Factory, openSUSE_11.4, openSUSE_11.3
+> >     - Seems to build fine...
+> >     - ...but there are errors about insserv I have no idea how to fix:
+> > 
+> > insserv: FATAL: service network has to be enabled to use service ceph
+> > insserv: exiting now!
+> > /sbin/insserv failed, exit code 1
+> > 
+> >   - SLE_11, SLE_11_SP1:
+> >     - The configure libedit check defines LIBEDIT_LIBS, which includes
+> >       -lcurses, and ncurses-devel gets installed, but
+> > 
+> > /usr/lib64/gcc/x86_64-suse-linux/4.3/../../../../x86_64-suse-linux/bin/ld:
+> > cannot find -lcurses
+> > 
+> >       This is annoying, because the configure macro is the one deciding to
+> >       link that in in the first place...  Do I need to list some other
+> >       ncurses -devel package explicitly as a build depenency??
+> > 
+> > 
+> >   - Fedora_14, 15 i586:
+> >     - The atomic test and set stuff doesn't seem to work on a uint32_t:
+> > 
+> > /home/abuild/rpmbuild/BUILD/ceph-0.36/src/common/simple_spin.cc:42:
+> > undefined reference to `__sync_bool_compare_and_swap_4'
+> > 
+> > 
+> >   - Suddenly build.opensuse.org isn't showing build logfiles anymore
+> >     ('remote error: no socket attached'), so I don't have details on the
+> >     others.  :(
+> > 
+> > In case it isn't obvious, I know next to nothing about writing spec
+> > files, and have probably made a mess of things trying to make it happy on
+> > all of these platforms.  Any help here would be greatly appreciated!
+> > 
+> Hmm. Seems this hasn't been send in your direction, but I've already put ceph
+> in the buildservice:
+> 
+> home:hreinecke:storage
+> 
+> The insserv thing is easy to workaround; just don't enable service ceph when
+> installing the package :-)
 
-Why do this?  A long long time ago, when you issued a write to a disk, it 
-would ACK the write when the data was written.  No more.  Now, the ACK 
-means the data is either the drive's cache or on disk.  You don't know 
-data is safe/durable until you issue a separate flush command.  Now RBD 
-behaves similarly: writes are acked immediately (up to some number of 
-bytes, at least), and a flush will wait for all previous writes to commit.  
-The only real difference between this and a real drive cache is that a 
-real drive will try to coalesce small writes into a single operation, 
-while RBD sends them all straight through to the backend cluster.
+Hmm, yeah... Is that the right thing to do though?  Don't RPMs normally 
+enable the serve when you install them?
 
-To make this work with qemu/KVM you need:
+> But note I had to fiddle with the spec file a bit (the one from git tree seems
+> to be a bit outdated).
+> And I've had to do two minor tweaks for openSUSE/SLES:
+> - 'docdir' is defined in configure.ac; this prohibits it to be redefined from
+> the commandline. We should rather leave it empty and have it specified via the
+> --docdir switch.
+> - openSUSE/SLES installs the fastcgi headers in its own subdir,
+>   so we need some configure logic to test for this.
 
- - Ceph v0.35 or later.
-
- - Set the rbd_writeback_window to the number of bytes (something on the 
-   order of what you'd expect a physical disk cache to be.. say, 8 MB).
-   This means using a qemu drive string like
-
-	rbd:rbd/myimage:rbd_writeback_window=8000000
-
- - You need qemu with commit 7a3f5fe, which wires up the qemu flush 
-   function properly.
-
-This is not yet implemented in the kernel RBD driver.  As a result, 
-effective performance using that device is still relatively poor.  We hope 
-to have similar behavior ready when the v3.2 merge window opens.
+I've fixed both of these in the upstream ceph.git, at least...
 
 sage
