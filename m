@@ -1,42 +1,33 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: OSD: no current directory
-Date: Tue, 11 Oct 2011 10:48:17 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110111045330.20977@cobra.newdream.net>
-References: <CAO47_-9FW_wD7+fD_ihGFivZD=FN1mx=32FJumNehtmvKGhqFg@mail.gmail.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: OSD crashes
+Date: Tue, 11 Oct 2011 11:09:25 -0700
+Message-ID: <CAF3hT9DhMjW1c0px4S_CJFWokFd0Mp1TW_3nhj7FcmXTRCEaoQ@mail.gmail.com>
+References: <CAO47_-8wgyvuYzB584WYCg-RArDAN=14_gp8wqEy2fUwuwELNA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45020 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754830Ab1JKRsT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2011 13:48:19 -0400
-In-Reply-To: <CAO47_-9FW_wD7+fD_ihGFivZD=FN1mx=32FJumNehtmvKGhqFg@mail.gmail.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:48303 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754879Ab1JKSJ0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2011 14:09:26 -0400
+Received: by iaek3 with SMTP id k3so1024908iae.19
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Oct 2011 11:09:26 -0700 (PDT)
+In-Reply-To: <CAO47_-8wgyvuYzB584WYCg-RArDAN=14_gp8wqEy2fUwuwELNA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
+To: chb@muc.de
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, 11 Oct 2011, Christian Brunner wrote:
-> Maybe this one is easier:
-> 
-> One of our OSDs isn't starting, because ther is no "current"
-> directory. What I have are three snap directories.
-> 
-> total 0
-> -rw-r--r-- 1 root root   37 Oct  9 15:57 ceph_fsid
-> -rw-r--r-- 1 root root    8 Oct  9 15:57 fsid
-> -rw-r--r-- 1 root root   21 Oct  9 15:57 magic
-> drwxr-xr-x 1 root root 7986 Oct 11 18:34 snap_506043
-> drwxr-xr-x 1 root root 7986 Oct 11 18:34 snap_507364
-> drwxr-xr-x 1 root root 7814 Oct 11 18:36 snap_507417
-> -rw-r--r-- 1 root root    4 Oct  9 15:57 store_version
-> -rw-r--r-- 1 root root    2 Oct  9 15:57 whoami
-> 
-> Is there a way to rollback the latest?
-
-That's what the OSD actually does on startup (roll back to the newest 
-snap_).  It's probably a trivial bug that's preventing startup now... I'll 
-take a look.  In the meantime, you can clone the latest snap_ to current 
-and it should start!
-
-sage
+On Tue, Oct 11, 2011 at 9:02 AM, Christian Brunner <chb@muc.de> wrote:
+> Here is another one...
+>
+> I've now run mkcephfs and started importing all our data from a
+> backup. However after two days, two of our OSDs are crashing right
+> after the start again.
+>
+> It all started with a "hit suicide timeout". Now I can't start it any
+> longer. Here is what I have in the logs. I'm sending the complete log
+> because I' getting different messages.
+This has a few interesting things, but it looks like it doesn't have
+all the entries -- are you using syslog over UDP by any chance?
+-Greg
