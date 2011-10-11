@@ -1,130 +1,51 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: OSD: no current directory
-Date: Tue, 11 Oct 2011 21:04:35 +0200
-Message-ID: <CAO47_-8NCBF5yLHZett7k5CMBjaHTktOr4v06QBBZJchn6PKFg@mail.gmail.com>
-References: <CAO47_-9FW_wD7+fD_ihGFivZD=FN1mx=32FJumNehtmvKGhqFg@mail.gmail.com>
-	<Pine.LNX.4.64.1110111045330.20977@cobra.newdream.net>
-	<CAO47_--b81FHZfZcQPMc=DcRrJns1j4018B53uts+xOiMBR1NQ@mail.gmail.com>
-	<Pine.LNX.4.64.1110111147150.20977@cobra.newdream.net>
-Reply-To: chb@muc.de
+From: Kelly Kane <kelly@hawknetworks.com>
+Subject: Re: RPMs on build.opensuse.org
+Date: Tue, 11 Oct 2011 12:45:03 -0700
+Message-ID: <CAKfXD0zvW4+C_ohi1onQ4ukbduXVOqg5AcOKMw7uTzZqxJBfxA@mail.gmail.com>
+References: <Pine.LNX.4.64.1110041025030.23052@cobra.newdream.net>
+	<201110071216.12793.cndegen@suse.de>
+	<Pine.LNX.4.64.1110092117360.26432@cobra.newdream.net>
+	<4E928DFD.40803@suse.de>
+	<Pine.LNX.4.64.1110101937300.7288@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1110111147150.20977@cobra.newdream.net>
-Sender: linux-btrfs-owner@vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:41971 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754933Ab1JKTpF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2011 15:45:05 -0400
+Received: by ggnv2 with SMTP id v2so6058118ggn.19
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Oct 2011 12:45:03 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1110101937300.7288@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Cc: Hannes Reinecke <hare@suse.de>, ceph-devel@vger.kernel.org, Christian Degen <cndegen@suse.de>, PChadwick@suse.com, dona.holmberg@dreamhost.com, Bryan Bogensberger <bryan@newdream.net>
 
-2011/10/11 Sage Weil <sage@newdream.net>:
-> On Tue, 11 Oct 2011, Christian Brunner wrote:
->> 2011/10/11 Sage Weil <sage@newdream.net>:
->> > On Tue, 11 Oct 2011, Christian Brunner wrote:
->> >> Maybe this one is easier:
->> >>
->> >> One of our OSDs isn't starting, because ther is no "current"
->> >> directory. What I have are three snap directories.
->> >>
->> >> total 0
->> >> -rw-r--r-- 1 root root =A0 37 Oct =A09 15:57 ceph_fsid
->> >> -rw-r--r-- 1 root root =A0 =A08 Oct =A09 15:57 fsid
->> >> -rw-r--r-- 1 root root =A0 21 Oct =A09 15:57 magic
->> >> drwxr-xr-x 1 root root 7986 Oct 11 18:34 snap_506043
->> >> drwxr-xr-x 1 root root 7986 Oct 11 18:34 snap_507364
->> >> drwxr-xr-x 1 root root 7814 Oct 11 18:36 snap_507417
->> >> -rw-r--r-- 1 root root =A0 =A04 Oct =A09 15:57 store_version
->> >> -rw-r--r-- 1 root root =A0 =A02 Oct =A09 15:57 whoami
->> >>
->> >> Is there a way to rollback the latest?
->> >
->> > That's what the OSD actually does on startup (roll back to the new=
-est
->> > snap_). =A0It's probably a trivial bug that's preventing startup n=
-ow... I'll
->> > take a look. =A0In the meantime, you can clone the latest snap_ to=
- current
->> > and it should start!
->> >
->> > sage
+On Mon, Oct 10, 2011 at 19:41, Sage Weil <sage@newdream.net> wrote:
 >>
->> This seems to be a btrfs problem. It fails, when I'm trying to creat=
-e the clone
->>
->> # btrfs subvolume snapshot snap_507417 current
->> Create a snapshot of 'snap_507417' in './current'
->> ERROR: cannot snapshot 'snap_507417'
->>
->> And I get the following kernel messages:
->>
->> [ 5863.263950] ------------[ cut here ]------------
->> [ 5863.269125] WARNING: at fs/btrfs/inode.c:2335
->> btrfs_orphan_cleanup+0xcd/0x3d0 [btrfs]()
->> [ 5863.278142] Hardware name: ProLiant DL180 G6
->> [ 5863.283161] Modules linked in: btrfs zlib_deflate libcrc32c bondi=
-ng
->> ipv6 serio_raw pcspkr ghes hed iTCO_wdt iTCO_vendor_support ixgbe dc=
-a
->> mdio i7core_edac edac_core iomemory_vsl(P) hpsa squashfs usb_storage
->> [last unloaded: scsi_wait_scan]
->> [ 5863.307774] Pid: 6349, comm: btrfs Tainted: P =A0 =A0 =A0 =A0W
->> 3.0.6-1.fits.2.el6.x86_64 #1
->> [ 5863.316647] Call Trace:
->> [ 5863.319648] =A0[<ffffffff8106344f>] warn_slowpath_common+0x7f/0xc=
-0
->> [ 5863.326536] =A0[<ffffffff810634aa>] warn_slowpath_null+0x1a/0x20
->> [ 5863.333146] =A0[<ffffffffa023fb0d>] btrfs_orphan_cleanup+0xcd/0x3=
-d0 [btrfs]
->> [ 5863.340839] =A0[<ffffffffa0238381>] ? join_transaction+0x201/0x25=
-0 [btrfs]
->> [ 5863.348482] =A0[<ffffffffa021fbaa>] ? block_rsv_migrate_bytes+0x3=
-a/0x50 [btrfs]
->> [ 5863.356590] =A0[<ffffffffa0261a3b>] btrfs_mksubvol+0x2fb/0x380 [b=
-trfs]
->> [ 5863.363726] =A0[<ffffffffa0261bba>]
->> btrfs_ioctl_snap_create_transid+0xfa/0x150 [btrfs]
->> [ 5863.372445] =A0[<ffffffffa0261c66>] btrfs_ioctl_snap_create+0x56/=
-0x80 [btrfs]
->> [ 5863.380398] =A0[<ffffffffa026583e>] btrfs_ioctl+0x2fe/0xd50 [btrf=
-s]
->> [ 5863.387344] =A0[<ffffffff8125ed20>] ? inode_has_perm+0x30/0x40
->> [ 5863.393798] =A0[<ffffffff81261a2c>] ? file_has_perm+0xdc/0xf0
->> [ 5863.400114] =A0[<ffffffff8117086a>] do_vfs_ioctl+0x9a/0x5a0
->> [ 5863.406244] =A0[<ffffffff81170e11>] sys_ioctl+0xa1/0xb0
->> [ 5863.412001] =A0[<ffffffff81562882>] system_call_fastpath+0x16/0x1=
-b
->> [ 5863.418767] ---[ end trace e3234ecab14ad64c ]---
->> [ 5863.424084] btrfs: Error removing orphan entry, stopping orphan c=
-leanup
->> [ 5863.431614] btrfs: could not do orphan cleanup -22
->>
->> Can I use an older snapshot as well?
+>> The insserv thing is easy to workaround; just don't enable service c=
+eph when
+>> installing the package :-)
 >
-> You're able to snapshot the others?
->
-> Yeah, any of the snap_ directories will work, although keep in mind w=
-hen
-> the OSD starts up it will immediately remove current/ and re-clone th=
-e
-> newest snap_ to current/ again. =A0If the problem is a toxic/broken s=
-nap_
-> dir, you'll need to rename it out of the way to avoid hitting the pro=
-blem
-> again...
->
-> sage
+> Hmm, yeah... Is that the right thing to do though? =C2=A0Don't RPMs n=
+ormally
+> enable the serve when you install them?
 
-OK - renaming snap_507417 to broken_snap_507417 worked.
+I think it is up to the package developer. For example on CentOS 5.4
+lighttpd and httpd do not start themselves, but I know the MySQL
+Community packages do start themselves. I know with MySQL I also
+always wind up immediately stopping it after it's installed to do
+configuration. As configuration of any given Ceph node is likely to be
+part of a larger configuration management/automation system it seems
+like it would be fine to push responsibility of "service ceph start"
+off onto the system administrators. I would still configure it to
+start automatically on boot in the rpm.
 
-Two other OSDs crashed at the moment it became online again, but as
-far as I can see, this is the same problem I've reported already.
-After a couple of OSD restarts, I have them all up again.
-
-Thanks for your help.
-
-Christian
+Kelly
 --
-To unsubscribe from this list: send the line "unsubscribe linux-btrfs" =
-in
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
 the body of a message to majordomo@vger.kernel.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
