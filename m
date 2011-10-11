@@ -1,107 +1,81 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: RPMs on build.opensuse.org
-Date: Mon, 10 Oct 2011 19:41:55 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110101937300.7288@cobra.newdream.net>
-References: <Pine.LNX.4.64.1110041025030.23052@cobra.newdream.net>
- <201110071216.12793.cndegen@suse.de> <Pine.LNX.4.64.1110092117360.26432@cobra.newdream.net>
- <4E928DFD.40803@suse.de>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: Btrfs High IO-Wait
+Date: Tue, 11 Oct 2011 09:05:19 +0200
+Message-ID: <CAO47_--KMP0ATOiN6Sv4SOq5Hf9MHiAh2pVB7LUsE4TtFAFv7g@mail.gmail.com>
+References: <4E9210DE.105@tuxadero.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54859 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750826Ab1JKCmF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Oct 2011 22:42:05 -0400
-In-Reply-To: <4E928DFD.40803@suse.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Hannes Reinecke <hare@suse.de>
-Cc: ceph-devel@vger.kernel.org, Christian Degen <cndegen@suse.de>, PChadwick@suse.com, dona.holmberg@dreamhost.com, Bryan Bogensberger <bryan@newdream.net>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: base64
+Return-path: <linux-btrfs-owner@vger.kernel.org>
+In-Reply-To: <4E9210DE.105@tuxadero.com>
+Sender: linux-btrfs-owner@vger.kernel.org
+To: martin@tuxadero.com
+Cc: ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Hannes!
-
-On Mon, 10 Oct 2011, Hannes Reinecke wrote:
-> Hi Sage,
-> On 10/10/2011 06:39 AM, Sage Weil wrote:
-> > Hey everyone,
-> > 
-> > Over the last few days I've wasted far more hours than I care to
-> > remember/admit futzing around with the ceph.spec file.  The goal is to use
-> > build.opensuse.org (or maybe a private instance) to build RPMs for
-> > multiple platforms, including opensuse, sles, fedora, rhel, and centos.
-> > 
-> > 	https://build.opensuse.org/package/show?package=ceph&project=home%3Aliewegas
-> > 
-> > A few things:
-> >   - I can't build packages in the actual RHEL environments because some
-> >     legal thing makes the -devel packages unavailable, so you need to look
-> >     at the CentOS ones instead.
-> >   - A bunch of debian targets are listed, but I didn't pull the debian/ dir
-> >     out of the tarball, so those show up as excluded currently.
-> >   - The tarball that in the build.opensuse.org repo is a snapshot from
-> >     recent master, not the actual ceph-0.36.tar.gz.  The .spec file also
-> >     has several changes that aren't in ceph.git yet.  Work from the
-> >     openbuild versions and I'll integrate back into the upstream once
-> >     things actually work.
-> > 	https://build.opensuse.org/package/files?package=ceph&project=home%3Aliewegas
-> > 
-> > Here is where things currently stand:
-> > 
-> >   - openSUSE_Tumbleweed, openSUSE_Factory, openSUSE_11.4, openSUSE_11.3
-> >     - Seems to build fine...
-> >     - ...but there are errors about insserv I have no idea how to fix:
-> > 
-> > insserv: FATAL: service network has to be enabled to use service ceph
-> > insserv: exiting now!
-> > /sbin/insserv failed, exit code 1
-> > 
-> >   - SLE_11, SLE_11_SP1:
-> >     - The configure libedit check defines LIBEDIT_LIBS, which includes
-> >       -lcurses, and ncurses-devel gets installed, but
-> > 
-> > /usr/lib64/gcc/x86_64-suse-linux/4.3/../../../../x86_64-suse-linux/bin/ld:
-> > cannot find -lcurses
-> > 
-> >       This is annoying, because the configure macro is the one deciding to
-> >       link that in in the first place...  Do I need to list some other
-> >       ncurses -devel package explicitly as a build depenency??
-> > 
-> > 
-> >   - Fedora_14, 15 i586:
-> >     - The atomic test and set stuff doesn't seem to work on a uint32_t:
-> > 
-> > /home/abuild/rpmbuild/BUILD/ceph-0.36/src/common/simple_spin.cc:42:
-> > undefined reference to `__sync_bool_compare_and_swap_4'
-> > 
-> > 
-> >   - Suddenly build.opensuse.org isn't showing build logfiles anymore
-> >     ('remote error: no socket attached'), so I don't have details on the
-> >     others.  :(
-> > 
-> > In case it isn't obvious, I know next to nothing about writing spec
-> > files, and have probably made a mess of things trying to make it happy on
-> > all of these platforms.  Any help here would be greatly appreciated!
-> > 
-> Hmm. Seems this hasn't been send in your direction, but I've already put ceph
-> in the buildservice:
-> 
-> home:hreinecke:storage
-> 
-> The insserv thing is easy to workaround; just don't enable service ceph when
-> installing the package :-)
-
-Hmm, yeah... Is that the right thing to do though?  Don't RPMs normally 
-enable the serve when you install them?
-
-> But note I had to fiddle with the spec file a bit (the one from git tree seems
-> to be a bit outdated).
-> And I've had to do two minor tweaks for openSUSE/SLES:
-> - 'docdir' is defined in configure.ac; this prohibits it to be redefined from
-> the commandline. We should rather leave it empty and have it specified via the
-> --docdir switch.
-> - openSUSE/SLES installs the fastcgi headers in its own subdir,
->   so we need some configure logic to test for this.
-
-I've fixed both of these in the upstream ceph.git, at least...
-
-sage
+SSB0aGluayB0aGlzIGlzIHJlbGF0ZWQgdG8gdGhlIHN5bmMgaXNzdWVzLiBZb3UgY291bGQgdHJ5
+IHRoZSBqb3NlZidzIGdpdCB0cmVlOgoKZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51
+eC9rZXJuZWwvZ2l0L2pvc2VmL2J0cmZzLXdvcmsuZ2l0CgpTaW5jZSB5ZXN0ZXJkYXkgSSdtIHVz
+aW5nIGl0IGluIG91ciBjZXBoIGNsdXN0ZXIgYW5kIGl0IHNlZW1zIHRvIGRvIGEKYmV0dGVyIGpv
+Yi4KClJlZ2FyZHMsCkNocmlzdGlhbgoKMjAxMS8xMC85IE1hcnRpbiBNYWlsYW5kIDxtYXJ0aW5A
+dHV4YWRlcm8uY29tPjoKPiBIaSwKPiBJIGhhdmUgaGlnaCBJTy1XYWl0IG9uIHRoZSBvZHMgKGNl
+cGgpLCB0aGUgb3NkIGFyZSBydW5uaW5nIGEgdjMuMS1yYzkKPiBrZXJuZWwuCj4gSSBhbHNvIGV4
+cGVyaWVuY2UgaGlnaCBJTy1yYXRlcywgYXJvdW5kIDUwMElPL3MgcmVwb3J0ZWQgdmlhIGlvc3Rh
+dC4KPgo+IERldmljZTogoCCgIKAgoCBycnFtL3MgoCB3cnFtL3MgoCCgIHIvcyCgIKAgdy9zIKAg
+oHJrQi9zIKAgoHdrQi9zIGF2Z3JxLXN6Cj4gYXZncXUtc3ogoCBhd2FpdCByX2F3YWl0IHdfYXdh
+aXQgoHN2Y3RtIKAldXRpbAo+IHNkYSCgIKAgoCCgIKAgoCCgIDAuMDAgoCCgIDAuMDAgoCCgMC4w
+MCCgIKA2LjgwIKAgoCAwLjAwIKAgoDYyLjQwIDE4LjM1Cj4gMC4wNCCgIKA1LjI5IKAgoDAuMDAg
+oCCgNS4yOSCgIDUuMjkgoCAzLjYwCj4gc2RiIKAgoCCgIKAgoCCgIKAgMC4wMCCgIDI0OS44MCAw
+LjQwIDY2OS42MCCgIKAgMS42MCCgNDExOC40MCAxMi4zMCCgIKA4Ny40Nwo+IKAxMzAuNTYgoCAx
+NS4wMCCgMTMwLjYzIKAgMS4wMSCgNjcuNDAKPgo+IEluIGNvbXBhcmlzb24sIHRoZSBzYW1lIHdv
+cmtsb2FkLCBidXQgdGhlIG9zZCB1c2VzIGV4dDQgYXMgYSBiYWNraW5nIGZzLgo+Cj4gRGV2aWNl
+OiCgIKAgoCCgIHJycW0vcyCgIHdycW0vcyCgIKAgci9zIKAgoCB3L3MgoCCgcmtCL3MgoCCgd2tC
+L3MgYXZncnEtc3oKPiBhdmdxdS1zeiCgIGF3YWl0IHJfYXdhaXQgd19hd2FpdCCgc3ZjdG0goCV1
+dGlsCj4gc2RhIKAgoCCgIKAgoCCgIKAgMC4wMCCgIKAgMC4wMCCgIKAwLjAwIKAgMTAuMDAgoCCg
+IDAuMDAgoCAxMjguMDAgMjUuNjAKPiAwLjAzIKAgoDMuNDAgoCCgMC4wMCCgIKAzLjQwIKAgMy40
+MCCgIDMuNDAKPiBzZGIgoCCgIKAgoCCgIKAgoCAwLjAwIKAgoDI3LjgwIDAuMDAgNDguMjAgoCCg
+IDAuMDAgoCAzMTguNDAgMTMuMjEgoCCgIDAuNDMKPiA4Ljg0IDAuMDAgOC44NCAxLjk5IKAgOS42
+MAo+Cj4gaW9kdW1wIHNob3dzIHNpbWlsYXIgcmVzdWx0cywgd2hlcmUgc2RiIGlzIHRoZSBkYXRh
+IGRpc2ssIHNkYTcgdGhlIGpvdXJuYWwKPiBhbmQgc2RhNSB0aGUgcm9vdC4KPgo+IGJ0cmZzCj4K
+PiByb290QHMtYnJpY2stMDAzOn4jIGVjaG8gMSA+IC9wcm9jL3N5cy92bS9ibG9ja19kdW1wCj4g
+cm9vdEBzLWJyaWNrLTAwMzp+IyB3aGlsZSB0cnVlOyBkbyBzbGVlcCAxOyBkbWVzZyAtYzsgZG9u
+ZSB8IHBlcmwKPiAvdXNyL2xvY2FsL2Jpbi9pb2R1bXAKPiBeQyMgQ2F1Z2h0IFNJR0lOVC4KPiBU
+QVNLIKAgoCCgIKAgoCCgIKAgoCCgIFBJRCCgIKAgoFRPVEFMIKAgoCCgIFJFQUQgoCCgIKBXUklU
+RSCgIKAgoERJUlRZCj4gREVWSUNFUwo+IGJ0cmZzLXN1Ym1pdC0wIKAgoCCgIKA4MzIxIKAgoCCg
+MjgwNDAgoCCgIKAgoCCgMCCgIKAgoDI4MDQwIKAgoCCgIKAgoDAgc2RiCj4gY2VwaC1vc2QgoCCg
+IKAgoCCgIKAgoDg1MTQgoCCgIKAgoDE1OCCgIKAgoCCgIKAwIKAgoCCgIKAxNTggoCCgIKAgoCCg
+MCBzZGE3Cj4ga3N3YXBkMCCgIKAgoCCgIKAgoCCgIKAgNDYgoCCgIKAgoCA4MSCgIKAgoCCgIKAw
+IKAgoCCgIKAgODEgoCCgIKAgoCCgMCBzZGExCj4gYmFzaCCgIKAgoCCgIKAgoCCgIKAgMTA3MDkg
+oCCgIKAgoCAzNSCgIKAgoCCgIDM1IKAgoCCgIKAgoDAgoCCgIKAgoCCgMCBzZGExCj4gZmx1c2gt
+ODowIKAgoCCgIKAgoCCgIKA5NjIgoCCgIKAgoCAxMiCgIKAgoCCgIKAwIKAgoCCgIKAgMTIgoCCg
+IKAgoCCgMCBzZGE1Cj4ga3dvcmtlci8wOjEgoCCgIKAgoCCgIDg4OTcgoCCgIKAgoCCgNiCgIKAg
+oCCgIKAwIKAgoCCgIKAgoDYgoCCgIKAgoCCgMCBzZGIKPiBrd29ya2VyLzE6MSCgIKAgoCCgIKAx
+MDM1NCCgIKAgoCCgIKAzIKAgoCCgIKAgoDAgoCCgIKAgoCCgMyCgIKAgoCCgIKAwIHNkYgo+IGtq
+b3VybmFsZCCgIKAgoCCgIKAgoCCgMjY2IKAgoCCgIKAgoDMgoCCgIKAgoCCgMCCgIKAgoCCgIKAz
+IKAgoCCgIKAgoDAgc2RhNQo+IGNlcGgtb3NkIKAgoCCgIKAgoCCgIKA4NTIzIKAgoCCgIKAgoDIg
+oCCgIKAgoCCgMiCgIKAgoCCgIKAwIKAgoCCgIKAgoDAgc2RhMQo+IGNlcGgtb3NkIKAgoCCgIKAg
+oCCgIKA4NTMxIKAgoCCgIKAgoDEgoCCgIKAgoCCgMSCgIKAgoCCgIKAwIKAgoCCgIKAgoDAgc2Rh
+MQo+IGRtZXNnIKAgoCCgIKAgoCCgIKAgoDEwNzEyIKAgoCCgIKAgoDEgoCCgIKAgoCCgMSCgIKAg
+oCCgIKAwIKAgoCCgIKAgoDAgc2RhNQo+Cj4KPiBleHQ0Cj4KPiByb290QHMtYnJpY2stMDAyOn4j
+IGVjaG8gMSA+IC9wcm9jL3N5cy92bS9ibG9ja19kdW1wCj4gcm9vdEBzLWJyaWNrLTAwMjp+IyB3
+aGlsZSB0cnVlOyBkbyBzbGVlcCAxOyBkbWVzZyAtYzsgZG9uZSB8IHBlcmwKPiAvdXNyL2xvY2Fs
+L2Jpbi9pb2R1bXAKPiBeQyMgQ2F1Z2h0IFNJR0lOVC4KPiBUQVNLIKAgoCCgIKAgoCCgIKAgoCCg
+IFBJRCCgIKAgoFRPVEFMIKAgoCCgIFJFQUQgoCCgIKBXUklURSCgIKAgoERJUlRZCj4gREVWSUNF
+Uwo+IGNlcGgtb3NkIKAgoCCgIKAgoCCgIKAzMTE1IKAgoCCgIKA4NDcgoCCgIKAgoCCgMCCgIKAg
+oCCgODQ3IKAgoCCgIKAgoDAgc2RiCj4gamJkMi9zZGItOCCgIKAgoCCgIKAgoDI4OTcgoCCgIKAg
+oDc4NCCgIKAgoCCgIKAwIKAgoCCgIKA3ODQgoCCgIKAgoCCgMCBzZGIKPiBjZXBoLW9zZCCgIKAg
+oCCgIKAgoCCgMzExMiCgIKAgoCCgNzI4IKAgoCCgIKAgoDAgoCCgIKAgoDcyOCCgIKAgoCCgIKAw
+IHNkYTUsCj4gc2RiCj4gY2VwaC1vc2QgoCCgIKAgoCCgIKAgoDMxMTAgoCCgIKAgoDE5MSCgIKAg
+oCCgIKAwIKAgoCCgIKAxOTEgoCCgIKAgoCCgMCBzZGE3Cj4gcGVybCCgIKAgoCCgIKAgoCCgIKAg
+oDM2MjggoCCgIKAgoCAxMyCgIKAgoCCgIDEzIKAgoCCgIKAgoDAgoCCgIKAgoCCgMCBzZGE1Cj4g
+Zmx1c2gtODoxNiCgIKAgoCCgIKAgoDI5MDEgoCCgIKAgoCCgOCCgIKAgoCCgIKAwIKAgoCCgIKAg
+oDggoCCgIKAgoCCgMCBzZGIKPiBram91cm5hbGQgoCCgIKAgoCCgIKAgoDI3MiCgIKAgoCCgIKAz
+IKAgoCCgIKAgoDAgoCCgIKAgoCCgMyCgIKAgoCCgIKAwIHNkYTUKPiBkbWVzZyCgIKAgoCCgIKAg
+oCCgIKAgMzYzMCCgIKAgoCCgIKAxIKAgoCCgIKAgoDEgoCCgIKAgoCCgMCCgIKAgoCCgIKAwIHNk
+YTUKPiBzbGVlcCCgIKAgoCCgIKAgoCCgIKAgMzYyOSCgIKAgoCCgIKAxIKAgoCCgIKAgoDEgoCCg
+IKAgoCCgMCCgIKAgoCCgIKAwIHNkYTUKPgo+Cj4gSSB0aGluayB0aGF0IGlzIHRoZSBzYW1lIHBy
+b2JsZW0gYXMgaW4KPiBodHRwOi8vbWFyYy5pbmZvLz9sPWNlcGgtZGV2ZWwmbT0xMzExNTgwNDkx
+MTcxMzkmdz0yCj4KPiBJIGFsc28gZGlkIGEgbGF0ZW5jeXRvcCBhcyBDaHJpcyByZWNvbW1lbmRl
+ZCBpbiB0aGUgYWJvdmUgdGhyZWFkLgo+Cj4gQmVzdCBSZWdhcmRzLAo+IKBtYXJ0aW4KPgo+Cj4K
+Pgo+Cj4KPgo=
