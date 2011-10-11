@@ -1,51 +1,29 @@
-From: Kelly Kane <kelly@hawknetworks.com>
-Subject: Re: RPMs on build.opensuse.org
-Date: Tue, 11 Oct 2011 12:45:03 -0700
-Message-ID: <CAKfXD0zvW4+C_ohi1onQ4ukbduXVOqg5AcOKMw7uTzZqxJBfxA@mail.gmail.com>
-References: <Pine.LNX.4.64.1110041025030.23052@cobra.newdream.net>
-	<201110071216.12793.cndegen@suse.de>
-	<Pine.LNX.4.64.1110092117360.26432@cobra.newdream.net>
-	<4E928DFD.40803@suse.de>
-	<Pine.LNX.4.64.1110101937300.7288@cobra.newdream.net>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: rbd import rbd_writeback_window
+Date: Tue, 11 Oct 2011 22:20:12 +0200
+Message-ID: <4E94A4FC.4020609@tuxadero.com>
+Reply-To: martin@tuxadero.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:41971 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754933Ab1JKTpF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2011 15:45:05 -0400
-Received: by ggnv2 with SMTP id v2so6058118ggn.19
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Oct 2011 12:45:03 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1110101937300.7288@cobra.newdream.net>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:44204 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751695Ab1JKUU0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Oct 2011 16:20:26 -0400
+Received: from [192.168.1.106] (e178216139.adsl.alicedsl.de [85.178.216.139])
+	(authenticated bits=0)
+	by einhorn.in-berlin.de (8.13.6/8.13.6/Debian-1) with ESMTP id p9BKKDr0012041
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Tue, 11 Oct 2011 22:20:24 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Hannes Reinecke <hare@suse.de>, ceph-devel@vger.kernel.org, Christian Degen <cndegen@suse.de>, PChadwick@suse.com, dona.holmberg@dreamhost.com, Bryan Bogensberger <bryan@newdream.net>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Oct 10, 2011 at 19:41, Sage Weil <sage@newdream.net> wrote:
->>
->> The insserv thing is easy to workaround; just don't enable service c=
-eph when
->> installing the package :-)
->
-> Hmm, yeah... Is that the right thing to do though? =C2=A0Don't RPMs n=
-ormally
-> enable the serve when you install them?
+Hello,
+is it possible to use the rbd_writeback_window with the rbd command to 
+speed up the import?
+Something like rbd import /mnt/image_vm1 vm99:rbd_writeback_window=800000
 
-I think it is up to the package developer. For example on CentOS 5.4
-lighttpd and httpd do not start themselves, but I know the MySQL
-Community packages do start themselves. I know with MySQL I also
-always wind up immediately stopping it after it's installed to do
-configuration. As configuration of any given Ceph node is likely to be
-part of a larger configuration management/automation system it seems
-like it would be fine to push responsibility of "service ceph start"
-off onto the system administrators. I would still configure it to
-start automatically on boot in the rpm.
-
-Kelly
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best Regards,
+  Martin
