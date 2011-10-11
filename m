@@ -1,81 +1,120 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: Btrfs High IO-Wait
-Date: Tue, 11 Oct 2011 09:05:19 +0200
-Message-ID: <CAO47_--KMP0ATOiN6Sv4SOq5Hf9MHiAh2pVB7LUsE4TtFAFv7g@mail.gmail.com>
-References: <4E9210DE.105@tuxadero.com>
-Reply-To: chb@muc.de
+From: "Daniel P. Berrange" <berrange@redhat.com>
+Subject: Re: [libvirt] [PATCH 4/5] buf: implement generic virBufferEscape
+Date: Tue, 11 Oct 2011 11:39:35 +0100
+Message-ID: <20111011103935.GB16057@redhat.com>
+References: <1316492023-17749-1-git-send-email-sage@newdream.net>
+ <1316492023-17749-5-git-send-email-sage@newdream.net>
+Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: base64
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-In-Reply-To: <4E9210DE.105@tuxadero.com>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: martin@tuxadero.com
-Cc: ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:44916 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752668Ab1JKKjz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 11 Oct 2011 06:39:55 -0400
+Content-Disposition: inline
+In-Reply-To: <1316492023-17749-5-git-send-email-sage@newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-SSB0aGluayB0aGlzIGlzIHJlbGF0ZWQgdG8gdGhlIHN5bmMgaXNzdWVzLiBZb3UgY291bGQgdHJ5
-IHRoZSBqb3NlZidzIGdpdCB0cmVlOgoKZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51
-eC9rZXJuZWwvZ2l0L2pvc2VmL2J0cmZzLXdvcmsuZ2l0CgpTaW5jZSB5ZXN0ZXJkYXkgSSdtIHVz
-aW5nIGl0IGluIG91ciBjZXBoIGNsdXN0ZXIgYW5kIGl0IHNlZW1zIHRvIGRvIGEKYmV0dGVyIGpv
-Yi4KClJlZ2FyZHMsCkNocmlzdGlhbgoKMjAxMS8xMC85IE1hcnRpbiBNYWlsYW5kIDxtYXJ0aW5A
-dHV4YWRlcm8uY29tPjoKPiBIaSwKPiBJIGhhdmUgaGlnaCBJTy1XYWl0IG9uIHRoZSBvZHMgKGNl
-cGgpLCB0aGUgb3NkIGFyZSBydW5uaW5nIGEgdjMuMS1yYzkKPiBrZXJuZWwuCj4gSSBhbHNvIGV4
-cGVyaWVuY2UgaGlnaCBJTy1yYXRlcywgYXJvdW5kIDUwMElPL3MgcmVwb3J0ZWQgdmlhIGlvc3Rh
-dC4KPgo+IERldmljZTogoCCgIKAgoCBycnFtL3MgoCB3cnFtL3MgoCCgIHIvcyCgIKAgdy9zIKAg
-oHJrQi9zIKAgoHdrQi9zIGF2Z3JxLXN6Cj4gYXZncXUtc3ogoCBhd2FpdCByX2F3YWl0IHdfYXdh
-aXQgoHN2Y3RtIKAldXRpbAo+IHNkYSCgIKAgoCCgIKAgoCCgIDAuMDAgoCCgIDAuMDAgoCCgMC4w
-MCCgIKA2LjgwIKAgoCAwLjAwIKAgoDYyLjQwIDE4LjM1Cj4gMC4wNCCgIKA1LjI5IKAgoDAuMDAg
-oCCgNS4yOSCgIDUuMjkgoCAzLjYwCj4gc2RiIKAgoCCgIKAgoCCgIKAgMC4wMCCgIDI0OS44MCAw
-LjQwIDY2OS42MCCgIKAgMS42MCCgNDExOC40MCAxMi4zMCCgIKA4Ny40Nwo+IKAxMzAuNTYgoCAx
-NS4wMCCgMTMwLjYzIKAgMS4wMSCgNjcuNDAKPgo+IEluIGNvbXBhcmlzb24sIHRoZSBzYW1lIHdv
-cmtsb2FkLCBidXQgdGhlIG9zZCB1c2VzIGV4dDQgYXMgYSBiYWNraW5nIGZzLgo+Cj4gRGV2aWNl
-OiCgIKAgoCCgIHJycW0vcyCgIHdycW0vcyCgIKAgci9zIKAgoCB3L3MgoCCgcmtCL3MgoCCgd2tC
-L3MgYXZncnEtc3oKPiBhdmdxdS1zeiCgIGF3YWl0IHJfYXdhaXQgd19hd2FpdCCgc3ZjdG0goCV1
-dGlsCj4gc2RhIKAgoCCgIKAgoCCgIKAgMC4wMCCgIKAgMC4wMCCgIKAwLjAwIKAgMTAuMDAgoCCg
-IDAuMDAgoCAxMjguMDAgMjUuNjAKPiAwLjAzIKAgoDMuNDAgoCCgMC4wMCCgIKAzLjQwIKAgMy40
-MCCgIDMuNDAKPiBzZGIgoCCgIKAgoCCgIKAgoCAwLjAwIKAgoDI3LjgwIDAuMDAgNDguMjAgoCCg
-IDAuMDAgoCAzMTguNDAgMTMuMjEgoCCgIDAuNDMKPiA4Ljg0IDAuMDAgOC44NCAxLjk5IKAgOS42
-MAo+Cj4gaW9kdW1wIHNob3dzIHNpbWlsYXIgcmVzdWx0cywgd2hlcmUgc2RiIGlzIHRoZSBkYXRh
-IGRpc2ssIHNkYTcgdGhlIGpvdXJuYWwKPiBhbmQgc2RhNSB0aGUgcm9vdC4KPgo+IGJ0cmZzCj4K
-PiByb290QHMtYnJpY2stMDAzOn4jIGVjaG8gMSA+IC9wcm9jL3N5cy92bS9ibG9ja19kdW1wCj4g
-cm9vdEBzLWJyaWNrLTAwMzp+IyB3aGlsZSB0cnVlOyBkbyBzbGVlcCAxOyBkbWVzZyAtYzsgZG9u
-ZSB8IHBlcmwKPiAvdXNyL2xvY2FsL2Jpbi9pb2R1bXAKPiBeQyMgQ2F1Z2h0IFNJR0lOVC4KPiBU
-QVNLIKAgoCCgIKAgoCCgIKAgoCCgIFBJRCCgIKAgoFRPVEFMIKAgoCCgIFJFQUQgoCCgIKBXUklU
-RSCgIKAgoERJUlRZCj4gREVWSUNFUwo+IGJ0cmZzLXN1Ym1pdC0wIKAgoCCgIKA4MzIxIKAgoCCg
-MjgwNDAgoCCgIKAgoCCgMCCgIKAgoDI4MDQwIKAgoCCgIKAgoDAgc2RiCj4gY2VwaC1vc2QgoCCg
-IKAgoCCgIKAgoDg1MTQgoCCgIKAgoDE1OCCgIKAgoCCgIKAwIKAgoCCgIKAxNTggoCCgIKAgoCCg
-MCBzZGE3Cj4ga3N3YXBkMCCgIKAgoCCgIKAgoCCgIKAgNDYgoCCgIKAgoCA4MSCgIKAgoCCgIKAw
-IKAgoCCgIKAgODEgoCCgIKAgoCCgMCBzZGExCj4gYmFzaCCgIKAgoCCgIKAgoCCgIKAgMTA3MDkg
-oCCgIKAgoCAzNSCgIKAgoCCgIDM1IKAgoCCgIKAgoDAgoCCgIKAgoCCgMCBzZGExCj4gZmx1c2gt
-ODowIKAgoCCgIKAgoCCgIKA5NjIgoCCgIKAgoCAxMiCgIKAgoCCgIKAwIKAgoCCgIKAgMTIgoCCg
-IKAgoCCgMCBzZGE1Cj4ga3dvcmtlci8wOjEgoCCgIKAgoCCgIDg4OTcgoCCgIKAgoCCgNiCgIKAg
-oCCgIKAwIKAgoCCgIKAgoDYgoCCgIKAgoCCgMCBzZGIKPiBrd29ya2VyLzE6MSCgIKAgoCCgIKAx
-MDM1NCCgIKAgoCCgIKAzIKAgoCCgIKAgoDAgoCCgIKAgoCCgMyCgIKAgoCCgIKAwIHNkYgo+IGtq
-b3VybmFsZCCgIKAgoCCgIKAgoCCgMjY2IKAgoCCgIKAgoDMgoCCgIKAgoCCgMCCgIKAgoCCgIKAz
-IKAgoCCgIKAgoDAgc2RhNQo+IGNlcGgtb3NkIKAgoCCgIKAgoCCgIKA4NTIzIKAgoCCgIKAgoDIg
-oCCgIKAgoCCgMiCgIKAgoCCgIKAwIKAgoCCgIKAgoDAgc2RhMQo+IGNlcGgtb3NkIKAgoCCgIKAg
-oCCgIKA4NTMxIKAgoCCgIKAgoDEgoCCgIKAgoCCgMSCgIKAgoCCgIKAwIKAgoCCgIKAgoDAgc2Rh
-MQo+IGRtZXNnIKAgoCCgIKAgoCCgIKAgoDEwNzEyIKAgoCCgIKAgoDEgoCCgIKAgoCCgMSCgIKAg
-oCCgIKAwIKAgoCCgIKAgoDAgc2RhNQo+Cj4KPiBleHQ0Cj4KPiByb290QHMtYnJpY2stMDAyOn4j
-IGVjaG8gMSA+IC9wcm9jL3N5cy92bS9ibG9ja19kdW1wCj4gcm9vdEBzLWJyaWNrLTAwMjp+IyB3
-aGlsZSB0cnVlOyBkbyBzbGVlcCAxOyBkbWVzZyAtYzsgZG9uZSB8IHBlcmwKPiAvdXNyL2xvY2Fs
-L2Jpbi9pb2R1bXAKPiBeQyMgQ2F1Z2h0IFNJR0lOVC4KPiBUQVNLIKAgoCCgIKAgoCCgIKAgoCCg
-IFBJRCCgIKAgoFRPVEFMIKAgoCCgIFJFQUQgoCCgIKBXUklURSCgIKAgoERJUlRZCj4gREVWSUNF
-Uwo+IGNlcGgtb3NkIKAgoCCgIKAgoCCgIKAzMTE1IKAgoCCgIKA4NDcgoCCgIKAgoCCgMCCgIKAg
-oCCgODQ3IKAgoCCgIKAgoDAgc2RiCj4gamJkMi9zZGItOCCgIKAgoCCgIKAgoDI4OTcgoCCgIKAg
-oDc4NCCgIKAgoCCgIKAwIKAgoCCgIKA3ODQgoCCgIKAgoCCgMCBzZGIKPiBjZXBoLW9zZCCgIKAg
-oCCgIKAgoCCgMzExMiCgIKAgoCCgNzI4IKAgoCCgIKAgoDAgoCCgIKAgoDcyOCCgIKAgoCCgIKAw
-IHNkYTUsCj4gc2RiCj4gY2VwaC1vc2QgoCCgIKAgoCCgIKAgoDMxMTAgoCCgIKAgoDE5MSCgIKAg
-oCCgIKAwIKAgoCCgIKAxOTEgoCCgIKAgoCCgMCBzZGE3Cj4gcGVybCCgIKAgoCCgIKAgoCCgIKAg
-oDM2MjggoCCgIKAgoCAxMyCgIKAgoCCgIDEzIKAgoCCgIKAgoDAgoCCgIKAgoCCgMCBzZGE1Cj4g
-Zmx1c2gtODoxNiCgIKAgoCCgIKAgoDI5MDEgoCCgIKAgoCCgOCCgIKAgoCCgIKAwIKAgoCCgIKAg
-oDggoCCgIKAgoCCgMCBzZGIKPiBram91cm5hbGQgoCCgIKAgoCCgIKAgoDI3MiCgIKAgoCCgIKAz
-IKAgoCCgIKAgoDAgoCCgIKAgoCCgMyCgIKAgoCCgIKAwIHNkYTUKPiBkbWVzZyCgIKAgoCCgIKAg
-oCCgIKAgMzYzMCCgIKAgoCCgIKAxIKAgoCCgIKAgoDEgoCCgIKAgoCCgMCCgIKAgoCCgIKAwIHNk
-YTUKPiBzbGVlcCCgIKAgoCCgIKAgoCCgIKAgMzYyOSCgIKAgoCCgIKAxIKAgoCCgIKAgoDEgoCCg
-IKAgoCCgMCCgIKAgoCCgIKAwIHNkYTUKPgo+Cj4gSSB0aGluayB0aGF0IGlzIHRoZSBzYW1lIHBy
-b2JsZW0gYXMgaW4KPiBodHRwOi8vbWFyYy5pbmZvLz9sPWNlcGgtZGV2ZWwmbT0xMzExNTgwNDkx
-MTcxMzkmdz0yCj4KPiBJIGFsc28gZGlkIGEgbGF0ZW5jeXRvcCBhcyBDaHJpcyByZWNvbW1lbmRl
-ZCBpbiB0aGUgYWJvdmUgdGhyZWFkLgo+Cj4gQmVzdCBSZWdhcmRzLAo+IKBtYXJ0aW4KPgo+Cj4K
-Pgo+Cj4KPgo=
+On Mon, Sep 19, 2011 at 09:13:42PM -0700, Sage Weil wrote:
+> Implement a generic helper to escape a given set of characters with a
+> leading '\'.  Generalizes virBufferEscapeSexpr().
+> 
+> Signed-off-by: Sage Weil <sage@newdream.net>
+> ---
+>  src/libvirt_private.syms |    1 +
+>  src/util/buf.c           |   33 ++++++++++++++++++++++++++-------
+>  src/util/buf.h           |    1 +
+>  3 files changed, 28 insertions(+), 7 deletions(-)
+> 
+> diff --git a/src/libvirt_private.syms b/src/libvirt_private.syms
+> index 830222b..d230fab 100644
+> --- a/src/libvirt_private.syms
+> +++ b/src/libvirt_private.syms
+> @@ -25,6 +25,7 @@ virBufferAddChar;
+>  virBufferAsprintf;
+>  virBufferContentAndReset;
+>  virBufferError;
+> +virBufferEscape;
+>  virBufferEscapeSexpr;
+>  virBufferEscapeString;
+>  virBufferFreeAndReset;
+> diff --git a/src/util/buf.c b/src/util/buf.c
+> index 5002486..7d0d2d3 100644
+> --- a/src/util/buf.c
+> +++ b/src/util/buf.c
+> @@ -383,9 +383,29 @@ virBufferEscapeSexpr(const virBufferPtr buf,
+>                       const char *format,
+>                       const char *str)
+>  {
+> +    virBufferEscape(buf, "\\\'", format, str);
+> +}
+> +
+> +/**
+> + * virBufferEscape:
+> + * @buf:  the buffer to dump
+> + * @toescape: NULL-terminated list of characters to escape
+> + * @format: a printf like format string but with only one %s parameter
+> + * @str:  the string argument which need to be escaped
+> + *
+> + * Do a formatted print with a single string to a buffer.  Any characters
+> + * in the provided list are escaped with a preceeding \.
+> + */
+> +void
+> +virBufferEscape(const virBufferPtr buf,
+> +                const char *toescape,
+> +                const char *format,
+> +                const char *str)
+> +{
+>      int len;
+>      char *escaped, *out;
+>      const char *cur;
+> +    const char *p;
+>  
+>      if ((format == NULL) || (buf == NULL) || (str == NULL))
+>          return;
+> @@ -408,14 +428,13 @@ virBufferEscapeSexpr(const virBufferPtr buf,
+>      cur = str;
+>      out = escaped;
+>      while (*cur != 0) {
+> -        switch (*cur) {
+> -        case '\\':
+> -        case '\'':
+> -            *out++ = '\\';
+> -            /* fallthrough */
+> -        default:
+> -            *out++ = *cur;
+> +        for (p = toescape; *p; ++p) {
+> +            if (*cur == *p) {
+> +                *out++ = '\\';
+> +                break;
+> +            }
+>          }
+> +        *out++ = *cur;
+>          cur++;
+>      }
+>      *out = 0;
+> diff --git a/src/util/buf.h b/src/util/buf.h
+> index 06d01ba..e545ed9 100644
+> --- a/src/util/buf.h
+> +++ b/src/util/buf.h
+> @@ -50,6 +50,7 @@ void virBufferStrcat(const virBufferPtr buf, ...)
+>    ATTRIBUTE_SENTINEL;
+>  void virBufferEscapeString(const virBufferPtr buf, const char *format, const char *str);
+>  void virBufferEscapeSexpr(const virBufferPtr buf, const char *format, const char *str);
+> +void virBufferEscape(const virBufferPtr buf, const char *toescape, const char *format, const char *str);
+>  void virBufferURIEncodeString (const virBufferPtr buf, const char *str);
+>  
+>  # define virBufferAddLit(buf_, literal_string_) \
+
+ACK, trivial isolated patch
+
+Daniel
+-- 
+|: http://berrange.com      -o-    http://www.flickr.com/photos/dberrange/ :|
+|: http://libvirt.org              -o-             http://virt-manager.org :|
+|: http://autobuild.org       -o-         http://search.cpan.org/~danberr/ :|
+|: http://entangle-photo.org       -o-       http://live.gnome.org/gtk-vnc :|
