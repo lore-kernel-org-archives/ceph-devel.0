@@ -1,59 +1,180 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: use UUID mount btrfs failed
-Date: Wed, 12 Oct 2011 09:03:18 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110120901460.17393@cobra.newdream.net>
-References: <CABAwU-Z=VJ4DkVANPyw6ogMyLz1CoGxAWcTGEay0QUOodL+Yiw@mail.gmail.com>
- <CAFtEh-dwema2fWTbX_EHsPuPhK56kDiMqe5xEuev86nPCtHZRA@mail.gmail.com>
- <CABAwU-bS7gZscTkDUDTzBetSZ_v1GgQtcr0rH3VTa8Xj3ETTpA@mail.gmail.com>
- <j73j32$6fs$1@dough.gmane.org> <CABAwU-YKYKORm1gfWQkPeE73SYe_R=-Sg7S3+ZZnusk2miH-Cg@mail.gmail.com>
+From: "Daniel P. Berrange" <berrange@redhat.com>
+Subject: Re: [libvirt] [PATCH 0/5 v2] Improve Ceph Qemu+RBD support
+Date: Wed, 12 Oct 2011 17:33:18 +0100
+Message-ID: <20111012163318.GA3444@redhat.com>
+References: <1316492023-17749-1-git-send-email-sage@newdream.net>
+Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-707065540-1318435398=:17393"
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60105 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751948Ab1JLQDU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Oct 2011 12:03:20 -0400
-In-Reply-To: <CABAwU-YKYKORm1gfWQkPeE73SYe_R=-Sg7S3+ZZnusk2miH-Cg@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:26831 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750769Ab1JLQdb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 12 Oct 2011 12:33:31 -0400
+Content-Disposition: inline
+In-Reply-To: <1316492023-17749-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: Thomas Mueller <thomas@chaschperli.ch>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Mon, Sep 19, 2011 at 09:13:38PM -0700, Sage Weil wrote:
+> The current support for qemu and Ceph RBD (rados block device) has two 
+> main deficiencies: authentication doesn't work, and it relies on 
+> environment variables (which don't work with latest upstream). This 
+> patch set addresses both those problems.
+> 
+> The first two patches update the xml schemas and conf to add a Ceph 
+> secret type and to specify authentication information along with the rbd 
+> disk.
+>
+> The next two patches make some libvirt changes.  We pass virConnectPtr 
+> down into the Domain{Attach,Detach} methods (needed to access secrets 
+> while building the qemu command), and add a helper that will escape 
+> arbitrary characters.
+> 
+> The final patch replaces the current RBD qemu code and uses the new conf 
+> info to do authentication properly.  (We still need to make a change 
+> there to avoid having the authentication key show up on qemu command 
+> line; I'll clean that up shortly.)
+> 
+> Comments on this approach?
 
---557981400-707065540-1318435398=:17393
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On Wed, 12 Oct 2011, huang jun wrote:
-> 2011/10/12 Thomas Mueller <thomas@chaschperli.ch>:
-> > On 12.10.2011 10:22, huang jun wrote:
-> >>
-> >> 2011/10/12 Damien Churchill<damoxc@gmail.com>:
-> >>>
-> >>> On 12 October 2011 02:22, huang jun<hjwsm1989@gmail.com> =A0wrote:
-> >>>>
-> >>>> I use the UUID option to mount the btrfs disk,but i can not success.
-> >>>> first, the disk is /dev/sdd1
-> >>>> then, i pull out the disk
-> >>>> and after mintues, pushed it again,at this time, it changes to /dev/=
-sde1
-> >>>> at this time, if we use /etc/init.d/ceph restart, it will failed, fo=
-r
-> >>>> the current mount option is likely "/dev/sd** "
-> >>>> but the UUID didn't change.
-> >>>> why i can not mount it successfuly?
-
-Maybe a dumb question, but I'm assuming you've done 'btrfsctl -a' or=20
-'btrfs device scan'?  Do you see lines like
-
-[  237.100670] device fsid 78a8ca36-478b-402b-9110-b2be4915d5f3 devid 1=20
-transid 4107 /dev/sde1
-
-with the UUID in question in the dmesg output?
-
-sage
+Ok, I've finally got myself a Ceph cluster up & running, with RBD
+exports to a QEMU guest[1], so I can give more sensible answers to
+these patches :-)
 
 
---557981400-707065540-1318435398=:17393--
+Overall you are taking the current XML for a disk:
+
+  <disk type='network' device='disk'>
+    <driver name='qemu' type='raw'/>
+    <source protocol='rbd' name='demo/wibble'>
+      <host name='lettuce.example.org' port='6798'/>
+      <host name='mustard.example.org' port='6798'/>
+      <host name='avocado.example.org' port='6798'/>
+    </source>
+    <target dev='vdb' bus='virtio'/>
+  </disk>
+
+and adding one new element <auth> such that we get
+
+  <disk type='network' device='disk'>
+    <driver name='qemu' type='raw'/>
+    <source protocol='rbd' name='demo/wibble'>
+      <auth id='admin' domain='clustername'/>
+      <host name='lettuce.example.org' port='6798'/>
+      <host name='mustard.example.org' port='6798'/>
+      <host name='avocado.example.org' port='6798'/>
+    </source>
+    <target dev='vdb' bus='virtio'/>
+  </disk>
+
+together with some secret XML that looks like:
+
+  <secret ephemeral='no' private='no'>
+    <uuid>0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f</uuid>
+    <usage type='ceph'>
+      <auth id='admin' domain='clustername'/>
+    </usage>
+  </secret>
+
+When starting a guest the auth id + domain are concatenated to find
+the secret. The 'id' is also used as the username to pass to QEMU.
+The 'domain' is only ever used for the secret lookup part, never
+passed to QEMU, since the host IP addrs do that job.
+
+By comparison, QCow2 encryption disks are done with:
+
+  <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='/home/berrange/VirtualMachines/demo.qcow2'/>
+      <target dev='hda' bus='ide'/>
+      <encryption format='qcow'>
+        <secret type='passphrase' uuid='0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f'/>
+      </encryption>
+  </disk>
+
+And the secret with:
+
+  <secret ephemeral='no' private='no'>
+    <uuid>0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f</uuid>
+    <usage type='volume'>
+      <volume>/home/berrange/VirtualMachines/demo.qcow2</volume>
+    </usage>
+  </secret>
+
+When starting a guest, the secret UUID is used to find the passphrase.
+
+
+So we have a difference in the way the secrets are linked to the disks
+between Ceph and QCow2 here.
+
+I can see the appeal of doing it the way you have, but at the same time
+I would like to have consistency with the QCow2 approach, and UUIDs are
+a stronger identifier IMHO.
+
+Also, although the secret XML is exposed auth id + domain as separate
+attributes in the XML, internally they're processed as a concatenated
+string, likewise the public API uses a concatenated string form. So
+I think the XML ought to use that form too, and not split them.
+
+Finally, I think the concept of authentication credentials for
+disks, could be more generally useful than just for Ceph or other
+network block devs, so I'm somewhat inclined to move it outside the
+<source> element
+
+
+Thus I would propose a slight variation on what you've done:
+
+  <disk type='network' device='disk'>
+    <driver name='qemu' type='raw'/>
+    <auth username='admin'>
+       <secret type='passphrase' uuid='0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f'/>
+    </auth>
+    <source protocol='rbd' name='demo/wibble'>
+      <host name='lettuce.example.org' port='6798'/>
+      <host name='mustard.example.org' port='6798'/>
+      <host name='avocado.example.org' port='6798'/>
+    </source>
+    <target dev='vdb' bus='virtio'/>
+  </disk>
+
+
+And in the secret XML:
+
+  <secret ephemeral='no' private='no'>
+    <uuid>0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f</uuid>
+    <usage type='ceph'>
+      <domain>some.cluster.name/admin</domain>
+    </usage>
+  </secret>
+
+
+Though I think the UUID based lookup should be primary, I would also
+accept an optional alternate syntax based on usage strings, if you
+think that's important:
+
+  <disk type='network' device='disk'>
+    <driver name='qemu' type='raw'/>
+    <auth username='admin'>
+       <secret type='passphrase' usage='some.cluster.name/admin'/>
+    </auth>
+    <source protocol='rbd' name='demo/wibble'>
+      <host name='lettuce.example.org' port='6798'/>
+      <host name='mustard.example.org' port='6798'/>
+      <host name='avocado.example.org' port='6798'/>
+    </source>
+    <target dev='vdb' bus='virtio'/>
+  </disk>
+
+
+Regards,
+Daniel
+
+[1] http://berrange.com/posts/2011/10/12/setting-up-a-ceph-cluster-and-exporting-a-rbd-volume-to-a-kvm-guest/
+-- 
+|: http://berrange.com      -o-    http://www.flickr.com/photos/dberrange/ :|
+|: http://libvirt.org              -o-             http://virt-manager.org :|
+|: http://autobuild.org       -o-         http://search.cpan.org/~danberr/ :|
+|: http://entangle-photo.org       -o-       http://live.gnome.org/gtk-vnc :|
