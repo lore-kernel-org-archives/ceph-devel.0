@@ -1,178 +1,204 @@
 From: "Daniel P. Berrange" <berrange@redhat.com>
-Subject: Re: [libvirt] [PATCH 0/5 v2] Improve Ceph Qemu+RBD support
-Date: Wed, 12 Oct 2011 17:33:18 +0100
-Message-ID: <20111012163318.GA3444@redhat.com>
+Subject: Re: [libvirt] [PATCH 1/5] secret: add Ceph secret type
+Date: Wed, 12 Oct 2011 17:36:01 +0100
+Message-ID: <20111012163601.GB3444@redhat.com>
 References: <1316492023-17749-1-git-send-email-sage@newdream.net>
+ <1316492023-17749-2-git-send-email-sage@newdream.net>
 Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:26831 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:21513 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750769Ab1JLQdb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 12 Oct 2011 12:33:31 -0400
+	id S1751500Ab1JLQgM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 12 Oct 2011 12:36:12 -0400
 Content-Disposition: inline
-In-Reply-To: <1316492023-17749-1-git-send-email-sage@newdream.net>
+In-Reply-To: <1316492023-17749-2-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-On Mon, Sep 19, 2011 at 09:13:38PM -0700, Sage Weil wrote:
-> The current support for qemu and Ceph RBD (rados block device) has two 
-> main deficiencies: authentication doesn't work, and it relies on 
-> environment variables (which don't work with latest upstream). This 
-> patch set addresses both those problems.
+On Mon, Sep 19, 2011 at 09:13:39PM -0700, Sage Weil wrote:
+> Add a new secret type to store a Ceph authentication key.  The ceph_id
+> field contains the name of the key (e.g. 'admin' for the ceph superuser).
 > 
-> The first two patches update the xml schemas and conf to add a Ceph 
-> secret type and to specify authentication information along with the rbd 
-> disk.
->
-> The next two patches make some libvirt changes.  We pass virConnectPtr 
-> down into the Domain{Attach,Detach} methods (needed to access secrets 
-> while building the qemu command), and add a helper that will escape 
-> arbitrary characters.
+> Signed-off-by: Sage Weil <sage@newdream.net>
+> ---
+>  docs/schemas/secret.rng      |   17 +++++++++++++++
+>  include/libvirt/libvirt.h.in |    3 ++
+>  src/conf/secret_conf.c       |   45 +++++++++++++++++++++++++++++++++++++++++-
+>  src/conf/secret_conf.h       |    1 +
+>  src/secret/secret_driver.c   |    8 +++++++
+>  5 files changed, 73 insertions(+), 1 deletions(-)
 > 
-> The final patch replaces the current RBD qemu code and uses the new conf 
-> info to do authentication properly.  (We still need to make a change 
-> there to avoid having the authentication key show up on qemu command 
-> line; I'll clean that up shortly.)
-> 
-> Comments on this approach?
+> diff --git a/docs/schemas/secret.rng b/docs/schemas/secret.rng
+> index 80270ae..c3da8b3 100644
+> --- a/docs/schemas/secret.rng
+> +++ b/docs/schemas/secret.rng
+> @@ -37,6 +37,7 @@
+>            <element name='usage'>
+>              <choice>
+>                <ref name='usagevolume'/>
+> +              <ref name='cephauth'/>
+>                <!-- More choices later -->
+>              </choice>
+>            </element>
+> @@ -54,6 +55,22 @@
+>      </element>
+>    </define>
+>  
+> +  <define name='cephauth'>
+> +    <attribute name='type'>
+> +      <value>ceph</value>
+> +    </attribute>
+> +    <element name='auth'>
+> +      <attribute name='id'>
+> +	<text/>
+> +      </attribute>
+> +      <optional>
+> +        <attribute name='domain'>
+> +	  <text/>
+> +	</attribute>
 
-Ok, I've finally got myself a Ceph cluster up & running, with RBD
-exports to a QEMU guest[1], so I can give more sensible answers to
-these patches :-)
+Here I would expect just
+
+    <element name='domain'>
+        <text/>
+    </element>
+
+> +      </optional>
+> +    </element>
+> +  </define>
+> +
+>    <define name="UUID">
+>      <choice>
+>        <data type="string">
+> diff --git a/include/libvirt/libvirt.h.in b/include/libvirt/libvirt.h.in
+> index b1bda31..51fd044 100644
+> --- a/include/libvirt/libvirt.h.in
+> +++ b/include/libvirt/libvirt.h.in
+> @@ -2257,7 +2257,10 @@ typedef virSecret *virSecretPtr;
+>  typedef enum {
+>      VIR_SECRET_USAGE_TYPE_NONE = 0,
+>      VIR_SECRET_USAGE_TYPE_VOLUME = 1,
+> +    VIR_SECRET_USAGE_TYPE_CEPH = 2,
+>      /* Expect more owner types later... */
+> +
+> +    VIR_SECRET_USAGE_TYPE_LAST
+>  } virSecretUsageType;
+>  
+>  virConnectPtr           virSecretGetConnect     (virSecretPtr secret);
+> diff --git a/src/conf/secret_conf.c b/src/conf/secret_conf.c
+> index 105afbe..8f11a51 100644
+> --- a/src/conf/secret_conf.c
+> +++ b/src/conf/secret_conf.c
+> @@ -35,7 +35,8 @@
+>  
+>  #define VIR_FROM_THIS VIR_FROM_SECRET
+>  
+> -VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_VOLUME + 1, "none", "volume")
+> +VIR_ENUM_IMPL(virSecretUsageType, VIR_SECRET_USAGE_TYPE_LAST,
+> +              "none", "volume", "ceph")
+>  
+>  void
+>  virSecretDefFree(virSecretDefPtr def)
+> @@ -52,6 +53,10 @@ virSecretDefFree(virSecretDefPtr def)
+>          VIR_FREE(def->usage.volume);
+>          break;
+>  
+> +    case VIR_SECRET_USAGE_TYPE_CEPH:
+> +        VIR_FREE(def->usage.authIdDomain);
+> +        break;
+> +
+>      default:
+>          VIR_ERROR(_("unexpected secret usage type %d"), def->usage_type);
+>          break;
+> @@ -65,6 +70,8 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
+>  {
+>      char *type_str;
+>      int type;
+> +    char *authId, *authDomain;
+> +    int ret;
+>  
+>      type_str = virXPathString("string(./usage/@type)", ctxt);
+>      if (type_str == NULL) {
+> @@ -94,6 +101,27 @@ virSecretDefParseUsage(xmlXPathContextPtr ctxt,
+>          }
+>          break;
+>  
+> +    case VIR_SECRET_USAGE_TYPE_CEPH:
+> +        authId = virXPathString("string(./usage/auth/@id)", ctxt);
+> +        if (!authId) {
+> +            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
+> +                                 _("ceph usage specified, but auth id is missing"));
+> +            return -1;
+> +        }
+> +        authDomain = virXPathString("string(./usage/auth/@domain)", ctxt);
+> +        if (!authDomain) {
+> +            VIR_FREE(authId);
+> +            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
+> +                                 _("ceph usage specified, but auth domain is missing"));
+> +            return -1;
+> +        }
+> +        ret = virAlloc(&def->usage.authIdDomain, strlen(authId) +
+> +                       strlen(authDomain) + 2);
+> +        sprintf(def->usage.authIdDomain, "%s/%s", authId, authDomain);
+> +        VIR_FREE(authId);
+> +        VIR_FREE(authDomain);
+> +        break;
 
 
-Overall you are taking the current XML for a disk:
+...which simplifies this to just 
 
-  <disk type='network' device='disk'>
-    <driver name='qemu' type='raw'/>
-    <source protocol='rbd' name='demo/wibble'>
-      <host name='lettuce.example.org' port='6798'/>
-      <host name='mustard.example.org' port='6798'/>
-      <host name='avocado.example.org' port='6798'/>
-    </source>
-    <target dev='vdb' bus='virtio'/>
-  </disk>
-
-and adding one new element <auth> such that we get
-
-  <disk type='network' device='disk'>
-    <driver name='qemu' type='raw'/>
-    <source protocol='rbd' name='demo/wibble'>
-      <auth id='admin' domain='clustername'/>
-      <host name='lettuce.example.org' port='6798'/>
-      <host name='mustard.example.org' port='6798'/>
-      <host name='avocado.example.org' port='6798'/>
-    </source>
-    <target dev='vdb' bus='virtio'/>
-  </disk>
-
-together with some secret XML that looks like:
-
-  <secret ephemeral='no' private='no'>
-    <uuid>0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f</uuid>
-    <usage type='ceph'>
-      <auth id='admin' domain='clustername'/>
-    </usage>
-  </secret>
-
-When starting a guest the auth id + domain are concatenated to find
-the secret. The 'id' is also used as the username to pass to QEMU.
-The 'domain' is only ever used for the secret lookup part, never
-passed to QEMU, since the host IP addrs do that job.
-
-By comparison, QCow2 encryption disks are done with:
-
-  <disk type='file' device='disk'>
-      <driver name='qemu' type='qcow2'/>
-      <source file='/home/berrange/VirtualMachines/demo.qcow2'/>
-      <target dev='hda' bus='ide'/>
-      <encryption format='qcow'>
-        <secret type='passphrase' uuid='0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f'/>
-      </encryption>
-  </disk>
-
-And the secret with:
-
-  <secret ephemeral='no' private='no'>
-    <uuid>0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f</uuid>
-    <usage type='volume'>
-      <volume>/home/berrange/VirtualMachines/demo.qcow2</volume>
-    </usage>
-  </secret>
-
-When starting a guest, the secret UUID is used to find the passphrase.
+    case VIR_SECRET_USAGE_TYPE_CEPH:
+        def->usage.volume = virXPathString("string(./usage/domain)", ctxt);
+        if (!def->usage.volume) {
+            virSecretReportError(VIR_ERR_INTERNAL_ERROR, "%s",
+                                 _("Ceph usage specified, but volume domain is missing"));
+            return -1;
+        }
+        break;
 
 
-So we have a difference in the way the secrets are linked to the disks
-between Ceph and QCow2 here.
 
-I can see the appeal of doing it the way you have, but at the same time
-I would like to have consistency with the QCow2 approach, and UUIDs are
-a stronger identifier IMHO.
+> +
+>      default:
+>          virSecretReportError(VIR_ERR_INTERNAL_ERROR,
+>                               _("unexpected secret usage type %d"),
+> @@ -220,6 +248,9 @@ virSecretDefFormatUsage(virBufferPtr buf,
+>                          const virSecretDefPtr def)
+>  {
+>      const char *type;
+> +    char *p;
+> +    char idAuth[80];
+> +    int len;
+>  
+>      type = virSecretUsageTypeTypeToString(def->usage_type);
+>      if (type == NULL) {
+> @@ -239,6 +270,18 @@ virSecretDefFormatUsage(virBufferPtr buf,
+>                                    def->usage.volume);
+>          break;
+>  
+> +    case VIR_SECRET_USAGE_TYPE_CEPH:
+> +        if (def->usage.authIdDomain != NULL) {
+> +            p = strchr(def->usage.authIdDomain, '/');
+> +            len = p - def->usage.authIdDomain;
+> +            strncpy(idAuth, def->usage.authIdDomain, len);
+> +            idAuth[len] = '\0';
+> +            p++;
+> +            virBufferEscapeString(buf, "    <auth id='%s'", idAuth);
+> +            virBufferEscapeString(buf, " domain='%s'/>\n", p);
+> +        }
+> +        break;
 
-Also, although the secret XML is exposed auth id + domain as separate
-attributes in the XML, internally they're processed as a concatenated
-string, likewise the public API uses a concatenated string form. So
-I think the XML ought to use that form too, and not split them.
+Likewise this to just
 
-Finally, I think the concept of authentication credentials for
-disks, could be more generally useful than just for Ceph or other
-network block devs, so I'm somewhat inclined to move it outside the
-<source> element
-
-
-Thus I would propose a slight variation on what you've done:
-
-  <disk type='network' device='disk'>
-    <driver name='qemu' type='raw'/>
-    <auth username='admin'>
-       <secret type='passphrase' uuid='0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f'/>
-    </auth>
-    <source protocol='rbd' name='demo/wibble'>
-      <host name='lettuce.example.org' port='6798'/>
-      <host name='mustard.example.org' port='6798'/>
-      <host name='avocado.example.org' port='6798'/>
-    </source>
-    <target dev='vdb' bus='virtio'/>
-  </disk>
-
-
-And in the secret XML:
-
-  <secret ephemeral='no' private='no'>
-    <uuid>0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f</uuid>
-    <usage type='ceph'>
-      <domain>some.cluster.name/admin</domain>
-    </usage>
-  </secret>
-
-
-Though I think the UUID based lookup should be primary, I would also
-accept an optional alternate syntax based on usage strings, if you
-think that's important:
-
-  <disk type='network' device='disk'>
-    <driver name='qemu' type='raw'/>
-    <auth username='admin'>
-       <secret type='passphrase' usage='some.cluster.name/admin'/>
-    </auth>
-    <source protocol='rbd' name='demo/wibble'>
-      <host name='lettuce.example.org' port='6798'/>
-      <host name='mustard.example.org' port='6798'/>
-      <host name='avocado.example.org' port='6798'/>
-    </source>
-    <target dev='vdb' bus='virtio'/>
-  </disk>
+     virBufferEscapeString(buf, "    <domain>%s</domain>\n", def->usage.authIdDomain);
 
 
 Regards,
 Daniel
-
-[1] http://berrange.com/posts/2011/10/12/setting-up-a-ceph-cluster-and-exporting-a-rbd-volume-to-a-kvm-guest/
 -- 
 |: http://berrange.com      -o-    http://www.flickr.com/photos/dberrange/ :|
 |: http://libvirt.org              -o-             http://virt-manager.org :|
