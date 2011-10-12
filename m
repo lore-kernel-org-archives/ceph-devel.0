@@ -1,174 +1,91 @@
-From: "Daniel P. Berrange" <berrange@redhat.com>
-Subject: Re: [libvirt] [PATCH 5/5] qemu/rbd: improve rbd device specification
-Date: Wed, 12 Oct 2011 17:48:58 +0100
-Message-ID: <20111012164858.GE3444@redhat.com>
-References: <1316492023-17749-1-git-send-email-sage@newdream.net>
- <1316492023-17749-6-git-send-email-sage@newdream.net>
-Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
+From: Eric Blake <eblake@redhat.com>
+Subject: Re: [libvirt] [PATCH 4/5] buf: implement generic virBufferEscape
+Date: Wed, 12 Oct 2011 11:09:04 -0600
+Message-ID: <4E95C9B0.5020205@redhat.com>
+References: <1316492023-17749-1-git-send-email-sage@newdream.net>	<1316492023-17749-5-git-send-email-sage@newdream.net> <20111011103935.GB16057@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:63944 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59475 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752907Ab1JLQtL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 12 Oct 2011 12:49:11 -0400
-Content-Disposition: inline
-In-Reply-To: <1316492023-17749-6-git-send-email-sage@newdream.net>
+	id S1753477Ab1JLRJL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 12 Oct 2011 13:09:11 -0400
+In-Reply-To: <20111011103935.GB16057@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
+To: "Daniel P. Berrange" <berrange@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-On Mon, Sep 19, 2011 at 09:13:43PM -0700, Sage Weil wrote:
-> This improves the support for qemu rbd devices by adding support for a few
-> key features (e.g., authentication) and cleaning up the way in which
-> rbd configuration options are passed to qemu.
-> 
-> And <auth> member of the disk source xml specifies how librbd should
-> authenticate.  The id property is the Ceph/RBD user to authenticate as,
-> and the domain property is a identifier (local to libvirt) for the Ceph
-> cluster in question.  If both are specified, we look for a libvirt secret
-> of type CEPH with matching id and domain properties.
-> 
-> The old RBD support relied on setting an environment variable to
-> communicate information to qemu/librbd.  Instead, pass those options
-> explicitly to qemu.  Update the qemu argument parsing and unit tests
-> accordingly.
-> 
-> Signed-off-by: Sage Weil <sage@newdream.net>
-> ---
->  src/qemu/qemu_command.c                            |  268 +++++++++++---------
->  .../qemuxml2argv-disk-drive-network-rbd.args       |    6 +-
->  .../qemuxml2argv-disk-drive-network-rbd.xml        |    1 +
->  3 files changed, 157 insertions(+), 118 deletions(-)
-> +static int buildRBDString(virConnectPtr conn,
-> +                          virDomainDiskDefPtr disk,
-> +                          virBufferPtr opt)
-> +{
-> +    int i;
-> +    char idDomain[80];
-> +    virSecretPtr sec;
-> +    char *secret;
-> +    size_t secret_size;
-> +
-> +    virBufferAsprintf(opt, "rbd:%s", disk->src);
-> +    if (disk->authId) {
-> +        virBufferEscape(opt, ":", ":id=%s", disk->authId);
-> +    }
-> +    if (disk->authDomain) {
-> +        /* look up secret */
-> +        snprintf(idDomain, sizeof(idDomain), "%s/%s", disk->authId,
-> +                 disk->authDomain);
-> +        sec = virSecretLookupByUsage(conn,
-> +                                     VIR_SECRET_USAGE_TYPE_CEPH,
-> +                                     idDomain);
+On 10/11/2011 04:39 AM, Daniel P. Berrange wrote:
+> On Mon, Sep 19, 2011 at 09:13:42PM -0700, Sage Weil wrote:
+>> Implement a generic helper to escape a given set of characters with a
+>> leading '\'.  Generalizes virBufferEscapeSexpr().
+>>
+>> Signed-off-by: Sage Weil<sage@newdream.net>
+>> @@ -408,14 +428,13 @@ virBufferEscapeSexpr(const virBufferPtr buf,
+>>       cur = str;
+>>       out = escaped;
+>>       while (*cur != 0) {
+>> -        switch (*cur) {
+>> -        case '\\':
+>> -        case '\'':
+>> -            *out++ = '\\';
+>> -            /* fallthrough */
+>> -        default:
+>> -            *out++ = *cur;
+>> +        for (p = toescape; *p; ++p) {
+>> +            if (*cur == *p) {
 
-This is where you'd want to use  virSecretLookupByUUID.
+strchr is slightly more efficient than hand-rolling this loop.
 
-> +        if (sec) {
-> +            char *base64;
-> +
-> +            secret = (char *)conn->secretDriver->getValue(sec, &secret_size, 0,
-> +                                   VIR_SECRET_GET_VALUE_INTERNAL_CALL);
+More importantly, you had a logic bug, where you replaced one hard-coded 
+instance of "\\'", but not the other (the strcspn optimization).  Also, 
+I tend to use "'" instead of "\'", although both work, since I favor 
+concise code (I save my ramblings for my emails :).
 
-No need for the cast to 'char *', since void * casts to anything in C.
+>
+> ACK, trivial isolated patch
 
-But you do need to handle case of the return'd secret being 'NULL'
-and return to the caller in that case.
+I added you to AUTHORS, squashed this in, then pushed.
 
-> +            /* qemu/librbd wants it base64 encoded */
-> +            base64_encode_alloc(secret, secret_size, &base64);
-> +            virBufferEscape(opt, ":", ":key=%s:auth_supported=cephx\\;none",
-> +                            base64);
-> +            VIR_FREE(base64);
-> +            VIR_FREE(secret);
-> +            virUnrefSecret(sec);
-> +        } else {
-> +            VIR_WARN("rbd id '%s' domain '%s' specified but secret not found",
-> +                     disk->authId, disk->authDomain);
+diff --git i/src/util/buf.c w/src/util/buf.c
+index 7d0d2d3..5627d8f 100644
+--- i/src/util/buf.c
++++ w/src/util/buf.c
+@@ -383,7 +383,7 @@ virBufferEscapeSexpr(const virBufferPtr buf,
+                       const char *format,
+                       const char *str)
+  {
+-    virBufferEscape(buf, "\\\'", format, str);
++    virBufferEscape(buf, "\\'", format, str);
+  }
 
-You ought to use  qemuReportError() here and return to the caller
+  /**
+@@ -414,7 +414,7 @@ virBufferEscape(const virBufferPtr buf,
+          return;
 
-> +        }
-> +    }
-> +    if (disk->nhosts > 0) {
-> +        virBufferStrcat(opt, ":mon_host=", NULL);
-> +        for (i = 0; i < disk->nhosts; ++i) {
-> +            if (i) {
-> +                virBufferStrcat(opt, "\\;", NULL);
-> +            }
-> +            if (disk->hosts[i].port) {
-> +                virBufferAsprintf(opt, "%s\\:%s",
-> +                                  disk->hosts[i].name,
-> +                                  disk->hosts[i].port);
-> +            } else {
-> +                virBufferAsprintf(opt, "%s", disk->hosts[i].name);
-> +            }
-> +        }
-> +    }
-> +
-> +    return 0;
-> +}
-> +
-
-> @@ -1453,8 +1594,9 @@ qemuBuildDriveStr(virConnectPtr conn,
->                                    disk->hosts->name, disk->hosts->port);
->                  break;
->              case VIR_DOMAIN_DISK_PROTOCOL_RBD:
-> -                /* TODO: set monitor hostnames */
-> -                virBufferAsprintf(&opt, "file=rbd:%s,", disk->src);
-> +                virBufferStrcat(&opt, "file=", NULL);
-> +                buildRBDString(conn, disk, &opt);
-> +                virBufferStrcat(&opt, ",", NULL);
->                  break;
->              case VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG:
->                  if (disk->nhosts == 0)
-> @@ -3597,24 +3715,11 @@ qemuBuildCommandLine(virConnectPtr conn,
->                      }
->                      break;
->                  case VIR_DOMAIN_DISK_PROTOCOL_RBD:
-> -                    if (virAsprintf(&file, "rbd:%s,", disk->src) < 0) {
-> -                        goto no_memory;
-> -                    }
-> -                    for (j = 0 ; j < disk->nhosts ; j++) {
-> -                        if (!has_rbd_hosts) {
-> -                            virBufferAddLit(&rbd_hosts, "CEPH_ARGS=-m ");
-> -                            has_rbd_hosts = true;
-> -                        } else {
-> -                            virBufferAddLit(&rbd_hosts, ",");
-> -                        }
-> -                        virDomainDiskHostDefPtr host = &disk->hosts[j];
-> -                        if (host->port) {
-> -                            virBufferAsprintf(&rbd_hosts, "%s:%s",
-> -                                              host->name,
-> -                                              host->port);
-> -                        } else {
-> -                            virBufferAdd(&rbd_hosts, host->name, -1);
-> -                        }
-> +                    {
-> +                        virBuffer opt = VIR_BUFFER_INITIALIZER;
-> +                        buildRBDString(conn, disk, &opt);
-> +                        virAsprintf(&file, "%s",
-> +                                    virBufferContentAndReset(&opt));
-
-This last statement leaks.  'virBufferContentAndReset' gives you back
-the internal buffer to keep, so there's no need to duplicate it using
-asprintf. Also you need to check for an error. So you want this
-
-     if (virBufferError(&opt)) {
-          virReportOOMError();
-          goto cleanup;
-     }
-     file = virBufferContentAndReset(&opt);
-
-
-Generally I think you're going in the right direction with this
-patch.
-
-Regards,
-Daniel
+      len = strlen(str);
+-    if (strcspn(str, "\\'") == len) {
++    if (strcspn(str, toescape) == len) {
+          virBufferAsprintf(buf, format, str);
+          return;
+      }
+@@ -428,12 +428,8 @@ virBufferEscape(const virBufferPtr buf,
+      cur = str;
+      out = escaped;
+      while (*cur != 0) {
+-        for (p = toescape; *p; ++p) {
+-            if (*cur == *p) {
+-                *out++ = '\\';
+-                break;
+-            }
+-        }
++        if (strchr(toescape, *cur))
++            *out++ = '\\';
+          *out++ = *cur;
+          cur++;
+      }
 -- 
-|: http://berrange.com      -o-    http://www.flickr.com/photos/dberrange/ :|
-|: http://libvirt.org              -o-             http://virt-manager.org :|
-|: http://autobuild.org       -o-         http://search.cpan.org/~danberr/ :|
-|: http://entangle-photo.org       -o-       http://live.gnome.org/gtk-vnc :|
+Eric Blake   eblake@redhat.com    +1-801-349-2682
+Libvirt virtualization library http://libvirt.org
