@@ -1,41 +1,50 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: [patch] build ceph without using btrfs
-Date: Thu, 13 Oct 2011 20:52:35 +0800
-Message-ID: <CABAwU-afkv_2HXNpoUKii9yCSZ9eqAYWVzpddPKwJfKHuSi6HA@mail.gmail.com>
+From: =?UTF-8?B?56iL6IyC?= <chengmao2010@gmail.com>
+Subject: =?UTF-8?Q?Can_read_and_write_on_the_same_connection_at_the_sam?=
+	=?UTF-8?Q?e_time=EF=BC=9F?=
+Date: Thu, 13 Oct 2011 21:27:30 +0800
+Message-ID: <CAGiyNfARcfqw4hnVnT0JBRJ+SkbUt71=Ls5R+pgnQ6L8K+_PfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:39902 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755113Ab1JMMwg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2011 08:52:36 -0400
-Received: by vws1 with SMTP id 1so1224248vws.19
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Oct 2011 05:52:35 -0700 (PDT)
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:44696 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751425Ab1JMN1c convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2011 09:27:32 -0400
+Received: by eye27 with SMTP id 27so1832645eye.19
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Oct 2011 06:27:30 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-If we build the ceph cluster without using btrfs, it returns error if
-the osd_data and mon_data directory doesn't exist.
-diff --git a/src/mkcephfs.in b/src/mkcephfs.in
-index 0d86c75..5bb94ae 100644
---- a/src/mkcephfs.in
-+++ b/src/mkcephfs.in
-@@ -246,6 +246,8 @@ if [ -n "$initdaemon" ]; then
-     name="$type.$id"
+kclient will establish only one connection with each osd=EF=BC=8Cbut th=
+ere is
+a mutex in the ceph_connection.
 
-     if [ $type = "osd" ]; then
-+       get_conf osd_data "" "osd data"
-+       test -d $osd_data || mkdir -p $osd_data
-        $BINDIR/cosd -c $conf --monmap $dir/monmap -i $id --mkfs
-        create_private_key
-     fi
-@@ -255,6 +257,8 @@ if [ -n "$initdaemon" ]; then
-     fi
+partial code about con_work
 
-     if [ $type = "mon" ]; then
-+       get_conf mon_data "" "mon data"
-+       test -d $mon_data || mkdir -p $mon_data
-        $BINDIR/cmon -c $conf --mkfs -i $id --monmap $dir/monmap
---osdmap $dir/osdmap -k $dir/keyring.mon
-     fi
+static void con_work(struct work_struct *work)
+{
+struct ceph_connection *con =3D container_of(work, struct ceph_connecti=
+on,
+=C2=A0=C2=A0work.work);
+mutex_lock(&con->mutex);
+=E2=80=A6=E2=80=A6
+=C2=A0=C2=A0 =C2=A0 =C2=A0if (test_and_clear_bit(SOCK_CLOSED, &con->sta=
+te) ||
+=C2=A0=C2=A0 try_read(con) < 0 ||
+=C2=A0=C2=A0 try_write(con) < 0) {
+mutex_unlock(&con->mutex);
+bsdocfs_fault(con); =C2=A0 =C2=A0 /* error/fault path */
+goto done_unlocked;
+}
+=E2=80=A6=E2=80=A6
+}
+
+if kclient read data from osdN=EF=BC=8Ccan kclient write data to osdN a=
+t the same time=EF=BC=9F
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
