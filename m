@@ -1,68 +1,31 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: use UUID mount btrfs failed
-Date: Thu, 13 Oct 2011 08:03:04 +0800
-Message-ID: <CABAwU-afqD=HBsp162k2SBX+zawD9yGv26KkgY8C2_14jG+ASA@mail.gmail.com>
-References: <CABAwU-Z=VJ4DkVANPyw6ogMyLz1CoGxAWcTGEay0QUOodL+Yiw@mail.gmail.com>
-	<CAFtEh-dwema2fWTbX_EHsPuPhK56kDiMqe5xEuev86nPCtHZRA@mail.gmail.com>
-	<CABAwU-bS7gZscTkDUDTzBetSZ_v1GgQtcr0rH3VTa8Xj3ETTpA@mail.gmail.com>
-	<j73j32$6fs$1@dough.gmane.org>
-	<CABAwU-YKYKORm1gfWQkPeE73SYe_R=-Sg7S3+ZZnusk2miH-Cg@mail.gmail.com>
-	<Pine.LNX.4.64.1110120901460.17393@cobra.newdream.net>
+From: mowang da <whooya.xxl@gmail.com>
+Subject: Re: osd deployment affects samba read performance
+Date: Thu, 13 Oct 2011 09:11:10 +0800
+Message-ID: <CAMwsgzN3bR1wtVG1snpEY_gUT6Dgy2uCxYWQu-VtwOgpmGg_-g@mail.gmail.com>
+References: <CABAwU-afNz4NDyKAGz+9OiFH57WQ0AsPi4HCOTM6B+OjAnsoYg@mail.gmail.com>
+	<Pine.LNX.4.64.1110110830050.20977@cobra.newdream.net>
+	<CABAwU-ZoDeF9rChNtooUa1Mpt21MuhP07DMfQdtQvQ8zNToCLQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=GB2312
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f42.google.com ([209.85.210.42]:34063 "EHLO
-	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750747Ab1JMADE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Oct 2011 20:03:04 -0400
-Received: by pzk1 with SMTP id 1so1278784pzk.1
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Oct 2011 17:03:04 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1110120901460.17393@cobra.newdream.net>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:51879 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750864Ab1JMBLL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Oct 2011 21:11:11 -0400
+Received: by qyk30 with SMTP id 30so5427241qyk.19
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Oct 2011 18:11:10 -0700 (PDT)
+In-Reply-To: <CABAwU-ZoDeF9rChNtooUa1Mpt21MuhP07DMfQdtQvQ8zNToCLQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Thomas Mueller <thomas@chaschperli.ch>, ceph-devel@vger.kernel.org
+To: huang jun <hjwsm1989@gmail.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-2011/10/13 Sage Weil <sage@newdream.net>:
-> On Wed, 12 Oct 2011, huang jun wrote:
->> 2011/10/12 Thomas Mueller <thomas@chaschperli.ch>:
->> > On 12.10.2011 10:22, huang jun wrote:
->> >>
->> >> 2011/10/12 Damien Churchill<damoxc@gmail.com>:
->> >>>
->> >>> On 12 October 2011 02:22, huang jun<hjwsm1989@gmail.com> =A0wrot=
-e:
->> >>>>
->> >>>> I use the UUID option to mount the btrfs disk,but i can not suc=
-cess.
->> >>>> first, the disk is /dev/sdd1
->> >>>> then, i pull out the disk
->> >>>> and after mintues, pushed it again,at this time, it changes to =
-/dev/sde1
->> >>>> at this time, if we use /etc/init.d/ceph restart, it will faile=
-d, for
->> >>>> the current mount option is likely "/dev/sd** "
->> >>>> but the UUID didn't change.
->> >>>> why i can not mount it successfuly?
->
-> Maybe a dumb question, but I'm assuming you've done 'btrfsctl -a' or
-> 'btrfs device scan'? =A0Do you see lines like
->
-> [ =A0237.100670] device fsid 78a8ca36-478b-402b-9110-b2be4915d5f3 dev=
-id 1
-> transid 4107 /dev/sde1
->
-> with the UUID in question in the dmesg output?
->
-> sage
->
->
-yes,the demsg |tail show that. but i have uncomment the 'btrfsctl -a"
-in /etc/init.d/ceph
-maybe that isn't the problem.
-
-thanks
+the samba read performance can reach 110MB/s,it's an exciting news. I
+have tested of it with kernel client, the read performance is 60M/s,
+the write performance is 80M/s.
+but, Can we only put together all of the OSDs on the same machine?
+What is the difference in both cases=A3=BF
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
