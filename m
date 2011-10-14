@@ -1,69 +1,83 @@
-From: Sage Weil <sage@newdream.net>
+From: Jojy Varghese <jojy.varghese@gmail.com>
 Subject: Re: [PATCH 1/3] mds:Interval tree
-Date: Thu, 13 Oct 2011 20:35:01 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110132034120.16643@cobra.newdream.net>
+Date: Thu, 13 Oct 2011 21:28:30 -0700
+Message-ID: <CAJD3hpXq3E9QismM2rbrYozxwBkTV8TfGg8ziY9FZLpXrUxZ7A@mail.gmail.com>
 References: <CAJD3hpWY0F-qg05Tgzy5twpcqJSQXAcAEs_yv7qTzFTxAWW33w@mail.gmail.com>
- <CAJD3hpXCO2uut-ftpFgOr7=vnE60g6_oeT2hmDy9QDo1d6n6Xw@mail.gmail.com>
+	<CAJD3hpXCO2uut-ftpFgOr7=vnE60g6_oeT2hmDy9QDo1d6n6Xw@mail.gmail.com>
+	<Pine.LNX.4.64.1110132034120.16643@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1363107950-1318563301=:16643"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51011 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754966Ab1JNDfD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Oct 2011 23:35:03 -0400
-In-Reply-To: <CAJD3hpXCO2uut-ftpFgOr7=vnE60g6_oeT2hmDy9QDo1d6n6Xw@mail.gmail.com>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:53777 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932455Ab1JNE2b convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Oct 2011 00:28:31 -0400
+Received: by ggnb1 with SMTP id b1so21978ggn.19
+        for <ceph-devel@vger.kernel.org>; Thu, 13 Oct 2011 21:28:30 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1110132034120.16643@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jojy Varghese <jojy.varghese@gmail.com>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-1363107950-1318563301=:16643
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-Hi Jojy-
-
-I merged this into the tree.  The next step is to redo the flock code to=20
-use this.  Should be much cleaner...
-
-Thanks!
-sage
+Great. Are there any unit test cases for the lock subsytem?
 
 
-On Tue, 11 Oct 2011, Jojy Varghese wrote:
+thanks
+Jojy
 
-> Hi
->   I am resending the patch series for interval set. This time I have
-> integrated the unit test cases to the existing suite.
->=20
-> =A0 This patch-series of 3 patches has following changes:
-> =A0 =A0 =A0 =A0- Interval tree implementation
-> =A0 =A0 =A0 =A0- Unit test cases for the implementation
->        - Makefile changes for unit test integration
->=20
->=20
-> Interval tree is an optimized data structure for =A0representing and
-> querying intervals. Elementary intervals are
-> represented as nodes of an avl tree and the corresponding data =A0is
-> stored on these nodes based on a concept of span.
-> =A0 =A0 =A0 =A0 This representation allows log(n) (where n is the number =
-of
-> data) storage. The balanced avl tree allows a log(n) query.
->=20
-> =A0 =A0 =A0 =A0 The implementation is a template class that is instantiat=
-ed
-> based on parameters :
-> =A0 =A0 =A0 =A0 - Interval type
-> =A0 =A0 =A0 =A0 - Data type
->=20
-> =A0 This is a basic component which can be used to store byte range locks=
-=2E
->=20
->=20
-> thanks
-> -Jojy
->=20
---557981400-1363107950-1318563301=:16643--
+
+On Thu, Oct 13, 2011 at 8:35 PM, Sage Weil <sage@newdream.net> wrote:
+> Hi Jojy-
+>
+> I merged this into the tree. =C2=A0The next step is to redo the flock=
+ code to
+> use this. =C2=A0Should be much cleaner...
+>
+> Thanks!
+> sage
+>
+>
+> On Tue, 11 Oct 2011, Jojy Varghese wrote:
+>
+>> Hi
+>> =C2=A0 I am resending the patch series for interval set. This time I=
+ have
+>> integrated the unit test cases to the existing suite.
+>>
+>> =C2=A0 This patch-series of 3 patches has following changes:
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0- Interval tree implementation
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0- Unit test cases for the implementation
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0- Makefile changes for unit test integrat=
+ion
+>>
+>>
+>> Interval tree is an optimized data structure for =C2=A0representing =
+and
+>> querying intervals. Elementary intervals are
+>> represented as nodes of an avl tree and the corresponding data =C2=A0=
+is
+>> stored on these nodes based on a concept of span.
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 This representation allows log(n) (where=
+ n is the number of
+>> data) storage. The balanced avl tree allows a log(n) query.
+>>
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 The implementation is a template class t=
+hat is instantiated
+>> based on parameters :
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 - Interval type
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 - Data type
+>>
+>> =C2=A0 This is a basic component which can be used to store byte ran=
+ge locks.
+>>
+>>
+>> thanks
+>> -Jojy
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
