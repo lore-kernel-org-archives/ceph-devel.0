@@ -1,218 +1,215 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Repeated messages of "heartbeat_check: no heartbeat from"
-Date: Fri, 14 Oct 2011 08:16:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110140816060.3720@cobra.newdream.net>
-References: <1312546310.2754.41.camel@wido-laptop.pcextreme.nl>
- <1312972246.2742.7.camel@wido-desktop> <1318602360.3019.24.camel@wido-desktop>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: OSD blocked for more than 120 seconds
+Date: Sat, 15 Oct 2011 21:33:24 +0200
+Message-ID: <CAO47_-8wOFxzjy-n2W_q75D=h7z8spswgghJ9iy8p6eQu-2kFA@mail.gmail.com>
+References: <4E974C87.2070204@tuxadero.com>
+	<1318585099.2999.10.camel@wido-laptop>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51933 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753786Ab1JNPQ5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Oct 2011 11:16:57 -0400
-In-Reply-To: <1318602360.3019.24.camel@wido-desktop>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:54160 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753831Ab1JOTdZ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 15 Oct 2011 15:33:25 -0400
+Received: by vws1 with SMTP id 1so1757799vws.19
+        for <ceph-devel@vger.kernel.org>; Sat, 15 Oct 2011 12:33:24 -0700 (PDT)
+In-Reply-To: <1318585099.2999.10.camel@wido-laptop>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+Cc: martin@tuxadero.com, ceph-devel@vger.kernel.org
 
-On Fri, 14 Oct 2011, Wido den Hollander wrote:
+I'm not seeing the same problem, but I've experienced something similar=
+:
+
+As you might know, I had serious performance problems with btrfs some
+month ago, after that, I switched to ext4 and had other problems
+there. Last Saturday I decided to give josef's current btrfs git repo
+a try in our ceph cluster.
+
+Everything performed well at first, but after a day I noticed that
+btrfs-cleaner was wasting more and more time in
+btrfs_clean_old_snapshots. When we reached load 20 on the OSDs I
+rebooted the nodes, everything was back to normal then. But again
+after a a few hours the load started to rise.
+
+My solution to fix this for the moment was, to turn of the btrfs
+snapshot feature in ceph with:
+
+filestore btrfs snaps =3D 0
+
+Now I have good performance, low waitio values on the disks and I
+haven't seen our btrfs warning until now as well.
+
+I don't know what the implications are (does this enable writeahead
+journaling in ceph?), but to me it's the only setup that does the job
+at the moment.
+
+Regards,
+Christian
+
+
+
+2011/10/14 Wido den Hollander <wido@widodh.nl>:
 > Hi,
-> 
-> I'm seeing this behavior again. In the monitor messages this started to
-> appear:
-> 
-> 2011-10-14 16:22:19.853752   log 2011-10-14 16:22:14.887881 mon.0
-> [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 3281 : [INF] osd.12
-> [2a00:f10:113:1:225:90ff:fe33:49b0]:6800/8023 failed (by osd.0
-> [2a00:f10:113:1:225:90ff:fe33:49fe]:6800/10678)
-> 
-> So, osd.0 is telling us that osd.12 is down, but the proces is running
-> and seems alive.
-> 
-> The logs are saying:
-> 
-> Oct 14 16:20:52 atom0 osd.0[10679]: 7f81deeac700 osd.0 511
-> heartbeat_check: no heartbeat from osd.12 since 2011-10-14
-> 16:00:07.636627 (cutoff 2011-10-14 16:20:32.025154)
-> Oct 14 16:20:52 atom0 osd.0[10679]: 7f81d2d93700 osd.0 511
-> heartbeat_check: no heartbeat from osd.12 since 2011-10-14
-> 16:00:07.636627 (cutoff 2011-10-14 16:20:32.108369)
-> Oct 14 16:20:53 atom0 osd.0[10679]: 7f81deeac700 osd.0 511
-> heartbeat_check: no heartbeat from osd.12 since 2011-10-14
-> 16:00:07.636627 (cutoff 2011-10-14 16:20:33.025462)
-> 
-> While osd.12 reports getting messages from osd.0
-> 
-> Oct 14 16:20:54 atom3 osd.12[8024]: 7fa3621bb700 --
-> [2a00:f10:113:1:225:90ff:fe33:49b0]:0/8024 <== osd.0
-> [2a00:f10:113:1:225:90ff:fe33:49fe]:6813/10678 1317 ====
-> osd_ping(heartbeat e511 as_of 355) v1 ==== 61+0+0 (2126910847 0 0)
-> 0x1e281c0 con 0x1f02c80
-> 
-> I see osd.0 sending pg_info messages:
-> 
-> Oct 14 16:20:58 atom0 osd.0[10679]: 7f81d769d700 --
-> [2a00:f10:113:1:225:90ff:fe33:49fe]:6812/10678 --> osd.12
-> [2a00:f10:113:1:225:90ff:fe33:49b0]:6801/8023 -- pg_info(1 pgs e512) v1
-> -- ?+0 0x3bf1e00
-> 
-> And osd.12 is also sending stuff back:
-> 
-> Oct 14 16:21:06 atom3 osd.12[8024]: 7fa3629bc700 --
-> [2a00:f10:113:1:225:90ff:fe33:49b0]:6801/8023 --> osd.0
-> [2a00:f10:113:1:225:90ff:fe33:49fe]:6812/10678 -- pg_info(1 pgs e518) v1
-> -- ?+0 0x6f3e540
-> 
-> I'm running the latest version, but I did do a complete powercycle of my
-> cluster this morning. It's after the powercycle these messages started
-> appearing.
-> 
-> Any ideas?
-
-Can you post full osd logs for a pair where there was some marking-down 
-occuring?  I'll take a look.
-
-Thanks!
-sage
-
-> 
+>
+> On Thu, 2011-10-13 at 22:39 +0200, Martin Mailand wrote:
+>> Hi,
+>> on one of my OSDs the ceph-osd task hung for more than 120 sec. The =
+OSD
+>> had almost no load, therefore it cannot be an overload problem. I th=
+ink
+>> it is a btrfs problem, could someone clarify it?
+>>
+>> This was in the dmesg.
+>>
+>> [29280.890040] INFO: task btrfs-cleaner:1708 blocked for more than 1=
+20
+>
+> Judging on the fact that I see btrfs-cleaner and btrfs-transaction
+> blocking I guess this is a btrfs bug/hangup.
+>
+> Which kernel are you using?
+>
 > Wido
-> 
-> On Wed, 2011-08-10 at 12:30 +0200, Wido den Hollander wrote:
-> > Hi,
-> > 
-> > I tried reproducing this today with the new heartbeat code, couldn't.
-> > 
-> > The new heartbeat code seems to work much better under load, I haven't
-> > seen any bouncing like I saw before.
-> > 
-> > Wido
-> > 
-> > On Fri, 2011-08-05 at 14:11 +0200, Wido den Hollander wrote:
-> > > Hi,
-> > > 
-> > > I'm seeing something weird which I don't want to report in a issue yet
-> > > in the tracker.
-> > > 
-> > > I suffered a pretty big crash which caused me to loose 15 of my 40 OSDs.
-> > > Some died because my WD Green 2TB disks failed, others since btrfs
-> > > didn't survive the hard reboot I had to give them.
-> > > 
-> > > When watching 'ceph -w' I noticed this:
-> > > 
-> > > 2011-08-05 13:32:03.209958    pg v504313: 8008 pgs: 1 inactive, 334
-> > > active+clean, 10 peering, 1 crashed+peering, 14 down+peering, 7 active
-> > > +clean+degraded, 7624 crashed+down+peering, 8 down+degraded+peering, 9
-> > > crashed+down+degraded+peering; 4417 GB data, 13121 GB used, 32504 GB /
-> > > 46575 GB avail; 8255/3391107 degraded (0.243%)
-> > > 2011-08-05 13:32:03.225712   mds e6033: 1/1/1 up {0=dga=up:replay(laggy
-> > > or crashed)}
-> > > 2011-08-05 13:32:03.225747   osd e9934: 40 osds: 25 up, 25 in
-> > > 2011-08-05 13:32:03.225874   log 2011-08-05 13:32:01.646596 mon0
-> > > [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 29796 : [INF] osd37
-> > > [2a00:f10:113:1:225:90ff:fe33:49a4]:6803/17881 failed (by osd7
-> > > [2a00:f10:113:1:225:90ff:fe32:cf64]:6806/2746)
-> > > 2011-08-05 13:32:03.225964   mon e1: 1 mons at
-> > > {dga=[2a00:f10:113:1:230:48ff:fed3:b086]:6789/0}
-> > > 2011-08-05 13:32:03.929650   log 2011-08-05 13:32:03.603681 mon0
-> > > [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 29797 : [INF] osd19
-> > > [2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 failed (by osd5
-> > > [2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506)
-> > > 
-> > > Here you see that osd5 is reporting that osd37 is down and osd7 is
-> > > reporting that osd19 is down.
-> > > 
-> > > These messages keep being repeated, over and over. My 'debug ms' is at
-> > > 1, so I took a look at the logs:
-> > > 
-> > > Aug  5 13:32:41 atom1 osd.5[2507]: 7f75227fc700 osd5 9963
-> > > heartbeat_check: no heartbeat from osd19 since 2011-08-04
-> > > 17:01:02.504942 (cutoff 2011-08-05 13:32:21.916364)
-> > > Aug  5 13:32:42 atom1 osd.5[2507]: 7f7531579700 osd5 9963
-> > > heartbeat_check: no heartbeat from osd19 since 2011-08-04
-> > > 17:01:02.504942 (cutoff 2011-08-05 13:32:22.381632)
-> > > Aug  5 13:32:43 atom1 osd.5[2507]: 7f7531579700 osd5 9965
-> > > heartbeat_check: no heartbeat from osd19 since 2011-08-04
-> > > 17:01:02.504942 (cutoff 2011-08-05 13:32:23.474198)
-> > > Aug  5 13:32:44 atom1 osd.5[2507]: 7f75227fc700 osd5 9965
-> > > heartbeat_check: no heartbeat from osd19 since 2011-08-04
-> > > 17:01:02.504942 (cutoff 2011-08-05 13:32:24.027161)
-> > > 
-> > > osd5 keeps claiming that osd19 is down, but when I check the logs I see
-> > > that osd19 is running and exchanging heartbeat messages with the other
-> > > OSDs in the cluster.
-> > > 
-> > > What seems odd to me is that there are no log messages about osd7
-> > > claiming that osd37 is down, although it keeps being repeated by 'ceph
-> > > -w'.
-> > > 
-> > > $ ceph osd injectargs 7 '--debug-ms 1'
-> > > $ ceph osd injectargs 37 '--debug-ms 1'
-> > > 
-> > > I made sure that was injected, but still, no log messages.
-> > > 
-> > > Going through the logs a bit further (after setting the logging to 20) I
-> > > saw osd.19 reporting:
-> > > 
-> > > Aug  5 13:48:23 atom4 osd.19[2741]: 7f634ca8e700 --
-> > > [2a00:f10:113:1:225:90ff:fe33:49cc]:6810/2740 >>
-> > > [2a00:f10:113:1:225:90ff:fe32:cf64]:6808/2506 pipe(0x7f64e4193ec0 sd=56
-> > > pgs=1530 cs=1 l=0).reader got envelope type=70 src osd5 front=61 data=0
-> > > off 0
-> > > 
-> > > It seems that it is communicating with osd5, but osd5 does not seem to
-> > > communicate with osd19?
-> > > 
-> > > The log also confirms that:
-> > > 
-> > > Aug  5 14:10:05 atom1 osd.5[2507]: 7f7531579700 --
-> > > [2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506 -->
-> > > [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 -- osd_failure(osd19
-> > > [2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 e10020 v10020) v1 -- ?+0
-> > > 0x6948000 con 0x1cd7710
-> > > Aug  5 14:10:05 atom1 osd.5[2507]: 7f7531579700 --
-> > > [2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506 submit_message
-> > > osd_failure(osd19 [2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 e10020
-> > > v10020) v1 remote [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0
-> > > Aug  5 14:10:05 atom1 osd.5[2507]: 7f75365a1700 --
-> > > [2a00:f10:113:1:225:90ff:fe32:cf64]:6800/2506 >>
-> > > [2a00:f10:113:1:230:48ff:fed3:b086]:6789/0 pipe(0x1cd74a0 sd=13 pgs=178
-> > > cs=1 l=1).writer encoding 17093 0x6948000 osd_failure(osd19
-> > > [2a00:f10:113:1:225:90ff:fe33:49cc]:6806/2740 e10020 v10020) v1
-> > > 
-> > > Now, to prevent (I tried...) my cluster from bouncing around I placed
-> > > this in the OSD section:
-> > > 
-> > >     osd min down reporters = 3
-> > >     osd min down reports = 5
-> > > 
-> > > Since only osd5 and osd7 are sending out these messages osd19 nor osd37
-> > > get marked down, but what is going on here?
-> > > 
-> > > I haven't restarted the OSDs yet.
-> > > 
-> > > I noticed that the OSD heartbeat process is being revised currently, but
-> > > I thought it might be helpful to report this.
-> > > 
-> > > Wido
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>
+>> seconds.
+>> [29280.905659] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+>> disables this message.
+>> [29280.922916] btrfs-cleaner =A0 D ffff8801153bdf80 =A0 =A0 0 =A0170=
+8 =A0 =A0 =A02
+>> 0x00000000
+>> [29280.922931] =A0ffff88011698bbd0 0000000000000046 ffff88011698bb90
+>> ffffffff81090d7d
+>> [29280.922960] =A0ffff880100000000 ffff88011698bfd8 ffff88011698a000
+>> ffff88011698bfd8
+>> [29280.922988] =A0ffffffff81a0d020 ffff8801153bdbc0 ffff88011698bbd0
+>> 0000000181090d7d
+>> [29280.923018] Call Trace:
+>> [29280.923043] =A0[<ffffffff81090d7d>] ? ktime_get_ts+0xad/0xe0
+>> [29280.923062] =A0[<ffffffff8110cf10>] ? __lock_page+0x70/0x70
+>> [29280.923082] =A0[<ffffffff815d93df>] schedule+0x3f/0x60
+>> [29280.923098] =A0[<ffffffff815d948c>] io_schedule+0x8c/0xd0
+>> [29280.923114] =A0[<ffffffff8110cf1e>] sleep_on_page+0xe/0x20
+>> [29280.923130] =A0[<ffffffff815d9c6f>] __wait_on_bit+0x5f/0x90
+>> [29280.923147] =A0[<ffffffff8110d168>] wait_on_page_bit+0x78/0x80
+>> [29280.923165] =A0[<ffffffff81086bd0>] ? autoremove_wake_function+0x=
+40/0x40
+>> [29280.923227] =A0[<ffffffffa0065ecb>] btrfs_defrag_file+0x4fb/0xc10=
+ [btrfs]
+>> [29280.923246] =A0[<ffffffff8117f6ac>] ? find_inode+0xac/0xb0
+>> [29280.923281] =A0[<ffffffffa003a2d0>] ?
+>> btrfs_clean_old_snapshots+0x160/0x160 [btrfs]
+>> [29280.923302] =A0[<ffffffff812e369b>] ? radix_tree_lookup+0xb/0x10
+>> [29280.923337] =A0[<ffffffffa0034f62>] ?
+>> btrfs_read_fs_root_no_name+0x1c2/0x2e0 [btrfs]
+>> [29280.923375] =A0[<ffffffffa004897e>] btrfs_run_defrag_inodes+0x15e=
+/0x210
+>> [btrfs]
+>> [29280.923410] =A0[<ffffffffa003278f>] cleaner_kthread+0x17f/0x1a0 [=
+btrfs]
+>> [29280.923443] =A0[<ffffffffa0032610>] ? btrfs_congested_fn+0xb0/0xb=
+0 [btrfs]
+>> [29280.923460] =A0[<ffffffff81086436>] kthread+0x96/0xa0
+>> [29280.923477] =A0[<ffffffff815e5934>] kernel_thread_helper+0x4/0x10
+>> [29280.923493] =A0[<ffffffff810863a0>] ? flush_kthread_worker+0xb0/0=
+xb0
+>> [29280.923510] =A0[<ffffffff815e5930>] ? gs_change+0x13/0x13
+>> [29280.923521] INFO: task btrfs-transacti:1709 blocked for more than=
+ 120
+>> seconds.
+>> [29280.939551] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+>> disables this message.
+>> [29280.956782] btrfs-transacti D ffff880115745f80 =A0 =A0 0 =A01709 =
+=A0 =A0 =A02
+>> 0x00000000
+>> [29280.956792] =A0ffff880115e6fd50 0000000000000046 ffff880115e6fd20
+>> ffff880111a5a3e0
+>> [29280.956800] =A0ffff880100000000 ffff880115e6ffd8 ffff880115e6e000
+>> ffff880115e6ffd8
+>> [29280.956809] =A0ffffffff81a0d020 ffff880115745bc0 0000000000000282
+>> 0000000116758450
+>> [29280.956817] Call Trace:
+>> [29280.956827] =A0[<ffffffff815d93df>] schedule+0x3f/0x60
+>> [29280.956855] =A0[<ffffffffa0037de5>] wait_for_commit.clone.16+0x55=
+/0x90
+>> [btrfs]
+>> [29280.956864] =A0[<ffffffff81086b90>] ? wake_up_bit+0x40/0x40
+>> [29280.956891] =A0[<ffffffffa0039726>]
+>> btrfs_commit_transaction+0x776/0x860 [btrfs]
+>> [29280.956900] =A0[<ffffffff8115653c>] ? kmem_cache_alloc+0x3c/0x130
+>> [29280.956907] =A0[<ffffffff815db6fe>] ? _raw_spin_lock+0xe/0x20
+>> [29280.956933] =A0[<ffffffffa003879d>] ?
+>> join_transaction.clone.24+0x5d/0x240 [btrfs]
+>> [29280.956941] =A0[<ffffffff81086b90>] ? wake_up_bit+0x40/0x40
+>> [29280.956966] =A0[<ffffffffa0033323>] transaction_kthread+0x273/0x2=
+90 [btrfs]
+>> [29280.956991] =A0[<ffffffffa00330b0>] ? check_leaf.clone.68+0x320/0=
+x320
+>> [btrfs]
+>> [29280.956999] =A0[<ffffffff81086436>] kthread+0x96/0xa0
+>> [29280.957007] =A0[<ffffffff815e5934>] kernel_thread_helper+0x4/0x10
+>> [29280.957015] =A0[<ffffffff810863a0>] ? flush_kthread_worker+0xb0/0=
+xb0
+>> [29280.957022] =A0[<ffffffff815e5930>] ? gs_change+0x13/0x13
+>> [29280.957030] INFO: task ceph-osd:1855 blocked for more than 120 se=
+conds.
+>> [29280.971860] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+>> disables this message.
+>> [29280.989164] ceph-osd =A0 =A0 =A0 =A0D ffff880114865f80 =A0 =A0 0 =
+=A01855 =A0 =A0 =A01
+>> 0x00000004
+>> [29280.989173] =A0ffff880115229c48 0000000000000082 ffff880115229bf8
+>> ffff880115230fb8
+>> [29280.989181] =A0ffff880115229c00 ffff880115229fd8 ffff880115228000
+>> ffff880115229fd8
+>> [29280.989189] =A0ffff8801151744d0 ffff880114865bc0 0000000000000282
+>> ffff880117864208
+>> [29280.989209] Call Trace:
+>> [29280.989226] =A0[<ffffffff815d93df>] schedule+0x3f/0x60
+>> [29280.989263] =A0[<ffffffffa003a017>]
+>> btrfs_commit_transaction_async+0x1f7/0x270 [btrfs]
+>> [29280.989296] =A0[<ffffffffa002375b>] ? block_rsv_add_bytes+0x5b/0x=
+80 [btrfs]
+>> [29280.989314] =A0[<ffffffff81086b90>] ? wake_up_bit+0x40/0x40
+>> [29280.989344] =A0[<ffffffffa00237ba>] ? block_rsv_migrate_bytes+0x3=
+a/0x50
+>> [btrfs]
+>> [29280.989380] =A0[<ffffffffa00655b1>] btrfs_mksubvol+0x301/0x3a0 [b=
+trfs]
+>> [29280.989416] =A0[<ffffffffa0065750>]
+>> btrfs_ioctl_snap_create_transid+0x100/0x160 [btrfs]
+>> [29280.989453] =A0[<ffffffffa00658d2>]
+>> btrfs_ioctl_snap_create_v2.clone.57+0xa2/0x100 [btrfs]
+>> [29280.989491] =A0[<ffffffffa0066d5d>] btrfs_ioctl+0x1fd/0xe20 [btrf=
+s]
+>> [29280.989507] =A0[<ffffffff811657c2>] ? do_sync_write+0xd2/0x110
+>> [29280.989525] =A0[<ffffffff811a053d>] ? fsnotify+0x1cd/0x2e0
+>> [29280.989541] =A0[<ffffffff811779f8>] do_vfs_ioctl+0x98/0x540
+>> [29280.989557] =A0[<ffffffff81177f31>] sys_ioctl+0x91/0xa0
+>> [29280.989575] =A0[<ffffffff815e37c2>] system_call_fastpath+0x16/0x1=
+b
+>>
+>>
+>> Best Regards,
+>> =A0 marti
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
