@@ -1,205 +1,76 @@
-From: Martin Mailand <martin@tuxadero.com>
+From: Christian Brunner <chb@muc.de>
 Subject: Re: OSD blocked for more than 120 seconds
-Date: Sat, 15 Oct 2011 22:01:19 +0200
-Message-ID: <4E99E68F.9090005@tuxadero.com>
-References: <4E974C87.2070204@tuxadero.com>	<1318585099.2999.10.camel@wido-laptop> <CAO47_-8wOFxzjy-n2W_q75D=h7z8spswgghJ9iy8p6eQu-2kFA@mail.gmail.com>
-Reply-To: martin@tuxadero.com
+Date: Mon, 17 Oct 2011 11:40:32 +0200
+Message-ID: <CAO47_-9qWX5cq-Qh9Kajt68ZCyzyhdsU5XTZ8MXSTj-s8+_XzA@mail.gmail.com>
+References: <4E974C87.2070204@tuxadero.com>
+	<1318585099.2999.10.camel@wido-laptop>
+	<CAO47_-8wOFxzjy-n2W_q75D=h7z8spswgghJ9iy8p6eQu-2kFA@mail.gmail.com>
+	<4E99E68F.9090005@tuxadero.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:40561 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751217Ab1JOUBf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 15 Oct 2011 16:01:35 -0400
-In-Reply-To: <CAO47_-8wOFxzjy-n2W_q75D=h7z8spswgghJ9iy8p6eQu-2kFA@mail.gmail.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:37255 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751225Ab1JQJkd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Oct 2011 05:40:33 -0400
+Received: by vcge1 with SMTP id e1so1824330vcg.19
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Oct 2011 02:40:32 -0700 (PDT)
+In-Reply-To: <4E99E68F.9090005@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chb@muc.de
+To: martin@tuxadero.com
 Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
 
-Hi Christian,
-I have a very similar experience, I also used josef's tree and btrfs 
-snaps = 0, the next problem I had than was excessive fragmentation, so I 
-  used this patch http://marc.info/?l=linux-btrfs&m=131495014823121&w=2, 
-and changed the btrfs option to (btrfs options = 
-noatime,nodatacow,autodefrag) that kept the fragmentation under control.
-But even with this setup after a few days the load on the osd is unbearable.
+2011/10/15 Martin Mailand <martin@tuxadero.com>:
+> Hi Christian,
+> I have a very similar experience, I also used josef's tree and btrfs =
+snaps =3D
+> 0, the next problem I had than was excessive fragmentation, so I =A0u=
+sed this
+> patch http://marc.info/?l=3Dlinux-btrfs&m=3D131495014823121&w=3D2, an=
+d changed the
+> btrfs option to (btrfs options =3D noatime,nodatacow,autodefrag) that=
+ kept the
+> fragmentation under control.
+> But even with this setup after a few days the load on the osd is unbe=
+arable.
 
-As far as I understood the doku if you disable the btrfs snapshot 
-functionality the writeahead journal is activated.
-http://ceph.newdream.net/wiki/Ceph.conf
-And I get this in the logs.
-mount: enabling WRITEAHEAD journal mode: 'filestore btrfs snap' mode is 
-not enabled
+How did you find out about our fragmentation issues? Was it just a
+performance problem?
 
-May I asked what kind of probs you did have with ext4? Because I am 
-looking into this direction as well.
+> As far as I understood the doku if you disable the btrfs snapshot
+> functionality the writeahead journal is activated.
+> http://ceph.newdream.net/wiki/Ceph.conf
+> And I get this in the logs.
+> mount: enabling WRITEAHEAD journal mode: 'filestore btrfs snap' mode =
+is not
+> enabled
+>
+> May I asked what kind of probs you did have with ext4? Because I am l=
+ooking
+> into this direction as well.
 
-Best Regards,
-  martin
+You can read about our ext4 problems here:
 
-Christian Brunner schrieb:
-> I'm not seeing the same problem, but I've experienced something similar:
-> 
-> As you might know, I had serious performance problems with btrfs some
-> month ago, after that, I switched to ext4 and had other problems
-> there. Last Saturday I decided to give josef's current btrfs git repo
-> a try in our ceph cluster.
-> 
-> Everything performed well at first, but after a day I noticed that
-> btrfs-cleaner was wasting more and more time in
-> btrfs_clean_old_snapshots. When we reached load 20 on the OSDs I
-> rebooted the nodes, everything was back to normal then. But again
-> after a a few hours the load started to rise.
-> 
-> My solution to fix this for the moment was, to turn of the btrfs
-> snapshot feature in ceph with:
-> 
-> filestore btrfs snaps = 0
-> 
-> Now I have good performance, low waitio values on the disks and I
-> haven't seen our btrfs warning until now as well.
-> 
-> I don't know what the implications are (does this enable writeahead
-> journaling in ceph?), but to me it's the only setup that does the job
-> at the moment.
-> 
-> Regards,
-> Christian
-> 
-> 
-> 
-> 2011/10/14 Wido den Hollander <wido@widodh.nl>:
->> Hi,
->>
->> On Thu, 2011-10-13 at 22:39 +0200, Martin Mailand wrote:
->>> Hi,
->>> on one of my OSDs the ceph-osd task hung for more than 120 sec. The OSD
->>> had almost no load, therefore it cannot be an overload problem. I think
->>> it is a btrfs problem, could someone clarify it?
->>>
->>> This was in the dmesg.
->>>
->>> [29280.890040] INFO: task btrfs-cleaner:1708 blocked for more than 120
->> Judging on the fact that I see btrfs-cleaner and btrfs-transaction
->> blocking I guess this is a btrfs bug/hangup.
->>
->> Which kernel are you using?
->>
->> Wido
->>
->>> seconds.
->>> [29280.905659] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
->>> disables this message.
->>> [29280.922916] btrfs-cleaner   D ffff8801153bdf80     0  1708      2
->>> 0x00000000
->>> [29280.922931]  ffff88011698bbd0 0000000000000046 ffff88011698bb90
->>> ffffffff81090d7d
->>> [29280.922960]  ffff880100000000 ffff88011698bfd8 ffff88011698a000
->>> ffff88011698bfd8
->>> [29280.922988]  ffffffff81a0d020 ffff8801153bdbc0 ffff88011698bbd0
->>> 0000000181090d7d
->>> [29280.923018] Call Trace:
->>> [29280.923043]  [<ffffffff81090d7d>] ? ktime_get_ts+0xad/0xe0
->>> [29280.923062]  [<ffffffff8110cf10>] ? __lock_page+0x70/0x70
->>> [29280.923082]  [<ffffffff815d93df>] schedule+0x3f/0x60
->>> [29280.923098]  [<ffffffff815d948c>] io_schedule+0x8c/0xd0
->>> [29280.923114]  [<ffffffff8110cf1e>] sleep_on_page+0xe/0x20
->>> [29280.923130]  [<ffffffff815d9c6f>] __wait_on_bit+0x5f/0x90
->>> [29280.923147]  [<ffffffff8110d168>] wait_on_page_bit+0x78/0x80
->>> [29280.923165]  [<ffffffff81086bd0>] ? autoremove_wake_function+0x40/0x40
->>> [29280.923227]  [<ffffffffa0065ecb>] btrfs_defrag_file+0x4fb/0xc10 [btrfs]
->>> [29280.923246]  [<ffffffff8117f6ac>] ? find_inode+0xac/0xb0
->>> [29280.923281]  [<ffffffffa003a2d0>] ?
->>> btrfs_clean_old_snapshots+0x160/0x160 [btrfs]
->>> [29280.923302]  [<ffffffff812e369b>] ? radix_tree_lookup+0xb/0x10
->>> [29280.923337]  [<ffffffffa0034f62>] ?
->>> btrfs_read_fs_root_no_name+0x1c2/0x2e0 [btrfs]
->>> [29280.923375]  [<ffffffffa004897e>] btrfs_run_defrag_inodes+0x15e/0x210
->>> [btrfs]
->>> [29280.923410]  [<ffffffffa003278f>] cleaner_kthread+0x17f/0x1a0 [btrfs]
->>> [29280.923443]  [<ffffffffa0032610>] ? btrfs_congested_fn+0xb0/0xb0 [btrfs]
->>> [29280.923460]  [<ffffffff81086436>] kthread+0x96/0xa0
->>> [29280.923477]  [<ffffffff815e5934>] kernel_thread_helper+0x4/0x10
->>> [29280.923493]  [<ffffffff810863a0>] ? flush_kthread_worker+0xb0/0xb0
->>> [29280.923510]  [<ffffffff815e5930>] ? gs_change+0x13/0x13
->>> [29280.923521] INFO: task btrfs-transacti:1709 blocked for more than 120
->>> seconds.
->>> [29280.939551] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
->>> disables this message.
->>> [29280.956782] btrfs-transacti D ffff880115745f80     0  1709      2
->>> 0x00000000
->>> [29280.956792]  ffff880115e6fd50 0000000000000046 ffff880115e6fd20
->>> ffff880111a5a3e0
->>> [29280.956800]  ffff880100000000 ffff880115e6ffd8 ffff880115e6e000
->>> ffff880115e6ffd8
->>> [29280.956809]  ffffffff81a0d020 ffff880115745bc0 0000000000000282
->>> 0000000116758450
->>> [29280.956817] Call Trace:
->>> [29280.956827]  [<ffffffff815d93df>] schedule+0x3f/0x60
->>> [29280.956855]  [<ffffffffa0037de5>] wait_for_commit.clone.16+0x55/0x90
->>> [btrfs]
->>> [29280.956864]  [<ffffffff81086b90>] ? wake_up_bit+0x40/0x40
->>> [29280.956891]  [<ffffffffa0039726>]
->>> btrfs_commit_transaction+0x776/0x860 [btrfs]
->>> [29280.956900]  [<ffffffff8115653c>] ? kmem_cache_alloc+0x3c/0x130
->>> [29280.956907]  [<ffffffff815db6fe>] ? _raw_spin_lock+0xe/0x20
->>> [29280.956933]  [<ffffffffa003879d>] ?
->>> join_transaction.clone.24+0x5d/0x240 [btrfs]
->>> [29280.956941]  [<ffffffff81086b90>] ? wake_up_bit+0x40/0x40
->>> [29280.956966]  [<ffffffffa0033323>] transaction_kthread+0x273/0x290 [btrfs]
->>> [29280.956991]  [<ffffffffa00330b0>] ? check_leaf.clone.68+0x320/0x320
->>> [btrfs]
->>> [29280.956999]  [<ffffffff81086436>] kthread+0x96/0xa0
->>> [29280.957007]  [<ffffffff815e5934>] kernel_thread_helper+0x4/0x10
->>> [29280.957015]  [<ffffffff810863a0>] ? flush_kthread_worker+0xb0/0xb0
->>> [29280.957022]  [<ffffffff815e5930>] ? gs_change+0x13/0x13
->>> [29280.957030] INFO: task ceph-osd:1855 blocked for more than 120 seconds.
->>> [29280.971860] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
->>> disables this message.
->>> [29280.989164] ceph-osd        D ffff880114865f80     0  1855      1
->>> 0x00000004
->>> [29280.989173]  ffff880115229c48 0000000000000082 ffff880115229bf8
->>> ffff880115230fb8
->>> [29280.989181]  ffff880115229c00 ffff880115229fd8 ffff880115228000
->>> ffff880115229fd8
->>> [29280.989189]  ffff8801151744d0 ffff880114865bc0 0000000000000282
->>> ffff880117864208
->>> [29280.989209] Call Trace:
->>> [29280.989226]  [<ffffffff815d93df>] schedule+0x3f/0x60
->>> [29280.989263]  [<ffffffffa003a017>]
->>> btrfs_commit_transaction_async+0x1f7/0x270 [btrfs]
->>> [29280.989296]  [<ffffffffa002375b>] ? block_rsv_add_bytes+0x5b/0x80 [btrfs]
->>> [29280.989314]  [<ffffffff81086b90>] ? wake_up_bit+0x40/0x40
->>> [29280.989344]  [<ffffffffa00237ba>] ? block_rsv_migrate_bytes+0x3a/0x50
->>> [btrfs]
->>> [29280.989380]  [<ffffffffa00655b1>] btrfs_mksubvol+0x301/0x3a0 [btrfs]
->>> [29280.989416]  [<ffffffffa0065750>]
->>> btrfs_ioctl_snap_create_transid+0x100/0x160 [btrfs]
->>> [29280.989453]  [<ffffffffa00658d2>]
->>> btrfs_ioctl_snap_create_v2.clone.57+0xa2/0x100 [btrfs]
->>> [29280.989491]  [<ffffffffa0066d5d>] btrfs_ioctl+0x1fd/0xe20 [btrfs]
->>> [29280.989507]  [<ffffffff811657c2>] ? do_sync_write+0xd2/0x110
->>> [29280.989525]  [<ffffffff811a053d>] ? fsnotify+0x1cd/0x2e0
->>> [29280.989541]  [<ffffffff811779f8>] do_vfs_ioctl+0x98/0x540
->>> [29280.989557]  [<ffffffff81177f31>] sys_ioctl+0x91/0xa0
->>> [29280.989575]  [<ffffffff815e37c2>] system_call_fastpath+0x16/0x1b
->>>
->>>
->>> Best Regards,
->>>   marti
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+http://marc.info/?l=3Dceph-devel&m=3D131201869703245&w=3D2
+
+Our bugreport with RedHat didn't make any progress for a long time,
+but last week RedHat made two sugestions:
+
+- If you configure ceph with 'filestore flusher =3D false', do you see
+any different behavior?
+- If you mount with -o noauto_da_alloc does it change anything?
+
+Since I have just migrated to btrfs, I've some problems to check this,
+but I'll try to do this as soon as I can get hold of some extra
+hardware.
+
+Regards,
+Christian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
