@@ -1,118 +1,97 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
-Subject: Re: Space not freed when removing files
-Date: Wed, 19 Oct 2011 23:56:21 +0800
-Message-ID: <CANExM-PaC3i3Ffrwt=s=HNVTa-O+6xfNvma1OX1o=59N9j9D9w@mail.gmail.com>
-References: <1300330817.383946.1319031737311.JavaMail.root@zmbs4.inria.fr>
-	<240272892.383967.1319031822299.JavaMail.root@zmbs4.inria.fr>
+From: Mandell Degerness <mandell@pistoncloud.com>
+Subject: rbd hangs
+Date: Wed, 19 Oct 2011 16:41:32 -0700
+Message-ID: <CA+jddaOT9TrgVNtdakpBfeH+Z0mShYot7eTYMiCn+W=VrT7Wew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:49901 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752285Ab1JSP4W convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Oct 2011 11:56:22 -0400
-Received: by ggnb1 with SMTP id b1so1800114ggn.19
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Oct 2011 08:56:22 -0700 (PDT)
-In-Reply-To: <240272892.383967.1319031822299.JavaMail.root@zmbs4.inria.fr>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:53981 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755392Ab1JSXld convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Oct 2011 19:41:33 -0400
+Received: by vcge1 with SMTP id e1so2016413vcg.19
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Oct 2011 16:41:33 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Cedric Morandin <cedric.morandin@inria.fr>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Cedric,
-
-How many clients do you have? Are the files accessed by multiple
-clients? If yes, I guess the problem is caused by Bug #630. You can
-confirm that by umounting ceph on all clients, and see if the space is
-released.
-
-The bug has been there for a long time and has been set to very low pri=
-ority. :(
-
-Henry
+I'm having an occasional bug where rbd is hanging.  This trace is in th=
+e logs:
 
 
-2011/10/19 Cedric Morandin <cedric.morandin@inria.fr>:
-> Hi everybody,
->
-> I'm using ceph with ceph-fuse client.
->
-> I have the same problem with version 0.36 or the new 0.37.
-> I use ext4 as filesystem for OSDs partition.
-> I have an application creating around 200 files for a total size arou=
-nd 40G :
->
-> du -sh /tmp/ceph/cmorandi/
-> 37G /tmp/ceph/cmorandi/
->
-> When I delete everything in this directory, the size with du is ok :
->
-> du -sh /tmp/ceph/cmorandi/
-> 512 /tmp/ceph/cmorandi/
->
-> But the df -h on the ceph mount show exactly the same amount of used =
-space.
-> 'ceph pg stat' give exactly the same number for data before and after=
- deletion:
->
-> [root@node91 ~]# ceph pg stat
-> 2011-10-19 14:59:56.263368 mon <- [pg,stat]
-> 2011-10-19 14:59:56.263910 mon.1 -> 'v6382: 792 pgs: 792 active+clean=
-; 228 GB data, 229 GB used, 90122 MB / 334 GB avail' (0)
-> [root@node91 ~]# ceph pg stat
-> 2011-10-19 15:01:56.157879 mon <- [pg,stat]
-> 2011-10-19 15:01:56.158889 mon.1 -> 'v6382: 792 pgs: 792 active+clean=
-; 228 GB data, 229 GB used, 90122 MB / 334 GB avail' (0)
->
-> If I stop, then start everything /etc/init.d/ceph -a [stop,start], th=
-e space is freed:
->
-> 2011-10-19 15:29:23.189312 pg v6407: 792 pgs: 792 active+clean; 210 G=
-B data, 211 GB used, 105 GB / 334 GB avail
->
-> Below the OSDs disk usage before and after restart :
->
-> root@node0:~ # for i in {92..95};do ssh node$i "df -h /dev/sda5";done
-> Filesystem Size Used Avail Use% Mounted on
-> /dev/sda5 84G 57G 23G 72% /data/osd.0
-> Filesystem Size Used Avail Use% Mounted on
-> /dev/sda5 84G 47G 33G 59% /data/osd.1
-> Filesystem Size Used Avail Use% Mounted on
-> /dev/sda5 84G 56G 24G 71% /data/osd.2
-> Filesystem Size Used Avail Use% Mounted on
-> /dev/sda5 84G 71G 8.8G 89% /data/osd.3
->
-> root@node0:~ # for i in {92..95};do ssh node$i "df -h /dev/sda5";done
-> Filesystem Size Used Avail Use% Mounted on
-> /dev/sda5 84G 52G 28G 66% /data/osd.0
-> Filesystem Size Used Avail Use% Mounted on
-> /dev/sda5 84G 43G 37G 55% /data/osd.1
-> Filesystem Size Used Avail Use% Mounted on
-> /dev/sda5 84G 52G 28G 65% /data/osd.2
-> Filesystem Size Used Avail Use% Mounted on
-> /dev/sda5 84G 66G 15G 83% /data/osd.3
->
-> I can reproduce it if needed.
-> I want to know if the problem might be related to a misconfiguration =
-or if it sounds more like a bug ?
->
-> Sincerely,
->
-> --
->
-> C=C3=A9dric Morandin - OASIS Research Team
-> INRIA Sophia Antipolis
-> 2004 route des lucioles - BP 93
-> 06902 Sophia-Antipolis (France)
-> Phone: +33 4 97 15 53 89
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
->
+Oct 19 16:33:04 node-172-16-0-130 kernel: ------------[ cut here ]-----=
+-------
+Oct 19 16:33:04 node-172-16-0-130 kernel: kernel BUG at fs/btrfs/inode.=
+c:3653!
+Oct 19 16:33:04 node-172-16-0-130 kernel: invalid opcode: 0000 [#1] SMP
+Oct 19 16:33:04 node-172-16-0-130 kernel: CPU 10
+Oct 19 16:33:04 node-172-16-0-130 kernel: Modules linked in: 8021q
+garp bridge stp llc ses enclosure sd_mod crc_t10dif pcspkr serio_raw
+i2c_i801 i2c_core iTCO_wdt iTCO_vendor_support mpt2sas ixgbe
+i7core_edac ioatdma edac_core scsi_transport_sas dca mdio raid_class
+Oct 19 16:33:04 node-172-16-0-130 kernel:
+Oct 19 16:33:04 node-172-16-0-130 kernel: Pid: 21278, comm: ceph-osd
+Tainted: G =A0 =A0 =A0 =A0W =A0 3.1.0-rc10-master-176 #1 Supermicro X8D=
+T6/X8DT6
+Oct 19 16:33:04 node-172-16-0-130 kernel: RIP:
+0010:[<ffffffff812caf81>] =A0[<ffffffff812caf81>]
+btrfs_evict_inode+0x151/0x21d
+Oct 19 16:33:04 node-172-16-0-130 kernel: RSP: 0018:ffff880424a8dd88
+EFLAGS: 00010293
+Oct 19 16:33:04 node-172-16-0-130 kernel: RAX: 00000000ffffffe4 RBX:
+ffff88042090bc00 RCX: 000000000000000a
+Oct 19 16:33:04 node-172-16-0-130 kernel: RDX: 0000000000000000 RSI:
+ffff88042090bc00 RDI: ffff880827eca6f8
+Oct 19 16:33:04 node-172-16-0-130 kernel: RBP: ffff880424a8ddb8 R08:
+0000000000000005 R09: 0000000000000001
+Oct 19 16:33:04 node-172-16-0-130 kernel: R10: 00000000556e9a99 R11:
+0000000000000001 R12: ffff88080c61d1d8
+Oct 19 16:33:04 node-172-16-0-130 kernel: R13: ffff880815480df8 R14:
+0000000000000000 R15: 00007f30eb04fde0
+Oct 19 16:33:04 node-172-16-0-130 kernel: FS: =A000007f30eb051700(0000)
+GS:ffff88083fc80000(0000) knlGS:0000000000000000
+Oct 19 16:33:04 node-172-16-0-130 kernel: CS: =A00010 DS: 0000 ES: 0000
+CR0: 0000000080050033
+Oct 19 16:33:04 node-172-16-0-130 kernel: CR2: 00007f9172e90d80 CR3:
+00000004255ac000 CR4: 00000000000006e0
+Oct 19 16:33:04 node-172-16-0-130 kernel: DR0: 0000000000000000 DR1:
+0000000000000000 DR2: 0000000000000000
+Oct 19 16:33:04 node-172-16-0-130 kernel: DR3: 0000000000000000 DR6:
+00000000ffff0ff0 DR7: 0000000000000400
+Oct 19 16:33:04 node-172-16-0-130 kernel: Process ceph-osd (pid:
+21278, threadinfo ffff880424a8c000, task ffff880411067560)
+Oct 19 16:33:04 node-172-16-0-130 kernel: Stack:
+Oct 19 16:33:04 node-172-16-0-130 kernel: ffff88080c61d1d8
+00000000556e9a99 ffff88080c61d1d8 ffff88080c61d2d8
+Oct 19 16:33:04 node-172-16-0-130 kernel: ffffffff81840310
+0000000000000000 ffff880424a8ddf8 ffffffff8115bcda
+Oct 19 16:33:04 node-172-16-0-130 kernel: ffff880424a8ddf8
+00000000556e9a99 0000000000000000 ffff88080c61d1d8
+Oct 19 16:33:04 node-172-16-0-130 kernel: Call Trace:
+Oct 19 16:33:04 node-172-16-0-130 kernel: [<ffffffff8115bcda>] evict+0x=
+a5/0x172
+Oct 19 16:33:04 node-172-16-0-130 kernel: [<ffffffff8115bf07>]
+iput_final+0x160/0x17f
+Oct 19 16:33:04 node-172-16-0-130 kernel: [<ffffffff8115bf75>] iput+0x4=
+f/0x6a
+Oct 19 16:33:04 node-172-16-0-130 kernel: [<ffffffff81151ccc>]
+do_unlinkat+0x133/0x1a1
+Oct 19 16:33:04 node-172-16-0-130 kernel: [<ffffffff81147de2>] ?
+sys_newstat+0x3d/0x5c
+Oct 19 16:33:04 node-172-16-0-130 kernel: [<ffffffff8115294d>]
+sys_unlink+0x29/0x3f
+Oct 19 16:33:04 node-172-16-0-130 kernel: [<ffffffff816324ab>]
+system_call_fastpath+0x16/0x1b
+Oct 19 16:33:04 node-172-16-0-130 kernel: Code: a0 03 00 00 31 c9 41
+b8 05 00 00 00 48 89 de 4c 89 ef 49 89 45 38 48 8b 93 a0 03 00 00 e8
+ad 4d fe ff 85 c0 74 18 83 f8 f5 74 02 <0f> 0b 48 89 de 4c 89 ef e8 fc
+58 ff ff 85 c0 74 ac 0f 0b 45 31
+Oct 19 16:33:04 node-172-16-0-130 kernel: RIP =A0[<ffffffff812caf81>]
+btrfs_evict_inode+0x151/0x21d
+Oct 19 16:33:04 node-172-16-0-130 kernel: RSP <ffff880424a8dd88>
+Oct 19 16:33:04 node-172-16-0-130 kernel: ---[ end trace 63e048c55b4b5c=
+4c ]---
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
