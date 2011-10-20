@@ -1,154 +1,102 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: 0.37 crash
-Date: Thu, 20 Oct 2011 20:49:14 +0200
-Message-ID: <4EA06D2A.6040101@tuxadero.com>
-References: <4EA040BC.30708@tuxadero.com> <4EA067A4.5090100@unilogicnetworks.net>
-Reply-To: martin@tuxadero.com
+From: "Daniel P. Berrange" <berrange@redhat.com>
+Subject: Re: passing secrets to block devices
+Date: Thu, 20 Oct 2011 20:24:17 +0100
+Message-ID: <20111020192417.GB16526@redhat.com>
+References: <4EA068D2.4030101@dreamhost.com>
+Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:43230 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751127Ab1JTStZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Oct 2011 14:49:25 -0400
-In-Reply-To: <4EA067A4.5090100@unilogicnetworks.net>
+Received: from mx1.redhat.com ([209.132.183.28]:10860 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751724Ab1JTTY1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 20 Oct 2011 15:24:27 -0400
+Content-Disposition: inline
+In-Reply-To: <4EA068D2.4030101@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Kleijkers <stefan@unilogicnetworks.net>
-Cc: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@dreamhost.com>
+Cc: libvir-list@redhat.com, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>
 
-Hi Stefan,
-in my case the osd process was just terminated, no IO wait. Could you 
-have a look in your dmesg, if there is any btrfs entry?
-Because the IO wait sounds like a btrfs problem.
+On Thu, Oct 20, 2011 at 11:30:42AM -0700, Josh Durgin wrote:
+> We're working on libvirt support for block device authentication [1]. To
+> authenticate, rbd needs a username and a secret. Normally, to
+> avoid putting the secret on the command line, you can store the secret
+> in a file and pass the file to qemu, but when this is automated,
+> there's no good way to know when the file can be removed. There are
+> a few ways to pass the secret to qemu that avoid this problem:
 
-Best Regards,
-  martin
+This is the same problem the iSCSI block driver currently faces,
+and also if the Curl/HTTP block driver wanted todo authentication
+we'd hit this. So it isn't unique to Ceph/RBD.
 
-Stefan Kleijkers schrieb:
-> Hello,
+> 1) pass an fd to an unlinked file containing the secret
 > 
-> I got the exact same problem. Upgraded from 0.36 to 0.37 and one of the 
-> two osds wouldn't start. In the log of the osd I also found the same 
-> error as below. The ceph-osd had status D (with ps, which is 
-> uninterruptable sleep) and I see a high IO wait with top. Also I noticed 
-> a lot of disk io on the disks.
+> This is the simplest method, but it sounds like qemu developers don't
+> like fd passing from libvirt. [2]
+
+That would be workable, but it means people trying to run the libvirt
+QEMU command line themselves, would have to remove some args.
+
+> 2) start guests paused, without disks requiring authentication, then
+>    use the drive_add monitor command to attach them
 > 
-> Stefan
+> This would make disks with authentication somewhat of a special case
+> in libvirt, but would be simple to implement, and require no qemu changes.
+
+This makes it very hard for people to take the libvirt QEMU command line
+and run themselves, since now an entire chunk of it is just missing.
+So I really don't want to go down this route.
+
+> 3) start guests paused, then send the secret via a new QMP/HMP
+>    command (block_set_conf <key> <value>?)
 > 
-> On 10/20/2011 05:39 PM, Martin Mailand wrote:
->> Hi,
->> today I tried the version 0.37 and it did not work very well, see below.
->> It was an update from 0.36.
->>
->> Best Regards,
->>  Martin
->>
->>
->> 2011-10-20 17:33:34.350502 7f0ada6f4760 ceph version 0.37 
->> (commit:a6f3bbb744a6faea95ae48317f0b838edb16a896), process ceph-osd, 
->> pid 21707
->> 2011-10-20 17:33:34.353543 7f0ada6f4760 filestore(/data/osd2) mount 
->> FIEMAP ioctl is NOT supported
->> 2011-10-20 17:33:34.353628 7f0ada6f4760 filestore(/data/osd2) mount 
->> detected btrfs
->> 2011-10-20 17:33:34.353656 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs CLONE_RANGE ioctl is supported
->> 2011-10-20 17:33:34.425059 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs SNAP_CREATE is supported
->> 2011-10-20 17:33:34.544564 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs SNAP_DESTROY is supported
->> 2011-10-20 17:33:34.544873 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs START_SYNC got 0 Success
->> 2011-10-20 17:33:34.544966 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs START_SYNC is supported (transid 149)
->> 2011-10-20 17:33:34.624965 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs WAIT_SYNC is supported
->> 2011-10-20 17:33:34.636719 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs SNAP_CREATE_V2 got 0 Success
->> 2011-10-20 17:33:34.636754 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs SNAP_CREATE_V2 is supported
->> 2011-10-20 17:33:34.644876 7f0ada6f4760 filestore(/data/osd2) mount 
->> found snaps <>
->> 2011-10-20 17:33:34.644983 7f0ada6f4760 filestore(/data/osd2) mount: 
->> enabling WRITEAHEAD journal mode: 'filestore btrfs snap' mode is not 
->> enabled
->> 2011-10-20 17:33:34.678324 7f0ada6f4760 journal  kernel version is 3.1.0
->> 2011-10-20 17:33:34.678737 7f0ada6f4760 journal _open /dev/sda7 fd 14: 
->> 476500201472 bytes, block size 4096 bytes, directio = 1
->> 2011-10-20 17:33:34.688215 7f0ada6f4760 journal read_entry 39366656 : 
->> seq 4653 710 bytes
->> 2011-10-20 17:33:34.688420 7f0ada6f4760 journal read_entry 39374848 : 
->> seq 4654 33 bytes
->> 2011-10-20 17:33:34.695110 7f0ada6f4760 journal  kernel version is 3.1.0
->> 2011-10-20 17:33:34.695496 7f0ada6f4760 journal _open /dev/sda7 fd 14: 
->> 476500201472 bytes, block size 4096 bytes, directio = 1
->> 2011-10-20 17:33:34.696359 7f0ada6f4760 FileStore is up to date.
->> 2011-10-20 17:33:34.696683 7f0ada6f4760 journal close /dev/sda7
->> 2011-10-20 17:33:34.697970 7f0ada6f4760 filestore(/data/osd2) mount 
->> FIEMAP ioctl is NOT supported
->> 2011-10-20 17:33:34.698013 7f0ada6f4760 filestore(/data/osd2) mount 
->> detected btrfs
->> 2011-10-20 17:33:34.698031 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs CLONE_RANGE ioctl is supported
->> 2011-10-20 17:33:34.774980 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs SNAP_CREATE is supported
->> 2011-10-20 17:33:34.904538 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs SNAP_DESTROY is supported
->> 2011-10-20 17:33:34.904945 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs START_SYNC got 0 Success
->> 2011-10-20 17:33:34.904995 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs START_SYNC is supported (transid 152)
->> 2011-10-20 17:33:34.991585 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs WAIT_SYNC is supported
->> 2011-10-20 17:33:34.996636 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs SNAP_CREATE_V2 got 0 Success
->> 2011-10-20 17:33:34.996664 7f0ada6f4760 filestore(/data/osd2) mount 
->> btrfs SNAP_CREATE_V2 is supported
->> 2011-10-20 17:33:35.004813 7f0ada6f4760 filestore(/data/osd2) mount 
->> found snaps <>
->> 2011-10-20 17:33:35.004902 7f0ada6f4760 filestore(/data/osd2) mount: 
->> enabling WRITEAHEAD journal mode: 'filestore btrfs snap' mode is not 
->> enabled
->> 2011-10-20 17:33:35.023071 7f0ada6f4760 journal  kernel version is 3.1.0
->> 2011-10-20 17:33:35.023353 7f0ada6f4760 journal _open /dev/sda7 fd 14: 
->> 476500201472 bytes, block size 4096 bytes, directio = 1
->> 2011-10-20 17:33:35.029846 7f0ada6f4760 journal read_entry 39366656 : 
->> seq 4653 710 bytes
->> 2011-10-20 17:33:35.030077 7f0ada6f4760 journal read_entry 39374848 : 
->> seq 4654 33 bytes
->> 2011-10-20 17:33:35.036728 7f0ada6f4760 journal  kernel version is 3.1.0
->> 2011-10-20 17:33:35.037142 7f0ada6f4760 journal _open /dev/sda7 fd 14: 
->> 476500201472 bytes, block size 4096 bytes, directio = 1
->> *** Caught signal (Aborted) **
->>  in thread 0x7f0ace7f9700
->>  ceph version 0.37 (commit:a6f3bbb744a6faea95ae48317f0b838edb16a896)
->>  1: /usr/bin/ceph-osd() [0x5bd012]
->>  2: (()+0xfc60) [0x7f0ada2d4c60]
->>  3: (gsignal()+0x35) [0x7f0ad8a5ad05]
->>  4: (abort()+0x186) [0x7f0ad8a5eab6]
->>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f0ad93116dd]
->>  6: (()+0xb9926) [0x7f0ad930f926]
->>  7: (()+0xb9953) [0x7f0ad930f953]
->>  8: (()+0xb9a5e) [0x7f0ad930fa5e]
->>  9: (ceph::buffer::list::iterator::copy(unsigned int, char*)+0x129) 
->> [0x5a7e99]
->>  10: (OSDMap::decode(ceph::buffer::list&)+0x81) [0x58f9f1]
->>  11: (OSD::get_map(unsigned int)+0x242) [0x53f6d2]
->>  12: (OSD::handle_osd_map(MOSDMap*)+0x1f82) [0x56ae72]
->>  13: (OSD::_dispatch(Message*)+0x36b) [0x56d11b]
->>  14: (OSD::ms_dispatch(Message*)+0xf6) [0x56e1c6]
->>  15: (SimpleMessenger::dispatch_entry()+0x88b) [0x5fff2b]
->>  16: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x4bd55c]
->>  17: (()+0x6d8c) [0x7f0ada2cbd8c]
->>  18: (clone()+0x6d) [0x7f0ad8b0d04d]
->> -- 
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> This is a larger change, but it would be more generally useful for
+> changing configuration at runtime.
+
+I don't think you need to try to solve the problem of a general
+purpose 'set configuration' command here, not least because that
+will likely get you drawn into a huge discussion about qemu device
+configuration in general which will likely never end.
+
+We already have a 'block_passwd' command for setting qcow2 decryption
+keys. These aren't decryption passwords, rather they are authentication
+passwords, so they're a little different, but I think this command could
+still likely be leveraged for Ceph/iSCSI/etc auth passwords.
+
+Ideally, we want to cope with having both a decryption & auth password
+for the same block device. eg, an encrypted qcow2 image accessed, over
+HTTP would require both. In these case there are 2 block drivers involved,
+the 'qcow2' driver and the 'http' driver. So perhaps an extra parameter
+for the 'block_password' command to identify which driver the password
+is intended for is the right approach. If omitted,we'd default to 'qcow2'
+for back compat.
+
+So eg, for a encrypted qcow2 disk accessed over http
+
+   -drive  file=http://fred@host/my.iso,format=qcow2,id=mydrive
+
+the app would invoke
+
+  { "execute": "block_password", "argument": { "device": "mydrive",
+                                               "driver", "qcow2",
+                                               "password", "12345" } }
+  { "execute": "block_password", "argument": { "device": "mydrive",
+                                               "driver", "curl",
+                                               "password", "7890" } }
+
+For Ceph/RBD with a plain file, you'd just do
+
+
+  { "execute": "block_password", "argument": { "device": "mydrive",
+                                               "driver", "rbd",
+                                               "password", "7890" } }
+
+
+Regards,
+Daniel
+-- 
+|: http://berrange.com      -o-    http://www.flickr.com/photos/dberrange/ :|
+|: http://libvirt.org              -o-             http://virt-manager.org :|
+|: http://autobuild.org       -o-         http://search.cpan.org/~danberr/ :|
+|: http://entangle-photo.org       -o-       http://live.gnome.org/gtk-vnc :|
