@@ -1,46 +1,150 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: passing secrets to block devices
-Date: Thu, 20 Oct 2011 11:30:42 -0700
-Message-ID: <4EA068D2.4030101@dreamhost.com>
+From: Stefan Kleijkers <stefan@unilogicnetworks.net>
+Subject: Re: 0.37 crash
+Date: Thu, 20 Oct 2011 20:25:40 +0200
+Message-ID: <4EA067A4.5090100@unilogicnetworks.net>
+References: <4EA040BC.30708@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:40544 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751042Ab1JTSan (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Oct 2011 14:30:43 -0400
+Received: from smtpq1.gn.mail.iss.as9143.net ([212.54.34.164]:33185 "EHLO
+	smtpq1.gn.mail.iss.as9143.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751354Ab1JTSm3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 20 Oct 2011 14:42:29 -0400
+Received: from [212.54.34.145] (helo=smtp14.gn.mail.iss.as9143.net)
+	by smtpq1.gn.mail.iss.as9143.net with esmtp (Exim 4.71)
+	(envelope-from <stefan@unilogicnetworks.net>)
+	id 1RGxJI-00056m-68
+	for ceph-devel@vger.kernel.org; Thu, 20 Oct 2011 20:25:44 +0200
+Received: from 541a3b56.cm-5-3a.dynamic.ziggo.nl ([84.26.59.86] helo=[192.168.178.15])
+	by smtp14.gn.mail.iss.as9143.net with esmtp (Exim 4.71)
+	(envelope-from <stefan@unilogicnetworks.net>)
+	id 1RGxJF-0005u4-5R
+	for ceph-devel@vger.kernel.org; Thu, 20 Oct 2011 20:25:41 +0200
+In-Reply-To: <4EA040BC.30708@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: libvir-list@redhat.com, qemu-devel@nongnu.org
-Cc: ceph-devel@vger.kernel.org, "Daniel P. Berrange" <berrange@redhat.com>, Kevin Wolf <kwolf@redhat.com>
+To: ceph-devel@vger.kernel.org
 
-We're working on libvirt support for block device authentication [1]. To
-authenticate, rbd needs a username and a secret. Normally, to
-avoid putting the secret on the command line, you can store the secret
-in a file and pass the file to qemu, but when this is automated,
-there's no good way to know when the file can be removed. There are
-a few ways to pass the secret to qemu that avoid this problem:
+Hello,
 
-1) pass an fd to an unlinked file containing the secret
+I got the exact same problem. Upgraded from 0.36 to 0.37 and one of the 
+two osds wouldn't start. In the log of the osd I also found the same 
+error as below. The ceph-osd had status D (with ps, which is 
+uninterruptable sleep) and I see a high IO wait with top. Also I noticed 
+a lot of disk io on the disks.
 
-This is the simplest method, but it sounds like qemu developers don't
-like fd passing from libvirt. [2]
+Stefan
 
-2) start guests paused, without disks requiring authentication, then
-    use the drive_add monitor command to attach them
-
-This would make disks with authentication somewhat of a special case
-in libvirt, but would be simple to implement, and require no qemu changes.
-
-3) start guests paused, then send the secret via a new QMP/HMP
-    command (block_set_conf <key> <value>?)
-
-This is a larger change, but it would be more generally useful for
-changing configuration at runtime.
-
-What do you think is the best approach?
-
-[1] http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/4129
-[2] http://lists.gnu.org/archive/html/qemu-devel/2011-08/msg02494.html
+On 10/20/2011 05:39 PM, Martin Mailand wrote:
+> Hi,
+> today I tried the version 0.37 and it did not work very well, see below.
+> It was an update from 0.36.
+>
+> Best Regards,
+>  Martin
+>
+>
+> 2011-10-20 17:33:34.350502 7f0ada6f4760 ceph version 0.37 
+> (commit:a6f3bbb744a6faea95ae48317f0b838edb16a896), process ceph-osd, 
+> pid 21707
+> 2011-10-20 17:33:34.353543 7f0ada6f4760 filestore(/data/osd2) mount 
+> FIEMAP ioctl is NOT supported
+> 2011-10-20 17:33:34.353628 7f0ada6f4760 filestore(/data/osd2) mount 
+> detected btrfs
+> 2011-10-20 17:33:34.353656 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs CLONE_RANGE ioctl is supported
+> 2011-10-20 17:33:34.425059 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs SNAP_CREATE is supported
+> 2011-10-20 17:33:34.544564 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs SNAP_DESTROY is supported
+> 2011-10-20 17:33:34.544873 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs START_SYNC got 0 Success
+> 2011-10-20 17:33:34.544966 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs START_SYNC is supported (transid 149)
+> 2011-10-20 17:33:34.624965 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs WAIT_SYNC is supported
+> 2011-10-20 17:33:34.636719 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs SNAP_CREATE_V2 got 0 Success
+> 2011-10-20 17:33:34.636754 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs SNAP_CREATE_V2 is supported
+> 2011-10-20 17:33:34.644876 7f0ada6f4760 filestore(/data/osd2) mount 
+> found snaps <>
+> 2011-10-20 17:33:34.644983 7f0ada6f4760 filestore(/data/osd2) mount: 
+> enabling WRITEAHEAD journal mode: 'filestore btrfs snap' mode is not 
+> enabled
+> 2011-10-20 17:33:34.678324 7f0ada6f4760 journal  kernel version is 3.1.0
+> 2011-10-20 17:33:34.678737 7f0ada6f4760 journal _open /dev/sda7 fd 14: 
+> 476500201472 bytes, block size 4096 bytes, directio = 1
+> 2011-10-20 17:33:34.688215 7f0ada6f4760 journal read_entry 39366656 : 
+> seq 4653 710 bytes
+> 2011-10-20 17:33:34.688420 7f0ada6f4760 journal read_entry 39374848 : 
+> seq 4654 33 bytes
+> 2011-10-20 17:33:34.695110 7f0ada6f4760 journal  kernel version is 3.1.0
+> 2011-10-20 17:33:34.695496 7f0ada6f4760 journal _open /dev/sda7 fd 14: 
+> 476500201472 bytes, block size 4096 bytes, directio = 1
+> 2011-10-20 17:33:34.696359 7f0ada6f4760 FileStore is up to date.
+> 2011-10-20 17:33:34.696683 7f0ada6f4760 journal close /dev/sda7
+> 2011-10-20 17:33:34.697970 7f0ada6f4760 filestore(/data/osd2) mount 
+> FIEMAP ioctl is NOT supported
+> 2011-10-20 17:33:34.698013 7f0ada6f4760 filestore(/data/osd2) mount 
+> detected btrfs
+> 2011-10-20 17:33:34.698031 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs CLONE_RANGE ioctl is supported
+> 2011-10-20 17:33:34.774980 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs SNAP_CREATE is supported
+> 2011-10-20 17:33:34.904538 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs SNAP_DESTROY is supported
+> 2011-10-20 17:33:34.904945 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs START_SYNC got 0 Success
+> 2011-10-20 17:33:34.904995 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs START_SYNC is supported (transid 152)
+> 2011-10-20 17:33:34.991585 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs WAIT_SYNC is supported
+> 2011-10-20 17:33:34.996636 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs SNAP_CREATE_V2 got 0 Success
+> 2011-10-20 17:33:34.996664 7f0ada6f4760 filestore(/data/osd2) mount 
+> btrfs SNAP_CREATE_V2 is supported
+> 2011-10-20 17:33:35.004813 7f0ada6f4760 filestore(/data/osd2) mount 
+> found snaps <>
+> 2011-10-20 17:33:35.004902 7f0ada6f4760 filestore(/data/osd2) mount: 
+> enabling WRITEAHEAD journal mode: 'filestore btrfs snap' mode is not 
+> enabled
+> 2011-10-20 17:33:35.023071 7f0ada6f4760 journal  kernel version is 3.1.0
+> 2011-10-20 17:33:35.023353 7f0ada6f4760 journal _open /dev/sda7 fd 14: 
+> 476500201472 bytes, block size 4096 bytes, directio = 1
+> 2011-10-20 17:33:35.029846 7f0ada6f4760 journal read_entry 39366656 : 
+> seq 4653 710 bytes
+> 2011-10-20 17:33:35.030077 7f0ada6f4760 journal read_entry 39374848 : 
+> seq 4654 33 bytes
+> 2011-10-20 17:33:35.036728 7f0ada6f4760 journal  kernel version is 3.1.0
+> 2011-10-20 17:33:35.037142 7f0ada6f4760 journal _open /dev/sda7 fd 14: 
+> 476500201472 bytes, block size 4096 bytes, directio = 1
+> *** Caught signal (Aborted) **
+>  in thread 0x7f0ace7f9700
+>  ceph version 0.37 (commit:a6f3bbb744a6faea95ae48317f0b838edb16a896)
+>  1: /usr/bin/ceph-osd() [0x5bd012]
+>  2: (()+0xfc60) [0x7f0ada2d4c60]
+>  3: (gsignal()+0x35) [0x7f0ad8a5ad05]
+>  4: (abort()+0x186) [0x7f0ad8a5eab6]
+>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f0ad93116dd]
+>  6: (()+0xb9926) [0x7f0ad930f926]
+>  7: (()+0xb9953) [0x7f0ad930f953]
+>  8: (()+0xb9a5e) [0x7f0ad930fa5e]
+>  9: (ceph::buffer::list::iterator::copy(unsigned int, char*)+0x129) 
+> [0x5a7e99]
+>  10: (OSDMap::decode(ceph::buffer::list&)+0x81) [0x58f9f1]
+>  11: (OSD::get_map(unsigned int)+0x242) [0x53f6d2]
+>  12: (OSD::handle_osd_map(MOSDMap*)+0x1f82) [0x56ae72]
+>  13: (OSD::_dispatch(Message*)+0x36b) [0x56d11b]
+>  14: (OSD::ms_dispatch(Message*)+0xf6) [0x56e1c6]
+>  15: (SimpleMessenger::dispatch_entry()+0x88b) [0x5fff2b]
+>  16: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x4bd55c]
+>  17: (()+0x6d8c) [0x7f0ada2cbd8c]
+>  18: (clone()+0x6d) [0x7f0ad8b0d04d]
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
