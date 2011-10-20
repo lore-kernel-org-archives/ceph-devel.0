@@ -1,102 +1,103 @@
-From: "Daniel P. Berrange" <berrange@redhat.com>
-Subject: Re: passing secrets to block devices
-Date: Thu, 20 Oct 2011 20:24:17 +0100
-Message-ID: <20111020192417.GB16526@redhat.com>
-References: <4EA068D2.4030101@dreamhost.com>
-Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Inode numbers on 32 Bit Linux
+Date: Thu, 20 Oct 2011 13:01:32 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1110201301240.13450@cobra.newdream.net>
+References: <201110200828.26887.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-437261150-1319140892=:13450"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:10860 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751724Ab1JTTY1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 20 Oct 2011 15:24:27 -0400
-Content-Disposition: inline
-In-Reply-To: <4EA068D2.4030101@dreamhost.com>
+Received: from cobra.newdream.net ([66.33.216.30]:43682 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750695Ab1JTUBd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Oct 2011 16:01:33 -0400
+In-Reply-To: <201110200828.26887.a.ott@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: libvir-list@redhat.com, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, Kevin Wolf <kwolf@redhat.com>
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Oct 20, 2011 at 11:30:42AM -0700, Josh Durgin wrote:
-> We're working on libvirt support for block device authentication [1]. To
-> authenticate, rbd needs a username and a secret. Normally, to
-> avoid putting the secret on the command line, you can store the secret
-> in a file and pass the file to qemu, but when this is automated,
-> there's no good way to know when the file can be removed. There are
-> a few ways to pass the secret to qemu that avoid this problem:
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-This is the same problem the iSCSI block driver currently faces,
-and also if the Curl/HTTP block driver wanted todo authentication
-we'd hit this. So it isn't unique to Ceph/RBD.
+--557981400-437261150-1319140892=:13450
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-> 1) pass an fd to an unlinked file containing the secret
-> 
-> This is the simplest method, but it sounds like qemu developers don't
-> like fd passing from libvirt. [2]
+Queueing this for 3.2-rc1, thanks!
 
-That would be workable, but it means people trying to run the libvirt
-QEMU command line themselves, would have to remove some args.
-
-> 2) start guests paused, without disks requiring authentication, then
->    use the drive_add monitor command to attach them
-> 
-> This would make disks with authentication somewhat of a special case
-> in libvirt, but would be simple to implement, and require no qemu changes.
-
-This makes it very hard for people to take the libvirt QEMU command line
-and run themselves, since now an entire chunk of it is just missing.
-So I really don't want to go down this route.
-
-> 3) start guests paused, then send the secret via a new QMP/HMP
->    command (block_set_conf <key> <value>?)
-> 
-> This is a larger change, but it would be more generally useful for
-> changing configuration at runtime.
-
-I don't think you need to try to solve the problem of a general
-purpose 'set configuration' command here, not least because that
-will likely get you drawn into a huge discussion about qemu device
-configuration in general which will likely never end.
-
-We already have a 'block_passwd' command for setting qcow2 decryption
-keys. These aren't decryption passwords, rather they are authentication
-passwords, so they're a little different, but I think this command could
-still likely be leveraged for Ceph/iSCSI/etc auth passwords.
-
-Ideally, we want to cope with having both a decryption & auth password
-for the same block device. eg, an encrypted qcow2 image accessed, over
-HTTP would require both. In these case there are 2 block drivers involved,
-the 'qcow2' driver and the 'http' driver. So perhaps an extra parameter
-for the 'block_password' command to identify which driver the password
-is intended for is the right approach. If omitted,we'd default to 'qcow2'
-for back compat.
-
-So eg, for a encrypted qcow2 disk accessed over http
-
-   -drive  file=http://fred@host/my.iso,format=qcow2,id=mydrive
-
-the app would invoke
-
-  { "execute": "block_password", "argument": { "device": "mydrive",
-                                               "driver", "qcow2",
-                                               "password", "12345" } }
-  { "execute": "block_password", "argument": { "device": "mydrive",
-                                               "driver", "curl",
-                                               "password", "7890" } }
-
-For Ceph/RBD with a plain file, you'd just do
+sage
 
 
-  { "execute": "block_password", "argument": { "device": "mydrive",
-                                               "driver", "rbd",
-                                               "password", "7890" } }
+On Thu, 20 Oct 2011, Amon Ott wrote:
 
-
-Regards,
-Daniel
--- 
-|: http://berrange.com      -o-    http://www.flickr.com/photos/dberrange/ :|
-|: http://libvirt.org              -o-             http://virt-manager.org :|
-|: http://autobuild.org       -o-         http://search.cpan.org/~danberr/ :|
-|: http://entangle-photo.org       -o-       http://live.gnome.org/gtk-vnc :|
+> Hi all,
+>=20
+> we need to run 32 Bit Linux kernels, but file identification of our RSBAC=
+=20
+> access control system relies on unique inode numbers. Plain Ceph uses ino=
+de=20
+> number 1 for all filesystem objects, leading to id problems. To check=20
+> yourself, make a "find" and see that it complains about file system loops=
+=20
+> because of this. ls -i shows number 1 for all items.
+>=20
+> I changed the inode number generation as follows to get unique numbers an=
+d now=20
+> everything works fine without collisions.
+>=20
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 35dc965..bb73b49 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -344,9 +344,10 @@ static inline struct ceph_vino ceph_vino(struct inod=
+e=20
+> *inode)
+>   * x86_64+ino32  64                     32
+>   * x86_64        64                     64
+>   */
+> -static inline u32 ceph_ino_to_ino32(ino_t ino)
+> +static inline u32 ceph_ino_to_ino32(__u64 vino)
+>  {
+> -       ino ^=3D ino >> (sizeof(ino) * 8 - 32);
+> +       u32 ino =3D vino & 0xffffffff;
+> +       ino ^=3D vino >> 32;
+>         if (!ino)
+>                 ino =3D 1;
+>         return ino;
+> @@ -359,9 +360,10 @@ static inline ino_t ceph_vino_to_ino(struct ceph_vin=
+o=20
+> vino)
+>  {
+>         ino_t ino =3D (ino_t)vino.ino;  /* ^ (vino.snap << 20); */
+>  #if BITS_PER_LONG =3D=3D 32
+> -       ino =3D ceph_ino_to_ino32(ino);
+> +       return ceph_ino_to_ino32(vino.ino);
+> +#else
+> +       return (ino_t)vino.ino;
+>  #endif
+> -       return ino;
+>  }
+>=20
+>=20
+>=20
+> Amon Ott
+> --=20
+> Dr. Amon Ott
+> m-privacy GmbH           Tel: +49 30 24342334
+> Am K=F6llnischen Park 1    Fax: +49 30 24342336
+> 10179 Berlin             http://www.m-privacy.de
+>=20
+> Amtsgericht Charlottenburg, HRB 84946
+>=20
+> Gesch=E4ftsf=FChrer:
+>  Dipl.-Kfm. Holger Maczkowsky,
+>  Roman Maczkowsky
+>=20
+> GnuPG-Key-ID: 0x2DD3A649
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-437261150-1319140892=:13450--
