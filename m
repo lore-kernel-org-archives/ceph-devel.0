@@ -1,45 +1,58 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: rbd snap rm error
-Date: Fri, 21 Oct 2011 08:45:28 -0700
-Message-ID: <3c016dac6373e7287ac2b068d9dbbf34@hq.newdream.net>
-References: <CAO47_-9S_72Q3=EZmh9qLgGj_Rt7DkP0VM4onkyrtiMA4zxHxQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: bug tracker status
+Date: Fri, 21 Oct 2011 11:16:09 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1110211109040.20281@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from hapkido.dreamhost.com ([66.33.216.122]:57011 "EHLO
-	hapkido.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751847Ab1JUPqR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Oct 2011 11:46:17 -0400
-Received: from pochacco.sd.dreamhost.com (pochacco.sd.dreamhost.com [66.33.195.34])
-	by hapkido.dreamhost.com (Postfix) with ESMTP id 636D41F576A
-	for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2011 08:46:16 -0700 (PDT)
-In-Reply-To: <CAO47_-9S_72Q3=EZmh9qLgGj_Rt7DkP0VM4onkyrtiMA4zxHxQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:55328 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753372Ab1JUSQK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Oct 2011 14:16:10 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 114B5BC8D2
+	for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2011 11:16:10 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id DCAFDBC8D2
+	for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2011 11:16:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chb@muc.de
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, 21 Oct 2011 11:41:55 +0200, Christian Brunner <chb@muc.de>
-wrote:
-> When I want to delete a snapshot, everything is working, but there is
-> a strange error message:
-> 
-> # rbd create --size=100 image
-> # rbd snap create --snap=image-snap1 image
-> # rbd snap ls image
-> 8       image-snap1     104857600
-> # rbd snap rm --snap=image-snap1 image
-> 2011-10-21 11:35:58.506393 7f4975f66720 librbd: could not set snap to
-> : error 2: No such file or directory
-> 2011-10-21 11:35:58.506554 7f4975f66720 librbd: Error re-reading rbd
-> header: error 2: No such file or directory
-> # rbd snap ls image
-> #
-> 
-> The snapshot hat been removed anyway. So this is not a real problem,
-> it's just irritating.
+I added a few new statuses to the tracker:
 
-This is more fallout from some argument parsing changes (like #1628).
-I'll be fixing this today.
+ - Need More Info (e.g. logs, core, whatever)
+ - Verified
+
+The problem I was having was keeping track of which bugs needed more info, 
+which ones someone was actively trying to reproduce, and then which ones 
+had been reproduced and had logs. 
+
+Once it is in Need More Info, if it's assigned to a person that means they 
+are actively working on/responsible for getting that info (e.g., 
+reproducing with logs or core).  It can then move back to Verified (and 
+clear the assignee).  Then someone can pick it up and continue on to In 
+Progress etc.
+
+That leaves us with open states
+
+ New
+ Verified
+ Need More Info
+ In Progress
+ Feedback
+ Testing
+
+and closed states
+
+ Resolved
+ Closed
+ Won't Fix
+ Rejected
+ Can't reproduce
+ Duplicate
+
+There is still a Feedback state which has no clear meaning for me...
+
+sage
+
