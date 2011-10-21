@@ -1,134 +1,38 @@
-From: "Daniel P. Berrange" <berrange@redhat.com>
-Subject: Re: passing secrets to block devices
-Date: Fri, 21 Oct 2011 09:40:07 +0100
-Message-ID: <20111021084007.GH17424@redhat.com>
-References: <4EA068D2.4030101@dreamhost.com>
- <20111020192417.GB16526@redhat.com>
- <4EA0971F.2010601@dreamhost.com>
- <4EA12DAF.1060402@redhat.com>
-Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
+From: Christian Brunner <chb@muc.de>
+Subject: rbd snap rm error
+Date: Fri, 21 Oct 2011 11:41:55 +0200
+Message-ID: <CAO47_-9S_72Q3=EZmh9qLgGj_Rt7DkP0VM4onkyrtiMA4zxHxQ@mail.gmail.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49734 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753739Ab1JUIkj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 21 Oct 2011 04:40:39 -0400
-Content-Disposition: inline
-In-Reply-To: <4EA12DAF.1060402@redhat.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:34869 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753941Ab1JUJl5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Oct 2011 05:41:57 -0400
+Received: by vcge1 with SMTP id e1so3134727vcg.19
+        for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2011 02:41:56 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kevin Wolf <kwolf@redhat.com>
-Cc: Josh Durgin <josh.durgin@dreamhost.com>, libvir-list@redhat.com, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, Oct 21, 2011 at 10:30:39AM +0200, Kevin Wolf wrote:
-> Am 20.10.2011 23:48, schrieb Josh Durgin:
-> > On 10/20/2011 12:24 PM, Daniel P. Berrange wrote:
-> >> On Thu, Oct 20, 2011 at 11:30:42AM -0700, Josh Durgin wrote:
-> >>> We're working on libvirt support for block device authentication [1]. To
-> >>> authenticate, rbd needs a username and a secret. Normally, to
-> >>> avoid putting the secret on the command line, you can store the secret
-> >>> in a file and pass the file to qemu, but when this is automated,
-> >>> there's no good way to know when the file can be removed. There are
-> >>> a few ways to pass the secret to qemu that avoid this problem:
-> >>
-> >> This is the same problem the iSCSI block driver currently faces,
-> >> and also if the Curl/HTTP block driver wanted todo authentication
-> >> we'd hit this. So it isn't unique to Ceph/RBD.
-> >>
-> >>> 1) pass an fd to an unlinked file containing the secret
-> >>>
-> >>> This is the simplest method, but it sounds like qemu developers don't
-> >>> like fd passing from libvirt. [2]
-> >>
-> >> That would be workable, but it means people trying to run the libvirt
-> >> QEMU command line themselves, would have to remove some args.
-> > 
-> > Isn't this already the case for chardevs? I can understand not wanting 
-> > more things like that though.
-> > 
-> >>> 2) start guests paused, without disks requiring authentication, then
-> >>>     use the drive_add monitor command to attach them
-> >>>
-> >>> This would make disks with authentication somewhat of a special case
-> >>> in libvirt, but would be simple to implement, and require no qemu changes.
-> >>
-> >> This makes it very hard for people to take the libvirt QEMU command line
-> >> and run themselves, since now an entire chunk of it is just missing.
-> >> So I really don't want to go down this route.
-> >>
-> >>> 3) start guests paused, then send the secret via a new QMP/HMP
-> >>>     command (block_set_conf<key>  <value>?)
-> >>>
-> >>> This is a larger change, but it would be more generally useful for
-> >>> changing configuration at runtime.
-> >>
-> >> I don't think you need to try to solve the problem of a general
-> >> purpose 'set configuration' command here, not least because that
-> >> will likely get you drawn into a huge discussion about qemu device
-> >> configuration in general which will likely never end.
-> >>
-> >> We already have a 'block_passwd' command for setting qcow2 decryption
-> >> keys. These aren't decryption passwords, rather they are authentication
-> >> passwords, so they're a little different, but I think this command could
-> >> still likely be leveraged for Ceph/iSCSI/etc auth passwords.
-> >>
-> >> Ideally, we want to cope with having both a decryption&  auth password
-> >> for the same block device. eg, an encrypted qcow2 image accessed, over
-> >> HTTP would require both. In these case there are 2 block drivers involved,
-> >> the 'qcow2' driver and the 'http' driver. So perhaps an extra parameter
-> >> for the 'block_password' command to identify which driver the password
-> >> is intended for is the right approach. If omitted,we'd default to 'qcow2'
-> >> for back compat.
-> >>
-> >> So eg, for a encrypted qcow2 disk accessed over http
-> >>
-> >>     -drive  file=http://fred@host/my.iso,format=qcow2,id=mydrive
-> >>
-> >> the app would invoke
-> >>
-> >>    { "execute": "block_password", "argument": { "device": "mydrive",
-> >>                                                 "driver", "qcow2",
-> >>                                                 "password", "12345" } }
-> >>    { "execute": "block_password", "argument": { "device": "mydrive",
-> >>                                                 "driver", "curl",
-> >>                                                 "password", "7890" } }
-> >>
-> >> For Ceph/RBD with a plain file, you'd just do
-> >>
-> >>
-> >>    { "execute": "block_password", "argument": { "device": "mydrive",
-> >>                                                 "driver", "rbd",
-> >>                                                 "password", "7890" } }
-> >>
-> > 
-> > This sounds good to me, although the same driver might use 
-> > authentication and encryption. Adding another argument to specify 'auth' 
-> > or 'encryption' would fix this, i.e.:
-> > 
-> >    { "execute": "block_password", "argument": { "device": "mydrive",
-> >                                                 "driver": "qcow2",
-> >                                                 "use": "encryption"
-> >                                                 "password": "12345" } }
-> > 
-> > I'll prepare a patch if there are no objections to this approach.
-> 
-> This proposed interface solves a problem that is currently purely
-> theoretical. With blockdev-add and friends, we'll get all of this for
-> free, so I'm not excited about adding something preliminary now even
-> though there's no practical need.
+ When I want to delete a snapshot, everything is working, but there is
+a strange error message:
 
-Ok.
+# rbd create --size=100 image
+# rbd snap create --snap=image-snap1 image
+# rbd snap ls image
+8       image-snap1     104857600
+# rbd snap rm --snap=image-snap1 image
+2011-10-21 11:35:58.506393 7f4975f66720 librbd: could not set snap to
+: error 2: No such file or directory
+2011-10-21 11:35:58.506554 7f4975f66720 librbd: Error re-reading rbd
+header: error 2: No such file or directory
+# rbd snap ls image
+#
 
-> For the rbd driver, please use the existing interface that qcow2 uses
-> for encrypted images.
+The snapshot hat been removed anyway. So this is not a real problem,
+it's just irritating.
 
-If you're ok with just reusing 'block_passwd' as it is today, with
-no arg parameters, then that's fine with me too.
-
-Daniel
--- 
-|: http://berrange.com      -o-    http://www.flickr.com/photos/dberrange/ :|
-|: http://libvirt.org              -o-             http://virt-manager.org :|
-|: http://autobuild.org       -o-         http://search.cpan.org/~danberr/ :|
-|: http://entangle-photo.org       -o-       http://live.gnome.org/gtk-vnc :|
+Kind regards,
+Christian
