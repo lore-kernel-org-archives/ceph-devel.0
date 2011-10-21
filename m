@@ -1,129 +1,140 @@
-From: shu ming <shuming@linux.vnet.ibm.com>
+From: "Daniel P. Berrange" <berrange@redhat.com>
 Subject: Re: [Qemu-devel] passing secrets to block devices
-Date: Fri, 21 Oct 2011 09:37:11 +0800
-Message-ID: <4EA0CCC7.1080501@linux.vnet.ibm.com>
-References: <4EA068D2.4030101@dreamhost.com> <20111020192417.GB16526@redhat.com> <4EA0971F.2010601@dreamhost.com>
+Date: Fri, 21 Oct 2011 08:05:08 +0100
+Message-ID: <20111021070508.GC17424@redhat.com>
+References: <4EA068D2.4030101@dreamhost.com>
+ <20111020192417.GB16526@redhat.com>
+ <4EA0971F.2010601@dreamhost.com>
+ <4EA0CCC7.1080501@linux.vnet.ibm.com>
+Reply-To: "Daniel P. Berrange" <berrange@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from e28smtp06.in.ibm.com ([122.248.162.6]:34948 "EHLO
-	e28smtp06.in.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752747Ab1JUBhx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Oct 2011 21:37:53 -0400
-Received: from d28relay01.in.ibm.com (d28relay01.in.ibm.com [9.184.220.58])
-	by e28smtp06.in.ibm.com (8.14.4/8.13.1) with ESMTP id p9L1bpWb025583
-	for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2011 07:07:51 +0530
-Received: from d28av01.in.ibm.com (d28av01.in.ibm.com [9.184.220.63])
-	by d28relay01.in.ibm.com (8.13.8/8.13.8/NCO v10.0) with ESMTP id p9L1boSK4268246
-	for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2011 07:07:51 +0530
-Received: from d28av01.in.ibm.com (loopback [127.0.0.1])
-	by d28av01.in.ibm.com (8.14.4/8.13.1/NCO v10.0 AVout) with ESMTP id p9L1bnF9010016
-	for <ceph-devel@vger.kernel.org>; Fri, 21 Oct 2011 07:07:50 +0530
-In-Reply-To: <4EA0971F.2010601@dreamhost.com>
+Received: from mx1.redhat.com ([209.132.183.28]:18110 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751124Ab1JUHFV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 21 Oct 2011 03:05:21 -0400
+Content-Disposition: inline
+In-Reply-To: <4EA0CCC7.1080501@linux.vnet.ibm.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: "Daniel P. Berrange" <berrange@redhat.com>, libvir-list@redhat.com, Kevin Wolf <kwolf@redhat.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org
+To: shu ming <shuming@linux.vnet.ibm.com>
+Cc: Josh Durgin <josh.durgin@dreamhost.com>, libvir-list@redhat.com, Kevin Wolf <kwolf@redhat.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org
 
-On 2011-10-21 5:48, Josh Durgin wrote:
-> On 10/20/2011 12:24 PM, Daniel P. Berrange wrote:
->> On Thu, Oct 20, 2011 at 11:30:42AM -0700, Josh Durgin wrote:
->>> We're working on libvirt support for block device authentication 
->>> [1]. To
->>> authenticate, rbd needs a username and a secret. Normally, to
->>> avoid putting the secret on the command line, you can store the secret
->>> in a file and pass the file to qemu, but when this is automated,
->>> there's no good way to know when the file can be removed. There are
->>> a few ways to pass the secret to qemu that avoid this problem:
->>
->> This is the same problem the iSCSI block driver currently faces,
->> and also if the Curl/HTTP block driver wanted todo authentication
->> we'd hit this. So it isn't unique to Ceph/RBD.
->>
->>> 1) pass an fd to an unlinked file containing the secret
->>>
->>> This is the simplest method, but it sounds like qemu developers don't
->>> like fd passing from libvirt. [2]
->>
->> That would be workable, but it means people trying to run the libvirt
->> QEMU command line themselves, would have to remove some args.
->
-> Isn't this already the case for chardevs? I can understand not wanting 
-> more things like that though.
->
->>> 2) start guests paused, without disks requiring authentication, then
->>>     use the drive_add monitor command to attach them
->>>
->>> This would make disks with authentication somewhat of a special case
->>> in libvirt, but would be simple to implement, and require no qemu 
->>> changes.
->>
->> This makes it very hard for people to take the libvirt QEMU command line
->> and run themselves, since now an entire chunk of it is just missing.
->> So I really don't want to go down this route.
->>
->>> 3) start guests paused, then send the secret via a new QMP/HMP
->>>     command (block_set_conf<key> <value>?)
->>>
->>> This is a larger change, but it would be more generally useful for
->>> changing configuration at runtime.
->>
->> I don't think you need to try to solve the problem of a general
->> purpose 'set configuration' command here, not least because that
->> will likely get you drawn into a huge discussion about qemu device
->> configuration in general which will likely never end.
->>
->> We already have a 'block_passwd' command for setting qcow2 decryption
->> keys. These aren't decryption passwords, rather they are authentication
->> passwords, so they're a little different, but I think this command could
->> still likely be leveraged for Ceph/iSCSI/etc auth passwords.
->>
->> Ideally, we want to cope with having both a decryption&  auth password
->> for the same block device. eg, an encrypted qcow2 image accessed, over
->> HTTP would require both. In these case there are 2 block drivers 
->> involved,
->> the 'qcow2' driver and the 'http' driver. So perhaps an extra parameter
->> for the 'block_password' command to identify which driver the password
->> is intended for is the right approach. If omitted,we'd default to 
->> 'qcow2'
->> for back compat.
->>
->> So eg, for a encrypted qcow2 disk accessed over http
->>
->>     -drive  file=http://fred@host/my.iso,format=qcow2,id=mydrive
->>
->> the app would invoke
->>
->>    { "execute": "block_password", "argument": { "device": "mydrive",
->>                                                 "driver", "qcow2",
->>                                                 "password", "12345" } }
->>    { "execute": "block_password", "argument": { "device": "mydrive",
->>                                                 "driver", "curl",
->>                                                 "password", "7890" } }
->>
->> For Ceph/RBD with a plain file, you'd just do
->>
->>
->>    { "execute": "block_password", "argument": { "device": "mydrive",
->>                                                 "driver", "rbd",
->>                                                 "password", "7890" } }
->>
->
-> This sounds good to me, although the same driver might use 
-> authentication and encryption. Adding another argument to specify 
-> 'auth' or 'encryption' would fix this, i.e.:
->
->   { "execute": "block_password", "argument": { "device": "mydrive",
->                                                "driver": "qcow2",
->                                                "use": "encryption"
->                                                "password": "12345" } }
->
-> I'll prepare a patch if there are no objections to this approach.
-Does the authentication be calculated by QEMU finally?  If it is, how 
-the "secrets" will be transported from libvirt to QEMU if they are in 
-different hosts?
-IMO, It should be encrpted to prevent the peek from others on the network.
+On Fri, Oct 21, 2011 at 09:37:11AM +0800, shu ming wrote:
+> On 2011-10-21 5:48, Josh Durgin wrote:
+> >On 10/20/2011 12:24 PM, Daniel P. Berrange wrote:
+> >>On Thu, Oct 20, 2011 at 11:30:42AM -0700, Josh Durgin wrote:
+> >>>We're working on libvirt support for block device
+> >>>authentication [1]. To
+> >>>authenticate, rbd needs a username and a secret. Normally, to
+> >>>avoid putting the secret on the command line, you can store the secret
+> >>>in a file and pass the file to qemu, but when this is automated,
+> >>>there's no good way to know when the file can be removed. There are
+> >>>a few ways to pass the secret to qemu that avoid this problem:
+> >>
+> >>This is the same problem the iSCSI block driver currently faces,
+> >>and also if the Curl/HTTP block driver wanted todo authentication
+> >>we'd hit this. So it isn't unique to Ceph/RBD.
+> >>
+> >>>1) pass an fd to an unlinked file containing the secret
+> >>>
+> >>>This is the simplest method, but it sounds like qemu developers don't
+> >>>like fd passing from libvirt. [2]
+> >>
+> >>That would be workable, but it means people trying to run the libvirt
+> >>QEMU command line themselves, would have to remove some args.
+> >
+> >Isn't this already the case for chardevs? I can understand not
+> >wanting more things like that though.
+> >
+> >>>2) start guests paused, without disks requiring authentication, then
+> >>>    use the drive_add monitor command to attach them
+> >>>
+> >>>This would make disks with authentication somewhat of a special case
+> >>>in libvirt, but would be simple to implement, and require no
+> >>>qemu changes.
+> >>
+> >>This makes it very hard for people to take the libvirt QEMU command line
+> >>and run themselves, since now an entire chunk of it is just missing.
+> >>So I really don't want to go down this route.
+> >>
+> >>>3) start guests paused, then send the secret via a new QMP/HMP
+> >>>    command (block_set_conf<key> <value>?)
+> >>>
+> >>>This is a larger change, but it would be more generally useful for
+> >>>changing configuration at runtime.
+> >>
+> >>I don't think you need to try to solve the problem of a general
+> >>purpose 'set configuration' command here, not least because that
+> >>will likely get you drawn into a huge discussion about qemu device
+> >>configuration in general which will likely never end.
+> >>
+> >>We already have a 'block_passwd' command for setting qcow2 decryption
+> >>keys. These aren't decryption passwords, rather they are authentication
+> >>passwords, so they're a little different, but I think this command could
+> >>still likely be leveraged for Ceph/iSCSI/etc auth passwords.
+> >>
+> >>Ideally, we want to cope with having both a decryption&  auth password
+> >>for the same block device. eg, an encrypted qcow2 image accessed, over
+> >>HTTP would require both. In these case there are 2 block drivers
+> >>involved,
+> >>the 'qcow2' driver and the 'http' driver. So perhaps an extra parameter
+> >>for the 'block_password' command to identify which driver the password
+> >>is intended for is the right approach. If omitted,we'd default
+> >>to 'qcow2'
+> >>for back compat.
+> >>
+> >>So eg, for a encrypted qcow2 disk accessed over http
+> >>
+> >>    -drive  file=http://fred@host/my.iso,format=qcow2,id=mydrive
+> >>
+> >>the app would invoke
+> >>
+> >>   { "execute": "block_password", "argument": { "device": "mydrive",
+> >>                                                "driver", "qcow2",
+> >>                                                "password", "12345" } }
+> >>   { "execute": "block_password", "argument": { "device": "mydrive",
+> >>                                                "driver", "curl",
+> >>                                                "password", "7890" } }
+> >>
+> >>For Ceph/RBD with a plain file, you'd just do
+> >>
+> >>
+> >>   { "execute": "block_password", "argument": { "device": "mydrive",
+> >>                                                "driver", "rbd",
+> >>                                                "password", "7890" } }
+> >>
+> >
+> >This sounds good to me, although the same driver might use
+> >authentication and encryption. Adding another argument to specify
+> >'auth' or 'encryption' would fix this, i.e.:
+> >
+> >  { "execute": "block_password", "argument": { "device": "mydrive",
+> >                                               "driver": "qcow2",
+> >                                               "use": "encryption"
+> >                                               "password": "12345" } }
+> >
+> >I'll prepare a patch if there are no objections to this approach.
+> Does the authentication be calculated by QEMU finally?  If it is,
+> how the "secrets" will be transported from libvirt to QEMU if they
+> are in different hosts?
+> IMO, It should be encrpted to prevent the peek from others on the network.
 
+libvirt + QEMU are always run on the same host, communicating via a
+UNIX domain socket. The application talking to libvirt might be on a
+remote host, but the libvirt sockets all have strong encryption. Now
+in theory you could have a mgmt app connecting to the monitor over
+TCP, I don't think that is something anyone will seriously do in
+practice. It doesn't offer any kind of authentication, so exposing
+it to the network would be giving away effective remote root access.
+So we should just consider the monitor socket to be a secure channel
+for this discussion.
 
-
+Regards,
+Daniel
+-- 
+|: http://berrange.com      -o-    http://www.flickr.com/photos/dberrange/ :|
+|: http://libvirt.org              -o-             http://virt-manager.org :|
+|: http://autobuild.org       -o-         http://search.cpan.org/~danberr/ :|
+|: http://entangle-photo.org       -o-       http://live.gnome.org/gtk-vnc :|
