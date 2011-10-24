@@ -1,125 +1,104 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: how to run ceph on top of other local file system
-Date: Sun, 23 Oct 2011 14:22:20 -0500
-Message-ID: <CAB7xdin1rNSi6zMQcnOviu2GVwnu3iNX46qh51vSviXZquhiRA@mail.gmail.com>
-References: <CAB7xdikWPdZ4RaLRvqpMhUdkOS6=99ggdx3iBidBkbWy3k5vOg@mail.gmail.com>
-	<CAORUGqBnqHOJp_wy3QOi=2LUy3Tbi+6PoaA4sTgUeSPqzDCZyw@mail.gmail.com>
-	<CAB7xdim9QmtLWSVTrPoZofrwY=0PQEzsxtcBjA=pgS-GzLgzAw@mail.gmail.com>
-	<CAF3hT9BwDAnUewrfTeZSWMuJSDHZW765jKF2sgQ2jNa32cLgxw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: ceph on non-btrfs file systems
+Date: Sun, 23 Oct 2011 18:54:49 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1110231739380.25255@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:54702 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750870Ab1JWTWV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Oct 2011 15:22:21 -0400
-Received: by iaby12 with SMTP id y12so488073iab.19
-        for <ceph-devel@vger.kernel.org>; Sun, 23 Oct 2011 12:22:20 -0700 (PDT)
-In-Reply-To: <CAF3hT9BwDAnUewrfTeZSWMuJSDHZW765jKF2sgQ2jNa32cLgxw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:44751 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752541Ab1JXByu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 23 Oct 2011 21:54:50 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 248B3BC957
+	for <ceph-devel@vger.kernel.org>; Sun, 23 Oct 2011 18:54:50 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id EB588BC957
+	for <ceph-devel@vger.kernel.org>; Sun, 23 Oct 2011 18:54:49 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-hi all,
+Although running on ext4, xfs, or whatever other non-btrfs you want mostly 
+works, there are a few important remaining issues:
 
-does ceph only support ext3 and btrfs? i mean if i have another file
-system, it support xattr, but it does not support journals, can i
-close the journal config and run it with ceph?
-i tried to do that by modifying the ceph.conf file (close the journal
-on osd). the mkcephfs seems ok, but when i start the service, cosd
-will crash.
-here's the log:
-2011-10-23 13:57:42.224779 7f1845ce6720 ceph version 0.34.commit:
-2f039eeeb745622b866d80feda7afa055e15f6d6. process: cosd. pid: 7849
-2011-10-23 13:57:42.225679 7f1845ce6720 filestore(/mnt/data/osd.0)
-mount FIEMAP ioctl is NOT supported
-2011-10-23 13:57:42.225697 7f1845ce6720 filestore(/mnt/data/osd.0)
-mount did NOT detect btrfs
-2011-10-23 13:57:42.225780 7f1845ce6720 filestore(/mnt/data/osd.0)
-mount found snaps <>
-2011-10-23 13:57:42.225805 7f1845ce6720 filestore(/mnt/data/osd.0)
-mount WARNING: no btrfs, and no journal in writeahead mode; data may
-be lost
-2011-10-23 13:57:42.225831 7f1845ce6720 filestore(/mnt/data/osd.0)
-mount WARNING: not btrfs or ext3; data may be lost
-2011-10-23 13:57:42.225836 7f1845ce6720 filestore(/mnt/data/osd.0)
-mount WARNING: no journal
-*** Caught signal (Aborted) **
- in thread 0x7f1845ce6720
- ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
- 1: ./cosd() [0x5c6304]
- 2: (()+0xf8f0) [0x7f18458dc8f0]
- 3: (gsignal()+0x35) [0x7f1844307a75]
- 4: (abort()+0x180) [0x7f184430b5c0]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f1844bbd8e5]
- 6: (()+0xcad16) [0x7f1844bbbd16]
- 7: (()+0xcad43) [0x7f1844bbbd43]
- 8: (()+0xcae3e) [0x7f1844bbbe3e]
- 9: (CrushWrapper::decode(ceph::buffer::list::iterator&)+0xac) [0x5611fc]
- 10: (OSDMap::decode(ceph::buffer::list&)+0x8aa) [0x5622aa]
- 11: (OSD::get_map(unsigned int)+0x221) [0x52f441]
- 12: (OSD::init()+0x47e) [0x53792e]
- 13: (main()+0x2adc) [0x49d07c]
- 14: (__libc_start_main()+0xfd) [0x7f18442f2c4d]
- 15: ./cosd() [0x49a179]
-2011-10-23 13:58:06.656315 7fcff35c6720 ceph version 0.34.commit:
-2f039eeeb745622b866d80feda7afa055e15f6d6. process: cosd. pid: 8596
-2011-10-23 13:58:06.657232 7fcff35c6720 filestore(/mnt/data/osd.0)
-mount FIEMAP ioctl is NOT supported
-2011-10-23 13:58:06.657250 7fcff35c6720 filestore(/mnt/data/osd.0)
-mount did NOT detect btrfs
-2011-10-23 13:58:06.657285 7fcff35c6720 filestore(/mnt/data/osd.0)
-mount found snaps <>
-2011-10-23 13:58:06.657302 7fcff35c6720 filestore(/mnt/data/osd.0)
-mount WARNING: no btrfs, and no journal in writeahead mode; data may
-be lost
-2011-10-23 13:58:06.657325 7fcff35c6720 filestore(/mnt/data/osd.0)
-mount WARNING: not btrfs or ext3; data may be lost
-2011-10-23 13:58:06.657330 7fcff35c6720 filestore(/mnt/data/osd.0)
-mount WARNING: no journal
-*** Caught signal (Aborted) **
- in thread 0x7fcff35c6720
- ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
- 1: ./cosd() [0x5c6304]
- 2: (()+0xf8f0) [0x7fcff31bc8f0]
- 3: (gsignal()+0x35) [0x7fcff1be7a75]
- 4: (abort()+0x180) [0x7fcff1beb5c0]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fcff249d8e5]
- 6: (()+0xcad16) [0x7fcff249bd16]
- 7: (()+0xcad43) [0x7fcff249bd43]
- 8: (()+0xcae3e) [0x7fcff249be3e]
- 9: (CrushWrapper::decode(ceph::buffer::list::iterator&)+0xac) [0x5611fc]
- 10: (OSDMap::decode(ceph::buffer::list&)+0x8aa) [0x5622aa]
- 11: (OSD::get_map(unsigned int)+0x221) [0x52f441]
- 12: (OSD::init()+0x47e) [0x53792e]
- 13: (main()+0x2adc) [0x49d07c]
- 14: (__libc_start_main()+0xfd) [0x7fcff1bd2c4d]
- 15: ./cosd() [0x49a179]
+1- ext4 limits total xattrs for 4KB.  This can cause problems in some 
+cases, as Ceph uses xattrs extensively.  Most of the time we don't hit 
+this.  We do hit the limit with radosgw pretty easily, though, and may 
+also hit it in exceptional cases where the OSD cluster is very unhealthy.
 
-does anyone have idea?
+There is a large xattr patch for ext4 from the Lustre folks that has been 
+floating around for (I think) years.  Maybe as interest grows in running 
+Ceph on ext4 this can move upstream.
 
-Thanks,
-Sheng
+Previously we were being forgiving about large setxattr failures on ext3, 
+but we found that was leading to corruption in certain cases (because we 
+couldn't set our internal metadata), so the next release will assert/crash 
+in that case (fail-stop instead of fail-maybe-eventually-corrupt). 
 
-On Mon, Oct 17, 2011 at 12:31 PM, Gregory Farnum
-<gregory.farnum@dreamhost.com> wrote:
-> On Mon, Oct 17, 2011 at 10:20 AM, sheng qiu <herbert1984106@gmail.com> wrote:
->> if my local file system does not support extended attributes, can i
->> use it?
-> Unfortunately not. Ceph requires xattr support; it uses xattrs for
-> internal bookkeeping as well as for its own xattr support.
->
-> Most filesystems do support xattrs these days, though; you probably
-> just need to specify it as a mount option. :)
-> -Greg
->
+XFS does not have an xattr size limit and thus does have this problem.
+
+2- The other problem is with OSD journal replay of non-idempotent 
+transactions.  On non-btrfs backends, the Ceph OSDs use a write-ahead 
+journal.  After restart, the OSD does not know exactly which transactions 
+in the journal may have already been committed to disk, and may reapply a 
+transaction again during replay.  For most operations (write, delete, 
+truncate) this is fine.
+
+Some operations, though, are non-idempotent.  The simplest example is 
+CLONE, which copies (efficiently, on btrfs) data from one object to 
+another.  If the source object is modified, the osd restarts, and then 
+the clone is replayed, the target will get incorrect (newer) data.  For 
+example,
+
+1- clone A -> B
+2- modify A
+   <osd crash, replay from 1>
+
+B will get new instead of old contents.  
+
+(This doesn't happen on btrfs because the snapshots allow us to replay 
+from a known consistent point in time.)
+
+For things like clone, skipping the operation of the target exists almost 
+works, except for cases like
+
+1- clone A -> B
+2- modify A
+...
+3- delete B
+   <osd crash, replay from 1>
+
+(Although in that example who cares if B had bad data; it was removed 
+anyway.)  The larger problem, though, is that that doesn't always work; 
+CLONERANGE copies a range of a file from A to B, where B may already 
+exist.  
+
+In practice, the higher level interfaces don't make full use of the 
+low-level interface, so it's possible some solution exists that careful 
+avoids the problem with a partial solution in the lower layer.  This makes 
+me nervous, though, as it is easy to break.
+
+Another possibility:
+
+ - on non-btrfs, we set a xattr on every modified object with the 
+   op_seq, the unique sequence number for the transaction.
+ - for any (potentially) non-idempotent operation, we fsync() before 
+   continuing to the next transaction, to ensure that xattr hits disk.
+ - on replay, we skip a transaction if the xattr indicates we already 
+   performed this transaction.
+
+Because every 'transaction' only modifies on a single object (file), 
+this ought to work.  It'll make things like clone slow, but let's face it: 
+they're already slow on non-btrfs file systems because they actually copy 
+the data (instead of duplicating the extent refs in btrfs).  And it should 
+make the full ObjectStore iterface safe, without upper layers having to 
+worry about the kinds and orders of transactions they perform.
+
+Other ideas?
+
+This issue is tracked at http://tracker.newdream.net/issues/213.
+
+sage
 
 
-
--- 
-Sheng Qiu
-Texas A & M University
-Room 302 Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
