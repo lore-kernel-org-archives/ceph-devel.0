@@ -1,212 +1,90 @@
-From: Sage Weil <sage@newdream.net>
-Subject: ceph on btrfs [was Re: ceph on non-btrfs file systems]
-Date: Mon, 24 Oct 2011 10:06:49 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110240941500.15349@cobra.newdream.net>
-References: <Pine.LNX.4.64.1110231739380.25255@cobra.newdream.net>
- <CAO47_-9jp===DT=scpe=U8BnPnUCAVz7xUWVCC9AMVmx67CdaA@mail.gmail.com>
+From: sheng qiu <herbert1984106@gmail.com>
+Subject: Re: how to run ceph on top of other local file system
+Date: Mon, 24 Oct 2011 14:02:44 -0500
+Message-ID: <CAB7xdinFBP1r-PuebjEXh1Rdwge-iEYNQpJmhCM88xuyEmqZhw@mail.gmail.com>
+References: <CAB7xdikWPdZ4RaLRvqpMhUdkOS6=99ggdx3iBidBkbWy3k5vOg@mail.gmail.com>
+	<CAORUGqBnqHOJp_wy3QOi=2LUy3Tbi+6PoaA4sTgUeSPqzDCZyw@mail.gmail.com>
+	<CAB7xdim9QmtLWSVTrPoZofrwY=0PQEzsxtcBjA=pgS-GzLgzAw@mail.gmail.com>
+	<CAF3hT9BwDAnUewrfTeZSWMuJSDHZW765jKF2sgQ2jNa32cLgxw@mail.gmail.com>
+	<CAB7xdin1rNSi6zMQcnOviu2GVwnu3iNX46qh51vSviXZquhiRA@mail.gmail.com>
+	<CAORUGqAwJwzOe1g8JMoHduTenau5uQT6fwWJYQ2pixNnLZ3cmw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-290282573-1319474820=:15349"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60424 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933035Ab1JXRGt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Oct 2011 13:06:49 -0400
-In-Reply-To: <CAO47_-9jp===DT=scpe=U8BnPnUCAVz7xUWVCC9AMVmx67CdaA@mail.gmail.com>
-Content-ID: <Pine.LNX.4.64.1110240952140.15349@cobra.newdream.net>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:58931 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752694Ab1JXTCq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Oct 2011 15:02:46 -0400
+Received: by wwe6 with SMTP id 6so9425421wwe.1
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Oct 2011 12:02:45 -0700 (PDT)
+In-Reply-To: <CAORUGqAwJwzOe1g8JMoHduTenau5uQT6fwWJYQ2pixNnLZ3cmw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
-Cc: ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+hi,
 
---557981400-290282573-1319474820=:15349
-Content-Type: TEXT/PLAIN; CHARSET=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Content-ID: <Pine.LNX.4.64.1110240952141.15349@cobra.newdream.net>
+is there any way to debug ceph to find out where it crash?
 
-[adding linux-btrfs to cc]
+Thanks,
+Sheng
 
-Josef, Chris, any ideas on the below issues?
-
-On Mon, 24 Oct 2011, Christian Brunner wrote:
-> Thanks for explaining this. I don't have any objections against btrfs
-> as a osd filesystem. Even the fact that there is no btrfs-fsck doesn't
-> scare me, since I can use the ceph replication to recover a lost
-> btrfs-filesystem. The only problem I have is, that btrfs is not stable
-> on our side and I wonder what you are doing to make it work. (Maybe
-> it's related to the load pattern of using ceph as a backend store for
-> qemu).
->=20
-> Here is a list of the btrfs problems I'm having:
->=20
-> - When I run ceph with the default configuration (btrfs snaps enabled)
-> I can see a rapid increase in Disk-I/O after a few hours of uptime.
-> Btrfs-cleaner is using more and more time in
-> btrfs_clean_old_snapshots().
-
-In theory, there shouldn't be any significant difference between taking a=
-=20
-snapshot and removing it a few commits later, and the prior root refs that=
-=20
-btrfs holds on to internally until the new commit is complete.  That's=20
-clearly not quite the case, though.
-
-In any case, we're going to try to reproduce this issue in our=20
-environment.
-
-> - When I run ceph with btrfs snaps disabled, the situation is getting
-> slightly better. I can run an OSD for about 3 days without problems,
-> but then again the load increases. This time, I can see that the
-> ceph-osd (blkdev_issue_flush) and btrfs-endio-wri are doing more work
-> than usual.
-
-FYI in this scenario you're exposed to the same journal replay issues that=
-=20
-ext4 and XFS are.  The btrfs workload that ceph is generating will also=20
-not be all that special, though, so this problem shouldn't be unique to=20
-ceph.
-
-> Another thing is that I'm seeing a WARNING: at fs/btrfs/inode.c:2114
-> from time to time. Maybe it's related to the performance issues, but
-> seems to be able to verify this.
-
-I haven't seen this yet with the latest stuff from Josef, but others have. =
-=20
-Josef, is there any information we can provide to help track it down?
-
-> It's really sad to see, that ceph performance and stability is
-> suffering that much from the underlying filesystems and that this
-> hasn't changed over the last months.
-
-We don't have anyone internally working on btrfs at the moment, and are=20
-still struggling to hire experienced kernel/fs people.  Josef has been=20
-very helpful with tracking these issues down, but he hass responsibilities=
-=20
-beyond just the Ceph related issues.  Progress is slow, but we are=20
-working on it!
-
-sage
-
-
->=20
-> Kind regards,
-> Christian
->=20
-> 2011/10/24 Sage Weil <sage@newdream.net>:
-> > Although running on ext4, xfs, or whatever other non-btrfs you want mos=
-tly
-> > works, there are a few important remaining issues:
-> >
-> > 1- ext4 limits total xattrs for 4KB. =A0This can cause problems in some
-> > cases, as Ceph uses xattrs extensively. =A0Most of the time we don't hi=
+On Mon, Oct 24, 2011 at 11:55 AM, Tommi Virtanen
+<tommi.virtanen@dreamhost.com> wrote:
+> On Sun, Oct 23, 2011 at 12:22, sheng qiu <herbert1984106@gmail.com> w=
+rote:
+>> does ceph only support ext3 and btrfs? i mean if i have another file
+>> system, it support xattr, but it does not support journals, can i
+>> close the journal config and run it with ceph?
+>
+> Ceph supports OSD storage on POSIX-compliant filesystems with extende=
+d
+> attributes. There are some edge cases that are still problematic, see
+> the email with subject "ceph on non-btrfs file systems" that Sage jus=
 t
-> > this. =A0We do hit the limit with radosgw pretty easily, though, and ma=
-y
-> > also hit it in exceptional cases where the OSD cluster is very unhealth=
-y.
-> >
-> > There is a large xattr patch for ext4 from the Lustre folks that has be=
-en
-> > floating around for (I think) years. =A0Maybe as interest grows in runn=
-ing
-> > Ceph on ext4 this can move upstream.
-> >
-> > Previously we were being forgiving about large setxattr failures on ext=
-3,
-> > but we found that was leading to corruption in certain cases (because w=
+> sent for a better discussion of those.
+>
+> I'm not sure what you mean by a filesystem "not supporting journals",
+> the ceph-osd journal is just a file it writes to. I'm not sure what
+> you mean by "closing the journal config"; you can disable the journal=
+,
+> but that will likely just make things slower; once again, using a
+> journal is possible on any filesystem, btrfs just makes it more
+> effective.
+>
+>> i tried to do that by modifying the ceph.conf file (close the journa=
+l
+>> on osd). the mkcephfs seems ok, but when i start the service, cosd
+>> will crash.
+>> here's the log:
+>> *** Caught signal (Aborted) **
+>> =A0in thread 0x7f1845ce6720
+>> =A0ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d=
+6)
+>> =A01: ./cosd() [0x5c6304]
+> ...
+>> =A09: (CrushWrapper::decode(ceph::buffer::list::iterator&)+0xac) [0x=
+5611fc]
+>> =A010: (OSDMap::decode(ceph::buffer::list&)+0x8aa) [0x5622aa]
+>> =A011: (OSD::get_map(unsigned int)+0x221) [0x52f441]
+>
+> That sounds more like the osdmap is corrupt, somehow. Anyone else hav=
 e
-> > couldn't set our internal metadata), so the next release will assert/cr=
-ash
-> > in that case (fail-stop instead of fail-maybe-eventually-corrupt).
-> >
-> > XFS does not have an xattr size limit and thus does have this problem.
-> >
-> > 2- The other problem is with OSD journal replay of non-idempotent
-> > transactions. =A0On non-btrfs backends, the Ceph OSDs use a write-ahead
-> > journal. =A0After restart, the OSD does not know exactly which transact=
-ions
-> > in the journal may have already been committed to disk, and may reapply=
- a
-> > transaction again during replay. =A0For most operations (write, delete,
-> > truncate) this is fine.
-> >
-> > Some operations, though, are non-idempotent. =A0The simplest example is
-> > CLONE, which copies (efficiently, on btrfs) data from one object to
-> > another. =A0If the source object is modified, the osd restarts, and the=
+> more specific suggestions?
+>
+
+
+
+--=20
+Sheng Qiu
+Texas A & M University
+Room 302 Wisenbaker
+email: herbert1984106@gmail.com
+College Station, TX 77843-3259
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-> > the clone is replayed, the target will get incorrect (newer) data. =A0F=
-or
-> > example,
-> >
-> > 1- clone A -> B
-> > 2- modify A
-> > =A0 <osd crash, replay from 1>
-> >
-> > B will get new instead of old contents.
-> >
-> > (This doesn't happen on btrfs because the snapshots allow us to replay
-> > from a known consistent point in time.)
-> >
-> > For things like clone, skipping the operation of the target exists almo=
-st
-> > works, except for cases like
-> >
-> > 1- clone A -> B
-> > 2- modify A
-> > ...
-> > 3- delete B
-> > =A0 <osd crash, replay from 1>
-> >
-> > (Although in that example who cares if B had bad data; it was removed
-> > anyway.) =A0The larger problem, though, is that that doesn't always wor=
-k;
-> > CLONERANGE copies a range of a file from A to B, where B may already
-> > exist.
-> >
-> > In practice, the higher level interfaces don't make full use of the
-> > low-level interface, so it's possible some solution exists that careful
-> > avoids the problem with a partial solution in the lower layer. =A0This =
-makes
-> > me nervous, though, as it is easy to break.
-> >
-> > Another possibility:
-> >
-> > =A0- on non-btrfs, we set a xattr on every modified object with the
-> > =A0 op_seq, the unique sequence number for the transaction.
-> > =A0- for any (potentially) non-idempotent operation, we fsync() before
-> > =A0 continuing to the next transaction, to ensure that xattr hits disk.
-> > =A0- on replay, we skip a transaction if the xattr indicates we already
-> > =A0 performed this transaction.
-> >
-> > Because every 'transaction' only modifies on a single object (file),
-> > this ought to work. =A0It'll make things like clone slow, but let's fac=
-e it:
-> > they're already slow on non-btrfs file systems because they actually co=
-py
-> > the data (instead of duplicating the extent refs in btrfs). =A0And it s=
-hould
-> > make the full ObjectStore iterface safe, without upper layers having to
-> > worry about the kinds and orders of transactions they perform.
-> >
-> > Other ideas?
-> >
-> > This issue is tracked at http://tracker.newdream.net/issues/213.
-> >
-> > sage
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-290282573-1319474820=:15349--
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
