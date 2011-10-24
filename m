@@ -1,84 +1,133 @@
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: kernel BUG at fs/btrfs/inode.c:1163
-Date: Mon, 24 Oct 2011 13:39:30 +0200
-Message-ID: <20111024113930.GF26547@ds.suse.cz>
-References: <4E9DDBB1.2050007@tuxadero.com>
- <20111019094925.GA29468@ds.suse.cz>
- <4E9EC9C1.4030901@tuxadero.com>
-Reply-To: dsterba@suse.cz
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH] ceph: fix memory leak in async readpages
+Date: Mon, 24 Oct 2011 09:09:38 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1110240907550.15349@cobra.newdream.net>
+References: <20110928181954.GA18512@rd.bbc.co.uk>
+ <Pine.LNX.4.64.1109281133330.13650@cobra.newdream.net>
+ <Pine.LNX.4.64.1109281215280.13650@cobra.newdream.net> <1319444888.4473.9.camel@cephclient0>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:41062 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754978Ab1JXLjc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 24 Oct 2011 07:39:32 -0400
-Content-Disposition: inline
-In-Reply-To: <4E9EC9C1.4030901@tuxadero.com>
+Received: from cobra.newdream.net ([66.33.216.30]:41129 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932769Ab1JXQJj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Oct 2011 12:09:39 -0400
+In-Reply-To: <1319444888.4473.9.camel@cephclient0>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Mailand <martin@tuxadero.com>
-Cc: dsterba@suse.cz, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Jeff Wu <cpwu@tnsoft.com.cn>
+Cc: David Flynn <davidf@rd.bbc.co.uk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 19, 2011 at 02:59:45PM +0200, Martin Mailand wrote:
-> Am 19.10.2011 11:49, schrieb David Sterba:
-> >It would be interesting what's the value of 'extent_type' at the time of
-> >crash, if it's eg -1 that could point to a real bug, some unhandled
-> >corner case in truncate, for example.
-> >
+Thanks, Jeff!
+
+Was there a workload that reliably triggered this case?
+
+sage
+
+
+On Mon, 24 Oct 2011, Jeff Wu wrote:
+
+> Hi ,
 > 
-> How can I do that?
-
-something like that would print the type information during runtime
-
---- a/fs/btrfs/inode.c
-+++ b/fs/btrfs/inode.c
-@@ -1160,6 +1160,11 @@ next_slot:
-                                btrfs_file_extent_inline_len(leaf, fi);
-                        extent_end = ALIGN(extent_end, root->sectorsize);
-                } else {
-+                       printk(KERN_CRIT "btrfs: unhandled extent type %d, key=[%llu,%u,%llu]",
-+                                       (unsigned long long)found_key.objecitd,
-+                                       (unsigned)found_key.tyep,
-+                                       (unsigned long long)found_key.offset,
-+                                       extent_type);
-                        BUG_ON(1);
-                }
- out_check:
----
-
-the key seems to be a relevant iformation to print as well, but the rest
-stored in the leaf item could be just garbage.
-
-The btrfs-debug-tree utility prints the whole tree items, but as I saw just now
-in the case of extent, it skips an unknown type (the same where kernel
-BUGs), which means that other extent data are glued to previous output
-and thus cannot be spotted easily. To fix that, apply these changes to
-progs' print-tree.c:
-
---- a/print-tree.c
-+++ b/print-tree.c
-@@ -138,7 +138,7 @@ static void print_file_extent_item(struct extent_buffer *eb,
-                  btrfs_file_extent_inline_len(eb, fi),
-                  btrfs_file_extent_compression(eb, fi));
-                return;
--       }
-+       } else
-        if (extent_type == BTRFS_FILE_EXTENT_PREALLOC) {
-                printf("\t\tprealloc data disk byte %llu nr %llu\n",
-                  (unsigned long long)btrfs_file_extent_disk_bytenr(eb, fi),
-@@ -147,6 +147,8 @@ static void print_file_extent_item(struct extent_buffer *eb,
-                  (unsigned long long)btrfs_file_extent_offset(eb, fi),
-                  (unsigned long long)btrfs_file_extent_num_bytes(eb, fi));
-                return;
-+       } else {
-+               printf("*** ERROR unknown extent type %d\n", extent_type);
-        }
-        printf("\t\textent data disk byte %llu nr %llu\n",
-                (unsigned long long)btrfs_file_extent_disk_bytenr(eb, fi),
----
-
-and run the utility on your fs.
-
-
-david
+> start_read() do twice "kfree(pages)",
+> 
+> ................
+>  out_pages:
+>         ceph_release_page_vector(pages, nr_pages);
+>         kfree(pages);
+> 
+> 
+> ceph_release_page_vector had kfree pages, continue to do kfree(pages),
+> sometimes ,async read ,printk "BUG kmalloc-16: Object already
+> free" ,then OOPS.
+> 
+> Jeff Wu
+> 
+> ----------------------------------------------------------------------
+> void ceph_release_page_vector(struct page **pages, int num_pages)
+> {
+> 	int i;
+> 
+> 	for (i = 0; i < num_pages; i++)
+> 		__free_pages(pages[i], 0);
+> 	kfree(pages);
+> }
+> 
+> 
+> $ git diff
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 5ffee90..4144caf 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -345,7 +345,6 @@ static int start_read(struct inode *inode, struct
+> list_head *page_list, int max)
+>  
+>  out_pages:
+>         ceph_release_page_vector(pages, nr_pages);
+> -       kfree(pages);
+>  out:
+>         ceph_osdc_put_request(req);
+>         return ret;
+> 
+> 
+> On Thu, 2011-09-29 at 03:16 +0800, Sage Weil wrote:
+> > On Wed, 28 Sep 2011, Sage Weil wrote:
+> > > I'll send this upstream with the other patches so it'll hopefully make 
+> > > 3.1...
+> > 
+> > Er, not really.. this'll go upstream during the next merge window, along 
+> > with the readahead code.  :)
+> > 
+> > sage
+> > 
+> > 
+> > > 
+> > > Thanks!
+> > > sage
+> > > 
+> > > 
+> > > On Wed, 28 Sep 2011, David Flynn wrote:
+> > > 
+> > > > The finish_read callback introduced in 63c90314546c1cec1f220f6ab24ea
+> > > > fails to release the page list allocated in start_read.
+> > > > ---
+> > > >  fs/ceph/addr.c |    1 +
+> > > >  1 files changed, 1 insertions(+), 0 deletions(-)
+> > > > 
+> > > > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> > > > index e06a322..4144caf 100644
+> > > > --- a/fs/ceph/addr.c
+> > > > +++ b/fs/ceph/addr.c
+> > > > @@ -261,6 +261,7 @@ static void finish_read(struct ceph_osd_request *req, struct ceph_msg *msg)
+> > > >  		unlock_page(page);
+> > > >  		page_cache_release(page);
+> > > >  	}
+> > > > +	kfree(req->r_pages);
+> > > >  }
+> > > >  
+> > > >  /*
+> > > > -- 
+> > > > 1.7.4.1
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > 
+> > > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
