@@ -1,83 +1,167 @@
-From: Arne Jansen <sensille@gmx.net>
-Subject: Re: ceph on btrfs [was Re: ceph on non-btrfs file systems]
-Date: Mon, 24 Oct 2011 23:37:08 +0200
-Message-ID: <4EA5DA84.9040600@gmx.net>
-References: <Pine.LNX.4.64.1110231739380.25255@cobra.newdream.net>	<CAO47_-9jp===DT=scpe=U8BnPnUCAVz7xUWVCC9AMVmx67CdaA@mail.gmail.com>	<Pine.LNX.4.64.1110240941500.15349@cobra.newdream.net>	<20111024195147.GB31264@dhcp231-156.rdu.redhat.com>	<20111024203509.GG5458@shiny.Mikenopa.local> <CAO47_-_nkU4=ixMKhT5-PhLDhCkprNt3nN7+DfmWgbLH8qrQiA@mail.gmail.com>
+From: Jeff Wu <cpwu@tnsoft.com.cn>
+Subject: Re: [PATCH] ceph: fix memory leak in async readpages
+Date: Tue, 25 Oct 2011 09:32:37 +0800
+Message-ID: <1319506357.2933.4.camel@cephclient0>
+References: <20110928181954.GA18512@rd.bbc.co.uk>
+	 <Pine.LNX.4.64.1109281133330.13650@cobra.newdream.net>
+	 <Pine.LNX.4.64.1109281215280.13650@cobra.newdream.net>
+	 <1319444888.4473.9.camel@cephclient0>
+	 <Pine.LNX.4.64.1110240907550.15349@cobra.newdream.net>
+Reply-To: <cpwu@tnsoft.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.23]:34144 "HELO
-	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1754355Ab1JXVhM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Oct 2011 17:37:12 -0400
-In-Reply-To: <CAO47_-_nkU4=ixMKhT5-PhLDhCkprNt3nN7+DfmWgbLH8qrQiA@mail.gmail.com>
+Received: from [210.22.136.227] ([210.22.136.227]:51567 "EHLO
+	MAIL.TNSOFT.COM.CN" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756168Ab1JYBcl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Oct 2011 21:32:41 -0400
+In-Reply-To: <Pine.LNX.4.64.1110240907550.15349@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chb@muc.de
-Cc: Chris Mason <chris.mason@oracle.com>, Josef Bacik <josef@redhat.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: David Flynn <davidf@rd.bbc.co.uk>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 24.10.2011 23:34, Christian Brunner wrote:
-> 2011/10/24 Chris Mason<chris.mason@oracle.com>:
->> On Mon, Oct 24, 2011 at 03:51:47PM -0400, Josef Bacik wrote:
->>> On Mon, Oct 24, 2011 at 10:06:49AM -0700, Sage Weil wrote:
->>>> [adding linux-btrfs to cc]
->>>>
->>>> Josef, Chris, any ideas on the below issues?
->>>>
->>>> On Mon, 24 Oct 2011, Christian Brunner wrote:
->>>>> Thanks for explaining this. I don't have any objections against btrfs
->>>>> as a osd filesystem. Even the fact that there is no btrfs-fsck doesn't
->>>>> scare me, since I can use the ceph replication to recover a lost
->>>>> btrfs-filesystem. The only problem I have is, that btrfs is not stable
->>>>> on our side and I wonder what you are doing to make it work. (Maybe
->>>>> it's related to the load pattern of using ceph as a backend store for
->>>>> qemu).
->>>>>
->>>>> Here is a list of the btrfs problems I'm having:
->>>>>
->>>>> - When I run ceph with the default configuration (btrfs snaps enabled)
->>>>> I can see a rapid increase in Disk-I/O after a few hours of uptime.
->>>>> Btrfs-cleaner is using more and more time in
->>>>> btrfs_clean_old_snapshots().
->>>>
->>>> In theory, there shouldn't be any significant difference between taking a
->>>> snapshot and removing it a few commits later, and the prior root refs that
->>>> btrfs holds on to internally until the new commit is complete.  That's
->>>> clearly not quite the case, though.
->>>>
->>>> In any case, we're going to try to reproduce this issue in our
->>>> environment.
->>>>
->>>
->>> I've noticed this problem too, clean_old_snapshots is taking quite a while in
->>> cases where it really shouldn't.  I will see if I can come up with a reproducer
->>> that doesn't require setting up ceph ;).
->>
->> This sounds familiar though, I thought we had fixed a similar
->> regression.  Either way, Arne's readahead code should really help.
->>
->> Which kernel version were you running?
->>
->> [ ack on the rest of Josef's comments ]
->
-> This was with a 3.0 kernel, including all btrfs-patches from josefs
-> git repo plus the "use the global reserve when truncating the free
-> space cache inode" patch.
->
-> I'll try the readahead code.
+Hi ,
 
-The current readahead code is only used for scrub. I plan to extend it
-to snapshot deletion in a next step, but currently I'm afraid it can't
-help.
+take the following steps:
 
--Arne
+$mount -t ceph monip:6789:/ /mnt/ceph
+$dd if=/dev/zero of=/mnt/ceph/2G bs=1M count=2048 conv=fsync
+----------------
+copy_test:
+#!/bin/bash
+cp /mnt/ceph/2G /mnt/$1/
+------------------
 
->
-> Thanks,
-> Christian
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+$copy_test 01 &
+$copy_test 02 &
+$copy_test 03 &
+$copy_test 04 &
+$copy_test 05 &
+$copy_test 06 &
+$copy_test 07 &
+$copy_test 08 &
+$copy_test 09 &
+
+
+
+
+Jeff
+
+
+On Tue, 2011-10-25 at 00:09 +0800, Sage Weil wrote:
+> Thanks, Jeff!
+> 
+> Was there a workload that reliably triggered this case?
+> 
+> sage
+> 
+> 
+> On Mon, 24 Oct 2011, Jeff Wu wrote:
+> 
+> > Hi ,
+> > 
+> > start_read() do twice "kfree(pages)",
+> > 
+> > ................
+> >  out_pages:
+> >         ceph_release_page_vector(pages, nr_pages);
+> >         kfree(pages);
+> > 
+> > 
+> > ceph_release_page_vector had kfree pages, continue to do kfree(pages),
+> > sometimes ,async read ,printk "BUG kmalloc-16: Object already
+> > free" ,then OOPS.
+> > 
+> > Jeff Wu
+> > 
+> > ----------------------------------------------------------------------
+> > void ceph_release_page_vector(struct page **pages, int num_pages)
+> > {
+> > 	int i;
+> > 
+> > 	for (i = 0; i < num_pages; i++)
+> > 		__free_pages(pages[i], 0);
+> > 	kfree(pages);
+> > }
+> > 
+> > 
+> > $ git diff
+> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> > index 5ffee90..4144caf 100644
+> > --- a/fs/ceph/addr.c
+> > +++ b/fs/ceph/addr.c
+> > @@ -345,7 +345,6 @@ static int start_read(struct inode *inode, struct
+> > list_head *page_list, int max)
+> >  
+> >  out_pages:
+> >         ceph_release_page_vector(pages, nr_pages);
+> > -       kfree(pages);
+> >  out:
+> >         ceph_osdc_put_request(req);
+> >         return ret;
+> > 
+> > 
+> > On Thu, 2011-09-29 at 03:16 +0800, Sage Weil wrote:
+> > > On Wed, 28 Sep 2011, Sage Weil wrote:
+> > > > I'll send this upstream with the other patches so it'll hopefully make 
+> > > > 3.1...
+> > > 
+> > > Er, not really.. this'll go upstream during the next merge window, along 
+> > > with the readahead code.  :)
+> > > 
+> > > sage
+> > > 
+> > > 
+> > > > 
+> > > > Thanks!
+> > > > sage
+> > > > 
+> > > > 
+> > > > On Wed, 28 Sep 2011, David Flynn wrote:
+> > > > 
+> > > > > The finish_read callback introduced in 63c90314546c1cec1f220f6ab24ea
+> > > > > fails to release the page list allocated in start_read.
+> > > > > ---
+> > > > >  fs/ceph/addr.c |    1 +
+> > > > >  1 files changed, 1 insertions(+), 0 deletions(-)
+> > > > > 
+> > > > > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> > > > > index e06a322..4144caf 100644
+> > > > > --- a/fs/ceph/addr.c
+> > > > > +++ b/fs/ceph/addr.c
+> > > > > @@ -261,6 +261,7 @@ static void finish_read(struct ceph_osd_request *req, struct ceph_msg *msg)
+> > > > >  		unlock_page(page);
+> > > > >  		page_cache_release(page);
+> > > > >  	}
+> > > > > +	kfree(req->r_pages);
+> > > > >  }
+> > > > >  
+> > > > >  /*
+> > > > > -- 
+> > > > > 1.7.4.1
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > > 
+> > > > > 
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > 
+> > > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
 
