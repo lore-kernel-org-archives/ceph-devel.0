@@ -1,42 +1,66 @@
-From: Sage Weil <sage@newdream.net>
+From: Christian Brunner <chb@muc.de>
 Subject: Re: ceph on btrfs [was Re: ceph on non-btrfs file systems]
-Date: Tue, 25 Oct 2011 09:36:29 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110250932140.20108@cobra.newdream.net>
+Date: Tue, 25 Oct 2011 21:09:45 +0200
+Message-ID: <CAO47_-9O0KzhGn_yskGYFMf8PH8APHg5BPbq98KFAU2RaYQYtw@mail.gmail.com>
 References: <Pine.LNX.4.64.1110231739380.25255@cobra.newdream.net>
- <CAO47_-9jp===DT=scpe=U8BnPnUCAVz7xUWVCC9AMVmx67CdaA@mail.gmail.com>
- <Pine.LNX.4.64.1110240941500.15349@cobra.newdream.net>
- <20111024195147.GB31264@dhcp231-156.rdu.redhat.com>
- <CAO47_-_=1uLV34WAAHFhv6z7fDmtY8L-+HUzfu=WcHNatbvxJQ@mail.gmail.com>
- <20111025122320.GA3703@dhcp231-156.rdu.redhat.com>
+	<CAO47_-9jp===DT=scpe=U8BnPnUCAVz7xUWVCC9AMVmx67CdaA@mail.gmail.com>
+	<Pine.LNX.4.64.1110240941500.15349@cobra.newdream.net>
+	<20111024195147.GB31264@dhcp231-156.rdu.redhat.com>
+	<CAO47_-_=1uLV34WAAHFhv6z7fDmtY8L-+HUzfu=WcHNatbvxJQ@mail.gmail.com>
+	<20111025122320.GA3703@dhcp231-156.rdu.redhat.com>
+	<Pine.LNX.4.64.1110250932140.20108@cobra.newdream.net>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43070 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751625Ab1JYQga (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Oct 2011 12:36:30 -0400
-In-Reply-To: <20111025122320.GA3703@dhcp231-156.rdu.redhat.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:32891 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751446Ab1JYTJr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Oct 2011 15:09:47 -0400
+In-Reply-To: <Pine.LNX.4.64.1110250932140.20108@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
+To: Sage Weil <sage@newdream.net>
 Cc: Josef Bacik <josef@redhat.com>, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
 
-On Tue, 25 Oct 2011, Josef Bacik wrote:
-> At this point it seems like the biggest problem with latency in ceph-osd 
-> is not related to btrfs, the latency seems to all be from the fact that 
-> ceph-osd is fsyncing a block dev for whatever reason. 
+2011/10/25 Sage Weil <sage@newdream.net>:
+> On Tue, 25 Oct 2011, Josef Bacik wrote:
+>> At this point it seems like the biggest problem with latency in ceph=
+-osd
+>> is not related to btrfs, the latency seems to all be from the fact t=
+hat
+>> ceph-osd is fsyncing a block dev for whatever reason.
+>
+> There is one place where we sync_file_range() on the journal block de=
+vice,
+> but that should only happen if directio is disabled (it's on by defau=
+lt).
+>
+> Christian, have you tweaked those settings in your ceph.conf? =A0It w=
+ould be
+> something like 'journal dio =3D false'. =A0If not, can you verify tha=
+t
+> directio shows true when the journal is initialized from your osd log=
+?
+> E.g.,
+>
+> =A02011-10-21 15:21:02.026789 7ff7e5c54720 journal _open dev/osd0.jou=
+rnal fd 14: 104857600 bytes, block size 4096 bytes, directio =3D 1
+>
+> If directio =3D 1 for you, something else funky is causing those
+> blkdev_fsync's...
 
-There is one place where we sync_file_range() on the journal block device, 
-but that should only happen if directio is disabled (it's on by default).  
+I've looked it up in the logs - directio is 1:
 
-Christian, have you tweaked those settings in your ceph.conf?  It would be 
-something like 'journal dio = false'.  If not, can you verify that 
-directio shows true when the journal is initialized from your osd log?  
-E.g.,
+Oct 25 17:20:16 os00 osd.000[1696]: 7f0016841740 journal _open
+/dev/vg01/lv_osd_journal_0 fd 15: 17179869184 bytes, block size 4096
+bytes, directio =3D 1
 
- 2011-10-21 15:21:02.026789 7ff7e5c54720 journal _open dev/osd0.journal fd 14: 104857600 bytes, block size 4096 bytes, directio = 1
-
-If directio = 1 for you, something else funky is causing those 
-blkdev_fsync's...
-
-sage
+Regards,
+Christian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
