@@ -1,71 +1,83 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: crash on ceph
-Date: Wed, 26 Oct 2011 09:12:32 -0500
-Message-ID: <CAB7xdim2nuP-J__fG2RippWx-2U8xQBas4SmTRF=Bugy9sa0-w@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph on btrfs [was Re: ceph on non-btrfs file systems]
+Date: Wed, 26 Oct 2011 09:32:09 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1110260929140.18909@cobra.newdream.net>
+References: <CAO47_-9L7SdQwhJ27B6yzrqG8xvj+CeZHeSutgeCixcv7kUidg@mail.gmail.com>
+ <Pine.LNX.4.64.1110252221510.6574@cobra.newdream.net>
+ <CAO47_--RTCNYP1s6O-jjjd_spT2=RrDJjBegd1S3YKz=on2YnQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-300933238-1319646729=:18909"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:53730 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754992Ab1JZOMd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2011 10:12:33 -0400
-Received: by iaby12 with SMTP id y12so1773241iab.19
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Oct 2011 07:12:32 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:54907 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933008Ab1JZQcL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Oct 2011 12:32:11 -0400
+In-Reply-To: <CAO47_--RTCNYP1s6O-jjjd_spT2=RrDJjBegd1S3YKz=on2YnQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Christian Brunner <chb@muc.de>
+Cc: ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
 
-hi,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-thanks for the reply. i met a new problem. now i can mount the ceph
-using cfuse. and write small single file. but it will crash when file
-size increased to some number. the osd.log is:
-2011-10-26 08:59:20.156983 7febdca06700 journal FileJournal::write_bl
-: write_fd failed: error 13: Permission denied
-2011-10-26 08:59:20.157000 7febdca06700 journal FileJournal::do_write:
-write_bl(pos=10481664) failed
-os/FileJournal.cc: In function 'void
-FileJournal::do_write(ceph::bufferlist&)', in thread '0x7febdca06700'
-os/FileJournal.cc: 817: FAILED assert(0)
- ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
- 1: (FileJournal::do_write(ceph::buffer::list&)+0x367) [0x6b61f7]
- 2: (FileJournal::write_thread_entry()+0x3e6) [0x6b97c6]
- 3: (FileJournal::Writer::entry()+0xd) [0x6a50dd]
- 4: (()+0x69ca) [0x7febe38119ca]
- 5: (clone()+0x6d) [0x7febe22f870d]
- ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
- 1: (FileJournal::do_write(ceph::buffer::list&)+0x367) [0x6b61f7]
- 2: (FileJournal::write_thread_entry()+0x3e6) [0x6b97c6]
- 3: (FileJournal::Writer::entry()+0xd) [0x6a50dd]
- 4: (()+0x69ca) [0x7febe38119ca]
- 5: (clone()+0x6d) [0x7febe22f870d]
-*** Caught signal (Aborted) **
- in thread 0x7febdca06700
- ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15f6d6)
- 1: ./cosd() [0x5c69d4]
- 2: (()+0xf8f0) [0x7febe381a8f0]
- 3: (gsignal()+0x35) [0x7febe2245a75]
- 4: (abort()+0x180) [0x7febe22495c0]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7febe2afb8e5]
- 6: (()+0xcad16) [0x7febe2af9d16]
- 7: (()+0xcad43) [0x7febe2af9d43]
- 8: (()+0xcae3e) [0x7febe2af9e3e]
- 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x39f) [0x5cbb1f]
- 10: (FileJournal::do_write(ceph::buffer::list&)+0x367) [0x6b61f7]
- 11: (FileJournal::write_thread_entry()+0x3e6) [0x6b97c6]
- 12: (FileJournal::Writer::entry()+0xd) [0x6a50dd]
- 13: (()+0x69ca) [0x7febe38119ca]
- 14: (clone()+0x6d) [0x7febe22f870d]
+--557981400-300933238-1319646729=:18909
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-does any one have idea about this?
+On Wed, 26 Oct 2011, Christian Brunner wrote:
+> 2011/10/26 Sage Weil <sage@newdream.net>:
+> > On Wed, 26 Oct 2011, Christian Brunner wrote:
+> >> >> > Christian, have you tweaked those settings in your ceph.conf? =A0=
+It would be
+> >> >> > something like 'journal dio =3D false'. =A0If not, can you verify=
+ that
+> >> >> > directio shows true when the journal is initialized from your osd=
+ log?
+> >> >> > E.g.,
+> >> >> >
+> >> >> > =A02011-10-21 15:21:02.026789 7ff7e5c54720 journal _open dev/osd0=
+=2Ejournal fd 14: 104857600 bytes, block size 4096 bytes, directio =3D 1
+> >> >> >
+> >> >> > If directio =3D 1 for you, something else funky is causing those
+> >> >> > blkdev_fsync's...
+> >> >>
+> >> >> I've looked it up in the logs - directio is 1:
+> >> >>
+> >> >> Oct 25 17:20:16 os00 osd.000[1696]: 7f0016841740 journal _open
+> >> >> /dev/vg01/lv_osd_journal_0 fd 15: 17179869184 bytes, block size 409=
+6
+> >> >> bytes, directio =3D 1
+> >> >
+> >> > Do you mind capturing an strace? =A0I'd like to see where that blkde=
+v_fsync
+> >> > is coming from.
+> >>
+> >> Here is an strace. I can see a lot of sync_file_range operations.
+> >
+> > Yeah, these all look like the flusher thread, and shouldn't be hitting
+> > blkdev_fsync. =A0Can you confirm that with
+> >
+> > =A0 =A0 =A0 =A0filestore flusher =3D false
+> > =A0 =A0 =A0 =A0filestore sync flush =3D false
+> >
+> > you get no sync_file_range at all? =A0I wonder if this is also perf lyi=
+ng
+> > about the call chain.
+>=20
+> Yes, setting this makes the sync_file_range calls go away.
 
-Thanks,
-Sheng
+Okay.  That means either sync_file_range on a regular btrfs file is=20
+triggering blkdev_fsync somewhere in btrfs, there is an extremely sneaky=20
+bug that is mixing up file descriptors, or latencytop is lying.  I'm=20
+guessing the latter, given the other weirdness Josef and Chris were=20
+seeing.  :)
 
--- 
-Sheng Qiu
-Texas A & M University
-Room 302 Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
+> Is it safe to use these settings with "filestore btrfs snap =3D 0"?
+
+Yeah.  They're purely a performance thing to push as much dirty data to=20
+disk as quickly as possible to minimize the snapshot create latency. =20
+You'll notice the write throughput tends to tank when them off.
+
+sage
+--557981400-300933238-1319646729=:18909--
