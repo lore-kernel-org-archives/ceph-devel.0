@@ -1,212 +1,135 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: ceph on btrfs [was Re: ceph on non-btrfs file systems]
-Date: Thu, 27 Oct 2011 13:17:57 +0200
-Message-ID: <4EA93DE5.8060506@tuxadero.com>
-References: <4EA86FD7.4030407@tuxadero.com> <4EA93844.3010601@tuxadero.com> <CADdPHGtimucFn5k8A-RWDGYa-C3u7wB-bajxgT0LtiNH4HZ7=A@mail.gmail.com>
+From: Damien Churchill <damoxc@gmail.com>
+Subject: Crash when trying to mount ext4
+Date: Thu, 27 Oct 2011 13:59:47 +0100
+Message-ID: <CAFtEh-dPs+3foczt0Cjs=gWu42as=scALPAfJo+QPK+C3fRUbg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:32893 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754083Ab1J0LSM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Oct 2011 07:18:12 -0400
-In-Reply-To: <CADdPHGtimucFn5k8A-RWDGYa-C3u7wB-bajxgT0LtiNH4HZ7=A@mail.gmail.com>
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:58114 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751186Ab1J0M7s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Oct 2011 08:59:48 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Majer <stefan.majer@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, Sage Weil <sage@newdream.net>, chb@muc.de, Josef Bacik <josef@redhat.com>, chris.mason@oracle.com
+To: linux-bcache@vger.kernel.org, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Stefan,
-I think the machine has enough ram.
+Hi,
 
-root@s-brick-003:~# free -m
-              total       used       free     shared    buffers     cached
-Mem:          3924       2401       1522          0         42       2115
--/+ buffers/cache:        243       3680
-Swap:         1951          0       1951
+I've been testing bcache with the latest sources from the git tree.
+I've been attempting to use a rbd (RADOS block device) as the backing
+device. I can format the bcache0 device with mkfs.ext4, however when I
+mount it, there is a kernel bug when it attempts to initialize the
+filesystem.
 
-There is no swap usage at all.
+I'm unsure if this is a bug in rbd or bcache however, I'm including
+the stack trace outputted by the kernel. The kernel has been based off
+the current Ubuntu Precise kernel (3.1.0) patched with the changes
+from the bcache git repository as well as the changes from the ceph
+repository in for-next (the same thing happened without the changes
+from the ceph repository). bcache does function as expected when using
+a raw disk drive.
 
--martin
-
-
-Am 27.10.2011 12:59, schrieb Stefan Majer:
-> Hi Martin,
->
-> a quick dig into your perf report show a large amount of swapper work.
-> If this is the case, i would suspect latency. So do you have not
-> enough physical ram in your machine ?
->
-> Greetings
->
-> Stefan Majer
->
-> On Thu, Oct 27, 2011 at 12:53 PM, Martin Mailand<martin@tuxadero.com>  wrote:
->> Hi
->> resend without the perf attachment, which could be found here:
->> http://tuxadero.com/multistorage/perf.report.txt.bz2
->>
->> Best Regards,
->>   martin
->>
->> -------- Original-Nachricht --------
->> Betreff: Re: ceph on btrfs [was Re: ceph on non-btrfs file systems]
->> Datum: Wed, 26 Oct 2011 22:38:47 +0200
->> Von: Martin Mailand<martin@tuxadero.com>
->> Antwort an: martin@tuxadero.com
->> An: Sage Weil<sage@newdream.net>
->> Kopie (CC): Christian Brunner<chb@muc.de>, ceph-devel@vger.kernel.org,
->>   linux-btrfs@vger.kernel.org
->>
->> Hi,
->> I have more or less the same setup as Christian and I suffer the same
->> problems.
->> But as far as I can see the output of latencytop and perf differs form
->> Christian one, both are attached.
->> I was wondering about the high latency from btrfs-submit.
->>
->> Process btrfs-submit-0 (970) Total: 2123.5 msec
->>
->> I have as well the high IO rate and high IO wait.
->>
->> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->>             0.60    0.00    2.20   82.40    0.00   14.80
->>
->> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s
->> avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->> sda               0.00     0.00    0.00    8.40     0.00    74.40
->> 17.71     0.03    3.81    0.00    3.81   3.81   3.20
->> sdb               0.00     7.00    0.00  269.80     0.00  1224.80
->> 9.08   107.19  398.69    0.00  398.69   3.15  85.00
->>
->> top - 21:57:41 up  8:41,  1 user,  load average: 0.65, 0.79, 0.76
->> Tasks: 179 total,   1 running, 178 sleeping,   0 stopped,   0 zombie
->> Cpu(s):  0.6%us,  2.4%sy,  0.0%ni, 70.8%id, 25.8%wa,  0.0%hi,  0.3%si,
->> 0.0%st
->> Mem:   4018276k total,  1577728k used,  2440548k free,    10496k buffers
->> Swap:  1998844k total,        0k used,  1998844k free,  1316696k cached
->>
->>    PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
->>
->>   1399 root      20   0  548m 103m 3428 S  0.0  2.6   2:01.85 ceph-osd
->>
->>   1401 root      20   0  548m 103m 3428 S  0.0  2.6   1:51.71 ceph-osd
->>
->>   1400 root      20   0  548m 103m 3428 S  0.0  2.6   1:50.30 ceph-osd
->>
->>   1391 root      20   0     0    0    0 S  0.0  0.0   1:18.39
->> btrfs-endio-wri
->>
->>    976 root      20   0     0    0    0 S  0.0  0.0   1:18.11
->> btrfs-endio-wri
->>
->>   1367 root      20   0     0    0    0 S  0.0  0.0   1:05.60
->> btrfs-worker-1
->>
->>    968 root      20   0     0    0    0 S  0.0  0.0   1:05.45
->> btrfs-worker-0
->>
->>   1163 root      20   0  141m 1636 1100 S  0.0  0.0   1:00.56 collectd
->>
->>    970 root      20   0     0    0    0 S  0.0  0.0   0:47.73
->> btrfs-submit-0
->>
->>   1402 root      20   0  548m 103m 3428 S  0.0  2.6   0:34.86 ceph-osd
->>
->>   1392 root      20   0     0    0    0 S  0.0  0.0   0:33.70
->> btrfs-endio-met
->>
->>    975 root      20   0     0    0    0 S  0.0  0.0   0:32.70
->> btrfs-endio-met
->>
->>   1415 root      20   0  548m 103m 3428 S  0.0  2.6   0:28.29 ceph-osd
->>
->>   1414 root      20   0  548m 103m 3428 S  0.0  2.6   0:28.24 ceph-osd
->>
->>   1397 root      20   0  548m 103m 3428 S  0.0  2.6   0:24.60 ceph-osd
->>
->>   1436 root      20   0  548m 103m 3428 S  0.0  2.6   0:13.31 ceph-osd
->>
->>
->> Here ist my setup.
->> Kernel v3.1 + Josef
->>
->> The config for this osd (ceph version 0.37
->> (commit:a6f3bbb744a6faea95ae48317f0b838edb16a896)) is:
->> [osd.1]
->>          host = s-brick-003
->>          osd journal = /dev/sda7
->>          btrfs devs = /dev/sdb
->>         btrfs options = noatime
->>         filestore_btrfs_snap = false
->>
->> I hope this helps to pin point the problem.
->>
->> Best Regards,
->> martin
->>
->>
->> Sage Weil schrieb:
->>>
->>> On Wed, 26 Oct 2011, Christian Brunner wrote:
->>>>
->>>> 2011/10/26 Sage Weil<sage@newdream.net>:
->>>>>
->>>>> On Wed, 26 Oct 2011, Christian Brunner wrote:
->>>>>>>>>
->>>>>>>>> Christian, have you tweaked those settings in your ceph.conf?  It
->>>>>>>>> would be
->>>>>>>>> something like 'journal dio = false'.  If not, can you verify that
->>>>>>>>> directio shows true when the journal is initialized from your osd
->>>>>>>>> log?
->>>>>>>>> E.g.,
->>>>>>>>>
->>>>>>>>>   2011-10-21 15:21:02.026789 7ff7e5c54720 journal _open
->>>>>>>>> dev/osd0.journal fd 14: 104857600 bytes, block size 4096 bytes, directio = 1
->>>>>>>>>
->>>>>>>>> If directio = 1 for you, something else funky is causing those
->>>>>>>>> blkdev_fsync's...
->>>>>>>>
->>>>>>>> I've looked it up in the logs - directio is 1:
->>>>>>>>
->>>>>>>> Oct 25 17:20:16 os00 osd.000[1696]: 7f0016841740 journal _open
->>>>>>>> /dev/vg01/lv_osd_journal_0 fd 15: 17179869184 bytes, block size 4096
->>>>>>>> bytes, directio = 1
->>>>>>>
->>>>>>> Do you mind capturing an strace?  I'd like to see where that
->>>>>>> blkdev_fsync
->>>>>>> is coming from.
->>>>>>
->>>>>> Here is an strace. I can see a lot of sync_file_range operations.
->>>>>
->>>>> Yeah, these all look like the flusher thread, and shouldn't be hitting
->>>>> blkdev_fsync.  Can you confirm that with
->>>>>
->>>>>        filestore flusher = false
->>>>>        filestore sync flush = false
->>>>>
->>>>> you get no sync_file_range at all?  I wonder if this is also perf lying
->>>>> about the call chain.
->>>>
->>>> Yes, setting this makes the sync_file_range calls go away.
->>>
->>> Okay.  That means either sync_file_range on a regular btrfs file is
->>> triggering blkdev_fsync somewhere in btrfs, there is an extremely sneaky
->>> bug that is mixing up file descriptors, or latencytop is lying.  I'm
->>> guessing the latter, given the other weirdness Josef and Chris were
->>> seeing.  :)
->>>
->>>> Is it safe to use these settings with "filestore btrfs snap = 0"?
->>>
->>> Yeah.  They're purely a performance thing to push as much dirty data to
->>> disk as quickly as possible to minimize the snapshot create latency.
->>> You'll notice the write throughput tends to tank when them off.
->>>
->>> sage
->>
->>
->
->
->
-
+Oct 27 13:10:10 dev1 kernel: [  253.509761] ------------[ cut here ]------------
+Oct 27 13:10:10 dev1 kernel: [  253.509796] kernel BUG at
+/home/dchurchill/Packages/oneiric/linux/linux-3.1.0/fs/bio.c:1504!
+Oct 27 13:10:10 dev1 kernel: [  253.509842] invalid opcode: 0000 [#1] SMP
+Oct 27 13:10:10 dev1 kernel: [  253.509871] CPU 1
+Oct 27 13:10:10 dev1 kernel: [  253.509883] Modules linked in: bnep
+rfcomm bluetooth ip6table_filter ip6_tables iptable_filter ip_tables
+x_tables parport_pc ppdev binfmt_misc snd_hda_codec_hdmi radeon ttm
+bridge stp snd_hda_codec_realtek drm_kms_helper drm snd_hda_intel
+snd_hda_codec snd_hwdep snd_seq_midi snd_rawmidi snd_pcm
+snd_seq_midi_event snd_seq snd_timer snd_seq_device snd psmouse
+soundcore eeepc_wmi asus_wmi i2c_algo_bit serio_raw snd_page_alloc
+sparse_keymap dm_multipath video mei(C) wmi rbd libceph lp parport
+r8169 firewire_ohci btrfs firewire_core crc_itu_t pata_marvell ahci
+libahci xhci_hcd e1000e zlib_deflate libcrc32c [last unloaded: kvm]
+Oct 27 13:10:10 dev1 kernel: [  253.510307]
+Oct 27 13:10:10 dev1 kernel: [  253.510318] Pid: 5686, comm:
+ext4lazyinit Tainted: G         C  3.1.0-2-generic #4 System
+manufacturer System Product Name/P8H67-M EVO
+Oct 27 13:10:10 dev1 kernel: [  253.510388] RIP:
+0010:[<ffffffff811a1bbf>]  [<ffffffff811a1bbf>] bio_split+0x2bf/0x2d0
+Oct 27 13:10:10 dev1 kernel: [  253.510438] RSP: 0018:ffff8803e81939f0
+ EFLAGS: 00010212
+Oct 27 13:10:10 dev1 kernel: [  253.510467] RAX: ffff8804213d9c60 RBX:
+ffff880421dee240 RCX: 0000000000005146
+Oct 27 13:10:10 dev1 kernel: [  253.510505] RDX: ffff8803f0c35600 RSI:
+0000000000015ec0 RDI: 00000000000001c7
+Oct 27 13:10:10 dev1 kernel: [  253.512604] RBP: ffff8803e8193a40 R08:
+ffff88043f495ec0 R09: 0000000000000000
+Oct 27 13:10:10 dev1 kernel: [  253.514711] R10: 0000000000000001 R11:
+000000000005d000 R12: 00000000000002e8
+Oct 27 13:10:10 dev1 kernel: [  253.516820] R13: ffff8803f0c35600 R14:
+ffff880421dee240 R15: 0000000000000000
+Oct 27 13:10:10 dev1 kernel: [  253.518926] FS:
+0000000000000000(0000) GS:ffff88043f480000(0000)
+knlGS:0000000000000000
+Oct 27 13:10:10 dev1 kernel: [  253.521046] CS:  0010 DS: 0000 ES:
+0000 CR0: 000000008005003b
+Oct 27 13:10:10 dev1 kernel: [  253.523166] CR2: 00000000004b2730 CR3:
+0000000001c05000 CR4: 00000000000406e0
+Oct 27 13:10:10 dev1 kernel: [  253.525300] DR0: 0000000000000000 DR1:
+0000000000000000 DR2: 0000000000000000
+Oct 27 13:10:10 dev1 kernel: [  253.527443] DR3: 0000000000000000 DR6:
+00000000ffff0ff0 DR7: 0000000000000400
+Oct 27 13:10:10 dev1 kernel: [  253.529564] Process ext4lazyinit (pid:
+5686, threadinfo ffff8803e8192000, task ffff8803f4b39720)
+Oct 27 13:10:10 dev1 kernel: [  253.531705] Stack:
+Oct 27 13:10:10 dev1 kernel: [  253.533827]  ffff8803e8193a70
+0000000000000100 ffff8804213d9c60 00004000e8193b28
+Oct 27 13:10:10 dev1 kernel: [  253.535992]  ffff880421dee240
+ffff8803e8193b38 ffff8803e8193b30 ffff8803e8fa0000
+Oct 27 13:10:10 dev1 kernel: [  253.538174]  ffff880421dee240
+0000000000000000 ffff8803e8193aa0 ffffffffa003c02d
+Oct 27 13:10:10 dev1 kernel: [  253.540353] Call Trace:
+Oct 27 13:10:10 dev1 kernel: [  253.542489]  [<ffffffffa003c02d>]
+bio_chain_clone.constprop.25+0x7d/0x180 [rbd]
+Oct 27 13:10:10 dev1 kernel: [  253.544632]  [<ffffffffa003e0f5>]
+rbd_rq_fn+0x225/0x340 [rbd]
+Oct 27 13:10:10 dev1 kernel: [  253.546760]  [<ffffffff812fa45a>] ?
+cfq_rq_enqueued+0xca/0x1c0
+Oct 27 13:10:10 dev1 kernel: [  253.548842]  [<ffffffff812e5710>]
+__make_request+0x2c0/0x330
+Oct 27 13:10:10 dev1 kernel: [  253.550890]  [<ffffffff812e2582>]
+generic_make_request.part.51+0x242/0x500
+Oct 27 13:10:10 dev1 kernel: [  253.552961]  [<ffffffff81112369>] ?
+mempool_alloc+0x59/0x140
+Oct 27 13:10:10 dev1 kernel: [  253.555026]  [<ffffffff81112369>] ?
+mempool_alloc+0x59/0x140
+Oct 27 13:10:10 dev1 kernel: [  253.557048]  [<ffffffff8108722e>] ?
+wake_up_bit+0x2e/0x40
+Oct 27 13:10:10 dev1 kernel: [  253.559039]  [<ffffffff812e2885>]
+generic_make_request+0x45/0x60
+Oct 27 13:10:10 dev1 kernel: [  253.561018]  [<ffffffff812e2927>]
+submit_bio+0x87/0x110
+Oct 27 13:10:10 dev1 kernel: [  253.562975]  [<ffffffff811a2eca>] ?
+bio_alloc_bioset+0xba/0x100
+Oct 27 13:10:10 dev1 kernel: [  253.564934]  [<ffffffff812eaa00>]
+blkdev_issue_zeroout+0x110/0x170
+Oct 27 13:10:10 dev1 kernel: [  253.566898]  [<ffffffff81211cbb>]
+ext4_init_inode_table+0x15b/0x370
+Oct 27 13:10:10 dev1 kernel: [  253.568854]  [<ffffffff81637625>] ?
+schedule_timeout+0x175/0x320
+Oct 27 13:10:10 dev1 kernel: [  253.570820]  [<ffffffff812238d5>]
+ext4_run_li_request+0x85/0xe0
+Oct 27 13:10:10 dev1 kernel: [  253.572789]  [<ffffffff812239cc>]
+ext4_lazyinit_thread+0x9c/0x1c0
+Oct 27 13:10:10 dev1 kernel: [  253.574752]  [<ffffffff81223930>] ?
+ext4_run_li_request+0xe0/0xe0
+Oct 27 13:10:10 dev1 kernel: [  253.576685]  [<ffffffff81086aac>]
+kthread+0x8c/0xa0
+Oct 27 13:10:10 dev1 kernel: [  253.578587]  [<ffffffff816435f4>]
+kernel_thread_helper+0x4/0x10
+Oct 27 13:10:10 dev1 kernel: [  253.580482]  [<ffffffff81086a20>] ?
+flush_kthread_worker+0xa0/0xa0
+Oct 27 13:10:10 dev1 kernel: [  253.582329]  [<ffffffff816435f0>] ?
+gs_change+0x13/0x13
+Oct 27 13:10:10 dev1 kernel: [  253.584138] Code: 48 89 da 49 83 c6 10
+8b 4d cc 48 8b 75 c0 ff d0 48 8b 55 b8 4c 89 f0 4c 29 f8 48 8b 44 02
+f0 48 85 c0 75 d8 e9 9f fd ff ff 0f 0b <0f> 0b 66 66 66 66 66 66 2e 0f
+1f 84 00 00 00 00 00 55 48 89 e5
+Oct 27 13:10:10 dev1 kernel: [  253.588081] RIP  [<ffffffff811a1bbf>]
+bio_split+0x2bf/0x2d0
+Oct 27 13:10:10 dev1 kernel: [  253.590007]  RSP <ffff8803e81939f0>
+Oct 27 13:10:10 dev1 kernel: [  253.600316] ---[ end trace 2d89848a4b76a3dc ]---
