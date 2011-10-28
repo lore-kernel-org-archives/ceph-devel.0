@@ -1,62 +1,110 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] vfs: add d_prune dentry operation
-Date: Fri, 28 Oct 2011 08:16:52 -0400
-Message-ID: <20111028121652.GA23417@infradead.org>
-References: <1317875170-9349-1-git-send-email-sage@newdream.net>
- <1317875170-9349-2-git-send-email-sage@newdream.net>
- <20111006212118.GA24109@infradead.org>
- <Pine.LNX.4.64.1110061507550.29500@cobra.newdream.net>
- <20111010051141.GV3159@dastard>
- <Pine.LNX.4.64.1110100850020.26361@cobra.newdream.net>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: Problem using librados
+Date: Fri, 28 Oct 2011 08:46:26 -0700
+Message-ID: <3812880fa7f821d4927e30ce58f4d152@hq.newdream.net>
+References: <CAMiHsJKtwp_xKKMa_=WscZK7H8cG8YXHMX=x0USw7poW8HENBA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1110100850020.26361@cobra.newdream.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sage Weil <sage@newdream.net>
-Cc: Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@infradead.org>, linux-fsdevel@vger.kernel.org, viro@ZenIV.linux.org.uk, ceph-devel@vger.kernel.org, rwheeler@redhat.com, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from hapkido.dreamhost.com ([66.33.216.122]:46947 "EHLO
+	hapkido.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756006Ab1J1PrJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2011 11:47:09 -0400
+Received: from pochacco.sd.dreamhost.com (pochacco.sd.dreamhost.com [66.33.195.34])
+	by hapkido.dreamhost.com (Postfix) with ESMTP id B1B3F17BD17
+	for <ceph-devel@vger.kernel.org>; Fri, 28 Oct 2011 08:47:08 -0700 (PDT)
+In-Reply-To: <CAMiHsJKtwp_xKKMa_=WscZK7H8cG8YXHMX=x0USw7poW8HENBA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Atish Kathpal <atish.kathpal@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-This variant seems to crash btrfs in xfstests 010:
+On Fri, 28 Oct 2011 16:22:07 +0530, Atish Kathpal
+<atish.kathpal@gmail.com> wrote:
+> Hello developers,
+>=20
+> This is a users query. Please help out.
+> I am trying to use the librados-dev library to use RADOS components o=
+f Ceph.
+> I have got Ceph installed on my machine, and the rados command line
+> shows me a pool named "data" when I say "rados lspools". I have also
+> tried out creating objects in this pool and it works perfectly.
+> However, when I try to access the same pool "data" through my C code,
+> by using librados.h, my code compiles and links fine but at run time =
+I
+> get this error:-
+>=20
+> $./a.out: cannot open rados pool data: No such file or directory
+>=20
+> My code is as follows:-
+> #include <stdio.h>
+> #include "rados/librados.h"
+> main(int argc, char *argv[])
+> {
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 int err;
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 rados_t cluster;
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 err =3D rados_create(&cluster, NULL);
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (err < 0) {
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 printf("%s: c=
+annot open a rados connection: %s\n",
+> argv[0], strerror(-err));
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
 
-010 0s ... 0s
-[ 8093.504387] BUG: unable to handle kernel NULL pointer dereference at (null)
-[ 8093.505618] IP: [<          (null)>]           (null)
-[ 8093.505930] PGD 196f5067 PUD 5507d067 PMD 0 
-[ 8093.505930] Oops: 0010 [#1] SMP 
-[ 8093.505930] CPU 0 
-[ 8093.505930] Modules linked in:
-[ 8093.505930] 
-[ 8093.505930] Pid: 26328, comm: umount Not tainted 3.1.0+ #90 Bochs Bochs
-[ 8093.505930] RIP: 0010:[<0000000000000000>]  [<          (null)>] (null)
-[ 8093.505930] RSP: 0018:ffff880009f63dc0  EFLAGS: 00010206
-[ 8093.505930] RAX: ffffffff81ae7780 RBX: ffff88002b93a840 RCX: 000000010023ad06
-[ 8093.505930] RDX: ffff88002b93a8e0 RSI: ffffffff8114fef0 RDI: ffff88002b93a840
-[ 8093.505930] RBP: ffff880009f63dd8 R08: 0000000000000000 R09: 002dffe1ea51a56d
-[ 8093.505930] R10: ffff880058c7f680 R11: 0000000000000004 R12: ffff88002b93a8c0
-[ 8093.505930] R13: 0000000000000000 R14: ffff88005a56d0c0 R15: ffff88001a896000
-[ 8093.505930] FS:  0000000000000000(0000) GS:ffff88005d800000(0063) knlGS:00000000f75c6700
-[ 8093.505930] CS:  0010 DS: 002b ES: 002b CR0: 0000000080050033
-[ 8093.505930] CR2: 0000000000000000 CR3: 0000000041ddc000 CR4: 00000000000006f0
-[ 8093.505930] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-[ 8093.505930] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
-[ 8093.505930] Process umount (pid: 26328, threadinfo ffff880009f62000, task ffff88003abd6500)
-[ 8093.505930] Stack:
-[ 8093.505930]  ffffffff8114efb7 ffff88002b93a840 ffff88005a3c4500 ffff880009f63e08
-[ 8093.505930]  ffffffff811516ea ffff880009f63f08 0000000000000000 ffff88001a896000
-[ 8093.505930]  ffffffff81ae40c0 ffff880009f63e28 ffffffff8115192e ffff880009f63e38
-[ 8093.505930] Call Trace:
-[ 8093.505930]  [<ffffffff8114efb7>] ? dentry_lru_prune+0x87/0x90
-[ 8093.505930]  [<ffffffff811516ea>] shrink_dcache_for_umount_subtree+0x7a/0x1e0
-[ 8093.505930]  [<ffffffff8115192e>] shrink_dcache_for_umount+0x2e/0x60
-[ 8093.505930]  [<ffffffff8113d977>] generic_shutdown_super+0x27/0xd0
-[ 8093.505930]  [<ffffffff8113dab1>] kill_anon_super+0x11/0x20
-[ 8093.505930]  [<ffffffff8113de25>] deactivate_locked_super+0x45/0x70
-[ 8093.505930]  [<ffffffff8113e7e9>] deactivate_super+0x49/0x70
-[ 8093.505930]  [<ffffffff81157f7b>] mntput_no_expire+0xab/0xf0
-[ 8093.505930]  [<ffffffff81158c1a>] sys_umount+0x6a/0x360
-[ 8093.505930]  [<ffffffff81158f1b>] sys_oldumount+0xb/0x10
-[ 8093.505930]  [<ffffffff819e2f05>] sysenter_dispatch+0x7/0x2b
-[ 8093.505930] Code:  Bad RIP value.
-[ 8093.505930] RIP  [<          (null)>]           (null)
+You need a couple more steps here - rados_create doesn't connect to the
+cluster yet. Looks like the docs need updating for this. You need to do
+
+the following before opening the pool (error checking omitted for
+brevity):
+
+        // get configuration info - use NULL as the path to search the
+default ceph.conf locations
+        rados_conf_read_file(cluster, path);
+        rados_connect(cluster);
+
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 rados_ioctx_t io;
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 char *poolname =3D "data";
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 err =3D rados_ioctx_create(cluster, pooln=
+ame, &io);
+> //<--------------------This line is causing the problem. Why am I not
+> able to access the pool?
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (err < 0) {
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 printf("%s: c=
+annot open rados pool %s: %s\n", argv[0],
+> poolname, strerror(-err));
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 rados_shutdow=
+n(cluster);
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 err =3D rados_write_full(io, "BITARRAY", =
+"hello", 5);
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (err < 0) {
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 printf("%s: c=
+annot write pool %s: %s\n", argv[0],
+> poolname, strerror(-err));
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 rados_ioctx_d=
+estroy(io);
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 rados_shutdow=
+n(cluster);
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+> }
+>=20
+> To show that the pool "data" exists, here's the output of the command
+> line rados tool:-
+> $ rados lspools
+> data
+> metadata
+> rbd
+>=20
+>=20
+> Please help me out.
+>=20
+> Thank you.
+>=20
+> Regards
+> Atish
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
