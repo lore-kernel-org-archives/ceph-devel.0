@@ -1,61 +1,85 @@
-From: Yehuda Sadeh Weinraub <yehudasa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Crash when trying to mount ext4
-Date: Thu, 27 Oct 2011 20:17:08 -0700
-Message-ID: <CAC-hyiE8+xugo-ZtG=i7vJQTKOZCqkiD0Xj2Y6_uvoX1T2MaBQ@mail.gmail.com>
-References: <CAFtEh-dPs+3foczt0Cjs=gWu42as=scALPAfJo+QPK+C3fRUbg@mail.gmail.com>
-	<CAC-hyiFAv1-HeFiX3MtOJwxbNyAAQp_CMpzDv0A7-Woo3+qKdA@mail.gmail.com>
-	<CAFtEh-dfsWQZ-Dpy8zAjK8Be=XfOqsBj4x3CU-G3AA7NYq8tSA@mail.gmail.com>
+From: Atish Kathpal <atish.kathpal@gmail.com>
+Subject: Problem using librados
+Date: Fri, 28 Oct 2011 16:22:07 +0530
+Message-ID: <CAMiHsJKtwp_xKKMa_=WscZK7H8cG8YXHMX=x0USw7poW8HENBA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-bcache-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAFtEh-dfsWQZ-Dpy8zAjK8Be=XfOqsBj4x3CU-G3AA7NYq8tSA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-bcache-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Damien Churchill <damoxc-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-bcache-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:39385 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932229Ab1J1Kw3 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2011 06:52:29 -0400
+Received: by bkbzt4 with SMTP id zt4so317728bkb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Oct 2011 03:52:28 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Oct 27, 2011 at 1:51 PM, Damien Churchill <damoxc-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> On 27 October 2011 17:25, Yehuda Sadeh Weinraub <yehudasa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> On Thu, Oct 27, 2011 at 5:59 AM, Damien Churchill <damoxc-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>> Hi,
->>>
->>> I've been testing bcache with the latest sources from the git tree.
->>> I've been attempting to use a rbd (RADOS block device) as the backing
->>> device. I can format the bcache0 device with mkfs.ext4, however when I
->>> mount it, there is a kernel bug when it attempts to initialize the
->>> filesystem.
->>>
->>> I'm unsure if this is a bug in rbd or bcache however, I'm including
->>> the stack trace outputted by the kernel. The kernel has been based off
->>> the current Ubuntu Precise kernel (3.1.0) patched with the changes
->>> from the bcache git repository as well as the changes from the ceph
->>> repository in for-next (the same thing happened without the changes
->>> from the ceph repository). bcache does function as expected when using
->>> a raw disk drive.
->>>
->>
->> Can you push a tree somewhere that has the exact kernel that you're
->> using, patched with the specific bcache version? It'll make it easier
->> for us to look at the issue.
->>
->> Thanks,
->> Yehuda
->>
->
-> Certainly, I've pushed it up to github,
-> https://github.com/damoxc/linux.git. It's in the branch "testing".
->
+Hello developers,
 
-I was able to reproduce the issue. It seems that bcache creates bios
-without invoking the merge_bvec callback (which we implement), so we
-end up with a request that holds pages that exceed the rbd block
-boundaries. The call to bio_split then crashes as it shouldn't have
-more than a single page trailing outside. So it's either a problem in
-bcache that doesn't call that callback, or an issue with rbd code that
-assumes that it'll always be called. A relatively quick workaround for
-rbd would be to create a special bio_split function that would do the
-required splitting for this case, but I'm not sure whether that would
-be the proper solution. If that's a bcache oversight and not an
-incorrect assumption I'd rather leave it for bcache.
+This is a users query. Please help out.
+I am trying to use the librados-dev library to use RADOS components of =
+Ceph.
+I have got Ceph installed on my machine, and the rados command line
+shows me a pool named "data" when I say "rados lspools". I have also
+tried out creating objects in this pool and it works perfectly.
+However, when I try to access the same pool "data" through my C code,
+by using librados.h, my code compiles and links fine but at run time I
+get this error:-
 
-Yehuda
+$./a.out: cannot open rados pool data: No such file or directory
+
+My code is as follows:-
+#include <stdio.h>
+#include "rados/librados.h"
+main(int argc, char *argv[])
+{
+=A0 =A0 =A0 =A0 int err;
+=A0 =A0 =A0 =A0 rados_t cluster;
+=A0 =A0 =A0 =A0 err =3D rados_create(&cluster, NULL);
+=A0 =A0 =A0 =A0 if (err < 0) {
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printf("%s: cannot open a rados connect=
+ion: %s\n",
+argv[0], strerror(-err));
+=A0 =A0 =A0 =A0 }
+=A0 =A0 =A0 =A0 rados_ioctx_t io;
+=A0 =A0 =A0 =A0 char *poolname =3D "data";
+=A0 =A0 =A0 =A0 err =3D rados_ioctx_create(cluster, poolname, &io);
+//<--------------------This line is causing the problem. Why am I not
+able to access the pool?
+=A0 =A0 =A0 =A0 if (err < 0) {
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printf("%s: cannot open rados pool %s: =
+%s\n", argv[0],
+poolname, strerror(-err));
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rados_shutdown(cluster);
+=A0 =A0 =A0 =A0 }
+=A0 =A0 =A0 =A0 err =3D rados_write_full(io, "BITARRAY", "hello", 5);
+=A0 =A0 =A0 =A0 if (err < 0) {
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printf("%s: cannot write pool %s: %s\n"=
+, argv[0],
+poolname, strerror(-err));
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rados_ioctx_destroy(io);
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rados_shutdown(cluster);
+=A0 =A0 =A0 =A0 }
+}
+
+To show that the pool "data" exists, here's the output of the command
+line rados tool:-
+$ rados lspools
+data
+metadata
+rbd
+
+
+Please help me out.
+
+Thank you.
+
+Regards
+Atish
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
