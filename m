@@ -1,109 +1,193 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph updates for 3.2-rc1
-Date: Fri, 28 Oct 2011 15:00:19 -0700
-Message-ID: <1319839219.32370.5.camel@slip>
+From: Eric Blake <eblake@redhat.com>
+Subject: Re: [PATCH 1/1] Use a common xml type for ceph secret usage.
+Date: Fri, 28 Oct 2011 16:03:48 -0600
+Message-ID: <4EAB26C4.9030103@redhat.com>
+References: <fc9aba44da7d8be72fabeba1caf07901aaef202d.1319836201.git.josh.durgin@dreamhost.com> <ce9e6885af6aa76edcebca9103a5690447e8dc47.1319835863.git.josh.durgin@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature"; boundary="=-tm5TTlQUWMD+Gb3rq//q"
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49981 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753172Ab1J1WAU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2011 18:00:20 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:15758 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753583Ab1J1WD4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 28 Oct 2011 18:03:56 -0400
+In-Reply-To: <ce9e6885af6aa76edcebca9103a5690447e8dc47.1319835863.git.josh.durgin@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@dreamhost.com>
+Cc: libvir-list@redhat.com, ceph-devel@vger.kernel.org
+
+On 10/28/2011 03:19 PM, Josh Durgin wrote:
+> The types used in domaincommon.rng and secret.rng should be the same.
+>
+> Signed-off-by: Josh Durgin<josh.durgin@dreamhost.com>
+> ---
+>   docs/schemas/domaincommon.rng |   11 ++++++++---
+>   docs/schemas/secret.rng       |    4 +++-
+>   2 files changed, 11 insertions(+), 4 deletions(-)
+>
+> diff --git a/docs/schemas/domaincommon.rng b/docs/schemas/domaincommon.rng
+> index 3477351..d053489 100644
+> --- a/docs/schemas/domaincommon.rng
+> +++ b/docs/schemas/domaincommon.rng
+> @@ -2558,13 +2558,13 @@
+>           <attribute name='uuid'>
+>             <ref name="UUID"/>
+>           </attribute>
+> -<attribute name="usage">
+> -<ref name="genericName"/>
+> +<attribute name='usage'>
+> +<ref name='usageName'/>
+
+genericName is probably fine instead of inventing usageName; but I'll 
+graduate it out of domaincommon.rng into basictypes.rng.
+
+>           </attribute>
+>         </choice>
+>       </element>
+>     </define>
+> -
+> +
+
+Spurious whitespace change.
+
+> +++ b/docs/schemas/secret.rng
+> @@ -4,6 +4,8 @@
+>       <ref name='secret'/>
+>     </start>
+>
+> +<include href='domaincommon.rng'/>
+
+domaincommon.rng is rather heavyweight; basictypes.rng is better.
+
+> +
+>     <define name='secret'>
+>       <element name='secret'>
+>         <optional>
+> @@ -60,7 +62,7 @@
+>         <value>ceph</value>
+>       </attribute>
+>       <element name='name'>
+> -<text/>
+> +<ref name='usageName'/>
+>       </element>
+>     </define>
+
+At any rate, once we include common types, we can stop repeating the 
+UUID definition too.
+
+Not quite like your original patch, but I'll go ahead and squash this 
+in, then push in your name since it matches up with your intent.
 
 
---=-tm5TTlQUWMD+Gb3rq//q
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+diff --git i/docs/schemas/basictypes.rng w/docs/schemas/basictypes.rng
+index b3267f5..3b4b952 100644
+--- i/docs/schemas/basictypes.rng
++++ w/docs/schemas/basictypes.rng
+@@ -97,6 +97,12 @@
+      </choice>
+    </define>
 
-Hi Linus,
++  <define name="genericName">
++    <data type="string">
++      <param name="pattern">[a-zA-Z0-9_\+\-]+</param>
++    </data>
++  </define>
++
+    <define name="dnsName">
+      <data type="string">
+        <param name="pattern">[a-zA-Z0-9\.\-]+</param>
+diff --git i/docs/schemas/domaincommon.rng w/docs/schemas/domaincommon.rng
+index d053489..b6f858e 100644
+--- i/docs/schemas/domaincommon.rng
++++ w/docs/schemas/domaincommon.rng
+@@ -2559,12 +2559,12 @@
+            <ref name="UUID"/>
+          </attribute>
+          <attribute name='usage'>
+-          <ref name='usageName'/>
++          <ref name='genericName'/>
+          </attribute>
+        </choice>
+      </element>
+    </define>
+-
++
+    <!--
+         Optional hypervisor extensions in their own namespace:
+           QEmu
+@@ -2660,11 +2660,6 @@
+        <param name="pattern">[A-Za-z0-9_\.\+\-]+</param>
+      </data>
+    </define>
+-  <define name="genericName">
+-    <data type="string">
+-      <param name="pattern">[a-zA-Z0-9_\+\-]+</param>
+-    </data>
+-  </define>
+    <define name="bridgeMode">
+      <data type="string">
+        <param name="pattern">(vepa|bridge|private|passthrough)</param>
+@@ -2675,11 +2670,6 @@
+        <param 
+name="pattern">(([0-2]?[0-9]?[0-9]\.){3}[0-2]?[0-9]?[0-9])|(([0-9a-fA-F]+|:)+[0-9a-fA-F]+)|([a-zA-Z0-9_\.\+\-]*)</param>
+      </data>
+    </define>
+-  <define name="usageName">
+-    <data type="string">
+-      <param name="pattern">[a-zA-Z0-9_\.\+\-]+</param>
+-    </data>
+-  </define>
+    <define name="usbId">
+      <data type="string">
+        <param name="pattern">(0x)?[0-9a-fA-F]{1,4}</param>
+diff --git i/docs/schemas/secret.rng w/docs/schemas/secret.rng
+index 3abd3c7..e49bd5a 100644
+--- i/docs/schemas/secret.rng
++++ w/docs/schemas/secret.rng
+@@ -1,10 +1,11 @@
++<?xml version="1.0"?>
+  <!-- A Relax NG schema for the libvirt secret properties XML format -->
+  <grammar xmlns="http://relaxng.org/ns/structure/1.0">
+    <start>
+      <ref name='secret'/>
+    </start>
 
-Please pull the following Ceph updates for 3.2-rc1 from
+-  <include href='domaincommon.rng'/>
++  <include href='basictypes.rng'/>
 
-  git://github.com/NewDreamNetwork/ceph-client.git for-linus
-or
-  git://ceph.newdream.net/git/ceph-client.git for-linus
+    <define name='secret'>
+      <element name='secret'>
+@@ -62,25 +63,8 @@
+        <value>ceph</value>
+      </attribute>
+      <element name='name'>
+-      <ref name='usageName'/>
++      <ref name='genericName'/>
+      </element>
+    </define>
 
-(That's the old tree location.  I haven't reestablished korg access because
-I don't see other kernel devs much around these parts.  Still working on it=
-.)
-
-The biggest thing here is a rewrite of the read path that vastly improves=
-=20
-read(ahead) performance.  There is also optional support for server name=
-=20
-resolution using the dns stuff, a fix for 32-bit ino number uniqueness,=20
-and a range of cleanups and small memory leak fixes.
-
-Once Christoph picks up the fixed d_prune patch I'll have a few more=20
-patches to send you that trun some Ceph client-side dentry caching stuff=
-=20
-back on.
-
-Thanks!
-sage
-
-
-
-Amon Ott (1):
-      ceph: fix 32-bit ino numbers
-
-Greg Farnum (1):
-      ceph: let the set_layout ioctl set single traits
-
-Noah Watkins (3):
-      ceph: replace leading spaces with tabs
-      ceph: fix ceph_monc_init memory leak
-      ceph: use kernel DNS resolver
-
-Sage Weil (11):
-      ceph: make readpages fully async
-      ceph: rename rsize -> rasize
-      ceph: implement (optional) max read size
-      ceph: document ioctls
-      libceph: create messenger with client
-      libceph: always preallocate mon connection
-      libceph: don't complain on msgpool alloc failures
-      libceph: warn on msg allocation failures
-      Revert "ceph: don't truncate dirty pages in invalidate work thread"
-      libceph: force resend of osd requests if we skip an osdmap
-      libceph: fix double-free of page vector
-
- drivers/block/rbd.c            |    2 +-
- fs/ceph/addr.c                 |  193 +++++++++++++++++++++++++-----------=
-----
- fs/ceph/caps.c                 |    2 +-
- fs/ceph/inode.c                |   46 +---------
- fs/ceph/ioctl.c                |   34 ++++++--
- fs/ceph/ioctl.h                |   55 +++++++++++-
- fs/ceph/mds_client.c           |   11 ++-
- fs/ceph/super.c                |   61 ++++++++-----
- fs/ceph/super.h                |   19 +++--
- include/linux/ceph/libceph.h   |    4 +-
- include/linux/ceph/messenger.h |    3 +-
- net/ceph/Kconfig               |   14 +++
- net/ceph/ceph_common.c         |   47 +++++-----
- net/ceph/messenger.c           |  130 +++++++++++++++++++++++----
- net/ceph/mon_client.c          |   79 +++++++++--------
- net/ceph/msgpool.c             |    4 +-
- net/ceph/osd_client.c          |   34 ++++---
- 17 files changed, 483 insertions(+), 255 deletions(-)
+-  <define name="UUID">
+-    <choice>
+-      <data type="string">
+-        <param name="pattern">[a-fA-F0-9]{32}</param>
+-      </data>
+-      <data type="string">
+-        <param 
+name="pattern">[a-fA-F0-9]{8}\-([a-fA-F0-9]{4}\-){3}[a-fA-F0-9]{12}</param>
+-      </data>
+-    </choice>
+-  </define>
+-
+-  <define name="absFilePath">
+-    <data type="string">
+-      <param name="pattern">/[a-zA-Z0-9_\.\+\-&amp;/%]+</param>
+-    </data>
+-  </define>
+-
+  </grammar>
 
 
---=-tm5TTlQUWMD+Gb3rq//q
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEABECAAYFAk6rJeoACgkQ2kQg7SiJlcgS7ACfR0KT6jFGfURJ5o0K1etP538s
-pl4AoM+xX6MhWL/6UM3lXTlk0tm/+3Wo
-=19kC
------END PGP SIGNATURE-----
-
---=-tm5TTlQUWMD+Gb3rq//q--
-
+-- 
+Eric Blake   eblake@redhat.com    +1-801-349-2682
+Libvirt virtualization library http://libvirt.org
