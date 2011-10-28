@@ -1,255 +1,224 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: how to run ceph on top of other local file system
-Date: Fri, 28 Oct 2011 14:12:31 -0500
-Message-ID: <CAB7xdinQ8uVDxX5R5bGF1mvGG_RLANNQ8A9Lweu4hDtGjnQ_HA@mail.gmail.com>
-References: <CAB7xdikWPdZ4RaLRvqpMhUdkOS6=99ggdx3iBidBkbWy3k5vOg@mail.gmail.com>
-	<CAORUGqBnqHOJp_wy3QOi=2LUy3Tbi+6PoaA4sTgUeSPqzDCZyw@mail.gmail.com>
-	<CAB7xdim9QmtLWSVTrPoZofrwY=0PQEzsxtcBjA=pgS-GzLgzAw@mail.gmail.com>
-	<CAF3hT9BwDAnUewrfTeZSWMuJSDHZW765jKF2sgQ2jNa32cLgxw@mail.gmail.com>
-	<CAB7xdin1rNSi6zMQcnOviu2GVwnu3iNX46qh51vSviXZquhiRA@mail.gmail.com>
-	<CAORUGqAwJwzOe1g8JMoHduTenau5uQT6fwWJYQ2pixNnLZ3cmw@mail.gmail.com>
-	<CAB7xdinFBP1r-PuebjEXh1Rdwge-iEYNQpJmhCM88xuyEmqZhw@mail.gmail.com>
-	<CAB7xdikHKc_EixAujGpkMzysO_7+0FipKhvyzZz7QELUV2d00A@mail.gmail.com>
-	<Pine.LNX.4.64.1110260936030.18909@cobra.newdream.net>
-	<CAB7xdikG2BuQiKiwVrFmzzPTDqyMLbObuy1GbyoQ=vkzGPa2Yw@mail.gmail.com>
-	<Pine.LNX.4.64.1110261123560.18909@cobra.newdream.net>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: [libvirt] [RFC PATCH v3 2/4] storage: add auth to virDomainDiskDef
+Date: Fri, 28 Oct 2011 12:15:10 -0700
+Message-ID: <4EAAFF3E.6070703@dreamhost.com>
+References: <cover.1319072460.git.josh.durgin@dreamhost.com>	<24e32a383e9e614a3d192fa709e73c22a069ce9e.1319072460.git.josh.durgin@dreamhost.com>	<20111027083301.GB20878@redhat.com> <4EAAFA1B.6080706@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:57979 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750834Ab1J1TMc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2011 15:12:32 -0400
-Received: by iaby12 with SMTP id y12so4365791iab.19
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Oct 2011 12:12:31 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1110261123560.18909@cobra.newdream.net>
+Received: from mail.hq.newdream.net ([66.33.206.127]:56616 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751222Ab1J1TPK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2011 15:15:10 -0400
+In-Reply-To: <4EAAFA1B.6080706@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Tommi Virtanen <tommi.virtanen@dreamhost.com>, ceph-devel@vger.kernel.org
+To: Eric Blake <eblake@redhat.com>
+Cc: "Daniel P. Berrange" <berrange@redhat.com>, libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-Hi sage,
-
-thanks for your help. i have built up the system and run postmark and
-iozone to get some performance data. my system contains two machine,
-one is set as monitor, mds and osd. another is set as mds and osd.
-each osd is a SSD with ext3.
-i compared this system with another system that only use a SSD with
-ext3 on a local machine without distributing data to other machines.
-to me, the performance of ceph is much poorer than a local
-environment. likely from mb/s to kb/s decrease......
-is this normal, i read the ceph paper, seems that the performance is
-not that bad.  i am a little confused.
-
-Thanks,
-Sheng
-
-On Wed, Oct 26, 2011 at 1:24 PM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 26 Oct 2011, sheng qiu wrote:
->> hi Sage,
->>
->> it's a file. but the file is on a separated device from the osd.
+On 10/28/2011 11:53 AM, Eric Blake wrote:
+> On 10/27/2011 02:33 AM, Daniel P. Berrange wrote:
+>> On Thu, Oct 20, 2011 at 11:01:25AM -0700, Josh Durgin wrote:
+>>> Add additional fields to let you specify the how to authenticate with
+>>> a disk.
+>>> The secret to use may be referenced by a usage string or a UUID, i.e.:
+>>>
+>>> <auth username='myuser'>
+>>> <secret type='ceph' usage='secretname'/>
+>>> </auth>
+>>>
+>>> or
+>>>
+>>> <auth username='myuser'>
+>>> <secret type='ceph' uuid='0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f'/>
+>>> </auth>
+>>>
 >
-> Is it on NFS or something? =A0Or maybe SELinux/AppArmor is mucking th=
-ings
-> up?
+>>> +++ b/src/Makefile.am
+>>> @@ -128,7 +128,8 @@ DOMAIN_CONF_SOURCES = \
+>>> conf/capabilities.c conf/capabilities.h \
+>>> conf/domain_conf.c conf/domain_conf.h \
+>>> conf/domain_audit.c conf/domain_audit.h \
+>>> - conf/domain_nwfilter.c conf/domain_nwfilter.h
+>>> + conf/domain_nwfilter.c conf/domain_nwfilter.h \
+>>> + conf/secret_conf.c
+>>
+>>
+>> Unless I'm missing something, I don't think your code changes to
+>> domain_conf.c actually introduce any dependancy on secret_conf.c
+>> You include secret_conf.h, but that is only to get access to one
+>> of the enum values. So there's no dep on the secret_conf.c code
+>> and you can just drop this hunk
 >
-> Try putting the journal on a raw block device, or a file on a local f=
-ile
-> system, and you shouldn't see this.
+> Actually, the linker now wants to pull in
+> virSecretUsageTypeTypeFromString (yuck; why do we have that doubled
+> "Type" in the name?), so that means more drivers have to add a link
+> library, to prevent problems like this:
 >
-> sage
+> libvirt_lxc-domain_conf.o: In function `virDomainDiskDefParseXML':
+> /home/remote/eblake/libvirt/src/conf/domain_conf.c:2479: undefined
+> reference to `virSecretUsageTypeTypeFromString'
 >
+>>> + </attribute>
+>>> + <attribute name="usage">
+>>> + <ref name="genericName"/>
 >
->>
->> On Wed, Oct 26, 2011 at 11:38 AM, Sage Weil <sage@newdream.net> wrot=
-e:
->> > On Wed, 26 Oct 2011, sheng qiu wrote:
->> >> thanks for the reply. i met a new problem. now i can mount the ce=
-ph
->> >> using cfuse. and write small single file. but it will crash when =
-file
->> >> size increased to some number. the osd.log is:
->> >> 2011-10-26 08:59:20.156983 7febdca06700 journal FileJournal::writ=
-e_bl
->> >> : write_fd failed: error 13: Permission denied
->> >
->> > We're getting an error when trying to write to the journal device.=
- =A0Is
->> > that a file or a block device? =A0I'm not sure what would cause a =
-write
->> > EACCES on an already-open file...
->> >
->> > And strace -f log might on the ceph-osd might tell us more.
->> >
->> > sage
->> >
->> >> 2011-10-26 08:59:20.157000 7febdca06700 journal FileJournal::do_w=
-rite:
->> >> write_bl(pos=3D10481664) failed
->> >> os/FileJournal.cc: In function 'void
->> >> FileJournal::do_write(ceph::bufferlist&)', in thread '0x7febdca06=
-700'
->> >> os/FileJournal.cc: 817: FAILED assert(0)
->> >> =A0ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15=
-f6d6)
->> >> =A01: (FileJournal::do_write(ceph::buffer::list&)+0x367) [0x6b61f=
-7]
->> >> =A02: (FileJournal::write_thread_entry()+0x3e6) [0x6b97c6]
->> >> =A03: (FileJournal::Writer::entry()+0xd) [0x6a50dd]
->> >> =A04: (()+0x69ca) [0x7febe38119ca]
->> >> =A05: (clone()+0x6d) [0x7febe22f870d]
->> >> =A0ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15=
-f6d6)
->> >> =A01: (FileJournal::do_write(ceph::buffer::list&)+0x367) [0x6b61f=
-7]
->> >> =A02: (FileJournal::write_thread_entry()+0x3e6) [0x6b97c6]
->> >> =A03: (FileJournal::Writer::entry()+0xd) [0x6a50dd]
->> >> =A04: (()+0x69ca) [0x7febe38119ca]
->> >> =A05: (clone()+0x6d) [0x7febe22f870d]
->> >> *** Caught signal (Aborted) **
->> >> =A0in thread 0x7febdca06700
->> >> =A0ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa055e15=
-f6d6)
->> >> =A01: ./cosd() [0x5c69d4]
->> >> =A02: (()+0xf8f0) [0x7febe381a8f0]
->> >> =A03: (gsignal()+0x35) [0x7febe2245a75]
->> >> =A04: (abort()+0x180) [0x7febe22495c0]
->> >> =A05: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7febe2a=
-fb8e5]
->> >> =A06: (()+0xcad16) [0x7febe2af9d16]
->> >> =A07: (()+0xcad43) [0x7febe2af9d43]
->> >> =A08: (()+0xcae3e) [0x7febe2af9e3e]
->> >> =A09: (ceph::__ceph_assert_fail(char const*, char const*, int, ch=
-ar
->> >> const*)+0x39f) [0x5cbb1f]
->> >> =A010: (FileJournal::do_write(ceph::buffer::list&)+0x367) [0x6b61=
-f7]
->> >> =A011: (FileJournal::write_thread_entry()+0x3e6) [0x6b97c6]
->> >> =A012: (FileJournal::Writer::entry()+0xd) [0x6a50dd]
->> >> =A013: (()+0x69ca) [0x7febe38119ca]
->> >> =A014: (clone()+0x6d) [0x7febe22f870d]
->> >>
->> >> does any one have idea about this?
->> >>
->> >> Thanks,
->> >> Sheng
->> >>
->> >> On Mon, Oct 24, 2011 at 2:02 PM, sheng qiu <herbert1984106@gmail.=
-com> wrote:
->> >> > hi,
->> >> >
->> >> > is there any way to debug ceph to find out where it crash?
->> >> >
->> >> > Thanks,
->> >> > Sheng
->> >> >
->> >> > On Mon, Oct 24, 2011 at 11:55 AM, Tommi Virtanen
->> >> > <tommi.virtanen@dreamhost.com> wrote:
->> >> >> On Sun, Oct 23, 2011 at 12:22, sheng qiu <herbert1984106@gmail=
-=2Ecom> wrote:
->> >> >>> does ceph only support ext3 and btrfs? i mean if i have anoth=
-er file
->> >> >>> system, it support xattr, but it does not support journals, c=
-an i
->> >> >>> close the journal config and run it with ceph?
->> >> >>
->> >> >> Ceph supports OSD storage on POSIX-compliant filesystems with =
-extended
->> >> >> attributes. There are some edge cases that are still problemat=
-ic, see
->> >> >> the email with subject "ceph on non-btrfs file systems" that S=
-age just
->> >> >> sent for a better discussion of those.
->> >> >>
->> >> >> I'm not sure what you mean by a filesystem "not supporting jou=
-rnals",
->> >> >> the ceph-osd journal is just a file it writes to. I'm not sure=
- what
->> >> >> you mean by "closing the journal config"; you can disable the =
-journal,
->> >> >> but that will likely just make things slower; once again, usin=
-g a
->> >> >> journal is possible on any filesystem, btrfs just makes it mor=
-e
->> >> >> effective.
->> >> >>
->> >> >>> i tried to do that by modifying the ceph.conf file (close the=
- journal
->> >> >>> on osd). the mkcephfs seems ok, but when i start the service,=
- cosd
->> >> >>> will crash.
->> >> >>> here's the log:
->> >> >>> *** Caught signal (Aborted) **
->> >> >>> =A0in thread 0x7f1845ce6720
->> >> >>> =A0ceph version 0.34 (commit:2f039eeeb745622b866d80feda7afa05=
-5e15f6d6)
->> >> >>> =A01: ./cosd() [0x5c6304]
->> >> >> ...
->> >> >>> =A09: (CrushWrapper::decode(ceph::buffer::list::iterator&)+0x=
-ac) [0x5611fc]
->> >> >>> =A010: (OSDMap::decode(ceph::buffer::list&)+0x8aa) [0x5622aa]
->> >> >>> =A011: (OSD::get_map(unsigned int)+0x221) [0x52f441]
->> >> >>
->> >> >> That sounds more like the osdmap is corrupt, somehow. Anyone e=
-lse have
->> >> >> more specific suggestions?
->> >> >>
->> >> >
->> >> >
->> >> >
->> >> > --
->> >> > Sheng Qiu
->> >> > Texas A & M University
->> >> > Room 302 Wisenbaker
->> >> > email: herbert1984106@gmail.com
->> >> > College Station, TX 77843-3259
->> >> >
->> >>
->> >>
->> >>
->> >> --
->> >> Sheng Qiu
->> >> Texas A & M University
->> >> Room 302 Wisenbaker
->> >> email: herbert1984106@gmail.com
->> >> College Station, TX 77843-3259
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.h=
-tml
->> >>
->> >>
->>
->>
->>
->> --
->> Sheng Qiu
->> Texas A & M University
->> Room 302 Wisenbaker
->> email: herbert1984106@gmail.com
->> College Station, TX 77843-3259
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
->>
+> This says usage='name' uses a genericName, but in secret.rng, you said
+> element <name> could use arbitrary text - that is, we have a discrepancy
+> where the secret could have an arbitrary name which validates for
+> secret.rng but fails to validate for <auth> as part of domain.rng. You
+> probably ought to do a followup patch that consolidates the two .rng
+> files to use the same definition for what you will accept as a valid
+> Ceph secret name.
 
+Yeah, I'll fix that.
 
+>>>
+>>> + if (def->auth.username) {
+>>> + virBufferAsprintf(buf, "<auth username='%s'>\n",
+>>> + def->auth.username);
+>>> + if (def->auth.secretType == VIR_DOMAIN_DISK_SECRET_TYPE_UUID) {
+>>> + virUUIDFormat(def->auth.secret.uuid, uuidstr);
+>>> + virBufferAsprintf(buf,
+>>> + "<secret type='passphrase' uuid='%s'/>\n",
+>
+> This disagrees with your type='ceph' in the commit message (twice). You
+> would have caught this had you added a test that does round-trip from
+> XML in and back out somewhere in the series. Could you please do that as
+> a followup patch?
 
---=20
-Sheng Qiu
-Texas A & M University
-Room 302 Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Oops, sorry about that. The reason I didn't include a test going from 
+commandline to secret is that we're going to be passing the secret 
+through the qemu monitor so it won't be exposed on the command line.
+
+>>> + uuidstr);
+>>> + }
+>>> + if (def->auth.secretType == VIR_DOMAIN_DISK_SECRET_TYPE_USAGE) {
+>>> + virBufferAsprintf(buf,
+>
+> This must use virBufferEscapeString, since the user's "usage" string may
+> have arbitrary text.
+>
+>>> + "<secret type='passphrase' usage='%s'/>\n",
+>>> + def->auth.secret.usage);
+>>> + }
+>>> + virBufferAsprintf(buf, "</auth>\n");
+>
+> AddLit is more efficient than Asprintf for a constant string.
+>
+>>> +enum virDomainDiskSecretType {
+>>> + VIR_DOMAIN_DISK_SECRET_TYPE_NONE,
+>>> + VIR_DOMAIN_DISK_SECRET_TYPE_UUID,
+>>> + VIR_DOMAIN_DISK_SECRET_TYPE_USAGE,
+>>> +
+>>> + VIR_DOMAIN_DISK_SECRET_TYPE_LAST
+>>> +};
+>>> +
+>>> /* Stores the virtual disk configuration */
+>>> typedef struct _virDomainDiskDef virDomainDiskDef;
+>>> typedef virDomainDiskDef *virDomainDiskDefPtr;
+>>> @@ -281,6 +289,14 @@ struct _virDomainDiskDef {
+>>> int protocol;
+>>> int nhosts;
+>>> virDomainDiskHostDefPtr hosts;
+>>> + struct {
+>>> + char *username;
+>>> + int secretType;
+>
+> I like to add a comment stating which values are expected in this field
+> (here, enum virDomainDiskSecretType).
+>
+>>
+>> ACK with the Makefile.am hunk dropped
+>
+> Also missing documentation. Here's what I had to squash in for that,
+> before pushing. Also, I added Josh to AUTHORS (shoot, I also realized
+> that I botched Josh's email in 1/4 when hand-applying everything, due to
+> battling the lost emails, sorry about that).
+>
+> diff --git i/docs/formatdomain.html.in w/docs/formatdomain.html.in
+> index fcffb25..f31b775 100644
+> --- i/docs/formatdomain.html.in
+> +++ w/docs/formatdomain.html.in
+> @@ -913,6 +913,16 @@
+> &lt;transient/&gt;
+> &lt;address type='drive' controller='0' bus='1' unit='0'/&gt;
+> &lt;/disk&gt;
+> + &lt;disk type='network'&gt;
+> + &lt;driver name="qemu" type="raw"/&gt;
+> + &lt;source protocol="rbd" name="image_name2"&gt;
+> + &lt;host name="hostname" port="7000"/&gt;
+> + &lt;/source&gt;
+> + &lt;target dev="hdd" bus="ide"/&gt;
+> + &lt;auth username='myuser'&gt;
+> + &lt;secret type='ceph' usage='mypassid'/&gt;
+> + &lt;/auth&gt;
+> + &lt;/disk&gt;
+> &lt;disk type='block' device='cdrom'&gt;
+> &lt;driver name='qemu' type='raw'/&gt;
+> &lt;target def='hdc' bus='ide'/&gt;
+> @@ -1160,7 +1170,24 @@
+> "drive" controller, additional attributes
+> <code>controller</code>, <code>bus</code>,
+> and <code>unit</code> are available, each defaulting to 0.
+> -
+> + </dd>
+> + <dt><code>auth</code></dt>
+> + <dd>If present, the <code>auth</code> element provides the
+> + authentication credentials needed to access the source. It
+> + includes a mandatory attribute <code>username</code>, which
+> + identifies the username to use during authentication, as well
+> + as a sub-element <code>secret</code> with mandatory
+> + attribute <code>type</code>, to tie back to
+> + a <a href="formatsecret.html">libvirt secret object</a> that
+> + holds the actual password or other credentials (the domain XML
+> + intentionally does not expose the password, only the reference
+> + to the object that does manage the password). For now, the
+> + only known secret <code>type</code> is "ceph", for Ceph RBD
+> + network sources, and requires either an
+> + attribute <code>uuid</code> with the UUID of the Ceph secret
+> + object, or an attribute <code>usage</code> with the name
+> + associated with the Ceph secret
+> + object. <span class="since">libvirt 0.9.7</span>
+> </dd>
+> </dl>
+>
+> diff --git i/src/Makefile.am w/src/Makefile.am
+> index 5b3a66f..995afae 100644
+> --- i/src/Makefile.am
+> +++ w/src/Makefile.am
+> @@ -128,8 +128,7 @@ DOMAIN_CONF_SOURCES = \
+> conf/capabilities.c conf/capabilities.h \
+> conf/domain_conf.c conf/domain_conf.h \
+> conf/domain_audit.c conf/domain_audit.h \
+> - conf/domain_nwfilter.c conf/domain_nwfilter.h \
+> - conf/secret_conf.c conf/secret_conf.h
+> + conf/domain_nwfilter.c conf/domain_nwfilter.h
+>
+> DOMAIN_EVENT_SOURCES = \
+> conf/domain_event.c conf/domain_event.h
+> @@ -1476,6 +1475,7 @@ libvirt_lxc_SOURCES = \
+> $(NODE_INFO_SOURCES) \
+> $(ENCRYPTION_CONF_SOURCES) \
+> $(DOMAIN_CONF_SOURCES) \
+> + $(SECRET_CONF_SOURCES) \
+> $(CPU_CONF_SOURCES) \
+> $(NWFILTER_PARAM_CONF_SOURCES)
+> libvirt_lxc_LDFLAGS = $(WARN_CFLAGS) $(AM_LDFLAGS)
+>
+> diff --git i/src/libvirt_private.syms w/src/libvirt_private.syms
+> index 987c512..288911a 100644
+> --- i/src/libvirt_private.syms
+> +++ w/src/libvirt_private.syms
+> @@ -930,6 +930,8 @@ virSecretDefFormat;
+> virSecretDefFree;
+> virSecretDefParseFile;
+> virSecretDefParseString;
+> +virSecretUsageTypeTypeFromString;
+> +virSecretUsageTypeTypeToString;
+>
+>
+> # security_driver.h
+>
+
