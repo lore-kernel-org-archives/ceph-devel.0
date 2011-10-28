@@ -1,74 +1,62 @@
-From: Damien Churchill <damoxc@gmail.com>
-Subject: Re: Crash when trying to mount ext4
-Date: Fri, 28 Oct 2011 12:49:48 +0100
-Message-ID: <CAFtEh-c7CA4aidt=1m_Zf8+sd3hxvLLcjC1A7qZ2zcqiDfbcBQ@mail.gmail.com>
-References: <CAFtEh-dPs+3foczt0Cjs=gWu42as=scALPAfJo+QPK+C3fRUbg@mail.gmail.com>
-	<CAC-hyiFAv1-HeFiX3MtOJwxbNyAAQp_CMpzDv0A7-Woo3+qKdA@mail.gmail.com>
-	<CAFtEh-dfsWQZ-Dpy8zAjK8Be=XfOqsBj4x3CU-G3AA7NYq8tSA@mail.gmail.com>
-	<CAC-hyiE8+xugo-ZtG=i7vJQTKOZCqkiD0Xj2Y6_uvoX1T2MaBQ@mail.gmail.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH] vfs: add d_prune dentry operation
+Date: Fri, 28 Oct 2011 08:16:52 -0400
+Message-ID: <20111028121652.GA23417@infradead.org>
+References: <1317875170-9349-1-git-send-email-sage@newdream.net>
+ <1317875170-9349-2-git-send-email-sage@newdream.net>
+ <20111006212118.GA24109@infradead.org>
+ <Pine.LNX.4.64.1110061507550.29500@cobra.newdream.net>
+ <20111010051141.GV3159@dastard>
+ <Pine.LNX.4.64.1110100850020.26361@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:58893 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932440Ab1J1Ltt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2011 07:49:49 -0400
-In-Reply-To: <CAC-hyiE8+xugo-ZtG=i7vJQTKOZCqkiD0Xj2Y6_uvoX1T2MaBQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: linux-bcache@vger.kernel.org, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1110100850020.26361@cobra.newdream.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@infradead.org>, linux-fsdevel@vger.kernel.org, viro@ZenIV.linux.org.uk, ceph-devel@vger.kernel.org, rwheeler@redhat.com, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 28 October 2011 04:17, Yehuda Sadeh Weinraub <yehudasa@gmail.com> wrote:
-> On Thu, Oct 27, 2011 at 1:51 PM, Damien Churchill <damoxc@gmail.com> wrote:
->> On 27 October 2011 17:25, Yehuda Sadeh Weinraub <yehudasa@gmail.com> wrote:
->>> On Thu, Oct 27, 2011 at 5:59 AM, Damien Churchill <damoxc@gmail.com> wrote:
->>>> Hi,
->>>>
->>>> I've been testing bcache with the latest sources from the git tree.
->>>> I've been attempting to use a rbd (RADOS block device) as the backing
->>>> device. I can format the bcache0 device with mkfs.ext4, however when I
->>>> mount it, there is a kernel bug when it attempts to initialize the
->>>> filesystem.
->>>>
->>>> I'm unsure if this is a bug in rbd or bcache however, I'm including
->>>> the stack trace outputted by the kernel. The kernel has been based off
->>>> the current Ubuntu Precise kernel (3.1.0) patched with the changes
->>>> from the bcache git repository as well as the changes from the ceph
->>>> repository in for-next (the same thing happened without the changes
->>>> from the ceph repository). bcache does function as expected when using
->>>> a raw disk drive.
->>>>
->>>
->>> Can you push a tree somewhere that has the exact kernel that you're
->>> using, patched with the specific bcache version? It'll make it easier
->>> for us to look at the issue.
->>>
->>> Thanks,
->>> Yehuda
->>>
->>
->> Certainly, I've pushed it up to github,
->> https://github.com/damoxc/linux.git. It's in the branch "testing".
->>
->
-> I was able to reproduce the issue. It seems that bcache creates bios
-> without invoking the merge_bvec callback (which we implement), so we
-> end up with a request that holds pages that exceed the rbd block
-> boundaries. The call to bio_split then crashes as it shouldn't have
-> more than a single page trailing outside. So it's either a problem in
-> bcache that doesn't call that callback, or an issue with rbd code that
-> assumes that it'll always be called. A relatively quick workaround for
-> rbd would be to create a special bio_split function that would do the
-> required splitting for this case, but I'm not sure whether that would
-> be the proper solution. If that's a bcache oversight and not an
-> incorrect assumption I'd rather leave it for bcache.
->
+This variant seems to crash btrfs in xfstests 010:
 
-Thanks a lot for looking. I agree that it should be fixed in the
-correct place instead of a workaround being implemented. I will try
-and have a look at the bcache code to see if I can spot anything and
-whip up a patch.
-
-Thanks again,
-Damien
+010 0s ... 0s
+[ 8093.504387] BUG: unable to handle kernel NULL pointer dereference at (null)
+[ 8093.505618] IP: [<          (null)>]           (null)
+[ 8093.505930] PGD 196f5067 PUD 5507d067 PMD 0 
+[ 8093.505930] Oops: 0010 [#1] SMP 
+[ 8093.505930] CPU 0 
+[ 8093.505930] Modules linked in:
+[ 8093.505930] 
+[ 8093.505930] Pid: 26328, comm: umount Not tainted 3.1.0+ #90 Bochs Bochs
+[ 8093.505930] RIP: 0010:[<0000000000000000>]  [<          (null)>] (null)
+[ 8093.505930] RSP: 0018:ffff880009f63dc0  EFLAGS: 00010206
+[ 8093.505930] RAX: ffffffff81ae7780 RBX: ffff88002b93a840 RCX: 000000010023ad06
+[ 8093.505930] RDX: ffff88002b93a8e0 RSI: ffffffff8114fef0 RDI: ffff88002b93a840
+[ 8093.505930] RBP: ffff880009f63dd8 R08: 0000000000000000 R09: 002dffe1ea51a56d
+[ 8093.505930] R10: ffff880058c7f680 R11: 0000000000000004 R12: ffff88002b93a8c0
+[ 8093.505930] R13: 0000000000000000 R14: ffff88005a56d0c0 R15: ffff88001a896000
+[ 8093.505930] FS:  0000000000000000(0000) GS:ffff88005d800000(0063) knlGS:00000000f75c6700
+[ 8093.505930] CS:  0010 DS: 002b ES: 002b CR0: 0000000080050033
+[ 8093.505930] CR2: 0000000000000000 CR3: 0000000041ddc000 CR4: 00000000000006f0
+[ 8093.505930] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[ 8093.505930] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+[ 8093.505930] Process umount (pid: 26328, threadinfo ffff880009f62000, task ffff88003abd6500)
+[ 8093.505930] Stack:
+[ 8093.505930]  ffffffff8114efb7 ffff88002b93a840 ffff88005a3c4500 ffff880009f63e08
+[ 8093.505930]  ffffffff811516ea ffff880009f63f08 0000000000000000 ffff88001a896000
+[ 8093.505930]  ffffffff81ae40c0 ffff880009f63e28 ffffffff8115192e ffff880009f63e38
+[ 8093.505930] Call Trace:
+[ 8093.505930]  [<ffffffff8114efb7>] ? dentry_lru_prune+0x87/0x90
+[ 8093.505930]  [<ffffffff811516ea>] shrink_dcache_for_umount_subtree+0x7a/0x1e0
+[ 8093.505930]  [<ffffffff8115192e>] shrink_dcache_for_umount+0x2e/0x60
+[ 8093.505930]  [<ffffffff8113d977>] generic_shutdown_super+0x27/0xd0
+[ 8093.505930]  [<ffffffff8113dab1>] kill_anon_super+0x11/0x20
+[ 8093.505930]  [<ffffffff8113de25>] deactivate_locked_super+0x45/0x70
+[ 8093.505930]  [<ffffffff8113e7e9>] deactivate_super+0x49/0x70
+[ 8093.505930]  [<ffffffff81157f7b>] mntput_no_expire+0xab/0xf0
+[ 8093.505930]  [<ffffffff81158c1a>] sys_umount+0x6a/0x360
+[ 8093.505930]  [<ffffffff81158f1b>] sys_oldumount+0xb/0x10
+[ 8093.505930]  [<ffffffff819e2f05>] sysenter_dispatch+0x7/0x2b
+[ 8093.505930] Code:  Bad RIP value.
+[ 8093.505930] RIP  [<          (null)>]           (null)
