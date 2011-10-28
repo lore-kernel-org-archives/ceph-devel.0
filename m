@@ -1,196 +1,93 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] vfs: add d_prune dentry operation
-Date: Fri, 28 Oct 2011 10:02:42 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1110280953470.28024@cobra.newdream.net>
-References: <1317875170-9349-1-git-send-email-sage@newdream.net>
- <1317875170-9349-2-git-send-email-sage@newdream.net> <20111006212118.GA24109@infradead.org>
- <Pine.LNX.4.64.1110061507550.29500@cobra.newdream.net> <20111010051141.GV3159@dastard>
- <Pine.LNX.4.64.1110100850020.26361@cobra.newdream.net> <20111028121652.GA23417@infradead.org>
+From: Eric Blake <eblake@redhat.com>
+Subject: Re: [libvirt] [RFC PATCH v3 1/4] secret: add Ceph secret type
+Date: Fri, 28 Oct 2011 11:41:52 -0600
+Message-ID: <4EAAE960.9010308@redhat.com>
+References: <cover.1319072460.git.josh.durgin@dreamhost.com>	<539f3129dfd5d3f80a06837b63dfc5d355f1acc8.1319072460.git.josh.durgin@dreamhost.com> <20111027082845.GA20878@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47214 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932364Ab1J1RCn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2011 13:02:43 -0400
-In-Reply-To: <20111028121652.GA23417@infradead.org>
+Received: from mx1.redhat.com ([209.132.183.28]:29937 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751472Ab1J1RmD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 28 Oct 2011 13:42:03 -0400
+In-Reply-To: <20111027082845.GA20878@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Dave Chinner <david@fromorbit.com>, linux-fsdevel@vger.kernel.org, viro@ZenIV.linux.org.uk, ceph-devel@vger.kernel.org, rwheeler@redhat.com, linux-kernel@vger.kernel.org
+To: "Daniel P. Berrange" <berrange@redhat.com>
+Cc: Josh Durgin <josh.durgin@dreamhost.com>, libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-On Fri, 28 Oct 2011, Christoph Hellwig wrote:
-> This variant seems to crash btrfs in xfstests 010:
+On 10/27/2011 02:28 AM, Daniel P. Berrange wrote:
+> On Thu, Oct 20, 2011 at 11:01:24AM -0700, Josh Durgin wrote:
+>> From: Sage Weil<sage@newdream.net>
+>>
+>> Add a new secret type to store a Ceph authentication key. The name
+>> is simply an identifier for easy human reference.
+>>
+>> The xml looks like this:
+>>
+>> <secret ephemeral='no' private='no'>
+>>    <uuid>0a81f5b2-8403-7b23-c8d6-21ccc2f80d6f</uuid>
+>>    <usage type='ceph'>
+>>      <name>mycluster_admin</name>
+>>    </usage>
+>> </secret>
+>>
+>> Signed-off-by: Sage Weil<sage@newdream.net>
+>> Signed-off-by: Josh Durgin<josh.durgin@dreamhost.com>
+>> ---
+>>   docs/schemas/secret.rng      |   10 ++++++++++
 
-This got rebased enough times that DCACHE_OP_PRUNE collided with 
-DCACHE_NEEDS_LOOKUP.  The version below fixes that, and also renumbers a 
-few of those constants to group it with the other DCACHE_OP_* guys.  I 
-assume it's okay to switch those up?
+Missing docs/formatsecret.html.in changes to document this, but I think 
+I managed.
 
-sage
+>>   include/libvirt/libvirt.h.in |    3 +++
+>>   src/conf/secret_conf.c       |   23 ++++++++++++++++++++++-
+>>   src/conf/secret_conf.h       |    1 +
+>>   src/secret/secret_driver.c   |    8 ++++++++
+>>   5 files changed, 44 insertions(+), 1 deletions(-)
+>
+> ACK
 
+I'm adding this, and pushing:
 
-From 2c39148ba12ce13442d66319f9d1ba91ce62974d Mon Sep 17 00:00:00 2001
-From: Sage Weil <sage@newdream.net>
-Date: Fri, 28 Oct 2011 09:55:21 -0700
-Subject: [PATCH] vfs: add d_prune dentry operation
+diff --git i/docs/formatsecret.html.in w/docs/formatsecret.html.in
+index 63a1f2a..01aff2d 100644
+--- i/docs/formatsecret.html.in
++++ w/docs/formatsecret.html.in
+@@ -39,8 +39,8 @@
+        <dd>
+          Specifies what this secret is used for.  A mandatory
+          <code>type</code> attribute specifies the usage category, 
+currently
+-        only <code>volume</code> is defined.  Specific usage categories are
+-        described below.
++        only <code>volume</code> and <code>ceph</code> are defined.
++        Specific usage categories are described below.
+        </dd>
+      </dl>
 
-This adds a d_prune dentry operation that is called by the VFS prior to
-pruning (i.e. unhashing and killing) a hashed dentry from the dcache.
-Wrap dentry_lru_del() and use the new _prune() helper in the cases where we
-are about to unhash and kill the dentry.
+@@ -54,6 +54,18 @@
+        this secret is associated with.
+      </p>
 
-This will be used by Ceph to maintain a flag indicating whether the
-complete contents of a directory are contained in the dcache, allowing it
-to satisfy lookups and readdir without addition server communication.
-
-Renumber a few DCACHE_* #defines to group DCACHE_OP_PRUNE with the other
-DCACHE_OP_ bits.
-
-Signed-off-by: Sage Weil <sage@newdream.net>
----
-
-v4: fixed DCACHE_OP_PRUNE collision with DCACHE_NEEDS_LOOKUP.
-v3: better comments for dentry_lru_{del,prune}
-v2: move prune call into dentry_lru_prune() wrapper
-
- Documentation/filesystems/Locking |    1 +
- fs/dcache.c                       |   40 ++++++++++++++++++++++++++++++++----
- include/linux/dcache.h            |    8 ++++--
- 3 files changed, 41 insertions(+), 8 deletions(-)
-
-diff --git a/Documentation/filesystems/Locking b/Documentation/filesystems/Locking
-index 6533807..d819ba1 100644
---- a/Documentation/filesystems/Locking
-+++ b/Documentation/filesystems/Locking
-@@ -29,6 +29,7 @@ d_hash		no		no		no		maybe
- d_compare:	yes		no		no		maybe
- d_delete:	no		yes		no		no
- d_release:	no		no		yes		no
-+d_prune:        no              yes             no              no
- d_iput:		no		no		yes		no
- d_dname:	no		no		no		no
- d_automount:	no		no		yes		no
-diff --git a/fs/dcache.c b/fs/dcache.c
-index a88948b..274f13e 100644
---- a/fs/dcache.c
-+++ b/fs/dcache.c
-@@ -225,7 +225,7 @@ static void dentry_unlink_inode(struct dentry * dentry)
- }
- 
- /*
-- * dentry_lru_(add|del|move_tail) must be called with d_lock held.
-+ * dentry_lru_(add|del|prune|move_tail) must be called with d_lock held.
-  */
- static void dentry_lru_add(struct dentry *dentry)
- {
-@@ -245,6 +245,9 @@ static void __dentry_lru_del(struct dentry *dentry)
- 	dentry_stat.nr_unused--;
- }
- 
-+/*
-+ * Remove a dentry with references from the LRU.
-+ */
- static void dentry_lru_del(struct dentry *dentry)
- {
- 	if (!list_empty(&dentry->d_lru)) {
-@@ -254,6 +257,23 @@ static void dentry_lru_del(struct dentry *dentry)
- 	}
- }
- 
-+/*
-+ * Remove a dentry that is unreferenced and about to be pruned
-+ * (unhashed and destroyed) from the LRU, and inform the file system.
-+ * This wrapper should be called _prior_ to unhashing a victim dentry.
-+ */
-+static void dentry_lru_prune(struct dentry *dentry)
-+{
-+	if (!list_empty(&dentry->d_lru)) {
-+		if (dentry->d_flags & DCACHE_OP_PRUNE)
-+			dentry->d_op->d_prune(dentry);
++    <h3>Usage type "ceph"</h3>
 +
-+		spin_lock(&dcache_lru_lock);
-+		__dentry_lru_del(dentry);
-+		spin_unlock(&dcache_lru_lock);
-+	}
-+}
++    <p>
++      This secret is associated with a Ceph RBD (rados block device).
++      The <code>&lt;usage type='ceph'&gt;</code> element must contain
++      a single <code>name</code> element that specifies a usage name
++      for the secret.  The Ceph secret can then be used by UUID or by
++      this usage name via the <code>&lt;auth&gt;</code> element of
++      a <a href="domain.html#elementsDisks">disk
++      device</a>. <span class="since">Since 0.9.7</span>.
++    </p>
 +
- static void dentry_lru_move_tail(struct dentry *dentry)
- {
- 	spin_lock(&dcache_lru_lock);
-@@ -403,8 +423,12 @@ relock:
- 
- 	if (ref)
- 		dentry->d_count--;
--	/* if dentry was on the d_lru list delete it from there */
--	dentry_lru_del(dentry);
-+	/*
-+	 * if dentry was on the d_lru list delete it from there.
-+	 * inform the fs via d_prune that this dentry is about to be
-+	 * unhashed and destroyed.
-+	 */
-+	dentry_lru_prune(dentry);
- 	/* if it was on the hash then remove it */
- 	__d_drop(dentry);
- 	return d_kill(dentry, parent);
-@@ -854,8 +878,12 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
- 		do {
- 			struct inode *inode;
- 
--			/* detach from the system */
--			dentry_lru_del(dentry);
-+			/*
-+			 * remove the dentry from the lru, and inform
-+			 * the fs that this dentry is about to be
-+			 * unhashed and destroyed.
-+			 */
-+			dentry_lru_prune(dentry);
- 			__d_shrink(dentry);
- 
- 			if (dentry->d_count != 0) {
-@@ -1283,6 +1311,8 @@ void d_set_d_op(struct dentry *dentry, const struct dentry_operations *op)
- 		dentry->d_flags |= DCACHE_OP_REVALIDATE;
- 	if (op->d_delete)
- 		dentry->d_flags |= DCACHE_OP_DELETE;
-+	if (op->d_prune)
-+		dentry->d_flags |= DCACHE_OP_PRUNE;
- 
- }
- EXPORT_SYMBOL(d_set_d_op);
-diff --git a/include/linux/dcache.h b/include/linux/dcache.h
-index 62157c0..4df9261 100644
---- a/include/linux/dcache.h
-+++ b/include/linux/dcache.h
-@@ -165,6 +165,7 @@ struct dentry_operations {
- 			unsigned int, const char *, const struct qstr *);
- 	int (*d_delete)(const struct dentry *);
- 	void (*d_release)(struct dentry *);
-+	void (*d_prune)(struct dentry *);
- 	void (*d_iput)(struct dentry *, struct inode *);
- 	char *(*d_dname)(struct dentry *, char *, int);
- 	struct vfsmount *(*d_automount)(struct path *);
-@@ -184,8 +185,9 @@ struct dentry_operations {
- #define DCACHE_OP_COMPARE	0x0002
- #define DCACHE_OP_REVALIDATE	0x0004
- #define DCACHE_OP_DELETE	0x0008
-+#define DCACHE_OP_PRUNE         0x0010
- 
--#define	DCACHE_DISCONNECTED	0x0010
-+#define	DCACHE_DISCONNECTED	0x0020
-      /* This dentry is possibly not currently connected to the dcache tree, in
-       * which case its parent will either be itself, or will have this flag as
-       * well.  nfsd will not use a dentry with this bit set, but will first
-@@ -196,8 +198,8 @@ struct dentry_operations {
-       * dentry into place and return that dentry rather than the passed one,
-       * typically using d_splice_alias. */
- 
--#define DCACHE_REFERENCED	0x0020  /* Recently used, don't discard. */
--#define DCACHE_RCUACCESS	0x0040	/* Entry has ever been RCU-visible */
-+#define DCACHE_REFERENCED	0x0040  /* Recently used, don't discard. */
-+#define DCACHE_RCUACCESS	0x0080	/* Entry has ever been RCU-visible */
- 
- #define DCACHE_CANT_MOUNT	0x0100
- #define DCACHE_GENOCIDE		0x0200
+      <h2><a name="example">Example</a></h2>
+
+      <pre>
+
+
 -- 
-1.7.0
-
+Eric Blake   eblake@redhat.com    +1-801-349-2682
+Libvirt virtualization library http://libvirt.org
