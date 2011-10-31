@@ -1,90 +1,43 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: [PATCH] hadoop: fix contract for listStatus
-Date: Mon, 31 Oct 2011 11:22:18 -0700
-Message-ID: <CAF3hT9DL4k5ZrPMqDzeC9R980s8h7ti5i+YRbgbmFc1V+g4ozw@mail.gmail.com>
-References: <975279467.13273.1319847928971.JavaMail.root@mail-01.cse.ucsc.edu>
+From: Eric Blake <eblake@redhat.com>
+Subject: Re: [libvirt] [RFC PATCH v3 3/4] qemu: pass virConnectPtr into Domain{Attach,
+ Detach}*
+Date: Mon, 31 Oct 2011 13:14:54 -0600
+Message-ID: <4EAEF3AE.1080400@redhat.com>
+References: <cover.1319072460.git.josh.durgin@dreamhost.com>	<4e26cbcba8e3c97941311abbc172b894626b8f96.1319072460.git.josh.durgin@dreamhost.com> <20111027083324.GC20878@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:52215 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933655Ab1JaSWT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Oct 2011 14:22:19 -0400
-Received: by iaby12 with SMTP id y12so7444196iab.19
-        for <ceph-devel@vger.kernel.org>; Mon, 31 Oct 2011 11:22:18 -0700 (PDT)
-In-Reply-To: <975279467.13273.1319847928971.JavaMail.root@mail-01.cse.ucsc.edu>
+Received: from mx1.redhat.com ([209.132.183.28]:2253 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933236Ab1JaTPB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 31 Oct 2011 15:15:01 -0400
+In-Reply-To: <20111027083324.GC20878@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@soe.ucsc.edu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Daniel P. Berrange" <berrange@redhat.com>
+Cc: Josh Durgin <josh.durgin@dreamhost.com>, libvir-list@redhat.com, ceph-devel@vger.kernel.org
 
-Just pushed this to master in
-commit:f9b7ecdb5bba1439dc4c13005a6213ddb6ecfcc5, with a minor change
-to the patch description. :)
-Thanks!
+On 10/27/2011 02:33 AM, Daniel P. Berrange wrote:
+> On Thu, Oct 20, 2011 at 11:01:26AM -0700, Josh Durgin wrote:
+>> From: Sage Weil<sage@newdream.net>
+>>
+>> The qemu RBD driver needs access to the conn in order to get the secret
+>> needed for connecting to the ceph cluster.
+>>
+>> Signed-off-by: Sage Weil<sage@newdream.net>
+>> ---
+>>   src/qemu/qemu_command.c |    5 +++--
+>>   src/qemu/qemu_command.h |    3 ++-
+>>   src/qemu/qemu_driver.c  |   17 ++++++++---------
+>>   src/qemu/qemu_hotplug.c |   15 +++++++++------
+>>   src/qemu/qemu_hotplug.h |    9 ++++++---
+>>   5 files changed, 28 insertions(+), 21 deletions(-)
+>
+> Trivial, ACK
 
-On Fri, Oct 28, 2011 at 5:25 PM, Noah Watkins <jayhawk@soe.ucsc.edu> wr=
-ote:
-> Return NULL when the path does not exist. Although
-> unspecified in the declaration header, other file
-> systems return a single result when the path is a file.
->
-> This fixes tracker issue #1661
->
-> Signed-off-by: Noah Watkins <noahwatkins@gmail.com>
-> ---
-> =A0src/client/hadoop/ceph/CephFileSystem.java | =A0 14 +++++++-------
-> =A01 files changed, 7 insertions(+), 7 deletions(-)
->
-> diff --git a/src/client/hadoop/ceph/CephFileSystem.java b/src/client/=
-hadoop/ceph/CephFileSystem.java
-> index c697075..a7317b1 100644
-> --- a/src/client/hadoop/ceph/CephFileSystem.java
-> +++ b/src/client/hadoop/ceph/CephFileSystem.java
-> @@ -435,9 +435,8 @@ public class CephFileSystem extends FileSystem {
-> =A0 =A0* Get the FileStatus for each listing in a directory.
-> =A0 =A0* @param path The directory to get listings from.
-> =A0 =A0* @return FileStatus[] containing one FileStatus for each dire=
-ctory listing;
-> - =A0 * null if path is not a directory.
-> + =A0 * =A0 =A0 =A0 =A0 null if path does not exist.
-> =A0 =A0* @throws IOException if initialize() hasn't been called.
-> - =A0 * @throws FileNotFoundException if the input path can't be foun=
-d.
-> =A0 =A0*/
-> =A0 public FileStatus[] listStatus(Path path) throws IOException {
-> =A0 =A0 if (!initialized) {
-> @@ -458,11 +457,12 @@ public class CephFileSystem extends FileSystem =
-{
-> =A0 =A0 =A0 ceph.debug("listStatus:exit", ceph.DEBUG);
-> =A0 =A0 =A0 return statuses;
-> =A0 =A0 }
-> - =A0 =A0if (!isFile(path)) {
-> - =A0 =A0 =A0throw new FileNotFoundException();
-> - =A0 =A0} // if we get here, listPaths returned null
-> - =A0 =A0// which means that the input wasn't a directory, so throw a=
-n Exception if it's not a file
-> - =A0 =A0return null; // or return null if it's a file
-> +
-> + =A0 =A0if (isFile(path)) {
-> + =A0 =A0 =A0return new FileStatus[] { getFileStatus(path) };
-> + =A0 =A0}
-> +
-> + =A0 =A0return null;
-> =A0 }
->
-> =A0 @Override
-> --
-> 1.7.5.4
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Now pushed.
+
+-- 
+Eric Blake   eblake@redhat.com    +1-801-349-2682
+Libvirt virtualization library http://libvirt.org
