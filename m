@@ -1,83 +1,55 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: BUG at fs/inode.c
-Date: Tue, 1 Nov 2011 09:51:00 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1111010907470.30839@cobra.newdream.net>
-References: <201110241239.13157.a.ott@m-privacy.de> <201110251038.06482.a.ott@m-privacy.de>
- <201110251635.11474.a.ott@m-privacy.de> <201111010923.18074.a.ott@m-privacy.de>
+Subject: Re: sync Ceph 0.37 with Debian
+Date: Tue, 1 Nov 2011 12:59:53 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1111011258480.20159@cobra.newdream.net>
+References: <1320137969.22458.173.camel@julia.gcs.org.hu>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39478 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:39545 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755349Ab1KAQvC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Nov 2011 12:51:02 -0400
-In-Reply-To: <201111010923.18074.a.ott@m-privacy.de>
+	with ESMTP id S1751704Ab1KAT7y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Nov 2011 15:59:54 -0400
+In-Reply-To: <1320137969.22458.173.camel@julia.gcs.org.hu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>
-Cc: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Laszlo Boszormenyi <gcs@debian.hu>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, 1 Nov 2011, Amon Ott wrote:
-> On Tuesday 25 October 2011 wrote Amon Ott:
-> > On Tuesday 25 October 2011 wrote Amon Ott:
-> > > On Monday 24 October 2011 wrote Yehuda Sadeh Weinraub:
-> > > > Also, the client logs could help shedding a light on the issue. You
-> > > > should have dynamic debugging turned on (CONFIG_DYNAMIC_DEBUG), and
-> > > > something along the lines of:
-> > > >
-> > > > # mount -t debugfs none /sys/kernel/debug
-> > > > # echo 'module ceph +p' > /sys/kernel/debug/dynamic_debug/control
-> > > > # echo 'module libceph +p' > /sys/kernel/debug/dynamic_debug/control
-> > >
-> > > New kernels are building right now. Upgraded to 3.0.8, put in new
-> > > ceph-client master fix 8ba1683acc83aee4bcab304844f8e60330e5ef1f and added
-> > > CONFIG_DYNAMIC_DEBUG. This kernel will go into two big servers this time
-> > > to give it some real load. Let's see whether I can reproduce there, too.
-> > > If so, I will provide debug output as requested.
-> >
-> > Finally, I could reproduce with debugging on and keep the system alive long
-> > enough to copy the kernel log. Attached are two examples of the BUG
-> > happening with surrounding Ceph logs. Before and after these extracts are
-> > some seconds without logging, so I assume they are complete.
-> 
-> Any news on this bug? Do you need more info? I would really like to go on 
-> testing, but this bug is a show stopper for me.
+Hi Laszlo,
 
-Sorry, I dropped this one. Just added it to the tracker at
-	http://tracker.newdream.net/issues/1667
-
-There is enough in those logs to tell that there is a bad iput() 
-somewhere.  In bug1, we create a new inode, link it to dn A, and shortly 
-thereafter dn B sees it is also linked to it (incorrectly) and we iput().  
-Presumably we reused an inode address that was still in use (and the same 
-thing happens with the new inode right after that).
-
-Can you capture a larger log segment?  The hope is to catch the first 
-use-after-free, and not the subsequent side-effects.
-
-Also, the below patch may help us parse the output with multiple threads.
+Thanks for these.  I committed everything to the wip-debian branch.. can 
+you verify they are correct before I merge to master?
 
 Thanks!
 sage
 
+On Tue, 1 Nov 2011, Laszlo Boszormenyi wrote:
 
-diff --git a/kernel/printk.c b/kernel/printk.c
-index 28a40d8..9fcf993 100644
---- a/kernel/printk.c
-+++ b/kernel/printk.c
-@@ -929,9 +929,10 @@ asmlinkage int vprintk(const char *fmt, va_list args)
- 
-                                t = cpu_clock(printk_cpu);
-                                nanosec_rem = do_div(t, 1000000000);
--                               tlen = sprintf(tbuf, "[%5lu.%06lu] ",
-+                               tlen = sprintf(tbuf, "[%5lu.%06lu %6lu] ",
-                                                (unsigned long) t,
--                                               nanosec_rem / 1000);
-+                                              nanosec_rem / 1000,
-+                                              current->pid);
- 
-                                for (tp = tbuf; tp < tbuf + tlen; tp++)
-                                        emit_log_char(*tp);
-
-
-
+> Hi all,
+> 
+> There are some mistakes and difference with Debian packages and your
+> work.
+> Please add debian/watch (attached).
+> libceph packages are renamed to libcephfs , but the related packager
+> files are not. The following should fix this:
+> git mv debian/libceph1.install debian/libcephfs1.install
+> git mv debian/libceph1.postinst debian/libcephfs1.postinst
+> git mv debian/libceph1.postrm debian/libcephfs1.postrm
+> git mv debian/libceph-dev.install debian/libcephfs-dev.install
+> 
+> Still on the renames, some conflicts-replaces are needed (attached).
+> 
+> As I see, the primary VCS location changed to github, state this in
+> debian/control as well (attached).
+> 
+> Either add the logrotate_missingok.patch (attached) or add missingok
+> to src/logrotate.conf [1].
+> 
+> Per policy and multiarch support, Debian packages have to empty their
+> dependency_libs in *.la files (attached).
+> 
+> Thanks,
+> Laszlo/GCS
+> [1] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=645651
+> 
