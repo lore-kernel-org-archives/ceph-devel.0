@@ -1,87 +1,55 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: how to run ceph on top of other local file system
-Date: Tue, 1 Nov 2011 20:09:50 -0500
-Message-ID: <CAB7xdi=n6Y7w=GonMfMN168m8bFjkQSbOR0Q=afz5hGpjUG3nA@mail.gmail.com>
-References: <CAB7xdikWPdZ4RaLRvqpMhUdkOS6=99ggdx3iBidBkbWy3k5vOg@mail.gmail.com>
-	<CAORUGqBnqHOJp_wy3QOi=2LUy3Tbi+6PoaA4sTgUeSPqzDCZyw@mail.gmail.com>
-	<CAB7xdim9QmtLWSVTrPoZofrwY=0PQEzsxtcBjA=pgS-GzLgzAw@mail.gmail.com>
-	<CAF3hT9BwDAnUewrfTeZSWMuJSDHZW765jKF2sgQ2jNa32cLgxw@mail.gmail.com>
-	<CAB7xdin1rNSi6zMQcnOviu2GVwnu3iNX46qh51vSviXZquhiRA@mail.gmail.com>
-	<CAORUGqAwJwzOe1g8JMoHduTenau5uQT6fwWJYQ2pixNnLZ3cmw@mail.gmail.com>
-	<CAB7xdinFBP1r-PuebjEXh1Rdwge-iEYNQpJmhCM88xuyEmqZhw@mail.gmail.com>
-	<CAB7xdikHKc_EixAujGpkMzysO_7+0FipKhvyzZz7QELUV2d00A@mail.gmail.com>
-	<Pine.LNX.4.64.1110260936030.18909@cobra.newdream.net>
-	<CAB7xdikG2BuQiKiwVrFmzzPTDqyMLbObuy1GbyoQ=vkzGPa2Yw@mail.gmail.com>
-	<Pine.LNX.4.64.1110261123560.18909@cobra.newdream.net>
-	<CAB7xdinQ8uVDxX5R5bGF1mvGG_RLANNQ8A9Lweu4hDtGjnQ_HA@mail.gmail.com>
-	<CAORUGqD3R8cho4W0_QpSf2Fwpt+9NagP0edhJNdFLc4oLaGyJw@mail.gmail.com>
-	<CAB7xdikDt4e7AjRQOKow+p2P4tD9M8yinrgnMxVGFrhu_NsYSg@mail.gmail.com>
-	<CAORUGqDKd1y3ro5tnfNwSXQjV0wYbhifa6XrPUgc5eWs_TMNiA@mail.gmail.com>
-	<CAB7xdin+KhKNEO7sGEgJ9YOpyzVHQZ91CLYW7n95xDJypENNwQ@mail.gmail.com>
-	<CAORUGqB+h4T3CwSVJB0HRw8s8MmfFrnD--OgcrhbfbFiY5traA@mail.gmail.com>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Re: BUG at fs/inode.c
+Date: Wed, 2 Nov 2011 09:53:44 +0100
+Message-ID: <201111020953.45095.a.ott@m-privacy.de>
+References: <201110241239.13157.a.ott@m-privacy.de> <201111010923.18074.a.ott@m-privacy.de> <Pine.LNX.4.64.1111010907470.30839@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:42502 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753206Ab1KBBJv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Nov 2011 21:09:51 -0400
-Received: by iage36 with SMTP id e36so465039iag.19
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Nov 2011 18:09:50 -0700 (PDT)
-In-Reply-To: <CAORUGqB+h4T3CwSVJB0HRw8s8MmfFrnD--OgcrhbfbFiY5traA@mail.gmail.com>
+Received: from www.m-privacy.de ([85.214.138.176]:39614 "EHLO www.m-privacy.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755050Ab1KBIxy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2011 04:53:54 -0400
+In-Reply-To: <Pine.LNX.4.64.1111010907470.30839@cobra.newdream.net>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-hi Tommi,
+On Tuesday 01 November 2011 wrote Sage Weil:
+> Can you capture a larger log segment?  The hope is to catch the first
+> use-after-free, and not the subsequent side-effects.
 
-Thanks for your reply.
-by now i just get a very abstract understand on the codes. i just
-describe how the ceph work by my current understanding.
-in the client/fuse_ll.cc, there defines the client interface for file
-system operations.
- i.e. for write->ceph_ll_write, then it invoke client->ll_write which
-may finally invoke writex(). here seems it only write to the client
-buffer and mark it as dirty. and the real write to the osd happens
-when invoke ObjectCacher->flush() (in fact, i did not know when will
-this function be invoked, or if my understanding is correct), which
-will invoke the  objecter->write_trunc(). inside this function it
-invoke op_submit which actually send out the write request to the OSD.
-is the above logic correct?
+I still have the full kern.log here from boot till BUG, cleaned it up a=
+ bit=20
+(no firewall lines, RSBAC stuff) and uploaded to=20
+https://download.m-privacy.de/kern-full.log.bz2
 
-i see there are four messengers client, cluster, messenger_hbin,
-messenger_hbout in the ceph_osd.cc. will one of the messengers
-responsible to handle the receiving request from client? i do not know
-how the OSD handle the received messages from client or mds.
+=46ull ceph logging had been enabled as soon as possible, after boot an=
+d before=20
+mounting ceph fs.
 
-Thanks,
-Sheng
+> Also, the below patch may help us parse the output with multiple thre=
+ads.
 
-On Tue, Nov 1, 2011 at 5:07 PM, Tommi Virtanen
-<tommi.virtanen@dreamhost.com> wrote:
-> On Tue, Nov 1, 2011 at 14:56, sheng qiu <herbert1984106@gmail.com> wr=
-ote:
->> Thanks for your reply. i am sorry for bothering you frequently.
->> i see there are several daemons to handle the requests. =A0i.e. clie=
-nt
->> to osd, can you tell me what exactly source file will handle
->> write/read request from client to/from osd?
->> i am not clear with the structure of the source codes.
->
-> Ignoring file metadata and the interaction with MDS, you might get
-> going by reading src/osd/OSD.cc OSD::handle_op.
->
+Put in the patch, new kernel packages building now.
 
-
-
+Amon Ott
 --=20
-Sheng Qiu
-Texas A & M University
-Room 302 Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Am K=C3=B6llnischen Park 1    Fax: +49 30 24342336
+10179 Berlin             http://www.m-privacy.de
+
+Amtsgericht Charlottenburg, HRB 84946
+
+Gesch=C3=A4ftsf=C3=BChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
