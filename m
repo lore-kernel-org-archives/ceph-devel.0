@@ -1,76 +1,64 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Cannot execute rados.py with sudoer
-Date: Wed, 2 Nov 2011 21:48:56 -0700
-Message-ID: <CAF3hT9DaMW8dCx=1BGnW1jjoK+AuDDBNe57tfV1S2P3rc-BPUw@mail.gmail.com>
-References: <8512670932FB654F81AF0FEF1BE6D49D649E74@WHQBEMAIL1.whq.wistron>
+From: <Eric_YH_Chen@wistron.com>
+Subject: RE: Cannot execute rados.py with sudoer
+Date: Thu, 3 Nov 2011 13:24:54 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D649F29@WHQBEMAIL1.whq.wistron>
+References: <8512670932FB654F81AF0FEF1BE6D49D649E74@WHQBEMAIL1.whq.wistron> <CAF3hT9DaMW8dCx=1BGnW1jjoK+AuDDBNe57tfV1S2P3rc-BPUw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:62159 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751116Ab1KCEs4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 00:48:56 -0400
-Received: by iage36 with SMTP id e36so905434iag.19
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2011 21:48:56 -0700 (PDT)
-In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D649E74@WHQBEMAIL1.whq.wistron>
+Received: from twnhumsw3.wistron.com ([220.128.89.23]:64664 "EHLO
+	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752466Ab1KCFZp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 01:25:45 -0400
+Content-class: urn:content-classes:message
+In-Reply-To: <CAF3hT9DaMW8dCx=1BGnW1jjoK+AuDDBNe57tfV1S2P3rc-BPUw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wistron.com
+To: gregory.farnum@dreamhost.com
 Cc: ceph-devel@vger.kernel.org
 
-This looks like your standard permissions issue to me. The keyring and
-log were probably created by mkcephfs running under sudo? But if you
-give your current user the ability to read/write from them everything
-should work fine.
--Greg
-
-On Wed, Nov 2, 2011 at 8:55 PM,  <Eric_YH_Chen@wistron.com> wrote:
-> Hi, all:
->
-> =C2=A0=C2=A0=C2=A0When I use raods.py, I met some problem even if the=
- user is in sudoer.
-> =E3=80=80=E3=80=80I found it would access /etc/ceph/client.admin.keyr=
-ing and /var/log/ceph/client.admin.log which is only available to root.
-> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 Do you have any suggestion=
-? I cannot execute the python problem with =E2=80=9Croot=E2=80=9D accou=
-nt. It would cause some security issue.
-> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 Thanks a lot!
->
-> Here is the sample code.
->
->>>> import rados
->>>> cluster =3D rados.Rados()
->>>> cluster.conf_read_file()
-> failed to open log file '/var/log/ceph/client.admin.log': error 13: P=
-ermission denied
->>>> cluster.connect()
-> 2011-11-03 11:49:20.937991 7f9fe5320720 monclient(hunting): MonClient=
-::init(): Failed to create keyring
-> 2011-11-03 11:49:50.938235 7f9fe5320720 monclient(hunting): authentic=
-ate timed out after 30
-> 2011-11-03 11:49:50.938283 7f9fe5320720 librados: client.admin authen=
-tication error error 110: Connection timed out
-> Traceback (most recent call last):
-> =C2=A0 File "<stdin>", line 1, in <module>
-> =C2=A0 File "/usr/lib/python2.7/rados.py", line 182, in connect
-> =C2=A0=C2=A0=C2=A0 raise make_ex(ret, "error calling connect")
-> rados.Error: error calling connect: error code 110
->
->
-> -rw-------=C2=A0=C2=A0 1 root root=C2=A0=C2=A0=C2=A0 92 2011-11-02 18=
-:13 client.admin.keyring
-> -rw-------=C2=A0 1 root root=C2=A0=C2=A0=C2=A0=C2=A0 0 2011-11-03 07:=
-47 client.admin.log
->
-> regards,
->
-> Eric/Pjack
->
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGksIEdyZWcsIA0KDQpUaGUgbG9nIGlzIGdlbmVyYXRlZCBieSBjZXBoIHNlcnZpY2UgYXQgcnVu
+dGltZS4NCg0KRXZlbiBJIGNoYW5nZSB0aGUgcGVybWlzc2lvbiwgaXQgd291bGQgYmUgb3Zlcndy
+aXR0ZW4gYnkgdGhlIHNlcnZpY2Ugc29tZWRheS4NCg0KSSBhbSBhZnJhaWQgaWYgdGhlcmUgaXMg
+YW55IG90aGVyIHBlcm1pc3Npb24gcHJvYmxlbSB3aGVuIEkgZXhlY3V0ZSBvdGhlciBjb21tYW5k
+cy4gIA0KDQpFeDogSSBuZWVkIHRvIG1vZGlmeSBtb3JlIGZpbGVzJyBwZXJtaXNzaW9uDQpFeDog
+VGhlIGxpYnJhcnkgdXNlIGFueSBBUEkgaW4ga2VybmVsIHNwYWNlLg0KDQpBbnl3YXksIHRoYW5r
+cyBmb3IgeW91ciByZXBseSwgSSB3aWxsIHRyeSB0byBtb2RpZnkgdGhlIHR3byBmaWxlcycgcGVy
+bWlzc2lvbiBmaXJzdC4NCg0KcmVnYXJkcywNCg0KRXJpYy9QamFjaw0KDQotLS0tLU9yaWdpbmFs
+IE1lc3NhZ2UtLS0tLQ0KRnJvbTogR3JlZ29yeSBGYXJudW0gW21haWx0bzpncmVnb3J5LmZhcm51
+bUBkcmVhbWhvc3QuY29tXSANClNlbnQ6IFRodXJzZGF5LCBOb3ZlbWJlciAwMywgMjAxMSAxMjo0
+OSBQTQ0KVG86IEVyaWMgWUggQ2hlbi9XSFEvV2lzdHJvbg0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5r
+ZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQ2Fubm90IGV4ZWN1dGUgcmFkb3MucHkgd2l0aCBzdWRv
+ZXINCg0KVGhpcyBsb29rcyBsaWtlIHlvdXIgc3RhbmRhcmQgcGVybWlzc2lvbnMgaXNzdWUgdG8g
+bWUuIFRoZSBrZXlyaW5nIGFuZA0KbG9nIHdlcmUgcHJvYmFibHkgY3JlYXRlZCBieSBta2NlcGhm
+cyBydW5uaW5nIHVuZGVyIHN1ZG8/IEJ1dCBpZiB5b3UNCmdpdmUgeW91ciBjdXJyZW50IHVzZXIg
+dGhlIGFiaWxpdHkgdG8gcmVhZC93cml0ZSBmcm9tIHRoZW0gZXZlcnl0aGluZw0Kc2hvdWxkIHdv
+cmsgZmluZS4NCi1HcmVnDQoNCk9uIFdlZCwgTm92IDIsIDIwMTEgYXQgODo1NSBQTSwgIDxFcmlj
+X1lIX0NoZW5Ad2lzdHJvbi5jb20+IHdyb3RlOg0KPiBIaSwgYWxsOg0KPg0KPiDCoMKgwqBXaGVu
+IEkgdXNlIHJhb2RzLnB5LCBJIG1ldCBzb21lIHByb2JsZW0gZXZlbiBpZiB0aGUgdXNlciBpcyBp
+biBzdWRvZXIuDQo+IOOAgOOAgEkgZm91bmQgaXQgd291bGQgYWNjZXNzIC9ldGMvY2VwaC9jbGll
+bnQuYWRtaW4ua2V5cmluZyBhbmQgL3Zhci9sb2cvY2VwaC9jbGllbnQuYWRtaW4ubG9nIHdoaWNo
+IGlzIG9ubHkgYXZhaWxhYmxlIHRvIHJvb3QuDQo+IMKgwqDCoMKgwqDCoMKgIERvIHlvdSBoYXZl
+IGFueSBzdWdnZXN0aW9uPyBJIGNhbm5vdCBleGVjdXRlIHRoZSBweXRob24gcHJvYmxlbSB3aXRo
+IOKAnHJvb3TigJ0gYWNjb3VudC4gSXQgd291bGQgY2F1c2Ugc29tZSBzZWN1cml0eSBpc3N1ZS4N
+Cj4gwqDCoMKgwqDCoMKgwqAgVGhhbmtzIGEgbG90IQ0KPg0KPiBIZXJlIGlzIHRoZSBzYW1wbGUg
+Y29kZS4NCj4NCj4+Pj4gaW1wb3J0IHJhZG9zDQo+Pj4+IGNsdXN0ZXIgPSByYWRvcy5SYWRvcygp
+DQo+Pj4+IGNsdXN0ZXIuY29uZl9yZWFkX2ZpbGUoKQ0KPiBmYWlsZWQgdG8gb3BlbiBsb2cgZmls
+ZSAnL3Zhci9sb2cvY2VwaC9jbGllbnQuYWRtaW4ubG9nJzogZXJyb3IgMTM6IFBlcm1pc3Npb24g
+ZGVuaWVkDQo+Pj4+IGNsdXN0ZXIuY29ubmVjdCgpDQo+IDIwMTEtMTEtMDMgMTE6NDk6MjAuOTM3
+OTkxIDdmOWZlNTMyMDcyMCBtb25jbGllbnQoaHVudGluZyk6IE1vbkNsaWVudDo6aW5pdCgpOiBG
+YWlsZWQgdG8gY3JlYXRlIGtleXJpbmcNCj4gMjAxMS0xMS0wMyAxMTo0OTo1MC45MzgyMzUgN2Y5
+ZmU1MzIwNzIwIG1vbmNsaWVudChodW50aW5nKTogYXV0aGVudGljYXRlIHRpbWVkIG91dCBhZnRl
+ciAzMA0KPiAyMDExLTExLTAzIDExOjQ5OjUwLjkzODI4MyA3ZjlmZTUzMjA3MjAgbGlicmFkb3M6
+IGNsaWVudC5hZG1pbiBhdXRoZW50aWNhdGlvbiBlcnJvciBlcnJvciAxMTA6IENvbm5lY3Rpb24g
+dGltZWQgb3V0DQo+IFRyYWNlYmFjayAobW9zdCByZWNlbnQgY2FsbCBsYXN0KToNCj4gwqAgRmls
+ZSAiPHN0ZGluPiIsIGxpbmUgMSwgaW4gPG1vZHVsZT4NCj4gwqAgRmlsZSAiL3Vzci9saWIvcHl0
+aG9uMi43L3JhZG9zLnB5IiwgbGluZSAxODIsIGluIGNvbm5lY3QNCj4gwqDCoMKgIHJhaXNlIG1h
+a2VfZXgocmV0LCAiZXJyb3IgY2FsbGluZyBjb25uZWN0IikNCj4gcmFkb3MuRXJyb3I6IGVycm9y
+IGNhbGxpbmcgY29ubmVjdDogZXJyb3IgY29kZSAxMTANCj4NCj4NCj4gLXJ3LS0tLS0tLcKgwqAg
+MSByb290IHJvb3TCoMKgwqAgOTIgMjAxMS0xMS0wMiAxODoxMyBjbGllbnQuYWRtaW4ua2V5cmlu
+Zw0KPiAtcnctLS0tLS0twqAgMSByb290IHJvb3TCoMKgwqDCoCAwIDIwMTEtMTEtMDMgMDc6NDcg
+Y2xpZW50LmFkbWluLmxvZw0KPg0KPiByZWdhcmRzLA0KPg0KPiBFcmljL1BqYWNrDQo+DQo+DQo+
+DQo=
