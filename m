@@ -1,35 +1,44 @@
 From: Atish Kathpal <atish.kathpal@gmail.com>
-Subject: How to recover degraded objects?
-Date: Thu, 3 Nov 2011 12:19:39 +0530
-Message-ID: <CAMiHsJLAYTbysxh4n-v3hgcDiqoS0eyva+CELz4Fdkv-K+fkZA@mail.gmail.com>
+Subject: Re: How to recover degraded objects?
+Date: Thu, 3 Nov 2011 12:28:39 +0530
+Message-ID: <CAMiHsJJ73xofKdNfqPzF1x1ax5AVGLb5Y+p-4Swhaxn8skaPFA@mail.gmail.com>
 References: <CAMiHsJL4bYiKXMRKs142PyetmsEBtizp9T-V97wf-5qpJVf6sw@mail.gmail.com>
+ <CAMiHsJLAYTbysxh4n-v3hgcDiqoS0eyva+CELz4Fdkv-K+fkZA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:54641 "EHLO
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:65279 "EHLO
 	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750788Ab1KCGuB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 02:50:01 -0400
-Received: by bke11 with SMTP id 11so759240bke.19
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2011 23:50:00 -0700 (PDT)
-In-Reply-To: <CAMiHsJL4bYiKXMRKs142PyetmsEBtizp9T-V97wf-5qpJVf6sw@mail.gmail.com>
+	with ESMTP id S1751572Ab1KCG7C (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 02:59:02 -0400
+Received: by bke11 with SMTP id 11so763295bke.19
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2011 23:59:01 -0700 (PDT)
+In-Reply-To: <CAMiHsJLAYTbysxh4n-v3hgcDiqoS0eyva+CELz4Fdkv-K+fkZA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-SGVsbG8KSSBoYXZlIGdvdCBhIHNpbmdsZSBub2RlIENlcGggY2x1c3RlciBpbnN0YWxsZWQgb24g
-bXkgdmlydHVhbCBtYWNoaW5lLgpJIGhhZCBzZXZlcmFsIG9iamVjdHMgYW5kIHBvb2xzIGluIG15
-IE9TRHMuIEhvd2V2ZXIsIGFsbCBvYmplY3RzIHNob3cKdXAgYXMgZGVncmFkZWQgYWZ0ZXIgaGF2
-aW5nIHJlYm9vdGVkIG15IG1hY2hpbmUgb25jZS4KSG93IGNhbiBJIHJlY292ZXIgdGhlIG9iamVj
-dHM/CgokIHJhZG9zIGRmCnBvb2wgbmFtZSCgIKAgoCBjYXRlZ29yeSCgIKAgoCCgIKAgoCCgIKAg
-S0IgoCCgIKBvYmplY3RzIKAgoCCgIGNsb25lcwogoCBkZWdyYWRlZCCgIKAgoHVuZm91bmQgoCCg
-IKAgoCCgIHJkIKAgoCCgIKByZCBLQiCgIKAgoCCgIKAgd3IKd3IgS0IKZGF0YSCgIKAgoCCgIKAg
-oCCgIKAgoCCgIC0goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoDIgoCCgIKAgoCCgIKA0CqAgoCCg
-IKAwIKAgoCCgIKAgoCCgNCCgIKAgoCCgIKAgMCCgIKAgoCCgIKAgoDAgoCCgIKAgoCCgIKAwCjI3
-MCCgIKAgoDEwNjQ5NjUKbWV0YWRhdGEgoCCgIKAgoCCgIKAgoC0goCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgMjQgoCCgIKAgoCCgIDIxCiCgIKAwIKAgoCCgIKAgoCAyMSCgIKAgoCCgIKAgMCCgIKAg
-oCCgIKAgMTEgoCCgIKAgoCCgIKAwIKAgoCCgIKAgoCA0OQogoCCgIKAgoCAyNgpyYmQgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIC0goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoDAgoCCgIKAgoCCgIKAw
-CiCgIKAgoCCgMCCgIKAgoCCgIKAgoDAgoCCgIKAgoCCgIDAgoCCgIKAgoCCgIKAwIKAgoCCgIKAg
-oCCgMAqgMCCgIKAgoCCgIKAgoDAKCgpUaGFua3MgJiBSZWdhcmRzCkF0aXNoCg==
+TW9yZW92ZXIsIEkgYW0gYWxzbyB1bmFibGUgdG8gY3JlYXRlIG5ldyBvYmplY3RzIGFuZC9vciBn
+ZXQvcHV0IHRoZQpkZWdyYWRlZCBvYmplY3RzLiBJIHJlLXJhbiBta2NlcGhmcyBhZnRlciBteSBy
+ZWJvb3QuCgpTY3JlZW5zaG90Ogo9PT09PT09PT09PQojIHJhZG9zIC1wIGRhdGEgY3JlYXRlIE5F
+VwoKPEkgZ2V0IG5vIHJlc3BvbnNlIG9uIGRvaW5nIHRoaXM+CgpeQyoqKiBDYXVnaHQgc2lnbmFs
+IChJbnRlcnJ1cHQpICoqCiBpbiB0aHJlYWQgMHhiNzg5YTZlMC4gU2h1dHRpbmcgZG93bi4KPT09
+PT09PT09PT0KQW55IHRpcHM/CgpUaGFua3MgYW5kIHJlZ2FyZHMKQXRpc2gKCk9uIFRodSwgTm92
+IDMsIDIwMTEgYXQgMTI6MTkgUE0sIEF0aXNoIEthdGhwYWwgPGF0aXNoLmthdGhwYWxAZ21haWwu
+Y29tPiB3cm90ZToKPiBIZWxsbwo+IEkgaGF2ZSBnb3QgYSBzaW5nbGUgbm9kZSBDZXBoIGNsdXN0
+ZXIgaW5zdGFsbGVkIG9uIG15IHZpcnR1YWwgbWFjaGluZS4KPiBJIGhhZCBzZXZlcmFsIG9iamVj
+dHMgYW5kIHBvb2xzIGluIG15IE9TRHMuIEhvd2V2ZXIsIGFsbCBvYmplY3RzIHNob3cKPiB1cCBh
+cyBkZWdyYWRlZCBhZnRlciBoYXZpbmcgcmVib290ZWQgbXkgbWFjaGluZSBvbmNlLgo+IEhvdyBj
+YW4gSSByZWNvdmVyIHRoZSBvYmplY3RzPwo+Cj4gJCByYWRvcyBkZgo+IHBvb2wgbmFtZSCgIKAg
+oCBjYXRlZ29yeSCgIKAgoCCgIKAgoCCgIKAgS0IgoCCgIKBvYmplY3RzIKAgoCCgIGNsb25lcwo+
+IKCgIGRlZ3JhZGVkIKAgoCCgdW5mb3VuZCCgIKAgoCCgIKAgcmQgoCCgIKAgoHJkIEtCIKAgoCCg
+IKAgoCB3cgo+IHdyIEtCCj4gZGF0YSCgIKAgoCCgIKAgoCCgIKAgoCCgIC0goCCgIKAgoCCgIKAg
+oCCgIKAgoCCgIKAgoDIgoCCgIKAgoCCgIKA0Cj4goCCgIKAgoDAgoCCgIKAgoCCgIKA0IKAgoCCg
+IKAgoCAwIKAgoCCgIKAgoCCgMCCgIKAgoCCgIKAgoDAKPiAyNzAgoCCgIKAxMDY0OTY1Cj4gbWV0
+YWRhdGEgoCCgIKAgoCCgIKAgoC0goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgMjQgoCCgIKAgoCCg
+IDIxCj4goKAgoDAgoCCgIKAgoCCgIDIxIKAgoCCgIKAgoCAwIKAgoCCgIKAgoCAxMSCgIKAgoCCg
+IKAgoDAgoCCgIKAgoCCgIDQ5Cj4goKAgoCCgIKAgMjYKPiByYmQgoCCgIKAgoCCgIKAgoCCgIKAg
+oCCgIC0goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoDAgoCCgIKAgoCCgIKAwCj4goKAgoCCgIKAw
+IKAgoCCgIKAgoCCgMCCgIKAgoCCgIKAgMCCgIKAgoCCgIKAgoDAgoCCgIKAgoCCgIKAwCj4goDAg
+oCCgIKAgoCCgIKAwCj4KPgo+IFRoYW5rcyAmIFJlZ2FyZHMKPiBBdGlzaAo+Cg==
