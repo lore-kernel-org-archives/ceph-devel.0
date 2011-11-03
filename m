@@ -1,91 +1,73 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: ceph-mon blocked error
-Date: Wed, 2 Nov 2011 21:47:07 -0700
-Message-ID: <CAF3hT9BuCqV5Z3GS4VVsQptT=d_uii20Q4hMP=qbHwD+f0-HTA@mail.gmail.com>
-References: <CA+jddaNKeneAL7350tv039H21Kr1kk1xSD4Eux_v7Of7vxpa5w@mail.gmail.com>
+Subject: Re: Cannot execute rados.py with sudoer
+Date: Wed, 2 Nov 2011 21:48:56 -0700
+Message-ID: <CAF3hT9DaMW8dCx=1BGnW1jjoK+AuDDBNe57tfV1S2P3rc-BPUw@mail.gmail.com>
+References: <8512670932FB654F81AF0FEF1BE6D49D649E74@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:35941 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:62159 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751116Ab1KCErI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 00:47:08 -0400
-Received: by iage36 with SMTP id e36so904163iag.19
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2011 21:47:07 -0700 (PDT)
-In-Reply-To: <CA+jddaNKeneAL7350tv039H21Kr1kk1xSD4Eux_v7Of7vxpa5w@mail.gmail.com>
+	with ESMTP id S1751116Ab1KCEs4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 00:48:56 -0400
+Received: by iage36 with SMTP id e36so905434iag.19
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2011 21:48:56 -0700 (PDT)
+In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D649E74@WHQBEMAIL1.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mandell Degerness <mandell@pistoncloud.com>
+To: Eric_YH_Chen@wistron.com
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, Nov 2, 2011 at 9:30 PM, Mandell Degerness
-<mandell@pistoncloud.com> wrote:
-> Should this error showing up in the log worry me?
-
-Looks like the process got stuck while waiting for xfs to do a sync.
-So...yes, that's a problem.
-
-The Ceph monitor really doesn't do anything special that I'd expect to
-be exposing filesystem bugs though. Do you have other Ceph processes
-running on this node?
+This looks like your standard permissions issue to me. The keyring and
+log were probably created by mkcephfs running under sudo? But if you
+give your current user the ability to read/write from them everything
+should work fine.
 -Greg
 
-
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: INFO: task ceph-mon:5715
-> blocked for more than 120 seconds.
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: "echo 0 >
-> /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: ceph-mon =A0 =A0 =A0 =A0D
-> 0000000006bcdc9f =A0 =A0 0 =A05715 =A0 =A0 =A01 0x00000000
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: ffff88080d5dfc38
-> 0000000000000086 ffff8807eadec0c0 ffff8804274d60c0
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: ffff88080d5dfc48
-> 0000000000011980 0000000000011980 0000000000011980
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: ffff88080d5dffd8
-> 0000000000011980 0000000000011980 ffff88080d5dffd8
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: Call Trace:
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630b5e>]
-> schedule+0x6d/0x83
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630ee2>]
-> schedule_timeout+0x36/0xe3
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630360>]
-> wait_for_common+0xa0/0x105
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81048595>] ?
-> try_to_wake_up+0x1ed/0x1ed
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff812462a8>] ?
-> xfs_bwrite+0x4b/0x95
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ef45>] ?
-> __sync_filesystem+0xa1/0xa1
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630553>]
-> wait_for_completion+0x30/0x46
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff812457c6>]
-> xfs_buf_iowait+0x61/0xb9
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff812462a8>]
-> xfs_bwrite+0x4b/0x95
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81254c70>]
-> xfs_sync_fsdata+0x4b/0x66
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81255138>]
-> xfs_quiesce_data+0x39/0xa3
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81252b49>]
-> xfs_fs_sync_fs+0x34/0x71
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ef1b>]
-> __sync_filesystem+0x77/0xa1
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ef6e>]
-> sync_one_sb+0x29/0x3f
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8114620e>]
-> iterate_supers+0x7c/0xe3
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ee2f>]
-> sync_filesystems+0x2f/0x45
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116f02e>]
-> sys_sync+0x34/0x5a
-> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8163326b>]
-> system_call_fastpath+0x16/0x1b
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+On Wed, Nov 2, 2011 at 8:55 PM,  <Eric_YH_Chen@wistron.com> wrote:
+> Hi, all:
+>
+> =C2=A0=C2=A0=C2=A0When I use raods.py, I met some problem even if the=
+ user is in sudoer.
+> =E3=80=80=E3=80=80I found it would access /etc/ceph/client.admin.keyr=
+ing and /var/log/ceph/client.admin.log which is only available to root.
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 Do you have any suggestion=
+? I cannot execute the python problem with =E2=80=9Croot=E2=80=9D accou=
+nt. It would cause some security issue.
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 Thanks a lot!
+>
+> Here is the sample code.
+>
+>>>> import rados
+>>>> cluster =3D rados.Rados()
+>>>> cluster.conf_read_file()
+> failed to open log file '/var/log/ceph/client.admin.log': error 13: P=
+ermission denied
+>>>> cluster.connect()
+> 2011-11-03 11:49:20.937991 7f9fe5320720 monclient(hunting): MonClient=
+::init(): Failed to create keyring
+> 2011-11-03 11:49:50.938235 7f9fe5320720 monclient(hunting): authentic=
+ate timed out after 30
+> 2011-11-03 11:49:50.938283 7f9fe5320720 librados: client.admin authen=
+tication error error 110: Connection timed out
+> Traceback (most recent call last):
+> =C2=A0 File "<stdin>", line 1, in <module>
+> =C2=A0 File "/usr/lib/python2.7/rados.py", line 182, in connect
+> =C2=A0=C2=A0=C2=A0 raise make_ex(ret, "error calling connect")
+> rados.Error: error calling connect: error code 110
+>
+>
+> -rw-------=C2=A0=C2=A0 1 root root=C2=A0=C2=A0=C2=A0 92 2011-11-02 18=
+:13 client.admin.keyring
+> -rw-------=C2=A0 1 root root=C2=A0=C2=A0=C2=A0=C2=A0 0 2011-11-03 07:=
+47 client.admin.log
+>
+> regards,
+>
+> Eric/Pjack
+>
+>
 >
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
