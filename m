@@ -1,45 +1,69 @@
-From: <Eric_YH_Chen@wistron.com>
-Subject: Cannot execute rados.py with sudoer
-Date: Thu, 3 Nov 2011 11:55:56 +0800
-Message-ID: <8512670932FB654F81AF0FEF1BE6D49D649E74@WHQBEMAIL1.whq.wistron>
+From: Mandell Degerness <mandell@pistoncloud.com>
+Subject: ceph-mon blocked error
+Date: Wed, 2 Nov 2011 21:30:55 -0700
+Message-ID: <CA+jddaNKeneAL7350tv039H21Kr1kk1xSD4Eux_v7Of7vxpa5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw4.wistron.com ([220.128.89.24]:62490 "EHLO
-	TWNHUMSW4.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754422Ab1KCD4r (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2011 23:56:47 -0400
-Received: from TWNHUFE4.whq.wistron (unverified [10.37.31.104]) by TWNHUMSW4.wistron.com
- (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta075b50f2ac0a816721f14@TWNHUMSW4.wistron.com> for <ceph-devel@vger.kernel.org>;
- Thu, 3 Nov 2011 11:59:27 +0800
-Content-class: urn:content-classes:message
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:60443 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750794Ab1KCEa4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 00:30:56 -0400
+Received: by vcge1 with SMTP id e1so787183vcg.19
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2011 21:30:55 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-SGksIGFsbDoNCg0KwqDCoMKgV2hlbiBJIHVzZSByYW9kcy5weSwgSSBtZXQgc29tZSBwcm9ibGVt
-IGV2ZW4gaWYgdGhlIHVzZXIgaXMgaW4gc3Vkb2VyLg0K44CA44CASSBmb3VuZCBpdCB3b3VsZCBh
-Y2Nlc3MgL2V0Yy9jZXBoL2NsaWVudC5hZG1pbi5rZXlyaW5nIGFuZCAvdmFyL2xvZy9jZXBoL2Ns
-aWVudC5hZG1pbi5sb2cgd2hpY2ggaXMgb25seSBhdmFpbGFibGUgdG8gcm9vdC4NCsKgwqDCoMKg
-wqDCoMKgIERvIHlvdSBoYXZlIGFueSBzdWdnZXN0aW9uPyBJIGNhbm5vdCBleGVjdXRlIHRoZSBw
-eXRob24gcHJvYmxlbSB3aXRoIOKAnHJvb3TigJ0gYWNjb3VudC4gSXQgd291bGQgY2F1c2Ugc29t
-ZSBzZWN1cml0eSBpc3N1ZS4NCsKgwqDCoMKgwqDCoMKgIFRoYW5rcyBhIGxvdCENCg0KSGVyZSBp
-cyB0aGUgc2FtcGxlIGNvZGUuIA0KDQo+Pj4gaW1wb3J0IHJhZG9zDQo+Pj4gY2x1c3RlciA9IHJh
-ZG9zLlJhZG9zKCkNCj4+PiBjbHVzdGVyLmNvbmZfcmVhZF9maWxlKCkNCmZhaWxlZCB0byBvcGVu
-IGxvZyBmaWxlICcvdmFyL2xvZy9jZXBoL2NsaWVudC5hZG1pbi5sb2cnOiBlcnJvciAxMzogUGVy
-bWlzc2lvbiBkZW5pZWQNCj4+PiBjbHVzdGVyLmNvbm5lY3QoKQ0KMjAxMS0xMS0wMyAxMTo0OToy
-MC45Mzc5OTEgN2Y5ZmU1MzIwNzIwIG1vbmNsaWVudChodW50aW5nKTogTW9uQ2xpZW50Ojppbml0
-KCk6IEZhaWxlZCB0byBjcmVhdGUga2V5cmluZw0KMjAxMS0xMS0wMyAxMTo0OTo1MC45MzgyMzUg
-N2Y5ZmU1MzIwNzIwIG1vbmNsaWVudChodW50aW5nKTogYXV0aGVudGljYXRlIHRpbWVkIG91dCBh
-ZnRlciAzMA0KMjAxMS0xMS0wMyAxMTo0OTo1MC45MzgyODMgN2Y5ZmU1MzIwNzIwIGxpYnJhZG9z
-OiBjbGllbnQuYWRtaW4gYXV0aGVudGljYXRpb24gZXJyb3IgZXJyb3IgMTEwOiBDb25uZWN0aW9u
-IHRpbWVkIG91dA0KVHJhY2ViYWNrIChtb3N0IHJlY2VudCBjYWxsIGxhc3QpOg0KwqAgRmlsZSAi
-PHN0ZGluPiIsIGxpbmUgMSwgaW4gPG1vZHVsZT4NCsKgIEZpbGUgIi91c3IvbGliL3B5dGhvbjIu
-Ny9yYWRvcy5weSIsIGxpbmUgMTgyLCBpbiBjb25uZWN0DQrCoMKgwqAgcmFpc2UgbWFrZV9leChy
-ZXQsICJlcnJvciBjYWxsaW5nIGNvbm5lY3QiKQ0KcmFkb3MuRXJyb3I6IGVycm9yIGNhbGxpbmcg
-Y29ubmVjdDogZXJyb3IgY29kZSAxMTANCg0KDQotcnctLS0tLS0twqDCoCAxIHJvb3Qgcm9vdMKg
-wqDCoCA5MiAyMDExLTExLTAyIDE4OjEzIGNsaWVudC5hZG1pbi5rZXlyaW5nDQotcnctLS0tLS0t
-wqAgMSByb290IHJvb3TCoMKgwqDCoCAwIDIwMTEtMTEtMDMgMDc6NDcgY2xpZW50LmFkbWluLmxv
-Zw0KDQpyZWdhcmRzLA0KDQpFcmljL1BqYWNrDQoNCg0K
+Should this error showing up in the log worry me?
+
+
+Nov  2 21:28:12 node-172-16-0-128 kernel: INFO: task ceph-mon:5715
+blocked for more than 120 seconds.
+Nov  2 21:28:12 node-172-16-0-128 kernel: "echo 0 >
+/proc/sys/kernel/hung_task_timeout_secs" disables this message.
+Nov  2 21:28:12 node-172-16-0-128 kernel: ceph-mon        D
+0000000006bcdc9f     0  5715      1 0x00000000
+Nov  2 21:28:12 node-172-16-0-128 kernel: ffff88080d5dfc38
+0000000000000086 ffff8807eadec0c0 ffff8804274d60c0
+Nov  2 21:28:12 node-172-16-0-128 kernel: ffff88080d5dfc48
+0000000000011980 0000000000011980 0000000000011980
+Nov  2 21:28:12 node-172-16-0-128 kernel: ffff88080d5dffd8
+0000000000011980 0000000000011980 ffff88080d5dffd8
+Nov  2 21:28:12 node-172-16-0-128 kernel: Call Trace:
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630b5e>]
+schedule+0x6d/0x83
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630ee2>]
+schedule_timeout+0x36/0xe3
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630360>]
+wait_for_common+0xa0/0x105
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff81048595>] ?
+try_to_wake_up+0x1ed/0x1ed
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff812462a8>] ?
+xfs_bwrite+0x4b/0x95
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ef45>] ?
+__sync_filesystem+0xa1/0xa1
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630553>]
+wait_for_completion+0x30/0x46
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff812457c6>]
+xfs_buf_iowait+0x61/0xb9
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff812462a8>]
+xfs_bwrite+0x4b/0x95
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff81254c70>]
+xfs_sync_fsdata+0x4b/0x66
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff81255138>]
+xfs_quiesce_data+0x39/0xa3
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff81252b49>]
+xfs_fs_sync_fs+0x34/0x71
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ef1b>]
+__sync_filesystem+0x77/0xa1
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ef6e>]
+sync_one_sb+0x29/0x3f
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff8114620e>]
+iterate_supers+0x7c/0xe3
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ee2f>]
+sync_filesystems+0x2f/0x45
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116f02e>]
+sys_sync+0x34/0x5a
+Nov  2 21:28:12 node-172-16-0-128 kernel: [<ffffffff8163326b>]
+system_call_fastpath+0x16/0x1b
