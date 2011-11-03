@@ -1,71 +1,103 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: how to run ceph on top of other local file system
-Date: Thu, 3 Nov 2011 13:30:29 -0500
-Message-ID: <CAB7xdimWE3bw1ZCjfZH-1md8Kpwp=uHSy8c63JZKuhAzW1Z=kA@mail.gmail.com>
-References: <CAB7xdikWPdZ4RaLRvqpMhUdkOS6=99ggdx3iBidBkbWy3k5vOg@mail.gmail.com>
-	<CAORUGqBnqHOJp_wy3QOi=2LUy3Tbi+6PoaA4sTgUeSPqzDCZyw@mail.gmail.com>
-	<CAB7xdim9QmtLWSVTrPoZofrwY=0PQEzsxtcBjA=pgS-GzLgzAw@mail.gmail.com>
-	<CAF3hT9BwDAnUewrfTeZSWMuJSDHZW765jKF2sgQ2jNa32cLgxw@mail.gmail.com>
-	<CAB7xdin1rNSi6zMQcnOviu2GVwnu3iNX46qh51vSviXZquhiRA@mail.gmail.com>
-	<CAORUGqAwJwzOe1g8JMoHduTenau5uQT6fwWJYQ2pixNnLZ3cmw@mail.gmail.com>
-	<CAB7xdinFBP1r-PuebjEXh1Rdwge-iEYNQpJmhCM88xuyEmqZhw@mail.gmail.com>
-	<CAB7xdikHKc_EixAujGpkMzysO_7+0FipKhvyzZz7QELUV2d00A@mail.gmail.com>
-	<Pine.LNX.4.64.1110260936030.18909@cobra.newdream.net>
-	<CAB7xdikG2BuQiKiwVrFmzzPTDqyMLbObuy1GbyoQ=vkzGPa2Yw@mail.gmail.com>
-	<Pine.LNX.4.64.1110261123560.18909@cobra.newdream.net>
-	<CAB7xdinQ8uVDxX5R5bGF1mvGG_RLANNQ8A9Lweu4hDtGjnQ_HA@mail.gmail.com>
-	<CAORUGqD3R8cho4W0_QpSf2Fwpt+9NagP0edhJNdFLc4oLaGyJw@mail.gmail.com>
-	<CAB7xdikDt4e7AjRQOKow+p2P4tD9M8yinrgnMxVGFrhu_NsYSg@mail.gmail.com>
-	<CAORUGqDKd1y3ro5tnfNwSXQjV0wYbhifa6XrPUgc5eWs_TMNiA@mail.gmail.com>
-	<CAB7xdin+KhKNEO7sGEgJ9YOpyzVHQZ91CLYW7n95xDJypENNwQ@mail.gmail.com>
-	<CAORUGqB+h4T3CwSVJB0HRw8s8MmfFrnD--OgcrhbfbFiY5traA@mail.gmail.com>
-	<CAB7xdi=n6Y7w=GonMfMN168m8bFjkQSbOR0Q=afz5hGpjUG3nA@mail.gmail.com>
-	<CAORUGqAxvQih9UaQfpKxvLhb1fov6bz=W2+0anUSs1-2XcFtrA@mail.gmail.com>
-	<CAB7xdikFfxLe7Yy9s43oabVeh+7G6FE=Le6yy2=LNqBBryQT1A@mail.gmail.com>
-	<CAORUGqDF4sKCYuzVANd0u_x+oBoV_-Wj_DPH=kuf=UxzBR3b-A@mail.gmail.com>
+From: Mandell Degerness <mandell@pistoncloud.com>
+Subject: Re: ceph-mon blocked error
+Date: Thu, 3 Nov 2011 12:09:23 -0700
+Message-ID: <CA+jddaNFKhu_KOa+VXhqGMw_pjM+uP9VFEcpeV+zY+E5KWO-Cw@mail.gmail.com>
+References: <CA+jddaNKeneAL7350tv039H21Kr1kk1xSD4Eux_v7Of7vxpa5w@mail.gmail.com>
+	<CAF3hT9BuCqV5Z3GS4VVsQptT=d_uii20Q4hMP=qbHwD+f0-HTA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:39641 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933797Ab1KCSaa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 14:30:30 -0400
-Received: by qyk2 with SMTP id 2so1145050qyk.19
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Nov 2011 11:30:30 -0700 (PDT)
-In-Reply-To: <CAORUGqDF4sKCYuzVANd0u_x+oBoV_-Wj_DPH=kuf=UxzBR3b-A@mail.gmail.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:60918 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934290Ab1KCTJY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 15:09:24 -0400
+Received: by vws1 with SMTP id 1so1215684vws.19
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Nov 2011 12:09:23 -0700 (PDT)
+In-Reply-To: <CAF3hT9BuCqV5Z3GS4VVsQptT=d_uii20Q4hMP=qbHwD+f0-HTA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-hi Tommi,
+We are currently running all services on each of the three nodes.
+(mon, mds, and several osd processes).
 
-Thanks for the reply. one more question, what does the rbd pool mean?
-how will it affect the ceph?
-
-Thanks,
-Sheng
-
-On Thu, Nov 3, 2011 at 12:55 PM, Tommi Virtanen
-<tommi.virtanen@dreamhost.com> wrote:
-> On Thu, Nov 3, 2011 at 10:20, sheng qiu <herbert1984106@gmail.com> wrote:
->> Hi,
+On Wed, Nov 2, 2011 at 9:47 PM, Gregory Farnum
+<gregory.farnum@dreamhost.com> wrote:
+> On Wed, Nov 2, 2011 at 9:30 PM, Mandell Degerness
+> <mandell@pistoncloud.com> wrote:
+>> Should this error showing up in the log worry me?
+>
+> Looks like the process got stuck while waiting for xfs to do a sync.
+> So...yes, that's a problem.
+>
+> The Ceph monitor really doesn't do anything special that I'd expect t=
+o
+> be exposing filesystem bugs though. Do you have other Ceph processes
+> running on this node?
+> -Greg
+>
+>
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: INFO: task ceph-mon:5715
+>> blocked for more than 120 seconds.
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: "echo 0 >
+>> /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: ceph-mon =A0 =A0 =A0 =A0=
+D
+>> 0000000006bcdc9f =A0 =A0 0 =A05715 =A0 =A0 =A01 0x00000000
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: ffff88080d5dfc38
+>> 0000000000000086 ffff8807eadec0c0 ffff8804274d60c0
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: ffff88080d5dfc48
+>> 0000000000011980 0000000000011980 0000000000011980
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: ffff88080d5dffd8
+>> 0000000000011980 0000000000011980 ffff88080d5dffd8
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: Call Trace:
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630b5e>]
+>> schedule+0x6d/0x83
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630ee2>]
+>> schedule_timeout+0x36/0xe3
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630360>]
+>> wait_for_common+0xa0/0x105
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81048595>] ?
+>> try_to_wake_up+0x1ed/0x1ed
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff812462a8>] ?
+>> xfs_bwrite+0x4b/0x95
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ef45>] ?
+>> __sync_filesystem+0xa1/0xa1
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81630553>]
+>> wait_for_completion+0x30/0x46
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff812457c6>]
+>> xfs_buf_iowait+0x61/0xb9
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff812462a8>]
+>> xfs_bwrite+0x4b/0x95
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81254c70>]
+>> xfs_sync_fsdata+0x4b/0x66
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81255138>]
+>> xfs_quiesce_data+0x39/0xa3
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff81252b49>]
+>> xfs_fs_sync_fs+0x34/0x71
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ef1b>]
+>> __sync_filesystem+0x77/0xa1
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ef6e>]
+>> sync_one_sb+0x29/0x3f
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8114620e>]
+>> iterate_supers+0x7c/0xe3
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116ee2f>]
+>> sync_filesystems+0x2f/0x45
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8116f02e>]
+>> sys_sync+0x34/0x5a
+>> Nov =A02 21:28:12 node-172-16-0-128 kernel: [<ffffffff8163326b>]
+>> system_call_fastpath+0x16/0x1b
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >>
->> is there a way to set ceph to have 0 replicas, and only have the
->> original data on osd? i just want to see how much the cost is to have
->> replicas.
->> i tried to ceph osd pool set metadata size 0, ceph osd pool set data
->> size 0. but not allowed.
 >
-> It's the number of copies, not the number of replicas. 0 copies is an
-> interesting paradox. Try 1.
->
-
-
-
--- 
-Sheng Qiu
-Texas A & M University
-Room 302 Wisenbaker
-email: herbert1984106@gmail.com
-College Station, TX 77843-3259
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
