@@ -1,43 +1,48 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: how to run ceph on top of other local file system
-Date: Wed, 2 Nov 2011 09:57:53 -0700
-Message-ID: <CAORUGqAxvQih9UaQfpKxvLhb1fov6bz=W2+0anUSs1-2XcFtrA@mail.gmail.com>
-References: <CAB7xdikWPdZ4RaLRvqpMhUdkOS6=99ggdx3iBidBkbWy3k5vOg@mail.gmail.com>
- <CAORUGqBnqHOJp_wy3QOi=2LUy3Tbi+6PoaA4sTgUeSPqzDCZyw@mail.gmail.com>
- <CAB7xdim9QmtLWSVTrPoZofrwY=0PQEzsxtcBjA=pgS-GzLgzAw@mail.gmail.com>
- <CAF3hT9BwDAnUewrfTeZSWMuJSDHZW765jKF2sgQ2jNa32cLgxw@mail.gmail.com>
- <CAB7xdin1rNSi6zMQcnOviu2GVwnu3iNX46qh51vSviXZquhiRA@mail.gmail.com>
- <CAORUGqAwJwzOe1g8JMoHduTenau5uQT6fwWJYQ2pixNnLZ3cmw@mail.gmail.com>
- <CAB7xdinFBP1r-PuebjEXh1Rdwge-iEYNQpJmhCM88xuyEmqZhw@mail.gmail.com>
- <CAB7xdikHKc_EixAujGpkMzysO_7+0FipKhvyzZz7QELUV2d00A@mail.gmail.com>
- <Pine.LNX.4.64.1110260936030.18909@cobra.newdream.net> <CAB7xdikG2BuQiKiwVrFmzzPTDqyMLbObuy1GbyoQ=vkzGPa2Yw@mail.gmail.com>
- <Pine.LNX.4.64.1110261123560.18909@cobra.newdream.net> <CAB7xdinQ8uVDxX5R5bGF1mvGG_RLANNQ8A9Lweu4hDtGjnQ_HA@mail.gmail.com>
- <CAORUGqD3R8cho4W0_QpSf2Fwpt+9NagP0edhJNdFLc4oLaGyJw@mail.gmail.com>
- <CAB7xdikDt4e7AjRQOKow+p2P4tD9M8yinrgnMxVGFrhu_NsYSg@mail.gmail.com>
- <CAORUGqDKd1y3ro5tnfNwSXQjV0wYbhifa6XrPUgc5eWs_TMNiA@mail.gmail.com>
- <CAB7xdin+KhKNEO7sGEgJ9YOpyzVHQZ91CLYW7n95xDJypENNwQ@mail.gmail.com>
- <CAORUGqB+h4T3CwSVJB0HRw8s8MmfFrnD--OgcrhbfbFiY5traA@mail.gmail.com> <CAB7xdi=n6Y7w=GonMfMN168m8bFjkQSbOR0Q=afz5hGpjUG3nA@mail.gmail.com>
+From: Noah Watkins <jayhawk@soe.ucsc.edu>
+Subject: [GIT PULL] hadoop updates
+Date: Wed, 2 Nov 2011 20:21:22 -0700 (PDT)
+Message-ID: <1138267490.27149.1320290482257.JavaMail.root@mail-01.cse.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:55539 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755120Ab1KBQ6R (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2011 12:58:17 -0400
-Received: by eye27 with SMTP id 27so329415eye.19
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2011 09:58:15 -0700 (PDT)
-In-Reply-To: <CAB7xdi=n6Y7w=GonMfMN168m8bFjkQSbOR0Q=afz5hGpjUG3nA@mail.gmail.com>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:34855 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932066Ab1KCDVW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2011 23:21:22 -0400
+Received: from mail-01.cse.ucsc.edu (mail-01.cse.ucsc.edu [128.114.48.32])
+	by mail-01.cse.ucsc.edu (Postfix) with ESMTP id 4BE75774C00A
+	for <ceph-devel@vger.kernel.org>; Wed,  2 Nov 2011 20:21:22 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sheng qiu <herbert1984106@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 1, 2011 at 18:09, sheng qiu <herbert1984106@gmail.com> wrote:
-> i see there are four messengers client, cluster, messenger_hbin,
-> messenger_hbout in the ceph_osd.cc. will one of the messengers
-> responsible to handle the receiving request from client? i do not know
-> how the OSD handle the received messages from client or mds.
+The following changes since commit c861ee105475b3f20f64f51b8611f9b69207ca8c:
 
-hb means heartbeat. My earlier message pointed you to exactly where an
-OSD handles a message from a client (MDS is also just a client of
-OSD).
+  PG: mark scrubmap entry as not absent when we see an update (2011-11-02 11:51:14 -0700)
+
+are available in the git repository at:
+  git://github.com/noahdesu/ceph.git for-master
+
+Noah Watkins (12):
+      hadoop: use standard log4j logging facility
+      hadoop: emulate Ceph file owner as current user
+      hadoop: simplify workingDir handling; add home directory
+      hadoop: remove initialization check
+      hadoop: remove unused variable
+      hadoop: remove statistics initialization
+      hadoop: remove deprecated isDirectory()
+      hadoop: remove deprecation warning
+      hadoop: fix unit test: testWorkingDirectory
+      hadoop: ENOTDIR should be negative
+      hadoop: FileSystem.rename should not return FileNotFound
+      hadoop: remove unused fs_default_name
+
+ src/client/hadoop/ceph/CephFS.java           |   56 ---
+ src/client/hadoop/ceph/CephFaker.java        |   39 +--
+ src/client/hadoop/ceph/CephFileSystem.java   |  461 ++++++++-----------------
+ src/client/hadoop/ceph/CephInputStream.java  |   38 +--
+ src/client/hadoop/ceph/CephOutputStream.java |   18 +-
+ src/client/hadoop/ceph/CephTalker.java       |    1 -
+ src/client/hadoop/ceph/TestCeph.java         |    3 +-
+ 7 files changed, 193 insertions(+), 423 deletions(-)
