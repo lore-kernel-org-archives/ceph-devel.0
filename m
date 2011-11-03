@@ -1,48 +1,45 @@
-From: Noah Watkins <jayhawk@soe.ucsc.edu>
-Subject: [GIT PULL] hadoop updates
-Date: Wed, 2 Nov 2011 20:21:22 -0700 (PDT)
-Message-ID: <1138267490.27149.1320290482257.JavaMail.root@mail-01.cse.ucsc.edu>
+From: <Eric_YH_Chen@wistron.com>
+Subject: Cannot execute rados.py with sudoer
+Date: Thu, 3 Nov 2011 11:55:56 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D649E74@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:34855 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932066Ab1KCDVW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2011 23:21:22 -0400
-Received: from mail-01.cse.ucsc.edu (mail-01.cse.ucsc.edu [128.114.48.32])
-	by mail-01.cse.ucsc.edu (Postfix) with ESMTP id 4BE75774C00A
-	for <ceph-devel@vger.kernel.org>; Wed,  2 Nov 2011 20:21:22 -0700 (PDT)
+Received: from twnhumsw4.wistron.com ([220.128.89.24]:62490 "EHLO
+	TWNHUMSW4.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754422Ab1KCD4r (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2011 23:56:47 -0400
+Received: from TWNHUFE4.whq.wistron (unverified [10.37.31.104]) by TWNHUMSW4.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta075b50f2ac0a816721f14@TWNHUMSW4.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Thu, 3 Nov 2011 11:59:27 +0800
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-The following changes since commit c861ee105475b3f20f64f51b8611f9b69207ca8c:
-
-  PG: mark scrubmap entry as not absent when we see an update (2011-11-02 11:51:14 -0700)
-
-are available in the git repository at:
-  git://github.com/noahdesu/ceph.git for-master
-
-Noah Watkins (12):
-      hadoop: use standard log4j logging facility
-      hadoop: emulate Ceph file owner as current user
-      hadoop: simplify workingDir handling; add home directory
-      hadoop: remove initialization check
-      hadoop: remove unused variable
-      hadoop: remove statistics initialization
-      hadoop: remove deprecated isDirectory()
-      hadoop: remove deprecation warning
-      hadoop: fix unit test: testWorkingDirectory
-      hadoop: ENOTDIR should be negative
-      hadoop: FileSystem.rename should not return FileNotFound
-      hadoop: remove unused fs_default_name
-
- src/client/hadoop/ceph/CephFS.java           |   56 ---
- src/client/hadoop/ceph/CephFaker.java        |   39 +--
- src/client/hadoop/ceph/CephFileSystem.java   |  461 ++++++++-----------------
- src/client/hadoop/ceph/CephInputStream.java  |   38 +--
- src/client/hadoop/ceph/CephOutputStream.java |   18 +-
- src/client/hadoop/ceph/CephTalker.java       |    1 -
- src/client/hadoop/ceph/TestCeph.java         |    3 +-
- 7 files changed, 193 insertions(+), 423 deletions(-)
+SGksIGFsbDoNCg0KwqDCoMKgV2hlbiBJIHVzZSByYW9kcy5weSwgSSBtZXQgc29tZSBwcm9ibGVt
+IGV2ZW4gaWYgdGhlIHVzZXIgaXMgaW4gc3Vkb2VyLg0K44CA44CASSBmb3VuZCBpdCB3b3VsZCBh
+Y2Nlc3MgL2V0Yy9jZXBoL2NsaWVudC5hZG1pbi5rZXlyaW5nIGFuZCAvdmFyL2xvZy9jZXBoL2Ns
+aWVudC5hZG1pbi5sb2cgd2hpY2ggaXMgb25seSBhdmFpbGFibGUgdG8gcm9vdC4NCsKgwqDCoMKg
+wqDCoMKgIERvIHlvdSBoYXZlIGFueSBzdWdnZXN0aW9uPyBJIGNhbm5vdCBleGVjdXRlIHRoZSBw
+eXRob24gcHJvYmxlbSB3aXRoIOKAnHJvb3TigJ0gYWNjb3VudC4gSXQgd291bGQgY2F1c2Ugc29t
+ZSBzZWN1cml0eSBpc3N1ZS4NCsKgwqDCoMKgwqDCoMKgIFRoYW5rcyBhIGxvdCENCg0KSGVyZSBp
+cyB0aGUgc2FtcGxlIGNvZGUuIA0KDQo+Pj4gaW1wb3J0IHJhZG9zDQo+Pj4gY2x1c3RlciA9IHJh
+ZG9zLlJhZG9zKCkNCj4+PiBjbHVzdGVyLmNvbmZfcmVhZF9maWxlKCkNCmZhaWxlZCB0byBvcGVu
+IGxvZyBmaWxlICcvdmFyL2xvZy9jZXBoL2NsaWVudC5hZG1pbi5sb2cnOiBlcnJvciAxMzogUGVy
+bWlzc2lvbiBkZW5pZWQNCj4+PiBjbHVzdGVyLmNvbm5lY3QoKQ0KMjAxMS0xMS0wMyAxMTo0OToy
+MC45Mzc5OTEgN2Y5ZmU1MzIwNzIwIG1vbmNsaWVudChodW50aW5nKTogTW9uQ2xpZW50Ojppbml0
+KCk6IEZhaWxlZCB0byBjcmVhdGUga2V5cmluZw0KMjAxMS0xMS0wMyAxMTo0OTo1MC45MzgyMzUg
+N2Y5ZmU1MzIwNzIwIG1vbmNsaWVudChodW50aW5nKTogYXV0aGVudGljYXRlIHRpbWVkIG91dCBh
+ZnRlciAzMA0KMjAxMS0xMS0wMyAxMTo0OTo1MC45MzgyODMgN2Y5ZmU1MzIwNzIwIGxpYnJhZG9z
+OiBjbGllbnQuYWRtaW4gYXV0aGVudGljYXRpb24gZXJyb3IgZXJyb3IgMTEwOiBDb25uZWN0aW9u
+IHRpbWVkIG91dA0KVHJhY2ViYWNrIChtb3N0IHJlY2VudCBjYWxsIGxhc3QpOg0KwqAgRmlsZSAi
+PHN0ZGluPiIsIGxpbmUgMSwgaW4gPG1vZHVsZT4NCsKgIEZpbGUgIi91c3IvbGliL3B5dGhvbjIu
+Ny9yYWRvcy5weSIsIGxpbmUgMTgyLCBpbiBjb25uZWN0DQrCoMKgwqAgcmFpc2UgbWFrZV9leChy
+ZXQsICJlcnJvciBjYWxsaW5nIGNvbm5lY3QiKQ0KcmFkb3MuRXJyb3I6IGVycm9yIGNhbGxpbmcg
+Y29ubmVjdDogZXJyb3IgY29kZSAxMTANCg0KDQotcnctLS0tLS0twqDCoCAxIHJvb3Qgcm9vdMKg
+wqDCoCA5MiAyMDExLTExLTAyIDE4OjEzIGNsaWVudC5hZG1pbi5rZXlyaW5nDQotcnctLS0tLS0t
+wqAgMSByb290IHJvb3TCoMKgwqDCoCAwIDIwMTEtMTEtMDMgMDc6NDcgY2xpZW50LmFkbWluLmxv
+Zw0KDQpyZWdhcmRzLA0KDQpFcmljL1BqYWNrDQoNCg0K
