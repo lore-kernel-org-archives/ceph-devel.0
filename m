@@ -1,46 +1,56 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] FileJournal: stop using sync_file_range
-Date: Thu, 3 Nov 2011 18:55:33 -0400
-Message-ID: <20111103225533.GA8535@infradead.org>
-References: <20111103214508.GA19234@infradead.org>
- <CAORUGqCLXcL0L_8_M+RLAXsmB5x5Wnwj7hNsF-wvSix8C=OGaA@mail.gmail.com>
+From: <Eric_YH_Chen@wistron.com>
+Subject: RE: Cannot execute rados.py with sudoer
+Date: Fri, 4 Nov 2011 09:45:05 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D64A442@WHQBEMAIL1.whq.wistron>
+References: <8512670932FB654F81AF0FEF1BE6D49D649E74@WHQBEMAIL1.whq.wistron> <CAF3hT9DaMW8dCx=1BGnW1jjoK+AuDDBNe57tfV1S2P3rc-BPUw@mail.gmail.com> <8512670932FB654F81AF0FEF1BE6D49D649F29@WHQBEMAIL1.whq.wistron> <CAORUGqDMuU0CoRU8c-kTH+MqA3wKqaYe05on769zhFEY3DNK2A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 173-166-109-252-newengland.hfc.comcastbusiness.net ([173.166.109.252]:59631
-	"EHLO bombadil.infradead.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751349Ab1KCWze (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 18:55:34 -0400
-Content-Disposition: inline
-In-Reply-To: <CAORUGqCLXcL0L_8_M+RLAXsmB5x5Wnwj7hNsF-wvSix8C=OGaA@mail.gmail.com>
+Received: from twnhumsw5.wistron.com ([220.128.89.25]:63736 "EHLO
+	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752176Ab1KDBp5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2011 21:45:57 -0400
+Content-class: urn:content-classes:message
+In-Reply-To: <CAORUGqDMuU0CoRU8c-kTH+MqA3wKqaYe05on769zhFEY3DNK2A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: tommi.virtanen@dreamhost.com
+Cc: gregory.farnum@dreamhost.com, ceph-devel@vger.kernel.org
 
-On Thu, Nov 03, 2011 at 03:48:15PM -0700, Tommi Virtanen wrote:
-> On Thu, Nov 3, 2011 at 14:45, Christoph Hellwig <hch@infradead.org> wrote:
-> One clarification here that came up in a conversation: the code quoted
-> was explicitly inside if (is_bdev), that is, it is only used when the
-> journal was on a raw block device. That should make a lot of the
-> metadata & block allocation irrelevant.
-> 
-> We're still very interested in hearing what are the real world barrier
-> / write cache flush guarantees from all the syscalls; the
-> documentation doesn't guarantee much, even for fsync.. from fsync(2):
-> 
->        If the underlying hard disk has write caching enabled, then the
-> data may not really be on
->        permanent storage when fsync() / fdatasync() return.
-
-It should make it to disk, but various filesystems have QOI issues and
-never flush a disk cache.  This is different from sync_file_range, which
-is implemented entirely inside the VM and has no chance at all to flush
-the cache (or filesystem metadata).
-
-Note that a block device might also have metadata for block allocations
-to flush - a prominent example is the device mapper thin provisioning
-target just merged in Linus' tree that relies on flushes to commit its
-metadata.  Another example is any kind of sparse VM image file when
-seen from the guest.  In both cases the metadata obviously hides behind
-the concept of cache flushes and isn't directly visible.
+SGksIFRvbW1pLA0KDQpIZXJlIGlzIG15IGNlcGguY29uZi4gVGhlICIvdmFyL2xvZy9jZXBoIiBm
+b2xkZXIgaXMgY3JlYXRlZCBieSBteXNlbGYuIA0KDQpCZWNhdXNlIHRoZSBzY3JpcHQgaW4gMC4z
+NyBkaWRuJ3QgY3JlYXRlIGl0LiANCg0KTWF5YmUgdGhlIHByb2JsZW0gaXMgSSBkaWQgbm90IHNl
+dCBjb3JyZWN0IHBlcm1pc3Npb24gdG8gdGhlIGZvbGRlci4NCg0KOyBnbG9iYWwNCltnbG9iYWxd
+DQogICAgICAgIGF1dGggc3VwcG9ydGVkID0gY2VwaHgNCiAgICAgICAgbWF4IG9wZW4gZmlsZXMg
+PSAxMzEwNzINCiAgICAgICAgbG9nIGZpbGUgPSAvdmFyL2xvZy9jZXBoLyRuYW1lLmxvZw0KICAg
+ICAgICBwaWQgZmlsZSA9IC92YXIvcnVuL2NlcGgvJG5hbWUucGlkDQogICAgICAgIGtleXJpbmcg
+PSAvZXRjL2NlcGgvJG5hbWUua2V5cmluZw0KDQpbbW9uXQ0KICAgICAgICBtb24gZGF0YSA9IC9z
+cnYvbW9uLiRpZA0KDQpbbW9uLmFdDQogICAgICAgIGhvc3QgPSB1YnVudHUxMTA0LTY0LTUNCiAg
+ICAgICAgbW9uIGFkZHIgPSAxNzIuMTYuMzMuNTo2Nzg5DQoNClttZHNdDQoNClttZHMuYV0NCiAg
+ICAgICAgaG9zdCA9IHVidW50dTExMDQtNjQtNQ0KDQpbb3NkXQ0KICAgICAgICBvc2QgZGF0YSA9
+IC9zcnYvb3NkLiRpZA0KICAgICAgICBvc2Qgam91cm5hbCA9IC9zcnYvb3NkLiRpZC5qb3VybmFs
+DQogICAgICAgIG9zZCBqb3VybmFsIHNpemUgPSAxMDAwIDsgam91cm5hbCBzaXplLCBpbiBtZWdh
+Ynl0ZXMNCg0KIFtvc2QuMF0NCiAgICAgICAgaG9zdCA9IHVidW50dTExMDQtNjQtNg0KICAgICAg
+ICBidHJmcyBkZXZzID0gL2Rldi9tYXBwZXIvdWJ1bnR1MTEwNC0tNjQtLTYtbHZvbDANCg0KW29z
+ZC4xXQ0KICAgICAgICBob3N0ID0gdWJ1bnR1NjQtMzMtNw0KICAgICAgICBidHJmcyBkZXZzID0g
+IC9kZXYvbWFwcGVyL3VidW50dTY0LS0zMy0tNy1sdm9sMA0KDQpbb3NkLjJdDQogICAgICAgIGhv
+c3QgPSB1YnVudHUxMTA0LTY0LTUNCiAgICAgICAgYnRyZnMgZGV2cyA9ICAvZGV2L21hcHBlci91
+YnVudHUxMTA0LS02NC0tNS1sdm9sMA0KDQpyZWdhcmRzLA0KDQpFcmljL1BqYWNrDQoNCi0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBUb21taSBWaXJ0YW5lbiBbbWFpbHRvOnRvbW1p
+LnZpcnRhbmVuQGRyZWFtaG9zdC5jb21dIA0KU2VudDogRnJpZGF5LCBOb3ZlbWJlciAwNCwgMjAx
+MSAxOjUxIEFNDQpUbzogRXJpYyBZSCBDaGVuL1dIUS9XaXN0cm9uDQpDYzogZ3JlZ29yeS5mYXJu
+dW1AZHJlYW1ob3N0LmNvbTsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJl
+OiBDYW5ub3QgZXhlY3V0ZSByYWRvcy5weSB3aXRoIHN1ZG9lcg0KDQpPbiBXZWQsIE5vdiAyLCAy
+MDExIGF0IDIyOjI0LCAgPEVyaWNfWUhfQ2hlbkB3aXN0cm9uLmNvbT4gd3JvdGU6DQo+IFRoZSBs
+b2cgaXMgZ2VuZXJhdGVkIGJ5IGNlcGggc2VydmljZSBhdCBydW50aW1lLg0KPg0KPiBFdmVuIEkg
+Y2hhbmdlIHRoZSBwZXJtaXNzaW9uLCBpdCB3b3VsZCBiZSBvdmVyd3JpdHRlbiBieSB0aGUgc2Vy
+dmljZSBzb21lZGF5Lg0KDQpEaWQgeW91IGNoYW5nZSBjZXBoLmNvbmYgYW5kIHNldCBvbmUgb2Yg
+dGhlIGxvZyBvcHRpb25zPyBUaGUgZGVmYXVsdA0KY29uZmlnIHdyaXRlcyB0byAvdmFyL2xvZyBv
+bmx5IGZyb20gdGhlIGRhZW1vbnMsIG5vdCBmcm9tIHRoZQ0KbGlicmFyaWVzLiBDYW4geW91IHBs
+ZWFzZSBzaGFyZSB5b3VyIGNvbmZpZ3VyYXRpb24uDQoNCkFzIGZvciBuZWVkaW5nIHRvIGJlIGFi
+bGUgdG8gcmVhZCBjbGllbnQuYWRtaW4sIHRoYXQgZmlsZSBpcyBub3QNCmNoYW5nZWQgYnkgdGhl
+IGNlcGggc2VydmljZXMgc3RhcnRpbmcsIHlvdSBjYW4gc2FmZWx5IGNob3duL2NobW9kIGl0Lg0K
+QWx0ZXJuYXRpdmVseSwgZ2l2ZSB0aGUgbm9uLXJvb3QgdXNlciBhIG5ldyBrZXksIGFuZCBhdXRo
+b3JpemUgdGhhdA0Kd2l0aCAiY2VwaCBhdXRoIGFkZCIuDQo=
