@@ -1,37 +1,55 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Feature request: "max mon" setting
-Date: Fri, 4 Nov 2011 10:02:37 -0700
-Message-ID: <CAF3hT9AoUL63hZeiFXdXON1H8nE=mQTcuE7Tkam8M7gRF__TBw@mail.gmail.com>
-References: <201111031302.51236.a.ott@m-privacy.de>
-	<CAORUGqCg815t-C_=+RPB3Z6xRWG6JeeSa1LtpQr1G-yo2wU=7g@mail.gmail.com>
-	<201111040912.14250.a.ott@m-privacy.de>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: Ceph copy-on-write
+Date: Fri, 4 Nov 2011 10:10:29 -0700
+Message-ID: <CAORUGqAUW4Z-+KmfBwxXTpdsF+T52HrPuQuQzcSuA9Z=UA7DyQ@mail.gmail.com>
+References: <4EB35754.1040506@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:45117 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932550Ab1KDRCh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Nov 2011 13:02:37 -0400
-Received: by iage36 with SMTP id e36so2749517iag.19
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Nov 2011 10:02:37 -0700 (PDT)
-In-Reply-To: <201111040912.14250.a.ott@m-privacy.de>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:42034 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755915Ab1KDRKw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Nov 2011 13:10:52 -0400
+Received: by wwi36 with SMTP id 36so3787722wwi.1
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Nov 2011 10:10:51 -0700 (PDT)
+In-Reply-To: <4EB35754.1040506@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Maxim Mikheev <mikhmv@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, Nov 4, 2011 at 1:12 AM, Amon Ott <a.ott@m-privacy.de> wrote:
-> I agree that our needs are special. We want to be able to start with 2 and
-> extend as customer needs grow, or start with 20 and shut some of them down if
-> load gets low. I now understand that we should start with at least three
-> nodes.
-It's not so special a usage case, you're just thinking of it wrong.
-Adding a new daemon of each type for every physical box you add is the
-wrong way to expand. You want to add OSDs for every box in order to
-take advantage of the storage; you CAN add an MDS for each box, but
-you should really be scaling them according to how much metadata
-activity you need to support; and the monitors need to be handled
-carefully in order to keep a strict majority of them alive at all
-times (and aside from durability the system doesn't much care about
-how many there are).
--Greg
+On Thu, Nov 3, 2011 at 20:09, Maxim Mikheev <mikhmv@gmail.com> wrote:
+> Is Ceph copy on write system?
+
+Ceph uses btrfs's copy-on-write properties internally, for cheap
+snapshots and journaling speed.
+
+As far as I know, Ceph does not currently expose reflink-style
+functionality to clients, and there's no common API either.
+
+I created a ticket http://tracker.newdream.net/issues/1680 to track
+this feature request.
+
+> If so, I think I do something wrong.
+> Files copying take too much time and disks space in my Ceph installation.
+> Could you like to help me resolve my problem?
+
+It seems you copied a 3075MB file from Ceph to Ceph, saw the free
+space in df drop 3395MB, and it took 109 seconds without sync, and
+you're asking why?
+
+First of all, the cephfs df statistics are allowed to update slowly,
+to improve performance. So that's not a reliable measure in the first
+place. Second, the df reports the underlying space free that ceph-osd
+sees, and that can be affected by other things such as journaling and
+unrelated files stored on the same filesystem. Also remember that ceph
+normally stores multiple copies of your data.
+
+As for writing at 31 MB/s, that's 310 Mbit/s, and if you have an OSD
+with just a single GigE network interface, the outgoing replication
+data stream uses the same network link. I've seen plenty of cheap GigE
+adapters max out at 600 Mbit/s, plus there's TCP and IP overhead. Lots
+of disks also max out at 40 MB/s. To troubleshoot further, you'll need
+to describe your cluster; how many OSDs, what kind of hardware and
+networking, what kind of performance do you see from the disks when
+accessed directly.
