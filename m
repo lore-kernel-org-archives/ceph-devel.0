@@ -1,95 +1,36 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] FileJournal: stop using sync_file_range
-Date: Fri, 4 Nov 2011 17:29:04 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1111041723440.29096@cobra.newdream.net>
-References: <20111103214508.GA19234@infradead.org>
+From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Subject: Re: ceph-mon blocked error
+Date: Fri, 04 Nov 2011 16:27:03 -0200
+Message-ID: <orwrbfu4js.fsf@livre.localdomain>
+References: <CA+jddaNKeneAL7350tv039H21Kr1kk1xSD4Eux_v7Of7vxpa5w@mail.gmail.com>
+	<CAF3hT9BuCqV5Z3GS4VVsQptT=d_uii20Q4hMP=qbHwD+f0-HTA@mail.gmail.com>
+	<CA+jddaNFKhu_KOa+VXhqGMw_pjM+uP9VFEcpeV+zY+E5KWO-Cw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60396 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751106Ab1KEA3H (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Nov 2011 20:29:07 -0400
-In-Reply-To: <20111103214508.GA19234@infradead.org>
+Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:48444 "EHLO
+	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750845Ab1KEFsH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Nov 2011 01:48:07 -0400
+In-Reply-To: <CA+jddaNFKhu_KOa+VXhqGMw_pjM+uP9VFEcpeV+zY+E5KWO-Cw@mail.gmail.com>
+	(Mandell Degerness's message of "Thu, 3 Nov 2011 12:09:23 -0700")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: ceph-devel@vger.kernel.org
+To: Mandell Degerness <mandell@pistoncloud.com>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
 
-On Thu, 3 Nov 2011, Christoph Hellwig wrote:
-> Using sync_file_range means that neither any required metadata gets commited,
-> nor the disk cache gets flushed.  Stop using it for the journal, and add
-> a comment on why a fsync_range system call would be helpful here.
+On Nov  3, 2011, Mandell Degerness <mandell@pistoncloud.com> wrote:
 
-Sigh... doesn't that mean that sync_file_range is almost completely 
-useless?  
+> We are currently running all services on each of the three nodes.
+> (mon, mds, and several osd processes).
 
-(Okay, not completely useless; we use it in FileStore.cc to push data to 
-disk quickly so that the eventual sync(2) is faster.)
+Do you also happen to have a ceph.ko mount on the node that showed the
+problem?  If so, you may be running into a deadlock in which ceph.ko is
+waiting for a response from the mon to complete a sync and release some
+pages, but mon is waiting for a sync to complete before it will respond.
 
-> Btw, why does the code use O_SYNC (and not even O_DSYNC!) if using 
-> direct I/O, but fdatasync/fsync for buffered I/O?  Avoiding cache 
-> flushes and metadata updates for every writes is just as important for 
-> direct I/O as it is for buffered I/O.
-
-Good call.. looks like I added it in 2010-02 but I couldn't tell you why.  
-:/
-
-Thanks!
-sage
-
-
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> 
-> Index: ceph/src/os/FileJournal.cc
-> ===================================================================
-> --- ceph.orig/src/os/FileJournal.cc	2011-11-03 22:27:35.304690331 +0100
-> +++ ceph/src/os/FileJournal.cc	2011-11-03 22:40:02.244191569 +0100
-> @@ -842,23 +842,26 @@ void FileJournal::do_write(bufferlist& b
->  
->    if (!directio) {
->      dout(20) << "do_write fsync" << dendl;
-> +
-> +    /*
-> +     * We'd really love to have a fsync_range or fdatasync_range and do a:
-> +     *
-> +     *  if (split) {
-> +     *    ::fsync_range(fd, header.max_size - split, split)l
-> +     *    ::fsync_range(fd, get_top(), bl.length() - split);
-> +     *  else
-> +     *    ::fsync_range(fd, write_pos, bl.length())
-> +     *
-> +     * NetBSD and AIX apparently have it, and adding it to Linux wouldn't be
-> +     * too hard given all the underlying infrastructure already exist.
-> +     *
-> +     * NOTE: using sync_file_range here would not be safe as it does not
-> +     * flush disk caches or commits any sort of metadata.
-> +     */
->  #if defined(DARWIN) || defined(__FreeBSD__)
->      ::fsync(fd);
->  #else
-> -# ifdef HAVE_SYNC_FILE_RANGE
-> -    if (is_bdev) {
-> -      if (split) {
-> -	::sync_file_range(fd, header.max_size - split, split, SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE);
-> -	::sync_file_range(fd, get_top(), bl.length() - split, SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE);
-> -	::sync_file_range(fd, header.max_size - split, split, SYNC_FILE_RANGE_WAIT_AFTER);
-> -	::sync_file_range(fd, get_top(), bl.length() - split, SYNC_FILE_RANGE_WAIT_AFTER);
-> -      } else {
-> -	::sync_file_range(fd, write_pos, bl.length(),
-> -			  SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
-> -      }
-> -    } else
-> -# endif
-> -      ::fdatasync(fd);
-> +    ::fdatasync(fd);
->  #endif
->    }
->  
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
