@@ -1,32 +1,51 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Ceph copy-on-write
-Date: Fri, 4 Nov 2011 12:54:42 -0700
-Message-ID: <CAORUGqA-mc399rQPwx0DyEMikMRszWGJijpgBw-7dPeMJEi0gw@mail.gmail.com>
-References: <4EB35754.1040506@gmail.com> <CAORUGqAUW4Z-+KmfBwxXTpdsF+T52HrPuQuQzcSuA9Z=UA7DyQ@mail.gmail.com>
- <4EB43E4A.5050001@gmail.com>
+From: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
+Subject: Re: radosgw-admin temp remove
+Date: Fri, 4 Nov 2011 13:15:37 -0700
+Message-ID: <CAC-hyiEih53S81D+Fnosv_nmChVmZ+0hugFqbta6Ft_4zN5Y2Q@mail.gmail.com>
+References: <CANExM-NKpof7kQ1sMCkcnwdAQ-F6e3QH5g5i3VKnCGyKrj4gaQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:33856 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750777Ab1KDTzG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Nov 2011 15:55:06 -0400
-Received: by wwi36 with SMTP id 36so4006292wwi.1
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Nov 2011 12:55:04 -0700 (PDT)
-In-Reply-To: <4EB43E4A.5050001@gmail.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:49609 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750916Ab1KDUPi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Nov 2011 16:15:38 -0400
+Received: by bke11 with SMTP id 11so2304954bke.19
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Nov 2011 13:15:37 -0700 (PDT)
+In-Reply-To: <CANExM-NKpof7kQ1sMCkcnwdAQ-F6e3QH5g5i3VKnCGyKrj4gaQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Maxim Mikheev <mikhmv@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Henry C Chang <henry.cy.chang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Nov 4, 2011 at 12:34, Maxim Mikheev <mikhmv@gmail.com> wrote:
-> I have another question. Looks like repository version 0.37 for ubuntu
-> oneric has brocken dependencies
-> for ceph-client-tools.
-> Can you advice how can I install it?
+On Fri, Nov 4, 2011 at 1:47 AM, Henry C Chang <henry.cy.chang@gmail.com=
+> wrote:
+> Hi all,
+>
+> I used to schedule a cron job to do "radosgw-admin --date `date
+> +%Y-%m-%d` temp remove".
+> It works fine in v0.36, but got an error in v0.37. See the error mess=
+age below:
+>
+> root@ceph1:~# radosgw-admin --date 2011-11-04 temp remove -d
+> 2011-11-04 16:34:27.373509 7f277c6ab760 cls_bucket_list .intent-log
+> start =A0num 1000
+> 2011-11-04 16:34:27.373538 7f277c6ab760 ERROR: empty marker for
+> cls_rgw bucket operation
+> failed to list objects
+>
+> I wonder if it is a bug or the command changed?
+>
 
-v0.37 renamed ceph-client-tools to ceph-common. Unfortunately, we
-didn't test the upgrade path, and the new ceph-common package doesn't
-replace ceph-client-tools automatically (this was fixed in
-ee34e09c6129297b3c4e9405138a4e3807d47118). You can remove
-ceph-client-tools manually, to get the upgrade to complete.
+That's a bug. We recently modified rgw to index bucket objects,
+however, this was only done for non-system buckets. On the bright
+side, it prevented a more severe bug that would eat your data to show
+itself. I just pushed a fix for both these bugs to the master branch.
+
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
