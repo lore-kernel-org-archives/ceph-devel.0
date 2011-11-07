@@ -1,36 +1,74 @@
 From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: Suggest to return [] when no image in the pool
-Date: Mon, 07 Nov 2011 09:27:18 -0800
-Message-ID: <4EB814F6.1090603@dreamhost.com>
-References: <8512670932FB654F81AF0FEF1BE6D49D649E74@WHQBEMAIL1.whq.wistron> <CAF3hT9DaMW8dCx=1BGnW1jjoK+AuDDBNe57tfV1S2P3rc-BPUw@mail.gmail.com> <8512670932FB654F81AF0FEF1BE6D49D68DEDB@WHQBEMAIL1.whq.wistron>
+Subject: Re: [PATCH] rbd: Document the rbd showmapped cmd
+Date: Mon, 07 Nov 2011 09:48:07 -0800
+Message-ID: <4EB819D7.80106@dreamhost.com>
+References: <1320657875-23476-1-git-send-email-psomas@grnet.gr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:40494 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:53573 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754814Ab1KGR1T (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2011 12:27:19 -0500
-In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D68DEDB@WHQBEMAIL1.whq.wistron>
+	with ESMTP id S1755664Ab1KGRsH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2011 12:48:07 -0500
+In-Reply-To: <1320657875-23476-1-git-send-email-psomas@grnet.gr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wistron.com
+To: Stratos Psomadakis <psomas@grnet.gr>
 Cc: ceph-devel@vger.kernel.org
 
-On 11/07/2011 01:43 AM, Eric_YH_Chen@wistron.com wrote:
-> Hi, developers,
+On 11/07/2011 01:24 AM, Stratos Psomadakis wrote:
+> Document the rbd showmapped cmd in rbd.usage(), and rbd's man page,
+> and add it to the bash completion script.
 >
-> When I used the API in rbd.py,
+> Signed-off-by: Stratos Psomadakis<psomas@grnet.gr>
+> ---
+>   man/rbd.8               |    3 +++
+>   src/bash_completion/rbd |    2 +-
+>   src/rbd.cc              |    2 ++
+>   3 files changed, 6 insertions(+), 1 deletions(-)
 >
-> I found RBD().list(ioctx) would return [""] when there is no image in the pool.
->
-> I suggest it should return [] in this case. It would avoid some programming problem. Thanks!
->
-> regards,
->
-> Eric/Pjack
+> diff --git a/man/rbd.8 b/man/rbd.8
+> index f2eea70..63f00ef 100644
+> --- a/man/rbd.8
+> +++ b/man/rbd.8
+> @@ -135,6 +135,9 @@ Maps the specified image to a block device via the rbd kernel module.
+>   .TP
+>   .B \fBunmap\fP [\fIdevice\-path\fP]
+>   Unmaps the block device that was mapped via the rbd kernel module.
+> +.TP
+> +.B \fBshowmapped\fP
+> +Show the rbd images that are mapped via the rbd kernel module.
+>   .UNINDENT
+>   .SH IMAGE NAME
+>   .sp
+> diff --git a/src/bash_completion/rbd b/src/bash_completion/rbd
+> index 5b6ec0e..549dc11 100644
+> --- a/src/bash_completion/rbd
+> +++ b/src/bash_completion/rbd
+> @@ -36,7 +36,7 @@ _rbd()
+>                   return 0
+>                   ;;
+>               *)
+> -                COMPREPLY=( $(compgen -W "ls list info create resize rm export import cp copy mv rename snap watch map unmap" -- ${cur}) )
+> +                COMPREPLY=( $(compgen -W "ls list info create resize rm export import cp copy mv rename snap watch map unmap showmapped" -- ${cur}) )
+>                   return 0
+>               ;;
+>           esac
+> diff --git a/src/rbd.cc b/src/rbd.cc
+> index 9757389..3945af6 100644
+> --- a/src/rbd.cc
+> +++ b/src/rbd.cc
+> @@ -83,6 +83,8 @@ void usage()
+>          <<  "                                            using the kernel\n"
+>          <<  "  unmap [device]                            unmap a rbd device that was\n"
+>          <<  "                                            mapped by the kernel\n"
+> +<<  "  showmapped                                show the rbd images mapped\n"
+> +<<  "                                            by the kernel\n"
+>          <<  "\n"
+>          <<  "Other input options:\n"
+>          <<  "  -p, --pool<pool>             source pool name\n"
 
-Fixed by 34d80397f73a847f31aad6f00afd0eeb3d526ca0. Thanks for reporting 
-this!
+Applied, thanks!
 
 Josh
