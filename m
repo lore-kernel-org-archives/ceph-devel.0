@@ -1,150 +1,62 @@
-From: Noah Watkins <jayhawk@soe.ucsc.edu>
-Subject: [patch RFC] client: return stripe address replicas
-Date: Mon, 7 Nov 2011 12:46:10 -0800 (PST)
-Message-ID: <172453601.38993.1320698769959.JavaMail.root@mail-01.cse.ucsc.edu>
+From: Leander Yu <leander.yu@gmail.com>
+Subject: Re: Feature request: "max mon" setting
+Date: Tue, 8 Nov 2011 05:03:14 +0800
+Message-ID: <CAA9wQNdQNpNzx+JxTMQBkXqk+PveZa85Hnym9t11ce=es0O8zg@mail.gmail.com>
+References: <201111031302.51236.a.ott@m-privacy.de>
+	<CAORUGqCg815t-C_=+RPB3Z6xRWG6JeeSa1LtpQr1G-yo2wU=7g@mail.gmail.com>
+	<201111040912.14250.a.ott@m-privacy.de>
+	<CAF3hT9AoUL63hZeiFXdXON1H8nE=mQTcuE7Tkam8M7gRF__TBw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:56869 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752284Ab1KGUqK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2011 15:46:10 -0500
-Received: from mail-01.cse.ucsc.edu (mail-01.cse.ucsc.edu [128.114.48.32])
-	by mail-01.cse.ucsc.edu (Postfix) with ESMTP id 0E7E27744005
-	for <ceph-devel@vger.kernel.org>; Mon,  7 Nov 2011 12:46:10 -0800 (PST)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:51902 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751885Ab1KGVDO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2011 16:03:14 -0500
+Received: by iage36 with SMTP id e36so6272204iag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Nov 2011 13:03:14 -0800 (PST)
+In-Reply-To: <CAF3hT9AoUL63hZeiFXdXON1H8nE=mQTcuE7Tkam8M7gRF__TBw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: Amon Ott <a.ott@m-privacy.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The patch below is a first attempt at updating the libcephfs API to return replica locations. I wanted to get opinions on the interface. The short version of the patch is the API changes:
+Hi Greg,
+Will there be any performance impact if there are too many mons?
 
-Client.h: returns vector of entity_addr_t
-  -int Client::get_file_stripe_address(int fd, loff_t offset, string& address)
-  +int Client::get_file_stripe_address(int fd, loff_t offset, vector<entity_addr_t>& address)
+Regards,
+Leander Yu.
 
-libcephfs.h: returns array of sockaddr_storage
-  int ceph_get_file_stripe_address(struct ceph_mount_info *cmount, int fd,
-  -				 loff_t offset, char *buf, int buflen);
-  +				 loff_t offset, struct sockaddr_storage *addr, int naddr);
-
-Thanks,
-Noah
-
-=========================================================
-
-Changes ceph_get_file_stripe_address to return a
-vector of entity_addr_t's for the primary and the
-replicas. libcephfs is updated to return the
-associated sockaddr_storage for each address.
----
- src/client/Client.cc           |   17 +++++++----------
- src/client/Client.h            |    2 +-
- src/include/cephfs/libcephfs.h |    2 +-
- src/libcephfs.cc               |   28 +++++++++++++++-------------
- 4 files changed, 24 insertions(+), 25 deletions(-)
-
-diff --git a/src/client/Client.cc b/src/client/Client.cc
-index 816fe83..1f01b80 100644
---- a/src/client/Client.cc
-+++ b/src/client/Client.cc
-@@ -6829,7 +6829,7 @@ int Client::get_pool_replication(int64_t pool)
-   return osdmap->get_pg_pool(pool)->get_size();
- }
- 
--int Client::get_file_stripe_address(int fd, loff_t offset, string& address)
-+int Client::get_file_stripe_address(int fd, loff_t offset, vector<entity_addr_t>& address)
- {
-   Mutex::Locker lock(client_lock);
- 
-@@ -6848,15 +6848,12 @@ int Client::get_file_stripe_address(int fd, loff_t offset, string& address)
-   osdmap->pg_to_acting_osds(pg, osds);
-   if (!osds.size())
-     return -EINVAL;
--  
--  // now we have the osd(s)
--  entity_addr_t addr = osdmap->get_addr(osds[0]);
--  
--  // now we need to turn it into a string
--  char foo[30];
--  __u8 *quad = (__u8*) &addr.in4_addr().sin_addr;
--  snprintf(foo, sizeof(foo), "%d.%d.%d.%d", (int)quad[0], (int)quad[1], (int)quad[2], (int)quad[3]);
--  address = foo;
-+
-+  for (unsigned i = 0; i < osds.size(); i++) {
-+    entity_addr_t addr = osdmap->get_addr(osds[i]);
-+    address.push_back(addr);
-+  }
-+
-   return 0;
- }
- 
-diff --git a/src/client/Client.h b/src/client/Client.h
-index bc98ac5..a30b73c 100644
---- a/src/client/Client.h
-+++ b/src/client/Client.h
-@@ -607,7 +607,7 @@ public:
- 
-   // expose file layout
-   int describe_layout(int fd, ceph_file_layout* layout);
--  int get_file_stripe_address(int fd, loff_t offset, string& address);
-+  int get_file_stripe_address(int fd, loff_t offset, vector<entity_addr_t>& address);
- 
-   // expose osdmap 
-   int get_local_osd();
-diff --git a/src/include/cephfs/libcephfs.h b/src/include/cephfs/libcephfs.h
-index 4b2b64f..6a4a20b 100644
---- a/src/include/cephfs/libcephfs.h
-+++ b/src/include/cephfs/libcephfs.h
-@@ -157,7 +157,7 @@ int ceph_get_file_stripe_unit(struct ceph_mount_info *cmount, int fh);
- int ceph_get_file_pool(struct ceph_mount_info *cmount, int fh);
- int ceph_get_file_replication(struct ceph_mount_info *cmount, int fh);
- int ceph_get_file_stripe_address(struct ceph_mount_info *cmount, int fd,
--				 loff_t offset, char *buf, int buflen);
-+				 loff_t offset, struct sockaddr_storage *addr, int naddr);
- 
- /* set default layout for new files */
- int ceph_set_default_file_stripe_unit(struct ceph_mount_info *cmount, int stripe);
-diff --git a/src/libcephfs.cc b/src/libcephfs.cc
-index 153348c..378ce7e 100644
---- a/src/libcephfs.cc
-+++ b/src/libcephfs.cc
-@@ -584,21 +584,23 @@ extern "C" int ceph_set_default_preferred_pg(struct ceph_mount_info *cmount, int
- }
- 
- extern "C" int ceph_get_file_stripe_address(struct ceph_mount_info *cmount, int fh,
--					    loff_t offset, char *buf, int buflen)
-+					    loff_t offset, struct sockaddr_storage *addr, int naddr)
- {
--  string address;
--  int r = cmount->get_client()->get_file_stripe_address(fh, offset, address);
-+  vector<entity_addr_t> address;
-+  unsigned i;
-+  int r;
-+
-+  if (naddr < 0)
-+    return -EINVAL;
-+
-+  r = cmount->get_client()->get_file_stripe_address(fh, offset, address);
-   if (r < 0)
--    return r; 
--  int len = address.size()+1;
--  if (len > buflen) {
--    if (buflen == 0)
--      return len;
--    return -ERANGE;
--  }
--  len = address.copy(buf, len, 0);
--  buf[len] = '\0'; // write a null char to terminate c-style string
--  return 0;
-+    return r;
-+
-+  for (i = 0; i < (unsigned)naddr && i < address.size(); i++)
-+    memcpy(&addr[i], &address[i].ss_addr(), sizeof(*addr));
-+
-+  return address.size();
- }
- 
- extern "C" int ceph_localize_reads(struct ceph_mount_info *cmount, int val)
--- 
-1.7.1
+On Sat, Nov 5, 2011 at 1:02 AM, Gregory Farnum
+<gregory.farnum@dreamhost.com> wrote:
+> On Fri, Nov 4, 2011 at 1:12 AM, Amon Ott <a.ott@m-privacy.de> wrote:
+>> I agree that our needs are special. We want to be able to start with=
+ 2 and
+>> extend as customer needs grow, or start with 20 and shut some of the=
+m down if
+>> load gets low. I now understand that we should start with at least t=
+hree
+>> nodes.
+> It's not so special a usage case, you're just thinking of it wrong.
+> Adding a new daemon of each type for every physical box you add is th=
+e
+> wrong way to expand. You want to add OSDs for every box in order to
+> take advantage of the storage; you CAN add an MDS for each box, but
+> you should really be scaling them according to how much metadata
+> activity you need to support; and the monitors need to be handled
+> carefully in order to keep a strict majority of them alive at all
+> times (and aside from durability the system doesn't much care about
+> how many there are).
+> -Greg
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
