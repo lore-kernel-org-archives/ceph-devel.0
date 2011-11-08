@@ -1,252 +1,188 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Problem with radosgw in 0.37
-Date: Tue, 8 Nov 2011 09:13:41 +0100
-Message-ID: <CAMwB3ThOq=z9ELN+dQkg2pif_Q_CXsJoU2D7wR4MMrnbwSVDYA@mail.gmail.com>
+From: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
+Subject: Re: Problem with radosgw in 0.37
+Date: Tue, 8 Nov 2011 09:27:15 -0800
+Message-ID: <CAC-hyiE5VYLzN6L5rkVCG7SeTJ4qPdRGvVCpZzCrPgiaD7zsDg@mail.gmail.com>
+References: <CAMwB3ThOq=z9ELN+dQkg2pif_Q_CXsJoU2D7wR4MMrnbwSVDYA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:60588 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753352Ab1KHINn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Nov 2011 03:13:43 -0500
-Received: by faan17 with SMTP id n17so243319faa.19
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Nov 2011 00:13:41 -0800 (PST)
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:41342 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751247Ab1KHR1R (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Nov 2011 12:27:17 -0500
+Received: by bke11 with SMTP id 11so615561bke.19
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Nov 2011 09:27:15 -0800 (PST)
+In-Reply-To: <CAMwB3ThOq=z9ELN+dQkg2pif_Q_CXsJoU2D7wR4MMrnbwSVDYA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Maybe, i have forgot something, but there is no doc about that.
-
-I create a configuration with nginx and radosgw for S3.
-
-On top of radosgw standing nginx witch cache capability. Everything
-was ok in version 0.32 of ceph. A have create a new filesystem with a
-newest 0.37 version, and now i have some problems.
-
-I run radosgw like this:
-
-radosgw --rgw-socket-path=3D/var/run/radosgw.sock --conf=3D/etc/ceph/ce=
-ph.conf
-
-In nginx i talk to unix socket of radosgw. Everything looks good. In
-Radosgw-admin i create user, and its ok.
-
-{ "user_id": "0",
-  "rados_uid": 0,
-  "display_name": "ocd",
-  "email": "",
-  "suspended": 0,
-  "subusers": [],
-  "keys": [
-        { "user": "0",
-          "access_key": "CFLZFEPYUAZV4EZ1P8OJ",
-          "secret_key": "HrWN8SNfjXPhUELPLIbRIA3nCfppQjJ5xV6EnhNM"}],
-
-pool name       category                 KB      objects       clones
-   degraded      unfound           rd        rd KB           wr
-wr KB
-=2Eintent-log     -                          1            1            =
-0
-           0           0            0            0            1
-    1
-=2Elog            -                         19           18            =
-0
-           0           0            0            0           39
-   39
-=2Ergw            -                         20           25            =
-0
-           0           0            1            0           49
-   46
-=2Ergw.buckets    -                         19           19            =
-0
-           0           0           32           15           45
-   23
-=2Eusers          -                          2            2            =
-0
-           0           0            0            0            2
-    2
-=2Eusers.email    -                          1            1            =
-0
-           0           0            0            0            1
-    1
-=2Eusers.uid      -                          4            4            =
-0
-           0           0            3            1            5
-    5
-data            -                          0            0            0
-           0           0            0            0            0
-    0
-metadata        -                          0            0            0
-           0           0            0            0            0
-    0
-rbd             -                          0            0            0
-           0           0            0            0            0
-    0
-  total used          540000           71
-  total avail      174920736
-  total space      175460736
-
-But when i testing this with a local s3lib its not working. In nginx ac=
-ces log:
-
-127.0.0.1 - - - [08/Nov/2011:09:03:48 +0100] "PUT /nodejs/test01
-HTTP/1.1" rlength: 377 bsent: 270 rtime: 0.006 urtime: 0.004 status:
-403 bbsent: 103 httpref: "-" useragent: "Mozilla/4.0 (Compatible; s3;
-libs3 2.0; Linux x86_64)"
-127.0.0.1 - - - [08/Nov/2011:09:03:55 +0100] "PUT /nodejs/test01
-HTTP/1.1" rlength: 377 bsent: 270 rtime: 0.006 urtime: 0.004 status:
-403 bbsent: 103 httpref: "-" useragent: "Mozilla/4.0 (Compatible; s3;
-libs3 2.0; Linux x86_64)"
-
-Request have code 100, waiting for something in radosgw.
-
-s3 -u put nodejs/test01 < /usr/src/libs3-2.0/TODO
-
-ERROR: ErrorAccessDenied
-
-=46rom external s3 client, a have something like that. Somehow bucket
-was created, but other operations not working with error access
-denied.
-
-<?xml version=3D'1.0' encoding=3D'UTF-8'?>
-<Error>
- <Code>AccessDenied</Code>
-</Error>
-
-I have some data from s3lib, by a many tries:
-
-                         Bucket                                 Created
---------------------------------------------------------  -------------=
--------
-nodejs                                                    2011-11-07T13=
-:11:42Z
-root@vm-10-177-48-24:/usr/src# s3 -u getacl nodejs
-OwnerID 0 ocd
- Type                                      User Identifier
-                              Permission
-------  ---------------------------------------------------------------=
----------------------------
- ------------
-UserID  0 (ocd)
-                            FULL_CONTROL
-root@vm-10-177-48-24:/usr/src# s3 -u test nodejs
-                         Bucket                                  Status
---------------------------------------------------------  -------------=
--------
-nodejs                                                    USA
-root@vm-10-177-48-24:/usr/src# s3 -u getacl nodejs
-OwnerID 0 ocd
- Type                                      User Identifier
-                              Permission
-------  ---------------------------------------------------------------=
----------------------------
- ------------
-UserID  0 (ocd)
-                            FULL_CONTROL
-root@vm-10-177-48-24:/usr/src# s3 -u list
-                         Bucket                                 Created
---------------------------------------------------------  -------------=
--------
-nodejs                                                    2011-11-07T13=
-:11:42Z
-
-
-Ceph.conf
-
-; global
-[global]
-        ; enable secure authentication
-        auth supported =3D cephx
-        keyring =3D /etc/ceph/keyring.bin
-
-; monitors
-;  You need at least one.  You need at least three if you want to
-;  tolerate any node failures.  Always create an odd number.
-[mon]
-        mon data =3D /vol0/data/mon.$id
-
-        ; some minimal logging (just message traffic) to aid debugging
-
-        debug ms =3D 1     ; see message traffic
-        debug mon =3D 0   ; monitor
-        debug paxos =3D 0 ; monitor replication
-        debug auth =3D 0  ;
-
-        mon allowed clock drift =3D 2
-
-[mon.0]
-        host =3D vm-10-177-48-24
-        mon addr =3D 10.177.48.24:6789
-
-; osd
-;  You need at least one.  Two if you want data to be replicated.
-;  Define as many as you like.
-[osd]
-        ; This is where the btrfs volume will be mounted.
-        osd data =3D /vol0/data/osd.$id
-
-        ; Ideally, make this a separate disk or partition.  A few GB
-        ; is usually enough; more if you have fast disks.  You can use
-        ; a file under the osd data dir if need be
-        ; (e.g. /data/osd$id/journal), but it will be slower than a
-        ; separate disk or partition.
-        osd journal =3D /vol0/data/osd.$id/journal
-
-        ; If the OSD journal is a file, you need to specify the size.
-This is specified in MB.
-        osd journal size =3D 512
-
-        filestore journal writeahead =3D 1
-        osd heartbeat grace =3D 5
-
-        debug ms =3D 1         ; message traffic
-        debug osd =3D 0
-        debug filestore =3D 0 ; local object storage
-        debug journal =3D 0   ; local journaling
-        debug monc =3D 0
-        debug rados =3D 0
-
-[osd.0]
-        host =3D vm-10-177-48-24
-        osd data =3D /vol0/data/osd.0
-        keyring =3D /vol0/data/osd.0/keyring
-
-[osd.1]
-        host =3D vm-10-177-48-24
-        osd data =3D /vol0/data/osd.1
-        keyring =3D /vol0/data/osd.1/keyring
-
-
-radosgw-admin bucket stats --bucket=3Dnodejs
-{ "bucket": "nodejs",
-  "pool": ".rgw.buckets",
-  "id": 10,
-  "marker": "10",
-  "owner": "0",
-  "usage": { "rgw.main": { "size_kb": 4,
-          "num_objects": 1},
-      "rgw.shadow": { "size_kb": 4,
-          "num_objects": 1}}}
-
-ceph -s
-2011-11-08 09:07:12.546715    pg v594: 460 pgs: 460 active+clean; 68
-KB data, 527 MB used, 166 GB / 167 GB avail
-2011-11-08 09:07:12.547555   mds e1: 0/0/1 up
-2011-11-08 09:07:12.547573   osd e12: 2 osds: 2 up, 2 in
-2011-11-08 09:07:12.547626   log 2011-11-08 08:31:46.761320 osd.0
-10.177.48.24:6800/12063 244 : [INF] 10.3 scrub ok
-2011-11-08 09:07:12.547709   mon e1: 1 mons at {0=3D10.177.48.24:6789/0=
-}
-
-
---=20
------
-Pozdrawiam
-
-S=C5=82awek "sZiBis" Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SSBoYXZlbid0IHJhbiByZ3cgb3ZlciBuZ2lueCBmb3IgcXVpdGUgYSB3aGlsZSwgc28gSSdtIG5v
+dCBzdXJlCndoZXRoZXIgaXQgY2FuIGFjdHVhbGx5IHdvcmsuIFRoZSBwcm9ibGVtIHRoYXQgeW91
+J3JlIHNlZWluZyBtaWdodCBiZQpyZWxhdGVkIHRvIHRoZSAxMDAtY29udGludWUgcHJvY2Vzc2lu
+Zywgd2hpY2ggaXMgbm93IGVuYWJsZWQgYnkKZGVmYXVsdC4gVHJ5IHRvIHR1cm4gaXQgb2ZmLCBz
+ZXR0aW5nIHRoZSBmb2xsb3dpbmcgdW5kZXIgdGhlIGdsb2JhbAoob3IgY2xpZW50KSBzZWN0aW9u
+IGluIHlvdXIgY2VwaC5jb25mOgoKICAgICAgICByZ3cgcHJpbnQgY29udGludWUgPSBmYWxzZQoK
+SWYgaXQgZG9lc24ndCBoZWxwIHdlJ2xsIG5lZWQgdG8gZGlnIGRlZXBlci4gVGhhbmtzLApZZWh1
+ZGEKCjIwMTEvMTEvOCBTxYJhd29taXIgU2tvd3JvbiA8c3ppYmlzQGdtYWlsLmNvbT46Cj4gTWF5
+YmUsIGkgaGF2ZSBmb3Jnb3Qgc29tZXRoaW5nLCBidXQgdGhlcmUgaXMgbm8gZG9jIGFib3V0IHRo
+YXQuCj4KPiBJIGNyZWF0ZSBhIGNvbmZpZ3VyYXRpb24gd2l0aCBuZ2lueCBhbmQgcmFkb3NndyBm
+b3IgUzMuCj4KPiBPbiB0b3Agb2YgcmFkb3NndyBzdGFuZGluZyBuZ2lueCB3aXRjaCBjYWNoZSBj
+YXBhYmlsaXR5LiBFdmVyeXRoaW5nCj4gd2FzIG9rIGluIHZlcnNpb24gMC4zMiBvZiBjZXBoLiBB
+IGhhdmUgY3JlYXRlIGEgbmV3IGZpbGVzeXN0ZW0gd2l0aCBhCj4gbmV3ZXN0IDAuMzcgdmVyc2lv
+biwgYW5kIG5vdyBpIGhhdmUgc29tZSBwcm9ibGVtcy4KPgo+IEkgcnVuIHJhZG9zZ3cgbGlrZSB0
+aGlzOgo+Cj4gcmFkb3NndyAtLXJndy1zb2NrZXQtcGF0aD0vdmFyL3J1bi9yYWRvc2d3LnNvY2sg
+LS1jb25mPS9ldGMvY2VwaC9jZXBoLmNvbmYKPgo+IEluIG5naW54IGkgdGFsayB0byB1bml4IHNv
+Y2tldCBvZiByYWRvc2d3LiBFdmVyeXRoaW5nIGxvb2tzIGdvb2QuIEluCj4gUmFkb3Nndy1hZG1p
+biBpIGNyZWF0ZSB1c2VyLCBhbmQgaXRzIG9rLgo+Cj4geyAidXNlcl9pZCI6ICIwIiwKPiDCoCJy
+YWRvc191aWQiOiAwLAo+IMKgImRpc3BsYXlfbmFtZSI6ICJvY2QiLAo+IMKgImVtYWlsIjogIiIs
+Cj4gwqAic3VzcGVuZGVkIjogMCwKPiDCoCJzdWJ1c2VycyI6IFtdLAo+IMKgImtleXMiOiBbCj4g
+wqAgwqAgwqAgwqB7ICJ1c2VyIjogIjAiLAo+IMKgIMKgIMKgIMKgIMKgImFjY2Vzc19rZXkiOiAi
+Q0ZMWkZFUFlVQVpWNEVaMVA4T0oiLAo+IMKgIMKgIMKgIMKgIMKgInNlY3JldF9rZXkiOiAiSHJX
+TjhTTmZqWFBoVUVMUExJYlJJQTNuQ2ZwcFFqSjV4VjZFbmhOTSJ9XSwKPgo+IHBvb2wgbmFtZSDC
+oCDCoCDCoCBjYXRlZ29yeSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBLQiDCoCDCoCDCoG9iamVj
+dHMgwqAgwqAgwqAgY2xvbmVzCj4gwqAgZGVncmFkZWQgwqAgwqAgwqB1bmZvdW5kIMKgIMKgIMKg
+IMKgIMKgIHJkIMKgIMKgIMKgIMKgcmQgS0IgwqAgwqAgwqAgwqAgwqAgd3IKPiB3ciBLQgo+IC5p
+bnRlbnQtbG9nIMKgIMKgIC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAx
+IMKgIMKgIMKgIMKgIMKgIMKgMSDCoCDCoCDCoCDCoCDCoCDCoDAKPiDCoCDCoCDCoCDCoCDCoCAw
+IMKgIMKgIMKgIMKgIMKgIDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMCDC
+oCDCoCDCoCDCoCDCoCDCoDEKPiDCoCDCoDEKPiAubG9nIMKgIMKgIMKgIMKgIMKgIMKgLSDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAxOSDCoCDCoCDCoCDCoCDCoCAxOCDCoCDC
+oCDCoCDCoCDCoCDCoDAKPiDCoCDCoCDCoCDCoCDCoCAwIMKgIMKgIMKgIMKgIMKgIDAgwqAgwqAg
+wqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDCoCAzOQo+IMKgIDM5
+Cj4gLnJndyDCoCDCoCDCoCDCoCDCoCDCoC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgMjAgwqAgwqAgwqAgwqAgwqAgMjUgwqAgwqAgwqAgwqAgwqAgwqAwCj4gwqAgwqAgwqAg
+wqAgwqAgMCDCoCDCoCDCoCDCoCDCoCAwIMKgIMKgIMKgIMKgIMKgIMKgMSDCoCDCoCDCoCDCoCDC
+oCDCoDAgwqAgwqAgwqAgwqAgwqAgNDkKPiDCoCA0Ngo+IC5yZ3cuYnVja2V0cyDCoCDCoC0gwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgMTkgwqAgwqAgwqAgwqAgwqAgMTkgwqAg
+wqAgwqAgwqAgwqAgwqAwCj4gwqAgwqAgwqAgwqAgwqAgMCDCoCDCoCDCoCDCoCDCoCAwIMKgIMKg
+IMKgIMKgIMKgIDMyIMKgIMKgIMKgIMKgIMKgIDE1IMKgIMKgIMKgIMKgIMKgIDQ1Cj4gwqAgMjMK
+PiAudXNlcnMgwqAgwqAgwqAgwqAgwqAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgMiDCoCDCoCDCoCDCoCDCoCDCoDIgwqAgwqAgwqAgwqAgwqAgwqAwCj4gwqAgwqAgwqAg
+wqAgwqAgMCDCoCDCoCDCoCDCoCDCoCAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDC
+oCDCoDAgwqAgwqAgwqAgwqAgwqAgwqAyCj4gwqAgwqAyCj4gLnVzZXJzLmVtYWlsIMKgIMKgLSDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDEgwqAgwqAgwqAgwqAgwqAgwqAx
+IMKgIMKgIMKgIMKgIMKgIMKgMAo+IMKgIMKgIMKgIMKgIMKgIDAgwqAgwqAgwqAgwqAgwqAgMCDC
+oCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMQo+
+IMKgIMKgMQo+IC51c2Vycy51aWQgwqAgwqAgwqAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgNCDCoCDCoCDCoCDCoCDCoCDCoDQgwqAgwqAgwqAgwqAgwqAgwqAwCj4gwqAg
+wqAgwqAgwqAgwqAgMCDCoCDCoCDCoCDCoCDCoCAwIMKgIMKgIMKgIMKgIMKgIMKgMyDCoCDCoCDC
+oCDCoCDCoCDCoDEgwqAgwqAgwqAgwqAgwqAgwqA1Cj4gwqAgwqA1Cj4gZGF0YSDCoCDCoCDCoCDC
+oCDCoCDCoC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKg
+IMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDCoCDCoDAKPiDCoCDCoCDCoCDCoCDCoCAwIMKgIMKgIMKg
+IMKgIMKgIDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDC
+oCDCoCDCoDAKPiDCoCDCoDAKPiBtZXRhZGF0YSDCoCDCoCDCoCDCoC0gwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDC
+oCDCoDAKPiDCoCDCoCDCoCDCoCDCoCAwIMKgIMKgIMKgIMKgIMKgIDAgwqAgwqAgwqAgwqAgwqAg
+wqAwIMKgIMKgIMKgIMKgIMKgIMKgMCDCoCDCoCDCoCDCoCDCoCDCoDAKPiDCoCDCoDAKPiByYmQg
+wqAgwqAgwqAgwqAgwqAgwqAgLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oDAgwqAgwqAgwqAgwqAgwqAgwqAwIMKgIMKgIMKgIMKgIMKgIMKgMAo+IMKgIMKgIMKgIMKgIMKg
+IDAgwqAgwqAgwqAgwqAgwqAgMCDCoCDCoCDCoCDCoCDCoCDCoDAgwqAgwqAgwqAgwqAgwqAgwqAw
+IMKgIMKgIMKgIMKgIMKgIMKgMAo+IMKgIMKgMAo+IMKgdG90YWwgdXNlZCDCoCDCoCDCoCDCoCDC
+oDU0MDAwMCDCoCDCoCDCoCDCoCDCoCA3MQo+IMKgdG90YWwgYXZhaWwgwqAgwqAgwqAxNzQ5MjA3
+MzYKPiDCoHRvdGFsIHNwYWNlIMKgIMKgIMKgMTc1NDYwNzM2Cj4KPiBCdXQgd2hlbiBpIHRlc3Rp
+bmcgdGhpcyB3aXRoIGEgbG9jYWwgczNsaWIgaXRzIG5vdCB3b3JraW5nLiBJbiBuZ2lueCBhY2Nl
+cyBsb2c6Cj4KPiAxMjcuMC4wLjEgLSAtIC0gWzA4L05vdi8yMDExOjA5OjAzOjQ4ICswMTAwXSAi
+UFVUIC9ub2RlanMvdGVzdDAxCj4gSFRUUC8xLjEiIHJsZW5ndGg6IDM3NyBic2VudDogMjcwIHJ0
+aW1lOiAwLjAwNiB1cnRpbWU6IDAuMDA0IHN0YXR1czoKPiA0MDMgYmJzZW50OiAxMDMgaHR0cHJl
+ZjogIi0iIHVzZXJhZ2VudDogIk1vemlsbGEvNC4wIChDb21wYXRpYmxlOyBzMzsKPiBsaWJzMyAy
+LjA7IExpbnV4IHg4Nl82NCkiCj4gMTI3LjAuMC4xIC0gLSAtIFswOC9Ob3YvMjAxMTowOTowMzo1
+NSArMDEwMF0gIlBVVCAvbm9kZWpzL3Rlc3QwMQo+IEhUVFAvMS4xIiBybGVuZ3RoOiAzNzcgYnNl
+bnQ6IDI3MCBydGltZTogMC4wMDYgdXJ0aW1lOiAwLjAwNCBzdGF0dXM6Cj4gNDAzIGJic2VudDog
+MTAzIGh0dHByZWY6ICItIiB1c2VyYWdlbnQ6ICJNb3ppbGxhLzQuMCAoQ29tcGF0aWJsZTsgczM7
+Cj4gbGliczMgMi4wOyBMaW51eCB4ODZfNjQpIgo+Cj4gUmVxdWVzdCBoYXZlIGNvZGUgMTAwLCB3
+YWl0aW5nIGZvciBzb21ldGhpbmcgaW4gcmFkb3Nndy4KPgo+IHMzIC11IHB1dCBub2RlanMvdGVz
+dDAxIDwgL3Vzci9zcmMvbGliczMtMi4wL1RPRE8KPgo+IEVSUk9SOiBFcnJvckFjY2Vzc0Rlbmll
+ZAo+Cj4gRnJvbSBleHRlcm5hbCBzMyBjbGllbnQsIGEgaGF2ZSBzb21ldGhpbmcgbGlrZSB0aGF0
+LiBTb21laG93IGJ1Y2tldAo+IHdhcyBjcmVhdGVkLCBidXQgb3RoZXIgb3BlcmF0aW9ucyBub3Qg
+d29ya2luZyB3aXRoIGVycm9yIGFjY2Vzcwo+IGRlbmllZC4KPgo+IDw/eG1sIHZlcnNpb249JzEu
+MCcgZW5jb2Rpbmc9J1VURi04Jz8+Cj4gPEVycm9yPgo+IMKgPENvZGU+QWNjZXNzRGVuaWVkPC9D
+b2RlPgo+IDwvRXJyb3I+Cj4KPiBJIGhhdmUgc29tZSBkYXRhIGZyb20gczNsaWIsIGJ5IGEgbWFu
+eSB0cmllczoKPgo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIEJ1Y2tldCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBDcmVhdGVkCj4g
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0g
+wqAtLS0tLS0tLS0tLS0tLS0tLS0tLQo+IG5vZGVqcyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDIwMTEt
+MTEtMDdUMTM6MTE6NDJaCj4gcm9vdEB2bS0xMC0xNzctNDgtMjQ6L3Vzci9zcmMjIHMzIC11IGdl
+dGFjbCBub2RlanMKPiBPd25lcklEIDAgb2NkCj4gwqBUeXBlIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgVXNlciBJZGVudGlmaWVyCj4gwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBQZXJtaXNzaW9uCj4gLS0t
+LS0tIMKgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCj4gwqAtLS0tLS0tLS0tLS0K
+PiBVc2VySUQgwqAwIChvY2QpCj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqBGVUxMX0NPTlRST0wKPiByb290QHZtLTEwLTE3Ny00OC0yNDovdXNyL3NyYyMgczMgLXUg
+dGVzdCBub2RlanMKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBCdWNrZXQg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBTdGF0dXMK
+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LSDCoC0tLS0tLS0tLS0tLS0tLS0tLS0tCj4gbm9kZWpzIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgVVNB
+Cj4gcm9vdEB2bS0xMC0xNzctNDgtMjQ6L3Vzci9zcmMjIHMzIC11IGdldGFjbCBub2RlanMKPiBP
+d25lcklEIDAgb2NkCj4gwqBUeXBlIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgVXNlciBJZGVudGlmaWVyCj4gwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBQZXJtaXNzaW9uCj4gLS0tLS0tIMKgLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCj4gwqAtLS0tLS0tLS0tLS0KPiBVc2VySUQgwqAwIChv
+Y2QpCj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBGVUxMX0NPTlRS
+T0wKPiByb290QHZtLTEwLTE3Ny00OC0yNDovdXNyL3NyYyMgczMgLXUgbGlzdAo+IMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIEJ1Y2tldCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBDcmVhdGVkCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gwqAtLS0tLS0tLS0tLS0tLS0tLS0t
+LQo+IG5vZGVqcyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDIwMTEtMTEtMDdUMTM6MTE6NDJaCj4KPgo+
+IENlcGguY29uZgo+Cj4gOyBnbG9iYWwKPiBbZ2xvYmFsXQo+IMKgIMKgIMKgIMKgOyBlbmFibGUg
+c2VjdXJlIGF1dGhlbnRpY2F0aW9uCj4gwqAgwqAgwqAgwqBhdXRoIHN1cHBvcnRlZCA9IGNlcGh4
+Cj4gwqAgwqAgwqAgwqBrZXlyaW5nID0gL2V0Yy9jZXBoL2tleXJpbmcuYmluCj4KPiA7IG1vbml0
+b3JzCj4gOyDCoFlvdSBuZWVkIGF0IGxlYXN0IG9uZS4gwqBZb3UgbmVlZCBhdCBsZWFzdCB0aHJl
+ZSBpZiB5b3Ugd2FudCB0bwo+IDsgwqB0b2xlcmF0ZSBhbnkgbm9kZSBmYWlsdXJlcy4gwqBBbHdh
+eXMgY3JlYXRlIGFuIG9kZCBudW1iZXIuCj4gW21vbl0KPiDCoCDCoCDCoCDCoG1vbiBkYXRhID0g
+L3ZvbDAvZGF0YS9tb24uJGlkCj4KPiDCoCDCoCDCoCDCoDsgc29tZSBtaW5pbWFsIGxvZ2dpbmcg
+KGp1c3QgbWVzc2FnZSB0cmFmZmljKSB0byBhaWQgZGVidWdnaW5nCj4KPiDCoCDCoCDCoCDCoGRl
+YnVnIG1zID0gMSDCoCDCoCA7IHNlZSBtZXNzYWdlIHRyYWZmaWMKPiDCoCDCoCDCoCDCoGRlYnVn
+IG1vbiA9IDAgwqAgOyBtb25pdG9yCj4gwqAgwqAgwqAgwqBkZWJ1ZyBwYXhvcyA9IDAgOyBtb25p
+dG9yIHJlcGxpY2F0aW9uCj4gwqAgwqAgwqAgwqBkZWJ1ZyBhdXRoID0gMCDCoDsKPgo+IMKgIMKg
+IMKgIMKgbW9uIGFsbG93ZWQgY2xvY2sgZHJpZnQgPSAyCj4KPiBbbW9uLjBdCj4gwqAgwqAgwqAg
+wqBob3N0ID0gdm0tMTAtMTc3LTQ4LTI0Cj4gwqAgwqAgwqAgwqBtb24gYWRkciA9IDEwLjE3Ny40
+OC4yNDo2Nzg5Cj4KPiA7IG9zZAo+IDsgwqBZb3UgbmVlZCBhdCBsZWFzdCBvbmUuIMKgVHdvIGlm
+IHlvdSB3YW50IGRhdGEgdG8gYmUgcmVwbGljYXRlZC4KPiA7IMKgRGVmaW5lIGFzIG1hbnkgYXMg
+eW91IGxpa2UuCj4gW29zZF0KPiDCoCDCoCDCoCDCoDsgVGhpcyBpcyB3aGVyZSB0aGUgYnRyZnMg
+dm9sdW1lIHdpbGwgYmUgbW91bnRlZC4KPiDCoCDCoCDCoCDCoG9zZCBkYXRhID0gL3ZvbDAvZGF0
+YS9vc2QuJGlkCj4KPiDCoCDCoCDCoCDCoDsgSWRlYWxseSwgbWFrZSB0aGlzIGEgc2VwYXJhdGUg
+ZGlzayBvciBwYXJ0aXRpb24uIMKgQSBmZXcgR0IKPiDCoCDCoCDCoCDCoDsgaXMgdXN1YWxseSBl
+bm91Z2g7IG1vcmUgaWYgeW91IGhhdmUgZmFzdCBkaXNrcy4gwqBZb3UgY2FuIHVzZQo+IMKgIMKg
+IMKgIMKgOyBhIGZpbGUgdW5kZXIgdGhlIG9zZCBkYXRhIGRpciBpZiBuZWVkIGJlCj4gwqAgwqAg
+wqAgwqA7IChlLmcuIC9kYXRhL29zZCRpZC9qb3VybmFsKSwgYnV0IGl0IHdpbGwgYmUgc2xvd2Vy
+IHRoYW4gYQo+IMKgIMKgIMKgIMKgOyBzZXBhcmF0ZSBkaXNrIG9yIHBhcnRpdGlvbi4KPiDCoCDC
+oCDCoCDCoG9zZCBqb3VybmFsID0gL3ZvbDAvZGF0YS9vc2QuJGlkL2pvdXJuYWwKPgo+IMKgIMKg
+IMKgIMKgOyBJZiB0aGUgT1NEIGpvdXJuYWwgaXMgYSBmaWxlLCB5b3UgbmVlZCB0byBzcGVjaWZ5
+IHRoZSBzaXplLgo+IFRoaXMgaXMgc3BlY2lmaWVkIGluIE1CLgo+IMKgIMKgIMKgIMKgb3NkIGpv
+dXJuYWwgc2l6ZSA9IDUxMgo+Cj4gwqAgwqAgwqAgwqBmaWxlc3RvcmUgam91cm5hbCB3cml0ZWFo
+ZWFkID0gMQo+IMKgIMKgIMKgIMKgb3NkIGhlYXJ0YmVhdCBncmFjZSA9IDUKPgo+IMKgIMKgIMKg
+IMKgZGVidWcgbXMgPSAxIMKgIMKgIMKgIMKgIDsgbWVzc2FnZSB0cmFmZmljCj4gwqAgwqAgwqAg
+wqBkZWJ1ZyBvc2QgPSAwCj4gwqAgwqAgwqAgwqBkZWJ1ZyBmaWxlc3RvcmUgPSAwIDsgbG9jYWwg
+b2JqZWN0IHN0b3JhZ2UKPiDCoCDCoCDCoCDCoGRlYnVnIGpvdXJuYWwgPSAwIMKgIDsgbG9jYWwg
+am91cm5hbGluZwo+IMKgIMKgIMKgIMKgZGVidWcgbW9uYyA9IDAKPiDCoCDCoCDCoCDCoGRlYnVn
+IHJhZG9zID0gMAo+Cj4gW29zZC4wXQo+IMKgIMKgIMKgIMKgaG9zdCA9IHZtLTEwLTE3Ny00OC0y
+NAo+IMKgIMKgIMKgIMKgb3NkIGRhdGEgPSAvdm9sMC9kYXRhL29zZC4wCj4gwqAgwqAgwqAgwqBr
+ZXlyaW5nID0gL3ZvbDAvZGF0YS9vc2QuMC9rZXlyaW5nCj4KPiBbb3NkLjFdCj4gwqAgwqAgwqAg
+wqBob3N0ID0gdm0tMTAtMTc3LTQ4LTI0Cj4gwqAgwqAgwqAgwqBvc2QgZGF0YSA9IC92b2wwL2Rh
+dGEvb3NkLjEKPiDCoCDCoCDCoCDCoGtleXJpbmcgPSAvdm9sMC9kYXRhL29zZC4xL2tleXJpbmcK
+Pgo+Cj4gcmFkb3Nndy1hZG1pbiBidWNrZXQgc3RhdHMgLS1idWNrZXQ9bm9kZWpzCj4geyAiYnVj
+a2V0IjogIm5vZGVqcyIsCj4gwqAicG9vbCI6ICIucmd3LmJ1Y2tldHMiLAo+IMKgImlkIjogMTAs
+Cj4gwqAibWFya2VyIjogIjEwIiwKPiDCoCJvd25lciI6ICIwIiwKPiDCoCJ1c2FnZSI6IHsgInJn
+dy5tYWluIjogeyAic2l6ZV9rYiI6IDQsCj4gwqAgwqAgwqAgwqAgwqAibnVtX29iamVjdHMiOiAx
+fSwKPiDCoCDCoCDCoCJyZ3cuc2hhZG93IjogeyAic2l6ZV9rYiI6IDQsCj4gwqAgwqAgwqAgwqAg
+wqAibnVtX29iamVjdHMiOiAxfX19Cj4KPiBjZXBoIC1zCj4gMjAxMS0xMS0wOCAwOTowNzoxMi41
+NDY3MTUgwqAgwqBwZyB2NTk0OiA0NjAgcGdzOiA0NjAgYWN0aXZlK2NsZWFuOyA2OAo+IEtCIGRh
+dGEsIDUyNyBNQiB1c2VkLCAxNjYgR0IgLyAxNjcgR0IgYXZhaWwKPiAyMDExLTExLTA4IDA5OjA3
+OjEyLjU0NzU1NSDCoCBtZHMgZTE6IDAvMC8xIHVwCj4gMjAxMS0xMS0wOCAwOTowNzoxMi41NDc1
+NzMgwqAgb3NkIGUxMjogMiBvc2RzOiAyIHVwLCAyIGluCj4gMjAxMS0xMS0wOCAwOTowNzoxMi41
+NDc2MjYgwqAgbG9nIDIwMTEtMTEtMDggMDg6MzE6NDYuNzYxMzIwIG9zZC4wCj4gMTAuMTc3LjQ4
+LjI0OjY4MDAvMTIwNjMgMjQ0IDogW0lORl0gMTAuMyBzY3J1YiBvawo+IDIwMTEtMTEtMDggMDk6
+MDc6MTIuNTQ3NzA5IMKgIG1vbiBlMTogMSBtb25zIGF0IHswPTEwLjE3Ny40OC4yNDo2Nzg5LzB9
+Cj4KPgo+IC0tCj4gLS0tLS0KPiBQb3pkcmF3aWFtCj4KPiBTxYJhd2VrICJzWmlCaXMiIFNrb3dy
+b24KPiAtLQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
+bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
+cmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCDCoGh0dHA6Ly92
+Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+Cg==
