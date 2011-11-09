@@ -1,43 +1,52 @@
-From: Sage Weil <sage@newdream.net>
+From: Noah Watkins <jayhawk@soe.ucsc.edu>
 Subject: Re: [patch RFC] client: return stripe address replicas
-Date: Wed, 9 Nov 2011 12:56:56 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111091255150.31435@cobra.newdream.net>
+Date: Wed, 9 Nov 2011 13:08:17 -0800
+Message-ID: <CAB2gnbXG0X2NDkhVAHZD0AzU5owp+aPndN0G-y2=+fbFDmqPqw@mail.gmail.com>
 References: <1771502131.44602.1320808517281.JavaMail.root@mail-01.cse.ucsc.edu>
+	<Pine.LNX.4.64.1111091255150.31435@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49932 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932850Ab1KIU44 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 15:56:56 -0500
-In-Reply-To: <1771502131.44602.1320808517281.JavaMail.root@mail-01.cse.ucsc.edu>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:35812 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753104Ab1KIVIU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 16:08:20 -0500
+Received: from mail-ww0-f44.google.com (mail-ww0-f44.google.com [74.125.82.44])
+	by mail-01.cse.ucsc.edu (Postfix) with ESMTPSA id 98A2E774C00C
+	for <ceph-devel@vger.kernel.org>; Wed,  9 Nov 2011 13:08:19 -0800 (PST)
+Received: by wwh12 with SMTP id 12so1302321wwh.1
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Nov 2011 13:08:17 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.64.1111091255150.31435@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@soe.ucsc.edu>
+To: Sage Weil <sage@newdream.net>
 Cc: Tommi Virtanen <tommi.virtanen@dreamhost.com>, ceph-devel <ceph-devel@vger.kernel.org>, Gregory Farnum <gregory.farnum@dreamhost.com>
 
-On Tue, 8 Nov 2011, Noah Watkins wrote:
-> ----- Original Message -----
-> > From: "Tommi Virtanen" <tommi.virtanen@dreamhost.com>
-> > 
-> > The value in returning the number that *would have been written* is in
-> > that now the caller can reallocate a buffer of exactly the right size
-> > (barring races). Like snprintf() and friends. With just a generic
-> > -ENOBUFS/-EMSGSIZE/whatever you cram in there, the caller must do a
-> > series of increasing guesses.
-> > 
-> 
-> Thanks for the feedback. I ended up using -ERANGE, and allow naddr=0 for 
-> querying the actual size.
+On Wed, Nov 9, 2011 at 12:56, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 8 Nov 2011, Noah Watkins wrote:
+>
+> The only issue with this is that, in the event that you don't guess a
+> sufficiently large array on the first call, you may need to call agai=
+n,
+> and in some cases that may mean multiple MDS requests. =C2=A0Normally=
+ that's
+> not the case. =C2=A0And a smart caller should guess 4 and only pass 0=
+ and then
+> N if 4 failed. =C2=A0But a naive caller will always make two calls, f=
+irst with
+> 0 and then with N, and in some cases that's actually slower.
 
-The only issue with this is that, in the event that you don't guess a 
-sufficiently large array on the first call, you may need to call again, 
-and in some cases that may mean multiple MDS requests.  Normally that's 
-not the case.  And a smart caller should guess 4 and only pass 0 and then 
-N if 4 failed.  But a naive caller will always make two calls, first with 
-0 and then with N, and in some cases that's actually slower.
+The code I'm using makes a large guess, and an alternative is for the
+user to cache the replication factor for a file? A similar approach usi=
+ng
+ERANGE is used by listxattr (well, it communicates ERANGE via errno).
+In any case, even with Tommi's *naddr_out approach, a certain amount
+of precise documentation on it's semantics is needed.
 
-Does it matter?
-
-sage
-
+- Noah
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
