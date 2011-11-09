@@ -1,75 +1,43 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] automake: enable 'make V=0'
-Date: Wed, 9 Nov 2011 12:55:02 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111091254420.31435@cobra.newdream.net>
-References: <1320806361-1801-1-git-send-email-jayhawk@cs.ucsc.edu>
+Subject: Re: [patch RFC] client: return stripe address replicas
+Date: Wed, 9 Nov 2011 12:56:56 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1111091255150.31435@cobra.newdream.net>
+References: <1771502131.44602.1320808517281.JavaMail.root@mail-01.cse.ucsc.edu>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51408 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:49932 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753513Ab1KIUzD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 15:55:03 -0500
-In-Reply-To: <1320806361-1801-1-git-send-email-jayhawk@cs.ucsc.edu>
+	with ESMTP id S932850Ab1KIU44 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 15:56:56 -0500
+In-Reply-To: <1771502131.44602.1320808517281.JavaMail.root@mail-01.cse.ucsc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Noah Watkins <jayhawk@soe.ucsc.edu>
+Cc: Tommi Virtanen <tommi.virtanen@dreamhost.com>, ceph-devel <ceph-devel@vger.kernel.org>, Gregory Farnum <gregory.farnum@dreamhost.com>
 
-Ah, much nicer.  Applied!
+On Tue, 8 Nov 2011, Noah Watkins wrote:
+> ----- Original Message -----
+> > From: "Tommi Virtanen" <tommi.virtanen@dreamhost.com>
+> > 
+> > The value in returning the number that *would have been written* is in
+> > that now the caller can reallocate a buffer of exactly the right size
+> > (barring races). Like snprintf() and friends. With just a generic
+> > -ENOBUFS/-EMSGSIZE/whatever you cram in there, the caller must do a
+> > series of increasing guesses.
+> > 
+> 
+> Thanks for the feedback. I ended up using -ERANGE, and allow naddr=0 for 
+> querying the actual size.
+
+The only issue with this is that, in the event that you don't guess a 
+sufficiently large array on the first call, you may need to call again, 
+and in some cases that may mean multiple MDS requests.  Normally that's 
+not the case.  And a smart caller should guess 4 and only pass 0 and then 
+N if 4 failed.  But a naive caller will always make two calls, first with 
+0 and then with N, and in some cases that's actually slower.
+
+Does it matter?
 
 sage
 
-
-On Tue, 8 Nov 2011, Noah Watkins wrote:
-
-> From: Noah Watkins <noahwatkins@gmail.com>
-> 
-> Enables silent mode for automake generated Makefiles,
-> and silent mode is _off_ by default. Using V=0 the output
-> is much easier to read when trying to find warnings:
-> 
-> nwatkins@piha:~/Projects/ceph/ceph$ make -j8 V=0
-> make[3]: Entering directory `/users/nwatkins/Projects/ceph/ceph/src'
->   CC     locks.o
->   CXX    journal.o
->   CXX    Server.o
->   CXX    Mutation.o
->   CXX    MDCache.o
->   CXX    Locker.o
->   CXX    Migrator.o
->   CXX    MDBalancer.o
->   CXX    CDentry.o
->   CXX    CDir.o
->   CXX    CInode.o
->   CXX    LogEvent.o
->   CXX    MDSTable.o
-> 
-> Signed-off-by: Noah Watkins <noahwatkins@gmail.com>
-> ---
->  configure.ac |    3 +++
->  1 files changed, 3 insertions(+), 0 deletions(-)
-> 
-> diff --git a/configure.ac b/configure.ac
-> index 54582e9..1700daa 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -20,6 +20,9 @@ AM_INIT_AUTOMAKE
->  AM_PROG_CC_C_O
->  AM_PROG_LIBTOOL
->  
-> +# Enable make V=0
-> +AM_SILENT_RULES([yes])
-> +
->  # Platform
->  case "${target_os}" in
->  darwin*)
-> -- 
-> 1.7.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
