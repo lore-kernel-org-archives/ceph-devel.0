@@ -1,49 +1,50 @@
-From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Subject: Re: [PATCH 3/4] net: add paged frag destructor support to kernel_sendpage.
-Date: Wed, 9 Nov 2011 19:02:44 +0100
-Message-ID: <CAHXqBFKXV14WrKRipaeMJ9_fpWDH_ud_2UjpKYKHKN08t3m-yw@mail.gmail.com>
-References: <1320850895.955.172.camel@zakaz.uk.xensource.com> <1320850927-30240-3-git-send-email-ian.campbell@citrix.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph-mon blocked error
+Date: Wed, 9 Nov 2011 12:54:38 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1111091254350.31435@cobra.newdream.net>
+References: <CA+jddaNKeneAL7350tv039H21Kr1kk1xSD4Eux_v7Of7vxpa5w@mail.gmail.com>
+ <CAF3hT9BuCqV5Z3GS4VVsQptT=d_uii20Q4hMP=qbHwD+f0-HTA@mail.gmail.com>
+ <CA+jddaNFKhu_KOa+VXhqGMw_pjM+uP9VFEcpeV+zY+E5KWO-Cw@mail.gmail.com>
+ <orwrbfu4js.fsf@livre.localdomain> <CA+jddaMPvTae_W_zKyjTewiKEzpJ_FB_zQoS=4J5pjEcOj90sQ@mail.gmail.com>
+ <orobwqt186.fsf@livre.localdomain> <CA+jddaMvo2XWAv2BvfEqBwMXYv8JV4MmFGXYF-0F2hQx92FGfw@mail.gmail.com>
+ <CAF3hT9DPq_X5F2ZK0JU5jh+ugMX_DzfB2hYTLRJ5G3aELRKKag@mail.gmail.com>
+ <CAORUGqD0EL4yb-RbrixJPkwjSubPpJD5NKX-2OwK6656bkgjHA@mail.gmail.com>
+ <CA+jddaO4H7owZ_byUprBCfvgCUTUC8ceePyPh_7G_SE8c_kKZA@mail.gmail.com>
+ <Pine.LNX.4.64.1111071508450.32056@cobra.newdream.net> <orhb2drxh5.fsf@livre.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:39821 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754512Ab1KISDH convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 13:03:07 -0500
-In-Reply-To: <1320850927-30240-3-git-send-email-ian.campbell@citrix.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51400 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753513Ab1KIUyk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 15:54:40 -0500
+In-Reply-To: <orhb2drxh5.fsf@livre.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ian Campbell <ian.campbell@citrix.com>
-Cc: netdev@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>, "Pekka Savola (ipv6)" <pekkas@netcore.fi>, James Morris <jmorris@namei.org>, Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>, Patrick McHardy <kaber@trash.net>, Trond Myklebust <Trond.Myklebust@netapp.com>, Greg Kroah-Hartman <gregkh@suse.de>, drbd-user@lists.linbit.com, devel@driverdev.osuosl.org, cluster-devel@redhat.com, ocfs2-devel@oss.oracle.com, ceph-devel@vger.kernel.org, rds-devel@oss.oracle.com, linux-nfs@vger.kernel.org
+To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Cc: Mandell Degerness <mandell@pistoncloud.com>, Tommi Virtanen <tommi.virtanen@dreamhost.com>, Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
 
-2011/11/9 Ian Campbell <ian.campbell@citrix.com>:
-> This requires adding a new argument to various sendpage hooks up and =
-down the
-> stack. At the moment this parameter is always NULL.
-[...]
-> --- a/include/linux/net.h
-> +++ b/include/linux/net.h
-> @@ -203,6 +204,7 @@ struct proto_ops {
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0ssize_t =C2=A0 =C2=A0 =C2=A0 =C2=A0 (*send=
-page) =C2=A0(struct socket *sock, struct page *page,
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 struct skb_fra=
-g_destructor *destroy,
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0int offs=
-et, size_t size, int flags);
+Applied, thanks!
 
-Maybe you could instead add new op like sendfrag() that would get
-already prepared skb_frag_struct? In the end all page data ends up
-described in skb_frag_struct, so this would reduce copying this
-information all over network stack. This might be a bigger change,
-though.
+On Wed, 9 Nov 2011, Alexandre Oliva wrote:
 
-Best Regards,
-Micha=C5=82 Miros=C5=82aw
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Nov  7, 2011, Sage Weil <sage@newdream.net> wrote:
+> 
+> > New kernels (.39+) and new glibc have syncfs(2), which syncs only the
+> > fs the ceph-osd is serving up.
+> 
+> I haven't seen the current glibc implementation, but the one I have on
+> my system is a stub that sets errno and returns nonzero.  autoconf
+> correctly detects it as a stub, but I'm concerned that syncfs might fail
+> with say ENOSYS and we'd happily go ahead assuming the data is properly
+> sync()ed.
+> 
+> The patch below fixes this, arranging for us to fallback to sync if
+> syncfs fails, but to try btrfs sync in between, under the assumption
+> that the ioctl will fail if fd isn't a btrfs inode.
+> 
+> > http://linux.die.net/man/2/syncfs
+> 
+> The man page is wrong or outdated: syncfs returns int, not void.
+> 
+> 
