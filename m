@@ -1,54 +1,31 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] rbd: Fix the showmapped cmd usage
-Date: Wed, 9 Nov 2011 14:07:52 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111091407210.31435@cobra.newdream.net>
-References: <1320876335-671-1-git-send-email-psomas@grnet.gr>
+From: Noah Watkins <jayhawk@soe.ucsc.edu>
+Subject: Updated hadoop patch
+Date: Wed, 9 Nov 2011 15:15:41 -0800 (PST)
+Message-ID: <1183389798.47687.1320880541074.JavaMail.root@mail-01.cse.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38827 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932089Ab1KIWHw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 17:07:52 -0500
-In-Reply-To: <1320876335-671-1-git-send-email-psomas@grnet.gr>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:51743 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754250Ab1KIXPl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 18:15:41 -0500
+Received: from mail-01.cse.ucsc.edu (mail-01.cse.ucsc.edu [128.114.48.32])
+	by mail-01.cse.ucsc.edu (Postfix) with ESMTP id 2AD78775C005
+	for <ceph-devel@vger.kernel.org>; Wed,  9 Nov 2011 15:15:41 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stratos Psomadakis <psomas@grnet.gr>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Applied, thanks!
+The Ceph/Hadoop wiki page now points to an updated patch
+that applies to Hadoop (and setup instructions). The
+patch in Ceph @ src/client/hadoop is outdated and can
+probably be either deleted or replaced with the patch
+found here:
 
-On Thu, 10 Nov 2011, Stratos Psomadakis wrote:
+  http://www.soe.ucsc.edu/~jayhawk/hadoop-0.20.205.0-cephfs1.patch
 
-> If the rbd showmapped cmd is given any extra arguments, rbd will fail
-> with "assert(0)". Fix it by exiting with "usage_exit()", if any
-> arguments are present, instead of failing.
-> 
-> Signed-off-by: Stratos Psomadakis <psomas@grnet.gr>
-> ---
->  src/rbd.cc |    3 +++
->  1 files changed, 3 insertions(+), 0 deletions(-)
-> 
-> diff --git a/src/rbd.cc b/src/rbd.cc
-> index 30f045f..47b556d 100644
-> --- a/src/rbd.cc
-> +++ b/src/rbd.cc
-> @@ -986,6 +986,9 @@ int main(int argc, const char **argv)
->        case OPT_RENAME:
->  	set_conf_param(v, &imgname, &destname);
->  	break;
-> +      case OPT_SHOWMAPPED:
-> +	usage_exit();
-> +	break;
->        default:
->  	assert(0);
->  	break;
-> -- 
-> 1.7.2.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+If the patch gets shoved in Git I'll update the wiki.
+
+Thanks,
+Noah
