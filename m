@@ -1,73 +1,41 @@
-From: Smart Weblications GmbH - Florian Wiessner
-	<f.wiessner@smart-weblications.de>
-Subject: Re: bug when using ceph and keyring does not exist
-Date: Thu, 10 Nov 2011 16:32:30 +0100
-Message-ID: <4EBBEE8E.5030808@smart-weblications.de>
-References: <4EB78876.10406@smart-weblications.de> <CAORUGqC2cDWHi37G6g8R2Q03OrkhfR-EgfB_1h5Ca6WzZThP5A@mail.gmail.com>
-Reply-To: f.wiessner@smart-weblications.de
+From: Thomas Meyer <thomas@m3y3r.de>
+Subject: [PATCH] ceph: Use kmemdup rather than duplicating its implementation
+Date: Thu, 10 Nov 2011 19:45:21 +0100
+Message-ID: <1320950721.20155.111.camel@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx04.smart-weblications.de ([188.65.144.39]:49308 "EHLO
-	mx04.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S934192Ab1KJPch (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 10 Nov 2011 10:32:37 -0500
-In-Reply-To: <CAORUGqC2cDWHi37G6g8R2Q03OrkhfR-EgfB_1h5Ca6WzZThP5A@mail.gmail.com>
+Received: from www17.your-server.de ([213.133.104.17]:42853 "EHLO
+	www17.your-server.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932429Ab1KJSp1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2011 13:45:27 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Am 08.11.2011 18:57, schrieb Tommi Virtanen:
-> On Sun, Nov 6, 2011 at 23:27, Smart Weblications GmbH - Florian
-> Wiessner<f.wiessner@smart-weblications.de>  wrote:
->> i think i found a bug:
-> ...
+Use kmemdup rather than duplicating its implementation
 
->
-> So a missing keyring make ceph command crash. I see this commit, I
-> think Sam found the bug independently and fixed it already. Please tr=
-y
-> again!
->
-> commit d4ef9215fd00b08a198986fde4af5635833555ec
-> Author: Samuel Just<samuel.just@dreamhost.com>
-> Date:   2011-11-07 15:04:02 -0800
->
->      common: return null if mc.init() unsuccessful
->
->      Prevents ceph.cc from segfaulting on missing keyring.
->
+The semantic patch that makes this change is available
+in scripts/coccinelle/api/memdup.cocci.
 
-yes, this fixes it - but a warning on stderr or so would be better imho=
-=2E.
+Signed-off-by: Thomas Meyer <thomas@m3y3r.de>
+---
+
+diff -u -p a/net/ceph/crypto.c b/net/ceph/crypto.c
+--- a/net/ceph/crypto.c 2011-11-07 19:38:30.130592543 +0100
++++ b/net/ceph/crypto.c 2011-11-08 10:58:06.915274800 +0100
+@@ -15,10 +15,9 @@ int ceph_crypto_key_clone(struct ceph_cr
+ 			  const struct ceph_crypto_key *src)
+ {
+ 	memcpy(dst, src, sizeof(struct ceph_crypto_key));
+-	dst->key = kmalloc(src->len, GFP_NOFS);
++	dst->key = kmemdup(src->key, src->len, GFP_NOFS);
+ 	if (!dst->key)
+ 		return -ENOMEM;
+-	memcpy(dst->key, src->key, src->len);
+ 	return 0;
+ }
+ 
 
 
---=20
-
-Mit freundlichen Gr=C3=BC=C3=9Fen,
-
-=46lorian Wiessner
-
-Smart Weblications GmbH
-Martinsberger Str. 1
-D-95119 Naila
-
-fon.: +49 9282 9638 200
-fax.: +49 9282 9638 205
-24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-http://www.smart-weblications.de
-
---
-Sitz der Gesellschaft: Naila
-Gesch=C3=A4ftsf=C3=BChrer: Florian Wiessner
-HRB-Nr.: HRB 3840 Amtsgericht Hof
-*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
