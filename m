@@ -1,39 +1,43 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Updated hadoop patch
-Date: Wed, 9 Nov 2011 15:43:34 -0800
-Message-ID: <CAF3hT9DxB=B4A5c_Xd6C_XjA=y5CCuZ+iAC7OvbhxCV89rwiWg@mail.gmail.com>
-References: <1183389798.47687.1320880541074.JavaMail.root@mail-01.cse.ucsc.edu>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: [RFC 0/2] rbd authentication
+Date: Wed,  9 Nov 2011 16:20:54 -0800
+Message-ID: <cover.1320884065.git.josh.durgin@dreamhost.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:41343 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753979Ab1KIXnf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 18:43:35 -0500
-Received: by ywf7 with SMTP id 7so2286911ywf.19
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Nov 2011 15:43:34 -0800 (PST)
-In-Reply-To: <1183389798.47687.1320880541074.JavaMail.root@mail-01.cse.ucsc.edu>
+Received: from mail.hq.newdream.net ([66.33.206.127]:47231 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751893Ab1KJAVk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2011 19:21:40 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@soe.ucsc.edu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: qemu-devel@nongnu.org
+Cc: ceph-devel@vger.kernel.org, kwolf@redhat.com
 
-On Wed, Nov 9, 2011 at 3:15 PM, Noah Watkins <jayhawk@soe.ucsc.edu> wro=
-te:
-> The Ceph/Hadoop wiki page now points to an updated patch
-> that applies to Hadoop (and setup instructions). The
-> patch in Ceph @ src/client/hadoop is outdated and can
-> probably be either deleted or replaced with the patch
-> found here:
->
-> =A0http://www.soe.ucsc.edu/~jayhawk/hadoop-0.20.205.0-cephfs1.patch
->
-> If the patch gets shoved in Git I'll update the wiki.
-Yep, done! Thanks for taking the time to generate it. :)
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+These patches allow keys to be passed to rbd devices for
+authentication via the same interface that qcow uses for encryption -
+the monitor block_passwd command.
+
+Since rbd cannot read anything from the cluster before authenticating,
+the size of the device is unknown until the key is set. At this point,
+the size can be refreshed as if the device were resized. This works
+fine with the virtio driver, but other drivers, like ide, don't
+implement the resize callback. What do you think is the best way to
+solve this?
+
+Josh Durgin (2):
+  block: let bdrv_set_key be used for authentication
+  rbd: implement bdrv_set_key
+
+ block.c          |   27 +++++++---
+ block.h          |    2 +-
+ block/rbd.c      |  160 ++++++++++++++++++++++++++++++++++++++----------------
+ block_int.h      |    3 +-
+ blockdev.c       |    3 +-
+ hmp-commands.hx  |    6 +-
+ monitor.c        |   13 +++--
+ qapi-schema.json |    7 ++-
+ qemu-img.c       |    4 +-
+ qerror.c         |   16 +++---
+ qerror.h         |   12 ++--
+ qmp-commands.hx  |    6 ++-
+ 12 files changed, 172 insertions(+), 87 deletions(-)
+
