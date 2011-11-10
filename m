@@ -1,18 +1,20 @@
 From: Sage Weil <sage@newdream.net>
 Subject: dynamic types for ceph collectd plugin
-Date: Thu, 10 Nov 2011 10:48:40 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111101042220.10729@cobra.newdream.net>
+Date: Thu, 10 Nov 2011 10:52:02 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1111101051040.12795@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33539 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:39247 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750835Ab1KJSsk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2011 13:48:40 -0500
+	with ESMTP id S1754966Ab1KJSwD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2011 13:52:03 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: collectd@verplant.org
 Cc: ceph-devel@vger.kernel.org
+
+[Resending to avoid mailman non-subscriber trap, sorry for the ceph-devel dup]
 
 Hi,
 
