@@ -1,46 +1,95 @@
-From: Sage Weil <sage@newdream.net>
-Subject: dynamic types for ceph collectd plugin
-Date: Thu, 10 Nov 2011 10:52:02 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111101051040.12795@cobra.newdream.net>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Crowbar barclamp for Ceph pushed to Github
+Date: Thu, 10 Nov 2011 15:22:41 -0800
+Message-ID: <CAORUGqCzSQgGOfo2E-aYy-3wvHEwdRaAsWi3XOeTSQ3zSADkYw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39247 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754966Ab1KJSwD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2011 13:52:03 -0500
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:51323 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753395Ab1KJXXF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2011 18:23:05 -0500
+Received: by wwe5 with SMTP id 5so461038wwe.1
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Nov 2011 15:23:02 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: collectd@verplant.org
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>, crowbar@lists.us.dell.com
 
-[Resending to avoid mailman non-subscriber trap, sorry for the ceph-devel dup]
+[Cross-posted to ceph-devel and the crowbar mailing list]
 
-Hi,
+Hi. I've been working on a Ceph (the unified storage system) barclamp
+for Crowbar (the bare-metal deployment system). I just pushed the work
+to Github, the relevant repositories are:
 
-We're working on a collectd plugin for Ceph (ceph.newdream.net) that 
-sluprs up internal metrics and instrumentation values from running ceph 
-daemons.  These are a range of random things like operation counts, types, 
-latencies, and so on for various Ceph subsystems.  
+  https://github.com/NewDreamNetwork/barclamp-ceph
+  https://github.com/NewDreamNetwork/ceph-cookbooks
 
-We structured the plugin so that it queries the daemon for the types of 
-the metrics it is gathering so that no modifications to types.db are 
-necessary.  This is great because we are adding (and in some cases 
-adjusting) the metrics we collect on an ongoing basis.  On the whole, it 
-works great.
+ceph-cookbooks is the Ceph cookbooks for standalone Chef
+installations; barclamp-ceph uses ceph-cookbooks as a submodule. To
+get the submodule activated, clone the repository like this:
 
-The problem is when we try to send the metrics to a server with the 
-network plugin.  As far as I can tell the server needs to have all the 
-types defined and isn't smart enough to take them from the client.  
-That means that currently the metrics all get dropped on the floor.
+  git clone --recursive https://github.com/NewDreamNetwork/barclamp-ceph.git
 
-Is it reasonable to just extend the network plugin protocol to also feed 
-types to the server?  Is this something that is planned?  As things 
-current stand, it seems like plugins that dynamically define their own 
-types are basically useless in combination with the network plugin...
 
-Or am I misunderstanding the situation?
+The work was tested with the Crowbar 1.1beta3 ISO, as available from
+http://crowbar.zehicle.com/crowbar111014.iso .
+On top of that, the following commands need to be run (in addition to
+installing the barclamp itself):
 
-Thanks!
-sage
+--8<--
+v=0.37-1maverick
+for p in ceph ceph-fuse ceph-common librados2 librbd1 libcephfs1 ceph-dbg; do
+  wget -nc --progress=dot:mega --directory-prefix=pkgs
+"http://ceph.newdream.net/debian/pool/main/c/ceph/${p}_${v}_amd64.deb"
+done
 
+# TODO missing because dvd does not include "universe"?
+wget -nc --progress=dot:mega --directory-prefix=pkgs \
+	http://archive.ubuntu.com/ubuntu/pool/universe/libc/libcrypto++/libcrypto++8_5.6.0-5_amd64.deb
+\
+	http://archive.ubuntu.com/ubuntu/pool/universe/g/google-perftools/libgoogle-perftools0_1.5-1_amd64.deb
+\
+	http://archive.ubuntu.com/ubuntu/pool/universe/g/google-perftools/libtcmalloc-minimal0_1.5-1_amd64.deb
+\
+	http://archive.ubuntu.com/ubuntu/pool/universe/libu/libunwind/libunwind7_0.99-0.2ubuntu1_amd64.deb
+
+dpkg-scanpackages pkgs /dev/null 2>/dev/null | gzip -9 >Packages.gz
+--8<--
+
+I would welcome feedback from the Crowbar community on how this can be
+made simpler; it seems the crowbar.yml "debs" and "gems" sections are
+for the ISO building process, and are not looked at when installing
+barclamps.
+
+Also any feedback on the barclamp code itself is most welcome.
+
+The cookbooks themselves are work in progress, and should be taken as
+such. There are significant limitations in their current
+functionality, such as only supporting a single monitor, and not
+leveraging multiple disks for storage. Watch the repository on Github
+to be notified of future improvements.
+
+
+In testing the barclamp, I ran into the following recurring Crowbar
+issues. Any light on them would be welcome:
+
+1. Crowbar's "sudo ./install" call must not use an existing domain, as
+it will hijack DNS for that domain completely.
+
+2. Sometimes in the debian-installer, a progress bar would freeze
+until keyboard input was seen. For example, last night I had the
+"Installing the base system" portion stay at something like 39% the
+whole night; in the morning, I hit arrow-down and the percentage
+started increasing again.
+
+3. Sometimes some of the recipes seem to not get called, or fail
+silently; for example, I just fought with a vm that was missing the
+/etc/apt/apt.conf file, and thus refused to install packages from
+unsigned sources, failing the chef-client run at ipmitool install
+time. I managed to see the same problem on repeat runs.
+
+
+Background material, in case it is needed because of the cross-posted
+nature of this message :
+Crowbar itself is at https://github.com/dellcloudedge/crowbar
+For more on Ceph, see http://ceph.newdream.net/
