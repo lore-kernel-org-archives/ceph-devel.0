@@ -1,74 +1,73 @@
-From: Stratos Psomadakis <psomas@grnet.gr>
-Subject: [PATCH] libceph: Allocate larger oid buffer in request msgs
-Date: Thu, 10 Nov 2011 15:45:37 +0200
-Message-ID: <1320932737-5215-1-git-send-email-psomas@grnet.gr>
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner@smart-weblications.de>
+Subject: Re: bug when using ceph and keyring does not exist
+Date: Thu, 10 Nov 2011 16:32:30 +0100
+Message-ID: <4EBBEE8E.5030808@smart-weblications.de>
+References: <4EB78876.10406@smart-weblications.de> <CAORUGqC2cDWHi37G6g8R2Q03OrkhfR-EgfB_1h5Ca6WzZThP5A@mail.gmail.com>
+Reply-To: f.wiessner@smart-weblications.de
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from averel.grnet-hq.admin.grnet.gr ([195.251.29.3]:27935 "EHLO
-	averel.grnet-hq.admin.grnet.gr" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932540Ab1KJNpm (ORCPT
+Received: from mx04.smart-weblications.de ([188.65.144.39]:49308 "EHLO
+	mx04.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934192Ab1KJPch (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 10 Nov 2011 08:45:42 -0500
+	Thu, 10 Nov 2011 10:32:37 -0500
+In-Reply-To: <CAORUGqC2cDWHi37G6g8R2Q03OrkhfR-EgfB_1h5Ca6WzZThP5A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-ceph_osd_request struct allocates a 40-byte buffer for object names.
-RBD image names can be up to 96 chars long (100 with the .rbd suffix),
-which results in the object name for the image being truncated, and a
-subsequent map failure.
+Am 08.11.2011 18:57, schrieb Tommi Virtanen:
+> On Sun, Nov 6, 2011 at 23:27, Smart Weblications GmbH - Florian
+> Wiessner<f.wiessner@smart-weblications.de>  wrote:
+>> i think i found a bug:
+> ...
 
-Increase the oid buffer in request messages, in order to avoid the
-truncation.
+>
+> So a missing keyring make ceph command crash. I see this commit, I
+> think Sam found the bug independently and fixed it already. Please tr=
+y
+> again!
+>
+> commit d4ef9215fd00b08a198986fde4af5635833555ec
+> Author: Samuel Just<samuel.just@dreamhost.com>
+> Date:   2011-11-07 15:04:02 -0800
+>
+>      common: return null if mc.init() unsuccessful
+>
+>      Prevents ceph.cc from segfaulting on missing keyring.
+>
 
-Signed-off-by: Stratos Psomadakis <psomas@grnet.gr>
----
-
-This is a quick fix, until #1701 is sorted out. I'm not sure if this
-is the best way to do it.
+yes, this fixes it - but a warning on stderr or so would be better imho=
+=2E.
 
 
- include/linux/ceph/osd_client.h |    8 +++++++-
- net/ceph/osd_client.c           |    2 +-
- 2 files changed, 8 insertions(+), 2 deletions(-)
+--=20
 
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index f88eacb..7c05ac2 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -10,6 +10,12 @@
- #include "osdmap.h"
- #include "messenger.h"
- 
-+/* 
-+ * Maximum object name size 
-+ * (must be at least as big as RBD_MAX_MD_NAME_LEN -- currently 100) 
-+ */
-+#define MAX_OBJ_NAME_SIZE 100
-+
- struct ceph_msg;
- struct ceph_snap_context;
- struct ceph_osd_request;
-@@ -75,7 +81,7 @@ struct ceph_osd_request {
- 	struct inode *r_inode;         	      /* for use by callbacks */
- 	void *r_priv;			      /* ditto */
- 
--	char              r_oid[40];          /* object name */
-+	char              r_oid[MAX_OBJ_NAME_SIZE];          /* object name */
- 	int               r_oid_len;
- 	unsigned long     r_stamp;            /* send OR check time */
- 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 733e4600..f4f3f58 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -244,7 +244,7 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
- 		ceph_pagelist_init(req->r_trail);
- 	}
- 	/* create request message; allow space for oid */
--	msg_size += 40;
-+	msg_size += MAX_OBJ_NAME_SIZE;
- 	if (snapc)
- 		msg_size += sizeof(u64) * snapc->num_snaps;
- 	if (use_mempool)
--- 
-1.7.2.5
+Mit freundlichen Gr=C3=BC=C3=9Fen,
+
+=46lorian Wiessner
+
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
+
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=C3=A4ftsf=C3=BChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
