@@ -1,41 +1,44 @@
-From: Thomas Meyer <thomas@m3y3r.de>
-Subject: [PATCH] ceph: Use kmemdup rather than duplicating its implementation
-Date: Thu, 10 Nov 2011 19:45:21 +0100
-Message-ID: <1320950721.20155.111.camel@localhost.localdomain>
+From: Sage Weil <sage@newdream.net>
+Subject: dynamic types for ceph collectd plugin
+Date: Thu, 10 Nov 2011 10:48:40 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1111101042220.10729@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www17.your-server.de ([213.133.104.17]:42853 "EHLO
-	www17.your-server.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932429Ab1KJSp1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2011 13:45:27 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:33539 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750835Ab1KJSsk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2011 13:48:40 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: collectd@verplant.org
+Cc: ceph-devel@vger.kernel.org
 
-Use kmemdup rather than duplicating its implementation
+Hi,
 
-The semantic patch that makes this change is available
-in scripts/coccinelle/api/memdup.cocci.
+We're working on a collectd plugin for Ceph (ceph.newdream.net) that 
+sluprs up internal metrics and instrumentation values from running ceph 
+daemons.  These are a range of random things like operation counts, types, 
+latencies, and so on for various Ceph subsystems.  
 
-Signed-off-by: Thomas Meyer <thomas@m3y3r.de>
----
+We structured the plugin so that it queries the daemon for the types of 
+the metrics it is gathering so that no modifications to types.db are 
+necessary.  This is great because we are adding (and in some cases 
+adjusting) the metrics we collect on an ongoing basis.  On the whole, it 
+works great.
 
-diff -u -p a/net/ceph/crypto.c b/net/ceph/crypto.c
---- a/net/ceph/crypto.c 2011-11-07 19:38:30.130592543 +0100
-+++ b/net/ceph/crypto.c 2011-11-08 10:58:06.915274800 +0100
-@@ -15,10 +15,9 @@ int ceph_crypto_key_clone(struct ceph_cr
- 			  const struct ceph_crypto_key *src)
- {
- 	memcpy(dst, src, sizeof(struct ceph_crypto_key));
--	dst->key = kmalloc(src->len, GFP_NOFS);
-+	dst->key = kmemdup(src->key, src->len, GFP_NOFS);
- 	if (!dst->key)
- 		return -ENOMEM;
--	memcpy(dst->key, src->key, src->len);
- 	return 0;
- }
- 
+The problem is when we try to send the metrics to a server with the 
+network plugin.  As far as I can tell the server needs to have all the 
+types defined and isn't smart enough to take them from the client.  
+That means that currently the metrics all get dropped on the floor.
 
+Is it reasonable to just extend the network plugin protocol to also feed 
+types to the server?  Is this something that is planned?  As things 
+current stand, it seems like plugins that dynamically define their own 
+types are basically useless in combination with the network plugin...
+
+Or am I misunderstanding the situation?
+
+Thanks!
+sage
 
