@@ -1,150 +1,141 @@
-From: Stefan Kleijkers <stefan@unilogicnetworks.net>
+From: Christian Brunner <chb@muc.de>
 Subject: Re: OSD hit suicide timeout
-Date: Fri, 11 Nov 2011 19:53:57 +0100
-Message-ID: <4EBD6F45.3090300@unilogicnetworks.net>
+Date: Fri, 11 Nov 2011 21:48:44 +0100
+Message-ID: <CAO47_-9CNQ-FNOkYZ0eZJk28ueNt+ZapFUmt7-Ty2ofkD+0gcw@mail.gmail.com>
 References: <CAO47_-_Rubnh9B_DGkUvO+DNn=1WHrZaeMK54fejYoJMHNFWew@mail.gmail.com>
+	<Pine.LNX.4.64.1111110902230.24252@cobra.newdream.net>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary=20cf307d02b099e1d804b17ba51c
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpq1.gn.mail.iss.as9143.net ([212.54.34.164]:43191 "EHLO
-	smtpq1.gn.mail.iss.as9143.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750738Ab1KKSyB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 11 Nov 2011 13:54:01 -0500
-In-Reply-To: <CAO47_-_Rubnh9B_DGkUvO+DNn=1WHrZaeMK54fejYoJMHNFWew@mail.gmail.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:58455 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750863Ab1KKUsp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Nov 2011 15:48:45 -0500
+Received: by vws1 with SMTP id 1so3758725vws.19
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Nov 2011 12:48:44 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.64.1111110902230.24252@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chb@muc.de
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-Hello Christian,
+--20cf307d02b099e1d804b17ba51c
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I have the same problem for some time now, but I'm in doubt if it's Ceph 
-related. With my setup it looks like the IO stalls, ofcourse after some 
-time the osd kills itself. Do you use BTRFS as local filesystem?
-
-If so, do you get WARNING: at fs/btrfs/inode.c:2198 
-btrfs_orphan_commit_root+0xa8/0xc0 messages in dmesg?
-
-I also notice a slowdown after a few hours and then a complete stall of 
-IO to the filesystem. With older versions of the osd they get in D state 
-(ps/top), with newer versions the kill themselves. But if I logon to the 
-osd (after they killed themselve) and go to the mounted filesystem I 
-notice the filesystem is non-responsive (tried ls/dd).
-
-Stefan
-
-On 11/11/2011 05:20 PM, Christian Brunner wrote:
-> I have upgraded to 0.38 today. After a few hours two of my OSDs
-> crashed with "hit suicide timeout". After a restart, they are up
-> again.
+2011/11/11 Sage Weil <sage@newdream.net>:
+> Hi Christian,
 >
-> I've seen this in prior versions, so I don't think it's related to the
-> upgrade. I just wanted to report that it's still there.
->
-> Here is what I've found in our syslog:
->
-> Nov 11 17:05:59 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
-> Nov 11 17:05:59 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
-> after 60
-> Nov 11 17:05:59 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
-> after 60
-> Nov 11 17:06:04 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
-> Nov 11 17:06:04 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
-> after 60
-> Nov 11 17:06:04 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
-> after 60
-> Nov 11 17:06:09 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
-> Nov 11 17:06:09 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
-> after 60
-> Nov 11 17:06:09 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
-> after 60
-> Nov 11 17:06:14 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
-> Nov 11 17:06:14 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
-> after 60
-> Nov 11 17:06:14 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
-> after 60
-> Nov 11 17:06:19 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
-> Nov 11 17:06:19 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
-> after 60
-> Nov 11 17:06:19 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
-> after 60
-> Nov 11 17:06:24 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
-> Nov 11 17:06:24 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
-> after 60
-> Nov 11 17:06:24 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
-> after 60
-> Nov 11 17:06:29 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
-> Nov 11 17:06:29 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
-> after 60
-> Nov 11 17:06:29 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
-> is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had suicide timed
-> out after 180
-> Nov 11 17:06:29 os03 osd.015[3641]: common/HeartbeatMap.cc: In
-> function 'bool ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*,
-> const char*, time_t)', in thread
-> '7f0816ee2700'#012common/HeartbeatMap.cc: 78: FAILED assert(0 == "hit
-> suicide timeout")
-> Nov 11 17:06:29 os03 osd.015[3641]:  ceph version 0.38
-> (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)#012 1:
-> (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
-> long)+0x214) [0x5a7774]#012 2: (ceph::HeartbeatMap::is_healthy()+0x87)
-> [0x5a7a97]#012 3: (ceph::HeartbeatMap::check_touch_file()+0x20)
-> [0x5a7cc0]#012 4: (CephContextServiceThread::entry()+0x5f)
-> [0x59ee3f]#012 5: (()+0x77e1) [0x7f0818a127e1]#012 6: (clone()+0x6d)
-> [0x7f08171e177d]
-> Nov 11 17:06:29 os03 osd.015[3641]:  ceph version 0.38
-> (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)#012 1:
-> (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
-> long)+0x214) [0x5a7774]#012 2: (ceph::HeartbeatMap::is_healthy()+0x87)
-> [0x5a7a97]#012 3: (ceph::HeartbeatMap::check_touch_file()+0x20)
-> [0x5a7cc0]#012 4: (CephContextServiceThread::entry()+0x5f)
-> [0x59ee3f]#012 5: (()+0x77e1) [0x7f0818a127e1]#012 6: (clone()+0x6d)
-> [0x7f08171e177d]
-> Nov 11 17:06:29 os03 osd.015[3641]: *** Caught signal (Aborted) **#012
-> in thread 7f0816ee2700
-> Nov 11 17:06:29 os03 osd.015[3641]:  ceph version 0.38
-> (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)#012 1:
-> /usr/bin/ceph-osd() [0x59e2a4]#012 2: (()+0xf490) [0x7f0818a1a490]#012
-> 3: (gsignal()+0x35) [0x7f081712e905]#012 4: (abort()+0x175)
-> [0x7f08171300e5]#012 5:
-> (__gnu_cxx::__verbose_terminate_handler()+0x12d) [0x7f08179e3a7d]#012
-> 6: (()+0xbcc06) [0x7f08179e1c06]#012 7: (()+0xbcc33)
-> [0x7f08179e1c33]#012 8: (()+0xbcd2e) [0x7f08179e1d2e]#012 9:
-> (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> const*)+0x39f) [0x5a05ef]#012 10:
-> (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
-> long)+0x214) [0x5a7774]#012 11:
-> (ceph::HeartbeatMap::is_healthy()+0x87) [0x5a7a97]#012 12:
-> (ceph::HeartbeatMap::check_touch_file()+0x20) [0x5a7cc0]#012 13:
-> (CephContextServiceThread::entry()+0x5f) [0x59ee3f]#012 14:
-> (()+0x77e1) [0x7f0818a127e1]#012 15: (clone()+0x6d) [0x7f08171e177d]
->
-> Regards,
-> Christian
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Do you have a core file? =A0Can you dump the thread stack traces so we ca=
+n
+> see if it got hung up on a syscall or somewhere internally (thread apply
+> all bt)?
 
+I'm not sure if it's from btrfs, but ther is no kernel warning at that time=
+.
+
+I'm missing some debuginfo packages at the moment, but I managed to
+install ceph-debuginfo. (If you need more I will ask a colleague to
+subscribe the debuginfo channel on the RedHat Satellite Server, but
+you will have to wait until Monday).
+
+Here is what I'm getting from the core file at the moment.
+
+Regards,
+Christian
+
+--20cf307d02b099e1d804b17ba51c
+Content-Type: application/x-bzip2; name="gdb.txt.bz2"
+Content-Disposition: attachment; filename="gdb.txt.bz2"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_guvnriii0
+
+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
+--20cf307d02b099e1d804b17ba51c--
