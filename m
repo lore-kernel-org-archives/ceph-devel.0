@@ -1,100 +1,125 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] libceph: Allocate larger oid buffer in request msgs
-Date: Thu, 10 Nov 2011 22:23:10 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111102219410.27241@cobra.newdream.net>
-References: <1320932737-5215-1-git-send-email-psomas@grnet.gr>
+From: Christian Brunner <chb@muc.de>
+Subject: OSD hit suicide timeout
+Date: Fri, 11 Nov 2011 17:20:12 +0100
+Message-ID: <CAO47_-_Rubnh9B_DGkUvO+DNn=1WHrZaeMK54fejYoJMHNFWew@mail.gmail.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55852 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752809Ab1KKGXK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Nov 2011 01:23:10 -0500
-In-Reply-To: <1320932737-5215-1-git-send-email-psomas@grnet.gr>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:36277 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932163Ab1KKQUN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Nov 2011 11:20:13 -0500
+Received: by vcbf1 with SMTP id f1so3530627vcb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Nov 2011 08:20:12 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stratos Psomadakis <psomas@grnet.gr>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hmm, I wish we could just make r_oid a char * and dynamically allocate the 
-name.  Unfortunately that would significantly complicate things because we 
-need to allocate osd requests in the writeback path during reclaim and 
-that'd involve a fallback memory pool or something similar.
+I have upgraded to 0.38 today. After a few hours two of my OSDs
+crashed with "hit suicide timeout". After a restart, they are up
+again.
 
-A larger fixed-sized buffer seems like the way to go for now.
+I've seen this in prior versions, so I don't think it's related to the
+upgrade. I just wanted to report that it's still there.
 
-I'll stick this in the queue, tho it'll probably get adjusted when the rbd 
-constants get cleaned up.
+Here is what I've found in our syslog:
 
-Thanks!
-sage
+Nov 11 17:05:59 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
+Nov 11 17:05:59 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
+after 60
+Nov 11 17:05:59 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
+after 60
+Nov 11 17:06:04 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
+Nov 11 17:06:04 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
+after 60
+Nov 11 17:06:04 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
+after 60
+Nov 11 17:06:09 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
+Nov 11 17:06:09 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
+after 60
+Nov 11 17:06:09 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
+after 60
+Nov 11 17:06:14 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
+Nov 11 17:06:14 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
+after 60
+Nov 11 17:06:14 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
+after 60
+Nov 11 17:06:19 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
+Nov 11 17:06:19 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
+after 60
+Nov 11 17:06:19 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
+after 60
+Nov 11 17:06:24 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
+Nov 11 17:06:24 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
+after 60
+Nov 11 17:06:24 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080fed4700' had timed out
+after 60
+Nov 11 17:06:29 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
+Nov 11 17:06:29 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had timed out
+after 60
+Nov 11 17:06:29 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
+is_healthy 'FileStore::op_tp thread 0x7f080f6d3700' had suicide timed
+out after 180
+Nov 11 17:06:29 os03 osd.015[3641]: common/HeartbeatMap.cc: In
+function 'bool ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*,
+const char*, time_t)', in thread
+'7f0816ee2700'#012common/HeartbeatMap.cc: 78: FAILED assert(0 == "hit
+suicide timeout")
+Nov 11 17:06:29 os03 osd.015[3641]:  ceph version 0.38
+(commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)#012 1:
+(ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
+long)+0x214) [0x5a7774]#012 2: (ceph::HeartbeatMap::is_healthy()+0x87)
+[0x5a7a97]#012 3: (ceph::HeartbeatMap::check_touch_file()+0x20)
+[0x5a7cc0]#012 4: (CephContextServiceThread::entry()+0x5f)
+[0x59ee3f]#012 5: (()+0x77e1) [0x7f0818a127e1]#012 6: (clone()+0x6d)
+[0x7f08171e177d]
+Nov 11 17:06:29 os03 osd.015[3641]:  ceph version 0.38
+(commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)#012 1:
+(ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
+long)+0x214) [0x5a7774]#012 2: (ceph::HeartbeatMap::is_healthy()+0x87)
+[0x5a7a97]#012 3: (ceph::HeartbeatMap::check_touch_file()+0x20)
+[0x5a7cc0]#012 4: (CephContextServiceThread::entry()+0x5f)
+[0x59ee3f]#012 5: (()+0x77e1) [0x7f0818a127e1]#012 6: (clone()+0x6d)
+[0x7f08171e177d]
+Nov 11 17:06:29 os03 osd.015[3641]: *** Caught signal (Aborted) **#012
+in thread 7f0816ee2700
+Nov 11 17:06:29 os03 osd.015[3641]:  ceph version 0.38
+(commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)#012 1:
+/usr/bin/ceph-osd() [0x59e2a4]#012 2: (()+0xf490) [0x7f0818a1a490]#012
+3: (gsignal()+0x35) [0x7f081712e905]#012 4: (abort()+0x175)
+[0x7f08171300e5]#012 5:
+(__gnu_cxx::__verbose_terminate_handler()+0x12d) [0x7f08179e3a7d]#012
+6: (()+0xbcc06) [0x7f08179e1c06]#012 7: (()+0xbcc33)
+[0x7f08179e1c33]#012 8: (()+0xbcd2e) [0x7f08179e1d2e]#012 9:
+(ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x39f) [0x5a05ef]#012 10:
+(ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*, char const*,
+long)+0x214) [0x5a7774]#012 11:
+(ceph::HeartbeatMap::is_healthy()+0x87) [0x5a7a97]#012 12:
+(ceph::HeartbeatMap::check_touch_file()+0x20) [0x5a7cc0]#012 13:
+(CephContextServiceThread::entry()+0x5f) [0x59ee3f]#012 14:
+(()+0x77e1) [0x7f0818a127e1]#012 15: (clone()+0x6d) [0x7f08171e177d]
 
-
-On Thu, 10 Nov 2011, Stratos Psomadakis wrote:
-
-> ceph_osd_request struct allocates a 40-byte buffer for object names.
-> RBD image names can be up to 96 chars long (100 with the .rbd suffix),
-> which results in the object name for the image being truncated, and a
-> subsequent map failure.
-> 
-> Increase the oid buffer in request messages, in order to avoid the
-> truncation.
-> 
-> Signed-off-by: Stratos Psomadakis <psomas@grnet.gr>
-> ---
-> 
-> This is a quick fix, until #1701 is sorted out. I'm not sure if this
-> is the best way to do it.
-> 
-> 
->  include/linux/ceph/osd_client.h |    8 +++++++-
->  net/ceph/osd_client.c           |    2 +-
->  2 files changed, 8 insertions(+), 2 deletions(-)
-> 
-> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-> index f88eacb..7c05ac2 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -10,6 +10,12 @@
->  #include "osdmap.h"
->  #include "messenger.h"
->  
-> +/* 
-> + * Maximum object name size 
-> + * (must be at least as big as RBD_MAX_MD_NAME_LEN -- currently 100) 
-> + */
-> +#define MAX_OBJ_NAME_SIZE 100
-> +
->  struct ceph_msg;
->  struct ceph_snap_context;
->  struct ceph_osd_request;
-> @@ -75,7 +81,7 @@ struct ceph_osd_request {
->  	struct inode *r_inode;         	      /* for use by callbacks */
->  	void *r_priv;			      /* ditto */
->  
-> -	char              r_oid[40];          /* object name */
-> +	char              r_oid[MAX_OBJ_NAME_SIZE];          /* object name */
->  	int               r_oid_len;
->  	unsigned long     r_stamp;            /* send OR check time */
->  
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 733e4600..f4f3f58 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -244,7 +244,7 @@ struct ceph_osd_request *ceph_osdc_alloc_request(struct ceph_osd_client *osdc,
->  		ceph_pagelist_init(req->r_trail);
->  	}
->  	/* create request message; allow space for oid */
-> -	msg_size += 40;
-> +	msg_size += MAX_OBJ_NAME_SIZE;
->  	if (snapc)
->  		msg_size += sizeof(u64) * snapc->num_snaps;
->  	if (use_mempool)
-> -- 
-> 1.7.2.5
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Regards,
+Christian
