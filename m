@@ -1,42 +1,50 @@
-From: Sage Weil <sage@newdream.net>
+From: Stefan Kleijkers <stefan@unilogicnetworks.net>
 Subject: Re: OSD hit suicide timeout
-Date: Fri, 11 Nov 2011 09:03:03 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111110902230.24252@cobra.newdream.net>
+Date: Fri, 11 Nov 2011 19:53:57 +0100
+Message-ID: <4EBD6F45.3090300@unilogicnetworks.net>
 References: <CAO47_-_Rubnh9B_DGkUvO+DNn=1WHrZaeMK54fejYoJMHNFWew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55297 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757975Ab1KKRDE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Nov 2011 12:03:04 -0500
+Received: from smtpq1.gn.mail.iss.as9143.net ([212.54.34.164]:43191 "EHLO
+	smtpq1.gn.mail.iss.as9143.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750738Ab1KKSyB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 11 Nov 2011 13:54:01 -0500
 In-Reply-To: <CAO47_-_Rubnh9B_DGkUvO+DNn=1WHrZaeMK54fejYoJMHNFWew@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
+To: chb@muc.de
 Cc: ceph-devel@vger.kernel.org
 
-Hi Christian,
+Hello Christian,
 
-Do you have a core file?  Can you dump the thread stack traces so we can 
-see if it got hung up on a syscall or somewhere internally (thread apply 
-all bt)?
+I have the same problem for some time now, but I'm in doubt if it's Ceph 
+related. With my setup it looks like the IO stalls, ofcourse after some 
+time the osd kills itself. Do you use BTRFS as local filesystem?
 
-Thanks-
-sage
+If so, do you get WARNING: at fs/btrfs/inode.c:2198 
+btrfs_orphan_commit_root+0xa8/0xc0 messages in dmesg?
 
+I also notice a slowdown after a few hours and then a complete stall of 
+IO to the filesystem. With older versions of the osd they get in D state 
+(ps/top), with newer versions the kill themselves. But if I logon to the 
+osd (after they killed themselve) and go to the mounted filesystem I 
+notice the filesystem is non-responsive (tried ls/dd).
 
-On Fri, 11 Nov 2011, Christian Brunner wrote:
+Stefan
 
+On 11/11/2011 05:20 PM, Christian Brunner wrote:
 > I have upgraded to 0.38 today. After a few hours two of my OSDs
 > crashed with "hit suicide timeout". After a restart, they are up
 > again.
-> 
+>
 > I've seen this in prior versions, so I don't think it's related to the
 > upgrade. I just wanted to report that it's still there.
-> 
+>
 > Here is what I've found in our syslog:
-> 
+>
 > Nov 11 17:05:59 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
 > is_healthy 'OSD::op_tp thread 0x7f0809dc7700' had timed out after 30
 > Nov 11 17:05:59 os03 osd.015[3641]: 7f0816ee2700 heartbeat_map
@@ -132,12 +140,11 @@ On Fri, 11 Nov 2011, Christian Brunner wrote:
 > (ceph::HeartbeatMap::check_touch_file()+0x20) [0x5a7cc0]#012 13:
 > (CephContextServiceThread::entry()+0x5f) [0x59ee3f]#012 14:
 > (()+0x77e1) [0x7f0818a127e1]#012 15: (clone()+0x6d) [0x7f08171e177d]
-> 
+>
 > Regards,
 > Christian
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
