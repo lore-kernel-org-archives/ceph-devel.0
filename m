@@ -1,85 +1,96 @@
-From: Sage Weil <sage@newdream.net>
+From: Mario van der Linde <linde@b1-systems.de>
 Subject: Re: rbd - input/output error
-Date: Mon, 14 Nov 2011 13:39:28 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111141338160.3717@cobra.newdream.net>
-References: <4EBF98B5.7040706@b1-systems.de> <Pine.LNX.4.64.1111141148220.29742@cobra.newdream.net>
- <4EC18864.4010308@b1-systems.de>
+Date: Mon, 14 Nov 2011 22:59:34 +0100
+Message-ID: <4EC18F46.70102@b1-systems.de>
+References: <4EBF98B5.7040706@b1-systems.de> <Pine.LNX.4.64.1111141148220.29742@cobra.newdream.net> <4EC18864.4010308@b1-systems.de> <Pine.LNX.4.64.1111141338160.3717@cobra.newdream.net>
+Reply-To: linde@b1-systems.de
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1759018362-1321306768=:3717"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig8DDADEC4E3339DC2DB41A13A"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38527 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751723Ab1KNVj3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2011 16:39:29 -0500
-In-Reply-To: <4EC18864.4010308@b1-systems.de>
+Received: from schattenjagd.systems.b1-systems.de ([217.11.58.34]:34542 "EHLO
+	mx1.b1-systems.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755977Ab1KNV7e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2011 16:59:34 -0500
+Received: from chewbakkat4003.office.b1-systems.de (g226139069.adsl.alicedsl.de [92.226.139.69])
+	by mx1.b1-systems.de (Postfix) with ESMTPSA id 2D1A64084
+	for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2011 22:59:32 +0100 (CET)
+In-Reply-To: <Pine.LNX.4.64.1111141338160.3717@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mario van der Linde <linde@b1-systems.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig8DDADEC4E3339DC2DB41A13A
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
---557981400-1759018362-1321306768=:3717
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Hello,
 
-On Mon, 14 Nov 2011, Mario van der Linde wrote:
-> Hello,
+On 14.11.2011 22:39, Sage Weil wrote:
+[...]
+>> This one gave me some output:
+>> rbd create testimg --size=3D10240 --log-to-stderr 2 --debug-ms 2
+>>
+>> See attached file.
 >=20
-> On 14.11.2011 20:48, Sage Weil wrote:
-> > On Sun, 13 Nov 2011, Mario van der Linde wrote:
-> [...]
-> >>> ceph1:~ # modprobe rbd
-> >>> ceph1:~ # rbd create testimg --size 10240
-> >>> create error: error 5: Input/output error
-> >=20
-> > Can you try with=20
-> >=20
-> >  rbd create testmsg --size 10240 --log-to-stderr --debug-ms 1
-> >=20
-> > so we can see a bit more about what is going on?
->=20
-> This one gave me some output:
-> rbd create testimg --size=3D10240 --log-to-stderr 2 --debug-ms 2
->=20
-> See attached file.
+> It sounds like the OSD can't find the libcls_rbd.so file.  Can you veri=
+fy=20
+> that it is in /usr/lib/rados-classes, and that that location isn't be=20
+> overridden by something in ceph.conf?
 
-It sounds like the OSD can't find the libcls_rbd.so file.  Can you verify=
-=20
-that it is in /usr/lib/rados-classes, and that that location isn't be=20
-overridden by something in ceph.conf?
+At first, on all Systems this file exists, but in /usr/lib64, not /usr/li=
+b:
+> ceph5:~ # for f in `seq 1 5`; do ssh ceph${f} ls -l /usr/lib64/rados-cl=
+asses; done | grep ' libcls_rbd.so '
+> lrwxrwxrwx 1 root root    19 Nov 10 10:15 libcls_rbd.so -> libcls_rbd.s=
+o.1.0.0
+> lrwxrwxrwx 1 root root    19 Nov 10 10:15 libcls_rbd.so -> libcls_rbd.s=
+o.1.0.0
+> lrwxrwxrwx 1 root root    19 Nov 10 10:16 libcls_rbd.so -> libcls_rbd.s=
+o.1.0.0
+> lrwxrwxrwx 1 root root    19 Nov 10 10:16 libcls_rbd.so -> libcls_rbd.s=
+o.1.0.0
+> lrwxrwxrwx 1 root root    19 Nov 10 10:16 libcls_rbd.so -> libcls_rbd.s=
+o.1.0.0
 
-sage
+Seems to be the right place in an x86_64 system.
+
+In ceph.conf there is no setting regarding to lib path.
+
+Is ceph-radosgw needed for rbd? I think not, while radosgw is AFAIK the
+REST interface...
+This package is not installed (due to a not resolveable cgi dependency).
 
 
->=20
-> Additional Info:
-> > ceph5:~ # modinfo rbd
-> > filename:       /lib/modules/3.1.0-rc9-1-desktop/kernel/drivers/block/r=
-bd.ko
-> > license:        GPL
-> > author:         Jeff Garzik <jeff@garzik.org>
-> > description:    rados block device
-> > author:         Yehuda Sadeh <yehuda@hq.newdream.net>
-> > author:         Sage Weil <sage@newdream.net>
-> > srcversion:     C8F4E38D4A716AB32B9F75C
-> > depends:       =20
-> > vermagic:       3.1.0-rc9-1-desktop SMP preempt mod_unload modversions
->=20
->=20
-> Regards
-> Mario
->=20
->=20
-> --=20
-> Mario van der Linde
-> Linux Consultant & Trainer
-> Tel.: +49-151-16879485
-> Mail: linde@b1-systems.de
->=20
-> B1 Systems GmbH
-> Osterfeldstra=DFe 7 / 85088 Vohburg / http://www.b1-systems.de
-> GF: Ralph Dehner / Unternehmenssitz: Vohburg / AG: Ingolstadt,HRB 3537
->=20
---557981400-1759018362-1321306768=:3717--
+Regards
+Mario
+
+
+--=20
+Mario van der Linde
+Linux Consultant & Trainer
+Tel.: +49-151-16879485
+Mail: linde@b1-systems.de
+
+B1 Systems GmbH
+Osterfeldstra=DFe 7 / 85088 Vohburg / http://www.b1-systems.de
+GF: Ralph Dehner / Unternehmenssitz: Vohburg / AG: Ingolstadt,HRB 3537
+
+
+--------------enig8DDADEC4E3339DC2DB41A13A
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.16 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAk7Bj0kACgkQ0xt2iESAuwQ9agCcCfoZPQ2bcpc4VrWKGUq5f837
+hQAAn1qBSd5MqwcDf37IFN4wS19hZsOJ
+=U75k
+-----END PGP SIGNATURE-----
+
+--------------enig8DDADEC4E3339DC2DB41A13A--
