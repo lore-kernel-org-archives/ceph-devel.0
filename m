@@ -1,212 +1,85 @@
-From: Mario van der Linde <linde@b1-systems.de>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: rbd - input/output error
-Date: Mon, 14 Nov 2011 22:30:12 +0100
-Message-ID: <4EC18864.4010308@b1-systems.de>
+Date: Mon, 14 Nov 2011 13:39:28 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1111141338160.3717@cobra.newdream.net>
 References: <4EBF98B5.7040706@b1-systems.de> <Pine.LNX.4.64.1111141148220.29742@cobra.newdream.net>
-Reply-To: linde@b1-systems.de
+ <4EC18864.4010308@b1-systems.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigBF527B25FE73C7A2D553CB01"
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1759018362-1321306768=:3717"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from schattenjagd.systems.b1-systems.de ([217.11.58.34]:55869 "EHLO
-	mx1.b1-systems.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753595Ab1KNVaN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2011 16:30:13 -0500
-Received: from chewbakkat4003.office.b1-systems.de (g226139069.adsl.alicedsl.de [92.226.139.69])
-	by mx1.b1-systems.de (Postfix) with ESMTPSA id 0560A4084
-	for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2011 22:30:10 +0100 (CET)
-In-Reply-To: <Pine.LNX.4.64.1111141148220.29742@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:38527 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751723Ab1KNVj3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2011 16:39:29 -0500
+In-Reply-To: <4EC18864.4010308@b1-systems.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Mario van der Linde <linde@b1-systems.de>
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigBF527B25FE73C7A2D553CB01
-Content-Type: multipart/mixed;
- boundary="------------010804010304080507030106"
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-This is a multi-part message in MIME format.
---------------010804010304080507030106
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+--557981400-1759018362-1321306768=:3717
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Hello,
-
-On 14.11.2011 20:48, Sage Weil wrote:
-> On Sun, 13 Nov 2011, Mario van der Linde wrote:
-[...]
->>> ceph1:~ # modprobe rbd
->>> ceph1:~ # rbd create testimg --size 10240
->>> create error: error 5: Input/output error
+On Mon, 14 Nov 2011, Mario van der Linde wrote:
+> Hello,
 >=20
-> Can you try with=20
+> On 14.11.2011 20:48, Sage Weil wrote:
+> > On Sun, 13 Nov 2011, Mario van der Linde wrote:
+> [...]
+> >>> ceph1:~ # modprobe rbd
+> >>> ceph1:~ # rbd create testimg --size 10240
+> >>> create error: error 5: Input/output error
+> >=20
+> > Can you try with=20
+> >=20
+> >  rbd create testmsg --size 10240 --log-to-stderr --debug-ms 1
+> >=20
+> > so we can see a bit more about what is going on?
 >=20
->  rbd create testmsg --size 10240 --log-to-stderr --debug-ms 1
+> This one gave me some output:
+> rbd create testimg --size=3D10240 --log-to-stderr 2 --debug-ms 2
 >=20
-> so we can see a bit more about what is going on?
+> See attached file.
 
-This one gave me some output:
-rbd create testimg --size=3D10240 --log-to-stderr 2 --debug-ms 2
+It sounds like the OSD can't find the libcls_rbd.so file.  Can you verify=
+=20
+that it is in /usr/lib/rados-classes, and that that location isn't be=20
+overridden by something in ceph.conf?
 
-See attached file.
+sage
 
-Additional Info:
-> ceph5:~ # modinfo rbd
-> filename:       /lib/modules/3.1.0-rc9-1-desktop/kernel/drivers/block/r=
+
+>=20
+> Additional Info:
+> > ceph5:~ # modinfo rbd
+> > filename:       /lib/modules/3.1.0-rc9-1-desktop/kernel/drivers/block/r=
 bd.ko
-> license:        GPL
-> author:         Jeff Garzik <jeff@garzik.org>
-> description:    rados block device
-> author:         Yehuda Sadeh <yehuda@hq.newdream.net>
-> author:         Sage Weil <sage@newdream.net>
-> srcversion:     C8F4E38D4A716AB32B9F75C
-> depends:       =20
-> vermagic:       3.1.0-rc9-1-desktop SMP preempt mod_unload modversions
-
-
-Regards
-Mario
-
-
---=20
-Mario van der Linde
-Linux Consultant & Trainer
-Tel.: +49-151-16879485
-Mail: linde@b1-systems.de
-
-B1 Systems GmbH
-Osterfeldstra=DFe 7 / 85088 Vohburg / http://www.b1-systems.de
-GF: Ralph Dehner / Unternehmenssitz: Vohburg / AG: Ingolstadt,HRB 3537
-
---------------010804010304080507030106
-Content-Type: text/plain;
- name="ceph_failure.out"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename="ceph_failure.out"
-
-Y2VwaDU6fiAjIHJiZCBjcmVhdGUgdGVzdGltZyAtLXNpemU9MTAyNDAgLS1sb2ctdG8tc3Rk
-ZXJyIDIgLS1kZWJ1Zy1tcyAyCjIwMTEtMTEtMTQgMjI6MjI6MDEuMDQ2MDM2IDdmYTBkZmY1
-MTcyMCAtLSA6LzAgbWVzc2VuZ2VyLnN0YXJ0CjIwMTEtMTEtMTQgMjI6MjI6MDEuMDQ2MzIw
-IDdmYTBkZmY1MTcyMCAtLSA6LzEwMDc2MjIgLS0+IDE5Mi4xNjguMS4yMjI6Njc4OS8wIC0t
-IGF1dGgocHJvdG8gMCAzMCBieXRlcykgdjEgLS0gPyswIDB4N2E2MGYwIGNvbiAweDdhNWU4
-MAoyMDExLTExLTE0IDIyOjIyOjAxLjA0NjU3NiA3ZmEwZGZmNGY3MDAgLS0gOi8xMDA3NjIy
-ID4+IDE5Mi4xNjguMS4yMjI6Njc4OS8wIHBpcGUoMHg3YTVjMTAgc2Q9MyBwZ3M9MCBjcz0w
-IGw9MCkuY29ubmVjdCBlcnJvciAxOTIuMTY4LjEuMjIyOjY3ODkvMCwgMTExOiBDb25uZWN0
-aW9uIHJlZnVzZWQKMjAxMS0xMS0xNCAyMjoyMjowMS4wNDY2MTYgN2ZhMGRmZjRmNzAwIC0t
-IDovMTAwNzYyMiA+PiAxOTIuMTY4LjEuMjIyOjY3ODkvMCBwaXBlKDB4N2E1YzEwIHNkPTMg
-cGdzPTAgY3M9MCBsPTApLmZhdWx0IDExMTogQ29ubmVjdGlvbiByZWZ1c2VkCjIwMTEtMTEt
-MTQgMjI6MjI6MDEuMDQ2NjU5IDdmYTBkZmY0ZjcwMCAtLSA6LzEwMDc2MjIgPj4gMTkyLjE2
-OC4xLjIyMjo2Nzg5LzAgcGlwZSgweDdhNWMxMCBzZD0zIHBncz0wIGNzPTAgbD0wKS5mYXVs
-dCBmaXJzdCBmYXVsdAoyMDExLTExLTE0IDIyOjIyOjAxLjA0Njk2MiA3ZmEwZGZmNGY3MDAg
-LS0gOi8xMDA3NjIyID4+IDE5Mi4xNjguMS4yMjI6Njc4OS8wIHBpcGUoMHg3YTVjMTAgc2Q9
-MyBwZ3M9MCBjcz0wIGw9MCkuY29ubmVjdCBlcnJvciAxOTIuMTY4LjEuMjIyOjY3ODkvMCwg
-MTExOiBDb25uZWN0aW9uIHJlZnVzZWQKMjAxMS0xMS0xNCAyMjoyMjowMS4wNDY5NzcgN2Zh
-MGRmZjRmNzAwIC0tIDovMTAwNzYyMiA+PiAxOTIuMTY4LjEuMjIyOjY3ODkvMCBwaXBlKDB4
-N2E1YzEwIHNkPTMgcGdzPTAgY3M9MCBsPTApLmZhdWx0IDExMTogQ29ubmVjdGlvbiByZWZ1
-c2VkCjIwMTEtMTEtMTQgMjI6MjI6MDEuMjQ3NDIyIDdmYTBkZmY0ZjcwMCAtLSA6LzEwMDc2
-MjIgPj4gMTkyLjE2OC4xLjIyMjo2Nzg5LzAgcGlwZSgweDdhNWMxMCBzZD0zIHBncz0wIGNz
-PTAgbD0wKS5jb25uZWN0IGVycm9yIDE5Mi4xNjguMS4yMjI6Njc4OS8wLCAxMTE6IENvbm5l
-Y3Rpb24gcmVmdXNlZAoyMDExLTExLTE0IDIyOjIyOjAxLjI0NzQ0OCA3ZmEwZGZmNGY3MDAg
-LS0gOi8xMDA3NjIyID4+IDE5Mi4xNjguMS4yMjI6Njc4OS8wIHBpcGUoMHg3YTVjMTAgc2Q9
-MyBwZ3M9MCBjcz0wIGw9MCkuZmF1bHQgMTExOiBDb25uZWN0aW9uIHJlZnVzZWQKMjAxMS0x
-MS0xNCAyMjoyMjowMS42NDc4ODEgN2ZhMGRmZjRmNzAwIC0tIDovMTAwNzYyMiA+PiAxOTIu
-MTY4LjEuMjIyOjY3ODkvMCBwaXBlKDB4N2E1YzEwIHNkPTMgcGdzPTAgY3M9MCBsPTApLmNv
-bm5lY3QgZXJyb3IgMTkyLjE2OC4xLjIyMjo2Nzg5LzAsIDExMTogQ29ubmVjdGlvbiByZWZ1
-c2VkCjIwMTEtMTEtMTQgMjI6MjI6MDEuNjQ3OTIzIDdmYTBkZmY0ZjcwMCAtLSA6LzEwMDc2
-MjIgPj4gMTkyLjE2OC4xLjIyMjo2Nzg5LzAgcGlwZSgweDdhNWMxMCBzZD0zIHBncz0wIGNz
-PTAgbD0wKS5mYXVsdCAxMTE6IENvbm5lY3Rpb24gcmVmdXNlZAoyMDExLTExLTE0IDIyOjIy
-OjAyLjQ0ODM3MyA3ZmEwZGZmNGY3MDAgLS0gOi8xMDA3NjIyID4+IDE5Mi4xNjguMS4yMjI6
-Njc4OS8wIHBpcGUoMHg3YTVjMTAgc2Q9MyBwZ3M9MCBjcz0wIGw9MCkuY29ubmVjdCBlcnJv
-ciAxOTIuMTY4LjEuMjIyOjY3ODkvMCwgMTExOiBDb25uZWN0aW9uIHJlZnVzZWQKMjAxMS0x
-MS0xNCAyMjoyMjowMi40NDg0MTQgN2ZhMGRmZjRmNzAwIC0tIDovMTAwNzYyMiA+PiAxOTIu
-MTY4LjEuMjIyOjY3ODkvMCBwaXBlKDB4N2E1YzEwIHNkPTMgcGdzPTAgY3M9MCBsPTApLmZh
-dWx0IDExMTogQ29ubmVjdGlvbiByZWZ1c2VkCjIwMTEtMTEtMTQgMjI6MjI6MDQuMDQ2Mzk4
-IDdmYTBkYjhkYjcwMCAtLSA6LzEwMDc2MjIgbWFya19kb3duIDB4N2E1ZTgwIC0tIDB4N2E1
-YzEwCjIwMTEtMTEtMTQgMjI6MjI6MDQuMDQ2NTY0IDdmYTBkYjhkYjcwMCAtLSA6LzEwMDc2
-MjIgLS0+IDE5Mi4xNjguMS4yMjE6Njc4OS8wIC0tIGF1dGgocHJvdG8gMCAzMCBieXRlcykg
-djEgLS0gPyswIDB4N2E2YTcwIGNvbiAweDdhNjdiMAoyMDExLTExLTE0IDIyOjIyOjA0LjA0
-NzMxNCA3ZmEwZGE4ZDk3MDAgLS0gMTkyLjE2OC4xLjIyNTowLzEwMDc2MjIgbGVhcm5lZCBt
-eSBhZGRyIDE5Mi4xNjguMS4yMjU6MC8xMDA3NjIyCjIwMTEtMTEtMTQgMjI6MjI6MDUuMDUx
-NjQ5IDdmYTBkYzhkZDcwMCAtLSAxOTIuMTY4LjEuMjI1OjAvMTAwNzYyMiA8PT0gbW9uLjAg
-MTkyLjE2OC4xLjIyMTo2Nzg5LzAgMSA9PT09IGF1dGhfcmVwbHkocHJvdG8gMSAwIFN1Y2Nl
-c3MpIHYxID09PT0gMjQrMCswICg1Mzg1NjczMDggMCAwKSAweDdhNmE3MCBjb24gMHg3YTY3
-YjAKMjAxMS0xMS0xNCAyMjoyMjowNS4wNTE3MjMgN2ZhMGRjOGRkNzAwIC0tIDE5Mi4xNjgu
-MS4yMjU6MC8xMDA3NjIyIC0tPiAxOTIuMTY4LjEuMjIxOjY3ODkvMCAtLSBtb25fc3Vic2Ny
-aWJlKHttb25tYXA9MCt9KSB2MSAtLSA/KzAgMHg3YTYwZjAgY29uIDB4N2E2N2IwCjIwMTEt
-MTEtMTQgMjI6MjI6MDUuMDUxOTUzIDdmYTBkZmY1MTcyMCAtLSAxOTIuMTY4LjEuMjI1OjAv
-MTAwNzYyMiAtLT4gMTkyLjE2OC4xLjIyMTo2Nzg5LzAgLS0gbW9uX3N1YnNjcmliZSh7bW9u
-bWFwPTArLG9zZG1hcD0wfSkgdjEgLS0gPyswIDB4N2E1YzEwIGNvbiAweDdhNjdiMAoyMDEx
-LTExLTE0IDIyOjIyOjA1LjA1MTk5NCA3ZmEwZGZmNTE3MjAgLS0gMTkyLjE2OC4xLjIyNTow
-LzEwMDc2MjIgLS0+IDE5Mi4xNjguMS4yMjE6Njc4OS8wIC0tIG1vbl9zdWJzY3JpYmUoe21v
-bm1hcD0wKyxvc2RtYXA9MH0pIHYxIC0tID8rMCAweDdhNmNmMCBjb24gMHg3YTY3YjAKMjAx
-MS0xMS0xNCAyMjoyMjowNS4wNTI5NjYgN2ZhMGRjOGRkNzAwIC0tIDE5Mi4xNjguMS4yMjU6
-MC8xMDA3NjIyIDw9PSBtb24uMCAxOTIuMTY4LjEuMjIxOjY3ODkvMCAyID09PT0gbW9uX21h
-cCB2MSA9PT09IDQ2OSswKzAgKDIzNjExMDI4MDcgMCAwKSAweDdhNWRmMCBjb24gMHg3YTY3
-YjAKMjAxMS0xMS0xNCAyMjoyMjowNS4wNTMwMTUgN2ZhMGRjOGRkNzAwIC0tIDE5Mi4xNjgu
-MS4yMjU6MC8xMDA3NjIyIDw9PSBtb24uMCAxOTIuMTY4LjEuMjIxOjY3ODkvMCAzID09PT0g
-bW9uX3N1YnNjcmliZV9hY2soMzAwcykgdjEgPT09PSAyMCswKzAgKDI0MDg5NjA2MDUgMCAw
-KSAweDdhNjBmMCBjb24gMHg3YTY3YjAKMjAxMS0xMS0xNCAyMjoyMjowNS4wNTMyMDYgN2Zh
-MGRjOGRkNzAwIC0tIDE5Mi4xNjguMS4yMjU6MC8xMDA3NjIyIDw9PSBtb24uMCAxOTIuMTY4
-LjEuMjIxOjY3ODkvMCA0ID09PT0gbW9uX21hcCB2MSA9PT09IDQ2OSswKzAgKDIzNjExMDI4
-MDcgMCAwKSAweDdhNWRmMCBjb24gMHg3YTY3YjAKMjAxMS0xMS0xNCAyMjoyMjowNS4wNTMy
-NTYgN2ZhMGRjOGRkNzAwIC0tIDE5Mi4xNjguMS4yMjU6MC8xMDA3NjIyIDw9PSBtb24uMCAx
-OTIuMTY4LjEuMjIxOjY3ODkvMCA1ID09PT0gb3NkX21hcCg1Mi4uNTIgc3JjIGhhcyAxLi41
-MikgdjIgPT09PSAzNDYzKzArMCAoNzc3ODcwNjUwIDAgMCkgMHg3YTdiNzAgY29uIDB4N2E2
-N2IwCjIwMTEtMTEtMTQgMjI6MjI6MDUuMDUzNDYyIDdmYTBkYzhkZDcwMCAtLSAxOTIuMTY4
-LjEuMjI1OjAvMTAwNzYyMiA8PT0gbW9uLjAgMTkyLjE2OC4xLjIyMTo2Nzg5LzAgNiA9PT09
-IG1vbl9zdWJzY3JpYmVfYWNrKDMwMHMpIHYxID09PT0gMjArMCswICgyNDA4OTYwNjA1IDAg
-MCkgMHg3YTVjMTAgY29uIDB4N2E2N2IwCjIwMTEtMTEtMTQgMjI6MjI6MDUuMDUzNDkwIDdm
-YTBkYzhkZDcwMCAtLSAxOTIuMTY4LjEuMjI1OjAvMTAwNzYyMiA8PT0gbW9uLjAgMTkyLjE2
-OC4xLjIyMTo2Nzg5LzAgNyA9PT09IG1vbl9tYXAgdjEgPT09PSA0NjkrMCswICgyMzYxMTAy
-ODA3IDAgMCkgMHg3YTdkOTAgY29uIDB4N2E2N2IwCjIwMTEtMTEtMTQgMjI6MjI6MDUuMDUz
-NzY3IDdmYTBkZmY1MTcyMCAtLSAxOTIuMTY4LjEuMjI1OjAvMTAwNzYyMiAtLT4gMTkyLjE2
-OC4xLjIyNDo2ODAwLzMyMTIgLS0gb3NkX29wKGNsaWVudC40MjM2LjA6MSB0ZXN0aW1nLnJi
-ZCBbc3RhdCAwfjBdIDIuZTM1YWQxNjkpIHYxIC0tID8rMCAweDdhNmQyMCBjb24gMHg3YTlh
-ZDAKMjAxMS0xMS0xNCAyMjoyMjowNS4wNTM5MDggN2ZhMGRjOGRkNzAwIC0tIDE5Mi4xNjgu
-MS4yMjU6MC8xMDA3NjIyIDw9PSBtb24uMCAxOTIuMTY4LjEuMjIxOjY3ODkvMCA4ID09PT0g
-b3NkX21hcCg1Mi4uNTIgc3JjIGhhcyAxLi41MikgdjIgPT09PSAzNDYzKzArMCAoNzc3ODcw
-NjUwIDAgMCkgMHg3YTcwMDAgY29uIDB4N2E2N2IwCjIwMTEtMTEtMTQgMjI6MjI6MDUuMDUz
-OTU5IDdmYTBkYzhkZDcwMCAtLSAxOTIuMTY4LjEuMjI1OjAvMTAwNzYyMiA8PT0gbW9uLjAg
-MTkyLjE2OC4xLjIyMTo2Nzg5LzAgOSA9PT09IG1vbl9zdWJzY3JpYmVfYWNrKDMwMHMpIHYx
-ID09PT0gMjArMCswICgyNDA4OTYwNjA1IDAgMCkgMHg3YTllODAgY29uIDB4N2E2N2IwCjIw
-MTEtMTEtMTQgMjI6MjI6MDUuMDU1MjUwIDdmYTBkYzhkZDcwMCAtLSAxOTIuMTY4LjEuMjI1
-OjAvMTAwNzYyMiA8PT0gb3NkLjQgMTkyLjE2OC4xLjIyNDo2ODAwLzMyMTIgMSA9PT09IG9z
-ZF9vcF9yZXBseSgxIHRlc3RpbWcucmJkIFtzdGF0IDB+MF0gPSAtMiAoTm8gc3VjaCBmaWxl
-IG9yIGRpcmVjdG9yeSkpIHYyID09PT0gMTAyKzArMCAoMTY3MDQzMzk5OCAwIDApIDB4N2E2
-ZDIwIGNvbiAweDdhOWFkMAoyMDExLTExLTE0IDIyOjIyOjA1LjA1NTM2OCA3ZmEwZGZmNTE3
-MjAgLS0gMTkyLjE2OC4xLjIyNTowLzEwMDc2MjIgLS0+IDE5Mi4xNjguMS4yMjQ6NjgwMC8z
-MjEyIC0tIG9zZF9vcChjbGllbnQuNDIzNi4wOjIgcmJkX2luZm8gW3dyaXRlIDB+MF0gMi5h
-YzBlNTczYSkgdjEgLS0gPyswIDB4N2E2ZmEwIGNvbiAweDdhOWFkMAoyMDExLTExLTE0IDIy
-OjIyOjA1LjA2OTA4OCA3ZmEwZGM4ZGQ3MDAgLS0gMTkyLjE2OC4xLjIyNTowLzEwMDc2MjIg
-PD09IG9zZC40IDE5Mi4xNjguMS4yMjQ6NjgwMC8zMjEyIDIgPT09PSBvc2Rfb3BfcmVwbHko
-MiByYmRfaW5mbyBbd3JpdGUgMH4wXSBhY2sgPSAwKSB2MiA9PT09IDk5KzArMCAoMzQyNDcw
-Mjk0MCAwIDApIDB4N2E2ZDIwIGNvbiAweDdhOWFkMAoyMDExLTExLTE0IDIyOjIyOjA1LjA2
-OTE4MiA3ZmEwZGZmNTE3MjAgLS0gMTkyLjE2OC4xLjIyNTowLzEwMDc2MjIgLS0+IDE5Mi4x
-NjguMS4yMjQ6NjgwMC8zMjEyIC0tIG9zZF9vcChjbGllbnQuNDIzNi4wOjMgcmJkX2luZm8g
-W2NhbGwgcmJkLmFzc2lnbl9iaWRdIDIuYWMwZTU3M2EpIHYxIC0tID8rMCAweDdhNWNkMCBj
-b24gMHg3YTlhZDAKMjAxMS0xMS0xNCAyMjoyMjowNS4wNjk2NTUgN2ZhMGRjOGRkNzAwIC0t
-IDE5Mi4xNjguMS4yMjU6MC8xMDA3NjIyIDw9PSBvc2QuNCAxOTIuMTY4LjEuMjI0OjY4MDAv
-MzIxMiAzID09PT0gb3NkX29wX3JlcGx5KDMgcmJkX2luZm8gW2NhbGxdID0gLTUgKElucHV0
-L291dHB1dCBlcnJvcikpIHYyID09PT0gOTkrMCswICg1NTkyMzE2MTggMCAwKSAweDdhNmQy
-MCBjb24gMHg3YTlhZDAKMjAxMS0xMS0xNCAyMjoyMjowNS4wNjk3MTIgN2ZhMGRmZjUxNzIw
-IGxpYnJiZDogZmFpbGVkIHRvIGFzc2lnbiBhIGJsb2NrIG5hbWUgZm9yIGltYWdlCmNyZWF0
-ZSBlcnJvcjogZXJyb3IgNTogSW5wdXQvb3V0cHV0IGVycm9y
---------------010804010304080507030106--
-
---------------enigBF527B25FE73C7A2D553CB01
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.16 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAk7BiGcACgkQ0xt2iESAuwRv0gCfb3JgVIFIdvNXaUvcBxmMQzUM
-P1cAoIcajfa8tZFVtPTt/niB6awg1du/
-=3GMh
------END PGP SIGNATURE-----
-
---------------enigBF527B25FE73C7A2D553CB01--
+> > license:        GPL
+> > author:         Jeff Garzik <jeff@garzik.org>
+> > description:    rados block device
+> > author:         Yehuda Sadeh <yehuda@hq.newdream.net>
+> > author:         Sage Weil <sage@newdream.net>
+> > srcversion:     C8F4E38D4A716AB32B9F75C
+> > depends:       =20
+> > vermagic:       3.1.0-rc9-1-desktop SMP preempt mod_unload modversions
+>=20
+>=20
+> Regards
+> Mario
+>=20
+>=20
+> --=20
+> Mario van der Linde
+> Linux Consultant & Trainer
+> Tel.: +49-151-16879485
+> Mail: linde@b1-systems.de
+>=20
+> B1 Systems GmbH
+> Osterfeldstra=DFe 7 / 85088 Vohburg / http://www.b1-systems.de
+> GF: Ralph Dehner / Unternehmenssitz: Vohburg / AG: Ingolstadt,HRB 3537
+>=20
+--557981400-1759018362-1321306768=:3717--
