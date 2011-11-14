@@ -1,77 +1,137 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: osd/OSD.cc: 5534: FAILED assert(pending_ops > 0)
-Date: Mon, 14 Nov 2011 20:45:53 +0100
-Message-ID: <4EC16FF1.1080002@tuxadero.com>
-References: <4EC11FF2.1030109@tuxadero.com> <CAF3hT9BZh8cFy+weYxuRSH+B36mf0z18ai4whqtcfyCAUPAu1Q@mail.gmail.com>
-Reply-To: martin@tuxadero.com
+From: Sage Weil <sage@newdream.net>
+Subject: Re: rbd - input/output error
+Date: Mon, 14 Nov 2011 11:48:52 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1111141148220.29742@cobra.newdream.net>
+References: <4EBF98B5.7040706@b1-systems.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-55062374-1321300132=:29742"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:50451 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752693Ab1KNTqH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2011 14:46:07 -0500
-In-Reply-To: <CAF3hT9BZh8cFy+weYxuRSH+B36mf0z18ai4whqtcfyCAUPAu1Q@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54878 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752305Ab1KNTsx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2011 14:48:53 -0500
+In-Reply-To: <4EBF98B5.7040706@b1-systems.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
+To: Mario van der Linde <linde@b1-systems.de>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Gregory,
-I do not have more at the moment. As I cannot have the debug log always 
-on, a core dump would be the best solution?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
--martin
+--557981400-55062374-1321300132=:29742
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Gregory Farnum schrieb:
-> Do you have any other system state? (More logs, core dumps.)
-> 
-> Make a bug in the tracker either way so it doesn't get lost track of. :)
-> -Greg
-> 
-> On Mon, Nov 14, 2011 at 6:04 AM, Martin Mailand <martin@tuxadero.com> wrote:
->> Hi,
->> today one of my ods died, the log is.
->>
->> sd/OSD.cc: In function 'void OSD::dequeue_op(PG*)', in thread '7faeb6139700'
->> osd/OSD.cc: 5534: FAILED assert(pending_ops > 0)
->>  ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
->>  1: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
->>  2: (ThreadPool::worker()+0x6e6) [0x5b7b16]
->>  3: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
->>  4: (()+0x6d8c) [0x7faec4d12d8c]
->>  5: (clone()+0x6d) [0x7faec355404d]
->>  ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
->>  1: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
->>  2: (ThreadPool::worker()+0x6e6) [0x5b7b16]
->>  3: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
->>  4: (()+0x6d8c) [0x7faec4d12d8c]
->>  5: (clone()+0x6d) [0x7faec355404d]
->> *** Caught signal (Aborted) **
->>  in thread 7faeb6139700
->>  ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
->>  1: /usr/bin/ceph-osd() [0x5b8b52]
->>  2: (()+0xfc60) [0x7faec4d1bc60]
->>  3: (gsignal()+0x35) [0x7faec34a1d05]
->>  4: (abort()+0x186) [0x7faec34a5ab6]
->>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7faec3d586dd]
->>  6: (()+0xb9926) [0x7faec3d56926]
->>  7: (()+0xb9953) [0x7faec3d56953]
->>  8: (()+0xb9a5e) [0x7faec3d56a5e]
->>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->> const*)+0x396) [0x5bddb6]
->>  10: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
->>  11: (ThreadPool::worker()+0x6e6) [0x5b7b16]
->>  12: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
->>  13: (()+0x6d8c) [0x7faec4d12d8c]
->>  14: (clone()+0x6d) [0x7faec355404d]
->>
->> Anything else needed to debug this?
->>
->> -martin
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+On Sun, 13 Nov 2011, Mario van der Linde wrote:
+
+> Hello,
+>=20
+> i'm playing around with ceph and set up a cluster with 5 nodes. cephfs
+> is working fine, but if i try to use rbd i get the following error:
+>=20
+> > ceph1:~ # modprobe rbd
+> > ceph1:~ # rbd create testimg --size 10240
+> > create error: error 5: Input/output error
+
+Can you try with=20
+
+ rbd create testmsg --size 10240 --log-to-stderr --debug-ms 1
+
+so we can see a bit more about what is going on?
+
+Thanks-
+sage
+
+
+
+> > ceph1:~ # ceph --version
+> > ceph version 0.37 (commit:a6f3bbb744a6faea95ae48317f0b838edb16a896)
+>=20
+> There are no log messages that give me a hint whats going wrong.
+>=20
+> Does anybody know what the cause of this error is?
+>=20
+> Here is the ceph.conf used for this cluster:
+> > [global]
+> >         log dir =3D /srv/ceph/out
+> >         logger dir =3D /srv/ceph/log
+> >        ; chdir =3D ""
+> >         pid file =3D /srv/ceph/out/$type$id.pid
+> > [mds]
+> >         pid file =3D /srv/ceph/out/$name.pid
+> >        ; lockdep =3D 1
+> >        ; debug ms =3D 1
+> >        ; debug mds =3D 20
+> >        ; mds log max segments =3D 2
+> >        max mds =3D 3
+> > [osd]
+> >        ; lockdep =3D 1
+> >        ; debug ms =3D 1
+> >        ; debug osd =3D 25
+> >        ; debug journal =3D 20
+> >        ; debug filestore =3D 10
+> >         osd data =3D /srv/ceph/dev/osd$id
+> >         osd journal =3D /srv/ceph/dev/osd$id/journal
+> >         osd journal size =3D 512
+> > [mon]
+> >        lockdep =3D 1
+> >        debug mon =3D 20
+> >        debug paxos =3D 20
+> >        debug ms =3D 1
+> >        mon data =3D "/srv/ceph/dev/mon$id"
+> > [mon.1]
+> >        host =3D ceph1
+> >        mon addr =3D 192.168.1.221:6789
+> > [mon.2]
+> >        host =3D ceph2
+> >        mon addr =3D 192.168.1.222:6789
+> > [mon.3]
+> >        host =3D ceph3
+> >        mon addr =3D 192.168.1.223:6789
+> > ;[mon.4]
+> > ;       host =3D ceph4
+> > ;       mon addr =3D 192.168.1.224:6789
+> > ;[mon.5]
+> > ;       host =3D ceph5
+> > ;       mon addr =3D 192.168.1.225:6789
+> > [osd.1]
+> >        host =3D ceph1
+> >        btrfs devs =3D /dev/sda6
+> > [osd.2]
+> >        host =3D ceph2
+> >        btrfs devs =3D /dev/sda6
+> > [osd.3]
+> >        host =3D ceph3
+> >        btrfs devs =3D /dev/sda6
+> > [osd.4]
+> >        host =3D ceph4
+> >        btrfs devs =3D /dev/sda6
+> > [osd.5]
+> >        host =3D ceph5
+> >        btrfs devs =3D /dev/sda6
+> > [mds.0]
+> >        host =3D ceph1
+> > [mds.1]
+> >        host =3D ceph2
+> > [mds.2]
+> >        host =3D ceph3
+>=20
+>=20
+> Greetings
+> Mario
+>=20
+> --=20
+>=20
+> Mario van der Linde                  Geschaeftsfuehrer: Ralph Dehner
+> Linux Consultant & Trainer           Unternehmenssitz:  Vohburg
+> B1 Systems GmbH                      Amtsgericht:       Ingolstadt
+> Osterfeldstra=DFe 7                    Handelsregister:   HRB 3537
+> 85088 Vohburg                        http://www.b1-systems.de
+> Mobil: +49 151 168 794 85
+> EMail: linde@b1-systems.de
+>=20
+> http://pgpkeys.pca.dfn.de/pks/lookup?op=3Dget&search=3D0xD31B76884480BB04
+>=20
+>=20
+--557981400-55062374-1321300132=:29742--
