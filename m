@@ -1,110 +1,94 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Fwd: ceph and ext4
-Date: Mon, 14 Nov 2011 11:54:11 -0800
-Message-ID: <CAF3hT9B=C1zN6y9zGgFZe4ZDy9-g9Fh04Abyf4F=KVD8rd=vZw@mail.gmail.com>
-References: <4EC10664.1080501@tuxadero.com>
-	<CAMvP8PAuBbG_hcgjD+WJGRFo=p59Um3HAAoRN5zjuRPWjsLh1A@mail.gmail.com>
-	<4EC118A1.1030008@tuxadero.com>
-	<CAF3hT9APJBfjqfkKd_r3-vydtC0B2EHx2aG1OGwipmF-B+mdZg@mail.gmail.com>
-	<4EC16EB6.3060707@tuxadero.com>
-	<CAF3hT9DbnQLJb5YPZJ15ekt5JWZLwyoMymm2x=s9V64kw5qKWQ@mail.gmail.com>
+Subject: Re: osd/OSD.cc: 5534: FAILED assert(pending_ops > 0)
+Date: Mon, 14 Nov 2011 11:54:52 -0800
+Message-ID: <CAF3hT9AqayxNCSKNZ8TfYMhOhPk0uEmGNKjJz+TTYAGMHfK3Jw@mail.gmail.com>
+References: <4EC11FF2.1030109@tuxadero.com>
+	<CAF3hT9BZh8cFy+weYxuRSH+B36mf0z18ai4whqtcfyCAUPAu1Q@mail.gmail.com>
+	<4EC16FF1.1080002@tuxadero.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:40221 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:63589 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754081Ab1KNTyM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2011 14:54:12 -0500
-Received: by iage36 with SMTP id e36so7575723iag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2011 11:54:11 -0800 (PST)
-In-Reply-To: <CAF3hT9DbnQLJb5YPZJ15ekt5JWZLwyoMymm2x=s9V64kw5qKWQ@mail.gmail.com>
+	with ESMTP id S1754224Ab1KNTyw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2011 14:54:52 -0500
+Received: by iage36 with SMTP id e36so7576295iag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2011 11:54:52 -0800 (PST)
+In-Reply-To: <4EC16FF1.1080002@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-Sorry, missed adding the list.
-
-
----------- Forwarded message ----------
-=46rom: Gregory Farnum <gregory.farnum@dreamhost.com>
-Date: Mon, Nov 14, 2011 at 11:53 AM
-Subject: Re: ceph and ext4
 To: martin@tuxadero.com
+Cc: ceph-devel@vger.kernel.org
 
+It's not a big deal; logging is expensive. :) Just a backtrace isn't a
+lot to go on, but it's better than nothing!
 
-Yeah, I think we'll be working on it in the next couple of months, but
-right now we're recommending xfs if you can't do btrfs.
-
-On Mon, Nov 14, 2011 at 11:40 AM, Martin Mailand <martin@tuxadero.com> =
+On Mon, Nov 14, 2011 at 11:45 AM, Martin Mailand <martin@tuxadero.com> =
 wrote:
 > Hi Gregory,
-> this is quite bad, so ext4 is still no alternative as a backend fs.
+> I do not have more at the moment. As I cannot have the debug log alwa=
+ys on,
+> a core dump would be the best solution?
 >
 > -martin
 >
 > Gregory Farnum schrieb:
 >>
->> On Mon, Nov 14, 2011 at 5:33 AM, Martin Mailand <martin@tuxadero.com=
+>> Do you have any other system state? (More logs, core dumps.)
+>>
+>> Make a bug in the tracker either way so it doesn't get lost track of=
+=2E :)
+>> -Greg
+>>
+>> On Mon, Nov 14, 2011 at 6:04 AM, Martin Mailand <martin@tuxadero.com=
 >
 >> wrote:
 >>>
->>> Hi Tomasz,
->>> as far as I know it still has this limit.
->>> But it should be relatively safe to use it.
+>>> Hi,
+>>> today one of my ods died, the log is.
 >>>
->>> http://marc.info/?l=3Dceph-devel&m=3D131942130322957&w=3D2
+>>> sd/OSD.cc: In function 'void OSD::dequeue_op(PG*)', in thread
+>>> '7faeb6139700'
+>>> osd/OSD.cc: 5534: FAILED assert(pending_ops > 0)
+>>> =A0ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509=
+b9)
+>>> =A01: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
+>>> =A02: (ThreadPool::worker()+0x6e6) [0x5b7b16]
+>>> =A03: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
+>>> =A04: (()+0x6d8c) [0x7faec4d12d8c]
+>>> =A05: (clone()+0x6d) [0x7faec355404d]
+>>> =A0ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509=
+b9)
+>>> =A01: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
+>>> =A02: (ThreadPool::worker()+0x6e6) [0x5b7b16]
+>>> =A03: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
+>>> =A04: (()+0x6d8c) [0x7faec4d12d8c]
+>>> =A05: (clone()+0x6d) [0x7faec355404d]
+>>> *** Caught signal (Aborted) **
+>>> =A0in thread 7faeb6139700
+>>> =A0ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509=
+b9)
+>>> =A01: /usr/bin/ceph-osd() [0x5b8b52]
+>>> =A02: (()+0xfc60) [0x7faec4d1bc60]
+>>> =A03: (gsignal()+0x35) [0x7faec34a1d05]
+>>> =A04: (abort()+0x186) [0x7faec34a5ab6]
+>>> =A05: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7faec3d58=
+6dd]
+>>> =A06: (()+0xb9926) [0x7faec3d56926]
+>>> =A07: (()+0xb9953) [0x7faec3d56953]
+>>> =A08: (()+0xb9a5e) [0x7faec3d56a5e]
+>>> =A09: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>> const*)+0x396) [0x5bddb6]
+>>> =A010: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
+>>> =A011: (ThreadPool::worker()+0x6e6) [0x5b7b16]
+>>> =A012: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
+>>> =A013: (()+0x6d8c) [0x7faec4d12d8c]
+>>> =A014: (clone()+0x6d) [0x7faec355404d]
 >>>
->>> If we hit the 4KB limit of xattrs in ext4 how does it show up in th=
-e rbd
->>> layer?
+>>> Anything else needed to debug this?
 >>>
->>> How does it show up in the fs layer, would the fs still be clean?
->>
->> Right now it would show up very badly, unfortunately. (And yes, the
->> limit is still there.) You'd notice, though you might manage to
->> corrupt some of your data first. :/
->>
->> However, if you're not taking snapshots and you're not using xattrs
->> yourself, you won't hit it with rbd or the Ceph FS.
->> -Greg
->>
 >>> -martin
->>>
->>>
->>> Am 14.11.2011 14:09, schrieb Tomasz Paszkowski:
->>>>
->>>> what about limit on xattr size ? Is it still limited to 4KB ?
->>>>
->>>>
->>>>
->>>> On Mon, Nov 14, 2011 at 1:15 PM, Martin Mailand<martin@tuxadero.co=
-m>
->>>> =A0wrote:
->>>>>
->>>>> Hi Christian,
->>>>> I am not sure if you noticed, but your ext4 bug is fixed in mainl=
-ine. I
->>>>> am
->>>>> running a ceph cluster with 40+ vms for over a week by now, witho=
-ut any
->>>>> problems. An fsck.ext4 shows the ext4 is clean.
->>>>> The performance of ext4 is much better than btrfs, no rise in the=
- load
->>>>> of
->>>>> the osd's.
->>>>>
->>>>> -martin
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel"
->>>>> in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.h=
-tml
->>>>>
->>>>
->>>>
 >>> --
 >>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
 l" in
