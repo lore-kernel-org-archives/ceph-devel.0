@@ -1,115 +1,103 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: v0.38 released
-Date: Tue, 15 Nov 2011 11:53:51 -0800
-Message-ID: <CAF3hT9AA5zgTsbHb-Gxn5BTeMG+=krGdO2NtRFcHTR_k_3dKgw@mail.gmail.com>
-References: <Pine.LNX.4.64.1111102113260.27241@cobra.newdream.net>
-	<20111115164254.GJ13394@systemlinux.org>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Re: osd/OSD.cc: 5534: FAILED assert(pending_ops > 0)
+Date: Tue, 15 Nov 2011 20:57:21 +0100
+Message-ID: <4EC2C421.2060803@tuxadero.com>
+References: <4EC11FF2.1030109@tuxadero.com> <CAF3hT9BZh8cFy+weYxuRSH+B36mf0z18ai4whqtcfyCAUPAu1Q@mail.gmail.com> <4EC16FF1.1080002@tuxadero.com> <CAF3hT9AqayxNCSKNZ8TfYMhOhPk0uEmGNKjJz+TTYAGMHfK3Jw@mail.gmail.com> <Pine.LNX.4.64.1111141220460.29742@cobra.newdream.net>
+Reply-To: martin@tuxadero.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:51563 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757342Ab1KOTxv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Nov 2011 14:53:51 -0500
-Received: by iage36 with SMTP id e36so8867674iag.19
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Nov 2011 11:53:51 -0800 (PST)
-In-Reply-To: <20111115164254.GJ13394@systemlinux.org>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:39902 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932077Ab1KOT5c (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Nov 2011 14:57:32 -0500
+In-Reply-To: <Pine.LNX.4.64.1111141220460.29742@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andre Noll <maan@systemlinux.org>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
 
-On Tue, Nov 15, 2011 at 8:42 AM, Andre Noll <maan@systemlinux.org> wrot=
-e:
-> On Thu, Nov 10, 21:14, Sage Weil wrote:
->> =A0* osd: some peering refactoring
->> =A0* osd: 'replay' period is per-pool (now only affects fs data pool=
-)
->> =A0* osd: clean up old osdmaps
->> =A0* osd: allow admin to revert lost objects to prior versions (or d=
-elete)
->> =A0* mkcephfs: generate reasonable crush map based on 'host' and 'ra=
-ck'
->> =A0 =A0fields in [osd.NN] sections of ceph.conf
->> =A0* radosgw: bucket index improvements
->> =A0* radosgw: improved swift support
->> =A0* rbd: misc command line tool fixes
->> =A0* debian: misc packaging fixes (including dependency breakage on =
-upgrades)
->> =A0* ceph: query daemon perfcounters via command line tool
+Hi,
+I have a bt.
+http://pastebin.com/QNcja2QK
+
+-martin
+
+Sage Weil schrieb:
+> On Mon, 14 Nov 2011, Gregory Farnum wrote:
+>> It's not a big deal; logging is expensive. :) Just a backtrace isn't a
+>> lot to go on, but it's better than nothing!
 >>
->> The big upcoming items for v0.39 are RBD layering (image cloning), f=
-urther
->> improvements to radosgw's Swift support, and some monitor failure re=
-covery
->> and bootstrapping improvements. =A0We're also continuing work on the
->> automation bits that the Chef cookbooks and Juju charms will use, an=
-d a
->> Crowbar barclamp was also just posted on github. =A0Several patches =
-are
->> still working their way into libvirt and qemu to improve support for=
- RBD
->> authentication.
->
-> Any plans to address the ENOSPC issue? I gave v0.38 a try and the
-> file system behaves like the older (<=3D 0.36) versions I've tried
-> before when it fills up: The ceph mounts hang on all clients.
-
-This is something we hope to address in the future, but we haven't
-come up with a good solution yet. (I haven't seen a good solution in
-other distributed systems either...)
-
-> But there is progress: Sync is now interuptable (it used to block
-> in D state so that it could not be killed even with SIGKILL), and
-> umount works even if the file system is full. However, subsequent
-> mount attempts then fail with "mount error 5 =3D Input/output error".
-Yay!
-
-> Our test setup consists of one mds, one monitor and 8 osds. mds and
-> monitor are on the same node, and this node is not not an osd. All
-> nodes are running Linux-3.0.9 ATM, but I would be willing to upgrade
-> to 3.1.1 if this is expected to make a difference.
->
-> Here's some output of "ceph -w". Funny enough it reports 770G of free
-> disk space space although the writing process terminated with ENOSPC.
-Right now RADOS (the object store under the Ceph FS) is pretty
-conservative about reporting ENOSPC. Since btrfs is also pretty
-unhappy when its disk fills up, an OSD marks itself as "full" once
-it's reached 95% of its capacity, and once a single OSD goes full then
-RADOS marks itself that way so you don't overfill a disk and have
-really bad things happen. (Hung mounts suck but are a lot better than
-mysterious data loss.)
-
-Looking at your ceph -s I'm surprised by a few things, though...
-1) Why do you have so many PGs? 8k/OSD is rather a lot
-2) I wouldn't expect your OSDs to have become so unbalanced that one
-of them hits 95% full when the cluster's only at 84% capacity.
-
-What is this cluster used for? Are you running anything besides the
-Ceph FS on it? (radosgw, maybe?)
--Greg
-
-> 2011-11-15 12:12:45.388535 =A0 =A0pg v38805: 65940 pgs: 1956 creating=
-, 63984 active+clean; 1856 GB data, 3730 GB used, 770 GB / 4600 GB avai=
-l
-> 2011-11-15 12:12:45.589228 =A0 mds e4: 1/1/1 up {0=3D0=3Dup:active}
-> 2011-11-15 12:12:45.589326 =A0 osd e11: 8 osds: 8 up, 8 in full
-> 2011-11-15 12:12:45.589908 =A0 log 2011-11-15 12:12:19.599894 osd.326=
- 192.168.3.26:6800/1673 168 : [INF] 0.593 scrub ok
-> 2011-11-15 12:12:45.590000 =A0 mon e1: 1 mons at {0=3D192.168.3.34:67=
-89/0}
-> 2011-11-15 12:12:49.554163 =A0 =A0pg v38806: 65940 pgs: 1956 creating=
-, 63984 active+clean; 1856 GB data, 3730 GB used, 770 GB / 4600 GB avai=
-l
-> 2011-11-15 12:12:54.526661 =A0 =A0pg v38807: 65940 pgs: 1956 creating=
-, 63984 active+clean; 1856 GB data, 3730 GB used, 770 GB / 4600 GB avai=
-l
-> 2011-11-15 12:12:56.309292 =A0 =A0pg v38808: 65940 pgs: 1956 creating=
-, 63984 active+clean; 1856 GB data, 3730 GB used, 770 GB / 4600 GB avai=
-l
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> On Mon, Nov 14, 2011 at 11:45 AM, Martin Mailand <martin@tuxadero.com> wrote:
+>>> Hi Gregory,
+>>> I do not have more at the moment. As I cannot have the debug log always on,
+>>> a core dump would be the best solution?
+> 
+> I'm mainly interested in whether pending_ops is 0 or < 0.  A 'thread apply 
+> all bt' may also be useful.
+> 
+> Thanks!
+> sage
+> 
+> 
+>>> -martin
+>>>
+>>> Gregory Farnum schrieb:
+>>>> Do you have any other system state? (More logs, core dumps.)
+>>>>
+>>>> Make a bug in the tracker either way so it doesn't get lost track of. :)
+>>>> -Greg
+>>>>
+>>>> On Mon, Nov 14, 2011 at 6:04 AM, Martin Mailand <martin@tuxadero.com>
+>>>> wrote:
+>>>>> Hi,
+>>>>> today one of my ods died, the log is.
+>>>>>
+>>>>> sd/OSD.cc: In function 'void OSD::dequeue_op(PG*)', in thread
+>>>>> '7faeb6139700'
+>>>>> osd/OSD.cc: 5534: FAILED assert(pending_ops > 0)
+>>>>>  ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
+>>>>>  1: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
+>>>>>  2: (ThreadPool::worker()+0x6e6) [0x5b7b16]
+>>>>>  3: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
+>>>>>  4: (()+0x6d8c) [0x7faec4d12d8c]
+>>>>>  5: (clone()+0x6d) [0x7faec355404d]
+>>>>>  ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
+>>>>>  1: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
+>>>>>  2: (ThreadPool::worker()+0x6e6) [0x5b7b16]
+>>>>>  3: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
+>>>>>  4: (()+0x6d8c) [0x7faec4d12d8c]
+>>>>>  5: (clone()+0x6d) [0x7faec355404d]
+>>>>> *** Caught signal (Aborted) **
+>>>>>  in thread 7faeb6139700
+>>>>>  ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
+>>>>>  1: /usr/bin/ceph-osd() [0x5b8b52]
+>>>>>  2: (()+0xfc60) [0x7faec4d1bc60]
+>>>>>  3: (gsignal()+0x35) [0x7faec34a1d05]
+>>>>>  4: (abort()+0x186) [0x7faec34a5ab6]
+>>>>>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7faec3d586dd]
+>>>>>  6: (()+0xb9926) [0x7faec3d56926]
+>>>>>  7: (()+0xb9953) [0x7faec3d56953]
+>>>>>  8: (()+0xb9a5e) [0x7faec3d56a5e]
+>>>>>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>>>>> const*)+0x396) [0x5bddb6]
+>>>>>  10: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
+>>>>>  11: (ThreadPool::worker()+0x6e6) [0x5b7b16]
+>>>>>  12: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
+>>>>>  13: (()+0x6d8c) [0x7faec4d12d8c]
+>>>>>  14: (clone()+0x6d) [0x7faec355404d]
+>>>>>
+>>>>> Anything else needed to debug this?
+>>>>>
+>>>>> -martin
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
