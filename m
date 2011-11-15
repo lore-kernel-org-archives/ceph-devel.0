@@ -1,37 +1,36 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: Assert in OSDMap::Incremental::decode with recent git
-Date: Tue, 15 Nov 2011 06:55:44 -0500
-Message-ID: <20111115115544.GA1557@infradead.org>
-References: <20111115113747.GA32287@rcn.com>
+From: Ted Ts'o <tytso@mit.edu>
+Subject: Re: ceph and ext4
+Date: Tue, 15 Nov 2011 09:22:46 -0500
+Message-ID: <20111115142246.GA7516@thunk.org>
+References: <4EC10664.1080501@tuxadero.com>
+ <CAO47_-9nfO32nwOAQMVdqw6iWGWK+FWb+MD=WeOz_vr4YrrKmw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 173-166-109-252-newengland.hfc.comcastbusiness.net ([173.166.109.252]:35820
-	"EHLO bombadil.infradead.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752756Ab1KOLzq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 15 Nov 2011 06:55:46 -0500
+Received: from li9-11.members.linode.com ([67.18.176.11]:60541 "EHLO
+	test.thunk.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755884Ab1KOOWw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 15 Nov 2011 09:22:52 -0500
 Content-Disposition: inline
-In-Reply-To: <20111115113747.GA32287@rcn.com>
+In-Reply-To: <CAO47_-9nfO32nwOAQMVdqw6iWGWK+FWb+MD=WeOz_vr4YrrKmw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Pieper <jjp@pobox.com>
-Cc: ceph-devel@vger.kernel.org
+To: Christian Brunner <chb@muc.de>
+Cc: Martin Mailand <martin@tuxadero.com>, ceph-devel@vger.kernel.org, linux-ext4@vger.kernel.org
 
-On Tue, Nov 15, 2011 at 06:37:47AM -0500, Josh Pieper wrote:
-> Hello,
+On Tue, Nov 15, 2011 at 09:29:28AM +0100, Christian Brunner wrote:
 > 
-> I was trying to test http://tracker.newdream.net/issues/1708, but in
-> the process of attempting to do so, keep getting asserts in one of my
-> monitors.
-> 
-> Pretty much all I have done is bring up a simple 3 node cluster, each
-> with a mon, osd, and mds.  All are using amd64 ubuntu 11.10, with git
-> 2e195500.  Once the cluster is up, I have a rbd load applied which is
-> a single VM reading large files.  Three times now, I have gotten the
-> same assert out of mon, inlined below.
+> I'd love to have a working filesystem for ceph, but the xattr issue
+> with ext4 really scares me. That's why I'm still wrestling with btrfs.
 
-I hit the same when trying to bring up a test cluster on a single
-physical machine.  As soon as moved to vstart.sh I couldn't reproduce
-it anymore.
+FYI, there are patches to extend ext4 to store xattr's in a separate
+inode.  They were submitted by the Whamcloud (formerly Oracle, Sun,
+Clustrefs -- the Lustre folks).
 
+Unfortunately I haven't had the personal time and review bandwidth to
+go over the patches, and they haven't been rebased in a while.  I'm
+not opposed to them; they just need some time and loving attention
+from folks with ext4 expertise to accelerate the process of getting
+the patches reviewed, and in mainline.
+
+					- Ted
