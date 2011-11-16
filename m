@@ -1,69 +1,57 @@
 From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: [PATCH] debian init: Do not stop or start daemons when installing
- or upgrading
-Date: Wed, 16 Nov 2011 22:01:23 +0100
-Message-ID: <4EC424A3.7080406@widodh.nl>
-References: <1321472475-19115-1-git-send-email-wido@widodh.nl> <1321472475-19115-2-git-send-email-wido@widodh.nl> <Pine.LNX.4.64.1111161152550.22555@cobra.newdream.net>
+Subject: phprados update
+Date: Wed, 16 Nov 2011 22:10:28 +0100
+Message-ID: <4EC426C4.3090704@widodh.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:41858 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752021Ab1KPVB0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Nov 2011 16:01:26 -0500
-In-Reply-To: <Pine.LNX.4.64.1111161152550.22555@cobra.newdream.net>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:40608 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752128Ab1KPVKa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Nov 2011 16:10:30 -0500
+Received: from [IPv6:2001:7b8:3cb:0:219:d2ff:fec0:b754] (unknown [IPv6:2001:7b8:3cb:0:219:d2ff:fec0:b754])
+	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPA id E8FCA76003
+	for <ceph-devel@vger.kernel.org>; Wed, 16 Nov 2011 22:10:28 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: gcs@debian.hu, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 11/16/2011 08:53 PM, Sage Weil wrote:
-> Ooh, that would certainly make things less annoying for me as well.
-> Unless that's contrary to some debian policy/best practice, Laszlo?
->
+Hi,
 
-We could also go for "--no-restart-on-upgrade".
+Some time ago the API of librados changed thus breaking phprados. I 
+tried implementing the C++ API of librados in PHP but I got pretty stuck 
+there with the new IoCTX stuff.
 
-I ran into this when upgrading the debs on my machines. The init script 
-would try to stop any running radosgw processes, that failed (none were 
-running), exited non-zero and that broke the prerm script.
+So I went to the C API and started implementing a C-only phprados with 
+just using the C functions.
 
-But since we are dealing with potentially very important daemons I don't 
-want any init scripts restarting my daemons, I want to do that myself.
+I just finished with implementing most of the librados functionality, 
+this includes:
+
+* Connecting
+* Creating and removing pools
+* Object handling like write and read
+* Xattr handling
+* Snapshot handling
+
+I stayed away from the rados tmap's, exec and async writes for now, 
+since I don't think a lot of PHP users will be using that functionality 
+(yet).
+
+My next steps are to hunt down some bugs and start writing a Object 
+based version in PHP, but I'll be using the internal object methods of 
+PHP for this while calling the C functions of librados in the background.
+
+This way I can create a RADOS object in PHP which meets the "standard" 
+of what PHP users are used to. For example: It is not common in PHP to 
+define the number of bytes you want to read when retrieving the value of 
+a xattr, PHP should figure that out for you.
+
+Any comments or suggestions on this?
+
+phprados can be found at: http://www.widodh.nl/git/phprados.git
+
+Further down the road I'll upload some tar archives as well.
 
 Wido
-
-> sage
->
->
-> On Wed, 16 Nov 2011, Wido den Hollander wrote:
->
->>
->> Signed-off-by: Wido den Hollander<wido@widodh.nl>
->> ---
->>   debian/rules |    2 +-
->>   1 files changed, 1 insertions(+), 1 deletions(-)
->>
->> diff --git a/debian/rules b/debian/rules
->> index a20258d..4f3fe62 100755
->> --- a/debian/rules
->> +++ b/debian/rules
->> @@ -98,7 +98,7 @@ binary-arch: build install
->>   	dh_installexamples
->>   	dh_install --sourcedir=$(DESTDIR) --list-missing
->>   	dh_installlogrotate
->> -	dh_installinit
->> +	dh_installinit --no-start
->>   	dh_installman
->>   	dh_lintian
->>   	dh_link
->> --
->> 1.7.5.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
