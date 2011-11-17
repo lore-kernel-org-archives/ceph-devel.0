@@ -1,49 +1,57 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: v0.38 released
-Date: Thu, 17 Nov 2011 10:01:21 -0800
-Message-ID: <CAORUGqA2HJQFXM01mq29TcSTK9p7OxLDGa9s85OfkbgWALnu7w@mail.gmail.com>
-References: <Pine.LNX.4.64.1111102113260.27241@cobra.newdream.net>
- <20111115164254.GJ13394@systemlinux.org> <CAF3hT9AA5zgTsbHb-Gxn5BTeMG+=krGdO2NtRFcHTR_k_3dKgw@mail.gmail.com>
- <20111116095614.GK13394@systemlinux.org> <CAORUGqCGRAK+x4Opzsw4hmjw2gKPWzxSvuVdx4A-2uR4mqQFZg@mail.gmail.com>
- <20111117103524.GL13394@systemlinux.org>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Cluster sync doesn't finsh
+Date: Thu, 17 Nov 2011 21:48:56 +0100
+Message-ID: <4EC57338.9040004@tuxadero.com>
+Reply-To: martin@tuxadero.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f42.google.com ([74.125.82.42]:56869 "EHLO
-	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751398Ab1KQSBn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Nov 2011 13:01:43 -0500
-Received: by wwe3 with SMTP id 3so3755038wwe.1
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Nov 2011 10:01:42 -0800 (PST)
-In-Reply-To: <20111117103524.GL13394@systemlinux.org>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:48264 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755825Ab1KQUtF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Nov 2011 15:49:05 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andre Noll <maan@systemlinux.org>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Josh Durgin <josh.durgin@dreamhost.com>
 
-On Thu, Nov 17, 2011 at 02:35, Andre Noll <maan@systemlinux.org> wrote:
-> I was under the impression that equal weights on all osds means to
-> fill up all file systems by the same percentage, i.e. that file syste=
-m
-> sizes are already taken care of.
->
-> But apparently this is not the case. =C2=A0So one has to set the weig=
-hts
-> manually according to the available disk space.
+Hi,
+I am doing cluster failure test, where I shut down one OSD an wait for 
+the cluster to sync. But the sync never finshed, at around 4-5% it 
+stops. I stoped osd2.
 
-The weight is actually a combination of all the factors that would go
-in: storage size, disk IO speed, network link bandwidth, heat in that
-part of the data center, future expansion plans, .. We could automate
-more of it, but it really is a fundamentally holistic number, and
-setting it based on just one aspect of reality will lead to someone
-else being unhappy. So it goes something like this:
+2011-11-17 16:40:48.015370    pg v1333: 600 pgs: 1 active, 546 
+active+clean, 53 active+clean+degraded; 113 GB data, 183 GB used, 1142 
+GB / 1395 GB avail; 4200/82404 degraded (5.097%)
+2011-11-17 16:40:53.109391    pg v1334: 600 pgs: 1 active, 546 
+active+clean, 53 active+clean+degraded; 113 GB data, 183 GB used, 1142 
+GB / 1395 GB avail; 4117/82404 degraded (4.996%)
+2011-11-17 16:40:58.228525    pg v1335: 600 pgs: 1 active, 546 
+active+clean, 53 active+clean+degraded; 113 GB data, 183 GB used, 1142 
+GB / 1395 GB avail; 4037/82404 degraded (4.899%)
+2011-11-17 16:41:03.223778    pg v1336: 600 pgs: 547 active+clean, 53 
+active+clean+degraded; 113 GB data, 183 GB used, 1142 GB / 1395 GB 
+avail; 4025/82404 degraded (4.884%)
+2011-11-17 16:42:45.520740    pg v1337: 600 pgs: 547 active+clean, 53 
+active+clean+degraded; 113 GB data, 184 GB used, 1141 GB / 1395 GB 
+avail; 4025/82404 degraded (4.884%)
 
-Step 1: improve documentation
-Step 2: have a monitoring system be able to feed back information to
-use as osd weights, with admin customazability
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+^C
+root@m-brick-000:~# date -R
+Thu, 17 Nov 2011 17:56:08 +0100
+root@m-brick-000:~#
+
+So for the last hour nothing happend, there is no load on the cluster.
+
+The osd log, the ceph.conf, pg dump, osd dump could be found here.
+
+http://85.214.49.87/ceph/
+
+ceph version 0.38-181-g2e19550 
+(commit:2e195500b5d3a8ab8512bcf2a219a6b7ff922c97)
+
+-martin
+
+
+
