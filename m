@@ -1,143 +1,49 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: osd/OSD.cc: 5534: FAILED assert(pending_ops > 0)
-Date: Thu, 17 Nov 2011 13:07:25 +0100
-Message-ID: <4EC4F8FD.6050401@tuxadero.com>
-References: <4EC11FF2.1030109@tuxadero.com> <CAF3hT9BZh8cFy+weYxuRSH+B36mf0z18ai4whqtcfyCAUPAu1Q@mail.gmail.com> <4EC16FF1.1080002@tuxadero.com> <CAF3hT9AqayxNCSKNZ8TfYMhOhPk0uEmGNKjJz+TTYAGMHfK3Jw@mail.gmail.com> <Pine.LNX.4.64.1111141220460.29742@cobra.newdream.net> <4EC2F026.7000109@tuxadero.com> <Pine.LNX.4.64.1111161311220.6368@cobra.newdream.net>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: v0.38 released
+Date: Thu, 17 Nov 2011 10:01:21 -0800
+Message-ID: <CAORUGqA2HJQFXM01mq29TcSTK9p7OxLDGa9s85OfkbgWALnu7w@mail.gmail.com>
+References: <Pine.LNX.4.64.1111102113260.27241@cobra.newdream.net>
+ <20111115164254.GJ13394@systemlinux.org> <CAF3hT9AA5zgTsbHb-Gxn5BTeMG+=krGdO2NtRFcHTR_k_3dKgw@mail.gmail.com>
+ <20111116095614.GK13394@systemlinux.org> <CAORUGqCGRAK+x4Opzsw4hmjw2gKPWzxSvuVdx4A-2uR4mqQFZg@mail.gmail.com>
+ <20111117103524.GL13394@systemlinux.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:39777 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750769Ab1KQMHi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Nov 2011 07:07:38 -0500
-In-Reply-To: <Pine.LNX.4.64.1111161311220.6368@cobra.newdream.net>
+Received: from mail-ww0-f42.google.com ([74.125.82.42]:56869 "EHLO
+	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751398Ab1KQSBn convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Nov 2011 13:01:43 -0500
+Received: by wwe3 with SMTP id 3so3755038wwe.1
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Nov 2011 10:01:42 -0800 (PST)
+In-Reply-To: <20111117103524.GL13394@systemlinux.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
+To: Andre Noll <maan@systemlinux.org>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-Hi Sage,
-I saw it once, but the osd node seems a bit dodgy. I re-imaged the  node 
-today, I try again to reproduce it.
+On Thu, Nov 17, 2011 at 02:35, Andre Noll <maan@systemlinux.org> wrote:
+> I was under the impression that equal weights on all osds means to
+> fill up all file systems by the same percentage, i.e. that file syste=
+m
+> sizes are already taken care of.
+>
+> But apparently this is not the case. =C2=A0So one has to set the weig=
+hts
+> manually according to the available disk space.
 
--martin
+The weight is actually a combination of all the factors that would go
+in: storage size, disk IO speed, network link bandwidth, heat in that
+part of the data center, future expansion plans, .. We could automate
+more of it, but it really is a fundamentally holistic number, and
+setting it based on just one aspect of reality will lead to someone
+else being unhappy. So it goes something like this:
 
-Am 16.11.2011 22:12, schrieb Sage Weil:
-> Hi Martin,
->
-> I've reread the code twice now and it's really not clear to me how
-> pending_ops could get out of sync with the actual queue size.  I've pushed
-> a couple of patches that remove surrounding dead code and add an
-> additional assert sanity check to master.    Have you seen this again, or
-> just that once?
->
-> Opened http://tracker.newdream.net/issues/1727
->
-> Thanks-
-> sage
->
->
-> On Wed, 16 Nov 2011, Martin Mailand wrote:
->
->> Hi,
->> so after a little help from greg.
->>
->> (gdb) print pending_ops
->> $1 = 0
->>
->> -martin
->>
->> Sage Weil schrieb:
->>> On Mon, 14 Nov 2011, Gregory Farnum wrote:
->>>> It's not a big deal; logging is expensive. :) Just a backtrace isn't a
->>>> lot to go on, but it's better than nothing!
->>>>
->>>> On Mon, Nov 14, 2011 at 11:45 AM, Martin Mailand<martin@tuxadero.com>
->>>> wrote:
->>>>> Hi Gregory,
->>>>> I do not have more at the moment. As I cannot have the debug log always
->>>>> on,
->>>>> a core dump would be the best solution?
->>>
->>> I'm mainly interested in whether pending_ops is 0 or<  0.  A 'thread apply
->>> all bt' may also be useful.
->>>
->>> Thanks!
->>> sage
->>>
->>>
->>>>> -martin
->>>>>
->>>>> Gregory Farnum schrieb:
->>>>>> Do you have any other system state? (More logs, core dumps.)
->>>>>>
->>>>>> Make a bug in the tracker either way so it doesn't get lost track of.
->>>>>> :)
->>>>>> -Greg
->>>>>>
->>>>>> On Mon, Nov 14, 2011 at 6:04 AM, Martin Mailand<martin@tuxadero.com>
->>>>>> wrote:
->>>>>>> Hi,
->>>>>>> today one of my ods died, the log is.
->>>>>>>
->>>>>>> sd/OSD.cc: In function 'void OSD::dequeue_op(PG*)', in thread
->>>>>>> '7faeb6139700'
->>>>>>> osd/OSD.cc: 5534: FAILED assert(pending_ops>  0)
->>>>>>>   ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
->>>>>>>   1: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
->>>>>>>   2: (ThreadPool::worker()+0x6e6) [0x5b7b16]
->>>>>>>   3: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
->>>>>>>   4: (()+0x6d8c) [0x7faec4d12d8c]
->>>>>>>   5: (clone()+0x6d) [0x7faec355404d]
->>>>>>>   ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
->>>>>>>   1: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
->>>>>>>   2: (ThreadPool::worker()+0x6e6) [0x5b7b16]
->>>>>>>   3: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
->>>>>>>   4: (()+0x6d8c) [0x7faec4d12d8c]
->>>>>>>   5: (clone()+0x6d) [0x7faec355404d]
->>>>>>> *** Caught signal (Aborted) **
->>>>>>>   in thread 7faeb6139700
->>>>>>>   ceph version 0.38 (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
->>>>>>>   1: /usr/bin/ceph-osd() [0x5b8b52]
->>>>>>>   2: (()+0xfc60) [0x7faec4d1bc60]
->>>>>>>   3: (gsignal()+0x35) [0x7faec34a1d05]
->>>>>>>   4: (abort()+0x186) [0x7faec34a5ab6]
->>>>>>>   5: (__gnu_cxx::__verbose_terminate_handler()+0x11d)
->>>>>>> [0x7faec3d586dd]
->>>>>>>   6: (()+0xb9926) [0x7faec3d56926]
->>>>>>>   7: (()+0xb9953) [0x7faec3d56953]
->>>>>>>   8: (()+0xb9a5e) [0x7faec3d56a5e]
->>>>>>>   9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->>>>>>> const*)+0x396) [0x5bddb6]
->>>>>>>   10: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
->>>>>>>   11: (ThreadPool::worker()+0x6e6) [0x5b7b16]
->>>>>>>   12: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
->>>>>>>   13: (()+0x6d8c) [0x7faec4d12d8c]
->>>>>>>   14: (clone()+0x6d) [0x7faec355404d]
->>>>>>>
->>>>>>> Anything else needed to debug this?
->>>>>>>
->>>>>>> -martin
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe
->>>>>>> ceph-devel" in
->>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Step 1: improve documentation
+Step 2: have a monitoring system be able to feed back information to
+use as osd weights, with admin customazability
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
