@@ -1,70 +1,86 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Cluster sync doesn't finsh
-Date: Fri, 18 Nov 2011 10:13:57 -0800
-Message-ID: <CAF3hT9A2O4xLByS=-sNkgvgV8MsvqgzYvcZf4+J1dXpV97jYVw@mail.gmail.com>
-References: <4EC57338.9040004@tuxadero.com>
-	<CAORUGqA888s9u23r6EfHCbMQ5t5QjGW8iNajdAZqK8pp7GqcXw@mail.gmail.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: v0.38 released
+Date: Fri, 18 Nov 2011 10:47:26 -0800
+Message-ID: <CAORUGqBNus_UuYOvkjcAtsbz+S1AKbafB1utwqAyq=sB7j8g9w@mail.gmail.com>
+References: <Pine.LNX.4.64.1111102113260.27241@cobra.newdream.net>
+ <20111115164254.GJ13394@systemlinux.org> <CAF3hT9AA5zgTsbHb-Gxn5BTeMG+=krGdO2NtRFcHTR_k_3dKgw@mail.gmail.com>
+ <20111116095614.GK13394@systemlinux.org> <CAORUGqCGRAK+x4Opzsw4hmjw2gKPWzxSvuVdx4A-2uR4mqQFZg@mail.gmail.com>
+ <20111117103524.GL13394@systemlinux.org> <CAORUGqA2HJQFXM01mq29TcSTK9p7OxLDGa9s85OfkbgWALnu7w@mail.gmail.com>
+ <20111118150157.GM13394@systemlinux.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:45265 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751550Ab1KRSN6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Nov 2011 13:13:58 -0500
-Received: by ghbz2 with SMTP id z2so859838ghb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Nov 2011 10:13:58 -0800 (PST)
-In-Reply-To: <CAORUGqA888s9u23r6EfHCbMQ5t5QjGW8iNajdAZqK8pp7GqcXw@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:58803 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753386Ab1KRSrs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Nov 2011 13:47:48 -0500
+Received: by wwe5 with SMTP id 5so5736293wwe.1
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Nov 2011 10:47:47 -0800 (PST)
+In-Reply-To: <20111118150157.GM13394@systemlinux.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: martin@tuxadero.com, ceph-devel@vger.kernel.org, Josh Durgin <josh.durgin@dreamhost.com>
+To: Andre Noll <maan@systemlinux.org>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On Fri, Nov 18, 2011 at 10:05 AM, Tommi Virtanen
-<tommi.virtanen@dreamhost.com> wrote:
-> On Thu, Nov 17, 2011 at 12:48, Martin Mailand <martin@tuxadero.com> w=
-rote:
->> Hi,
->> I am doing cluster failure test, where I shut down one OSD an wait f=
-or the
->> cluster to sync. But the sync never finshed, at around 4-5% it stops=
-=2E I
->> stoped osd2.
-> ...
->> 2011-11-17 16:42:45.520740 =A0 =A0pg v1337: 600 pgs: 547 active+clea=
-n, 53
->> active+clean+degraded; 113 GB data, 184 GB used, 1141 GB / 1395 GB a=
-vail;
->> 4025/82404 degraded (4.884%)
-> ...
->> The osd log, the ceph.conf, pg dump, osd dump could be found here.
->>
->> http://85.214.49.87/ceph/
+On Fri, Nov 18, 2011 at 07:01, Andre Noll <maan@systemlinux.org> wrote:
+> For starters, it would be nice to include the ceph osd subcommands
+> in the man pages. To my knowledge they are only documented on the
+> (old) wiki
 >
-> This looks a bit worrying:
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0http://ceph.newdream.net/wiki/Monitor_comm=
+ands
 >
-> 2011-11-17 17:56:35.771574 7f704c834700 -- 192.168.42.113:0/2424 >>
-> 192.168.42.114:6802/21115 pipe(0x2596c80 sd=3D17 pgs=3D0 cs=3D0 l=3D0=
-).connect
-> claims to be 192.168.42.114:6802/21507 not 192.168.42.114:6802/21115 =
--
-> wrong node!
->
-> So osd.0 is basically refusing to talk to one of the other OSDs. I
-> don't understand the messenger well enough to know why this would be,
-> but it wouldn't surprise me if this problem kept the objects degraded
-> -- it looks like a breakage in the osd<->osd communication.
->
-> Now if this was the reason, I'd expect a restart of all the OSDs to
-> get it back in shape; messenger state is ephemeral. Can you confirm
-> that?
+> at the moment. Would a patch that adds the subcommands and descriptio=
+ns
+> to the man pages be accepted?
 
-Probably not =97=A0that wrong node thing can occur for a lot of differe=
-nt
-reasons, some of which matter and most of which don't. Sam's looking
-into the problem; there's something going wrong with the CRUSH
-calculations or the monitor PG placement overrides or something...
--Greg
+I'm not sure if the man page are the best for that; there's a lot of
+subcommands, and man forces it into a big list of things. I'd
+personally go for putting a reference under
+http://ceph.newdream.net/docs/latest/ops/ and using the structure for
+separating osd/mon/mds etc into slightly more manageable chunks.
+
+> If so, I'd be willing to do this work. However, the files in man/
+> of the ceph git repo seem to be generated by docutils, so I suspect
+> they are not meant to be edited directly. What's the preferred way
+> to patch the man pages?
+
+The content comes from doc/man/ and is built with ./admin/build-doc
+
+That puts the whole html into build-doc/output/html/ and the *roff in
+build-doc/output/man/ and from there it is migrated to man/ "by need"
+(there's too much noise in the changes to keep doing that all the
+time, and there's too many toolchain dependencies to generate docs on
+every build).
+
+>> Step 2: have a monitoring system be able to feed back information to
+>> use as osd weights, with admin customazability
+> How could such a monitoring system be implemented? In particular if
+> abstract criteria like "future extension plans" have to be considered=
+=2E
+
+Going back to my initial list: storage size, disk IO speed, network
+link bandwidth, heat in that
+part of the data center, future expansion plans, ..
+
+That divides into 3 groups:
+- things that are more about the capability of the hardware (=3D change
+very seldomly)
+- things that are monitored outside of ceph
+- plans
+
+Hence, it seems to me that a sysadmin would do something like look at
+the node data gathered by something like Ohai/Chef, combine that with
+collectd/munin-style monitoring of the data center, optionally do
+something like "increase weights of rack 7 by 40%", and then spit out
+a mapping of osd id -> weight.
+
+Our chef cookbooks will probably provide a skeleton for that in the
+future, but that's not a short term need; most installations will
+probably set the weights once when the hardware is new, and I'd expect
+practically all clusters <6 months old to have fairly homogenous
+hardware, and thus identical weights.
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
