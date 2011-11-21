@@ -1,80 +1,133 @@
-From: Mark Kampe <mark.kampe@dreamhost.com>
-Subject: The costs of logging and not logging
-Date: Mon, 21 Nov 2011 08:29:55 -0800
-Message-ID: <4ECA7C83.1090702@dreamhost.com>
+From: Andre Noll <maan@systemlinux.org>
+Subject: Re: v0.38 released
+Date: Mon, 21 Nov 2011 18:32:54 +0100
+Message-ID: <20111121173254.GN13394@systemlinux.org>
+References: <Pine.LNX.4.64.1111102113260.27241@cobra.newdream.net>
+ <20111115164254.GJ13394@systemlinux.org>
+ <CAF3hT9AA5zgTsbHb-Gxn5BTeMG+=krGdO2NtRFcHTR_k_3dKgw@mail.gmail.com>
+ <20111116095614.GK13394@systemlinux.org>
+ <CAORUGqCGRAK+x4Opzsw4hmjw2gKPWzxSvuVdx4A-2uR4mqQFZg@mail.gmail.com>
+ <20111117103524.GL13394@systemlinux.org>
+ <CAORUGqA2HJQFXM01mq29TcSTK9p7OxLDGa9s85OfkbgWALnu7w@mail.gmail.com>
+ <20111118150157.GM13394@systemlinux.org>
+ <CAORUGqBNus_UuYOvkjcAtsbz+S1AKbafB1utwqAyq=sB7j8g9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="+2GlJm56SCtLHYlr"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:33639 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751681Ab1KUQ3z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2011 11:29:55 -0500
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 227B9C066
-	for <ceph-devel@vger.kernel.org>; Mon, 21 Nov 2011 08:38:32 -0800 (PST)
-Received: from [192.168.107.232] (aon.hq.newdream.net [64.111.111.107])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 1C3ACC064
-	for <ceph-devel@vger.kernel.org>; Mon, 21 Nov 2011 08:38:32 -0800 (PST)
+Received: from systemlinux.org ([79.140.41.46]:33673 "EHLO
+	v3-1046.systemlinux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755324Ab1KURbF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2011 12:31:05 -0500
+Content-Disposition: inline
+In-Reply-To: <CAORUGqBNus_UuYOvkjcAtsbz+S1AKbafB1utwqAyq=sB7j8g9w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-The bugs we most dread are situations that only happen rarely,
-and are only detected long after the damage has been done.
-Given the business we are in, we will face many of them.
-We apparently have such bugs open at this very moment.
 
-In most cases, the primary debugging tools one has are
-audit and diagnostic logs ... which WE do not have because
-they are too expensive (because they are synchronously
-written with C++ streams) to leave enabled all the time.
+--+2GlJm56SCtLHYlr
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I think it is a mistake to think of audit and diagnostic
-logs as a tool to be turned on when we have a problem to
-debug.  There should be a basic level of logging that is
-always enabled (so we will have data after the first
-instance of the bug) ... which can be cranked up from
-verbose to bombastic when we find a problem that won't
-yield to more moderate interrogation:
+On Fri, Nov 18, 10:47, Tommi Virtanen wrote:
+> On Fri, Nov 18, 2011 at 07:01, Andre Noll <maan@systemlinux.org> wrote:
+> > For starters, it would be nice to include the ceph osd subcommands
+> > in the man pages. To my knowledge they are only documented on the
+> > (old) wiki
+> >
+> > =C2=A0 =C2=A0 =C2=A0 =C2=A0http://ceph.newdream.net/wiki/Monitor_comman=
+ds
+> >
+> > at the moment. Would a patch that adds the subcommands and descriptions
+> > to the man pages be accepted?
+>=20
+> I'm not sure if the man page are the best for that; there's a lot of
+> subcommands, and man forces it into a big list of things. I'd
+> personally go for putting a reference under
+> http://ceph.newdream.net/docs/latest/ops/ and using the structure for
+> separating osd/mon/mds etc into slightly more manageable chunks.
 
-  (a) after the problem happens is too late to
-      start collecting data.
+I believe that code and documentation should be located as close as
+possible, and I'd also prefer to edit and access the documentation
+locally via command line tools rather than through a browser. But
+I don't have a strong opinion on this, so let's go for the web
+documentation.
 
-  (b) these logs are gold mines of information for
-      a myriad of purposes we cannot yet even imagine.
+Should I prepare something and post a request for inclusion to the
+web pages on this mailing list, or do you want me to edit the web
+documentation directly?
 
-This can only be done if the logging mechanism is
-sufficiently inexpensive that we are not afraid to
-use it:
-     low execution artifact from the logging operations
-     reansonable memory costs for bufferring
-     small enough on disk that we can keep them for months
+> > If so, I'd be willing to do this work. However, the files in man/
+> > of the ceph git repo seem to be generated by docutils, so I suspect
+> > they are not meant to be edited directly. What's the preferred way
+> > to patch the man pages?
+>=20
+> The content comes from doc/man/ and is built with ./admin/build-doc
+>=20
+> That puts the whole html into build-doc/output/html/ and the *roff in
+> build-doc/output/man/ and from there it is migrated to man/ "by need"
+> (there's too much noise in the changes to keep doing that all the
+> time, and there's too many toolchain dependencies to generate docs on
+> every build).
 
-Not having such a mechanism is (if I correctly
-understand) already hurting us for internal debugging,
-and will quickly cripple us when we have customer
-(i.e. people who cannot diagnose problems for
-themselves) problems to debug.
+I see, thanks for explaining. The ./admin/build-doc command worked
+for me out of the box on an Ubuntu lucid system btw.
 
-There are many tricks to make logging cheap, and the
-sizes acceptable.  There are probably a dozen open-source
-implementations that already do what we need, and if they
-don't something basic can be built in a two-digit number
-of hours.  The real cost is not in the mechanism but in
-adapting existing code to use it.  This cost can be
-mitigated by making the changes opportunistically ...
-one component at a time, as dictated by need/fear.
+> >> Step 2: have a monitoring system be able to feed back information to
+> >> use as osd weights, with admin customazability
+> > How could such a monitoring system be implemented? In particular if
+> > abstract criteria like "future extension plans" have to be considered.
+>=20
+> Going back to my initial list: storage size, disk IO speed, network
+> link bandwidth, heat in that
+> part of the data center, future expansion plans, ..
+>=20
+> That divides into 3 groups:
+> - things that are more about the capability of the hardware (=3D change
+> very seldomly)
+> - things that are monitored outside of ceph
+> - plans
+>=20
+> Hence, it seems to me that a sysadmin would do something like look at
+> the node data gathered by something like Ohai/Chef, combine that with
+> collectd/munin-style monitoring of the data center, optionally do
+> something like "increase weights of rack 7 by 40%", and then spit out
+> a mapping of osd id -> weight.
 
-But we cannot make that change-over until we have a
-mechanism.  Because the greatest cost is not the
-mechanism, but the change-over, we should give more
-than passing thought to what mechanism to choose ...
-so that the decision we make remains a good one for
-the next few years.
+OK, got the idea. However, in this example the difficult thing is
+the decision "increase weights of rack 7 by 40%", which is made by a
+human. Recomputing the osd weights accordingly should be fairly simple.
 
-This may be something that we need to do sooner,
-rather than later.
+> Our chef cookbooks will probably provide a skeleton for that in the
+> future, but that's not a short term need; most installations will
+> probably set the weights once when the hardware is new, and I'd expect
+> practically all clusters <6 months old to have fairly homogenous
+> hardware, and thus identical weights.
 
-regards,
-    ---mark---
+Are you implying that ceph is only suitable for new clusters with
+homogeneous hardware? I'm asking because our cluster is far from
+homogeneous. There are 8 year old 2-core nodes with small SCSI disks
+as well as 64-core boxes with much larger SATA disks.
+
+Thanks
+Andre
+--=20
+The only person who always got his work done by Friday was Robinson Crusoe
+
+--+2GlJm56SCtLHYlr
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk7Ki0YACgkQWto1QDEAkw8KTwCgiFeIyle6nCR0C+6e+F18K8RJ
+mUUAnRHdJoM0sO3hN7fH8kMr/dDijxDy
+=jLMt
+-----END PGP SIGNATURE-----
+
+--+2GlJm56SCtLHYlr--
