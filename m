@@ -1,68 +1,50 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: radosgw performance after 0.37
-Date: Mon, 21 Nov 2011 12:58:50 -0800
-Message-ID: <CAC-hyiFJD=A463KTKV0b4iX-x5ByswoRyOU=2vnt4NGD8Z=URw@mail.gmail.com>
-References: <CAA9wQNc9qmbbshrL5hYYhiwpAbwF-5bzhM=h3dG9B_jY9HO3Hw@mail.gmail.com>
-	<CAC-hyiHWENFD88bjCP0Zz4KYCR_7PHO9iDbqLZ+jNOzXRWxZ-w@mail.gmail.com>
-	<CAF3hT9DwOV_FkeEPFkL3-ip_iKLj7OKH5hRtHRPux9drZYYtdA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: samlang@gmail.com
+Subject: [PATCH] client: Fix for client hang caused by connection drop to MDS.
+Date: Mon, 21 Nov 2011 15:51:19 -0600
+Message-ID: <1321912279-15673-1-git-send-email-samlang@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:37384 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753457Ab1KUU6w convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2011 15:58:52 -0500
-Received: by bke11 with SMTP id 11so7066924bke.19
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Nov 2011 12:58:50 -0800 (PST)
-In-Reply-To: <CAF3hT9DwOV_FkeEPFkL3-ip_iKLj7OKH5hRtHRPux9drZYYtdA@mail.gmail.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:44194 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752910Ab1KUVvX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2011 16:51:23 -0500
+Received: by iage36 with SMTP id e36so7850264iag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Nov 2011 13:51:23 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: Leander Yu <leander.yu@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Sam Lang <samlang@gmail.com>
 
-On Mon, Nov 21, 2011 at 10:55 AM, Gregory Farnum
-<gregory.farnum@dreamhost.com> wrote:
-> On Sun, Nov 20, 2011 at 3:03 PM, Yehuda Sadeh Weinraub
-> <yehudasa@gmail.com> wrote:
->> On Sun, Nov 20, 2011 at 9:49 AM, Leander Yu <leander.yu@gmail.com> w=
-rote:
->>> Hi all,
->>> I found that after 0.37 the radosgw have some fundamental changes
->>> which put all object in to .rgw.buckets pool.
->>> From the release note it seem for better scalability however I wond=
-er
->>> how this changes will improve the scalability? Base on our test, a
->>> simple list bucket command by s3cmd will take more than 10 sec when
->>> the file number is bigger than 10k. is this normal? or it's a
->>> potential bug?
->>
->> The scaling issue that was solved was the ability to increase the
->> number of buckets, whereas you're hitting a different issue now that
->> relates to the number of objects per bucket. The problem is with the
->> inefficient implementation of the rados tmap (trivial map) that
->> requires that every read/write from the directory index requires
->> reading the entire object, which is not too scalable. We are going t=
-o
->> replace tmap with a not-so-trivial-map that would scale much better
->> (feature #1571 in the ceph tracker, currently planned for 0.39).
->>
->> I verified that this is in fact the issue. The problem with listing
->> object using s3cmd is that it requests the data in chunks of 1000,
->> which means that going through 10k objects requires that the entire
->> directory is being read of disk (on the osd side) 10 times.
->
-> I wouldn't expect this to be so slow, though =97 presumably the
-> directory object is in cache so all it's doing is some memory copies
-> after the first read off disk?
+From: Sam Lang <samlang@gmail.com>
 
-Yeah, you're right. I redid it again, this time looking carefully at
-who waits where, and it appears that most of the time is spent in
-s3cmd itself when it digests the information.
+This patch will cause inprogress client operations to the MDS server to
+be kicked if the connection to the MDS server is dropped.
+---
+ src/client/Client.cc |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
 
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/src/client/Client.cc b/src/client/Client.cc
+index 78d12c8e..1f37dfc 100644
+--- a/src/client/Client.cc
++++ b/src/client/Client.cc
+@@ -6907,6 +6907,18 @@ bool Client::ms_handle_reset(Connection *con)
+   ldout(cct, 0) << "ms_handle_reset on " << con->get_peer_addr() << dendl;
+   Mutex::Locker l(client_lock);
+   objecter->ms_handle_reset(con);
++
++  // look for mds that has this connection and kick associated requests
++  for(map<int, MetaSession*>::iterator it = mds_sessions.begin();
++      it != mds_sessions.end();
++      it++)
++  {
++      if((*it).second->inst.addr.probably_equals(con->get_peer_addr()))
++      {
++          kick_requests((*it).first, true);
++          break;
++      }
++  }
+   return false;
+ }
+ 
+-- 
+1.7.5.4
+
