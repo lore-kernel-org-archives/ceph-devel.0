@@ -1,59 +1,74 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: radosgw performance after 0.37
-Date: Mon, 21 Nov 2011 10:55:18 -0800
-Message-ID: <CAF3hT9DwOV_FkeEPFkL3-ip_iKLj7OKH5hRtHRPux9drZYYtdA@mail.gmail.com>
-References: <CAA9wQNc9qmbbshrL5hYYhiwpAbwF-5bzhM=h3dG9B_jY9HO3Hw@mail.gmail.com>
-	<CAC-hyiHWENFD88bjCP0Zz4KYCR_7PHO9iDbqLZ+jNOzXRWxZ-w@mail.gmail.com>
+From: Mark Kampe <mark.kampe@dreamhost.com>
+Subject: Re: The costs of logging and not logging
+Date: Mon, 21 Nov 2011 11:31:40 -0800
+Message-ID: <4ECAA71C.10202@dreamhost.com>
+References: <4ECA7C83.1090702@dreamhost.com> <Pine.LNX.4.64.1111211047330.24847@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:39562 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752449Ab1KUSzT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2011 13:55:19 -0500
-Received: by iage36 with SMTP id e36so7659288iag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Nov 2011 10:55:18 -0800 (PST)
-In-Reply-To: <CAC-hyiHWENFD88bjCP0Zz4KYCR_7PHO9iDbqLZ+jNOzXRWxZ-w@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:43486 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753949Ab1KUTbl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2011 14:31:41 -0500
+In-Reply-To: <Pine.LNX.4.64.1111211047330.24847@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: Leander Yu <leander.yu@gmail.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-On Sun, Nov 20, 2011 at 3:03 PM, Yehuda Sadeh Weinraub
-<yehudasa@gmail.com> wrote:
-> On Sun, Nov 20, 2011 at 9:49 AM, Leander Yu <leander.yu@gmail.com> wr=
-ote:
->> Hi all,
->> I found that after 0.37 the radosgw have some fundamental changes
->> which put all object in to .rgw.buckets pool.
->> From the release note it seem for better scalability however I wonde=
-r
->> how this changes will improve the scalability? Base on our test, a
->> simple list bucket command by s3cmd will take more than 10 sec when
->> the file number is bigger than 10k. is this normal? or it's a
->> potential bug?
->
-> The scaling issue that was solved was the ability to increase the
-> number of buckets, whereas you're hitting a different issue now that
-> relates to the number of objects per bucket. The problem is with the
-> inefficient implementation of the rados tmap (trivial map) that
-> requires that every read/write from the directory index requires
-> reading the entire object, which is not too scalable. We are going to
-> replace tmap with a not-so-trivial-map that would scale much better
-> (feature #1571 in the ceph tracker, currently planned for 0.39).
->
-> I verified that this is in fact the issue. The problem with listing
-> object using s3cmd is that it requests the data in chunks of 1000,
-> which means that going through 10k objects requires that the entire
-> directory is being read of disk (on the osd side) 10 times.
+I'm a big believer in asynchronous flushes of an in-memory
+ring-buffer.  For user-mode processes a core-dump-grave
+robber can reliably pull out all of the un-flushed entries
+... and the same process will also work for the vast majority
+of all kernel crashes.
 
-I wouldn't expect this to be so slow, though =97 presumably the
-directory object is in cache so all it's doing is some memory copies
-after the first read off disk?
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+String logging is popular because:
+   1. It trivial to do (in the instrumented code)
+   2. It is trivial to read (in the recovered logs)
+   3. It is easily usable by grep/perl/etc type tools
+
+But binary logging:
+   1. is much (e.g. 4-10x) smaller (especially for standard header info)
+   2. is much faster to take (no formatting, less data to copy)
+   3. is much faster to process (no re-parsing)
+   4. is smaller to store on disk and faster to ship for diagnosis
+
+   and a log dumper can quickly produce output that
+   is identical to what the strings would have been
+
+So I also prefer binary logs ... even though they require
+the importation of additional classes.  But ...
+
+  (a) the log classes must be kept upwards compatible so
+      that old logs can be ready by newer tools.
+
+  (b) the binary records should glow-in-the-dark, so that
+      they can be recovered even from corrupted ring-buffers
+      and blocks whose meta-data has been lost.
+
+> I see two main issues with the slowness of the current logs:
+>
+>   - all of the string rendering in the operator<<()'s is slow.  things like
+> prefixing every line with a dump of the pg state is great for debugging,
+> but makes the overhead very high.  we could scale all of that back, but
+> it'd be a big project.
+>   - the logging always goes to a file, synchronously.  we could write to a
+> ring buffer and either write it out only on crash, or (at the very least)
+> write it async.
+
+> I wonder, though, if something different might work.  gcc lets you
+> arbitrarily instrument function calls with -finstrument-functions.
+> Something that logs function calls and arguments to an in-memory ring
+> buffer and dumps that out on crash could potentially have a low overhead
+> (if we restrict it to certain code) and would give us lots of insight into
+> what happend leading up to the crash.
+
+This does have the advantage of being automatic ... but it is much more
+information, perhaps without much more value.  My experience with
+logging is that you don't have to capture very much information,
+and that in fact we often go back to weed out no-longer-interesting
+information.  Not only does too much information take cycles and
+space, but it also makes it hard to find "the good stuff".  I think that 
+human architects can make very good decisions about what
+information should be captured, and when.
