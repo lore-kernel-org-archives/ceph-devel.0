@@ -1,34 +1,41 @@
-From: Victor Lowther <victor.lowther@gmail.com>
-Subject: Re: [Crowbar] Crowbar barclamp for Ceph pushed to Github
-Date: Mon, 21 Nov 2011 20:47:27 -0600
-Message-ID: <CAMy6mNJkLA9VY_BjnNPNYor_tkn7aVqp-Jy2K2_C6cF=-7ho3w@mail.gmail.com>
-References: <CAORUGqCzSQgGOfo2E-aYy-3wvHEwdRaAsWi3XOeTSQ3zSADkYw@mail.gmail.com>
+From: Atish Kathpal <atish.kathpal@gmail.com>
+Subject: Metadata queries on Ceph/RADOS
+Date: Tue, 22 Nov 2011 13:41:32 +0530
+Message-ID: <CAMiHsJJN1UB++ijcorzBBi=YD9eawur62WF9L1QxtwwiH78HXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f42.google.com ([74.125.82.42]:61712 "EHLO
-	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753655Ab1KVCr2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2011 21:47:28 -0500
-Received: by wwe3 with SMTP id 3so6501932wwe.1
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Nov 2011 18:47:27 -0800 (PST)
-In-Reply-To: <CAORUGqCzSQgGOfo2E-aYy-3wvHEwdRaAsWi3XOeTSQ3zSADkYw@mail.gmail.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:51415 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755348Ab1KVILz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Nov 2011 03:11:55 -0500
+Received: by fagn18 with SMTP id n18so109046fag.19
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Nov 2011 00:11:54 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, crowbar@lists.us.dell.com
+To: ceph-devel@vger.kernel.org
 
-Hi, Tommi:
+Hello
 
-I have been playing with the Ceph barclamp a bit -- I have a pull
-request in the Github repo that makes the recipe play nice with the
-build system.
+Does RADOS support metadata queries? I have gone through librados and
+the "rados" command line tool, and there doesn't seem to be a way for
+me to say, query the object store saying: "Give me all objects with
+Xattr Video =3D 1". The only way I can think of is to write some of my
+own code using librados.
 
-I have gotten to the point of trying to generate an deploy a default
-proposal, but the one in the barclamp is a little sparse -- is there a
-more detailed proposal that y'all tested with?
+Any pointers if the system has a metadata service or something that I
+can query?
 
-Regards,
+(I have seen few diagrams=A0showing a metadata cluster as part of Ceph
+which supports metadata operations, how can I leverage that? reference
+diagram: http://www.usenix.org/event/osdi06/tech/full_papers/weil/weil_=
+html/fig/overview.png)
 
-Victor Lowther
-victor_lowther@dell.com
+=A0Regards
+Atish
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
