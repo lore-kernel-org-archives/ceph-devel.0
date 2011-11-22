@@ -1,45 +1,48 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: Metadata queries on Ceph/RADOS
-Date: Tue, 22 Nov 2011 09:09:25 -0800
-Message-ID: <4ECBD745.1060708@dreamhost.com>
-References: <CAMiHsJJN1UB++ijcorzBBi=YD9eawur62WF9L1QxtwwiH78HXw@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: Recommended btrfs mount options
+Date: Tue, 22 Nov 2011 21:46:29 +0100
+Message-ID: <CAO47_-_V4d=3abABvqrV+muJ3cF-J-=-RQ748Vr+U=_ZdffZfw@mail.gmail.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:58751 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753965Ab1KVRJ0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Nov 2011 12:09:26 -0500
-In-Reply-To: <CAMiHsJJN1UB++ijcorzBBi=YD9eawur62WF9L1QxtwwiH78HXw@mail.gmail.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:65045 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754696Ab1KVUq3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Nov 2011 15:46:29 -0500
+Received: by vcbfk1 with SMTP id fk1so688467vcb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Nov 2011 12:46:29 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Atish Kathpal <atish.kathpal@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 11/22/2011 12:11 AM, Atish Kathpal wrote:
-> Hello
->
-> Does RADOS support metadata queries? I have gone through librados and
-> the "rados" command line tool, and there doesn't seem to be a way for
-> me to say, query the object store saying: "Give me all objects with
-> Xattr Video = 1". The only way I can think of is to write some of my
-> own code using librados.
+Reading the latest pull request by Chris Mason, I was wondering about
+the recommended mount options for an OSD-Filesystem.
 
-That's right, RADOS operates on a single-object transaction level. 
-There's no way for it to support consistent reads of multiple objects 
-without rewriting much of the OSD - it's not designed for that. For your 
-use case, you could store your metadata in a trivial map (tmap) object 
-using librados' tmap_* functions. This is what radosgw uses for storing 
-which objects are in which buckets. These are slow for large mappings, 
-but we have plans to fix that  (http://tracker.newdream.net/issues/1571).
+In the past I came across the following btrfs options, that were used
+in conjunction with ceph:
 
-> Any pointers if the system has a metadata service or something that I
-> can query?
->
-> (I have seen few diagrams showing a metadata cluster as part of Ceph
-> which supports metadata operations, how can I leverage that? reference
-> diagram: http://www.usenix.org/event/osdi06/tech/full_papers/weil/weil_html/fig/overview.png)
+- nodatacow: To avoid fragmentation. I think this one makes sense when
+you are using rbd, but it turns of btrfs-csums. Is it safe to use?
+(ceph has his own csums, right?)
 
-The metadata cluster is for the Ceph distruted file system, which is 
-another layer on top of RADOS.
+- autodefrag: To reduce fragmentation. I think this one makes sense in any case.
+
+- compression: I'm using lzo compression right now, as my CPUs in the
+OSD nodes where idle most of the time and it is improving throughput
+quite a bit.
+
+- notreelog: Never heard of it before I read the pull request. Should I use it?
+
+- flushoncommit: Is it obsolete now?
+
+- nocluster (requires an additional btrfs patch from Alexandre): I was
+reading that he was able to reduce the excessive metadata overhead,
+but it is slower. Does anyone know more about it?
+
+I'm running with "noatime,compression=lzo" at the moment, but I'm
+planning to add autodefrag as soon as my load problems are fixed. I
+would really like to know, what you are using and why?
+
+Thanks,
+Christian
