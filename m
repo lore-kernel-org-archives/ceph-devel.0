@@ -1,50 +1,75 @@
-From: samlang@gmail.com
-Subject: [PATCH] client: Fix for client hang caused by connection drop to MDS.
-Date: Mon, 21 Nov 2011 15:51:19 -0600
-Message-ID: <1321912279-15673-1-git-send-email-samlang@gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: A couple more ceph-mon crashes
+Date: Mon, 21 Nov 2011 16:03:06 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1111211601350.24847@cobra.newdream.net>
+References: <20111119150309.GA13985@rcn.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:44194 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752910Ab1KUVvX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2011 16:51:23 -0500
-Received: by iage36 with SMTP id e36so7850264iag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Nov 2011 13:51:23 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:60687 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754882Ab1KVADH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2011 19:03:07 -0500
+In-Reply-To: <20111119150309.GA13985@rcn.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sam Lang <samlang@gmail.com>
+To: Josh Pieper <jjp@pobox.com>
+Cc: ceph-devel@vger.kernel.org
 
-From: Sam Lang <samlang@gmail.com>
+Hi Josh,
 
-This patch will cause inprogress client operations to the MDS server to
-be kicked if the connection to the MDS server is dropped.
----
- src/client/Client.cc |   12 ++++++++++++
- 1 files changed, 12 insertions(+), 0 deletions(-)
+I just pushed a series of mon patches that rework some of this code.  I've 
+been trashing on them for a while now without problems, though my test 
+still needs to be better about the monitor workload it presents.
 
-diff --git a/src/client/Client.cc b/src/client/Client.cc
-index 78d12c8e..1f37dfc 100644
---- a/src/client/Client.cc
-+++ b/src/client/Client.cc
-@@ -6907,6 +6907,18 @@ bool Client::ms_handle_reset(Connection *con)
-   ldout(cct, 0) << "ms_handle_reset on " << con->get_peer_addr() << dendl;
-   Mutex::Locker l(client_lock);
-   objecter->ms_handle_reset(con);
-+
-+  // look for mds that has this connection and kick associated requests
-+  for(map<int, MetaSession*>::iterator it = mds_sessions.begin();
-+      it != mds_sessions.end();
-+      it++)
-+  {
-+      if((*it).second->inst.addr.probably_equals(con->get_peer_addr()))
-+      {
-+          kick_requests((*it).first, true);
-+          break;
-+      }
-+  }
-   return false;
- }
- 
--- 
-1.7.5.4
+In any case, you should have better luck with the current master.
 
+Thanks!
+sage
+
+
+On Sat, 19 Nov 2011, Josh Pieper wrote:
+
+> I observed the following two crashes using the same test setup I have
+> had for the previous reports.  3x ubuntu 11.04 amd64 nodes with an rbd
+> load, this time each running cc5b5e17.
+> 
+> Links to the full logs are below each stack trace snip.
+> 
+> mon/OSDMonitor.cc: In function 'MOSDMap* OSDMonitor::build_incremental(epoch_t, epoch_t)', in thread '7fd11a363700'
+> mon/OSDMonitor.cc: 944: FAILED assert(0)
+>  ceph version 0.38-202-gcc5b5e1 (commit:cc5b5e17e64c011b68cc8560676182e187bbb503)
+>  1: (OSDMonitor::build_incremental(unsigned int, unsigned int)+0xc86) [0x497f76]
+>  2: (OSDMonitor::committed()+0x162) [0x49a1f2]
+>  3: (PaxosService::_commit()+0x19e) [0x491fee]
+>  4: (Context::complete(int)+0xa) [0x47c10a]
+>  5: (finish_contexts(CephContext*, std::list<Context*, std::allocator<Context*> >&, int)+0xca) [0x47da6a]
+>  6: (Paxos::handle_accept(MMonPaxos*)+0x5b4) [0x48dbc4]
+>  7: (Paxos::dispatch(PaxosServiceMessage*)+0x23b) [0x48f38b]
+>  8: (Monitor::_ms_dispatch(Message*)+0xcbf) [0x47b64f]
+>  9: (Monitor::ms_dispatch(Message*)+0x35) [0x486405]
+> 
+> http://joshp.no-ip.com:8080/20111119-mon-build_incremental.log
+> 
+> 
+> mon/PaxosService.cc: In function 'void PaxosService::propose_pending()', in thread '7f4dd6acd700'
+> mon/PaxosService.cc: 127: FAILED assert(have_pending)
+>  ceph version 0.38-202-gcc5b5e1 (commit:cc5b5e17e64c011b68cc8560676182e187bbb503)
+>  1: (PaxosService::propose_pending()+0x335) [0x4924b5]
+>  2: (PGMonitor::check_osd_map(unsigned int)+0xcb0) [0x4d42e0]
+>  3: (Context::complete(int)+0xa) [0x47c10a]
+>  4: (finish_contexts(CephContext*, std::list<Context*, std::allocator<Context*> >&, int)+0xca) [0x47da6a]
+>  5: (Paxos::handle_accept(MMonPaxos*)+0x5d8) [0x48dbe8]
+>  6: (Paxos::dispatch(PaxosServiceMessage*)+0x23b) [0x48f38b]
+>  7: (Monitor::_ms_dispatch(Message*)+0xcbf) [0x47b64f]
+>  8: (Monitor::ms_dispatch(Message*)+0x35) [0x486405]
+> 
+> http://joshp.no-ip.com:8080/20111119-mon-propose_pending.log
+> 
+> -Josh
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
