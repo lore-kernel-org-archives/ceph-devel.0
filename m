@@ -1,72 +1,54 @@
-From: Sage Weil <sage@newdream.net>
+From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 Subject: Re: Recommended btrfs mount options
-Date: Tue, 22 Nov 2011 14:18:42 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111221415280.11288@cobra.newdream.net>
+Date: Wed, 23 Nov 2011 09:38:18 -0200
+Message-ID: <or39dful05.fsf@livre.localdomain>
 References: <CAO47_-_V4d=3abABvqrV+muJ3cF-J-=-RQ748Vr+U=_ZdffZfw@mail.gmail.com>
+	<Pine.LNX.4.64.1111221415280.11288@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36292 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753219Ab1KVWSn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Nov 2011 17:18:43 -0500
-In-Reply-To: <CAO47_-_V4d=3abABvqrV+muJ3cF-J-=-RQ748Vr+U=_ZdffZfw@mail.gmail.com>
+Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:33663 "EHLO
+	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751985Ab1KWLiu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 Nov 2011 06:38:50 -0500
+In-Reply-To: <Pine.LNX.4.64.1111221415280.11288@cobra.newdream.net> (Sage
+	Weil's message of "Tue, 22 Nov 2011 14:18:42 -0800 (PST)")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <chb@muc.de>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Christian Brunner <chb@muc.de>, ceph-devel@vger.kernel.org
 
-On Tue, 22 Nov 2011, Christian Brunner wrote:
-> Reading the latest pull request by Chris Mason, I was wondering about
-> the recommended mount options for an OSD-Filesystem.
-> 
-> In the past I came across the following btrfs options, that were used
-> in conjunction with ceph:
-> 
-> - nodatacow: To avoid fragmentation. I think this one makes sense when
-> you are using rbd, but it turns of btrfs-csums. Is it safe to use?
-> (ceph has his own csums, right?)
+On Nov 22, 2011, Sage Weil <sage@newdream.net> wrote:
 
-I'm not sure this will help, since we snapshot for each commit, so it 
-will COW in that case regardless.  We only csum across the wire, so we'll 
-rely on btrfs checksums..
+> On Tue, 22 Nov 2011, Christian Brunner wrote:
 
-> - autodefrag: To reduce fragmentation. I think this one makes sense in 
-> any case.
+>> - compression: I'm using lzo compression right now, as my CPUs in the
+>> OSD nodes where idle most of the time and it is improving throughput
+>> quite a bit.
 
-Yeah
+> The caveat here is that there is a corner case with inline extents and the 
+> clone ioctl that isn't implemented.
 
-> - compression: I'm using lzo compression right now, as my CPUs in the
-> OSD nodes where idle most of the time and it is improving throughput
-> quite a bit.
+What happens when you trigger that case?  Crash or corruption?
 
-The caveat here is that there is a corner case with inline extents and the 
-clone ioctl that isn't implemented.  That should get dealt with at some 
-point.  (To clone a portion of an inline extent you need to decompress 
-to a buffer and recompress part of it into a new extent.)
+I ask because I've been running with zlib compression, and I haven't
+noticed any problems along these lines, though I haven't got to a point
+in which I'm doing more than rsyncing whole trees into the filesystem
+yet.
 
-> - notreelog: Never heard of it before I read the pull request. Should I 
-> use it?
+>> - nocluster (requires an additional btrfs patch from Alexandre): I was
+>> reading that he was able to reduce the excessive metadata overhead,
+>> but it is slower. Does anyone know more about it?
 
-It basically makes fsync do a full commit, but ceph-osd doesn't fsync, so 
-it isn't helpful.  Obsolete.
- 
-> - flushoncommit: Is it obsolete now?
+> We haven't tried this.
 
-Obsolete.  The snapshot creation does a flush.
+I've used it occasionally and temporarily, to rebalance metadata and
+bring btrfs (even with clustered allocation) back to a faster pace
+without umount.
 
-> - nocluster (requires an additional btrfs patch from Alexandre): I was
-> reading that he was able to reduce the excessive metadata overhead,
-> but it is slower. Does anyone know more about it?
-
-We haven't tried this.
-
-> I'm running with "noatime,compression=lzo" at the moment, but I'm
-> planning to add autodefrag as soon as my load problems are fixed. I
-> would really like to know, what you are using and why?
-
-For now we're just using noatime.  I would love to turn on lzo compression 
-after the clone issue is dealt with, even tho it would be really hard to 
-trigger the issue.
-
-sage
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
