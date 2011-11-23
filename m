@@ -1,46 +1,69 @@
-From: Laszlo Boszormenyi <gcs@debian.hu>
-Subject: Re: [PATCH] debian init: Do not stop or start daemons when
- installing or upgrading
-Date: Thu, 24 Nov 2011 00:52:09 +0100
-Message-ID: <1322092329.18718.32.camel@julia.gcs.org.hu>
-References: <1321472475-19115-1-git-send-email-wido@widodh.nl>
-	 <1321472475-19115-2-git-send-email-wido@widodh.nl>
-	 <Pine.LNX.4.64.1111161152550.22555@cobra.newdream.net>
+From: Xiaofei Du <xiaofei.du008@gmail.com>
+Subject: Re: Why Ceph's aggregate write throughput does not scale with the
+ number of osd nodes
+Date: Wed, 23 Nov 2011 15:53:06 -0800
+Message-ID: <CAND_vCbtiHQ=ujGs=UHf2m3HoWud9wS8kj4FpctvaWUDze4GnQ@mail.gmail.com>
+References: <CAND_vCaQU5hFk++6mMnS7MwnAoY2_c-xxe3pEbjJsGQuAsaeiQ@mail.gmail.com>
+ <CAF3hT9AqbhPDrBmeymTvBO_FZp5FF2VmwyPeh_cQFFgsi-L96A@mail.gmail.com>
+ <CAND_vCZTuOmq3LMJ7eqc8jtbc7Yv7e9YSqy6=cTwGtjBsZ+rfA@mail.gmail.com> <CAKfXD0x=ujYL9mr09tQzc2UZp4QRszEPyJWp3a+e01dYvsXufA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.barcikacomp.hu ([94.248.160.10]:52367 "EHLO
-	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752510Ab1KWXwU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Nov 2011 18:52:20 -0500
-In-Reply-To: <Pine.LNX.4.64.1111161152550.22555@cobra.newdream.net>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:54977 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750900Ab1KWXxh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Nov 2011 18:53:37 -0500
+Received: by iage36 with SMTP id e36so2249931iag.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Nov 2011 15:53:37 -0800 (PST)
+In-Reply-To: <CAKfXD0x=ujYL9mr09tQzc2UZp4QRszEPyJWp3a+e01dYvsXufA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+To: Kelly Kane <kelly@hawknetworks.com>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
 
-On Wed, 2011-11-16 at 11:53 -0800, Sage Weil wrote:
-> Ooh, that would certainly make things less annoying for me as well.  
-> Unless that's contrary to some debian policy/best practice, Laszlo?
- The following change is fine with me. Please commit it sage and I'll do
-the same in the next upload.
+Hi Kelly,
 
-> On Wed, 16 Nov 2011, Wido den Hollander wrote:
-> > diff --git a/debian/rules b/debian/rules
-> > index a20258d..4f3fe62 100755
-> > --- a/debian/rules
-> > +++ b/debian/rules
-> > @@ -98,7 +98,7 @@ binary-arch: build install
-> >  	dh_installexamples
-> >  	dh_install --sourcedir=$(DESTDIR) --list-missing
-> >  	dh_installlogrotate
-> > -	dh_installinit
-> > +	dh_installinit --no-start
-> >  	dh_installman
-> >  	dh_lintian
-> >  	dh_link
+I used m1.large instances. I tried both EBS and local storage. I did
+IO test on the EBS and local devices. It is not bad. I also tested
+HDFS on these instances. it showed much better aggregate writing
+throughput. So I guess it is not disk IO problems. Yeah, EC2 disk IO
+does have fluctuations, but the throughput is not so bad.
 
-Regards,
-Laszlo/GCS
+Best,
+Xiaofei
 
+On Wed, Nov 23, 2011 at 2:33 PM, Kelly Kane <kelly@hawknetworks.com> wr=
+ote:
+> On Wed, Nov 23, 2011 at 12:07, Xiaofei Du <xiaofei.du008@gmail.com> w=
+rote:
+>>
+>> I installed Ceph on 10 ec2 instances.
+>
+> Can you go into more detail about your EC2 instances and where you ar=
+e
+> storing your data? If you are storing them on standard EBS then you
+> are competing for non-guaranteed bandwidth. The information contained
+> on the AWS product description page is basically a lie (
+> http://aws.amazon.com/ebs/ ) unless things have changed substantially
+> since I last used them. =A0If you are storing data on the ephemeral
+> disks then unless you are on a "whole machine" instance
+> (m1.xlarge/c1.xlarge/m2.4xlarge) you are competing for SATA resources
+> on the ephemeral disks. If your machine neighbors are doing some heav=
+y
+> disk workload you may simply be starved for resources.
+>
+> Kelly
+>
+
+
+
+--=20
+Xiaofei (Gregory) Du
+Department of Computer Science
+University of California, Santa Barbara
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
