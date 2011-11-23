@@ -1,66 +1,79 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: [PATCH] debian init: Do not stop or start daemons when installing
- or upgrading
-Date: Wed, 23 Nov 2011 20:59:24 +0100
-Message-ID: <4ECD509C.4020108@widodh.nl>
-References: <1321472475-19115-1-git-send-email-wido@widodh.nl> <1321472475-19115-2-git-send-email-wido@widodh.nl> <Pine.LNX.4.64.1111161152550.22555@cobra.newdream.net>
+From: Xiaofei Du <xiaofei.du008@gmail.com>
+Subject: Re: Why Ceph's aggregate write throughput does not scale with the
+ number of osd nodes
+Date: Wed, 23 Nov 2011 12:07:36 -0800
+Message-ID: <CAND_vCZTuOmq3LMJ7eqc8jtbc7Yv7e9YSqy6=cTwGtjBsZ+rfA@mail.gmail.com>
+References: <CAND_vCaQU5hFk++6mMnS7MwnAoY2_c-xxe3pEbjJsGQuAsaeiQ@mail.gmail.com>
+ <CAF3hT9AqbhPDrBmeymTvBO_FZp5FF2VmwyPeh_cQFFgsi-L96A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:42116 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751956Ab1KWT71 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Nov 2011 14:59:27 -0500
-In-Reply-To: <Pine.LNX.4.64.1111161152550.22555@cobra.newdream.net>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:43889 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751196Ab1KWUII convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Nov 2011 15:08:08 -0500
+Received: by iage36 with SMTP id e36so2054953iag.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Nov 2011 12:08:07 -0800 (PST)
+In-Reply-To: <CAF3hT9AqbhPDrBmeymTvBO_FZp5FF2VmwyPeh_cQFFgsi-L96A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: gcs@debian.hu, ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
+Hi Greg,
 
+I installed Ceph on 10 ec2 instances. one for mon, one for mds, and
+the other eights are osds. I used IOZONE's distributed measurement
+mode (Multiple clients that are on different nodes and creating=A0 same
+type of workload in parallel) to test the scalability of Ceph. The
+problem is with the increase of the number of clients that was doing
+writing. the aggregate write throughput didn't scale up. For example.
+when I had only one client writing data to ceph, the throughput was
+around 60 MB/s. when I had 2 clients writing to two different files to
+ceph, the throughput was still around 60MB/s. Same condition with 4
+clients and 8 clients. And the Clients were all on different nodes.
+But the aggregate reading throughput did scale up, which told us that
+the data was distributed on different osds. Otherwise it wouldn't
+scale up with the number of the reading clients.
 
-On 11/16/2011 08:53 PM, Sage Weil wrote:
-> Ooh, that would certainly make things less annoying for me as well.
-> Unless that's contrary to some debian policy/best practice, Laszlo?
+So I don't know the reason why it couldn't scale up for writing. I saw
+the old bugs, so I tried new versions, but it still didn't work.
+
+BTW, actually my English name is Gregory too :) That's a good name
+
+Best,
+Xiaofei
+
+On Wed, Nov 23, 2011 at 10:53 AM, Gregory Farnum
+<gregory.farnum@dreamhost.com> wrote:
 >
+> On Wed, Nov 23, 2011 at 10:38 AM, Xiaofei Du <xiaofei.du008@gmail.com=
+> wrote:
+> > I searched online. saw=A0Bug #538 and=A0Tasks #584=A0may related to=
+ my
+> > problem. What's the status of this problem? I first used version 0.=
+34.
+> > Then I tried a newer version which is 0.37. But the problem still
+> > exists. Is there anyone who knows this problem and how to solve thi=
+s?
+> > Thanks a lot. and Happy Thanksgiving
+> Can you give us more details about the problem you're seeing? We've
+> got a pile of new hardware being installed now that we will soon be
+> doing large-scale testing on so we'll run into any problems. But if
+> you're seeing scaling issues it'd be good to know something more than
+> that they're related to two old bugs...
+> :)
+> -Greg
 
-Laszlo, have you been able to look at this yet?
 
-Thanks!
 
-Wido
-
-> sage
->
->
-> On Wed, 16 Nov 2011, Wido den Hollander wrote:
->
->>
->> Signed-off-by: Wido den Hollander<wido@widodh.nl>
->> ---
->>   debian/rules |    2 +-
->>   1 files changed, 1 insertions(+), 1 deletions(-)
->>
->> diff --git a/debian/rules b/debian/rules
->> index a20258d..4f3fe62 100755
->> --- a/debian/rules
->> +++ b/debian/rules
->> @@ -98,7 +98,7 @@ binary-arch: build install
->>   	dh_installexamples
->>   	dh_install --sourcedir=$(DESTDIR) --list-missing
->>   	dh_installlogrotate
->> -	dh_installinit
->> +	dh_installinit --no-start
->>   	dh_installman
->>   	dh_lintian
->>   	dh_link
->> --
->> 1.7.5.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+--
+Xiaofei (Gregory) Du
+Department of Computer Science
+University of California, Santa Barbara
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
