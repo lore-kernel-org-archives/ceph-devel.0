@@ -1,69 +1,74 @@
-From: Xiaofei Du <xiaofei.du008@gmail.com>
-Subject: Re: Why Ceph's aggregate write throughput does not scale with the
- number of osd nodes
-Date: Wed, 23 Nov 2011 15:53:06 -0800
-Message-ID: <CAND_vCbtiHQ=ujGs=UHf2m3HoWud9wS8kj4FpctvaWUDze4GnQ@mail.gmail.com>
-References: <CAND_vCaQU5hFk++6mMnS7MwnAoY2_c-xxe3pEbjJsGQuAsaeiQ@mail.gmail.com>
- <CAF3hT9AqbhPDrBmeymTvBO_FZp5FF2VmwyPeh_cQFFgsi-L96A@mail.gmail.com>
- <CAND_vCZTuOmq3LMJ7eqc8jtbc7Yv7e9YSqy6=cTwGtjBsZ+rfA@mail.gmail.com> <CAKfXD0x=ujYL9mr09tQzc2UZp4QRszEPyJWp3a+e01dYvsXufA@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: pginfo updates
+Date: Thu, 24 Nov 2011 12:33:24 +0100
+Message-ID: <CAO47_-_WLRby4m9rAvdUyCJu+_+33uHp90XPOnRJ0M=0JohouQ@mail.gmail.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:54977 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750900Ab1KWXxh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Nov 2011 18:53:37 -0500
-Received: by iage36 with SMTP id e36so2249931iag.19
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Nov 2011 15:53:37 -0800 (PST)
-In-Reply-To: <CAKfXD0x=ujYL9mr09tQzc2UZp4QRszEPyJWp3a+e01dYvsXufA@mail.gmail.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:39100 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751230Ab1KXLdZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Nov 2011 06:33:25 -0500
+Received: by vbbfc26 with SMTP id fc26so1404660vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Nov 2011 03:33:24 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kelly Kane <kelly@hawknetworks.com>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Kelly,
+I'm running a btrfs-debug patch on one of our nodes. This patch prints
+calls to btrfs_orphan_add. I'm still waiting for the problem the patch
+was intended to trace, but in the logs I found something ceph related
+I don't understand:
 
-I used m1.large instances. I tried both EBS and local storage. I did
-IO test on the EBS and local devices. It is not bad. I also tested
-HDFS on these instances. it showed much better aggregate writing
-throughput. So I guess it is not disk IO problems. Yeah, EC2 disk IO
-does have fluctuations, but the throughput is not so bad.
+When I look at the btrfs_orphan_add messages there is one inode that
+is updated over and over again. When I count the inodes in my log, I
+can see the following distribution (only inodes with more than 500
+btrfs_orphan_add calls listed):
 
-Best,
-Xiaofei
+   #cnt     Inode
+   1117  7403
+  17218  7457
+    848  7484
+    539  7984
+   1446  9098
+    635  9346
 
-On Wed, Nov 23, 2011 at 2:33 PM, Kelly Kane <kelly@hawknetworks.com> wr=
-ote:
-> On Wed, Nov 23, 2011 at 12:07, Xiaofei Du <xiaofei.du008@gmail.com> w=
-rote:
->>
->> I installed Ceph on 10 ec2 instances.
->
-> Can you go into more detail about your EC2 instances and where you ar=
-e
-> storing your data? If you are storing them on standard EBS then you
-> are competing for non-guaranteed bandwidth. The information contained
-> on the AWS product description page is basically a lie (
-> http://aws.amazon.com/ebs/ ) unless things have changed substantially
-> since I last used them. =A0If you are storing data on the ephemeral
-> disks then unless you are on a "whole machine" instance
-> (m1.xlarge/c1.xlarge/m2.4xlarge) you are competing for SATA resources
-> on the ephemeral disks. If your machine neighbors are doing some heav=
-y
-> disk workload you may simply be starved for resources.
->
-> Kelly
->
+When I look at the filesysteme, I can see that inode 7457 belongs to:
 
+current/meta/DIR_8/DIR_A/pginfo\u2.8d__0_28D2BFA8
 
+I don't know how the pginfo stuff works, but I really wonder why the
+distribution is so uneven.
 
---=20
-Xiaofei (Gregory) Du
-Department of Computer Science
-University of California, Santa Barbara
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+"strace -f | grep 28D2BFA8" is giving me the this output:
+
+[...]
+[pid  3840] stat("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+{st_mode=S_IFREG|0644, st_size=8, ...}) = 0
+[pid  3840] stat("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+{st_mode=S_IFREG|0644, st_size=8, ...}) = 0
+[pid  3840] truncate("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+0) = 0
+[pid  3840] stat("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+{st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+[pid  3840] stat("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+{st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+[pid  3840] open("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+O_WRONLY|O_CREAT, 0644) = 64
+[pid  3841] stat("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+{st_mode=S_IFREG|0644, st_size=8, ...}) = 0
+[pid  3841] stat("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+{st_mode=S_IFREG|0644, st_size=8, ...}) = 0
+[pid  3841] truncate("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+0) = 0
+[pid  3841] stat("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+{st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+[pid  3841] stat("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+{st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+[pid  3841] open("/ceph/osd.015/current/meta/DIR_2/pginfo\\u2.d6__0_28D16932",
+O_WRONLY|O_CREAT, 0644) = 64
+[...]
+
+Regards,
+Christian
