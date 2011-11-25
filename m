@@ -1,114 +1,103 @@
-From: Xiaofei Du <xiaofei.du008@gmail.com>
-Subject: Re: Why Ceph's aggregate write throughput does not scale with the
- number of osd nodes
-Date: Thu, 24 Nov 2011 14:20:43 -0800
-Message-ID: <CAND_vCZi7UYcTgSxjDdRDgLQzzhG_T9rq2TmhxxxjXL8RJUzYA@mail.gmail.com>
-References: <CAND_vCaQU5hFk++6mMnS7MwnAoY2_c-xxe3pEbjJsGQuAsaeiQ@mail.gmail.com>
- <CAF3hT9AqbhPDrBmeymTvBO_FZp5FF2VmwyPeh_cQFFgsi-L96A@mail.gmail.com>
- <CAND_vCZTuOmq3LMJ7eqc8jtbc7Yv7e9YSqy6=cTwGtjBsZ+rfA@mail.gmail.com>
- <CAND_vCYXQQ4bokmAvV+Z46UT7_Pygd_h0kwXSch_r+HDg5W25Q@mail.gmail.com>
- <CAF3hT9AHSHf5Gd+9_AydBDWj2if01iNLjmQ5_PXLPna_-GwXQg@mail.gmail.com>
- <CAND_vCbSNbqL8faw0yAYp3guahexo7sAr0X1cQGS5rRZv=71xw@mail.gmail.com>
- <CAF3hT9DsujHNTBiAc=Fm2Vu=FsKBSW4nouwg0QPa73kfHF0mtg@mail.gmail.com>
- <CAND_vCZZjvmKYw7dfiqv_geY-upKLNAz_JVZ0_yr5aKQ6x_jKw@mail.gmail.com>
- <CAF3hT9Dh-byw6h5R633GPxxiMgGmkCtd-MpzRSARoka2RYw88Q@mail.gmail.com>
- <CAND_vCZccYerOQmU9hS3N=hKyjjYnNqTXtTw-Dgw0hUz67Tauw@mail.gmail.com> <CAF3hT9CydOZnDJzG99UkFxj2hGC_08wpZETFAd-jKR_eeXXyRA@mail.gmail.com>
+From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Subject: Cannot mount ceph filesystem: error 5 (Input/Output error)
+Date: Fri, 25 Nov 2011 17:53:15 +0100
+Message-ID: <4366451.BU1d1YAr76@pc10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:57420 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750946Ab1KXWVO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Nov 2011 17:21:14 -0500
-Received: by iage36 with SMTP id e36so3574088iag.19
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Nov 2011 14:21:14 -0800 (PST)
-In-Reply-To: <CAF3hT9CydOZnDJzG99UkFxj2hGC_08wpZETFAd-jKR_eeXXyRA@mail.gmail.com>
+Received: from unknownsite.de ([62.48.69.106]:35917 "EHLO hartes-hannover.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751496Ab1KYRA7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 25 Nov 2011 12:00:59 -0500
+Received: from pc10.localnet (pc10.asys-h.de [193.98.1.90])
+	by hartes-hannover.de (Postfix) with ESMTPSA id 8C88D10C866
+	for <ceph-devel@vger.kernel.org>; Fri, 25 Nov 2011 17:53:19 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-> Eventually. Right now Ceph is pretty config-heavy, unfortunately. So
-> like I said, you can change the weights of the slow nodes =97 this wi=
-ll
-> map less of the data to them, so they have fewer writes and reads. Bu=
-t
-> even then you're going to be stuck pretty low due to your disk write
-> bandwidth. On a modern disk that doesn't matter so much since they ca=
-n
-> push two simultaneous 50MB/s+ streams (ie, one 50MB/s journal and one
-> 50MB/s data store), but even so we generally recommend separate
-> spindles for the journal.
+Hi,
 
-Yeah. I have tried separating the journaling with the real data
-writing on different disks. And also I used btrfs over multiple disks.
-That did have a good performance.
-Greg, thanks a lot for your help. Enjoy the Thanksgiving!!
+When trying to mount a Ceph filesystem with "mount.ceph 10.3.1.33:6789:/ /mnt", 
+the command hangs for several minutes and then fails with the message 
 
-Best,
-Xiaofei
+mount error 5 = Input/output error
 
-On Thu, Nov 24, 2011 at 1:03 PM, Gregory Farnum
-<gregory.farnum@dreamhost.com> wrote:
-> On Thu, Nov 24, 2011 at 12:31 PM, Xiaofei Du <xiaofei.du008@gmail.com=
-> wrote:
->> This means no matter how many clients I have I should always get
->> around 79MB/s, right? This sounds reasonable. Thanks for the
->> explanation. So do you guys have plans to solve this "unbalanced
->> cluster" problem?
-> Eventually. Right now Ceph is pretty config-heavy, unfortunately. So
-> like I said, you can change the weights of the slow nodes =97 this wi=
-ll
-> map less of the data to them, so they have fewer writes and reads. Bu=
-t
-> even then you're going to be stuck pretty low due to your disk write
-> bandwidth. On a modern disk that doesn't matter so much since they ca=
-n
-> push two simultaneous 50MB/s+ streams (ie, one 50MB/s journal and one
-> 50MB/s data store), but even so we generally recommend separate
-> spindles for the journal.
->
->> I guess several other distributed file systems have
->> the same issue. HDFS has this issue too. I guess the solution is to
->> use stable disk IO bandwidth hardware. If that couldn't be guarantee=
-d,
->> you need to detect slow nodes and kick them out of the cluster.
-> I'm not sure how other systems handle it =97=A0many don't, HDFS might=
- or
-> might not. But as I look at the description of how HDFS replicates
-> data it looks to me like it matters less.
-> http://hadoop.apache.org/common/docs/current/hdfs_design.html#Robustn=
-ess
-> indicates that all data is written to a client-local file, then
-> (asynchronously from the client's write) it is written out to the
-> first DataNode, which copies the data to the second, which copies to
-> the third, etc. But in this scheme the file doesn't need to be fully
-> replicated to each DataNode for the client to close the file and
-> consider it data-safe.
-> These are the appropriate set of data consistency choices for HDFS,
-> but Ceph is designed to satisfy consistency requirements for a much
-> more stringent set of needs. :)
->
->>
->>> Are you using ceph-fuse or the kernel client? And if it's the kerne=
-l
->>> client, what version?
->> I am using ceph-fuse
-> Bah humbug. :( I've created http://tracker.newdream.net/issues/1752 t=
-o
-> keep track of this issue; it'll be properly prioritized next week.
-> -Greg
->
+Background:
 
+I'm trying to set up a small 3-machine Ceph cluster, to be used for network-
+transparent block- and file storage for Qemu server virtualization. This is the 
+first time I'm doing anything at all with Ceph, so many of the concepts are 
+still new and a bit confusing to me.
 
+My plan was to set up each of the three machines equally with one mon, one osd 
+and one mds, and to add more servers, or replace the existing ones with bigger 
+machines, as need arises.
 
---=20
-Xiaofei (Gregory) Du
-Department of Computer Science
-University of California, Santa Barbara
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So far, I have only started with one of the three servers, to get at least a 
+basic configuration working and to get some feel for the system and its 
+components, before adding the other two.
+
+The machines are all running a basic installation of CentOS 6. What I did so 
+far on the first machine was:
+
+- Build a newer kernel (3.1.1) with built-in support for btrfs and ceph, 
+reboot with it
+- Prepare two larger empty partitions (sda5 and sdb5) for data storage
+- Download and unpack ceph-0.38.tar.gz, cd ceph-0.38
+- Run ./configure
+- Repeat numerous times while installing one dependency after the other, 
+eventually ending up with ./configure --without-fuse --without-tcmalloc
+- make && make install
+- Copy src/init-ceph to /etc/init.d/
+- Create /usr/local/etc/ceph/ceph.conf with this content:
+
+[global]
+        max open files = 131072
+        log file = /var/log/ceph/$name.log
+        log_to_syslog = true
+        pid file = /var/run/ceph/$name.pid
+
+[mon]
+        mon data = /mondata/$name
+
+[mon.ceph1]
+        host = ceph1
+        mon addr = 10.3.1.33:6789
+
+[mds]
+        keyring = /cephxdata/keyring.$name
+
+[mds.alpha]
+        host = ceph1
+
+[osd]
+        osd data = /data/$name
+        osd journal = /data/$name/journal
+        osd journal size = 1000 ; journal size, in megabytes
+
+[osd.0]
+        host = ceph1
+        btrfs devs = /dev/sda5 /dev/sdb5
+
+(Slightly adjusted from src/sample.ceph.conf, comments removed for brevity)
+
+- Run mkcephfs -c /usr/local/etc/ceph/ceph.conf --mkbtrfs -a -k \
+/usr/local/etc/ceph/keyring.bin
+- Run /etc/init.d/ceph start
+
+After these steps, I tried to mount the ceph filesystem (on the same machine) 
+with "mount.ceph 10.3.1.33:6789:/ /mnt" and got the aforementioned error.
+
+The only thing that happens in the logs when I try to mount is this one line 
+in mon log:
+2011-11-25 17:26:53.216745 7f0ee75df700 -- 10.3.1.33:6789/0 >> 
+10.3.1.33:0/1719960241 pipe(0x7f0ee0001320 sd=12 pgs=0 cs=0 l=0).accept peer 
+addr is really 10.3.1.33:0/1719960241 (socket is 10.3.1.33:46908/0)
+
+The osd and mds logs do not show any activity at that point.
+
+Does anybody have any idea what could be going wrong here?
+
+	Guido
