@@ -1,143 +1,105 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Cannot mount ceph filesystem: error 5 (Input/Output error)
-Date: Fri, 25 Nov 2011 19:54:42 +0100
-Message-ID: <4ECFE472.9020603@widodh.nl>
-References: <4366451.BU1d1YAr76@pc10>
+From: Maxim Mikheev <mikhmv@datintsol.com>
+Subject: need help in a recovering ceph
+Date: Sat, 26 Nov 2011 10:31:02 -0500
+Message-ID: <4ED10636.6070705@biodatomics.com>
+Reply-To: Maxim Mikheev <mikhmv@datintsol.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:38324 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751073Ab1KYSyp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Nov 2011 13:54:45 -0500
-In-Reply-To: <4366451.BU1d1YAr76@pc10>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:47353 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752620Ab1KZPbG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Nov 2011 10:31:06 -0500
+Received: by vcbfk14 with SMTP id fk14so2663931vcb.19
+        for <ceph-devel@vger.kernel.org>; Sat, 26 Nov 2011 07:31:04 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Guido,
+Hi Everyone,
 
-On 11/25/2011 05:53 PM, Guido Winkelmann wrote:
-> Hi,
->
-> When trying to mount a Ceph filesystem with "mount.ceph 10.3.1.33:6789:/ /mnt",
-> the command hangs for several minutes and then fails with the message
->
-> mount error 5 = Input/output error
+My ceph instance was too slow and I tried to benchmark it with bonnie++. 
+Benchmark finished with error message and Ceph died.
+I cannot mount ceph on any computers:
+root@s3-2core:~# mount -t ceph -o 
+name=admin,secretfile=/etc/ceph/mycluster.secret   192.168.2.11:/ /root/mnt/
+mount error 5 = Input/output error
 
-Does "ceph -s" work? If so, what is the output?
+I have 250Gb data in ceph, I can generate this data again but it will 
+take around 2 weeks.
 
->
-> Background:
->
-> I'm trying to set up a small 3-machine Ceph cluster, to be used for network-
-> transparent block- and file storage for Qemu server virtualization. This is the
-> first time I'm doing anything at all with Ceph, so many of the concepts are
-> still new and a bit confusing to me.
->
-> My plan was to set up each of the three machines equally with one mon, one osd
-> and one mds, and to add more servers, or replace the existing ones with bigger
-> machines, as need arises.
+The question how can I reanimate ceph? I like the idea of ceph but 
+unfortunately I am not alone in the project an we are close to give up 
+on using it.
+I just recently start to use it and don't know what kind of information 
+I should submit. Here are what I know:
 
-If should be enough to have 3 OSD's and 1 MON and 1 MDS, for basic 
-testing that is all you'd need.
+root@s2-8core:~# ceph health
+2011-11-26 10:20:32.565809 mon <- [health]
+2011-11-26 10:20:32.566140 mon.0 -> 'HEALTH_OK' (0)
+---------------------------------------------------------------------------------------------------
+  # ceph osd dump -o -
+2011-11-26 10:04:46.922947 mon <- [osd,dump]
+2011-11-26 10:04:46.935616 mon.0 -> 'dumped osdmap epoch 465' (0)
+epoch 465
+fsid c09c2197-3976-3779-d7b1-26700db70b68
+created 2011-11-04 12:43:26.390483
+modifed 2011-11-25 22:21:17.275421
+flags full
 
->
-> So far, I have only started with one of the three servers, to get at least a
-> basic configuration working and to get some feel for the system and its
-> components, before adding the other two.
->
-> The machines are all running a basic installation of CentOS 6. What I did so
-> far on the first machine was:
->
-> - Build a newer kernel (3.1.1) with built-in support for btrfs and ceph,
-> reboot with it
-> - Prepare two larger empty partitions (sda5 and sdb5) for data storage
-> - Download and unpack ceph-0.38.tar.gz, cd ceph-0.38
-> - Run ./configure
-> - Repeat numerous times while installing one dependency after the other,
-> eventually ending up with ./configure --without-fuse --without-tcmalloc
+pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 192 
+pgp_num 192 lpg_num 2 lpgp_num 2 last_change 5 owner 0 
+crash_replay_interval 60
+     removed_snaps [2~2]
+pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 
+192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 1 owner 0
+pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 192 
+pgp_num 192 lpg_num 2 lpgp_num 2 last_change 1 owner 0
 
-I'd recommend using tcmalloc, it will save a lot of memory usage.
+max_osd 3
+osd.0 up   in  weight 1 up_from 462 up_thru 462 down_at 303 
+last_clean_interval [292,298) lost_at 461 192.168.2.10:6800/4059 
+192.168.2.10:6801/4059 192.168.2.10:6802/4059
+osd.1 up   in  weight 1 up_from 296 up_thru 462 down_at 295 
+last_clean_interval [281,294) lost_at 199 192.168.2.11:6801/3363 
+192.168.2.11:6805/3363 192.168.2.11:6806/3363
+osd.2 up   in  weight 1 up_from 272 up_thru 462 down_at 268 
+last_clean_interval [257,267) 192.168.2.12:6800/1097 
+192.168.2.12:6801/1097 192.168.2.12:6802/1097
 
-> - make&&  make install
-> - Copy src/init-ceph to /etc/init.d/
-> - Create /usr/local/etc/ceph/ceph.conf with this content:
->
-> [global]
->          max open files = 131072
->          log file = /var/log/ceph/$name.log
->          log_to_syslog = true
->          pid file = /var/run/ceph/$name.pid
 
-You want to log to syslog and files simultaneously? That will cause 
-double the I/O on that system.
+  wrote 1081 byte payload to -
+----------------------------------------------------------------------------------------------------
+root@s2-8core:~# cat /etc/ceph/ceph.conf
+[global]
+     auth supported = cephx
+         keyring = /etc/ceph/mycluster.keyring
+         max open files = 131072
+         log file = /var/log/ceph/$name.log
+         pid file = /var/run/ceph/$name.pid
+[mon]
+     keyring = /etc/ceph/$name.keyring
+     mon data = /srv/mon.$id
+     debug ms = 1
+[mon.a]
+     host = s2-8core
+     mon addr = 192.168.2.11:6789
+[mds]
+     keyring = /etc/ceph/$name.keyring
+[mds.a]
+     host = s2-8core
+[osd]
+     keyring = /etc/ceph/$name.keyring
+     osd data = /srv/osd.$id
+     osd journal = /srv/osd.$id/journal
+     osd journal size = 1000 ; journal size, in megabytes
+[osd.0]
+     host = s1-2core
+[osd.1]
+     host = s2-8core
+[osd.2]
+     host = s3-2core
 
->
-> [mon]
->          mon data = /mondata/$name
->
-> [mon.ceph1]
->          host = ceph1
->          mon addr = 10.3.1.33:6789
->
-> [mds]
->          keyring = /cephxdata/keyring.$name
->
-
-Why did you specify a keyring here? You did not enable the cephx 
-authentication.
-
-> [mds.alpha]
->          host = ceph1
->
-> [osd]
->          osd data = /data/$name
->          osd journal = /data/$name/journal
->          osd journal size = 1000 ; journal size, in megabytes
->
-> [osd.0]
->          host = ceph1
->          btrfs devs = /dev/sda5 /dev/sdb5
->
-
-Does that actually work? Never tested with specifying to devices. What 
-are you trying to do? Create a striped filesystem?
-
-> (Slightly adjusted from src/sample.ceph.conf, comments removed for brevity)
->
-> - Run mkcephfs -c /usr/local/etc/ceph/ceph.conf --mkbtrfs -a -k \
-> /usr/local/etc/ceph/keyring.bin
-> - Run /etc/init.d/ceph start
->
-> After these steps, I tried to mount the ceph filesystem (on the same machine)
-> with "mount.ceph 10.3.1.33:6789:/ /mnt" and got the aforementioned error.
->
-
-Mounting the Ceph filesystem on the same host as where your OSD is 
-running is not recommended. Although it should probably work, you could 
-run into some trouble.
-
-You could take a look at my ceph.conf: http://zooi.widodh.nl/ceph/ceph.conf
-
-That might give you some more clues!
-
-Wido
-
-> The only thing that happens in the logs when I try to mount is this one line
-> in mon log:
-> 2011-11-25 17:26:53.216745 7f0ee75df700 -- 10.3.1.33:6789/0>>
-> 10.3.1.33:0/1719960241 pipe(0x7f0ee0001320 sd=12 pgs=0 cs=0 l=0).accept peer
-> addr is really 10.3.1.33:0/1719960241 (socket is 10.3.1.33:46908/0)
->
-> The osd and mds logs do not show any activity at that point.
->
-> Does anybody have any idea what could be going wrong here?
->
-> 	Guido
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thank you in an advance,
+    Max
