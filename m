@@ -1,92 +1,38 @@
-From: Sage Weil <sage@newdream.net>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
 Subject: Re: need help in a recovering ceph
-Date: Mon, 28 Nov 2011 09:44:18 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111280943180.11288@cobra.newdream.net>
-References: <4ED10636.6070705@biodatomics.com> <4ED36701.3060107@widodh.nl>
- <4ED37271.8030504@biodatomics.com> <CAF3hT9CS9EMnuUjTJF3S9L7U21xaOiin8eaezha2QToNBgATKA@mail.gmail.com>
- <4ED3BCBE.6000906@biodatomics.com> <CAF3hT9CFYe9AeUH5GBCcaUsfdP9itoL9ByVmbPZwe3ETuAT1nQ@mail.gmail.com>
- <4ED3C64B.5060601@biodatomics.com>
+Date: Mon, 28 Nov 2011 10:05:06 -0800
+Message-ID: <CAORUGqDnXH_UDyq_39wFhNUWbjS+YQJF4a71UPkKqR+5FNDq9w@mail.gmail.com>
+References: <4ED10636.6070705@biodatomics.com> <4ED36701.3060107@widodh.nl> <4ED37271.8030504@biodatomics.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43745 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751795Ab1K1RoT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2011 12:44:19 -0500
-In-Reply-To: <4ED3C64B.5060601@biodatomics.com>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:52662 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751795Ab1K1SLD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2011 13:11:03 -0500
+Received: by eaak14 with SMTP id k14so2080481eaa.19
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2011 10:11:00 -0800 (PST)
+In-Reply-To: <4ED37271.8030504@biodatomics.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: max@biodatomics.com
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Wido den Hollander <wido@widodh.nl>, Maxim Mikheev <mikhmv@datintsol.com>, ceph-devel@vger.kernel.org
 
-On Mon, 28 Nov 2011, Maxim Mikheev wrote:
-> root@s1-2core:~# ceph mon injectargs --mon_osd_full_ratio 96
-> 2011-11-28 12:29:39.067860 mon <- [mon,injectargs]
-> 2011-11-28 12:29:39.068438 mon.0 -> 'unknown command injectargs' (-22)
-> root@s1-2core:~# ceph mon injectargs "mon osd full ratio = 96"
-> 2011-11-28 12:29:53.431669 mon <- [mon,injectargs,mon osd full ratio = 96]
-> 2011-11-28 12:29:53.432076 mon.0 -> 'unknown command injectargs' (-22)
+On Mon, Nov 28, 2011 at 03:37, Maxim Mikheev <mikhmv@datintsol.com> wrote:
+> [ 2007.419285] fsck.btrfs[3727]: segfault at c9 ip 0000000000412f2d sp
+> 00007fffafb96738 error 4 in btrfsck[400000+1f000]
+> [ 2209.940609] end_request: I/O error, dev fd0, sector 0
+...
+> Looks likes some errors on btrfs under ceph. you can find results of fsck
+> /dev/sda3 as an attachment.
 
-Try
+Yup, that btrfs is pining for the fjords. And last I heard, the
+recovery tools aren't very good.
 
- ceph mon tell \* injectargs '--mon-osd-full-ratio 96'
+As long as the underlying filesystem is that broken, it's hard to say
+what the OSD will do.
 
-and then do the rados bench thing.
-
-sage
-
-
-> 
-> Max
-> 
-> 
-> 
-> On 11/28/2011 12:23 PM, Gregory Farnum wrote:
-> > On Mon, Nov 28, 2011 at 8:54 AM, Maxim Mikheev<mikhmv@biodatomics.com>
-> > wrote:
-> > > I understand you Greg. I hope you have a good Thanksgiving.
-> > > 
-> > > I did:
-> > > root@s2-8core:~# ceph osd reweight-by-utilization
-> > > 2011-11-28 11:38:40.201428 mon<- [osd,reweight-by-utilization]
-> > > 2011-11-28 11:38:40.209388 mon.0 ->  'SUCCESSFUL reweight-by-utilization:
-> > > average_util: 0.386560, overload_util: 0.463872. overloaded osds: 2
-> > > [1.000000 ->  0.406347], ' (0)
-> > > 
-> > > How can I initiate transfer data for balancing?
-> > > 
-> > > root@s2-8core:~# ceph -w
-> > > 2011-11-28 11:40:19.634094    pg v385135: 594 pgs: 594 active+clean; 254
-> > > GB
-> > > data, 522 GB used, 673 GB / 1351 GB avail
-> > > 2011-11-28 11:40:19.635551   mds e182: 1/1/1 up {0=a=up:active}
-> > > 2011-11-28 11:40:19.635592   osd e465: 3 osds: 3 up, 3 in full
-> > > 2011-11-28 11:40:19.635665   log 2011-11-28 09:22:55.618408 osd.2
-> > > 192.168.2.12:6800/1097 476 : [INF] 1.1f scrub ok
-> > > 2011-11-28 11:40:19.635759   mon e1: 1 mons at {a=192.168.2.11:6789/0}
-> > > 
-> > > Monitor didn't show any transfer activity after changing weights.
-> > Hmmm. It looks like we need to rework the OSDs so they subscribe to
-> > map updates when full. Try running "rados -p data bench 10 write". It
-> > will fail, but let it go for a few seconds and it should cause all the
-> > OSDs to update their maps and begin shuffling data.
-> > 
-> > > And another question:
-> > > How can I change mon_osd_full_ratio?
-> > > I tried this:
-> > > root@s2-8core:~# ceph mon injectargs 'mon_osd_full_ratio = 96'
-> > > 2011-11-28 11:53:11.070059 mon<- [mon,injectargs,mon_osd_full_ratio = 96]
-> > > 2011-11-28 11:53:11.070383 mon.0 ->  'unknown command injectargs' (-22)
-> > either:
-> > ceph mon injectargs --mon_osd_full_ratio 96
-> > or
-> > ceph mon injectargs "mon osd full ratio = 96"
-> > should work.
-> > :)
-> > -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+You can try backup+restore of the data itself (it's just files and
+extended attributes), but you're probably going to have to re-mkfs it.
+Ceph should be able to recover the actual data, if you have the usual
+replicated setup.
