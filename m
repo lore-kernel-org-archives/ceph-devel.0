@@ -1,81 +1,61 @@
-From: Mark Kampe <mark.kampe@dreamhost.com>
-Subject: moving towards release criteria
-Date: Mon, 28 Nov 2011 11:01:22 -0800
-Message-ID: <4ED3DA82.7030506@dreamhost.com>
+From: Andre Noll <maan@systemlinux.org>
+Subject: Re: [PATCH/RFC 5/6] doc: Add missing documentation for osd pool
+ get.
+Date: Mon, 28 Nov 2011 20:27:03 +0100
+Message-ID: <20111128192703.GB8944@systemlinux.org>
+References: <20111121180656.GO13394@systemlinux.org>
+ <1322489076-31364-1-git-send-email-maan@systemlinux.org>
+ <1322489076-31364-6-git-send-email-maan@systemlinux.org>
+ <CAF3hT9Aqa9xpn9CGQiUFuVZz_Lp5SpqtVpN5D5h=mPnmLLC_kw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="i9LlY+UWpKt15+FH"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:56509 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752843Ab1K1TBW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2011 14:01:22 -0500
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id AF3C5C063
-	for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2011 11:10:26 -0800 (PST)
-Received: from [192.168.107.232] (aon.hq.newdream.net [64.111.111.107])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id A850EC062
-	for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2011 11:10:26 -0800 (PST)
+Received: from systemlinux.org ([79.140.41.46]:59072 "EHLO
+	v3-1046.systemlinux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753436Ab1K1TZL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2011 14:25:11 -0500
+Content-Disposition: inline
+In-Reply-To: <CAF3hT9Aqa9xpn9CGQiUFuVZz_Lp5SpqtVpN5D5h=mPnmLLC_kw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-At present we are running automated nightlies to catch
-problems that slip past developers or only show up on
-long runs, and filing bugs when they fail ... but the
-decision of whether or not we are ready to push out a
-new release is not yet criterion-based.  We have to
-start moving towards official release criteria.
 
-I suggest that our initial release criteria should fall
-into four categories:
+--i9LlY+UWpKt15+FH
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-   (1) functional validation
+On Mon, Nov 28, 10:37, Gregory Farnum wrote:
+> > + =C2=A0 =C2=A0 =C2=A0 * ``pg_num``: See above.
+> > + =C2=A0 =C2=A0 =C2=A0 * ``pgp_num``: See above.
+> > + =C2=A0 =C2=A0 =C2=A0 * ``lpg_num``: The localized pg number.
+> > + =C2=A0 =C2=A0 =C2=A0 * ``lpgp_num``: The number of localized pgs.
+> The lpg_num and lpgp_num are analogous to the pg_num and the pgp_num =E2=
+=80=94
+> the lpg_num is the number of local PGs, and the lpgp_num is the number
+> used for placing them. This matters less for the local PGs than the
+> regular PGs but it can still control where the replicas are placed.
 
-	100% passage of designated validation suites,
-	with a formal process for managing the functional
-	assertions to be tested (or designating specific
-	assertions to be compliance-optional)
-	
-   (2) regression tests
+Thanks for the clarification. I will update the patch accordingly.
 
-	100% passage of designated regression suites,
-	with a formal process for designating which
-	bugs do and do not require the creation of
-	new regression test cases.
+Andre
+--=20
+The only person who always got his work done by Friday was Robinson Crusoe
 
-   (3) performance
+--i9LlY+UWpKt15+FH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
 
-	individual and aggregate throughput measurements,
-	and key-event timings will be made with controlled
-	loads on specified hardware configuration, and
-	compared against performance targets, and a formal
-	process for defining the target metrics and requirements.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
 
-   (4) reliability and robustness
+iEYEARECAAYFAk7T4IcACgkQWto1QDEAkw/FHgCfeEpLcuH7hNtkiiEahhG0vMhj
+UIgAn1y6HLb/6O5i2Rb1Pi/QJ2m9yQCe
+=8JOA
+-----END PGP SIGNATURE-----
 
-	a specified number of hours of (client perceived) error
-	free operation under continuous load (with specified
-	levels and characteristics), in the face of specified
-	error injections ... and a formal process for defining
-	the times, load characteristics, error injections, and
-	acceptable performance.
-
-Does this seem like the right general form for our release criteria? 
-What changes would you suggest?
-
-Once we agree on the general form of our release criteria, the next
-steps are:
-
-   (a) put some stakes in the ground for the initial requirements
-       (knowing that they will evolve in scope, specificity, and
-       rigour)
-
-   (b) propose some processes for the review, approval, and
-       evolution of those standards, and the communication of
-       the (current) requirements and results to the community.
-
-   (c) set a date for the first release to be subject to these
-       criteria
-
-comments?
+--i9LlY+UWpKt15+FH--
