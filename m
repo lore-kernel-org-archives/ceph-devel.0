@@ -1,220 +1,41 @@
 From: Andre Noll <maan@systemlinux.org>
-Subject: [PATCH/RFC 1/6] doc: Import the list of ceph subcommands from wiki.
-Date: Mon, 28 Nov 2011 15:04:31 +0100
-Message-ID: <1322489076-31364-2-git-send-email-maan@systemlinux.org>
+Subject: [PATCH/RFC 6/6] doc: Clarify documentation of reweight command.
+Date: Mon, 28 Nov 2011 15:04:36 +0100
+Message-ID: <1322489076-31364-7-git-send-email-maan@systemlinux.org>
 References: <20111121180656.GO13394@systemlinux.org>
  <1322489076-31364-1-git-send-email-maan@systemlinux.org>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4.gwdg.de ([134.76.10.17]:35212 "EHLO mx4.gwdg.de"
+Received: from mx3.gwdg.de ([134.76.10.16]:45662 "EHLO mx3.gwdg.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753969Ab1K1OOf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 28 Nov 2011 09:14:35 -0500
+	id S1753259Ab1K1OQi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 28 Nov 2011 09:16:38 -0500
 In-Reply-To: <1322489076-31364-1-git-send-email-maan@systemlinux.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
 Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Andre Noll <maan@systemlinux.org>
 
-This adds the content of the wiki page at
-
-	http://ceph.newdream.net/wiki/Monitor_commands
-
-to doc/ops/monitor.rst in order to make it available at the new
-official location for the ceph documentation. This first patch is
-just the result of a cut-and-paste operation. There are no changes
-in content, but the text was converted to rst format.
-
-Signed-Off-By: Andre Noll <maan@systemlinux.org>
+This has led to some discussions on the mailing list, so let's try
+to be clear about the meaning of an OSD weight.
 ---
- doc/ops/monitor.rst |  178 ++++++++++++++++++++++++++++++++++++++++++++++++++-
- 1 files changed, 177 insertions(+), 1 deletions(-)
+ doc/ops/monitor.rst |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
 
 diff --git a/doc/ops/monitor.rst b/doc/ops/monitor.rst
-index 98c75c3..626685e 100644
+index 076c8e1..5fcb0aa 100644
 --- a/doc/ops/monitor.rst
 +++ b/doc/ops/monitor.rst
-@@ -4,4 +4,180 @@
-  Monitoring Ceph
- =================
+@@ -152,7 +152,9 @@ resending pending requests. ::
  
--.. todo:: write me
-+Monitor commands
-+----------------
-+
-+Monitor commands are issued using the ceph utility (in versions before
-+Dec08 it was called cmonctl)::
-+
-+	$ ceph [-m monhost] command
-+
-+where the command is usually of the form::
-+
-+	$ ceph subsystem command
-+
-+System commands
-+---------------
-+
-+::
-+
-+	$ ceph stop
-+
-+Cleanly shuts down the cluster.  ::
-+
-+	$ ceph -s
-+
-+Shows an overview of the current status of the cluster.  ::
-+
-+	$ ceph -w
-+
-+Shows a running summary of the status of the cluster, and major events.
-+
-+AUTH subsystem
-+--------------
-+::
-+
-+	$ ceph auth add <osd> <--in-file|-i> <path-to-osd-keyring>
-+
-+Add auth keyring for an osd.  ::
-+
-+	$ ceph auth list
-+
-+Show auth key OSD subsystem.
-+
-+OSD subsystem
-+-------------
-+::
-+
-+	$ ceph osd stat
-+
-+Query osd subsystem status. ::
-+
-+	$ ceph osd getmap -o file
-+
-+Write a copy of the most recent osd map to a file. See osdmaptool. ::
-+
-+	$ ceph osd getcrushmap -o file
-+
-+Write a copy of the crush map from the most recent osd map to
-+file. This is functionally equivalent to ::
-+
-+	$ ceph osd getmap -o /tmp/osdmap
-+	$ osdmaptool /tmp/osdmap --export-crush file
-+
-+::
-+
-+	$ ceph osd getmaxosd
-+
-+Query the current max_osd parameter in the osd map. ::
-+
-+	$ ceph osd setmap -i file
-+
-+Import the given osd map. Note that this can be a bit dangerous,
-+since the osd map includes dynamic state about which OSDs are current
-+on or offline; only do this if you've just modified a (very) recent
-+copy of the map. ::
-+
-+	$ ceph osd setcrushmap -i file
-+
-+Import the given crush map. ::
-+
-+	$ ceph osd setmaxosd
-+
-+Set the max_osd parameter in the osd map. This is necessary when
-+expanding the storage cluster. ::
-+
-+	$ ceph osd down N
-+
-+Mark osdN down. ::
-+
-+	$ ceph osd out N
-+
-+Mark osdN out of the distribution (i.e. allocated no data). ::
-+
-+	$ ceph osd in N
-+
-+Mark osdN in the distribution (i.e. allocated data). ::
-+
-+	$ ceph class list
-+
-+List classes that are loaded in the ceph cluster. ::
-+
-+	$ ceph osd pause
-+	$ ceph osd unpause
-+
-+TODO ::
-+
-+	$ ceph osd reweight N W
-+
-+Sets the weight of osdN to W. ::
-+
-+	$ ceph osd reweight-by-utilization [threshold]
-+
-+Reweights all the OSDs by reducing the weight of OSDs which are
-+heavily overused. By default it will adjust the weights downward on
-+OSDs which have 120% of the average utilization, but if you include
-+threshold it will use that percentage instead. ::
-+
-+	$ ceph osd blacklist add ADDRESS[:source_port] [TIME]
-+	$ ceph osd blacklist rm ADDRESS[:source_port]
-+
-+Adds/removes the address to/from the blacklist. When adding an address,
-+you can specify how long it should be blacklisted in seconds; otherwise
-+it will default to 1 hour. A blacklisted address is prevented from
-+connecting to any osd. Blacklisting is most often used to prevent a
-+laggy mds making bad changes to data on the osds.
-+
-+These commands are mostly only useful for failure testing, as
-+blacklists are normally maintained automatically and shouldn't need
-+manual intervention. ::
-+
-+	$ ceph osd pool mksnap POOL SNAPNAME
-+	$ ceph osd pool rmsnap POOL SNAPNAME
-+
-+Creates/deletes a snapshot of a pool. ::
-+
-+	$ ceph osd pool create POOL
-+	$ ceph osd pool delete POOL
-+
-+Creates/deletes a storage pool. ::
-+
-+	$ ceph osd pool set POOL FIELD VALUE
-+
-+Changes a pool setting. Valid fields are:
-+
-+	* ``size``: Sets the number of copies of data in the pool.
-+	* ``pg_num``: TODO
-+	* ``pgp_num``: TODO
-+
-+::
-+
-+	$ ceph osd scrub N
-+
-+Sends a scrub command to osdN. To send the command to all osds, use ``*``.
-+TODO: what does this actually do ::
-+
-+	$ ceph osd repair N
-+
-+Sends a repair command to osdN. To send the command to all osds, use ``*``.
-+TODO: what does this actually do
-+
-+MDS subsystem
-+-------------
-+
-+Change configuration parameters on a running mds. ::
-+
-+	$ ceph mds tell <mds-id> injectargs '--<switch> <value> [--<switch> <value>]'
-+
-+Example::
-+
-+	$ ceph mds tell 0 injectargs '--debug_ms 1 --debug_mds 10'
-+
-+Enables debug messages. ::
-+
-+	$ ceph mds stat
-+
-+Displays the status of all metadata servers.
-+
-+dump, getmap, stop, set_max_mds, setmap: TODO
-+
+ 	$ ceph osd reweight N W
+ 
+-Sets the weight of osdN to W. ::
++Set the weight of osdN to W. Two OSDs with the same weight will receive
++roughly the same number of I/O requests and store approximately the
++same amount of data. ::
+ 
+ 	$ ceph osd reweight-by-utilization [threshold]
+ 
 -- 
 1.7.8.rc1.14.g248db
 
