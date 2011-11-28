@@ -1,225 +1,78 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: osd/OSD.cc: 5534: FAILED assert(pending_ops > 0)
-Date: Mon, 28 Nov 2011 09:19:50 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1111280917270.11288@cobra.newdream.net>
-References: <4EC11FF2.1030109@tuxadero.com>
- <CAF3hT9BZh8cFy+weYxuRSH+B36mf0z18ai4whqtcfyCAUPAu1Q@mail.gmail.com>
- <4EC16FF1.1080002@tuxadero.com> <CAF3hT9AqayxNCSKNZ8TfYMhOhPk0uEmGNKjJz+TTYAGMHfK3Jw@mail.gmail.com>
- <Pine.LNX.4.64.1111141220460.29742@cobra.newdream.net> <4EC2F026.7000109@tuxadero.com>
- <Pine.LNX.4.64.1111161311220.6368@cobra.newdream.net> <4ECE4560.9090500@tuxadero.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: need help in a recovering ceph
+Date: Mon, 28 Nov 2011 09:23:50 -0800
+Message-ID: <CAF3hT9CFYe9AeUH5GBCcaUsfdP9itoL9ByVmbPZwe3ETuAT1nQ@mail.gmail.com>
+References: <4ED10636.6070705@biodatomics.com>
+	<4ED36701.3060107@widodh.nl>
+	<4ED37271.8030504@biodatomics.com>
+	<CAF3hT9CS9EMnuUjTJF3S9L7U21xaOiin8eaezha2QToNBgATKA@mail.gmail.com>
+	<4ED3BCBE.6000906@biodatomics.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45664 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751795Ab1K1RTy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2011 12:19:54 -0500
-In-Reply-To: <4ECE4560.9090500@tuxadero.com>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:38621 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752792Ab1K1RXv convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2011 12:23:51 -0500
+Received: by ggnr5 with SMTP id r5so5443095ggn.19
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2011 09:23:50 -0800 (PST)
+In-Reply-To: <4ED3BCBE.6000906@biodatomics.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Mailand <martin@tuxadero.com>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
+To: max@biodatomics.com
+Cc: Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Martin,
+On Mon, Nov 28, 2011 at 8:54 AM, Maxim Mikheev <mikhmv@biodatomics.com>=
+ wrote:
+> I understand you Greg. I hope you have a good Thanksgiving.
+>
+> I did:
+> root@s2-8core:~# ceph osd reweight-by-utilization
+> 2011-11-28 11:38:40.201428 mon <- [osd,reweight-by-utilization]
+> 2011-11-28 11:38:40.209388 mon.0 -> 'SUCCESSFUL reweight-by-utilizati=
+on:
+> average_util: 0.386560, overload_util: 0.463872. overloaded osds: 2
+> [1.000000 -> 0.406347], ' (0)
+>
+> How can I initiate transfer data for balancing?
+>
+> root@s2-8core:~# ceph -w
+> 2011-11-28 11:40:19.634094=A0=A0=A0 pg v385135: 594 pgs: 594 active+c=
+lean; 254 GB
+> data, 522 GB used, 673 GB / 1351 GB avail
+> 2011-11-28 11:40:19.635551=A0=A0 mds e182: 1/1/1 up {0=3Da=3Dup:activ=
+e}
+> 2011-11-28 11:40:19.635592=A0=A0 osd e465: 3 osds: 3 up, 3 in full
+> 2011-11-28 11:40:19.635665=A0=A0 log 2011-11-28 09:22:55.618408 osd.2
+> 192.168.2.12:6800/1097 476 : [INF] 1.1f scrub ok
+> 2011-11-28 11:40:19.635759=A0=A0 mon e1: 1 mons at {a=3D192.168.2.11:=
+6789/0}
+>
+> Monitor didn't show any transfer activity after changing weights.
 
-I reviewed this code again last week and realized the locking wasn't quite 
-right.  And then that the pending_ops counter was largely useless.  So 
-most of it has been simplified/rewritten now in master, and this problem 
-will be gone--at least in its current form.
+Hmmm. It looks like we need to rework the OSDs so they subscribe to
+map updates when full. Try running "rados -p data bench 10 write". It
+will fail, but let it go for a few seconds and it should cause all the
+OSDs to update their maps and begin shuffling data.
 
-Please let us know if you see any new issues with the latest master.  (The 
-relevant commit is b47347bd7c377037f7fbc199f0c88b447c9626d1.)
-
-Thanks-
-sage
-
-
-
-On Thu, 24 Nov 2011, Martin Mailand wrote:
-
-> Hi Sage,
-> I hit it again, this time on another osd
-> 
-> ceph version 0.38-181-g2e19550
-> (commit:2e195500b5d3a8ab8512bcf2a219a6b7ff922c97)
-> 
-> Thread 1 (Thread 2951):
-> #0  0x00007f36bbb41b3b in raise () from /lib/x86_64-linux-gnu/libpthread.so.0
-> #1  0x00000000005f5852 in reraise_fatal (signum=6) at
-> global/signal_handler.cc:59
-> #2  0x00000000005f5e4a in handle_fatal_signal (signum=6) at
-> global/signal_handler.cc:106
-> #3  <signal handler called>
-> #4  0x00007f36ba0c2d05 in raise () from /lib/x86_64-linux-gnu/libc.so.6
-> #5  0x00007f36ba0c6ab6 in abort () from /lib/x86_64-linux-gnu/libc.so.6
-> #6  0x00007f36ba9796dd in __gnu_cxx::__verbose_terminate_handler() () from
-> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> ---Type <return> to continue, or q <return> to quit---
-> #7  0x00007f36ba977926 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #8  0x00007f36ba977953 in std::terminate() () from
-> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #9  0x00007f36ba977a5e in __cxa_throw () from
-> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #10 0x00000000005f6956 in ceph::__ceph_assert_fail (assertion=<value optimized
-> out>, file=<value optimized out>, line=<value optimized out>,
->     func=<value optimized out>) at common/assert.cc:70
-> #11 0x000000000056616a in OSD::dequeue_op (this=0x25b0000, pg=<value optimized
-> out>) at osd/OSD.cc:5518
-> #12 0x00000000005d4406 in ThreadPool::worker (this=0x25b0408) at
-> common/WorkQueue.cc:54
-> #13 0x00000000005822dd in ThreadPool::WorkThread::entry (this=<value optimized
-> out>) at ./common/WorkQueue.h:120
-> #14 0x00007f36bbb38d8c in start_thread () from
-> /lib/x86_64-linux-gnu/libpthread.so.0
-> #15 0x00007f36ba17504d in clone () from /lib/x86_64-linux-gnu/libc.so.6
-> #16 0x0000000000000000 in ?? ()
-> (gdb) thread 1
-> [Switching to thread 1 (Thread 2951)]#0  0x00007f36bbb41b3b in raise () from
-> /lib/x86_64-linux-gnu/libpthread.so.0
-> (gdb) frame 11
-> #11 0x000000000056616a in OSD::dequeue_op (this=0x25b0000, pg=<value optimized
-> out>) at osd/OSD.cc:5518
-> 5518    osd/OSD.cc: No such file or directory.
->         in osd/OSD.cc
-> (gdb) p pending_ops
-> $1 = 0
-> 
-> 
-> 
-> -martin
-> 
-> 
-> Am 16.11.2011 22:12, schrieb Sage Weil:
-> > Hi Martin,
-> > 
-> > I've reread the code twice now and it's really not clear to me how
-> > pending_ops could get out of sync with the actual queue size.  I've pushed
-> > a couple of patches that remove surrounding dead code and add an
-> > additional assert sanity check to master.    Have you seen this again, or
-> > just that once?
-> > 
-> > Opened http://tracker.newdream.net/issues/1727
-> > 
-> > Thanks-
-> > sage
-> > 
-> > 
-> > On Wed, 16 Nov 2011, Martin Mailand wrote:
-> > 
-> > > Hi,
-> > > so after a little help from greg.
-> > > 
-> > > (gdb) print pending_ops
-> > > $1 = 0
-> > > 
-> > > -martin
-> > > 
-> > > Sage Weil schrieb:
-> > > > On Mon, 14 Nov 2011, Gregory Farnum wrote:
-> > > > > It's not a big deal; logging is expensive. :) Just a backtrace isn't a
-> > > > > lot to go on, but it's better than nothing!
-> > > > > 
-> > > > > On Mon, Nov 14, 2011 at 11:45 AM, Martin Mailand<martin@tuxadero.com>
-> > > > > wrote:
-> > > > > > Hi Gregory,
-> > > > > > I do not have more at the moment. As I cannot have the debug log
-> > > > > > always
-> > > > > > on,
-> > > > > > a core dump would be the best solution?
-> > > > 
-> > > > I'm mainly interested in whether pending_ops is 0 or<  0.  A 'thread
-> > > > apply
-> > > > all bt' may also be useful.
-> > > > 
-> > > > Thanks!
-> > > > sage
-> > > > 
-> > > > 
-> > > > > > -martin
-> > > > > > 
-> > > > > > Gregory Farnum schrieb:
-> > > > > > > Do you have any other system state? (More logs, core dumps.)
-> > > > > > > 
-> > > > > > > Make a bug in the tracker either way so it doesn't get lost track
-> > > > > > > of.
-> > > > > > > :)
-> > > > > > > -Greg
-> > > > > > > 
-> > > > > > > On Mon, Nov 14, 2011 at 6:04 AM, Martin
-> > > > > > > Mailand<martin@tuxadero.com>
-> > > > > > > wrote:
-> > > > > > > > Hi,
-> > > > > > > > today one of my ods died, the log is.
-> > > > > > > > 
-> > > > > > > > sd/OSD.cc: In function 'void OSD::dequeue_op(PG*)', in thread
-> > > > > > > > '7faeb6139700'
-> > > > > > > > osd/OSD.cc: 5534: FAILED assert(pending_ops>  0)
-> > > > > > > >   ceph version 0.38
-> > > > > > > > (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
-> > > > > > > >   1: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
-> > > > > > > >   2: (ThreadPool::worker()+0x6e6) [0x5b7b16]
-> > > > > > > >   3: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
-> > > > > > > >   4: (()+0x6d8c) [0x7faec4d12d8c]
-> > > > > > > >   5: (clone()+0x6d) [0x7faec355404d]
-> > > > > > > >   ceph version 0.38
-> > > > > > > > (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
-> > > > > > > >   1: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
-> > > > > > > >   2: (ThreadPool::worker()+0x6e6) [0x5b7b16]
-> > > > > > > >   3: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
-> > > > > > > >   4: (()+0x6d8c) [0x7faec4d12d8c]
-> > > > > > > >   5: (clone()+0x6d) [0x7faec355404d]
-> > > > > > > > *** Caught signal (Aborted) **
-> > > > > > > >   in thread 7faeb6139700
-> > > > > > > >   ceph version 0.38
-> > > > > > > > (commit:b600ec2ac7c0f2e508720f8e8bb87c3db15509b9)
-> > > > > > > >   1: /usr/bin/ceph-osd() [0x5b8b52]
-> > > > > > > >   2: (()+0xfc60) [0x7faec4d1bc60]
-> > > > > > > >   3: (gsignal()+0x35) [0x7faec34a1d05]
-> > > > > > > >   4: (abort()+0x186) [0x7faec34a5ab6]
-> > > > > > > >   5: (__gnu_cxx::__verbose_terminate_handler()+0x11d)
-> > > > > > > > [0x7faec3d586dd]
-> > > > > > > >   6: (()+0xb9926) [0x7faec3d56926]
-> > > > > > > >   7: (()+0xb9953) [0x7faec3d56953]
-> > > > > > > >   8: (()+0xb9a5e) [0x7faec3d56a5e]
-> > > > > > > >   9: (ceph::__ceph_assert_fail(char const*, char const*, int,
-> > > > > > > > char
-> > > > > > > > const*)+0x396) [0x5bddb6]
-> > > > > > > >   10: (OSD::dequeue_op(PG*)+0x4bb) [0x55a4db]
-> > > > > > > >   11: (ThreadPool::worker()+0x6e6) [0x5b7b16]
-> > > > > > > >   12: (ThreadPool::WorkThread::entry()+0xd) [0x57398d]
-> > > > > > > >   13: (()+0x6d8c) [0x7faec4d12d8c]
-> > > > > > > >   14: (clone()+0x6d) [0x7faec355404d]
-> > > > > > > > 
-> > > > > > > > Anything else needed to debug this?
-> > > > > > > > 
-> > > > > > > > -martin
-> > > > > > > > --
-> > > > > > > > To unsubscribe from this list: send the line "unsubscribe
-> > > > > > > > ceph-devel" in
-> > > > > > > > the body of a message to majordomo@vger.kernel.org
-> > > > > > > > More majordomo info at
-> > > > > > > > http://vger.kernel.org/majordomo-info.html
-> > > > > > > > 
-> > > > > --
-> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > > > in
-> > > > > the body of a message to majordomo@vger.kernel.org
-> > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> And another question:
+> How can I change mon_osd_full_ratio?
+> I tried this:
+> root@s2-8core:~# ceph mon injectargs 'mon_osd_full_ratio =3D 96'
+> 2011-11-28 11:53:11.070059 mon <- [mon,injectargs,mon_osd_full_ratio =
+=3D 96]
+> 2011-11-28 11:53:11.070383 mon.0 -> 'unknown command injectargs' (-22=
+)
+either:
+ceph mon injectargs --mon_osd_full_ratio 96
+or
+ceph mon injectargs "mon osd full ratio =3D 96"
+should work.
+:)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
