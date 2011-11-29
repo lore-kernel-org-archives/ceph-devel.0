@@ -1,99 +1,122 @@
-From: Xiaofei Du <xiaofei.du008@gmail.com>
-Subject: Re: Ceph stripe reading and writing question
-Date: Mon, 28 Nov 2011 20:56:50 -0800
-Message-ID: <CAND_vCa-q8nPNkFjyDKAZ75O8mJTckwSP_AkJ8OEVwpZbH=VdA@mail.gmail.com>
-References: <CAND_vCbozehy2107R9+BrcK+wx1ReVot9hQ9VY0HjebDuigwdQ@mail.gmail.com>
- <CAND_vCbSBya4Cok21FPTrE-2SJ3XsXjTX0xD2NyqYkWCkyV9fw@mail.gmail.com> <-6796339341470921814@unknownmsgid>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: os/FileJournal.cc: 1011: FAILED assert(seq >= last_committed_seq)
+Date: Tue, 29 Nov 2011 12:48:26 +0100
+Message-ID: <4ED4C68A.9060606@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:59322 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751827Ab1K2E5V convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2011 23:57:21 -0500
-Received: by iage36 with SMTP id e36so10013520iag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2011 20:57:21 -0800 (PST)
-In-Reply-To: <-6796339341470921814@unknownmsgid>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:37355 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751411Ab1K2Lse (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Nov 2011 06:48:34 -0500
+Received: from [172.30.1.184] ([192.166.201.59])
+	(authenticated bits=0)
+	by einhorn.in-berlin.de (8.13.6/8.13.6/Debian-1) with ESMTP id pATBmQ6b031437
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Tue, 29 Nov 2011 12:48:31 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Nov 28, 2011 at 7:48 PM, Gregory Farnum
-<gregory.farnum@dreamhost.com> wrote:
-> (Added list for future reference.)
-> On Nov 28, 2011, at 5:47 PM, Xiaofei Du <xiaofei.du008@gmail.com> wro=
-te:
->
-> Do you remember we talked several days before about the problem I
-> encountered for testing ceph on ec2? The reason I ask this question i=
-s
-> I am still confused with one of the results.=A0The following is what =
-you
-> told me.
->
-> You have two nodes that write at 20MB/s and six that write at 45MB/s.
->
-> Journaling cuts each of those in half: two nodes at 10MB/s, six at
->
-> 23MB/s. That's an aggregate 158MB/s of write bandwidth, but each writ=
-e
->
-> goes to two OSDs so you only get half of that, or 79MB/s of write
->
-> bandwidth. You are getting about the bandwidth I would expect out of =
-a
->
-> slow and unbalanced cluster.
->
-> My question is since journaling cuts the bandwidth of each node into
-> half. When I did the test for writing a single file. Why could I stil=
-l
-> achieve a bandwidth around 45MB/s. If it goes to the 45MB/s node, it
-> could only achieve 23MB/s. My question is why it could still achieve
-> 45MB/s for writing a single file? Thanks a lot
->
-> As you reference below, Ceph stripes files over objects (4MB by defau=
-lt).
-> When you write an object, it can buffer the write, and when it flushe=
-s the
-> buffer out to disk it can send objects out to multiple OSDs simultane=
-ously.
-Awesome, Ceph's design is really nice in many details
-
->
->
-> On Nov 28, 2011, at 5:27 PM, Xiaofei Du <xiaofei.du008@gmail.com> wro=
-te:
->
-> Hi Gregory,
-> I have a question about Ceph's read and write mechanism. If I only wr=
-ite one
-> file or read one file at a time. Does it doing the read and the write
-> concurrently for each of the stripe? For example. I have a 160 MB fil=
-e.
-> Ceph's stripe is 16MB, which means this file will be striped into 10
-> objects. My question is when I do reading or writing for this file, w=
-ill it
-> do it concurrently?
->
-> Have you adjusted the stripe size? The default is 4MB.
-> In any case, yes, it will do concurrent IOs.
-> -Greg
-No. I didn't adjust the stripe size. Because I saw 16MB on the Ceph
-paper. So I thought the default one was 16MB. Thanks a lot again. Greg
-
-Best,
-Xiaofei
+Hi
+I hit this assertion a few times. I use ext4 as the osd fs, so I think 
+we have to replay the whole journal, maybe that triggers it.
 
 
---=20
-Xiaofei (Gregory) Du
-Department of Computer Science
-University of California, Santa Barbara
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-martin
+
+2011-11-29 11:37:55.393296 7fab45dbc7a0 FileStore is up to date.
+os/FileJournal.cc: In function 'virtual void 
+FileJournal::committed_thru(uint64_t)', in thread '7fab434cf700'
+os/FileJournal.cc: 1011: FAILED assert(seq >= last_committed_seq)
+  ceph version 0.38-244-g30def38 
+(commit:30def38d21b217f244db74e6c469598d794fa8a1)
+  1: (FileJournal::committed_thru(unsigned long)+0xcd) [0x72e7cd]
+  2: (JournalingObjectStore::commit_finish()+0xb9) [0x714d79]
+  3: (FileStore::sync_entry()+0xec7) [0x70aae7]
+  4: (FileStore::SyncThread::entry()+0xd) [0x7139bd]
+  5: (()+0x6d8c) [0x7fab45993d8c]
+  6: (clone()+0x6d) [0x7fab43fd004d]
+  ceph version 0.38-244-g30def38 
+(commit:30def38d21b217f244db74e6c469598d794fa8a1)
+  1: (FileJournal::committed_thru(unsigned long)+0xcd) [0x72e7cd]
+  2: (JournalingObjectStore::commit_finish()+0xb9) [0x714d79]
+  3: (FileStore::sync_entry()+0xec7) [0x70aae7]
+  4: (FileStore::SyncThread::entry()+0xd) [0x7139bd]
+  5: (()+0x6d8c) [0x7fab45993d8c]
+  6: (clone()+0x6d) [0x7fab43fd004d]
+*** Caught signal (Aborted) **
+  in thread 7fab434cf700
+  ceph version 0.38-244-g30def38 
+(commit:30def38d21b217f244db74e6c469598d794fa8a1)
+  1: /usr/bin/ceph-osd() [0x5a7ba2]
+  2: (()+0xfc60) [0x7fab4599cc60]
+  3: (gsignal()+0x35) [0x7fab43f1dd05]
+  4: (abort()+0x186) [0x7fab43f21ab6]
+  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fab447d46dd]
+  6: (()+0xb9926) [0x7fab447d2926]
+  7: (()+0xb9953) [0x7fab447d2953]
+  8: (()+0xb9a5e) [0x7fab447d2a5e]
+  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char 
+const*)+0x396) [0x5cd9e6]
+  10: (FileJournal::committed_thru(unsigned long)+0xcd) [0x72e7cd]
+  11: (JournalingObjectStore::commit_finish()+0xb9) [0x714d79]
+  12: (FileStore::sync_entry()+0xec7) [0x70aae7]
+  13: (FileStore::SyncThread::entry()+0xd) [0x7139bd]
+  14: (()+0x6d8c) [0x7fab45993d8c]
+  15: (clone()+0x6d) [0x7fab43fd004d]
+
+
+Thread 1 (Thread 2491):
+#0  0x00007fab4599cb3b in raise () from 
+/lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00000000005a77f2 in reraise_fatal (signum=6) at 
+global/signal_handler.cc:59
+#2  0x00000000005a7dea in handle_fatal_signal (signum=6) at 
+global/signal_handler.cc:106
+#3  <signal handler called>
+#4  0x00007fab43f1dd05 in raise () from /lib/x86_64-linux-gnu/libc.so.6
+#5  0x00007fab43f21ab6 in abort () from /lib/x86_64-linux-gnu/libc.so.6
+#6  0x00007fab447d46dd in __gnu_cxx::__verbose_terminate_handler() () 
+from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#7  0x00007fab447d2926 in ?? () from 
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+---Type <return> to continue, or q <return> to quit---
+#8  0x00007fab447d2953 in std::terminate() () from 
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#9  0x00007fab447d2a5e in __cxa_throw () from 
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#10 0x00000000005cd9e6 in ceph::__ceph_assert_fail (assertion=<value 
+optimized out>, file=<value optimized out>, line=<value optimized out>, 
+func=<value optimized out>)
+     at common/assert.cc:70
+#11 0x000000000072e7cd in FileJournal::committed_thru (this=0x1410000, 
+seq=4145693) at os/FileJournal.cc:1011
+#12 0x0000000000714d79 in JournalingObjectStore::commit_finish 
+(this=0x1401000) at os/JournalingObjectStore.cc:260
+#13 0x000000000070aae7 in FileStore::sync_entry (this=0x1401000) at 
+os/FileStore.cc:3079
+#14 0x00000000007139bd in FileStore::SyncThread::entry (this=<value 
+optimized out>) at os/FileStore.h:101
+#15 0x00007fab45993d8c in start_thread () from 
+/lib/x86_64-linux-gnu/libpthread.so.0
+#16 0x00007fab43fd004d in clone () from /lib/x86_64-linux-gnu/libc.so.6
+#17 0x0000000000000000 in ?? ()
+(gdb)
+(gdb) thread 1
+[Switching to thread 1 (Thread 2491)]#0  0x00007fab4599cb3b in raise () 
+from /lib/x86_64-linux-gnu/libpthread.so.0
+(gdb) thread 11
+Thread ID 11 not known.
+(gdb) frame 11
+#11 0x000000000072e7cd in FileJournal::committed_thru (this=0x1410000, 
+seq=4145693) at os/FileJournal.cc:1011
+1011    os/FileJournal.cc: No such file or directory.
+         in os/FileJournal.cc
+(gdb) p seq
+$1 = 4145693
+(gdb) p last_committed_seq
+$2 = 4145768
+(gdb)
+
