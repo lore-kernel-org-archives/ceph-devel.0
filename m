@@ -1,85 +1,72 @@
-From: Josh Pieper <jjp@pobox.com>
-Subject: Re: A couple more ceph-mon crashes
-Date: Thu, 1 Dec 2011 07:50:32 -0500
-Message-ID: <20111201125032.GF11344@rcn.com>
-References: <20111119150309.GA13985@rcn.com>
- <Pine.LNX.4.64.1111211601350.24847@cobra.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Circular lock / deadlock in kernel client
+Date: Thu, 1 Dec 2011 08:12:24 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1112010812090.18236@cobra.newdream.net>
+References: <201111301321.47514.a.ott@m-privacy.de>
+ <Pine.LNX.4.64.1111300919520.28417@cobra.newdream.net>
+ <Pine.LNX.4.64.1111300952290.28417@cobra.newdream.net>
+ <201112010916.09576.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-962192031-1322755944=:18236"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.lnh.mail.rcn.net ([207.172.157.102]:51709 "EHLO
-	smtp02.lnh.mail.rcn.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753385Ab1LAMue (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Dec 2011 07:50:34 -0500
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1111211601350.24847@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:34793 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755263Ab1LAQM1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Dec 2011 11:12:27 -0500
+In-Reply-To: <201112010916.09576.a.ott@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Amon Ott <a.ott@m-privacy.de>
 Cc: ceph-devel@vger.kernel.org
 
-Sage,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I've been banging on a recent commit for a while now and haven't been
-able to reproduce any of those problems.  Thanks!
+--557981400-962192031-1322755944=:18236
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
--Josh
+On Thu, 1 Dec 2011, Amon Ott wrote:
+> On Wednesday 30 November 2011 wrote Sage Weil:
+> > I pushed a wip-i-ceph-lock branch to ceph-client.git that replaces our
+> > (ab?)use of i_lock with a new i_ceph_lock in the ceph inode.  This avoi=
+ds
+> > being bitten by the lock ordering constraint imposed by igrab(), which
+> > requires i_lock to safely take a reference to an inode without racing w=
+ith
+> > inode destruction.  This lets us keep two inode list locks logically
+> > ordered inside i_ceph_lock (with i_lock as an inner lock).
+>=20
+> I see the branch, but there is nothing new in it. Is that the right locat=
+ion?=20
+> Maybe forgot to push?
+>=20
+> https://github.com/NewDreamNetwork/ceph-client/tree/wip-i-ceph-lock
 
-Sage Weil wrote:
-> Hi Josh,
-> 
-> I just pushed a series of mon patches that rework some of this code.  I've 
-> been trashing on them for a while now without problems, though my test 
-> still needs to be better about the monitor workload it presents.
-> 
-> In any case, you should have better luck with the current master.
-> 
-> Thanks!
-> sage
-> 
-> 
-> On Sat, 19 Nov 2011, Josh Pieper wrote:
-> 
-> > I observed the following two crashes using the same test setup I have
-> > had for the previous reports.  3x ubuntu 11.04 amd64 nodes with an rbd
-> > load, this time each running cc5b5e17.
-> > 
-> > Links to the full logs are below each stack trace snip.
-> > 
-> > mon/OSDMonitor.cc: In function 'MOSDMap* OSDMonitor::build_incremental(epoch_t, epoch_t)', in thread '7fd11a363700'
-> > mon/OSDMonitor.cc: 944: FAILED assert(0)
-> >  ceph version 0.38-202-gcc5b5e1 (commit:cc5b5e17e64c011b68cc8560676182e187bbb503)
-> >  1: (OSDMonitor::build_incremental(unsigned int, unsigned int)+0xc86) [0x497f76]
-> >  2: (OSDMonitor::committed()+0x162) [0x49a1f2]
-> >  3: (PaxosService::_commit()+0x19e) [0x491fee]
-> >  4: (Context::complete(int)+0xa) [0x47c10a]
-> >  5: (finish_contexts(CephContext*, std::list<Context*, std::allocator<Context*> >&, int)+0xca) [0x47da6a]
-> >  6: (Paxos::handle_accept(MMonPaxos*)+0x5b4) [0x48dbc4]
-> >  7: (Paxos::dispatch(PaxosServiceMessage*)+0x23b) [0x48f38b]
-> >  8: (Monitor::_ms_dispatch(Message*)+0xcbf) [0x47b64f]
-> >  9: (Monitor::ms_dispatch(Message*)+0x35) [0x486405]
-> > 
-> > http://joshp.no-ip.com:8080/20111119-mon-build_incremental.log
-> > 
-> > 
-> > mon/PaxosService.cc: In function 'void PaxosService::propose_pending()', in thread '7f4dd6acd700'
-> > mon/PaxosService.cc: 127: FAILED assert(have_pending)
-> >  ceph version 0.38-202-gcc5b5e1 (commit:cc5b5e17e64c011b68cc8560676182e187bbb503)
-> >  1: (PaxosService::propose_pending()+0x335) [0x4924b5]
-> >  2: (PGMonitor::check_osd_map(unsigned int)+0xcb0) [0x4d42e0]
-> >  3: (Context::complete(int)+0xa) [0x47c10a]
-> >  4: (finish_contexts(CephContext*, std::list<Context*, std::allocator<Context*> >&, int)+0xca) [0x47da6a]
-> >  5: (Paxos::handle_accept(MMonPaxos*)+0x5d8) [0x48dbe8]
-> >  6: (Paxos::dispatch(PaxosServiceMessage*)+0x23b) [0x48f38b]
-> >  7: (Monitor::_ms_dispatch(Message*)+0xcbf) [0x47b64f]
-> >  8: (Monitor::ms_dispatch(Message*)+0x35) [0x486405]
-> > 
-> > http://joshp.no-ip.com:8080/20111119-mon-propose_pending.log
-> > 
-> > -Josh
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
+Oops, I pushed the wrong branch.  It's there now.
+
+Sorry!
+sage
+
+>=20
+> Amon Ott
+> --=20
+> Dr. Amon Ott
+> m-privacy GmbH           Tel: +49 30 24342334
+> Am K=F6llnischen Park 1    Fax: +49 30 24342336
+> 10179 Berlin             http://www.m-privacy.de
+>=20
+> Amtsgericht Charlottenburg, HRB 84946
+>=20
+> Gesch=E4ftsf=FChrer:
+>  Dipl.-Kfm. Holger Maczkowsky,
+>  Roman Maczkowsky
+>=20
+> GnuPG-Key-ID: 0x2DD3A649
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-962192031-1322755944=:18236--
