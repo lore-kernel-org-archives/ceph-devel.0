@@ -1,66 +1,47 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.39 released
-Date: Fri, 2 Dec 2011 12:14:20 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1112021213441.10925@cobra.newdream.net>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: No function to list the pool in rados.py
+Date: Fri, 02 Dec 2011 14:11:51 -0800
+Message-ID: <4ED94D27.8090101@dreamhost.com>
+References: <8512670932FB654F81AF0FEF1BE6D49D8EB4D1@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53636 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751820Ab1LBUOV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Dec 2011 15:14:21 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 0D2D7BCB02
-	for <ceph-devel@vger.kernel.org>; Fri,  2 Dec 2011 12:14:21 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 70A6DBC92D
-	for <ceph-devel@vger.kernel.org>; Fri,  2 Dec 2011 12:14:20 -0800 (PST)
+Received: from mail.hq.newdream.net ([66.33.206.127]:41076 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756007Ab1LBWLv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Dec 2011 17:11:51 -0500
+In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D8EB4D1@WHQBEMAIL1.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Eric_YH_Chen@wistron.com
+Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
 
-v0.39 has been tagged and uploaded.  There was a lot of bug fixing going 
-on that isn't terribly exciting.  That aside, the highlights include:
+On 12/01/2011 09:33 PM, Eric_YH_Chen@wistron.com wrote:
+> Hi, ceph developments:
+>
+>    Could we add one more function in rados.py to list the pool?
+>
+>    I had already implemented the function. Thanks a lot!
+>
+> class Rados(object):
+>      def list(self):
+>          size = c_size_t(512)
+>          while True:
+>              c_names = create_string_buffer(size.value)
+>              ret = self.librados.rados_pool_list(self.cluster,
+> byref(c_names), size)
+>              if ret>  size.value:
+>                  size = ret
+>              else:
+>                  break
+>          return filter(lambda name: name != '', c_names.raw.split('\0'))
 
- * mon: rearchitected bootstrap (mkfs)
- * mon: vastly simplified mon cluster expansion
- * config: choose daemon ip based on subnet instead of explicitly
- * hadoop: misc hadoop client fixes
- * osd: many bugs fixed
- * make: pretty V=0 mode
- * radosgw: swift support improvements
- * radosgw, objecter: perfcounter instrumentation
- * we now build on FreeBSD
- * debian: packaging cleanup
+Added in c883100448bb7e86b4f0d52a425e0d0a278c79a0 with a couple small 
+changes to check that we're connected and keep the type of size c_size_t.
 
-The monitor and network config changes are worth mentioning.  We 
-simplified monitor bootstrapping to make it easier to use tools like Chef 
-or Juju to bring up a fresh cluster.  At the same time we made monitor 
-cluster expansion almost trivial, and fixed an important performance 
-problem when a monitor was down for a long time and then came back up.
+Next time if you could send a patch or github pull request it'd be 
+easier to apply.
 
-Specifying the network config for daemons is also simple now that you can 
-constrain the choice to a specific subnet.  That means that when you have 
-a whole cluster with a public and private network for, say, the OSDs, you 
-can force ceph-osd to choose an ip for each interface from the appropriate 
-subnet without explicitly setting the IP in the ceph.conf for each daemon.
-
-Ceph now builds on FreeBSD, thanks to some porting work by Stanislav 
-Sedov.
-
-There were a lot of small fixes to the OSD.  A few bugs remain, however, 
-in strange recovery corner cases.  Some of the core recovery code is being 
-rewritten for v0.40 that will vastly simplify things and make the system 
-more performant and less of a memory hog during recovery (see the 
-wip-backfill branch in ceph.git).
-
-For v0.40 we are also working on the RBD image cloning ("layering"), and 
-it's going to be pretty slick.  And the vastly improved ceph.spec file is 
-almost ready and should land in v0.40 as well.
-
-To download v0.39:
- * Git at git://github.com/NewDreamNetwork/ceph.git
- * Tarball at http://ceph.newdream.net/download/ceph-0.39.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/latest/ops/install/mkcephfs/#installing-the-packages
- 
-sage
+Thanks!
+Josh
