@@ -1,135 +1,576 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: os/FileJournal.cc: 1011: FAILED assert(seq >= last_committed_seq)
-Date: Mon, 05 Dec 2011 19:33:04 +0100
-Message-ID: <4EDD0E60.6090902@tuxadero.com>
-References: <4ED4C68A.9060606@tuxadero.com> <4ED4C87F.6010505@grnet.gr> <4ED4CCAB.6040005@tuxadero.com> <4ED4E477.6060108@tuxadero.com> <Pine.LNX.4.64.1111290806450.32268@cobra.newdream.net> <4EDCB881.3060704@tuxadero.com> <Pine.LNX.4.64.1112050943260.16190@cobra.newdream.net>
-Reply-To: martin@tuxadero.com
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: Client receives 'connection refused' only after heavy use
+Date: Mon, 05 Dec 2011 10:57:59 -0800
+Message-ID: <4EDD1437.4030608@cs.ucsc.edu>
+References: <4EDC0ECF.60805@cs.ucsc.edu> <4EDC1853.5080405@cs.ucsc.edu> <Pine.LNX.4.64.1112042046280.8414@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------000506040208070908090806"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:33145 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755600Ab1LESdI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2011 13:33:08 -0500
-In-Reply-To: <Pine.LNX.4.64.1112050943260.16190@cobra.newdream.net>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:40818 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756094Ab1LES6D (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2011 13:58:03 -0500
+In-Reply-To: <Pine.LNX.4.64.1112042046280.8414@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+Cc: Noah Watkins <jayhawk@soe.ucsc.edu>, ceph-devel@vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------000506040208070908090806
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+On 12/04/2011 08:47 PM, Sage Weil wrote:
+> It would be interested to see what `ls -al /proc/$pid/fd` looks like after
+> the process has been running for a while...  there is probably a leak
+> somewhere.
+>    
 
-Hi Sage,
-I just updated the crashed osd, and it did not work very well.
+Here is the proc/<mds_pid>/fd contents. These contents should reflect an 
+idle cluster with no active clients.
 
-os/FileJournal.cc: 1173: FAILED assert(h->seq >= last_committed_seq)
+-Noah
 
-1173	os/FileJournal.cc: No such file or directory.
-	in os/FileJournal.cc
-(gdb) p h->seq
-value has been optimized out
-(gdb) p last_committed_seq
-$1 = 16834095
+root@issdm-23:~# ls -la /proc/1394/fd | wc -l
+542
+root@issdm-23:~# ls -la /proc/1394/fd/
+total 0
+dr-x------ 2 root root  0 2011-12-05 10:54 .
+dr-xr-xr-x 7 root root  0 2011-12-04 16:56 ..
+lr-x------ 1 root root 64 2011-12-05 10:54 0 -> /dev/null
+lr-x------ 1 root root 64 2011-12-05 10:54 1 -> /dev/null
+lrwx------ 1 root root 64 2011-12-05 10:54 10 -> socket:[40002]
+lrwx------ 1 root root 64 2011-12-05 10:54 100 -> socket:[12769]
+lrwx------ 1 root root 64 2011-12-05 10:54 101 -> socket:[12770]
+lrwx------ 1 root root 64 2011-12-05 10:54 102 -> socket:[12773]
+lrwx------ 1 root root 64 2011-12-05 10:54 103 -> socket:[12774]
+lrwx------ 1 root root 64 2011-12-05 10:54 104 -> socket:[12776]
+lrwx------ 1 root root 64 2011-12-05 10:54 105 -> socket:[12786]
+lrwx------ 1 root root 64 2011-12-05 10:54 106 -> socket:[12787]
+lrwx------ 1 root root 64 2011-12-05 10:54 107 -> socket:[12788]
+lrwx------ 1 root root 64 2011-12-05 10:54 108 -> socket:[12789]
+lrwx------ 1 root root 64 2011-12-05 10:54 109 -> socket:[12790]
+lrwx------ 1 root root 64 2011-12-05 10:54 11 -> socket:[40004]
+lrwx------ 1 root root 64 2011-12-05 10:54 110 -> socket:[12803]
+lrwx------ 1 root root 64 2011-12-05 10:54 111 -> socket:[12804]
+lrwx------ 1 root root 64 2011-12-05 10:54 112 -> socket:[12816]
+lrwx------ 1 root root 64 2011-12-05 10:54 113 -> socket:[12818]
+lrwx------ 1 root root 64 2011-12-05 10:54 114 -> socket:[12831]
+lrwx------ 1 root root 64 2011-12-05 10:54 115 -> socket:[12832]
+lrwx------ 1 root root 64 2011-12-05 10:54 116 -> socket:[12834]
+lrwx------ 1 root root 64 2011-12-05 10:54 117 -> socket:[12836]
+lrwx------ 1 root root 64 2011-12-05 10:54 118 -> socket:[12838]
+lrwx------ 1 root root 64 2011-12-05 10:54 119 -> socket:[12840]
+lrwx------ 1 root root 64 2011-12-05 10:54 12 -> socket:[11560]
+lrwx------ 1 root root 64 2011-12-05 10:54 120 -> socket:[12842]
+lrwx------ 1 root root 64 2011-12-05 10:54 121 -> socket:[12844]
+lrwx------ 1 root root 64 2011-12-05 10:54 122 -> socket:[12846]
+lrwx------ 1 root root 64 2011-12-05 10:54 123 -> socket:[12848]
+lrwx------ 1 root root 64 2011-12-05 10:54 124 -> socket:[12851]
+lrwx------ 1 root root 64 2011-12-05 10:54 125 -> socket:[12852]
+lrwx------ 1 root root 64 2011-12-05 10:54 126 -> socket:[12854]
+lrwx------ 1 root root 64 2011-12-05 10:54 127 -> socket:[12856]
+lrwx------ 1 root root 64 2011-12-05 10:54 128 -> socket:[12858]
+lrwx------ 1 root root 64 2011-12-05 10:54 129 -> socket:[12860]
+lrwx------ 1 root root 64 2011-12-05 10:54 13 -> socket:[39999]
+lrwx------ 1 root root 64 2011-12-05 10:54 130 -> socket:[12862]
+lrwx------ 1 root root 64 2011-12-05 10:54 131 -> socket:[12864]
+lrwx------ 1 root root 64 2011-12-05 10:54 132 -> socket:[12866]
+lrwx------ 1 root root 64 2011-12-05 10:54 133 -> socket:[12873]
+lrwx------ 1 root root 64 2011-12-05 10:54 134 -> socket:[12880]
+lrwx------ 1 root root 64 2011-12-05 10:54 135 -> socket:[12882]
+lrwx------ 1 root root 64 2011-12-05 10:54 136 -> socket:[12894]
+lrwx------ 1 root root 64 2011-12-05 10:54 137 -> socket:[12896]
+lrwx------ 1 root root 64 2011-12-05 10:54 138 -> socket:[12908]
+lrwx------ 1 root root 64 2011-12-05 10:54 139 -> socket:[12910]
+lrwx------ 1 root root 64 2011-12-05 10:54 14 -> socket:[40005]
+lrwx------ 1 root root 64 2011-12-05 10:54 140 -> socket:[14170]
+lrwx------ 1 root root 64 2011-12-05 10:54 141 -> socket:[12915]
+lrwx------ 1 root root 64 2011-12-05 10:54 142 -> socket:[12916]
+lrwx------ 1 root root 64 2011-12-05 10:54 143 -> socket:[12918]
+lrwx------ 1 root root 64 2011-12-05 10:54 144 -> socket:[12920]
+lrwx------ 1 root root 64 2011-12-05 10:54 145 -> socket:[12927]
+lrwx------ 1 root root 64 2011-12-05 10:54 146 -> socket:[12944]
+lrwx------ 1 root root 64 2011-12-05 10:54 147 -> socket:[12956]
+lrwx------ 1 root root 64 2011-12-05 10:54 148 -> socket:[12958]
+lrwx------ 1 root root 64 2011-12-05 10:54 149 -> socket:[12980]
+lrwx------ 1 root root 64 2011-12-05 10:54 15 -> socket:[40001]
+lrwx------ 1 root root 64 2011-12-05 10:54 150 -> socket:[14222]
+lrwx------ 1 root root 64 2011-12-05 10:54 151 -> socket:[14259]
+lrwx------ 1 root root 64 2011-12-05 10:54 152 -> socket:[14302]
+lrwx------ 1 root root 64 2011-12-05 10:54 153 -> socket:[14313]
+lrwx------ 1 root root 64 2011-12-05 10:54 154 -> socket:[14321]
+lrwx------ 1 root root 64 2011-12-05 10:54 155 -> socket:[14334]
+lrwx------ 1 root root 64 2011-12-05 10:54 156 -> socket:[14346]
+lrwx------ 1 root root 64 2011-12-05 10:54 157 -> socket:[14348]
+lrwx------ 1 root root 64 2011-12-05 10:54 158 -> socket:[14350]
+lrwx------ 1 root root 64 2011-12-05 10:54 159 -> socket:[15519]
+lrwx------ 1 root root 64 2011-12-05 10:54 16 -> socket:[39994]
+lrwx------ 1 root root 64 2011-12-05 10:54 160 -> socket:[15668]
+lrwx------ 1 root root 64 2011-12-05 10:54 161 -> socket:[15679]
+lrwx------ 1 root root 64 2011-12-05 10:54 162 -> socket:[15727]
+lrwx------ 1 root root 64 2011-12-05 10:54 163 -> socket:[15740]
+lrwx------ 1 root root 64 2011-12-05 10:54 164 -> socket:[15757]
+lrwx------ 1 root root 64 2011-12-05 10:54 165 -> socket:[15759]
+lrwx------ 1 root root 64 2011-12-05 10:54 166 -> socket:[15761]
+lrwx------ 1 root root 64 2011-12-05 10:54 167 -> socket:[15763]
+lrwx------ 1 root root 64 2011-12-05 10:54 168 -> socket:[15765]
+lrwx------ 1 root root 64 2011-12-05 10:54 169 -> socket:[15767]
+lrwx------ 1 root root 64 2011-12-05 10:54 17 -> socket:[12488]
+lrwx------ 1 root root 64 2011-12-05 10:54 170 -> socket:[15769]
+lrwx------ 1 root root 64 2011-12-05 10:54 171 -> socket:[15771]
+lrwx------ 1 root root 64 2011-12-05 10:54 172 -> socket:[15773]
+lrwx------ 1 root root 64 2011-12-05 10:54 173 -> socket:[15775]
+lrwx------ 1 root root 64 2011-12-05 10:54 174 -> socket:[15777]
+lrwx------ 1 root root 64 2011-12-05 10:54 175 -> socket:[15779]
+lrwx------ 1 root root 64 2011-12-05 10:54 176 -> socket:[15781]
+lrwx------ 1 root root 64 2011-12-05 10:54 177 -> socket:[15783]
+lrwx------ 1 root root 64 2011-12-05 10:54 178 -> socket:[15785]
+lrwx------ 1 root root 64 2011-12-05 10:54 179 -> socket:[15795]
+lrwx------ 1 root root 64 2011-12-05 10:54 18 -> socket:[10214]
+lrwx------ 1 root root 64 2011-12-05 10:54 180 -> socket:[15796]
+lrwx------ 1 root root 64 2011-12-05 10:54 181 -> socket:[15797]
+lrwx------ 1 root root 64 2011-12-05 10:54 182 -> socket:[15798]
+lrwx------ 1 root root 64 2011-12-05 10:54 183 -> socket:[15800]
+lrwx------ 1 root root 64 2011-12-05 10:54 184 -> socket:[15802]
+lrwx------ 1 root root 64 2011-12-05 10:54 185 -> socket:[15804]
+lrwx------ 1 root root 64 2011-12-05 10:54 186 -> socket:[15806]
+lrwx------ 1 root root 64 2011-12-05 10:54 187 -> socket:[15809]
+lrwx------ 1 root root 64 2011-12-05 10:54 188 -> socket:[15810]
+lrwx------ 1 root root 64 2011-12-05 10:54 189 -> socket:[15812]
+lrwx------ 1 root root 64 2011-12-05 10:54 19 -> socket:[10656]
+lrwx------ 1 root root 64 2011-12-05 10:54 190 -> socket:[15814]
+lrwx------ 1 root root 64 2011-12-05 10:54 191 -> socket:[15816]
+lrwx------ 1 root root 64 2011-12-05 10:54 192 -> socket:[15818]
+lrwx------ 1 root root 64 2011-12-05 10:54 193 -> socket:[15821]
+lrwx------ 1 root root 64 2011-12-05 10:54 194 -> socket:[15822]
+lrwx------ 1 root root 64 2011-12-05 10:54 195 -> socket:[15824]
+lrwx------ 1 root root 64 2011-12-05 10:54 196 -> socket:[15826]
+lrwx------ 1 root root 64 2011-12-05 10:54 197 -> socket:[15828]
+lrwx------ 1 root root 64 2011-12-05 10:54 198 -> socket:[15830]
+lrwx------ 1 root root 64 2011-12-05 10:54 199 -> socket:[15852]
+lr-x------ 1 root root 64 2011-12-05 10:54 2 -> /dev/null
+lrwx------ 1 root root 64 2011-12-05 10:54 20 -> socket:[10847]
+lrwx------ 1 root root 64 2011-12-05 10:54 200 -> socket:[15854]
+lrwx------ 1 root root 64 2011-12-05 10:54 201 -> socket:[15856]
+lrwx------ 1 root root 64 2011-12-05 10:54 202 -> socket:[15858]
+lrwx------ 1 root root 64 2011-12-05 10:54 203 -> socket:[15860]
+lrwx------ 1 root root 64 2011-12-05 10:54 204 -> socket:[15866]
+lrwx------ 1 root root 64 2011-12-05 10:54 205 -> socket:[15873]
+lrwx------ 1 root root 64 2011-12-05 10:54 206 -> socket:[15875]
+lrwx------ 1 root root 64 2011-12-05 10:54 207 -> socket:[15877]
+lrwx------ 1 root root 64 2011-12-05 10:54 208 -> socket:[15879]
+lrwx------ 1 root root 64 2011-12-05 10:54 209 -> socket:[15881]
+lrwx------ 1 root root 64 2011-12-05 10:54 21 -> socket:[10849]
+lrwx------ 1 root root 64 2011-12-05 10:54 210 -> socket:[15895]
+lrwx------ 1 root root 64 2011-12-05 10:54 211 -> socket:[15896]
+lrwx------ 1 root root 64 2011-12-05 10:54 212 -> socket:[15897]
+lrwx------ 1 root root 64 2011-12-05 10:54 213 -> socket:[15898]
+lrwx------ 1 root root 64 2011-12-05 10:54 214 -> socket:[15899]
+lrwx------ 1 root root 64 2011-12-05 10:54 215 -> socket:[15900]
+lrwx------ 1 root root 64 2011-12-05 10:54 216 -> socket:[15901]
+lrwx------ 1 root root 64 2011-12-05 10:54 217 -> socket:[15902]
+lrwx------ 1 root root 64 2011-12-05 10:54 218 -> socket:[15904]
+lrwx------ 1 root root 64 2011-12-05 10:54 219 -> socket:[15906]
+lrwx------ 1 root root 64 2011-12-05 10:54 22 -> socket:[10856]
+lrwx------ 1 root root 64 2011-12-05 10:54 220 -> socket:[15908]
+lrwx------ 1 root root 64 2011-12-05 10:54 221 -> socket:[15910]
+lrwx------ 1 root root 64 2011-12-05 10:54 222 -> socket:[15912]
+lrwx------ 1 root root 64 2011-12-05 10:54 223 -> socket:[15914]
+lrwx------ 1 root root 64 2011-12-05 10:54 224 -> socket:[15926]
+lrwx------ 1 root root 64 2011-12-05 10:54 225 -> socket:[15928]
+lrwx------ 1 root root 64 2011-12-05 10:54 226 -> socket:[15930]
+lrwx------ 1 root root 64 2011-12-05 10:54 227 -> socket:[15932]
+lrwx------ 1 root root 64 2011-12-05 10:54 228 -> socket:[15934]
+lrwx------ 1 root root 64 2011-12-05 10:54 229 -> socket:[15936]
+lrwx------ 1 root root 64 2011-12-05 10:54 23 -> socket:[10858]
+lrwx------ 1 root root 64 2011-12-05 10:54 230 -> socket:[15943]
+lrwx------ 1 root root 64 2011-12-05 10:54 231 -> socket:[15945]
+lrwx------ 1 root root 64 2011-12-05 10:54 232 -> socket:[15947]
+lrwx------ 1 root root 64 2011-12-05 10:54 233 -> socket:[15960]
+lrwx------ 1 root root 64 2011-12-05 10:54 234 -> socket:[15961]
+lrwx------ 1 root root 64 2011-12-05 10:54 235 -> socket:[15962]
+lrwx------ 1 root root 64 2011-12-05 10:54 236 -> socket:[15963]
+lrwx------ 1 root root 64 2011-12-05 10:54 237 -> socket:[15964]
+lrwx------ 1 root root 64 2011-12-05 10:54 238 -> socket:[15965]
+lrwx------ 1 root root 64 2011-12-05 10:54 239 -> socket:[15966]
+lrwx------ 1 root root 64 2011-12-05 10:54 24 -> socket:[10863]
+lrwx------ 1 root root 64 2011-12-05 10:54 240 -> socket:[15968]
+lrwx------ 1 root root 64 2011-12-05 10:54 241 -> socket:[15970]
+lrwx------ 1 root root 64 2011-12-05 10:54 242 -> socket:[15973]
+lrwx------ 1 root root 64 2011-12-05 10:54 243 -> socket:[15974]
+lrwx------ 1 root root 64 2011-12-05 10:54 244 -> socket:[15976]
+lrwx------ 1 root root 64 2011-12-05 10:54 245 -> socket:[15984]
+lrwx------ 1 root root 64 2011-12-05 10:54 246 -> socket:[15985]
+lrwx------ 1 root root 64 2011-12-05 10:54 247 -> socket:[16002]
+lrwx------ 1 root root 64 2011-12-05 10:54 248 -> socket:[16004]
+lrwx------ 1 root root 64 2011-12-05 10:54 249 -> socket:[16006]
+lrwx------ 1 root root 64 2011-12-05 10:54 25 -> socket:[10872]
+lrwx------ 1 root root 64 2011-12-05 10:54 250 -> socket:[16008]
+lrwx------ 1 root root 64 2011-12-05 10:54 251 -> socket:[16015]
+lrwx------ 1 root root 64 2011-12-05 10:54 252 -> socket:[16017]
+lrwx------ 1 root root 64 2011-12-05 10:54 253 -> socket:[16019]
+lrwx------ 1 root root 64 2011-12-05 10:54 254 -> socket:[16021]
+lrwx------ 1 root root 64 2011-12-05 10:54 255 -> socket:[16023]
+lrwx------ 1 root root 64 2011-12-05 10:54 256 -> socket:[16035]
+lrwx------ 1 root root 64 2011-12-05 10:54 257 -> socket:[16036]
+lrwx------ 1 root root 64 2011-12-05 10:54 258 -> socket:[16037]
+lrwx------ 1 root root 64 2011-12-05 10:54 259 -> socket:[16038]
+lrwx------ 1 root root 64 2011-12-05 10:54 26 -> socket:[10873]
+lrwx------ 1 root root 64 2011-12-05 10:54 260 -> socket:[16039]
+lrwx------ 1 root root 64 2011-12-05 10:54 261 -> socket:[16040]
+lrwx------ 1 root root 64 2011-12-05 10:54 262 -> socket:[16042]
+lrwx------ 1 root root 64 2011-12-05 10:54 263 -> socket:[16044]
+lrwx------ 1 root root 64 2011-12-05 10:54 264 -> socket:[16046]
+lrwx------ 1 root root 64 2011-12-05 10:54 265 -> socket:[16048]
+lrwx------ 1 root root 64 2011-12-05 10:54 266 -> socket:[16050]
+lrwx------ 1 root root 64 2011-12-05 10:54 267 -> socket:[16057]
+lrwx------ 1 root root 64 2011-12-05 10:54 268 -> socket:[16081]
+lrwx------ 1 root root 64 2011-12-05 10:54 269 -> socket:[16083]
+lrwx------ 1 root root 64 2011-12-05 10:54 27 -> socket:[10874]
+lrwx------ 1 root root 64 2011-12-05 10:54 270 -> socket:[16095]
+lrwx------ 1 root root 64 2011-12-05 10:54 271 -> socket:[16097]
+lrwx------ 1 root root 64 2011-12-05 10:54 272 -> socket:[16099]
+lrwx------ 1 root root 64 2011-12-05 10:54 273 -> socket:[16106]
+lrwx------ 1 root root 64 2011-12-05 10:54 274 -> socket:[16108]
+lrwx------ 1 root root 64 2011-12-05 10:54 275 -> socket:[16115]
+lrwx------ 1 root root 64 2011-12-05 10:54 276 -> socket:[16117]
+lrwx------ 1 root root 64 2011-12-05 10:54 277 -> socket:[16120]
+lrwx------ 1 root root 64 2011-12-05 10:54 278 -> socket:[16121]
+lrwx------ 1 root root 64 2011-12-05 10:54 279 -> socket:[16123]
+lrwx------ 1 root root 64 2011-12-05 10:54 28 -> socket:[10876]
+lrwx------ 1 root root 64 2011-12-05 10:54 280 -> socket:[16125]
+lrwx------ 1 root root 64 2011-12-05 10:54 281 -> socket:[16128]
+lrwx------ 1 root root 64 2011-12-05 10:54 282 -> socket:[16130]
+lrwx------ 1 root root 64 2011-12-05 10:54 283 -> socket:[16131]
+lrwx------ 1 root root 64 2011-12-05 10:54 284 -> socket:[16133]
+lrwx------ 1 root root 64 2011-12-05 10:54 285 -> socket:[16135]
+lrwx------ 1 root root 64 2011-12-05 10:54 286 -> socket:[16137]
+lrwx------ 1 root root 64 2011-12-05 10:54 287 -> socket:[16149]
+lrwx------ 1 root root 64 2011-12-05 10:54 288 -> socket:[16151]
+lrwx------ 1 root root 64 2011-12-05 10:54 289 -> socket:[16153]
+lrwx------ 1 root root 64 2011-12-05 10:54 29 -> socket:[10878]
+lrwx------ 1 root root 64 2011-12-05 10:54 290 -> socket:[16161]
+lrwx------ 1 root root 64 2011-12-05 10:54 291 -> socket:[16162]
+lrwx------ 1 root root 64 2011-12-05 10:54 292 -> socket:[16174]
+lrwx------ 1 root root 64 2011-12-05 10:54 293 -> socket:[16176]
+lrwx------ 1 root root 64 2011-12-05 10:54 294 -> socket:[16183]
+lrwx------ 1 root root 64 2011-12-05 10:54 295 -> socket:[16185]
+lrwx------ 1 root root 64 2011-12-05 10:54 296 -> socket:[16187]
+lrwx------ 1 root root 64 2011-12-05 10:54 297 -> socket:[16196]
+lrwx------ 1 root root 64 2011-12-05 10:54 298 -> socket:[16197]
+lrwx------ 1 root root 64 2011-12-05 10:54 299 -> socket:[16199]
+l-wx------ 1 root root 64 2011-12-05 10:54 3 -> /var/log/ceph/mds.a.log
+lrwx------ 1 root root 64 2011-12-05 10:54 30 -> socket:[10892]
+lrwx------ 1 root root 64 2011-12-05 10:54 300 -> socket:[16200]
+lrwx------ 1 root root 64 2011-12-05 10:54 301 -> socket:[16202]
+lrwx------ 1 root root 64 2011-12-05 10:54 302 -> socket:[16204]
+lrwx------ 1 root root 64 2011-12-05 10:54 303 -> socket:[16206]
+lrwx------ 1 root root 64 2011-12-05 10:54 304 -> socket:[16213]
+lrwx------ 1 root root 64 2011-12-05 10:54 305 -> socket:[16214]
+lrwx------ 1 root root 64 2011-12-05 10:54 306 -> socket:[16216]
+lrwx------ 1 root root 64 2011-12-05 10:54 307 -> socket:[16223]
+lrwx------ 1 root root 64 2011-12-05 10:54 308 -> socket:[16225]
+lrwx------ 1 root root 64 2011-12-05 10:54 309 -> socket:[16227]
+lrwx------ 1 root root 64 2011-12-05 10:54 31 -> socket:[10919]
+lrwx------ 1 root root 64 2011-12-05 10:54 310 -> socket:[16229]
+lrwx------ 1 root root 64 2011-12-05 10:54 311 -> socket:[16231]
+lrwx------ 1 root root 64 2011-12-05 10:54 312 -> socket:[16239]
+lrwx------ 1 root root 64 2011-12-05 10:54 313 -> socket:[16240]
+lrwx------ 1 root root 64 2011-12-05 10:54 314 -> socket:[16252]
+lrwx------ 1 root root 64 2011-12-05 10:54 315 -> socket:[16265]
+lrwx------ 1 root root 64 2011-12-05 10:54 316 -> socket:[16266]
+lrwx------ 1 root root 64 2011-12-05 10:54 317 -> socket:[16273]
+lrwx------ 1 root root 64 2011-12-05 10:54 318 -> socket:[16275]
+lrwx------ 1 root root 64 2011-12-05 10:54 319 -> socket:[16282]
+lrwx------ 1 root root 64 2011-12-05 10:54 32 -> socket:[39995]
+lrwx------ 1 root root 64 2011-12-05 10:54 320 -> socket:[16284]
+lrwx------ 1 root root 64 2011-12-05 10:54 321 -> socket:[16286]
+lrwx------ 1 root root 64 2011-12-05 10:54 322 -> socket:[16288]
+lrwx------ 1 root root 64 2011-12-05 10:54 323 -> socket:[16290]
+lrwx------ 1 root root 64 2011-12-05 10:54 324 -> socket:[16297]
+lrwx------ 1 root root 64 2011-12-05 10:54 325 -> socket:[16299]
+lrwx------ 1 root root 64 2011-12-05 10:54 326 -> socket:[16301]
+lrwx------ 1 root root 64 2011-12-05 10:54 327 -> socket:[16303]
+lrwx------ 1 root root 64 2011-12-05 10:54 328 -> socket:[16305]
+lrwx------ 1 root root 64 2011-12-05 10:54 329 -> socket:[16307]
+lrwx------ 1 root root 64 2011-12-05 10:54 33 -> socket:[11572]
+lrwx------ 1 root root 64 2011-12-05 10:54 330 -> socket:[16310]
+lrwx------ 1 root root 64 2011-12-05 10:54 331 -> socket:[16311]
+lrwx------ 1 root root 64 2011-12-05 10:54 332 -> socket:[16313]
+lrwx------ 1 root root 64 2011-12-05 10:54 333 -> socket:[16315]
+lrwx------ 1 root root 64 2011-12-05 10:54 334 -> socket:[16317]
+lrwx------ 1 root root 64 2011-12-05 10:54 335 -> socket:[18794]
+lrwx------ 1 root root 64 2011-12-05 10:54 336 -> socket:[16346]
+lrwx------ 1 root root 64 2011-12-05 10:54 337 -> socket:[16358]
+lrwx------ 1 root root 64 2011-12-05 10:54 338 -> socket:[16360]
+lrwx------ 1 root root 64 2011-12-05 10:54 339 -> socket:[16362]
+lrwx------ 1 root root 64 2011-12-05 10:54 34 -> socket:[12540]
+lrwx------ 1 root root 64 2011-12-05 10:54 340 -> socket:[16370]
+lrwx------ 1 root root 64 2011-12-05 10:54 341 -> socket:[16377]
+lrwx------ 1 root root 64 2011-12-05 10:54 342 -> socket:[19386]
+lrwx------ 1 root root 64 2011-12-05 10:54 343 -> socket:[19398]
+lrwx------ 1 root root 64 2011-12-05 10:54 344 -> socket:[19435]
+lrwx------ 1 root root 64 2011-12-05 10:54 345 -> socket:[19441]
+lrwx------ 1 root root 64 2011-12-05 10:54 346 -> socket:[19489]
+lrwx------ 1 root root 64 2011-12-05 10:54 347 -> socket:[19502]
+lrwx------ 1 root root 64 2011-12-05 10:54 348 -> socket:[19519]
+lrwx------ 1 root root 64 2011-12-05 10:54 349 -> socket:[19521]
+lrwx------ 1 root root 64 2011-12-05 10:54 35 -> socket:[20392]
+lrwx------ 1 root root 64 2011-12-05 10:54 350 -> socket:[19523]
+lrwx------ 1 root root 64 2011-12-05 10:54 351 -> socket:[19525]
+lrwx------ 1 root root 64 2011-12-05 10:54 352 -> socket:[19527]
+lrwx------ 1 root root 64 2011-12-05 10:54 353 -> socket:[19529]
+lrwx------ 1 root root 64 2011-12-05 10:54 354 -> socket:[19531]
+lrwx------ 1 root root 64 2011-12-05 10:54 355 -> socket:[19533]
+lrwx------ 1 root root 64 2011-12-05 10:54 356 -> socket:[19535]
+lrwx------ 1 root root 64 2011-12-05 10:54 357 -> socket:[19537]
+lrwx------ 1 root root 64 2011-12-05 10:54 358 -> socket:[19539]
+lrwx------ 1 root root 64 2011-12-05 10:54 359 -> socket:[19541]
+lrwx------ 1 root root 64 2011-12-05 10:54 36 -> socket:[39997]
+lrwx------ 1 root root 64 2011-12-05 10:54 360 -> socket:[19543]
+lrwx------ 1 root root 64 2011-12-05 10:54 361 -> socket:[19545]
+lrwx------ 1 root root 64 2011-12-05 10:54 362 -> socket:[19547]
+lrwx------ 1 root root 64 2011-12-05 10:54 363 -> socket:[19549]
+lrwx------ 1 root root 64 2011-12-05 10:54 364 -> socket:[19551]
+lrwx------ 1 root root 64 2011-12-05 10:54 365 -> socket:[19554]
+lrwx------ 1 root root 64 2011-12-05 10:54 366 -> socket:[19555]
+lrwx------ 1 root root 64 2011-12-05 10:54 367 -> socket:[19557]
+lrwx------ 1 root root 64 2011-12-05 10:54 368 -> socket:[19559]
+lrwx------ 1 root root 64 2011-12-05 10:54 369 -> socket:[19567]
+lrwx------ 1 root root 64 2011-12-05 10:54 37 -> socket:[11612]
+lrwx------ 1 root root 64 2011-12-05 10:54 370 -> socket:[19568]
+lrwx------ 1 root root 64 2011-12-05 10:54 371 -> socket:[19571]
+lrwx------ 1 root root 64 2011-12-05 10:54 372 -> socket:[19572]
+lrwx------ 1 root root 64 2011-12-05 10:54 373 -> socket:[19575]
+lrwx------ 1 root root 64 2011-12-05 10:54 374 -> socket:[19576]
+lrwx------ 1 root root 64 2011-12-05 10:54 375 -> socket:[19578]
+lrwx------ 1 root root 64 2011-12-05 10:54 376 -> socket:[19580]
+lrwx------ 1 root root 64 2011-12-05 10:54 377 -> socket:[19583]
+lrwx------ 1 root root 64 2011-12-05 10:54 378 -> socket:[19584]
+lrwx------ 1 root root 64 2011-12-05 10:54 379 -> socket:[19586]
+lrwx------ 1 root root 64 2011-12-05 10:54 38 -> socket:[11629]
+lrwx------ 1 root root 64 2011-12-05 10:54 380 -> socket:[19588]
+lrwx------ 1 root root 64 2011-12-05 10:54 381 -> socket:[19590]
+lrwx------ 1 root root 64 2011-12-05 10:54 382 -> socket:[19592]
+lrwx------ 1 root root 64 2011-12-05 10:54 383 -> socket:[19605]
+lrwx------ 1 root root 64 2011-12-05 10:54 384 -> socket:[19607]
+lrwx------ 1 root root 64 2011-12-05 10:54 385 -> socket:[19609]
+lrwx------ 1 root root 64 2011-12-05 10:54 386 -> socket:[19611]
+lrwx------ 1 root root 64 2011-12-05 10:54 387 -> socket:[19618]
+lrwx------ 1 root root 64 2011-12-05 10:54 388 -> socket:[19620]
+lrwx------ 1 root root 64 2011-12-05 10:54 389 -> socket:[19622]
+lrwx------ 1 root root 64 2011-12-05 10:54 39 -> socket:[11689]
+lrwx------ 1 root root 64 2011-12-05 10:54 390 -> socket:[19624]
+lrwx------ 1 root root 64 2011-12-05 10:54 391 -> socket:[19626]
+lrwx------ 1 root root 64 2011-12-05 10:54 392 -> socket:[19628]
+lrwx------ 1 root root 64 2011-12-05 10:54 393 -> socket:[19630]
+lrwx------ 1 root root 64 2011-12-05 10:54 394 -> socket:[19632]
+lrwx------ 1 root root 64 2011-12-05 10:54 395 -> socket:[19641]
+lrwx------ 1 root root 64 2011-12-05 10:54 396 -> socket:[19642]
+lrwx------ 1 root root 64 2011-12-05 10:54 397 -> socket:[19643]
+lrwx------ 1 root root 64 2011-12-05 10:54 398 -> socket:[19645]
+lrwx------ 1 root root 64 2011-12-05 10:54 399 -> socket:[19647]
+lrwx------ 1 root root 64 2011-12-05 10:54 4 -> socket:[7837]
+lrwx------ 1 root root 64 2011-12-05 10:54 40 -> socket:[11716]
+lrwx------ 1 root root 64 2011-12-05 10:54 400 -> socket:[19649]
+lrwx------ 1 root root 64 2011-12-05 10:54 401 -> socket:[19651]
+lrwx------ 1 root root 64 2011-12-05 10:54 402 -> socket:[19653]
+lrwx------ 1 root root 64 2011-12-05 10:54 403 -> socket:[19666]
+lrwx------ 1 root root 64 2011-12-05 10:54 404 -> socket:[19667]
+lrwx------ 1 root root 64 2011-12-05 10:54 405 -> socket:[19668]
+lrwx------ 1 root root 64 2011-12-05 10:54 406 -> socket:[19675]
+lrwx------ 1 root root 64 2011-12-05 10:54 407 -> socket:[19677]
+lrwx------ 1 root root 64 2011-12-05 10:54 408 -> socket:[19679]
+lrwx------ 1 root root 64 2011-12-05 10:54 409 -> socket:[19681]
+lrwx------ 1 root root 64 2011-12-05 10:54 41 -> socket:[11727]
+lrwx------ 1 root root 64 2011-12-05 10:54 410 -> socket:[19683]
+lrwx------ 1 root root 64 2011-12-05 10:54 411 -> socket:[19685]
+lrwx------ 1 root root 64 2011-12-05 10:54 412 -> socket:[19687]
+lrwx------ 1 root root 64 2011-12-05 10:54 413 -> socket:[19689]
+lrwx------ 1 root root 64 2011-12-05 10:54 414 -> socket:[19691]
+lrwx------ 1 root root 64 2011-12-05 10:54 415 -> socket:[19693]
+lrwx------ 1 root root 64 2011-12-05 10:54 416 -> socket:[19695]
+lrwx------ 1 root root 64 2011-12-05 10:54 417 -> socket:[19697]
+lrwx------ 1 root root 64 2011-12-05 10:54 418 -> socket:[19699]
+lrwx------ 1 root root 64 2011-12-05 10:54 419 -> socket:[19701]
+lrwx------ 1 root root 64 2011-12-05 10:54 42 -> socket:[11748]
+lrwx------ 1 root root 64 2011-12-05 10:54 420 -> socket:[19704]
+lrwx------ 1 root root 64 2011-12-05 10:54 421 -> socket:[19705]
+lrwx------ 1 root root 64 2011-12-05 10:54 422 -> socket:[19716]
+lrwx------ 1 root root 64 2011-12-05 10:54 423 -> socket:[19718]
+lrwx------ 1 root root 64 2011-12-05 10:54 424 -> socket:[19707]
+lrwx------ 1 root root 64 2011-12-05 10:54 425 -> socket:[19709]
+lrwx------ 1 root root 64 2011-12-05 10:54 426 -> socket:[19720]
+lrwx------ 1 root root 64 2011-12-05 10:54 427 -> socket:[19727]
+lrwx------ 1 root root 64 2011-12-05 10:54 428 -> socket:[19735]
+lrwx------ 1 root root 64 2011-12-05 10:54 429 -> socket:[19736]
+lrwx------ 1 root root 64 2011-12-05 10:54 43 -> socket:[11761]
+lrwx------ 1 root root 64 2011-12-05 10:54 430 -> socket:[19738]
+lrwx------ 1 root root 64 2011-12-05 10:54 431 -> socket:[19740]
+lrwx------ 1 root root 64 2011-12-05 10:54 432 -> socket:[19742]
+lrwx------ 1 root root 64 2011-12-05 10:54 433 -> socket:[19744]
+lrwx------ 1 root root 64 2011-12-05 10:54 434 -> socket:[19746]
+lrwx------ 1 root root 64 2011-12-05 10:54 435 -> socket:[19748]
+lrwx------ 1 root root 64 2011-12-05 10:54 436 -> socket:[19750]
+lrwx------ 1 root root 64 2011-12-05 10:54 437 -> socket:[19752]
+lrwx------ 1 root root 64 2011-12-05 10:54 438 -> socket:[19754]
+lrwx------ 1 root root 64 2011-12-05 10:54 439 -> socket:[19756]
+lrwx------ 1 root root 64 2011-12-05 10:54 44 -> socket:[11778]
+lrwx------ 1 root root 64 2011-12-05 10:54 440 -> socket:[19765]
+lrwx------ 1 root root 64 2011-12-05 10:54 441 -> socket:[19766]
+lrwx------ 1 root root 64 2011-12-05 10:54 442 -> socket:[19767]
+lrwx------ 1 root root 64 2011-12-05 10:54 443 -> socket:[19769]
+lrwx------ 1 root root 64 2011-12-05 10:54 444 -> socket:[19771]
+lrwx------ 1 root root 64 2011-12-05 10:54 445 -> socket:[19773]
+lrwx------ 1 root root 64 2011-12-05 10:54 446 -> socket:[19775]
+lrwx------ 1 root root 64 2011-12-05 10:54 447 -> socket:[19777]
+lrwx------ 1 root root 64 2011-12-05 10:54 448 -> socket:[19784]
+lrwx------ 1 root root 64 2011-12-05 10:54 449 -> socket:[19786]
+lrwx------ 1 root root 64 2011-12-05 10:54 45 -> socket:[11780]
+lrwx------ 1 root root 64 2011-12-05 10:54 450 -> socket:[19788]
+lrwx------ 1 root root 64 2011-12-05 10:54 451 -> socket:[19795]
+lrwx------ 1 root root 64 2011-12-05 10:54 452 -> socket:[19797]
+lrwx------ 1 root root 64 2011-12-05 10:54 453 -> socket:[19799]
+lrwx------ 1 root root 64 2011-12-05 10:54 454 -> socket:[19801]
+lrwx------ 1 root root 64 2011-12-05 10:54 455 -> socket:[19803]
+lrwx------ 1 root root 64 2011-12-05 10:54 456 -> socket:[19811]
+lrwx------ 1 root root 64 2011-12-05 10:54 457 -> socket:[19812]
+lrwx------ 1 root root 64 2011-12-05 10:54 458 -> socket:[19814]
+lrwx------ 1 root root 64 2011-12-05 10:54 459 -> socket:[19816]
+lrwx------ 1 root root 64 2011-12-05 10:54 46 -> socket:[11787]
+lrwx------ 1 root root 64 2011-12-05 10:54 460 -> socket:[19819]
+lrwx------ 1 root root 64 2011-12-05 10:54 461 -> socket:[19820]
+lrwx------ 1 root root 64 2011-12-05 10:54 462 -> socket:[19830]
+lrwx------ 1 root root 64 2011-12-05 10:54 463 -> socket:[19831]
+lrwx------ 1 root root 64 2011-12-05 10:54 464 -> socket:[19832]
+lrwx------ 1 root root 64 2011-12-05 10:54 465 -> socket:[19833]
+lrwx------ 1 root root 64 2011-12-05 10:54 466 -> socket:[19835]
+lrwx------ 1 root root 64 2011-12-05 10:54 467 -> socket:[19837]
+lrwx------ 1 root root 64 2011-12-05 10:54 468 -> socket:[19848]
+lrwx------ 1 root root 64 2011-12-05 10:54 469 -> socket:[19849]
+lrwx------ 1 root root 64 2011-12-05 10:54 47 -> socket:[40000]
+lrwx------ 1 root root 64 2011-12-05 10:54 470 -> socket:[19850]
+lrwx------ 1 root root 64 2011-12-05 10:54 471 -> socket:[19851]
+lrwx------ 1 root root 64 2011-12-05 10:54 472 -> socket:[19852]
+lrwx------ 1 root root 64 2011-12-05 10:54 473 -> socket:[19854]
+lrwx------ 1 root root 64 2011-12-05 10:54 474 -> socket:[19856]
+lrwx------ 1 root root 64 2011-12-05 10:54 475 -> socket:[19863]
+lrwx------ 1 root root 64 2011-12-05 10:54 476 -> socket:[19865]
+lrwx------ 1 root root 64 2011-12-05 10:54 477 -> socket:[19867]
+lrwx------ 1 root root 64 2011-12-05 10:54 478 -> socket:[19869]
+lrwx------ 1 root root 64 2011-12-05 10:54 479 -> socket:[19871]
+lrwx------ 1 root root 64 2011-12-05 10:54 48 -> socket:[39996]
+lrwx------ 1 root root 64 2011-12-05 10:54 480 -> socket:[19878]
+lrwx------ 1 root root 64 2011-12-05 10:54 481 -> socket:[19880]
+lrwx------ 1 root root 64 2011-12-05 10:54 482 -> socket:[19882]
+lrwx------ 1 root root 64 2011-12-05 10:54 483 -> socket:[19884]
+lrwx------ 1 root root 64 2011-12-05 10:54 484 -> socket:[19886]
+lrwx------ 1 root root 64 2011-12-05 10:54 485 -> socket:[19888]
+lrwx------ 1 root root 64 2011-12-05 10:54 486 -> socket:[19890]
+lrwx------ 1 root root 64 2011-12-05 10:54 487 -> socket:[19892]
+lrwx------ 1 root root 64 2011-12-05 10:54 488 -> socket:[19894]
+lrwx------ 1 root root 64 2011-12-05 10:54 489 -> socket:[19902]
+lrwx------ 1 root root 64 2011-12-05 10:54 49 -> socket:[12551]
+lrwx------ 1 root root 64 2011-12-05 10:54 490 -> socket:[19903]
+lrwx------ 1 root root 64 2011-12-05 10:54 491 -> socket:[19905]
+lrwx------ 1 root root 64 2011-12-05 10:54 492 -> socket:[19907]
+lrwx------ 1 root root 64 2011-12-05 10:54 493 -> socket:[19909]
+lrwx------ 1 root root 64 2011-12-05 10:54 494 -> socket:[19911]
+lrwx------ 1 root root 64 2011-12-05 10:54 495 -> socket:[19913]
+lrwx------ 1 root root 64 2011-12-05 10:54 496 -> socket:[19915]
+lrwx------ 1 root root 64 2011-12-05 10:54 497 -> socket:[19922]
+lrwx------ 1 root root 64 2011-12-05 10:54 498 -> socket:[19924]
+lrwx------ 1 root root 64 2011-12-05 10:54 499 -> socket:[19926]
+lr-x------ 1 root root 64 2011-12-05 10:54 5 -> pipe:[7841]
+lrwx------ 1 root root 64 2011-12-05 10:54 50 -> socket:[12605]
+lrwx------ 1 root root 64 2011-12-05 10:54 500 -> socket:[19934]
+lrwx------ 1 root root 64 2011-12-05 10:54 501 -> socket:[19935]
+lrwx------ 1 root root 64 2011-12-05 10:54 502 -> socket:[19937]
+lrwx------ 1 root root 64 2011-12-05 10:54 503 -> socket:[19943]
+lrwx------ 1 root root 64 2011-12-05 10:54 504 -> socket:[19951]
+lrwx------ 1 root root 64 2011-12-05 10:54 505 -> socket:[19952]
+lrwx------ 1 root root 64 2011-12-05 10:54 506 -> socket:[19954]
+lrwx------ 1 root root 64 2011-12-05 10:54 507 -> socket:[19956]
+lrwx------ 1 root root 64 2011-12-05 10:54 508 -> socket:[19958]
+lrwx------ 1 root root 64 2011-12-05 10:54 509 -> socket:[19960]
+lrwx------ 1 root root 64 2011-12-05 10:54 51 -> socket:[12618]
+lrwx------ 1 root root 64 2011-12-05 10:54 510 -> socket:[19962]
+lrwx------ 1 root root 64 2011-12-05 10:54 511 -> socket:[40003]
+lrwx------ 1 root root 64 2011-12-05 10:54 512 -> socket:[19974]
+lrwx------ 1 root root 64 2011-12-05 10:54 513 -> socket:[19975]
+lrwx------ 1 root root 64 2011-12-05 10:54 514 -> socket:[19976]
+lrwx------ 1 root root 64 2011-12-05 10:54 515 -> socket:[19977]
+lrwx------ 1 root root 64 2011-12-05 10:54 516 -> socket:[20409]
+lrwx------ 1 root root 64 2011-12-05 10:54 517 -> socket:[19986]
+lrwx------ 1 root root 64 2011-12-05 10:54 518 -> socket:[19988]
+lrwx------ 1 root root 64 2011-12-05 10:54 519 -> socket:[20446]
+lrwx------ 1 root root 64 2011-12-05 10:54 52 -> socket:[12630]
+lrwx------ 1 root root 64 2011-12-05 10:54 520 -> socket:[19997]
+lrwx------ 1 root root 64 2011-12-05 10:54 521 -> socket:[19999]
+lrwx------ 1 root root 64 2011-12-05 10:54 522 -> socket:[20001]
+lrwx------ 1 root root 64 2011-12-05 10:54 523 -> socket:[20003]
+lrwx------ 1 root root 64 2011-12-05 10:54 524 -> socket:[20010]
+lrwx------ 1 root root 64 2011-12-05 10:54 525 -> socket:[20012]
+lrwx------ 1 root root 64 2011-12-05 10:54 526 -> socket:[20014]
+lrwx------ 1 root root 64 2011-12-05 10:54 527 -> socket:[20022]
+lrwx------ 1 root root 64 2011-12-05 10:54 528 -> socket:[20023]
+lrwx------ 1 root root 64 2011-12-05 10:54 529 -> socket:[20025]
+lrwx------ 1 root root 64 2011-12-05 10:54 53 -> socket:[12632]
+lrwx------ 1 root root 64 2011-12-05 10:54 530 -> socket:[20032]
+lrwx------ 1 root root 64 2011-12-05 10:54 531 -> socket:[20039]
+lrwx------ 1 root root 64 2011-12-05 10:54 532 -> socket:[20046]
+lrwx------ 1 root root 64 2011-12-05 10:54 533 -> socket:[20110]
+lrwx------ 1 root root 64 2011-12-05 10:54 534 -> socket:[20134]
+lrwx------ 1 root root 64 2011-12-05 10:54 535 -> socket:[20146]
+lrwx------ 1 root root 64 2011-12-05 10:54 536 -> socket:[20158]
+lrwx------ 1 root root 64 2011-12-05 10:54 537 -> socket:[20170]
+lrwx------ 1 root root 64 2011-12-05 10:54 538 -> socket:[20192]
+lrwx------ 1 root root 64 2011-12-05 10:54 54 -> socket:[12634]
+lrwx------ 1 root root 64 2011-12-05 10:54 55 -> socket:[12636]
+lrwx------ 1 root root 64 2011-12-05 10:54 56 -> socket:[12639]
+lrwx------ 1 root root 64 2011-12-05 10:54 57 -> socket:[12640]
+lrwx------ 1 root root 64 2011-12-05 10:54 58 -> socket:[12642]
+lrwx------ 1 root root 64 2011-12-05 10:54 59 -> socket:[12644]
+l-wx------ 1 root root 64 2011-12-05 10:54 6 -> pipe:[7841]
+lrwx------ 1 root root 64 2011-12-05 10:54 60 -> socket:[12646]
+lrwx------ 1 root root 64 2011-12-05 10:54 61 -> socket:[12648]
+lrwx------ 1 root root 64 2011-12-05 10:54 62 -> socket:[12651]
+lrwx------ 1 root root 64 2011-12-05 10:54 63 -> socket:[12652]
+lrwx------ 1 root root 64 2011-12-05 10:54 64 -> socket:[12654]
+lrwx------ 1 root root 64 2011-12-05 10:54 65 -> socket:[12656]
+lrwx------ 1 root root 64 2011-12-05 10:54 66 -> socket:[12659]
+lrwx------ 1 root root 64 2011-12-05 10:54 67 -> socket:[12660]
+lrwx------ 1 root root 64 2011-12-05 10:54 68 -> socket:[12662]
+lrwx------ 1 root root 64 2011-12-05 10:54 69 -> socket:[12664]
+lrwx------ 1 root root 64 2011-12-05 10:54 7 -> socket:[7842]
+lrwx------ 1 root root 64 2011-12-05 10:54 70 -> socket:[12666]
+lrwx------ 1 root root 64 2011-12-05 10:54 71 -> socket:[12674]
+lrwx------ 1 root root 64 2011-12-05 10:54 72 -> socket:[12675]
+lrwx------ 1 root root 64 2011-12-05 10:54 73 -> socket:[12682]
+lrwx------ 1 root root 64 2011-12-05 10:54 74 -> socket:[12684]
+lrwx------ 1 root root 64 2011-12-05 10:54 75 -> socket:[12687]
+lrwx------ 1 root root 64 2011-12-05 10:54 76 -> socket:[12688]
+lrwx------ 1 root root 64 2011-12-05 10:54 77 -> socket:[12691]
+lrwx------ 1 root root 64 2011-12-05 10:54 78 -> socket:[12692]
+lrwx------ 1 root root 64 2011-12-05 10:54 79 -> socket:[12694]
+lrwx------ 1 root root 64 2011-12-05 10:54 8 -> socket:[7850]
+lrwx------ 1 root root 64 2011-12-05 10:54 80 -> socket:[12696]
+lrwx------ 1 root root 64 2011-12-05 10:54 81 -> socket:[12698]
+lrwx------ 1 root root 64 2011-12-05 10:54 82 -> socket:[12700]
+lrwx------ 1 root root 64 2011-12-05 10:54 83 -> socket:[12702]
+lrwx------ 1 root root 64 2011-12-05 10:54 84 -> socket:[12704]
+lrwx------ 1 root root 64 2011-12-05 10:54 85 -> socket:[12706]
+lrwx------ 1 root root 64 2011-12-05 10:54 86 -> socket:[12708]
+lrwx------ 1 root root 64 2011-12-05 10:54 87 -> socket:[12732]
+lrwx------ 1 root root 64 2011-12-05 10:54 88 -> socket:[12734]
+lrwx------ 1 root root 64 2011-12-05 10:54 89 -> socket:[12746]
+lrwx------ 1 root root 64 2011-12-05 10:54 9 -> socket:[39998]
+lrwx------ 1 root root 64 2011-12-05 10:54 90 -> socket:[12748]
+lrwx------ 1 root root 64 2011-12-05 10:54 91 -> socket:[12750]
+lrwx------ 1 root root 64 2011-12-05 10:54 92 -> socket:[12752]
+lrwx------ 1 root root 64 2011-12-05 10:54 93 -> socket:[12754]
+lrwx------ 1 root root 64 2011-12-05 10:54 94 -> socket:[12756]
+lrwx------ 1 root root 64 2011-12-05 10:54 95 -> socket:[12758]
+lrwx------ 1 root root 64 2011-12-05 10:54 96 -> socket:[12760]
+lrwx------ 1 root root 64 2011-12-05 10:54 97 -> socket:[12762]
+lrwx------ 1 root root 64 2011-12-05 10:54 98 -> socket:[12764]
+lrwx------ 1 root root 64 2011-12-05 10:54 99 -> socket:[12766]
 
-
--martin
-
-Am 05.12.2011 18:44, schrieb Sage Weil:
-> dc167bac7800c75df971bded4b54e0de48f7b18f (wip-journal branch) should fix
-> this.  Can you give it a test before I push to stable?
->
-> Thanks!
-> sage
->
->
-> On Mon, 5 Dec 2011, Martin Mailand wrote:
->
->> Hi Sage,
->> it happened again, this time I have the log, it's attached.
->>
->> (gdb) thread 1
->> [Switching to thread 1 (Thread 24077)]#0  0x00007f7995b83b3b in raise () from
->> /lib/x86_64-linux-gnu/libpthread.so.0
->> (gdb) frame 11
->> #11 0x000000000072ee8d in FileJournal::committed_thru (this=0x1ebc000,
->> seq=16833973) at os/FileJournal.cc:1011
->> 1011    os/FileJournal.cc: No such file or directory.
->>          in os/FileJournal.cc
->> (gdb) p seq
->> $1 = 16833973
->> (gdb) p last_committed_seq
->> $2 = 16834010
->> (gdb)
->>
->> Is this all info you need, or should I leave the osd in this state for further
->> debugging?
->>
->> -martin
->>
->> Am 29.11.2011 17:07, schrieb Sage Weil:
->>> On Tue, 29 Nov 2011, Martin Mailand wrote:
->>>> Hi,
->>>> with a build from today, I have the same prob.
->>>>
->>>> os/FileJournal.cc: In function 'virtual void
->>>> FileJournal::committed_thru(uint64_t)', in thread '7fc55c85f700'
->>>> os/FileJournal.cc: 1011: FAILED assert(seq>= last_committed_seq)
->>>>    ceph version 0.38-250-gc2889fe
->>>> (commit:c2889fef420611df3dd0de4064c91f6aa9f86625)
->>>
->>> Can you post a log of the failed ceph-osd restart with 'debug journal =
->>> 20' and 'debug filestore = 20'?
->>>
->>> Thanks!
->>> sage
->>>
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---------------000506040208070908090806
-Content-Type: application/x-bzip;
- name="osd.log.bz2"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename="osd.log.bz2"
-
-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
-zg==
---------------000506040208070908090806--
