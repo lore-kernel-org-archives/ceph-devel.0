@@ -1,40 +1,63 @@
 From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Client receives 'connection refused' only after heavy use
-Date: Mon, 5 Dec 2011 11:36:47 -0800
-Message-ID: <CAORUGqATJ=xcs3GPQkdqN5q4MjQcEYewj_aJhq2DVa=m95TLww@mail.gmail.com>
-References: <4EDC0ECF.60805@cs.ucsc.edu> <4EDC1853.5080405@cs.ucsc.edu>
- <Pine.LNX.4.64.1112042046280.8414@cobra.newdream.net> <4EDD1437.4030608@cs.ucsc.edu>
- <CAORUGqCZy+j3MUry7ut=E7YXNiPHLGSqRw5qyqaOKR2=12mjhA@mail.gmail.com> <4EDD15EC.1000900@cs.ucsc.edu>
+Subject: Re: [PATCH/RFC 0/6]: Introduction
+Date: Mon, 5 Dec 2011 13:09:25 -0800
+Message-ID: <CAORUGqCOqMALc6RX3E3Jwn3CraoaSb3M-L=fT9Joeu-e-DHrfw@mail.gmail.com>
+References: <20111121180656.GO13394@systemlinux.org> <1322489076-31364-1-git-send-email-maan@systemlinux.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:53746 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:45001 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753842Ab1LEThK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2011 14:37:10 -0500
-Received: by faar15 with SMTP id r15so991606faa.19
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Dec 2011 11:37:08 -0800 (PST)
-In-Reply-To: <4EDD15EC.1000900@cs.ucsc.edu>
+	with ESMTP id S1756408Ab1LEVJr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2011 16:09:47 -0500
+Received: by faar15 with SMTP id r15so1098678faa.19
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Dec 2011 13:09:46 -0800 (PST)
+In-Reply-To: <1322489076-31364-1-git-send-email-maan@systemlinux.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: Noah Watkins <jayhawk@soe.ucsc.edu>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Andre Noll <maan@systemlinux.org>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On Mon, Dec 5, 2011 at 11:05, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
-> root@issdm-23:~# lsof -n -p 1394
-> COMMAND =C2=A0 PID USER =C2=A0 FD =C2=A0 TYPE =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 DEVICE SIZE/OFF =C2=A0 =C2=A0NODE NAME
-> ceph-mds 1394 root =C2=A0 12u =C2=A0sock =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0 =C2=A0 =C2=A00,6 =C2=A0 =C2=A0 =C2=A00t0 =C2=A0 11560 can=
-'t
-> identify protocol
+On Mon, Nov 28, 2011 at 06:04, Andre Noll <maan@systemlinux.org> wrote:
+> Here is what I have so far. This patch set imports the documentation
+> of the OSD subcommands from the wiki to the preciously emtpy file
+> doc/ops/monitor.rst of the git repo. The first patch is just the
+> result of a cut & paste operation of the corresponding wiki page
+> while the other patches try to improve on this. The aim is to have
+> a complete and up to date documentation for all osd subcommands.
+>
+> I don't believe the series is ready for inclusion yet as some
+> subcommands (cluster_snap, lost, in, out, ...) still lack useful
+> descriptions. It would be nice to add one sentence to each such command
+> that explains its purpose and the circumstances under which one might
+> want to use this particular command.
+>
+> So please review and comment. I will fold in your suggestions and
+> follow up with a re-rolled series provided there is substantial
+> feedback.
 
-There's 506 of these guys in the listing. I would say there's a leak
-of sockets that get created with socket(2), but don't get bind(2) or
-connect(2) called on them.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Good work! I want to roll this in the docs asap, even if it is still partial.
+
+For that to happen, we need to do two things:
+
+1. get you to add Signed-off-by lines as per SubmittingPatches
+2. figure out where this documentation belongs
+
+For ops/monitor is meant for "how do I reassure myself my service
+works the right way". Think nagios, collectd, munin, etc. Apologies
+for not having much content there yet..
+
+The ops/ hierarchy as a whole is meant to be "user/goal oriented".
+That is, I don't want to put in a section "ceph monitor commands".
+Instead, we need to ask the question "what is the admin trying to do",
+and that's the guiding principle for ops/.
+
+A reference-style document that exhaustively lists all possible
+actions should go into some other top-level section. Right now, the
+closest parallels we have are config/ ("Configuration reference") and
+api/, both meant to be comprehensive references.
+
+Let's do this: make your patch put things in doc/control.rst, with the
+title "Control commands", and have doc/index.rst toctree have, below
+config, an entry for control. I can take it from there if we want to
+reorganize the document more.
