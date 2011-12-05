@@ -1,145 +1,39 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: Cluster sync doesn't finsh
-Date: Mon, 05 Dec 2011 13:44:10 +0100
-Message-ID: <4EDCBC9A.1070107@tuxadero.com>
-References: <4EC57338.9040004@tuxadero.com> <CAORUGqA888s9u23r6EfHCbMQ5t5QjGW8iNajdAZqK8pp7GqcXw@mail.gmail.com> <CAF3hT9A2O4xLByS=-sNkgvgV8MsvqgzYvcZf4+J1dXpV97jYVw@mail.gmail.com> <CACLRD_1YxK8R9cRwXnZWK2=3QeQB8oq9-ZeNvtCYYMNpHGTRVg@mail.gmail.com> <4EC6BD55.5050709@tuxadero.com> <CACLRD_3S1xfBE0v=vX5hQcLoBSd_EJVsUvLK8R=oRCBu2fSz4w@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: 'ceph -w' in 0.39
+Date: Mon, 5 Dec 2011 14:59:42 +0100
+Message-ID: <CAO47_--yZib5-zpwDutQSdiw7f8CWu=2CE0jNVAVP2fD4nrcZA@mail.gmail.com>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:57060 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754203Ab1LEMoP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2011 07:44:15 -0500
-In-Reply-To: <CACLRD_3S1xfBE0v=vX5hQcLoBSd_EJVsUvLK8R=oRCBu2fSz4w@mail.gmail.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:61184 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932151Ab1LEN7n (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2011 08:59:43 -0500
+Received: by vbbfc26 with SMTP id fc26so3881068vbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Dec 2011 05:59:42 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Sam,
-is there anything new on this Issue, which I could test?
+I've just updated to 0.39. Everything seems to be fine, except one
+minor thing I noticed:
 
--martin
+'ceph -w' output stops after a few minutes. With "debug ms = 1" it
+ends with these lines:
 
+2011-12-05 14:45:52.939300 7fc700637700 -- 10.255.0.21:0/14145 <==
+mon.2 10.255.0.22:6789/0 315 ==== mon_observe_notify(v4525550 1303
+bytes v4525550) v1 ==== 1354+0+0 (339634604 0 0) 0x7fc6f4000920 con
+0x874070
+2011-12-05 14:45:52.939319    pg v4525550: 2776 pgs: 2776
+active+clean; 3362 GB data, 1646 GB used, 57135 GB / 59615 GB avail
 
-Am 19.11.2011 02:05, schrieb Samuel Just:
-> I've inserted this bug as #1738.  Unfortunately, this will take a bit
-> of effort to fix.  In the short term, you could switch to a crushmap
-> where each node at the bottom level of the hierarchy contains more
-> than one device.  (i.e., remove the node level and stop at the rack
-> level).
->
-> Thanks for the help!
-> -Sam
->
-> On Fri, Nov 18, 2011 at 12:17 PM, Martin Mailand<martin@tuxadero.com>=
-  wrote:
->> Hi Sam,
->>
->> here the crushmap
->>
->> http://85.214.49.87/ceph/crushmap.txt
->> http://85.214.49.87/ceph/crushmap
->>
->> -martin
->>
->> Samuel Just schrieb:
->>>
->>> It looks like a crushmap related problem.  Could you send us the cr=
-ushmap?
->>>
->>> ceph osd getcrushmap
->>>
->>> Thanks
->>> -Sam
->>>
->>> On Fri, Nov 18, 2011 at 10:13 AM, Gregory Farnum
->>> <gregory.farnum@dreamhost.com>  wrote:
->>>>
->>>> On Fri, Nov 18, 2011 at 10:05 AM, Tommi Virtanen
->>>> <tommi.virtanen@dreamhost.com>  wrote:
->>>>>
->>>>> On Thu, Nov 17, 2011 at 12:48, Martin Mailand<martin@tuxadero.com=
->
->>>>> wrote:
->>>>>>
->>>>>> Hi,
->>>>>> I am doing cluster failure test, where I shut down one OSD an wa=
-it for
->>>>>> the
->>>>>> cluster to sync. But the sync never finshed, at around 4-5% it s=
-tops. I
->>>>>> stoped osd2.
->>>>>
->>>>> ...
->>>>>>
->>>>>> 2011-11-17 16:42:45.520740    pg v1337: 600 pgs: 547 active+clea=
-n, 53
->>>>>> active+clean+degraded; 113 GB data, 184 GB used, 1141 GB / 1395 =
-GB
->>>>>> avail;
->>>>>> 4025/82404 degraded (4.884%)
->>>>>
->>>>> ...
->>>>>>
->>>>>> The osd log, the ceph.conf, pg dump, osd dump could be found her=
-e.
->>>>>>
->>>>>> http://85.214.49.87/ceph/
->>>>>
->>>>> This looks a bit worrying:
->>>>>
->>>>> 2011-11-17 17:56:35.771574 7f704c834700 -- 192.168.42.113:0/2424>=
->
->>>>> 192.168.42.114:6802/21115 pipe(0x2596c80 sd=3D17 pgs=3D0 cs=3D0 l=
-=3D0).connect
->>>>> claims to be 192.168.42.114:6802/21507 not 192.168.42.114:6802/21=
-115 -
->>>>> wrong node!
->>>>>
->>>>> So osd.0 is basically refusing to talk to one of the other OSDs. =
-I
->>>>> don't understand the messenger well enough to know why this would=
- be,
->>>>> but it wouldn't surprise me if this problem kept the objects degr=
-aded
->>>>> -- it looks like a breakage in the osd<->osd communication.
->>>>>
->>>>> Now if this was the reason, I'd expect a restart of all the OSDs =
-to
->>>>> get it back in shape; messenger state is ephemeral. Can you confi=
-rm
->>>>> that?
->>>>
->>>> Probably not =E2=80=94 that wrong node thing can occur for a lot o=
-f different
->>>> reasons, some of which matter and most of which don't. Sam's looki=
-ng
->>>> into the problem; there's something going wrong with the CRUSH
->>>> calculations or the monitor PG placement overrides or something...
->>>> -Greg
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+After that, silence...
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+When I press Ctrl-C and restart it, it is again running for a few minutes.
+
+Any hints what I'm doing wrong?
+
+Thanks,
+Christian
