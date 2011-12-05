@@ -1,63 +1,40 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: [PATCH/RFC 0/6]: Introduction
-Date: Mon, 5 Dec 2011 13:09:25 -0800
-Message-ID: <CAORUGqCOqMALc6RX3E3Jwn3CraoaSb3M-L=fT9Joeu-e-DHrfw@mail.gmail.com>
-References: <20111121180656.GO13394@systemlinux.org> <1322489076-31364-1-git-send-email-maan@systemlinux.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: 'ceph -w' in 0.39
+Date: Mon, 5 Dec 2011 13:42:52 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1112051342290.13773@cobra.newdream.net>
+References: <CAO47_--yZib5-zpwDutQSdiw7f8CWu=2CE0jNVAVP2fD4nrcZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:45001 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756408Ab1LEVJr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2011 16:09:47 -0500
-Received: by faar15 with SMTP id r15so1098678faa.19
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Dec 2011 13:09:46 -0800 (PST)
-In-Reply-To: <1322489076-31364-1-git-send-email-maan@systemlinux.org>
+Received: from cobra.newdream.net ([66.33.216.30]:41802 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932409Ab1LEVmx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2011 16:42:53 -0500
+In-Reply-To: <CAO47_--yZib5-zpwDutQSdiw7f8CWu=2CE0jNVAVP2fD4nrcZA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andre Noll <maan@systemlinux.org>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Christian Brunner <chb@muc.de>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Nov 28, 2011 at 06:04, Andre Noll <maan@systemlinux.org> wrote:
-> Here is what I have so far. This patch set imports the documentation
-> of the OSD subcommands from the wiki to the preciously emtpy file
-> doc/ops/monitor.rst of the git repo. The first patch is just the
-> result of a cut & paste operation of the corresponding wiki page
-> while the other patches try to improve on this. The aim is to have
-> a complete and up to date documentation for all osd subcommands.
->
-> I don't believe the series is ready for inclusion yet as some
-> subcommands (cluster_snap, lost, in, out, ...) still lack useful
-> descriptions. It would be nice to add one sentence to each such command
-> that explains its purpose and the circumstances under which one might
-> want to use this particular command.
->
-> So please review and comment. I will fold in your suggestions and
-> follow up with a re-rolled series provided there is substantial
-> feedback.
+Hi Christian,
 
-Good work! I want to roll this in the docs asap, even if it is still partial.
+On Mon, 5 Dec 2011, Christian Brunner wrote:
+> I've just updated to 0.39. Everything seems to be fine, except one
+> minor thing I noticed:
+> 
+> 'ceph -w' output stops after a few minutes. With "debug ms = 1" it
+> ends with these lines:
+> 
+> 2011-12-05 14:45:52.939300 7fc700637700 -- 10.255.0.21:0/14145 <==
+> mon.2 10.255.0.22:6789/0 315 ==== mon_observe_notify(v4525550 1303
+> bytes v4525550) v1 ==== 1354+0+0 (339634604 0 0) 0x7fc6f4000920 con
+> 0x874070
+> 2011-12-05 14:45:52.939319    pg v4525550: 2776 pgs: 2776
+> active+clean; 3362 GB data, 1646 GB used, 57135 GB / 59615 GB avail
+> 
+> After that, silence...
 
-For that to happen, we need to do two things:
+I just pushed a fix for this to the stable branch.  
 
-1. get you to add Signed-off-by lines as per SubmittingPatches
-2. figure out where this documentation belongs
-
-For ops/monitor is meant for "how do I reassure myself my service
-works the right way". Think nagios, collectd, munin, etc. Apologies
-for not having much content there yet..
-
-The ops/ hierarchy as a whole is meant to be "user/goal oriented".
-That is, I don't want to put in a section "ceph monitor commands".
-Instead, we need to ask the question "what is the admin trying to do",
-and that's the guiding principle for ops/.
-
-A reference-style document that exhaustively lists all possible
-actions should go into some other top-level section. Right now, the
-closest parallels we have are config/ ("Configuration reference") and
-api/, both meant to be comprehensive references.
-
-Let's do this: make your patch put things in doc/control.rst, with the
-title "Control commands", and have doc/index.rst toctree have, below
-config, an entry for control. I can take it from there if we want to
-reorganize the document more.
+Thanks!
+sage
