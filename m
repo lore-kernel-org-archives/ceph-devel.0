@@ -1,65 +1,51 @@
-From: Andre Noll <maan@systemlinux.org>
-Subject: Re: [PATCH/RFC 0/6]: Introduction
-Date: Tue, 6 Dec 2011 18:01:37 +0100
-Message-ID: <20111206170136.GC8944@systemlinux.org>
-References: <20111121180656.GO13394@systemlinux.org>
- <1322489076-31364-1-git-send-email-maan@systemlinux.org>
- <CAORUGqCOqMALc6RX3E3Jwn3CraoaSb3M-L=fT9Joeu-e-DHrfw@mail.gmail.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: rbd device would disappear after re-boot
+Date: Tue, 6 Dec 2011 11:10:39 -0800
+Message-ID: <CAORUGqDjAW-PpqtfL_hzDKZEk3HbgozBBjip-nBYhG6yYgduTg@mail.gmail.com>
+References: <8512670932FB654F81AF0FEF1BE6D49D943112@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="69pVuxX8awAiJ7fD"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from systemlinux.org ([79.140.41.46]:41727 "EHLO
-	v3-1046.systemlinux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751603Ab1LFQ7m (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 11:59:42 -0500
-Content-Disposition: inline
-In-Reply-To: <CAORUGqCOqMALc6RX3E3Jwn3CraoaSb3M-L=fT9Joeu-e-DHrfw@mail.gmail.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:63187 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753077Ab1LFTLy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 14:11:54 -0500
+Received: by bkbzv3 with SMTP id zv3so3862420bkb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Dec 2011 11:11:53 -0800 (PST)
+In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D943112@WHQBEMAIL1.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Eric_YH_Chen@wistron.com
+Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
 
+On Tue, Dec 6, 2011 at 01:31,  <Eric_YH_Chen@wistron.com> wrote:
+> =C2=A0 Another question about the rbd device. All rbd device would di=
+sappear
+> after server re-boot.
+>
+> =C2=A0 Do you have any plan to implement a feature that server would =
+re-map
+> all the device during initialization?
+>
+> =C2=A0 If not, do you have any suggestion (about technical part) if w=
+e want
+> to implement this feature?
+>
+> =C2=A0 Furthermore, we would like to send a pull request after we fin=
+ish it,
+> any policy should we take-care?
 
---69pVuxX8awAiJ7fD
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Yes, all mappings need to be re-established after a reboot.
 
-On Mon, Dec 05, 13:09, Tommi Virtanen wrote:
-> > So please review and comment. I will fold in your suggestions and
-> > follow up with a re-rolled series provided there is substantial
-> > feedback.
->=20
-> Good work! I want to roll this in the docs asap, even if it is still part=
-ial.
+There is no convention yet on configuring what should be
+re-established. Right now, putting an "rbd map" in something like
+/etc/rc.local is a decent workaround.
 
-[...]
-
-> Let's do this: make your patch put things in doc/control.rst, with the
-> title "Control commands", and have doc/index.rst toctree have, below
-> config, an entry for control. I can take it from there if we want to
-> reorganize the document more.
-
-OK. I will update the patch series according to your comments and send
-an updated version soon.
-
-Thanks
-Andre
---=20
-The only person who always got his work done by Friday was Robinson Crusoe
-
---69pVuxX8awAiJ7fD
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk7eSnAACgkQWto1QDEAkw/XKACfa/qsuvCG95lpi6P4Ou9Glzb2
-6rkAoJuxtRpwIu73kZ552Js782PWvaRO
-=8SUf
------END PGP SIGNATURE-----
-
---69pVuxX8awAiJ7fD--
+I created http://tracker.newdream.net/issues/1790 to track this feature=
+=2E
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
