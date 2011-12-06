@@ -1,72 +1,97 @@
-From: Amon Ott <a.ott@m-privacy.de>
-Subject: Re: Circular lock / deadlock in kernel client
-Date: Tue, 6 Dec 2011 14:21:28 +0100
-Message-ID: <201112061421.30695.a.ott@m-privacy.de>
-References: <201111301321.47514.a.ott@m-privacy.de> <Pine.LNX.4.64.1112010812090.18236@cobra.newdream.net> <201112011724.48724.a.ott@m-privacy.de>
+From: Brian Chrisman <brchrisman@gmail.com>
+Subject: Re: How to sync data on different server but with the same image
+Date: Tue, 6 Dec 2011 08:00:56 -0800
+Message-ID: <CAN4=B2kdTfJ27NVGETcY=EhAZtYqGtkZtMMosPd=4hpMDNFjaw@mail.gmail.com>
+References: <8512670932FB654F81AF0FEF1BE6D49D9430EB@WHQBEMAIL1.whq.wistron>
+	<1323163999.26341.2.camel@Nokia-N900-02-8>
+	<8512670932FB654F81AF0FEF1BE6D49D943125@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.138.176]:52307 "EHLO www.m-privacy.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933167Ab1LFNWb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 08:22:31 -0500
-In-Reply-To: <201112011724.48724.a.ott@m-privacy.de>
-Content-Disposition: inline
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:56173 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750715Ab1LFQA4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 11:00:56 -0500
+Received: by vcbfk14 with SMTP id fk14so5018593vcb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Dec 2011 08:00:56 -0800 (PST)
+In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D943125@WHQBEMAIL1.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Eric_YH_Chen@wistron.com
+Cc: wido@widodh.nl, ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
 
-On Thursday 01 December 2011 wrote Amon Ott:
-> On Thursday 01 December 2011 wrote Sage Weil:
-> > On Thu, 1 Dec 2011, Amon Ott wrote:
-> > > On Wednesday 30 November 2011 wrote Sage Weil:
-> > > > I pushed a wip-i-ceph-lock branch to ceph-client.git that repla=
-ces
-> > > > our (ab?)use of i_lock with a new i_ceph_lock in the ceph inode=
-=2E=20
-> > > > This avoids being bitten by the lock ordering constraint impose=
-d by
-> > > > igrab(), which requires i_lock to safely take a reference to an=
- inode
-> > > > without racing with inode destruction.  This lets us keep two i=
-node
-> > > > list locks logically ordered inside i_ceph_lock (with i_lock as=
- an
-> > > > inner lock).
-> > >
-> > > I see the branch, but there is nothing new in it. Is that the rig=
-ht
-> > > location? Maybe forgot to push?
-> > >
-> > > https://github.com/NewDreamNetwork/ceph-client/tree/wip-i-ceph-lo=
-ck
-> >
-> > Oops, I pushed the wrong branch.  It's there now.
+Eric,
+If you export the rbd device directly via your iSCSI target driver, it
+should work.
+I verified this with the SCST target, but the LIO target should work as=
+ well.
+As Wido said, you don't want to mount the same rbd device on multiple
+clients without a shared filesystem (and in that case, you might as
+well use cephfs), but exporting rbd over iSCSI works.
+
+
+On Tue, Dec 6, 2011 at 1:38 AM,  <Eric_YH_Chen@wistron.com> wrote:
+> Hi, Wido:
 >
-> Got the new commit, but it does not apply cleanly to my tree. I will =
-try to
-> get it merged tomorrow and retry. I cannot use kernel 3.2-pre here, t=
-he
-> rest of the system needs to be stable.
-
-Merged in and bug seems to be fixed. No more deadlock warnings today.
-
-Amon Ott
---=20
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Am K=F6llnischen Park 1    Fax: +49 30 24342336
-10179 Berlin             http://www.m-privacy.de
-
-Amtsgericht Charlottenburg, HRB 84946
-
-Gesch=E4ftsf=FChrer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
-
-GnuPG-Key-ID: 0x2DD3A649
+> =A0 This is a preliminary experiment before implement iSCSI High Avai=
+lable multipath.
+> =A0 =A0 =A0 =A0http://ceph.newdream.net/wiki/ISCSI
+>
+> =A0 Therefore, we use Ceph as rbd device instead of file system.
+>
+>
+> -----Original Message-----
+> From: Wido den Hollander [mailto:wido@widodh.nl]
+> Sent: Tuesday, December 06, 2011 5:33 PM
+> To: Eric YH Chen/WHQ/Wistron; ceph-devel@vger.kernel.org
+> Cc: Chris YT Huang/WHQ/Wistron
+> Subject: Re: How to sync data on different server but with the same i=
+mage
+>
+> Hi,
+>
+> ----- Original message -----
+>> Dear All:
+>>
+>>=A0 =A0 =A0 =A0I map the same rbd image to the rbd device on two diff=
+erent servers.
+>>
+>> =A0=A0=A0 For example:
+>>=A0 =A0 =A0 =A0 =A0 =A01. create rbd image named foo
+>>=A0 =A0 =A0 =A0 =A0 =A02. map foo to /dev/rbd0 on server A,=A0 =A0mou=
+nt /dev/rbd0 to /mnt
+>>=A0 =A0 =A0 =A0 =A0 =A03. map foo to /dev/rbd0 on server B,=A0 =A0mou=
+nt /dev/rbd0 to /mnt
+>>
+>>=A0 =A0 =A0 =A0If I put add a file to /mnt via server A, I hope I can=
+ see the same
+>> file on server B.
+>>=A0 =A0 =A0 =A0However, I can't see it until I umount /mnt on server =
+A and re-mount
+>> /mnt on server B.
+>
+> You'd have to use an cluster filesystem like GFS or OCFS2 to let this=
+ work.
+>
+> But why not use Ceph as a filesystem instead of RBD? That seems to do=
+ what you want.
+>
+> Wido
+>
+>>
+>>=A0 =A0 =A0 =A0Do you have any comment about this scenario? How could=
+ I force the
+>> data synchronization?
+>>
+>>=A0 =A0 =A0 =A0Actually, I want to implement the iSCSI High Available=
+ multipath on
+>> http://ceph.newdream.net/wiki/ISCSI.
+>>=A0 =A0 =A0 =A0Therefore, I tried this small experiment first, but fa=
+il. Would you
+>> please give me some suggestion before I start to implement it? Thank=
+s!
+>>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
