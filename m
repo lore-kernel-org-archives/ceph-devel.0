@@ -1,63 +1,65 @@
-From: Tomasz Paszkowski <ss7pro@gmail.com>
-Subject: Re: Ceph Best Practices
-Date: Tue, 6 Dec 2011 20:33:03 +0100
-Message-ID: <CAMvP8PCqaPM_aVFC1s1bYk46XzFN3KzHh2wEPm9P9uiqQgrDjQ@mail.gmail.com>
-References: <CABGLbPHXtga0tXYRrF=bLmtJK1U439TDZkEXsvBkc=LFyFiaDg@mail.gmail.com>
- <CABGLbPHuo52tUSWWSt2=fbLNK1FoeLM-qALHKmUfb4P9T6gcZQ@mail.gmail.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: Cannot mount ceph filesystem: error 5 (Input/Output error)
+Date: Tue, 6 Dec 2011 11:51:45 -0800
+Message-ID: <CAF3hT9DSf5Xaw00PUFHp5OtGAabka+Wc6H4vVkK24PJGNizd4Q@mail.gmail.com>
+References: <4366451.BU1d1YAr76@pc10>
+	<2356347.ajsbJfnmVK@pc10>
+	<CACLRD_0mb_PxqmZUqgTnjXJARKw6NV34QEF_fqCtXZ4UJ7C9GQ@mail.gmail.com>
+	<3826746.5bRf3lS2YZ@tolkien>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:34022 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751866Ab1LFTdZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 14:33:25 -0500
-Received: by dadv6 with SMTP id v6so5481291dad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Dec 2011 11:33:25 -0800 (PST)
-In-Reply-To: <CABGLbPHuo52tUSWWSt2=fbLNK1FoeLM-qALHKmUfb4P9T6gcZQ@mail.gmail.com>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:61618 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753897Ab1LFTvq convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 14:51:46 -0500
+Received: by qcqz2 with SMTP id z2so2558564qcq.19
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Dec 2011 11:51:45 -0800 (PST)
+In-Reply-To: <3826746.5bRf3lS2YZ@tolkien>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Dec 5, 2011 at 10:47 PM, Steven Crothers
-<steven.crothers@gmail.com> wrote:
-> Hello,
+On Sat, Dec 3, 2011 at 6:21 AM, Guido Winkelmann
+<guido-ceph@thisisnotatest.de> wrote:
+> On Friday 02 December 2011 11:29:41 Samuel Just wrote:
+>> Guido,
+>>
+>> Sorry for the confusion, you hit a bug where the default map for a
+>> cluster with one osd contains no pgs. =A00.39 (which will be release=
+d
+>> today) will have a fix.
 >
-> I have a quick question about the way to layout disks in the OSDs. I
-> can't really find the information I'm looking for on the Wiki or in
-> the existing mailing list archives that I have saved (4-5months
-> worth).
->
-> In the even a large OSD is being build (say 20 drives, same make/model
-> 2TB). How would you build the OSD? Is it best to format each disk
-> individually or build them into a raid group? Is there performance
-> benefits to having each disk setup individually or perhaps having X
-> amount of raid groups on the system?
-
-It depends on workload you're going to put on this system. Remember
-that CEPH is splitting each image into 4MB/s chunks. If you are going
-to assign
-each disk individually than each chunk will be only on single drive.
-If you'll assign huge raid protected block device than each chunk may
-be placed on more than 1 drive.
-You have to also consider what is better for you in case if one of the
-drives will fail. Do you prefer raid controller doing rebuild process
-or do you want host cpu and ceph to take care of it.
-Another issue here is that smaller disk drive is easier to recover
-after failure (eg: filesystem failure ;).
+> Really? Then why does the output of ceph -s below mention 6 pgs?
+There are a couple of different categories of PGs; the 6 that exist
+are "local" PGs which are tied to a specific OSD. However, those
+aren't actually used in a standard Ceph configuration.
 
 
-
-> How would someone theoretically utilize this amount of storage as
-> efficiently as possible?
-
-It depends on CPU power you have on each box and planned workload. You
-can always setup four logical drives on raid controller and than
-import them to OSD if your host CPU is hitting maximal utilization.
-
-
-
-
--- 
-Tomasz Paszkowski
-SS7, Asterisk, SAN, Datacenter, Cloud Computing
-+48500166299
+> BTW, that's another aspect where the documentation is a bit lacking r=
+ight now.
+> I've found a page telling me how to change the number of pgs, but I c=
+ouldn't
+> find any explanation so far what a pg actually is, or why I should wa=
+nt to
+> change their number...
+PG =3D "placement group". When placing data in the cluster, objects are
+mapped into PGs, and those PGs are mapped onto OSDs. We use the
+indirection so that we can group objects, which reduces the amount of
+per-object metadata we need to keep track of and processes we need to
+run (it would be prohibitively expensive to track eg the placement
+history on a per-object basis).
+Increasing the number of PGs can reduce the variance in per-OSD load
+across your cluster, but each PG requires a bit more CPU and memory on
+the OSDs that are storing it. We try and ballpark it at 100 PGs/OSD,
+although it can vary widely without ill effects depending on your
+cluster. You hit a bug in how we calculate the initial PG number from
+a cluster description.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
