@@ -1,77 +1,51 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: How to sync data on different server but with the same image
-Date: Tue, 06 Dec 2011 10:33:19 +0100
-Message-ID: <1323163999.26341.2.camel@Nokia-N900-02-8>
-References: <8512670932FB654F81AF0FEF1BE6D49D9430EB@WHQBEMAIL1.whq.wistron>
-Reply-To: Wido den Hollander <wido@widodh.nl>
+From: <Eric_YH_Chen@wistron.com>
+Subject: RE: How to sync data on different server but with the same image
+Date: Tue, 6 Dec 2011 17:38:05 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D943125@WHQBEMAIL1.whq.wistron>
+References: <8512670932FB654F81AF0FEF1BE6D49D9430EB@WHQBEMAIL1.whq.wistron> <1323163999.26341.2.camel@Nokia-N900-02-8>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:52741 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932974Ab1LFJd0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 04:33:26 -0500
-In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D9430EB@WHQBEMAIL1.whq.wistron>
-Content-ID: <1323163998.26341.1.camel@Nokia-N900-02-8>
+Received: from twnhumsw3.wistron.com ([220.128.89.23]:65062 "EHLO
+	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932901Ab1LFJiH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 04:38:07 -0500
+Content-class: urn:content-classes:message
+In-Reply-To: <1323163999.26341.2.camel@Nokia-N900-02-8>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wistron.com, ceph-devel@vger.kernel.org
+To: wido@widodh.nl, ceph-devel@vger.kernel.org
 Cc: Chris_YT_Huang@wistron.com
 
-Hi,
-
------ Original message -----
-> Dear All:
->=20
->=C2=A0 =C2=A0 =C2=A0  I map the same rbd image to the rbd device on tw=
-o different servers.
->=20
-> =C2=A0=C2=A0=C2=A0 For example:=C2=A0 =C2=A0 =20
->=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0  1. create rbd image named foo
->=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0  2. map foo to /dev/rbd0 on server =
-A,=C2=A0  mount /dev/rbd0 to /mnt
->=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0  3. map foo to /dev/rbd0 on server =
-B,=C2=A0  mount /dev/rbd0 to /mnt
->=20
->=C2=A0 =C2=A0 =C2=A0  If I put add a file to /mnt via server A, I hope=
- I can see the same
-> file on server B.
->=C2=A0 =C2=A0 =C2=A0  However, I can't see it until I umount /mnt on s=
-erver A and re-mount
-> /mnt on server B.
-
-You'd have to use an cluster filesystem like GFS or OCFS2 to let this w=
-ork.
-
-But why not use Ceph as a filesystem instead of RBD? That seems to do w=
-hat you want.
-
-Wido
-
->=C2=A0 =C2=A0 =C2=A0 =20
->=C2=A0 =C2=A0 =C2=A0  Do you have any comment about this scenario? How=
- could I force the
-> data synchronization?
->=20
->=C2=A0 =C2=A0 =C2=A0  Actually, I want to implement the iSCSI High Ava=
-ilable multipath on
-> http://ceph.newdream.net/wiki/ISCSI.
->=C2=A0 =C2=A0 =C2=A0  Therefore, I tried this small experiment first, =
-but fail. Would you
-> please give me some suggestion before I start to implement it? Thanks=
-!
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at=C2=A0  http://vger.kernel.org/majordomo-info.h=
-tml
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGksIFdpZG86DQoNCiAgIFRoaXMgaXMgYSBwcmVsaW1pbmFyeSBleHBlcmltZW50IGJlZm9yZSBp
+bXBsZW1lbnQgaVNDU0kgSGlnaCBBdmFpbGFibGUgbXVsdGlwYXRoLg0KCWh0dHA6Ly9jZXBoLm5l
+d2RyZWFtLm5ldC93aWtpL0lTQ1NJDQogICANCiAgIFRoZXJlZm9yZSwgd2UgdXNlIENlcGggYXMg
+cmJkIGRldmljZSBpbnN0ZWFkIG9mIGZpbGUgc3lzdGVtLiANCg0KDQotLS0tLU9yaWdpbmFsIE1l
+c3NhZ2UtLS0tLQ0KRnJvbTogV2lkbyBkZW4gSG9sbGFuZGVyIFttYWlsdG86d2lkb0B3aWRvZGgu
+bmxdIA0KU2VudDogVHVlc2RheSwgRGVjZW1iZXIgMDYsIDIwMTEgNTozMyBQTQ0KVG86IEVyaWMg
+WUggQ2hlbi9XSFEvV2lzdHJvbjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCkNjOiBDaHJp
+cyBZVCBIdWFuZy9XSFEvV2lzdHJvbg0KU3ViamVjdDogUmU6IEhvdyB0byBzeW5jIGRhdGEgb24g
+ZGlmZmVyZW50IHNlcnZlciBidXQgd2l0aCB0aGUgc2FtZSBpbWFnZQ0KDQpIaSwNCg0KLS0tLS0g
+T3JpZ2luYWwgbWVzc2FnZSAtLS0tLQ0KPiBEZWFyIEFsbDoNCj4gDQo+wqAgwqAgwqAgIEkgbWFw
+IHRoZSBzYW1lIHJiZCBpbWFnZSB0byB0aGUgcmJkIGRldmljZSBvbiB0d28gZGlmZmVyZW50IHNl
+cnZlcnMuDQo+IA0KPiDCoMKgwqAgRm9yIGV4YW1wbGU6wqAgwqAgIA0KPsKgIMKgIMKgIMKgIMKg
+ICAxLiBjcmVhdGUgcmJkIGltYWdlIG5hbWVkIGZvbw0KPsKgIMKgIMKgIMKgIMKgICAyLiBtYXAg
+Zm9vIHRvIC9kZXYvcmJkMCBvbiBzZXJ2ZXIgQSzCoCAgbW91bnQgL2Rldi9yYmQwIHRvIC9tbnQN
+Cj7CoCDCoCDCoCDCoCDCoCAgMy4gbWFwIGZvbyB0byAvZGV2L3JiZDAgb24gc2VydmVyIEIswqAg
+IG1vdW50IC9kZXYvcmJkMCB0byAvbW50DQo+IA0KPsKgIMKgIMKgICBJZiBJIHB1dCBhZGQgYSBm
+aWxlIHRvIC9tbnQgdmlhIHNlcnZlciBBLCBJIGhvcGUgSSBjYW4gc2VlIHRoZSBzYW1lDQo+IGZp
+bGUgb24gc2VydmVyIEIuDQo+wqAgwqAgwqAgIEhvd2V2ZXIsIEkgY2FuJ3Qgc2VlIGl0IHVudGls
+IEkgdW1vdW50IC9tbnQgb24gc2VydmVyIEEgYW5kIHJlLW1vdW50DQo+IC9tbnQgb24gc2VydmVy
+IEIuDQoNCllvdSdkIGhhdmUgdG8gdXNlIGFuIGNsdXN0ZXIgZmlsZXN5c3RlbSBsaWtlIEdGUyBv
+ciBPQ0ZTMiB0byBsZXQgdGhpcyB3b3JrLg0KDQpCdXQgd2h5IG5vdCB1c2UgQ2VwaCBhcyBhIGZp
+bGVzeXN0ZW0gaW5zdGVhZCBvZiBSQkQ/IFRoYXQgc2VlbXMgdG8gZG8gd2hhdCB5b3Ugd2FudC4N
+Cg0KV2lkbw0KDQo+wqAgwqAgwqAgIA0KPsKgIMKgIMKgICBEbyB5b3UgaGF2ZSBhbnkgY29tbWVu
+dCBhYm91dCB0aGlzIHNjZW5hcmlvPyBIb3cgY291bGQgSSBmb3JjZSB0aGUNCj4gZGF0YSBzeW5j
+aHJvbml6YXRpb24/DQo+IA0KPsKgIMKgIMKgICBBY3R1YWxseSwgSSB3YW50IHRvIGltcGxlbWVu
+dCB0aGUgaVNDU0kgSGlnaCBBdmFpbGFibGUgbXVsdGlwYXRoIG9uDQo+IGh0dHA6Ly9jZXBoLm5l
+d2RyZWFtLm5ldC93aWtpL0lTQ1NJLg0KPsKgIMKgIMKgICBUaGVyZWZvcmUsIEkgdHJpZWQgdGhp
+cyBzbWFsbCBleHBlcmltZW50IGZpcnN0LCBidXQgZmFpbC4gV291bGQgeW91DQo+IHBsZWFzZSBn
+aXZlIG1lIHNvbWUgc3VnZ2VzdGlvbiBiZWZvcmUgSSBzdGFydCB0byBpbXBsZW1lbnQgaXQ/IFRo
+YW5rcyENCj4gDQo=
