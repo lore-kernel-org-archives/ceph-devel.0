@@ -1,57 +1,57 @@
 From: Amon Ott <a.ott@m-privacy.de>
-Subject: Re: Bug #1047 reproduced
-Date: Tue, 6 Dec 2011 14:20:27 +0100
-Message-ID: <201112061420.29220.a.ott@m-privacy.de>
-References: <201112010937.37642.a.ott@m-privacy.de> <Pine.LNX.4.64.1112020855440.10925@cobra.newdream.net> <201112051121.51834.a.ott@m-privacy.de>
+Subject: Re: Circular lock / deadlock in kernel client
+Date: Tue, 6 Dec 2011 14:21:28 +0100
+Message-ID: <201112061421.30695.a.ott@m-privacy.de>
+References: <201111301321.47514.a.ott@m-privacy.de> <Pine.LNX.4.64.1112010812090.18236@cobra.newdream.net> <201112011724.48724.a.ott@m-privacy.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-15
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.138.176]:52193 "EHLO www.m-privacy.de"
+Received: from www.m-privacy.de ([85.214.138.176]:52307 "EHLO www.m-privacy.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933167Ab1LFNWX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 08:22:23 -0500
-In-Reply-To: <201112051121.51834.a.ott@m-privacy.de>
+	id S933167Ab1LFNWb convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 08:22:31 -0500
+In-Reply-To: <201112011724.48724.a.ott@m-privacy.de>
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-On Monday 05 December 2011 wrote Amon Ott:
-> On Friday 02 December 2011 wrote Sage Weil:
-> > On Fri, 2 Dec 2011, Amon Ott wrote:
-> > > On Thursday 01 December 2011 you wrote:
-> > > > On all four nodes of my test cluster, MDS crashes with a trace =
-like
-> > > > that in bug #1047. Example and ceph.conf attached. Ceph server =
-side
-> > > > is from git master, last commit
-> > > > ce6572273943ffdca4b7dc5344152d6c35106a2d.
-> > > >
-> > > > MDS does not start on any node here, it reliably crashes with t=
-hat
-> > > > assert.
+On Thursday 01 December 2011 wrote Amon Ott:
+> On Thursday 01 December 2011 wrote Sage Weil:
+> > On Thu, 1 Dec 2011, Amon Ott wrote:
+> > > On Wednesday 30 November 2011 wrote Sage Weil:
+> > > > I pushed a wip-i-ceph-lock branch to ceph-client.git that repla=
+ces
+> > > > our (ab?)use of i_lock with a new i_ceph_lock in the ceph inode=
+=2E=20
+> > > > This avoids being bitten by the lock ordering constraint impose=
+d by
+> > > > igrab(), which requires i_lock to safely take a reference to an=
+ inode
+> > > > without racing with inode destruction.  This lets us keep two i=
+node
+> > > > list locks logically ordered inside i_ceph_lock (with i_lock as=
+ an
+> > > > inner lock).
 > > >
-> > > Does it makes sense for you to keep the cluster in that broken st=
-ate,
-> > > so that we can reproduce that bug or test a potential fix? Otherw=
-ise, I
-> > > would recreate the Ceph filesystem to make more tests. I also hav=
-e a
-> > > full log of one mds from start to crash here.
+> > > I see the branch, but there is nothing new in it. Is that the rig=
+ht
+> > > location? Maybe forgot to push?
+> > >
+> > > https://github.com/NewDreamNetwork/ceph-client/tree/wip-i-ceph-lo=
+ck
 > >
-> > Can you attach the log to #1047 for posterity?  I'll take a quick l=
-ook
-> > and see if there is any further info to gain from the log.  I'm gue=
-ssing
-> > the actual bug occured before the crash, when the anchor table wasn=
-'t
-> > updated properly, but there may be clues here.
+> > Oops, I pushed the wrong branch.  It's there now.
 >
-> Log attached to the bug on Saturday. Will retry with Ceph 0.39, too.
+> Got the new commit, but it does not apply cleanly to my tree. I will =
+try to
+> get it merged tomorrow and retry. I cannot use kernel 3.2-pre here, t=
+he
+> rest of the system needs to be stable.
 
-Seems to be fixed with 0.39.
+Merged in and bug seems to be fixed. No more deadlock warnings today.
 
 Amon Ott
 --=20
