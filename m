@@ -1,70 +1,45 @@
-From: Steven Crothers <steven.crothers@gmail.com>
-Subject: Fwd: Ceph Best Practices
-Date: Mon, 5 Dec 2011 16:47:40 -0500
-Message-ID: <CABGLbPHuo52tUSWWSt2=fbLNK1FoeLM-qALHKmUfb4P9T6gcZQ@mail.gmail.com>
-References: <CABGLbPHXtga0tXYRrF=bLmtJK1U439TDZkEXsvBkc=LFyFiaDg@mail.gmail.com>
+From: <Eric_YH_Chen@wistron.com>
+Subject: How to sync data on different server but with the same image
+Date: Tue, 6 Dec 2011 17:17:44 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D9430EB@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:54493 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932464Ab1LEVrl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2011 16:47:41 -0500
-Received: by bkbzv3 with SMTP id zv3so2410362bkb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Dec 2011 13:47:40 -0800 (PST)
-In-Reply-To: <CABGLbPHXtga0tXYRrF=bLmtJK1U439TDZkEXsvBkc=LFyFiaDg@mail.gmail.com>
+Received: from twnhumsw5.wistron.com ([220.128.89.25]:64572 "EHLO
+	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932905Ab1LFJRr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 04:17:47 -0500
+Received: from twnhufe1.whq.wistron (unverified [10.37.31.101]) by TWNHUMSW5.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta120cb3546c0a8167320e4@TWNHUMSW5.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Tue, 6 Dec 2011 17:18:43 +0800
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Chris_YT_Huang@wistron.com
 
-Hello,
+Dear All:
 
-I have a quick question about the way to layout disks in the OSDs. I
-can't really find the information I'm looking for on the Wiki or in
-the existing mailing list archives that I have saved (4-5months
-worth).
+   I map the same rbd image to the rbd device on two different servers.
 
-In the even a large OSD is being build (say 20 drives, same make/model
-2TB). How would you build the OSD? Is it best to format each disk
-individually or build them into a raid group? Is there performance
-benefits to having each disk setup individually or perhaps having X
-amount of raid groups on the system?
+	For example:   
+     1. create rbd image named foo
+     2. map foo to /dev/rbd0 on server A,  mount /dev/rbd0 to /mnt
+     3. map foo to /dev/rbd0 on server B,  mount /dev/rbd0 to /mnt
 
-How would someone theoretically utilize this amount of storage as
-efficiently as possible?
+   If I put add a file to /mnt via server A, I hope I can see the same
+file on server B.
+   However, I can't see it until I umount /mnt on server A and re-mount
+/mnt on server B.
+   
+   Do you have any comment about this scenario? How could I force the
+data synchronization?
 
-Or am I missing the larger issue and should I be roping all these
-drives into a btrfs pool? The documentation on disk layout isn't very
-clear and I'm not quite sure where to head. I'm building out a
-smallish cluster right now, but I plan on making it quite large in the
-future.
+   Actually, I want to implement the iSCSI High Available multipath on
+http://ceph.newdream.net/wiki/ISCSI.
+   Therefore, I tried this small experiment first, but fail. Would you
+please give me some suggestion before I start to implement it? Thanks!
 
-For miscellaneous details assume the following:
-A 32GB SLC SSD is presented for Journaling
-Each drive is hot-swappable at the OS and hardware level, and tested
-The TCP/IP segment is highly bonded (5+ bonds per OSD @ 1G)
-Network backplane supports max line rates
-RBD drivers will be used nearly exclusively (minus some S3 gateway
-usage for minimal storage)
-Redundancy is of the highest importance, being able to replace a
-single drive is more important than saving storage
-Performance is also highly important, however if the tolerance is -/+
-5-10% before it sacrifices redundancy then redundancy would be choosen
-The ability to build this setup (N+2) and be able to sustain a full
-OSD failure is also required
 
-Knowing this, how would you layout the disks and why? My goal is to
-basically provision large amounts of media storage to workstations
-quickly and cheap, which maintaining that the availability of the
-storage will be higher than the workstation itself.
-
-This would include storage of master copies ect ect.
-
-PS: Yes I know that Ceph is not a replacement for backups and no
-solution is perfect, I'm going to use a cluster aware filesystem on
-the RBD's and mount them also on another machine which will do nightly
-rsyncs to a drobo.
-
---
-Steven Crothers
-steven.crothers@gmail.com
