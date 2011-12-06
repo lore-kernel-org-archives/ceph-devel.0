@@ -1,51 +1,74 @@
-From: <Eric_YH_Chen@wistron.com>
-Subject: RE: How to sync data on different server but with the same image
-Date: Tue, 6 Dec 2011 17:38:05 +0800
-Message-ID: <8512670932FB654F81AF0FEF1BE6D49D943125@WHQBEMAIL1.whq.wistron>
-References: <8512670932FB654F81AF0FEF1BE6D49D9430EB@WHQBEMAIL1.whq.wistron> <1323163999.26341.2.camel@Nokia-N900-02-8>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Re: Bug #1047 reproduced
+Date: Tue, 6 Dec 2011 14:20:27 +0100
+Message-ID: <201112061420.29220.a.ott@m-privacy.de>
+References: <201112010937.37642.a.ott@m-privacy.de> <Pine.LNX.4.64.1112020855440.10925@cobra.newdream.net> <201112051121.51834.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=iso-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw3.wistron.com ([220.128.89.23]:65062 "EHLO
-	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932901Ab1LFJiH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 04:38:07 -0500
-Content-class: urn:content-classes:message
-In-Reply-To: <1323163999.26341.2.camel@Nokia-N900-02-8>
+Received: from www.m-privacy.de ([85.214.138.176]:52193 "EHLO www.m-privacy.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933167Ab1LFNWX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 08:22:23 -0500
+In-Reply-To: <201112051121.51834.a.ott@m-privacy.de>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: wido@widodh.nl, ceph-devel@vger.kernel.org
-Cc: Chris_YT_Huang@wistron.com
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-SGksIFdpZG86DQoNCiAgIFRoaXMgaXMgYSBwcmVsaW1pbmFyeSBleHBlcmltZW50IGJlZm9yZSBp
-bXBsZW1lbnQgaVNDU0kgSGlnaCBBdmFpbGFibGUgbXVsdGlwYXRoLg0KCWh0dHA6Ly9jZXBoLm5l
-d2RyZWFtLm5ldC93aWtpL0lTQ1NJDQogICANCiAgIFRoZXJlZm9yZSwgd2UgdXNlIENlcGggYXMg
-cmJkIGRldmljZSBpbnN0ZWFkIG9mIGZpbGUgc3lzdGVtLiANCg0KDQotLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KRnJvbTogV2lkbyBkZW4gSG9sbGFuZGVyIFttYWlsdG86d2lkb0B3aWRvZGgu
-bmxdIA0KU2VudDogVHVlc2RheSwgRGVjZW1iZXIgMDYsIDIwMTEgNTozMyBQTQ0KVG86IEVyaWMg
-WUggQ2hlbi9XSFEvV2lzdHJvbjsgY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCkNjOiBDaHJp
-cyBZVCBIdWFuZy9XSFEvV2lzdHJvbg0KU3ViamVjdDogUmU6IEhvdyB0byBzeW5jIGRhdGEgb24g
-ZGlmZmVyZW50IHNlcnZlciBidXQgd2l0aCB0aGUgc2FtZSBpbWFnZQ0KDQpIaSwNCg0KLS0tLS0g
-T3JpZ2luYWwgbWVzc2FnZSAtLS0tLQ0KPiBEZWFyIEFsbDoNCj4gDQo+wqAgwqAgwqAgIEkgbWFw
-IHRoZSBzYW1lIHJiZCBpbWFnZSB0byB0aGUgcmJkIGRldmljZSBvbiB0d28gZGlmZmVyZW50IHNl
-cnZlcnMuDQo+IA0KPiDCoMKgwqAgRm9yIGV4YW1wbGU6wqAgwqAgIA0KPsKgIMKgIMKgIMKgIMKg
-ICAxLiBjcmVhdGUgcmJkIGltYWdlIG5hbWVkIGZvbw0KPsKgIMKgIMKgIMKgIMKgICAyLiBtYXAg
-Zm9vIHRvIC9kZXYvcmJkMCBvbiBzZXJ2ZXIgQSzCoCAgbW91bnQgL2Rldi9yYmQwIHRvIC9tbnQN
-Cj7CoCDCoCDCoCDCoCDCoCAgMy4gbWFwIGZvbyB0byAvZGV2L3JiZDAgb24gc2VydmVyIEIswqAg
-IG1vdW50IC9kZXYvcmJkMCB0byAvbW50DQo+IA0KPsKgIMKgIMKgICBJZiBJIHB1dCBhZGQgYSBm
-aWxlIHRvIC9tbnQgdmlhIHNlcnZlciBBLCBJIGhvcGUgSSBjYW4gc2VlIHRoZSBzYW1lDQo+IGZp
-bGUgb24gc2VydmVyIEIuDQo+wqAgwqAgwqAgIEhvd2V2ZXIsIEkgY2FuJ3Qgc2VlIGl0IHVudGls
-IEkgdW1vdW50IC9tbnQgb24gc2VydmVyIEEgYW5kIHJlLW1vdW50DQo+IC9tbnQgb24gc2VydmVy
-IEIuDQoNCllvdSdkIGhhdmUgdG8gdXNlIGFuIGNsdXN0ZXIgZmlsZXN5c3RlbSBsaWtlIEdGUyBv
-ciBPQ0ZTMiB0byBsZXQgdGhpcyB3b3JrLg0KDQpCdXQgd2h5IG5vdCB1c2UgQ2VwaCBhcyBhIGZp
-bGVzeXN0ZW0gaW5zdGVhZCBvZiBSQkQ/IFRoYXQgc2VlbXMgdG8gZG8gd2hhdCB5b3Ugd2FudC4N
-Cg0KV2lkbw0KDQo+wqAgwqAgwqAgIA0KPsKgIMKgIMKgICBEbyB5b3UgaGF2ZSBhbnkgY29tbWVu
-dCBhYm91dCB0aGlzIHNjZW5hcmlvPyBIb3cgY291bGQgSSBmb3JjZSB0aGUNCj4gZGF0YSBzeW5j
-aHJvbml6YXRpb24/DQo+IA0KPsKgIMKgIMKgICBBY3R1YWxseSwgSSB3YW50IHRvIGltcGxlbWVu
-dCB0aGUgaVNDU0kgSGlnaCBBdmFpbGFibGUgbXVsdGlwYXRoIG9uDQo+IGh0dHA6Ly9jZXBoLm5l
-d2RyZWFtLm5ldC93aWtpL0lTQ1NJLg0KPsKgIMKgIMKgICBUaGVyZWZvcmUsIEkgdHJpZWQgdGhp
-cyBzbWFsbCBleHBlcmltZW50IGZpcnN0LCBidXQgZmFpbC4gV291bGQgeW91DQo+IHBsZWFzZSBn
-aXZlIG1lIHNvbWUgc3VnZ2VzdGlvbiBiZWZvcmUgSSBzdGFydCB0byBpbXBsZW1lbnQgaXQ/IFRo
-YW5rcyENCj4gDQo=
+On Monday 05 December 2011 wrote Amon Ott:
+> On Friday 02 December 2011 wrote Sage Weil:
+> > On Fri, 2 Dec 2011, Amon Ott wrote:
+> > > On Thursday 01 December 2011 you wrote:
+> > > > On all four nodes of my test cluster, MDS crashes with a trace =
+like
+> > > > that in bug #1047. Example and ceph.conf attached. Ceph server =
+side
+> > > > is from git master, last commit
+> > > > ce6572273943ffdca4b7dc5344152d6c35106a2d.
+> > > >
+> > > > MDS does not start on any node here, it reliably crashes with t=
+hat
+> > > > assert.
+> > >
+> > > Does it makes sense for you to keep the cluster in that broken st=
+ate,
+> > > so that we can reproduce that bug or test a potential fix? Otherw=
+ise, I
+> > > would recreate the Ceph filesystem to make more tests. I also hav=
+e a
+> > > full log of one mds from start to crash here.
+> >
+> > Can you attach the log to #1047 for posterity?  I'll take a quick l=
+ook
+> > and see if there is any further info to gain from the log.  I'm gue=
+ssing
+> > the actual bug occured before the crash, when the anchor table wasn=
+'t
+> > updated properly, but there may be clues here.
+>
+> Log attached to the bug on Saturday. Will retry with Ceph 0.39, too.
+
+Seems to be fixed with 0.39.
+
+Amon Ott
+--=20
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Am K=F6llnischen Park 1    Fax: +49 30 24342336
+10179 Berlin             http://www.m-privacy.de
+
+Amtsgericht Charlottenburg, HRB 84946
+
+Gesch=E4ftsf=FChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
