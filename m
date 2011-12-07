@@ -1,32 +1,34 @@
 From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Subject: Re: Cannot mount ceph filesystem: error 5 (Input/Output error)
-Date: Wed, 07 Dec 2011 15:38:57 +0100
-Message-ID: <1871670.5qvOuPR13S@pc10>
-References: <4366451.BU1d1YAr76@pc10> <3826746.5bRf3lS2YZ@tolkien> <CAF3hT9DSf5Xaw00PUFHp5OtGAabka+Wc6H4vVkK24PJGNizd4Q@mail.gmail.com>
+Subject: Build fails on Fedora 14 on linking librados-config
+Date: Wed, 07 Dec 2011 16:19:24 +0100
+Message-ID: <220547841.g14m0M3JMV@pc10>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from unknownsite.de ([62.48.69.106]:55815 "EHLO hartes-hannover.de"
+Received: from unknownsite.de ([62.48.69.106]:54460 "EHLO hartes-hannover.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755798Ab1LGOi7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 7 Dec 2011 09:38:59 -0500
+	id S1756064Ab1LGPT3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 7 Dec 2011 10:19:29 -0500
 Received: from pc10.localnet (pc10.asys-h.de [193.98.1.90])
-	by hartes-hannover.de (Postfix) with ESMTPSA id 8C4CF10C866
-	for <ceph-devel@vger.kernel.org>; Wed,  7 Dec 2011 15:38:58 +0100 (CET)
-In-Reply-To: <CAF3hT9DSf5Xaw00PUFHp5OtGAabka+Wc6H4vVkK24PJGNizd4Q@mail.gmail.com>
+	by hartes-hannover.de (Postfix) with ESMTPSA id 7259610C866
+	for <ceph-devel@vger.kernel.org>; Wed,  7 Dec 2011 16:19:28 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Am Dienstag, 6. Dezember 2011, 11:51:45 schrieben Sie:
-> PG = "placement group". When placing data in the cluster, objects are
-> mapped into PGs, and those PGs are mapped onto OSDs.
+Hi,
 
-How does the Object->PG mapping look like, do you map more than one object on 
-one PG, or do you sometimes map an object to more than one PG? How about the 
-mapping of PGs to OSDs, does one PG belong to exactly one OSD?
+When building ceph 0.39 on Fedora 14, the build process fails with the 
+following messages:
 
-Does one PG represent a fixed amount of storage space?
+  CXXLD  librados-config
+/usr/bin/ld: ./.libs/libglobal.a(libcommon_la-HeartbeatMap.o): undefined 
+reference to symbol 'pthread_rwlock_wrlock@@GLIBC_2.2.5'
+/usr/bin/ld: note: 'pthread_rwlock_wrlock@@GLIBC_2.2.5' is defined in DSO 
+/lib64/libpthread.so.0 so try adding it to the linker command line
+/lib64/libpthread.so.0: could not read symbols: Invalid operation
+collect2: ld returned 1 exit status
+make[3]: *** [librados-config] Error 1
 
-        Guido
+	Guido
