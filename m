@@ -1,119 +1,52 @@
 From: <Eric_YH_Chen@wistron.com>
-Subject: RE: How to sync data on different server but with the same image
-Date: Wed, 7 Dec 2011 10:00:40 +0800
-Message-ID: <8512670932FB654F81AF0FEF1BE6D49D943342@WHQBEMAIL1.whq.wistron>
-References: <8512670932FB654F81AF0FEF1BE6D49D9430EB@WHQBEMAIL1.whq.wistron><1323163999.26341.2.camel@Nokia-N900-02-8><8512670932FB654F81AF0FEF1BE6D49D943125@WHQBEMAIL1.whq.wistron> <CAN4=B2kdTfJ27NVGETcY=EhAZtYqGtkZtMMosPd=4hpMDNFjaw@mail.gmail.com>
+Subject: RE: rbd device would disappear after re-boot
+Date: Wed, 7 Dec 2011 10:38:42 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D9433C2@WHQBEMAIL1.whq.wistron>
+References: <8512670932FB654F81AF0FEF1BE6D49D943112@WHQBEMAIL1.whq.wistron> <CAORUGqDjAW-PpqtfL_hzDKZEk3HbgozBBjip-nBYhG6yYgduTg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw5.wistron.com ([220.128.89.25]:63940 "EHLO
+Received: from twnhumsw5.wistron.com ([220.128.89.25]:53356 "EHLO
 	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754583Ab1LGCAo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 21:00:44 -0500
+	with ESMTP id S1754934Ab1LGCir (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 21:38:47 -0500
 Content-class: urn:content-classes:message
-In-Reply-To: <CAN4=B2kdTfJ27NVGETcY=EhAZtYqGtkZtMMosPd=4hpMDNFjaw@mail.gmail.com>
+In-Reply-To: <CAORUGqDjAW-PpqtfL_hzDKZEk3HbgozBBjip-nBYhG6yYgduTg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: brchrisman@gmail.com
-Cc: wido@widodh.nl, ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
+To: tommi.virtanen@dreamhost.com
+Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
 
-Hi, Brian:
-
-    I would like to use SCST target or LIO target.=20
-	But I found they are not supported on ubuntu 11.10 server.=20
-    (LIO iSCSI is released under 3.1 kernel, but 11.10 server uses 3.0 =
-kernel)
-    Could you kindly to share how to use SCST target or LIO target on u=
-buntu ?
-
-    I try the multipath with STGT, however, but it doesn't work well.=20
-    I think that is because it doesn't support BLOCKIO, am I right?=20
-
-    Thanks!
-
------Original Message-----
-=46rom: Brian Chrisman [mailto:brchrisman@gmail.com]=20
-Sent: Wednesday, December 07, 2011 12:01 AM
-To: Eric YH Chen/WHQ/Wistron
-Cc: wido@widodh.nl; ceph-devel@vger.kernel.org; Chris YT Huang/WHQ/Wist=
-ron
-Subject: Re: How to sync data on different server but with the same ima=
-ge
-
-Eric,
-If you export the rbd device directly via your iSCSI target driver, it
-should work.
-I verified this with the SCST target, but the LIO target should work as=
- well.
-As Wido said, you don't want to mount the same rbd device on multiple
-clients without a shared filesystem (and in that case, you might as
-well use cephfs), but exporting rbd over iSCSI works.
-
-
-On Tue, Dec 6, 2011 at 1:38 AM,  <Eric_YH_Chen@wistron.com> wrote:
-> Hi, Wido:
->
-> =A0 This is a preliminary experiment before implement iSCSI High Avai=
-lable multipath.
-> =A0 =A0 =A0 =A0http://ceph.newdream.net/wiki/ISCSI
->
-> =A0 Therefore, we use Ceph as rbd device instead of file system.
->
->
-> -----Original Message-----
-> From: Wido den Hollander [mailto:wido@widodh.nl]
-> Sent: Tuesday, December 06, 2011 5:33 PM
-> To: Eric YH Chen/WHQ/Wistron; ceph-devel@vger.kernel.org
-> Cc: Chris YT Huang/WHQ/Wistron
-> Subject: Re: How to sync data on different server but with the same i=
-mage
->
-> Hi,
->
-> ----- Original message -----
->> Dear All:
->>
->>=A0 =A0 =A0 =A0I map the same rbd image to the rbd device on two diff=
-erent servers.
->>
->> =A0=A0=A0 For example:
->>=A0 =A0 =A0 =A0 =A0 =A01. create rbd image named foo
->>=A0 =A0 =A0 =A0 =A0 =A02. map foo to /dev/rbd0 on server A,=A0 =A0mou=
-nt /dev/rbd0 to /mnt
->>=A0 =A0 =A0 =A0 =A0 =A03. map foo to /dev/rbd0 on server B,=A0 =A0mou=
-nt /dev/rbd0 to /mnt
->>
->>=A0 =A0 =A0 =A0If I put add a file to /mnt via server A, I hope I can=
- see the same
->> file on server B.
->>=A0 =A0 =A0 =A0However, I can't see it until I umount /mnt on server =
-A and re-mount
->> /mnt on server B.
->
-> You'd have to use an cluster filesystem like GFS or OCFS2 to let this=
- work.
->
-> But why not use Ceph as a filesystem instead of RBD? That seems to do=
- what you want.
->
-> Wido
->
->>
->>=A0 =A0 =A0 =A0Do you have any comment about this scenario? How could=
- I force the
->> data synchronization?
->>
->>=A0 =A0 =A0 =A0Actually, I want to implement the iSCSI High Available=
- multipath on
->> http://ceph.newdream.net/wiki/ISCSI.
->>=A0 =A0 =A0 =A0Therefore, I tried this small experiment first, but fa=
-il. Would you
->> please give me some suggestion before I start to implement it? Thank=
-s!
->>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGksIFRvbW1pOg0KDQpUaGFua3MgZm9yIHlvdXIgc3VnZ2VzdGlvbi4NCg0KV2Ugd2lsbCB0cnkg
+dG8gaW1wbGVtZW50IGEgd29ya2Fyb3VuZCBzb2x1dGlvbiBmb3Igb3VyIGludGVybmFsIGV4cGVy
+aW1lbnQuDQoNCkkgaGF2ZSBhbm90aGVyIGxpdHRsZSBxdWVzdGlvbi4gQ291bGQgSSBtYXAgc3Bl
+Y2lmaWMgaW1hZ2UgdG8gc3BlY2lmaWMgZGV2aWNlPw0KDQpGb3IgZXhhbXBsZToNCkJlZm9yZSBy
+ZS1ib290DQppZCAgICAgIHBvb2wgICAgaW1hZ2UgICBzbmFwICAgIGRldmljZQ0KMCAgICAgICBy
+YmQgICAgIGZvbzEgICAgLSAgICAgICAvZGV2L3JiZDANCjEgICAgICAgcmJkICAgICBmb28zICAg
+IC0gICAgICAgL2Rldi9yYmQyDQoNCkhvdyBjb3VsZCBJIHJlLW1hcCB0aGUgaW1hZ2UoZm9vMykg
+dG8gZGV2aWNlKC9kZXYvcmJkMikgYnV0IHNraXAgcmJkMT8gIFRoZSBjb21tYW5kIHByb3ZpZGVk
+IGJ5IGNlcGggQ0xJIGNhbm5vdCBhY2hpZXZlIHRoaXMuDQoNCklmIEkgcmUtbWFwIHRoZSBpbWFn
+ZSB0byBhbm90aGVyIGRldmljZSwgaXQgd291bGQgbm90IHN5bmMgd2l0aCBpU0NTSSBjb25maWd1
+cmF0aW9uIGFuZCBtYXkgY2F1c2UgcHJvYmxlbS4NCg0KVGhhbmtzIGEgbG90IQ0KDQoNCi0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBUb21taSBWaXJ0YW5lbiBbbWFpbHRvOnRvbW1p
+LnZpcnRhbmVuQGRyZWFtaG9zdC5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBEZWNlbWJlciAwNywg
+MjAxMSAzOjExIEFNDQpUbzogRXJpYyBZSCBDaGVuL1dIUS9XaXN0cm9uDQpDYzogY2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmc7IENocmlzIFlUIEh1YW5nL1dIUS9XaXN0cm9uDQpTdWJqZWN0OiBS
+ZTogcmJkIGRldmljZSB3b3VsZCBkaXNhcHBlYXIgYWZ0ZXIgcmUtYm9vdA0KDQpPbiBUdWUsIERl
+YyA2LCAyMDExIGF0IDAxOjMxLCAgPEVyaWNfWUhfQ2hlbkB3aXN0cm9uLmNvbT4gd3JvdGU6DQo+
+IMKgIEFub3RoZXIgcXVlc3Rpb24gYWJvdXQgdGhlIHJiZCBkZXZpY2UuIEFsbCByYmQgZGV2aWNl
+IHdvdWxkIGRpc2FwcGVhcg0KPiBhZnRlciBzZXJ2ZXIgcmUtYm9vdC4NCj4NCj4gwqAgRG8geW91
+IGhhdmUgYW55IHBsYW4gdG8gaW1wbGVtZW50IGEgZmVhdHVyZSB0aGF0IHNlcnZlciB3b3VsZCBy
+ZS1tYXANCj4gYWxsIHRoZSBkZXZpY2UgZHVyaW5nIGluaXRpYWxpemF0aW9uPw0KPg0KPiDCoCBJ
+ZiBub3QsIGRvIHlvdSBoYXZlIGFueSBzdWdnZXN0aW9uIChhYm91dCB0ZWNobmljYWwgcGFydCkg
+aWYgd2Ugd2FudA0KPiB0byBpbXBsZW1lbnQgdGhpcyBmZWF0dXJlPw0KPg0KPiDCoCBGdXJ0aGVy
+bW9yZSwgd2Ugd291bGQgbGlrZSB0byBzZW5kIGEgcHVsbCByZXF1ZXN0IGFmdGVyIHdlIGZpbmlz
+aCBpdCwNCj4gYW55IHBvbGljeSBzaG91bGQgd2UgdGFrZS1jYXJlPw0KDQpZZXMsIGFsbCBtYXBw
+aW5ncyBuZWVkIHRvIGJlIHJlLWVzdGFibGlzaGVkIGFmdGVyIGEgcmVib290Lg0KDQpUaGVyZSBp
+cyBubyBjb252ZW50aW9uIHlldCBvbiBjb25maWd1cmluZyB3aGF0IHNob3VsZCBiZQ0KcmUtZXN0
+YWJsaXNoZWQuIFJpZ2h0IG5vdywgcHV0dGluZyBhbiAicmJkIG1hcCIgaW4gc29tZXRoaW5nIGxp
+a2UNCi9ldGMvcmMubG9jYWwgaXMgYSBkZWNlbnQgd29ya2Fyb3VuZC4NCg0KSSBjcmVhdGVkIGh0
+dHA6Ly90cmFja2VyLm5ld2RyZWFtLm5ldC9pc3N1ZXMvMTc5MCB0byB0cmFjayB0aGlzIGZlYXR1
+cmUuDQo=
