@@ -1,52 +1,95 @@
-From: <Eric_YH_Chen@wistron.com>
-Subject: RE: rbd device would disappear after re-boot
-Date: Wed, 7 Dec 2011 10:38:42 +0800
-Message-ID: <8512670932FB654F81AF0FEF1BE6D49D9433C2@WHQBEMAIL1.whq.wistron>
-References: <8512670932FB654F81AF0FEF1BE6D49D943112@WHQBEMAIL1.whq.wistron> <CAORUGqDjAW-PpqtfL_hzDKZEk3HbgozBBjip-nBYhG6yYgduTg@mail.gmail.com>
+From: Damien Churchill <damoxc@gmail.com>
+Subject: Re: rbd device would disappear after re-boot
+Date: Wed, 7 Dec 2011 02:48:58 +0000
+Message-ID: <CAFtEh-e9_93PL9rqbmUwCKjPLeQVug9QTWRg=wdQwRj-vt0EXQ@mail.gmail.com>
+References: <8512670932FB654F81AF0FEF1BE6D49D943112@WHQBEMAIL1.whq.wistron>
+	<CAORUGqDjAW-PpqtfL_hzDKZEk3HbgozBBjip-nBYhG6yYgduTg@mail.gmail.com>
+	<8512670932FB654F81AF0FEF1BE6D49D9433C2@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw5.wistron.com ([220.128.89.25]:53356 "EHLO
-	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754934Ab1LGCir (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 21:38:47 -0500
-Content-class: urn:content-classes:message
-In-Reply-To: <CAORUGqDjAW-PpqtfL_hzDKZEk3HbgozBBjip-nBYhG6yYgduTg@mail.gmail.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:49330 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754835Ab1LGCs7 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 21:48:59 -0500
+Received: by dadv6 with SMTP id v6so100402dad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Dec 2011 18:48:59 -0800 (PST)
+In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D9433C2@WHQBEMAIL1.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: tommi.virtanen@dreamhost.com
-Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
+To: Eric_YH_Chen@wistron.com
+Cc: tommi.virtanen@dreamhost.com, ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
 
-SGksIFRvbW1pOg0KDQpUaGFua3MgZm9yIHlvdXIgc3VnZ2VzdGlvbi4NCg0KV2Ugd2lsbCB0cnkg
-dG8gaW1wbGVtZW50IGEgd29ya2Fyb3VuZCBzb2x1dGlvbiBmb3Igb3VyIGludGVybmFsIGV4cGVy
-aW1lbnQuDQoNCkkgaGF2ZSBhbm90aGVyIGxpdHRsZSBxdWVzdGlvbi4gQ291bGQgSSBtYXAgc3Bl
-Y2lmaWMgaW1hZ2UgdG8gc3BlY2lmaWMgZGV2aWNlPw0KDQpGb3IgZXhhbXBsZToNCkJlZm9yZSBy
-ZS1ib290DQppZCAgICAgIHBvb2wgICAgaW1hZ2UgICBzbmFwICAgIGRldmljZQ0KMCAgICAgICBy
-YmQgICAgIGZvbzEgICAgLSAgICAgICAvZGV2L3JiZDANCjEgICAgICAgcmJkICAgICBmb28zICAg
-IC0gICAgICAgL2Rldi9yYmQyDQoNCkhvdyBjb3VsZCBJIHJlLW1hcCB0aGUgaW1hZ2UoZm9vMykg
-dG8gZGV2aWNlKC9kZXYvcmJkMikgYnV0IHNraXAgcmJkMT8gIFRoZSBjb21tYW5kIHByb3ZpZGVk
-IGJ5IGNlcGggQ0xJIGNhbm5vdCBhY2hpZXZlIHRoaXMuDQoNCklmIEkgcmUtbWFwIHRoZSBpbWFn
-ZSB0byBhbm90aGVyIGRldmljZSwgaXQgd291bGQgbm90IHN5bmMgd2l0aCBpU0NTSSBjb25maWd1
-cmF0aW9uIGFuZCBtYXkgY2F1c2UgcHJvYmxlbS4NCg0KVGhhbmtzIGEgbG90IQ0KDQoNCi0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBUb21taSBWaXJ0YW5lbiBbbWFpbHRvOnRvbW1p
-LnZpcnRhbmVuQGRyZWFtaG9zdC5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBEZWNlbWJlciAwNywg
-MjAxMSAzOjExIEFNDQpUbzogRXJpYyBZSCBDaGVuL1dIUS9XaXN0cm9uDQpDYzogY2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmc7IENocmlzIFlUIEh1YW5nL1dIUS9XaXN0cm9uDQpTdWJqZWN0OiBS
-ZTogcmJkIGRldmljZSB3b3VsZCBkaXNhcHBlYXIgYWZ0ZXIgcmUtYm9vdA0KDQpPbiBUdWUsIERl
-YyA2LCAyMDExIGF0IDAxOjMxLCAgPEVyaWNfWUhfQ2hlbkB3aXN0cm9uLmNvbT4gd3JvdGU6DQo+
-IMKgIEFub3RoZXIgcXVlc3Rpb24gYWJvdXQgdGhlIHJiZCBkZXZpY2UuIEFsbCByYmQgZGV2aWNl
-IHdvdWxkIGRpc2FwcGVhcg0KPiBhZnRlciBzZXJ2ZXIgcmUtYm9vdC4NCj4NCj4gwqAgRG8geW91
-IGhhdmUgYW55IHBsYW4gdG8gaW1wbGVtZW50IGEgZmVhdHVyZSB0aGF0IHNlcnZlciB3b3VsZCBy
-ZS1tYXANCj4gYWxsIHRoZSBkZXZpY2UgZHVyaW5nIGluaXRpYWxpemF0aW9uPw0KPg0KPiDCoCBJ
-ZiBub3QsIGRvIHlvdSBoYXZlIGFueSBzdWdnZXN0aW9uIChhYm91dCB0ZWNobmljYWwgcGFydCkg
-aWYgd2Ugd2FudA0KPiB0byBpbXBsZW1lbnQgdGhpcyBmZWF0dXJlPw0KPg0KPiDCoCBGdXJ0aGVy
-bW9yZSwgd2Ugd291bGQgbGlrZSB0byBzZW5kIGEgcHVsbCByZXF1ZXN0IGFmdGVyIHdlIGZpbmlz
-aCBpdCwNCj4gYW55IHBvbGljeSBzaG91bGQgd2UgdGFrZS1jYXJlPw0KDQpZZXMsIGFsbCBtYXBw
-aW5ncyBuZWVkIHRvIGJlIHJlLWVzdGFibGlzaGVkIGFmdGVyIGEgcmVib290Lg0KDQpUaGVyZSBp
-cyBubyBjb252ZW50aW9uIHlldCBvbiBjb25maWd1cmluZyB3aGF0IHNob3VsZCBiZQ0KcmUtZXN0
-YWJsaXNoZWQuIFJpZ2h0IG5vdywgcHV0dGluZyBhbiAicmJkIG1hcCIgaW4gc29tZXRoaW5nIGxp
-a2UNCi9ldGMvcmMubG9jYWwgaXMgYSBkZWNlbnQgd29ya2Fyb3VuZC4NCg0KSSBjcmVhdGVkIGh0
-dHA6Ly90cmFja2VyLm5ld2RyZWFtLm5ldC9pc3N1ZXMvMTc5MCB0byB0cmFjayB0aGlzIGZlYXR1
-cmUuDQo=
+On 7 December 2011 02:38,  <Eric_YH_Chen@wistron.com> wrote:
+> Hi, Tommi:
+>
+> Thanks for your suggestion.
+>
+> We will try to implement a workaround solution for our internal exper=
+iment.
+>
+> I have another little question. Could I map specific image to specifi=
+c device?
+>
+> For example:
+> Before re-boot
+> id =C2=A0 =C2=A0 =C2=A0pool =C2=A0 =C2=A0image =C2=A0 snap =C2=A0 =C2=
+=A0device
+> 0 =C2=A0 =C2=A0 =C2=A0 rbd =C2=A0 =C2=A0 foo1 =C2=A0 =C2=A0- =C2=A0 =C2=
+=A0 =C2=A0 /dev/rbd0
+> 1 =C2=A0 =C2=A0 =C2=A0 rbd =C2=A0 =C2=A0 foo3 =C2=A0 =C2=A0- =C2=A0 =C2=
+=A0 =C2=A0 /dev/rbd2
+>
+> How could I re-map the image(foo3) to device(/dev/rbd2) but skip rbd1=
+? =C2=A0The command provided by ceph CLI cannot achieve this.
+>
+> If I re-map the image to another device, it would not sync with iSCSI=
+ configuration and may cause problem.
+>
+
+You can use the symlinks created, if memory serves they end up as
+something along the lines of:
+
+/dev/rbd/<poolname>/<diskname>:0
+
+> Thanks a lot!
+>
+>
+> -----Original Message-----
+> From: Tommi Virtanen [mailto:tommi.virtanen@dreamhost.com]
+> Sent: Wednesday, December 07, 2011 3:11 AM
+> To: Eric YH Chen/WHQ/Wistron
+> Cc: ceph-devel@vger.kernel.org; Chris YT Huang/WHQ/Wistron
+> Subject: Re: rbd device would disappear after re-boot
+>
+> On Tue, Dec 6, 2011 at 01:31, =C2=A0<Eric_YH_Chen@wistron.com> wrote:
+>> =C2=A0 Another question about the rbd device. All rbd device would d=
+isappear
+>> after server re-boot.
+>>
+>> =C2=A0 Do you have any plan to implement a feature that server would=
+ re-map
+>> all the device during initialization?
+>>
+>> =C2=A0 If not, do you have any suggestion (about technical part) if =
+we want
+>> to implement this feature?
+>>
+>> =C2=A0 Furthermore, we would like to send a pull request after we fi=
+nish it,
+>> any policy should we take-care?
+>
+> Yes, all mappings need to be re-established after a reboot.
+>
+> There is no convention yet on configuring what should be
+> re-established. Right now, putting an "rbd map" in something like
+> /etc/rc.local is a decent workaround.
+>
+> I created http://tracker.newdream.net/issues/1790 to track this featu=
+re.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
