@@ -1,44 +1,52 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Cannot mount ceph filesystem: error 5 (Input/Output error)
-Date: Wed, 7 Dec 2011 10:03:17 -0800
-Message-ID: <CAORUGqD9jdS_zyHwCN6VAL9ibaj47pHvX9nxOo38zvGngLC1Rw@mail.gmail.com>
-References: <4366451.BU1d1YAr76@pc10> <3826746.5bRf3lS2YZ@tolkien>
- <CAF3hT9DSf5Xaw00PUFHp5OtGAabka+Wc6H4vVkK24PJGNizd4Q@mail.gmail.com>
- <1871670.5qvOuPR13S@pc10> <CAORUGqDkyTJUWgj-0knXsfYxFC5izi703L=ASsPhigAXY0WZmA@mail.gmail.com>
+From: Christian Brunner <chb@muc.de>
+Subject: Re: 'ceph -w' in 0.39
+Date: Wed, 7 Dec 2011 21:20:07 +0100
+Message-ID: <CAO47_-_R97_p7R8djYyhypnxTzS7JGC5Vea6eqA3Jw4Dbeyt1w@mail.gmail.com>
+References: <CAO47_--yZib5-zpwDutQSdiw7f8CWu=2CE0jNVAVP2fD4nrcZA@mail.gmail.com>
+	<Pine.LNX.4.64.1112051342290.13773@cobra.newdream.net>
+Reply-To: chb@muc.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:48529 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756788Ab1LGSDj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2011 13:03:39 -0500
-Received: by eekd41 with SMTP id d41so743643eek.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2011 10:03:38 -0800 (PST)
-In-Reply-To: <CAORUGqDkyTJUWgj-0knXsfYxFC5izi703L=ASsPhigAXY0WZmA@mail.gmail.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:54393 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757618Ab1LGUUI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2011 15:20:08 -0500
+Received: by vcbfk14 with SMTP id fk14so825299vcb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2011 12:20:07 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.64.1112051342290.13773@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, Dec 7, 2011 at 10:00, Tommi Virtanen
-<tommi.virtanen@dreamhost.com> wrote:
-> def crush(pg):
-> =C2=A0 =C2=A0all_osds =3D ['osd.0', 'osd.1', 'osd.2', ...]
-> =C2=A0 =C2=A0result =3D []
-> =C2=A0 =C2=A0# size is the number of copies; primary+replicas
-> =C2=A0 =C2=A0while len(result) < size:
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0r =3D get_random_number()
+2011/12/5 Sage Weil <sage@newdream.net>:
+> Hi Christian,
+>
+> On Mon, 5 Dec 2011, Christian Brunner wrote:
+>> I've just updated to 0.39. Everything seems to be fine, except one
+>> minor thing I noticed:
+>>
+>> 'ceph -w' output stops after a few minutes. With "debug ms =3D 1" it
+>> ends with these lines:
+>>
+>> 2011-12-05 14:45:52.939300 7fc700637700 -- 10.255.0.21:0/14145 <=3D=3D
+>> mon.2 10.255.0.22:6789/0 315 =3D=3D=3D=3D mon_observe_notify(v452555=
+0 1303
+>> bytes v4525550) v1 =3D=3D=3D=3D 1354+0+0 (339634604 0 0) 0x7fc6f4000=
+920 con
+>> 0x874070
+>> 2011-12-05 14:45:52.939319 =A0 =A0pg v4525550: 2776 pgs: 2776
+>> active+clean; 3362 GB data, 1646 GB used, 57135 GB / 59615 GB avail
+>>
+>> After that, silence...
+>
+> I just pushed a fix for this to the stable branch.
 
-Err I mean pseudorandom, based on pg. So basically "r =3D pg" there.
+Thanks! It's working now.
 
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0chosen =3D all_osds[ r % len(all_osds) ]
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0if chosen in result:
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0# osd can be picked only onc=
-e
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0continue
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0result.append(chosen)
-> =C2=A0 =C2=A0return result
+Christian
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
