@@ -1,29 +1,32 @@
-From: Kevin Wolf <kwolf@redhat.com>
-Subject: Re: [PATCH] rbd: always set out parameter in qemu_rbd_snap_list
-Date: Wed, 07 Dec 2011 11:27:48 +0100
-Message-ID: <4EDF3FA4.7060601@redhat.com>
-References: <1323219910-17021-1-git-send-email-josh.durgin@dreamhost.com>
+From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Subject: Re: Cannot mount ceph filesystem: error 5 (Input/Output error)
+Date: Wed, 07 Dec 2011 15:38:57 +0100
+Message-ID: <1871670.5qvOuPR13S@pc10>
+References: <4366451.BU1d1YAr76@pc10> <3826746.5bRf3lS2YZ@tolkien> <CAF3hT9DSf5Xaw00PUFHp5OtGAabka+Wc6H4vVkK24PJGNizd4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:27174 "EHLO mx1.redhat.com"
+Received: from unknownsite.de ([62.48.69.106]:55815 "EHLO hartes-hannover.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753825Ab1LGKYl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 7 Dec 2011 05:24:41 -0500
-In-Reply-To: <1323219910-17021-1-git-send-email-josh.durgin@dreamhost.com>
+	id S1755798Ab1LGOi7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 7 Dec 2011 09:38:59 -0500
+Received: from pc10.localnet (pc10.asys-h.de [193.98.1.90])
+	by hartes-hannover.de (Postfix) with ESMTPSA id 8C4CF10C866
+	for <ceph-devel@vger.kernel.org>; Wed,  7 Dec 2011 15:38:58 +0100 (CET)
+In-Reply-To: <CAF3hT9DSf5Xaw00PUFHp5OtGAabka+Wc6H4vVkK24PJGNizd4Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, chb@muc.de
+To: ceph-devel@vger.kernel.org
 
-Am 07.12.2011 02:05, schrieb Josh Durgin:
-> The caller expects psn_tab to be NULL when there are no snapshots or
-> an error occurs. This results in calling g_free on an invalid address.
-> 
-> Reported-by: Oliver Francke <Oliver@filoo.de>
-> Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
+Am Dienstag, 6. Dezember 2011, 11:51:45 schrieben Sie:
+> PG = "placement group". When placing data in the cluster, objects are
+> mapped into PGs, and those PGs are mapped onto OSDs.
 
-Thanks, applied to the block branch.
+How does the Object->PG mapping look like, do you map more than one object on 
+one PG, or do you sometimes map an object to more than one PG? How about the 
+mapping of PGs to OSDs, does one PG belong to exactly one OSD?
 
-Kevin
+Does one PG represent a fixed amount of storage space?
+
+        Guido
