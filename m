@@ -1,54 +1,62 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: 'ceph -w' in 0.39
-Date: Wed, 7 Dec 2011 21:20:07 +0100
-Message-ID: <CAO47_-_R97_p7R8djYyhypnxTzS7JGC5Vea6eqA3Jw4Dbeyt1w@mail.gmail.com>
-References: <CAO47_--yZib5-zpwDutQSdiw7f8CWu=2CE0jNVAVP2fD4nrcZA@mail.gmail.com>
-	<Pine.LNX.4.64.1112051342290.13773@cobra.newdream.net>
-Reply-To: chb@muc.de
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: Client receives 'connection refused' only after heavy use
+Date: Wed, 7 Dec 2011 14:33:35 -0800
+Message-ID: <CAF3hT9DACT5QMNkPYv8tG2dE=JnnZO-k22-k7SG7htbv6D2YEg@mail.gmail.com>
+References: <4EDC0ECF.60805@cs.ucsc.edu>
+	<4EDC1853.5080405@cs.ucsc.edu>
+	<Pine.LNX.4.64.1112042046280.8414@cobra.newdream.net>
+	<4EDD1437.4030608@cs.ucsc.edu>
+	<CAORUGqCZy+j3MUry7ut=E7YXNiPHLGSqRw5qyqaOKR2=12mjhA@mail.gmail.com>
+	<4EDD15EC.1000900@cs.ucsc.edu>
+	<CAORUGqATJ=xcs3GPQkdqN5q4MjQcEYewj_aJhq2DVa=m95TLww@mail.gmail.com>
+	<CAF3hT9A=cRttnho5DhF991+UnwCfxGO5sDtvU8AmBXMfEhg_Qg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:54393 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757618Ab1LGUUI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2011 15:20:08 -0500
-Received: by vcbfk14 with SMTP id fk14so825299vcb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2011 12:20:07 -0800 (PST)
-In-Reply-To: <Pine.LNX.4.64.1112051342290.13773@cobra.newdream.net>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:64260 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757048Ab1LGWdg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2011 17:33:36 -0500
+Received: by qcqz2 with SMTP id z2so878212qcq.19
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2011 14:33:35 -0800 (PST)
+In-Reply-To: <CAF3hT9A=cRttnho5DhF991+UnwCfxGO5sDtvU8AmBXMfEhg_Qg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
 Cc: ceph-devel@vger.kernel.org
 
-2011/12/5 Sage Weil <sage@newdream.net>:
-> Hi Christian,
->
-> On Mon, 5 Dec 2011, Christian Brunner wrote:
->> I've just updated to 0.39. Everything seems to be fine, except one
->> minor thing I noticed:
->>
->> 'ceph -w' output stops after a few minutes. With "debug ms =3D 1" it
->> ends with these lines:
->>
->> 2011-12-05 14:45:52.939300 7fc700637700 -- 10.255.0.21:0/14145 <=3D=3D
->> mon.2 10.255.0.22:6789/0 315 =3D=3D=3D=3D mon_observe_notify(v452555=
-0 1303
->> bytes v4525550) v1 =3D=3D=3D=3D 1354+0+0 (339634604 0 0) 0x7fc6f4000=
-920 con
->> 0x874070
->> 2011-12-05 14:45:52.939319 =A0 =A0pg v4525550: 2776 pgs: 2776
->> active+clean; 3362 GB data, 1646 GB used, 57135 GB / 59615 GB avail
->>
->> After that, silence...
->
-> I just pushed a fix for this to the stable branch.
+Noah:
+Branch wip-messenger contains the patch you want (plus one or two
+cleanups), or apply the below. Should handle it, although I'd like to
+do a more thorough cleanup of this problem at a later time.
+-Greg
 
-Thanks! It's working now.
+From 8c4f4748e8b683f5b4ea939295793421c0ab7b61 Mon Sep 17 00:00:00 2001
+From: Greg Farnum <gregory.farnum@dreamhost.com>
+Date: Wed, 7 Dec 2011 14:19:23 -0800
+Subject: [PATCH] mds: mark_disposable when closing a Client connection.
 
-Christian
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This is causing issues since the Client's ack of the MClientSession
+is somehow not getting back to the MDS. We should make the
+Client/SimpleMessenger be better-behaved about shutdown, but for
+now this solution matches how we're working elsewhere in our codebase.
+
+Signed-off-by: Greg Farnum <gregory.farnum@dreamhost.com>
+---
+ src/mds/Server.cc |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/src/mds/Server.cc b/src/mds/Server.cc
+index a9ef64f..d44bd7e 100644
+--- a/src/mds/Server.cc
++++ b/src/mds/Server.cc
+@@ -289,6 +289,7 @@ void Server::_session_logged(Session *session,
+uint64_t state_seq, bool open, ve
+       // reset session
+       mds->send_message_client(new
+MClientSession(CEPH_SESSION_CLOSE), session);
+       mds->sessionmap.set_state(session, Session::STATE_CLOSED);
++      mds->messenger->mark_disposable(session->connection);
+       session->clear();
+     } else if (session->is_killing()) {
+       // destroy session, close connection
