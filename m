@@ -1,95 +1,141 @@
-From: Damien Churchill <damoxc@gmail.com>
-Subject: Re: rbd device would disappear after re-boot
-Date: Wed, 7 Dec 2011 02:48:58 +0000
-Message-ID: <CAFtEh-e9_93PL9rqbmUwCKjPLeQVug9QTWRg=wdQwRj-vt0EXQ@mail.gmail.com>
-References: <8512670932FB654F81AF0FEF1BE6D49D943112@WHQBEMAIL1.whq.wistron>
-	<CAORUGqDjAW-PpqtfL_hzDKZEk3HbgozBBjip-nBYhG6yYgduTg@mail.gmail.com>
-	<8512670932FB654F81AF0FEF1BE6D49D9433C2@WHQBEMAIL1.whq.wistron>
+From: Noah Watkins <jayhawk@soe.ucsc.edu>
+Subject: Client stuck 'waiting on max_size'
+Date: Tue, 6 Dec 2011 20:02:23 -0800 (PST)
+Message-ID: <1340951383.133589.1323230543007.JavaMail.root@mail-01.cse.ucsc.edu>
+References: <726402583.133585.1323230432339.JavaMail.root@mail-01.cse.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:49330 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754835Ab1LGCs7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 21:48:59 -0500
-Received: by dadv6 with SMTP id v6so100402dad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Dec 2011 18:48:59 -0800 (PST)
-In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D9433C2@WHQBEMAIL1.whq.wistron>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:46220 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752574Ab1LGECX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2011 23:02:23 -0500
+Received: from mail-01.cse.ucsc.edu (mail-01.cse.ucsc.edu [128.114.48.32])
+	by mail-01.cse.ucsc.edu (Postfix) with ESMTP id 1A6B31009C19
+	for <ceph-devel@vger.kernel.org>; Tue,  6 Dec 2011 20:02:23 -0800 (PST)
+In-Reply-To: <726402583.133585.1323230432339.JavaMail.root@mail-01.cse.ucsc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wistron.com
-Cc: tommi.virtanen@dreamhost.com, ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 7 December 2011 02:38,  <Eric_YH_Chen@wistron.com> wrote:
-> Hi, Tommi:
->
-> Thanks for your suggestion.
->
-> We will try to implement a workaround solution for our internal exper=
-iment.
->
-> I have another little question. Could I map specific image to specifi=
-c device?
->
-> For example:
-> Before re-boot
-> id =C2=A0 =C2=A0 =C2=A0pool =C2=A0 =C2=A0image =C2=A0 snap =C2=A0 =C2=
-=A0device
-> 0 =C2=A0 =C2=A0 =C2=A0 rbd =C2=A0 =C2=A0 foo1 =C2=A0 =C2=A0- =C2=A0 =C2=
-=A0 =C2=A0 /dev/rbd0
-> 1 =C2=A0 =C2=A0 =C2=A0 rbd =C2=A0 =C2=A0 foo3 =C2=A0 =C2=A0- =C2=A0 =C2=
-=A0 =C2=A0 /dev/rbd2
->
-> How could I re-map the image(foo3) to device(/dev/rbd2) but skip rbd1=
-? =C2=A0The command provided by ceph CLI cannot achieve this.
->
-> If I re-map the image to another device, it would not sync with iSCSI=
- configuration and may cause problem.
->
+I have a simple libcephfs client (code attached) that:
 
-You can use the symlinks created, if memory serves they end up as
-something along the lines of:
+1) mounts ceph
+2) opens/create a file
+3) writes 1K
 
-/dev/rbd/<poolname>/<diskname>:0
+But gets stuck on the write. The client log repeats the following over and over. (c code for test appended).
 
-> Thanks a lot!
->
->
-> -----Original Message-----
-> From: Tommi Virtanen [mailto:tommi.virtanen@dreamhost.com]
-> Sent: Wednesday, December 07, 2011 3:11 AM
-> To: Eric YH Chen/WHQ/Wistron
-> Cc: ceph-devel@vger.kernel.org; Chris YT Huang/WHQ/Wistron
-> Subject: Re: rbd device would disappear after re-boot
->
-> On Tue, Dec 6, 2011 at 01:31, =C2=A0<Eric_YH_Chen@wistron.com> wrote:
->> =C2=A0 Another question about the rbd device. All rbd device would d=
-isappear
->> after server re-boot.
->>
->> =C2=A0 Do you have any plan to implement a feature that server would=
- re-map
->> all the device during initialization?
->>
->> =C2=A0 If not, do you have any suggestion (about technical part) if =
-we want
->> to implement this feature?
->>
->> =C2=A0 Furthermore, we would like to send a pull request after we fi=
-nish it,
->> any policy should we take-care?
->
-> Yes, all mappings need to be re-established after a reboot.
->
-> There is no convention yet on configuring what should be
-> re-established. Right now, putting an "rbd map" in something like
-> /etc/rc.local is a decent workaround.
->
-> I created http://tracker.newdream.net/issues/1790 to track this featu=
-re.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Noah
+
+
+2011-12-06 19:50:23.329501 7ff3a7023700 client.6154  cap mds.0 issued pAsLsXsFscr implemented pAsLsXsFscr revoking -
+2011-12-06 19:50:37.330474 7ff3a7023700 client.6154 renew_caps()
+2011-12-06 19:50:37.330536 7ff3a7023700 client.6154 renew_caps requesting from mds.0
+2011-12-06 19:50:37.330549 7ff3a7023700 client.6154 renew_caps mds.0
+2011-12-06 19:50:37.331304 7ff3a6021700 client.6154 handle_client_session client_session(renewcaps seq 4) v1
+2011-12-06 19:50:37.331357 7ff3a9eb7760 client.6154 waiting on max_size, endoff 1024 max_size 0
+2011-12-06 19:50:57.331975 7ff3a7023700 client.6154 renew_caps()
+2011-12-06 19:50:57.332021 7ff3a7023700 client.6154 renew_caps requesting from mds.0
+2011-12-06 19:50:57.332036 7ff3a7023700 client.6154 renew_caps mds.0
+2011-12-06 19:50:57.332757 7ff3a6021700 client.6154 handle_client_session client_session(renewcaps seq 5) v1
+2011-12-06 19:50:57.332809 7ff3a9eb7760 client.6154 waiting on max_size, endoff 1024 max_size 0
+2011-12-06 19:51:17.333445 7ff3a7023700 client.6154 renew_caps()
+2011-12-06 19:51:17.333492 7ff3a7023700 client.6154 renew_caps requesting from mds.0
+2011-12-06 19:51:17.333507 7ff3a7023700 client.6154 renew_caps mds.0
+2011-12-06 19:51:17.334220 7ff3a6021700 client.6154 handle_client_session client_session(renewcaps seq 6) v1
+2011-12-06 19:51:17.334274 7ff3a9eb7760 client.6154 waiting on max_size, endoff 1024 max_size 0
+2011-12-06 19:51:37.334880 7ff3a7023700 client.6154 renew_caps()
+2011-12-06 19:51:37.334927 7ff3a7023700 client.6154 renew_caps requesting from mds.0
+2011-12-06 19:51:37.334941 7ff3a7023700 client.6154 renew_caps mds.0
+2011-12-06 19:51:37.335657 7ff3a6021700 client.6154 handle_client_session client_session(renewcaps seq 7) v1
+2011-12-06 19:51:37.335707 7ff3a9eb7760 client.6154 waiting on max_size, endoff 1024 max_size 0
+2011-12-06 19:51:57.336312 7ff3a7023700 client.6154 renew_caps()
+2011-12-06 19:51:57.336356 7ff3a7023700 client.6154 renew_caps requesting from mds.0
+2011-12-06 19:51:57.336370 7ff3a7023700 client.6154 renew_caps mds.0
+2011-12-06 19:51:57.337057 7ff3a6021700 client.6154 handle_client_session client_session(renewcaps seq 8) v1
+2011-12-06 19:51:57.337109 7ff3a9eb7760 client.6154 waiting on max_size, endoff 1024 max_size 0
+2011-12-06 19:52:17.337745 7ff3a7023700 client.6154 renew_caps()
+2011-12-06 19:52:17.337791 7ff3a7023700 client.6154 renew_caps requesting from mds.0
+2011-12-06 19:52:17.337805 7ff3a7023700 client.6154 renew_caps mds.0
+2011-12-06 19:52:17.338499 7ff3a6021700 client.6154 handle_client_session client_session(renewcaps seq 9) v1
+2011-12-06 19:52:17.338550 7ff3a9eb7760 client.6154 waiting on max_size, endoff 1024 max_size 0
+2011-12-06 19:52:37.339187 7ff3a7023700 client.6154 renew_caps()
+2011-12-06 19:52:37.339236 7ff3a7023700 client.6154 renew_caps requesting from mds.0
+2011-12-06 19:52:37.339250 7ff3a7023700 client.6154 renew_caps mds.0
+2011-12-06 19:52:37.339968 7ff3a6021700 client.6154 handle_client_session client_session(renewcaps seq 10) v1
+2011-12-06 19:52:37.340015 7ff3a9eb7760 client.6154 waiting on max_size, endoff 1024 max_size 0
+
+
+=============
+
+#define _FILE_OFFSET_BITS 64
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <cephfs/libcephfs.h>
+
+#define MB64 (1<<26)
+
+int main(int argc, const char **argv)
+{
+	struct ceph_mount_info *cmount;
+	int ret, fd, len;
+	char buf[1024];
+
+	if (argc < 3) {
+		fprintf(stderr, "usage: ./%s <conf> <file>\n", argv[0]);
+		exit(1);
+	}
+
+	ret = ceph_create(&cmount, NULL);
+	if (ret) {
+		fprintf(stderr, "ceph_create=%d\n", ret);
+		exit(1);
+	}
+
+	ret = ceph_conf_read_file(cmount, argv[1]);
+	if (ret) {
+		fprintf(stderr, "ceph_conf_read_file=%d\n", ret);
+		exit(1);
+	}
+
+	ret = ceph_conf_parse_argv(cmount, argc, argv);
+	if (ret) {
+		fprintf(stderr, "ceph_conf_parse_argv=%d\n", ret);
+		exit(1);
+	}
+
+	ret = ceph_mount(cmount, NULL);
+	if (ret) {
+		fprintf(stderr, "ceph_mount=%d\n", ret);
+		exit(1);
+	}
+
+	ret = ceph_chdir(cmount, "/");
+	if (ret) {
+		fprintf(stderr, "ceph_chdir=%d\n", ret);
+		exit(1);
+	}
+
+	fd = ceph_open(cmount, argv[2], O_CREAT|O_TRUNC, 0777);	
+	if (fd < 0) {
+		fprintf(stderr, "ceph_open=%d\n", fd);
+		exit(1);
+	}
+
+	memset(buf, 'a', sizeof(buf));
+
+	len = ceph_write(cmount, fd, buf, sizeof(buf), 0);
+
+	fprintf(stdout, "wrote %d bytes\n", len);
+
+	ceph_shutdown(cmount);
+
+	return 0;
+}
