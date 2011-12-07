@@ -1,56 +1,57 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Client stuck 'waiting on max_size'
-Date: Tue, 6 Dec 2011 21:45:43 -0800
-Message-ID: <CAF3hT9Dfp2017j+O2bDw8AG=HT+yviO45P+Gv29NgU9FkdeCXA@mail.gmail.com>
-References: <726402583.133585.1323230432339.JavaMail.root@mail-01.cse.ucsc.edu>
-	<1340951383.133589.1323230543007.JavaMail.root@mail-01.cse.ucsc.edu>
-	<CAF3hT9DHJ6gRxU_d3niH_LrgL=zHcEgaYSXgH+DTq+1ZEOU9+w@mail.gmail.com>
-	<4EDEF490.5050606@cs.ucsc.edu>
+Subject: Re: Client receives 'connection refused' only after heavy use
+Date: Tue, 6 Dec 2011 21:49:23 -0800
+Message-ID: <CAF3hT9A=cRttnho5DhF991+UnwCfxGO5sDtvU8AmBXMfEhg_Qg@mail.gmail.com>
+References: <4EDC0ECF.60805@cs.ucsc.edu>
+	<4EDC1853.5080405@cs.ucsc.edu>
+	<Pine.LNX.4.64.1112042046280.8414@cobra.newdream.net>
+	<4EDD1437.4030608@cs.ucsc.edu>
+	<CAORUGqCZy+j3MUry7ut=E7YXNiPHLGSqRw5qyqaOKR2=12mjhA@mail.gmail.com>
+	<4EDD15EC.1000900@cs.ucsc.edu>
+	<CAORUGqATJ=xcs3GPQkdqN5q4MjQcEYewj_aJhq2DVa=m95TLww@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:58891 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751077Ab1LGFpo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2011 00:45:44 -0500
-Received: by ggnr5 with SMTP id r5so237008ggn.19
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Dec 2011 21:45:44 -0800 (PST)
-In-Reply-To: <4EDEF490.5050606@cs.ucsc.edu>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:62095 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751008Ab1LGFtY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2011 00:49:24 -0500
+Received: by iakc1 with SMTP id c1so375551iak.19
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Dec 2011 21:49:23 -0800 (PST)
+In-Reply-To: <CAORUGqATJ=xcs3GPQkdqN5q4MjQcEYewj_aJhq2DVa=m95TLww@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-I see a lot of this:
-2011-12-06 19:42:50.401143 7fc8b1850700 mds.0.locker  i want to change
-file_max, but lock won't allow it (yet)
-2011-12-06 19:42:50.401168 7fc8b1850700 mds.0.locker file_excl (ifile
-sync) on [inode 10000000cda [2,head] /noah.bin auth v1600 s=3D0 n(v0
-1=3D1+0) (iversion lock) cr=3D{6143=3D0-67108864@1}
-caps=3D{6139=3D-/pFscr@2,6143=3DpAsLsXsFc/pFscr@4},l=3D6143 | c
-aps dirty 0x1f87c80]
+Looks like these are all sockets that don't get closed because we send
+the associated Pipes into reconnect, but they never actually do so
+(and never move on out of it into shutting down). We made some changes
+to how reconnect and cleanup are done that probably weren't
+complete/missed a case. (Maybe only clients actually try to reconnect,
+but everybody goes into that state?)
+=46or tomorrow!
 
-Unfortunately I'm having trouble thinking straight so dealing with it
-will have to wait until morning, but it shouldn't be too hard to track
-down what's happening.
-
-On Tue, Dec 6, 2011 at 9:07 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wrot=
+On Mon, Dec 5, 2011 at 11:36 AM, Tommi Virtanen
+<tommi.virtanen@dreamhost.com> wrote:
+> On Mon, Dec 5, 2011 at 11:05, Noah Watkins <jayhawk@cs.ucsc.edu> wrot=
 e:
-> On 12/6/11 8:49 PM, Gregory Farnum wrote:
->>
->> The client is waiting for the MDS to give it permission to make the
->> file larger. I think this data comes back in a caps message, but it
->> probably got stuck on the MDS for some reason. Try grepping through
->> the MDS and client logs for max_size and see if there's something
->> obvious (or send it our way).
+>> root@issdm-23:~# lsof -n -p 1394
+>> COMMAND =A0 PID USER =A0 FD =A0 TYPE =A0 =A0 =A0 =A0 =A0 =A0 DEVICE =
+SIZE/OFF =A0 =A0NODE NAME
+>> ceph-mds 1394 root =A0 12u =A0sock =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00,=
+6 =A0 =A0 =A00t0 =A0 11560 can't
+>> identify protocol
 >
->
-> Logs are here:
->
-> =A0http://piha.soe.ucsc.edu/cephlogs/max_size/
->
-> -Noah
+> There's 506 of these guys in the listing. I would say there's a leak
+> of sockets that get created with socket(2), but don't get bind(2) or
+> connect(2) called on them.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
