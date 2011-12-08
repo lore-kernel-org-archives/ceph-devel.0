@@ -1,47 +1,279 @@
-From: <Eric_YH_Chen@wistron.com>
-Subject: RE: rbd device would disappear after re-boot
-Date: Thu, 8 Dec 2011 15:31:49 +0800
-Message-ID: <8512670932FB654F81AF0FEF1BE6D49D943CC9@WHQBEMAIL1.whq.wistron>
-References: <8512670932FB654F81AF0FEF1BE6D49D943112@WHQBEMAIL1.whq.wistron> <CAORUGqDjAW-PpqtfL_hzDKZEk3HbgozBBjip-nBYhG6yYgduTg@mail.gmail.com> <8512670932FB654F81AF0FEF1BE6D49D9433C2@WHQBEMAIL1.whq.wistron> <CAORUGqAhUEZXnjzpxvG0d7q5K-zjvefN5LQhTqiyYSRTLk+tGg@mail.gmail.com>
+From: pankaj singh <psingh.ait@gmail.com>
+Subject: Re: Problem while CEPH setup
+Date: Thu, 8 Dec 2011 14:02:43 +0530
+Message-ID: <CAPrqf9335B=mh7KOHLr_hDv2BwTG0T54fQsWG4zMPsyOjgGw1A@mail.gmail.com>
+References: <CAPrqf92pUqDZznQHhnKAwFHwZh0OMWs3r-5VMjWcu_g9ds-ehQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="UTF-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw3.wistron.com ([220.128.89.23]:60574 "EHLO
-	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751578Ab1LHHbx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2011 02:31:53 -0500
-Content-class: urn:content-classes:message
-In-Reply-To: <CAORUGqAhUEZXnjzpxvG0d7q5K-zjvefN5LQhTqiyYSRTLk+tGg@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:47629 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752505Ab1LHIco convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2011 03:32:44 -0500
+Received: by wgbdr13 with SMTP id dr13so3019433wgb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Dec 2011 00:32:43 -0800 (PST)
+In-Reply-To: <CAPrqf92pUqDZznQHhnKAwFHwZh0OMWs3r-5VMjWcu_g9ds-ehQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: tommi.virtanen@dreamhost.com
-Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
+To: ceph-devel@vger.kernel.org
 
-SGksIFRvbW1pOg0KDQpXaGF0IEkgc2VlIGlzIGxpa2UgdGhpcy4NCg0KbHJ3eHJ3eHJ3eCAxIHJv
-b3Qgcm9vdCAxMCAyMDExLTEyLTA3IDE2OjQ4IGZvbzE6MCAtPiAuLi8uLi9yYmQwDQpscnd4cnd4
-cnd4IDEgcm9vdCByb290IDEwIDIwMTEtMTItMDcgMTY6NTAgZm9vMjoxIC0+IC4uLy4uL3JiZDEN
-Cg0KVGhlIGV4dHJhIG51bWJlciAoOjAgYW5kIDoxKSBiZWhpbmQgdGhlIGltYWdlIG5hbWUgbWFr
-ZSB0aGUgcHJvYmxlbSBzdGlsbCBleGlzdHMuDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQpGcm9tOiBUb21taSBWaXJ0YW5lbiBbbWFpbHRvOnRvbW1pLnZpcnRhbmVuQGRyZWFtaG9zdC5j
-b21dIA0KU2VudDogVGh1cnNkYXksIERlY2VtYmVyIDA4LCAyMDExIDE6MzEgQU0NClRvOiBFcmlj
-IFlIIENoZW4vV0hRL1dpc3Ryb24NCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgQ2hy
-aXMgWVQgSHVhbmcvV0hRL1dpc3Ryb24NClN1YmplY3Q6IFJlOiByYmQgZGV2aWNlIHdvdWxkIGRp
-c2FwcGVhciBhZnRlciByZS1ib290DQoNCk9uIFR1ZSwgRGVjIDYsIDIwMTEgYXQgMTg6MzgsICA8
-RXJpY19ZSF9DaGVuQHdpc3Ryb24uY29tPiB3cm90ZToNCj4gSSBoYXZlIGFub3RoZXIgbGl0dGxl
-IHF1ZXN0aW9uLiBDb3VsZCBJIG1hcCBzcGVjaWZpYyBpbWFnZSB0byBzcGVjaWZpYyBkZXZpY2U/
-DQo+DQo+IEZvciBleGFtcGxlOg0KPiBCZWZvcmUgcmUtYm9vdA0KPiBpZCDCoCDCoCDCoHBvb2wg
-wqAgwqBpbWFnZSDCoCBzbmFwIMKgIMKgZGV2aWNlDQo+IDAgwqAgwqAgwqAgcmJkIMKgIMKgIGZv
-bzEgwqAgwqAtIMKgIMKgIMKgIC9kZXYvcmJkMA0KPiAxIMKgIMKgIMKgIHJiZCDCoCDCoCBmb28z
-IMKgIMKgLSDCoCDCoCDCoCAvZGV2L3JiZDINCj4NCj4gSG93IGNvdWxkIEkgcmUtbWFwIHRoZSBp
-bWFnZShmb28zKSB0byBkZXZpY2UoL2Rldi9yYmQyKSBidXQgc2tpcCByYmQxPyDCoFRoZSBjb21t
-YW5kIHByb3ZpZGVkIGJ5IGNlcGggQ0xJIGNhbm5vdCBhY2hpZXZlIHRoaXMuDQo+DQo+IElmIEkg
-cmUtbWFwIHRoZSBpbWFnZSB0byBhbm90aGVyIGRldmljZSwgaXQgd291bGQgbm90IHN5bmMgd2l0
-aCBpU0NTSSBjb25maWd1cmF0aW9uIGFuZCBtYXkgY2F1c2UgcHJvYmxlbS4NCg0KSSdtIGp1c3Qg
-Y29uZmlybWluZyB3aGF0IERhbWllbiBzYWlkLiBEb24ndCByZWx5IG9uIHRoZSBudW1iZXJpbmcg
-dG8NCmJlIGNvbnNpc3RlbnQgZXZlbiBmcm9tIG9uZSBib290IHRvIGFub3RoZXI7IHdlIHByb3Zp
-ZGUgYSB1ZGV2IGhlbHBlcg0KdGhhdCBhc3NpZ25zIG1vcmUgcGVybWFuZW50IG5hbWVzLCBiYXNl
-ZCBvbiB0aGUgcG9vbCwgaW1hZ2UgbmFtZSwgYW5kDQpwb3RlbnRpYWxseSBzbmFwc2hvdCBuYW1l
-LiBZb3UnbGwgZ2V0IGEgc3ltbGluayBsaWtlDQovZGV2L3JiZC9QT09ML0lNQUdFIG9yIC9kZXYv
-cmJkL1BPT0wvSU1BR0VAU05BUCwgdXNlIHRoYXQgbmFtZS4NCg==
+Hi Guys,
+
+Any help would be appreciable...
+
+Regards,
+~Pankaj Singh
+
+On Wed, Dec 7, 2011 at 12:40 PM, pankaj singh <psingh.ait@gmail.com> wr=
+ote:
+> =A0 =A0Hi,
+>
+> =A0 =A0I and my friend Rohan tries to setup ceph on our machine. We a=
+re new
+> =A0 =A0to ceph. We have got some issues during ceph setup.
+> =A0 =A0We have followed following steps.
+>
+> =A0 =A01. downloaded the code from Git repo.
+> =A0 =A02. compile the code. ./configure ; make
+> =A0 =A03. make install
+> =A0 =A04. created ceph.conf file.
+> =A0 =A0/------------------
+> =A0 =A0[global]
+> =A0 =A0; =A0 =A0 =A0 log dir =3D out
+> =A0 =A0; =A0 =A0 =A0 logger dir =3D log
+> =A0 =A0; =A0 =A0 =A0 chdir =3D ""
+> =A0 =A0; =A0 =A0 =A0 pid file =3D out/$type$id.pid
+> =A0 =A0; =A0 =A0 =A0 auth supported =3D cephx
+> =A0 =A0; =A0 =A0 =A0 keyring =3D /etc/ceph/$name.keyring
+> =A0 =A0[mon]
+> =A0 =A0 =A0 =A0 =A0mon data =3D /root/workera/CEPH/mondata/data/mon.$=
+id
+>
+> =A0 =A0[osd]
+> =A0 =A0 =A0 =A0 =A0osd data =3D /root/workera/CEPH/mondata/data/osd.$=
+id
+> =A0 =A0 =A0 =A0 =A0osd journal =3D /root/workera/CEPH/mondata/data/os=
+d.$id.journal
+> =A0 =A0 =A0 =A0 =A0osd journal size =3D 1000
+>
+> =A0 =A0[mon.0]
+> =A0 =A0 =A0 =A0 =A0host =3D alpha
+> =A0 =A0 =A0 =A0 =A0mon addr =3D 192.168.56.102:6789
+>
+> =A0 =A0[osd.0]
+> =A0 =A0 =A0 =A0 =A0host =3D alpha
+> =A0 =A0 =A0 =A0 =A0btrfs devs =3D /root/workera/CEPH/mondata/data/osd=
+0
+>
+> =A0 =A0[mds]
+> =A0 =A0 =A0 =A0 =A0debug mds =3D 1
+> =A0 =A0[mds.alpha]
+> =A0 =A0 =A0 =A0 =A0host =3D alpha
+> =A0 =A0/----------------------
+> =A0 =A05. Created the necessary directories. mkdir -p
+> /root/workera/CEPH/mondata/data
+> =A0 =A06. created a file disk "osd0" with btrfs filesystem.
+> =A0 =A07. Run mkcephfs --allhosts -c ceph.conf
+> =A0 =A0 =A0This is the error what i got:
+>
+> =A0 =A0/---------------------------
+> =A0 =A0temp dir is /tmp/mkcephfs.rvWtFT0Ddi
+> =A0 =A0preparing monmap in /tmp/mkcephfs.rvWtFT0Ddi/monmap
+> =A0 =A0/usr/local/bin/monmaptool --create --clobber --add 0
+> =A0 =A0192.168.56.102:6789 --print /tmp/mkcephfs.rvWtFT0Ddi/monmap
+> =A0 =A0/usr/local/bin/monmaptool: monmap file /tmp/mkcephfs.rvWtFT0Dd=
+i/monmap
+> =A0 =A0/usr/local/bin/monmaptool: generated fsid
+> fa4b96f9-9c95-424c-b9b0-d55b83ce1d59
+> =A0 =A0epoch 0
+> =A0 =A0fsid fa4b96f9-9c95-424c-b9b0-d55b83ce1d59
+> =A0 =A0last_changed 2011-12-04 05:35:34.443071
+> =A0 =A0created 2011-12-04 05:35:34.443071
+> =A0 =A00: 192.168.56.102:6789/0 mon.0
+> =A0 =A0/usr/local/bin/monmaptool: writing epoch 0 to
+> =A0 =A0/tmp/mkcephfs.rvWtFT0Ddi/monmap (1 monitors)
+> =A0 =A0=3D=3D=3D osd.0 =3D=3D=3D
+> =A0 =A02011-12-04 05:35:34.785176 b70bc710 created object store
+> =A0 =A0/root/workera/CEPH/mondata/data/osd.0 journal
+> =A0 =A0/root/workera/CEPH/mondata/data/osd.0.journal for osd.0 fsid
+> =A0 =A0fa4b96f9-9c95-424c-b9b0-d55b83ce1d59
+> =A0 =A0creating private key for osd.0 keyring
+> /tmp/mkcephfs.rvWtFT0Ddi/keyring.osd.0
+> =A0 =A0creating /tmp/mkcephfs.rvWtFT0Ddi/keyring.osd.0
+> =A0 =A0=3D=3D=3D mds.alpha =3D=3D=3D
+> =A0 =A0creating private key for mds.alpha keyring
+> =A0 =A0/tmp/mkcephfs.rvWtFT0Ddi/keyring.mds.alpha
+> =A0 =A0creating /tmp/mkcephfs.rvWtFT0Ddi/keyring.mds.alpha
+> =A0 =A0Building generic osdmap from /tmp/mkcephfs.rvWtFT0Ddi/conf
+> =A0 =A0/usr/local/bin/osdmaptool: osdmap file '/tmp/mkcephfs.rvWtFT0D=
+di/osdmap'
+> =A0 =A0*** glibc detected *** /usr/local/bin/osdmaptool: free(): inva=
+lid
+> =A0 =A0pointer: 0x081e84a8 ***
+> =A0 =A0=3D=3D=3D=3D=3D=3D=3D Backtrace: =3D=3D=3D=3D=3D=3D=3D=3D=3D
+> =A0 =A0/lib/libc.so.6(+0x6ed8b)[0xb71e6d8b]
+> =A0 =A0/lib/libc.so.6(cfree+0x9b)[0xb71eb28b]
+> =A0 =A0/usr/local/bin/osdmaptool(crush_calc_straw+0x26c)[0x8135cdc]
+> =A0 =A0/usr/local/bin/osdmaptool(crush_make_straw_bucket+0xd7)[0x8135=
+e07]
+> =A0 =A0/usr/local/bin/osdmaptool(crush_make_bucket+0xb0)[0x8135ed0]
+> =A0 =A0/usr/local/bin/osdmaptool(_ZN12CrushWrapper10add_bucketEiiiiiP=
+iS0_+0x46)[0x811430c]
+> =A0 =A0/usr/local/bin/osdmaptool(_ZN6OSDMap32build_simple_crush_map_f=
+rom_confEP11CephContextR12CrushWrapperRSt3mapIiPKcSt4lessIiESaISt4pairI=
+KiS6_EEE+0x102)[0x8111f34]
+> =A0 =A0/usr/local/bin/osdmaptool(_ZN6OSDMap22build_simple_from_confEP=
+11CephContextjR6uuid_diii+0x588)[0x8111d88]
+> =A0 =A0/usr/local/bin/osdmaptool(main+0xc80)[0x80f4d8f]
+> =A0 =A0/lib/libc.so.6(__libc_start_main+0xf3)[0xb7191003]
+> =A0 =A0/usr/local/bin/osdmaptool[0x80f3ed1]
+> =A0 =A0=3D=3D=3D=3D=3D=3D=3D Memory map: =3D=3D=3D=3D=3D=3D=3D=3D
+> =A0 =A008048000-081cf000 r-xp 00000000 08:02 802104 =A0 =A0 /usr/loca=
+l/bin/osdmaptool
+> =A0 =A0081cf000-081d1000 r--p 00187000 08:02 802104 =A0 =A0 /usr/loca=
+l/bin/osdmaptool
+> =A0 =A0081d1000-081d3000 rw-p 00189000 08:02 802104 =A0 =A0 /usr/loca=
+l/bin/osdmaptool
+> =A0 =A0081d3000-081ff000 rw-p 00000000 00:00 0 =A0 =A0 =A0 =A0 =A0[he=
+ap]
+> =A0 =A0b68b2000-b68b3000 ---p 00000000 00:00 0
+> =A0 =A0b68b3000-b7178000 rw-p 00000000 00:00 0
+> =A0 =A0b7178000-b72de000 r-xp 00000000 08:02 525765 =A0 =A0 /lib/libc=
+-2.14.1.so
+> =A0 =A0b72de000-b72e0000 r--p 00165000 08:02 525765 =A0 =A0 /lib/libc=
+-2.14.1.so
+> =A0 =A0b72e0000-b72e1000 rw-p 00167000 08:02 525765 =A0 =A0 /lib/libc=
+-2.14.1.so
+> =A0 =A0b72e1000-b72e4000 rw-p 00000000 00:00 0
+> =A0 =A0b72e4000-b7300000 r-xp 00000000 08:02 525771 =A0 =A0 /lib/libg=
+cc_s.so.1
+> =A0 =A0b7300000-b7301000 r--p 0001b000 08:02 525771 =A0 =A0 /lib/libg=
+cc_s.so.1
+> =A0 =A0b7301000-b7302000 rw-p 0001c000 08:02 525771 =A0 =A0 /lib/libg=
+cc_s.so.1
+> =A0 =A0b7302000-b732b000 r-xp 00000000 08:02 525493 =A0 =A0 /lib/libm=
+-2.14.1.so
+> =A0 =A0b732b000-b732c000 r--p 00028000 08:02 525493 =A0 =A0 /lib/libm=
+-2.14.1.so
+> =A0 =A0b732c000-b732d000 rw-p 00029000 08:02 525493 =A0 =A0 /lib/libm=
+-2.14.1.so
+> =A0 =A0b732d000-b740f000 r-xp 00000000 08:02 270052
+> /usr/lib/libstdc++.so.6.0.16
+> =A0 =A0b740f000-b7413000 r--p 000e2000 08:02 270052
+> /usr/lib/libstdc++.so.6.0.16
+> =A0 =A0b7413000-b7414000 rw-p 000e6000 08:02 270052
+> /usr/lib/libstdc++.so.6.0.16
+> =A0 =A0b7414000-b741c000 rw-p 00000000 00:00 0
+> =A0 =A0b741c000-b7811000 r-xp 00000000 08:02 293697
+> /usr/lib/libcryptopp.so.9.0.0
+> =A0 =A0b7811000-b7847000 r--p 003f5000 08:02 293697
+> /usr/lib/libcryptopp.so.9.0.0
+> =A0 =A0b7847000-b7849000 rw-p 0042b000 08:02 293697
+> /usr/lib/libcryptopp.so.9.0.0
+> =A0 =A0b7849000-b784d000 rw-p 00000000 00:00 0
+> =A0 =A0b784d000-b7854000 r-xp 00000000 08:02 525478 =A0 =A0 /lib/libr=
+t-2.14.1.so
+> =A0 =A0b7854000-b7855000 r--p 00006000 08:02 525478 =A0 =A0 /lib/libr=
+t-2.14.1.so
+> =A0 =A0b7855000-b7856000 rw-p 00007000 08:02 525478 =A0 =A0 /lib/libr=
+t-2.14.1.so
+> =A0 =A0b7856000-b785a000 r-xp 00000000 08:02 525907 =A0 =A0 /lib/libu=
+uid.so.1.3.0
+> =A0 =A0b785a000-b785b000 r--p 00003000 08:02 525907 =A0 =A0 /lib/libu=
+uid.so.1.3.0
+> =A0 =A0b785b000-b785c000 rw-p 00004000 08:02 525907 =A0 =A0 /lib/libu=
+uid.so.1.3.0
+> =A0 =A0b785c000-b7873000 r-xp 00000000 08:02 525926 =A0 =A0 /lib/libp=
+thread-2.14.1.so
+> =A0 =A0b7873000-b7874000 r--p 00016000 08:02 525926 =A0 =A0 /lib/libp=
+thread-2.14.1.so
+> =A0 =A0b7874000-b7875000 rw-p 00017000 08:02 525926 =A0 =A0 /lib/libp=
+thread-2.14.1.so
+> =A0 =A0b7875000-b7877000 rw-p 00000000 00:00 0
+> =A0 =A0b788c000-b788f000 rw-p 00000000 00:00 0
+> =A0 =A0b788f000-b78ae000 r-xp 00000000 08:02 525496 =A0 =A0 /lib/ld-2=
+=2E14.1.so
+> =A0 =A0b78ae000-b78af000 r--p 0001f000 08:02 525496 =A0 =A0 /lib/ld-2=
+=2E14.1.so
+> =A0 =A0b78af000-b78b0000 rw-p 00020000 08:02 525496 =A0 =A0 /lib/ld-2=
+=2E14.1.so
+> =A0 =A0bfdfc000-bfe1d000 rw-p 00000000 00:00 0 =A0 =A0 =A0 =A0 =A0[st=
+ack]
+> =A0 =A0ffffe000-fffff000 r-xp 00000000 00:00 0 =A0 =A0 =A0 =A0 =A0[vd=
+so]
+> =A0 =A0*** Caught signal (Aborted) **
+> =A0 =A0 in thread b7176710
+> =A0 =A0 ceph version 0.39-28-g4a0b00a
+> (commit:4a0b00a0f29a87965925e0b44c997bece96b9936)
+> =A0 =A0 1: (ceph::BackTrace::BackTrace(int)+0x36) [0x8107cc6]
+> =A0 =A0 2: /usr/local/bin/osdmaptool() [0x81079bd]
+> =A0 =A0 3: [0xffffe400]
+> =A0 =A0 4: (gsignal()+0x45) [0xb71a58c5]
+> =A0 =A0 5: (abort()+0x175) [0xb71a71d5]
+> =A0 =A0 6: (()+0x685ca) [0xb71e05ca]
+> =A0 =A0 7: (()+0x6ed8b) [0xb71e6d8b]
+> =A0 =A0 8: (cfree()+0x9b) [0xb71eb28b]
+> =A0 =A0 9: (crush_calc_straw()+0x26c) [0x8135cdc]
+> =A0 =A0 10: (crush_make_straw_bucket()+0xd7) [0x8135e07]
+> =A0 =A0 11: (crush_make_bucket()+0xb0) [0x8135ed0]
+> =A0 =A0 12: (CrushWrapper::add_bucket(int, int, int, int, int, int*,
+> =A0 =A0int*)+0x46) [0x811430c]
+> =A0 =A0 13: (OSDMap::build_simple_crush_map_from_conf(CephContext*,
+> =A0 =A0CrushWrapper&, std::map<int, char const*, std::less<int>,
+> =A0 =A0std::allocator<std::pair<int const, char const*> > >&)+0x102)
+> =A0 =A0[0x8111f34]
+> =A0 =A0 14: (OSDMap::build_simple_from_conf(CephContext*, unsigned in=
+t,
+> =A0 =A0uuid_d&, int, int, int)+0x588) [0x8111d88]
+> =A0 =A0 15: (main()+0xc80) [0x80f4d8f]
+> =A0 =A0 16: (__libc_start_main()+0xf3) [0xb7191003]
+> =A0 =A0 17: /usr/local/bin/osdmaptool() [0x80f3ed1]
+> =A0 =A0/usr/local/sbin/mkcephfs: line 405: 26267 Aborted
+> =A0 =A0(core dumped) $BINDIR/osdmaptool --create-from-conf $dir/osdma=
+p -c
+> =A0 =A0$conf
+> =A0 =A0/-------------------------------------
+>
+> =A0 =A0This error probably occurs because of following reason
+> =A0 =A0In function crush_calc_straw while allocating "reverse" malloc=
+ getting
+> =A0 =A0zero as the argument because "bucket->h.size" happens to be ze=
+ro. So
+> =A0 =A0while trying to free this variable causing =A0trouble.
+>
+> =A0 =A0So, We tried a work around by putting the check for zero size =
+in
+> =A0 =A0the start of function, which would return from the function if=
+ it is zero.
+>
+> =A0 =A0 After this mkcephfs ran successfully but still
+>
+> =A0 =A0getting issues while trying to run ceph-mon.
+> =A0 =A0Now ceph-mon =A0command is unable to create ceph-mon daemon an=
+d hence when we
+>
+> =A0 =A0try to mount with the fuse interface or using the kernel clien=
+t it
+> =A0 =A0does not gets mounted stating error connection failed.
+>
+> =A0 =A0Here is my machine info:
+> =A0 =A0Platform =3D OpenSuse 12.1
+> =A0 =A0kernel version =3D linux-3.1.0-1.2
+>
+> --
+> Regards,
+> Pankaj SIngh
+> Phone No: 8826266889
+
+
+
+--=20
+Regards,
+Pankaj SIngh
+Phone No: 8826266889
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
