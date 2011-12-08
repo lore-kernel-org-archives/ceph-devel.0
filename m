@@ -1,75 +1,47 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fwd: Intermittent Assert Failure
-Date: Wed, 7 Dec 2011 21:54:43 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1112072153430.2448@cobra.newdream.net>
-References: <4EE0490E.2000205@cs.ucsc.edu>
+From: <Eric_YH_Chen@wistron.com>
+Subject: RE: rbd device would disappear after re-boot
+Date: Thu, 8 Dec 2011 15:31:49 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D943CC9@WHQBEMAIL1.whq.wistron>
+References: <8512670932FB654F81AF0FEF1BE6D49D943112@WHQBEMAIL1.whq.wistron> <CAORUGqDjAW-PpqtfL_hzDKZEk3HbgozBBjip-nBYhG6yYgduTg@mail.gmail.com> <8512670932FB654F81AF0FEF1BE6D49D9433C2@WHQBEMAIL1.whq.wistron> <CAORUGqAhUEZXnjzpxvG0d7q5K-zjvefN5LQhTqiyYSRTLk+tGg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+	charset="UTF-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44281 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751028Ab1LHFyo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2011 00:54:44 -0500
-In-Reply-To: <4EE0490E.2000205@cs.ucsc.edu>
+Received: from twnhumsw3.wistron.com ([220.128.89.23]:60574 "EHLO
+	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751578Ab1LHHbx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2011 02:31:53 -0500
+Content-class: urn:content-classes:message
+In-Reply-To: <CAORUGqAhUEZXnjzpxvG0d7q5K-zjvefN5LQhTqiyYSRTLk+tGg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel@vger.kernel.org, John Ralston <jralston@ucsc.edu>
+To: tommi.virtanen@dreamhost.com
+Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
 
-On Wed, 7 Dec 2011, Noah Watkins wrote:
-> Stack trace from a simple Ceph client that does nothing more than open a file
-> and call ceph_read(...) on it.
-
-This just looks like a crash we've periodically been seeing in qa, but 
-haven't been able to reproduce with logging (or diagnose from the cores).
-
-I did some cleanup in Client::unmount() and rearranged some stuff.  Can 
-you see if it still happens with the latest master?
-
-Thanks!
-sage
-
-
-
-> 
-> - Noah
-> 
-> Hey,
-> I just wanted to note that I got this failure occasionally when I was running
-> ceph_read on issdm-29
-> 
-> @issdm-29:~$ time ./ceph_read /etc/ceph/ceph.conf /john.1gb.bin
-> client/Client.cc: In function 'void Client::put_inode(Inode*, int)', in thread
-> '7fbccb1ea760'
-> client/Client.cc: 1763: FAILED assert(!unclean)
->  ceph version 0.38-259-gd4aef20
-> (commit:d4aef20210d43e25eefe945009e6f77d5b045381)
->  1: (Client::put_inode(Inode*, int)+0x615) [0x7fbccabe0455]
->  2: (Client::unlink(Dentry*, bool)+0x27d) [0x7fbccabe1fed]
->  3: (Client::trim_dentry(Dentry*)+0x73) [0x7fbccabe31a3]
->  4: (Client::trim_cache()+0x215) [0x7fbccabe3585]
->  5: (Client::unmount()+0x4d4) [0x7fbccac06474]
->  6: (ceph_shutdown()+0x79) [0x7fbccabd00e9]
->  7: ./ceph_read() [0x400e3e]
->  8: (__libc_start_main()+0xfe) [0x7fbcca7fcd8e]
->  9: ./ceph_read() [0x400a69]
->  ceph version 0.38-259-gd4aef20
-> (commit:d4aef20210d43e25eefe945009e6f77d5b045381)
->  1: (Client::put_inode(Inode*, int)+0x615) [0x7fbccabe0455]
->  2: (Client::unlink(Dentry*, bool)+0x27d) [0x7fbccabe1fed]
->  3: (Client::trim_dentry(Dentry*)+0x73) [0x7fbccabe31a3]
->  4: (Client::trim_cache()+0x215) [0x7fbccabe3585]
->  5: (Client::unmount()+0x4d4) [0x7fbccac06474]
->  6: (ceph_shutdown()+0x79) [0x7fbccabd00e9]
->  7: ./ceph_read() [0x400e3e]
->  8: (__libc_start_main()+0xfe) [0x7fbcca7fcd8e]
->  9: ./ceph_read() [0x400a69]
-> terminate called after throwing an instance of 'ceph::FailedAssertion'
-> Aborted
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+SGksIFRvbW1pOg0KDQpXaGF0IEkgc2VlIGlzIGxpa2UgdGhpcy4NCg0KbHJ3eHJ3eHJ3eCAxIHJv
+b3Qgcm9vdCAxMCAyMDExLTEyLTA3IDE2OjQ4IGZvbzE6MCAtPiAuLi8uLi9yYmQwDQpscnd4cnd4
+cnd4IDEgcm9vdCByb290IDEwIDIwMTEtMTItMDcgMTY6NTAgZm9vMjoxIC0+IC4uLy4uL3JiZDEN
+Cg0KVGhlIGV4dHJhIG51bWJlciAoOjAgYW5kIDoxKSBiZWhpbmQgdGhlIGltYWdlIG5hbWUgbWFr
+ZSB0aGUgcHJvYmxlbSBzdGlsbCBleGlzdHMuDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
+DQpGcm9tOiBUb21taSBWaXJ0YW5lbiBbbWFpbHRvOnRvbW1pLnZpcnRhbmVuQGRyZWFtaG9zdC5j
+b21dIA0KU2VudDogVGh1cnNkYXksIERlY2VtYmVyIDA4LCAyMDExIDE6MzEgQU0NClRvOiBFcmlj
+IFlIIENoZW4vV0hRL1dpc3Ryb24NCkNjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZzsgQ2hy
+aXMgWVQgSHVhbmcvV0hRL1dpc3Ryb24NClN1YmplY3Q6IFJlOiByYmQgZGV2aWNlIHdvdWxkIGRp
+c2FwcGVhciBhZnRlciByZS1ib290DQoNCk9uIFR1ZSwgRGVjIDYsIDIwMTEgYXQgMTg6MzgsICA8
+RXJpY19ZSF9DaGVuQHdpc3Ryb24uY29tPiB3cm90ZToNCj4gSSBoYXZlIGFub3RoZXIgbGl0dGxl
+IHF1ZXN0aW9uLiBDb3VsZCBJIG1hcCBzcGVjaWZpYyBpbWFnZSB0byBzcGVjaWZpYyBkZXZpY2U/
+DQo+DQo+IEZvciBleGFtcGxlOg0KPiBCZWZvcmUgcmUtYm9vdA0KPiBpZCDCoCDCoCDCoHBvb2wg
+wqAgwqBpbWFnZSDCoCBzbmFwIMKgIMKgZGV2aWNlDQo+IDAgwqAgwqAgwqAgcmJkIMKgIMKgIGZv
+bzEgwqAgwqAtIMKgIMKgIMKgIC9kZXYvcmJkMA0KPiAxIMKgIMKgIMKgIHJiZCDCoCDCoCBmb28z
+IMKgIMKgLSDCoCDCoCDCoCAvZGV2L3JiZDINCj4NCj4gSG93IGNvdWxkIEkgcmUtbWFwIHRoZSBp
+bWFnZShmb28zKSB0byBkZXZpY2UoL2Rldi9yYmQyKSBidXQgc2tpcCByYmQxPyDCoFRoZSBjb21t
+YW5kIHByb3ZpZGVkIGJ5IGNlcGggQ0xJIGNhbm5vdCBhY2hpZXZlIHRoaXMuDQo+DQo+IElmIEkg
+cmUtbWFwIHRoZSBpbWFnZSB0byBhbm90aGVyIGRldmljZSwgaXQgd291bGQgbm90IHN5bmMgd2l0
+aCBpU0NTSSBjb25maWd1cmF0aW9uIGFuZCBtYXkgY2F1c2UgcHJvYmxlbS4NCg0KSSdtIGp1c3Qg
+Y29uZmlybWluZyB3aGF0IERhbWllbiBzYWlkLiBEb24ndCByZWx5IG9uIHRoZSBudW1iZXJpbmcg
+dG8NCmJlIGNvbnNpc3RlbnQgZXZlbiBmcm9tIG9uZSBib290IHRvIGFub3RoZXI7IHdlIHByb3Zp
+ZGUgYSB1ZGV2IGhlbHBlcg0KdGhhdCBhc3NpZ25zIG1vcmUgcGVybWFuZW50IG5hbWVzLCBiYXNl
+ZCBvbiB0aGUgcG9vbCwgaW1hZ2UgbmFtZSwgYW5kDQpwb3RlbnRpYWxseSBzbmFwc2hvdCBuYW1l
+LiBZb3UnbGwgZ2V0IGEgc3ltbGluayBsaWtlDQovZGV2L3JiZC9QT09ML0lNQUdFIG9yIC9kZXYv
+cmJkL1BPT0wvSU1BR0VAU05BUCwgdXNlIHRoYXQgbmFtZS4NCg==
