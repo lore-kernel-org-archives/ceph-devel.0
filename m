@@ -1,52 +1,50 @@
 From: Amon Ott <a.ott@m-privacy.de>
-Subject: Re: Circular lock / deadlock in kernel client
-Date: Thu, 8 Dec 2011 14:39:33 +0100
-Message-ID: <201112081439.34719.a.ott@m-privacy.de>
-References: <201111301321.47514.a.ott@m-privacy.de> <Pine.LNX.4.64.1112070831250.22025@cobra.newdream.net> <201112081058.47241.a.ott@m-privacy.de>
+Subject: Return stale file handle (-ESTALE) like NFS instead of hanging forever?
+Date: Thu, 8 Dec 2011 14:55:55 +0100
+Message-ID: <201112081455.56365.a.ott@m-privacy.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-15
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.138.176]:52702 "EHLO www.m-privacy.de"
+Received: from www.m-privacy.de ([85.214.138.176]:56970 "EHLO www.m-privacy.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750796Ab1LHNjo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2011 08:39:44 -0500
-In-Reply-To: <201112081058.47241.a.ott@m-privacy.de>
+	id S1751252Ab1LHN4G convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2011 08:56:06 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by www.m-privacy.de (Postfix) with ESMTP id 477B285F10
+	for <ceph-devel@vger.kernel.org>; Thu,  8 Dec 2011 14:56:04 +0100 (CET)
+Received: from www.m-privacy.de ([127.0.0.1])
+ by localhost (www.m-privacy.de [127.0.0.1]) (amavisd-maia, port 10024)
+ with ESMTP id 06464-07 for <ceph-devel@vger.kernel.org>;
+ Thu,  8 Dec 2011 14:55:57 +0100 (CET)
+Received: from gw.compuniverse.de (unknown [85.183.4.97])
+	(using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by www.m-privacy.de (Postfix) with ESMTPSA id CFD4185F0F
+	for <ceph-devel@vger.kernel.org>; Thu,  8 Dec 2011 14:55:57 +0100 (CET)
+Received: from tgham.compuniverse.de (tgham.compuniverse.de [192.168.201.30])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by gw.compuniverse.de (Postfix) with ESMTPS id 4885426D7E
+	for <ceph-devel@vger.kernel.org>; Thu,  8 Dec 2011 14:55:57 +0100 (CET)
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thursday 08 December 2011 wrote Amon Ott:
-> On Wednesday 07 December 2011 wrote Sage Weil:
-> > I pushed a patch to wip-d-lock that may fix this one, but unfortuna=
-tely
-> > don't have time to test this very carefully right now.  Let us know=
- if
-> > that helps, or you can wait until next week.
->
-> Rebuilding kernel with that patch.
+Hi folks,
 
-With the patch the deadlock disappears and the kernel does not hang at =
-the=20
-locks afterwards.
+if file access through Ceph kernel client cannot continue, e.g. because=
+ there=20
+is no mds available, it hangs forever.
 
-> > The call path that was triggering both of these can be exercised by
-> > restarting the ceph-mds daemon.  Try running your client for a bit =
-and
-> > the doing that and see if you get any more splats.
->
-> What triggered the kernel problem was bug 1047. ceph-mds crashed on a=
-ll
-> nodes with that assert. When the kernel detected that the main mds
-> connection was missing, it tried to reconnect and hung.
-
-This problem remains, and without a working mds the whole ceph mount ha=
-ngs.=20
-Instead of crashing, mds sometimes goes into a dead loop and uses a cpu=
- core=20
-at 100%. This also makes the mount hang.
+I would prefer if after a timeout the application would get an error co=
+de,=20
+e.g. the -ESTALE that NFS and Gluster return if something goes wrong. T=
+his=20
+would allow for the application to handle the error instead of blocking=
+=20
+forever without a chance to recover.
 
 Amon Ott
 --=20
