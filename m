@@ -1,62 +1,55 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Client receives 'connection refused' only after heavy use
-Date: Wed, 7 Dec 2011 14:33:35 -0800
-Message-ID: <CAF3hT9DACT5QMNkPYv8tG2dE=JnnZO-k22-k7SG7htbv6D2YEg@mail.gmail.com>
-References: <4EDC0ECF.60805@cs.ucsc.edu>
-	<4EDC1853.5080405@cs.ucsc.edu>
-	<Pine.LNX.4.64.1112042046280.8414@cobra.newdream.net>
-	<4EDD1437.4030608@cs.ucsc.edu>
-	<CAORUGqCZy+j3MUry7ut=E7YXNiPHLGSqRw5qyqaOKR2=12mjhA@mail.gmail.com>
-	<4EDD15EC.1000900@cs.ucsc.edu>
-	<CAORUGqATJ=xcs3GPQkdqN5q4MjQcEYewj_aJhq2DVa=m95TLww@mail.gmail.com>
-	<CAF3hT9A=cRttnho5DhF991+UnwCfxGO5sDtvU8AmBXMfEhg_Qg@mail.gmail.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Fwd: Intermittent Assert Failure
+Date: Wed, 07 Dec 2011 21:20:14 -0800
+Message-ID: <4EE0490E.2000205@cs.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:64260 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757048Ab1LGWdg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2011 17:33:36 -0500
-Received: by qcqz2 with SMTP id z2so878212qcq.19
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2011 14:33:35 -0800 (PST)
-In-Reply-To: <CAF3hT9A=cRttnho5DhF991+UnwCfxGO5sDtvU8AmBXMfEhg_Qg@mail.gmail.com>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:55144 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750716Ab1LHFUY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2011 00:20:24 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: John Ralston <jralston@ucsc.edu>
 
-Noah:
-Branch wip-messenger contains the patch you want (plus one or two
-cleanups), or apply the below. Should handle it, although I'd like to
-do a more thorough cleanup of this problem at a later time.
--Greg
+Stack trace from a simple Ceph client that does nothing more than open a 
+file and call ceph_read(...) on it.
 
-From 8c4f4748e8b683f5b4ea939295793421c0ab7b61 Mon Sep 17 00:00:00 2001
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Date: Wed, 7 Dec 2011 14:19:23 -0800
-Subject: [PATCH] mds: mark_disposable when closing a Client connection.
+- Noah
 
-This is causing issues since the Client's ack of the MClientSession
-is somehow not getting back to the MDS. We should make the
-Client/SimpleMessenger be better-behaved about shutdown, but for
-now this solution matches how we're working elsewhere in our codebase.
+Hey,
+I just wanted to note that I got this failure occasionally when I was 
+running ceph_read on issdm-29
 
-Signed-off-by: Greg Farnum <gregory.farnum@dreamhost.com>
----
- src/mds/Server.cc |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+@issdm-29:~$ time ./ceph_read /etc/ceph/ceph.conf /john.1gb.bin
+client/Client.cc: In function 'void Client::put_inode(Inode*, int)', in 
+thread '7fbccb1ea760'
+client/Client.cc: 1763: FAILED assert(!unclean)
+  ceph version 0.38-259-gd4aef20 
+(commit:d4aef20210d43e25eefe945009e6f77d5b045381)
+  1: (Client::put_inode(Inode*, int)+0x615) [0x7fbccabe0455]
+  2: (Client::unlink(Dentry*, bool)+0x27d) [0x7fbccabe1fed]
+  3: (Client::trim_dentry(Dentry*)+0x73) [0x7fbccabe31a3]
+  4: (Client::trim_cache()+0x215) [0x7fbccabe3585]
+  5: (Client::unmount()+0x4d4) [0x7fbccac06474]
+  6: (ceph_shutdown()+0x79) [0x7fbccabd00e9]
+  7: ./ceph_read() [0x400e3e]
+  8: (__libc_start_main()+0xfe) [0x7fbcca7fcd8e]
+  9: ./ceph_read() [0x400a69]
+  ceph version 0.38-259-gd4aef20 
+(commit:d4aef20210d43e25eefe945009e6f77d5b045381)
+  1: (Client::put_inode(Inode*, int)+0x615) [0x7fbccabe0455]
+  2: (Client::unlink(Dentry*, bool)+0x27d) [0x7fbccabe1fed]
+  3: (Client::trim_dentry(Dentry*)+0x73) [0x7fbccabe31a3]
+  4: (Client::trim_cache()+0x215) [0x7fbccabe3585]
+  5: (Client::unmount()+0x4d4) [0x7fbccac06474]
+  6: (ceph_shutdown()+0x79) [0x7fbccabd00e9]
+  7: ./ceph_read() [0x400e3e]
+  8: (__libc_start_main()+0xfe) [0x7fbcca7fcd8e]
+  9: ./ceph_read() [0x400a69]
+terminate called after throwing an instance of 'ceph::FailedAssertion'
+Aborted
 
-diff --git a/src/mds/Server.cc b/src/mds/Server.cc
-index a9ef64f..d44bd7e 100644
---- a/src/mds/Server.cc
-+++ b/src/mds/Server.cc
-@@ -289,6 +289,7 @@ void Server::_session_logged(Session *session,
-uint64_t state_seq, bool open, ve
-       // reset session
-       mds->send_message_client(new
-MClientSession(CEPH_SESSION_CLOSE), session);
-       mds->sessionmap.set_state(session, Session::STATE_CLOSED);
-+      mds->messenger->mark_disposable(session->connection);
-       session->clear();
-     } else if (session->is_killing()) {
-       // destroy session, close connection
