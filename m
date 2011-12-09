@@ -1,90 +1,34 @@
-From: Andre Noll <maan@systemlinux.org>
-Subject: [PATCH v2 2/6] doc: Add documentation of missing osd commands.
-Date: Fri,  9 Dec 2011 18:57:41 +0100
-Message-ID: <1323453465-30053-3-git-send-email-maan@systemlinux.org>
-References: <1323453465-30053-1-git-send-email-maan@systemlinux.org>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4.gwdg.de ([134.76.10.17]:2291 "EHLO mx4.gwdg.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752086Ab1LIR6C (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 9 Dec 2011 12:58:02 -0500
-In-Reply-To: <1323453465-30053-1-git-send-email-maan@systemlinux.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Andre Noll <maan@systemlinux.org>
+From: Andreas Dilger <adilger@whamcloud.com>
+Subject: Re: ceph and ext4
+Date: Fri, 9 Dec 2011 15:24:02 -0700
+Message-ID: <5D6C7B37-1594-48FF-A682-8CC1FE0A6870@whamcloud.com>
+References: <4EC10664.1080501@tuxadero.com> <CAO47_-9nfO32nwOAQMVdqw6iWGWK+FWb+MD=WeOz_vr4YrrKmw@mail.gmail.com> <20111115142246.GA7516@thunk.org> <246EA1CC-3C33-4D41-80C0-2331C426EBB0@whamcloud.com> <CAO47_-9vGg89HgxjT=dzSSsUxxdbZ=yJoYQk4Qge8WGPjeVmKw@mail.gmail.com>
+Mime-Version: 1.0 (Apple Message framework v1084)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-ext4-owner@vger.kernel.org>
+In-Reply-To: <CAO47_-9vGg89HgxjT=dzSSsUxxdbZ=yJoYQk4Qge8WGPjeVmKw@mail.gmail.com>
+Sender: linux-ext4-owner@vger.kernel.org
+To: chb@muc.de
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, Jian Yu <yujian@whamcloud.com>
+List-Id: ceph-devel.vger.kernel.org
 
-The set of OSD commands which added by the previous commit is
-incomplete. This patch adds documentation for the following
-OSD commands which were previously missing: dump, tree, crush,
-cluster_snap, lost, create, rm.
+On 2011-12-08, at 3:59 PM, Christian Brunner wrote:
+> 2011/11/15 Andreas Dilger <adilger@whamcloud.com>:
+>> Coincidentally, we have someone working in those patches again. The main obstacle for accepting the previous patch as-is was that Ted wanted to add support for "medium-sized" xattrs that are addressed as a string of blocks, instead of via an inode.
+> 
+> Did you make progress with this. I'm still having serious trouble with
+> btrfs and would like to try these.
 
-Signed-Off-By: Andre Noll <maan@systemlinux.org>
----
- doc/control.rst |   44 +++++++++++++++++++++++++++++++++++++++++---
- 1 files changed, 41 insertions(+), 3 deletions(-)
+The latest patches are available at http://review.whamcloud.com/1708, but are based on the RHEL6.1 2.6.32 kernel.  The work to implement "medium-sized" xattrs was more complex than anticipated, and is not finished yet.
 
-diff --git a/doc/control.rst b/doc/control.rst
-index 15a6686..61e1523 100644
---- a/doc/control.rst
-+++ b/doc/control.rst
-@@ -64,9 +64,48 @@ file. This is functionally equivalent to ::
- 
- 	$ ceph osd getmap -o /tmp/osdmap
- 	$ osdmaptool /tmp/osdmap --export-crush file
--
- ::
- 
-+	$ ceph osd dump [--format format>]
-+
-+Dump the osd map. Valid formats for -f are "plain" and "json". If no
-+--format option is given, the osd map is dumped as plain text. ::
-+
-+	$ ceph osd tree [--format format]
-+
-+Dump the osd map as a tree with one line per osd containing weight
-+and state. ::
-+
-+	$ ceph osd crush add <id> <name> <weight> [<loc1> [<loc2> ...]]
-+
-+Add a new item with the given id/name/weight at the specified
-+location. ::
-+
-+	$ ceph osd crush remove <id>
-+
-+Remove an existing item from the crush map. ::
-+
-+	$ ceph osd crush reweight <name> <weight>
-+
-+Set the weight of the item given by ``<name>`` to ``<weight>``. ::
-+
-+	$ ceph osd cluster_snap <name>
-+
-+Create a cluster snapshot. ::
-+
-+	$ ceph osd lost [--yes-i-really-mean-it]
-+
-+Mark an OSD as lost. This may result in permanent data loss. Use with caution. ::
-+
-+	$ ceph osd create [<id>]
-+
-+Create a new OSD. If no ID is given, a new ID is automatically selected
-+if possible. ::
-+
-+	$ ceph osd rm [<id>...]
-+
-+Remove the given OSD(s). ::
-+
- 	$ ceph osd getmaxosd
- 
- Query the current max_osd parameter in the osd map. ::
-@@ -179,5 +218,4 @@ Enables debug messages. ::
- 
- Displays the status of all metadata servers.
- 
--dump, getmap, stop, set_max_mds, setmap: TODO
--
-+set_max_mds: TODO
--- 
-1.7.8.rc1.14.g248db
+The use of external inode xattrs is working, which allows xattr sizes up to 64kB.  The 64kB limit is imposed by the VFS and could potentially be increased.
+
+Cheers, Andreas
+--
+Andreas Dilger 
+Principal Engineer
+Whamcloud, Inc.
+
+
 
