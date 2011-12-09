@@ -1,43 +1,37 @@
-From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Subject: Re: Build fails on Fedora 14 on linking librados-config
-Date: Fri, 09 Dec 2011 16:17:47 +0100
-Message-ID: <1494963.dggp1jPvU4@pc10>
-References: <220547841.g14m0M3JMV@pc10>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+From: Andre Noll <maan@systemlinux.org>
+Subject: [PATCH v2 0/6] OSD documentation improvements
+Date: Fri,  9 Dec 2011 18:57:39 +0100
+Message-ID: <1323453465-30053-1-git-send-email-maan@systemlinux.org>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from unknownsite.de ([62.48.69.106]:39187 "EHLO hartes-hannover.de"
+Received: from mx4.gwdg.de ([134.76.10.17]:2291 "EHLO mx4.gwdg.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751300Ab1LIPRx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 9 Dec 2011 10:17:53 -0500
-Received: from pc10.localnet (pc10.asys-h.de [193.98.1.90])
-	by hartes-hannover.de (Postfix) with ESMTPSA id 37ECB10C866
-	for <ceph-devel@vger.kernel.org>; Fri,  9 Dec 2011 16:17:52 +0100 (CET)
-In-Reply-To: <220547841.g14m0M3JMV@pc10>
+	id S1751979Ab1LIR6B (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 9 Dec 2011 12:58:01 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-Am Mittwoch, 7. Dezember 2011, 16:19:24 schrieben Sie:
-> Hi,
-> 
-> When building ceph 0.39 on Fedora 14, the build process fails with the
-> following messages:
-> 
->   CXXLD  librados-config
-> /usr/bin/ld: ./.libs/libglobal.a(libcommon_la-HeartbeatMap.o): undefined
-> reference to symbol 'pthread_rwlock_wrlock@@GLIBC_2.2.5'
-> /usr/bin/ld: note: 'pthread_rwlock_wrlock@@GLIBC_2.2.5' is defined in DSO
-> /lib64/libpthread.so.0 so try adding it to the linker command line
-> /lib64/libpthread.so.0: could not read symbols: Invalid operation
-> collect2: ld returned 1 exit status
-> make[3]: *** [librados-config] Error 1
+Patch 1 imports the documentation from the wiki to the new file
+doc/doc/control.rst of the git repo. It is just the result of a cut &
+paste operation. The other patches of the series aim for a complete
+and up to date documentation for all osd subcommands.
 
-I filed a bug under http://tracker.newdream.net/issues/1797
+Changes to V1:
+	* Proper SOB for all patches,
+	* Address Gregory Farnum's comment on Patch 5/6 of V1,
+	* Put things in doc/control.rst rather than doc/ops/monitor.rst
+	  and change title to Control commands on Tommi Virtanen's
+	  request.
 
-It turns out compiling works if you call configure with
+Some OSD subcommands still lack useful descriptions. For example
+it's not clear (to me at least) what's the point of the osd "in"
+and "out" commands.  But this can easily be improved later, so I'd
+propose to merge this version of the patch series.
 
-LIBS="-lpthread" ./configure
+BTW: I tried to rebase against the current master branch. However, as
+it turned out, ditaa is now required for building the documentation
+and there is no package for my distribution (lucid). Ditaa from SVN
+didn't like my java version, so I gave up and did not rebase.
 
-	Guido
+Andre
