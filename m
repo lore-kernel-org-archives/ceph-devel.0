@@ -1,27 +1,82 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: [PATCH v2 0/6] OSD documentation improvements
-Date: Fri, 9 Dec 2011 16:54:38 -0800
-Message-ID: <CAORUGqCQJu1+6+Ni5wehJtrN4H-EjzOpMXHBOf4rHKea=EnhSA@mail.gmail.com>
-References: <1323453465-30053-1-git-send-email-maan@systemlinux.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: [PATCH] security: don't try to label network disks
+Date: Fri,  9 Dec 2011 19:49:40 -0800
+Message-ID: <f80b111522e8dc7069ade8d5aacb4d05c2a8fed2.1323488550.git.josh.durgin@dreamhost.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:50155 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752830Ab1LJAzA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Dec 2011 19:55:00 -0500
-Received: by wgbdr13 with SMTP id dr13so6672057wgb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Dec 2011 16:54:59 -0800 (PST)
-In-Reply-To: <1323453465-30053-1-git-send-email-maan@systemlinux.org>
+Received: from mail.hq.newdream.net ([66.33.206.127]:33928 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752129Ab1LJDuI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Dec 2011 22:50:08 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andre Noll <maan@systemlinux.org>
+To: libvir-list@redhat.com
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, Dec 9, 2011 at 09:57, Andre Noll <maan@systemlinux.org> wrote:
-> Patch 1 imports the documentation from the wiki to the new file
-> doc/doc/control.rst of the git repo. It is just the result of a cut &
-> paste operation. The other patches of the series aim for a complete
-> and up to date documentation for all osd subcommands.
+Network disks don't have paths to be resolved or files to be checked
+for ownership. ee3efc41e6233e625aa03003bf3127319ccd546f checked this
+for some image label functions, but was partially reverted in a
+refactor.  This finishes adding the check to each security driver's
+set and restore label methods for images.
 
-Thanks, I really appreciate this work. I'll merge it in on Monday.
+Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
+---
+ src/security/security_apparmor.c |    3 +++
+ src/security/security_dac.c      |    6 ++++++
+ src/security/security_selinux.c  |    3 +++
+ 3 files changed, 12 insertions(+), 0 deletions(-)
+
+diff --git a/src/security/security_apparmor.c b/src/security/security_apparmor.c
+index db7e7dc..3a01a21 100644
+--- a/src/security/security_apparmor.c
++++ b/src/security/security_apparmor.c
+@@ -606,6 +606,9 @@ AppArmorRestoreSecurityImageLabel(virSecurityManagerPtr mgr,
+                                   virDomainObjPtr vm,
+                                   virDomainDiskDefPtr disk ATTRIBUTE_UNUSED)
+ {
++    if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK)
++        return 0;
++
+     return reload_profile(mgr, vm, NULL, false);
+ }
+ 
+diff --git a/src/security/security_dac.c b/src/security/security_dac.c
+index 0e75319..9f8a320 100644
+--- a/src/security/security_dac.c
++++ b/src/security/security_dac.c
+@@ -180,6 +180,9 @@ virSecurityDACSetSecurityImageLabel(virSecurityManagerPtr mgr,
+     if (!priv->dynamicOwnership)
+         return 0;
+ 
++    if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK)
++        return 0;
++
+     return virDomainDiskDefForeachPath(disk,
+                                        virSecurityManagerGetAllowDiskFormatProbing(mgr),
+                                        false,
+@@ -199,6 +202,9 @@ virSecurityDACRestoreSecurityImageLabelInt(virSecurityManagerPtr mgr,
+     if (!priv->dynamicOwnership)
+         return 0;
+ 
++    if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK)
++        return 0;
++
+     /* Don't restore labels on readoly/shared disks, because
+      * other VMs may still be accessing these
+      * Alternatively we could iterate over all running
+diff --git a/src/security/security_selinux.c b/src/security/security_selinux.c
+index 78c0d45..6ef61c7 100644
+--- a/src/security/security_selinux.c
++++ b/src/security/security_selinux.c
+@@ -636,6 +636,9 @@ SELinuxSetSecurityImageLabel(virSecurityManagerPtr mgr,
+     if (secdef->norelabel)
+         return 0;
+ 
++    if (disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK)
++        return 0;
++
+     return virDomainDiskDefForeachPath(disk,
+                                        allowDiskFormatProbing,
+                                        true,
+-- 
+1.7.1
+
