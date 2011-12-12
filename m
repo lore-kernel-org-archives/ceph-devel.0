@@ -1,64 +1,52 @@
-From: Jens Rehpoehler <jens.rehpoehler@filoo.de>
-Subject: ceph -w output
-Date: Mon, 12 Dec 2011 20:23:15 +0100
-Message-ID: <4EE654A3.1040309@filoo.de>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: Problem while CEPH setup
+Date: Mon, 12 Dec 2011 13:25:57 -0800
+Message-ID: <CAORUGqAZHGuysP-xjBbBPm9arWXuLOUrmwL_C_ynAq9ny2jmTQ@mail.gmail.com>
+References: <CAPrqf92pUqDZznQHhnKAwFHwZh0OMWs3r-5VMjWcu_g9ds-ehQ@mail.gmail.com>
+ <CAPrqf9335B=mh7KOHLr_hDv2BwTG0T54fQsWG4zMPsyOjgGw1A@mail.gmail.com>
+ <Pine.LNX.4.64.1112080827550.2448@cobra.newdream.net> <Pine.LNX.4.64.1112080837310.2448@cobra.newdream.net>
+ <CAPrqf90QD_evG8a1a8qvkTMbG42-4eFyT2VPZ8S+VPhDubzmpQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------060403090301070707020803"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-6.de-punkt.de ([93.190.64.36]:56765 "EHLO
-	mail-6.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752372Ab1LLT3z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2011 14:29:55 -0500
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:34922 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754002Ab1LLV0T convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2011 16:26:19 -0500
+Received: by faar15 with SMTP id r15so1741556faa.19
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2011 13:26:18 -0800 (PST)
+In-Reply-To: <CAPrqf90QD_evG8a1a8qvkTMbG42-4eFyT2VPZ8S+VPhDubzmpQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: pankaj singh <psingh.ait@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------060403090301070707020803
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+On Thu, Dec 8, 2011 at 09:25, pankaj singh <psingh.ait@gmail.com> wrote=
+:
+> Hi Sage,
+>
+> After pulling the changes, the problem has been resolved.
+>
+> Still, we are getting problem in ceph-mon command. It fails to create
+> ceph-mon demon.
+>
+> # ceph-mon -c ceph.conf -i 0
+> =C2=A0** WARNING: Ceph is still under development. =C2=A0Any feedback=
+ can be directed =C2=A0**
+> =C2=A0** =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0at ceph-devel@vger.kernel.=
+org or http://ceph.newdream.net/. =C2=A0 =C2=A0 **
+> starting mon.0 rank 0 at 192.168.56.101:6789/0 mon_data
+> /root/workera/CEPH/mondata/data/mon.0 fsid
+> 531eb76e-9181-41c4-b162-66b05cfda952
+>
+> So we getting timeout when we try to mount ceph client (both fuse and
+> kernel client).
 
-Hi,
-
-could someone please explain to following to me:
-
-2011-12-12 20:16:16.899140    pg v182377: 1190 pgs: 18 creating, 1172 
-active+clean; 332 GB data, 652 GB used, 13270 GB / 14667 GB avail
-2011-12-12 20:16:20.769268    pg v182378: 1190 pgs: 18 creating, 1172 
-active+clean; 332 GB data, 652 GB used, 13270 GB / 14667 GB avail
-
-I've created the filesystem a week ago. The Status "18 creating" remains 
-since then. I've another Cluster where "creating" never shows up.
-
-Anything to worry about ? Any chance to debug this ?
-
-Thanks a lot !!
-
-Jens
-
-PS: it's the first time i write to a list. please be patient with me if 
-i break any rules :)
-
---------------060403090301070707020803
-Content-Type: text/x-vcard; charset=utf-8;
- name="jens_rehpoehler.vcf"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
- filename="jens_rehpoehler.vcf"
-
-begin:vcard
-fn;quoted-printable:Jens Rehp=C3=B6hler
-n;quoted-printable:Rehp=C3=B6hler;Jens
-org:Filoo GmbH
-adr:;;Tilsiter Str. 1;Langenberg;NRW;33449;Deutschland
-email;internet:jens.rehpoehler@filoo.de
-tel;work:+49-5248-1898412
-tel;fax:+49-5248-189819
-tel;cell:+49-151-54645798
-url:www.filoo.de
-version:2.1
-end:vcard
-
-
---------------060403090301070707020803--
+I see no error message there. Do you have an actual error, for example
+from the logs in /var/log/ceph/ ?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
