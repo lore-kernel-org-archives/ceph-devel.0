@@ -1,69 +1,57 @@
-From: pankaj singh <psingh.ait@gmail.com>
-Subject: Re: Problem while CEPH setup
-Date: Tue, 13 Dec 2011 22:28:17 +0530
-Message-ID: <CAPrqf91Ch0UDjmqkp77ZhTQm34D=8jGdT7F921g4qEBUFcaxow@mail.gmail.com>
-References: <CAPrqf92pUqDZznQHhnKAwFHwZh0OMWs3r-5VMjWcu_g9ds-ehQ@mail.gmail.com>
-	<CAPrqf9335B=mh7KOHLr_hDv2BwTG0T54fQsWG4zMPsyOjgGw1A@mail.gmail.com>
-	<Pine.LNX.4.64.1112080827550.2448@cobra.newdream.net>
-	<Pine.LNX.4.64.1112080837310.2448@cobra.newdream.net>
-	<CAPrqf90QD_evG8a1a8qvkTMbG42-4eFyT2VPZ8S+VPhDubzmpQ@mail.gmail.com>
-	<CAORUGqAZHGuysP-xjBbBPm9arWXuLOUrmwL_C_ynAq9ny2jmTQ@mail.gmail.com>
+From: Samuel Just <sam.just@dreamhost.com>
+Subject: Re: ceph -w output
+Date: Tue, 13 Dec 2011 09:57:51 -0800
+Message-ID: <CACLRD_3n6rCJNFVgmWesDjP3P7DY0bfZr_XGTtx9MC=r29uYRg@mail.gmail.com>
+References: <4EE654A3.1040309@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:52410 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753453Ab1LMQ6T convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2011 11:58:19 -0500
-Received: by vcbfk14 with SMTP id fk14so4818445vcb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2011 08:58:18 -0800 (PST)
-In-Reply-To: <CAORUGqAZHGuysP-xjBbBPm9arWXuLOUrmwL_C_ynAq9ny2jmTQ@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:53860 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754993Ab1LMR5x convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2011 12:57:53 -0500
+Received: by wgbdr13 with SMTP id dr13so14189140wgb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2011 09:57:52 -0800 (PST)
+In-Reply-To: <4EE654A3.1040309@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Its seems that "fix" has been merged into the master, so its resolved.
+A pg is in the "creating" stage between when its pool is created and
+when the OSD responsible for it first creates it.  Did this happen
+after creating a pool?  Could you send the output of 'ceph pg dump'
+and 'ceph osd dump'?
 
-Regards,
-~Pankaj Singh
+Thanks,
+-Sam
 
-On Tue, Dec 13, 2011 at 2:55 AM, Tommi Virtanen
-<tommi.virtanen@dreamhost.com> wrote:
-> On Thu, Dec 8, 2011 at 09:25, pankaj singh <psingh.ait@gmail.com> wro=
-te:
->> Hi Sage,
->>
->> After pulling the changes, the problem has been resolved.
->>
->> Still, we are getting problem in ceph-mon command. It fails to creat=
-e
->> ceph-mon demon.
->>
->> # ceph-mon -c ceph.conf -i 0
->> =A0** WARNING: Ceph is still under development. =A0Any feedback can =
-be directed =A0**
->> =A0** =A0 =A0 =A0 =A0 =A0at ceph-devel@vger.kernel.org or http://cep=
-h.newdream.net/. =A0 =A0 **
->> starting mon.0 rank 0 at 192.168.56.101:6789/0 mon_data
->> /root/workera/CEPH/mondata/data/mon.0 fsid
->> 531eb76e-9181-41c4-b162-66b05cfda952
->>
->> So we getting timeout when we try to mount ceph client (both fuse an=
-d
->> kernel client).
+On Mon, Dec 12, 2011 at 11:23 AM, Jens Rehpoehler
+<jens.rehpoehler@filoo.de> wrote:
+> Hi,
 >
-> I see no error message there. Do you have an actual error, for exampl=
-e
-> from the logs in /var/log/ceph/ ?
-
-
-
---=20
-Regards,
-Pankaj SIngh
-Phone No: 8826266889
+> could someone please explain to following to me:
+>
+> 2011-12-12 20:16:16.899140 =C2=A0 =C2=A0pg v182377: 1190 pgs: 18 crea=
+ting, 1172
+> active+clean; 332 GB data, 652 GB used, 13270 GB / 14667 GB avail
+> 2011-12-12 20:16:20.769268 =C2=A0 =C2=A0pg v182378: 1190 pgs: 18 crea=
+ting, 1172
+> active+clean; 332 GB data, 652 GB used, 13270 GB / 14667 GB avail
+>
+> I've created the filesystem a week ago. The Status "18 creating" rema=
+ins
+> since then. I've another Cluster where "creating" never shows up.
+>
+> Anything to worry about ? Any chance to debug this ?
+>
+> Thanks a lot !!
+>
+> Jens
+>
+> PS: it's the first time i write to a list. please be patient with me =
+if i
+> break any rules :)
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
