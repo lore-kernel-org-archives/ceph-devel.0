@@ -1,53 +1,50 @@
-From: Matt Weil <mweil@genome.wustl.edu>
-Subject: btrfs: open_ctree failed
-Date: Mon, 12 Dec 2011 21:20:58 -0600
-Message-ID: <4EE6C49A.5070600@genome.wustl.edu>
+From: <Eric_YH_Chen@wistron.com>
+Subject: How to know the status of the monitors?
+Date: Tue, 13 Dec 2011 17:12:58 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D9DD46F@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=BIG5
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gscsmtp.wustl.edu ([128.252.233.26]:38645 "HELO
-	gscsmtp.wustl.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1751203Ab1LMDbK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2011 22:31:10 -0500
-Received: from Matt-Weils-MacBook-Pro.local (75-132-29-58.dhcp.stls.mo.charter.com [75.132.29.58])
-	by gscsmtp.wustl.edu (Postfix) with ESMTPSA id D89D840BA1
-	for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2011 21:20:58 -0600 (CST)
+Received: from twnhumsw4.wistron.com ([220.128.89.24]:58583 "EHLO
+	TWNHUMSW4.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753349Ab1LMJNB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2011 04:13:01 -0500
+Received: from TWNHUFE4.whq.wistron (unverified [10.37.31.104]) by TWNHUMSW4.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta144d6ada8c0a81672bec@TWNHUMSW4.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Tue, 13 Dec 2011 17:17:34 +0800
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Chris_YT_Huang@wistron.com, Alex_KT_Lin@wistron.com
 
+Hi, all:
 
-another butter bug?
+    Is there any command or API can retrieve the status of all monitors=
+?
 
- > btrfs: open_ctree failed
- > ------------[ cut here ]------------
- > WARNING: at fs/btrfs/inode.c:2194 btrfs_orphan_commit_root+0xb0/0xc0 
-[btrfs]()
- > Hardware name: ProLiant DL380 G5
- > Modules linked in: btrfs zlib_deflate nfsd exportfs autofs4 nfs lockd 
-fscache auth_rpcgss nfs_acl sunrpc bonding ipv6 dm_mirror dm_region_hash 
-dm_log ipmi_si ipmi_msghandler hpilo pcspkr serio_raw sg iTCO_wdt 
-iTCO_vendor_support i5k_amb i5000_edac edac_core bnx2 shpchp ext4 
-mbcache jbd2 sr_mod cdrom pata_acpi ata_generic ata_piix hpsa cciss 
-radeon ttm drm_kms_helper drm hwmon i2c_algo_bit i2c_core dm_mod [last 
-unloaded: speedstep_lib]
- > Pid: 42, comm: kworker/4:1 Not tainted 3.0.8 #3
- > Call Trace:
- >  [<ffffffff8105ff5f>] warn_slowpath_common+0x7f/0xc0
- >  [<ffffffff8105ffba>] warn_slowpath_null+0x1a/0x20
- >  [<ffffffffa04c8250>] btrfs_orphan_commit_root+0xb0/0xc0 [btrfs]
- >  [<ffffffffa04c3845>] commit_fs_roots+0xc5/0x1b0 [btrfs]
- >  [<ffffffffa04c48fe>] btrfs_commit_transaction+0x40e/0x850 [btrfs]
- >  [<ffffffff8104cd80>] ? __dequeue_entity+0x30/0x50
- >  [<ffffffff81082670>] ? wake_up_bit+0x40/0x40
- >  [<ffffffffa04c5010>] ? btrfs_end_transaction+0x20/0x20 [btrfs]
- >  [<ffffffffa04c502f>] do_async_commit+0x1f/0x30 [btrfs]
- >  [<ffffffff8107b9d1>] process_one_work+0x131/0x450
- >  [<ffffffff8107d57c>] worker_thread+0x17c/0x3c0
- >  [<ffffffff8107d400>] ? manage_workers+0x220/0x220
- >  [<ffffffff81081ff6>] kthread+0x96/0xa0
- >  [<ffffffff814e3f04>] kernel_thread_helper+0x4/0x10
- >  [<ffffffff81081f60>] ? kthread_worker_fn+0x1a0/0x1a0
- >  [<ffffffff814e3f00>] ? gs_change+0x13/0x13
- > ---[ end trace ed99a1a191db74aa ]---
+    I use =A1=A5ceph mon stat=A1=A6 to get this information. However, t=
+he mon.e is not available (server is shutdown).
+
+      2011-12-13 17:08:35.499022 mon <- [mon,stat]
+=A1@=A1@=A1@2011-12-13 17:08:35.499716 mon.1 -> 'e3: 5 mons at {a=3D172=
+=2E16.33.5:6789/0,b=3D172.16.33.6:6789/0,c=3D172.16.33.7:6789/0,d=3D172=
+=2E16.33.71:6789/0,e=3D172.16.33.72:6789/0}, election epoch 16, quorum =
+0,1,2,3' (0)
+   =20
+    Even I use =A1=A5ceph mon dump=A1=A6, I still cannot know if the mo=
+nitor is alive or not.
+
+		0: 172.16.33.5:6789/0 mon.a
+		1: 172.16.33.6:6789/0 mon.b
+		2: 172.16.33.7:6789/0 mon.c
+		3: 172.16.33.71:6789/0 mon.d
+		4: 172.16.33.72:6789/0 mon.e
+
+    Please give some help. Thanks!
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
