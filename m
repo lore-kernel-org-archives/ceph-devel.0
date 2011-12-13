@@ -1,57 +1,71 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: ceph/hadoop benchmarking
-Date: Tue, 13 Dec 2011 12:12:03 -0800
-Message-ID: <CAORUGqA-oiwC4E2QGTeMweacJNJaS7A0CXDN-3ay2Vwc6Q7WrA@mail.gmail.com>
-References: <193464577.4390.1319657347846.JavaMail.root@mail-01.cse.ucsc.edu>
- <Pine.LNX.4.64.1110261425320.18909@cobra.newdream.net> <4EE77DAA.5070900@cs.ucsc.edu>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph fixes for -rc6
+Date: Tue, 13 Dec 2011 12:36:53 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1112131156460.25422@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:39678 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755830Ab1LMUMZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2011 15:12:25 -0500
-Received: by eekc4 with SMTP id c4so52074eek.19
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2011 12:12:24 -0800 (PST)
-In-Reply-To: <4EE77DAA.5070900@cs.ucsc.edu>
+Received: from cobra.newdream.net ([66.33.216.30]:38089 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751283Ab1LMUgx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2011 15:36:53 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: Sage Weil <sage@newdream.net>, Noah Watkins <jayhawk@soe.ucsc.edu>, Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-On Tue, Dec 13, 2011 at 08:30, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
-> The debhelper tool and friends seem to do a good job of packaging up the
-> Java in this way, but integrating this into Ceph's default Debian scripts
-> means that anyone would now need a JDK to build Ceph with
-> dpkg-buildpackages.
->
-> Is there a way to parametrize the Debian build process so people who don't
-> care about Java bindings can proceed? An alternative approach is to say have
-> another set of Debian build scripts in src/client/java/debian.
+Hi Linus,
 
-The only parametrization I'm aware of is DEB_BUILD_OPTIONS, and it's
-not really meant to be used for toggling off bits of functionality.
-And if we would support DEB_BUILD_OPTIONS=nojava, would that mean not
-listing the java sdk in Build-Dependencies? That sounds like a bad
-road to take.
+Please pull the following ceph fixes from
 
-The clean options I see are:
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
 
-1. require anyone building the debs to have the java sdk debs installed
-2. split the java bindings into a separate source package
+There are two biggish things here, unfortunately.  One is a locking fix 
+that replaces i_lock use with a ceph-private inode spinlock.  This is 
+necessary to work around lock ordering issues which unfortunately we 
+didn't notice until now (it's from the lock scalability stuff a couple of 
+kernels back).  The diffstat is large, but it's a mechanical replacement 
+and has been pretty well tested.  The other big one is removing rbd 
+rollback functionality from the kernel entirely (we found a minor bug but 
+it is better done from userspace anyway).
 
-Frankly, I think 2. is decent option. Make ceph provide libcephfs-dev
-etc, make that a build-dependency of the java bindings. It complicates
-"build everything" but simplifies the common case. It lets these
-things evolve at different rates. It acts as a good check on whether
-we did a good job on libcephfs-dev packaging and API/ABI changes.
+There are also a handful of other small bug fixes (missing spin_unlock, 
+typo), some error reporting/handling on a corrupt image, a fix for the 
+CRUSH mapping calculation, and a fix for a the seek() regression in 3.1.
 
-I personally dislike it a lot when some upstream project tries to
-maintain all the language bindings in the world in the single master
-repository. That leads to a "one size fits nobody" world. For example,
-even our python bindings are *miserably* maintained compared to most
-true-Python projects; for example, they are not PyPI/pip-friendly. The
-reason why I've been ok with the python bindings is we use them
-internally, for tests etc, and I want to push more in that direction..
-but we already have the PHP bindings in a separate repo. We don't need
-all the worlds bindings in ceph.git.
+There will probably be one more lock ordering patch coming shortly, but I 
+want to do some more testing first.
+
+Thanks!
+sage
+
+
+Josh Durgin (2):
+      rbd: return an error when an invalid header is read
+      rbd: remove buggy rollback functionality
+
+Sage Weil (4):
+      ceph: fix rasize reporting by ceph_show_options
+      ceph: use i_ceph_lock instead of i_lock
+      crush: fix mapping calculation when force argument doesn't exist
+      ceph: fix SEEK_CUR, SEEK_SET regression
+
+Yehuda Sadeh (1):
+      ceph: add missing spin_unlock at ceph_mdsc_build_path()
+
+ Documentation/ABI/testing/sysfs-bus-rbd |    7 -
+ drivers/block/rbd.c                     |  101 ++---------------
+ fs/ceph/addr.c                          |    8 +-
+ fs/ceph/caps.c                          |  187 ++++++++++++++++---------------
+ fs/ceph/dir.c                           |   24 ++--
+ fs/ceph/file.c                          |   23 ++--
+ fs/ceph/inode.c                         |   53 +++++----
+ fs/ceph/ioctl.c                         |    4 +-
+ fs/ceph/mds_client.c                    |   33 +++---
+ fs/ceph/mds_client.h                    |    2 +-
+ fs/ceph/snap.c                          |   16 ++--
+ fs/ceph/super.c                         |    2 +-
+ fs/ceph/super.h                         |   31 +++---
+ fs/ceph/xattr.c                         |   42 ++++----
+ net/ceph/crush/mapper.c                 |   35 ++----
+ 15 files changed, 239 insertions(+), 329 deletions(-)
