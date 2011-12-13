@@ -1,72 +1,91 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: How to know the status of the monitors?
-Date: Tue, 13 Dec 2011 08:12:38 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1112130811360.25425@cobra.newdream.net>
-References: <8512670932FB654F81AF0FEF1BE6D49D9DD46F@WHQBEMAIL1.whq.wistron>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: ceph/hadoop benchmarking
+Date: Tue, 13 Dec 2011 08:30:34 -0800
+Message-ID: <4EE77DAA.5070900@cs.ucsc.edu>
+References: <193464577.4390.1319657347846.JavaMail.root@mail-01.cse.ucsc.edu> <Pine.LNX.4.64.1110261425320.18909@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-312023773-1323792758=:25425"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42400 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752676Ab1LMQMl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2011 11:12:41 -0500
-In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D9DD46F@WHQBEMAIL1.whq.wistron>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:58530 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755198Ab1LMQaM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2011 11:30:12 -0500
+In-Reply-To: <Pine.LNX.4.64.1110261425320.18909@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wistron.com
-Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com, Alex_KT_Lin@wistron.com
+To: Sage Weil <sage@newdream.net>
+Cc: Noah Watkins <jayhawk@soe.ucsc.edu>, Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Comments below
 
---557981400-312023773-1323792758=:25425
-Content-Type: TEXT/PLAIN; charset=BIG5
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+On 10/26/11 2:34 PM, Sage Weil wrote:
+> [adding ceph-devel CC]
+>
+> On Wed, 26 Oct 2011, Noah Watkins wrote:
+>> ----- Original Message -----
+>>> From: "Sage Weil"<sage@newdream.net>
+>>>
+>>>>
+>>>> There was some packaging/cleanup work mentioned a while back on the
+>>>> mailing list. Is anyone working on this?
+>>>
+>>> Nope.
+>>>
+>>> I'm not really sure what the "right' way to build/expose/package java
+>>> bindings is.. but presumably it's less annoying than what we have now
+>>> :)
+>>
+>> I'm revisiting this now to prepare packages and instructions for the
+>> students running benchmarks this quarter, but I wanted to get your
+>> input on future goals to not waste too much effort doing short-term
+>> stuff. The possible approaches I see:
+>>
+>> 1) Everything (JNI wrappers + Java) lives in the Ceph tree and build
+>>     instructions include applying a patch to Hadoop.
+>>
+>>     The current solution, and isn't too bad but needs documentation. This
+>>     approach can be simplified to avoid patching Hadoop by integrating
+>>     Ceph-specific Java code using the CLASSPATH global variable.
+>>
+>> 2) Everything is sent to Hadoop upstream.
+>>
+>>     This is convenient because the Hadoop infrastructure already has
+>>     the facilities for building and linking native code into Hadoop,
+>>     and the only depenendency then becomes a standard ceph-devel
+>>     installation.
+>>
+>>     This was the approach taken with the kernel client version which
+>>     also included JNI code (for ioctl).
+>>
+>> 3) Only JNI wrappers live in the Ceph tree and push Java patch upstream.
+>>
+>>     This could be better if it is anticipated that libceph will see a lot
+>>     of churn in the future, and we'd avoid pushing more changes upstream.
+>
+> #3 strikes me as the right approach, since there are potentially other
+> Java users of libcephfs, and the Hadoop CephFileSystem class will be best
+> maintained (and most usable) if it upstream.  There will just be the
+> initial pain of getting the packaging right for libcephfs so that it will
+> work w/ hadoop out of the box.  (I'm assuming that is possible.. e.g.
+> apt-get install ceph, fire up hadoop with the proper config?)
 
-Hi Eric,
+A couple comments about libceph-java: After looking through a bunch of 
+Debian Java packages, it seems a common approach to packaging JNI/Java 
+code is using the scheme:
 
- ceph quorum_status
+   libcephfs-jni  --> .so
+   libcephfs-java --> .jar
 
-will tell you which monitors are part of the quorum.  It will block until=
-=20
-a quorum is reached.
+The debhelper tool and friends seem to do a good job of packaging up the 
+Java in this way, but integrating this into Ceph's default Debian 
+scripts means that anyone would now need a JDK to build Ceph with 
+dpkg-buildpackages.
 
- ceph mon_status
+Is there a way to parametrize the Debian build process so people who 
+don't care about Java bindings can proceed? An alternative approach is 
+to say have another set of Debian build scripts in src/client/java/debian.
 
-will give you the status of the monitor you happened to connect to.  You=20
-can query a specific monitor with -m <ip>.
+Thanks,
+Noah
 
-sage
-
-
-On Tue, 13 Dec 2011, Eric_YH_Chen@wistron.com wrote:
-
-> Hi, all:
->=20
->     Is there any command or API can retrieve the status of all monitors?
->=20
->     I use =A1=A5ceph mon stat=A1=A6 to get this information. However, the=
- mon.e is not available (server is shutdown).
->=20
->       2011-12-13 17:08:35.499022 mon <- [mon,stat]
-> =A1@=A1@=A1@2011-12-13 17:08:35.499716 mon.1 -> 'e3: 5 mons at {a=3D172.1=
-6.33.5:6789/0,b=3D172.16.33.6:6789/0,c=3D172.16.33.7:6789/0,d=3D172.16.33.7=
-1:6789/0,e=3D172.16.33.72:6789/0}, election epoch 16, quorum 0,1,2,3' (0)
->    =20
->     Even I use =A1=A5ceph mon dump=A1=A6, I still cannot know if the moni=
-tor is alive or not.
->=20
-> =09=090: 172.16.33.5:6789/0 mon.a
-> =09=091: 172.16.33.6:6789/0 mon.b
-> =09=092: 172.16.33.7:6789/0 mon.c
-> =09=093: 172.16.33.71:6789/0 mon.d
-> =09=094: 172.16.33.72:6789/0 mon.e
->=20
->     Please give some help. Thanks!
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-312023773-1323792758=:25425--
