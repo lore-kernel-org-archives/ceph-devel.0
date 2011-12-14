@@ -1,41 +1,32 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: ceph -w output
-Date: Wed, 14 Dec 2011 08:43:05 -0800
-Message-ID: <CAORUGqB4ebxyumBdAjA=HcPyPhznfaFX43seoiNQVi32Rs8onw@mail.gmail.com>
-References: <4EE654A3.1040309@filoo.de> <CACLRD_3n6rCJNFVgmWesDjP3P7DY0bfZr_XGTtx9MC=r29uYRg@mail.gmail.com>
- <4EE8601F.90206@filoo.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Xi Wang <xi.wang@gmail.com>
+Subject: [PATCH 0/3] ceph: fix multiple out-of-bounds checks
+Date: Wed, 14 Dec 2011 15:24:30 -0500
+Message-ID: <1323894273-13904-1-git-send-email-xi.wang@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:49655 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754801Ab1LNQn1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2011 11:43:27 -0500
-Received: by faar15 with SMTP id r15so1362145faa.19
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Dec 2011 08:43:26 -0800 (PST)
-In-Reply-To: <4EE8601F.90206@filoo.de>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:53937 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754832Ab1LNU0A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2011 15:26:00 -0500
+Received: by qcqz2 with SMTP id z2so763871qcq.19
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Dec 2011 12:26:00 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Jens_Rehp=C3=B6hler?= <jens.rehpoehler@filoo.de>
-Cc: Samuel Just <sam.just@dreamhost.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org, Xi Wang <xi.wang@gmail.com>
 
-On Wed, Dec 14, 2011 at 00:36, Jens Rehp=C3=B6hler <jens.rehpoehler@fil=
-oo.de> wrote:
-> Attached you will find the output you asked for. Is there any limitat=
-ion
-> on the amount of pools ? We create
-> pools for every customer and store their VM images in that pools. So =
-we
-> will create a lot of pools over time.
+Fix several possible out-of-bounds pointers if the incoming message is
+corrupted or malicious.
 
-Each pool gets its own set of PGs (Placement Groups). An OSD that
-manages too many PGs will use a lot of RAM. What is "too many" is
-debatable, and really up to benchmarks, but considering we recommend
-about 100 PGs/OSD as a starting point, you probably don't want to go
-two orders of magnitude above that.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Xi Wang (3):
+  ceph: fix out-of-bounds pointers in parse_reply_info()
+  ceph: fix bounds check macros ceph_decode_need and ceph_encode_need
+  ceph: avoid panic with mismatched symbolic link sizes in fill_inode()
+
+ fs/ceph/inode.c             |   10 +++++-----
+ fs/ceph/mds_client.c        |    2 ++
+ include/linux/ceph/decode.h |    9 +++++++--
+ 3 files changed, 14 insertions(+), 7 deletions(-)
+
+-- 
+1.7.5.4
+
