@@ -1,47 +1,41 @@
-From: =?UTF-8?B?SmVucyBSZWhww7ZobGVy?= <jens.rehpoehler@filoo.de>
-Subject: Re: ceph -w output
-Date: Thu, 15 Dec 2011 10:45:15 +0100
-Message-ID: <4EE9C1AB.2010403@filoo.de>
-References: <4EE654A3.1040309@filoo.de> <CACLRD_3n6rCJNFVgmWesDjP3P7DY0bfZr_XGTtx9MC=r29uYRg@mail.gmail.com> <4EE8601F.90206@filoo.de> <CAORUGqB4ebxyumBdAjA=HcPyPhznfaFX43seoiNQVi32Rs8onw@mail.gmail.com>
+From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Subject: Random blocks when accessing rbd images
+Date: Thu, 15 Dec 2011 16:07:55 +0100
+Message-ID: <1404301.on6okQVZ04@pc10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-3.de-punkt.de ([93.190.64.33]:42253 "EHLO
-	mail-3.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753065Ab1LOJpS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Dec 2011 04:45:18 -0500
-In-Reply-To: <CAORUGqB4ebxyumBdAjA=HcPyPhznfaFX43seoiNQVi32Rs8onw@mail.gmail.com>
+Received: from unknownsite.de ([62.48.69.106]:40956 "EHLO hartes-hannover.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751245Ab1LOPIC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 15 Dec 2011 10:08:02 -0500
+Received: from pc10.localnet (pc10.asys-h.de [193.98.1.90])
+	by hartes-hannover.de (Postfix) with ESMTPSA id 21EC910C866
+	for <ceph-devel@vger.kernel.org>; Thu, 15 Dec 2011 16:08:00 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Samuel Just <sam.just@dreamhost.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Am 14.12.2011 17:43, schrieb Tommi Virtanen:
-> On Wed, Dec 14, 2011 at 00:36, Jens Rehp=C3=B6hler <jens.rehpoehler@f=
-iloo.de> wrote:
->> Attached you will find the output you asked for. Is there any limita=
-tion
->> on the amount of pools ? We create
->> pools for every customer and store their VM images in that pools. So=
- we
->> will create a lot of pools over time.
-> Each pool gets its own set of PGs (Placement Groups). An OSD that
-> manages too many PGs will use a lot of RAM. What is "too many" is
-> debatable, and really up to benchmarks, but considering we recommend
-> about 100 PGs/OSD as a starting point, you probably don't want to go
-> two orders of magnitude above that.
-Ok .... that will serve our needs. Remains only the "creating" question=
-=2E
+Hi,
 
-Any answers to that ?
+I've got a small ceph cluster with one mon, one mds and two osds (all on the 
+same machine, for now), that I want to use as a block- and file storage backend 
+for qemu machine virtualisation.
 
-Thanks a lot !
+I found that read access to some of the rbd images, or parts of some of them 
+sometimes blocks indefinitely, usually after the image has been sitting around 
+untouched for a while, for example over night. This has the effect that virtual 
+machines that try to access their disks as well as rbd commands like "rbd cp" 
+will just hang indefinitely.
 
-Jens
+ I found that these blocks can usually be "fixed" by restarting one of the 
+osds.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The last time this happened, ceph -s reported one of the osds to be in state 
+"active+clean+scrubbing". (I'm afraid I don't have the complete output from 
+ceph -s anymore.)
+
+Does anybody have any idea what could be going wrong here?
+
+	Guido
