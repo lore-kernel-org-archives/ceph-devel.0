@@ -1,60 +1,45 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Return stale file handle (-ESTALE) like NFS instead of hanging forever?
-Date: Wed, 14 Dec 2011 22:23:31 -0800
-Message-ID: <CAF3hT9CHwgkuXynhdM9bmG2g6n2pFYdxxwRH3mCw7Jxcp6QfzQ@mail.gmail.com>
-References: <201112081455.56365.a.ott@m-privacy.de>
+From: =?UTF-8?B?SmVucyBSZWhww7ZobGVy?= <jens.rehpoehler@filoo.de>
+Subject: Re: ceph -w output
+Date: Thu, 15 Dec 2011 10:45:15 +0100
+Message-ID: <4EE9C1AB.2010403@filoo.de>
+References: <4EE654A3.1040309@filoo.de> <CACLRD_3n6rCJNFVgmWesDjP3P7DY0bfZr_XGTtx9MC=r29uYRg@mail.gmail.com> <4EE8601F.90206@filoo.de> <CAORUGqB4ebxyumBdAjA=HcPyPhznfaFX43seoiNQVi32Rs8onw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:35418 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751716Ab1LOGXc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Dec 2011 01:23:32 -0500
-Received: by iaeh11 with SMTP id h11so2315257iae.19
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Dec 2011 22:23:32 -0800 (PST)
-In-Reply-To: <201112081455.56365.a.ott@m-privacy.de>
+Received: from mail-3.de-punkt.de ([93.190.64.33]:42253 "EHLO
+	mail-3.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753065Ab1LOJpS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Dec 2011 04:45:18 -0500
+In-Reply-To: <CAORUGqB4ebxyumBdAjA=HcPyPhznfaFX43seoiNQVi32Rs8onw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Samuel Just <sam.just@dreamhost.com>, ceph-devel@vger.kernel.org
 
-On Thu, Dec 8, 2011 at 5:55 AM, Amon Ott <a.ott@m-privacy.de> wrote:
-> Hi folks,
->
-> if file access through Ceph kernel client cannot continue, e.g. becau=
-se there
-> is no mds available, it hangs forever.
->
-> I would prefer if after a timeout the application would get an error =
-code,
-> e.g. the -ESTALE that NFS and Gluster return if something goes wrong.=
- This
-> would allow for the application to handle the error instead of blocki=
-ng
-> forever without a chance to recover.
-This is interesting to me =97 Ceph works very hard to provide POSIX
-semantics and so philosophically the introduction of ESTALE returns is
-not a natural thing for us.
-That doesn't necessarily make it the wrong choice, but since Ceph's
-systems are designed to be self-repairing the expectation is that any
-outage is a temporary situation that will resolve itself pretty
-quickly. And unlike NFS, which often returns ESTALE when other file
-accesses might succeed, if Ceph fails on an MDS request that's pretty
-much the ballgame. So returning ESTALE seems like it's a cop-out,
-losing data and behaving unexpectedly without actually doing anything
-to resolve the issues or giving other data a chance to get saved =97 ie=
-,
-it's not something we want to do automatically. I believe we already
-honor interrupts so that you can do things like Ctrl-C an application
-waiting for IO and cancel the operations.
+Am 14.12.2011 17:43, schrieb Tommi Virtanen:
+> On Wed, Dec 14, 2011 at 00:36, Jens Rehp=C3=B6hler <jens.rehpoehler@f=
+iloo.de> wrote:
+>> Attached you will find the output you asked for. Is there any limita=
+tion
+>> on the amount of pools ? We create
+>> pools for every customer and store their VM images in that pools. So=
+ we
+>> will create a lot of pools over time.
+> Each pool gets its own set of PGs (Placement Groups). An OSD that
+> manages too many PGs will use a lot of RAM. What is "too many" is
+> debatable, and really up to benchmarks, but considering we recommend
+> about 100 PGs/OSD as a starting point, you probably don't want to go
+> two orders of magnitude above that.
+Ok .... that will serve our needs. Remains only the "creating" question=
+=2E
 
-Can you describe why this behavior interests you (and manual
-interruption is insufficient)? I discussed with a few people the
-possibility of making it an off-by-default mount option (though I'm
-unclear on the technical difficulty involved; I'm not big on our
-kernel stuff); presumably that would be enough for your purposes?
--Greg
+Any answers to that ?
+
+Thanks a lot !
+
+Jens
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
