@@ -1,56 +1,57 @@
-From: Samuel Just <sam.just@dreamhost.com>
-Subject: Re: BUG: scheduling while atomic
-Date: Wed, 14 Dec 2011 15:59:16 -0800
-Message-ID: <CACLRD_3TPWWKzCyhkRzdH3pPEgLZC6y96Tm_yDCfpZieHbkYDw@mail.gmail.com>
-References: <201112091100.52460.a.ott@m-privacy.de>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Perf counters assert error
+Date: Wed, 14 Dec 2011 17:48:04 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1112141747460.12793@cobra.newdream.net>
+References: <138631751.2978.1323906826560.JavaMail.root@mail-01.cse.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:56728 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755595Ab1LNX7T convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2011 18:59:19 -0500
-Received: by faar15 with SMTP id r15so1820743faa.19
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Dec 2011 15:59:18 -0800 (PST)
-In-Reply-To: <201112091100.52460.a.ott@m-privacy.de>
+Received: from cobra.newdream.net ([66.33.216.30]:39581 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755804Ab1LOBsG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2011 20:48:06 -0500
+In-Reply-To: <138631751.2978.1323906826560.JavaMail.root@mail-01.cse.ucsc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@dreamhost.com>
+To: Noah Watkins <jayhawk@soe.ucsc.edu>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Anyone with some kernel client experience want to take a look at this?
--Sam
+Hi Noah,
 
-On Fri, Dec 9, 2011 at 2:00 AM, Amon Ott <a.ott@m-privacy.de> wrote:
-> Sorry folks for making so much trouble,
->
-> but there is still another locking issue with the kernel client. iput=
- gets
-> called with locks held, but iput can sleep and did in this occasion. =
-It did
-> not hang the system this time, but it can be quite nasty.
->
-> Log attached as usual.
->
-> Amon Ott
+I just pushed a fix for this.  Please let me know if that doesn't sort it 
+out for you!
+
+sage
+
+
+On Wed, 14 Dec 2011, Noah Watkins wrote:
+
+> I got this assertion with the latest master.
+> 
+> Thanks,
+> Noah
+> 
+> nwatkins@piha:~$ hadoop fs -ls
+> 11/12/14 15:51:57 INFO ceph.CephFileSystem: initialize:Ceph initialization arguments: CephFSInterface --log-file /tmp/client.log --debug_client 20 --debug_ms 20 -m 192.168.141.123:6789 --client-readahead-max-periods=1
+> common/perf_counters.cc: In function 'void PerfCountersCollection::remove(PerfCounters*)', in thread '7f82d022b700'
+> common/perf_counters.cc: 52: FAILED assert(i != m_loggers.end())
+>  ceph version 0.39-124-g1430c8a (commit:1430c8abaa37ee8ae4795907773b9b350fc5189a)
+>  1: (PerfCountersCollection::remove(PerfCounters*)+0x222) [0x7f8285e67062]
+>  2: (Client::shutdown()+0x215) [0x7f8285d1ca75]
+>  3: (ceph_mount()+0x11c) [0x7f8285d151ec]
+>  4: (Java_org_apache_hadoop_fs_ceph_CephTalker_ceph_1initializeClient()+0x39d) [0x7f8284cb57bd]
+>  5: [0x7f82cc29bc88]
+>  ceph version 0.39-124-g1430c8a (commit:1430c8abaa37ee8ae4795907773b9b350fc5189a)
+>  1: (PerfCountersCollection::remove(PerfCounters*)+0x222) [0x7f8285e67062]
+>  2: (Client::shutdown()+0x215) [0x7f8285d1ca75]
+>  3: (ceph_mount()+0x11c) [0x7f8285d151ec]
+>  4: (Java_org_apache_hadoop_fs_ceph_CephTalker_ceph_1initializeClient()+0x39d) [0x7f8284cb57bd]
+>  5: [0x7f82cc29bc88]
+> terminate called after throwing an instance of 'ceph::FailedAssertion'
+> Aborted
 > --
-> Dr. Amon Ott
-> m-privacy GmbH =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 Tel: +49 30 2434233=
-4
-> Am K=C3=B6llnischen Park 1 =C2=A0 =C2=A0Fax: +49 30 24342336
-> 10179 Berlin =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 http://www.m-p=
-rivacy.de
->
-> Amtsgericht Charlottenburg, HRB 84946
->
-> Gesch=C3=A4ftsf=C3=BChrer:
-> =C2=A0Dipl.-Kfm. Holger Maczkowsky,
-> =C2=A0Roman Maczkowsky
->
-> GnuPG-Key-ID: 0x2DD3A649
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
