@@ -1,41 +1,47 @@
 From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Return stale file handle (-ESTALE) like NFS instead of hanging forever?
-Date: Fri, 16 Dec 2011 11:16:01 -0800
-Message-ID: <CAORUGqBDwTOTMKEjiqM1Y705cMXAhr5cqDESC970WFB0GkiPiQ@mail.gmail.com>
-References: <201112081455.56365.a.ott@m-privacy.de> <CAF3hT9CHwgkuXynhdM9bmG2g6n2pFYdxxwRH3mCw7Jxcp6QfzQ@mail.gmail.com>
- <201112160936.35587.a.ott@m-privacy.de>
+Subject: Python packages status
+Date: Fri, 16 Dec 2011 11:43:35 -0800
+Message-ID: <CAORUGqBqvRmk9200+kmOPDnWG61usbTEgk8uU6g+JONkae=bzA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:41278 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752238Ab1LPTQX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2011 14:16:23 -0500
-Received: by wgbdr13 with SMTP id dr13so6716735wgb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Dec 2011 11:16:22 -0800 (PST)
-In-Reply-To: <201112160936.35587.a.ott@m-privacy.de>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:33493 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755826Ab1LPTn5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2011 14:43:57 -0500
+Received: by faar15 with SMTP id r15so3212392faa.19
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Dec 2011 11:43:56 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>, Jay Pipes <jaypipes@gmail.com>
 
-On Fri, Dec 16, 2011 at 00:36, Amon Ott <a.ott@m-privacy.de> wrote:
-> Our server clusters have quite a few cron jobs as well as Nagios health checks
-> that also access the common data area on Ceph FS for configuration and status
-> storage. If these jobs hang forever because of a blocked access, they cannot
-> finish their other tasks - even if that access is not vital for these other
-> tasks. Specially, they can never return a result. You cannot even shutdown
-> the system cleanly, if umount blocks forever.
+Hi. Jay brought up the state of Ceph's Python bindings in a
+conversation, and I wanted to share this reasoning with the whole
+list.
 
-Especially for Nagios checks, you really want to be very defensive
-about things that might hang. I've seen too many nagios checks hanging
-e.g. due to TCP, so I'd recommend using a generic timeout mechanism to
-make sure all your checks, everywhere, fail if they take too long..
-There's no point in waiting for a health check that's run every 5
-minutes for more than 5 minutes.
+Note, I'm talking about debs, rpm etc case is similar but separate.
 
-Something like /usr/bin/timeout from coreutils is your friend.
+- The python bindings we have are not currently pip-installable.
+- We could make them pip-installable. The easiest way to that would be
+to split them out to a separate source package. This is not as useful
+as it seems, as they'll require the underlying librados / librbd /
+librgw etc libraries to be available. And if we find ctypes
+insufficient for the bindings, then "pip install" will start needing
+the -dev packages also installed.
+- If you can't just take a base OS and do "pip install rbd", but need
+to install the Ceph library packages, you might as well get the python
+modules from the "python-ceph" package at the same time.
+- We want to use the Python bindings internally, to test Ceph, as part
+of automated tests. Splitting them out to separate source is in
+conflict with this desire.
 
-(Whether this applies to cron jobs is a different conversation.. I
-tend to think "yes"; I've seen too many systems pile up a hundred
-instances of the same hourly cronjob.)
+For Debian-based systems, here's how to get usable Python libraries for Ceph:
+1. Follow the installation guide at
+http://ceph.newdream.net/docs/latest/ops/install/mkcephfs/
+2. Run "sudo apt-get install python-ceph"
+
+You can quickly check that they work with python -c 'import rbd'
+
+API docs, as much as they exist currently, are at
+http://ceph.newdream.net/docs/latest/api/librbdpy/ and more will come
+as siblings of that document later.
