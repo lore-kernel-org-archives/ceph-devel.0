@@ -1,33 +1,52 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: RBD layering needs to work across pools
-Date: Fri, 16 Dec 2011 14:48:10 -0800
-Message-ID: <CAORUGqBWQ5Sm1npyq4Jh0eoEHCmNz+Rb1jE+mOrT8KGM+A=CwA@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: Assert in OSD::build_incremental_map_msg
+Date: Fri, 16 Dec 2011 16:13:40 -0700
+Message-ID: <4EEBD0A4.7000408@sandia.gov>
+References: <4EEB7AE9.5080601@sandia.gov>
+ <Pine.LNX.4.64.1112160955040.25421@cobra.newdream.net>
+ <4EEB8D4A.5020506@sandia.gov>
+ <CACLRD_0+0-NTszjVtira9Og80J-NGt+wBh3hcBp4==gHWdstLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:50492 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752634Ab1LPWzP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2011 17:55:15 -0500
-Received: by wibhm6 with SMTP id hm6so299467wib.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Dec 2011 14:55:14 -0800 (PST)
+Received: from sentry-two.sandia.gov ([132.175.109.14]:45471 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752488Ab1LPXOK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2011 18:14:10 -0500
+In-Reply-To: <CACLRD_0+0-NTszjVtira9Og80J-NGt+wBh3hcBp4==gHWdstLg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <josh.durgin@dreamhost.com>
+To: Samuel Just <sam.just@dreamhost.com>
+Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi list, hi Josh.
+On 12/16/2011 03:43 PM, Samuel Just wrote:
+> bfbde5b18525406fc3b678751459e989ea5d4977 in master should fix it.
 
-This came up in an OpenStack conversation today:
+Great, thanks for taking a look.
 
-if we store "template images" and "volumes" both in RBD, it would make
-a lot of sense prevent the Nova nodes from accidentally writing to the
-golden images. That is, have the templates in a separate pool that is
-writeable to Glance, but read-only for the Nova nodes.
+-- Jim
 
-To support this, we'd need to make sure the RBD layering we're
-building is able to use base images in a separate pool. (And handle
-the ugly case where after a misconfiguration the client can't access
-the base image anymore...)
+> -Sam
+>
+> On Fri, Dec 16, 2011 at 10:26 AM, Jim Schutt<jaschut@sandia.gov>  wrote:
+>> On 12/16/2011 10:56 AM, Sage Weil wrote:
+>>>
+>>> Hi Jim,
+>>>
+>>> Are you able to generate an osd log leading up to this crash?
+>>>
+>>>         debug osd = 20
+>>>         debug filestore = 10
+>>>         debug ms = 1
+>>
+>>
+>> Sent by private email.
+>>
+>> Thanks for taking a look.
+>>
+>> -- Jim
+>>
 
-Josh, can you say whether that falls in line with what's been planned
-for the layering?
