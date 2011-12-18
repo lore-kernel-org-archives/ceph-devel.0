@@ -1,63 +1,97 @@
-From: Smart Weblications GmbH - Florian Wiessner
-	<f.wiessner@smart-weblications.de>
-Subject: Re: ceph-osd not starting
-Date: Sun, 18 Dec 2011 13:51:03 +0100
-Message-ID: <4EEDE1B7.6090406@smart-weblications.de>
-References: <4EEB3848.8080202@smart-weblications.de> <CACLRD_0HD9iFLDQBsccHibPGA6rqjos51c4w13qChB0Xw9nQsw@mail.gmail.com> <4EEBB685.4090906@smart-weblications.de> <CACLRD_1TwMN+YNoyizt7+ZnvEtjRWKW21yJuJpnucnY=QwQtGQ@mail.gmail.com>
-Reply-To: f.wiessner@smart-weblications.de
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Random blocks when accessing rbd images
+Date: Sun, 18 Dec 2011 15:26:27 +0100
+Message-ID: <4EEDF813.204@widodh.nl>
+References: <1404301.on6okQVZ04@pc10> <4EEA1309.9030602@grnet.gr> <3807778.ycpoZxnZL4@pc10> <CACLRD_1LPhCC3szKfsj_pZ6-5rr=pr+P8KyWO76CxU6x0K17mA@mail.gmail.com> <4EEA2174.2060002@widodh.nl> <4EEA2299.6070601@tuxadero.com> <4EEA23F8.10209@tuxadero.com> <4EEB6F31.2050109@widodh.nl> <CACLRD_3pvKUmS+qtEPvQLi1hL71+4jUDMTT8mUaHpB8pYn09kQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx03.smart-weblications.de ([188.65.144.38]:52038 "EHLO
-	mx03.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751615Ab1LRMvh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 18 Dec 2011 07:51:37 -0500
-In-Reply-To: <CACLRD_1TwMN+YNoyizt7+ZnvEtjRWKW21yJuJpnucnY=QwQtGQ@mail.gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:33325 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751039Ab1LRO0a (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Dec 2011 09:26:30 -0500
+In-Reply-To: <CACLRD_3pvKUmS+qtEPvQLi1hL71+4jUDMTT8mUaHpB8pYn09kQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Samuel Just <sam.just@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-Am 17.12.2011 00:55, schrieb Samuel Just:
-> There is no further output?  Does the process die at that point, or
-> does it hang?
+On 12/16/2011 10:17 PM, Samuel Just wrote:
+> In master, 061e7619aacf60a828e0ce84a108d5a0bea247c6 may fix the
+> problem.  If not, 5274e88d2cb8c0449a4ecd1ff0cf8bb0af2cfc97 includes
+> some asserts that may give us a clue as to how this is happening.
 
-it just dies - is the cephfs from the previous version incompatible wit=
-h the
-newer version?
+I've been running with bfbde5b18525406fc3b678751459e989ea5d4977 for over 
+24 hours now, everything is still active+clean.
 
-strace of the osd not starting:
+If it comes back I'll update this thread.
 
-http://office.smart-weblications.net//osd-trace.txt
+Thanks,
 
+Wido
 
-
-
---=20
-
-Mit freundlichen Gr=C3=BC=C3=9Fen,
-
-=46lorian Wiessner
-
-Smart Weblications GmbH
-Martinsberger Str. 1
-D-95119 Naila
-
-fon.: +49 9282 9638 200
-fax.: +49 9282 9638 205
-24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-http://www.smart-weblications.de
-
---
-Sitz der Gesellschaft: Naila
-Gesch=C3=A4ftsf=C3=BChrer: Florian Wiessner
-HRB-Nr.: HRB 3840 Amtsgericht Hof
-*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -Sam
+>
+> On Fri, Dec 16, 2011 at 8:17 AM, Wido den Hollander<wido@widodh.nl>  wrote:
+>> Hi,
+>>
+>>
+>> On 12/15/2011 05:44 PM, Martin Mailand wrote:
+>>>
+>>> Hi,
+>>> at least there is a patch that should have fixed it.
+>>>
+>>> http://marc.info/?l=ceph-devel&m=131955913203561&w=2
+>>>
+>>
+>> I'm still seeing this one:
+>>
+>> 2011-12-16 17:14:53.638722    pg v1170309: 7808 pgs: 7807 active+clean, 1
+>> active+clean+scrubbing; 15279 MB data, 47262 MB used, 73838 GB / 74520 GB
+>> avail
+>>
+>> In this case PG "2.688" is in scrubbing state and is staying that way.
+>>
+>> I'm running v0.39, not the latest master.
+>>
+>> Any suggestions to trace this one down?
+>>
+>> Wido
+>>
+>>
+>>> Am 15.12.2011 17:38, schrieb Martin Mailand:
+>>>>
+>>>> Hi Wido,
+>>>> but wasn't that fixed a few weeks ago?
+>>>>
+>>>> -martin
+>>>>
+>>>> Am 15.12.2011 17:33, schrieb Wido den Hollander:
+>>>>>
+>>>>> Yes, from what I've seen it will block indefinitely until you restart
+>>>>> one of the OSDs who are member of the PG.
+>>>>>
+>>>>> Wido
+>>>>
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
