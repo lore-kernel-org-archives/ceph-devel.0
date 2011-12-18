@@ -1,55 +1,63 @@
-From: Christian Brunner <chb@muc.de>
-Subject: Re: Understanding Ceph
-Date: Sun, 18 Dec 2011 13:17:18 +0100
-Message-ID: <CAO47_-_Ur4SzuuCA0m5n1++gFSXtapw=xTy1vE5Os-n1uGhdXg@mail.gmail.com>
-References: <CAJMJAuPK8c4YBx3HUXOwOVfJAQuN2m2BHPNfyhr4hmpa0f1+Mw@mail.gmail.com>
-Reply-To: chb@muc.de
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner@smart-weblications.de>
+Subject: Re: ceph-osd not starting
+Date: Sun, 18 Dec 2011 13:51:03 +0100
+Message-ID: <4EEDE1B7.6090406@smart-weblications.de>
+References: <4EEB3848.8080202@smart-weblications.de> <CACLRD_0HD9iFLDQBsccHibPGA6rqjos51c4w13qChB0Xw9nQsw@mail.gmail.com> <4EEBB685.4090906@smart-weblications.de> <CACLRD_1TwMN+YNoyizt7+ZnvEtjRWKW21yJuJpnucnY=QwQtGQ@mail.gmail.com>
+Reply-To: f.wiessner@smart-weblications.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:43054 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751538Ab1LRMRT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Dec 2011 07:17:19 -0500
-Received: by vbbfc26 with SMTP id fc26so3448418vbb.19
-        for <ceph-devel@vger.kernel.org>; Sun, 18 Dec 2011 04:17:18 -0800 (PST)
-In-Reply-To: <CAJMJAuPK8c4YBx3HUXOwOVfJAQuN2m2BHPNfyhr4hmpa0f1+Mw@mail.gmail.com>
+Received: from mx03.smart-weblications.de ([188.65.144.38]:52038 "EHLO
+	mx03.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751615Ab1LRMvh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 18 Dec 2011 07:51:37 -0500
+In-Reply-To: <CACLRD_1TwMN+YNoyizt7+ZnvEtjRWKW21yJuJpnucnY=QwQtGQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bill Hastings <bllhastings@gmail.com>
+To: Samuel Just <sam.just@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Bill,
+Am 17.12.2011 00:55, schrieb Samuel Just:
+> There is no further output?  Does the process die at that point, or
+> does it hang?
 
-2011/12/18 Bill Hastings <bllhastings@gmail.com>:
+it just dies - is the cephfs from the previous version incompatible wit=
+h the
+newer version?
 
-> I am trying to get my feet wet with Ceph and RADOS. My aim is to use
-> it as a block device for KVM instances. My understanding is that
-> virtual disks get striped at 1 MB boundaries by default. Does that
-> mean that there are going to be 1MB files on disks?
+strace of the osd not starting:
 
-Yes, the virtual disk is striped over multiple objects. By default
-they have a size of 4MB (not 1MB). Ceph is storing objects, but in the
-end they will be written as files on the different object stores.
-
-> Let's say I want
-> to update a particular vdisk with 16 bytes of data at offset 4096.
-> This would mean I want to update the first 1MB chunk.
-
-Yes, but you don't need to write the whole chunk again. You can update
-the 16 bytes withour rewriting everything. (In fact rbd is using
-sparse objects by default - "thin provisioning").
+http://office.smart-weblications.net//osd-trace.txt
 
 
-> Let us assume I
-> have 3 way replication and the replicas are A, B and C. The write may
-> succeed at A and B and fail at C. Is there any state kept in the
-> metadata indicating at which replicas the write succeeded?
 
-Objects are grouped into placement groups (PGs).The ceph monitor is
-tracking the state of the PGs. With this information, the clients will
-be directed to the working replicas. When an object store is failing,
-it will start rebuilding the missing objects on other object stores.
 
-Regards,
-Christian
+--=20
+
+Mit freundlichen Gr=C3=BC=C3=9Fen,
+
+=46lorian Wiessner
+
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
+
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=C3=A4ftsf=C3=BChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
