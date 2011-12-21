@@ -1,64 +1,75 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: how many MDS active daemons to run
-Date: Tue, 20 Dec 2011 16:10:51 -0800
-Message-ID: <CAF3hT9A1XEeZinwjFscouDkS4Pf2hT6RKQHP9B3bSy2=uQiOLQ@mail.gmail.com>
-References: <4EF11A83.2030006@genome.wustl.edu>
-	<CAF3hT9B0jq0adbT2hy6TjFyzs9TcRfVapnXEV0OAjrnby553zg@mail.gmail.com>
-	<4EF120A5.2010100@genome.wustl.edu>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Re: Bug #1047 reproduced
+Date: Wed, 21 Dec 2011 13:37:43 +0100
+Message-ID: <201112211337.44363.a.ott@m-privacy.de>
+References: <201112010937.37642.a.ott@m-privacy.de> <201112021217.10054.a.ott@m-privacy.de> <Pine.LNX.4.64.1112020855440.10925@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=iso-8859-15
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:43614 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752206Ab1LUAKw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Dec 2011 19:10:52 -0500
-Received: by iaeh11 with SMTP id h11so10974799iae.19
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Dec 2011 16:10:52 -0800 (PST)
-In-Reply-To: <4EF120A5.2010100@genome.wustl.edu>
+Received: from www.m-privacy.de ([85.214.138.176]:39083 "EHLO www.m-privacy.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752481Ab1LUMhy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Dec 2011 07:37:54 -0500
+In-Reply-To: <Pine.LNX.4.64.1112020855440.10925@cobra.newdream.net>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Weil <mweil@genome.wustl.edu>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, Dec 20, 2011 at 3:56 PM, Matt Weil <mweil@genome.wustl.edu> wro=
-te:
-> On 12/20/11 5:39 PM, Gregory Farnum wrote:
->>
->> On Tue, Dec 20, 2011 at 3:30 PM, Matt Weil<mweil@genome.wustl.edu> =A0=
-wrote:
->>>
->>> Hello all:
->>>
->>> given six osd servers does it make any difference of each one also =
-runs a
->>> mds or not?
->>>
->>> How many mds's is to many. =A0How does this effect metadata perform=
-ance.
->>
->> Right now a single-MDS system is significantly more stable than a
->> system with multiple active MDSes, so if possible you should use tha=
+On Friday 02 December 2011 wrote Sage Weil:
+> On Fri, 2 Dec 2011, Amon Ott wrote:
+> > On Thursday 01 December 2011 you wrote:
+> > > On all four nodes of my test cluster, MDS crashes with a trace li=
+ke
+> > > that in bug #1047. Example and ceph.conf attached. Ceph server si=
+de is
+> > > from git master, last commit ce6572273943ffdca4b7dc5344152d6c3510=
+6a2d.
+> > >
+> > > MDS does not start on any node here, it reliably crashes with tha=
 t
->> configuration. Only add MDSes when you need more metadata throughput
->> (probably you only need one).
+> > > assert.
+> >
+> > Does it makes sense for you to keep the cluster in that broken stat=
+e, so
+> > that we can reproduce that bug or test a potential fix? Otherwise, =
+I
+> > would recreate the Ceph filesystem to make more tests. I also have =
+a full
+> > log of one mds from start to crash here.
 >
->
-> Thanks for the response.
->
-> these osd servers are also going run the client and serve out NFS.
-Make sure you carefully consider the deadlock risks associated with
-running filesystem clients and servers on the same machine... :) (See
-here:http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/4335
-and the containing thread for more info if needed.)
+> Can you attach the log to #1047 for posterity?  I'll take a quick loo=
+k and
+> see if there is any further info to gain from the log.  I'm guessing =
+the
+> actual bug occured before the crash, when the anchor table wasn't upd=
+ated
+> properly, but there may be clues here.
 
-> Is it better to split the mds and mon out to a dedicated system? =A0t=
-hen run
-> standby on the active osd's
-Depends on your hardware and performance requirements =97 the MDS will
-consume as much RAM as you allow it to, and up to a CPU or so. The
-OSDs don't use much memory, but the more that's available to page
-cache the less they need to hit disk to serve reads, etc.
+Did you find some time to look into this? The bug makes Ceph unusable f=
+or us=20
+even with moderate load. All mds instances die with the same assert, th=
+e only=20
+way to recover in that state is to recreate the complete ceph fs and re=
+store=20
+backups.
+
+Amon Ott
+--=20
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Am K=F6llnischen Park 1    Fax: +49 30 24342336
+10179 Berlin             http://www.m-privacy.de
+
+Amtsgericht Charlottenburg, HRB 84946
+
+Gesch=E4ftsf=FChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
