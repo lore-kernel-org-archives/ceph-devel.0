@@ -1,94 +1,83 @@
-From: Amon Ott <a.ott@m-privacy.de>
-Subject: Re: Bug #1047 reproduced
-Date: Wed, 21 Dec 2011 17:36:24 +0100
-Message-ID: <201112211736.25725.a.ott@m-privacy.de>
-References: <201112010937.37642.a.ott@m-privacy.de> <201112211337.44363.a.ott@m-privacy.de> <CAF3hT9AHa_7WNx+x5qf0iHwmphWu1LLfR-9NUvFjVScZy94JqA@mail.gmail.com>
+From: <Eric_YH_Chen@wistron.com>
+Subject: Do not understand some terms about cluster health
+Date: Thu, 22 Dec 2011 11:47:58 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49DA7E3E2@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.138.176]:46966 "EHLO www.m-privacy.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752053Ab1LUQgn convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Dec 2011 11:36:43 -0500
-In-Reply-To: <CAF3hT9AHa_7WNx+x5qf0iHwmphWu1LLfR-9NUvFjVScZy94JqA@mail.gmail.com>
-Content-Disposition: inline
+Received: from twnhumsw4.wistron.com ([220.128.89.24]:62433 "EHLO
+	TWNHUMSW4.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752956Ab1LVDsA convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Dec 2011 22:48:00 -0500
+Received: from twnhufe3.whq.wistron (unverified [10.37.31.103]) by TWNHUMSW4.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta172073e0bc0a816721e0c@TWNHUMSW4.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Thu, 22 Dec 2011 11:53:31 +0800
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+To: ceph-devel@vger.kernel.org
+Cc: Chris_YT_Huang@wistron.com
 
-On Wednesday 21 December 2011 wrote Gregory Farnum:
-> On Wed, Dec 21, 2011 at 4:37 AM, Amon Ott <a.ott@m-privacy.de> wrote:
-> > On Friday 02 December 2011 wrote Sage Weil:
-> >> On Fri, 2 Dec 2011, Amon Ott wrote:
-> >> > On Thursday 01 December 2011 you wrote:
-> >> > > On all four nodes of my test cluster, MDS crashes with a trace=
- like
-> >> > > that in bug #1047. Example and ceph.conf attached. Ceph server=
- side
-> >> > > is from git master, last commit
-> >> > > ce6572273943ffdca4b7dc5344152d6c35106a2d.
-> >> > >
-> >> > > MDS does not start on any node here, it reliably crashes with =
-that
-> >> > > assert.
-> >> >
-> >> > Does it makes sense for you to keep the cluster in that broken s=
-tate,
-> >> > so that we can reproduce that bug or test a potential fix? Other=
-wise,
-> >> > I would recreate the Ceph filesystem to make more tests. I also =
-have a
-> >> > full log of one mds from start to crash here.
-> >>
-> >> Can you attach the log to #1047 for posterity? =A0I'll take a quic=
-k look
-> >> and see if there is any further info to gain from the log. =A0I'm =
-guessing
-> >> the actual bug occured before the crash, when the anchor table was=
-n't
-> >> updated properly, but there may be clues here.
-> >
-> > Did you find some time to look into this? The bug makes Ceph unusab=
-le for
-> > us even with moderate load. All mds instances die with the same ass=
-ert,
-> > the only way to recover in that state is to recreate the complete c=
-eph fs
-> > and restore backups.
->
-> Sage is gone on vacation right now (unless he decides not to be for a
-> while), but we've been focusing our efforts on the OSDs lately so I
-> don't think he's looked at it. I'll see if I can carve out some time
-> tomorrow or Friday, but I can't promise anything.
->
-> Alexandre, can you check this bug and make sure it looks like the sam=
-e
-> one you reported as #1850?
+Hi, All
 
-Thank you for looking into it. The behaviour in #1850 looks quite simil=
-ar to=20
-our bug, apart from the hardlinks. We copy many files here in our tests=
-, too.=20
-Last time I hit the bug I had really restarted the master mds.
+   When I type 'ceph health' to get the status of cluster, it will show
+some information.
 
-Amon Ott
---=20
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Am K=F6llnischen Park 1    Fax: +49 30 24342336
-10179 Berlin             http://www.m-privacy.de
+   Would you please to explain the term?
 
-Amtsgericht Charlottenburg, HRB 84946
+   Ex: HEALTH_WARN 3/54 degraded (5.556%)
+ 
+         What does "degraded" mean ?  Is it a serious error and how to
+fix it ? 
 
-Gesch=E4ftsf=FChrer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
+   Ex: HEALTH_WARN 264 pgs degraded, 6/60 degraded (10.000%); 3/27
+unfound (11.111%)
 
-GnuPG-Key-ID: 0x2DD3A649
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+         What does "unfound" mean?  Could we recover the data?  
+         Would it cause the whole data in rbd image corrupted and never
+access ?
+
+   When I type 'ceph pg dump', it would show like this.  Would you
+please explain what is "hb in" and "hb out" ?
+
+	osdstat  kbused          kbavail          kb              hb in
+hb out
+	0       17300872        1884175720      1906311168
+[6,7,8,9,10,11] [6,7,8,9,10,11]
+	1       16661664        1884808728      1906311168
+[6,7,8,9,10,11] [6,7,8,9,10,11]
+	2       15695664        1886027584      1906311168
+[6,7,8,9,10,11] [6,7,8,9,10,11]
+	3       16463440        1885005328      1906311168
+[6,7,8,9,10,11] [6,7,8,9,10,11]
+	4       14101016        1888130760      1906311168
+[6,7,8,9,10,11] [6,7,8,9,10,11]
+	5       14015804        1888215124      1906311168
+[6,7,8,9,10,11] [6,7,8,9,10,11]
+	6       19312280        1881660776      1906311168
+[0,1,2,3,4,5]   [0,1,2,3,4,5]
+	7       14451992        1887521200      1906311168
+[0,1,2,3,4,5]   [0,1,2,3,4,5]
+	8       16336028        1885393468      1906311168
+[0,1,2,3,4,5]   [0,1,2,3,4,5]
+	9       16697868        1884773940      1906311168
+[0,1,2,3,4,5]   [0,1,2,3,4,5]
+	10      13530456        1888695776      1906311168
+[0,1,2,3,4,5]   [0,1,2,3,4,5]
+	11      13921908        1888307364      1906311168
+[0,1,2,3,4,5]   [0,1,2,3,4,5]
+	sum    188488992       22632715768     22875734016      
+
+
+  And from the latest document, I know we can do the cluster snapshot by
+" ceph osd cluster_snap <name>"
+  Is that means we can rollback the data from the snapshot? Do you have
+any related document to show how to operate it?
+
+  Thanks a lot!
+
+
+
+
