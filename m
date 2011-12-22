@@ -1,48 +1,102 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: Random blocks when accessing rbd images
-Date: Thu, 22 Dec 2011 14:59:57 +0100
-Message-ID: <4EF337DD.30509@tuxadero.com>
-References: <1404301.on6okQVZ04@pc10> <4EEA1309.9030602@grnet.gr> <3807778.ycpoZxnZL4@pc10> <CACLRD_1LPhCC3szKfsj_pZ6-5rr=pr+P8KyWO76CxU6x0K17mA@mail.gmail.com> <4EEA2174.2060002@widodh.nl> <4EEA2299.6070601@tuxadero.com> <4EEA23F8.10209@tuxadero.com> <4EEB6F31.2050109@widodh.nl> <CACLRD_3pvKUmS+qtEPvQLi1hL71+4jUDMTT8mUaHpB8pYn09kQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: __d_find_alias() problem
+Date: Thu, 22 Dec 2011 08:11:42 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1112220754490.3284@cobra.newdream.net>
+References: <1324568779.3957.73.camel@doink>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:32792 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750703Ab1LVOAC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Dec 2011 09:00:02 -0500
-In-Reply-To: <CACLRD_3pvKUmS+qtEPvQLi1hL71+4jUDMTT8mUaHpB8pYn09kQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46968 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753024Ab1LVQLn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Dec 2011 11:11:43 -0500
+In-Reply-To: <1324568779.3957.73.camel@doink>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@dreamhost.com>
+To: Alex Elder <elder@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Samuel
-I think I am seeing it now.
+On Thu, 22 Dec 2011, Alex Elder wrote:
+> I'll send all this to ceph-devel later, I just wanted
+[added cc]
 
-root@s-brick-003:~# ceph pg dump|grep -i scrub
-pg_stat objects mip     degr    unf     kb      bytes   log     disklog 
-state   v       reported        up      acting  last_scrub
-0.6     0       0       0       0       0       0       0       0 
-active+clean+scrubbing  0'0     60'156  [6,2]   [6,2]   0'0 
-2011-12-20 14:44:55.787529
-root@s-brick-003:~# ceph -v
-ceph version 0.39-171-gdcedda8 
-(commit:dcedda84d0e1f69af985c301276c67c1b11e7efc)
-root@s-brick-003:~#
+> to document it while it's fresh and send it to *someone*
+> and you made this change so I'm sending it to you.  The
+> change in question is:
+> 
+>     be655596b3de5873f994ddbe205751a5ffb4de39
+>     ceph: use i_ceph_lock instead of i_lock
+> 
+> First, after updating my ceph tree and rebuilding I found
+> that every time I completed a mount in my UML environment
+> it would immediately crash the UML.
+> 
+> This led to me learning how to attach a debugger to
+> the UML (good) and this morning I was able to capture
+> this situation in gdb.
+> 
+> The problem is in ceph_dir_set_complete(), which is
+> blindly dereferencing the return value of
+> __d_find_any_alias(inode), and that function is
+> returning NULL because the inode's i_dentry list
+> is empty.
+> 
+> So that's problem 1.
 
+Yeah, looks like I broke that with 
+9f6f8f50663e6cf42cca64f1f5ee0ca438c33c46.  Just moving the dentry->d_sb 
+inside the if should do it!  Strange that this didn't trigger on sepia... 
+:/
 
-I also had an osd crash and hit this (Assertion: 
-./messages/MOSDRepScrub.h: 64: FAILED assert(v == 0)), see my other 
-email for more information.
+> In looking at this I find that __d_find_any_alias()
+> is duplicated in ceph, to (almost) match the Linux
+> implementation which is not exported.  But unlike
+> the Linux version, the ceph version does NOT grab
+> a reference to the found alias.  I consider this a
+> bug, because a function with an identical name should
+> perform identically to the original, otherwise it
+> should be named something different.
+> 
+> That's problem 2.
+> Furthermore, I looked at the locking that's done for
+> the Linux version of __d_find_any_alias, and that
+> truly does require taking the Linux inode lock--the
+> (new) ceph inode i_ceph_lock is not sufficient.  Note
+> that __d_find_any_alias() really only operates on the
+> Linux inode and does nothing with the ceph inode, so
+> it may be that simply changing the locking used *in
+> this case* back to using the Linux inode lock is
+> enough to fix the problem.  But I'm not familiar
+> enough at this point to know the locking context
+> where these calls are made, so can't be sure doing
+> this would cause problems (like lock inversions).
+> 
+> There are three places this __d_find_any_alias()
+> is called:  ceph_dir_{set,clear,test}_complete().
+> Those are straightforward, but the calls to *those*
+> functions are mostly embedded in long strings of
+> logical conditions so it's going to take a little
+> work to unwind this.
+> 
+> So that's problem 3, which is the biggest one.
 
--martin
+I think the __d_find_any_alias() needs to take the i_lock and a reference 
+to make it fully safe.  i_lock is ordered inside i_ceph_lock, now, so that 
+should be safe in all of the call chains.  Better yet, we should just 
+export the VFS version and use that.
 
+What do you think?  A simple fix is best so we can get it into 3.2 (which 
+is about a week away?).
 
+> Potential problem 4 is that this suggests the
+> mechanical switch to using i_ceph_lock is a little
+> suspect and might need a closer look.
 
-Am 16.12.2011 22:17, schrieb Samuel Just:
-> In master, 061e7619aacf60a828e0ce84a108d5a0bea247c6 may fix the
-> problem.  If not, 5274e88d2cb8c0449a4ecd1ff0cf8bb0af2cfc97 includes
-> some asserts that may give us a clue as to how this is happening.
-> -Sam
+Yeah.  Well, this is one of the few cases where i_lock where we muddle 
+with the dcache internal structure.  The others should pretty much all be 
+in dir.c, and maybe inode.c's splice_dentry() and friends.  The dcache 
+readdir is by far the most suspect of all of those, but also probably the 
+lowest priority at the moment.  Maybe your visit in January would be a 
+good time to go over it in detail?
 
+sage
