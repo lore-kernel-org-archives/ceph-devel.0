@@ -1,55 +1,84 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 1/3] interval_set: fix truncation of _size
-Date: Thu, 22 Dec 2011 12:16:27 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1112221216180.3284@cobra.newdream.net>
-References: <1324550845-8031-1-git-send-email-henry.cy.chang@gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Subject: [PATCH 1/3] ceph: take inode lock when finding an inode alias
+Date: Thu, 22 Dec 2011 12:13:09 -0800
+Message-ID: <1324584791-31933-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45289 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:45294 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751392Ab1LVUQ2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Dec 2011 15:16:28 -0500
-In-Reply-To: <1324550845-8031-1-git-send-email-henry.cy.chang@gmail.com>
+	with ESMTP id S1753404Ab1LVURL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Dec 2011 15:17:11 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry.cy.chang@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Alex Elder <elder@dreamhost.com>
 
-Applied all three of these.  Thanks!
+From: Alex Elder <elder@dreamhost.com>
 
-sage
+In the ceph_dir_*_complete() functions, a call to
+__d_find_any_alias() is used to get a dentry for a inode.
+Previously this was done under the inode's i_lock, but
+recently this change converted things to use the ceph
+inode's i_ceph_lock instead:
+    be655596 ceph: use i_ceph_lock instead of i_lock
 
+Finding an inode alias operates (only) on the Linux inode, so
+we really do need to take the Linux lock for this.  Since i_lock
+is ordered inside i_ceph_lock, we can safely do this for all
+these ceph cases.
 
-On Thu, 22 Dec 2011, Henry C Chang wrote:
+For now, just copy the d_find_any_alias() function from
+"fs/dcache.c" and use that instead.
 
-> _size is type of int64_t. Use int to store the value of _size
-> will cause value truncation.
-> 
-> Signed-off-by: Henry C Chang <henry.cy.chang@gmail.com>
-> ---
->  src/include/interval_set.h |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/src/include/interval_set.h b/src/include/interval_set.h
-> index ae1c7ff..bfc62a9 100644
-> --- a/src/include/interval_set.h
-> +++ b/src/include/interval_set.h
-> @@ -361,7 +361,7 @@ class interval_set {
->  
->    void swap(interval_set<T>& other) {
->      m.swap(other.m);
-> -    int t = _size;
-> +    int64_t t = _size;
->      _size = other._size;
->      other._size = t;
->    }    
-> -- 
-> 1.7.4.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Signed-off-by: Alex Elder <elder@dreamhost.com>
+---
+ fs/ceph/dir.c |   18 +++++++++++++++---
+ 1 files changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index 3eeb976..e58b0d1 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -1104,9 +1104,21 @@ static struct dentry * __d_find_any_alias(struct inode *inode)
+ 	return alias;
+ }
+ 
++/* The following code copied from "fs/dcache.c" */
++static struct dentry * d_find_any_alias(struct inode *inode)
++{
++	struct dentry *de;
++
++	spin_lock(&inode->i_lock);
++	de = __d_find_any_alias(inode);
++	spin_unlock(&inode->i_lock);
++	return de;
++}
++/* End of code copied from "fs/dcache.c" */
++
+ void ceph_dir_set_complete(struct inode *inode)
+ {
+-	struct dentry *dentry = __d_find_any_alias(inode);
++	struct dentry *dentry = d_find_any_alias(inode);
+ 	
+ 	if (dentry && ceph_dentry(dentry)) {
+ 		dout(" marking %p (%p) complete\n", inode, dentry);
+@@ -1116,7 +1128,7 @@ void ceph_dir_set_complete(struct inode *inode)
+ 
+ void ceph_dir_clear_complete(struct inode *inode)
+ {
+-	struct dentry *dentry = __d_find_any_alias(inode);
++	struct dentry *dentry = d_find_any_alias(inode);
+ 
+ 	if (dentry && ceph_dentry(dentry)) {
+ 		dout(" marking %p (%p) NOT complete\n", inode, dentry);
+@@ -1126,7 +1138,7 @@ void ceph_dir_clear_complete(struct inode *inode)
+ 
+ bool ceph_dir_test_complete(struct inode *inode)
+ {
+-	struct dentry *dentry = __d_find_any_alias(inode);
++	struct dentry *dentry = d_find_any_alias(inode);
+ 
+ 	if (dentry && ceph_dentry(dentry))
+ 		return test_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
+-- 
+1.7.5.4
+
