@@ -1,108 +1,45 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: towards a user-mode diagnostic log mechanism
-Date: Fri, 23 Dec 2011 11:04:44 +0100
-Message-ID: <4EF4523C.9030104@widodh.nl>
-References: <4EEFF614.8040207@dreamhost.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Why only support odd number monitors in ceph cluster?
+Date: Fri, 23 Dec 2011 07:48:05 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1112230745010.13105@cobra.newdream.net>
+References: <8512670932FB654F81AF0FEF1BE6D49DABFBE6@WHQBEMAIL1.whq.wistron>
+ <4EF44B13.80301@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:38086 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754069Ab1LWKEZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Dec 2011 05:04:25 -0500
-In-Reply-To: <4EEFF614.8040207@dreamhost.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46278 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751614Ab1LWPsH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Dec 2011 10:48:07 -0500
+In-Reply-To: <4EF44B13.80301@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kampe <mark.kampe@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Eric_YH_Chen@wistron.com, ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com, Alex_KT_Lin@wistron.com
 
-On 12/20/2011 03:42 AM, Mark Kampe wrote:
-> I'd like to keep this ball moving ... as I believe that the
-> limitations of our current logging mechanisms are already
-> making support difficult, and that is about to become worse.
->
+On Fri, 23 Dec 2011, Wido den Hollander wrote:
+> Hi,
+> 
+> On 12/23/2011 08:21 AM, Eric_YH_Chen@wistron.com wrote:
+> > Hi, all:
+> > 
+> >       I am curious about why ceph cluster only support odd number monitors.
+> 
+> It doesn't only support a odd number. A even number of monitors works in
+> theory, but it's recommended to use a odd number to get a majority.
 
-I'll have to agree on that.
+Right.  A bit more detail:
 
-Running a larger cluster with full debugging on is nearly impossible. It 
-puts a lot of load on your systems which could even lead to more trouble.
+Running an even number of monitors means a slightly higher risk of failure 
+than running one less monitor.  For example, if you run 3 monitors, you 
+can tolerate 1 failure (2 is a strict majority).  And you have 3 machines 
+that can fail.  
 
-> As a first step, I'd just like to get opinions on the general
-> requirements we are trying to satisfy, and decisions we have
-> to make along the way.
->
-> Comments?
->
-> I Requirements
->
-> A. Primary Requirements (must have)
-> 1. information captured
-> a. standard: time, sub-system, level, proc/thread
-> b. additional: operation and parameters
-> c. extensible for new operations
-> 2. efficiency
-> a. run time overhead < 1%
-> (I believe this requires delayed flush circular bufferring)
-> b. persistent space O(Gigabytes per node-year)
-> 3. configurability
-> a. capture level per sub-system
-> 4. persistence
-> a. flushed out on process shut-down
-> b. recoverable from user-mode core-dumps
-> 5. presentation
-> a. output can be processed w/grep,less,...
->
-> B. Secondary Requirements (nice to have)
-> 1. ease of use
-> a. compatible with/convertable from existing calls
-> b. run-time definition of new event records
-> 2. configurability
-> a. size/rotation rules per sub-system
-> b. separate in-memory/on-disk capture levels
->
-> II Decisions to be made
->
-> A. Capture Circumstances
-> 1. some subset of procedure calls
-> (I'm opposed to this, but it is an option)
-> 2. explicit event logging calls
->
-> B. Capture Format
-> 1. ASCII text
-> 2. per-event binary format
-> 3. binary header + ASCII text
->
-> C. Synchronization
-> 1. per-process vs per-thread buffers
->
-> D. Flushing
-> 1. last writer flushes vs dedicated thread
-> 2. single- vs double-bufferred output
->
-> E. Available open source candidates
+On the other hand, if you run four, you can still only tolerate 1 failure 
+(3 is a majority but 2 is not).  But then you have 4 machines that can 
+potentially fail, and your risk of 2 dying is slightly higher.
 
-I'd still opt for the ring-buffer where all kinds of information is 
-being dumped in. A separate reader/analyser can get this information out 
-of the ring and write logs of it our do performance counting.
+The difference is risk is probably pretty small for most failure rates, 
+but, generally speaking, odd numbers are slightly better.
 
-Currently there is no statistics information about OSD's as well. From 
-log entries you can also generate statistics, the amount of IOps a 
-specific OSD has to process, the number of PG operations, etc, etc.
-
-I'd still suggest to take a look at how Varnish did this with their 
-varnishlog and varnishncsa tools.
-
-That works for us with 10k req/sec and we can do fully debugging without 
-performance impact.
-
-Just my $2c
-
-Wido
-
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
-
+sage
