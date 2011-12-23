@@ -1,53 +1,91 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: how can I achieve HA with ceph?
-Date: Thu, 22 Dec 2011 16:00:23 -0800
-Message-ID: <CAF3hT9A=iDLWtmY_GsiS49Mi-pDNN1U0Rs3MuJsW93JFDObJ+w@mail.gmail.com>
-References: <CA+o_KftAGMjT8+z1xet7BsPai8UEsQQv074dQExY_WOFrzZAgw@mail.gmail.com>
-	<CAF3hT9C_gMsYSbe7L5KeYGqGkPaDxeNV8bdfD7EZPbKDE8pjQQ@mail.gmail.com>
-	<CA+o_KftLn70adfmD7FGFoVq6YNfOUaFddGdw--9KTsPL12f8pQ@mail.gmail.com>
-	<CAF3hT9BuP7AbSVC89VLngQMrwYztMx-p77Cj3sO_Pu1GTN6ayA@mail.gmail.com>
-	<CA+o_KfsG=_TvQVNJ1HcUcTvntN5gqKCC3eXFhYwZVj3_fF4wRg@mail.gmail.com>
-	<CAF3hT9Bq6Nwan2wF54Gz0OpHWoO9pGJE1h2a-ke6=7wW4wBSrA@mail.gmail.com>
-	<CA+o_KfuigaFGYvHVOk_W-gpTQryheYfc4=9v5nxemUyqhH-GQw@mail.gmail.com>
-	<CAF3hT9AUFiZz01PzE9n8VYK0NJCQBFndKVsiOfAX5-ZNrNw+Og@mail.gmail.com>
-	<CA+o_KfvFnNqhiYuySZnhz7jdhj=MXgpiGqZA+D7Dw+fqZ7VNjA@mail.gmail.com>
+Subject: Re: Bug #1047 reproduced
+Date: Thu, 22 Dec 2011 16:27:14 -0800
+Message-ID: <CAF3hT9BrL8WJbG2cgDADfSZk02HWwi4Q2MgK_yu6fiDSyZrwRg@mail.gmail.com>
+References: <201112010937.37642.a.ott@m-privacy.de>
+	<201112211337.44363.a.ott@m-privacy.de>
+	<CAF3hT9AHa_7WNx+x5qf0iHwmphWu1LLfR-9NUvFjVScZy94JqA@mail.gmail.com>
+	<201112211736.25725.a.ott@m-privacy.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:56372 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:60147 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753446Ab1LWAAY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Dec 2011 19:00:24 -0500
-Received: by iaeh11 with SMTP id h11so14198563iae.19
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Dec 2011 16:00:23 -0800 (PST)
-In-Reply-To: <CA+o_KfvFnNqhiYuySZnhz7jdhj=MXgpiGqZA+D7Dw+fqZ7VNjA@mail.gmail.com>
+	with ESMTP id S1753817Ab1LWA1O convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Dec 2011 19:27:14 -0500
+Received: by iaeh11 with SMTP id h11so14226780iae.19
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Dec 2011 16:27:14 -0800 (PST)
+In-Reply-To: <201112211736.25725.a.ott@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Karoly Horvath <rhswdev@gmail.com>
+To: Amon Ott <a.ott@m-privacy.de>
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, Dec 21, 2011 at 8:43 AM, Karoly Horvath <rhswdev@gmail.com> wrote:
-> On Wed, Dec 21, 2011 at 4:13 PM, Gregory Farnum
->>> By client I assume you mean the kernel driver.. the FS is freezed, so
->>> I cannot unmount (cannot even `shutdown`).. how can I force the client
->>> to reconnect?
+On Wed, Dec 21, 2011 at 8:36 AM, Amon Ott <a.ott@m-privacy.de> wrote:
+> On Wednesday 21 December 2011 wrote Gregory Farnum:
+>> On Wed, Dec 21, 2011 at 4:37 AM, Amon Ott <a.ott@m-privacy.de> wrote=
+:
+>> > On Friday 02 December 2011 wrote Sage Weil:
+>> >> On Fri, 2 Dec 2011, Amon Ott wrote:
+>> >> > On Thursday 01 December 2011 you wrote:
+>> >> > > On all four nodes of my test cluster, MDS crashes with a trac=
+e like
+>> >> > > that in bug #1047. Example and ceph.conf attached. Ceph serve=
+r side
+>> >> > > is from git master, last commit
+>> >> > > ce6572273943ffdca4b7dc5344152d6c35106a2d.
+>> >> > >
+>> >> > > MDS does not start on any node here, it reliably crashes with=
+ that
+>> >> > > assert.
+>> >> >
+>> >> > Does it makes sense for you to keep the cluster in that broken =
+state,
+>> >> > so that we can reproduce that bug or test a potential fix? Othe=
+rwise,
+>> >> > I would recreate the Ceph filesystem to make more tests. I also=
+ have a
+>> >> > full log of one mds from start to crash here.
+>> >>
+>> >> Can you attach the log to #1047 for posterity? =A0I'll take a qui=
+ck look
+>> >> and see if there is any further info to gain from the log. =A0I'm=
+ guessing
+>> >> the actual bug occured before the crash, when the anchor table wa=
+sn't
+>> >> updated properly, but there may be clues here.
+>> >
+>> > Did you find some time to look into this? The bug makes Ceph unusa=
+ble for
+>> > us even with moderate load. All mds instances die with the same as=
+sert,
+>> > the only way to recover in that state is to recreate the complete =
+ceph fs
+>> > and restore backups.
 >>
->> Try a lazy force unmount:
->> umount -lf ceph_mnt_point/
->> And then mount again.
+>> Sage is gone on vacation right now (unless he decides not to be for =
+a
+>> while), but we've been focusing our efforts on the OSDs lately so I
+>> don't think he's looked at it. I'll see if I can carve out some time
+>> tomorrow or Friday, but I can't promise anything.
+>>
+>> Alexandre, can you check this bug and make sure it looks like the sa=
+me
+>> one you reported as #1850?
 >
-> wow, never heard about this, thanks.:)
-> will report with the next mail
->
-> In the meantime I did one test, killing mds+osd+mon on beta,
-> it's jammed in '{0=alpha=up:replay}', after 45 minutes I shut it down...
-> I attached the logs.
+> Thank you for looking into it. The behaviour in #1850 looks quite sim=
+ilar to
+> our bug, apart from the hardlinks. We copy many files here in our tes=
+ts, too.
+> Last time I hit the bug I had really restarted the master mds.
 
-Oh, this is very odd! The MDS goes to sleep while it waits for an
-up-to-date OSDMap, but it never seems to get woken up even though I
-see the message sending in the OSDMap.
-
-So let's try this one more time, but this time also add in "debug
-objecter = 20" to the MDS config...Those logs will include everything
-I need, or nothing will, promise! :)
+Unfortunately there's not enough info in this log either. If you can
+reproduce it with "mds debug =3D 20" and put that log somewhere, it
+ought to be enough to work out what's going on, though. Sorry. :(
 -Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
