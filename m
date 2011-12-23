@@ -1,46 +1,108 @@
-From: Amon Ott <a.ott@m-privacy.de>
-Subject: Re: Bug #1047 reproduced
-Date: Fri, 23 Dec 2011 10:58:16 +0100
-Message-ID: <201112231058.17554.a.ott@m-privacy.de>
-References: <201112010937.37642.a.ott@m-privacy.de> <201112211736.25725.a.ott@m-privacy.de> <CAF3hT9BrL8WJbG2cgDADfSZk02HWwi4Q2MgK_yu6fiDSyZrwRg@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: towards a user-mode diagnostic log mechanism
+Date: Fri, 23 Dec 2011 11:04:44 +0100
+Message-ID: <4EF4523C.9030104@widodh.nl>
+References: <4EEFF614.8040207@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.138.176]:33962 "EHLO www.m-privacy.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756458Ab1LWJ61 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Dec 2011 04:58:27 -0500
-In-Reply-To: <CAF3hT9BrL8WJbG2cgDADfSZk02HWwi4Q2MgK_yu6fiDSyZrwRg@mail.gmail.com>
-Content-Disposition: inline
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:38086 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754069Ab1LWKEZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Dec 2011 05:04:25 -0500
+In-Reply-To: <4EEFF614.8040207@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
+To: Mark Kampe <mark.kampe@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Friday 23 December 2011 wrote Gregory Farnum:
-> Unfortunately there's not enough info in this log either. If you can
-> reproduce it with "mds debug =3D 20" and put that log somewhere, it
-> ought to be enough to work out what's going on, though. Sorry. :(
+On 12/20/2011 03:42 AM, Mark Kampe wrote:
+> I'd like to keep this ball moving ... as I believe that the
+> limitations of our current logging mechanisms are already
+> making support difficult, and that is about to become worse.
+>
 
-Will do that as soon as I can.
+I'll have to agree on that.
 
-Amon Ott
---=20
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Am K=F6llnischen Park 1    Fax: +49 30 24342336
-10179 Berlin             http://www.m-privacy.de
+Running a larger cluster with full debugging on is nearly impossible. It 
+puts a lot of load on your systems which could even lead to more trouble.
 
-Amtsgericht Charlottenburg, HRB 84946
+> As a first step, I'd just like to get opinions on the general
+> requirements we are trying to satisfy, and decisions we have
+> to make along the way.
+>
+> Comments?
+>
+> I Requirements
+>
+> A. Primary Requirements (must have)
+> 1. information captured
+> a. standard: time, sub-system, level, proc/thread
+> b. additional: operation and parameters
+> c. extensible for new operations
+> 2. efficiency
+> a. run time overhead < 1%
+> (I believe this requires delayed flush circular bufferring)
+> b. persistent space O(Gigabytes per node-year)
+> 3. configurability
+> a. capture level per sub-system
+> 4. persistence
+> a. flushed out on process shut-down
+> b. recoverable from user-mode core-dumps
+> 5. presentation
+> a. output can be processed w/grep,less,...
+>
+> B. Secondary Requirements (nice to have)
+> 1. ease of use
+> a. compatible with/convertable from existing calls
+> b. run-time definition of new event records
+> 2. configurability
+> a. size/rotation rules per sub-system
+> b. separate in-memory/on-disk capture levels
+>
+> II Decisions to be made
+>
+> A. Capture Circumstances
+> 1. some subset of procedure calls
+> (I'm opposed to this, but it is an option)
+> 2. explicit event logging calls
+>
+> B. Capture Format
+> 1. ASCII text
+> 2. per-event binary format
+> 3. binary header + ASCII text
+>
+> C. Synchronization
+> 1. per-process vs per-thread buffers
+>
+> D. Flushing
+> 1. last writer flushes vs dedicated thread
+> 2. single- vs double-bufferred output
+>
+> E. Available open source candidates
 
-Gesch=E4ftsf=FChrer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
+I'd still opt for the ring-buffer where all kinds of information is 
+being dumped in. A separate reader/analyser can get this information out 
+of the ring and write logs of it our do performance counting.
 
-GnuPG-Key-ID: 0x2DD3A649
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Currently there is no statistics information about OSD's as well. From 
+log entries you can also generate statistics, the amount of IOps a 
+specific OSD has to process, the number of PG operations, etc, etc.
+
+I'd still suggest to take a look at how Varnish did this with their 
+varnishlog and varnishncsa tools.
+
+That works for us with 10k req/sec and we can do fully debugging without 
+performance impact.
+
+Just my $2c
+
+Wido
+
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
+
