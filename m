@@ -1,53 +1,37 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Some Question Regarding to RBD performance
-Date: Mon, 26 Dec 2011 08:27:54 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1112260819590.3637@cobra.newdream.net>
-References: <CAA9wQNfSH=8ei6Kk8VQ6nWELhL5SV0eXFHv58WkPL4bFQsjtqg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Florian Haas <florian@hastexo.com>
+Subject: Trivial patch to fix init script LSB compliance
+Date: Tue, 27 Dec 2011 11:43:46 +0100
+Message-ID: <1324982627-9520-1-git-send-email-florian@hastexo.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44468 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750730Ab1LZQ1z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Dec 2011 11:27:55 -0500
-In-Reply-To: <CAA9wQNfSH=8ei6Kk8VQ6nWELhL5SV0eXFHv58WkPL4bFQsjtqg@mail.gmail.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:39013 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753369Ab1L0KoF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Dec 2011 05:44:05 -0500
+Received: by eekc4 with SMTP id c4so11561042eek.19
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Dec 2011 02:44:01 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Leander Yu <leander.yu@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Leander,
+Hi everyone,
 
-On Mon, 26 Dec 2011, Leander Yu wrote:
-> Hi all,
-> I have a question regarding to RBD performance. Recently I test RBD in
-> 2 cluster, using dd if=/dev/zero of=/dev/rbd5 bs=4M count=1024
-> oflag=direct. I got 33.4MB/s in one cluster , however got only 6MB/s
-> in the other cluster.
-> 
-> I have confirmed that the network bandwidth is ok. and osd bench shows
-> around 32 ~ 40 MB/s on all OSD. Is this performance normal? if not ,
-> how can I troubleshoot it?
-> I have move journal to ramdisk for testing and get performance boost
-> to 7x MB/s. Does this means the HDD is the bottleneck ?
-> 
-> The other cluster that got 33.4 MB/s , it's osd bench shows around
-> 44MB/s. The major difference between those two cluster is the better
-> performed one use SAS with RAID controller the other use SATA with no
-> RAID control.
+please consider merging the following trivial patch that makes the
+ceph init script return the proper LSB exit code (3) for the status
+action if the service is gracefully stopped, and only return 1 (as
+before) if the service has died and left its PID file hanging around.
 
-If you are using the kernel client, each 4M write is fully synchronous, 
-which means (among other things) that the client is completely idle while 
-the write is being replicated by the OSDs.  This makes the performance 
-very sensitive to the write latency; it's not really testing write 
-throughput.  Your SAS RAID controller is probably doing writeback caching 
-of some kind that keeps the write latency low, while the SATA disks 
-clearly are not.
+Who cares about the exit code? Pacemaker does
+(http://www.clusterlabs.org). Pacemaker is a high-availability
+resource manager that can be used for monitoring and recovering
+resources in-place, and as per a brief discussion in #ceph that I had
+with Greg before the holidays, no such in-place recovery currently
+exists within Ceph itself. Integrating init script based services with
+Pacemaker is trivial if the script complies with the exit codes that
+the LSB spec specifies.
 
-'dd oflag=direct' is probably not the benchmark you want; no application 
-should do a single synchronous IO at a time and expect good throughput.  
-The more interesting number would be steady-state buffered write 
-throughput when you have a file system on top, or something along those 
-lines.
+Feedback on this is much appreciated. Hope this is useful.
 
-sage
+Cheers,
+Florian
+
+[PATCH] init script: be LSB compliant for exit code on status
