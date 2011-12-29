@@ -1,27 +1,37 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 3/3] ceph: enable/disable dentry complete flags via mount
- option
-Date: Thu, 29 Dec 2011 04:11:36 -0500
-Message-ID: <20111229091136.GC5257@infradead.org>
-References: <1325124315-3487-1-git-send-email-sage@newdream.net>
- <1325124315-3487-4-git-send-email-sage@newdream.net>
+From: <Eric_YH_Chen@wistron.com>
+Subject: Ceph based on ext4
+Date: Thu, 29 Dec 2011 17:42:22 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49DB0E5A3@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 173-166-109-252-newengland.hfc.comcastbusiness.net ([173.166.109.252]:37319
-	"EHLO bombadil.infradead.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751829Ab1L2JLh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 29 Dec 2011 04:11:37 -0500
-Content-Disposition: inline
-In-Reply-To: <1325124315-3487-4-git-send-email-sage@newdream.net>
+Received: from twnhumsw5.wistron.com ([220.128.89.25]:63565 "EHLO
+	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752027Ab1L2Jm2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Dec 2011 04:42:28 -0500
+Received: from twnhufe3.whq.wistron (unverified [10.37.31.103]) by TWNHUMSW5.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta197550e65c0a8167315b8@TWNHUMSW5.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Thu, 29 Dec 2011 17:44:28 +0800
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wed, Dec 28, 2011 at 06:05:15PM -0800, Sage Weil wrote:
-> Enable/disable use of the dentry dir 'complete' flag via a mount option.
+Hi, all:
 
-Please add documentation when a user would specify this option.
+    We want to test the stability and performance of ceph with ext4 file
+system.
+    Here is the information from `mount`,  do we set all attributes
+correct?
+	
+    /dev/sda1 on /srv/osd.0 type ext4
+(rw,noatime,nodiratime,errors=remount-ro,data=writeback,user_xattr)
 
+	And from the tutorial at
+http://ceph.newdream.net/wiki/Creating_a_new_file_system
+	We also disable the journal functionality by ` tune2fs -O
+^has_journal /dev/sda1`
+     
+    Any extra comment to get better performance? Thanks!
