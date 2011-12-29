@@ -1,37 +1,41 @@
 From: <Eric_YH_Chen@wistron.com>
-Subject: Ceph based on ext4
-Date: Thu, 29 Dec 2011 17:42:22 +0800
-Message-ID: <8512670932FB654F81AF0FEF1BE6D49DB0E5A3@WHQBEMAIL1.whq.wistron>
+Subject: RE: Hang at 'rbd info <image>'
+Date: Thu, 29 Dec 2011 17:49:47 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49DB0E5B5@WHQBEMAIL1.whq.wistron>
+References: <8512670932FB654F81AF0FEF1BE6D49DA2EE99@WHQBEMAIL1.whq.wistron> <CAORUGqADEE=kGB2jbMs_M__jnLjHU39ONg6eAOro+H40YGYECw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw5.wistron.com ([220.128.89.25]:63565 "EHLO
-	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752027Ab1L2Jm2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Dec 2011 04:42:28 -0500
-Received: from twnhufe3.whq.wistron (unverified [10.37.31.103]) by TWNHUMSW5.wistron.com
- (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta197550e65c0a8167315b8@TWNHUMSW5.wistron.com> for <ceph-devel@vger.kernel.org>;
- Thu, 29 Dec 2011 17:44:28 +0800
+Received: from twnhumsw2.wistron.com ([220.128.89.22]:58788 "EHLO
+	TWNHUMSW2.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751980Ab1L2Jtt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Dec 2011 04:49:49 -0500
 Content-class: urn:content-classes:message
+In-Reply-To: <CAORUGqADEE=kGB2jbMs_M__jnLjHU39ONg6eAOro+H40YGYECw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: tommi.virtanen@dreamhost.com
+Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wistron.com
 
-Hi, all:
-
-    We want to test the stability and performance of ceph with ext4 file
-system.
-    Here is the information from `mount`,  do we set all attributes
-correct?
-	
-    /dev/sda1 on /srv/osd.0 type ext4
-(rw,noatime,nodiratime,errors=remount-ro,data=writeback,user_xattr)
-
-	And from the tutorial at
-http://ceph.newdream.net/wiki/Creating_a_new_file_system
-	We also disable the journal functionality by ` tune2fs -O
-^has_journal /dev/sda1`
-     
-    Any extra comment to get better performance? Thanks!
+SGksIFRvbW1pOg0KDQogICBUaGUgaGVhbHRoIG9mIGNlcGggaXMgJ0hFQUxUSF9PSycuDQoNCiAg
+IERvIHlvdSB3YW50IHRvIHNlZSBhbnkgb3RoZXIgaW5mb3JtYXRpb24gb2YgY2VwaCBjbHVzdGVy
+PyAgDQoNCiAgICBJIGFsc28gdHJpZWQgdGhlc2UgdHdvIGNvbW1hbmQgYnV0IG5vIHVzZS4NCg0K
+ICAgYGNlcGggb3NkIHJlcGFpciAqYA0KICAgYGNlcGggb3NkIHNjcnViICpgDQoNCiAgICBBbmQg
+SSBhbHNvIGNhbm5vdCBtYXAgdGhlIHJiZCBpbWFnZSB0byByYmQgZGV2aWNlLiANCg0KICAgIElz
+IHRoZXJlIGFueSBzb2x1dGlvbiB0byBmaXggaXQ/IEkgY2Fubm90IGFjY2VzcyB0aGUgcmJkIGlt
+YWdlIGFueW1vcmUuDQoNCiAgICBUaGFua3MhDQogICANCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdl
+LS0tLS0NCkZyb206IFRvbW1pIFZpcnRhbmVuIFttYWlsdG86dG9tbWkudmlydGFuZW5AZHJlYW1o
+b3N0LmNvbV0gDQpTZW50OiBUdWVzZGF5LCBEZWNlbWJlciAyMCwgMjAxMSAzOjAyIEFNDQpUbzog
+RXJpYyBZSCBDaGVuL1dIUS9XaXN0cm9uDQpDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc7
+IENocmlzIFlUIEh1YW5nL1dIUS9XaXN0cm9uOyBBbGV4IExlZS9XSFEvV2lzdHJvbg0KU3ViamVj
+dDogUmU6IEhhbmcgYXQgJ3JiZCBpbmZvIDxpbWFnZT4nDQoNCk9uIFN1biwgRGVjIDE4LCAyMDEx
+IGF0IDE5OjMyLCAgPEVyaWNfWUhfQ2hlbkB3aXN0cm9uLmNvbT4gd3JvdGU6DQo+IEhpLCBhbGw6
+DQo+DQo+IMKgwqDCoCBJIG1ldCBhIHNpdHVhdGlvbiB0aGF0IGNlcGggc3lzdGVtIHdvdWxkIGhh
+bmcgYXQg4oCYcmJkIGluZm8gPGltYWdlPi4NCj4g44CA44CAT25seSBjYW4gcmVwcm9kdWNlZCBv
+biBvbmUgaW1hZ2UuDQo+IOOAgOOAgEhvdyBjYW4gSSBrbm93IHdoYXQgaGFwcGVuZWQ/IElzIHRo
+ZXJlIGFueSBsb2cgdGhhdCBJIGNhbiBwcm92aWRlIHRvIHlvdSBmb3IgYW5hbHlzaXM/IFRoYW5r
+cyENCg0KVGhhdCB3b3VsZCBoYXBwZW4gaWYgdGhlIG9iamVjdCB0aGF0IHN0b3JlcyB0aGUgcmJk
+IGltYWdlIGhlYWRlciB3b3VsZA0KYmUgdW5yZWFjaGFibGUuIElzIHlvdXIgY2x1c3RlciBoZWFs
+dGh5ICgiY2VwaCBoZWFsdGgiLCAiY2VwaCAtcyIpPw0K
