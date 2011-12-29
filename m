@@ -1,100 +1,116 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 3/3] ceph: enable/disable dentry complete flags via mount option
-Date: Wed, 28 Dec 2011 18:05:15 -0800
-Message-ID: <1325124315-3487-4-git-send-email-sage@newdream.net>
+Subject: [PATCH 2/3] ceph: take a reference to the dentry in d_find_any_alias()
+Date: Wed, 28 Dec 2011 18:05:14 -0800
+Message-ID: <1325124315-3487-3-git-send-email-sage@newdream.net>
 References: <1325124315-3487-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:41610 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:41608 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750889Ab1L2ChF (ORCPT
+	with ESMTP id S1750874Ab1L2ChF (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Dec 2011 21:37:05 -0500
 In-Reply-To: <1325124315-3487-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@newdream.net>
+Cc: Alex Elder <elder@dreamhost.com>
 
-Enable/disable use of the dentry dir 'complete' flag via a mount option.
+From: Alex Elder <elder@dreamhost.com>
 
-Signed-off-by: Sage Weil <sage@newdream.net>
+The ceph code duplicates __d_find_any_alias(), but it currently
+does not take a reference to the returned dentry as it should.
+Replace the ceph implementation with an exact copy of what's
+found in "fs/dcache.c", and update the callers so they drop
+their reference when they're done with it.
+
+Unfortunately this requires the wholesale copy of the functions
+that implement __dget().  It would be much nicer to just export
+d_find_any_alias() from "fs/dcache.c" instead.
+
+Signed-off-by: Alex Elder <elder@dreamhost.com>
 ---
- fs/ceph/dir.c   |    3 ++-
- fs/ceph/super.c |   14 ++++++++++++++
- fs/ceph/super.h |    1 +
- 3 files changed, 17 insertions(+), 1 deletions(-)
+ fs/ceph/dir.c |   31 +++++++++++++++++++++++++------
+ 1 files changed, 25 insertions(+), 6 deletions(-)
 
 diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index caddb7d..35db035 100644
+index e58b0d1..caddb7d 100644
 --- a/fs/ceph/dir.c
 +++ b/fs/ceph/dir.c
-@@ -1134,7 +1134,8 @@ void ceph_dir_set_complete(struct inode *inode)
+@@ -1091,9 +1091,20 @@ static int ceph_snapdir_d_revalidate(struct dentry *dentry,
+ 	return 1;
+ }
+ 
+-/*
+- * Set/clear/test dir complete flag on the dir's dentry.
+- */
++/* The following code copied from "fs/dcache.c" */
++/* This must be called with d_lock held */
++static inline void __dget_dlock(struct dentry *dentry)
++{
++	dentry->d_count++;
++}
++
++static inline void __dget(struct dentry *dentry)
++{
++	spin_lock(&dentry->d_lock);
++	__dget_dlock(dentry);
++	spin_unlock(&dentry->d_lock);
++}
++
+ static struct dentry * __d_find_any_alias(struct inode *inode)
+ {
+ 	struct dentry *alias;
+@@ -1101,10 +1112,10 @@ static struct dentry * __d_find_any_alias(struct inode *inode)
+ 	if (list_empty(&inode->i_dentry))
+ 		return NULL;
+ 	alias = list_first_entry(&inode->i_dentry, struct dentry, d_alias);
++	__dget(alias);
+ 	return alias;
+ }
+ 
+-/* The following code copied from "fs/dcache.c" */
+ static struct dentry * d_find_any_alias(struct inode *inode)
+ {
+ 	struct dentry *de;
+@@ -1116,6 +1127,9 @@ static struct dentry * d_find_any_alias(struct inode *inode)
+ }
+ /* End of code copied from "fs/dcache.c" */
+ 
++/*
++ * Set/clear/test dir complete flag on the dir's dentry.
++ */
+ void ceph_dir_set_complete(struct inode *inode)
  {
  	struct dentry *dentry = d_find_any_alias(inode);
- 	
--	if (dentry && ceph_dentry(dentry)) {
-+	if (dentry && ceph_dentry(dentry) &&
-+	    ceph_test_mount_opt(ceph_sb_to_client(dentry->d_sb), USEDCACHE)) {
+@@ -1124,6 +1138,7 @@ void ceph_dir_set_complete(struct inode *inode)
  		dout(" marking %p (%p) complete\n", inode, dentry);
  		set_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
  	}
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index b48f15f..3f4e5ad 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -131,6 +131,8 @@ enum {
- 	Opt_rbytes,
- 	Opt_norbytes,
- 	Opt_noasyncreaddir,
-+	Opt_usedcache,
-+	Opt_nousedcache,
- 	Opt_ino32,
- };
++	dput(dentry);
+ }
  
-@@ -152,6 +154,8 @@ static match_table_t fsopt_tokens = {
- 	{Opt_rbytes, "rbytes"},
- 	{Opt_norbytes, "norbytes"},
- 	{Opt_noasyncreaddir, "noasyncreaddir"},
-+	{Opt_usedcache, "usedcache"},
-+	{Opt_nousedcache, "nousedcache"},
- 	{Opt_ino32, "ino32"},
- 	{-1, NULL}
- };
-@@ -231,6 +235,12 @@ static int parse_fsopt_token(char *c, void *private)
- 	case Opt_noasyncreaddir:
- 		fsopt->flags |= CEPH_MOUNT_OPT_NOASYNCREADDIR;
- 		break;
-+	case Opt_usedcache:
-+		fsopt->flags |= CEPH_MOUNT_OPT_USEDCACHE;
-+		break;
-+	case Opt_nousedcache:
-+		fsopt->flags &= ~CEPH_MOUNT_OPT_USEDCACHE;
-+		break;
- 	case Opt_ino32:
- 		fsopt->flags |= CEPH_MOUNT_OPT_INO32;
- 		break;
-@@ -377,6 +387,10 @@ static int ceph_show_options(struct seq_file *m, struct vfsmount *mnt)
- 		seq_puts(m, ",norbytes");
- 	if (fsopt->flags & CEPH_MOUNT_OPT_NOASYNCREADDIR)
- 		seq_puts(m, ",noasyncreaddir");
-+	if (fsopt->flags & CEPH_MOUNT_OPT_USEDCACHE)
-+		seq_puts(m, ",usedcache");
-+	else
-+		seq_puts(m, ",nousedcache");
+ void ceph_dir_clear_complete(struct inode *inode)
+@@ -1134,15 +1149,19 @@ void ceph_dir_clear_complete(struct inode *inode)
+ 		dout(" marking %p (%p) NOT complete\n", inode, dentry);
+ 		clear_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
+ 	}
++	dput(dentry);
+ }
  
- 	if (fsopt->wsize)
- 		seq_printf(m, ",wsize=%d", fsopt->wsize);
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index edcbf37..9270d9d 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -28,6 +28,7 @@
- #define CEPH_MOUNT_OPT_RBYTES          (1<<5) /* dir st_bytes = rbytes */
- #define CEPH_MOUNT_OPT_NOASYNCREADDIR  (1<<7) /* no dcache readdir */
- #define CEPH_MOUNT_OPT_INO32           (1<<8) /* 32 bit inos */
-+#define CEPH_MOUNT_OPT_USEDCACHE       (1<<9)
+ bool ceph_dir_test_complete(struct inode *inode)
+ {
+ 	struct dentry *dentry = d_find_any_alias(inode);
++	bool ret = false;
  
- #define CEPH_MOUNT_OPT_DEFAULT    (CEPH_MOUNT_OPT_RBYTES)
+ 	if (dentry && ceph_dentry(dentry))
+-		return test_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
+-	return false;
++		ret = test_bit(CEPH_D_COMPLETE, &ceph_dentry(dentry)->flags);
++	dput(dentry);
++
++	return ret;
+ }
  
+ /*
 -- 
 1.7.2.5
 
