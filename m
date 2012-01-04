@@ -1,128 +1,119 @@
-From: =?UTF-8?B?SmVucyBSZWhww7ZobGVy?= <jens.rehpoehler@filoo.de>
-Subject: Re: ceph -w output
-Date: Wed, 04 Jan 2012 12:51:08 +0100
-Message-ID: <4F043D2C.9090306@filoo.de>
-References: <4EE654A3.1040309@filoo.de> <CACLRD_3n6rCJNFVgmWesDjP3P7DY0bfZr_XGTtx9MC=r29uYRg@mail.gmail.com> <4EE8601F.90206@filoo.de> <CAORUGqB4ebxyumBdAjA=HcPyPhznfaFX43seoiNQVi32Rs8onw@mail.gmail.com> <4EE9C1AB.2010403@filoo.de> <CACLRD_3v3t-6nrkEGjiKgpcy-ou_4FpSiRTYA_-tJiguV=dvEw@mail.gmail.com> <4EEB2813.6060109@filoo.de>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: First work on RBD storage pool support in libvirt
+Date: Wed, 04 Jan 2012 20:30:09 +0100
+Message-ID: <4F04A8C1.1090205@widodh.nl>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigAA9CD0C79BB1E9D8BDAE94BC"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-6.de-punkt.de ([93.190.64.36]:49734 "EHLO
-	mail-6.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752785Ab2ADLvR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jan 2012 06:51:17 -0500
-In-Reply-To: <4EEB2813.6060109@filoo.de>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:37561 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750805Ab2ADTaM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jan 2012 14:30:12 -0500
+Received: from [IPv6:2001:7b8:3cb:0:219:d2ff:fec0:b754] (unknown [IPv6:2001:7b8:3cb:0:219:d2ff:fec0:b754])
+	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPA id 8888F3FC11
+	for <ceph-devel@vger.kernel.org>; Wed,  4 Jan 2012 20:30:10 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigAA9CD0C79BB1E9D8BDAE94BC
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-Hi Sam,
+The last few days I've been working on a storage backend driver for 
+libvirt which supports RBD.
 
-just to inform you: after upgrade to the lastest master (ceph version
-0.39-210-gdf84594 (commit:df84594f205bb37d3b062b5b3b9cfd224e6c57d2)
+This has been in the tracker for a while: 
+http://tracker.newdream.net/issues/1422
 
-the pgs in "creating" state disappeared. The bugfix seems to work.
+My current work can be found at: http://www.widodh.nl/git/libvirt.git in 
+the 'rbd' branch.
 
-Thx again
+I realize it is far from done, a lot of work has to be done, but I'd 
+like to discuss some things first before making some decisions I might 
+later regret.
 
-Jens
+My idea was to discuss it here first and after a few iterations get it 
+reviewed by the libvirt guys.
 
-Am 16.12.2011 12:14, schrieb Jens Rehp=C3=B6hler:
-> Hi Sam,
->
-> thanks for the answers.
->
-> We began with osd3 und osd4 for internal reasons. osd1 to 3 will be
-> addes in near future.
->
-> I will wait until the patch is in the stables branch.
->
-> Thanks again
->
-> Jens
->
->
-> Am 15.12.2011 18:35, schrieb Samuel Just:
->> Sorry for the delay.  It looks like you hit a corner case in our crush=
+Let me start with the XML:
 
->> implementation.  The short version is that this bug got fixed last
->> week in commit 14f8f00e579083db542568a60cd23d50055c92a3.
->>
->> The long version is that you have osd.3 and osd.4, but not osd.0,
->> osd.1, or osd.2.  The pgs stuck in creating are the ones mapped
->> specifically to osds 0, 1, and 2.  A pg ending in p# (like pg1.0p0) is=
+<pool type='rbd'>
+   <name>cephclusterdev</name>
+   <source>
+	  <name>myrbdpool</name>
+     <host name='[2a00:f10:11b:cef0:230:48ff:fed3:b086]' port='6789' 
+prefer_ipv6='true'/>
+     <auth type='cephx' id='admin' 
+secret='a313871d-864a-423c-9765-5374707565e1'/>
+   </source>
+</pool>
 
->> supposed to map to osd.0 if possible.  With the above patch, those pgs=
+A few things here:
 
->> should remap to available osds.
->>
->> -Sam
->>
->> On Thu, Dec 15, 2011 at 1:45 AM, Jens Rehp=C3=B6hler
->> <jens.rehpoehler@filoo.de> wrote:
->>> Am 14.12.2011 17:43, schrieb Tommi Virtanen:
->>>> On Wed, Dec 14, 2011 at 00:36, Jens Rehp=C3=B6hler <jens.rehpoehler@=
-filoo.de> wrote:
->>>>> Attached you will find the output you asked for. Is there any limit=
-ation
->>>>> on the amount of pools ? We create
->>>>> pools for every customer and store their VM images in that pools. S=
-o we
->>>>> will create a lot of pools over time.
->>>> Each pool gets its own set of PGs (Placement Groups). An OSD that
->>>> manages too many PGs will use a lot of RAM. What is "too many" is
->>>> debatable, and really up to benchmarks, but considering we recommend=
+* I'm leaning on the secretDriver from libvirt for storing the actual 
+cephx key. Should I also store the id in there or keep that in the pool 
+declaration?
 
->>>> about 100 PGs/OSD as a starting point, you probably don't want to go=
+* prefer_ipv6? I'm a IPv6 guy, I try to get as much over IPv6 as I can. 
+Since Ceph doesn't support dual-stack you have to explicitly enable 
+IPv6. I did not want to let librados read a ceph.conf from outside 
+libvirt I added this variable. Not the fanciest way I think, but it 
+could serve other future storage drivers in libvirt
 
->>>> two orders of magnitude above that.
->>> Ok .... that will serve our needs. Remains only the "creating" questi=
-on.
->>>
->>> Any answers to that ?
->>>
->>> Thanks a lot !
->>>
->>> Jens
->>>
+* How should we pass other configuration options? I want to stay away 
+from the ceph.conf as far as possible. Imho a user should be able to 
+define a XML and get it all up and running. You will also run into 
+apparmor/SELinux on systems, so libvirt won't have permission to read 
+files everywhere you want it to. I also thinks the libvirt guys want to 
+keep everything as generic as possible. In the future we might see more 
+storage backends which have almost the same properties as RBD. How do we 
+pass extra config options?
 
 
---=20
-mit freundlichen Gr=C3=BCssen
+That's the XML file for declaring the pool.
 
-Jens Rehp=C3=B6hler
+The pool itself uses librados/librbd instead of invoking the 'rbd' command.
 
-----------------------------------------------------------------------
-Filoo GmbH
-Moltkestr. 25a
-33330 G=C3=BCtersloh
-HRB4355 AG G=C3=BCtersloh
+The other storage backends do invoke external binaries, but that didn't 
+seem the right way here since we have the luxury of C-API's.
 
-Gesch=C3=A4ftsf=C3=BChrer: S.Grewing | J.Rehp=C3=B6hler | C.Kunz
-Telefon: +49 5241 8673012 | Mobil: +49 151 54645798
-Hotline: 07000-3378658 (14 Ct/min) Fax: +49 5241 8673020
+I'm aware of the fact that a lot of memory handling and cleaning won't 
+be as it should be. I'm fairly new to C, so I'll make mistakes here and 
+there.
+
+The current driver is however focused on Qemu/KVM, since that is 
+currently the only virtualization technique which supports RBD.
+
+This exposes another problem. Then you do a "dumpxml" it expects a 
+target path which is up until now an absolute path to a file or block 
+device.
+
+Recently disks with the type 'network' were introduced for Sheepdog and 
+RBD, but attaching a 'network' volume to a domain is currently not 
+possible with the XML schemes. I'm thinking about a generic way to 
+attach network volumes to a domain.
+
+Another feature I'd like to add in the future is managing kernel RBD. We 
+could set up RBD for the user and mapping and unmapping devices on 
+demand for virtual machines.
+
+The 'rbd' binary does this mapping, but that is done in the binary 
+itself and not by librbd. Would it be a smart move to add a map() and 
+unmap() method to librbd?
+
+The last thing I'm thinking about is the spare allocation of the RBD 
+images. Right now both 'allocation' and 'capacity' are set to the 
+virtual size of the RBD image. rbd_stat() does not report the actual 
+size of the image, it only reports the virtual size of the image. Is 
+there a way to figure out how big a RBD image actually is?
 
 
+My plan is to add RBD support to CloudStack after the libvirt 
+integration has finished. CloudStack heavily relies on the storage pools 
+of libvirt, so adding RBD support to CloudStack depends on libvirt.
 
---------------enigAA9CD0C79BB1E9D8BDAE94BC
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Feedback is welcome on this!
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+Thanks,
 
-iEYEARECAAYFAk8EPTIACgkQrXbD/qaJ+dPS1wCfXS0ALL7Try4nZkbFP2kdheva
-IoMAni7PB9WL00J+ejwpm3I1PBYxxJH+
-=ZNDF
------END PGP SIGNATURE-----
-
---------------enigAA9CD0C79BB1E9D8BDAE94BC--
+Wido
