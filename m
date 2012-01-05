@@ -1,47 +1,37 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 0/2] Add resource agents to debian build, trivial C&P
- error
-Date: Thu, 5 Jan 2012 13:47:21 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201051346420.2101@cobra.newdream.net>
-References: <1325799212-14675-1-git-send-email-florian@hastexo.com>
+From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
+Subject: Re: [PATCH 0/2] Add Ceph integration with OCF-compliant HA resource managers
+Date: Fri, 06 Jan 2012 00:07:14 +0100
+Message-ID: <1392105.DlScea8uhi@mranderson>
+References: <1325188682-9518-1-git-send-email-florian@hastexo.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34466 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932376Ab2AEVrW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jan 2012 16:47:22 -0500
-In-Reply-To: <1325799212-14675-1-git-send-email-florian@hastexo.com>
+Received: from mail.ki.iif.hu ([193.6.222.241]:63507 "EHLO mail.ki.iif.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757717Ab2AEXNz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 5 Jan 2012 18:13:55 -0500
+In-Reply-To: <1325188682-9518-1-git-send-email-florian@hastexo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Florian Haas <florian@hastexo.com>
-Cc: ceph-devel@vger.kernel.org, gcs@debian.hu
+Cc: ceph-devel@vger.kernel.org
 
-Applied, thanks!
+On 2011. December 29. 20:58:00 Florian Haas wrote:
+> please consider reviewing the following patches. These add
+> OCF-compliant cluster resource agent functionality to Ceph, allowing
+> MDS, OSD and MON to run as cluster resources under compliant managers
+> (such as Pacemaker, http://www.clusterlabs.org).
 
-Lazslo, let me know if anything is amiss with the Debian bits.
+Nice work, however, I don't really see the point of running Ceph in a HA 
+cluster. If you have more than one machine, then why not deploy Ceph as an 
+active-active (Ceph) cluster? If you want an active-backup cluster, then why 
+use Ceph?
 
-Thanks!
-sage
+There might be situations however, where this feature can come handy, although 
+I can't think of any right now. Can you sketch up one?
+
+-- 
+cc
 
 
-
-On Thu, 5 Jan 2012, Florian Haas wrote:
-
-> Hi,
-> 
-> please consider two follow-up patches to the OCF resource agents: the
-> first adds them to the Debian build, as a separate package
-> "ceph-resource-agents" that depends on resource-agents, the second
-> fixes a trivial (and embarassing, however harmless) cut and paste
-> error. Thanks!
-> 
-> Cheers,
-> Florian
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
