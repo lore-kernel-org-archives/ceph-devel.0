@@ -1,55 +1,72 @@
-From: Ian Campbell <Ian.Campbell@citrix.com>
-Subject: Re: [PATCH 5/6] net: add paged frag destructor support to
- kernel_sendpage.
-Date: Thu, 5 Jan 2012 20:04:34 +0000
-Message-ID: <1325793874.29084.25.camel@dagon.hellion.org.uk>
-References: <1325783399.25206.413.camel@zakaz.uk.xensource.com>
-	 <1325783624-14601-5-git-send-email-ian.campbell@citrix.com>
-	 <20120105.141522.1303730212186060591.davem@davemloft.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20120105.141522.1303730212186060591.davem@davemloft.net>
-Sender: netdev-owner@vger.kernel.org
-To: David Miller <davem@davemloft.net>
-Cc: "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "eric.dumazet@gmail.com" <eric.dumazet@gmail.com>, "kuznet@ms2.inr.ac.ru" <kuznet@ms2.inr.ac.ru>, "pekkas@netcore.fi" <pekkas@netcore.fi>, "jmorris@namei.org" <jmorris@namei.org>, "yoshfuji@linux-ipv6.org" <yoshfuji@linux-ipv6.org>, "kaber@trash.net" <kaber@trash.net>, "Trond.Myklebust@netapp.com" <Trond.Myklebust@netapp.com>, "gregkh@suse.de" <gregkh@suse.de>, "drbd-user@lists.linbit.com" <drbd-user@lists.linbit.com>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "cluster-devel@redhat.com" <cluster-devel@redhat.com>, "ocfs2-devel@oss.oracle.com" <ocfs2-devel@oss.oracle.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "rds-devel@oss.oracle.com" <rds-devel@oss.oracle.com>, "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Florian Haas <florian@hastexo.com>
+Subject: [PATCH 1/2] debian: build ceph-resource-agents
+Date: Thu,  5 Jan 2012 22:33:31 +0100
+Message-ID: <1325799212-14675-2-git-send-email-florian@hastexo.com>
+References: <1325799212-14675-1-git-send-email-florian@hastexo.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:61060 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758211Ab2AEVdt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jan 2012 16:33:49 -0500
+Received: by eekc4 with SMTP id c4so668765eek.19
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Jan 2012 13:33:48 -0800 (PST)
+In-Reply-To: <1325799212-14675-1-git-send-email-florian@hastexo.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Florian Haas <florian@hastexo.com>
 
-On Thu, 2012-01-05 at 19:15 +0000, David Miller wrote:
-> From: Ian Campbell <ian.campbell@citrix.com>
-> Date: Thu, 5 Jan 2012 17:13:43 +0000
-> 
-> > -static ssize_t do_tcp_sendpages(struct sock *sk, struct page **pages, int poffset,
-> > +static ssize_t do_tcp_sendpages(struct sock *sk,
-> > +				struct page **pages,
-> > +				struct skb_frag_destructor **destructors,
-> > +				int poffset,
-> >  			 size_t psize, int flags)
-> >  {
-> >  	struct tcp_sock *tp = tcp_sk(sk);
-> 
-> An array of destructors is madness, and the one call site that specifies this
-> passes an address of a single entry.
+---
+ debian/ceph-resource-agents.install |    1 +
+ debian/control                      |   13 +++++++++++++
+ debian/rules                        |    2 ++
+ 3 files changed, 16 insertions(+), 0 deletions(-)
+ create mode 100644 debian/ceph-resource-agents.install
 
-I figured it was easy enough to accommodate the multiple destructor case
-but you are right that is overkill given the current (and realistically,
-expected) usage, I'll change that for the next round.
+diff --git a/debian/ceph-resource-agents.install b/debian/ceph-resource-agents.install
+new file mode 100644
+index 0000000..30843f6
+--- /dev/null
++++ b/debian/ceph-resource-agents.install
+@@ -0,0 +1 @@
++usr/lib/ocf/resource.d/ceph/*
+diff --git a/debian/control b/debian/control
+index e8c4d30..0f57ad3 100644
+--- a/debian/control
++++ b/debian/control
+@@ -112,6 +112,19 @@ Description: debugging symbols for ceph-common
+  .
+  This package contains the debugging symbols for ceph-common.
+ 
++Package: ceph-resource-agents
++Architecture: linux-any
++Recommends: pacemaker
++Priority: extra
++Depends: ceph (= ${binary:Version}), ${misc:Depends}, resource-agents
++Description: OCF-compliant resource agents for Ceph
++ Ceph is a distributed storage and network file system designed to provide
++ excellent performance, reliability, and scalability.
++ .
++ This package contains the resource agents (RAs) which integrate
++ Ceph with OCF-compliant cluster resource managers,
++ such as Pacemaker.
++
+ Package: librados2
+ Conflicts: librados, librados1
+ Replaces: librados, librados1
+diff --git a/debian/rules b/debian/rules
+index 4f3fe62..0bc594a 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -20,6 +20,8 @@ endif
+ 
+ export DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+ 
++extraopts += --with-ocf
++
+ ifeq ($(DEB_HOST_ARCH), armel)
+   # armel supports ARMv4t or above instructions sets.
+   # libatomic-ops is only usable with Ceph for ARMv6 or above.
+-- 
+1.7.5.4
 
-(that's assuming we don't end up with some scheme where the struct page
-* is in the destructor struct like I was investigating previously to
-alleviate the frag size overhead. I guess this illustrates nicely why
-that approach got ugly: these array propagate all the way up the call
-chain if you do that)
-
-> This also would never even have to occur if you put the destructor inside of
-> struct page instead.
-> 
-> Finally, except for the skb_shared_info() layout optimization in patch #1 which
-> I alreayd applied, this stuff is not baked enough for the 3.3 merge window.
-
-Sure thing, I should have made it clear in my intro mail that I was
-aiming for 3.4.
-
-Thanks,
-Ian
