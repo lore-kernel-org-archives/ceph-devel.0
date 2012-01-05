@@ -1,48 +1,47 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: [PATCH 2/2] OCF RA: fix variable name
-Date: Thu,  5 Jan 2012 22:33:32 +0100
-Message-ID: <1325799212-14675-3-git-send-email-florian@hastexo.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH 0/2] Add resource agents to debian build, trivial C&P
+ error
+Date: Thu, 5 Jan 2012 13:47:21 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201051346420.2101@cobra.newdream.net>
 References: <1325799212-14675-1-git-send-email-florian@hastexo.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:44884 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758215Ab2AEVdu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jan 2012 16:33:50 -0500
-Received: by mail-ee0-f46.google.com with SMTP id c4so668754eek.19
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jan 2012 13:33:50 -0800 (PST)
+Received: from cobra.newdream.net ([66.33.216.30]:34466 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932376Ab2AEVrW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jan 2012 16:47:22 -0500
 In-Reply-To: <1325799212-14675-1-git-send-email-florian@hastexo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Florian Haas <florian@hastexo.com>
+To: Florian Haas <florian@hastexo.com>
+Cc: ceph-devel@vger.kernel.org, gcs@debian.hu
 
----
- src/ocf/ceph.in |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+Applied, thanks!
 
-diff --git a/src/ocf/ceph.in b/src/ocf/ceph.in
-index 9db1bc9..9448a29 100644
---- a/src/ocf/ceph.in
-+++ b/src/ocf/ceph.in
-@@ -16,15 +16,15 @@ ceph_meta_data() {
-     case $__SCRIPT_NAME in
- 	"osd")
- 	    longdesc="Wraps the ceph init script to provide an OCF resource agent that manages and monitors the Ceph OSD service."
--	    longdesc="Manages a Ceph OSD instance."
-+	    shortdesc="Manages a Ceph OSD instance."
- 	    ;;
- 	"mds")
- 	    longdesc="Wraps the ceph init script to provide an OCF resource agent that manages and monitors the Ceph MDS service."
--	    longdesc="Manages a Ceph MDS instance."
-+	    shortdesc="Manages a Ceph MDS instance."
- 	    ;;
- 	"mon")
- 	    longdesc="Wraps the ceph init script to provide an OCF resource agent that manages and monitors the Ceph MON service."
--	    longdesc="Manages a Ceph MON instance."
-+	    shortdesc="Manages a Ceph MON instance."
- 	    ;;
-     esac
-     
--- 
-1.7.5.4
+Lazslo, let me know if anything is amiss with the Debian bits.
 
+Thanks!
+sage
+
+
+
+On Thu, 5 Jan 2012, Florian Haas wrote:
+
+> Hi,
+> 
+> please consider two follow-up patches to the OCF resource agents: the
+> first adds them to the Debian build, as a separate package
+> "ceph-resource-agents" that depends on resource-agents, the second
+> fixes a trivial (and embarassing, however harmless) cut and paste
+> error. Thanks!
+> 
+> Cheers,
+> Florian
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
