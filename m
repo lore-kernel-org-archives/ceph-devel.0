@@ -1,91 +1,67 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Re: [PATCH 0/2] Add Ceph integration with OCF-compliant HA resource managers
-Date: Fri, 6 Jan 2012 20:00:51 +0100
-Message-ID: <CAPUexz8+300nFSYT8MgUVATeyJfaPWXLujj+Cwi73yYfOHjyXA@mail.gmail.com>
-References: <1325188682-9518-1-git-send-email-florian@hastexo.com>
-	<1392105.DlScea8uhi@mranderson>
+From: Mark Kampe <mark.kampe@dreamhost.com>
+Subject: Re: towards a user-mode diagnostic log mechanism
+Date: Fri, 06 Jan 2012 17:46:32 -0800
+Message-ID: <4F07A3F8.8000407@dreamhost.com>
+References: <4EEFF614.8040207@dreamhost.com> <CA+qbEUNvLL0pui+XOr5W2m6dmBCxg8d4ZobrAnXV=wTQ=7YCFw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:50866 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756639Ab2AFTAw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2012 14:00:52 -0500
-Received: by qats34 with SMTP id s34so892195qat.19
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Jan 2012 11:00:51 -0800 (PST)
-In-Reply-To: <1392105.DlScea8uhi@mranderson>
+Received: from mail.hq.newdream.net ([66.33.206.127]:52323 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759224Ab2AGBqc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2012 20:46:32 -0500
+In-Reply-To: <CA+qbEUNvLL0pui+XOr5W2m6dmBCxg8d4ZobrAnXV=wTQ=7YCFw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Colin McCabe <cmccabe@alumni.cmu.edu>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Szabolcs,
+On 01/05/12 20:09, Colin McCabe wrote:
 
-2012/1/6 Sz=C3=A9kelyi Szabolcs <szekelyi@niif.hu>:
-> On 2011. December 29. 20:58:00 Florian Haas wrote:
->> please consider reviewing the following patches. These add
->> OCF-compliant cluster resource agent functionality to Ceph, allowing
->> MDS, OSD and MON to run as cluster resources under compliant manager=
-s
->> (such as Pacemaker, http://www.clusterlabs.org).
+> Getting the system time is a surprisingly expensive operation, and
+> this poses a problem for logging system designers.  You can use the
+> rdtsc CPU instruction, but unfortunately on some architectures CPU
+> frequency scaling makes it very inaccurate.  Even when it is accurate,
+> it's not synchronized between multiple CPUs.
 >
-> Nice work, however, I don't really see the point of running Ceph in a=
- HA
-> cluster. If you have more than one machine, then why not deploy Ceph =
-as an
-> active-active (Ceph) cluster? If you want an active-backup cluster, t=
-hen why
-> use Ceph?
+> Another option is to without time for most messages and just have a
+> periodic timestamp that gets injected every so often-- perhaps every
+> second, for example.
 
-What makes you think that Pacemaker doesn't support active/active?
+I agree it needs to be cheap ... but my experience with
+debugging problems in this sort of system suggests that
+we need the finest grained timestamps we can get
+(on every single message).
 
-> There might be situations however, where this feature can come handy,=
- although
-> I can't think of any right now. Can you sketch up one?
+Even though the clocks on different nodes are not that
+closely synchronized, computing the relative offsets
+from initial transactions isn't hard ... and then it
+becomes possible to construct a total ordering of
+events with accurate timings.
 
-As far as I'm informed, there's currently no "official" method of
-recovering Ceph daemons in place when they die. And I suppose (correct
-me if I'm wrong) that there would be two ways of achieving that.
+> Pantheios and log4cpp are two potential candidates.  I don't know that
+> much about either, unfortunately.
 
-1. systemd integration. systemd, via Restart=3Don-failure (or maybe eve=
-n
-Restart=3Dalways) in a .service definition, could recover a failed
-daemon. As far as I can see, such service definitions don't exist for
-any of the ceph daemons, and systemd is not exactly my home turf, so I
-can't really contribute to ceph/systemd integration. That being said,
-systemd is currently far from ubiquitous on most platforms, and
-specifically in the Debian/Ubuntu corner I wonder if we're going to
-see widespread systemd integration anytime soon. (It still would be
-cool to have, needless to say.)
+Good suggestions.  I am also looking at varnish (suggested by Wido
+den Hollander) which does logging in a shared memory segment from
+which external processes can save it (or not).  What was (for me)
+a new idea here is the clean decoupling of in-memory event capture
+from on-disk persistence and log rotation.  After I thought about
+it for a few minutes, I concluded it had many nice consequences.
 
-2. Pacemaker integration. Pacemaker has the ability of recovering
-daemons in-place via its monitor operations and automatic resource
-recovery, and has no systemd dependency (it doesn't need to interface
-with any of the init daemons for resource management, really).
-Pacemaker is available across all Linux distros, today.
+> Honestly, I feel like logging is something that you will end up
+> customizing pretty extensively to suit the needs of your application.
+> But perhaps it's worth checking out what these libraries provide--
+> especially in terms of efficiency.
 
-Pacemaker integration has an added benefit: since Pacemaker is aware
-of the services in a cluster, we can always tell the cluster, i want
-this many mon instances, or this many OSDs, and Pacemaker can ensure
-exactly that. Pacemaker is also unique among cluster managers that it
-supports clones, a configuration facility that comes in very handy for
-Ceph daemon management.
+I agree that the data captured is going to be something we hone
+based on experience.  I am (for now) most concerned with the
+mechanism ... because I don't want to start making big investments
+in instrumentation until we have a good mechanism, around which
+we can fix the APIs that instrumentation will use.
 
-Pacemaker (or more specifically its underlying
-communications/messaging layer) is, obviously, not without
-limitations. Specifically, most people deploy clusters of less than 10
-nodes in size, with 32 nodes in one cluster membership being the
-current maximum that any QA/QE organization frequently tests for
-reliability. But still, say a 20-node Pacemaker cluster, where 8 nodes
-hold RADOS storage and the other 12 are hypervisor hosts consuming the
-storage via libvirt/RBD -- such a thing can still manage an ample
-number of Terabytes worth of storage, and host a pretty large array of
-virtual machines, don't you think?
+I'll try to review the suggested candidates and describe the
+mechanisms and advantages of each in another two weeks.
 
-Cheers,
-=46lorian
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thank you very much for the feedback.
