@@ -1,67 +1,83 @@
-From: Mark Kampe <mark.kampe@dreamhost.com>
-Subject: Re: towards a user-mode diagnostic log mechanism
-Date: Fri, 06 Jan 2012 17:46:32 -0800
-Message-ID: <4F07A3F8.8000407@dreamhost.com>
-References: <4EEFF614.8040207@dreamhost.com> <CA+qbEUNvLL0pui+XOr5W2m6dmBCxg8d4ZobrAnXV=wTQ=7YCFw@mail.gmail.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: questions about radosgw
+Date: Sat, 7 Jan 2012 11:10:15 +0800
+Message-ID: <CABAwU-Y-h+1Yez49wsYzNnDF_=KLdMQg6osY1XHi2NHTSZDRhw@mail.gmail.com>
+References: <CABAwU-ZVOzWBH1ethSuCFmNODC9bN3QPO7DMj3Y8EwP5tM3xjA@mail.gmail.com>
+	<4F05AE63.8080302@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:52323 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759224Ab2AGBqc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2012 20:46:32 -0500
-In-Reply-To: <CA+qbEUNvLL0pui+XOr5W2m6dmBCxg8d4ZobrAnXV=wTQ=7YCFw@mail.gmail.com>
+Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:46946 "EHLO
+	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1759377Ab2AGDKR convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 6 Jan 2012 22:10:17 -0500
+Received: by obcwo16 with SMTP id wo16so2590908obc.19
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Jan 2012 19:10:16 -0800 (PST)
+In-Reply-To: <4F05AE63.8080302@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Colin McCabe <cmccabe@alumni.cmu.edu>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
-On 01/05/12 20:09, Colin McCabe wrote:
+hi,wido
+I have an idea, why not use radosgw+fs to balance the workload?
+but i can not successfully deploy it.
+I really want to know whether radosgw+fs works?
+If so, how about the performance between radosgw+fs and radosgw+rados?
 
-> Getting the system time is a surprisingly expensive operation, and
-> this poses a problem for logging system designers.  You can use the
-> rdtsc CPU instruction, but unfortunately on some architectures CPU
-> frequency scaling makes it very inaccurate.  Even when it is accurate,
-> it's not synchronized between multiple CPUs.
+thanks!
+
+2012/1/5 Wido den Hollander <wido@widodh.nl>:
+> Hi,
 >
-> Another option is to without time for most messages and just have a
-> periodic timestamp that gets injected every so often-- perhaps every
-> second, for example.
+>
+> On 01/05/2012 12:48 PM, huang jun wrote:
+>>
+>> hi,all
+>> I'am using the s3+radosgw, there are some questions confused me very=
+ much:
+>> first) An object's size is 400MB, then the =A0whole object will stor=
+ed
+>> in OSDs as one big single object, but not striped into 4MB objects. =
+so
+>> how can we got workload banlance if we want to store big objects and
+>> small ones?
+>
+>
+> That is correct, RADOS nor the RADOS gateway stripes objects.
+>
+> You will get workload balance if you have a (almost) even spread of w=
+orkload
+> over your different objects.
+>
+> The dev's might shed some more light on this.
+>
+>
+>> second) Can we change the number of pgs in a pool that created by S3
+>> clients or just using rados commands?
+>
+>
+> As far as I know you can't do this through the S3 clients but only wi=
+th the
+> rados commands. I also would find it rather weird if you could do thi=
+s as a
+> client.
+>
+> Wido
+>
+>>
+>> thanks
+>>
+>
 
-I agree it needs to be cheap ... but my experience with
-debugging problems in this sort of system suggests that
-we need the finest grained timestamps we can get
-(on every single message).
 
-Even though the clocks on different nodes are not that
-closely synchronized, computing the relative offsets
-from initial transactions isn't hard ... and then it
-becomes possible to construct a total ordering of
-events with accurate timings.
 
-> Pantheios and log4cpp are two potential candidates.  I don't know that
-> much about either, unfortunately.
-
-Good suggestions.  I am also looking at varnish (suggested by Wido
-den Hollander) which does logging in a shared memory segment from
-which external processes can save it (or not).  What was (for me)
-a new idea here is the clean decoupling of in-memory event capture
-from on-disk persistence and log rotation.  After I thought about
-it for a few minutes, I concluded it had many nice consequences.
-
-> Honestly, I feel like logging is something that you will end up
-> customizing pretty extensively to suit the needs of your application.
-> But perhaps it's worth checking out what these libraries provide--
-> especially in terms of efficiency.
-
-I agree that the data captured is going to be something we hone
-based on experience.  I am (for now) most concerned with the
-mechanism ... because I don't want to start making big investments
-in instrumentation until we have a good mechanism, around which
-we can fix the APIs that instrumentation will use.
-
-I'll try to review the suggested candidates and describe the
-mechanisms and advantages of each in another two weeks.
-
-Thank you very much for the feedback.
+--=20
+huangjun
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
