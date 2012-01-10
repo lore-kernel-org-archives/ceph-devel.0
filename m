@@ -1,79 +1,76 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: [PATCH]: set up rbd snapshot handling
-Date: Tue, 10 Jan 2012 12:01:05 -0800
-Message-ID: <CAF3hT9Cu0BZQfrgCpBRRaPHyfSy3V-A=jJLe3qGr4UoFMcniOQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Subject: Re: .rgw expand number of pg's
+Date: Tue, 10 Jan 2012 22:27:43 +0100
+Message-ID: <-5608777025883579446@unknownmsgid>
+References: <CAMwB3ThYa0A7iOBNXETbJz5GV29o2u=LKZadvq=yfhT3tdDZ-Q@mail.gmail.com>
+ <6752061.143.1326216212374.JavaMail.mobile-sync@vbkn16>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:52285 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932527Ab2AJUBG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jan 2012 15:01:06 -0500
-Received: by iabz25 with SMTP id z25so1320030iab.19
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Jan 2012 12:01:05 -0800 (PST)
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:55007 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755288Ab2AJV1q convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jan 2012 16:27:46 -0500
+Received: by wibhm6 with SMTP id hm6so18831wib.19
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jan 2012 13:27:44 -0800 (PST)
+In-Reply-To: <6752061.143.1326216212374.JavaMail.mobile-sync@vbkn16>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: qemu-devel@nongnu.org
-Cc: ceph-devel@vger.kernel.org
+To: Samuel Just <sam.just@dreamhost.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-rbd: wire up snapshot removal and rollback functionality
+Maybe i missunderstood problem, but i see something like this.
 
-Signed-off-by: Greg Farnum <gregory.farnum@dreamhost.com>
-Reviewed-by: Josh Durgin <josh.durgin@dreamhost.com>
----
- block/rbd.c |   32 ++++++++++++++++++++++++++++++++
- 1 files changed, 32 insertions(+), 0 deletions(-)
+My setup is 3 node cluster. 78 osd and 3 mons. At the top of the
+cluster working radosgw on every machine. Every pool have a 3
+replicas. Default politics for replicas is host in racks, and every
+machine is in other rack.
 
-diff --git a/block/rbd.c b/block/rbd.c
-index 7a2384c..f52c1ca 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -787,6 +787,36 @@ static int qemu_rbd_snap_create(BlockDriverState *bs,
-     return 0;
- }
+When i do a stress test via s3 client, writing a lot of new object via
+balancer to the cluster i discovered, that only 3 osd are involved.
+This means that only one osd on every machine working in one time,
+when the object are writen via radosgw.
 
-+static int qemu_rbd_snap_remove(BlockDriverState *bs,
-+                                const char *snapshot_name)
-+{
-+    BDRVRBDState *s = bs->opaque;
-+    int r;
-+
-+    r = rbd_snap_remove(s->image, snapshot_name);
-+    if (r < 0) {
-+        error_report("failed to remove snap: %s", strerror(-r));
-+        return r;
-+    }
-+
-+    return 0;
-+}
-+
-+static int qemu_rbd_snap_rollback(BlockDriverState *bs,
-+                                  const char *snapshot_name)
-+{
-+    BDRVRBDState *s = bs->opaque;
-+    int r;
-+
-+    r = rbd_snap_rollback(s->image, snapshot_name);
-+    if (r < 0) {
-+        error_report("failed to rollback to snap: %s", strerror(-r));
-+        return r;
-+    }
-+
-+    return 0;
-+}
-+
- static int qemu_rbd_snap_list(BlockDriverState *bs,
-                               QEMUSnapshotInfo **psn_tab)
- {
-@@ -860,7 +890,9 @@ static BlockDriver bdrv_rbd = {
-     .bdrv_co_flush_to_disk  = qemu_rbd_co_flush,
+Thats why i write this mail about increase number of pgs in radosgw
+pool. Maybe i am wrong, but how i can perform this better, more
+parallel, to use power of many drives (osd's) ??
 
-     .bdrv_snapshot_create   = qemu_rbd_snap_create,
-+    .bdrv_snapshot_delete   = qemu_rbd_snap_remove,
-     .bdrv_snapshot_list     = qemu_rbd_snap_list,
-+    .bdrv_snapshot_goto     = qemu_rbd_snap_rollback,
- };
+=46or example when i use a rbd in this case, usage of osd devices is
+more random, and parallel.
 
- static void bdrv_rbd_init(void)
--- 
-1.7.2.5
+Pozdrawiam
+
+iSS
+
+On 10 sty 2012, at 18:11, Samuel Just <sam.just@dreamhost.com> wrote:
+
+> At the moment, expanding the number of pgs in a pool is not working.
+> We hope to get it working in the somewhat near future (probably a few
+> months).  Are you attempting to expand the number of osds and running
+> out of pgs?
+> -Sam
+>
+> 2012/1/10 S=C5=82awomir Skowron <slawomir.skowron@gmail.com>:
+>> How to expand number of pg's in rgw pool ??
+>>
+>> --
+>> -----
+>> Pozdrawiam
+>>
+>> S=C5=82awek "sZiBis" Skowron
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
