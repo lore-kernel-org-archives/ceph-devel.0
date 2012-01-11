@@ -1,41 +1,35 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Slides on Ceph and tools we use
-Date: Wed, 11 Jan 2012 09:42:22 -0800
-Message-ID: <CAORUGqD2Uw_xErBEy2ZTqX1mbsfM3Z6oOSzxmRMkotAcN0ibqg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:52150 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757858Ab2AKRmo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jan 2012 12:42:44 -0500
-Received: by wibhm14 with SMTP id hm14so567446wib.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jan 2012 09:42:43 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+From: Sage Weil <sage@newdream.net>
+Subject: [PATCH 0/2] Reenable ceph dcache usage
+Date: Wed, 11 Jan 2012 10:46:40 -0800
+Message-ID: <1326307602-16284-1-git-send-email-sage@newdream.net>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: viro@ZenIV.linux.org.uk, hch@infradead.org
+Cc: ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, Sage Weil <sage@newdream.net>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi. In the last 6 months, I've presented a few times about Ceph, the
-tools we use, and just miscellaneous useful things.
-I figured I should share the slides with the list.
+Hi Al, Christoph,
 
-Disclaimer: my style of slides is built to support the presentation,
-the slides by themselves may not be as enlightening. Do ask if
-something is unclear!
+These two patches export d_find_any_alias() and reenable the Ceph use of 
+the dcache for negative lookups and readdir without hitting the server.  
+The behavior is controllable via a mount option (and now documented).
 
-Enjoy!
+Unless there are any objections to the export, I plan to send this to 
+Linus shortly.
+
+Thanks!
+sage
 
 
-http://eagain.net/talks/concurrency-oh-my/
-Concurrency, Parallelism, Events, Asynchronicity, Oh My: concepts and
-Python applications of concurrency, 2011-11-10 at SoCal Piggies.
+Sage Weil (2):
+  vfs: export symbol d_find_any_alias()
+  ceph: enable/disable dentry complete flags via mount option
 
-http://eagain.net/talks/ceph-overview/
-Ceph Overview for the OpenStack Conference, 2011-10-07 at OpenStack Conference.
+ Documentation/filesystems/ceph.txt |   16 +++++++++++-----
+ fs/ceph/dir.c                      |   25 ++++++++++++++++++++++---
+ fs/ceph/super.c                    |   14 ++++++++++++++
+ fs/ceph/super.h                    |    1 +
+ fs/dcache.c                        |    4 ++--
+ include/linux/dcache.h             |    1 +
+ 6 files changed, 51 insertions(+), 10 deletions(-)
 
-http://eagain.net/talks/teuthology/
-Teuthology: a multi-machine test runner, 2011-07-01 at DreamHost.
-
-http://eagain.net/talks/intro-to-boto/
-Introduction to Boto, and an even briefer intro to Gevent, 2011-07-01
-at DreamHost.
