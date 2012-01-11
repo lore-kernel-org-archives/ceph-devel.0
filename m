@@ -1,35 +1,36 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
 Subject: Re: towards a user-mode diagnostic log mechanism
-Date: Tue, 10 Jan 2012 17:04:26 -0800
-Message-ID: <CAORUGqDmT86qdvpba1EYo6_D7KjAm7eHa_hReRgnw0uOU=8HQQ@mail.gmail.com>
-References: <4EEFF614.8040207@dreamhost.com> <CA+qbEUNvLL0pui+XOr5W2m6dmBCxg8d4ZobrAnXV=wTQ=7YCFw@mail.gmail.com>
- <CAORUGqDCBaOA_N2+Lw+tyhDc3wjGBjEnnBYZO-=aMaNoRycoPw@mail.gmail.com> <4F0CDA9A.4070500@cs.ucsc.edu>
+Date: Tue, 10 Jan 2012 17:06:55 -0800
+Message-ID: <4F0CE0AF.6090702@cs.ucsc.edu>
+References: <4EEFF614.8040207@dreamhost.com> <CA+qbEUNvLL0pui+XOr5W2m6dmBCxg8d4ZobrAnXV=wTQ=7YCFw@mail.gmail.com> <CAORUGqDCBaOA_N2+Lw+tyhDc3wjGBjEnnBYZO-=aMaNoRycoPw@mail.gmail.com> <4F0CDA9A.4070500@cs.ucsc.edu> <CAORUGqDmT86qdvpba1EYo6_D7KjAm7eHa_hReRgnw0uOU=8HQQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f42.google.com ([74.125.82.42]:40299 "EHLO
-	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756929Ab2AKBEs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jan 2012 20:04:48 -0500
-Received: by wgbdt14 with SMTP id dt14so3287437wgb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Jan 2012 17:04:47 -0800 (PST)
-In-Reply-To: <4F0CDA9A.4070500@cs.ucsc.edu>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:38545 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754211Ab2AKBG2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jan 2012 20:06:28 -0500
+In-Reply-To: <CAORUGqDmT86qdvpba1EYo6_D7KjAm7eHa_hReRgnw0uOU=8HQQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: Colin McCabe <cmccabe@alumni.cmu.edu>, Mark Kampe <mark.kampe@dreamhost.com>, ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Noah Watkins <jayhawk@soe.ucsc.edu>, Colin McCabe <cmccabe@alumni.cmu.edu>, Mark Kampe <mark.kampe@dreamhost.com>, ceph-devel@vger.kernel.org
 
-On Tue, Jan 10, 2012 at 16:40, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
-> The cost of reading the software clock via gettimeofday is dependent on the
-> OS implementation, and can vary by as much as 2 orders of magnitude (see
-> attached slide: 1.6us vs 60ns per clock read).
+On 1/10/12 5:04 PM, Tommi Virtanen wrote:
+> On Tue, Jan 10, 2012 at 16:40, Noah Watkins<jayhawk@cs.ucsc.edu>  wrote:
+>>
+>> Older Linux kernels force a thread into the kernel when calling gettimeofday
+>> adding enormous overhead relative to the newer vsyscall implementations that
+>> evaluate gettimeofday within userspace.
 >
-> Older Linux kernels force a thread into the kernel when calling gettimeofday
-> adding enormous overhead relative to the newer vsyscall implementations that
-> evaluate gettimeofday within userspace.
+> So turning debug to full blast on older kernels will be painful. I'm
+> personally ok with that, especially when the alternative is
+> implementing all of the TSC logic myself. This is really complex code,
+> and somebody went through the effort of solving the hard problems for
 
-So turning debug to full blast on older kernels will be painful. I'm
-personally ok with that, especially when the alternative is
-implementing all of the TSC logic myself. This is really complex code,
-and somebody went through the effort of solving the hard problems for
-us -- let's use their code!
+Yeh, that was just a bit of fyi noise.
+
+> us -- let's use their code!
+
+I definitely agree :)
