@@ -1,72 +1,58 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [GIT PULL] Ceph updates for 3.3-rc1
-Date: Thu, 12 Jan 2012 11:23:19 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201121112180.13761@cobra.newdream.net>
+Subject: Ceph status update
+Date: Thu, 12 Jan 2012 12:53:41 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201121239210.613@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51693 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:59648 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754055Ab2ALTXV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2012 14:23:21 -0500
+	with ESMTP id S1751981Ab2ALUxs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2012 15:53:48 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 880D0BC60D
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Jan 2012 12:53:47 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 02978BC60D
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Jan 2012 12:53:46 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Linus,
+This is just a quick status update to let everyone know where the project 
+is at right now.
 
-Please pull the following Ceph updates from:
+We had an extended bugfixing sprint over the holidays and v0.40 will be 
+out tomorrow.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+v0.41 will be two weeks, and the focus now (and for the near future) is 
+entirely on rados (osd, monitor) and rgw.  If you have problems with the 
+MDS, we'd like to gather all the important information to record in the 
+bug tracker, but we don't want to lose focus on the other issues 
+just yet.
 
-There is a conflict in here between d46cfba and a patch from Al, 3c5184e.  
-Stephen has a fixup in -next, or you can resolve yourself (just make sure 
-ceph_init_dentry() is called for both paths, and that the r_target_inode 
-initialization isn't duplicated :).
+The main things on our plate right now:
 
-The dir complete/dcache stuff is wired up again (this time conditionally 
-via a mount option).  d_find_any_alias() is now exported to allow that.  
-Then there are a few bug fixes (removexattr memory reservation, rwsem 
-initialization, dentry initialization, iput under spinlock), some 
-cleanups, and a small fix for the CRUSH mapping.
+ - finishing the OSD 'backfill' code, which improves OSD recovery 
+   efficiency.
+ - extending rados with efficient key/value objects
+ - better visibility into OSD and client performance
+ - plan for better handling future upgrades in non-disruptive fashion
+ - getting our huge pile of new QA hardware online and usable!
 
-Thanks!
+Next sprint will include
+
+ - new and improved (efficient) osd scrub
+ - limit msgr connections (avoid fd starvation)
+
+Notable things we're deferring a bit...
+
+ - rbd layering... :(
+ - chef/juju/udev integration, and other improvements in daemon configuration, 
+   start, stop, etc.
+
+I'm probably missing something, but those are the highlights.  I'm going 
+to start sending these emails out on a more regular basis (every sprint) 
+so keep people in the loop!
+
 sage
-
-
-Alex Elder (3):
-      ceph: always initialize the dentry in open_root_dentry()
-      rbd: initialize snap_rwsem in rbd_add()
-      ceph: ensure prealloc_blob is in place when removing xattr
-
-Sage Weil (7):
-      ceph: remove unnecessary d_fsdata conditional checks
-      crush: fix force for non-root TAKE
-      ceph: avoid useless dget/dput in encode_fh
-      ceph: avoid iput() while holding spinlock in ceph_dir_fsync
-      libceph: remove useless return value for osd_client __send_request()
-      vfs: export symbol d_find_any_alias()
-      ceph: enable/disable dentry complete flags via mount option
-
-Thomas Meyer (1):
-      ceph: Use kmemdup rather than duplicating its implementation
-
-Yehuda Sadeh (1):
-      ceph: dereference pointer after checking for NULL
-
- Documentation/filesystems/ceph.txt |   18 ++++++--
- drivers/block/rbd.c                |    2 +
- fs/ceph/dir.c                      |   76 +++++++++++++++++++++---------------
- fs/ceph/export.c                   |    6 +--
- fs/ceph/inode.c                    |    3 +-
- fs/ceph/mds_client.c               |    4 +-
- fs/ceph/super.c                    |   21 ++++++++--
- fs/ceph/super.h                    |    1 +
- fs/ceph/xattr.c                    |   22 ++++++++++
- fs/dcache.c                        |   11 ++++-
- include/linux/dcache.h             |    1 +
- net/ceph/crush/mapper.c            |   11 ++++-
- net/ceph/crypto.c                  |    3 +-
- net/ceph/osd_client.c              |   21 +++-------
- 14 files changed, 130 insertions(+), 70 deletions(-)
