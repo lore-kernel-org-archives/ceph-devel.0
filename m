@@ -1,27 +1,72 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 2/2] ceph: enable/disable dentry complete flags via mount
- option
-Date: Thu, 12 Jan 2012 14:05:02 -0500
-Message-ID: <20120112190502.GB5022@infradead.org>
-References: <1326307602-16284-1-git-send-email-sage@newdream.net>
- <1326307602-16284-3-git-send-email-sage@newdream.net>
- <20120111190001.GB29582@infradead.org>
- <Pine.LNX.4.64.1201111244040.13761@cobra.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: [GIT PULL] Ceph updates for 3.3-rc1
+Date: Thu, 12 Jan 2012 11:23:19 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201121112180.13761@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 173-166-109-252-newengland.hfc.comcastbusiness.net ([173.166.109.252]:45629
-	"EHLO bombadil.infradead.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754593Ab2ALTFD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 Jan 2012 14:05:03 -0500
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1201111244040.13761@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:51693 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754055Ab2ALTXV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2012 14:23:21 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Christoph Hellwig <hch@infradead.org>, viro@ZenIV.linux.org.uk, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Looks good,
+Hi Linus,
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Please pull the following Ceph updates from:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+
+There is a conflict in here between d46cfba and a patch from Al, 3c5184e.  
+Stephen has a fixup in -next, or you can resolve yourself (just make sure 
+ceph_init_dentry() is called for both paths, and that the r_target_inode 
+initialization isn't duplicated :).
+
+The dir complete/dcache stuff is wired up again (this time conditionally 
+via a mount option).  d_find_any_alias() is now exported to allow that.  
+Then there are a few bug fixes (removexattr memory reservation, rwsem 
+initialization, dentry initialization, iput under spinlock), some 
+cleanups, and a small fix for the CRUSH mapping.
+
+Thanks!
+sage
+
+
+Alex Elder (3):
+      ceph: always initialize the dentry in open_root_dentry()
+      rbd: initialize snap_rwsem in rbd_add()
+      ceph: ensure prealloc_blob is in place when removing xattr
+
+Sage Weil (7):
+      ceph: remove unnecessary d_fsdata conditional checks
+      crush: fix force for non-root TAKE
+      ceph: avoid useless dget/dput in encode_fh
+      ceph: avoid iput() while holding spinlock in ceph_dir_fsync
+      libceph: remove useless return value for osd_client __send_request()
+      vfs: export symbol d_find_any_alias()
+      ceph: enable/disable dentry complete flags via mount option
+
+Thomas Meyer (1):
+      ceph: Use kmemdup rather than duplicating its implementation
+
+Yehuda Sadeh (1):
+      ceph: dereference pointer after checking for NULL
+
+ Documentation/filesystems/ceph.txt |   18 ++++++--
+ drivers/block/rbd.c                |    2 +
+ fs/ceph/dir.c                      |   76 +++++++++++++++++++++---------------
+ fs/ceph/export.c                   |    6 +--
+ fs/ceph/inode.c                    |    3 +-
+ fs/ceph/mds_client.c               |    4 +-
+ fs/ceph/super.c                    |   21 ++++++++--
+ fs/ceph/super.h                    |    1 +
+ fs/ceph/xattr.c                    |   22 ++++++++++
+ fs/dcache.c                        |   11 ++++-
+ include/linux/dcache.h             |    1 +
+ net/ceph/crush/mapper.c            |   11 ++++-
+ net/ceph/crypto.c                  |    3 +-
+ net/ceph/osd_client.c              |   21 +++-------
+ 14 files changed, 130 insertions(+), 70 deletions(-)
