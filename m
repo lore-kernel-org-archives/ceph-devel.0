@@ -1,47 +1,39 @@
-From: Sage Weil <sage@newdream.net>
-Subject: pg time stamps
-Date: Fri, 13 Jan 2012 09:24:21 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201130919540.7683@cobra.newdream.net>
+From: Alex Elder <elder@dreamhost.com>
+Subject: [PATCH 0/4] ceph: properly protect session cap_gen and cap_ttl
+Date: Fri, 13 Jan 2012 11:49:57 -0800
+Message-ID: <1326484197.3334.27.camel@doink>
+Reply-To: elder@dreamhost.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38820 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751481Ab2AMRYV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2012 12:24:21 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 383B3BC795
-	for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2012 09:24:21 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 147C6BC795
-	for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2012 09:24:21 -0800 (PST)
+Received: from mail.hq.newdream.net ([66.33.206.127]:38991 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753317Ab2AMTt6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2012 14:49:58 -0500
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 091CCC066
+	for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2012 11:50:06 -0800 (PST)
+Received: from [192.168.107.250] (aon.hq.newdream.net [64.111.111.107])
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id E894EC062
+	for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2012 11:50:05 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-wip-osd-pg-stats adds a time stamp and epoch number to the pg_stat_t 
-struct.  The epoch is updated when the mapping changes, and the time stamp 
-is updated when the pg state changes.
+This series addresses a few issues with the use of the
+ceph_mds_session s_cap_gen and s_cap_ttl fields.
 
-The state timestamp is the interesting one, since it'll make it easier to 
-identify PGs that are stuck in, say, down or peering states for long 
-periods of time. 
+These two fields are used for handling session timeouts, etc.  At
+times they need to be updated or sampled together, and until now
+this has been done under the protection of the session's s_cap_lock.
+However this results in a possible circular locking dependency. 
+This is fixed by introducing a new "inner" lock specifically for
+protecting this case.
 
-What it doesn't help with is when the pg state is toggling between two 
-undesireable states (the stamp will still get updated).  In practice, what 
-we probably care about is active vs not active, and degraded vs not 
-degraded.  We could add additional time stamps for those, but that may be 
-overkill.
+In addition, since these fields are used for synchronization (and
+especially since one is 64 bits), convert them use atomic types.
 
-Previously we had planned on doing this sort of monitoring using an 
-external agent, but that's kind of a pain, duplicates storage, etc.  This 
-is simple to add into the pg_stat_t update logic.
+					-Alex
 
-I expect this will be rebased on top of the new encoding strategy stuff so 
-that the object versioning is backward and forwards compatible, so don't 
-worry about that part here.
 
-https://github.com/NewDreamNetwork/ceph/commit/f43282796af50d760a620970ad691e0a20bcf178
-
-Thoughts?
-sage
