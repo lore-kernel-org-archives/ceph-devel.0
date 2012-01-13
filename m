@@ -1,52 +1,48 @@
-From: Alex Elder <elder@dreamhost.com>
-Subject: Re: [PATCH 3/4] ceph: make session->s_cap_gen atomic
-Date: Fri, 13 Jan 2012 12:32:33 -0800
-Message-ID: <1326486753.3334.33.camel@doink>
-References: <1326484207.3334.30.camel@doink>
-	 <Pine.LNX.4.64.1201131153030.16683@cobra.newdream.net>
-Reply-To: elder@dreamhost.com
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: Re: [PATCH] wrong unix timestamp calculation in hadoop lib
+Date: Fri, 13 Jan 2012 13:58:17 -0800
+Message-ID: <CAB2gnbU+S6_t25_8vHYTn5TPOZ1VHwBRjnYj4oaee6OoWVmF0w@mail.gmail.com>
+References: <1326467544-19913-1-git-send-email-octo47@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:55552 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759089Ab2AMUce (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2012 15:32:34 -0500
-In-Reply-To: <Pine.LNX.4.64.1201131153030.16683@cobra.newdream.net>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:58171 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753432Ab2AMV6S convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2012 16:58:18 -0500
+Received: by wibhm14 with SMTP id hm14so731908wib.19
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2012 13:58:17 -0800 (PST)
+In-Reply-To: <1326467544-19913-1-git-send-email-octo47@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Andrey Stepachev <octo47@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Andrey Stepachev <octo@yandex-team.ru>
 
-On Fri, 2012-01-13 at 11:56 -0800, Sage Weil wrote:
-> On Fri, 13 Jan 2012, Alex Elder wrote:
-> > The ceph_mds_session s_cap_gen field can be accessed concurrently
-> > and is used for synchronization.  Change it to be an atomic_t to
-> > make the desired atomicity explicit.
-> > 
-> > Signed-off-by: Alex Elder <elder@dreamhost.com>
+On Fri, Jan 13, 2012 at 07:12, Andrey Stepachev <octo47@gmail.com> wrot=
+e:
+> From: Andrey Stepachev <octo@yandex-team.ru>
+>
+> Hadoop always see wrong dates due of wrong timestamp calculation.
+> Possibly fixes #1666.
 
-. . .
+Using coarse-grained timestamps might mask the problem in 1666. But it
+would only work in certain circumstances such as when clock sync skew
+is sufficiently small, and I think edge conditions would continue to
+exist. A more robust solution is probably needed for #1666 :(
 
-> > @@ -2874,7 +2874,7 @@ void ceph_mdsc_lease_release(struct
-> > ceph_mds_client *mdsc, struct inode *inode,
-> >  	di = ceph_dentry(dentry);
-> >  	if (!di || !di->lease_session ||
-> >  	    di->lease_session->s_mds < 0 ||
-> > -	    di->lease_gen != di->lease_session->s_cap_gen ||
-> > +	    di->lease_gen != atomic_read(&di->lease_session->s_cap_gen) ||
-> 
-> Okay, this one needs synchronization.  It looks like the only one, too.  
-> Can we just use the spinlock for it?
+> Signed-off-by: Andrey Stepachev <octo@yandex-team.ru>
+>
+> ---
+> =C2=A0src/client/hadoop/CephFSInterface.cc | =C2=A0 =C2=A08 ++++----
+> =C2=A01 files changed, 4 insertions(+), 4 deletions(-)
+>
+> - =C2=A0long long java_mtime(st.st_mtime);
+> + =C2=A0long long java_mtime(st.st_mtim.tv_sec);
 
-I'll rework the series.  I will change this one to just include
-the use of the spinlock instead in this one spot, and will
-drop the next one.
-
-Thanks a lot for the review.
-
-					-Alex
-
-. . .
-
+mtime vs mtim: the later is non-portable?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
