@@ -1,152 +1,191 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 1/4] ceph: create a new session lock to avoid lock
- inversion
-Date: Fri, 13 Jan 2012 11:52:09 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201131151140.16683@cobra.newdream.net>
-References: <1326484200.3334.28.camel@doink>
+Subject: Re: [PATCH 3/4] ceph: make session->s_cap_gen atomic
+Date: Fri, 13 Jan 2012 11:56:26 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201131153030.16683@cobra.newdream.net>
+References: <1326484207.3334.30.camel@doink>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58100 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:58140 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753335Ab2AMTwM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2012 14:52:12 -0500
-In-Reply-To: <1326484200.3334.28.camel@doink>
+	with ESMTP id S1758983Ab2AMT41 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2012 14:56:27 -0500
+In-Reply-To: <1326484207.3334.30.camel@doink>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
 On Fri, 13 Jan 2012, Alex Elder wrote:
-
-> Lockdep was reporting a possible circular lock dependency in
-> dentry_lease_is_valid().  That function needs to sample the
-> session's s_cap_gen and and s_cap_ttl fields coherently, but needs
-> to do so while holding a dentry lock.  The s_cap_lock field was
-> being used to protect the two fields, but that can't be taken while
-> holding a lock on a dentry within the session.
-> 
-> In most cases, the s_cap_gen and s_cap_ttl fields only get operated
-> on separately.  But in three cases they need to be updated together.
-> Implement a new lock to protect the spots updating both fields
-> atomically is required.
+> The ceph_mds_session s_cap_gen field can be accessed concurrently
+> and is used for synchronization.  Change it to be an atomic_t to
+> make the desired atomicity explicit.
 > 
 > Signed-off-by: Alex Elder <elder@dreamhost.com>
 > ---
->  fs/ceph/caps.c       |    4 ++--
->  fs/ceph/dir.c        |   14 +++-----------
->  fs/ceph/mds_client.c |    8 +++++---
->  fs/ceph/mds_client.h |    7 +++++--
->  4 files changed, 15 insertions(+), 18 deletions(-)
+>  fs/ceph/caps.c       |    6 +++---
+>  fs/ceph/dir.c        |    2 +-
+>  fs/ceph/inode.c      |    4 ++--
+>  fs/ceph/mds_client.c |    8 ++++----
+>  fs/ceph/mds_client.h |    2 +-
+>  5 files changed, 11 insertions(+), 11 deletions(-)
 > 
 > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index 8b53193..90d789d 100644
+> index 90d789d..fd240e3 100644
 > --- a/fs/ceph/caps.c
 > +++ b/fs/ceph/caps.c
-> @@ -641,10 +641,10 @@ static int __cap_is_valid(struct ceph_cap *cap)
->  	unsigned long ttl;
+> @@ -622,7 +622,7 @@ retry:
+>  	cap->seq = seq;
+>  	cap->issue_seq = seq;
+>  	cap->mseq = mseq;
+> -	cap->cap_gen = session->s_cap_gen;
+> +	cap->cap_gen = atomic_read(&session->s_cap_gen);
+
+This (cap update/addition) happens under the session mutex, so we don't 
+need to worry about an s_cap_gen update here.
+
+>  
+>  	if (fmode >= 0)
+>  		__ceph_get_fmode(ci, fmode);
+> @@ -642,7 +642,7 @@ static int __cap_is_valid(struct ceph_cap *cap)
 >  	u32 gen;
 >  
-> -	spin_lock(&cap->session->s_cap_lock);
-> +	spin_lock(&cap->session->s_gen_ttl_lock);
->  	gen = cap->session->s_cap_gen;
+>  	spin_lock(&cap->session->s_gen_ttl_lock);
+> -	gen = cap->session->s_cap_gen;
+> +	gen = atomic_read(&cap->session->s_cap_gen);
 >  	ttl = cap->session->s_cap_ttl;
-> -	spin_unlock(&cap->session->s_cap_lock);
-> +	spin_unlock(&cap->session->s_gen_ttl_lock);
+>  	spin_unlock(&cap->session->s_gen_ttl_lock);
+
+If we hold the spinlock, I don't think we need it here, either.
+
 >  
->  	if (cap->cap_gen < gen || time_after_eq(jiffies, ttl)) {
->  		dout("__cap_is_valid %p cap %p issued %s "
+> @@ -2347,7 +2347,7 @@ static void handle_cap_grant(struct inode *inode,
+> struct ceph_mds_caps *grant,
+>  	issued = __ceph_caps_issued(ci, &implemented);
+>  	issued |= implemented | __ceph_caps_dirty(ci);
+>  
+> -	cap->cap_gen = session->s_cap_gen;
+> +	cap->cap_gen = atomic_read(&session->s_cap_gen);
+
+Also under session mutex.
+
+>  
+>  	__check_cap_issue(ci, cap, newcaps);
+>  
 > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index ab2b035..a1a0693 100644
+> index a1a0693..da9427d 100644
 > --- a/fs/ceph/dir.c
 > +++ b/fs/ceph/dir.c
-> @@ -971,24 +971,16 @@ static int dentry_lease_is_valid(struct dentry
+> @@ -978,7 +978,7 @@ static int dentry_lease_is_valid(struct dentry
 > *dentry)
->  	struct inode *dir = NULL;
->  	u32 seq = 0;
->  
-> -retry:
->  	spin_lock(&dentry->d_lock);
->  	di = ceph_dentry(dentry);
->  	if (di->lease_session) {
->  		s = di->lease_session;
 >  		ceph_get_mds_session(s);
-> -		spin_unlock(&dentry->d_lock);
-> -		spin_lock(&s->s_cap_lock);
-> -		spin_lock(&dentry->d_lock);
-> -		if (di->lease_session != s) {
-> -			spin_unlock(&s->s_cap_lock);
-> -			spin_unlock(&dentry->d_lock);
-> -			ceph_put_mds_session(s);
-> -			goto retry;
-> -		}
-
-We should drop/squash my patch that added this ugliness in the first 
-place.
-
-Otherwise, looks good!
-
-> +
-> +		spin_lock(&s->s_gen_ttl_lock);
->  		gen = s->s_cap_gen;
->  		ttl = s->s_cap_ttl;
-> -		spin_unlock(&s->s_cap_lock);
-> +		spin_unlock(&s->s_gen_ttl_lock);
 >  
->  		if (di->lease_gen == gen &&
->  		    time_before(jiffies, dentry->d_time) &&
+>  		spin_lock(&s->s_gen_ttl_lock);
+> -		gen = s->s_cap_gen;
+> +		gen = atomic_read(&s->s_cap_gen);
+>  		ttl = s->s_cap_ttl;
+>  		spin_unlock(&s->s_gen_ttl_lock);
+
+or the spinlock
+
+>  
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index f556e76..23bee03 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -820,7 +820,7 @@ static void update_dentry_lease(struct dentry
+> *dentry,
+>  	if (duration == 0)
+>  		goto out_unlock;
+>  
+> -	if (di->lease_gen == session->s_cap_gen &&
+> +	if (di->lease_gen == atomic_read(&session->s_cap_gen) &&
+>  	    time_before(ttl, dentry->d_time))
+>  		goto out_unlock;  /* we already have a newer lease. */
+
+under session mutex
+
+>  
+> @@ -831,7 +831,7 @@ static void update_dentry_lease(struct dentry
+> *dentry,
+>  
+>  	if (!di->lease_session)
+>  		di->lease_session = ceph_get_mds_session(session);
+> -	di->lease_gen = session->s_cap_gen;
+> +	di->lease_gen = atomic_read(&session->s_cap_gen);
+
+here too
+
+>  	di->lease_seq = le32_to_cpu(lease->seq);
+>  	di->lease_renew_after = half_ttl;
+>  	di->lease_renew_from = 0;
 > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 23ab6a3..2b0e274 100644
+> index bd147fa..cd567c3 100644
 > --- a/fs/ceph/mds_client.c
 > +++ b/fs/ceph/mds_client.c
-> @@ -398,9 +398,11 @@ static struct ceph_mds_session
+> @@ -399,7 +399,7 @@ static struct ceph_mds_session
 > *register_session(struct ceph_mds_client *mdsc,
->  	s->s_con.peer_name.type = CEPH_ENTITY_TYPE_MDS;
 >  	s->s_con.peer_name.num = cpu_to_le64(mds);
 >  
-> -	spin_lock_init(&s->s_cap_lock);
-> +	spin_lock_init(&s->s_gen_ttl_lock);
->  	s->s_cap_gen = 0;
->  	s->s_cap_ttl = 0;
-> +
-> +	spin_lock_init(&s->s_cap_lock);
->  	s->s_renew_requested = 0;
->  	s->s_renew_seq = 0;
->  	INIT_LIST_HEAD(&s->s_caps);
-> @@ -2326,10 +2328,10 @@ static void handle_session(struct
-> ceph_mds_session *session,
->  	case CEPH_SESSION_STALE:
+>  	spin_lock_init(&s->s_gen_ttl_lock);
+> -	s->s_cap_gen = 0;
+> +	atomic_set(&s->s_cap_gen, 0);
+>  	s->s_cap_ttl = jiffies - 1;
+>  
+>  	spin_lock_init(&s->s_cap_lock);
+> @@ -2328,7 +2328,7 @@ static void handle_session(struct ceph_mds_session
+> *session,
 >  		pr_info("mds%d caps went stale, renewing\n",
 >  			session->s_mds);
-> -		spin_lock(&session->s_cap_lock);
-> +		spin_lock(&session->s_gen_ttl_lock);
->  		session->s_cap_gen++;
->  		session->s_cap_ttl = 0;
-> -		spin_unlock(&session->s_cap_lock);
-> +		spin_unlock(&session->s_gen_ttl_lock);
+>  		spin_lock(&session->s_gen_ttl_lock);
+> -		session->s_cap_gen++;
+> +		atomic_inc(&session->s_cap_gen);
+
+spinlock
+
+>  		session->s_cap_ttl = jiffies - 1;
+>  		spin_unlock(&session->s_gen_ttl_lock);
 >  		send_renew_caps(mdsc, session);
->  		break;
+> @@ -2783,7 +2783,7 @@ static void handle_lease(struct ceph_mds_client
+> *mdsc,
 >  
+>  	case CEPH_MDS_LEASE_RENEW:
+>  		if (di->lease_session == session &&
+> -		    di->lease_gen == session->s_cap_gen &&
+> +		    di->lease_gen == atomic_read(&session->s_cap_gen) &&
+
+under session->mutex
+
+>  		    di->lease_renew_from &&
+>  		    di->lease_renew_after == 0) {
+>  			unsigned long duration =
+> @@ -2874,7 +2874,7 @@ void ceph_mdsc_lease_release(struct
+> ceph_mds_client *mdsc, struct inode *inode,
+>  	di = ceph_dentry(dentry);
+>  	if (!di || !di->lease_session ||
+>  	    di->lease_session->s_mds < 0 ||
+> -	    di->lease_gen != di->lease_session->s_cap_gen ||
+> +	    di->lease_gen != atomic_read(&di->lease_session->s_cap_gen) ||
+
+Okay, this one needs synchronization.  It looks like the only one, too.  
+Can we just use the spinlock for it?
+
+>  	    !time_before(jiffies, dentry->d_time)) {
+>  		dout("lease_release inode %p dentry %p -- "
+>  		     "no lease\n",
 > diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> index a50ca0e..8c7c04e 100644
+> index 8c7c04e..20ca17e 100644
 > --- a/fs/ceph/mds_client.h
 > +++ b/fs/ceph/mds_client.h
-> @@ -117,10 +117,13 @@ struct ceph_mds_session {
->  	void             *s_authorizer_buf, *s_authorizer_reply_buf;
->  	size_t            s_authorizer_buf_len, s_authorizer_reply_buf_len;
+> @@ -119,7 +119,7 @@ struct ceph_mds_session {
 >  
-> -	/* protected by s_cap_lock */
-> -	spinlock_t        s_cap_lock;
-> +	/* protected by s_gen_ttl_lock */
-> +	spinlock_t        s_gen_ttl_lock;
->  	u32               s_cap_gen;  /* inc each time we get mds stale msg */
+>  	/* protected by s_gen_ttl_lock */
+>  	spinlock_t        s_gen_ttl_lock;
+> -	u32               s_cap_gen;  /* inc each time we get mds stale msg */
+> +	atomic_t          s_cap_gen;  /* inc each time we get mds stale msg */
 >  	unsigned long     s_cap_ttl;  /* when session caps expire */
-> +
-> +	/* protected by s_cap_lock */
-> +	spinlock_t        s_cap_lock;
->  	struct list_head  s_caps;     /* all caps issued by this session */
->  	int               s_nr_caps, s_trim_caps;
->  	int               s_num_cap_releases;
+>  
+>  	/* protected by s_cap_lock */
 > -- 
 > 1.7.5.4
 > 
