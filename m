@@ -1,65 +1,60 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Assertion in v0.40 - os/FileStore.cc: 2438: FAILED assert(0 ==
- "unexpected error")
-Date: Sat, 14 Jan 2012 21:52:11 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201142150180.24825@cobra.newdream.net>
-References: <4F1193DE.7040202@tuxadero.com> <Pine.LNX.4.64.1201141835180.21391@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Xi Wang <xi.wang@gmail.com>
+Subject: [PATCH RESEND] ceph: fix bounds checking macros
+Date: Sun, 15 Jan 2012 01:06:50 -0500
+Message-ID: <1326607610-6867-1-git-send-email-xi.wang@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42157 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750720Ab2AOFwM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Jan 2012 00:52:12 -0500
-In-Reply-To: <Pine.LNX.4.64.1201141835180.21391@cobra.newdream.net>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:44010 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750756Ab2AOGMK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Jan 2012 01:12:10 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Mailand <martin@tuxadero.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Xi Wang <xi.wang@gmail.com>
 
-Hi Martin-
+The bounds check (*p + n > end) can be bypassed with a large n due to
+pointer wraparound, especially when n is read from network.  Change the
+check to a safer form (n > end - *p).
 
-On Sat, 14 Jan 2012, Sage Weil wrote:
-> Hi Martin-
-> 
-> On Sat, 14 Jan 2012, Martin Mailand wrote:
-> 
-> > Hi
-> > one of four OSD died during the update to v0.40 with an Assertion
-> > os/FileStore.cc: 2438: FAILED assert(0 == "unexpected error")
-> > Even after a complete shutdown of the cluster an a new start with all OSD at
-> > the same version, this osd did not start.
-> > 
-> > The OSD Log it attached.
-> 
-> It's trying to replay a transaction that appears to be invalid because the 
-> .2 clone is smaller than it thinks.  Is this the first time the OSD 
-> crashed, or did it crash once, and you cranked up logs and generated 
-> this one?  If you have the previous log, that would be helpful... it 
-> should have a similar tranasction dump but a different stack trace.
+Signed-off-by: Xi Wang <xi.wang@gmail.com>
+---
+ include/linux/ceph/decode.h |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
 
-I pushed a wip-osd-dump-journal branch to git that will make
+diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
+index c5b6939..c0b1e46 100644
+--- a/include/linux/ceph/decode.h
++++ b/include/linux/ceph/decode.h
+@@ -12,6 +12,11 @@
+  *   void *end    pointer to end of buffer (last byte + 1)
+  */
+ 
++static inline int ceph_need(void **p, void *end, size_t n)
++{
++	return (end < *p) || (n > end - *p);
++}
++
+ static inline u64 ceph_decode_64(void **p)
+ {
+ 	u64 v = get_unaligned_le64(*p);
+@@ -47,7 +52,7 @@ static inline void ceph_decode_copy(void **p, void *pv, size_t n)
+  */
+ #define ceph_decode_need(p, end, n, bad)		\
+ 	do {						\
+-		if (unlikely(*(p) + (n) > (end))) 	\
++		if (unlikely(ceph_need(p, end, n)))	\
+ 			goto bad;			\
+ 	} while (0)
+ 
+@@ -166,7 +171,7 @@ static inline void ceph_encode_string(void **p, void *end,
+ 
+ #define ceph_encode_need(p, end, n, bad)		\
+ 	do {						\
+-		if (unlikely(*(p) + (n) > (end))) 	\
++		if (unlikely(ceph_need(p, end, n)))	\
+ 			goto bad;			\
+ 	} while (0)
+ 
+-- 
+1.7.5.4
 
-	ceph-osd -i <whatever> --dump-journal > /tmp/foo.txt
-
-dump the contents of your entire osd journal (sans data) to a text file.  
-Do you mind sending that along as well?  I'd like to see what is in the 
-journal _after_ the event that is failing (if anything).
-
-Thanks!
-sage
-
-
-> 
-> Also, are any of the 6 patches on top of 0.40 related to the filestore or 
-> osd?
-> 
-> Thanks!
-> sage
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
