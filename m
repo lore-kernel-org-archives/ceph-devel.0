@@ -1,25 +1,65 @@
-From: Xi Wang <xi.wang@gmail.com>
-Subject: Re: [PATCH RESEND] ceph: fix length validation in parse_reply_info()
-Date: Sun, 15 Jan 2012 00:42:07 -0500
-Message-ID: <58B7A365-298C-4C8C-9D28-2569D5F17E46@gmail.com>
-References: <1326597659-3892-1-git-send-email-xi.wang@gmail.com> <Pine.LNX.4.64.1201142117210.24825@cobra.newdream.net>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Assertion in v0.40 - os/FileStore.cc: 2438: FAILED assert(0 ==
+ "unexpected error")
+Date: Sat, 14 Jan 2012 21:52:11 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201142150180.24825@cobra.newdream.net>
+References: <4F1193DE.7040202@tuxadero.com> <Pine.LNX.4.64.1201141835180.21391@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:36520 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750758Ab2AOFmL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Jan 2012 00:42:11 -0500
-In-Reply-To: <Pine.LNX.4.64.1201142117210.24825@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:42157 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750720Ab2AOFwM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Jan 2012 00:52:12 -0500
+In-Reply-To: <Pine.LNX.4.64.1201141835180.21391@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Martin Mailand <martin@tuxadero.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Jan 15, 2012, at 12:18 AM, Sage Weil wrote:
-> Applied.  Sorry I missed this the first time around!
+Hi Martin-
 
-Thanks. ;-)
+On Sat, 14 Jan 2012, Sage Weil wrote:
+> Hi Martin-
+> 
+> On Sat, 14 Jan 2012, Martin Mailand wrote:
+> 
+> > Hi
+> > one of four OSD died during the update to v0.40 with an Assertion
+> > os/FileStore.cc: 2438: FAILED assert(0 == "unexpected error")
+> > Even after a complete shutdown of the cluster an a new start with all OSD at
+> > the same version, this osd did not start.
+> > 
+> > The OSD Log it attached.
+> 
+> It's trying to replay a transaction that appears to be invalid because the 
+> .2 clone is smaller than it thinks.  Is this the first time the OSD 
+> crashed, or did it crash once, and you cranked up logs and generated 
+> this one?  If you have the previous log, that would be helpful... it 
+> should have a similar tranasction dump but a different stack trace.
 
-- xi
+I pushed a wip-osd-dump-journal branch to git that will make
+
+	ceph-osd -i <whatever> --dump-journal > /tmp/foo.txt
+
+dump the contents of your entire osd journal (sans data) to a text file.  
+Do you mind sending that along as well?  I'd like to see what is in the 
+journal _after_ the event that is failing (if anything).
+
+Thanks!
+sage
+
+
+> 
+> Also, are any of the 6 patches on top of 0.40 related to the filestore or 
+> osd?
+> 
+> Thanks!
+> sage
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
