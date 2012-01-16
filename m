@@ -1,124 +1,170 @@
-From: Andrey Stepachev <octo47@gmail.com>
-Subject: Re: Slow ceph io. High iops. Compared to hadoop.
-Date: Mon, 16 Jan 2012 15:23:27 +0400
-Message-ID: <CAADCt4KQUnN9Mmc+LEmMs_ryYp1Jveega7XHt9mJdjJ6-AHg1w@mail.gmail.com>
-References: <CAADCt4+BEYHi8x_RFTo5GEkvneqc_XDO_RGJuWUNhXYNcMS47w@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: wip-encoding
+Date: Mon, 16 Jan 2012 15:46:45 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201161520380.27147@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:58880 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754262Ab2APLXt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2012 06:23:49 -0500
-Received: by wgbdq11 with SMTP id dq11so550629wgb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2012 03:23:48 -0800 (PST)
-In-Reply-To: <CAADCt4+BEYHi8x_RFTo5GEkvneqc_XDO_RGJuWUNhXYNcMS47w@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:49285 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750696Ab2APXqs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2012 18:46:48 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id C8372BC7EC
+	for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2012 15:46:47 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 98D86BC7EC
+	for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2012 15:46:47 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Ops. It is really a buffer problem.
-It can be checked with easy with ceph osd tell 4 bench
+There are two things going on in this branch.  The first part is a 
+'standard' way of constructing the encode/decode functions to facilitate 
+backward and forward compatibility and incompatibility detection.  The 
+basic scheme is:
 
-bench: wrote 1024 MB in blocks of 15625 KB in 17.115538 sec at 61264 KB=
-/sec
-bench: wrote 1024 MB in blocks of 122 MB in 12.281531 sec at 85378 KB/s=
-ec
-bench: wrote 1024 MB in blocks of 244 MB in 13.529501 sec at 77502 KB/s=
-ec
-bench: wrote 3814 MB in blocks of 488 MB in 30.909198 sec at 123 MB/sec
+  1 byte - version of this encoding
+  1 byte - incompat version.. the oldest code version we expect to be able 
+           to decode this
+  4 bytes - length of payload
+  ... data ...
 
-and in last case dstat show 'iozone-like iops'
+In general, when we decode, we verify that the incompat version is <= our 
+(code) version.  If not, we throw an exception.  Then we decode the 
+payload, using the version for any conditionals we need to (e.g. to skip 
+newly added fields, etc.).  We skip any data at the end.
 
- 100: 100: 100: 100|  0   0  94   6   0   0|   0   538M|   0   238
- 100: 100: 100: 100|  0   0  96   3   0   0|   0   525M|   0   133
- 100: 100: 100: 100|  0   2  95   3   0   0|   0   497M|   0   128
-18.0:39.0:30.0:27.0|  0   3  96   2   0   0|   0   144M|   0  40.0
-75.0:74.0:72.0:67.0|  0   3  95   2   0   0|   0   103M|   0  2698
- 100: 100: 100: 100|  0  13  83   4   0   0|   0   484M|   0   125
- 100: 100: 100: 100|  0   0 100   0   0   0|   0   486M|   0   124
- 100: 100: 100: 100|  0   3  88   9   0   0|   0   476M|   0   123
+When we revise an encoding, we should add new fields at the end, and in 
+general leave old fields in place, ideally with values that won't confuse 
+old code.  When that doesn't work, we'll eventually need to bump the 
+incompat version to write off old code.  This generally isn't a problem if 
+people are rolling forward frequently.  Only users to make big jumps will 
+have trouble having daemons with different versions interact (at least 
+when it comes to encoding; if protocols change that's another matter).
 
-Now question arises: how ceph can be tuned to gain such
-performance in normal operations, not in bench?
+When we can't handle a change with a compatible encoding change, we can 
+introduce a feature bits and conditionally encode old formats for old 
+peers.  This is just more work and eats into a more limited feature bit 
+space.
 
-2012/1/16 Andrey Stepachev <octo47@gmail.com>:
-> Hi all.
->
-> Last week I've investigate the status for hadoop on ceph.
-> I create some patches to remove some bugs and crashes.
-> Looks like it works. Even hbase works on top.
->
-> For reference all sources and patches are here
->
-> https://github.com/octo47/hadoop-common/tree/branch-1.0-ceph
-> https://github.com/octo47/ceph/tree/v0.40-hadoop
->
-> After YCSB and TestDSFIO work without crashes i start investigate
-> performance.
->
-> I have 5node cluster with 4 sata disks. btrfs. 24core on each.
-> raid. iozone shows up to 520MB/s.
->
-> Performance differs in 2-3 times. After some tests i see strange thin=
-g.
-> hadoop uses disk very close to iozone: small amount and iops and high
-> throughtput (same as iozone).
-> ceph uses very inefficient: huge amount of iops, up to 3 times less
-> throughtput (i think because of high amount of iops).
->
-> hadoop dstat output:
-> sda--sdb--sdc--sdd- ----total-cpu-usage---- -dsk/total- --io/total-
-> util:util:util:util|usr sys idl wai hiq siq| read =C2=A0writ| read =C2=
-=A0writ
-> =C2=A0100: 100: 100: 100| =C2=A01 =C2=A0 5 =C2=A083 =C2=A011 =C2=A0 0=
- =C2=A0 0| =C2=A0 0 =C2=A0 529M| =C2=A0 0 =C2=A0 247
-> =C2=A0100: 100: 100: 100| =C2=A01 =C2=A0 0 =C2=A083 =C2=A016 =C2=A0 0=
- =C2=A0 0| =C2=A0 0 =C2=A0 542M| =C2=A0 0 =C2=A0 168
-> =C2=A0100: 100: 100: 100| =C2=A01 =C2=A0 0 =C2=A081 =C2=A018 =C2=A0 0=
- =C2=A0 0| =C2=A028k =C2=A0518M|6.00 =C2=A0 149
-> =C2=A0100: 100: 100: 100| =C2=A01 =C2=A0 4 =C2=A077 =C2=A017 =C2=A0 0=
- =C2=A0 0| =C2=A0 0 =C2=A0 533M| =C2=A0 0 =C2=A0 243
-> =C2=A0100: 100: 100: 100| =C2=A01 =C2=A0 3 =C2=A083 =C2=A013 =C2=A0 0=
- =C2=A0 0| =C2=A0 0 =C2=A0 523M| =C2=A0 0 =C2=A0 264
->
-> ceph dstat output:
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D
-> sda--sdb--sdc--sdd- ----total-cpu-usage---- -dsk/total- --io/total-
-> util:util:util:util|usr sys idl wai hiq siq| read =C2=A0writ| read =C2=
-=A0writ
-> 68.0:70.0:79.0:76.0| =C2=A01 =C2=A0 2 =C2=A093 =C2=A0 4 =C2=A0 0 =C2=A0=
- 0| =C2=A0 0 =C2=A0 195M| =C2=A0 0 =C2=A01723
-> 86.0:85.0:93.0:91.0| =C2=A01 =C2=A0 2 =C2=A091 =C2=A0 5 =C2=A0 0 =C2=A0=
- 0| =C2=A0 0 =C2=A0 226M| =C2=A0 0 =C2=A01816
-> 85.0:85.0:85.0:84.0| =C2=A01 =C2=A0 3 =C2=A092 =C2=A0 4 =C2=A0 0 =C2=A0=
- 0| =C2=A0 0 =C2=A0 235M| =C2=A0 0 =C2=A02316
->
->
-> So, my question is: can someone point me:
-> a) can it be because of inefficient buffer size on osd part
-> (i tried to increase CephOutputStream buffer to 256kb, not helps)
-> b) what other problems can be and what options can i tune
-> to find out what is going on.
->
-> PS: i can't use iozone on kernel mounted fs. something
-> hang in kernel, only reboot helps.
-> in /var/log/messages i see attached kern.log.
->
->
->
-> --
-> Andrey.
+To make this painless, there are a few new macros to do the encode/decode 
+boilerplate.  If the encode/decode functions we originally
+
+ void pool_snap_info_t::encode(bufferlist& bl) const
+ {
+   __u8 struct_v = 1;
+   ::encode(struct_v, bl);
+   ::encode(snapid, bl);
+   ::encode(stamp, bl);
+   ::encode(name, bl);
+ }
+ 
+ void pool_snap_info_t::decode(bufferlist::iterator& bl)
+ {
+   __u8 struct_v;
+   ::decode(struct_v, bl);
+   ::decode(snapid, bl);
+   ::decode(stamp, bl);
+   ::decode(name, bl);
+ }
+
+then we would revise them to be
+
+ void pool_snap_info_t::encode(bufferlist& bl) const
+ {
+   ENCODE_START(2, 2, bl);
+
+New version is 2.  v1 code can't decode this, so the second argument 
+(incompat) is also 2.
+
+   ::encode(snapid, bl);
+   ::encode(stamp, bl);
+   ::encode(name, bl);
+   ::encode(new_thing, bl);
+   ENCODE_FINISH();
+ }
+ 
+ void pool_snap_info_t::decode(bufferlist::iterator& bl)
+ {
+   DECODE_START_LEGACY(2, bl, 2);
+
+We can still decode v1 code, but it doesn't have the (new) length and 
+incompat version fields, so use the _LEGACY macro.  The second 2 means we 
+started using the new approach with v2.
+
+   ::decode(snapid, bl);
+   ::decode(stamp, bl);
+   ::decode(name, bl);
+   if (struct_v >= 2)
+     ::decode(new_thing, bl);
+   DECODE_FINISH();
+ }
+
+This requires and initial incompat change to add the length and incompat 
+fields, but then we can generally add things without breakage.
+
+----
+
+The second question is how to test compatibility between different 
+versions of code.  There are a few parts to this.
+
+First, a ceph-dencoder tool is compiled for each version of the code that 
+is able to encode, decode, and dump (in json) whatever structures we 
+support.  It works something like this:
+
+  ceph-dencoder object_info_t -i inputfile decode dump_json
+
+to read in encoded data, decode it, and dump it into json.  We can do a 
+trivial identity check (that decode of encode matches) with
+
+  ceph-dencoder object_info_t -i inputfile decode dump_json > /tmp/a
+  ceph-dencoder object_info_t -i inputfile decode encode decode dump_json > /tmp/b
+  cmp /tmp/a tmp/b
+
+Obviously that should always pass.  For testing cross-version encoding, we 
+need a ceph-dencoder and a corpus of objects encoded for each version.  
+Assuming you have that, you can (a) make sure we can decode anything from 
+other versions without crashing, (b) compare the dumps between version and 
+whitelist changes (e.g., when fields are added or removed).  You can also 
+specify feature bits to test encoding for older versions, and take, say 
+everything for the v0.42 corpus, encode for the v0.40 feature bits, and 
+verify that the 0.40 version of ceph-dencoder can handle it.  And 
+verify+whitelist diffs.
+
+How to build the per-version corpus?  We can write unit tests that 
+explicitly generate interesting object instances.  That's tedious and time 
+consuming, but probably best, since the developer knows what corner cases 
+are interesting.
+
+Alternatively/additionally, a patch in wip-encoding instruments the 
+encode() wrapper to dump a sample of all encoded objects to a temporary 
+directory.  This lets you run the system for a while and quickly generate 
+a body of encoded objects that can feed the verification process above.  
+Some moderate human attention can pick a sample of those, or we can 
+randomly take the biggest, smallest, and something in between.. whatever 
+seems appropriate.
 
 
+Current status:
+ - The ceph-dencoder tool works.
+ - Capturing encoded objects works.
+ - New encode/decode macros are there.
+ - A simple shell script does some basic identity checks (decode of encode 
+   is the same).
 
---=20
-Andrey.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Still need:
+ - how to structure corpus
+ - scripts to do cross-version validation
+ - process for whitelisting differences
+ - some slightly special handline for Message, which doesn't use the 
+   standard encode/decode wrapper functions.
+
+I'm hoping for something that is relatively robust and also mostly 
+painless.  In particular, it would be nice to get some decent coverage 
+without a bit initial investment.  Currently, we just need to write dump() 
+functions and then add types to src/test/encoding/types.h.
+
+Thoughts on this approach?  
+
+sage
