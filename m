@@ -1,98 +1,115 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: 0.40 OSD - Address family not supported by protocol
-Date: Tue, 17 Jan 2012 14:25:10 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201171422010.24000@cobra.newdream.net>
-References: <20120114145550.GN4585@rcn.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: simplifying compound operations
+Date: Tue, 17 Jan 2012 15:28:34 -0800
+Message-ID: <CAF3hT9CPa49u3hktnROPbOrQ-_-9KTDDzk1DfNiRC4FiA3EXOA@mail.gmail.com>
+References: <Pine.LNX.4.64.1201121628360.18796@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52111 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755914Ab2AQWZN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jan 2012 17:25:13 -0500
-In-Reply-To: <20120114145550.GN4585@rcn.com>
+Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:62804 "EHLO
+	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755252Ab2AQX2f convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 17 Jan 2012 18:28:35 -0500
+Received: by obcva7 with SMTP id va7so6463181obc.19
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Jan 2012 15:28:34 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.64.1201121628360.18796@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Pieper <jjp@pobox.com>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Josh,
+I made some line notes on Github about this series, but apart from
+those it looks good; the design makes sense.
 
-I just sorted this out.  The problem was that the encoding for 
-OSDSuperblock was changed, and that struct was embedded in the MOSDBoot 
-message.  Some of your OSDs restarted befor the monitors, so the old 
-monitors saw the new structure and misdecoded the message with garbage 
-(well, zeros) for the heartbeat address.  This made it into the OSDMap, 
-and a very impolite assert in the messenger code made the process crash 
-when it got an error from socket(2).
+One other thing, though: we are going to need to rev the librados
+version for this, yes? So it should probably wait until our C bindings
+are complete.
+-Greg
 
-The assert and error handling is cleaned up.  There isn't a nice way to 
-fix the behavior of the old code, though, so for everyone else: 
-upgrade/restart the monitors before the osds to avoid triggering this.  If 
-you do, restarting the OSDs (possibly a couple of times) will clear it up.  
-Once all of the ':/0' values disappear from 'ceph osd dump' you're in the 
-clear.
-
-sage
-
-
-http://tracker.newdream.net/issues/1942
-
-On Sat, 14 Jan 2012, Josh Pieper wrote:
-
-> I just upgraded our test cluster to 0.40, and immediately after
-> starting up get asserts in all the OSDs.  I've inlined a relevant
-> backtrace below, is there anything else that would be useful for
-> debugging?
-> 
-> Our test cluster is 3 ubuntu 11.10 amd64 machines, each with a mon and
-> osd.
-> 
-> Looking at an strace, it is pretty clearly asking for an invalid
-> address family, although I'm not sure where it is coming from.
-> 
-> [pid 30648] socket(PF_UNSPEC, SOCK_STREAM, 0 <unfinished ...>
-> [pid 30648] <... socket resumed> )      = -1 EAFNOSUPPORT (Address family not supported by protocol)
-> 
-> -Josh
-> 
-> -------
-> 2012-01-14 09:31:03.395266 7f67edf08700 -- 10.1.10.71:6801/27529 >> 10.1.10.73:6801/8127 pipe(0x14e0780 sd=19 pgs=0 cs=0 l=0).connect claims to be 10.1.10.73:6801/24029 not 10.1.10.73:6801/8127 - wrong node!
-> 2012-01-14 09:31:03.395579 7f67ede07700 -- :/27530 >> :/0 pipe(0x14e0500 sd=-1 pgs=0 cs=0 l=0).connect couldn't created socket Address family not supported by protocol
-> msg/SimpleMessenger.cc: In function 'int SimpleMessenger::Pipe::connect()', in thread '7f67ede07700'
-> msg/SimpleMessenger.cc: 1038: FAILED assert(0)
->  ceph version 0.40 (commit:7eea40ea37fb3a68a2042a2218c9b8c9c40a843e)
->  1: (SimpleMessenger::Pipe::connect()+0x87c) [0x5be81c]
->  2: (SimpleMessenger::Pipe::writer()+0x456) [0x5c1536]
->  3: (SimpleMessenger::Pipe::Writer::entry()+0xd) [0x4b228d]
->  4: (()+0x7efc) [0x7f67ffdf4efc]
->  5: (clone()+0x6d) [0x7f67fe42589d]
->  ceph version 0.40 (commit:7eea40ea37fb3a68a2042a2218c9b8c9c40a843e)
->  1: (SimpleMessenger::Pipe::connect()+0x87c) [0x5be81c]
->  2: (SimpleMessenger::Pipe::writer()+0x456) [0x5c1536]
->  3: (SimpleMessenger::Pipe::Writer::entry()+0xd) [0x4b228d]
->  4: (()+0x7efc) [0x7f67ffdf4efc]
->  5: (clone()+0x6d) [0x7f67fe42589d]
-> *** Caught signal (Aborted) **
->  in thread 7f67ede07700
->  ceph version 0.40 (commit:7eea40ea37fb3a68a2042a2218c9b8c9c40a843e)
->  1: /usr/bin/ceph-osd() [0x5fd926]
->  2: (()+0x10060) [0x7f67ffdfd060]
->  3: (gsignal()+0x35) [0x7f67fe37a3a5]
->  4: (abort()+0x17b) [0x7f67fe37db0b]
->  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f67fec38d7d]
->  6: (()+0xb9f26) [0x7f67fec36f26]
->  7: (()+0xb9f53) [0x7f67fec36f53]
->  8: (()+0xba04e) [0x7f67fec3704e]
->  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x193) [0x5cfd33]
->  10: (SimpleMessenger::Pipe::connect()+0x87c) [0x5be81c]
->  11: (SimpleMessenger::Pipe::writer()+0x456) [0x5c1536]
->  12: (SimpleMessenger::Pipe::Writer::entry()+0xd) [0x4b228d]
->  13: (()+0x7efc) [0x7f67ffdf4efc]
->  14: (clone()+0x6d) [0x7f67fe42589d]
+On Thu, Jan 12, 2012 at 4:40 PM, Sage Weil <sage@newdream.net> wrote:
+> One of the features of the Ceph OSDs is the ability to do complex com=
+pound
+> operations atomically. =A0Things like "write object + set xattr" or "=
+read
+> xattr + read object data" or even "verify xattr foo =3D bar, and if s=
+o,
+> write object data".
+>
+> Compound operations are built as a vector<OSDOp>, where each OSDOp ha=
+s the
+> description of the operation and an input bufferlist. =A0For results,
+> however, results accumulate in a single buffer and the caller is
+> responsible for picking through the pile for the results of those
+> operations. =A0That clearly sucks.
+>
+> Enter wip-op-data-mux branch,
+> =A0 =A0 =A0 =A0https://github.com/NewDreamNetwork/ceph/commits/wip-op=
+-data-mux
+>
+> First, we rename OSDOp::data -> indata, and add an outdata. =A0We als=
+o add
+> an rval so you can get the result code for individual operations. =A0=
+The
+> MOSDOpReply message encoding is updated to pass that over the wire to=
+ the
+> client. =A0(This is upwards and downwards compatible change.)
+>
+> =A0 =A0 =A0 =A0https://github.com/NewDreamNetwork/ceph/commit/a855828=
+4db178cfaf07a20bc475e7366c7903ffd
+>
+> The OSD is updated to actually put results in those OSDOp fields:
+>
+> =A0 =A0 =A0 =A0https://github.com/NewDreamNetwork/ceph/commit/ff55d2f=
+310312bb5390326dcc35961d39ccad416
+>
+> Conveniently, that change doesn't actually affect the resulting encod=
+ing
+> for old clients, except that the OSDOp::op::payload_len is now filled=
+ in
+> properly--and nobody ever looked at that before. =A0Old (and new) cli=
+ents
+> will still see the haystack.
+>
+> Then, we extend the Objecter (client-side) ObjectOperation methods fo=
+r
+> read operations (read(..), getxattr(..), etc.) to take pointer argume=
+nts
+> for where the results go:
+>
+> =A0 =A0 =A0 =A0https://github.com/NewDreamNetwork/ceph/commit/fe07783=
+2b915175b8ed7880c1fa285309c642563
+>
+> and the Objecter will sift through the haystack and fill those guys i=
+n
+> when the reply comes back.
+>
+> Finally, the librados ObjectReadOperations are similarly updated:
+>
+> =A0 =A0 =A0 =A0https://github.com/NewDreamNetwork/ceph/commit/920bd56=
+85c195e0a3c1c3c43f124fe904a73c9b3
+>
+> Currently the arguments are optional, but I'm updating the rgw caller=
+s now
+> and it makes things _way_ cleaner. =A0It's probably best to make them
+> required so that librados users don't need to have internal knowledge=
+ of
+> how we encoding things over the wire, e.g. for things like stat().
+>
+> I haven't finished testing this yet. =A0Mainly I want to know if the
+> Objecter internal API and librados external API changes make sense.
+> And/or if there are any alternative ideas about how this should be
+> approached...
+>
+> sage
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
