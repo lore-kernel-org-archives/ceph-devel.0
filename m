@@ -1,115 +1,98 @@
-From: Andrey Stepachev <octo47@gmail.com>
-Subject: Re: [PATCH] wrong unix timestamp calculation in hadoop lib
-Date: Wed, 18 Jan 2012 01:37:58 +0400
-Message-ID: <CAADCt4KR=wZ5V_O3Sq2s7DWJoTtrW7joj_H2Hsp3+Ap2e4JDXg@mail.gmail.com>
-References: <1326467544-19913-1-git-send-email-octo47@gmail.com>
- <CAB2gnbVFEasWwccsj7FhffuOG3cxOC18u-oNzDtXhoF=iXVx1A@mail.gmail.com>
- <CAADCt4Lm91UdEiZUoBD7LTK33BDEZJMJNqcGmrZy81tP+nxy3g@mail.gmail.com>
- <CAB2gnbW8opiPaAYS7+x31AW2eVGVHqx+_-F_8JWD0V_4gB8e_Q@mail.gmail.com> <CAF3hT9AAnMsUgeOTzPt12WE8=ZHGkgVgzOOj=LJ5pQ_TxJO+uA@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: 0.40 OSD - Address family not supported by protocol
+Date: Tue, 17 Jan 2012 14:25:10 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201171422010.24000@cobra.newdream.net>
+References: <20120114145550.GN4585@rcn.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:39210 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932069Ab2AQViU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jan 2012 16:38:20 -0500
-Received: by werb14 with SMTP id b14so1494564wer.19
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Jan 2012 13:38:19 -0800 (PST)
-In-Reply-To: <CAF3hT9AAnMsUgeOTzPt12WE8=ZHGkgVgzOOj=LJ5pQ_TxJO+uA@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:52111 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755914Ab2AQWZN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jan 2012 17:25:13 -0500
+In-Reply-To: <20120114145550.GN4585@rcn.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: Noah Watkins <noahwatkins@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Josh Pieper <jjp@pobox.com>
+Cc: ceph-devel@vger.kernel.org
 
-2012/1/18 Gregory Farnum <gregory.farnum@dreamhost.com>:
-> I pulled this patch into master. Thanks, Andrey!
->
-> On Fri, Jan 13, 2012 at 4:04 PM, Noah Watkins <noahwatkins@gmail.com>=
- wrote:
->> On Fri, Jan 13, 2012 at 14:33, Andrey Stepachev <octo47@gmail.com> w=
-rote:
->>> 2012/1/14 Noah Watkins <noahwatkins@gmail.com>:
->>>> On Fri, Jan 13, 2012 at 07:12, Andrey Stepachev <octo47@gmail.com>=
- wrote:
->>>>> From: Andrey Stepachev <octo@yandex-team.ru>
->>>>>
->>>>> Hadoop always see wrong dates due of wrong timestamp calculation.
->>>>> Possibly fixes #1666.
->>>>
->>>> Using coarse-grained timestamps might mask the problem in 1666. Bu=
-t it
->>>> would only work in certain circumstances such as when clock sync s=
-kew
->>>> is sufficiently small, and I think edge conditions would continue =
-to
->>>> exist.
->>>
->>> No. It is really bug. Not a coarse grained solution.
->>> Here is really bug, because if we don't divide we get
->>> not milliseconds, we'll got seconds. In my test environment
->>> i have time difference up to several hours.
->>>
->>> Java uses millis, so we must divide nanos to get millis.
->>> =C2=A0java_mtime +=3D st.st_mtim.tv_nsec / 1000;
->>>
->>>> A more robust solution is probably needed for #1666 :(
->>>
->>> How about new function ceph_lstat_nocache, which
->>> in turn will call lstat with flags =3D=3D 0. In that case
->>> _get_attr always will query MDS (if I understand code,
->>> but I can be wrong). It is a performance hit, but
->>> hadoop should work.
->>> We can ever do lstat twice and get the biggest
->>> mtime.
->>
->> Yeh, we need some way to refresh the cached stats at the client (if =
-i
->> remember 1666 correctly). If you are running into this issue there i=
-s
->> a small hack for Hadoop that you an apply (it's on the wiki) until
->> something for 1666 is figured out. By the way, these JNI wrappers ar=
-e
->> being rewritten to be Hadoop agnostic (pure libcephfs), and the code
->> is at github.com/noahdesu/java-cephfs -- I was just getting ready to
->> port the stat code, so it is nice you brought this issue back up :)
->>
->>>
->>>>
->>>>>
->>>>> Signed-off-by: Andrey Stepachev <octo@yandex-team.ru>
->>>>>
->>>>> ---
->>>>> =C2=A0src/client/hadoop/CephFSInterface.cc | =C2=A0 =C2=A08 ++++-=
----
->>>>> =C2=A01 files changed, 4 insertions(+), 4 deletions(-)
->>>>>
->>>>> - =C2=A0long long java_mtime(st.st_mtime);
->>>>> + =C2=A0long long java_mtime(st.st_mtim.tv_sec);
->>>>
->>>> mtime vs mtim: the later is non-portable?
->>>
->>> Yeah. Yes. This can be safely removed from patch.
->
-> Is this something I should fix? It's presumably not a big problem
-> since the older code had references to "tv_mtim", but I'm not too
-> familiar with the history of *nix structs...
+Hi Josh,
 
-I'm not a big guru too, but st_atim.tv_nsec used in code,
-so it looks more consistent to use st_atim.tv_sec, then
-st_atime (which is a macro). Accroding to stat.h if
-we havn't st_atim, code will not compile, because we try
-to access st_mtim.tv_nsec.
-So, I think that my original patch is preferable.
+I just sorted this out.  The problem was that the encoding for 
+OSDSuperblock was changed, and that struct was embedded in the MOSDBoot 
+message.  Some of your OSDs restarted befor the monitors, so the old 
+monitors saw the new structure and misdecoded the message with garbage 
+(well, zeros) for the heartbeat address.  This made it into the OSDMap, 
+and a very impolite assert in the messenger code made the process crash 
+when it got an error from socket(2).
 
-> -Greg
+The assert and error handling is cleaned up.  There isn't a nice way to 
+fix the behavior of the old code, though, so for everyone else: 
+upgrade/restart the monitors before the osds to avoid triggering this.  If 
+you do, restarting the OSDs (possibly a couple of times) will clear it up.  
+Once all of the ':/0' values disappear from 'ceph osd dump' you're in the 
+clear.
+
+sage
 
 
+http://tracker.newdream.net/issues/1942
 
---=20
-Andrey.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Sat, 14 Jan 2012, Josh Pieper wrote:
+
+> I just upgraded our test cluster to 0.40, and immediately after
+> starting up get asserts in all the OSDs.  I've inlined a relevant
+> backtrace below, is there anything else that would be useful for
+> debugging?
+> 
+> Our test cluster is 3 ubuntu 11.10 amd64 machines, each with a mon and
+> osd.
+> 
+> Looking at an strace, it is pretty clearly asking for an invalid
+> address family, although I'm not sure where it is coming from.
+> 
+> [pid 30648] socket(PF_UNSPEC, SOCK_STREAM, 0 <unfinished ...>
+> [pid 30648] <... socket resumed> )      = -1 EAFNOSUPPORT (Address family not supported by protocol)
+> 
+> -Josh
+> 
+> -------
+> 2012-01-14 09:31:03.395266 7f67edf08700 -- 10.1.10.71:6801/27529 >> 10.1.10.73:6801/8127 pipe(0x14e0780 sd=19 pgs=0 cs=0 l=0).connect claims to be 10.1.10.73:6801/24029 not 10.1.10.73:6801/8127 - wrong node!
+> 2012-01-14 09:31:03.395579 7f67ede07700 -- :/27530 >> :/0 pipe(0x14e0500 sd=-1 pgs=0 cs=0 l=0).connect couldn't created socket Address family not supported by protocol
+> msg/SimpleMessenger.cc: In function 'int SimpleMessenger::Pipe::connect()', in thread '7f67ede07700'
+> msg/SimpleMessenger.cc: 1038: FAILED assert(0)
+>  ceph version 0.40 (commit:7eea40ea37fb3a68a2042a2218c9b8c9c40a843e)
+>  1: (SimpleMessenger::Pipe::connect()+0x87c) [0x5be81c]
+>  2: (SimpleMessenger::Pipe::writer()+0x456) [0x5c1536]
+>  3: (SimpleMessenger::Pipe::Writer::entry()+0xd) [0x4b228d]
+>  4: (()+0x7efc) [0x7f67ffdf4efc]
+>  5: (clone()+0x6d) [0x7f67fe42589d]
+>  ceph version 0.40 (commit:7eea40ea37fb3a68a2042a2218c9b8c9c40a843e)
+>  1: (SimpleMessenger::Pipe::connect()+0x87c) [0x5be81c]
+>  2: (SimpleMessenger::Pipe::writer()+0x456) [0x5c1536]
+>  3: (SimpleMessenger::Pipe::Writer::entry()+0xd) [0x4b228d]
+>  4: (()+0x7efc) [0x7f67ffdf4efc]
+>  5: (clone()+0x6d) [0x7f67fe42589d]
+> *** Caught signal (Aborted) **
+>  in thread 7f67ede07700
+>  ceph version 0.40 (commit:7eea40ea37fb3a68a2042a2218c9b8c9c40a843e)
+>  1: /usr/bin/ceph-osd() [0x5fd926]
+>  2: (()+0x10060) [0x7f67ffdfd060]
+>  3: (gsignal()+0x35) [0x7f67fe37a3a5]
+>  4: (abort()+0x17b) [0x7f67fe37db0b]
+>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f67fec38d7d]
+>  6: (()+0xb9f26) [0x7f67fec36f26]
+>  7: (()+0xb9f53) [0x7f67fec36f53]
+>  8: (()+0xba04e) [0x7f67fec3704e]
+>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x193) [0x5cfd33]
+>  10: (SimpleMessenger::Pipe::connect()+0x87c) [0x5be81c]
+>  11: (SimpleMessenger::Pipe::writer()+0x456) [0x5c1536]
+>  12: (SimpleMessenger::Pipe::Writer::entry()+0xd) [0x4b228d]
+>  13: (()+0x7efc) [0x7f67ffdf4efc]
+>  14: (clone()+0x6d) [0x7f67fe42589d]
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
