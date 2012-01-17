@@ -1,84 +1,67 @@
-From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-Subject: [PATCH] [ceph spec] package *.py* files
-Date: Tue, 17 Jan 2012 17:22:17 -0200
-Message-ID: <orboq2w2vq.fsf@livre.localdomain>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: [PATCH] check for valid filehandler, before using in next calls
+Date: Tue, 17 Jan 2012 13:19:34 -0800
+Message-ID: <CAF3hT9Cs6NDcC77p-=aubMD2VByta5YUXpXkmQUEYpVd+x+dMQ@mail.gmail.com>
+References: <1326455916-28463-1-git-send-email-octo@yandex-team.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:35550 "EHLO
-	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755557Ab2AQUNr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 17 Jan 2012 15:13:47 -0500
-Received: from freie (gw-to-emilia.oliva.athome.lsd.ic.unicamp.br [172.31.160.17] (may be forged))
-	by boneca.lsd.ic.unicamp.br (8.14.5/8.14.5) with ESMTP id q0HJMJ3K018684
-	for <ceph-devel@vger.kernel.org>; Tue, 17 Jan 2012 17:22:19 -0200
-Received: from livre.localdomain (livre-to-gw.oliva.athome.lsd.ic.unicamp.br [172.31.160.19])
-	by freie (8.14.5/8.14.5) with ESMTP id q0HJMJkV016290
-	for <ceph-devel@vger.kernel.org>; Tue, 17 Jan 2012 17:22:19 -0200
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:60317 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755556Ab2AQVTe convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jan 2012 16:19:34 -0500
+Received: by iagf6 with SMTP id f6so4816716iag.19
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Jan 2012 13:19:34 -0800 (PST)
+In-Reply-To: <1326455916-28463-1-git-send-email-octo@yandex-team.ru>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Andrey Stepachev <octo@yandex-team.ru>
+Cc: ceph-devel@vger.kernel.org
 
-Some post-install rpmbuild defaults byte-compile all packaged python
-files, so don't bother removing the .pyc files, and package .py* to
-get both .pyo and .pyc.  It wastes a tiny little bit of space, but it
-makes the spec file portable across a wider range of rpm and python
-configurations.
+Merged this to master; thanks!
+-Greg
 
-Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicam.br>
----
- ceph.spec.in |   19 +++----------------
- 1 files changed, 3 insertions(+), 16 deletions(-)
-
-diff --git a/ceph.spec.in b/ceph.spec.in
-index 3950fd1..d4994b5 100644
---- a/ceph.spec.in
-+++ b/ceph.spec.in
-@@ -255,10 +255,6 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/lib/ceph/tmp/
- mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log/ceph/
- mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/run/ceph/
- mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/ceph/
--# remove *.pyc where *.pyo exists
--rm $RPM_BUILD_ROOT/%{python_sitelib}/rados.pyc
--rm $RPM_BUILD_ROOT/%{python_sitelib}/rbd.pyc
--rm $RPM_BUILD_ROOT/%{python_sitelib}/rgw.pyc
- 
- %clean
- rm -rf $RPM_BUILD_ROOT
-@@ -351,12 +347,6 @@ fi
- %ghost %dir %{_localstatedir}/run/ceph/
- %dir %{_sysconfdir}/ceph/
- /usr/sbin/rcceph
--# not sure why I need to list those for CentOS although they're removed in install
--%if 0%{defined centos_version}
--%{python_sitelib}/rados.pyc
--%{python_sitelib}/rbd.pyc
--%{python_sitelib}/rgw.pyc
--%endif
- %{_libdir}/rados-classes/libcls_rbd.so.*
- %{_libdir}/rados-classes/libcls_rgw.so.*
- 
-@@ -483,11 +473,8 @@ fi
- #################################################################################
- %files -n python-ceph
- %defattr(-,root,root,-)
--%{python_sitelib}/rados.py
--%{python_sitelib}/rados.pyo
--%{python_sitelib}/rbd.py
--%{python_sitelib}/rbd.pyo
--%{python_sitelib}/rgw.py
--%{python_sitelib}/rgw.pyo
-+%{python_sitelib}/rados.py*
-+%{python_sitelib}/rbd.py*
-+%{python_sitelib}/rgw.py*
- 
- %changelog
--- 
-1.7.7.5
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+On Fri, Jan 13, 2012 at 3:58 AM, Andrey Stepachev <octo@yandex-team.ru>=
+ wrote:
+> In case of nonexistent file, calling Client::replication()
+> triggers assert.
+>
+> Signed-off-by: Andrey Stepachev <octo@yandex-team.ru>
+> ---
+> =A0src/client/hadoop/CephFSInterface.cc | =A0 =A05 ++++-
+> =A01 files changed, 4 insertions(+), 1 deletions(-)
+>
+> diff --git a/src/client/hadoop/CephFSInterface.cc b/src/client/hadoop=
+/CephFSInterface.cc
+> index 4a050f2..5ffca64 100644
+> --- a/src/client/hadoop/CephFSInterface.cc
+> +++ b/src/client/hadoop/CephFSInterface.cc
+> @@ -750,9 +750,12 @@ JNIEXPORT jint JNICALL Java_org_apache_hadoop_fs=
+_ceph_CephTalker_ceph_1replicati
+> =A0 ceph_mount_info *cmount =3D get_ceph_mount_t(env, obj);
+> =A0 int fh =3D 0;
+> =A0 fh =3D ceph_open(cmount, c_path, O_RDONLY, 0);
+> + =A0env->ReleaseStringUTFChars(j_path, c_path);
+> + =A0if (fh < 0) {
+> + =A0 =A0 =A0 =A0 return fh;
+> + =A0}
+> =A0 int replication =3D ceph_get_file_replication(cmount, fh);
+> =A0 ceph_close(cmount, fh);
+> - =A0env->ReleaseStringUTFChars(j_path, c_path);
+> =A0 return replication;
+> =A0}
+>
+> --
+> 1.7.5.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
