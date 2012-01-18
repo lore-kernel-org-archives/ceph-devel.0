@@ -1,87 +1,57 @@
-From: Andrey Stepachev <octo47@gmail.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
 Subject: Re: How to remove lost objects.
-Date: Thu, 19 Jan 2012 01:57:02 +0400
-Message-ID: <CAADCt4LJY5LTqCcSv2XegEUvoRFJmrVFbE9gZzyAUVkAWwdDpg@mail.gmail.com>
+Date: Wed, 18 Jan 2012 14:18:57 -0800
+Message-ID: <CAORUGqCXBZiADpz_y=dROMJRWn++Ae6g6eVJ6HCLdPpw0HmbRQ@mail.gmail.com>
 References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
  <CAORUGqAj-2k+8cvzxwVwDb32upEdv_FFAc96-05fiyVRF3qE6g@mail.gmail.com>
- <CAADCt4JEEjhmsKem2M0-7auyx5wh2UGd7YLAtDYhiofkFSkkoA@mail.gmail.com> <CAORUGqCmhjMh6YpsS_5uaKh9OxHjoqwWSXhnZTh2JD5vpixvPw@mail.gmail.com>
+ <CAADCt4JEEjhmsKem2M0-7auyx5wh2UGd7YLAtDYhiofkFSkkoA@mail.gmail.com>
+ <CAORUGqCmhjMh6YpsS_5uaKh9OxHjoqwWSXhnZTh2JD5vpixvPw@mail.gmail.com> <CAADCt4LJY5LTqCcSv2XegEUvoRFJmrVFbE9gZzyAUVkAWwdDpg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:61287 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752867Ab2ARV5Y convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 16:57:24 -0500
-Received: by wibhm6 with SMTP id hm6so2588823wib.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 13:57:23 -0800 (PST)
-In-Reply-To: <CAORUGqCmhjMh6YpsS_5uaKh9OxHjoqwWSXhnZTh2JD5vpixvPw@mail.gmail.com>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:34682 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753775Ab2ARWTT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 17:19:19 -0500
+Received: by werb13 with SMTP id b13so764826wer.19
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 14:19:18 -0800 (PST)
+In-Reply-To: <CAADCt4LJY5LTqCcSv2XegEUvoRFJmrVFbE9gZzyAUVkAWwdDpg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+To: Andrey Stepachev <octo47@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-2012/1/19 Tommi Virtanen <tommi.virtanen@dreamhost.com>:
-> On Wed, Jan 18, 2012 at 12:45, Andrey Stepachev <octo47@gmail.com> wr=
-ote:
->> I understand this. But I want to know, how ceph will react on
->> some =C2=A0bad conditions. I don't want to lost my data because
->> of some broken hardware (like switch) do some bad things on
->> my cluster. (so far, ceph looks good event in such bad environment).
->
-> When a node becomes unreachable / equivalently slow, Ceph clients wil=
-l
-> wait for it. After a brief period of time, the node is declared down,
-> and the operations will continue -- the Placement Group(s) involved
-> will be in degraded mode, and you won't have all the replicas of the
-> data you want. Once the node recovers (goes up) or is declared lost
-> (goes out), replicas of the relevant data will be placed elsewhere.
-> Either way, once the data is at the desired replication level again,
-> the PG gets out of degraded mode.
+On Wed, Jan 18, 2012 at 13:57, Andrey Stepachev <octo47@gmail.com> wrote:
+> Thanks for clarification. I don't dig yet, how data moved when osd
+> marked as out and how pg calculated for this data. (in other words,
+> how new place for missing replica calculated, and what happens,
+> when out osd returns back)
 
-Thanks for clarification. I don't dig yet, how data moved when osd
-marked as out and how pg calculated for this data. (in other words,
-how new place for missing replica calculated, and what happens,
-when out osd returns back)
+That would be the CRUSH algorithm just getting a different cluster
+state as input, and thus deciding on a new location for (some of) the
+data. At that point, any data that needs to be migrated, would be
+migrated. If the same osd id returns (on new hardware or old), once
+it's marked "in", the CRUSH algorithm will again start placing data on
+it. Whether that's the same set of data or not depends on whether
+anything else changed in the cluster, in the meanwhile.
 
->
-> We don't recommend running Ceph in a WAN scenario. If you care about
-> your not losing your data, you should still be able to build
-> independent failure domains just by using different rows/areas/racks
-> in a single data center. Low latency and high bandwidth are very
-> desirable. Ceph does synchronous replication instead of the more
-> common "slave trails the master by some unknown amount of operations"=
-=2E
+Currently, CRUSH is best described in the academic papers about Ceph.
+There's a quick braindump/simplified explanation at
+http://ceph.newdream.net/docs/latest/dev/placement-group/
 
-We don't try to use Ceph in true WAN. But we try to find some dfs, whic=
-h will
-operate well in our environment: multiple dc, relatively low latency
-(<10ms as average),
-irregular dc outages. And we need synchronous replication and we need
-bigtable (hbase in case of ceph).
-I believe, that ceph can be configured to operate in such environment, =
-but
-I can be completely wrong. And I try to check some boundary conditions.
+> We don't try to use Ceph in true WAN. But we try to find some dfs, which will
+> operate well in our environment: multiple dc, relatively low latency
+> (<10ms as average),
+> irregular dc outages. And we need synchronous replication and we need
+> bigtable (hbase in case of ceph).
+> I believe, that ceph can be configured to operate in such environment, but
+> I can be completely wrong. And I try to check some boundary conditions.
 
->
->>> Object removal is done in the background. Give it some time, and go=
-od
->>> networking, and you should get the free space back.
->> So, I can't 'trigger' this procedure?
->> (I can't find good docs about scrub and repair, so I still don't
->> know what they do exactly).
->
-> It's triggered automatically, just give it idle time and it should ge=
-t it done.
+As long as you understand that network blip translates to storage
+blip, with Ceph. That is, we don't just write to master and hope that
+replication catches up at some later time.
 
-Yeah, it is good to see some progress (like mdadm shows), but it is not
-critical. Can you point me, who does this job. MDS?
+> Yeah, it is good to see some progress (like mdadm shows), but it is not
+> critical. Can you point me, who does this job. MDS?
 
-
---=20
-Andrey.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This is answered in http://ceph.newdream.net/docs/latest/dev/delayed-delete/
