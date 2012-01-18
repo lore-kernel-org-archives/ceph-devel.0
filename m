@@ -1,48 +1,38 @@
-From: Andrey Stepachev <octo47@gmail.com>
-Subject: How to remove lost objects.
-Date: Wed, 18 Jan 2012 19:37:17 +0400
-Message-ID: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: Adding new mon to existing cluster in ceph v0.39(+?)
+Date: Wed, 18 Jan 2012 08:37:44 -0800
+Message-ID: <CAORUGqDZaPVu2vVw_pQie-r32ZLzOaW_K6ypDk7tuoeKpJZ9yA@mail.gmail.com>
+References: <CAMwB3TgxYQ8BsLCfTp+6-ZB_g0V4VGGDFqLxvxKmo3773CTwiA@mail.gmail.com>
+ <CACLRD_1-ur_e4HMB4mp_FRiNzB2j8e_3N=L7Wt2feRnX3hzNQg@mail.gmail.com> <CAMwB3TgyYOfxGLFUiYc4qz1Av1ut+v=XS4rZ6D4kTWkUST0ubA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f42.google.com ([74.125.82.42]:45325 "EHLO
-	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752536Ab2ARPhj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 10:37:39 -0500
-Received: by wgbgn7 with SMTP id gn7so3723140wgb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 07:37:38 -0800 (PST)
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:39739 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757976Ab2ARQiI convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 11:38:08 -0500
+Received: by wibhm6 with SMTP id hm6so2354293wib.19
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 08:38:06 -0800 (PST)
+In-Reply-To: <CAMwB3TgyYOfxGLFUiYc4qz1Av1ut+v=XS4rZ6D4kTWkUST0ubA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?Q?S=C5=82awomir_Skowron?= <slawomir.skowron@gmail.com>
+Cc: Samuel Just <sam.just@dreamhost.com>, ceph-devel@vger.kernel.org
 
-Hi,
+2012/1/18 S=C5=82awomir Skowron <slawomir.skowron@gmail.com>:
+> Now i don't remember message but it was about a public-addr of mon in
+> conf, and problem with no new mon in monmap. My mon section looks lik=
+e
+> this:
 
-I've test ceph against laggy network. (0ms-400ms delays).
-At some moment i got many messages like:
-2012-01-18 16:06:49.184776 7ff134119700 -- 84.201.161.73:6801/25424
-send_message dropped message osd_op_reply(291 1000000101b.0000001e
-[write 66734080~37
-4784] ondisk = 0) v1 because of no pipe on con 0x315e640
-And ceph don't respond on ls on some of subdirs (via hadoop fs -ls or
-kernel client)
-My cluster runs with no debug at that moment, so I can't find what is going on.
-
-After restart ceph writes to log
-2012-01-18 16:10:39.985509 7f217989d780 osd.1 155 pg[0.155( v 136'373
-(94'368,136'373]+backlog n=3 ec=1 les/c 150/145 146/151/58) [] r=0
-lpr=0 (info mismatch, log(94'368,0'0]+backlog) (log bound mismatch,
-actual=[8'124,94'369]) lcod 0'0 mlcod 0'0 inactive] read_log  got dup
-94'369 (last was 94'369, dropping that one)
-
-After such strange hangouts i found, that rm -rf on filesystem
-(mounted via kernel),
-fs shows, that 210Gb still in use. Looking at /data/osd.x i found many
-objects inside.
-So:
-a) looks like some errors lead us to orphaned objects in rados
-b) i can't find utility, which can check that orpaned data (and cleanup it)
-
-Question: how I can identify what objects are, and how I can clean up them.
-
--- 
-Andrey.
+I honestly can't tell from this email if you're still having trouble.
+If http://ceph.newdream.net/docs/latest/ops/manage/grow/mon/ on a
+fresh install doesn't help you along, please show exactly what
+commands you ran, what output you got, and what you expected to see
+instead. We want to help, but need specifics to be able to do that.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
