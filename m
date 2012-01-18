@@ -1,65 +1,61 @@
-From: Neil Horman <nhorman@tuxdriver.com>
-Subject: [PATCH] Convert mount.ceph to use KEY_SPEC_PROCESS_KEYRING
-Date: Wed, 18 Jan 2012 12:00:14 -0500
-Message-ID: <1326906014-20896-1-git-send-email-nhorman@tuxdriver.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: another Problem / question
+Date: Wed, 18 Jan 2012 09:04:12 -0800
+Message-ID: <CAORUGqCsMHbqy+ALn9huvOnZG0Rzy+uMPNNx5q+KZWcyU0Oz4A@mail.gmail.com>
+References: <4F16C582.7010403@filoo.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from charlotte.tuxdriver.com ([70.61.120.58]:43316 "EHLO
-	smtp.tuxdriver.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932214Ab2ARRA2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 12:00:28 -0500
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:56086 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932196Ab2ARREd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 12:04:33 -0500
+Received: by mail-ww0-f44.google.com with SMTP id dq11so3434794wgb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 09:04:33 -0800 (PST)
+In-Reply-To: <4F16C582.7010403@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Neil Horman <nhorman@tuxdriver.com>, Josh Durgin <josh.durgin@dreamhost.com>
+To: =?UTF-8?Q?Jens_Rehp=C3=B6hler?= <jens.rehpoehler@filoo.de>
+Cc: ceph-devel@vger.kernel.org
 
-having mount.ceph use KEY_SPEC_USER_KEYRING to pass keys to the kernel has
-several disadvantages:
+On Wed, Jan 18, 2012 at 05:13, Jens Rehp=C3=B6hler <jens.rehpoehler@fil=
+oo.de> wrote:
+> Hi all,
+>
+> todo i've done few performance tests with my two clusters.
+>
+> I've used : rados -p data load-gen --run-length 10 --target-throughpu=
+t 50
+>
+> to generate some load. Now i have a question regarding "ceph -w" outp=
+ut.
+>
+> The output before the test was:
+>
+> 2012-01-18 11:55:28.621107 =C2=A0 =C2=A0pg v113011: 594 pgs: 594 peer=
+ing; 61022 MB
+> data, 120 GB used, 244 GB / 372 GB avail
+>
+> here is the output after the test:
+>
+> 2012-01-18 13:53:30.190602 =C2=A0 =C2=A0pg v113119: 594 pgs: 594 acti=
+ve+clean;
+> 1058 GB data, 120 GB used, 244 GB / 372 GB avail
+>
+> How can i have more Data then the available discspace ? Is there any
+> possiblity to identify the rados objects of this test and delete them
+> manualy ?
 
-1) It leaves the key setting in the uid_keyring, which is reachable from the
-session keyring via a link (see keyctl list <root session keyring ref>).  This
-means its accessible to other processes in the same session that don't need
-access to it, even after the kernel is done with it.
+A quick read of the source seems to say "rados load-gen" writes at
+random offsets..
 
-2) The user keyring has some very counter-intuitive semantics as far as keyring
-permissions goes.  The user keyring is access via a link from the session
-keyring, which a process may not have permission to access in some situations.
-For instance if mount.ceph is executed via su without having started a new
-session, mount.ceph will not have access to the uid keyring unless the calling
-proces (in this case su) has granted access permission.  The result is a -EPERM
-error when executing mount.ceph to a cephx enabled server.  If the same command
-is attempted in a new root session (e.g. su - or su -l), the mount command will
-work fine
+  size_t off =3D get_random(0, info.len);
 
-Switching the mount.ceph command to use the KEY_SPEC_PROCESS_KEYRING solves both
-of these problems.  By using this keyring, accessibility is guaranteed because
-its added and accessed in the same process context both in user space and the
-kernel, assuring aceesability, despite the session specifics.  It also ensures
-that the key will get cleaned up after the mount.ceph process exits
-automatically, since there is no longer a need for it (the kernel clones the key
-during the mount process and releases it on unmount).
-
-I've tested this here on my local ceph cluster, and it works properly under both
-su and su -l .
-
-Signed-off-by: Neil Horman <nhorman@tuxdriver.com>
-CC: Josh Durgin <josh.durgin@dreamhost.com>
----
- src/common/secret.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/src/common/secret.c b/src/common/secret.c
-index 70c8794..365782f 100644
---- a/src/common/secret.c
-+++ b/src/common/secret.c
-@@ -65,7 +65,7 @@ static int set_kernel_secret(const char *secret, const char *key_name)
-     return ret;
-   }
- 
--  serial = add_key("ceph", key_name, payload, sizeof(payload), KEY_SPEC_USER_KEYRING);
-+  serial = add_key("ceph", key_name, payload, sizeof(payload), KEY_SPEC_PROCESS_KEYRING);
-   if (serial == -1) {
-     ret = -errno;
-   }
--- 
-1.7.7.5
-
+which means you have a lot of sparse objects. And that makes the "1058
+GB data, 120 GB used" make sense.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
