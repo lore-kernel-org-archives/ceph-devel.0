@@ -1,59 +1,71 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: another Problem / question
-Date: Wed, 18 Jan 2012 09:04:12 -0800
-Message-ID: <CAORUGqCsMHbqy+ALn9huvOnZG0Rzy+uMPNNx5q+KZWcyU0Oz4A@mail.gmail.com>
-References: <4F16C582.7010403@filoo.de>
+From: Andrey Stepachev <octo47@gmail.com>
+Subject: Re: How to remove lost objects.
+Date: Thu, 19 Jan 2012 00:48:50 +0400
+Message-ID: <CAADCt4+BL6mdrQ5XyMwdNjOMQeBh-aUAxp_8ohR-AeZ4Xd8SOA@mail.gmail.com>
+References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:56086 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932196Ab2ARREd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 12:04:33 -0500
-Received: by mail-ww0-f44.google.com with SMTP id dq11so3434794wgb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 09:04:33 -0800 (PST)
-In-Reply-To: <4F16C582.7010403@filoo.de>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:45089 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757640Ab2ARUtM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 15:49:12 -0500
+Received: by wibhm6 with SMTP id hm6so2545047wib.19
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 12:49:11 -0800 (PST)
+In-Reply-To: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Jens_Rehp=C3=B6hler?= <jens.rehpoehler@filoo.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 18, 2012 at 05:13, Jens Rehp=C3=B6hler <jens.rehpoehler@fil=
-oo.de> wrote:
-> Hi all,
->
-> todo i've done few performance tests with my two clusters.
->
-> I've used : rados -p data load-gen --run-length 10 --target-throughpu=
-t 50
->
-> to generate some load. Now i have a question regarding "ceph -w" outp=
-ut.
->
-> The output before the test was:
->
-> 2012-01-18 11:55:28.621107 =C2=A0 =C2=A0pg v113011: 594 pgs: 594 peer=
-ing; 61022 MB
-> data, 120 GB used, 244 GB / 372 GB avail
->
-> here is the output after the test:
->
-> 2012-01-18 13:53:30.190602 =C2=A0 =C2=A0pg v113119: 594 pgs: 594 acti=
-ve+clean;
-> 1058 GB data, 120 GB used, 244 GB / 372 GB avail
->
-> How can i have more Data then the available discspace ? Is there any
-> possiblity to identify the rados objects of this test and delete them
-> manualy ?
+But still don't know what happens with ceph, so it can't
+respond and hang. It is not a good behavior, because
+such situation leads to unresponsible cluster in case of
+temporal network failure.
 
-A quick read of the source seems to say "rados load-gen" writes at
-random offsets..
+2012/1/18 Andrey Stepachev <octo47@gmail.com>:
+> Hi,
+>
+> I've test ceph against laggy network. (0ms-400ms delays).
+> At some moment i got many messages like:
+> 2012-01-18 16:06:49.184776 7ff134119700 -- 84.201.161.73:6801/25424
+> send_message dropped message osd_op_reply(291 1000000101b.0000001e
+> [write 66734080~37
+> 4784] ondisk =3D 0) v1 because of no pipe on con 0x315e640
+> And ceph don't respond on ls on some of subdirs (via hadoop fs -ls or
+> kernel client)
+> My cluster runs with no debug at that moment, so I can't find what is=
+ going on.
+>
+> After restart ceph writes to log
+> 2012-01-18 16:10:39.985509 7f217989d780 osd.1 155 pg[0.155( v 136'373
+> (94'368,136'373]+backlog n=3D3 ec=3D1 les/c 150/145 146/151/58) [] r=3D=
+0
+> lpr=3D0 (info mismatch, log(94'368,0'0]+backlog) (log bound mismatch,
+> actual=3D[8'124,94'369]) lcod 0'0 mlcod 0'0 inactive] read_log =C2=A0=
+got dup
+> 94'369 (last was 94'369, dropping that one)
+>
+> After such strange hangouts i found, that rm -rf on filesystem
+> (mounted via kernel),
+> fs shows, that 210Gb still in use. Looking at /data/osd.x i found man=
+y
+> objects inside.
+> So:
+> a) looks like some errors lead us to orphaned objects in rados
+> b) i can't find utility, which can check that orpaned data (and clean=
+up it)
+>
+> Question: how I can identify what objects are, and how I can clean up=
+ them.
+>
+> --
+> Andrey.
 
-  size_t off =3D get_random(0, info.len);
 
-which means you have a lot of sparse objects. And that makes the "1058
-GB data, 120 GB used" make sense.
+
+--=20
+Andrey.
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
