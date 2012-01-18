@@ -1,43 +1,65 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: How to remove lost objects.
-Date: Wed, 18 Jan 2012 08:50:36 -0800
-Message-ID: <CAORUGqAj-2k+8cvzxwVwDb32upEdv_FFAc96-05fiyVRF3qE6g@mail.gmail.com>
-References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Neil Horman <nhorman@tuxdriver.com>
+Subject: [PATCH] Convert mount.ceph to use KEY_SPEC_PROCESS_KEYRING
+Date: Wed, 18 Jan 2012 12:00:14 -0500
+Message-ID: <1326906014-20896-1-git-send-email-nhorman@tuxdriver.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:41293 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932111Ab2ARQu6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 11:50:58 -0500
-Received: by wibhm6 with SMTP id hm6so2365288wib.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 08:50:57 -0800 (PST)
-In-Reply-To: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
+Received: from charlotte.tuxdriver.com ([70.61.120.58]:43316 "EHLO
+	smtp.tuxdriver.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932214Ab2ARRA2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 12:00:28 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Stepachev <octo47@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Neil Horman <nhorman@tuxdriver.com>, Josh Durgin <josh.durgin@dreamhost.com>
 
-On Wed, Jan 18, 2012 at 07:37, Andrey Stepachev <octo47@gmail.com> wrote:
-> I've test ceph against laggy network. (0ms-400ms delays).
+having mount.ceph use KEY_SPEC_USER_KEYRING to pass keys to the kernel has
+several disadvantages:
 
-400ms? Are you circling the Earth once with every packet? For
-reference, west coast of US <-> Europe is less than 200ms.
+1) It leaves the key setting in the uid_keyring, which is reachable from the
+session keyring via a link (see keyctl list <root session keyring ref>).  This
+means its accessible to other processes in the same session that don't need
+access to it, even after the kernel is done with it.
 
-Ceph is not suitable for a WAN / satellite / etc setups. It assumes
-the cluster is co-located, and just honestly is aimed at network
-speeds upwards from 1Gbps. Anything else would require completely
-different caching and replication mechanisms. You can't maintain cache
-coherency across such huge latencies, without making the user
-experience slow (as you observed).
+2) The user keyring has some very counter-intuitive semantics as far as keyring
+permissions goes.  The user keyring is access via a link from the session
+keyring, which a process may not have permission to access in some situations.
+For instance if mount.ceph is executed via su without having started a new
+session, mount.ceph will not have access to the uid keyring unless the calling
+proces (in this case su) has granted access permission.  The result is a -EPERM
+error when executing mount.ceph to a cephx enabled server.  If the same command
+is attempted in a new root session (e.g. su - or su -l), the mount command will
+work fine
 
-> After such strange hangouts i found, that rm -rf on filesystem
-> (mounted via kernel),
-> fs shows, that 210Gb still in use. Looking at /data/osd.x i found many
-> objects inside.
-> So:
-> a) looks like some errors lead us to orphaned objects in rados
-> b) i can't find utility, which can check that orpaned data (and cleanup it)
+Switching the mount.ceph command to use the KEY_SPEC_PROCESS_KEYRING solves both
+of these problems.  By using this keyring, accessibility is guaranteed because
+its added and accessed in the same process context both in user space and the
+kernel, assuring aceesability, despite the session specifics.  It also ensures
+that the key will get cleaned up after the mount.ceph process exits
+automatically, since there is no longer a need for it (the kernel clones the key
+during the mount process and releases it on unmount).
 
-Object removal is done in the background. Give it some time, and good
-networking, and you should get the free space back.
+I've tested this here on my local ceph cluster, and it works properly under both
+su and su -l .
+
+Signed-off-by: Neil Horman <nhorman@tuxdriver.com>
+CC: Josh Durgin <josh.durgin@dreamhost.com>
+---
+ src/common/secret.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/common/secret.c b/src/common/secret.c
+index 70c8794..365782f 100644
+--- a/src/common/secret.c
++++ b/src/common/secret.c
+@@ -65,7 +65,7 @@ static int set_kernel_secret(const char *secret, const char *key_name)
+     return ret;
+   }
+ 
+-  serial = add_key("ceph", key_name, payload, sizeof(payload), KEY_SPEC_USER_KEYRING);
++  serial = add_key("ceph", key_name, payload, sizeof(payload), KEY_SPEC_PROCESS_KEYRING);
+   if (serial == -1) {
+     ret = -errno;
+   }
+-- 
+1.7.7.5
+
