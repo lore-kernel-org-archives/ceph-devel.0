@@ -1,36 +1,50 @@
 From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Adding new mon to existing cluster in ceph v0.39(+?)
-Date: Wed, 18 Jan 2012 08:37:44 -0800
-Message-ID: <CAORUGqDZaPVu2vVw_pQie-r32ZLzOaW_K6ypDk7tuoeKpJZ9yA@mail.gmail.com>
-References: <CAMwB3TgxYQ8BsLCfTp+6-ZB_g0V4VGGDFqLxvxKmo3773CTwiA@mail.gmail.com>
- <CACLRD_1-ur_e4HMB4mp_FRiNzB2j8e_3N=L7Wt2feRnX3hzNQg@mail.gmail.com> <CAMwB3TgyYOfxGLFUiYc4qz1Av1ut+v=XS4rZ6D4kTWkUST0ubA@mail.gmail.com>
+Subject: Re: Testing environment.
+Date: Wed, 18 Jan 2012 08:43:30 -0800
+Message-ID: <CAORUGqCZa4sULkVW-Kjd-8hm5c65=WWGw0J5d9O9ocaDcp6nZQ@mail.gmail.com>
+References: <CAADCt4L-84gBJBdXgCjmW4N28v1eqFnGoz72d1Z0bLEnVRpNgg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:39739 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757976Ab2ARQiI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 11:38:08 -0500
-Received: by wibhm6 with SMTP id hm6so2354293wib.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 08:38:06 -0800 (PST)
-In-Reply-To: <CAMwB3TgyYOfxGLFUiYc4qz1Av1ut+v=XS4rZ6D4kTWkUST0ubA@mail.gmail.com>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:43904 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757975Ab2ARQnx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 11:43:53 -0500
+Received: by werb13 with SMTP id b13so515773wer.19
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 08:43:52 -0800 (PST)
+In-Reply-To: <CAADCt4L-84gBJBdXgCjmW4N28v1eqFnGoz72d1Z0bLEnVRpNgg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?S=C5=82awomir_Skowron?= <slawomir.skowron@gmail.com>
-Cc: Samuel Just <sam.just@dreamhost.com>, ceph-devel@vger.kernel.org
+To: Andrey Stepachev <octo47@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-2012/1/18 S=C5=82awomir Skowron <slawomir.skowron@gmail.com>:
-> Now i don't remember message but it was about a public-addr of mon in
-> conf, and problem with no new mon in monmap. My mon section looks lik=
-e
-> this:
+On Tue, Jan 17, 2012 at 22:59, Andrey Stepachev <octo47@gmail.com> wrot=
+e:
+> Hi,
+>
+> I want to test my changes in ceph. But for now I doesn't have automat=
+ed
+> solution. =D0=A1an someone of the developers will share with me his e=
+nvironment
+> or tell me how it can quickly set it up?
 
-I honestly can't tell from this email if you're still having trouble.
-If http://ceph.newdream.net/docs/latest/ops/manage/grow/mon/ on a
-fresh install doesn't help you along, please show exactly what
-commands you ran, what output you got, and what you expected to see
-instead. We want to help, but need specifics to be able to do that.
+Brief description is of the current (old) setup is, we have a pile of
+Ubuntu 10.10 boxes with the default user "ubuntu" created, run
+https://github.com/NewDreamNetwork/ceph-qa-chef/blob/master/solo/solo-f=
+rom-scratch
+on them to prepare them, then use
+https://github.com/NewDreamNetwork/teuthology with
+https://github.com/NewDreamNetwork/ceph-qa-suite as config to run
+regression tests on them.
+
+Now, whether I expect you to be able to use that knowledge in any
+meaningful fashion, that's a different question ;)
+
+If you have code that follows SubmittingPatches passes unit tests
+(make check), is neat (make distcheck) and passes your manual testing,
+submit a Github pull request and I'm sure someone will run the
+regression tests on it.
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
