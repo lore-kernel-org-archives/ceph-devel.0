@@ -1,52 +1,43 @@
 From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Testing environment.
-Date: Wed, 18 Jan 2012 08:43:30 -0800
-Message-ID: <CAORUGqCZa4sULkVW-Kjd-8hm5c65=WWGw0J5d9O9ocaDcp6nZQ@mail.gmail.com>
-References: <CAADCt4L-84gBJBdXgCjmW4N28v1eqFnGoz72d1Z0bLEnVRpNgg@mail.gmail.com>
+Subject: Re: How to remove lost objects.
+Date: Wed, 18 Jan 2012 08:50:36 -0800
+Message-ID: <CAORUGqAj-2k+8cvzxwVwDb32upEdv_FFAc96-05fiyVRF3qE6g@mail.gmail.com>
+References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:43904 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757975Ab2ARQnx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 11:43:53 -0500
-Received: by werb13 with SMTP id b13so515773wer.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 08:43:52 -0800 (PST)
-In-Reply-To: <CAADCt4L-84gBJBdXgCjmW4N28v1eqFnGoz72d1Z0bLEnVRpNgg@mail.gmail.com>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:41293 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932111Ab2ARQu6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 11:50:58 -0500
+Received: by wibhm6 with SMTP id hm6so2365288wib.19
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 08:50:57 -0800 (PST)
+In-Reply-To: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Andrey Stepachev <octo47@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 17, 2012 at 22:59, Andrey Stepachev <octo47@gmail.com> wrot=
-e:
-> Hi,
->
-> I want to test my changes in ceph. But for now I doesn't have automat=
-ed
-> solution. =D0=A1an someone of the developers will share with me his e=
-nvironment
-> or tell me how it can quickly set it up?
+On Wed, Jan 18, 2012 at 07:37, Andrey Stepachev <octo47@gmail.com> wrote:
+> I've test ceph against laggy network. (0ms-400ms delays).
 
-Brief description is of the current (old) setup is, we have a pile of
-Ubuntu 10.10 boxes with the default user "ubuntu" created, run
-https://github.com/NewDreamNetwork/ceph-qa-chef/blob/master/solo/solo-f=
-rom-scratch
-on them to prepare them, then use
-https://github.com/NewDreamNetwork/teuthology with
-https://github.com/NewDreamNetwork/ceph-qa-suite as config to run
-regression tests on them.
+400ms? Are you circling the Earth once with every packet? For
+reference, west coast of US <-> Europe is less than 200ms.
 
-Now, whether I expect you to be able to use that knowledge in any
-meaningful fashion, that's a different question ;)
+Ceph is not suitable for a WAN / satellite / etc setups. It assumes
+the cluster is co-located, and just honestly is aimed at network
+speeds upwards from 1Gbps. Anything else would require completely
+different caching and replication mechanisms. You can't maintain cache
+coherency across such huge latencies, without making the user
+experience slow (as you observed).
 
-If you have code that follows SubmittingPatches passes unit tests
-(make check), is neat (make distcheck) and passes your manual testing,
-submit a Github pull request and I'm sure someone will run the
-regression tests on it.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> After such strange hangouts i found, that rm -rf on filesystem
+> (mounted via kernel),
+> fs shows, that 210Gb still in use. Looking at /data/osd.x i found many
+> objects inside.
+> So:
+> a) looks like some errors lead us to orphaned objects in rados
+> b) i can't find utility, which can check that orpaned data (and cleanup it)
+
+Object removal is done in the background. Give it some time, and good
+networking, and you should get the free space back.
