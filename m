@@ -1,90 +1,96 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: How to remove lost objects.
-Date: Wed, 18 Jan 2012 14:55:14 -0800
-Message-ID: <CAF3hT9D2yFqt5EKYFce_jmTdjFC_7V9LR-er+F_KuJJ3dyunSA@mail.gmail.com>
-References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
-	<CAADCt4+BL6mdrQ5XyMwdNjOMQeBh-aUAxp_8ohR-AeZ4Xd8SOA@mail.gmail.com>
+Subject: Re: how can I achieve HA with ceph?
+Date: Wed, 18 Jan 2012 15:43:29 -0800
+Message-ID: <CAF3hT9C6zT5ShqP95pXv6+N1oPC0cR5w_dauCbAKRt2TZrBfzw@mail.gmail.com>
+References: <CA+o_KftAGMjT8+z1xet7BsPai8UEsQQv074dQExY_WOFrzZAgw@mail.gmail.com>
+	<CAF3hT9C_gMsYSbe7L5KeYGqGkPaDxeNV8bdfD7EZPbKDE8pjQQ@mail.gmail.com>
+	<CA+o_KftLn70adfmD7FGFoVq6YNfOUaFddGdw--9KTsPL12f8pQ@mail.gmail.com>
+	<CAF3hT9BuP7AbSVC89VLngQMrwYztMx-p77Cj3sO_Pu1GTN6ayA@mail.gmail.com>
+	<CA+o_KfsG=_TvQVNJ1HcUcTvntN5gqKCC3eXFhYwZVj3_fF4wRg@mail.gmail.com>
+	<CAF3hT9Bq6Nwan2wF54Gz0OpHWoO9pGJE1h2a-ke6=7wW4wBSrA@mail.gmail.com>
+	<CA+o_KfuigaFGYvHVOk_W-gpTQryheYfc4=9v5nxemUyqhH-GQw@mail.gmail.com>
+	<CAF3hT9AUFiZz01PzE9n8VYK0NJCQBFndKVsiOfAX5-ZNrNw+Og@mail.gmail.com>
+	<CA+o_Kft7RWEanbBM8ZUMTaz0ucr-XEOc1tJHK7i304XnspmRyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:35520 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:58269 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752085Ab2ARWzO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 17:55:14 -0500
-Received: by iagf6 with SMTP id f6so6681246iag.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 14:55:14 -0800 (PST)
-In-Reply-To: <CAADCt4+BL6mdrQ5XyMwdNjOMQeBh-aUAxp_8ohR-AeZ4Xd8SOA@mail.gmail.com>
+	with ESMTP id S1753130Ab2ARXn3 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 18:43:29 -0500
+Received: by iagf6 with SMTP id f6so6741157iag.19
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 15:43:29 -0800 (PST)
+In-Reply-To: <CA+o_Kft7RWEanbBM8ZUMTaz0ucr-XEOc1tJHK7i304XnspmRyA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Stepachev <octo47@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Karoly Horvath <rhswdev@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Jan 18, 2012 at 12:48 PM, Andrey Stepachev <octo47@gmail.com> w=
-rote:
-> But still don't know what happens with ceph, so it can't
-> respond and hang. It is not a good behavior, because
-> such situation leads to unresponsible cluster in case of
-> temporal network failure.
-
-I'm a little concerned about this =97=A0I would expect to see hangs of =
-up
-to ~30 seconds (the timeout period), but for operations to then
-continue. Are you putting the MDS down? If so, do you have any
-standbys specified?
-
-
-> 2012/1/18 Andrey Stepachev <octo47@gmail.com>:
->> Hi,
->>
->> I've test ceph against laggy network. (0ms-400ms delays).
->> At some moment i got many messages like:
->> 2012-01-18 16:06:49.184776 7ff134119700 -- 84.201.161.73:6801/25424
->> send_message dropped message osd_op_reply(291 1000000101b.0000001e
->> [write 66734080~37
->> 4784] ondisk =3D 0) v1 because of no pipe on con 0x315e640
->> And ceph don't respond on ls on some of subdirs (via hadoop fs -ls o=
-r
->> kernel client)
->> My cluster runs with no debug at that moment, so I can't find what i=
-s going on.
->>
->> After restart ceph writes to log
->> 2012-01-18 16:10:39.985509 7f217989d780 osd.1 155 pg[0.155( v 136'37=
-3
->> (94'368,136'373]+backlog n=3D3 ec=3D1 les/c 150/145 146/151/58) [] r=
-=3D0
->> lpr=3D0 (info mismatch, log(94'368,0'0]+backlog) (log bound mismatch=
-,
->> actual=3D[8'124,94'369]) lcod 0'0 mlcod 0'0 inactive] read_log =A0go=
-t dup
->> 94'369 (last was 94'369, dropping that one)
->>
->> After such strange hangouts i found, that rm -rf on filesystem
->> (mounted via kernel),
->> fs shows, that 210Gb still in use. Looking at /data/osd.x i found ma=
-ny
->> objects inside.
->> So:
->> a) looks like some errors lead us to orphaned objects in rados
->> b) i can't find utility, which can check that orpaned data (and clea=
-nup it)
->>
->> Question: how I can identify what objects are, and how I can clean u=
-p them.
->>
->> --
->> Andrey.
+On Tue, Jan 17, 2012 at 5:08 AM, Karoly Horvath <rhswdev@gmail.com> wro=
+te:
+> Hi,
 >
+> I did this test on the new ceph 0.40-1oneiric package.
 >
+> I removed the power cord from beta.
+>
+> alpha became the new active MDS
+> 2012-01-17 12:32:36.817012 =A0 mds e494: 1/1/1 up {0=3Dalpha=3Dup:act=
+ive}
+> but I still couldn't access the ceph fs, so I tried lazy force umount
+> as you suggested:
+> umount -lf ceph_mnt_point/
+> but it never returned.
+>
+> I attached the logs.
+
+To diagnose a problem like that we're going to need the client logs.
+If nothing else there's probably some relevant output in dmesg? Also,
+what kernel version?
+Everything I checked looked good for the rest of the system; did you
+check if new clients could do things appropriately?
+-Greg
+
+> (note: I removed a huge chunk of the alpha mds log covering approx 1 =
+minute)
 >
 > --
-> Andrey.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> Karoly Horvath
+>
+>
+> On Wed, Dec 21, 2011 at 4:13 PM, Gregory Farnum
+> <gregory.farnum@dreamhost.com> wrote:
+>> [Re-added list]
+>>
+>> On Wed, Dec 21, 2011 at 4:33 AM, Karoly Horvath <rhswdev@gmail.com> =
+wrote:
+>>> On Wed, Dec 21, 2011 at 12:03 AM, Gregory Farnum
+>>>> It looks like maybe you got it turned on in the mon section rather
+>>>> than the mds or global sections. :)
+>>>
+>>> right
+>>>
+>>>> However, as I look at these a little more it generally looks good,
+>>>> even in trial 3. The only alarming thing that's present is a note =
+that
+>>>> two of your clients failed to reconnect to the MDS in time and wer=
+e
+>>>> cut off. Did you try establishing a new connection to the cluster =
+and
+>>>> seeing if that worked? It's possible there's a client bug, or that
+>>>> there was some sort of network error that interfered with them.
+>>>> -Greg
+>>>
+>>> By client I assume you mean the kernel driver.. the FS is freezed, =
+so
+>>> I cannot unmount (cannot even `shutdown`).. how can I force the cli=
+ent
+>>> to reconnect?
+>>
+>> Try a lazy force unmount:
+>> umount -lf ceph_mnt_point/
+>> And then mount again.
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
