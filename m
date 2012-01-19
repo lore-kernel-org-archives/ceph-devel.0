@@ -1,99 +1,56 @@
 From: Andrey Stepachev <octo47@gmail.com>
-Subject: Re: How to remove lost objects.
-Date: Thu, 19 Jan 2012 09:52:29 +0400
-Message-ID: <CAADCt4+X79C+VW30b8MM18FasDFLZtjQacWm=HkBAA-EXAq80g@mail.gmail.com>
-References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
- <CAADCt4+BL6mdrQ5XyMwdNjOMQeBh-aUAxp_8ohR-AeZ4Xd8SOA@mail.gmail.com> <CAF3hT9D2yFqt5EKYFce_jmTdjFC_7V9LR-er+F_KuJJ3dyunSA@mail.gmail.com>
+Subject: Re: Testing environment.
+Date: Thu, 19 Jan 2012 12:47:53 +0400
+Message-ID: <CAADCt4K7CJDYBZwZULyofA3bgQ_Ohz+WtDvNLuj2bcDT68FqkQ@mail.gmail.com>
+References: <CAADCt4L-84gBJBdXgCjmW4N28v1eqFnGoz72d1Z0bLEnVRpNgg@mail.gmail.com>
+ <CAORUGqCZa4sULkVW-Kjd-8hm5c65=WWGw0J5d9O9ocaDcp6nZQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:50924 "EHLO
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:33052 "EHLO
 	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751144Ab2ASFwv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jan 2012 00:52:51 -0500
-Received: by wics10 with SMTP id s10so93932wic.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 21:52:50 -0800 (PST)
-In-Reply-To: <CAF3hT9D2yFqt5EKYFce_jmTdjFC_7V9LR-er+F_KuJJ3dyunSA@mail.gmail.com>
+	with ESMTP id S1753731Ab2ASIsP convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jan 2012 03:48:15 -0500
+Received: by wics10 with SMTP id s10so173825wic.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jan 2012 00:48:14 -0800 (PST)
+In-Reply-To: <CAORUGqCZa4sULkVW-Kjd-8hm5c65=WWGw0J5d9O9ocaDcp6nZQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
-> On Wed, Jan 18, 2012 at 12:48 PM, Andrey Stepachev <octo47@gmail.com>=
- wrote:
->> But still don't know what happens with ceph, so it can't
->> respond and hang. It is not a good behavior, because
->> such situation leads to unresponsible cluster in case of
->> temporal network failure.
->
-> I'm a little concerned about this =E2=80=94=C2=A0I would expect to se=
-e hangs of up
-> to ~30 seconds (the timeout period), but for operations to then
-> continue. Are you putting the MDS down? If so, do you have any
-> standbys specified?
+Thanks!
+I'll try to do something with that. Thanks :)
 
-Yes, MDS goes down (I restart it at some point, while changing somethin=
-g
-in config).
-Yes, i have 2 standbys.
-Clients hang more then 10 minutes.
-
+2012/1/18 Tommi Virtanen <tommi.virtanen@dreamhost.com>:
+> On Tue, Jan 17, 2012 at 22:59, Andrey Stepachev <octo47@gmail.com> wr=
+ote:
+>> Hi,
+>>
+>> I want to test my changes in ceph. But for now I doesn't have automa=
+ted
+>> solution. =D0=A1an someone of the developers will share with me his =
+environment
+>> or tell me how it can quickly set it up?
 >
+> Brief description is of the current (old) setup is, we have a pile of
+> Ubuntu 10.10 boxes with the default user "ubuntu" created, run
+> https://github.com/NewDreamNetwork/ceph-qa-chef/blob/master/solo/solo=
+-from-scratch
+> on them to prepare them, then use
+> https://github.com/NewDreamNetwork/teuthology with
+> https://github.com/NewDreamNetwork/ceph-qa-suite as config to run
+> regression tests on them.
 >
->> 2012/1/18 Andrey Stepachev <octo47@gmail.com>:
->>> Hi,
->>>
->>> I've test ceph against laggy network. (0ms-400ms delays).
->>> At some moment i got many messages like:
->>> 2012-01-18 16:06:49.184776 7ff134119700 -- 84.201.161.73:6801/25424
->>> send_message dropped message osd_op_reply(291 1000000101b.0000001e
->>> [write 66734080~37
->>> 4784] ondisk =3D 0) v1 because of no pipe on con 0x315e640
->>> And ceph don't respond on ls on some of subdirs (via hadoop fs -ls =
-or
->>> kernel client)
->>> My cluster runs with no debug at that moment, so I can't find what =
-is going on.
->>>
->>> After restart ceph writes to log
->>> 2012-01-18 16:10:39.985509 7f217989d780 osd.1 155 pg[0.155( v 136'3=
-73
->>> (94'368,136'373]+backlog n=3D3 ec=3D1 les/c 150/145 146/151/58) [] =
-r=3D0
->>> lpr=3D0 (info mismatch, log(94'368,0'0]+backlog) (log bound mismatc=
-h,
->>> actual=3D[8'124,94'369]) lcod 0'0 mlcod 0'0 inactive] read_log =C2=A0=
-got dup
->>> 94'369 (last was 94'369, dropping that one)
->>>
->>> After such strange hangouts i found, that rm -rf on filesystem
->>> (mounted via kernel),
->>> fs shows, that 210Gb still in use. Looking at /data/osd.x i found m=
-any
->>> objects inside.
->>> So:
->>> a) looks like some errors lead us to orphaned objects in rados
->>> b) i can't find utility, which can check that orpaned data (and cle=
-anup it)
->>>
->>> Question: how I can identify what objects are, and how I can clean =
-up them.
->>>
->>> --
->>> Andrey.
->>
->>
->>
->> --
->> Andrey.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
-tml
+> Now, whether I expect you to be able to use that knowledge in any
+> meaningful fashion, that's a different question ;)
+>
+> If you have code that follows SubmittingPatches passes unit tests
+> (make check), is neat (make distcheck) and passes your manual testing=
+,
+> submit a Github pull request and I'm sure someone will run the
+> regression tests on it.
 
 
 
