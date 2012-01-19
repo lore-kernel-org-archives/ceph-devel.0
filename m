@@ -1,44 +1,76 @@
-From: Holger Macht <hmacht@suse.de>
-Subject: Re: [PATCH] [ceph spec] package *.py* files
-Date: Thu, 19 Jan 2012 17:35:15 +0000 (UTC)
-Message-ID: <loom.20120119T183130-208@post.gmane.org>
-References: <orboq2w2vq.fsf@livre.localdomain>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: How to remove lost objects.
+Date: Thu, 19 Jan 2012 11:31:26 -0800
+Message-ID: <CAF3hT9CuXn4p8ZE752RmM1E+ua14QNBb_WaN9OZZSU2SPtfdEw@mail.gmail.com>
+References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
+	<CAADCt4+BL6mdrQ5XyMwdNjOMQeBh-aUAxp_8ohR-AeZ4Xd8SOA@mail.gmail.com>
+	<CAF3hT9D2yFqt5EKYFce_jmTdjFC_7V9LR-er+F_KuJJ3dyunSA@mail.gmail.com>
+	<CAADCt4+X79C+VW30b8MM18FasDFLZtjQacWm=HkBAA-EXAq80g@mail.gmail.com>
+	<CAF3hT9C+TxK01DbwdMBhZX7vKJr3Jaheg1t-G4hWM_gNvdb_Qg@mail.gmail.com>
+	<CAADCt4+u87=Bhukqs5EX6uyzXCL+ug0=_M6DDLQ6oSh1acmTsw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:39009 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932571Ab2ASRkL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Jan 2012 12:40:11 -0500
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Rnvy3-0001IY-24
-	for ceph-devel@vger.kernel.org; Thu, 19 Jan 2012 18:40:07 +0100
-Received: from charybdis-ext.suse.de ([195.135.221.2])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jan 2012 18:40:07 +0100
-Received: from hmacht by charybdis-ext.suse.de with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jan 2012 18:40:07 +0100
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:54236 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932675Ab2ASTb1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jan 2012 14:31:27 -0500
+Received: by ggnb1 with SMTP id b1so221295ggn.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jan 2012 11:31:26 -0800 (PST)
+In-Reply-To: <CAADCt4+u87=Bhukqs5EX6uyzXCL+ug0=_M6DDLQ6oSh1acmTsw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Andrey Stepachev <octo47@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Alexandre Oliva <oliva <at> lsd.ic.unicamp.br> writes:
+On Thu, Jan 19, 2012 at 12:53 AM, Andrey Stepachev <octo47@gmail.com> w=
+rote:
+> 2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
+>> On Wednesday, January 18, 2012, Andrey Stepachev <octo47@gmail.com> =
+wrote:
+>>> 2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
+>>>> On Wed, Jan 18, 2012 at 12:48 PM, Andrey Stepachev <octo47@gmail.c=
+om>
+>>>> wrote:
+>>>>> But still don't know what happens with ceph, so it can't
+>>>>> respond and hang. It is not a good behavior, because
+>>>>> such situation leads to unresponsible cluster in case of
+>>>>> temporal network failure.
+>>>>
+>>>> I'm a little concerned about this =97=A0I would expect to see hang=
+s of up
+>>>> to ~30 seconds (the timeout period), but for operations to then
+>>>> continue. Are you putting the MDS down? If so, do you have any
+>>>> standbys specified?
+>>>
+>>> Yes, MDS goes down (I restart it at some point, while changing some=
+thing
+>>> in config).
+>>> Yes, i have 2 standbys.
+>>> Clients hang more then 10 minutes.
+>>
+>> Okay, so it's probably an issue with the MDS not entering recovery w=
+hen it
+>> should. Are you also taking down one of the monitor nodes? There's a=
+ known
+>> bug which can cause a standby MDS to wait up to 15 minutes if its mo=
+nitor
+>> goes down which is fixed in latest master (and maybe .40; I'd have t=
+o
+>> check).
+>
+> Yes. I have collocated mon mds and osd on some nodes.
+> And restart all daemons at once. I use 0.40. (built from my github fo=
+rk).
 
-> 
-> Some post-install rpmbuild defaults byte-compile all packaged python
-> files, so don't bother removing the .pyc files, and package .py* to
-> get both .pyo and .pyc.  It wastes a tiny little bit of space, but it
-> makes the spec file portable across a wider range of rpm and python
-> configurations.
-
-Just wondering...do you have a concrete issue or an example where this is a 
-problem?
-
-Regards
- Holger
-
-
+Hrm. I checked and the fix is in 0.40. Can you reproduce this with
+client logging enabled (--debug_ms 1 --debug_client 10) and post the
+logs somewhere for me to check out? That should be able to isolate the
+problem area at least.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
