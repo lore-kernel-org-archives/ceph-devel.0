@@ -1,74 +1,87 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
+From: Andrey Stepachev <octo47@gmail.com>
 Subject: Re: How to remove lost objects.
-Date: Thu, 19 Jan 2012 11:31:26 -0800
-Message-ID: <CAF3hT9CuXn4p8ZE752RmM1E+ua14QNBb_WaN9OZZSU2SPtfdEw@mail.gmail.com>
+Date: Fri, 20 Jan 2012 00:36:00 +0400
+Message-ID: <CAADCt4KTKnFKXBC6VG9nZ_M8_265-qXeHQXVnQD2rjQNVOjZ7g@mail.gmail.com>
 References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
-	<CAADCt4+BL6mdrQ5XyMwdNjOMQeBh-aUAxp_8ohR-AeZ4Xd8SOA@mail.gmail.com>
-	<CAF3hT9D2yFqt5EKYFce_jmTdjFC_7V9LR-er+F_KuJJ3dyunSA@mail.gmail.com>
-	<CAADCt4+X79C+VW30b8MM18FasDFLZtjQacWm=HkBAA-EXAq80g@mail.gmail.com>
-	<CAF3hT9C+TxK01DbwdMBhZX7vKJr3Jaheg1t-G4hWM_gNvdb_Qg@mail.gmail.com>
-	<CAADCt4+u87=Bhukqs5EX6uyzXCL+ug0=_M6DDLQ6oSh1acmTsw@mail.gmail.com>
+ <CAADCt4+BL6mdrQ5XyMwdNjOMQeBh-aUAxp_8ohR-AeZ4Xd8SOA@mail.gmail.com>
+ <CAF3hT9D2yFqt5EKYFce_jmTdjFC_7V9LR-er+F_KuJJ3dyunSA@mail.gmail.com>
+ <CAADCt4+X79C+VW30b8MM18FasDFLZtjQacWm=HkBAA-EXAq80g@mail.gmail.com>
+ <CAF3hT9C+TxK01DbwdMBhZX7vKJr3Jaheg1t-G4hWM_gNvdb_Qg@mail.gmail.com>
+ <CAADCt4+u87=Bhukqs5EX6uyzXCL+ug0=_M6DDLQ6oSh1acmTsw@mail.gmail.com> <CAF3hT9CuXn4p8ZE752RmM1E+ua14QNBb_WaN9OZZSU2SPtfdEw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:54236 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932675Ab2ASTb1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jan 2012 14:31:27 -0500
-Received: by ggnb1 with SMTP id b1so221295ggn.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jan 2012 11:31:26 -0800 (PST)
-In-Reply-To: <CAADCt4+u87=Bhukqs5EX6uyzXCL+ug0=_M6DDLQ6oSh1acmTsw@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:49535 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932705Ab2ASUgW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jan 2012 15:36:22 -0500
+Received: by wgbdq11 with SMTP id dq11so372487wgb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jan 2012 12:36:21 -0800 (PST)
+In-Reply-To: <CAF3hT9CuXn4p8ZE752RmM1E+ua14QNBb_WaN9OZZSU2SPtfdEw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Stepachev <octo47@gmail.com>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 19, 2012 at 12:53 AM, Andrey Stepachev <octo47@gmail.com> w=
-rote:
-> 2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
->> On Wednesday, January 18, 2012, Andrey Stepachev <octo47@gmail.com> =
-wrote:
->>> 2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
->>>> On Wed, Jan 18, 2012 at 12:48 PM, Andrey Stepachev <octo47@gmail.c=
-om>
->>>> wrote:
->>>>> But still don't know what happens with ceph, so it can't
->>>>> respond and hang. It is not a good behavior, because
->>>>> such situation leads to unresponsible cluster in case of
->>>>> temporal network failure.
+2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
+> On Thu, Jan 19, 2012 at 12:53 AM, Andrey Stepachev <octo47@gmail.com>=
+ wrote:
+>> 2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
+>>> On Wednesday, January 18, 2012, Andrey Stepachev <octo47@gmail.com>=
+ wrote:
+>>>> 2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
+>>>>> On Wed, Jan 18, 2012 at 12:48 PM, Andrey Stepachev <octo47@gmail.=
+com>
+>>>>> wrote:
+>>>>>> But still don't know what happens with ceph, so it can't
+>>>>>> respond and hang. It is not a good behavior, because
+>>>>>> such situation leads to unresponsible cluster in case of
+>>>>>> temporal network failure.
+>>>>>
+>>>>> I'm a little concerned about this =E2=80=94=C2=A0I would expect t=
+o see hangs of up
+>>>>> to ~30 seconds (the timeout period), but for operations to then
+>>>>> continue. Are you putting the MDS down? If so, do you have any
+>>>>> standbys specified?
 >>>>
->>>> I'm a little concerned about this =97=A0I would expect to see hang=
-s of up
->>>> to ~30 seconds (the timeout period), but for operations to then
->>>> continue. Are you putting the MDS down? If so, do you have any
->>>> standbys specified?
+>>>> Yes, MDS goes down (I restart it at some point, while changing som=
+ething
+>>>> in config).
+>>>> Yes, i have 2 standbys.
+>>>> Clients hang more then 10 minutes.
 >>>
->>> Yes, MDS goes down (I restart it at some point, while changing some=
-thing
->>> in config).
->>> Yes, i have 2 standbys.
->>> Clients hang more then 10 minutes.
+>>> Okay, so it's probably an issue with the MDS not entering recovery =
+when it
+>>> should. Are you also taking down one of the monitor nodes? There's =
+a known
+>>> bug which can cause a standby MDS to wait up to 15 minutes if its m=
+onitor
+>>> goes down which is fixed in latest master (and maybe .40; I'd have =
+to
+>>> check).
 >>
->> Okay, so it's probably an issue with the MDS not entering recovery w=
-hen it
->> should. Are you also taking down one of the monitor nodes? There's a=
- known
->> bug which can cause a standby MDS to wait up to 15 minutes if its mo=
-nitor
->> goes down which is fixed in latest master (and maybe .40; I'd have t=
-o
->> check).
+>> Yes. I have collocated mon mds and osd on some nodes.
+>> And restart all daemons at once. I use 0.40. (built from my github f=
+ork).
 >
-> Yes. I have collocated mon mds and osd on some nodes.
-> And restart all daemons at once. I use 0.40. (built from my github fo=
-rk).
+> Hrm. I checked and the fix is in 0.40. Can you reproduce this with
+> client logging enabled (--debug_ms 1 --debug_client 10) and post the
+> logs somewhere for me to check out? That should be able to isolate th=
+e
+> problem area at least.
 
-Hrm. I checked and the fix is in 0.40. Can you reproduce this with
-client logging enabled (--debug_ms 1 --debug_client 10) and post the
-logs somewhere for me to check out? That should be able to isolate the
-problem area at least.
--Greg
+Client writes "renew caps" and nothing more.
+I'd try to reproduce problem with more logging, but still no luck.
+May be debug serializes race somewhere and prevents
+this bug to occur.
+
+> -Greg
+
+
+
+--=20
+Andrey.
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
