@@ -1,112 +1,73 @@
-From: Josh Pieper <jjp@pobox.com>
-Subject: Re: 0.40 OSD - Address family not supported by protocol
-Date: Wed, 18 Jan 2012 23:00:33 -0500
-Message-ID: <20120119040033.GY4585@rcn.com>
-References: <20120114145550.GN4585@rcn.com>
- <Pine.LNX.4.64.1201171422010.24000@cobra.newdream.net>
+From: Andrey Stepachev <octo47@gmail.com>
+Subject: Re: How to remove lost objects.
+Date: Thu, 19 Jan 2012 09:48:41 +0400
+Message-ID: <CAADCt4JuNJqPuAOhpoQN4f56cW+krimjcz0fbB=BSPPxi1cN3w@mail.gmail.com>
+References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
+ <CAORUGqAj-2k+8cvzxwVwDb32upEdv_FFAc96-05fiyVRF3qE6g@mail.gmail.com>
+ <CAADCt4JEEjhmsKem2M0-7auyx5wh2UGd7YLAtDYhiofkFSkkoA@mail.gmail.com>
+ <CAORUGqCmhjMh6YpsS_5uaKh9OxHjoqwWSXhnZTh2JD5vpixvPw@mail.gmail.com>
+ <CAADCt4LJY5LTqCcSv2XegEUvoRFJmrVFbE9gZzyAUVkAWwdDpg@mail.gmail.com> <CAORUGqCXBZiADpz_y=dROMJRWn++Ae6g6eVJ6HCLdPpw0HmbRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.lnh.mail.rcn.net ([207.172.157.102]:65398 "EHLO
-	smtp02.lnh.mail.rcn.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755582Ab2ASEAf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2012 23:00:35 -0500
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1201171422010.24000@cobra.newdream.net>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:53792 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751645Ab2ASFtD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jan 2012 00:49:03 -0500
+Received: by wics10 with SMTP id s10so92676wic.19
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2012 21:49:01 -0800 (PST)
+In-Reply-To: <CAORUGqCXBZiADpz_y=dROMJRWn++Ae6g6eVJ6HCLdPpw0HmbRQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Sage,
+2012/1/19 Tommi Virtanen <tommi.virtanen@dreamhost.com>:
+> On Wed, Jan 18, 2012 at 13:57, Andrey Stepachev <octo47@gmail.com> wrote:
+>> Thanks for clarification. I don't dig yet, how data moved when osd
+>> marked as out and how pg calculated for this data. (in other words,
+>> how new place for missing replica calculated, and what happens,
+>> when out osd returns back)
+>
+> That would be the CRUSH algorithm just getting a different cluster
+> state as input, and thus deciding on a new location for (some of) the
+> data. At that point, any data that needs to be migrated, would be
+> migrated. If the same osd id returns (on new hardware or old), once
+> it's marked "in", the CRUSH algorithm will again start placing data on
+> it. Whether that's the same set of data or not depends on whether
+> anything else changed in the cluster, in the meanwhile.
+>
+> Currently, CRUSH is best described in the academic papers about Ceph.
+> There's a quick braindump/simplified explanation at
+> http://ceph.newdream.net/docs/latest/dev/placement-group/
 
-Thanks for sorting out the root cause!
+Thanks. I'll red that.
 
--Josh
+>
+>> We don't try to use Ceph in true WAN. But we try to find some dfs, which will
+>> operate well in our environment: multiple dc, relatively low latency
+>> (<10ms as average),
+>> irregular dc outages. And we need synchronous replication and we need
+>> bigtable (hbase in case of ceph).
+>> I believe, that ceph can be configured to operate in such environment, but
+>> I can be completely wrong. And I try to check some boundary conditions.
+>
+> As long as you understand that network blip translates to storage
+> blip, with Ceph. That is, we don't just write to master and hope that
+> replication catches up at some later time.
 
-Sage Weil wrote:
-> Hi Josh,
-> 
-> I just sorted this out.  The problem was that the encoding for 
-> OSDSuperblock was changed, and that struct was embedded in the MOSDBoot 
-> message.  Some of your OSDs restarted befor the monitors, so the old 
-> monitors saw the new structure and misdecoded the message with garbage 
-> (well, zeros) for the heartbeat address.  This made it into the OSDMap, 
-> and a very impolite assert in the messenger code made the process crash 
-> when it got an error from socket(2).
-> 
-> The assert and error handling is cleaned up.  There isn't a nice way to 
-> fix the behavior of the old code, though, so for everyone else: 
-> upgrade/restart the monitors before the osds to avoid triggering this.  If 
-> you do, restarting the OSDs (possibly a couple of times) will clear it up.  
-> Once all of the ':/0' values disappear from 'ceph osd dump' you're in the 
-> clear.
-> 
-> sage
-> 
-> 
-> http://tracker.newdream.net/issues/1942
-> 
-> On Sat, 14 Jan 2012, Josh Pieper wrote:
-> 
-> > I just upgraded our test cluster to 0.40, and immediately after
-> > starting up get asserts in all the OSDs.  I've inlined a relevant
-> > backtrace below, is there anything else that would be useful for
-> > debugging?
-> > 
-> > Our test cluster is 3 ubuntu 11.10 amd64 machines, each with a mon and
-> > osd.
-> > 
-> > Looking at an strace, it is pretty clearly asking for an invalid
-> > address family, although I'm not sure where it is coming from.
-> > 
-> > [pid 30648] socket(PF_UNSPEC, SOCK_STREAM, 0 <unfinished ...>
-> > [pid 30648] <... socket resumed> )      = -1 EAFNOSUPPORT (Address family not supported by protocol)
-> > 
-> > -Josh
-> > 
-> > -------
-> > 2012-01-14 09:31:03.395266 7f67edf08700 -- 10.1.10.71:6801/27529 >> 10.1.10.73:6801/8127 pipe(0x14e0780 sd=19 pgs=0 cs=0 l=0).connect claims to be 10.1.10.73:6801/24029 not 10.1.10.73:6801/8127 - wrong node!
-> > 2012-01-14 09:31:03.395579 7f67ede07700 -- :/27530 >> :/0 pipe(0x14e0500 sd=-1 pgs=0 cs=0 l=0).connect couldn't created socket Address family not supported by protocol
-> > msg/SimpleMessenger.cc: In function 'int SimpleMessenger::Pipe::connect()', in thread '7f67ede07700'
-> > msg/SimpleMessenger.cc: 1038: FAILED assert(0)
-> >  ceph version 0.40 (commit:7eea40ea37fb3a68a2042a2218c9b8c9c40a843e)
-> >  1: (SimpleMessenger::Pipe::connect()+0x87c) [0x5be81c]
-> >  2: (SimpleMessenger::Pipe::writer()+0x456) [0x5c1536]
-> >  3: (SimpleMessenger::Pipe::Writer::entry()+0xd) [0x4b228d]
-> >  4: (()+0x7efc) [0x7f67ffdf4efc]
-> >  5: (clone()+0x6d) [0x7f67fe42589d]
-> >  ceph version 0.40 (commit:7eea40ea37fb3a68a2042a2218c9b8c9c40a843e)
-> >  1: (SimpleMessenger::Pipe::connect()+0x87c) [0x5be81c]
-> >  2: (SimpleMessenger::Pipe::writer()+0x456) [0x5c1536]
-> >  3: (SimpleMessenger::Pipe::Writer::entry()+0xd) [0x4b228d]
-> >  4: (()+0x7efc) [0x7f67ffdf4efc]
-> >  5: (clone()+0x6d) [0x7f67fe42589d]
-> > *** Caught signal (Aborted) **
-> >  in thread 7f67ede07700
-> >  ceph version 0.40 (commit:7eea40ea37fb3a68a2042a2218c9b8c9c40a843e)
-> >  1: /usr/bin/ceph-osd() [0x5fd926]
-> >  2: (()+0x10060) [0x7f67ffdfd060]
-> >  3: (gsignal()+0x35) [0x7f67fe37a3a5]
-> >  4: (abort()+0x17b) [0x7f67fe37db0b]
-> >  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f67fec38d7d]
-> >  6: (()+0xb9f26) [0x7f67fec36f26]
-> >  7: (()+0xb9f53) [0x7f67fec36f53]
-> >  8: (()+0xba04e) [0x7f67fec3704e]
-> >  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x193) [0x5cfd33]
-> >  10: (SimpleMessenger::Pipe::connect()+0x87c) [0x5be81c]
-> >  11: (SimpleMessenger::Pipe::writer()+0x456) [0x5c1536]
-> >  12: (SimpleMessenger::Pipe::Writer::entry()+0xd) [0x4b228d]
-> >  13: (()+0x7efc) [0x7f67ffdf4efc]
-> >  14: (clone()+0x6d) [0x7f67fe42589d]
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
+Yes, but in case of dc outage with master, no writes possible at all.
+So I try to trade some dfs perfomance for HA in several dc.
+
+>
+>> Yeah, it is good to see some progress (like mdadm shows), but it is not
+>> critical. Can you point me, who does this job. MDS?
+>
+> This is answered in http://ceph.newdream.net/docs/latest/dev/delayed-delete/
+
+Looks like this is a prime place, where to read. Not wiki. Thanks,
+I'll read whole docs.
+
 
 -- 
-Shaw's Principle:
-	Build a system that even a fool can use, and only a fool will
-	want to use it.
+Andrey.
