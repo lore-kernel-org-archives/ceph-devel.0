@@ -1,66 +1,165 @@
-From: Holger Macht <hmacht@suse.de>
-Subject: Re: [PATCH] [ceph spec] package *.py* files
-Date: Fri, 20 Jan 2012 16:03:42 +0100
-Message-ID: <20120120150342.GB7606@homac.suse.de>
-References: <orboq2w2vq.fsf@livre.localdomain>
- <loom.20120119T183130-208@post.gmane.org>
- <orehuvp6ce.fsf@livre.localdomain>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: wip-encoding
+Date: Fri, 20 Jan 2012 10:58:31 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201201045230.8753@cobra.newdream.net>
+References: <Pine.LNX.4.64.1201161520380.27147@cobra.newdream.net>
+ <CAF3hT9CMJ1MZmA6Dkzj8ZXKpDtYECk_h3s2rudQjYkZDc-2cQw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-54174739-1327085911=:8753"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:52479 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753692Ab2ATPDp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 20 Jan 2012 10:03:45 -0500
-Content-Disposition: inline
-In-Reply-To: <orehuvp6ce.fsf@livre.localdomain>
+Received: from cobra.newdream.net ([66.33.216.30]:40284 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754222Ab2ATS6c (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jan 2012 13:58:32 -0500
+In-Reply-To: <CAF3hT9CMJ1MZmA6Dkzj8ZXKpDtYECk_h3s2rudQjYkZDc-2cQw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu 19. Jan - 22:26:09, Alexandre Oliva wrote:
-> On Jan 19, 2012, Holger Macht <hmacht@suse.de> wrote:
-> 
-> > Alexandre Oliva <oliva <at> lsd.ic.unicamp.br> writes:
-> >> 
-> >> Some post-install rpmbuild defaults byte-compile all packaged python
-> >> files, so don't bother removing the .pyc files, and package .py* to
-> >> get both .pyo and .pyc.  It wastes a tiny little bit of space, but it
-> >> makes the spec file portable across a wider range of rpm and python
-> >> configurations.
-> 
-> > Just wondering...do you have a concrete issue or an example where this is a 
-> > problem?
-> 
-> It failed to build on a BLAGified Fedora 16, complaining about the
-> unpackaged .pyc files.  It's not just CentOS that creates the .pyc files
-> in brp-python-bytecompile.  
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-So the built failed because *.pyo was there and *.pyc wasn't? That is
-really strange, because I really don't think both are needed. But sure,
-there might be python configurations out there I don't know of, which
-can't handle pyo but can do fine with pyc. So maybe we should just
-always put pyc files in for maximum compatibility across distributions?
+--557981400-54174739-1327085911=:8753
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Otherwise, if this really makes the build fail for some distributions,
-go for it. I will not argue about the different build systems because 1)
-I don't know enough about them (including the one from SUSE) and 2) I
-don't won't to dig to deep because of some minor issue like this.
+On Tue, 17 Jan 2012, Gregory Farnum wrote:
+> On Mon, Jan 16, 2012 at 3:46 PM, Sage Weil <sage@newdream.net> wrote:
+> > When we can't handle a change with a compatible encoding change, we can
+> > introduce a feature bits and conditionally encode old formats for old
+> > peers. =A0This is just more work and eats into a more limited feature b=
+it
+> > space.
+>=20
+> I'd like to hear a lot more about this ? it's the real problem. I
+> think we've already got one example in the codebase of encoding for
+> backwards-compatibility, and it's a huge mess.
+> Could we construct reasonable macros/functions that take in compat
+> bits from the daemon we're targeting and then select the appropriate
+> encoder based on those, for instance? It certainly shouldn't be hacked
+> together on a case-by-case basis because we're going to start running
+> into a lot more of these things as we start testing for
+> forwards-and-backwards compatibility.
 
-> Plus, they should be packaged (if at all) in python-ceph, but
-> definitely not in the main ceph package.
+The current pattern is=20
 
-They are packaged in python-ceph.
+void Foo::encode(bufferlist& bl, unsigned features) const
+{
+  if (features & NEW_THING) {
+     // encode normally
+  } else {
+     // encode old way (wahtever was in this func)
+  }
+}
 
-> Another issue I forgot while posting the patch was that there was not a
-> .tar.bz2 available from the ceph site.  I ended up recompressing the .gz
-> as .bz2, but if ceph is going to be released compressed as .gz, the spec
-> file ought to be adjusted to reflect that.
+I'm not sure what to add here to make this less painful or error-prone. =20
+ceph-dencoder does have options to print the feature set for the version=20
+it was compiled for, and to set the bits passed to encoder functions, so=20
+that we can test these paths.
 
-My fault. I also recompressed them at the very start of working on the
-spec file and changed it accordingly, but I'm fine for changing this
-back to .gz.
+> > =A0void pool_snap_info_t::decode(bufferlist::iterator& bl)
+> > =A0{
+> > =A0 DECODE_START_LEGACY(2, bl, 2);
+> >
+> > We can still decode v1 code, but it doesn't have the (new) length and
+> > incompat version fields, so use the _LEGACY macro. =A0The second 2 mean=
+s we
+> > started using the new approach with v2.
+>=20
+> Is there a DECODE_START (non-legacy) for new structs?
 
-Regards
- Holger
+yeah
+
+> > This requires and initial incompat change to add the length and incompa=
+t
+> > fields, but then we can generally add things without breakage.
+> Hmm...if we come up with something that talks feature bits we could do
+> this nicely with a compat bit. :)
+
+Hmm, yeah.  If we redo a bunch of encoders at once we can use a=20
+single feature bit for all of them.  That's a good idea!
+
+> > How to build the per-version corpus? =A0We can write unit tests that
+> > explicitly generate interesting object instances. =A0That's tedious and=
+ time
+> > consuming, but probably best, since the developer knows what corner cas=
+es
+> > are interesting.
+>=20
+> If we've got a single tool that can handle all the structs we can
+> presumably encode each struct from a given version?
+> Obviously constructing actual state would require more work but just
+> checking the default constructor version of each struct would go a
+> long, loooong way toward automating encode/decode checks.
+
+Yeah.  So the new idea here is to create a static class methods like
+
+  static void generate_test_instances(list<T>& o);
+
+and have the implementation fill a list with some interesting object=20
+instances.  That normally looks something like
+
+  void foo_t::generate_test_instances(list<foo_t>& o) {
+    foo_t a;
+    o.push_back(a);
+    a.x =3D 1;
+    a.y =3D 2;
+    a.z.push_back(3);
+    o.push_back(a);
+  }
+
+and the ceph-dencoder lets you select these generated objects to=20
+encode/decode/dump/whatever.
+
+I cleaned up the tool usage a bit and it currently looks like
+
+$ ./ceph-dencoder -h
+usage: ceph-dencoder [commands ...]
+
+  version          print version string (to stdout)
+
+  import <encfile> read encoded data from encfile
+  export <outfile> write encoded data to outfile
+
+  features <num>   set feature bits used for encoding
+  get_features     print feature bits (int) to stdout
+
+  list_types       list supported types
+  type <classname> select type
+  decode           decode into in-core object
+  encode           encode in-core object
+  dump_json        dump in-core object as json (to stdout)
+
+  count            print number of generated test objects (to stdout)
+  select <n>       select generated test object as in-core object
+
+
+There are also some preliminary scripts to populate an archive that looks=
+=20
+something like
+
+ar
+ar/0.40
+ar/0.40/osd_stat_t
+ar/0.40/osd_stat_t/25afb7d451b03137f945307a1ed82a33
+ar/0.40/osd_stat_t/800a085cc38e531cd41af1905a0f37e8
+=2E..
+ar/0.40/utime_t
+ar/0.40/utime_t/8bdbd752410ebe5fb417a23173910b0f
+ar/0.40/utime_t/e8884a8076dd8e639f5bfa3b896427a8
+ar/0.40/utime_t/6bd3e253cb30ad41417f055be3f8a485
+=2E..
+
+I'm thinking we also include a built ceph-dencoder in each version dir, so=
+=20
+that some scripts can do the cross-version validation.  That just requires=
+=20
+standarizing the usage for ceph-dencoder, so please poke some holes in the=
+=20
+above!
+
+thanks
+sage
+
+--557981400-54174739-1327085911=:8753--
