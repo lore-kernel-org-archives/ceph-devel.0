@@ -1,89 +1,50 @@
-From: Andrey Stepachev <octo47@gmail.com>
-Subject: Re: How to remove lost objects.
-Date: Fri, 20 Jan 2012 00:36:00 +0400
-Message-ID: <CAADCt4KTKnFKXBC6VG9nZ_M8_265-qXeHQXVnQD2rjQNVOjZ7g@mail.gmail.com>
-References: <CAADCt4KfW7JS59ev_T4L3VMvmQm+OquD-8L7NTKS9u2RjNMPKg@mail.gmail.com>
- <CAADCt4+BL6mdrQ5XyMwdNjOMQeBh-aUAxp_8ohR-AeZ4Xd8SOA@mail.gmail.com>
- <CAF3hT9D2yFqt5EKYFce_jmTdjFC_7V9LR-er+F_KuJJ3dyunSA@mail.gmail.com>
- <CAADCt4+X79C+VW30b8MM18FasDFLZtjQacWm=HkBAA-EXAq80g@mail.gmail.com>
- <CAF3hT9C+TxK01DbwdMBhZX7vKJr3Jaheg1t-G4hWM_gNvdb_Qg@mail.gmail.com>
- <CAADCt4+u87=Bhukqs5EX6uyzXCL+ug0=_M6DDLQ6oSh1acmTsw@mail.gmail.com> <CAF3hT9CuXn4p8ZE752RmM1E+ua14QNBb_WaN9OZZSU2SPtfdEw@mail.gmail.com>
+From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Subject: Re: [PATCH] [ceph spec] package *.py* files
+Date: Thu, 19 Jan 2012 22:26:09 -0200
+Message-ID: <orehuvp6ce.fsf@livre.localdomain>
+References: <orboq2w2vq.fsf@livre.localdomain>
+	<loom.20120119T183130-208@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:49535 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932705Ab2ASUgW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jan 2012 15:36:22 -0500
-Received: by wgbdq11 with SMTP id dq11so372487wgb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jan 2012 12:36:21 -0800 (PST)
-In-Reply-To: <CAF3hT9CuXn4p8ZE752RmM1E+ua14QNBb_WaN9OZZSU2SPtfdEw@mail.gmail.com>
+Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:42526 "EHLO
+	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1756222Ab2ATA0W (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 19 Jan 2012 19:26:22 -0500
+In-Reply-To: <loom.20120119T183130-208@post.gmane.org> (Holger Macht's message
+	of "Thu, 19 Jan 2012 17:35:15 +0000 (UTC)")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Holger Macht <hmacht@suse.de>
+Cc: ceph-devel@vger.kernel.org
 
-2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
-> On Thu, Jan 19, 2012 at 12:53 AM, Andrey Stepachev <octo47@gmail.com>=
- wrote:
->> 2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
->>> On Wednesday, January 18, 2012, Andrey Stepachev <octo47@gmail.com>=
- wrote:
->>>> 2012/1/19 Gregory Farnum <gregory.farnum@dreamhost.com>:
->>>>> On Wed, Jan 18, 2012 at 12:48 PM, Andrey Stepachev <octo47@gmail.=
-com>
->>>>> wrote:
->>>>>> But still don't know what happens with ceph, so it can't
->>>>>> respond and hang. It is not a good behavior, because
->>>>>> such situation leads to unresponsible cluster in case of
->>>>>> temporal network failure.
->>>>>
->>>>> I'm a little concerned about this =E2=80=94=C2=A0I would expect t=
-o see hangs of up
->>>>> to ~30 seconds (the timeout period), but for operations to then
->>>>> continue. Are you putting the MDS down? If so, do you have any
->>>>> standbys specified?
->>>>
->>>> Yes, MDS goes down (I restart it at some point, while changing som=
-ething
->>>> in config).
->>>> Yes, i have 2 standbys.
->>>> Clients hang more then 10 minutes.
->>>
->>> Okay, so it's probably an issue with the MDS not entering recovery =
-when it
->>> should. Are you also taking down one of the monitor nodes? There's =
-a known
->>> bug which can cause a standby MDS to wait up to 15 minutes if its m=
-onitor
->>> goes down which is fixed in latest master (and maybe .40; I'd have =
-to
->>> check).
->>
->> Yes. I have collocated mon mds and osd on some nodes.
->> And restart all daemons at once. I use 0.40. (built from my github f=
-ork).
->
-> Hrm. I checked and the fix is in 0.40. Can you reproduce this with
-> client logging enabled (--debug_ms 1 --debug_client 10) and post the
-> logs somewhere for me to check out? That should be able to isolate th=
-e
-> problem area at least.
+On Jan 19, 2012, Holger Macht <hmacht@suse.de> wrote:
 
-Client writes "renew caps" and nothing more.
-I'd try to reproduce problem with more logging, but still no luck.
-May be debug serializes race somewhere and prevents
-this bug to occur.
+> Alexandre Oliva <oliva <at> lsd.ic.unicamp.br> writes:
+>> 
+>> Some post-install rpmbuild defaults byte-compile all packaged python
+>> files, so don't bother removing the .pyc files, and package .py* to
+>> get both .pyo and .pyc.  It wastes a tiny little bit of space, but it
+>> makes the spec file portable across a wider range of rpm and python
+>> configurations.
 
-> -Greg
+> Just wondering...do you have a concrete issue or an example where this is a 
+> problem?
+
+It failed to build on a BLAGified Fedora 16, complaining about the
+unpackaged .pyc files.  It's not just CentOS that creates the .pyc files
+in brp-python-bytecompile.  Plus, they should be packaged (if at all) in
+python-ceph, but definitely not in the main ceph package.
 
 
+Another issue I forgot while posting the patch was that there was not a
+.tar.bz2 available from the ceph site.  I ended up recompressing the .gz
+as .bz2, but if ceph is going to be released compressed as .gz, the spec
+file ought to be adjusted to reflect that.
 
---=20
-Andrey.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
