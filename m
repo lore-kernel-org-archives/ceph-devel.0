@@ -1,32 +1,79 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: subuser of radosgw
-Date: Fri, 20 Jan 2012 13:53:58 -0800
-Message-ID: <CAORUGqCunP=cFm5J=yOfjvTk3-=RdTMA9j_eCXvxg916kdHVvw@mail.gmail.com>
-References: <CABAwU-ZMc1ANrwnrv7c6=oUv=PiSb-Zj-xFgMDfQUDWM=Zb6nA@mail.gmail.com>
- <CAC-hyiGM9ZwdX7KmZTmewcHfP5YE4XUaw78FDgNj_L1kLOorpA@mail.gmail.com>
- <CABAwU-Z2YPm9niHz07ue+TvJOyPG30j43RGY2vJckv9uRfPU0w@mail.gmail.com>
- <CAC-hyiHW6dQzcezH+0VOMpg1jebr68Yq6JCrczQP8egARjZNDA@mail.gmail.com> <CABAwU-b--nBzwJHONH7PNJyyF_E4BvVz7_9DciecEyegZY3K-g@mail.gmail.com>
+From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Subject: Re: [PATCH] [ceph spec] package *.py* files
+Date: Fri, 20 Jan 2012 21:28:56 -0200
+Message-ID: <or39baosw7.fsf@livre.localdomain>
+References: <orboq2w2vq.fsf@livre.localdomain>
+	<loom.20120119T183130-208@post.gmane.org>
+	<orehuvp6ce.fsf@livre.localdomain>
+	<20120120150342.GB7606@homac.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:57933 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755196Ab2ATVyU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jan 2012 16:54:20 -0500
-Received: by werb13 with SMTP id b13so805747wer.19
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Jan 2012 13:54:19 -0800 (PST)
-In-Reply-To: <CABAwU-b--nBzwJHONH7PNJyyF_E4BvVz7_9DciecEyegZY3K-g@mail.gmail.com>
+Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:45638 "EHLO
+	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752049Ab2ATX3G (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 20 Jan 2012 18:29:06 -0500
+In-Reply-To: <20120120150342.GB7606@homac.suse.de> (Holger Macht's message of
+	"Fri, 20 Jan 2012 16:03:42 +0100")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Holger Macht <hmacht@suse.de>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Jan 12, 2012 at 18:41, huang jun <hjwsm1989@gmail.com> wrote:
-> does rgw support json? now, the default format is xml, but there is
-> something wrong when i using it upload the *.docx file,
-> just like "Failed to parse XML document with handler ".
+On Jan 20, 2012, Holger Macht <hmacht@suse.de> wrote:
 
-radosgw stores bytes, it does not care about the content of those
-bytes. Any file format will work just as well.
+> On Thu 19. Jan - 22:26:09, Alexandre Oliva wrote:
+>> On Jan 19, 2012, Holger Macht <hmacht@suse.de> wrote:
+>> 
+>> > Alexandre Oliva <oliva <at> lsd.ic.unicamp.br> writes:
+>> >> 
+>> >> Some post-install rpmbuild defaults byte-compile all packaged python
+>> >> files, so don't bother removing the .pyc files, and package .py* to
+>> >> get both .pyo and .pyc.  It wastes a tiny little bit of space, but it
+>> >> makes the spec file portable across a wider range of rpm and python
+>> >> configurations.
+>> 
+>> > Just wondering...do you have a concrete issue or an example where this is a 
+>> > problem?
+>> 
+>> It failed to build on a BLAGified Fedora 16, complaining about the
+>> unpackaged .pyc files.  It's not just CentOS that creates the .pyc files
+>> in brp-python-bytecompile.  
 
-I can't find that error message anywhere on the Ceph source tree.
+> So the built failed because *.pyo was there and *.pyc wasn't?
+
+No, both were there, but the .pyc was (correctly) flagged as not
+packaged.
+
+> So maybe we should just always put pyc files in for maximum
+> compatibility across distributions?
+
+Yeah.
+
+> Otherwise, if this really makes the build fail for some distributions,
+
+The CentOS-only .pyc packaging did not cover other distros that required
+it, such as Fedora and BLAG, yes.
+
+>> Plus, they should be packaged (if at all) in python-ceph, but
+>> definitely not in the main ceph package.
+
+> They are packaged in python-ceph.
+
+No, look at the patch.  The ugly work-around to package .pyc files on
+CentOS only was not in python-ceph.
+
+> My fault. I also recompressed them at the very start of working on the
+> spec file and changed it accordingly, but I'm fine for changing this
+> back to .gz.
+
+I'd rather use the smallest available tarball, but we should use
+whatever ceph publishes.  If it's going to be .gz from now on, we have
+to change the spec file.
+
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
