@@ -1,116 +1,98 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: wip-encoding
-Date: Sun, 22 Jan 2012 22:18:16 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201222206550.22651@cobra.newdream.net>
-References: <Pine.LNX.4.64.1201161520380.27147@cobra.newdream.net>
- <CAF3hT9CMJ1MZmA6Dkzj8ZXKpDtYECk_h3s2rudQjYkZDc-2cQw@mail.gmail.com>
- <Pine.LNX.4.64.1201201045230.8753@cobra.newdream.net>
- <CAF3hT9BwUW8mHsB+Z2u_iUGZp0494wGKjFgmjhzipxuYhXcV_w@mail.gmail.com>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Use 2 as fallback inode number on 32 Bit kernel
+Date: Mon, 23 Jan 2012 15:31:18 +0100
+Message-ID: <201201231531.18469.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-489448358-1327299496=:22651"
+Content-Type: Multipart/Mixed;
+  boundary="Boundary-00=_28WHPVFhYHmrqZn"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60071 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751677Ab2AWGSS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2012 01:18:18 -0500
-In-Reply-To: <CAF3hT9BwUW8mHsB+Z2u_iUGZp0494wGKjFgmjhzipxuYhXcV_w@mail.gmail.com>
+Received: from www.m-privacy.de ([85.214.138.176]:57075 "EHLO www.m-privacy.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752317Ab2AWOb2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 23 Jan 2012 09:31:28 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by www.m-privacy.de (Postfix) with ESMTP id 8120285EFD
+	for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2012 15:31:26 +0100 (CET)
+Received: from www.m-privacy.de ([127.0.0.1])
+ by localhost (www.m-privacy.de [127.0.0.1]) (amavisd-maia, port 10024)
+ with ESMTP id 09473-08 for <ceph-devel@vger.kernel.org>;
+ Mon, 23 Jan 2012 15:31:20 +0100 (CET)
+Received: from gw.compuniverse.de (unknown [85.183.4.97])
+	(using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by www.m-privacy.de (Postfix) with ESMTPSA id 01E4A85EFC
+	for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2012 15:31:20 +0100 (CET)
+Received: from tgham.compuniverse.de (tgham.compuniverse.de [192.168.201.30])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by gw.compuniverse.de (Postfix) with ESMTPS id 771EB262D4
+	for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2012 15:31:19 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+--Boundary-00=_28WHPVFhYHmrqZn
+Content-Type: text/plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: inline
 
---557981400-489448358-1327299496=:22651
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Hi folks,
 
-On Fri, 20 Jan 2012, Gregory Farnum wrote:
-> On Fri, Jan 20, 2012 at 10:58 AM, Sage Weil <sage@newdream.net> wrote:
-> > The current pattern is
-> >
-> > void Foo::encode(bufferlist& bl, unsigned features) const
-> > {
-> > =A0if (features & NEW_THING) {
-> > =A0 =A0 // encode normally
-> > =A0} else {
-> > =A0 =A0 // encode old way (wahtever was in this func)
-> > =A0}
-> > }
-> >
-> > I'm not sure what to add here to make this less painful or error-prone.
-> > ceph-dencoder does have options to print the feature set for the versio=
-n
-> > it was compiled for, and to set the bits passed to encoder functions, s=
-o
-> > that we can test these paths.
->=20
-> Well, our features tend to all move forward, so perhaps we should have
-> a way of specifying different encoders based on the feature bits (or
-> struct version) we're targeting, instead of if-elsing through the code
-> (nesting with something like this tends to sprawl ever-deeper). I
-> think that would make it easier to test inter-version compatibility
-> and avoid accidentally breaking interoperation.
->=20
-> Not having spent a bunch of time thinking about how to do this I don't
-> have obviously better ideas off-hand, but I'd really like it if
-> somebody could either present a good option or else say why we won't
-> get anything much better, instead of just pressing ahead because
-> nobody has any better ideas. :( We're going to be stuck with this for
-> a while.
+the current code in 32 Bit use 1 as fallback number, if the inode number=20
+calculation returns 0. This always collides with the inode number of the ro=
+ot=20
+inode. The attached patch changes the fallback number to 2, which seems to =
+be=20
+unused on our test systems.
 
-Hmm.  I don't like obscuring control flow with macros, and features needs=
-=20
-to be an argument.  I don't have any real ideas here.
+Amon Ott
+=2D-=20
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Am K=F6llnischen Park 1    Fax: +49 30 24342336
+10179 Berlin             http://www.m-privacy.de
 
-> >> > This requires and initial incompat change to add the length and inco=
-mpat
-> >> > fields, but then we can generally add things without breakage.
-> >> Hmm...if we come up with something that talks feature bits we could do
-> >> this nicely with a compat bit. :)
-> >
-> > Hmm, yeah. =A0If we redo a bunch of encoders at once we can use a
-> > single feature bit for all of them. =A0That's a good idea!
->=20
-> I'm not sure my thought came across clearly ?=A0we should be able to use
-> a compat rather than an incompat flag if we have a good way to target
-> multiple versions in our encoder.
+Amtsgericht Charlottenburg, HRB 84946
 
-You'll need to explain what you mean on Monday.. I'm missing it!
+Gesch=E4ftsf=FChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
 
-> > I cleaned up the tool usage a bit and it currently looks like
-> >
-> > $ ./ceph-dencoder -h
-> > usage: ceph-dencoder [commands ...]
-> >
-> > =A0version =A0 =A0 =A0 =A0 =A0print version string (to stdout)
-> >
-> > =A0import <encfile> read encoded data from encfile
-> > =A0export <outfile> write encoded data to outfile
-> >
-> > =A0features <num> =A0 set feature bits used for encoding
-> > =A0get_features =A0 =A0 print feature bits (int) to stdout
->=20
-> We will probably be happier in the long run if we can use symbolic
-> names for the features. Not sure how difficult that would be, though.
+GnuPG-Key-ID: 0x2DD3A649
 
-Just a bunch of string parsing and conversion functions.  Meh...
-=20
-> > =A0list_types =A0 =A0 =A0 list supported types
-> > =A0type <classname> select type
-> > =A0decode =A0 =A0 =A0 =A0 =A0 decode into in-core object
-> > =A0encode =A0 =A0 =A0 =A0 =A0 encode in-core object
-> > =A0dump_json =A0 =A0 =A0 =A0dump in-core object as json (to stdout)
-> >
-> > =A0count =A0 =A0 =A0 =A0 =A0 =A0print number of generated test objects =
-(to stdout)
-> > =A0select <n> =A0 =A0 =A0 select generated test object as in-core objec=
-t
->=20
-> I'm not sure what "in-core" means here, nor what it means to "select type=
-".
+--Boundary-00=_28WHPVFhYHmrqZn
+Content-Type: text/x-diff;
+  charset="iso 8859-15";
+  name="ceph-32bit-inode-fallback-2.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+	filename="ceph-32bit-inode-fallback-2.patch"
 
-I'll it to 'in-memory'. :)
+commit e9b257a3b1364980f3247e110c4ded56b4fbe54a
+Author: Amon Ott <ao@m-privacy.de>
+Date:   Fri Jan 20 15:40:51 2012 +0100
 
---557981400-489448358-1327299496=:22651--
+    Use 2 instead of 1 as fallback for 32 Bit inode number.
+    
+    The root directory of the Ceph mount has inode number 1, so falling back
+    to 1 always creates a collision. 2 is unused on my test systems and seems
+    less likely to collide.
+    
+    Signed-off-by: Amon Ott <ao@m-privacy.de>
+
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 9d19790..595f026 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -351,7 +351,7 @@ static inline u32 ceph_ino_to_ino32(__u64 vino)
+ 	u32 ino = vino & 0xffffffff;
+ 	ino ^= vino >> 32;
+ 	if (!ino)
+-		ino = 1;
++		ino = 2;
+ 	return ino;
+ }
+ 
+
+--Boundary-00=_28WHPVFhYHmrqZn--
