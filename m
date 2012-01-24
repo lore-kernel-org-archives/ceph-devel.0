@@ -1,34 +1,49 @@
-From: Chris Mason <chris.mason@oracle.com>
-Subject: Re: Btrfs slowdown with ceph (how to reproduce)
-Date: Tue, 24 Jan 2012 14:40:44 -0500
-Message-ID: <20120124194044.GI4387@shiny>
-References: <CAO47_-8Eb_v8X95KxSZ2H-DNC3hLZkrfq1ce3CAfW2G9CUV5gQ@mail.gmail.com>
- <20120123181928.GA3724@localhost.localdomain>
- <20120123185040.GH4387@shiny>
- <4F1F036E.9030801@tuxadero.com>
+From: Holger Macht <hmacht@suse.de>
+Subject: Re: [PATCH] [ceph spec] package *.py* files
+Date: Tue, 24 Jan 2012 21:18:21 +0100
+Message-ID: <20120124201821.GA32255@homac.suse.de>
+References: <orboq2w2vq.fsf@livre.localdomain>
+ <loom.20120119T183130-208@post.gmane.org>
+ <orehuvp6ce.fsf@livre.localdomain>
+ <20120120150342.GB7606@homac.suse.de>
+ <or39baosw7.fsf@livre.localdomain>
+ <Pine.LNX.4.64.1201201536070.8753@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-btrfs-owner@vger.kernel.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:49840 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756471Ab2AXUSY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 24 Jan 2012 15:18:24 -0500
 Content-Disposition: inline
-In-Reply-To: <4F1F036E.9030801@tuxadero.com>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: Martin Mailand <martin@tuxadero.com>
-Cc: Josef Bacik <josef@redhat.com>, Christian Brunner <chb@muc.de>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+In-Reply-To: <Pine.LNX.4.64.1201201536070.8753@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Alexandre Oliva <oliva@lsd.ic.unicamp.br>, ceph-devel@vger.kernel.org
 
-On Tue, Jan 24, 2012 at 08:15:58PM +0100, Martin Mailand wrote:
-> Hi
-> I tried the branch on one of my ceph osd, and there is a big
-> difference in the performance.
-> The average request size stayed high, but after around a hour the
-> kernel crashed.
+On Fr 20. Jan - 15:36:45, Sage Weil wrote:
+> On Fri, 20 Jan 2012, Alexandre Oliva wrote:
+> > On Jan 20, 2012, Holger Macht <hmacht@suse.de> wrote:
+> > > So maybe we should just always put pyc files in for maximum
+> > > compatibility across distributions?
+> > 
+> > Yeah.
 > 
-> IOstat
-> http://pastebin.com/xjuriJ6J
+> I should apply this, then?
+
+Ok, fine with me.
+
 > 
-> Kernel trace
-> http://pastebin.com/SYE95GgH
+> > > My fault. I also recompressed them at the very start of working on the
+> > > spec file and changed it accordingly, but I'm fine for changing this
+> > > back to .gz.
+> > 
+> > I'd rather use the smallest available tarball, but we should use
+> > whatever ceph publishes.  If it's going to be .gz from now on, we have
+> > to change the spec file.
+> 
+> I'll start doing .bz2 (in addition to .gz) with 0.41.
 
-Aha, this I know how to fix.  Thanks for trying it out.
-
--chris
+Thanks,
+ Holger
