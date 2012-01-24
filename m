@@ -1,71 +1,46 @@
-From: Holger Macht <hmacht@suse.de>
-Subject: Re: [PATCH] [ceph spec] package *.py* files
-Date: Tue, 24 Jan 2012 21:26:17 +0100
-Message-ID: <20120124202617.GB32255@homac.suse.de>
-References: <orboq2w2vq.fsf@livre.localdomain>
- <loom.20120119T183130-208@post.gmane.org>
- <orehuvp6ce.fsf@livre.localdomain>
- <20120120150342.GB7606@homac.suse.de>
- <or39baosw7.fsf@livre.localdomain>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Re: Btrfs slowdown with ceph (how to reproduce)
+Date: Tue, 24 Jan 2012 21:55:37 +0100
+Message-ID: <4F1F1AC9.1090307@tuxadero.com>
+References: <CAO47_-8Eb_v8X95KxSZ2H-DNC3hLZkrfq1ce3CAfW2G9CUV5gQ@mail.gmail.com> <20120123181928.GA3724@localhost.localdomain> <20120123185040.GH4387@shiny> <4F1F036E.9030801@tuxadero.com> <20120124194044.GI4387@shiny>
+Reply-To: martin@tuxadero.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:50083 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756835Ab2AXU0U (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 24 Jan 2012 15:26:20 -0500
-Content-Disposition: inline
-In-Reply-To: <or39baosw7.fsf@livre.localdomain>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:57016 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756572Ab2AXU4A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Jan 2012 15:56:00 -0500
+In-Reply-To: <20120124194044.GI4387@shiny>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-Cc: ceph-devel@vger.kernel.org
+To: Chris Mason <chris.mason@oracle.com>, Josef Bacik <josef@redhat.com>, Christian Brunner <chb@muc.de>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-On Fr 20. Jan - 21:28:56, Alexandre Oliva wrote:
-> On Jan 20, 2012, Holger Macht <hmacht@suse.de> wrote:
-> 
-> > On Thu 19. Jan - 22:26:09, Alexandre Oliva wrote:
-> >> On Jan 19, 2012, Holger Macht <hmacht@suse.de> wrote:
-> >> 
-> >> > Alexandre Oliva <oliva <at> lsd.ic.unicamp.br> writes:
-> >> >> 
-> >> >> Some post-install rpmbuild defaults byte-compile all packaged python
-> >> >> files, so don't bother removing the .pyc files, and package .py* to
-> >> >> get both .pyo and .pyc.  It wastes a tiny little bit of space, but it
-> >> >> makes the spec file portable across a wider range of rpm and python
-> >> >> configurations.
-> >> 
-> >> > Just wondering...do you have a concrete issue or an example where this is a 
-> >> > problem?
-> >> 
-> >> It failed to build on a BLAGified Fedora 16, complaining about the
-> >> unpackaged .pyc files.  It's not just CentOS that creates the .pyc files
-> >> in brp-python-bytecompile.  
-> 
-> > So the built failed because *.pyo was there and *.pyc wasn't?
-> 
-> No, both were there, but the .pyc was (correctly) flagged as not
-> packaged.
-> 
-> > So maybe we should just always put pyc files in for maximum
-> > compatibility across distributions?
-> 
-> Yeah.
-> 
-> > Otherwise, if this really makes the build fail for some distributions,
-> 
-> The CentOS-only .pyc packaging did not cover other distros that required
-> it, such as Fedora and BLAG, yes.
-> 
-> >> Plus, they should be packaged (if at all) in python-ceph, but
-> >> definitely not in the main ceph package.
-> 
-> > They are packaged in python-ceph.
-> 
-> No, look at the patch.  The ugly work-around to package .pyc files on
-> CentOS only was not in python-ceph.
+Hi Chris,
+great to hear that, could you give me a ping if you fixed it, than I can 
+retry it?
 
-Ok, now I see.
+-martin
 
-Regards
- Holger
+Am 24.01.2012 20:40, schrieb Chris Mason:
+> On Tue, Jan 24, 2012 at 08:15:58PM +0100, Martin Mailand wrote:
+>> Hi
+>> I tried the branch on one of my ceph osd, and there is a big
+>> difference in the performance.
+>> The average request size stayed high, but after around a hour the
+>> kernel crashed.
+>>
+>> IOstat
+>> http://pastebin.com/xjuriJ6J
+>>
+>> Kernel trace
+>> http://pastebin.com/SYE95GgH
+>
+> Aha, this I know how to fix.  Thanks for trying it out.
+>
+> -chris
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
