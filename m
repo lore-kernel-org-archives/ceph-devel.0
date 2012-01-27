@@ -1,104 +1,67 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: osd crash during resync
-Date: Thu, 26 Jan 2012 11:18:44 +0100
-Message-ID: <4F212884.6020606@tuxadero.com>
-References: <4F1EFCFA.3060607@tuxadero.com> <Pine.LNX.4.64.1201251408060.30331@cobra.newdream.net>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Re: Bug #1047 reproduced
+Date: Fri, 27 Jan 2012 15:23:52 +0100
+Message-ID: <201201271523.54502.a.ott@m-privacy.de>
+References: <201112010937.37642.a.ott@m-privacy.de> <CAF3hT9BrL8WJbG2cgDADfSZk02HWwi4Q2MgK_yu6fiDSyZrwRg@mail.gmail.com> <201112291230.59323.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:59371 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750842Ab2AZKTA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jan 2012 05:19:00 -0500
-In-Reply-To: <Pine.LNX.4.64.1201251408060.30331@cobra.newdream.net>
+Received: from www.m-privacy.de ([85.214.138.176]:57513 "EHLO www.m-privacy.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752702Ab2A0OYF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Jan 2012 09:24:05 -0500
+In-Reply-To: <201112291230.59323.a.ott@m-privacy.de>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Sage,
-I uploaded the osd.0 log as well.
+On Thursday 29 December 2011 wrote Amon Ott:
+> I finally got the test cluster freed up for more Ceph testing.
+>
+> On Friday 23 December 2011 wrote Gregory Farnum:
+> > Unfortunately there's not enough info in this log either. If you ca=
+n
+> > reproduce it with "mds debug =3D 20" and put that log somewhere, it
+> > ought to be enough to work out what's going on, though. Sorry. :(
+> > -Greg
+>
+> Here is what MDS logs with debug 20. No idea if it really helps. The
+> cluster is still in the broken state, should I try to reproduce with =
+a
+> recreated ceph fs and debug 20? This could be GBs of logs.
 
-http://85.214.49.87/ceph/20120124/osd.0.log.bz2
+Update: I recreated the Ceph FS with release 0.40. It broke only becaus=
+e of a=20
+btrfs bug hitting two of the four nodes (after ca. one day of heavy loa=
+d) and=20
+recovered without problems when the nodes were back. Then I recreated w=
+ith=20
+ext4 as osd storage area and have not managed to break it within four d=
+ays,=20
+two of these under heavy load.
 
--martin
+This means that this bug is probably fixed. It might be related to the=20
+automatic reconnect of mds, which avoids meta data inconsistencies. :)
 
-Am 25.01.2012 23:08, schrieb Sage Weil:
-> Hi Martin,
->
-> On Tue, 24 Jan 2012, Martin Mailand wrote:
->> Hi,
->> today I tried the btrfs patch mentioned on the btrfs ml. Therefore I rebooted
->> osd.0 with a new kernel and created a new btrfs on the osd.0, than I took the
->> osd.0 into the cluster. During the the resync of osd.0 osd.2 and osd.3
->> crashed.
->> I am not sure, if the crashes happened because I played with osd.0, or if they
->> are bugs.
->>
->>
->> osd.2
->> -rw-------  1 root root 1.1G 2012-01-24 12:19
->> core-ceph-osd-1000-1327403927-s-brick-002
->>
->> log:
->> 2012-01-24 12:15:45.563135 7f1fdd42c700 log [INF] : 2.a restarting backfill on
->> osd.0 from (185'113859,185'113859] 0//0 to 196'114038
->> osd/PG.cc: In function 'void PG::finish_recovery_op(const hobject_t&, bool)',
->> in thread '7f1fdab26700'
->> osd/PG.cc: 1553: FAILED assert(recovery_ops_active>  0)
->>
->> -rw-------  1 root root 758M 2012-01-24 15:58
->> core-ceph-osd-20755-1327417128-s-brick-002
->
-> Can you post the log for osd.0 too?
->
-> Thanks!
-> sage
->
->
->
->>
->> log:
->> 2012-01-24 15:58:48.356892 7fe26acbf700 osd.2 379 pg[2.ff( v 379'286211 lc
->> 202'286160 (185'285159,379'286211] n=112 ec=1 les/c 379/310 373/376/376) [2,1]
->> r=0 lpr=376 rops=1 mlcod 202'286160 active m=6]  * oi->watcher: client.4478
->> cookie=1
->> osd/ReplicatedPG.cc: In function 'void
->> ReplicatedPG::populate_obc_watchers(ReplicatedPG::ObjectContext*)', in thread
->> '7fe26fdca700'
->> osd/ReplicatedPG.cc: 3199: FAILED assert(obc->watchers.size() == 0)
->> osd/ReplicatedPG.cc: In function 'void
->> ReplicatedPG::populate_obc_watchers(ReplicatedPG::ObjectContext*)', in thread
->> '7fe26fdca700'
->>
->> http://85.214.49.87/ceph/20120124/osd.2.log.bz2
->>
->>
->>
->> osd.3
->> -rw-------  1 root root 986M 2012-01-24 12:24
->> core-ceph-osd-962-1327404263-s-brick-003
->>
->> log:
->> 2012-01-24 12:15:50.241321 7f30c8fde700 log [INF] : 2.2e restarting backfill
->> on osd.0 from (185'338312,185'338312] 0//0 to 196'339910
->> 2012-01-24 12:21:48.420242 7f30c5ed7700 log [INF] : 2.9d scrub ok
->> osd/PG.cc: In function 'void PG::activate(ObjectStore::Transaction&,
->> std::list<Context*>&, std::map<int, std::map<pg_t, PG::Query>  >&,
->> std::map<int, MOSDPGInfo*>*)', in thread '7f30c8fde700'
->>
->> http://85.214.49.87/ceph/20120124/osd.3.log.bz2
->>
->>
->>
->> -martin
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+Amon Ott
+--=20
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Am K=F6llnischen Park 1    Fax: +49 30 24342336
+10179 Berlin             http://www.m-privacy.de
 
+Amtsgericht Charlottenburg, HRB 84946
+
+Gesch=E4ftsf=FChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
