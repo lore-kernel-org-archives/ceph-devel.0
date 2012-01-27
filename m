@@ -1,73 +1,78 @@
-From: Stefan Kleijkers <stefan@kleijkers.nl>
-Subject: Re: ceph on XFS
-Date: Fri, 27 Jan 2012 22:34:43 +0100
-Message-ID: <4F231873.6070001@kleijkers.nl>
-References: <CAO47_-8JzjxoGB_ZjVwWtdhYLJ3LoVZQyoQoSWuJ1v9W9ioSLg@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: wip-pg-stale
+Date: Fri, 27 Jan 2012 15:43:15 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201271542150.8285@cobra.newdream.net>
+References: <Pine.LNX.4.64.1201271330420.8285@cobra.newdream.net>
+ <CAF3hT9CZXERFnPOuiZiy12sKBzr7xmjWKo9HtEmD6AJueC_gDg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1149120647-1327707795=:8285"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpq2.gn.mail.iss.as9143.net ([212.54.34.165]:52733 "EHLO
-	smtpq2.gn.mail.iss.as9143.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753570Ab2A0WLz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 27 Jan 2012 17:11:55 -0500
-In-Reply-To: <CAO47_-8JzjxoGB_ZjVwWtdhYLJ3LoVZQyoQoSWuJ1v9W9ioSLg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:40148 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751485Ab2A0XnP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Jan 2012 18:43:15 -0500
+In-Reply-To: <CAF3hT9CZXERFnPOuiZiy12sKBzr7xmjWKo9HtEmD6AJueC_gDg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chb@muc.de
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Christian,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I just switched testing from btrfs to xfs, because I also have the 
-problem with the extreme slowdown with btrfs after a short while.
+--557981400-1149120647-1327707795=:8285
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-The performance and stability I'm getting with xfs at the moment is very 
-good.
+On Fri, 27 Jan 2012, Gregory Farnum wrote:
+> On Fri, Jan 27, 2012 at 1:32 PM, Sage Weil <sage@newdream.net> wrote:
+> > Please review.
+> >
+> > If the monitor sees an osdmap go by where nodes go down (or up) it will
+> > scan its pg_map and mark any pg whose primary is down as 'stale'. =A0If=
+/when
+> > the pg recovers, that will get refreshed. =A0If not, the admin will kno=
+w
+> > something is up.
+> Hmm. Without any kind of timeout this flag will get set every time an
+> OSD goes down ? the replicas won't alert the new primary until after
+> they get the map marking their old primary down, and this check will
+> be run synchronously with the generation of the map marking the OSD
+> down.
+> The "spurious" stale marker on each PG isn't a big deal (it'll
+> disappear after a few seconds), but if we're going to set HEALTH_WARN
+> based on it, that seems like a bit much to me.
 
-I'm testing two setups:
-- OSD per disk with XFS with two nodes and 12 disks per node. An 
-intermediate server that acts as gateway, mounting the cephfs and 
-exposing it with rsync daemon. Doing 20 rsyncs to different directories 
-on the cephfs (backups of linux servers with about 100GB of data each).
-- OSD per disk with XFS with two nodes and 12 disks per node. An 
-intermediate server that acts as a gateway, connecting to 20 rbd's and 
-formatted as ext3 filesystems. Those filesystems get exposed with a 
-rsync daemon. Same load as with the first setup.
+My thought is that as soon as we add the time stamps to the state=20
+transition, it'll only warn once things are stale for a while.  We already=
+=20
+have the same problem with degraded/peering/etc with the health checks...
 
-Both nodes have a ssd for journaling (partitioned in 12 partitions, for 
-each osd).
+sage
 
-Both setups perform really good. It's a gigabit network and with the 
-first setup I get about 50MB/s average, the second setup goes faster, 
-but I don't have any concrete figures at the moment.
 
-In the past I had a lot of trouble with btrfs, it crashed a lot. But 
-with the 3.2.1 kernel those crashes disappeared.
-
-Stefan
-
-On 01/27/2012 09:48 PM, Christian Brunner wrote:
-> Hi,
->
-> reading the list archives, I get the impression that XFS is the second
-> best alternative to btrfs. But when I start an ceph-osd on an XFS
-> volume, there is still a big warning:
->
-> WARNING: not btrfs or ext3.  We don't currently support file systems other
->               than btrfs and ext3 (data=journal or data=ordered).  Data may be
->               lost in the event of a crash.
->
-> I know that I can't use btrfs snapshots, but is it really that bad?
->
-> I'm running a recent RHEL6.2 kernel now, that has all those wonderful
-> optimizations, Dave Chinner was talking about.
->
-> Thanks,
-> Christian
+>=20
+> > We'll soon be adding the last_active, last_clean, and now last_unstale =
+(?)
+> > fields so that bigger alarms can go off when the pg stays stale for mor=
+e
+> > than a few seconds...
+> Yeah; I think we want to use this to trigger big warnings, but not to
+> trigger warnings without it.
+> -Greg
+>=20
+>=20
+> >
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+>=20
+>=20
+--557981400-1149120647-1327707795=:8285--
