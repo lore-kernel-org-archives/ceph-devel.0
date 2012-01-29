@@ -1,37 +1,37 @@
-From: Madhusudhan <madhusudhana.u.acharya@gmail.com>
-Subject: Ceph behavior in case of network failure
-Date: Sun, 29 Jan 2012 04:52:40 +0000 (UTC)
-Message-ID: <loom.20120129T054836-318@post.gmane.org>
+From: Sage Weil <sage@newdream.net>
+Subject: ceph-client.git master
+Date: Sun, 29 Jan 2012 09:04:38 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201290858380.12891@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:60330 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750939Ab2A2FS3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 29 Jan 2012 00:18:29 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1RrMrz-0001C3-97
-	for ceph-devel@vger.kernel.org; Sun, 29 Jan 2012 06:00:03 +0100
-Received: from 202.164.25.5 ([202.164.25.5])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sun, 29 Jan 2012 06:00:03 +0100
-Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sun, 29 Jan 2012 06:00:03 +0100
+Received: from cobra.newdream.net ([66.33.216.30]:46199 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752955Ab2A2REl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Jan 2012 12:04:41 -0500
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id A8A53BC7BD
+	for <ceph-devel@vger.kernel.org>; Sun, 29 Jan 2012 09:04:40 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 80496BC7BD
+	for <ceph-devel@vger.kernel.org>; Sun, 29 Jan 2012 09:04:40 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-I have configured ceph in centos5.6 after a 
-very long fight. Now, i am in the way 
-to evaluate the Ceph. Forget me if my 
-question looks amateur. If we consider a 
-situation where my core switch fails, 
-resulting in n/w failure in entire data 
-center. What happens to ceph cluster ? 
-will it sustain this n/w failure and comes 
-online when the n/w is restored ? 
+I pulled Chris's btrfs for-linus branch into ceph-client.git master for 
+the benefit of our qa runs (which use the same kernel on the client and 
+server side).  This makes the master even more of a mess than it already 
+was.
 
+Alex, what do you think?  Right now the branches are roughly:
+
+ for-next  -- tested and reviewed, for next window
+ master    -- lightly tested.  this is what qa runs against.
+ for-linus -- for linus to pull now.. either for -rc or current window.
+
+We could make master the reviewed+tested branch, and do a 'testing' 
+branch for the free-for-all, so that it's clearer to people that it's 
+untested, likely to be rebased, etc.
+
+sage
