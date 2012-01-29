@@ -1,37 +1,25 @@
-From: Sage Weil <sage@newdream.net>
-Subject: ceph-client.git master
-Date: Sun, 29 Jan 2012 09:04:38 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201290858380.12891@cobra.newdream.net>
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: Files under ceph-mon's auth directory
+Date: Mon, 30 Jan 2012 01:24:38 +0800
+Message-ID: <CANExM-N2yrdFwzv4tr7wYZ_mEh_-kSn9OrOyzqwcB2sTJh0G8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46199 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752955Ab2A2REl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Jan 2012 12:04:41 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id A8A53BC7BD
-	for <ceph-devel@vger.kernel.org>; Sun, 29 Jan 2012 09:04:40 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 80496BC7BD
-	for <ceph-devel@vger.kernel.org>; Sun, 29 Jan 2012 09:04:40 -0800 (PST)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:56465 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753101Ab2A2RYj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Jan 2012 12:24:39 -0500
+Received: by iacb35 with SMTP id b35so4151633iac.19
+        for <ceph-devel@vger.kernel.org>; Sun, 29 Jan 2012 09:24:38 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-I pulled Chris's btrfs for-linus branch into ceph-client.git master for 
-the benefit of our qa runs (which use the same kernel on the client and 
-server side).  This makes the master even more of a mess than it already 
-was.
+Hi,
 
-Alex, what do you think?  Right now the branches are roughly:
+After running ceph for months, the ceph-mon's auth directory contains
+117729 files, around 473MB. Unlike pgmap or logm, the files under auth
+directory seems never been trimmed. It causes that adding a mon takes
+a long long time. Is there a way to avoid it?
 
- for-next  -- tested and reviewed, for next window
- master    -- lightly tested.  this is what qa runs against.
- for-linus -- for linus to pull now.. either for -rc or current window.
-
-We could make master the reviewed+tested branch, and do a 'testing' 
-branch for the free-for-all, so that it's clearer to people that it's 
-untested, likely to be rebased, etc.
-
-sage
+Henry
