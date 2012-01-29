@@ -1,40 +1,37 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.41 released
-Date: Sat, 28 Jan 2012 15:29:29 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201281528570.28466@cobra.newdream.net>
+From: Madhusudhan <madhusudhana.u.acharya@gmail.com>
+Subject: Ceph behavior in case of network failure
+Date: Sun, 29 Jan 2012 04:52:40 +0000 (UTC)
+Message-ID: <loom.20120129T054836-318@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43316 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753291Ab2A1X33 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Jan 2012 18:29:29 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 4D567BC7EC
-	for <ceph-devel@vger.kernel.org>; Sat, 28 Jan 2012 15:29:29 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 1231FBC7EC
-	for <ceph-devel@vger.kernel.org>; Sat, 28 Jan 2012 15:29:29 -0800 (PST)
+Received: from plane.gmane.org ([80.91.229.3]:60330 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750939Ab2A2FS3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 29 Jan 2012 00:18:29 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1RrMrz-0001C3-97
+	for ceph-devel@vger.kernel.org; Sun, 29 Jan 2012 06:00:03 +0100
+Received: from 202.164.25.5 ([202.164.25.5])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 29 Jan 2012 06:00:03 +0100
+Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 29 Jan 2012 06:00:03 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-v0.41 is ready!  There are a few key things in this release:
+I have configured ceph in centos5.6 after a 
+very long fight. Now, i am in the way 
+to evaluate the Ceph. Forget me if my 
+question looks amateur. If we consider a 
+situation where my core switch fails, 
+resulting in n/w failure in entire data 
+center. What happens to ceph cluster ? 
+will it sustain this n/w failure and comes 
+online when the n/w is restored ? 
 
- * osd: new 'backfill' recovery code (less memory, faster)
- * osd: misc bug fixes (scrub, out of order replies)
- * radosgw: better logging
- * librados: improved api for compound operations
-
-For v0.42 we're working on improved journal performance for the OSD, 
-better encoding for data structures (to ease upgrades and downgrades), rgw 
-performance improvements, and an efficient key/value object interface.
-
-You can download v0.41 from the usual places:
-
- * Git at git://github.com/NewDreamNetwork/ceph.git
- * Tarball at http://ceph.newdream.net/download/ceph-0.41.tar.gz
- * For Debian/Ubuntu packages, see
-   http://ceph.newdream.net/docs/latest/ops/install/mkcephfs/#installing-the-packages
- 
-sage
