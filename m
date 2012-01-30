@@ -1,29 +1,29 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Files under ceph-mon's auth directory
-Date: Sun, 29 Jan 2012 09:47:30 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1201290947120.28466@cobra.newdream.net>
-References: <CANExM-N2yrdFwzv4tr7wYZ_mEh_-kSn9OrOyzqwcB2sTJh0G8w@mail.gmail.com>
+From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
+Subject: Nagios plugin
+Date: Mon, 30 Jan 2012 15:50:40 +0100
+Message-ID: <4848775.TCucqMtAc2@mranderson>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55088 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753232Ab2A2Rrc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Jan 2012 12:47:32 -0500
-In-Reply-To: <CANExM-N2yrdFwzv4tr7wYZ_mEh_-kSn9OrOyzqwcB2sTJh0G8w@mail.gmail.com>
+Received: from mail.ki.iif.hu ([193.6.222.241]:63111 "EHLO mail.ki.iif.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753027Ab2A3Ouv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 30 Jan 2012 09:50:51 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry.cy.chang@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: dallas@newdream.net
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 30 Jan 2012, Henry C Chang wrote:
-> After running ceph for months, the ceph-mon's auth directory contains
-> 117729 files, around 473MB. Unlike pgmap or logm, the files under auth
-> directory seems never been trimmed. It causes that adding a mon takes
-> a long long time. Is there a way to avoid it?
+Hi Dallas,
 
-None of the auth data is exposed outside of the monitor, so it should be 
-trivial to trim it. I'll stick it in the tracker.
+I've seen in #709 that you've been working on the Nagios plugin for Ceph. I 
+want to monitor Ceph from Nagios, too, and avoid duplicating your work. But I 
+can't find the result anywhere. Can you point me to the right place, if it's 
+available for the public?
 
-Thanks!
-sage
+Thanks,
+-- 
+cc
+
+
