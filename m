@@ -1,46 +1,32 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Ceph behavior in case of network failure
-Date: Mon, 30 Jan 2012 09:14:09 -0800
-Message-ID: <CAF3hT9A6JZPUdWxbeixdpbCQEuEZfDLzD4EvjASG0+6U3EV_Eg@mail.gmail.com>
-References: <loom.20120129T054836-318@post.gmane.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Installing_on_RedHat_or_CentOS
+Date: Mon, 30 Jan 2012 09:35:11 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1201300933400.23054@cobra.newdream.net>
+References: <4F26BB5A.5060103@cirrhus9.com>
+ <CAF3hT9DvvJ8PNQ3bXyZTt-FhHfA1GZ8bncm-HmZs9OX5=97aBA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:50448 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751987Ab2A3ROK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jan 2012 12:14:10 -0500
-Received: by ggnb1 with SMTP id b1so1932206ggn.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Jan 2012 09:14:09 -0800 (PST)
-In-Reply-To: <loom.20120129T054836-318@post.gmane.org>
+Received: from cobra.newdream.net ([66.33.216.30]:44785 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752124Ab2A3RfP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jan 2012 12:35:15 -0500
+In-Reply-To: <CAF3hT9DvvJ8PNQ3bXyZTt-FhHfA1GZ8bncm-HmZs9OX5=97aBA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Madhusudhan <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: JJ <jjones@cirrhus9.com>, ceph-devel@vger.kernel.org
 
-On Sat, Jan 28, 2012 at 8:52 PM, Madhusudhan
-<madhusudhana.u.acharya@gmail.com> wrote:
-> I have configured ceph in centos5.6 after a
-> very long fight. Now, i am in the way
-> to evaluate the Ceph. Forget me if my
-> question looks amateur. If we consider a
-> situation where my core switch fails,
-> resulting in n/w failure in entire data
-> center. What happens to ceph cluster ?
-> will it sustain this n/w failure and comes
-> online when the n/w is restored ?
+On Mon, 30 Jan 2012, Gregory Farnum wrote:
+> On Mon, Jan 30, 2012 at 7:46 AM, JJ <jjones@cirrhus9.com> wrote:
+> > Is 64bit architecture a requirement?
+> Nope!
+> > Is fuse* a requirement? (modprobe fuse doesn't issue any warnings)
+> Nope! Although you will have an easier time with the FUSE client than
+> the kernel client on a CentOS machine.
 
-Hmmm. If your network breaks horribly, you will probably need to
-restart the daemons =97=A0once their communication breaks they'll start
-marking each other down and the monitors will probably accept those
-reports once the network starts working again. (Actually, maybe we
-should update that so the monitors reject sufficiently old reports.)
-But it will be a transient effect; restarting your machines will be
-enough to restore service. :)
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Side note: Unfortunately, 64-bit is currently a requirement for ceph-fuse.  
+The fuse api is ino based, and client/fuse_ll.cc doesn't do anything to 
+cram the 64-bit ceph inos into 32 bits.
+
+sage
