@@ -1,74 +1,75 @@
-From: madhusudhan <madhusudhana.u.acharya@gmail.com>
-Subject: Re: Ceph behavior in case of network failure
-Date: Tue, 31 Jan 2012 05:13:29 +0000 (UTC)
-Message-ID: <loom.20120131T060749-554@post.gmane.org>
-References: <loom.20120129T054836-318@post.gmane.org> <CAF3hT9A6JZPUdWxbeixdpbCQEuEZfDLzD4EvjASG0+6U3EV_Eg@mail.gmail.com>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Cannot delete some empty dirs and weird sizes
+Date: Tue, 31 Jan 2012 13:00:20 +0100
+Message-ID: <201201311300.20787.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-15
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:59098 "EHLO plane.gmane.org"
+Received: from www.m-privacy.de ([85.214.138.176]:49303 "EHLO www.m-privacy.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750917Ab2AaFNn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 31 Jan 2012 00:13:43 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Rs62G-0003ze-JP
-	for ceph-devel@vger.kernel.org; Tue, 31 Jan 2012 06:13:40 +0100
-Received: from 202.164.25.5 ([202.164.25.5])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 31 Jan 2012 06:13:40 +0100
-Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 31 Jan 2012 06:13:40 +0100
+	id S1752742Ab2AaMAa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jan 2012 07:00:30 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by www.m-privacy.de (Postfix) with ESMTP id 2212185FBE
+	for <ceph-devel@vger.kernel.org>; Tue, 31 Jan 2012 13:00:29 +0100 (CET)
+Received: from www.m-privacy.de ([127.0.0.1])
+ by localhost (www.m-privacy.de [127.0.0.1]) (amavisd-maia, port 10024)
+ with ESMTP id 28992-08 for <ceph-devel@vger.kernel.org>;
+ Tue, 31 Jan 2012 13:00:22 +0100 (CET)
+Received: from gw.compuniverse.de (unknown [85.183.4.97])
+	(using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by www.m-privacy.de (Postfix) with ESMTPSA id 46F4085FBD
+	for <ceph-devel@vger.kernel.org>; Tue, 31 Jan 2012 13:00:22 +0100 (CET)
+Received: from tgham.compuniverse.de (tgham.compuniverse.de [192.168.201.30])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by gw.compuniverse.de (Postfix) with ESMTPS id B59D2262D5
+	for <ceph-devel@vger.kernel.org>; Tue, 31 Jan 2012 13:00:21 +0100 (CET)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Gregory Farnum <gregory.farnum <at> dreamhost.com> writes:
+Hi again!
 
->=20
-> On Sat, Jan 28, 2012 at 8:52 PM, Madhusudhan
-> <madhusudhana.u.acharya <at> gmail.com> wrote:
-> > I have configured ceph in centos5.6 after a
-> > very long fight. Now, i am in the way
-> > to evaluate the Ceph. Forget me if my
-> > question looks amateur. If we consider a
-> > situation where my core switch fails,
-> > resulting in n/w failure in entire data
-> > center. What happens to ceph cluster ?
-> > will it sustain this n/w failure and comes
-> > online when the n/w is restored ?
->=20
-> Hmmm. If your network breaks horribly, you will probably need to
-> restart the daemons =E2=80=94=C2=A0once their communication breaks th=
-ey'll start
-> marking each other down and the monitors will probably accept those
-> reports once the network starts working again. (Actually, maybe we
-> should update that so the monitors reject sufficiently old reports.)
-> But it will be a transient effect; restarting your machines will be
-> enough to restore service. :)
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo <at> vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
-Thank you Greg for the reply. Do we have to start both osd/mon=20
-deamons on all the nodes ? I one of the case, i rebooted my=20
-osd node (when it wan running to check the fault tolerance)=20
-and when it came online, its journal got corrupted. I had to=20
-reinitialize the node by erasing all data in it. And rebooting
- the entire cluster (in case of n/w failure) doesn't seems to
- be a good idea for me as clients will start mounting the=20
-cluster immediately and start writing or reading =20
-from the cluster.=20
+We are running Ceph 0.41 and kernel 3.2.2 with current for-linus code (=
+commit =20
+3d882ce47de80e0294a536bec771b5651885b4d3) now.
 
+After some heavy workloads we see quite a few directories that cannot b=
+e=20
+deleted, although ls and find show that they are empty. rmdir says they=
+ are=20
+not empty.
 
+Additionally, ceph reports various weird size values for some, but not =
+all of=20
+them:
+ls -la .tmp/tiny61/.mozilla/firefox/default.yat/
+insgesamt 0
+drwxr-xr-x 1 tiny61 users 18446744073705748665 25. Jan 10:02 .
+drwxr-xr-x 1 tiny61 users 18446744073705748665 25. Jan 10:02 ..
 
+Is this a known or a new bug? Can it be related to .snap pseudo dirs? T=
+he=20
+problem appeared without ever using snapshots, though.
+
+Amon Ott
+--=20
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Am K=F6llnischen Park 1    Fax: +49 30 24342336
+10179 Berlin             http://www.m-privacy.de
+
+Amtsgericht Charlottenburg, HRB 84946
+
+Gesch=E4ftsf=FChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
