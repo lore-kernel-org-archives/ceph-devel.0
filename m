@@ -1,72 +1,50 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Ceph behavior in case of network failure
-Date: Tue, 31 Jan 2012 10:29:15 -0800
-Message-ID: <CAF3hT9Afey7uMvQV7M__hr+aO241ViY05hJiFfwV+H4O7-gZmA@mail.gmail.com>
-References: <loom.20120129T054836-318@post.gmane.org>
-	<CAF3hT9A6JZPUdWxbeixdpbCQEuEZfDLzD4EvjASG0+6U3EV_Eg@mail.gmail.com>
-	<loom.20120131T060749-554@post.gmane.org>
+Subject: Re: Cannot delete some empty dirs and weird sizes
+Date: Tue, 31 Jan 2012 10:40:23 -0800
+Message-ID: <CAF3hT9AE9A0d_rdGN+W=wHQG1ksUJkg0H1+-eQh1n+5ZOBn2Hg@mail.gmail.com>
+References: <201201311300.20787.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:40083 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:52060 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753505Ab2AaS3Q convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jan 2012 13:29:16 -0500
-Received: by iacb35 with SMTP id b35so296546iac.19
-        for <ceph-devel@vger.kernel.org>; Tue, 31 Jan 2012 10:29:15 -0800 (PST)
-In-Reply-To: <loom.20120131T060749-554@post.gmane.org>
+	with ESMTP id S1753313Ab2AaSkY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jan 2012 13:40:24 -0500
+Received: by iacb35 with SMTP id b35so307350iac.19
+        for <ceph-devel@vger.kernel.org>; Tue, 31 Jan 2012 10:40:23 -0800 (PST)
+In-Reply-To: <201201311300.20787.a.ott@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: madhusudhan <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-On Mon, Jan 30, 2012 at 9:13 PM, madhusudhan
-<madhusudhana.u.acharya@gmail.com> wrote:
-> Gregory Farnum <gregory.farnum <at> dreamhost.com> writes:
+On Tue, Jan 31, 2012 at 4:00 AM, Amon Ott <a.ott@m-privacy.de> wrote:
+> Hi again!
 >
->>
->> On Sat, Jan 28, 2012 at 8:52 PM, Madhusudhan
->> <madhusudhana.u.acharya <at> gmail.com> wrote:
->> > I have configured ceph in centos5.6 after a
->> > very long fight. Now, i am in the way
->> > to evaluate the Ceph. Forget me if my
->> > question looks amateur. If we consider a
->> > situation where my core switch fails,
->> > resulting in n/w failure in entire data
->> > center. What happens to ceph cluster ?
->> > will it sustain this n/w failure and comes
->> > online when the n/w is restored ?
->>
->> Hmmm. If your network breaks horribly, you will probably need to
->> restart the daemons =97=A0once their communication breaks they'll st=
-art
->> marking each other down and the monitors will probably accept those
->> reports once the network starts working again. (Actually, maybe we
->> should update that so the monitors reject sufficiently old reports.)
->> But it will be a transient effect; restarting your machines will be
->> enough to restore service. :)
->> -Greg
->>
-> Thank you Greg for the reply. Do we have to start both osd/mon
-> deamons on all the nodes ? I one of the case, i rebooted my
-> osd node (when it wan running to check the fault tolerance)
-> and when it came online, its journal got corrupted. I had to
-> reinitialize the node by erasing all data in it. And rebooting
-> =A0the entire cluster (in case of n/w failure) doesn't seems to
-> =A0be a good idea for me as clients will start mounting the
-> cluster immediately and start writing or reading
-> from the cluster.
+> We are running Ceph 0.41 and kernel 3.2.2 with current for-linus code (commit
+> 3d882ce47de80e0294a536bec771b5651885b4d3) now.
+>
+> After some heavy workloads we see quite a few directories that cannot be
+> deleted, although ls and find show that they are empty. rmdir says they are
+> not empty.
+>
+> Additionally, ceph reports various weird size values for some, but not all of
+> them:
+> ls -la .tmp/tiny61/.mozilla/firefox/default.yat/
+> insgesamt 0
+> drwxr-xr-x 1 tiny61 users 18446744073705748665 25. Jan 10:02 .
+> drwxr-xr-x 1 tiny61 users 18446744073705748665 25. Jan 10:02 ..
+>
+> Is this a known or a new bug? Can it be related to .snap pseudo dirs? The
+> problem appeared without ever using snapshots, though.
 
-Hmm, actually I checked with some coworkers and you shouldn't need to
-restart anything at all =97=A0the OSDs will correct the report themselv=
-es.
-So it should all be good! You'll likely experience some slowness while
-the OSD states flap (up and down), but it will all be transparent to
-the clients.
+I believe this is new. Based on the odd sizes (that's a 64-bit -1
+interpreted as unsigned, fyi), my guess is that the "recursive
+accounting" statistics are off and that's leading the MDS to believe
+the directory is not empty even though it is. It's unlikely to be
+directly related to snapshots, though it's not impossible.
+
+Have you seen this on more than one MDS? If it's reproducible we could
+more easily figure out the cause; otherwise the best we can do is to
+maybe fix up the specific instance of it.
 -Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
