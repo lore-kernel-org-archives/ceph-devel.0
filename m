@@ -1,36 +1,42 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: autogen.sh error
-Date: Tue, 31 Jan 2012 14:36:59 -0800
-Message-ID: <CAORUGqAAXDZM9h85i326cmLdJ4yzuPN16nZfZqr0iW0OW3RUQA@mail.gmail.com>
-References: <4F2867A7.4040005@cirrhus9.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Jon <jon@islandtechnologies.net>
+Subject: Re: Ceph behavior in case of network failure
+Date: Tue, 31 Jan 2012 15:34:46 -0800
+Message-ID: <0C314DF0-5ACA-4CF4-A04F-C7EF8C0A1023@islandtechnologies.net>
+References: <loom.20120129T054836-318@post.gmane.org>
+Mime-Version: 1.0 (Apple Message framework v1251.1)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:64934 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753352Ab2AaWhU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jan 2012 17:37:20 -0500
-Received: by werb13 with SMTP id b13so468231wer.19
-        for <ceph-devel@vger.kernel.org>; Tue, 31 Jan 2012 14:37:19 -0800 (PST)
-In-Reply-To: <4F2867A7.4040005@cirrhus9.com>
+Received: from lax-gw06.mailroute.net ([199.89.0.106]:33667 "EHLO
+	mail.mroute.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753060Ab2AaXnd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jan 2012 18:43:33 -0500
+In-Reply-To: <loom.20120129T054836-318@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: JJ <jjones@cirrhus9.com>
+To: Madhusudhan <madhusudhana.u.acharya@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, Jan 31, 2012 at 14:13, JJ <jjones@cirrhus9.com> wrote:
-> I keep getting errors and I am not sure how I can satisfy this?
-> CentOS 5.5 x86_64 / 2.6.18-194.32.1.el5xen
+I look forward to the availability of TRILL on commodity ethernet switches.
 
-Starting from a fresh tarball / git clone, what commands did you run?
+http://en.wikipedia.org/wiki/TRILL_(computing)
 
-gtest is bundled in the source, as recommended by upstream, so it's
-not a build dependency. However, it is not "properly" integrated into
-the top-level automake/autoconf, as we don't want to run its unit
-tests all the time, hence we've seen error like what you describe
-happen sometimes. But with this limitation, it's dependencies are not
-100% correct, so some times things try to use it before it's built.
+I expect that clustered systems like Ceph will help increase demand for TRILL.
 
-google-perftools is mostly about tcmalloc. The "isa" variables means
-the instruction set architecture of the host, to force dependency on
-exactly the right kind of package.
+On Jan 28, 2012, at 8:52 PM, Madhusudhan wrote:
+
+> I have configured ceph in centos5.6 after a 
+> very long fight. Now, i am in the way 
+> to evaluate the Ceph. Forget me if my 
+> question looks amateur. If we consider a 
+> situation where my core switch fails, 
+> resulting in n/w failure in entire data 
+> center. What happens to ceph cluster ? 
+> will it sustain this n/w failure and comes 
+> online when the n/w is restored ? 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
