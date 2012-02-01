@@ -1,96 +1,53 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: efficient removal of old objects
-Date: Wed, 1 Feb 2012 00:26:04 -0800
-Message-ID: <CAC-hyiG512de2h+R98g1POOy0Lw18A15TPwE=ge-OgjofdR8Wg@mail.gmail.com>
-References: <Pine.LNX.4.64.1201311549170.21770@cobra.newdream.net>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: [RFC PATCH 0/6] Understanding delays due to throttling under
+ very heavy write load
+Date: Wed,  1 Feb 2012 08:54:22 -0700
+Message-ID: <1328111668-10068-1-git-send-email-jaschut@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:56788 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753949Ab2BAI0E convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2012 03:26:04 -0500
-Received: by ggnh1 with SMTP id h1so440215ggn.19
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Feb 2012 00:26:04 -0800 (PST)
-In-Reply-To: <Pine.LNX.4.64.1201311549170.21770@cobra.newdream.net>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:38998 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756409Ab2BAQMf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2012 11:12:35 -0500
+Received: from interceptor2.sandia.gov (interceptor2.sandia.gov [132.175.109.18])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by sentry-two.sandia.gov (Postfix) with ESMTP id 177A517A6AA
+	for <ceph-devel@vger.kernel.org>; Wed,  1 Feb 2012 08:55:15 -0700 (MST)
+Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21]) by interceptor2.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Wed, 1 Feb 2012 08:54:57 -0700
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Jim Schutt <jaschut@sandia.gov>
 
-On Tue, Jan 31, 2012 at 4:33 PM, Sage Weil <sage@newdream.net> wrote:
-> Currently rgw logs objects it wants to delete after some period of ti=
-me,
-> and an radosgw-admin command comes back later to process the log. =A0=
-It
-> works, but is currently slow (one sync op at a time).
+Hi,
 
-Intent log generation doesn't come free of charge, it adds some load
-on the system.
+FWIW, I've been trying to understand op delays under very heavy write
+load, and have been working a little with the policy throttler in hopes of
+using throttling delays to help track down which ops were backing up.
+Without much success, unfortunately.
 
->
-> A better approach would be to mark objects for later removal, and hav=
-e the
-> OSD do it in some more efficient way. =A0wip-objs-expire has a client=
- side
-> (librados) interface for this.
+When I saw the wip-osd-op-tracking branch, I wondered if any of this
+stuff might be helpful.  Here it is, just in case.
 
-Note that setting expiration on an object is a more lightweight
-operation than appending the intent log, as it would be done as a sub
-op in the compound operation that created the object.
+-- Jim
 
->
-> I think there are a couple questions:
->
-> Should this be generalized to saying "do these osd ops at time X" ins=
-tead
-> of "delete at time X". =A0Then it could setxattr, remove, call into a=
- class,
-> whatever.
+Jim Schutt (6):
+  msgr: print message sequence number and tid when receiving message
+    envelope
+  common/Throttle: track sleep/wake sequences in Throttle, report them
+    for policy throttler
+  common/Throttle: throttle in FIFO order
+  common/Throttle: FIFO throttler doesn't need to signal waiters when
+    max changes
+  common/Throttle: make get() report number of waiters on entry/exit
+  msg: log Message interactions with throttler
 
-While I think it'd make a nice feature, I also think that the problem
-space of a garbage collection is a bit different, and given the time
-constraints it wouldn't make sense implementing this right now anyway.
->
-> How would the OSD implement this? =A0A kludgey way would be to do it =
-during
-> scrub. =A0The current scrub implementation may make that problematic =
-because
-> it does a whole PG at time, and we probably don't want to issue a who=
-le
-> PG's worth of deletes at a time. =A0Is there a way to make that less
-> painful?
+ src/common/Throttle.h      |   75 +++++++++++++++++++++++++++++++-------------
+ src/msg/Message.h          |   71 +++++++++++++++++++++++++++++++++++------
+ src/msg/SimpleMessenger.cc |   22 +++++++++---
+ 3 files changed, 129 insertions(+), 39 deletions(-)
 
-If we need to lock the entire pg while removing the objects it wouldn't=
- work.
-I'm not too familiar with the scrub code, and I don't want to dive
-here into possible implementation details, but getting the scrub to
-generate a list of objects for removal may be possible.
 
->
-> Not using scrub means we need some sort of index to keep track of obj=
-ects
-> with delayed events. =A0Using a collection for this might work, but l=
-oading
-> all this state into memory would be slow if there were too many event=
-s
-> registered.
->
-> Given all that, and that we need a solution to the expiration soon
-> (weeks), do we
-> =A0- do a complete solution now,
-> =A0- parallelize radosgw-admin log processing,
-> =A0- or hack it into scrub?
->
-I don't expect to see many hands going up for "hacking" anything. I
-would argue that having a garbage collection related job going on
-inside a maintenance activity is not that far fetched. Not at any cost
-though.
-
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
