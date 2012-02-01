@@ -1,168 +1,168 @@
-From: Amon Ott <a.ott@m-privacy.de>
-Subject: Re: Cannot delete some empty dirs and weird sizes
-Date: Wed, 1 Feb 2012 18:02:37 +0100
-Message-ID: <201202011802.39891.a.ott@m-privacy.de>
-References: <201201311300.20787.a.ott@m-privacy.de> <CAF3hT9AE9A0d_rdGN+W=wHQG1ksUJkg0H1+-eQh1n+5ZOBn2Hg@mail.gmail.com>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: efficient removal of old objects
+Date: Wed, 1 Feb 2012 09:39:05 -0800
+Message-ID: <CAF3hT9DXMz6Ga-=FHz35KGMaj+bS8pA2bZky3mvo7xbEejxppQ@mail.gmail.com>
+References: <Pine.LNX.4.64.1201311549170.21770@cobra.newdream.net>
+	<CAC-hyiG512de2h+R98g1POOy0Lw18A15TPwE=ge-OgjofdR8Wg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.138.176]:55272 "EHLO www.m-privacy.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754516Ab2BARCw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2012 12:02:52 -0500
-In-Reply-To: <CAF3hT9AE9A0d_rdGN+W=wHQG1ksUJkg0H1+-eQh1n+5ZOBn2Hg@mail.gmail.com>
-Content-Disposition: inline
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:35933 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754357Ab2BARjG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2012 12:39:06 -0500
+Received: by iacb35 with SMTP id b35so1791423iac.19
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Feb 2012 09:39:06 -0800 (PST)
+In-Reply-To: <CAC-hyiG512de2h+R98g1POOy0Lw18A15TPwE=ge-OgjofdR8Wg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@newdream.net>, Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 
-On Tuesday 31 January 2012 wrote Gregory Farnum:
-> On Tue, Jan 31, 2012 at 4:00 AM, Amon Ott <a.ott@m-privacy.de> wrote:
-> > Hi again!
-> >
-> > We are running Ceph 0.41 and kernel 3.2.2 with current for-linus co=
-de
-> > (commit 3d882ce47de80e0294a536bec771b5651885b4d3) now.
-> >
-> > After some heavy workloads we see quite a few directories that cann=
-ot be
-> > deleted, although ls and find show that they are empty. rmdir says =
-they
-> > are not empty.
-> >
-> > Additionally, ceph reports various weird size values for some, but =
-not
-> > all of them:
-> > ls -la .tmp/tiny61/.mozilla/firefox/default.yat/
-> > insgesamt 0
-> > drwxr-xr-x 1 tiny61 users 18446744073705748665 25. Jan 10:02 .
-> > drwxr-xr-x 1 tiny61 users 18446744073705748665 25. Jan 10:02 ..
-> >
-> > Is this a known or a new bug? Can it be related to .snap pseudo dir=
-s? The
-> > problem appeared without ever using snapshots, though.
+On Wed, Feb 1, 2012 at 12:04 AM, Yehuda Sadeh Weinraub
+<yehudasa@gmail.com> wrote:
+> (resending to list, sorry tv)
 >
-> I believe this is new. Based on the odd sizes (that's a 64-bit -1
-> interpreted as unsigned, fyi), my guess is that the "recursive
-> accounting" statistics are off and that's leading the MDS to believe
-> the directory is not empty even though it is. It's unlikely to be
-> directly related to snapshots, though it's not impossible.
+> On Tue, Jan 31, 2012 at 5:02 PM, Tommi Virtanen
+> <tommi.virtanen@dreamhost.com> wrote:
+>>
+>> On Tue, Jan 31, 2012 at 16:33, Sage Weil <sage@newdream.net> wrote:
+>> > Currently rgw logs objects it wants to delete after some period of=
+ time,
+>> > and an radosgw-admin command comes back later to process the log. =
+=A0It
+>> > works, but is currently slow (one sync op at a time).
+>> >
+>> > A better approach would be to mark objects for later removal, and =
+have the
+>> > OSD do it in some more efficient way. =A0wip-objs-expire has a cli=
+ent side
+>> > (librados) interface for this.
+>>
+>> Is there some reason why this would be significantly more performant
+>> when done by the OSD itself? It seems like the deletion times can be
+>> bucketed by time nicely, then each bucket just contains a set of ids
+>> -- a good fit for the map data type -- and the client for running th=
+is
+>> deletion just streams the bucket contents over and issues delete
+>> messages for everything. What makes that inherently slow?
 >
-> Have you seen this on more than one MDS? If it's reproducible we coul=
-d
-> more easily figure out the cause; otherwise the best we can do is to
-> maybe fix up the specific instance of it.
+> Random access to random cold objects is generally slower than doing
+> the operations on a single pg. E.g., if doing it as part of the scrub=
+,
+> then objects are accessed anyway and are hopefully cached.
 
-I had to recreate ceph fs several times today because of kernel problem=
-s. Now=20
-I have only one dir that is wrong:
-ls -la .tmp/tiny14/.config/pcmanfm/LXDE/
-insgesamt 0
-drwxr-xr-x 1 32252 users 393  1. Feb 15:19 .
-drwxr-xr-x 1 32252 users   0  1. Feb 17:21 ..
+You are dramatically overstating the impact of latency on an
+inherently parallelizable and non-interactive operation. A couple disk
+seeks *do not matter.*
 
-This is probably caused by another reboot I had to do, although I think=
- ceph=20
-should have recovered here. Might also be caused by this setting that I=
- tried=20
-for a while, it is off now:
-mds standby replay =3D true
-With this setting, if the active mds gets killed, no mds is able to bec=
-ome=20
-active, so everything hangs. Had to reboot again.
+On Wed, Feb 1, 2012 at 12:26 AM, Yehuda Sadeh Weinraub
+<yehudasa@gmail.com> wrote:
+> On Tue, Jan 31, 2012 at 4:33 PM, Sage Weil <sage@newdream.net> wrote:
+>> A better approach would be to mark objects for later removal, and ha=
+ve the
+>> OSD do it in some more efficient way. =A0wip-objs-expire has a clien=
+t side
+>> (librados) interface for this.
+>
+> Note that setting expiration on an object is a more lightweight
+> operation than appending the intent log, as it would be done as a sub
+> op in the compound operation that created the object.
 
-=46ound that in mds log, the reported wrong size matches the dir total:
+=2E..you're going to set expirations on the objects when you write them=
+?
+What if the user's upload takes longer than you expect?
 
-2012-02-01 17:21:51.306561 4f830b70 mds.0.cache.dir(1000000b055) _fetch=
-ed =20
-badness: got (but i already had) [inode 100000066c9
-[2,head] /tiny14/.config/pcmanfm/
-LXDE.conf auth v4 s=3D393 n(v0 b393 1=3D1+0) (iversion lock) cr=3D{4711=
-=3D0-4194304@1}=20
-caps=3D{5313=3DpAsLsXsFscr/-@1} | caps 0x1d13c600] mode 33188 mtime 201=
-2-01-24=20
-15:55:59.0000002012-02-01 17:21:51.306646 4f830b70 log [ERR] : loaded d=
-up=20
-inode 100000066c9 [2,head] v7 at /tiny14/.config/pcmanfm/LXDE/pcmanfm.c=
-onf,=20
-but inode 100000066c9.head v4 already exists=20
-at /tiny14/.config/pcmanfm/LXDE.conf
-2012-02-01 17:21:51.349424 4f830b70 mds.0.cache.dir(100000066ae) mismat=
-ch=20
-between head items and fnode.fragstat! printing dentries
-2012-02-01 17:21:51.349457 4f830b70 mds.0.cache.dir(100000066ae)=20
-get_num_head_items() =3D 2; fnode.fragstat.nfiles=3D0 fnode.fragstat.ns=
-ubdirs=3D1
-2012-02-01 17:21:51.349493 4f830b70 mds.0.cache.dir(100000066ae) [dentr=
-y=20
-#1/tiny14/.config/pcmanfm/LXDE [2,head] auth (dversion lock) pv=3D0 v=3D=
-16=20
-inode=3D0x1cff3828 | inodepin 0x1b9f4de0]
-2012-02-01 17:21:51.349521 4f830b70 mds.0.cache.dir(100000066ae) [dentr=
-y=20
-#1/tiny14/.config/pcmanfm/LXDE.conf [2,head] auth (dn xlock x=3D1 by=20
-0x1ab21200) (dversion lock w=3D1 last_client=3D5313) pv=3D17 v=3D16 ap=3D=
-2+2=20
-inode=3D0x1d13c600 | request lock inodepin authpin 0x1b90f064]
-2012-02-01 17:21:51.349552 4f830b70 mds.0.cache.dir(100000066ae) mismat=
-ch=20
-between child accounted_rstats and my rstats!
-2012-02-01 17:21:51.349573 4f830b70 mds.0.cache.dir(100000066ae) total =
-of=20
-child dentrys: n(v0 rc2012-02-01 15:19:55.517733 b786 3=3D2+1)
-2012-02-01 17:21:51.349591 4f830b70 mds.0.cache.dir(100000066ae) my rst=
-ats:             =20
-n(v3 rc2012-02-01 15:19:55.517733 b393 2=3D1+1)
-2012-02-01 17:21:51.349616 4f830b70 mds.0.cache.dir(100000066ae) [dentr=
-y=20
-#1/tiny14/.config/pcmanfm/LXDE [2,head] auth (dversion lock) pv=3D0 v=3D=
-16=20
-inode=3D0x1cff3828 | inodepin 0x1b9f4de0] n(v0 rc2012-02-01 15:19:55.51=
-7733=20
-b393 2=3D1+1)
-2012-02-01 17:21:51.349643 4f830b70 mds.0.cache.dir(100000066ae) [dentr=
-y=20
-#1/tiny14/.config/pcmanfm/LXDE.conf [2,head] auth (dn xlock x=3D1 by=20
-0x1ab21200) (dversion lock w=3D1 last_client=3D5313) pv=3D17 v=3D16 ap=3D=
-2+2=20
-inode=3D0x1d13c600 | request lock inodepin authpin 0x1b90f064] n(v0 b39=
-3 1=3D1+0)
+>> I think there are a couple questions:
+>>
+>> Should this be generalized to saying "do these osd ops at time X" in=
+stead
+>> of "delete at time X". =A0Then it could setxattr, remove, call into =
+a class,
+>> whatever.
+>
+> While I think it'd make a nice feature, I also think that the problem
+> space of a garbage collection is a bit different, and given the time
+> constraints it wouldn't make sense implementing this right now anyway=
+=2E
 
+This is client-side garbage collection, not RADOS garbage collection.
+Don't confuse those issues, either =97=A0the second is appropriate to p=
+ut
+into the OSDs as special logic; the first is not. That's why we think
+that any OSD implementation of this should be generalized as a class
+interface, rather than a specific hack.
 
-Then killed the active mds, another takes over and suddenly the missing=
- file=20
-appears:
-=2Etmp/tiny14/.config/pcmanfm/LXDE/insgesamt 1
-drwxr-xr-x 1 32252 users 393  1. Feb 15:19 .
-drwxr-xr-x 1 32252 users   0  1. Feb 17:21 ..
--rw-r--r-- 1 root  root  393 24. Jan 15:55 pcmanfm.conf
+>> How would the OSD implement this? =A0A kludgey way would be to do it=
+ during
+>> scrub. =A0The current scrub implementation may make that problematic=
+ because
+>> it does a whole PG at time, and we probably don't want to issue a wh=
+ole
+>> PG's worth of deletes at a time. =A0Is there a way to make that less
+>> painful?
+>
+> If we need to lock the entire pg while removing the objects it wouldn=
+'t work.
 
-Restarted the original mds, it does not appear in "ceph mds dump", alth=
-ough it=20
-is running at 100% cpu. Same happened with other mds processes after ki=
-lling=20
-and starting, now I have only one left that is working correctly.
+That's how scrub works right now...
 
-Will leave the cluster in this state now and have another look tomorrow=
- -=20
-maybe the spinning mds processes recover by some miracle.
+> I'm not too familiar with the scrub code, and I don't want to dive
+> here into possible implementation details, but getting the scrub to
+> generate a list of objects for removal may be possible.
 
-Amon Ott
---=20
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Am K=F6llnischen Park 1    Fax: +49 30 24342336
-10179 Berlin             http://www.m-privacy.de
+Sam and I tossed around a few ideas for how to do this, and it's not
+impossible, but it was significantly more complicated than everybody
+thinks it is at first glance. (You need to make sure that it doesn't
+interact with recovery at all, which means it needs to go through the
+normal request mechanism, which means you need to build up a queue of
+deletes while scrubbing and then dispatch it properly without
+disrupting client requests or running out of memory; you need to make
+sure that scrubbing runs more reliably than it does right now...etc
+etc)
 
-Amtsgericht Charlottenburg, HRB 84946
+>> Not using scrub means we need some sort of index to keep track of ob=
+jects
+>> with delayed events. =A0Using a collection for this might work, but =
+loading
+>> all this state into memory would be slow if there were too many even=
+ts
+>> registered.
+>>
+>> Given all that, and that we need a solution to the expiration soon
+>> (weeks), do we
+>> =A0- do a complete solution now,
+>> =A0- parallelize radosgw-admin log processing,
+>> =A0- or hack it into scrub?
+>>
+> I don't expect to see many hands going up for "hacking" anything. I
+> would argue that having a garbage collection related job going on
+> inside a maintenance activity is not that far fetched. Not at any cos=
+t
+> though.
 
-Gesch=E4ftsf=FChrer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
+The problem is that it changes the nature of scrub. Right now, scrub
+doesn't change anything at all; scrub repair sets the replicas to have
+the same state as the primary. You want to add a client-controlled
+state mutation that is triggered as part of scrub, which *really*
+makes it different (and complicated)...or else it's a hack to have
+scrub trigger some weird sequences of requests (as I outlined above).
+Either way, it's a big change to scrub that smells hacky.
 
-GnuPG-Key-ID: 0x2DD3A649
+The basic issue here is that the RGW stuff can all be done as
+client-side operations, and all you've demonstrated is that doing it
+serially with a single client is slow (but not slower than the
+generation of the objects, which means that it does actually work).
+The correct response to that is not to add half-baked features to the
+OSD; the correct response is to make your client behave well.
+If we *do* want to add time-based triggers that clients can set up,
+that ought to be a well-thought-out interface that isn't limited to a
+single use-case. I'm totally fine with the idea, as long as it comes
+at some point in the future when we aren't all working hard to
+stabilize the core system.
+
+-Greg
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
