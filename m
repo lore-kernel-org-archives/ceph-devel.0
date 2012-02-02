@@ -1,95 +1,64 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: [RFC PATCH 0/6] Understanding delays due to throttling
- under very heavy write load
-Date: Thu, 2 Feb 2012 08:38:52 -0700
-Message-ID: <4F2AAE0C.6030609@sandia.gov>
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: [RFC PATCH 0/6] Understanding delays due to throttling under very
+ heavy write load
+Date: Thu, 2 Feb 2012 09:52:04 -0800
+Message-ID: <CAF3hT9BNc4n4HBNEqsf+d6-Rjv7TC8nJ1VponJCBVpLB8=_F5Q@mail.gmail.com>
 References: <1328111668-10068-1-git-send-email-jaschut@sandia.gov>
- <CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com>
+	<CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com>
+	<4F29CDAA.408@sandia.gov>
+	<CAF3hT9BZEP_FWS=qt8ivA++aDpPGGFzuD_PtMcvDRS2aDEN+hw@mail.gmail.com>
+	<4F2AABF5.6050803@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:37525 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756177Ab2BBPjZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2012 10:39:25 -0500
-In-Reply-To: <CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:53435 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757078Ab2BBRwF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2012 12:52:05 -0500
+Received: by iacb35 with SMTP id b35so3428414iac.19
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2012 09:52:04 -0800 (PST)
+In-Reply-To: <4F2AABF5.6050803@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
+To: Jim Schutt <jaschut@sandia.gov>
 Cc: ceph-devel@vger.kernel.org
 
-(resent because I forgot the list on my original reply)
-
-On 02/01/2012 03:33 PM, Gregory Farnum wrote:
-> On Wed, Feb 1, 2012 at 7:54 AM, Jim Schutt<jaschut@sandia.gov>  wrote=
-:
->> Hi,
->>
->> FWIW, I've been trying to understand op delays under very heavy writ=
-e
->> load, and have been working a little with the policy throttler in ho=
-pes of
->> using throttling delays to help track down which ops were backing up=
-=2E
->> Without much success, unfortunately.
->>
->> When I saw the wip-osd-op-tracking branch, I wondered if any of this
->> stuff might be helpful.  Here it is, just in case.
+On Thu, Feb 2, 2012 at 7:29 AM, Jim Schutt <jaschut@sandia.gov> wrote:
+> I'm currently running 24 OSDs/server, one 1TB 7200 RPM SAS drive
+> per OSD. =A0During a test I watch both OSD servers with both
+> vmstat and iostat.
 >
-> In general these patches are dumping information to the logs, and par=
-t
-> of the wip-osd-op-tracking branch is actually keeping track of most o=
-f
-> the message queueing wait times as part of the message itself
-> (although not the information about number of waiters and sleep/wake
-> seqs). I'm inclined to prefer that approach to log dumping.
-
-I agree - I've just been using log dumping because I can extract
-any relationships I can write a perl script to find :)  So far,
-not too helpful.
-
-> Are there any patches you recommend for merging? I'm a little curious
-> about the ordered wakeup one =E2=80=94 do you have data about when th=
-at's a
-> problem?
-
-I've been trying to push the client:osd ratio, and in my testbed
-I can run up to 166 linux clients. Right now I'm running them
-against 48 OSDs.  The clients are 1 Gb/s ethernet, and the OSDs
-have a 10 Gb/s ethernet for clients and another for the cluster.
-
-During sustained write loads I see a factor of 10 oscillation
-in aggregate throughput, and during that time I see clients
-stuck in the policy throttler for hundreds of seconds, and I
-see a number of waiters equal to
-   number of clients - (throttler limit) / (msg size)
-If I do a histogram of throttler wait times I see a handful of
-messages that wait for an extra couple hundreds of seconds
-without the ordered wakeup.
-
-I'm not sure what this will look like if my throughput
-variations can be fixed.  But, for our HPC loads I expect
-we'll often see periods where offered load is much higher
-that aggregate bandwidth of any system we can afford to
-build, so ordered wakeup may be useful in such cases for
-client fairness.
-
-So I'd recommend the ordered wakeup patch if you don't
-see any downsides.
-
-Sorry for the noise on the others - mostly I just wanted
-to share the sort of things I've been looking at.  I'll
-be learning to use your new stuff soon...
-
--- Jim
-
-> -Greg
+> During a "good" period, vmstat says the server is sustaining > 2 GB/s
+> for multiple tens of seconds. =A0Since I use replication factor 2, th=
+at
+> means that server is sustaining > 500 MB/s aggregate client throughpu=
+t,
+> right? =A0During such a period vmstat also reports ~10% CPU idle.
 >
+> During a "bad" period, vmstat says the server is doing ~200 MB/s,
+> with lots of idle cycles. =A0It is during these periods that
+> messages stuck in the policy throttler build up such long
+> wait times. =A0Sometimes I see really bad periods with aggregate
+> throughput per server < 100 MB/s.
 >
+> The typical pattern I see is that a run starts with tens of seconds
+> of aggregate throughput > 2 GB/s. =A0Then it drops and bounces around
+> 500 - 1000 MB/s, with occasional excursions under 100 MB/s. =A0Then
+> it ramps back up near 2 GB/s again.
 
-
+Hmm. 100MB/s is awfully low for this theory, but have you tried to
+correlate the drops in throughput with the OSD journals running out of
+space? I assume from your setup that they're sharing the disk with the
+store (although it works either way), and your description makes me
+think that throughput is initially constrained by sequential journal
+writes but then the journal runs out of space and the OSD has to wait
+for the main store to catch up (with random IO), and that sends the IO
+patterns all to hell. (If you can say that random 4MB IOs are
+hellish.)
+I'm also curious about memory usage as a possible explanation for the
+more dramatic drops.
+-Greg
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
