@@ -1,136 +1,119 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: [RFC PATCH 3/6] common/Throttle: throttle in FIFO order
-Date: Thu, 2 Feb 2012 11:01:05 -0800
-Message-ID: <CAF3hT9BKwBTQD0qF3WV2NGZ5c9DnzsC60ETkP1YDiOHp+saKFA@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: [EXTERNAL] Re: [RFC PATCH 0/6] Understanding delays due to
+ throttling under very heavy write load
+Date: Thu, 2 Feb 2012 12:06:22 -0700
+Message-ID: <4F2ADEAE.8010403@sandia.gov>
 References: <1328111668-10068-1-git-send-email-jaschut@sandia.gov>
-	<1328111668-10068-4-git-send-email-jaschut@sandia.gov>
-	<CAF3hT9ABvoTmmA7+6KQ_rBJZdqH44nGQL+fLAXCdkYR1pbRqOQ@mail.gmail.com>
-	<4F2AD669.4080703@sandia.gov>
+ <CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com>
+ <4F29CDAA.408@sandia.gov>
+ <CAF3hT9BZEP_FWS=qt8ivA++aDpPGGFzuD_PtMcvDRS2aDEN+hw@mail.gmail.com>
+ <4F2AABF5.6050803@sandia.gov>
+ <CAF3hT9BNc4n4HBNEqsf+d6-Rjv7TC8nJ1VponJCBVpLB8=_F5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:55443 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755396Ab2BBTBG convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2012 14:01:06 -0500
-Received: by iacb35 with SMTP id b35so3505366iac.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2012 11:01:05 -0800 (PST)
-In-Reply-To: <4F2AD669.4080703@sandia.gov>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:46055 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932604Ab2BBTGt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2012 14:06:49 -0500
+In-Reply-To: <CAF3hT9BNc4n4HBNEqsf+d6-Rjv7TC8nJ1VponJCBVpLB8=_F5Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Feb 2, 2012 at 10:31 AM, Jim Schutt <jaschut@sandia.gov> wrote:
-> On 02/02/2012 10:53 AM, Gregory Farnum wrote:
+On 02/02/2012 10:52 AM, Gregory Farnum wrote:
+> On Thu, Feb 2, 2012 at 7:29 AM, Jim Schutt<jaschut@sandia.gov>  wrote:
+>> I'm currently running 24 OSDs/server, one 1TB 7200 RPM SAS drive
+>> per OSD.  During a test I watch both OSD servers with both
+>> vmstat and iostat.
 >>
->> I went to merge this but then had a question on part of it (below).
+>> During a "good" period, vmstat says the server is sustaining>  2 GB/s
+>> for multiple tens of seconds.  Since I use replication factor 2, that
+>> means that server is sustaining>  500 MB/s aggregate client throughput,
+>> right?  During such a period vmstat also reports ~10% CPU idle.
 >>
->> On Wed, Feb 1, 2012 at 7:54 AM, Jim Schutt<jaschut@sandia.gov> =A0wr=
-ote:
->>>
->>> Under heavy write load from many clients, many reader threads will
->>> be waiting in the policy throttler, all on a single condition varia=
-ble.
->>> When a wakeup is signalled, any of those threads may receive the
->>> signal. =A0This increases the variance in the message processing
->>> latency, and in extreme cases can significantly delay a message.
->>>
->>> This patch causes threads to exit a throttler in the same order
->>> they entered.
->>>
->>> Signed-off-by: Jim Schutt<jaschut@sandia.gov>
->>> ---
->>> =A0src/common/Throttle.h | =A0 42 ++++++++++++++++++++++++++++-----=
----------
->>> =A01 files changed, 28 insertions(+), 14 deletions(-)
->>>
->>> diff --git a/src/common/Throttle.h b/src/common/Throttle.h
->>> index 10560bf..ca72060 100644
->>> --- a/src/common/Throttle.h
->>> +++ b/src/common/Throttle.h
->>> @@ -3,23 +3,31 @@
->>>
->>> =A0#include "Mutex.h"
->>> =A0#include "Cond.h"
->>> +#include<list>
->>>
->>> =A0class Throttle {
->>> - =A0int64_t count, max, waiting;
->>> + =A0int64_t count, max;
->>> =A0 uint64_t sseq, wseq;
->>> =A0 Mutex lock;
->>> - =A0Cond cond;
->>> + =A0list<Cond*> =A0cond;
->>>
->>> =A0public:
->>> - =A0Throttle(int64_t m =3D 0) : count(0), max(m), waiting(0), sseq=
-(0),
->>> wseq(0),
->>> + =A0Throttle(int64_t m =3D 0) : count(0), max(m), sseq(0), wseq(0)=
-,
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0lock("Throttle::=
-lock") {
->>> =A0 =A0 assert(m>=3D 0);
->>> =A0 }
->>> + =A0~Throttle() {
->>> + =A0 =A0while (!cond.empty()) {
->>> + =A0 =A0 =A0Cond *cv =3D cond.front();
->>> + =A0 =A0 =A0delete cv;
->>> + =A0 =A0 =A0cond.pop_front();
->>> + =A0 =A0}
->>> + =A0}
->>>
->>> =A0private:
->>> =A0 void _reset_max(int64_t m) {
->>> - =A0 =A0if (m< =A0max)
->>> - =A0 =A0 =A0cond.SignalOne();
->>> + =A0 =A0if (m< =A0max&& =A0!cond.empty())
->>>
->>> + =A0 =A0 =A0cond.front()->SignalOne();
->>> =A0 =A0 max =3D m;
->>> =A0 }
->>> =A0 bool _should_wait(int64_t c) {
->>> @@ -28,19 +36,24 @@ private:
->>> =A0 =A0 =A0 ((c< =A0max&& =A0count + c> =A0max) || =A0 // normally =
-stay under max
->>> =A0 =A0 =A0 =A0(c>=3D max&& =A0count> =A0max)); =A0 =A0 =A0 // exce=
-pt for large c
->>>
->>> =A0 }
->>> +
->>> =A0 bool _wait(int64_t c) {
->>> =A0 =A0 bool waited =3D false;
->>> - =A0 =A0if (_should_wait(c)) {
->>> - =A0 =A0 =A0waiting +=3D c;
->>> + =A0 =A0if (_should_wait(c) || !cond.empty()) { // always wait beh=
-ind other
->>> waiters.
->>> + =A0 =A0 =A0Cond *cv =3D new Cond;
->>> + =A0 =A0 =A0cond.push_back(cv);
->>> =A0 =A0 =A0 do {
->>> + =A0 =A0 =A0 =A0if (cv !=3D cond.front())
->>> + =A0 =A0 =A0 =A0 =A0cond.front()->SignalOne(); =A0// wake up the o=
-ldest.
+>> During a "bad" period, vmstat says the server is doing ~200 MB/s,
+>> with lots of idle cycles.  It is during these periods that
+>> messages stuck in the policy throttler build up such long
+>> wait times.  Sometimes I see really bad periods with aggregate
+>> throughput per server<  100 MB/s.
 >>
->>
->> What's this extra wakeup for? Unless I'm missing something it's alwa=
-ys
->> going to be gratuitous. :/
+>> The typical pattern I see is that a run starts with tens of seconds
+>> of aggregate throughput>  2 GB/s.  Then it drops and bounces around
+>> 500 - 1000 MB/s, with occasional excursions under 100 MB/s.  Then
+>> it ramps back up near 2 GB/s again.
 >
->
-> I think it was a poorly thought-out attempt at
-> defensive programming. =A0Now that I'm thinking about
-> it harder, I agree it is gratuitous.
->
-> Thanks -- Jim
+> Hmm. 100MB/s is awfully low for this theory, but have you tried to
+> correlate the drops in throughput with the OSD journals running out of
+> space?
 
-Awesome. Applied to master in commit:83432af2adce75676b734d2b99dd88372e=
-de833a.
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+A spot check of logs from my last run doesn't seem to have any
+"journal throttle: waited for" messages during a slowdown.
+Is that what you mean?
+
+During the fast part of I run I see lots of journal messages
+with this pattern:
+
+2012-02-02 09:16:18.376996 7fe602e67700 journal put_throttle finished 12 ops and 50346596 bytes, now 22 ops and 90041106 bytes
+2012-02-02 09:16:18.417507 7fe5eb436700 journal throttle: waited for bytes
+2012-02-02 09:16:18.417656 7fe5e742e700 journal throttle: waited for bytes
+2012-02-02 09:16:18.417756 7fe5f2444700 journal throttle: waited for bytes
+2012-02-02 09:16:18.422157 7fe5ea434700 journal throttle: waited for bytes
+2012-02-02 09:16:18.422186 7fe5e9c33700 journal throttle: waited for bytes
+2012-02-02 09:16:18.424195 7fe5e642c700 journal throttle: waited for bytes
+2012-02-02 09:16:18.427106 7fe5fb456700 journal throttle: waited for bytes
+2012-02-02 09:16:18.427139 7fe5f7c4f700 journal throttle: waited for bytes
+2012-02-02 09:16:18.427159 7fe5e5c2b700 journal throttle: waited for bytes
+2012-02-02 09:16:18.427176 7fe5ee43c700 journal throttle: waited for bytes
+2012-02-02 09:16:18.428299 7fe5f744e700 journal throttle: waited for bytes
+2012-02-02 09:16:19.297369 7fe602e67700 journal put_throttle finished 12 ops and 50346596 bytes, now 21 ops and 85845571 bytes
+
+which I think means my journal is doing 50 MB/s, right?
+
+> I assume from your setup that they're sharing the disk with the
+> store (although it works either way),
+
+I've got a 4 GB journal partition on the outer tracks of the disk.
+
+> and your description makes me
+> think that throughput is initially constrained by sequential journal
+> writes but then the journal runs out of space and the OSD has to wait
+> for the main store to catch up (with random IO), and that sends the IO
+> patterns all to hell. (If you can say that random 4MB IOs are
+> hellish.)
+
+iostat 1 during the fast part of a run shows both journal and data
+partitions running at 45-50 MB/s.  During the slow part of a run
+they both show similar but low data rates.
+
+> I'm also curious about memory usage as a possible explanation for the
+> more dramatic drops.
+
+My OSD servers have 48 GB memory.  During a run I rarely see less than
+24 GB used by the page cache, with the rest mostly used by anonymous memory.
+I don't run with any swap.
+
+So far I'm looking at two behaviours I've noticed that seem anomalous to me.
+
+One is that I instrumented ms_dispatch(), and I see it take
+a half-second or more several hundred times, out of several
+thousand messages.  Is that expected?
+
+Another is that once a message receive starts, I see ~50 messages
+that take tens of seconds to receive, when the nominal receive time is
+a half-second or less.  I'm in the process of tooling up to collect
+tcpdump data on all my clients to try to catch what is going on with that.
+
+Any other ideas on what to look for would be greatly appreciated.
+
+-- Jim
+
+> -Greg
+>
+>
+
+
