@@ -1,41 +1,31 @@
-From: Mark Kampe <Mark.Kampe@dreamhost.com>
-Subject: Re: efficient removal of old objects
-Date: Wed, 01 Feb 2012 16:11:30 -0800
-Message-ID: <4F29D4B2.6010608@dreamhost.com>
-References: <Pine.LNX.4.64.1201311549170.21770@cobra.newdream.net> <CAORUGqCkRzAbXVjGvVDGX=MxURMy5NijsdPGRgWDpgT3_CyMow@mail.gmail.com>
+From: =?UTF-8?B?6IOh54Ca5qOu?= <softrank.net@gmail.com>
+Subject: More questions about the thesis.
+Date: Thu, 2 Feb 2012 16:35:47 +0800
+Message-ID: <CALwGbPL=FuZDdnt7xnGVw7ygA0Zr0EwLDSqHnWj6z+KdCkzESQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:44651 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751593Ab2BBALb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2012 19:11:31 -0500
-In-Reply-To: <CAORUGqCkRzAbXVjGvVDGX=MxURMy5NijsdPGRgWDpgT3_CyMow@mail.gmail.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:65462 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754727Ab2BBIfr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2012 03:35:47 -0500
+Received: by yhoo21 with SMTP id o21so967423yho.19
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2012 00:35:47 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 01/31/12 17:02, Tommi Virtanen wrote:
+Hi everyone.
 
-> To make my point even clearer: point me to another data store that has
-> that idiom.
+I've received a nice and welcome response last time. Thank you. I've
+got some other questions this time.
 
-(a) Automatic expiration and deletion is, and has long been, a
-     standard feature of archival systems ... and our RADOS
-     clouds are much larger than most archival systems.
+thesis can be found: http://www.ssrc.ucsc.edu/Papers/weil-sc06.pdf
 
-(b) I have no competent opinions on the short term solution to this
-     particular problem, but in the longer term I do not believe
-     that garbage collection can or should be entrusted to clients.
-     Clients are ephemeral and cannot be depended on to remember,
-     a few years (or even hours) from now, that there were some
-     files they were supposed to delete.
+at page 4, chapter 3.2.2 Replica Ranks, under Figure 2.
+>>...thus defining a sequence of candidates for each replica rank that are probabilistically independent of others' failures.
+Here, why "probabilistically" instead of "certainly"? and what's
+others' failure?
 
-     IMHO, object store intelligence is not merely about back-ground
-     replication and migration, but about "being able to take
-     responsibility for the life cycle of the data they hold".
-     The amount of data we store will quickly grow beyond the
-     ability of external agents to manage it, and lifecycle
-     automation will become increasingly critical.
+>>...making it unweildly for parity schemes.
+Here, what does "unweildly" mean? is it "unwieldy" or something else?
