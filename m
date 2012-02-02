@@ -1,48 +1,41 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: [RFC PATCH 0/6] Understanding delays due to throttling under very
- heavy write load
-Date: Wed, 1 Feb 2012 14:33:46 -0800
-Message-ID: <CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com>
-References: <1328111668-10068-1-git-send-email-jaschut@sandia.gov>
+From: Mark Kampe <Mark.Kampe@dreamhost.com>
+Subject: Re: efficient removal of old objects
+Date: Wed, 01 Feb 2012 16:11:30 -0800
+Message-ID: <4F29D4B2.6010608@dreamhost.com>
+References: <Pine.LNX.4.64.1201311549170.21770@cobra.newdream.net> <CAORUGqCkRzAbXVjGvVDGX=MxURMy5NijsdPGRgWDpgT3_CyMow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:54907 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755437Ab2BAWdr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2012 17:33:47 -0500
-Received: by iacb35 with SMTP id b35so2120900iac.19
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Feb 2012 14:33:46 -0800 (PST)
-In-Reply-To: <1328111668-10068-1-git-send-email-jaschut@sandia.gov>
+Received: from mail.hq.newdream.net ([66.33.206.127]:44651 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751593Ab2BBALb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2012 19:11:31 -0500
+In-Reply-To: <CAORUGqCkRzAbXVjGvVDGX=MxURMy5NijsdPGRgWDpgT3_CyMow@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, Feb 1, 2012 at 7:54 AM, Jim Schutt <jaschut@sandia.gov> wrote:
-> Hi,
->
-> FWIW, I've been trying to understand op delays under very heavy write
-> load, and have been working a little with the policy throttler in hop=
-es of
-> using throttling delays to help track down which ops were backing up.
-> Without much success, unfortunately.
->
-> When I saw the wip-osd-op-tracking branch, I wondered if any of this
-> stuff might be helpful. =A0Here it is, just in case.
+On 01/31/12 17:02, Tommi Virtanen wrote:
 
-In general these patches are dumping information to the logs, and part
-of the wip-osd-op-tracking branch is actually keeping track of most of
-the message queueing wait times as part of the message itself
-(although not the information about number of waiters and sleep/wake
-seqs). I'm inclined to prefer that approach to log dumping.
-Are there any patches you recommend for merging? I'm a little curious
-about the ordered wakeup one =97 do you have data about when that's a
-problem?
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To make my point even clearer: point me to another data store that has
+> that idiom.
+
+(a) Automatic expiration and deletion is, and has long been, a
+     standard feature of archival systems ... and our RADOS
+     clouds are much larger than most archival systems.
+
+(b) I have no competent opinions on the short term solution to this
+     particular problem, but in the longer term I do not believe
+     that garbage collection can or should be entrusted to clients.
+     Clients are ephemeral and cannot be depended on to remember,
+     a few years (or even hours) from now, that there were some
+     files they were supposed to delete.
+
+     IMHO, object store intelligence is not merely about back-ground
+     replication and migration, but about "being able to take
+     responsibility for the life cycle of the data they hold".
+     The amount of data we store will quickly grow beyond the
+     ability of external agents to manage it, and lifecycle
+     automation will become increasingly critical.
