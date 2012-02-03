@@ -1,40 +1,38 @@
-From: Alex Elder <elder@dreamhost.com>
-Subject: Re: [PATCH RESEND] ceph: avoid panic with mismatched symlink sizes
- in fill_inode()
-Date: Fri, 03 Feb 2012 15:04:30 -0600
-Message-ID: <1328303070.21405.91.camel@doink>
-References: <1328280936-2688-1-git-send-email-xi.wang@gmail.com>
-	 <1328300672.21405.90.camel@doink>
-	 <972F971B-171E-467D-8E64-C1C49CB94622@gmail.com>
-Reply-To: elder@dreamhost.com
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: how to remove laggy mds ?
+Date: Fri, 3 Feb 2012 13:19:34 -0800
+Message-ID: <CAORUGqD2q3G+aEGVBJ4+68YAyA+Wy_0RyGi=J_f3qMRHLG_Ljg@mail.gmail.com>
+References: <4F2C3A10.1040605@shadow.gt.owl.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:33094 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753830Ab2BCVEg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2012 16:04:36 -0500
-In-Reply-To: <972F971B-171E-467D-8E64-C1C49CB94622@gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:32832 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754677Ab2BCVTz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2012 16:19:55 -0500
+Received: by wgbdt10 with SMTP id dt10so4277663wgb.1
+        for <ceph-devel@vger.kernel.org>; Fri, 03 Feb 2012 13:19:54 -0800 (PST)
+In-Reply-To: <4F2C3A10.1040605@shadow.gt.owl.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xi Wang <xi.wang@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+To: =?UTF-8?Q?Jens_Rehp=C3=B6hler?= <jens@shadow.gt.owl.de>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, 2012-02-03 at 15:49 -0500, Xi Wang wrote:
-> On Feb 3, 2012, at 3:24 PM, Alex Elder wrote:
-> > Looks good, though it might good to at least call
-> > WARN_ON().  What do you think?
-> 
-> Sounds good to me.  I will send a v2.  Thanks.
+On Fri, Feb 3, 2012 at 11:48, Jens Rehp=C3=B6hler <jens@shadow.gt.owl.d=
+e> wrote:
+> one of my test mds servers died a few days ago. (hardware crash) I wi=
+ll
+> not buy a new one.
+>
+> Is there any chance to remove this laggy mds ?
 
-No need.  I can do it for you.	-Alex
+Start the mds daemon somewhere. If you don't want to fix/replace the
+hardware, well, start it somewhere else. It has no local state.
 
-> - xi
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
+Decreasing the number of active mdses is not currently supported.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
