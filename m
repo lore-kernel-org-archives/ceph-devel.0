@@ -1,97 +1,56 @@
-From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-Subject: avoid crashes from faulty crushmap
-Date: Fri, 03 Feb 2012 07:30:29 -0200
-Message-ID: <orpqdwnu16.fsf@livre.localdomain>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=-=-="
+From: Xi Wang <xi.wang@gmail.com>
+Subject: [PATCH RESEND] ceph: avoid panic with mismatched symlink sizes in fill_inode()
+Date: Fri,  3 Feb 2012 09:55:36 -0500
+Message-ID: <1328280936-2688-1-git-send-email-xi.wang@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:59317 "EHLO
-	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755437Ab2BCJaf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2012 04:30:35 -0500
-Received: from freie (gw-to-emilia.oliva.athome.lsd.ic.unicamp.br [172.31.160.17] (may be forged))
-	by boneca.lsd.ic.unicamp.br (8.14.5/8.14.5) with ESMTP id q139UV2j026919
-	for <ceph-devel@vger.kernel.org>; Fri, 3 Feb 2012 07:30:32 -0200
-Received: from livre.localdomain (livre-to-gw.oliva.athome.lsd.ic.unicamp.br [172.31.160.19])
-	by freie (8.14.5/8.14.5) with ESMTP id q139UU2b011012
-	for <ceph-devel@vger.kernel.org>; Fri, 3 Feb 2012 07:30:30 -0200
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:35020 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756771Ab2BCO7R (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2012 09:59:17 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Xi Wang <xi.wang@gmail.com>
 
---=-=-=
+Return -EINVAL rather than panic if iinfo->symlink_len and
+inode->i_size do not match.
 
-I messed up a crush map the other day, mixing components of different
-types in a single rule.  The crushmap compiler didn't complain, but mons
-and osds would crash when applying those rules.  I had to use this patch
-to recover the cluster.  Only the second hunk was relevant, but I
-figured a BUG_ON that stops you from fixing the problem is best avoided
-;-)
+Also use kstrndup rather than kmalloc/memcpy.
 
-
---=-=-=
-Content-Type: message/rfc822
-Content-Disposition: inline;
- filename=0002-crush-don-t-BUG_ON-within-crush_choose.patch
-
-From: Alexandre Oliva <lxoliva@fsfla.org>
-Date: Sun, 29 Jan 2012 05:15:18 -0200
-Subject: [PATCH 2/2] [crush] don't BUG_ON within crush_choose
-
-It's very hard to recover from an invalid crushmap if mons fail
-assertions while processing the map, and osds crash while advancing
-past an already-fixed map.  Skip such broken rules instead of
-aborting.
-
-Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Signed-off-by: Xi Wang <xi.wang@gmail.com>
 ---
- src/crush/mapper.c |   14 +++++++++++---
- 1 files changed, 11 insertions(+), 3 deletions(-)
+ fs/ceph/inode.c |   11 ++++++-----
+ 1 files changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/src/crush/mapper.c b/src/crush/mapper.c
-index 1e475b40..6ce4c97 100644
---- a/src/crush/mapper.c
-+++ b/src/crush/mapper.c
-@@ -354,7 +354,11 @@ static int crush_choose(const struct crush_map *map,
- 					item = bucket_perm_choose(in, x, r);
- 				else
- 					item = crush_bucket_choose(in, x, r);
--				BUG_ON(item >= map->max_devices);
-+				if (item >= map->max_devices) {
-+					dprintk("  bad item %d\n", item);
-+					skip_rep = 1;
-+					break;
-+				}
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index 2c48937..6c0205d 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -677,18 +677,19 @@ static int fill_inode(struct inode *inode,
+ 	case S_IFLNK:
+ 		inode->i_op = &ceph_symlink_iops;
+ 		if (!ci->i_symlink) {
+-			int symlen = iinfo->symlink_len;
++			u32 symlen = iinfo->symlink_len;
+ 			char *sym;
  
- 				/* desired type? */
- 				if (item < 0)
-@@ -365,8 +369,12 @@ static int crush_choose(const struct crush_map *map,
+-			BUG_ON(symlen != inode->i_size);
+ 			spin_unlock(&ci->i_ceph_lock);
  
- 				/* keep going? */
- 				if (itemtype != type) {
--					BUG_ON(item >= 0 ||
--					       (-1-item) >= map->max_buckets);
-+					if (item >= 0 ||
-+					    (-1-item) >= map->max_buckets) {
-+						dprintk("  bad item type %d\n", type)
-+						skip_rep = 1;
-+						break;
-+					}
- 					in = map->buckets[-1-item];
- 					retry_bucket = 1;
- 					continue;
++			err = -EINVAL;
++			if (symlen != inode->i_size)
++				goto out;
++
+ 			err = -ENOMEM;
+-			sym = kmalloc(symlen+1, GFP_NOFS);
++			sym = kstrndup(iinfo->symlink, symlen, GFP_NOFS);
+ 			if (!sym)
+ 				goto out;
+-			memcpy(sym, iinfo->symlink, symlen);
+-			sym[symlen] = 0;
+ 
+ 			spin_lock(&ci->i_ceph_lock);
+ 			if (!ci->i_symlink)
 -- 
-1.7.7.6
+1.7.5.4
 
-
---=-=-=
-
-
-
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
-
---=-=-=--
