@@ -1,179 +1,155 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: [EXTERNAL] Re: [RFC PATCH 0/6] Understanding delays due to
- throttling under very heavy write load
-Date: Thu, 2 Feb 2012 16:28:36 -0800
-Message-ID: <CAF3hT9AcxxNtscFczP8fShSsaBm_4zhLQZ2F5c7h1YswVaXHkA@mail.gmail.com>
-References: <1328111668-10068-1-git-send-email-jaschut@sandia.gov>
-	<CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com>
-	<4F29CDAA.408@sandia.gov>
-	<CAF3hT9BZEP_FWS=qt8ivA++aDpPGGFzuD_PtMcvDRS2aDEN+hw@mail.gmail.com>
-	<4F2AABF5.6050803@sandia.gov>
-	<CAF3hT9BNc4n4HBNEqsf+d6-Rjv7TC8nJ1VponJCBVpLB8=_F5Q@mail.gmail.com>
-	<4F2ADEAE.8010403@sandia.gov>
-	<CAF3hT9CFkxnWR4zoTRPtyGU5CbfV_PvL+=dqnvZcr7G0HBOb+w@mail.gmail.com>
-	<4F2AF085.6000405@sandia.gov>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: couldn't use rbd
+Date: Thu, 02 Feb 2012 17:26:51 -0800
+Message-ID: <4F2B37DB.4070506@dreamhost.com>
+References: <CAM2zNoOyURtLAzh=DNcPjazj1RpgEY7WeJ_-QVjOWzbTp+qSUQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:33000 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753460Ab2BCA2h convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2012 19:28:37 -0500
-Received: by iacb35 with SMTP id b35so3873526iac.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2012 16:28:36 -0800 (PST)
-In-Reply-To: <4F2AF085.6000405@sandia.gov>
+Received: from mail.hq.newdream.net ([66.33.206.127]:38496 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754048Ab2BCB0v (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2012 20:26:51 -0500
+In-Reply-To: <CAM2zNoOyURtLAzh=DNcPjazj1RpgEY7WeJ_-QVjOWzbTp+qSUQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
+To: Masuko Tomoya <tomoya.masuko@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Feb 2, 2012 at 12:22 PM, Jim Schutt <jaschut@sandia.gov> wrote:
-> I found 0 instances of "waiting for commit" in all my OSD logs for my=
- last
-> run.
+On 02/02/2012 01:49 AM, Masuko Tomoya wrote:
+> Hi, all.
 >
-> So I never waited on the journal?
+> When I execute "rbd" command, it is not success.
+>
+> root@ceph01:~# rbd list
+> (no response)
+>
+> /var/log/ceph/mon.0.log
+> -----
+> 2012-02-02 17:58:19.801762 7ff4bbfb1710 -- 10.68.119.191:6789/0<==
+> client.? 10.68.119.191:0/1002580 1 ==== auth(proto 0 30 bytes) v1 ====
+> 56+0+0 (625540289 0 0) 0x1619a00 con 0x1615a00
+> 2012-02-02 17:58:19.801919 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> 10.68.119.191:0/1002580 -- auth_reply(proto 2 0 Success) v1 -- ?+0
+> 0x1619c00 con 0x1615a00
+> 2012-02-02 17:58:19.802505 7ff4bbfb1710 -- 10.68.119.191:6789/0<==
+> client.? 10.68.119.191:0/1002580 2 ==== auth(proto 2 32 bytes) v1 ====
+> 58+0+0 (346146289 0 0) 0x161fc00 con 0x1615a00
+> 2012-02-02 17:58:19.802673 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> 10.68.119.191:0/1002580 -- auth_reply(proto 2 0 Success) v1 -- ?+0
+> 0x1619a00 con 0x1615a00
+> 2012-02-02 17:58:19.803473 7ff4bbfb1710 -- 10.68.119.191:6789/0<==
+> client.? 10.68.119.191:0/1002580 3 ==== auth(proto 2 165 bytes) v1
+> ==== 191+0+0 (3737796417 0 0) 0x1619600 con 0x1615a00
+> 2012-02-02 17:58:19.803745 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> 10.68.119.191:0/1002580 -- auth_reply(proto 2 0 Success) v1 -- ?+0
+> 0x161fc00 con 0x1615a00
+> 2012-02-02 17:58:19.804425 7ff4bbfb1710 -- 10.68.119.191:6789/0<==
+> client.? 10.68.119.191:0/1002580 4 ==== mon_subscribe({monmap=0+}) v2
+> ==== 23+0+0 (1620593354 0 0) 0x1617380 con 0x1615a00
+> 2012-02-02 17:58:19.804488 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> 10.68.119.191:0/1002580 -- mon_map v1 -- ?+0 0x1635700 con 0x1615a00
+> 2012-02-02 17:58:19.804517 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> client.? 10.68.119.191:0/1002580 -- mon_subscribe_ack(300s) v1 -- ?+0
+> 0x163d780
+> 2012-02-02 17:58:19.804550 7ff4bbfb1710 -- 10.68.119.191:6789/0<==
+> client.4112 10.68.119.191:0/1002580 5 ====
+> mon_subscribe({monmap=0+,osdmap=0}) v2 ==== 42+0+0 (982583713 0 0)
+> 0x1617a80 con 0x1615a00
+> 2012-02-02 17:58:19.804578 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> 10.68.119.191:0/1002580 -- mon_map v1 -- ?+0 0x1617380 con 0x1615a00
+> 2012-02-02 17:58:19.804656 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> client.? 10.68.119.191:0/1002580 -- osd_map(3..3 src has 1..3) v1 --
+> ?+0 0x1619600
+> 2012-02-02 17:58:19.804744 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> client.4112 10.68.119.191:0/1002580 -- mon_subscribe_ack(300s) v1 --
+> ?+0 0x163d900
+> 2012-02-02 17:58:19.804778 7ff4bbfb1710 -- 10.68.119.191:6789/0<==
+> client.4112 10.68.119.191:0/1002580 6 ====
+> mon_subscribe({monmap=0+,osdmap=0}) v2 ==== 42+0+0 (982583713 0 0)
+> 0x16178c0 con 0x1615a00
+> 2012-02-02 17:58:19.804811 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> 10.68.119.191:0/1002580 -- mon_map v1 -- ?+0 0x1617a80 con 0x1615a00
+> 2012-02-02 17:58:19.804855 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> client.? 10.68.119.191:0/1002580 -- osd_map(3..3 src has 1..3) v1 --
+> ?+0 0x1619400
+> 2012-02-02 17:58:19.804884 7ff4bbfb1710 -- 10.68.119.191:6789/0 -->
+> client.4112 10.68.119.191:0/1002580 -- mon_subscribe_ack(300s) v1 --
+> ?+0 0x161d300
+> -----
 
-Looks like it. Interesting.
+No problems there.
 
+>
+> BTW, I could execute "rados lspools".
+>
+> root@ceph01:~# rados lspools
+> data
+> metadata
+> rbd
 
->>> So far I'm looking at two behaviours I've noticed that seem anomalo=
-us to
->>> me.
->>>
->>> One is that I instrumented ms_dispatch(), and I see it take
->>> a half-second or more several hundred times, out of several
->>> thousand messages. =A0Is that expected?
->>
->>
->> How did you instrument it? If you wrapped the whole function it's
->> possible that those longer runs are actually chewing through several
->> messages that had to get waitlisted for some reason previously.
->> (That's the call to do_waiters().)
+This might mean the rbd image list object can't be read for some
+reason, or the rbd tool is doing something weird that the rados tool
+isn't. Can you share the output of 'ceph -s' and
+'rbd ls --log-to-stderr --debug-ms 1 --debug-objecter 20 --debug-monc 20 
+--debug-auth 20'?
+
+You can run 'rados lspools' with those options as well and compare.
+
+> I would like to use rbd volume and attach it as virtual device for VM
+> guest on KVM.
+>
+> Could you advice to me ?
 >
 >
-> Yep, I wrapped the whole function, and also instrumented taking osd_l=
-ock
-> while I was there. =A0About half the time that ms_dispatch() takes mo=
-re than
-> 0.5 seconds, taking osd_lock is responsible for the delay. =A0There's=
- two
-> dispatch threads, one for ops and one for rep_ops, right? =A0So one's
-> waiting on the other?
+> My environment is below.
+>
+> *ceph cluster is configured on single server.
+> *server is ubuntu 10.10 maverick.
+> *ceph, librados2 and librbd1 packages are installed.
+>   (version: 0.38-1maverick)
+> *apparmor is disable.
 
-There's just one main dispatcher; no split for the ops and rep_ops .
-The reason for that "dispatch_running" is that if there are requests
-waiting then the tick() function will run through them if the
-messenger dispatch thread is currently idle.
-But it is possible for the Messenger to try and dispatch, and for that
-to be blocked while some amount of (usually trivial) work is being
-done by a different thread, yes. I don't think we've ever observed it
-being a problem for anything other than updating OSD maps, though...
+apparmor shouldn't matter if you have libvirt 0.9.9 or newer.
 
-
->>> Another is that once a message receive starts, I see ~50 messages
->>> that take tens of seconds to receive, when the nominal receive time=
- is
->>> a half-second or less. =A0I'm in the process of tooling up to colle=
-ct
->>> tcpdump data on all my clients to try to catch what is going on wit=
-h
->>> that.
->>
->>
->> Again, how are you instrumenting that?
+> *root@ceph01:/# ls -l /etc/ceph
+> total 16
+> -rw-r--r-- 1 root root 340 2012-02-02 17:28 ceph.conf
+> -rw------- 1 root root  92 2012-02-02 17:28 client.admin.keyring
+> -rw------- 1 root root  85 2012-02-02 17:28 mds.0.keyring
+> -rw------- 1 root root  85 2012-02-02 17:28 osd.0.keyring
+> */var/lib/ceph/tmp is exists.
+> root@ceph01:/var/log# ls -l /var/lib/ceph/
+> total 4
+> drwxrwxrwx 2 root root 4096 2011-11-11 09:28 tmp
+>
+> */etc/ceph/ceph.conf
+> [global]
+>          auth supported = cephx
+>          keyring = /etc/ceph/$name.keyring
+> [mon]
+>          mon data = /data/data/mon$id
+>          debug ms = 1
+> [mon.0]
+>          host = ceph01
+>          mon addr = 10.68.119.191:6789
+> [mds]
+>
+> [mds.0]
+>          host = ceph01
+> [osd]
+>          osd data = /data/osd$id
+>          osd journal = /data/osd$id/journal
+>          osd journal size = 512
+>          osd class tmp = /var/lib/ceph/tmp
+> [osd.0]
+>          host = ceph01
+>          btrfs devs = /dev/sdb1
 >
 >
-> I post-process the logs, looking at the time difference between
-> "reader got .* policy throttler" and "reader got .* osd_op(client".
-
-I guess the logging output must have changed a bit at some pointer (or
-was that one of your patches?). master has "reader wants" not "reader
-got" for the policy throttler. (Just got a little confused when
-checking the code.)
-
-> When I find a candidate message, I grep the log for just that reader =
-thread,
-> and see, e.g., this:
+> Waiting for your reply,
 >
-> osd.0.log:1280693:2012-02-02 09:17:57.704508 7fe5c9099700 --
-> 172.17.131.32:6800/14974 >> 172.17.135.85:0/1283168808 pipe(0xbdc9680=
- sd=3D215
-> pgs=3D49 cs=3D1 l=3D1).reader got 2670720 from policy throttler 48809=
-510/50000000
-> seq 828/828 waiters 157/149 for src client.4301 tid=3D247
-> osd.0.log:1280694:2012-02-02 09:17:57.704525 7fe5c9099700 --
-> 172.17.131.32:6800/14974 >> 172.17.135.85:0/1283168808 pipe(0xbdc9680=
- sd=3D215
-> pgs=3D49 cs=3D1 l=3D1).reader wants 2670720 from dispatch throttler
-> 41944358/66666666
-> osd.0.log:1280701:2012-02-02 09:17:57.704654 7fe5c9099700 --
-> 172.17.131.32:6800/14974 >> 172.17.135.85:0/1283168808 pipe(0xbdc9680=
- sd=3D215
-> pgs=3D49 cs=3D1 l=3D1).reader got front 128
-> osd.0.log:1280705:2012-02-02 09:17:57.704752 7fe5c9099700 --
-> 172.17.131.32:6800/14974 >> 172.17.135.85:0/1283168808 pipe(0xbdc9680=
- sd=3D215
-> pgs=3D49 cs=3D1 l=3D1).reader allocating new rx buffer at offset 0
-> osd.0.log:1280710:2012-02-02 09:17:57.704873 7fe5c9099700 --
-> 172.17.131.32:6800/14974 >> 172.17.135.85:0/1283168808 pipe(0xbdc9680=
- sd=3D215
-> pgs=3D49 cs=3D1 l=3D1).reader reading nonblocking into 0x11922000 len=
- 2670592
-> osd.0.log:1559767:2012-02-02 09:19:40.726589 7fe5c9099700 --
-> 172.17.131.32:6800/14974 >> 172.17.135.85:0/1283168808 pipe(0xbdc9680=
- sd=3D215
-> pgs=3D49 cs=3D1 l=3D1).reader reading nonblocking into 0x11a6a5cc len=
- 1325620
-> osd.0.log:1561092:2012-02-02 09:19:40.927559 7fe5c9099700 --
-> 172.17.131.32:6800/14974 >> 172.17.135.85:0/1283168808 pipe(0xbdc9680=
- sd=3D215
-> pgs=3D49 cs=3D1 l=3D1).reader reading nonblocking into 0x11a6ab74 len=
- 1324172
->
-> Note the ~2 minute delay (and ~300,000 lines of logging) between the =
-first
-> and second reads.
->
-> During that time 129 sockets were processed - what makes sd=3D215 spe=
-cial?
+> Tomoya.
 
-Hrm. Well, you can try turning up the messenger debugging to 30 and
-taking advantage of the "reader reading" "reader read" pair right
-around tcp_read_nonblocking.
 
-> I've added tracepoints in my client kernel try_write(), and nothing s=
-eems
-> unusual (that's with running the patch to ceph_write_space() I posted
-> earlier):
->
-> =A0 =A0 kworker/0:2-1790 =A0[000] =A01543.200887: ceph_try_write_msg_=
-done: peer osd0
-> tid 179 seq 3 sent 4194304
-> =A0 =A0 kworker/0:2-1790 =A0[000] =A01543.200901: ceph_prepare_write_=
-msg: peer osd0
-> tid 207 seq 4 sent 0
-*snip*
-> =A0 =A0 kworker/0:2-1790 =A0[000] =A01569.078614: ceph_try_write_msg_=
-done: peer osd0
-> tid 207 seq 4 sent 4194304
->
-> There's a 25 second gap at 1543.236256, but nothing like the
-> 100 second gap in the reader.
->
-> Hence, tcpdump seems like a good idea?
-
-You do bring us interesting problems! Let us know what info you come up=
- with.
-
-Oh, and I keep forgetting to ask: what does the write workload look
-like? At first I assumed this was a CephFS workload, but given that
-you're changing max message sizes and have half-second writes you're
-probably doing something else?
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
