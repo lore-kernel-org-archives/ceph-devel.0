@@ -1,44 +1,35 @@
-From: Josh Pieper <jjp@pobox.com>
-Subject: Possible RBD inconsistencies with kvm+Windows 7
-Date: Fri, 3 Feb 2012 13:19:35 -0500
-Message-ID: <20120203181935.GA4676@rcn.com>
+From: =?ISO-8859-1?Q?Jens_Rehp=F6hler?= <jens@shadow.gt.owl.de>
+Subject: how to remove laggy mds ?
+Date: Fri, 03 Feb 2012 20:48:32 +0100
+Message-ID: <4F2C3A10.1040605@shadow.gt.owl.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.lnh.mail.rcn.net ([207.172.157.102]:5635 "EHLO
-	smtp02.lnh.mail.rcn.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750964Ab2BCSTh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2012 13:19:37 -0500
-Content-Disposition: inline
+Received: from mail-5.de-punkt.de ([93.190.64.35]:59354 "EHLO
+	mail-5.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751317Ab2BCTzP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2012 14:55:15 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-I have a Windows 7 guest running under kvm/libvirt with RBD as a
-backend to a cluster of 3 OSDs.  With this setup, I am seeing behavior
-that looks suspiciously like disk corruption in the guest VM executing
-some of our workloads.
+Hi List,
 
-For instance, in one occurance, there is a python function that
-recursively deletes a large directory tree while the disk is otherwise
-loaded.  For us, this occasionally fails because the OS reported that
-all the files in the directory were deleted, but then reports the
-directory is not empty when going to remove it.  In another, a simple
-test application writes new files to a directory every 50ms, then
-after 6s verifies that at least 3 files were written, also while the
-disk is under heavy load.
+one of my test mds servers died a few days ago. (hardware crash) I will
+not buy a new one.
 
-We have never ever seen these failures on bare metal, or on kvm
-instances backed by a LVM volume in years of operation, but they
-happen every couple of hours with RBD.  Unfortunately, I have been
-unsuccessful when attempting to create synthetic test cases to
-demonstrate the inconsistent RBD behavior.
+Is there any chance to remove this laggy mds ?
 
-Has anyone else seen similar inconsistent RBD behavior, or have ideas
-how to diagnose further?
+2012-02-03 20:38:53.801623   mds e86436: 2/2/1 up
+{0=0=up:resolve,1=0=up:resolve(laggy or crashed)}
+2012-02-03 20:39:08.943880   mds e86437: 2/2/1 up
+{0=0=up:resolve,1=0=up:resolve(laggy or crashed)}
+2012-02-03 20:39:24.094926   mds e86438: 2/2/1 up
+{0=0=up:resolve,1=0=up:resolve(laggy or crashed)}
+2012-02-03 20:39:39.236560   mds e86439: 2/2/1 up
+{0=0=up:resolve,1=0=up:resolve(laggy or crashed)}
 
-For reference, I am running ceph 0.41, qemu-kvm 1.0 on ubuntu 11.10
-amd64.
+Thanks !!
 
-Regards,
-Josh
+Jens
