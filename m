@@ -1,17 +1,16 @@
 From: Masuko Tomoya <tomoya.masuko@gmail.com>
-Subject: (unknown)
-Date: Fri, 3 Feb 2012 20:46:46 -0800
-Message-ID: <CAM2zNoPgP-=s+d44x4VUTXUf2Gru1a5JaecEy=hjq1nn799tLw@mail.gmail.com>
+Subject: about attaching rbd volume from instance on KVM
+Date: Fri, 3 Feb 2012 20:48:00 -0800
+Message-ID: <CAM2zNoMCEb+8m1SJrS_oXHhQw18L5axNRQY-RB53GfgACNN9Hg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:60855 "EHLO
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:40426 "EHLO
 	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751561Ab2BDEqr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2012 23:46:47 -0500
-Received: by lagu2 with SMTP id u2so2174447lag.19
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Feb 2012 20:46:46 -0800 (PST)
-Subject: 
+	by vger.kernel.org with ESMTP id S1752391Ab2BDEsC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2012 23:48:02 -0500
+Received: by lagu2 with SMTP id u2so2174690lag.19
+        for <ceph-devel@vger.kernel.org>; Fri, 03 Feb 2012 20:48:01 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
@@ -58,9 +57,9 @@ My environment is below.
  -librados2 and librbd1 packages are installed.
  (version: 0.41-1maverick)
  -qemu-kvm is 0.14.0-rc1. I built qemu with rbd enable.
-  the output of run 'qemu-img' show 'rbd' at supported formats field.
-  (I built qemu reffering this page.
-  http://ceph.newdream.net/wiki/QEMU-RBD)
+ the output of run 'qemu-img' show 'rbd' at supported formats field.
+ (I built qemu reffering this page.
+ http://ceph.newdream.net/wiki/QEMU-RBD)
  -apparmor is disable.
  -libvirt is 0.8.8
 
@@ -78,36 +77,36 @@ total 20
  -contents of ceph.conf is below.
 root@compute1:~# cat /etc/ceph/ceph.conf
 [global]
-        auth supported = cephx
-        keyring = /etc/ceph/keyring.bin
+       auth supported = cephx
+       keyring = /etc/ceph/keyring.bin
 [mon]
-        mon data = /data/data/mon$id
-        debug ms = 1
+       mon data = /data/data/mon$id
+       debug ms = 1
 [mon.0]
-        host = ceph01
-        mon addr = 10.68.119.191:6789
+       host = ceph01
+       mon addr = 10.68.119.191:6789
 [mds]
-        keyring = /etc/ceph/keyring.$name
+       keyring = /etc/ceph/keyring.$name
 [mds.0]
-        host = ceph01
+       host = ceph01
 [osd]
-        keyring = /etc/ceph/keyring.$name
-        osd data = /data/osd$id
-        osd journal = /data/osd$id/journal
-        osd journal size = 512
-        osd class tmp = /var/lib/ceph/tmp
-        debug osd = 20
-        debug ms = 1
-        debug filestore = 20
+       keyring = /etc/ceph/keyring.$name
+       osd data = /data/osd$id
+       osd journal = /data/osd$id/journal
+       osd journal size = 512
+       osd class tmp = /var/lib/ceph/tmp
+       debug osd = 20
+       debug ms = 1
+       debug filestore = 20
 [osd.0]
-        host = ceph01
-        btrfs devs = /dev/sdb1
+       host = ceph01
+       btrfs devs = /dev/sdb1
 
 ===
 *conten of keyring.admin is below
 root@compute1:~# cat /etc/ceph/keyring.admin
 [client.admin]
-        key = AQDFeCxPyBlNIRAAxS1DcRHpMXRpcjY/GNMwYg==
+       key = AQDFeCxPyBlNIRAAxS1DcRHpMXRpcjY/GNMwYg==
 
 
 ===
@@ -116,32 +115,32 @@ root@ceph01:/etc/ceph# ceph auth list
 2012-02-03 20:34:59.507451 mon <- [auth,list]
 2012-02-03 20:34:59.508785 mon.0 -> 'installed auth entries:
 mon.
-        key: AQDFeCxPiK04IxAAslDBNkrOGKWxcbCh2iysqg==
+       key: AQDFeCxPiK04IxAAslDBNkrOGKWxcbCh2iysqg==
 mds.0
-        key: AQDFeCxPsJ+LGhAAJ3/rmkAtGXSv/eHh0yXgww==
-        caps: [mds] allow
-        caps: [mon] allow rwx
-        caps: [osd] allow *
+       key: AQDFeCxPsJ+LGhAAJ3/rmkAtGXSv/eHh0yXgww==
+       caps: [mds] allow
+       caps: [mon] allow rwx
+       caps: [osd] allow *
 osd.0
-        key: AQDFeCxPoEK+ExAAecD7+tWgpIRoZx2AT7Jwbg==
-        caps: [mon] allow rwx
-        caps: [osd] allow *
+       key: AQDFeCxPoEK+ExAAecD7+tWgpIRoZx2AT7Jwbg==
+       caps: [mon] allow rwx
+       caps: [osd] allow *
 client.admin
-        key: AQDFeCxPyBlNIRAAxS1DcRHpMXRpcjY/GNMwYg==
-        caps: [mds] allow
-        caps: [mon] allow *
-        caps: [osd] allow *
+       key: AQDFeCxPyBlNIRAAxS1DcRHpMXRpcjY/GNMwYg==
+       caps: [mds] allow
+       caps: [mon] allow *
+       caps: [osd] allow *
 ' (0)
 
 ====
 *xml file is below.
 root@compute1:~# cat /root/testvolume.xml
 <disk type='network' device='disk'>
-  <driver name='qemu' type='raw'/>
-  <source protocol='rbd' name='rbd/testvolume'>
-    <host name='10.68.119.191' port='6789'/>
-  </source>
-  <target dev='vde' bus='virtio'/>
+ <driver name='qemu' type='raw'/>
+ <source protocol='rbd' name='rbd/testvolume'>
+   <host name='10.68.119.191' port='6789'/>
+ </source>
+ <target dev='vde' bus='virtio'/>
 </disk>
 
 ====
