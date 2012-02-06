@@ -1,186 +1,246 @@
-From: Christian Brunner <christian@brunner-muc.de>
-Subject: Re: about attaching rbd volume from instance on KVM
-Date: Mon, 6 Feb 2012 09:06:12 +0100
-Message-ID: <CAJafhzSa=tUJpOyLaQvde__hM+5wwN4wDjRei+HGrm5nf7VX0w@mail.gmail.com>
-References: <CAM2zNoMCEb+8m1SJrS_oXHhQw18L5axNRQY-RB53GfgACNN9Hg@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: [RFC PATCH 0/6] Understanding delays due to throttling
+ under very heavy write load
+Date: Mon, 6 Feb 2012 09:20:35 -0700
+Message-ID: <4F2FFDD3.1010100@sandia.gov>
+References: <1328111668-10068-1-git-send-email-jaschut@sandia.gov>
+ <CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com>
+ <4F29CDAA.408@sandia.gov>
+ <CAF3hT9BZEP_FWS=qt8ivA++aDpPGGFzuD_PtMcvDRS2aDEN+hw@mail.gmail.com>
+ <4F2AABF5.6050803@sandia.gov>
+ <CAF3hT9BNc4n4HBNEqsf+d6-Rjv7TC8nJ1VponJCBVpLB8=_F5Q@mail.gmail.com>
+ <4F2ADEAE.8010403@sandia.gov>
+ <CAF3hT9CFkxnWR4zoTRPtyGU5CbfV_PvL+=dqnvZcr7G0HBOb+w@mail.gmail.com>
+ <4F2AF085.6000405@sandia.gov>
+ <CAF3hT9AcxxNtscFczP8fShSsaBm_4zhLQZ2F5c7h1YswVaXHkA@mail.gmail.com>
+ <4F2C08A7.2050507@sandia.gov> <3032884323297001561@unknownmsgid>
+ <4F2C6EE6.4050008@sandia.gov>
+ <CAC-hyiHSNv_VgLcyVCrJ66HxTGFNBONrmmBddJk5326dLTKgkw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:53691 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751087Ab2BFIGO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2012 03:06:14 -0500
-Received: by wgbdt10 with SMTP id dt10so5934745wgb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2012 00:06:12 -0800 (PST)
-In-Reply-To: <CAM2zNoMCEb+8m1SJrS_oXHhQw18L5axNRQY-RB53GfgACNN9Hg@mail.gmail.com>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:54771 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754865Ab2BFQVP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2012 11:21:15 -0500
+In-Reply-To: <CAC-hyiHSNv_VgLcyVCrJ66HxTGFNBONrmmBddJk5326dLTKgkw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Masuko Tomoya <tomoya.masuko@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
+Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Libvirt is trying to set security lables even for network shares. This
-will not work. I think this is fixed in newer libvirt versions. For
-older versions you can try this patch:
+On 02/03/2012 05:03 PM, Yehuda Sadeh Weinraub wrote:
+> On Fri, Feb 3, 2012 at 3:33 PM, Jim Schutt<jaschut@sandia.gov>  wrote:
 
-http://www.redhat.com/archives/libvir-list/2011-May/msg01446.html
+>
+> You can try running 'iostat -t -kx -d 1' on the osds, and see whether %util
+> reaches 100%, and when it happens whether it's due to number of io
+> operations that are thrashing, or whether it's due to high amount of data.
+> FWIW, you may try setting  'filestore flusher = false', and set
+> /proc/sys/vm/dirty_background_ratio' to a small number (e.g., 1M).
 
-Regards,
-Christian
+Here's some iostat data from early in a run, when things are
+running well:
 
-2012/2/4 Masuko Tomoya <tomoya.masuko@gmail.com>:
-> Hi, all.
+
+02/02/2012 09:14:13 AM
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           23.24    0.00   61.99    7.38    0.00    7.38
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rMB/s    wMB/s avgrq-sz avgqu-sz   await  svctm  %util
+sdc               0.00     0.00    0.00  206.00     0.00   101.57  1009.79    54.80  251.27   4.86 100.10
+sdd               0.00     0.00    0.00  202.00     0.00    98.10   994.61    27.85  132.42   4.96 100.10
+sde               0.00     4.00    0.00  212.00     0.00   105.09  1015.25    96.06  588.43   4.72 100.10
+sdh               0.00     0.00    0.00  200.00     0.00    97.11   994.40    69.77  535.01   5.00 100.10
+sdg               0.00     2.00    0.00  221.00     0.00   109.59  1015.60    82.05  298.71   4.53 100.10
+sda               0.00     1.00    0.00  212.00     0.00    83.93   810.75    18.26   84.82   4.68  99.30
+sdf               0.00     0.00    0.00  208.00     0.00   102.55  1009.73    77.23  383.19   4.50  93.70
+sdb               0.00     0.00    0.00  205.00     0.00    98.66   985.68    19.97  133.98   4.84  99.20
+sdj               0.00     0.00    0.00  202.00     0.00    99.59  1009.66    69.97  257.47   4.95 100.00
+sdk               0.00     0.00    0.00  204.00     0.00    98.10   984.86    20.83  100.34   4.87  99.30
+sdm               0.00     0.00    0.00  216.00     0.00   106.55  1010.22    77.73  268.67   4.63 100.00
+sdn               0.00     0.00    0.00  205.00     0.00    98.60   985.05    19.33   95.88   4.81  98.60
+sdo               0.00     0.00    0.00  232.00     0.00   106.25   937.93    23.26   82.19   4.29  99.50
+sdl               0.00     0.00    0.00  181.00     0.00    85.12   963.09    24.73  131.71   4.80  86.80
+sdp               0.00     4.00    0.00  207.00     0.00    87.41   864.77    37.01  111.13   4.49  93.00
+sdi               0.00     0.00    0.00  208.00     0.00   103.04  1014.54    72.30  263.72   4.70  97.70
+sdr               0.00     0.00    0.00  191.00     0.00    76.75   822.95    11.51   83.69   4.59  87.60
+sds               0.00     0.00    0.00  209.00     0.00   101.91   998.58    49.95  278.08   4.70  98.20
+sdt               0.00     0.00    0.00  209.00     0.00    99.57   975.69    27.31  157.44   4.79 100.10
+sdu               0.00     0.00    0.00  216.00     0.00   107.09  1015.41    79.82  345.88   4.63 100.10
+sdw               0.00     0.00    0.00  208.00     0.00   103.09  1015.00    74.55  308.15   4.81 100.10
+sdv               0.00     0.00    0.00  201.00     0.00    98.05   999.08    76.87  265.88   4.98 100.10
+sdx               0.00     0.00    0.00  202.00     0.00   100.50  1018.93   110.40  327.68   4.96 100.10
+sdq               0.00     0.00    0.00  228.00     0.00   112.59  1011.30    54.84  281.04   4.39 100.10
+
+02/02/2012 09:14:14 AM
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           22.11    0.00   54.03   15.38    0.00    8.48
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rMB/s    wMB/s avgrq-sz avgqu-sz   await  svctm  %util
+sdc               0.00     0.00    0.00  233.00     0.00    99.68   876.15    95.98  384.42   4.29 100.00
+sdd               0.00     0.00    0.00  205.00     0.00    96.64   965.46    20.37  108.51   4.84  99.30
+sde               0.00     0.00    0.00  225.00     0.00    99.54   906.03    92.38  420.67   4.44 100.00
+sdh               0.00     0.00    0.00  198.00     0.00    97.05  1003.84    79.39  410.56   5.05 100.00
+sdg               0.00     0.00    0.00  245.00     0.00   108.38   905.99    84.40  385.47   4.08 100.00
+sda               0.00     4.00    0.00  220.00     0.00    96.23   895.78    63.24  294.59   4.44  97.60
+sdf               0.00     0.00    0.00  216.00     0.00   107.09  1015.41    87.67  399.14   4.57  98.80
+sdb               0.00     0.00    0.00  156.00     0.00    72.05   945.95    11.61   58.94   4.84  75.50
+sdj               0.00     0.00    0.00  199.00     0.00    95.41   981.95    56.28  366.11   4.84  96.40
+sdk               0.00     0.00    0.00  206.00     0.00   100.14   995.57    54.69  241.41   4.86 100.10
+sdm               0.00     0.00    0.00  200.00     0.00    99.09  1014.72    79.51  506.47   4.74  94.70
+sdn               0.00     0.00    0.00  191.00     0.00    91.29   978.81    26.82  128.39   5.18  98.90
+sdo               0.00     0.00    0.00  234.00     0.00   106.75   934.32    49.82  231.07   4.27 100.00
+sdl               0.00     0.00    0.00  214.00     0.00   103.62   991.70    33.03  168.13   4.62  98.80
+sdp               0.00     0.00    0.00  219.00     0.00   106.08   992.00    64.69  328.92   4.57 100.00
+sdi               0.00     0.00    0.00  210.00     0.00   104.09  1015.09   100.98  421.01   4.76 100.00
+sdr               0.00     0.00    0.00  180.00     0.00    81.66   929.07    10.31   63.59   5.12  92.20
+sds               0.00     0.00    0.00  201.00     0.00    95.15   969.47    32.60  144.16   4.98 100.00
+sdt               0.00     0.00    0.00  198.00     0.00    95.72   990.10    33.26  155.98   4.84  95.90
+sdu               0.00     0.00    0.00  219.00     0.00   108.59  1015.53    66.10  347.91   4.57 100.00
+sdw               0.00     0.00    0.00  204.00     0.00   100.75  1011.41    81.20  456.47   4.80  98.00
+sdv               0.00     0.00    0.00  197.00     0.00    96.09   998.90    44.19  284.65   5.08 100.00
+sdx               0.00     0.00    0.00  211.00     0.00   104.19  1011.26    84.87  542.85   4.69  99.00
+sdq               0.00     0.00    0.00  216.00     0.00   105.10   996.52    36.63  134.40   4.63 100.00
+
+
+This is later in the same run, when things are not going as well:
+
+02/02/2012 09:21:52 AM
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+            5.13    0.00   13.31    8.52    0.00   73.04
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rMB/s    wMB/s avgrq-sz avgqu-sz   await  svctm  %util
+sdc               0.00     0.00    0.00   36.00     0.00    16.02   911.11     1.43   39.72   5.64  20.30
+sdd               0.00     0.00    0.00   18.00     0.00     8.01   911.11     0.85   47.28   6.39  11.50
+sde               0.00     0.00    0.00    4.00     0.00     0.01     6.00     0.08   20.00  13.00   5.20
+sdh               0.00     0.00    0.00   20.00     0.00     8.01   820.40     0.65   32.40   5.30  10.60
+sdg               0.00     0.00    0.00   19.00     0.00     8.01   863.58     0.60   31.63   4.63   8.80
+sda               0.00     0.00    0.00   82.00     0.00    36.04   900.10     3.13   37.05   5.15  42.20
+sdf               0.00     0.00    0.00   18.00     0.00     8.01   911.11     0.80   44.22   6.39  11.50
+sdb               0.00     8.00    0.00   42.00     0.00     1.75    85.52     0.14    3.43   1.40   5.90
+sdj               0.00    16.00    0.00  103.00     0.00    25.64   509.83     2.21   21.36   3.65  37.60
+sdk               0.00    14.00    0.00  152.00     0.00    47.93   645.79     3.96   27.31   4.12  62.60
+sdm               0.00     0.00    0.00   21.00     0.00     9.39   915.81     0.94   44.57   5.71  12.00
+sdn               0.00    34.00    0.00  197.00     0.00    64.61   671.72    28.66   85.62   4.02  79.10
+sdo               0.00     0.00    0.00   92.00     0.00    42.54   946.87     6.22   55.58   4.85  44.60
+sdl               0.00     0.00    0.00    6.00     0.00     2.01   685.33     0.09   59.67   6.33   3.80
+sdp               0.00    10.00    0.00   58.00     0.00     9.56   337.52     1.20   20.60   3.05  17.70
+sdi               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00   0.00   0.00
+sdr               0.00     0.00    0.00   37.00     0.00    16.02   886.92     1.19   32.27   5.11  18.90
+sds               0.00    18.00    0.00  115.00     0.00    26.54   472.70     4.03   25.94   3.20  36.80
+sdt               0.00     0.00    0.00  131.00     0.00    60.05   938.87     6.13   46.33   5.11  67.00
+sdu               0.00    12.00    0.00  119.00     0.00    31.40   540.44     2.93   24.65   3.05  36.30
+sdw               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00   0.00   0.00
+sdv               0.00     4.00    0.00   63.00     0.00     9.46   307.68     0.83   14.32   2.38  15.00
+sdx               0.00     0.00    0.00   35.00     0.00    15.51   907.66     0.79   28.20   4.89  17.10
+sdq               0.00     0.00    0.00   37.00     0.00    16.02   886.70     1.52   41.00   5.86  21.70
+
+02/02/2012 09:21:53 AM
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+            3.74    0.00    8.75    6.60    0.00   80.90
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rMB/s    wMB/s avgrq-sz avgqu-sz   await  svctm  %util
+sdc               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00   0.00   0.00
+sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00   0.00   0.00
+sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00   0.00   0.00
+sdh               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00   0.00   0.00
+sdg               0.00     0.00    0.00   18.00     0.00     8.01   911.11     0.88   48.94   6.83  12.30
+sda               0.00     0.00    0.00   45.00     0.00     7.38   335.64     0.54   18.87   1.78   8.00
+sdf               0.00     0.00    0.00   18.00     0.00     8.01   911.11     0.93   51.44   6.78  12.20
+sdb               0.00     0.00    0.00    5.00     0.00     0.74   302.40     0.05   10.20   8.20   4.10
+sdj               0.00     0.00    0.00   72.00     0.00    32.03   911.11     2.51   34.99   5.01  36.10
+sdk               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00   0.00   0.00
+sdm               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00   0.00   0.00
+sdn               0.00     0.00    0.00  123.00     0.00    52.60   875.84    13.83  209.72   4.84  59.50
+sdo               0.00     0.00    0.00   13.00     0.00     5.52   868.92     0.30  108.31   4.69   6.10
+sdl               0.00     0.00    0.00   27.00     0.00    12.47   945.78     1.33   47.15   6.59  17.80
+sdp               0.00     0.00    0.00   11.00     0.00     4.50   838.55     0.51   14.09   5.09   5.60
+sdi               0.00     0.00    0.00   19.00     0.00     8.01   863.58     0.72   38.05   5.74  10.90
+sdr               0.00     0.00    0.00   18.00     0.00     8.01   911.11     0.69   38.33   5.89  10.60
+sds               0.00     0.00    0.00   56.00     0.00    19.66   718.86     1.31   39.16   5.11  28.60
+sdt               0.00     0.00    0.00  161.00     0.00    72.57   923.18     6.97   37.39   5.07  81.70
+sdu               0.00     0.00    0.00   66.00     0.00    30.02   931.64     2.77   39.85   5.09  33.60
+sdw               0.00     0.00    0.00   20.00     0.00     8.51   871.60     1.47   27.80   4.85   9.70
+sdv               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00   0.00   0.00
+sdx               0.00     0.00    0.00   36.00     0.00    16.02   911.11     1.37   38.08   5.72  20.60
+sdq               0.00     0.00    0.00   44.00     0.00    19.46   906.00     1.15   26.02   4.50  19.80
+
+And finally, this is still later, near the end of the run, when things have recovered
+somewhat:
+
+02/02/2012 09:22:34 AM
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           15.25    0.00   52.27   20.88    0.00   11.60
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rMB/s    wMB/s avgrq-sz avgqu-sz   await  svctm  %util
+sdc               0.00     1.00    0.00  217.00     0.00    95.20   898.51    84.43  413.56   4.60  99.90
+sdd               0.00     0.00    0.00   40.00     0.00    16.86   863.00     1.59   28.45   5.55  22.20
+sde               0.00     0.00    0.00  206.00     0.00    99.27   986.95    89.64  452.92   4.85  99.90
+sdh               0.00     0.00    0.00   51.00     0.00    22.53   904.63     2.02   35.45   5.47  27.90
+sdg               0.00     0.00    0.00  230.00     0.00   112.49  1001.63    92.87  283.01   4.33  99.60
+sda               0.00     0.00    0.00  215.00     0.00   106.10  1010.68    94.45  253.40   4.65  99.90
+sdf               0.00     0.00    0.00   73.00     0.00    32.04   898.74     2.20   30.08   5.11  37.30
+sdb               0.00     0.00    0.00   92.00     0.00    40.05   891.48     2.55   27.70   4.85  44.60
+sdj               0.00    44.00    0.00  280.00     0.00    91.61   670.03   109.32  314.59   3.57  99.90
+sdk               0.00     1.00    0.00  210.00     0.00   100.63   981.41    97.79  419.98   4.76  99.90
+sdm               0.00    42.00    0.00  282.00     0.00   100.27   728.23    92.86  285.38   3.54  99.90
+sdn               0.00     0.00    0.00  213.00     0.00   100.81   969.31    41.62  301.33   4.67  99.40
+sdo               0.00    39.00    0.00  306.00     0.00   102.84   688.29    82.44  279.69   3.26  99.70
+sdl               0.00     0.00    0.00  219.00     0.00   104.16   974.06    83.05  421.80   4.56  99.90
+sdp               0.00    46.00    0.00  277.00     0.00    97.01   717.23   106.44  324.31   3.61  99.90
+sdi               0.00     0.00    0.00   56.00     0.00    24.03   878.86     1.73   30.91   5.05  28.30
+sdr               0.00    34.00    0.00  266.00     0.00    97.66   751.91    63.86  304.39   3.76 100.00
+sds               0.00    18.00    0.00   67.00     0.00    17.41   532.18     1.68   25.03   3.79  25.40
+sdt               0.00     0.00    0.00  130.00     0.00    64.01  1008.37    56.33  166.52   4.99  64.90
+sdu               0.00     0.00    0.00  197.00     0.00    95.02   987.82    44.70  282.45   4.95  97.60
+sdw               0.00     0.00    0.00  207.00     0.00    93.39   923.98    90.21  448.08   4.83  99.90
+sdv               0.00     0.00    0.00  204.00     0.00   100.52  1009.14    84.16  425.70   4.85  98.90
+sdx               0.00     0.00    0.00  203.00     0.00    88.75   895.33    87.10  475.92   4.92  99.90
+sdq               0.00     0.00    0.00   18.00     0.00     8.01   911.11     0.52   28.83   4.83   8.70
+
+02/02/2012 09:22:35 AM
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           14.63    0.00   50.99   22.22    0.00   12.16
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rMB/s    wMB/s avgrq-sz avgqu-sz   await  svctm  %util
+sdc               0.00     0.00    0.00  209.00     0.00    99.54   975.35    84.02  409.76   4.78  99.90
+sdd               0.00     0.00    0.00   13.00     0.00     5.50   867.08     0.34   57.31   6.23   8.10
+sde               0.00     0.00    0.00  204.00     0.00    98.12   985.06    87.28  418.62   4.88  99.50
+sdh               0.00     0.00    0.00   78.00     0.00    34.12   895.79     2.15   30.26   5.37  41.90
+sdg               0.00     0.00    0.00  226.00     0.00   108.48   983.04    93.54  336.46   4.42  99.80
+sda               0.00     0.00    0.00  219.00     0.00   108.07  1010.63    80.90  510.96   4.53  99.20
+sdf               0.00     6.00    0.00   81.00     0.00    21.20   535.90     1.99   24.47   3.59  29.10
+sdb               0.00     0.00    0.00   71.00     0.00    32.03   923.94     2.46   34.63   4.65  33.00
+sdj               0.00     0.00    0.00  192.00     0.00    83.87   894.62    83.33  459.53   5.21 100.10
+sdk               0.00    41.00    0.00  285.00     0.00    94.12   676.32   104.34  310.17   3.51 100.10
+sdm               0.00     0.00    0.00  202.00     0.00    90.44   916.91    86.45  506.52   4.96 100.10
+sdn               0.00     0.00    0.00  208.00     0.00   101.48   999.23    87.79  323.35   4.79  99.70
+sdo               0.00     1.00    0.00  228.00     0.00   108.63   975.75    89.79  327.24   4.38  99.80
+sdl               0.00    28.00    0.00  270.00     0.00    97.64   740.65    52.06  281.67   3.54  95.60
+sdp               0.00     0.00    0.00  195.00     0.00    85.65   899.57    92.28  453.54   5.14 100.20
+sdi               0.00    14.00    0.00   31.00     0.00     9.02   595.61     0.96   30.94   4.77  14.80
+sdr               0.00     0.00    0.00  192.00     0.00    83.11   886.46    14.22  142.39   5.06  97.10
+sds               0.00     0.00    0.00   18.00     0.00     8.01   911.11     0.73   40.39   5.89  10.60
+sdt               0.00     0.00    0.00  201.00     0.00    98.66  1005.29    65.87  425.37   4.89  98.30
+sdu               0.00     0.00    0.00  209.00     0.00   103.01  1009.38    87.49  285.51   4.74  99.10
+sdw               0.00     0.00    0.00  204.00     0.00    96.74   971.22    82.66  410.50   4.89  99.70
+sdv               0.00     0.00    0.00  198.00     0.00    96.61   999.23    83.39  420.17   5.03  99.50
+sdx               0.00     0.00    0.00  204.00     0.00    98.79   991.80    86.54  428.67   4.90 100.00
+sdq               0.00     0.00    0.00   36.00     0.00    16.02   911.11     0.88   24.33   4.44  16.00
+
+
+The above suggests to me that the slowdown is a result
+of requests not getting submitted at the same rate as
+when things are running well.
+
+-- Jim
+
 >
-> I'm trying to attach rbd volume from instance on KVM.
-> But I have problem.
-> Could you help me ?
+> Yehuda
 >
-> ---
-> I tried to attach rbd volume on ceph01 to instance on compute1 with
-> virsh command.
->
-> root@compute1:~# virsh attach-device test-ub16 /root/testvolume.xml
-> error: Failed to attach device from /root/testvolume.xml
-> error: cannot resolve symlink rbd/testvolume: No such file or directo=
-ry
->
-> /var/log/messages
-> Feb =A03 20:14:48 compute1 libvirtd: 20:14:48.717: 3234: error :
-> qemuMonitorTextAddDevice:2417 : operation failed: adding
-> virtio-blk-pci,bus=3Dpci.0,addr=3D0x9,drive=3Ddrive-virtio-disk4,id=3D=
-virtio-disk4
-> device failed: Device needs media, but drive is empty#015#012Device
-> 'virtio-blk-pci' could not be initialized#015#012
-> Feb =A03 20:14:48 compute1 libvirtd: 20:14:48.717: 3234: warning :
-> qemuDomainAttachPciDiskDevice:188 : qemuMonitorAddDevice failed on
-> file=3Drbd:rbd/testvolume,if=3Dnone,id=3Ddrive-virtio-disk4,format=3D=
-raw
-> (virtio-blk-pci,bus=3Dpci.0,addr=3D0x9,drive=3Ddrive-virtio-disk4,id=3D=
-virtio-disk4)
-> Feb =A03 20:14:48 compute1 libvirtd: 20:14:48.717: 3234: error :
-> virSecurityDACRestoreSecurityFileLabel:143 : cannot resolve symlink
-> rbd/testvolume: No such file or directory
-> Feb =A03 20:14:48 compute1 libvirtd: 20:14:48.717: 3234: warning :
-> qemuDomainAttachPciDiskDevice:229 : Unable to restore security label
-> on rbd/testvolume
->
-> there is no log in /var/log/ceph/mon.0.log of host ceph01.
-> ---
->
->
-> My environment is below.
-> *There are two servers. All server are ubuntu 10.10 x86_64.
-> *ceph01: single server configured ceph.(version: 0.41-1maverick)
-> *compute1: kvm hypervisor
-> =A0-librados2 and librbd1 packages are installed.
-> =A0(version: 0.41-1maverick)
-> =A0-qemu-kvm is 0.14.0-rc1. I built qemu with rbd enable.
-> =A0the output of run 'qemu-img' show 'rbd' at supported formats field=
-=2E
-> =A0(I built qemu reffering this page.
-> =A0http://ceph.newdream.net/wiki/QEMU-RBD)
-> =A0-apparmor is disable.
-> =A0-libvirt is 0.8.8
->
-> =3D=3D=3D=3D
-> =A0-there is ceph.conf on compute1.
-> root@compute1:~# ls -l /etc/ceph/
-> total 20
-> -rw-r--r-- 1 root root 508 2012-02-03 14:38 ceph.conf
-> -rw------- 1 root root =A063 2012-02-03 17:04 keyring.admin
-> -rw------- 1 root root =A063 2012-02-03 14:38 keyring.bin
-> -rw------- 1 root root =A056 2012-02-03 14:38 keyring.mds.0
-> -rw------- 1 root root =A056 2012-02-03 14:38 keyring.osd.0
->
-> =3D=3D=3D=3D=3D
-> =A0-contents of ceph.conf is below.
-> root@compute1:~# cat /etc/ceph/ceph.conf
-> [global]
-> =A0 =A0 =A0 auth supported =3D cephx
-> =A0 =A0 =A0 keyring =3D /etc/ceph/keyring.bin
-> [mon]
-> =A0 =A0 =A0 mon data =3D /data/data/mon$id
-> =A0 =A0 =A0 debug ms =3D 1
-> [mon.0]
-> =A0 =A0 =A0 host =3D ceph01
-> =A0 =A0 =A0 mon addr =3D 10.68.119.191:6789
-> [mds]
-> =A0 =A0 =A0 keyring =3D /etc/ceph/keyring.$name
-> [mds.0]
-> =A0 =A0 =A0 host =3D ceph01
-> [osd]
-> =A0 =A0 =A0 keyring =3D /etc/ceph/keyring.$name
-> =A0 =A0 =A0 osd data =3D /data/osd$id
-> =A0 =A0 =A0 osd journal =3D /data/osd$id/journal
-> =A0 =A0 =A0 osd journal size =3D 512
-> =A0 =A0 =A0 osd class tmp =3D /var/lib/ceph/tmp
-> =A0 =A0 =A0 debug osd =3D 20
-> =A0 =A0 =A0 debug ms =3D 1
-> =A0 =A0 =A0 debug filestore =3D 20
-> [osd.0]
-> =A0 =A0 =A0 host =3D ceph01
-> =A0 =A0 =A0 btrfs devs =3D /dev/sdb1
->
-> =3D=3D=3D
-> *conten of keyring.admin is below
-> root@compute1:~# cat /etc/ceph/keyring.admin
-> [client.admin]
-> =A0 =A0 =A0 key =3D AQDFeCxPyBlNIRAAxS1DcRHpMXRpcjY/GNMwYg=3D=3D
->
->
-> =3D=3D=3D
-> *output of run 'ceph auth list'
-> root@ceph01:/etc/ceph# ceph auth list
-> 2012-02-03 20:34:59.507451 mon <- [auth,list]
-> 2012-02-03 20:34:59.508785 mon.0 -> 'installed auth entries:
-> mon.
-> =A0 =A0 =A0 key: AQDFeCxPiK04IxAAslDBNkrOGKWxcbCh2iysqg=3D=3D
-> mds.0
-> =A0 =A0 =A0 key: AQDFeCxPsJ+LGhAAJ3/rmkAtGXSv/eHh0yXgww=3D=3D
-> =A0 =A0 =A0 caps: [mds] allow
-> =A0 =A0 =A0 caps: [mon] allow rwx
-> =A0 =A0 =A0 caps: [osd] allow *
-> osd.0
-> =A0 =A0 =A0 key: AQDFeCxPoEK+ExAAecD7+tWgpIRoZx2AT7Jwbg=3D=3D
-> =A0 =A0 =A0 caps: [mon] allow rwx
-> =A0 =A0 =A0 caps: [osd] allow *
-> client.admin
-> =A0 =A0 =A0 key: AQDFeCxPyBlNIRAAxS1DcRHpMXRpcjY/GNMwYg=3D=3D
-> =A0 =A0 =A0 caps: [mds] allow
-> =A0 =A0 =A0 caps: [mon] allow *
-> =A0 =A0 =A0 caps: [osd] allow *
-> ' (0)
->
-> =3D=3D=3D=3D
-> *xml file is below.
-> root@compute1:~# cat /root/testvolume.xml
-> <disk type=3D'network' device=3D'disk'>
-> =A0<driver name=3D'qemu' type=3D'raw'/>
-> =A0<source protocol=3D'rbd' name=3D'rbd/testvolume'>
-> =A0 <host name=3D'10.68.119.191' port=3D'6789'/>
-> =A0</source>
-> =A0<target dev=3D'vde' bus=3D'virtio'/>
-> </disk>
->
-> =3D=3D=3D=3D
-> *testvolume is on rados pools.
-> root@compute1:~# qemu-img info rbd:rbd/testvolume
-> image: rbd:rbd/testvolume
-> file format: raw
-> virtual size: 1.0G (1073741824 bytes)
-> disk size: unavailable
->
->
-> Waiting for reply,
->
-> Tomoya.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
