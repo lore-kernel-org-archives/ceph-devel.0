@@ -1,107 +1,67 @@
-From: huang jun <hjwsm1989@gmail.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 Subject: Re: raodsgw--s3 client can't display objects with prefix of "_"
-Date: Tue, 7 Feb 2012 08:55:55 +0800
-Message-ID: <CABAwU-YFCV+C2VOTsemArGDVdCNzB3yF2+QVXQ9Zqe5t+-9axg@mail.gmail.com>
+Date: Mon, 6 Feb 2012 23:02:51 -0800
+Message-ID: <CAC-hyiHLVD0Hvwo9WXf6juVB6Q9TFb-9EaehBsA-ORrXQmmp0Q@mail.gmail.com>
 References: <CABAwU-Y_emMq1DBu3xkZsvXhD87f_tE8NnaYww_GxeFLm3mpeg@mail.gmail.com>
 	<CAC-hyiG6mOmGNBNh6wVYF8QOdZ=cvXqB43piy3+C5bt_Q_6h4g@mail.gmail.com>
 	<CABAwU-aaYHD3saGCOyBiGV9-OwM6NqKfcVBc=-kHks8AG1S=NA@mail.gmail.com>
 	<CAC-hyiHvA1B+D=0borNwf2w9G1uTMXjm48-iTfH7_+h51pr6wg@mail.gmail.com>
+	<CABAwU-YFCV+C2VOTsemArGDVdCNzB3yF2+QVXQ9Zqe5t+-9axg@mail.gmail.com>
+	<CAC-hyiEFebiuP4vkX2s=Vg-TnDkLP2sBO=bAUvftbZm0Yb0K3A@mail.gmail.com>
+	<CABAwU-Zb_9BhhpXNT1CT_+t_AtCALfdSJqZZubUcr9d-uzuO8A@mail.gmail.com>
+	<CAC-hyiFNsxH--p11+eFE4cRKLx+SZDKr2hOF5vrE_QMuKNF84g@mail.gmail.com>
+	<CABAwU-a=aAW5ScAh_GtGuru+SS38OrT5rO-Rov6UUW1nF-DjTA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:42606 "EHLO
-	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756518Ab2BGAz4 convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 6 Feb 2012 19:55:56 -0500
-Received: by obcva7 with SMTP id va7so7549372obc.19
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2012 16:55:55 -0800 (PST)
-In-Reply-To: <CAC-hyiHvA1B+D=0borNwf2w9G1uTMXjm48-iTfH7_+h51pr6wg@mail.gmail.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:51671 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755544Ab2BGHCw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2012 02:02:52 -0500
+Received: by yhoo21 with SMTP id o21so2855500yho.19
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2012 23:02:51 -0800 (PST)
+In-Reply-To: <CABAwU-a=aAW5ScAh_GtGuru+SS38OrT5rO-Rov6UUW1nF-DjTA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: huang jun <hjwsm1989@gmail.com>, ceph-devel@vger.kernel.org
 
-2012/2/7 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
-> On Sun, Feb 5, 2012 at 7:49 PM, huang jun <hjwsm1989@gmail.com> wrote=
-:
->> 2012/2/6 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
->>> On Sun, Feb 5, 2012 at 6:21 PM, huang jun <hjwsm1989@gmail.com> wro=
-te:
->>>> hi, all
->>>> Recently, we use s3 client cyberduck to add some files to RADOS, i=
-t
->>>> seems doesn't support objects named with prefix of '_'.
->>>> eg, if we put a object named "_test"(1 prefix "_") in bucket TEST,=
- it
->>>> will store in RADOS in another name =A0"___test"(3 prefix "_").
->>>> =A0 =A0 =A0but if we list bucket TEST, it sends op whoes oid is "_=
-_test"(2
->>>> prefix "_"), result the RADOS return ENOENT err.
+On Mon, Feb 6, 2012 at 5:44 PM, huang jun <hjwsm1989@gmail.com> wrote:
+> 2012/2/7 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
+>> On Mon, Feb 6, 2012 at 5:03 PM, huang jun <hjwsm1989@gmail.com> wrot=
+e:
+>>> 2012/2/7 Yehuda Sadeh Weinraub <yehudasa@gmail.com>:
+>>>> On Mon, Feb 6, 2012 at 4:55 PM, huang jun <hjwsm1989@gmail.com> wr=
+ote:
+>>>> Objects that were created earlier cannot be accessed after applyin=
+g
+>>>> that patch. New objects should be fine.
 >>>
->>> That's a bug. From what I can tell, the bucket listing is broken (w=
-hen
->>> object name starts with underscore). I created bug #2025 in the cep=
-h
->>> tracker.
+>>> yes, i created a new bucket to test the patch. but the object can
+>>> neither be deleted or getxattr of it.
 >>>
->>>> we trace the debug log,and found where it comes from:
->>>> in =A0"translate_raw_obj" func of =A0rgw_common.h,
->>>> =A0 =A0 if (obj.size() >=3D 2 && obj[1] =3D=3D '_') {
->>>> =A0 =A0 =A0 =A0 =A0obj =3D obj.substr(1);
->>>> =A0 =A0 =A0 =A0 return true;
->>>> =A0 =A0 =A0}
->>>> =A0why cut the obj name?
->>>
->>> The underscore serves as an escape character. Some object are creat=
-ed
->>> in a separate namespace, and the format for those objects is:
->>>
->>> _<namespace>_<obj name>
->>>
->>> These objects reside in the bucket, but may not be listable, and ma=
-y
->>> not be accounted in the bucket stats.
->>>
->>>> =A0what is "string ns" in struct rgw_obj doing here? Can't we just=
- use
->>>> the origin obj name that passed object_name verfication?
->>>
->>> 'ns' is the namespace. I'm not sure what check you're pointing at, =
-but
->>> we do need to handle the case where an object has a namespace
->>> different than the default one.
->>>
->> I mean here is "validate_object_name" when init the rgw_handler.
->> i think we should do nothing if the "ns" =A0string is empty.
->> i have done a test, it works well except that when we download a fil=
-e
->> "_test' (size is 20B)
->> the yberduck returns error "unexpected end of ZLIB input stream".
+>> Can you provide rgw log for that? Add the following under your
+>> ceph.conf [client] section:
+>>
+>> =A0debug rgw =3D 20
+>> =A0debug ms =3D 1
+>>
+>> Also, do you have any other changes in the rgw code?
+>>
 >
-> There are actually two different issues. One is that we don't escape
-> the preceding underscore correctly (adding two underscores instead of
-> one), and the second issue is that we don't return the translated
-> object when listing a bucket.
+> hi, i attach the log of apache, the operation is:
+> 1) create an object "_file".
+> 2)delete the object.
+> hope that can give some infos.
 >
-> I pushed a fix for those issues to the ceph master branch. The only
-> caveat is that you can't access now any object that was uploaded that
-> started with underscore. If possible, it'd be best to remove those
-> objects before applying the fix. Let me know if that's a real issue.
+> and my radosgw was not the newest one, it from v0.32, does that matte=
+rs?
 >
-> Thanks,
-> Yehuda
+Yeah, pretty much. 0.32 is ancient history by now, and there were lots
+of bugs that have since been fixed. The code that handling that stuff
+has changed significantly.
 
-hi,
- I test the fix patch, there are no problem to list the object begin
-with undersocre,
- but they can not be deleted and getxattr of it.
- Because it will add an underscore in obj-name when  sending delete op
-to RADOS, so it returns error "Not found"
-
---=20
-huangjun
+Yehuda
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
