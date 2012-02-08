@@ -1,45 +1,39 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: Nova on RBD Device
-Date: Tue, 07 Feb 2012 18:32:24 -0800
-Message-ID: <4F31DEB8.3070409@dreamhost.com>
-References: <CA+jddaPFD5qVmUFVygW-HgWbCCvhM6A+_2BCann7NuZgmwgRJA@mail.gmail.com>
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: Questions about OSD recovery
+Date: Wed, 8 Feb 2012 10:54:14 +0800
+Message-ID: <CANExM-NCijMZX89Bp6wOGkLmkqKeqiqhnMJ8VKKN_QSQXnm7LA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:53733 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755249Ab2BHCcY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2012 21:32:24 -0500
-In-Reply-To: <CA+jddaPFD5qVmUFVygW-HgWbCCvhM6A+_2BCann7NuZgmwgRJA@mail.gmail.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:43642 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756927Ab2BHCyP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2012 21:54:15 -0500
+Received: by iacb35 with SMTP id b35so173946iac.19
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Feb 2012 18:54:14 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mandell Degerness <mandell@pistoncloud.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 02/07/2012 11:01 AM, Mandell Degerness wrote:
-> Can anyone point me in the right direction for setting up Nova so that
-> it allocates disk space on RBD device(s) rather than on local disk as
-> defined in the --instances_path flag?
+Hi all,
 
-You probably want to use the boot-from-volume api extension. I think 
-there's support in nova-client for this now.
+I did some experiments on the OSD and had some questions about it.
 
-> I've already got nova-volume working with RBD.
->
-> I suspect that I need to modify _cache_image and _create_image in
-> nova/virt/libvirt/connection.py.
+I removed one object directly from the osd data store. As expected,
+the osd didn't notice it until I manually scrubbed the pg. However,
+the scrubbing doen't trigger the recovery automatically. I had to do
+'ceph pg repair' to fix it.
 
-Nova itself doesn't know how to do I/O to volumes - it just knows how to 
-configure a hypervisor to use one. You'll need to attach the volume to 
-an existing vm to write an image to it, or use a hack like:
+So, my first question is: can the recovery process be triggered
+automatically once the scrubbing has detected the inconsistency?
 
-rbd rm pool/image && qemu-img convert -f raw -O rbd /path/to/img 
-rbd:pool/image
+Then, I tried again and removed another object. But this time, I
+didn't scrub the pg. I restarted the osd. As expected, the osd didn't
+notice that, either.
 
-In the future, once rbd layering is implemented, we'd like to be able to 
-store images in rbd via glance, and clone them into bootable nova volumes.
+My second question is: is it possible to check the existence of the
+objects when scanning the pg during osd startup? Does it make sense to
+do so?
 
-> Regards,
-> Mandell Degerness
-
+Regards,
+Henry
