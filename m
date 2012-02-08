@@ -1,40 +1,45 @@
-From: Florian Haas <florian@hastexo.com>
+From: Josh Durgin <josh.durgin@dreamhost.com>
 Subject: Re: Nova on RBD Device
-Date: Wed, 8 Feb 2012 00:15:38 +0100
-Message-ID: <CAPUexz9OwigAdfLEpV_79PvW6f48s0OvXCKY1j9CMUX2Hp8ofg@mail.gmail.com>
+Date: Tue, 07 Feb 2012 18:32:24 -0800
+Message-ID: <4F31DEB8.3070409@dreamhost.com>
 References: <CA+jddaPFD5qVmUFVygW-HgWbCCvhM6A+_2BCann7NuZgmwgRJA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:64042 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753992Ab2BGXPj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2012 18:15:39 -0500
-Received: by qcqw6 with SMTP id w6so4402107qcq.19
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Feb 2012 15:15:39 -0800 (PST)
+Received: from mail.hq.newdream.net ([66.33.206.127]:53733 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755249Ab2BHCcY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2012 21:32:24 -0500
 In-Reply-To: <CA+jddaPFD5qVmUFVygW-HgWbCCvhM6A+_2BCann7NuZgmwgRJA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Mandell Degerness <mandell@pistoncloud.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Feb 7, 2012 at 8:01 PM, Mandell Degerness
-<mandell@pistoncloud.com> wrote:
+On 02/07/2012 11:01 AM, Mandell Degerness wrote:
 > Can anyone point me in the right direction for setting up Nova so that
 > it allocates disk space on RBD device(s) rather than on local disk as
 > defined in the --instances_path flag?
->
+
+You probably want to use the boot-from-volume api extension. I think 
+there's support in nova-client for this now.
+
 > I've already got nova-volume working with RBD.
 >
 > I suspect that I need to modify _cache_image and _create_image in
 > nova/virt/libvirt/connection.py.
 
-Hmmm. Wouldn't that most likely be a question for the openstack list?
-http://wiki.openstack.org/MailingLists for details on how to
-subscribe, if you haven't already.
+Nova itself doesn't know how to do I/O to volumes - it just knows how to 
+configure a hypervisor to use one. You'll need to attach the volume to 
+an existing vm to write an image to it, or use a hack like:
 
-Cheers,
-Florian
+rbd rm pool/image && qemu-img convert -f raw -O rbd /path/to/img 
+rbd:pool/image
 
--- 
-Need help with High Availability?
-http://www.hastexo.com/now
+In the future, once rbd layering is implemented, we'd like to be able to 
+store images in rbd via glance, and clone them into bootable nova volumes.
+
+> Regards,
+> Mandell Degerness
+
