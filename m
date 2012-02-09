@@ -1,566 +1,299 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: [RFC PATCH 0/6] Understanding delays due to throttling
- under very heavy write load
-Date: Thu, 9 Feb 2012 13:53:13 -0700
-Message-ID: <4F343239.2010907@sandia.gov>
+From: sridhar basam <sri@basam.org>
+Subject: Re: [RFC PATCH 0/6] Understanding delays due to throttling under very
+ heavy write load
+Date: Thu, 9 Feb 2012 17:40:35 -0500
+Message-ID: <CAGnVnB=beb2XMB55FfG7TgBeqa4gmb=O1S54=s+V6rANeoq3ug@mail.gmail.com>
 References: <1328111668-10068-1-git-send-email-jaschut@sandia.gov>
- <CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com>
- <4F29CDAA.408@sandia.gov>
- <CAF3hT9BZEP_FWS=qt8ivA++aDpPGGFzuD_PtMcvDRS2aDEN+hw@mail.gmail.com>
- <4F2AABF5.6050803@sandia.gov>
- <CAF3hT9BNc4n4HBNEqsf+d6-Rjv7TC8nJ1VponJCBVpLB8=_F5Q@mail.gmail.com>
- <4F2ADEAE.8010403@sandia.gov>
- <CAF3hT9CFkxnWR4zoTRPtyGU5CbfV_PvL+=dqnvZcr7G0HBOb+w@mail.gmail.com>
- <4F2AF085.6000405@sandia.gov>
- <CAF3hT9AcxxNtscFczP8fShSsaBm_4zhLQZ2F5c7h1YswVaXHkA@mail.gmail.com>
- <4F2C08A7.2050507@sandia.gov> <3032884323297001561@unknownmsgid>
- <4F2C6EE6.4050008@sandia.gov>
- <CAC-hyiHSNv_VgLcyVCrJ66HxTGFNBONrmmBddJk5326dLTKgkw@mail.gmail.com>
- <4F2FFDD3.1010100@sandia.gov>
- <CAC-hyiEdAd++dQFBjPDutqipQcMXZqh4RdEEyA=v12vs6ueDxA@mail.gmail.com>
- <4F3019E9.80607@sandia.gov>
- <CAF3hT9CW7_CF4iT0cY858kgkke7Wu=TK7ULzPhFj-AW9jycyZA@mail.gmail.com>
+	<CAF3hT9DV46n0TwWOVC0LsCdd921uus3kzQfPLuMNEATjpYzT3g@mail.gmail.com>
+	<4F29CDAA.408@sandia.gov>
+	<CAF3hT9BZEP_FWS=qt8ivA++aDpPGGFzuD_PtMcvDRS2aDEN+hw@mail.gmail.com>
+	<4F2AABF5.6050803@sandia.gov>
+	<CAF3hT9BNc4n4HBNEqsf+d6-Rjv7TC8nJ1VponJCBVpLB8=_F5Q@mail.gmail.com>
+	<4F2ADEAE.8010403@sandia.gov>
+	<CAF3hT9CFkxnWR4zoTRPtyGU5CbfV_PvL+=dqnvZcr7G0HBOb+w@mail.gmail.com>
+	<4F2AF085.6000405@sandia.gov>
+	<CAF3hT9AcxxNtscFczP8fShSsaBm_4zhLQZ2F5c7h1YswVaXHkA@mail.gmail.com>
+	<4F2C08A7.2050507@sandia.gov>
+	<3032884323297001561@unknownmsgid>
+	<4F2C6EE6.4050008@sandia.gov>
+	<CAC-hyiHSNv_VgLcyVCrJ66HxTGFNBONrmmBddJk5326dLTKgkw@mail.gmail.com>
+	<4F2FFDD3.1010100@sandia.gov>
+	<CAC-hyiEdAd++dQFBjPDutqipQcMXZqh4RdEEyA=v12vs6ueDxA@mail.gmail.com>
+	<4F3019E9.80607@sandia.gov>
+	<CAF3hT9CW7_CF4iT0cY858kgkke7Wu=TK7ULzPhFj-AW9jycyZA@mail.gmail.com>
+	<4F343239.2010907@sandia.gov>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary=------------030705010509000104020603
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:48553 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754005Ab2BIUxf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2012 15:53:35 -0500
-In-Reply-To: <CAF3hT9CW7_CF4iT0cY858kgkke7Wu=TK7ULzPhFj-AW9jycyZA@mail.gmail.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:37644 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753210Ab2BIWkg convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2012 17:40:36 -0500
+Received: by vbjk17 with SMTP id k17so1420215vbj.19
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Feb 2012 14:40:35 -0800 (PST)
+In-Reply-To: <4F343239.2010907@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
---------------030705010509000104020603
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
-
-On 02/06/2012 11:35 AM, Gregory Farnum wrote:
-> On Mon, Feb 6, 2012 at 10:20 AM, Jim Schutt<jaschut@sandia.gov>  wrote:
->> On 02/06/2012 10:22 AM, Yehuda Sadeh Weinraub wrote:
+On Thu, Feb 9, 2012 at 3:53 PM, Jim Schutt <jaschut@sandia.gov> wrote:
+> On 02/06/2012 11:35 AM, Gregory Farnum wrote:
+>>
+>> On Mon, Feb 6, 2012 at 10:20 AM, Jim Schutt<jaschut@sandia.gov> =A0w=
+rote:
 >>>
->>> On Mon, Feb 6, 2012 at 8:20 AM, Jim Schutt<jaschut@sandia.gov>    wrote:
->>
->>
+>>> On 02/06/2012 10:22 AM, Yehuda Sadeh Weinraub wrote:
 >>>>
->>>> The above suggests to me that the slowdown is a result
->>>> of requests not getting submitted at the same rate as
->>>> when things are running well.
 >>>>
+>>>> On Mon, Feb 6, 2012 at 8:20 AM, Jim Schutt<jaschut@sandia.gov> =A0=
+ =A0wrote:
 >>>
->>> Yeah, it really looks like that. My suggestions wouldn't help there.
 >>>
->>> I do see that when things go well the number of writes per device is
->>> capped at ~200 writes per second and the throughput per device is
->>> ~100MB/sec. Is 100MB/sec the expected device throughput?
+>>>
+>>>>>
+>>>>> The above suggests to me that the slowdown is a result
+>>>>> of requests not getting submitted at the same rate as
+>>>>> when things are running well.
+>>>>>
+>>>>
+>>>> Yeah, it really looks like that. My suggestions wouldn't help ther=
+e.
+>>>>
+>>>> I do see that when things go well the number of writes per device =
+is
+>>>> capped at ~200 writes per second and the throughput per device is
+>>>> ~100MB/sec. Is 100MB/sec the expected device throughput?
+>>>
+>>>
+>>>
+>>> Pretty much, at least for the outer tracks on a drive. =A0I've seen
+>>> ~108 MB/s with dd to a block device. =A0Also, I've got 8 drives per
+>>> SAS adapter with 6 Gb/s links, so it seems unlikely to me that my
+>>> disk subsystem is any sort of significant bottleneck.
 >>
 >>
->> Pretty much, at least for the outer tracks on a drive.  I've seen
->> ~108 MB/s with dd to a block device.  Also, I've got 8 drives per
->> SAS adapter with 6 Gb/s links, so it seems unlikely to me that my
->> disk subsystem is any sort of significant bottleneck.
+>> Well, you might try changing your throttling settings on the OSDs.
+>> ms_dispatch_throttle_bytes defaults to 100<<20 (100MB) and is used f=
+or
+>> throttling dispatch; osd_max_client_bytes defaults to 500<<20 (500MB=
+)
+>> and is used to limit the amount of client data in memory (ie; messag=
+es
+>> are included in this throttler for their entire lifetime, not just
+>> while waiting for dispatch).
+>>
+>>
 >
-> Well, you might try changing your throttling settings on the OSDs.
-> ms_dispatch_throttle_bytes defaults to 100<<20 (100MB) and is used for
-> throttling dispatch; osd_max_client_bytes defaults to 500<<20 (500MB)
-> and is used to limit the amount of client data in memory (ie; messages
-> are included in this throttler for their entire lifetime, not just
-> while waiting for dispatch).
+> I've made a little progress isolating this.
 >
+> "osd client message size cap =3D =A05000000" makes the stall
+> completely reproducible (which also means I can reproduce
+> on two different network types, ethernet and IPoIB.), and I
+> am able to generate graphs of throttled/receive/process time
+> for each request received by an OSD (see attached SVG plot).
 >
+> Such plots suggest to me my problem is caused by stalled
+> receives. =A0Using debug ms =3D 30 on my OSDs turns up instances
+> of this:
+>
+> osd.0.log:4514502:2012-02-08 12:34:39.258276 7f6acec77700 --
+> 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000=
+ sd=3D173
+> pgs=3D7 cs=3D1 l=3D1).reader wants 4194432 from dispatch throttler 0/=
+25000000
+> osd.0.log:4514503:2012-02-08 12:34:39.258298 7f6acec77700 --
+> 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000=
+ sd=3D173
+> pgs=3D7 cs=3D1 l=3D1).reader got front 128
+> osd.0.log:4514504:2012-02-08 12:34:39.258325 7f6acec77700 --
+> 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000=
+ sd=3D173
+> pgs=3D7 cs=3D1 l=3D1).reader allocating new rx buffer at offset 0
+> osd.0.log:4514507:2012-02-08 12:34:39.258423 7f6acec77700 --
+> 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000=
+ sd=3D173
+> pgs=3D7 cs=3D1 l=3D1).reader reading nonblocking into 0x1656c000 len =
+4194304
+> osd.0.log:4514509:2012-02-08 12:34:39.259060 7f6acec77700 --
+> 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000=
+ sd=3D173
+> pgs=3D7 cs=3D1 l=3D1).reader read 1369231 of 4194304
+> osd.0.log:4546819:2012-02-08 12:35:35.468156 7f6acec77700 --
+> 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000=
+ sd=3D173
+> pgs=3D7 cs=3D1 l=3D1).reader reading nonblocking into 0x166ba48f len =
+2825073
+> osd.0.log:4546820:2012-02-08 12:35:35.468189 7f6acec77700 --
+> 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000=
+ sd=3D173
+> pgs=3D7 cs=3D1 l=3D1).reader read 1448 of 2825073
+>
+> which I take to mean that the reader thread sat in poll() for 56 secs=
+, in
+> this case.
+>
+> I was able to correlate such stalls with tcpdump output collected on
+> clients. =A0Here's an example from another run:
+>
+> 15:09:37.584600 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.]=
+, ack
+> 23631561, win 65535, options [nop,nop,TS val 1096144 ecr 1100575], le=
+ngth 0
+> 15:09:37.584613 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23631561:23663417, ack 1218, win 20904, options [nop,nop,TS val 11006=
+15 ecr
+> 1096144], length 31856
+> 15:09:37.584655 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23663417:23695273, ack 1218, win 20904, options [nop,nop,TS val 11006=
+15 ecr
+> 1096144], length 31856
+> 15:09:37.624476 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.]=
+, ack
+> 23695273, win 65535, options [nop,nop,TS val 1096184 ecr 1100615], le=
+ngth 0
+> 15:09:37.624489 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23695273:23727129, ack 1218, win 20904, options [nop,nop,TS val 11006=
+55 ecr
+> 1096184], length 31856
+> 15:09:37.624532 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [P.=
+], seq
+> 23727129:23758985, ack 1218, win 20904, options [nop,nop,TS val 11006=
+55 ecr
+> 1096184], length 31856
+> 15:09:37.664454 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.]=
+, ack
+> 23758985, win 65535, options [nop,nop,TS val 1096224 ecr 1100655], le=
+ngth 0
+> 15:09:37.664468 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23758985:23790841, ack 1218, win 20904, options [nop,nop,TS val 11006=
+95 ecr
+> 1096224], length 31856
+> 15:09:37.664506 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23790841:23822697, ack 1218, win 20904, options [nop,nop,TS val 11006=
+95 ecr
+> 1096224], length 31856
+> 15:09:37.706937 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.]=
+, ack
+> 23822697, win 65535, options [nop,nop,TS val 1096266 ecr 1100695], le=
+ngth 0
+> 15:09:37.706950 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23854553, ack 1218, win 20904, options [nop,nop,TS val 11007=
+38 ecr
+> 1096266], length 31856
+> 15:09:37.706995 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [P.=
+], seq
+> 23854553:23886409, ack 1218, win 20904, options [nop,nop,TS val 11007=
+38 ecr
+> 1096266], length 31856
+> 15:09:37.929946 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 11009=
+61 ecr
+> 1096266], length 1448
+> 15:09:38.376961 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 11014=
+08 ecr
+> 1096266], length 1448
+> 15:09:39.270947 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 11023=
+02 ecr
+> 1096266], length 1448
+> 15:09:41.056943 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 11040=
+88 ecr
+> 1096266], length 1448
+> 15:09:44.632946 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 11076=
+64 ecr
+> 1096266], length 1448
+> 15:09:51.784947 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 11148=
+16 ecr
+> 1096266], length 1448
+> 15:10:06.088945 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 11291=
+20 ecr
+> 1096266], length 1448
+> 15:10:34.728951 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 11577=
+60 ecr
+> 1096266], length 1448
+> 15:11:31.944946 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 12149=
+76 ecr
+> 1096266], length 1448
+> 15:11:31.945075 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.]=
+, ack
+> 23824145, win 65535, options [nop,nop,TS val 1210496 ecr 1214976], le=
+ngth 0
+> 15:11:31.945091 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23886409:23889305, ack 1218, win 20904, options [nop,nop,TS val 12149=
+76 ecr
+> 1210496], length 2896
+> 15:11:31.945178 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.]=
+, ack
+> 23824145, win 65535, options [nop,nop,TS val 1210496 ecr
+> 1214976,nop,nop,sack 1 {23886409:23887857}], length 0
+> 15:11:31.945199 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23824145:23825593, ack 1218, win 20904, options [nop,nop,TS val 12149=
+76 ecr
+> 1210496], length 1448
+> 15:11:31.945207 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23825593:23827041, ack 1218, win 20904, options [nop,nop,TS val 12149=
+76 ecr
+> 1210496], length 1448
+> 15:11:31.945214 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.]=
+, seq
+> 23827041:23828489, ack 1218, win 20904, options [nop,nop,TS val 12149=
+76 ecr
+> 1210496], length 1448
+>
+> So in this case the client retransmitted for ~2 minutes with no respo=
+nse
+> from
+> the OSD. =A0Note that during this time the client was talking to othe=
+r OSDs on
+> the
+> same server.
+>
+> I want to try turning off GSO/GRO on my interfaces, but then
+> I think I need to post to netdev...
+>
+> -- Jim
 
-I've made a little progress isolating this.
+The network trace output looks weird, it either means all of the
+packets between 23822697:23886409 were lost or a bug in the networking
+stack. The application should have no effect on the acks that should
+have been generated. Even if you assume one or more of the frames on
+the wire between 23822697:23886409 were somehow lost, you would have
+had to see some sort of duplicate acks with sack segments.
 
-"osd client message size cap =  5000000" makes the stall
-completely reproducible (which also means I can reproduce
-on two different network types, ethernet and IPoIB.), and I
-am able to generate graphs of throttled/receive/process time
-for each request received by an OSD (see attached SVG plot).
+Is this a bunch of bare metal servers or are these virtual? If you
+could tap the network just upstream of the OSD servers, it would help
+narrow down where to look at. You could also just turning off GRO/GSO,
+as you suggest, to see if it makes a difference.
 
-Such plots suggest to me my problem is caused by stalled
-receives.  Using debug ms = 30 on my OSDs turns up instances
-of this:
-
-osd.0.log:4514502:2012-02-08 12:34:39.258276 7f6acec77700 -- 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000 sd=173 pgs=7 cs=1 l=1).reader wants 4194432 from dispatch throttler 0/25000000
-osd.0.log:4514503:2012-02-08 12:34:39.258298 7f6acec77700 -- 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000 sd=173 pgs=7 cs=1 l=1).reader got front 128
-osd.0.log:4514504:2012-02-08 12:34:39.258325 7f6acec77700 -- 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000 sd=173 pgs=7 cs=1 l=1).reader allocating new rx buffer at offset 0
-osd.0.log:4514507:2012-02-08 12:34:39.258423 7f6acec77700 -- 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000 sd=173 pgs=7 cs=1 l=1).reader reading nonblocking into 0x1656c000 len 4194304
-osd.0.log:4514509:2012-02-08 12:34:39.259060 7f6acec77700 -- 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000 sd=173 pgs=7 cs=1 l=1).reader read 1369231 of 4194304
-osd.0.log:4546819:2012-02-08 12:35:35.468156 7f6acec77700 -- 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000 sd=173 pgs=7 cs=1 l=1).reader reading nonblocking into 0x166ba48f len 2825073
-osd.0.log:4546820:2012-02-08 12:35:35.468189 7f6acec77700 -- 172.17.131.32:6800/15199 >> 172.17.135.85:0/2712733083 pipe(0x2ef0000 sd=173 pgs=7 cs=1 l=1).reader read 1448 of 2825073
-
-which I take to mean that the reader thread sat in poll() for 56 secs, in
-this case.
-
-I was able to correlate such stalls with tcpdump output collected on
-clients.  Here's an example from another run:
-
-15:09:37.584600 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.], ack 23631561, win 65535, options [nop,nop,TS val 1096144 ecr 1100575], length 0
-15:09:37.584613 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23631561:23663417, ack 1218, win 20904, options [nop,nop,TS val 1100615 ecr 1096144], length 31856
-15:09:37.584655 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23663417:23695273, ack 1218, win 20904, options [nop,nop,TS val 1100615 ecr 1096144], length 31856
-15:09:37.624476 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.], ack 23695273, win 65535, options [nop,nop,TS val 1096184 ecr 1100615], length 0
-15:09:37.624489 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23695273:23727129, ack 1218, win 20904, options [nop,nop,TS val 1100655 ecr 1096184], length 31856
-15:09:37.624532 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [P.], seq 23727129:23758985, ack 1218, win 20904, options [nop,nop,TS val 1100655 ecr 1096184], length 31856
-15:09:37.664454 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.], ack 23758985, win 65535, options [nop,nop,TS val 1096224 ecr 1100655], length 0
-15:09:37.664468 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23758985:23790841, ack 1218, win 20904, options [nop,nop,TS val 1100695 ecr 1096224], length 31856
-15:09:37.664506 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23790841:23822697, ack 1218, win 20904, options [nop,nop,TS val 1100695 ecr 1096224], length 31856
-15:09:37.706937 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.], ack 23822697, win 65535, options [nop,nop,TS val 1096266 ecr 1100695], length 0
-15:09:37.706950 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23854553, ack 1218, win 20904, options [nop,nop,TS val 1100738 ecr 1096266], length 31856
-15:09:37.706995 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [P.], seq 23854553:23886409, ack 1218, win 20904, options [nop,nop,TS val 1100738 ecr 1096266], length 31856
-15:09:37.929946 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 1100961 ecr 1096266], length 1448
-15:09:38.376961 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 1101408 ecr 1096266], length 1448
-15:09:39.270947 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 1102302 ecr 1096266], length 1448
-15:09:41.056943 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 1104088 ecr 1096266], length 1448
-15:09:44.632946 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 1107664 ecr 1096266], length 1448
-15:09:51.784947 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 1114816 ecr 1096266], length 1448
-15:10:06.088945 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 1129120 ecr 1096266], length 1448
-15:10:34.728951 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 1157760 ecr 1096266], length 1448
-15:11:31.944946 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23822697:23824145, ack 1218, win 20904, options [nop,nop,TS val 1214976 ecr 1096266], length 1448
-15:11:31.945075 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.], ack 23824145, win 65535, options [nop,nop,TS val 1210496 ecr 1214976], length 0
-15:11:31.945091 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23886409:23889305, ack 1218, win 20904, options [nop,nop,TS val 1214976 ecr 1210496], length 2896
-15:11:31.945178 IP 172.17.131.32.6808 > 172.17.135.7.37045: Flags [.], ack 23824145, win 65535, options [nop,nop,TS val 1210496 ecr 1214976,nop,nop,sack 1 {23886409:23887857}], length 0
-15:11:31.945199 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23824145:23825593, ack 1218, win 20904, options [nop,nop,TS val 1214976 ecr 1210496], length 1448
-15:11:31.945207 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23825593:23827041, ack 1218, win 20904, options [nop,nop,TS val 1214976 ecr 1210496], length 1448
-15:11:31.945214 IP 172.17.135.7.37045 > 172.17.131.32.6808: Flags [.], seq 23827041:23828489, ack 1218, win 20904, options [nop,nop,TS val 1214976 ecr 1210496], length 1448
-
-So in this case the client retransmitted for ~2 minutes with no response from
-the OSD.  Note that during this time the client was talking to other OSDs on the
-same server.
-
-I want to try turning off GSO/GRO on my interfaces, but then
-I think I need to post to netdev...
-
--- Jim
-
---------------030705010509000104020603
-Content-Type: application/x-bzip;
- name=osd.0.msg-et.svg.bz2
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename=osd.0.msg-et.svg.bz2
-
-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
-GDTcqsNhGw5IOnCN0N09v68/OCfrAT+YB/iA/vXYHUHEf4DI/iDsDqA6PvwENgHUB6A+sHcH
-VPo5cVlsA/Yen1AOA/uFLn2cdZ4JCaaH8N+RCwI0K/p29njwD388QfyAfp/gPqOpuS+FR1Hk
-I8x8wisFl6j5AHYB+jhHsojVjFypDQMYDt0/++7XfcLaqclN84EP2ilyk0+r6gH/H1fh8n9e
-Qj9x9/gfN/bPm/yfPp9mKPy1UIUxCCU1StDErQsStDEgUMStDErQxK0MStDErQxIFDErQxK0
-MStDErQxK0MStARK0MStDErQxK0MStDErQxIFDErQxK0MStDErQxK0MSBQxK0MStDErQxK0M
-StDEgUMStDErQxK0MStDErQxK0BErQxK0MStDErQxK0MStDEgUMStDErQxK0MStDErQxIFDE
-rQxIFMQhTEIUxCFMQJTEIUxCFMQhTEIUxCFMQhSRCFMQhTEIUxCFMQhTEIUxAlMQhTEIUxCF
-MQBQxK0MSBQxK0MStDErQxK0MStDEgUMStDErQxK0MStDErQxK0BEAUkStDErQxK0MStDErQ
-xIFDErQxK0MStDErQxK0MSBQxK0MStDErQxK0MStDEgUMSBTEIUxCFMQhTEIUxCFJEIUxCFM
-QhTEIUxCFMQhTECUxCFMQhTEIUxCFMQhTECUxCFMQhTEIUxCFMQhQRIFDErQxK0MStDErQxK
-0MStARK0MStDErQxK0MStDErQxIFDErQxK0MStDErQxK0MSBQxK0MStDErQxK0MStDEgUMSt
-DErQxK0MStDErQxK0BErQxK0MStDErQxK0MStDEgUMStDErQxK0MStDErQxIFDErQxK0MStD
-ErQxK0MSBQxK0MStDErQxK0MStDErQEStDErQxK0MStDErQxK0MSBQxK0MStDErQxK0MStDE
-gUMStDErQxK0MStDErQxIFDErQxK0MStDErQxK0MStARK0MStDErQxK0MStDErQxIFDErQxK
-0MStDErQxK0MSBQxK0MStDErQxK0MStDEgUMStDErQxK0MQhQxK0lUrSwgEP9vl/KjF5WtVV
-a1VVrVVWtVVa1VVrVVVoUWqkrKxaysWsrFrKxaysWsrFrKyuZk5IgUB+H9M/py/16tTt7lCw
-7fHkfbqd34f6OPPY96L+ID8/0gP8wH2/sEH5Qbjx1wSgKHAB979HyqJ2fd/sfSD+l/d6/rAf
-pPyRe806gfPk+8XtB1NDZTn2aGojwLtI9XsLs9aP37KmnmdQyPIOtR8fsBT/ADAhqCHkbbf2
-4R2gHcAwHy5xfBgncfxdNgeXkeXmpyEe38iB/xx1nU+B3+XCCHYPuAe0B/kDIj0EdTr8D2Ah
-h4Np8AJkAaPW+gfjNFERXmdwj2SKT8P+/kg7Dt8T0esB+DmL7Ueap3+L8aCagPyHwg/AA+w9
-uAZ0OzgHnqAwPsXZFuQAOm3AIfGAye5F+rmA8zrR8/+AQ7f1gP/IHuQTtO3vFDtNQH1iPxYe
-1HcBgeToD4nLYBwGxBNFA9PcHAIeZuIO4A8CPq63yvzBgAfpF0BgezYBOfoAMieSkSMr87oI
-/v/d1B/Lt9HwB+QE+T5xH5xTXq1z7QHkL6hVtTmIP8vI5dR7DsPIe8R634H8wHBH6PrrtAB7
-tzl8Ij4fq9t789DU7Nx59m4jwd3ygOgDyTcRfiAZEfL0eR2nZ8YDzAHxUPEHuAejsAOwjy4f
-b75R9NYHuAe0B7gHy3EeFSFPTuDgR6APUADwD19zoCHP4j9D+PmI9w9XvB7OnrzrS/a/M6/F
-7QdoCNn1vjodumDv9uHIBDsOgDoceoEM7gH/8XckU4UJBTbnQdA=
---------------030705010509000104020603--
-
+ Sridhar
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
