@@ -1,59 +1,56 @@
-From: =?ISO-8859-15?Q?Jens_Rehp=F6hler?= <jens.rehpoehler@filoo.de>
-Subject: Problem with inconsistent PG
-Date: Fri, 10 Feb 2012 08:43:21 +0100
-Message-ID: <4F34CA99.6020905@filoo.de>
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: Re: Questions about OSD recovery
+Date: Fri, 10 Feb 2012 16:26:22 +0800
+Message-ID: <CANExM-NOQQqshVeXnNkwSgkBCg5p3C15zA5K_1ejdy_uPucdVw@mail.gmail.com>
+References: <CANExM-NCijMZX89Bp6wOGkLmkqKeqiqhnMJ8VKKN_QSQXnm7LA@mail.gmail.com>
+	<4F333A0C.7080902@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-3.de-punkt.de ([93.190.64.33]:60090 "EHLO
-	mail-3.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753098Ab2BJHnZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Feb 2012 02:43:25 -0500
+Received: from mail-we0-f174.google.com ([74.125.82.174]:43638 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753546Ab2BJI0Y convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Feb 2012 03:26:24 -0500
+Received: by werb13 with SMTP id b13so1822460wer.19
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Feb 2012 00:26:23 -0800 (PST)
+In-Reply-To: <4F333A0C.7080902@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: oliver.francke@filoo.de
+To: Josh Durgin <josh.durgin@dreamhost.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Liste,
+=E5=9C=A8 2012=E5=B9=B42=E6=9C=889=E6=97=A5=E4=B8=8A=E5=8D=8811:14=EF=BC=
+=8CJosh Durgin <josh.durgin@dreamhost.com> =E5=AF=AB=E9=81=93=EF=BC=9A
+> Detecting missing objects on startup is possible by looking at
+> the pg log and comparing it to the objects on disk, but this can
+> be a pretty expensive operation. The osd might also be out of
 
-today i've got another problem.
+Yeah. It can be pretty expensive, but we only do it once on startup.
+Also, since the osd has not yet joined the cluster, it shouldn't
+affect the cluster
+performance.
 
-ceph -w shows up with an inconsistent PG over night:
+> date, so it's log might be useless (for example it could have
+> divergent history that was not acked). It can't know how many
+> current objects that should be there aren't until it goes through
+> peering (to get an up to date and authoritative log) and
+> recovery (to get missing data the logs say should be there). This
+> is why scrub skips pgs that aren't active+clean. More details of
+> peering can be found at http://ceph.newdream.net/docs/latest/dev/peer=
+ing/.
 
-2012-02-10 08:38:48.701775    pg v441251: 1982 pgs: 1981 active+clean, 1
-active+clean+inconsistent; 1790 GB data, 3368 GB used, 18977 GB / 22345
-GB avail
-2012-02-10 08:38:49.702789    pg v441252: 1982 pgs: 1981 active+clean, 1
-active+clean+inconsistent; 1790 GB data, 3368 GB used, 18977 GB / 22345
-GB avail
+Since peering only compare logs, I was thinking at least the osd should
+check the existence of the objects the log claims to have. Then, we
+would have the chance to recover the object before the pg goes active.
 
-I've identified it with "ceph pg dump - | grep inconsistent
-
-109.6    141    0    0    0    463820288    111780    111780   
-active+clean+inconsistent    485'7115    480'7301    [3,4]    [3,4]   
-485'7061    2012-02-10 08:02:12.043986
-
-Now I've tried to repair it with: ceph pg repair 109.6
-
-2012-02-10 08:35:52.276325 mon <- [pg,repair,109.6]
-2012-02-10 08:35:52.276776 mon.1 -> 'instructing pg 109.6 on osd.3 to
-repair' (0)
-
-but i only get the following result:
-
-2012-02-10 08:36:18.447553   log 2012-02-10 08:36:08.455420 osd.3
-10.10.10.8:6801/25980 6913 : [ERR] 109.6 osd.4: soid
-1ef398ce/rb.0.0.0000000000bd/headsize 2736128 != known size 3145728
-2012-02-10 08:36:18.447553   log 2012-02-10 08:36:08.455426 osd.3
-10.10.10.8:6801/25980 6914 : [ERR] 109.6 scrub 0 missing, 1 inconsistent
-objects
-2012-02-10 08:36:18.447553   log 2012-02-10 08:36:08.455799 osd.3
-10.10.10.8:6801/25980 6915 : [ERR] 109.6 scrub 1 errors
-
-Can someone please explain me what to do in this case and how to recover
-the pg ?
-
-Thanks a lot !
-
-Jens
+Also, I like the idea of storing crc/hash alongside the object as Tv sa=
+id.
+With that, we can even prevent the client from reading the corrupt data
+by checking the crc/hash on each read. (Though, the read performance
+will surely degrade.)
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
