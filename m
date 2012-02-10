@@ -1,85 +1,82 @@
-From: =?iso-8859-1?Q?Jo=E3o_Eduardo_Lu=EDs?= <jecluis@gmail.com>
-Subject: Re: s3--object name with "%" questions
-Date: Fri, 10 Feb 2012 19:27:20 +0000
-Message-ID: <98824354-25F6-4EC9-9665-2872781D9D36@gmail.com>
-References: <CABAwU-bsdR+kwbvUfTcw8AmiT8M_kJz8MKuFNBjpB3WfJ6OXgw@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: multipart/signed; protocol="application/pgp-signature"; micalg=pgp-sha1; boundary="Apple-Mail-5-555006545"
-Content-Transfer-Encoding: 7bit
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Problem with inconsistent PG
+Date: Fri, 10 Feb 2012 14:30:58 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1202101425500.2943@cobra.newdream.net>
+References: <4F34CA99.6020905@filoo.de>
+Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-379999940-1328913058=:2943"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:37393 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759027Ab2BJT1a (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Feb 2012 14:27:30 -0500
-Received: by werb13 with SMTP id b13so2253638wer.19
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Feb 2012 11:27:29 -0800 (PST)
-In-Reply-To: <CABAwU-bsdR+kwbvUfTcw8AmiT8M_kJz8MKuFNBjpB3WfJ6OXgw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:56125 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752705Ab2BJWbA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Feb 2012 17:31:00 -0500
+In-Reply-To: <4F34CA99.6020905@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-15?Q?Jens_Rehp=F6hler?= <jens.rehpoehler@filoo.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, oliver.francke@filoo.de
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---Apple-Mail-5-555006545
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=iso-8859-1
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
+--557981400-379999940-1328913058=:2943
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-On Feb 10, 2012, at 9:06 AM, huang jun wrote:
-
-> hi,list
-> After testing the object-name include "+" in radosgw.now we tested
-> object-name with "%",
-> which was supported by the amazon's object-name rules, either in the
-> underlayer FS btrfs .
-> but it seems not  the case in radosgw, we can not create an object
-> whoes name include "%",
+On Fri, 10 Feb 2012, Jens Rehp=F6hler wrote:
+> Hi Liste,
 >=20
-> after we can create it, then the ListBucket result shows the name of
-> the object "test%huang" is "test2608ang".
-> we trace the debug log, the object-name was changed by "vsnprintf" in
-> formatter.dump_format, because the "%" is a control character,
-> so, there is any methods if user want to store an object  with name
-> string include  "%".
+> today i've got another problem.
 >=20
+> ceph -w shows up with an inconsistent PG over night:
+>=20
+> 2012-02-10 08:38:48.701775    pg v441251: 1982 pgs: 1981 active+clean, 1
+> active+clean+inconsistent; 1790 GB data, 3368 GB used, 18977 GB / 22345
+> GB avail
+> 2012-02-10 08:38:49.702789    pg v441252: 1982 pgs: 1981 active+clean, 1
+> active+clean+inconsistent; 1790 GB data, 3368 GB used, 18977 GB / 22345
+> GB avail
+>=20
+> I've identified it with "ceph pg dump - | grep inconsistent
+>=20
+> 109.6    141    0    0    0    463820288    111780    111780  =20
+> active+clean+inconsistent    485'7115    480'7301    [3,4]    [3,4]  =20
+> 485'7061    2012-02-10 08:02:12.043986
+>=20
+> Now I've tried to repair it with: ceph pg repair 109.6
+>=20
+> 2012-02-10 08:35:52.276325 mon <- [pg,repair,109.6]
+> 2012-02-10 08:35:52.276776 mon.1 -> 'instructing pg 109.6 on osd.3 to
+> repair' (0)
+>=20
+> but i only get the following result:
+>=20
+> 2012-02-10 08:36:18.447553   log 2012-02-10 08:36:08.455420 osd.3
+> 10.10.10.8:6801/25980 6913 : [ERR] 109.6 osd.4: soid
+> 1ef398ce/rb.0.0.0000000000bd/headsize 2736128 !=3D known size 3145728
+> 2012-02-10 08:36:18.447553   log 2012-02-10 08:36:08.455426 osd.3
+> 10.10.10.8:6801/25980 6914 : [ERR] 109.6 scrub 0 missing, 1 inconsistent
+> objects
+> 2012-02-10 08:36:18.447553   log 2012-02-10 08:36:08.455799 osd.3
+> 10.10.10.8:6801/25980 6915 : [ERR] 109.6 scrub 1 errors
+>=20
+> Can someone please explain me what to do in this case and how to recover
+> the pg ?
 
-Not sure if this would help at all, but have you tried to escape the %?
+So the "fix" is just to truncate the file to the expected size, 3145728,=20
+by finding it in the current/ directory.  The name/path will be slightly=20
+weird; look for 'rb.0.0.0000000000bd'.
 
-> --=20
-> thanks,
-> huangjun
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The data is still suspect, though.  Did the ceph-osd restart or crash=20
+recently?  I would do that, repair (it should succeed), and then fsck the=
+=20
+file system in that rbd image.
 
----
-Jo=E3o Eduardo Lu=EDs
-gpg key: 477C26E5 from pool.keyserver.eu=20
+We just fixed a bug that was causing transactions to leak across=20
+checkpoint/snapshot boundaries.  That could be responsible for causing all=
+=20
+sorts of subtle corruptions, including this one.  It'll be included in=20
+v0.42 (out next week).
 
-
-
-
-
-
---Apple-Mail-5-555006545
-content-type: application/pgp-signature; x-mac-type=70674453;
-	name=PGP.sig
-content-description: This is a digitally signed message part
-content-disposition: inline; filename=PGP.sig
-content-transfer-encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG/MacGPG2 v2.0.16 (Darwin)
-
-iQEcBAEBAgAGBQJPNW+dAAoJEJ9vvxhHfCblXGsH/RBXtPo9JOMbMPrZKzf9yNcl
-XUQR3gGrQcNk/leQxdtZKtgiXzSBrHhMql/LesgcY8ZxjZ3fij8e1VaYS4CnNUte
-v9AVBiB/xsuvunCHBgt0KFutBuAmGtSnRchXEEoLoYacXxmXnbn2Q3ZBI6bYMY+f
-aYay4stQfsv8WMDBABPxI+uNr+Ps3E371BI2/lJqb55NydNITWXtzRUYjswd2V5I
-q7e2DbCvhEUkCXjmEC6FXkPZtjCYo8pzV1KxukviW33YX3N2JjkaSvvVoH67kF1G
-GxYeCQ/+GsZHhsbV/9iFhIFgStuxWx59Ik45fBirhl5m2pCYwIbZ90wEm85fLdY=
-=7Rgg
------END PGP SIGNATURE-----
-
---Apple-Mail-5-555006545--
+sage
+--557981400-379999940-1328913058=:2943--
