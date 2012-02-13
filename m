@@ -1,119 +1,79 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Re: Problem with inconsistent PG
-Date: Mon, 13 Feb 2012 09:13:09 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1202130910330.13736@cobra.newdream.net>
-References: <4F37A9F5.6030908@filoo.de>
+From: Dyweni - Ceph-Devel <YS3fpFE2ykfB@dyweni.com>
+Subject: Re: OSD id in configuration file
+Date: Mon, 13 Feb 2012 11:15:54 -0600
+Message-ID: <78276ffb22ef20e17ca2580f1d8b308e@pl1.haspere.com>
+References: <8512670932FB654F81AF0FEF1BE6D49DE23C32@WHQBEMAIL1.whq.wistron>
+ <Pine.LNX.4.64.1202130905260.13736@cobra.newdream.net>
+Reply-To: <YS3fpFE2ykfB@dyweni.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57263 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754480Ab2BMRNK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2012 12:13:10 -0500
-In-Reply-To: <4F37A9F5.6030908@filoo.de>
+Received: from pl1.haspere.com ([208.111.35.220]:51327 "EHLO pl1.haspere.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755411Ab2BMRVw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 13 Feb 2012 12:21:52 -0500
+In-Reply-To: <Pine.LNX.4.64.1202130905260.13736@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jens Rehpoehler <jens.rehpoehler@filoo.de>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Eric_YH_Chen@wistron.com, ceph-devel@vger.kernel.org
 
-On Sun, 12 Feb 2012, Jens Rehpoehler wrote:
+ Hi,
 
-> > >  Hi Liste,
-> > > 
-> > >  today i've got another problem.
-> > > 
-> > >  ceph -w shows up with an inconsistent PG over night:
-> > > 
-> > >  2012-02-10 08:38:48.701775    pg v441251: 1982 pgs: 1981 active+clean, 1
-> > >  active+clean+inconsistent; 1790 GB data, 3368 GB used, 18977 GB / 22345
-> > >  GB avail
-> > >  2012-02-10 08:38:49.702789    pg v441252: 1982 pgs: 1981 active+clean, 1
-> > >  active+clean+inconsistent; 1790 GB data, 3368 GB used, 18977 GB / 22345
-> > >  GB avail
-> > > 
-> > >  I've identified it with "ceph pg dump - | grep inconsistent
-> > > 
-> > >  109.6    141    0    0    0    463820288    111780    111780
-> > >  active+clean+inconsistent    485'7115    480'7301    [3
-> > > <http://marc.info/?l=ceph-devel&m=132891306919981&w=2#3>,4
-> > > <http://marc.info/?l=ceph-devel&m=132891306919981&w=2#4>]    [3
-> > > <http://marc.info/?l=ceph-devel&m=132891306919981&w=2#3>,4
-> > > <http://marc.info/?l=ceph-devel&m=132891306919981&w=2#4>]
-> > >  485'7061    2012-02-10 08:02:12.043986
-> > > 
-> > >  Now I've tried to repair it with: ceph pg repair 109.6
-> > > 
-> > >  2012-02-10 08:35:52.276325 mon<- [pg,repair,109.6]
-> > >  2012-02-10 08:35:52.276776 mon.1 ->  'instructing pg 109.6 on osd.3 to
-> > >  repair' (0)
-> > > 
-> > >  but i only get the following result:
-> > > 
-> > >  2012-02-10 08:36:18.447553   log 2012-02-10 08:36:08.455420 osd.3
-> > >  10.10.10.8:6801/25980 6913 : [ERR] 109.6 osd.4: soid
-> > >  1ef398ce/rb.0.0.0000000000bd/headsize 2736128 != known size 3145728
-> > >  2012-02-10 08:36:18.447553   log 2012-02-10 08:36:08.455426 osd.3
-> > >  10.10.10.8:6801/25980 6914 : [ERR] 109.6 scrub 0 missing, 1 inconsistent
-> > >  objects
-> > >  2012-02-10 08:36:18.447553   log 2012-02-10 08:36:08.455799 osd.3
-> > >  10.10.10.8:6801/25980 6915 : [ERR] 109.6 scrub 1 errors
-> > > 
-> > >  Can someone please explain me what to do in this case and how to recover
-> > >  the pg ?
-> > 
-> > So the "fix" is just to truncate the file to the expected size, 3145728,
-> > by finding it in the current/ directory.  The name/path will be slightly
-> > weird; look for 'rb.0.0.0000000000bd'.
-> > 
-> > The data is still suspect, though.  Did the ceph-osd restart or crash
-> > recently?  I would do that, repair (it should succeed), and then fsck the
-> > file system in that rbd image.
-> > 
-> > We just fixed a bug that was causing transactions to leak across
-> > checkpoint/snapshot boundaries.  That could be responsible for causing all
-> > sorts of subtle corruptions, including this one.  It'll be included in
-> > v0.42 (out next week).
-> > 
-> > sage
-> 
-> Hi Sarge,
-> 
-> no ... the osd didn't crash. I had to do some hardware maintainance and push
-> it
-> out of distribution with "ceph osd out 3". After a short while i used
-> "/etc/init.d/ceph stop" on that osd.
-> Then, after my work i've started ceph and push it in the distribution with
-> "ceph osd in 3".
+ That doesn't make sense... Would you explain further?
 
-For the bug I'm worried about, stopping the daemon and crashing are 
-equivalent.  In both cases, a transaction may have been only partially 
-included in the checkpoint.
- 
-> Could you please tell me if this is the right way to get an osd out for
-> maintainance ? Is there
-> any other thing i should do to keep data consistent ?
+ This page (http://ceph.newdream.net/wiki/Cluster_configuration) says 
+ the id
+ can be a number or a name, which applies to (mon|mds|ods).$id.
 
-You followed the right procedure.  There is (hopefully, was!) just a bug.
+ Will I have problems using SHA1 sums to uniquely identify each OSD in 
+ my
+ cluster? (i.e. OSD.$sha1sum)
 
-sage
+ ---
+ Thanks,
+ Dyweni
 
+ On Mon, 13 Feb 2012 09:07:16 -0800 (PST), Sage Weil wrote:
 
-> My structure is ->  3 MDS/MON Server on seperate Hardware Nodes an 3 OSD Nodes
-> with a each a total capacity
-> of 8 TB. Journaling is done on a separate SSD per node. The whole thing is a
-> data store for a kvm virtualisation
-> farm. The farm is accessing the data directly per rbd.
-> 
-> Thank you
-> 
-> Jens
-> 
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> On Mon, 13 Feb 2012, Eric_YH_Chen@wistron.com [1] wrote:
+>> Hi, all: For the scalability consideration, we would like to name 
+>> the
+>> first harddisk as "00101" on first server. And named the first 
+>> harddisk
+>> as "00201" on second server. The ceph.conf seems like this: [osd] 
+>> osd
+>> data = /srv/osd.$id osd journal = /srv/osd.$id.journal osd journal 
+>> size
+>> = 1000 [osd.00101]
+> The leading 0's are meaningless (or at worst, misleading) here. 
+> ceph-osd
+> identifiers are integers.
+>
+>> host = server-001 btrfs dev= /dev/sda [osd.00102] host = server-001
+>> btrfs dev= /dev/sdb [osd.00103] host = server-001 btrfs dev= 
+>> /dev/sdc
+>> [osd.00201] host = server-002 btrfs dev= /dev/sda [osd.00202] host =
+>> server-002 btrfs dev= /dev/sdb [osd.00203] host = server-002 btrfs 
+>> dev=
+>> /dev/sdc [osd.00301] host = server-003 btrfs dev= /dev/sda 
+>> [osd.00302]
+>> host = server-003 btrfs dev= /dev/sdb [osd.00303] host = server-003
+>> btrfs dev= /dev/sdc But we are worried about if it is an acceptable
+>> configuration for ceph. As I see, the maximum osd is 304 now, 
+>> although
+>> there are only 9 osds in the cluster. Will this configuration 
+>> influence
+>> about the performance? And what if we add osd.00204 in the future?
+> They are stored as an array currently, so if the max is 304 using
+> anything below that is better, not worse. ~300 is a small number, so 
+> this
+> isn't really problematic. Just don't label an OSD osd.200302 or 
+> you'll be
+> unhappy. sage -- To unsubscribe from this list: send the line
+> "unsubscribe ceph-devel" in the body of a message to
+> majordomo@vger.kernel.org [2] More majordomo info at
+> http://vger.kernel.org/majordomo-info.html [3]
+
