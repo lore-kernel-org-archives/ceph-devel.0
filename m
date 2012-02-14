@@ -1,35 +1,119 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: ceph_setattr mask
-Date: Tue, 14 Feb 2012 10:48:37 -0800
-Message-ID: <4EE4DFDB-50B9-44C5-850A-209A661ADF2B@cs.ucsc.edu>
-References: <C5CEE4B7-2D43-48F4-B741-8AB23C62D039@cs.ucsc.edu> <CAF3hT9A-n9yVWQExONF2T0ODwZRLeoVe6bi3qTFY9EEGeWBv+A@mail.gmail.com> <6E946A5C-EC6F-4D3F-9D37-1CA6A640AF55@cs.ucsc.edu> <Pine.LNX.4.64.1202140902450.1554@cobra.newdream.net>
-Mime-Version: 1.0 (Apple Message framework v1257)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Gregory Farnum <gregory.farnum@dreamhost.com>
+Subject: SimpleMessenger testing plan
+Date: Tue, 14 Feb 2012 13:17:03 -0800
+Message-ID: <CAF3hT9Co8J-RU1_dn9ATi8AtzxBEG+ggcwjrgPVrzDg1kGqn3w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:51363 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754994Ab2BNSsi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2012 13:48:38 -0500
-In-Reply-To: <Pine.LNX.4.64.1202140902450.1554@cobra.newdream.net>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:38587 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757277Ab2BNVRE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2012 16:17:04 -0500
+Received: by iacb35 with SMTP id b35so431705iac.19
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2012 13:17:04 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
+We on the team decided a while ago that it's past time to start
+looking seriously at how we can do proper testing of more of our core
+components without spinning up a full Ceph instance. We've been trying
+to sneak it in as we can on new features and modules, but after some
+recent experiences debugging and fixing the SimpleMessenger I got
+tasked with looking at how we can implement proper module tests for
+it. I did so yesterday and came up with a design outline that I'd like
+to start working on when the team gets back from FAST. We will be
+meeting about it as a group later and I welcome any input from the
+list over the next couple of days! :)
 
-On Feb 14, 2012, at 9:03 AM, Sage Weil wrote:
+=46irst, we need to decide on the approach we want to take to running
+these tests. Sage suggested that we might want to spin up a bunch of
+Messengers and run them through a workload while randomly failing
+their network operations some random fraction of the time. This
+doesn't satisfy me for two reasons. First, I like to *know* that
+certain scenarios have been tested, which is difficult to check with
+random failure injection; second, I want to be able to check the
+post-failure state of the system to make sure that we haven't leaked
+resources or otherwise failed non-catastrophically. Given that, we
+need to define a testing framework with very fine-grained control over
+when failures are injected.
 
->> 
->> java-libcephfs has a build dependency on libcephfs-dev deb that only 
->> contains libcephfs.h. These flags must be available during build and it 
->> seems to make little sense to add another header just for these bits. So 
->> as far as moving vs copying I'm not sure, but exposing all of ceph_fs.h 
->> seems like overkill.
-> 
-> The simplest thing is to probably duplicate them (with an #ifndef guard) 
-> in libcephfs.h.  I'll push something to do that now.
+My design consists of two parts. One is a mechanism for incrementally
+designating the state of the SimpleMessenger; the second is a system
+for testing based on this state, syscall fault injection, and
+purpose-written testing scripts.
+The interface for the state designator is simple:
+debug_state.set_state("Accepter::accepting"). We want it to be
+extensible so that you can start off with simple brackets and then
+move on to deeper levels like
+"Accepter::accepting::waiting"->"Accepter::accepting::reading_other_add=
+r",
+etc. And to allow states for more than one module =97 allowing the
+SimpleMessenger to store the state of the Accepter as well as the
+state for the Dispatcher, etc. This suggests to me a pretty simple
+implementation where we grab out the first word of the state as the
+module (Accepter, Dispatcher) and look those up in a map, then use the
+rest of the state as part of a recursing struct so it can nest
+arbitrarily. We have an instance as part of each Messenger and as part
+of each Pipe and insert set_state calls through the SimpleMessenger
+code as we decide we care about them.
 
-Works great. Thanks.
+The system for testing is broken into two big pieces. One is a
+MessengerDriver, which acts as the client for a single SimpleMessenger
+instance. The DebugState has hooks to notify the MessengerDriver on
+state changes, and we will instrument the SimpleMessenger's syscalls
+to pass through the MessengerDriver (using either macros or pluggable
+objects) so it can inject failures on demand.
+The second piece is a TestDriver, which creates MessengerDriver
+objects and is responsible for feeding them test orders on how to
+behave. This interface can start off pretty simply, eg as simple
+hard-coded arrays of tests to run, but I expect it to evolve, perhaps
+to the point where we can programmatically generate complicated
+many-to-many tests in Python.
+The interface between the TestDriver and the MessengerDriver should be
+pretty simple, consisting largely of the function
+test_orders(vector<string>& ops).
+Test orders are lists of strings(for now. Better later). These strings
+can be things like:
+connect <ip>: initiate a connect attempt to the given IP
+send <message> <ip>: start sending the given message to the given IP
+wait <module> <n> <state>: wait until you've seen the given state n
+times in the given module
+fail <module> <function> <error code>: the next time the given module
+calls the given syscall function, return the given error code
+shutdown: destroy the attached SimpleMessenger and return.
+These can be expanded later to do fancier things like: (these examples
+allow even more precise cross-Messenger synchronization)
+block <cond> <module> <function>, block <cond> <module> <state> : the
+next time <module> calls <function>/reaches <state>, block on <cond>
+signal <cond> <module> <function>, signal <cond> <module> <state>: the
+next time <module> calls <function>/reaches <state>, notify <cond>
 
-- Noah
+Then the MessengerDriver will run through the given operations until
+it runs out, and then when its code next executes it will block while
+waiting for more instructions to come in via test_orders().
+
+Because the MessengerDriver will be called into on every state change
+and on every syscall, simple instructions like this let us write very
+powerful, precisely-timed tests with a fairly small set of
+instructions to interpret.
+
+I'm not terribly interested in replacing the networking stack =97=A0doi=
+ng
+so would require writing our own routing code and I don't see much
+benefit to it in terms of testability. Perhaps even a negative, in
+that by going through the normal networking paths we will hit more of
+TCP's bizarre behavior patterns (not all of them, obviously, since
+we're all in a single process on a single machine, but more).
+We will also need some glue to do things like pass bound IP addresses
+around, etc, but I don't see that being important or difficult in
+terms of the interfaces described.
+
+Thoughts? Obvious points I've failed to consider?
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
