@@ -1,71 +1,71 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: logrotate and auto start = no
-Date: Wed, 15 Feb 2012 06:40:53 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1202150639050.3836@cobra.newdream.net>
-References: <4F3BC08F.7090106@widodh.nl>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Wido den Hollander <wido@widodh.nl>
+Subject: [PATCH] init: Only check if auto start is disabled when the issued command is "start"
+Date: Wed, 15 Feb 2012 16:20:16 +0100
+Message-ID: <1329319216-5505-1-git-send-email-wido@widodh.nl>
+References: <Pine.LNX.4.64.1202150639050.3836@cobra.newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33274 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759243Ab2BOOky (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Feb 2012 09:40:54 -0500
-In-Reply-To: <4F3BC08F.7090106@widodh.nl>
+Received: from amd.ceph.widodh.nl ([31.25.100.162]:41480 "EHLO
+	amd.ceph.widodh.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750907Ab2BOPdV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Feb 2012 10:33:21 -0500
+In-Reply-To: <Pine.LNX.4.64.1202150639050.3836@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Wido den Hollander <wido@widodh.nl>
 
-On Wed, 15 Feb 2012, Wido den Hollander wrote:
-> Hi,
-> 
-> When "auto start = no" is set for the OSD's, the logs won't get rotated.
-> 
-> I've set this to no so I can easily reboot machines without all OSD's
-> starting, I think it's easier with testing or when you replace a broken disk.
-> 
-> Anyway, this prevents the logs from being rotated, causing my disks to fill
-> up:
-> 
-> /var/log/ceph/*.log {
->     rotate 7
->     daily
->     compress
->     sharedscripts
->     postrotate
->         invoke-rc.d ceph reload >/dev/null || service ceph reload >/dev/null
->     endscript
->     missingok
-> }
-> 
-> The init script doesn't touch daemons which have auto start set to no, but
-> this also prevents logrotate from doing it's job.
-> 
-> Some suggestions:
-> 
-> 1. Don't use the init script for logrotation
-> 2. Modify the init script
+This still makes sure daemons don't start on boot.
 
-This is my choice.  We can probably just move the check into the 'start' 
-block.  It also looks like the auto_start check is doing something weird 
-if the value is "mds"... 
+When auto start was disabled it would also prevent logrotate from doing it's job.
 
-> 3. Add a note in the documentation about this behaviour
-> 
-> I think that logrotation should work regardless the setting of auto start?
+Signed-off-by: Wido den Hollander <wido@widodh.nl>
+---
+ src/init-ceph.in |   19 +++++++------------
+ 1 files changed, 7 insertions(+), 12 deletions(-)
 
-Yeah, definitely!
+diff --git a/src/init-ceph.in b/src/init-ceph.in
+index 72249f9..2deed19 100644
+--- a/src/init-ceph.in
++++ b/src/init-ceph.in
+@@ -171,13 +171,6 @@ for name in $what; do
+     num=$id
+     name="$type.$id"
+ 
+-    get_conf auto_start "" "auto start"
+-    if [ -z "$@" ] || [ "$@" = "mds" ]; then
+-	if [ "$auto_start" = "no" ] || [ "$auto_start" = "false" ] || [ "$auto_start" = "0" ]; then
+-	    continue
+-	fi
+-    fi
+-
+     check_host || continue
+ 
+     get_conf pid_file "/var/run/ceph/$type.$id.pid" "pid file"
+@@ -188,17 +181,19 @@ for name in $what; do
+     [ -n "$log_dir" ] && do_cmd "mkdir -p $log_dir"
+     [ -n "$log_sym_dir" ] && do_cmd "mkdir -p $log_sym_dir"
+ 
+-    # start, and already running?  (do this check early to avoid unnecessary work!)
++    binary="$BINDIR/ceph-$type"
+     if [ "$command" = "start" ]; then
++        get_conf auto_start "" "auto start"
++        if [ "$auto_start" = "no" ] || [ "$auto_start" = "false" ] || [ "$auto_start" = "0" ]; then
++            echo "Skipping Ceph $name on $host... auto start is disabled"
++            continue
++        fi
++
+ 	if daemon_is_running $name ceph-$type $id $pid_file; then
+ 	    echo "Starting Ceph $name on $host...already running"
+ 	    continue
+ 	fi
+-    fi
+ 
+-    # binary?
+-    binary="$BINDIR/ceph-$type"
+-    if [ "$command" = "start" ]; then
+ 	get_conf copy_executable_to "" "copy executable to"
+ 	if [ -n "$copy_executable_to" ]; then
+ 	    scp $binary "$host:$copy_executable_to"
+-- 
+1.7.5.4
 
-sage
-
-
-> 
-> What do you think?
-> 
-> Wido
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
