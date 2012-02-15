@@ -1,55 +1,71 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Size of monitor data dir
-Date: Wed, 15 Feb 2012 13:35:59 +0100
-Message-ID: <4F3BA6AF.1080308@widodh.nl>
-References: <CA+jddaODnwadRXpXaCNzzmDB5h7dK_+Y82y_+zpBKF0zkTgJNQ@mail.gmail.com> <Pine.LNX.4.64.1202141818560.3836@cobra.newdream.net>
+From: ZhuRongze <zrz4ceph@gmail.com>
+Subject: I found some problem in CRUSH code
+Date: Wed, 15 Feb 2012 21:51:10 +0800
+Message-ID: <4F3BB84E.50209@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+ boundary="------------000207080806050909040900"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:40668 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758036Ab2BOMgF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Feb 2012 07:36:05 -0500
-In-Reply-To: <Pine.LNX.4.64.1202141818560.3836@cobra.newdream.net>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:41346 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751555Ab2BONvS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Feb 2012 08:51:18 -0500
+Received: by iacb35 with SMTP id b35so1470277iac.19
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Feb 2012 05:51:17 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Mandell Degerness <mandell@pistoncloud.com>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 02/15/2012 03:20 AM, Sage Weil wrote:
-> On Tue, 14 Feb 2012, Mandell Degerness wrote:
->> How big can the monitor data directory grow?  Is there a rule of thumb
->> that can be used?
->
-> Right now the monitor dir include teh cluster log files (log and log.*),
-> which grow indefinitely unless you rotate them.  The other directories
-> are mostly trimmed by the monitor itself and should stay pretty small (few
-> hundred megs at most?).  The lingering exception is the mdsmap dir, which
-> isn't yet trimmed, but you guys won't be using that anyway (and the maps
-> are small).
->
-> Maybe Wido or someone else who has a long running cluster can see how big
-> it is?
+This is a multi-part message in MIME format.
+--------------000207080806050909040900
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-I just took a look at my oldest cluster, which has been running for 
-about 4 months now with a single monitor.
+Hi,
 
-This cluster has 6 OSD's and is running two virtual machines with RBD. 
-The monitor directory is 29M right now.
+The function crush_adjust_tree_bucket_item_weight in 
+ceph-0.41/src/crush/builder.c seem to  have a bug. The argument weight 
+is no use, because it is assigned .
+--------------------------------------------------------------------
+int crush_adjust_tree_bucket_item_weight(struct crush_bucket_tree 
+*bucket, int item, int weight)
+{
+     int diff;
+     int node;
+     unsigned i, j;
+     unsigned depth = calc_depth(bucket->h.size);
 
-On my larger cluster, which I had to re-install, the monitor directories 
-are about 400M.
+     for (i = 0; i < bucket->h.size; i++) {
+         if (bucket->h.items[i] == item)
+             break;
+     }
+     if (i == bucket->h.size)
+         return 0;
 
-The logm directory is however trimmed? My oldest messages are from 
-February 14th on both clusters.
+     node = crush_calc_tree_node(i);
+     diff = weight = bucket->node_weights[node];
+     bucket->node_weights[node] = weight;
+     bucket->h.weight += diff;
 
-I'd however advice somewhere around 5GB at at least. I'm running my 
-monitors on ext4 and I've ran out of inodes a couple of times. But if 
-all directories are trimmed, you are not likely to run into that.
+     for (j=1; j<depth; j++) {
+         node = parent(node);
+         bucket->node_weights[node] += diff;
+     }
 
-You should however be careful with the log.* files, they can grow 
-quickly. We could provide a standard logrotate script in the deb's / 
-rpm's for those?
+     return diff;
 
-Wido
+--------------------------------------------------------------------
+The function crush_adjust_list_bucket_item_weight also have a same problem.
+
+-ZhuRongze
+
+--------------000207080806050909040900
+Content-Type: text/x-vcard; charset=utf-8;
+ name="zrz4ceph.vcf"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="zrz4ceph.vcf"
+
+YmVnaW46dmNhcmQNCmZuOlJvbmd6ZSBaaHUNCm46Wmh1O1Jvbmd6ZQ0Kb3JnOlNJTkE7U1dT
+DQp2ZXJzaW9uOjIuMQ0KZW5kOnZjYXJkDQoNCg==
+--------------000207080806050909040900--
