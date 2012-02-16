@@ -1,67 +1,36 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 04/11] ceph: Push file_update_time() into ceph_page_mkwrite()
-Date: Thu, 16 Feb 2012 11:13:53 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1202161113001.24079@cobra.newdream.net>
-References: <1329399979-3647-1-git-send-email-jack@suse.cz>
- <1329399979-3647-5-git-send-email-jack@suse.cz> <1329419077.3121.38.camel@doink>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: ceph-resource-agents
+Date: Thu, 16 Feb 2012 12:12:42 -0800
+Message-ID: <989BA3D6-5844-4566-AA9B-69A0472C0228@cs.ucsc.edu>
+Mime-Version: 1.0 (Apple Message framework v1257)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50385 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753470Ab2BPTN5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2012 14:13:57 -0500
-In-Reply-To: <1329419077.3121.38.camel@doink>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:55112 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755321Ab2BPUMp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2012 15:12:45 -0500
+Received: from [131.106.59.173] (205.158.58.247.ptr.us.xo.net [205.158.58.247])
+	by mail-01.cse.ucsc.edu (Postfix) with ESMTPSA id 1600C774C005
+	for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2012 12:12:45 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@dreamhost.com>
-Cc: Jan Kara <jack@suse.cz>, LKML <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>, Eric Sandeen <sandeen@redhat.com>, Dave Chinner <david@fromorbit.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, 16 Feb 2012, Alex Elder wrote:
-> On Thu, 2012-02-16 at 14:46 +0100, Jan Kara wrote:
-> > CC: Sage Weil <sage@newdream.net>
-> > CC: ceph-devel@vger.kernel.org
-> > Signed-off-by: Jan Kara <jack@suse.cz>
-> 
-> 
-> This will update the timestamp even if a write
-> fault fails, which is different from before.
-> 
-> Hard to avoid though.
-> 
-> Looks good to me.
+On Ubuntu LTS 10.04, ceph-resource-agents package depends on resource-agents that seems to have not shown up until 11.10 so there is a dependency problem:
 
-Yeah.  Let's put something in the tracker to take a look later (I think we 
-can do better), but this is okay for now.
+nwatkins@piha:~/Projects/ceph$ sudo apt-get install ceph-resource-agents
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+ceph-resource-agents is already the newest version.
+You might want to run 'apt-get -f install' to correct these:
+The following packages have unmet dependencies:
+ ceph-resource-agents : Depends: resource-agents but it is not installable
+                        Recommends: pacemaker but it is not going to be installed
+E: Unmet dependencies. Try 'apt-get -f install' with no packages (or specify a solution).
 
-Signed-off-by: Sage Weil <sage@newdream.net>
 
-> 
-> Signed-off-by: Alex Elder <elder@dreamhost.com>
-> 
-> >  fs/ceph/addr.c |    3 +++
-> >  1 files changed, 3 insertions(+), 0 deletions(-)
-> > 
-> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> > index 173b1d2..12b139f 100644
-> > --- a/fs/ceph/addr.c
-> > +++ b/fs/ceph/addr.c
-> > @@ -1181,6 +1181,9 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
-> >  	loff_t size, len;
-> >  	int ret;
-> >  
-> > +	/* Update time before taking page lock */
-> > +	file_update_time(vma->vm_file);
-> > +
-> >  	size = i_size_read(inode);
-> >  	if (off + PAGE_CACHE_SIZE <= size)
-> >  		len = PAGE_CACHE_SIZE;
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Aside from that dependency problem, is it safe to completely omit the ceph-resource-agents package for a Ceph install?
+
+-Noah
