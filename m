@@ -1,144 +1,75 @@
-From: Sage Weil <sage@newdream.net>
-Subject: RE: Which SSD method is better for performance?
-Date: Sun, 19 Feb 2012 19:16:28 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1202191911060.31319@cobra.newdream.net>
-References: <81C477727102DA4E9B2605AC748C495407E36DF6A4@exch10>
- <4F3A5786.7060006@widodh.nl> <81C477727102DA4E9B2605AC748C495407E36DF792@exch10>
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH 04/11] ceph: Push file_update_time() into
+ ceph_page_mkwrite()
+Date: Mon, 20 Feb 2012 12:06:27 +0100
+Message-ID: <20120220110627.GB6799@quack.suse.cz>
+References: <1329399979-3647-1-git-send-email-jack@suse.cz>
+ <1329399979-3647-5-git-send-email-jack@suse.cz>
+ <1329419077.3121.38.camel@doink>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60567 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751560Ab2BTDQa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 19 Feb 2012 22:16:30 -0500
-In-Reply-To: <81C477727102DA4E9B2605AC748C495407E36DF792@exch10>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
-Cc: Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <1329419077.3121.38.camel@doink>
+Sender: owner-linux-mm@kvack.org
+To: Alex Elder <elder@dreamhost.com>
+Cc: Jan Kara <jack@suse.cz>, LKML <linux-kernel@vger.kernel.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Andrew Morton <akpm@linux-foundation.org>, Eric Sandeen <sandeen@redhat.com>, Dave Chinner <david@fromorbit.com>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 20 Feb 2012, Paul Pettigrew wrote:
-> And secondly, should the SSD Journal sizes be large or small?  Ie, is 
-> say 1G partition per paired 2-3TB SATA disk OK? Or as large an SSD as 
-> possible? There are many forum posts that say 100-200MB will suffice.  
-> A quick piece of advice will save us hopefully sever days of 
-> reconfiguring and benchmarking the Cluster :-)
-
-ceph-osd will periodically do a 'commit' to ensure that stuff in the 
-journal is written safely to the file system.  On btrfs that's a snapshot, 
-on anything else it's a sync(2).  When the journals hits 50% we trigger a 
-commit, or when a timer expires (I think 30 seconds by default).  There is 
-some overhead associated with the sync/snapshot, so less is generally 
-better.
-
-A decent rule of thumb is probably to make the journal big enough to 
-consume sustained writes for 10-30 seconds.  On modern disks, that's 
-probably 1-3GB?  If the journal is on the same spindle as the fs, it'll be 
-probably half that...
-</hand waving>
-
-sage
+On Thu 16-02-12 13:04:37, Alex Elder wrote:
+> On Thu, 2012-02-16 at 14:46 +0100, Jan Kara wrote:
+> > CC: Sage Weil <sage@newdream.net>
+> > CC: ceph-devel@vger.kernel.org
+> > Signed-off-by: Jan Kara <jack@suse.cz>
+> 
+> 
+> This will update the timestamp even if a write
+> fault fails, which is different from before.
+>
+> Hard to avoid though.
+  Yes. Relatively easy solution for this (at least for some filesystems)
+is to include time update into other operations filesystem is doing.
+Usually filesystem can do some preparations, then take page lock and then
+update time stamps together with other things it wants to do. It usually
+will be even faster than current scheme. But I decided to leave that to
+fs maintainers because page_mkwrite() code tends to be tricky wrt locking
+etc.
 
 
+> Looks good to me.
+> 
+> Signed-off-by: Alex Elder <elder@dreamhost.com>
+  Thanks.
 
-> 
-> Thanks
-> 
-> Paul
-> 
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wido den Hollander
-> Sent: Tuesday, 14 February 2012 10:46 PM
-> To: Paul Pettigrew
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Which SSD method is better for performance?
-> 
-> Hi,
-> 
-> On 02/14/2012 01:39 AM, Paul Pettigrew wrote:
-> > G'day all
-> >
-> > About to commence an R&D eval of the Ceph platform having been impressed with the momentum achieved over the past 12mths.
-> >
-> > I have one question re design before rolling out to metal........
-> >
-> > I will be using 1x SSD drive per storage server node (assume it is /dev/sdb for this discussion), and cannot readily determine the pro/con's for the two methods of using it for OSD-Journal, being:
-> > #1. place it in the main [osd] stanza and reference the whole drive as 
-> > a single partition; or
-> 
-> That won't work. If you do that all OSD's will try to open the journal. 
-> The journal for each OSD has to be unique.
-> 
-> > #2. partition up the disk, so 1x partition per SATA HDD, and place 
-> > each partition in the [osd.N] portion
-> 
-> That would be your best option.
-> 
-> I'm doing the same: http://zooi.widodh.nl/ceph/ceph.conf
-> 
-> the VG "data" is placed on a SSD (Intel X25-M).
-> 
-> >
-> > So if I were to code #1 in the ceph.conf file, it would be:
-> > [osd]
-> > osd journal = /dev/sdb
-> >
-> > Or, #2 would be like:
-> > [osd.0]
-> >          host = ceph1
-> >          btrfs devs = /dev/sdc
-> >          osd journal = /dev/sdb5
-> > [osd.1]
-> >          host = ceph1
-> >          btrfs devs = /dev/sdd
-> >          osd journal = /dev/sdb6
-> > [osd.2]
-> >          host = ceph1
-> >          btrfs devs = /dev/sde
-> >          osd journal = /dev/sdb7
-> > [osd.3]
-> >          host = ceph1
-> >          btrfs devs = /dev/sdf
-> >          osd journal = /dev/sdb8
-> >
-> > I am asking therefore, is the added work (and constraints) of specifying down to individual partitions per #2 worth it in performance gains? Does it not also have a constraint, in that if I wanted to add more HDD's into the server (we buy 45 bay units, and typically provision HDD's "on demand" i.e. 15x at a time as usage grows), I would have to additionally partition the SSD (taking it offline) - but if it were #1 option, I would only have to add more [osd.N] sections (and not have to worry about getting the SSD with 45x partitions)?
-> >
-> 
-> You'd still have to go for #2. However, running 45 OSD's on a single machine is a bit tricky imho.
-> 
-> If that machine fails you would loose 45 OSD's at once, that will put a lot of stress on the recovery of your cluster.
-> 
-> You'd also need a lot of RAM to accommodate those 45 OSD's, at least 48GB of RAM I guess.
-> 
-> A last note, if you use a SSD for your journaling, make sure that you align your partitions which the page size of the SSD, otherwise you'd run into the write amplification of the SSD, resulting in a performance loss.
-> 
-> Wido
-> 
-> > One final related question, if I were to use #1 method (which I would prefer if there is no material performance or other reason to use #2), then that specification (i.e. the "osd journal = /dev/sdb") SSD disk reference would have to be identical on all other hardware nodes, yes (I want to use the same ceph.conf file on all servers per the doco recommendations)? What would happen if for example, the SSD was on /dev/sde on a new node added into the cluster? References to /dev/disk/by-id etc are clearly no help, so should a symlink be used from the get-go? Eg something like "ln -s /dev/sdb /srv/ssd" on one box, and  "ln -s /dev/sde /srv/ssd" on the other box, so that in the [osd] section we could use this line which would find the SSD disk on all nodes "osd journal = /srv/ssd"?
-> >
-> > Many thanks for any advice provided.
-> >
-> > Cheers
-> >
-> > Paul
-> >
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+								Honza
+
+> >  fs/ceph/addr.c |    3 +++
+> >  1 files changed, 3 insertions(+), 0 deletions(-)
+> > 
+> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> > index 173b1d2..12b139f 100644
+> > --- a/fs/ceph/addr.c
+> > +++ b/fs/ceph/addr.c
+> > @@ -1181,6 +1181,9 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+> >  	loff_t size, len;
+> >  	int ret;
+> >  
+> > +	/* Update time before taking page lock */
+> > +	file_update_time(vma->vm_file);
+> > +
+> >  	size = i_size_read(inode);
+> >  	if (off + PAGE_CACHE_SIZE <= size)
+> >  		len = PAGE_CACHE_SIZE;
 > 
 > 
 > 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+-- 
+Jan Kara <jack@suse.cz>
+SUSE Labs, CR
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
