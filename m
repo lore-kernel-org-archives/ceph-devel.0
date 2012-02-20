@@ -1,134 +1,322 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Problem after ceph-osd crash
-Date: Mon, 20 Feb 2012 10:05:14 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1202201002440.30577@cobra.newdream.net>
-References: <4F427C05.1000304@filoo.de> <Pine.LNX.4.64.1202200941100.30577@cobra.newdream.net>
- <4F42879F.1040802@filoo.de>
+From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <slawomir.skowron@gmail.com>
+Subject: Serious problem after increase pg_num in pool
+Date: Mon, 20 Feb 2012 20:16:49 +0100
+Message-ID: <CAMwB3Tio0DjJDHv5EXT1=_qb=ytc7ooBMCbFano3aiTQt8ti6Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1333711764-1329761114=:30577"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47677 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751705Ab2BTSFO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2012 13:05:14 -0500
-In-Reply-To: <4F42879F.1040802@filoo.de>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:62791 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752984Ab2BTTQu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2012 14:16:50 -0500
+Received: by wgbdt10 with SMTP id dt10so5003762wgb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Feb 2012 11:16:49 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Oliver Francke <Oliver.Francke@filoo.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+After increase number pg_num from 8 to 100 in .rgw.buckets i have some
+serious problems.
 
---557981400-1333711764-1329761114=:30577
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+pool name       category                 KB      objects       clones
+   degraded      unfound           rd        rd KB           wr
+wr KB
+=2Eintent-log     -                       4662           19            =
+0
+           0           0            0            0        26502
+26501
+=2Elog            -                          0            0            =
+0
+           0           0            0            0       913732
+913342
+=2Ergw            -                          1           10            =
+0
+           0           0            1            0            9
+    7
+=2Ergw.buckets    -                   39582566        73707            =
+0
+        8061           0        86594            0       610896
+36050541
+=2Ergw.control    -                          0            1            =
+0
+           0           0            0            0            0
+    0
+=2Eusers          -                          1            1            =
+0
+           0           0            0            0            1
+    1
+=2Eusers.uid      -                          1            2            =
+0
+           0           0            2            1            3
+    3
+data            -                          0            0            0
+           0           0            0            0            0
+    0
+metadata        -                          0            0            0
+           0           0            0            0            0
+    0
+rbd             -                   21590723         5328            0
+           1           0           77           75      3013595
+378345507
+  total used       229514252        79068
+  total avail    19685615164
+  total space    20980898464
 
-On Mon, 20 Feb 2012, Oliver Francke wrote:
-> Hi Sage,
->=20
-> On 02/20/2012 06:41 PM, Sage Weil wrote:
-> > On Mon, 20 Feb 2012, Oliver Francke wrote:
-> > > Hi,
-> > >=20
-> > > we are just in trouble after some mess with trying to include a new
-> > > OSD-node
-> > > into our cluster.
-> > >=20
-> > > We get some weird "libceph: corrupt inc osdmap epoch 880 off 102
-> > > (ffffc9001db8990a of ffffc9001db898a4-ffffc9001db89dae)"
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384251 mon.0
+10.177.64.4:6789/0 36135 : [INF] osd.28 10.177.64.6:6806/824 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384275 mon.0
+10.177.64.4:6789/0 36136 : [INF] osd.37 10.177.64.6:6841/29133 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384301 mon.0
+10.177.64.4:6789/0 36137 : [INF] osd.7 10.177.64.4:6813/8223 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384327 mon.0
+10.177.64.4:6789/0 36138 : [INF] osd.44 10.177.64.6:6859/2370 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384353 mon.0
+10.177.64.4:6789/0 36139 : [INF] osd.49 10.177.64.6:6865/29878 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384384 mon.0
+10.177.64.4:6789/0 36140 : [INF] osd.17 10.177.64.4:6827/5909 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384410 mon.0
+10.177.64.4:6789/0 36141 : [INF] osd.12 10.177.64.4:6810/5410 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384435 mon.0
+10.177.64.4:6789/0 36142 : [INF] osd.39 10.177.64.6:6843/12733 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384461 mon.0
+10.177.64.4:6789/0 36143 : [INF] osd.42 10.177.64.6:6848/13067 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384485 mon.0
+10.177.64.4:6789/0 36144 : [INF] osd.31 10.177.64.6:6840/1233 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384513 mon.0
+10.177.64.4:6789/0 36145 : [INF] osd.36 10.177.64.6:6830/12573 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384537 mon.0
+10.177.64.4:6789/0 36146 : [INF] osd.38 10.177.64.6:6833/32587 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384567 mon.0
+10.177.64.4:6789/0 36147 : [INF] osd.5 10.177.64.4:6873/7842 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384596 mon.0
+10.177.64.4:6789/0 36148 : [INF] osd.21 10.177.64.4:6844/11607 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384622 mon.0
+10.177.64.4:6789/0 36149 : [INF] osd.23 10.177.64.4:6853/6826 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384661 mon.0
+10.177.64.4:6789/0 36150 : [INF] osd.51 10.177.64.6:6858/15894 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384693 mon.0
+10.177.64.4:6789/0 36151 : [INF] osd.48 10.177.64.6:6862/13476 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384723 mon.0
+10.177.64.4:6789/0 36152 : [INF] osd.32 10.177.64.6:6815/3701 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384759 mon.0
+10.177.64.4:6789/0 36153 : [INF] osd.41 10.177.64.6:6847/1861 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384790 mon.0
+10.177.64.4:6789/0 36154 : [INF] osd.0 10.177.64.4:6800/5230 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384814 mon.0
+10.177.64.4:6789/0 36155 : [INF] osd.3 10.177.64.4:6865/7242 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384838 mon.0
+10.177.64.4:6789/0 36156 : [INF] osd.1 10.177.64.4:6804/9729 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384864 mon.0
+10.177.64.4:6789/0 36157 : [INF] osd.47 10.177.64.6:6866/13924 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384896 mon.0
+10.177.64.4:6789/0 36158 : [INF] osd.45 10.177.64.6:6857/4401 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384928 mon.0
+10.177.64.4:6789/0 36159 : [INF] osd.20 10.177.64.4:6842/6246 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384952 mon.0
+10.177.64.4:6789/0 36160 : [INF] osd.16 10.177.64.4:6821/5833 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384982 mon.0
+10.177.64.4:6789/0 36161 : [INF] osd.35 10.177.64.6:6824/3877 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.385007 mon.0
+10.177.64.4:6789/0 36162 : [INF] osd.3 10.177.64.4:6865/7242 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.385032 mon.0
+10.177.64.4:6789/0 36163 : [INF] osd.7 10.177.64.4:6813/8223 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.385059 mon.0
+10.177.64.4:6789/0 36164 : [INF] osd.19 10.177.64.4:6831/10499 failed
+(by osd.55 10.177.64.8:6809/28642)
+2012-02-20 20:06:10.851483    pg v172582: 10548 pgs: 92 creating, 1
+active, 9713 active+clean, 3 active+degraded+backfill, 657 peering, 77
+down+peering, 5 active+degraded; 59744 MB data, 218 GB used, 18773 GB
+/ 20008 GB avail; 8071/237184 degraded (3.403%)
+2012-02-20 20:06:10.967491   osd e7436: 78 osds: 70 up, 73 in
+2012-02-20 20:06:10.990903   log 2012-02-20 20:05:56.448227 mon.2
+10.177.64.8:6789/0 134 : [INF] mon.2 calling new monitor election
+2012-02-20 20:06:10.990903   log 2012-02-20 20:05:58.252635 mon.1
+10.177.64.6:6789/0 3929 : [INF] mon.1 calling new monitor election
+2012-02-20 20:06:11.034669    pg v172583: 10548 pgs: 92 creating, 1
+active, 9713 active+clean, 3 active+degraded+backfill, 657 peering, 77
+down+peering, 5 active+degraded; 59744 MB data, 218 GB used, 18773 GB
+/ 20008 GB avail; 8071/237184 degraded (3.403%)
+2012-02-20 20:06:11.958126   osd e7437: 78 osds: 70 up, 73 in
+2012-02-20 20:06:12.068650    pg v172584: 10548 pgs: 92 creating, 1
+active, 9711 active+clean, 3 active+degraded+backfill, 659 peering, 77
+down+peering, 5 active+degraded; 59744 MB data, 218 GB used, 18773 GB
+/ 20008 GB avail; 8067/237184 degraded (3.401%)
+2012-02-20 20:06:12.947997   osd e7438: 78 osds: 70 up, 73 in
+2012-02-20 20:06:13.770942    pg v172585: 10548 pgs: 3 inactive, 92
+creating, 1 active, 9824 active+clean, 3 active+degraded+backfill, 541
+peering, 77 down+peering, 7 active+degraded; 59744 MB data, 218 GB
+used, 18773 GB / 20008 GB avail; 8067/237184 degraded (3.401%)
+2012-02-20 20:06:14.686248    pg v172586: 10548 pgs: 3 inactive, 92
+creating, 1 active, 9894 active+clean, 3 active+degraded+backfill, 471
+peering, 77 down+peering, 7 active+degraded; 59744 MB data, 218 GB
+used, 18773 GB / 20008 GB avail; 8067/237184 degraded (3.401%)
+2012-02-20 20:06:15.340365    pg v172587: 10548 pgs: 3 inactive, 92
+creating, 1 active, 9915 active+clean, 3 active+degraded+backfill, 447
+peering, 77 down+peering, 10 active+degraded; 59744 MB data, 218 GB
+used, 18773 GB / 20008 GB avail; 8067/237184 degraded (3.401%)
+2012-02-20 20:06:16.852264    pg v172588: 10548 pgs: 3 inactive, 92
+creating, 84 active, 10094 active+clean, 3 active+degraded+backfill,
+179 peering, 77 down+peering, 16 active+degraded; 59744 MB data, 218
+GB used, 18773 GB / 20008 GB avail; 8067/237184 degraded (3.401%)
 
-I just retested the kernel client against the new server code and I don't=
-=20
-see this.  If you can pull the osdmap/880 file from the monitor data=20
-directory (soon, please, the monitor will delete it once things fully=20
-recover and move on) I can see what the data looks like.
+osds is going to fail, again, and again, another going to fail. Number
+of up osd changing from 62, to 70-72, and going down, ang again going
+up.
 
-> > >=20
-> > > on the console.
-> > > The whole system is in a state ala:
-> > >=20
-> > > 012-02-20 17:56:27.585295    pg v942504: 2046 pgs: 1348 active+clean,=
- 43
-> > > active+recovering+degraded+remapped+backfill, 218 active+recovering, =
-437
-> > > active+recovering+remapped+backfill; 1950 GB data, 3734 GB used, 2605=
-9 GB
-> > > /
-> > > 29794 GB avail; 272914/1349073 degraded (20.230%)
-> > >=20
-> > > and sometimes the ceph-osd on node0 is crashing. At the moment of wri=
-ting,
-> > > the
-> > > degrading continues to shrink down below 20%.
-> > How did ceph-osd crash?  Is there a dump in the log?
->=20
-> 'course I will provide all logs, uhm, a bit later, we are busy to start a=
-ll
-> VM's, and handle first customer-tickets right now ;-)
->
-> To be most complete for the collection, would you be so kind to give a=20
-> list of all necessary kern.log osdX.log etc.?
+2012-02-20 20:09:47.305016 7f816009e700 osd.20 7476 heartbeat_check:
+no heartbeat from osd.64 since 2012-02-20 20:09:30.286408 (cutoff
+2012-02-20 20:09:42.304975)
+2012-02-20 20:09:47.410159 7f816c9b8700 osd.20 7476 heartbeat_check:
+no heartbeat from osd.61 since 2012-02-20 20:09:29.807115 (cutoff
+2012-02-20 20:09:42.410144)
+2012-02-20 20:09:47.410177 7f816c9b8700 osd.20 7476 heartbeat_check:
+no heartbeat from osd.64 since 2012-02-20 20:09:30.286408 (cutoff
+2012-02-20 20:09:42.410144)
+2012-02-20 20:09:47.906661 7f816009e700 osd.20 7476 heartbeat_check:
+no heartbeat from osd.61 since 2012-02-20 20:09:29.807115 (cutoff
+2012-02-20 20:09:42.906639)
+2012-02-20 20:09:47.906685 7f816009e700 osd.20 7476 heartbeat_check:
+no heartbeat from osd.64 since 2012-02-20 20:09:30.286408 (cutoff
+2012-02-20 20:09:42.906639)
+2012-02-20 20:09:48.114431 7f815660b700 -- 10.177.64.4:0/6389 >>
+10.177.64.4:6854/5398 pipe(0x1398c500 sd=3D47 pgs=3D26 cs=3D2 l=3D0).co=
+nnect
+claims to be 10.177.64.4:6854/17798 not 10.177.64.4:6854/5398 - wrong
+node!
+2012-02-20 20:09:48.410333 7f816c9b8700 osd.20 7476 heartbeat_check:
+no heartbeat from osd.61 since 2012-02-20 20:09:29.807115 (cutoff
+2012-02-20 20:09:43.410313)
+2012-02-20 20:09:48.410361 7f816c9b8700 osd.20 7476 heartbeat_check:
+no heartbeat from osd.64 since 2012-02-20 20:09:30.286408 (cutoff
+2012-02-20 20:09:43.410313)
+2012-02-20 20:09:51.450127 7f814b75d700 -- 10.177.64.4:0/6389 >>
+10.177.64.4:6855/17423 pipe(0xa86e780 sd=3D17 pgs=3D17 cs=3D2 l=3D0).co=
+nnect
+claims to be 10.177.64.4:6855/17798 not 10.177.64.4:6855/17423 - wrong
+node!
+2012-02-20 20:09:54.498949 7f814a248700 -- 10.177.64.4:0/6389 >>
+10.177.64.4:6854/19396 pipe(0x38cc780 sd=3D25 pgs=3D8 cs=3D2 l=3D0).con=
+nect
+claims to be 10.177.64.4:6854/17798 not 10.177.64.4:6854/19396 - wrong
+node!
 
-I think just the crashed osd log will be enough.  It looks like the rest=20
-of the cluster is recovering ok...
+Some of them is going down with this:
 
-Are the VMs running on top of the kernel rbd client, or KVM+librbd?
+2012-02-20 18:22:15.824992 7fe3ec1c97a0 ceph version 0.41
+(commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d), process ceph-osd,
+pid 31379
+2012-02-20 18:22:15.826476 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+mount FIEMAP ioctl is supported
+2012-02-20 18:22:15.826514 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+mount did NOT detect btrfs
+2012-02-20 18:22:15.826613 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+mount found snaps <>
+2012-02-20 18:22:15.826650 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+mount: WRITEAHEAD journal mode explicitly enabled in conf
+2012-02-20 18:22:16.415671 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+mount FIEMAP ioctl is supported
+2012-02-20 18:22:16.415703 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+mount did NOT detect btrfs
+2012-02-20 18:22:16.415744 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+mount found snaps <>
+2012-02-20 18:22:16.415758 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+mount: WRITEAHEAD journal mode explicitly enabled in conf
+osd/OSD.cc: In function 'void OSD::split_pg(PG*, std::map<pg_t, PG*>&,
+ObjectStore::Transaction&)' thread 7fe3df8c4700 time 2012-02-20
+18:22:19.900886
+osd/OSD.cc: 4066: FAILED assert(child)
+ ceph version 0.41 (commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d)
+ 1: (OSD::split_pg(PG*, std::map<pg_t, PG*, std::less<pg_t>,
+std::allocator<std::pair<pg_t const, PG*> > >&,
+ObjectStore::Transaction&)+0x23e0) [0x54cd20]
+ 2: (OSD::kick_pg_split_queue()+0x880) [0x556d90]
+ 3: (OSD::handle_pg_notify(MOSDPGNotify*)+0x4b6) [0x559546]
+ 4: (OSD::_dispatch(Message*)+0x608) [0x560e58]
+ 5: (OSD::ms_dispatch(Message*)+0x11e) [0x561b7e]
+ 6: (SimpleMessenger::dispatch_entry()+0x76b) [0x5c844b]
+ 7: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x4b5cfc]
+ 8: (()+0x7efc) [0x7fe3ebda3efc]
+ 9: (clone()+0x6d) [0x7fe3ea3d489d]
+ ceph version 0.41 (commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d)
+ 1: (OSD::split_pg(PG*, std::map<pg_t, PG*, std::less<pg_t>,
+std::allocator<std::pair<pg_t const, PG*> > >&,
+ObjectStore::Transaction&)+0x23e0) [0x54cd20]
+ 2: (OSD::kick_pg_split_queue()+0x880) [0x556d90]
+ 3: (OSD::handle_pg_notify(MOSDPGNotify*)+0x4b6) [0x559546]
+ 4: (OSD::_dispatch(Message*)+0x608) [0x560e58]
+ 5: (OSD::ms_dispatch(Message*)+0x11e) [0x561b7e]
+ 6: (SimpleMessenger::dispatch_entry()+0x76b) [0x5c844b]
+ 7: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x4b5cfc]
+ 8: (()+0x7efc) [0x7fe3ebda3efc]
+ 9: (clone()+0x6d) [0x7fe3ea3d489d]
+*** Caught signal (Aborted) **
+ in thread 7fe3df8c4700
+ ceph version 0.41 (commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d)
+ 1: /usr/bin/ceph-osd() [0x6099f6]
+ 2: (()+0x10060) [0x7fe3ebdac060]
+ 3: (gsignal()+0x35) [0x7fe3ea3293a5]
+ 4: (abort()+0x17b) [0x7fe3ea32cb0b]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fe3eabe7d7d]
+ 6: (()+0xb9f26) [0x7fe3eabe5f26]
+ 7: (()+0xb9f53) [0x7fe3eabe5f53]
+ 8: (()+0xba04e) [0x7fe3eabe604e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x200) [0x5dc6b0]
+ 10: (OSD::split_pg(PG*, std::map<pg_t, PG*, std::less<pg_t>,
+std::allocator<std::pair<pg_t const, PG*> > >&,
+ObjectStore::Transaction&)+0x23e0) [0x54cd20]
+ 11: (OSD::kick_pg_split_queue()+0x880) [0x556d90]
+ 12: (OSD::handle_pg_notify(MOSDPGNotify*)+0x4b6) [0x559546]
+ 13: (OSD::_dispatch(Message*)+0x608) [0x560e58]
+ 14: (OSD::ms_dispatch(Message*)+0x11e) [0x561b7e]
+ 15: (SimpleMessenger::dispatch_entry()+0x76b) [0x5c844b]
+ 16: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x4b5cfc]
+ 17: (()+0x7efc) [0x7fe3ebda3efc]
+ 18: (clone()+0x6d) [0x7fe3ea3d489d]
+2012-02-20 18:23:57.915653 7fa818e3e7a0 ceph version 0.41
+(commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d), process ceph-osd,
+pid 6596
 
-sage
+Do you have any ideas ?? if you need some data from cluster, or a core
+dumps from osd i have a lot of them, but they are large.
 
+--=20
+-----
+Pozdrawiam
 
->=20
-> Thnx for the fast reaction,
->=20
-> Oliver.
->=20
-> > sage
-> >=20
-> > > Any clues?
-> > >=20
-> > > Thnx in @vance,
-> > >=20
-> > > Oliver.
-> > >=20
-> > > --=20
-> > >=20
-> > > Oliver Francke
-> > >=20
-> > > filoo GmbH
-> > > Moltkestra=DFe 25a
-> > > 33330 G=FCtersloh
-> > > HRB4355 AG G=FCtersloh
-> > >=20
-> > > Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
-> > >=20
-> > > Folgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-> > >=20
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > >=20
->=20
->=20
-> --=20
->=20
-> Oliver Francke
->=20
-> filoo GmbH
-> Moltkestra=DFe 25a
-> 33330 G=FCtersloh
-> HRB4355 AG G=FCtersloh
->=20
-> Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
->=20
-> Folgen Sie uns auf Twitter: http://twitter.com/filoogmbh
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-1333711764-1329761114=:30577--
+S=C5=82awek "sZiBis" Skowron
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
