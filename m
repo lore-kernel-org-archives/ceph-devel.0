@@ -1,88 +1,45 @@
-From: Diego Woitasen <diego@woitasen.com.ar>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: v0.42 released
-Date: Mon, 20 Feb 2012 22:50:57 -0300
-Message-ID: <CAA7Uhck1u8CJjtwjqUvRYyMFS8EKeQi-0f1FMSwGXYpvzus21g@mail.gmail.com>
+Date: Mon, 20 Feb 2012 21:33:17 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1202202121250.26279@cobra.newdream.net>
 References: <Pine.LNX.4.64.1202201001200.30602@cobra.newdream.net>
+ <CAA7Uhck1u8CJjtwjqUvRYyMFS8EKeQi-0f1FMSwGXYpvzus21g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:38185 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752624Ab2BUBu6 convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Feb 2012 20:50:58 -0500
-Received: by lagu2 with SMTP id u2so7028548lag.19
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Feb 2012 17:50:57 -0800 (PST)
-In-Reply-To: <Pine.LNX.4.64.1202201001200.30602@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:51390 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750765Ab2BUFdS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Feb 2012 00:33:18 -0500
+In-Reply-To: <CAA7Uhck1u8CJjtwjqUvRYyMFS8EKeQi-0f1FMSwGXYpvzus21g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Diego Woitasen <diego@woitasen.com.ar>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Feb 20, 2012 at 3:01 PM, Sage Weil <sage@newdream.net> wrote:
-> v0.42 is ready! =A0This has mostly been a stabilization release, with=
- a few
-> critical bugs fixed. =A0There is also an across-the-board change in d=
-ata
-> structure encoding that is not backwards-compatible, but is designed =
-to
-> allow future changes to be (both forwards- and backwards-).
->
-> Notable changes include:
->
-> =A0* osd: new (non-backwards compatible!) encoding for all structures
-> =A0* osd: fixed bug with transactions being non-atomic (leaking acros=
-s
-> =A0 commit boundaries)
-> =A0* osd: track in-progress requests, log slow ones
-> =A0* osd: randomly choose pull target during recovery (better load ba=
-lance)
-> =A0* osd: fixed recovery stall
-> =A0* mon: a few recovery bug fixes
-> =A0* mon: trim old auth files
-> =A0* mon: better detection/warning about down pgs
-> =A0* objecter: expose in-process requests via admin socket
-> =A0* new infrastructure for testing data structure encoding changes (=
-forward
-> =A0 and backward compatibility)
->
-> Aside from the data structure encoding change, there is relatively li=
-ttle
-> new code since v0.41. =A0This should be a pretty solid release.
->
-> For v0.43, we are working on merging a few big changes. =A0The main o=
-ne is a
-> new key/value interface for objects: each object, instead of storing =
-a
-> blob of bytes, would consist of a (potentially large) set of key/valu=
-e
-> pairs that can be set/queried efficiently. =A0This is going to make a=
- huge
-> difference for radosgw performance with large buckets, and will help =
-with
-> large directories as well. =A0There is also ongoing stabilization wor=
-k with
-> the OSD and new interfaces for administrators to query the state of t=
-he
-> cluster and diagnose common problems.
->
-> v0.42 can be found from the usual locations:
->
-> =A0* Git at git://github.com/NewDreamNetwork/ceph.git
-> =A0* Tarball at=A0http://ceph.newdream.net/download/ceph-0.42.tar.gz
-> =A0* For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/la=
-test/ops/install/mkcephfs/#installing-the-packages
->
-> sage
+On Mon, 20 Feb 2012, Diego Woitasen wrote:
+> Production ready, right?
 
-Production ready, right?
+We are very close, at least with RADOS and RBD.
 
-:)
+This is what we are focused on:
 
---=20
-Diego Woitasen
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ - improving qa coverage.  it's grown by leaps and bounds over the last 
+   several months, and is getting better.
+ - osd stability.  we are cleaning up a few bits of problematic code, and 
+   ensuring that the core functionality is well tested.  that includes 
+   api coverage, load/stress testing, and failure testing.  most of the 
+   recent work is in the 'thrashing' tests, which continously mark osds 
+   in/out and/or restart daemons.  these tests are all passing.
+ - administrator tools.  we've identified the top 10 most likely failure 
+   scenarios that people are likely to see, and are going down the list to 
+   ensure that they are detected, reported, diagnosable, and ideally 
+   fixable.
+ - key/value objects.  this is on of the few recent bits of new 
+   functionality, but it's needed to make radosgw perform well for large 
+   bucket sizes.
+
+And very soon (next sprint?) we will be returning some attention to RBD
+caching and layering.
+
+sage
