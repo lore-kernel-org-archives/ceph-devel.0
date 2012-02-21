@@ -1,87 +1,510 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Re: Missing required features 2000
-Date: Tue, 21 Feb 2012 14:45:18 +0100
-Message-ID: <CAMwB3Tg8Xh2cgaNrK8t40woJmYaJh38BUQZrZ7vkLboKdyMO8A@mail.gmail.com>
-References: <CAMwB3Tjs8yiL1y7QgtRdbdCo2kmun-E4MRe6vGiG2ZvB2EUF4Q@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Serious problem after increase pg_num in pool
+Date: Tue, 21 Feb 2012 08:00:02 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1202210758170.26279@cobra.newdream.net>
+References: <CAMwB3Tio0DjJDHv5EXT1=_qb=ytc7ooBMCbFano3aiTQt8ti6Q@mail.gmail.com>
+ <CAMwB3TjWU_nttbe2skH8YU0LAOZzxapFhZsyDVZMsyu29_tYJg@mail.gmail.com>
+ <Pine.LNX.4.64.1202201218260.19182@cobra.newdream.net> <-4281574952208424215@unknownmsgid>
+ <-8744530373707238121@unknownmsgid>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-878886453-1329840002=:26279"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:56479 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752647Ab2BUNpT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Feb 2012 08:45:19 -0500
-Received: by werb13 with SMTP id b13so3805225wer.19
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Feb 2012 05:45:18 -0800 (PST)
-In-Reply-To: <CAMwB3Tjs8yiL1y7QgtRdbdCo2kmun-E4MRe6vGiG2ZvB2EUF4Q@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54394 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752347Ab2BUQAE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Feb 2012 11:00:04 -0500
+In-Reply-To: <-8744530373707238121@unknownmsgid>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ok Sorry for trouble, this is old version of ceph on one machine. All
-packages has been updated to 0.42, except a ceph package :(
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-2012/2/21 S=C5=82awomir Skowron <szibis@gmail.com>:
-> What is that mean v0.42 in mon log:
->
-> 2012-02-21 14:31:56.188513 7f4c59cee700 -- 10.177.64.4:6789/0 >>
-> 10.177.64.6:6815/11843 pipe(0x133f280 sd=3D36 pgs=3D0 cs=3D0 l=3D1).p=
-eer
-> missing required features 2000
-> 2012-02-21 14:31:56.215195 7f4c59cee700 -- 10.177.64.4:6789/0 >> :/0
-> pipe(0x133f780 sd=3D36 pgs=3D0 cs=3D0 l=3D0).accept sd=3D36
-> 2012-02-21 14:31:56.215376 7f4c59cee700 -- 10.177.64.4:6789/0 >>
-> 10.177.64.6:6809/11390 pipe(0x133f780 sd=3D36 pgs=3D0 cs=3D0 l=3D1).p=
-eer
-> missing required features 2000
-> 2012-02-21 14:31:56.254106 7f4c59cee700 -- 10.177.64.4:6789/0 >> :/0
-> pipe(0x1672a00 sd=3D36 pgs=3D0 cs=3D0 l=3D0).accept sd=3D36
-> 2012-02-21 14:31:56.254280 7f4c59cee700 -- 10.177.64.4:6789/0 >>
-> 10.177.64.6:6866/8497 pipe(0x1672a00 sd=3D36 pgs=3D0 cs=3D0 l=3D1).pe=
+--557981400-878886453-1329840002=:26279
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+
+On Tue, 21 Feb 2012, S?awomir Skowron wrote:
+> If there is no chance to stabilize this cluster i will try something like=
+ this.
+>=20
+> - stop one machine in cluster.
+> - check if its still ok, and data are available
+> - make new fs on one machine
+> - migrate data by rados via obsync
+> - expand new cluster by second, and third machine
+> - change keys for radosgw etc
+> - new cluster is up with old dara
+>=20
+> I can be done to migrate objects in .rgw.buckets pool via obsync ??
+
+obsync operates at the s3/switch bucket level, of which many are stored=20
+in .rgw.buckets.  You'll need to sync each of those buckets individually.
+
+Before you do that, though, I have a pg split branch that is almost ready. =
+=20
+If you don't mind, I'd be curious if it can handle your semi-broken=20
+cluster.  I'll have it pushed in about 2 hours, if you can wait!  If not,=
+=20
+no worries.
+
+sage
+
+
+
+>=20
+> Dnia 21 lut 2012 o godz. 07:46 "S=FF=FFawomir Skowron" <szibis@gmail.com>=
+ napisa=FF=FF(a):
+>=20
+> > 40 GB in 3 copies in rgw bucket, and some data in RBD, but they can be
+> > destroyed.
+> >
+> > Ceph -s reports 224 GB in normal state.
+> >
+> > Pozdrawiam
+> >
+> > iSS
+> >
+> > Dnia 20 lut 2012 o godz. 21:19 Sage Weil <sage@newdream.net> napisa=FF=
+=FF(a):
+> >
+> >> Ooh, the pg split functionality is currently broken, and we weren't
+> >> planning on fixing it for a while longer.  I didn't realize it was sti=
+ll
+> >> possible to trigger from the monitor.
+> >>
+> >> I'm looking at how difficult it is to make it work (even inefficiently=
+).
+> >>
+> >> How much data do you have in the cluster?
+> >>
+> >> sage
+> >>
+> >>
+> >>
+> >>
+> >> On Mon, 20 Feb 2012, S?awomir Skowron wrote:
+> >>
+> >>> and this in ceph -w
+> >>>
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611270 osd.76
+> >>> 10.177.64.8:6872/5395 49 : [ERR] mkpg 7.e up [76,11] !=3D acting [76]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611308 osd.76
+> >>> 10.177.64.8:6872/5395 50 : [ERR] mkpg 7.16 up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611339 osd.76
+> >>> 10.177.64.8:6872/5395 51 : [ERR] mkpg 7.1e up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611369 osd.76
+> >>> 10.177.64.8:6872/5395 52 : [ERR] mkpg 7.26 up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611399 osd.76
+> >>> 10.177.64.8:6872/5395 53 : [ERR] mkpg 7.2e up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611428 osd.76
+> >>> 10.177.64.8:6872/5395 54 : [ERR] mkpg 7.36 up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611458 osd.76
+> >>> 10.177.64.8:6872/5395 55 : [ERR] mkpg 7.3e up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611488 osd.76
+> >>> 10.177.64.8:6872/5395 56 : [ERR] mkpg 7.46 up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611517 osd.76
+> >>> 10.177.64.8:6872/5395 57 : [ERR] mkpg 7.4e up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611547 osd.76
+> >>> 10.177.64.8:6872/5395 58 : [ERR] mkpg 7.56 up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:13.531857   log 2012-02-20 20:34:07.611577 osd.76
+> >>> 10.177.64.8:6872/5395 59 : [ERR] mkpg 7.5e up [76,11] !=3D acting [76=
+]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.618816 osd.20
+> >>> 10.177.64.4:6839/6735 54 : [ERR] mkpg 7.f up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.618854 osd.20
+> >>> 10.177.64.4:6839/6735 55 : [ERR] mkpg 7.17 up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.618883 osd.20
+> >>> 10.177.64.4:6839/6735 56 : [ERR] mkpg 7.1f up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.618912 osd.20
+> >>> 10.177.64.4:6839/6735 57 : [ERR] mkpg 7.27 up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.618941 osd.20
+> >>> 10.177.64.4:6839/6735 58 : [ERR] mkpg 7.2f up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.618970 osd.20
+> >>> 10.177.64.4:6839/6735 59 : [ERR] mkpg 7.37 up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.618999 osd.20
+> >>> 10.177.64.4:6839/6735 60 : [ERR] mkpg 7.3f up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.619027 osd.20
+> >>> 10.177.64.4:6839/6735 61 : [ERR] mkpg 7.47 up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.619056 osd.20
+> >>> 10.177.64.4:6839/6735 62 : [ERR] mkpg 7.4f up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.619085 osd.20
+> >>> 10.177.64.4:6839/6735 63 : [ERR] mkpg 7.57 up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>> 2012-02-20 20:34:17.015290   log 2012-02-20 20:34:07.619113 osd.20
+> >>> 10.177.64.4:6839/6735 64 : [ERR] mkpg 7.5f up [51,20,64] !=3D acting
+> >>> [20,51,64]
+> >>>
+> >>> 2012/2/20 S?awomir Skowron <slawomir.skowron@gmail.com>:
+> >>>> After increase number pg_num from 8 to 100 in .rgw.buckets i have so=
+me
+> >>>> serious problems.
+> >>>>
+> >>>> pool name       category                 KB      objects       clone=
+s
+> >>>>  degraded      unfound           rd        rd KB           wr
+> >>>> wr KB
+> >>>> .intent-log     -                       4662           19           =
+ 0
+> >>>>          0           0            0            0        26502
+> >>>> 26501
+> >>>> .log            -                          0            0           =
+ 0
+> >>>>          0           0            0            0       913732
+> >>>> 913342
+> >>>> .rgw            -                          1           10           =
+ 0
+> >>>>          0           0            1            0            9
+> >>>>   7
+> >>>> .rgw.buckets    -                   39582566        73707           =
+ 0
+> >>>>       8061           0        86594            0       610896
+> >>>> 36050541
+> >>>> .rgw.control    -                          0            1           =
+ 0
+> >>>>          0           0            0            0            0
+> >>>>   0
+> >>>> .users          -                          1            1           =
+ 0
+> >>>>          0           0            0            0            1
+> >>>>   1
+> >>>> .users.uid      -                          1            2           =
+ 0
+> >>>>          0           0            2            1            3
+> >>>>   3
+> >>>> data            -                          0            0           =
+ 0
+> >>>>          0           0            0            0            0
+> >>>>   0
+> >>>> metadata        -                          0            0           =
+ 0
+> >>>>          0           0            0            0            0
+> >>>>   0
+> >>>> rbd             -                   21590723         5328           =
+ 0
+> >>>>          1           0           77           75      3013595
+> >>>> 378345507
+> >>>> total used       229514252        79068
+> >>>> total avail    19685615164
+> >>>> total space    20980898464
+> >>>>
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384251 mon.0
+> >>>> 10.177.64.4:6789/0 36135 : [INF] osd.28 10.177.64.6:6806/824 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384275 mon.0
+> >>>> 10.177.64.4:6789/0 36136 : [INF] osd.37 10.177.64.6:6841/29133 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384301 mon.0
+> >>>> 10.177.64.4:6789/0 36137 : [INF] osd.7 10.177.64.4:6813/8223 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384327 mon.0
+> >>>> 10.177.64.4:6789/0 36138 : [INF] osd.44 10.177.64.6:6859/2370 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384353 mon.0
+> >>>> 10.177.64.4:6789/0 36139 : [INF] osd.49 10.177.64.6:6865/29878 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384384 mon.0
+> >>>> 10.177.64.4:6789/0 36140 : [INF] osd.17 10.177.64.4:6827/5909 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384410 mon.0
+> >>>> 10.177.64.4:6789/0 36141 : [INF] osd.12 10.177.64.4:6810/5410 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384435 mon.0
+> >>>> 10.177.64.4:6789/0 36142 : [INF] osd.39 10.177.64.6:6843/12733 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384461 mon.0
+> >>>> 10.177.64.4:6789/0 36143 : [INF] osd.42 10.177.64.6:6848/13067 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384485 mon.0
+> >>>> 10.177.64.4:6789/0 36144 : [INF] osd.31 10.177.64.6:6840/1233 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384513 mon.0
+> >>>> 10.177.64.4:6789/0 36145 : [INF] osd.36 10.177.64.6:6830/12573 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384537 mon.0
+> >>>> 10.177.64.4:6789/0 36146 : [INF] osd.38 10.177.64.6:6833/32587 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384567 mon.0
+> >>>> 10.177.64.4:6789/0 36147 : [INF] osd.5 10.177.64.4:6873/7842 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384596 mon.0
+> >>>> 10.177.64.4:6789/0 36148 : [INF] osd.21 10.177.64.4:6844/11607 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384622 mon.0
+> >>>> 10.177.64.4:6789/0 36149 : [INF] osd.23 10.177.64.4:6853/6826 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384661 mon.0
+> >>>> 10.177.64.4:6789/0 36150 : [INF] osd.51 10.177.64.6:6858/15894 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384693 mon.0
+> >>>> 10.177.64.4:6789/0 36151 : [INF] osd.48 10.177.64.6:6862/13476 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384723 mon.0
+> >>>> 10.177.64.4:6789/0 36152 : [INF] osd.32 10.177.64.6:6815/3701 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384759 mon.0
+> >>>> 10.177.64.4:6789/0 36153 : [INF] osd.41 10.177.64.6:6847/1861 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384790 mon.0
+> >>>> 10.177.64.4:6789/0 36154 : [INF] osd.0 10.177.64.4:6800/5230 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384814 mon.0
+> >>>> 10.177.64.4:6789/0 36155 : [INF] osd.3 10.177.64.4:6865/7242 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384838 mon.0
+> >>>> 10.177.64.4:6789/0 36156 : [INF] osd.1 10.177.64.4:6804/9729 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384864 mon.0
+> >>>> 10.177.64.4:6789/0 36157 : [INF] osd.47 10.177.64.6:6866/13924 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384896 mon.0
+> >>>> 10.177.64.4:6789/0 36158 : [INF] osd.45 10.177.64.6:6857/4401 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384928 mon.0
+> >>>> 10.177.64.4:6789/0 36159 : [INF] osd.20 10.177.64.4:6842/6246 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384952 mon.0
+> >>>> 10.177.64.4:6789/0 36160 : [INF] osd.16 10.177.64.4:6821/5833 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.384982 mon.0
+> >>>> 10.177.64.4:6789/0 36161 : [INF] osd.35 10.177.64.6:6824/3877 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.385007 mon.0
+> >>>> 10.177.64.4:6789/0 36162 : [INF] osd.3 10.177.64.4:6865/7242 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.385032 mon.0
+> >>>> 10.177.64.4:6789/0 36163 : [INF] osd.7 10.177.64.4:6813/8223 failed
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.688085   log 2012-02-20 20:06:09.385059 mon.0
+> >>>> 10.177.64.4:6789/0 36164 : [INF] osd.19 10.177.64.4:6831/10499 faile=
+d
+> >>>> (by osd.55 10.177.64.8:6809/28642)
+> >>>> 2012-02-20 20:06:10.851483    pg v172582: 10548 pgs: 92 creating, 1
+> >>>> active, 9713 active+clean, 3 active+degraded+backfill, 657 peering, =
+77
+> >>>> down+peering, 5 active+degraded; 59744 MB data, 218 GB used, 18773 G=
+B
+> >>>> / 20008 GB avail; 8071/237184 degraded (3.403%)
+> >>>> 2012-02-20 20:06:10.967491   osd e7436: 78 osds: 70 up, 73 in
+> >>>> 2012-02-20 20:06:10.990903   log 2012-02-20 20:05:56.448227 mon.2
+> >>>> 10.177.64.8:6789/0 134 : [INF] mon.2 calling new monitor election
+> >>>> 2012-02-20 20:06:10.990903   log 2012-02-20 20:05:58.252635 mon.1
+> >>>> 10.177.64.6:6789/0 3929 : [INF] mon.1 calling new monitor election
+> >>>> 2012-02-20 20:06:11.034669    pg v172583: 10548 pgs: 92 creating, 1
+> >>>> active, 9713 active+clean, 3 active+degraded+backfill, 657 peering, =
+77
+> >>>> down+peering, 5 active+degraded; 59744 MB data, 218 GB used, 18773 G=
+B
+> >>>> / 20008 GB avail; 8071/237184 degraded (3.403%)
+> >>>> 2012-02-20 20:06:11.958126   osd e7437: 78 osds: 70 up, 73 in
+> >>>> 2012-02-20 20:06:12.068650    pg v172584: 10548 pgs: 92 creating, 1
+> >>>> active, 9711 active+clean, 3 active+degraded+backfill, 659 peering, =
+77
+> >>>> down+peering, 5 active+degraded; 59744 MB data, 218 GB used, 18773 G=
+B
+> >>>> / 20008 GB avail; 8067/237184 degraded (3.401%)
+> >>>> 2012-02-20 20:06:12.947997   osd e7438: 78 osds: 70 up, 73 in
+> >>>> 2012-02-20 20:06:13.770942    pg v172585: 10548 pgs: 3 inactive, 92
+> >>>> creating, 1 active, 9824 active+clean, 3 active+degraded+backfill, 5=
+41
+> >>>> peering, 77 down+peering, 7 active+degraded; 59744 MB data, 218 GB
+> >>>> used, 18773 GB / 20008 GB avail; 8067/237184 degraded (3.401%)
+> >>>> 2012-02-20 20:06:14.686248    pg v172586: 10548 pgs: 3 inactive, 92
+> >>>> creating, 1 active, 9894 active+clean, 3 active+degraded+backfill, 4=
+71
+> >>>> peering, 77 down+peering, 7 active+degraded; 59744 MB data, 218 GB
+> >>>> used, 18773 GB / 20008 GB avail; 8067/237184 degraded (3.401%)
+> >>>> 2012-02-20 20:06:15.340365    pg v172587: 10548 pgs: 3 inactive, 92
+> >>>> creating, 1 active, 9915 active+clean, 3 active+degraded+backfill, 4=
+47
+> >>>> peering, 77 down+peering, 10 active+degraded; 59744 MB data, 218 GB
+> >>>> used, 18773 GB / 20008 GB avail; 8067/237184 degraded (3.401%)
+> >>>> 2012-02-20 20:06:16.852264    pg v172588: 10548 pgs: 3 inactive, 92
+> >>>> creating, 84 active, 10094 active+clean, 3 active+degraded+backfill,
+> >>>> 179 peering, 77 down+peering, 16 active+degraded; 59744 MB data, 218
+> >>>> GB used, 18773 GB / 20008 GB avail; 8067/237184 degraded (3.401%)
+> >>>>
+> >>>> osds is going to fail, again, and again, another going to fail. Numb=
 er
-> missing required features 2000
-> 2012-02-21 14:31:56.254888 7f4c59cee700 -- 10.177.64.4:6789/0 >> :/0
-> pipe(0x11e5000 sd=3D36 pgs=3D0 cs=3D0 l=3D0).accept sd=3D36
-> 2012-02-21 14:31:56.255063 7f4c59cee700 -- 10.177.64.4:6789/0 >>
-> 10.177.64.6:6866/8497 pipe(0x11e5000 sd=3D36 pgs=3D0 cs=3D0 l=3D1).pe=
-er
-> missing required features 2000
-> 2012-02-21 14:31:56.278601 7f4c59cee700 -- 10.177.64.4:6789/0 >> :/0
-> pipe(0x11e5280 sd=3D36 pgs=3D0 cs=3D0 l=3D0).accept sd=3D36
-> 2012-02-21 14:31:56.278775 7f4c59cee700 -- 10.177.64.4:6789/0 >>
-> 10.177.64.6:6803/10948 pipe(0x11e5280 sd=3D36 pgs=3D0 cs=3D0 l=3D1).p=
-eer
-> missing required features 2000
-> 2012-02-21 14:31:56.289903 7f4c59cee700 -- 10.177.64.4:6789/0 >> :/0
-> pipe(0x11e5780 sd=3D36 pgs=3D0 cs=3D0 l=3D0).accept sd=3D36
-> 2012-02-21 14:31:56.290199 7f4c59cee700 -- 10.177.64.4:6789/0 >>
-> 10.177.64.6:6830/7347 pipe(0x11e5780 sd=3D36 pgs=3D0 cs=3D0 l=3D1).pe=
-er
-> missing required features 2000
-> 2012-02-21 14:31:56.290768 7f4c59cee700 -- 10.177.64.4:6789/0 >> :/0
-> pipe(0xe95c80 sd=3D36 pgs=3D0 cs=3D0 l=3D0).accept sd=3D36
-> 2012-02-21 14:31:56.290944 7f4c59cee700 -- 10.177.64.4:6789/0 >>
-> 10.177.64.6:6830/7347 pipe(0xe95c80 sd=3D36 pgs=3D0 cs=3D0 l=3D1).pee=
-r missing
-> required features 200
->
-> After adding a new osd's into cluster.
->
+> >>>> of up osd changing from 62, to 70-72, and going down, ang again goin=
+g
+> >>>> up.
+> >>>>
+> >>>> 2012-02-20 20:09:47.305016 7f816009e700 osd.20 7476 heartbeat_check:
+> >>>> no heartbeat from osd.64 since 2012-02-20 20:09:30.286408 (cutoff
+> >>>> 2012-02-20 20:09:42.304975)
+> >>>> 2012-02-20 20:09:47.410159 7f816c9b8700 osd.20 7476 heartbeat_check:
+> >>>> no heartbeat from osd.61 since 2012-02-20 20:09:29.807115 (cutoff
+> >>>> 2012-02-20 20:09:42.410144)
+> >>>> 2012-02-20 20:09:47.410177 7f816c9b8700 osd.20 7476 heartbeat_check:
+> >>>> no heartbeat from osd.64 since 2012-02-20 20:09:30.286408 (cutoff
+> >>>> 2012-02-20 20:09:42.410144)
+> >>>> 2012-02-20 20:09:47.906661 7f816009e700 osd.20 7476 heartbeat_check:
+> >>>> no heartbeat from osd.61 since 2012-02-20 20:09:29.807115 (cutoff
+> >>>> 2012-02-20 20:09:42.906639)
+> >>>> 2012-02-20 20:09:47.906685 7f816009e700 osd.20 7476 heartbeat_check:
+> >>>> no heartbeat from osd.64 since 2012-02-20 20:09:30.286408 (cutoff
+> >>>> 2012-02-20 20:09:42.906639)
+> >>>> 2012-02-20 20:09:48.114431 7f815660b700 -- 10.177.64.4:0/6389 >>
+> >>>> 10.177.64.4:6854/5398 pipe(0x1398c500 sd=3D47 pgs=3D26 cs=3D2 l=3D0)=
+=2Econnect
+> >>>> claims to be 10.177.64.4:6854/17798 not 10.177.64.4:6854/5398 - wron=
+g
+> >>>> node!
+> >>>> 2012-02-20 20:09:48.410333 7f816c9b8700 osd.20 7476 heartbeat_check:
+> >>>> no heartbeat from osd.61 since 2012-02-20 20:09:29.807115 (cutoff
+> >>>> 2012-02-20 20:09:43.410313)
+> >>>> 2012-02-20 20:09:48.410361 7f816c9b8700 osd.20 7476 heartbeat_check:
+> >>>> no heartbeat from osd.64 since 2012-02-20 20:09:30.286408 (cutoff
+> >>>> 2012-02-20 20:09:43.410313)
+> >>>> 2012-02-20 20:09:51.450127 7f814b75d700 -- 10.177.64.4:0/6389 >>
+> >>>> 10.177.64.4:6855/17423 pipe(0xa86e780 sd=3D17 pgs=3D17 cs=3D2 l=3D0)=
+=2Econnect
+> >>>> claims to be 10.177.64.4:6855/17798 not 10.177.64.4:6855/17423 - wro=
+ng
+> >>>> node!
+> >>>> 2012-02-20 20:09:54.498949 7f814a248700 -- 10.177.64.4:0/6389 >>
+> >>>> 10.177.64.4:6854/19396 pipe(0x38cc780 sd=3D25 pgs=3D8 cs=3D2 l=3D0).=
+connect
+> >>>> claims to be 10.177.64.4:6854/17798 not 10.177.64.4:6854/19396 - wro=
+ng
+> >>>> node!
+> >>>>
+> >>>> Some of them is going down with this:
+> >>>>
+> >>>> 2012-02-20 18:22:15.824992 7fe3ec1c97a0 ceph version 0.41
+> >>>> (commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d), process ceph-osd,
+> >>>> pid 31379
+> >>>> 2012-02-20 18:22:15.826476 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+> >>>> mount FIEMAP ioctl is supported
+> >>>> 2012-02-20 18:22:15.826514 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+> >>>> mount did NOT detect btrfs
+> >>>> 2012-02-20 18:22:15.826613 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+> >>>> mount found snaps <>
+> >>>> 2012-02-20 18:22:15.826650 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+> >>>> mount: WRITEAHEAD journal mode explicitly enabled in conf
+> >>>> 2012-02-20 18:22:16.415671 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+> >>>> mount FIEMAP ioctl is supported
+> >>>> 2012-02-20 18:22:16.415703 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+> >>>> mount did NOT detect btrfs
+> >>>> 2012-02-20 18:22:16.415744 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+> >>>> mount found snaps <>
+> >>>> 2012-02-20 18:22:16.415758 7fe3ec1c97a0 filestore(/vol0/data/osd.24)
+> >>>> mount: WRITEAHEAD journal mode explicitly enabled in conf
+> >>>> osd/OSD.cc: In function 'void OSD::split_pg(PG*, std::map<pg_t, PG*>=
+&,
+> >>>> ObjectStore::Transaction&)' thread 7fe3df8c4700 time 2012-02-20
+> >>>> 18:22:19.900886
+> >>>> osd/OSD.cc: 4066: FAILED assert(child)
+> >>>> ceph version 0.41 (commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d)
+> >>>> 1: (OSD::split_pg(PG*, std::map<pg_t, PG*, std::less<pg_t>,
+> >>>> std::allocator<std::pair<pg_t const, PG*> > >&,
+> >>>> ObjectStore::Transaction&)+0x23e0) [0x54cd20]
+> >>>> 2: (OSD::kick_pg_split_queue()+0x880) [0x556d90]
+> >>>> 3: (OSD::handle_pg_notify(MOSDPGNotify*)+0x4b6) [0x559546]
+> >>>> 4: (OSD::_dispatch(Message*)+0x608) [0x560e58]
+> >>>> 5: (OSD::ms_dispatch(Message*)+0x11e) [0x561b7e]
+> >>>> 6: (SimpleMessenger::dispatch_entry()+0x76b) [0x5c844b]
+> >>>> 7: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x4b5cfc]
+> >>>> 8: (()+0x7efc) [0x7fe3ebda3efc]
+> >>>> 9: (clone()+0x6d) [0x7fe3ea3d489d]
+> >>>> ceph version 0.41 (commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d)
+> >>>> 1: (OSD::split_pg(PG*, std::map<pg_t, PG*, std::less<pg_t>,
+> >>>> std::allocator<std::pair<pg_t const, PG*> > >&,
+> >>>> ObjectStore::Transaction&)+0x23e0) [0x54cd20]
+> >>>> 2: (OSD::kick_pg_split_queue()+0x880) [0x556d90]
+> >>>> 3: (OSD::handle_pg_notify(MOSDPGNotify*)+0x4b6) [0x559546]
+> >>>> 4: (OSD::_dispatch(Message*)+0x608) [0x560e58]
+> >>>> 5: (OSD::ms_dispatch(Message*)+0x11e) [0x561b7e]
+> >>>> 6: (SimpleMessenger::dispatch_entry()+0x76b) [0x5c844b]
+> >>>> 7: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x4b5cfc]
+> >>>> 8: (()+0x7efc) [0x7fe3ebda3efc]
+> >>>> 9: (clone()+0x6d) [0x7fe3ea3d489d]
+> >>>> *** Caught signal (Aborted) **
+> >>>> in thread 7fe3df8c4700
+> >>>> ceph version 0.41 (commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d)
+> >>>> 1: /usr/bin/ceph-osd() [0x6099f6]
+> >>>> 2: (()+0x10060) [0x7fe3ebdac060]
+> >>>> 3: (gsignal()+0x35) [0x7fe3ea3293a5]
+> >>>> 4: (abort()+0x17b) [0x7fe3ea32cb0b]
+> >>>> 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fe3eabe7d7d]
+> >>>> 6: (()+0xb9f26) [0x7fe3eabe5f26]
+> >>>> 7: (()+0xb9f53) [0x7fe3eabe5f53]
+> >>>> 8: (()+0xba04e) [0x7fe3eabe604e]
+> >>>> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> >>>> const*)+0x200) [0x5dc6b0]
+> >>>> 10: (OSD::split_pg(PG*, std::map<pg_t, PG*, std::less<pg_t>,
+> >>>> std::allocator<std::pair<pg_t const, PG*> > >&,
+> >>>> ObjectStore::Transaction&)+0x23e0) [0x54cd20]
+> >>>> 11: (OSD::kick_pg_split_queue()+0x880) [0x556d90]
+> >>>> 12: (OSD::handle_pg_notify(MOSDPGNotify*)+0x4b6) [0x559546]
+> >>>> 13: (OSD::_dispatch(Message*)+0x608) [0x560e58]
+> >>>> 14: (OSD::ms_dispatch(Message*)+0x11e) [0x561b7e]
+> >>>> 15: (SimpleMessenger::dispatch_entry()+0x76b) [0x5c844b]
+> >>>> 16: (SimpleMessenger::DispatchThread::entry()+0x1c) [0x4b5cfc]
+> >>>> 17: (()+0x7efc) [0x7fe3ebda3efc]
+> >>>> 18: (clone()+0x6d) [0x7fe3ea3d489d]
+> >>>> 2012-02-20 18:23:57.915653 7fa818e3e7a0 ceph version 0.41
+> >>>> (commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d), process ceph-osd,
+> >>>> pid 6596
+> >>>>
+> >>>> Do you have any ideas ?? if you need some data from cluster, or a co=
+re
+> >>>> dumps from osd i have a lot of them, but they are large.
+> >>>>
+> >>>> --
+> >>>> -----
+> >>>> Pozdrawiam
+> >>>>
+> >>>> S?awek "sZiBis" Skowron
+> >>>
+> >>>
+> >>>
+> >>> --
+> >>> -----
+> >>> Pozdrawiam
+> >>>
+> >>> S?awek "sZiBis" Skowron
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> >>> the body of a message to majordomo@vger.kernel.org
+> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>
 > --
-> -----
-> Pozdrawiam
->
-> S=C5=82awek "sZiBis" Skowron
-
-
-
---=20
------
-Pozdrawiam
-
-S=C5=82awek "sZiBis" Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-878886453-1329840002=:26279--
