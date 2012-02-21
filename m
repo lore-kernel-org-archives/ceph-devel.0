@@ -1,42 +1,62 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Re: v0.42 not compiling .deb's (but v0.41 can)
-Date: Tue, 21 Feb 2012 10:58:49 +0100
-Message-ID: <CAPUexz9b3-qCDLZ4uHmamdygh54X5WA5J5nAdL3RqxcuxFZ3Zg@mail.gmail.com>
-References: <81C477727102DA4E9B2605AC748C495407E36DF7D7@exch10>
-	<81C477727102DA4E9B2605AC748C495407E36DF7D9@exch10>
+From: =?ISO-8859-15?Q?Jens_Rehp=F6hler?= <jens.rehpoehler@filoo.de>
+Subject: Problems after crash yesterday
+Date: Tue, 21 Feb 2012 11:24:57 +0100
+Message-ID: <4F4370F9.5030807@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:38121 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753725Ab2BUJ6v convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Feb 2012 04:58:51 -0500
-Received: by qadc10 with SMTP id c10so4128832qad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Feb 2012 01:58:50 -0800 (PST)
-In-Reply-To: <81C477727102DA4E9B2605AC748C495407E36DF7D9@exch10>
+Received: from mail-3.de-punkt.de ([93.190.64.33]:33566 "EHLO
+	mail-3.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752281Ab2BUKZA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Feb 2012 05:25:00 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: sage@newdream.net
 
-On Tue, Feb 21, 2012 at 9:57 AM, Paul Pettigrew
-<Paul.Pettigrew@mach.com.au> wrote:
-> I was able to workaround this by using the slower build command (ie n=
-ot adding the "-j16" option):
-> =C2=A0dpkg-buildpackage
+Hi sage,
 
-=46WIW, I just built 0.42 on squeeze amd64, with "dpkg-buildpackage -j4=
-"
-on a 2-core virtual machine, and that build completed just fine.
+sorry ... we have to disturb you again.
 
-Cheers,
-=46lorian
+After the node crash (oli wrote about that) we have some problems.
 
---=20
-Need help with High Availability?
-http://www.hastexo.com/now
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The recovery process is stuck at:
+
+2012-02-21 11:20:15.948527    pg v986715: 2046 pgs: 2035 active+clean,
+10 active+clean+inconsistent, 1 active+recovering+remapped+backfill;
+1988 GB data, 3823 GB used, 25970 GB / 29794 GB avail; 1/1121879
+degraded (0.000%)
+
+We also see this messages every few seconds:
+
+2012-02-21 11:20:15.106958   log 2012-02-21 11:20:05.765762 osd.3
+10.10.10.8:6803/29916 131581 : [WRN] old request pg_log(0.ea epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently started
+2012-02-21 11:20:15.106958   log 2012-02-21 11:20:05.765775 osd.3
+10.10.10.8:6803/29916 131582 : [WRN] old request pg_log(2.e8 epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no
+flag points reached
+2012-02-21 11:20:15.106958   log 2012-02-21 11:20:06.765912 osd.3
+10.10.10.8:6803/29916 131583 : [WRN] old request pg_log(0.ea epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently started
+2012-02-21 11:20:15.106958   log 2012-02-21 11:20:06.765943 osd.3
+10.10.10.8:6803/29916 131584 : [WRN] old request pg_log(2.e8 epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no
+flag points reached
+2012-02-21 11:20:15.106958   log 2012-02-21 11:20:07.766312 osd.3
+10.10.10.8:6803/29916 131585 : [WRN] old request pg_log(0.ea epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently started
+2012-02-21 11:20:15.106958   log 2012-02-21 11:20:07.766324 osd.3
+10.10.10.8:6803/29916 131586 : [WRN] old request pg_log(2.e8 epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no
+flag points reached
+2012-02-21 11:20:15.106958   log 2012-02-21 11:20:08.766467 osd.3
+10.10.10.8:6803/29916 131587 : [WRN] old request pg_log(0.ea epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently started
+
+Any ideas how we can get the cluster back to consistent state  ?
+
+Thank you !!
+
+Jens
