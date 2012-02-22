@@ -1,51 +1,73 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Performance test on Ceph cluster
-Date: Wed, 22 Feb 2012 09:55:15 -0800
-Message-ID: <CAF3hT9BFCUwkQhPsNm6fYW4wePRaOr_pK1MfxHTtnYSvBJoupA@mail.gmail.com>
-References: <loom.20120222T102830-526@post.gmane.org>
+Subject: Re: [PATCH] ceph.spec.in: Move libcls_*.so from -devel to base package
+Date: Wed, 22 Feb 2012 10:00:15 -0800
+Message-ID: <CAF3hT9Cz6fe46t6dO137V+qoRG=UwO3eTNubVUpmBpFTVj-sZw@mail.gmail.com>
+References: <20120215162908.GA22127@homac.suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:59193 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751387Ab2BVRzQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Feb 2012 12:55:16 -0500
-Received: by yhoo21 with SMTP id o21so195078yho.19
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Feb 2012 09:55:15 -0800 (PST)
-In-Reply-To: <loom.20120222T102830-526@post.gmane.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:48336 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751966Ab2BVSAQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Feb 2012 13:00:16 -0500
+Received: by iacb35 with SMTP id b35so325705iac.19
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Feb 2012 10:00:15 -0800 (PST)
+In-Reply-To: <20120215162908.GA22127@homac.suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: madhusudhana <madhusudhana.u.acharya@gmail.com>
+To: Holger Macht <hmacht@suse.de>
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, Feb 22, 2012 at 1:39 AM, madhusudhana
-<madhusudhana.u.acharya@gmail.com> wrote:
-> Hi
-> I have finally configured a ceph cluster with 8 nodes. I have 2 MDS
-> servers and 3 monitors and rest of 3 nodes are OSD. Each system has
-> 2T SATA drives. I have 3 partitions created, one for root file
-> system, another for CEPH journal and the rest of the space is for
-> OSD. I was able to get 5.6T space from three nodes.
->
-> All the machines are of same type (HP DL160 G7) with 48 of RAM and
-> quad core dual cpu's.
->
-> I am using iozone for testing the performance against NetApp filer
-> Below is the command what I am using for iozone test
->
-> /opt/iozone/bin/iozone -R -e -l i -u 1 -r 4096k -s 1024m -F /mnt/ceph-
-> test/ceph.iozone
-
-If I'm reading it correctly you're using Direct IO? That's almost
-certainly just going to be slow...
-
->
-> When I see the result, the value from ceph cluster is not at all
-> coming near to an entry level NetApp filer. I would like to
-> know the ideal way (if there is any) for testing ceph cluster
-> performance so that we can compare it with other file systems.
-> If required, I can share the test results.
-
-Please do, or we won't have anywhere to go off of. :) And are you
-running this on GigE or 10GigE?
+I didn't see him say so, but Sage pulled this in last week...thanks! :)
 -Greg
+
+On Wed, Feb 15, 2012 at 8:29 AM, Holger Macht <hmacht@suse.de> wrote:
+> OSDs (src/osd/ClassHandler.cc) specifically look for libcls_*.so in
+> /usr/$libdir/rados-classes, so libcls_rbd.so and libcls_rgw.so need t=
+o
+> be shipped along with the base package.
+>
+> Signed-off-by: Holger Macht <hmacht@suse.de>
+> ---
+> =A0ceph.spec.in | =A0 =A06 ++----
+> =A01 files changed, 2 insertions(+), 4 deletions(-)
+>
+> diff --git a/ceph.spec.in b/ceph.spec.in
+> index 48fd4ee..58c3af7 100644
+> --- a/ceph.spec.in
+> +++ b/ceph.spec.in
+> @@ -348,8 +348,8 @@ fi
+> =A0%ghost %dir %{_localstatedir}/run/ceph/
+> =A0%dir %{_sysconfdir}/ceph/
+> =A0/usr/sbin/rcceph
+> -%{_libdir}/rados-classes/libcls_rbd.so.*
+> -%{_libdir}/rados-classes/libcls_rgw.so.*
+> +%{_libdir}/rados-classes/libcls_rbd.so*
+> +%{_libdir}/rados-classes/libcls_rgw.so*
+>
+> =A0##################################################################=
+###############
+> =A0%files fuse
+> @@ -377,8 +377,6 @@ fi
+> =A0%dir %{_includedir}/rbd
+> =A0%{_includedir}/rbd/librbd.h
+> =A0%{_includedir}/rbd/librbd.hpp
+> -%{_libdir}/rados-classes/libcls_rbd.so
+> -%{_libdir}/rados-classes/libcls_rgw.so
+> =A0%{_libdir}/libcephfs.so
+> =A0%{_libdir}/librbd.so
+> =A0%{_libdir}/librgw.so
+> --
+> 1.7.7
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
