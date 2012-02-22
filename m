@@ -1,55 +1,174 @@
-From: madhusudhana <madhusudhana.u.acharya@gmail.com>
-Subject: Performance test on Ceph cluster
-Date: Wed, 22 Feb 2012 09:39:00 +0000 (UTC)
-Message-ID: <loom.20120222T102830-526@post.gmane.org>
+From: =?ISO-8859-15?Q?Jens_Rehp=F6hler?= <jens.rehpoehler@filoo.de>
+Subject: Re: Problems after crash yesterday
+Date: Wed, 22 Feb 2012 10:53:41 +0100
+Message-ID: <4F44BB25.10202@filoo.de>
+References: <4F4370F9.5030807@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig640586105E9224535C0D5DB5"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:43680 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752900Ab2BVJjO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 22 Feb 2012 04:39:14 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1S08fG-0002Dq-NS
-	for ceph-devel@vger.kernel.org; Wed, 22 Feb 2012 10:39:10 +0100
-Received: from 202.164.25.5 ([202.164.25.5])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Feb 2012 10:39:10 +0100
-Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Feb 2012 10:39:10 +0100
+Received: from mail-3.de-punkt.de ([93.190.64.33]:54279 "EHLO
+	mail-3.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754615Ab2BVJxs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Feb 2012 04:53:48 -0500
+In-Reply-To: <4F4370F9.5030807@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: sage@newdream.net
 
-Hi
-I have finally configured a ceph cluster with 8 nodes. I have 2 MDS
-servers and 3 monitors and rest of 3 nodes are OSD. Each system has
-2T SATA drives. I have 3 partitions created, one for root file
-system, another for CEPH journal and the rest of the space is for
-OSD. I was able to get 5.6T space from three nodes. 
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig640586105E9224535C0D5DB5
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: quoted-printable
 
-All the machines are of same type (HP DL160 G7) with 48 of RAM and 
-quad core dual cpu's. 
+Some Additios: meanwhile we are at the state:
 
-I am using iozone for testing the performance against NetApp filer
-Below is the command what I am using for iozone test
+2012-02-22 10:38:49.587403    pg v1044553: 2046 pgs: 2036 active+clean,
+10 active+clean+inconsistent; 2110 GB data, 4061 GB used, 25732 GB /
+29794 GB avail
 
-/opt/iozone/bin/iozone -R -e -l i -u 1 -r 4096k -s 1024m -F /mnt/ceph-
-test/ceph.iozone
+The  active+recovering+remapped+backfill disappeared auf a restart of a
+cashed OSD.
 
-When I see the result, the value from ceph cluster is not at all
-coming near to an entry level NetApp filer. I would like to
-know the ideal way (if there is any) for testing ceph cluster 
-performance so that we can compare it with other file systems.
-If required, I can share the test results.
+The OSD crashed after issuing the command "ceph pg repair 106.3".
+
+The repeating message is also there:
+
+2012-02-22 10:52:36.198983   log 2012-02-22 10:52:32.182488 osd.3
+10.10.10.8:6803/29916 302906 : [WRN] old request pg_log(0.ea epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently star=
+ted
+2012-02-22 10:52:36.198983   log 2012-02-22 10:52:32.182500 osd.3
+10.10.10.8:6803/29916 302907 : [WRN] old request pg_log(2.e8 epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no
+flag points reached
+2012-02-22 10:52:36.198983   log 2012-02-22 10:52:33.182615 osd.3
+10.10.10.8:6803/29916 302908 : [WRN] old request pg_log(0.ea epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently star=
+ted
+2012-02-22 10:52:36.198983   log 2012-02-22 10:52:33.182629 osd.3
+10.10.10.8:6803/29916 302909 : [WRN] old request pg_log(2.e8 epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no
+flag points reached
+2012-02-22 10:52:36.198983   log 2012-02-22 10:52:34.182839 osd.3
+10.10.10.8:6803/29916 302910 : [WRN] old request pg_log(0.ea epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently star=
+ted
+2012-02-22 10:52:36.198983   log 2012-02-22 10:52:34.182853 osd.3
+10.10.10.8:6803/29916 302911 : [WRN] old request pg_log(2.e8 epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no
+flag points reached
+2012-02-22 10:52:36.198983   log 2012-02-22 10:52:35.183075 osd.3
+10.10.10.8:6803/29916 302912 : [WRN] old request pg_log(0.ea epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently star=
+ted
+2012-02-22 10:52:36.198983   log 2012-02-22 10:52:35.183089 osd.3
+10.10.10.8:6803/29916 302913 : [WRN] old request pg_log(2.e8 epoch 849
+query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no
+flag points reached
+
+Seems to hang since our crash.
+
+At last we see some scrub error like this:
+
+2012-02-22 10:47:35.049386 log 2012-02-22 10:47:25.310571 osd.4
+10.10.10.10:6800/17745 34356 : [ERR] 16.4 osd.2: soid
+ce7f1004/rb.0.0.00000000001a/headmissing attr _, missing attr snapset
+
+any advice ?
+
+thanks
+
+Jens
 
 
-Any suggestion greatly appreciated.
 
-Thanks
-__madhusudhan
+Am 21.02.2012 11:24, schrieb Jens Rehp=F6hler:
+> Hi sage,
+>
+> sorry ... we have to disturb you again.
+>
+> After the node crash (oli wrote about that) we have some problems.
+>
+> The recovery process is stuck at:
+>
+> 2012-02-21 11:20:15.948527    pg v986715: 2046 pgs: 2035 active+clean,
+> 10 active+clean+inconsistent, 1 active+recovering+remapped+backfill;
+> 1988 GB data, 3823 GB used, 25970 GB / 29794 GB avail; 1/1121879
+> degraded (0.000%)
+>
+> We also see this messages every few seconds:
+>
+> 2012-02-21 11:20:15.106958   log 2012-02-21 11:20:05.765762 osd.3
+> 10.10.10.8:6803/29916 131581 : [WRN] old request pg_log(0.ea epoch 849
+> query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently st=
+arted
+> 2012-02-21 11:20:15.106958   log 2012-02-21 11:20:05.765775 osd.3
+> 10.10.10.8:6803/29916 131582 : [WRN] old request pg_log(2.e8 epoch 849
+> query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no=
 
+> flag points reached
+> 2012-02-21 11:20:15.106958   log 2012-02-21 11:20:06.765912 osd.3
+> 10.10.10.8:6803/29916 131583 : [WRN] old request pg_log(0.ea epoch 849
+> query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently st=
+arted
+> 2012-02-21 11:20:15.106958   log 2012-02-21 11:20:06.765943 osd.3
+> 10.10.10.8:6803/29916 131584 : [WRN] old request pg_log(2.e8 epoch 849
+> query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no=
+
+> flag points reached
+> 2012-02-21 11:20:15.106958   log 2012-02-21 11:20:07.766312 osd.3
+> 10.10.10.8:6803/29916 131585 : [WRN] old request pg_log(0.ea epoch 849
+> query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently st=
+arted
+> 2012-02-21 11:20:15.106958   log 2012-02-21 11:20:07.766324 osd.3
+> 10.10.10.8:6803/29916 131586 : [WRN] old request pg_log(2.e8 epoch 849
+> query_epoch 843) v2 received at 2012-02-20 17:39:41.774662 currently no=
+
+> flag points reached
+> 2012-02-21 11:20:15.106958   log 2012-02-21 11:20:08.766467 osd.3
+> 10.10.10.8:6803/29916 131587 : [WRN] old request pg_log(0.ea epoch 849
+> query_epoch 843) v2 received at 2012-02-20 17:39:41.774507 currently st=
+arted
+>
+> Any ideas how we can get the cluster back to consistent state  ?
+>
+> Thank you !!
+>
+> Jens
+
+
+--=20
+mit freundlichen Gr=FCssen
+
+Jens Rehp=F6hler
+
+----------------------------------------------------------------------
+Filoo GmbH
+Moltkestr. 25a
+33330 G=FCtersloh
+HRB4355 AG G=FCtersloh
+
+Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | Dr. C.Kunz
+Telefon: +49 5241 8673012 | Mobil: +49 151 54645798
+Hotline: 07000-3378658 (14 Ct/min) Fax: +49 5241 8673020
+
+
+
+--------------enig640586105E9224535C0D5DB5
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAk9EuykACgkQrXbD/qaJ+dMhTwCfeucntPTKXVP+lh3O4NPWCJC1
+BhwAniHccsw/z9stwjbHUUsA+Ljh54Gf
+=ZuZ9
+-----END PGP SIGNATURE-----
+
+--------------enig640586105E9224535C0D5DB5--
