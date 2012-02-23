@@ -1,67 +1,49 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: I found some problem in CRUSH code
-Date: Thu, 23 Feb 2012 10:54:07 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1202231052480.31303@cobra.newdream.net>
-References: <4F3BB84E.50209@gmail.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: ceph does not work
+Date: Thu, 23 Feb 2012 11:00:21 -0800
+Message-ID: <CAORUGqC_bDOzyo4nmwT6gUo_yOsyEz3nUFdZs5+m0WdHFMraYw@mail.gmail.com>
+References: <1329988516.4f4603a4d1995@mail.inbox.lv>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38180 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752680Ab2BWSyL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Feb 2012 13:54:11 -0500
-In-Reply-To: <4F3BB84E.50209@gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:56245 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755577Ab2BWTAm convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Feb 2012 14:00:42 -0500
+Received: by wgbdt10 with SMTP id dt10so1375715wgb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2012 11:00:41 -0800 (PST)
+In-Reply-To: <1329988516.4f4603a4d1995@mail.inbox.lv>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ZhuRongze <zrz4ceph@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?0JTQtdC90LjRgdC60LAt0YDQtdC00LjRgdC60LA=?= <slim@inbox.lv>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Thu, Feb 23, 2012 at 01:15, =D0=94=D0=B5=D0=BD=D0=B8=D1=81=D0=BA=D0=B0=
+-=D1=80=D0=B5=D0=B4=D0=B8=D1=81=D0=BA=D0=B0 <slim@inbox.lv> wrote:
+> ehllo here,
+>
+> i have tried to setup ceph .41 in simple configuration:
+> 3 nodes, each running mon, mds & osd with replication level 3 for dat=
+a & metadata pools.
+> Each node mounts ceph locally via ceph-fuse
+> cluster seems running well until one of the nodes goes down for simpl=
+e reboot.
+> Then all mount points become inaccessible, data transfer hangs and cl=
+uster stop working
+>
+> What is the purpose of ceph software while such simple case does not =
+go through ?
 
-Yes, that's a bug... Those ='s should be -, as with the straw bucket type.  
-Opened http://tracker.newdream.net/issues/2096
+You have a replication factor of 3, and 3 OSDs. If one of them is
+down, the replication factor of 3 cannot be satisfied anymore. You
+need either more nodes, or a smaller replication factor.
 
-Thanks!  This'll be fixed in v0.43.
-sage
-
-
-On Wed, 15 Feb 2012, ZhuRongze wrote:
-
-> Hi,
-> 
-> The function crush_adjust_tree_bucket_item_weight in
-> ceph-0.41/src/crush/builder.c seem to  have a bug. The argument weight is no
-> use, because it is assigned .
-> --------------------------------------------------------------------
-> int crush_adjust_tree_bucket_item_weight(struct crush_bucket_tree *bucket, int
-> item, int weight)
-> {
->     int diff;
->     int node;
->     unsigned i, j;
->     unsigned depth = calc_depth(bucket->h.size);
-> 
->     for (i = 0; i < bucket->h.size; i++) {
->         if (bucket->h.items[i] == item)
->             break;
->     }
->     if (i == bucket->h.size)
->         return 0;
-> 
->     node = crush_calc_tree_node(i);
->     diff = weight = bucket->node_weights[node];
->     bucket->node_weights[node] = weight;
->     bucket->h.weight += diff;
-> 
->     for (j=1; j<depth; j++) {
->         node = parent(node);
->         bucket->node_weights[node] += diff;
->     }
-> 
->     return diff;
-> 
-> --------------------------------------------------------------------
-> The function crush_adjust_list_bucket_item_weight also have a same problem.
-> 
-> -ZhuRongze
-> 
+Ceph is not an eventually consistent system; building a POSIX
+filesystem on top of one is pretty much impossible. With Ceph, all
+replicas are always kept up to date.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
