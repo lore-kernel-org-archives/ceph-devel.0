@@ -1,167 +1,95 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] Add old_inodes to emetablob
-Date: Wed, 22 Feb 2012 22:04:07 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1202222159060.27988@cobra.newdream.net>
-References: <orboos1qyu.fsf@livre.localdomain>
+From: madhusudhana <madhusudhana.u.acharya@gmail.com>
+Subject: Re: Performance test on Ceph cluster
+Date: Thu, 23 Feb 2012 07:12:56 +0000 (UTC)
+Message-ID: <loom.20120223T080047-368@post.gmane.org>
+References: <loom.20120222T102830-526@post.gmane.org> <CAORUGqC4Nof1d0V1K-ntNuRMh6c27AC+cB67HCxsKR-fWa+qPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54771 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752154Ab2BWGEM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Feb 2012 01:04:12 -0500
-In-Reply-To: <orboos1qyu.fsf@livre.localdomain>
+Received: from plane.gmane.org ([80.91.229.3]:40861 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751623Ab2BWHNN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 23 Feb 2012 02:13:13 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1S0SrY-0005J2-LC
+	for ceph-devel@vger.kernel.org; Thu, 23 Feb 2012 08:13:12 +0100
+Received: from 202.164.25.5 ([202.164.25.5])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2012 08:13:12 +0100
+Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2012 08:13:12 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Applied, with a small cleanup (wip-mds-old-inodes).. I'll merge it in 
-tomorrow after a bit of testing.
-
-On Tue, 21 Feb 2012, Alexandre Oliva wrote:
-> This was supposed to fix bug 1946, and likely bug 1849 too, but it looks
-> like something's still missing for a complete fix.  fuse-unmounting
-> between touching a dir and creating a snapshot seems to help get correct
-> snapshot timestamp,
-
-Hmm, that sounds like ceph-fuse isn't sending the write flushsnap cap 
-message.  I forget.. have you tried the same with the kernel client?
-
-> but touching the dir after remounting and restarting
-> the mds shortly afterwards very often results in the wrong timestamp for
-> the snapshot.
-
-Do you 'sync' after the touch, by any chance?  It may be lost between the 
-client and mds, not in the MDS journal.  A full mds log of this should 
-have the answer.
-
-Thanks for digging into this!
-sage
-
-
+Tommi Virtanen <tommi.virtanen <at> dreamhost.com> writes:
 
 > 
-> 8<-----
+> On Wed, Feb 22, 2012 at 01:39, madhusudhana
+> <madhusudhana.u.acharya <at> gmail.com> wrote:
+> > Hi
+> > I have finally configured a ceph cluster with 8 nodes. I have 2 MDS
+> > servers and 3 monitors and rest of 3 nodes are OSD. Each system has
+> > 2T SATA drives. I have 3 partitions created, one for root file
+> > system, another for CEPH journal and the rest of the space is for
+> > OSD. I was able to get 5.6T space from three nodes.
+> >
+> > All the machines are of same type (HP DL160 G7) with 48 of RAM and
+> > quad core dual cpu's.
+> >
+> > I am using iozone for testing the performance against NetApp filer
+> > Below is the command what I am using for iozone test
+> >
+> > /opt/iozone/bin/iozone -R -e -l i -u 1 -r 4096k -s 1024m -F /mnt/ceph-
+> > test/ceph.iozone
 > 
-> Add information about old inodes to the mds journal.
+> 1. Make sure you have only 1 active MDS, multi-MDS is an extra
+> complication you're better skipping right now.
+> 2. What underlying filesystem are you using for the OSDs?
+> 3. What Linux kernel version is running on the OSDs?
+> 4. What machine is the client, running iozone? How is it connected to
+> the others? Kernel client or FUSE?
+> 5. What Linux kernel version is running on the client?
 > 
-> Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-> ---
->  src/mds/events/EMetaBlob.h |   32 +++++++++++++++++++++++++-------
->  src/mds/journal.cc         |    2 ++
->  2 files changed, 27 insertions(+), 7 deletions(-)
-> 
-> diff --git a/src/mds/events/EMetaBlob.h b/src/mds/events/EMetaBlob.h
-> index e03f147..747bff3 100644
-> --- a/src/mds/events/EMetaBlob.h
-> +++ b/src/mds/events/EMetaBlob.h
-> @@ -68,6 +68,8 @@ public:
->      bufferlist snapbl;
->      bool dirty;
->      struct default_file_layout *dir_layout;
-> +    typedef map<snapid_t, old_inode_t> old_inodes_t;
-> +    old_inodes_t *old_inodes;
->  
->      bufferlist _enc;
->  
-> @@ -77,10 +79,11 @@ public:
->      fullbit(const string& d, snapid_t df, snapid_t dl, 
->  	    version_t v, inode_t& i, fragtree_t &dft, 
->  	    map<string,bufferptr> &xa, const string& sym,
-> -	    bufferlist &sbl, bool dr, default_file_layout *defl = NULL) :
-> +	    bufferlist &sbl, bool dr, default_file_layout *defl = NULL,
-> +	    old_inodes_t *oi = NULL) :
->        //dn(d), dnfirst(df), dnlast(dl), dnv(v), 
->        //inode(i), dirfragtree(dft), xattrs(xa), symlink(sym), snapbl(sbl), dirty(dr) 
-> -      dir_layout(NULL), _enc(1024)
-> +      dir_layout(NULL), old_inodes(NULL), _enc(1024)
->      {
->        ::encode(d, _enc);
->        ::encode(df, _enc);
-> @@ -98,15 +101,21 @@ public:
->  	  ::encode(*defl, _enc);
->        }
->        ::encode(dr, _enc);      
-> +      ::encode(oi ? true : false, _enc);
-> +      if (oi)
-> +	::encode(*oi, _enc);
->      }
-> -    fullbit(bufferlist::iterator &p) : dir_layout(NULL) { decode(p); }
-> -    fullbit() : dir_layout(NULL) {}
-> +    fullbit(bufferlist::iterator &p) : dir_layout(NULL), old_inodes(NULL) {
-> +      decode(p);
-> +    }
-> +    fullbit() : dir_layout(NULL), old_inodes(NULL) {}
->      ~fullbit() {
-> +      delete old_inodes;
->        delete dir_layout;
->      }
->  
->      void encode(bufferlist& bl) const {
-> -      __u8 struct_v = 2;
-> +      __u8 struct_v = 3;
->        ::encode(struct_v, bl);
->        assert(_enc.length());
->        bl.append(_enc); 
-> @@ -135,6 +144,14 @@ public:
->  	}
->        }
->        ::decode(dirty, bl);
-> +      if (struct_v >= 3) {
-> +	bool old_inodes_present;
-> +	::decode(old_inodes_present, bl);
-> +	if (old_inodes_present) {
-> +	  old_inodes = new old_inodes_t;
-> +	  ::decode(*old_inodes, bl);
-> +	}
-> +      }
->      }
->  
->      void update_inode(MDS *mds, CInode *in);
-> @@ -562,7 +579,8 @@ private:
->  									 *pi, in->dirfragtree,
->  									 *in->get_projected_xattrs(),
->  									 in->symlink, snapbl,
-> -									 dirty, default_layout)));
-> +									 dirty, default_layout,
-> +									 &in->old_inodes)));
->      if (pi)
->        lump.get_dfull().back()->inode = *pi;
->      return &lump.get_dfull().back()->inode;
-> @@ -614,7 +632,7 @@ private:
->  		       0,
->  		       *pi, *pdft, *px,
->  		       in->symlink, snapbl,
-> -		       dirty, default_layout);
-> +		       dirty, default_layout, &in->old_inodes);
->      return &root->inode;
->    }
->    
-> diff --git a/src/mds/journal.cc b/src/mds/journal.cc
-> index 5f74bbb..fd45213 100644
-> --- a/src/mds/journal.cc
-> +++ b/src/mds/journal.cc
-> @@ -416,6 +416,8 @@ void EMetaBlob::fullbit::update_inode(MDS *mds, CInode *in)
->    } else if (in->inode.is_symlink()) {
->      in->symlink = symlink;
->    }
-> +  if (old_inodes)
-> +    in->old_inodes = *old_inodes;
->  }
->  
->  void EMetaBlob::replay(MDS *mds, LogSegment *logseg)
-> -- 
-> 1.7.7.6
-> 
-> -- 
-> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-> You must be the change you wish to see in the world. -- Gandhi
-> Be Free! -- http://FSFLA.org/   FSF Latin America board member
-> Free Software Evangelist      Red Hat Brazil Compiler Engineer
+> Going forward, in a setup like that you could put OSDs on the machines
+> that run ceph-mon; ceph-mon is very lightweight and doesn't need
+> dedicated machines in a small setup.
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
+> the body of a message to majordomo <at> vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
+1. can you please let me know how I can make only 1 MDS active ?
+2. BTRFS for all OSD's
+3. All hosts (including OSD) in my ceph cluster are running 3.0.9 ver
+                [root@ceph-node-8 ~]# uname -r
+                3.0.9
+4. All 9 machines are replica of each other. I have imaged them using 
+systemimager. Only difference is 9th node is not a part of CEPH 
+cluster. I mounted ceph cluster to this node using mount -t ceph 
+command
+5. All 9 clients are running same version of CentOS and Kernel with
+1GigE interface
+
+You mean to say, I can have ceph mon/OSD's running in the 
+same machine ? but, in ceph wiki, i have read that its better to 
+have different machines for each mds/mon/osd. 
+
+I assume that ceph uses whatever ethernet interface i have (1GigE)
+in my system to load balance the cluster in case of node failure and
+node addition. Won't this uses entire bandwidth during load 
+balancing ? won't this cause bandwidth saturation for clients ?
+
+I would like to know what benchmark I should use to test CEPH ?
+I want to present the data to my management how CEPH can perform when
+compared with other file systems (like GlusterFS/NetApp/Lustre)
+
+Thanks
+Madhusudhana
+
+
