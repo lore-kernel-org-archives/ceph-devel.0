@@ -1,80 +1,71 @@
 From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Problems after crash yesterday
-Date: Thu, 23 Feb 2012 21:14:31 -0800
-Message-ID: <CAF3hT9DhHzr0Ho2Uv6f_1K4aieEnbjtfpKH1UCPpmm4BQHHJEw@mail.gmail.com>
-References: <4F4370F9.5030807@filoo.de>
-	<4F44BB25.10202@filoo.de>
-	<406144037926269578@unknownmsgid>
-	<4F454F4F.2080104@filoo.de>
+Subject: Re: Repeated messages of "heartbeat_check: no heartbeat from"
+Date: Thu, 23 Feb 2012 21:18:10 -0800
+Message-ID: <CAF3hT9BPkWi6XXrKeyAv3pXXdPk+eRt=faQCv3ri7eDZey63qw@mail.gmail.com>
+References: <1312546310.2754.41.camel@wido-laptop.pcextreme.nl>
+	<1312972246.2742.7.camel@wido-desktop>
+	<4F3BBD50.3030905@widodh.nl>
+	<CAF3hT9DHxakM8PAAPuZBUjOHHo-0gbU3qLW0jkkGKTR79Rg5qQ@mail.gmail.com>
+	<4F4618D3.4030501@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:47874 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:36383 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750970Ab2BXFOb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Feb 2012 00:14:31 -0500
-Received: by iacb35 with SMTP id b35so2544067iac.19
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2012 21:14:31 -0800 (PST)
-In-Reply-To: <4F454F4F.2080104@filoo.de>
+	with ESMTP id S1750709Ab2BXFSK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Feb 2012 00:18:10 -0500
+Received: by iacb35 with SMTP id b35so2546750iac.19
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2012 21:18:10 -0800 (PST)
+In-Reply-To: <4F4618D3.4030501@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Jens_Rehp=F6hler?= <jens.rehpoehler@filoo.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "sage@newdream.net" <sage@newdream.net>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-On Wed, Feb 22, 2012 at 12:25 PM, Jens Rehp=F6hler
-<jens.rehpoehler@filoo.de> wrote:
-> Hi Gregory,
+On Thu, Feb 23, 2012 at 2:45 AM, Wido den Hollander <wido@widodh.nl> wr=
+ote:
+> Hi,
 >
 >
-> On 22.02.2012 18:12, Gregory Farnum wrote:
->> On Feb 22, 2012, at 1:53 AM, "Jens Rehp=F6hler" <jens.rehpoehler@fil=
-oo.de> wrote:
+>
+> On 02/22/2012 07:08 PM, Gregory Farnum wrote:
 >>
->>> Some Additios: meanwhile we are at the state:
->>>
->>> 2012-02-22 10:38:49.587403 =A0 =A0pg v1044553: 2046 pgs: 2036 activ=
-e+clean,
->>> 10 active+clean+inconsistent; 2110 GB data, 4061 GB used, 25732 GB =
-/
->>> 29794 GB avail
->>>
->>> The =A0active+recovering+remapped+backfill disappeared auf a restar=
-t of a
->>> cashed OSD.
->>>
->>> The OSD crashed after issuing the command "ceph pg repair 106.3".
->>>
->>> The repeating message is also there:
->> Hmm. These messages indicate there are requests that came in that
->> never got answered -- or else that the tracking code isn't quite rig=
-ht
->> (it's new functionality). What version are you running?
-> We use:
+>> Wido,
+>> Sorry we lost track of this last week =97 we were all distracted by =
+=46AST 12!
+>> :)
+>>
+> No problem!
 >
-> root@fcmsnode0:~# ceph -v
-> ceph version 0.42-62-gd6de0bb
-> (commit:d6de0bb83bcac238b3a6a376915e06fb7129b2c8)
 >
-> Kernel is 3.2.1
+>> So it looks like they're both on the same map and osd.4 is sending
+>> pings to osd.19, but osd.19 is just ignoring them? Or do you really
+>> have on debug_os and not debug_osd? :)
 >
-> i accidently updated one of our OSDs to 0.42 -> So we updated the who=
-le
-> cluster.
 >
-> The OSD repeated to crash while issuing =A0"repair" command. The
-> inconsistent PGs
-> are all on the same (newly added) node.
+> That was a typo, I have debug_osd set to 20.
+>
+> I haven't rebooted the OSD's since and now osd.4 and osd.19 are not
+> complaining anymore, but it's now a different set of OSD's who are sa=
+ying
+> the other one is down.
+>
+> I'm still running v0.41 btw. I'm not going to touch the cluster until=
+ this
+> one is tracked down, it keeps coming back.
+>
+> Suggestions?
 
-Oh, that's interesting. Are all the other nodes in the cluster up and i=
-n?
+Well, like Sage said long ago, this will be easiest to diagnose if
+there are logs available for both OSDs that cover the entire time
+after one requested heartbeats from the other.
 
-In the next version or two we will have a lot more capability to look
-into what's happening with stuck PGs like this, but for the moment we
-need a log. If all the other nodes in the system are up, can you
-restart this new OSD with "debug osd =3D 20" and "debug ms =3D 1" added=
- to
-its config?
+If you do have these and can post them somewhere, I'm sure Sage or I
+will find it interesting enough to look through...  ;)
+If not, I'm out of ideas, although I'm not super-familiar with the
+heartbeat code since Sage rewrote it so we may be able to come up with
+something if we discuss it more.
 -Greg
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
