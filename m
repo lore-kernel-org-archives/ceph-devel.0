@@ -1,58 +1,42 @@
-From: Sage Weil <sage@newdream.net>
+From: Laszlo Boszormenyi <gcs@debian.hu>
 Subject: Re: ceph v0.42 sync
-Date: Sun, 26 Feb 2012 21:29:04 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1202262126110.23717@cobra.newdream.net>
+Date: Mon, 27 Feb 2012 07:01:12 +0100
+Message-ID: <1330322472.3834.56.camel@julia.gcs.org.hu>
 References: <1330250058.3834.46.camel@julia.gcs.org.hu>
- <Pine.LNX.4.64.1202262122370.23717@cobra.newdream.net>
+	 <Pine.LNX.4.64.1202262122370.23717@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47075 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750811Ab2B0F3F (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2012 00:29:05 -0500
+Received: from mail.barcikacomp.hu ([94.248.160.10]:42995 "EHLO
+	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750811Ab2B0GBQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2012 01:01:16 -0500
+Received: from [192.168.0.100] (kabelnet-248-67.parisat.hu [91.147.248.67])
+	by mail.barcikacomp.hu (Postfix) with ESMTPA id CDB5297CAC
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2012 07:01:12 +0100 (CET)
 In-Reply-To: <Pine.LNX.4.64.1202262122370.23717@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Laszlo Boszormenyi <gcs@debian.hu>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Sun, 26 Feb 2012, Sage Weil wrote:
-> On Sun, 26 Feb 2012, Laszlo Boszormenyi wrote:
-> > Hi,
-> > 
-> > I send some patches to make the packaging difference smaller between us.
-> > The first, create_run_dir.patch to make /run/ceph created on every
-> > start. Yes, it's /run as /var/run is now a symbolic link to the former.
-> > The next is an update to control to reflect the new Standards-Version
-> > and to make hdparm optional to sdparm, which is for sATA discs.
-> > Then an update to rules. Adding build-arch and build-indep targets.
-> 
-> I've applied these to master, thanks!  They'll be in v0.43.
-
-Hmm, actually it looks like /run isn't present on many of my machines 
-(squeeze, oneiric).  I'm inclined to stick with the /var/run symlink until 
-the change is more pervasive.  
-
-Is this important enough to add an autoconf option to use the new path 
-instead of the old?
-
-sage
-
-
-> 
-> > I ask for a clarification of version numbers. Homepage shows v0.42 as
-> > the latest downloadable as git contains v0.42.1 and v0.42.2 tags. Are
-> > they official and/or should I wait for v0.43 which is due to yesterday
-> > as I know?
-> 
+On Sun, 2012-02-26 at 21:23 -0800, Sage Weil wrote:
 > v0.42.2 for now.. v0.43 should be out either Friday or the following 
 > Monday.
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+ OK, will get v0.42.2 from git, as the homepage has only v0.42 for
+download.
+
+On Sun, 2012-02-26 at 21:29 -0800, Sage Weil wrote:
+> Hmm, actually it looks like /run isn't present on many of my machines 
+> (squeeze, oneiric).  I'm inclined to stick with the /var/run symlink until 
+> the change is more pervasive.  
+ Yes, this change is for the new Debian and Ubuntu releases in
+development. The others have /var/run only.
+
+> Is this important enough to add an autoconf option to use the new path 
+> instead of the old?
+ Not at all. Even now /run is the real directory, /var/run is now a
+symlink to it. Everyone can still use /var/run for a while.
+
+Laszlo/GCS
+
