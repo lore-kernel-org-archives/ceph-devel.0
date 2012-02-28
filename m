@@ -1,47 +1,56 @@
-From: Gregory Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Implication of using rados_ioctx_locator_set_key
-Date: Tue, 28 Feb 2012 10:49:16 -0800
-Message-ID: <CAF3hT9AfZBVw+RQPCowDxsswECPE5kZXOMTh6XWBc34XAPmeng@mail.gmail.com>
-References: <8CC04085-3786-4230-8793-0D9097F261F0@cs.ucsc.edu>
+From: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
+Subject: Re: RadosGW problems with copy in s3
+Date: Tue, 28 Feb 2012 14:41:08 -0800
+Message-ID: <CAC-hyiFL429jjfi7J7fiwoshdRQRq9_1AhECJ+sg2=nV+5NpZw@mail.gmail.com>
+References: <CAMwB3ThF2kTWNDJM9zYOVh0ud29nAoib4yTwNRgiJuacDKh=7w@mail.gmail.com>
+	<CAC-hyiHSUYv-Mk7RxB-_a8ObePrf9osLRFjj-G2_9Dz6z8v6Vw@mail.gmail.com>
+	<CAMwB3ThZ4jPis_Bb9tsf=HTnh3gLd6CNkn2XMr4xo09bO3hEiQ@mail.gmail.com>
+	<CAC-hyiHB0aDsEO8ES8pqhcXB38MR1QNZLMB=jyRm2p_Yp7V8Aw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:41089 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965988Ab2B1StR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 13:49:17 -0500
-Received: by yhmm54 with SMTP id m54so1209231yhm.19
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 10:49:17 -0800 (PST)
-In-Reply-To: <8CC04085-3786-4230-8793-0D9097F261F0@cs.ucsc.edu>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:56803 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754703Ab2B1WlK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 17:41:10 -0500
+Received: by bkcik5 with SMTP id ik5so1781417bkc.19
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 14:41:09 -0800 (PST)
+In-Reply-To: <CAC-hyiHB0aDsEO8ES8pqhcXB38MR1QNZLMB=jyRm2p_Yp7V8Aw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel@vger.kernel.org, Adam Manzanares <nmtadam@gmail.com>, Carlos Maltzahn <carlosm@soe.ucsc.edu>
+To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <slawomir.skowron@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Feb 28, 2012 at 10:07 AM, Noah Watkins <jayhawk@cs.ucsc.edu> wr=
-ote:
-> I'm curious about what performance implications there may be when usi=
-ng rados_ioctx_locator_set_key.
+(resending to list)
+
+On Tue, Feb 28, 2012 at 11:53 AM, S=C5=82awomir Skowron
+<slawomir.skowron@gmail.com> wrote:
 >
-> If a large number of objects are forced into a single PG using a fixe=
-d locator key, are there performance implications for subsequent look-u=
-ps by object name? Is some type of index structure used under the hood =
-since the PG isn't chosen using locator_key =3D object_name?
+> 2012/2/28 Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>:
+> > On Tue, Feb 28, 2012 at 3:43 AM, S=C5=82awomir Skowron
+> > <slawomir.skowron@gmail.com> wrote:
+> >> After some parallel copy command via botto for many files everythi=
+ng,
+> >> going to slow down, and eventualy got timeout from nginx@radosgw.
 
-The placement path with a locator defined is the same as without a
-locator defined =97=A0the difference is that with a locator you're plac=
-ing
-based on hash(locator) instead of hash(object_name).
 
-Used sparingly (mapping a couple objects to the same locator), this
-won't have any performance implications. Used to great excess, you can
-run into a variety of problems:
-reducing the amount of hash space used, increasing variance in PG sizes
-forcing a large number of objects into a single folder on the OSD disk
-store (because it won't split apart a single hash)
-=2E..actually, that's all I can come up with off-hand.
--Greg
+Note that you're overwriting the same object. Is that intentional?
+
+>
+> Reproduced logs in attachment.
+>
+
+I was able to recreate the issue. The problem is specifically related
+to the fact that you're overwriting the same object from 10s of
+parallel threads. What happens is that our race-detection code (that
+is related to the radosgw atomic object write) detects that the
+underlying object has been written and it needs to reread its header
+before overwriting it. This works well when there are a few writers to
+the same object, but doesn't scale very well. I opened issue #2120 to
+track the issue.
+
+Yehuda
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
