@@ -1,60 +1,87 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: ceph config without ctrfs
-Date: Tue, 28 Feb 2012 09:26:01 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1202280923530.19562@cobra.newdream.net>
-References: <4F4C0F60.1070100@genome.wustl.edu>
- <CAF3hT9Ap-rqB+3B0WqUzFGhMFDTrN00HiYHAhaW0gSF_60HNnQ@mail.gmail.com>
- <CAORUGqD7ufy=NyS39JGFOAX4ikZf+q6JL=CEK18a7cmRWsoSEA@mail.gmail.com>
+From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
+Subject: Re: [WRN] map e### wrongly marked me down or wrong addr
+Date: Tue, 28 Feb 2012 18:26:47 +0100
+Message-ID: <2723197.ltUXXyvl0z@mranderson>
+References: <2230716.Iq9SpLVmvc@mranderson> <2227262.Lg19pAvyvB@mranderson> <CAF3hT9DDKCV6uh3WPStrmnTOuWOBc1k_n-YUJMi9wzCT8GL5YA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-740224192-1330449961=:19562"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51246 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754706Ab2B1R0C (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 12:26:02 -0500
-In-Reply-To: <CAORUGqD7ufy=NyS39JGFOAX4ikZf+q6JL=CEK18a7cmRWsoSEA@mail.gmail.com>
+Received: from mail.ki.iif.hu ([193.6.222.241]:57433 "EHLO mail.ki.iif.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S965608Ab2B1R05 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 12:26:57 -0500
+In-Reply-To: <CAF3hT9DDKCV6uh3WPStrmnTOuWOBc1k_n-YUJMi9wzCT8GL5YA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Gregory Farnum <gregory.farnum@dreamhost.com>, Matt Weil <mweil@genome.wustl.edu>, ceph-devel@vger.kernel.org
+To: Gregory Farnum <gregory.farnum@dreamhost.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, wido@widodh.nl
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-740224192-1330449961=:19562
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On Mon, 27 Feb 2012, Tommi Virtanen wrote:
-> On Mon, Feb 27, 2012 at 15:29, Gregory Farnum
-> <gregory.farnum@dreamhost.com> wrote:
-> > On Mon, Feb 27, 2012 at 3:18 PM, Matt Weil <mweil@genome.wustl.edu> wro=
-te:
-> >> How do you do this type of config (specifying multiple devices per ser=
-ver)
-> >> on xfs not btrfs?
-> >>
-> >>> [osd.1]
-> >>> =A0 =A0 =A0 =A0host =3D linuscs92
-> >>> =A0 =A0 =A0 =A0btrfs devs =3D /dev/cciss/c1d2
+On 2012. February 28. 08:16:34 Gregory Farnum wrote:
+> 2012/2/28 Sz=C3=A9kelyi Szabolcs <szekelyi@niif.hu>:
+> > On 2012. February 27. 09:03:11 Sage Weil wrote:
+> >> On Mon, 27 Feb 2012, Sz=C3=A9kelyi Szabolcs wrote:
+> >> > whenever I restart osd.0 I see a pair of messages like
+> >> >=20
+> >> > 2012-02-27 17:26:00.132666 mon.0 <osd_1_ip>:6789/0 106 : [INF]
+> >> > osd.0
+> >> > <osd_0_ip>:6801/29931 failed (by osd.1 <osd_1_ip>:6806/20125)
+> >> > 2012-02-27 17:26:21.074926 osd.0 <osd_0_ip>:6801/29931 1 : [WRN]
+> >> > map
+> >> > e370
+> >> > wrongly marked me down or wrong addr
+> >> >=20
+> >> > a couple of times. The situation stabilizes in a normal state
+> >> > after
+> >> > about two minutes.
+> >> >=20
+> >> > Should I worry about this? Maybe the first message is about the
+> >> > just
+> >> > killed OSD, and the second comes from the new incarnation, and
+> >> > this is
+> >> > completely normal? This is Ceph 0.41.
+> >>=20
+> >> It's not normal.  Wido was seeing something similar, I think.  I
+> >> suspect
+> >> the problem is that during startup ceph-osd just busy, but the
+> >> heartbeat
+> >> code is such that it's not supposed to miss them.
+> >>=20
+> >> Can you reproduce this with 'debug ms =3D 1'?
+> >=20
+> > Yes, I managed to. Output of ceph -w attached (with IP addresses
+> > mangled). My setup is 3 nodes, node 1 and 2 running OSD, MDS and MO=
+N,
+> > node 3 running MON only. I also have the logs from all nodes in cas=
+e
+> > you need it.
 >=20
-> My inclination at this point is to deprecate & remove the "btrfs devs"
-> feature as soon as possible. It's a half-feature that keeps tripping
-> people up.
->=20
-> Format your filesystems as you wish, mount them, and point "osd data"
-> at one. "btrfs devs" was meant for quickly creating throwaway test
-> setups.
+> Yes, please. Just the cluster state is not very helpful =E2=80=94 we =
+want to
+> see why the OSDs are marking each other down, not when. :)
 
-Sounds good to me.  Should we add a warning if the feature is used for=20
-now, or just rip it out?
+Okay, it was a firewall issue. The port range that was allowed to reach=
+ the=20
+OSDs didn't include a number of necessary ports. It started working aft=
+er a=20
+while because I also had a rule like
 
-It would also be nice to define the path forward at the same time.  Even a=
-=20
-high level description of what you have in mind to the list so that people=
-=20
-know where we're going and can work toward.
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT=20
 
-sage
+So osd.1 could not talk to osd.0 after a restart (because of the wrong =
+port=20
+range), only after osd.0 started talking to osd.1 (because of the -m st=
+ate=20
+rule).
 
---557981400-740224192-1330449961=:19562--
+Sorry for the noise.
+
+--=20
+cc
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
