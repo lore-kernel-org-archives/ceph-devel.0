@@ -1,64 +1,61 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: Recommended number of pools, one Q. ever wanted to ask
-Date: Tue, 28 Feb 2012 10:35:37 +0100
-Message-ID: <4F4C9FE9.7000808@filoo.de>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Recommended number of pools, one Q. ever wanted to ask
+Date: Tue, 28 Feb 2012 10:42:23 +0100
+Message-ID: <4F4CA17F.4070007@widodh.nl>
+References: <4F4C9FE9.7000808@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-3.de-punkt.de ([93.190.64.33]:48991 "EHLO
-	mail-3.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753134Ab2B1Jfk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 04:35:40 -0500
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:38030 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755158Ab2B1JmZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 04:42:25 -0500
+In-Reply-To: <4F4C9FE9.7000808@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Oliver Francke <Oliver.Francke@filoo.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi *,
+Hi,
 
-well, there was once a comment on our layout in means of "too many pool=
-s".
-Our setup is to have a pool per customer, to simplify the view on used=20
-storage
-capacity.
-So, if we have - in a couple of months, we hope - more then some hundre=
-d
-customers, this setup was not recommended, cause the whole system is no=
-t
-designed for handling that. ( Sage)
+On 02/28/2012 10:35 AM, Oliver Francke wrote:
+> Hi *,
+>
+> well, there was once a comment on our layout in means of "too many pools".
+> Our setup is to have a pool per customer, to simplify the view on used
+> storage
+> capacity.
+> So, if we have - in a couple of months, we hope - more then some hundred
+> customers, this setup was not recommended, cause the whole system is not
+> designed for handling that. ( Sage)
+>
+> What does "not recommended" mean? Is it, that per OSD the used memory
+> will be
+> too high?
 
-What does "not recommended" mean? Is it, that per OSD the used memory=20
-will be
-too high?
-Is this a general performance issue?
+Yes. Every new pool you create will consume some memory on the OSD. So 
+if you start creating a lot of pools, you will also start consuming more 
+and more memory.
 
-Well, if we read "pool", this gave us the basic idea/concept to put all=
-=20
-per-customers
-data into it.
+I haven't followed this lately, but that is the current information I have.
 
-Please sched some light in 8-)
+The number of objects in a pool is also not a problem, you can have 
+millions without any issues. It's the number of pools which will haunt 
+you later on.
 
-Kind regards,
+Wido
 
-Oliver.
+> Is this a general performance issue?
+>
+> Well, if we read "pool", this gave us the basic idea/concept to put all
+> per-customers
+> data into it.
+>
+> Please sched some light in 8-)
+>
+> Kind regards,
+>
+> Oliver.
+>
 
---=20
-
-Oliver Francke
-
-filoo GmbH
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-HRB4355 AG G=FCtersloh
-
-Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
-
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
