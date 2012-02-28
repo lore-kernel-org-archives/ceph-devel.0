@@ -1,81 +1,101 @@
 From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Repeated messages of "heartbeat_check: no heartbeat from"
-Date: Tue, 28 Feb 2012 16:42:03 +0100
-Message-ID: <4F4CF5CB.9060006@widodh.nl>
-References: <1312546310.2754.41.camel@wido-laptop.pcextreme.nl> <1312972246.2742.7.camel@wido-desktop> <4F3BBD50.3030905@widodh.nl> <CAF3hT9DHxakM8PAAPuZBUjOHHo-0gbU3qLW0jkkGKTR79Rg5qQ@mail.gmail.com> <4F4618D3.4030501@widodh.nl> <CAF3hT9BPkWi6XXrKeyAv3pXXdPk+eRt=faQCv3ri7eDZey63qw@mail.gmail.com>
+Subject: Re: Recommended number of pools, one Q. ever wanted to ask
+Date: Tue, 28 Feb 2012 16:51:11 +0100
+Message-ID: <4F4CF7EF.7010505@widodh.nl>
+References: <4F4C9FE9.7000808@filoo.de> <4F4CA17F.4070007@widodh.nl> <4F4CA380.2010004@filoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:42146 "EHLO
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:42884 "EHLO
 	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965548Ab2B1PmG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 10:42:06 -0500
-In-Reply-To: <CAF3hT9BPkWi6XXrKeyAv3pXXdPk+eRt=faQCv3ri7eDZey63qw@mail.gmail.com>
+	with ESMTP id S965614Ab2B1PvN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 10:51:13 -0500
+In-Reply-To: <4F4CA380.2010004@filoo.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
+To: Oliver Francke <Oliver.Francke@filoo.de>
+Cc: ceph-devel@vger.kernel.org
 
 Hi,
 
-On 02/24/2012 06:18 AM, Gregory Farnum wrote:
-> On Thu, Feb 23, 2012 at 2:45 AM, Wido den Hollander<wido@widodh.nl>  =
-wrote:
+On 02/28/2012 10:50 AM, Oliver Francke wrote:
+> Well,
+>
+> On 02/28/2012 10:42 AM, Wido den Hollander wrote:
 >> Hi,
 >>
->>
->>
->> On 02/22/2012 07:08 PM, Gregory Farnum wrote:
+>> On 02/28/2012 10:35 AM, Oliver Francke wrote:
+>>> Hi *,
 >>>
->>> Wido,
->>> Sorry we lost track of this last week =97 we were all distracted by=
- FAST 12!
->>> :)
+>>> well, there was once a comment on our layout in means of "too many
+>>> pools".
+>>> Our setup is to have a pool per customer, to simplify the view on used
+>>> storage
+>>> capacity.
+>>> So, if we have - in a couple of months, we hope - more then some hundred
+>>> customers, this setup was not recommended, cause the whole system is not
+>>> designed for handling that. ( Sage)
 >>>
->> No problem!
+>>> What does "not recommended" mean? Is it, that per OSD the used memory
+>>> will be
+>>> too high?
 >>
+>> Yes. Every new pool you create will consume some memory on the OSD. So
+>> if you start creating a lot of pools, you will also start consuming
+>> more and more memory.
 >>
->>> So it looks like they're both on the same map and osd.4 is sending
->>> pings to osd.19, but osd.19 is just ignoring them? Or do you really
->>> have on debug_os and not debug_osd? :)
+>> I haven't followed this lately, but that is the current information I
+>> have.
 >>
->>
->> That was a typo, I have debug_osd set to 20.
->>
->> I haven't rebooted the OSD's since and now osd.4 and osd.19 are not
->> complaining anymore, but it's now a different set of OSD's who are s=
-aying
->> the other one is down.
->>
->> I'm still running v0.41 btw. I'm not going to touch the cluster unti=
-l this
->> one is tracked down, it keeps coming back.
->>
->> Suggestions?
+>> The number of objects in a pool is also not a problem, you can have
+>> millions without any issues. It's the number of pools which will haunt
+>> you later on.
 >
-> Well, like Sage said long ago, this will be easiest to diagnose if
-> there are logs available for both OSDs that cover the entire time
-> after one requested heartbeats from the other.
->
-> If you do have these and can post them somewhere, I'm sure Sage or I
-> will find it interesting enough to look through...  ;)
-> If not, I'm out of ideas, although I'm not super-familiar with the
-> heartbeat code since Sage rewrote it so we may be able to come up wit=
-h
-> something if we discuss it more.
-> -Greg
+> thnx for the quick reply, so if we can imagine, that the number of pool
+> per OSD is
+> the limiting factor, we shall not have more than let's say ~100, means,
+> we shall be
+> safe.
 
-I created an issue for this with logs attached:=20
-http://tracker.newdream.net/issues/2116
+IIRC the number of pools is a problem, but for every pool you have a 
+number of Placement Groups (PG's) (pg_num). Each PG eats a small amount 
+of memory.
 
-Thanks,
+As the number of OSD's increases you also want to increase the number of 
+PG's, this improves performance.
+
+But as you have more PG's per pool, you start increasing memory usage. 
+Now, PG's will be spread out over your OSD's, but it could still 
+increase the usage.
+
+This probably won't be a problem with 500 pools, or maybe a thousand 
+pools (but it could), but going above that could be a problem.
 
 Wido
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>>
+>> Wido
+>
+> best regards,
+>
+> Oliver.
+>
+>>
+>>> Is this a general performance issue?
+>>>
+>>> Well, if we read "pool", this gave us the basic idea/concept to put all
+>>> per-customers
+>>> data into it.
+>>>
+>>> Please sched some light in 8-)
+>>>
+>>> Kind regards,
+>>>
+>>> Oliver.
+>>>
+>>
+>
+>
+
