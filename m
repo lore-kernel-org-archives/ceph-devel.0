@@ -1,179 +1,156 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: [PATCH 2/5] rbd: don't use sscanf() in rbd_add_parse_args()
-Date: Tue, 28 Feb 2012 19:59:13 -0800
-Message-ID: <4F4DA291.5080403@dreamhost.com>
+Subject: [PATCH 1/5] rbd: encapsulate argument parsing for rbd_add()
+Date: Tue, 28 Feb 2012 19:59:10 -0800
+Message-ID: <4F4DA28E.1090308@dreamhost.com>
 References: <4F4DA1EA.3080705@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:40129 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:40120 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755041Ab2B2D7N (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 22:59:13 -0500
+	with ESMTP id S1755041Ab2B2D7L (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 22:59:11 -0500
 Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id A1C8C24329
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 19:59:13 -0800 (PST)
+	by mail.hq.newdream.net (Postfix) with ESMTP id 299D324318
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 19:59:11 -0800 (PST)
 Received: from [192.168.107.136] (aon.hq.newdream.net [64.111.111.107])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 8DB502431D
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 19:59:13 -0800 (PST)
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 1F97B24314
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 19:59:11 -0800 (PST)
 In-Reply-To: <4F4DA1EA.3080705@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Make use of a few simple helper routines to parse the arguments
-rather than sscanf().  This will treat both missing and too-long
-arguments as invalid input (rather than silently truncating the
-input in the too-long case).  In time this can also be used by
-rbd_add() to use the passed-in buffer in place, rather than copying
-its contents into new buffers.
+Move the code that parses the arguments provided to rbd_add() (which
+are supplied via /sys/bus/rbd/add) into a separate function.
 
-It appears to me that the sscanf() previously used would not
-correctly handle a supplied snapshot--the two final "%s" conversion
-specifications were not separated by a space, and I'm not sure
-how sscanf() handles that situation.  It may not be well-defined.
-So that may be a bug this change fixes (but I didn't verify that).
-
-The sizes of the mon_addrs and options buffers are now passed to
-rbd_add_parse_args(), so they can be supplied to copy_token().
+Also rename the "mon_dev_name" variable in rbd_add() to be
+"mon_addrs".   The variable represents a list of one or more
+comma-separated monitor IP addresses, each with an optional port
+number.  I think "mon_addrs" captures that notion a little better.
 
 Signed-off-by: Alex Elder <elder@dreamhost.com>
 ---
-  drivers/block/rbd.c |   99 
-+++++++++++++++++++++++++++++++++++++++++++-------
-  1 files changed, 85 insertions(+), 14 deletions(-)
+  drivers/block/rbd.c |   68 
++++++++++++++++++++++++++++++++-------------------
+  1 files changed, 42 insertions(+), 26 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 3731a15..d2157a7 100644
+index 29bbac1..3731a15 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2220,6 +2220,53 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
+@@ -2219,12 +2219,43 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
+  	atomic_cmpxchg(&rbd_id_max, rbd_id, max_id);
   }
 
-  /*
-+ * Skips over white space at *buf, and updates *buf to point to the
-+ * first found non-space character (if any). Returns the length of
-+ * the token (string of non-white space characters) found.
++/*
++ * This fills in the pool_name, obj, obj_len, snap_name, obj_len,
++ * rbd_dev, rbd_md_name, and name fields of the given rbd_dev, based
++ * on the list of monitor addresses and other options provided via
++ * /sys/bus/rbd/add.
 + */
-+static inline size_t next_token(const char **buf)
++static int rbd_add_parse_args(struct rbd_device *rbd_dev,
++			      const char *buf,
++			      char *mon_addrs,
++			      char *options)
 +{
-+        /*
-+        * These are the characters that produce nonzero for
-+        * isspace() in the "C" and "POSIX" locales.
-+        */
-+        const char *spaces = " \f\n\r\t\v";
++	if (sscanf(buf, "%" __stringify(RBD_MAX_OPT_LEN) "s "
++		   "%" __stringify(RBD_MAX_OPT_LEN) "s "
++		   "%" __stringify(RBD_MAX_POOL_NAME_LEN) "s "
++		   "%" __stringify(RBD_MAX_OBJ_NAME_LEN) "s"
++		   "%" __stringify(RBD_MAX_SNAP_NAME_LEN) "s",
++		   mon_addrs, options, rbd_dev->pool_name,
++		   rbd_dev->obj, rbd_dev->snap_name) < 4)
++		return -EINVAL;
 +
-+        *buf += strspn(*buf, spaces);	/* Find start of token */
++	if (rbd_dev->snap_name[0] == 0)
++		memcpy(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
++			sizeof RBD_SNAP_HEAD_NAME);
 +
-+	return strcspn(*buf, spaces);   /* Return token length */
++	rbd_dev->obj_len = strlen(rbd_dev->obj);
++	snprintf(rbd_dev->obj_md_name, sizeof(rbd_dev->obj_md_name), "%s%s",
++		 rbd_dev->obj, RBD_SUFFIX);
++
++	return 0;
 +}
 +
-+/*
-+ * Finds the next token in *buf, and if the provided token buffer is
-+ * big enough, copies the found token into it.  The result, if
-+ * copied, is guaranteed to be terminated with '\0'.
-+ *
-+ * Returns the length of the token found (not including the '\0').
-+ * Return value will be 0 if no token is found, and it will be >=
-+ * token_size if the token would not fit.
-+ *
-+ * The *buf pointer will be updated point beyond the end of the
-+ * found token.  Note that this occurs even if the token buffer is
-+ * too small to hold it.
-+ */
-+static inline size_t copy_token(const char **buf,
-+				char *token,
-+				size_t token_size)
-+{
-+        size_t len;
+  static ssize_t rbd_add(struct bus_type *bus,
+  		       const char *buf,
+  		       size_t count)
+  {
+  	struct rbd_device *rbd_dev;
+-	char *mon_dev_name = NULL;
++	char *mon_addrs = NULL;
+  	char *options = NULL;
+  	struct ceph_osd_client *osdc;
+  	int rc = -ENOMEM;
+@@ -2235,8 +2266,8 @@ static ssize_t rbd_add(struct bus_type *bus,
+  	rbd_dev = kzalloc(sizeof(*rbd_dev), GFP_KERNEL);
+  	if (!rbd_dev)
+  		goto err_nomem;
+-	mon_dev_name = kmalloc(count, GFP_KERNEL);
+-	if (!mon_dev_name)
++	mon_addrs = kmalloc(count, GFP_KERNEL);
++	if (!mon_addrs)
+  		goto err_nomem;
+  	options = kmalloc(count, GFP_KERNEL);
+  	if (!options)
+@@ -2250,30 +2281,15 @@ static ssize_t rbd_add(struct bus_type *bus,
+  	/* generate unique id: find highest unique id, add one */
+  	rbd_id_get(rbd_dev);
+
++	/* Fill in the device name, now that we have its id. */
++	snprintf(rbd_dev->name, DEV_NAME_LEN, RBD_DRV_NAME "%d", rbd_dev->id);
 +
-+	len = next_token(buf);
-+	if (len < token_size) {
-+		memcpy(token, *buf, len);
-+		*(token + len) = '\0';
-+	}
-+	*buf += len;
-+
-+        return len;
-+}
-+
-+/*
-   * This fills in the pool_name, obj, obj_len, snap_name, obj_len,
-   * rbd_dev, rbd_md_name, and name fields of the given rbd_dev, based
-   * on the list of monitor addresses and other options provided via
-@@ -2228,25 +2275,48 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
-  static int rbd_add_parse_args(struct rbd_device *rbd_dev,
-  			      const char *buf,
-  			      char *mon_addrs,
--			      char *options)
--{
+  	/* parse add command */
 -	if (sscanf(buf, "%" __stringify(RBD_MAX_OPT_LEN) "s "
 -		   "%" __stringify(RBD_MAX_OPT_LEN) "s "
 -		   "%" __stringify(RBD_MAX_POOL_NAME_LEN) "s "
 -		   "%" __stringify(RBD_MAX_OBJ_NAME_LEN) "s"
 -		   "%" __stringify(RBD_MAX_SNAP_NAME_LEN) "s",
--		   mon_addrs, options, rbd_dev->pool_name,
--		   rbd_dev->obj, rbd_dev->snap_name) < 4)
-+			      size_t mon_addrs_size,
-+			      char *options,
-+			      size_t options_size)
-+{
-+	size_t	len;
-+
-+	/* The first four tokens are required */
-+
-+	len = copy_token(&buf, mon_addrs, mon_addrs_size);
-+	if (!len || len >= mon_addrs_size)
-  		return -EINVAL;
-
+-		   mon_dev_name, options, rbd_dev->pool_name,
+-		   rbd_dev->obj, rbd_dev->snap_name) < 4) {
+-		rc = -EINVAL;
++	rc = rbd_add_parse_args(rbd_dev, buf, mon_addrs, options);
++	if (rc)
+  		goto err_put_id;
+-	}
+-
 -	if (rbd_dev->snap_name[0] == 0)
 -		memcpy(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
 -			sizeof RBD_SNAP_HEAD_NAME);
-+	len = copy_token(&buf, options, options_size);
-+	if (!len || len >= options_size)
-+		return -EINVAL;
-+
-+	len = copy_token(&buf, rbd_dev->pool_name, sizeof rbd_dev->pool_name);
-+	if (!len || len >= sizeof rbd_dev->pool_name)
-+		return -EINVAL;
-+
-+	len = copy_token(&buf, rbd_dev->obj, sizeof rbd_dev->obj);
-+	if (!len || len >= sizeof rbd_dev->obj)
-+		return -EINVAL;
-+
-+	/* We have the object length in hand, save it. */
-+
-+	rbd_dev->obj_len = len;
-
+-
 -	rbd_dev->obj_len = strlen(rbd_dev->obj);
-  	snprintf(rbd_dev->obj_md_name, sizeof(rbd_dev->obj_md_name), "%s%s",
-  		 rbd_dev->obj, RBD_SUFFIX);
+-	snprintf(rbd_dev->obj_md_name, sizeof(rbd_dev->obj_md_name), "%s%s",
+-		 rbd_dev->obj, RBD_SUFFIX);
+-
+-	/* initialize rest of new object */
+-	snprintf(rbd_dev->name, DEV_NAME_LEN, RBD_DRV_NAME "%d", rbd_dev->id);
 
-+	/*
-+	 * The snapshot name is optional, but it's an error if it's
-+	 * too long.  If no snapshot is supplied, fill in the default.
-+	 */
-+	len = copy_token(&buf, rbd_dev->snap_name, sizeof rbd_dev->snap_name);
-+	if (!len)
-+		memcpy(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
-+			sizeof RBD_SNAP_HEAD_NAME);
-+	else if (len >= sizeof rbd_dev->snap_name)
-+		return -EINVAL;
-+
-  	return 0;
-  }
-
-@@ -2285,7 +2355,8 @@ static ssize_t rbd_add(struct bus_type *bus,
-  	snprintf(rbd_dev->name, DEV_NAME_LEN, RBD_DRV_NAME "%d", rbd_dev->id);
-
-  	/* parse add command */
--	rc = rbd_add_parse_args(rbd_dev, buf, mon_addrs, options);
-+	rc = rbd_add_parse_args(rbd_dev, buf, mon_addrs, count,
-+				options, count);
-  	if (rc)
+-	rbd_dev->rbd_client = rbd_get_client(mon_dev_name, options);
++	rbd_dev->rbd_client = rbd_get_client(mon_addrs, options);
+  	if (IS_ERR(rbd_dev->rbd_client)) {
+  		rc = PTR_ERR(rbd_dev->rbd_client);
   		goto err_put_id;
+@@ -2314,7 +2330,7 @@ err_out_bus:
 
+  	rbd_bus_del_dev(rbd_dev);
+  	kfree(options);
+-	kfree(mon_dev_name);
++	kfree(mon_addrs);
+  	return rc;
+
+  err_out_blkdev:
+@@ -2325,7 +2341,7 @@ err_put_id:
+  	rbd_id_put(rbd_dev);
+  err_nomem:
+  	kfree(options);
+-	kfree(mon_dev_name);
++	kfree(mon_addrs);
+  	kfree(rbd_dev);
+
+  	dout("Error adding device %s\n", buf);
 -- 
 1.7.5.4
 
