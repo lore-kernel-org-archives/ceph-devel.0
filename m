@@ -1,103 +1,122 @@
-From: Alex Elder <elder@dreamhost.com>
-Subject: [PATCH, v2] libceph: encapsulate some messenger cleanup code
-Date: Wed, 29 Feb 2012 09:44:26 -0800
-Message-ID: <4F4E63FA.20307@dreamhost.com>
-References: <4F4DAD34.2030202@dreamhost.com> <4F4DADA8.4090508@dreamhost.com>
+From: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
+Subject: Re: RadosGW problems with copy in s3
+Date: Wed, 29 Feb 2012 11:44:16 -0800
+Message-ID: <CAC-hyiHFUAGWJf1MxGS=MBcdsHSYrtpjcPo6di3MOK=S=6Hj0g@mail.gmail.com>
+References: <CAMwB3ThF2kTWNDJM9zYOVh0ud29nAoib4yTwNRgiJuacDKh=7w@mail.gmail.com>
+	<CAC-hyiHSUYv-Mk7RxB-_a8ObePrf9osLRFjj-G2_9Dz6z8v6Vw@mail.gmail.com>
+	<CAMwB3ThZ4jPis_Bb9tsf=HTnh3gLd6CNkn2XMr4xo09bO3hEiQ@mail.gmail.com>
+	<CAC-hyiHB0aDsEO8ES8pqhcXB38MR1QNZLMB=jyRm2p_Yp7V8Aw@mail.gmail.com>
+	<CAC-hyiFL429jjfi7J7fiwoshdRQRq9_1AhECJ+sg2=nV+5NpZw@mail.gmail.com>
+	<CAMwB3Tje2tgruL8yP29Q1eYTON5kuS3neetA=6zXed4OriJefg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:55827 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754497Ab2B2Ro1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Feb 2012 12:44:27 -0500
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 3E29724333
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Feb 2012 09:44:27 -0800 (PST)
-Received: from [192.168.107.136] (aon.hq.newdream.net [64.111.111.107])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 2F4C324314
-	for <ceph-devel@vger.kernel.org>; Wed, 29 Feb 2012 09:44:27 -0800 (PST)
-In-Reply-To: <4F4DADA8.4090508@dreamhost.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:61169 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750773Ab2B2ToR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Feb 2012 14:44:17 -0500
+Received: by bkcik5 with SMTP id ik5so2678748bkc.19
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Feb 2012 11:44:16 -0800 (PST)
+In-Reply-To: <CAMwB3Tje2tgruL8yP29Q1eYTON5kuS3neetA=6zXed4OriJefg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <slawomir.skowron@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Define a helper function to perform various cleanup operations.  Use
-it both in the exit routine and in the init routine in the event of
-an error.
+On Wed, Feb 29, 2012 at 5:06 AM, S=C5=82awomir Skowron
+<slawomir.skowron@gmail.com> wrote:
+>
+> Ok, it's intentional.
+>
+> We are checking meta info about files, then, checking md5 of file
+> content. In parallel, updating object that have change, and then
+> archiving this objects in another key, and last thing is deleting
+> objects that expires.
+>
+> This happens over and over, because, this site is changing many times=
+=2E
+>
+> Now i don't have any idea, how to workaround this problem, without
+> shutdown this app :(
 
-Signed-off-by: Alex Elder <elder@dreamhost.com>
-
----
-v2: updated due to switch to using ZERO_PAGE(0) in an earlier patch
-     in the series.
-
-  net/ceph/messenger.c |   38 ++++++++++++++++++++------------------
-  1 file changed, 20 insertions(+), 18 deletions(-)
-
-Index: b/net/ceph/messenger.c
-===================================================================
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -99,6 +99,20 @@ static void encode_my_addr(struct ceph_m
-   */
-  static struct workqueue_struct *ceph_msgr_wq;
-
-+void _ceph_msgr_exit(void)
-+{
-+	if (ceph_msgr_wq)
-+		destroy_workqueue(ceph_msgr_wq);
-+
-+	BUG_ON(zero_page_address == NULL);
-+	zero_page_address = NULL;
-+
-+	BUG_ON(zero_page == NULL);
-+	kunmap(zero_page);
-+	page_cache_release(zero_page);
-+	zero_page = NULL;
-+}
-+
-  int ceph_msgr_init(void)
-  {
-  	BUG_ON(zero_page != NULL);
-@@ -109,33 +123,21 @@ int ceph_msgr_init(void)
-  	zero_page_address = kmap(zero_page);
-
-  	ceph_msgr_wq = alloc_workqueue("ceph-msgr", WQ_NON_REENTRANT, 0);
--	if (!ceph_msgr_wq) {
--		pr_err("msgr_init failed to create workqueue\n");
--
--		zero_page_address = NULL;
--		kunmap(zero_page);
--		page_cache_release(zero_page);
--		zero_page = NULL;
-+	if (ceph_msgr_wq)
-+		return 0;
-
--		return -ENOMEM;
--	}
-+	pr_err("msgr_init failed to create workqueue\n");
-+	_ceph_msgr_exit();
-
--	return 0;
-+	return -ENOMEM;
-  }
-  EXPORT_SYMBOL(ceph_msgr_init);
-
-  void ceph_msgr_exit(void)
-  {
-  	BUG_ON(ceph_msgr_wq == NULL);
--	destroy_workqueue(ceph_msgr_wq);
--
--	BUG_ON(zero_page_address == NULL);
--	zero_page_address = NULL;
-
--	BUG_ON(zero_page == NULL);
--	kunmap(zero_page);
--	page_cache_release(zero_page);
--	zero_page = NULL;
-+	_ceph_msgr_exit();
-  }
-  EXPORT_SYMBOL(ceph_msgr_exit);
+I looked at your osd log again, and there are other things that don't
+look right. I'll also need you to turn on 'debug osd =3D 20' and 'debug
+filestore =3D 20'.
+Other than that, I just pushed a workaround that might improve things.
+It's on the wip-rgw-atomic-no-retry branch on github (based on
+0.42.2), so you might want to give it a spin and let us know whether
+it actually improved things.
 
 
+>
+> Another question is, why data from radosgw writing almost everything
+> only on one osd, and copies to 2 others, and only those. Is anyone ca=
+n
+> explain this to me ??
+>
+> /dev/sdu =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.18
+> /dev/sdw =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+08M =C2=A0260G =C2=A0 1% /vol0/data/osd.21
+> /dev/sdz =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+38M =C2=A0260G =C2=A0 1% /vol0/data/osd.24
+> /dev/sde =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.3
+> /dev/sdr =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.16
+> /dev/sdaa =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 275G =C2=A0696M =C2=
+=A0260G =C2=A0 1% /vol0/data/osd.25
+> /dev/sdp =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.14
+> /dev/sdd =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.2
+> /dev/sdk =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.8
+> /dev/sdh =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+08M =C2=A0260G =C2=A0 1% /vol0/data/osd.6
+> /dev/sds =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.17
+> /dev/sdf =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+38M =C2=A0260G =C2=A0 1% /vol0/data/osd.4
+> /dev/sdj =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+37M =C2=A0260G =C2=A0 1% /vol0/data/osd.9
+> /dev/sdc =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+04M =C2=A0260G =C2=A0 1% /vol0/data/osd.1
+> /dev/sdv =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A02=
+=2E7G =C2=A0258G =C2=A0 2% /vol0/data/osd.20
+> /dev/sdn =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+07M =C2=A0260G =C2=A0 1% /vol0/data/osd.12
+> /dev/sdo =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.13
+> /dev/sdg =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.5
+> /dev/sdy =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+33M =C2=A0260G =C2=A0 1% /vol0/data/osd.23
+> /dev/sdm =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.11
+> /dev/sdx =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.22
+> /dev/sdb =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+08M =C2=A0260G =C2=A0 1% /vol0/data/osd.0
+> /dev/sdq =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.15
+> /dev/sdl =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.10
+> /dev/sdi =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+05M =C2=A0260G =C2=A0 1% /vol0/data/osd.7
+> /dev/sdt =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0275G =C2=A06=
+04M =C2=A0260G =C2=A0 1% /vol0/data/osd.19
+>
+That's probably because you're overwriting the same object over and
+over. When you do that the old object is still being kept so that any
+pending readers may complete reading it. You should run a maintenance
+utility in order to remove those (radosgw-admin temp remove --date=3D..
+to remove all temp objects that were created before a specific date).
+
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
