@@ -1,33 +1,179 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: [PATCH 0/5] rbd: cleanups related to argument parsing
-Date: Tue, 28 Feb 2012 19:56:26 -0800
-Message-ID: <4F4DA1EA.3080705@dreamhost.com>
+Subject: [PATCH 2/5] rbd: don't use sscanf() in rbd_add_parse_args()
+Date: Tue, 28 Feb 2012 19:59:13 -0800
+Message-ID: <4F4DA291.5080403@dreamhost.com>
+References: <4F4DA1EA.3080705@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:40095 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:40129 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757605Ab2B2D42 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 22:56:28 -0500
+	with ESMTP id S1755041Ab2B2D7N (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 22:59:13 -0500
 Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 2ED2F24318
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 19:56:28 -0800 (PST)
+	by mail.hq.newdream.net (Postfix) with ESMTP id A1C8C24329
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 19:59:13 -0800 (PST)
 Received: from [192.168.107.136] (aon.hq.newdream.net [64.111.111.107])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 21FFD24314
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 19:56:28 -0800 (PST)
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 8DB502431D
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 19:59:13 -0800 (PST)
+In-Reply-To: <4F4DA1EA.3080705@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This series affects the way arguments are parsed in rbd_add().
-It first encapsulates the code into its own helper function.
-Then it uses a few simple tokenization functions instead of
-sscanf() to parse the string provided, which makes it possible
-to do a better job of error checking the input.  It makes use
-of the ability to check for certain invariants at build time
-rather than runtime.  And by reworking what information gets
-passed around, eliminates the need to allocate a buffer to
-hold the monitor addresses.
+Make use of a few simple helper routines to parse the arguments
+rather than sscanf().  This will treat both missing and too-long
+arguments as invalid input (rather than silently truncating the
+input in the too-long case).  In time this can also be used by
+rbd_add() to use the passed-in buffer in place, rather than copying
+its contents into new buffers.
 
-					-Alex
+It appears to me that the sscanf() previously used would not
+correctly handle a supplied snapshot--the two final "%s" conversion
+specifications were not separated by a space, and I'm not sure
+how sscanf() handles that situation.  It may not be well-defined.
+So that may be a bug this change fixes (but I didn't verify that).
+
+The sizes of the mon_addrs and options buffers are now passed to
+rbd_add_parse_args(), so they can be supplied to copy_token().
+
+Signed-off-by: Alex Elder <elder@dreamhost.com>
+---
+  drivers/block/rbd.c |   99 
++++++++++++++++++++++++++++++++++++++++++++-------
+  1 files changed, 85 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 3731a15..d2157a7 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2220,6 +2220,53 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
+  }
+
+  /*
++ * Skips over white space at *buf, and updates *buf to point to the
++ * first found non-space character (if any). Returns the length of
++ * the token (string of non-white space characters) found.
++ */
++static inline size_t next_token(const char **buf)
++{
++        /*
++        * These are the characters that produce nonzero for
++        * isspace() in the "C" and "POSIX" locales.
++        */
++        const char *spaces = " \f\n\r\t\v";
++
++        *buf += strspn(*buf, spaces);	/* Find start of token */
++
++	return strcspn(*buf, spaces);   /* Return token length */
++}
++
++/*
++ * Finds the next token in *buf, and if the provided token buffer is
++ * big enough, copies the found token into it.  The result, if
++ * copied, is guaranteed to be terminated with '\0'.
++ *
++ * Returns the length of the token found (not including the '\0').
++ * Return value will be 0 if no token is found, and it will be >=
++ * token_size if the token would not fit.
++ *
++ * The *buf pointer will be updated point beyond the end of the
++ * found token.  Note that this occurs even if the token buffer is
++ * too small to hold it.
++ */
++static inline size_t copy_token(const char **buf,
++				char *token,
++				size_t token_size)
++{
++        size_t len;
++
++	len = next_token(buf);
++	if (len < token_size) {
++		memcpy(token, *buf, len);
++		*(token + len) = '\0';
++	}
++	*buf += len;
++
++        return len;
++}
++
++/*
+   * This fills in the pool_name, obj, obj_len, snap_name, obj_len,
+   * rbd_dev, rbd_md_name, and name fields of the given rbd_dev, based
+   * on the list of monitor addresses and other options provided via
+@@ -2228,25 +2275,48 @@ static void rbd_id_put(struct rbd_device *rbd_dev)
+  static int rbd_add_parse_args(struct rbd_device *rbd_dev,
+  			      const char *buf,
+  			      char *mon_addrs,
+-			      char *options)
+-{
+-	if (sscanf(buf, "%" __stringify(RBD_MAX_OPT_LEN) "s "
+-		   "%" __stringify(RBD_MAX_OPT_LEN) "s "
+-		   "%" __stringify(RBD_MAX_POOL_NAME_LEN) "s "
+-		   "%" __stringify(RBD_MAX_OBJ_NAME_LEN) "s"
+-		   "%" __stringify(RBD_MAX_SNAP_NAME_LEN) "s",
+-		   mon_addrs, options, rbd_dev->pool_name,
+-		   rbd_dev->obj, rbd_dev->snap_name) < 4)
++			      size_t mon_addrs_size,
++			      char *options,
++			      size_t options_size)
++{
++	size_t	len;
++
++	/* The first four tokens are required */
++
++	len = copy_token(&buf, mon_addrs, mon_addrs_size);
++	if (!len || len >= mon_addrs_size)
+  		return -EINVAL;
+
+-	if (rbd_dev->snap_name[0] == 0)
+-		memcpy(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
+-			sizeof RBD_SNAP_HEAD_NAME);
++	len = copy_token(&buf, options, options_size);
++	if (!len || len >= options_size)
++		return -EINVAL;
++
++	len = copy_token(&buf, rbd_dev->pool_name, sizeof rbd_dev->pool_name);
++	if (!len || len >= sizeof rbd_dev->pool_name)
++		return -EINVAL;
++
++	len = copy_token(&buf, rbd_dev->obj, sizeof rbd_dev->obj);
++	if (!len || len >= sizeof rbd_dev->obj)
++		return -EINVAL;
++
++	/* We have the object length in hand, save it. */
++
++	rbd_dev->obj_len = len;
+
+-	rbd_dev->obj_len = strlen(rbd_dev->obj);
+  	snprintf(rbd_dev->obj_md_name, sizeof(rbd_dev->obj_md_name), "%s%s",
+  		 rbd_dev->obj, RBD_SUFFIX);
+
++	/*
++	 * The snapshot name is optional, but it's an error if it's
++	 * too long.  If no snapshot is supplied, fill in the default.
++	 */
++	len = copy_token(&buf, rbd_dev->snap_name, sizeof rbd_dev->snap_name);
++	if (!len)
++		memcpy(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
++			sizeof RBD_SNAP_HEAD_NAME);
++	else if (len >= sizeof rbd_dev->snap_name)
++		return -EINVAL;
++
+  	return 0;
+  }
+
+@@ -2285,7 +2355,8 @@ static ssize_t rbd_add(struct bus_type *bus,
+  	snprintf(rbd_dev->name, DEV_NAME_LEN, RBD_DRV_NAME "%d", rbd_dev->id);
+
+  	/* parse add command */
+-	rc = rbd_add_parse_args(rbd_dev, buf, mon_addrs, options);
++	rc = rbd_add_parse_args(rbd_dev, buf, mon_addrs, count,
++				options, count);
+  	if (rc)
+  		goto err_put_id;
+
+-- 
+1.7.5.4
+
