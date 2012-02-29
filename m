@@ -1,89 +1,127 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: [PATCH 3/4] libceph: make ceph_tcp_connect() return int
-Date: Tue, 28 Feb 2012 20:46:38 -0800
-Message-ID: <4F4DADAE.2000708@dreamhost.com>
+Subject: [PATCH 4/4] libceph: a few small changes
+Date: Tue, 28 Feb 2012 20:46:44 -0800
+Message-ID: <4F4DADB4.4040909@dreamhost.com>
 References: <4F4DAD34.2030202@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:48680 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:48684 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965408Ab2B2Eqi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 23:46:38 -0500
+	with ESMTP id S965676Ab2B2Eqo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 23:46:44 -0500
 Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 7596624318
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 20:46:38 -0800 (PST)
+	by mail.hq.newdream.net (Postfix) with ESMTP id 9B42024318
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 20:46:44 -0800 (PST)
 Received: from [192.168.107.136] (aon.hq.newdream.net [64.111.111.107])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 6A7E024314
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 20:46:38 -0800 (PST)
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 90B2024314
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 20:46:44 -0800 (PST)
 In-Reply-To: <4F4DAD34.2030202@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-There is no real need for ceph_tcp_connect() to return the socket
-pointer it creates, since it already assigns it to con->sock, which
-is visible to the caller.  Instead, have it return an error code,
-which tidies things up a bit.
+This gathers a number of very minor changes:
+     - use %hu when formatting the a socket address's address family
+     - null out the ceph_msgr_wq pointer after the queue has been
+       destroyed
+     - drop a needless cast in ceph_write_space()
+     - add a WARN() call in ceph_state_change() in the event an
+       unrecognized socket state is encountered
+     - rearrange the logic in ceph_con_get() and ceph_con_put() so
+       that:
+         - the reference counts are only atomically read once
+	- the values displayed via dout() calls are known to
+	  be meaningful at the time they are formatted
 
 Signed-off-by: Alex Elder <elder@dreamhost.com>
 ---
-  net/ceph/messenger.c |   14 ++++++--------
-  1 files changed, 6 insertions(+), 8 deletions(-)
+  net/ceph/messenger.c |   33 +++++++++++++++++++--------------
+  1 files changed, 19 insertions(+), 14 deletions(-)
 
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 2e496e2..9a8a479 100644
+index 9a8a479..d793b9f 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -236,7 +236,7 @@ static void set_sock_callbacks(struct socket *sock,
-  /*
-   * initiate connection to a remote socket.
-   */
--static struct socket *ceph_tcp_connect(struct ceph_connection *con)
-+static int ceph_tcp_connect(struct ceph_connection *con)
-  {
-  	struct sockaddr_storage *paddr = &con->peer_addr.in_addr;
-  	struct socket *sock;
-@@ -246,7 +246,7 @@ static struct socket *ceph_tcp_connect(struct 
-ceph_connection *con)
-  	ret = sock_create_kern(con->peer_addr.in_addr.ss_family, SOCK_STREAM,
-  			       IPPROTO_TCP, &sock);
-  	if (ret)
--		return ERR_PTR(ret);
-+		return ret;
-  	sock->sk->sk_allocation = GFP_NOFS;
+@@ -80,8 +80,8 @@ const char *ceph_pr_addr(const struct sockaddr_storage 
+*ss)
+  		break;
 
-  #ifdef CONFIG_LOCKDEP
-@@ -269,11 +269,11 @@ static struct socket *ceph_tcp_connect(struct 
-ceph_connection *con)
-  		sock_release(sock);
-  		con->error_msg = "connect error";
-
--		return ERR_PTR(ret);
-+		return ret;
+  	default:
+-		snprintf(s, MAX_ADDR_STR_LEN, "(unknown sockaddr family %d)",
+-			 (int)ss->ss_family);
++		snprintf(s, MAX_ADDR_STR_LEN, "(unknown sockaddr family %hu)",
++			 ss->ss_family);
   	}
-  	con->sock = sock;
 
--	return sock;
-+	return 0;
+  	return s;
+@@ -101,8 +101,10 @@ static struct workqueue_struct *ceph_msgr_wq;
+
+  void _ceph_msgr_exit(void)
+  {
+-	if (ceph_msgr_wq)
++	if (ceph_msgr_wq) {
+  		destroy_workqueue(ceph_msgr_wq);
++		ceph_msgr_wq = NULL;
++	}
+
+  	BUG_ON(zero_page_address == NULL);
+  	zero_page_address = NULL;
+@@ -169,8 +171,7 @@ static void ceph_data_ready(struct sock *sk, int 
+count_unused)
+  /* socket has buffer space for writing */
+  static void ceph_write_space(struct sock *sk)
+  {
+-	struct ceph_connection *con =
+-		(struct ceph_connection *)sk->sk_user_data;
++	struct ceph_connection *con = sk->sk_user_data;
+
+  	/* only queue to workqueue if there is data we want to write. */
+  	if (test_bit(WRITE_PENDING, &con->state)) {
+@@ -212,6 +213,9 @@ static void ceph_state_change(struct sock *sk)
+  		dout("ceph_state_change TCP_ESTABLISHED\n");
+  		queue_con(con);
+  		break;
++	default:
++		WARN(1, "unexpected socket state (%d)", sk->sk_state);
++		break;
+  	}
   }
 
-  static int ceph_tcp_recvmsg(struct socket *sock, void *buf, size_t len)
-@@ -1850,11 +1850,9 @@ more:
-  		con->in_tag = CEPH_MSGR_TAG_READY;
-  		dout("try_write initiating connect on %p new state %lu\n",
-  		     con, con->state);
--		con->sock = ceph_tcp_connect(con);
--		if (IS_ERR(con->sock)) {
--			con->sock = NULL;
-+		ret = ceph_tcp_connect(con);
-+		if (ret < 0) {
-  			con->error_msg = "connect error";
--			ret = -1;
-  			goto out;
-  		}
+@@ -416,22 +420,23 @@ bool ceph_con_opened(struct ceph_connection *con)
+   */
+  struct ceph_connection *ceph_con_get(struct ceph_connection *con)
+  {
+-	dout("con_get %p nref = %d -> %d\n", con,
+-	     atomic_read(&con->nref), atomic_read(&con->nref) + 1);
+-	if (atomic_inc_not_zero(&con->nref))
+-		return con;
+-	return NULL;
++	int nref = __atomic_add_unless(&con->nref, 1, 0);
++
++	dout("con_get %p nref = %d -> %d\n", con, nref, nref + 1);
++
++	return nref ? con : NULL;
+  }
+
+  void ceph_con_put(struct ceph_connection *con)
+  {
+-	dout("con_put %p nref = %d -> %d\n", con,
+-	     atomic_read(&con->nref), atomic_read(&con->nref) - 1);
+-	BUG_ON(atomic_read(&con->nref) == 0);
+-	if (atomic_dec_and_test(&con->nref)) {
++	int nref = atomic_dec_return(&con->nref);
++
++	BUG_ON(nref < 0);
++	if (nref == 0) {
+  		BUG_ON(con->sock);
+  		kfree(con);
   	}
++	dout("con_put %p nref = %d -> %d\n", con, nref + 1, nref);
+  }
+
+  /*
 -- 
 1.7.5.4
 
