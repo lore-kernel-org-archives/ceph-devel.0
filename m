@@ -1,113 +1,108 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <slawomir.skowron@gmail.com>
-Subject: Re: RadosGW problems with copy in s3
-Date: Wed, 29 Feb 2012 14:06:25 +0100
-Message-ID: <CAMwB3Tje2tgruL8yP29Q1eYTON5kuS3neetA=6zXed4OriJefg@mail.gmail.com>
-References: <CAMwB3ThF2kTWNDJM9zYOVh0ud29nAoib4yTwNRgiJuacDKh=7w@mail.gmail.com>
-	<CAC-hyiHSUYv-Mk7RxB-_a8ObePrf9osLRFjj-G2_9Dz6z8v6Vw@mail.gmail.com>
-	<CAMwB3ThZ4jPis_Bb9tsf=HTnh3gLd6CNkn2XMr4xo09bO3hEiQ@mail.gmail.com>
-	<CAC-hyiHB0aDsEO8ES8pqhcXB38MR1QNZLMB=jyRm2p_Yp7V8Aw@mail.gmail.com>
-	<CAC-hyiFL429jjfi7J7fiwoshdRQRq9_1AhECJ+sg2=nV+5NpZw@mail.gmail.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: [PATCH] net/ceph: Only clear SOCK_NOSPACE when there is
+ sufficient space in the socket buffer
+Date: Wed, 29 Feb 2012 08:30:58 -0700
+Message-ID: <4F4E44B2.3040707@sandia.gov>
+References: <1328111989-10191-1-git-send-email-jaschut@sandia.gov>
+ <1328234852.21405.66.camel@doink>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:61686 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754691Ab2B2NG1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Feb 2012 08:06:27 -0500
-Received: by wibhm11 with SMTP id hm11so2671604wib.19
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Feb 2012 05:06:25 -0800 (PST)
-In-Reply-To: <CAC-hyiFL429jjfi7J7fiwoshdRQRq9_1AhECJ+sg2=nV+5NpZw@mail.gmail.com>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:54837 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031159Ab2B2PbO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Feb 2012 10:31:14 -0500
+In-Reply-To: <1328234852.21405.66.camel@doink>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
+To: elder@dreamhost.com
 Cc: ceph-devel@vger.kernel.org
 
-Ok, it's intentional.
+Hi Alex,
 
-We are checking meta info about files, then, checking md5 of file
-content. In parallel, updating object that have change, and then
-archiving this objects in another key, and last thing is deleting
-objects that expires.
-
-This happens over and over, because, this site is changing many times.
-
-Now i don't have any idea, how to workaround this problem, without
-shutdown this app :(
-
-Another question is, why data from radosgw writing almost everything
-only on one osd, and copies to 2 others, and only those. Is anyone can
-explain this to me ??
-
-/dev/sdu              275G  605M  260G   1% /vol0/data/osd.18
-/dev/sdw              275G  608M  260G   1% /vol0/data/osd.21
-/dev/sdz              275G  638M  260G   1% /vol0/data/osd.24
-/dev/sde              275G  605M  260G   1% /vol0/data/osd.3
-/dev/sdr              275G  605M  260G   1% /vol0/data/osd.16
-/dev/sdaa             275G  696M  260G   1% /vol0/data/osd.25
-/dev/sdp              275G  605M  260G   1% /vol0/data/osd.14
-/dev/sdd              275G  605M  260G   1% /vol0/data/osd.2
-/dev/sdk              275G  605M  260G   1% /vol0/data/osd.8
-/dev/sdh              275G  608M  260G   1% /vol0/data/osd.6
-/dev/sds              275G  605M  260G   1% /vol0/data/osd.17
-/dev/sdf              275G  638M  260G   1% /vol0/data/osd.4
-/dev/sdj              275G  637M  260G   1% /vol0/data/osd.9
-/dev/sdc              275G  604M  260G   1% /vol0/data/osd.1
-/dev/sdv              275G  2.7G  258G   2% /vol0/data/osd.20
-/dev/sdn              275G  607M  260G   1% /vol0/data/osd.12
-/dev/sdo              275G  605M  260G   1% /vol0/data/osd.13
-/dev/sdg              275G  605M  260G   1% /vol0/data/osd.5
-/dev/sdy              275G  633M  260G   1% /vol0/data/osd.23
-/dev/sdm              275G  605M  260G   1% /vol0/data/osd.11
-/dev/sdx              275G  605M  260G   1% /vol0/data/osd.22
-/dev/sdb              275G  608M  260G   1% /vol0/data/osd.0
-/dev/sdq              275G  605M  260G   1% /vol0/data/osd.15
-/dev/sdl              275G  605M  260G   1% /vol0/data/osd.10
-/dev/sdi              275G  605M  260G   1% /vol0/data/osd.7
-/dev/sdt              275G  604M  260G   1% /vol0/data/osd.19
-
-
-2012/2/28 Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>:
-> (resending to list)
->
-> On Tue, Feb 28, 2012 at 11:53 AM, S=C5=82awomir Skowron
-> <slawomir.skowron@gmail.com> wrote:
+On 02/02/2012 07:07 PM, Alex Elder wrote:
+> On Wed, 2012-02-01 at 08:59 -0700, Jim Schutt wrote:
+>> The Ceph messenger would sometimes queue multiple work items to write
+>> data to a socket when the socket buffer was full.
 >>
->> 2012/2/28 Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>:
->> > On Tue, Feb 28, 2012 at 3:43 AM, S=C5=82awomir Skowron
->> > <slawomir.skowron@gmail.com> wrote:
->> >> After some parallel copy command via botto for many files everyth=
-ing,
->> >> going to slow down, and eventualy got timeout from nginx@radosgw.
->
->
-> Note that you're overwriting the same object. Is that intentional?
->
+>> Fix this problem by making ceph_write_space() use SOCK_NOSPACE in the
+>> same way that net/core/stream.c:sk_stream_write_space() does, i.e.,
+>> clearing it only when sufficient space is available in the socket buffer.
 >>
->> Reproduced logs in attachment.
->>
+>> Signed-off-by: Jim Schutt<jaschut@sandia.gov>
 >
-> I was able to recreate the issue. The problem is specifically related
-> to the fact that you're overwriting the same object from 10s of
-> parallel threads. What happens is that our race-detection code (that
-> is related to the radosgw atomic object write) detects that the
-> underlying object has been written and it needs to reread its header
-> before overwriting it. This works well when there are a few writers t=
-o
-> the same object, but doesn't scale very well. I opened issue #2120 to
-> track the issue.
+> This looks good to me.  You are avoiding queueing more
+> messages if the amount of free space for writing is
+> less than the minimum.  And if not, you leave the
+> SOCK_NOSPACE flag alone.
+>
+> My only general thought on looking at this is that
+> this is using instantaneous space available in a
+> socket send buffer to make a decision on whether
+> to add something to a workqueue, whose work item
+> *may* put something into the send buffer.  By the
+> time the work item actually runs, the state of
+> the socket may be very different.
+>
+> Still, this is an improvement and at this point I
+> am not in a position to suggest anything that
+> would close the gap.
+>
+> Reviewed-by: Alex Elder<elder@dreamhost.com>
 
-You join this with Tasks #1956, and when this task go to development ??
+Do you think this is worth sending upstream?
 
-> Yehuda
+Do I need to to something more, or are you willing
+to add it to your ceph-client for-review branch?
 
---=20
------
-Pozdrawiam
+Thanks -- Jim
 
-S=C5=82awek "sZiBis" Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>> ---
+>>   net/ceph/messenger.c |   18 ++++++++++++------
+>>   1 files changed, 12 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+>> index 67973f0..a4df90b 100644
+>> --- a/net/ceph/messenger.c
+>> +++ b/net/ceph/messenger.c
+>> @@ -175,16 +175,22 @@ static void ceph_write_space(struct sock *sk)
+>>   	struct ceph_connection *con =
+>>   		(struct ceph_connection *)sk->sk_user_data;
+>>
+>> -	/* only queue to workqueue if there is data we want to write. */
+>> +	/* only queue to workqueue if there is data we want to write,
+>> +	 * and there is sufficient space in the socket buffer to accept
+>> +	 * more data.  clear SOCK_NOSPACE so that ceph_write_space()
+>> +	 * doesn't get called again until try_write() fills the socket
+>> +	 * buffer. See net/ipv4/tcp_input.c:tcp_check_space()
+>> +	 * and net/core/stream.c:sk_stream_write_space().
+>> +	 */
+>>   	if (test_bit(WRITE_PENDING,&con->state)) {
+>> -		dout("ceph_write_space %p queueing write work\n", con);
+>> -		queue_con(con);
+>> +		if (sk_stream_wspace(sk)>= sk_stream_min_wspace(sk)) {
+>> +			dout("ceph_write_space %p queueing write work\n", con);
+>> +			clear_bit(SOCK_NOSPACE,&sk->sk_socket->flags);
+>> +			queue_con(con);
+>> +		}
+>>   	} else {
+>>   		dout("ceph_write_space %p nothing to write\n", con);
+>>   	}
+>> -
+>> -	/* since we have our own write_space, clear the SOCK_NOSPACE flag */
+>> -	clear_bit(SOCK_NOSPACE,&sk->sk_socket->flags);
+>>   }
+>>
+>>   /* socket's state has changed */
+>
+>
+>
+>
+>
+
+
