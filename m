@@ -1,47 +1,43 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: Fwd: Re: [PATCH] ceph: use a shared zero page rather than one per
- messenger
-Date: Tue, 28 Feb 2012 21:04:55 -0800
-Message-ID: <4F4DB1F7.7090709@dreamhost.com>
-References: <4F4DB1C7.6050104@dreamhost.com>
+Subject: Re: [PATCH 0/6] ceph: virtual extended attribute cleanup
+Date: Tue, 28 Feb 2012 21:15:21 -0800
+Message-ID: <4F4DB469.4030109@dreamhost.com>
+References: <4F4D98D5.1010506@dreamhost.com> <20120229042044.GB1865@infradead.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:60129 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:39787 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750779Ab2B2FE6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Feb 2012 00:04:58 -0500
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id D126824318
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 21:04:55 -0800 (PST)
-Received: from [192.168.107.136] (aon.hq.newdream.net [64.111.111.107])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id C442724314
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 21:04:55 -0800 (PST)
-In-Reply-To: <4F4DB1C7.6050104@dreamhost.com>
+	with ESMTP id S1751243Ab2B2FPW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Feb 2012 00:15:22 -0500
+In-Reply-To: <20120229042044.GB1865@infradead.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-
-Neglected to copy the list on my response.	-Alex
-
--------- Original Message --------
-Subject: Re: [PATCH] ceph: use a shared zero page rather than one per 
-messenger
-Date: Tue, 28 Feb 2012 21:04:07 -0800
-From: Alex Elder <elder@dreamhost.com>
 To: Christoph Hellwig <hch@infradead.org>
+Cc: ceph-devel@vger.kernel.org
 
-On 02/28/2012 08:18 PM, Christoph Hellwig wrote:
-> On Tue, Feb 28, 2012 at 07:06:22PM -0800, Alex Elder wrote:
->> Each messenger allocates a page to be used when writing zeroes
->> out in the event of error or other abnormal condition.  Just
->> allocate one at initialization time and have them all share it.
+On 02/28/2012 08:20 PM, Christoph Hellwig wrote:
+> On Tue, Feb 28, 2012 at 07:17:41PM -0800, Alex Elder wrote:
+>> This series cleans up some code involving ceph's virtual extended
+>> attributes.  Three of them define some simple macros are set up to
+>> help ensure the attributes are defined in a consistent way.  One
+>> makes the size of certain constant values get defined at startup
+>> time rather than repeatedly, and the remaining two are some very
+>> small changes made for clarity.
 >
-> Any reason you don't simply use the kernel-wide ZERO_PAGE()?
+> Is there any reason you can't use the generic_*xattr helpers that
+> parse attribute names and use the handler array in the superblock?
 
-No reason, I just didn't take the change to that logical
-conclusion.  I'll update it to do that instead.
+We should.  And I started to look at that but decided to at least
+start moving the code in a better, more regular direction.  I've
+got it on a list but haven't gotten around to it.  Lots of this
+stuff is just the result of taking my first walk through some
+of this code.
+
+> I'm still vaguely planning on getting all remaining filesystems
+> converted over to it.
+
+OK.  I'll look into converting this stuff soon.
 
 					-Alex
-
