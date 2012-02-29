@@ -1,80 +1,103 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: [PATCH 2/2] rbd: convert to using flags field
-Date: Tue, 28 Feb 2012 20:41:55 -0800
-Message-ID: <4F4DAC93.5090309@dreamhost.com>
-References: <4F4DAC48.7060804@dreamhost.com>
+Subject: [PATCH] rbd: don't drop the rbd_id too early
+Date: Tue, 28 Feb 2012 20:42:51 -0800
+Message-ID: <4F4DACCB.8000404@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:47085 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:47095 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932134Ab2B2Elz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 23:41:55 -0500
+	with ESMTP id S932134Ab2B2Emv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2012 23:42:51 -0500
 Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 865FB24314
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 20:41:55 -0800 (PST)
+	by mail.hq.newdream.net (Postfix) with ESMTP id 79DFB24318
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 20:42:51 -0800 (PST)
 Received: from [192.168.107.136] (aon.hq.newdream.net [64.111.111.107])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 78CF024325
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 20:41:55 -0800 (PST)
-In-Reply-To: <4F4DAC48.7060804@dreamhost.com>
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 6B9EB24314
+	for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2012 20:42:51 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-To allow having more than just read-only as Boolean state associated
-with an rbd_device, replace the "read_only" field with a more
-general "flags" field.  The non-atomic versions of bit operations
-are fine for our purposes.
+Currently an rbd device's id is released when it is removed, but it
+is done before the code is run to clean up sysfs-related files (such
+as /sys/bus/rbd/devices/1).
+
+It's possible that an rbd is still in use after the rbd_remove()
+call has been made.  It's essentially the same as an active inode
+that stays around after it has been removed--until its final close
+operation.  This means that the id shows up as free for reuse at a
+time it should not be.
+
+The effect of this was seen by Jens Rehpoehler, who:
+     - had a filesystem mounted on an rbd device
+     - unmapped that filesystem (without unmounting)
+     - found that the mount still worked properly
+     - but hit a panic when he attempted to re-map a new rbd device
+
+This re-map attempt found the previously-unmapped id available.
+The subsequent attempt to reuse it was met with a panic while
+attempting to (re-)install the sysfs entry for the new mapped
+device.
+
+Fix this by holding off "putting" the rbd id, until the rbd_device
+release function is called--when the last reference is finally
+dropped.
+
+Note: This fixes: http://tracker.newdream.net/issues/1907
 
 Signed-off-by: Alex Elder <elder@dreamhost.com>
 ---
-  drivers/block/rbd.c |   14 ++++++++++----
-  1 files changed, 10 insertions(+), 4 deletions(-)
+  drivers/block/rbd.c |   14 +++++++++-----
+  1 files changed, 9 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e7b443a..da38804 100644
+index da38804..7cae4a3 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -176,7 +176,8 @@ struct rbd_device {
-  	char                    snap_name[RBD_MAX_SNAP_NAME_LEN];
-  	u32 cur_snap;	/* index+1 of current snapshot within snap context
-  			   0 - for the head */
--	int read_only;
+@@ -2440,7 +2440,12 @@ static ssize_t rbd_add(struct bus_type *bus,
+  	if (rc)
+  		goto err_out_blkdev;
+
+-	/* set up and announce blkdev mapping */
++	/*
++	 * At this point cleanup in the event of an error is the job
++	 * of the sysfs code (initiated by rbd_bus_del_dev()).
++	 *
++	 * Set up and announce blkdev mapping.
++	 */
+  	rc = rbd_init_disk(rbd_dev);
+  	if (rc)
+  		goto err_out_bus;
+@@ -2452,8 +2457,6 @@ static ssize_t rbd_add(struct bus_type *bus,
+  	return count;
+
+  err_out_bus:
+-	rbd_id_put(rbd_dev);
+-
+  	/* this will also clean up rest of rbd_dev stuff */
+
+  	rbd_bus_del_dev(rbd_dev);
+@@ -2511,6 +2514,9 @@ static void rbd_dev_release(struct device *dev)
+  	/* clean up and free blkdev */
+  	rbd_free_disk(rbd_dev);
+  	unregister_blkdev(rbd_dev->major, rbd_dev->name);
 +
-+	unsigned long		flags;
++	/* done with the id, and with the rbd_dev */
++	rbd_id_put(rbd_dev);
+  	kfree(rbd_dev);
 
-  	struct list_head	node;
+  	/* release module ref */
+@@ -2543,8 +2549,6 @@ static ssize_t rbd_remove(struct bus_type *bus,
+  		goto done;
+  	}
 
-@@ -187,19 +188,24 @@ struct rbd_device {
-  	struct device		dev;
-  };
+-	rbd_id_put(rbd_dev);
+-
+  	__rbd_remove_all_snaps(rbd_dev);
+  	rbd_bus_del_dev(rbd_dev);
 
-+/* Bit position definitions for the rbd_device->flags */
-+enum {
-+	RBD_DEV_FLAG_READ_ONLY,
-+};
-+
-  static inline bool rbd_dev_is_readonly(struct rbd_device *rbd_dev)
-  {
--	return rbd_dev->read_only;
-+	return test_bit(RBD_DEV_FLAG_READ_ONLY, &rbd_dev->flags);
-  }
-
-  static inline void rbd_dev_set_readonly(struct rbd_device *rbd_dev)
-  {
--	rbd_dev->read_only = true;
-+	__set_bit(RBD_DEV_FLAG_READ_ONLY, &rbd_dev->flags);
-  }
-
-  static inline void rbd_dev_clear_readonly(struct rbd_device *rbd_dev)
-  {
--	rbd_dev->read_only = false;
-+	__clear_bit(RBD_DEV_FLAG_READ_ONLY, &rbd_dev->flags);
-  }
-
-  static DEFINE_MUTEX(ctl_mutex);	  /* Serialize 
-open/close/setup/teardown */
 -- 
 1.7.5.4
 
