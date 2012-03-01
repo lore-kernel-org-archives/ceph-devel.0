@@ -1,47 +1,43 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: PG state issue
-Date: Thu, 01 Mar 2012 11:34:06 +0100
-Message-ID: <4F4F509E.1040905@widodh.nl>
-References: <CANExM-MJ6eSifymHe-aSwwyPkBaTSbLUVZGHVwvrcUFGpNopoA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:37862 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754905Ab2CAKeJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Mar 2012 05:34:09 -0500
-In-Reply-To: <CANExM-MJ6eSifymHe-aSwwyPkBaTSbLUVZGHVwvrcUFGpNopoA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry.cy.chang@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH 3/9] ceph: Push file_update_time() into ceph_page_mkwrite()
+Date: Thu,  1 Mar 2012 12:41:37 +0100
+Message-ID: <1330602103-8851-4-git-send-email-jack@suse.cz>
+References: <1330602103-8851-1-git-send-email-jack@suse.cz>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1330602103-8851-1-git-send-email-jack@suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, linux-fsdevel@vger.kernel.org, dchinner@redhat.com, Jan Kara <jack@suse.cz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+CC: Sage Weil <sage@newdream.net>
+CC: ceph-devel@vger.kernel.org
+Acked-by: Sage Weil <sage@newdream.net>
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ fs/ceph/addr.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
 
-On 03/01/2012 10:43 AM, Henry C Chang wrote:
-> Hi,
-> With version 0.42, I found that the pg's state is not in "degrade" any
-> more if the number of osds is smaller than that of the replication.
-> For example, if I create a cluster of one osd with replication 2, all
-> pgs are in active+clean state. (The pgs were in active+clean+degrade
-> state in the earlier versions.)
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 173b1d2..12b139f 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1181,6 +1181,9 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+ 	loff_t size, len;
+ 	int ret;
+ 
++	/* Update time before taking page lock */
++	file_update_time(vma->vm_file);
++
+ 	size = i_size_read(inode);
+ 	if (off + PAGE_CACHE_SIZE <= size)
+ 		len = PAGE_CACHE_SIZE;
+-- 
+1.7.1
 
-Just a conformation from my side.
-
-Currently I have 3 OSD's which our down/out and only one PG went into 
-degraded state. The weird thing is, these OSD's are not acting for this PG.
-
-The OSD's for this PG are all up and in.
-
-Wido
-
->
-> I think it should be a bug in terms of cluster status although it does
-> not cause any other problems to me so far.
->
-> Henry
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
