@@ -1,130 +1,134 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH 6/6] ceph: make ceph_setxattr() and ceph_removexattr()
- more alike
-Date: Fri, 2 Mar 2012 11:35:39 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1203021134230.6413@cobra.newdream.net>
-References: <4F4D98D5.1010506@dreamhost.com> <4F4D99D3.8070501@dreamhost.com>
+Subject: Re: [PATCH 1/4] rbd: a few small cleanups
+Date: Fri, 2 Mar 2012 11:44:07 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1203021142250.6413@cobra.newdream.net>
+References: <4F4D9BF6.5070102@dreamhost.com> <4F4D9CEB.7020700@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56835 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:41712 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751644Ab2CBTfm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Mar 2012 14:35:42 -0500
-In-Reply-To: <4F4D99D3.8070501@dreamhost.com>
+	with ESMTP id S1759201Ab2CBToI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Mar 2012 14:44:08 -0500
+In-Reply-To: <4F4D9CEB.7020700@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@dreamhost.com>
 Cc: ceph-devel@vger.kernel.org
 
+The "sizeof *foo" weirds me out too, but probably just because I've never 
+seen it.  Visually it isn't as obvious that "foo * sizeof *bar" parses 
+and associates correctly. 
+
+sage
+
 On Tue, 28 Feb 2012, Alex Elder wrote:
 
-> This patch just rearranges a few bits of code to make more
-> portions of ceph_setxattr() and ceph_removexattr() identical.
+> Some minor cleanups in "drivers/block/rbd.c:
+>     - Use the more meaningful "RBD_MAX_OBJ_NAME_LEN" in place if "96"
+>       in the definition of RBD_MAX_MD_NAME_LEN.
+>     - Use DEFINE_SPINLOCK() to define and initialize node_lock.
+>     - Drop a needless (char *) cast in parse_rbd_opts_token().
+>     - Make a few minor formatting changes.
 > 
 > Signed-off-by: Alex Elder <elder@dreamhost.com>
 > ---
->  fs/ceph/xattr.c |   15 ++++++++-------
->  1 files changed, 8 insertions(+), 7 deletions(-)
+>  drivers/block/rbd.c |   21 +++++++++------------
+>  1 files changed, 9 insertions(+), 12 deletions(-)
 > 
-> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-> index 984c863..3fccd3b 100644
-> --- a/fs/ceph/xattr.c
-> +++ b/fs/ceph/xattr.c
-> @@ -764,15 +764,15 @@ int ceph_setxattr(struct dentry *dentry, const char
-> *name,
->  	struct inode *inode = dentry->d_inode;
->  	struct ceph_vxattr *vxattr;
->  	struct ceph_inode_info *ci = ceph_inode(inode);
-> +	int issued;
->  	int err;
-> +	int dirty;
->  	int name_len = strlen(name);
->  	int val_len = size;
->  	char *newname = NULL;
->  	char *newval = NULL;
->  	struct ceph_inode_xattr *xattr = NULL;
-> -	int issued;
->  	int required_blob_size;
-> -	int dirty;
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 7f40cb4..7c8c07a 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -46,7 +46,7 @@
 > 
->  	if (ceph_snap(inode) != CEPH_NOSNAP)
->  		return -EROFS;
-> @@ -803,6 +803,7 @@ int ceph_setxattr(struct dentry *dentry, const char *name,
->  	spin_lock(&ci->i_ceph_lock);
->  retry:
-
-This:
-
->  	issued = __ceph_caps_issued(ci, NULL);
-> +	dout("setxattr %p issued %s\n", inode, ceph_cap_string(issued));
->  	if (!(issued & CEPH_CAP_XATTR_EXCL))
->  		goto do_sync;
-
-needs to go after this:
-
->  	__build_xattrs(inode);
-
-All of the __build_xattrs() calls should go before the cap check, because 
-they drop i_ceph_lock.  
-
-Can probably do that in a new patch, since it was broken for some of these 
-before.
-
-Otherwise, this series looks good!
-
-Reviewed-by: Sage Weil <sage@newdream.net>
-
-> @@ -811,7 +812,7 @@ retry:
+>  #define RBD_MINORS_PER_MAJOR	256		/* max minors per blkdev */
 > 
->  	if (!ci->i_xattrs.prealloc_blob ||
->  	    required_blob_size > ci->i_xattrs.prealloc_blob->alloc_len) {
-> -		struct ceph_buffer *blob = NULL;
-> +		struct ceph_buffer *blob;
+> -#define RBD_MAX_MD_NAME_LEN	(96 + sizeof(RBD_SUFFIX))
+> +#define RBD_MAX_MD_NAME_LEN	(RBD_MAX_OBJ_NAME_LEN + sizeof(RBD_SUFFIX))
+>  #define RBD_MAX_POOL_NAME_LEN	64
+>  #define RBD_MAX_SNAP_NAME_LEN	32
+>  #define RBD_MAX_OPT_LEN		1024
+> @@ -175,7 +175,7 @@ static struct bus_type rbd_bus_type = {
+>  	.name		= "rbd",
+>  };
 > 
->  		spin_unlock(&ci->i_ceph_lock);
->  		dout(" preaallocating new blob size=%d\n",
-> required_blob_size);
-> @@ -825,12 +826,13 @@ retry:
->  		goto retry;
->  	}
+> -static spinlock_t node_lock;      /* protects client get/put */
+> +static DEFINE_SPINLOCK(node_lock);      /* protects client get/put */
 > 
-> -	dout("setxattr %p issued %s\n", inode, ceph_cap_string(issued));
->  	err = __set_xattr(ci, newname, name_len, newval,
->  			  val_len, 1, 1, 1, &xattr);
-> +
->  	dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_XATTR_EXCL);
->  	ci->i_xattrs.dirty = true;
->  	inode->i_ctime = CURRENT_TIME;
-> +
->  	spin_unlock(&ci->i_ceph_lock);
->  	if (dirty)
->  		__mark_inode_dirty(inode, dirty);
-> @@ -892,18 +894,17 @@ int ceph_removexattr(struct dentry *dentry, const char
-> *name)
->  		return -EOPNOTSUPP;
+>  static DEFINE_MUTEX(ctl_mutex);	  /* Serialize
+> open/close/setup/teardown */
+>  static LIST_HEAD(rbd_dev_list);    /* devices */
+> @@ -324,7 +324,7 @@ static int parse_rbd_opts_token(char *c, void *private)
+>  	substring_t argstr[MAX_OPT_ARGS];
+>  	int token, intval, ret;
 > 
->  	spin_lock(&ci->i_ceph_lock);
-> -	__build_xattrs(inode);
->  	issued = __ceph_caps_issued(ci, NULL);
->  	dout("removexattr %p issued %s\n", inode, ceph_cap_string(issued));
-> -
->  	if (!(issued & CEPH_CAP_XATTR_EXCL))
->  		goto do_sync;
-> +	__build_xattrs(inode);
+> -	token = match_token((char *)c, rbdopt_tokens, argstr);
+> +	token = match_token(c, rbdopt_tokens, argstr);
+>  	if (token < 0)
+>  		return -EINVAL;
 > 
->  	err = __remove_xattr_by_name(ceph_inode(inode), name);
-> +
->  	dirty = __ceph_mark_dirty_caps(ci, CEPH_CAP_XATTR_EXCL);
->  	ci->i_xattrs.dirty = true;
->  	inode->i_ctime = CURRENT_TIME;
-> -
->  	spin_unlock(&ci->i_ceph_lock);
->  	if (dirty)
->  		__mark_inode_dirty(inode, dirty);
+> @@ -372,7 +372,8 @@ static int rbd_get_client(struct rbd_device *rbd_dev,
+> const char *mon_addr,
+>  	rbd_opts->notify_timeout = RBD_NOTIFY_TIMEOUT_DEFAULT;
+> 
+>  	ret = ceph_parse_options(&opt, options, mon_addr,
+> -				 mon_addr + strlen(mon_addr),
+> parse_rbd_opts_token, rbd_opts);
+> +				mon_addr + strlen(mon_addr),
+> +				parse_rbd_opts_token, rbd_opts);
+>  	if (ret < 0)
+>  		goto done_err;
+> 
+> @@ -460,15 +461,13 @@ static int rbd_header_from_disk(struct rbd_image_header
+> *header,
+>  	u32 snap_count = le32_to_cpu(ondisk->snap_count);
+>  	int ret = -ENOMEM;
+> 
+> -	if (memcmp(ondisk, RBD_HEADER_TEXT, sizeof(RBD_HEADER_TEXT))) {
+> +	if (memcmp(ondisk, RBD_HEADER_TEXT, sizeof(RBD_HEADER_TEXT)))
+>  		return -ENXIO;
+> -	}
+> 
+>  	init_rwsem(&header->snap_rwsem);
+>  	header->snap_names_len = le64_to_cpu(ondisk->snap_names_len);
+>  	header->snapc = kmalloc(sizeof(struct ceph_snap_context) +
+> -				snap_count *
+> -				 sizeof(struct rbd_image_snap_ondisk),
+> +				snap_count * sizeof *ondisk,
+>  				gfp_flags);
+>  	if (!header->snapc)
+>  		return -ENOMEM;
+> @@ -498,8 +497,7 @@ static int rbd_header_from_disk(struct rbd_image_header
+> *header,
+>  	header->snapc->num_snaps = snap_count;
+>  	header->total_snaps = snap_count;
+> 
+> -	if (snap_count &&
+> -	    allocated_snaps == snap_count) {
+> +	if (snap_count && allocated_snaps == snap_count) {
+>  		for (i = 0; i < snap_count; i++) {
+>  			header->snapc->snaps[i] =
+>  				le64_to_cpu(ondisk->snaps[i].id);
+> @@ -2421,7 +2419,7 @@ static int rbd_sysfs_init(void)
+>  	rbd_bus_type.bus_attrs = rbd_bus_attrs;
+> 
+>  	ret = bus_register(&rbd_bus_type);
+> -	 if (ret < 0)
+> +	if (ret < 0)
+>  		return ret;
+> 
+>  	ret = device_register(&rbd_root_dev);
+> @@ -2442,7 +2440,6 @@ int __init rbd_init(void)
+>  	rc = rbd_sysfs_init();
+>  	if (rc)
+>  		return rc;
+> -	spin_lock_init(&node_lock);
+>  	pr_info("loaded " DRV_NAME_LONG "\n");
+>  	return 0;
+>  }
 > -- 
 > 1.7.5.4
-> 
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
