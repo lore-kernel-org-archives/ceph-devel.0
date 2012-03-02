@@ -1,42 +1,50 @@
-From: Ted Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH 00/11 v2] Push file_update_time() into .page_mkwrite
-Date: Thu, 1 Mar 2012 18:29:42 -0500
-Message-ID: <20120301232942.GH32588@thunk.org>
-References: <1330602103-8851-1-git-send-email-jack@suse.cz>
+From: Christian Brunner <christian@brunner-muc.de>
+Subject: protocol version mismatch
+Date: Fri, 2 Mar 2012 10:19:57 +0100
+Message-ID: <CAJafhzSp7eHZ_nQBFAtGO3p02470munOPKswpR3BOtVb9K69-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <1330602103-8851-1-git-send-email-jack@suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Jan Kara <jack@suse.cz>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, linux-fsdevel@vger.kernel.org, dchinner@redhat.com, Jaya Kumar <jayalk@intworks.biz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Steve French <sfrench@samba.org>, linux-cifs@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, Miklos Szeredi <miklos@szeredi.hu>, fuse-devel@lists.sourceforge.net, Steven Whitehouse <swhiteho@redhat.com>, cluster-devel@redhat.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:32931 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757836Ab2CBJT6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Mar 2012 04:19:58 -0500
+Received: by wibhm2 with SMTP id hm2so469550wib.19
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Mar 2012 01:19:57 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Mar 01, 2012 at 12:41:34PM +0100, Jan Kara wrote:
-> 
-> To fix the issue, this patch set changes page fault code to call
-> file_update_time() only when ->page_mkwrite() callback is not provided. If the
-> callback is provided, it is the responsibility of the filesystem to perform
-> update of i_mtime / i_ctime if needed. We also push file_update_time() call
-> to all existing ->page_mkwrite() implementations if the time update does not
-> obviously happen by other means. If you know your filesystem does not need
-> update of modification times in ->page_mkwrite() handler, please speak up and
-> I'll drop the patch for your filesystem.
+Hi,
 
-I don't know if this introductory text is going to be saved anywhere
-permanent, such as the merge commit (since git now has the ability to
-have much more informative merge descriptions).  But if it is going to
-be preserved, it might be worth mentioning that if the filesystem uses
-block_page_mkpage(), it will handled automatically for them since the
-patch series does push the call to file_update_time(0 into
-__block_page_mkpage().
+I've just updated our ceph-cluster from 0.39 to 0.42.2. Now I'm seeing
+a lot of messages like these in the OSD log:
 
-					- Ted
+Mar  2 10:15:43 os00 osd.003[15096]: 7f0b9831c700 --
+10.255.0.60:6821/15095 >> 10.255.0.61:6812/22474 pipe(0x2e74100 sd=47
+pgs=0 cs=0 l=0).connect protocol version mismatch, my 9 != 0
+Mar  2 10:15:44 os00 osd.000[14377]: 7fa07d660700 --
+10.255.0.60:6802/14376 >> 10.255.0.61:6818/22919 pipe(0x2c92d00 sd=24
+pgs=0 cs=0 l=0).connect protocol version mismatch, my 9 != 0
+Mar  2 10:15:44 os00 osd.000[14377]: 7fa07d55f700 --
+10.255.0.60:6802/14376 >> 10.255.0.61:6815/22697 pipe(0x32a9900 sd=32
+pgs=0 cs=0 l=0).connect protocol version mismatch, my 9 != 0
+Mar  2 10:15:44 os00 osd.002[14898]: 7f1e52ea6700 --
+10.255.0.60:6817/14897 >> 10.255.0.63:6813/10357 pipe(0x3a82800 sd=32
+pgs=0 cs=0 l=0).connect protocol version mismatch, my 9 != 0
+Mar  2 10:15:44 os00 osd.002[14898]: 7f1e52fa7700 --
+10.255.0.60:6817/14897 >> 10.255.0.63:6806/10448 pipe(0x3a81180 sd=30
+pgs=0 cs=0 l=0).connect protocol version mismatch, my 9 != 0
+Mar  2 10:15:44 os00 osd.002[14898]: 7f1e531a9700 --
+10.255.0.60:6817/14897 >> 10.255.0.63:6807/10265 pipe(0x3a80280 sd=34
+pgs=0 cs=0 l=0).connect protocol version mismatch, my 9 != 0
+Mar  2 10:15:45 os00 osd.002[14898]: 7f1e542ba700 --
+10.255.0.60:6817/14897 >> 10.255.0.61:6821/23156 pipe(0x413d000 sd=40
+pgs=0 cs=0 l=0).connect protocol version mismatch, my 9 != 0
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+10.255.0.60 - 10.255.0.63 are our OSD hosts.
+
+Is there anything I can do about this? (Everything seems to be working...).
+
+Regards,
+Christian
