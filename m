@@ -1,71 +1,69 @@
-From: Sage Weil <sage@newdream.net>
+From: Greg Farnum <gregory.farnum@dreamhost.com>
 Subject: Re: git repository is gone
-Date: Fri, 2 Mar 2012 11:11:37 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1203021111280.6413@cobra.newdream.net>
+Date: Fri, 2 Mar 2012 11:13:32 -0800
+Message-ID: <7F3ABBAADF0F457481E2FA05D53535E7@dreamhost.com>
 References: <1330715160.2218.2.camel@julia.gcs.org.hu>
  <CAM7f0tLF5=2zVQa68Dq2hJcAWGR+Fbi-6jepeoGAXhyC_gcYTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1023166295-1330715497=:6413"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43904 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750913Ab2CBTLi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Mar 2012 14:11:38 -0500
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:40209 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751634Ab2CBTNe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Mar 2012 14:13:34 -0500
+Received: by dajr28 with SMTP id r28so2318788daj.19
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Mar 2012 11:13:34 -0800 (PST)
 In-Reply-To: <CAM7f0tLF5=2zVQa68Dq2hJcAWGR+Fbi-6jepeoGAXhyC_gcYTQ@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dirk Meister <dirkmeister@acm.org>
-Cc: Laszlo Boszormenyi <gcs@debian.hu>, ceph-devel@vger.kernel.org
+To: Dirk Meister <dirkmeister@acm.org>, Laszlo Boszormenyi <gcs@debian.hu>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Sorry guys, it happened just about exactly 10 minutes ago and I think Sage hasn't gotten around to making an announcement or updating the website. We were going to do it at the end of the day but then realized that some of our testing infrastructure was going to break and we wanted to be working when it happened...
 
---557981400-1023166295-1330715497=:6413
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Since you bring it up a little more notification probably would have been good, but please be gentle. We're trying to remove any company branding. :) 
 
-On Fri, 2 Mar 2012, Dirk Meister wrote:
+
+On Friday, March 2, 2012 at 11:09 AM, Dirk Meister wrote:
+
 > Hello,
->=20
+> 
 > it looks like that the NewDreamNetwork github organization was renamed
 > to ceph. So the new repository is https://github.com/ceph/ceph.git.
->=20
+> 
 > See also: https://github.com/ceph/ceph
->=20
+> 
 > I was also a bit surprised. There was no notification on the mailing
 > or have I missed something?
-
-You guys are just too fast for me.  Sorry!
-
-sage
-
->=20
+> 
 > Best regards,
 > Dirk
->=20
-> On Fri, Mar 2, 2012 at 8:06 PM, Laszlo Boszormenyi <gcs@debian.hu> wrote:
+> 
+> On Fri, Mar 2, 2012 at 8:06 PM, Laszlo Boszormenyi <gcs@debian.hu (mailto:gcs@debian.hu)> wrote:
 > > Hi,
-> >
+> > 
 > > I've realized that:
 > > git/ceph $ git pull
 > > fatal: The remote end hung up unexpectedly
-> >
+> > 
 > > Which is due to https://github.com/NewDreamNetwork/ceph being 404.
-> > Is the repository moving to somewhere else? The homepage still referenc=
-e
+> > Is the repository moving to somewhere else? The homepage still reference
 > > this address.
-> >
+> > 
 > > Laszlo/GCS
-> >
+> > 
 > > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
+> > More majordomo info at http://vger.kernel.org/majordomo-info.html
+> 
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-1023166295-1330715497=:6413--
+> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
+
+
+
