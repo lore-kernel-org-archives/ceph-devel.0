@@ -1,92 +1,77 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: leveldb configure errors
-Date: Fri, 2 Mar 2012 16:14:16 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1203021614060.1674@cobra.newdream.net>
-References: <50C10F7E-5438-463D-864D-8C9CF7AC8030@cs.ucsc.edu>
- <49D1C699-E24E-4A2B-B8BF-60B673552D4B@cs.ucsc.edu>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: [PATCH 0/3] Generic libcephfs Java wrappers
+Date: Fri, 02 Mar 2012 16:47:28 -0800
+Message-ID: <4F516A20.8060901@cs.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45402 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965489Ab2CCAOS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Mar 2012 19:14:18 -0500
-In-Reply-To: <49D1C699-E24E-4A2B-B8BF-60B673552D4B@cs.ucsc.edu>
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:51305 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754314Ab2CCAr2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Mar 2012 19:47:28 -0500
+Received: from martini.local (soenat3.cse.ucsc.edu [128.114.60.41])
+	by mail-01.cse.ucsc.edu (Postfix) with ESMTPSA id AEE941008A88
+	for <ceph-devel@vger.kernel.org>; Fri,  2 Mar 2012 16:47:28 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: Noah Watkins <jayhawk@soe.ucsc.edu>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Alternatively,
+Generic libcephfs Java wrappers.
 
- git submodule init
- git submodule update
+This is the first of a patch series that can eventually replace the current Java wrappers that are Hadoop specific. This group implements enough of the libcephfs API to support Hadoop functionality, includes Debian packaging, autoconf magics that look for default Java installations, and some basic JUnit tests.
 
-sage
+The patches are available in the git repository at:
 
-On Fri, 2 Mar 2012, Noah Watkins wrote:
+  git://github.com/noahdesu/ceph.git wip/java-cephfs
 
-> Solved:
-> 
->   git clone --recursive
-> 
-> -Noah
-> 
-> On Mar 2, 2012, at 3:24 PM, Noah Watkins wrote:
-> 
-> > With the latest master the leveldb directory is showing up empty and causing some problems after the clone. Is there an additional step required to get that directory to be populated?
-> > 
-> > -Noah
-> > 
-> > $ ./configure
-> > ...
-> > config.status: executing libtool commands
-> > === configuring in src/leveldb (/home/nwatkins/projects/ceph/clean/ceph/src/leveldb)
-> > configure: WARNING: no configuration information is in src/leveldb
-> > 
-> > 
-> > 
-> > nwatkins@kyoto:~/projects/ceph/clean/ceph$ ls -l src/leveldb/
-> > total 0
-> > 
-> > 
-> > 
-> > nwatkins@kyoto:~/projects/ceph/clean/ceph$ make
-> > Making all in .
-> > make[1]: Entering directory `/home/nwatkins/projects/ceph/clean/ceph'
-> > make[1]: Nothing to be done for `all-am'.
-> > make[1]: Leaving directory `/home/nwatkins/projects/ceph/clean/ceph'
-> > Making all in src
-> > make[1]: Entering directory `/home/nwatkins/projects/ceph/clean/ceph/src'
-> > rm -f init-ceph init-ceph.tmp
-> > sed -e 's|@bindir[@]|/usr/local/bin|g' -e 's|@libdir[@]|/usr/local/lib|g' -e 's|@sysconfdir[@]|/usr/local/etc|g' -e 's|@datadir[@]|/usr/local/share/ceph|g' -e 's|@prefix[@]|/usr/local|g' -e 's|@@GCOV_PREFIX_STRIP[@][@]|7|g' './init-ceph.in' >init-ceph.tmp
-> > chmod +x init-ceph.tmp
-> > chmod a-w init-ceph.tmp
-> > mv init-ceph.tmp init-ceph
-> > make  all-recursive
-> > make[2]: Entering directory `/home/nwatkins/projects/ceph/clean/ceph/src'
-> > Making all in ocf
-> > make[3]: Entering directory `/home/nwatkins/projects/ceph/clean/ceph/src/ocf'
-> > make[3]: Nothing to be done for `all'.
-> > make[3]: Leaving directory `/home/nwatkins/projects/ceph/clean/ceph/src/ocf'
-> > Making all in leveldb
-> > make[3]: Entering directory `/home/nwatkins/projects/ceph/clean/ceph/src/leveldb'
-> > make[3]: *** No rule to make target `all'.  Stop.
-> > make[3]: Leaving directory `/home/nwatkins/projects/ceph/clean/ceph/src/leveldb'
-> > make[2]: *** [all-recursive] Error 1
-> > make[2]: Leaving directory `/home/nwatkins/projects/ceph/clean/ceph/src'
-> > make[1]: *** [all] Error 2
-> > make[1]: Leaving directory `/home/nwatkins/projects/ceph/clean/ceph/src'
-> > make: *** [all-recursive] Error 1
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Noah Watkins (3):
+  java: add Java and C++ source files
+  java: setup autotools to build cephfs-java
+  debian: add libcephfs-java package
+
+ configure.ac                                       |   74 ++
+ debian/.gitignore                                  |    1 +
+ debian/control                                     |    8 +-
+ debian/libceph1-java.install                       |    2 +
+ debian/rules                                       |    1 +
+ src/Makefile.am                                    |   15 +-
+ src/java/.gitignore                                |    4 +
+ src/java/Makefile.am                               |   49 +
+ src/java/README                                    |   43 +
+ src/java/build.xml                                 |   67 ++
+ .../java/net/newdream/ceph/fs/CephConstants.java   |   38 +
+ .../java/net/newdream/ceph/fs/CephDirectory.java   |   84 ++
+ .../java/net/newdream/ceph/fs/CephException.java   |   21 +
+ .../ceph/fs/CephInvalidStateException.java         |   11 +
+ src/java/java/net/newdream/ceph/fs/CephMount.java  |  360 +++++++
+ .../net/newdream/ceph/fs/CephNativeLoader.java     |   16 +
+ src/java/java/net/newdream/ceph/fs/CephProxy.java  |  217 ++++
+ src/java/java/net/newdream/ceph/fs/CephStat.java   |   15 +
+ .../java/net/newdream/ceph/fs/CephStatVFS.java     |   14 +
+ src/java/java/net/newdream/ceph/fs/CephStruct.java |   33 +
+ src/java/native/libcephfs_jni.cc                   | 1037 ++++++++++++++++++++
+ src/java/test/CephMountCreateTest.java             |   76 ++
+ src/java/test/CephMountTest.java                   |   72 ++
+ 23 files changed, 2256 insertions(+), 2 deletions(-)
+ create mode 100644 debian/libceph1-java.install
+ create mode 100644 src/java/.gitignore
+ create mode 100644 src/java/Makefile.am
+ create mode 100644 src/java/README
+ create mode 100644 src/java/build.xml
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephConstants.java
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephDirectory.java
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephException.java
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephInvalidStateException.java
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephMount.java
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephNativeLoader.java
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephProxy.java
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephStat.java
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephStatVFS.java
+ create mode 100644 src/java/java/net/newdream/ceph/fs/CephStruct.java
+ create mode 100644 src/java/native/libcephfs_jni.cc
+ create mode 100644 src/java/test/CephMountCreateTest.java
+ create mode 100644 src/java/test/CephMountTest.java
+
+-- 
+1.7.5.4
