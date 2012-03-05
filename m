@@ -1,55 +1,49 @@
 From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Dependencies
-Date: Mon, 5 Mar 2012 09:01:38 -0800
-Message-ID: <CAORUGqCqXy_cPb6Gn4vsacXb+x-zjDP69G==Jpiwp5E_ELmRrQ@mail.gmail.com>
-References: <4F54DFD9.1010209@dreamhost.com> <CAORUGqDQLXLxjiqEtJx=Pa0UQ=dq_tyoQzVkEY2Z=QQJ7dOo3A@mail.gmail.com>
+Subject: Re: [PATCH 1/3] java: add Java and C++ source files
+Date: Mon, 5 Mar 2012 09:25:37 -0800
+Message-ID: <CAORUGqCgPzhSKzOdxHsQG=o64zrhzUmLvDOd5u3Q5k-+0_Q8YQ@mail.gmail.com>
+References: <4F516A75.6020500@cs.ucsc.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f52.google.com ([209.85.210.52]:50786 "EHLO
-	mail-pz0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750963Ab2CERB6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Mar 2012 12:01:58 -0500
-Received: by dadp12 with SMTP id p12so5343289dad.11
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Mar 2012 09:01:58 -0800 (PST)
-In-Reply-To: <CAORUGqDQLXLxjiqEtJx=Pa0UQ=dq_tyoQzVkEY2Z=QQJ7dOo3A@mail.gmail.com>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:48005 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751052Ab2CERZ5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Mar 2012 12:25:57 -0500
+Received: by pbcun15 with SMTP id un15so3001982pbc.19
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Mar 2012 09:25:57 -0800 (PST)
+In-Reply-To: <4F516A75.6020500@cs.ucsc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
+Cc: ceph-devel@vger.kernel.org
 
-[Resending to ceph-devel without the HTML gmail put in.]
+On Fri, Mar 2, 2012 at 16:48, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
+> This adds all of the Java and C++ source files that make up the
+> libcephfs Java wrappers package.
+...
+> +2. Set CEPHFS_CONF environment variable to point to a ceph.conf. This can be
+> +ommitted if the desired configuration file can be found in a default location.
 
-On Mon, Mar 5, 2012 at 07:46, Alex Elder <elder@dreamhost.com> wrote:
->
-> Is there any way that we can do any or all of these?
-> - we can identify when a new dependency like that has been added
+Simple typo, "omitted".
 
-The Build-Depends: line in debian/control changed. Or, the
-BuildRequires: lines in ceph.spec.in changed, for RPM dstros.
+> +package net.newdream.ceph.fs;
 
-(Or someone screwed up, and forgot to change them, but when that gets
-fixed, go back to previous paragraph.)
+I think com.ceph.fs would be a smaller punishment on the programmers
+using this, and we have that domain name.
 
-> - we can do this automatically
-> - we can mention something (like in a release announcement) when
-> =C2=A0new dependencies have been added since last time
+> diff --git a/src/java/test/CephMountCreateTest.java b/src/java/test/CephMountCreateTest.java
+...
+> + * This tests the mount root dir functionality. It creates an empty
+> + * directory in the real root, then it re-mounts the file system
+> + * with the empty directory specified as the root. Assertions are
+> + * that the "/" in the normal mount is non-empty, and that "/" is
+> + * empty in the mount with the empty directory as the root.
 
-Automatically answering whether that content changed after last
-release is easy. Release management is not (it's a repetitive,
-relatively rare & high-importance task).
+So the JUnit tests require a functional ceph cluster to run. Can you
+state that explicitly in the source/docs, please?
 
-> - we can do a nicer job of telling the user that a particular
-> =C2=A0package is missing--better than the "test for gtmm failed" kind
-> =C2=A0of message that the configure script provides
 
-That's autoconf, it's hard to improve on, and intentionally does not
-assume the system is managed using debs or RPM etc.
 
-As long as you're on Debian/Ubuntu, running dpkg-checkbuilddeps will
-check your system against debian/control.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I did not dig deep, and I'm no Java expert, but more client-side
+support is exciting stuff!
