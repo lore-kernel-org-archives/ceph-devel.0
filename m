@@ -1,39 +1,60 @@
 From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 3/7] ceph: Push file_update_time() into ceph_page_mkwrite()
-Date: Mon,  5 Mar 2012 15:54:14 +0100
-Message-ID: <1330959258-23211-4-git-send-email-jack@suse.cz>
-References: <1330959258-23211-1-git-send-email-jack@suse.cz>
+Subject: [PATCH 0/7 v3] Push file_update_time() into .page_mkwrite
+Date: Mon,  5 Mar 2012 15:54:11 +0100
+Message-ID: <1330959258-23211-1-git-send-email-jack@suse.cz>
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1330959258-23211-1-git-send-email-jack@suse.cz>
 Sender: owner-linux-mm@kvack.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, Jan Kara <jack@suse.cz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, Jan Kara <jack@suse.cz>, Jaya Kumar <jayalk@intworks.biz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, Steven Whitehouse <swhiteho@redhat.com>, cluster-devel@redhat.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: ceph-devel.vger.kernel.org
 
+  Hello,
+
+  to provide reliable support for filesystem freezing, filesystems need to have
+complete control over when metadata is changed. In particular,
+file_update_time() calls from page fault code make it impossible for
+filesystems to prevent inodes from being dirtied while the filesystem is
+frozen.
+
+To fix the issue, this patch set changes page fault code to call
+file_update_time() only when ->page_mkwrite() callback is not provided. If the
+callback is provided, it is the responsibility of the filesystem to perform
+update of i_mtime / i_ctime if needed. We also push file_update_time() call
+to all existing ->page_mkwrite() implementations if the time update does not
+obviously happen by other means. This is including __block_page_mkwrite() so
+filesystems using it are handled. If you know your filesystem does not need
+update of modification times in ->page_mkwrite() handler, please speak up and
+I'll drop the patch for your filesystem.
+
+As a side note, an alternative would be to remove calls of file_update_time()
+from page fault code altogether and require all filesystems needing it to do
+that in their ->page_mkwrite() implementation. That is certainly possible
+although maybe slightly inefficient and would require auditting 100+
+vm_operations_structs *shiver*.
+
+Changes since v1:
+* Dropped patches for filesystems which don't need them
+* Added some acks
+* Improved sysfs patch by Alex Elder's suggestion
+
+Changes since v2:
+* Dropped patches for more filesystems
+
+Andrew, would you be willing to merge these patches via your tree? This seems
+to be a final version.
+
+								Honza
+
+CC: Jaya Kumar <jayalk@intworks.biz>
 CC: Sage Weil <sage@newdream.net>
 CC: ceph-devel@vger.kernel.org
-Acked-by: Sage Weil <sage@newdream.net>
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- fs/ceph/addr.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
-
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 173b1d2..12b139f 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1181,6 +1181,9 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
- 	loff_t size, len;
- 	int ret;
- 
-+	/* Update time before taking page lock */
-+	file_update_time(vma->vm_file);
-+
- 	size = i_size_read(inode);
- 	if (off + PAGE_CACHE_SIZE <= size)
- 		len = PAGE_CACHE_SIZE;
--- 
-1.7.1
+CC: Eric Van Hensbergen <ericvh@gmail.com>
+CC: Ron Minnich <rminnich@sandia.gov>
+CC: Latchesar Ionkov <lucho@ionkov.net>
+CC: v9fs-developer@lists.sourceforge.net
+CC: Steven Whitehouse <swhiteho@redhat.com>
+CC: cluster-devel@redhat.com
+CC: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
