@@ -1,49 +1,55 @@
-From: Alex Elder <elder@dreamhost.com>
-Subject: Dependencies
-Date: Mon, 05 Mar 2012 09:46:33 -0600
-Message-ID: <4F54DFD9.1010209@dreamhost.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: Dependencies
+Date: Mon, 5 Mar 2012 09:01:38 -0800
+Message-ID: <CAORUGqCqXy_cPb6Gn4vsacXb+x-zjDP69G==Jpiwp5E_ELmRrQ@mail.gmail.com>
+References: <4F54DFD9.1010209@dreamhost.com> <CAORUGqDQLXLxjiqEtJx=Pa0UQ=dq_tyoQzVkEY2Z=QQJ7dOo3A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:53339 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751014Ab2CEPqd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Mar 2012 10:46:33 -0500
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 1BDF124373
-	for <ceph-devel@vger.kernel.org>; Mon,  5 Mar 2012 07:46:38 -0800 (PST)
-Received: from [172.22.22.79] (c-71-195-31-37.hsd1.mn.comcast.net [71.195.31.37])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id E2E1C24303
-	for <ceph-devel@vger.kernel.org>; Mon,  5 Mar 2012 07:46:37 -0800 (PST)
+Received: from mail-pz0-f52.google.com ([209.85.210.52]:50786 "EHLO
+	mail-pz0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750963Ab2CERB6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Mar 2012 12:01:58 -0500
+Received: by dadp12 with SMTP id p12so5343289dad.11
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Mar 2012 09:01:58 -0800 (PST)
+In-Reply-To: <CAORUGqDQLXLxjiqEtJx=Pa0UQ=dq_tyoQzVkEY2Z=QQJ7dOo3A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-I occasionally bump into newly-required packages when I'm trying
-to build ceph.  I don't remember what they have been, but today I
-hit this when I tried "make clean":
+[Resending to ceph-devel without the HTML gmail put in.]
 
-     configure: error: --with-radosgw was given but libcurl (libcurl-dev 
-on debian) not found
+On Mon, Mar 5, 2012 at 07:46, Alex Elder <elder@dreamhost.com> wrote:
+>
+> Is there any way that we can do any or all of these?
+> - we can identify when a new dependency like that has been added
 
-That was resolved by installing libcurl4-gnutls-dev (at least I
-think that's what made it go away).
+The Build-Depends: line in debian/control changed. Or, the
+BuildRequires: lines in ceph.spec.in changed, for RPM dstros.
 
-After that I hit this:
+(Or someone screwed up, and forgot to change them, but when that gets
+fixed, go back to previous paragraph.)
 
-     configure: error: --with-gtk2 was given, but test for gtkmm failed
+> - we can do this automatically
+> - we can mention something (like in a release announcement) when
+> =C2=A0new dependencies have been added since last time
 
-That took a number of trials, but eventually I think the package
-that I installed which made this problem go away was libgtkmm-2.4-dev.
+Automatically answering whether that content changed after last
+release is easy. Release management is not (it's a repetitive,
+relatively rare & high-importance task).
 
-Is there any way that we can do any or all of these?
-- we can identify when a new dependency like that has been added
-- we can do this automatically
-- we can mention something (like in a release announcement) when
-   new dependencies have been added since last time
-- we can do a nicer job of telling the user that a particular
-   package is missing--better than the "test for gtmm failed" kind
-   of message that the configure script provides
+> - we can do a nicer job of telling the user that a particular
+> =C2=A0package is missing--better than the "test for gtmm failed" kind
+> =C2=A0of message that the configure script provides
 
-					-Alex
+That's autoconf, it's hard to improve on, and intentionally does not
+assume the system is managed using debs or RPM etc.
+
+As long as you're on Debian/Ubuntu, running dpkg-checkbuilddeps will
+check your system against debian/control.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
