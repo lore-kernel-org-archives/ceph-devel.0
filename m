@@ -1,64 +1,84 @@
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 0/7 v3] Push file_update_time() into .page_mkwrite
-Date: Mon,  5 Mar 2012 15:54:11 +0100
-Message-ID: <1330959258-23211-1-git-send-email-jack@suse.cz>
-Return-path: <owner-linux-mm@kvack.org>
-Sender: owner-linux-mm@kvack.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, Jan Kara <jack@suse.cz>, Jaya Kumar <jayalk@intworks.biz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, Steven Whitehouse <swhiteho@redhat.com>, cluster-devel@redhat.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Sage Weil <sage@newdream.net>
+Subject: Re: PG state issue
+Date: Mon, 5 Mar 2012 07:28:11 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.1203050727530.11992@cobra.newdream.net>
+References: <CANExM-MJ6eSifymHe-aSwwyPkBaTSbLUVZGHVwvrcUFGpNopoA@mail.gmail.com>
+ <Pine.LNX.4.64.1203010810330.30824@cobra.newdream.net>
+ <CANExM-Nb48s1ASTRuV1daSe3X1PhLfxza6+zUJNGShGL+tSLiA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-42010196-1330961291=:11992"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:38214 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964837Ab2CEP2M (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Mar 2012 10:28:12 -0500
+In-Reply-To: <CANExM-Nb48s1ASTRuV1daSe3X1PhLfxza6+zUJNGShGL+tSLiA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Henry C Chang <henry.cy.chang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-  Hello,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-  to provide reliable support for filesystem freezing, filesystems need to have
-complete control over when metadata is changed. In particular,
-file_update_time() calls from page fault code make it impossible for
-filesystems to prevent inodes from being dirtied while the filesystem is
-frozen.
+--557981400-42010196-1330961291=:11992
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-To fix the issue, this patch set changes page fault code to call
-file_update_time() only when ->page_mkwrite() callback is not provided. If the
-callback is provided, it is the responsibility of the filesystem to perform
-update of i_mtime / i_ctime if needed. We also push file_update_time() call
-to all existing ->page_mkwrite() implementations if the time update does not
-obviously happen by other means. This is including __block_page_mkwrite() so
-filesystems using it are handled. If you know your filesystem does not need
-update of modification times in ->page_mkwrite() handler, please speak up and
-I'll drop the patch for your filesystem.
+On Mon, 5 Mar 2012, Henry C Chang wrote:
+> Hi Sage,
+>=20
+> I just tested v0.43. All pgs are shown active+degraded now. However,
+> is it possible to show the number (or percentage) of degraded objects
+> as in the earlier version?
 
-As a side note, an alternative would be to remove calls of file_update_time()
-from page fault code altogether and require all filesystems needing it to do
-that in their ->page_mkwrite() implementation. That is certainly possible
-although maybe slightly inefficient and would require auditting 100+
-vm_operations_structs *shiver*.
+Yeah.  Just opened http://tracker.newdream.net/issues/2137, will look at=20
+it this week.
 
-Changes since v1:
-* Dropped patches for filesystems which don't need them
-* Added some acks
-* Improved sysfs patch by Alex Elder's suggestion
+Thanks!
+sage
 
-Changes since v2:
-* Dropped patches for more filesystems
 
-Andrew, would you be willing to merge these patches via your tree? This seems
-to be a final version.
-
-								Honza
-
-CC: Jaya Kumar <jayalk@intworks.biz>
-CC: Sage Weil <sage@newdream.net>
-CC: ceph-devel@vger.kernel.org
-CC: Eric Van Hensbergen <ericvh@gmail.com>
-CC: Ron Minnich <rminnich@sandia.gov>
-CC: Latchesar Ionkov <lucho@ionkov.net>
-CC: v9fs-developer@lists.sourceforge.net
-CC: Steven Whitehouse <swhiteho@redhat.com>
-CC: cluster-devel@redhat.com
-CC: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+>=20
+> Henry
+>=20
+> =FF=FF 2012=FF=FF3=FF=FF2=FF=FF=FF=FF=FF=FF12:14=FF=FFSage Weil <sage@new=
+dream.net> =FF=FF=FF=FF=FF=FF
+> > Hi Henry, Wido,
+> >
+> > On Thu, 1 Mar 2012, Henry C Chang wrote:
+> >> With version 0.42, I found that the pg's state is not in "degrade" any
+> >> more if the number of osds is smaller than that of the replication.
+> >> For example, if I create a cluster of one osd with replication 2, all
+> >> pgs are in active+clean state. (The pgs were in active+clean+degrade
+> >> state in the earlier versions.)
+> >
+> > The PG states were tweaked a fair bit for v0.43:
+> >
+> > - new 'recovering' state means we are actively recovering the PG (no
+> > =A0longer implied by lack of 'clean')
+> > - 'remapped' means we have temporarily remapped a pg to a specific set =
+of
+> > =A0OSDs (other than what CRUSH gives us)
+> > - 'clean' specifically means we have the right number of replicas and
+> > =A0aren't remapped.
+> >
+> > ...and the 'degraded' thing you are seeing is fixed. =A0This is all in =
+place
+> > in the 'next' or 'master' branches.
+> >
+> >> I think it should be a bug in terms of cluster status although it does
+> >> not cause any other problems to me so far.
+> >
+> > Yeah, it's simply a matter of how the internal state is displayed/repor=
+ted
+> > to the moitor.
+> >
+> > sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-42010196-1330961291=:11992--
