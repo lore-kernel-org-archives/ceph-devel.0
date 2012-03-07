@@ -1,119 +1,85 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Braindump: path names, partition labels, FHS, auto-discovery
-Date: Wed, 7 Mar 2012 12:54:01 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1203071240550.32072@cobra.newdream.net>
-References: <CAORUGqB-XXXt3Gdx6xdKupg+dwC7XMGptg-K_2QTmn4ybcK+Qg@mail.gmail.com>
- <1331114101.19173.34.camel@squire.doc.ic.ac.uk>
+From: Greg Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: [PATCH 0/3] Generic libcephfs Java wrappers
+Date: Wed, 7 Mar 2012 13:40:46 -0800
+Message-ID: <FCB709D302224AD984BB00F851ACE8C2@dreamhost.com>
+References: <4F516A20.8060901@cs.ucsc.edu>
+ <Pine.LNX.4.64.1203070935010.8008@cobra.newdream.net>
+ <3071055F-EFD8-441A-913C-B04C8BC662FF@cs.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47187 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751092Ab2CGUyD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Mar 2012 15:54:03 -0500
-In-Reply-To: <1331114101.19173.34.camel@squire.doc.ic.ac.uk>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:58958 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750887Ab2CGVku convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Mar 2012 16:40:50 -0500
+Received: by pbcun15 with SMTP id un15so905385pbc.19
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Mar 2012 13:40:49 -0800 (PST)
+In-Reply-To: <3071055F-EFD8-441A-913C-B04C8BC662FF@cs.ucsc.edu>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David McBride <dwm@doc.ic.ac.uk>
-Cc: Tommi Virtanen <tommi.virtanen@dreamhost.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On Wed, 7 Mar 2012, David McBride wrote:
-> On Tue, 2012-03-06 at 13:19 -0800, Tommi Virtanen wrote:
-> 
-> > - scan the partitions for partition label with the prefix
-> > "ceph-osd-data-".
-> 
-> Thought: I'd consider not using a numbered partition label as the
-> primary identifier for an OSD.
-> 
-> There are failure modes that can occur, for example, if you have disks
-> from multiple different Ceph clusters accessible to a given host, or if
-> you have a partially failed (or historical copy) of an OSD disk
-> accessible at the same time as a current instance.
-> 
-> (Though you might reasonably rule these cases as out-of-scope.)
-> 
-> To make handling cases like these straightforward, I suspect Ceph may
-> want to use something functionally equivalent to an MD superblock --
-> though in practice, with an OSD, this could simply be a file containing
-> the appropriate meta-data.
-> 
-> In fact, I imagine that the OSDs could already contain the necessary
-> fields -- a reference to their parent cluster's UUID, to ensure foreign
-> volumes aren't mistakenly mounted; something like mdadm's event-counters
-> to distinguish between current/historical versions of the same OSD.
-> (Configuration epoch-count?); a UUID reference to that OSD's journal
-> file, etc.
+I went over all this today and had several line notes. Overall it looks=
+ good, though! =20
 
-We're mostly there.  Each cluster has a uuid, and each ceph-osd instance 
-gets a uuid when you do ceph-osd --mkfs.  That uuid is recorded in the osd 
-data dir and in the journal, so you know that they go together.  
-
-I think the 'epoch count' type stuff is sort of subsumed by all the osdmap 
-versioning and so forth... are you imagining a duplicate/backup instance 
-of an osd drive getting plugged in or something?  We don't guard for 
-that, but I'm not sure offhand how we would.  :/
-
-Anyway, I suspect the missing piece here is to incorporate the uuids into 
-the path names somehow.  
-
-TV wrote:
-> - FHS says human-editable configuration goes in /etc
-> - FHS says machine-editable state goes in /var/lib/ceph
-> - use /var/lib/ceph/mon/$id/ for mon.$id
-> - use /var/lib/ceph/osd-journal/$id for osd.$id journal; symlink to
-> actual location
-> - use /var/lib/ceph/osd-data/$id for osd.$id data; may be a symlink to
-> actual location?
-
-I wonder if these should be something like
-
- /var/lib/ceph/$cluster_uuid/mon/$id
- /var/lib/ceph/$cluster_uuid/osd-data/$osd_uuid.$id
- /var/lib/ceph/$cluster_uuid/osd-journal/$osd_uuid.$id
-
-so that cluster instances don't stomp on one another.  OTOH, that would 
-imply that we should do something like
-
- /etc/ceph/$cluster_uuid/ceph.conf, keyring, etc.
-
-too.
+To emphasize what Sage said about the package name: We should change th=
+at to com.ceph.fs.
+CephMount::conf_get requires a buf_size. But we freely adjust that if w=
+e need more space, so is there any point to it? I can't see callers rea=
+lly having a better idea of size than we do.
+(Oh, now I see there's another one that doesn't take buf_size. Do we ha=
+ve a use case for the with-size option, though?)
+Similarly with getdnames
+We don't implement CephMount::mkdir, just mkdirs? I *can* see use cases=
+ for not wanting recursive creates...
+The ordering is a little funny for some functions =E2=80=94 we see clos=
+e() before open(), for instance. Maybe we should reorder these?
+set_default_file_replication doesn't actually do anything internally =E2=
+=80=94 I thought that was documented somewhere. Even if it's not, it ce=
+rtainly should be here (and elsewhere, patches welcome! ;). (It passes =
+the value to the Client, and the Client passes it to the MDS, but the M=
+DS never looks at it).
+I like the states and require_state() stuff. It's making me notice that=
+ you need a little more documentation on stuff like closedir and what h=
+appens to the CephDirectory under success and error returns. :)
+The CHECK_ARG_* stuff could use some docs. I see now that CHECK_ARG_BOU=
+NDS is expecting a full comparison, so it's probably just my lack of pr=
+eprocessor idiom knowledge, but it weirded me out. And CHECK_ARG_COND a=
+ppears to be unused.
+do we need mount() when we can just run mount(null)? Similarly, I don't=
+ think we need an if-else in CephMountCreateTest::setupMount. :)
 
 
->  - - -
-> 
-> Perhaps related to this, I've been looking to determine whether it's
-> feasible to build and configure a Ceph cluster incrementally -- building
-> an initial cluster containing just a single MON node, and then piecewise
-> adding additional OSDs / MDSs / MONs to build up to the full-set.
-> 
-> In part, this is so that the processes for initially setting up the
-> cluster and for expanding the cluster once its in operation are
-> identical.  But this is also to avoid needing to hand-maintain a
-> configuration file, replicated across all hosts, that enumerates all of
-> the different cluster elements -- replicating a function already handled
-> better by the MON elements.
-> 
-> I can almost see the ceph.conf file only being used at cluster
-> initialization-time, then discarded in favour of run-time commands that
-> update the live cluster state.
-> 
-> Is this practical?  (Or even desirable?)
 
-This is exactly what the eventual chef/juju/etc building blocks will do.  
-The tricky part is really the monitor cluster bootstrap (because you may 
-have 3 of them coming up in parallel, and they need to form an initial 
-quorum in a safe/sane way).  Once that happens, expanding the cluster is 
-pretty mechanical.
 
-The goal is to provide building blocks (simple scripts, hooks, whatever) 
-for doing things like mapping a new block device to the proper location, 
-starting up the appropriate ceph-osd, initializing/labeling a new device, 
-creating a new ceph-osd on it and adding it to the cluster, etc.  The 
-chef/juju/whatever scripts would then build on the common set of tools.
+On Wednesday, March 7, 2012 at 10:02 AM, Noah Watkins wrote:
 
-Most of the pieces are worked out in TV's head or mine, but we haven't had 
-time to put it all together.  First we need to get our new qa hardware 
-online..
+> I've kept an eye on how much things are deviating from the current im=
+plementation and its pretty minimal, so I think producing a new version=
+ to use the generic libcephfs interface will happen quickly.
+> =20
+> As for producing an upstream patch, I think the two biggest concerns =
+are:
+> =20
+> 1. Reporting hostname/racks rather than IPs for object location.
+> 2. Address (or at least document) the time synchronization issue.
+> =20
+> These are largely orthogonal to getting the code ready for upstream, =
+but may be a "political" road block? I can put together the details of =
+these two issues in a separate thread=E2=80=A6
 
-sage
+Please do! I know I've seen most of these issues come up, but I'm still=
+ a bit fuzzy on the time sync issue.
+
+Thanks!
+-Greg
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
