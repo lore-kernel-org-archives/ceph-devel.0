@@ -1,59 +1,65 @@
-From: lixiaobing10@otcaix.iscas.ac.cn
-Subject: Problems when I tried to let Hadoop use Ceph
-Date: Thu, 8 Mar 2012 19:12:18 +0800 (CST)
-Message-ID: <f123f2.24b.135f2026959.Coremail.lixiaobing10@otcaix.iscas.ac.cn>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: General question about a testbed
+Date: Thu, 08 Mar 2012 17:11:51 +0100
+Message-ID: <4F58DA47.5080500@widodh.nl>
+References: <1331195839.14554.29.camel@zitpcx6759.desy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [124.16.137.195] ([124.16.137.195]:60266 "EHLO
-	otcaix.iscas.ac.cn" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1752089Ab2CHLTF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Mar 2012 06:19:05 -0500
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:49969 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757980Ab2CHQLy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Mar 2012 11:11:54 -0500
+In-Reply-To: <1331195839.14554.29.camel@zitpcx6759.desy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sven Sternberger <sven.sternberger@desy.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi ceph-devel,
-I came up with the following problems when I tried to let Hadoop use Ce=
-ph. Could you give any advice? Thanks firstly!
-I installed ceph-0.20.2 and hadoop.0.20.205.0 with the hadoop.0.20.205.=
-0-cephfs1.patch successfully. Both ceph and hadoop(using HDFS) can work=
- well separately. Besides, I could run command like 'hadoop fs -ls /', =
-'hadoop fs -put /localfilepath /cephfilepath' correctly. But when I run=
- a mapreduce demo: wordcount with a small file containing about two tho=
-usand words, reduce task crashed reporting information like:=C2=A0
-A fatal error has been detected by the Java Runtime Environment:...Prob=
-lematic frame:C =C2=A0[libceph.so.1.0.0+0x898e7]...
-I thought it was because ceph version is a little older compared with h=
-adoop version. So I tried ceph-0.41.0 and ceph-0.30.0.=C2=A0
-However, when I run command 'hadoop fs -ls /' with ceph-0.41.0, a FATAL=
- error occurred:
-=46ATAL ceph.CephFileSystem: initialize:Ceph initialization failed!
-After tracing the source code, I found the failure was due to client fa=
-iling to authenticate and establish communication with ceph. I was not =
-quite sure about the reason leading to this failure.=C2=A0=C2=A0And whe=
-n I tried ceph-0.30.0, I got the following when I run 'hadoop fs -ls /'=
-, a little like the first one:
-A fatal error has been detected by the Java Runtime Environment:...Prob=
-lematic frame:C =C2=A0[libceph.so.1.0.0+0x929fe]...
-I found that ceph-0.41.0 can make libcephfs.so directly, which hadoop l=
-ooking for. =C2=A0While ceph-0.20.2 and ceph-0.30.0 just make libceph.s=
-o out. So I used 'ln -s libceph.so libcephfs.so' to bypass this problem=
-=2E
-The above is what I got when I tried to let Hadoop use Ceph. And ceph-0=
-=2E20.2 led me to the best point among the three versions. I did this a=
-ccording to the paper 'Ceph as a scalable alternative to the Hadoop Dis=
-tributed File System' and the webpage 'http://ceph.newdream.net/wiki/Ha=
-doop_FileSystem'. The webpage did not point out the version of Ceph, wh=
-ich I think is important to my trial.=C2=A0
-Now, I really need your suggestion. And thanks for your attention. Hopi=
-ng to get your reply soon!
-Best,Xiaobing
+Hi,
 
+On 03/08/2012 09:37 AM, Sven Sternberger wrote:
+> Hello!
+>
+> I want to set up a testbed for evaluating
+> ceph. At this point we want to look at the performance
+> and the administration of a small cluster (4 machines,
+> 60TB)
+>
+> So neither ceph nor btrfs are good supported by
+> ScientificLinux which we use.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Instead of btrfs you could also use ext4 (with user_xattr!).
+>
+> It would be helpful if you could point out which
+> linux distributions gives an easy starting point.
+> Should we use an recent kernel, or go with the distribution
+> default.
+
+I'm running my cluster(s) on Ubuntu 11.10. For the OSD's you don't have 
+to run the latest kernel, but if you decide to use btrfs it could be a 
+good idea to use a new kernel. btrfs is still under development, it 
+get's better with every kernel.
+
+I think the main test systems of the dev's are running Debian, so that 
+might be a good choice. Debian packages are available on the Ceph 
+website or can easily be build from source.
+
+When you want to use the kernel client (CephFS / POSIX filesystem) I 
+recommend using a recent kernel on the client, same story was with btrfs.
+
+Wido
+
+>
+> best regards!
+>
+> Sven
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
