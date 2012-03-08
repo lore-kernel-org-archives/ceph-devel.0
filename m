@@ -1,57 +1,75 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: [PATCH 0/3] Generic libcephfs Java wrappers
-Date: Thu, 8 Mar 2012 10:54:24 -0800
-Message-ID: <4B306D7B-E017-445D-8F76-AB0EDC7B61D7@cs.ucsc.edu>
-References: <4F516A20.8060901@cs.ucsc.edu> <Pine.LNX.4.64.1203070935010.8008@cobra.newdream.net> <3071055F-EFD8-441A-913C-B04C8BC662FF@cs.ucsc.edu> <FCB709D302224AD984BB00F851ACE8C2@dreamhost.com> <E6A73CCF-3C17-42C1-BA41-33E1CADA6675@cs.ucsc.edu> <E71CA82A2DB647E193C249D30CA491A8@dreamhost.com>
-Mime-Version: 1.0 (Apple Message framework v1257)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:44730 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757464Ab2CHSyZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Mar 2012 13:54:25 -0500
-In-Reply-To: <E71CA82A2DB647E193C249D30CA491A8@dreamhost.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <gregory.farnum@dreamhost.com>
-Cc: Noah Watkins <jayhawk@soe.ucsc.edu>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: [PATCH 00/11 v2] Push file_update_time() into .page_mkwrite
+Date: Thu, 08 Mar 2012 15:12:56 -0800
+Message-ID: <4F593CF8.2000105@amacapital.net>
+References: <1330602103-8851-1-git-send-email-jack@suse.cz>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1330602103-8851-1-git-send-email-jack@suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Jan Kara <jack@suse.cz>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, linux-fsdevel@vger.kernel.org, dchinner@redhat.com, Jaya Kumar <jayalk@intworks.biz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Steve French <sfrench@samba.org>, linux-cifs@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, Miklos Szeredi <miklos@szeredi.hu>, fuse-devel@lists.sourceforge.net, Steven Whitehouse <swhiteho@redhat.com>, cluster-devel@redhat.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+List-Id: ceph-devel.vger.kernel.org
 
-
-On Mar 8, 2012, at 10:48 AM, Greg Farnum wrote:
-
-> On Thursday, March 8, 2012 at 9:30 AM, Noah Watkins wrote:
->> 
->> On Mar 7, 2012, at 1:40 PM, Greg Farnum wrote:
->> 
->>> CephMount::conf_get requires a buf_size. But we freely adjust that if we need more space, so is there any point to it? I can't see callers really having a better idea of size than we do.
->> Good point. I can't think of a reason to publicly expose the buffer length param in CephMount to users, but CephProxy is a private interface. On a related a related note:
->> 
->> int ceph_conf_get(struct ceph_mount_info *cmount, const char *option, char *buf, size_t len);
->> 
->> shouldn't the 'buf' parameter be char ** if libcephfs is going to be doing a re-alloc, or is there some voodoo behind the scenes?
-> libcephfs doesn't do a re-alloc there; I was talking about the Java stuff when I said it freely adjusts. :)
-
-The documentation seems to indicate that it does do a malloc. Maybe it is just out of date?
-
-/* Returns a configuration value as a string.
- * If len is positive, that is the maximum number of bytes we'll write into the
- * buffer. If len == -1, we'll call malloc() and set *buf.
- * Returns 0 on success, error code otherwise. Returns ENAMETOOLONG if the
- * buffer is too short. */
-
->>> I like the states and require_state() stuff. It's making me notice that you need a little more documentation on stuff like closedir and what happens to the CephDirectory under success and error returns. :)
->> 
->> The state checking is really helpful to catch set faults when blindly casting Java long to void* :) I wonder if there is a way to push the state checking even further down in libcephfs? Currently all errors are communicated through a generic CephException, but making things more specific as we go along will be nice.
+On 03/01/2012 03:41 AM, Jan Kara wrote:
+>   Hello,
 > 
-> I'm not sure how we'd push it farther down in a way that's any cleaner, did you have some thoughts or just a wish to not do it in Java?
-
-Just making unrealistic dreams :) -- I think that the state machine approach is good. Implicitly, users of libcephfs C API must take care do this anyway.
-
-> Oh, and I forgot something important last time: there's no licensing associated with any of these files right now. :) I think we talked previously about making it Apache, but whatever it is should be clearly noted!
-
-Just added a TODO for this. I think it was MIT, but i'll go back and look t the e-mails.
-
-> -Greg
+>   to provide reliable support for filesystem freezing, filesystems need to have
+> complete control over when metadata is changed. In particular,
+> file_update_time() calls from page fault code make it impossible for
+> filesystems to prevent inodes from being dirtied while the filesystem is
+> frozen.
 > 
+> To fix the issue, this patch set changes page fault code to call
+> file_update_time() only when ->page_mkwrite() callback is not provided. If the
+> callback is provided, it is the responsibility of the filesystem to perform
+> update of i_mtime / i_ctime if needed. We also push file_update_time() call
+> to all existing ->page_mkwrite() implementations if the time update does not
+> obviously happen by other means. If you know your filesystem does not need
+> update of modification times in ->page_mkwrite() handler, please speak up and
+> I'll drop the patch for your filesystem.
+> 
+> As a side note, an alternative would be to remove call of file_update_time()
+> from page fault code altogether and require all filesystems needing it to do
+> that in their ->page_mkwrite() implementation. That is certainly possible
+> although maybe slightly inefficient and would require auditting 100+
+> vm_operations_structs *shiver*.
 
+
+
+IMO updating file times should happen when changes get written out, not
+when a page is made writable, for two reasons:
+
+1. Correctness.  With the current approach, it's very easy for files to
+be changed after the last mtime update -- any changes between mkwrite
+and actual writeback won't affect mtime.
+
+2. Performance.  I have an application (presumably guessable from my
+email address) for which blocking in page_mkwrite is an absolute
+show-stopper.  (In fact it's so bad that we reverted back to running on
+Windows until I hacked up a kernel to not do this.)  I have an incorrect
+patch [1] to fix it, but I haven't gotten around to a real fix.  (I also
+have stable pages reverted in my kernel.  Some day I'll submit a patch
+to make it a filesystem option.  Or maybe it should even be a block
+device / queue property like the alignment offset and optimal io size --
+there are plenty of block device and file combinations which don't
+benefit at all from stable pages.)
+
+I'd prefer if file_update_time in page_mkwrite didn't proliferate.  A
+better fix is probably to introduce a new inode flag, update it when a
+page is undirtied, and then dirty and write the inode from the writeback
+path.  (Kind of like my patch, but with an inode flag instead of a page
+flag, and with the file_update_time done from the fs.)
+
+[1] http://patchwork.ozlabs.org/patch/122516/
+
+--Andy
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
