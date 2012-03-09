@@ -1,63 +1,41 @@
-From: Tomasz Paszkowski <ss7pro@gmail.com>
-Subject: Re: Make Openstack work with Ceph
-Date: Fri, 9 Mar 2012 07:33:01 +0100
-Message-ID: <CAMvP8PAMmRRFN6XoGkSsmdb8hJN5ZP6SLhMqstur4FKKDNKbiQ@mail.gmail.com>
-References: <4F586F49.4070703@gmail.com> <CAMvP8PCRdcmcM7wYid0_G7FMWGLO4LNUdxOKGi+24hWMdZyHjg@mail.gmail.com>
- <4F58F737.4090601@dreamhost.com> <CA+jddaP1fasXfvb6e9bHajDsUp+UnXpp5ysMmiMq2dFaPqnXcQ@mail.gmail.com>
+From: Madhusudhan <madhusudhana.u.acharya@gmail.com>
+Subject: Too slow data copying in ceph cluster
+Date: Fri, 9 Mar 2012 07:03:50 +0000 (UTC)
+Message-ID: <loom.20120309T075843-941@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:36340 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750876Ab2CIGdV convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Mar 2012 01:33:21 -0500
-Received: by yhmm54 with SMTP id m54so699487yhm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Mar 2012 22:33:21 -0800 (PST)
-In-Reply-To: <CA+jddaP1fasXfvb6e9bHajDsUp+UnXpp5ysMmiMq2dFaPqnXcQ@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:35722 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751382Ab2CIHEC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 9 Mar 2012 02:04:02 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1S5trs-0003od-0f
+	for ceph-devel@vger.kernel.org; Fri, 09 Mar 2012 08:04:00 +0100
+Received: from 202.164.25.5 ([202.164.25.5])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Mar 2012 08:03:59 +0100
+Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Mar 2012 08:03:59 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-I'll let you know when it'll be sth more than dirty hack J
+Hi
+I am trying to evaluate ceph cluster by using our actual workload.
+I need almost 500G of data to be copied to ceph cluster in order
+for doing workload test. But, 500G copying is taking a lot of time
+(Coping started at 8.30AM PST time Thursday, 8th March). Its 
+more than 12hrs and copying didn't completed. Can you please help
+me to understand this delay ?
 
-
-On Thu, Mar 8, 2012 at 7:21 PM, Mandell Degerness
-<mandell@pistoncloud.com> wrote:
-> I, also, am watching this closely as I'd like to see it integrated
-> into OpenStack (and thereby into PentOS).
->
-> -Mandell
->
-> On Thu, Mar 8, 2012 at 10:15 AM, Josh Durgin <josh.durgin@dreamhost.c=
-om> wrote:
->> On 03/08/2012 12:58 AM, Tomasz Paszkowski wrote:
->>>
->>> This is good enough but I'am working on solution to implement volum=
-e
->>> imaging directly from nova-compute component. It's should be made
->>> public within 3/4 weeks.
->>
->>
->> That sounds great! I'd be happy to review it and help get it upstrea=
-m.
->>
->> Josh
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+I have 2 MDS (one active, one standby), 3 monitors and 3 OSD's 
+running. All 8 hosts are same OS/patch level running centos 5.6
+with kernel 3.0.9 version.
 
 
 
---=20
-Tomasz Paszkowski
-SS7, Asterisk, SAN, Datacenter, Cloud Computing
-+48500166299
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
