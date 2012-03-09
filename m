@@ -1,103 +1,104 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Is ceph cluster time sensitive
-Date: Fri, 9 Mar 2012 08:52:32 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.1203090849230.11669@cobra.newdream.net>
-References: <loom.20120309T160103-320@post.gmane.org>
- <Pine.LNX.4.64.1203090821470.11669@cobra.newdream.net>
- <loom.20120309T174045-17@post.gmane.org>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: scaling issues
+Date: Fri, 9 Mar 2012 12:39:17 -0700
+Message-ID: <4F5A5C65.6030705@sandia.gov>
+References: <4F59414B.3000403@sandia.gov>
+ <Pine.LNX.4.64.1203081625030.21631@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34550 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754555Ab2CIQwe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Mar 2012 11:52:34 -0500
-In-Reply-To: <loom.20120309T174045-17@post.gmane.org>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:53645 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932138Ab2CITkC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Mar 2012 14:40:02 -0500
+In-Reply-To: <Pine.LNX.4.64.1203081625030.21631@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Madhusudhan <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 9 Mar 2012, Madhusudhan wrote:
-> Sage Weil <sage <at> newdream.net> writes:
-> 
-> > 
-> > On Fri, 9 Mar 2012, Madhusudhan wrote:
-> > > Hi all,
-> > > Just wanted to know if ceph cluster is time sensitive. will there
-> > > be any issue if the date and time differs between client machine
-> > > and ceph cluster? do their time has to be in sync to work 
-> > > properly? if time differs, will there be any performance issue ?
-> > 
-> > It is time sensitive.  You currently need to have (reasonably well) 
-> > synchronized clocks.  At the very minimum, the ceph-mon daemons need to 
-> > run on machines with good time.  There are also some oddities that can 
-> > occur if the fs client doesn't match the metadata server... At some point 
-> > we'll take a closer look at what we can do to make that less of a problem, 
-> > but for now things will be a bit wonky.
-> 
-> 
-> Thank you Sage.
-> Currenlty all nodes in ceph cluster are having a set of time set on them and 
-> client is having a different time. Below is example
-> 
-> Date in one of ceph node :
-> [root@ceph-node-5 ~]# date
-> Fri Mar  9 08:41:39 PST 2012
-> 
-> Date in the client machine :
-> [root@my_client_10 ~]# date
-> Fri Mar  9 22:12:02 IST 2012
-> 
-> Will this difference cause performance issue ?
+On 03/08/2012 05:26 PM, Sage Weil wrote:
+> On Thu, 8 Mar 2012, Jim Schutt wrote:
+>> Hi,
+>>
+>> I've been trying to scale up a Ceph filesystem to as big
+>> as I have hardware for - up to 288 OSDs right now.
+>>
+>> (I'm using commit ed0f605365e - tip of master branch from
+>> a few days ago.)
+>>
+>> My problem is that I cannot get a 288 OSD filesystem to go active
+>> (that's with 1 mon and 1 MDS).  Pretty quickly I start seeing
+>> "mds e4 e4: 1/1/1 up {0=cs33=up:creating(laggy or crashed)}".
+>> Note that as this is happening all the OSDs and the MDS are
+>> essentially idle; only the mon is busy.
+>>
+>> While tailing the mon log I noticed there was a periodic pause;
+>> after adding a little more debug printing, I learned that the
+>> pause was due to encoding pg_stat_t before writing the pg_map to disk.
+>>
+>> Here's the result of a scaling study I did on startup time for
+>> a freshly created filesystem.  I normally run 24 OSDs/server on
+>> these machines with no trouble, for small numbers of OSDs.
+>>
+>>                     seconds from      seconds from     seconds to
+>>     OSD       PG   store() mount     store() mount      encode
+>>                         to            to all PGs       pg_stat_t   Notes
+>>                     up:active        active+clean*
+>>
+>>      48     9504       58                63              0.30
+>>      72    14256       70                89              0.65
+>>      96    19008       93               117              1.1
+>>     120    23760      132               138              1.7
+>>     144    28512       92               165              2.3
+>>     168    33264      215               218              3.2       periods of
+>> "up:creating(laggy or crashed)"
+>>     192    38016      392               344              4.0       periods of
+>> "up:creating(laggy or crashed)"
+>>     240    47520     1189               644              6.3       periods of
+>> "up:creating(laggy or crashed)"
+>>     288    57024>14400>14400              9.0       never went
+>> active;>200 OSDs out, reporting "wrongly marked me down"
+>
+> Weird, pg_stat_t really shouldn't be growing quadratically.  Can you look
+> at the size of the monitors pg/latest file, and see if those are growing
+> quadratically as well?  I would expect it to be proportional to the
+> encode time.
 
-I can't think how right now, but I may be missing something.  It's hard to 
-tell why things are slow without knowing more about the cluster, load, 
-workoad, etc.
+Here's the size of the last written mon/pgmap/latest for each run,
+and the time it took to encode the pg_stat_t part of that last
+instance of the file:
 
-A good sanity check is to run rados bench from a client node to see the 
-raw write throughput you can get.  Something like 'rados -p rbd bench 60 
-write'.
+OSDs  size of  pg_stat_t
+        latest   encode
+                  time
 
-> > 
-> > > Any plans to include exports/quotas in ceph file system ?
-> > > it will be a beauty if we have above to options, so that the space
-> > > in ceph cluster can be effectively allocated to client system.
-> > 
-> > I'm not sure what you mean by exports, but quotas will be added 
-> > eventually.  Again, it's a ways out.
-> > 
-> > sage
-> > 
-> 
-> when i said exports, i mean to say about unix exports, where i can 
-> export individual directories/sub-directories to different hosts in
-> different subnets. 
-> 
-> As a NAS admin, i make use exports a lot. Some time we have to export
-> a directory to certain subnet and some time to a different subnet.
+  48   2976397  0.323052
+  72   4472477  0.666633
+  96   5969461  1.159198
+120   7466021  1.738096
+144   8963141  2.428229
+168  10460309  3.203832
+192  11956709  4.083013
+240  14950445  6.453171
+288  17916589  9.462052
 
-Oh.  Yeah, that's also on the roadmap, although again all the fs stuff is 
-a ways out.
+Looks like the file size is growing linearly, but the
+encode time is not?
 
-sage
+>
+> And maybe send us a copy of one of the big ones?
 
+On its way.
 
-> 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo <at> vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> 
-> 
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+-- Jim
+
+>
+> Thanks-
+> sage
+>
+>
+
