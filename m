@@ -1,46 +1,81 @@
-From: Madhusudhan <madhusudhana.u.acharya@gmail.com>
-Subject: mount via ceph-fuse is failing
-Date: Fri, 9 Mar 2012 07:18:27 +0000 (UTC)
-Message-ID: <loom.20120309T081725-352@post.gmane.org>
+From: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
+Subject: Re: [PATCH 00/11 v2] Push file_update_time() into .page_mkwrite
+Date: Fri, 9 Mar 2012 09:19:52 +0100
+Message-ID: <20120309081952.GA21038@quack.suse.cz>
+References: <1330602103-8851-1-git-send-email-jack@suse.cz>
+ <4F593CF8.2000105@amacapital.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:36580 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751673Ab2CIHSm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 9 Mar 2012 02:18:42 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1S5u63-0008IQ-LO
-	for ceph-devel@vger.kernel.org; Fri, 09 Mar 2012 08:18:39 +0100
-Received: from 202.164.25.5 ([202.164.25.5])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Mar 2012 08:18:39 +0100
-Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Mar 2012 08:18:39 +0100
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <4F593CF8.2000105-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dchinner-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Jaya Kumar <jayalk-vMRLXvPMFfQANPMfv7sqcg@public.gmane.org>, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Eric Van Hensbergen <ericvh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ron Minnich <rminnich-4OHPYypu0djtX7QSmKvirg@public.gmane.org>, Latchesar Ionkov <lucho-OnYtXJJ0/fesTnJN9+BGXg@public.gmane.org>, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>, fuse-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Steven Whitehouse <swhiteho-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
-When i try to mount ceph file systems via fuse, its failing. 
+  Hello,
 
+On Thu 08-03-12 15:12:56, Andy Lutomirski wrote:
+> On 03/01/2012 03:41 AM, Jan Kara wrote:
+> >   Hello,
+> > 
+> >   to provide reliable support for filesystem freezing, filesystems need to have
+> > complete control over when metadata is changed. In particular,
+> > file_update_time() calls from page fault code make it impossible for
+> > filesystems to prevent inodes from being dirtied while the filesystem is
+> > frozen.
+> > 
+> > To fix the issue, this patch set changes page fault code to call
+> > file_update_time() only when ->page_mkwrite() callback is not provided. If the
+> > callback is provided, it is the responsibility of the filesystem to perform
+> > update of i_mtime / i_ctime if needed. We also push file_update_time() call
+> > to all existing ->page_mkwrite() implementations if the time update does not
+> > obviously happen by other means. If you know your filesystem does not need
+> > update of modification times in ->page_mkwrite() handler, please speak up and
+> > I'll drop the patch for your filesystem.
+> > 
+> > As a side note, an alternative would be to remove call of file_update_time()
+> > from page fault code altogether and require all filesystems needing it to do
+> > that in their ->page_mkwrite() implementation. That is certainly possible
+> > although maybe slightly inefficient and would require auditting 100+
+> > vm_operations_structs *shiver*.
+> 
+> 
+> 
+> IMO updating file times should happen when changes get written out, not
+> when a page is made writable, for two reasons:
+> 
+> 1. Correctness.  With the current approach, it's very easy for files to
+> be changed after the last mtime update -- any changes between mkwrite
+> and actual writeback won't affect mtime.
+> 
+> 2. Performance.  I have an application (presumably guessable from my
+> email address) for which blocking in page_mkwrite is an absolute
+> show-stopper.  (In fact it's so bad that we reverted back to running on
+> Windows until I hacked up a kernel to not do this.)  I have an incorrect
+> patch [1] to fix it, but I haven't gotten around to a real fix.  (I also
+> have stable pages reverted in my kernel.  Some day I'll submit a patch
+> to make it a filesystem option.  Or maybe it should even be a block
+> device / queue property like the alignment offset and optimal io size --
+> there are plenty of block device and file combinations which don't
+> benefit at all from stable pages.)
+> 
+> I'd prefer if file_update_time in page_mkwrite didn't proliferate.  A
+> better fix is probably to introduce a new inode flag, update it when a
+> page is undirtied, and then dirty and write the inode from the writeback
+> path.  (Kind of like my patch, but with an inode flag instead of a page
+> flag, and with the file_update_time done from the fs.)
+> 
+> [1] http://patchwork.ozlabs.org/patch/122516/
+  Andy, I'm aware of your problems. Just firstly, I wouldn't like to
+complicate the filesystem freezing patch set even more by improving unrelated
+things. And secondly, I think these changes won't make fixing your problem
+harder. I'd even argue it will be easier because you can do conversion
+filesystem by filesystem. Getting lock ordering and other things right for
+all filesystems at once is much harded.
 
-[root@ceph-node-9 ~]# ceph-fuse -m 10.25.12.123,10.25.12.124,10.25.12.125:/ 
-/mnt/macharya_ceph/
-ceph-fuse[18533]: starting ceph client
-ceph-fuse[18533]: starting fuse
-fuse: unknown option `big_writes'
-2012-03-08 23:12:52.100276 7ffff7ab3760 fuse_lowlevel_new failed
-ceph-fuse[18533]: fuse finished with error 33
-ceph-fuse[18532]: mount failed: (33) Numerical argument out of domain
-
-
-what can be the issue ? 
-
-Thanks
-__M
-
+								Honza
+-- 
+Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
+SUSE Labs, CR
