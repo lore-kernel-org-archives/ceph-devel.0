@@ -1,144 +1,72 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: scaling issues
-Date: Fri, 9 Mar 2012 16:21:08 -0700
-Message-ID: <4F5A9064.3020400@sandia.gov>
-References: <4F59414B.3000403@sandia.gov>
- <Pine.LNX.4.64.1203081625030.21631@cobra.newdream.net>
- <4F5A5C65.6030705@sandia.gov>
+From: Kamal Mostafa <kamal@canonical.com>
+Subject: Re: [PATCH 0/7 v3] Push file_update_time() into .page_mkwrite
+Date: Sun, 11 Mar 2012 13:23:17 -0700
+Message-ID: <1331497397.4641.87.camel@fourier>
+References: <1330959258-23211-1-git-send-email-jack@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
+Content-Type: multipart/signed; micalg="pgp-sha256";
+	protocol="application/pgp-signature"; boundary="=-uNr12NXa9pODOIjYE4wW"
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1330959258-23211-1-git-send-email-jack@suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Jan Kara <jack@suse.cz>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, Jaya Kumar <jayalk@intworks.biz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, Steven Whitehouse <swhiteho@redhat.com>, cluster-devel@redhat.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+List-Id: ceph-devel.vger.kernel.org
+
+
+--=-uNr12NXa9pODOIjYE4wW
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, 2012-03-05 at 15:54 +0100, Jan Kara wrote:
+> Hello,
+>=20
+>   to provide reliable support for filesystem freezing, filesystems need t=
+o have
+> complete control over when metadata is changed.  [...]
+
+This patch set has been tested at Canonical along with the testing for
+"[PATCH 00/19] Fix filesystem freezing deadlocks".
+
+Please add the following endorsements for these patches (those actually
+exercised by our test case):  1, 2, 6, 7
+
+Tested-by: Kamal Mostafa <kamal@canonical.com>
+Tested-by: Peter M. Petrakis <peter.petrakis@canonical.com>
+Tested-by: Dann Frazier <dann.frazier@canonical.com>
+Tested-by: Massimo Morana <massimo.morana@canonical.com>
+       =20
+ -Kamal
+
+
+--=-uNr12NXa9pODOIjYE4wW
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:45289 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751151Ab2CIXVj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Mar 2012 18:21:39 -0500
-In-Reply-To: <4F5A5C65.6030705@sandia.gov>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 03/09/2012 12:39 PM, Jim Schutt wrote:
-> On 03/08/2012 05:26 PM, Sage Weil wrote:
->> On Thu, 8 Mar 2012, Jim Schutt wrote:
->>> Hi,
->>>
->>> I've been trying to scale up a Ceph filesystem to as big
->>> as I have hardware for - up to 288 OSDs right now.
->>>
->>> (I'm using commit ed0f605365e - tip of master branch from
->>> a few days ago.)
->>>
->>> My problem is that I cannot get a 288 OSD filesystem to go active
->>> (that's with 1 mon and 1 MDS). Pretty quickly I start seeing
->>> "mds e4 e4: 1/1/1 up {0=cs33=up:creating(laggy or crashed)}".
->>> Note that as this is happening all the OSDs and the MDS are
->>> essentially idle; only the mon is busy.
->>>
->>> While tailing the mon log I noticed there was a periodic pause;
->>> after adding a little more debug printing, I learned that the
->>> pause was due to encoding pg_stat_t before writing the pg_map to disk.
->>>
->>> Here's the result of a scaling study I did on startup time for
->>> a freshly created filesystem. I normally run 24 OSDs/server on
->>> these machines with no trouble, for small numbers of OSDs.
->>>
->>> seconds from seconds from seconds to
->>> OSD PG store() mount store() mount encode
->>> to to all PGs pg_stat_t Notes
->>> up:active active+clean*
->>>
->>> 48 9504 58 63 0.30
->>> 72 14256 70 89 0.65
->>> 96 19008 93 117 1.1
->>> 120 23760 132 138 1.7
->>> 144 28512 92 165 2.3
->>> 168 33264 215 218 3.2 periods of
->>> "up:creating(laggy or crashed)"
->>> 192 38016 392 344 4.0 periods of
->>> "up:creating(laggy or crashed)"
->>> 240 47520 1189 644 6.3 periods of
->>> "up:creating(laggy or crashed)"
->>> 288 57024>14400>14400 9.0 never went
->>> active;>200 OSDs out, reporting "wrongly marked me down"
->>
->> Weird, pg_stat_t really shouldn't be growing quadratically. Can you look
->> at the size of the monitors pg/latest file, and see if those are growing
->> quadratically as well? I would expect it to be proportional to the
->> encode time.
->
-> Here's the size of the last written mon/pgmap/latest for each run,
-> and the time it took to encode the pg_stat_t part of that last
-> instance of the file:
->
-> OSDs size of pg_stat_t
-> latest encode
-> time
->
-> 48 2976397 0.323052
-> 72 4472477 0.666633
-> 96 5969461 1.159198
-> 120 7466021 1.738096
-> 144 8963141 2.428229
-> 168 10460309 3.203832
-> 192 11956709 4.083013
-> 240 14950445 6.453171
-> 288 17916589 9.462052
->
-> Looks like the file size is growing linearly, but the
-> encode time is not?
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
 
-I remembered I've been compiling with -g since I started working
-with ceph (so I could poke around easily in gdb, and at small sizes
-it didn't seem to hurt anything).  That's how I generated the above
-results.
+iQIcBAABCAAGBQJPXQm1AAoJEHqwmdxYrXhZd2IP/RMP90PYnrdD+ssBVyMMl6dS
+LVc6bKs+9M5OtXxt2UJ7CJ49EOupHhyj0X0ehEDCyJYIyBUHey2FAXa6/tgrRRy6
+G/VeNr7TTYOyUDpvpaJRtjEoqXnqN/Q2ffyRMjaQQtItSGfFTkOP8ojiH4MXQYiD
+lxD3Skcb87+QhiYDdba/w6BFQdc0hNotHdaAO6kEZZktdYgKpT802+zbJkl+gj3G
+c47tac0AoSgs3iLxO0Q6RBHswAFIoACvJC5VbJk8sIRAsJ6uyfuqjfdRw6YPRooU
+zojPVBQVAQAhBKZiN62LNDX90/+0eQ+VrCVCIRUZ8Bh9XIAgDxrU45pJ+o3MZ2dd
+QKI9SbkYr6PnU7kz9X/ifrNt0cqRAErEK2w+tuq8aAKdcmjmFZ1IXL115yUJMRJr
+0irkld8l3ZM8alJUVe5YIm2eEuxCQc9f+G+EJ220dwEWp9c8pGCWy7med9sqsyEN
+jlBAuBQuzfpJ2jRiVnh2rXL7fs54wTSRe/3aM8M9LyMFiv9lAmbDGkwBfMu72UV3
+l2pZ6q5zhViSiWwsD2dThdCY5BU6i90QUgB2H09jYZBWvKDKwklFid0ySQkkBfKI
+zuK42hWY55Dqi6JNHwk0gQpts+aELPBSh39tnLETbCYahGkUamSgKk9wnYSB3XIl
+RkMWQlxO36YoVCig3sCk
+=g1ZX
+-----END PGP SIGNATURE-----
 
-I recompiled with -g -O2, and got this:
+--=-uNr12NXa9pODOIjYE4wW--
 
-OSDs  size of  pg_stat_t
-        latest   encode
-                  time
-
-   48   2976461  0.052731
-   72   4472477  0.107187
-   96   5969477  0.194690
-  120   7466021  0.311586
-  144   8963141  0.465111
-  168  10460317  0.680222
-  192  11956709  0.713398
-  240  14950437  1.159426
-  288  17944413  1.714004
-
-It seems that encoding time still isn't proportional to the
-size of pgmap/latest.  However, things have improved enough
-that my 288 OSD filesystem goes active pretty quickly (~90 sec),
-so I can continue testing at that scale.
-
--- Jim
-
-
->
->>
->> And maybe send us a copy of one of the big ones?
->
-> On its way.
->
-> -- Jim
->
->>
->> Thanks-
->> sage
->>
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
->
->
-
-
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
