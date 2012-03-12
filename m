@@ -1,100 +1,84 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: [PATCH 5/5] libceph: isolate kmap() call in write_partial_msg_pages()
-Date: Mon, 12 Mar 2012 17:40:30 -0500
-Message-ID: <4F5E7B5E.2050400@dreamhost.com>
-References: <4F5E79C6.6040301@dreamhost.com>
+Subject: [PATCH] ceph: fix three bugs, two in ceph_vxattrcb_file_layout()
+Date: Mon, 12 Mar 2012 17:42:27 -0500
+Message-ID: <4F5E7BD3.6030308@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:58522 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:54498 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757533Ab2CLWk0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Mar 2012 18:40:26 -0400
+	with ESMTP id S1757716Ab2CLWmY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Mar 2012 18:42:24 -0400
 Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id CCB8E243A2
-	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:41:00 -0700 (PDT)
+	by mail.hq.newdream.net (Postfix) with ESMTP id 3E00B243A2
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:42:58 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net [71.195.31.37])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id A00812439E
-	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:41:00 -0700 (PDT)
-In-Reply-To: <4F5E79C6.6040301@dreamhost.com>
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 104B52439E
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:42:57 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-In write_partial_msg_pages(), every case now does an identical call
-to kmap(page).  Instead, just call it once inside the CRC-computing
-block where it's needed.  Move the definition of kaddr inside that
-block, and make it a (char *) to ensure portable pointer arithmetic.
+In ceph_vxattrcb_file_layout(), there is a check to determine
+whether a preferred PG should be formatted into the output buffer.
+That check assumes that a preferred PG number of 0 indicates "no
+preference," but that is wrong.  No preference is indicated by a
+negative (specifically, -1) PG number.
 
-We still don't kunmap() it until after the sendpage() call, in case
-that also ends up needing to use the mapping.
+In addition, if that condition yields true, the preferred value
+is formatted into a sized buffer, but the size consumed by the
+earlier snprintf() call is not accounted for, opening up the
+possibilty of a buffer overrun.
+
+Finally, in ceph_vxattrcb_dir_rctime() where the nanoseconds part of
+the time displayed did not include leading 0's, which led to
+erroneous (sub-second portion of) time values being shown.
+
+This fixes these three issues:
+     http://tracker.newdream.net/issues/2155
+     http://tracker.newdream.net/issues/2156
+     http://tracker.newdream.net/issues/2157
 
 Signed-off-by: Alex Elder <elder@dreamhost.com>
 ---
-  net/ceph/messenger.c |   13 ++-----------
-  1 files changed, 2 insertions(+), 11 deletions(-)
+  fs/ceph/xattr.c |   11 ++++++++---
+  1 files changed, 8 insertions(+), 3 deletions(-)
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 2bf9ab4..f0993af 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -835,7 +835,6 @@ static int write_partial_msg_pages(struct 
-ceph_connection *con)
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index 18df51e..715cfc6 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -79,7 +79,7 @@ static size_t ceph_vxattrcb_dir_rbytes(struct 
+ceph_inode_info *ci, char *val,
+  static size_t ceph_vxattrcb_dir_rctime(struct ceph_inode_info *ci, 
+char *val,
+  				       size_t size)
+  {
+-	return snprintf(val, size, "%ld.%ld", (long)ci->i_rctime.tv_sec,
++	return snprintf(val, size, "%ld.09%ld", (long)ci->i_rctime.tv_sec,
+  			(long)ci->i_rctime.tv_nsec);
+  }
 
-  	while (data_len > con->out_msg_pos.data_pos) {
-  		struct page *page = NULL;
--		void *kaddr = NULL;
-  		int max_write = PAGE_SIZE;
-  		int bio_offset = 0;
+@@ -118,10 +118,15 @@ static size_t ceph_vxattrcb_file_layout(struct 
+ceph_inode_info *ci, char *val,
+  		(unsigned long long)ceph_file_layout_su(ci->i_layout),
+  		(unsigned long long)ceph_file_layout_stripe_count(ci->i_layout),
+  		(unsigned long long)ceph_file_layout_object_size(ci->i_layout));
+-	if (ceph_file_layout_pg_preferred(ci->i_layout))
+-		ret += snprintf(val + ret, size, "preferred_osd=%lld\n",
++
++	if (ceph_file_layout_pg_preferred(ci->i_layout) >= 0) {
++		val += ret;
++		size -= ret;
++		ret += snprintf(val, size, "preferred_osd=%lld\n",
+  			    (unsigned long long)ceph_file_layout_pg_preferred(
+  				    ci->i_layout));
++	}
++
+  	return ret;
+  }
 
-@@ -856,18 +855,12 @@ static int write_partial_msg_pages(struct 
-ceph_connection *con)
-
-  			page = list_first_entry(&msg->trail->head,
-  						struct page, lru);
--			if (do_datacrc)
--				kaddr = kmap(page);
-  			max_write = PAGE_SIZE;
-  		} else if (msg->pages) {
-  			page = msg->pages[con->out_msg_pos.page];
--			if (do_datacrc)
--				kaddr = kmap(page);
-  		} else if (msg->pagelist) {
-  			page = list_first_entry(&msg->pagelist->head,
-  						struct page, lru);
--			if (do_datacrc)
--				kaddr = kmap(page);
-  #ifdef CONFIG_BLOCK
-  		} else if (msg->bio) {
-  			struct bio_vec *bv;
-@@ -875,14 +868,10 @@ static int write_partial_msg_pages(struct 
-ceph_connection *con)
-  			bv = bio_iovec_idx(msg->bio_iter, msg->bio_seg);
-  			page = bv->bv_page;
-  			bio_offset = bv->bv_offset;
--			if (do_datacrc)
--				kaddr = kmap(page);
-  			max_write = bv->bv_len;
-  #endif
-  		} else {
-  			page = zero_page;
--			if (do_datacrc)
--				kaddr = kmap(page);
-  		}
-  		len = min_t(int, max_write - con->out_msg_pos.page_pos,
-  			    total_max_write);
-@@ -891,7 +880,9 @@ static int write_partial_msg_pages(struct 
-ceph_connection *con)
-  			void *base;
-  			u32 crc;
-  			u32 tmpcrc = le32_to_cpu(con->out_msg->footer.data_crc);
-+			char *kaddr;
-
-+			kaddr = kmap(page);
-  			BUG_ON(kaddr == NULL);
-  			base = kaddr + con->out_msg_pos.page_pos + bio_offset;
-  			crc = crc32c(tmpcrc, base, len);
 -- 
 1.7.5.4
 
