@@ -1,72 +1,43 @@
-From: Kamal Mostafa <kamal@canonical.com>
+From: Jan Kara <jack@suse.cz>
 Subject: Re: [PATCH 0/7 v3] Push file_update_time() into .page_mkwrite
-Date: Sun, 11 Mar 2012 13:23:17 -0700
-Message-ID: <1331497397.4641.87.camel@fourier>
+Date: Mon, 12 Mar 2012 09:22:20 +0100
+Message-ID: <20120312082220.GA5998@quack.suse.cz>
 References: <1330959258-23211-1-git-send-email-jack@suse.cz>
+ <1331497397.4641.87.camel@fourier>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha256";
-	protocol="application/pgp-signature"; boundary="=-uNr12NXa9pODOIjYE4wW"
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1330959258-23211-1-git-send-email-jack@suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Jan Kara <jack@suse.cz>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, Jaya Kumar <jayalk@intworks.biz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, Steven Whitehouse <swhiteho@redhat.com>, cluster-devel@redhat.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:41073 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753236Ab2CLIWa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 12 Mar 2012 04:22:30 -0400
+Content-Disposition: inline
+In-Reply-To: <1331497397.4641.87.camel@fourier>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Kamal Mostafa <kamal@canonical.com>
+Cc: Jan Kara <jack@suse.cz>, Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, Jaya Kumar <jayalk@intworks.biz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, Steven Whitehouse <swhiteho@redhat.com>, cluster-devel@redhat.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
+On Sun 11-03-12 13:23:17, Kamal Mostafa wrote:
+> On Mon, 2012-03-05 at 15:54 +0100, Jan Kara wrote:
+> > Hello,
+> > 
+> >   to provide reliable support for filesystem freezing, filesystems need to have
+> > complete control over when metadata is changed.  [...]
+> 
+> This patch set has been tested at Canonical along with the testing for
+> "[PATCH 00/19] Fix filesystem freezing deadlocks".
+> 
+> Please add the following endorsements for these patches (those actually
+> exercised by our test case):  1, 2, 6, 7
+> 
+> Tested-by: Kamal Mostafa <kamal@canonical.com>
+> Tested-by: Peter M. Petrakis <peter.petrakis@canonical.com>
+> Tested-by: Dann Frazier <dann.frazier@canonical.com>
+> Tested-by: Massimo Morana <massimo.morana@canonical.com>
+  Thanks for testing guys!
 
---=-uNr12NXa9pODOIjYE4wW
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-On Mon, 2012-03-05 at 15:54 +0100, Jan Kara wrote:
-> Hello,
->=20
->   to provide reliable support for filesystem freezing, filesystems need t=
-o have
-> complete control over when metadata is changed.  [...]
-
-This patch set has been tested at Canonical along with the testing for
-"[PATCH 00/19] Fix filesystem freezing deadlocks".
-
-Please add the following endorsements for these patches (those actually
-exercised by our test case):  1, 2, 6, 7
-
-Tested-by: Kamal Mostafa <kamal@canonical.com>
-Tested-by: Peter M. Petrakis <peter.petrakis@canonical.com>
-Tested-by: Dann Frazier <dann.frazier@canonical.com>
-Tested-by: Massimo Morana <massimo.morana@canonical.com>
-       =20
- -Kamal
-
-
---=-uNr12NXa9pODOIjYE4wW
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iQIcBAABCAAGBQJPXQm1AAoJEHqwmdxYrXhZd2IP/RMP90PYnrdD+ssBVyMMl6dS
-LVc6bKs+9M5OtXxt2UJ7CJ49EOupHhyj0X0ehEDCyJYIyBUHey2FAXa6/tgrRRy6
-G/VeNr7TTYOyUDpvpaJRtjEoqXnqN/Q2ffyRMjaQQtItSGfFTkOP8ojiH4MXQYiD
-lxD3Skcb87+QhiYDdba/w6BFQdc0hNotHdaAO6kEZZktdYgKpT802+zbJkl+gj3G
-c47tac0AoSgs3iLxO0Q6RBHswAFIoACvJC5VbJk8sIRAsJ6uyfuqjfdRw6YPRooU
-zojPVBQVAQAhBKZiN62LNDX90/+0eQ+VrCVCIRUZ8Bh9XIAgDxrU45pJ+o3MZ2dd
-QKI9SbkYr6PnU7kz9X/ifrNt0cqRAErEK2w+tuq8aAKdcmjmFZ1IXL115yUJMRJr
-0irkld8l3ZM8alJUVe5YIm2eEuxCQc9f+G+EJ220dwEWp9c8pGCWy7med9sqsyEN
-jlBAuBQuzfpJ2jRiVnh2rXL7fs54wTSRe/3aM8M9LyMFiv9lAmbDGkwBfMu72UV3
-l2pZ6q5zhViSiWwsD2dThdCY5BU6i90QUgB2H09jYZBWvKDKwklFid0ySQkkBfKI
-zuK42hWY55Dqi6JNHwk0gQpts+aELPBSh39tnLETbCYahGkUamSgKk9wnYSB3XIl
-RkMWQlxO36YoVCig3sCk
-=g1ZX
------END PGP SIGNATURE-----
-
---=-uNr12NXa9pODOIjYE4wW--
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+								Honza
+-- 
+Jan Kara <jack@suse.cz>
+SUSE Labs, CR
