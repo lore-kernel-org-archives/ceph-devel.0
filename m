@@ -1,93 +1,91 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: [PATCH 3/5] libceph: get rid of zero_page_address
-Date: Mon, 12 Mar 2012 17:40:23 -0500
-Message-ID: <4F5E7B57.7060606@dreamhost.com>
+Subject: [PATCH 4/5] libceph: rename "page_shift" variable to something sensible
+Date: Mon, 12 Mar 2012 17:40:26 -0500
+Message-ID: <4F5E7B5A.8090809@dreamhost.com>
 References: <4F5E79C6.6040301@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:58514 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:58518 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757554Ab2CLWkU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Mar 2012 18:40:20 -0400
+	with ESMTP id S1757554Ab2CLWkX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Mar 2012 18:40:23 -0400
 Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 4AA5F243A2
-	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:40:54 -0700 (PDT)
+	by mail.hq.newdream.net (Postfix) with ESMTP id E63F02439E
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:40:57 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net [71.195.31.37])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 1E6252439E
-	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:40:54 -0700 (PDT)
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 72867243A4
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:40:57 -0700 (PDT)
 In-Reply-To: <4F5E79C6.6040301@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-There's not a lot of benefit to zero_page_address, which basically
-holds a mapping of the zero page through the life of the messenger
-module.  Even with our own mapping, the sendpage interface where
-it's used may need to kmap() it again.  It's almost certain to
-be in low memory anyway.
+In write_partial_msg_pages() there is a local variable used to
+track the starting offset within a bio segment to use.  Its name,
+"page_shift" defies the Linux convention of using that name for
+log-base-2(page size).
 
-So stop treating the zero page specially in write_partial_msg_pages()
-and just get rid of zero_page_address entirely.
+Since it's only used in the bio case rename it "bio_offset".  Use it
+along with the page_pos field to compute the memory offset when
+computing CRC's in that function.  This makes the bio case match the
+others more closely.
 
 Signed-off-by: Alex Elder <elder@dreamhost.com>
 ---
-  net/ceph/messenger.c |   11 ++---------
-  1 files changed, 2 insertions(+), 9 deletions(-)
+  net/ceph/messenger.c |   11 ++++++-----
+  1 files changed, 6 insertions(+), 5 deletions(-)
 
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index adca1e6..4f1714c 100644
+index 4f1714c..2bf9ab4 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -61,7 +61,6 @@ static char addr_str[ADDR_STR_COUNT][MAX_ADDR_STR_LEN];
-  static atomic_t addr_str_seq = ATOMIC_INIT(0);
-
-  static struct page *zero_page;		/* used in certain error cases */
--static void *zero_page_address;		/* kernel virtual addr of zero_page */
-
-  const char *ceph_pr_addr(const struct sockaddr_storage *ss)
-  {
-@@ -111,9 +110,6 @@ void _ceph_msgr_exit(void)
-  		ceph_msgr_wq = NULL;
-  	}
-
--	BUG_ON(zero_page_address == NULL);
--	zero_page_address = NULL;
--
-  	BUG_ON(zero_page == NULL);
-  	kunmap(zero_page);
-  	page_cache_release(zero_page);
-@@ -126,9 +122,6 @@ int ceph_msgr_init(void)
-  	zero_page = ZERO_PAGE(0);
-  	page_cache_get(zero_page);
-
--	BUG_ON(zero_page_address != NULL);
--	zero_page_address = kmap(zero_page);
--
-  	ceph_msgr_wq = alloc_workqueue("ceph-msgr", WQ_NON_REENTRANT, 0);
-  	if (ceph_msgr_wq)
-  		return 0;
-@@ -889,7 +882,7 @@ static int write_partial_msg_pages(struct 
+@@ -837,7 +837,7 @@ static int write_partial_msg_pages(struct 
 ceph_connection *con)
-  		} else {
-  			page = zero_page;
+  		struct page *page = NULL;
+  		void *kaddr = NULL;
+  		int max_write = PAGE_SIZE;
+-		int page_shift = 0;
++		int bio_offset = 0;
+
+  		total_max_write = data_len - trail_len -
+  			con->out_msg_pos.data_pos;
+@@ -874,9 +874,9 @@ static int write_partial_msg_pages(struct 
+ceph_connection *con)
+
+  			bv = bio_iovec_idx(msg->bio_iter, msg->bio_seg);
+  			page = bv->bv_page;
+-			page_shift = bv->bv_offset;
++			bio_offset = bv->bv_offset;
   			if (do_datacrc)
--				kaddr = zero_page_address;
+-				kaddr = kmap(page) + page_shift;
 +				kaddr = kmap(page);
-  		}
-  		len = min_t(int, max_write - con->out_msg_pos.page_pos,
-  			    total_max_write);
-@@ -908,7 +901,7 @@ static int write_partial_msg_pages(struct 
+  			max_write = bv->bv_len;
+  #endif
+  		} else {
+@@ -888,17 +888,18 @@ static int write_partial_msg_pages(struct 
 ceph_connection *con)
-  				      con->out_msg_pos.page_pos + page_shift,
+  			    total_max_write);
+
+  		if (do_datacrc && !con->out_msg_pos.did_page_crc) {
++			void *base;
+  			u32 crc;
+-			void *base = kaddr + con->out_msg_pos.page_pos;
+  			u32 tmpcrc = le32_to_cpu(con->out_msg->footer.data_crc);
+
+  			BUG_ON(kaddr == NULL);
++			base = kaddr + con->out_msg_pos.page_pos + bio_offset;
+  			crc = crc32c(tmpcrc, base, len);
+  			con->out_msg->footer.data_crc = cpu_to_le32(crc);
+  			con->out_msg_pos.did_page_crc = true;
+  		}
+  		ret = ceph_tcp_sendpage(con->sock, page,
+-				      con->out_msg_pos.page_pos + page_shift,
++				      con->out_msg_pos.page_pos + bio_offset,
   				      len, 1);
 
--		if (do_datacrc && kaddr != zero_page_address)
-+		if (do_datacrc)
-  			kunmap(page);
-
-  		if (ret <= 0)
+  		if (do_datacrc)
 -- 
 1.7.5.4
 
