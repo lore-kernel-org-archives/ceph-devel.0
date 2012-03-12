@@ -1,43 +1,136 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 0/7 v3] Push file_update_time() into .page_mkwrite
-Date: Mon, 12 Mar 2012 09:22:20 +0100
-Message-ID: <20120312082220.GA5998@quack.suse.cz>
-References: <1330959258-23211-1-git-send-email-jack@suse.cz>
- <1331497397.4641.87.camel@fourier>
+From: Alex Elder <elder@dreamhost.com>
+Subject: [PATCH] libceph: fix inverted crc option logic
+Date: Mon, 12 Mar 2012 17:24:51 -0500
+Message-ID: <4F5E77B3.4070801@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:41073 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753236Ab2CLIWa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 12 Mar 2012 04:22:30 -0400
-Content-Disposition: inline
-In-Reply-To: <1331497397.4641.87.camel@fourier>
+Received: from mail.hq.newdream.net ([66.33.206.127]:58066 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757512Ab2CLWYs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Mar 2012 18:24:48 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id A0738243A4
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:25:22 -0700 (PDT)
+Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net [71.195.31.37])
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id 725AD2439E
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:25:22 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kamal Mostafa <kamal@canonical.com>
-Cc: Jan Kara <jack@suse.cz>, Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, LKML <linux-kernel@vger.kernel.org>, Al Viro <viro@ZenIV.linux.org.uk>, Christoph Hellwig <hch@infradead.org>, Jaya Kumar <jayalk@intworks.biz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Eric Van Hensbergen <ericvh@gmail.com>, Ron Minnich <rminnich@sandia.gov>, Latchesar Ionkov <lucho@ionkov.net>, v9fs-developer@lists.sourceforge.net, Steven Whitehouse <swhiteho@redhat.com>, cluster-devel@redhat.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: ceph-devel@vger.kernel.org
 
-On Sun 11-03-12 13:23:17, Kamal Mostafa wrote:
-> On Mon, 2012-03-05 at 15:54 +0100, Jan Kara wrote:
-> > Hello,
-> > 
-> >   to provide reliable support for filesystem freezing, filesystems need to have
-> > complete control over when metadata is changed.  [...]
-> 
-> This patch set has been tested at Canonical along with the testing for
-> "[PATCH 00/19] Fix filesystem freezing deadlocks".
-> 
-> Please add the following endorsements for these patches (those actually
-> exercised by our test case):  1, 2, 6, 7
-> 
-> Tested-by: Kamal Mostafa <kamal@canonical.com>
-> Tested-by: Peter M. Petrakis <peter.petrakis@canonical.com>
-> Tested-by: Dann Frazier <dann.frazier@canonical.com>
-> Tested-by: Massimo Morana <massimo.morana@canonical.com>
-  Thanks for testing guys!
+CRC's are computed for all messages between ceph entities.  The CRC
+computation for the data portion of message can optionally be
+disabled using the "nocrc" (common) ceph option.  The default is
+for CRC computation for the data portion to be enabled.
 
-								Honza
+Unfortunately, the code that implements this feature interprets the
+feature flag wrong, meaning that by default the CRC's have *not*
+been computed (or checked) for the data portion of messages unless
+the "nocrc" option was supplied.
+
+Fix this, in write_partial_msg_pages() and read_partial_message().
+Also change the flag variable in write_partial_msg_pages() to be
+"no_datacrc" to match the usage elsewhere in the file.
+
+This fixes http://tracker.newdream.net/issues/2064
+
+Signed-off-by: Alex Elder <elder@dreamhost.com>
+---
+  net/ceph/messenger.c |   20 ++++++++++----------
+  1 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 1a22975..589b768 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -812,7 +812,7 @@ static int write_partial_msg_pages(struct 
+ceph_connection *con)
+  	struct ceph_msg *msg = con->out_msg;
+  	unsigned data_len = le32_to_cpu(msg->hdr.data_len);
+  	size_t len;
+-	bool do_crc = con->msgr->nocrc;
++	bool do_datacrc = !con->msgr->nocrc;
+  	int ret;
+  	int total_max_write;
+  	int in_trail = 0;
+@@ -850,17 +850,17 @@ static int write_partial_msg_pages(struct 
+ceph_connection *con)
+
+  			page = list_first_entry(&msg->trail->head,
+  						struct page, lru);
+-			if (do_crc)
++			if (do_datacrc)
+  				kaddr = kmap(page);
+  			max_write = PAGE_SIZE;
+  		} else if (msg->pages) {
+  			page = msg->pages[con->out_msg_pos.page];
+-			if (do_crc)
++			if (do_datacrc)
+  				kaddr = kmap(page);
+  		} else if (msg->pagelist) {
+  			page = list_first_entry(&msg->pagelist->head,
+  						struct page, lru);
+-			if (do_crc)
++			if (do_datacrc)
+  				kaddr = kmap(page);
+  #ifdef CONFIG_BLOCK
+  		} else if (msg->bio) {
+@@ -869,19 +869,19 @@ static int write_partial_msg_pages(struct 
+ceph_connection *con)
+  			bv = bio_iovec_idx(msg->bio_iter, msg->bio_seg);
+  			page = bv->bv_page;
+  			page_shift = bv->bv_offset;
+-			if (do_crc)
++			if (do_datacrc)
+  				kaddr = kmap(page) + page_shift;
+  			max_write = bv->bv_len;
+  #endif
+  		} else {
+  			page = zero_page;
+-			if (do_crc)
++			if (do_datacrc)
+  				kaddr = zero_page_address;
+  		}
+  		len = min_t(int, max_write - con->out_msg_pos.page_pos,
+  			    total_max_write);
+
+-		if (do_crc && !con->out_msg_pos.did_page_crc) {
++		if (do_datacrc && !con->out_msg_pos.did_page_crc) {
+  			u32 crc;
+  			void *base = kaddr + con->out_msg_pos.page_pos;
+  			u32 tmpcrc = le32_to_cpu(con->out_msg->footer.data_crc);
+@@ -897,7 +897,7 @@ static int write_partial_msg_pages(struct 
+ceph_connection *con)
+  				      MSG_DONTWAIT | MSG_NOSIGNAL |
+  				      MSG_MORE);
+
+-		if (do_crc && kaddr != zero_page_address)
++		if (do_datacrc && kaddr != zero_page_address)
+  			kunmap(page);
+
+  		if (ret == -EAGAIN)
+@@ -927,7 +927,7 @@ static int write_partial_msg_pages(struct 
+ceph_connection *con)
+  	dout("write_partial_msg_pages %p msg %p done\n", con, msg);
+
+  	/* prepare and queue up footer, too */
+-	if (!do_crc)
++	if (!do_datacrc)
+  		con->out_msg->footer.flags |= CEPH_MSG_FOOTER_NOCRC;
+  	ceph_con_out_kvec_reset(con);
+  	prepare_write_message_footer(con);
+@@ -1639,7 +1639,7 @@ static int read_partial_message(struct 
+ceph_connection *con)
+  	int ret;
+  	int to, left;
+  	unsigned front_len, middle_len, data_len;
+-	bool do_datacrc = con->msgr->nocrc;
++	bool do_datacrc = !con->msgr->nocrc;
+  	int skip;
+  	u64 seq;
+  	u32 crc;
 -- 
-Jan Kara <jack@suse.cz>
-SUSE Labs, CR
+1.7.5.4
+
