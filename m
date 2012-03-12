@@ -1,169 +1,176 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: [PATCH 2/5] ceph: make ceph file layout helpers take a pointer
-Date: Mon, 12 Mar 2012 17:57:45 -0500
-Message-ID: <4F5E7F69.5090502@dreamhost.com>
+Subject: [PATCH 4/5] ceph: use 64-bit math in ceph_calc_file_object_mapping()
+Date: Mon, 12 Mar 2012 17:57:51 -0500
+Message-ID: <4F5E7F6F.6060403@dreamhost.com>
 References: <4F5E7DA5.4040802@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:44861 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:44874 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757436Ab2CLW5m (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Mar 2012 18:57:42 -0400
+	with ESMTP id S1757699Ab2CLW5r (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Mar 2012 18:57:47 -0400
 Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id A2A21243A2
-	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:58:16 -0700 (PDT)
+	by mail.hq.newdream.net (Postfix) with ESMTP id D4450243A2
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:58:21 -0700 (PDT)
 Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net [71.195.31.37])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id 77A6A2439E
-	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:58:16 -0700 (PDT)
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id A7D7C2439E
+	for <ceph-devel@vger.kernel.org>; Mon, 12 Mar 2012 15:58:21 -0700 (PDT)
 In-Reply-To: <4F5E7DA5.4040802@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Make the helpers for accessing the fields of an on-disk ceph file
-layout structure take the address of a layout structure rather than
-the structure itself.  It's more useful (and to my eye a bit more
-normal).
+Convert ceph_calc_file_object_mapping() so it uses 64-bit variables
+and divide operators.  This is in anticipation of the next patch,
+to keep the the changes it incurs more focused.
 
-Use the result in ceph_file_layout_stripe_width() and
-ceph_file_layout_period(), since it's now possible.
-
-Rename ceph_file_layout_su() to be ceph_file_layout_stripe_unit().
+I made most of the variable names more verbose, and because it now
+uses do_div() some of the calculations get done in a different
+order.  Net result is that the code does what it did before, but it
+looks quite a bit different...
 
 Signed-off-by: Alex Elder <elder@dreamhost.com>
 ---
-  fs/ceph/ioctl.c              |   16 ++++++++--------
-  fs/ceph/xattr.c              |   10 +++++-----
-  include/linux/ceph/ceph_fs.h |   28 +++++++++++++++-------------
-  3 files changed, 28 insertions(+), 26 deletions(-)
+  net/ceph/osdmap.c |  112 
++++++++++++++++++++++++++++++++++--------------------
+  1 files changed, 70 insertions(+), 42 deletions(-)
 
-diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
-index 790914a59..23cb78b 100644
---- a/fs/ceph/ioctl.c
-+++ b/fs/ceph/ioctl.c
-@@ -22,9 +22,9 @@ static long ceph_ioctl_get_layout(struct file *file, 
-void __user *arg)
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index f5f6e41..26c30e7 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -933,59 +933,87 @@ bad:
 
-  	err = ceph_do_getattr(file->f_dentry->d_inode, CEPH_STAT_CAP_LAYOUT);
-  	if (!err) {
--		l.stripe_unit = ceph_file_layout_su(ci->i_layout);
--		l.stripe_count = ceph_file_layout_stripe_count(ci->i_layout);
--		l.object_size = ceph_file_layout_object_size(ci->i_layout);
-+		l.stripe_unit = ceph_file_layout_stripe_unit(&ci->i_layout);
-+		l.stripe_count = ceph_file_layout_stripe_count(&ci->i_layout);
-+		l.object_size = ceph_file_layout_object_size(&ci->i_layout);
-  		l.data_pool = le32_to_cpu(ci->i_layout.fl_pg_pool);
-  		l.preferred_osd =
-  			(s32)le32_to_cpu(ci->i_layout.fl_pg_preferred);
-@@ -52,9 +52,9 @@ static long ceph_ioctl_set_layout(struct file *file, 
-void __user *arg)
-  	/* validate changed params against current layout */
-  	err = ceph_do_getattr(file->f_dentry->d_inode, CEPH_STAT_CAP_LAYOUT);
-  	if (!err) {
--		nl.stripe_unit = ceph_file_layout_su(ci->i_layout);
--		nl.stripe_count = ceph_file_layout_stripe_count(ci->i_layout);
--		nl.object_size = ceph_file_layout_object_size(ci->i_layout);
-+		nl.stripe_unit = ceph_file_layout_stripe_unit(&ci->i_layout);
-+		nl.stripe_count = ceph_file_layout_stripe_count(&ci->i_layout);
-+		nl.object_size = ceph_file_layout_object_size(&ci->i_layout);
-  		nl.data_pool = le32_to_cpu(ci->i_layout.fl_pg_pool);
-  		nl.preferred_osd =
-  				(s32)le32_to_cpu(ci->i_layout.fl_pg_preferred);
-@@ -203,8 +203,8 @@ static long ceph_ioctl_get_dataloc(struct file 
-*file, void __user *arg)
-  	ceph_calc_file_object_mapping(&ci->i_layout, dl.file_offset, &len,
-  				      &dl.object_no, &dl.object_offset, &olen);
-  	dl.file_offset -= dl.object_offset;
--	dl.object_size = ceph_file_layout_object_size(ci->i_layout);
--	dl.block_size = ceph_file_layout_su(ci->i_layout);
-+	dl.object_size = ceph_file_layout_object_size(&ci->i_layout);
-+	dl.block_size = ceph_file_layout_stripe_unit(&ci->i_layout);
 
-  	/* block_offset = object_offset % block_size */
-  	tmp = dl.object_offset;
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 715cfc6..75960b1 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -115,16 +115,16 @@ static size_t ceph_vxattrcb_file_layout(struct 
-ceph_inode_info *ci, char *val,
-
-  	ret = snprintf(val, size,
-  		"chunk_bytes=%lld\nstripe_count=%lld\nobject_size=%lld\n",
--		(unsigned long long)ceph_file_layout_su(ci->i_layout),
--		(unsigned long long)ceph_file_layout_stripe_count(ci->i_layout),
--		(unsigned long long)ceph_file_layout_object_size(ci->i_layout));
-+		(unsigned long long)ceph_file_layout_su(&ci->i_layout),
-+		(unsigned long long)ceph_file_layout_stripe_count(&ci->i_layout),
-+		(unsigned long long)ceph_file_layout_object_size(&ci->i_layout));
-
--	if (ceph_file_layout_pg_preferred(ci->i_layout) >= 0) {
-+	if (ceph_file_layout_pg_preferred(&ci->i_layout) >= 0) {
-  		val += ret;
-  		size -= ret;
-  		ret += snprintf(val, size, "preferred_osd=%lld\n",
-  			    (unsigned long long)ceph_file_layout_pg_preferred(
--				    ci->i_layout));
-+				    &ci->i_layout));
-  	}
-
-  	return ret;
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index 62e3bb3..2645704 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -74,32 +74,34 @@ struct ceph_file_layout {
+  /*
+- * calculate file layout from given offset, length.
+- * fill in correct oid, logical length, and object extent
+- * offset, length.
++ * calculate file layout from given offset, length.  fill in correct
++ * object number, logical length, and object extent offset and length.
+   *
+- * for now, we write only a single su, until we can
+- * pass a stride back to the caller.
++ * for now, we write only a single stripe_unit, until we can pass a
++ * stride back to the caller.
    */
-
-  #define CEPH_MIN_STRIPE_UNIT 65536
--#define ceph_file_layout_su(l) ((__s32)le32_to_cpu((l).fl_stripe_unit))
-+#define ceph_file_layout_stripe_unit(l) \
-+		((__s32) le32_to_cpu((l)->fl_stripe_unit))
-  #define ceph_file_layout_stripe_count(l) \
--	((__s32)le32_to_cpu((l).fl_stripe_count))
--#define ceph_file_layout_object_size(l) 
-((__s32)le32_to_cpu((l).fl_object_size))
--#define ceph_file_layout_cas_hash(l) ((__s32)le32_to_cpu((l).fl_cas_hash))
--#define ceph_file_layout_object_su(l) \
--	((__s32)le32_to_cpu((l).fl_object_stripe_unit))
-+		((__s32) le32_to_cpu((l)->fl_stripe_count))
-+#define ceph_file_layout_object_size(l) \
-+		((__s32) le32_to_cpu((l)->fl_object_size))
-+#define ceph_file_layout_cas_hash(l) \
-+		((__s32) le32_to_cpu((l)->fl_cas_hash))
-+#define ceph_file_layout_object_stripe_unit(l) \
-+		((__s32) le32_to_cpu((l)->fl_object_stripe_unit))
-  #define ceph_file_layout_pg_preferred(l) \
--	((__s32)le32_to_cpu((l).fl_pg_preferred))
-+		((__s32) le32_to_cpu((l)->fl_pg_preferred))
-  #define ceph_file_layout_pg_pool(l) \
--	((__s32)le32_to_cpu((l).fl_pg_pool))
-+		((__s32) le32_to_cpu((l)->fl_pg_pool))
-
-  static inline unsigned ceph_file_layout_stripe_width(struct 
-ceph_file_layout *l)
+  void ceph_calc_file_object_mapping(struct ceph_file_layout *layout,
+-				   u64 off, u64 *plen,
+-				   u64 *ono,
+-				   u64 *oxoff, u64 *oxlen)
++				   u64 off,
++				   u64 *plen,
++				   u64 *object_num,
++				   u64 *object_ext_off,
++				   u64 *object_ext_len)
   {
--	return le32_to_cpu(l->fl_stripe_unit) *
--		le32_to_cpu(l->fl_stripe_count);
-+	return (unsigned) (ceph_file_layout_stripe_unit(l) *
-+				ceph_file_layout_stripe_count(l));
-  }
-
-  /* "period" == bytes before i start on a new set of objects */
-  static inline unsigned ceph_file_layout_period(struct ceph_file_layout *l)
-  {
--	return le32_to_cpu(l->fl_object_size) *
--		le32_to_cpu(l->fl_stripe_count);
-+	return (unsigned) (ceph_file_layout_object_size(l) *
-+				ceph_file_layout_stripe_count(l));
-  }
-
+-	u32 osize = (u32) ceph_file_layout_object_size(layout);
+-	u32 su = (u32) ceph_file_layout_stripe_unit(layout);
+-	u32 sc = (u32) ceph_file_layout_stripe_count(layout);
+-	u32 bl, stripeno, stripepos, objsetno;
+-	u32 su_per_object;
+-	u64 t, su_offset;
 -
-  int ceph_file_layout_is_valid(const struct ceph_file_layout *layout);
+-	dout("mapping %llu~%llu  osize %u fl_su %u\n", off, *plen,
+-	     osize, su);
+-	su_per_object = osize / su;
+-	dout("osize %u / su %u = su_per_object %u\n", osize, su,
+-	     su_per_object);
+-
+-	BUG_ON((su & ~PAGE_MASK) != 0);
+-	/* bl = *off / su; */
+-	t = off;
+-	do_div(t, su);
+-	bl = t;
+-	dout("off %llu / su %u = bl %u\n", off, su, bl);
+-
+-	stripeno = bl / sc;
+-	stripepos = bl % sc;
+-	objsetno = stripeno / su_per_object;
+-
+-	*ono = objsetno * sc + stripepos;
+-	dout("objset %u * sc %u = ono %u\n", objsetno, sc, (unsigned)*ono);
+-
+-	/* *oxoff = *off % layout->fl_stripe_unit;  # offset in su */
+-	t = off;
+-	su_offset = do_div(t, su);
+-	*oxoff = su_offset + (stripeno % su_per_object) * su;
++	u64 object_size = (u64) ceph_file_layout_object_size(layout);
++	u64 stripe_unit = (u64) ceph_file_layout_stripe_unit(layout);
++	u64 stripe_count = (u64) ceph_file_layout_stripe_count(layout);
++	u64 stripe_unit_per_object;
++	u64 stripe_unit_num;
++	u64 stripe_unit_offset;
++	u64 stripe_num;
++	u64 stripe_pos;			/* Which object within an object set */
++	u64 obj_set_num;
++	u64 obj_stripe_unit_num;	/* Which stripe_unit within object */
++
++	BUG_ON((stripe_unit & ~PAGE_MASK) != 0);
++
++	dout("mapping %llu~%llu  object_size %llu fl_stripe_unit %llu\n",
++		off, *plen, object_size, stripe_unit);
++
++	/* stripe_unit_per_object = object_size / stripe_unit; */
++	stripe_unit_per_object = object_size;
++	do_div(stripe_unit_per_object, stripe_unit);
++	dout("object_size %llu / stripe_unit %llu "
++			"= stripe_unit_per_object %llu\n",
++		object_size, stripe_unit, stripe_unit_per_object);
++
++	/*
++	 * stripe_unit_num = off / stripe_unit;
++	 * stripe_unit_offset = off % stripe_unit;
++	 */
++	stripe_unit_num = off;
++	stripe_unit_offset = do_div(stripe_unit_num, stripe_unit);
++	dout("off %llu / stripe_unit %llu = "
++			"stripe_unit_num %llu rem stripe_unit_offset = %llu\n",
++		off, stripe_unit, stripe_unit_num, stripe_unit_offset);
++
++	/*
++	 * stripe_num = stripe_unit_num / stripe_count;
++	 * stripe_pos = stripe_unit_num % stripe_count;
++	 */
++	stripe_num = stripe_unit_num;
++	stripe_pos = do_div(stripe_num, stripe_count);
++	dout("stripe_unit_num %llu / stripe_count %llu = "
++			"stripe_num %llu rem stripe_pos %llu\n",
++		stripe_unit_num, stripe_count, stripe_num, stripe_pos);
++
++	/*
++	 * obj_set_num = stripe_num / stripe_unit_per_object;
++	 * obj_stripe_unit_num = stripe_num % stripe_unit_per_object;
++	 */
++	obj_set_num = stripe_num;
++	obj_stripe_unit_num = do_div(obj_set_num, stripe_unit_per_object);
++
++	*object_num = obj_set_num * stripe_count + stripe_pos;
++	dout("obj_set_num %llu * stripe_count %llu = object_num %llu\n",
++		obj_set_num, stripe_count, *object_num);
++	*object_ext_off = stripe_unit * obj_stripe_unit_num
++				+ stripe_unit_offset;
++	dout("obj_stripe_unit_num %llu * stripe_unit %llu = "
++			"object_ext_off %llu\n",
++		obj_stripe_unit_num, stripe_unit, *object_ext_off);
 
-  struct ceph_dir_layout {
+  	/*
+  	 * Calculate the length of the extent being written to the selected
+  	 * object. This is the minimum of the full length requested (plen) or
+  	 * the remainder of the current stripe being written to.
+  	 */
+-	*oxlen = min_t(u64, *plen, su - su_offset);
+-	*plen = *oxlen;
++	*object_ext_len = min_t(u64, *plen, stripe_unit - stripe_unit_offset);
++	*plen = *object_ext_len;
+
+-	dout(" obj extent %llu~%llu\n", *oxoff, *oxlen);
++	dout(" obj extent %llu~%llu\n", *object_ext_off, *object_ext_len);
+  }
+  EXPORT_SYMBOL(ceph_calc_file_object_mapping);
+
 -- 
 1.7.5.4
 
