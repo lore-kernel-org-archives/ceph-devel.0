@@ -1,51 +1,46 @@
-From: Bryan Wright <bkw1a@ayesha.phys.virginia.edu>
-Subject: Trying to build "ceph-client-standalone" under kernel 2.6.32
-Date: Tue, 13 Mar 2012 14:55:33 +0000 (UTC)
-Message-ID: <loom.20120313T154901-294@post.gmane.org>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: ls -l not listing file attributes inside ceph directory
+Date: Tue, 13 Mar 2012 11:22:50 -0700
+Message-ID: <CAORUGqCdDzaeAw61AJo5=BzYoAsmqd4FZp0wVxBw-w24iyNG8g@mail.gmail.com>
+References: <loom.20120313T100729-291@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:34567 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753148Ab2CMPAL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 13 Mar 2012 11:00:11 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1S7TCm-0003hj-8R
-	for ceph-devel@vger.kernel.org; Tue, 13 Mar 2012 16:00:04 +0100
-Received: from ayesha.phys.Virginia.EDU ([128.143.102.43])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Mar 2012 16:00:04 +0100
-Received: from bkw1a by ayesha.phys.Virginia.EDU with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Mar 2012 16:00:04 +0100
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:61560 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758733Ab2CMSXK convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Mar 2012 14:23:10 -0400
+Received: by ghrr11 with SMTP id r11so864975ghr.19
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Mar 2012 11:23:10 -0700 (PDT)
+In-Reply-To: <loom.20120313T100729-291@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: madhusudhana <madhusudhana.u.acharya@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi folks,
+On Tue, Mar 13, 2012 at 02:13, madhusudhana
+<madhusudhana.u.acharya@gmail.com> wrote:
+> Hi all
+> When I run ls -l command inside a folder coming from ceph cluster,
+> sometime it will not list file properties. when I run again, it
+> will list for some files and not for some. Any idea why this happens =
+?
+>
+>
+> [root@ceph-node-9 test35]# ll
+> total 0
+> ?--------- =C2=A0? ? =C2=A0 =C2=A0 =C2=A0? =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 ? =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0? arra=
+ys
 
-     I'm trying to build the kernel client, following the directions here:
+Is that with the kernel client or FUSE?
 
-http://ceph.newdream.net/wiki/Building_kernel_client
+What's the version number of Ceph?
 
-I'm doing this under 32-bit CentOS 5.7 with a 2.6.32 kernel.  (Ultimately, I'll
-have both 32-bit and 64-bit clients.)  My understanding is that the fuse
-implementation won't work on 32-bit clients because fuse can't deal with ceph's
-long inode numbers on that platform, so I'm trying to compile a kernel module
-that I can maintain with dkms.
-
-     The problem is that when I try "make -C libceph", I get errors of the form:
-
-/usr/src/ceph-client-standalone/libceph/ceph_common.c:9:28: error:
-keys/ceph-type.h: No such file or directory
-
-
-      What am I doing wrong here?  Any advice would be appreciated.
-
-                                              Thanks,
-                                              Bryan
-
-
+What's the kernel version on the client?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
