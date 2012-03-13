@@ -1,45 +1,52 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+From: Bryan Wright <bkw1a@ayesha.phys.virginia.edu>
 Subject: Re: Trying to build "ceph-client-standalone" under kernel 2.6.32
-Date: Tue, 13 Mar 2012 11:29:53 -0700
-Message-ID: <CAORUGqBgiLggF4epHUX9+eNS3M8aYx=O6RLG-F92ud9Vcvb_Hw@mail.gmail.com>
+Date: Tue, 13 Mar 2012 18:40:07 +0000 (UTC)
+Message-ID: <loom.20120313T193341-715@post.gmane.org>
 References: <loom.20120313T154901-294@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f52.google.com ([209.85.210.52]:60680 "EHLO
-	mail-pz0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753941Ab2CMSaO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Mar 2012 14:30:14 -0400
-Received: by dadp12 with SMTP id p12so1365431dad.11
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Mar 2012 11:30:13 -0700 (PDT)
-In-Reply-To: <loom.20120313T154901-294@post.gmane.org>
+Received: from plane.gmane.org ([80.91.229.3]:37176 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753222Ab2CMSkX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 13 Mar 2012 14:40:23 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1S7Wdw-0000M1-Da
+	for ceph-devel@vger.kernel.org; Tue, 13 Mar 2012 19:40:20 +0100
+Received: from ayesha.phys.Virginia.EDU ([128.143.102.43])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Mar 2012 19:40:20 +0100
+Received: from bkw1a by ayesha.phys.Virginia.EDU with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Mar 2012 19:40:20 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bryan Wright <bkw1a@ayesha.phys.virginia.edu>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, Mar 13, 2012 at 07:55, Bryan Wright
-<bkw1a@ayesha.phys.virginia.edu> wrote:
-> I'm doing this under 32-bit CentOS 5.7 with a 2.6.32 kernel. =C2=A0(U=
-ltimately, I'll
-=2E..
-> =C2=A0 =C2=A0 The problem is that when I try "make -C libceph", I get=
- errors of the form:
->
-> /usr/src/ceph-client-standalone/libceph/ceph_common.c:9:28: error:
-> keys/ceph-type.h: No such file or directory
+Bryan Wright <bkw1a <at> ayesha.phys.virginia.edu> writes:
 
-I'm afraid the standalone tree is not really kept up to date, and
-adjusting for the changes in the mainline kernel is making it ever
-harder to do so.
+> I'm doing this under 32-bit CentOS 5.7 with a 2.6.32 kernel.
 
-Perhaps you could use a newer kernel on your CentOS install?
+Sorry, let me correct that: I'm actually doing this under CentOS 6.2 with a
+2.6.32 kernel.  We also have a bunch of CentOS 5.7 machines, but they'll be
+upgraded before I try to make them ceph clients.
 
-Or just run 64-bit and use FUSE. It's been a long time since I saw a
-server that couldn't do 64-bit, or had less than 4GB of RAM.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+     Regarding the possibility of using a later kernel, I could do that, but
+then I'd need to worry more about keeping on top of security updates.  If I can
+use the stock CentOS kernel, then I can just let the CentOS maintainers worry
+about that.
+
+     Regarding the possibility of moving the 32-bit machines to 64-bit, it's an
+option, but there's otherwise very little pressure to make the move, and some
+trepidation about what might break.  For us, a 32-bit kernel with PAE has been a
+fine configuration.
+
+                                                Bryan
+ 
+
+
+
+
