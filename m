@@ -1,66 +1,85 @@
 From: madhusudhana <madhusudhana.u.acharya@gmail.com>
-Subject: Re: ls -l not listing file attributes inside ceph directory
-Date: Wed, 14 Mar 2012 04:22:22 +0000 (UTC)
-Message-ID: <loom.20120314T052053-42@post.gmane.org>
-References: <loom.20120313T100729-291@post.gmane.org> <CAORUGqCdDzaeAw61AJo5=BzYoAsmqd4FZp0wVxBw-w24iyNG8g@mail.gmail.com>
+Subject: Re: TOO SLOW data write speed and delete.. NEED HELP
+Date: Wed, 14 Mar 2012 04:28:24 +0000 (UTC)
+Message-ID: <loom.20120314T052312-964@post.gmane.org>
+References: <loom.20120313T113524-750@post.gmane.org> <4F5FA114.7070806@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:39748 "EHLO plane.gmane.org"
+Received: from plane.gmane.org ([80.91.229.3]:40496 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750857Ab2CNEZE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 14 Mar 2012 00:25:04 -0400
+	id S1750860Ab2CNEaH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 14 Mar 2012 00:30:07 -0400
 Received: from list by plane.gmane.org with local (Exim 4.69)
 	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1S7fln-0000tL-Lj
-	for ceph-devel@vger.kernel.org; Wed, 14 Mar 2012 05:25:03 +0100
+	id 1S7fqd-00040A-Pm
+	for ceph-devel@vger.kernel.org; Wed, 14 Mar 2012 05:30:03 +0100
 Received: from 202.164.25.5 ([202.164.25.5])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Mar 2012 05:25:03 +0100
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Mar 2012 05:30:03 +0100
 Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Mar 2012 05:25:03 +0100
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Mar 2012 05:30:03 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Tommi Virtanen <tommi.virtanen <at> dreamhost.com> writes:
+Jo=C3=A3o Eduardo Lu=C3=ADs <jecluis <at> gmail.com> writes:
 
 >=20
-> On Tue, Mar 13, 2012 at 02:13, madhusudhana
-> <madhusudhana.u.acharya <at> gmail.com> wrote:
-> > Hi all
-> > When I run ls -l command inside a folder coming from ceph cluster,
-> > sometime it will not list file properties. when I run again, it
-> > will list for some files and not for some. Any idea why this happen=
-s ?
-> >
-> >
-> > [root <at> ceph-node-9 test35]# ll
-> > total 0
-> > ?--------- =C2=A0? ? =C2=A0 =C2=A0 =C2=A0? =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 ? =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0? a=
-rrays
+> On 03/13/2012 10:39 AM, madhusudhana wrote:
+> > Hi all,
+> > Can someone PLEASE help me to understand why data copying (simple c=
+p
+> > or rsync) is SO slow in CEPH ? And delete command (\rm -rf) for rem=
+oving
+> > a small (175M) directory is taking so much of time. Because of this=
+,
+> > i am not able to complete evaluation of ceph using my actual worklo=
+ad.=20
+> >=20
+> > I am hereby requesting all to help me in finding out the reason for=
+=20
+> > slow write/delete in my ceph cluster. I am really trying hard to=20
+> > complete the evaluation with actual workload but not able to copy t=
+he
+> > data whats required for evaluation to ceph cluster bcz of slow copy=
+=2E
+> >=20
+> > I really appreciate any help on this.
+> >=20
+> > Thanks in advance
+> > Madhusudhan
+> >=20
 >=20
-> Is that with the kernel client or FUSE?
+> Hi Madhusudhan,
 >=20
-> What's the version number of Ceph?
+> Are you using Btrfs? And are you taking snapshots while you're
+> performing those operations?
 >=20
-> What's the kernel version on the client?
+Joao,
+Yes. all my OSD's are running on btrfs. I am not doing anything special
+except running 'cp' or 'rsync' command. can you please let me know how
+i can find if am taking snapshots while I do 'cp' or 'rsync' commands ?
 
-its kernel client. I mounted using mount -t ceph
+One more concern is 'rm' command is also TOO slow. I am a newbie here a=
+nd=20
+i don't know to much about ceph working. I configured it in a simple wa=
+y.
+Install ceph and run mkcephfs and start ceph in all the servers in the=20
+cluster.
 
-ceph version :
-[root@ceph-node-1 tmp]# ceph -v
-ceph version 0.41 (commit:c1345f7136a0af55d88280ffe4b58339aaf28c9d
+I want to understand why basic operations like 'cp' and 'rm' are slow b=
+cz=20
+my actual workload does a lot of copy and delete operation. If I find t=
+he
+reason for the slowness and get a fix, then I think i can better compar=
+e and=20
+complete my ceph evaluation.=20
 
-kernel version in client:
-[root@ceph-node-9 ~]# uname -a
-Linux ceph-node-9 3.0.9 #3 SMP Tue Feb 21 16:59:41 IST 2012 x86_64 x86_=
-64 x86_64=20
-GNU/Linux
+Thanks
 
 
 
