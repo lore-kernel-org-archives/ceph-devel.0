@@ -1,102 +1,123 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: TOO SLOW data write speed and delete.. NEED HELP
-Date: Wed, 14 Mar 2012 10:56:34 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1203141052350.11925@cobra.newdream.net>
-References: <loom.20120313T113524-750@post.gmane.org> <4F5FA114.7070806@gmail.com>
- <loom.20120314T052312-964@post.gmane.org>
+Subject: Re: timed out in osd1 error in dmes
+Date: Wed, 14 Mar 2012 10:59:25 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1203141057030.11925@cobra.newdream.net>
+References: <loom.20120313T083325-276@post.gmane.org> <4F5FACD8.8090902@dreamhost.com>
+ <loom.20120314T051739-894@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1379884912-1331747794=:11925"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53008 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:53022 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761183Ab2CNR4f (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Mar 2012 13:56:35 -0400
-In-Reply-To: <loom.20120314T052312-964@post.gmane.org>
+	with ESMTP id S1756688Ab2CNR7Z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Mar 2012 13:59:25 -0400
+In-Reply-To: <loom.20120314T051739-894@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: madhusudhana <madhusudhana.u.acharya@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---557981400-1379884912-1331747794=:11925
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
 On Wed, 14 Mar 2012, madhusudhana wrote:
-> Jo=E3o Eduardo Lu=EDs <jecluis <at> gmail.com> writes:
-> > On 03/13/2012 10:39 AM, madhusudhana wrote:
+> Josh Durgin <josh.durgin <at> dreamhost.com> writes:
+> 
+> > 
+> > On 03/13/2012 12:35 AM, madhusudhana wrote:
 > > > Hi all,
-> > > Can someone PLEASE help me to understand why data copying (simple cp
-> > > or rsync) is SO slow in CEPH ? And delete command (\rm -rf) for remov=
-ing
-> > > a small (175M) directory is taking so much of time. Because of this,
-> > > i am not able to complete evaluation of ceph using my actual workload=
-=2E=20
-> > >=20
-> > > I am hereby requesting all to help me in finding out the reason for=
-=20
-> > > slow write/delete in my ceph cluster. I am really trying hard to=20
-> > > complete the evaluation with actual workload but not able to copy the
-> > > data whats required for evaluation to ceph cluster bcz of slow copy.
-> > >=20
-> > > I really appreciate any help on this.
-> > >=20
-> > > Thanks in advance
-> > > Madhusudhan
-> > >=20
-> >=20
-> > Hi Madhusudhan,
-> >=20
-> > Are you using Btrfs? And are you taking snapshots while you're
-> > performing those operations?
-> >=20
-> Joao,
-> Yes. all my OSD's are running on btrfs. I am not doing anything special
-> except running 'cp' or 'rsync' command. can you please let me know how
-> i can find if am taking snapshots while I do 'cp' or 'rsync' commands ?
->=20
-> One more concern is 'rm' command is also TOO slow. I am a newbie here and=
-=20
-> i don't know to much about ceph working. I configured it in a simple way.
-> Install ceph and run mkcephfs and start ceph in all the servers in the=20
-> cluster.
->=20
-> I want to understand why basic operations like 'cp' and 'rm' are slow bcz=
-=20
-> my actual workload does a lot of copy and delete operation. If I find the
-> reason for the slowness and get a fix, then I think i can better compare =
-and=20
-> complete my ceph evaluation.=20
+> > > The server in which i have mounted file system using mount -t ceph
+> > > is showing below errors in dmesg.
+> > >
+> > >
+> > > libceph:  tid 79987 timed out on osd2, will reset osd
+> > > libceph:  tid 81516 timed out on osd0, will reset osd
+> > > libceph:  tid 81133 timed out on osd1, will reset osd
+> > > libceph: skipping osd1 10.25.12.127:6800 seq 1 expected 2
+> > > libceph:  tid 80108 timed out on osd2, will reset osd
+> > > libceph:  tid 81134 timed out on osd1, will reset osd
+> > > libceph:  tid 81641 timed out on osd1, will reset osd
+> > >
+> > >
+> > > Is is because of this, write/copy operation in my cluster
+> > > is slow ? is this a error which needs attention or can be
+> > > safely ignored ?
+> > 
+> > These are usually harmless, and could just mean the osds can't keep up 
+> > with the requests you're giving them. Given your other issues, it might 
+> > be a symptom of a problem with your osds.
+> > 
+> > What filesystem are the osds using? Are there any warnings from these 
+> > filesystems in dmesg?
+> 
+> All my osd's are using btrfs.  below are the dmesg tailed from all osd's
 
-There are a range of reasons why this could be slow, and unfortunately we=
-=20
-don't have enough information to tell what is the problem.=20
+Heh, I should read my mail in order.  It sounds like the cp's are probably 
+slow due to the OSDs.  
 
-First, see what the OSD performance looks like.  Output from, say,
+> ceph-node-6
+> generic-usb 0003:0603:00F2.0004: input,hiddev0: USB HID v1.10 Device [NOVATEK 
+> USB Keyboard] on usb-0000:00:1d.1-1/input1
+> usb 5-1: USB disconnect, device number 3
+> device fsid aed12ad8-4053-4066-9074-9a9f2419c03f devid 1 transid 7 /dev/sda5
+> device fsid aed12ad8-4053-4066-9074-9a9f2419c03f devid 1 transid 7 /dev/sda5
+> device fsid ee29fef4-5e07-4be7-bf2c-592e3b9fa62b devid 1 transid 7 /dev/sda5
+> device fsid ee29fef4-5e07-4be7-bf2c-592e3b9fa62b devid 1 transid 7 /dev/sda5
+> device fsid ee29fef4-5e07-4be7-bf2c-592e3b9fa62b devid 1 transid 12 /dev/sda5
+> btrfs: truncated 1 orphans
+> btrfs: truncated 1 orphans
 
- rados -p rbd bench 60 write
- rados -p rbd bench 60 write -b 4096
+These are harmless noise, BTW, you can ignore them.
 
-will give us a sense of what the object store performance looks like.
+Can you tell us how your OSDs are configured?  Where are the data 
+directories and journals located?  (The [osd] section of ceph.conf would 
+be helpful.)
 
-The other big question is which client you're using.. since you have=20
-ceph-fuse problems, I assume you're using the kernel client?  Which kernel=
-=20
-version, etc.  If it's MDS performance the way to diagnose would probably=
-=20
-be to gather a message log initially ('debug ms =3D 1' on the [mds] section=
-=20
-of ceph.conf) to see what the client/mds interaction looks like.  MDS=20
-performance isn't something we have very much time to spend on right now,=
-=20
-though, since our focus in primarily RADOS and RBD stability currently=20
-(unless you want to talk to the professional services side of things,=20
-info@ceph.com).
+Another useful piece of information would be the ceph-osd's raw 
+performance writing to the local disk+journal, which you can get with
 
-The first step, though, is to figure out if this is an OSD or MDS=20
-performance issue...
+ $ ceph tell osd.0 bench
 
+You might want to check it for several nodes to see if it's consistent, 
+etc.
+
+Thanks!
 sage
---557981400-1379884912-1331747794=:11925--
+
+
+
+> ceph-node-7
+> device fsid 7baa8339-8d1e-4cca-9e61-c5f9bd4c3ab0 devid 1 transid 10 /dev/sda5
+> device fsid b8aa714a-347a-4d6c-8bae-8a732bfc380f devid 1 transid 13 /dev/sda4
+> device fsid 3c3a56cf-2d00-4fea-a49d-c2cb19af1ea2 devid 1 transid 7 /dev/sda5
+> device fsid 3c3a56cf-2d00-4fea-a49d-c2cb19af1ea2 devid 1 transid 7 /dev/sda5
+> device fsid b8aa714a-347a-4d6c-8bae-8a732bfc380f devid 1 transid 13 /dev/sda4
+> device fsid 7c3d2b55-118f-447e-9e65-767005893fec devid 1 transid 7 /dev/sda5
+> device fsid 7c3d2b55-118f-447e-9e65-767005893fec devid 1 transid 7 /dev/sda5
+> device fsid b8aa714a-347a-4d6c-8bae-8a732bfc380f devid 1 transid 13 /dev/sda4
+> device fsid 7c3d2b55-118f-447e-9e65-767005893fec devid 1 transid 12 /dev/sda5
+> btrfs: truncated 1 orphans
+> 
+> ceph-node-8
+> usb 5-1: New USB device found, idVendor=0603, idProduct=00f2
+> usb 5-1: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+> usb 5-1: Product: USB Keyboard
+> usb 5-1: Manufacturer: NOVATEK
+> input: NOVATEK USB Keyboard as /devices/pci0000:00/0000:00:1d.1/usb5/5-1/5-
+> 1:1.0/input/input3
+> generic-usb 0003:0603:00F2.0001: input: USB HID v1.10 Keyboard [NOVATEK USB 
+> Keyboard] on usb-0000:00:1d.1-1/input0
+> input: NOVATEK USB Keyboard as /devices/pci0000:00/0000:00:1d.1/usb5/5-1/5-
+> 1:1.1/input/input4
+> generic-usb 0003:0603:00F2.0002: input,hiddev0: USB HID v1.10 Device [NOVATEK 
+> USB Keyboard] on usb-0000:00:1d.1-1/input1
+> usb 5-1: USB disconnect, device number 2
+> btrfs: truncated 1 orphans
+> 
+> do you see any issue with osd? all 3 osd's are showing "btrfs: truncated 1 
+> orphans" error.
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
