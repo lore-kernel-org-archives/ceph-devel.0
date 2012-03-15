@@ -1,153 +1,150 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: Re: q. about rbd-header
-Date: Thu, 15 Mar 2012 11:21:18 +0100
-Message-ID: <4F61C29E.4090300@filoo.de>
-References: <9CB50149-F22E-4130-80FD-1A8472891BD5@filoo.de> <89CB135C-CB66-4240-B89C-EFDFCB8AACF4@filoo.de> <4F6114D6.4000809@dreamhost.com>
+From: Alex Elder <elder@dreamhost.com>
+Subject: [PATCH] rbd: move snap_rwsem to the device, rename to header_rwsem
+Date: Thu, 15 Mar 2012 10:14:10 -0500
+Message-ID: <4F620742.60107@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-5.de-punkt.de ([93.190.64.35]:38537 "EHLO
-	mail-5.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753891Ab2COKVV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Mar 2012 06:21:21 -0400
-In-Reply-To: <4F6114D6.4000809@dreamhost.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:51311 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755536Ab2COPOE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Mar 2012 11:14:04 -0400
+Received: from mail.hq.newdream.net (localhost [127.0.0.1])
+	by mail.hq.newdream.net (Postfix) with ESMTP id 251B5243BD
+	for <ceph-devel@vger.kernel.org>; Thu, 15 Mar 2012 08:14:49 -0700 (PDT)
+Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net [71.195.31.37])
+	by mail.hq.newdream.net (Postfix) with ESMTPSA id EAA17243BC
+	for <ceph-devel@vger.kernel.org>; Thu, 15 Mar 2012 08:14:48 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Josh,
+(Re-posting Josh's prescient patch--it fixes a newly identified issue.)
 
-On 03/14/2012 10:59 PM, Josh Durgin wrote:
-> On 03/14/2012 01:49 PM, Oliver Francke wrote:
->> Well,
->>
->> nobody able to sched some light in?
->> Did some math and found out how to fill the size bytes.
->
-> Sorry I didn't respond faster.
->
->> But, one question never got answered:
->>      - why is - with busy VMs - frequently the first block affected,
->>        with the result of damaged=20
->> grub-loaders/partition-tables/filesystems?
->>        Is this some NULL/zero pointer thingy in case of ceph-failure=
-?
->
-> My guess is that this is not the first object affected, but it's wher=
-e=20
-> the loss of an object is most easily noticeable - if an object doesn'=
-t=20
-> exist, it's treated as being full of zeros, which might go undetected=
-=20
-> for a long time if it's e.g. some temp or log file that's not reread=20
-> and verified.
+A new temporary header is allocated each time the header changes, but
+only the changed properties are copied over. We don't need a new
+semaphore for each header update.
 
-well, I responded to Sage with some more infos from one of the images=20
-where the header is missing... Did not want to bother the list ;)
+This addresses http://tracker.newdream.net/issues/2174
 
->
->> If you demand some broken images=85 we have many of them to investig=
-ate,
->> unfortunately.
->
-> We'd really like to find the root cause of the problem. One=20
-> possibility is some bad interaction between osds running different=20
-> versions. This caused one issue with recovery stxShadow saw yesterday=
-,=20
-> for example (http://tracker.newdream.net/issues/2132). Had you been=20
-> doing rolling upgrades of osds before these problems appeared? If so,=
-=20
-> do you know which versions you had running concurrently?
->
-> Are your osds often restarting?
->
-> What we'd need to diagnose this are osd logs during recovery with:
->
-> debug osd =3D 20
-> debug ms =3D 1
->
-> Once you detect the problem, a log from each replica storing the pg=20
-> the bad/missing object is in should be enough.
->
-> And just to make sure, you aren't writing to these rbd images from=20
-> multiple places, right? This wouldn't cause the missing header=20
-> objects, but is likely to cause corruption of the image data. This=20
-> could happen, for example, by rolling an image back to a snapshot=20
-> while a vm is running on it.
+Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
+Reviewed-by: Alex Elder <elder@dreamhost.com>
+---
+  drivers/block/rbd.c |   20 ++++++++++----------
+  1 files changed, 10 insertions(+), 10 deletions(-)
 
-Currently we don't use snapshots. And of course ensure, a VM is running=
-=20
-once at a time ;-) And we had some "rolling upgrade", but this was=20
-_after_ trouble/crashes occured.
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index bc75d82..50117dd 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -82,7 +82,6 @@ struct rbd_image_header {
+  	__u8 obj_order;
+  	__u8 crypt_type;
+  	__u8 comp_type;
+-	struct rw_semaphore snap_rwsem;
+  	struct ceph_snap_context *snapc;
+  	size_t snap_names_len;
+  	u64 snap_seq;
+@@ -173,6 +172,8 @@ struct rbd_device {
+  	struct ceph_osd_event   *watch_event;
+  	struct ceph_osd_request *watch_request;
 
-Oliver.
++	/* protects updating the header */
++	struct rw_semaphore     header_rwsem;
+  	char                    snap_name[RBD_MAX_SNAP_NAME_LEN];
+  	u32 cur_snap;	/* index+1 of current snapshot within snap context
+  			   0 - for the head */
+@@ -502,7 +503,6 @@ static int rbd_header_from_disk(struct 
+rbd_image_header *header,
+  	if (!header->snapc)
+  		return -ENOMEM;
 
->
-> Josh
->
->> Maybe this sounds a bit harsh, after the 5th night-shift trying to=20
->> repair images
->> and keep customers calm, I think this is forgivable.
->>
->> Oliver.
->>
->> Am 14.03.2012 um 16:05 schrieb Oliver Francke:
->>
->>> Hey,
->>>
->>> anybody out there who could explain the structure of a rbd-header?=20
->>> After
->>> last crash we have about 10 images with a:
->>>    2012-03-14 15:22:47.998790 7f45a61e3760 librbd: Error reading
->>> header: 2 No such file or directory
->>> error opening image vm-266-disk-1.rbd: 2 No such file or directory
->>> ... error?
->>> I understand the "rb.x.y"-prefix, the 2 ^ 16hex as block-size. But
->>> the size/count encoding is not intuitive ;)
->>>
->>> Besides one file, where I "created" a header and putted it via "rad=
-os
->>> put" back into the pool, and got some files
->>> back, many of the other images with lost headers have different siz=
-es.
->>>
->>> We got bad luck again, too many crashed VM's, too much data-loss...
->>>
->>> Comments welcome ;)
->>>
->>> Oliver.
->>> --=20
->>> To unsubscribe from this list: send the line "unsubscribe=20
->>> ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> --=20
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+-	init_rwsem(&header->snap_rwsem);
+  	header->snap_names_len = le64_to_cpu(ondisk->snap_names_len);
+  	if (snap_count) {
+  		header->snap_names = kmalloc(header->snap_names_len,
+@@ -597,7 +597,7 @@ static int rbd_header_set_snap(struct rbd_device 
+*dev, u64 *size)
 
+  	BUILD_BUG_ON(sizeof (dev->snap_name) < sizeof (RBD_SNAP_HEAD_NAME));
 
---=20
+-	down_write(&header->snap_rwsem);
++	down_write(&dev->header_rwsem);
 
-Oliver Francke
+  	if (!memcmp(dev->snap_name, RBD_SNAP_HEAD_NAME,
+  		    sizeof (RBD_SNAP_HEAD_NAME))) {
+@@ -620,7 +620,7 @@ static int rbd_header_set_snap(struct rbd_device 
+*dev, u64 *size)
 
-filoo GmbH
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-HRB4355 AG G=FCtersloh
+  	ret = 0;
+  done:
+-	up_write(&header->snap_rwsem);
++	up_write(&dev->header_rwsem);
+  	return ret;
+  }
 
-Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
+@@ -887,7 +887,6 @@ static int rbd_do_request(struct request *rq,
+  	struct timespec mtime = CURRENT_TIME;
+  	struct rbd_request *req_data;
+  	struct ceph_osd_request_head *reqhead;
+-	struct rbd_image_header *header = &dev->header;
+  	struct ceph_osd_client *osdc;
 
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
+  	req_data = kzalloc(sizeof(*req_data), GFP_NOIO);
+@@ -905,13 +904,13 @@ static int rbd_do_request(struct request *rq,
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  	dout("rbd_do_request obj=%s ofs=%lld len=%lld\n", obj, len, ofs);
+
+-	down_read(&header->snap_rwsem);
++	down_read(&dev->header_rwsem);
+
+  	osdc = &dev->rbd_client->client->osdc;
+  	req = ceph_osdc_alloc_request(osdc, flags, snapc, ops,
+  					false, GFP_NOIO, pages, bio);
+  	if (!req) {
+-		up_read(&header->snap_rwsem);
++		up_read(&dev->header_rwsem);
+  		ret = -ENOMEM;
+  		goto done_pages;
+  	}
+@@ -946,7 +945,7 @@ static int rbd_do_request(struct request *rq,
+  				snapc,
+  				&mtime,
+  				req->r_oid, req->r_oid_len);
+-	up_read(&header->snap_rwsem);
++	up_read(&dev->header_rwsem);
+
+  	if (linger_req) {
+  		ceph_osdc_set_request_linger(osdc, req);
+@@ -1718,7 +1717,7 @@ static int __rbd_update_snaps(struct rbd_device 
+*rbd_dev)
+  	/* resized? */
+  	set_capacity(rbd_dev->disk, h.image_size / SECTOR_SIZE);
+
+-	down_write(&rbd_dev->header.snap_rwsem);
++	down_write(&rbd_dev->header_rwsem);
+
+  	snap_seq = rbd_dev->header.snapc->seq;
+  	if (rbd_dev->header.total_snaps &&
+@@ -1743,7 +1742,7 @@ static int __rbd_update_snaps(struct rbd_device 
+*rbd_dev)
+
+  	ret = __rbd_init_snaps_header(rbd_dev);
+
+-	up_write(&rbd_dev->header.snap_rwsem);
++	up_write(&rbd_dev->header_rwsem);
+
+  	return ret;
+  }
+@@ -2380,6 +2379,7 @@ static ssize_t rbd_add(struct bus_type *bus,
+  	spin_lock_init(&rbd_dev->lock);
+  	INIT_LIST_HEAD(&rbd_dev->node);
+  	INIT_LIST_HEAD(&rbd_dev->snaps);
++	init_rwsem(&rbd_dev->header_rwsem);
+
+  	/* generate unique id: find highest unique id, add one */
+  	rbd_id_get(rbd_dev);
+-- 
+1.7.5.4
+
