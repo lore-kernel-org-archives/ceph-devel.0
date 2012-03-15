@@ -1,150 +1,51 @@
-From: Alex Elder <elder@dreamhost.com>
-Subject: [PATCH] rbd: move snap_rwsem to the device, rename to header_rwsem
-Date: Thu, 15 Mar 2012 10:14:10 -0500
-Message-ID: <4F620742.60107@dreamhost.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: timed out in osd1 error in dmes
+Date: Thu, 15 Mar 2012 08:47:06 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1203150846180.21671@cobra.newdream.net>
+References: <loom.20120313T083325-276@post.gmane.org> <4F5FACD8.8090902@dreamhost.com>
+ <loom.20120314T051739-894@post.gmane.org> <Pine.LNX.4.64.1203141057030.11925@cobra.newdream.net>
+ <loom.20120315T084452-832@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:51311 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755536Ab2COPOE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Mar 2012 11:14:04 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 251B5243BD
-	for <ceph-devel@vger.kernel.org>; Thu, 15 Mar 2012 08:14:49 -0700 (PDT)
-Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net [71.195.31.37])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id EAA17243BC
-	for <ceph-devel@vger.kernel.org>; Thu, 15 Mar 2012 08:14:48 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:51534 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031252Ab2COPrH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Mar 2012 11:47:07 -0400
+In-Reply-To: <loom.20120315T084452-832@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: madhusudhana <madhusudhana.u.acharya@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-(Re-posting Josh's prescient patch--it fixes a newly identified issue.)
+> > These are harmless noise, BTW, you can ignore them.
+> > 
+> > Can you tell us how your OSDs are configured?  Where are the data 
+> > directories and journals located?  (The [osd] section of ceph.conf would 
+> > be helpful.)
 
-A new temporary header is allocated each time the header changes, but
-only the changed properties are copied over. We don't need a new
-semaphore for each header update.
+Can you share your ceph.conf please?
 
-This addresses http://tracker.newdream.net/issues/2174
+> > Another useful piece of information would be the ceph-osd's raw 
+> > performance writing to the local disk+journal, which you can get with
+> > 
+> >  $ ceph tell osd.0 bench
+> > 
+> > You might want to check it for several nodes to see if it's consistent, 
+> > etc.
+> > 
+> Below are the results from above command run against all osd's
+> 
+> 
+> 2012-03-15 13:06:19.980924 osd.0 -> 'bench: wrote 1024 MB in blocks of 
+> 4096 KB in 67.474949 sec at 15540 KB/sec' (0)
+> 2012-03-15 13:09:20.573176 osd.1 -> 'bench: wrote 1024 MB in blocks of 
+> 4096 KB in 70.815932 sec at 14807 KB/sec' (0)
+> 2012-03-15 13:11:57.895738 osd.2 -> 'bench: wrote 1024 MB in blocks of 
+> 4096 KB in 60.370233 sec at 17369 KB/sec' (0)
 
-Signed-off-by: Josh Durgin <josh.durgin@dreamhost.com>
-Reviewed-by: Alex Elder <elder@dreamhost.com>
----
-  drivers/block/rbd.c |   20 ++++++++++----------
-  1 files changed, 10 insertions(+), 10 deletions(-)
+This is pretty slow, and probably due to the way your osd journals are 
+configured.  Please share your ceph.conf!
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index bc75d82..50117dd 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -82,7 +82,6 @@ struct rbd_image_header {
-  	__u8 obj_order;
-  	__u8 crypt_type;
-  	__u8 comp_type;
--	struct rw_semaphore snap_rwsem;
-  	struct ceph_snap_context *snapc;
-  	size_t snap_names_len;
-  	u64 snap_seq;
-@@ -173,6 +172,8 @@ struct rbd_device {
-  	struct ceph_osd_event   *watch_event;
-  	struct ceph_osd_request *watch_request;
-
-+	/* protects updating the header */
-+	struct rw_semaphore     header_rwsem;
-  	char                    snap_name[RBD_MAX_SNAP_NAME_LEN];
-  	u32 cur_snap;	/* index+1 of current snapshot within snap context
-  			   0 - for the head */
-@@ -502,7 +503,6 @@ static int rbd_header_from_disk(struct 
-rbd_image_header *header,
-  	if (!header->snapc)
-  		return -ENOMEM;
-
--	init_rwsem(&header->snap_rwsem);
-  	header->snap_names_len = le64_to_cpu(ondisk->snap_names_len);
-  	if (snap_count) {
-  		header->snap_names = kmalloc(header->snap_names_len,
-@@ -597,7 +597,7 @@ static int rbd_header_set_snap(struct rbd_device 
-*dev, u64 *size)
-
-  	BUILD_BUG_ON(sizeof (dev->snap_name) < sizeof (RBD_SNAP_HEAD_NAME));
-
--	down_write(&header->snap_rwsem);
-+	down_write(&dev->header_rwsem);
-
-  	if (!memcmp(dev->snap_name, RBD_SNAP_HEAD_NAME,
-  		    sizeof (RBD_SNAP_HEAD_NAME))) {
-@@ -620,7 +620,7 @@ static int rbd_header_set_snap(struct rbd_device 
-*dev, u64 *size)
-
-  	ret = 0;
-  done:
--	up_write(&header->snap_rwsem);
-+	up_write(&dev->header_rwsem);
-  	return ret;
-  }
-
-@@ -887,7 +887,6 @@ static int rbd_do_request(struct request *rq,
-  	struct timespec mtime = CURRENT_TIME;
-  	struct rbd_request *req_data;
-  	struct ceph_osd_request_head *reqhead;
--	struct rbd_image_header *header = &dev->header;
-  	struct ceph_osd_client *osdc;
-
-  	req_data = kzalloc(sizeof(*req_data), GFP_NOIO);
-@@ -905,13 +904,13 @@ static int rbd_do_request(struct request *rq,
-
-  	dout("rbd_do_request obj=%s ofs=%lld len=%lld\n", obj, len, ofs);
-
--	down_read(&header->snap_rwsem);
-+	down_read(&dev->header_rwsem);
-
-  	osdc = &dev->rbd_client->client->osdc;
-  	req = ceph_osdc_alloc_request(osdc, flags, snapc, ops,
-  					false, GFP_NOIO, pages, bio);
-  	if (!req) {
--		up_read(&header->snap_rwsem);
-+		up_read(&dev->header_rwsem);
-  		ret = -ENOMEM;
-  		goto done_pages;
-  	}
-@@ -946,7 +945,7 @@ static int rbd_do_request(struct request *rq,
-  				snapc,
-  				&mtime,
-  				req->r_oid, req->r_oid_len);
--	up_read(&header->snap_rwsem);
-+	up_read(&dev->header_rwsem);
-
-  	if (linger_req) {
-  		ceph_osdc_set_request_linger(osdc, req);
-@@ -1718,7 +1717,7 @@ static int __rbd_update_snaps(struct rbd_device 
-*rbd_dev)
-  	/* resized? */
-  	set_capacity(rbd_dev->disk, h.image_size / SECTOR_SIZE);
-
--	down_write(&rbd_dev->header.snap_rwsem);
-+	down_write(&rbd_dev->header_rwsem);
-
-  	snap_seq = rbd_dev->header.snapc->seq;
-  	if (rbd_dev->header.total_snaps &&
-@@ -1743,7 +1742,7 @@ static int __rbd_update_snaps(struct rbd_device 
-*rbd_dev)
-
-  	ret = __rbd_init_snaps_header(rbd_dev);
-
--	up_write(&rbd_dev->header.snap_rwsem);
-+	up_write(&rbd_dev->header_rwsem);
-
-  	return ret;
-  }
-@@ -2380,6 +2379,7 @@ static ssize_t rbd_add(struct bus_type *bus,
-  	spin_lock_init(&rbd_dev->lock);
-  	INIT_LIST_HEAD(&rbd_dev->node);
-  	INIT_LIST_HEAD(&rbd_dev->snaps);
-+	init_rwsem(&rbd_dev->header_rwsem);
-
-  	/* generate unique id: find highest unique id, add one */
-  	rbd_id_get(rbd_dev);
--- 
-1.7.5.4
-
+Thanks-
+sage
