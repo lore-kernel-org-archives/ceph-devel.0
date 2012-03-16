@@ -1,70 +1,258 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: [PATCH -v2] Generic libcephfs Java bindings
-Date: Thu, 15 Mar 2012 14:49:25 -0700
-Message-ID: <8FB333053FF344758B28D74716543012@dreamhost.com>
-References: <575E1B43-986C-4165-AF8E-B6C256263498@cs.ucsc.edu>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH 3/5] ceph: make use of ceph file layout helpers
+Date: Thu, 15 Mar 2012 22:59:24 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1203152257080.13626@cobra.newdream.net>
+References: <4F5E7DA5.4040802@dreamhost.com> <4F5E7F6C.1040904@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:63945 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932448Ab2COVt3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Mar 2012 17:49:29 -0400
-Received: by yenl12 with SMTP id l12so3569681yen.19
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Mar 2012 14:49:29 -0700 (PDT)
-In-Reply-To: <575E1B43-986C-4165-AF8E-B6C256263498@cs.ucsc.edu>
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:41606 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752517Ab2CPF7Z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Mar 2012 01:59:25 -0400
+In-Reply-To: <4F5E7F6C.1040904@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@newdream.net>, Joe Buck <buck@soe.ucsc.edu>
+To: Alex Elder <elder@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wednesday, March 14, 2012 at 11:21 PM, Noah Watkins wrote:
-> This is version 2 of the generic libcephfs Java bindings based on feedback from the original patch set (thanks!). The short-log at the bottom of the e-mail shows the commits made based on feedback, but the Git branch below has them all rebased into fewer patches for a clean history.
+On Mon, 12 Mar 2012, Alex Elder wrote:
+> There are helpers defined in "include/linux/ceph/osdmap.h" for
+> accessing the fields of an on-disk ceph file layout structure.
+> Use them--consistently--throughout the code.
 > 
-> Thanks,
-> - Noah
+> Also define CEPH_FILE_LAYOUT_PG_PREFERRED_NONE, to represent
+> symbolically the explicit "no preferred PG" value.
 > 
-> Consolidated patch set is available in the git repository at:
+> Make a few casts explicit too (to make it more obvious it's
+> occuring).  This produces some long lines, but they go away in an
+> upcoming patch.
 > 
-> git://github.com/noahdesu/ceph (http://github.com/noahdesu/ceph) wip/java-cephfs
+> Signed-off-by: Alex Elder <elder@dreamhost.com>
+> ---
+>  drivers/block/rbd.c          |    2 +-
+>  fs/ceph/ioctl.c              |   24 ++++++++++++------------
+>  fs/ceph/xattr.c              |    5 +++--
+>  include/linux/ceph/ceph_fs.h |    3 ++-
+>  net/ceph/ceph_fs.c           |    6 +++---
+>  net/ceph/osdmap.c            |   25 +++++++++++++------------
+>  6 files changed, 34 insertions(+), 31 deletions(-)
 > 
-> Noah Watkins (3):
-> java: add Java and C++ source files
-> automake: setup autotools to build cephfs-java
-> debian: add libcephfs-java package
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 6bbd5af..e9521ed 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -936,7 +936,7 @@ static int rbd_do_request(struct request *rq,
+>  	layout->fl_stripe_unit = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
+>  	layout->fl_stripe_count = cpu_to_le32(1);
+>  	layout->fl_object_size = cpu_to_le32(1 << RBD_MAX_OBJ_ORDER);
+> -	layout->fl_pg_preferred = cpu_to_le32(-1);
+> +	layout->fl_pg_preferred = CEPH_FILE_LAYOUT_PG_PREFERRED_NONE;
+>  	layout->fl_pg_pool = cpu_to_le32(dev->poolid);
+>  	ceph_calc_raw_layout(osdc, layout, snapid, ofs, &len, &bno,
+>  				req, ops);
+> diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
+> index 23cb78b..75cff03 100644
+> --- a/fs/ceph/ioctl.c
+> +++ b/fs/ceph/ioctl.c
+> @@ -22,12 +22,12 @@ static long ceph_ioctl_get_layout(struct file *file, void
+> __user *arg)
 > 
-> Sage Weil (2):
-> do_autogen.sh (http://do_autogen.sh): add -j flag to enable java stuff
-> Makefile: add src/include to #include path for libcephfs_jni_la
+>  	err = ceph_do_getattr(file->f_dentry->d_inode, CEPH_STAT_CAP_LAYOUT);
+>  	if (!err) {
+> -		l.stripe_unit = ceph_file_layout_stripe_unit(&ci->i_layout);
+> -		l.stripe_count = ceph_file_layout_stripe_count(&ci->i_layout);
+> -		l.object_size = ceph_file_layout_object_size(&ci->i_layout);
+> -		l.data_pool = le32_to_cpu(ci->i_layout.fl_pg_pool);
+> +		l.stripe_unit = (__u64)
+> ceph_file_layout_stripe_unit(&ci->i_layout);
+> +		l.stripe_count = (__u64)
+> ceph_file_layout_stripe_count(&ci->i_layout);
+> +		l.object_size = (__u64)
+> ceph_file_layout_object_size(&ci->i_layout);
+> +		l.data_pool = (__u64) ceph_file_layout_pg_pool(&ci->i_layout);
+>  		l.preferred_osd =
+> -			(s32)le32_to_cpu(ci->i_layout.fl_pg_preferred);
+> +			(__s64) ceph_file_layout_pg_preferred(&ci->i_layout);
+>  		if (copy_to_user(arg, &l, sizeof(l)))
+>  			return -EFAULT;
+>  	}
+> @@ -52,12 +52,12 @@ static long ceph_ioctl_set_layout(struct file *file, void
+> __user *arg)
+>  	/* validate changed params against current layout */
+>  	err = ceph_do_getattr(file->f_dentry->d_inode, CEPH_STAT_CAP_LAYOUT);
+>  	if (!err) {
+> -		nl.stripe_unit = ceph_file_layout_stripe_unit(&ci->i_layout);
+> -		nl.stripe_count =
+> ceph_file_layout_stripe_count(&ci->i_layout);
+> -		nl.object_size = ceph_file_layout_object_size(&ci->i_layout);
+> -		nl.data_pool = le32_to_cpu(ci->i_layout.fl_pg_pool);
+> +		nl.stripe_unit = (__u64)
+> ceph_file_layout_stripe_unit(&ci->i_layout);
+> +		nl.stripe_count = (__u64)
+> ceph_file_layout_stripe_count(&ci->i_layout);
+> +		nl.object_size = (__u64)
+> ceph_file_layout_object_size(&ci->i_layout);
+> +		nl.data_pool = (__u64)
+> ceph_file_layout_pg_pool(&ci->i_layout);
+>  		nl.preferred_osd =
+> -
+> (s32)le32_to_cpu(ci->i_layout.fl_pg_preferred);
+> +				(__s64)
+> ceph_file_layout_pg_preferred(&ci->i_layout);
+>  	} else
+>  		return err;
 > 
-> ============================================================
-> Original change log based on feedback
-> ============================================================
+> @@ -203,8 +203,8 @@ static long ceph_ioctl_get_dataloc(struct file *file, void
+> __user *arg)
+>  	ceph_calc_file_object_mapping(&ci->i_layout, dl.file_offset, &len,
+>  				      &dl.object_no, &dl.object_offset,
+> &olen);
+>  	dl.file_offset -= dl.object_offset;
+> -	dl.object_size = ceph_file_layout_object_size(&ci->i_layout);
+> -	dl.block_size = ceph_file_layout_stripe_unit(&ci->i_layout);
+> +	dl.object_size = (__u64) ceph_file_layout_object_size(&ci->i_layout);
+> +	dl.block_size = (__u64) ceph_file_layout_stripe_unit(&ci->i_layout);
 > 
-> Noah Watkins (12):
-> java: add Java and C++ source files
-> java: setup autotools to build cephfs-java
-> debian: add libcephfs-java package
-> java: add MIT license
-> java: document valid states in JavaDoc
-> java: order methods according to libcephfs.h
-> java: fix typo; update testing notes
-> java: remove redundant mount() interface
-> java: use protected getdnames(int bufSize)
+>  	/* block_offset = object_offset % block_size */
+>  	tmp = dl.object_offset;
+> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+> index 75960b1..bfd5b93 100644
+> --- a/fs/ceph/xattr.c
+> +++ b/fs/ceph/xattr.c
+> @@ -115,11 +115,12 @@ static size_t ceph_vxattrcb_file_layout(struct
+> ceph_inode_info *ci, char *val,
+> 
+>  	ret = snprintf(val, size,
+>  		"chunk_bytes=%lld\nstripe_count=%lld\nobject_size=%lld\n",
+> -		(unsigned long long)ceph_file_layout_su(&ci->i_layout),
+> +		(unsigned long
+> long)ceph_file_layout_stripe_unit(&ci->i_layout),
+>  		(unsigned long
+> long)ceph_file_layout_stripe_count(&ci->i_layout),
+>  		(unsigned long
+> long)ceph_file_layout_object_size(&ci->i_layout));
+> 
+> -	if (ceph_file_layout_pg_preferred(&ci->i_layout) >= 0) {
+> +	if (ceph_file_layout_pg_preferred(&ci->i_layout) !=
+> +			CEPH_FILE_LAYOUT_PG_PREFERRED_NONE) {
 
-But you left it public in CephMount?
- 
-> java: switch classpath to com.ceph.fs
-> java: remove unused macro
-> java: document CPP macro-foo
+The function returns cpu order, #define is little endian
 
-Looks like a couple of my line notes are still left. Am I just confused in my opinions? :(
-There's no note that set_default_file_replication is a no-op in its documentation.
-closedir does not explain what happens to the CephDirectory state under success and failure. Honestly I don't even know what you're supposed to do with it if it fails, and why the code resets it to PREPARING instead of a CLOSED state is unclear to me. :)
+>  		val += ret;
+>  		size -= ret;
+>  		ret += snprintf(val, size, "preferred_osd=%lld\n",
+> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+> index 2645704..cf86032 100644
+> --- a/include/linux/ceph/ceph_fs.h
+> +++ b/include/linux/ceph/ceph_fs.h
+> @@ -73,7 +73,8 @@ struct ceph_file_layout {
+>   * file layout helpers
+>   */
+> 
+> -#define CEPH_MIN_STRIPE_UNIT 65536
+> +#define CEPH_MIN_STRIPE_UNIT			65536
+> +#define CEPH_FILE_LAYOUT_PG_PREFERRED_NONE	((__s32) cpu_to_le32(-1))
+>  #define ceph_file_layout_stripe_unit(l) \
+>  		((__s32) le32_to_cpu((l)->fl_stripe_unit))
+>  #define ceph_file_layout_stripe_count(l) \
+> diff --git a/net/ceph/ceph_fs.c b/net/ceph/ceph_fs.c
+> index 41466cc..c3197b9 100644
+> --- a/net/ceph/ceph_fs.c
+> +++ b/net/ceph/ceph_fs.c
+> @@ -9,9 +9,9 @@
+>   */
+>  int ceph_file_layout_is_valid(const struct ceph_file_layout *layout)
+>  {
+> -	__u32 su = le32_to_cpu(layout->fl_stripe_unit);
+> -	__u32 sc = le32_to_cpu(layout->fl_stripe_count);
+> -	__u32 os = le32_to_cpu(layout->fl_object_size);
+> +	__u32 su = (__u32) ceph_file_layout_stripe_unit(layout);
+> +	__u32 sc = (__u32) ceph_file_layout_stripe_count(layout);
+> +	__u32 os = (__u32) ceph_file_layout_object_size(layout);
+> 
+>  	/* stripe unit, object size must be non-zero, 64k increment */
+>  	if (!su || (su & (CEPH_MIN_STRIPE_UNIT-1)))
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index 29ad46e..f5f6e41 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -945,9 +945,9 @@ void ceph_calc_file_object_mapping(struct ceph_file_layout
+> *layout,
+>  				   u64 *ono,
+>  				   u64 *oxoff, u64 *oxlen)
+>  {
+> -	u32 osize = le32_to_cpu(layout->fl_object_size);
+> -	u32 su = le32_to_cpu(layout->fl_stripe_unit);
+> -	u32 sc = le32_to_cpu(layout->fl_stripe_count);
+> +	u32 osize = (u32) ceph_file_layout_object_size(layout);
+> +	u32 su = (u32) ceph_file_layout_stripe_unit(layout);
+> +	u32 sc = (u32) ceph_file_layout_stripe_count(layout);
+>  	u32 bl, stripeno, stripepos, objsetno;
+>  	u32 su_per_object;
+>  	u64 t, su_offset;
+> @@ -1000,8 +1000,8 @@ int ceph_calc_object_layout(struct ceph_object_layout
+> *ol,
+>  {
+>  	unsigned num, num_mask;
+>  	struct ceph_pg pgid;
+> -	s32 preferred = (s32)le32_to_cpu(fl->fl_pg_preferred);
+> -	int poolid = le32_to_cpu(fl->fl_pg_pool);
+> +	s32 preferred = (s32) ceph_file_layout_pg_preferred(fl);
+> +	int poolid = (int) ceph_file_layout_pg_pool(fl);
+>  	struct ceph_pg_pool_info *pool;
+>  	unsigned ps;
+> 
+> @@ -1011,23 +1011,24 @@ int ceph_calc_object_layout(struct ceph_object_layout
+> *ol,
+>  	if (!pool)
+>  		return -EIO;
+>  	ps = ceph_str_hash(pool->v.object_hash, oid, strlen(oid));
+> -	if (preferred >= 0) {
+> +
+> +	if (preferred == CEPH_FILE_LAYOUT_PG_PREFERRED_NONE) {
 
-If possible for my reviewing sanity, it'd be nice if I could access the changes you've made to things instead of trying to figure out how to run diffs against changing filenames and stuff, too, but that's just a wish.
-Thanks for your work!
--Greg
+Here, too.  I'd just stick with >= ...
 
+> +		num = le32_to_cpu(pool->v.pg_num);
+> +		num_mask = pool->pg_num_mask;
+> +	} else {
+>  		ps += preferred;
+>  		num = le32_to_cpu(pool->v.lpg_num);
+>  		num_mask = pool->lpg_num_mask;
+> -	} else {
+> -		num = le32_to_cpu(pool->v.pg_num);
+> -		num_mask = pool->pg_num_mask;
+>  	}
+> 
+>  	pgid.ps = cpu_to_le16(ps);
+>  	pgid.preferred = cpu_to_le16(preferred);
+>  	pgid.pool = fl->fl_pg_pool;
+> -	if (preferred >= 0)
+> +	if (preferred == CEPH_FILE_LAYOUT_PG_PREFERRED_NONE)
+
+and here.
+
+BTW, Yehuda was periodically running the kernel code through sparse, which 
+picks up all the endianness stuff.  That would be a worthy exercise to 
+document and do from time to time.
+
+> +		dout("calc_object_layout '%s' pgid %d.%x\n", oid, poolid, ps);
+> +	else
+>  		dout("calc_object_layout '%s' pgid %d.%xp%d\n", oid, poolid,
+> ps,
+>  		     (int)preferred);
+> -	else
+> -		dout("calc_object_layout '%s' pgid %d.%x\n", oid, poolid, ps);
+> 
+>  	ol->ol_pgid = pgid;
+>  	ol->ol_stripe_unit = fl->fl_object_stripe_unit;
+> -- 
+> 1.7.5.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
