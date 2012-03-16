@@ -1,55 +1,49 @@
-From: Andrey Stepachev <octo47@gmail.com>
+From: Greg Farnum <gregory.farnum@dreamhost.com>
 Subject: Re: Hadoop on ceph
-Date: Sat, 17 Mar 2012 01:24:32 +0400
-Message-ID: <CAADCt4LBvF-oKpWRx9WO1zFnCqPRr_8EPmnv-qZqWY4jLq0-AQ@mail.gmail.com>
-References: <4F623EB9.1000901@genome.wustl.edu> <CAADCt4+npvtAYqshMKxtNedF+_UQrQPMS3VvG8Bd-Ughkhoqfg@mail.gmail.com>
- <Pine.LNX.4.64.1203160832570.31380@cobra.newdream.net> <DB33BD3B-B4FB-492F-B099-BECF0ED6764A@cs.ucsc.edu>
+Date: Fri, 16 Mar 2012 14:35:34 -0700
+Message-ID: <F0C7EFD2944442DFBB761475E0133398@dreamhost.com>
+References: <4F623EB9.1000901@genome.wustl.edu>
+ <CAADCt4+npvtAYqshMKxtNedF+_UQrQPMS3VvG8Bd-Ughkhoqfg@mail.gmail.com>
+ <Pine.LNX.4.64.1203160832570.31380@cobra.newdream.net>
+ <DB33BD3B-B4FB-492F-B099-BECF0ED6764A@cs.ucsc.edu>
+ <CAADCt4LBvF-oKpWRx9WO1zFnCqPRr_8EPmnv-qZqWY4jLq0-AQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:55043 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753878Ab2CPVYy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Mar 2012 17:24:54 -0400
-Received: by wibhq7 with SMTP id hq7so1449364wib.1
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Mar 2012 14:24:53 -0700 (PDT)
-In-Reply-To: <DB33BD3B-B4FB-492F-B099-BECF0ED6764A@cs.ucsc.edu>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:63821 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161134Ab2CPVfi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Mar 2012 17:35:38 -0400
+Received: by obbuo6 with SMTP id uo6so273178obb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Mar 2012 14:35:37 -0700 (PDT)
+In-Reply-To: <CAADCt4LBvF-oKpWRx9WO1zFnCqPRr_8EPmnv-qZqWY4jLq0-AQ@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: Sage Weil <sage@newdream.net>, Matt Weil <mweil@genome.wustl.edu>, ceph-devel@vger.kernel.org
+To: Andrey Stepachev <octo47@gmail.com>
+Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, Sage Weil <sage@newdream.net>, Matt Weil <mweil@genome.wustl.edu>, ceph-devel@vger.kernel.org
 
-2012/3/16 Noah Watkins <jayhawk@cs.ucsc.edu>:
->
-> On Mar 16, 2012, at 8:37 AM, Sage Weil wrote:
->
->> Hi Andrey,
->>
->> On Fri, 16 Mar 2012, Andrey Stepachev wrote:
->>
->> possible). =C2=A0I take it TestDSFIO is a standard hadoop benchmark?
->
-> Yes, this is. There are a number of benchmarks that ship with Hadoop.=
- Although this is untested, one reason you might be seeing throughput i=
-ssues is with the standard read/write interface that copies bytes acros=
-s the JNI interface. On the short list of stuff for the next Java wrapp=
-er set is to use the ByteBuffer interface (NIO) to avoid this copying.
-
-I'm not sure, that problem on java side. All disks loaded at 100%, so
-I think, that problem clearly on osd part. But i want to test your new
-integration and see, if something changes. You maybe right, but I'm not=
-=2E
-
->
-> - Noah
+On Friday, March 16, 2012 at 2:24 PM, Andrey Stepachev wrote:
+> 2012/3/16 Noah Watkins <jayhawk@cs.ucsc.edu (mailto:jayhawk@cs.ucsc.edu)>:
+> > 
+> > On Mar 16, 2012, at 8:37 AM, Sage Weil wrote:
+> > 
+> > > Hi Andrey,
+> > > 
+> > > On Fri, 16 Mar 2012, Andrey Stepachev wrote:
+> > > 
+> > > possible). I take it TestDSFIO is a standard hadoop benchmark?
+> > 
+> > Yes, this is. There are a number of benchmarks that ship with Hadoop. Although this is untested, one reason you might be seeing throughput issues is with the standard read/write interface that copies bytes across the JNI interface. On the short list of stuff for the next Java wrapper set is to use the ByteBuffer interface (NIO) to avoid this copying.
+> 
+> I'm not sure, that problem on java side. All disks loaded at 100%, so
+> I think, that problem clearly on osd part. But i want to test your new
+> integration and see, if something changes. You maybe right, but I'm not.
 
 
+Those are some awfully slow disks. I don't know exactly what this test measures, but if you're write-constrained on the HDFS side then Ceph will definitely be slower due to little things like the journaling that it does. And that is a data safety issue where Ceph is paying much higher costs than HDFS does.
+But it doesn't mean that Ceph is necessarily slower on good hardware. :)
+-Greg
 
---=20
-Andrey.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
