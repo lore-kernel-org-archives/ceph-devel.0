@@ -1,49 +1,49 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Hadoop on ceph
-Date: Fri, 16 Mar 2012 14:35:34 -0700
-Message-ID: <F0C7EFD2944442DFBB761475E0133398@dreamhost.com>
-References: <4F623EB9.1000901@genome.wustl.edu>
- <CAADCt4+npvtAYqshMKxtNedF+_UQrQPMS3VvG8Bd-Ughkhoqfg@mail.gmail.com>
- <Pine.LNX.4.64.1203160832570.31380@cobra.newdream.net>
- <DB33BD3B-B4FB-492F-B099-BECF0ED6764A@cs.ucsc.edu>
- <CAADCt4LBvF-oKpWRx9WO1zFnCqPRr_8EPmnv-qZqWY4jLq0-AQ@mail.gmail.com>
+From: Chu Duc Minh <chu.ducminh@gmail.com>
+Subject: Re: Create/Quota/Mount pool
+Date: Sat, 17 Mar 2012 12:55:58 +0700
+Message-ID: <4F64276E.5090407@gmail.com>
+References: <4F6327FB.4070104@gmail.com> <Pine.LNX.4.64.1203160830320.31380@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:63821 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161134Ab2CPVfi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Mar 2012 17:35:38 -0400
-Received: by obbuo6 with SMTP id uo6so273178obb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Mar 2012 14:35:37 -0700 (PDT)
-In-Reply-To: <CAADCt4LBvF-oKpWRx9WO1zFnCqPRr_8EPmnv-qZqWY4jLq0-AQ@mail.gmail.com>
-Content-Disposition: inline
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:50164 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752143Ab2CQF4H (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Mar 2012 01:56:07 -0400
+Received: by dajr28 with SMTP id r28so7148348daj.19
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Mar 2012 22:56:06 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1203160830320.31380@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andrey Stepachev <octo47@gmail.com>
-Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, Sage Weil <sage@newdream.net>, Matt Weil <mweil@genome.wustl.edu>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-On Friday, March 16, 2012 at 2:24 PM, Andrey Stepachev wrote:
-> 2012/3/16 Noah Watkins <jayhawk@cs.ucsc.edu (mailto:jayhawk@cs.ucsc.edu)>:
-> > 
-> > On Mar 16, 2012, at 8:37 AM, Sage Weil wrote:
-> > 
-> > > Hi Andrey,
-> > > 
-> > > On Fri, 16 Mar 2012, Andrey Stepachev wrote:
-> > > 
-> > > possible). I take it TestDSFIO is a standard hadoop benchmark?
-> > 
-> > Yes, this is. There are a number of benchmarks that ship with Hadoop. Although this is untested, one reason you might be seeing throughput issues is with the standard read/write interface that copies bytes across the JNI interface. On the short list of stuff for the next Java wrapper set is to use the ByteBuffer interface (NIO) to avoid this copying.
-> 
-> I'm not sure, that problem on java side. All disks loaded at 100%, so
-> I think, that problem clearly on osd part. But i want to test your new
-> integration and see, if something changes. You maybe right, but I'm not.
+On 03/16/2012 10:32 PM, Sage Weil wrote:
+> On Fri, 16 Mar 2012, Chu Duc Minh wrote:
+>> Hi, i'm searching a way to create more data(s) pool and quota for each pool.
+>> Do you know how to select pool to mount when using ceph client. (i'm using
+>> kernel 3.0.x)
+> You can create pools with
+>
+>   ceph osd pool create<poolname>
+>
+> make them usable by the fs with
+>
+>   ceph mds add_data_pool<poolname>
+>
+> and then set a subdirectory to use that pool for new files with cephfs
+> (man cephfs).
+>
+> If you run into problems, let us know; this isn't well documented yet!
+>
+> sage
+Hi, how can I know the ID of new <poolname>, because it's needed for 
+cephfs command? Or i must use numeric <poolname>?
+I'm using Cephx for auth, how can i set permission for a individual 
+client only can mount & see a specify subdirectory/pool?
+I succeeded when using numeric poolname but fail on "ceph auth add ..." 
+and mount.
+(I tried many options for ceph auth add ... - but still does not success)
 
-
-Those are some awfully slow disks. I don't know exactly what this test measures, but if you're write-constrained on the HDFS side then Ceph will definitely be slower due to little things like the journaling that it does. And that is a data safety issue where Ceph is paying much higher costs than HDFS does.
-But it doesn't mean that Ceph is necessarily slower on good hardware. :)
--Greg
-
-
+Thank you very much!
