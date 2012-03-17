@@ -1,42 +1,68 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Mysteriously poor write performance
-Date: Sat, 17 Mar 2012 14:35:49 +0300
-Message-ID: <CABYiri-C1ftxsM3dWqtcRzXBYoddRbHug=TA6j+0EY-cuMt3Mw@mail.gmail.com>
+From: Andrey Stepachev <octo47@gmail.com>
+Subject: Re: Hadoop on ceph
+Date: Sat, 17 Mar 2012 21:50:29 +0400
+Message-ID: <CAADCt4LfqtZ4_70TtBnwsXE+2WMBae1TLFXM86mzRFqx2zN9PQ@mail.gmail.com>
+References: <4F623EB9.1000901@genome.wustl.edu> <CAADCt4+npvtAYqshMKxtNedF+_UQrQPMS3VvG8Bd-Ughkhoqfg@mail.gmail.com>
+ <Pine.LNX.4.64.1203160832570.31380@cobra.newdream.net> <DB33BD3B-B4FB-492F-B099-BECF0ED6764A@cs.ucsc.edu>
+ <CAADCt4LBvF-oKpWRx9WO1zFnCqPRr_8EPmnv-qZqWY4jLq0-AQ@mail.gmail.com> <F0C7EFD2944442DFBB761475E0133398@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:52892 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756267Ab2CQLgL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Mar 2012 07:36:11 -0400
-Received: by wibhq7 with SMTP id hq7so1956908wib.1
-        for <ceph-devel@vger.kernel.org>; Sat, 17 Mar 2012 04:36:09 -0700 (PDT)
+Received: from mail-we0-f174.google.com ([74.125.82.174]:35259 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757081Ab2CQRuu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Mar 2012 13:50:50 -0400
+Received: by wejx9 with SMTP id x9so4800316wej.19
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Mar 2012 10:50:49 -0700 (PDT)
+In-Reply-To: <F0C7EFD2944442DFBB761475E0133398@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Greg Farnum <gregory.farnum@dreamhost.com>
+Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, Sage Weil <sage@newdream.net>, Matt Weil <mweil@genome.wustl.edu>, ceph-devel@vger.kernel.org
 
-Hi,
+2012/3/17 Greg Farnum <gregory.farnum@dreamhost.com>:
+> On Friday, March 16, 2012 at 2:24 PM, Andrey Stepachev wrote:
+>> 2012/3/16 Noah Watkins <jayhawk@cs.ucsc.edu (mailto:jayhawk@cs.ucsc.edu)>:
+>> >
+>> > On Mar 16, 2012, at 8:37 AM, Sage Weil wrote:
+>> >
+>> > > Hi Andrey,
+>> > >
+>> > > On Fri, 16 Mar 2012, Andrey Stepachev wrote:
+>> > >
+>> > > possible). I take it TestDSFIO is a standard hadoop benchmark?
+>> >
+>> > Yes, this is. There are a number of benchmarks that ship with Hadoop. Although this is untested, one reason you might be seeing throughput issues is with the standard read/write interface that copies bytes across the JNI interface. On the short list of stuff for the next Java wrapper set is to use the ByteBuffer interface (NIO) to avoid this copying.
+>>
+>> I'm not sure, that problem on java side. All disks loaded at 100%, so
+>> I think, that problem clearly on osd part. But i want to test your new
+>> integration and see, if something changes. You maybe right, but I'm not.
+>
+>
+> Those are some awfully slow disks.
+Replication was 3.
 
-I`ve did some performance tests at the following configuration:
+> I don't know exactly what this test measures, but if you're write-constrained on the HDFS side then Ceph will definitely be slower due to little things like the journaling that it does. And that is a data safety issue where Ceph is paying much higher costs than HDFS does.
 
-mon0, osd0 and mon1, osd1 - two twelve-core r410 with 32G ram, mon2 -
-dom0 with three dedicated cores and 1.5G, mostly idle. First three
-disks on each r410 arranged into raid0 and holds osd data when fourth
-holds os and osd` journal partition, all ceph-related stuff mounted on
-the ext4 without barriers.
+This test runs 36 mappers on 6 hosts. Each mapper writes its own file
+in parallel.
+All that hosts host ceph filesystem. 6 osd, 1 mds  + 2 standby, 3 mons. Mappers
+was executed on that hosts.
 
-Firstly, I`ve noticed about a difference of benchmark performance and
-write speed through rbd from small kvm instance running on one of
-first two machines - when bench gave me about 110Mb/s, writing zeros
-to raw block device inside vm with dd was at top speed about 45 mb/s,
-for vm`fs (ext4 with default options) performance drops to ~23Mb/s.
-Things get worse, when I`ve started second vm at second host and tried
-to continue same dd tests simultaneously - performance fairly divided
-by half for each instance :). Enabling jumbo frames, playing with cpu
-affinity for ceph and vm instances and trying different TCP congestion
-protocols gave no effect at all - with DCTCP I have slightly smoother
-network load graph and that`s all.
+> But it doesn't mean that Ceph is necessarily slower on good hardware. :)
 
-Can ml please suggest anything to try to improve performance?
+I don't mean, that Ceph is somewhat slower at general.
+Test shows, that hadoop on ceph is x1.5 times slower, then hdfs.
+Hadoop has specific write workload and on that workload hadoop shines
+right now.
+Hadoop read also better. Hadoop can read locally from replica.
 
-ceph-0.43, libvirt-0.9.8, qemu-1.0.0, kernel 3.2
+> -Greg
+>
+>
+
+
+
+-- 
+Andrey.
