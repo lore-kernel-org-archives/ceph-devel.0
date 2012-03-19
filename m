@@ -1,230 +1,167 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: Mysteriously poor write performance
-Date: Mon, 19 Mar 2012 22:30:30 +0300
-Message-ID: <CABYiri9YsagQ46WejP+77hgVD-0KELiQXGaqeMyokyeo8W5BVQ@mail.gmail.com>
-References: <CABYiri-C1ftxsM3dWqtcRzXBYoddRbHug=TA6j+0EY-cuMt3Mw@mail.gmail.com>
- <Pine.LNX.4.64.1203181121460.580@cobra.newdream.net> <CABYiri9hcWdPv5Xs_X6S+tM6-U_uGq68pnTzetc=cVxK7NiNQg@mail.gmail.com>
- <4825A243C5604C48A3E022008ED974D0@dreamhost.com> <CABYiri9omWz_vSZxL_McYg5bMoW20x6TBCsXHTHwgZ0hqUxofA@mail.gmail.com>
- <4F677D95.8040208@dreamhost.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Logging braindump
+Date: Mon, 19 Mar 2012 13:53:26 -0700
+Message-ID: <CAORUGqCqK0WUEGiXyM+6KYfWswPrW_eV=qp8Q2CCAUSXguYdDA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:33430 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965009Ab2CSTaw convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Mar 2012 15:30:52 -0400
-Received: by wejx9 with SMTP id x9so6146082wej.19
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Mar 2012 12:30:50 -0700 (PDT)
-In-Reply-To: <4F677D95.8040208@dreamhost.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:65215 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751674Ab2CSUxr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Mar 2012 16:53:47 -0400
+Received: by dajr28 with SMTP id r28so10382578daj.19
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Mar 2012 13:53:46 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@dreamhost.com>
-Cc: Greg Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Thanks to Greg, I have noticed very strange thing - data pool filled
-with a bunch of objects like rb.0.0.0000000004db with typical size
-4194304 when original pool for guest os has size only 112(created as
-40g). Seems that something went wrong, because on 0.42 I had more
-impressive performance on cheaper hardware. For first time, I blamed
-recent crash and recreated cluster from scratch about a hour ago, but
-those objects created in a bare data/ pool with only one vm.
+So, we've been talking about an in-memory buffer that would contain
+debug-level messages, and a separate thread/process [1] that would
+write a subset of these to disk. Thus, on crash, we'd have a lot of
+detail available (the ring buffer entries not yet overwritten),
+without paying the IO/serialization/storage cost of dumping it all out
+to disk.
+
+[1] e.g. varnish uses an mmaped file for a ringbuffer, consumes it
+from a difference process; that way, the log consumer cannot corrupt
+the server process memory. Of course, this means log messages cannot
+contain pointers to indirect data. And that means the buffer is not
+made of constant size entries, like Disruptor tends to assume.. though
+I think you could view Disruptor sequence numbers as byte offsets, if
+you wanted.
 
 
 
+RING BUFFER
 
-On Mon, Mar 19, 2012 at 10:40 PM, Josh Durgin <josh.durgin@dreamhost.co=
-m> wrote:
-> On 03/19/2012 11:13 AM, Andrey Korolyov wrote:
->>
->> Nope, I`m using KVM for rbd guests. Surely I`ve been noticed that Sa=
-ge
->> mentioned too small value and I`ve changed it to 64M before posting
->> previous message with no success - both 8M and this value cause a
->> performance drop. When I tried to wrote small amount of data that ca=
-n
->> be compared to writeback cache size(both on raw device and ext3 with
->> sync option), following results were made:
->
->
-> I just want to clarify that the writeback window isn't a full writeba=
-ck
-> cache - it doesn't affect reads, and does not help with request mergi=
-ng etc.
-> It simply allows a bunch of writes to be in flight while acking the w=
-rite to
-> the guest immediately. We're working on a full-fledged writeback cach=
-e that
-> to replace the writeback window.
->
->
->> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D10 oflag=3Ddirect=
- (almost
->> same without oflag there and in the following samples)
->> 10+0 records in
->> 10+0 records out
->> 104857600 bytes (105 MB) copied, 0.864404 s, 121 MB/s
->> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D20 oflag=3Ddirect
->> 20+0 records in
->> 20+0 records out
->> 209715200 bytes (210 MB) copied, 6.67271 s, 31.4 MB/s
->> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D30 oflag=3Ddirect
->> 30+0 records in
->> 30+0 records out
->> 314572800 bytes (315 MB) copied, 12.4806 s, 25.2 MB/s
->>
->> and so on. Reference test with bs=3D1M and count=3D2000 has slightly=
- worse
->> results _with_ writeback cache than without, as I`ve mentioned befor=
-e.
->> =C2=A0Here the bench results, they`re almost equal on both nodes:
->>
->> bench: wrote 1024 MB in blocks of 4096 KB in 9.037468 sec at 113 MB/=
-sec
->
->
-> One thing to check is the size of the writes that are actually being =
-sent by
-> rbd. The guest is probably splitting them into relatively small (128 =
-or
-> 256k) writes. Ideally it would be sending 4k writes, and this should =
-be a
-> lot faster.
->
-> You can see the writes being sent by adding debug_ms=3D1 to the clien=
-t or osd.
-> The format is osd_op(.*[write OFFSET~LENGTH]).
->
->
->> Also, because I`ve not mentioned it before, network performance is
->> enough to hold fair gigabit connectivity with MTU 1500. Seems that i=
-t
->> is not interrupt problem or something like it - even if ceph-osd,
->> ethernet card queues and kvm instance pinned to different sets of
->> cores, nothing changes.
->>
->> On Mon, Mar 19, 2012 at 8:59 PM, Greg Farnum
->> <gregory.farnum@dreamhost.com> =C2=A0wrote:
->>>
->>> It sounds like maybe you're using Xen? The "rbd writeback window" o=
-ption
->>> only works for userspace rbd implementations (eg, KVM).
->>> If you are using KVM, you probably want 81920000 (~80MB) rather tha=
-n
->>> 8192000 (~8MB).
->>>
->>> What options are you running dd with? If you run a rados bench from=
- both
->>> machines, what do the results look like?
->>> Also, can you do the ceph osd bench on each of your OSDs, please?
->>> (http://ceph.newdream.net/wiki/Troubleshooting#OSD_performance)
->>> -Greg
->>>
->>>
->>> On Monday, March 19, 2012 at 6:46 AM, Andrey Korolyov wrote:
->>>
->>>> More strangely, writing speed drops down by fifteen percent when t=
-his
->>>> option was set in vm` config(instead of result from
->>>> http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg03685.ht=
-ml).
->>>> As I mentioned, I`m using 0.43, but due to crashed osds, ceph has =
-been
->>>> recompiled with e43546dee9246773ffd6877b4f9495f1ec61cd55 and
->>>> 1468d95101adfad44247016a1399aab6b86708d2 - both cases caused crash=
-es
->>>> under heavy load.
->>>>
->>>> On Sun, Mar 18, 2012 at 10:22 PM, Sage Weil<sage@newdream.net
->>>> (mailto:sage@newdream.net)> =C2=A0wrote:
->>>>>
->>>>> On Sat, 17 Mar 2012, Andrey Korolyov wrote:
->>>>>>
->>>>>> Hi,
->>>>>>
->>>>>> I`ve did some performance tests at the following configuration:
->>>>>>
->>>>>> mon0, osd0 and mon1, osd1 - two twelve-core r410 with 32G ram, m=
-on2 -
->>>>>> dom0 with three dedicated cores and 1.5G, mostly idle. First thr=
-ee
->>>>>> disks on each r410 arranged into raid0 and holds osd data when f=
-ourth
->>>>>> holds os and osd` journal partition, all ceph-related stuff moun=
-ted on
->>>>>> the ext4 without barriers.
->>>>>>
->>>>>> Firstly, I`ve noticed about a difference of benchmark performanc=
-e and
->>>>>> write speed through rbd from small kvm instance running on one o=
-f
->>>>>> first two machines - when bench gave me about 110Mb/s, writing z=
-eros
->>>>>> to raw block device inside vm with dd was at top speed about 45 =
-mb/s,
->>>>>> for vm`fs (ext4 with default options) performance drops to ~23Mb=
-/s.
->>>>>> Things get worse, when I`ve started second vm at second host and=
- tried
->>>>>> to continue same dd tests simultaneously - performance fairly di=
-vided
->>>>>> by half for each instance :). Enabling jumbo frames, playing wit=
-h cpu
->>>>>> affinity for ceph and vm instances and trying different TCP cong=
-estion
->>>>>> protocols gave no effect at all - with DCTCP I have slightly smo=
-other
->>>>>> network load graph and that`s all.
->>>>>>
->>>>>> Can ml please suggest anything to try to improve performance?
->>>>>
->>>>>
->>>>> Can you try setting
->>>>>
->>>>> rbd writeback window =3D 8192000
->>>>>
->>>>> or similar, and see what kind of effect that has? I suspect it'll=
- speed
->>>>> up dd; I'm less sure about ext3.
->>>>>
->>>>> Thanks!
->>>>> sage
->>>>>
->>>>>
->>>>>>
->>>>>> ceph-0.43, libvirt-0.9.8, qemu-1.0.0, kernel 3.2
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
-evel"
->>>>>> in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> (mailto:majordomo@vger.kernel.org)
->>>>>> More majordomo info at http://vger.kernel.org/majordomo-info.htm=
-l
->>>>>
->>>>>
->>>>
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> (mailto:majordomo@vger.kernel.org)
->>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
-tml
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+For the ring buffer, we've been looking at Disruptor[2]-style
+"consumer tries to catch up with a sequence number from producer"
+design. As we have multiple producers (threads creating log entries),
+the cost of creating a log entry would be a single cmpxchg op, and
+then whatever work is needed to lay out the event in the ringbuffer.
+
+http://martinfowler.com/articles/lmax.html
+http://code.google.com/p/disruptor/
+
+The in-memory data format could just use whatever data format is most
+convenient. The ringbuffer could be an array tiny structs with the
+base fields like thread id embedded there, and pointers to separately
+allocated data for items that aren't always present. But this means we
+need to be very careful about memory management; we want the data
+pointed to to stay alive and unmodified until the producer loops
+around the ringbuffer.
+
+Alternatively, interpret Disruptor sequence numbers as byte offsets,
+serialize message first, allocate that much space from ring buffer
+(still just one cmpxchg). This pushes more of the work to the producer
+of log messages, but avoids having an intermediate data format that
+needs to be converted to another format, and simplifies memory
+management tremendously.
+
+
+DISK FORMAT
+
+The process writing the events to disk should be more focused on
+usefulness and longevity of the data. If the ring buffer is just
+arrays with pointers, here we should take the performance hit to
+convert to one of the known formats. I feel strongly in favor of
+structured logging, as parsing bazillion log entries is slow, and
+maintaining the parsing rules is actually harder than structured
+logging in the first place.
+
+The status quo is hoping to improve syslog, but there's so much
+Enterprise in this stuff that I'm not holding my breath..
+http://lwn.net/Articles/484731/ . Work that has come out includes the
+structured syslog format below, CEE querying further down.
+
+Some candidates:
+
+- Scribe and Flume are pre-existing "log collectors" that emphasize a
+DAG of log flow, lots of Java everywhere.. I'm not thrilled.
+  https://github.com/facebook/scribe  https://cwiki.apache.org/FLUME/
+
+- journald: I'm just going to pretend it doesn't exist, at least for 2
+years: http://blog.gerhards.net/2011/11/journald-and-rsyslog.html
+
+- syslog's structured logging extension:
+http://tools.ietf.org/html/rfc5424#section-6.5
+
+  essentially, [key=value key2=val2] MESSAGE
+
+ <165>1 2003-10-11T22:14:15.003Z mymachine.example.com
+           evntslog - ID47 [exampleSDID@32473 iut="3" eventSource=
+           "Application" eventID="1011"] BOMAn application
+           event log entry...
+
+- JSON: http://json.org/
+
+  {"key": "value", "key2": "val2", "message": "MESSAGE"}
+
+  the convention is lines of json, separated by newlines, each line is
+a full event
+
+  biggest downside is numbers are always floats (need to stringify
+large numbers), binary data must be encoded somehow into a utf-8
+string (base64 is most common).
+
+- GELF: compressed JSON with specific fields:
+https://github.com/Graylog2/graylog2-docs/wiki/GELF
+- Google Protocol Buffers: considered clumsy these days (code
+generation from IDL etc); only Google has significant investment in
+the format
+- Thrift: considered clumsy these days (code generation from IDL etc);
+only Facebook has significant investment in the format
+- BSON: sort of close to binary encoding of JSON + extra data types,
+not a huge improvement in speed/space.. http://bsonspec.org/
+- Avro: Apache-sponspored data format, nicely self-describing,
+apparently slow? http://avro.apache.org/
+- MessagePack: binary encoding for JSON, claims to beat others in
+speed.. http://msgpack.org/
+
+And all of these can be compressed with e.g. Snappy as they flow to
+disk.  http://code.google.com/p/snappy/
+
+Downside of just all but JSON: we'd need to bundle the library --
+distro support just isn't there yet.
+
+Should the disk format be binary? That makes it less friendly to the
+admin. I'm not sure which way to go. JSON is simpler and friendlier,
+e.g. MessagePack has identical data model but is faster and takes less
+space. Some options:
+  a. make configurable so simple installations don't need to suffer binary logs
+  b. just pick one and stick with it
+
+
+
+QUERYING / ANALYSIS
+
+- use a format from above that is mapreduce-friedly, or can be 1:1
+imported into another storage system
+- software like Graylog may be of use, but I fear we'll overwhelm it
+with events: http://graylog2.org/
+- Cassandra's Brisk is a really easy way to run SQL-like Hive queries
+over structured data, and has a design that'll ingest any amount of
+data, Just Add Hardware(tm):
+http://www.datastax.com/docs/0.8/brisk/index
+- the standards process is churning out things like CEE, but I'm not
+holding my breath: http://cee.mitre.org/
+
+
+
+MY RECOMMENDATIONS [biased, as always ;-]
+
+- bundle the MessagePack library
+- in thread that calls log: serialize as MessagePack onto stack,
+allocate needed bytes from ringbuffer, copy event to ringbuffer
+- write to disk is now very simple, could even be done in a different
+process (mmap header+ringbuffer)
+- let disk files be named after timestamp they were started at, start
+new ones based on time & size (no .0 -> .1 -> .2 renaming needed)
+- make it really simple to process+delete chunks of log, feeding them
+into Brisk or Graylog, then deleting from the node (perhaps after a
+delay, so last 24h is locally browseable)
+  (and don't remove things that haven't been processed)
+
+
+
+Hope that made sense. Let's talk more, especially if it didn't ;)
