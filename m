@@ -1,87 +1,227 @@
-From: ruslan usifov <ruslan.usifov@gmail.com>
-Subject: Re: Ceph mon crash
-Date: Mon, 19 Mar 2012 22:44:09 +0400
-Message-ID: <CAHULbCkQ-vzDgHHZtSLNGgZFLAODphUTjFJfmK5y+SnveJqfYg@mail.gmail.com>
-References: <CAHULbCnEs7o6E5mvUtMjN7NxJ3-fn8M-nriUdCqqceiBOvXKKA@mail.gmail.com>
-	<CAHULbCk9RkaDUKYncp4-cYB3H9uhU8rjP+z0PW7YRD+goTORcg@mail.gmail.com>
-	<CAHULbCk1Lqp7fe6+0hSZkJp57Aht57zzoF8bXLpuBa+TCfcX4w@mail.gmail.com>
-	<66BEE4F342554A54BA21F31CB051E2C4@dreamhost.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: Mysteriously poor write performance
+Date: Mon, 19 Mar 2012 22:30:30 +0300
+Message-ID: <CABYiri9YsagQ46WejP+77hgVD-0KELiQXGaqeMyokyeo8W5BVQ@mail.gmail.com>
+References: <CABYiri-C1ftxsM3dWqtcRzXBYoddRbHug=TA6j+0EY-cuMt3Mw@mail.gmail.com>
+ <Pine.LNX.4.64.1203181121460.580@cobra.newdream.net> <CABYiri9hcWdPv5Xs_X6S+tM6-U_uGq68pnTzetc=cVxK7NiNQg@mail.gmail.com>
+ <4825A243C5604C48A3E022008ED974D0@dreamhost.com> <CABYiri9omWz_vSZxL_McYg5bMoW20x6TBCsXHTHwgZ0hqUxofA@mail.gmail.com>
+ <4F677D95.8040208@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:45620 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756370Ab2CSSoK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Mar 2012 14:44:10 -0400
-Received: by ghrr11 with SMTP id r11so5726629ghr.19
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Mar 2012 11:44:09 -0700 (PDT)
-In-Reply-To: <66BEE4F342554A54BA21F31CB051E2C4@dreamhost.com>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:33430 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965009Ab2CSTaw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Mar 2012 15:30:52 -0400
+Received: by wejx9 with SMTP id x9so6146082wej.19
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Mar 2012 12:30:50 -0700 (PDT)
+In-Reply-To: <4F677D95.8040208@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@dreamhost.com>
+Cc: Greg Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
 
-2012/3/19 Greg Farnum <gregory.farnum@dreamhost.com>:
-> On Monday, March 19, 2012 at 7:33 AM, ruslan usifov wrote:
->> Hello
+Thanks to Greg, I have noticed very strange thing - data pool filled
+with a bunch of objects like rb.0.0.0000000004db with typical size
+4194304 when original pool for guest os has size only 112(created as
+40g). Seems that something went wrong, because on 0.42 I had more
+impressive performance on cheaper hardware. For first time, I blamed
+recent crash and recreated cluster from scratch about a hour ago, but
+those objects created in a bare data/ pool with only one vm.
+
+
+
+
+On Mon, Mar 19, 2012 at 10:40 PM, Josh Durgin <josh.durgin@dreamhost.co=
+m> wrote:
+> On 03/19/2012 11:13 AM, Andrey Korolyov wrote:
 >>
->> I have follow stack trace:
+>> Nope, I`m using KVM for rbd guests. Surely I`ve been noticed that Sa=
+ge
+>> mentioned too small value and I`ve changed it to 64M before posting
+>> previous message with no success - both 8M and this value cause a
+>> performance drop. When I tried to wrote small amount of data that ca=
+n
+>> be compared to writeback cache size(both on raw device and ext3 with
+>> sync option), following results were made:
+>
+>
+> I just want to clarify that the writeback window isn't a full writeba=
+ck
+> cache - it doesn't affect reads, and does not help with request mergi=
+ng etc.
+> It simply allows a bunch of writes to be in flight while acking the w=
+rite to
+> the guest immediately. We're working on a full-fledged writeback cach=
+e that
+> to replace the writeback window.
+>
+>
+>> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D10 oflag=3Ddirect=
+ (almost
+>> same without oflag there and in the following samples)
+>> 10+0 records in
+>> 10+0 records out
+>> 104857600 bytes (105 MB) copied, 0.864404 s, 121 MB/s
+>> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D20 oflag=3Ddirect
+>> 20+0 records in
+>> 20+0 records out
+>> 209715200 bytes (210 MB) copied, 6.67271 s, 31.4 MB/s
+>> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D30 oflag=3Ddirect
+>> 30+0 records in
+>> 30+0 records out
+>> 314572800 bytes (315 MB) copied, 12.4806 s, 25.2 MB/s
 >>
->> #0 0xb77fa424 in __kernel_vsyscall ()
->> (gdb) bt
->> #0 0xb77fa424 in __kernel_vsyscall ()
->> #1 0xb77e98a0 in raise () from /lib/i386-linux-gnu/
->> libpthread.so.0
->> #2 0x08230f8b in ?? ()
->> #3 <signal handler called>
->> #4 0xb77fa424 in __kernel_vsyscall ()
->> #5 0xb70eae71 in raise () from /lib/i386-linux-gnu/libc.so.6
->> #6 0xb70ee34e in abort () from /lib/i386-linux-gnu/libc.so.6
->> #7 0xb73130b5 in __gnu_cxx::__verbose_terminate_handler() () from
->> /usr/lib/i386-linux-gnu/libstdc++.so.6
->> #8 0xb7310fa5 in ?? () from /usr/lib/i386-linux-gnu/libstdc++.so.6
->> #9 0xb7310fe2 in std::terminate() () from
->> /usr/lib/i386-linux-gnu/libstdc++.so.6
->> #10 0xb731114e in __cxa_throw () from /usr/lib/i386-linux-gnu/libstd=
-c++.so.6
->> #11 0x0822f8c7 in ceph::__ceph_assert_fail(char const*, char const*,
->> int, char const*) ()
->> #12 0x081cf8a4 in MDSMap::get_health(std::basic_ostream<char,
->> std::char_traits<char> >&) const ()
->> #13 0x0811e8a7 in MDSMonitor::get_health(std::basic_ostream<char,
->> std::char_traits<char> >&) const ()
->> #14 0x080c4977 in Monitor::handle_command(MMonCommand*) ()
->> #15 0x080cf244 in Monitor::_ms_dispatch(Message*) ()
->> #16 0x080df1a4 in Monitor::ms_dispatch(Message*) ()
->> #17 0x081f706d in SimpleMessenger::dispatch_entry() ()
->> #18 0x080b27d2 in SimpleMessenger::DispatchThread::entry() ()
->> #19 0x081b5d81 in Thread::_entry_func(void*) ()
->> #20 0xb77e0e99 in start_thread () from /lib/i386-linux-gnu/libpthrea=
-d.so.0
->> #21 0xb71919ee in clone () from /lib/i386-linux-gnu/libc.so.6
+>> and so on. Reference test with bs=3D1M and count=3D2000 has slightly=
+ worse
+>> results _with_ writeback cache than without, as I`ve mentioned befor=
+e.
+>> =C2=A0Here the bench results, they`re almost equal on both nodes:
+>>
+>> bench: wrote 1024 MB in blocks of 4096 KB in 9.037468 sec at 113 MB/=
+sec
 >
-> Can you get the line number from frame 12? (f 12 <enter>, then just p=
-aste the output) Also the output of "ceph -s" if things are still runni=
-ng. The only assert I see in get_health() is that each "up" MDS be in m=
-ds_info, which really ought to be true=85.
-
-
-Sorry but no, i use precompiled binaries from this
-http://ceph.newdream.net/debian. Perhaps this helps, initialy i
-configure all ceph services mon, mds, osd, but then i test only rdb
-and remove all mds from cluster (3 vmware machines) throw follow
-command:
-
-ceph mds rm 1 (i write this lines by memory so can mistaken in syntax)
-
 >
->> And when one mon crashes all other monitors in cluster will crashes
->> too:-((. So one time in cluster not any alive mons
+> One thing to check is the size of the writes that are actually being =
+sent by
+> rbd. The guest is probably splitting them into relatively small (128 =
+or
+> 256k) writes. Ideally it would be sending 4k writes, and this should =
+be a
+> lot faster.
 >
-> Yeah, this is because the crash is being triggered by a get_health co=
-mmand and it's trying it out on each monitor in turn as they fail.
-> -Greg
+> You can see the writes being sent by adding debug_ms=3D1 to the clien=
+t or osd.
+> The format is osd_op(.*[write OFFSET~LENGTH]).
+>
+>
+>> Also, because I`ve not mentioned it before, network performance is
+>> enough to hold fair gigabit connectivity with MTU 1500. Seems that i=
+t
+>> is not interrupt problem or something like it - even if ceph-osd,
+>> ethernet card queues and kvm instance pinned to different sets of
+>> cores, nothing changes.
+>>
+>> On Mon, Mar 19, 2012 at 8:59 PM, Greg Farnum
+>> <gregory.farnum@dreamhost.com> =C2=A0wrote:
+>>>
+>>> It sounds like maybe you're using Xen? The "rbd writeback window" o=
+ption
+>>> only works for userspace rbd implementations (eg, KVM).
+>>> If you are using KVM, you probably want 81920000 (~80MB) rather tha=
+n
+>>> 8192000 (~8MB).
+>>>
+>>> What options are you running dd with? If you run a rados bench from=
+ both
+>>> machines, what do the results look like?
+>>> Also, can you do the ceph osd bench on each of your OSDs, please?
+>>> (http://ceph.newdream.net/wiki/Troubleshooting#OSD_performance)
+>>> -Greg
+>>>
+>>>
+>>> On Monday, March 19, 2012 at 6:46 AM, Andrey Korolyov wrote:
+>>>
+>>>> More strangely, writing speed drops down by fifteen percent when t=
+his
+>>>> option was set in vm` config(instead of result from
+>>>> http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg03685.ht=
+ml).
+>>>> As I mentioned, I`m using 0.43, but due to crashed osds, ceph has =
+been
+>>>> recompiled with e43546dee9246773ffd6877b4f9495f1ec61cd55 and
+>>>> 1468d95101adfad44247016a1399aab6b86708d2 - both cases caused crash=
+es
+>>>> under heavy load.
+>>>>
+>>>> On Sun, Mar 18, 2012 at 10:22 PM, Sage Weil<sage@newdream.net
+>>>> (mailto:sage@newdream.net)> =C2=A0wrote:
+>>>>>
+>>>>> On Sat, 17 Mar 2012, Andrey Korolyov wrote:
+>>>>>>
+>>>>>> Hi,
+>>>>>>
+>>>>>> I`ve did some performance tests at the following configuration:
+>>>>>>
+>>>>>> mon0, osd0 and mon1, osd1 - two twelve-core r410 with 32G ram, m=
+on2 -
+>>>>>> dom0 with three dedicated cores and 1.5G, mostly idle. First thr=
+ee
+>>>>>> disks on each r410 arranged into raid0 and holds osd data when f=
+ourth
+>>>>>> holds os and osd` journal partition, all ceph-related stuff moun=
+ted on
+>>>>>> the ext4 without barriers.
+>>>>>>
+>>>>>> Firstly, I`ve noticed about a difference of benchmark performanc=
+e and
+>>>>>> write speed through rbd from small kvm instance running on one o=
+f
+>>>>>> first two machines - when bench gave me about 110Mb/s, writing z=
+eros
+>>>>>> to raw block device inside vm with dd was at top speed about 45 =
+mb/s,
+>>>>>> for vm`fs (ext4 with default options) performance drops to ~23Mb=
+/s.
+>>>>>> Things get worse, when I`ve started second vm at second host and=
+ tried
+>>>>>> to continue same dd tests simultaneously - performance fairly di=
+vided
+>>>>>> by half for each instance :). Enabling jumbo frames, playing wit=
+h cpu
+>>>>>> affinity for ceph and vm instances and trying different TCP cong=
+estion
+>>>>>> protocols gave no effect at all - with DCTCP I have slightly smo=
+other
+>>>>>> network load graph and that`s all.
+>>>>>>
+>>>>>> Can ml please suggest anything to try to improve performance?
+>>>>>
+>>>>>
+>>>>> Can you try setting
+>>>>>
+>>>>> rbd writeback window =3D 8192000
+>>>>>
+>>>>> or similar, and see what kind of effect that has? I suspect it'll=
+ speed
+>>>>> up dd; I'm less sure about ext3.
+>>>>>
+>>>>> Thanks!
+>>>>> sage
+>>>>>
+>>>>>
+>>>>>>
+>>>>>> ceph-0.43, libvirt-0.9.8, qemu-1.0.0, kernel 3.2
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
+evel"
+>>>>>> in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> (mailto:majordomo@vger.kernel.org)
+>>>>>> More majordomo info at http://vger.kernel.org/majordomo-info.htm=
+l
+>>>>>
+>>>>>
+>>>>
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> (mailto:majordomo@vger.kernel.org)
+>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
+>
 >
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
