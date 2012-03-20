@@ -1,260 +1,66 @@
 From: Samuel Just <sam.just@dreamhost.com>
-Subject: Re: Mysteriously poor write performance
-Date: Tue, 20 Mar 2012 15:36:09 -0700
-Message-ID: <CACLRD_2+zKBfmOm-+1GT1+zMtTQ5B0e21_J3C7Qfw+YCH5+o=w@mail.gmail.com>
-References: <CABYiri-C1ftxsM3dWqtcRzXBYoddRbHug=TA6j+0EY-cuMt3Mw@mail.gmail.com>
-	<Pine.LNX.4.64.1203181121460.580@cobra.newdream.net>
-	<CABYiri9hcWdPv5Xs_X6S+tM6-U_uGq68pnTzetc=cVxK7NiNQg@mail.gmail.com>
-	<4825A243C5604C48A3E022008ED974D0@dreamhost.com>
-	<CABYiri9omWz_vSZxL_McYg5bMoW20x6TBCsXHTHwgZ0hqUxofA@mail.gmail.com>
-	<4F677D95.8040208@dreamhost.com>
-	<CABYiri-AV6WK-H7K9oSwSnMSAgB6ZAHLDn2Ar6omdS=8EAjtfA@mail.gmail.com>
+Subject: Re: Just noticed this with ceph-0.43 - ceph-0.39 does not have this
+ issue. I'm trying to use Ceph on multiple platforms, one of which is CentOS
+ 5. CentOS 5 still uses Python 2.4, and byte-compilation o
+Date: Tue, 20 Mar 2012 15:38:02 -0700
+Message-ID: <CACLRD_1drOhMwMYe-6SFGF9MU8VHSR5rk3zz8b=HnSy6fNnpAA@mail.gmail.com>
+References: <4F68A57802000099000DD35F@collaborate.seakr.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:57822 "EHLO
+Received: from mail-we0-f174.google.com ([74.125.82.174]:52289 "EHLO
 	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758865Ab2CTWgK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Mar 2012 18:36:10 -0400
-Received: by wejx9 with SMTP id x9so471147wej.19
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Mar 2012 15:36:09 -0700 (PDT)
-In-Reply-To: <CABYiri-AV6WK-H7K9oSwSnMSAgB6ZAHLDn2Ar6omdS=8EAjtfA@mail.gmail.com>
+	with ESMTP id S1758901Ab2CTWiE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Mar 2012 18:38:04 -0400
+Received: by wejx9 with SMTP id x9so472369wej.19
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Mar 2012 15:38:03 -0700 (PDT)
+In-Reply-To: <4F68A57802000099000DD35F@collaborate.seakr.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Can you set osd and filestore debugging to 20, restart the osds, run
-rados bench as before, and post the logs?
--Sam Just
+I believe the with statement came in python 2.5.  It would need to be
+converted to use the older style.
+-Sam
 
-On Tue, Mar 20, 2012 at 1:37 PM, Andrey Korolyov <andrey@xdel.ru> wrote=
-:
-> rados bench 60 write -p data
-> <skip>
-> Total time run: =C2=A0 =C2=A0 =C2=A0 =C2=A061.217676
-> Total writes made: =C2=A0 =C2=A0 989
-> Write size: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A04194304
-> Bandwidth (MB/sec): =C2=A0 =C2=A064.622
+On Tue, Mar 20, 2012 at 2:42 PM, Nick Couchman <Nick.Couchman@seakr.com=
+> wrote:
+> Just noticed this with ceph-0.43 - ceph-0.39 does not have this issue=
+=2E =C2=A0I'm trying to use Ceph on multiple platforms, one of which is=
+ CentOS 5. =C2=A0CentOS 5 still uses Python 2.4, and byte-compilation o=
+f the rados.py file fails during the build of ceph 0.43 with the follow=
+ing error:
 >
-> Average Latency: =C2=A0 =C2=A0 =C2=A0 0.989608
-> Max latency: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 2.21701
-> Min latency: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 0.255315
+> Byte-compiling python modules...
+> rados.py =C2=A0File "/usr/lib/python2.4/site-packages/rados.py", line=
+ 422
+> =C2=A0 =C2=A0with self.lock:
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0^
+> SyntaxError: invalid syntax
 >
-> Here a snip from osd log, seems write size is okay.
+> A quick Google search doesn't turn up anything obviously wrong with t=
+his statement - just that Python 2.4 may not support this? =C2=A0Is the=
+re anything that can be done to make this block of code (Ioctx, some of=
+ the aio stuff) compatible with Python 2.4?
 >
-> 2012-03-21 00:00:39.397066 7fdda86a7700 osd.0 10 pg[0.58( v 10'83
-> (0'0,10'83] n=3D50 ec=3D1 les/c 9/9 8/8/6) [0,1] r=3D0 lpr=3D8 mlcod =
-10'82
-> active+clean] =C2=A0removing repgather(0x31b5360 applying 10'83 rep_t=
-id=3D597
-> wfack=3D wfdisk=3D op=3Dosd_op(client.4599.0:2533 rb.0.2.000000000040=
- [write
-> 1220608~4096] 0.17eb9fd8) v4)
-> 2012-03-21 00:00:39.397086 7fdda86a7700 osd.0 10 pg[0.58( v 10'83
-> (0'0,10'83] n=3D50 ec=3D1 les/c 9/9 8/8/6) [0,1] r=3D0 lpr=3D8 mlcod =
-10'82
-> active+clean] =C2=A0 =C2=A0q front is repgather(0x31b5360 applying 10=
-'83
-> rep_tid=3D597 wfack=3D wfdisk=3D op=3Dosd_op(client.4599.0:2533
-> rb.0.2.000000000040 [write 1220608~4096] 0.17eb9fd8) v4)
+> Thanks - Nick
 >
-> Sorry for my previous question about rbd chunks, it was really stupid=
- :)
 >
-> On Mon, Mar 19, 2012 at 10:40 PM, Josh Durgin <josh.durgin@dreamhost.=
-com> wrote:
->> On 03/19/2012 11:13 AM, Andrey Korolyov wrote:
->>>
->>> Nope, I`m using KVM for rbd guests. Surely I`ve been noticed that S=
-age
->>> mentioned too small value and I`ve changed it to 64M before posting
->>> previous message with no success - both 8M and this value cause a
->>> performance drop. When I tried to wrote small amount of data that c=
-an
->>> be compared to writeback cache size(both on raw device and ext3 wit=
-h
->>> sync option), following results were made:
->>
->>
->> I just want to clarify that the writeback window isn't a full writeb=
-ack
->> cache - it doesn't affect reads, and does not help with request merg=
-ing etc.
->> It simply allows a bunch of writes to be in flight while acking the =
-write to
->> the guest immediately. We're working on a full-fledged writeback cac=
-he that
->> to replace the writeback window.
->>
->>
->>> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D10 oflag=3Ddirec=
-t (almost
->>> same without oflag there and in the following samples)
->>> 10+0 records in
->>> 10+0 records out
->>> 104857600 bytes (105 MB) copied, 0.864404 s, 121 MB/s
->>> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D20 oflag=3Ddirec=
-t
->>> 20+0 records in
->>> 20+0 records out
->>> 209715200 bytes (210 MB) copied, 6.67271 s, 31.4 MB/s
->>> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D30 oflag=3Ddirec=
-t
->>> 30+0 records in
->>> 30+0 records out
->>> 314572800 bytes (315 MB) copied, 12.4806 s, 25.2 MB/s
->>>
->>> and so on. Reference test with bs=3D1M and count=3D2000 has slightl=
-y worse
->>> results _with_ writeback cache than without, as I`ve mentioned befo=
-re.
->>> =C2=A0Here the bench results, they`re almost equal on both nodes:
->>>
->>> bench: wrote 1024 MB in blocks of 4096 KB in 9.037468 sec at 113 MB=
-/sec
->>
->>
->> One thing to check is the size of the writes that are actually being=
- sent by
->> rbd. The guest is probably splitting them into relatively small (128=
- or
->> 256k) writes. Ideally it would be sending 4k writes, and this should=
- be a
->> lot faster.
->>
->> You can see the writes being sent by adding debug_ms=3D1 to the clie=
-nt or osd.
->> The format is osd_op(.*[write OFFSET~LENGTH]).
->>
->>
->>> Also, because I`ve not mentioned it before, network performance is
->>> enough to hold fair gigabit connectivity with MTU 1500. Seems that =
-it
->>> is not interrupt problem or something like it - even if ceph-osd,
->>> ethernet card queues and kvm instance pinned to different sets of
->>> cores, nothing changes.
->>>
->>> On Mon, Mar 19, 2012 at 8:59 PM, Greg Farnum
->>> <gregory.farnum@dreamhost.com> =C2=A0wrote:
->>>>
->>>> It sounds like maybe you're using Xen? The "rbd writeback window" =
-option
->>>> only works for userspace rbd implementations (eg, KVM).
->>>> If you are using KVM, you probably want 81920000 (~80MB) rather th=
-an
->>>> 8192000 (~8MB).
->>>>
->>>> What options are you running dd with? If you run a rados bench fro=
-m both
->>>> machines, what do the results look like?
->>>> Also, can you do the ceph osd bench on each of your OSDs, please?
->>>> (http://ceph.newdream.net/wiki/Troubleshooting#OSD_performance)
->>>> -Greg
->>>>
->>>>
->>>> On Monday, March 19, 2012 at 6:46 AM, Andrey Korolyov wrote:
->>>>
->>>>> More strangely, writing speed drops down by fifteen percent when =
-this
->>>>> option was set in vm` config(instead of result from
->>>>> http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg03685.h=
-tml).
->>>>> As I mentioned, I`m using 0.43, but due to crashed osds, ceph has=
- been
->>>>> recompiled with e43546dee9246773ffd6877b4f9495f1ec61cd55 and
->>>>> 1468d95101adfad44247016a1399aab6b86708d2 - both cases caused cras=
-hes
->>>>> under heavy load.
->>>>>
->>>>> On Sun, Mar 18, 2012 at 10:22 PM, Sage Weil<sage@newdream.net
->>>>> (mailto:sage@newdream.net)> =C2=A0wrote:
->>>>>>
->>>>>> On Sat, 17 Mar 2012, Andrey Korolyov wrote:
->>>>>>>
->>>>>>> Hi,
->>>>>>>
->>>>>>> I`ve did some performance tests at the following configuration:
->>>>>>>
->>>>>>> mon0, osd0 and mon1, osd1 - two twelve-core r410 with 32G ram, =
-mon2 -
->>>>>>> dom0 with three dedicated cores and 1.5G, mostly idle. First th=
-ree
->>>>>>> disks on each r410 arranged into raid0 and holds osd data when =
-fourth
->>>>>>> holds os and osd` journal partition, all ceph-related stuff mou=
-nted on
->>>>>>> the ext4 without barriers.
->>>>>>>
->>>>>>> Firstly, I`ve noticed about a difference of benchmark performan=
-ce and
->>>>>>> write speed through rbd from small kvm instance running on one =
-of
->>>>>>> first two machines - when bench gave me about 110Mb/s, writing =
-zeros
->>>>>>> to raw block device inside vm with dd was at top speed about 45=
- mb/s,
->>>>>>> for vm`fs (ext4 with default options) performance drops to ~23M=
-b/s.
->>>>>>> Things get worse, when I`ve started second vm at second host an=
-d tried
->>>>>>> to continue same dd tests simultaneously - performance fairly d=
-ivided
->>>>>>> by half for each instance :). Enabling jumbo frames, playing wi=
-th cpu
->>>>>>> affinity for ceph and vm instances and trying different TCP con=
-gestion
->>>>>>> protocols gave no effect at all - with DCTCP I have slightly sm=
-oother
->>>>>>> network load graph and that`s all.
->>>>>>>
->>>>>>> Can ml please suggest anything to try to improve performance?
->>>>>>
->>>>>>
->>>>>> Can you try setting
->>>>>>
->>>>>> rbd writeback window =3D 8192000
->>>>>>
->>>>>> or similar, and see what kind of effect that has? I suspect it'l=
-l speed
->>>>>> up dd; I'm less sure about ext3.
->>>>>>
->>>>>> Thanks!
->>>>>> sage
->>>>>>
->>>>>>
->>>>>>>
->>>>>>> ceph-0.43, libvirt-0.9.8, qemu-1.0.0, kernel 3.2
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-=
-devel"
->>>>>>> in
->>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>> (mailto:majordomo@vger.kernel.org)
->>>>>>> More majordomo info at http://vger.kernel.org/majordomo-info.ht=
-ml
->>>>>>
->>>>>>
->>>>>
->>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> (mailto:majordomo@vger.kernel.org)
->>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>>
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.=
-html
->>
->>
+>
+> --------
+> This e-mail may contain confidential and privileged material for the =
+sole use of the intended recipient. =C2=A0If this email is not intended=
+ for you, or you are not responsible for the delivery of this message t=
+o the intended recipient, please note that this message may contain SEA=
+KR Engineering (SEAKR) Privileged/Proprietary Information. =C2=A0In suc=
+h a case, you are strictly prohibited from downloading, photocopying, d=
+istributing or otherwise using this message, its contents or attachment=
+s in any way. =C2=A0If you have received this message in error, please =
+notify us immediately by replying to this e-mail and delete the message=
+ from your mailbox. =C2=A0Information contained in this message that do=
+es not relate to the business of SEAKR is neither endorsed by nor attri=
+butable to SEAKR.
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
  in
