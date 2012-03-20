@@ -1,42 +1,70 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Ceph mon crash
-Date: Mon, 19 Mar 2012 17:19:41 -0700
-Message-ID: <A542F36937A84D5D9450188A02E47FC7@dreamhost.com>
-References: <CAHULbCnEs7o6E5mvUtMjN7NxJ3-fn8M-nriUdCqqceiBOvXKKA@mail.gmail.com>
- <CAHULbCk9RkaDUKYncp4-cYB3H9uhU8rjP+z0PW7YRD+goTORcg@mail.gmail.com>
- <CAHULbCk1Lqp7fe6+0hSZkJp57Aht57zzoF8bXLpuBa+TCfcX4w@mail.gmail.com>
- <66BEE4F342554A54BA21F31CB051E2C4@dreamhost.com>
- <CAHULbCkQ-vzDgHHZtSLNGgZFLAODphUTjFJfmK5y+SnveJqfYg@mail.gmail.com>
+From: =?UTF-8?B?6IOh54Ca5qOu?= <softrank.net@gmail.com>
+Subject: Problem in building Ceph on CentOS 6
+Date: Tue, 20 Mar 2012 14:21:12 +0800
+Message-ID: <CALwGbPKfZSBGoTQT+3+3iDv4Bqt2orUTDahc6reObdnLq1cdsw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:38872 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932368Ab2CTATo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Mar 2012 20:19:44 -0400
-Received: by yhmm54 with SMTP id m54so6020059yhm.19
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Mar 2012 17:19:44 -0700 (PDT)
-In-Reply-To: <CAHULbCkQ-vzDgHHZtSLNGgZFLAODphUTjFJfmK5y+SnveJqfYg@mail.gmail.com>
-Content-Disposition: inline
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:47876 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754560Ab2CTGVN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Mar 2012 02:21:13 -0400
+Received: by iagz16 with SMTP id z16so10549419iag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Mar 2012 23:21:12 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ruslan usifov <ruslan.usifov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Monday, March 19, 2012 at 11:44 AM, ruslan usifov wrote:
-> Sorry but no, i use precompiled binaries from this
-> http://ceph.newdream.net/debian. Perhaps this helps, initialy i
-> configure all ceph services mon, mds, osd, but then i test only rdb
-> and remove all mds from cluster (3 vmware machines) throw follow
-> command:
-> 
-> ceph mds rm 1 (i write this lines by memory so can mistaken in syntax)
+Hello everyone.
 
-Oh. That's a fun command! Where on earth did you find it documented?
-Unfortunately, it's only supposed to be used "when things get weird." (And really, I'm not sure when it would be appropriate.) If you run it on a healthy cluster, it will break things.
-I created a bug to make it not do that: http://tracker.newdream.net/issues/2188
+I'm following the steps in
+http://ceph.newdream.net/wiki/Building_kernel_client?TPSecNotice&TPNotC=
+heck
+to build ceph on my CentOS.
 
-If necessary I can figure out how to create a good MDSMap and inject it into your monitors, but I'd rather not if you don't have any data in there. (In which case, reformat the cluster.)
--Greg
+I've updated my kernel to version 3.2.12 without selecting any ceph
+related configuration options. Then I follow these steps until "$ make
+-C ceph".
 
+I get the following error message.
+
+
+> [deltamaster@localhost ceph-client-standalone]$ sudo make -C ceph
+> make: Entering directory `/home/deltamaster/ceph-client-standalone/ce=
+ph'
+> make -C /lib/modules/3.2.12/build M=3D/home/deltamaster/ceph-client-s=
+tandalone/ceph CONFIG_CEPH_FS=3Dm modules
+> make[1]: Entering directory `/usr/src/linux-3.2.12'
+>   CC [M]  /home/deltamaster/ceph-client-standalone/ceph/inode.o
+> /home/deltamaster/ceph-client-standalone/ceph/inode.c:95: warning: in=
+itialization from incompatible pointer type
+> /home/deltamaster/ceph-client-standalone/ceph/inode.c: In function =91=
+fill_inode=92:
+> /home/deltamaster/ceph-client-standalone/ceph/inode.c:623: error: ass=
+ignment of read-only member =91i_nlink=92
+> /home/deltamaster/ceph-client-standalone/ceph/inode.c: In function =91=
+ceph_permission=92:
+> /home/deltamaster/ceph-client-standalone/ceph/inode.c:1810: error: =91=
+IPERM_FLAG_RCU=92 undeclared (first use in this function)
+> /home/deltamaster/ceph-client-standalone/ceph/inode.c:1810: error: (E=
+ach undeclared identifier is reported only once
+> /home/deltamaster/ceph-client-standalone/ceph/inode.c:1810: error: fo=
+r each function it appears in.)
+> /home/deltamaster/ceph-client-standalone/ceph/inode.c:1816: error: to=
+o many arguments to function =91generic_permission=92
+> make[2]: *** [/home/deltamaster/ceph-client-standalone/ceph/inode.o] =
+Error 1
+> make[1]: *** [_module_/home/deltamaster/ceph-client-standalone/ceph] =
+Error 2
+> make[1]: Leaving directory `/usr/src/linux-3.2.12'
+> make: *** [all] Error 2
+> make: Leaving directory `/home/deltamaster/ceph-client-standalone/cep=
+h'
+
+I've no idea how to solve this.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
