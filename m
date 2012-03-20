@@ -1,55 +1,64 @@
-From: "Nick Couchman" <Nick.Couchman@seakr.com>
-Subject: rados.py broken with Python2.4
-Date: Tue, 20 Mar 2012 15:47:44 -0600
-Message-ID: <4F68A6A002000099000DD364@collaborate.seakr.com>
-References: <4F68A57802000099000DD35F@collaborate.seakr.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: rados.py broken with Python2.4
+Date: Tue, 20 Mar 2012 14:57:18 -0700
+Message-ID: <CAORUGqDuysDKt7z99ypH+C541yJ-E_4J=dedV9wPOqcTzAsHsg@mail.gmail.com>
+References: <4F68A57802000099000DD35F@collaborate.seakr.com> <4F68A6A002000099000DD364@collaborate.seakr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.seakr.com ([64.2.143.10]:40066 "EHLO mx1.seakr.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755253Ab2CTVrr convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:2:1>);
-	Tue, 20 Mar 2012 17:47:47 -0400
-Received: from mx-inside.seakr.com ([192.168.100.31])
-	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q2KMhE6P011478
-	for <ceph-devel@vger.kernel.org>; Tue, 20 Mar 2012 16:43:14 -0600
-Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
-	by mx-inside.seakr.com (Postfix) with ESMTP id 3AB9A44C58
-	for <ceph-devel@vger.kernel.org>; Tue, 20 Mar 2012 15:47:46 -0600 (MDT)
-In-Reply-To: <4F68A57802000099000DD35F@collaborate.seakr.com>
-Content-Disposition: inline
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:48728 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755253Ab2CTV5j convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Mar 2012 17:57:39 -0400
+Received: by pbcun15 with SMTP id un15so326101pbc.19
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Mar 2012 14:57:38 -0700 (PDT)
+In-Reply-To: <4F68A6A002000099000DD364@collaborate.seakr.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Couchman <Nick.Couchman@seakr.com>, ceph-devel@vger.kernel.org
+To: Nick Couchman <Nick.Couchman@seakr.com>
+Cc: ceph-devel@vger.kernel.org
 
->>> On 2012/03/20 at 15:42, "Nick Couchman" <Nick.Couchman@seakr.com> wrote: 
-> Just noticed this with ceph-0.43 - ceph-0.39 does not have this issue.  I'm 
-> trying to use Ceph on multiple platforms, one of which is CentOS 5.  CentOS 5 
-> still uses Python 2.4, and byte-compilation of the rados.py file fails during 
-> the build of ceph 0.43 with the following error:
-> 
-> Byte-compiling python modules...
-> rados.py  File "/usr/lib/python2.4/site-packages/rados.py", line 422
->     with self.lock:
->             ^
-> SyntaxError: invalid syntax
-> 
-> A quick Google search doesn't turn up anything obviously wrong with this 
-> statement - just that Python 2.4 may not support this?  Is there anything that 
-> can be done to make this block of code (Ioctx, some of the aio stuff) 
-> compatible with Python 2.4?
-> 
-> Thanks - Nick
-> 
-> 
-> 
+On Tue, Mar 20, 2012 at 14:47, Nick Couchman <Nick.Couchman@seakr.com> =
+wrote:
+>> Just noticed this with ceph-0.43 - ceph-0.39 does not have this issu=
+e. =C2=A0I'm
+>> trying to use Ceph on multiple platforms, one of which is CentOS 5. =
+=C2=A0CentOS 5
+>> still uses Python 2.4, and byte-compilation of the rados.py file fai=
+ls during
+>> the build of ceph 0.43 with the following error:
+>>
+>> Byte-compiling python modules...
+>> rados.py =C2=A0File "/usr/lib/python2.4/site-packages/rados.py", lin=
+e 422
+>> =C2=A0 =C2=A0 with self.lock:
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ^
+>> SyntaxError: invalid syntax
+>>
+>> A quick Google search doesn't turn up anything obviously wrong with =
+this
+>> statement - just that Python 2.4 may not support this? =C2=A0Is ther=
+e anything that
+>> can be done to make this block of code (Ioctx, some of the aio stuff=
+)
+>> compatible with Python 2.4?
 
-Apologies for the lack of subject line in the previous e-mail...bad form for a first post to this list!
+Python 2.4 does not support the with statement.
 
+You should be able to replace that with
 
+        self.lock.acquire()
+        try:
+            cb =3D self.safe_cbs[completion]
+            del self.safe_cbs[completion]
+        finally:
+            self.lock.release()
 
---------
-
-This e-mail may contain confidential and privileged material for the sole use of the intended recipient.  If this email is not intended for you, or you are not responsible for the delivery of this message to the intended recipient, please note that this message may contain SEAKR Engineering (SEAKR) Privileged/Proprietary Information.  In such a case, you are strictly prohibited from downloading, photocopying, distributing or otherwise using this message, its contents or attachments in any way.  If you have received this message in error, please notify us immediately by replying to this e-mail and delete the message from your mailbox.  Information contained in this message that does not relate to the business of SEAKR is neither endorsed by nor attributable to SEAKR.
+I'm afraid we don't have resources to maintain Python support for
+versions before 2.6; after all, 2.5 was released 5.5 years ago.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
