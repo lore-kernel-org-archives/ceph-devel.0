@@ -1,71 +1,61 @@
 From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: [PATCH] Makefile: fix modules that cannot find pk11pub.h when
- compiling with NSS on RHEL6
-Date: Wed, 21 Mar 2012 10:09:09 -0600
-Message-ID: <1332346149-32656-1-git-send-email-jaschut@sandia.gov>
+Subject: Re: platform requirements / centos 6.2
+Date: Wed, 21 Mar 2012 10:26:51 -0600
+Message-ID: <4F6A014B.3050701@sandia.gov>
+References: <20120321121619.4bca22b4@dieter-ws>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:34518 "EHLO
+Received: from sentry-two.sandia.gov ([132.175.109.14]:47787 "EHLO
 	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757912Ab2CUQJj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 12:09:39 -0400
-Received: from interceptor1.sandia.gov (interceptor1.sandia.gov [132.175.109.5])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by sentry-two.sandia.gov (Postfix) with ESMTP id 124BD26B2F6
-	for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 10:09:33 -0600 (MDT)
-Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21]) by interceptor1.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 10:09:27 -0600
+	with ESMTP id S1758943Ab2CUQ1I (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 12:27:08 -0400
+In-Reply-To: <20120321121619.4bca22b4@dieter-ws>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Jim Schutt <jaschut@sandia.gov>
+To: "Plaetinck, Dieter" <dieter@vimeo.com>
+Cc: ceph-devel@vger.kernel.org
 
+On 03/21/2012 05:16 AM, Plaetinck, Dieter wrote:
+> Hello,
+> Ceph/Rados looks very well designed and engineered.
+> I would like to build a cluster to test the rados distributed object storage (not the distributed FS or block devices)
+> I've seen the list of dependencies on the wiki, but it doesn't mention specific versions for the libraries and tools, nor lists anything about the Linux kernel version.
+>
 
-Signed-off-by: Jim Schutt <jaschut@sandia.gov>
----
- src/Makefile.am |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+The ceph configure script is pretty good about checking for
+minimum required versions of libs, etc.
 
-diff --git a/src/Makefile.am b/src/Makefile.am
-index cdfb43d..2062d1c 100644
---- a/src/Makefile.am
-+++ b/src/Makefile.am
-@@ -48,7 +48,7 @@ if LINUX
- ceph_osd_LDADD += -ldl
- endif
- bin_PROGRAMS += ceph-osd
--ceph_osd_CXXFLAGS = ${AM_CXXFLAGS} \
-+ceph_osd_CXXFLAGS = ${CRYPTO_CXXFLAGS} ${AM_CXXFLAGS} \
- 	-I$(top_srcdir)/src/leveldb/include
- 
- # mds
-@@ -111,6 +111,7 @@ osdmaptool_LDADD = $(LIBGLOBAL_LDA)
- bin_PROGRAMS += monmaptool crushtool osdmaptool
- 
- ceph_dencoder_SOURCES = test/encoding/ceph_dencoder.cc
-+ceph_dencoder_CXXFLAGS = ${CRYPTO_CXXFLAGS} ${AM_CXXFLAGS}
- ceph_dencoder_LDADD = $(LIBGLOBAL_LDA) libosd.la libmds.a libos.la libmon.la
- bin_PROGRAMS += ceph-dencoder
- 
-@@ -1010,6 +1011,7 @@ libmon_la_SOURCES = \
- 	mon/AuthMonitor.cc \
- 	mon/Elector.cc \
- 	mon/MonitorStore.cc
-+libmon_la_CXXFLAGS= ${CRYPTO_CXXFLAGS} ${AM_CXXFLAGS}
- libmon_la_LIBADD = libglobal.la
- noinst_LTLIBRARIES += libmon.la
- 
-@@ -1078,6 +1080,7 @@ libosdc_la_SOURCES = \
- 	osdc/ObjectCacher.cc \
- 	osdc/Filer.cc \
- 	osdc/Journaler.cc
-+libosdc_la_CXXFLAGS= ${CRYPTO_CXXFLAGS} ${AM_CXXFLAGS}
- libosdc_la_LIBADD = libcommon.la
- noinst_LTLIBRARIES += libosdc.la
- 
--- 
-1.7.8.2
+> Btrfs is getting updates every kernel release, so the sane thing would probably be using the most recent kernel possible (3.3, released a few days ago even has more btrfs improvements)
+> However, we prefer using Centos 6.2, which uses Linux 2.6.32, and since we don't need the snapshotting feature, I would opt for xfs instead of btrfs.  AFAICT btrfs is only recommended if you want snapshots.
+>
+> Does this seem like a good plan?  Or would this platform be too outdated?  What are the required or recommended versions of the dependencies?
+> (for example, in centos 6.2 libuuid is at 2.17.2, libedit 2.11)
+> Anyone else running on centos 6.2?
+
+I have a ceph testbed running on RHEL 6.2 using kernel.org kernels.
+I use both stable series kernels, and Linus's master branch (usually
+after -rc3 or so on each new kernel).  Occasionally a new driver
+version for my hardware wants a new firmware blob, which is easy
+to get from the kernel.org linux-firmware tree.
+
+-- Jim
+
+>
+>
+> Thanks guys,
+> Dieter
+>
+> PS: links to http://ceph.newdream.net/docs/master/ and
+> http://ceph.newdream.net/wiki/ from the menu on the homepage would be useful.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
 
 
