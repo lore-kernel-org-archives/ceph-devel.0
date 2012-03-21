@@ -1,54 +1,39 @@
-From: madhusudhana <madhusudhana.u.acharya@gmail.com>
-Subject: Increase in performance by increasing OSD's ?
-Date: Wed, 21 Mar 2012 15:11:23 +0000 (UTC)
-Message-ID: <loom.20120321T161007-745@post.gmane.org>
+From: ruslan usifov <ruslan.usifov@gmail.com>
+Subject: periodically delays when one of mons dies
+Date: Wed, 21 Mar 2012 19:30:14 +0400
+Message-ID: <CAHULbCnLxNd4j9f3Nfa7-hr0DJ8A_b_sge+1haunDqbPbS1siA@mail.gmail.com>
+References: <CAHULbC=doKVD1Y72qO9kpbi4YoQ6EginOLsbGC_cGrLRPcyV_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:52517 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753824Ab2CUPLm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 21 Mar 2012 11:11:42 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SANCK-0000U0-8t
-	for ceph-devel@vger.kernel.org; Wed, 21 Mar 2012 16:11:36 +0100
-Received: from Static-18.46.99.14.tataidc.co.in ([Static-18.46.99.14.tataidc.co.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 16:11:36 +0100
-Received: from madhusudhana.u.acharya by Static-18.46.99.14.tataidc.co.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 16:11:36 +0100
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:32919 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752291Ab2CUPaP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 11:30:15 -0400
+Received: by gghe5 with SMTP id e5so1027762ggh.19
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 08:30:15 -0700 (PDT)
+In-Reply-To: <CAHULbC=doKVD1Y72qO9kpbi4YoQ6EginOLsbGC_cGrLRPcyV_Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi all,
+Hello
 
-Will increase in the number of OSD will increase performance in ceph
-cluster? I mean to say, if ceph cluster is giving ~70MB/s with 3 OSD,
-will increasing OSD number to 5, increase the performance to ~100MB/s ?
+I'm new to ceph, and perhaps misunderstand some things.
 
-I have re-created my entire ceph cluster with CentOS 6.2 and kernel 
-3.2.11 and ceph 0.43. When i ran some tests, the results are far
-better than my first cluster results. But, they are not yet near to
-a normal linux machine or a entry level NetApp storage box. I have tested 
-with cp, rsync, rm and dd commands. The performance what I am getting from
-ceph are not satisfactory (test with my actual work load is even 
-worse). For instance, rsync of 10G directory took 84 mins to complete 
-in Linux machine (in NetApp it was 89mins). But, the same rsync took like 
-10hrs to copy 10G of data. 
+I have test configuration with 3 wmvare machines (i test RBD). My setup
+consist of:
 
-I work in a semiconductor company as a NAS admin. We use NetApp storage
-for all development and 99% we use NFS infrastrucure.
-So, I am trying to get some results from ceph which is at-least near to an
-entry level NetApp storage. 
+3: mons
+3: osd
 
-I am pointing this bcz, when we call ceph as high performance storage, then
-it should perform better compared to any generic storage or a linux server.
 
-Let me know if there is any fine tune that i can do which can in turn increase 
-the performance of the my ceph cluster.
-
+When i kill one mon (simulate fail), time to time (periodicaly) i got little
+delays when work with RBD device, perhaps this happens when client try
+failed mon, is it possible switch off this failed mon until it fully
+restore. perhaps pacemaker will help in this case + failover ip + somthing
+like proxy which known about mon configuration (i try haproxy but without
+success: 1 first of all haproxy doesn't know about live or fail mons sof
+delays will happens also ceph doesn't allow this scheme - ie ceph client
+check ip address on which it connect and what send to hip mon, and in schem
+with proxy this values doesn't coincide)
