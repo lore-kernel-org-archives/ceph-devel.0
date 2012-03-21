@@ -1,34 +1,59 @@
-From: "Plaetinck, Dieter" <dieter@vimeo.com>
-Subject: platform requirements / centos 6.2
-Date: Wed, 21 Mar 2012 12:16:19 +0100
-Message-ID: <20120321121619.4bca22b4@dieter-ws>
+From: Sage Weil <sage@newdream.net>
+Subject: v0.44 released
+Date: Wed, 21 Mar 2012 06:39:51 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1203210638450.28797@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ny-iacmail.iac.com ([63.119.10.45]:25245 "EHLO
-	ny-iacmail.iac.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750708Ab2CULXk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 07:23:40 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:32891 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752069Ab2CUNjw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 09:39:52 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 7F3F8BC802
+	for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 06:39:51 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 27979BC802
+	for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 06:39:51 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hello,
-Ceph/Rados looks very well designed and engineered.
-I would like to build a cluster to test the rados distributed object storage (not the distributed FS or block devices)
-I've seen the list of dependencies on the wiki, but it doesn't mention specific versions for the libraries and tools, nor lists anything about the Linux kernel version.
+v0.44 is ready!  Changes since v0.43 include:
 
-Btrfs is getting updates every kernel release, so the sane thing would probably be using the most recent kernel possible (3.3, released a few days ago even has more btrfs improvements)
-However, we prefer using Centos 6.2, which uses Linux 2.6.32, and since we don't need the snapshotting feature, I would opt for xfs instead of btrfs.  AFAICT btrfs is only recommended if you want snapshots.
+ * osd: key/value objects (objects are now blobs, key/value bundles, and 
+   xattrs)
+ * osd: cleaned up PG state, stats
+ * osd: fixed transaction replay on non-btrfs after ill-timed failures
+ * osd: several recovery fixes
+ * radosgw: improved PUT performance
+ * radosgw: improved list objects performance, filtering
+ * radosgw: manifests for large objects
+ * radosgw: Swift/S3 ACL interoperability (last set ACL type wins)
+ * librados: new key/value object API
+ * Ubuntu 12.04 precise packages
 
-Does this seem like a good plan?  Or would this platform be too outdated?  What are the required or recommended versions of the dependencies?
-(for example, in centos 6.2 libuuid is at 2.17.2, libedit 2.11)
-Anyone else running on centos 6.2?
+The exciting part of this release is that the key/value "object map"  
+work has been merged, along with radosgw changes to take advantage of the 
+new API.  This allows you to use a key/value interface to manage many 
+small records in a single object, in addition of the regular object data 
+and attributes.  Keys in the same object are stored together on disk--just 
+like object data would be--so there are locality advantages to putting 
+related keys in the same object.  However, there are no limits on how many 
+keys per object beyond concerns about load and space balancing (all keys 
+in an object are stored together on the same set of Ceph OSDs).  This 
+provides an interesting alternative to conventional distributed key/value 
+stores like Cassandra that distribute all keys in a single namespace 
+across all nodes.  For example, radosgw now uses the new object map API to 
+manage the index object for each bucket.
 
+For v0.45, we're continuing work on RBD caching, performance and bug 
+fixes, and working around xattr size limitations in ext3/4.
 
-Thanks guys,
-Dieter
+You can get v0.44 from the usual locations:
 
-PS: links to http://ceph.newdream.net/docs/master/ and
-http://ceph.newdream.net/wiki/ from the menu on the homepage would be useful.
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.newdream.net/download/ceph-0.44.tar.gz
+ * For Debian/Ubuntu packages, see 
+   http://ceph.newdream.net/docs/master/ops/install/mkcephfs/#installing-the-packages
+ 
