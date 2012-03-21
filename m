@@ -1,48 +1,30 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Increase in performance by increasing OSD's ?
-Date: Wed, 21 Mar 2012 10:50:15 -0700
-Message-ID: <E2991B22EA9D489A9C9D02461B1DDC76@dreamhost.com>
-References: <loom.20120321T161007-745@post.gmane.org>
+From: "Plaetinck, Dieter" <dieter@vimeo.com>
+Subject: non-btrfs and checksumming, rados tutorial, planning wrt
+ documentation
+Date: Wed, 21 Mar 2012 19:23:26 +0100
+Message-ID: <20120321192326.1d598442@dieter-ws>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:57780 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752548Ab2CURuR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 13:50:17 -0400
-Received: by yhmm54 with SMTP id m54so1167296yhm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 10:50:17 -0700 (PDT)
-In-Reply-To: <loom.20120321T161007-745@post.gmane.org>
-Content-Disposition: inline
+Received: from ny-iacmail.iac.com ([63.119.10.45]:56634 "EHLO
+	ny-iacmail.iac.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753795Ab2CUSZQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 14:25:16 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: madhusudhana <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wednesday, March 21, 2012 at 8:11 AM, madhusudhana wrote:
-> Hi all,
-> 
-> Will increase in the number of OSD will increase performance in ceph
-> cluster? I mean to say, if ceph cluster is giving ~70MB/s with 3 OSD,
-> will increasing OSD number to 5, increase the performance to ~100MB/s ?
+1) if you don't use btrfs (i.e. xfs) will checksumming still be done? by the OSD's? does the checksumming happen on every data read, or do underused OSD's also checksum their data in the background? (like openstack swift does).  if checksum mismatch, what does the client see, and what actions are taken? for example if you use librados, will the librados api return the read data to the user (even if known to be invalid), throw an error, or will librados try to read from other nodes first to try to return the valid data?) will the disk be marked as failed, or will the system attempt to overwrite the bad file with a good copy?
 
-It should, assuming similar OSD hardware.
-> I have re-created my entire ceph cluster with CentOS 6.2 and kernel 
-> 3.2.11 and ceph 0.43. When i ran some tests, the results are far
-> better than my first cluster results. But, they are not yet near to
-> a normal linux machine or a entry level NetApp storage box. I have tested 
-> with cp, rsync, rm and dd commands. The performance what I am getting from
-> ceph are not satisfactory (test with my actual work load is even 
-> worse). For instance, rsync of 10G directory took 84 mins to complete 
-> in Linux machine (in NetApp it was 89mins). But, the same rsync took like 
-> 10hrs to copy 10G of data.
+2) I'm trying to set up basic rados distributed object storage cluster. I've successfully
+followed http://ceph.newdream.net/wiki/Installing_on_RedHat_or_CentOS, but now I'm stuck trying to configure and actually run the thing.
+(I didn't modify the prefix and the various *dir configure arguments, as I think /usr/local is the best location, for now)
+I found http://ceph.newdream.net/wiki/Simple_test_setup but it's more than 2 years old, the workingdir.conf it refers to doesn't exist anymore.
+is a matter of copying src/sample.ceph.conf to /usr/local/etc, modifying it, and then?
+How to set up a basic rados cluster?
 
-1GB/hour is certainly not good! Does the rsync cover folders with very large numbers of files in them (tens of thousands)? These are currently slow on the MDS, although we can give you some features to enable that should remove that as a factor. (As with the rest of the filesystem, they're not production ready, but we'll probably turn them on by default as soon as we get the time to run more large-scale tests with them.)
-If you aren't using very large folders, then either your MDS is CPU constrained, your OSDs aren't fast enough, or something horrible is happening.
-How much CPU does the ceph-mds process use up while running the rsync?
-What client are you doing the rsync from? (Kernel or ceph-fuse?)
-What are the results of "rados -p data bench write 60"?
-How much memory are your daemons using?
--Greg
+3) I saw in the "lords of ceph" footage somebody mentioning work would start on improving the docs.  Is there any concrete planning on this you can share?
 
+thanks,
+Dieter
