@@ -1,82 +1,48 @@
-From: Samuel Just <sam.just@dreamhost.com>
-Subject: Re: Theoretical questions
-Date: Wed, 21 Mar 2012 10:12:44 -0700
-Message-ID: <CACLRD_3=FU+2jO6=AZ-KAyk7AqZmduffasDmbVh9BbLNhJW9+g@mail.gmail.com>
-References: <CAGEBRh0t-X4-HE5-nyFbAmW7-k+yj7d4FjhiZL_WhQ6CjPToew@mail.gmail.com>
+From: Greg Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: Increase in performance by increasing OSD's ?
+Date: Wed, 21 Mar 2012 10:50:15 -0700
+Message-ID: <E2991B22EA9D489A9C9D02461B1DDC76@dreamhost.com>
+References: <loom.20120321T161007-745@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:50105 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758485Ab2CURMr convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 13:12:47 -0400
-Received: by wibhj6 with SMTP id hj6so6798036wib.1
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 10:12:44 -0700 (PDT)
-In-Reply-To: <CAGEBRh0t-X4-HE5-nyFbAmW7-k+yj7d4FjhiZL_WhQ6CjPToew@mail.gmail.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:57780 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752548Ab2CURuR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 13:50:17 -0400
+Received: by yhmm54 with SMTP id m54so1167296yhm.19
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 10:50:17 -0700 (PDT)
+In-Reply-To: <loom.20120321T161007-745@post.gmane.org>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: madhusudhana <madhusudhana.u.acharya@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-1. The standby mds does not maintain cached metadata in memory or
-serve reads.  When taking over from a failed mds, it reads the
-primary's journal, which does warm up its cache somewhat.  Optionally,
-you can put an mds into standby-replay for an active mds.  In this case=
-,
-the standby-replay mds will continually replay the primary's journal in
-order to more quickly take over in the case of a crash.
+On Wednesday, March 21, 2012 at 8:11 AM, madhusudhana wrote:
+> Hi all,
+> 
+> Will increase in the number of OSD will increase performance in ceph
+> cluster? I mean to say, if ceph cluster is giving ~70MB/s with 3 OSD,
+> will increasing OSD number to 5, increase the performance to ~100MB/s ?
 
-2. Primary-copy is the only strategy currently implemented.
+It should, assuming similar OSD hardware.
+> I have re-created my entire ceph cluster with CentOS 6.2 and kernel 
+> 3.2.11 and ceph 0.43. When i ran some tests, the results are far
+> better than my first cluster results. But, they are not yet near to
+> a normal linux machine or a entry level NetApp storage box. I have tested 
+> with cp, rsync, rm and dd commands. The performance what I am getting from
+> ceph are not satisfactory (test with my actual work load is even 
+> worse). For instance, rsync of 10G directory took 84 mins to complete 
+> in Linux machine (in NetApp it was 89mins). But, the same rsync took like 
+> 10hrs to copy 10G of data.
 
-3. On a sync, we wait for commits to ensure data safety.
+1GB/hour is certainly not good! Does the rsync cover folders with very large numbers of files in them (tens of thousands)? These are currently slow on the MDS, although we can give you some features to enable that should remove that as a factor. (As with the rest of the filesystem, they're not production ready, but we'll probably turn them on by default as soon as we get the time to run more large-scale tests with them.)
+If you aren't using very large folders, then either your MDS is CPU constrained, your OSDs aren't fast enough, or something horrible is happening.
+How much CPU does the ceph-mds process use up while running the rsync?
+What client are you doing the rsync from? (Kernel or ceph-fuse?)
+What are the results of "rados -p data bench write 60"?
+How much memory are your daemons using?
+-Greg
 
-4. I don't quite understand this question.
-
-5.  Currently, there is not a good way to accomplish this using only
-ceph.  Replication is synchronous on writes, so you would be paying
-the latency cost between data centers on each write if you wanted to
-replicate between data centers.  We don't currently support reading fro=
-m
-the closest replica.
-
-
-On Wed, Mar 21, 2012 at 2:22 AM, Borodin Vladimir <v.a.borodin@gmail.co=
-m> wrote:
-> Hi all.
->
-> I've read everything in ceph.newdream.net/docs and
-> ceph.newdream.net/wiki. I've also read some articles from
-> ceph.newdream.net/publications. But I haven't found answers on some
-> questions:
-> 1. there is one active MDS and one in standby mode. Active MDS caches
-> all metadata in RAM. Does standby MDS copy this information to RAM?
-> Will it take metadata from OSDs on every request after primary MDS
-> failure? Do read requests come to standby MDS?
-> 2. what replication strategy on OSDs (primary-copy, chain or splay) i=
-s
-> turned on by default?
-> 3. when does kernel client understand that the write was successfull
-> (when it recieves ack or commit from primary OSD)?
-> 4. I want to have 3 copies of each object. By default there is a way
-> to write only one successfull copy (and two others give a failure),
-> isn't that? Is there a way to turn this off (even if one of three
-> copies failed, the object will be placed to another PG)?
-> 5. if I have several data centers with good network connection, what
-> is the way to provide data locality? For example, most of write and
-> read requests from Spain come to Spanish DC and most of write and rea=
-d
-> requests from Russia come to Russian DC. Is it posible?
->
-> Regards,
-> Vladimir.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
