@@ -1,74 +1,42 @@
-From: Samuel Just <sam.just@dreamhost.com>
-Subject: Re: Just noticed this with ceph-0.43 - ceph-0.39 does not have this
- issue. I'm trying to use Ceph on multiple platforms, one of which is CentOS
- 5. CentOS 5 still uses Python 2.4, and byte-compilation o
-Date: Tue, 20 Mar 2012 15:38:02 -0700
-Message-ID: <CACLRD_1drOhMwMYe-6SFGF9MU8VHSR5rk3zz8b=HnSy6fNnpAA@mail.gmail.com>
-References: <4F68A57802000099000DD35F@collaborate.seakr.com>
+From: Borodin Vladimir <v.a.borodin@gmail.com>
+Subject: Theoretical questions
+Date: Wed, 21 Mar 2012 12:22:58 +0300
+Message-ID: <CAGEBRh0t-X4-HE5-nyFbAmW7-k+yj7d4FjhiZL_WhQ6CjPToew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:52289 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758901Ab2CTWiE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Mar 2012 18:38:04 -0400
-Received: by wejx9 with SMTP id x9so472369wej.19
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Mar 2012 15:38:03 -0700 (PDT)
-In-Reply-To: <4F68A57802000099000DD35F@collaborate.seakr.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:46613 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932168Ab2CUJW7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 05:22:59 -0400
+Received: by iagz16 with SMTP id z16so1324746iag.19
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 02:22:58 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-I believe the with statement came in python 2.5.  It would need to be
-converted to use the older style.
--Sam
+Hi all.
 
-On Tue, Mar 20, 2012 at 2:42 PM, Nick Couchman <Nick.Couchman@seakr.com=
-> wrote:
-> Just noticed this with ceph-0.43 - ceph-0.39 does not have this issue=
-=2E =C2=A0I'm trying to use Ceph on multiple platforms, one of which is=
- CentOS 5. =C2=A0CentOS 5 still uses Python 2.4, and byte-compilation o=
-f the rados.py file fails during the build of ceph 0.43 with the follow=
-ing error:
->
-> Byte-compiling python modules...
-> rados.py =C2=A0File "/usr/lib/python2.4/site-packages/rados.py", line=
- 422
-> =C2=A0 =C2=A0with self.lock:
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0^
-> SyntaxError: invalid syntax
->
-> A quick Google search doesn't turn up anything obviously wrong with t=
-his statement - just that Python 2.4 may not support this? =C2=A0Is the=
-re anything that can be done to make this block of code (Ioctx, some of=
- the aio stuff) compatible with Python 2.4?
->
-> Thanks - Nick
->
->
->
-> --------
-> This e-mail may contain confidential and privileged material for the =
-sole use of the intended recipient. =C2=A0If this email is not intended=
- for you, or you are not responsible for the delivery of this message t=
-o the intended recipient, please note that this message may contain SEA=
-KR Engineering (SEAKR) Privileged/Proprietary Information. =C2=A0In suc=
-h a case, you are strictly prohibited from downloading, photocopying, d=
-istributing or otherwise using this message, its contents or attachment=
-s in any way. =C2=A0If you have received this message in error, please =
-notify us immediately by replying to this e-mail and delete the message=
- from your mailbox. =C2=A0Information contained in this message that do=
-es not relate to the business of SEAKR is neither endorsed by nor attri=
-butable to SEAKR.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I've read everything in ceph.newdream.net/docs and
+ceph.newdream.net/wiki. I've also read some articles from
+ceph.newdream.net/publications. But I haven't found answers on some
+questions:
+1. there is one active MDS and one in standby mode. Active MDS caches
+all metadata in RAM. Does standby MDS copy this information to RAM?
+Will it take metadata from OSDs on every request after primary MDS
+failure? Do read requests come to standby MDS?
+2. what replication strategy on OSDs (primary-copy, chain or splay) is
+turned on by default?
+3. when does kernel client understand that the write was successfull
+(when it recieves ack or commit from primary OSD)?
+4. I want to have 3 copies of each object. By default there is a way
+to write only one successfull copy (and two others give a failure),
+isn't that? Is there a way to turn this off (even if one of three
+copies failed, the object will be placed to another PG)?
+5. if I have several data centers with good network connection, what
+is the way to provide data locality? For example, most of write and
+read requests from Spain come to Spanish DC and most of write and read
+requests from Russia come to Russian DC. Is it posible?
+
+Regards,
+Vladimir.
