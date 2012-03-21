@@ -1,153 +1,117 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Problem in building Ceph on CentOS 6
-Date: Wed, 21 Mar 2012 09:37:41 -0700
-Message-ID: <3779DB66B05F4499814F1FE63B5D81E1@dreamhost.com>
-References: <CALwGbPKfZSBGoTQT+3+3iDv4Bqt2orUTDahc6reObdnLq1cdsw@mail.gmail.com>
- <2588ED1D12494B3EAD14CAD5D6787E9E@dreamhost.com>
- <CALwGbP+_vv1iuuq8dZNafaPcjPZ0qPYH8UoKR3X-tsQvCRXx4A@mail.gmail.com>
- <5A266BFABB6F4473AFCE93EC765D8337@dreamhost.com>
- <CALwGbP+5ZQDObh8WdsT2-ABKOaKOS9YE1hPdsKpGEMhrwvuC5Q@mail.gmail.com>
+From: Samuel Just <sam.just@dreamhost.com>
+Subject: Re: v0.44 released
+Date: Wed, 21 Mar 2012 09:39:18 -0700
+Message-ID: <CACLRD_1-Fq_oR=iGZorm5z-6MpnT=zBOUcLi72=ofKYTf9CEog@mail.gmail.com>
+References: <Pine.LNX.4.64.1203210638450.28797@cobra.newdream.net>
+	<CAMvP8PCofyuio+P0XY0d-DVq8YRkb1wzSajq3K3Wf8Tgg5Xz1g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:63985 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758136Ab2CUQho convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 12:37:44 -0400
-Received: by yenl12 with SMTP id l12so1096800yen.19
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 09:37:44 -0700 (PDT)
-In-Reply-To: <CALwGbP+5ZQDObh8WdsT2-ABKOaKOS9YE1hPdsKpGEMhrwvuC5Q@mail.gmail.com>
-Content-Disposition: inline
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:47713 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758100Ab2CUQjT convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 12:39:19 -0400
+Received: by wgbdr13 with SMTP id dr13so788330wgb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 09:39:18 -0700 (PDT)
+In-Reply-To: <CAMvP8PCofyuio+P0XY0d-DVq8YRkb1wzSajq3K3Wf8Tgg5Xz1g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?Q?=E8=83=A1=E7=80=9A=E6=A3=AE?= <softrank.net@gmail.com>
-Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-I'm not sure what you mean here. Building software never installs confi=
-g files unless you're doing an install as well... =20
+Hi,
 
+The relevant api functions are the omap_* methods of
+ObjectWriteOperation and ObjectReadOperation, which can be found in
+src/include/rados/librados.hpp.  Note, ObjectWriteOperation and
+ObjectReadOperation are transactions which are submitted using
+aio_operate or operate.  src/test/rados-api/aio.cc has some usage
+examples in the OmapPP test.
 
-On Tuesday, March 20, 2012 at 11:20 PM, =E8=83=A1=E7=80=9A=E6=A3=AE wro=
-te:
+-Sam
 
-> I've successfully built ceph, but why can't I see config files?
-> No files in /usr/local/etc/ceph, and no ceph folder under /etc either=
-=2E
-> =20
-> On Tue, Mar 20, 2012 at 3:52 PM, Greg Farnum
-> <gregory.farnum@dreamhost.com (mailto:gregory.farnum@dreamhost.com)> =
-wrote:
-> > You should keep discussion on the list...I think you want to say ye=
-s to all of those, but I'm actually not sure! :)
-> > =20
-> > =20
-> > On Tuesday, March 20, 2012 at 12:20 AM, =E8=83=A1=E7=80=9A=E6=A3=AE=
- wrote:
-> > =20
-> > > Thank you Greg.
-> > > Should I tick on the following options before compiling to enable
-> > > ceph? Are there any other options should I enable?
-> > > =20
-> > > Use in-kernel support for DNS lookup (CEPH_LIB_USE_DNS_RESOLVER)
-> > > Ceph core library (EXPERIMENTAL) (CEPH_LIB)
-> > > Include file:line in ceph debug output (CEPH_LIB_PRETTYDEBUG)
-> > > Ceph distributed file system (EXPERIMENTAL) (CEPH_FS)
-> > > =20
-> > > =20
-> > > On Tue, Mar 20, 2012 at 2:35 PM, Greg Farnum
-> > > <gregory.farnum@dreamhost.com (mailto:gregory.farnum@dreamhost.co=
-m)> wrote:
-> > > > On Monday, March 19, 2012 at 11:21 PM, =E8=83=A1=E7=80=9A=E6=A3=
-=AE wrote:
-> > > > > Hello everyone.
-> > > > > =20
-> > > > > I'm following the steps in
-> > > > > http://ceph.newdream.net/wiki/Building_kernel_client?TPSecNot=
-ice&TPNotCheck
-> > > > > to build ceph on my CentOS.
-> > > > > =20
-> > > > > I've updated my kernel to version 3.2.12 without selecting an=
-y ceph
-> > > > > related configuration options. Then I follow these steps unti=
-l "$ make
-> > > > > -C ceph".
-> > > > =20
-> > > > =20
-> > > > =20
-> > > > =20
-> > > > =20
-> > > > If you're using such a new kernel version, why not just the bui=
-lt-in version of Ceph?
-> > > > =20
-> > > > If you don't want to do that, what branch are you attempting to=
- build from? What's the most recent patch?
-> > > > The backports etc stuff isn't real well-maintained right now bu=
-t this and the build error should let our kernel devs figure out what's=
- going on.
-> > > > -Greg
-> > > > =20
-> > > > > =20
-> > > > > I get the following error message.
-> > > > > =20
-> > > > > =20
-> > > > > > [deltamaster@localhost ceph-client-standalone]$ sudo make -=
-C ceph
-> > > > > > make: Entering directory `/home/deltamaster/ceph-client-sta=
-ndalone/ceph'
-> > > > > > make -C /lib/modules/3.2.12/build M=3D/home/deltamaster/cep=
-h-client-standalone/ceph CONFIG_CEPH_FS=3Dm modules
-> > > > > > make[1]: Entering directory `/usr/src/linux-3.2.12'
-> > > > > > CC [M] /home/deltamaster/ceph-client-standalone/ceph/inode.=
-o
-> > > > > > /home/deltamaster/ceph-client-standalone/ceph/inode.c:95: w=
-arning: initialization from incompatible pointer type
-> > > > > > /home/deltamaster/ceph-client-standalone/ceph/inode.c: In f=
-unction =E2=80=98fill_inode=E2=80=99:
-> > > > > > /home/deltamaster/ceph-client-standalone/ceph/inode.c:623: =
-error: assignment of read-only member =E2=80=98i_nlink=E2=80=99
-> > > > > > /home/deltamaster/ceph-client-standalone/ceph/inode.c: In f=
-unction =E2=80=98ceph_permission=E2=80=99:
-> > > > > > /home/deltamaster/ceph-client-standalone/ceph/inode.c:1810:=
- error: =E2=80=98IPERM_FLAG_RCU=E2=80=99 undeclared (first use in this =
-function)
-> > > > > > /home/deltamaster/ceph-client-standalone/ceph/inode.c:1810:=
- error: (Each undeclared identifier is reported only once
-> > > > > > /home/deltamaster/ceph-client-standalone/ceph/inode.c:1810:=
- error: for each function it appears in.)
-> > > > > > /home/deltamaster/ceph-client-standalone/ceph/inode.c:1816:=
- error: too many arguments to function =E2=80=98generic_permission=E2=80=
-=99
-> > > > > > make[2]: *** [/home/deltamaster/ceph-client-standalone/ceph=
-/inode.o] Error 1
-> > > > > > make[1]: *** [_module_/home/deltamaster/ceph-client-standal=
-one/ceph] Error 2
-> > > > > > make[1]: Leaving directory `/usr/src/linux-3.2.12'
-> > > > > > make: *** [all] Error 2
-> > > > > > make: Leaving directory `/home/deltamaster/ceph-client-stan=
-dalone/ceph'
-> > > > > =20
-> > > > > =20
-> > > > > =20
-> > > > > =20
-> > > > > =20
-> > > > > =20
-> > > > > =20
-> > > > > I've no idea how to solve this.
-> > > > > --
-> > > > > To unsubscribe from this list: send the line "unsubscribe cep=
-h-devel" in
-> > > > > the body of a message to majordomo@vger.kernel.org (mailto:ma=
-jordomo@vger.kernel.org)
-> > > > > More majordomo info at http://vger.kernel.org/majordomo-info.=
-html
-> > > > =20
-> > > =20
-> > =20
-> =20
-
-
-
+On Wed, Mar 21, 2012 at 6:56 AM, Tomasz Paszkowski <ss7pro@gmail.com> w=
+rote:
+> Hi,
+>
+> Can write sth more about new key/value api or point part of the sourc=
+e
+> where we can get familiar with it.
+>
+>
+> On Wed, Mar 21, 2012 at 2:39 PM, Sage Weil <sage@newdream.net> wrote:
+>> v0.44 is ready! =C2=A0Changes since v0.43 include:
+>>
+>> =C2=A0* osd: key/value objects (objects are now blobs, key/value bun=
+dles, and
+>> =C2=A0 xattrs)
+>> =C2=A0* osd: cleaned up PG state, stats
+>> =C2=A0* osd: fixed transaction replay on non-btrfs after ill-timed f=
+ailures
+>> =C2=A0* osd: several recovery fixes
+>> =C2=A0* radosgw: improved PUT performance
+>> =C2=A0* radosgw: improved list objects performance, filtering
+>> =C2=A0* radosgw: manifests for large objects
+>> =C2=A0* radosgw: Swift/S3 ACL interoperability (last set ACL type wi=
+ns)
+>> =C2=A0* librados: new key/value object API
+>> =C2=A0* Ubuntu 12.04 precise packages
+>>
+>> The exciting part of this release is that the key/value "object map"
+>> work has been merged, along with radosgw changes to take advantage o=
+f the
+>> new API. =C2=A0This allows you to use a key/value interface to manag=
+e many
+>> small records in a single object, in addition of the regular object =
+data
+>> and attributes. =C2=A0Keys in the same object are stored together on=
+ disk--just
+>> like object data would be--so there are locality advantages to putti=
+ng
+>> related keys in the same object. =C2=A0However, there are no limits =
+on how many
+>> keys per object beyond concerns about load and space balancing (all =
+keys
+>> in an object are stored together on the same set of Ceph OSDs). =C2=A0=
+This
+>> provides an interesting alternative to conventional distributed key/=
+value
+>> stores like Cassandra that distribute all keys in a single namespace
+>> across all nodes. =C2=A0For example, radosgw now uses the new object=
+ map API to
+>> manage the index object for each bucket.
+>>
+>> For v0.45, we're continuing work on RBD caching, performance and bug
+>> fixes, and working around xattr size limitations in ext3/4.
+>>
+>> You can get v0.44 from the usual locations:
+>>
+>> =C2=A0* Git at git://github.com/ceph/ceph.git
+>> =C2=A0* Tarball at http://ceph.newdream.net/download/ceph-0.44.tar.g=
+z
+>> =C2=A0* For Debian/Ubuntu packages, see
+>> =C2=A0 http://ceph.newdream.net/docs/master/ops/install/mkcephfs/#in=
+stalling-the-packages
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
+>
+>
+>
+> --
+> Tomasz Paszkowski
+> SS7, Asterisk, SAN, Datacenter, Cloud Computing
+> +48500166299
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
+ml
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
