@@ -1,48 +1,80 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Clocks Not Synchronized
-Date: Wed, 21 Mar 2012 09:57:18 -0700
-Message-ID: <A08B7F7C85B549F5AB38DC08F32DB998@dreamhost.com>
-References: <4F699FBA02000099000DD40B@collaborate.seakr.com>
+From: Samuel Just <sam.just@dreamhost.com>
+Subject: Re: Theoretical questions
+Date: Wed, 21 Mar 2012 10:12:44 -0700
+Message-ID: <CACLRD_3=FU+2jO6=AZ-KAyk7AqZmduffasDmbVh9BbLNhJW9+g@mail.gmail.com>
+References: <CAGEBRh0t-X4-HE5-nyFbAmW7-k+yj7d4FjhiZL_WhQ6CjPToew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:63042 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753315Ab2CUQ5W convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 12:57:22 -0400
-Received: by obbeh20 with SMTP id eh20so816513obb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 09:57:21 -0700 (PDT)
-In-Reply-To: <4F699FBA02000099000DD40B@collaborate.seakr.com>
-Content-Disposition: inline
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:50105 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758485Ab2CURMr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Mar 2012 13:12:47 -0400
+Received: by wibhj6 with SMTP id hj6so6798036wib.1
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Mar 2012 10:12:44 -0700 (PDT)
+In-Reply-To: <CAGEBRh0t-X4-HE5-nyFbAmW7-k+yj7d4FjhiZL_WhQ6CjPToew@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Couchman <Nick.Couchman@seakr.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wednesday, March 21, 2012 at 8:30 AM, Nick Couchman wrote:
-> I'm setting up ceph and looking at the output of "ceph -w" and I'm se=
-eing lots of warnings about messages from mon.X being stamped in the fu=
-ture (142 seconds), clocks not synchronized. However, all of these syst=
-ems use NTP, and if I use the "date" command to see the system time, th=
-ey are definitely synchronized to within a second or so - definitely no=
-t out of sync 142 seconds. What else should I check?
-> =20
+1. The standby mds does not maintain cached metadata in memory or
+serve reads.  When taking over from a failed mds, it reads the
+primary's journal, which does warm up its cache somewhat.  Optionally,
+you can put an mds into standby-replay for an active mds.  In this case=
+,
+the standby-replay mds will continually replay the primary's journal in
+order to more quickly take over in the case of a crash.
 
-All the check for future timestamps does is get the time and compare to=
- the one in a lease message. The only thing I can think of is if you've=
- set the "clock offset" parameter on one machine, which seems unlikely=E2=
-=80=A6The other possibilities are that
-1) we somehow broke how we're passing timestamps along and nobody else =
-has seen it. This is unlikely =E2=80=94 we haven't made any changes to =
-this in a long time that I'm aware of.
-2) one of the Monitors is running gettimeofday() and seeing that the pa=
-ssed-along timestamp (from gettimeofday() on the other host) is 142 sec=
-onds in the future.
-So=E2=80=A6try running date on each of them again? :) Unless people are=
- aware of date and gettimeofday() somehow not being in sync?
--Greg
+2. Primary-copy is the only strategy currently implemented.
 
+3. On a sync, we wait for commits to ensure data safety.
+
+4. I don't quite understand this question.
+
+5.  Currently, there is not a good way to accomplish this using only
+ceph.  Replication is synchronous on writes, so you would be paying
+the latency cost between data centers on each write if you wanted to
+replicate between data centers.  We don't currently support reading fro=
+m
+the closest replica.
+
+
+On Wed, Mar 21, 2012 at 2:22 AM, Borodin Vladimir <v.a.borodin@gmail.co=
+m> wrote:
+> Hi all.
+>
+> I've read everything in ceph.newdream.net/docs and
+> ceph.newdream.net/wiki. I've also read some articles from
+> ceph.newdream.net/publications. But I haven't found answers on some
+> questions:
+> 1. there is one active MDS and one in standby mode. Active MDS caches
+> all metadata in RAM. Does standby MDS copy this information to RAM?
+> Will it take metadata from OSDs on every request after primary MDS
+> failure? Do read requests come to standby MDS?
+> 2. what replication strategy on OSDs (primary-copy, chain or splay) i=
+s
+> turned on by default?
+> 3. when does kernel client understand that the write was successfull
+> (when it recieves ack or commit from primary OSD)?
+> 4. I want to have 3 copies of each object. By default there is a way
+> to write only one successfull copy (and two others give a failure),
+> isn't that? Is there a way to turn this off (even if one of three
+> copies failed, the object will be placed to another PG)?
+> 5. if I have several data centers with good network connection, what
+> is the way to provide data locality? For example, most of write and
+> read requests from Spain come to Spanish DC and most of write and rea=
+d
+> requests from Russia come to Russian DC. Is it posible?
+>
+> Regards,
+> Vladimir.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
+ml
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
