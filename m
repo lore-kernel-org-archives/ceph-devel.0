@@ -1,94 +1,58 @@
-From: Sage Weil <sage@newdream.net>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
 Subject: Re: Logging braindump
-Date: Thu, 22 Mar 2012 13:39:22 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1203221332520.25117@cobra.newdream.net>
+Date: Thu, 22 Mar 2012 15:32:11 -0700
+Message-ID: <CA+qbEUPGMAM9CskZ5dKTatB8KoU83Hom3Te3=LnjvE1kgOG32A@mail.gmail.com>
 References: <CAORUGqCqK0WUEGiXyM+6KYfWswPrW_eV=qp8Q2CCAUSXguYdDA@mail.gmail.com>
- <CA+qbEUPQcVqmUgNYXu6+U4+QCUjxsSkq9pVQ98=Es8rKscT12Q@mail.gmail.com>
- <4F6B6CB0.1000400@dreamhost.com> <CAORUGqBQ=EKHfSFwRO65wLfJBRT4Oh=OFoXKdvG9uwYRisuJJA@mail.gmail.com>
+	<CA+qbEUPQcVqmUgNYXu6+U4+QCUjxsSkq9pVQ98=Es8rKscT12Q@mail.gmail.com>
+	<4F6B6CB0.1000400@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1719851930-1332448762=:25117"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40548 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758619Ab2CVUjW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Mar 2012 16:39:22 -0400
-In-Reply-To: <CAORUGqBQ=EKHfSFwRO65wLfJBRT4Oh=OFoXKdvG9uwYRisuJJA@mail.gmail.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:62900 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751849Ab2CVWcM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Mar 2012 18:32:12 -0400
+Received: by wgbdr13 with SMTP id dr13so1714021wgb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Mar 2012 15:32:11 -0700 (PDT)
+In-Reply-To: <4F6B6CB0.1000400@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: Mark Kampe <Mark.Kampe@dreamhost.com>, Colin McCabe <cmccabe@alumni.cmu.edu>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Kampe <Mark.Kampe@dreamhost.com>
+Cc: Tommi Virtanen <tommi.virtanen@dreamhost.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Thu, Mar 22, 2012 at 11:17 AM, Mark Kampe <Mark.Kampe@dreamhost.com>=
+ wrote:
+> On 03/22/12 09:38, Colin McCabe wrote:
+>> An mmap'ed buffer, even a lockless one, is a simple beast. =A0Do you
+>> really need a whole library just for that? =A0Maybe I'm just
+>> old-fashioned.
+>
+>
+> IMHO, surprisingly few things involving large numbers of performance
+> critical threads turn out to be simple :-) =A0For example:
+>
+> =A0 =A0 =A0 =A0If we are logging a lot, buffer management has the pot=
+ential
+> =A0 =A0 =A0 =A0to become a bottle-neck ... so we need to be able to a=
+llocate
+> =A0 =A0 =A0 =A0a record of the required size from the circular buffer
+> =A0 =A0 =A0 =A0with atomic instructions (at least in non-wrap situati=
+ons).
+>
+> =A0 =A0 =A0 =A0But if records are allocated and then filled, we have =
+to
+> =A0 =A0 =A0 =A0consider how to handle the case where the filling is
+> =A0 =A0 =A0 =A0delayed, and the reader catches up with an incomplete
+> =A0 =A0 =A0 =A0log record (e.g. skip it, wait how long, ???).
 
---557981400-1719851930-1332448762=:25117
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+The easiest solution is to store pointers in the circular buffer
+rather than directly writing to it.   Another solution would be epoch
+numbers that increment each time the log buffer wraps around.
 
-On Thu, 22 Mar 2012, Tommi Virtanen wrote:
-> > =A0 =A0 =A0 =A0If we are logging a lot, buffer management has the poten=
-tial
-> > =A0 =A0 =A0 =A0to become a bottle-neck ... so we need to be able to all=
-ocate
-> > =A0 =A0 =A0 =A0a record of the required size from the circular buffer
-> > =A0 =A0 =A0 =A0with atomic instructions (at least in non-wrap situation=
-s).
-> >
-> > =A0 =A0 =A0 =A0But if records are allocated and then filled, we have to
-> > =A0 =A0 =A0 =A0consider how to handle the case where the filling is
-> > =A0 =A0 =A0 =A0delayed, and the reader catches up with an incomplete
-> > =A0 =A0 =A0 =A0log record (e.g. skip it, wait how long, ???).
-> >
-> > =A0 =A0 =A0 =A0And while we hope this will never happen, we have to dea=
-l
-> > =A0 =A0 =A0 =A0with what happens when the writer catches up with the
-> > =A0 =A0 =A0 =A0reader, or worse, an incomplete log block ... where we m=
-ight
-> > =A0 =A0 =A0 =A0have to determine whether or not the owner is deceased (=
-making
-> > =A0 =A0 =A0 =A0it safe to break his record lock) ... or should we simpl=
-y take
-> > =A0 =A0 =A0 =A0down the service at that point (on the assumption that s=
-omething
-> > =A0 =A0 =A0 =A0has gone very wrong).
->=20
-> The Disruptor design handles all these, is simple in the sense of
-> "that's what I would have built", and looks good.
-
-My only problem with the disrupter stuff was that, as i was reading it, it=
-=20
-was very much like "yeah, given the limitations of Java, that's what you=20
-would do," but we're in a slightly different boat.  i.e., they use a=20
-ringbuffer of pointers to preallocated objects.
-
-My guess is that the best bet would be preallocated Entry objects (either=
-=20
-in a flat buffer or on the heap) with a preallocated per-entry buffer=20
-(say, 80 chars) that will spill over into something slow/simple when=20
-necessary.  And something disrupter-like to claim slots in the ringbuffer.
-
-But in any case, I think the key is first measuring how much time we spend
-
- - rendering the current entries
- - queueing each entry
-
-under varying levels of concurrency.  With the current code, for instance,=
-=20
-I think most time is spent convering crap into strings and waiting for a=20
-blocking flush.  We aren't logging millions of items, only hundreds.
-
+C.
 --
-
-Ignoring the nitty gitty of the log queueing, though... does the basic=20
-framework make sense?  That is,
-
- - a set of predefined subsystems, each with their own log levels
- - a level to control which entries are gathered/rendered, with a fast=20
-   contitional check (in, say, dout macro)
- - a level to control which entries are logged d
- - a dump on crash (or other event) of everything we have
-
-?
-
-sage
---557981400-1719851930-1332448762=:25117--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
