@@ -1,87 +1,490 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: Logging braindump
-Date: Thu, 22 Mar 2012 11:29:03 -0700
-Message-ID: <CAORUGqBQ=EKHfSFwRO65wLfJBRT4Oh=OFoXKdvG9uwYRisuJJA@mail.gmail.com>
-References: <CAORUGqCqK0WUEGiXyM+6KYfWswPrW_eV=qp8Q2CCAUSXguYdDA@mail.gmail.com>
- <CA+qbEUPQcVqmUgNYXu6+U4+QCUjxsSkq9pVQ98=Es8rKscT12Q@mail.gmail.com> <4F6B6CB0.1000400@dreamhost.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: Mysteriously poor write performance
+Date: Thu, 22 Mar 2012 21:40:26 +0300
+Message-ID: <CABYiri-j3DAraN37FDZSEuKi127rTz8WvbTDizkZ+BwfXeVSmQ@mail.gmail.com>
+References: <CABYiri-C1ftxsM3dWqtcRzXBYoddRbHug=TA6j+0EY-cuMt3Mw@mail.gmail.com>
+ <Pine.LNX.4.64.1203181121460.580@cobra.newdream.net> <CABYiri9hcWdPv5Xs_X6S+tM6-U_uGq68pnTzetc=cVxK7NiNQg@mail.gmail.com>
+ <4825A243C5604C48A3E022008ED974D0@dreamhost.com> <CABYiri9omWz_vSZxL_McYg5bMoW20x6TBCsXHTHwgZ0hqUxofA@mail.gmail.com>
+ <4F677D95.8040208@dreamhost.com> <CABYiri-AV6WK-H7K9oSwSnMSAgB6ZAHLDn2Ar6omdS=8EAjtfA@mail.gmail.com>
+ <CACLRD_2+zKBfmOm-+1GT1+zMtTQ5B0e21_J3C7Qfw+YCH5+o=w@mail.gmail.com>
+ <CABYiri9An0sYP6pP1xU_Xjz7yhXdv1eF-4q-DqtqygYH76rMHw@mail.gmail.com>
+ <CACLRD_0BK0WVX6=-n3doF680efibNVjq_qB_DwxF73MXNWQ_LA@mail.gmail.com>
+ <CABYiri--y7zyS_+GvNqCayQd6PXyU8R0GEiBC0BD885DK6w7Rw@mail.gmail.com>
+ <CACLRD_1Ndcoz3+aOzn4O-7DLL-ePV8ujeGyaN9AeHXTxsO2AeA@mail.gmail.com>
+ <CABYiri-J-+SsqXOq=ircP-v80rfiXjoFX20wLa0Pfc7KvyA0SQ@mail.gmail.com>
+ <CACLRD_1PWntwwyWTWij1OuC+LaSU=jz5gittQ5vwqGSXQnyzeQ@mail.gmail.com>
+ <CABYiri_bjt9Equj4JcoVsN5AEMxxX_qaNNBYZzCfi2rirsTCkA@mail.gmail.com>
+ <CABYiri8TfJXC7j3L5QXXFO2nmtwiyoP=YSGCZse0VrsY+_zbLw@mail.gmail.com>
+ <CACLRD_2fcSnVOq4JSQ6m5OCRKKZQH3QVpYT6hM6JHDVMxH0NsQ@mail.gmail.com>
+ <CABYiri8qHCv6=dFUc-8tFo9bxEtUTQhV1cE9K=CK8hbhW3u10A@mail.gmail.com> <CACLRD_0CxGWdMerehzAd4yko3COeufZFhGPE-v7QOmMs7fSvYg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:43735 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753263Ab2CVS3Y convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Mar 2012 14:29:24 -0400
-Received: by ghrr11 with SMTP id r11so2045316ghr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Mar 2012 11:29:24 -0700 (PDT)
-In-Reply-To: <4F6B6CB0.1000400@dreamhost.com>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:44460 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758713Ab2CVSks convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 22 Mar 2012 14:40:48 -0400
+Received: by wibhr17 with SMTP id hr17so1036325wib.1
+        for <ceph-devel@vger.kernel.org>; Thu, 22 Mar 2012 11:40:46 -0700 (PDT)
+In-Reply-To: <CACLRD_0CxGWdMerehzAd4yko3COeufZFhGPE-v7QOmMs7fSvYg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kampe <Mark.Kampe@dreamhost.com>
-Cc: Colin McCabe <cmccabe@alumni.cmu.edu>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Samuel Just <sam.just@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Mar 22, 2012 at 11:17, Mark Kampe <Mark.Kampe@dreamhost.com> wr=
-ote:
-> (a) I actually favor not simply mmaping the circular buffer,
-> =C2=A0 =C2=A0but having a program that pulls the data out of memory
-> =C2=A0 =C2=A0and writes it to disk (ala Varnish). =C2=A0In addition t=
-o doing
-> =C2=A0 =C2=A0huge writes (greatly reducing the write overhead), it ca=
-n
-> =C2=A0 =C2=A0filter what it processes, so that we have extensive logg=
-ing
-> =C2=A0 =C2=A0for the last few seconds, and more manageable logs on di=
-sk
-> =C2=A0 =C2=A0extending farther back in time (modulo log rotation).
+random-rw: (g=3D0): rw=3Dwrite, bs=3D4K-4K/4K-4K, ioengine=3Dsync, iode=
+pth=3D2
+Starting 1 process
+Jobs: 1 (f=3D1): [W] [100.0% done] [0K/35737K /s] [0/8725 iops] [eta 00=
+m:00s]
+random-rw: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D9647
+  write: io=3D163840KB, bw=3D37760KB/s, iops=3D9439, runt=3D  4339msec
+    clat (usec): min=3D70, max=3D39801, avg=3D104.19, stdev=3D324.29
+    bw (KB/s) : min=3D30480, max=3D43312, per=3D98.83%, avg=3D37317.00,=
+ stdev=3D5770.28
+  cpu          : usr=3D1.84%, sys=3D13.00%, ctx=3D40961, majf=3D0, minf=
+=3D26
+  IO depths    : 1=3D100.0%, 2=3D0.0%, 4=3D0.0%, 8=3D0.0%, 16=3D0.0%, 3=
+2=3D0.0%, >=3D64=3D0.0%
+     submit    : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, =
+64=3D0.0%, >=3D64=3D0.0%
+     complete  : 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D0.0%, 32=3D0.0%, =
+64=3D0.0%, >=3D64=3D0.0%
+     issued r/w: total=3D0/40960, short=3D0/0
+     lat (usec): 100=3D79.69%, 250=3D19.89%, 500=3D0.12%, 750=3D0.12%, =
+1000=3D0.11%
+     lat (msec): 2=3D0.01%, 4=3D0.01%, 10=3D0.03%, 20=3D0.01%, 50=3D0.0=
+1%
 
-varnishlog communicates via a mmap'ed ringbuffer. These are not in conf=
-lict.
 
-> (b) The most interesting logs are probably the ones in coredumps
-> =C2=A0 =C2=A0(that didn't make it out to disk) for which we want a
-> =C2=A0 =C2=A0crawler/extractor anyway. =C2=A0It probably isn't very h=
-ard to
-> =C2=A0 =C2=A0make the program that extracts logs from memory also be
-> =C2=A0 =C2=A0able to pick the pockets of dead bodies (put a big self
-> =C2=A0 =C2=A0identifying header on the front of each buffer).
-
-A single memory area for this makes it easier.. that's why I like the
-ringbuffer.
-
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0If we are logging a lot, buffer management=
- has the potential
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0to become a bottle-neck ... so we need to =
-be able to allocate
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0a record of the required size from the cir=
-cular buffer
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0with atomic instructions (at least in non-=
-wrap situations).
+On Thu, Mar 22, 2012 at 9:26 PM, Samuel Just <sam.just@dreamhost.com> w=
+rote:
+> Our journal writes are actually sequential. =C2=A0Could you send FIO
+> results for sequential 4k writes osd.0's journal and osd.1's journal?
+> -Sam
 >
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0But if records are allocated and then fill=
-ed, we have to
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0consider how to handle the case where the =
-filling is
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0delayed, and the reader catches up with an=
- incomplete
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0log record (e.g. skip it, wait how long, ?=
-??).
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0And while we hope this will never happen, =
-we have to deal
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0with what happens when the writer catches =
-up with the
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0reader, or worse, an incomplete log block =
-=2E.. where we might
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0have to determine whether or not the owner=
- is deceased (making
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0it safe to break his record lock) ... or s=
-hould we simply take
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0down the service at that point (on the ass=
-umption that something
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0has gone very wrong).
-
-The Disruptor design handles all these, is simple in the sense of
-"that's what I would have built", and looks good.
+> On Thu, Mar 22, 2012 at 5:21 AM, Andrey Korolyov <andrey@xdel.ru> wro=
+te:
+>> FIO output for journal partition, directio enabled, seems good(same
+>> results for ext4 on other single sata disks).
+>>
+>> random-rw: (g=3D0): rw=3Drandwrite, bs=3D4K-4K/4K-4K, ioengine=3Dsyn=
+c, iodepth=3D2
+>> Starting 1 process
+>> Jobs: 1 (f=3D1): [w] [100.0% done] [0K/3219K /s] [0/786 iops] [eta 0=
+0m:00s]
+>> random-rw: (groupid=3D0, jobs=3D1): err=3D 0: pid=3D21926
+>> =C2=A0write: io=3D163840KB, bw=3D2327KB/s, iops=3D581, runt=3D 70403=
+msec
+>> =C2=A0 =C2=A0clat (usec): min=3D122, max=3D441551, avg=3D1714.52, st=
+dev=3D7565.04
+>> =C2=A0 =C2=A0bw (KB/s) : min=3D =C2=A0552, max=3D 3880, per=3D100.61=
+%, avg=3D2341.23, stdev=3D480.05
+>> =C2=A0cpu =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0: usr=3D0.42%, sys=3D1.3=
+4%, ctx=3D40976, majf=3D0, minf=3D42
+>> =C2=A0IO depths =C2=A0 =C2=A0: 1=3D100.0%, 2=3D0.0%, 4=3D0.0%, 8=3D0=
+=2E0%, 16=3D0.0%, 32=3D0.0%, >=3D64=3D0.0%
+>> =C2=A0 =C2=A0 submit =C2=A0 =C2=A0: 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, =
+16=3D0.0%, 32=3D0.0%, 64=3D0.0%, >=3D64=3D0.0%
+>> =C2=A0 =C2=A0 complete =C2=A0: 0=3D0.0%, 4=3D100.0%, 8=3D0.0%, 16=3D=
+0.0%, 32=3D0.0%, 64=3D0.0%, >=3D64=3D0.0%
+>> =C2=A0 =C2=A0 issued r/w: total=3D0/40960, short=3D0/0
+>> =C2=A0 =C2=A0 lat (usec): 250=3D31.70%, 500=3D0.68%, 750=3D0.10%, 10=
+00=3D0.63%
+>> =C2=A0 =C2=A0 lat (msec): 2=3D41.31%, 4=3D20.91%, 10=3D4.40%, 20=3D0=
+=2E17%, 50=3D0.07%
+>> =C2=A0 =C2=A0 lat (msec): 500=3D0.04%
+>>
+>>
+>>
+>> On Thu, Mar 22, 2012 at 1:20 AM, Samuel Just <sam.just@dreamhost.com=
+> wrote:
+>>> (CCing the list)
+>>>
+>>> So, the problem isn't the bandwidth. =C2=A0Before we respond to the=
+ client,
+>>> we write the operation to the journal. =C2=A0In this case, that ope=
+ration
+>>> is taking >1s per operation on osd.1. =C2=A0Both rbd and rados benc=
+h will
+>>> only allow a limited number of ops in flight at a time, so this
+>>> latency is killing your throughput. =C2=A0For comparison, the laten=
+cy for
+>>> writing to the journal on osd.0 is < .3s. =C2=A0Can you measure dir=
+ect io
+>>> latency for writes to your osd.1 journal file?
+>>> -Sam
+>>>
+>>> On Wed, Mar 21, 2012 at 1:56 PM, Andrey Korolyov <andrey@xdel.ru> w=
+rote:
+>>>> Oh, you may confuse with Zabbix metrics - y-axis means Megabytes/s=
+,
+>>>> not Megabits.
+>>>>
+>>>> On Thu, Mar 22, 2012 at 12:53 AM, Andrey Korolyov <andrey@xdel.ru>=
+ wrote:
+>>>>> [global]
+>>>>> =C2=A0 =C2=A0 =C2=A0 log dir =3D /ceph/out
+>>>>> =C2=A0 =C2=A0 =C2=A0 log_file =3D ""
+>>>>> =C2=A0 =C2=A0 =C2=A0 logger dir =3D /ceph/log
+>>>>> =C2=A0 =C2=A0 =C2=A0 pid file =3D /ceph/out/$type$id.pid
+>>>>> [mds]
+>>>>> =C2=A0 =C2=A0 =C2=A0 pid file =3D /ceph/out/$name.pid
+>>>>> =C2=A0 =C2=A0 =C2=A0 lockdep =3D 1
+>>>>> =C2=A0 =C2=A0 =C2=A0 mds log max segments =3D 2
+>>>>> [osd]
+>>>>> =C2=A0 =C2=A0 =C2=A0 lockdep =3D 1
+>>>>> =C2=A0 =C2=A0 =C2=A0 filestore_xattr_use_omap =3D 1
+>>>>> =C2=A0 =C2=A0 =C2=A0 osd data =3D /ceph/dev/osd$id
+>>>>> =C2=A0 =C2=A0 =C2=A0 osd journal =3D /ceph/meta/journal
+>>>>> =C2=A0 =C2=A0 =C2=A0 osd journal size =3D 100
+>>>>> [mon]
+>>>>> =C2=A0 =C2=A0 =C2=A0 lockdep =3D 1
+>>>>> =C2=A0 =C2=A0 =C2=A0 mon data =3D /ceph/dev/mon$id
+>>>>> [mon.0]
+>>>>> =C2=A0 =C2=A0 =C2=A0 host =3D 172.20.1.32
+>>>>> =C2=A0 =C2=A0 =C2=A0 mon addr =3D 172.20.1.32:6789
+>>>>> [mon.1]
+>>>>> =C2=A0 =C2=A0 =C2=A0 host =3D 172.20.1.33
+>>>>> =C2=A0 =C2=A0 =C2=A0 mon addr =3D 172.20.1.33:6789
+>>>>> [mon.2]
+>>>>> =C2=A0 =C2=A0 =C2=A0 host =3D 172.20.1.35
+>>>>> =C2=A0 =C2=A0 =C2=A0 mon addr =3D 172.20.1.35:6789
+>>>>> [osd.0]
+>>>>> =C2=A0 =C2=A0 =C2=A0 host =3D 172.20.1.32
+>>>>> [osd.1]
+>>>>> =C2=A0 =C2=A0 =C2=A0 host =3D 172.20.1.33
+>>>>> [mds.a]
+>>>>> =C2=A0 =C2=A0 =C2=A0 host =3D 172.20.1.32
+>>>>>
+>>>>> /dev/sda1 on /ceph type ext4 (rw,barrier=3D0,user_xattr)
+>>>>> /dev/mapper/system-cephmeta on /ceph/meta type ext4 (rw,barrier=3D=
+0,user_xattr)
+>>>>> Simple performance tests on those fs shows ~133Mb/s for /ceph and
+>>>>> metadata/. Also both machines do not hold anything else which may
+>>>>> impact osd.
+>>>>>
+>>>>> Also please note of following:
+>>>>>
+>>>>> http://i.imgur.com/ZgFdO.png
+>>>>>
+>>>>> First two peaks are related to running rados bench, then goes clu=
+ster
+>>>>> recreation, automated debian install and final peaks are dd test.
+>>>>> Surely I can have more precise graphs, but current one probably e=
+nough
+>>>>> to state a situation - rbd utilizing about a quarter of possible
+>>>>> bandwidth(if we can count rados bench as 100%).
+>>>>>
+>>>>> On Thu, Mar 22, 2012 at 12:39 AM, Samuel Just <sam.just@dreamhost=
+=2Ecom> wrote:
+>>>>>> Hmm, there seem to be writes taking as long as 1.5s to hit journ=
+al on
+>>>>>> osd.1... =C2=A0Could you post your ceph.conf? =C2=A0Might there =
+be a problem
+>>>>>> with the osd.1 journal disk?
+>>>>>> -Sam
+>>>>>>
+>>>>>> On Wed, Mar 21, 2012 at 1:25 PM, Andrey Korolyov <andrey@xdel.ru=
+> wrote:
+>>>>>>> Oh, sorry - they probably inherited rights from log files, fixe=
+d.
+>>>>>>>
+>>>>>>> On Thu, Mar 22, 2012 at 12:17 AM, Samuel Just <sam.just@dreamho=
+st.com> wrote:
+>>>>>>>> I get 403 Forbidden when I try to download any of the files.
+>>>>>>>> -Sam
+>>>>>>>>
+>>>>>>>> On Wed, Mar 21, 2012 at 11:51 AM, Andrey Korolyov <andrey@xdel=
+=2Eru> wrote:
+>>>>>>>>> http://xdel.ru/downloads/ceph-logs/
+>>>>>>>>>
+>>>>>>>>> 1/ contains logs related to bench initiated at the osd0 machi=
+ne and 2/
+>>>>>>>>> - at osd1.
+>>>>>>>>>
+>>>>>>>>> On Wed, Mar 21, 2012 at 8:54 PM, Samuel Just <sam.just@dreamh=
+ost.com> wrote:
+>>>>>>>>>> Hmm, I'm seeing some very high latency on ops sent to osd.1.=
+ =C2=A0Can you
+>>>>>>>>>> post osd.1's logs?
+>>>>>>>>>> -Sam
+>>>>>>>>>>
+>>>>>>>>>> On Wed, Mar 21, 2012 at 3:51 AM, Andrey Korolyov <andrey@xde=
+l.ru> wrote:
+>>>>>>>>>>> Here, please: http://xdel.ru/downloads/ceph.log.gz
+>>>>>>>>>>>
+>>>>>>>>>>> Sometimes 'cur MB/s ' shows zero during rados bench, even i=
+f any debug
+>>>>>>>>>>> output disabled and log_file set to the empty value, hope i=
+t`s okay.
+>>>>>>>>>>>
+>>>>>>>>>>> On Wed, Mar 21, 2012 at 2:36 AM, Samuel Just <sam.just@drea=
+mhost.com> wrote:
+>>>>>>>>>>>> Can you set osd and filestore debugging to 20, restart the=
+ osds, run
+>>>>>>>>>>>> rados bench as before, and post the logs?
+>>>>>>>>>>>> -Sam Just
+>>>>>>>>>>>>
+>>>>>>>>>>>> On Tue, Mar 20, 2012 at 1:37 PM, Andrey Korolyov <andrey@x=
+del.ru> wrote:
+>>>>>>>>>>>>> rados bench 60 write -p data
+>>>>>>>>>>>>> <skip>
+>>>>>>>>>>>>> Total time run: =C2=A0 =C2=A0 =C2=A0 =C2=A061.217676
+>>>>>>>>>>>>> Total writes made: =C2=A0 =C2=A0 989
+>>>>>>>>>>>>> Write size: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A04194=
+304
+>>>>>>>>>>>>> Bandwidth (MB/sec): =C2=A0 =C2=A064.622
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Average Latency: =C2=A0 =C2=A0 =C2=A0 0.989608
+>>>>>>>>>>>>> Max latency: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 2.21701
+>>>>>>>>>>>>> Min latency: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 0.255315
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Here a snip from osd log, seems write size is okay.
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> 2012-03-21 00:00:39.397066 7fdda86a7700 osd.0 10 pg[0.58(=
+ v 10'83
+>>>>>>>>>>>>> (0'0,10'83] n=3D50 ec=3D1 les/c 9/9 8/8/6) [0,1] r=3D0 lp=
+r=3D8 mlcod 10'82
+>>>>>>>>>>>>> active+clean] =C2=A0removing repgather(0x31b5360 applying=
+ 10'83 rep_tid=3D597
+>>>>>>>>>>>>> wfack=3D wfdisk=3D op=3Dosd_op(client.4599.0:2533 rb.0.2.=
+000000000040 [write
+>>>>>>>>>>>>> 1220608~4096] 0.17eb9fd8) v4)
+>>>>>>>>>>>>> 2012-03-21 00:00:39.397086 7fdda86a7700 osd.0 10 pg[0.58(=
+ v 10'83
+>>>>>>>>>>>>> (0'0,10'83] n=3D50 ec=3D1 les/c 9/9 8/8/6) [0,1] r=3D0 lp=
+r=3D8 mlcod 10'82
+>>>>>>>>>>>>> active+clean] =C2=A0 =C2=A0q front is repgather(0x31b5360=
+ applying 10'83
+>>>>>>>>>>>>> rep_tid=3D597 wfack=3D wfdisk=3D op=3Dosd_op(client.4599.=
+0:2533
+>>>>>>>>>>>>> rb.0.2.000000000040 [write 1220608~4096] 0.17eb9fd8) v4)
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Sorry for my previous question about rbd chunks, it was r=
+eally stupid :)
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> On Mon, Mar 19, 2012 at 10:40 PM, Josh Durgin <josh.durgi=
+n@dreamhost.com> wrote:
+>>>>>>>>>>>>>> On 03/19/2012 11:13 AM, Andrey Korolyov wrote:
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> Nope, I`m using KVM for rbd guests. Surely I`ve been no=
+ticed that Sage
+>>>>>>>>>>>>>>> mentioned too small value and I`ve changed it to 64M be=
+fore posting
+>>>>>>>>>>>>>>> previous message with no success - both 8M and this val=
+ue cause a
+>>>>>>>>>>>>>>> performance drop. When I tried to wrote small amount of=
+ data that can
+>>>>>>>>>>>>>>> be compared to writeback cache size(both on raw device =
+and ext3 with
+>>>>>>>>>>>>>>> sync option), following results were made:
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> I just want to clarify that the writeback window isn't a=
+ full writeback
+>>>>>>>>>>>>>> cache - it doesn't affect reads, and does not help with =
+request merging etc.
+>>>>>>>>>>>>>> It simply allows a bunch of writes to be in flight while=
+ acking the write to
+>>>>>>>>>>>>>> the guest immediately. We're working on a full-fledged w=
+riteback cache that
+>>>>>>>>>>>>>> to replace the writeback window.
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D10 o=
+flag=3Ddirect (almost
+>>>>>>>>>>>>>>> same without oflag there and in the following samples)
+>>>>>>>>>>>>>>> 10+0 records in
+>>>>>>>>>>>>>>> 10+0 records out
+>>>>>>>>>>>>>>> 104857600 bytes (105 MB) copied, 0.864404 s, 121 MB/s
+>>>>>>>>>>>>>>> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D20 o=
+flag=3Ddirect
+>>>>>>>>>>>>>>> 20+0 records in
+>>>>>>>>>>>>>>> 20+0 records out
+>>>>>>>>>>>>>>> 209715200 bytes (210 MB) copied, 6.67271 s, 31.4 MB/s
+>>>>>>>>>>>>>>> dd if=3D/dev/zero of=3D/var/img.1 bs=3D10M count=3D30 o=
+flag=3Ddirect
+>>>>>>>>>>>>>>> 30+0 records in
+>>>>>>>>>>>>>>> 30+0 records out
+>>>>>>>>>>>>>>> 314572800 bytes (315 MB) copied, 12.4806 s, 25.2 MB/s
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> and so on. Reference test with bs=3D1M and count=3D2000=
+ has slightly worse
+>>>>>>>>>>>>>>> results _with_ writeback cache than without, as I`ve me=
+ntioned before.
+>>>>>>>>>>>>>>> =C2=A0Here the bench results, they`re almost equal on b=
+oth nodes:
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> bench: wrote 1024 MB in blocks of 4096 KB in 9.037468 s=
+ec at 113 MB/sec
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> One thing to check is the size of the writes that are ac=
+tually being sent by
+>>>>>>>>>>>>>> rbd. The guest is probably splitting them into relativel=
+y small (128 or
+>>>>>>>>>>>>>> 256k) writes. Ideally it would be sending 4k writes, and=
+ this should be a
+>>>>>>>>>>>>>> lot faster.
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> You can see the writes being sent by adding debug_ms=3D1=
+ to the client or osd.
+>>>>>>>>>>>>>> The format is osd_op(.*[write OFFSET~LENGTH]).
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> Also, because I`ve not mentioned it before, network per=
+formance is
+>>>>>>>>>>>>>>> enough to hold fair gigabit connectivity with MTU 1500.=
+ Seems that it
+>>>>>>>>>>>>>>> is not interrupt problem or something like it - even if=
+ ceph-osd,
+>>>>>>>>>>>>>>> ethernet card queues and kvm instance pinned to differe=
+nt sets of
+>>>>>>>>>>>>>>> cores, nothing changes.
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> On Mon, Mar 19, 2012 at 8:59 PM, Greg Farnum
+>>>>>>>>>>>>>>> <gregory.farnum@dreamhost.com> =C2=A0wrote:
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> It sounds like maybe you're using Xen? The "rbd writeb=
+ack window" option
+>>>>>>>>>>>>>>>> only works for userspace rbd implementations (eg, KVM)=
+=2E
+>>>>>>>>>>>>>>>> If you are using KVM, you probably want 81920000 (~80M=
+B) rather than
+>>>>>>>>>>>>>>>> 8192000 (~8MB).
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> What options are you running dd with? If you run a rad=
+os bench from both
+>>>>>>>>>>>>>>>> machines, what do the results look like?
+>>>>>>>>>>>>>>>> Also, can you do the ceph osd bench on each of your OS=
+Ds, please?
+>>>>>>>>>>>>>>>> (http://ceph.newdream.net/wiki/Troubleshooting#OSD_per=
+formance)
+>>>>>>>>>>>>>>>> -Greg
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> On Monday, March 19, 2012 at 6:46 AM, Andrey Korolyov =
+wrote:
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> More strangely, writing speed drops down by fifteen p=
+ercent when this
+>>>>>>>>>>>>>>>>> option was set in vm` config(instead of result from
+>>>>>>>>>>>>>>>>> http://www.mail-archive.com/ceph-devel@vger.kernel.or=
+g/msg03685.html).
+>>>>>>>>>>>>>>>>> As I mentioned, I`m using 0.43, but due to crashed os=
+ds, ceph has been
+>>>>>>>>>>>>>>>>> recompiled with e43546dee9246773ffd6877b4f9495f1ec61c=
+d55 and
+>>>>>>>>>>>>>>>>> 1468d95101adfad44247016a1399aab6b86708d2 - both cases=
+ caused crashes
+>>>>>>>>>>>>>>>>> under heavy load.
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> On Sun, Mar 18, 2012 at 10:22 PM, Sage Weil<sage@newd=
+ream.net
+>>>>>>>>>>>>>>>>> (mailto:sage@newdream.net)> =C2=A0wrote:
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> On Sat, 17 Mar 2012, Andrey Korolyov wrote:
+>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>> Hi,
+>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>> I`ve did some performance tests at the following co=
+nfiguration:
+>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>> mon0, osd0 and mon1, osd1 - two twelve-core r410 wi=
+th 32G ram, mon2 -
+>>>>>>>>>>>>>>>>>>> dom0 with three dedicated cores and 1.5G, mostly id=
+le. First three
+>>>>>>>>>>>>>>>>>>> disks on each r410 arranged into raid0 and holds os=
+d data when fourth
+>>>>>>>>>>>>>>>>>>> holds os and osd` journal partition, all ceph-relat=
+ed stuff mounted on
+>>>>>>>>>>>>>>>>>>> the ext4 without barriers.
+>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>> Firstly, I`ve noticed about a difference of benchma=
+rk performance and
+>>>>>>>>>>>>>>>>>>> write speed through rbd from small kvm instance run=
+ning on one of
+>>>>>>>>>>>>>>>>>>> first two machines - when bench gave me about 110Mb=
+/s, writing zeros
+>>>>>>>>>>>>>>>>>>> to raw block device inside vm with dd was at top sp=
+eed about 45 mb/s,
+>>>>>>>>>>>>>>>>>>> for vm`fs (ext4 with default options) performance d=
+rops to ~23Mb/s.
+>>>>>>>>>>>>>>>>>>> Things get worse, when I`ve started second vm at se=
+cond host and tried
+>>>>>>>>>>>>>>>>>>> to continue same dd tests simultaneously - performa=
+nce fairly divided
+>>>>>>>>>>>>>>>>>>> by half for each instance :). Enabling jumbo frames=
+, playing with cpu
+>>>>>>>>>>>>>>>>>>> affinity for ceph and vm instances and trying diffe=
+rent TCP congestion
+>>>>>>>>>>>>>>>>>>> protocols gave no effect at all - with DCTCP I have=
+ slightly smoother
+>>>>>>>>>>>>>>>>>>> network load graph and that`s all.
+>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>> Can ml please suggest anything to try to improve pe=
+rformance?
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> Can you try setting
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> rbd writeback window =3D 8192000
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> or similar, and see what kind of effect that has? I =
+suspect it'll speed
+>>>>>>>>>>>>>>>>>> up dd; I'm less sure about ext3.
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>> Thanks!
+>>>>>>>>>>>>>>>>>> sage
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>> ceph-0.43, libvirt-0.9.8, qemu-1.0.0, kernel 3.2
+>>>>>>>>>>>>>>>>>>> --
+>>>>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsub=
+scribe ceph-devel"
+>>>>>>>>>>>>>>>>>>> in
+>>>>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>>>>>>>> (mailto:majordomo@vger.kernel.org)
+>>>>>>>>>>>>>>>>>>> More majordomo info at http://vger.kernel.org/major=
+domo-info.html
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> --
+>>>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubsc=
+ribe ceph-devel" in
+>>>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>>>>>> (mailto:majordomo@vger.kernel.org)
+>>>>>>>>>>>>>>>>> More majordomo info at http://vger.kernel.org/majordo=
+mo-info.html
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> --
+>>>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscri=
+be ceph-devel" in
+>>>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>>>> More majordomo info at =C2=A0http://vger.kernel.org/maj=
+ordomo-info.html
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>> --
+>>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe=
+ ceph-devel" in
+>>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>>> More majordomo info at =C2=A0http://vger.kernel.org/major=
+domo-info.html
+>>>>>>>>>>>> --
+>>>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe =
+ceph-devel" in
+>>>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>>>> More majordomo info at =C2=A0http://vger.kernel.org/majord=
+omo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
