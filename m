@@ -1,58 +1,66 @@
-From: lixiaobing10@otcaix.iscas.ac.cn
-Subject: Problems when startup ceph - mds always in creating status
-Date: Fri, 23 Mar 2012 17:24:47 +0800 (CST)
-Message-ID: <2d863c.50.1363edf5dd6.Coremail.lixiaobing10@otcaix.iscas.ac.cn>
+From: Stefan Majer <stefan.majer@gmail.com>
+Subject: rados df does not report reads (rd and rd KB stays constant)
+Date: Fri, 23 Mar 2012 15:07:29 +0100
+Message-ID: <CADdPHGs-e-MwD6Cr5L9W_JgH0UmZSTJhN2NBuPtpOUBiih9GDQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GBK
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [124.16.137.195] ([124.16.137.195]:42624 "EHLO
-	otcaix.iscas.ac.cn" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1755413Ab2CWJck convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Mar 2012 05:32:40 -0400
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:48073 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755311Ab2CWOH3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Mar 2012 10:07:29 -0400
+Received: by ghrr11 with SMTP id r11so2756890ghr.19
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Mar 2012 07:07:29 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi ceph-devel,
+Hi,
 
-When I followed the instruction from 'Using Hadoop with Ceph' wiki to l=
-et hadoop use ceph, I encountered a problem when I started ceph. Using =
-'ceph -s' command, I found that mds was always in 'creating' status, an=
-d could not enter 'active=A1=AF status. The output of 'ceph -s' is like=
- following:
+i use rados df to collect several statistics of our ceph cluster for
+monitoring purpose. But the reporting of rd and rd KB is broken,
+because it does not change over time.
+wr and wr KB reflect really well our storage usage.
 
-pg v9: 6 pgs: 6 active+clean+degraded; 0 KB data, 376 KB used, 5118 MB =
-/ 5119 MB avail
-mds e3: 1/1/1 up {0=3D0=3Dup:creating}
-osd e3: 1 osds: 1 up, 1 in
-log 2012-03-23 10:36:25.411393 osd.0 192.168.122.100:6801/19407 6 : [IN=
-=46] 2.1p0 scrub ok
-mon e1: 1 mons at {0=3D192.168.122.100:6789/0}
+So this seems to be broken. We have ceph-0.4.2 installed.
 
-I set the debug level to 20 to get everything in log files. But I am to=
-o new to ceph, and cannot locate the error. Could someone give me any g=
-uidance? Thank you very much!
+here are two outputs of rados df with 2 seconds inbetween.
+[root@sc00 ~]# rados df
+pool name       category                 KB      objects       clones
+   degraded      unfound           rd        rd KB           wr
+wr KB
+data                -                       499713          123
+       0                0                0            0            0
+       123       499713
+metadata         -                                 0            0
+         0                0                0            0            0
+           0            0
+rbd                  -                 3229400110       798827
+   0                0               0         7429        24682
+371028901  17579250219
+  total used      6474458716       798950
+  total avail    56006434852
+  total space    62480893568
 
-Best,
-Xiaobing
+[root@sc00 ~]# rados df
+pool name       category                 KB      objects       clones
+   degraded      unfound           rd        rd KB           wr
+wr KB
+data                -                     499713          123
+       0                0                0            0
+0          123       499713
+metadata         -                               0            0
+         0                0                0            0
+ 0            0            0
+rbd                  -                 3229400110       798827
+  0                 0                0         7429        24682
+371028936  17579250619
+  total used      6474458716       798950
+  total avail    56006434852
+  total space    62480893568
 
-P.S.=20
-My experiment environment is xen-4.1.2, Dom0 kernel 3.2.12, and DomU is=
- Fedora14; and I installed ceph all in one DomU;=20
-I use =A1=AEmkcephfs -c /etc/ceph/ceph.conf -a --mkbtrfs=A1=AF to forma=
-t ceph; and =A1=AEinit-ceph -c /etc/ceph/ceph.conf -a start=A1=AF to st=
-art ceph;
 
-P.P.S.
-Because my mail with attachment could not reach ceph-devel@vger.kernel.=
-org , I can send you them separately if you need them. Thanks for your =
-attention and time!
+Greetings
 
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Stefan Majer
