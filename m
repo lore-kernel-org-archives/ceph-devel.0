@@ -1,71 +1,60 @@
-From: "Nick Couchman" <Nick.Couchman@seakr.com>
-Subject: Re: leveldb build issues in 0.44
-Date: Sun, 25 Mar 2012 08:41:24 -0600
-Message-ID: <4F6EDA3402000099000DD8C6@collaborate.seakr.com>
+From: Jonathan Dieter <jdieter@lesbg.com>
+Subject: Re: Compilation issues on Fedora 13 and Fedora 15
+Date: Sun, 25 Mar 2012 18:23:25 +0300
+Message-ID: <1332689005.2102.3.camel@jdlaptop.lesbg.loc>
+References: <1332665829.7312.8.camel@indica.cc.iitb.ac.in>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature";
+	boundary="=-K3+YlR1LOZU7In+Z7vq2"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.seakr.com ([64.2.143.10]:60491 "EHLO mx1.seakr.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756090Ab2CYOl0 convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
-	Sun, 25 Mar 2012 10:41:26 -0400
-Received: from mx-inside.seakr.com ([192.168.100.31])
-	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q2PFbYI3001720
-	for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 09:37:34 -0600
-Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
-	by mx-inside.seakr.com (Postfix) with ESMTP id 5CA0D44C5F
-	for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 08:41:25 -0600 (MDT)
-Content-Disposition: inline
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:35919 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756330Ab2CYPXb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Mar 2012 11:23:31 -0400
+Received: by wibhq7 with SMTP id hq7so3571304wib.1
+        for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 08:23:30 -0700 (PDT)
+In-Reply-To: <1332665829.7312.8.camel@indica.cc.iitb.ac.in>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: oliva@lsd.ic.unicamp.br, sage@newdream.net
-Cc: ceph-devel@vger.kernel.org
-
-Well, leveldb is fine, but I'm still seeing a build error:
-
-  CXX    libcommon_la-version.lo
-In file included from ./rgw/rgw_common.h:18:0,
-                 from ./rgw/rgw_access.h:11,
-                 from test/encoding/types.h:87,
-                 from test/encoding/ceph_dencoder.cc:13:
-./common/ceph_crypto.h:44:22: fatal error: pk11pub.h: No such file or directory
-compilation terminated.
-
-I believe I'm using the NSS library for crypto support, and I can see the pk11pub.h file in my include directory, so I know it's present.
-
--Nick
-
->>> Sage Weil  03/23/12 6:28 PM >>>
-Hey Nick-
-
-Can you confirm this fixes your problem?  If so I can apply this to the 
-stable branch (for 0.44.1).
-
-Thanks!
-sage
+To: ceph-devel@vger.kernel.org
 
 
-On Thu, 22 Mar 2012, Alexandre Oliva wrote:
+--=-K3+YlR1LOZU7In+Z7vq2
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-> On Mar 22, 2012, "Nick Couchman"  wrote:
-> 
-> > ./db/builder.h:8:28: fatal error: leveldb/status.h: No such file or directory
-> > compilation terminated.
-> 
-> > This is an RPM build
-> 
-> This patch fixed it for me.
-> 
-> 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Sun, 2012-03-25 at 14:27 +0530, Ajit K Jena wrote:
+> Hello All,
+>=20
+> I have lost touch with the growth of ceph after version 0.30.
+> I am trying to compile version 0.43 and 0.44 on FC13 and FC15.
 
+FWIW, we've pushed 0.43 in Fedora 17. We don't have anything later than
+0.41 in versions lower than 17 because of Fedora's updates policies. =20
 
+However, you could take the source rpm from F17 and rebuild it for older
+versions of Fedora.
 
---------
+It's available at
+http://kojipkgs.fedoraproject.org/packages/ceph/0.43/1.fc17/src/ceph-0.43-1=
+.fc17.src.rpm
 
-This e-mail may contain confidential and privileged material for the sole use of the intended recipient.  If this email is not intended for you, or you are not responsible for the delivery of this message to the intended recipient, please note that this message may contain SEAKR Engineering (SEAKR) Privileged/Proprietary Information.  In such a case, you are strictly prohibited from downloading, photocopying, distributing or otherwise using this message, its contents or attachments in any way.  If you have received this message in error, please notify us immediately by replying to this e-mail and delete the message from your mailbox.  Information contained in this message that does not relate to the business of SEAKR is neither endorsed by nor attributable to SEAKR.
+I'll probably push 0.44 to F17 once I manage to get the RPM built.
+
+Jonathan
+
+--=-K3+YlR1LOZU7In+Z7vq2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iEYEABECAAYFAk9vOG0ACgkQH3CnpFdSY1xGtwCdG4aGjG5LJCxkdHCAsvQiyfKt
+hN0AoNQCHc2Nxgm0SGAIoEFXH+cyT+Vt
+=7PrW
+-----END PGP SIGNATURE-----
+
+--=-K3+YlR1LOZU7In+Z7vq2--
+
