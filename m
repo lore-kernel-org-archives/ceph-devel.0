@@ -1,27 +1,34 @@
-From: Ajit K Jena <ajit@iitb.ac.in>
+From: "Nick Couchman" <Nick.Couchman@seakr.com>
 Subject: Re: Compilation issues on Fedora 13 and Fedora 15
-Date: Sun, 25 Mar 2012 16:17:08 +0530
-Message-ID: <1332672428.9164.7.camel@indica.cc.iitb.ac.in>
-References: <1332665829.7312.8.camel@indica.cc.iitb.ac.in>
-	 <4F6EEFF7.4020901@widodh.nl>
-Reply-To: ajit@iitb.ac.in
+Date: Sun, 25 Mar 2012 08:05:01 -0600
+Message-ID: <4F6ED1AD02000099000DD8B7@collaborate.seakr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.iitb.ac.in ([59.162.23.13]:34589 "EHLO smtp1.iitb.ac.in"
+Received: from mx1.seakr.com ([64.2.143.10]:45950 "EHLO mx1.seakr.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755622Ab2CYKrK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 25 Mar 2012 06:47:10 -0400
-Received: from ldns1.iitb.ac.in (ldns1.iitb.ac.in [10.200.12.1])
-	by smtp1.iitb.ac.in (Postfix) with SMTP id CBF52C01AB82
-	for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 16:17:08 +0530 (IST)
-In-Reply-To: <4F6EEFF7.4020901@widodh.nl>
+	id S1754634Ab2CYOFF convert rfc822-to-8bit (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:2:1>);
+	Sun, 25 Mar 2012 10:05:05 -0400
+Received: from mx-inside.seakr.com ([192.168.100.31])
+	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q2PF1CE1001497
+	for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 09:01:13 -0600
+Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
+	by mx-inside.seakr.com (Postfix) with ESMTP id 8AD6544C5E
+	for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 08:05:03 -0600 (MDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
+To: ajit@iitb.ac.in, wido@widodh.nl
 Cc: ceph-devel@vger.kernel.org
 
+Ajit,
+Did you see my previous post to the list about leveldb build issues in 0.44?  This is an issue specifically with rpmbuild, with the spec file.  If you check out the list archives you'll see that Alexandre posted a patch for the spec file that fixes the rpmbuild (have not tried it, yet - just about to do that).
+
+-Nick
+
+>>> Ajit K Jena  03/25/12 4:47 AM >>>
 Hi Wido,
 
 Thanx for your response.
@@ -79,3 +86,13 @@ On Sun, 2012-03-25 at 12:14 +0200, Wido den Hollander wrote:
 > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--------
+
+This e-mail may contain confidential and privileged material for the sole use of the intended recipient.  If this email is not intended for you, or you are not responsible for the delivery of this message to the intended recipient, please note that this message may contain SEAKR Engineering (SEAKR) Privileged/Proprietary Information.  In such a case, you are strictly prohibited from downloading, photocopying, distributing or otherwise using this message, its contents or attachments in any way.  If you have received this message in error, please notify us immediately by replying to this e-mail and delete the message from your mailbox.  Information contained in this message that does not relate to the business of SEAKR is neither endorsed by nor attributable to SEAKR.
