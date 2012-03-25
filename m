@@ -1,91 +1,54 @@
 From: "Nick Couchman" <Nick.Couchman@seakr.com>
-Subject: Re: Compilation issues on Fedora 13 and Fedora 15
-Date: Sun, 25 Mar 2012 08:05:01 -0600
-Message-ID: <4F6ED1AD02000099000DD8B7@collaborate.seakr.com>
+Subject: Re: leveldb build issues in 0.44
+Date: Sun, 25 Mar 2012 08:18:11 -0600
+Message-ID: <4F6ED4C302000099000DD8BD@collaborate.seakr.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.seakr.com ([64.2.143.10]:45950 "EHLO mx1.seakr.com"
+Received: from mx1.seakr.com ([64.2.143.10]:55855 "EHLO mx1.seakr.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754634Ab2CYOFF convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:2:1>);
-	Sun, 25 Mar 2012 10:05:05 -0400
+	id S1755425Ab2CYOSO convert rfc822-to-8bit (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
+	Sun, 25 Mar 2012 10:18:14 -0400
 Received: from mx-inside.seakr.com ([192.168.100.31])
-	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q2PF1CE1001497
-	for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 09:01:13 -0600
+	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q2PFEMOq001567
+	for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 09:14:22 -0600
 Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
-	by mx-inside.seakr.com (Postfix) with ESMTP id 8AD6544C5E
-	for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 08:05:03 -0600 (MDT)
+	by mx-inside.seakr.com (Postfix) with ESMTP id 370AF44C5F
+	for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 08:18:13 -0600 (MDT)
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ajit@iitb.ac.in, wido@widodh.nl
+To: oliva@lsd.ic.unicamp.br, sage@newdream.net
 Cc: ceph-devel@vger.kernel.org
 
-Ajit,
-Did you see my previous post to the list about leveldb build issues in 0.44?  This is an issue specifically with rpmbuild, with the spec file.  If you check out the list archives you'll see that Alexandre posted a patch for the spec file that fixes the rpmbuild (have not tried it, yet - just about to do that).
+Sorry for the delay - just now got back to trying out this patch.  It seems to work - leveldb compiles correctly.  I have not finished the build process, yet, so once it is completed I will respond and you know for sure.
 
 -Nick
 
->>> Ajit K Jena  03/25/12 4:47 AM >>>
-Hi Wido,
+>>> Sage Weil  03/23/12 6:28 PM >>>
+Hey Nick-
 
-Thanx for your response.
+Can you confirm this fixes your problem?  If so I can apply this to the 
+stable branch (for 0.44.1).
 
-No. I just downloaded the bz2 compressed tar file and
-tried rpmbuild. 
+Thanks!
+sage
 
-Just when and where do I run the git commands ? I had
-never done this from version 0.20 till 0.31. Why now ?
-In any case I get the following response when I run it:
 
-fatal: Not a git repository (or any of the parent directories): .git
+On Thu, 22 Mar 2012, Alexandre Oliva wrote:
 
-Regards.
-
---ajit
-
-On Sun, 2012-03-25 at 12:14 +0200, Wido den Hollander wrote:
-> Hi,
+> On Mar 22, 2012, "Nick Couchman"  wrote:
 > 
-> On 03/25/2012 10:57 AM, Ajit K Jena wrote:
-> > Hello All,
-> >
-> > I have lost touch with the growth of ceph after version 0.30.
-> > I am trying to compile version 0.43 and 0.44 on FC13 and FC15.
-> > It does not build successfully. I get the following error:
-> >
-> >     make[3]: *** No rule to make target `leveldb/libleveldb.a', needed by
-> > `ceph-osd'.  Stop.
-> >     make[3]: *** Waiting for unfinished jobs....
-> >
-> > I have the following questions:
-> >
-> >    a) What is this error about ? Has CEPH dropped Fedora as a target
-> >       OS platform ?
-> >
-> >    b) What is the best suited OS for building/testing CEPH prototypes ?
-> >
-> > Thanks for your attention.
+> > ./db/builder.h:8:28: fatal error: leveldb/status.h: No such file or directory
+> > compilation terminated.
 > 
-> Did you init the GIT submodules?
+> > This is an RPM build
 > 
-> $ git submodule init
-> $ git submodule update
+> This patch fixed it for me.
 > 
-> Wido
 > 
-> >
-> > --ajit
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 the body of a message to majordomo@vger.kernel.org
