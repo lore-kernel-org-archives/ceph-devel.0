@@ -1,81 +1,46 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: periodically delays when one of mons dies
-Date: Sun, 25 Mar 2012 08:29:02 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1203250825070.23214@cobra.newdream.net>
-References: <CAHULbC=doKVD1Y72qO9kpbi4YoQ6EginOLsbGC_cGrLRPcyV_Q@mail.gmail.com>
- <CAHULbCnLxNd4j9f3Nfa7-hr0DJ8A_b_sge+1haunDqbPbS1siA@mail.gmail.com>
- <63F3EB16E0CC4D6E9AC1F738A38838F0@dreamhost.com>
- <CAHULbCk90QZ7J0gc+_8V7LW9i5Amz2jxSo6QPJKx3Pp90Q4SBg@mail.gmail.com>
- <Pine.LNX.4.64.1203231729120.6414@cobra.newdream.net>
- <CAHULbCm=LrjVwQtRJ4CzgdJbt93Yh4H_C5KCqPrFtxDgVVxA2w@mail.gmail.com>
+Subject: Re: Compilation issues on Fedora 13 and Fedora 15
+Date: Sun, 25 Mar 2012 08:40:04 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1203250834500.23214@cobra.newdream.net>
+References: <1332665829.7312.8.camel@indica.cc.iitb.ac.in>
+ <1332689005.2102.3.camel@jdlaptop.lesbg.loc>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1197385434-1332689342=:23214"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50446 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:37057 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756468Ab2CYP3D (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Mar 2012 11:29:03 -0400
-In-Reply-To: <CAHULbCm=LrjVwQtRJ4CzgdJbt93Yh4H_C5KCqPrFtxDgVVxA2w@mail.gmail.com>
+	with ESMTP id S1756241Ab2CYPkF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Mar 2012 11:40:05 -0400
+In-Reply-To: <1332689005.2102.3.camel@jdlaptop.lesbg.loc>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ruslan usifov <ruslan.usifov@gmail.com>
-Cc: Greg Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
+To: Jonathan Dieter <jdieter@lesbg.com>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Jonathan,
 
---557981400-1197385434-1332689342=:23214
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+On Sun, 25 Mar 2012, Jonathan Dieter wrote:
+> On Sun, 2012-03-25 at 14:27 +0530, Ajit K Jena wrote:
+> > Hello All,
+> > 
+> > I have lost touch with the growth of ceph after version 0.30.
+> > I am trying to compile version 0.43 and 0.44 on FC13 and FC15.
+> 
+> FWIW, we've pushed 0.43 in Fedora 17. We don't have anything later than
+> 0.41 in versions lower than 17 because of Fedora's updates policies.  
+> 
+> However, you could take the source rpm from F17 and rebuild it for older
+> versions of Fedora.
+> 
+> It's available at
+> http://kojipkgs.fedoraproject.org/packages/ceph/0.43/1.fc17/src/ceph-0.43-1.fc17.src.rpm
+> 
+> I'll probably push 0.44 to F17 once I manage to get the RPM built.
 
-On Sun, 25 Mar 2012, ruslan usifov wrote:
-> 2012/3/24 Sage Weil <sage@newdream.net>:
-> > On Fri, 23 Mar 2012, ruslan usifov wrote:
-> >> Sorry for my bad English.
-> >>
-> >> I mean that, if throw pacemaker we organize fault tolerant monitor
-> >> (monitor that will work all time - even in fail case), we prevent
-> >
-> > The other key thing to keep in mind is that this is completely unnecess=
-ary
-> > with Ceph. =A0Just run 3 (or 5, or 7, or whatever) monitors, and indivi=
-dual
-> > ceph-mon failures won't affect the availability. =A0Ceph clients are sm=
-art
-> > enough to find a non-failed monitor, and the cluster manages consistenc=
-y
-> > and so forth on it's own.
-> >
-> > The whole point is to _avoid_ kludgey proxy/failover solutions like
-> > this...
-> >
-> > sage
->=20
-> Yes, you right and I agree with you, but if "Ceph clients are smart
-> enough to find a non-failed monitor" why they not smart to prevent
-> connect to failed monitor until it fully restore, so now I have
-> periodical delays when client try to connect to failed monitor,
-> ?ertainly finally it find live monitor and all work fine, and with
-> failover i try to solve problem of this delays
+I just pushed two patches to the stable branch that should address this: 
+d3bcac241f25f681a585c2115a79befe43dd7d6c and 
+3ab28950beabe9d452da35ec2f2d583751764a9a.  Can you verify the problem goes 
+away?
 
-Ah, I see.
-
-There are basically two types of delays to worry about: opening an initial=
-=20
-session when one or more monitors may be down, and failing over to another=
-=20
-monitor with the one our session is with goes away.
-
-For the first case, we can mask that by attempting to open a session with=
-=20
-multiple monitors in parallel, and pick whichever succeeds first (or=20
-something along those lines).
-
-For the failover case, I think it basically comes down to a timeout: the=20
-amount of time you are willing to wait for one monitor before trying=20
-another (currently it's 3 seconds).  Presumably pacemaker (or whatever)=20
-has the same type of delay built in?
-
+Thanks!
 sage
-
---557981400-1197385434-1332689342=:23214--
