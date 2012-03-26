@@ -1,80 +1,73 @@
-From: Samuel Just <sam.just@dreamhost.com>
-Subject: Re: Problems when startup ceph - mds always in creating status
-Date: Mon, 26 Mar 2012 10:02:34 -0700
-Message-ID: <CACLRD_1R1qVJF5cHo6W53F3Mnr1c+BAY=jR5e=_d5bi166+Q7Q@mail.gmail.com>
-References: <2d863c.50.1363edf5dd6.Coremail.lixiaobing10@otcaix.iscas.ac.cn>
-	<CACLRD_3hEzw5ODFBSx4-Jwy+5-yLrz0ycWB0bD8LSq4aC2nBQA@mail.gmail.com>
+From: Greg Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: rados df does not report reads (rd and rd KB stays
+ constant)
+Date: Mon, 26 Mar 2012 10:09:45 -0700
+Message-ID: <76ED0140BDEE4D7B8DA439D73D9BD6CA@dreamhost.com>
+References: <CADdPHGs-e-MwD6Cr5L9W_JgH0UmZSTJhN2NBuPtpOUBiih9GDQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:38746 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932974Ab2CZRCf convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Mar 2012 13:02:35 -0400
-Received: by wibhq7 with SMTP id hq7so4617502wib.1
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 10:02:34 -0700 (PDT)
-In-Reply-To: <CACLRD_3hEzw5ODFBSx4-Jwy+5-yLrz0ycWB0bD8LSq4aC2nBQA@mail.gmail.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:60076 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932667Ab2CZRJw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Mar 2012 13:09:52 -0400
+Received: by mail-ob0-f174.google.com with SMTP id eh20so5376725obb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 10:09:51 -0700 (PDT)
+In-Reply-To: <CADdPHGs-e-MwD6Cr5L9W_JgH0UmZSTJhN2NBuPtpOUBiih9GDQ@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: lixiaobing10@otcaix.iscas.ac.cn
+To: Stefan Majer <stefan.majer@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-Nevermind, found the ceph.conf in your other reply.  What ceph version
-are you running?
--Sam
+On Friday, March 23, 2012 at 7:07 AM, Stefan Majer wrote:
+> Hi,
+> 
+> i use rados df to collect several statistics of our ceph cluster for
+> monitoring purpose. But the reporting of rd and rd KB is broken,
+> because it does not change over time.
+> wr and wr KB reflect really well our storage usage.
+> 
+> So this seems to be broken. We have ceph-0.4.2 installed.
+> 
+> here are two outputs of rados df with 2 seconds inbetween.
+> [root@sc00 ~]# rados df
+> pool name category KB objects clones
+> degraded unfound rd rd KB wr
+> wr KB
+> data - 499713 123
+> 0 0 0 0 0
+> 123 499713
+> metadata - 0 0
+> 0 0 0 0 0
+> 0 0
+> rbd - 3229400110 798827
+> 0 0 0 7429 24682
+> 371028901 17579250219
+> total used 6474458716 798950
+> total avail 56006434852
+> total space 62480893568
+> 
+> [root@sc00 ~]# rados df
+> pool name category KB objects clones
+> degraded unfound rd rd KB wr
+> wr KB
+> data - 499713 123
+> 0 0 0 0
+> 0 123 499713
+> metadata - 0 0
+> 0 0 0 0
+> 0 0 0
+> rbd - 3229400110 798827
+> 0 0 0 7429 24682
+> 371028936 17579250619
+> total used 6474458716 798950
+> total avail 56006434852
+> total space 62480893568
 
-On Mon, Mar 26, 2012 at 9:46 AM, Samuel Just <sam.just@dreamhost.com> w=
-rote:
-> Can you post your ceph.conf?
-> -Sam
->
-> 2012/3/23 =C2=A0<lixiaobing10@otcaix.iscas.ac.cn>:
->> Hi ceph-devel,
->>
->> When I followed the instruction from 'Using Hadoop with Ceph' wiki t=
-o let hadoop use ceph, I encountered a problem when I started ceph. Usi=
-ng 'ceph -s' command, I found that mds was always in 'creating' status,=
- and could not enter 'active=E2=80=99 status. The output of 'ceph -s' i=
-s like following:
->>
->> pg v9: 6 pgs: 6 active+clean+degraded; 0 KB data, 376 KB used, 5118 =
-MB / 5119 MB avail
->> mds e3: 1/1/1 up {0=3D0=3Dup:creating}
->> osd e3: 1 osds: 1 up, 1 in
->> log 2012-03-23 10:36:25.411393 osd.0 192.168.122.100:6801/19407 6 : =
-[INF] 2.1p0 scrub ok
->> mon e1: 1 mons at {0=3D192.168.122.100:6789/0}
->>
->> I set the debug level to 20 to get everything in log files. But I am=
- too new to ceph, and cannot locate the error. Could someone give me an=
-y guidance? Thank you very much!
->>
->> Best,
->> Xiaobing
->>
->> P.S.
->> My experiment environment is xen-4.1.2, Dom0 kernel 3.2.12, and DomU=
- is Fedora14; and I installed ceph all in one DomU;
->> I use =E2=80=98mkcephfs -c /etc/ceph/ceph.conf -a --mkbtrfs=E2=80=99=
- to format ceph; and =E2=80=98init-ceph -c /etc/ceph/ceph.conf -a start=
-=E2=80=99 to start ceph;
->>
->> P.P.S.
->> Because my mail with attachment could not reach ceph-devel@vger.kern=
-el.org , I can send you them separately if you need them. Thanks for yo=
-ur attention and time!
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
-tml
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Sage made a bug for this:
+http://tracker.newdream.net/issues/2209
+
+Thanks for the report!
