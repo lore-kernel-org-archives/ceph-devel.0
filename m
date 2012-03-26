@@ -1,82 +1,55 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Re: RadosGW problems with copy in s3
-Date: Mon, 26 Mar 2012 15:05:40 +0200
-Message-ID: <CAMwB3TiPaqbHRd5U4thDUfdg8ZGiuMwJPUh2E0vMoTvXu50YXg@mail.gmail.com>
-References: <CAMwB3ThF2kTWNDJM9zYOVh0ud29nAoib4yTwNRgiJuacDKh=7w@mail.gmail.com>
-	<CAC-hyiHSUYv-Mk7RxB-_a8ObePrf9osLRFjj-G2_9Dz6z8v6Vw@mail.gmail.com>
-	<CAMwB3ThZ4jPis_Bb9tsf=HTnh3gLd6CNkn2XMr4xo09bO3hEiQ@mail.gmail.com>
-	<CAC-hyiHB0aDsEO8ES8pqhcXB38MR1QNZLMB=jyRm2p_Yp7V8Aw@mail.gmail.com>
-	<CAC-hyiFL429jjfi7J7fiwoshdRQRq9_1AhECJ+sg2=nV+5NpZw@mail.gmail.com>
-	<CAMwB3Tje2tgruL8yP29Q1eYTON5kuS3neetA=6zXed4OriJefg@mail.gmail.com>
-	<CAC-hyiHFUAGWJf1MxGS=MBcdsHSYrtpjcPo6di3MOK=S=6Hj0g@mail.gmail.com>
-	<CAMwB3TjuDhRfTheJvTKx7yiTy7JSiTp2h795fuNS-mjFeJP=Fg@mail.gmail.com>
-	<CAMwB3Tg3e7dKpves54sFag6BTp5PAfYwOgYQ4PHW0gs2oDkTJw@mail.gmail.com>
-	<CAC-hyiFkVyUHA1mthYaSVoqxQSrz5g2zo1kmLQAfDanzAxjH1A@mail.gmail.com>
-	<-8255131364718062163@unknownmsgid>
-	<CAMwB3Tjftbdh9kxMgxkU9-vEmyxj2X4b4a0o2HC_e=7xXZ6RMw@mail.gmail.com>
-	<CAC-hyiG_sRjF+RrRHyuhVudwAQYQVOPSJ64QY4NvbwPFKsaJow@mail.gmail.com>
-	<-7040347706194281020@unknownmsgid>
+From: Greg Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: problems when hadoop runs upon ceph
+Date: Mon, 26 Mar 2012 09:38:37 -0700
+Message-ID: <F9608BCF7A3D469288597C784FDA4AC7@dreamhost.com>
+References: <1765b87.66.136439257f9.Coremail.lixiaobing10@otcaix.iscas.ac.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:58552 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756546Ab2CZNFl convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Mar 2012 09:05:41 -0400
-Received: by wgbdr13 with SMTP id dr13so3866007wgb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 06:05:40 -0700 (PDT)
-In-Reply-To: <-7040347706194281020@unknownmsgid>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:64377 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932738Ab2CZQiq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Mar 2012 12:38:46 -0400
+Received: by yhmm54 with SMTP id m54so3950554yhm.19
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 09:38:45 -0700 (PDT)
+In-Reply-To: <1765b87.66.136439257f9.Coremail.lixiaobing10@otcaix.iscas.ac.cn>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: lixiaobing10@otcaix.iscas.ac.cn
+Cc: ceph-devel@vger.kernel.org
 
-After some tests. PUT/GET/DELETE via Radosgw now in version 0.44 works
-much better.
+Is this the same cluster you were unable to get the MDS out of "creating" on? Hadoop won't work without an active MDS since it can't mount the filesystem. :) 
 
-End of this topic.
+The reason your MDS isn't starting up is complicated; look for an email on that shortly...
+-Greg
 
-Thanks.
 
-2012/3/6 S=B3awomir Skowron <szibis@gmail.com>:
-> On 6 mar 2012, at 18:53, Yehuda Sadeh Weinraub
-> <yehuda.sadeh@dreamhost.com> wrote:
->
->> On Tue, Mar 6, 2012 at 2:08 AM, S=B3awomir Skowron <szibis@gmail.com=
-> wrote:
->>
->>> All logs from osd.24, osd.62, and osd.36 with osd debug =3D20 and
->>> filestore debug =3D 20 from 2012-03-06 10:25 and more.
->>>
->>> http://217.144.195.170/ceph/osd.24.log.tar.gz =A0 (348MB) - machine=
- 1 - rack1
->>> http://217.144.195.170/ceph/osd.36.log.tar.gz =A0 (26MB) - machine =
-2 - rack 2
->>> http://217.144.195.170/ceph/osd.62.log.tar.gz =A0 (23MB) - machine3=
- - rack 3
->>>
->>
->> I looked at the logs, and it seems that you hit the tmap scaling
->> issue. Luckily we're fixing that for 0.44, so it's going to be fixed
->> in the next version.
->>
->> Yehuda
->
-> That's wonderful news. Thanks for everything.
->
-> Regards
-> Slawomir Skowron
+On Saturday, March 24, 2012 at 12:18 AM, lixiaobing10@otcaix.iscas.ac.cn wrote:
+
+> Hi ceph-devel,
+> 
+> I installed ceph-0.44, which can be mounted by ceph-fuse correctly. Besides, hadoop-0.20.205.0 patched with hadoop-0.20.205.0-cephfs1.patch can run correctly too, but with hdfs as the underlying fs. (refered to http://ceph.newdream.net/wiki/Hadoop_FileSystem)
+> 
+> However, when I let hadoop use ceph as the fs, I encountered this problem: 
+> 
+> 12/03/24 14:45:47 INFO ceph.CephFileSystem: initialize:Ceph initialization arguments: CephFSInterface -k /data/keyring.mds.0 -n client.admin --auth-supported=cephx -m 192.168.122.201:6789 --client-readahead-max-periods=1
+> 12/03/24 14:45:47 FATAL ceph.CephFileSystem: initialize:Ceph initialization failed!
+> Bad connection to FS. command aborted. exception: Ceph initialization failed!
+> 
+> I have traced the source code from java-side to ceph-side, and found the connection between them failed to establish. But I have no idea about the real cause. Could someone give me any suggestion on this problem?
+> 
+> Additionally, hadoop-0.20.205.0 patched with hadoop-0.20.205.0-cephfs1.patch can work with ceph-0.20.1, although it would crashed during reduce task phase, and that is why I turned to the latest ceph version.
+> 
+> Thanks for your attention!
+> 
+> Best,
+> Xiaobing
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
 
 
 
---=20
------
-Pozdrawiam
-
-S=B3awek "sZiBis" Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
