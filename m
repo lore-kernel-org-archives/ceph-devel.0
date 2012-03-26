@@ -1,41 +1,52 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: How to read CRUSH source code efficiently?
-Date: Mon, 26 Mar 2012 11:13:01 -0700
-Message-ID: <CAORUGqDMpe-rpaejvGDJxV5R2gB8kpzr+Y2Cud5-64CdGYyrKg@mail.gmail.com>
-References: <CALwGbP+9N8Ygzbqn9QxPENwcm4_ZeU0BGCYzE_kJvH3GrEX=EQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: osd shutdown notification
+Date: Mon, 26 Mar 2012 12:36:26 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1203261228050.19530@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:37541 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932627Ab2CZSNW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Mar 2012 14:13:22 -0400
-Received: by pbcun15 with SMTP id un15so6257693pbc.19
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 11:13:21 -0700 (PDT)
-In-Reply-To: <CALwGbP+9N8Ygzbqn9QxPENwcm4_ZeU0BGCYzE_kJvH3GrEX=EQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:43050 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754068Ab2CZTg3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Mar 2012 15:36:29 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 41858BC795
+	for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 12:36:29 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 1DC21BC795
+	for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 12:36:29 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?6IOh54Ca5qOu?= <softrank.net@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Sat, Mar 24, 2012 at 00:35, =E8=83=A1=E7=80=9A=E6=A3=AE <softrank.ne=
-t@gmail.com> wrote:
-> After reading the thesis about CRUSH, I proceed to read the related
-> source code in order to understand it more deeply and thoroughly.
->
-> But it's seems not to be efficient to read the source code files in
-> src/crush one by one.
->
-> I'd like to know where should I start? I think the pseudo code
-> "Algorithm 1" described in the thesis is quite important, but where
-> can I find the implementation of this algorithm?
+Currently when you shutdown/kill a ceph-osd it is no different from it 
+crashing: you have to wait N seconds for its peers to conclude the process 
+is down before the OSD is deemed 'failed' and the osd map is updated.
 
-crush_do_rule chooses an array of decision based on a rule. It's not
-structured quite the same way as procedure SELECT, but you should see
-parallels.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This would be pretty easy to improve on:
+
+ - on a clean shutdown (e.g., due to SIGTERM), we could execv a call to 
+   the ceph tool to tell the monitors the osd stopped (maybe with a 
+   'reason' and nice log message).
+
+ - on an unclean shutdown (e.g., failed assert, segfault) we can
+   do the same, with an appropriate message in the system log
+
+Basically it means that is ceph-osd crashes or shuts down then it 
+will normally get instantly marked down without waiting for the normal osd 
+timeout to expire.
+
+execv() is kind of ugly, but seems safer in the failure cases, where you 
+can't trust the existing MonClient to be operational.  
+
+Alternatively, some external wrapper could watch for the process to 
+terminate and notify the cluster, but this would be a bit more difficult 
+to implement, because that notification needs to uniquely identify the 
+process instance (e.g., via the cluster addr), and we'd need some way for 
+it to wait for the osd to join and then extract that id, etc.
+
+Thoughts?
+
+sage
+
+
