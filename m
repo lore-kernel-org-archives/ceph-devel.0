@@ -1,54 +1,70 @@
-From: =?UTF-8?B?Q2zDoXVkaW8=?= Martins <ctpm@ist.utl.pt>
-Subject: Increasing the number of PGs
-Date: Mon, 26 Mar 2012 21:34:59 +0100
-Message-ID: <20120326213459.e8ace6f3.ctpm@ist.utl.pt>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: osd shutdown notification
+Date: Mon, 26 Mar 2012 14:00:02 -0700
+Message-ID: <CAORUGqAbHhZJ-=-HXwBZjboUGVKJBP9nBHD4ZKufs7-OeCqKnw@mail.gmail.com>
+References: <Pine.LNX.4.64.1203261228050.19530@cobra.newdream.net>
+ <CAORUGqDBoyvSFsSMVZdfWhPUFGsQTG6pZ-n9u=YnXtj0zzOGAg@mail.gmail.com>
+ <Pine.LNX.4.64.1203261251230.19530@cobra.newdream.net> <CAORUGqDi8+Jdhoop7QYHvROBYouJd5AvHr_ZHLD5Z+j6jZHrdA@mail.gmail.com>
+ <Pine.LNX.4.64.1203261310240.19530@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.ist.utl.pt ([193.136.128.21]:38313 "EHLO smtp1.ist.utl.pt"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756785Ab2CZUo6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 26 Mar 2012 16:44:58 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by smtp1.ist.utl.pt (Postfix) with ESMTP id 316CD700042A
-	for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 21:35:00 +0100 (WEST)
-Received: from smtp1.ist.utl.pt ([127.0.0.1])
-	by localhost (smtp1.ist.utl.pt [127.0.0.1]) (amavisd-new, port 10025)
-	with LMTP id mNWxIfpSP+Y2 for <ceph-devel@vger.kernel.org>;
-	Mon, 26 Mar 2012 21:35:00 +0100 (WEST)
-Received: from mail2.ist.utl.pt (mail.ist.utl.pt [IPv6:2001:690:2100:1::8])
-	by smtp1.ist.utl.pt (Postfix) with ESMTP id F09897000427
-	for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 21:34:59 +0100 (WEST)
-Received: from coyote.ist.utl.pt (unknown [IPv6:2001:690:2100:2:21d:92ff:fea9:c53d])
-	(Authenticated sender: ist146506)
-	by mail2.ist.utl.pt (Postfix) with ESMTPSA id 9F9F62007385
-	for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 21:34:59 +0100 (WEST)
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:49520 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752255Ab2CZVAX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Mar 2012 17:00:23 -0400
+Received: by pbcun15 with SMTP id un15so6415774pbc.19
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Mar 2012 14:00:22 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1203261310240.19530@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
+On Mon, Mar 26, 2012 at 13:16, Sage Weil <sage@newdream.net> wrote:
+>> Perhaps a separate executable that sends "osd.42 is now definitely
+>> down" will be good enough? Hopefully you don't have two osd.42's
+>> around, anyway. And if you want that, instead of execing ceph-osd, y=
+ou
+>> do a fork & exec, wait in the parent, then exec that thing that mark=
+s
+>> it down. For upstart (and often for others too), there's a "after th=
+e
+>> service exits" hook where we could also plug that in, if we wanted t=
+o.
+>
+> ...except that the way to reliably mark down a particular osd.42 requ=
+ires
+> data that's private to the ceph-osd instance, and unknown until it st=
+arts
+> up and joins the cluster. =C2=A0That makes it awkward to implement an=
+y kind of
+> wrapper because you have to pass it a cookie using some side-channel.
 
- Greetings,
+Why do you need to know where osd.42 was last seen just to be able to
+authoritatively claim osd.42 is 1) down 2) at a new location.
 
- I've been testing Ceph on a cluster where I have added new OSDs
-several times, to the point where I now have 46 OSDs and only a total
-of 192 PGs per pool, which now seems rather far from what the
-documentation suggests (about 100 per OSD in each pool).
+Think about power supply failure and hotswapping the disk to a new serv=
+er.
 
- Some past messages on this list and some documentation suggest that
-increasing pg_num on a cluster with data won't give good results and
-that PG splitting is not functional at this time.
+> execv() in the signal handler, OTOH, is easy. =C2=A0Is it that offens=
+ive?
+>
+> The other nice thing about that is that the failure notification can =
+be
+> informative for free: "osd.42 stopped: got SIGTERM", "osd.42 stopped:
+> failed assert at foo.cc:1234", etc.
 
- Can anyone clarify if this is still the case as of v0.43 and/or v0.44,
-or is it safe to increase pg_num on a pool with live data?
+I'm worried about all the things that want us to exit(3). Code
+coverage, valgrind, what not.
 
-Thanks in advance
-
-Best regards
-
-Cl=C3=A1udio
-
+If you're thinking of shipping the crash reason to monitors, I think
+you're once again trying to replace a bunch of a sysadmin's toolkit
+with Ceph-internal features. Ones that they can't use with all the
+non-Ceph things they run on their storage cluster anyway, like statsd,
+sshd, etc. I feel confident in saying Ceph will lose that race, in
+stability, functionality and familiarity to target audience.
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
