@@ -1,89 +1,41 @@
-From: Jonathan Dieter <jdieter@lesbg.com>
-Subject: Re: Compilation issues on Fedora 13 and Fedora 15
-Date: Sun, 25 Mar 2012 20:45:09 +0300
-Message-ID: <1332697509.2102.9.camel@jdlaptop.lesbg.loc>
-References: <1332665829.7312.8.camel@indica.cc.iitb.ac.in>
-	 <1332689005.2102.3.camel@jdlaptop.lesbg.loc>
-	 <Pine.LNX.4.64.1203250834500.23214@cobra.newdream.net>
+From: Alex Elder <elder@dreamhost.com>
+Subject: Oneiric Builds
+Date: Mon, 26 Mar 2012 07:54:46 -0500
+Message-ID: <4F706716.2020806@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature";
-	boundary="=-QFXBaHzehKzxsln/N7VV"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:47487 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756639Ab2CYRpN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 25 Mar 2012 13:45:13 -0400
-Received: by wgbdr13 with SMTP id dr13so3256169wgb.1
-        for <ceph-devel@vger.kernel.org>; Sun, 25 Mar 2012 10:45:12 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1203250834500.23214@cobra.newdream.net>
+Received: from mail.hq.newdream.net ([66.33.206.127]:48947 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755968Ab2CZMyt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Mar 2012 08:54:49 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Dan Mick <dan.mick@dreamhost.com>, tommi.virtanen@dreamhost.com
 Cc: ceph-devel@vger.kernel.org
 
+I'm unable to load an up-to-date ceph-common package on my plana
+(oneiric) system.  One of you mentioned something about how this file:
 
---=-QFXBaHzehKzxsln/N7VV
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+     /etc/apt/sources.list.d/ceph.list
 
-On Sun, 2012-03-25 at 08:40 -0700, Sage Weil wrote:
-> Hi Jonathan,
->=20
-> On Sun, 25 Mar 2012, Jonathan Dieter wrote:
-> > On Sun, 2012-03-25 at 14:27 +0530, Ajit K Jena wrote:
-> > > Hello All,
-> > >=20
-> > > I have lost touch with the growth of ceph after version 0.30.
-> > > I am trying to compile version 0.43 and 0.44 on FC13 and FC15.
-> >=20
-> > FWIW, we've pushed 0.43 in Fedora 17. We don't have anything later than
-> > 0.41 in versions lower than 17 because of Fedora's updates policies. =
-=20
-> >=20
-> > However, you could take the source rpm from F17 and rebuild it for olde=
-r
-> > versions of Fedora.
-> >=20
-> > It's available at
-> > http://kojipkgs.fedoraproject.org/packages/ceph/0.43/1.fc17/src/ceph-0.=
-43-1.fc17.src.rpm
-> >=20
-> > I'll probably push 0.44 to F17 once I manage to get the RPM built.
->=20
-> I just pushed two patches to the stable branch that should address this:=
-=20
-> d3bcac241f25f681a585c2115a79befe43dd7d6c and=20
-> 3ab28950beabe9d452da35ec2f2d583751764a9a.  Can you verify the problem goe=
-s=20
-> away?
+is referring to natty, when it should be referring to oneiric.
+Dan found that the reason was we aren't building packages for
+oneric.  He found, *somewhere*, this code snippet:
 
-Ok, with the two patches, ceph builds, but leveldb doesn't seem to be
-using our compiler flags.
+     case distro
+     when "maverick"
+       # we don't actually build for maverick, but natty seems to work
+       # fine; old sepia is still maverick
+       distro = "natty"
+     when "oneiric"
+       # TODO we don't yet build debs for oneiric, so kludge it back to
+       # natty; FIX ME
+       distro = "natty"
+     end
 
-The build is at:
-http://koji.fedoraproject.org/koji/taskinfo?taskID=3D3930921
+In the mean time I think I can find a way to build the package
+on my machine, but is there a fix for this pending?
 
-And the x86_64 build log is at:
-http://koji.fedoraproject.org/koji/getfile?taskID=3D3930922&name=3Dbuild.lo=
-g
-
-If you scroll down to where leveldb builds and then to where ceph starts
-building after that, you'll see the difference in the build flags.
-
-Jonathan
-
---=-QFXBaHzehKzxsln/N7VV
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iEYEABECAAYFAk9vWaUACgkQH3CnpFdSY1wfIQCgv+tzDeU+aHaRulGJMO9G6++o
-21sAmwRuOkW72p4Mj3EVy9J1+1uEs8OS
-=2xHl
------END PGP SIGNATURE-----
-
---=-QFXBaHzehKzxsln/N7VV--
-
+					-Alex
