@@ -1,128 +1,53 @@
 From: David McBride <dwm@doc.ic.ac.uk>
-Subject: Re: Braindump: path names, partition labels, FHS, auto-discovery
-Date: Tue, 27 Mar 2012 12:29:38 +0100
-Message-ID: <1332847778.8411.59.camel@squire.doc.ic.ac.uk>
-References: <CAORUGqB-XXXt3Gdx6xdKupg+dwC7XMGptg-K_2QTmn4ybcK+Qg@mail.gmail.com>
-	 <1331114101.19173.34.camel@squire.doc.ic.ac.uk>
-	 <Pine.LNX.4.64.1203071240550.32072@cobra.newdream.net>
-	 <loom.20120319T094436-306@post.gmane.org>
-	 <Pine.LNX.4.64.1203200004040.22592@cobra.newdream.net>
+Subject: Re: Increasing the number of PGs
+Date: Tue, 27 Mar 2012 12:46:11 +0100
+Message-ID: <1332848771.8411.68.camel@squire.doc.ic.ac.uk>
+References: <20120326213459.e8ace6f3.ctpm@ist.utl.pt>
+	 <CAORUGqBzBBoi3TeWcqzyeN7vSW+=FCLM72MnPJfCqOFrQ9iOdg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cardinal.doc.ic.ac.uk ([146.169.1.194]:56783 "EHLO
+Received: from cardinal.doc.ic.ac.uk ([146.169.1.194]:42818 "EHLO
 	cardinal.doc.ic.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751618Ab2C0L3v (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Mar 2012 07:29:51 -0400
-In-Reply-To: <Pine.LNX.4.64.1203200004040.22592@cobra.newdream.net>
+	with ESMTP id S1752132Ab2C0LqN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Mar 2012 07:46:13 -0400
+In-Reply-To: <CAORUGqBzBBoi3TeWcqzyeN7vSW+=FCLM72MnPJfCqOFrQ9iOdg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development Mailing List <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: =?ISO-8859-1?Q?Cl=E1udio?= Martins <ctpm@ist.utl.pt>, ceph-devel@vger.kernel.org
 
-On Tue, 2012-03-20 at 00:25 -0700, Sage Weil wrote:
+On Mon, 2012-03-26 at 16:15 -0700, Tommi Virtanen wrote:
 
-> Currently the ceph-osd it told which id to be on startup; the only real 
-> shift here would be to let you specify some uuids instead and have it pull 
-> it's rank (id) out of the .../whoami file.
+> >  Can anyone clarify if this is still the case as of v0.43 and/or v0.44,
+> > or is it safe to increase pg_num on a pool with live data?
+> 
+> Sadly, that is still the current state of affairs.
 
-I'm increasingly coming to believe that an OSD's rank should not be
-exposed to the admin/user.  While it's clearly important as an internal
-implementation detail, I can't currently see a reason why the admin
-needs to know how an OSDs rank, or why it can't (in principle) be
-dynamically managed on the administrator's behalf.
+Does the act of adding OSDs itself result in the PG count being
+increased?  
 
-A non-trivial part of the complexity of (re-)configuring a running
-cluster as nodes are added and removed is the correct numbering of OSDs.
+This seems to be the behaviour I've just observed on my testing cluster
+(running 0.44) using an incantation like:
 
-At the moment I'm still experimenting -- I don't know what's supposed to
-happen when low-numbered OSDs are removed; do all the existing ones
-renumber?  Or do you get fragmentation in the OSD number space?
+> for i in `seq 14 27`; do
+> ceph osd create $i
+> ceph osd crush add $i osd.$i 1.0 host=$hostname rack=$rack pool=default
+> ceph-osd -i $i --mkfs --mkkey
+> ceph -i /etc/ceph/keyring.osd.$i auth add osd.$i osd "allow *" mon "allow rwx"
+> done
 
-If it's the former, then the rank of an OSD is metadata that can change
-during its lifetime -- meaning that it's probably not a good idea to use
-it in path-names, for example.
+The number of PGs seems to have roughly doubled, and half of my
+OSDs now assert in OSD::get_or_create_pg() with "FAILED assert(role == 0)".
 
-I suspect that using UUIDs and/or human-readable labels to refer to OSDs
-is probably going to be superior than using the OSDs' rank.
+This seems to be a similar failure-mode for others who report issues after 
+PG-splitting; as in those cases, `ceph -w` also reports errors of the form:
 
-> We've set up a special key that has permission to create new osds only, 
-> but again it's pretty bad security.  Chef's model just doesn't work well 
-> here.
+  [ERR] mkpg 1.1p23 up [5,12] != acting [12]
 
-If I understand the model correctly:
-
- - Each individual daemon generates its own keys.  This is a secret key 
-   in the symmetric-cryptography sense.
- - Each daemon needs to have its keys registered with the MON cluster.
-   (The MON operates as a centrally-trusted key distribution centre.)
- - To register keys with the MON cluster, a cluster administrative 
-   privilege is required.
- - The registration process also updates the effective access-control 
-   privilege set associated with that key.
-
-Two thoughts:
-
- 1. I suspect that some small changes to the bootstrap procedure could 
-    result in a more streamlined process:
-
-     - OSDs stop being responsible for generating their own keys.  
-       Their keys are instead generated by a MON node and are stored in 
-       the MON cluster.  As a result, the problem to be solved changes: 
-
-         * before, an OSD needed to have the necessary privileges to
-           update the cluster-wide configuration; 
-         * now, the MON node only needs to have the necessary privileges
-           to install an OSD's secret key on that OSD's host.
-
-     - It should then be straightforward to set up a privileged, 
-       automated process -- probably on a MON node -- to stage a copy
-       of an OSDs secret key to the appropriate location on that OSD's 
-       host.
-
-       (This assumes that an OSDs host can be automatically determined 
-       and authenticated using some existing means (SSH keys, Kerberos, 
-       etc.) -- which I'd expect to be the case for any non-trivial 
-       installation.)
-
-     - This automated process could be triggered by the OSD   
-       installation process -- either by an out-of-band script, or 
-       conceivably by a key-solicitation message sent in-band by the 
-       OSD itself.
-
- 2. This sounds very similar to the model for Kerberos 5, as used in 
-    the MIT Kerberos implementation and Microsoft's Active Directory.  
-    It might be an interesting (future!) project to see how difficult 
-    it would be to modify the Ceph daemons and protocols to use 
-    Kerberos-based authentication as an alternative to cephx, possibly 
-    via the GSS-API.
-
-Aha, I note that this is probably not a surprise -- the 0.18 
-release-notes, for example, note the similarity between cephx and
-Kerberos.  I presume the goal in rolling your own was to avoid adding
-barriers to deployment?
-
->  - is a single init script still appropriate, or do we want something 
->    better?  (I'm not very familiar with the new best practices for upstart 
->    or systemd for multi-instance services like this.)
-
-At risk of duplicating part of the functionality of Upstart or systemd,
-the traditional solution for this kind of problem is for the
-multi-process tool to implement its own master-control process, and have
-init start that.  Responsibility for (re-)starting sub-processes is then
-delegated to this master daemon.  
-
-As well as allowing sophisticated tool-specific logic for determining
-what processes should/should not be started, this can be a useful point
-of control for enforcing privilege separation and resource-limits
-between sub-processes.
-
-This approach can be powerful, but does require the overhead of
-implementing and managing all of the necessary logic yourself.  I can't
-comment on whether tools like Upstart, systemd, or something else could
-easily be used to avoid incurring this additional cost.  This may be
-something worth discussing with upstream developers..?
+Have I done something wrong?  Is there some alternate sequence of steps
+that avoids / suppresses PG splitting?
 
 Cheers,
 David
