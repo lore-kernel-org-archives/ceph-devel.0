@@ -1,54 +1,132 @@
-From: Tomoki BENIYA <beniya@bit-isle.co.jp>
-Subject: Build error in 0.44
-Date: Tue, 27 Mar 2012 17:43:18 +0900
-Message-ID: <20120327171741.D52F.33BC0F0F@bit-isle.co.jp>
+From: David McBride <dwm@doc.ic.ac.uk>
+Subject: Re: Braindump: path names, partition labels, FHS, auto-discovery
+Date: Tue, 27 Mar 2012 12:29:38 +0100
+Message-ID: <1332847778.8411.59.camel@squire.doc.ic.ac.uk>
+References: <CAORUGqB-XXXt3Gdx6xdKupg+dwC7XMGptg-K_2QTmn4ybcK+Qg@mail.gmail.com>
+	 <1331114101.19173.34.camel@squire.doc.ic.ac.uk>
+	 <Pine.LNX.4.64.1203071240550.32072@cobra.newdream.net>
+	 <loom.20120319T094436-306@post.gmane.org>
+	 <Pine.LNX.4.64.1203200004040.22592@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.bit-isle.co.jp ([61.117.207.4]:46388 "EHLO
-	mail.bit-isle.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757611Ab2C0JSE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Mar 2012 05:18:04 -0400
-Received: from [192.168.40.41] (unknown [219.166.46.195])
-	by mail.bit-isle.co.jp (Postfix) with ESMTP id 9F3DF290007
-	for <ceph-devel@vger.kernel.org>; Tue, 27 Mar 2012 17:41:27 +0900 (JST)
+Received: from cardinal.doc.ic.ac.uk ([146.169.1.194]:56783 "EHLO
+	cardinal.doc.ic.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751618Ab2C0L3v (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Mar 2012 07:29:51 -0400
+In-Reply-To: <Pine.LNX.4.64.1203200004040.22592@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development Mailing List <ceph-devel@vger.kernel.org>
 
-Hi all
+On Tue, 2012-03-20 at 00:25 -0700, Sage Weil wrote:
 
-When I build ceph 0.44, it occured error and failed to build.
-They said following error
-===================================
-make: *** [build-stamp] Error 1
-dpkg-buildpackage: error: debian/rules build gave error exit status 2
-===================================
+> Currently the ceph-osd it told which id to be on startup; the only real 
+> shift here would be to let you specify some uuids instead and have it pull 
+> it's rank (id) out of the .../whoami file.
 
-What should I do?
+I'm increasingly coming to believe that an OSD's rank should not be
+exposed to the admin/user.  While it's clearly important as an internal
+implementation detail, I can't currently see a reason why the admin
+needs to know how an OSDs rank, or why it can't (in principle) be
+dynamically managed on the administrator's behalf.
 
+A non-trivial part of the complexity of (re-)configuring a running
+cluster as nodes are added and removed is the correct numbering of OSDs.
 
-# cat /etc/debian_version
-wheezy/sid
+At the moment I'm still experimenting -- I don't know what's supposed to
+happen when low-numbered OSDs are removed; do all the existing ones
+renumber?  Or do you get fragmentation in the OSD number space?
 
-# uname -a
-Linux debian7 3.1.0-1-amd64 #1 SMP Tue Jan 10 05:01:58 UTC 2012 x86_64 GNU/Linux
+If it's the former, then the rank of an OSD is metadata that can change
+during its lifetime -- meaning that it's probably not a good idea to use
+it in path-names, for example.
 
-# dpkg-buildpackage
-......
-autoreconf: running: /usr/bin/autoheader --force
-autoreconf: running: automake --add-missing --copy --force-missing
-Makefile.am:182: `lib/libgtest.a' is not a standard libtool library name
-Makefile.am:182: did you mean `lib/libgtest.la'?
-Makefile.am:182: `lib/libgtest_main.a' is not a standard libtool library name
-Makefile.am:182: did you mean `lib/libgtest_main.la'?
-autoreconf: Leaving directory `.'
-autoreconf: `configure.ac' or `configure.in' is required
-make: *** [build-stamp] Error 1
-dpkg-buildpackage: error: debian/rules build gave error exit status 2
+I suspect that using UUIDs and/or human-readable labels to refer to OSDs
+is probably going to be superior than using the OSDs' rank.
 
+> We've set up a special key that has permission to create new osds only, 
+> but again it's pretty bad security.  Chef's model just doesn't work well 
+> here.
 
+If I understand the model correctly:
+
+ - Each individual daemon generates its own keys.  This is a secret key 
+   in the symmetric-cryptography sense.
+ - Each daemon needs to have its keys registered with the MON cluster.
+   (The MON operates as a centrally-trusted key distribution centre.)
+ - To register keys with the MON cluster, a cluster administrative 
+   privilege is required.
+ - The registration process also updates the effective access-control 
+   privilege set associated with that key.
+
+Two thoughts:
+
+ 1. I suspect that some small changes to the bootstrap procedure could 
+    result in a more streamlined process:
+
+     - OSDs stop being responsible for generating their own keys.  
+       Their keys are instead generated by a MON node and are stored in 
+       the MON cluster.  As a result, the problem to be solved changes: 
+
+         * before, an OSD needed to have the necessary privileges to
+           update the cluster-wide configuration; 
+         * now, the MON node only needs to have the necessary privileges
+           to install an OSD's secret key on that OSD's host.
+
+     - It should then be straightforward to set up a privileged, 
+       automated process -- probably on a MON node -- to stage a copy
+       of an OSDs secret key to the appropriate location on that OSD's 
+       host.
+
+       (This assumes that an OSDs host can be automatically determined 
+       and authenticated using some existing means (SSH keys, Kerberos, 
+       etc.) -- which I'd expect to be the case for any non-trivial 
+       installation.)
+
+     - This automated process could be triggered by the OSD   
+       installation process -- either by an out-of-band script, or 
+       conceivably by a key-solicitation message sent in-band by the 
+       OSD itself.
+
+ 2. This sounds very similar to the model for Kerberos 5, as used in 
+    the MIT Kerberos implementation and Microsoft's Active Directory.  
+    It might be an interesting (future!) project to see how difficult 
+    it would be to modify the Ceph daemons and protocols to use 
+    Kerberos-based authentication as an alternative to cephx, possibly 
+    via the GSS-API.
+
+Aha, I note that this is probably not a surprise -- the 0.18 
+release-notes, for example, note the similarity between cephx and
+Kerberos.  I presume the goal in rolling your own was to avoid adding
+barriers to deployment?
+
+>  - is a single init script still appropriate, or do we want something 
+>    better?  (I'm not very familiar with the new best practices for upstart 
+>    or systemd for multi-instance services like this.)
+
+At risk of duplicating part of the functionality of Upstart or systemd,
+the traditional solution for this kind of problem is for the
+multi-process tool to implement its own master-control process, and have
+init start that.  Responsibility for (re-)starting sub-processes is then
+delegated to this master daemon.  
+
+As well as allowing sophisticated tool-specific logic for determining
+what processes should/should not be started, this can be a useful point
+of control for enforcing privilege separation and resource-limits
+between sub-processes.
+
+This approach can be powerful, but does require the overhead of
+implementing and managing all of the necessary logic yourself.  I can't
+comment on whether tools like Upstart, systemd, or something else could
+easily be used to avoid incurring this additional cost.  This may be
+something worth discussing with upstream developers..?
+
+Cheers,
+David
 -- 
-Tomoki BENIYA <beniya@bit-isle.co.jp>
+David McBride <dwm@doc.ic.ac.uk>
+Department of Computing, Imperial College, London
 
