@@ -1,57 +1,42 @@
-From: David McBride <dwm@doc.ic.ac.uk>
-Subject: Re: Increasing the number of PGs
-Date: Tue, 27 Mar 2012 12:46:11 +0100
-Message-ID: <1332848771.8411.68.camel@squire.doc.ic.ac.uk>
-References: <20120326213459.e8ace6f3.ctpm@ist.utl.pt>
-	 <CAORUGqBzBBoi3TeWcqzyeN7vSW+=FCLM72MnPJfCqOFrQ9iOdg@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Unmount btrfs when stopping OSD's
+Date: Tue, 27 Mar 2012 16:20:45 +0200
+Message-ID: <4F71CCBD.4070501@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cardinal.doc.ic.ac.uk ([146.169.1.194]:42818 "EHLO
-	cardinal.doc.ic.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752132Ab2C0LqN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Mar 2012 07:46:13 -0400
-In-Reply-To: <CAORUGqBzBBoi3TeWcqzyeN7vSW+=FCLM72MnPJfCqOFrQ9iOdg@mail.gmail.com>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:49910 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750977Ab2C0OUr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Mar 2012 10:20:47 -0400
+Received: from [IPv6:2a00:f10:113:1:16da:e9ff:fe71:cc37] (unknown [IPv6:2a00:f10:113:1:16da:e9ff:fe71:cc37])
+	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id 8A48D40060
+	for <ceph-devel@vger.kernel.org>; Tue, 27 Mar 2012 16:20:45 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: =?ISO-8859-1?Q?Cl=E1udio?= Martins <ctpm@ist.utl.pt>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, 2012-03-26 at 16:15 -0700, Tommi Virtanen wrote:
+Hi,
 
-> >  Can anyone clarify if this is still the case as of v0.43 and/or v0.44,
-> > or is it safe to increase pg_num on a pool with live data?
-> 
-> Sadly, that is still the current state of affairs.
+It's something I noticed some time ago, but never really paid attention to.
 
-Does the act of adding OSDs itself result in the PG count being
-increased?  
+When we start an OSD we automatically mount the btrfs filesystem if 
+"btrfs devs" is set, but we do not unmount when we stop the OSD.
 
-This seems to be the behaviour I've just observed on my testing cluster
-(running 0.44) using an incantation like:
+I see the init script is prepared for this:
 
-> for i in `seq 14 27`; do
-> ceph osd create $i
-> ceph osd crush add $i osd.$i 1.0 host=$hostname rack=$rack pool=default
-> ceph-osd -i $i --mkfs --mkkey
-> ceph -i /etc/ceph/keyring.osd.$i auth add osd.$i osd "allow *" mon "allow rwx"
-> done
+dobtrfsumount=0
+..
+     --btrfsumount)
+	    dobtrfsumount=1
+..
+if [ $dobtrfsumount -eq 1 ] && [ -n "$btrfs_devs" ]; then
 
-The number of PGs seems to have roughly doubled, and half of my
-OSDs now assert in OSD::get_or_create_pg() with "FAILED assert(role == 0)".
+Why would this be set to 0 by default? Any reason?
 
-This seems to be a similar failure-mode for others who report issues after 
-PG-splitting; as in those cases, `ceph -w` also reports errors of the form:
+I like my daemons/init scripts to clean up their 'mess' when they stop.
 
-  [ERR] mkpg 1.1p23 up [5,12] != acting [12]
+I'd vote for setting this to 1 by default.
 
-Have I done something wrong?  Is there some alternate sequence of steps
-that avoids / suppresses PG splitting?
-
-Cheers,
-David
--- 
-David McBride <dwm@doc.ic.ac.uk>
-Department of Computing, Imperial College, London
-
+Wido
