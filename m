@@ -1,207 +1,55 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Increasing the number of PGs
-Date: Wed, 28 Mar 2012 09:21:30 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1203280916440.32376@cobra.newdream.net>
-References: <20120326213459.e8ace6f3.ctpm@ist.utl.pt>
- <CAORUGqBzBBoi3TeWcqzyeN7vSW+=FCLM72MnPJfCqOFrQ9iOdg@mail.gmail.com>
- <1332848771.8411.68.camel@squire.doc.ic.ac.uk> <1332866711.8411.70.camel@squire.doc.ic.ac.uk>
- <Pine.LNX.4.64.1203271105180.1271@cobra.newdream.net>
- <1332882253.8411.72.camel@squire.doc.ic.ac.uk> <1332938733.8411.96.camel@squire.doc.ic.ac.uk>
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: RBD attach via libvirt to kvm vm - VM kernel hang
+Date: Wed, 28 Mar 2012 09:24:10 -0700
+Message-ID: <4F733B2A.7050902@dreamhost.com>
+References: <CAMwB3Tj4F1H_TnYsJVDELnod5z=DKwtdGiZExiVrMaJDycKvEw@mail.gmail.com> <CAORUGqAWnFz5uMOH=SAXb+n=ysMF9vvgGK-fqn0gdm5eDo9woA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44975 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758476Ab2C1QVa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Mar 2012 12:21:30 -0400
-In-Reply-To: <1332938733.8411.96.camel@squire.doc.ic.ac.uk>
+Received: from mail.hq.newdream.net ([66.33.206.127]:44654 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758258Ab2C1QYM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Mar 2012 12:24:12 -0400
+In-Reply-To: <CAORUGqAWnFz5uMOH=SAXb+n=ysMF9vvgGK-fqn0gdm5eDo9woA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David McBride <dwm@doc.ic.ac.uk>
-Cc: Tommi Virtanen <tommi.virtanen@dreamhost.com>, ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: =?UTF-8?B?U8WCYXdvbWlyIFNrb3dyb24=?= <szibis@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi David-
+On 03/28/2012 09:13 AM, Tommi Virtanen wrote:
+> 2012/3/28 S=C5=82awomir Skowron<szibis@gmail.com>:
+>> VM on-01 with config like in attachment (dumpxml) - hang, after
+>> attaching rbd device with kernel_bug in attachment.
+>
+> [   68.630913] BUG: unable to handle kernel NULL pointer dereference
+> at 0000000000000049
+> [   68.632016] IP: [<ffffffff8130a6a5>] pci_find_capability+0x15/0x60
+> ...
+> [   68.632016] Call Trace:
+> [   68.632016]  [<ffffffff8131a9f7>] pci_set_payload+0xa7/0x140
+> [   68.632016]  [<ffffffff8131ae38>] pci_configure_slot.part.6+0x18/0=
+x100
+> [   68.632016]  [<ffffffff8131af52>] pci_configure_slot+0x32/0x40
+> [   68.632016]  [<ffffffffa003a7e8>] enable_device+0x188/0x9a0 [acpip=
+hp]
+> [   68.632016]  [<ffffffff81307349>] ? pci_bus_read_config_dword+0x89=
+/0xa0
+> ...
+>
+> Well, that sure looks like a bug. I can't tell whether it's in QEmu,
+> the QEmu rbd driver, or what. Josh, have you seen a crash like this?
 
-On Wed, 28 Mar 2012, David McBride wrote:
+I've not seen a crash like this before. I'm not aware of RBD being
+treated differently from other block devices in the pci layer in qemu,
+so I'd guess this is a qemu or guest kernel bug.
 
-> On Tue, 2012-03-27 at 22:04 +0100, David McBride wrote:
-> > On Tue, 2012-03-27 at 11:06 -0700, Sage Weil wrote:
-> > 
-> > > This shouldn't change the PG count either.  If you do
-> > > 
-> > >  ceph osd dump | grep ^pool
-> > > 
-> > > you'll see a pg_num value for each pool that should remain constant.  
-> > > Only the size should change (replica count)...
-> > 
-> > Okay, that's what I was expecting.  I earlier rebuilt the cluster and
-> > repeated my earlier results; however, I don't have the output of those
-> > commands to hand.
-> 
-> Hi,
-> 
-> Results are in.  Something odd is going on; the results returned by
-> `ceph -s` and `ceph osd dump` are inconsistent:
-> 
-> * `ceph osd dump` does indeed indicate that the pg_num values are 
->   remaining constant for each pool before and after changing the replica
->   count.
-> 
-> * However, the total number of PGs being reported by `ceph -s` or 
->   `ceph -w` increases immediately after issuing the replica count change
->   command for a pool.  The increase in size is equal to the number of 
->   live OSDs; in this case, 28.
-> 
-> * This apparent (silent) increase in PG count will occur three times if
->   the change is applied to all three pools, `data`, `metadata`, and 
->   `rbd`.  
-> 
-> * Changing the replica count up and down again after the initial  
->   increase has no effect on the reported replica count.
-> 
-> * My steps for reproducing are:
-> 
->   - Mint a new cluster, with 14 OSDs stored on server A.
->   - Start the cluster.
->   - Add some data to the `rbd` pool using `rados bench`.
->   - Initialize 14 additional OSDs on server B.
->   - Add the server B OSDs to the cluster.
->   - Increase the replica count.
-> 
->   This process is probably not minimal.  I can try to run some 
->   experiments to see what factors are significant.
->   (I'm pretty sure I could skip the `rados bench` step, for example.)
-> 
-> * In case it makes a difference, I'm using XFS, not BTRFS, for the OSD's
->   backing-store.
-> 
-> 
-> Here's the output of ceph status commands during the various stages:
-> 
-> 
-> Prior to OSD addition:
-> ======================
-> 
-> output from: `ceph -s`:
-> 
-> > 2012-03-28 12:30:25.086686    pg v133: 2772 pgs: 2772 active+clean; 13252 MB data, 55720 MB used, 1857 GB / 1911 GB avail
-> > 2012-03-28 12:30:25.101300   mds e1: 0/0/1 up
-> > 2012-03-28 12:30:25.101424   osd e11: 14 osds: 14 up, 14 in
-> > 2012-03-28 12:30:25.101689   log 2012-03-28 12:25:22.596734 mon.0 146.169.21.55:6789/0 16 : [INF] osd.8 146.169.1.13:6836/6339 boot
-> > 2012-03-28 12:30:25.101897   mon e1: 1 mons at {vm-cephhead=146.169.21.55:6789/0}
-> 
-> output from: `ceph osd dump | grep pg_num`:
-> 
-> > pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0 crash_replay_interval 45
-> > pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> > pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-
-Oh!  lpg_num is > 0, which means a small number of "localized" pgs are 
-created for every OSD.  This aren't used by anything currently (they were 
-originally added to support hadoop-style placement, but even there we 
-don't use them).
-
-I'm guessing the pg count jumped after you added OSDs, not when you 
-adjusted the replica count.  You can confirm by looking at
-
- ceph pg dump
-
-before and after, and you should see that the new pgs all have a 'p##' at 
-the end (where the ## is the osd they are localized to).
-
-We probably want to turn those off by default, since they are unused.
-
-sage
-
-
-> 
-> 
-> Adding the second set of OSDs:
-> =============================
-> 
-> output from: `ceph osd dump | grep pg_num`:
-> 
-> > pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0 crash_replay_interval 45
-> > pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> > pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> 
-> Changing `rbd` pool replica count:
-> =================================
-> 
-> output from: `ceph -w`:
-> 
-> > 2012-03-28 12:36:36.768714    pg v313: 2772 pgs: 2772 active+clean; 13252 MB data, 86002 MB used, 3739 GB / 3823 GB avail
-> > 2012-03-28 12:36:37.763292    pg v314: 2772 pgs: 2772 active+clean; 13252 MB data, 85163 MB used, 3740 GB / 3823 GB avail
-> 
-> (issued: `ceph osd pool set rbd size 3`)
-> 
-> > 2012-03-28 12:36:42.308575    pg v315: 2800 pgs: 28 creating, 2772 active+clean; 13252 MB data, 85163 MB used, 3740 GB / 3823 GB avail
-> > 2012-03-28 12:36:42.314124   osd e105: 28 osds: 28 up, 28 in
-> > 2012-03-28 12:36:43.399792    pg v316: 2800 pgs: 28 creating, 2772 active+clean; 13252 MB data, 85163 MB used, 3740 GB / 3823 GB avail
-> > 2012-03-28 12:36:43.402742   osd e106: 28 osds: 28 up, 28 in
-> > 2012-03-28 12:36:46.691598    pg v317: 2800 pgs: 28 creating, 2737 active+clean, 35 active+recovering; 13252 MB data, 84818 MB used, 3740 GB / 3823 GB avail; 274/6765 degraded (4.050%)
-> > 2012-03-28 12:36:47.596507    pg v318: 2800 pgs: 28 creating, 2709 active+clean, 63 active+recovering; 13252 MB data, 84819 MB used, 3740 GB / 3823 GB avail; 524/6890 degraded (7.605%)
-> 
-> output from: `ceph osd dump | grep pg_num`:
-> 
-> > pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0 crash_replay_interval 45
-> > pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> > pool 2 'rbd' rep size 3 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 105 owner 0
-> 
-> 
-> Changing `data` pool replica count:
-> ==================================
-> 
-> output from: `ceph -w`:
-> 
-> > 2012-03-28 13:10:54.818447    pg v573: 2800 pgs: 14 creating, 2786 active+clean; 13252 MB data, 98329 MB used, 3727 GB / 3823 GB avail
-> 
-> (issued: `ceph osd pool set data size 3`)
-> 
-> > 2012-03-28 13:11:08.240605    pg v574: 2828 pgs: 42 creating, 2786 active+clean; 13252 MB data, 98329 MB used, 3727 GB / 3823 GB avail
-> > 2012-03-28 13:11:08.245026   osd e114: 28 osds: 28 up, 28 in
-> > 2012-03-28 13:11:09.050371    pg v575: 2828 pgs: 42 creating, 2786 active+clean; 13252 MB data, 98329 MB used, 3727 GB / 3823 GB avail
-> > 2012-03-28 13:11:09.051179   osd e115: 28 osds: 28 up, 28 in
-> 
-> output from: `ceph osd dump | grep pg_num`:
-> 
-> > pool 0 'data' rep size 3 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 114 owner 0 crash_replay_interval 45
-> > pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> > pool 2 'rbd' rep size 3 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 112 owner 0
-> 
-> 
-> Increase metadata pool
-> ======================
-> 
-> output from `ceph -w`:
-> 
-> > 2012-03-28 13:12:04.279557    pg v580: 2828 pgs: 28 creating, 2800 active+clean; 13252 MB data, 98338 MB used, 3727 GB / 3823 GB avail
-> 
-> (issued: `ceph osd pool set metadata size 3`)
-> 
-> > 2012-03-28 13:13:19.748554    pg v581: 2856 pgs: 56 creating, 2800 active+clean; 13252 MB data, 98338 MB used, 3727 GB / 3823 GB avail
-> > 2012-03-28 13:13:19.753181   osd e116: 28 osds: 28 up, 28 in
-> > 2012-03-28 13:13:20.840151    pg v582: 2856 pgs: 56 creating, 2800 active+clean; 13252 MB data, 98338 MB used, 3727 GB / 3823 GB avail
-> > 2012-03-28 13:13:20.842065   osd e117: 28 osds: 28 up, 28 in
-> 
-> output from: `ceph osd dump | grep pg_num`: 
-> 
-> > pool 0 'data' rep size 3 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 114 owner 0 crash_replay_interval 45
-> > pool 1 'metadata' rep size 3 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 116 owner 0
-> > pool 2 'rbd' rep size 3 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 112 owner 0
-> 
-> 
-> This sounds like it's probably defect.  Should I mint a new bug ticket in the tracker?
-> 
-> Cheers,
-> David
-> -- 
-> David McBride <dwm@doc.ic.ac.uk>
-> Department of Computing, Imperial College, London
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Does attaching a non-rbd disk (still using the virtio driver) cause the
+same problem? If not, what distro and kernel version is the guest
+running?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
