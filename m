@@ -1,180 +1,292 @@
-From: David McBride <dwm@doc.ic.ac.uk>
-Subject: Re: Increasing the number of PGs
-Date: Wed, 28 Mar 2012 13:45:33 +0100
-Message-ID: <1332938733.8411.96.camel@squire.doc.ic.ac.uk>
-References: <20120326213459.e8ace6f3.ctpm@ist.utl.pt>
-	 <CAORUGqBzBBoi3TeWcqzyeN7vSW+=FCLM72MnPJfCqOFrQ9iOdg@mail.gmail.com>
-	 <1332848771.8411.68.camel@squire.doc.ic.ac.uk>
-	 <1332866711.8411.70.camel@squire.doc.ic.ac.uk>
-	 <Pine.LNX.4.64.1203271105180.1271@cobra.newdream.net>
-	 <1332882253.8411.72.camel@squire.doc.ic.ac.uk>
+From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Subject: RBD attach via libvirt to kvm vm - VM kernel hang
+Date: Wed, 28 Mar 2012 15:27:29 +0200
+Message-ID: <CAMwB3Tj4F1H_TnYsJVDELnod5z=DKwtdGiZExiVrMaJDycKvEw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary=000e0cdfdb52aa372d04bc4d9132
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cardinal.doc.ic.ac.uk ([146.169.1.194]:34909 "EHLO
-	cardinal.doc.ic.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751509Ab2C1Mpn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Mar 2012 08:45:43 -0400
-In-Reply-To: <1332882253.8411.72.camel@squire.doc.ic.ac.uk>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:50679 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756119Ab2C1N1a (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Mar 2012 09:27:30 -0400
+Received: by bkcik5 with SMTP id ik5so902252bkc.19
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Mar 2012 06:27:29 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Tommi Virtanen <tommi.virtanen@dreamhost.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, 2012-03-27 at 22:04 +0100, David McBride wrote:
-> On Tue, 2012-03-27 at 11:06 -0700, Sage Weil wrote:
-> 
-> > This shouldn't change the PG count either.  If you do
-> > 
-> >  ceph osd dump | grep ^pool
-> > 
-> > you'll see a pg_num value for each pool that should remain constant.  
-> > Only the size should change (replica count)...
-> 
-> Okay, that's what I was expecting.  I earlier rebuilt the cluster and
-> repeated my earlier results; however, I don't have the output of those
-> commands to hand.
+--000e0cdfdb52aa372d04bc4d9132
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Hi,
+Dom0 - Ubuntu oneiric, kernel 3.0.0-16-server.
 
-Results are in.  Something odd is going on; the results returned by
-`ceph -s` and `ceph osd dump` are inconsistent:
+ii  kvm
+1:84+dfsg-0ubuntu16+1.0+noroms+0ubuntu10 dummy transitional package
+from kvm to qemu-kvm
+ii  qemu                                1.0+noroms-0ubuntu10
+          dummy transitional package from qemu to qemu-kvm
+ii  qemu-common                         1.0+noroms-0ubuntu10
+          qemu common functionality (bios, documentation, etc)
+ii  qemu-kvm                            1.0+noroms-0ubuntu10
+          Full virtualization on i386 and amd64 hardware
+ii  qemu-utils                          1.0+noroms-0ubuntu10
+          qemu utilities
+ii  libvirt-bin                         0.9.9~release1-2ubuntu6
+          programs for the libvirt library
+ii  libvirt0                            0.9.9~release1-2ubuntu6
+          library for interfacing with different virtualization
+systems
+ii  python-libvirt                      0.9.9~release1-2ubuntu6
+          libvirt Python bindings
 
-* `ceph osd dump` does indeed indicate that the pg_num values are 
-  remaining constant for each pool before and after changing the replica
-  count.
+<disk type=3D"network" device=3D"disk">
+         <driver name=3D"qemu" type=3D"raw"/>
+         <source protocol=3D"rbd"
+name=3D"rbd/foo:id=3Dadmin:rbd_writeback_window=3D8000000">
+             <host name=3D"10.177.64.4" port=3D"6789"/>
+             <host name=3D"10.177.64.6" port=3D"6789"/>
+             <host name=3D"10.177.64.8" port=3D"6789"/>
+         </source>
+         <target dev=3D"vdd" bus=3D"virtio"/>
+</disk>
 
-* However, the total number of PGs being reported by `ceph -s` or 
-  `ceph -w` increases immediately after issuing the replica count change
-  command for a pool.  The increase in size is equal to the number of 
-  live OSDs; in this case, 28.
+After:
 
-* This apparent (silent) increase in PG count will occur three times if
-  the change is applied to all three pools, `data`, `metadata`, and 
-  `rbd`.  
+virsh attach-device on-01 /tmp/rbd.xml
+Device attached successfully
 
-* Changing the replica count up and down again after the initial  
-  increase has no effect on the reported replica count.
+libvirt log is clean.
 
-* My steps for reproducing are:
+VM on-01 with config like in attachment (dumpxml) - hang, after
+attaching rbd device with kernel_bug in attachment.
 
-  - Mint a new cluster, with 14 OSDs stored on server A.
-  - Start the cluster.
-  - Add some data to the `rbd` pool using `rados bench`.
-  - Initialize 14 additional OSDs on server B.
-  - Add the server B OSDs to the cluster.
-  - Increase the replica count.
+With compiled vanilia kvm 1.0, this bug exists, same as above ubuntu
+kvm version.
 
-  This process is probably not minimal.  I can try to run some 
-  experiments to see what factors are significant.
-  (I'm pretty sure I could skip the `rados bench` step, for example.)
+--=20
+-----
+Regards
 
-* In case it makes a difference, I'm using XFS, not BTRFS, for the OSD's
-  backing-store.
+S=C5=82awek Skowron
 
+--000e0cdfdb52aa372d04bc4d9132
+Content-Type: text/plain; charset=US-ASCII; name="kernel_bug.txt"
+Content-Disposition: attachment; filename="kernel_bug.txt"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_h0cegg760
 
-Here's the output of ceph status commands during the various stages:
+WyAgIDY4LjYzMDkxM10gQlVHOiB1bmFibGUgdG8gaGFuZGxlIGtlcm5lbCBOVUxMIHBvaW50ZXIg
+ZGVyZWZlcmVuY2UgYXQgMDAwMDAwMDAwMDAwMDA0OQ0KWyAgIDY4LjYzMjAxNl0gSVA6IFs8ZmZm
+ZmZmZmY4MTMwYTZhNT5dIHBjaV9maW5kX2NhcGFiaWxpdHkrMHgxNS8weDYwDQpbICAgNjguNjMy
+MDE2XSBQR0QgMWI1MzcwNjcgUFVEIDFhZmVkMDY3IFBNRCAwDQpbICAgNjguNjMyMDE2XSBPb3Bz
+OiAwMDAwIFsjMV0gU01QDQpbICAgNjguNjMyMDE2XSBDUFUgMA0KWyAgIDY4LjYzMjAxNl0gTW9k
+dWxlcyBsaW5rZWQgaW46IGJvbmRpbmcgcHNtb3VzZSB2aXJ0aW9fYmFsbG9vbiBzZXJpb19yYXcg
+aTJjX3BpaXg0IGFjcGlwaHAgbHAgcGFycG9ydCBmbG9wcHkgaXhnYmV2Zg0KWyAgIDY4LjYzMjAx
+Nl0NClsgICA2OC42MzIwMTZdIFBpZDogMTcsIGNvbW06IGt3b3JrZXIvMDoxIE5vdCB0YWludGVk
+IDMuMC4wLTEzLXhlbiAjMjIgQm9jaHMgQm9jaHMNClsgICA2OC42MzIwMTZdIFJJUDogMDAxMDpb
+PGZmZmZmZmZmODEzMGE2YTU+XSAgWzxmZmZmZmZmZjgxMzBhNmE1Pl0gcGNpX2ZpbmRfY2FwYWJp
+bGl0eSsweDE1LzB4NjANClsgICA2OC42MzIwMTZdIFJTUDogMDAwMDpmZmZmODgwMDFkYWEzYjIw
+ICBFRkxBR1M6IDAwMDEwMjgyDQpbICAgNjguNjMyMDE2XSBSQVg6IDAwMDAwMDAwMDAwMDAwMDAg
+UkJYOiBmZmZmODgwMDFkYTY3MDAwIFJDWDogMDAwMDAwMDAwMDAwMDBhNA0KWyAgIDY4LjYzMjAx
+Nl0gUkRYOiAwMDAwMDAwMDAwMDAwMDAwIFJTSTogMDAwMDAwMDAwMDAwMDAxMCBSREk6IDAwMDAw
+MDAwMDAwMDAwMDANClsgICA2OC42MzIwMTZdIFJCUDogZmZmZjg4MDAxZGFhM2I0MCBSMDg6IDAw
+MDAwMDAwMDAwMDAwMDIgUjA5OiBmZmZmODgwMDFkYWEzYjFjDQpbICAgNjguNjMyMDE2XSBSMTA6
+IDAwMDAwMDAwMDAwMDAwMjggUjExOiAwMDAwMDAwMDAwMDAwMDAwIFIxMjogMDAwMDAwMDAwMDAw
+MDAwMA0KWyAgIDY4LjYzMjAxNl0gUjEzOiAwMDAwMDAwMDAwMDAwMDAwIFIxNDogMDAwMDAwMDAw
+MDAwMDAwMCBSMTU6IDAwMDAwMDAwMDAwMDAwYTgNClsgICA2OC42MzIwMTZdIEZTOiAgMDAwMDAw
+MDAwMDAwMDAwMCgwMDAwKSBHUzpmZmZmODgwMDFmYzAwMDAwKDAwMDApIGtubEdTOjAwMDAwMDAw
+MDAwMDAwMDANClsgICA2OC42MzIwMTZdIENTOiAgMDAxMCBEUzogMDAwMCBFUzogMDAwMCBDUjA6
+IDAwMDAwMDAwODAwNTAwM2INClsgICA2OC42MzIwMTZdIENSMjogMDAwMDAwMDAwMDAwMDA0OSBD
+UjM6IDAwMDAwMDAwMWNhN2EwMDAgQ1I0OiAwMDAwMDAwMDAwMDAwNmYwDQpbICAgNjguNjMyMDE2
+XSBEUjA6IDAwMDAwMDAwMDAwMDAwMDAgRFIxOiAwMDAwMDAwMDAwMDAwMDAwIERSMjogMDAwMDAw
+MDAwMDAwMDAwMA0KWyAgIDY4LjYzMjAxNl0gRFIzOiAwMDAwMDAwMDAwMDAwMDAwIERSNjogMDAw
+MDAwMDBmZmZmMGZmMCBEUjc6IDAwMDAwMDAwMDAwMDA0MDANClsgICA2OC42MzIwMTZdIFByb2Nl
+c3Mga3dvcmtlci8wOjEgKHBpZDogMTcsIHRocmVhZGluZm8gZmZmZjg4MDAxZGFhMjAwMCwgdGFz
+ayBmZmZmODgwMDFkYTc5NzIwKQ0KWyAgIDY4LjYzMjAxNl0gU3RhY2s6DQpbICAgNjguNjMyMDE2
+XSAgMDAwMDAwMDAwMDAwMDI4MiBmZmZmODgwMDFkYTY3MDAwIGZmZmY4ODAwMWRhNjcwMDAgMDAw
+MDAwMDAwMDAwMDAwMA0KWyAgIDY4LjYzMjAxNl0gIGZmZmY4ODAwMWRhYTNiYTAgZmZmZmZmZmY4
+MTMxYTlmNyBmZmZmZmZmZjgxYzUwMDAwIGZmZmY4ODAwMWRhNjYwMDANClsgICA2OC42MzIwMTZd
+ICBmZmZmZmZmZjgxYzVkY2MwIDAwMDAwMDAwMWRhNjYwMDAgZmZmZjg4MDAxZGFhM2JhMCBmZmZm
+ODgwMDFkYTY3MDAwDQpbICAgNjguNjMyMDE2XSBDYWxsIFRyYWNlOg0KWyAgIDY4LjYzMjAxNl0g
+IFs8ZmZmZmZmZmY4MTMxYTlmNz5dIHBjaV9zZXRfcGF5bG9hZCsweGE3LzB4MTQwDQpbICAgNjgu
+NjMyMDE2XSAgWzxmZmZmZmZmZjgxMzFhZTM4Pl0gcGNpX2NvbmZpZ3VyZV9zbG90LnBhcnQuNisw
+eDE4LzB4MTAwDQpbICAgNjguNjMyMDE2XSAgWzxmZmZmZmZmZjgxMzFhZjUyPl0gcGNpX2NvbmZp
+Z3VyZV9zbG90KzB4MzIvMHg0MA0KWyAgIDY4LjYzMjAxNl0gIFs8ZmZmZmZmZmZhMDAzYTdlOD5d
+IGVuYWJsZV9kZXZpY2UrMHgxODgvMHg5YTAgW2FjcGlwaHBdDQpbICAgNjguNjMyMDE2XSAgWzxm
+ZmZmZmZmZjgxMzA3MzQ5Pl0gPyBwY2lfYnVzX3JlYWRfY29uZmlnX2R3b3JkKzB4ODkvMHhhMA0K
+WyAgIDY4LjYzMjAxNl0gIFs8ZmZmZmZmZmY4MTM0ODVhND5dID8gYWNwaV9vc193YWl0X2V2ZW50
+c19jb21wbGV0ZSsweDIzLzB4MjMNClsgICA2OC42MzIwMTZdICBbPGZmZmZmZmZmYTAwMzllZDA+
+XSBhY3BpcGhwX2VuYWJsZV9zbG90KzB4ODAvMHhiMCBbYWNwaXBocF0NClsgICA2OC42MzIwMTZd
+ICBbPGZmZmZmZmZmYTAwMzlmYzQ+XSBhY3BpcGhwX2NoZWNrX2JyaWRnZS5pc3JhLjEyKzB4NjQv
+MHhmMCBbYWNwaXBocF0NClsgICA2OC42MzIwMTZdICBbPGZmZmZmZmZmYTAwM2EyMTM+XSBoYW5k
+bGVfaG90cGx1Z19ldmVudF9mdW5jKzB4MTAzLzB4MWIwIFthY3BpcGhwXQ0KWyAgIDY4LjYzMjAx
+Nl0gIFs8ZmZmZmZmZmY4MTM0YjBmZj5dID8gYWNwaV9idXNfZ2V0X2RldmljZSsweDI3LzB4NDAN
+ClsgICA2OC42MzIwMTZdICBbPGZmZmZmZmZmODEzNTdkYjM+XSBhY3BpX2V2X25vdGlmeV9kaXNw
+YXRjaCsweDY3LzB4N2UNClsgICA2OC42MzIwMTZdICBbPGZmZmZmZmZmODEzNDg1Y2I+XSBhY3Bp
+X29zX2V4ZWN1dGVfZGVmZXJyZWQrMHgyNy8weDM0DQpbICAgNjguNjMyMDE2XSAgWzxmZmZmZmZm
+ZjgxMDdiYWZhPl0gcHJvY2Vzc19vbmVfd29yaysweDExYS8weDQ4MA0KWyAgIDY4LjYzMjAxNl0g
+IFs8ZmZmZmZmZmY4MTA3YzhhNT5dIHdvcmtlcl90aHJlYWQrMHgxNjUvMHgzNzANClsgICA2OC42
+MzIwMTZdICBbPGZmZmZmZmZmODEwN2M3NDA+XSA/IG1hbmFnZV93b3JrZXJzLmlzcmEuMzArMHgx
+MzAvMHgxMzANClsgICA2OC42MzIwMTZdICBbPGZmZmZmZmZmODEwODBjZWM+XSBrdGhyZWFkKzB4
+OGMvMHhhMA0KWyAgIDY4LjYzMjAxNl0gIFs8ZmZmZmZmZmY4MTYxNjgyND5dIGtlcm5lbF90aHJl
+YWRfaGVscGVyKzB4NC8weDEwDQpbICAgNjguNjMyMDE2XSAgWzxmZmZmZmZmZjgxMDgwYzYwPl0g
+PyBmbHVzaF9rdGhyZWFkX3dvcmtlcisweGEwLzB4YTANClsgICA2OC42MzIwMTZdICBbPGZmZmZm
+ZmZmODE2MTY4MjA+XSA/IGdzX2NoYW5nZSsweDEzLzB4MTMNClsgICA2OC42MzIwMTZdIENvZGU6
+IDQ1IGNjIDQ4IDgzIGM0IDIwIDViIDQxIDVjIDQxIDVkIDQxIDVlIDVkIGMzIDBmIDFmIDgwIDAw
+IDAwIDAwIDAwIDU1IDQ4IDg5IGU1IDQ4IDgzIGVjIDIwIDQ4IDg5IDVkIGYwIDRjIDg5IDY1IGY4
+IDY2IDY2IDY2IDY2IDkwIDwwZj4gYjYgNTcgNDkgNDkgODkgZmMgODkgZjMgOGIgNzcgMzggNDgg
+OGIgN2YgMTAgZTggZTYgZjggZmYgZmYNClsgICA2OC42MzIwMTZdIFJJUCAgWzxmZmZmZmZmZjgx
+MzBhNmE1Pl0gcGNpX2ZpbmRfY2FwYWJpbGl0eSsweDE1LzB4NjANClsgICA2OC42MzIwMTZdICBS
+U1AgPGZmZmY4ODAwMWRhYTNiMjA+DQpbICAgNjguNjMyMDE2XSBDUjI6IDAwMDAwMDAwMDAwMDAw
+NDkNClsgICA2OC42OTg5MzFdIC0tLVsgZW5kIHRyYWNlIDRlYTcxYzJiMTQxMGU0OTYgXS0tLQ0K
+WyAgIDY4LjcwMDM2NV0gQlVHOiB1bmFibGUgdG8gaGFuZGxlIGtlcm5lbCBwYWdpbmcgcmVxdWVz
+dCBhdCBmZmZmZmZmZmZmZmZmZmY4DQpbICAgNjguNzAyMDUxXSBJUDogWzxmZmZmZmZmZjgxMDgx
+MTgxPl0ga3RocmVhZF9kYXRhKzB4MTEvMHgyMA0KWyAgIDY4LjcwMzU5Ml0gUEdEIDFjMDUwNjcg
+UFVEIDFjMDYwNjcgUE1EIDANClsgICA2OC43MDQzMTJdIE9vcHM6IDAwMDAgWyMyXSBTTVANClsg
+ICA2OC43MDQzMTJdIENQVSAwDQpbICAgNjguNzA0MzEyXSBNb2R1bGVzIGxpbmtlZCBpbjogYm9u
+ZGluZyBwc21vdXNlIHZpcnRpb19iYWxsb29uIHNlcmlvX3JhdyBpMmNfcGlpeDQgYWNwaXBocCBs
+cCBwYXJwb3J0IGZsb3BweSBpeGdiZXZmDQpbICAgNjguNzA0MzEyXQ0KWyAgIDY4LjcwNDMxMl0g
+UGlkOiAxNywgY29tbToga3dvcmtlci8wOjEgVGFpbnRlZDogRyAgICAgIEQgICAgIDMuMC4wLTEz
+LXhlbiAjMjIgQm9jaHMgQm9jaHMNClsgICA2OC43MDQzMTJdIFJJUDogMDAxMDpbPGZmZmZmZmZm
+ODEwODExODE+XSAgWzxmZmZmZmZmZjgxMDgxMTgxPl0ga3RocmVhZF9kYXRhKzB4MTEvMHgyMA0K
+WyAgIDY4LjcwNDMxMl0gUlNQOiAwMDAwOmZmZmY4ODAwMWRhYTM3NjAgIEVGTEFHUzogMDAwMTAw
+OTINClsgICA2OC43MDQzMTJdIFJBWDogMDAwMDAwMDAwMDAwMDAwMCBSQlg6IDAwMDAwMDAwMDAw
+MDAwMDAgUkNYOiAwMDAwMDAwMDAwMDAwMDAwDQpbICAgNjguNzA0MzEyXSBSRFg6IDAwMDAwMDAw
+MDAwMDAwMDAgUlNJOiAwMDAwMDAwMDAwMDAwMDAwIFJESTogZmZmZjg4MDAxZGE3OTcyMA0KWyAg
+IDY4LjcwNDMxMl0gUkJQOiBmZmZmODgwMDFkYWEzNzc4IFIwODogMDAwMDAwMDAwMDk4OTY4MCBS
+MDk6IDAwMDAwMDAwMDAwMDAwMDENClsgICA2OC43MDQzMTJdIFIxMDogMDAwMDAwMDAwMDAwMTQw
+MCBSMTE6IGZmZmY4ODAwMWRhNzQ1OTggUjEyOiAwMDAwMDAwMDAwMDAwMDAwDQpbICAgNjguNzA0
+MzEyXSBSMTM6IGZmZmY4ODAwMWRhNzlhZTggUjE0OiAwMDAwMDAwMDAwMDAwMDAwIFIxNTogMDAw
+MDAwMDAwMDAwMDI0Ng0KWyAgIDY4LjcwNDMxMl0gRlM6ICAwMDAwMDAwMDAwMDAwMDAwKDAwMDAp
+IEdTOmZmZmY4ODAwMWZjMDAwMDAoMDAwMCkga25sR1M6MDAwMDAwMDAwMDAwMDAwMA0KWyAgIDY4
+LjcwNDMxMl0gQ1M6ICAwMDEwIERTOiAwMDAwIEVTOiAwMDAwIENSMDogMDAwMDAwMDA4MDA1MDAz
+Yg0KWyAgIDY4LjcwNDMxMl0gQ1IyOiBmZmZmZmZmZmZmZmZmZmY4IENSMzogMDAwMDAwMDAxY2E3
+YTAwMCBDUjQ6IDAwMDAwMDAwMDAwMDA2ZjANClsgICA2OC43MDQzMTJdIERSMDogMDAwMDAwMDAw
+MDAwMDAwMCBEUjE6IDAwMDAwMDAwMDAwMDAwMDAgRFIyOiAwMDAwMDAwMDAwMDAwMDAwDQpbICAg
+NjguNzA0MzEyXSBEUjM6IDAwMDAwMDAwMDAwMDAwMDAgRFI2OiAwMDAwMDAwMGZmZmYwZmYwIERS
+NzogMDAwMDAwMDAwMDAwMDQwMA0KWyAgIDY4LjcwNDMxMl0gUHJvY2VzcyBrd29ya2VyLzA6MSAo
+cGlkOiAxNywgdGhyZWFkaW5mbyBmZmZmODgwMDFkYWEyMDAwLCB0YXNrIGZmZmY4ODAwMWRhNzk3
+MjApDQpbICAgNjguNzA0MzEyXSBTdGFjazoNClsgICA2OC43MDQzMTJdICBmZmZmZmZmZjgxMDdj
+ZGY1IGZmZmY4ODAwMWRhYTM3NzggZmZmZjg4MDAxZmMxMmE0MCBmZmZmODgwMDFkYWEzN2Y4DQpb
+ICAgNjguNzA0MzEyXSAgZmZmZmZmZmY4MTYwYjMyNyBmZmZmODgwMDFkYWEzN2I4IGZmZmY4ODAw
+MWRhNzk3MjAgZmZmZjg4MDAxZGFhM2ZkOA0KWyAgIDY4LjcwNDMxMl0gIGZmZmY4ODAwMWRhYTNm
+ZDggZmZmZjg4MDAxZGFhM2ZkOCAwMDAwMDAwMDAwMDEyYTQwIGZmZmY4ODAwMWRhYTM3ZTgNClsg
+ICA2OC43MDQzMTJdIENhbGwgVHJhY2U6DQpbICAgNjguNzA0MzEyXSAgWzxmZmZmZmZmZjgxMDdj
+ZGY1Pl0gPyB3cV93b3JrZXJfc2xlZXBpbmcrMHgxNS8weGEwDQpbICAgNjguNzA0MzEyXSAgWzxm
+ZmZmZmZmZjgxNjBiMzI3Pl0gX19zY2hlZHVsZSsweDVlNy8weDcwMA0KWyAgIDY4LjcwNDMxMl0g
+IFs8ZmZmZmZmZmY4MTA1NmVmZj5dIHNjaGVkdWxlKzB4M2YvMHg2MA0KWyAgIDY4LjcwNDMxMl0g
+IFs8ZmZmZmZmZmY4MTA2MzBkMz5dIGRvX2V4aXQrMHgyNzMvMHg0NDANClsgICA2OC43MDQzMTJd
+ICBbPGZmZmZmZmZmODE2MGU3ZDA+XSBvb3BzX2VuZCsweGIwLzB4ZjANClsgICA2OC43MDQzMTJd
+ICBbPGZmZmZmZmZmODE1ZjVkMjI+XSBub19jb250ZXh0KzB4MTQ1LzB4MTUyDQpbICAgNjguNzA0
+MzEyXSAgWzxmZmZmZmZmZjgxNWY1ZWJkPl0gX19iYWRfYXJlYV9ub3NlbWFwaG9yZSsweDE4ZS8w
+eDFiMQ0KWyAgIDY4LjcwNDMxMl0gIFs8ZmZmZmZmZmY4MTJmMTcxZT5dID8gdnNucHJpbnRmKzB4
+MzVlLzB4NjIwDQpbICAgNjguNzA0MzEyXSAgWzxmZmZmZmZmZjgxNWY1ZWYzPl0gYmFkX2FyZWFf
+bm9zZW1hcGhvcmUrMHgxMy8weDE1DQpbICAgNjguNzA0MzEyXSAgWzxmZmZmZmZmZjgxNjExMGZk
+Pl0gZG9fcGFnZV9mYXVsdCsweDQzZC8weDUzMA0KWyAgIDY4LjcwNDMxMl0gIFs8ZmZmZmZmZmY4
+MTA1ZWZjZj5dID8gY29uc29sZV91bmxvY2srMHhiZi8weDEyMA0KWyAgIDY4LjcwNDMxMl0gIFs8
+ZmZmZmZmZmY4MTA1ZjA0Yz5dID8gY29uc29sZV90cnlsb2NrKzB4MWMvMHg3MA0KWyAgIDY4Ljcw
+NDMxMl0gIFs8ZmZmZmZmZmY4MTAzMjlhOT5dID8gZGVmYXVsdF9zcGluX2xvY2tfZmxhZ3MrMHg5
+LzB4MTANClsgICA2OC43MDQzMTJdICBbPGZmZmZmZmZmODE0ZGM4YTM+XSA/IHBjaV9jb25mMV9y
+ZWFkKzB4YzMvMHgxMjANClsgICA2OC43MDQzMTJdICBbPGZmZmZmZmZmODE2MTA5MDU+XSBkb19h
+c3luY19wYWdlX2ZhdWx0KzB4MzUvMHg4MA0KWyAgIDY4LjcwNDMxMl0gIFs8ZmZmZmZmZmY4MTYw
+ZGI0NT5dIGFzeW5jX3BhZ2VfZmF1bHQrMHgyNS8weDMwDQpbICAgNjguNzA0MzEyXSAgWzxmZmZm
+ZmZmZjgxMzBhNmE1Pl0gPyBwY2lfZmluZF9jYXBhYmlsaXR5KzB4MTUvMHg2MA0KWyAgIDY4Ljcw
+NDMxMl0gIFs8ZmZmZmZmZmY4MTMxYTlmNz5dIHBjaV9zZXRfcGF5bG9hZCsweGE3LzB4MTQwDQpb
+ICAgNjguNzA0MzEyXSAgWzxmZmZmZmZmZjgxMzFhZTM4Pl0gcGNpX2NvbmZpZ3VyZV9zbG90LnBh
+cnQuNisweDE4LzB4MTAwDQpbICAgNjguNzA0MzEyXSAgWzxmZmZmZmZmZjgxMzFhZjUyPl0gcGNp
+X2NvbmZpZ3VyZV9zbG90KzB4MzIvMHg0MA0KWyAgIDY4LjcwNDMxMl0gIFs8ZmZmZmZmZmZhMDAz
+YTdlOD5dIGVuYWJsZV9kZXZpY2UrMHgxODgvMHg5YTAgW2FjcGlwaHBdDQpbICAgNjguNzA0MzEy
+XSAgWzxmZmZmZmZmZjgxMzA3MzQ5Pl0gPyBwY2lfYnVzX3JlYWRfY29uZmlnX2R3b3JkKzB4ODkv
+MHhhMA0KWyAgIDY4LjcwNDMxMl0gIFs8ZmZmZmZmZmY4MTM0ODVhND5dID8gYWNwaV9vc193YWl0
+X2V2ZW50c19jb21wbGV0ZSsweDIzLzB4MjMNClsgICA2OC43MDQzMTJdICBbPGZmZmZmZmZmYTAw
+MzllZDA+XSBhY3BpcGhwX2VuYWJsZV9zbG90KzB4ODAvMHhiMCBbYWNwaXBocF0NClsgICA2OC43
+MDQzMTJdICBbPGZmZmZmZmZmYTAwMzlmYzQ+XSBhY3BpcGhwX2NoZWNrX2JyaWRnZS5pc3JhLjEy
+KzB4NjQvMHhmMCBbYWNwaXBocF0NClsgICA2OC43MDQzMTJdICBbPGZmZmZmZmZmYTAwM2EyMTM+
+XSBoYW5kbGVfaG90cGx1Z19ldmVudF9mdW5jKzB4MTAzLzB4MWIwIFthY3BpcGhwXQ0KWyAgIDY4
+LjcwNDMxMl0gIFs8ZmZmZmZmZmY4MTM0YjBmZj5dID8gYWNwaV9idXNfZ2V0X2RldmljZSsweDI3
+LzB4NDANClsgICA2OC43MDQzMTJdICBbPGZmZmZmZmZmODEzNTdkYjM+XSBhY3BpX2V2X25vdGlm
+eV9kaXNwYXRjaCsweDY3LzB4N2UNClsgICA2OC43MDQzMTJdICBbPGZmZmZmZmZmODEzNDg1Y2I+
+XSBhY3BpX29zX2V4ZWN1dGVfZGVmZXJyZWQrMHgyNy8weDM0DQpbICAgNjguNzA0MzEyXSAgWzxm
+ZmZmZmZmZjgxMDdiYWZhPl0gcHJvY2Vzc19vbmVfd29yaysweDExYS8weDQ4MA0KWyAgIDY4Ljcw
+NDMxMl0gIFs8ZmZmZmZmZmY4MTA3YzhhNT5dIHdvcmtlcl90aHJlYWQrMHgxNjUvMHgzNzANClsg
+ICA2OC43MDQzMTJdICBbPGZmZmZmZmZmODEwN2M3NDA+XSA/IG1hbmFnZV93b3JrZXJzLmlzcmEu
+MzArMHgxMzAvMHgxMzANClsgICA2OC43MDQzMTJdICBbPGZmZmZmZmZmODEwODBjZWM+XSBrdGhy
+ZWFkKzB4OGMvMHhhMA0KWyAgIDY4LjcwNDMxMl0gIFs8ZmZmZmZmZmY4MTYxNjgyND5dIGtlcm5l
+bF90aHJlYWRfaGVscGVyKzB4NC8weDEwDQpbICAgNjguNzA0MzEyXSAgWzxmZmZmZmZmZjgxMDgw
+YzYwPl0gPyBmbHVzaF9rdGhyZWFkX3dvcmtlcisweGEwLzB4YTANClsgICA2OC43MDQzMTJdICBb
+PGZmZmZmZmZmODE2MTY4MjA+XSA/IGdzX2NoYW5nZSsweDEzLzB4MTMNClsgICA2OC43MDQzMTJd
+IENvZGU6IDQxIDVmIDVkIGMzIGJlIDNlIDAxIDAwIDAwIDQ4IGM3IGM3IGYwIGIxIDllIDgxIGU4
+IDY1IGQ3IGZkIGZmIGU5IDc0IGZlIGZmIGZmIDU1IDQ4IDg5IGU1IDY2IDY2IDY2IDY2IDkwIDQ4
+IDhiIDg3IDcwIDAzIDAwIDAwIDVkDQpbICAgNjguNzA0MzEyXSAgOGIgNDAgZjggYzMgNjYgMmUg
+MGYgMWYgODQgMDAgMDAgMDAgMDAgMDAgNTUgNDggODkgZTUgNjYgNjYNClsgICA2OC43MDQzMTJd
+IFJJUCAgWzxmZmZmZmZmZjgxMDgxMTgxPl0ga3RocmVhZF9kYXRhKzB4MTEvMHgyMA0KWyAgIDY4
+LjcwNDMxMl0gIFJTUCA8ZmZmZjg4MDAxZGFhMzc2MD4NClsgICA2OC43MDQzMTJdIENSMjogZmZm
+ZmZmZmZmZmZmZmZmOA0KWyAgIDY4LjcwNDMxMl0gLS0tWyBlbmQgdHJhY2UgNGVhNzFjMmIxNDEw
+ZTQ5NyBdLS0tDQpbICAgNjguNzA0MzEyXSBGaXhpbmcgcmVjdXJzaXZlIGZhdWx0IGJ1dCByZWJv
+b3QgaXMgbmVlZGVkIQ0K
+--000e0cdfdb52aa372d04bc4d9132
+Content-Type: text/plain; charset=US-ASCII; name="vm_dumpxml.txt"
+Content-Disposition: attachment; filename="vm_dumpxml.txt"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_h0ceo0og1
 
-
-Prior to OSD addition:
-======================
-
-output from: `ceph -s`:
-
-> 2012-03-28 12:30:25.086686    pg v133: 2772 pgs: 2772 active+clean; 13252 MB data, 55720 MB used, 1857 GB / 1911 GB avail
-> 2012-03-28 12:30:25.101300   mds e1: 0/0/1 up
-> 2012-03-28 12:30:25.101424   osd e11: 14 osds: 14 up, 14 in
-> 2012-03-28 12:30:25.101689   log 2012-03-28 12:25:22.596734 mon.0 146.169.21.55:6789/0 16 : [INF] osd.8 146.169.1.13:6836/6339 boot
-> 2012-03-28 12:30:25.101897   mon e1: 1 mons at {vm-cephhead=146.169.21.55:6789/0}
-
-output from: `ceph osd dump | grep pg_num`:
-
-> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0 crash_replay_interval 45
-> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-
-
-Adding the second set of OSDs:
-=============================
-
-output from: `ceph osd dump | grep pg_num`:
-
-> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0 crash_replay_interval 45
-> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-
-Changing `rbd` pool replica count:
-=================================
-
-output from: `ceph -w`:
-
-> 2012-03-28 12:36:36.768714    pg v313: 2772 pgs: 2772 active+clean; 13252 MB data, 86002 MB used, 3739 GB / 3823 GB avail
-> 2012-03-28 12:36:37.763292    pg v314: 2772 pgs: 2772 active+clean; 13252 MB data, 85163 MB used, 3740 GB / 3823 GB avail
-
-(issued: `ceph osd pool set rbd size 3`)
-
-> 2012-03-28 12:36:42.308575    pg v315: 2800 pgs: 28 creating, 2772 active+clean; 13252 MB data, 85163 MB used, 3740 GB / 3823 GB avail
-> 2012-03-28 12:36:42.314124   osd e105: 28 osds: 28 up, 28 in
-> 2012-03-28 12:36:43.399792    pg v316: 2800 pgs: 28 creating, 2772 active+clean; 13252 MB data, 85163 MB used, 3740 GB / 3823 GB avail
-> 2012-03-28 12:36:43.402742   osd e106: 28 osds: 28 up, 28 in
-> 2012-03-28 12:36:46.691598    pg v317: 2800 pgs: 28 creating, 2737 active+clean, 35 active+recovering; 13252 MB data, 84818 MB used, 3740 GB / 3823 GB avail; 274/6765 degraded (4.050%)
-> 2012-03-28 12:36:47.596507    pg v318: 2800 pgs: 28 creating, 2709 active+clean, 63 active+recovering; 13252 MB data, 84819 MB used, 3740 GB / 3823 GB avail; 524/6890 degraded (7.605%)
-
-output from: `ceph osd dump | grep pg_num`:
-
-> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0 crash_replay_interval 45
-> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> pool 2 'rbd' rep size 3 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 105 owner 0
-
-
-Changing `data` pool replica count:
-==================================
-
-output from: `ceph -w`:
-
-> 2012-03-28 13:10:54.818447    pg v573: 2800 pgs: 14 creating, 2786 active+clean; 13252 MB data, 98329 MB used, 3727 GB / 3823 GB avail
-
-(issued: `ceph osd pool set data size 3`)
-
-> 2012-03-28 13:11:08.240605    pg v574: 2828 pgs: 42 creating, 2786 active+clean; 13252 MB data, 98329 MB used, 3727 GB / 3823 GB avail
-> 2012-03-28 13:11:08.245026   osd e114: 28 osds: 28 up, 28 in
-> 2012-03-28 13:11:09.050371    pg v575: 2828 pgs: 42 creating, 2786 active+clean; 13252 MB data, 98329 MB used, 3727 GB / 3823 GB avail
-> 2012-03-28 13:11:09.051179   osd e115: 28 osds: 28 up, 28 in
-
-output from: `ceph osd dump | grep pg_num`:
-
-> pool 0 'data' rep size 3 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 114 owner 0 crash_replay_interval 45
-> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> pool 2 'rbd' rep size 3 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 112 owner 0
-
-
-Increase metadata pool
-======================
-
-output from `ceph -w`:
-
-> 2012-03-28 13:12:04.279557    pg v580: 2828 pgs: 28 creating, 2800 active+clean; 13252 MB data, 98338 MB used, 3727 GB / 3823 GB avail
-
-(issued: `ceph osd pool set metadata size 3`)
-
-> 2012-03-28 13:13:19.748554    pg v581: 2856 pgs: 56 creating, 2800 active+clean; 13252 MB data, 98338 MB used, 3727 GB / 3823 GB avail
-> 2012-03-28 13:13:19.753181   osd e116: 28 osds: 28 up, 28 in
-> 2012-03-28 13:13:20.840151    pg v582: 2856 pgs: 56 creating, 2800 active+clean; 13252 MB data, 98338 MB used, 3727 GB / 3823 GB avail
-> 2012-03-28 13:13:20.842065   osd e117: 28 osds: 28 up, 28 in
-
-output from: `ceph osd dump | grep pg_num`: 
-
-> pool 0 'data' rep size 3 crush_ruleset 0 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 114 owner 0 crash_replay_interval 45
-> pool 1 'metadata' rep size 3 crush_ruleset 1 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 116 owner 0
-> pool 2 'rbd' rep size 3 crush_ruleset 2 object_hash rjenkins pg_num 896 pgp_num 896 lpg_num 2 lpgp_num 2 last_change 112 owner 0
-
-
-This sounds like it's probably defect.  Should I mint a new bug ticket in the tracker?
-
-Cheers,
-David
--- 
-David McBride <dwm@doc.ic.ac.uk>
-Department of Computing, Imperial College, London
-
+PGRvbWFpbiB0eXBlPSdrdm0nIGlkPSc4Jz4NCiAgPG5hbWU+b25lLTEwMTIwMTwvbmFtZT4NCiAg
+PHV1aWQ+YTUwZmVlZTctZGI4My0wZDgyLWI5YmEtY2ZkYWUyZGZiOTE1PC91dWlkPg0KICA8bWVt
+b3J5PjUyNDI4ODwvbWVtb3J5Pg0KICA8Y3VycmVudE1lbW9yeT41MjQyODg8L2N1cnJlbnRNZW1v
+cnk+DQogIDx2Y3B1PjE8L3ZjcHU+DQogIDxvcz4NCiAgICA8dHlwZSBhcmNoPSd4ODZfNjQnIG1h
+Y2hpbmU9J3BjLTEuMCc+aHZtPC90eXBlPg0KICAgIDxib290IGRldj0naGQnLz4NCiAgPC9vcz4N
+CiAgPGZlYXR1cmVzPg0KICAgIDxhY3BpLz4NCiAgPC9mZWF0dXJlcz4NCiAgPGNsb2NrIG9mZnNl
+dD0ndXRjJy8+DQogIDxvbl9wb3dlcm9mZj5kZXN0cm95PC9vbl9wb3dlcm9mZj4NCiAgPG9uX3Jl
+Ym9vdD5yZXN0YXJ0PC9vbl9yZWJvb3Q+DQogIDxvbl9jcmFzaD5kZXN0cm95PC9vbl9jcmFzaD4N
+CiAgPGRldmljZXM+DQogICAgPGVtdWxhdG9yPi91c3IvYmluL2t2bTwvZW11bGF0b3I+DQogICAg
+PGRpc2sgdHlwZT0nZmlsZScgZGV2aWNlPSdkaXNrJz4NCiAgICAgIDxkcml2ZXIgbmFtZT0ncWVt
+dScgdHlwZT0ncmF3Jy8+DQogICAgICA8c291cmNlIGZpbGU9Jy9uZWJ1bGEvbmVidWxhL3Zhci8x
+MDEyMDEvaW1hZ2VzL2Rpc2suMCcvPg0KICAgICAgPHRhcmdldCBkZXY9J2hkYScgYnVzPSd2aXJ0
+aW8nLz4NCiAgICAgIDxhbGlhcyBuYW1lPSd2aXJ0aW8tZGlzazAnLz4NCiAgICAgIDxhZGRyZXNz
+IHR5cGU9J3BjaScgZG9tYWluPScweDAwMDAnIGJ1cz0nMHgwMCcgc2xvdD0nMHgwMycgZnVuY3Rp
+b249JzB4MCcvPg0KICAgIDwvZGlzaz4NCiAgICA8ZGlzayB0eXBlPSdmaWxlJyBkZXZpY2U9J2Rp
+c2snPg0KICAgICAgPGRyaXZlciBuYW1lPSdxZW11JyB0eXBlPSdyYXcnLz4NCiAgICAgIDxzb3Vy
+Y2UgZmlsZT0nL25lYnVsYS9uZWJ1bGEvdmFyLzEwMTIwMS9pbWFnZXMvZGlzay4xJy8+DQogICAg
+ICA8dGFyZ2V0IGRldj0ndmRiJyBidXM9J3ZpcnRpbycvPg0KICAgICAgPGFsaWFzIG5hbWU9J3Zp
+cnRpby1kaXNrMScvPg0KICAgICAgPGFkZHJlc3MgdHlwZT0ncGNpJyBkb21haW49JzB4MDAwMCcg
+YnVzPScweDAwJyBzbG90PScweDA0JyBmdW5jdGlvbj0nMHgwJy8+DQogICAgPC9kaXNrPg0KICAg
+IDxkaXNrIHR5cGU9J25ldHdvcmsnIGRldmljZT0nZGlzayc+DQogICAgICA8ZHJpdmVyIG5hbWU9
+J3FlbXUnIHR5cGU9J3JhdycvPg0KICAgICAgPHNvdXJjZSBwcm90b2NvbD0ncmJkJyBuYW1lPSdy
+YmQvZm9vOmlkPWFkbWluOnJiZF93cml0ZWJhY2tfd2luZG93PTgwMDAwMDAnPg0KICAgICAgICA8
+aG9zdCBuYW1lPScxMC4xNzcuNjQuNCcgcG9ydD0nNjc4OScvPg0KICAgICAgICA8aG9zdCBuYW1l
+PScxMC4xNzcuNjQuNicgcG9ydD0nNjc4OScvPg0KICAgICAgICA8aG9zdCBuYW1lPScxMC4xNzcu
+NjQuOCcgcG9ydD0nNjc4OScvPg0KICAgICAgPC9zb3VyY2U+DQogICAgICA8dGFyZ2V0IGRldj0n
+dmRkJyBidXM9J3ZpcnRpbycvPg0KICAgICAgPGFsaWFzIG5hbWU9J3ZpcnRpby1kaXNrMycvPg0K
+ICAgICAgPGFkZHJlc3MgdHlwZT0ncGNpJyBkb21haW49JzB4MDAwMCcgYnVzPScweDAwJyBzbG90
+PScweDA4JyBmdW5jdGlvbj0nMHgwJy8+DQogICAgPC9kaXNrPg0KICAgIDxzZXJpYWwgdHlwZT0n
+cHR5Jz4NCiAgICAgIDxzb3VyY2UgcGF0aD0nL2Rldi9wdHMvMycvPg0KICAgICAgPHRhcmdldCBw
+b3J0PScwJy8+DQogICAgICA8YWxpYXMgbmFtZT0nc2VyaWFsMCcvPg0KICAgIDwvc2VyaWFsPg0K
+ICAgIDxjb25zb2xlIHR5cGU9J3B0eScgdHR5PScvZGV2L3B0cy8zJz4NCiAgICAgIDxzb3VyY2Ug
+cGF0aD0nL2Rldi9wdHMvMycvPg0KICAgICAgPHRhcmdldCB0eXBlPSdzZXJpYWwnIHBvcnQ9JzAn
+Lz4NCiAgICAgIDxhbGlhcyBuYW1lPSdzZXJpYWwwJy8+DQogICAgPC9jb25zb2xlPg0KICAgIDxp
+bnB1dCB0eXBlPSdtb3VzZScgYnVzPSdwczInLz4NCiAgICA8Z3JhcGhpY3MgdHlwZT0ndm5jJyBw
+b3J0PSc1OTAxJyBhdXRvcG9ydD0neWVzJyBsaXN0ZW49JzAuMC4wLjAnPg0KICAgICAgPGxpc3Rl
+biB0eXBlPSdhZGRyZXNzJyBhZGRyZXNzPScwLjAuMC4wJy8+DQogICAgPC9ncmFwaGljcz4NCiAg
+ICA8dmlkZW8+DQogICAgICA8bW9kZWwgdHlwZT0nY2lycnVzJyB2cmFtPSc5MjE2JyBoZWFkcz0n
+MScvPg0KICAgICAgPGFsaWFzIG5hbWU9J3ZpZGVvMCcvPg0KICAgICAgPGFkZHJlc3MgdHlwZT0n
+cGNpJyBkb21haW49JzB4MDAwMCcgYnVzPScweDAwJyBzbG90PScweDAyJyBmdW5jdGlvbj0nMHgw
+Jy8+DQogICAgPC92aWRlbz4NCiAgICA8aG9zdGRldiBtb2RlPSdzdWJzeXN0ZW0nIHR5cGU9J3Bj
+aScgbWFuYWdlZD0neWVzJz4NCiAgICAgIDxzb3VyY2U+DQogICAgICAgIDxhZGRyZXNzIGRvbWFp
+bj0nMHgwMDAwJyBidXM9JzB4MWEnIHNsb3Q9JzB4MTAnIGZ1bmN0aW9uPScweDMnLz4NCiAgICAg
+IDwvc291cmNlPg0KICAgICAgPGFsaWFzIG5hbWU9J2hvc3RkZXYwJy8+DQogICAgICA8YWRkcmVz
+cyB0eXBlPSdwY2knIGRvbWFpbj0nMHgwMDAwJyBidXM9JzB4MDAnIHNsb3Q9JzB4MDUnIGZ1bmN0
+aW9uPScweDAnLz4NCiAgICA8L2hvc3RkZXY+DQogICAgPGhvc3RkZXYgbW9kZT0nc3Vic3lzdGVt
+JyB0eXBlPSdwY2knIG1hbmFnZWQ9J3llcyc+DQogICAgICA8c291cmNlPg0KICAgICAgICA8YWRk
+cmVzcyBkb21haW49JzB4MDAwMCcgYnVzPScweDFhJyBzbG90PScweDEwJyBmdW5jdGlvbj0nMHgy
+Jy8+DQogICAgICA8L3NvdXJjZT4NCiAgICAgIDxhbGlhcyBuYW1lPSdob3N0ZGV2MScvPg0KICAg
+ICAgPGFkZHJlc3MgdHlwZT0ncGNpJyBkb21haW49JzB4MDAwMCcgYnVzPScweDAwJyBzbG90PScw
+eDA2JyBmdW5jdGlvbj0nMHgwJy8+DQogICAgPC9ob3N0ZGV2Pg0KICAgIDxtZW1iYWxsb29uIG1v
+ZGVsPSd2aXJ0aW8nPg0KICAgICAgPGFsaWFzIG5hbWU9J2JhbGxvb24wJy8+DQogICAgICA8YWRk
+cmVzcyB0eXBlPSdwY2knIGRvbWFpbj0nMHgwMDAwJyBidXM9JzB4MDAnIHNsb3Q9JzB4MDcnIGZ1
+bmN0aW9uPScweDAnLz4NCiAgICA8L21lbWJhbGxvb24+DQogIDwvZGV2aWNlcz4NCiAgPHNlY2xh
+YmVsIHR5cGU9J2R5bmFtaWMnIG1vZGVsPSdhcHBhcm1vcicgcmVsYWJlbD0neWVzJz4NCiAgICA8
+bGFiZWw+bGlidmlydC1hNTBmZWVlNy1kYjgzLTBkODItYjliYS1jZmRhZTJkZmI5MTU8L2xhYmVs
+Pg0KICAgIDxpbWFnZWxhYmVsPmxpYnZpcnQtYTUwZmVlZTctZGI4My0wZDgyLWI5YmEtY2ZkYWUy
+ZGZiOTE1PC9pbWFnZWxhYmVsPg0KICA8L3NlY2xhYmVsPg0KPC9kb21haW4+
+--000e0cdfdb52aa372d04bc4d9132--
