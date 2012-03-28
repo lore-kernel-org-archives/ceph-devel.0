@@ -1,55 +1,79 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.44.1 released
-Date: Tue, 27 Mar 2012 20:19:00 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1203272018290.7257@cobra.newdream.net>
+From: Tomoki BENIYA <beniya@bit-isle.co.jp>
+Subject: Re: Build error in 0.44
+Date: Wed, 28 Mar 2012 15:06:41 +0900
+Message-ID: <20120328145730.1FE0.33BC0F0F@bit-isle.co.jp>
+References: <20120327171741.D52F.33BC0F0F@bit-isle.co.jp> <CANExM-NJ2eK-e3vHxO9pbRyS1fPPeWG8ycFxu97ugbf8TxhGaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-356731340-1332904740=:7257"
+Content-Type: text/plain; charset="ISO-2022-JP"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57785 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755528Ab2C1DTC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Mar 2012 23:19:02 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 7B381BC883
-	for <ceph-devel@vger.kernel.org>; Tue, 27 Mar 2012 20:19:01 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 7006BBC883
-	for <ceph-devel@vger.kernel.org>; Tue, 27 Mar 2012 20:19:00 -0700 (PDT)
+Received: from mail.bit-isle.co.jp ([61.117.207.4]:37171 "EHLO
+	mail.bit-isle.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750987Ab2C1GGn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Mar 2012 02:06:43 -0400
+In-Reply-To: <CANExM-NJ2eK-e3vHxO9pbRyS1fPPeWG8ycFxu97ugbf8TxhGaw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: henry.cy.chang@gmail.com
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+I could build it!
+I didn't detect news page...
 
---557981400-356731340-1332904740=:7257
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Thanks!
 
-Hi everyone,
 
-This point release has a few important fixes:
+On Wed, 28 Mar 2012 10:40:11 +0800
+Henry C Chang <henry.cy.chang@gmail.com> wrote:
 
- * osd: a few replay fixes for non-btrfs users
- * librados: resend watch operations at appropriate times
- * fix rpm builds
- * fix libnss builds
+> I guess you need to the following submodule initialization before you
+> build the debs:
+> git submodule init
+> git submodule update
+> 
+> Henry
+> 
+> 在 2012年3月27日下午4:43，Tomoki BENIYA <beniya@bit-isle.co.jp> 寫道：
+> > Hi all
+> >
+> > When I build ceph 0.44, it occured error and failed to build.
+> > They said following error
+> > ===================================
+> > make: *** [build-stamp] Error 1
+> > dpkg-buildpackage: error: debian/rules build gave error exit status 2
+> > ===================================
+> >
+> > What should I do?
+> >
+> >
+> > # cat /etc/debian_version
+> > wheezy/sid
+> >
+> > # uname -a
+> > Linux debian7 3.1.0-1-amd64 #1 SMP Tue Jan 10 05:01:58 UTC 2012 x86_64 GNU/Linux
+> >
+> > # dpkg-buildpackage
+> > ......
+> > autoreconf: running: /usr/bin/autoheader --force
+> > autoreconf: running: automake --add-missing --copy --force-missing
+> > Makefile.am:182: `lib/libgtest.a' is not a standard libtool library name
+> > Makefile.am:182: did you mean `lib/libgtest.la'?
+> > Makefile.am:182: `lib/libgtest_main.a' is not a standard libtool library name
+> > Makefile.am:182: did you mean `lib/libgtest_main.la'?
+> > autoreconf: Leaving directory `.'
+> > autoreconf: `configure.ac' or `configure.in' is required
+> > make: *** [build-stamp] Error 1
+> > dpkg-buildpackage: error: debian/rules build gave error exit status 2
+> >
+> >
+> > --
+> > Tomoki BENIYA <beniya@bit-isle.co.jp>
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at ?http://vger.kernel.org/majordomo-info.html
 
-It's also worth mentioning (since several people have mentioned problems=20
-on the list) that you need to do
+-- 
+Tomoki BENIYA <beniya@bit-isle.co.jp>
 
-=09git submodule init
-=09git submodule update
-
-from the source tree before you build for the first time to get the=20
-correct version of leveldb.
-
-You can get this release from the usual places:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at=A0http://ceph.newdream.net/download/ceph-0.44.1.tar.gz
- * For Debian/Ubuntu packages, see=A0http://ceph.newdream.net/docs/master/o=
-ps/install/mkcephfs/#installing-the-packages
-
-sage
---557981400-356731340-1332904740=:7257--
