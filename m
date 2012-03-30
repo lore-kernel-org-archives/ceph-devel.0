@@ -1,101 +1,89 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: Re: [PATCH 3/5] ceph: make use of ceph file layout helpers
-Date: Fri, 30 Mar 2012 14:55:45 -0500
-Message-ID: <4F760FC1.5010906@dreamhost.com>
-References: <4F5E7DA5.4040802@dreamhost.com> <4F5E7F6C.1040904@dreamhost.com> <Pine.LNX.4.64.1203152257080.13626@cobra.newdream.net>
+Subject: Re: [PATCH 5/5] ceph: fix up the types of the file layout helpers
+Date: Fri, 30 Mar 2012 14:55:59 -0500
+Message-ID: <4F760FCF.2090604@dreamhost.com>
+References: <4F5E7DA5.4040802@dreamhost.com> <4F5E7F71.5050605@dreamhost.com> <Pine.LNX.4.64.1203152307310.13626@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:35599 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:35614 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759348Ab2C3Tzj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Mar 2012 15:55:39 -0400
-In-Reply-To: <Pine.LNX.4.64.1203152257080.13626@cobra.newdream.net>
+	with ESMTP id S1761355Ab2C3Tzw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Mar 2012 15:55:52 -0400
+In-Reply-To: <Pine.LNX.4.64.1203152307310.13626@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-On 03/16/2012 12:59 AM, Sage Weil wrote:
+On 03/16/2012 01:10 AM, Sage Weil wrote:
 > On Mon, 12 Mar 2012, Alex Elder wrote:
->> There are helpers defined in "include/linux/ceph/osdmap.h" for
->> accessing the fields of an on-disk ceph file layout structure.
->> Use them--consistently--throughout the code.
+>
+>> The helper macros for accessing file layout fields of an on-disk
+>> ceph file layout structure cast their results to type (__s32).  This
+>> is a bit strange, since (with one exception--fl_pg_preferred):
+>>      - there is no need for negative values; and
+>>      - all users of these macros are assigning their result to
+>>        64-bit variables.
+>> So just make these macros return a 64-bit unsigned type.
 >>
->> Also define CEPH_FILE_LAYOUT_PG_PREFERRED_NONE, to represent
->> symbolically the explicit "no preferred PG" value.
->>
->> Make a few casts explicit too (to make it more obvious it's
->> occuring).  This produces some long lines, but they go away in an
->> upcoming patch.
+>> The exception is the preferred placement group, which remains a
+>> signed 32-bit value.  A placement group id encodes the preferred
+>> primary OSD in a 16-bit value, and there's no sense at this point
+>> getting too far away from that.
 >>
 >> Signed-off-by: Alex Elder<elder@dreamhost.com>
 
-A few comments below.  I'm about to re-post this series.
+. . .
+
+>> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+>> index 26c30e7..bc2d807 100644
+>> --- a/net/ceph/osdmap.c
+>> +++ b/net/ceph/osdmap.c
 
 . . .
 
->> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
->> index 75960b1..bfd5b93 100644
->> --- a/fs/ceph/xattr.c
->> +++ b/fs/ceph/xattr.c
->> @@ -115,11 +115,12 @@ static size_t ceph_vxattrcb_file_layout(struct
->> ceph_inode_info *ci, char *val,
->>
->>   	ret = snprintf(val, size,
->>   		"chunk_bytes=%lld\nstripe_count=%lld\nobject_size=%lld\n",
->> -		(unsigned long long)ceph_file_layout_su(&ci->i_layout),
->> +		(unsigned long
->> long)ceph_file_layout_stripe_unit(&ci->i_layout),
->>   		(unsigned long
->> long)ceph_file_layout_stripe_count(&ci->i_layout),
->>   		(unsigned long
->> long)ceph_file_layout_object_size(&ci->i_layout));
->>
->> -	if (ceph_file_layout_pg_preferred(&ci->i_layout)>= 0) {
->> +	if (ceph_file_layout_pg_preferred(&ci->i_layout) !=
->> +			CEPH_FILE_LAYOUT_PG_PREFERRED_NONE) {
->
-> The function returns cpu order, #define is little endian
-
-I will fix this--throughout.  I'm going to define the constant
-in CPU order instead (and fix the one place that depended on it
-being in little endian order).
-
->>   		val += ret;
->>   		size -= ret;
->>   		ret += snprintf(val, size, "preferred_osd=%lld\n",
->> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
->> index 2645704..cf86032 100644
->> --- a/include/linux/ceph/ceph_fs.h
->> +++ b/include/linux/ceph/ceph_fs.h
+>> @@ -1028,29 +1028,30 @@ int ceph_calc_object_layout(struct ceph_object_layout
 
 . . .
 
->> @@ -1011,23 +1011,24 @@ int ceph_calc_object_layout(struct ceph_object_layout
->> *ol,
->>   	if (!pool)
->>   		return -EIO;
->>   	ps = ceph_str_hash(pool->v.object_hash, oid, strlen(oid));
->> -	if (preferred>= 0) {
->> +
->> +	if (preferred == CEPH_FILE_LAYOUT_PG_PREFERRED_NONE) {
->
-> Here, too.  I'd just stick with>= ...
-
-No, I intentionally defined this constant to have a specific
-meaning, and I don't want any sense that it is greater than
-or less than something--just distinguished from all other
-valid preferred PG values.
-
->
->> +		num = le32_to_cpu(pool->v.pg_num);
->> +		num_mask = pool->pg_num_mask;
->> +	} else {
->>   		ps += preferred;
->>   		num = le32_to_cpu(pool->v.lpg_num);
->>   		num_mask = pool->lpg_num_mask;
+>> -	ps = ceph_str_hash(pool->v.object_hash, oid, strlen(oid));
+>>
+>> -	if (preferred == CEPH_FILE_LAYOUT_PG_PREFERRED_NONE) {
+>> -		num = le32_to_cpu(pool->v.pg_num);
+>> -		num_mask = pool->pg_num_mask;
 >> -	} else {
+>> +	ps = ceph_str_hash(pool->v.object_hash, oid, strlen(oid));
+>> +	if (preferred != CEPH_FILE_LAYOUT_PG_PREFERRED_NONE) {
+>> +		BUG_ON(preferred<  0);
+>>   		ps += preferred;
+>> -		num = le32_to_cpu(pool->v.lpg_num);
+>> -		num_mask = pool->lpg_num_mask;
+>>   	}
+>>
+>> +	num = le32_to_cpu(pool->v.lpg_num);
+>> +	num_mask = pool->lpg_num_mask;
+>
+> Unless i'm misreading this diff, you're switching to always using lpg_num
+> and lpg_num_mask instead of pg_num and pg_num_mask.  That "l" prefix means
+> "localized," for a different set of localized PGs used when htere is a
+> preferred OSD.  We need to keep these assignments in the if and else
+> blocks...
+
+No, you read it right and I got it wrong.  I misread the code
+and thought they were operating with the same fields.  I'll fix
+it.
+
+					-Alex
+
+>> +
+>>   	pgid.ps = cpu_to_le16(ps);
+>> -	pgid.preferred = cpu_to_le16(preferred);
+>> +	pgid.preferred = cpu_to_le16((s16) preferred);
+>>   	pgid.pool = fl->fl_pg_pool;
+>>   	if (preferred == CEPH_FILE_LAYOUT_PG_PREFERRED_NONE)
+>>   		dout("calc_object_layout '%s' pgid %d.%x\n", oid, poolid, ps);
 
 . . .
+
