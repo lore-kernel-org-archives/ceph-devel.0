@@ -1,89 +1,61 @@
-From: Alex Elder <elder@dreamhost.com>
-Subject: Re: [PATCH 5/5] ceph: fix up the types of the file layout helpers
-Date: Fri, 30 Mar 2012 14:55:59 -0500
-Message-ID: <4F760FCF.2090604@dreamhost.com>
-References: <4F5E7DA5.4040802@dreamhost.com> <4F5E7F71.5050605@dreamhost.com> <Pine.LNX.4.64.1203152307310.13626@cobra.newdream.net>
+From: zhurongze <zrz4ceph@gmail.com>
+Subject: Re: Question about the implementation of bucket_straw_choose in src/crush/mapper.c
+Date: Sun, 01 Apr 2012 10:33:19 +0800
+Message-ID: <4F77BE6F.9090401@gmail.com>
+References: <CALwGbP+0xWC=-zZYdx_D6ikgEq6NRYYfweEDn7z5WceCypPRNw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:35614 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761355Ab2C3Tzw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Mar 2012 15:55:52 -0400
-In-Reply-To: <Pine.LNX.4.64.1203152307310.13626@cobra.newdream.net>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:54220 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754056Ab2DACd0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 31 Mar 2012 22:33:26 -0400
+Received: by pbcun15 with SMTP id un15so3246800pbc.19
+        for <ceph-devel@vger.kernel.org>; Sat, 31 Mar 2012 19:33:26 -0700 (PDT)
+In-Reply-To: <CALwGbP+0xWC=-zZYdx_D6ikgEq6NRYYfweEDn7z5WceCypPRNw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: =?UTF-8?B?6IOh54Ca5qOu?= <softrank.net@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 03/16/2012 01:10 AM, Sage Weil wrote:
-> On Mon, 12 Mar 2012, Alex Elder wrote:
+=E4=BA=8E 2012=E5=B9=B403=E6=9C=8829=E6=97=A5 17:16, =E8=83=A1=E7=80=9A=
+=E6=A3=AE =E5=86=99=E9=81=93:
+> Hi everyone, i'm proceeding reading source code of crush
 >
->> The helper macros for accessing file layout fields of an on-disk
->> ceph file layout structure cast their results to type (__s32).  This
->> is a bit strange, since (with one exception--fl_pg_preferred):
->>      - there is no need for negative values; and
->>      - all users of these macros are assigning their result to
->>        64-bit variables.
->> So just make these macros return a 64-bit unsigned type.
->>
->> The exception is the preferred placement group, which remains a
->> signed 32-bit value.  A placement group id encodes the preferred
->> primary OSD in a 16-bit value, and there's no sense at this point
->> getting too far away from that.
->>
->> Signed-off-by: Alex Elder<elder@dreamhost.com>
-
-. . .
-
->> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
->> index 26c30e7..bc2d807 100644
->> --- a/net/ceph/osdmap.c
->> +++ b/net/ceph/osdmap.c
-
-. . .
-
->> @@ -1028,29 +1028,30 @@ int ceph_calc_object_layout(struct ceph_object_layout
-
-. . .
-
->> -	ps = ceph_str_hash(pool->v.object_hash, oid, strlen(oid));
->>
->> -	if (preferred == CEPH_FILE_LAYOUT_PG_PREFERRED_NONE) {
->> -		num = le32_to_cpu(pool->v.pg_num);
->> -		num_mask = pool->pg_num_mask;
->> -	} else {
->> +	ps = ceph_str_hash(pool->v.object_hash, oid, strlen(oid));
->> +	if (preferred != CEPH_FILE_LAYOUT_PG_PREFERRED_NONE) {
->> +		BUG_ON(preferred<  0);
->>   		ps += preferred;
->> -		num = le32_to_cpu(pool->v.lpg_num);
->> -		num_mask = pool->lpg_num_mask;
->>   	}
->>
->> +	num = le32_to_cpu(pool->v.lpg_num);
->> +	num_mask = pool->lpg_num_mask;
+> i'm reading src/crush/mapper.c which is describing the core
+> implementation of crush alg.
+> in reading function bucket_straw_choose, i compare the implementation
+> with the idea written in the thesis and have some problem
+> understanding it.
 >
-> Unless i'm misreading this diff, you're switching to always using lpg_num
-> and lpg_num_mask instead of pg_num and pg_num_mask.  That "l" prefix means
-> "localized," for a different set of localized PGs used when htere is a
-> preferred OSD.  We need to keep these assignments in the if and else
-> blocks...
-
-No, you read it right and I got it wrong.  I misread the code
-and thought they were operating with the same fields.  I'll fix
-it.
-
-					-Alex
-
->> +
->>   	pgid.ps = cpu_to_le16(ps);
->> -	pgid.preferred = cpu_to_le16(preferred);
->> +	pgid.preferred = cpu_to_le16((s16) preferred);
->>   	pgid.pool = fl->fl_pg_pool;
->>   	if (preferred == CEPH_FILE_LAYOUT_PG_PREFERRED_NONE)
->>   		dout("calc_object_layout '%s' pgid %d.%x\n", oid, poolid, ps);
-
-. . .
-
+> in the thesis, it said that the length of straw should multiply the
+> weight of bucket item so that heavier items are more likely to be
+> selected.
+> in bucket_straw_choose, i see bucket->straws multiplying the hash val=
+ue only.
+>
+> next, i referred to crush.h to take a look at the data structure of
+> crush_bucket_straw, and found two members named 'straws' and
+> 'item_weights'.
+>
+> i just don't know whether 'weight' and 'straw' in the implementation
+> mean the same thing as in thesis. if so, why item_weights is not used
+> in bucket_straw_choose.
+>
+> Thanks.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Are you chinese?  I wrote 2 articles about  CRUSH design and source cod=
+e=20
+analysis in Chinese, I think this is useful for you.
+The Link is http://toplab.sinaapp.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
