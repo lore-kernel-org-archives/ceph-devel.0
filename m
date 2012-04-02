@@ -1,17 +1,17 @@
 From: Stefan Kleijkers <stefan@unilogicnetworks.net>
 Subject: Re: OSD suicide
-Date: Mon, 02 Apr 2012 22:14:21 +0200
-Message-ID: <4F7A089D.8040904@unilogicnetworks.net>
+Date: Mon, 02 Apr 2012 22:18:37 +0200
+Message-ID: <4F7A099D.9050307@unilogicnetworks.net>
 References: <CAGEBRh0Yr6EoOafQF6PYhDe8TZNwUcc6ZeJW7KhXBSf-VU0J9w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-out117.unilogicnetworks.net ([62.133.206.117]:49804 "EHLO
+Received: from mail-out117.unilogicnetworks.net ([62.133.206.117]:56985 "EHLO
 	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751887Ab2DBUdk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Apr 2012 16:33:40 -0400
+	by vger.kernel.org with ESMTP id S1752278Ab2DBUuV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Apr 2012 16:50:21 -0400
 In-Reply-To: <CAGEBRh0Yr6EoOafQF6PYhDe8TZNwUcc6ZeJW7KhXBSf-VU0J9w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
