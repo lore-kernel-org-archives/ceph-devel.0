@@ -1,96 +1,37 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: Possible RBD inconsistencies with kvm+Windows 7
-Date: Mon, 02 Apr 2012 08:17:07 -0700
-Message-ID: <4F79C2F3.2010106@dreamhost.com>
-References: <20120203181935.GA4676@rcn.com> <4F2C3BBE.6070802@dreamhost.com> <20120203201552.GA6365@rcn.com> <20120402145816.GB2847@rcn.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: Failed HD, automate procedure?
+Date: Mon, 2 Apr 2012 09:23:04 -0700
+Message-ID: <CAORUGqAoX1XR_TfqQ0i37ji3Wzm2Ab4YexsFJrX-dw6+p6DaXw@mail.gmail.com>
+References: <CAHzdKU+85+aKqr2aQqCcrnzjo4kou3FVQxCLAZpa=OKN_ZNfOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:44542 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752219Ab2DBPRK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Apr 2012 11:17:10 -0400
-In-Reply-To: <20120402145816.GB2847@rcn.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:40199 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752420Ab2DBQXZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Apr 2012 12:23:25 -0400
+Received: by vbbff1 with SMTP id ff1so1803168vbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Apr 2012 09:23:24 -0700 (PDT)
+In-Reply-To: <CAHzdKU+85+aKqr2aQqCcrnzjo4kou3FVQxCLAZpa=OKN_ZNfOw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Pieper <jjp@pobox.com>
+To: Marco Aroldi <marco.aroldi@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 04/02/2012 07:58 AM, Josh Pieper wrote:
-> Josh Pieper wrote:
->> Josh Durgin wrote:
->>> On 02/03/2012 10:19 AM, Josh Pieper wrote:
->>>> I have a Windows 7 guest running under kvm/libvirt with RBD as a
->>>> backend to a cluster of 3 OSDs.  With this setup, I am seeing behavior
->>>> that looks suspiciously like disk corruption in the guest VM executing
->>>> some of our workloads.
->>>>
->>>> For instance, in one occurance, there is a python function that
->>>> recursively deletes a large directory tree while the disk is otherwise
->>>> loaded.  For us, this occasionally fails because the OS reported that
->>>> all the files in the directory were deleted, but then reports the
->>>> directory is not empty when going to remove it.  In another, a simple
->>>> test application writes new files to a directory every 50ms, then
->>>> after 6s verifies that at least 3 files were written, also while the
->>>> disk is under heavy load.
->>>>
->>>> We have never ever seen these failures on bare metal, or on kvm
->>>> instances backed by a LVM volume in years of operation, but they
->>>> happen every couple of hours with RBD.  Unfortunately, I have been
->>>> unsuccessful when attempting to create synthetic test cases to
->>>> demonstrate the inconsistent RBD behavior.
->>>>
->>>> Has anyone else seen similar inconsistent RBD behavior, or have ideas
->>>> how to diagnose further?
->>>
->>> What fs are your osds using? A while ago there was a bug in ext4's
->>> fiemap that sometimes caused incorrect reads - if you set
->>> filestore_fiemap_threshold larger than your object size, you can test
->>> whether fiemap is the problem.
->>
->> The OSDs are using xfs.  In my testing with 0.40, btrfs had incredible
->> performance problems after a day or so of operation.  The last I
->> heard, ext4 could potentially have data loss due to its limited xattr
->> support.
->>
->>> Are you using the rbd_writeback_window option? If so, does the
->>> corruption occur without it?
->>
->> Yes I was.  In prior tests, performance was abysmal without it.  I
->> will test without it, but our runs will load the system very
->> differently when they are going so slowly.
->>
->>> In any case, a log of this occurring with debug_ms=1 and
->>> debug_rbd=20 from qemu will tell us if there are out-of-order
->>> operations happening.
->>
->> Great, I will attempt to record some.
+On Mon, Apr 2, 2012 at 03:31, Marco Aroldi <marco.aroldi@gmail.com> wrote:
+> i'm looking the procedure to replace a failed HD
+> (http://ceph.newdream.net/wiki/Replacing_a_failed_disk/OSD)
+> and I was wondering if the procedure could be more automated like:
 >
-> Reponse much delayed.
->
-> I have finally gotten around to doing more tests here, now with ceph
-> 0.44.1, although the kvm version is still the same at 1.0.
->
-> Disabling the rbd_writeback_window option definitely makes all the
-> problems clear up.  With it on, I can trigger a failure approximately
-> 2 or 3 times per day, whereas with it off, I have been problem free
-> for a week now.
+> 1- The operator replaces the failed hd, say osd.23
+> 2- Give a new command like "ceph reborn osd.23"
 
-That's good to hear. If this does turn out to be a request ordering 
-problem from rbd_writeback_window, rbd caching should fix it.
+To echo what Wido said, this is definitely in the plan. The goal is
+something like this:
 
-> I have not yet managed to get our kvm to run with the appropriate
-> logging parameters.  For various reasons it is a lot easier for our
-> kvm's to run through libvirt.  I have been passing the
-> rbd_writeback_window option by just appending a
-> ":rbd_writeback_window=x" to the filename in my libvirt xml file.
-> Doing the same thing with debug_rbd didn't appear to get the option to
-> the right place no matter which form I tried.  Is there any secret
-> easy way to get kvm/qemu rbd debugging options turned on when invoked
-> through libvirt?
-
-You probably just need to add 'log_to_stderr=1', or 'log_file=path/to/file'.
-
-Thanks!
-Josh
+- failed disk is unmounted and the "service light" is set (where available)
+- a technician pulls out the failed disk and plugs in a prepared new one
+- new disk is automatically taken into use, a new osd is started
+- later, the failed disk can be examined and recovered, if desired; OR
+  the osd that used that disk is deleted from the monitors and the disk
+  discarded
