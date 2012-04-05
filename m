@@ -1,36 +1,42 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: pg in creating state can't be removed?
-Date: Thu, 5 Apr 2012 08:20:20 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1204050819110.2059@cobra.newdream.net>
-References: <CANExM-N3DQsBzG+sLoj8x3Gs4tAdRGOXu=n0Evr5yfEfq1jF=A@mail.gmail.com>
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: Re: Recommended btrfs mount options
+Date: Thu, 05 Apr 2012 17:22:23 +0200
+Message-ID: <4F7DB8AF.4020502@univ-nantes.fr>
+References: <CAO47_-_V4d=3abABvqrV+muJ3cF-J-=-RQ748Vr+U=_ZdffZfw@mail.gmail.com> <Pine.LNX.4.64.1111221415280.11288@cobra.newdream.net> <or39dful05.fsf@livre.localdomain> <Pine.LNX.4.64.1111230704560.5214@cobra.newdream.net> <4F7D9679.5050006@univ-nantes.fr> <Pine.LNX.4.64.1204050809360.2059@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39453 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752226Ab2DEPUX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Apr 2012 11:20:23 -0400
-In-Reply-To: <CANExM-N3DQsBzG+sLoj8x3Gs4tAdRGOXu=n0Evr5yfEfq1jF=A@mail.gmail.com>
+Received: from smtp-tls1.univ-nantes.fr ([193.52.101.145]:45904 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752279Ab2DEPWY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Apr 2012 11:22:24 -0400
+In-Reply-To: <Pine.LNX.4.64.1204050809360.2059@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henry C Chang <henry.cy.chang@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Alexandre Oliva <oliva@lsd.ic.unicamp.br>, Christian Brunner <chb@muc.de>, ceph-devel@vger.kernel.org
 
-On Thu, 5 Apr 2012, Henry C Chang wrote:
-> Hi folks,
-> 
-> I created a pool without adding any osds to it in the crushmap. As
-> expected, all pgs remains in creating state since no osds take care of
-> them.
-> 
-> However, I do expect that this pool should be able to be removed.
-> Currently, removing such a pool hangs forever as the pg removal has to
-> wait until the pg have been created. Does my expectation make sense?
+Le 05/04/2012 17:11, Sage Weil a =E9crit :
 
-Yeah.  I seem to remember the pg removal code cleaning up stuff in the 
-monitor's PGMap, but I'm also pretty sure this scenario was never tested.  
+> Yes, it's safe.  We fall back to a manual copy if we see EINVAL from =
+the
+> ioctl.
+>
+> sage
 
-Do you see where it is waiting for PG creation?  I don't think it should 
-need to do that, since it's going to be thrown out anyway. 
+Great, thanks for the answer .
 
-sage
+
+cheers,
+
+
+--=20
+Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
+Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
