@@ -1,75 +1,183 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [PATCH] rbd: don't hold spinlock during messenger flush
-Date: Thu, 5 Apr 2012 13:27:14 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1204051326420.1289@cobra.newdream.net>
-References: <4F7DB02D.7060807@dreamhost.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: defaults paths #2
+Date: Thu, 5 Apr 2012 16:36:39 -0700
+Message-ID: <CAORUGqBs3=_sVnYB+vdamAW3S7ShqY5Gz1hGiY4ozUd7enTn3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51780 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751671Ab2DEU1U (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Apr 2012 16:27:20 -0400
-In-Reply-To: <4F7DB02D.7060807@dreamhost.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:41801 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751787Ab2DEXhA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Apr 2012 19:37:00 -0400
+Received: by yhmm54 with SMTP id m54so1064202yhm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Apr 2012 16:36:59 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 5 Apr 2012, Alex Elder wrote:
-> A recent change made changes to the rbd_client_list be protected by
-> a spinlock.  Unfortunately in rbd_put_client(), the lock is taken
-> before possibly dropping the last reference to an rbd_client, and on
-> the last reference that eventually calls flush_workqueue() which can
-> sleep.
-> 
-> The problem was flagged by a debug spinlock warning:
->     BUG: spinlock wrong CPU on CPU#3, rbd/27814
-> 
-> The solution is to move the spinlock acquisition and release inside
-> rbd_client_release(), which is the spot where it's really needed for
-> protecting the removal of the rbd_client from the client list.
-> 
-> Signed-off-by: Alex Elder <elder@dreamhost.com>
-> ---
->  drivers/block/rbd.c |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 013c7a5..c1f7701 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -450,7 +450,9 @@ static void rbd_client_release(struct kref *kref)
->  	struct rbd_client *rbdc = container_of(kref, struct rbd_client, kref);
-> 
->  	dout("rbd_release_client %p\n", rbdc);
-> +	spin_lock(&rbd_client_list_lock);
->  	list_del(&rbdc->node);
-> +	spin_unlock(&rbd_client_list_lock);
-> 
->  	ceph_destroy_client(rbdc->client);
->  	kfree(rbdc->rbd_opts);
-> @@ -463,9 +465,7 @@ static void rbd_client_release(struct kref *kref)
->   */
->  static void rbd_put_client(struct rbd_device *rbd_dev)
->  {
-> -	spin_lock(&rbd_client_list_lock);
->  	kref_put(&rbd_dev->rbd_client->kref, rbd_client_release);
-> -	spin_unlock(&rbd_client_list_lock);
->  	rbd_dev->rbd_client = NULL;
->  }
+[Apologies for starting a new thread, vger unsubscribed me without
+warning, I'm reading the previous thread via web]
 
-This looks right to me.  Let's get it into testing...
+In response to the thread at http://marc.info/?t=133360781700001&r=1&w=2
 
-Reviewed-by: Sage Weil <sage@newdream.net>
 
-> 
-> -- 
-> 1.7.5.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Sage:
+> The locations could be:
+>  keyring:
+>   /etc/ceph/$cluster.keyring  (fallback to /etc/ceph/keyring)
+
+I think all the osds and mons will have their secrets inside their
+data dir. This, if used, will be just for the command line tools.
+
+>  osd_data, mon_data:
+>   /var/lib/ceph/$cluster.$name
+>   /var/lib/ceph/$cluster/$name
+>   /var/lib/ceph/data/$cluster.$name
+>   /var/lib/ceph/$type-data/$cluster-$id
+
+I'm thinking.. /var/lib/ceph/$type/$cluster-$id, where $type is osd or mon.
+And this is what is in the wip-defaults branch now, it seems.
+
+
+
+Bernard Grymonpon <bernard@openminds.be>:
+> As a osd consists of data and the journal, it should stay together, with all info for \
+> that one osd in one place:
+>
+> I would suggest
+>
+> /var/lib/ceph/osd/$id/data
+> and
+> /var/lib/ceph/osd/$id/journal
+
+Journal can live inside .../data (when just a file on the same spindle
+is ok), we don't need to use a directory tree level just for that.
+
+> ($id could be replaced by $uuid or $name, for which I would prefer $uuid)
+
+In some ways $uuid is cleaner, but this is something that is too
+visible for admins, and the $id space still exists and cannot tolerate
+collisions, so we might as well use those.
+
+
+
+Andrey Korolyov <andrey@xdel.ru>:
+> Right, but probably we need journal separation at the directory level
+> by default, because there is a very small amount of cases when speed
+> of main storage is sufficient for journal or when resulting speed
+> decrease is not significant, so journal by default may go into
+> /var/lib/ceph/osd/journals/$i/journal where osd/journals mounted on
+> the fast disk.
+
+Journals as files in a single, separate, dedicated filesystem (most
+likely on SSD) is on my list of use cases to be supported. I don't
+think we need to always use /var/lib/ceph/osd/journals just to support
+that; I think I can arrange the support without that clumsiness.
+Details are still pending.
+
+I think many people with that hardware setup will choose to just GPT
+partition the SSD, and have a lot less code in the way of the IO.
+
+
+
+Bernard Grymonpon <bernard@openminds.be>:
+> I feel it's up to the sysadmin to mount / symlink the correct storage devices on the \
+> correct paths - ceph should not be concerned that some volumes might need to sit \
+> together.
+
+I think we agree on intents, but I disagree strongly with the words
+you chose. The sysadmin should not need to symlink anything. We will
+bring up a whole cluster, and enable you to manage that easily.
+Anything less is a failure. You may choose to opt out of some of that
+higher smarts, if you want to do it differently, but we will need to
+provide that. Managing a big cluster without automation is painful,
+and people shouldn't need to reinvent the wheel.
+
+Now, whether that automation uses symlinks to point things to the
+right places or not, that's almost an implementation detail.
+
+
+
+Bernard Grymonpon <bernard@openminds.be>:
+> I assume most OSD nodes will normally run a single OSD, so this would not apply to \
+> most nodes.
+
+Expected use right now is 1 OSD per hard drive, 8-12 hard drives per
+server. That's what we'll be benchmarking on, primarily.
+
+
+
+Wido den Hollander <wido@widodh.nl>:
+> I think that's a wrong assumption. On most systems I think multiple OSDs
+> will exist, it's debatable if one would run OSDs from different clusters
+> very often.
+
+I expect mixing clusters to be rare, but that use case has been made
+strongly enough that it seems we will support it as a first-class
+feature.
+
+> I'm currently using: osd data = /var/lib/ceph/$name
+>
+> To get back to what sage mentioned, why add the "-data" suffix to a
+> directory name? Isn't it obvious that a directory will contain data?
+
+He was separating osd-data from osd-journal. Since that we've
+simplified that to /var/lib/ceph/$type/$cluster-$id, which is close to
+what you have, but 1) separating osd data dirs from rest of
+/var/lib/ceph, for future expansion room 2) adding the cluster name.
+
+> As I think it is a very specific scenario where a machine would be
+> participating in multiple Ceph clusters I'd vote for:
+>
+>   /var/lib/ceph/$type/$id
+
+I really want to avoid having two different cases, two different code
+paths to test, a more rare variant that can break without being
+noticed. I want everything to always look the same. "ceph-" seems a
+small enough price to pay for that.
+
+
+
+Bernard Grymonpon <bernard@openminds.be>:
+> If it is recommended setup to have multiple OSDs per node (like, one OSD per physical \
+> drive), then we need to take that in account - but don't assume that one node only \
+> has one SSD disk for journals, which would be shared between all OSDs...
+
+As I tried to explain in an earlier "braindump" email, we'll support journals
+
+1. inside osd data
+2. on shared ssd as file
+3. separate block dev (e.g. ssd or raid 2nd lun with different config)
+
+and find the right journal automagically, by matching uuids. This is
+what I'm working on right now.
+
+
+
+Bernard Grymonpon <bernard@openminds.be>:
+> I would suggest you fail the startup of the daemon, as it doesn't have all the needed \
+> parts - I personally don't like these "autodiscover" thingies, you never know why \
+> they are waiting/searching for,...
+
+If you don't like hotplug, you can disable it.
+
+Having hundreds of machines with ~10 disks each and the data center
+being remote and managed by people you've never seen will probably
+make you like the automation more. Having failed disks turn on an LED,
+ops swapping in a new drive from a dedicated pile of pre-prepared
+spares, and things just.. working.. is the goal.
+
+> Say that we duplicate a node, for some testing/failover/... I would not
+> want to daemon to automatically start, just because the data is there...
+
+If you do that, just turn hotplug off before you plug the disks in to
+the replica. There's not much you can do with it, though -- starting
+the osds is a no-no, in this case.
+
+I would argue that random copying of osd data disks or journals is an
+accident waiting to happen. But there's nothing inherent in the design
+to say you can't do that. Just don't do hotplug.
+
+We can't rely on hotplug working anyway. There will *always* be a
+change for the admin to manually say "hey, here's a new block device
+for you, see if there's something to run there".
