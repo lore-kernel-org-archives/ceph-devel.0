@@ -1,43 +1,75 @@
-From: Yehuda Sadeh Weinraub <yehuda.sadeh@dreamhost.com>
-Subject: Re: ceph build error on leveldb
-Date: Thu, 5 Apr 2012 11:02:20 -0700
-Message-ID: <CAC-hyiHS=4oa2Nh5-F4uennHUhaqQNVieLb-ZfTQT+_8ELTuQw@mail.gmail.com>
-References: <CACqFU2nJD1BgvuRBsFU_MBkGuEdUrjw=0Vir0NwbtMOhDY82Sw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH] rbd: don't hold spinlock during messenger flush
+Date: Thu, 5 Apr 2012 13:27:14 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1204051326420.1289@cobra.newdream.net>
+References: <4F7DB02D.7060807@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:38633 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752402Ab2DESCW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Apr 2012 14:02:22 -0400
-Received: by bkcik5 with SMTP id ik5so1585643bkc.19
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Apr 2012 11:02:20 -0700 (PDT)
-In-Reply-To: <CACqFU2nJD1BgvuRBsFU_MBkGuEdUrjw=0Vir0NwbtMOhDY82Sw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51780 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751671Ab2DEU1U (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Apr 2012 16:27:20 -0400
+In-Reply-To: <4F7DB02D.7060807@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Feiyi Wang <fwang2@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, Apr 5, 2012 at 10:58 AM, Feiyi Wang <fwang2@gmail.com> wrote:
-> hi all
->
-> I am new to ceph and is trying to give it a spin for testing:
-> on both master or stable branch, the configure script gives the
-> WARNING (CentOS 6)
->
->
-> config.status: executing depfiles commands
-> config.status: executing libtool commands
-> === configuring in src/leveldb (/home/fwang2/ceph/src/leveldb)
-> configure: WARNING: no configuration information is in src/leveldb
->
-> and the following make fails:
+On Thu, 5 Apr 2012, Alex Elder wrote:
+> A recent change made changes to the rbd_client_list be protected by
+> a spinlock.  Unfortunately in rbd_put_client(), the lock is taken
+> before possibly dropping the last reference to an rbd_client, and on
+> the last reference that eventually calls flush_workqueue() which can
+> sleep.
+> 
+> The problem was flagged by a debug spinlock warning:
+>     BUG: spinlock wrong CPU on CPU#3, rbd/27814
+> 
+> The solution is to move the spinlock acquisition and release inside
+> rbd_client_release(), which is the spot where it's really needed for
+> protecting the removal of the rbd_client from the client list.
+> 
+> Signed-off-by: Alex Elder <elder@dreamhost.com>
+> ---
+>  drivers/block/rbd.c |    4 ++--
+>  1 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 013c7a5..c1f7701 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -450,7 +450,9 @@ static void rbd_client_release(struct kref *kref)
+>  	struct rbd_client *rbdc = container_of(kref, struct rbd_client, kref);
+> 
+>  	dout("rbd_release_client %p\n", rbdc);
+> +	spin_lock(&rbd_client_list_lock);
+>  	list_del(&rbdc->node);
+> +	spin_unlock(&rbd_client_list_lock);
+> 
+>  	ceph_destroy_client(rbdc->client);
+>  	kfree(rbdc->rbd_opts);
+> @@ -463,9 +465,7 @@ static void rbd_client_release(struct kref *kref)
+>   */
+>  static void rbd_put_client(struct rbd_device *rbd_dev)
+>  {
+> -	spin_lock(&rbd_client_list_lock);
+>  	kref_put(&rbd_dev->rbd_client->kref, rbd_client_release);
+> -	spin_unlock(&rbd_client_list_lock);
+>  	rbd_dev->rbd_client = NULL;
+>  }
 
-After checking out the source tree, run:
+This looks right to me.  Let's get it into testing...
 
- git submodule init
- git submodule update
+Reviewed-by: Sage Weil <sage@newdream.net>
 
-That should update the leveldb submodule.
-
-Yehuda
+> 
+> -- 
+> 1.7.5.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
