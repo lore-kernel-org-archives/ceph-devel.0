@@ -1,82 +1,26 @@
-From: Damien Churchill <damoxc@gmail.com>
-Subject: Re: pgs stuck inactive
-Date: Wed, 4 Apr 2012 22:44:31 +0100
-Message-ID: <CAFtEh-dsM_G5GCyqnnBVfAc7GmKZLZcLzkQzrCAGjDgyLC3CGg@mail.gmail.com>
-References: <CAFtEh-dcEKQ2AzcVmu1G5i-zFHgim5SLZvEmNtDsvkHt+JnzLA@mail.gmail.com>
-	<CACLRD_2yhpoUGoivHQpp-LyO82MdTz5SpD0MN5b_vEoqSGBzgg@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: cephx auth
+Date: Wed, 4 Apr 2012 23:18:49 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1204042317560.28065@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:42761 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752852Ab2DDVoc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Apr 2012 17:44:32 -0400
-Received: by gghe5 with SMTP id e5so468991ggh.19
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Apr 2012 14:44:31 -0700 (PDT)
-In-Reply-To: <CACLRD_2yhpoUGoivHQpp-LyO82MdTz5SpD0MN5b_vEoqSGBzgg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53159 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753635Ab2DEGSu (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Apr 2012 02:18:50 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id DA5EBBCAF5
+	for <ceph-devel@vger.kernel.org>; Wed,  4 Apr 2012 23:18:49 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id AAE59BCAF5
+	for <ceph-devel@vger.kernel.org>; Wed,  4 Apr 2012 23:18:49 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@dreamhost.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-I've uploaded them to:
+Should we make cephx auth the default?  Currently it is still 'none', but 
+this code is 2 years old now and I haven't seen an auth-related bug in at 
+least half a year.
 
-http://damoxc.net/ceph/osdmap
-http://damoxc.net/ceph/pg_dump
-
-Thanks
-
-On 4 April 2012 21:51, Samuel Just <sam.just@dreamhost.com> wrote:
-> Can you post a copy of your osd map and the output of 'ceph pg dump' =
-?
-> =C2=A0You can get the osdmap via 'ceph osd getmap -o <filename>'.
-> -Sam
->
-> On Wed, Apr 4, 2012 at 1:12 AM, Damien Churchill <damoxc@gmail.com> w=
-rote:
->> Hi,
->>
->> I'm having some trouble getting some pgs to stop being inactive. The
->> cluster is running 0.44.1 and the kernel version is 3.2.x.
->>
->> ceph -s reports:
->> 2012-04-04 09:08:57.816029 =C2=A0 =C2=A0pg v188540: 990 pgs: 223 ina=
-ctive, 767
->> active+clean; 205 GB data, 1013 GB used, 8204 GB / 9315 GB avail
->> 2012-04-04 09:08:57.817970 =C2=A0 mds e2198: 1/1/1 up {0=3Dnode24=3D=
-up:active},
->> 4 up:standby
->> 2012-04-04 09:08:57.818024 =C2=A0 osd e5910: 5 osds: 5 up, 5 in
->> 2012-04-04 09:08:57.818201 =C2=A0 log 2012-04-04 09:04:03.838358 osd=
-=2E3
->> 172.22.10.24:6801/30000 159 : [INF] 0.13d scrub ok
->> 2012-04-04 09:08:57.818280 =C2=A0 mon e7: 3 mons at
->> {node21=3D172.22.10.21:6789/0,node22=3D172.22.10.22:6789/0,node23=3D=
-172.22.10.23:6789/0}
->>
->> ceph health says:
->> 2012-04-04 09:09:01.651053 mon <- [health]
->> 2012-04-04 09:09:01.666585 mon.1 -> 'HEALTH_WARN 223 pgs stuck
->> inactive; 223 pgs stuck unclean' (0)
->>
->> I was wondering if anyone has any suggestions about how to resolve
->> this, or things to look for. I've tried restarted the ceph daemons o=
-n
->> the various nodes a few times to no-avail. I don't think that there =
-is
->> anything wrong with any of the nodes either.
->>
->> Thanks in advance,
->> Damien
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
-tml
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
