@@ -1,60 +1,50 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: defaults paths #2
-Date: Thu, 5 Apr 2012 22:12:44 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1204052204290.21401@cobra.newdream.net>
-References: <CAORUGqBs3=_sVnYB+vdamAW3S7ShqY5Gz1hGiY4ozUd7enTn3w@mail.gmail.com>
+From: Laszlo Boszormenyi <gcs@debian.hu>
+Subject: ceph 0.44+ and leveldb
+Date: Fri, 06 Apr 2012 07:18:18 +0200
+Message-ID: <1333689498.19737.11.camel@julia.gcs.org.hu>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51692 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752543Ab2DFFMt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Apr 2012 01:12:49 -0400
-In-Reply-To: <CAORUGqBs3=_sVnYB+vdamAW3S7ShqY5Gz1hGiY4ozUd7enTn3w@mail.gmail.com>
+Received: from mail.barcikacomp.hu ([94.248.160.10]:57082 "EHLO
+	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752933Ab2DFFSW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Apr 2012 01:18:22 -0400
+Received: from [192.168.0.100] (kabelnet-248-67.parisat.hu [91.147.248.67])
+	by mail.barcikacomp.hu (Postfix) with ESMTPA id DA30749DBC
+	for <ceph-devel@vger.kernel.org>; Fri,  6 Apr 2012 07:18:18 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, 5 Apr 2012, Tommi Virtanen wrote:
-> > As I think it is a very specific scenario where a machine would be
-> > participating in multiple Ceph clusters I'd vote for:
-> >
-> >   /var/lib/ceph/$type/$id
-> 
-> I really want to avoid having two different cases, two different code
-> paths to test, a more rare variant that can break without being
-> noticed. I want everything to always look the same. "ceph-" seems a
-> small enough price to pay for that.
+Hi Ceph developers,
 
-Here's what I'm thinking:
+It seems you included leveldb in the source of Ceph. It has two serious
+problems.
+First, security. Now leveldb can't be updated to a newer version, only
+with Ceph. Worst, security teams may not notice leveldb is embedded into
+Ceph; meaning the latter would remain unfixed and vulnerable.
+Second, as it doesn't contain fixes for various architectures that a
+separately packaged leveldb has, it can make Ceph fail to build on
+several architectures where leveldb is built otherwise.
 
- - No data paths are hard-coded except for /etc/ceph/*.conf
+See the Debian build list for example:
+https://buildd.debian.org/status/package.php?p=ceph+leveldb&suite=sid
 
- - We initially mount osd volumes in some temporary location (say, 
-   /var/lib/ceph/temp/$uuid)
+Also, leveldb doesn't work on all architectures. Making Ceph less
+portable, which means less users can reach it.
+See the build failures for ia64, mips, powerpc and s390[x]:
+-- cut --
+from ./db/builder.cc:7:
+./port/atomic_pointer.h:133:2: error: #error Please implement AtomicPointer for this platform.
+make[5]: *** [builder.o] Error 1
+make[5]: *** Waiting for unfinished jobs....
+make[4]: *** [all] Error 2
+make[5]: Leaving directory `/build/buildd-ceph_0.44.1-1-ia64-2UAFHZ/ceph-0.44.1/src/leveldb'
+-- cut --
 
- - We identify the oid, cluster uuid, etc., and determine where to mount 
-   it with
+Please re-evaluate the usage of leveldb.
 
-	ceph-osd --cluster $cluster -i $id --show-config-value osd_data
+Regards,
+Laszlo/GCS
 
-   This will normally give you the default, unless the conf file specified 
-   something else.
-
- - Normal people get a default of /var/lib/ceph/$type/$id
-
- - Multicluster crazies put
-
-	[global]
-		osd data = /var/lib/ceph/$type/$cluster-$id
-		osd journal = /var/lib/ceph/$type/$cluster-$id/journal
-		mon data = /var/lib/ceph/$type/$cluster-$id
-
-   (or whatever) in /etc/ceph/$cluster.conf and get something else.
-
-Code paths are identical, data flow is identical.  We get a simple general 
-case, without closing the door on multicluster configurations, which vary 
-only by the config value that is easily adjusted on a per-cluster basis...
-
-sage
