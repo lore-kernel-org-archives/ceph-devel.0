@@ -1,56 +1,89 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
-Subject: Re: pg in creating state can't be removed?
-Date: Fri, 6 Apr 2012 22:41:53 +0800
-Message-ID: <CANExM-O7JbiJqx71mifL51=xuutsTrBKWW4ttuE7vt6uNzpFDA@mail.gmail.com>
-References: <CANExM-N3DQsBzG+sLoj8x3Gs4tAdRGOXu=n0Evr5yfEfq1jF=A@mail.gmail.com>
-	<Pine.LNX.4.64.1204050819110.2059@cobra.newdream.net>
+From: Samuel Just <sam.just@dreamhost.com>
+Subject: Re: pgs stuck inactive
+Date: Fri, 6 Apr 2012 09:50:09 -0700
+Message-ID: <CACLRD_1NiFHjx_PZxokVBkADG0z+A61Sj57NJFyYF_vM=ZKSbA@mail.gmail.com>
+References: <CAFtEh-dcEKQ2AzcVmu1G5i-zFHgim5SLZvEmNtDsvkHt+JnzLA@mail.gmail.com>
+	<CACLRD_2yhpoUGoivHQpp-LyO82MdTz5SpD0MN5b_vEoqSGBzgg@mail.gmail.com>
+	<CAFtEh-dsM_G5GCyqnnBVfAc7GmKZLZcLzkQzrCAGjDgyLC3CGg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:50587 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754159Ab2DFOly convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Apr 2012 10:41:54 -0400
-Received: by iagz16 with SMTP id z16so3171978iag.19
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Apr 2012 07:41:53 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1204050819110.2059@cobra.newdream.net>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:51794 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752973Ab2DFQuL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Apr 2012 12:50:11 -0400
+Received: by wibhq7 with SMTP id hq7so697068wib.1
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Apr 2012 09:50:10 -0700 (PDT)
+In-Reply-To: <CAFtEh-dsM_G5GCyqnnBVfAc7GmKZLZcLzkQzrCAGjDgyLC3CGg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Damien Churchill <damoxc@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Ahh...I was testing with v0.39. I re-tested it with the latest release
-and have no such problem.
-Sorry for the noise.
+Is there a 0.138_head directory under current/ on any of your osds?
+If so, can you post the log to that osd?  I could also use the osd.0
+log.
+-Sam
 
-Henry
-
-=E5=9C=A8 2012=E5=B9=B44=E6=9C=885=E6=97=A5=E4=B8=8B=E5=8D=8811:20=EF=BC=
-=8CSage Weil <sage@newdream.net> =E5=AF=AB=E9=81=93=EF=BC=9A
-> On Thu, 5 Apr 2012, Henry C Chang wrote:
->> Hi folks,
+On Wed, Apr 4, 2012 at 2:44 PM, Damien Churchill <damoxc@gmail.com> wro=
+te:
+> I've uploaded them to:
+>
+> http://damoxc.net/ceph/osdmap
+> http://damoxc.net/ceph/pg_dump
+>
+> Thanks
+>
+> On 4 April 2012 21:51, Samuel Just <sam.just@dreamhost.com> wrote:
+>> Can you post a copy of your osd map and the output of 'ceph pg dump'=
+ ?
+>> =C2=A0You can get the osdmap via 'ceph osd getmap -o <filename>'.
+>> -Sam
 >>
->> I created a pool without adding any osds to it in the crushmap. As
->> expected, all pgs remains in creating state since no osds take care =
-of
->> them.
->>
->> However, I do expect that this pool should be able to be removed.
->> Currently, removing such a pool hangs forever as the pg removal has =
-to
->> wait until the pg have been created. Does my expectation make sense?
->
-> Yeah. =C2=A0I seem to remember the pg removal code cleaning up stuff =
-in the
-> monitor's PGMap, but I'm also pretty sure this scenario was never tes=
-ted.
->
-> Do you see where it is waiting for PG creation? =C2=A0I don't think i=
-t should
-> need to do that, since it's going to be thrown out anyway.
->
-> sage
+>> On Wed, Apr 4, 2012 at 1:12 AM, Damien Churchill <damoxc@gmail.com> =
+wrote:
+>>> Hi,
+>>>
+>>> I'm having some trouble getting some pgs to stop being inactive. Th=
+e
+>>> cluster is running 0.44.1 and the kernel version is 3.2.x.
+>>>
+>>> ceph -s reports:
+>>> 2012-04-04 09:08:57.816029 =C2=A0 =C2=A0pg v188540: 990 pgs: 223 in=
+active, 767
+>>> active+clean; 205 GB data, 1013 GB used, 8204 GB / 9315 GB avail
+>>> 2012-04-04 09:08:57.817970 =C2=A0 mds e2198: 1/1/1 up {0=3Dnode24=3D=
+up:active},
+>>> 4 up:standby
+>>> 2012-04-04 09:08:57.818024 =C2=A0 osd e5910: 5 osds: 5 up, 5 in
+>>> 2012-04-04 09:08:57.818201 =C2=A0 log 2012-04-04 09:04:03.838358 os=
+d.3
+>>> 172.22.10.24:6801/30000 159 : [INF] 0.13d scrub ok
+>>> 2012-04-04 09:08:57.818280 =C2=A0 mon e7: 3 mons at
+>>> {node21=3D172.22.10.21:6789/0,node22=3D172.22.10.22:6789/0,node23=3D=
+172.22.10.23:6789/0}
+>>>
+>>> ceph health says:
+>>> 2012-04-04 09:09:01.651053 mon <- [health]
+>>> 2012-04-04 09:09:01.666585 mon.1 -> 'HEALTH_WARN 223 pgs stuck
+>>> inactive; 223 pgs stuck unclean' (0)
+>>>
+>>> I was wondering if anyone has any suggestions about how to resolve
+>>> this, or things to look for. I've tried restarted the ceph daemons =
+on
+>>> the various nodes a few times to no-avail. I don't think that there=
+ is
+>>> anything wrong with any of the nodes either.
+>>>
+>>> Thanks in advance,
+>>> Damien
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.=
+html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
