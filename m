@@ -1,95 +1,104 @@
-From: Damien Churchill <damoxc@gmail.com>
+From: Samuel Just <sam.just@dreamhost.com>
 Subject: Re: pgs stuck inactive
-Date: Fri, 6 Apr 2012 17:55:04 +0100
-Message-ID: <CAFtEh-dLfUYpSbUJamReXB2e1JHm0b55HPs-h1wjCXym-cmHyA@mail.gmail.com>
+Date: Fri, 6 Apr 2012 10:30:52 -0700
+Message-ID: <CACLRD_3ccxvLiHxEHMBK+Q+2Ag41a+M07NofU9+Z8Fr06vvvfA@mail.gmail.com>
 References: <CAFtEh-dcEKQ2AzcVmu1G5i-zFHgim5SLZvEmNtDsvkHt+JnzLA@mail.gmail.com>
 	<CACLRD_2yhpoUGoivHQpp-LyO82MdTz5SpD0MN5b_vEoqSGBzgg@mail.gmail.com>
 	<CAFtEh-dsM_G5GCyqnnBVfAc7GmKZLZcLzkQzrCAGjDgyLC3CGg@mail.gmail.com>
 	<CACLRD_1NiFHjx_PZxokVBkADG0z+A61Sj57NJFyYF_vM=ZKSbA@mail.gmail.com>
+	<CAFtEh-dLfUYpSbUJamReXB2e1JHm0b55HPs-h1wjCXym-cmHyA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:60694 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755703Ab2DFQzF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Apr 2012 12:55:05 -0400
-Received: by ghrr11 with SMTP id r11so1324514ghr.19
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Apr 2012 09:55:04 -0700 (PDT)
-In-Reply-To: <CACLRD_1NiFHjx_PZxokVBkADG0z+A61Sj57NJFyYF_vM=ZKSbA@mail.gmail.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:41030 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753169Ab2DFRax convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Apr 2012 13:30:53 -0400
+Received: by wgbdr13 with SMTP id dr13so2361608wgb.1
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Apr 2012 10:30:52 -0700 (PDT)
+In-Reply-To: <CAFtEh-dLfUYpSbUJamReXB2e1JHm0b55HPs-h1wjCXym-cmHyA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@dreamhost.com>
+To: Damien Churchill <damoxc@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I've got that directory on 3 of the osds: 0, 3 and 4. Do you want the
-logs to all 3 of them?
+Hmm, osd.0 should be enough.  I need osd debugging at around 20 from
+when the osd started.  Restarting the osd with debugging at 20 would
+also work fine.
+-Sam
 
-On 6 April 2012 17:50, Samuel Just <sam.just@dreamhost.com> wrote:
-> Is there a 0.138_head directory under current/ on any of your osds?
-> If so, can you post the log to that osd? =C2=A0I could also use the o=
-sd.0
-> log.
-> -Sam
+On Fri, Apr 6, 2012 at 9:55 AM, Damien Churchill <damoxc@gmail.com> wro=
+te:
+> I've got that directory on 3 of the osds: 0, 3 and 4. Do you want the
+> logs to all 3 of them?
 >
-> On Wed, Apr 4, 2012 at 2:44 PM, Damien Churchill <damoxc@gmail.com> w=
-rote:
->> I've uploaded them to:
+> On 6 April 2012 17:50, Samuel Just <sam.just@dreamhost.com> wrote:
+>> Is there a 0.138_head directory under current/ on any of your osds?
+>> If so, can you post the log to that osd? =C2=A0I could also use the =
+osd.0
+>> log.
+>> -Sam
 >>
->> http://damoxc.net/ceph/osdmap
->> http://damoxc.net/ceph/pg_dump
->>
->> Thanks
->>
->> On 4 April 2012 21:51, Samuel Just <sam.just@dreamhost.com> wrote:
->>> Can you post a copy of your osd map and the output of 'ceph pg dump=
-' ?
->>> =C2=A0You can get the osdmap via 'ceph osd getmap -o <filename>'.
->>> -Sam
+>> On Wed, Apr 4, 2012 at 2:44 PM, Damien Churchill <damoxc@gmail.com> =
+wrote:
+>>> I've uploaded them to:
 >>>
->>> On Wed, Apr 4, 2012 at 1:12 AM, Damien Churchill <damoxc@gmail.com>=
- wrote:
->>>> Hi,
+>>> http://damoxc.net/ceph/osdmap
+>>> http://damoxc.net/ceph/pg_dump
+>>>
+>>> Thanks
+>>>
+>>> On 4 April 2012 21:51, Samuel Just <sam.just@dreamhost.com> wrote:
+>>>> Can you post a copy of your osd map and the output of 'ceph pg dum=
+p' ?
+>>>> =C2=A0You can get the osdmap via 'ceph osd getmap -o <filename>'.
+>>>> -Sam
 >>>>
->>>> I'm having some trouble getting some pgs to stop being inactive. T=
-he
->>>> cluster is running 0.44.1 and the kernel version is 3.2.x.
->>>>
->>>> ceph -s reports:
->>>> 2012-04-04 09:08:57.816029 =C2=A0 =C2=A0pg v188540: 990 pgs: 223 i=
-nactive, 767
->>>> active+clean; 205 GB data, 1013 GB used, 8204 GB / 9315 GB avail
->>>> 2012-04-04 09:08:57.817970 =C2=A0 mds e2198: 1/1/1 up {0=3Dnode24=3D=
-up:active},
->>>> 4 up:standby
->>>> 2012-04-04 09:08:57.818024 =C2=A0 osd e5910: 5 osds: 5 up, 5 in
->>>> 2012-04-04 09:08:57.818201 =C2=A0 log 2012-04-04 09:04:03.838358 o=
-sd.3
->>>> 172.22.10.24:6801/30000 159 : [INF] 0.13d scrub ok
->>>> 2012-04-04 09:08:57.818280 =C2=A0 mon e7: 3 mons at
->>>> {node21=3D172.22.10.21:6789/0,node22=3D172.22.10.22:6789/0,node23=3D=
-172.22.10.23:6789/0}
->>>>
->>>> ceph health says:
->>>> 2012-04-04 09:09:01.651053 mon <- [health]
->>>> 2012-04-04 09:09:01.666585 mon.1 -> 'HEALTH_WARN 223 pgs stuck
->>>> inactive; 223 pgs stuck unclean' (0)
->>>>
->>>> I was wondering if anyone has any suggestions about how to resolve
->>>> this, or things to look for. I've tried restarted the ceph daemons=
- on
->>>> the various nodes a few times to no-avail. I don't think that ther=
-e is
->>>> anything wrong with any of the nodes either.
->>>>
->>>> Thanks in advance,
->>>> Damien
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info=
-=2Ehtml
+>>>> On Wed, Apr 4, 2012 at 1:12 AM, Damien Churchill <damoxc@gmail.com=
+> wrote:
+>>>>> Hi,
+>>>>>
+>>>>> I'm having some trouble getting some pgs to stop being inactive. =
+The
+>>>>> cluster is running 0.44.1 and the kernel version is 3.2.x.
+>>>>>
+>>>>> ceph -s reports:
+>>>>> 2012-04-04 09:08:57.816029 =C2=A0 =C2=A0pg v188540: 990 pgs: 223 =
+inactive, 767
+>>>>> active+clean; 205 GB data, 1013 GB used, 8204 GB / 9315 GB avail
+>>>>> 2012-04-04 09:08:57.817970 =C2=A0 mds e2198: 1/1/1 up {0=3Dnode24=
+=3Dup:active},
+>>>>> 4 up:standby
+>>>>> 2012-04-04 09:08:57.818024 =C2=A0 osd e5910: 5 osds: 5 up, 5 in
+>>>>> 2012-04-04 09:08:57.818201 =C2=A0 log 2012-04-04 09:04:03.838358 =
+osd.3
+>>>>> 172.22.10.24:6801/30000 159 : [INF] 0.13d scrub ok
+>>>>> 2012-04-04 09:08:57.818280 =C2=A0 mon e7: 3 mons at
+>>>>> {node21=3D172.22.10.21:6789/0,node22=3D172.22.10.22:6789/0,node23=
+=3D172.22.10.23:6789/0}
+>>>>>
+>>>>> ceph health says:
+>>>>> 2012-04-04 09:09:01.651053 mon <- [health]
+>>>>> 2012-04-04 09:09:01.666585 mon.1 -> 'HEALTH_WARN 223 pgs stuck
+>>>>> inactive; 223 pgs stuck unclean' (0)
+>>>>>
+>>>>> I was wondering if anyone has any suggestions about how to resolv=
+e
+>>>>> this, or things to look for. I've tried restarted the ceph daemon=
+s on
+>>>>> the various nodes a few times to no-avail. I don't think that the=
+re is
+>>>>> anything wrong with any of the nodes either.
+>>>>>
+>>>>> Thanks in advance,
+>>>>> Damien
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-inf=
+o.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
