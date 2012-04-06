@@ -1,114 +1,87 @@
-From: Damien Churchill <damoxc@gmail.com>
-Subject: Re: pgs stuck inactive
-Date: Fri, 6 Apr 2012 18:53:08 +0100
-Message-ID: <CAFtEh-evVi0q8CZmbPJX_WaCD_y2E=RBf6nNu13106E8hopk5A@mail.gmail.com>
-References: <CAFtEh-dcEKQ2AzcVmu1G5i-zFHgim5SLZvEmNtDsvkHt+JnzLA@mail.gmail.com>
-	<CACLRD_2yhpoUGoivHQpp-LyO82MdTz5SpD0MN5b_vEoqSGBzgg@mail.gmail.com>
-	<CAFtEh-dsM_G5GCyqnnBVfAc7GmKZLZcLzkQzrCAGjDgyLC3CGg@mail.gmail.com>
-	<CACLRD_1NiFHjx_PZxokVBkADG0z+A61Sj57NJFyYF_vM=ZKSbA@mail.gmail.com>
-	<CAFtEh-dLfUYpSbUJamReXB2e1JHm0b55HPs-h1wjCXym-cmHyA@mail.gmail.com>
-	<CACLRD_3ccxvLiHxEHMBK+Q+2Ag41a+M07NofU9+Z8Fr06vvvfA@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: defaults paths #2
+Date: Fri, 6 Apr 2012 10:55:45 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1204061038430.3020@cobra.newdream.net>
+References: <CAORUGqBs3=_sVnYB+vdamAW3S7ShqY5Gz1hGiY4ozUd7enTn3w@mail.gmail.com>
+ <Pine.LNX.4.64.1204052204290.21401@cobra.newdream.net>
+ <CAORUGqBq93+nWutxEAb=uWmEqCpCPCjcRKrzkTY4rRPMhfX1Vw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-707766596-1333734797=:3020"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:35718 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754302Ab2DFRxI convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Apr 2012 13:53:08 -0400
-Received: by yenl12 with SMTP id l12so1333655yen.19
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Apr 2012 10:53:08 -0700 (PDT)
-In-Reply-To: <CACLRD_3ccxvLiHxEHMBK+Q+2Ag41a+M07NofU9+Z8Fr06vvvfA@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:52566 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754055Ab2DFRzq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Apr 2012 13:55:46 -0400
+In-Reply-To: <CAORUGqBq93+nWutxEAb=uWmEqCpCPCjcRKrzkTY4rRPMhfX1Vw@mail.gmail.com>
+Content-ID: <Pine.LNX.4.64.1204061053260.3020@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sam.just@dreamhost.com>
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Okay, uploaded it to http://damoxc.net/ceph/osd.0.log.gz. I restarted
-the osd with debug osd =3D 20 and let it run for 5 minutes or so.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-On 6 April 2012 18:30, Samuel Just <sam.just@dreamhost.com> wrote:
-> Hmm, osd.0 should be enough. =C2=A0I need osd debugging at around 20 =
-from
-> when the osd started. =C2=A0Restarting the osd with debugging at 20 w=
-ould
-> also work fine.
-> -Sam
->
-> On Fri, Apr 6, 2012 at 9:55 AM, Damien Churchill <damoxc@gmail.com> w=
-rote:
->> I've got that directory on 3 of the osds: 0, 3 and 4. Do you want th=
-e
->> logs to all 3 of them?
->>
->> On 6 April 2012 17:50, Samuel Just <sam.just@dreamhost.com> wrote:
->>> Is there a 0.138_head directory under current/ on any of your osds?
->>> If so, can you post the log to that osd? =C2=A0I could also use the=
- osd.0
->>> log.
->>> -Sam
->>>
->>> On Wed, Apr 4, 2012 at 2:44 PM, Damien Churchill <damoxc@gmail.com>=
- wrote:
->>>> I've uploaded them to:
->>>>
->>>> http://damoxc.net/ceph/osdmap
->>>> http://damoxc.net/ceph/pg_dump
->>>>
->>>> Thanks
->>>>
->>>> On 4 April 2012 21:51, Samuel Just <sam.just@dreamhost.com> wrote:
->>>>> Can you post a copy of your osd map and the output of 'ceph pg du=
-mp' ?
->>>>> =C2=A0You can get the osdmap via 'ceph osd getmap -o <filename>'.
->>>>> -Sam
->>>>>
->>>>> On Wed, Apr 4, 2012 at 1:12 AM, Damien Churchill <damoxc@gmail.co=
-m> wrote:
->>>>>> Hi,
->>>>>>
->>>>>> I'm having some trouble getting some pgs to stop being inactive.=
- The
->>>>>> cluster is running 0.44.1 and the kernel version is 3.2.x.
->>>>>>
->>>>>> ceph -s reports:
->>>>>> 2012-04-04 09:08:57.816029 =C2=A0 =C2=A0pg v188540: 990 pgs: 223=
- inactive, 767
->>>>>> active+clean; 205 GB data, 1013 GB used, 8204 GB / 9315 GB avail
->>>>>> 2012-04-04 09:08:57.817970 =C2=A0 mds e2198: 1/1/1 up {0=3Dnode2=
-4=3Dup:active},
->>>>>> 4 up:standby
->>>>>> 2012-04-04 09:08:57.818024 =C2=A0 osd e5910: 5 osds: 5 up, 5 in
->>>>>> 2012-04-04 09:08:57.818201 =C2=A0 log 2012-04-04 09:04:03.838358=
- osd.3
->>>>>> 172.22.10.24:6801/30000 159 : [INF] 0.13d scrub ok
->>>>>> 2012-04-04 09:08:57.818280 =C2=A0 mon e7: 3 mons at
->>>>>> {node21=3D172.22.10.21:6789/0,node22=3D172.22.10.22:6789/0,node2=
-3=3D172.22.10.23:6789/0}
->>>>>>
->>>>>> ceph health says:
->>>>>> 2012-04-04 09:09:01.651053 mon <- [health]
->>>>>> 2012-04-04 09:09:01.666585 mon.1 -> 'HEALTH_WARN 223 pgs stuck
->>>>>> inactive; 223 pgs stuck unclean' (0)
->>>>>>
->>>>>> I was wondering if anyone has any suggestions about how to resol=
-ve
->>>>>> this, or things to look for. I've tried restarted the ceph daemo=
-ns on
->>>>>> the various nodes a few times to no-avail. I don't think that th=
-ere is
->>>>>> anything wrong with any of the nodes either.
->>>>>>
->>>>>> Thanks in advance,
->>>>>> Damien
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
-evel" in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-in=
-fo.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--557981400-707766596-1333734797=:3020
+Content-Type: TEXT/PLAIN; CHARSET=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-ID: <Pine.LNX.4.64.1204061053261.3020@cobra.newdream.net>
+
+On Fri, 6 Apr 2012, Tommi Virtanen wrote:
+> On Thu, Apr 5, 2012 at 22:12, Sage Weil <sage@newdream.net> wrote:
+> > Here's what I'm thinking:
+> >
+> > =A0- No data paths are hard-coded except for /etc/ceph/*.conf
+> > =A0- We initially mount osd volumes in some temporary location (say,
+> > =A0 /var/lib/ceph/temp/$uuid)
+> > =A0- We identify the oid, cluster uuid, etc., and determine where to mo=
+unt
+> > =A0 it with
+> >
+> > =A0 =A0 =A0 =A0ceph-osd --cluster $cluster -i $id --show-config-value o=
+sd_data
+> >
+> > =A0 This will normally give you the default, unless the conf file speci=
+fied
+> > =A0 something else.
+> > =A0- Normal people get a default of /var/lib/ceph/$type/$id
+> > =A0- Multicluster crazies put
+> >
+> > =A0 =A0 =A0 =A0[global]
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0osd data =3D /var/lib/ceph/$type/$cluste=
+r-$id
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0osd journal =3D /var/lib/ceph/$type/$clu=
+ster-$id/journal
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mon data =3D /var/lib/ceph/$type/$cluste=
+r-$id
+> >
+> > =A0 (or whatever) in /etc/ceph/$cluster.conf and get something else.
+> >
+> > Code paths are identical, data flow is identical. =A0We get a simple ge=
+neral
+> > case, without closing the door on multicluster configurations, which va=
+ry
+> > only by the config value that is easily adjusted on a per-cluster basis=
+=2E..
+>=20
+> Except we lost features. Now I can't iterate the contents of a
+> directory and know what they mean. I think we'll need that.
+
+Unless you infer it from the conf value or some such kludge, but that=20
+would be fragile.  Okay.  I'm good with /var/lib/ceph/$type/$cluster-$id=20
+then.
+
+Hopefully we can keep things as general as possible, so that brave souls=20
+can go out of bounds without getting bitten.  For example, never parse the=
+=20
+directory name if the same information can be had from the directory=20
+contents.
+
+Bernard, I suspect it would be pretty simple to make ceph-osd start up=20
+either via -i <id> or --uuid <uuid> which would enable a uuid-based scheme=
+=20
+like you describe.  For these cookbooks, though, it'll be an <id>-based=20
+approach.
+
+sage
+--557981400-707766596-1333734797=:3020--
