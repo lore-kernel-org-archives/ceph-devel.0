@@ -1,72 +1,48 @@
-From: "Nick Couchman" <Nick.Couchman@seakr.com>
-Subject: Re: fallocate issue on CentOS 5
-Date: Sat, 07 Apr 2012 23:06:05 -0600
-Message-ID: <4F80C85D02000099000DE9F5@collaborate.seakr.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: defaults paths #2
+Date: Mon, 9 Apr 2012 11:03:44 -0700
+Message-ID: <CAORUGqD06LYcg3-y5BNNt724cvxUm1pkarDx_LoWoPSzx1=f1g@mail.gmail.com>
+References: <CAORUGqBs3=_sVnYB+vdamAW3S7ShqY5Gz1hGiY4ozUd7enTn3w@mail.gmail.com>
+ <9B9005B1-9397-4171-8726-A52903B8B8F1@openminds.be> <CAORUGqD_Oe2F-yTS87h5P8oB=OrUTcuZo7BsWo3bqy66VJ1YfA@mail.gmail.com>
+ <720D7ADB-C3E4-4C5E-B308-216D941FDC83@openminds.be>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.seakr.com ([64.2.143.10]:38854 "EHLO mx1.seakr.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751243Ab2DHFGI convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:2:1>);
-	Sun, 8 Apr 2012 01:06:08 -0400
-Received: from mx-inside.seakr.com ([192.168.100.31])
-	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q3866A6R016946
-	for <ceph-devel@vger.kernel.org>; Sun, 8 Apr 2012 00:06:11 -0600
-Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
-	by mx-inside.seakr.com (Postfix) with ESMTP id 53C4844C69
-	for <ceph-devel@vger.kernel.org>; Sat,  7 Apr 2012 23:06:07 -0600 (MDT)
-Content-Disposition: inline
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:64391 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756677Ab2DISEG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Apr 2012 14:04:06 -0400
+Received: by vbbff1 with SMTP id ff1so2449380vbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Apr 2012 11:04:05 -0700 (PDT)
+In-Reply-To: <720D7ADB-C3E4-4C5E-B308-216D941FDC83@openminds.be>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@newdream.net
-Cc: ceph-devel@vger.kernel.org
+To: Bernard Grymonpon <bernard@openminds.be>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sat, 2012-04-07 at 08:48 -0700, Sage Weil wrote:
-> On Sat, 7 Apr 2012, Nick Couchman wrote:
-> > I'm trying to compile 0.44.1 on CentOS 5, and am running into the following compile-time error:
-> > 
-> >  g++ -DHAVE_CONFIG_H -I. -I. -I. -I/usr/include/nss3 -I/usr/include/nspr4 -Wall -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -rdynamic -Winit-self -Wpointer-arith -fno-strict-aliasing -DCEPH_LIBDIR=\"/usr/lib64\" -Wnon-virtual-dtor -Wno-invalid-offsetof -Wstrict-null-sentinel -I../src/leveldb/include -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m64 -mtune=generic -MT libos_la-FileStore.lo -MD -MP -MF .deps/libos_la-FileStore.Tpo -c os/FileStore.cc  -fPIC -DPIC -o .libs/libos_la-FileStore.o
-> > os/FileStore.cc: In member function 'int FileStore::_zero(coll_t, const hobject_t&, uint64_t, size_t)':
-> > os/FileStore.cc:3013: error: 'fallocate' was not declared in this scope
-> > os/FileStore.cc: In member function 'void FileStore::sync_entry()':
-> > os/FileStore.cc:3385: warning: passing 'float' for argument 1 to 'SyncEntryTimeout::SyncEntryTimeout(int)'
-> > make[3]: *** [libos_la-FileStore.lo] Error 1
-> > make[3]: *** Waiting for unfinished jobs....
-> > 
-> > Interestingly, if I go to that block of code, there's an "#ifdef HAVE_FALLOCATE" block there, and this is inside that block.  So, I go and look at the output of configure and I see:
-> > 
-> > checking for utime.h... yes
-> > checking for sync_file_range... no
-> > checking for fallocate... no
-> > checking for a Python interpreter with version >= 2.4... python
-> > checking for python... /usr/bin/python
-> > 
-> > Configure script believes fallocate is not available.  And, indeed, from config.log:
-> > 
-> > configure:18309: checking for fallocate
-> > configure:18309: gcc -o conftest -g -O2 conftest.c >&5
-> > /tmp/ccybZzwg.o: In function `main':
-> > /root/ceph-0.44.1/conftest.c:81: undefined referenece to `fallocate'
-> > 
-> > Okay, so compiler cannot find it, then why is this block of code being evaluated??  I poked around a bit more, and found that HAVE_FALLOCATE is defined in /usr/include/linux/fs.h, which appears to be included in FileStore.cc.  So, even though the configure script fails to detect fallocate correctly, it's still pulling it in because it is defined in the linux/fs.h file, even though it doesn't work.  What's the best way to fix this build issue and have it correctly disable HAVE_FALLOCATE if fallocate() doesn't really work?
-> 
-> That's annoying.  You could modify configure.ac so that it defines 
-> something other than HAVE_FALLOCATE (CEPH_HAVE_FALLOCATE, perhaps) and 
-> adjust the #ifdefs accordingly...
-> 
-> sage
+On Fri, Apr 6, 2012 at 12:45, Bernard Grymonpon <bernard@openminds.be> wrote:
+> Lets go wild, and say, if you have hunderds of machines, summing up to thousands of of disks, all already migrated/moved to other machines/... , and it reports that OSD 536 is offline, how will you find what disk is failing/corrupt/... in which machine? Will you keep track which OSD ran on which node last?
 
-Very annoying, but thanks for the tip - that worked great!  I was able
-to patch configure.ac and src/os/FileStore.cc in that manner and build
-RPMs for CentOS 5!
+That's a good question and I don't have a good enough answer for you
+yet. Rest assured that's a valid concern.
 
--Nick
+It seems we're still approaching this from different angles. You want
+to have an inventory of disks, known by uuid, and want to track where
+they are, and plan their moves.
 
+I want to know I have N servers with K hdd slots each, and I want each
+one to be fully populated with healthy disks. I don't care what disk
+is where, and I don't think it's realistic for me to maintain a manual
+inventory. A failed disk means unplug that disk. An empty slot means
+plug in a disk from the dedicated pile of spares. A chassis needing
+maintenance is to be shut down, disks unplugged & plugged in
+elsewhere. I don't care where. A lost disk needs to have its osd
+deleted at some point (or just let them pile up; not a realistic
+problem for a decade or so). Any inventory of disks is only realistic
+from the discovery angle; just report what's plugged in right now.
 
+I consider individual disks just about as uninteresting as power
+supplies. Does that make sense?
 
-
---------
-
-This e-mail may contain confidential and privileged material for the sole use of the intended recipient.  If this email is not intended for you, or you are not responsible for the delivery of this message to the intended recipient, please note that this message may contain SEAKR Engineering (SEAKR) Privileged/Proprietary Information.  In such a case, you are strictly prohibited from downloading, photocopying, distributing or otherwise using this message, its contents or attachments in any way.  If you have received this message in error, please notify us immediately by replying to this e-mail and delete the message from your mailbox.  Information contained in this message that does not relate to the business of SEAKR is neither endorsed by nor attributable to SEAKR.
+Details pending..
