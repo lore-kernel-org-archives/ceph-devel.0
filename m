@@ -1,55 +1,68 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: defaults paths #2
-Date: Mon, 9 Apr 2012 12:22:35 -0700
-Message-ID: <CAORUGqC2M-d4wCHbboMCsozsqQsk5zKhv_fotWZ4hq9MhTb_0A@mail.gmail.com>
-References: <CAORUGqBs3=_sVnYB+vdamAW3S7ShqY5Gz1hGiY4ozUd7enTn3w@mail.gmail.com>
- <9B9005B1-9397-4171-8726-A52903B8B8F1@openminds.be> <CAORUGqD_Oe2F-yTS87h5P8oB=OrUTcuZo7BsWo3bqy66VJ1YfA@mail.gmail.com>
- <720D7ADB-C3E4-4C5E-B308-216D941FDC83@openminds.be> <CAORUGqD06LYcg3-y5BNNt724cvxUm1pkarDx_LoWoPSzx1=f1g@mail.gmail.com>
- <Pine.LNX.4.64.1204091115310.21531@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Xi Wang <xi.wang@gmail.com>
+Subject: [PATCH] rbd: fix integer overflow in rbd_header_from_disk()
+Date: Mon,  9 Apr 2012 17:52:15 -0400
+Message-ID: <1334008335-8377-1-git-send-email-xi.wang@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:51391 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757616Ab2DITW4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Apr 2012 15:22:56 -0400
-Received: by vbbff1 with SMTP id ff1so2503614vbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Apr 2012 12:22:55 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1204091115310.21531@cobra.newdream.net>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:37552 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756953Ab2DIVwY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Apr 2012 17:52:24 -0400
+Received: by qadc11 with SMTP id c11so1738935qad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Apr 2012 14:52:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Bernard Grymonpon <bernard@openminds.be>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Alex Elder <elder@dreamhost.com>, Yehuda Sadeh <yehuda@hq.newdream.net>, Sage Weil <sage@newdream.net>, Xi Wang <xi.wang@gmail.com>
 
-On Mon, Apr 9, 2012 at 11:16, Sage Weil <sage@newdream.net> wrote:
-> One thing we need to keep in mind here is that the individual disks a=
-re
-> placed in the CRUSH hierarchy based on the host/rack/etc location in =
-the
-> datacenter. =C2=A0Moving disk around arbitrarily will break the place=
-ment
-> constraints if that position isn't also changed.
+ondisk->snap_count is read from disk via rbd_req_sync_read() and thus
+needs validation.  Otherwise, a bogus `snap_count' could overflow the
+kmalloc() size, leading to memory corruption.
 
-Yeah, the location will have to be updated. I tend to think disks
-*will* move, and it's better to cope with it than to think it won't
-happen. All you need is a simple power supply/mobo/raid
-controller/nic/etc failure, if there's any free slots anywhere it's
-probably better to plug the disks in there than waiting for a
-replacement part. I'm working under the assumption that it's better to
-"just bring them up" rather than having an extended osd outage or
-claiming the osd as lost.
+Also use `u32' consistently for `snap_count'.
 
-Updating the new location for the osd could be something we do even at
-every osd start -- it's a nop if the location is the same as the old
-one. And we can say the host knows where it is, and that information
-is available in /etc or /var/lib/ceph.
+Signed-off-by: Xi Wang <xi.wang@gmail.com>
+---
+ drivers/block/rbd.c |   12 +++++++-----
+ 1 files changed, 7 insertions(+), 5 deletions(-)
 
-I'll come back to this once it's a little bit more concrete; I'd
-rather not make speculative changes, until I can actual trigger the
-behavior in a test bench.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 013c7a5..d47f7e6 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -487,18 +487,20 @@ static void rbd_coll_release(struct kref *kref)
+  */
+ static int rbd_header_from_disk(struct rbd_image_header *header,
+ 				 struct rbd_image_header_ondisk *ondisk,
+-				 int allocated_snaps,
++				 u32 allocated_snaps,
+ 				 gfp_t gfp_flags)
+ {
+-	int i;
+-	u32 snap_count;
++	u32 i, snap_count;
+ 
+ 	if (memcmp(ondisk, RBD_HEADER_TEXT, sizeof(RBD_HEADER_TEXT)))
+ 		return -ENXIO;
+ 
+ 	snap_count = le32_to_cpu(ondisk->snap_count);
++	if (snap_count > (ULONG_MAX - sizeof(struct ceph_snap_context))
++			 / sizeof(*ondisk))
++		return -EINVAL;
+ 	header->snapc = kmalloc(sizeof(struct ceph_snap_context) +
+-				snap_count * sizeof (*ondisk),
++				snap_count * sizeof(*ondisk),
+ 				gfp_flags);
+ 	if (!header->snapc)
+ 		return -ENOMEM;
+@@ -1592,7 +1594,7 @@ static int rbd_read_header(struct rbd_device *rbd_dev,
+ {
+ 	ssize_t rc;
+ 	struct rbd_image_header_ondisk *dh;
+-	int snap_count = 0;
++	u32 snap_count = 0;
+ 	u64 ver;
+ 	size_t len;
+ 
+-- 
+1.7.5.4
+
