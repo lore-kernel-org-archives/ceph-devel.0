@@ -1,67 +1,46 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Make libcephfs return error when unmounted?
-Date: Wed, 11 Apr 2012 11:12:36 -0700
-Message-ID: <71CC6D8F-361D-4C00-AED1-C0C928CDAB9F@cs.ucsc.edu>
-Mime-Version: 1.0 (Apple Message framework v1257)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Josh Durgin <josh.durgin@dreamhost.com>
+Subject: Re: How to set MDS log size
+Date: Wed, 11 Apr 2012 11:21:19 -0700
+Message-ID: <4F85CB9F.5020201@dreamhost.com>
+References: <loom.20120411T092920-80@post.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:59288 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932761Ab2DKSMg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 14:12:36 -0400
+Received: from mail.hq.newdream.net ([66.33.206.127]:34512 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754346Ab2DKSVX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 14:21:23 -0400
+In-Reply-To: <loom.20120411T092920-80@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Greg Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>
+To: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+On 04/11/2012 12:33 AM, Madhusudhana U wrote:
+> Hi all,
+> In my MDS system of ceph cluster, my entire root partition is full bcz of
+> one big mds log file
+>
+>
+> [root@ceph-node-7 ceph]# du -sh *
+> 0       mds.admin.log
+> 27G     mds.ceph-node-7.log
+>
+> [root@ceph-node-7 ceph]# df -h
+> Filesystem            Size  Used Avail Use% Mounted on
+> /dev/sda2              39G   39G     0 100% /
+> tmpfs                  24G     0   24G   0% /dev/shm
+> /dev/sda1             2.0G   76M  1.8G   5% /boot
+> /dev/sda5              19G  409M   18G   3% /ceph
+>
+> How to set a max size for mds log ? does it auto rotate ? Bcz my root
+> partition is full, will this affect read/write performance in
+> my ceph cluster?
 
-A simple program like this:
+Ceph comes with a logrotate config, which should be in
+/etc/logrotate.d/ceph on debian-based distros. If you changed the
+location of the logs, you'll need to update the logrotate configuration
+to match.
 
-int main(int argc, char **argv)
-{
-        int ret;
-        struct ceph_mount_info *cmount;
-
-        ceph_create(&cmount, NULL);
-        //ceph_mount(cmount, NULL);
-        ceph_chdir(cmount, "/");
-}
-
-will segfault because in the below snippet, cmount->get_client() returns NULL when ceph_mount(..) has not been been called with success.
-
-extern "C" int ceph_chdir (struct ceph_mount_info *cmount, const char *s)                                                                             
-{                                                                                                                                                     
-        return cmount->get_client()->chdir(s);                                                                                                             
-}
-
-It would be very useful to get a uniform error return value rather than the fault. Something like this came to mind:
-
-diff --git a/src/libcephfs.cc b/src/libcephfs.cc
-index b1481e6..4751e8f 100644
---- a/src/libcephfs.cc
-+++ b/src/libcephfs.cc
-@@ -180,6 +180,10 @@ public:
-     return cct;
-   }
- 
-+  bool is_mounted(void) {
-+    return mounted;
-+  }
-+
- private:
-   uint64_t msgr_nonce;
-   bool mounted;
-@@ -282,6 +286,8 @@ extern "C" const char* ceph_getcwd(struct ceph_mount_info *cmount)
- 
- extern "C" int ceph_chdir (struct ceph_mount_info *cmount, const char *s)
- {
-+  if (!cmount->is_mounted())
-+    return -1004;
-   return cmount->get_client()->chdir(s);
- }
-
-Any thoughts on a good way to handle this?
-
--Noah
+Josh
