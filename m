@@ -1,63 +1,102 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
 Subject: Re: Make libcephfs return error when unmounted?
-Date: Wed, 11 Apr 2012 15:43:34 -0700
-Message-ID: <DC088163E5B34011990FE53B1D45EBC0@dreamhost.com>
-References: <71CC6D8F-361D-4C00-AED1-C0C928CDAB9F@cs.ucsc.edu>
- <CAC-hyiGhR-ayeffsT6ZTAS4aozr_Ub_YJQN8L5Hs9zM3zWBS5g@mail.gmail.com>
- <20E3E083-D1C5-4D86-9709-95515538C1BA@cs.ucsc.edu>
- <CE79CB0202FC4C04ACB4EBAC3A0C1232@dreamhost.com>
- <CAC-hyiF=AHeLjF8kOj9rW-G3bU_8oQWjGZdFa6y=CbtUi7yf4Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Date: Wed, 11 Apr 2012 15:47:00 -0700
+Message-ID: <CA6CF0E3-F03F-4F51-B5E9-960A5B2EF15A@cs.ucsc.edu>
+References: <71CC6D8F-361D-4C00-AED1-C0C928CDAB9F@cs.ucsc.edu> <4D23FD899165483BAF0CEEDC9FF75D61@dreamhost.com> <D283FDD9-61D3-4F93-9650-5A27F61C9E60@cs.ucsc.edu> <2A75BD433C7F498CAB63CC83680D90C0@dreamhost.com> <48DC15FE-3A1B-4CB1-8968-A40EF9743F47@cs.ucsc.edu> <029236CD17D048BEA83B9FFF308C2395@dreamhost.com>
+Mime-Version: 1.0 (Apple Message framework v1257)
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:51627 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754868Ab2DKWng (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 18:43:36 -0400
-Received: by mail-ob0-f174.google.com with SMTP id tb18so1828393obb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Apr 2012 15:43:36 -0700 (PDT)
-In-Reply-To: <CAC-hyiF=AHeLjF8kOj9rW-G3bU_8oQWjGZdFa6y=CbtUi7yf4Q@mail.gmail.com>
-Content-Disposition: inline
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:37690 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754114Ab2DKWrB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 18:47:01 -0400
+In-Reply-To: <029236CD17D048BEA83B9FFF308C2395@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, ceph-devel@vger.kernel.org
+To: Greg Farnum <gregory.farnum@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
 
+On Apr 11, 2012, at 3:39 PM, Greg Farnum wrote:
 
-On Wednesday, April 11, 2012 at 3:34 PM, Yehuda Sadeh Weinraub wrote:
+> On Wednesday, April 11, 2012 at 3:18 PM, Noah Watkins wrote:
+>> One could pair the pointer with a magic value in a separate structur=
+e, but even libc doesn't go to these lengths to protect users...
+>=20
+> At that point we'd run a pretty high risk of segfaulting when trying =
+to deref and look at the magic value anyway. Nothing useful we can do h=
+ere, I think. :/
 
-> On Wed, Apr 11, 2012 at 3:13 PM, Greg Farnum
-> <gregory.farnum@dreamhost.com (mailto:gregory.farnum@dreamhost.com)> wrote:
-> > On Wednesday, April 11, 2012 at 2:59 PM, Noah Watkins wrote:
-> > > 
-> > > On Apr 11, 2012, at 11:22 AM, Yehuda Sadeh Weinraub wrote:
-> > > 
-> > > > Also need to check that cmount is initialized. I'd add a helper:
-> > > > 
-> > > > Client *ceph_get_client(struct ceph_mount_info *cmont)
-> > > > {
-> > > > if (cmount && cmount->is_mounted())
-> > > > return cmount->get_client();
-> > > > 
-> > > > return NULL;
-> > > > }
-> > > 
-> > > 
-> > > 
-> > > 
-> > > 
-> > > How useful is checking cmount != NULL here? This defensive check depends on users initializing their cmount pointers to NULL, but the API doesn't do anything to require this initialization assumption.
-> > > 
-> > > - Noah
-> > I had a whole email going until I realized you were just right. So, yeah, that wouldn't do anything since a cmount they forgot to have the API initialize is just going to hold random data. Urgh.
-> 
-> 
-> 
-> There's no destructor either, maybe it's a good time to add one?
-> 
-> Yehuda 
-Actually, there is. The problem is that to the client it's an opaque pointer under many(most?) circumstances, so that it can be used by C users. 
--Greg
+Actually I meant:
 
+struct container {
+  int magic;
+  struct ceph_mount_info *ptr;
+};
+
+ceph_chdir(struct container something);
+
+Then, container.magic should equal INITIALIZED where INITIALIZED is "so=
+me value that is unlikely to ever be present at a memory location where=
+ container is allocated". Lol=85 overkill and not bullet-proof.
+
+> On Wednesday, April 11, 2012 at 3:29 PM, Noah Watkins wrote:
+>=20
+>>=20
+>> On Apr 11, 2012, at 11:32 AM, Greg Farnum wrote:
+>>=20
+>>> On Wednesday, April 11, 2012 at 11:25 AM, Noah Watkins wrote:
+>>>>=20
+>>>> On Apr 11, 2012, at 11:22 AM, Greg Farnum wrote:
+>>>>=20
+>>>>> On Wednesday, April 11, 2012 at 11:12 AM, Noah Watkins wrote:
+>>>>>> Hi all,
+>>>>>>=20
+>>>>>> -Noah =20
+>>>>> I'm not sure where the "-1004" came from,
+>>>>=20
+>>>>=20
+>>>>=20
+>>>> ceph_mount(..) seems to return some random error codes (-1000, 100=
+1) already :)
+>>>=20
+>>> <grumble> legacy undocumented grr </grumble>
+>>> Let's try to use standard error codes where available, and (if we h=
+ave to create our own) document any new ones with user-accessible names=
+ and explanations. I don't know which one is "best" but I see a lot of =
+applicable choices when scanning errno-base et al.
+>>=20
+>>=20
+>>=20
+>> If I'm choosing from from errno-base I might go with
+>>=20
+>> #define ENXIO 6 /* No such device or address */
+>>=20
+>> It's used:
+>>=20
+>> osd/OSD.cc (http://OSD.cc)
+>> void OSD::handle_misdirected_op(PG *pg, OpRequest *op)
+>> =85
+>> reply_op_error(op, -ENXIO)
+>>=20
+>> I'm wondering if you happen to know if this will be propagated back =
+to the client? I'd be nice to have an exclusive not-mounted condition o=
+n the client side.
+>>=20
+>> -Noah =20
+> Unfortunately it is. (I just grepped and see it's returned by both th=
+e MDS and the OSD, but it's not in Objecter et al so it's not filtered =
+out anywhere.)
+>=20
+> ENODEV isn't returned from anything; do you think that makes sense?
+> -Greg
+>=20
+>=20
+>=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
