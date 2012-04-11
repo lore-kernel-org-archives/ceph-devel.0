@@ -1,118 +1,63 @@
-From: Stefan Kleijkers <stefan@unilogicnetworks.net>
-Subject: Re: Can we have mutiple OSD in a single machine
-Date: Wed, 11 Apr 2012 16:33:18 +0200
-Message-ID: <4F85962E.8040405@unilogicnetworks.net>
-References: <loom.20120411T093935-734@post.gmane.org> <4F853882.8010001@unilogicnetworks.net> <loom.20120411T143907-211@post.gmane.org>
+From: Jonathan Dieter <jdieter@lesbg.com>
+Subject: Re: ceph 0.44+ and leveldb
+Date: Wed, 11 Apr 2012 18:04:19 +0300
+Message-ID: <1334156659.2114.25.camel@jdlaptop.lesbg.loc>
+References: <1333689498.19737.11.camel@julia.gcs.org.hu>
+	 <Pine.LNX.4.64.1204060943510.3020@cobra.newdream.net>
+	 <1333741995.2114.15.camel@jdlaptop.lesbg.loc>
+	 <Pine.LNX.4.64.1204092232550.26893@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature";
+	boundary="=-ZjBJCeLdyZkmA3DbEFKi"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-out117.unilogicnetworks.net ([62.133.206.117]:56609 "EHLO
-	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1760151Ab2DKOdU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Apr 2012 10:33:20 -0400
-In-Reply-To: <loom.20120411T143907-211@post.gmane.org>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:35984 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753754Ab2DKPE2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 11:04:28 -0400
+Received: by wibhq7 with SMTP id hq7so988807wib.1
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Apr 2012 08:04:27 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1204092232550.26893@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
-
-Hello,
-
-You will get something like this:
-
-[osd.0]
-         host = ceph-node-1
-         btrfs devs = /dev/sda6
-
-[osd.1]
-         host = ceph-node-1
-         btrfs devs = /dev/sda7
-
-[osd.2]
-         host = ceph-node-1
-         btrfs devs = /dev/sda8
-
-[osd.3]
-         host = ceph-node-1
-         btrfs devs = /dev/sda9
+To: Sage Weil <sage@newdream.net>
+Cc: Laszlo Boszormenyi <gcs@debian.hu>, ceph-devel@vger.kernel.org
 
 
-[osd.4]
-         host = ceph-node-2
-         btrfs devs = /dev/sda6
+--=-ZjBJCeLdyZkmA3DbEFKi
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-[osd.5]
-         host = ceph-node-2
-         btrfs devs = /dev/sda7
+On Mon, 2012-04-09 at 22:36 -0700, Sage Weil wrote:
+> Hi Laszlo, Jonathan,
+>=20
+> configure will now accept a --with-system-leveldb flag that will use the=
+=20
+> installed libleveldb.  For Debian, we just need to update debian/rules an=
+d=20
+> add libsnappy-dev and libleveldb-dev to the build depends.
+>=20
+> Jonathan, I'm not doing anything to the .spec file yet either, since=20
+> presumably leveldb needs to be packaged first.
+>=20
+> The change is in the next and master branches, so it'll be there for=20
+> v0.45 (which I plan to release tomorrow).
 
-etc...
+Thanks much!  I'll see what it will take to get leveldb into Fedora.
 
-But as Tomasz mentions, you get no extra performance, because in most cases the disk is the bottleneck.
+Jonathan
 
-Besides I recommend to not use btrfs devs anymore, they want to deprecate that option. So you only get the "osd data =<directory>" option.
+--=-ZjBJCeLdyZkmA3DbEFKi
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
 
-If you really want to add performance use more disks or use a fast journal device (I use a SSD).
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-Stefan
+iEYEABECAAYFAk+FnXMACgkQH3CnpFdSY1xeDQCeK0YpogZkfQINp3HkddNAh4Dx
++NgAn1GkOcubLZV7TY+MgJOTKocLgMet
+=d4+m
+-----END PGP SIGNATURE-----
 
-
-
-
-On 04/11/2012 02:42 PM, Madhusudhana U wrote:
-> Stefan Kleijkers<stefan<at>  unilogicnetworks.net>  writes:
->
->> Hello,
->>
->> Yes that's no problem. I'm using that configuration for some time now.
->> Just generate a config with multiple OSD clauses with the same node/host.
->>
->> With the newer ceph version mkcephfs is smart enough to detect the osd's
->> on the same node and will generate a crushmap whereby the objects get
->> replicated to different nodes.
->>
->> I didn't see any impact on the performance (if you have enough
->> processing power, because you need more of that).
->>
->> I wanted to use just a few OSD's per node with mdraid, so I could use
->> RAID6. This way I could swap a faulty disk without bringing the node
->> down. But I couldn't get it stable with mdraid.
->>
-> This is how my OSD part in ceph.conf looks like
->
-> [osd.0]
->          host = ceph-node-1
->          btrfs devs = /dev/sda6
->
-> [osd.1]
->          host = ceph-node-2
->          btrfs devs = /dev/sda6
->
-> [osd.2]
->          host = ceph-node-3
->          btrfs devs = /dev/sda6
->
-> [osd.3]
->          host = ceph-node-4
->          btrfs devs = /dev/sda6
->
->
->
-> Can you please help me how I can add multiple OSD in the same machine
-> considering that i have 4 partition created for OSD ?
->
-> I have powerful machines having 6 quad core Intel Xeon with 48G of RAM
->
->
->
->
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+--=-ZjBJCeLdyZkmA3DbEFKi--
 
