@@ -1,109 +1,67 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: [PATCH] Statically binding ports for ceph-osd
-Date: Wed, 11 Apr 2012 10:13:41 -0700
-Message-ID: <85A055772ADC4A0E9C7CC957BA581798@dreamhost.com>
-References: <CAPud5_4Fhjxwb2AjznBNPif8gLUrsJYqtkLX5OzBLMA1JAvw3g@mail.gmail.com>
- <CAPud5_7B8DG4hnVTqBnw7aHuJf8CJnPUjo3ZUfOjDPo89rqvSQ@mail.gmail.com>
- <C1A5CCB0C744475E8F129F38DAE60867@dreamhost.com>
- <CAPud5_7uh6k7=5aT2YH0Lyv23+L=r5Awuw8zdhhdwvhzaWm_qw@mail.gmail.com>
- <Pine.LNX.4.64.1204101651270.18921@cobra.newdream.net>
- <CAPud5_55jJ1tfxD_XVQGJE+5wZe2jhYnwmv3aqXOgT1tbCXOkw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Make libcephfs return error when unmounted?
+Date: Wed, 11 Apr 2012 11:12:36 -0700
+Message-ID: <71CC6D8F-361D-4C00-AED1-C0C928CDAB9F@cs.ucsc.edu>
+Mime-Version: 1.0 (Apple Message framework v1257)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:37700 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932592Ab2DKRNo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 13:13:44 -0400
-Received: by yhmm54 with SMTP id m54so583930yhm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Apr 2012 10:13:44 -0700 (PDT)
-In-Reply-To: <CAPud5_55jJ1tfxD_XVQGJE+5wZe2jhYnwmv3aqXOgT1tbCXOkw@mail.gmail.com>
-Content-Disposition: inline
+Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:59288 "EHLO
+	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932761Ab2DKSMg convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 14:12:36 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Greg Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>
 
-You're unlikely to hit it since you're setting all addresses, but we somehow managed to introduce an error even in that small patch -- you may want to pull in commit cd4a760e9b22047fa5a45d0211ec4130809d725e as well.
--Greg
+Hi all,
 
-On Tuesday, April 10, 2012 at 5:13 PM, Nick Bartos wrote:
-> Good enough for me, I'll just patch it for the short term.
-> 
-> Thanks!
-> 
-> On Tue, Apr 10, 2012 at 4:51 PM, Sage Weil <sage@newdream.net (mailto:sage@newdream.net)> wrote:
-> > On Tue, 10 Apr 2012, Nick Bartos wrote:
-> > > Awesome, thanks so much!  Can I assume this will make it into the next
-> > > ceph stable release?  I'll probably just backport it now before we
-> > > actually start using it, so I don't have to change the config later.
-> > > 
-> > 
-> > 
-> > v0.45 is out today/tomorrow, but it'll be in v0.46.
-> > 
-> > sage
-> > 
-> > 
-> > > 
-> > > On Tue, Apr 10, 2012 at 4:16 PM, Greg Farnum
-> > > <gregory.farnum@dreamhost.com (mailto:gregory.farnum@dreamhost.com)> wrote:
-> > > > Yep, you're absolutely correct. Might as well let users specify the whole address rather than just the port, though ? since your patch won't apply to current upstream due to some heartbeating changes I whipped up another one which adds the "osd heartbeat addr" option. It's pushed it to master in commit 6fbac10dc68e67d1c700421f311cf5e26991d39c, but you'll want to backport (easy) or carry your change until you upgrade (and remember to change the config!). :)
-> > > > Thanks for the report!
-> > > > -Greg
-> > > > 
-> > > > 
-> > > > On Tuesday, April 10, 2012 at 12:56 PM, Nick Bartos wrote:
-> > > > 
-> > > > > After doing some more looking at the code, it appears that this option
-> > > > > is not supported. I created a small patch (attached) which adds the
-> > > > > functionality. Is there any way we could get this, or something like
-> > > > > this, applied upstream? I think this is important functionality for
-> > > > > firewalled environments, and seems like a simple fix since all the
-> > > > > other services (including ones for ceph-mon and ceph-mds) already
-> > > > > allow you to specify a static port.
-> > > > > 
-> > > > > 
-> > > > > On Mon, Apr 9, 2012 at 5:27 PM, Nick Bartos <nick@pistoncloud.com (mailto:nick@pistoncloud.com)> wrote:
-> > > > > > I'm trying to get ceph-osd's listening ports to be set statically for
-> > > > > > firewall reasons. I am able to get 2 of the 3 ports set statically,
-> > > > > > however the 3rd one is still getting set dynamically.
-> > > > > > 
-> > > > > > I am using:
-> > > > > > 
-> > > > > > [osd.48]
-> > > > > > host = 172.16.0.13
-> > > > > > cluster addr = 172.16.0.13:6944
-> > > > > > public addr = 172.16.0.13:6945
-> > > > > > 
-> > > > > > The daemon will successfully bind to 6944 and 6945, but also binds to
-> > > > > > 6800. What additional option do I need? I started looking at the
-> > > > > > code and thought "hb addr = 172.16.0.13:6946" would do it, but
-> > > > > > specifying that option seems to have no effect (or at least does not
-> > > > > > achieve the desired result).
-> > > > > > 
-> > > > > 
-> > > > > 
-> > > > > 
-> > > > > 
-> > > > > Attachments:
-> > > > > - ceph-0.41-osd_hb_port.patch
-> > > > > 
-> > > > 
-> > > > 
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > 
-> > 
-> 
-> 
-> 
-> 
+A simple program like this:
 
+int main(int argc, char **argv)
+{
+        int ret;
+        struct ceph_mount_info *cmount;
 
+        ceph_create(&cmount, NULL);
+        //ceph_mount(cmount, NULL);
+        ceph_chdir(cmount, "/");
+}
 
+will segfault because in the below snippet, cmount->get_client() returns NULL when ceph_mount(..) has not been been called with success.
+
+extern "C" int ceph_chdir (struct ceph_mount_info *cmount, const char *s)                                                                             
+{                                                                                                                                                     
+        return cmount->get_client()->chdir(s);                                                                                                             
+}
+
+It would be very useful to get a uniform error return value rather than the fault. Something like this came to mind:
+
+diff --git a/src/libcephfs.cc b/src/libcephfs.cc
+index b1481e6..4751e8f 100644
+--- a/src/libcephfs.cc
++++ b/src/libcephfs.cc
+@@ -180,6 +180,10 @@ public:
+     return cct;
+   }
+ 
++  bool is_mounted(void) {
++    return mounted;
++  }
++
+ private:
+   uint64_t msgr_nonce;
+   bool mounted;
+@@ -282,6 +286,8 @@ extern "C" const char* ceph_getcwd(struct ceph_mount_info *cmount)
+ 
+ extern "C" int ceph_chdir (struct ceph_mount_info *cmount, const char *s)
+ {
++  if (!cmount->is_mounted())
++    return -1004;
+   return cmount->get_client()->chdir(s);
+ }
+
+Any thoughts on a good way to handle this?
+
+-Noah
