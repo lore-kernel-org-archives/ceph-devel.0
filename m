@@ -1,82 +1,109 @@
-From: Alex Elder <elder@dreamhost.com>
-Subject: Interesting Error
-Date: Wed, 11 Apr 2012 11:07:30 -0500
-Message-ID: <4F85AC42.5050601@dreamhost.com>
+From: Greg Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: [PATCH] Statically binding ports for ceph-osd
+Date: Wed, 11 Apr 2012 10:13:41 -0700
+Message-ID: <85A055772ADC4A0E9C7CC957BA581798@dreamhost.com>
+References: <CAPud5_4Fhjxwb2AjznBNPif8gLUrsJYqtkLX5OzBLMA1JAvw3g@mail.gmail.com>
+ <CAPud5_7B8DG4hnVTqBnw7aHuJf8CJnPUjo3ZUfOjDPo89rqvSQ@mail.gmail.com>
+ <C1A5CCB0C744475E8F129F38DAE60867@dreamhost.com>
+ <CAPud5_7uh6k7=5aT2YH0Lyv23+L=r5Awuw8zdhhdwvhzaWm_qw@mail.gmail.com>
+ <Pine.LNX.4.64.1204101651270.18921@cobra.newdream.net>
+ <CAPud5_55jJ1tfxD_XVQGJE+5wZe2jhYnwmv3aqXOgT1tbCXOkw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:39745 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759793Ab2DKQH0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 12:07:26 -0400
-Received: from mail.hq.newdream.net (localhost [127.0.0.1])
-	by mail.hq.newdream.net (Postfix) with ESMTP id 2E02324478
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Apr 2012 09:10:01 -0700 (PDT)
-Received: from [172.22.22.4] (c-71-195-31-37.hsd1.mn.comcast.net [71.195.31.37])
-	by mail.hq.newdream.net (Postfix) with ESMTPSA id D330D24476
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Apr 2012 09:10:00 -0700 (PDT)
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:37700 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932592Ab2DKRNo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 13:13:44 -0400
+Received: by yhmm54 with SMTP id m54so583930yhm.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Apr 2012 10:13:44 -0700 (PDT)
+In-Reply-To: <CAPud5_55jJ1tfxD_XVQGJE+5wZe2jhYnwmv3aqXOgT1tbCXOkw@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Nick Bartos <nick@pistoncloud.com>
+Cc: ceph-devel@vger.kernel.org
 
-I'm running suites/iozone.sh on a 3-node ceph cluster with
-each running kernel ceph-client/wip-layout-helpers.
+You're unlikely to hit it since you're setting all addresses, but we somehow managed to introduce an error even in that small patch -- you may want to pull in commit cd4a760e9b22047fa5a45d0211ec4130809d725e as well.
+-Greg
 
-I've hit a consistent error twice now, but it seems to be
-hitting it when running with particular arguments.
+On Tuesday, April 10, 2012 at 5:13 PM, Nick Bartos wrote:
+> Good enough for me, I'll just patch it for the short term.
+> 
+> Thanks!
+> 
+> On Tue, Apr 10, 2012 at 4:51 PM, Sage Weil <sage@newdream.net (mailto:sage@newdream.net)> wrote:
+> > On Tue, 10 Apr 2012, Nick Bartos wrote:
+> > > Awesome, thanks so much!  Can I assume this will make it into the next
+> > > ceph stable release?  I'll probably just backport it now before we
+> > > actually start using it, so I don't have to change the config later.
+> > > 
+> > 
+> > 
+> > v0.45 is out today/tomorrow, but it'll be in v0.46.
+> > 
+> > sage
+> > 
+> > 
+> > > 
+> > > On Tue, Apr 10, 2012 at 4:16 PM, Greg Farnum
+> > > <gregory.farnum@dreamhost.com (mailto:gregory.farnum@dreamhost.com)> wrote:
+> > > > Yep, you're absolutely correct. Might as well let users specify the whole address rather than just the port, though ? since your patch won't apply to current upstream due to some heartbeating changes I whipped up another one which adds the "osd heartbeat addr" option. It's pushed it to master in commit 6fbac10dc68e67d1c700421f311cf5e26991d39c, but you'll want to backport (easy) or carry your change until you upgrade (and remember to change the config!). :)
+> > > > Thanks for the report!
+> > > > -Greg
+> > > > 
+> > > > 
+> > > > On Tuesday, April 10, 2012 at 12:56 PM, Nick Bartos wrote:
+> > > > 
+> > > > > After doing some more looking at the code, it appears that this option
+> > > > > is not supported. I created a small patch (attached) which adds the
+> > > > > functionality. Is there any way we could get this, or something like
+> > > > > this, applied upstream? I think this is important functionality for
+> > > > > firewalled environments, and seems like a simple fix since all the
+> > > > > other services (including ones for ceph-mon and ceph-mds) already
+> > > > > allow you to specify a static port.
+> > > > > 
+> > > > > 
+> > > > > On Mon, Apr 9, 2012 at 5:27 PM, Nick Bartos <nick@pistoncloud.com (mailto:nick@pistoncloud.com)> wrote:
+> > > > > > I'm trying to get ceph-osd's listening ports to be set statically for
+> > > > > > firewall reasons. I am able to get 2 of the 3 ports set statically,
+> > > > > > however the 3rd one is still getting set dynamically.
+> > > > > > 
+> > > > > > I am using:
+> > > > > > 
+> > > > > > [osd.48]
+> > > > > > host = 172.16.0.13
+> > > > > > cluster addr = 172.16.0.13:6944
+> > > > > > public addr = 172.16.0.13:6945
+> > > > > > 
+> > > > > > The daemon will successfully bind to 6944 and 6945, but also binds to
+> > > > > > 6800. What additional option do I need? I started looking at the
+> > > > > > code and thought "hb addr = 172.16.0.13:6946" would do it, but
+> > > > > > specifying that option seems to have no effect (or at least does not
+> > > > > > achieve the desired result).
+> > > > > > 
+> > > > > 
+> > > > > 
+> > > > > 
+> > > > > 
+> > > > > Attachments:
+> > > > > - ceph-0.41-osd_hb_port.patch
+> > > > > 
+> > > > 
+> > > > 
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > 
+> > 
+> 
+> 
+> 
+> 
 
-Here are the three commands in that workunit:
-     iozone -c -e -s 1024M -r 16K -t 1 -F f1 -i 0 -i 1
-     iozone -c -e -s 1024M -r 1M -t 1 -F f2 -i 0 -i 1
-     iozone -c -e -s 10240M -r 1M -t 1 -F f3 -i 0 -i 1
-
-The first two run to completion without a problem.  The third
-one runs for a while and then reports something like what's
-below, and then hangs the test (system is still operational).
-I see this in the syslog, but I'm not sure its timing aligned
-with the failure:
-     [ 3925.501128] libceph: osd1 10.214.133.32:6800 socket closed
-
-Since it shows up only with the 10MB file size and 1MB record
-size I am wondering if this combination hits some sort of
-boundary that would help me understand what's wrong.  Anyone
-have any ideas?
-
-Here is how my three nodes are configured in the teuthology file:
-     - [mon.a, mon.c, osd.0]
-     - [mon.b, mds.a, osd.1]
-     - [client.0]
-
-Thanks.
-
-					-Alex
 
 
-         Run began: Wed Apr 11 08:36:52 2012
-
-         Include close in write timing
-         Include fsync in write timing
-         File size set to 10485760 KB
-         Record Size 1024 KB
-         Command line used: iozone -c -e -s 10240M -r 1M -t 1 -F f3 -i 0 
--i 1
-         Output is in Kbytes/sec
-         Time Resolution = 0.000001 seconds.
-         Processor cache size set to 1024 Kbytes.
-         Processor cache line size set to 32 bytes.
-         File stride size set to 17 * record size.
-         Throughput test with 1 process
-         Each process writes a 10485760 Kbyte file in 1024 Kbyte records
-
-Error writing block 9408, fd= 3
-
-         Children see throughput for  1 initial writers  =       0.00 KB/sec
-         Parent sees throughput for  1 initial writers   =       0.00 KB/sec
-         Min throughput per process      =       0.00 KB/sec
-         Max throughput per process      =       0.00 KB/sec
-         Avg throughput per process      =       0.00 KB/sec
-         Min xfer                        =       0.00 KB
-
-Child 0
-f3: No such file or directory
