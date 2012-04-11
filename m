@@ -1,42 +1,32 @@
-From: Stefan Kleijkers <stefan@unilogicnetworks.net>
+From: Tomasz Paszkowski <ss7pro@gmail.com>
 Subject: Re: Can we have mutiple OSD in a single machine
-Date: Wed, 11 Apr 2012 09:53:38 +0200
-Message-ID: <4F853882.8010001@unilogicnetworks.net>
+Date: Wed, 11 Apr 2012 11:45:09 +0200
+Message-ID: <6626464112406899193@unknownmsgid>
 References: <loom.20120411T093935-734@post.gmane.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0 (iPhone Mail 8A293)
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-out117.unilogicnetworks.net ([62.133.206.117]:52450 "EHLO
-	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753619Ab2DKHxk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 11 Apr 2012 03:53:40 -0400
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:59700 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754255Ab2DKJpN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 05:45:13 -0400
+Received: by ghrr11 with SMTP id r11so314900ghr.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Apr 2012 02:45:12 -0700 (PDT)
 In-Reply-To: <loom.20120411T093935-734@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hello,
+Hi,
 
-Yes that's no problem. I'm using that configuration for some time now. 
-Just generate a config with multiple OSD clauses with the same node/host.
+Please correct me if I'am wrong. You would like to partition single dri=
+ve ?
 
-With the newer ceph version mkcephfs is smart enough to detect the osd's 
-on the same node and will generate a crushmap whereby the objects get 
-replicated to different nodes.
 
-I didn't see any impact on the performance (if you have enough 
-processing power, because you need more of that).
+Dnia 11-04-2012 o godz. 09:42 Madhusudhana U
+<madhusudhana.u.acharya@gmail.com> napisa=C5=82(a):
 
-I wanted to use just a few OSD's per node with mdraid, so I could use 
-RAID6. This way I could swap a faulty disk without bringing the node 
-down. But I couldn't get it stable with mdraid.
-
-Stefan
-
-On 04/11/2012 09:42 AM, Madhusudhana U wrote:
 > Hi all,
 > I have a system with 2T SATA drive and I want to add it to my ceph
 > cluster. I was thinking instead of creating one large OSD, can't
@@ -47,8 +37,12 @@ On 04/11/2012 09:42 AM, Madhusudhana U wrote:
 > __Madhusudhana
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
