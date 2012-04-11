@@ -1,102 +1,83 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: Make libcephfs return error when unmounted?
-Date: Wed, 11 Apr 2012 15:47:00 -0700
-Message-ID: <CA6CF0E3-F03F-4F51-B5E9-960A5B2EF15A@cs.ucsc.edu>
-References: <71CC6D8F-361D-4C00-AED1-C0C928CDAB9F@cs.ucsc.edu> <4D23FD899165483BAF0CEEDC9FF75D61@dreamhost.com> <D283FDD9-61D3-4F93-9650-5A27F61C9E60@cs.ucsc.edu> <2A75BD433C7F498CAB63CC83680D90C0@dreamhost.com> <48DC15FE-3A1B-4CB1-8968-A40EF9743F47@cs.ucsc.edu> <029236CD17D048BEA83B9FFF308C2395@dreamhost.com>
-Mime-Version: 1.0 (Apple Message framework v1257)
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Danny Kukawka <danny.kukawka@bisect.de>
+Subject: Kernel crashes with RBD
+Date: Thu, 12 Apr 2012 00:30:49 +0200
+Message-ID: <4F860619.5040802@bisect.de>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig077AE7730B68A3172ED91855"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:37690 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754114Ab2DKWrB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Apr 2012 18:47:01 -0400
-In-Reply-To: <029236CD17D048BEA83B9FFF308C2395@dreamhost.com>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:58100 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1759447Ab2DKWxY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 Apr 2012 18:53:24 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <gregory.farnum@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig077AE7730B68A3172ED91855
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+we are currently testing CEPH with RBD on a cluster with 1GBit and
+10Gbit interfaces. While we see no kernel crashes with RBD if the
+cluster runs on the 1GBit interfaces, we see very frequent kernel
+crashes with the 10Gbit network while running tests with e.g. fio
+against the RBDs.
+
+I've tested it with kernel v3.0 and also 3.3.0 (with the patches from
+the 'for-linus' branch from ceph-client.git at git.kernel.org).
+
+With more client machines running tests the crashes occur even much
+faster. The issue is fully reproducible here.
+
+Has anyone seen similar problems? See the backtrace below.
+
+Regards
+
+Danny
+
+PID: 10902  TASK: ffff88032a9a2080  CPU: 0   COMMAND: "kworker/0:0"
+ #0 [ffff8803235fd950] machine_kexec at ffffffff810265ee
+ #1 [ffff8803235fd9a0] crash_kexec at ffffffff810a3bda
+ #2 [ffff8803235fda70] oops_end at ffffffff81444688
+ #3 [ffff8803235fda90] __bad_area_nosemaphore at ffffffff81032a35
+ #4 [ffff8803235fdb50] do_page_fault at ffffffff81446d3e
+ #5 [ffff8803235fdc50] page_fault at ffffffff81443865
+    [exception RIP: read_partial_message+816]
+    RIP: ffffffffa041e500  RSP: ffff8803235fdd00  RFLAGS: 00010246
+    RAX: 0000000000000000  RBX: 00000000000009d7  RCX: 0000000000008000
+    RDX: 0000000000000000  RSI: 00000000000009d7  RDI: ffffffff813c8d78
+    RBP: ffff880328827030   R8: 00000000000009d7   R9: 0000000000004000
+    R10: 0000000000000000  R11: ffffffff81205800  R12: 0000000000000000
+    R13: 0000000000000069  R14: ffff88032a9bc780  R15: 0000000000000000
+    ORIG_RAX: ffffffffffffffff  CS: 0010  SS: 0018
+ #6 [ffff8803235fdd38] thread_return at ffffffff81440e82
+ #7 [ffff8803235fdd78] try_read at ffffffffa041ed58 [libceph]
+ #8 [ffff8803235fddf8] con_work at ffffffffa041fb2e [libceph]
+ #9 [ffff8803235fde28] process_one_work at ffffffff8107487c
+#10 [ffff8803235fde78] worker_thread at ffffffff8107740a
+#11 [ffff8803235fdee8] kthread at ffffffff8107b736
+#12 [ffff8803235fdf48] kernel_thread_helper at ffffffff8144c144
 
 
-On Apr 11, 2012, at 3:39 PM, Greg Farnum wrote:
+--------------enig077AE7730B68A3172ED91855
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-> On Wednesday, April 11, 2012 at 3:18 PM, Noah Watkins wrote:
->> One could pair the pointer with a magic value in a separate structur=
-e, but even libc doesn't go to these lengths to protect users...
->=20
-> At that point we'd run a pretty high risk of segfaulting when trying =
-to deref and look at the magic value anyway. Nothing useful we can do h=
-ere, I think. :/
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.18 (GNU/Linux)
 
-Actually I meant:
+iJwEAQECAAYFAk+GBigACgkQ9DHLX79LmTKdXgQAklecH/LsSaFDBlaZa/EKd7ON
+J4YAjCaJ+2bOmngSqO34OuperO/yMygseVbrN/Z38W9a8WsLFFNyZoLPyNxUzrxq
+4Pa+0q6/1xZy3VGuDQL/EMbV2qXFWFTKhxE/O+C3qh8HvWRc8v4cad7xZsG7WX3K
+WFSooT0Be3ltIY0ivVg=
+=S7AD
+-----END PGP SIGNATURE-----
 
-struct container {
-  int magic;
-  struct ceph_mount_info *ptr;
-};
-
-ceph_chdir(struct container something);
-
-Then, container.magic should equal INITIALIZED where INITIALIZED is "so=
-me value that is unlikely to ever be present at a memory location where=
- container is allocated". Lol=85 overkill and not bullet-proof.
-
-> On Wednesday, April 11, 2012 at 3:29 PM, Noah Watkins wrote:
->=20
->>=20
->> On Apr 11, 2012, at 11:32 AM, Greg Farnum wrote:
->>=20
->>> On Wednesday, April 11, 2012 at 11:25 AM, Noah Watkins wrote:
->>>>=20
->>>> On Apr 11, 2012, at 11:22 AM, Greg Farnum wrote:
->>>>=20
->>>>> On Wednesday, April 11, 2012 at 11:12 AM, Noah Watkins wrote:
->>>>>> Hi all,
->>>>>>=20
->>>>>> -Noah =20
->>>>> I'm not sure where the "-1004" came from,
->>>>=20
->>>>=20
->>>>=20
->>>> ceph_mount(..) seems to return some random error codes (-1000, 100=
-1) already :)
->>>=20
->>> <grumble> legacy undocumented grr </grumble>
->>> Let's try to use standard error codes where available, and (if we h=
-ave to create our own) document any new ones with user-accessible names=
- and explanations. I don't know which one is "best" but I see a lot of =
-applicable choices when scanning errno-base et al.
->>=20
->>=20
->>=20
->> If I'm choosing from from errno-base I might go with
->>=20
->> #define ENXIO 6 /* No such device or address */
->>=20
->> It's used:
->>=20
->> osd/OSD.cc (http://OSD.cc)
->> void OSD::handle_misdirected_op(PG *pg, OpRequest *op)
->> =85
->> reply_op_error(op, -ENXIO)
->>=20
->> I'm wondering if you happen to know if this will be propagated back =
-to the client? I'd be nice to have an exclusive not-mounted condition o=
-n the client side.
->>=20
->> -Noah =20
-> Unfortunately it is. (I just grepped and see it's returned by both th=
-e MDS and the OSD, but it's not in Objecter et al so it's not filtered =
-out anywhere.)
->=20
-> ENODEV isn't returned from anything; do you think that makes sense?
-> -Greg
->=20
->=20
->=20
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--------------enig077AE7730B68A3172ED91855--
