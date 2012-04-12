@@ -1,49 +1,79 @@
-From: Damien Churchill <damoxc@gmail.com>
-Subject: Re: pgs stuck inactive
-Date: Thu, 12 Apr 2012 16:29:43 +0100
-Message-ID: <CAFtEh-eEH5Hon5o2hXiEXA6FewB05Uj8=fR4L3HtkLw9zTxccA@mail.gmail.com>
-References: <CAFtEh-dcEKQ2AzcVmu1G5i-zFHgim5SLZvEmNtDsvkHt+JnzLA@mail.gmail.com>
-	<CACLRD_2yhpoUGoivHQpp-LyO82MdTz5SpD0MN5b_vEoqSGBzgg@mail.gmail.com>
-	<CAFtEh-dsM_G5GCyqnnBVfAc7GmKZLZcLzkQzrCAGjDgyLC3CGg@mail.gmail.com>
-	<CACLRD_1NiFHjx_PZxokVBkADG0z+A61Sj57NJFyYF_vM=ZKSbA@mail.gmail.com>
-	<CAFtEh-dLfUYpSbUJamReXB2e1JHm0b55HPs-h1wjCXym-cmHyA@mail.gmail.com>
-	<CACLRD_3ccxvLiHxEHMBK+Q+2Ag41a+M07NofU9+Z8Fr06vvvfA@mail.gmail.com>
-	<CAFtEh-evVi0q8CZmbPJX_WaCD_y2E=RBf6nNu13106E8hopk5A@mail.gmail.com>
-	<CACLRD_3hqoOqbZWnyft3B+pEaPG=pmiDt5HeQASUC=OPS-uA7Q@mail.gmail.com>
-	<CAFtEh-dnR0zu=ct-gG0L+76BTYHVFimjFKNhHjnDNZWA=Scs1g@mail.gmail.com>
-	<CACLRD_1pf3ezZKAvEuub5PN1=cMESvnuTOVh_45NYc4T5hcPhA@mail.gmail.com>
-	<CAFtEh-cx2by6yG_xiQbq5e2fbViOWyHoaOLFPBCZgX7x-7gwFA@mail.gmail.com>
-	<CACLRD_0UrwKJuELiZqrL7Q_5AjB1EvOd5gqLRzrxw_7AFMcjxg@mail.gmail.com>
-	<CAFtEh-fwt9BwZ7NwZaJVnwq3hgzvkrb1XvKT0uF81vePRcu7oA@mail.gmail.com>
-	<CACLRD_2hHbKFVjSDFHG-z=Sy5wgHDHz6=NWx9mEw51PMLVF7Ng@mail.gmail.com>
-	<CAFtEh-c7VP1n3+9iDzXsnt4YjzVx7GiYu4BLfL4ssOa6Rq1rPA@mail.gmail.com>
-	<CACLRD_11ahz6h1yKhC7CVAxM8ha-BkOVztb3zBkhyo4Kd4t6aQ@mail.gmail.com>
-	<3154FE08568349E9B9EB0EBBCE4EDFB2@dreamhost.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Bernard Grymonpon <bernard@openminds.be>
+Subject: Re: defaults paths #2
+Date: Thu, 12 Apr 2012 17:49:54 +0200
+Message-ID: <5C3620C3-51B5-44D5-986C-266ADE715F9B@openminds.be>
+References: <CAORUGqBs3=_sVnYB+vdamAW3S7ShqY5Gz1hGiY4ozUd7enTn3w@mail.gmail.com> <9B9005B1-9397-4171-8726-A52903B8B8F1@openminds.be> <CAORUGqD_Oe2F-yTS87h5P8oB=OrUTcuZo7BsWo3bqy66VJ1YfA@mail.gmail.com> <720D7ADB-C3E4-4C5E-B308-216D941FDC83@openminds.be> <CAORUGqD06LYcg3-y5BNNt724cvxUm1pkarDx_LoWoPSzx1=f1g@mail.gmail.com> <Pine.LNX.4.64.1204091115310.21531@cobra.newdream.net> <CAORUGqC2M-d4wCHbboMCsozsqQsk5zKhv_fotWZ4hq9MhTb_0A@mail.gmail.com>
+Mime-Version: 1.0 (Apple Message framework v1084)
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:40802 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934343Ab2DLP3n convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Apr 2012 11:29:43 -0400
-Received: by yhmm54 with SMTP id m54so1124505yhm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Apr 2012 08:29:43 -0700 (PDT)
-In-Reply-To: <3154FE08568349E9B9EB0EBBCE4EDFB2@dreamhost.com>
+Received: from november.openminds.be ([195.47.215.47]:42749 "EHLO
+	november.openminds.be" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934032Ab2DLPt4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Apr 2012 11:49:56 -0400
+In-Reply-To: <CAORUGqC2M-d4wCHbboMCsozsqQsk5zKhv_fotWZ4hq9MhTb_0A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <gregory.farnum@dreamhost.com>
-Cc: Samuel Just <sam.just@dreamhost.com>, ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 11 April 2012 00:40, Greg Farnum <gregory.farnum@dreamhost.com> wrote:
->
-> A quick glance through these shows that all the pg_temp requests aren't actually requesting any changes from the monitor. It's either a very serious mon bug which happened a while ago (unlikely, given the restarts and ongoing map changes, etc), or an OSD bug. I think we want logs from both osd.0 and osd.3 at the same time, from what I'm seeing. :)
-> -Greg
->
 
-Just to make sure all bases are covered:
+On 09 Apr 2012, at 21:22, Tommi Virtanen wrote:
 
-http://damoxc.net/ceph/ceph-logs-20120412142537.tar.gz
+> On Mon, Apr 9, 2012 at 11:16, Sage Weil <sage@newdream.net> wrote:
+>> One thing we need to keep in mind here is that the individual disks are
+>> placed in the CRUSH hierarchy based on the host/rack/etc location in the
+>> datacenter.  Moving disk around arbitrarily will break the placement
+>> constraints if that position isn't also changed.
+> 
+> Yeah, the location will have to be updated. I tend to think disks
+> *will* move, and it's better to cope with it than to think it won't
+> happen. All you need is a simple power supply/mobo/raid
+> controller/nic/etc failure, if there's any free slots anywhere it's
+> probably better to plug the disks in there than waiting for a
+> replacement part. I'm working under the assumption that it's better to
+> "just bring them up" rather than having an extended osd outage or
+> claiming the osd as lost.
 
-This contains all 5 osd logs and all 3 monitor logs, everything
-restarted with debug logging prior to capturing the logs.
+I've updated my recipes to support disk moving now (and multi-mon clusters, btw), and have moved from
+
+/var/lib/ceph/osd/$clustername-$id 
+
+to
+
+/var/lib/ceph/osd/$clustername-$uuid
+
+It just isn't pretty to mount a disk in a temp place, check the "whoami" file, and then umount and remount everything on a certain ID. It is all automatically handled, and I think this feels okay.
+
+The disks are detected by the label, which I made "$cluster.ceph". If such a label is detected, the disk is mounted, the whoami file is read, and the OSD is started with the correct parameters. If the whoami file is not present, the OSD is initialized and added to the mons...
+
+Input would be much appreciated - both using chef (one node at a time), and rather "building" a cluster instead of initializing a full cluster at once, makes the setup a bit strange sometimes (I don't know how the amount of pg's is determined, or can be suggested, when creating a cluster).
+
+> Updating the new location for the osd could be something we do even at
+> every osd start -- it's a nop if the location is the same as the old
+> one. And we can say the host knows where it is, and that information
+> is available in /etc or /var/lib/ceph.
+
+I also got to the point where I want to update the location of an OSD when bringing a OSD online.
+
+Adding a new (bare) disk (and OSD) is easy: 
+
+ceph osd crush add 3 osd.3 1 pool=default host=2 rack=1
+
+(with host=2 and rack=1 coming from the node itself, somehow - it would be easy if we could use alfanumerical hostnames in those parameters...)
+
+If there would be a 
+
+ceph osd crush update 3 osd.3 pool=default host=3 rack=2
+
+command, that would solve the whole location problem.
+
+Rgds,
+Bernard
+
+> 
+> I'll come back to this once it's a little bit more concrete; I'd
+> rather not make speculative changes, until I can actual trigger the
+> behavior in a test bench.
+
+
