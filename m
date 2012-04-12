@@ -1,71 +1,48 @@
-From: Stefan Kleijkers <stefan@unilogicnetworks.net>
-Subject: Re: Partition for OSD journal
-Date: Thu, 12 Apr 2012 20:12:59 +0200
-Message-ID: <4F871B2B.2060006@unilogicnetworks.net>
-References: <loom.20120412T181758-343@post.gmane.org>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: [PATCH] Statically binding ports for ceph-osd
+Date: Thu, 12 Apr 2012 11:42:51 -0700
+Message-ID: <CAORUGqB-onNKsFt7-ra9u4LmwEFXpZRdARv3-axaW=ZeKooVDQ@mail.gmail.com>
+References: <CAPud5_4Fhjxwb2AjznBNPif8gLUrsJYqtkLX5OzBLMA1JAvw3g@mail.gmail.com>
+ <CAPud5_7B8DG4hnVTqBnw7aHuJf8CJnPUjo3ZUfOjDPo89rqvSQ@mail.gmail.com> <C1A5CCB0C744475E8F129F38DAE60867@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-out117.unilogicnetworks.net ([62.133.206.117]:54568 "EHLO
-	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1757926Ab2DLSNE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 12 Apr 2012 14:13:04 -0400
-In-Reply-To: <loom.20120412T181758-343@post.gmane.org>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:56379 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752808Ab2DLSnN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Apr 2012 14:43:13 -0400
+Received: by vbbff1 with SMTP id ff1so1578975vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Apr 2012 11:43:11 -0700 (PDT)
+In-Reply-To: <C1A5CCB0C744475E8F129F38DAE60867@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Greg Farnum <gregory.farnum@dreamhost.com>
+Cc: Nick Bartos <nick@pistoncloud.com>, ceph-devel@vger.kernel.org
 
-Hello,
+On Tue, Apr 10, 2012 at 16:16, Greg Farnum <gregory.farnum@dreamhost.co=
+m> wrote:
+> Yep, you're absolutely correct. Might as well let users specify the w=
+hole address rather than just the port, though =E2=80=94 since your pat=
+ch won't apply to current upstream due to some heartbeating changes I w=
+hipped up another one which adds the "osd heartbeat addr" option. It's =
+pushed it to master in commit 6fbac10dc68e67d1c700421f311cf5e26991d39c,=
+ but you'll want to backport (easy) or carry your change until you upgr=
+ade (and remember to change the config!). :)
 
-Just partition the disk, like sda1, sda2, etc and add the following to 
-your config:
-[osd.0]
-             osd journal = /dev/sda1
+We're trying to push the "public addr" and "cluster addr" to have a
+"public network" and "cluster network" alternatives that don't require
+per-node IP address changes.. Adding more "addr" variants without
+"network" ones is probably not the most awesome idea.
 
-[osd.1]
-             osd journal = /dev/sda2
-
-etc...
-
-So you can point the "osd journal" to a file or to a device.
-
-The negative side to this is you have to partition the disk and have to 
-add a different option for every osd. You could fix this with udev and 
-make a logical naming scheme for the device like:
-/dev/osd.0.journal
-/dev/osd.1.journal
-etc
-
-That way you can add to your config:
-[osd]
-             osd journal = /dev/osd.$id.journal
-
-Stefan
-
-On 04/12/2012 06:22 PM, Madhusudhana U wrote:
-> Hi all,
-> I read in the wiki that, to have a better performance compared to file
-> under OSD data dir, we can have a seperate partition for OSD journal.
-> can someone suggest me, how i can mention this in ceph.conf file ?
-> I have below lines in my ceph.conf file. Is this means I already have
-> a partition for OSD journal
->
-> [osd]
->          osd data = /data/osd.$id
->          keyring = /etc/ceph/keyring.$name
->          osd journal = /journal/osd.$id.journal
->
-> /journal is a separate partition of 20G.
->
-> Thanks
-> __M
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+Now, because this is about port allocation, it runs into problems
+trying to run multiple OSDs per machine without per-osd [osd.42]
+sections, so I guess that's not as relevant here. I don't have a good
+suggestion as to what to do for port allocation, apart from ensuring
+that the port range being used is configurable (or even easily
+discoverable).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
