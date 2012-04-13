@@ -1,82 +1,61 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Re: Problem after upgrade to 0.45
-Date: Fri, 13 Apr 2012 14:09:13 +0200
-Message-ID: <CAMwB3ThsOt=fLHn54GpD4h7DmnMskAFJxm58Kp40ANKfLOFV9Q@mail.gmail.com>
-References: <CAMwB3TidM-Jebn0Hjr0sM8a-F0jpaByRAH0tLha27CAhV7pPqw@mail.gmail.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Re: Questions about hash functions of CRUSH
+Date: Fri, 13 Apr 2012 08:55:54 -0700
+Message-ID: <CAORUGqCZ8U5aEHNP+--ZVm5FS2A-Jp9cV-DU9Qr0QMHzVpVSrg@mail.gmail.com>
+References: <CALwGbPJPxT+q0ThYQ0H+Th4j=J0PE=q+byCf4YTw=THtCdkqpQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:61790 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752510Ab2DMMJO convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Apr 2012 08:09:14 -0400
-Received: by wibhj6 with SMTP id hj6so6449193wib.1
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Apr 2012 05:09:13 -0700 (PDT)
-In-Reply-To: <CAMwB3TidM-Jebn0Hjr0sM8a-F0jpaByRAH0tLha27CAhV7pPqw@mail.gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:51523 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752417Ab2DMP4P convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Apr 2012 11:56:15 -0400
+Received: by vbbff1 with SMTP id ff1so2165058vbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Apr 2012 08:56:14 -0700 (PDT)
+In-Reply-To: <CALwGbPJPxT+q0ThYQ0H+Th4j=J0PE=q+byCf4YTw=THtCdkqpQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?UTF-8?B?6IOh54Ca5qOu?= <softrank.net@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-More info, that after i use filestore_xattr_use_omap =3D 1 in conf, and
-ceph -w is like that in attachment in mail before.
-
-I have downgrade to 0.44, and everything is ok now, but why this happen=
- ??
-
-2012/4/13 S=B3awomir Skowron <szibis@gmail.com>:
-> 2012-04-13 11:03:20.017166 7f63d62b47a0 -- 0.0.0.0:6848/9291
-> accepter.bind my_inst.addr is 0.0.0.0:6848/9291 need_addr=3D1
-> 2012-04-13 11:03:20.018576 7f63d62b47a0 filestore(/vol0/data/osd.1)
-> basedir /vol0/data/osd.1 journal /vol0/data/osd.1/journal
-> 2012-04-13 11:03:20.027918 7f63d62b47a0 filestore(/vol0/data/osd.1)
-> limited size xattrs -- enable filestore_xattr_use_omap
-> 2012-04-13 11:03:20.028014 7f63d62b47a0 =A0** ERROR: error converting
-> store /vol0/data/osd.1: (95) Operation not supported
-> 2012-04-13 11:07:08.904974 7f35299ed7a0 ceph version 0.45
-> (commit:0aea1cb1df5c3e5ab783ca6f2ed7649823b613c5), process ceph-osd,
-> pid 20052
-> 2012-04-13 11:07:08.905164 7f35299ed7a0 -- 0.0.0.0:6800/20052
-> accepter.bind my_inst.addr is 0.0.0.0:6800/20052 need_addr=3D1
-> 2012-04-13 11:07:08.905182 7f35299ed7a0 -- 0.0.0.0:6801/20052
-> accepter.bind my_inst.addr is 0.0.0.0:6801/20052 need_addr=3D1
-> 2012-04-13 11:07:08.905197 7f35299ed7a0 -- 0.0.0.0:6802/20052
-> accepter.bind my_inst.addr is 0.0.0.0:6802/20052 need_addr=3D1
-> 2012-04-13 11:07:08.906418 7f35299ed7a0 filestore(/vol0/data/osd.1)
-> basedir /vol0/data/osd.1 journal /vol0/data/osd.1/journal
-> 2012-04-13 11:07:08.906565 7f35299ed7a0 filestore(/vol0/data/osd.1)
-> limited size xattrs -- enable filestore_xattr_use_omap
-> 2012-04-13 11:07:08.906644 7f35299ed7a0 =A0** ERROR: error converting
-> store /vol0/data/osd.1: (95) Operation not supported
-> 2012-04-13 11:09:18.894624 7fd2a60157a0 ceph version 0.45
-> (commit:0aea1cb1df5c3e5ab783ca6f2ed7649823b613c5), process ceph-osd,
-> pid 31803
-> 2012-04-13 11:09:18.894859 7fd2a60157a0 -- 0.0.0.0:6800/31803
-> accepter.bind my_inst.addr is 0.0.0.0:6800/31803 need_addr=3D1
-> 2012-04-13 11:09:18.894884 7fd2a60157a0 -- 0.0.0.0:6801/31803
-> accepter.bind my_inst.addr is 0.0.0.0:6801/31803 need_addr=3D1
-> 2012-04-13 11:09:18.894905 7fd2a60157a0 -- 0.0.0.0:6802/31803
-> accepter.bind my_inst.addr is 0.0.0.0:6802/31803 need_addr=3D1
-> 2012-04-13 11:09:18.896173 7fd2a60157a0 filestore(/vol0/data/osd.1)
-> basedir /vol0/data/osd.1 journal /vol0/data/osd.1/journal
-> 2012-04-13 11:09:18.896326 7fd2a60157a0 filestore(/vol0/data/osd.1)
-> limited size xattrs -- enable filestore_xattr_use_omap
+On Fri, Apr 13, 2012 at 02:36, =E8=83=A1=E7=80=9A=E6=A3=AE <softrank.ne=
+t@gmail.com> wrote:
+> Hi everyone.
 >
-> and my ceph -w in attachment. Many failed osd, and more.
+> I'm still reading CRUSH source code.
 >
-> --
-> -----
-> Pozdrawiam
+> When reading src/crush/hash.c, I've got some questions about the hash=
+ function.
 >
-> S=B3awek "sZiBis" Skowron
+> 1. There are several magic numbers there, like=C2=A01315423911, 23123=
+2,
+> 1232. Are they arbitrary or do they really mean something in theory?
+>
+> 2.=C2=A0crush_hashmix macro is a part of Jenkins hash function. In th=
+e
+> series of crush_hash_rjenkins1_* functions, why input parameters are
+> mixed this way instead of something else?=C2=A0Are they arbitrary or =
+do
+> they really mean something in theory?
 
+Typically, hash functions have primes and similar magic numbers, and
+carefully-chosen mixing functions, to strike a balance between result
+uniformity, collision avoidance, and performance. CRUSH uses what is
+known as a Jenkins hash, which is one of the de facto standard "fast
+hashes".
 
+See more:
+http://en.wikipedia.org/wiki/Jenkins_hash_function
+http://burtleburtle.net/bob/hash/evahash.html
 
---=20
------
-Pozdrawiam
+> 3. I read the phrase "funneling hash", but I don't quite understand
+> what does it mean.
 
-S=B3awek "sZiBis" Skowron
+=46unneling is an undesirable property in a hash function, where when
+input changes in only a few bit locations, the output also changes in
+only a few bit locations. More desirable is that even a single bit
+change in the input causes a "big disturbance" in the output.
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
