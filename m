@@ -1,85 +1,76 @@
-From: Josh Durgin <josh.durgin@dreamhost.com>
-Subject: Re: Problem after upgrade to 0.45
-Date: Fri, 13 Apr 2012 11:35:35 -0700
-Message-ID: <4F8871F7.9070808@dreamhost.com>
-References: <CAMwB3TidM-Jebn0Hjr0sM8a-F0jpaByRAH0tLha27CAhV7pPqw@mail.gmail.com> <CAMwB3ThsOt=fLHn54GpD4h7DmnMskAFJxm58Kp40ANKfLOFV9Q@mail.gmail.com>
+From: Greg Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: pgs stuck inactive
+Date: Fri, 13 Apr 2012 12:30:32 -0700
+Message-ID: <8260F00ADA384FEDBA6AA9873273BB38@dreamhost.com>
+References: <CAFtEh-dcEKQ2AzcVmu1G5i-zFHgim5SLZvEmNtDsvkHt+JnzLA@mail.gmail.com>
+ <CACLRD_2yhpoUGoivHQpp-LyO82MdTz5SpD0MN5b_vEoqSGBzgg@mail.gmail.com>
+ <CAFtEh-dsM_G5GCyqnnBVfAc7GmKZLZcLzkQzrCAGjDgyLC3CGg@mail.gmail.com>
+ <CACLRD_1NiFHjx_PZxokVBkADG0z+A61Sj57NJFyYF_vM=ZKSbA@mail.gmail.com>
+ <CAFtEh-dLfUYpSbUJamReXB2e1JHm0b55HPs-h1wjCXym-cmHyA@mail.gmail.com>
+ <CACLRD_3ccxvLiHxEHMBK+Q+2Ag41a+M07NofU9+Z8Fr06vvvfA@mail.gmail.com>
+ <CAFtEh-evVi0q8CZmbPJX_WaCD_y2E=RBf6nNu13106E8hopk5A@mail.gmail.com>
+ <CACLRD_3hqoOqbZWnyft3B+pEaPG=pmiDt5HeQASUC=OPS-uA7Q@mail.gmail.com>
+ <CAFtEh-dnR0zu=ct-gG0L+76BTYHVFimjFKNhHjnDNZWA=Scs1g@mail.gmail.com>
+ <CACLRD_1pf3ezZKAvEuub5PN1=cMESvnuTOVh_45NYc4T5hcPhA@mail.gmail.com>
+ <CAFtEh-cx2by6yG_xiQbq5e2fbViOWyHoaOLFPBCZgX7x-7gwFA@mail.gmail.com>
+ <CACLRD_0UrwKJuELiZqrL7Q_5AjB1EvOd5gqLRzrxw_7AFMcjxg@mail.gmail.com>
+ <CAFtEh-fwt9BwZ7NwZaJVnwq3hgzvkrb1XvKT0uF81vePRcu7oA@mail.gmail.com>
+ <CACLRD_2hHbKFVjSDFHG-z=Sy5wgHDHz6=NWx9mEw51PMLVF7Ng@mail.gmail.com>
+ <CAFtEh-c7VP1n3+9iDzXsnt4YjzVx7GiYu4BLfL4ssOa6Rq1rPA@mail.gmail.com>
+ <CACLRD_11ahz6h1yKhC7CVAxM8ha-BkOVztb3zBkhyo4Kd4t6aQ@mail.gmail.com>
+ <3154FE08568349E9B9EB0EBBCE4EDFB2@dreamhost.com>
+ <CAFtEh-eEH5Hon5o2hXiEXA6FewB05Uj8=fR4L3HtkLw9zTxccA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2;
-	format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:59287 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755953Ab2DMSfm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Apr 2012 14:35:42 -0400
-In-Reply-To: <CAMwB3ThsOt=fLHn54GpD4h7DmnMskAFJxm58Kp40ANKfLOFV9Q@mail.gmail.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:44373 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751970Ab2DMTah convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Apr 2012 15:30:37 -0400
+Received: by obbta14 with SMTP id ta14so959698obb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Apr 2012 12:30:35 -0700 (PDT)
+In-Reply-To: <CAFtEh-eEH5Hon5o2hXiEXA6FewB05Uj8=fR4L3HtkLw9zTxccA@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Damien Churchill <damoxc@gmail.com>
+Cc: Samuel Just <sam.just@dreamhost.com>, ceph-devel@vger.kernel.org
 
-On 04/13/2012 05:09 AM, S=B3awomir Skowron wrote:
-> More info, that after i use filestore_xattr_use_omap =3D 1 in conf, a=
-nd
-> ceph -w is like that in attachment in mail before.
->
+On Thursday, April 12, 2012 at 8:29 AM, Damien Churchill wrote:
+> On 11 April 2012 00:40, Greg Farnum <gregory.farnum@dreamhost.com (ma=
+ilto:gregory.farnum@dreamhost.com)> wrote:
+> > =20
+> > A quick glance through these shows that all the pg_temp requests ar=
+en't actually requesting any changes from the monitor. It's either a ve=
+ry serious mon bug which happened a while ago (unlikely, given the rest=
+arts and ongoing map changes, etc), or an OSD bug. I think we want logs=
+ from both osd.0 and osd.3 at the same time, from what I'm seeing. :)
+> > -Greg
+> =20
+> =20
+> =20
+> Just to make sure all bases are covered:
+> =20
+> http://damoxc.net/ceph/ceph-logs-20120412142537.tar.gz
+> =20
+> This contains all 5 osd logs and all 3 monitor logs, everything
+> restarted with debug logging prior to capturing the logs.
 
-I didn't get the first email, and don't see it in the archives. What=20
-problem are you seeing now?
+I (and Sam) spent some time looking at this very closely. It continues =
+to tell me that the OSD and the monitor are disagreeing on whether osd =
+3 should be in the pg temp set for some things, but they seem to agree =
+on everything else=E2=80=A6. =20
+Can you zip up for me:
+1) The files matching osdmap* of osd0's store from the current/meta/ di=
+rectory,
+2) The contents of your lead monitor's osdmap and osdmap_full directori=
+es?
 
-Josh
-
-> I have downgrade to 0.44, and everything is ok now, but why this happ=
-en ??
->
-> 2012/4/13 S=B3awomir Skowron<szibis@gmail.com>:
->> 2012-04-13 11:03:20.017166 7f63d62b47a0 -- 0.0.0.0:6848/9291
->> accepter.bind my_inst.addr is 0.0.0.0:6848/9291 need_addr=3D1
->> 2012-04-13 11:03:20.018576 7f63d62b47a0 filestore(/vol0/data/osd.1)
->> basedir /vol0/data/osd.1 journal /vol0/data/osd.1/journal
->> 2012-04-13 11:03:20.027918 7f63d62b47a0 filestore(/vol0/data/osd.1)
->> limited size xattrs -- enable filestore_xattr_use_omap
->> 2012-04-13 11:03:20.028014 7f63d62b47a0  ** ERROR: error converting
->> store /vol0/data/osd.1: (95) Operation not supported
->> 2012-04-13 11:07:08.904974 7f35299ed7a0 ceph version 0.45
->> (commit:0aea1cb1df5c3e5ab783ca6f2ed7649823b613c5), process ceph-osd,
->> pid 20052
->> 2012-04-13 11:07:08.905164 7f35299ed7a0 -- 0.0.0.0:6800/20052
->> accepter.bind my_inst.addr is 0.0.0.0:6800/20052 need_addr=3D1
->> 2012-04-13 11:07:08.905182 7f35299ed7a0 -- 0.0.0.0:6801/20052
->> accepter.bind my_inst.addr is 0.0.0.0:6801/20052 need_addr=3D1
->> 2012-04-13 11:07:08.905197 7f35299ed7a0 -- 0.0.0.0:6802/20052
->> accepter.bind my_inst.addr is 0.0.0.0:6802/20052 need_addr=3D1
->> 2012-04-13 11:07:08.906418 7f35299ed7a0 filestore(/vol0/data/osd.1)
->> basedir /vol0/data/osd.1 journal /vol0/data/osd.1/journal
->> 2012-04-13 11:07:08.906565 7f35299ed7a0 filestore(/vol0/data/osd.1)
->> limited size xattrs -- enable filestore_xattr_use_omap
->> 2012-04-13 11:07:08.906644 7f35299ed7a0  ** ERROR: error converting
->> store /vol0/data/osd.1: (95) Operation not supported
->> 2012-04-13 11:09:18.894624 7fd2a60157a0 ceph version 0.45
->> (commit:0aea1cb1df5c3e5ab783ca6f2ed7649823b613c5), process ceph-osd,
->> pid 31803
->> 2012-04-13 11:09:18.894859 7fd2a60157a0 -- 0.0.0.0:6800/31803
->> accepter.bind my_inst.addr is 0.0.0.0:6800/31803 need_addr=3D1
->> 2012-04-13 11:09:18.894884 7fd2a60157a0 -- 0.0.0.0:6801/31803
->> accepter.bind my_inst.addr is 0.0.0.0:6801/31803 need_addr=3D1
->> 2012-04-13 11:09:18.894905 7fd2a60157a0 -- 0.0.0.0:6802/31803
->> accepter.bind my_inst.addr is 0.0.0.0:6802/31803 need_addr=3D1
->> 2012-04-13 11:09:18.896173 7fd2a60157a0 filestore(/vol0/data/osd.1)
->> basedir /vol0/data/osd.1 journal /vol0/data/osd.1/journal
->> 2012-04-13 11:09:18.896326 7fd2a60157a0 filestore(/vol0/data/osd.1)
->> limited size xattrs -- enable filestore_xattr_use_omap
->>
->> and my ceph -w in attachment. Many failed osd, and more.
->>
->> --
->> -----
->> Pozdrawiam
->>
->> S=B3awek "sZiBis" Skowron
->
->
->
+We can check these for differences and then run them through some of ou=
+r tools and stuff to try and identify the issue.
+Thanks!
+-Greg
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
