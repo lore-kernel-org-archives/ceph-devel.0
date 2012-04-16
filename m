@@ -1,63 +1,48 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: RBD storage pool support in libvirt
-Date: Mon, 16 Apr 2012 21:01:19 +0200
-Message-ID: <4F8C6C7F.5030001@widodh.nl>
-References: <4F04A8C1.1090205@widodh.nl> <4F04EFA1.5050704@dreamhost.com> <4F05B8F0.10003@widodh.nl> <4F50E7A6.10100@widodh.nl> <4F8C6B91.6060809@widodh.nl>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: librados aio completion
+Date: Mon, 16 Apr 2012 12:37:51 -0700
+Message-ID: <CAC-hyiEFKkohqWhYRgrc0zvbhrZeca=YCrW00JTSqe-0v5DEpQ@mail.gmail.com>
+References: <Pine.LNX.4.64.1204152141160.14018@cobra.newdream.net>
+	<CAC-hyiFiL=a6dRaE-UkJ-egj1hJTSWQD-6GUitcmRiXvNrEUEA@mail.gmail.com>
+	<Pine.LNX.4.64.1204161157440.10153@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:39020 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751189Ab2DPTBT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Apr 2012 15:01:19 -0400
-Received: from [IPv6:2a00:f10:11c:ab:52e5:49ff:fec2:c976] (unknown [IPv6:2a00:f10:11c:ab:52e5:49ff:fec2:c976])
-	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPA id 3AC304047A
-	for <ceph-devel@vger.kernel.org>; Mon, 16 Apr 2012 21:01:18 +0200 (CEST)
-In-Reply-To: <4F8C6B91.6060809@widodh.nl>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:56945 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751948Ab2DPThw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Apr 2012 15:37:52 -0400
+Received: by bkcik5 with SMTP id ik5so3963898bkc.19
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Apr 2012 12:37:51 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1204161157440.10153@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Mon, Apr 16, 2012 at 12:00 PM, Sage Weil <sage@newdream.net> wrote:
+>
+> I pushed a wip-2301 that does this. =A0The downside to this approach =
+is that
+> the is_safe() and is_complete() methods will return false until after=
+ the
+> callback returns, which includes the callback itself. =A0So a callbac=
+k that
+> assumes that is_complete() will return true will be wrong.
+>
+> If that's not okay, the alternative is to make the wait_for_complete(=
+)
+> actually be a wait_for_complete_and_callback_has_returned(). =A0That =
+drops
+> the symmetry between wait_for_complete() and is_complete(), which is
+> awkward.
+>
+maybe is_ack(), is_safe() and is_complete()?
 
-On 04/16/2012 08:57 PM, Wido den Hollander wrote:
-> Hi,
->
-> About two weeks ago I submitted my patch to the libvirt mailinglist:
-> https://www.redhat.com/archives/libvir-list/2012-March/msg01320.html
->
-> I've placed the code on github: https://github.com/wido/libvirt
->
-> This storage drivers lets you managed RBD images through libvirt which
-> could make it easier to manage your RBD storage pools.
->
-> I'm also working on CloudStack integration for RBD (Can also be found on
-> Github), that required RBD support in libvirt since CS relies on libvirt
-> for managing it's storage pools.
->
-> Since the patch hasn't been accepted in libvirt yet I'll keep rebasing
-> the code against the master branch regularly.
->
-> Josh from the Ceph team helped me to improve the code, thanks for that!
->
-> I encourage everybody to test it and play around with it, since there
-> probably will be some corner cases I haven't found.
->
-> Example XML's can be found in "tests/storagepoolxml2xmlin"
-
-What I forgot to add:
-
-The "virsh vol-download|vol-upload" commands won't work, this is due 
-some internal workings of libvirt: 
-https://www.redhat.com/archives/libvir-list/2012-February/msg00503.html
-
-Wido
-
->
-> Wido
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
