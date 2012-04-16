@@ -1,33 +1,35 @@
-From: =?UTF-8?B?6IOh54Ca5qOu?= <softrank.net@gmail.com>
-Subject: Questions about bucket algorithm and bucket choose
-Date: Sun, 15 Apr 2012 14:12:02 +0800
-Message-ID: <CALwGbPKqXyubH1O-cBoYm-LaJ86LR3QOzzd=mYyL8HESx1+13g@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: librados aio completion
+Date: Sun, 15 Apr 2012 21:44:38 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1204152141160.14018@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:63509 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751114Ab2DOGMD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Apr 2012 02:12:03 -0400
-Received: by iagz16 with SMTP id z16so6021983iag.19
-        for <ceph-devel@vger.kernel.org>; Sat, 14 Apr 2012 23:12:02 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:34075 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750734Ab2DPEol (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Apr 2012 00:44:41 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id BB5A9BCB0A
+	for <ceph-devel@vger.kernel.org>; Sun, 15 Apr 2012 21:44:40 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 4D1B5BCB0A
+	for <ceph-devel@vger.kernel.org>; Sun, 15 Apr 2012 21:44:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi everyone.
+We just switched the completion callbacks so that they are called 
+asynchronously from another thread.  This makes the locking less weird for 
+certain callers and lets you call back into librados in your callback 
+safely.
 
-One question is about performance of bucket algorithms, it seems that
-on every aspect, straw bucket is at least not worse than list bucket.
-So does it mean we shall always use straw bucket instead of list
-bucket?
+This breaks one of the functional tests, which sets a bool in the 
+callback, does wait_for_complete() on the aio handle, and then asserts 
+that the bool is set.  There's now a race between the caller's thread and 
+the completion thread.
 
-I was browsing branch tree of ceph to trace back earlier versions of
-the implementation. I noticed that crush_uniform_bucket_choose has
-been significantly changed. I read the comment which said the original
-method (seems to be described in the thesis) is not random enough and
-has some bad behavior, but I don't know what kind of bad behavior is
-that. For what reason a random permutation is a better choice?
+Do we just call this a broken test, or do we want some way of blocking on 
+the aio handle until the completion has been called?
 
-Regards,
-Sam
+sage
