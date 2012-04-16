@@ -1,35 +1,48 @@
-From: Sage Weil <sage@newdream.net>
-Subject: librados aio completion
-Date: Sun, 15 Apr 2012 21:44:38 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1204152141160.14018@cobra.newdream.net>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: librados aio completion
+Date: Sun, 15 Apr 2012 22:25:09 -0700
+Message-ID: <CAC-hyiFiL=a6dRaE-UkJ-egj1hJTSWQD-6GUitcmRiXvNrEUEA@mail.gmail.com>
+References: <Pine.LNX.4.64.1204152141160.14018@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34075 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750734Ab2DPEol (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Apr 2012 00:44:41 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id BB5A9BCB0A
-	for <ceph-devel@vger.kernel.org>; Sun, 15 Apr 2012 21:44:40 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 4D1B5BCB0A
-	for <ceph-devel@vger.kernel.org>; Sun, 15 Apr 2012 21:44:40 -0700 (PDT)
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:63676 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750788Ab2DPFZL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Apr 2012 01:25:11 -0400
+Received: by bkcik5 with SMTP id ik5so3326337bkc.19
+        for <ceph-devel@vger.kernel.org>; Sun, 15 Apr 2012 22:25:09 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1204152141160.14018@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-We just switched the completion callbacks so that they are called 
-asynchronously from another thread.  This makes the locking less weird for 
-certain callers and lets you call back into librados in your callback 
-safely.
+On Sun, Apr 15, 2012 at 9:44 PM, Sage Weil <sage@newdream.net> wrote:
+> We just switched the completion callbacks so that they are called
+> asynchronously from another thread. =A0This makes the locking less we=
+ird for
+> certain callers and lets you call back into librados in your callback
+> safely.
+>
+> This breaks one of the functional tests, which sets a bool in the
+> callback, does wait_for_complete() on the aio handle, and then assert=
+s
+> that the bool is set. =A0There's now a race between the caller's thre=
+ad and
+> the completion thread.
+>
+> Do we just call this a broken test, or do we want some way of blockin=
+g on
+> the aio handle until the completion has been called?
 
-This breaks one of the functional tests, which sets a bool in the 
-callback, does wait_for_complete() on the aio handle, and then asserts 
-that the bool is set.  There's now a race between the caller's thread and 
-the completion thread.
+I'd expect wait_for_complete() to wait until the completion completed.
+We can add some other wait_for_foo() for the current case.
 
-Do we just call this a broken test, or do we want some way of blocking on 
-the aio handle until the completion has been called?
-
-sage
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
