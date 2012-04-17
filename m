@@ -1,47 +1,59 @@
-From: Damien Churchill <damoxc@gmail.com>
-Subject: Re: pgs stuck inactive
-Date: Tue, 17 Apr 2012 06:32:25 +0100
-Message-ID: <CAFtEh-fCaBXCyVJ13nqtuf-t_ULETzbTUvNEMtJ7GL61s3hOUg@mail.gmail.com>
-References: <CAFtEh-dcEKQ2AzcVmu1G5i-zFHgim5SLZvEmNtDsvkHt+JnzLA@mail.gmail.com>
-	<CACLRD_2yhpoUGoivHQpp-LyO82MdTz5SpD0MN5b_vEoqSGBzgg@mail.gmail.com>
-	<CAFtEh-dsM_G5GCyqnnBVfAc7GmKZLZcLzkQzrCAGjDgyLC3CGg@mail.gmail.com>
-	<CACLRD_1NiFHjx_PZxokVBkADG0z+A61Sj57NJFyYF_vM=ZKSbA@mail.gmail.com>
-	<CAFtEh-dLfUYpSbUJamReXB2e1JHm0b55HPs-h1wjCXym-cmHyA@mail.gmail.com>
-	<CACLRD_3ccxvLiHxEHMBK+Q+2Ag41a+M07NofU9+Z8Fr06vvvfA@mail.gmail.com>
-	<CAFtEh-evVi0q8CZmbPJX_WaCD_y2E=RBf6nNu13106E8hopk5A@mail.gmail.com>
-	<CACLRD_3hqoOqbZWnyft3B+pEaPG=pmiDt5HeQASUC=OPS-uA7Q@mail.gmail.com>
-	<CAFtEh-dnR0zu=ct-gG0L+76BTYHVFimjFKNhHjnDNZWA=Scs1g@mail.gmail.com>
-	<CACLRD_1pf3ezZKAvEuub5PN1=cMESvnuTOVh_45NYc4T5hcPhA@mail.gmail.com>
-	<CAFtEh-cx2by6yG_xiQbq5e2fbViOWyHoaOLFPBCZgX7x-7gwFA@mail.gmail.com>
-	<CACLRD_0UrwKJuELiZqrL7Q_5AjB1EvOd5gqLRzrxw_7AFMcjxg@mail.gmail.com>
-	<CAFtEh-fwt9BwZ7NwZaJVnwq3hgzvkrb1XvKT0uF81vePRcu7oA@mail.gmail.com>
-	<CACLRD_2hHbKFVjSDFHG-z=Sy5wgHDHz6=NWx9mEw51PMLVF7Ng@mail.gmail.com>
-	<CAFtEh-c7VP1n3+9iDzXsnt4YjzVx7GiYu4BLfL4ssOa6Rq1rPA@mail.gmail.com>
-	<CACLRD_11ahz6h1yKhC7CVAxM8ha-BkOVztb3zBkhyo4Kd4t6aQ@mail.gmail.com>
-	<3154FE08568349E9B9EB0EBBCE4EDFB2@dreamhost.com>
-	<CAFtEh-eEH5Hon5o2hXiEXA6FewB05Uj8=fR4L3HtkLw9zTxccA@mail.gmail.com>
-	<8260F00ADA384FEDBA6AA9873273BB38@dreamhost.com>
-	<CAFtEh-cxqG_FiPiAV8QWQtJ2bUcDnN00Kv+SEu1bUi-Jg2uaxw@mail.gmail.com>
-	<90B1EE3CB1C7494B9B097AD5E4BCF272@dreamhost.com>
+From: Sage Weil <sage@newdream.net>
+Subject: localized pgs
+Date: Tue, 17 Apr 2012 09:36:03 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1204170935350.15197@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:58768 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751153Ab2DQFcZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Apr 2012 01:32:25 -0400
-Received: by ghrr11 with SMTP id r11so2878383ghr.19
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Apr 2012 22:32:25 -0700 (PDT)
-In-Reply-To: <90B1EE3CB1C7494B9B097AD5E4BCF272@dreamhost.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53317 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753704Ab2DQQgK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Apr 2012 12:36:10 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 0B66BBC7C5
+	for <ceph-devel@vger.kernel.org>; Tue, 17 Apr 2012 09:36:08 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 41FCABC7C5
+	for <ceph-devel@vger.kernel.org>; Tue, 17 Apr 2012 09:36:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <gregory.farnum@dreamhost.com>
-Cc: Samuel Just <sam.just@dreamhost.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 17 April 2012 01:06, Greg Farnum <gregory.farnum@dreamhost.com> wrote:
-> Yep!
-> We looked into this more today and have discovered some definite oddness. Have you by any chance tried to change the number of PGs in your pools?
+I think the preferred osd placement groups need to go.  They were 
+originally added to get hadoop-style data placement, but it's not clear 
+that that is actually desireable, we don't recommend or test them, and 
+looking at them now there are some serious problems with how they 
+currently work.
 
-I haven't no (at least certainly not on purpose!). All I've really
-done is copy a bit of stuff onto the unix fs and create a few rbd
-volumes, as well as upgrade it when a new version comes out.
+- The idea was that there would be a small set of pgs that are bound to 
+osds, but we aren't creating them when osds are added and removed.  Nor 
+can we, because data is stored in the pg and doesn't move between pgs. If 
+we created new localized pgs when osds are added, that would mean 
+previously stored data is now in the wrong pg.  I think the only way it 
+would work (given the current approach) is if you decided at cluster 
+creation time what the max number of osds would be, and they would bind 
+themselves to other osds similarly to how the stable_mod() function is 
+used for the object to pg mapping.
+
+- It is muddies the current abstractions.  The whole point of Ceph is that 
+OSDs can come and go, and as soon as you can say this data is stored on 
+that disk the whole thing gets messy.
+
+- The forcefeed bits in CRUSH are hugely ugly.  It would be incredibly 
+satisfying to rip them out.
+
+- Using localized PGs can very easily screw up the distribution of data in 
+the system.  Users won't have any concept of how much disk space is 
+available, etc., which means that Ceph would have to monitor the localized 
+data on each node and move other PGs away as appropriate. Even if it did 
+that, the localized data could outgrow the node size too. There are a few 
+tricks that could be played to delay ENOSPC, but nothing that is 
+particularly compelling.
+
+- Nobody uses them.
+
+I guess the question is, is there a compelling use case, and if there is, 
+is there a better approach?
+
+sage
+
