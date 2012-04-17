@@ -1,75 +1,47 @@
-From: Samuel Just <sam.just@dreamhost.com>
-Subject: Re: librados aio completion
-Date: Mon, 16 Apr 2012 17:49:33 -0700
-Message-ID: <CACLRD_2Qb3J_WvRSienfR6pFTunKXuFXAPbHDUs0QNTKPP0Z3g@mail.gmail.com>
-References: <Pine.LNX.4.64.1204152141160.14018@cobra.newdream.net>
-	<CAC-hyiFiL=a6dRaE-UkJ-egj1hJTSWQD-6GUitcmRiXvNrEUEA@mail.gmail.com>
-	<Pine.LNX.4.64.1204161157440.10153@cobra.newdream.net>
-	<CAC-hyiEFKkohqWhYRgrc0zvbhrZeca=YCrW00JTSqe-0v5DEpQ@mail.gmail.com>
-	<D763974EEA9A43E08946E03484894631@dreamhost.com>
-	<Pine.LNX.4.64.1204161405580.31853@cobra.newdream.net>
-	<59070F5B091941E0934A1175E82717B7@dreamhost.com>
-	<CAC-hyiGhHr+Pqf2z53ONZsuUfr-RKUedWU-GyteB8hB8Zgzobw@mail.gmail.com>
-	<Pine.LNX.4.64.1204161736170.26253@cobra.newdream.net>
+From: Damien Churchill <damoxc@gmail.com>
+Subject: Re: pgs stuck inactive
+Date: Tue, 17 Apr 2012 06:32:25 +0100
+Message-ID: <CAFtEh-fCaBXCyVJ13nqtuf-t_ULETzbTUvNEMtJ7GL61s3hOUg@mail.gmail.com>
+References: <CAFtEh-dcEKQ2AzcVmu1G5i-zFHgim5SLZvEmNtDsvkHt+JnzLA@mail.gmail.com>
+	<CACLRD_2yhpoUGoivHQpp-LyO82MdTz5SpD0MN5b_vEoqSGBzgg@mail.gmail.com>
+	<CAFtEh-dsM_G5GCyqnnBVfAc7GmKZLZcLzkQzrCAGjDgyLC3CGg@mail.gmail.com>
+	<CACLRD_1NiFHjx_PZxokVBkADG0z+A61Sj57NJFyYF_vM=ZKSbA@mail.gmail.com>
+	<CAFtEh-dLfUYpSbUJamReXB2e1JHm0b55HPs-h1wjCXym-cmHyA@mail.gmail.com>
+	<CACLRD_3ccxvLiHxEHMBK+Q+2Ag41a+M07NofU9+Z8Fr06vvvfA@mail.gmail.com>
+	<CAFtEh-evVi0q8CZmbPJX_WaCD_y2E=RBf6nNu13106E8hopk5A@mail.gmail.com>
+	<CACLRD_3hqoOqbZWnyft3B+pEaPG=pmiDt5HeQASUC=OPS-uA7Q@mail.gmail.com>
+	<CAFtEh-dnR0zu=ct-gG0L+76BTYHVFimjFKNhHjnDNZWA=Scs1g@mail.gmail.com>
+	<CACLRD_1pf3ezZKAvEuub5PN1=cMESvnuTOVh_45NYc4T5hcPhA@mail.gmail.com>
+	<CAFtEh-cx2by6yG_xiQbq5e2fbViOWyHoaOLFPBCZgX7x-7gwFA@mail.gmail.com>
+	<CACLRD_0UrwKJuELiZqrL7Q_5AjB1EvOd5gqLRzrxw_7AFMcjxg@mail.gmail.com>
+	<CAFtEh-fwt9BwZ7NwZaJVnwq3hgzvkrb1XvKT0uF81vePRcu7oA@mail.gmail.com>
+	<CACLRD_2hHbKFVjSDFHG-z=Sy5wgHDHz6=NWx9mEw51PMLVF7Ng@mail.gmail.com>
+	<CAFtEh-c7VP1n3+9iDzXsnt4YjzVx7GiYu4BLfL4ssOa6Rq1rPA@mail.gmail.com>
+	<CACLRD_11ahz6h1yKhC7CVAxM8ha-BkOVztb3zBkhyo4Kd4t6aQ@mail.gmail.com>
+	<3154FE08568349E9B9EB0EBBCE4EDFB2@dreamhost.com>
+	<CAFtEh-eEH5Hon5o2hXiEXA6FewB05Uj8=fR4L3HtkLw9zTxccA@mail.gmail.com>
+	<8260F00ADA384FEDBA6AA9873273BB38@dreamhost.com>
+	<CAFtEh-cxqG_FiPiAV8QWQtJ2bUcDnN00Kv+SEu1bUi-Jg2uaxw@mail.gmail.com>
+	<90B1EE3CB1C7494B9B097AD5E4BCF272@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:55459 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752940Ab2DQAte convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Apr 2012 20:49:34 -0400
-Received: by wejx9 with SMTP id x9so3703400wej.19
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Apr 2012 17:49:33 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1204161736170.26253@cobra.newdream.net>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:58768 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751153Ab2DQFcZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Apr 2012 01:32:25 -0400
+Received: by ghrr11 with SMTP id r11so2878383ghr.19
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Apr 2012 22:32:25 -0700 (PDT)
+In-Reply-To: <90B1EE3CB1C7494B9B097AD5E4BCF272@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Yehuda Sadeh Weinraub <yehudasa@gmail.com>, Greg Farnum <gregory.farnum@dreamhost.com>, ceph-devel@vger.kernel.org
+To: Greg Farnum <gregory.farnum@dreamhost.com>
+Cc: Samuel Just <sam.just@dreamhost.com>, ceph-devel@vger.kernel.org
 
-It seems to me that anything done in the callback will have its own
-synchronisation which users can simply use to wait for the callback to
-complete.  In that case, we should not have wait_for_* wait for the
-callback.
--Sam
+On 17 April 2012 01:06, Greg Farnum <gregory.farnum@dreamhost.com> wrote:
+> Yep!
+> We looked into this more today and have discovered some definite oddness. Have you by any chance tried to change the number of PGs in your pools?
 
-On Mon, Apr 16, 2012 at 5:44 PM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 16 Apr 2012, Yehuda Sadeh Weinraub wrote:
->> wait_for_ack() : got ack or safe response, entails is_ack()
->> wait_for_safe(): got safe response, entails is_safe(), is_ack()
->> wait_for_complete(): done with the request, callback returned, entai=
-ls
->> is_complete(), is_safe(), is_ack()
->
-> The problem is we already have is_complete() and it means what you me=
-an by
-> is_ack().
->
-> Either:
-> 1- add new is_complete_and_cb() and wait_for_complete_and_cb(),
-> =C2=A0 is_safe_and_cb() and wait_for_safe_and_cb().
-> 2- make existing is_complete() mean the above (and
-> =C2=A0 is_safe()/wait_for_safe() mean is_safe_and_cb()). =C2=A0is_com=
-plete() will
-> =C2=A0 be false when called from the callback. =C2=A0(i.e., current w=
-ip branch.)
-> 3- is_complete() means is complete, but wait_for_complete() waits for
-> =C2=A0 complete and cb.
-> 4- status quo (user has no idea when cb has been called).
->
-> I like #1, personally. =C2=A0I doubt there are current users using bo=
-th the cb
-> and wait_for_*() methods (aside from our functional tests).
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I haven't no (at least certainly not on purpose!). All I've really
+done is copy a bit of stuff onto the unix fs and create a few rbd
+volumes, as well as upgrade it when a new version comes out.
