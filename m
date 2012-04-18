@@ -1,63 +1,44 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: re: ceph: move encode_fh to new API
-Date: Wed, 18 Apr 2012 12:40:28 +0300
-Message-ID: <20120418094028.GA6866@elgon.mountain>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Re: wip-librbd-caching
+Date: Wed, 18 Apr 2012 14:50:17 +0200
+Message-ID: <4F8EB889.4080106@tuxadero.com>
+References: <4F872D48.6070801@tuxadero.com> <Pine.LNX.4.64.1204121240310.21220@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from rcsinet15.oracle.com ([148.87.113.117]:21303 "EHLO
-	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751272Ab2DRJkv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 05:40:51 -0400
-Content-Disposition: inline
+Received: from einhorn.in-berlin.de ([192.109.42.8]:49953 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752021Ab2DRMu3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 08:50:29 -0400
+In-Reply-To: <Pine.LNX.4.64.1204121240310.21220@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@newdream.net
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org, Josh Durgin <josh.durgin@dreamhost.com>
 
-Hello Sage Weil,
+Am 12.04.2012 21:45, schrieb Sage Weil:
+> The config options you'll want to look at are client_oc_* (in case you
+> didn't see that already :).  "oc" is short for objectcacher, and it isn't
+> only used for client (libcephfs), so it might be worth renaming these
+> options before people start using them.
 
-This is a semi-automatic email about new static checker warnings.
+Hi,
 
-The patch f59919a07e03: "ceph: move encode_fh to new API" from Apr 5, 
-2012, leads to the following Smatch complaint:
+I changed the values and the performance is still very good and the 
+memory footprint is much smaller.
 
-fs/ceph/export.c:85 ceph_encode_fh()
-	 error: we previously assumed 'dentry' could be null (see line 67)
+OPTION(client_oc_size, OPT_INT, 1024*1024* 50)    // MB * n
+OPTION(client_oc_max_dirty, OPT_INT, 1024*1024* 25)    // MB * n  (dirty 
+OR tx.. bigish)
+OPTION(client_oc_target_dirty, OPT_INT, 1024*1024* 8) // target dirty 
+(keep this smallish)
+// note: the max amount of "in flight" dirty data is roughly (max - target)
 
-fs/ceph/export.c
-    66		/* if we found an alias, generate a connectable fh */
-    67		if (*max_len >= connected_handle_length && dentry) {
-                                                           ^^^^^^
-New check.
+But I am not quite sure about the meaning of the values.
+client_oc_size Max size of the cache?
+client_oc_max_dirty max dirty value before the writeback starts?
+client_oc_target_dirty ???
 
-    68			dout("encode_fh %p connectable\n", dentry);
-    69			spin_lock(&dentry->d_lock);
-    70			parent = dentry->d_parent;
-    71			cfh->ino = ceph_ino(inode);
-    72			cfh->parent_ino = ceph_ino(parent->d_inode);
-    73			cfh->parent_name_hash = ceph_dentry_hash(parent->d_inode,
-    74								 dentry);
-    75			*max_len = connected_handle_length;
-    76			type = 2;
-    77			spin_unlock(&dentry->d_lock);
-    78		} else if (*max_len >= handle_length) {
-    79			if (parent_inode) {
-    80				/* nfsd wants connectable */
-    81				*max_len = connected_handle_length;
-    82				type = 255;
-    83			} else {
-    84				dout("encode_fh %p\n", dentry);
-    85				fh->ino = ceph_ino(dentry->d_inode);
-                                                   ^^^^^^^^^^^^^^^
-Old dereference.
 
-    86				*max_len = handle_length;
-    87				type = 1;
-
-These emails really are mostly automated...  So if it's a false positive
-then I blame the script.  Hope it's not too much spam.
-
-regards,
-dan carpenter
-
+-martin
