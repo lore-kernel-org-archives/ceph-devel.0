@@ -1,32 +1,44 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: localized pgs
-Date: Wed, 18 Apr 2012 08:08:29 -0700
-Message-ID: <FDD48DF9-F4A1-414A-865A-8C571E63A7AA@cs.ucsc.edu>
-References: <Pine.LNX.4.64.1204170935350.15197@cobra.newdream.net>
-Mime-Version: 1.0 (Apple Message framework v1257)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Alex Elder <elder@dreamhost.com>
+Subject: [PATCH] ceph: osd_client: fix endianness bug in osd_req_encode_op()
+Date: Wed, 18 Apr 2012 10:18:15 -0500
+Message-ID: <4F8EDB37.5000900@dreamhost.com>
+References: <4F8ED911.90309@dreamhost.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:43949 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751042Ab2DRPIb convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 11:08:31 -0400
-In-Reply-To: <Pine.LNX.4.64.1204170935350.15197@cobra.newdream.net>
+Received: from mail.hq.newdream.net ([66.33.206.127]:33995 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751151Ab2DRPSR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 11:18:17 -0400
+In-Reply-To: <4F8ED911.90309@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Al Viro <viro@ZenIV.linux.org.uk>, Sage Weil <sage@newdream.net>, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org
 
+ From Al Viro <viro@zeniv.linux.org.uk>
 
-On Apr 17, 2012, at 9:36 AM, Sage Weil wrote:
+Al Viro noticed that we were using a non-cpu-encoded value in
+a switch statement in osd_req_encode_op().  The result would
+clearly not work correctly on a big-endian machine.
 
-> I guess the question is, is there a compelling use case, and if there is, 
-> is there a better approach?
+Signed-off-by: Alex Elder <elder@dreamhost.com>
 
-I am failing to find a reference to the paper, but I recall that the 1 localized write to HDFS for MR applications isn't enormously beneficial. Then again it does save a lot of network traffic, especially for triplication.
+---
+  net/ceph/osd_client.c |    2 +-
+  1 file changed, 1 insertion(+), 1 deletion(-)
 
-As more people start looking at the Object Class handler mechanism, I could see it being desirable to stick data into objects (grab later via rendezvous) rather than return data to the rados_exec caller. Making that efficient would be important.
+Index: b/net/ceph/osd_client.c
+===================================================================
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -278,7 +278,7 @@ static void osd_req_encode_op(struct cep
+  {
+  	dst->op = cpu_to_le16(src->op);
 
-Could you piggyback on the recovery logic to accomplish this? Say, write 2 objects as normal, and 1 local "miss placed" object, letting RADOS asynchronously move that object to its intended location.
-
-- Noah
+-	switch (dst->op) {
++	switch (src->op) {
+  	case CEPH_OSD_OP_READ:
+  	case CEPH_OSD_OP_WRITE:
+  		dst->extent.offset =
