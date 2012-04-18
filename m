@@ -1,27 +1,39 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: rbd snapshot in qemu and libvirt
-Date: Wed, 18 Apr 2012 15:08:09 +0200
-Message-ID: <4F8EBCB9.3030803@tuxadero.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: rbd snapshot in qemu and libvirt
+Date: Wed, 18 Apr 2012 15:10:38 +0200
+Message-ID: <4F8EBD4E.1050606@widodh.nl>
+References: <4F8EBCB9.3030803@tuxadero.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:50171 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750808Ab2DRNIL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 09:08:11 -0400
-Received: from [172.30.1.184] ([192.166.201.59])
-	(authenticated bits=0)
-	by einhorn.in-berlin.de (8.13.6/8.13.6/Debian-1) with ESMTP id q3ID89Lr010842
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Wed, 18 Apr 2012 15:08:10 +0200
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:58259 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750808Ab2DRNKl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 09:10:41 -0400
+In-Reply-To: <4F8EBCB9.3030803@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Martin Mailand <martin@tuxadero.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi List,
+Hi,
 
-does anyone know the actual progress of the rbd snapshot feature 
-integration into qemu and libvirt?
+On 04/18/2012 03:08 PM, Martin Mailand wrote:
+> Hi List,
+>
+> does anyone know the actual progress of the rbd snapshot feature
+> integration into qemu and libvirt?
 
--martin
+I tested this about a year ago and that worked fine.
+
+Anything in particular you are looking for?
+
+Wido
+
+>
+> -martin
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
