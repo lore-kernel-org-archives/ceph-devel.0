@@ -1,61 +1,29 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: wip-librbd-caching
-Date: Wed, 18 Apr 2012 09:27:27 -0700
-Message-ID: <59C9961D9B314E3E979F937368248BB3@dreamhost.com>
-References: <4F872D48.6070801@tuxadero.com>
- <Pine.LNX.4.64.1204121240310.21220@cobra.newdream.net>
- <4F8EB889.4080106@tuxadero.com>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Re: rbd snapshot in qemu and libvirt
+Date: Wed, 18 Apr 2012 18:34:03 +0200
+Message-ID: <4F8EECFB.1080406@tuxadero.com>
+References: <4F8EBCB9.3030803@tuxadero.com> <4F8EBD4E.1050606@widodh.nl> <4F8EC028.40601@tuxadero.com> <CABYiri-7DYgFsSBYSbWVzXxuA_NgzaAN9s9hQ_JXuuZhxzLSaw@mail.gmail.com> <4F8ED5CA.7040006@tuxadero.com> <CABYiri_GOHwpOZ2ZOUU4xTtHDmJFC01f07c2nQZ3yxT9j7m1Rg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:33905 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752557Ab2DRQ1b convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 12:27:31 -0400
-Received: by ghrr11 with SMTP id r11so3782035ghr.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Apr 2012 09:27:31 -0700 (PDT)
-In-Reply-To: <4F8EB889.4080106@tuxadero.com>
-Content-Disposition: inline
+Received: from einhorn.in-berlin.de ([192.109.42.8]:51935 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751533Ab2DRQeP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 12:34:15 -0400
+In-Reply-To: <CABYiri_GOHwpOZ2ZOUU4xTtHDmJFC01f07c2nQZ3yxT9j7m1Rg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Mailand <martin@tuxadero.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, Josh Durgin <josh.durgin@dreamhost.com>
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
 
-On Wednesday, April 18, 2012 at 5:50 AM, Martin Mailand wrote:
-> Hi,
-> =20
-> I changed the values and the performance is still very good and the =20
-> memory footprint is much smaller.
-> =20
-> OPTION(client_oc_size, OPT_INT, 1024*1024* 50) // MB * n
-> OPTION(client_oc_max_dirty, OPT_INT, 1024*1024* 25) // MB * n (dirty =
-=20
-> OR tx.. bigish)
-> OPTION(client_oc_target_dirty, OPT_INT, 1024*1024* 8) // target dirty=
- =20
-> (keep this smallish)
-> // note: the max amount of "in flight" dirty data is roughly (max - t=
-arget)
-> =20
-> But I am not quite sure about the meaning of the values.
-> client_oc_size Max size of the cache?
-> client_oc_max_dirty max dirty value before the writeback starts?
-> client_oc_target_dirty ???
-> =20
+Hi,
 
-Right now the cache writeout algorithms are based on amount of dirty da=
-ta, rather than something like how long the data has been dirty. =20
-client_oc_size is the max (and therefore typical) size of the cache.
-client_oc_max_dirty is the largest amount of dirty data in the cache =E2=
-=80=94 if this much is dirty and you try to dirty more, the dirtier (a =
-write of some kind) will block until some of the other dirty data has b=
-een committed.
-client_oc_target_dirty is the amount of dirty data that will trigger th=
-e cache to start flushing data out.
+Am 18.04.2012 17:52, schrieb Andrey Korolyov:
+> Oh, I forgot to say about a patch:
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+perfect, now it works.
+
+Thanks.
+
+-martin
