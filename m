@@ -1,56 +1,79 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: Re: [patch] rbd: use gfp_flags parameter in rbd_header_from_disk()
-Date: Wed, 18 Apr 2012 09:17:25 -0500
-Message-ID: <4F8ECCF5.5000501@dreamhost.com>
-References: <20120322063309.GC7369@elgon.mountain>
+Subject: Re: [PATCH] rbd: fix integer overflow in rbd_header_from_disk()
+Date: Wed, 18 Apr 2012 09:21:46 -0500
+Message-ID: <4F8ECDFA.70209@dreamhost.com>
+References: <1334008335-8377-1-git-send-email-xi.wang@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:48105 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:48195 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751532Ab2DRORc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 10:17:32 -0400
-In-Reply-To: <20120322063309.GC7369@elgon.mountain>
+	with ESMTP id S1752533Ab2DROVs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 10:21:48 -0400
+In-Reply-To: <1334008335-8377-1-git-send-email-xi.wang@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: Xi Wang <xi.wang@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Yehuda Sadeh <yehuda@hq.newdream.net>, Sage Weil <sage@newdream.net>
 
-On 03/22/2012 01:33 AM, Dan Carpenter wrote:
-> We should use the gfp_flags that the caller specified instead of
-> GFP_KERNEL here.
+On 04/09/2012 04:52 PM, Xi Wang wrote:
+> ondisk->snap_count is read from disk via rbd_req_sync_read() and thus
+> needs validation.  Otherwise, a bogus `snap_count' could overflow the
+> kmalloc() size, leading to memory corruption.
 >
-> There is only one caller and it uses GFP_KERNEL, so this change is just
-> a cleanup and doesn't change how the code works.
->
-> Signed-off-by: Dan Carpenter<dan.carpenter@oracle.com>
+> Also use `u32' consistently for `snap_count'.
 
-This looks good.  Sorry it didn't get committed earlier.
+This looks good, however I have changed it to use UINT_MAX
+rather than ULONG_MAX, because on some architectures size_t
+(__kernel_size_t) is defined as type (unsigned int).  It
+is the more conservative value, and even on architectures
+where __BITS_PER_LONG is 64, it still offers a sane upper
+bound on the number of snapshots for a rbd device.
 
 Reviewed-by: Alex Elder <elder@dreamhost.com>
 
+> Signed-off-by: Xi Wang<xi.wang@gmail.com>
+> ---
+>   drivers/block/rbd.c |   12 +++++++-----
+>   1 files changed, 7 insertions(+), 5 deletions(-)
+>
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index a6278e7..fc9341f 100644
+> index 013c7a5..d47f7e6 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -474,11 +474,11 @@ static int rbd_header_from_disk(struct rbd_image_header *header,
+> @@ -487,18 +487,20 @@ static void rbd_coll_release(struct kref *kref)
+>    */
+>   static int rbd_header_from_disk(struct rbd_image_header *header,
+>   				 struct rbd_image_header_ondisk *ondisk,
+> -				 int allocated_snaps,
+> +				 u32 allocated_snaps,
+>   				 gfp_t gfp_flags)
+>   {
+> -	int i;
+> -	u32 snap_count;
+> +	u32 i, snap_count;
+>
+>   	if (memcmp(ondisk, RBD_HEADER_TEXT, sizeof(RBD_HEADER_TEXT)))
+>   		return -ENXIO;
+>
+>   	snap_count = le32_to_cpu(ondisk->snap_count);
+> +	if (snap_count>  (ULONG_MAX - sizeof(struct ceph_snap_context))
+> +			 / sizeof(*ondisk))
+> +		return -EINVAL;
+>   	header->snapc = kmalloc(sizeof(struct ceph_snap_context) +
+> -				snap_count * sizeof (*ondisk),
+> +				snap_count * sizeof(*ondisk),
+>   				gfp_flags);
+>   	if (!header->snapc)
 >   		return -ENOMEM;
->   	if (snap_count) {
->   		header->snap_names = kmalloc(header->snap_names_len,
-> -					     GFP_KERNEL);
-> +					     gfp_flags);
->   		if (!header->snap_names)
->   			goto err_snapc;
->   		header->snap_sizes = kmalloc(snap_count * sizeof(u64),
-> -					     GFP_KERNEL);
-> +					     gfp_flags);
->   		if (!header->snap_sizes)
->   			goto err_names;
->   	} else {
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> @@ -1592,7 +1594,7 @@ static int rbd_read_header(struct rbd_device *rbd_dev,
+>   {
+>   	ssize_t rc;
+>   	struct rbd_image_header_ondisk *dh;
+> -	int snap_count = 0;
+> +	u32 snap_count = 0;
+>   	u64 ver;
+>   	size_t len;
 >
 
