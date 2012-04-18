@@ -1,85 +1,56 @@
 From: Alex Elder <elder@dreamhost.com>
-Subject: Re: [PATCH 2/3] ceph: fix bounds check macros ceph_decode_need and
- ceph_encode_need
-Date: Wed, 18 Apr 2012 09:13:11 -0500
-Message-ID: <4F8ECBF7.7060509@dreamhost.com>
-References: <1323894273-13904-1-git-send-email-xi.wang@gmail.com> <1323894273-13904-3-git-send-email-xi.wang@gmail.com>
+Subject: Re: [patch] rbd: use gfp_flags parameter in rbd_header_from_disk()
+Date: Wed, 18 Apr 2012 09:17:25 -0500
+Message-ID: <4F8ECCF5.5000501@dreamhost.com>
+References: <20120322063309.GC7369@elgon.mountain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:38473 "EHLO
+Received: from mail.hq.newdream.net ([66.33.206.127]:48105 "EHLO
 	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751151Ab2DRONN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 10:13:13 -0400
-In-Reply-To: <1323894273-13904-3-git-send-email-xi.wang@gmail.com>
+	with ESMTP id S1751532Ab2DRORc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 10:17:32 -0400
+In-Reply-To: <20120322063309.GC7369@elgon.mountain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xi Wang <xi.wang@gmail.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Yehuda Sadeh <yehuda@hq.newdream.net>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
 
-On 12/14/2011 02:24 PM, Xi Wang wrote:
-> Given a large n, the bounds check (*p + n>  end) can be bypassed due to
-> pointer wraparound.  A safer check is (n>  end - *p).
+On 03/22/2012 01:33 AM, Dan Carpenter wrote:
+> We should use the gfp_flags that the caller specified instead of
+> GFP_KERNEL here.
 >
-> Signed-off-by: Xi Wang<xi.wang@gmail.com>
+> There is only one caller and it uses GFP_KERNEL, so this change is just
+> a cleanup and doesn't change how the code works.
+>
+> Signed-off-by: Dan Carpenter<dan.carpenter@oracle.com>
 
-I noticed this proposed change never got committed.
-
-It looks good, but I don't like the name "ceph_need()".
-
-I am planning to pull this in soon, modified like this:
-
-static inline int ceph_need_ok(void **p, void *end, size_t n)
-{
-        return end >= *p && n <= end - *p;
-}
-
-And then used like this:
-
-                if (!likely(ceph_need_ok(p, end, n)))
-
-If you have an objection to that, please say so soon
-(and if you have no objection, please ACK).
+This looks good.  Sorry it didn't get committed earlier.
 
 Reviewed-by: Alex Elder <elder@dreamhost.com>
 
-> ---
->   include/linux/ceph/decode.h |    9 +++++++--
->   1 files changed, 7 insertions(+), 2 deletions(-)
->
-> diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
-> index c5b6939..ea6db7b 100644
-> --- a/include/linux/ceph/decode.h
-> +++ b/include/linux/ceph/decode.h
-> @@ -12,6 +12,11 @@
->    *   void *end    pointer to end of buffer (last byte + 1)
->    */
->
-> +static inline int ceph_need(void **p, void *end, size_t n)
-> +{
-> +	return ((end<  *p) || (n>  end - *p));
-> +}
-> +
->   static inline u64 ceph_decode_64(void **p)
->   {
->   	u64 v = get_unaligned_le64(*p);
-> @@ -47,7 +52,7 @@ static inline void ceph_decode_copy(void **p, void *pv, size_t n)
->    */
->   #define ceph_decode_need(p, end, n, bad)		\
->   	do {						\
-> -		if (unlikely(*(p) + (n)>  (end))) 	\
-> +		if (unlikely(ceph_need(p, end, n)))	\
->   			goto bad;			\
->   	} while (0)
->
-> @@ -166,7 +171,7 @@ static inline void ceph_encode_string(void **p, void *end,
->
->   #define ceph_encode_need(p, end, n, bad)		\
->   	do {						\
-> -		if (unlikely(*(p) + (n)>  (end))) 	\
-> +		if (unlikely(ceph_need(p, end, n)))	\
->   			goto bad;			\
->   	} while (0)
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index a6278e7..fc9341f 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -474,11 +474,11 @@ static int rbd_header_from_disk(struct rbd_image_header *header,
+>   		return -ENOMEM;
+>   	if (snap_count) {
+>   		header->snap_names = kmalloc(header->snap_names_len,
+> -					     GFP_KERNEL);
+> +					     gfp_flags);
+>   		if (!header->snap_names)
+>   			goto err_snapc;
+>   		header->snap_sizes = kmalloc(snap_count * sizeof(u64),
+> -					     GFP_KERNEL);
+> +					     gfp_flags);
+>   		if (!header->snap_sizes)
+>   			goto err_names;
+>   	} else {
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 
