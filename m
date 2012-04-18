@@ -1,38 +1,32 @@
-From: Xi Wang <xi.wang@gmail.com>
-Subject: Re: [PATCH] rbd: fix integer overflow in rbd_header_from_disk()
-Date: Wed, 18 Apr 2012 14:09:35 -0400
-Message-ID: <30227880-FACB-4180-B129-7B5D407094E5@gmail.com>
-References: <1334008335-8377-1-git-send-email-xi.wang@gmail.com> <4F8ECDFA.70209@dreamhost.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
+From: Alex Elder <elder@dreamhost.com>
+Subject: Re: [PATCH 2/3] ceph: fix bounds check macros ceph_decode_need and
+ ceph_encode_need
+Date: Wed, 18 Apr 2012 13:41:23 -0500
+Message-ID: <4F8F0AD3.2030403@dreamhost.com>
+References: <1323894273-13904-1-git-send-email-xi.wang@gmail.com> <1323894273-13904-3-git-send-email-xi.wang@gmail.com> <4F8ECBF7.7060509@dreamhost.com> <Pine.LNX.4.64.1204181052530.15730@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:43130 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751311Ab2DRSJj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 14:09:39 -0400
-Received: by yenl12 with SMTP id l12so3872201yen.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Apr 2012 11:09:39 -0700 (PDT)
-In-Reply-To: <4F8ECDFA.70209@dreamhost.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:41194 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751245Ab2DRSlZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Apr 2012 14:41:25 -0400
+In-Reply-To: <Pine.LNX.4.64.1204181052530.15730@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@dreamhost.com>
-Cc: ceph-devel@vger.kernel.org, Yehuda Sadeh <yehuda@hq.newdream.net>, Sage Weil <sage@newdream.net>
+To: Sage Weil <sage@newdream.net>
+Cc: Xi Wang <xi.wang@gmail.com>, ceph-devel@vger.kernel.org
 
-On Apr 18, 2012, at 10:21 AM, Alex Elder wrote:
-> 
-> This looks good, however I have changed it to use UINT_MAX
-> rather than ULONG_MAX, because on some architectures size_t
-> (__kernel_size_t) is defined as type (unsigned int).  It
-> is the more conservative value, and even on architectures
-> where __BITS_PER_LONG is 64, it still offers a sane upper
-> bound on the number of snapshots for a rbd device.
+On 04/18/2012 12:53 PM, Sage Weil wrote:
+> Would something like ceph_has_room() make more sense?
 
-Looks good to me.
+Yes, and standing by itself it reads a lot better too.
 
-BTW, on which arch is size_t 32-bit while long is 64?
-Several commits still use ULONG_MAX, such as
+The "need_ok" came from the fact that it was only ever
+called by ceph_need_*() macros.
 
-http://git.kernel.org/linus/64486697
+Without objection I'll change it to ceph_has_room()
+before I commit it for testing.
 
-- xi
+					-Alex
