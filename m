@@ -1,65 +1,34 @@
-From: Ajit K Jena <ajit@iitb.ac.in>
-Subject: Re: Compilation issues on Fedora 13 and Fedora 15
-Date: Thu, 19 Apr 2012 16:30:49 +0530
-Message-ID: <1334833249.17770.36.camel@indica.cc.iitb.ac.in>
-References: <1332665829.7312.8.camel@indica.cc.iitb.ac.in>
-	 <1332689005.2102.3.camel@jdlaptop.lesbg.loc>
-	 <1334337873.17237.13.camel@indica.cc.iitb.ac.in>
-	 <alpine.LFD.2.02.1204140209460.13159@stderr.seidelnet.de>
-	 <1334402200.3126.17.camel@jdlaptop.lesbg.loc>
-Reply-To: ajit@iitb.ac.in
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Re: rbd snapshot in qemu and libvirt
+Date: Thu, 19 Apr 2012 14:42:10 +0200
+Message-ID: <4F900822.50707@tuxadero.com>
+References: <4F8EBCB9.3030803@tuxadero.com> <4F8EBD4E.1050606@widodh.nl> <4F8EC028.40601@tuxadero.com> <CABYiri-7DYgFsSBYSbWVzXxuA_NgzaAN9s9hQ_JXuuZhxzLSaw@mail.gmail.com> <4F8ED5CA.7040006@tuxadero.com> <CABYiri_GOHwpOZ2ZOUU4xTtHDmJFC01f07c2nQZ3yxT9j7m1Rg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.iitb.ac.in ([59.162.23.13]:37236 "EHLO smtp1.iitb.ac.in"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752601Ab2DSLBL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 19 Apr 2012 07:01:11 -0400
-Received: from ldns1.iitb.ac.in (ldns1.iitb.ac.in [10.200.12.1])
-	by smtp1.iitb.ac.in (Postfix) with SMTP id 58411C081867
-	for <ceph-devel@vger.kernel.org>; Thu, 19 Apr 2012 16:30:53 +0530 (IST)
-Received: from [10.100.106.210] (indica.cc.iitb.ac.in [10.100.106.210])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by smtp-auth.iitb.ac.in (Postfix) with ESMTP id B3F4213906
-	for <ceph-devel@vger.kernel.org>; Thu, 19 Apr 2012 16:30:49 +0530 (IST)
-In-Reply-To: <1334402200.3126.17.camel@jdlaptop.lesbg.loc>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:60246 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751245Ab2DSMmU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Apr 2012 08:42:20 -0400
+Received: from [172.30.1.184] ([192.166.201.59])
+	(authenticated bits=0)
+	by einhorn.in-berlin.de (8.13.6/8.13.6/Debian-1) with ESMTP id q3JCgAMJ013893
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Thu, 19 Apr 2012 14:42:18 +0200
+In-Reply-To: <CABYiri_GOHwpOZ2ZOUU4xTtHDmJFC01f07c2nQZ3yxT9j7m1Rg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Dear List,
+Hi List,
 
-I have been able to get things going on CentOS 6.0. Have
-been able to set up a small prototype based on CEPH 0.45
-version.
+is it possible to quiesce the disk before a snapshot? Or does it make no 
+sense with rbd?
+How about the new rbd_cache, does it get flushed before the snapshot?
 
-Just wanted to post here for records so that it may benefit
-someone else.
+I would like to use it like this.
 
---ajit
+virsh snapshot-create --quiesce $DOMAIN
 
-On Sat, 2012-04-14 at 14:16 +0300, Jonathan Dieter wrote:
-> On Sat, 2012-04-14 at 02:30 +0200, Udo Seidel wrote:
-> > Hi Ajit,
-> > I have successfully built 0.43 and 0.45 on Fedora 16 (last Fedora updates 
-> > installed on Thursday). I suggest to try again with either of these 
-> > versions. I have used the src.rpm packages from here: 
-> > kojipkgs.fedoraproject.org/packages/ceph/
-> > Good luck,
-> > Udo
-> 
-> +1
-> 
-> The source RPMs for Fedora 17 should rebuild just fine for Fedora 15 and
-> 16.
-> 
-> Jonathan
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+-martin
