@@ -1,67 +1,93 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Re: Best practice - upgrade ceph cluster
-Date: Fri, 20 Apr 2012 22:18:57 +0200
-Message-ID: <1364130642661991879@unknownmsgid>
-References: <5934003767531706998@unknownmsgid> <12410AE5386441BAAE2D0996C7D025AD@dreamhost.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Log files with 0.45
+Date: Fri, 20 Apr 2012 13:21:50 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1204201317480.27669@cobra.newdream.net>
+References: <4F8E48C3.7040309@bisect.de> <4A32F0EAF810462DA627FE3E06945B65@dreamhost.com>
+ <CAPud5_6M_f2eSz4dMT7QGXVpdbtc3Q_sPD-byAYL0Y+JQ0bAVA@mail.gmail.com>
+ <CADxhoDSjfQBoUNWwiKFzj=Hjm2C6cvacbR1si48Ad+_sta9KMA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1450143406-1334953310=:27669"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:36655 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751371Ab2DTUS7 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Apr 2012 16:18:59 -0400
-Received: by wibhq7 with SMTP id hq7so1040394wib.1
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Apr 2012 13:18:58 -0700 (PDT)
-In-Reply-To: <12410AE5386441BAAE2D0996C7D025AD@dreamhost.com>
+Received: from cobra.newdream.net ([66.33.216.30]:41524 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752146Ab2DTUVv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Apr 2012 16:21:51 -0400
+In-Reply-To: <CADxhoDSjfQBoUNWwiKFzj=Hjm2C6cvacbR1si48Ad+_sta9KMA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <gregory.farnum@dreamhost.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Calvin Morrow <calvin.morrow@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 20 kwi 2012, at 21:35, Greg Farnum <gregory.farnum@dreamhost.com> wr=
-ote:
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-> On Friday, April 20, 2012 at 12:00 PM, S=C5=82awomir Skowron wrote:
->> Maybe it's a lame question, but is anybody knows simplest procedure,
->> for most non-disrubtive upgrade of ceph cluster with real workload o=
+--557981400-1450143406-1334953310=:27669
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+
+On Fri, 20 Apr 2012, Calvin Morrow wrote:
+> I'm seeing the same.  < 12 hours with 6 OSDs resulted in ~18 GB of
+> logs.  I had to change my log rotate config to compress based on size
+> instead of once a day or I ended up with a full root partition.
+>=20
+> I would love to know if there's a better way to handle it.
+
+This will be fixed in 0.46. You can also cherry-pick=20
+ac874a62533c3845f9e68201bfd4f7020332da24 from the stable branch to fix=20
+this.
+
+You can also set 'debug optracker =3D 0' to turn this down.
+
+sage
+
+
+
+>=20
+> Calvin
+>=20
+> On Fri, Apr 20, 2012 at 5:05 PM, Nick Bartos <nick@pistoncloud.com> wrote=
+:
+> > Is there a recommended log config for production systems? =A0I'm also
+> > trying to decrease the verbosity in 0.45, using the options specified
+> > here: =A0http://ceph.newdream.net/wiki/Debugging. =A0Setting them down =
+to
+> > '1' doesn't end the insane log sprawl I'm seeing.
+> >
+> > On Tue, Apr 17, 2012 at 10:09 PM, Greg Farnum
+> > <gregory.farnum@dreamhost.com> wrote:
+> >> On Tuesday, April 17, 2012 at 9:53 PM, Danny Kukawka wrote:
+> >>> Hi,
+> >>>
+> >>> did something change with the default log levels for OSDs on v0.45? W=
+ith
+> >>> 0.43 and IIRC also 0.44* the logfiles had a acceptable size, but now =
+I
+> >>> get by default ~3Gbyte per OSD over 12 hours without any change in th=
+e
+> >>> config file.
+> >>>
+> >>> Danny
+> >> I think some extra event notifications got stuck in the logs for OSD o=
+perations; they're nice for debugging but may well have a log level higher =
+than they should. They should be easy to compress a lot, though!
+> >>
+> >> Can you comment on this, Sam?
+> >> -Greg
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
->> it ??
->
-> Unfortunate though it is, non-disruptive upgrades aren't a great idea=
- to attempt right now. We've architected the system to make it possible=
-, and we *try* to keep things forward-compatible, but we don't currentl=
-y do any of the testing necessary to promise something like that.
-> It will be possible Very Soon in one form or another, but for now you=
- shouldn't count on it. When you can, you'll hear about it =E2=80=94 we=
-'ll be proudly sharing that we're testing it, it works, whether it's on=
- our main branch or a new long-term stable, etc etc. ;)
->
-
-I am waiting impatiently :)
-
->> It's most important if we want semi-automate this process with some
->> tools. Maybe there is a cookbook for this operation ?? I know that
->> automate this is not simple, and dangerous, but even in manual upgra=
-de
->> it's important to know what can we expect.
->
-> So, for now what we recommend is shutting down the cluster, upgrading=
- everything all at once, and then starting up the monitors, OSDs, and M=
-DS (in that order). Handling disk changes is a lot easier to write and =
-test than making sure that things are wire-compatible, and has been wor=
-king well for a long time. If for some reason it makes you feel better =
-you should also be able to upgrade the monitors as a group, then the OS=
-Ds as a group, then the MDS. Things will start back up and the OSDs wil=
-l go through a brief peering period, but since nobody will have extra d=
-ata or anything it should be fast.
-> -Greg
->
->
-
-Ok thanks.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-1450143406-1334953310=:27669--
