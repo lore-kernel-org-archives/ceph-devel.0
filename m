@@ -1,82 +1,32 @@
-From: =?UTF-8?B?6IOh54Ca5qOu?= <softrank.net@gmail.com>
-Subject: Re: Questions about bucket algorithm and bucket choose
-Date: Sat, 21 Apr 2012 16:50:36 +0800
-Message-ID: <CALwGbPJ1C4uL=VZ455WBV=JkqhGarBQcajRzWmuXtTLZUa3byQ@mail.gmail.com>
-References: <CALwGbPKqXyubH1O-cBoYm-LaJ86LR3QOzzd=mYyL8HESx1+13g@mail.gmail.com>
-	<Pine.LNX.4.64.1204161425180.31853@cobra.newdream.net>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: collectd and ceph plugin
+Date: Sat, 21 Apr 2012 13:06:34 +0400
+Message-ID: <CABYiri_+2qiPjqHOGBmfFK-LD7ZJtjdM=GC8-JrAVLJmjmcpBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:63755 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751980Ab2DUIug convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 21 Apr 2012 04:50:36 -0400
-Received: by iagz16 with SMTP id z16so14381545iag.19
-        for <ceph-devel@vger.kernel.org>; Sat, 21 Apr 2012 01:50:36 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1204161425180.31853@cobra.newdream.net>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:39021 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751145Ab2DUJGz convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 21 Apr 2012 05:06:55 -0400
+Received: by wgbds11 with SMTP id ds11so1285225wgb.1
+        for <ceph-devel@vger.kernel.org>; Sat, 21 Apr 2012 02:06:54 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Oh, perhaps I find the reason for the bad behavior.
+Hello everyone,
 
-According to Jenkins hash algorithm, any number of lower bits of the
-hash result is uniformly distributed, but the modular arithmetic can
-destroy the uniform distribution, unless the size of the bucket is the
-power of 2!
+I have just tried ceph collectd fork on wheezy and noticed that all
+logs for ceph plugin produce nothing but zeroes(see below) for all
+types of nodes. Python cephtool works just fine. Collectd run as root
+and there is no obvious errors like socket permissions and no tips
+from its log. First of all, I don`t know if ceph plugin supposed to
+work or not - there is no clearly state except tracker tickets :)
 
-Am I right?
-
-On Tue, Apr 17, 2012 at 5:29 AM, Sage Weil <sage@newdream.net> wrote:
-> On Sun, 15 Apr 2012, =A0wrote:
->> Hi everyone.
->>
->> One question is about performance of bucket algorithms, it seems tha=
-t
->> on every aspect, straw bucket is at least not worse than list bucket=
-=2E
->> So does it mean we shall always use straw bucket instead of list
->> bucket?
->
-> Well, list on average will calculate a hash for 1/2 of the items, whi=
-le
-> straw always does every item. =A0That said, we use straw by default f=
-or all
-> buckets. =A0As long as there is _some_ hierarchy, the individual buck=
-ets
-> don't get too big, and CRUSH is so cheap anyway that it doesn't reall=
-y
-> matter... especially when compared to the cost of moving data due to =
-a
-> less-than-optimal remapping.
->
->> I was browsing branch tree of ceph to trace back earlier versions of
->> the implementation. I noticed that crush_uniform_bucket_choose has
->> been significantly changed. I read the comment which said the origin=
-al
->> method (seems to be described in the thesis) is not random enough an=
-d
->> has some bad behavior, but I don't know what kind of bad behavior is
->> that. For what reason a random permutation is a better choice?
->
-> If I remember correctly, the problem was that it would favor certain =
-nodes
-> when there were too many or certain patterns of failures within the
-> bucket (I don't remember the details). =A0The original algorithmw as
-> supposed to give you a random permutation too, but it didn't always d=
-o
-> that.
->
-> I think that code is also used as a fallback if the sampling fails to
-> return a good value after too many tries.
->
-> This will be one of the things we look at in a month or two when we
-> take a careful look at CRUSH.
->
-> sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+epoch,filestore.journal_queue_max_ops.type,filestore.journal_queue_ops.type,filestore.journal_ops.type,filestore.journal_queue_max_bytes.type,filestore.journal_queue_bytes.type,filestore.journal_bytes.type,filestore.journal_latency.type,filestore.op_queue_max_ops.type,filestore.op_queue_ops.type,filestore.ops.type,filestore.op_queue_max_bytes.type,filestore.op_queue_bytes.type,filestore.bytes.type,filestore.apply_latency.type,filestore.committing.type,filestore.commitcycle.type,filestore.commitcycle_interval.type,filestore.commitcycle_latency.type,filestore.journal_full.type,osd.opq.type,osd.op_wip.type,osd.op.type,osd.op_in_bytes.type,osd.op_out_bytes.type,osd.op_latency.type,osd.op_r.type,osd.op_r_out_bytes.type,osd.op_r_latency.type,osd.op_w.type,osd.op_w_in_bytes.type,osd.op_w_rlat.typ
+ e,osd.op_w_latency.type,osd.op_rw.type,osd.op_rw_in_bytes.type,osd.op_rw_out_bytes.type,osd.op_rw_rlat.type,osd.op_rw_latency.type,osd.subop.type,osd.subop_in_bytes.type,osd.subop_latency.type,osd.subop_w.type,osd.subop_w_in_bytes.type,osd.subop_w_latency.type,osd.subop_pull.type,osd.subop_pull_latency.type,osd.subop_push.type,osd.subop_push_in_bytes.type,osd.subop_push_latency.type,osd.pull.type,osd.push.type,osd.push_out_bytes.type,osd.recovery_ops.type,osd.loadavg.type,osd.buffer_bytes.type,osd.numpg.type,osd.numpg_primary.type,osd.numpg_replica.type,osd.numpg_stray.type,osd.heartbeat_to_peers.type,osd.heartbeat_from_peers.type,osd.map_messages.type,osd.map_message_epochs.type,osd.map_message_epoch_dups.type
+1334959476.043,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0,0,0.000000,0,0,0.000000,0,0,0.000000,0.000000,0,0,0,0.000000,0.000000,0,0,0.000000,0,0,0.000000,0,0.000000,0,0,0.000000,0,0,0,0,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0,0,0
+1334959486.033,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0,0,0.000000,0,0,0.000000,0,0,0.000000,0.000000,0,0,0,0.000000,0.000000,0,0,0.000000,0,0,0.000000,0,0.000000,0,0,0.000000,0,0,0,0,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0,0,0
+1334959496.038,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0,0,0.000000,0,0,0.000000,0,0,0.000000,0.000000,0,0,0,0.000000,0.000000,0,0,0.000000,0,0,0.000000,0,0.000000,0,0,0.000000,0,0,0,0,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0,0,0
