@@ -1,91 +1,52 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Questions about bucket algorithm and bucket choose
-Date: Sat, 21 Apr 2012 21:21:25 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1204212120460.29786@cobra.newdream.net>
-References: <CALwGbPKqXyubH1O-cBoYm-LaJ86LR3QOzzd=mYyL8HESx1+13g@mail.gmail.com>
- <Pine.LNX.4.64.1204161425180.31853@cobra.newdream.net>
- <CALwGbPJ1C4uL=VZ455WBV=JkqhGarBQcajRzWmuXtTLZUa3byQ@mail.gmail.com>
+Subject: Re: collectd and ceph plugin
+Date: Sat, 21 Apr 2012 21:32:30 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1204212124100.29786@cobra.newdream.net>
+References: <CABYiri_+2qiPjqHOGBmfFK-LD7ZJtjdM=GC8-JrAVLJmjmcpBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1576963055-1335068485=:29786"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37325 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35541 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750802Ab2DVEV1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Apr 2012 00:21:27 -0400
-In-Reply-To: <CALwGbPJ1C4uL=VZ455WBV=JkqhGarBQcajRzWmuXtTLZUa3byQ@mail.gmail.com>
+	with ESMTP id S1750756Ab2DVEcc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Apr 2012 00:32:32 -0400
+In-Reply-To: <CABYiri_+2qiPjqHOGBmfFK-LD7ZJtjdM=GC8-JrAVLJmjmcpBQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?6IOh54Ca5qOu?= <softrank.net@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Sat, 21 Apr 2012, Andrey Korolyov wrote:
+> Hello everyone,
+> 
+> I have just tried ceph collectd fork on wheezy and noticed that all
+> logs for ceph plugin produce nothing but zeroes(see below) for all
+> types of nodes. Python cephtool works just fine. Collectd run as root
+> and there is no obvious errors like socket permissions and no tips
+> from its log. First of all, I don`t know if ceph plugin supposed to
+> work or not - there is no clearly state except tracker tickets :)
+> 
+> epoch,filestore.journal_queue_max_ops.type,filestore.journal_queue_ops.type,filestore.journal_ops.type,filestore.journal_queue_max_bytes.type,filestore.journal_queue_bytes.type,filestore.journal_bytes.type,filestore.journal_latency.type,filestore.op_queue_max_ops.type,filestore.op_queue_ops.type,filestore.ops.type,filestore.op_queue_max_bytes.type,filestore.op_queue_bytes.type,filestore.bytes.type,filestore.apply_latency.type,filestore.committing.type,filestore.commitcycle.type,filestore.commitcycle_interval.type,filestore.commitcycle_latency.type,filestore.journal_full.type,osd.opq.type,osd.op_wip.type,osd.op.type,osd.op_in_bytes.type,osd.op_out_bytes.type,osd.op_latency.type,osd.op_r.type,osd.op_r_out_bytes.type,osd.op_r_latency.type,osd.op_w.type,osd.op_w_in_bytes.type,osd.op_w_rlat.t
+ ype,osd.op_w_latency.type,osd.op_rw.type,osd.op_rw_in_bytes.type,osd.op_rw_out_bytes.type,osd.op_rw_rlat.type,osd.op_rw_latency.type,osd.subop.type,osd.subop_in_bytes.type,osd.subop_latency.
+ ty
+>  pe,osd.subop_w.type,osd.subop_w_in_bytes.type,osd.subop_w_latency.type,osd.subop_pull.type,osd.subop_pull_latency.type,osd.subop_push.type,osd.subop_push_in_bytes.type,osd.subop_push_latency.type,osd.pull.type,osd.push.type,osd.push_out_bytes.type,osd.recovery_ops.type,osd.loadavg.type,osd.buffer_bytes.type,osd.numpg.type,osd.numpg_primary.type,osd.numpg_replica.type,osd.numpg_stray.type,osd.heartbeat_to_peers.type,osd.heartbeat_from_peers.type,osd.map_messages.type,osd.map_message_epochs.type,osd.map_message_epoch_dups.type
+> 1334959476.043,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0,0,0.000000,0,0,0.000000,0,0,0.000000,0.000000,0,0,0,0.000000,0.000000,0,0,0.000000,0,0,0.000000,0,0.000000,0,0,0.000000,0,0,0,0,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0,0,0
+> 1334959486.033,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0,0,0.000000,0,0,0.000000,0,0,0.000000,0.000000,0,0,0,0.000000,0.000000,0,0,0.000000,0,0,0.000000,0,0.000000,0,0,0.000000,0,0,0,0,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0,0,0
+> 1334959496.038,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0.000000,0.000000,0,0,0,0.000000,0,0,0.000000,0,0,0.000000,0.000000,0,0,0,0.000000,0.000000,0,0,0.000000,0,0,0.000000,0,0.000000,0,0,0.000000,0,0,0,0,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0,0,0
 
---557981400-1576963055-1335068485=:29786
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+My memory is hazy here, but I think you might be using an old version of 
+the plugin.  The most recent version can be found at
 
-On Sat, 21 Apr 2012,  wrote:
-> Oh, perhaps I find the reason for the bad behavior.
->=20
-> According to Jenkins hash algorithm, any number of lower bits of the
-> hash result is uniformly distributed, but the modular arithmetic can
-> destroy the uniform distribution, unless the size of the bucket is the
-> power of 2!
->=20
-> Am I right?
+	git://ceph.newdream.net/git/collectd-4.1.10.git
 
-Maybe, but I'm not ready to blame the hash yet.  Is there a specific map=20
-you're looking at?  Can you attach that so we can be sure we're talking=20
-about the same thing?
+in the 'ceph' branch.  Note that this isn't an upstream collectd tree... 
+it's based on a debian package source snapshot, and the ceph-full-history 
+branch has a bunch of build-related crap in git that shouldn't be.  
+
+We aren't using it anymore, but the code works.  If you or someone else 
+wants to adopt it and get it upstream into collectd that would be great!  
+
+FWIW, dh has moved to statsd instead: https://github.com/etsy/statsd
 
 sage
 
-
->=20
-> On Tue, Apr 17, 2012 at 5:29 AM, Sage Weil <sage@newdream.net> wrote:
-> > On Sun, 15 Apr 2012, =A0wrote:
-> >> Hi everyone.
-> >>
-> >> One question is about performance of bucket algorithms, it seems that
-> >> on every aspect, straw bucket is at least not worse than list bucket.
-> >> So does it mean we shall always use straw bucket instead of list
-> >> bucket?
-> >
-> > Well, list on average will calculate a hash for 1/2 of the items, while
-> > straw always does every item. =A0That said, we use straw by default for=
- all
-> > buckets. =A0As long as there is _some_ hierarchy, the individual bucket=
-s
-> > don't get too big, and CRUSH is so cheap anyway that it doesn't really
-> > matter... especially when compared to the cost of moving data due to a
-> > less-than-optimal remapping.
-> >
-> >> I was browsing branch tree of ceph to trace back earlier versions of
-> >> the implementation. I noticed that crush_uniform_bucket_choose has
-> >> been significantly changed. I read the comment which said the original
-> >> method (seems to be described in the thesis) is not random enough and
-> >> has some bad behavior, but I don't know what kind of bad behavior is
-> >> that. For what reason a random permutation is a better choice?
-> >
-> > If I remember correctly, the problem was that it would favor certain no=
-des
-> > when there were too many or certain patterns of failures within the
-> > bucket (I don't remember the details). =A0The original algorithmw as
-> > supposed to give you a random permutation too, but it didn't always do
-> > that.
-> >
-> > I think that code is also used as a fallback if the sampling fails to
-> > return a good value after too many tries.
-> >
-> > This will be one of the things we look at in a month or two when we
-> > take a careful look at CRUSH.
-> >
-> > sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-1576963055-1335068485=:29786--
