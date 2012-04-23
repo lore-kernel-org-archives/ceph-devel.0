@@ -1,73 +1,54 @@
-From: Stefan Kleijkers <stefan@unilogicnetworks.net>
-Subject: Re: SAS disks for OSD's
-Date: Mon, 23 Apr 2012 21:22:15 +0200
-Message-ID: <4F95ABE7.6020202@unilogicnetworks.net>
-References: <loom.20120423T175101-19@post.gmane.org>
+From: Calvin Morrow <calvin.morrow@gmail.com>
+Subject: NFS over Ceph
+Date: Mon, 23 Apr 2012 17:50:07 -0600
+Message-ID: <CADxhoDTMQMrNBYE8PykjB4UCkCBmyXcUsKxnaXmfyYNbfr9-7A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-out117.unilogicnetworks.net ([62.133.206.117]:43392 "EHLO
-	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754199Ab2DWTWR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 23 Apr 2012 15:22:17 -0400
-In-Reply-To: <loom.20120423T175101-19@post.gmane.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:40051 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754025Ab2DWXuI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Apr 2012 19:50:08 -0400
+Received: by wgbdr13 with SMTP id dr13so76184wgb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Apr 2012 16:50:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hello,
+I've been testing a couple different use scenarios with Ceph 0.45
+(two-node cluster, single mon, active/standby mds).  I have a pair of
+KVM virtual machines acting as ceph clients to re-export iSCSI over
+RBD block devices, and also NFS over a Ceph mount (mount -t ceph).
 
-I don't think you will see a great difference in performance between 
-"sas" and "sata" disks, because the connection type is only a minor 
-point in performance. There are other factors that impact the 
-performance a lot more.
-How many RPMs are the disks? The more RPM the lower the average seek 
-time. Lower average seek time is great for random IO.
-How dense are the disks, with more sectors per cilinder you can read or 
-write more data per round. Great for sequential IO.
+The iSCSI re-export is going very well.  So far I haven't had any
+issues to speak of (even while testing Pacemaker based failover).
 
-And there are other factors that impact performance. But in general the 
-"sata" disks are disks with low RPMs and high density, therefor they are 
-(in general) poor on random IO and great on sequential IO. With the 
-"sas" disks it's the other way around. But even something like 2.5" vs 
-3.5" can impact performance because it can have impact on the density of 
-the disk.
+The NFS re-export isn't going nearly as well.  I'm running into
+several issues with reliability, speed, etc.  To start with, file
+operations seem painstakingly long.  Copying over multiple 20 Kb files
+takes  > 10 seconds per file.  "dd if=/dev/zero of='.... goes very
+fast once the data transfer starts, but the actual opening of the file
+can take nearly as long (or longer depending on size).
 
-But I think using a "sas" disk as journal won't give you any performance 
-gain. As journal you want a device that can handle a lot of IOPS and 
-also have a lot of bandwidth.
-I think a SSD gives a good balance between IOPS, bandwidth, size and 
-price (compared to sata/sas disks and nvram).
+I've also run into cases where the directory mounted as ceph
+(/mnt/ceph) "hangs" on the NFS server requiring a reboot of the NFS
+server.
 
-"sas" disks for the OSD can gain you performance compared to the "sata" 
-disks, but it depends on the specs of the disk, the workload, the kind 
-and size of the journal, ratio between write/read, etc. So it's a little 
-difficult to tell you if the "sas" disks gain you any or enough 
-performance for the extra cost.
+That said, are there any special recommendations regarding exporting
+Ceph through NFS?  I know that in the wiki and also (still present as
+of 3.3.3) kernel source indicates:
 
-Stefan
+* NFS export support
+*
+* NFS re-export of a ceph mount is, at present, only semireliable.
+* The basic issue is that the Ceph architectures doesn't lend itself
+* well to generating filehandles that will remain valid forever.
 
-On 04/23/2012 05:56 PM, Madhusudhana U wrote:
-> Hi all,
-> Is any performance benefit we will get using SAS storage for OSD instead of
-> SATA storage ? Is any one using SAS drives which is producing good performance?
->
-> Or I can use SAS drives for journal and SATA storage for OSD?
->
-> Which one in above two scenario would yield a better performance?
->
-> I would like to test above scenarios, before i would like to hear if
-> anyone got good results with SAS drives.
->
-> Thanks
-> __M
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Should I be trying this a different way?  NFS export of a filesystem
+(ext4 / xfs) on RBD?  Other options?  Also, does the filehandle
+limitation specified above apply to more than NFS (such as a KVM image
+using a file on a ceph mount for storage backing)?
 
+Any insight would be appreciated.
+
+Calvin
