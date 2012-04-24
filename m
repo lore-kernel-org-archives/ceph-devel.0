@@ -1,39 +1,58 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: Strange write behavior on an osd
-Date: Tue, 24 Apr 2012 19:39:22 +0200
-Message-ID: <4F96E54A.6080904@tuxadero.com>
-References: <4F96B971.5050806@tuxadero.com> <4F96C557.4090603@gmail.com> <4F96CF81.4030707@tuxadero.com> <4F96D56E.1080205@gmail.com>
-Reply-To: martin@tuxadero.com
+From: Neil Horman <nhorman@tuxdriver.com>
+Subject: Re: Ceph on btrfs 3.4rc
+Date: Tue, 24 Apr 2012 13:41:15 -0400
+Message-ID: <20120424174115.GA9012@hmsreliant.think-freely.org>
+References: <CAJafhzSVZ3+1ApgJU=sQu6gM62BeWVGG4mqFPNYRHx79czYJtQ@mail.gmail.com>
+ <20120424152141.GB3326@localhost.localdomain>
+ <Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
+ <20120424173343.GB6164@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:34354 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756812Ab2DXRjZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Apr 2012 13:39:25 -0400
-In-Reply-To: <4F96D56E.1080205@gmail.com>
+Received: from charlotte.tuxdriver.com ([70.61.120.58]:56689 "EHLO
+	smtp.tuxdriver.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756795Ab2DXRlc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Apr 2012 13:41:32 -0400
+Content-Disposition: inline
+In-Reply-To: <20120424173343.GB6164@localhost.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-15?Q?Jo=E3o_Eduardo_Lu=EDs?= <jecluis@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Josef Bacik <josef@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, Christian Brunner <christian@brunner-muc.de>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Hi,
+On Tue, Apr 24, 2012 at 01:33:44PM -0400, Josef Bacik wrote:
+> On Tue, Apr 24, 2012 at 09:26:15AM -0700, Sage Weil wrote:
+> > On Tue, 24 Apr 2012, Josef Bacik wrote:
+> > > On Fri, Apr 20, 2012 at 05:09:34PM +0200, Christian Brunner wrote:
+> > > > After running ceph on XFS for some time, I decided to try btrfs again.
+> > > > Performance with the current "for-linux-min" branch and big metadata
+> > > > is much better. The only problem (?) I'm still seeing is a warning
+> > > > that seems to occur from time to time:
+> > 
+> > Actually, before you do that... we have a new tool, 
+> > test_filestore_workloadgen, that generates a ceph-osd-like workload on the 
+> > local file system.  It's a subset of what a full OSD might do, but if 
+> > we're lucky it will be sufficient to reproduce this issue.  Something like
+> > 
+> >  test_filestore_workloadgen --osd-data /foo --osd-journal /bar
+> > 
+> > will hopefully do the trick.
+> > 
+> > Christian, maybe you can see if that is able to trigger this warning?  
+> > You'll need to pull it from the current master branch; it wasn't in the 
+> > last release.
+> > 
+> 
+> Keep up the good work Sage, at this rate I'll never have to setup ceph for
+> myself :),
+> 
+You can setup another OSD on daedalus if you're looking for something to do
+Josef :)
+Neil
 
-Am 24.04.2012 18:31, schrieb Jo=E3o Eduardo Lu=EDs:
-> What kernel and btrfs versions are you using?
-
-Kernel:3.4.0-rc3
-
-btrfs-tools                     0.19+20100601-3ubuntu3
-
-That's how I created the fs.
-mkfs.btrfs -n 32k -l 32k /dev/sd{c,d,e,f}
-
--martin
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Josef
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
