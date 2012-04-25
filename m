@@ -1,58 +1,43 @@
-From: Neil Horman <nhorman@tuxdriver.com>
-Subject: Re: Ceph on btrfs 3.4rc
-Date: Tue, 24 Apr 2012 13:41:15 -0400
-Message-ID: <20120424174115.GA9012@hmsreliant.think-freely.org>
-References: <CAJafhzSVZ3+1ApgJU=sQu6gM62BeWVGG4mqFPNYRHx79czYJtQ@mail.gmail.com>
- <20120424152141.GB3326@localhost.localdomain>
- <Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
- <20120424173343.GB6164@localhost.localdomain>
+From: H Hartley Sweeten <hartleys@visionengravers.com>
+Subject: [PATCH] crush: include header for global symbols
+Date: Tue, 24 Apr 2012 17:38:37 -0700
+Message-ID: <201204241738.38280.hartleys@visionengravers.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from charlotte.tuxdriver.com ([70.61.120.58]:56689 "EHLO
-	smtp.tuxdriver.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756795Ab2DXRlc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Apr 2012 13:41:32 -0400
+Received: from mail209.messagelabs.com ([216.82.255.3]:56498 "EHLO
+	mail209.messagelabs.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753626Ab2DYAiw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 24 Apr 2012 20:38:52 -0400
 Content-Disposition: inline
-In-Reply-To: <20120424173343.GB6164@localhost.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josef Bacik <josef@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, Christian Brunner <christian@brunner-muc.de>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: netdev@vger.kernel.org, ceph-devel@vger.kernel.org, sage@newdream.net, davem@davemloft.net
 
-On Tue, Apr 24, 2012 at 01:33:44PM -0400, Josef Bacik wrote:
-> On Tue, Apr 24, 2012 at 09:26:15AM -0700, Sage Weil wrote:
-> > On Tue, 24 Apr 2012, Josef Bacik wrote:
-> > > On Fri, Apr 20, 2012 at 05:09:34PM +0200, Christian Brunner wrote:
-> > > > After running ceph on XFS for some time, I decided to try btrfs again.
-> > > > Performance with the current "for-linux-min" branch and big metadata
-> > > > is much better. The only problem (?) I'm still seeing is a warning
-> > > > that seems to occur from time to time:
-> > 
-> > Actually, before you do that... we have a new tool, 
-> > test_filestore_workloadgen, that generates a ceph-osd-like workload on the 
-> > local file system.  It's a subset of what a full OSD might do, but if 
-> > we're lucky it will be sufficient to reproduce this issue.  Something like
-> > 
-> >  test_filestore_workloadgen --osd-data /foo --osd-journal /bar
-> > 
-> > will hopefully do the trick.
-> > 
-> > Christian, maybe you can see if that is able to trigger this warning?  
-> > You'll need to pull it from the current master branch; it wasn't in the 
-> > last release.
-> > 
-> 
-> Keep up the good work Sage, at this rate I'll never have to setup ceph for
-> myself :),
-> 
-You can setup another OSD on daedalus if you're looking for something to do
-Josef :)
-Neil
+Include the header to pickup the definitions of the global symbols.
 
-> Josef
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Quiets the following sparse warnings:
+
+warning: symbol 'crush_find_rule' was not declared. Should it be static?
+warning: symbol 'crush_do_rule' was not declared. Should it be static?
+
+Signed-off-by: H Hartley Sweeten <hsweeten@visionengravers.com>
+Cc: Sage Weil <sage@newdream.net>
+Cc: "David S. Miller" <davem@davemloft.net>
+
+---
+
+diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
+index 854ac53..363f8f7 100644
+--- a/net/ceph/crush/mapper.c
++++ b/net/ceph/crush/mapper.c
+@@ -20,6 +20,7 @@
+ 
+ #include <linux/crush/crush.h>
+ #include <linux/crush/hash.h>
++#include <linux/crush/mapper.h>
+ 
+ /*
+  * Implement the core CRUSH mapping algorithm.
