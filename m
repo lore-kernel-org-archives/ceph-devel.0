@@ -1,191 +1,71 @@
-From: Tomasz Paszkowski <ss7pro@gmail.com>
-Subject: Re: OSD died
-Date: Wed, 25 Apr 2012 13:24:49 +0200
-Message-ID: <CAMvP8PCj604hc9Y=wNkFs4_ZUBG3tvD3Dk+Dy84NpHvH7OVC_g@mail.gmail.com>
-References: <CAMvP8PD-zKg6OhWEjM4QWSdtXmkdoca-6LghvgTgdHoiOyPPwg@mail.gmail.com>
- <CAMvP8PAs+4AW-PiVO=5p7Q2CLC3=uz-hSUKD7C9NW-dcDCJ=1w@mail.gmail.com>
+From: Christian Brunner <christian@brunner-muc.de>
+Subject: Re: Ceph on btrfs 3.4rc
+Date: Wed, 25 Apr 2012 13:28:14 +0200
+Message-ID: <CAJafhzQ0BtNsUSr4cPYLg1MfMoKQhvYE3eS6VskRBeyJOF58iw@mail.gmail.com>
+References: <CAJafhzSVZ3+1ApgJU=sQu6gM62BeWVGG4mqFPNYRHx79czYJtQ@mail.gmail.com>
+	<20120424152141.GB3326@localhost.localdomain>
+	<Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:58871 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758513Ab2DYLZK convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Apr 2012 07:25:10 -0400
-Received: by yhmm54 with SMTP id m54so1006695yhm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Apr 2012 04:25:10 -0700 (PDT)
-In-Reply-To: <CAMvP8PAs+4AW-PiVO=5p7Q2CLC3=uz-hSUKD7C9NW-dcDCJ=1w@mail.gmail.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:39136 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758591Ab2DYL2O convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Apr 2012 07:28:14 -0400
+Received: by iadi9 with SMTP id i9so2372035iad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Apr 2012 04:28:14 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Josef Bacik <josef@redhat.com>, ceph-devel@vger.kernel.org
 
-after upgrade to v0.45 stack trace is as follows:
-
-Program received signal SIGABRT, Aborted.
-[Switching to Thread 0x7fffeac55700 (LWP 11011)]
-0x00007ffff5ebb445 in raise () from /lib/x86_64-linux-gnu/libc.so.6
-(gdb) bt
-#0  0x00007ffff5ebb445 in raise () from /lib/x86_64-linux-gnu/libc.so.6
-#1  0x00007ffff5ebebab in abort () from /lib/x86_64-linux-gnu/libc.so.6
-#2  0x00007ffff680969d in __gnu_cxx::__verbose_terminate_handler() ()
-   from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#3  0x00007ffff6807846 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc+=
-+.so.6
-#4  0x00007ffff6807873 in std::terminate() ()
-   from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#5  0x00007ffff680796e in __cxa_throw ()
-   from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#6  0x0000000000695ec0 in ceph::__ceph_assert_fail (
-    assertion=3D0x80b1ed "_size >=3D 0", file=3D0x80a222 "./include/int=
-erval_set.h",
-    line=3D382,
-    func=3D0x81bf60 "void interval_set<T>::erase(T, T) [with T =3D snap=
-id_t]")
-    at common/assert.cc:75
-#7  0x00000000005d1359 in erase (len=3D..., start=3D..., this=3D0xbe573=
-8)
-    at ./include/interval_set.h:382
-#8  subtract (a=3D..., this=3D0xbe5738) at ./include/interval_set.h:404
-#9  OSD::advance_map (this=3D0xbca000, t=3D..., tfin=3D<optimized out>)
-    at osd/OSD.cc:3475
-#10 0x00000000005d33bf in OSD::handle_osd_map (this=3D0xbca000, m=3D0x2=
-a4c800)
-    at osd/OSD.cc:3272
-#11 0x00000000005d4c9b in OSD::_dispatch (this=3D0xbca000, m=3D0x2a4c80=
-0)
-    at osd/OSD.cc:2780
----Type <return> to continue, or q <return> to quit---
-#12 0x00000000005d52a5 in OSD::ms_dispatch (this=3D0xbca000, m=3D0x2a4c=
-800)
-    at osd/OSD.cc:2605
-#13 0x000000000067a91b in ms_deliver_dispatch (m=3D0x2a4c800, this=3D0x=
-ba8680)
-    at msg/Messenger.h:178
-#14 SimpleMessenger::dispatch_entry (this=3D0xba8680)
-    at msg/SimpleMessenger.cc:363
-#15 0x0000000000648f1d in SimpleMessenger::DispatchThread::entry (
-    this=3D<optimized out>) at msg/SimpleMessenger.h:560
-#16 0x00007ffff79c2e9a in start_thread ()
-   from /lib/x86_64-linux-gnu/libpthread.so.0
-#17 0x00007ffff5f774bd in clone () from /lib/x86_64-linux-gnu/libc.so.6
-#18 0x0000000000000000 in ?? ()
-
-
-On Wed, Apr 25, 2012 at 12:11 PM, Tomasz Paszkowski <ss7pro@gmail.com> =
-wrote:
-> osd dump is like this:
+Am 24. April 2012 18:26 schrieb Sage Weil <sage@newdream.net>:
+> On Tue, 24 Apr 2012, Josef Bacik wrote:
+>> On Fri, Apr 20, 2012 at 05:09:34PM +0200, Christian Brunner wrote:
+>> > After running ceph on XFS for some time, I decided to try btrfs ag=
+ain.
+>> > Performance with the current "for-linux-min" branch and big metada=
+ta
+>> > is much better. The only problem (?) I'm still seeing is a warning
+>> > that seems to occur from time to time:
 >
-> pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
-> 768 pgp_num 768 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> crash_replay_interval 45
-> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins
-> pg_num 768 pgp_num 768 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num
-> 768 pgp_num 768 lpg_num 2 lpgp_num 2 last_change 1 owner 0
-> pool 9 'nova' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num
-> 2568 pgp_num 2568 lpg_num 0 lpgp_num 0 last_change 1435 owner
-> 18446744073709551615
-> =A0 =A0 =A0 =A0removed_snaps [1~1]
-> pool 10 'glance' rep size 2 crush_ruleset 0 object_hash rjenkins
-> pg_num 2568 pgp_num 2568 lpg_num 0 lpgp_num 0 last_change 132 owner
-> 18446744073709551615
+> Actually, before you do that... we have a new tool,
+> test_filestore_workloadgen, that generates a ceph-osd-like workload o=
+n the
+> local file system. =A0It's a subset of what a full OSD might do, but =
+if
+> we're lucky it will be sufficient to reproduce this issue. =A0Somethi=
+ng like
 >
+> =A0test_filestore_workloadgen --osd-data /foo --osd-journal /bar
 >
-> On Wed, Apr 25, 2012 at 11:04 AM, Tomasz Paszkowski <ss7pro@gmail.com=
-> wrote:
->> Hi,
->>
->> After making and removing snapshot from one of the pools, all of the
->> osd in cluster are dying with log like below:
->>
->>
->> 2012-04-25 11:01:00.938313 7f66694b9700 osd.1 1434 =A0removing old
->> osdmap epoch 966
->> 2012-04-25 11:01:00.938330 7f66694b9700 osd.1 1434 =A0removing old
->> osdmap epoch 967
->> 2012-04-25 11:01:00.938348 7f66694b9700 osd.1 1434 =A0advance to epo=
-ch
->> 1435 (<=3D newest 1470)
->> 2012-04-25 11:01:00.939437 7f66694b9700 osd.1 1435 advance_map epoch
->> 1435 =A01325 pgs
->> 2012-04-25 11:01:00.939455 7f66694b9700 osd.1 1435 =A0pool 0 removed
->> snaps [], unchanged (snap_epoch =3D 0)
->> 2012-04-25 11:01:00.939469 7f66694b9700 osd.1 1435 =A0pool 1 removed
->> snaps [], unchanged (snap_epoch =3D 0)
->> 2012-04-25 11:01:00.939482 7f66694b9700 osd.1 1435 =A0pool 2 removed
->> snaps [], unchanged (snap_epoch =3D 0)
->> ./include/interval_set.h: In function 'void interval_set<T>::erase(T=
-,
->> T) [with T =3D snapid_t]' thread 7f66694b9700 time 2012-04-25
->> 11:01:00.939509
->> ./include/interval_set.h: 382: FAILED assert(_size >=3D 0)
->> =A0ceph version 0.44.1 (commit:c89b7f22c8599eb974e75a2f7a5f855358199=
-dee)
->> =A01: (OSD::advance_map(ObjectStore::Transaction&, C_Contexts*)+0x29=
-71) [0x5cfb51]
->> =A02: (OSD::handle_osd_map(MOSDMap*)+0x193c) [0x5d162c]
->> =A03: (OSD::_dispatch(Message*)+0x2eb) [0x5d34fb]
->> =A04: (OSD::ms_dispatch(Message*)+0x129) [0x5d3a59]
->> =A05: (SimpleMessenger::dispatch_entry()+0x78b) [0x67513b]
->> =A06: (SimpleMessenger::DispatchThread::entry()+0xd) [0x52124d]
->> =A07: (()+0x7e9a) [0x7f6676226e9a]
->> =A08: (clone()+0x6d) [0x7f66747db4bd]
->> =A0ceph version 0.44.1 (commit:c89b7f22c8599eb974e75a2f7a5f855358199=
-dee)
->> =A01: (OSD::advance_map(ObjectStore::Transaction&, C_Contexts*)+0x29=
-71) [0x5cfb51]
->> =A02: (OSD::handle_osd_map(MOSDMap*)+0x193c) [0x5d162c]
->> =A03: (OSD::_dispatch(Message*)+0x2eb) [0x5d34fb]
->> =A04: (OSD::ms_dispatch(Message*)+0x129) [0x5d3a59]
->> =A05: (SimpleMessenger::dispatch_entry()+0x78b) [0x67513b]
->> =A06: (SimpleMessenger::DispatchThread::entry()+0xd) [0x52124d]
->> =A07: (()+0x7e9a) [0x7f6676226e9a]
->> =A08: (clone()+0x6d) [0x7f66747db4bd]
->> *** Caught signal (Aborted) **
->> =A0in thread 7f66694b9700
->> =A0ceph version 0.44.1 (commit:c89b7f22c8599eb974e75a2f7a5f855358199=
-dee)
->> =A01: /usr/bin/ceph-osd() [0x6fa0c6]
->> =A02: (()+0xfcb0) [0x7f667622ecb0]
->> =A03: (gsignal()+0x35) [0x7f667471f445]
->> =A04: (abort()+0x17b) [0x7f6674722bab]
->> =A05: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f667506d6=
-9d]
->> =A06: (()+0xb5846) [0x7f667506b846]
->> =A07: (()+0xb5873) [0x7f667506b873]
->> =A08: (()+0xb596e) [0x7f667506b96e]
->> =A09: (ceph::__ceph_assert_fail(char const*, char const*, int, char
->> const*)+0x200) [0x68f420]
->> =A010: (OSD::advance_map(ObjectStore::Transaction&, C_Contexts*)+0x2=
-971)
->> [0x5cfb51]
->> =A011: (OSD::handle_osd_map(MOSDMap*)+0x193c) [0x5d162c]
->> =A012: (OSD::_dispatch(Message*)+0x2eb) [0x5d34fb]
->> =A013: (OSD::ms_dispatch(Message*)+0x129) [0x5d3a59]
->> =A014: (SimpleMessenger::dispatch_entry()+0x78b) [0x67513b]
->> =A015: (SimpleMessenger::DispatchThread::entry()+0xd) [0x52124d]
->> =A016: (()+0x7e9a) [0x7f6676226e9a]
->> =A017: (clone()+0x6d) [0x7f66747db4bd]
->>
->>
->> --
->> Tomasz Paszkowski
->> SS7, Asterisk, SAN, Datacenter, Cloud Computing
->> +48500166299
+> will hopefully do the trick.
 >
->
->
-> --
-> Tomasz Paszkowski
-> SS7, Asterisk, SAN, Datacenter, Cloud Computing
-> +48500166299
+> Christian, maybe you can see if that is able to trigger this warning?
+> You'll need to pull it from the current master branch; it wasn't in t=
+he
+> last release.
 
+I've tried test_filestore_workloadgen, but it didn't work very well.
+After 5 Minutes it terminated with the following messages:
 
+2012-04-25 11:28:57.768709 7fcac3f69760  0 Destroying collection
+'0.1_head' (358 objects)
+2012-04-25 11:29:07.478747 7fcac3f69760  0 Destroying collection
+'0.22_head' (477 objects)
+2012-04-25 11:29:07.479035 7fcac3f69760  0 We ran out of collections!
+2012-04-25 11:29:07.916149 7fcac3f69760  1 journal close
+/dev/mapper/vg01-lv_osd_journal_0
 
---=20
-Tomasz Paszkowski
-SS7, Asterisk, SAN, Datacenter, Cloud Computing
-+48500166299
+I guess this is not btrfs related .-)
+
+@Josef: If Sage doesn't have any other solution, I'll put up some ceph
+installation instructions.
+
+Regards,
+Christian
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
