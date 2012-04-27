@@ -1,79 +1,112 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: global_init fails when only specifying monitor address
-Date: Thu, 26 Apr 2012 19:01:57 +0200
-Message-ID: <4F997F85.5030604@widodh.nl>
-References: <4F994883.3060805@widodh.nl> <Pine.LNX.4.64.1204260932260.6109@cobra.newdream.net> <56D7D5E0071D4CEB94971EAF7A27E75E@dreamhost.com>
+From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Subject: Release/branch naming; input requested
+Date: Thu, 26 Apr 2012 17:09:15 -0700
+Message-ID: <CAORUGqBxO=n_7xkDEFr_gi=y=+7abo0mErYSDOwVTq+zaA_cTw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:36957 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758051Ab2DZRCD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Apr 2012 13:02:03 -0400
-In-Reply-To: <56D7D5E0071D4CEB94971EAF7A27E75E@dreamhost.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:58228 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758596Ab2D0AJg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Apr 2012 20:09:36 -0400
+Received: by vbbff1 with SMTP id ff1so147206vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Apr 2012 17:09:35 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <gregory.farnum@dreamhost.com>
-Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+
+Ceph is maturing as a product. This brings us new challenges. Up to
+this point, we've been putting out a new release every 2-3 weeks, and
+only rarely updating an old release. Update releases like 0.42.2 are
+still a fairly rare occasion, and the the last number has never
+reached 4. However, as we get more and more customers and integrators
+deploying Ceph, we need to provide more stable branches with long term
+maintenance.
+
+I'm expecting, worst case, we'll be looking at something like this:
+
+- "oldstable": right now, 0.41 plus bugfixes only, because that's what
+deployed out there; updates will be rare
+- "stable": minor new features will be brought in, but we'll need to
+do extensive upgrade testing
+- "integration": this will be what our OpenStack Folsom integration
+will be against; including e.g. RBD layering
+- "latest": new release every 2-3 weeks
+
+On top of these, if you ask for the autobuilt repositories, we have:
+
+- "master": autobuilt all the time
+- several branches similar to "master", one per ceph.git branch, that
+sometimes are helpful in isolating a bug, or testing whether a code
+change fixes it
+
+Now, all of these are relative names. For example, once OpenStack
+Folsom is released, we'll need to open a new line of development for
+integrating the next version, branching it off the "latest" at a
+suitable point in time.
+
+The problem with these relative names is, if you run a system against
+"stable", and what "stable" points at changes, suddenly your old &
+reliable system thinks it needs to be upgraded. It's better to look up
+the current value of stable, and point the installation at that for
+updates. Combine this with people tending to be pretty bad at
+remembering specific numbers (I was a Debian Developer and I still
+can't remember which one is Debian 5.0!), and a new practice emerged:
+releases started getting codenames.
+
+Debian originally started giving their releases codenames from the Toy
+Story movies: hamm, slink, potato, woody, sarge, etch, lenny, squeeze,
+wheezy.
+
+Ubuntu uses largely similar infrastructure, but quickly improved on
+that by alphabetizing their codenames: breezy, dapper, edgy, feisty,
+gutsy, hardy, intrepid, jaunty, karmic, lucid, maverick, natty,
+oneiric, precise; you don't need to remember the order to know
+maverick came after lucid. The theme here is adjectives describing an
+alliterative animal, Natty Narwhal etc.
+
+OpenStack has picked the same alphabetical idea, using geographic
+names near where their per-release development summit is hosted:
+austin, bexar, cactus, diablo, essex, folsom.
+
+A company I used to work for picked names of mountains, largely
+choosing based on the magnificence of the upcoming release. By that
+logic, agel would have fewer new features than matterhorn. The same
+theme of mountains could also be used alphabetically. (Back at that
+point, a large part of that reasoning was that we left version
+numbering completely up to sales; engineering just did a look up of
+codename.buildnumber => version string, and we were able to change the
+version number of the product without rebuilding.)
+
+On the flip side, Ubuntu also picked up an idea of versioning releases
+based on the time of the release: YY.MM, as in 11.10, 12.04. This
+works really well for them, because they release only every 6 months,
+and they put a lot of effort into being on schedule, so it's always
+.04 or .10.
 
 
 
-On 04/26/2012 06:57 PM, Greg Farnum wrote:
-> On Thursday, April 26, 2012 at 9:33 AM, Sage Weil wrote:
->> On Thu, 26 Apr 2012, Wido den Hollander wrote:
->>> Hi,
->>>
->>> I tried to connect to a small Ceph setup on my desktop without cephx and that
->>> failed:
->>>
->>> root@stack01:~# ceph -m wido-desktop.widodh.nl:6789 (http://wido-desktop.widodh.nl:6789) -s
->>> global_init: unable to open config file.
->>> root@stack01:~#
->>>
->>> I however worked with:
->>>
->>> root@stack01:~# ceph -m wido-desktop.widodh.nl:6789 (http://wido-desktop.widodh.nl:6789) -c /dev/null -s
->>> 2012-04-26 14:55:33.828524 pg v148: 594 pgs: 594 active+clean; 0 bytes
->>> data, 7740 KB used, 70571 MB / 76800 MB avail
->>> 2012-04-26 14:55:33.829622 mds e1: 0/0/1 up
->>> 2012-04-26 14:55:33.836144 osd e14: 3 osds: 3 up, 3 in
->>> 2012-04-26 14:55:33.886429 log 2012-04-26 14:52:50.674430 osd.1
->>> [2a00:f10:11c:ab:52e5:49ff:fec2:c976]:6807/28366 12 : [INF] 1.2b scrub ok
->>> 2012-04-26 14:55:33.892423 mon e1: 1 mons at
->>> {desktop=[2a00:f10:11c:ab:52e5:49ff:fec2:c976]:6789/0}
->>> root@stack01:~#
->>>
->>> I quick look at global_init.cc (http://global_init.cc) showed me why this happened, it simply looks
->>> for a configuration file to open and when it can't it fails.
->>>
->>> But if a monitor address is set, a config file shouldn't be mandatory.
->>>
->>> It could be accomplished rather simple by setting the flag
->>> CINIT_FLAG_NO_DEFAULT_CONFIG_FILE if a mon_host has been set, but to do that
->>> conf->parse_argv(args); should move a few lines up.
->>>
->>> Comments? Thoughts?
->>
->> I wonder if the simplest thing to do is:
->>
->> - never error out on missing config in the default search path
->> - always error out on missing config if it was explicitly specified via
->> -c foo or CEPH_CONF in environment.
->>
->> ?
->>
->> sage
-> I think this is probably right. I think that we may even error out correctly if we don't have values specified that we need, but we'll need to check that.
+Now, here are my actual questions:
 
-I agree, that would be indeed much easier :)
+1. What should the "relative" names of the branches be? "stable" vs
+"latest" etc. I especially don't like "integration", but I do see a
+time where it is not ready for "stable" but still needs to branch off
+of "latest".
 
-> I'm working on similar stuff as I look at monitor cluster additions for Carl, so I'll look at this today.
+2. Do we want to use cutesy codenames? Alphabetical? Based on what theme?
 
-Thanks!
+3. Do we want to use calendar based names? "I'm using Ceph branch
+2012.04"? (Or spell it 2012-04 to avoid confusing with 0.41 style
+versions?)
 
-Wido
+3. What do we do with version numbers? With a 2-3 week iteration,
+we'll end up with something like 0.41.x, 0.56.x for Folsom integration
+(less than a year from now), and 0.57, 0.58 etc for "latest".
 
-> -Greg
->
->
+4. What will be worthy of 1.0? Is it when the distributed file system
+is solid? Getting out of 0.x would help with separating the different
+branches based on major numbers, but I fear that window has closed
+already.
+
+
+Your input is welcome.
