@@ -1,117 +1,55 @@
-From: Colin McCabe <cmccabe@alumni.cmu.edu>
-Subject: Re: global_init fails when only specifying monitor address
-Date: Sat, 28 Apr 2012 18:10:42 -0700
-Message-ID: <CA+qbEUMucp8tpF_ofTrinvE1e7Krue1gT164H04UQOkDueYuqQ@mail.gmail.com>
-References: <4F994883.3060805@widodh.nl>
-	<Pine.LNX.4.64.1204260932260.6109@cobra.newdream.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Xi Wang <xi.wang@gmail.com>
+Subject: [PATCH 1/3] ligceph: fix overflow in __decode_pool_names()
+Date: Sun, 29 Apr 2012 02:59:23 -0400
+Message-ID: <1335682765-1643-1-git-send-email-xi.wang@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:45099 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755607Ab2D2BKo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Apr 2012 21:10:44 -0400
-Received: by wibhj6 with SMTP id hj6so1768368wib.1
-        for <ceph-devel@vger.kernel.org>; Sat, 28 Apr 2012 18:10:42 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1204260932260.6109@cobra.newdream.net>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:50911 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751561Ab2D2HBD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Apr 2012 03:01:03 -0400
+Received: by qatm19 with SMTP id m19so988683qat.19
+        for <ceph-devel@vger.kernel.org>; Sun, 29 Apr 2012 00:01:03 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@dreamhost.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org, Xi Wang <xi.wang@gmail.com>
 
-There's no technical reason why you can't simply remove these lines:
+`len' is read from network and thus needs validation.  Otherwise a
+large `len' would cause out-of-bounds access via the memcpy() call.
+In addition, len = 0xffffffff would overflow the kmalloc() size,
+leading to out-of-bounds write.
 
->  if (ret =3D=3D -EDOM) {
->    dout_emergency("global_init: error parsing config file.\n");
->    _exit(1);
->  }
+This patch adds a check of `len' via ceph_decode_need().  Also use
+kstrndup rather than kmalloc/memcpy.
 
-Without a configuration file, you'll just get the defaults for
-everything.  Wido, it sounds like that is what you're already doing by
-passing in "-c /dev/null"
+Signed-off-by: Xi Wang <xi.wang@gmail.com>
+---
+ net/ceph/osdmap.c |    9 +++------
+ 1 files changed, 3 insertions(+), 6 deletions(-)
 
-So why didn't we do that in the first place?  It was basically a
-philosophical reason.  We have a section in the configuration file for
-clients.  If clients don't use that section, then it would seem kind
-of pointless to have it.  If I were a system administrator, I might be
-annoyed by accidentally failing to set CEPH_CONF in my .bashrc, and
-getting a bunch of defaults flooding in when I ran /usr/bin/ceph (or
-some other tool).
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 29ad46e..f80afc3 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -495,15 +495,12 @@ static int __decode_pool_names(void **p, void *end, struct ceph_osdmap *map)
+ 		ceph_decode_32_safe(p, end, pool, bad);
+ 		ceph_decode_32_safe(p, end, len, bad);
+ 		dout("  pool %d len %d\n", pool, len);
++		ceph_decode_need(p, end, len, bad);
+ 		pi = __lookup_pg_pool(&map->pg_pools, pool);
+ 		if (pi) {
+ 			kfree(pi->name);
+-			pi->name = kmalloc(len + 1, GFP_NOFS);
+-			if (pi->name) {
+-				memcpy(pi->name, *p, len);
+-				pi->name[len] = '\0';
+-				dout("  name is %s\n", pi->name);
+-			}
++			pi->name = kstrndup(*p, len, GFP_NOFS);
++			dout("  name is %s\n", pi->name);
+ 		}
+ 		*p += len;
+ 	}
+-- 
+1.7.5.4
 
-With that being said, there is a case to be made that we should let
-people run without a configuration file if they so desire.  Most UNIX
-utilities will run with out without a configuration file, so maybe
-that's what cephtool and similar utilities should do.  Your call.
-
-
-Unrelated:
-It might be a good time to get rid of that chunk of code in
-md_config_t::parse_config_files_impl that does "Warn about section
-names that look like old-style section names."  It's been a while
-since that actually mattered, I believe.
-
-Colin
-
-
-On Thu, Apr 26, 2012 at 9:33 AM, Sage Weil <sage@newdream.net> wrote:
-> On Thu, 26 Apr 2012, Wido den Hollander wrote:
->> Hi,
->>
->> I tried to connect to a small Ceph setup on my desktop without cephx=
- and that
->> failed:
->>
->> root@stack01:~# ceph -m wido-desktop.widodh.nl:6789 -s
->> global_init: unable to open config file.
->> root@stack01:~#
->>
->> I however worked with:
->>
->> root@stack01:~# ceph -m wido-desktop.widodh.nl:6789 -c /dev/null -s
->> 2012-04-26 14:55:33.828524 =A0 =A0pg v148: 594 pgs: 594 active+clean=
-; 0 bytes
->> data, 7740 KB used, 70571 MB / 76800 MB avail
->> 2012-04-26 14:55:33.829622 =A0 mds e1: 0/0/1 up
->> 2012-04-26 14:55:33.836144 =A0 osd e14: 3 osds: 3 up, 3 in
->> 2012-04-26 14:55:33.886429 =A0 log 2012-04-26 14:52:50.674430 osd.1
->> [2a00:f10:11c:ab:52e5:49ff:fec2:c976]:6807/28366 12 : [INF] 1.2b scr=
-ub ok
->> 2012-04-26 14:55:33.892423 =A0 mon e1: 1 mons at
->> {desktop=3D[2a00:f10:11c:ab:52e5:49ff:fec2:c976]:6789/0}
->> root@stack01:~#
->>
->> I quick look at global_init.cc showed me why this happened, it simpl=
-y looks
->> for a configuration file to open and when it can't it fails.
->>
->> But if a monitor address is set, a config file shouldn't be mandator=
-y.
->>
->> It could be accomplished rather simple by setting the flag
->> CINIT_FLAG_NO_DEFAULT_CONFIG_FILE if a mon_host has been set, but to=
- do that
->> conf->parse_argv(args); should move a few lines up.
->>
->> Comments? Thoughts?
->
-> I wonder if the simplest thing to do is:
->
-> =A0- never error out on missing config in the default search path
-> =A0- always error out on missing config if it was explicitly specifie=
-d via
-> =A0 -c foo or CEPH_CONF in environment.
->
-> ?
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
