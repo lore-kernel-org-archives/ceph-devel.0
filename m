@@ -1,34 +1,41 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
-Subject: rados import/export
-Date: Mon, 30 Apr 2012 11:31:39 +0800
-Message-ID: <CANExM-MCR7wZMyn-gEw7Mx6j-eq2-nw_jLHMYOaK2v+5JRS3Yg@mail.gmail.com>
+From: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
+Subject: how to mount a specific pool in cephs
+Date: Mon, 30 Apr 2012 16:16:11 +1000
+Message-ID: <81C477727102DA4E9B2605AC748C495418EE10F2E4@exch10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:52742 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755086Ab2D3Dbk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Apr 2012 23:31:40 -0400
-Received: by iadi9 with SMTP id i9so3584768iad.19
-        for <ceph-devel@vger.kernel.org>; Sun, 29 Apr 2012 20:31:39 -0700 (PDT)
+Received: from mf2.mach.net.au ([115.165.172.4]:49840 "EHLO mf2.mach.net.au"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751515Ab2D3GpY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Apr 2012 02:45:24 -0400
+Received: from exch10.ad.mach.net.au (exch10.ad.mach.net.au [115.165.169.4])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by mf2.mach.net.au (Postfix) with ESMTP id 15F8C27FCB
+	for <ceph-devel@vger.kernel.org>; Mon, 30 Apr 2012 16:16:13 +1000 (EST)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi all,
+Hi all
 
-I found one issue when I played around the "rados import/export"
-commands. I tried:
+Running Ceph version 0.45-1precise on 12.04 x64.
 
-1. Export the pool ".users.uid" to a local directory.
-2. Delete the pool.
-3. Import the pool ".user.uid" from the local directory.
+I cannot find the right syntax to mount a specific pool created, that has a customised replica level set, which is different to the default "data" pool (i.e. we have an additional pool called "backup"). Can somebody please advise the right syntax??
 
-After the pool is restored, the rgw's user info are correct. However,
-I failed to list the user's buckets.
-Then, I traced the codes a little bit. It seems the problem is that we
-do not export/import the omaps (stored in leveldb) of the objects.
-Since v0.44, we employed leveldb to store the key/value maps. I think
-we need to take care of the omaps as well during backup and restore.
+I tried the following per: http://ceph.newdream.net/docs/master/man/8/mount.ceph/
+    mount -t ceph 10.32.0.10:6789:/backup /mnt/ceph -vv -o name=admin,secret=ThisIsNotTheRealSecret==
+And it hard-hung the server, and needed a hard power restart (ouch!).
 
-Henry
+The following works fine, but it is not connecting to the "backup" pool (with no pool name specified, it is going to pool0 called "data"):
+    mount -t ceph 10.32.0.10:6789:/ /mnt/ceph -vv -o name=admin,secret=ThisIsNotTheRealSecret==
+
+Very many thanks
+
+Paul
+
+
+
