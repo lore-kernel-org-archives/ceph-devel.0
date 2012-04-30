@@ -1,60 +1,74 @@
-From: Tommi Virtanen <tommi.virtanen@dreamhost.com>
-Subject: Re: rados import/export
-Date: Mon, 30 Apr 2012 14:20:31 -0700
-Message-ID: <CAORUGqDFhA5focC=fvUJVai1ezi+rWp4PRJ=cEz5syxWhCz4aA@mail.gmail.com>
-References: <CANExM-MCR7wZMyn-gEw7Mx6j-eq2-nw_jLHMYOaK2v+5JRS3Yg@mail.gmail.com>
- <Pine.LNX.4.64.1204301348170.3920@cobra.newdream.net> <CAORUGqD=neAYCH2qPZTF6oG=V4yNKhfupXoViAbV5TiR0Qfotg@mail.gmail.com>
- <Pine.LNX.4.64.1204301406120.32303@cobra.newdream.net>
+From: Sage Weil <sage@newdream.net>
+Subject: v0.46 released
+Date: Mon, 30 Apr 2012 16:07:47 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1204301607180.32303@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:45270 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756828Ab2D3VUx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Apr 2012 17:20:53 -0400
-Received: by vcqp1 with SMTP id p1so2365822vcq.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Apr 2012 14:20:52 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1204301406120.32303@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:33697 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756884Ab2D3XHs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Apr 2012 19:07:48 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id BA8B0BC883
+	for <ceph-devel@vger.kernel.org>; Mon, 30 Apr 2012 16:07:47 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 97618BC883
+	for <ceph-devel@vger.kernel.org>; Mon, 30 Apr 2012 16:07:47 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Henry C Chang <henry.cy.chang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Apr 30, 2012 at 14:08, Sage Weil <sage@newdream.net> wrote:
->> Does just adding a .db suffix make the name safe? If yes, xattr is n=
-ot
->> needed; if no, it's not enough. Reading src/rados_export.cc and
->> src/rados_sync.cc, I see nothing like that. What if I have objects
->> "foo" and "foo.db" in a pool?
->
-> I'm pretty sure we need to mark the object with a magic xattr. =C2=A0=
-Which
-> probably means the filename itself needs to be mangled to avoid colli=
-ding
-> with other objects. =C2=A0Probably an xattr on the object file referr=
-ing to the
-> external mangled file with the k/v content.
+Another sprint, and v0.46 is ready.  Big items in this release include:
 
-Perhaps make the db file use one of the reserved characters that will
-never appear in a plain old rados object. $ is the only one that's
-really safe..
+ * rbd: new caching mode (see below)
+ * rbd: trim/discard support
+ * cluster naming
+ * osd: new default locations (slimmer .conf files, see below)
+ * osd: various journal replay fixes for non-btrfs file systems
+ * log: async and multi-level logging (see below)
 
->> Note to self: the only thing avoiding collisions for e.g. "foo/" and
->> "foo$" is the hash.
-> I vaguely recall Colin talking about the trailing /, but we may have
-> decided to ignore the problem for now.
+The biggest new item here is the new RBD (librbd) cache mode that Josh has 
+been working on.  This reuses a caching module that ceph-fuse and 
+libcephfs have used for ages, so the cache portion of the code is 
+well-tested, but the integration with librbd is new, and there are some 
+(rare) failure cases that are not yet handled in this version. We 
+recommend it for performance and failure testing at this stage, but not 
+for production use just yet-wait for v0.47.  librbd also got trim/discard 
+support.  Patches for wire it up to qemu are still working their way 
+upstream (and won't work for virtio until virtio gets discard support).
 
-Oh I mean anything that gets mapped to @ can cause collisions. "foo@"
-and "foo$" will collide. "foo\n" and "foo\\" will collide.
+We've revamped some of the default locations for data directories and log 
+files and incoporated a cluster name configurable.  By default, the 
+cluster name is `ceph', and the config file is /etc/ceph/$cluster.conf (so 
+ceph.conf is still the default).  The $cluster substitution variable is 
+used the other default locations, allowing the same host to contain 
+daemons participating in different clusters.  All data defaults to 
+/var/lib/ceph/$type/$cluster-$id (e.g., /var/lib/ceph/osd/ceph-123 for 
+osd_data), and logs go to /var/log/ceph/$cluster.$type.$id.  You can, of 
+course, still override these with your own locations as before.
 
-=46rankly, my gut instinct right now is "kill it with fire". Collisions
-in object names is a miserable problem to have. This would have been
-better off with e.g. a HTTP-style %20 escaping mechanism, or a \x20
-style one; one that preserves the byte, and does not just replace it
-with '@'.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+There is also new logging code that allows the daemons to gather debug 
+information at a different (higher) log level than what is actually 
+written to the log (asynchronously).  In the event of a crash (seg fault, 
+failed assertion), the full log is dumped to the log for our reading 
+pleasure.  The general syntax looks like:
+
+	debug foo = 1/10
+
+where `foo' is the subsystem name (e.g., "osd", "filestore", etc.), the 
+first number is the debug level that is written to the log, and the second 
+number is the level that is gathered in memory (we keep many thousands of 
+past entries around by default).  The hope is that people can gather debug 
+information in memory with a lower performance impact and avoid eating 
+their disk space.  We'll need some more operational experience to find out 
+how expensive that will really be.
+
+You can get v0.46 from the usual locations:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.newdream.net/download/ceph-0.46.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/master/ops/install/mkcephfs/#installing-the-packages
+ 
+sage
+
