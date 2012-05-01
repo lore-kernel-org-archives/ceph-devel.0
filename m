@@ -1,74 +1,123 @@
-From: Sage Weil <sage@newdream.net>
-Subject: v0.46 released
-Date: Mon, 30 Apr 2012 16:07:47 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1204301607180.32303@cobra.newdream.net>
+From: Greg Farnum <gregory.farnum@dreamhost.com>
+Subject: Re: global_init fails when only specifying monitor address
+Date: Tue, 1 May 2012 09:36:40 -0700
+Message-ID: <AB9F708F613F43F1BF61BAA850F61A06@dreamhost.com>
+References: <4F994883.3060805@widodh.nl>
+ <Pine.LNX.4.64.1204260932260.6109@cobra.newdream.net>
+ <CA+qbEUMucp8tpF_ofTrinvE1e7Krue1gT164H04UQOkDueYuqQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33697 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756884Ab2D3XHs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Apr 2012 19:07:48 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id BA8B0BC883
-	for <ceph-devel@vger.kernel.org>; Mon, 30 Apr 2012 16:07:47 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 97618BC883
-	for <ceph-devel@vger.kernel.org>; Mon, 30 Apr 2012 16:07:47 -0700 (PDT)
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:39100 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753504Ab2EAQgo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 1 May 2012 12:36:44 -0400
+Received: by obbtb18 with SMTP id tb18so1017478obb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 01 May 2012 09:36:44 -0700 (PDT)
+In-Reply-To: <CA+qbEUMucp8tpF_ofTrinvE1e7Krue1gT164H04UQOkDueYuqQ@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
 
-Another sprint, and v0.46 is ready.  Big items in this release include:
+What we ended up merging into master is a change so that if you don't specify a configuration file, you'll get a small warning printed out but the program will continue executing. We may remove the warning in future, but right now we thought it was important to leave in since using the default parameters can result in some truly bizarre error messages if they don't match what the rest of the system is using. 
+-Greg
 
- * rbd: new caching mode (see below)
- * rbd: trim/discard support
- * cluster naming
- * osd: new default locations (slimmer .conf files, see below)
- * osd: various journal replay fixes for non-btrfs file systems
- * log: async and multi-level logging (see below)
 
-The biggest new item here is the new RBD (librbd) cache mode that Josh has 
-been working on.  This reuses a caching module that ceph-fuse and 
-libcephfs have used for ages, so the cache portion of the code is 
-well-tested, but the integration with librbd is new, and there are some 
-(rare) failure cases that are not yet handled in this version. We 
-recommend it for performance and failure testing at this stage, but not 
-for production use just yet-wait for v0.47.  librbd also got trim/discard 
-support.  Patches for wire it up to qemu are still working their way 
-upstream (and won't work for virtio until virtio gets discard support).
+On Saturday, April 28, 2012 at 6:10 PM, Colin McCabe wrote:
 
-We've revamped some of the default locations for data directories and log 
-files and incoporated a cluster name configurable.  By default, the 
-cluster name is `ceph', and the config file is /etc/ceph/$cluster.conf (so 
-ceph.conf is still the default).  The $cluster substitution variable is 
-used the other default locations, allowing the same host to contain 
-daemons participating in different clusters.  All data defaults to 
-/var/lib/ceph/$type/$cluster-$id (e.g., /var/lib/ceph/osd/ceph-123 for 
-osd_data), and logs go to /var/log/ceph/$cluster.$type.$id.  You can, of 
-course, still override these with your own locations as before.
+> There's no technical reason why you can't simply remove these lines:
+> 
+> > if (ret == -EDOM) {
+> > dout_emergency("global_init: error parsing config file.\n");
+> > _exit(1);
+> > }
+> 
+> 
+> 
+> Without a configuration file, you'll just get the defaults for
+> everything. Wido, it sounds like that is what you're already doing by
+> passing in "-c /dev/null"
+> 
+> So why didn't we do that in the first place? It was basically a
+> philosophical reason. We have a section in the configuration file for
+> clients. If clients don't use that section, then it would seem kind
+> of pointless to have it. If I were a system administrator, I might be
+> annoyed by accidentally failing to set CEPH_CONF in my .bashrc, and
+> getting a bunch of defaults flooding in when I ran /usr/bin/ceph (or
+> some other tool).
+> 
+> With that being said, there is a case to be made that we should let
+> people run without a configuration file if they so desire. Most UNIX
+> utilities will run with out without a configuration file, so maybe
+> that's what cephtool and similar utilities should do. Your call.
+> 
+> 
+> Unrelated:
+> It might be a good time to get rid of that chunk of code in
+> md_config_t::parse_config_files_impl that does "Warn about section
+> names that look like old-style section names." It's been a while
+> since that actually mattered, I believe.
+> 
+> Colin
+> 
+> 
+> On Thu, Apr 26, 2012 at 9:33 AM, Sage Weil <sage@newdream.net (mailto:sage@newdream.net)> wrote:
+> > On Thu, 26 Apr 2012, Wido den Hollander wrote:
+> > > Hi,
+> > > 
+> > > I tried to connect to a small Ceph setup on my desktop without cephx and that
+> > > failed:
+> > > 
+> > > root@stack01:~# ceph -m wido-desktop.widodh.nl:6789 (http://wido-desktop.widodh.nl:6789) -s
+> > > global_init: unable to open config file.
+> > > root@stack01:~#
+> > > 
+> > > I however worked with:
+> > > 
+> > > root@stack01:~# ceph -m wido-desktop.widodh.nl:6789 (http://wido-desktop.widodh.nl:6789) -c /dev/null -s
+> > > 2012-04-26 14:55:33.828524 pg v148: 594 pgs: 594 active+clean; 0 bytes
+> > > data, 7740 KB used, 70571 MB / 76800 MB avail
+> > > 2012-04-26 14:55:33.829622 mds e1: 0/0/1 up
+> > > 2012-04-26 14:55:33.836144 osd e14: 3 osds: 3 up, 3 in
+> > > 2012-04-26 14:55:33.886429 log 2012-04-26 14:52:50.674430 osd.1
+> > > [2a00:f10:11c:ab:52e5:49ff:fec2:c976]:6807/28366 12 : [INF] 1.2b scrub ok
+> > > 2012-04-26 14:55:33.892423 mon e1: 1 mons at
+> > > {desktop=[2a00:f10:11c:ab:52e5:49ff:fec2:c976]:6789/0}
+> > > root@stack01:~#
+> > > 
+> > > I quick look at global_init.cc (http://global_init.cc) showed me why this happened, it simply looks
+> > > for a configuration file to open and when it can't it fails.
+> > > 
+> > > But if a monitor address is set, a config file shouldn't be mandatory.
+> > > 
+> > > It could be accomplished rather simple by setting the flag
+> > > CINIT_FLAG_NO_DEFAULT_CONFIG_FILE if a mon_host has been set, but to do that
+> > > conf->parse_argv(args); should move a few lines up.
+> > > 
+> > > Comments? Thoughts?
+> > 
+> > I wonder if the simplest thing to do is:
+> > 
+> > - never error out on missing config in the default search path
+> > - always error out on missing config if it was explicitly specified via
+> > -c foo or CEPH_CONF in environment.
+> > 
+> > ?
+> > 
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
+> > More majordomo info at http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
 
-There is also new logging code that allows the daemons to gather debug 
-information at a different (higher) log level than what is actually 
-written to the log (asynchronously).  In the event of a crash (seg fault, 
-failed assertion), the full log is dumped to the log for our reading 
-pleasure.  The general syntax looks like:
 
-	debug foo = 1/10
-
-where `foo' is the subsystem name (e.g., "osd", "filestore", etc.), the 
-first number is the debug level that is written to the log, and the second 
-number is the level that is gathered in memory (we keep many thousands of 
-past entries around by default).  The hope is that people can gather debug 
-information in memory with a lower performance impact and avoid eating 
-their disk space.  We'll need some more operational experience to find out 
-how expensive that will really be.
-
-You can get v0.46 from the usual locations:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.newdream.net/download/ceph-0.46.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/master/ops/install/mkcephfs/#installing-the-packages
- 
-sage
 
