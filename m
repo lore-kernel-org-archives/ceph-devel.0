@@ -1,20 +1,20 @@
 From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
 Subject: Possible memory leak in mon?
-Date: Thu, 03 May 2012 07:58:27 +0930
-Message-ID: <4FA1B50B.8080603@bashkirtsev.com>
+Date: Thu, 03 May 2012 08:19:16 +0930
+Message-ID: <4FA1B9EC.9050509@bashkirtsev.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:53111 "EHLO
+Received: from mail.logics.net.au ([150.101.56.178]:53151 "EHLO
 	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754874Ab2EBWdn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 May 2012 18:33:43 -0400
+	with ESMTP id S1755604Ab2EBWw1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 May 2012 18:52:27 -0400
 Received: from x.logics.net.au (gw.logics.net.au [150.101.235.251] (may be forged))
 	(authenticated bits=0)
-	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q42MSR56017254
+	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q42MnG0T017980
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-CAMELLIA256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Thu, 3 May 2012 07:58:35 +0930
+	for <ceph-devel@vger.kernel.org>; Thu, 3 May 2012 08:19:26 +0930
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
@@ -38,6 +38,10 @@ Running 0.45. Should I deliberately recreate conditions and crash mon to
 get more debug info (if you need it of course, and if yes then what)?
 3. Does figure 4G per process coming from 32 bit pointers in mon? Or mon 
 potentially can consume more than 4G?
+4. I guess it is good idea to keep mon fs on separate partition so it 
+would not experience disk-full state. Currently it is around 80Mb while 
+whole ceph 42% full of 2100Gb with 6 OSDs and 600 pgs. Can you provide 
+some idea how to estimate mon fs size?
 
 Regards,
 Vladimir
