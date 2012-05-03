@@ -1,77 +1,80 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: higher level library for storing large(r) RADOS objects
-Date: Wed, 2 May 2012 23:21:39 -0700
-Message-ID: <CAC-hyiHftFs7CPnTkFpfR--W+TEAS2GHZss5T2u9CKvy2wPdmg@mail.gmail.com>
-References: <4FA2208E.5010208@widodh.nl>
+From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Subject: Re: Possible memory leak in mon?
+Date: Thu, 03 May 2012 15:54:16 +0930
+Message-ID: <4FA22490.5060001@bashkirtsev.com>
+References: <4FA1B50B.8080603@bashkirtsev.com> <07C999FE3BF7420ABC05B7CFF88B06AD@dreamhost.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:48022 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751317Ab2ECGVk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 May 2012 02:21:40 -0400
-Received: by bkcji2 with SMTP id ji2so1044815bkc.19
-        for <ceph-devel@vger.kernel.org>; Wed, 02 May 2012 23:21:39 -0700 (PDT)
-In-Reply-To: <4FA2208E.5010208@widodh.nl>
+Received: from mail.logics.net.au ([150.101.56.178]:54406 "EHLO
+	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751118Ab2ECGZc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 May 2012 02:25:32 -0400
+In-Reply-To: <07C999FE3BF7420ABC05B7CFF88B06AD@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Greg Farnum <gregory.farnum@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, May 2, 2012 at 11:07 PM, Wido den Hollander <wido@widodh.nl> wrote:
-> Hi,
+Greg,
+
+Apologies for multiple emails: my mail server is backed by ceph now and 
+it struggled this morning (separate issue). So my mail server reported 
+back to my mailer that sending of email failed when obviously it was not 
+the case.
+
+[root@gamma ~]# ceph -s
+2012-05-03 15:46:55.640951   mds e2666: 1/1/1 up {0=1=up:active}, 1 
+up:standby
+2012-05-03 15:46:55.647106   osd e10728: 6 osds: 6 up, 6 in
+2012-05-03 15:46:55.654052   log 2012-05-03 15:46:26.557084 mon.2 
+172.16.64.202:6789/0 2878 : [INF] mon.2 calling new monitor election
+2012-05-03 15:46:55.654425   mon e7: 3 mons at 
+{0=172.16.64.200:6789/0,1=172.16.64.201:6789/0,2=172.16.64.202:6789/0}
+2012-05-03 15:46:56.961624    pg v1251669: 600 pgs: 2 creating, 598 
+active+clean; 309 GB data, 963 GB used, 1098 GB / 2145 GB avail
+
+Loggin is on but nothing obvious in there: logs quite small. Number of 
+ceph health logged (ceph monitored by nagios and so this record appears 
+every 5 minutes), monitors periodically call for election (different 
+periods between 1 to 15 minutes as it looks). That's it.
+
+Regards,
+Vladimir
+
+On 03/05/12 09:52, Greg Farnum wrote:
+> On Wednesday, May 2, 2012 at 3:28 PM, Vladimir Bashkirtsev wrote:
+>> Dear devs,
+>>
+>> I have three mons and two of them suddenly consumed around 4G of RAM
+>> while third one happily lived with 150M. This immediately prompts few
+>> questions:
+>>
+>> 1. What is expected memory use of mon? I believed that mon merely
+>> directs clients to relevant OSDs and should not consume a lot of
+>> resources - please correct me if I am wrong.
+>> 2. In both cases where mon consumed a lot of memory it was preceded by
+>> disk-full condition and both machines where incidents happened are 64
+>> bit, rest of cluster 32 bit. mon fs and log files happened to be in the
+>> same partition - ceph osd produced a lot of messages, filled up disk,
+>> mon crashed (no core as disk was full), manually deleted logs, restarted
+>> mon without any issue, some time later found mon using 4G of RAM.
+>> Running 0.45. Should I deliberately recreate conditions and crash mon to
+>> get more debug info (if you need it of course, and if yes then what)?
+>> 3. Does figure 4G per process coming from 32 bit pointers in mon? Or mon
+>> potentially can consume more than 4G?
+>>
+>> Regards,
+>> Vladimir
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+> First: one email is enough.
 >
-> I've been talking to Josh today and we've been talking a bit about storing
-> large objects in RADOS.
->
-> One of the problem I currently see with using RADOS is storing really large
-> objects.
->
-> RADOS objects are stored on the OSD as a whole file, so potentially a single
-> RADOS object could press an OSD over the full_ratio and stalling the whole
-> cluster.
->
-> This also shows another problem. It this object is heavily used a couple of
-> OSDs will be very busy with the I/O's for this object.
->
-> So I was thinking about an library on top of RADOS which is kind of similar
-> to RBD, but it's only focused on storing objects.
->
-> The first object in a pool could have a couple of xattrs:
->
-> object1
-> - stripe_size: 4096
-> - size: 40960
->
-> Based on the xattr operation we know where to read or write when asked for a
-> specific offset and length.
->
-> object1, object1_1, object1_2, until object1_9
->
-> Potentially this could also be used for the RADOS Gateway? Since that will
-> suffer from the same problem when you want to scale out.
->
-> With the RAODS Gateway you can't control a user storing a 200G tar file with
-> his backups in it, you never know.
->
-> It's just a thought but I just wanted to get it out there and check out the
-> opinions.
->
-> Comments? Suggestions?
+> Second: in normal use your monitors should not consume very much memory. It sounds like something's wrong. Can you please provide the output of "ceph -s"?
+> Also, do you have any monitor logging on? My best guess is that for some reason the monitors aren't all communicating with each other and so they are buffering messages.
+> -Greg
 >
 
-Actually, nowadays RGW keeps a map ("manifest") in each object which
-points to where all the parts of that object actually reside. For
-multipart uploads we don't merge the parts, but rather create a
-manifest that points at them. For regular uploads (up to 5GB) we keep
-the first 512K on the head object (where the map resides), and the
-rest is in another rados object. In theory objects can be striped
-using this or similar infrastructure. We don't impose a constant
-stripe size, but the manifest can be extended to handle such cases.
-What I'd really like to see is a rgw library that provides an object
-access api and will access the backend directly. This will be used for
-rgw itself, help clean up its internal structure, and will be useful
-for other applications that don't need to go through the gateway
-itself (but do need the same object access semantics).
-
-Yehuda
