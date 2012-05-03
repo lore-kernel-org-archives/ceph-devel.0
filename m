@@ -1,56 +1,60 @@
-From: Greg Farnum <gregory.farnum@dreamhost.com>
-Subject: Re: Possible memory leak in mon?
-Date: Wed, 2 May 2012 17:22:17 -0700
-Message-ID: <07C999FE3BF7420ABC05B7CFF88B06AD@dreamhost.com>
-References: <4FA1B50B.8080603@bashkirtsev.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: higher level library for storing large(r) RADOS objects
+Date: Thu, 03 May 2012 08:07:10 +0200
+Message-ID: <4FA2208E.5010208@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:45743 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752989Ab2ECAWV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 2 May 2012 20:22:21 -0400
-Received: by obbtb18 with SMTP id tb18so1679818obb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 02 May 2012 17:22:20 -0700 (PDT)
-In-Reply-To: <4FA1B50B.8080603@bashkirtsev.com>
-Content-Disposition: inline
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:41084 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750732Ab2ECGIG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 May 2012 02:08:06 -0400
+Received: from [192.168.1.61] (74-93-0-217-SFBA.hfc.comcastbusiness.net [74.93.0.217])
+	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPA id B0919763A6
+	for <ceph-devel@vger.kernel.org>; Thu,  3 May 2012 08:07:32 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wednesday, May 2, 2012 at 3:28 PM, Vladimir Bashkirtsev wrote:
-> Dear devs,
-> 
-> I have three mons and two of them suddenly consumed around 4G of RAM 
-> while third one happily lived with 150M. This immediately prompts few 
-> questions:
-> 
-> 1. What is expected memory use of mon? I believed that mon merely 
-> directs clients to relevant OSDs and should not consume a lot of 
-> resources - please correct me if I am wrong.
-> 2. In both cases where mon consumed a lot of memory it was preceded by 
-> disk-full condition and both machines where incidents happened are 64 
-> bit, rest of cluster 32 bit. mon fs and log files happened to be in the 
-> same partition - ceph osd produced a lot of messages, filled up disk, 
-> mon crashed (no core as disk was full), manually deleted logs, restarted 
-> mon without any issue, some time later found mon using 4G of RAM. 
-> Running 0.45. Should I deliberately recreate conditions and crash mon to 
-> get more debug info (if you need it of course, and if yes then what)?
-> 3. Does figure 4G per process coming from 32 bit pointers in mon? Or mon 
-> potentially can consume more than 4G?
-> 
-> Regards,
-> Vladimir
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
+Hi,
 
-First: one email is enough. 
+I've been talking to Josh today and we've been talking a bit about 
+storing large objects in RADOS.
 
-Second: in normal use your monitors should not consume very much memory. It sounds like something's wrong. Can you please provide the output of "ceph -s"?
-Also, do you have any monitor logging on? My best guess is that for some reason the monitors aren't all communicating with each other and so they are buffering messages.
--Greg
+One of the problem I currently see with using RADOS is storing really 
+large objects.
 
+RADOS objects are stored on the OSD as a whole file, so potentially a 
+single RADOS object could press an OSD over the full_ratio and stalling 
+the whole cluster.
+
+This also shows another problem. It this object is heavily used a couple 
+of OSDs will be very busy with the I/O's for this object.
+
+So I was thinking about an library on top of RADOS which is kind of 
+similar to RBD, but it's only focused on storing objects.
+
+The first object in a pool could have a couple of xattrs:
+
+object1
+- stripe_size: 4096
+- size: 40960
+
+Based on the xattr operation we know where to read or write when asked 
+for a specific offset and length.
+
+object1, object1_1, object1_2, until object1_9
+
+Potentially this could also be used for the RADOS Gateway? Since that 
+will suffer from the same problem when you want to scale out.
+
+With the RAODS Gateway you can't control a user storing a 200G tar file 
+with his backups in it, you never know.
+
+It's just a thought but I just wanted to get it out there and check out 
+the opinions.
+
+Comments? Suggestions?
+
+Wido
