@@ -1,107 +1,94 @@
-From: Josef Bacik <josef@redhat.com>
-Subject: Re: Ceph on btrfs 3.4rc
-Date: Thu, 3 May 2012 10:13:55 -0400
-Message-ID: <20120503141354.GC1914@localhost.localdomain>
-References: <CAJafhzSVZ3+1ApgJU=sQu6gM62BeWVGG4mqFPNYRHx79czYJtQ@mail.gmail.com>
- <20120424152141.GB3326@localhost.localdomain>
- <Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
- <CAJafhzSgaQ3sx=Af0Ru0CiwQH37V5y8jgjoTo_8yozcjo9rpPA@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: higher level library for storing large(r) RADOS objects
+Date: Thu, 03 May 2012 17:19:40 +0200
+Message-ID: <4FA2A20C.2020505@widodh.nl>
+References: <4FA2208E.5010208@widodh.nl> <CAC-hyiHftFs7CPnTkFpfR--W+TEAS2GHZss5T2u9CKvy2wPdmg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAJafhzSgaQ3sx=Af0Ru0CiwQH37V5y8jgjoTo_8yozcjo9rpPA@mail.gmail.com>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: Christian Brunner <christian@brunner-muc.de>
-Cc: Sage Weil <sage@newdream.net>, Josef Bacik <josef@redhat.com>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:33351 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752191Ab2ECPTt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 3 May 2012 11:19:49 -0400
+In-Reply-To: <CAC-hyiHftFs7CPnTkFpfR--W+TEAS2GHZss5T2u9CKvy2wPdmg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 27, 2012 at 01:02:08PM +0200, Christian Brunner wrote:
-> Am 24. April 2012 18:26 schrieb Sage Weil <sage@newdream.net>:
-> > On Tue, 24 Apr 2012, Josef Bacik wrote:
-> >> On Fri, Apr 20, 2012 at 05:09:34PM +0200, Christian Brunner wrote:
-> >> > After running ceph on XFS for some time, I decided to try btrfs =
-again.
-> >> > Performance with the current "for-linux-min" branch and big meta=
-data
-> >> > is much better. The only problem (?) I'm still seeing is a warni=
-ng
-> >> > that seems to occur from time to time:
-> >
-> > Actually, before you do that... we have a new tool,
-> > test_filestore_workloadgen, that generates a ceph-osd-like workload=
- on the
-> > local file system. =A0It's a subset of what a full OSD might do, bu=
-t if
-> > we're lucky it will be sufficient to reproduce this issue. =A0Somet=
-hing like
-> >
-> > =A0test_filestore_workloadgen --osd-data /foo --osd-journal /bar
-> >
-> > will hopefully do the trick.
-> >
-> > Christian, maybe you can see if that is able to trigger this warnin=
-g?
-> > You'll need to pull it from the current master branch; it wasn't in=
- the
-> > last release.
->=20
-> Trying to reproduce with test_filestore_workloadgen didn't work for
-> me. So here are some instructions on how to reproduce with a minimal
-> ceph setup.
->=20
-> You will need a single system with two disks and a bit of memory.
->=20
-> - Compile and install ceph (detailed instructions:
-> http://ceph.newdream.net/docs/master/ops/install/mkcephfs/)
->=20
-> - For the test setup I've used two tmpfs files as journal devices. To
-> create these, do the following:
->=20
-> # mkdir -p /ceph/temp
-> # mount -t tmpfs tmpfs /ceph/temp
-> # dd if=3D/dev/zero of=3D/ceph/temp/journal0 count=3D500 bs=3D1024k
-> # dd if=3D/dev/zero of=3D/ceph/temp/journal1 count=3D500 bs=3D1024k
->=20
-> - Now you should create and mount btrfs. Here is what I did:
->=20
-> # mkfs.btrfs -l 64k -n 64k /dev/sda
-> # mkfs.btrfs -l 64k -n 64k /dev/sdb
-> # mkdir /ceph/osd.000
-> # mkdir /ceph/osd.001
-> # mount -o noatime,space_cache,inode_cache,autodefrag /dev/sda /ceph/=
-osd.000
-> # mount -o noatime,space_cache,inode_cache,autodefrag /dev/sdb /ceph/=
-osd.001
->=20
-> - Create /etc/ceph/ceph.conf similar to the attached ceph.conf. You
-> will probably have to change the btrfs devices and the hostname
-> (os39).
->=20
-> - Create the ceph filesystems:
->=20
-> # mkdir /ceph/mon
-> # mkcephfs -a -c /etc/ceph/ceph.conf
->=20
-> - Start ceph (e.g. "service ceph start")
->=20
-> - Now you should be able to use ceph - "ceph -s" will tell you about
-> the state of the ceph cluster.
->=20
-> - "rbd create -size 100 testimg" will create an rbd image on the ceph=
- cluster.
->=20
+Hi,
 
-It's failing here
+On 03-05-12 08:21, Yehuda Sadeh Weinraub wrote:
+> On Wed, May 2, 2012 at 11:07 PM, Wido den Hollander<wido@widodh.nl>  wrote:
+>> Hi,
+>>
+>> I've been talking to Josh today and we've been talking a bit about storing
+>> large objects in RADOS.
+>>
+>> One of the problem I currently see with using RADOS is storing really large
+>> objects.
+>>
+>> RADOS objects are stored on the OSD as a whole file, so potentially a single
+>> RADOS object could press an OSD over the full_ratio and stalling the whole
+>> cluster.
+>>
+>> This also shows another problem. It this object is heavily used a couple of
+>> OSDs will be very busy with the I/O's for this object.
+>>
+>> So I was thinking about an library on top of RADOS which is kind of similar
+>> to RBD, but it's only focused on storing objects.
+>>
+>> The first object in a pool could have a couple of xattrs:
+>>
+>> object1
+>> - stripe_size: 4096
+>> - size: 40960
+>>
+>> Based on the xattr operation we know where to read or write when asked for a
+>> specific offset and length.
+>>
+>> object1, object1_1, object1_2, until object1_9
+>>
+>> Potentially this could also be used for the RADOS Gateway? Since that will
+>> suffer from the same problem when you want to scale out.
+>>
+>> With the RAODS Gateway you can't control a user storing a 200G tar file with
+>> his backups in it, you never know.
+>>
+>> It's just a thought but I just wanted to get it out there and check out the
+>> opinions.
+>>
+>> Comments? Suggestions?
+>>
+>
+> Actually, nowadays RGW keeps a map ("manifest") in each object which
+> points to where all the parts of that object actually reside. For
+> multipart uploads we don't merge the parts, but rather create a
+> manifest that points at them. For regular uploads (up to 5GB) we keep
+> the first 512K on the head object (where the map resides), and the
+> rest is in another rados object. In theory objects can be striped
+> using this or similar infrastructure. We don't impose a constant
+> stripe size, but the manifest can be extended to handle such cases.
+> What I'd really like to see is a rgw library that provides an object
+> access api and will access the backend directly. This will be used for
+> rgw itself, help clean up its internal structure, and will be useful
+> for other applications that don't need to go through the gateway
+> itself (but do need the same object access semantics).
 
-http://fpaste.org/e3BG/
+That is something I thought about as well. If we could move most of the 
+RGW's functionality into librgw we could in theory re-write the RGW in 
+Python where you could use bindings for librgw to access the RADOS data.
 
-Thanks,
+librgw could then also just store larger objects like I thought about. 
+If it's kept clean it could serve just that purpose.
 
-Josef
---
-To unsubscribe from this list: send the line "unsubscribe linux-btrfs" =
-in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Rewriting the RGW in Python might be just one step to far, I know a lot 
+of work has gone into it. However, with Python it could easily run 
+stand-alone and you could have just a proxy like nginx, Varnish or even 
+Apache in front of it, you could loose the whole FastCGI/fcgi stuff.
+
+Wido
+
+>
+> Yehuda
