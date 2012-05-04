@@ -1,99 +1,122 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 06/11] crush: use a temporary variable to simplify crush_do_rule
-Date: Fri,  4 May 2012 15:54:03 -0700
-Message-ID: <1336172048-6848-7-git-send-email-sage@newdream.net>
+Subject: [PATCH 05/11] crush: be more tolerant of nonsensical crush maps
+Date: Fri,  4 May 2012 15:54:02 -0700
+Message-ID: <1336172048-6848-6-git-send-email-sage@newdream.net>
 References: <1336172048-6848-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37649 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:37645 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760573Ab2EDWyW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 May 2012 18:54:22 -0400
+	with ESMTP id S1754606Ab2EDWyT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 May 2012 18:54:19 -0400
 In-Reply-To: <1336172048-6848-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@newdream.net>
 
-Use a temporary variable here to avoid repeated array lookups and clean up
-the code a bit.
-
-This reflects ceph.git commit 6b5be27634ad307b471a5bf0db85c4f5c834885f.
+If we get a map that doesn't make sense, error out or ignore the badness
+instead of BUGging out.  This reflects the ceph.git commits
+9895f0bff7dc68e9b49b572613d242315fb11b6c and
+8ded26472058d5205803f244c2f33cb6cb10de79.
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- net/ceph/crush/mapper.c |   20 +++++++++++---------
- 1 files changed, 11 insertions(+), 9 deletions(-)
+ net/ceph/crush/mapper.c |   33 ++++++++++++++++++++++++---------
+ 1 files changed, 24 insertions(+), 9 deletions(-)
 
 diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index c39bb9c..9f407c5 100644
+index 4df0607..c39bb9c 100644
 --- a/net/ceph/crush/mapper.c
 +++ b/net/ceph/crush/mapper.c
-@@ -519,14 +519,15 @@ int crush_do_rule(const struct crush_map *map,
+@@ -152,8 +152,8 @@ static int bucket_list_choose(struct crush_bucket_list *bucket,
+ 			return bucket->h.items[i];
  	}
  
- 	for (step = 0; step < rule->len; step++) {
-+		struct crush_rule_step *curstep = &rule->steps[step];
-+
- 		firstn = 0;
--		switch (rule->steps[step].op) {
-+		switch (curstep->op) {
- 		case CRUSH_RULE_TAKE:
--			w[0] = rule->steps[step].arg1;
-+			w[0] = curstep->arg1;
+-	BUG_ON(1);
+-	return 0;
++	dprintk("bad list sums for bucket %d\n", bucket->h.id);
++	return bucket->h.items[0];
+ }
  
- 			/* find position in force_context/hierarchy */
--			while (force_pos >= 0 &&
--			       force_context[force_pos] != w[0])
-+			while (force_pos >= 0 && force_context[force_pos] != w[0])
- 				force_pos--;
- 			/* and move past it */
- 			if (force_pos >= 0)
-@@ -538,15 +539,16 @@ int crush_do_rule(const struct crush_map *map,
- 		case CRUSH_RULE_CHOOSE_LEAF_FIRSTN:
- 		case CRUSH_RULE_CHOOSE_FIRSTN:
+ 
+@@ -239,6 +239,7 @@ static int bucket_straw_choose(struct crush_bucket_straw *bucket,
+ static int crush_bucket_choose(struct crush_bucket *in, int x, int r)
+ {
+ 	dprintk(" crush_bucket_choose %d x=%d r=%d\n", in->id, x, r);
++	BUG_ON(in->size == 0);
+ 	switch (in->alg) {
+ 	case CRUSH_BUCKET_UNIFORM:
+ 		return bucket_uniform_choose((struct crush_bucket_uniform *)in,
+@@ -253,7 +254,7 @@ static int crush_bucket_choose(struct crush_bucket *in, int x, int r)
+ 		return bucket_straw_choose((struct crush_bucket_straw *)in,
+ 					   x, r);
+ 	default:
+-		BUG_ON(1);
++		dprintk("unknown bucket %d alg %d\n", in->id, in->alg);
+ 		return in->items[0];
+ 	}
+ }
+@@ -354,7 +355,11 @@ static int crush_choose(const struct crush_map *map,
+ 					item = bucket_perm_choose(in, x, r);
+ 				else
+ 					item = crush_bucket_choose(in, x, r);
+-				BUG_ON(item >= map->max_devices);
++				if (item >= map->max_devices) {
++					dprintk("   bad item %d\n", item);
++					skip_rep = 1;
++					break;
++				}
+ 
+ 				/* desired type? */
+ 				if (item < 0)
+@@ -365,8 +370,12 @@ static int crush_choose(const struct crush_map *map,
+ 
+ 				/* keep going? */
+ 				if (itemtype != type) {
+-					BUG_ON(item >= 0 ||
+-					       (-1-item) >= map->max_buckets);
++					if (item >= 0 ||
++					    (-1-item) >= map->max_buckets) {
++						dprintk("   bad item type %d\n", type);
++						skip_rep = 1;
++						break;
++					}
+ 					in = map->buckets[-1-item];
+ 					retry_bucket = 1;
+ 					continue;
+@@ -478,7 +487,10 @@ int crush_do_rule(const struct crush_map *map,
+ 	int numrep;
+ 	int firstn;
+ 
+-	BUG_ON(ruleno >= map->max_rules);
++	if ((__u32)ruleno >= map->max_rules) {
++		dprintk(" bad ruleno %d\n", ruleno);
++		return 0;
++	}
+ 
+ 	rule = map->rules[ruleno];
+ 	result_len = 0;
+@@ -528,7 +540,8 @@ int crush_do_rule(const struct crush_map *map,
  			firstn = 1;
-+			/* fall through */
  		case CRUSH_RULE_CHOOSE_LEAF_INDEP:
  		case CRUSH_RULE_CHOOSE_INDEP:
- 			if (wsize == 0)
- 				break;
+-			BUG_ON(wsize == 0);
++			if (wsize == 0)
++				break;
  
  			recurse_to_leaf =
--				rule->steps[step].op ==
-+				curstep->op ==
- 				 CRUSH_RULE_CHOOSE_LEAF_FIRSTN ||
--				rule->steps[step].op ==
-+				curstep->op ==
- 				CRUSH_RULE_CHOOSE_LEAF_INDEP;
+ 				rule->steps[step].op ==
+@@ -597,7 +610,9 @@ int crush_do_rule(const struct crush_map *map,
+ 			break;
  
- 			/* reset output */
-@@ -558,7 +560,7 @@ int crush_do_rule(const struct crush_map *map,
- 				 * basically, numrep <= 0 means relative to
- 				 * the provided result_max
- 				 */
--				numrep = rule->steps[step].arg1;
-+				numrep = curstep->arg1;
- 				if (numrep <= 0) {
- 					numrep += result_max;
- 					if (numrep <= 0)
-@@ -569,7 +571,7 @@ int crush_do_rule(const struct crush_map *map,
- 					/* skip any intermediate types */
- 					while (force_pos &&
- 					       force_context[force_pos] < 0 &&
--					       rule->steps[step].arg2 !=
-+					       curstep->arg2 !=
- 					       map->buckets[-1 -
- 					       force_context[force_pos]]->type)
- 						force_pos--;
-@@ -583,7 +585,7 @@ int crush_do_rule(const struct crush_map *map,
- 						      map->buckets[-1-w[i]],
- 						      weight,
- 						      x, numrep,
--						      rule->steps[step].arg2,
-+						      curstep->arg2,
- 						      o+osize, j,
- 						      firstn,
- 						      recurse_to_leaf, c+osize);
+ 		default:
+-			BUG_ON(1);
++			dprintk(" unknown op %d at step %d\n",
++				curstep->op, step);
++			break;
+ 		}
+ 	}
+ 	return result_len;
 -- 
 1.7.9
 
