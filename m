@@ -1,141 +1,120 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 07/11] crush: remove forcefeed functionality
-Date: Fri,  4 May 2012 15:54:04 -0700
-Message-ID: <1336172048-6848-8-git-send-email-sage@newdream.net>
+Subject: [PATCH 08/11] crush: remove parent maps
+Date: Fri,  4 May 2012 15:54:05 -0700
+Message-ID: <1336172048-6848-9-git-send-email-sage@newdream.net>
 References: <1336172048-6848-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37648 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:37652 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760493Ab2EDWyT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 May 2012 18:54:19 -0400
+	with ESMTP id S1760574Ab2EDWyW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 May 2012 18:54:22 -0400
 In-Reply-To: <1336172048-6848-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@newdream.net>
 
-Remove forcefeed functionality from CRUSH.  This is an ugly misfeature that
-is mostly useless and unused.  Remove it.
+These were used for the ill-fated forcefeed feature.  Remove them.
 
-Reflects ceph.git commit ed974b5000f2851207d860a651809af4a1867942.
+Reflects ceph.git commit ebdf80edfecfbd5a842b71fbe5732857994380c1.
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- include/linux/crush/mapper.h |    1 -
- net/ceph/crush/mapper.c      |   48 +-----------------------------------------
- net/ceph/osdmap.c            |    2 +-
- 3 files changed, 2 insertions(+), 49 deletions(-)
+ include/linux/crush/crush.h |   11 -----------
+ net/ceph/crush/crush.c      |   25 -------------------------
+ net/ceph/osdmap.c           |    7 -------
+ 3 files changed, 0 insertions(+), 43 deletions(-)
 
-diff --git a/include/linux/crush/mapper.h b/include/linux/crush/mapper.h
-index 9322ab8..71d79f4 100644
---- a/include/linux/crush/mapper.h
-+++ b/include/linux/crush/mapper.h
-@@ -14,7 +14,6 @@ extern int crush_find_rule(const struct crush_map *map, int ruleset, int type, i
- extern int crush_do_rule(const struct crush_map *map,
- 			 int ruleno,
- 			 int x, int *result, int result_max,
--			 int forcefeed,    /* -1 for none */
- 			 const __u32 *weights);
- 
- #endif
-diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index 9f407c5..1867afb 100644
---- a/net/ceph/crush/mapper.c
-+++ b/net/ceph/crush/mapper.c
-@@ -463,15 +463,12 @@ reject:
-  * @param x hash input
-  * @param result pointer to result vector
-  * @param resultmax: maximum result size
-- * @param force force initial replica choice; -1 for none
-  */
- int crush_do_rule(const struct crush_map *map,
- 		  int ruleno, int x, int *result, int result_max,
--		  int force, const __u32 *weight)
-+		  const __u32 *weight)
- {
- 	int result_len;
--	int force_context[CRUSH_MAX_DEPTH];
--	int force_pos = -1;
- 	int a[CRUSH_MAX_SET];
- 	int b[CRUSH_MAX_SET];
- 	int c[CRUSH_MAX_SET];
-@@ -497,27 +494,6 @@ int crush_do_rule(const struct crush_map *map,
- 	w = a;
- 	o = b;
+diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
+index 3f50369..158a4d2 100644
+--- a/include/linux/crush/crush.h
++++ b/include/linux/crush/crush.h
+@@ -151,16 +151,6 @@ struct crush_map {
+ 	struct crush_bucket **buckets;
+ 	struct crush_rule **rules;
  
 -	/*
--	 * determine hierarchical context of force, if any.  note
--	 * that this may or may not correspond to the specific types
--	 * referenced by the crush rule.  it will also only affect
--	 * the first descent (TAKE).
+-	 * Parent pointers to identify the parent bucket a device or
+-	 * bucket in the hierarchy.  If an item appears more than
+-	 * once, this is the _last_ time it appeared (where buckets
+-	 * are processed in bucket id order, from -1 on down to
+-	 * -max_buckets.
 -	 */
--	if (force >= 0 &&
--	    force < map->max_devices &&
--	    map->device_parents[force] != 0 &&
--	    !is_out(map, weight, force, x)) {
--		while (1) {
--			force_context[++force_pos] = force;
--			if (force >= 0)
--				force = map->device_parents[force];
--			else
--				force = map->bucket_parents[-1-force];
--			if (force == 0)
--				break;
--		}
--	}
+-	__u32 *bucket_parents;
+-	__u32 *device_parents;
 -
- 	for (step = 0; step < rule->len; step++) {
- 		struct crush_rule_step *curstep = &rule->steps[step];
+ 	__s32 max_buckets;
+ 	__u32 max_rules;
+ 	__s32 max_devices;
+@@ -169,7 +159,6 @@ struct crush_map {
  
-@@ -525,14 +501,6 @@ int crush_do_rule(const struct crush_map *map,
- 		switch (curstep->op) {
- 		case CRUSH_RULE_TAKE:
- 			w[0] = curstep->arg1;
--
--			/* find position in force_context/hierarchy */
--			while (force_pos >= 0 && force_context[force_pos] != w[0])
--				force_pos--;
--			/* and move past it */
--			if (force_pos >= 0)
--				force_pos--;
--
- 			wsize = 1;
- 			break;
- 
-@@ -567,20 +535,6 @@ int crush_do_rule(const struct crush_map *map,
- 						continue;
- 				}
- 				j = 0;
--				if (osize == 0 && force_pos >= 0) {
--					/* skip any intermediate types */
--					while (force_pos &&
--					       force_context[force_pos] < 0 &&
--					       curstep->arg2 !=
--					       map->buckets[-1 -
--					       force_context[force_pos]]->type)
--						force_pos--;
--					o[osize] = force_context[force_pos];
--					if (recurse_to_leaf)
--						c[osize] = force_context[0];
--					j++;
--					force_pos--;
--				}
- 				osize += crush_choose(map,
- 						      map->buckets[-1-w[i]],
- 						      weight,
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 7d39f3c..9dda36f 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -1069,7 +1069,7 @@ static int *calc_pg_raw(struct ceph_osdmap *osdmap, struct ceph_pg pgid,
- 	pps += poolid;
- 	*num = crush_do_rule(osdmap->crush, ruleno, pps, osds,
- 			     min_t(int, pool->v.size, *num),
--			     -1, osdmap->osd_weight);
-+			     osdmap->osd_weight);
- 	return osds;
+ /* crush.c */
+ extern int crush_get_bucket_item_weight(const struct crush_bucket *b, int pos);
+-extern void crush_calc_parents(struct crush_map *map);
+ extern void crush_destroy_bucket_uniform(struct crush_bucket_uniform *b);
+ extern void crush_destroy_bucket_list(struct crush_bucket_list *b);
+ extern void crush_destroy_bucket_tree(struct crush_bucket_tree *b);
+diff --git a/net/ceph/crush/crush.c b/net/ceph/crush/crush.c
+index 8c2201d..bab3eac 100644
+--- a/net/ceph/crush/crush.c
++++ b/net/ceph/crush/crush.c
+@@ -46,29 +46,6 @@ int crush_get_bucket_item_weight(const struct crush_bucket *b, int p)
+ 	return 0;
  }
  
+-/**
+- * crush_calc_parents - Calculate parent vectors for the given crush map.
+- * @map: crush_map pointer
+- */
+-void crush_calc_parents(struct crush_map *map)
+-{
+-	int i, b, c;
+-
+-	for (b = 0; b < map->max_buckets; b++) {
+-		if (map->buckets[b] == NULL)
+-			continue;
+-		for (i = 0; i < map->buckets[b]->size; i++) {
+-			c = map->buckets[b]->items[i];
+-			BUG_ON(c >= map->max_devices ||
+-			       c < -map->max_buckets);
+-			if (c >= 0)
+-				map->device_parents[c] = map->buckets[b]->id;
+-			else
+-				map->bucket_parents[-1-c] = map->buckets[b]->id;
+-		}
+-	}
+-}
+-
+ void crush_destroy_bucket_uniform(struct crush_bucket_uniform *b)
+ {
+ 	kfree(b->h.perm);
+@@ -143,8 +120,6 @@ void crush_destroy(struct crush_map *map)
+ 		kfree(map->rules);
+ 	}
+ 
+-	kfree(map->bucket_parents);
+-	kfree(map->device_parents);
+ 	kfree(map);
+ }
+ 
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 9dda36f..dac448b 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -161,13 +161,6 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+ 	c->max_rules = ceph_decode_32(p);
+ 	c->max_devices = ceph_decode_32(p);
+ 
+-	c->device_parents = kcalloc(c->max_devices, sizeof(u32), GFP_NOFS);
+-	if (c->device_parents == NULL)
+-		goto badmem;
+-	c->bucket_parents = kcalloc(c->max_buckets, sizeof(u32), GFP_NOFS);
+-	if (c->bucket_parents == NULL)
+-		goto badmem;
+-
+ 	c->buckets = kcalloc(c->max_buckets, sizeof(*c->buckets), GFP_NOFS);
+ 	if (c->buckets == NULL)
+ 		goto badmem;
 -- 
 1.7.9
 
