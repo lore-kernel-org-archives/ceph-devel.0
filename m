@@ -1,41 +1,141 @@
 From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 04/11] crush: adjust local retry threshold
-Date: Fri,  4 May 2012 15:54:01 -0700
-Message-ID: <1336172048-6848-5-git-send-email-sage@newdream.net>
+Subject: [PATCH 07/11] crush: remove forcefeed functionality
+Date: Fri,  4 May 2012 15:54:04 -0700
+Message-ID: <1336172048-6848-8-git-send-email-sage@newdream.net>
 References: <1336172048-6848-1-git-send-email-sage@newdream.net>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37644 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:37648 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760565Ab2EDWyO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 May 2012 18:54:14 -0400
+	with ESMTP id S1760493Ab2EDWyT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 May 2012 18:54:19 -0400
 In-Reply-To: <1336172048-6848-1-git-send-email-sage@newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@newdream.net>
 
-This small adjustment reflects a change that was made in ceph.git commit
-af6a9f30696c900a2a8bd7ae24e8ed15fb4964bb, about 6 months ago.  An N-1
-search is not exhaustive.  Fixed ceph.git bug #1594.
+Remove forcefeed functionality from CRUSH.  This is an ugly misfeature that
+is mostly useless and unused.  Remove it.
+
+Reflects ceph.git commit ed974b5000f2851207d860a651809af4a1867942.
 
 Signed-off-by: Sage Weil <sage@newdream.net>
 ---
- net/ceph/crush/mapper.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ include/linux/crush/mapper.h |    1 -
+ net/ceph/crush/mapper.c      |   48 +-----------------------------------------
+ net/ceph/osdmap.c            |    2 +-
+ 3 files changed, 2 insertions(+), 49 deletions(-)
 
+diff --git a/include/linux/crush/mapper.h b/include/linux/crush/mapper.h
+index 9322ab8..71d79f4 100644
+--- a/include/linux/crush/mapper.h
++++ b/include/linux/crush/mapper.h
+@@ -14,7 +14,6 @@ extern int crush_find_rule(const struct crush_map *map, int ruleset, int type, i
+ extern int crush_do_rule(const struct crush_map *map,
+ 			 int ruleno,
+ 			 int x, int *result, int result_max,
+-			 int forcefeed,    /* -1 for none */
+ 			 const __u32 *weights);
+ 
+ #endif
 diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-index 7aa79a4..4df0607 100644
+index 9f407c5..1867afb 100644
 --- a/net/ceph/crush/mapper.c
 +++ b/net/ceph/crush/mapper.c
-@@ -415,7 +415,7 @@ reject:
- 					if (collide && flocal < 3)
- 						/* retry locally a few times */
- 						retry_bucket = 1;
--					else if (flocal < in->size + orig_tries)
-+					else if (flocal <= in->size + orig_tries)
- 						/* exhaustive bucket search */
- 						retry_bucket = 1;
- 					else if (ftotal < 20)
+@@ -463,15 +463,12 @@ reject:
+  * @param x hash input
+  * @param result pointer to result vector
+  * @param resultmax: maximum result size
+- * @param force force initial replica choice; -1 for none
+  */
+ int crush_do_rule(const struct crush_map *map,
+ 		  int ruleno, int x, int *result, int result_max,
+-		  int force, const __u32 *weight)
++		  const __u32 *weight)
+ {
+ 	int result_len;
+-	int force_context[CRUSH_MAX_DEPTH];
+-	int force_pos = -1;
+ 	int a[CRUSH_MAX_SET];
+ 	int b[CRUSH_MAX_SET];
+ 	int c[CRUSH_MAX_SET];
+@@ -497,27 +494,6 @@ int crush_do_rule(const struct crush_map *map,
+ 	w = a;
+ 	o = b;
+ 
+-	/*
+-	 * determine hierarchical context of force, if any.  note
+-	 * that this may or may not correspond to the specific types
+-	 * referenced by the crush rule.  it will also only affect
+-	 * the first descent (TAKE).
+-	 */
+-	if (force >= 0 &&
+-	    force < map->max_devices &&
+-	    map->device_parents[force] != 0 &&
+-	    !is_out(map, weight, force, x)) {
+-		while (1) {
+-			force_context[++force_pos] = force;
+-			if (force >= 0)
+-				force = map->device_parents[force];
+-			else
+-				force = map->bucket_parents[-1-force];
+-			if (force == 0)
+-				break;
+-		}
+-	}
+-
+ 	for (step = 0; step < rule->len; step++) {
+ 		struct crush_rule_step *curstep = &rule->steps[step];
+ 
+@@ -525,14 +501,6 @@ int crush_do_rule(const struct crush_map *map,
+ 		switch (curstep->op) {
+ 		case CRUSH_RULE_TAKE:
+ 			w[0] = curstep->arg1;
+-
+-			/* find position in force_context/hierarchy */
+-			while (force_pos >= 0 && force_context[force_pos] != w[0])
+-				force_pos--;
+-			/* and move past it */
+-			if (force_pos >= 0)
+-				force_pos--;
+-
+ 			wsize = 1;
+ 			break;
+ 
+@@ -567,20 +535,6 @@ int crush_do_rule(const struct crush_map *map,
+ 						continue;
+ 				}
+ 				j = 0;
+-				if (osize == 0 && force_pos >= 0) {
+-					/* skip any intermediate types */
+-					while (force_pos &&
+-					       force_context[force_pos] < 0 &&
+-					       curstep->arg2 !=
+-					       map->buckets[-1 -
+-					       force_context[force_pos]]->type)
+-						force_pos--;
+-					o[osize] = force_context[force_pos];
+-					if (recurse_to_leaf)
+-						c[osize] = force_context[0];
+-					j++;
+-					force_pos--;
+-				}
+ 				osize += crush_choose(map,
+ 						      map->buckets[-1-w[i]],
+ 						      weight,
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 7d39f3c..9dda36f 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -1069,7 +1069,7 @@ static int *calc_pg_raw(struct ceph_osdmap *osdmap, struct ceph_pg pgid,
+ 	pps += poolid;
+ 	*num = crush_do_rule(osdmap->crush, ruleno, pps, osds,
+ 			     min_t(int, pool->v.size, *num),
+-			     -1, osdmap->osd_weight);
++			     osdmap->osd_weight);
+ 	return osds;
+ }
+ 
 -- 
 1.7.9
 
