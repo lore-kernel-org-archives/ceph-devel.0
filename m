@@ -1,38 +1,75 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [patch] rbd: endian bug in rbd_req_cb()
-Date: Fri, 4 May 2012 20:39:55 +0300
-Message-ID: <20120504173954.GA18827@elgon.mountain>
+From: Christian Brunner <christian@brunner-muc.de>
+Subject: Re: Ceph on btrfs 3.4rc
+Date: Fri, 4 May 2012 22:24:16 +0200
+Message-ID: <CAJafhzR3PFKUGq6JutzeaF61X=kJ9x62fH62-BYAs0S=sa=P9A@mail.gmail.com>
+References: <CAJafhzSVZ3+1ApgJU=sQu6gM62BeWVGG4mqFPNYRHx79czYJtQ@mail.gmail.com>
+	<20120424152141.GB3326@localhost.localdomain>
+	<Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
+	<CAJafhzSgaQ3sx=Af0Ru0CiwQH37V5y8jgjoTo_8yozcjo9rpPA@mail.gmail.com>
+	<20120503141354.GC1914@localhost.localdomain>
+	<f35947dc064c7ff1a073b430a2d681f5@hq.newdream.net>
+	<20120503152053.GA7313@localhost.localdomain>
+	<1e9c626272411bb1fb403a3aa8aeced7@hq.newdream.net>
+	<20120503194924.GC7313@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from acsinet15.oracle.com ([141.146.126.227]:34742 "EHLO
-	acsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753125Ab2EDRkH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 May 2012 13:40:07 -0400
-Content-Disposition: inline
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:34512 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754231Ab2EDUYR convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 May 2012 16:24:17 -0400
+Received: by yenm10 with SMTP id m10so2675549yen.19
+        for <ceph-devel@vger.kernel.org>; Fri, 04 May 2012 13:24:17 -0700 (PDT)
+In-Reply-To: <20120503194924.GC7313@localhost.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@hq.newdream.net>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: Josef Bacik <josef@redhat.com>
+Cc: Josh Durgin <josh.durgin@dreamhost.com>, Sage Weil <sage@newdream.net>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Sparse complains about this because:
-drivers/block/rbd.c:996:20: warning: cast to restricted __le32
-drivers/block/rbd.c:996:20: warning: cast from restricted __le16
+2012/5/3 Josef Bacik <josef@redhat.com>:
+> On Thu, May 03, 2012 at 09:38:27AM -0700, Josh Durgin wrote:
+>> On Thu, 3 May 2012 11:20:53 -0400, Josef Bacik <josef@redhat.com>
+>> wrote:
+>> > On Thu, May 03, 2012 at 08:17:43AM -0700, Josh Durgin wrote:
+>> >
+>> > Yeah all that was in the right place, I rebooted and I magically
+>> > stopped getting
+>> > that error, but now I'm getting this
+>> >
+>> > http://fpaste.org/OE92/
+>> >
+>> > with that ping thing repeating over and over. =A0Thanks,
+>>
+>> That just looks like the osd isn't running. If you restart the
+>> osd with 'debug osd =3D 20' the osd log should tell us what's going =
+on.
+>
+> Ok that part was my fault, Duh I need to redo the tmpfs and mkcephfs =
+stuff after
+> reboot. =A0But now I'm back to my original problem
+>
+> http://fpaste.org/PfwO/
+>
+> I have the osd class dir =3D /usr/lib64/rados-classes thing set and l=
+ibcls_rbd is
+> in there, so I'm not sure what is wrong. =A0Thanks,
 
-These are set in osd_req_encode_op() and they are le16.
+Thats really strange. Do you have the osd logs in /var/log/ceph? If
+so, can you look if you find anything about "rbd" or "class" loading
+in there?
 
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+Another thing you should try is, whether you can access ceph with rados=
+:
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index c1f7701..64d3d6f 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -993,7 +993,7 @@ static void rbd_req_cb(struct ceph_osd_request *req, struct ceph_msg *msg)
- 	op = (void *)(replyhead + 1);
- 	rc = le32_to_cpu(replyhead->result);
- 	bytes = le64_to_cpu(op->extent.length);
--	read_op = (le32_to_cpu(op->op) == CEPH_OSD_OP_READ);
-+	read_op = (le16_to_cpu(op->op) == CEPH_OSD_OP_READ);
- 
- 	dout("rbd_req_cb bytes=%lld readop=%d rc=%d\n", bytes, read_op, rc);
- 
+# rados -p rbd ls
+# rados -p rbd -i /proc/cpuinfo put testobj
+# rados -p rbd -o - get testobj
+
+Regards,
+Christian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
