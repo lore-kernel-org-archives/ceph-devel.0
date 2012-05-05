@@ -1,58 +1,65 @@
-From: Sage Weil <sage@newdream.net>
-Subject: [PATCH 09/11] crush: fix tree node weight lookup
-Date: Fri,  4 May 2012 15:54:06 -0700
-Message-ID: <1336172048-6848-10-git-send-email-sage@newdream.net>
-References: <1336172048-6848-1-git-send-email-sage@newdream.net>
+From: Colin McCabe <cmccabe@alumni.cmu.edu>
+Subject: Re: Berserker toolkit for (semi-)automated fs fuzz testing
+Date: Sat, 5 May 2012 13:36:03 -0700
+Message-ID: <CA+qbEUP_bcSohhixqUGH+44gFeEBSaeJTAzRbkcym+AxjNvRgQ@mail.gmail.com>
+References: <CA+qbEUN3DZzCCJm=mLT+QczXs0nN2xE_86RJPcwCLYEKMVtcSQ@mail.gmail.com>
+	<CAORUGqBbL6WSt83jqoTJ5kXhbQc_SErYJUK=+yZ6nB2Mg=b=SQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37655 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760493Ab2EDWyX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 4 May 2012 18:54:23 -0400
-In-Reply-To: <1336172048-6848-1-git-send-email-sage@newdream.net>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:48532 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751893Ab2EEUgF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 5 May 2012 16:36:05 -0400
+Received: by werb10 with SMTP id b10so557626wer.19
+        for <ceph-devel@vger.kernel.org>; Sat, 05 May 2012 13:36:04 -0700 (PDT)
+In-Reply-To: <CAORUGqBbL6WSt83jqoTJ5kXhbQc_SErYJUK=+yZ6nB2Mg=b=SQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@newdream.net>
+To: Tommi Virtanen <tommi.virtanen@dreamhost.com>
+Cc: ceph-devel@vger.kernel.org
 
-Fix the node weight lookup for tree buckets by using a correct accessor.
+On Mon, Apr 30, 2012 at 10:13 AM, Tommi Virtanen
+<tommi.virtanen@dreamhost.com> wrote:
+> On Sat, Apr 28, 2012 at 17:29, Colin McCabe <cmccabe@alumni.cmu.edu> =
+wrote:
+>> This could be useful for testing the in-kernel Ceph client:
+>>
+>> http://www.spinics.net/lists/linux-ext4/msg31856.html
+>
+> Well, that post is all about non-networked file systems.
+>
+> zzuf has a network mode (-n) where it hijacks the socket calls and ca=
+n
+> randomly mutate the bytes transferred. However, I feel like most of
+> the benefits of that wrapper are lost, as the Ceph network behavior
+> just isn't very cleanly deterministic.. even if we included the
+> cluster serving the client inside the System Under Test for the
+> fuzzing, I feel like the crashes wouldn't be very reproducible, so
+> fancy features of that wrapper, like the the git bisect integration,
+> will not be useful.
+>
+> What we might want to do is run zzuf to mess with the osds etc while
+> exercising the usual QA suite, similar to thrashing. Not
+> deterministically reproducible, but would probably expose some bugs
+> now and then.
 
-Reflects ceph.git commit d287ade5bcbdca82a3aef145b92924cf1e856733.
+Even ext{2,3,4} and btrfs use threads.  That means that the behavior
+under test is never going to be deterministic.  The real question is
+how many bugs would be exposed, and whether those bugs would be
+fixable with the information provided.  Performance testing is the
+area where nondeterminism really starts to hurt the most.
 
-Signed-off-by: Sage Weil <sage@newdream.net>
----
- include/linux/crush/crush.h |    5 +++++
- net/ceph/crush/crush.c      |    4 +---
- 2 files changed, 6 insertions(+), 3 deletions(-)
+Colin
 
-diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-index 158a4d2..7c47508 100644
---- a/include/linux/crush/crush.h
-+++ b/include/linux/crush/crush.h
-@@ -166,4 +166,9 @@ extern void crush_destroy_bucket_straw(struct crush_bucket_straw *b);
- extern void crush_destroy_bucket(struct crush_bucket *b);
- extern void crush_destroy(struct crush_map *map);
- 
-+static inline int crush_calc_tree_node(int i)
-+{
-+	return ((i+1) << 1)-1;
-+}
-+
- #endif
-diff --git a/net/ceph/crush/crush.c b/net/ceph/crush/crush.c
-index bab3eac..568adac 100644
---- a/net/ceph/crush/crush.c
-+++ b/net/ceph/crush/crush.c
-@@ -37,9 +37,7 @@ int crush_get_bucket_item_weight(const struct crush_bucket *b, int p)
- 	case CRUSH_BUCKET_LIST:
- 		return ((struct crush_bucket_list *)b)->item_weights[p];
- 	case CRUSH_BUCKET_TREE:
--		if (p & 1)
--			return ((struct crush_bucket_tree *)b)->node_weights[p];
--		return 0;
-+		return ((struct crush_bucket_tree *)b)->node_weights[crush_calc_tree_node(p)];
- 	case CRUSH_BUCKET_STRAW:
- 		return ((struct crush_bucket_straw *)b)->item_weights[p];
- 	}
--- 
-1.7.9
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
