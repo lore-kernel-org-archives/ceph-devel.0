@@ -1,84 +1,48 @@
-From: Sage Weil <sage@newdream.net>
-Subject: performance on btrfs
-Date: Mon, 7 May 2012 20:11:45 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205072003420.31186@cobra.newdream.net>
+From: Nick Bartos <nick@pistoncloud.com>
+Subject: "converting" btrfs osds to xfs?
+Date: Tue, 8 May 2012 08:39:55 -0700
+Message-ID: <CAPud5_6MkeN-6n4rGX=Mew7nGfsmOOAiAtWVgdPArio6z2d_Fg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40092 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751053Ab2EHDLt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 7 May 2012 23:11:49 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id EF115BCB0D
-	for <ceph-devel@vger.kernel.org>; Mon,  7 May 2012 20:11:48 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 677D6BCB02
-	for <ceph-devel@vger.kernel.org>; Mon,  7 May 2012 20:11:48 -0700 (PDT)
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:50705 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755510Ab2EHPj6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 May 2012 11:39:58 -0400
+Received: by yenm10 with SMTP id m10so4957007yen.19
+        for <ceph-devel@vger.kernel.org>; Tue, 08 May 2012 08:39:57 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Looping everyone else in here on some simple write performance tests on 
-top of btrfs.  4mb writes, journal on ssd.  Seekwatcher movies at
+I am considering converting some OSDs to xfs (currently running btrfs)
+for stability reasons.  I have a couple of ideas for doing this, and
+was hoping to get some comments:
 
-http://nhm.ceph.com/movies/btrfs-dd-experiment/
+Method #1:
+1.  Check cluster health and make sure data on a specific OSD is
+replicated elsewhere.
+2.  Bring down the OSD
+3.  Reformat it to xfs
+4.  Restart OSD
+5.  Repeat 1-4 until all btrfs OSDs have been converted.
 
-Four tests here.  Raw disk bw is around 135 MB/sec.
+Method #2:
+1.  Take cluster offline.
+2.  Copy the data off btrfs onto a separate disk
+3.  Reformat it to xfs
+4.  Copy data back
+5.  Repeat 1-4 until all btrfs disks have been converted.
+6.  Bring up cluster.
 
-> >> a: cluster
-> >>  - flusher on
-> >>  - no vm tuning
-> >>  - initially fast, then crazy slow, then ...
-> >>  - commit/sync every ~5s
+Obviously #1 seems much more appetizing, but unfortunately I can't
+seem to find out how to verify that data on a specific OSD is
+replicated elsewhere.  I could go off general cluster health, but that
+seems more error prone.
 
-Super fast at first, then a long lull where we're waiting for btrfs snap 
-to complete, but disk tput is like 15 MB/sec (from iostat).  But in the 
-movie it looks like and sequential.. maybe the ios are too small or badly 
-aligned/timed or something?  Need to look at the raw blktrace data to see 
-where the seeks are.  This may be a problem in commit_transaction 
-(fs/btrfs/transaction.c) doing the flushing inefficiently?
+Going with #2 would incur a large downtime, which I would like to
+avoid.  Additionally, I am not completely certain which data must be
+copied off and restored, as it seems some btrfs snapshots are done
+which would not easily be migratable to xfs.
 
-> >> b: much much later
-> >>  - consistent 40 MB/sec
-
-20 minutes later, same run... things settle into 40 MB/sec.  Can clearly 
-see the funny gaps Yehuda was talking about
-
-I suspect the seekiness there is appending to the pg logs?  Maybe we can 
-verify that somehow?  Hopefully we can convince btrfs we don't care about 
-fragmentation of those files (basically never read) and write them more 
-efficiently.
-
-> >> c:
-> >>  - no ceph cluster, just a for loop:
-> >> for f in `seq 1 10000` ; do dd if=/dev/zero of=$f bs=4M count=1 ; attr -s
-> >> foo -V bar $f ; echo asdf >> foo.txt ; attr -s foo -V $f foo.txt ; done
-> >>    and
-> >> while true ; do sync ; sleep 5 ; done
-> >>  - 20 MB dirty_bytes limit (so that VM does writeout quickly)
-> >>  -> 60 MB/sec    (initially fast, though, more like 120 MB/sec)
-
-Weird we don't see the seeks here.. maybe they're just closer than in b?  
-Also, here i have one "log" (foo.txt) vs dozens of them (for each pg) in 
-b.  This clearly points to improvements to be had in btrfs (it's not all 
-our fault).  Should repeat this test on XFS.
-
-> >> d:
-> >>  - filestore flusher = false
-> >>  - 20mb dirty_bytes
-> >>  -> 55 MB/sec, slowly dropping
-
-This is letting the VM do the writeout.  Presumably those dots are the pg 
-logs again, but written out less politely.  Wonder why...
-
-
-c and d aren't *too* far off, which suggests this is mostly a btrfs 
-allocation issue.  But a vs b tells me there is also something 
-unfortunately going on with how we throttle the io coming in and manage 
-the flushing.  :/
-
-Let's get a simple workload reproducer together here (either workloadgen 
-or a simple script) that we can harass linux-btrfs@vger with?
-
-sage
+Which of these sounds better to other people?  Is there a method #3?
