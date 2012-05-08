@@ -1,74 +1,76 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Ceph kernel client - kernel craches
-Date: Tue, 8 May 2012 12:18:11 -0700
-Message-ID: <CADvuQRG2EJSC90GR+qkJN-tzi1d3VxxnZV_gMt_JdAcL2fEx4g@mail.gmail.com>
-References: <CAHcbcZe2NSJhveSKq7tSazKcfB4b8ZUX89RtknXc==cQ59vDjQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: "converting" btrfs osds to xfs?
+Date: Tue, 8 May 2012 12:38:43 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205081238010.14100@cobra.newdream.net>
+References: <CAPud5_6MkeN-6n4rGX=Mew7nGfsmOOAiAtWVgdPArio6z2d_Fg@mail.gmail.com>
+ <CADvuQRHDkpiDQSn84CvVccHf-pwPzyQZZQcpy34P0TcaWAk-FQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1475060255-1336505923=:14100"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:39344 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754867Ab2EHTSc convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 May 2012 15:18:32 -0400
-Received: by pbbrp8 with SMTP id rp8so8412471pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 08 May 2012 12:18:32 -0700 (PDT)
-In-Reply-To: <CAHcbcZe2NSJhveSKq7tSazKcfB4b8ZUX89RtknXc==cQ59vDjQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:37119 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756099Ab2EHTiq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 8 May 2012 15:38:46 -0400
+In-Reply-To: <CADvuQRHDkpiDQSn84CvVccHf-pwPzyQZZQcpy34P0TcaWAk-FQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Giorgos Kappes <geokapp@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: Nick Bartos <nick@pistoncloud.com>, ceph-devel@vger.kernel.org
 
-On Tue, May 8, 2012 at 8:43 AM, Giorgos Kappes <geokapp@gmail.com> wrot=
-e:
-> When I am running deboostrap to install a base Debian Squeeze system
-> on a Ceph directory the client's kernel crashes with the following
-> message:
->
-> I: Extracting zlib1g...
-> W: Failure trying to run: chroot /mnt/debian mount -t proc proc /proc
-> [ =C2=A0759.776151] kernel tried to execute NX-protected page - explo=
-it
-> attempt? (uid: 0)
-> [ =C2=A0759.776169] BUG: unable to handle kernel paging request at ff=
-ffe8fffffe4ab0
-=2E..
-> [ =C2=A0759.776438] =C2=A0[<ffffffff81099405>] ? __rcu_process_callba=
-cks+0x1c7/0x2f8
-> [ =C2=A0759.776447] =C2=A0[<ffffffff81099898>] ? rcu_process_callback=
-s+0x2c/0x56
-> [ =C2=A0759.776457] =C2=A0[<ffffffff8104cb72>] ? __do_softirq+0xc4/0x=
-1a0
-> [ =C2=A0759.776465] =C2=A0[<ffffffff81096875>] ? handle_percpu_irq+0x=
-3d/0x54
-> [ =C2=A0759.776475] =C2=A0[<ffffffff8150efb6>] ? __xen_evtchn_do_upca=
-ll+0x1c7/0x205
-> [ =C2=A0759.776484] =C2=A0[<ffffffff8176e52c>] ? call_softirq+0x1c/0x=
-30
-> [ =C2=A0759.776493] =C2=A0[<ffffffff8100fa47>] ? do_softirq+0x3f/0x79
-> [ =C2=A0759.776501] =C2=A0[<ffffffff8104c942>] ? irq_exit+0x44/0xb5
-> [ =C2=A0759.776508] =C2=A0[<ffffffff8150ffc6>] ? xen_evtchn_do_upcall=
-+0x27/0x32
-> [ =C2=A0759.776516] =C2=A0[<ffffffff8176e57e>] ? xen_do_hypervisor_ca=
-llback+0x1e/0x30
-=2E..
-> My simple cluster consists of 3 nodes in total. Each node is a Xen
-> domU guest running the Linux kernel 3.2.6 and ceph 0.43. For
-> reference, here is my configuration:
-=2E..
-> My Ceph kernel client is another Xen domU node running the Linux
-> kernel 3.2.11. I have also tried a native client with the same result=
-=2E
-> Please note that this bug happens only in the client side.
-> Your help would be greatly appreciated.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Your backtrace includes Xen code in it -- can you reproduce this bug
-with a mainline kernel, without Xen at all?
+--557981400-1475060255-1336505923=:14100
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Also, the error encountered is from the NX security subsystem. It
-would be nice to know what would happen without NX.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Tue, 8 May 2012, Tommi Virtanen wrote:
+> On Tue, May 8, 2012 at 8:39 AM, Nick Bartos <nick@pistoncloud.com> wrote:
+> > I am considering converting some OSDs to xfs (currently running btrfs)
+> > for stability reasons. =A0I have a couple of ideas for doing this, and
+> > was hoping to get some comments:
+> >
+> > Method #1:
+> > 1. =A0Check cluster health and make sure data on a specific OSD is
+> > replicated elsewhere.
+> > 2. =A0Bring down the OSD
+> > 3. =A0Reformat it to xfs
+> > 4. =A0Restart OSD
+> > 5. =A0Repeat 1-4 until all btrfs OSDs have been converted.
+> ...
+> > Obviously #1 seems much more appetizing, but unfortunately I can't
+> > seem to find out how to verify that data on a specific OSD is
+> > replicated elsewhere. =A0I could go off general cluster health, but tha=
+t
+> > seems more error prone.
+>=20
+> You can set the osd weight in crush to 0 and wait for the files inside
+> the osd data dir to disappear. If you want to control how much
+
+You can also just mark the osd 'out' without touching the CRUSH map;=20
+that'll be easier and a bit more efficient wrt data movement:
+
+=09ceph osd out 123
+
+When the one comes back, you'll need to
+
+=09ceph osd in 123
+
+sage
+
+> bandwidth is consumed for this transfer, you can also drop the weight
+> in e.g. 0.1 decrements. That should give you enough feedback from "du"
+> or "df" to be comfortable with the fact that your data is actually
+> moving elsewhere.
+>=20
+> I'd recommend completely removing the osd, and creating a new one; you
+> can even reuse the the osd id. Just don't try to copy the files over
+> from filesystem to another; the details of the btrfs interaction are
+> more low-level than what just a tar or cp can capture.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-1475060255-1336505923=:14100--
