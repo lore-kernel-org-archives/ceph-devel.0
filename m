@@ -1,30 +1,40 @@
 From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Subject: New site lacks a download link
-Date: Wed, 09 May 2012 15:07:31 +0200
-Message-ID: <8516427.RzmcuQ7yG2@pc10>
+Subject: Compile error in rgw/rgw_xml.h in 0.46
+Date: Wed, 09 May 2012 15:46:13 +0200
+Message-ID: <3675148.h66agqk253@pc10>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from unknownsite.de ([62.48.69.106]:60198 "EHLO hartes-hannover.de"
+Received: from unknownsite.de ([62.48.69.106]:33528 "EHLO hartes-hannover.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757766Ab2EINQh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 May 2012 09:16:37 -0400
+	id S1753115Ab2EINqS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 9 May 2012 09:46:18 -0400
 Received: from pc10.localnet (pc10.asys-h.de [193.98.1.90])
-	by hartes-hannover.de (Postfix) with ESMTPSA id 3D64010C866
-	for <ceph-devel@vger.kernel.org>; Wed,  9 May 2012 15:07:54 +0200 (CEST)
+	by hartes-hannover.de (Postfix) with ESMTPSA id 6834F10C866
+	for <ceph-devel@vger.kernel.org>; Wed,  9 May 2012 15:46:17 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi,
+Compiling Ceph 0.46 fails at rgw/rgw_dencoder.cc with the following errors:
 
-I see you have redesigned your website, and that it now points to ceph.com 
-instead of ceph.newdream.org.
+In file included from rgw/rgw_dencoder.cc:7:
+rgw/rgw_acl_s3.h:9:19: error: expat.h: No such file or directory
+In file included from rgw/rgw_acl_s3.h:11,
+                 from rgw/rgw_dencoder.cc:7:
+rgw/rgw_xml.h:59: error: 'XML_Parser' does not name a type
+make[3]: *** [ceph_dencoder-rgw_dencoder.o] Error 1
+make[3]: Leaving directory `/root/ceph-0.46/src'
+make[2]: *** [all-recursive] Error 1
+make[2]: Leaving directory `/root/ceph-0.46/src'
+make[1]: *** [all] Error 2
+make[1]: Leaving directory `/root/ceph-0.46/src'
+make: *** [all-recursive] Error 1
 
-If I may offer some criticism - the new site appears to lack one of the more 
-essential parts for an Open Source project: A download link.
-I managed to find the downloads anyway, by just typing ceph.com/download into 
-the address field, but still, it's a bit confusing this way.
+This is on CentOS 6.2.
+
+I managed to get it to compile by installing expat-devel first. Maybe the 
+configure script should check for the existence of the expat header files?
 
 	Guido
