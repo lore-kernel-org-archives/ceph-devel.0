@@ -1,36 +1,82 @@
-From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Subject: Re: Can I use btrfs-restore to restore ceph osds?
-Date: Wed, 09 May 2012 19:35:47 +0200
-Message-ID: <1862199.KHPoMmXDX8@pc10>
-References: <8973610.uuSzCzFUvq@pc10>
+From: Josef Bacik <josef@redhat.com>
+Subject: Re: Ceph on btrfs 3.4rc
+Date: Wed, 9 May 2012 16:25:54 -0400
+Message-ID: <20120509202554.GA1900@localhost.localdomain>
+References: <CAJafhzSVZ3+1ApgJU=sQu6gM62BeWVGG4mqFPNYRHx79czYJtQ@mail.gmail.com>
+ <20120424152141.GB3326@localhost.localdomain>
+ <Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
+ <CAJafhzSgaQ3sx=Af0Ru0CiwQH37V5y8jgjoTo_8yozcjo9rpPA@mail.gmail.com>
+ <20120503141354.GC1914@localhost.localdomain>
+ <f35947dc064c7ff1a073b430a2d681f5@hq.newdream.net>
+ <20120503152053.GA7313@localhost.localdomain>
+ <1e9c626272411bb1fb403a3aa8aeced7@hq.newdream.net>
+ <20120503194924.GC7313@localhost.localdomain>
+ <CAJafhzR3PFKUGq6JutzeaF61X=kJ9x62fH62-BYAs0S=sa=P9A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from unknownsite.de ([62.48.69.106]:32800 "EHLO hartes-hannover.de"
+Received: from mx1.redhat.com ([209.132.183.28]:53014 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754302Ab2EIRfz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 May 2012 13:35:55 -0400
-Received: from pc10.localnet (pc10.asys-h.de [193.98.1.90])
-	by hartes-hannover.de (Postfix) with ESMTPSA id 2E95E10C866
-	for <ceph-devel@vger.kernel.org>; Wed,  9 May 2012 19:35:54 +0200 (CEST)
-In-Reply-To: <8973610.uuSzCzFUvq@pc10>
+	id S1758245Ab2EIU0A (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 9 May 2012 16:26:00 -0400
+Content-Disposition: inline
+In-Reply-To: <CAJafhzR3PFKUGq6JutzeaF61X=kJ9x62fH62-BYAs0S=sa=P9A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Christian Brunner <christian@brunner-muc.de>
+Cc: Josef Bacik <josef@redhat.com>, Josh Durgin <josh.durgin@dreamhost.com>, Sage Weil <sage@newdream.net>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Am Mittwoch, 9. Mai 2012, 19:15:19 schrieben Sie:
-> I'm currently trying to re-enable my experimental ceph cluster that has been
-> offline for a few months. Unfortunately, it appears that, out of the six
-> btrfs volumes involved, only one can still be mounted, the other five are
-> broken somehow. (If I ever use Ceph in production, it's probably not going
-> to be on btrfs after this... I cannot recall whether or not the servers
-> were properly shut down the last time, but even if not, this is a bit
-> ridiculous.)
+On Fri, May 04, 2012 at 10:24:16PM +0200, Christian Brunner wrote:
+> 2012/5/3 Josef Bacik <josef@redhat.com>:
+> > On Thu, May 03, 2012 at 09:38:27AM -0700, Josh Durgin wrote:
+> >> On Thu, 3 May 2012 11:20:53 -0400, Josef Bacik <josef@redhat.com>
+> >> wrote:
+> >> > On Thu, May 03, 2012 at 08:17:43AM -0700, Josh Durgin wrote:
+> >> >
+> >> > Yeah all that was in the right place, I rebooted and I magically
+> >> > stopped getting
+> >> > that error, but now I'm getting this
+> >> >
+> >> > http://fpaste.org/OE92/
+> >> >
+> >> > with that ping thing repeating over and over. =A0Thanks,
+> >>
+> >> That just looks like the osd isn't running. If you restart the
+> >> osd with 'debug osd =3D 20' the osd log should tell us what's goin=
+g on.
+> >
+> > Ok that part was my fault, Duh I need to redo the tmpfs and mkcephf=
+s stuff after
+> > reboot. =A0But now I'm back to my original problem
+> >
+> > http://fpaste.org/PfwO/
+> >
+> > I have the osd class dir =3D /usr/lib64/rados-classes thing set and=
+ libcls_rbd is
+> > in there, so I'm not sure what is wrong. =A0Thanks,
+>=20
+> Thats really strange. Do you have the osd logs in /var/log/ceph? If
+> so, can you look if you find anything about "rbd" or "class" loading
+> in there?
+>=20
+> Another thing you should try is, whether you can access ceph with rad=
+os:
+>=20
+> # rados -p rbd ls
+> # rados -p rbd -i /proc/cpuinfo put testobj
+> # rados -p rbd -o - get testobj
+>
 
-In case anybody was wondering, the machines were using kernel 3.1.1 when they 
-last ran. (And still are, but I'm preparing a newer kernel.) I don't know yet 
-what bug has caused this breakage and whether or not it's still present in 
-newer kernels.
+Ok weirdly ceph is trying to dlopen /usr/lib64/rados-classes/libcls_rbd=
+=2Eso but
+all I had was libcls_rbd.so.1 and libcls_rbd.so.1.0.0.  Symlink fixed t=
+hat part,
+I'll see if I can reproduce now.  Thanks,
 
-	Guido
+Josef
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
