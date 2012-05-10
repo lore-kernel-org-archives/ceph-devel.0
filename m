@@ -1,82 +1,143 @@
-From: Josef Bacik <josef@redhat.com>
-Subject: Re: Ceph on btrfs 3.4rc
-Date: Wed, 9 May 2012 16:25:54 -0400
-Message-ID: <20120509202554.GA1900@localhost.localdomain>
-References: <CAJafhzSVZ3+1ApgJU=sQu6gM62BeWVGG4mqFPNYRHx79czYJtQ@mail.gmail.com>
- <20120424152141.GB3326@localhost.localdomain>
- <Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
- <CAJafhzSgaQ3sx=Af0Ru0CiwQH37V5y8jgjoTo_8yozcjo9rpPA@mail.gmail.com>
- <20120503141354.GC1914@localhost.localdomain>
- <f35947dc064c7ff1a073b430a2d681f5@hq.newdream.net>
- <20120503152053.GA7313@localhost.localdomain>
- <1e9c626272411bb1fb403a3aa8aeced7@hq.newdream.net>
- <20120503194924.GC7313@localhost.localdomain>
- <CAJafhzR3PFKUGq6JutzeaF61X=kJ9x62fH62-BYAs0S=sa=P9A@mail.gmail.com>
+From: Tomoki BENIYA <beniya@bit-isle.co.jp>
+Subject: Always creating PGs
+Date: Thu, 10 May 2012 18:17:33 +0900
+Message-ID: <20120510175036.FC97.33BC0F0F@bit-isle.co.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53014 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758245Ab2EIU0A (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 9 May 2012 16:26:00 -0400
-Content-Disposition: inline
-In-Reply-To: <CAJafhzR3PFKUGq6JutzeaF61X=kJ9x62fH62-BYAs0S=sa=P9A@mail.gmail.com>
+Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:57658 "HELO
+	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S932075Ab2EJJRc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 May 2012 05:17:32 -0400
+Received: by pbbrr4 with SMTP id rr4so1581924pbb.9
+        for <ceph-devel@vger.kernel.org>; Thu, 10 May 2012 02:17:30 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christian Brunner <christian@brunner-muc.de>
-Cc: Josef Bacik <josef@redhat.com>, Josh Durgin <josh.durgin@dreamhost.com>, Sage Weil <sage@newdream.net>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Fri, May 04, 2012 at 10:24:16PM +0200, Christian Brunner wrote:
-> 2012/5/3 Josef Bacik <josef@redhat.com>:
-> > On Thu, May 03, 2012 at 09:38:27AM -0700, Josh Durgin wrote:
-> >> On Thu, 3 May 2012 11:20:53 -0400, Josef Bacik <josef@redhat.com>
-> >> wrote:
-> >> > On Thu, May 03, 2012 at 08:17:43AM -0700, Josh Durgin wrote:
-> >> >
-> >> > Yeah all that was in the right place, I rebooted and I magically
-> >> > stopped getting
-> >> > that error, but now I'm getting this
-> >> >
-> >> > http://fpaste.org/OE92/
-> >> >
-> >> > with that ping thing repeating over and over. =A0Thanks,
-> >>
-> >> That just looks like the osd isn't running. If you restart the
-> >> osd with 'debug osd =3D 20' the osd log should tell us what's goin=
-g on.
-> >
-> > Ok that part was my fault, Duh I need to redo the tmpfs and mkcephf=
-s stuff after
-> > reboot. =A0But now I'm back to my original problem
-> >
-> > http://fpaste.org/PfwO/
-> >
-> > I have the osd class dir =3D /usr/lib64/rados-classes thing set and=
- libcls_rbd is
-> > in there, so I'm not sure what is wrong. =A0Thanks,
->=20
-> Thats really strange. Do you have the osd logs in /var/log/ceph? If
-> so, can you look if you find anything about "rbd" or "class" loading
-> in there?
->=20
-> Another thing you should try is, whether you can access ceph with rad=
-os:
->=20
-> # rados -p rbd ls
-> # rados -p rbd -i /proc/cpuinfo put testobj
-> # rados -p rbd -o - get testobj
->
+Hi, all
 
-Ok weirdly ceph is trying to dlopen /usr/lib64/rados-classes/libcls_rbd=
-=2Eso but
-all I had was libcls_rbd.so.1 and libcls_rbd.so.1.0.0.  Symlink fixed t=
-hat part,
-I'll see if I can reproduce now.  Thanks,
+I created Ceph file system using Debian7 of 64bit.
 
-Josef
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I found that PGs of 'creating' status are never finished.
+
+# ceph pg stat
+v17596: 1204 pgs: 8 creating, 1196 active+clean; 25521 MB data, 77209 MB used, 2223 GB / 2318 GB avail
+                  ~~~~~~~~~~
+                  always creating, why?
+
+# ceph pg dump|grep creating
+1.1p6   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
+0.1p7   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
+1.1p7   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
+0.1p6   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
+1.1p8   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
+0.1p9   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
+1.1p9   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
+0.1p8   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
+
+Configuration is wrong?
+How to resolve this problem?
+
+========================================
+[global]
+        auth supported = cephx
+        max open files = 131072
+        log_to_syslog = true
+        pid file = /var/run/ceph/$name.pid
+        keyring = /etc/ceph/keyring.bin
+
+[mon]
+        mon data = /ceph/$name
+
+[mon.0]
+        host = mon0
+        mon addr = 192.168.233.81:6789
+
+[mon.1]
+        host = mon1
+        mon addr = 192.168.233.82:6789
+
+[mon.2]
+        host = mon2
+        mon addr = 192.168.233.83:6789
+
+[mds]
+        keyring = /etc/ceph/keyring.$name
+
+[mds.0]
+        host = mds0
+
+[osd]
+        osd journal = /var/journal
+        osd journal size = 1000
+        keyring = /etc/ceph/keyring.$name
+
+[osd.0]
+        host = osd0
+        btrfs devs = /dev/sdb1
+        osd data = /ceph0
+        osd journal = /var/journal0
+
+[osd.1]
+        host = osd0
+        btrfs devs = /dev/sdc1
+        osd data = /ceph1
+        osd journal = /var/journal1
+
+[osd.2]
+        host = osd1
+        btrfs devs = /dev/sdb1
+        osd data = /ceph0
+        osd journal = /var/journal0
+
+[osd.3]
+        host = osd1
+        btrfs devs = /dev/sdc1
+        osd data = /ceph1
+        osd journal = /var/journal1
+
+[osd.4]
+        host = osd2
+        btrfs devs = /dev/sdb1
+        osd data = /ceph0
+        osd journal = /var/journal0
+
+[osd.5]
+        host = osd2
+        btrfs devs = /dev/sdc1
+        osd data = /ceph1
+        osd journal = /var/journal1
+
+[osd.6]
+        host = osd3
+        btrfs devs = /dev/sdb1
+        osd data = /ceph0
+        osd journal = /var/journal0
+
+[osd.7]
+        host = osd3
+        btrfs devs = /dev/sdc1
+        osd data = /ceph1
+        osd journal = /var/journal1
+
+[osd.8]
+        host = osd4
+        btrfs devs = /dev/sdb1
+        osd data = /ceph0
+        osd journal = /var/journal0
+
+[osd.9]
+        host = osd4
+        btrfs devs = /dev/sdc1
+        osd data = /ceph1
+        osd journal = /var/journal1
+========================================
+
+Thanks.
+
+-- 
+Tomoki BENIYA <beniya@bit-isle.co.jp>
+
