@@ -1,118 +1,70 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: [RFC PATCH 2/2] ceph: retry CRUSH map descent from root if leaf
- is failed
-Date: Thu, 10 May 2012 16:38:26 -0600
-Message-ID: <1336689506-15029-3-git-send-email-jaschut@sandia.gov>
-References: <1336689506-15029-1-git-send-email-jaschut@sandia.gov>
+From: Nick Bartos <nick@pistoncloud.com>
+Subject: Re: "converting" btrfs osds to xfs?
+Date: Thu, 10 May 2012 15:44:11 -0700
+Message-ID: <CAPud5_5fsBXX-N-SM7P7Fouba+9P2Nt5aAPfq+nLkUcN4_d5OQ@mail.gmail.com>
+References: <CAPud5_6MkeN-6n4rGX=Mew7nGfsmOOAiAtWVgdPArio6z2d_Fg@mail.gmail.com>
+	<CADvuQRHDkpiDQSn84CvVccHf-pwPzyQZZQcpy34P0TcaWAk-FQ@mail.gmail.com>
+	<Pine.LNX.4.64.1205081238010.14100@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:33060 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761692Ab2EJWjA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 May 2012 18:39:00 -0400
-In-Reply-To: <1336689506-15029-1-git-send-email-jaschut@sandia.gov>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:47035 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761578Ab2EJWoM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 May 2012 18:44:12 -0400
+Received: by yenm10 with SMTP id m10so2055061yen.19
+        for <ceph-devel@vger.kernel.org>; Thu, 10 May 2012 15:44:11 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1205081238010.14100@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@newdream.net
-Cc: sam.just@dreamhost.com, ceph-devel@vger.kernel.org, Jim Schutt <jaschut@sandia.gov>
+To: Sage Weil <sage@newdream.net>
+Cc: Tommi Virtanen <tv@inktank.com>, ceph-devel@vger.kernel.org
 
-When an object is re-replicated after a leaf failure, the remapped replica
-ends up under the bucket that held the failed leaf.  This causes uneven
-data distribution across the storage cluster, to the point that when all
-the leaves of a bucket but one fail, that remaining leaf holds all the
-data from its failed peers.
+After I run the 'ceph osd out 123' command, is there a specific ceph
+command I can poll so I know when it's OK to kill the OSD daemon and
+begin the reformat process?
 
-For example, consider the crush rule
-  step chooseleaf firstn 0 type <node_type>
-
-This rule means that <n> replicas will be chosen in such a manner that
-each chosen leaf's branch will contain a unique instance of <node_type>.
-
-For such ops, the tree descent has two steps: call them the inner and
-outer descent.
-
-If the tree descent down to <node_type> is the outer descent, and the
-descent from <node_type> down to a leaf is the inner descent, the issue
-is that a down leaf is detected on the inner descent, but we want to
-retry the outer descent.  This ensures that re-replication after a leaf
-failure disperses the re-replicated objects as widely as possible across
-the storage cluster.
-
-Fix this by causing the inner descent to return immediately on choosing
-a failed leaf, unless we've fallen back to exhaustive search.
-
-Note that after this change, for a chooseleaf rule, if the primary OSD
-in a placement group has failed, choosing a replacement may result in
-one of the other OSDs in the PG colliding with the new primary.  This
-requires that OSD's data for that PG to need moving as well.  This
-seems unavoidable but should be relatively rare.
-
-Signed-off-by: Jim Schutt <jaschut@sandia.gov>
----
- src/crush/mapper.c |   12 +++++++++---
- 1 files changed, 9 insertions(+), 3 deletions(-)
-
-diff --git a/src/crush/mapper.c b/src/crush/mapper.c
-index e5dc950..698da55 100644
---- a/src/crush/mapper.c
-+++ b/src/crush/mapper.c
-@@ -286,6 +286,7 @@ static int is_out(const struct crush_map *map, const __u32 *weight, int item, in
-  * @param outpos our position in that vector
-  * @param firstn true if choosing "first n" items, false if choosing "indep"
-  * @param recurseto_leaf: true if we want one device under each item of given type
-+ * @param descend_once true if we should only try one descent before giving up
-  * @param out2 second output vector for leaf items (if @a recurse_to_leaf)
-  */
- static int crush_choose(const struct crush_map *map,
-@@ -293,7 +294,7 @@ static int crush_choose(const struct crush_map *map,
- 			const __u32 *weight,
- 			int x, int numrep, int type,
- 			int *out, int outpos,
--			int firstn, int recurse_to_leaf,
-+			int firstn, int recurse_to_leaf, int descend_once,
- 			int *out2)
- {
- 	int rep;
-@@ -397,6 +398,7 @@ static int crush_choose(const struct crush_map *map,
- 							 x, outpos+1, 0,
- 							 out2, outpos,
- 							 firstn, 0,
-+							 ftotal < orig_tries,
- 							 NULL) <= outpos)
- 							/* didn't get leaf */
- 							reject = 1;
-@@ -430,7 +432,10 @@ reject:
- 					 * descent during that phase so that multiple
- 					 * buckets can be exhaustively searched.
- 					 */
--					if (ftotal <= orig_tries)
-+					if (reject && descend_once)
-+						/* let outer call try again */
-+						skip_rep = 1;
-+					else if (ftotal <= orig_tries)
- 						retry_descent = 1;
- 					else if (flocal <= in->size + orig_tries)
- 						/* exhaustive bucket search */
-@@ -491,6 +496,7 @@ int crush_do_rule(const struct crush_map *map,
- 	int i, j;
- 	int numrep;
- 	int firstn;
-+	const int descend_once = 0;
- 
- 	if ((__u32)ruleno >= map->max_rules) {
- 		dprintk(" bad ruleno %d\n", ruleno);
-@@ -550,7 +556,7 @@ int crush_do_rule(const struct crush_map *map,
- 						      curstep->arg2,
- 						      o+osize, j,
- 						      firstn,
--						      recurse_to_leaf, c+osize);
-+						      recurse_to_leaf, descend_once, c+osize);
- 			}
- 
- 			if (recurse_to_leaf)
--- 
-1.7.8.2
-
-
+On Tue, May 8, 2012 at 12:38 PM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 8 May 2012, Tommi Virtanen wrote:
+>> On Tue, May 8, 2012 at 8:39 AM, Nick Bartos <nick@pistoncloud.com> w=
+rote:
+>> > I am considering converting some OSDs to xfs (currently running bt=
+rfs)
+>> > for stability reasons. =A0I have a couple of ideas for doing this,=
+ and
+>> > was hoping to get some comments:
+>> >
+>> > Method #1:
+>> > 1. =A0Check cluster health and make sure data on a specific OSD is
+>> > replicated elsewhere.
+>> > 2. =A0Bring down the OSD
+>> > 3. =A0Reformat it to xfs
+>> > 4. =A0Restart OSD
+>> > 5. =A0Repeat 1-4 until all btrfs OSDs have been converted.
+>> ...
+>> > Obviously #1 seems much more appetizing, but unfortunately I can't
+>> > seem to find out how to verify that data on a specific OSD is
+>> > replicated elsewhere. =A0I could go off general cluster health, bu=
+t that
+>> > seems more error prone.
+>>
+>> You can set the osd weight in crush to 0 and wait for the files insi=
+de
+>> the osd data dir to disappear. If you want to control how much
+>
+> You can also just mark the osd 'out' without touching the CRUSH map;
+> that'll be easier and a bit more efficient wrt data movement:
+>
+> =A0 =A0 =A0 =A0ceph osd out 123
+>
+> When the one comes back, you'll need to
+>
+> =A0 =A0 =A0 =A0ceph osd in 123
+>
+> sage
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
