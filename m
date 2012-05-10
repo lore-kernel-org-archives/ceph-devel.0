@@ -1,165 +1,313 @@
-From: Calvin Morrow <calvin.morrow@gmail.com>
-Subject: Re: slow performance even when using SSDs
-Date: Thu, 10 May 2012 12:24:16 -0600
-Message-ID: <CADxhoDRB1i8Knj97ROKvFgFvh63hD4EW+OT3A6YAY+dYvDZ0hg@mail.gmail.com>
-References: <4FABAFE9.5060202@profihost.ag>
-	<4FABBE23.4030608@profihost.ag>
+From: Josef Bacik <josef@redhat.com>
+Subject: Re: Ceph on btrfs 3.4rc
+Date: Thu, 10 May 2012 16:35:23 -0400
+Message-ID: <20120510203523.GD2061@localhost.localdomain>
+References: <CAJafhzSVZ3+1ApgJU=sQu6gM62BeWVGG4mqFPNYRHx79czYJtQ@mail.gmail.com>
+ <20120424152141.GB3326@localhost.localdomain>
+ <Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
+ <CAJafhzSgaQ3sx=Af0Ru0CiwQH37V5y8jgjoTo_8yozcjo9rpPA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:34711 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755548Ab2EJSYR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 May 2012 14:24:17 -0400
-Received: by wgbdr13 with SMTP id dr13so1729949wgb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 10 May 2012 11:24:16 -0700 (PDT)
-In-Reply-To: <4FABBE23.4030608@profihost.ag>
+Received: from mx1.redhat.com ([209.132.183.28]:44097 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756343Ab2EJUf1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 10 May 2012 16:35:27 -0400
+Content-Disposition: inline
+In-Reply-To: <CAJafhzSgaQ3sx=Af0Ru0CiwQH37V5y8jgjoTo_8yozcjo9rpPA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org
+To: Christian Brunner <christian@brunner-muc.de>
+Cc: Sage Weil <sage@newdream.net>, Josef Bacik <josef@redhat.com>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-I was getting roughly the same results of your tmpfs test using
-spinning disks for OSDs with a 160GB Intel 320 SSD being used for the
-journal.  Theoretically the 520 SSD should give better performance
-than my 320s.
-
-Keep in mind that even with balance-alb, multiple GigE connections
-will only be used if there are multiple TCP sessions being used by
-Ceph.
-
-You don't mention it in your email, but if you're using kernel 3.4+
-you'll want to make sure your create your btrfs filesystem using the
-large node & leaf size (Big Metadata - I've heard recommendations of
-32k instead of default 4k) so your performance doesn't degrade over
-time.
-
-I'm curious what speed you're getting from dd in a streaming write.
-You might try running a "dd if=3D/dev/zero of=3D<intel ssd partition>
-bs=3D128k count=3Dsomething" to see what the SSD will spit out without
-Ceph in the picture.
-
-Calvin
-
-On Thu, May 10, 2012 at 7:09 AM, Stefan Priebe - Profihost AG
-<s.priebe@profihost.ag> wrote:
-> OK, here some retests. I had the SDDs conected to an old Raid control=
-ler
-> even i did used them as JBODs (oops).
->
-> Here are two new Tests (using kernel 3.4-rc6) it would be great if
-> someone could tell me if they're fine or bad.
->
-> New tests with all 3 SSDs connected to the mainboard.
->
-> #~ rados -p rbd bench 60 write
-> Total time run: =A0 =A0 =A0 =A060.342419
-> Total writes made: =A0 =A0 2021
-> Write size: =A0 =A0 =A0 =A0 =A0 =A04194304
-> Bandwidth (MB/sec): =A0 =A0133.969
->
-> Average Latency: =A0 =A0 =A0 0.477476
-> Max latency: =A0 =A0 =A0 =A0 =A0 0.942029
-> Min latency: =A0 =A0 =A0 =A0 =A0 0.109467
->
-> #~ rados -p rbd bench 60 write -b 4096
-> Total time run: =A0 =A0 =A0 =A060.726326
-> Total writes made: =A0 =A0 59026
-> Write size: =A0 =A0 =A0 =A0 =A0 =A04096
-> Bandwidth (MB/sec): =A0 =A03.797
->
-> Average Latency: =A0 =A0 =A0 0.016459
-> Max latency: =A0 =A0 =A0 =A0 =A0 0.874841
-> Min latency: =A0 =A0 =A0 =A0 =A0 0.002392
->
-> Another test with only osd on the disk and the journal in memory / tm=
-pfs:
-> #~ rados -p rbd bench 60 write
-> Total time run: =A0 =A0 =A0 =A060.513240
-> Total writes made: =A0 =A0 2555
-> Write size: =A0 =A0 =A0 =A0 =A0 =A04194304
-> Bandwidth (MB/sec): =A0 =A0168.889
->
-> Average Latency: =A0 =A0 =A0 0.378775
-> Max latency: =A0 =A0 =A0 =A0 =A0 4.59233
-> Min latency: =A0 =A0 =A0 =A0 =A0 0.055179
->
-> #~ rados -p rbd bench 60 write -b 4096
-> Total time run: =A0 =A0 =A0 =A060.116260
-> Total writes made: =A0 =A0 281903
-> Write size: =A0 =A0 =A0 =A0 =A0 =A04096
-> Bandwidth (MB/sec): =A0 =A018.318
->
-> Average Latency: =A0 =A0 =A0 0.00341067
-> Max latency: =A0 =A0 =A0 =A0 =A0 0.720486
-> Min latency: =A0 =A0 =A0 =A0 =A0 0.000602
->
-> Another problem i have is i'm always getting:
-> "2012-05-10 15:05:22.140027 mon.0 192.168.0.100:6789/0 19 : [WRN]
-> message from mon.2 was stamped 0.109244s in the future, clocks not
-> synchronized"
->
-> even on all systems ntp is running fine.
->
-> Stefan
->
-> Am 10.05.2012 14:09, schrieb Stefan Priebe - Profihost AG:
->> Dear List,
->>
->> i'm doing a testsetup with ceph v0.46 and wanted to know how fast ce=
-ph is.
->>
->> my testsetup:
->> 3 servers with Intel Xeon X3440, 180GB SSD Intel 520 Series, 4GB RAM=
-, 2x
->> 1Gbit/s LAN each
->>
->> All 3 are running as mon a-c and osd 0-2. Two of them are also runni=
+On Fri, Apr 27, 2012 at 01:02:08PM +0200, Christian Brunner wrote:
+> Am 24. April 2012 18:26 schrieb Sage Weil <sage@newdream.net>:
+> > On Tue, 24 Apr 2012, Josef Bacik wrote:
+> >> On Fri, Apr 20, 2012 at 05:09:34PM +0200, Christian Brunner wrote:
+> >> > After running ceph on XFS for some time, I decided to try btrfs =
+again.
+> >> > Performance with the current "for-linux-min" branch and big meta=
+data
+> >> > is much better. The only problem (?) I'm still seeing is a warni=
 ng
->> as mds.2 and mds.3 (has 8GB RAM instead of 4GB).
->>
->> All machines run ceph v0.46 and vanilla Linux Kernel v3.0.30 and all=
- of
->> them use btrfs on the ssd which serves /srv/{osd,mon}.X. All of them=
- use
->> eth0+eth1 as bond0 (mode 6).
->>
->> This gives me:
->> rados -p rbd bench 60 write
->>
->> ...
->> Total time run: =A0 =A0 =A0 =A061.465323
->> Total writes made: =A0 =A0 776
->> Write size: =A0 =A0 =A0 =A0 =A0 =A04194304
->> Bandwidth (MB/sec): =A0 =A050.500
->>
->> Average Latency: =A0 =A0 =A0 1.2654
->> Max latency: =A0 =A0 =A0 =A0 =A0 2.77124
->> Min latency: =A0 =A0 =A0 =A0 =A0 0.170936
->>
->> Shouldn't it be at least 100MB/s? (1Gbit/s / 8)
->>
->> And rados -p rbd bench 60 write -b 4096 gives pretty bad results:
->> Total time run: =A0 =A0 =A0 =A060.221130
->> Total writes made: =A0 =A0 6401
->> Write size: =A0 =A0 =A0 =A0 =A0 =A04096
->> Bandwidth (MB/sec): =A0 =A00.415
->>
->> Average Latency: =A0 =A0 =A0 0.150525
->> Max latency: =A0 =A0 =A0 =A0 =A0 1.12647
->> Min latency: =A0 =A0 =A0 =A0 =A0 0.026599
->>
->> All btrfs ssds are also mounted with noatime.
->>
->> Thanks for your help!
->>
->> Greets Stefan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> >> > that seems to occur from time to time:
+> >
+> > Actually, before you do that... we have a new tool,
+> > test_filestore_workloadgen, that generates a ceph-osd-like workload=
+ on the
+> > local file system. =A0It's a subset of what a full OSD might do, bu=
+t if
+> > we're lucky it will be sufficient to reproduce this issue. =A0Somet=
+hing like
+> >
+> > =A0test_filestore_workloadgen --osd-data /foo --osd-journal /bar
+> >
+> > will hopefully do the trick.
+> >
+> > Christian, maybe you can see if that is able to trigger this warnin=
+g?
+> > You'll need to pull it from the current master branch; it wasn't in=
+ the
+> > last release.
+>=20
+> Trying to reproduce with test_filestore_workloadgen didn't work for
+> me. So here are some instructions on how to reproduce with a minimal
+> ceph setup.
+>=20
+> You will need a single system with two disks and a bit of memory.
+>=20
+> - Compile and install ceph (detailed instructions:
+> http://ceph.newdream.net/docs/master/ops/install/mkcephfs/)
+>=20
+> - For the test setup I've used two tmpfs files as journal devices. To
+> create these, do the following:
+>=20
+> # mkdir -p /ceph/temp
+> # mount -t tmpfs tmpfs /ceph/temp
+> # dd if=3D/dev/zero of=3D/ceph/temp/journal0 count=3D500 bs=3D1024k
+> # dd if=3D/dev/zero of=3D/ceph/temp/journal1 count=3D500 bs=3D1024k
+>=20
+> - Now you should create and mount btrfs. Here is what I did:
+>=20
+> # mkfs.btrfs -l 64k -n 64k /dev/sda
+> # mkfs.btrfs -l 64k -n 64k /dev/sdb
+> # mkdir /ceph/osd.000
+> # mkdir /ceph/osd.001
+> # mount -o noatime,space_cache,inode_cache,autodefrag /dev/sda /ceph/=
+osd.000
+> # mount -o noatime,space_cache,inode_cache,autodefrag /dev/sdb /ceph/=
+osd.001
+>=20
+> - Create /etc/ceph/ceph.conf similar to the attached ceph.conf. You
+> will probably have to change the btrfs devices and the hostname
+> (os39).
+>=20
+> - Create the ceph filesystems:
+>=20
+> # mkdir /ceph/mon
+> # mkcephfs -a -c /etc/ceph/ceph.conf
+>=20
+> - Start ceph (e.g. "service ceph start")
+>=20
+> - Now you should be able to use ceph - "ceph -s" will tell you about
+> the state of the ceph cluster.
+>=20
+> - "rbd create -size 100 testimg" will create an rbd image on the ceph=
+ cluster.
+>=20
+> - Compile my test with "gcc -o rbdtest rbdtest.c -lrbd" and run it
+> with "./rbdtest testimg".
+>=20
+> I can see the first btrfs_orphan_commit_root warning after an hour or
+> so... I hope that I've described all necessary steps. If there is a
+> problem just send me a note.
+>=20
+
+Well I feel like an idiot, I finally get it to reproduce, go look at wh=
+ere I
+want to put my printks and theres the problem staring me right in the f=
+ace.
+I've looked seriously at this problem 2 or 3 times and have missed this=
+ every
+single freaking time.  Here is the patch I'm trying, please try it on y=
+ours to
+make sure it fixes the problem.  It takes like 2 hours for it to reprod=
+uce for
+me so I won't be able to fully test it until tomorrow, but so far it ha=
+sn't
+broken anything so it should be good.  Thanks,
+
+Josef
+
+
+diff --git a/fs/btrfs/btrfs_inode.h b/fs/btrfs/btrfs_inode.h
+index eefe573..4ad628d 100644
+--- a/fs/btrfs/btrfs_inode.h
++++ b/fs/btrfs/btrfs_inode.h
+@@ -57,9 +57,6 @@ struct btrfs_inode {
+ 	/* used to order data wrt metadata */
+ 	struct btrfs_ordered_inode_tree ordered_tree;
+=20
+-	/* for keeping track of orphaned inodes */
+-	struct list_head i_orphan;
+-
+ 	/* list of all the delalloc inodes in the FS.  There are times we nee=
+d
+ 	 * to write all the delalloc pages to disk, and this list is used
+ 	 * to walk them all.
+@@ -164,6 +161,7 @@ struct btrfs_inode {
+ 	unsigned dummy_inode:1;
+ 	unsigned in_defrag:1;
+ 	unsigned delalloc_meta_reserved:1;
++	unsigned has_orphan_item:1;
+=20
+ 	/*
+ 	 * always compress this one file
+diff --git a/fs/btrfs/ctree.h b/fs/btrfs/ctree.h
+index 8a89888..6dd20f3 100644
+--- a/fs/btrfs/ctree.h
++++ b/fs/btrfs/ctree.h
+@@ -1375,7 +1375,7 @@ struct btrfs_root {
+ 	struct list_head root_list;
+=20
+ 	spinlock_t orphan_lock;
+-	struct list_head orphan_list;
++	atomic_t orphan_inodes;
+ 	struct btrfs_block_rsv *orphan_block_rsv;
+ 	int orphan_item_inserted;
+ 	int orphan_cleanup_state;
+diff --git a/fs/btrfs/disk-io.c b/fs/btrfs/disk-io.c
+index 7f849b3..8bbe8c4 100644
+--- a/fs/btrfs/disk-io.c
++++ b/fs/btrfs/disk-io.c
+@@ -1148,7 +1148,6 @@ static void __setup_root(u32 nodesize, u32 leafsi=
+ze, u32 sectorsize,
+ 	root->orphan_block_rsv =3D NULL;
+=20
+ 	INIT_LIST_HEAD(&root->dirty_list);
+-	INIT_LIST_HEAD(&root->orphan_list);
+ 	INIT_LIST_HEAD(&root->root_list);
+ 	spin_lock_init(&root->orphan_lock);
+ 	spin_lock_init(&root->inode_lock);
+@@ -1161,6 +1160,7 @@ static void __setup_root(u32 nodesize, u32 leafsi=
+ze, u32 sectorsize,
+ 	atomic_set(&root->log_commit[0], 0);
+ 	atomic_set(&root->log_commit[1], 0);
+ 	atomic_set(&root->log_writers, 0);
++	atomic_set(&root->orphan_inodes, 0);
+ 	root->log_batch =3D 0;
+ 	root->log_transid =3D 0;
+ 	root->last_log_commit =3D 0;
+diff --git a/fs/btrfs/inode.c b/fs/btrfs/inode.c
+index 0218a4e..0265d40 100644
+--- a/fs/btrfs/inode.c
++++ b/fs/btrfs/inode.c
+@@ -2138,12 +2138,12 @@ void btrfs_orphan_commit_root(struct btrfs_tran=
+s_handle *trans,
+ 	struct btrfs_block_rsv *block_rsv;
+ 	int ret;
+=20
+-	if (!list_empty(&root->orphan_list) ||
++	if (atomic_read(&root->orphan_inodes) ||
+ 	    root->orphan_cleanup_state !=3D ORPHAN_CLEANUP_DONE)
+ 		return;
+=20
+ 	spin_lock(&root->orphan_lock);
+-	if (!list_empty(&root->orphan_list)) {
++	if (atomic_read(&root->orphan_inodes)) {
+ 		spin_unlock(&root->orphan_lock);
+ 		return;
+ 	}
+@@ -2200,8 +2200,8 @@ int btrfs_orphan_add(struct btrfs_trans_handle *t=
+rans, struct inode *inode)
+ 		block_rsv =3D NULL;
+ 	}
+=20
+-	if (list_empty(&BTRFS_I(inode)->i_orphan)) {
+-		list_add(&BTRFS_I(inode)->i_orphan, &root->orphan_list);
++	if (!BTRFS_I(inode)->has_orphan_item) {
++		BTRFS_I(inode)->has_orphan_item =3D 1;
+ #if 0
+ 		/*
+ 		 * For proper ENOSPC handling, we should do orphan
+@@ -2214,6 +2214,7 @@ int btrfs_orphan_add(struct btrfs_trans_handle *t=
+rans, struct inode *inode)
+ 			insert =3D 1;
+ #endif
+ 		insert =3D 1;
++		atomic_inc(&root->orphan_inodes);
+ 	}
+=20
+ 	if (!BTRFS_I(inode)->orphan_meta_reserved) {
+@@ -2261,9 +2262,8 @@ int btrfs_orphan_del(struct btrfs_trans_handle *t=
+rans, struct inode *inode)
+ 	int release_rsv =3D 0;
+ 	int ret =3D 0;
+=20
+-	spin_lock(&root->orphan_lock);
+-	if (!list_empty(&BTRFS_I(inode)->i_orphan)) {
+-		list_del_init(&BTRFS_I(inode)->i_orphan);
++	if (BTRFS_I(inode)->has_orphan_item) {
++		BTRFS_I(inode)->has_orphan_item =3D 0;
+ 		delete_item =3D 1;
+ 	}
+=20
+@@ -2271,7 +2271,6 @@ int btrfs_orphan_del(struct btrfs_trans_handle *t=
+rans, struct inode *inode)
+ 		BTRFS_I(inode)->orphan_meta_reserved =3D 0;
+ 		release_rsv =3D 1;
+ 	}
+-	spin_unlock(&root->orphan_lock);
+=20
+ 	if (trans && delete_item) {
+ 		ret =3D btrfs_del_orphan_item(trans, root, btrfs_ino(inode));
+@@ -2281,6 +2280,9 @@ int btrfs_orphan_del(struct btrfs_trans_handle *t=
+rans, struct inode *inode)
+ 	if (release_rsv)
+ 		btrfs_orphan_release_metadata(inode);
+=20
++	if (trans && delete_item)
++		atomic_dec(&root->orphan_inodes);
++
+ 	return 0;
+ }
+=20
+@@ -2418,9 +2420,8 @@ int btrfs_orphan_cleanup(struct btrfs_root *root)
+ 		 * add this inode to the orphan list so btrfs_orphan_del does
+ 		 * the proper thing when we hit it
+ 		 */
+-		spin_lock(&root->orphan_lock);
+-		list_add(&BTRFS_I(inode)->i_orphan, &root->orphan_list);
+-		spin_unlock(&root->orphan_lock);
++		atomic_inc(&root->orphan_inodes);
++		BTRFS_I(inode)->has_orphan_item =3D 1;
+=20
+ 		/* if we have links, this was a truncate, lets do that */
+ 		if (inode->i_nlink) {
+@@ -3741,7 +3742,7 @@ void btrfs_evict_inode(struct inode *inode)
+ 	btrfs_wait_ordered_range(inode, 0, (u64)-1);
+=20
+ 	if (root->fs_info->log_root_recovering) {
+-		BUG_ON(!list_empty(&BTRFS_I(inode)->i_orphan));
++		BUG_ON(!BTRFS_I(inode)->has_orphan_item);
+ 		goto no_delete;
+ 	}
+=20
+@@ -6921,6 +6922,7 @@ struct inode *btrfs_alloc_inode(struct super_bloc=
+k *sb)
+ 	ei->in_defrag =3D 0;
+ 	ei->delalloc_meta_reserved =3D 0;
+ 	ei->complete_ordered =3D 0;
++	ei->has_orphan_item =3D 0;
+ 	ei->force_compress =3D BTRFS_COMPRESS_NONE;
+=20
+ 	ei->delayed_node =3D NULL;
+@@ -6934,7 +6936,6 @@ struct inode *btrfs_alloc_inode(struct super_bloc=
+k *sb)
+ 	mutex_init(&ei->log_mutex);
+ 	mutex_init(&ei->delalloc_mutex);
+ 	btrfs_ordered_inode_tree_init(&ei->ordered_tree);
+-	INIT_LIST_HEAD(&ei->i_orphan);
+ 	INIT_LIST_HEAD(&ei->delalloc_inodes);
+ 	INIT_LIST_HEAD(&ei->ordered_operations);
+ 	INIT_LIST_HEAD(&ei->ordered_finished);
+@@ -6980,13 +6981,11 @@ void btrfs_destroy_inode(struct inode *inode)
+ 		spin_unlock(&root->fs_info->ordered_extent_lock);
+ 	}
+=20
+-	spin_lock(&root->orphan_lock);
+-	if (!list_empty(&BTRFS_I(inode)->i_orphan)) {
++	if (BTRFS_I(inode)->has_orphan_item) {
+ 		printk(KERN_INFO "BTRFS: inode %llu still on the orphan list\n",
+ 		       (unsigned long long)btrfs_ino(inode));
+-		list_del_init(&BTRFS_I(inode)->i_orphan);
++		atomic_dec(&root->orphan_inodes);
+ 	}
+-	spin_unlock(&root->orphan_lock);
+=20
+ 	while (1) {
+ 		ordered =3D btrfs_lookup_first_ordered_extent(inode, (u64)-1);
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
