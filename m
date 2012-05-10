@@ -1,143 +1,61 @@
-From: Tomoki BENIYA <beniya@bit-isle.co.jp>
-Subject: Always creating PGs
-Date: Thu, 10 May 2012 18:17:33 +0900
-Message-ID: <20120510175036.FC97.33BC0F0F@bit-isle.co.jp>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: slow performance even when using SSDs
+Date: Thu, 10 May 2012 14:09:13 +0200
+Message-ID: <4FABAFE9.5060202@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:57658 "HELO
-	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S932075Ab2EJJRc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 10 May 2012 05:17:32 -0400
-Received: by pbbrr4 with SMTP id rr4so1581924pbb.9
-        for <ceph-devel@vger.kernel.org>; Thu, 10 May 2012 02:17:30 -0700 (PDT)
+Received: from mail.profihost.ag ([85.158.179.208]:35379 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756492Ab2EJMQG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 May 2012 08:16:06 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi, all
+Dear List,
 
-I created Ceph file system using Debian7 of 64bit.
+i'm doing a testsetup with ceph v0.46 and wanted to know how fast ceph is.
 
-I found that PGs of 'creating' status are never finished.
+my testsetup:
+3 servers with Intel Xeon X3440, 180GB SSD Intel 520 Series, 4GB RAM, 2x
+1Gbit/s LAN each
 
-# ceph pg stat
-v17596: 1204 pgs: 8 creating, 1196 active+clean; 25521 MB data, 77209 MB used, 2223 GB / 2318 GB avail
-                  ~~~~~~~~~~
-                  always creating, why?
+All 3 are running as mon a-c and osd 0-2. Two of them are also running
+as mds.2 and mds.3 (has 8GB RAM instead of 4GB).
 
-# ceph pg dump|grep creating
-1.1p6   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
-0.1p7   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
-1.1p7   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
-0.1p6   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
-1.1p8   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
-0.1p9   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
-1.1p9   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
-0.1p8   0       0       0       0       0       0       0       creating        0.000000        0'0     0'0     []      []      0'0     0.000000
+All machines run ceph v0.46 and vanilla Linux Kernel v3.0.30 and all of
+them use btrfs on the ssd which serves /srv/{osd,mon}.X. All of them use
+eth0+eth1 as bond0 (mode 6).
 
-Configuration is wrong?
-How to resolve this problem?
+This gives me:
+rados -p rbd bench 60 write
 
-========================================
-[global]
-        auth supported = cephx
-        max open files = 131072
-        log_to_syslog = true
-        pid file = /var/run/ceph/$name.pid
-        keyring = /etc/ceph/keyring.bin
+...
+Total time run:        61.465323
+Total writes made:     776
+Write size:            4194304
+Bandwidth (MB/sec):    50.500
 
-[mon]
-        mon data = /ceph/$name
+Average Latency:       1.2654
+Max latency:           2.77124
+Min latency:           0.170936
 
-[mon.0]
-        host = mon0
-        mon addr = 192.168.233.81:6789
+Shouldn't it be at least 100MB/s? (1Gbit/s / 8)
 
-[mon.1]
-        host = mon1
-        mon addr = 192.168.233.82:6789
+And rados -p rbd bench 60 write -b 4096 gives pretty bad results:
+Total time run:        60.221130
+Total writes made:     6401
+Write size:            4096
+Bandwidth (MB/sec):    0.415
 
-[mon.2]
-        host = mon2
-        mon addr = 192.168.233.83:6789
+Average Latency:       0.150525
+Max latency:           1.12647
+Min latency:           0.026599
 
-[mds]
-        keyring = /etc/ceph/keyring.$name
+All btrfs ssds are also mounted with noatime.
 
-[mds.0]
-        host = mds0
+Thanks for your help!
 
-[osd]
-        osd journal = /var/journal
-        osd journal size = 1000
-        keyring = /etc/ceph/keyring.$name
-
-[osd.0]
-        host = osd0
-        btrfs devs = /dev/sdb1
-        osd data = /ceph0
-        osd journal = /var/journal0
-
-[osd.1]
-        host = osd0
-        btrfs devs = /dev/sdc1
-        osd data = /ceph1
-        osd journal = /var/journal1
-
-[osd.2]
-        host = osd1
-        btrfs devs = /dev/sdb1
-        osd data = /ceph0
-        osd journal = /var/journal0
-
-[osd.3]
-        host = osd1
-        btrfs devs = /dev/sdc1
-        osd data = /ceph1
-        osd journal = /var/journal1
-
-[osd.4]
-        host = osd2
-        btrfs devs = /dev/sdb1
-        osd data = /ceph0
-        osd journal = /var/journal0
-
-[osd.5]
-        host = osd2
-        btrfs devs = /dev/sdc1
-        osd data = /ceph1
-        osd journal = /var/journal1
-
-[osd.6]
-        host = osd3
-        btrfs devs = /dev/sdb1
-        osd data = /ceph0
-        osd journal = /var/journal0
-
-[osd.7]
-        host = osd3
-        btrfs devs = /dev/sdc1
-        osd data = /ceph1
-        osd journal = /var/journal1
-
-[osd.8]
-        host = osd4
-        btrfs devs = /dev/sdb1
-        osd data = /ceph0
-        osd journal = /var/journal0
-
-[osd.9]
-        host = osd4
-        btrfs devs = /dev/sdc1
-        osd data = /ceph1
-        osd journal = /var/journal1
-========================================
-
-Thanks.
-
--- 
-Tomoki BENIYA <beniya@bit-isle.co.jp>
-
+Greets Stefan
