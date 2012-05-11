@@ -1,127 +1,57 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/3] ceph: messenger: update "to" in read_partial() caller
-Date: Thu, 10 May 2012 20:18:47 -0500
-Message-ID: <4FAC68F7.1030508@inktank.com>
-References: <4FAC4799.3010903@inktank.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: waiting for sub ops
+Date: Fri, 11 May 2012 09:02:07 +0200
+Message-ID: <4FACB96F.3050309@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:35045 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751631Ab2EKBSt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 10 May 2012 21:18:49 -0400
-Received: by mail-ob0-f174.google.com with SMTP id tb18so2527882obb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 10 May 2012 18:18:49 -0700 (PDT)
-In-Reply-To: <4FAC4799.3010903@inktank.com>
+Received: from mail.profihost.ag ([85.158.179.208]:51348 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753791Ab2EKHB6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 11 May 2012 03:01:58 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-read_partial() always increases whatever "to" value is supplied by
-adding the requested size to it.  That's the only thing it does with
-that pointed-to value.
+Hi,
 
-Do that pointer advance in the caller (and then only when the
-updated value will be subsequently used), and change the "to"
-parameter to be an in-only and non-pointer value.
+while doing some stress testing with bonnie++ i'm seeing always these
+messages accross all osd's here is just an example for osd.2.
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
-  net/ceph/messenger.c |   31 ++++++++++++++++---------------
-  1 file changed, 16 insertions(+), 15 deletions(-)
+All machines are connected with 2x 1Gbit/s bonding mode 6 to a HP switch.
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 673133e..37fd2ae 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -992,11 +992,12 @@ static int prepare_read_message(struct 
-ceph_connection *con)
+2012-05-11 08:58:52.752057 osd.2 192.168.0.102:6801/4798 3218 : [WRN]
+old request osd_op(mds.0.1:49546 200.00000027 [write 1643206~13552]
+1.379675e3) v4 received at 2012-05-11 08:58:22.044033 currently waiting
+for sub ops
+2012-05-11 08:58:52.752059 osd.2 192.168.0.102:6801/4798 3219 : [WRN]
+old request osd_op(client.4108.1:28755 10000008004.00000266 [write
+0~4194304] 0.79b497c7 snapc 1=[]) received at 2012-05-11 08:58:22.026435
+currently waiting for sub ops
+2012-05-11 08:58:52.752061 osd.2 192.168.0.102:6801/4798 3220 : [WRN]
+old request osd_op(client.4108.1:28762 10000008004.0000026d [write
+0~4194304] 0.493cb0d4 snapc 1=[]) received at 2012-05-11 08:58:22.191536
+currently waiting for sub ops
+2012-05-11 08:58:52.752064 osd.2 192.168.0.102:6801/4798 3221 : [WRN]
+old request osd_op(client.4108.1:28765 10000008004.00000270 [write
+0~4194304] 0.b2f1b144 snapc 1=[]) received at 2012-05-11 08:58:22.290388
+currently waiting for sub ops
+2012-05-11 08:58:52.752066 osd.2 192.168.0.102:6801/4798 3222 : [WRN]
+old request osd_op(client.4108.1:28774 10000008004.00000279 [write
+0~4194304] 0.2373c652 snapc 1=[]) received at 2012-05-11 08:58:22.392604
+currently waiting for sub ops
+2012-05-11 08:58:52.752068 osd.2 192.168.0.102:6801/4798 3223 : [WRN]
+old request osd_op(client.4108.1:28775 10000008004.0000027a [write
+0~4194304] 0.24a58617 snapc 1=[]) received at 2012-05-11 08:58:22.455618
+currently waiting for sub ops
+2012-05-11 08:58:52.752070 osd.2 192.168.0.102:6801/4798 3224 : [WRN]
+old request osd_op(client.4108.1:28777 10000008004.0000027c [write
+0~4194304] 0.1c900a76 snapc 1=[]) received at 2012-05-11 08:58:22.527086
+currently waiting for sub ops
+2012-05-11 08:58:53.752212 osd.2 192.168.0.102:6801/4798 3225 : [WRN]
+old request osd_op(client.4108.1:28808 10000008004.0000029b [write
+0~4194304] 0.46c529aa snapc 1=[]) received at 2012-05-11 08:58:23.252258
+currently waiting for sub ops
 
-
-  static int read_partial(struct ceph_connection *con,
--			int *to, int size, void *object)
-+			int to, int size, void *object)
-  {
--	*to += size;
--	while (con->in_base_pos < *to) {
--		int left = *to - con->in_base_pos;
-+	int end = to + size;
-+
-+	while (con->in_base_pos < end) {
-+		int left = end - con->in_base_pos;
-  		int have = size - left;
-  		int ret = ceph_tcp_recvmsg(con->sock, object + have, left);
-  		if (ret <= 0)
-@@ -1017,14 +1018,16 @@ static int read_partial_banner(struct 
-ceph_connection *con)
-  	dout("read_partial_banner %p at %d\n", con, con->in_base_pos);
-
-  	/* peer's banner */
--	ret = read_partial(con, &to, strlen(CEPH_BANNER), con->in_banner);
-+	ret = read_partial(con, to, strlen(CEPH_BANNER), con->in_banner);
-  	if (ret <= 0)
-  		goto out;
--	ret = read_partial(con, &to, sizeof(con->actual_peer_addr),
-+	to += strlen(CEPH_BANNER);
-+	ret = read_partial(con, to, sizeof(con->actual_peer_addr),
-  			   &con->actual_peer_addr);
-  	if (ret <= 0)
-  		goto out;
--	ret = read_partial(con, &to, sizeof(con->peer_addr_for_me),
-+	to += sizeof(con->actual_peer_addr);
-+	ret = read_partial(con, to, sizeof(con->peer_addr_for_me),
-  			   &con->peer_addr_for_me);
-  	if (ret <= 0)
-  		goto out;
-@@ -1038,10 +1041,11 @@ static int read_partial_connect(struct 
-ceph_connection *con)
-
-  	dout("read_partial_connect %p at %d\n", con, con->in_base_pos);
-
--	ret = read_partial(con, &to, sizeof(con->in_reply), &con->in_reply);
-+	ret = read_partial(con, to, sizeof(con->in_reply), &con->in_reply);
-  	if (ret <= 0)
-  		goto out;
--	ret = read_partial(con, &to, le32_to_cpu(con->in_reply.authorizer_len),
-+	to += sizeof(con->in_reply);
-+	ret = read_partial(con, to, le32_to_cpu(con->in_reply.authorizer_len),
-  			   con->auth_reply_buf);
-  	if (ret <= 0)
-  		goto out;
-@@ -1491,9 +1495,7 @@ static int process_connect(struct ceph_connection 
-*con)
-   */
-  static int read_partial_ack(struct ceph_connection *con)
-  {
--	int to = 0;
--
--	return read_partial(con, &to, sizeof(con->in_temp_ack),
-+	return read_partial(con, 0, sizeof(con->in_temp_ack),
-  			    &con->in_temp_ack);
-  }
-
-@@ -1638,8 +1640,7 @@ static int read_partial_message(struct 
-ceph_connection *con)
-  	dout("read_partial_message con %p msg %p\n", con, m);
-
-  	/* header */
--	to = 0;
--	ret = read_partial(con, &to, sizeof (con->in_hdr), &con->in_hdr);
-+	ret = read_partial(con, 0, sizeof (con->in_hdr), &con->in_hdr);
-  	if (ret <= 0)
-  		return ret;
-
-@@ -1755,7 +1756,7 @@ static int read_partial_message(struct 
-ceph_connection *con)
-
-  	/* footer */
-  	to = sizeof (m->hdr);
--	ret = read_partial(con, &to, sizeof (m->footer), &m->footer);
-+	ret = read_partial(con, to, sizeof (m->footer), &m->footer);
-  	if (ret <= 0)
-  		return ret;
-
--- 
-1.7.9.5
-
+Stefan
