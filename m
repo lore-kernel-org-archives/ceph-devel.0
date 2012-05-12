@@ -1,84 +1,99 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [RFC PATCH 0/2] Distribute re-replicated objects evenly after
- OSD failure
-Date: Sat, 12 May 2012 16:51:16 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205121646040.21796@cobra.newdream.net>
-References: <1336689506-15029-1-git-send-email-jaschut@sandia.gov>
+Subject: Re: [PATCH 1/3] ceph: messenger: use read_partial() in read_partial_message()
+Date: Sat, 12 May 2012 16:54:11 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205121654010.21796@cobra.newdream.net>
+References: <4FAC4799.3010903@inktank.com> <4FAC68F1.3070301@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47038 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:47047 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755265Ab2ELXvS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 May 2012 19:51:18 -0400
-In-Reply-To: <1336689506-15029-1-git-send-email-jaschut@sandia.gov>
+	with ESMTP id S1751693Ab2ELXyN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 12 May 2012 19:54:13 -0400
+In-Reply-To: <4FAC68F1.3070301@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: sam.just@dreamhost.com, ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hey Jim,
+Reviewed-by: Sage Weil <sage@inktank.com>
 
-These both look like reasonable changes.  And it's great to see they fix 
-behavior for you.
+On Thu, 10 May 2012, Alex Elder wrote:
 
-I'm not going to merge them yet, though.  We're just kicking off a CRUSH 
-refresh project next week that will include some testing framework to more 
-thoroughly validate the quality of the output, and also take a more 
-holistic look at all what the algorithm is doing and see what we can 
-improve.  Most likely these changes will be included, but revving the 
-mapping algorithm is going to be tricky for forward/backward 
-compatibility, and we'd like to get it all in at once.  (And/or come up 
-with a better way to deal with mismatched versions...)
-
-Thanks!
-sage
-
-
-On Thu, 10 May 2012, Jim Schutt wrote:
-
-> Hi Sage,
+> There are two blocks of code in read_partial_message()--those that
+> read the header and footer of the message--that can be replaced by a
+> call to read_partial().  Do that.
 > 
-> I've been trying to solve the issue mentioned in tracker #2047, which I 
-> think is the same as I described in
->   http://www.spinics.net/lists/ceph-devel/msg05824.html
+> Signed-off-by: Alex Elder <elder@inktank.com>
+> ---
+>  net/ceph/messenger.c |   30 ++++++++++--------------------
+>  1 file changed, 10 insertions(+), 20 deletions(-)
 > 
-> The attached patches seem to fix it for me.  I also attempted to 
-> address the local search issue you mentioned in #2047.
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index f0993af..673133e 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -1628,7 +1628,7 @@ static int read_partial_message(struct ceph_connection
+> *con)
+>  {
+>  	struct ceph_msg *m = con->in_msg;
+>  	int ret;
+> -	int to, left;
+> +	int to;
+>  	unsigned front_len, middle_len, data_len;
+>  	bool do_datacrc = !con->msgr->nocrc;
+>  	int skip;
+> @@ -1638,15 +1638,10 @@ static int read_partial_message(struct ceph_connection
+> *con)
+>  	dout("read_partial_message con %p msg %p\n", con, m);
 > 
-> I'm testing this using a cluster with 3 rows, 2 racks/row, 2 hosts/rack,
-> 4 osds/host. I tested against a CRUSH map with the rules:
-> 	step take root
-> 	step chooseleaf firstn 0 type rack
-> 	step emit
+>  	/* header */
+> -	while (con->in_base_pos < sizeof(con->in_hdr)) {
+> -		left = sizeof(con->in_hdr) - con->in_base_pos;
+> -		ret = ceph_tcp_recvmsg(con->sock,
+> -				       (char *)&con->in_hdr +
+> con->in_base_pos,
+> -				       left);
+> -		if (ret <= 0)
+> -			return ret;
+> -		con->in_base_pos += ret;
+> -	}
+> +	to = 0;
+> +	ret = read_partial(con, &to, sizeof (con->in_hdr), &con->in_hdr);
+> +	if (ret <= 0)
+> +		return ret;
 > 
-> I'm in the processes of testing this as follows:
+>  	crc = crc32c(0, &con->in_hdr, offsetof(struct ceph_msg_header, crc));
+>  	if (cpu_to_le32(crc) != con->in_hdr.crc) {
+> @@ -1759,16 +1754,11 @@ static int read_partial_message(struct ceph_connection
+> *con)
+>  	}
 > 
-> I wrote some data to the cluster, then started shutting down OSDs using
-> "init-ceph stop osd.n". For the first rack's worth, I shut OSDs down
-> sequentially.  I waited for recovery to complete each time before
-> stopping the next OSD.  For the next rack I shut down the first 3 OSDs
-> on a host at the same time, waited for recovery to complete, then shut
-> down the last OSD on that host.  For the next racks, I shut down all
-> the OSDs on the hosts in the rack at the same time.
-> 
-> Right now I'm waiting for recovery to complete after shutting down
-> the third rack.  Once recovery completed after each phase so far,
-> there were no degraded objects.
-> 
-> So, this is looking fairly solid to me so far.  What do you think?
-> 
-> Thanks -- Jim
-> 
-> Jim Schutt (2):
->   ceph: retry CRUSH map descent before retrying bucket
->   ceph: retry CRUSH map descent from root if leaf is failed
-> 
->  src/crush/mapper.c |   30 ++++++++++++++++++++++--------
->  1 files changed, 22 insertions(+), 8 deletions(-)
-> 
+>  	/* footer */
+> -	to = sizeof(m->hdr) + sizeof(m->footer);
+> -	while (con->in_base_pos < to) {
+> -		left = to - con->in_base_pos;
+> -		ret = ceph_tcp_recvmsg(con->sock, (char *)&m->footer +
+> -				       (con->in_base_pos - sizeof(m->hdr)),
+> -				       left);
+> -		if (ret <= 0)
+> -			return ret;
+> -		con->in_base_pos += ret;
+> -	}
+> +	to = sizeof (m->hdr);
+> +	ret = read_partial(con, &to, sizeof (m->footer), &m->footer);
+> +	if (ret <= 0)
+> +		return ret;
+> +
+>  	dout("read_partial_message got msg %p %d (%u) + %d (%u) + %d (%u)\n",
+>  	     m, front_len, m->footer.front_crc, middle_len,
+>  	     m->footer.middle_crc, data_len, m->footer.data_crc);
 > -- 
-> 1.7.8.2
+> 1.7.9.5
 > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
