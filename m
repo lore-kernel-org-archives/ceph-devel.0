@@ -1,49 +1,46 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Disabling logs in the mon data directory?
-Date: Mon, 14 May 2012 13:42:30 -0700
-Message-ID: <CAPYLRzhmTHiUkDsOgvsvQaUuXbsNVzqVCWEbkAu6Y8bx9eD7jA@mail.gmail.com>
-References: <CAPud5_79Vn0xwTSB-2Zhp5sz05DmOgLCWREEP6oV3Frj=QyfCw@mail.gmail.com>
+Subject: Re: [PATCH] libcephfs: return error when not mounted
+Date: Mon, 14 May 2012 13:57:04 -0700
+Message-ID: <CAPYLRzgBa8Ucoqase5jQU_a8SrW0DtaZozp2ckDT5a0=Y6FoGQ@mail.gmail.com>
+References: <6E886DEA-B266-4677-8206-C817595BBA86@cs.ucsc.edu>
+	<CADvuQRENXm=5O+uZ8-UwGidSgbn3KvV212sPkUam9uzOyLrvMg@mail.gmail.com>
+	<FC7D87FB-20FE-400E-959D-7C3FC558A89B@cs.ucsc.edu>
+	<Pine.LNX.4.64.1205141034001.20330@cobra.newdream.net>
+	<6DA7B347-76E2-4D6D-9ABA-42BF973F8AAC@cs.ucsc.edu>
+	<CAPYLRzgn_cwk6LfYgZbC5FvBbph9z6HGh_qyveHBr3CFOocs8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:54075 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757829Ab2ENUmb convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 14 May 2012 16:42:31 -0400
-Received: by lahd3 with SMTP id d3so3648492lah.19
-        for <ceph-devel@vger.kernel.org>; Mon, 14 May 2012 13:42:30 -0700 (PDT)
-In-Reply-To: <CAPud5_79Vn0xwTSB-2Zhp5sz05DmOgLCWREEP6oV3Frj=QyfCw@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:56539 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757400Ab2ENU5G convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 May 2012 16:57:06 -0400
+Received: by lbbgm6 with SMTP id gm6so3641810lbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 14 May 2012 13:57:04 -0700 (PDT)
+In-Reply-To: <CAPYLRzgn_cwk6LfYgZbC5FvBbph9z6HGh_qyveHBr3CFOocs8w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
 Cc: ceph-devel@vger.kernel.org
 
-Sorry for the long delay; we've all been really busy here...
+On Mon, May 14, 2012 at 10:49 AM, Gregory Farnum <greg@inktank.com> wro=
+te:
+> I haven't had the chance to go over everything thoroughly (I notice a
+> few other users of EDOM that I want to check out), but those
+> definitely sound better to me.
+> More better review comments later today.
+> -Greg
 
-On Tue, May 1, 2012 at 4:24 PM, Nick Bartos <nick@pistoncloud.com> wrot=
-e:
-> I'm trying to get all logs going to syslog, and disable all ceph log
-> files. =A0I added the following to [global]:
->
-> =A0 =A0log file =3D ""
-> =A0 =A0log to syslog =3D true
->
-> Which I thought would do the trick, however I see that there are stil=
-l
-> logs generated in the monitor data directory. =A0I also tried adding =
-the
-> following to [global], but it doesn't seem to help:
->
-> =A0 =A0clog to monitors =3D false
-> =A0 =A0clog to syslog =3D true
-
-So I don't know anybody actually running it this way, but these
-settings *ought* to work. Do you have that in the config file for each
-daemon individually?
-If not there's probably some issue with how we're reading in config
-files versus creating our logging objects.
+After reviewing, I do have one other note, and that's on the use of
+errno. Most of Ceph avoids errno; it's only set in 19 places in the
+code and a lot of those don't count. However, we seem to have run into
+a need for it (readdir), and this patchset has both rewinddir and
+seekdir returning under error conditions without doing any
+notification. So I think both of those functions (and any I missed)
+need to set errno if they bail out =97 the other possibility is
+converting them to have a return code, which I'm not opposed to but is
+another user-visible change.
 -Greg
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
