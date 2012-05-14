@@ -1,72 +1,41 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 3/3] ceph: messenger: change read_partial() to take "end"
- arg
-Date: Mon, 14 May 2012 11:28:51 -0500
-Message-ID: <4FB132C3.8090306@inktank.com>
-References: <4FAC4799.3010903@inktank.com> <4FAC68FF.9020406@inktank.com> <Pine.LNX.4.64.1205121708080.21796@cobra.newdream.net>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: [PATCH] libcephfs: return error when not mounted
+Date: Mon, 14 May 2012 10:03:23 -0700
+Message-ID: <CADvuQRENXm=5O+uZ8-UwGidSgbn3KvV212sPkUam9uzOyLrvMg@mail.gmail.com>
+References: <6E886DEA-B266-4677-8206-C817595BBA86@cs.ucsc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:41575 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757183Ab2ENQ2w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 May 2012 12:28:52 -0400
-Received: by yenm10 with SMTP id m10so4398131yen.19
-        for <ceph-devel@vger.kernel.org>; Mon, 14 May 2012 09:28:52 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1205121708080.21796@cobra.newdream.net>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:37450 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756889Ab2ENRDo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 14 May 2012 13:03:44 -0400
+Received: by dady13 with SMTP id y13so6154360dad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 14 May 2012 10:03:44 -0700 (PDT)
+In-Reply-To: <6E886DEA-B266-4677-8206-C817595BBA86@cs.ucsc.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Noah Watkins <jayhawk@cs.ucsc.edu>
+Cc: ceph-devel@vger.kernel.org, Greg Farnum <gregory.farnum@dreamhost.com>, Sage Weil <sage@newdream.net>
 
-On 05/12/2012 07:11 PM, Sage Weil wrote:
-> This looks correct, but seems like a more confusing calling convention
-> to me.  Before this patch it's basically a (start, len) logical
-> range in the input stream.. after it's (end, len).  It also seems to be
-> more code?
->
-> sage
->
-> On Thu, 10 May 2012, Alex Elder wrote:
->
->> Make the second argument to read_partial() be the ending input byte
->> position rather than the beginning offset it now represents.  This
->> amounts to moving the addition "to + size" into the caller.
->>
->> Signed-off-by: Alex Elder<elder@inktank.com>
->> ---
+On Fri, May 11, 2012 at 6:21 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wro=
+te:
+> Return an error rather than a segfault if a client uses the interface
+> when unmounted. The Java bindings were explicitly enforcing the
+> mounted state, but this was overly complicated, uncommon, and better
+> handled with a simple exception that can be checked at libcephfs leve=
+l.
+=2E..
+> + =C2=A0if (!cmount->is_mounted())
+> + =C2=A0 =C2=A0return -EDOM;
 
-Note that this patch also left the local variable "to" in
-read_partial_message() unused.  I'll delete its definition
-before I commit.
+Noah, this is not really about your patch, as existing code already
+has return -EDOM, but... oh boy does the API abuse POSIX errors.
 
-Thanks for the review.
-
-					-Alex
-
-. . .
->> @@ -1755,8 +1771,9 @@ static int read_partial_message(struct ceph_connection
->> *con)
->>   	}
->>
->>   	/* footer */
->> -	to = sizeof (m->hdr);
->> -	ret = read_partial(con, to, sizeof (m->footer),&m->footer);
->> +	size = sizeof (m->footer);
->> +	end += size;
->> +	ret = read_partial(con, end, size,&m->footer);
->>   	if (ret<= 0)
->>   		return ret;
->>
->> --
->> 1.7.9.5
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->
-
+"Numerical argument out of domain".
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
