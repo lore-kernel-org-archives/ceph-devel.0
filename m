@@ -1,251 +1,123 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 09/16] ceph: define ceph_auth_handshake type
-Date: Thu, 17 May 2012 09:04:51 -0500
-Message-ID: <4FB50583.8000206@inktank.com>
+Subject: [PATCH 11/16] ceph: ensure auth ops are defined before use
+Date: Thu, 17 May 2012 09:05:02 -0500
+Message-ID: <4FB5058E.4020800@inktank.com>
 References: <4FB50329.7010206@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:50220 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761935Ab2EQOEs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 10:04:48 -0400
-Received: by mail-yw0-f46.google.com with SMTP id m54so1852487yhm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 07:04:48 -0700 (PDT)
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:34817 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932676Ab2EQOE7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 10:04:59 -0400
+Received: by mail-gg0-f174.google.com with SMTP id u4so1802686ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 07:04:59 -0700 (PDT)
 In-Reply-To: <4FB50329.7010206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-The definitions for the ceph_mds_session and ceph_osd both contain
-five fields related only to "authorizers."  Encapsulate those fields
-into their own struct type, allowing for better isolation in some
-upcoming patches.
+In the create_authorizer method for both the mds and osd clients,
+the auth_client->ops pointer is blindly dereferenced.  There is no
+obvious guarantee that this pointer has been assigned.  And
+furthermore, even if the ops pointer is non-null there is definitely
+no guarantee that the create_authorizer or destroy_authorizer
+methods are defined.
 
-Fix the #includes in "linux/ceph/osd_client.h" to lay out their more
-complete canonical path.
+Add checks in both routines to make sure they are defined (non-null)
+before use.  Add similar checks in a few other spots in these files
+while we're at it.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 Reviewed-by: Sage Weil <sage@inktank.com>
 ---
-  fs/ceph/mds_client.c            |   32 ++++++++++++++++----------------
-  fs/ceph/mds_client.h            |    5 ++---
-  include/linux/ceph/auth.h       |    8 ++++++++
-  include/linux/ceph/osd_client.h |   11 +++++------
-  net/ceph/osd_client.c           |   32 ++++++++++++++++----------------
-  5 files changed, 47 insertions(+), 41 deletions(-)
+  fs/ceph/mds_client.c  |   14 ++++++--------
+  net/ceph/osd_client.c |   15 ++++++++++-----
+  2 files changed, 16 insertions(+), 13 deletions(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 89971e1..42013c6 100644
+index b71ffd2..4622817 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -334,10 +334,10 @@ void ceph_put_mds_session(struct ceph_mds_session *s)
-  	dout("mdsc put_session %p %d -> %d\n", s,
-  	     atomic_read(&s->s_ref), atomic_read(&s->s_ref)-1);
-  	if (atomic_dec_and_test(&s->s_ref)) {
--		if (s->s_authorizer)
-+		if (s->s_auth.authorizer)
-  		     s->s_mdsc->fsc->client->monc.auth->ops->destroy_authorizer(
-  			     s->s_mdsc->fsc->client->monc.auth,
--			     s->s_authorizer);
-+			     s->s_auth.authorizer);
-  		kfree(s);
-  	}
-  }
-@@ -3404,29 +3404,29 @@ static int get_authorizer(struct ceph_connection 
+@@ -3406,16 +3406,14 @@ static int get_authorizer(struct ceph_connection 
 *con,
-  	struct ceph_auth_client *ac = mdsc->fsc->client->monc.auth;
   	int ret = 0;
 
--	if (force_new && s->s_authorizer) {
--		ac->ops->destroy_authorizer(ac, s->s_authorizer);
--		s->s_authorizer = NULL;
-+	if (force_new && s->s_auth.authorizer) {
-+		ac->ops->destroy_authorizer(ac, s->s_auth.authorizer);
-+		s->s_auth.authorizer = NULL;
+  	if (force_new && auth->authorizer) {
+-		ac->ops->destroy_authorizer(ac, auth->authorizer);
++		if (ac->ops && ac->ops->destroy_authorizer)
++			ac->ops->destroy_authorizer(ac, auth->authorizer);
+  		auth->authorizer = NULL;
   	}
--	if (s->s_authorizer == NULL) {
-+	if (s->s_auth.authorizer == NULL) {
-  		if (ac->ops->create_authorizer) {
-  			ret = ac->ops->create_authorizer(
-  				ac, CEPH_ENTITY_TYPE_MDS,
--				&s->s_authorizer,
--				&s->s_authorizer_buf,
--				&s->s_authorizer_buf_len,
--				&s->s_authorizer_reply_buf,
--				&s->s_authorizer_reply_buf_len);
-+				&s->s_auth.authorizer,
-+				&s->s_auth.authorizer_buf,
-+				&s->s_auth.authorizer_buf_len,
-+				&s->s_auth.authorizer_reply_buf,
-+				&s->s_auth.authorizer_reply_buf_len);
-  			if (ret)
-  				return ret;
-  		}
+-	if (auth->authorizer == NULL) {
+-		if (ac->ops->create_authorizer) {
+-			ret = ac->ops->create_authorizer(ac,
+-						CEPH_ENTITY_TYPE_MDS, auth);
+-			if (ret)
+-				return ret;
+-		}
++	if (!auth->authorizer && ac->ops && ac->ops->create_authorizer) {
++		ret = ac->ops->create_authorizer(ac, CEPH_ENTITY_TYPE_MDS, auth);
++		if (ret)
++			return ret;
   	}
 
   	*proto = ac->protocol;
--	*buf = s->s_authorizer_buf;
--	*len = s->s_authorizer_buf_len;
--	*reply_buf = s->s_authorizer_reply_buf;
--	*reply_len = s->s_authorizer_reply_buf_len;
-+	*buf = s->s_auth.authorizer_buf;
-+	*len = s->s_auth.authorizer_buf_len;
-+	*reply_buf = s->s_auth.authorizer_reply_buf;
-+	*reply_len = s->s_auth.authorizer_reply_buf_len;
-  	return 0;
-  }
-
-@@ -3437,7 +3437,7 @@ static int verify_authorizer_reply(struct 
-ceph_connection *con, int len)
-  	struct ceph_mds_client *mdsc = s->s_mdsc;
-  	struct ceph_auth_client *ac = mdsc->fsc->client->monc.auth;
-
--	return ac->ops->verify_authorizer_reply(ac, s->s_authorizer, len);
-+	return ac->ops->verify_authorizer_reply(ac, s->s_auth.authorizer, len);
-  }
-
-  static int invalidate_authorizer(struct ceph_connection *con)
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 8c7c04e..dd26846 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -11,6 +11,7 @@
-  #include <linux/ceph/types.h>
-  #include <linux/ceph/messenger.h>
-  #include <linux/ceph/mdsmap.h>
-+#include <linux/ceph/auth.h>
-
-  /*
-   * Some lock dependencies:
-@@ -113,9 +114,7 @@ struct ceph_mds_session {
-
-  	struct ceph_connection s_con;
-
--	struct ceph_authorizer *s_authorizer;
--	void             *s_authorizer_buf, *s_authorizer_reply_buf;
--	size_t            s_authorizer_buf_len, s_authorizer_reply_buf_len;
-+	struct ceph_auth_handshake s_auth;
-
-  	/* protected by s_gen_ttl_lock */
-  	spinlock_t        s_gen_ttl_lock;
-diff --git a/include/linux/ceph/auth.h b/include/linux/ceph/auth.h
-index aa13392..5b774d1 100644
---- a/include/linux/ceph/auth.h
-+++ b/include/linux/ceph/auth.h
-@@ -14,6 +14,14 @@
-  struct ceph_auth_client;
-  struct ceph_authorizer;
-
-+struct ceph_auth_handshake {
-+	struct ceph_authorizer *authorizer;
-+	void *authorizer_buf;
-+	size_t authorizer_buf_len;
-+	void *authorizer_reply_buf;
-+	size_t authorizer_reply_buf_len;
-+};
-+
-  struct ceph_auth_client_ops {
-  	const char *name;
-
-diff --git a/include/linux/ceph/osd_client.h 
-b/include/linux/ceph/osd_client.h
-index 7c05ac2..cedfb1a 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -6,9 +6,10 @@
-  #include <linux/mempool.h>
-  #include <linux/rbtree.h>
-
--#include "types.h"
--#include "osdmap.h"
--#include "messenger.h"
-+#include <linux/ceph/types.h>
-+#include <linux/ceph/osdmap.h>
-+#include <linux/ceph/messenger.h>
-+#include <linux/ceph/auth.h>
-
-  /*
-   * Maximum object name size
-@@ -40,9 +41,7 @@ struct ceph_osd {
-  	struct list_head o_requests;
-  	struct list_head o_linger_requests;
-  	struct list_head o_osd_lru;
--	struct ceph_authorizer *o_authorizer;
--	void *o_authorizer_buf, *o_authorizer_reply_buf;
--	size_t o_authorizer_buf_len, o_authorizer_reply_buf_len;
-+	struct ceph_auth_handshake o_auth;
-  	unsigned long lru_ttl;
-  	int o_marked_for_keepalive;
-  	struct list_head o_keepalive_item;
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index daa2716..66b09d6 100644
+index 2da4b9e..f640bdf 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -667,8 +667,8 @@ static void put_osd(struct ceph_osd *osd)
-  	if (atomic_dec_and_test(&osd->o_ref)) {
+@@ -664,10 +664,10 @@ static void put_osd(struct ceph_osd *osd)
+  {
+  	dout("put_osd %p %d -> %d\n", osd, atomic_read(&osd->o_ref),
+  	     atomic_read(&osd->o_ref) - 1);
+-	if (atomic_dec_and_test(&osd->o_ref)) {
++	if (atomic_dec_and_test(&osd->o_ref) && osd->o_auth.authorizer) {
   		struct ceph_auth_client *ac = osd->o_osdc->client->monc.auth;
 
--		if (osd->o_authorizer)
--			ac->ops->destroy_authorizer(ac, osd->o_authorizer);
-+		if (osd->o_auth.authorizer)
-+			ac->ops->destroy_authorizer(ac, osd->o_auth.authorizer);
+-		if (osd->o_auth.authorizer)
++		if (ac->ops && ac->ops->destroy_authorizer)
+  			ac->ops->destroy_authorizer(ac, osd->o_auth.authorizer);
   		kfree(osd);
   	}
-  }
-@@ -2117,27 +2117,27 @@ static int get_authorizer(struct ceph_connection 
+@@ -2119,10 +2119,11 @@ static int get_authorizer(struct ceph_connection 
 *con,
-  	struct ceph_auth_client *ac = osdc->client->monc.auth;
   	int ret = 0;
 
--	if (force_new && o->o_authorizer) {
--		ac->ops->destroy_authorizer(ac, o->o_authorizer);
--		o->o_authorizer = NULL;
-+	if (force_new && o->o_auth.authorizer) {
-+		ac->ops->destroy_authorizer(ac, o->o_auth.authorizer);
-+		o->o_auth.authorizer = NULL;
+  	if (force_new && auth->authorizer) {
+-		ac->ops->destroy_authorizer(ac, auth->authorizer);
++		if (ac->ops && ac->ops->destroy_authorizer)
++			ac->ops->destroy_authorizer(ac, auth->authorizer);
+  		auth->authorizer = NULL;
   	}
--	if (o->o_authorizer == NULL) {
-+	if (o->o_auth.authorizer == NULL) {
-  		ret = ac->ops->create_authorizer(
-  			ac, CEPH_ENTITY_TYPE_OSD,
--			&o->o_authorizer,
--			&o->o_authorizer_buf,
--			&o->o_authorizer_buf_len,
--			&o->o_authorizer_reply_buf,
--			&o->o_authorizer_reply_buf_len);
-+			&o->o_auth.authorizer,
-+			&o->o_auth.authorizer_buf,
-+			&o->o_auth.authorizer_buf_len,
-+			&o->o_auth.authorizer_reply_buf,
-+			&o->o_auth.authorizer_reply_buf_len);
+-	if (auth->authorizer == NULL) {
++	if (!auth->authorizer && ac->ops && ac->ops->create_authorizer) {
+  		ret = ac->ops->create_authorizer(ac, CEPH_ENTITY_TYPE_OSD, auth);
   		if (ret)
   			return ret;
-  	}
-
-  	*proto = ac->protocol;
--	*buf = o->o_authorizer_buf;
--	*len = o->o_authorizer_buf_len;
--	*reply_buf = o->o_authorizer_reply_buf;
--	*reply_len = o->o_authorizer_reply_buf_len;
-+	*buf = o->o_auth.authorizer_buf;
-+	*len = o->o_auth.authorizer_buf_len;
-+	*reply_buf = o->o_auth.authorizer_reply_buf;
-+	*reply_len = o->o_auth.authorizer_reply_buf_len;
-  	return 0;
-  }
-
-@@ -2148,7 +2148,7 @@ static int verify_authorizer_reply(struct 
+@@ -2144,6 +2145,10 @@ static int verify_authorizer_reply(struct 
 ceph_connection *con, int len)
   	struct ceph_osd_client *osdc = o->o_osdc;
   	struct ceph_auth_client *ac = osdc->client->monc.auth;
 
--	return ac->ops->verify_authorizer_reply(ac, o->o_authorizer, len);
-+	return ac->ops->verify_authorizer_reply(ac, o->o_auth.authorizer, len);
++	/*
++	 * XXX If ac->ops or ac->ops->verify_authorizer_reply is null,
++	 * XXX which do we do:  succeed or fail?
++	 */
+  	return ac->ops->verify_authorizer_reply(ac, o->o_auth.authorizer, len);
   }
 
-  static int invalidate_authorizer(struct ceph_connection *con)
+@@ -2153,7 +2158,7 @@ static int invalidate_authorizer(struct 
+ceph_connection *con)
+  	struct ceph_osd_client *osdc = o->o_osdc;
+  	struct ceph_auth_client *ac = osdc->client->monc.auth;
+
+-	if (ac->ops->invalidate_authorizer)
++	if (ac->ops && ac->ops->invalidate_authorizer)
+  		ac->ops->invalidate_authorizer(ac, CEPH_ENTITY_TYPE_OSD);
+
+  	return ceph_monc_validate_auth(&osdc->client->monc);
 -- 
 1.7.5.4
 
