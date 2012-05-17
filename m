@@ -1,145 +1,104 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 13/16] ceph: use info returned by get_authorizer
-Date: Thu, 17 May 2012 09:05:14 -0500
-Message-ID: <4FB5059A.1030508@inktank.com>
+Subject: [PATCH 14/16] ceph: return pointer from prepare_connect_authorizer()
+Date: Thu, 17 May 2012 09:05:17 -0500
+Message-ID: <4FB5059D.8080404@inktank.com>
 References: <4FB50329.7010206@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:50220 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966342Ab2EQOFL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 10:05:11 -0400
-Received: by mail-yw0-f46.google.com with SMTP id m54so1852487yhm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 07:05:10 -0700 (PDT)
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:34817 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966342Ab2EQOFO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 10:05:14 -0400
+Received: by mail-gg0-f174.google.com with SMTP id u4so1802686ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 07:05:14 -0700 (PDT)
 In-Reply-To: <4FB50329.7010206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Rather than passing a bunch of arguments to be filled in with the
-content of the ceph_auth_handshake buffer now returned by the
-get_authorizer method, just use the returned information in the
-caller, and drop the unnecessary arguments.
+Change prepare_connect_authorizer() so it returns a pointer (or
+pointer-coded error).
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 Reviewed-by: Sage Weil <sage@inktank.com>
 ---
-  fs/ceph/mds_client.c           |    9 +--------
-  include/linux/ceph/messenger.h |    4 +---
-  net/ceph/messenger.c           |   13 +++++++------
-  net/ceph/osd_client.c          |    9 +--------
-  4 files changed, 10 insertions(+), 25 deletions(-)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 67938a9..200bc87 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -3401,9 +3401,7 @@ out:
-   * managed separately.  Caller must *not* attempt to free it.
-   */
-  static struct ceph_auth_handshake *get_authorizer(struct 
-ceph_connection *con,
--					void **buf, int *len, int *proto,
--					void **reply_buf, int *reply_len,
--					int force_new)
-+					int *proto, int force_new)
-  {
-  	struct ceph_mds_session *s = con->private;
-  	struct ceph_mds_client *mdsc = s->s_mdsc;
-@@ -3421,12 +3419,7 @@ static struct ceph_auth_handshake 
-*get_authorizer(struct ceph_connection *con,
-  		if (ret)
-  			return ERR_PTR(ret);
-  	}
--
-  	*proto = ac->protocol;
--	*buf = auth->authorizer_buf;
--	*len = auth->authorizer_buf_len;
--	*reply_buf = auth->authorizer_reply_buf;
--	*reply_len = auth->authorizer_reply_buf_len;
-
-  	return auth;
-  }
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index b10b55f..2521a95 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -27,9 +27,7 @@ struct ceph_connection_operations {
-  	/* authorize an outgoing connection */
-  	struct ceph_auth_handshake *(*get_authorizer) (
-  				struct ceph_connection *con,
--				void **buf, int *len, int *proto,
--				void **reply_buf, int *reply_len,
--				int force_new);
-+			       int *proto, int force_new);
-  	int (*verify_authorizer_reply) (struct ceph_connection *con, int len);
-  	int (*invalidate_authorizer)(struct ceph_connection *con);
+  net/ceph/messenger.c |   18 +++++++++---------
+  1 files changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index ac27a2c..6d82c1a 100644
+index 6d82c1a..f92d564 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -671,20 +671,21 @@ static int prepare_connect_authorizer(struct 
+@@ -653,7 +653,7 @@ static void prepare_write_keepalive(struct 
 ceph_connection *con)
+   * Connection negotiation.
+   */
 
-  	mutex_unlock(&con->mutex);
+-static int prepare_connect_authorizer(struct ceph_connection *con)
++static struct ceph_auth_handshake *prepare_connect_authorizer(struct 
+ceph_connection *con)
+  {
+  	void *auth_buf;
+  	int auth_len;
+@@ -664,7 +664,7 @@ static int prepare_connect_authorizer(struct 
+ceph_connection *con)
+  		con->out_connect.authorizer_protocol = CEPH_AUTH_UNKNOWN;
+  		con->out_connect.authorizer_len = 0;
 
--	auth_buf = NULL;
--	auth_len = 0;
-  	auth_protocol = CEPH_AUTH_UNKNOWN;
--	auth = con->ops->get_authorizer(con, &auth_buf, &auth_len,
--				&auth_protocol, &con->auth_reply_buf,
--				&con->auth_reply_buf_len, con->auth_retry);
-+	auth = con->ops->get_authorizer(con, &auth_protocol, con->auth_retry);
-+
+-		return 0;
++		return NULL;
+  	}
+
+  	/* Can't hold the mutex while getting authorizer */
+@@ -677,9 +677,9 @@ static int prepare_connect_authorizer(struct 
+ceph_connection *con)
   	mutex_lock(&con->mutex);
 
   	if (IS_ERR(auth))
-  		return PTR_ERR(auth);
--
+-		return PTR_ERR(auth);
++		return auth;
   	if (test_bit(CLOSED, &con->state) || test_bit(OPENING, &con->state))
-  		return -EAGAIN;
+-		return -EAGAIN;
++		return ERR_PTR(-EAGAIN);
 
-+	auth_buf = auth->authorizer_buf;
-+	auth_len = auth->authorizer_buf_len;
-+	con->auth_reply_buf = auth->authorizer_reply_buf;
-+	con->auth_reply_buf_len = auth->authorizer_reply_buf_len;
-+
-  	con->out_connect.authorizer_protocol = cpu_to_le32(auth_protocol);
-  	con->out_connect.authorizer_len = cpu_to_le32(auth_len);
+  	auth_buf = auth->authorizer_buf;
+  	auth_len = auth->authorizer_buf_len;
+@@ -692,7 +692,7 @@ static int prepare_connect_authorizer(struct 
+ceph_connection *con)
+  	if (auth_len)
+  		ceph_con_out_kvec_add(con, auth_len, auth_buf);
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index fa74ae0..b7d633c 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2113,9 +2113,7 @@ static void put_osd_con(struct ceph_connection *con)
-   * managed separately.  Caller must *not* attempt to free it.
-   */
-  static struct ceph_auth_handshake *get_authorizer(struct 
-ceph_connection *con,
--					void **buf, int *len, int *proto,
--					void **reply_buf, int *reply_len,
--					int force_new)
-+					int *proto, int force_new)
-  {
-  	struct ceph_osd *o = con->private;
-  	struct ceph_osd_client *osdc = o->o_osdc;
-@@ -2133,12 +2131,7 @@ static struct ceph_auth_handshake 
-*get_authorizer(struct ceph_connection *con,
-  		if (ret)
-  			return ERR_PTR(ret);
-  	}
--
-  	*proto = ac->protocol;
--	*buf = auth->authorizer_buf;
--	*len = auth->authorizer_buf_len;
--	*reply_buf = auth->authorizer_reply_buf;
--	*reply_len = auth->authorizer_reply_buf_len;
-
-  	return auth;
+-	return 0;
++	return auth;
   }
+
+  /*
+@@ -712,7 +712,7 @@ static int prepare_write_connect(struct 
+ceph_connection *con)
+  {
+  	unsigned global_seq = get_global_seq(con->msgr, 0);
+  	int proto;
+-	int ret;
++	struct ceph_auth_handshake *auth;
+
+  	switch (con->peer_name.type) {
+  	case CEPH_ENTITY_TYPE_MON:
+@@ -739,9 +739,9 @@ static int prepare_write_connect(struct 
+ceph_connection *con)
+  	con->out_connect.flags = 0;
+
+  	ceph_con_out_kvec_add(con, sizeof (con->out_connect), &con->out_connect);
+-	ret = prepare_connect_authorizer(con);
+-	if (ret)
+-		return ret;
++	auth = prepare_connect_authorizer(con);
++	if (IS_ERR(auth))
++		return PTR_ERR(auth);
+
+  	con->out_more = 0;
+  	set_bit(WRITE_PENDING, &con->state);
 -- 
 1.7.5.4
 
