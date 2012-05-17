@@ -1,96 +1,40 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 16/16] ceph: add auth buf in prepare_write_connect()
-Date: Thu, 17 May 2012 09:05:25 -0500
-Message-ID: <4FB505A5.9090207@inktank.com>
-References: <4FB50329.7010206@inktank.com>
+From: Josef Bacik <josef@redhat.com>
+Subject: Re: Ceph on btrfs 3.4rc
+Date: Thu, 17 May 2012 10:43:07 -0400
+Message-ID: <20120517144306.GA3011@dhcp231-144.rdu.redhat.com>
+References: <Pine.LNX.4.64.1204240922040.29159@cobra.newdream.net>
+ <CAJafhzSgaQ3sx=Af0Ru0CiwQH37V5y8jgjoTo_8yozcjo9rpPA@mail.gmail.com>
+ <20120510203523.GD2061@localhost.localdomain>
+ <20120511133124.GB2089@localhost.localdomain>
+ <4FAD5B7E.5040801@tuxadero.com>
+ <20120511191623.GB3503@localhost.localdomain>
+ <4FB11479.8060408@tuxadero.com>
+ <20120514142048.GA3260@localhost.localdomain>
+ <20120516192035.GA1910@localhost.localdomain>
+ <4FB4D30C.7030301@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:34817 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966342Ab2EQOFW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 10:05:22 -0400
-Received: by mail-gg0-f174.google.com with SMTP id u4so1802686ggl.19
-        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 07:05:22 -0700 (PDT)
-In-Reply-To: <4FB50329.7010206@inktank.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39250 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933033Ab2EQOnT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 17 May 2012 10:43:19 -0400
+Content-Disposition: inline
+In-Reply-To: <4FB4D30C.7030301@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Martin Mailand <martin@tuxadero.com>
+Cc: Josef Bacik <josef@redhat.com>, Christian Brunner <christian@brunner-muc.de>, Sage Weil <sage@newdream.net>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Move the addition of the authorizer buffer to a connection's
-out_kvec out of get_connect_authorizer() and into its caller.  This
-way, the caller--prepare_write_connect()--can avoid adding the
-connect header to out_kvec before it has been fully initialized.
+On Thu, May 17, 2012 at 12:29:32PM +0200, Martin Mailand wrote:
+> Hi Josef,
+> 
+> somehow I still get the kernel Bug messages, I used your patch from
+> the 16th against rc7.
+> 
 
-Prior to this patch, it was possible for a connect header to be
-sent over the wire before the authorizer protocol or buffer length
-fields were initialized.  An authorizer buffer associated with that
-header could also be queued to send only after the connection header
-that describes it was on the wire.
+Was there anything above those messages?  There should have been a WARN_ON() or
+something.  If not thats fine, I just need to know one way or the other so I can
+figure out what to do next.  Thanks,
 
-Fixes http://tracker.newdream.net/issues/2424
-
-Signed-off-by: Alex Elder <elder@inktank.com>
-Reviewed-by: Sage Weil <sage@inktank.com>
----
-  net/ceph/messenger.c |   17 ++++++++---------
-  1 files changed, 8 insertions(+), 9 deletions(-)
-
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index bfddd87..c0b18dc 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -656,8 +656,6 @@ static void prepare_write_keepalive(struct 
-ceph_connection *con)
-  static struct ceph_auth_handshake *get_connect_authorizer(struct 
-ceph_connection *con,
-  						int *auth_proto)
-  {
--	void *auth_buf;
--	int auth_len;
-  	struct ceph_auth_handshake *auth;
-
-  	if (!con->ops->get_authorizer) {
-@@ -680,15 +678,9 @@ static struct ceph_auth_handshake 
-*get_connect_authorizer(struct ceph_connection
-  	if (test_bit(CLOSED, &con->state) || test_bit(OPENING, &con->state))
-  		return ERR_PTR(-EAGAIN);
-
--	auth_buf = auth->authorizer_buf;
--	auth_len = auth->authorizer_buf_len;
-  	con->auth_reply_buf = auth->authorizer_reply_buf;
-  	con->auth_reply_buf_len = auth->authorizer_reply_buf_len;
-
--	con->out_connect.authorizer_len = cpu_to_le32(auth_len);
--
--	if (auth_len)
--		ceph_con_out_kvec_add(con, auth_len, auth_buf);
-
-  	return auth;
-  }
-@@ -737,12 +729,19 @@ static int prepare_write_connect(struct 
-ceph_connection *con)
-  	con->out_connect.protocol_version = cpu_to_le32(proto);
-  	con->out_connect.flags = 0;
-
--	ceph_con_out_kvec_add(con, sizeof (con->out_connect), &con->out_connect);
-  	auth_proto = CEPH_AUTH_UNKNOWN;
-  	auth = get_connect_authorizer(con, &auth_proto);
-  	if (IS_ERR(auth))
-  		return PTR_ERR(auth);
-+
-  	con->out_connect.authorizer_protocol = cpu_to_le32(auth_proto);
-+	con->out_connect.authorizer_len = cpu_to_le32(auth->authorizer_buf_len);
-+
-+	ceph_con_out_kvec_add(con, sizeof (con->out_connect),
-+					&con->out_connect);
-+	if (auth->authorizer_buf_len)
-+		ceph_con_out_kvec_add(con, auth->authorizer_buf_len,
-+					auth->authorizer_buf);
-
-  	con->out_more = 0;
-  	set_bit(WRITE_PENDING, &con->state);
--- 
-1.7.5.4
-
+Josef
