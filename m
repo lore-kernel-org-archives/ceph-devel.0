@@ -1,44 +1,47 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Journal too small
-Date: Thu, 17 May 2012 10:00:10 -0700
-Message-ID: <CADvuQREq_EZHBshxEyWQTFoBnTYy1j_VvW6yUwVXXk1ddBM+NA@mail.gmail.com>
-References: <201205171259.55967.karol.jurak@gmail.com> <Pine.LNX.4.64.1205170901100.7019@cobra.newdream.net>
+From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
+Subject: Re: global_init_daemonize: BUG: there are 1 child threads already started that will now die!
+Date: Thu, 17 May 2012 19:19:01 +0200
+Message-ID: <5352012.m3lbF3EvYq@mranderson>
+References: <12500703.xTHoDB74aK@mranderson> <Pine.LNX.4.64.1205170902090.7019@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:57803 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751366Ab2EQRAd convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 13:00:33 -0400
-Received: by dady13 with SMTP id y13so2662469dad.19
-        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 10:00:32 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1205170901100.7019@cobra.newdream.net>
+Received: from mail.ki.iif.hu ([193.6.222.241]:55930 "EHLO mail.ki.iif.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753495Ab2EQRTM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 13:19:12 -0400
+In-Reply-To: <Pine.LNX.4.64.1205170902090.7019@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Karol Jurak <karol.jurak@gmail.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>, Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, May 17, 2012 at 9:01 AM, Sage Weil <sage@inktank.com> wrote:
->> 2012-05-12 13:31:04.034144 7f491061d700 =C2=A01 journal check_for_fu=
-ll at
->> 863363072 : JOURNAL FULL 863363072 >=3D 1048571903 (max_size 1048576=
-000
->> start 863363072)
->> 2012-05-12 13:31:04.034680 7f491061d700 =C2=A00 journal JOURNAL TOO =
-SMALL: item
->> 1693745152 > journal 1048571904 (usable)
+On 2012. May 17. 09:02:45 Sage Weil wrote:
+> On Thu, 17 May 2012, Sz=E9kelyi Szabolcs wrote:
+> > I get the $subject message when starting Ceph with the init script.=
+ I have
+> > to try it 15-20 times until the start suceeds. I've seen this messa=
+ge
+> > emitted by the monitor and MDS daemons, but never by OSDs. Is this =
+really
+> > a bug as the message says? I have two theoretically identical clust=
+ers,
+> > and only one of them produces this error, so something might be wro=
+ng on
+> > my side, but what?
+>=20
+> This is just a broken/racy check.  There's a patch in the stable bran=
+ch
+> that removes it.  It'll also be fixed in 0.47, out tomorrow most like=
+ly.
 
-> The osds tolerate the full journal. =C2=A0There will be a big latency=
- spike,
-> but they'll recover without risking data. =C2=A0You should definitely=
- increase
-> the journal size if this happens regulary, though.
+Great, thank you both!
 
-I propose for your merging pleasure:
-https://github.com/ceph/ceph/commits/journal-too-small
-https://github.com/ceph/ceph/commit/62db60bede8b187e25acb715f6616d2ce7c=
-fc97f
+--=20
+cc
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
