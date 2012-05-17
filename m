@@ -1,58 +1,45 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Journal too small
-Date: Thu, 17 May 2012 09:01:55 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205170901100.7019@cobra.newdream.net>
-References: <201205171259.55967.karol.jurak@gmail.com>
+Subject: Re: global_init_daemonize: BUG: there are 1 child threads already
+ started that will now die!
+Date: Thu, 17 May 2012 09:02:45 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205170902090.7019@cobra.newdream.net>
+References: <12500703.xTHoDB74aK@mranderson>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-2020904051-1337270565=:7019"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35318 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35339 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760102Ab2EQQB6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 12:01:58 -0400
-In-Reply-To: <201205171259.55967.karol.jurak@gmail.com>
+	with ESMTP id S1760102Ab2EQQCt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 12:02:49 -0400
+In-Reply-To: <12500703.xTHoDB74aK@mranderson>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Karol Jurak <karol.jurak@gmail.com>
+To: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, 17 May 2012, Karol Jurak wrote:
-> Hi,
-> 
-> During an ongoing recovery in one of my clusters a couple of OSDs 
-> complained about too small journal. For instance:
-> 
-> 2012-05-12 13:31:04.034144 7f491061d700  1 journal check_for_full at 
-> 863363072 : JOURNAL FULL 863363072 >= 1048571903 (max_size 1048576000 
-> start 863363072)
-> 2012-05-12 13:31:04.034680 7f491061d700  0 journal JOURNAL TOO SMALL: item 
-> 1693745152 > journal 1048571904 (usable)
-> 
-> I was under the impression that the OSDs stopped participating in recovery 
-> after this event. (ceph -w showed that the number of PGs in state 
-> active+clean no longer increased.) They resumed recovery after I enlarged 
-> their journals (stop osd, --flush-journal, --mkjournal, start osd).
-> 
-> How serious is such situation? Do the OSDs know how to handle it 
-> correctly? Or could this result in some data loss or corruption? After the 
-> recovery finished (ceph -w showed that all PGs are in active+clean state) 
-> I noticed that a few rbd images were corrupted.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-The osds tolerate the full journal.  There will be a big latency spike, 
-but they'll recover without risking data.  You should definitely increase 
-the journal size if this happens regulary, though.
+--557981400-2020904051-1337270565=:7019
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+
+On Thu, 17 May 2012, Sz=E9kelyi Szabolcs wrote:
+> Hello,
+>=20
+> I get the $subject message when starting Ceph with the init script. I hav=
+e to=20
+> try it 15-20 times until the start suceeds. I've seen this message emitte=
+d by=20
+> the monitor and MDS daemons, but never by OSDs. Is this really a bug as t=
+he=20
+> message says? I have two theoretically identical clusters, and only one o=
+f=20
+> them produces this error, so something might be wrong on my side, but wha=
+t?
+
+This is just a broken/racy check.  There's a patch in the stable branch=20
+that removes it.  It'll also be fixed in 0.47, out tomorrow most likely.
 
 sage
-
-> 
-> The cluster runs v0.46. The OSDs use ext4. I'm pretty sure that during the 
-> recovery no clients were accessing the cluster.
-> 
-> Best regards,
-> Karol
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--557981400-2020904051-1337270565=:7019--
