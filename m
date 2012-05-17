@@ -1,66 +1,58 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: global_init_daemonize: BUG: there are 1 child threads already
- started that will now die!
-Date: Thu, 17 May 2012 08:28:26 -0700
-Message-ID: <4FB5191A.9080102@inktank.com>
-References: <12500703.xTHoDB74aK@mranderson>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Journal too small
+Date: Thu, 17 May 2012 09:01:55 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205170901100.7019@cobra.newdream.net>
+References: <201205171259.55967.karol.jurak@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:51771 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966647Ab2EQP23 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 11:28:29 -0400
-Received: by dady13 with SMTP id y13so2556411dad.19
-        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 08:28:29 -0700 (PDT)
-In-Reply-To: <12500703.xTHoDB74aK@mranderson>
+Received: from cobra.newdream.net ([66.33.216.30]:35318 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760102Ab2EQQB6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 12:01:58 -0400
+In-Reply-To: <201205171259.55967.karol.jurak@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
+To: Karol Jurak <karol.jurak@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 05/17/2012 04:53 AM, Sz=E9kelyi Szabolcs wrote:
-> Hello,
->
-> I get the $subject message when starting Ceph with the init script. I=
- have to
-> try it 15-20 times until the start suceeds. I've seen this message em=
-itted by
-> the monitor and MDS daemons, but never by OSDs. Is this really a bug =
-as the
-> message says? I have two theoretically identical clusters, and only o=
-ne of
-> them produces this error, so something might be wrong on my side, but=
- what?
->
-> Thanks,
+On Thu, 17 May 2012, Karol Jurak wrote:
+> Hi,
+> 
+> During an ongoing recovery in one of my clusters a couple of OSDs 
+> complained about too small journal. For instance:
+> 
+> 2012-05-12 13:31:04.034144 7f491061d700  1 journal check_for_full at 
+> 863363072 : JOURNAL FULL 863363072 >= 1048571903 (max_size 1048576000 
+> start 863363072)
+> 2012-05-12 13:31:04.034680 7f491061d700  0 journal JOURNAL TOO SMALL: item 
+> 1693745152 > journal 1048571904 (usable)
+> 
+> I was under the impression that the OSDs stopped participating in recovery 
+> after this event. (ceph -w showed that the number of PGs in state 
+> active+clean no longer increased.) They resumed recovery after I enlarged 
+> their journals (stop osd, --flush-journal, --mkjournal, start osd).
+> 
+> How serious is such situation? Do the OSDs know how to handle it 
+> correctly? Or could this result in some data loss or corruption? After the 
+> recovery finished (ceph -w showed that all PGs are in active+clean state) 
+> I noticed that a few rbd images were corrupted.
 
-This was a kludgy check that was accidentally getting triggered after=20
-some logging code changes. It was removed by:
+The osds tolerate the full journal.  There will be a big latency spike, 
+but they'll recover without risking data.  You should definitely increase 
+the journal size if this happens regulary, though.
 
-commit 2629474f521f5cf67ccb8d09c289e1424c9e07ec
-Author: Sage Weil <sage.weil@dreamhost.com>
-Date:   Thu May 3 18:50:42 2012 -0700
+sage
 
-global_init: do not count threads before daemonize()
-
-We were verifying that there was only 1 thread (the presumably main()) =
-when
-we call daemonize.  However, with the new logging code, we stop a threa=
-d
-right before the check, and /proc apparently updates asynchronously suc=
-h
-that our attempt to count running threads gives us a bad answer.
-
-Just remove this kludgey check; we'll have to catch this class of bugs
-the hard way.
-
-Signed-off-by: Sage Weil <sage.weil@dreamhost.com>
-Reviewed-by: Greg Farnum <greg@inktank.com>
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> The cluster runs v0.46. The OSDs use ext4. I'm pretty sure that during the 
+> recovery no clients were accessing the cluster.
+> 
+> Best regards,
+> Karol
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
