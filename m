@@ -1,79 +1,71 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 07/16] ceph: messenger: rework prepare_connect_authorizer()
-Date: Thu, 17 May 2012 09:04:38 -0500
-Message-ID: <4FB50576.5070904@inktank.com>
+Subject: [PATCH 05/16] ceph: don't set WRITE_PENDING too early
+Date: Thu, 17 May 2012 09:04:27 -0500
+Message-ID: <4FB5056B.7040200@inktank.com>
 References: <4FB50329.7010206@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:50220 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761919Ab2EQOEh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 10:04:37 -0400
-Received: by mail-yw0-f46.google.com with SMTP id m54so1852487yhm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 07:04:37 -0700 (PDT)
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:34817 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761802Ab2EQOEY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 10:04:24 -0400
+Received: by mail-gg0-f174.google.com with SMTP id u4so1802686ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 07:04:23 -0700 (PDT)
 In-Reply-To: <4FB50329.7010206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Change prepare_connect_authorizer() so it returns without dropping
-the connection mutex if the connection has no get_authorizer method.
+prepare_write_connect() prepares a connect message, then sets
+WRITE_PENDING on the connection.  Then *after* this, it calls
+prepare_connect_authorizer(), which updates the content of the
+connection buffer already queued for sending.  It's also possible it
+will result in prepare_write_connect() returning -EAGAIN despite the
+WRITE_PENDING big getting set.
 
-Use the symbolic CEPH_AUTH_UNKNOWN instead of 0 when assigning
-authorization protocols.
+Fix this by preparing the connect authorizer first, setting the
+WRITE_PENDING bit only after that is done.
+
+Partially addresses http://tracker.newdream.net/issues/2424
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 Reviewed-by: Sage Weil <sage@inktank.com>
 ---
-  net/ceph/messenger.c |   28 +++++++++++++++++++---------
-  1 files changed, 19 insertions(+), 9 deletions(-)
+  net/ceph/messenger.c |    6 +++++-
+  1 files changed, 5 insertions(+), 1 deletions(-)
 
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 8e76936..09409a3 100644
+index 47499dc..cf29293 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -656,19 +656,29 @@ static void prepare_write_keepalive(struct 
+@@ -697,6 +697,7 @@ static int prepare_write_connect(struct 
 ceph_connection *con)
-  static int prepare_connect_authorizer(struct ceph_connection *con)
   {
-  	void *auth_buf;
--	int auth_len = 0;
--	int auth_protocol = 0;
-+	int auth_len;
-+	int auth_protocol;
-+
-+	if (!con->ops->get_authorizer) {
-+		con->out_connect.authorizer_protocol = CEPH_AUTH_UNKNOWN;
-+		con->out_connect.authorizer_len = 0;
-+
-+		return 0;
-+	}
-+
-+	/* Can't hold the mutex while getting authorizer */
+  	unsigned global_seq = get_global_seq(con->msgr, 0);
+  	int proto;
++	int ret;
 
-  	mutex_unlock(&con->mutex);
--	if (con->ops->get_authorizer)
--		con->ops->get_authorizer(con, &auth_buf, &auth_len,
--					 &auth_protocol, &con->auth_reply_buf,
--					 &con->auth_reply_buf_len,
--					 con->auth_retry);
-+
-+	auth_buf = NULL;
-+	auth_len = 0;
-+	auth_protocol = CEPH_AUTH_UNKNOWN;
-+	con->ops->get_authorizer(con, &auth_buf, &auth_len, &auth_protocol,
-+				&con->auth_reply_buf, &con->auth_reply_buf_len,
-+				con->auth_retry);
-  	mutex_lock(&con->mutex);
+  	switch (con->peer_name.type) {
+  	case CEPH_ENTITY_TYPE_MON:
+@@ -723,11 +724,14 @@ static int prepare_write_connect(struct 
+ceph_connection *con)
+  	con->out_connect.flags = 0;
 
--	if (test_bit(CLOSED, &con->state) ||
--	    test_bit(OPENING, &con->state))
-+	if (test_bit(CLOSED, &con->state) || test_bit(OPENING, &con->state))
-  		return -EAGAIN;
+  	ceph_con_out_kvec_add(con, sizeof (con->out_connect), &con->out_connect);
++	ret = prepare_connect_authorizer(con);
++	if (ret)
++		return ret;
 
-  	con->out_connect.authorizer_protocol = cpu_to_le32(auth_protocol);
+  	con->out_more = 0;
+  	set_bit(WRITE_PENDING, &con->state);
+
+-	return prepare_connect_authorizer(con);
++	return 0;
+  }
+
+  /*
 -- 
 1.7.5.4
 
