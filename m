@@ -1,70 +1,58 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 00/16] ceph: messenger cleanups and fixes
-Date: Thu, 17 May 2012 08:54:49 -0500
-Message-ID: <4FB50329.7010206@inktank.com>
+Subject: [PATCH 01/16] libceph: don't reset kvec in prepare_write_banner()
+Date: Thu, 17 May 2012 09:03:24 -0500
+Message-ID: <4FB5052C.60508@inktank.com>
+References: <4FB50329.7010206@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:58908 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760910Ab2EQNyr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 09:54:47 -0400
-Received: by gglu4 with SMTP id u4so1792025ggl.19
-        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 06:54:46 -0700 (PDT)
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:55240 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761207Ab2EQODV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 10:03:21 -0400
+Received: by yenm10 with SMTP id m10so1786673yen.19
+        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 07:03:21 -0700 (PDT)
+In-Reply-To: <4FB50329.7010206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This series culminates in fixing a bug in which ceph connection
-header might get sent over the wire before its associated authorizer
-structure has been fully prepared.  More info is found here:
-     http://tracker.newdream.net/issues/2424
+Move the kvec reset for a connection out of prepare_write_banner and
+into its only caller.
 
-Sage preemptively reviewed them before I got them posted to the
-list, and the patches that follow indicate that.  These patches are
-being tested now, and unless I get actionable feedback (and if they
-successfully pass testing) I'll be committing them as-is.
+Signed-off-by: Alex Elder <elder@inktank.com>
+Reviewed-by: Sage Weil <sage@inktank.com>
+---
+  net/ceph/messenger.c |    4 +---
+  1 files changed, 1 insertions(+), 3 deletions(-)
 
-Along the way a few other small bugs are fixed (or avoided) and some
-data structures and interfaces are modified a bit to simplify
-things.  Here is a bit of summary information about them.
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index a659b4d..bcbd409 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -686,7 +686,6 @@ static int prepare_connect_authorizer(struct 
+ceph_connection *con)
+  static void prepare_write_banner(struct ceph_messenger *msgr,
+  				 struct ceph_connection *con)
+  {
+-	ceph_con_out_kvec_reset(con);
+  	ceph_con_out_kvec_add(con, strlen(CEPH_BANNER), CEPH_BANNER);
+  	ceph_con_out_kvec_add(con, sizeof (msgr->my_enc_addr),
+  					&msgr->my_enc_addr);
+@@ -726,10 +725,9 @@ static int prepare_write_connect(struct 
+ceph_messenger *msgr,
+  	con->out_connect.protocol_version = cpu_to_le32(proto);
+  	con->out_connect.flags = 0;
 
-These first four rearrange some places where a connection's out_kvec
-fields get reset, and where/when a banner gets put out prior to a
-connection header.  A couple of functions can then eliminate a
-parameter as a result.
-     libceph: don't reset kvec in prepare_write_banner()
-     ceph: messenger: reset connection kvec caller
-     ceph: messenger: send banner in process_connect()
-     ceph: drop msgr argument from prepare_write_connect()
++	ceph_con_out_kvec_reset(con);
+  	if (include_banner)
+  		prepare_write_banner(msgr, con);
+-	else
+-		ceph_con_out_kvec_reset(con);
+  	ceph_con_out_kvec_add(con, sizeof (con->out_connect), &con->out_connect);
 
-This defers setting WRITE_PENDING when a connection header has been
-queued to write but not its associated authorizer buffer.
-     ceph: don't set WRITE_PENDING too early
+  	con->out_more = 0;
+-- 
+1.7.5.4
 
-These add error checking in two spots, and rearranges a function so
-a simple case can be handled without dropping a connection's mutex.
-     ceph: messenger: check prepare_write_connect() result
-     ceph: messenger: rework prepare_connect_authorizer()
-     ceph: messenger: check return from get_authorizer
-
-This defines a type to group some authorizer-related fields, then
-uses it to simplify some function interfaces.  It also adds some
-additional checking before using method function pointers.
-     ceph: define ceph_auth_handshake type
-     ceph: messenger: reduce args to create_authorizer
-     ceph: ensure auth ops are defined before use
-     ceph: have get_authorizer methods return pointers
-     ceph: use info returned by get_authorizer
-     ceph: return pointer from prepare_connect_authorizer()
-
-These final two implement the final fix for bug 2424 mentioned
-above.  It doesn't place the connection header into out_kvec until
-it is fully initialized, and then ensures the associated authorizer
-buffer is also added before marking the WRITE_PENDING flag on the
-connection (and also before dropping the connection mutex).
-     ceph: rename prepare_connect_authorizer()
-     ceph: add auth buf in prepare_write_connect()
-
-					-Alex
