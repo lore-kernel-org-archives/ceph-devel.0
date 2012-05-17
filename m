@@ -1,50 +1,39 @@
-From: Sage Weil <sage@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
 Subject: Re: Journal too small
-Date: Thu, 17 May 2012 10:33:47 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205171033060.7019@cobra.newdream.net>
+Date: Thu, 17 May 2012 11:59:52 -0700
+Message-ID: <4FB54AA8.7080906@inktank.com>
 References: <201205171259.55967.karol.jurak@gmail.com>
- <Pine.LNX.4.64.1205170901100.7019@cobra.newdream.net>
- <CADvuQREq_EZHBshxEyWQTFoBnTYy1j_VvW6yUwVXXk1ddBM+NA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-795279687-1337276027=:7019"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45291 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760393Ab2EQRdu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 13:33:50 -0400
-In-Reply-To: <CADvuQREq_EZHBshxEyWQTFoBnTYy1j_VvW6yUwVXXk1ddBM+NA@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:45543 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S967604Ab2EQS7z (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 17 May 2012 14:59:55 -0400
+Received: by pbbrp8 with SMTP id rp8so2898238pbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 17 May 2012 11:59:54 -0700 (PDT)
+In-Reply-To: <201205171259.55967.karol.jurak@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Karol Jurak <karol.jurak@gmail.com>, ceph-devel@vger.kernel.org
+To: Karol Jurak <karol.jurak@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On 05/17/2012 03:59 AM, Karol Jurak wrote:
+> How serious is such situation? Do the OSDs know how to handle it
+> correctly? Or could this result in some data loss or corruption? After the
+> recovery finished (ceph -w showed that all PGs are in active+clean state)
+> I noticed that a few rbd images were corrupted.
 
---557981400-795279687-1337276027=:7019
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+As Sage mentioned, the OSDs know how to handle full journals correctly.
 
-On Thu, 17 May 2012, Tommi Virtanen wrote:
-> On Thu, May 17, 2012 at 9:01 AM, Sage Weil <sage@inktank.com> wrote:
-> >> 2012-05-12 13:31:04.034144 7f491061d700 =A01 journal check_for_full at
-> >> 863363072 : JOURNAL FULL 863363072 >=3D 1048571903 (max_size 104857600=
-0
-> >> start 863363072)
-> >> 2012-05-12 13:31:04.034680 7f491061d700 =A00 journal JOURNAL TOO SMALL=
-: item
-> >> 1693745152 > journal 1048571904 (usable)
->=20
-> > The osds tolerate the full journal. =A0There will be a big latency spik=
-e,
-> > but they'll recover without risking data. =A0You should definitely incr=
-ease
-> > the journal size if this happens regulary, though.
->=20
-> I propose for your merging pleasure:
-> https://github.com/ceph/ceph/commits/journal-too-small
-> https://github.com/ceph/ceph/commit/62db60bede8b187e25acb715f6616d2ce7cfc=
-97f
+I'd like to figure out how your rbd images got corrupted, if possible.
 
-Perfect, merged.
---557981400-795279687-1337276027=:7019--
+How did you notice the corruption?
+
+Has your cluster always run 0.46, or did you upgrade from earlier
+versions?
+
+What happened to the cluster between your last check for corruption and
+now? Did your use of it or any ceph client or server configuration
+change?
