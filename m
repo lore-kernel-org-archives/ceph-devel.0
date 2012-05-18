@@ -1,53 +1,286 @@
-From: Karol Jurak <karol.jurak@gmail.com>
-Subject: Re: Journal too small
-Date: Fri, 18 May 2012 12:58:49 +0200
-Message-ID: <201205181258.49273.karol.jurak@gmail.com>
-References: <201205171259.55967.karol.jurak@gmail.com> <Pine.LNX.4.64.1205170901100.7019@cobra.newdream.net>
+From: Josef Bacik <josef@redhat.com>
+Subject: Re: Ceph on btrfs 3.4rc
+Date: Fri, 18 May 2012 10:48:00 -0400
+Message-ID: <20120518144759.GA1892@localhost.localdomain>
+References: <20120511191623.GB3503@localhost.localdomain>
+ <4FB11479.8060408@tuxadero.com>
+ <20120514142048.GA3260@localhost.localdomain>
+ <20120516192035.GA1910@localhost.localdomain>
+ <4FB4D30C.7030301@tuxadero.com>
+ <20120517144306.GA3011@dhcp231-144.rdu.redhat.com>
+ <4FB51577.5090100@tuxadero.com>
+ <20120517194358.GA9846@dhcp231-144.rdu.redhat.com>
+ <CAJafhzTQJchdd600DiEnooUH-P9ZcLvW+oEczCMNskd+Ud4BmQ@mail.gmail.com>
+ <4FB56B21.7070800@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:39949 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751643Ab2ERK6x (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 May 2012 06:58:53 -0400
-Received: by weyu7 with SMTP id u7so1726041wey.19
-        for <ceph-devel@vger.kernel.org>; Fri, 18 May 2012 03:58:52 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1205170901100.7019@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-btrfs-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <4FB56B21.7070800@tuxadero.com>
+Sender: linux-btrfs-owner@vger.kernel.org
+To: Martin Mailand <martin@tuxadero.com>
+Cc: Josef Bacik <josef@redhat.com>, Christian Brunner <christian@brunner-muc.de>, Sage Weil <sage@newdream.net>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Thursday 17 of May 2012 18:01:55 Sage Weil wrote:
-> On Thu, 17 May 2012, Karol Jurak wrote:
-> > Hi,
-> > 
-> > During an ongoing recovery in one of my clusters a couple of OSDs
-> > complained about too small journal. For instance:
-> > 
-> > 2012-05-12 13:31:04.034144 7f491061d700  1 journal check_for_full at
-> > 863363072 : JOURNAL FULL 863363072 >= 1048571903 (max_size 1048576000
-> > start 863363072)
-> > 2012-05-12 13:31:04.034680 7f491061d700  0 journal JOURNAL TOO SMALL:
-> > item 1693745152 > journal 1048571904 (usable)
-> > 
-> > I was under the impression that the OSDs stopped participating in
-> > recovery after this event. (ceph -w showed that the number of PGs in
-> > state active+clean no longer increased.) They resumed recovery after
-> > I enlarged their journals (stop osd, --flush-journal, --mkjournal,
-> > start osd).
-> > 
-> > How serious is such situation? Do the OSDs know how to handle it
-> > correctly? Or could this result in some data loss or corruption?
-> > After the recovery finished (ceph -w showed that all PGs are in
-> > active+clean state) I noticed that a few rbd images were corrupted.
+On Thu, May 17, 2012 at 11:18:25PM +0200, Martin Mailand wrote:
+> Hi Josef,
 > 
-> The osds tolerate the full journal.  There will be a big latency spike,
-> but they'll recover without risking data.  You should definitely
-> increase the journal size if this happens regulary, though.
+> I hit exact the same bug as Christian with your last patch.
+> 
 
-Thank you for clarification and advice.
+Ok hopefully this will print something out that makes sense.  Thanks,
 
-Karol
+Josef
+
+
+diff --git a/fs/btrfs/btrfs_inode.h b/fs/btrfs/btrfs_inode.h
+index 9b9b15f..492c74f 100644
+--- a/fs/btrfs/btrfs_inode.h
++++ b/fs/btrfs/btrfs_inode.h
+@@ -57,9 +57,6 @@ struct btrfs_inode {
+ 	/* used to order data wrt metadata */
+ 	struct btrfs_ordered_inode_tree ordered_tree;
+ 
+-	/* for keeping track of orphaned inodes */
+-	struct list_head i_orphan;
+-
+ 	/* list of all the delalloc inodes in the FS.  There are times we need
+ 	 * to write all the delalloc pages to disk, and this list is used
+ 	 * to walk them all.
+@@ -156,6 +153,8 @@ struct btrfs_inode {
+ 	unsigned dummy_inode:1;
+ 	unsigned in_defrag:1;
+ 	unsigned delalloc_meta_reserved:1;
++	unsigned has_orphan_item:1;
++	unsigned doing_truncate:1;
+ 
+ 	/*
+ 	 * always compress this one file
+diff --git a/fs/btrfs/ctree.h b/fs/btrfs/ctree.h
+index 8fd7233..aad2600 100644
+--- a/fs/btrfs/ctree.h
++++ b/fs/btrfs/ctree.h
+@@ -1375,7 +1375,7 @@ struct btrfs_root {
+ 	struct list_head root_list;
+ 
+ 	spinlock_t orphan_lock;
+-	struct list_head orphan_list;
++	atomic_t orphan_inodes;
+ 	struct btrfs_block_rsv *orphan_block_rsv;
+ 	int orphan_item_inserted;
+ 	int orphan_cleanup_state;
+diff --git a/fs/btrfs/disk-io.c b/fs/btrfs/disk-io.c
+index a7ffc88..ff3bf4b 100644
+--- a/fs/btrfs/disk-io.c
++++ b/fs/btrfs/disk-io.c
+@@ -1153,7 +1153,6 @@ static void __setup_root(u32 nodesize, u32 leafsize, u32 sectorsize,
+ 	root->orphan_block_rsv = NULL;
+ 
+ 	INIT_LIST_HEAD(&root->dirty_list);
+-	INIT_LIST_HEAD(&root->orphan_list);
+ 	INIT_LIST_HEAD(&root->root_list);
+ 	spin_lock_init(&root->orphan_lock);
+ 	spin_lock_init(&root->inode_lock);
+@@ -1166,6 +1165,7 @@ static void __setup_root(u32 nodesize, u32 leafsize, u32 sectorsize,
+ 	atomic_set(&root->log_commit[0], 0);
+ 	atomic_set(&root->log_commit[1], 0);
+ 	atomic_set(&root->log_writers, 0);
++	atomic_set(&root->orphan_inodes, 0);
+ 	root->log_batch = 0;
+ 	root->log_transid = 0;
+ 	root->last_log_commit = 0;
+diff --git a/fs/btrfs/inode.c b/fs/btrfs/inode.c
+index 61b16c6..7de7f6f 100644
+--- a/fs/btrfs/inode.c
++++ b/fs/btrfs/inode.c
+@@ -2072,12 +2072,12 @@ void btrfs_orphan_commit_root(struct btrfs_trans_handle *trans,
+ 	struct btrfs_block_rsv *block_rsv;
+ 	int ret;
+ 
+-	if (!list_empty(&root->orphan_list) ||
++	if (atomic_read(&root->orphan_inodes) ||
+ 	    root->orphan_cleanup_state != ORPHAN_CLEANUP_DONE)
+ 		return;
+ 
+ 	spin_lock(&root->orphan_lock);
+-	if (!list_empty(&root->orphan_list)) {
++	if (atomic_read(&root->orphan_inodes)) {
+ 		spin_unlock(&root->orphan_lock);
+ 		return;
+ 	}
+@@ -2134,8 +2134,8 @@ int btrfs_orphan_add(struct btrfs_trans_handle *trans, struct inode *inode)
+ 		block_rsv = NULL;
+ 	}
+ 
+-	if (list_empty(&BTRFS_I(inode)->i_orphan)) {
+-		list_add(&BTRFS_I(inode)->i_orphan, &root->orphan_list);
++	if (!BTRFS_I(inode)->has_orphan_item) {
++		BTRFS_I(inode)->has_orphan_item = 1;
+ #if 0
+ 		/*
+ 		 * For proper ENOSPC handling, we should do orphan
+@@ -2148,6 +2148,7 @@ int btrfs_orphan_add(struct btrfs_trans_handle *trans, struct inode *inode)
+ 			insert = 1;
+ #endif
+ 		insert = 1;
++		atomic_inc(&root->orphan_inodes);
+ 	}
+ 
+ 	if (!BTRFS_I(inode)->orphan_meta_reserved) {
+@@ -2166,6 +2167,9 @@ int btrfs_orphan_add(struct btrfs_trans_handle *trans, struct inode *inode)
+ 	if (insert >= 1) {
+ 		ret = btrfs_insert_orphan_item(trans, root, btrfs_ino(inode));
+ 		if (ret && ret != -EEXIST) {
++			spin_lock(&root->orphan_lock);
++			BTRFS_I(inode)->has_orphan_item = 0;
++			spin_unlock(&root->orphan_lock);
+ 			btrfs_abort_transaction(trans, root, ret);
+ 			return ret;
+ 		}
+@@ -2195,13 +2199,21 @@ int btrfs_orphan_del(struct btrfs_trans_handle *trans, struct inode *inode)
+ 	int release_rsv = 0;
+ 	int ret = 0;
+ 
++	/*
++	 * evict_inode gets called without holding the i_mutex so we need to
++	 * take the orphan lock to make sure we are safe in messing with these.
++	 */
+ 	spin_lock(&root->orphan_lock);
+-	if (!list_empty(&BTRFS_I(inode)->i_orphan)) {
+-		list_del_init(&BTRFS_I(inode)->i_orphan);
+-		delete_item = 1;
++	if (BTRFS_I(inode)->has_orphan_item) {
++		if (trans) {
++			BTRFS_I(inode)->has_orphan_item = 0;
++			delete_item = 1;
++		} else {
++			WARN_ON(1);
++		}
+ 	}
+ 
+-	if (BTRFS_I(inode)->orphan_meta_reserved) {
++	if (trans && BTRFS_I(inode)->orphan_meta_reserved) {
+ 		BTRFS_I(inode)->orphan_meta_reserved = 0;
+ 		release_rsv = 1;
+ 	}
+@@ -2209,12 +2221,18 @@ int btrfs_orphan_del(struct btrfs_trans_handle *trans, struct inode *inode)
+ 
+ 	if (trans && delete_item) {
+ 		ret = btrfs_del_orphan_item(trans, root, btrfs_ino(inode));
++		if (ret)
++			printk(KERN_ERR "couldn't find orphan item for %Lu\n",
++			       btrfs_ino(inode));
+ 		BUG_ON(ret); /* -ENOMEM or corruption (JDM: Recheck) */
+ 	}
+ 
+ 	if (release_rsv)
+ 		btrfs_orphan_release_metadata(inode);
+ 
++	if (trans && delete_item)
++		atomic_dec(&root->orphan_inodes);
++
+ 	return 0;
+ }
+ 
+@@ -2341,6 +2359,8 @@ int btrfs_orphan_cleanup(struct btrfs_root *root)
+ 				ret = PTR_ERR(trans);
+ 				goto out;
+ 			}
++			printk(KERN_ERR "auto deleting %Lu\n",
++			       found_key.objectid);
+ 			ret = btrfs_del_orphan_item(trans, root,
+ 						    found_key.objectid);
+ 			BUG_ON(ret); /* -ENOMEM or corruption (JDM: Recheck) */
+@@ -2353,7 +2373,9 @@ int btrfs_orphan_cleanup(struct btrfs_root *root)
+ 		 * the proper thing when we hit it
+ 		 */
+ 		spin_lock(&root->orphan_lock);
+-		list_add(&BTRFS_I(inode)->i_orphan, &root->orphan_list);
++		atomic_inc(&root->orphan_inodes);
++		WARN_ON(BTRFS_I(inode)->has_orphan_item);
++		BTRFS_I(inode)->has_orphan_item = 1;
+ 		spin_unlock(&root->orphan_lock);
+ 
+ 		/* if we have links, this was a truncate, lets do that */
+@@ -3671,7 +3693,7 @@ void btrfs_evict_inode(struct inode *inode)
+ 	btrfs_wait_ordered_range(inode, 0, (u64)-1);
+ 
+ 	if (root->fs_info->log_root_recovering) {
+-		BUG_ON(!list_empty(&BTRFS_I(inode)->i_orphan));
++		BUG_ON(!BTRFS_I(inode)->has_orphan_item);
+ 		goto no_delete;
+ 	}
+ 
+@@ -6683,9 +6705,13 @@ static int btrfs_truncate(struct inode *inode)
+ 	u64 mask = root->sectorsize - 1;
+ 	u64 min_size = btrfs_calc_trunc_metadata_size(root, 1);
+ 
++	spin_lock(&BTRFS_I(inode)->lock);
++	BUG_ON(BTRFS_I(inode)->doing_truncate);
++	BTRFS_I(inode)->doing_truncate = 0;
++	spin_unlock(&BTRFS_I(inode)->lock);
+ 	ret = btrfs_truncate_page(inode->i_mapping, inode->i_size);
+ 	if (ret)
+-		return ret;
++		goto real_out;
+ 
+ 	btrfs_wait_ordered_range(inode, inode->i_size & (~mask), (u64)-1);
+ 	btrfs_ordered_update_i_size(inode, inode->i_size, NULL);
+@@ -6727,8 +6753,10 @@ static int btrfs_truncate(struct inode *inode)
+ 	 * updating the inode.
+ 	 */
+ 	rsv = btrfs_alloc_block_rsv(root);
+-	if (!rsv)
+-		return -ENOMEM;
++	if (!rsv) {
++		ret = -ENOMEM;
++		goto real_out;
++	}
+ 	rsv->size = min_size;
+ 
+ 	/*
+@@ -6847,7 +6875,10 @@ end_trans:
+ 
+ out:
+ 	btrfs_free_block_rsv(root, rsv);
+-
++real_out:
++	spin_lock(&BTRFS_I(inode)->lock);
++	BTRFS_I(inode)->doing_truncate = 0;
++	spin_unlock(&BTRFS_I(inode)->lock);
+ 	if (ret && !err)
+ 		err = ret;
+ 
+@@ -6914,6 +6945,8 @@ struct inode *btrfs_alloc_inode(struct super_block *sb)
+ 	ei->dummy_inode = 0;
+ 	ei->in_defrag = 0;
+ 	ei->delalloc_meta_reserved = 0;
++	ei->has_orphan_item = 0;
++	ei->doing_truncate = 0;
+ 	ei->force_compress = BTRFS_COMPRESS_NONE;
+ 
+ 	ei->delayed_node = NULL;
+@@ -6927,7 +6960,6 @@ struct inode *btrfs_alloc_inode(struct super_block *sb)
+ 	mutex_init(&ei->log_mutex);
+ 	mutex_init(&ei->delalloc_mutex);
+ 	btrfs_ordered_inode_tree_init(&ei->ordered_tree);
+-	INIT_LIST_HEAD(&ei->i_orphan);
+ 	INIT_LIST_HEAD(&ei->delalloc_inodes);
+ 	INIT_LIST_HEAD(&ei->ordered_operations);
+ 	RB_CLEAR_NODE(&ei->rb_node);
+@@ -6972,13 +7004,11 @@ void btrfs_destroy_inode(struct inode *inode)
+ 		spin_unlock(&root->fs_info->ordered_extent_lock);
+ 	}
+ 
+-	spin_lock(&root->orphan_lock);
+-	if (!list_empty(&BTRFS_I(inode)->i_orphan)) {
++	if (BTRFS_I(inode)->has_orphan_item) {
+ 		printk(KERN_INFO "BTRFS: inode %llu still on the orphan list\n",
+ 		       (unsigned long long)btrfs_ino(inode));
+-		list_del_init(&BTRFS_I(inode)->i_orphan);
++		atomic_dec(&root->orphan_inodes);
+ 	}
+-	spin_unlock(&root->orphan_lock);
+ 
+ 	while (1) {
+ 		ordered = btrfs_lookup_first_ordered_extent(inode, (u64)-1);
