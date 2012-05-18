@@ -1,104 +1,93 @@
-From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Subject: Re: Possible memory leak in mon?
-Date: Fri, 18 May 2012 19:37:54 +0930
-Message-ID: <4FB61F7A.2080602@bashkirtsev.com>
-References: <4FA1B50B.8080603@bashkirtsev.com> <07C999FE3BF7420ABC05B7CFF88B06AD@dreamhost.com> <4FA22490.5060001@bashkirtsev.com> <A1BA6F85E3224387AFB0C24A7786B470@dreamhost.com> <4FA71D05.7050305@bashkirtsev.com> <CAPYLRzgpZmASDE=3XYF+BBydtOopN19nOk8Tkmqk_-EdscmrMg@mail.gmail.com>
+From: Christian Brunner <christian@brunner-muc.de>
+Subject: Re: is rados block cluster production ready ?
+Date: Fri, 18 May 2012 12:43:01 +0200
+Message-ID: <CAJafhzQL4tpyZeRot2=+7HDyMR8xPTcgQS93rXNn+M+f2j8W0Q@mail.gmail.com>
+References: <CAJafhzR2PLsH1B3Wwz5c=WAmVNsA1+GeTVKR4o7uLJVoeC_Ubw@mail.gmail.com>
+	<b8e35866-361b-4fb2-9273-4c29017158d0@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:46946 "EHLO
-	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757078Ab2ERKJO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 May 2012 06:09:14 -0400
-In-Reply-To: <CAPYLRzgpZmASDE=3XYF+BBydtOopN19nOk8Tkmqk_-EdscmrMg@mail.gmail.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:49117 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966034Ab2ERKnD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 18 May 2012 06:43:03 -0400
+Received: by yhmm54 with SMTP id m54so2717098yhm.19
+        for <ceph-devel@vger.kernel.org>; Fri, 18 May 2012 03:43:02 -0700 (PDT)
+In-Reply-To: <b8e35866-361b-4fb2-9273-4c29017158d0@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
+To: Alexandre DERUMIER <aderumier@odiso.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 16/05/12 02:43, Gregory Farnum wrote:
-> On Sun, May 6, 2012 at 5:53 PM, Vladimir Bashkirtsev
-> <vladimir@bashkirtsev.com>  wrote:
->> On 03/05/12 16:23, Greg Farnum wrote:
->>> On Wednesday, May 2, 2012 at 11:24 PM, Vladimir Bashkirtsev wrote:
->>>> Greg,
->>>>
->>>> Apologies for multiple emails: my mail server is backed by ceph no=
-w and
->>>> it struggled this morning (separate issue). So my mail server repo=
-rted
->>>> back to my mailer that sending of email failed when obviously it w=
-as not
->>>> the case.
->>> Interesting =97 I presume you're using the file system? That's not =
-something
->>> we've heard of anybody doing with Ceph before. :)
->>>
->>>> [root@gamma ~]# ceph -s
->>>> 2012-05-03 15:46:55.640951 mds e2666: 1/1/1 up {0=3D1=3Dup:active}=
-, 1
->>>> up:standby
->>>> 2012-05-03 15:46:55.647106 osd e10728: 6 osds: 6 up, 6 in
->>>> 2012-05-03 15:46:55.654052 log 2012-05-03 15:46:26.557084 mon.2
->>>> 172.16.64.202:6789/0 2878 : [INF] mon.2 calling new monitor electi=
-on
->>>> 2012-05-03 15:46:55.654425 mon e7: 3 mons at
->>>> {0=3D172.16.64.200:6789/0,1=3D172.16.64.201:6789/0,2=3D172.16.64.2=
-02:6789/0}
->>>> 2012-05-03 15:46:56.961624 pg v1251669: 600 pgs: 2 creating, 598
->>>> active+clean; 309 GB data, 963 GB used, 1098 GB / 2145 GB avail
->>>>
->>>> Loggin is on but nothing obvious in there: logs quite small. Numbe=
-r of
->>>> ceph health logged (ceph monitored by nagios and so this record ap=
-pears
->>>> every 5 minutes), monitors periodically call for election (differe=
-nt
->>>> periods between 1 to 15 minutes as it looks). That's it.
->>> Hrm. Generally speaking the monitors shouldn't call for elections u=
-nless
->>> something changes (one of them crashes) or the leader monitor is sl=
-owing
->>> down.
->>> Can you increase the debug_mon to 20, the debug_ms to 1, and post o=
-ne of
->>> the logs somewhere? The "Live Debugging" section of
->>> http://ceph.com/wiki/Debugging should give you what you need. :)
->> Here's the logs and core dumps:
->> http://www.bashkirtsev.com/logs-2012-05-07.tar.bz2
->>
->> Mons grown to 1.2GB and 2GB of memory.
-> When I look at the logs for mon.0, I see that there are a lot of
-> places where mon.0 takes tens of seconds to write something to disk.
-> If the disk is just about full, that might make sense (many
-> filesystems don't handle a nearly-full disk very well at all); and a
-> monitor getting stuck for that long could definitely explain why they
-> start using up so much memory (they're buffering messages). I suspect
-> that there's not anything particularly wrong here, unless I'm
-> misunderstanding the story you're telling me. :) Have you noticed thi=
-s
-> problem when the monitor's disk partition isn't nearly full?
-> -Greg
-I have recreated conditions when mon started to consume more memory:=20
-everything appears in line with your suspicions. When disk gets almost=20
-full, mon slows down and finally crashes quite badly so I cannot recove=
-r=20
-it. I am forced then to destroy mon all together and create a new one=20
-instead.
+2012/5/18 Alexandre DERUMIER <aderumier@odiso.com>:
+> Hi Christian,
+> thanks for your response.
+>
+>>>We are using 0.45 in production. Recent ceph versions are quite stable
+>>>(although we hat some troubles with excessive logging and a full log
+>>>partition lately which caused our cluster to halt).
+>
+> excessive logging because of a configuration error ?
 
-Long story short: in docs/wiki it should be stated as recommendation NO=
-T=20
-to keep monfs on the same partition as ceph log (which can grow quickly=
-)=20
-and preferably keep it on separate partition all together.
+0.45 had some debug messages enabled by default, which we didn't
+realize when doing the update. It can be easily disabled in the
+config. (Haven't checked if this is still the case in 0.46).
 
-In the same time it begs another question: what it recommended partitio=
-n=20
-size for monfs?
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>For the moment I would definitely recommend using XFS as the
+>>>underlying filesystem. At least until there is a fix for the
+>>>orphan_commit_root problem. XFS comes with a slight performance
+>>>impact, but it seems to be the only filesystem that is able to handle
+>>>heavy ceph workload for the moment.
+>
+> What's the benefit of using btrfs ? snapshots ? (I would like to be able to do snapshots, maybe clones)
+
+RBD snapshots are handled independent of the underlying filesystem. So
+you wouldn't loose that feature. (AFAIK clones are still on the
+roadmap - RBD layering).
+
+When enabled ceph is using btrfs snapshots internally for consistent
+writes. This gives you some performances advantages. With other
+filesystems you can only use "write ahead journaling".
+
+see http://ceph.com/docs/master/dev/filestore-filesystem-compat/
+
+>>>We are running a small ceph cluster (4 Servers with 4 OSDs each) on a
+>>>10GE network. Servers are spread across two datacenters with a 5km (3
+>>>mile) long 10GE fibre-link for data replication. Our servers are
+>>>equipped with 80GB Fusion-IO drives (for the journal) and traditional
+>>>3,5'' SAS drives in a RAID5 configuration (but I would not reccommend
+>>>this setup).
+>
+>>>From a guest we can get a throughput ~ 500MB/s.
+>
+> Great ! (And from multiple guests ? do you have more throughput ?)
+
+Yes. We were able to increase that even from a single guest with a
+RAID0 over multiple rbd volumes.
+
+> Also about latencies, do you have good latencies with you fusion-io journal?
+
+Latencies are ok, but I don't like the proprietary driver. Not that
+the driver is causing any problems, but it is always a bit tricky when
+doing kernel updates.
+
+> I currently use zfs storage, and writes are going to fast journal nvram then flushed to disk 15K.
+> It is the same behaviour with ceph ?
+
+That is quite similar to the ceph journal.
+
+>>>This is probably the best hardware for a ceph cluster money can buy.
+>>>Are you planning a single SAS drive per OSD?
+>
+> Yes, on osd by drive.
+> So if something goes wrong with brtfs or xfs, I'll have only 1 failed disk and not the whole raid.
+> Is it the right way for osd ?
+
+You can do it this way. We decided to put the ceph storage on a local
+RAID5 because we didn't want to re-replicate over the network when a
+single disk has to be swapped. There has been a discussion on the
+list, about the best way to setup the OSDs, but I think there was no
+final consensus.
+
+Regards,
+Christian
