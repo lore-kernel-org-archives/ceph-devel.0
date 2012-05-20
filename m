@@ -1,76 +1,67 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
+From: Christian Brunner <christian@brunner-muc.de>
 Subject: Re: Designing a cluster guide
-Date: Sun, 20 May 2012 10:13:03 +0200 (CEST)
-Message-ID: <acf48b9c-2c6a-46a7-9939-318325999f89@mailpro>
-References: <4FB8A3A5.5090809@profihost.ag>
+Date: Sun, 20 May 2012 10:19:33 +0200
+Message-ID: <CAJafhzRKCcSr37HjviAKRoMztv+twd5r+4Z99heUSy40G1rjag@mail.gmail.com>
+References: <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
+	<4FB8A3A5.5090809@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:47685 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751798Ab2ETINZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 May 2012 04:13:25 -0400
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:36337 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752004Ab2ETITe convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 20 May 2012 04:19:34 -0400
+Received: by obbtb18 with SMTP id tb18so6405321obb.19
+        for <ceph-devel@vger.kernel.org>; Sun, 20 May 2012 01:19:33 -0700 (PDT)
 In-Reply-To: <4FB8A3A5.5090809@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org, Gregory Farnum <greg@inktank.com>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org, Gregory Farnum <greg@inktank.com>
 
-I think that depend how much random writes io you have and acceptable l=
-atency you need.
+2012/5/20 Stefan Priebe <s.priebe@profihost.ag>:
+> Am 19.05.2012 18:15, schrieb Alexandre DERUMIER:
+>
+>> Hi,
+>>
+>> For your journal , if you have money, you can use
+>>
+>> stec zeusram ssd drive. (around 2000=80 /8GB / 100000 iops read/writ=
+e with
+>> 4k block).
+>> I'm using them with zfs san, they rocks for journal.
+>> http://www.stec-inc.com/product/zeusram.php
+>>
+>> another interessesting product is ddrdrive
+>> http://www.ddrdrive.com/
+>
+>
+> Great products but really expensive. The question is do we really nee=
+d this
+> in case of rbd block device.
 
-(As the purpose of the journal is to take random io then flush them seq=
-uentially to slow storage).
+I think it depends, what you are planning to do. I was calculating
+different storage type for our cloud solution lately. I think that
+there are three different types that make sense (at least for us):
 
-Maybe some slower ssd will fill your needs.
-(just be carefull of performance degradation in time, trim,....)
+- Cheap Object Storage (S3):
 
+  Many 3,5'' SATA Drives for the storage (probably in a RAID config)
+  A small and cheap SSD for the journal
 
+- Basic Block Storage (RBD):
 
+  Many 2,5'' SATA Drives for the storage (RAID10 and/or mutliple OSDs)
+  Small MaxIOPS SSDs for each OSD journal
 
------ Mail original -----=20
+- High performance Block Storage (RBD)
 
-De: "Stefan Priebe" <s.priebe@profihost.ag>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: ceph-devel@vger.kernel.org, "Gregory Farnum" <greg@inktank.com>=20
-Envoy=C3=A9: Dimanche 20 Mai 2012 09:56:21=20
-Objet: Re: Designing a cluster guide=20
+  Many large SATA SSDs for the storage (prbably in a RAID5 config)
+  stec zeusram ssd drive for the journal
 
-Am 19.05.2012 18:15, schrieb Alexandre DERUMIER:=20
-> Hi,=20
->=20
-> For your journal , if you have money, you can use=20
->=20
-> stec zeusram ssd drive. (around 2000=E2=82=AC /8GB / 100000 iops read=
-/write with 4k block).=20
-> I'm using them with zfs san, they rocks for journal.=20
-> http://www.stec-inc.com/product/zeusram.php=20
->=20
-> another interessesting product is ddrdrive=20
-> http://www.ddrdrive.com/=20
-
-Great products but really expensive. The question is do we really need=20
-this in case of rbd block device.=20
-
-Stefan=20
-
-
-
---=20
-
---=20
-
-
-
-
-	Alexandre D erumier=20
-Ing=C3=A9nieur Syst=C3=A8me=20
-=46ixe : 03 20 68 88 90=20
-=46ax : 03 20 68 90 81=20
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
-12 rue Marivaux 75002 Paris - France=20
-=09
+Regards,
+Christian
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
