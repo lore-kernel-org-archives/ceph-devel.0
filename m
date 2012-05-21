@@ -1,46 +1,48 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: KVM/RBD Block device hangs
-Date: Mon, 21 May 2012 16:59:27 +0200
-Message-ID: <4FBA584F.7070406@widodh.nl>
-References: <4FBA54E2.3000703@profihost.ag> <4FBA559D.7040902@widodh.nl> <4FBA5647.40101@profihost.ag>
+From: Christian Brunner <christian@brunner-muc.de>
+Subject: Re: Designing a cluster guide
+Date: Mon, 21 May 2012 17:03:26 +0200
+Message-ID: <CAJafhzRppRkhojq0wa08QVtfNEgCSOat+itK8QnQYrCOvVPDQA@mail.gmail.com>
+References: <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
+	<4FB8A3A5.5090809@profihost.ag>
+	<CAJafhzRKCcSr37HjviAKRoMztv+twd5r+4Z99heUSy40G1rjag@mail.gmail.com>
+	<4FB8AADE.1000406@profihost.ag>
+	<CAJafhzTv8a6auWQAw3u2zqRDi-DR9g1b9kwXYbX+kCG0=dOofg@mail.gmail.com>
+	<4FB9FB45.7020102@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:38522 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757173Ab2EUPAk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 11:00:40 -0400
-In-Reply-To: <4FBA5647.40101@profihost.ag>
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:35022 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758283Ab2EUPD1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 11:03:27 -0400
+Received: by gglu4 with SMTP id u4so4387968ggl.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 08:03:26 -0700 (PDT)
+In-Reply-To: <4FB9FB45.7020102@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org, Gregory Farnum <greg@inktank.com>
 
-On 05/21/2012 04:50 PM, Stefan Priebe - Profihost AG wrote:
-> Am 21.05.2012 16:47, schrieb Wido den Hollander:
->> What do you mean the OSD crashes? I assume you have multiple OSD's in
->> your cluster and one of them crashes? Or do ALL of them do go down?
-> 2 of them went down (1st then 10 minutes later the 2nd)
->
->>> What's next / wrong?
+2012/5/21 Stefan Priebe - Profihost AG <s.priebe@profihost.ag>:
+> Am 20.05.2012 10:31, schrieb Christian Brunner:
+>>> That's exactly what i thought too but then you need a seperate ceph / rbd
+>>> cluster for each type.
+>>>
+>>> Which will result in a minimum of:
+>>> 3x mon servers per type
+>>> 4x osd servers per type
+>>> ---
+>>>
+>>> so you'll need a minimum of 12x osd systems and 9x mon systems.
 >>
->> Could you fetch the last 100 line from the log file and also tell us
->> which version you are running?
-> i'm upgrading right now to v0.47 and will try to reproduce.
->
->> Also, the output of "ceph -s" might be useful.
-> before or after the crash?
+>> You can arrange the storage types in different pools, so that you
+>> don't need separate mon servers (this can be done by adjusting the
+>> crushmap) and you could even run multiple OSDs per server.
+> That sounds great. Can you give me a hint how to setup pools? Right now
+> i have data, metadata and rbd => the default pools. But i wasn't able to
+> find any page in the wiki which described how to setup pools.
 
-Probably after, but both is fine. I just want to know how your cluster 
-is doing and what the PG states are.
+rados mkpool <pool-name> [123[ 4]]     create pool <pool-name>'
+                                    [with auid 123[and using crush rule 4]]
 
-Wido
-
->
-> Stefan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Christian
