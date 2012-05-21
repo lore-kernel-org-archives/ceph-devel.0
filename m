@@ -1,76 +1,35 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: v0.47 released
-Date: Mon, 21 May 2012 00:37:10 -0700
-Message-ID: <4FB9F0A6.7040808@inktank.com>
-References: <Pine.LNX.4.64.1205202137430.843@cobra.newdream.net>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: is rados block cluster production ready ?
+Date: Mon, 21 May 2012 10:09:19 +0200
+Message-ID: <4FB9F82F.9050208@profihost.ag>
+References: <531ff5f3-11d5-488e-adfb-68000f3c36c0@mailpro> <c1099add-5872-4b8b-9250-9dd33791a776@mailpro> <CADvuQREa3PXCG4Udvuy45wHUKBAruc40md_cOrssXYTN+8-JJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:47231 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750732Ab2EUHhN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 03:37:13 -0400
-Received: by pbbrp8 with SMTP id rp8so6579042pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 00:37:13 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1205202137430.843@cobra.newdream.net>
+Received: from mail.profihost.ag ([85.158.179.208]:53245 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755312Ab2EUIJU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 04:09:20 -0400
+In-Reply-To: <CADvuQREa3PXCG4Udvuy45wHUKBAruc40md_cOrssXYTN+8-JJw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
 
-On 05/20/2012 09:38 PM, Sage Weil wrote:
-> It's been another three weeks and v0.47 is ready.  The highlights include:
->
->   * librbd: write-thru cache mode
+Am 18.05.2012 18:13, schrieb Tommi Virtanen:
+> <aderumier@odiso.com> wrote:
+>> About network, does the rados protocol support some kind of multipathing ? Or does I need to use bonding/lacp ?
+> 
+> Bonding is almost always good if you have the switch ports & bandwidth
+> to spare. Even without bonding, one of the tricks RADOS does is that
+> each chunk of the RBD image is stored on a different OSD, so your
+> hypervisor will actually talk to even thousands of OSDs when the vm
+> accesses the disk. This way, the network link of any individual
+> storage node is less likely to become a performance bottleneck for the
+> vm.
+That's great but if you go the way of having for example 8x OSDs per
+server with 8 single Disks - how can i archieve that ceph is splitting
+my files to the correct servers for redundancy?
 
-Some more detail on rbd caching:
-
-By default librbd does no caching - writes and reads go directly to the
-storage cluster, and writes return only when the data is on disk on all
-replicas.
-
-With caching enabled, writes return immediately, unless there are more
-than rbd_cache_max_dirty unflushed bytes. In this case, the write
-triggers writeback and blocks until enough bytes are flushed.
-
-To enable writethrough mode, set rbd_cache_max_dirty to 0. This means
-writes return only when the data is on disk on all replicas, but reads
-may come from the cache.
-
-The cache is in memory on the client, and each rbd image has its own.
-Since it's local to the client, and there's no coherency if there are
-others accessing the image, running something like GFS or OCFS on top
-of rbd would not work with caching enabled.
-
-The options for controlling the cache are:
-
-option                 | type      | default | description
------------------------+-----------+---------+------------
-rbd_cache              | bool      | false   | whether caching is enabled
-rbd_cache_size         | long long | 32 MiB  | total cache size in bytes
-rbd_cache_max_dirty    | long long | 24 MiB  | maximum number of dirty 
-bytes before triggering writeback
-rbd_cache_target_dirty | long long | 16 MiB  | writeback starts at this 
-threshold, but does not block the write
-rbd_cache_max_age      | float     | 1.0     | seconds in cache before 
-writeback starts
-
-The cache code was written for ceph-fuse a few years ago, so it's been
-in use for a while now. It was just tweaked a bit to allow librbd
-to use it. The rbd_cache_* options have the same meanings as the
-client_oc_* options for ceph-fuse.
-
->   * librbd: improved error handling
-
-To clarify, these were fixes for error handling in the caching module
-used by ceph-fuse and librbd, and does not matter if you aren't using
-ceph-fuse or rbd caching. It made write errors be returned to the
-caller when the cache is flushed, and exposed read errors to the client
-as well.
-
-0.47 also includes a fix for a deadlock that was more likely to 
-triggered with rbd caching enabled. I don't know of any outstanding 
-issues with rbd caching since that was fixed.
-
-Josh
+Stefan
