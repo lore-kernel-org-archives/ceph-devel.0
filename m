@@ -1,114 +1,63 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: qemu-rdb questions
-Date: Sun, 20 May 2012 23:07:59 -0700
-Message-ID: <4FB9DBBF.5070107@inktank.com>
-References: <f5e64790-567a-4ad4-8b3d-01f6f6604dd7@mailpro>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: v0.47 released
+Date: Mon, 21 May 2012 08:46:30 +0200
+Message-ID: <4FB9E4C6.9060104@profihost.ag>
+References: <Pine.LNX.4.64.1205202137430.843@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:43683 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752488Ab2EUGID (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 02:08:03 -0400
-Received: by pbbrp8 with SMTP id rp8so6488966pbb.19
-        for <ceph-devel@vger.kernel.org>; Sun, 20 May 2012 23:08:02 -0700 (PDT)
-In-Reply-To: <f5e64790-567a-4ad4-8b3d-01f6f6604dd7@mailpro>
+Received: from mail.profihost.ag ([85.158.179.208]:43182 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751051Ab2EUGqc (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 02:46:32 -0400
+In-Reply-To: <Pine.LNX.4.64.1205202137430.843@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 05/19/2012 09:33 PM, Alexandre DERUMIER wrote:
-> Hi,
-> i'm planning to do rdb integration in proxmox2 kvm distribution (not using libvirt).
->
-> I found some doc here
-> http://ceph.com/wiki/QEMU-RBD
-> and also in libvirt mailing list.
->
->
-> some questions:
->
-> qemu drive command line :
-> -------------------------
-> -drive file=rbd:pool/image:id=myname:key=QVFDVm41aE82SHpGQWhBQXEwTkN2OGp0SmNJY0UrSE9CbE1RMUE=:auth_supported=cephx none:mon_host=mon1.example.org\:6321\;mon2.example.org\:6322\;mon3.example.org\:6322,if=virtio,format=raw
->
-> is it the right syntax ?
+Hi,
 
-Newer qemu doesn't like the space in auth_supported, so you'll want to
-use a semicolon instead:
+the debian archive still shows: 0.46 =>
+http://ceph.com/debian/dists/squeeze/main/binary-amd64/Packages
 
--drive 
-file=rbd:pool/image:id=myname:key=QVFDVm41aE82SHpGQWhBQXEwTkN2OGp0SmNJY0UrSE9CbE1RMUE=:auth_supported=cephx;none:mon_host=mon1.example.org\:6321\;mon2.example.org\:6322\;mon3.example.org\:6322,if=virtio,format=raw
+Greets
+  Stefan
 
-The key/value pairs separated by colons are Ceph configuration options.
-The above drive line is equivalent the following settings:
-
-/path/to/myname.keyring containing the keyring for myname, as shown by 
-'ceph auth list'.
-
-/etc/ceph/ceph.conf containing:
-
-[client.myname]
-     keyring = /path/to/myname.keyring
-     auth supported = cephx none
-     mon host = 
-mon1.example.org:6321;mon2.example.org:6322;mon3.example.org:6322
-
-And a drive line like:
-
--drive file=rbd:pool/image:id=myname,if=virtio,format=raw
-
-Qemu reads the from the ceph.conf file if it exists. Any extra
-options you add override those from the configuration file.
-
-You can have it read from another file by adding ':conf=/path/to/file'.
-
->
->
-> for image management, what is the best way ? qemu-img or rdb ?
->
-> rdb creation with qemu-img:
-> ----------------------------
-> qemu-img create -f rbd rbd:data/foo 10G
->
-> how to specify monitor, authentification,.... ?
->
-> rdb delete/resize with qemu-img?
-> --------------------------------
-> don't find any infos.
-
-The rbd tool has more features. As you noticed, qemu doesn't know how
-to delete images. It also can't rename them. I'm not sure if qemu-img
-lets you resize them. The monitor and auth options for qemu-img are the
-same as for qemu's -drive syntax. You can configure them in
-/etc/ceph/ceph.conf, or on the command line.
-
-For the rbd tool, if you don't want to use a configuration file, the
-options would be:
-
-rbd --mon-host 
-'mon1.example.org:6321;mon2.example.org:6322;mon3.example.org:6322' 
---keyring /path/to/keyring --id myname --auth-supported 'cephx;none'
-
-These are generic ceph options, and work with any ceph command. They can
-also be set in the CEPH_ARGS environment variable.
-
->
->
-> rdb commands
-> ------------
-> Is the rdb kernel module require to use rdb command ?
-
-Nope, it's only needed if you want to have /dev/rbd devices on your
-hosts.
-
-> Also,I would like to not have any /dev/rdbx device on my client.
-
-qemu goes directly through the userspace librbd to access rbd images.
-The rbd kernel module isn't involved at all, and no devices appear on 
-the host. The guest does not know it's using rbd; it sees a block 
-device, just as if you were using e.g. a qcow2 file.
-
-Josh
+Am 21.05.2012 06:38, schrieb Sage Weil:
+> It's been another three weeks and v0.47 is ready.  The highlights include:
+> 
+>  * mon: admin tools to control unwieldy clusters (temporarily block osd 
+>    boots, failures, etc.)
+>  * osd: reduced memory footprint for peering/thrashing
+>  * librbd: write-thru cache mode
+>  * librbd: improved error handling
+>  * osd: removal of ill-conceived 'localized pg' feature (those annoying 
+>    PGs with 'p' in them)
+>  * rados-bench: simple tool to benchmark radosgw (or S3) (based on 'rados 
+>    bench' command)
+> 
+> In truth it wasn't the most productive sprint because of the work that 
+> went into the launch of the web sites, the launch party, and the 
+> subsequent inebriation.  However, the new RBD caching feature is looking 
+> very good at this point, and patches are working their way upstream in 
+> Qemu/KVM to enable it with the generic 'cache=writethrough' or 
+> 'cache=writeback' settings.
+> 
+> One other noteworthy item is that I generated a new PGP key to sign 
+> releases with.  The key is now in ceph.git, and has been signed by my 
+> personal key.  If you are installing debs from our repositories, you'll 
+> want to add the new key to your APT keyring to avoid annoying security 
+> warnings.
+> 
+> For v0.48, we are working on a ceph-osd refactor to improve threading and 
+> performance, multi-monitor and OSD hotplugging support for upstart and 
+> Chef, improvements to the OSD and monitor bootstrapping to make that 
+> possible, and RBD groundwork for the much-anticipated layering feature.
+> 
+> You can get v0.47 from the usual places:
+> 
+>  * Git at git://github.com/ceph/ceph.git
+>  * Tarball at http://ceph.newdream.net/download/ceph-0.47.tar.gz
+>  * For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/master/install/debian
