@@ -1,25 +1,25 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: Designing a cluster guide
-Date: Mon, 21 May 2012 22:14:33 +0200
-Message-ID: <4FBAA229.1050204@profihost.ag>
-References: <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro> <4FB8A3A5.5090809@profihost.ag> <CAJafhzRKCcSr37HjviAKRoMztv+twd5r+4Z99heUSy40G1rjag@mail.gmail.com> <4FB8B1CE.1080803@icukhosting.co.uk> <CAJafhzQp1SeGZUdUL5XszaRw-0bU0f38r3ghLgmTvZrF0oB_=w@mail.gmail.com> <4FBA599F.5050000@profihost.ag> <CAMvP8PBSxybik20238UAX6TKfqGBb=wEqmFyEHk4fSAzU_Fjxg@mail.gmail.com> <4FBAA163.9040408@profihost.ag> <CAMvP8PDUvY9h=0onvob_ekA5GK9A-0thVqyJ7ETTen8mALj0Sw@mail.gmail.com>
+From: Nick Bartos <nick@pistoncloud.com>
+Subject: ceph 0.47 libs3 install problem
+Date: Mon, 21 May 2012 13:14:55 -0700
+Message-ID: <CAPud5_7UKKe-=GNfWnJEut179Nz6oBdegrKX5Xoyo4Vj7oL4cw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:40730 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758205Ab2EUUOg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 16:14:36 -0400
-In-Reply-To: <CAMvP8PDUvY9h=0onvob_ekA5GK9A-0thVqyJ7ETTen8mALj0Sw@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:48532 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758485Ab2EUUO4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 16:14:56 -0400
+Received: by pbbrp8 with SMTP id rp8so7381715pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 13:14:56 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tomasz Paszkowski <ss7pro@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Am 21.05.2012 22:13, schrieb Tomasz Paszkowski:
-> Just to clarify. You'd like to measure I/O on those system which are
-> currently running on physical machines ?
-IOPs not just I/O.
+I'm trying to install ceph 0.47, but --prefix isn't getting passed to
+the bundled libs3.  I installed libs3 separately, but even when using
+--with-system-libs3 (as ./configure suggests) or
+--with-system-libs3=yes (just for the hell of it), it still installs
+libs3, and outside of the prefix it was given.
 
-Stefan
+Anyone know of a way to either get ceph's libs3 to be installed in
+--prefix, or to get it to use the system one instead?
