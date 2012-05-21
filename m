@@ -1,36 +1,134 @@
-From: Damien Churchill <damoxc@gmail.com>
-Subject: Re: Designing a cluster guide
-Date: Mon, 21 May 2012 19:15:51 +0100
-Message-ID: <CAFtEh-e2ZVMHGhrBrAnGpXbGPPmhFo-Z3hrUHHNBgb==tNPXkQ@mail.gmail.com>
-References: <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
-	<4FB8A3A5.5090809@profihost.ag>
-	<CAJafhzRKCcSr37HjviAKRoMztv+twd5r+4Z99heUSy40G1rjag@mail.gmail.com>
-	<4FB8B1CE.1080803@icukhosting.co.uk>
-	<CAJafhzQp1SeGZUdUL5XszaRw-0bU0f38r3ghLgmTvZrF0oB_=w@mail.gmail.com>
-	<4FBA599F.5050000@profihost.ag>
-	<CAMvP8PBSxybik20238UAX6TKfqGBb=wEqmFyEHk4fSAzU_Fjxg@mail.gmail.com>
-	<CANT588uxL7jrf1BfowUeer_AnDTfGjzkWVFhS4aNMaMSst_jyA@mail.gmail.com>
-	<CAMvP8PADFfE-eENK_oq9_GsB0t35xd+j5yVvoh+k7qvc0pgUog@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Possible memory leak in mon?
+Date: Mon, 21 May 2012 11:18:46 -0700
+Message-ID: <CAPYLRzgeZH47wEE8NaGPmJhGvpc3zbViPOpyKQVCY=m_AyDOLg@mail.gmail.com>
+References: <4FA1B50B.8080603@bashkirtsev.com>
+	<07C999FE3BF7420ABC05B7CFF88B06AD@dreamhost.com>
+	<4FA22490.5060001@bashkirtsev.com>
+	<A1BA6F85E3224387AFB0C24A7786B470@dreamhost.com>
+	<4FA71D05.7050305@bashkirtsev.com>
+	<CAPYLRzgpZmASDE=3XYF+BBydtOopN19nOk8Tkmqk_-EdscmrMg@mail.gmail.com>
+	<4FB61F7A.2080602@bashkirtsev.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:51009 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757941Ab2EUSPx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 14:15:53 -0400
-Received: by wibhn6 with SMTP id hn6so2688371wib.1
-        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 11:15:52 -0700 (PDT)
-In-Reply-To: <CAMvP8PADFfE-eENK_oq9_GsB0t35xd+j5yVvoh+k7qvc0pgUog@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:43387 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932095Ab2EUSSs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 14:18:48 -0400
+Received: by lbbgm6 with SMTP id gm6so3669724lbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 11:18:46 -0700 (PDT)
+In-Reply-To: <4FB61F7A.2080602@bashkirtsev.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tomasz Paszkowski <ss7pro@gmail.com>
+To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 21 May 2012 16:36, Tomasz Paszkowski <ss7pro@gmail.com> wrote:
-> Project is indeed very interesting, but requires to patch a kernel
-> source. For me using lkm is safer ;)
+On Fri, May 18, 2012 at 3:07 AM, Vladimir Bashkirtsev
+<vladimir@bashkirtsev.com> wrote:
+> On 16/05/12 02:43, Gregory Farnum wrote:
+>>
+>> On Sun, May 6, 2012 at 5:53 PM, Vladimir Bashkirtsev
+>> <vladimir@bashkirtsev.com> =A0wrote:
+>>>
+>>> On 03/05/12 16:23, Greg Farnum wrote:
+>>>>
+>>>> On Wednesday, May 2, 2012 at 11:24 PM, Vladimir Bashkirtsev wrote:
+>>>>>
+>>>>> Greg,
+>>>>>
+>>>>> Apologies for multiple emails: my mail server is backed by ceph n=
+ow and
+>>>>> it struggled this morning (separate issue). So my mail server rep=
+orted
+>>>>> back to my mailer that sending of email failed when obviously it =
+was
+>>>>> not
+>>>>> the case.
+>>>>
+>>>> Interesting =97 I presume you're using the file system? That's not
+>>>> something
+>>>> we've heard of anybody doing with Ceph before. :)
+>>>>
+>>>>> [root@gamma ~]# ceph -s
+>>>>> 2012-05-03 15:46:55.640951 mds e2666: 1/1/1 up {0=3D1=3Dup:active=
+}, 1
+>>>>> up:standby
+>>>>> 2012-05-03 15:46:55.647106 osd e10728: 6 osds: 6 up, 6 in
+>>>>> 2012-05-03 15:46:55.654052 log 2012-05-03 15:46:26.557084 mon.2
+>>>>> 172.16.64.202:6789/0 2878 : [INF] mon.2 calling new monitor elect=
+ion
+>>>>> 2012-05-03 15:46:55.654425 mon e7: 3 mons at
+>>>>> {0=3D172.16.64.200:6789/0,1=3D172.16.64.201:6789/0,2=3D172.16.64.=
+202:6789/0}
+>>>>> 2012-05-03 15:46:56.961624 pg v1251669: 600 pgs: 2 creating, 598
+>>>>> active+clean; 309 GB data, 963 GB used, 1098 GB / 2145 GB avail
+>>>>>
+>>>>> Loggin is on but nothing obvious in there: logs quite small. Numb=
+er of
+>>>>> ceph health logged (ceph monitored by nagios and so this record a=
+ppears
+>>>>> every 5 minutes), monitors periodically call for election (differ=
+ent
+>>>>> periods between 1 to 15 minutes as it looks). That's it.
+>>>>
+>>>> Hrm. Generally speaking the monitors shouldn't call for elections =
+unless
+>>>> something changes (one of them crashes) or the leader monitor is s=
+lowing
+>>>> down.
+>>>> Can you increase the debug_mon to 20, the debug_ms to 1, and post =
+one of
+>>>> the logs somewhere? The "Live Debugging" section of
+>>>> http://ceph.com/wiki/Debugging should give you what you need. :)
+>>>
+>>> Here's the logs and core dumps:
+>>> http://www.bashkirtsev.com/logs-2012-05-07.tar.bz2
+>>>
+>>> Mons grown to 1.2GB and 2GB of memory.
+>>
+>> When I look at the logs for mon.0, I see that there are a lot of
+>> places where mon.0 takes tens of seconds to write something to disk.
+>> If the disk is just about full, that might make sense (many
+>> filesystems don't handle a nearly-full disk very well at all); and a
+>> monitor getting stuck for that long could definitely explain why the=
+y
+>> start using up so much memory (they're buffering messages). I suspec=
+t
+>> that there's not anything particularly wrong here, unless I'm
+>> misunderstanding the story you're telling me. :) Have you noticed th=
+is
+>> problem when the monitor's disk partition isn't nearly full?
+>> -Greg
 >
+> I have recreated conditions when mon started to consume more memory:
+> everything appears in line with your suspicions. When disk gets almos=
+t full,
+> mon slows down and finally crashes quite badly so I cannot recover it=
+=2E I am
+> forced then to destroy mon all together and create a new one instead.
+>
+> Long story short: in docs/wiki it should be stated as recommendation =
+NOT to
+> keep monfs on the same partition as ceph log (which can grow quickly)=
+ and
+> preferably keep it on separate partition all together.
 
-I believe bcache is actually in the process of being mainlined and
-moved to a device mapper target, although I could wrong about one or
-more of those things.
+Patches and edits welcome! :)
+
+> In the same time it begs another question: what it recommended partit=
+ion
+> size for monfs?
+I'm looking at a cluster about a month old with a 765MB mon data
+directory. Most of that (~500 MB) is in the log files, which can be
+trimmed manually, and I believe that everything else taking up data
+trims itself when stuff's working. So if you're willing to set up a
+pseudo-log rotation (or do it yourself on a timer every month or so) a
+couple GB should leave you plenty of breathing room.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
