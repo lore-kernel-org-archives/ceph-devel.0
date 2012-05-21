@@ -1,63 +1,76 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+From: Josh Durgin <josh.durgin@inktank.com>
 Subject: Re: v0.47 released
-Date: Mon, 21 May 2012 08:46:30 +0200
-Message-ID: <4FB9E4C6.9060104@profihost.ag>
+Date: Mon, 21 May 2012 00:37:10 -0700
+Message-ID: <4FB9F0A6.7040808@inktank.com>
 References: <Pine.LNX.4.64.1205202137430.843@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:43182 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751051Ab2EUGqc (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 02:46:32 -0400
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:47231 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750732Ab2EUHhN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 03:37:13 -0400
+Received: by pbbrp8 with SMTP id rp8so6579042pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 00:37:13 -0700 (PDT)
 In-Reply-To: <Pine.LNX.4.64.1205202137430.843@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi,
-
-the debian archive still shows: 0.46 =>
-http://ceph.com/debian/dists/squeeze/main/binary-amd64/Packages
-
-Greets
-  Stefan
-
-Am 21.05.2012 06:38, schrieb Sage Weil:
+On 05/20/2012 09:38 PM, Sage Weil wrote:
 > It's been another three weeks and v0.47 is ready.  The highlights include:
-> 
->  * mon: admin tools to control unwieldy clusters (temporarily block osd 
->    boots, failures, etc.)
->  * osd: reduced memory footprint for peering/thrashing
->  * librbd: write-thru cache mode
->  * librbd: improved error handling
->  * osd: removal of ill-conceived 'localized pg' feature (those annoying 
->    PGs with 'p' in them)
->  * rados-bench: simple tool to benchmark radosgw (or S3) (based on 'rados 
->    bench' command)
-> 
-> In truth it wasn't the most productive sprint because of the work that 
-> went into the launch of the web sites, the launch party, and the 
-> subsequent inebriation.  However, the new RBD caching feature is looking 
-> very good at this point, and patches are working their way upstream in 
-> Qemu/KVM to enable it with the generic 'cache=writethrough' or 
-> 'cache=writeback' settings.
-> 
-> One other noteworthy item is that I generated a new PGP key to sign 
-> releases with.  The key is now in ceph.git, and has been signed by my 
-> personal key.  If you are installing debs from our repositories, you'll 
-> want to add the new key to your APT keyring to avoid annoying security 
-> warnings.
-> 
-> For v0.48, we are working on a ceph-osd refactor to improve threading and 
-> performance, multi-monitor and OSD hotplugging support for upstart and 
-> Chef, improvements to the OSD and monitor bootstrapping to make that 
-> possible, and RBD groundwork for the much-anticipated layering feature.
-> 
-> You can get v0.47 from the usual places:
-> 
->  * Git at git://github.com/ceph/ceph.git
->  * Tarball at http://ceph.newdream.net/download/ceph-0.47.tar.gz
->  * For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/master/install/debian
+>
+>   * librbd: write-thru cache mode
+
+Some more detail on rbd caching:
+
+By default librbd does no caching - writes and reads go directly to the
+storage cluster, and writes return only when the data is on disk on all
+replicas.
+
+With caching enabled, writes return immediately, unless there are more
+than rbd_cache_max_dirty unflushed bytes. In this case, the write
+triggers writeback and blocks until enough bytes are flushed.
+
+To enable writethrough mode, set rbd_cache_max_dirty to 0. This means
+writes return only when the data is on disk on all replicas, but reads
+may come from the cache.
+
+The cache is in memory on the client, and each rbd image has its own.
+Since it's local to the client, and there's no coherency if there are
+others accessing the image, running something like GFS or OCFS on top
+of rbd would not work with caching enabled.
+
+The options for controlling the cache are:
+
+option                 | type      | default | description
+-----------------------+-----------+---------+------------
+rbd_cache              | bool      | false   | whether caching is enabled
+rbd_cache_size         | long long | 32 MiB  | total cache size in bytes
+rbd_cache_max_dirty    | long long | 24 MiB  | maximum number of dirty 
+bytes before triggering writeback
+rbd_cache_target_dirty | long long | 16 MiB  | writeback starts at this 
+threshold, but does not block the write
+rbd_cache_max_age      | float     | 1.0     | seconds in cache before 
+writeback starts
+
+The cache code was written for ceph-fuse a few years ago, so it's been
+in use for a while now. It was just tweaked a bit to allow librbd
+to use it. The rbd_cache_* options have the same meanings as the
+client_oc_* options for ceph-fuse.
+
+>   * librbd: improved error handling
+
+To clarify, these were fixes for error handling in the caching module
+used by ceph-fuse and librbd, and does not matter if you aren't using
+ceph-fuse or rbd caching. It made write errors be returned to the
+caller when the cache is flushed, and exposed read errors to the client
+as well.
+
+0.47 also includes a fix for a deadlock that was more likely to 
+triggered with rbd caching enabled. I don't know of any outstanding 
+issues with rbd caching since that was fixed.
+
+Josh
