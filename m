@@ -1,134 +1,41 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Possible memory leak in mon?
-Date: Mon, 21 May 2012 11:18:46 -0700
-Message-ID: <CAPYLRzgeZH47wEE8NaGPmJhGvpc3zbViPOpyKQVCY=m_AyDOLg@mail.gmail.com>
-References: <4FA1B50B.8080603@bashkirtsev.com>
-	<07C999FE3BF7420ABC05B7CFF88B06AD@dreamhost.com>
-	<4FA22490.5060001@bashkirtsev.com>
-	<A1BA6F85E3224387AFB0C24A7786B470@dreamhost.com>
-	<4FA71D05.7050305@bashkirtsev.com>
-	<CAPYLRzgpZmASDE=3XYF+BBydtOopN19nOk8Tkmqk_-EdscmrMg@mail.gmail.com>
-	<4FB61F7A.2080602@bashkirtsev.com>
+Subject: Re: Replication at file/folder filen
+Date: Mon, 21 May 2012 11:40:05 -0700
+Message-ID: <CAPYLRzhid7pRn2dD1sEr2w=3pLGihANNuMs-ZN9f0BBBv8niOQ@mail.gmail.com>
+References: <loom.20120521T192333-932@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:43387 "EHLO
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:52368 "EHLO
 	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932095Ab2EUSSs convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 14:18:48 -0400
-Received: by lbbgm6 with SMTP id gm6so3669724lbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 11:18:46 -0700 (PDT)
-In-Reply-To: <4FB61F7A.2080602@bashkirtsev.com>
+	with ESMTP id S1750842Ab2EUSkH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 14:40:07 -0400
+Received: by lbbgm6 with SMTP id gm6so3684257lbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 11:40:05 -0700 (PDT)
+In-Reply-To: <loom.20120521T192333-932@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+To: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, May 18, 2012 at 3:07 AM, Vladimir Bashkirtsev
-<vladimir@bashkirtsev.com> wrote:
-> On 16/05/12 02:43, Gregory Farnum wrote:
->>
->> On Sun, May 6, 2012 at 5:53 PM, Vladimir Bashkirtsev
->> <vladimir@bashkirtsev.com> =A0wrote:
->>>
->>> On 03/05/12 16:23, Greg Farnum wrote:
->>>>
->>>> On Wednesday, May 2, 2012 at 11:24 PM, Vladimir Bashkirtsev wrote:
->>>>>
->>>>> Greg,
->>>>>
->>>>> Apologies for multiple emails: my mail server is backed by ceph n=
-ow and
->>>>> it struggled this morning (separate issue). So my mail server rep=
-orted
->>>>> back to my mailer that sending of email failed when obviously it =
-was
->>>>> not
->>>>> the case.
->>>>
->>>> Interesting =97 I presume you're using the file system? That's not
->>>> something
->>>> we've heard of anybody doing with Ceph before. :)
->>>>
->>>>> [root@gamma ~]# ceph -s
->>>>> 2012-05-03 15:46:55.640951 mds e2666: 1/1/1 up {0=3D1=3Dup:active=
-}, 1
->>>>> up:standby
->>>>> 2012-05-03 15:46:55.647106 osd e10728: 6 osds: 6 up, 6 in
->>>>> 2012-05-03 15:46:55.654052 log 2012-05-03 15:46:26.557084 mon.2
->>>>> 172.16.64.202:6789/0 2878 : [INF] mon.2 calling new monitor elect=
-ion
->>>>> 2012-05-03 15:46:55.654425 mon e7: 3 mons at
->>>>> {0=3D172.16.64.200:6789/0,1=3D172.16.64.201:6789/0,2=3D172.16.64.=
-202:6789/0}
->>>>> 2012-05-03 15:46:56.961624 pg v1251669: 600 pgs: 2 creating, 598
->>>>> active+clean; 309 GB data, 963 GB used, 1098 GB / 2145 GB avail
->>>>>
->>>>> Loggin is on but nothing obvious in there: logs quite small. Numb=
-er of
->>>>> ceph health logged (ceph monitored by nagios and so this record a=
-ppears
->>>>> every 5 minutes), monitors periodically call for election (differ=
-ent
->>>>> periods between 1 to 15 minutes as it looks). That's it.
->>>>
->>>> Hrm. Generally speaking the monitors shouldn't call for elections =
-unless
->>>> something changes (one of them crashes) or the leader monitor is s=
-lowing
->>>> down.
->>>> Can you increase the debug_mon to 20, the debug_ms to 1, and post =
-one of
->>>> the logs somewhere? The "Live Debugging" section of
->>>> http://ceph.com/wiki/Debugging should give you what you need. :)
->>>
->>> Here's the logs and core dumps:
->>> http://www.bashkirtsev.com/logs-2012-05-07.tar.bz2
->>>
->>> Mons grown to 1.2GB and 2GB of memory.
->>
->> When I look at the logs for mon.0, I see that there are a lot of
->> places where mon.0 takes tens of seconds to write something to disk.
->> If the disk is just about full, that might make sense (many
->> filesystems don't handle a nearly-full disk very well at all); and a
->> monitor getting stuck for that long could definitely explain why the=
-y
->> start using up so much memory (they're buffering messages). I suspec=
-t
->> that there's not anything particularly wrong here, unless I'm
->> misunderstanding the story you're telling me. :) Have you noticed th=
-is
->> problem when the monitor's disk partition isn't nearly full?
->> -Greg
->
-> I have recreated conditions when mon started to consume more memory:
-> everything appears in line with your suspicions. When disk gets almos=
-t full,
-> mon slows down and finally crashes quite badly so I cannot recover it=
-=2E I am
-> forced then to destroy mon all together and create a new one instead.
->
-> Long story short: in docs/wiki it should be stated as recommendation =
-NOT to
-> keep monfs on the same partition as ceph log (which can grow quickly)=
- and
-> preferably keep it on separate partition all together.
+On Mon, May 21, 2012 at 10:28 AM, Madhusudhana U
+<madhusudhana.u.acharya@gmail.com> wrote:
+> Hi all,
+> I assume in CEPH, by default, replications are set for both data and metadata.
+> Is it possible for setting replication for individual file/folders ? I find this
+> very usefule. In most of the cases, we may need more protections for just few
+> files/folders. Instead of setting replication level for entire data, it would be
+> good to set for required files/folders. If not possible in current version,
+> is it possible to add this in future? I would love to see this feature in CEPH.
 
-Patches and edits welcome! :)
+Replication levels are set on the level of RADOS pools. By default,
+those are "data" and "metadata" (for the filesystem).
+However, you can create more pools which the MDS uses, and you can
+specify that newly-created files (individually, or on the directory
+subtree level) go into a different pool from the system default.
+Check out the cephfs tool for more info on setting the pool.
 
-> In the same time it begs another question: what it recommended partit=
-ion
-> size for monfs?
-I'm looking at a cluster about a month old with a 765MB mon data
-directory. Most of that (~500 MB) is in the log files, which can be
-trimmed manually, and I believe that everything else taking up data
-trims itself when stuff's working. So if you're willing to set up a
-pseudo-log rotation (or do it yourself on a timer every month or so) a
-couple GB should leave you plenty of breathing room.
+There is not currently a way to move existing files into a new pool
+(without doing a copy through the client, anyway), and nothing on the
+roadmap to change that. If it would be helpful, let us know!
 -Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
