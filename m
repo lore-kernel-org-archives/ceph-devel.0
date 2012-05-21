@@ -1,78 +1,162 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: ceph 0.47 libs3 install problem
-Date: Mon, 21 May 2012 14:31:21 -0700
-Message-ID: <CAC-hyiGgk8WmYtgn45giA3nsscOrhvbwS2iQOWcLCY7vqr+KJw@mail.gmail.com>
-References: <CAPud5_7UKKe-=GNfWnJEut179Nz6oBdegrKX5Xoyo4Vj7oL4cw@mail.gmail.com>
-	<CADvuQRG5EGBq2DB3L71RHKahT8z40mZ=sSPkEaPf2gPTgki+Xg@mail.gmail.com>
-	<CAC-hyiFTXoxU9xsveM=GMMAkFXC9FzzQs5Gm8FmTQ=Bcr+D7uw@mail.gmail.com>
+From: Quenten Grasso <QGrasso@onq.com.au>
+Subject: RE: Designing a cluster guide
+Date: Mon, 21 May 2012 23:52:31 +0000
+Message-ID: <7111C6286D862F43B94FD6291D8989158644DD@EX01.onqtel.local>
+References: <4FB75BAD.3080709@profihost.ag>
+	<8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
+	<CAMvP8PDRUTO8M0=4MvjDtEtUM7aKePOWvGRFiJA1onu4VgXHPw@mail.gmail.com>
+ <CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:45293 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752439Ab2EUVbW convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 17:31:22 -0400
-Received: by bkcji2 with SMTP id ji2so4383758bkc.19
-        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 14:31:21 -0700 (PDT)
-In-Reply-To: <CAC-hyiFTXoxU9xsveM=GMMAkFXC9FzzQs5Gm8FmTQ=Bcr+D7uw@mail.gmail.com>
+Received: from mx1.onqtel.net ([120.88.69.160]:35900 "EHLO mx1.onqtel.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753638Ab2EVABs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 21 May 2012 20:01:48 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mx1.onqtel.net (Postfix) with ESMTP id CA0EF8D070
+	for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 09:53:07 +1000 (EST)
+Received: from mx1.onqtel.net ([127.0.0.1])
+	by localhost (mx1.onqtel.net [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 01kGbPGZs5P9 for <ceph-devel@vger.kernel.org>;
+	Tue, 22 May 2012 09:53:04 +1000 (EST)
+Received: from ex01.onqtel.local (ex01.onqtel.local [10.21.0.30])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by mx1.onqtel.net (Postfix) with ESMTPS id 2518B8D029
+	for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 09:53:04 +1000 (EST)
+In-Reply-To: <CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Bartos <nick@pistoncloud.com>
-Cc: Tommi Virtanen <tv@inktank.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, May 21, 2012 at 1:29 PM, Yehuda Sadeh <yehuda@inktank.com> wrot=
-e:
-> On Mon, May 21, 2012 at 1:22 PM, Tommi Virtanen <tv@inktank.com> wrot=
-e:
->> On Mon, May 21, 2012 at 1:14 PM, Nick Bartos <nick@pistoncloud.com> =
-wrote:
->>> I'm trying to install ceph 0.47, but --prefix isn't getting passed =
-to
->>> the bundled libs3. =A0I installed libs3 separately, but even when u=
-sing
->>> --with-system-libs3 (as ./configure suggests) or
->>> --with-system-libs3=3Dyes (just for the hell of it), it still insta=
-lls
->>> libs3, and outside of the prefix it was given.
->>>
->>> Anyone know of a way to either get ceph's libs3 to be installed in
->>> --prefix, or to get it to use the system one instead?
->>
->> Hmm. I just noticed this: src/Makefile.am has
->>
->> SUBDIRS =3D ocf libs3
->> ...
->> if WITH_SYSTEM_LIBS3
->> rest_bench_LDADD +=3D -ls3
->> else
->> rest_bench_LDADD +=3D libs3/build/lib/libs3.a -lcurl -lxml2
->> rest_bench_CXXFLAGS +=3D -I$(top_srcdir)/src/libs3/inc
->> SUBDIRS +=3D libs3
->> endif
->>
->> I'm guessing the top SUBDIRS assignment should not have libs3 there,
->> and that's the source of your trouble. Yehuda, can you confirm &
->> commit a fix?
->
-> It does look like a possible suspect. I'll verify that.
->
-
-This is the culprit, however, it doesn't solve the case where we
-actually need libs3 (when rest-bench is enabled). We don't really need
-to make install anyway, as we link statically to that library.
-
-I pushed two fixes, one to ceph.git
-(3a2dc969fffe6ee6f3a51583444998aba6449b7a) that removes the
-unconditional appending of libs3 to SUBDIRS, and the second one to
-libs3.git (9dc3a9c683385abfe4ad92b7c6ff30719acc3c13) that overrides
-the install rule.
-
-Yehuda
-
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgQWxsLA0KDQoNCkkndmUgYmVlbiB0aGlua2luZyBhYm91dCB0aGlzIGlzc3VlIG15c2VsZiBw
+YXN0IGZldyBkYXlzLCBhbmQgYW4gaWRlYSBJJ3ZlIGNvbWUgdXAgd2l0aCBpcyBydW5uaW5nIDE2
+IHggMi41IiAxNUsgNzIvMTQ2R0IgRGlza3MsIA0KaW4gcmFpZCAxMCBpbnNpZGUgYSAyVSBTZXJ2
+ZXIgd2l0aCBKQk9EJ3MgYXR0YWNoZWQgdG8gdGhlIHNlcnZlciBmb3IgYWN0dWFsIHN0b3JhZ2Uu
+DQoNCkNhbiBzb21lb25lIGhlbHAgY2xhcmlmeSB0aGlzIG9uZSwNCg0KT25jZSB0aGUgZGF0YSBp
+cyB3cml0dGVuIHRvIHRoZSAoam91cm5hbCBkaXNrKSBhbmQgdGhlbiByZWFkIGZyb20gdGhlIChq
+b3VybmFsIGRpc2spIHRoZW4gd3JpdHRlbiB0byB0aGUgKHN0b3JhZ2UgZGlzaykgb25jZSB0aGlz
+IGlzIGNvbXBsZXRlIHRoaXMgaXMgY29uc2lkZXJlZCBhIHN1Y2Nlc3NmdWwgd3JpdGUgYnkgdGhl
+IGNsaWVudD8NCk9yICANCk9uY2UgdGhlIGRhdGEgaXMgd3JpdHRlbiB0byB0aGUgKGpvdXJuYWwg
+ZGlzaykgaXMgdGhpcyBjb25zaWRlcmVkIHN1Y2Nlc3NmdWwgYnkgdGhlIGNsaWVudD8NCk9yDQpP
+bmNlIHRoZSBkYXRhIGlzIHdyaXR0ZW4gdG8gdGhlIChqb3VybmFsIGRpc2spIGFuZCB3cml0dGVu
+IHRvIHRoZSAoc3RvcmFnZSBkaXNrKSBhdCB0aGUgc2FtZSB0aW1lLCBvbmNlIGNvbXBsZXRlIHRo
+aXMgaXMgY29uc2lkZXJlZCBhIHN1Y2Nlc3NmdWwgd3JpdGUgYnkgdGhlIGNsaWVudD8gKGlmIHRo
+aXMgaXMgdGhlIGNhc2UgU1NEJ3MgbWF5IG5vdCBiZSBzbyB1c2VmdWwpDQoNCg0KUHJvcyANClF1
+aXRlIGZhc3QgV3JpdGUgdGhyb3VnaHB1dCB0byB0aGUgam91cm5hbCBkaXNrcywNCk5vIHdyaXRl
+IHdhcmVvdXQgb2YgU1NEJ3MNClJBSUQgMTAgd2l0aCAxR0IgQ2FjaGUgQ29udHJvbGxlciBhbHNv
+IGhlbHBzIGltcHJvdmUgdGhpbmdzIChpZiByZWFsbHkga2VlbiB5b3UgY291bGQgdXNlIGEgY2Fj
+aGVjYWRlIGFzIHdlbGwpDQoNCg0KQ29ucw0KTm90IGFzIGZhc3QgYXMgU1NEJ3MNCk1vcmUgcmFj
+a3NwYWNlIHJlcXVpcmVkIHBlciBzZXJ2ZXIuDQoNCg0KUmVnYXJkcywNClF1ZW50ZW4NCg0KLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
+ZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFs
+ZiBPZiBTbGF3b21pciBTa293cm9uDQpTZW50OiBUdWVzZGF5LCAyMiBNYXkgMjAxMiA3OjIyIEFN
+DQpUbzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCkNjOiBUb21hc3ogUGFzemtvd3NraQ0K
+U3ViamVjdDogUmU6IERlc2lnbmluZyBhIGNsdXN0ZXIgZ3VpZGUNCg0KTWF5YmUgZ29vZCBmb3Ig
+am91cm5hbCB3aWxsIGJlIHR3byBjaGVhcCBNTEMgSW50ZWwgZHJpdmVzIG9uIFNhbmRmb3JjZQ0K
+KDMyMC81MjApLCAxMjBHQiBvciAyNDBHQiwgYW5kIEhQQSBjaGFuZ2VkIHRvIDIwLTMwR0Igb25s
+eSBmb3INCnNlcGFyYXRlIGpvdXJuYWxpbmcgcGFydGl0aW9ucyB3aXRoIGhhcmR3YXJlIFJBSUQx
+Lg0KDQpJIGxpa2UgdG8gdGVzdCBzZXR1cCBsaWtlIHRoaXMsIGJ1dCBtYXliZSBzb21lb25lIGhh
+dmUgYW55IHJlYWwgbGlmZSBpbmZvID8/DQoNCk9uIE1vbiwgTWF5IDIxLCAyMDEyIGF0IDU6MDcg
+UE0sIFRvbWFzeiBQYXN6a293c2tpIDxzczdwcm9AZ21haWwuY29tPiB3cm90ZToNCj4gQW5vdGhl
+ciBncmVhdCB0aGluZyB0aGF0IHNob3VsZCBiZSBtZW50aW9uZWQgaXM6DQo+IGh0dHBzOi8vZ2l0
+aHViLmNvbS9mYWNlYm9vay9mbGFzaGNhY2hlLy4gSXQgZ2l2ZXMgcmVhbGx5IGh1Z2UNCj4gcGVy
+Zm9ybWFuY2UgaW1wcm92ZW1lbnRzIGZvciByZWFkcy93cml0ZXMgKGVzcGVjaWFseSBvbiBGdW5z
+aW9uSU8NCj4gZHJpdmVzKSBldmVudCB3aXRob3V0IHVzaW5nIGxpYnJiZCBjYWNoaW5nIDotKQ0K
+Pg0KPg0KPg0KPiBPbiBTYXQsIE1heSAxOSwgMjAxMiBhdCA2OjE1IFBNLCBBbGV4YW5kcmUgREVS
+VU1JRVIgPGFkZXJ1bWllckBvZGlzby5jb20+IHdyb3RlOg0KPj4gSGksDQo+Pg0KPj4gRm9yIHlv
+dXIgam91cm5hbCAsIGlmIHlvdSBoYXZlIG1vbmV5LCB5b3UgY2FuIHVzZQ0KPj4NCj4+IHN0ZWMg
+emV1c3JhbSBzc2QgZHJpdmUuIChhcm91bmQgMjAwMOKCrCAvOEdCIC8gMTAwMDAwIGlvcHMgcmVh
+ZC93cml0ZSB3aXRoIDRrIGJsb2NrKS4NCj4+IEknbSB1c2luZyB0aGVtIHdpdGggemZzIHNhbiwg
+dGhleSByb2NrcyBmb3Igam91cm5hbC4NCj4+IGh0dHA6Ly93d3cuc3RlYy1pbmMuY29tL3Byb2R1
+Y3QvemV1c3JhbS5waHANCj4+DQo+PiBhbm90aGVyIGludGVyZXNzZXN0aW5nIHByb2R1Y3QgaXMg
+ZGRyZHJpdmUNCj4+IGh0dHA6Ly93d3cuZGRyZHJpdmUuY29tLw0KPj4NCj4+IC0tLS0tIE1haWwg
+b3JpZ2luYWwgLS0tLS0NCj4+DQo+PiBEZTogIlN0ZWZhbiBQcmllYmUiIDxzLnByaWViZUBwcm9m
+aWhvc3QuYWc+DQo+PiDDgDogIkdyZWdvcnkgRmFybnVtIiA8Z3JlZ0Bpbmt0YW5rLmNvbT4NCj4+
+IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPj4gRW52b3nDqTogU2FtZWRpIDE5IE1h
+aSAyMDEyIDEwOjM3OjAxDQo+PiBPYmpldDogUmU6IERlc2lnbmluZyBhIGNsdXN0ZXIgZ3VpZGUN
+Cj4+DQo+PiBIaSBHcmVnLA0KPj4NCj4+IEFtIDE3LjA1LjIwMTIgMjM6MjcsIHNjaHJpZWIgR3Jl
+Z29yeSBGYXJudW06DQo+Pj4+IEl0IG1lbnRpb25zIGZvciBleGFtcGxlICJGYXN0IENQVSIgZm9y
+IHRoZSBtZHMgc3lzdGVtLiBXaGF0IGRvZXMgZmFzdA0KPj4+PiBtZWFuPyBKdXN0IHRoZSBzcGVl
+ZCBvZiBvbmUgY29yZT8gT3IgaXMgY2VwaCBkZXNpZ25lZCB0byB1c2UgbXVsdGkgY29yZT8NCj4+
+Pj4gSXMgbXVsdGkgY29yZSBvciBtb3JlIHNwZWVkIGltcG9ydGFudD8NCj4+PiBSaWdodCBub3cs
+IGl0J3MgcHJpbWFyaWx5IHRoZSBzcGVlZCBvZiBhIHNpbmdsZSBjb3JlLiBUaGUgTURTIGlzDQo+
+Pj4gaGlnaGx5IHRocmVhZGVkIGJ1dCBkb2luZyBtb3N0IHRoaW5ncyByZXF1aXJlcyBncmFiYmlu
+ZyBhIGJpZyBsb2NrLg0KPj4+IEhvdyBmYXN0IGlzIGEgcXVhbGl0YXRpdmUgcmF0aGVyIHRoYW4g
+cXVhbnRpdGF0aXZlIGFzc2Vzc21lbnQgYXQgdGhpcw0KPj4+IHBvaW50LCB0aG91Z2guDQo+PiBT
+byB3b3VsZCB5b3UgcmVjb21tYW5kIGEgZmFzdCAobW9yZSBnaHopIENvcmUgaTMgaW5zdGVhZCBv
+ZiBhIHNpbmdsZQ0KPj4geGVvbiBmb3IgdGhpcyBzeXN0ZW0/IChwcmljZSBwZXIgZ2h6IGlzIGJl
+dHRlcikuDQo+Pg0KPj4+IEl0IGRlcGVuZHMgb24gd2hhdCB5b3VyIG5vZGVzIGxvb2sgbGlrZSwg
+YW5kIHdoYXQgc29ydCBvZiBjbHVzdGVyDQo+Pj4geW91J3JlIHJ1bm5pbmcuIFRoZSBtb25pdG9y
+cyBhcmUgcHJldHR5IGxpZ2h0d2VpZ2h0LCBidXQgdGhleSB3aWxsIGFkZA0KPj4+ICpzb21lKiBs
+b2FkLiBNb3JlIGltcG9ydGFudCBpcyB0aGVpciBkaXNrIGFjY2VzcyBwYXR0ZXJucyDigJQgdGhl
+eSBoYXZlDQo+Pj4gdG8gZG8gYSBsb3Qgb2Ygc3luY3MuIFNvIGlmIHRoZXkncmUgc2hhcmluZyBh
+IG1hY2hpbmUgd2l0aCBzb21lIG90aGVyDQo+Pj4gZGFlbW9uIHlvdSB3YW50IHRoZW0gdG8gaGF2
+ZSBhbiBpbmRlcGVuZGVudCBkaXNrIGFuZCB0byBiZSBydW5uaW5nIGENCj4+PiBuZXcga2VybmVs
+JmdsaWJjIHNvIHRoYXQgdGhleSBjYW4gdXNlIHN5bmNmcyByYXRoZXIgdGhhbiBzeW5jLiAoVGhl
+DQo+Pj4gb25seSBkaXN0cmlidXRpb24gSSBrbm93IGZvciBzdXJlIGRvZXMgdGhpcyBpcyBVYnVu
+dHUgMTIuMDQuKQ0KPj4gV2hpY2gga2VybmVsIGFuZCB3aGljaCBnbGliYyB2ZXJzaW9uIHN1cHBv
+cnRzIHRoaXM/IEkgaGF2ZSBzZWFyY2hlZA0KPj4gZ29vZ2xlIGJ1dCBoYXZlbid0IGZvdW5kIGFu
+IGV4YWN0IHZlcnNpb24uIFdlJ3JlIHVzaW5nIGRlYmlhbiBsZW5ueQ0KPj4gc3F1ZWV6ZSB3aXRo
+IGEgY3VzdG9tIGtlcm5lbC4NCj4+DQo+Pj4+IFJlZ2FyZGluZyB0aGUgT1NEcyBpcyBpdCBmaW5l
+IHRvIHVzZSBhbiBTU0QgUmFpZCAxIGZvciB0aGUgam91cm5hbCBhbmQNCj4+Pj4gcGVyaGFwcyAy
+MnggU0FUQSBEaXNrcyBpbiBhIFJhaWQgMTAgZm9yIHRoZSBGUyBvciBpcyB0aGlzIHF1aXRlIGFi
+c3VyZA0KPj4+PiBhbmQgeW91IHNob3VsZCBnbyBmb3IgMjJ4IFNTRCBEaXNrcyBpbiBhIFJhaWQg
+Nj8NCj4+PiBZb3UnbGwgbmVlZCB0byBkbyB5b3VyIG93biBmYWlsdXJlIGNhbGN1bGF0aW9ucyBv
+biB0aGlzIG9uZSwgSSdtDQo+Pj4gYWZyYWlkLiBKdXN0IHRha2Ugbm90ZSB0aGF0IHlvdSdsbCBw
+cmVzdW1hYmx5IGJlIGxpbWl0ZWQgdG8gdGhlIHNwZWVkDQo+Pj4gb2YgeW91ciBqb3VybmFsaW5n
+IGRldmljZSBoZXJlLg0KPj4gWWVhaCB0aGF0J3Mgd2h5IGkgd2FudGVkIHRvIHVzZSBhIFJhaWQg
+MSBvZiBTU0RzIGZvciB0aGUgam91cm5hbGluZy4gT3INCj4+IGlzIHRoaXMgc3RpbGwgdG9vIHNs
+b3c/IEFub3RoZXIgaWRlYSB3YXMgdG8gdXNlIG9ubHkgYSByYW1kaXNrIGZvciB0aGUNCj4+IGpv
+dXJuYWwgYW5kIGJhY2t1cCB0aGUgZmlsZXMgd2hpbGUgc2h1dHRpbmcgZG93biB0byBkaXNrIGFu
+ZCByZXN0b3JlDQo+PiB0aGVtIGFmdGVyIGJvb3QuDQo+Pg0KPj4+IEdpdmVuIHRoYXQgQ2VwaCBp
+cyBnb2luZyB0byBiZSBkb2luZyBpdHMgb3duIHJlcGxpY2F0aW9uLCB0aG91Z2gsIEkNCj4+PiB3
+b3VsZG4ndCB3YW50IHRvIGFkZCBpbiBhbm90aGVyIHdob2xlIGxheWVyIG9mIHJlcGxpY2F0aW9u
+IHdpdGggcmFpZDEwDQo+Pj4g4oCUIGRvIHlvdSByZWFsbHkgd2FudCB0byBtdWx0aXBseSB5b3Vy
+IHN0b3JhZ2UgcmVxdWlyZW1lbnRzIGJ5IGFub3RoZXINCj4+PiBmYWN0b3Igb2YgdHdvPw0KPj4g
+T0sgY29ycmVjdCBiYWQgaWRlYS4NCj4+DQo+Pj4+IElzIGl0IG1vcmUgdXNlZnVsIHRoZSB1c2Ug
+YSBSYWlkIDYgSFcgQ29udHJvbGxlciBvciB0aGUgYnRyZnMgcmFpZD8NCj4+PiBJIHdvdWxkIHVz
+ZSB0aGUgaGFyZHdhcmUgY29udHJvbGxlciBvdmVyIGJ0cmZzIHJhaWQgZm9yIG5vdzsgaXQgYWxs
+b3dzDQo+Pj4gbW9yZSBmbGV4aWJpbGl0eSBpbiBlZyBzd2l0Y2hpbmcgdG8geGZzLiA6KQ0KPj4g
+T0sgYnV0IG92ZXJhbGwgeW91IHdvdWxkIHJlY29tbWFuZCBydW5uaW5nIG9uZSBvc2QgcGVyIGRp
+c2sgcmlnaHQ/IFNvDQo+PiBpbnN0ZWFkIG9mIHVzaW5nIGEgUmFpZCA2IHdpdGggZm9yIGV4YW1w
+bGUgMTAgZGlza3MgeW91IHdvdWxkIHJ1biA2IG9zZHMNCj4+IG9uIHRoaXMgbWFjaGluZT8NCj4+
+DQo+Pj4+IFVzZSBzaW5nbGUgc29ja2V0IFhlb24gZm9yIHRoZSBPU0RzIG9yIER1YWwgU29ja2V0
+Pw0KPj4+IER1YWwgc29ja2V0IHNlcnZlcnMgd2lsbCBiZSBvdmVya2lsbCBnaXZlbiB0aGUgc2V0
+dXAgeW91J3JlDQo+Pj4gZGVzY3JpYmluZy4gT3VyIFdBRyBydWxlIG9mIHRodW1iIGlzIDFHSHog
+b2YgbW9kZXJuIENQVSBwZXIgT1NEDQo+Pj4gZGFlbW9uLiBZb3UgbWlnaHQgY29uc2lkZXIgaXQg
+aWYgeW91IGRlY2lkZWQgeW91IHdhbnRlZCB0byBkbyBhbiBPU0QNCj4+PiBwZXIgZGlzayBpbnN0
+ZWFkICh0aGF0J3MgYSBtb3JlIGNvbW1vbiBjb25maWd1cmF0aW9uLCBidXQgaXQgcmVxdWlyZXMN
+Cj4+PiBtb3JlIENQVSBhbmQgUkFNIHBlciBkaXNrIGFuZCB3ZSBkb24ndCBrbm93IHlldCB3aGlj
+aCBpcyB0aGUgYmV0dGVyDQo+Pj4gY2hvaWNlKS4NCj4+IElzIHRoZXJlIGFsc28gYSBydWxlIG9m
+IHRodW1iIGZvciB0aGUgbWVtb3J5Pw0KPj4NCj4+IE15IGJpZ2dlc3QgcHJvYmxlbSB3aXRoIGNl
+cGggcmlnaHQgbm93IGlzIHRoZSBhd2Z1bCBzbG93IHNwZWVkIHdoaWxlDQo+PiBkb2luZyByYW5k
+b20gcmVhZHMgYW5kIHdyaXRlcy4NCj4+DQo+PiBTZXF1ZW50aWFsIHJlYWQgYW5kIHdyaXRlcyBh
+cmUgYXQgMjAwTWIvcyAodGhhdCdzIHByZXR0eSBnb29kIGZvciBib25kZWQNCj4+IGR1YWwgR2Jp
+dC9zKS4gQnV0IHJhbmRvbSByZWFkcyBhbmQgd3JpdGUgYXJlIG9ubHkgYXQgMCw4IC0gMSw1IE1i
+L3MNCj4+IHdoaWNoIGlzIGRlZi4gdG9vIHNsb3cuDQo+Pg0KPj4gU3RlZmFuDQo+PiAtLQ0KPj4g
+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
+IGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJu
+ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+DQo+Pg0KPj4NCj4+IC0tDQo+Pg0KPj4gLS0N
+Cj4+DQo+Pg0KPj4NCj4+DQo+PiDCoCDCoCDCoCDCoEFsZXhhbmRyZSBEIGVydW1pZXINCj4+IElu
+Z8OpbmlldXIgU3lzdMOobWUNCj4+IEZpeGUgOiAwMyAyMCA2OCA4OCA5MA0KPj4gRmF4IDogMDMg
+MjAgNjggOTAgODENCj4+IDQ1IEJ2ZCBkdSBHw6luw6lyYWwgTGVjbGVyYyA1OTEwMCBSb3ViYWl4
+IC0gRnJhbmNlDQo+PiAxMiBydWUgTWFyaXZhdXggNzUwMDIgUGFyaXMgLSBGcmFuY2UNCj4+DQo+
+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
+c3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
+b3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCDCoGh0dHA6
+Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPg0KPg0KPg0KPiAtLQ0KPiBU
+b21hc3ogUGFzemtvd3NraQ0KPiBTUzcsIEFzdGVyaXNrLCBTQU4sIERhdGFjZW50ZXIsIENsb3Vk
+IENvbXB1dGluZw0KPiArNDg1MDAxNjYyOTkNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+IHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+IE1vcmUg
+bWFqb3Jkb21vIGluZm8gYXQgwqBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
+Lmh0bWwNCg0KDQoNCi0tIA0KLS0tLS0NClBvemRyYXdpYW0NCg0KU8WCYXdlayAic1ppQmlzIiBT
+a293cm9uDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUg
+InVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQp0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
+b3Jkb21vQHZnZXIua2VybmVsLm9yZw0KTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
+ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
