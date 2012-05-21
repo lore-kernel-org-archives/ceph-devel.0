@@ -1,39 +1,71 @@
-From: Jimmy Tang <jtang@tchpc.tcd.ie>
-Subject: availability of the 0.47 release tarballs at  http://ceph.com/download/
-Date: Mon, 21 May 2012 10:52:18 +0100
-Message-ID: <FA9234AF-2E18-4CD1-A2C3-300F4B813DAB@tchpc.tcd.ie>
-Mime-Version: 1.0 (Apple Message framework v1278)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: Re: reproductible kernel oops with kernel 3.2 inside kvm
+Date: Mon, 21 May 2012 14:24:32 +0200
+Message-ID: <4FBA3400.4090202@univ-nantes.fr>
+References: <4FA290C1.9080808@univ-nantes.fr> <4FB57A03.70309@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:59714 "EHLO
-	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753120Ab2EUJ7F convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 05:59:05 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id 3276082D45
-	for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 10:52:20 +0100 (IST)
-Received: from tabaet.tchpc.tcd.ie ([127.0.0.1])
-	by localhost (tabaet.tchpc.tcd.ie [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id bYkQwRJgV3mm for <ceph-devel@vger.kernel.org>;
-	Mon, 21 May 2012 10:52:19 +0100 (IST)
-Received: from x00.tchpc.tcd.ie (x00.tchpc.tcd.ie [134.226.112.149])
-	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id 7CCE082094
-	for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 10:52:19 +0100 (IST)
+Received: from smtptls1-cha.cpub.univ-nantes.fr ([193.52.103.113]:36705 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754587Ab2EUMcs (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 08:32:48 -0400
+In-Reply-To: <4FB57A03.70309@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi All
+On 18/05/2012 00:21, Josh Durgin wrote:
+> Hi Yann,
+>
+> Sorry for the late response.
+>
+> On 05/03/2012 07:05 AM, Yann Dupont wrote:
+>> Hello. I'm stress testing ceph since some time now, with quite good
+>> results. I really like ceph and will probably use in in some
+>> pre-production services.
+>>
+>> Anyway I've seen some bugs.
+>>
+>> One of them is instability if the kernel is running inside KVM, lead=
+ing
+>> to a very fast (and reproductible) kernel oops. On bare metal this
+>> particular oops doesn't happen.
+>>
+>> The kernel oops itself involve ceph, but it could be a real bug in k=
+vm
+>> too.
+>>
+>> The host machine is runnning 3.2.2
+>> kvm is quite ancien (0.14)
+>> guest OS is ubuntu 12.04 with his standard kernel. Retried with cust=
+om
+>> 3.2 kernel with the same problem.
+>
+> I'm not sure how many people are using the kernel client within kvm,
+> but I haven't seen this problem before. Since it's in d_prune, it's
+> probably Ceph related, but perhaps kvm makes a race condition trigger
+> more often in your environment.
+>
+> I filed http://tracker.newdream.net/issues/2444 to track this.
 
-Could I ask if the url http://ceph.com/download/ will continue to have release tarballs or will the download location change? I ask this as I am interested in updating my own personal fork of the archlinux package for ceph.
+Ok, thanks.
 
-Regards,
-Jimmy Tang
+I'll see the issue in the tracker. As this KVM isn't a production=20
+machine, I can make tests very easily on it.
+
+
+Cheers
+--=20
+Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
+Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+
 
 --
-Senior Software Engineer, Digital Repository of Ireland (DRI)
-Trinity Centre for High Performance Computing,
-Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
-http://www.tchpc.tcd.ie/
-
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
