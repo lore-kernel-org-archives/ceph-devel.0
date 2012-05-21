@@ -1,70 +1,42 @@
 From: Sage Weil <sage@inktank.com>
-Subject: v0.47 released
-Date: Sun, 20 May 2012 21:38:22 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205202137430.843@cobra.newdream.net>
+Subject: new pgp key for release debs
+Date: Sun, 20 May 2012 21:42:37 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205202138250.843@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1752482405-1337575095=:843"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35320 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:56267 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750837Ab2EUEiZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 00:38:25 -0400
+	with ESMTP id S1750805Ab2EUEmk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 00:42:40 -0400
 Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id D06B0BC7C1
-	for <ceph-devel@vger.kernel.org>; Sun, 20 May 2012 21:38:24 -0700 (PDT)
+	by cobra.newdream.net (Postfix) with ESMTP id 7FA62BC7C1
+	for <ceph-devel@vger.kernel.org>; Sun, 20 May 2012 21:42:40 -0700 (PDT)
 Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 9C8A5BC7C1
-	for <ceph-devel@vger.kernel.org>; Sun, 20 May 2012 21:38:24 -0700 (PDT)
+	by cobra.newdream.net (Postfix) with ESMTP id 35307BC7C1
+	for <ceph-devel@vger.kernel.org>; Sun, 20 May 2012 21:42:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+I generated a new PGP key to sign releases with, instead of using my 
+personal key.  The new key is signed by my key and is available at
 
---557981400-1752482405-1337575095=:843
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+	https://github.com/ceph/ceph/raw/master/keys/release.asc
 
-It's been another three weeks and v0.47 is ready. =A0The highlights include=
-:
+or from a public keyserver.  The fingerprint is
 
- * mon: admin tools to control unwieldy clusters (temporarily block osd=20
-   boots, failures, etc.)
- * osd: reduced memory footprint for peering/thrashing
- * librbd: write-thru cache mode
- * librbd: improved error handling
- * osd: removal of ill-conceived 'localized pg' feature (those annoying=20
-   PGs with 'p' in them)
- * rados-bench: simple tool to benchmark radosgw (or S3) (based on 'rados=
-=20
-   bench' command)
+pub   4096R/17ED316D 2012-05-20
+      Key fingerprint = 7F6C 9F23 6D17 0493 FCF4  04F2 7EBF DD5D 17ED 316D
+uid                  Ceph Release Key <sage@newdream.net>
 
-In truth it wasn't the most productive sprint because of the work that=20
-went into the launch of the web sites, the launch party, and the=20
-subsequent=A0inebriation. =A0However, the new RBD caching feature is lookin=
-g=20
-very good at this point, and patches are working their way upstream in=20
-Qemu/KVM to enable it with the generic 'cache=3Dwritethrough' or=20
-'cache=3Dwriteback' settings.
+You can add it to your APT keyring with
 
-One other noteworthy item is that I generated a new PGP key to sign=20
-releases with. =A0The key is now in ceph.git, and has been signed by my=20
-personal key. =A0If you are installing debs from our repositories, you'll=
-=20
-want to add the new key to your APT keyring to avoid annoying security=20
-warnings.
+	wget -q -O- https://raw.github.com/ceph/ceph/master/keys/release.asc | sudo apt-key add -
 
-For v0.48, we are working on a ceph-osd refactor to improve threading and=
-=20
-performance, multi-monitor and OSD hotplugging support for upstart and=20
-Chef, improvements to the OSD and monitor bootstrapping to make that=20
-possible, and RBD groundwork for the much-anticipated layering feature.
+(as per the instructions at http://ceph.com/docs/master/install/debian/).  
+If you had my key in there from before, you can remove it with
 
-You can get v0.47 from the usual places:
+	apt-key del 288995c8
 
- * Git at git://github.com/ceph/ceph.git
- * Tarball at=A0http://ceph.newdream.net/download/ceph-0.47.tar.gz
- * For Debian/Ubuntu packages, see=A0http://ceph.newdream.net/docs/master/i=
-nstall/debian
---557981400-1752482405-1337575095=:843--
+sage
