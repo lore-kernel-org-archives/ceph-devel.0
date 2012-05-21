@@ -1,26 +1,57 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: Designing a cluster guide
-Date: Mon, 21 May 2012 22:11:15 +0200
-Message-ID: <4FBAA163.9040408@profihost.ag>
-References: <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro> <4FB8A3A5.5090809@profihost.ag> <CAJafhzRKCcSr37HjviAKRoMztv+twd5r+4Z99heUSy40G1rjag@mail.gmail.com> <4FB8B1CE.1080803@icukhosting.co.uk> <CAJafhzQp1SeGZUdUL5XszaRw-0bU0f38r3ghLgmTvZrF0oB_=w@mail.gmail.com> <4FBA599F.5050000@profihost.ag> <CAMvP8PBSxybik20238UAX6TKfqGBb=wEqmFyEHk4fSAzU_Fjxg@mail.gmail.com>
+From: Jimmy Tang <jtang@tchpc.tcd.ie>
+Subject: Re: availability of the 0.47 release tarballs at
+	http://ceph.com/download/
+Date: Mon, 21 May 2012 21:12:33 +0100
+Message-ID: <20120521201233.GA23658@tchpc.tcd.ie>
+References: <FA9234AF-2E18-4CD1-A2C3-300F4B813DAB@tchpc.tcd.ie> <sfid-H20120521-171601-+031.56-1@marduk.tchpc.tcd.ie> <Pine.LNX.4.64.1205210915170.5496@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="GvXjxJ+pjyke8COw"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:49264 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932227Ab2EUULT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 16:11:19 -0400
-In-Reply-To: <CAMvP8PBSxybik20238UAX6TKfqGBb=wEqmFyEHk4fSAzU_Fjxg@mail.gmail.com>
+Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:59700 "EHLO
+	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754093Ab2EUUMf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 16:12:35 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1205210915170.5496@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tomasz Paszkowski <ss7pro@gmail.com>
-Cc: Christian Brunner <christian@brunner-muc.de>, Tim O'Donovan <tim@icukhosting.co.uk>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Am 21.05.2012 17:12, schrieb Tomasz Paszkowski:
-> If you're using Qemu/KVM you can use 'info blockstats' command for
-> measruing I/O on particular VM.
 
-I want to migrate physical servers to KVM. Any idea for that?
+--GvXjxJ+pjyke8COw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Stefan
+On Mon, May 21, 2012 at 09:15:58AM -0700, Sage Weil wrote:
+>=20
+> It will.  I forgot to push the tarballs (and debs) last night, but just=
+=20
+> pushed them this morning.
+>=20
+
+Ok, thanks
+
+Jimmy.
+
+--=20
+Jimmy Tang
+Trinity Centre for High Performance Computing,
+Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
+http://www.tchpc.tcd.ie/
+
+--GvXjxJ+pjyke8COw
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEABECAAYFAk+6oa8ACgkQmRvHlXBDSynAcgCfehkRspbRlM+6x18cGw00cAI4
+MI4An0O6wPlcMHhvGuOytgWwjxdL+9iJ
+=qD9U
+-----END PGP SIGNATURE-----
+
+--GvXjxJ+pjyke8COw--
