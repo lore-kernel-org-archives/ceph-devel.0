@@ -1,40 +1,42 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: ceph osd crush add - uknown command crush
-Date: Tue, 22 May 2012 13:27:50 -0700
-Message-ID: <271B7E7C4B014BFE86FC17F9AF863BD8@inktank.com>
-References: <CAMwB3TjS_r-U55py7WPu1RZmNob78nodB6a=i9sb1sx3mxvXDw@mail.gmail.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: how to debug slow rbd block device
+Date: Tue, 22 May 2012 22:30:04 +0200
+Message-ID: <4FBBF74C.9020608@profihost.ag>
+References: <4FBB8A5B.9010500@profihost.ag> <B141A2FBE87F4859AF931D71A339468E@inktank.com> <4FBBEBC8.1000205@profihost.ag> <1C70F3FB753C4AEC97247E04FAE3C733@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:34128 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753440Ab2EVU1z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 May 2012 16:27:55 -0400
-Received: by dady13 with SMTP id y13so8728051dad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 13:27:55 -0700 (PDT)
-In-Reply-To: <CAMwB3TjS_r-U55py7WPu1RZmNob78nodB6a=i9sb1sx3mxvXDw@mail.gmail.com>
-Content-Disposition: inline
+Received: from mail.profihost.ag ([85.158.179.208]:43789 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760372Ab2EVUaH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 May 2012 16:30:07 -0400
+In-Reply-To: <1C70F3FB753C4AEC97247E04FAE3C733@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?Q?S=C5=82awomir_Skowron?= <szibis@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
+To: Greg Farnum <greg@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tuesday, May 22, 2012 at 1:15 PM, S=C5=82awomir Skowron wrote:
-> /usr/bin/ceph -v
-> ceph version 0.47.1 (commit:f5a9404445e2ed5ec2ee828aa53d73d4a002f7a5)
-> =20
-> root@obs-10-177-66-4:/# /usr/bin/ceph osd crush add 1 osd.1 1.0
-> pool=3Ddefault rack=3Dunknownrack host=3Dobs-10-177-66-4
-> root@obs-10-177-66-4:/# unknown command crush
-> =20
-> Something has changed (there is no change in doc) or it's bug ??
-Gah, something changed.
+Am 22.05.2012 21:52, schrieb Greg Farnum:
+> On Tuesday, May 22, 2012 at 12:40 PM, Stefan Priebe wrote:
+> Huh. That's less than I would expect. Especially since it ought to be going through the page cache.
+> What version of RBD is KVM using here?
+v0.47.1
 
-Use "ceph osd crush set=E2=80=A6" =20
+> Can you (from the KVM host) run
+> "rados -p data bench seq 60 -t 1"
+> "rados -p data bench seq 60 -t 16"
+> and paste the final output from both?
+OK here it is first with write then with seq read.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+# rados -p data bench 60 write -t 1
+# rados -p data bench 60 write -t 16
+# rados -p data bench 60 seq -t 1
+# rados -p data bench 60 seq -t 16
+
+Output is here:
+http://pastebin.com/iFy8GS7i
+
+Thanks!
+
+Stefan
