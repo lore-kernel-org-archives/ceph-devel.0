@@ -1,45 +1,80 @@
-From: Grant Ashman <Grant.Ashman@mach.com.au>
-Subject: RE: how to mount a specific pool in cephs
-Date: Wed, 23 May 2012 07:12:29 +1000
-Message-ID: <3E281FAE45D705468EBA19F32321E72B32A009D964@exch11>
-References: <81C477727102DA4E9B2605AC748C495418EE10F2E4@exch10>
- <CAORUGqCMGZeVRO_dB7GEt8NJ=M63NZNejUMT75LEPFM3MaJVoA@mail.gmail.com>
- <loom.20120522T135204-38@post.gmane.org>
- <8CBFE0C21212497AA50AEBE59EEFCAFF@inktank.com>
+From: Grant Ashman <grant.ashman@mach.com.au>
+Subject: Re: how to mount a specific pool in cephs
+Date: Tue, 22 May 2012 21:51:10 +0000 (UTC)
+Message-ID: <loom.20120522T234403-146@post.gmane.org>
+References: <81C477727102DA4E9B2605AC748C495418EE10F2E4@exch10> <CAORUGqCMGZeVRO_dB7GEt8NJ=M63NZNejUMT75LEPFM3MaJVoA@mail.gmail.com> <loom.20120522T135204-38@post.gmane.org> <8CBFE0C21212497AA50AEBE59EEFCAFF@inktank.com> <3E281FAE45D705468EBA19F32321E72B32A009D964@exch11> <9AF25259E69149DE97352565797966E1@inktank.com> <loom.20120522T232520-187@post.gmane.org> <6DEB34DCFE6447C1BEE4A3E374801FAC@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mf4.mach.net.au ([74.55.157.90]:59320 "EHLO mf4.mach.net.au"
+Received: from plane.gmane.org ([80.91.229.3]:46196 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750917Ab2EVVqF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 May 2012 17:46:05 -0400
-In-Reply-To: <8CBFE0C21212497AA50AEBE59EEFCAFF@inktank.com>
-Content-Language: en-US
+	id S1755389Ab2EVVv1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 May 2012 17:51:27 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1SWwzD-0003pd-UZ
+	for ceph-devel@vger.kernel.org; Tue, 22 May 2012 23:51:23 +0200
+Received: from 60-240-78-43.static.tpgi.com.au ([60.240.78.43])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 23:51:23 +0200
+Received: from grant.ashman by 60-240-78-43.static.tpgi.com.au with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 23:51:23 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-PlRoYXQncyB0aGUgcmlnaHQgcG9vbCBJRDsgeWVzLiBJIGJlbGlldmUgdGhl
-IHByb2JsZW0gaXMgdGhhdCB0aGUgY2VwaGZzIHRvb2wgY3VycmVudGx5IHJl
-cXVpcmVzIHlvdSB0byBmaWxsIGluIGFsbCB0aGUgZmllbGRzLCBub3QgPz5q
-dXN0IHRoZSBvbmUgeW91IHdpc2ggdG8gY2hhbmdlLiBUcnkgdGhhdCAoc2V0
-dGluZyBhbGwgdGhlIG90aGVyIHZhbHVlcyB0byBtYXRjaCB3aGF0IHlvdSBz
-ZWUgd2hlbiB5b3UgdmlldyB0aGUgbGF5b3V0KS4gOikgLT4gR3JlZw0KDQpI
-aSwNCg0KSSd2ZSB0cmllZCBzZXR0aW5nIGFsbCB2YWx1ZXMgdGhlIHNhbWUg
-YXMgdGhlIGN1cnJlbnQgbGF5b3V0IC0gY2hhbmdpbmcgb25seSB0aGUgcG9v
-bCBudW1iZXIgYW5kIEkgc3RpbGwgZ2V0Ow0KDQpyb290QGRzYW4tdGVzdDov
-bW50L2NlcGgtdGVzdCMgY2VwaGZzIC9tbnQvY2VwaC1iYWNrdXAgc2hvd19s
-YXlvdXQNCmxheW91dC5kYXRhX3Bvb2w6ICAgICAwDQpsYXlvdXQub2JqZWN0
-X3NpemU6ICAgNDE5NDMwNA0KbGF5b3V0LnN0cmlwZV91bml0OiAgIDQxOTQz
-MDQNCmxheW91dC5zdHJpcGVfY291bnQ6ICAxDQpyb290QGRzYW4tdGVzdDov
-bW50L2NlcGgtdGVzdCMgDQpyb290QGRzYW4tdGVzdDovbW50L2NlcGgtdGVz
-dCMgY2VwaGZzIC9tbnQvY2VwaC1iYWNrdXAgc2V0X2xheW91dCAtcCAzIC1z
-IDQxOTQzMDQgLXUgNDE5NDMwNCAtYyAxDQpFcnJvciBzZXR0aW5nIGxheW91
-dDogSW52YWxpZCBhcmd1bWVudA0KDQpJZiBJIGxlYXZlIGFsbCB2YWx1ZXMg
-ZXhhY3RseSB0aGUgc2FtZSBpLmUgJy1wIDAnIHRoZSBjb21tYW5kIHJ1bnMg
-d2l0aG91dCBhbnkgZXJyb3Igb3V0cHV0LiBIb3dldmVyLCBjaGFuZ2luZyB0
-aGUgcG9vbCBmcm9tIGFueXRoaW5nIGJ1dCAwIHJlc3VsdHMgaW4gJ0Vycm9y
-IHNldHRpbmcgbGF5b3V0OiBJbnZhbGlkIGFyZ3VtZW50Jw0KDQpBbnkgaWRl
-YXM/DQoNCkdyYW50DQoKCg==
+Greg Farnum <greg <at> inktank.com> writes:
+
+> > When I specify the add data pool I get the following:
+> > (with or without the additional values)
+> > =20
+> > root <at> dsan-test:~# ceph mds add_data_pool backup
+> > added data pool 0 to mdsmap
+>=20
+> Okay, that's not right =E2=80=94 it should say pool 3.
+> According to the docs I found you ran that correctly, but let's try r=
+unning=20
+"ceph mds add_data_pool 3" and
+> see if that resolves correctly.
+> *goes to look at code*
+> Argh, yep, it's expecting a pool ID, not a pool name. Gah.
+>=20
+> > root <at> dsan-test:~# cephfs /mnt/ceph-backup set_layout -p 3
+> > Error setting layout: Invalid argument
+> > =20
+> > Seems to be pointing at pool 0 instead of pool 3 like it should?
+> > =20
+
+Awesome, that seemed to work!
+However, I feel a bit silly - what I'm after is:
+
+/mnt/ceph-data - mounted to pool 0 (data)
+/mnt/ceph-backup - mounted to pool 3 (backup)
+
+but this seemed to change both to mount to pool 3?
+
+Am I simply doing something wrong at my mount stage?
+
+The process to mount my specific pool as I understand it is;
+
+1. mount -t ceph 1.2.3.4:/ /mnt/ceph-backup
+2. ceph mds add_data_pool 3
+3. cephfs /mnt/ceph-backup/ -p 3=20
+
+Which should give me /ceph-backup mounted to the backup pool.
+
+Should I simply then do a=20
+mount -t ceph 1.2.3.4:/ /mnt/ceph-data/
+to get the /ceph-data/ pool mounted to the pool 0 data pool?
+
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
