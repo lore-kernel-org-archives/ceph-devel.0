@@ -1,66 +1,93 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: how to debug slow rbd block device
-Date: Tue, 22 May 2012 13:49:12 -0700
-Message-ID: <45F1742481D84E7A90951816DB23609F@inktank.com>
-References: <4FBB8A5B.9010500@profihost.ag>
- <B141A2FBE87F4859AF931D71A339468E@inktank.com>
- <4FBBEBC8.1000205@profihost.ag>
- <1C70F3FB753C4AEC97247E04FAE3C733@inktank.com>
- <4FBBF74C.9020608@profihost.ag>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: build errors centos 6.2
+Date: Tue, 22 May 2012 13:50:00 -0700
+Message-ID: <CAC-hyiEp=wNvr-ia8=_gGEgb3USMGekDbif62-Mtwtzf+Cg+pQ@mail.gmail.com>
+References: <4FBBA38B.2070203@genome.wustl.edu>
+	<CAC-hyiH05vJSA6d-NxfoM88uAwAFvhE3GKrD8KRCVcag6yW6Kw@mail.gmail.com>
+	<4FBBEC32.60206@genome.wustl.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:58501 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754111Ab2EVUtS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 May 2012 16:49:18 -0400
-Received: by dady13 with SMTP id y13so8748404dad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 13:49:17 -0700 (PDT)
-In-Reply-To: <4FBBF74C.9020608@profihost.ag>
-Content-Disposition: inline
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:50316 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932626Ab2EVUuB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 May 2012 16:50:01 -0400
+Received: by bkcji2 with SMTP id ji2so5375234bkc.19
+        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 13:50:00 -0700 (PDT)
+In-Reply-To: <4FBBEC32.60206@genome.wustl.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org
+To: Matt Weil <mweil@genome.wustl.edu>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tuesday, May 22, 2012 at 1:30 PM, Stefan Priebe wrote:
-> Am 22.05.2012 21:52, schrieb Greg Farnum:
-> > On Tuesday, May 22, 2012 at 12:40 PM, Stefan Priebe wrote:
-> > Huh. That's less than I would expect. Especially since it ought to =
-be going through the page cache.
-> > What version of RBD is KVM using here?
-> =20
-> =20
-> v0.47.1
-> =20
-> > Can you (from the KVM host) run
-> > "rados -p data bench seq 60 -t 1"
-> > "rados -p data bench seq 60 -t 16"
-> > and paste the final output from both?
-> =20
-> =20
-> OK here it is first with write then with seq read.
-> =20
-> # rados -p data bench 60 write -t 1
-> # rados -p data bench 60 write -t 16
-> # rados -p data bench 60 seq -t 1
-> # rados -p data bench 60 seq -t 16
-> =20
-> Output is here:
-> http://pastebin.com/iFy8GS7i
+On Tue, May 22, 2012 at 12:42 PM, Matt Weil <mweil@genome.wustl.edu> wr=
+ote:
+>
+>> build/obj/util.do: Compiling dynamic object
+>> src/simplexml.c:27:27: error: libxml/parser.h: No such file or direc=
+tory
+>> src/simplexml.c:48: error: expected '=3D', ',', ';', 'asm' or
+>> '__attribute__' before 'saxGetEntity'
+>> cc1: warnings being treated as errors
+>> src/simplexml.c:56: error: type defaults to 'int' in declaration of
+>> 'xmlChar'
+>> src/simplexml.c:56: error: expected ';', ',' or ')' before '*' token
+>> src/simplexml.c:88: error: type defaults to 'int' in declaration of
+>> 'xmlChar'
+>> src/simplexml.c:88: error: expected ';', ',' or ')' before '*' token
+>> src/simplexml.c:111: error: type defaults to 'int' in declaration of
+>> 'xmlChar'
+>> src/simplexml.c:111: error: expected ';', ',' or ')' before '*' toke=
+n
+>> src/simplexml.c:138: error: variable 'saxHandlerG' has initializer b=
+ut
+>> incomplete type
+>
+>
+> sorry I did trim it.
+>
+>
+> On 5/22/12 11:06 AM, Yehuda Sadeh wrote:
+>>
+>> The log is trimmed, but I guess it's complaining about missing
+>> libxml2. In any case, you shouldn't be compiling libs3 (unless you
+>> compile rest-bench) so cherry-picking commit
+>> 4e3807bc587c232318b0a2023ac7e9d39fef67a3 should solve this issue.
+>>
+>> On Tue, May 22, 2012 at 7:32 AM, Matt Weil<mweil@genome.wustl.edu> =A0=
+wrote:
+>>>>
+>>>> make[3]: *** [build/obj/simplexml.do] Error 1
+>>>> make[3]: *** Waiting for unfinished jobs....
+>>>> make[3]: Leaving directory `/root/rpmbuild/BUILD/ceph-0.47/src/lib=
+s3'
+>>>> make[2]: *** [all-recursive] Error 1
+>>>> make[2]: Leaving directory `/root/rpmbuild/BUILD/ceph-0.47/src'
+>>>> make[1]: *** [all] Error 2
+>>>> make[1]: Leaving directory `/root/rpmbuild/BUILD/ceph-0.47/src'
+>>>> make: *** [all-recursive] Error 1
+>>>> error: Bad exit status from /var/tmp/rpm-tmp.9tq56B (%build)
+>>>>
+>>>>
+>>>> RPM build errors:
+>>>> =A0 =A0Bad exit status from /var/tmp/rpm-tmp.9tq56B (%build)
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
+>
+>
 
-Heh, yep, sorry about the commands =E2=80=94 haven't run them personall=
-y in a while. :)
+Yeah, as I said, it's missing libxml2 so it fails to compile libs3.
+However, it shouldn't even try to compile that, so commit
+4e3807bc587c232318b0a2023ac7e9d39fef67a3 should fix that for you.
 
-Anyway, it looks like you're just paying a synchronous write penalty, s=
-ince with 1 write at a time you're getting 30-40MB/s out of rados bench=
-, but with 16 you're getting >100MB/s. (If you bump up past 16 or incre=
-ase the size of each with -b you may find yourself getting even more.)
-So try enabling RBD writeback caching =E2=80=94 see http://marc.info/?l=
-=3Dceph-devel&m=3D133758599712768&w=3D2
--Greg
-
+Yehuda
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
