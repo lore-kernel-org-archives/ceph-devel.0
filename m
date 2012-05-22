@@ -1,62 +1,62 @@
-From: Josef Bacik <josef@redhat.com>
-Subject: Re: Ceph on btrfs 3.4rc
-Date: Tue, 22 May 2012 09:31:52 -0400
-Message-ID: <20120522133152.GA1890@localhost.localdomain>
-References: <4FB4D30C.7030301@tuxadero.com>
- <20120517144306.GA3011@dhcp231-144.rdu.redhat.com>
- <4FB51577.5090100@tuxadero.com>
- <20120517194358.GA9846@dhcp231-144.rdu.redhat.com>
- <CAJafhzTQJchdd600DiEnooUH-P9ZcLvW+oEczCMNskd+Ud4BmQ@mail.gmail.com>
- <4FB56B21.7070800@tuxadero.com>
- <20120518144759.GA1892@localhost.localdomain>
- <4FB685C9.2050607@tuxadero.com>
- <20120518190105.GB1892@localhost.localdomain>
- <4FB9BDBA.2030806@cn.fujitsu.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: write cache disabling recommendations for journal and storage
+ disks ?
+Date: Tue, 22 May 2012 07:41:50 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205220736390.26515@cobra.newdream.net>
+References: <d287d282-620a-4f13-afe6-2a0f603600c1@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:21709 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751860Ab2EVNcK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 22 May 2012 09:32:10 -0400
-Content-Disposition: inline
-In-Reply-To: <4FB9BDBA.2030806@cn.fujitsu.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51216 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758840Ab2EVOlx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 May 2012 10:41:53 -0400
+In-Reply-To: <d287d282-620a-4f13-afe6-2a0f603600c1@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Miao Xie <miaox@cn.fujitsu.com>
-Cc: Josef Bacik <josef@redhat.com>, Martin Mailand <martin@tuxadero.com>, Christian Brunner <christian@brunner-muc.de>, Sage Weil <sage@newdream.net>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, May 21, 2012 at 11:59:54AM +0800, Miao Xie wrote:
-> Hi Josef,
+On Tue, 22 May 2012, Alexandre DERUMIER wrote:
+> Hi, I have some questions about disabling write cache
+> "
+> http://ceph.com/docs/master/config-cluster/file-system-recommendations/
 > 
-> On fri, 18 May 2012 15:01:05 -0400, Josef Bacik wrote:
-> > diff --git a/fs/btrfs/btrfs_inode.h b/fs/btrfs/btrfs_inode.h
-> > index 9b9b15f..492c74f 100644
-> > --- a/fs/btrfs/btrfs_inode.h
-> > +++ b/fs/btrfs/btrfs_inode.h
-> > @@ -57,9 +57,6 @@ struct btrfs_inode {
-> >  	/* used to order data wrt metadata */
-> >  	struct btrfs_ordered_inode_tree ordered_tree;
-> >  
-> > -	/* for keeping track of orphaned inodes */
-> > -	struct list_head i_orphan;
-> > -
-> >  	/* list of all the delalloc inodes in the FS.  There are times we need
-> >  	 * to write all the delalloc pages to disk, and this list is used
-> >  	 * to walk them all.
-> > @@ -156,6 +153,8 @@ struct btrfs_inode {
-> >  	unsigned dummy_inode:1;
-> >  	unsigned in_defrag:1;
-> >  	unsigned delalloc_meta_reserved:1;
-> > +	unsigned has_orphan_item:1;
-> > +	unsigned doing_truncate:1;
+> Ceph aims for data safety, which means that when the application receives notice that data was written to the disk, that data was actually written to the disk. For old kernels (<2.6.33), disable the write cache if the journal is on a raw disk. Newer kernels should work fine.
 > 
-> I think the problem is we should not use the different lock to protect the bit fields which
-> are stored in the same machine word. Or some bit fields may be covered by the others when
-> someone change those fields. Could you try to declare ->delalloc_meta_reserved and ->has_orphan_item
-> as a integer?
+> Use hdparm to disable write caching on the hard disk:
 > 
+> hdparm -W 0 /dev/hda 0
+> "
 
-Oh freaking duh, thank you Miao, I'm an idiot.
+To clarify: on newer kernels, calling fsync() or fdatasync() flushes the 
+disk's write cache, so this isn't something you need to worry about at 
+all.
 
-Josef
+> Cache on journal disk:
+> 
+> what happen if we have a powerfailure, if data are in cache of journal 
+> disk (ssd with/without supercapicitor) (so write is ack, but not really 
+> write on disk).
+
+The ack is only sent if the client requests it, and normally the client 
+does not.  Which means the client didn't get the ack, and will resend the 
+request to the other replicas once the failed OSD is marked down.
+
+> Cache on disks storage:
+> what happen if we have a powerfailure,if write is commited to journal, 
+> but write are in cache of storage disks and not yet on the platters ?
+
+On newer kernels, the file system is careful to flush the disk cache any 
+time durability matters (e.g., during a journal commit); there is no need 
+to disable it on that disk.  If the write is durable in the journal, it 
+will be applied to the fs on ceph-osd restart.
+
+> Maybe the best way is to disable write cache on both (journal and 
+> storage disks) ?
+
+If you have an old kernel, disable it on the journal, and (if you're using 
+ext3) mount with -o discard.  On newer kernels, I believe discard is 
+(finally) the default.
+
+sage
