@@ -1,162 +1,273 @@
-From: Quenten Grasso <QGrasso@onq.com.au>
-Subject: RE: Designing a cluster guide
-Date: Mon, 21 May 2012 23:52:31 +0000
-Message-ID: <7111C6286D862F43B94FD6291D8989158644DD@EX01.onqtel.local>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Designing a cluster guide
+Date: Mon, 21 May 2012 17:30:14 -0700
+Message-ID: <CAPYLRzgyyW5N894X1T=-gNyRdPmu-+VDr0=NuuLVEs93nGJZbw@mail.gmail.com>
 References: <4FB75BAD.3080709@profihost.ag>
 	<8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
 	<CAMvP8PDRUTO8M0=4MvjDtEtUM7aKePOWvGRFiJA1onu4VgXHPw@mail.gmail.com>
- <CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
+	<CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
+	<7111C6286D862F43B94FD6291D8989158644DD@EX01.onqtel.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.onqtel.net ([120.88.69.160]:35900 "EHLO mx1.onqtel.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753638Ab2EVABs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 21 May 2012 20:01:48 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mx1.onqtel.net (Postfix) with ESMTP id CA0EF8D070
-	for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 09:53:07 +1000 (EST)
-Received: from mx1.onqtel.net ([127.0.0.1])
-	by localhost (mx1.onqtel.net [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id 01kGbPGZs5P9 for <ceph-devel@vger.kernel.org>;
-	Tue, 22 May 2012 09:53:04 +1000 (EST)
-Received: from ex01.onqtel.local (ex01.onqtel.local [10.21.0.30])
-	(using TLSv1 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by mx1.onqtel.net (Postfix) with ESMTPS id 2518B8D029
-	for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 09:53:04 +1000 (EST)
-In-Reply-To: <CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:45211 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756150Ab2EVAaQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 21 May 2012 20:30:16 -0400
+Received: by lbbgm6 with SMTP id gm6so3877186lbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 21 May 2012 17:30:14 -0700 (PDT)
+In-Reply-To: <7111C6286D862F43B94FD6291D8989158644DD@EX01.onqtel.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Quenten Grasso <QGrasso@onq.com.au>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGkgQWxsLA0KDQoNCkkndmUgYmVlbiB0aGlua2luZyBhYm91dCB0aGlzIGlzc3VlIG15c2VsZiBw
-YXN0IGZldyBkYXlzLCBhbmQgYW4gaWRlYSBJJ3ZlIGNvbWUgdXAgd2l0aCBpcyBydW5uaW5nIDE2
-IHggMi41IiAxNUsgNzIvMTQ2R0IgRGlza3MsIA0KaW4gcmFpZCAxMCBpbnNpZGUgYSAyVSBTZXJ2
-ZXIgd2l0aCBKQk9EJ3MgYXR0YWNoZWQgdG8gdGhlIHNlcnZlciBmb3IgYWN0dWFsIHN0b3JhZ2Uu
-DQoNCkNhbiBzb21lb25lIGhlbHAgY2xhcmlmeSB0aGlzIG9uZSwNCg0KT25jZSB0aGUgZGF0YSBp
-cyB3cml0dGVuIHRvIHRoZSAoam91cm5hbCBkaXNrKSBhbmQgdGhlbiByZWFkIGZyb20gdGhlIChq
-b3VybmFsIGRpc2spIHRoZW4gd3JpdHRlbiB0byB0aGUgKHN0b3JhZ2UgZGlzaykgb25jZSB0aGlz
-IGlzIGNvbXBsZXRlIHRoaXMgaXMgY29uc2lkZXJlZCBhIHN1Y2Nlc3NmdWwgd3JpdGUgYnkgdGhl
-IGNsaWVudD8NCk9yICANCk9uY2UgdGhlIGRhdGEgaXMgd3JpdHRlbiB0byB0aGUgKGpvdXJuYWwg
-ZGlzaykgaXMgdGhpcyBjb25zaWRlcmVkIHN1Y2Nlc3NmdWwgYnkgdGhlIGNsaWVudD8NCk9yDQpP
-bmNlIHRoZSBkYXRhIGlzIHdyaXR0ZW4gdG8gdGhlIChqb3VybmFsIGRpc2spIGFuZCB3cml0dGVu
-IHRvIHRoZSAoc3RvcmFnZSBkaXNrKSBhdCB0aGUgc2FtZSB0aW1lLCBvbmNlIGNvbXBsZXRlIHRo
-aXMgaXMgY29uc2lkZXJlZCBhIHN1Y2Nlc3NmdWwgd3JpdGUgYnkgdGhlIGNsaWVudD8gKGlmIHRo
-aXMgaXMgdGhlIGNhc2UgU1NEJ3MgbWF5IG5vdCBiZSBzbyB1c2VmdWwpDQoNCg0KUHJvcyANClF1
-aXRlIGZhc3QgV3JpdGUgdGhyb3VnaHB1dCB0byB0aGUgam91cm5hbCBkaXNrcywNCk5vIHdyaXRl
-IHdhcmVvdXQgb2YgU1NEJ3MNClJBSUQgMTAgd2l0aCAxR0IgQ2FjaGUgQ29udHJvbGxlciBhbHNv
-IGhlbHBzIGltcHJvdmUgdGhpbmdzIChpZiByZWFsbHkga2VlbiB5b3UgY291bGQgdXNlIGEgY2Fj
-aGVjYWRlIGFzIHdlbGwpDQoNCg0KQ29ucw0KTm90IGFzIGZhc3QgYXMgU1NEJ3MNCk1vcmUgcmFj
-a3NwYWNlIHJlcXVpcmVkIHBlciBzZXJ2ZXIuDQoNCg0KUmVnYXJkcywNClF1ZW50ZW4NCg0KLS0t
-LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJu
-ZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFs
-ZiBPZiBTbGF3b21pciBTa293cm9uDQpTZW50OiBUdWVzZGF5LCAyMiBNYXkgMjAxMiA3OjIyIEFN
-DQpUbzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCkNjOiBUb21hc3ogUGFzemtvd3NraQ0K
-U3ViamVjdDogUmU6IERlc2lnbmluZyBhIGNsdXN0ZXIgZ3VpZGUNCg0KTWF5YmUgZ29vZCBmb3Ig
-am91cm5hbCB3aWxsIGJlIHR3byBjaGVhcCBNTEMgSW50ZWwgZHJpdmVzIG9uIFNhbmRmb3JjZQ0K
-KDMyMC81MjApLCAxMjBHQiBvciAyNDBHQiwgYW5kIEhQQSBjaGFuZ2VkIHRvIDIwLTMwR0Igb25s
-eSBmb3INCnNlcGFyYXRlIGpvdXJuYWxpbmcgcGFydGl0aW9ucyB3aXRoIGhhcmR3YXJlIFJBSUQx
-Lg0KDQpJIGxpa2UgdG8gdGVzdCBzZXR1cCBsaWtlIHRoaXMsIGJ1dCBtYXliZSBzb21lb25lIGhh
-dmUgYW55IHJlYWwgbGlmZSBpbmZvID8/DQoNCk9uIE1vbiwgTWF5IDIxLCAyMDEyIGF0IDU6MDcg
-UE0sIFRvbWFzeiBQYXN6a293c2tpIDxzczdwcm9AZ21haWwuY29tPiB3cm90ZToNCj4gQW5vdGhl
-ciBncmVhdCB0aGluZyB0aGF0IHNob3VsZCBiZSBtZW50aW9uZWQgaXM6DQo+IGh0dHBzOi8vZ2l0
-aHViLmNvbS9mYWNlYm9vay9mbGFzaGNhY2hlLy4gSXQgZ2l2ZXMgcmVhbGx5IGh1Z2UNCj4gcGVy
-Zm9ybWFuY2UgaW1wcm92ZW1lbnRzIGZvciByZWFkcy93cml0ZXMgKGVzcGVjaWFseSBvbiBGdW5z
-aW9uSU8NCj4gZHJpdmVzKSBldmVudCB3aXRob3V0IHVzaW5nIGxpYnJiZCBjYWNoaW5nIDotKQ0K
-Pg0KPg0KPg0KPiBPbiBTYXQsIE1heSAxOSwgMjAxMiBhdCA2OjE1IFBNLCBBbGV4YW5kcmUgREVS
-VU1JRVIgPGFkZXJ1bWllckBvZGlzby5jb20+IHdyb3RlOg0KPj4gSGksDQo+Pg0KPj4gRm9yIHlv
-dXIgam91cm5hbCAsIGlmIHlvdSBoYXZlIG1vbmV5LCB5b3UgY2FuIHVzZQ0KPj4NCj4+IHN0ZWMg
-emV1c3JhbSBzc2QgZHJpdmUuIChhcm91bmQgMjAwMOKCrCAvOEdCIC8gMTAwMDAwIGlvcHMgcmVh
-ZC93cml0ZSB3aXRoIDRrIGJsb2NrKS4NCj4+IEknbSB1c2luZyB0aGVtIHdpdGggemZzIHNhbiwg
-dGhleSByb2NrcyBmb3Igam91cm5hbC4NCj4+IGh0dHA6Ly93d3cuc3RlYy1pbmMuY29tL3Byb2R1
-Y3QvemV1c3JhbS5waHANCj4+DQo+PiBhbm90aGVyIGludGVyZXNzZXN0aW5nIHByb2R1Y3QgaXMg
-ZGRyZHJpdmUNCj4+IGh0dHA6Ly93d3cuZGRyZHJpdmUuY29tLw0KPj4NCj4+IC0tLS0tIE1haWwg
-b3JpZ2luYWwgLS0tLS0NCj4+DQo+PiBEZTogIlN0ZWZhbiBQcmllYmUiIDxzLnByaWViZUBwcm9m
-aWhvc3QuYWc+DQo+PiDDgDogIkdyZWdvcnkgRmFybnVtIiA8Z3JlZ0Bpbmt0YW5rLmNvbT4NCj4+
-IENjOiBjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZw0KPj4gRW52b3nDqTogU2FtZWRpIDE5IE1h
-aSAyMDEyIDEwOjM3OjAxDQo+PiBPYmpldDogUmU6IERlc2lnbmluZyBhIGNsdXN0ZXIgZ3VpZGUN
-Cj4+DQo+PiBIaSBHcmVnLA0KPj4NCj4+IEFtIDE3LjA1LjIwMTIgMjM6MjcsIHNjaHJpZWIgR3Jl
-Z29yeSBGYXJudW06DQo+Pj4+IEl0IG1lbnRpb25zIGZvciBleGFtcGxlICJGYXN0IENQVSIgZm9y
-IHRoZSBtZHMgc3lzdGVtLiBXaGF0IGRvZXMgZmFzdA0KPj4+PiBtZWFuPyBKdXN0IHRoZSBzcGVl
-ZCBvZiBvbmUgY29yZT8gT3IgaXMgY2VwaCBkZXNpZ25lZCB0byB1c2UgbXVsdGkgY29yZT8NCj4+
-Pj4gSXMgbXVsdGkgY29yZSBvciBtb3JlIHNwZWVkIGltcG9ydGFudD8NCj4+PiBSaWdodCBub3cs
-IGl0J3MgcHJpbWFyaWx5IHRoZSBzcGVlZCBvZiBhIHNpbmdsZSBjb3JlLiBUaGUgTURTIGlzDQo+
-Pj4gaGlnaGx5IHRocmVhZGVkIGJ1dCBkb2luZyBtb3N0IHRoaW5ncyByZXF1aXJlcyBncmFiYmlu
-ZyBhIGJpZyBsb2NrLg0KPj4+IEhvdyBmYXN0IGlzIGEgcXVhbGl0YXRpdmUgcmF0aGVyIHRoYW4g
-cXVhbnRpdGF0aXZlIGFzc2Vzc21lbnQgYXQgdGhpcw0KPj4+IHBvaW50LCB0aG91Z2guDQo+PiBT
-byB3b3VsZCB5b3UgcmVjb21tYW5kIGEgZmFzdCAobW9yZSBnaHopIENvcmUgaTMgaW5zdGVhZCBv
-ZiBhIHNpbmdsZQ0KPj4geGVvbiBmb3IgdGhpcyBzeXN0ZW0/IChwcmljZSBwZXIgZ2h6IGlzIGJl
-dHRlcikuDQo+Pg0KPj4+IEl0IGRlcGVuZHMgb24gd2hhdCB5b3VyIG5vZGVzIGxvb2sgbGlrZSwg
-YW5kIHdoYXQgc29ydCBvZiBjbHVzdGVyDQo+Pj4geW91J3JlIHJ1bm5pbmcuIFRoZSBtb25pdG9y
-cyBhcmUgcHJldHR5IGxpZ2h0d2VpZ2h0LCBidXQgdGhleSB3aWxsIGFkZA0KPj4+ICpzb21lKiBs
-b2FkLiBNb3JlIGltcG9ydGFudCBpcyB0aGVpciBkaXNrIGFjY2VzcyBwYXR0ZXJucyDigJQgdGhl
-eSBoYXZlDQo+Pj4gdG8gZG8gYSBsb3Qgb2Ygc3luY3MuIFNvIGlmIHRoZXkncmUgc2hhcmluZyBh
-IG1hY2hpbmUgd2l0aCBzb21lIG90aGVyDQo+Pj4gZGFlbW9uIHlvdSB3YW50IHRoZW0gdG8gaGF2
-ZSBhbiBpbmRlcGVuZGVudCBkaXNrIGFuZCB0byBiZSBydW5uaW5nIGENCj4+PiBuZXcga2VybmVs
-JmdsaWJjIHNvIHRoYXQgdGhleSBjYW4gdXNlIHN5bmNmcyByYXRoZXIgdGhhbiBzeW5jLiAoVGhl
-DQo+Pj4gb25seSBkaXN0cmlidXRpb24gSSBrbm93IGZvciBzdXJlIGRvZXMgdGhpcyBpcyBVYnVu
-dHUgMTIuMDQuKQ0KPj4gV2hpY2gga2VybmVsIGFuZCB3aGljaCBnbGliYyB2ZXJzaW9uIHN1cHBv
-cnRzIHRoaXM/IEkgaGF2ZSBzZWFyY2hlZA0KPj4gZ29vZ2xlIGJ1dCBoYXZlbid0IGZvdW5kIGFu
-IGV4YWN0IHZlcnNpb24uIFdlJ3JlIHVzaW5nIGRlYmlhbiBsZW5ueQ0KPj4gc3F1ZWV6ZSB3aXRo
-IGEgY3VzdG9tIGtlcm5lbC4NCj4+DQo+Pj4+IFJlZ2FyZGluZyB0aGUgT1NEcyBpcyBpdCBmaW5l
-IHRvIHVzZSBhbiBTU0QgUmFpZCAxIGZvciB0aGUgam91cm5hbCBhbmQNCj4+Pj4gcGVyaGFwcyAy
-MnggU0FUQSBEaXNrcyBpbiBhIFJhaWQgMTAgZm9yIHRoZSBGUyBvciBpcyB0aGlzIHF1aXRlIGFi
-c3VyZA0KPj4+PiBhbmQgeW91IHNob3VsZCBnbyBmb3IgMjJ4IFNTRCBEaXNrcyBpbiBhIFJhaWQg
-Nj8NCj4+PiBZb3UnbGwgbmVlZCB0byBkbyB5b3VyIG93biBmYWlsdXJlIGNhbGN1bGF0aW9ucyBv
-biB0aGlzIG9uZSwgSSdtDQo+Pj4gYWZyYWlkLiBKdXN0IHRha2Ugbm90ZSB0aGF0IHlvdSdsbCBw
-cmVzdW1hYmx5IGJlIGxpbWl0ZWQgdG8gdGhlIHNwZWVkDQo+Pj4gb2YgeW91ciBqb3VybmFsaW5n
-IGRldmljZSBoZXJlLg0KPj4gWWVhaCB0aGF0J3Mgd2h5IGkgd2FudGVkIHRvIHVzZSBhIFJhaWQg
-MSBvZiBTU0RzIGZvciB0aGUgam91cm5hbGluZy4gT3INCj4+IGlzIHRoaXMgc3RpbGwgdG9vIHNs
-b3c/IEFub3RoZXIgaWRlYSB3YXMgdG8gdXNlIG9ubHkgYSByYW1kaXNrIGZvciB0aGUNCj4+IGpv
-dXJuYWwgYW5kIGJhY2t1cCB0aGUgZmlsZXMgd2hpbGUgc2h1dHRpbmcgZG93biB0byBkaXNrIGFu
-ZCByZXN0b3JlDQo+PiB0aGVtIGFmdGVyIGJvb3QuDQo+Pg0KPj4+IEdpdmVuIHRoYXQgQ2VwaCBp
-cyBnb2luZyB0byBiZSBkb2luZyBpdHMgb3duIHJlcGxpY2F0aW9uLCB0aG91Z2gsIEkNCj4+PiB3
-b3VsZG4ndCB3YW50IHRvIGFkZCBpbiBhbm90aGVyIHdob2xlIGxheWVyIG9mIHJlcGxpY2F0aW9u
-IHdpdGggcmFpZDEwDQo+Pj4g4oCUIGRvIHlvdSByZWFsbHkgd2FudCB0byBtdWx0aXBseSB5b3Vy
-IHN0b3JhZ2UgcmVxdWlyZW1lbnRzIGJ5IGFub3RoZXINCj4+PiBmYWN0b3Igb2YgdHdvPw0KPj4g
-T0sgY29ycmVjdCBiYWQgaWRlYS4NCj4+DQo+Pj4+IElzIGl0IG1vcmUgdXNlZnVsIHRoZSB1c2Ug
-YSBSYWlkIDYgSFcgQ29udHJvbGxlciBvciB0aGUgYnRyZnMgcmFpZD8NCj4+PiBJIHdvdWxkIHVz
-ZSB0aGUgaGFyZHdhcmUgY29udHJvbGxlciBvdmVyIGJ0cmZzIHJhaWQgZm9yIG5vdzsgaXQgYWxs
-b3dzDQo+Pj4gbW9yZSBmbGV4aWJpbGl0eSBpbiBlZyBzd2l0Y2hpbmcgdG8geGZzLiA6KQ0KPj4g
-T0sgYnV0IG92ZXJhbGwgeW91IHdvdWxkIHJlY29tbWFuZCBydW5uaW5nIG9uZSBvc2QgcGVyIGRp
-c2sgcmlnaHQ/IFNvDQo+PiBpbnN0ZWFkIG9mIHVzaW5nIGEgUmFpZCA2IHdpdGggZm9yIGV4YW1w
-bGUgMTAgZGlza3MgeW91IHdvdWxkIHJ1biA2IG9zZHMNCj4+IG9uIHRoaXMgbWFjaGluZT8NCj4+
-DQo+Pj4+IFVzZSBzaW5nbGUgc29ja2V0IFhlb24gZm9yIHRoZSBPU0RzIG9yIER1YWwgU29ja2V0
-Pw0KPj4+IER1YWwgc29ja2V0IHNlcnZlcnMgd2lsbCBiZSBvdmVya2lsbCBnaXZlbiB0aGUgc2V0
-dXAgeW91J3JlDQo+Pj4gZGVzY3JpYmluZy4gT3VyIFdBRyBydWxlIG9mIHRodW1iIGlzIDFHSHog
-b2YgbW9kZXJuIENQVSBwZXIgT1NEDQo+Pj4gZGFlbW9uLiBZb3UgbWlnaHQgY29uc2lkZXIgaXQg
-aWYgeW91IGRlY2lkZWQgeW91IHdhbnRlZCB0byBkbyBhbiBPU0QNCj4+PiBwZXIgZGlzayBpbnN0
-ZWFkICh0aGF0J3MgYSBtb3JlIGNvbW1vbiBjb25maWd1cmF0aW9uLCBidXQgaXQgcmVxdWlyZXMN
-Cj4+PiBtb3JlIENQVSBhbmQgUkFNIHBlciBkaXNrIGFuZCB3ZSBkb24ndCBrbm93IHlldCB3aGlj
-aCBpcyB0aGUgYmV0dGVyDQo+Pj4gY2hvaWNlKS4NCj4+IElzIHRoZXJlIGFsc28gYSBydWxlIG9m
-IHRodW1iIGZvciB0aGUgbWVtb3J5Pw0KPj4NCj4+IE15IGJpZ2dlc3QgcHJvYmxlbSB3aXRoIGNl
-cGggcmlnaHQgbm93IGlzIHRoZSBhd2Z1bCBzbG93IHNwZWVkIHdoaWxlDQo+PiBkb2luZyByYW5k
-b20gcmVhZHMgYW5kIHdyaXRlcy4NCj4+DQo+PiBTZXF1ZW50aWFsIHJlYWQgYW5kIHdyaXRlcyBh
-cmUgYXQgMjAwTWIvcyAodGhhdCdzIHByZXR0eSBnb29kIGZvciBib25kZWQNCj4+IGR1YWwgR2Jp
-dC9zKS4gQnV0IHJhbmRvbSByZWFkcyBhbmQgd3JpdGUgYXJlIG9ubHkgYXQgMCw4IC0gMSw1IE1i
-L3MNCj4+IHdoaWNoIGlzIGRlZi4gdG9vIHNsb3cuDQo+Pg0KPj4gU3RlZmFuDQo+PiAtLQ0KPj4g
-VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
-IGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+DQo+Pg0KPj4NCj4+IC0tDQo+Pg0KPj4gLS0N
-Cj4+DQo+Pg0KPj4NCj4+DQo+PiDCoCDCoCDCoCDCoEFsZXhhbmRyZSBEIGVydW1pZXINCj4+IElu
-Z8OpbmlldXIgU3lzdMOobWUNCj4+IEZpeGUgOiAwMyAyMCA2OCA4OCA5MA0KPj4gRmF4IDogMDMg
-MjAgNjggOTAgODENCj4+IDQ1IEJ2ZCBkdSBHw6luw6lyYWwgTGVjbGVyYyA1OTEwMCBSb3ViYWl4
-IC0gRnJhbmNlDQo+PiAxMiBydWUgTWFyaXZhdXggNzUwMDIgUGFyaXMgLSBGcmFuY2UNCj4+DQo+
-PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
-c3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
-b3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCDCoGh0dHA6
-Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPg0KPg0KPg0KPiAtLQ0KPiBU
-b21hc3ogUGFzemtvd3NraQ0KPiBTUzcsIEFzdGVyaXNrLCBTQU4sIERhdGFjZW50ZXIsIENsb3Vk
-IENvbXB1dGluZw0KPiArNDg1MDAxNjYyOTkNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
-aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+IHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+IE1vcmUg
-bWFqb3Jkb21vIGluZm8gYXQgwqBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwNCg0KDQoNCi0tIA0KLS0tLS0NClBvemRyYXdpYW0NCg0KU8WCYXdlayAic1ppQmlzIiBT
-a293cm9uDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUg
-InVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQp0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
-b3Jkb21vQHZnZXIua2VybmVsLm9yZw0KTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+On Mon, May 21, 2012 at 4:52 PM, Quenten Grasso <QGrasso@onq.com.au> wr=
+ote:
+> Hi All,
+>
+>
+> I've been thinking about this issue myself past few days, and an idea=
+ I've come up with is running 16 x 2.5" 15K 72/146GB Disks,
+> in raid 10 inside a 2U Server with JBOD's attached to the server for =
+actual storage.
+>
+> Can someone help clarify this one,
+>
+> Once the data is written to the (journal disk) and then read from the=
+ (journal disk) then written to the (storage disk) once this is complet=
+e this is considered a successful write by the client?
+> Or
+> Once the data is written to the (journal disk) is this considered suc=
+cessful by the client?
+This one =E2=80=94=C2=A0the write is considered "safe" once it is on-di=
+sk on all
+OSDs currently responsible for hosting the object.
+
+Every time anybody mentions RAID10 I have to remind them of the
+storage amplification that entails, though. Are you sure you want that
+on top of (well, underneath, really) Ceph's own replication?
+
+> Or
+> Once the data is written to the (journal disk) and written to the (st=
+orage disk) at the same time, once complete this is considered a succes=
+sful write by the client? (if this is the case SSD's may not be so usef=
+ul)
+>
+>
+> Pros
+> Quite fast Write throughput to the journal disks,
+> No write wareout of SSD's
+> RAID 10 with 1GB Cache Controller also helps improve things (if reall=
+y keen you could use a cachecade as well)
+>
+>
+> Cons
+> Not as fast as SSD's
+> More rackspace required per server.
+>
+>
+> Regards,
+> Quenten
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.=
+kernel.org] On Behalf Of Slawomir Skowron
+> Sent: Tuesday, 22 May 2012 7:22 AM
+> To: ceph-devel@vger.kernel.org
+> Cc: Tomasz Paszkowski
+> Subject: Re: Designing a cluster guide
+>
+> Maybe good for journal will be two cheap MLC Intel drives on Sandforc=
+e
+> (320/520), 120GB or 240GB, and HPA changed to 20-30GB only for
+> separate journaling partitions with hardware RAID1.
+>
+> I like to test setup like this, but maybe someone have any real life =
+info ??
+>
+> On Mon, May 21, 2012 at 5:07 PM, Tomasz Paszkowski <ss7pro@gmail.com>=
+ wrote:
+>> Another great thing that should be mentioned is:
+>> https://github.com/facebook/flashcache/. It gives really huge
+>> performance improvements for reads/writes (especialy on FunsionIO
+>> drives) event without using librbd caching :-)
+>>
+>>
+>>
+>> On Sat, May 19, 2012 at 6:15 PM, Alexandre DERUMIER <aderumier@odiso=
+=2Ecom> wrote:
+>>> Hi,
+>>>
+>>> For your journal , if you have money, you can use
+>>>
+>>> stec zeusram ssd drive. (around 2000=E2=82=AC /8GB / 100000 iops re=
+ad/write with 4k block).
+>>> I'm using them with zfs san, they rocks for journal.
+>>> http://www.stec-inc.com/product/zeusram.php
+>>>
+>>> another interessesting product is ddrdrive
+>>> http://www.ddrdrive.com/
+>>>
+>>> ----- Mail original -----
+>>>
+>>> De: "Stefan Priebe" <s.priebe@profihost.ag>
+>>> =C3=80: "Gregory Farnum" <greg@inktank.com>
+>>> Cc: ceph-devel@vger.kernel.org
+>>> Envoy=C3=A9: Samedi 19 Mai 2012 10:37:01
+>>> Objet: Re: Designing a cluster guide
+>>>
+>>> Hi Greg,
+>>>
+>>> Am 17.05.2012 23:27, schrieb Gregory Farnum:
+>>>>> It mentions for example "Fast CPU" for the mds system. What does =
+fast
+>>>>> mean? Just the speed of one core? Or is ceph designed to use mult=
+i core?
+>>>>> Is multi core or more speed important?
+>>>> Right now, it's primarily the speed of a single core. The MDS is
+>>>> highly threaded but doing most things requires grabbing a big lock=
+=2E
+>>>> How fast is a qualitative rather than quantitative assessment at t=
+his
+>>>> point, though.
+>>> So would you recommand a fast (more ghz) Core i3 instead of a singl=
+e
+>>> xeon for this system? (price per ghz is better).
+>>>
+>>>> It depends on what your nodes look like, and what sort of cluster
+>>>> you're running. The monitors are pretty lightweight, but they will=
+ add
+>>>> *some* load. More important is their disk access patterns =E2=80=94=
+ they have
+>>>> to do a lot of syncs. So if they're sharing a machine with some ot=
+her
+>>>> daemon you want them to have an independent disk and to be running=
+ a
+>>>> new kernel&glibc so that they can use syncfs rather than sync. (Th=
+e
+>>>> only distribution I know for sure does this is Ubuntu 12.04.)
+>>> Which kernel and which glibc version supports this? I have searched
+>>> google but haven't found an exact version. We're using debian lenny
+>>> squeeze with a custom kernel.
+>>>
+>>>>> Regarding the OSDs is it fine to use an SSD Raid 1 for the journa=
+l and
+>>>>> perhaps 22x SATA Disks in a Raid 10 for the FS or is this quite a=
+bsurd
+>>>>> and you should go for 22x SSD Disks in a Raid 6?
+>>>> You'll need to do your own failure calculations on this one, I'm
+>>>> afraid. Just take note that you'll presumably be limited to the sp=
+eed
+>>>> of your journaling device here.
+>>> Yeah that's why i wanted to use a Raid 1 of SSDs for the journaling=
+=2E Or
+>>> is this still too slow? Another idea was to use only a ramdisk for =
+the
+>>> journal and backup the files while shutting down to disk and restor=
+e
+>>> them after boot.
+>>>
+>>>> Given that Ceph is going to be doing its own replication, though, =
+I
+>>>> wouldn't want to add in another whole layer of replication with ra=
+id10
+>>>> =E2=80=94 do you really want to multiply your storage requirements=
+ by another
+>>>> factor of two?
+>>> OK correct bad idea.
+>>>
+>>>>> Is it more useful the use a Raid 6 HW Controller or the btrfs rai=
+d?
+>>>> I would use the hardware controller over btrfs raid for now; it al=
+lows
+>>>> more flexibility in eg switching to xfs. :)
+>>> OK but overall you would recommand running one osd per disk right? =
+So
+>>> instead of using a Raid 6 with for example 10 disks you would run 6=
+ osds
+>>> on this machine?
+>>>
+>>>>> Use single socket Xeon for the OSDs or Dual Socket?
+>>>> Dual socket servers will be overkill given the setup you're
+>>>> describing. Our WAG rule of thumb is 1GHz of modern CPU per OSD
+>>>> daemon. You might consider it if you decided you wanted to do an O=
+SD
+>>>> per disk instead (that's a more common configuration, but it requi=
+res
+>>>> more CPU and RAM per disk and we don't know yet which is the bette=
+r
+>>>> choice).
+>>> Is there also a rule of thumb for the memory?
+>>>
+>>> My biggest problem with ceph right now is the awful slow speed whil=
+e
+>>> doing random reads and writes.
+>>>
+>>> Sequential read and writes are at 200Mb/s (that's pretty good for b=
+onded
+>>> dual Gbit/s). But random reads and write are only at 0,8 - 1,5 Mb/s
+>>> which is def. too slow.
+>>>
+>>> Stefan
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+>>> --
+>>>
+>>> --
+>>>
+>>>
+>>>
+>>>
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0Alexandre D erumier
+>>> Ing=C3=A9nieur Syst=C3=A8me
+>>> Fixe : 03 20 68 88 90
+>>> Fax : 03 20 68 90 81
+>>> 45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France
+>>> 12 rue Marivaux 75002 Paris - France
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.=
+html
+>>
+>>
+>>
+>> --
+>> Tomasz Paszkowski
+>> SS7, Asterisk, SAN, Datacenter, Cloud Computing
+>> +48500166299
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
+>
+>
+>
+> --
+> -----
+> Pozdrawiam
+>
+> S=C5=82awek "sZiBis" Skowron
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
+ml
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
