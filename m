@@ -1,49 +1,78 @@
-From: Jerker Nyberg <jerker@Update.UU.SE>
-Subject: Re: Designing a cluster guide
-Date: Tue, 22 May 2012 11:04:34 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1205220852290.15565@Psilocybe.Update.UU.SE>
-References: <4FB75BAD.3080709@profihost.ag> <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
- <CAMvP8PDRUTO8M0=4MvjDtEtUM7aKePOWvGRFiJA1onu4VgXHPw@mail.gmail.com>
- <CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
- <7111C6286D862F43B94FD6291D8989158644DD@EX01.onqtel.local>
- <CAPYLRzgyyW5N894X1T=-gNyRdPmu-+VDr0=NuuLVEs93nGJZbw@mail.gmail.com>
+From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Subject: [PATCH] Update ceph.spec for ceph-0.47
+Date: Tue, 22 May 2012 05:17:47 -0300
+Message-ID: <orfwasr5n8.fsf@livre.localdomain>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-293463789-1943731892-1337669890=:15565"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from Psilocybe.Update.UU.SE ([130.238.19.25]:41068 "EHLO
-	Psilocybe.Update.UU.SE" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757034Ab2EVJOT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 May 2012 05:14:19 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by Psilocybe.Update.UU.SE (Postfix) with ESMTP id A31DA3006E
-	for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 11:04:34 +0200 (CEST)
-In-Reply-To: <CAPYLRzgyyW5N894X1T=-gNyRdPmu-+VDr0=NuuLVEs93nGJZbw@mail.gmail.com>
-Content-ID: <Pine.LNX.4.64.1205220858200.15565@Psilocybe.Update.UU.SE>
+Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:38836 "EHLO
+	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1756811Ab2EVJTZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 22 May 2012 05:19:25 -0400
+Received: from freie.oliva.athome.lsd.ic.unicamp.br (gw-to-emilia.oliva.athome.lsd.ic.unicamp.br [172.31.160.17] (may be forged))
+	by boneca.lsd.ic.unicamp.br (8.14.5/8.14.5) with ESMTP id q4M8HopC005533
+	for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 05:17:50 -0300
+Received: from livre.localdomain (livre-to-gw.oliva.athome.lsd.ic.unicamp.br [172.31.160.19])
+	by freie.oliva.athome.lsd.ic.unicamp.br (8.14.5/8.14.5) with ESMTP id q4M8HnJ3011754
+	for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 05:17:49 -0300
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Add BuildRequires: libxml2-devel.
+Move BuildRequires: libcurl-devel to a more proper place.
+Uninstall libs3, incorrectly installed in RPM_BUILD_ROOT.
+Package %{_includedir}/rados/librgw.h.
+---
+ ceph.spec.in |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
 
----293463789-1943731892-1337669890=:15565
-Content-Type: TEXT/PLAIN; CHARSET=iso-8859-1; FORMAT=flowed
-Content-Transfer-Encoding: 8BIT
-Content-ID: <Pine.LNX.4.64.1205220858201.15565@Psilocybe.Update.UU.SE>
+diff --git a/ceph.spec.in b/ceph.spec.in
+index b3dd3f0..1dbd645 100644
+--- a/ceph.spec.in
++++ b/ceph.spec.in
+@@ -37,6 +37,8 @@ BuildRequires:	gdbm
+ BuildRequires:	pkgconfig
+ BuildRequires:	python
+ BuildRequires:  libaio-devel
++BuildRequires:  libcurl-devel
++BuildRequires:  libxml2-devel
+ 
+ #################################################################################
+ # specific
+@@ -55,7 +57,6 @@ Requires(post):	chkconfig
+ Requires(preun):chkconfig
+ Requires(preun):initscripts
+ %endif
+-BuildRequires: libcurl-devel
+ %if 0%{with tcmalloc}
+ # use isa so this will not be satisfied by
+ # google-perftools-devel.i686 on a x86_64 box
+@@ -232,6 +233,10 @@ make -j$(getconf _NPROCESSORS_ONLN)
+ 
+ %install
+ make DESTDIR=$RPM_BUILD_ROOT install
++make DESTDIR=$RPM_BUILD_ROOT -C src/libs3 uninstall
++rmdir $RPM_BUILD_ROOT/bin
++rmdir $RPM_BUILD_ROOT/lib
++rmdir $RPM_BUILD_ROOT/include
+ find $RPM_BUILD_ROOT -type f -name "*.la" -exec rm -f {} ';'
+ find $RPM_BUILD_ROOT -type f -name "*.a" -exec rm -f {} ';'
+ install -D src/init-ceph $RPM_BUILD_ROOT%{_initrddir}/ceph
+@@ -365,6 +370,7 @@ fi
+ %dir %{_includedir}/rados
+ %{_includedir}/rados/librados.h
+ %{_includedir}/rados/librados.hpp
++%{_includedir}/rados/librgw.h
+ %{_includedir}/rados/buffer.h
+ %{_includedir}/rados/page.h
+ %{_includedir}/rados/crc32c.h
+-- 
+1.7.7.6
 
-On Mon, 21 May 2012, Gregory Farnum wrote:
-
-> This one  the write is considered "safe" once it is on-disk on all
-> OSDs currently responsible for hosting the object.
-
-Is it possible to configure the client to consider the write successful 
-when the data is hitting RAM on all the OSDs but not yet committed to 
-disk?
-
-Also, the IBM zFS research file system is talking about cooperative cache 
-and Lustre about a collaborative cache. Do you have any thoughts of this 
-regarding Ceph?
-
-Regards,
-Jerker Nyberg, Uppsala, Sweden.
----293463789-1943731892-1337669890=:15565--
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
