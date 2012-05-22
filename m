@@ -1,70 +1,93 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: how to mount a specific pool in cephs
-Date: Tue, 22 May 2012 10:58:32 -0700
-Message-ID: <8CBFE0C21212497AA50AEBE59EEFCAFF@inktank.com>
-References: <81C477727102DA4E9B2605AC748C495418EE10F2E4@exch10>
- <CAORUGqCMGZeVRO_dB7GEt8NJ=M63NZNejUMT75LEPFM3MaJVoA@mail.gmail.com>
- <loom.20120522T135204-38@post.gmane.org>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: RGW, future directions
+Date: Tue, 22 May 2012 11:07:53 -0700
+Message-ID: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:50239 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755444Ab2EVR6h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 May 2012 13:58:37 -0400
-Received: by pbbrp8 with SMTP id rp8so8704866pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 10:58:37 -0700 (PDT)
-In-Reply-To: <loom.20120522T135204-38@post.gmane.org>
-Content-Disposition: inline
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:45389 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753359Ab2EVSHy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 22 May 2012 14:07:54 -0400
+Received: by bkcji2 with SMTP id ji2so5244801bkc.19
+        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 11:07:53 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Grant Ashman <grant.ashman@mach.com.au>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tuesday, May 22, 2012 at 5:02 AM, Grant Ashman wrote:
-> Tommi Virtanen <tommi.virtanen <at> dreamhost.com (http://dreamhost.com)> writes:
-> > 
-> > You don't mount pools directly; there's filesystem metadata (as
-> > managed by metadata servers) that is needed too.
-> > 
-> > What you probably want is to specify that a subtree of your ceph dfs
-> > stores the file data in a separate pool, using "cephfs
-> > /mnt/ceph/some/subtree set_layout --pool 6". Note that a numerical
-> > pool id is currently required.
-> > 
-> > http://ceph.newdream.net/docs/master/man/8/cephfs/
-> > 
-> > You can mount any subtree of the ceph dfs directly, using
-> > 10.32.0.10:6789:/some/subtree in your mount command.
-> 
-> 
-> 
-> Hi Tommi,
-> 
-> We have tried setting the layout as described below with:
-> 'cephfs /mnt/ceph-backup/ set_layout --pool 3'
-> 
-> However, I only ever receive the following output;
-> 'Error setting layout: Invalid argument'
-> 
-> I can run other view the current layout of the mount 
-> point, but cannot change the pool layout.
-> 
-> My understanding of the numeric pool is as follows:
-> 
-> root@dsan-test:/mnt# ceph osd dump -o -|grep 'pool'
-> pool 0 'data' rep size 2 crush_ruleset 0
-> pool 1 'metadata' rep size 2 crush_ruleset 1
-> pool 2 'rbd' rep size 2 crush_ruleset 2
-> pool 3 'backup' rep size 2 crush_ruleset 0 
-> 
-> (omitted detail I thought unnecessary)
-> 
-> Therefore the backup pool which we specifically want to mount is 3?
-> 
-> Are you able to assist with the syntax for cephfs set_layout?
-That's the right pool ID; yes. I believe the problem is that the cephfs tool currently requires you to fill in all the fields, not just the one you wish to change. Try that (setting all the other values to match what you see when you view the layout). :)
--Greg
+RGW is maturing. Beside looking at performance, which highly ties into
+RADOS performance, we'd like to hear whether there are certain pain
+points or future directions that you (you as in the ceph community)
+would like to see us taking.
+
+There are a few directions that we were thinking about:
+
+1. Extend Object Storage API
+
+Swift and S3 has some features that we don't currently support. We can
+certainly extend our functionality, however, is there any demand for
+more features? E.g., self destructing objects, web site, user logs,
+etc.
+
+2. Better OpenStack interoperability
+
+Keystone support? Other?
+
+3. New features
+
+Some examples:
+
+=A0- multitenancy: api for domains and user management
+=A0- snapshots
+=A0- computation front end: upload object, then do some data
+transformation/calculation.
+=A0- simple key-value api
+
+4. CDMI
+
+Sage brought up the CDMI support question to ceph-devel, and I don't
+remember him getting any response. Is there any intereset in CDMI?
 
 
+5. Native apache/nginx module or embedded web server
+
+We still need to prove that the web server is a bottleneck, or poses
+scaling issues. Writing a correct native nginx module will require
+turning rgw process model into event driven, which is not going to be
+easy.
+
+6. Improve garbage collection
+
+Currently rgw generates intent logs for garabage removal that require
+running an external tool later, which is an administrative pain. We
+can implement other solutions (OSD side garbage collection,
+integrating cleanup process into the gateway, etc.) but we need to
+understand the priority.
+
+7. libradosgw
+
+We have had this in mind for some time now. Creating a programming api
+for rgw, not too different from librados and librbd. It'll hopefully
+make code much cleaner. It will allow users to write different front
+ends for the rgw backend, and it will make it easier for users to
+write applications that interact with the backend, e.g., do processing
+on objects that users uploaded, FUSE for rgw without S3 as an
+intermediate, etc.
+
+8. Administration tools improvement
+
+We can always do better there.
+
+9. Other ideas?
+
+
+Any comments are welcome!
+
+Thanks,
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
