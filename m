@@ -1,42 +1,241 @@
-From: Xiaopong Tran <xiaopong.tran@gmail.com>
-Subject: Re: RGW, future directions
-Date: Wed, 23 May 2012 19:22:05 +0800
-Message-ID: <5c05c2ea-51f7-4f9f-bfac-e6e9c57feec0@email.android.com>
-References: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com> <CANExM-PHHCwnH8n_nrjA=HJ0uzL268kjZf6pAh5+Eh73=1UPMg@mail.gmail.com>
+From: Felix Feinhals <ff@turtle-entertainment.de>
+Subject: Re: MDS crash, wont startup again
+Date: Wed, 23 May 2012 14:28:29 +0200
+Message-ID: <CA+WUqKy2DrEM90HrSF8ju68gjLhVv3TWEFTb68fi+5GpifOLTg@mail.gmail.com>
+References: <CA+WUqKxZoh_5k5qgtUFwnsr2=gaZ4_RONazYQG7enKa75WhNVQ@mail.gmail.com>
+ <CA+WUqKyFusqxiPkPvQeSaP_nPBd5_ab4nLz1xWeOZZqMLk1SBA@mail.gmail.com>
+ <4FB56FD1.5090805@inktank.com> <CA+WUqKz5HQ77p7TYxJhiOPfY6Tm+12O+FRFr19ra6t9bZb6YSg@mail.gmail.com>
+ <CAPYLRzjTs19air=7cT3PGSWiHGFUyKuTeX9OHzTBfBPyMXan+g@mail.gmail.com>
+ <CA+WUqKyH6bro4u-PXoKC0WEi37bn85YaG8jxi9SZ+fvpZFx--g@mail.gmail.com> <DF93AE65E2C74807A83392C93D9EDA0B@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:42661 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932305Ab2EWLrM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 07:47:12 -0400
-Received: by pbbrp8 with SMTP id rp8so9778717pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 04:47:12 -0700 (PDT)
-In-Reply-To: <CANExM-PHHCwnH8n_nrjA=HJ0uzL268kjZf6pAh5+Eh73=1UPMg@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:61468 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759644Ab2EWM2q convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 08:28:46 -0400
+Received: by lbbgm6 with SMTP id gm6so5015671lbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 05:28:44 -0700 (PDT)
+In-Reply-To: <DF93AE65E2C74807A83392C93D9EDA0B@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Greg Farnum <greg@inktank.com>
+Cc: ceph-devel@vger.kernel.org
+
+Hey,
+
+ok i installed libc-dbg and run your commands now this comes up:
+
+gdb /usr/bin/ceph-mds core
+
+snip
+
+GNU gdb (GDB) 7.0.1-debian
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /usr/bin/ceph-mds...Reading symbols from
+/usr/lib/debug/usr/bin/ceph-mds...done.
+(no debugging symbols found)...done.
+[New Thread 22980]
+[New Thread 22984]
+[New Thread 22986]
+[New Thread 22979]
+[New Thread 22970]
+[New Thread 22981]
+[New Thread 22971]
+[New Thread 22976]
+[New Thread 22973]
+[New Thread 22975]
+[New Thread 22974]
+[New Thread 22972]
+[New Thread 22978]
+[New Thread 22982]
+
+warning: Can't read pathname for load map: Input/output error.
+Reading symbols from /lib/libpthread.so.0...Reading symbols from
+/usr/lib/debug/lib/libpthread-2.11.3.so...done.
+(no debugging symbols found)...done.
+Loaded symbols for /lib/libpthread.so.0
+Reading symbols from /usr/lib/libcrypto++.so.8...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib/libcrypto++.so.8
+Reading symbols from /lib/libuuid.so.1...(no debugging symbols found)...done.
+Loaded symbols for /lib/libuuid.so.1
+Reading symbols from /lib/librt.so.1...Reading symbols from
+/usr/lib/debug/lib/librt-2.11.3.so...done.
+(no debugging symbols found)...done.
+Loaded symbols for /lib/librt.so.1
+Reading symbols from /usr/lib/libtcmalloc.so.0...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib/libtcmalloc.so.0
+Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib/libstdc++.so.6
+Reading symbols from /lib/libm.so.6...Reading symbols from
+/usr/lib/debug/lib/libm-2.11.3.so...done.
+(no debugging symbols found)...done.
+Loaded symbols for /lib/libm.so.6
+Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols found)...done.
+Loaded symbols for /lib/libgcc_s.so.1
+Reading symbols from /lib/libc.so.6...Reading symbols from
+/usr/lib/debug/lib/libc-2.11.3.so...done.
+(no debugging symbols found)...done.
+Loaded symbols for /lib/libc.so.6
+Reading symbols from /lib64/ld-linux-x86-64.so.2...Reading symbols
+from /usr/lib/debug/lib/ld-2.11.3.so...done.
+(no debugging symbols found)...done.
+Loaded symbols for /lib64/ld-linux-x86-64.so.2
+Reading symbols from /usr/lib/libunwind.so.7...(no debugging symbols
+found)...done.
+Loaded symbols for /usr/lib/libunwind.so.7
+Core was generated by `/usr/bin/ceph-mds -i c --pid-file
+/var/run/ceph/mds.c.pid -c /etc/ceph/ceph.con'.
+Program terminated with signal 11, Segmentation fault.
+#0  0x00007f10c00d2ebb in raise (sig=<value optimized out>) at
+../nptl/sysdeps/unix/sysv/linux/pt-raise.c:41
+41      ../nptl/sysdeps/unix/sysv/linux/pt-raise.c: No such file or directory.
+        in ../nptl/sysdeps/unix/sysv/linux/pt-raise.c
+
+snip
+
+Now
+
+thread apply all bt
+
+...
+
+thread 1
+[Switching to thread 1 (Thread 22977)]#0  0x00007f10c00d2ebb in raise
+(sig=<value optimized out>) at
+../nptl/sysdeps/unix/sysv/linux/pt-raise.c:41
+41      in ../nptl/sysdeps/unix/sysv/linux/pt-raise.c
 
 
+Thread 1 (Thread 22977):
+---Type <return> to continue, or q <return> to quit---
+#0  0x00007f10c00d2ebb in raise (sig=<value optimized out>) at
+../nptl/sysdeps/unix/sysv/linux/pt-raise.c:41
+#1  0x000000000081469e in reraise_fatal (signum=11) at
+global/signal_handler.cc:58
+#2  handle_fatal_signal (signum=11) at global/signal_handler.cc:104
+#3  <signal handler called>
+#4  SnapRealm::have_past_parents_open (this=0x0, first=..., last=...)
+at mds/snap.cc:112
 
+#5  0x000000000055d58b in MDCache::check_realm_past_parents
+(this=0x2b49200, realm=0x0) at mds/MDCache.cc:4495
+#6  0x0000000000572eec in
+MDCache::choose_lock_states_and_reconnect_caps (this=0x2b49200) at
+mds/MDCache.cc:4533
+#7  0x00000000005931a0 in MDCache::rejoin_gather_finish
+(this=0x2b49200) at mds/MDCache.cc:4444
+#8  0x000000000059b9d5 in MDCache::rejoin_send_rejoins
+(this=0x2b49200) at mds/MDCache.cc:3388
+#9  0x00000000004a8721 in MDS::rejoin_joint_start (this=0x2b5e000) at
+mds/MDS.cc:1404
+#10 0x00000000004c253a in MDS::handle_mds_map (this=0x2b5e000,
+m=<value optimized out>) at mds/MDS.cc:968
+#11 0x00000000004c4513 in MDS::handle_core_message (this=0x2b5e000,
+m=0x2b4d800) at mds/MDS.cc:1651
+#12 0x00000000004c45ef in MDS::_dispatch (this=0x2b5e000, m=0x2b4d800)
+at mds/MDS.cc:1790
+#13 0x00000000004c628b in MDS::ms_dispatch (this=0x2b5e000,
+m=0x2b4d800) at mds/MDS.cc:1602
+#14 0x00000000007acb49 in Messenger::ms_deliver_dispatch
+(this=0x2b41680) at msg/Messenger.h:178
+#15 SimpleMessenger::dispatch_entry (this=0x2b41680) at
+msg/SimpleMessenger.cc:363
+#16 0x00000000007336ed in SimpleMessenger::DispatchThread::entry() ()
+#17 0x00007f10c00ca8ca in start_thread (arg=<value optimized out>) at
+pthread_create.c:300
+#18 0x00007f10be95292d in clone () at
+../sysdeps/unix/sysv/linux/x86_64/clone.S:112
+#19 0x0000000000000000 in ?? ()
 
+So i wonder is the crash because of the missing file message?
+
+2012/5/22 Greg Farnum <greg@inktank.com>:
 >
->I would like to see radosgw supporting:
->- Object versioning
->- Bucket policy
 >
-
-+1 for these.
-
+> On Tuesday, May 22, 2012 at 3:12 AM, Felix Feinhals wrote:
+>
+>> I am not quite sure on how to get you the coredump infos. I installed
+>> all ceph-dbg packages and executed:
 >>
->> 7. libradosgw
+>> gdb /usr/bin/ceph-mds core
 >>
-
-Yes, please :)
-
-Cheers,
-
-Xiaopong
-
+>> snip
+>>
+>> GNU gdb (GDB) 7.0.1-debian
+>> Copyright (C) 2009 Free Software Foundation, Inc.
+>> License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+>> This is free software: you are free to change and redistribute it.
+>> There is NO WARRANTY, to the extent permitted by law. Type "show copying"
+>> and "show warranty" for details.
+>> This GDB was configured as "x86_64-linux-gnu".
+>> For bug reporting instructions, please see:
+>> <http://www.gnu.org/software/gdb/bugs/>...
+>> Reading symbols from /usr/bin/ceph-mds...Reading symbols from
+>> /usr/lib/debug/usr/bin/ceph-mds...done.
+>> (no debugging symbols found)...done.
+>> [New Thread 22980]
+>> [New Thread 22984]
+>> [New Thread 22986]
+>> [New Thread 22979]
+>> [New Thread 22970]
+>> [New Thread 22981]
+>> [New Thread 22971]
+>> [New Thread 22976]
+>> [New Thread 22973]
+>> [New Thread 22975]
+>> [New Thread 22974]
+>> [New Thread 22972]
+>> [New Thread 22978]
+>> [New Thread 22982]
+>>
+>> warning: Can't read pathname for load map: Input/output error.
+>> Reading symbols from /lib/libpthread.so.0...(no debugging symbols found)...done.
+>> Loaded symbols for /lib/libpthread.so.0
+>> Reading symbols from /usr/lib/libcrypto++.so.8...(no debugging symbols
+>> found)...done.
+>> Loaded symbols for /usr/lib/libcrypto++.so.8
+>> Reading symbols from /lib/libuuid.so.1...(no debugging symbols found)...done.
+>> Loaded symbols for /lib/libuuid.so.1
+>> Reading symbols from /lib/librt.so.1...(no debugging symbols found)...done.
+>> Loaded symbols for /lib/librt.so.1
+>> Reading symbols from /usr/lib/libtcmalloc.so.0...(no debugging symbols
+>> found)...done.
+>> Loaded symbols for /usr/lib/libtcmalloc.so.0
+>> Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols
+>> found)...done.
+>> Loaded symbols for /usr/lib/libstdc++.so.6
+>> Reading symbols from /lib/libm.so.6...(no debugging symbols found)...done.
+>> Loaded symbols for /lib/libm.so.6
+>> Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols found)...done.
+>> Loaded symbols for /lib/libgcc_s.so.1
+>> Reading symbols from /lib/libc.so.6...(no debugging symbols found)...done.
+>> Loaded symbols for /lib/libc.so.6
+>> Reading symbols from /lib64/ld-linux-x86-64.so.2...(no debugging
+>> symbols found)...done.
+>> Loaded symbols for /lib64/ld-linux-x86-64.so.2
+>> Reading symbols from /usr/lib/libunwind.so.7...(no debugging symbols
+>> found)...done.
+>> Loaded symbols for /usr/lib/libunwind.so.7
+>> Core was generated by `/usr/bin/ceph-mds -i c --pid-file
+>> /var/run/ceph/mds.c.pid -c /etc/ceph/ceph.con'.
+>> Program terminated with signal 11, Segmentation fault.
+>> #0 0x00007f10c00d2ebb in raise () from /lib/libpthread.so.0
+>>
+>
+> Argh. This is finicky and annoying; don't feel bad. :) There are two possibilities here:
+> 1) If I remember correctly, PATH and the actual debug symbol install locations often don't match up. Check out where the debug packages actually installed to, and make sure that directory is in PATH when running gdb.
+> 2) The default thread you're getting a backtrace on doesn't look to be the one we actually care about (notice how the backtrace is through completely different parts of the code); it's conceivable that there just aren't any debug symbols for those libraries. Try running "thread apply all bt" (I think that's the right command) and looking for one that matches the backtrace in the log file. Then switch to it ("thread x" where x is the thread number) and get the backtrace of that.
+> -Greg
+>
