@@ -1,241 +1,116 @@
-From: Felix Feinhals <ff@turtle-entertainment.de>
-Subject: Re: MDS crash, wont startup again
-Date: Wed, 23 May 2012 14:28:29 +0200
-Message-ID: <CA+WUqKy2DrEM90HrSF8ju68gjLhVv3TWEFTb68fi+5GpifOLTg@mail.gmail.com>
-References: <CA+WUqKxZoh_5k5qgtUFwnsr2=gaZ4_RONazYQG7enKa75WhNVQ@mail.gmail.com>
- <CA+WUqKyFusqxiPkPvQeSaP_nPBd5_ab4nLz1xWeOZZqMLk1SBA@mail.gmail.com>
- <4FB56FD1.5090805@inktank.com> <CA+WUqKz5HQ77p7TYxJhiOPfY6Tm+12O+FRFr19ra6t9bZb6YSg@mail.gmail.com>
- <CAPYLRzjTs19air=7cT3PGSWiHGFUyKuTeX9OHzTBfBPyMXan+g@mail.gmail.com>
- <CA+WUqKyH6bro4u-PXoKC0WEi37bn85YaG8jxi9SZ+fvpZFx--g@mail.gmail.com> <DF93AE65E2C74807A83392C93D9EDA0B@inktank.com>
+From: Christian Brunner <christian@brunner-muc.de>
+Subject: Re: Ceph on btrfs 3.4rc
+Date: Wed, 23 May 2012 14:34:43 +0200
+Message-ID: <CAJafhzQGHsSA6dUwOqTJERj7SgVmKFuVDHk5R+i7n0FuhUAj_g@mail.gmail.com>
+References: <20120517144306.GA3011@dhcp231-144.rdu.redhat.com>
+	<4FB51577.5090100@tuxadero.com>
+	<20120517194358.GA9846@dhcp231-144.rdu.redhat.com>
+	<CAJafhzTQJchdd600DiEnooUH-P9ZcLvW+oEczCMNskd+Ud4BmQ@mail.gmail.com>
+	<4FB56B21.7070800@tuxadero.com>
+	<20120518144759.GA1892@localhost.localdomain>
+	<4FB685C9.2050607@tuxadero.com>
+	<20120518190105.GB1892@localhost.localdomain>
+	<4FB9BDBA.2030806@cn.fujitsu.com>
+	<CAJafhzSmLC9yUwrxsJEz5vKYnfP0DSWdMnA0oXmLT_4CQFc1oQ@mail.gmail.com>
+	<20120522173344.GB1890@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:61468 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759644Ab2EWM2q convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 08:28:46 -0400
-Received: by lbbgm6 with SMTP id gm6so5015671lbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 05:28:44 -0700 (PDT)
-In-Reply-To: <DF93AE65E2C74807A83392C93D9EDA0B@inktank.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:64712 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751715Ab2EWMep convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 08:34:45 -0400
+Received: by yhmm54 with SMTP id m54so6486075yhm.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 05:34:44 -0700 (PDT)
+In-Reply-To: <20120522173344.GB1890@localhost.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <greg@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Josef Bacik <josef@redhat.com>
+Cc: miaox@cn.fujitsu.com, Martin Mailand <martin@tuxadero.com>, Sage Weil <sage@newdream.net>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-Hey,
-
-ok i installed libc-dbg and run your commands now this comes up:
-
-gdb /usr/bin/ceph-mds core
-
-snip
-
-GNU gdb (GDB) 7.0.1-debian
-Copyright (C) 2009 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
-and "show warranty" for details.
-This GDB was configured as "x86_64-linux-gnu".
-For bug reporting instructions, please see:
-<http://www.gnu.org/software/gdb/bugs/>...
-Reading symbols from /usr/bin/ceph-mds...Reading symbols from
-/usr/lib/debug/usr/bin/ceph-mds...done.
-(no debugging symbols found)...done.
-[New Thread 22980]
-[New Thread 22984]
-[New Thread 22986]
-[New Thread 22979]
-[New Thread 22970]
-[New Thread 22981]
-[New Thread 22971]
-[New Thread 22976]
-[New Thread 22973]
-[New Thread 22975]
-[New Thread 22974]
-[New Thread 22972]
-[New Thread 22978]
-[New Thread 22982]
-
-warning: Can't read pathname for load map: Input/output error.
-Reading symbols from /lib/libpthread.so.0...Reading symbols from
-/usr/lib/debug/lib/libpthread-2.11.3.so...done.
-(no debugging symbols found)...done.
-Loaded symbols for /lib/libpthread.so.0
-Reading symbols from /usr/lib/libcrypto++.so.8...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib/libcrypto++.so.8
-Reading symbols from /lib/libuuid.so.1...(no debugging symbols found)...done.
-Loaded symbols for /lib/libuuid.so.1
-Reading symbols from /lib/librt.so.1...Reading symbols from
-/usr/lib/debug/lib/librt-2.11.3.so...done.
-(no debugging symbols found)...done.
-Loaded symbols for /lib/librt.so.1
-Reading symbols from /usr/lib/libtcmalloc.so.0...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib/libtcmalloc.so.0
-Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib/libstdc++.so.6
-Reading symbols from /lib/libm.so.6...Reading symbols from
-/usr/lib/debug/lib/libm-2.11.3.so...done.
-(no debugging symbols found)...done.
-Loaded symbols for /lib/libm.so.6
-Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols found)...done.
-Loaded symbols for /lib/libgcc_s.so.1
-Reading symbols from /lib/libc.so.6...Reading symbols from
-/usr/lib/debug/lib/libc-2.11.3.so...done.
-(no debugging symbols found)...done.
-Loaded symbols for /lib/libc.so.6
-Reading symbols from /lib64/ld-linux-x86-64.so.2...Reading symbols
-from /usr/lib/debug/lib/ld-2.11.3.so...done.
-(no debugging symbols found)...done.
-Loaded symbols for /lib64/ld-linux-x86-64.so.2
-Reading symbols from /usr/lib/libunwind.so.7...(no debugging symbols
-found)...done.
-Loaded symbols for /usr/lib/libunwind.so.7
-Core was generated by `/usr/bin/ceph-mds -i c --pid-file
-/var/run/ceph/mds.c.pid -c /etc/ceph/ceph.con'.
-Program terminated with signal 11, Segmentation fault.
-#0  0x00007f10c00d2ebb in raise (sig=<value optimized out>) at
-../nptl/sysdeps/unix/sysv/linux/pt-raise.c:41
-41      ../nptl/sysdeps/unix/sysv/linux/pt-raise.c: No such file or directory.
-        in ../nptl/sysdeps/unix/sysv/linux/pt-raise.c
-
-snip
-
-Now
-
-thread apply all bt
-
-...
-
-thread 1
-[Switching to thread 1 (Thread 22977)]#0  0x00007f10c00d2ebb in raise
-(sig=<value optimized out>) at
-../nptl/sysdeps/unix/sysv/linux/pt-raise.c:41
-41      in ../nptl/sysdeps/unix/sysv/linux/pt-raise.c
-
-
-Thread 1 (Thread 22977):
----Type <return> to continue, or q <return> to quit---
-#0  0x00007f10c00d2ebb in raise (sig=<value optimized out>) at
-../nptl/sysdeps/unix/sysv/linux/pt-raise.c:41
-#1  0x000000000081469e in reraise_fatal (signum=11) at
-global/signal_handler.cc:58
-#2  handle_fatal_signal (signum=11) at global/signal_handler.cc:104
-#3  <signal handler called>
-#4  SnapRealm::have_past_parents_open (this=0x0, first=..., last=...)
-at mds/snap.cc:112
-
-#5  0x000000000055d58b in MDCache::check_realm_past_parents
-(this=0x2b49200, realm=0x0) at mds/MDCache.cc:4495
-#6  0x0000000000572eec in
-MDCache::choose_lock_states_and_reconnect_caps (this=0x2b49200) at
-mds/MDCache.cc:4533
-#7  0x00000000005931a0 in MDCache::rejoin_gather_finish
-(this=0x2b49200) at mds/MDCache.cc:4444
-#8  0x000000000059b9d5 in MDCache::rejoin_send_rejoins
-(this=0x2b49200) at mds/MDCache.cc:3388
-#9  0x00000000004a8721 in MDS::rejoin_joint_start (this=0x2b5e000) at
-mds/MDS.cc:1404
-#10 0x00000000004c253a in MDS::handle_mds_map (this=0x2b5e000,
-m=<value optimized out>) at mds/MDS.cc:968
-#11 0x00000000004c4513 in MDS::handle_core_message (this=0x2b5e000,
-m=0x2b4d800) at mds/MDS.cc:1651
-#12 0x00000000004c45ef in MDS::_dispatch (this=0x2b5e000, m=0x2b4d800)
-at mds/MDS.cc:1790
-#13 0x00000000004c628b in MDS::ms_dispatch (this=0x2b5e000,
-m=0x2b4d800) at mds/MDS.cc:1602
-#14 0x00000000007acb49 in Messenger::ms_deliver_dispatch
-(this=0x2b41680) at msg/Messenger.h:178
-#15 SimpleMessenger::dispatch_entry (this=0x2b41680) at
-msg/SimpleMessenger.cc:363
-#16 0x00000000007336ed in SimpleMessenger::DispatchThread::entry() ()
-#17 0x00007f10c00ca8ca in start_thread (arg=<value optimized out>) at
-pthread_create.c:300
-#18 0x00007f10be95292d in clone () at
-../sysdeps/unix/sysv/linux/x86_64/clone.S:112
-#19 0x0000000000000000 in ?? ()
-
-So i wonder is the crash because of the missing file message?
-
-2012/5/22 Greg Farnum <greg@inktank.com>:
->
->
-> On Tuesday, May 22, 2012 at 3:12 AM, Felix Feinhals wrote:
->
->> I am not quite sure on how to get you the coredump infos. I installed
->> all ceph-dbg packages and executed:
->>
->> gdb /usr/bin/ceph-mds core
->>
->> snip
->>
->> GNU gdb (GDB) 7.0.1-debian
->> Copyright (C) 2009 Free Software Foundation, Inc.
->> License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
->> This is free software: you are free to change and redistribute it.
->> There is NO WARRANTY, to the extent permitted by law. Type "show copying"
->> and "show warranty" for details.
->> This GDB was configured as "x86_64-linux-gnu".
->> For bug reporting instructions, please see:
->> <http://www.gnu.org/software/gdb/bugs/>...
->> Reading symbols from /usr/bin/ceph-mds...Reading symbols from
->> /usr/lib/debug/usr/bin/ceph-mds...done.
->> (no debugging symbols found)...done.
->> [New Thread 22980]
->> [New Thread 22984]
->> [New Thread 22986]
->> [New Thread 22979]
->> [New Thread 22970]
->> [New Thread 22981]
->> [New Thread 22971]
->> [New Thread 22976]
->> [New Thread 22973]
->> [New Thread 22975]
->> [New Thread 22974]
->> [New Thread 22972]
->> [New Thread 22978]
->> [New Thread 22982]
->>
->> warning: Can't read pathname for load map: Input/output error.
->> Reading symbols from /lib/libpthread.so.0...(no debugging symbols found)...done.
->> Loaded symbols for /lib/libpthread.so.0
->> Reading symbols from /usr/lib/libcrypto++.so.8...(no debugging symbols
->> found)...done.
->> Loaded symbols for /usr/lib/libcrypto++.so.8
->> Reading symbols from /lib/libuuid.so.1...(no debugging symbols found)...done.
->> Loaded symbols for /lib/libuuid.so.1
->> Reading symbols from /lib/librt.so.1...(no debugging symbols found)...done.
->> Loaded symbols for /lib/librt.so.1
->> Reading symbols from /usr/lib/libtcmalloc.so.0...(no debugging symbols
->> found)...done.
->> Loaded symbols for /usr/lib/libtcmalloc.so.0
->> Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols
->> found)...done.
->> Loaded symbols for /usr/lib/libstdc++.so.6
->> Reading symbols from /lib/libm.so.6...(no debugging symbols found)...done.
->> Loaded symbols for /lib/libm.so.6
->> Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols found)...done.
->> Loaded symbols for /lib/libgcc_s.so.1
->> Reading symbols from /lib/libc.so.6...(no debugging symbols found)...done.
->> Loaded symbols for /lib/libc.so.6
->> Reading symbols from /lib64/ld-linux-x86-64.so.2...(no debugging
->> symbols found)...done.
->> Loaded symbols for /lib64/ld-linux-x86-64.so.2
->> Reading symbols from /usr/lib/libunwind.so.7...(no debugging symbols
->> found)...done.
->> Loaded symbols for /usr/lib/libunwind.so.7
->> Core was generated by `/usr/bin/ceph-mds -i c --pid-file
->> /var/run/ceph/mds.c.pid -c /etc/ceph/ceph.con'.
->> Program terminated with signal 11, Segmentation fault.
->> #0 0x00007f10c00d2ebb in raise () from /lib/libpthread.so.0
+2012/5/22 Josef Bacik <josef@redhat.com>:
 >>
 >
-> Argh. This is finicky and annoying; don't feel bad. :) There are two possibilities here:
-> 1) If I remember correctly, PATH and the actual debug symbol install locations often don't match up. Check out where the debug packages actually installed to, and make sure that directory is in PATH when running gdb.
-> 2) The default thread you're getting a backtrace on doesn't look to be the one we actually care about (notice how the backtrace is through completely different parts of the code); it's conceivable that there just aren't any debug symbols for those libraries. Try running "thread apply all bt" (I think that's the right command) and looking for one that matches the backtrace in the log file. Then switch to it ("thread x" where x is the thread number) and get the backtrace of that.
-> -Greg
->
+> Yeah you would also need to change orphan_meta_reserved. =A0I fixed t=
+his by just
+> taking the BTRFS_I(inode)->lock when messing with these since we don'=
+t want to
+> take up all that space in the inode just for a marker. =A0I ran this =
+patch for 3
+> hours with no issues, let me know if it works for you. =A0Thanks,
+
+Compared to the last runs, I had to run it much longer, but somehow I
+managed to hit a BUG_ON again:
+
+[448281.002087] couldn't find orphan item for 2027, nlink 1, root 308,
+root being deleted no
+[448281.011339] ------------[ cut here ]------------
+[448281.016590] kernel BUG at fs/btrfs/inode.c:2230!
+[448281.021837] invalid opcode: 0000 [#1] SMP
+[448281.026525] CPU 4
+[448281.028670] Modules linked in: btrfs zlib_deflate libcrc32c xfs
+exportfs sunrpc bonding ipv6 sg serio_raw pcspkr iTCO_wdt
+iTCO_vendor_support ixgbe dca mdio i7core_edac edac_core
+iomemory_vsl(PO) hpsa squashfs [last unloaded: btrfs]
+[448281.052215]
+[448281.053977] Pid: 16018, comm: ceph-osd Tainted: P        W  O
+3.3.5-1.fits.1.el6.x86_64 #1 HP ProLiant DL180 G6
+[448281.065555] RIP: 0010:[<ffffffffa04a17ab>]  [<ffffffffa04a17ab>]
+btrfs_orphan_del+0x19b/0x1b0 [btrfs]
+[448281.075965] RSP: 0018:ffff880458257d18  EFLAGS: 00010292
+[448281.081987] RAX: 0000000000000063 RBX: ffff8803a28ebc48 RCX:
+0000000000002fdb
+[448281.090042] RDX: 0000000000000000 RSI: 0000000000000046 RDI:
+0000000000000246
+[448281.098093] RBP: ffff880458257d58 R08: ffffffff81af6100 R09:
+0000000000000000
+[448281.106146] R10: 0000000000000004 R11: 0000000000000000 R12:
+0000000000000001
+[448281.114202] R13: ffff88052e130400 R14: 0000000000000001 R15:
+ffff8805beae9e10
+[448281.122262] FS:  00007fa2e772f700(0000) GS:ffff880627280000(0000)
+knlGS:0000000000000000
+[448281.131386] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[448281.137879] CR2: ffffffffff600400 CR3: 00000005015a5000 CR4:
+00000000000006e0
+[448281.145929] DR0: 0000000000000000 DR1: 0000000000000000 DR2:
+0000000000000000
+[448281.153974] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7:
+0000000000000400
+[448281.162043] Process ceph-osd (pid: 16018, threadinfo
+ffff880458256000, task ffff88055b711940)
+[448281.171646] Stack:
+[448281.173987]  ffff880458257dff ffff8803a28eba98 ffff880458257d58
+ffff8805beae9e10
+[448281.182377]  0000000000000000 ffff88052e130400 ffff88029ff33380
+ffff8803a28ebc48
+[448281.190766]  ffff880458257e08 ffffffffa04ab4e6 0000000000000000
+ffff8803a28ebc48
+[448281.199155] Call Trace:
+[448281.202005]  [<ffffffffa04ab4e6>] btrfs_truncate+0x5f6/0x660 [btrfs=
+]
+[448281.209203]  [<ffffffffa04ab646>] btrfs_setattr+0xf6/0x1a0 [btrfs]
+[448281.216202]  [<ffffffff811816fb>] notify_change+0x18b/0x2b0
+[448281.222517]  [<ffffffff81276541>] ? selinux_inode_permission+0xd1/0=
+x130
+[448281.229990]  [<ffffffff81165f44>] do_truncate+0x64/0xa0
+[448281.235919]  [<ffffffff81172669>] ? inode_permission+0x49/0x100
+[448281.242617]  [<ffffffff81166197>] sys_truncate+0x137/0x150
+[448281.248838]  [<ffffffff8158b1e9>] system_call_fastpath+0x16/0x1b
+[448281.255631] Code: a0 49 8b 8d f0 02 00 00 8b 53 48 4c 0f 45 c0 48
+85 f6 74 1b 80 bb 60 fe ff ff 84 74 12 48 c7 c7 e8 1d 50 a0 31 c0 e8
+9d ea 0d e1 <0f> 0b eb fe 48 8b 73 40 eb e8 66 66 2e 0f 1f 84 00 00 00
+00 00
+[448281.277435] RIP  [<ffffffffa04a17ab>] btrfs_orphan_del+0x19b/0x1b0 =
+[btrfs]
+[448281.285229]  RSP <ffff880458257d18>
+[448281.289667] ---[ end trace 9adc7b36a3e66872 ]---
+
+Sorry,
+Christian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
