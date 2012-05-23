@@ -1,75 +1,94 @@
-From: Guilhem LETTRON <guilhem.lettron@gmail.com>
-Subject: Re: RGW, future directions
-Date: Wed, 23 May 2012 18:12:48 +0200
-Message-ID: <CAMQoE_0MYWyBGfNkv51QMh18t6HbaA6scrVSNwrmHrUW0aiRCg@mail.gmail.com>
-References: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] Update ceph.spec for ceph-0.47
+Date: Wed, 23 May 2012 10:55:36 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205231048060.15923@cobra.newdream.net>
+References: <orfwasr5n8.fsf@livre.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:50392 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965054Ab2EWQNJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 12:13:09 -0400
-Received: by yhmm54 with SMTP id m54so6735790yhm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 09:13:08 -0700 (PDT)
-In-Reply-To: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:55715 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756717Ab2EWRzj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 13:55:39 -0400
+In-Reply-To: <orfwasr5n8.fsf@livre.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
+To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Tue, 22 May 2012, Alexandre Oliva wrote:
+> Add BuildRequires: libxml2-devel.
+> Move BuildRequires: libcurl-devel to a more proper place.
+> Uninstall libs3, incorrectly installed in RPM_BUILD_ROOT.
 
-2012/5/22 Yehuda Sadeh <yehuda@inktank.com>:
-> RGW is maturing. Beside looking at performance, which highly ties int=
-o
-> RADOS performance, we'd like to hear whether there are certain pain
-> points or future directions that you (you as in the ceph community)
-> would like to see us taking.
->
-> There are a few directions that we were thinking about:
+We fixed the Makefile so that libs3 is no longer installed in the first 
+place, took that part out.
 
-> 3. New features
->
-> Some examples:
->
-> =A0- multitenancy: api for domains and user management
-> =A0- snapshots
-> =A0- computation front end: upload object, then do some data
-> transformation/calculation.
-> =A0- simple key-value api
+> Package %{_includedir}/rados/librgw.h.
 
-+1 any new feature can be a new solution for futur needs.
+This shouldn't be installed.. I've fixed the Makefile accordingly.
 
-> 5. Native apache/nginx module or embedded web server
->
-> We still need to prove that the web server is a bottleneck, or poses
-> scaling issues. Writing a correct native nginx module will require
-> turning rgw process model into event driven, which is not going to be
-> easy.
+An abbreviated version of the patch is now in stable.
 
-It is, for me the #1 feature :
-- I only use Nginx for everythings... instead radosgw
-- another process / another deamon / another problem
-- resolve once for all the "buffering" problem : only apache/fastcgi
-can send without buffering. And when you send BIG files, it's not an
-option.
+Thanks!
+sage
 
-> 8. Administration tools improvement
->
-> We can always do better there.
 
-Agree, bucket / pool management is quite an ordeal.
-It come (of course) with a better documentation.
-
-> Thanks,
-> Yehuda
-
-Thanks,
-Guilhem Lettron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> ---
+>  ceph.spec.in |    8 +++++++-
+>  1 files changed, 7 insertions(+), 1 deletions(-)
+> 
+> diff --git a/ceph.spec.in b/ceph.spec.in
+> index b3dd3f0..1dbd645 100644
+> --- a/ceph.spec.in
+> +++ b/ceph.spec.in
+> @@ -37,6 +37,8 @@ BuildRequires:	gdbm
+>  BuildRequires:	pkgconfig
+>  BuildRequires:	python
+>  BuildRequires:  libaio-devel
+> +BuildRequires:  libcurl-devel
+> +BuildRequires:  libxml2-devel
+>  
+>  #################################################################################
+>  # specific
+> @@ -55,7 +57,6 @@ Requires(post):	chkconfig
+>  Requires(preun):chkconfig
+>  Requires(preun):initscripts
+>  %endif
+> -BuildRequires: libcurl-devel
+>  %if 0%{with tcmalloc}
+>  # use isa so this will not be satisfied by
+>  # google-perftools-devel.i686 on a x86_64 box
+> @@ -232,6 +233,10 @@ make -j$(getconf _NPROCESSORS_ONLN)
+>  
+>  %install
+>  make DESTDIR=$RPM_BUILD_ROOT install
+> +make DESTDIR=$RPM_BUILD_ROOT -C src/libs3 uninstall
+> +rmdir $RPM_BUILD_ROOT/bin
+> +rmdir $RPM_BUILD_ROOT/lib
+> +rmdir $RPM_BUILD_ROOT/include
+>  find $RPM_BUILD_ROOT -type f -name "*.la" -exec rm -f {} ';'
+>  find $RPM_BUILD_ROOT -type f -name "*.a" -exec rm -f {} ';'
+>  install -D src/init-ceph $RPM_BUILD_ROOT%{_initrddir}/ceph
+> @@ -365,6 +370,7 @@ fi
+>  %dir %{_includedir}/rados
+>  %{_includedir}/rados/librados.h
+>  %{_includedir}/rados/librados.hpp
+> +%{_includedir}/rados/librgw.h
+>  %{_includedir}/rados/buffer.h
+>  %{_includedir}/rados/page.h
+>  %{_includedir}/rados/crc32c.h
+> -- 
+> 1.7.7.6
+> 
+> -- 
+> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+> You must be the change you wish to see in the world. -- Gandhi
+> Be Free! -- http://FSFLA.org/   FSF Latin America board member
+> Free Software Evangelist      Red Hat Brazil Compiler Engineer
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
