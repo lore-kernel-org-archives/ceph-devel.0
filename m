@@ -1,52 +1,43 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RGW, future directions
-Date: Wed, 23 May 2012 14:57:20 -0700
-Message-ID: <CAC-hyiEmhhwSKhHVQGe2FkSeB4No=XLkvL9X7rVKDaGKrSCAUg@mail.gmail.com>
-References: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
-	<CANT588skKYuwE2sGvkNs_7W0i=X5Ts=mr_Z+4iQXE4BUpqQcmg@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.47.2 released
+Date: Wed, 23 May 2012 16:17:44 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205231617100.15923@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1912575984-1337815064=:15923"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:56450 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754473Ab2EWV5V convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 17:57:21 -0400
-Received: by bkcji2 with SMTP id ji2so6408420bkc.19
-        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 14:57:20 -0700 (PDT)
-In-Reply-To: <CANT588skKYuwE2sGvkNs_7W0i=X5Ts=mr_Z+4iQXE4BUpqQcmg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:45014 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752635Ab2EWXRp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 19:17:45 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 9DDD7BC7A5
+	for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 16:17:44 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 7A4E7BC7A5
+	for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 16:17:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kiran Patil <kirantpatil@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wed, May 23, 2012 at 3:17 AM, Kiran Patil <kirantpatil@gmail.com> wr=
-ote:
-> Hello,
->
-> How about this CloudFS=A0management=A0system ?
->
-> The=A0CloudFS=A0management=A0system=A0consists=A0of=A0two=A0parts:=A0=
-a=A0very=A0simple
-> web-based management=A0daemon=A0called=A0cloudfsd,=A0and=A0scripts=A0=
-to=A0perform
-> various=A0discrete functions.
->
-> http://git.fedorahosted.org/git/?p=3DCloudFS.git;a=3Dsummary
->
-> http://git.fedorahosted.org/git/?p=3DCloudFS.git;a=3Dblob;f=3Dscripts=
-/README.ssl;h=3D3547f6b354d8b3455359ea019f6db9ce74862d2e;hb=3Dcloudfsd
->
-> I am not sure, whether it can be reused for ceph.
->
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Not sure either. However, the idea of having management API may ease
-any such integration.
+--557981400-1912575984-1337815064=:15923
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Thanks,
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This point release fixes a librbd bug and a small items:
+
+ * librbd: possible livelock with the caching enabled
+ * libs3 compilation/install confusion (when building from source)
+ * ceph.spec updates
+
+You can get it from the usual places:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at=C2=A0http://ceph.newdream.net/download/ceph-0.47.2.tar.gz
+ * For Debian/Ubuntu packages, see=C2=A0http://ceph.newdream.net/docs/maste=
+r/install/debian
+
+sage
+--557981400-1912575984-1337815064=:15923--
