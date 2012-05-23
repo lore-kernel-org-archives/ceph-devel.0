@@ -1,77 +1,72 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: how to mount a specific pool in cephs
-Date: Tue, 22 May 2012 22:15:35 -0700
-Message-ID: <0AD816275C544C9EAB3A6804BBC34817@inktank.com>
-References: <81C477727102DA4E9B2605AC748C495418EE10F2E4@exch10>
- <CAORUGqCMGZeVRO_dB7GEt8NJ=M63NZNejUMT75LEPFM3MaJVoA@mail.gmail.com>
- <loom.20120522T135204-38@post.gmane.org>
- <8CBFE0C21212497AA50AEBE59EEFCAFF@inktank.com>
- <3E281FAE45D705468EBA19F32321E72B32A009D964@exch11>
- <9AF25259E69149DE97352565797966E1@inktank.com>
- <loom.20120522T232520-187@post.gmane.org>
- <6DEB34DCFE6447C1BEE4A3E374801FAC@inktank.com>
- <loom.20120522T234403-146@post.gmane.org>
+Subject: Re: Designing a cluster guide
+Date: Tue, 22 May 2012 22:31:57 -0700
+Message-ID: <296E2D5FBD414EAEACB9E345FF676519@inktank.com>
+References: <4FB75BAD.3080709@profihost.ag>
+ <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
+ <CAMvP8PDRUTO8M0=4MvjDtEtUM7aKePOWvGRFiJA1onu4VgXHPw@mail.gmail.com>
+ <CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
+ <7111C6286D862F43B94FD6291D8989158644DD@EX01.onqtel.local>
+ <CAPYLRzgyyW5N894X1T=-gNyRdPmu-+VDr0=NuuLVEs93nGJZbw@mail.gmail.com>
+ <Pine.LNX.4.64.1205220852290.15565@Psilocybe.Update.UU.SE>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:55961 "EHLO
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:64923 "EHLO
 	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752120Ab2EWFPY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 01:15:24 -0400
-Received: by dady13 with SMTP id y13so9217378dad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 22:15:23 -0700 (PDT)
-In-Reply-To: <loom.20120522T234403-146@post.gmane.org>
+	with ESMTP id S1751559Ab2EWFbp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 01:31:45 -0400
+Received: by dady13 with SMTP id y13so9233494dad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 22:31:45 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1205220852290.15565@Psilocybe.Update.UU.SE>
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Grant Ashman <grant.ashman@mach.com.au>
-Cc: ceph-devel@vger.kernel.org
+To: Jerker Nyberg <jerker@update.uu.se>
+Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
 
-On Tuesday, May 22, 2012 at 2:51 PM, Grant Ashman wrote:
-> Awesome, that seemed to work!
-> However, I feel a bit silly - what I'm after is:
-> 
-> /mnt/ceph-data - mounted to pool 0 (data)
-> /mnt/ceph-backup - mounted to pool 3 (backup)
-> 
-> but this seemed to change both to mount to pool 3?
-> 
-> Am I simply doing something wrong at my mount stage?
-> 
-> The process to mount my specific pool as I understand it is;
-> 
-> 1. mount -t ceph 1.2.3.4:/ /mnt/ceph-backup
-> 2. ceph mds add_data_pool 3
-> 3. cephfs /mnt/ceph-backup/ -p 3 
-> 
-> Which should give me /ceph-backup mounted to the backup pool.
-> 
-> Should I simply then do a 
-> mount -t ceph 1.2.3.4:/ /mnt/ceph-data/
-> to get the /ceph-data/ pool mounted to the pool 0 data pool?
+On Tuesday, May 22, 2012 at 2:04 AM, Jerker Nyberg wrote:
+> On Mon, 21 May 2012, Gregory Farnum wrote:
+> =20
+> > This one the write is considered "safe" once it is on-disk on all
+> > OSDs currently responsible for hosting the object.
+> =20
+> =20
+> =20
+> Is it possible to configure the client to consider the write successf=
+ul =20
+> when the data is hitting RAM on all the OSDs but not yet committed to=
+ =20
+> disk?
 
-Right now, you can't actually get fully-distinct filesystem trees in a single Ceph cluster. That will probably come at some point in the future, and will require different MDS daemons and separate data & metadata pools for each filesystem.
+Direct users of the RADOS object store (i.e., librados) can do all kind=
+s of things with the integrity guarantee options. But I don't believe t=
+here's currently a way to make the filesystem do so =E2=80=94 among oth=
+er things, you're running through the page cache and other writeback ca=
+ches anyway, so it generally wouldn't be useful except when running an =
+fsync or similar. And at that point you probably really want to not be =
+lying to the application that's asking for it.
 
-What you *can* do right now is:
-1) Set the pool a subtree writes all its new data to, and
-2) mount subtrees of the filesystem, and
-3) give specific clients read/write access to only a subset of the pools used by the filesystem hierarchy.
+> Also, the IBM zFS research file system is talking about cooperative c=
+ache =20
+> and Lustre about a collaborative cache. Do you have any thoughts of t=
+his =20
+> regarding Ceph?
 
-This means that you could have your root directory contain a "live" and a "backup" directory:
-mount -t ceph 1.2.3.4:/ /mnt/ceph
-mkdir /mnt/ceph/live; mkdir /mnt/ceph/backup
-
-Leave the "live" directory using pool 0 while setting the "backup" directory to use pool 3:
-cephfs /mnt/ceph/backup -p 3; umount /mnt/ceph
-
-And then run one of
-mount -t ceph 1.2.3.4:/live /mnt/ceph
-or
-mount -t ceph 1.2.3.4:/backup /mnt/ceph-backup
-
-On your live and backup servers, respectively. (Or mount both and copy files to backup, or whatever.) Your live servers won't see the backup space, and the backup space won't see the live space, and they will live in different pools that you can place on different OSDs. (Although the metadata can't be segregated right now; you'll want a different strategy for that.)
-
-Make sense?
+I haven't heard of this before, but assuming I'm understanding my brief=
+ read directly, this isn't on the current Ceph roadmap. I sort of see h=
+ow it's useful, but I think it's less useful for a system like Ceph =E2=
+=80=94 we're more scale-out in terms of CPU and memory correlating with=
+ added disk space compared to something like Lustre where the object st=
+orage (OST) and the object handlers (OSS) are divorced, and we stripe f=
+iles across more servers than I believe Lustre tends to do.
+But perhaps I'm missing something =E2=80=94 do you have a use case on C=
+eph?
 -Greg
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
