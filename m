@@ -1,70 +1,74 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Designing a cluster guide
-Date: Tue, 22 May 2012 22:31:57 -0700
-Message-ID: <296E2D5FBD414EAEACB9E345FF676519@inktank.com>
-References: <4FB75BAD.3080709@profihost.ag>
- <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
- <CAMvP8PDRUTO8M0=4MvjDtEtUM7aKePOWvGRFiJA1onu4VgXHPw@mail.gmail.com>
- <CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
- <7111C6286D862F43B94FD6291D8989158644DD@EX01.onqtel.local>
- <CAPYLRzgyyW5N894X1T=-gNyRdPmu-+VDr0=NuuLVEs93nGJZbw@mail.gmail.com>
- <Pine.LNX.4.64.1205220852290.15565@Psilocybe.Update.UU.SE>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: how to debug slow rbd block device
+Date: Wed, 23 May 2012 08:18:07 +0200
+Message-ID: <4FBC811F.5060004@profihost.ag>
+References: <4FBB8A5B.9010500@profihost.ag> <B141A2FBE87F4859AF931D71A339468E@inktank.com> <4FBBEBC8.1000205@profihost.ag> <1C70F3FB753C4AEC97247E04FAE3C733@inktank.com> <4FBBF74C.9020608@profihost.ag> <45F1742481D84E7A90951816DB23609F@inktank.com> <4FBBFE7B.4060406@profihost.ag> <65E9589544C4489F93761035433ADC01@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:64923 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751559Ab2EWFbp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 01:31:45 -0400
-Received: by dady13 with SMTP id y13so9233494dad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 22 May 2012 22:31:45 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1205220852290.15565@Psilocybe.Update.UU.SE>
-Content-Disposition: inline
+Received: from mail.profihost.ag ([85.158.179.208]:35429 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751899Ab2EWGSB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 02:18:01 -0400
+In-Reply-To: <65E9589544C4489F93761035433ADC01@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jerker Nyberg <jerker@update.uu.se>
-Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
+To: Greg Farnum <greg@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tuesday, May 22, 2012 at 2:04 AM, Jerker Nyberg wrote:
-> On Mon, 21 May 2012, Gregory Farnum wrote:
-> =20
-> > This one the write is considered "safe" once it is on-disk on all
-> > OSDs currently responsible for hosting the object.
-> =20
-> =20
-> =20
-> Is it possible to configure the client to consider the write successf=
-ul =20
-> when the data is hitting RAM on all the OSDs but not yet committed to=
- =20
-> disk?
+Hi,
 
-Direct users of the RADOS object store (i.e., librados) can do all kind=
-s of things with the integrity guarantee options. But I don't believe t=
-here's currently a way to make the filesystem do so =E2=80=94 among oth=
-er things, you're running through the page cache and other writeback ca=
-ches anyway, so it generally wouldn't be useful except when running an =
-fsync or similar. And at that point you probably really want to not be =
-lying to the application that's asking for it.
+>> So try enabling RBD writeback caching =E2=80=94 see http://marc.info
+>> /?l=3Dceph-devel&m=3D133758599712768&w=3D2
+>> will test tomorrow. Thanks.
+Can we path this to the qemu-drive option?
 
-> Also, the IBM zFS research file system is talking about cooperative c=
-ache =20
-> and Lustre about a collaborative cache. Do you have any thoughts of t=
-his =20
-> regarding Ceph?
+Stefan
 
-I haven't heard of this before, but assuming I'm understanding my brief=
- read directly, this isn't on the current Ceph roadmap. I sort of see h=
-ow it's useful, but I think it's less useful for a system like Ceph =E2=
-=80=94 we're more scale-out in terms of CPU and memory correlating with=
- added disk space compared to something like Lustre where the object st=
-orage (OST) and the object handlers (OSS) are divorced, and we stripe f=
-iles across more servers than I believe Lustre tends to do.
-But perhaps I'm missing something =E2=80=94 do you have a use case on C=
-eph?
--Greg
 
+Am 22.05.2012 23:11, schrieb Greg Farnum:
+> On Tuesday, May 22, 2012 at 2:00 PM, Stefan Priebe wrote:
+>> Am 22.05.2012 22:49, schrieb Greg Farnum:
+>>> Anyway, it looks like you're just paying a synchronous write penalt=
+y
+>> =20
+>> =20
+>> What does that exactly mean? Shouldn't one threaded write to four =20
+>> 260MB/s devices gives at least 100Mb/s?
+>=20
+> Well, with dd you've got a single thread issuing synchronous IO reque=
+sts to the kernel. We could have it set up so that those synchronous re=
+quests get split up, but they aren't, and between the kernel and KVM it=
+ looks like when it needs to make a write out to disk it sends one requ=
+est at a time to the Ceph backend. So you aren't writing to four 260MB/=
+s devices; you are writing to one 260MB/s device without any pipelining=
+ =E2=80=94 meaning you send off a 4MB write, then wait until it's done,=
+ then send off a second 4MB write, then wait until it's done, etc.
+> Frankly I'm surprised you aren't getting a bit more throughput than y=
+ou're seeing (I remember other people getting much more out of less bee=
+fy boxes), but it doesn't much matter because what you really want to d=
+o is enable the client-side writeback cache in RBD, which will dispatch=
+ multiple requests at once and not force writes to be committed before =
+reporting back to the kernel. Then you should indeed be writing to four=
+ 260MB/s devices at once. :)
+>=20
+>> =20
+>>> since with 1 write at a time you're getting 30-40MB/s out of rados =
+bench, but with 16 you're getting>100MB/s.
+>>> (If you bump up past 16 or increase the size of each with -b you ma=
+y =20
+>> =20
+>> find yourself getting even more.)
+>> yep noticed that.
+>> =20
+>>> So try enabling RBD writeback caching =E2=80=94 see http://marc.inf=
+o/?l=3Dceph-devel&m=3D133758599712768&w=3D2
+>> will test tomorrow. Thanks.
+>> =20
+>> Stefan =20
+>=20
+>=20
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
