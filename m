@@ -1,61 +1,71 @@
-From: Jerker Nyberg <jerker@Update.UU.SE>
-Subject: Re: Designing a cluster guide
-Date: Wed, 23 May 2012 21:47:03 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1205230859410.15565@Psilocybe.Update.UU.SE>
-References: <4FB75BAD.3080709@profihost.ag> <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
- <CAMvP8PDRUTO8M0=4MvjDtEtUM7aKePOWvGRFiJA1onu4VgXHPw@mail.gmail.com>
- <CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
- <7111C6286D862F43B94FD6291D8989158644DD@EX01.onqtel.local>
- <CAPYLRzgyyW5N894X1T=-gNyRdPmu-+VDr0=NuuLVEs93nGJZbw@mail.gmail.com>
- <Pine.LNX.4.64.1205220852290.15565@Psilocybe.Update.UU.SE>
- <296E2D5FBD414EAEACB9E345FF676519@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: how to debug slow rbd block device
+Date: Wed, 23 May 2012 12:54:52 -0700
+Message-ID: <4FBD408C.5000504@inktank.com>
+References: <4FBB8A5B.9010500@profihost.ag> <B141A2FBE87F4859AF931D71A339468E@inktank.com> <4FBBEBC8.1000205@profihost.ag> <1C70F3FB753C4AEC97247E04FAE3C733@inktank.com> <4FBBF74C.9020608@profihost.ag> <45F1742481D84E7A90951816DB23609F@inktank.com> <4FBBFE7B.4060406@profihost.ag> <65E9589544C4489F93761035433ADC01@inktank.com> <4FBC811F.5060004@profihost.ag> <4FBC83F3.7070400@inktank.com> <4FBC8B41.1020300@profihost.ag> <4FBC8F8F.6060004@inktank.com> <4FBC904A.7090407@profihost.ag> <4FBC92E2.5020807@inktank.com> <CABYiri8PXT9dpCGLE7dn=_PoW8CdLxqZF87OHe=dMXEWxogb_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-293463789-83196304-1337756467=:15565"
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from Psilocybe.Update.UU.SE ([130.238.19.25]:48574 "EHLO
-	Psilocybe.Update.UU.SE" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753141Ab2EWTrG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 15:47:06 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by Psilocybe.Update.UU.SE (Postfix) with ESMTP id 41FA43006C
-	for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 21:47:03 +0200 (CEST)
-In-Reply-To: <296E2D5FBD414EAEACB9E345FF676519@inktank.com>
-Content-ID: <Pine.LNX.4.64.1205230901190.15565@Psilocybe.Update.UU.SE>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:43173 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753061Ab2EWTyz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 15:54:55 -0400
+Received: by pbbrp8 with SMTP id rp8so10336408pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 12:54:55 -0700 (PDT)
+In-Reply-To: <CABYiri8PXT9dpCGLE7dn=_PoW8CdLxqZF87OHe=dMXEWxogb_w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On 05/23/2012 02:03 AM, Andrey Korolyov wrote:
+> Hi Josh,
+>
+> Can you please answer to list on this question? It is important when
+> someone wants to build HA KVM cluster on the rbd backend and needs to
+> wc cache. Thanks!
+>
+> On Wed, May 23, 2012 at 10:30 AM, Josh Durgin<josh.durgin@inktank.com=
+>  wrote:
+>> On 05/22/2012 11:18 PM, Stefan Priebe - Profihost AG wrote:
+>>>
+>>> Hi,
+>>>
+>>>>> So try enabling RBD writeback caching =E2=80=94 see http://marc.i=
+nfo
+>>>>> /?l=3Dceph-devel&m=3D133758599712768&w=3D2
+>>>>> will test tomorrow. Thanks.
+>>>
+>>> Can we path this to the qemu-drive option?
+>>
+>>
+>> Yup, see http://article.gmane.org/gmane.comp.file-systems.ceph.devel=
+/6400
+>>
+>> The normal qemu cache=3Dwriteback/writethrough/none option will work=
+ in qemu
+>> 1.2.
+>>
+>> Josh
+>
+> By the way, is it possible to flush cache outside? I may need that fo=
+r
+> VM live migration and such hook will be helpful.
 
----293463789-83196304-1337756467=:15565
-Content-Type: TEXT/PLAIN; CHARSET=iso-8859-1; FORMAT=flowed
-Content-Transfer-Encoding: 8BIT
-Content-ID: <Pine.LNX.4.64.1205230901191.15565@Psilocybe.Update.UU.SE>
+Qemu will do that for you in many cases, but it looks like we need to=20
+implement bdrv_invalidate_cache to make live migration work.
 
-On Tue, 22 May 2012, Gregory Farnum wrote:
+http://tracker.newdream.net/issues/2467
 
-> Direct users of the RADOS object store (i.e., librados) can do all kinds 
-> of things with the integrity guarantee options. But I don't believe 
-> there's currently a way to make the filesystem do so ÿÿ among other 
-> things, you're running through the page cache and other writeback caches 
-> anyway, so it generally wouldn't be useful except when running an fsync 
-> or similar. And at that point you probably really want to not be lying 
-> to the application that's asking for it.
+librbd itself flushes the cache when a snapshot is created or the image=
+=20
+is closed, but there's no way to trigger it directly right now.
 
-I am comparing with in-memory databases. If replication and failovers are 
-used, couldn't in-memory in some cases be good enough? And faster.
-
-> do you have a use case on Ceph?
-
-Currently of interest:
-
-  * Scratch file system for HPC. (kernel client)
-  * Scratch file system for research groups. (SMB, NFS, SSH)
-  * Backend for simple disk backup. (SSH/rsync, AFP, BackupPC)
-  * Metropolitan cluster.
-  * VDI backend. KVM with RBD.
-
-Regards,
-Jerker Nyberg, Uppsala, Sweden.
----293463789-83196304-1337756467=:15565--
+http://tracker.newdream.net/issues/2468
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
