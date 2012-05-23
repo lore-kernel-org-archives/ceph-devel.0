@@ -1,78 +1,206 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: I have some problem to mount ceph file system
-Date: Wed, 23 May 2012 14:32:58 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205231432240.15923@cobra.newdream.net>
-References: <loom.20120523T104810-478@post.gmane.org>
- <CAPYLRzi8cDg7nQRGnK8iytD8SuCwkB5qVr+fWuUDm2o1_ckQfA@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: MDS crash, wont startup again
+Date: Wed, 23 May 2012 14:39:02 -0700
+Message-ID: <CAPYLRzhGQscvJ1g73OwJ8ENKog-CtMp03a3LtB2e+bXSD0Eecg@mail.gmail.com>
+References: <CA+WUqKxZoh_5k5qgtUFwnsr2=gaZ4_RONazYQG7enKa75WhNVQ@mail.gmail.com>
+	<CA+WUqKyFusqxiPkPvQeSaP_nPBd5_ab4nLz1xWeOZZqMLk1SBA@mail.gmail.com>
+	<4FB56FD1.5090805@inktank.com>
+	<CA+WUqKz5HQ77p7TYxJhiOPfY6Tm+12O+FRFr19ra6t9bZb6YSg@mail.gmail.com>
+	<CAPYLRzjTs19air=7cT3PGSWiHGFUyKuTeX9OHzTBfBPyMXan+g@mail.gmail.com>
+	<CA+WUqKyH6bro4u-PXoKC0WEi37bn85YaG8jxi9SZ+fvpZFx--g@mail.gmail.com>
+	<DF93AE65E2C74807A83392C93D9EDA0B@inktank.com>
+	<CA+WUqKy2DrEM90HrSF8ju68gjLhVv3TWEFTb68fi+5GpifOLTg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-996527474-1337808778=:15923"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43072 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758864Ab2EWVdC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 17:33:02 -0400
-In-Reply-To: <CAPYLRzi8cDg7nQRGnK8iytD8SuCwkB5qVr+fWuUDm2o1_ckQfA@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:49707 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760863Ab2EWVjD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 17:39:03 -0400
+Received: by lbbgm6 with SMTP id gm6so5420352lbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 14:39:02 -0700 (PDT)
+In-Reply-To: <CA+WUqKy2DrEM90HrSF8ju68gjLhVv3TWEFTb68fi+5GpifOLTg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Frank <frankwoo.scc@gmail.com>, ceph-devel@vger.kernel.org
+To: Felix Feinhals <ff@turtle-entertainment.de>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wed, May 23, 2012 at 5:28 AM, Felix Feinhals
+<ff@turtle-entertainment.de> wrote:
+> Hey,
+>
+> ok i installed libc-dbg and run your commands now this comes up:
+>
+> gdb /usr/bin/ceph-mds core
+>
+> snip
+>
+> GNU gdb (GDB) 7.0.1-debian
+> Copyright (C) 2009 Free Software Foundation, Inc.
+> License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/g=
+pl.html>
+> This is free software: you are free to change and redistribute it.
+> There is NO WARRANTY, to the extent permitted by law. =A0Type "show c=
+opying"
+> and "show warranty" for details.
+> This GDB was configured as "x86_64-linux-gnu".
+> For bug reporting instructions, please see:
+> <http://www.gnu.org/software/gdb/bugs/>...
+> Reading symbols from /usr/bin/ceph-mds...Reading symbols from
+> /usr/lib/debug/usr/bin/ceph-mds...done.
+> (no debugging symbols found)...done.
+> [New Thread 22980]
+> [New Thread 22984]
+> [New Thread 22986]
+> [New Thread 22979]
+> [New Thread 22970]
+> [New Thread 22981]
+> [New Thread 22971]
+> [New Thread 22976]
+> [New Thread 22973]
+> [New Thread 22975]
+> [New Thread 22974]
+> [New Thread 22972]
+> [New Thread 22978]
+> [New Thread 22982]
+>
+> warning: Can't read pathname for load map: Input/output error.
+> Reading symbols from /lib/libpthread.so.0...Reading symbols from
+> /usr/lib/debug/lib/libpthread-2.11.3.so...done.
+> (no debugging symbols found)...done.
+> Loaded symbols for /lib/libpthread.so.0
+> Reading symbols from /usr/lib/libcrypto++.so.8...(no debugging symbol=
+s
+> found)...done.
+> Loaded symbols for /usr/lib/libcrypto++.so.8
+> Reading symbols from /lib/libuuid.so.1...(no debugging symbols found)=
+=2E..done.
+> Loaded symbols for /lib/libuuid.so.1
+> Reading symbols from /lib/librt.so.1...Reading symbols from
+> /usr/lib/debug/lib/librt-2.11.3.so...done.
+> (no debugging symbols found)...done.
+> Loaded symbols for /lib/librt.so.1
+> Reading symbols from /usr/lib/libtcmalloc.so.0...(no debugging symbol=
+s
+> found)...done.
+> Loaded symbols for /usr/lib/libtcmalloc.so.0
+> Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols
+> found)...done.
+> Loaded symbols for /usr/lib/libstdc++.so.6
+> Reading symbols from /lib/libm.so.6...Reading symbols from
+> /usr/lib/debug/lib/libm-2.11.3.so...done.
+> (no debugging symbols found)...done.
+> Loaded symbols for /lib/libm.so.6
+> Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols found=
+)...done.
+> Loaded symbols for /lib/libgcc_s.so.1
+> Reading symbols from /lib/libc.so.6...Reading symbols from
+> /usr/lib/debug/lib/libc-2.11.3.so...done.
+> (no debugging symbols found)...done.
+> Loaded symbols for /lib/libc.so.6
+> Reading symbols from /lib64/ld-linux-x86-64.so.2...Reading symbols
+> from /usr/lib/debug/lib/ld-2.11.3.so...done.
+> (no debugging symbols found)...done.
+> Loaded symbols for /lib64/ld-linux-x86-64.so.2
+> Reading symbols from /usr/lib/libunwind.so.7...(no debugging symbols
+> found)...done.
+> Loaded symbols for /usr/lib/libunwind.so.7
+> Core was generated by `/usr/bin/ceph-mds -i c --pid-file
+> /var/run/ceph/mds.c.pid -c /etc/ceph/ceph.con'.
+> Program terminated with signal 11, Segmentation fault.
+> #0 =A00x00007f10c00d2ebb in raise (sig=3D<value optimized out>) at
+> ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:41
+> 41 =A0 =A0 =A0../nptl/sysdeps/unix/sysv/linux/pt-raise.c: No such fil=
+e or directory.
+> =A0 =A0 =A0 =A0in ../nptl/sysdeps/unix/sysv/linux/pt-raise.c
+>
+> snip
+>
+> Now
+>
+> thread apply all bt
+>
+> ...
+>
+> thread 1
+> [Switching to thread 1 (Thread 22977)]#0 =A00x00007f10c00d2ebb in rai=
+se
+> (sig=3D<value optimized out>) at
+> ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:41
+> 41 =A0 =A0 =A0in ../nptl/sysdeps/unix/sysv/linux/pt-raise.c
+>
+>
+> Thread 1 (Thread 22977):
+> ---Type <return> to continue, or q <return> to quit---
+> #0 =A00x00007f10c00d2ebb in raise (sig=3D<value optimized out>) at
+> ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:41
+> #1 =A00x000000000081469e in reraise_fatal (signum=3D11) at
+> global/signal_handler.cc:58
+> #2 =A0handle_fatal_signal (signum=3D11) at global/signal_handler.cc:1=
+04
+> #3 =A0<signal handler called>
+> #4 =A0SnapRealm::have_past_parents_open (this=3D0x0, first=3D..., las=
+t=3D...)
+> at mds/snap.cc:112
+>
+> #5 =A00x000000000055d58b in MDCache::check_realm_past_parents
+> (this=3D0x2b49200, realm=3D0x0) at mds/MDCache.cc:4495
+> #6 =A00x0000000000572eec in
+> MDCache::choose_lock_states_and_reconnect_caps (this=3D0x2b49200) at
+> mds/MDCache.cc:4533
+> #7 =A00x00000000005931a0 in MDCache::rejoin_gather_finish
+> (this=3D0x2b49200) at mds/MDCache.cc:4444
+> #8 =A00x000000000059b9d5 in MDCache::rejoin_send_rejoins
+> (this=3D0x2b49200) at mds/MDCache.cc:3388
+> #9 =A00x00000000004a8721 in MDS::rejoin_joint_start (this=3D0x2b5e000=
+) at
+> mds/MDS.cc:1404
+> #10 0x00000000004c253a in MDS::handle_mds_map (this=3D0x2b5e000,
+> m=3D<value optimized out>) at mds/MDS.cc:968
+> #11 0x00000000004c4513 in MDS::handle_core_message (this=3D0x2b5e000,
+> m=3D0x2b4d800) at mds/MDS.cc:1651
+> #12 0x00000000004c45ef in MDS::_dispatch (this=3D0x2b5e000, m=3D0x2b4=
+d800)
+> at mds/MDS.cc:1790
+> #13 0x00000000004c628b in MDS::ms_dispatch (this=3D0x2b5e000,
+> m=3D0x2b4d800) at mds/MDS.cc:1602
+> #14 0x00000000007acb49 in Messenger::ms_deliver_dispatch
+> (this=3D0x2b41680) at msg/Messenger.h:178
+> #15 SimpleMessenger::dispatch_entry (this=3D0x2b41680) at
+> msg/SimpleMessenger.cc:363
+> #16 0x00000000007336ed in SimpleMessenger::DispatchThread::entry() ()
+> #17 0x00007f10c00ca8ca in start_thread (arg=3D<value optimized out>) =
+at
+> pthread_create.c:300
+> #18 0x00007f10be95292d in clone () at
+> ../sysdeps/unix/sysv/linux/x86_64/clone.S:112
+> #19 0x0000000000000000 in ?? ()
+>
+> So i wonder is the crash because of the missing file message?
 
---557981400-996527474-1337808778=:15923
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Okay, that is what I wanted. It looks like it can't find the
+snaprealm, and I have a pretty good guess why.
+If you're building your own binaries, you can apply the patch below
+and I bet things will work. (Let me know if they do or don't!)
+-Greg
 
-On Wed, 23 May 2012, Gregory Farnum wrote:
-> On Wed, May 23, 2012 at 1:51 AM, Frank <frankwoo.scc@gmail.com> wrote:
-> > Hello
-> > I have a question about ceph.
-> >
-> > When I mount ceph, I do the command as follow :
-> >
-> > # mount -t ceph -o name=3Dadmin,secret=3DXXXXXX 10.1.0.1:6789/ /mnt/cep=
-h -vv
-> >
-> > now I create an user "foo" and make a secretkey by ceph-authtool like t=
-hat :
-> >
-> > # ceph-authtool /etc/ceph/keyring.bin -n client.foo --gen-key
-> >
-> > then I add the key into ceph :
-> >
-> > # ceph auth add client.foo osd 'allow *' mon 'allow *' mds 'allow' -i
-> > /etc/ceph/keyring.bin
-> >
-> > so i can mount ceph by foo :
-> >
-> > # mount -t ceph -o name=3Dfoo,secret=3DXOXOXO 10.1.0.1:6789/ /mnt/ceph =
--vv
-> >
-> > my question is if i don't want "foo" that has permission to mount 10.1.=
-0.1:6789/
-> >
-> > HOW TO DO IT=FF=FF
-> >
-> > if there is a directory "foo"
-> >
-> > I want he can mount 10.1.0.1:6789:/foo/
-> >
-> > but have no access to mount 10.1.0.1:6789:/
->=20
-> I'm afraid that's not an option with Ceph right now, that I'm aware
-> of. It was built and designed for a trusted set of servers and
-> clients, and while we're slowly carving out areas of security, this
-> isn't one we've done yet.
-> If it's an important feature for you, you should create a feature
-> request in the tracker (tracker.newdream.net) for it, which we will
-> prioritize and work on once we've moved to focus on the full
-> filesystem. :)
 
-http://tracker.newdream.net/issues/1237
-
-(tho the final config will probably not look like that; suggestions=20
-welcome.)
-
-sage
---557981400-996527474-1337808778=:15923--
+diff --git a/src/mds/CInode.cc b/src/mds/CInode.cc
+index 70faeb8..becccf5 100644
+--- a/src/mds/CInode.cc
++++ b/src/mds/CInode.cc
+@@ -2130,7 +2130,7 @@ SnapRealm *CInode::find_snaprealm()
+   while (!cur->snaprealm) {
+     if (cur->get_parent_dn())
+       cur =3D cur->get_parent_dn()->get_dir()->get_inode();
+-    else if (get_projected_parent_dn())
++    else if (cur->get_projected_parent_dn())
+       cur =3D cur->get_projected_parent_dn()->get_dir()->get_inode();
+     else
+       break;
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
