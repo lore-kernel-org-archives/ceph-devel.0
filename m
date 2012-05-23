@@ -1,80 +1,127 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: how to debug slow rbd block device
-Date: Wed, 23 May 2012 11:10:42 +0200
-Message-ID: <4FBCA992.6090702@profihost.ag>
-References: <4FBB8A5B.9010500@profihost.ag> <B141A2FBE87F4859AF931D71A339468E@inktank.com> <4FBBEBC8.1000205@profihost.ag> <1C70F3FB753C4AEC97247E04FAE3C733@inktank.com> <4FBBF74C.9020608@profihost.ag> <45F1742481D84E7A90951816DB23609F@inktank.com> <4FBBFE7B.4060406@profihost.ag> <65E9589544C4489F93761035433ADC01@inktank.com> <4FBCA035.2050507@profihost.ag>
+From: Kiran Patil <kirantpatil@gmail.com>
+Subject: Re: RGW, future directions
+Date: Wed, 23 May 2012 15:47:31 +0530
+Message-ID: <CANT588skKYuwE2sGvkNs_7W0i=X5Ts=mr_Z+4iQXE4BUpqQcmg@mail.gmail.com>
+References: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:47158 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750895Ab2EWJKf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 05:10:35 -0400
-In-Reply-To: <4FBCA035.2050507@profihost.ag>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:61200 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755559Ab2EWKRd convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 23 May 2012 06:17:33 -0400
+Received: by lahd3 with SMTP id d3so4979239lah.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 03:17:31 -0700 (PDT)
+In-Reply-To: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <greg@inktank.com>
+To: Yehuda Sadeh <yehuda@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Am 23.05.2012 10:30, schrieb Stefan Priebe - Profihost AG:
-> Am 22.05.2012 23:11, schrieb Greg Farnum:
->> On Tuesday, May 22, 2012 at 2:00 PM, Stefan Priebe wrote:
->>> Am 22.05.2012 22:49, schrieb Greg Farnum:
->>>> Anyway, it looks like you're just paying a synchronous write penal=
-ty
->>> =20
->>> =20
->>> What does that exactly mean? Shouldn't one threaded write to four =20
->>> 260MB/s devices gives at least 100Mb/s?
->>
->> Well, with dd you've got a single thread issuing synchronous IO requ=
-ests to the kernel. We could have it set up so that those synchronous r=
-equests get split up, but they aren't, and between the kernel and KVM i=
-t looks like when it needs to make a write out to disk it sends one req=
-uest at a time to the Ceph backend. So you aren't writing to four 260MB=
-/s devices; you are writing to one 260MB/s device without any pipelinin=
-g =E2=80=94 meaning you send off a 4MB write, then wait until it's done=
-, then send off a second 4MB write, then wait until it's done, etc.
->> Frankly I'm surprised you aren't getting a bit more throughput than =
-you're seeing (I remember other people getting much more out of less be=
-efy boxes), but it doesn't much matter because what you really want to =
-do is enable the client-side writeback cache in RBD, which will dispatc=
-h multiple requests at once and not force writes to be committed before=
- reporting back to the kernel. Then you should indeed be writing to fou=
-r 260MB/s devices at once. :)
->=20
-> OK i understand that but still the question where is the bottlenek in
-> this case. I mean i see not more than 40% network load, not more than
-> 10% cpu load and only 40MB/s to the SSD. I would still expect a netwo=
-rk
-> load of 70-90%.
+Hello,
 
-*gr* i found a broken SATA cable ;-(
+How about this CloudFS=A0management=A0system ?
 
-this is now with the replaced SATA cable and with rbd cache turned on:
+The=A0CloudFS=A0management=A0system=A0consists=A0of=A0two=A0parts:=A0a=A0=
+very=A0simple
+web-based management=A0daemon=A0called=A0cloudfsd,=A0and=A0scripts=A0to=
+=A0perform
+various=A0discrete functions.
 
-systembootimage:/mnt# dd if=3D/dev/zero of=3Dtest bs=3D4M count=3D1000
-1000+0 records in
-1000+0 records out
-4194304000 bytes (4,2 GB) copied, 57,9194 s, 72,4 MB/s
+http://git.fedorahosted.org/git/?p=3DCloudFS.git;a=3Dsummary
 
-systembootimage:/mnt# dd if=3Dtest of=3D/dev/null bs=3D4M count=3D1000
-1000+0 records in
-1000+0 records out
-4194304000 bytes (4,2 GB) copied, 46,3499 s, 90,5 MB/s
+http://git.fedorahosted.org/git/?p=3DCloudFS.git;a=3Dblob;f=3Dscripts/R=
+EADME.ssl;h=3D3547f6b354d8b3455359ea019f6db9ce74862d2e;hb=3Dcloudfsd
 
-rados write bench 8 threads:
-Total time run:        60.222947
-Total writes made:     1519
-Write size:            4194304
-Bandwidth (MB/sec):    100.892
+I am not sure, whether it can be reused for ceph.
 
-Average Latency:       0.317098
-Max latency:           1.88908
-Min latency:           0.089681
+Thanks,
+Kiran.
 
-Stefan
+On Tue, May 22, 2012 at 11:37 PM, Yehuda Sadeh <yehuda@inktank.com> wro=
+te:
+>
+> RGW is maturing. Beside looking at performance, which highly ties int=
+o
+> RADOS performance, we'd like to hear whether there are certain pain
+> points or future directions that you (you as in the ceph community)
+> would like to see us taking.
+>
+> There are a few directions that we were thinking about:
+>
+> 1. Extend Object Storage API
+>
+> Swift and S3 has some features that we don't currently support. We ca=
+n
+> certainly extend our functionality, however, is there any demand for
+> more features? E.g., self destructing objects, web site, user logs,
+> etc.
+>
+> 2. Better OpenStack interoperability
+>
+> Keystone support? Other?
+>
+> 3. New features
+>
+> Some examples:
+>
+> =A0- multitenancy: api for domains and user management
+> =A0- snapshots
+> =A0- computation front end: upload object, then do some data
+> transformation/calculation.
+> =A0- simple key-value api
+>
+> 4. CDMI
+>
+> Sage brought up the CDMI support question to ceph-devel, and I don't
+> remember him getting any response. Is there any intereset in CDMI?
+>
+>
+> 5. Native apache/nginx module or embedded web server
+>
+> We still need to prove that the web server is a bottleneck, or poses
+> scaling issues. Writing a correct native nginx module will require
+> turning rgw process model into event driven, which is not going to be
+> easy.
+>
+> 6. Improve garbage collection
+>
+> Currently rgw generates intent logs for garabage removal that require
+> running an external tool later, which is an administrative pain. We
+> can implement other solutions (OSD side garbage collection,
+> integrating cleanup process into the gateway, etc.) but we need to
+> understand the priority.
+>
+> 7. libradosgw
+>
+> We have had this in mind for some time now. Creating a programming ap=
+i
+> for rgw, not too different from librados and librbd. It'll hopefully
+> make code much cleaner. It will allow users to write different front
+> ends for the rgw backend, and it will make it easier for users to
+> write applications that interact with the backend, e.g., do processin=
+g
+> on objects that users uploaded, FUSE for rgw without S3 as an
+> intermediate, etc.
+>
+> 8. Administration tools improvement
+>
+> We can always do better there.
+>
+> 9. Other ideas?
+>
+>
+> Any comments are welcome!
+>
+> Thanks,
+> Yehuda
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
