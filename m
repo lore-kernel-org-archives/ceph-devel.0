@@ -1,115 +1,81 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
-Subject: Re: RGW, future directions
-Date: Wed, 23 May 2012 16:59:00 +0800
-Message-ID: <CANExM-PHHCwnH8n_nrjA=HJ0uzL268kjZf6pAh5+Eh73=1UPMg@mail.gmail.com>
-References: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Multiple named clusters on same nodes
+Date: Wed, 23 May 2012 11:00:27 +0200
+Message-ID: <201205231100.28327.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-15
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:46361 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751390Ab2EWI7B convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 04:59:01 -0400
-Received: by ghrr11 with SMTP id r11so1122379ghr.19
-        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 01:59:00 -0700 (PDT)
-In-Reply-To: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
+Received: from www.m-privacy.de ([85.214.237.71]:44939 "EHLO www.m-privacy.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752563Ab2EWJAi convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 05:00:38 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by www.m-privacy.de (Postfix) with ESMTP id 29F1B63CBD
+	for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 11:00:34 +0200 (CEST)
+Received: from www.m-privacy.de ([127.0.0.1])
+ by localhost (www.m-privacy.de [127.0.0.1]) (amavisd-maia, port 10024)
+ with ESMTP id 11866-09 for <ceph-devel@vger.kernel.org>;
+ Wed, 23 May 2012 11:00:27 +0200 (CEST)
+Received: from gw.compuniverse.de (unknown [85.183.4.97])
+	(using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by www.m-privacy.de (Postfix) with ESMTPSA id 2AF2063CBC
+	for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 11:00:27 +0200 (CEST)
+Received: from tgham.compuniverse.de (tgham.compuniverse.de [192.168.201.30])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by gw.compuniverse.de (Postfix) with ESMTPS id 673A520BD9
+	for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 11:00:29 +0200 (CEST)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-2012/5/23 Yehuda Sadeh <yehuda@inktank.com>:
-> RGW is maturing. Beside looking at performance, which highly ties int=
-o
-> RADOS performance, we'd like to hear whether there are certain pain
-> points or future directions that you (you as in the ceph community)
-> would like to see us taking.
->
-> There are a few directions that we were thinking about:
->
-> 1. Extend Object Storage API
->
-> Swift and S3 has some features that we don't currently support. We ca=
-n
-> certainly extend our functionality, however, is there any demand for
-> more features? E.g., self destructing objects, web site, user logs,
-> etc.
->
+Hello all!
 
-I would like to see radosgw supporting:
-- Object versioning
-- Bucket policy
+We would like to have two independent clusters on the same cluster node=
+s,=20
+specially one for user home directories (called homeuser) and one for b=
+ackups=20
+(backup). The reason is that in case the homeuser cephfs breaks (like i=
+t has=20
+done several times in our tests), we still have independent storage of =
+the=20
+backups without the need of seperate server nodes.
 
-> 2. Better OpenStack interoperability
->
-> Keystone support? Other?
->
-> 3. New features
->
-> Some examples:
->
-> =C2=A0- multitenancy: api for domains and user management
-> =C2=A0- snapshots
-> =C2=A0- computation front end: upload object, then do some data
-> transformation/calculation.
-> =C2=A0- simple key-value api
->
-> 4. CDMI
->
-> Sage brought up the CDMI support question to ceph-devel, and I don't
-> remember him getting any response. Is there any intereset in CDMI?
->
->
-> 5. Native apache/nginx module or embedded web server
->
-> We still need to prove that the web server is a bottleneck, or poses
-> scaling issues. Writing a correct native nginx module will require
-> turning rgw process model into event driven, which is not going to be
-> easy.
->
-> 6. Improve garbage collection
->
-> Currently rgw generates intent logs for garabage removal that require
-> running an external tool later, which is an administrative pain. We
-> can implement other solutions (OSD side garbage collection,
-> integrating cleanup process into the gateway, etc.) but we need to
-> understand the priority.
->
-> 7. libradosgw
->
-> We have had this in mind for some time now. Creating a programming ap=
-i
-> for rgw, not too different from librados and librbd. It'll hopefully
-> make code much cleaner. It will allow users to write different front
-> ends for the rgw backend, and it will make it easier for users to
-> write applications that interact with the backend, e.g., do processin=
-g
-> on objects that users uploaded, FUSE for rgw without S3 as an
-> intermediate, etc.
->
+So I started experimenting with the new "cluster" variable, but it does=
+ not=20
+seem to be well supported so far. mkcephfs does not even know about it =
+and=20
+always uses "ceph" as cluster name. Setting a value for "cluster" in gl=
+obal=20
+section of ceph.conf (homeuser.conf, backup.conf, ...) does not work, i=
+t is=20
+not even used in the same config file, instead it has the fixed value "=
+ceph".
 
-I am also interested in libradosgw. With it, we can support other
-protocols easily. (e.g., webdav)
+My questions:
+1) Has someone here ever tried such a setup?
+2) Is there an official (documented) way to at least setup ceph cluster=
+s with=20
+individual cluster names?
+3) Are there plans to support cluster names in mkcephfs?
 
+Amon Ott
+--=20
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Am K=F6llnischen Park 1    Fax: +49 30 24342336
+10179 Berlin             http://www.m-privacy.de
 
-> 8. Administration tools improvement
->
-> We can always do better there.
->
-> 9. Other ideas?
->
->
-> Any comments are welcome!
->
-> Thanks,
-> Yehuda
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
+Amtsgericht Charlottenburg, HRB 84946
+
+Gesch=E4ftsf=FChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
