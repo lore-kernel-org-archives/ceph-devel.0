@@ -1,47 +1,42 @@
-From: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
-Subject: Re: Huge MDS log crashing the cluster
-Date: Wed, 23 May 2012 10:33:03 +0000 (UTC)
-Message-ID: <loom.20120523T122902-865@post.gmane.org>
-References: <loom.20120522T130047-937@post.gmane.org> <CADvuQRFtccEPA4k7X8R-_gGvPzz6Zt13Za1buPjp_5ufY-zk4Q@mail.gmail.com>
+From: Xiaopong Tran <xiaopong.tran@gmail.com>
+Subject: Re: RGW, future directions
+Date: Wed, 23 May 2012 19:22:07 +0800
+Message-ID: <8c947afb-a9f6-4e39-8639-8e231d4ab033@email.android.com>
+References: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com> <CANExM-PHHCwnH8n_nrjA=HJ0uzL268kjZf6pAh5+Eh73=1UPMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:44241 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932167Ab2EWKdZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 23 May 2012 06:33:25 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SX8sY-0005az-GK
-	for ceph-devel@vger.kernel.org; Wed, 23 May 2012 12:33:20 +0200
-Received: from 202.164.25.5 ([202.164.25.5])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 12:33:18 +0200
-Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 12:33:18 +0200
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:65232 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759759Ab2EWLdq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 07:33:46 -0400
+Received: by pbbrp8 with SMTP id rp8so9762850pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 04:33:46 -0700 (PDT)
+In-Reply-To: <CANExM-PHHCwnH8n_nrjA=HJ0uzL268kjZf6pAh5+Eh73=1UPMg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Tommi Virtanen <tv <at> inktank.com> writes:
-> The default logrotate script installed by ceph.deb rotates log files
-> daily and preserves 7 days of logs. If your /var is tiny, or you have
-> heavy debugging turned on, you probably need to rotate more often and
-> retain fewer log files. Or, if you're not using the debs, you'll need
-> to provide some other means of rotating the log files.
 
-In order to log rotate, we need to stop the deamon accessing the log file 
-and them rename it right? I have removed the log file using rm command to 
-check whether it will release the space, but even after the file removal, 
-my /var partition is still full. 
 
-So, do I have to stop MDS deamon and then remove the log file ? i am not 
-finding any command through which i can stop MDS on node. Can you please
-let me know how i can safely stop the MDS and then start it back ?
 
-Thanks
+>
+>I would like to see radosgw supporting:
+>- Object versioning
+>- Bucket policy
+>
 
++1 for these.
+
+>>
+>> 7. libradosgw
+>>
+
+Yes, please :)
+
+Cheers,
+
+Xiaopong
 
