@@ -1,41 +1,30 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Multiple named clusters on same nodes
-Date: Wed, 23 May 2012 11:12:48 -0700
-Message-ID: <CADvuQRHFR8_6EPy-02Xm9Zx-vUnPg3ngiTEr5hLZkKgaLNA--A@mail.gmail.com>
-References: <201205231100.28327.a.ott@m-privacy.de>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Re: Ceph on btrfs 3.4rc
+Date: Wed, 23 May 2012 21:12:01 +0200
+Message-ID: <4FBD3681.5060000@tuxadero.com>
+References: <20120517194358.GA9846@dhcp231-144.rdu.redhat.com> <CAJafhzTQJchdd600DiEnooUH-P9ZcLvW+oEczCMNskd+Ud4BmQ@mail.gmail.com> <4FB56B21.7070800@tuxadero.com> <20120518144759.GA1892@localhost.localdomain> <4FB685C9.2050607@tuxadero.com> <20120518190105.GB1892@localhost.localdomain> <4FB9BDBA.2030806@cn.fujitsu.com> <CAJafhzSmLC9yUwrxsJEz5vKYnfP0DSWdMnA0oXmLT_4CQFc1oQ@mail.gmail.com> <20120522173344.GB1890@localhost.localdomain> <CAJafhzQGHsSA6dUwOqTJERj7SgVmKFuVDHk5R+i7n0FuhUAj_g@mail.gmail.com> <20120523150235.GB2127@localhost.localdomain>
+Reply-To: martin@tuxadero.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:39668 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756717Ab2EWSNJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 14:13:09 -0400
-Received: by pbbrp8 with SMTP id rp8so10215185pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 11:13:09 -0700 (PDT)
-In-Reply-To: <201205231100.28327.a.ott@m-privacy.de>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:54788 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933028Ab2EWTMQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 15:12:16 -0400
+In-Reply-To: <20120523150235.GB2127@localhost.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>
-Cc: ceph-devel@vger.kernel.org
+To: Josef Bacik <josef@redhat.com>
+Cc: Christian Brunner <christian@brunner-muc.de>, miaox@cn.fujitsu.com, Sage Weil <sage@newdream.net>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
 
-On Wed, May 23, 2012 at 2:00 AM, Amon Ott <a.ott@m-privacy.de> wrote:
-> So I started experimenting with the new "cluster" variable, but it does not
-> seem to be well supported so far. mkcephfs does not even know about it and
-> always uses "ceph" as cluster name. Setting a value for "cluster" in global
-> section of ceph.conf (homeuser.conf, backup.conf, ...) does not work, it is
-> not even used in the same config file, instead it has the fixed value "ceph".
+Hi Josef,
 
-"cluster" is not meant to be set in the config file; that's too late,
-the config file is read from /etc/ceph/$cluster.conf. Instead, you
-pass in --cluster=foo, and that is early enough to influence what
-config file is read.
+this patch is running for 3 hours without a Bug and without the Warning.
+I will let it run overnight and report tomorrow.
+It looks very good ;-)
 
-The --cluster argument will be more useful with the new-style Chef
-deployment. All the new daemon running infrastructure will already
-happily run osds and mons from multiple cluster, even though several
-locations still have "ceph" hardcoded, just due to time pressure.
+-martin
 
-I don't think anyone is likely to fix mkcephfs to work with it -- I'm
-personally trying to get mkcephfs declared obsolete. It's
-fundamentally the wrong tool; for example, it cannot expand or
-reconfigure an existing cluster.
+Am 23.05.2012 17:02, schrieb Josef Bacik:
+> Ok give this a shot, it should do it.  Thanks,
