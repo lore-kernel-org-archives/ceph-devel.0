@@ -1,120 +1,94 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Henry C Chang <henry.cy.chang@gmail.com>
 Subject: Re: RGW, future directions
-Date: Thu, 24 May 2012 07:15:47 +0200
-Message-ID: <4FBDC403.9090106@widodh.nl>
+Date: Thu, 24 May 2012 13:49:34 +0800
+Message-ID: <CANExM-M20zhkw+zRSiYyovHSi2m8tnhuDJmgKG4cCR96hSyc6w@mail.gmail.com>
 References: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
+	<CANExM-PHHCwnH8n_nrjA=HJ0uzL268kjZf6pAh5+Eh73=1UPMg@mail.gmail.com>
+	<CAC-hyiFYYk23WMqdY4zG-tsBio+dWJSn3x-u+pnXPwGiBXvHKQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:42312 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751320Ab2EXFPw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 01:15:52 -0400
-In-Reply-To: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:39050 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751346Ab2EXFtf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 01:49:35 -0400
+Received: by ghrr11 with SMTP id r11so1663720ghr.19
+        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 22:49:35 -0700 (PDT)
+In-Reply-To: <CAC-hyiFYYk23WMqdY4zG-tsBio+dWJSn3x-u+pnXPwGiBXvHKQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Yehuda Sadeh <yehuda@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-
-
-On 22-05-12 20:07, Yehuda Sadeh wrote:
-> RGW is maturing. Beside looking at performance, which highly ties into
-> RADOS performance, we'd like to hear whether there are certain pain
-> points or future directions that you (you as in the ceph community)
-> would like to see us taking.
+2012/5/24 Yehuda Sadeh <yehuda@inktank.com>:
+> On Wed, May 23, 2012 at 1:59 AM, Henry C Chang <henry.cy.chang@gmail.com> wrote:
+>> 2012/5/23 Yehuda Sadeh <yehuda@inktank.com>:
+>>> RGW is maturing. Beside looking at performance, which highly ties into
+>>> RADOS performance, we'd like to hear whether there are certain pain
+>>> points or future directions that you (you as in the ceph community)
+>>> would like to see us taking.
+>>>
+>>> There are a few directions that we were thinking about:
+>>>
+>>> 1. Extend Object Storage API
+>>>
+>>> Swift and S3 has some features that we don't currently support. We can
+>>> certainly extend our functionality, however, is there any demand for
+>>> more features? E.g., self destructing objects, web site, user logs,
+>>> etc.
+>>>
+>>
+>> I would like to see radosgw supporting:
+>> - Object versioning
 >
-> There are a few directions that we were thinking about:
+> Yeah, we had that in mind for while now. Ceph issue #418. We have made
+> some progress towards that, but we're not there yet.
 >
-> 1. Extend Object Storage API
+>> - Bucket policy
 >
-> Swift and S3 has some features that we don't currently support. We can
-> certainly extend our functionality, however, is there any demand for
-> more features? E.g., self destructing objects, web site, user logs,
-> etc.
->
-> 2. Better OpenStack interoperability
->
-> Keystone support? Other?
->
-> 3. New features
->
-> Some examples:
->
->   - multitenancy: api for domains and user management
->   - snapshots
->   - computation front end: upload object, then do some data
-> transformation/calculation.
->   - simple key-value api
->
-> 4. CDMI
->
-> Sage brought up the CDMI support question to ceph-devel, and I don't
-> remember him getting any response. Is there any intereset in CDMI?
->
->
-> 5. Native apache/nginx module or embedded web server
->
-> We still need to prove that the web server is a bottleneck, or poses
-> scaling issues. Writing a correct native nginx module will require
-> turning rgw process model into event driven, which is not going to be
-> easy.
+> Anything specific that you'd like to see there? Bucket policy is very
+> tied into amazon aws, and I don't think we should clone that. We can,
+> however, look at what additional useful functionality we can have.
 >
 
-I'd not go for a native nginx or Apache module, that would bring extra C 
-code into the story which would mean extra dependencies.
+To me, one of the most powerful thing of bucket policy is: it allows
+you to set permissions for a large number of objects with one
+statement. Below is a simple example. You can specify the "Resource"
+with a wildcard (or even <bucket>/<obj_prefix>*).
 
-My vote would still go to a embedded webserver written in something like 
-Python. You could then use Apache/nginx/Varnish as a reverse proxy in 
-front and do all kinds of cool stuff.
+{
+  "Version":"2008-10-17",
+  "Statement":[{
+	"Sid":"AddPerm",
+        "Effect":"Allow",
+	  "Principal": {
+            "AWS": "*"
+         },
+      "Action":["s3:GetObject"],
+      "Resource":["arn:aws:s3:::bucket/*"
+      ]
+    }
+  ]
+}
 
-You could even doing caching in nginx or Varnish and let the RGW notify 
-those proxy's when an object has changed so they can purge their cache. 
-This would dramatically improve the performance of the gateway.
+I agree, we don't have to clone that. Similar functionality would be great!!
 
-It would also simplify the code, why try to do caching on your own when 
-some great HTTP caches are out there?
 
-> 6. Improve garbage collection
+>>> 7. libradosgw
+>>>
+>>> We have had this in mind for some time now. Creating a programming api
+>>> for rgw, not too different from librados and librbd. It'll hopefully
+>>> make code much cleaner. It will allow users to write different front
+>>> ends for the rgw backend, and it will make it easier for users to
+>>> write applications that interact with the backend, e.g., do processing
+>>> on objects that users uploaded, FUSE for rgw without S3 as an
+>>> intermediate, etc.
+>>>
+>>
+>> I am also interested in libradosgw. With it, we can support other
+>> protocols easily. (e.g., webdav)
+>>
 >
-> Currently rgw generates intent logs for garabage removal that require
-> running an external tool later, which is an administrative pain. We
-> can implement other solutions (OSD side garbage collection,
-> integrating cleanup process into the gateway, etc.) but we need to
-> understand the priority.
->
-> 7. libradosgw
->
-> We have had this in mind for some time now. Creating a programming api
-> for rgw, not too different from librados and librbd. It'll hopefully
-> make code much cleaner. It will allow users to write different front
-> ends for the rgw backend, and it will make it easier for users to
-> write applications that interact with the backend, e.g., do processing
-> on objects that users uploaded, FUSE for rgw without S3 as an
-> intermediate, etc.
->
-
-Yes, I would really like this. Combine this with the Python 
-stand-alone/embedded webserver I proposed and you get a really nice RGW 
-I think.
-
-> 8. Administration tools improvement
->
-> We can always do better there.
->
-
-When we have libradosgw it wouldn't be that hard to make a nice web 
-front-end where you can manage the whole thing.
-
-> 9. Other ideas?
->
->
-> Any comments are welcome!
 >
 > Thanks,
 > Yehuda
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
