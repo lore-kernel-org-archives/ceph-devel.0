@@ -1,34 +1,38 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: write-through cache
-Date: Wed, 23 May 2012 17:44:11 -0700
-Message-ID: <4FBD845B.5030402@inktank.com>
-References: <CA+jddaPW1YpHqo667dD6_9ce8iRhQLOX911-dWKT+XRFMR3YGw@mail.gmail.com>
+From: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
+Subject: NFS re-exporting CEPH cluster
+Date: Thu, 24 May 2012 05:14:56 +0000 (UTC)
+Message-ID: <loom.20120524T071113-43@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:41752 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750859Ab2EXAoN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 23 May 2012 20:44:13 -0400
-Received: by pbbrp8 with SMTP id rp8so10641055pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 23 May 2012 17:44:13 -0700 (PDT)
-In-Reply-To: <CA+jddaPW1YpHqo667dD6_9ce8iRhQLOX911-dWKT+XRFMR3YGw@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:39785 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752200Ab2EXFPL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 24 May 2012 01:15:11 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1SXQOC-0004Nu-Fs
+	for ceph-devel@vger.kernel.org; Thu, 24 May 2012 07:15:08 +0200
+Received: from 202.164.25.5 ([202.164.25.5])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 24 May 2012 07:15:08 +0200
+Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 24 May 2012 07:15:08 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mandell Degerness <mandell@pistoncloud.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 05/23/2012 04:44 PM, Mandell Degerness wrote:
-> I would like to test the effect of using the new write-through cache
-> on RBD volumes mounted to Openstack VMs.  What, precisely, are the
-> changes I need to make to the volume XML in order to do so?
+Hi all,
+Can anyone tried re-exporting CEPH cluster via NFS with success (I mean to 
+say, mount the CEPH cluster in one of the machine and then export that via 
+NFS to clients)? I need to do this bcz of my client kernel version and some
+EDA tools compatibility.Can someone suggest me how I can successfully 
+re-export CEPH over NFS ?
 
-If your only volumes are rbd, you can append 
-:rbd_cache=true:rbd_cache_max_dirty=0 to the image name in the volume 
-xml, so it would include something like
 
-<source protocol="rbd" 
-name="pool/image:rbd_cache=true:rbd_cache_max_dirty=0">
+Thanks
+__M
 
-Josh
