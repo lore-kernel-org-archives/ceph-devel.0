@@ -1,39 +1,53 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: how to free space from rados bench comman?
-Date: Thu, 24 May 2012 11:14:11 -0700
-Message-ID: <907FC3D6C9504834A33A73C3D83D6E3F@inktank.com>
-References: <4FBDDCAE.7040709@profihost.ag> <4FBDE314.7030305@widodh.nl>
- <4FBDE57F.9010409@profihost.ag> <4FBDEFB0.3030700@widodh.nl>
- <4FBDF691.3070601@profihost.ag>
- <986F41761DD1467EA38C8C853CFE8160@inktank.com>
- <4FBE7885.6080200@inktank.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: poor OSD performance using kernel 3.4
+Date: Thu, 24 May 2012 13:53:01 -0500
+Message-ID: <4FBE838D.4000303@inktank.com>
+References: <4FBE415E.8030702@profihost.ag> <CAJCPpW+SKnnVUaDEAsCkKyZwMVrHCRJF2C8zqB4eORgwW5p=1Q@mail.gmail.com> <4FBE7ABC.5020502@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:55663 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933458Ab2EXSOP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 14:14:15 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rp8so593608pbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 24 May 2012 11:14:15 -0700 (PDT)
-In-Reply-To: <4FBE7885.6080200@inktank.com>
-Content-Disposition: inline
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:46940 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751170Ab2EXSxE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 14:53:04 -0400
+Received: by yhmm54 with SMTP id m54so122499yhm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 24 May 2012 11:53:03 -0700 (PDT)
+In-Reply-To: <4FBE7ABC.5020502@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "=?utf-8?Q?ceph-devel=40vger.kernel.org?=" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thursday, May 24, 2012 at 11:05 AM, Josh Durgin wrote:
-> Why not have the read benchmark write data itself, and then benchmark
-> reading? Then both read and write benchmarks can clean up after
-> themselves.
-> 
-> It's a bit odd to have the read benchmark depend on you running a write
-> benchmark first.
-> 
-> Josh 
-We've talked about that and decided we didn't like it. I think it was about being able to repeat large read benchmarks without having to wait for all the data to get written out first, and also (although this was never implemented) being able to implement random read benchmarks and things in ways that allowed you to make the cache cold first.
-Which is not to say that changing it is a bad idea; I could be talked into that or somebody else could do it. :)
--Greg
+Hi Stefan,
+
+Thanks for the info!  I've been testing on 3.4 for the last couple of 
+days but haven't run into that problem here.  It looks like your journal 
+has writes going to it quickly and then things stall as it tries to 
+write out to your data disk.  I wonder if any of the data actually makes 
+it to the disk...  Can you run iostat or collectl or something and see 
+what kind of write throughput you get to the OSD data disks?
+
+Thanks,
+Mark
+
+On 05/24/2012 01:15 PM, Stefan Priebe wrote:
+>
+> Am 24.05.2012 16:55, schrieb Mark Nelson:
+>> Hi Stefan,
+>>
+>> Were these both tested on fresh filesystems?  If you still have any
+>> 3.0.30 available, could you try a couple of longer running tests (say 5
+>> minutes) and see how they compare?
+>
+> Yes with 3.4 it totally stalls. Tested with XFS and btrfs. Client 
+> always had the same Kernel. So i just changed the kernel on osd side.
+>
+> Kernel 3.4
+> http://pastebin.com/raw.php?i=CApKbSNj
+>
+> Kernel 3.0.30
+> http://pastebin.com/raw.php?i=kZ7rnwcM
+>
+> Stefan
 
