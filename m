@@ -1,47 +1,51 @@
-From: Ajit K Jena <ajit@iitb.ac.in>
-Subject: Problems while doing rpmbuild on CENTOS
-Date: Thu, 24 May 2012 14:07:26 +0530
-Message-ID: <1337848646.30818.48.camel@indica.cc.iitb.ac.in>
-Reply-To: ajit@iitb.ac.in
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: how to free space from rados bench comman?
+Date: Thu, 24 May 2012 10:51:29 +0200
+Message-ID: <4FBDF691.3070601@profihost.ag>
+References: <4FBDDCAE.7040709@profihost.ag> <4FBDE314.7030305@widodh.nl> <4FBDE57F.9010409@profihost.ag> <4FBDEFB0.3030700@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.iitb.ac.in ([59.162.23.13]:33921 "EHLO smtp1.iitb.ac.in"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753370Ab2EXIh3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 24 May 2012 04:37:29 -0400
-Received: from ldns2.iitb.ac.in (ldns2.iitb.ac.in [10.200.12.2])
-	by smtp1.iitb.ac.in (Postfix) with SMTP id 02DC94340628
-	for <ceph-devel@vger.kernel.org>; Thu, 24 May 2012 14:07:27 +0530 (IST)
-Received: from [10.100.106.210] (indica.cc.iitb.ac.in [10.100.106.210])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by smtp-auth.iitb.ac.in (Postfix) with ESMTP id 8A38613906
-	for <ceph-devel@vger.kernel.org>; Thu, 24 May 2012 14:07:26 +0530 (IST)
+Received: from mail.profihost.ag ([85.158.179.208]:37357 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751939Ab2EXIvR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 04:51:17 -0400
+In-Reply-To: <4FBDEFB0.3030700@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi All,
+Am 24.05.2012 10:22, schrieb Wido den Hollander:
+> On 24-05-12 09:38, Stefan Priebe - Profihost AG wrote:
+>>
+>> ~# rados -p data ls|wc -l
+>> 46631
+> 
+> That is weird, I thought the bench tool cleaned up it's "mess".
+> 
+> Imho it should cleanup after it's done, but there might be a reason why
+> it's not. Did you abort the benchmark or did you let it do the whole run?
+No it doesn't BUG?
 
-I am trying to build the CEPH stuff from bzip source archive by
-using the command below:
+~# rados -p data ls
+~#
+~# rados -p data bench 20 write -t 16
+...
+~# rados -p data ls| wc -l
+589
 
-      rpmbuild -tb /home/src/ceph.related/ceph-0.47.2.tar.bz2
+>> I do not use the data pool so it is seperate ;-) i only use the rbd pool
+>> for block devices.
+>>
+>> So i will free the space with:
+>> for i in `rados -p data ls`; do echo $i; rados -p data rm $i; done
+> 
+> rados -p data ls|xargs -n 1 rados -p data rm
+> 
+> I love shorter commands ;)
+me too i just tried it without -n and hoped that this works but rados
+didn't support more than 1 file per command and i didn't remembered -n1 ;)
 
-I get the following error:
-
-      error: File /home/src/ceph.related/libs3-trunk.tar.gz: No such
-file or directory
-
-What is this and where do I get this file from ? Can anyone pl give
-me some pointers on this ?
-
-Regards.
-
---ajit
-
-
-      
-
+Stefan
