@@ -1,79 +1,39 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: poor OSD performance using kernel 3.4
-Date: Thu, 24 May 2012 16:10:38 +0200
-Message-ID: <4FBE415E.8030702@profihost.ag>
+From: Florian Haas <florian@hastexo.com>
+Subject: Re: ceph rbd crashes/stalls while random write 4k blocks
+Date: Thu, 24 May 2012 16:19:41 +0200
+Message-ID: <CAPUexz8S+T8K4e641N34WD=8nQYgoQOSCCBrkkvJA7bcrW+K+w@mail.gmail.com>
+References: <4FBE167A.9060505@profihost.ag>
+	<CAPUexz8MxynjO9m=TFpAiVtE9OCGWQfL615XU9yYFksHhNKTeA@mail.gmail.com>
+	<4FBE40FF.1040304@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:42506 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754620Ab2EXOKZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 10:10:25 -0400
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:52696 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754055Ab2EXOTm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 10:19:42 -0400
+Received: by qadb17 with SMTP id b17so4083076qad.19
+        for <ceph-devel@vger.kernel.org>; Thu, 24 May 2012 07:19:41 -0700 (PDT)
+In-Reply-To: <4FBE40FF.1040304@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi list,
+On Thu, May 24, 2012 at 4:09 PM, Stefan Priebe - Profihost AG
+<s.priebe@profihost.ag> wrote:
+>> Take a look at these to see if anything looks familiar:
+>>
+>> http://oss.sgi.com/bugzilla/show_bug.cgi?id=922
+>> https://bugs.launchpad.net/ubuntu/+source/linux/+bug/979498
+>> http://oss.sgi.com/archives/xfs/2011-11/msg00400.html
+>
+> These are solved by using 3.0.20.
 
-today while testing btrfs i discovered a very poor osd performance using
-kernel 3.4.
+... or so Christoph says, but comment #4 in bug 922 seems to indicate otherwise.
 
-Underlying FS is XFS but it is the same with btrfs.
+Florian
 
-3.0.30:
-~# rados -p data bench 10 write -t 16
-Maintaining 16 concurrent writes of 4194304 bytes for at least 10 seconds.
-  sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
-    0       0         0         0         0         0         -         0
-    1      16        41        25   99.9767       100  0.586984  0.447293
-    2      16        71        55   109.979       120  0.934388  0.488375
-    3      16        99        83   110.647       112   1.15982  0.503111
-    4      16       130       114   113.981       124   1.05952  0.516925
-    5      16       159       143   114.382       116  0.149313  0.510734
-    6      16       188       172   114.649       116  0.287166   0.52203
-    7      16       215       199   113.697       108  0.151784  0.531461
-    8      16       242       226   112.984       108  0.623478  0.539896
-    9      16       265       249   110.651        92   0.50354  0.538504
-   10      16       296       280   111.984       124  0.155048  0.542846
-Total time run:        10.776153
-Total writes made:     297
-Write size:            4194304
-Bandwidth (MB/sec):    110.243
-
-Average Latency:       0.577534
-Max latency:           1.85499
-Min latency:           0.091473
-
-
-3.4:
-~# rados -p data bench 10 write -t 16
-Maintaining 16 concurrent writes of 4194304 bytes for at least 10 seconds.
-  sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg lat
-    0       0         0         0         0         0         -         0
-    1      16        40        24   95.9794        96  0.393196  0.455936
-    2      16        68        52   103.983       112  0.835652  0.517297
-    3      16        85        69   91.9849        68   1.00535  0.493058
-    4      16        96        80   79.9869        44  0.096564  0.577948
-    5      16       103        87   69.5879        28  0.092722  0.589147
-    6      16       117       101   67.3216        56  0.222175  0.675334
-    7      16       130       114   65.1321        52   0.15677  0.623806
-    8      16       144       128   63.9896        56  0.089157   0.56746
-    9      16       144       128   56.8794         0         -   0.56746
-   10      16       144       128   51.1912         0         -   0.56746
-   11      16       144       128   46.5373         0         -   0.56746
-   12      16       144       128   42.6591         0         -   0.56746
-   13      16       144       128   39.3776         0         -   0.56746
-   14      16       144       128   36.5649         0         -   0.56746
-   15      16       144       128   34.1272         0         -   0.56746
-   16      16       145       129   32.2443       0.5   11.3422  0.650985
-Total time run:        16.193871
-Total writes made:     145
-Write size:            4194304
-Bandwidth (MB/sec):    35.816
-
-Average Latency:       1.78467
-Max latency:           14.4744
-Min latency:           0.088753
-
-Stefan
+-- 
+Need help with High Availability?
+http://www.hastexo.com/now
