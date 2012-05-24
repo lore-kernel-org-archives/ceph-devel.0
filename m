@@ -1,67 +1,167 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: how to free space from rados bench comman?
-Date: Thu, 24 May 2012 10:22:08 +0200
-Message-ID: <4FBDEFB0.3030700@widodh.nl>
-References: <4FBDDCAE.7040709@profihost.ag> <4FBDE314.7030305@widodh.nl> <4FBDE57F.9010409@profihost.ag>
+From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Subject: Re: RGW, future directions
+Date: Thu, 24 May 2012 10:23:02 +0200
+Message-ID: <CAMwB3ThqNG7=neTc_=NJ87_yB33vtr+CNnjR9og_TG5RwUrJgA@mail.gmail.com>
+References: <CAC-hyiHQ1oy6cyB-sQHd5b6XQhCgQxHrLDcvzWO0OOwGWfFsRQ@mail.gmail.com>
+	<4FBDC403.9090106@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:60095 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751101Ab2EXIWM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 04:22:12 -0400
-In-Reply-To: <4FBDE57F.9010409@profihost.ag>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:60187 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753786Ab2EXIXE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 04:23:04 -0400
+Received: by wgbds11 with SMTP id ds11so5434267wgb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 24 May 2012 01:23:02 -0700 (PDT)
+In-Reply-To: <4FBDC403.9090106@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, ceph-devel@vger.kernel.org
 
-
-
-On 24-05-12 09:38, Stefan Priebe - Profihost AG wrote:
-> Am 24.05.2012 09:28, schrieb Wido den Hollander:
->> Hi,
+On Thu, May 24, 2012 at 7:15 AM, Wido den Hollander <wido@widodh.nl> wr=
+ote:
+>
+>
+> On 22-05-12 20:07, Yehuda Sadeh wrote:
 >>
->> On 24-05-12 09:01, Stefan Priebe - Profihost AG wrote:
->>> Hi,
->>>
->>> every rados bench write uses disk space and my space fills up. How to
->>> free this space again?
->>>
->>> Used command?
->>> rados -p data bench 60 write -t 16
+>> RGW is maturing. Beside looking at performance, which highly ties in=
+to
+>> RADOS performance, we'd like to hear whether there are certain pain
+>> points or future directions that you (you as in the ceph community)
+>> would like to see us taking.
 >>
->> What does this show:
+>> There are a few directions that we were thinking about:
 >>
->> $ rados -p data ls|wc -l
+>> 1. Extend Object Storage API
+>>
+>> Swift and S3 has some features that we don't currently support. We c=
+an
+>> certainly extend our functionality, however, is there any demand for
+>> more features? E.g., self destructing objects, web site, user logs,
+>> etc.
+>>
+>> 2. Better OpenStack interoperability
+>>
+>> Keystone support? Other?
+>>
+>> 3. New features
+>>
+>> Some examples:
+>>
+>> =C2=A0- multitenancy: api for domains and user management
+>> =C2=A0- snapshots
+>> =C2=A0- computation front end: upload object, then do some data
+>> transformation/calculation.
+>> =C2=A0- simple key-value api
+>>
+>> 4. CDMI
+>>
+>> Sage brought up the CDMI support question to ceph-devel, and I don't
+>> remember him getting any response. Is there any intereset in CDMI?
+>>
+>>
+>> 5. Native apache/nginx module or embedded web server
+>>
+>> We still need to prove that the web server is a bottleneck, or poses
+>> scaling issues. Writing a correct native nginx module will require
+>> turning rgw process model into event driven, which is not going to b=
+e
+>> easy.
+>>
 >
-> ~# rados -p data ls|wc -l
-> 46631
+> I'd not go for a native nginx or Apache module, that would bring extr=
+a C
+> code into the story which would mean extra dependencies.
+>
+> My vote would still go to a embedded webserver written in something l=
+ike
+> Python. You could then use Apache/nginx/Varnish as a reverse proxy in=
+ front
+> and do all kinds of cool stuff.
+>
+> You could even doing caching in nginx or Varnish and let the RGW noti=
+fy
+> those proxy's when an object has changed so they can purge their cach=
+e. This
+> would dramatically improve the performance of the gateway.
+>
+> It would also simplify the code, why try to do caching on your own wh=
+en some
+> great HTTP caches are out there?
+>
 
-That is weird, I thought the bench tool cleaned up it's "mess".
-
-Imho it should cleanup after it's done, but there might be a reason why 
-it's not. Did you abort the benchmark or did you let it do the whole run?
+100% +1
 
 >
-> I do not use the data pool so it is seperate ;-) i only use the rbd pool
-> for block devices.
+>> 6. Improve garbage collection
+>>
+>> Currently rgw generates intent logs for garabage removal that requir=
+e
+>> running an external tool later, which is an administrative pain. We
+>> can implement other solutions (OSD side garbage collection,
+>> integrating cleanup process into the gateway, etc.) but we need to
+>> understand the priority.
+>>
+>> 7. libradosgw
+>>
+>> We have had this in mind for some time now. Creating a programming a=
+pi
+>> for rgw, not too different from librados and librbd. It'll hopefully
+>> make code much cleaner. It will allow users to write different front
+>> ends for the rgw backend, and it will make it easier for users to
+>> write applications that interact with the backend, e.g., do processi=
+ng
+>> on objects that users uploaded, FUSE for rgw without S3 as an
+>> intermediate, etc.
+>>
 >
-> So i will free the space with:
-> for i in `rados -p data ls`; do echo $i; rados -p data rm $i; done
-
-rados -p data ls|xargs -n 1 rados -p data rm
-
-I love shorter commands ;)
-
-Wido
-
+> Yes, I would really like this. Combine this with the Python
+> stand-alone/embedded webserver I proposed and you get a really nice R=
+GW I
+> think.
 >
-> Thanks!
 >
-> Stefan
+>> 8. Administration tools improvement
+>>
+>> We can always do better there.
+>>
+>
+> When we have libradosgw it wouldn't be that hard to make a nice web
+> front-end where you can manage the whole thing.
+>
+>
+>> 9. Other ideas?
+>>
+>>
+>> Any comments are welcome!
+>>
+>> Thanks,
+>> Yehuda
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
+ml
+
+
+
+--=20
+-----
+Pozdrawiam
+
+S=C5=82awek "sZiBis" Skowron
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
