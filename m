@@ -1,30 +1,25 @@
-From: Martin Mailand <martin@tuxadero.com>
-Subject: Re: Ceph on btrfs 3.4rc
-Date: Thu, 24 May 2012 08:03:33 +0200
-Message-ID: <4FBDCF35.6060409@tuxadero.com>
-References: <20120517194358.GA9846@dhcp231-144.rdu.redhat.com> <CAJafhzTQJchdd600DiEnooUH-P9ZcLvW+oEczCMNskd+Ud4BmQ@mail.gmail.com> <4FB56B21.7070800@tuxadero.com> <20120518144759.GA1892@localhost.localdomain> <4FB685C9.2050607@tuxadero.com> <20120518190105.GB1892@localhost.localdomain> <4FB9BDBA.2030806@cn.fujitsu.com> <CAJafhzSmLC9yUwrxsJEz5vKYnfP0DSWdMnA0oXmLT_4CQFc1oQ@mail.gmail.com> <20120522173344.GB1890@localhost.localdomain> <CAJafhzQGHsSA6dUwOqTJERj7SgVmKFuVDHk5R+i7n0FuhUAj_g@mail.gmail.com> <20120523150235.GB2127@localhost.localdomain> <4FBD3681.5060000@tuxadero.com>
-Reply-To: martin@tuxadero.com
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: how to free space from rados bench comman?
+Date: Thu, 24 May 2012 09:01:02 +0200
+Message-ID: <4FBDDCAE.7040709@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from einhorn.in-berlin.de ([192.109.42.8]:37608 "EHLO
-	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753001Ab2EXGEA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 02:04:00 -0400
-In-Reply-To: <4FBD3681.5060000@tuxadero.com>
+Received: from mail.profihost.ag ([85.158.179.208]:49251 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751013Ab2EXHAv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 24 May 2012 03:00:51 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: martin@tuxadero.com
-Cc: Josef Bacik <josef@redhat.com>, Christian Brunner <christian@brunner-muc.de>, miaox@cn.fujitsu.com, Sage Weil <sage@newdream.net>, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Hi,
-the ceph cluster is running under heavy load for the last 13 hours 
-without a problem, dmesg is empty and the performance is good.
 
--martin
+every rados bench write uses disk space and my space fills up. How to
+free this space again?
 
-Am 23.05.2012 21:12, schrieb Martin Mailand:
-> this patch is running for 3 hours without a Bug and without the Warning.
-> I will let it run overnight and report tomorrow.
-> It looks very good ;-)
+Used command?
+rados -p data bench 60 write -t 16
+
+Stefan
