@@ -1,50 +1,68 @@
 From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: ceph rbd crashes/stalls while random write 4k blocks
-Date: Fri, 25 May 2012 09:35:14 +0200
-Message-ID: <4FBF3632.6090903@profihost.ag>
-References: <4FBE167A.9060505@profihost.ag>	<CAPUexz8MxynjO9m=TFpAiVtE9OCGWQfL615XU9yYFksHhNKTeA@mail.gmail.com>	<4FBE40FF.1040304@profihost.ag>	<CAPUexz8S+T8K4e641N34WD=8nQYgoQOSCCBrkkvJA7bcrW+K+w@mail.gmail.com>	<4FBF2AF5.5040805@profihost.ag> <CAPUexz_s=ePEiod9H_nXroBnTLOknbYww+8z2qvW=NEPF0TayQ@mail.gmail.com>
+Subject: Re: poor OSD performance using kernel 3.4
+Date: Fri, 25 May 2012 10:19:08 +0200
+Message-ID: <4FBF407C.70407@profihost.ag>
+References: <4FBE415E.8030702@profihost.ag> <CAJCPpW+SKnnVUaDEAsCkKyZwMVrHCRJF2C8zqB4eORgwW5p=1Q@mail.gmail.com> <4FBE7ABC.5020502@profihost.ag> <4FBE838D.4000303@inktank.com> <4FBE8662.1070801@profihost.ag> <4FBEE5FF.7080907@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:36194 "EHLO
+Received: from mail.profihost.ag ([85.158.179.208]:47633 "EHLO
 	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754982Ab2EYHe6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 May 2012 03:34:58 -0400
-In-Reply-To: <CAPUexz_s=ePEiod9H_nXroBnTLOknbYww+8z2qvW=NEPF0TayQ@mail.gmail.com>
+	with ESMTP id S1752151Ab2EYISw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 May 2012 04:18:52 -0400
+In-Reply-To: <4FBEE5FF.7080907@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Florian Haas <florian@hastexo.com>
+To: Mark Nelson <mark.nelson@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 25.05.2012 09:33, schrieb Florian Haas:
-> On Fri, May 25, 2012 at 8:47 AM, Stefan Priebe - Profihost AG
-> <s.priebe@profihost.ag> wrote:
->> Am 24.05.2012 16:19, schrieb Florian Haas:
->>> On Thu, May 24, 2012 at 4:09 PM, Stefan Priebe - Profihost AG
->>> <s.priebe@profihost.ag> wrote:
->>>>> Take a look at these to see if anything looks familiar:
->>>>>
->>>>> http://oss.sgi.com/bugzilla/show_bug.cgi?id=922
->>>>> https://bugs.launchpad.net/ubuntu/+source/linux/+bug/979498
->>>>> http://oss.sgi.com/archives/xfs/2011-11/msg00400.html
->>>>
->>>> These are solved by using 3.0.20.
->>>
->>> ... or so Christoph says, but comment #4 in bug 922 seems to indicate otherwise.
->>
->> I'm sorry you're absolutely right. BUT XFS had some regressions with
->> xlog_grabt_log_space since 2.6.28 which was fixed in 3.0.X by reverting
->> back to a kernel thread instead of workers. I was working with Christoph
->> and Dave on this problem and it tooked be nearly a whole month to track
->> that down (git commit c7eead1e118fb7e34ee8f5063c3c090c054c3820). In this
->> case (#922) it seems it is really related to a too small log. But I
->> don't have a too small log in my ceph case ;-)
+Am 25.05.2012 03:53, schrieb Mark Nelson:
+> On 05/24/2012 02:05 PM, Stefan Priebe wrote:
+>> 3.2.18 works fine too.
 > 
-> Hmmm. So what's Chinner saying about this one? Should we move this
-> discussion to an XFS list?
+> Honestly I don't know if tmpfs journal with dio = false would lead to
+> that kind of behavior.  Anything interesting in the logs if you turn
+> debugging up?
 
-I already send the trace to Christoph, Dave and the XFS List. Sadly no
-reply.
+just stuff like this. But writing to the osd disk works - no idea why i
+have seen a rate of 0 yesterday.
+
+[INF] 2.2a scrub ok
+2012-05-25 10:01:00.825442    pg v165: 768 pgs: 768 active+clean; 592 MB
+data, 1181 MB used, 669 GB / 670 GB avail
+
+2012-05-25 10:01:00.623252 osd.0 10.0.255.100:6800/7423 121 : [WRN] 1
+slow requests, 1 included below; oldest blocked for > 30.042783 secs
+
+2012-05-25 10:01:00.623259 osd.0 10.0.255.100:6800/7423 122 : [WRN] slow
+request 30.042783 seconds old, received at 2012-05-25 10:00:30.580392:
+osd_op(client.4111.0:74 proxmox1_154826_object73 [write 0~4194304]
+0.5343bcc6) v4 currently waiting for sub ops
+
+
+>> > I wonder if any of the data actually makes
+>>> it to the disk... Can you run iostat or collectl or something and see
+>>> what kind of write throughput you get to the OSD data disks?
+>> none... so it seems get's never transferred from journal to disk.
+> 
+> This might be a stupid question, but writes to those partitions work
+> outside of Ceph with the new kernel right?
+
+I just tested with dd:
+dd if=/dev/zero of=/srv/test bs=1M count=10000 oflag=direct
+
+this gaves me a constant rate of 240MB/s on ALL osds.
+
+Also an "ceph osd tell X bench" shows 260MB/s on all OSDs.
+
+But when i use the rados bench i see the same for XFS and btrfs which
+looks like an heavy up and down rate of the cur MB/s while doing the
+rados bench.
+See:
+XFS:
+http://pastebin.com/raw.php?i=8ahaePZw
+btrfs:
+http://pastebin.com/raw.php?i=BrwSC1yg
 
 Stefan
