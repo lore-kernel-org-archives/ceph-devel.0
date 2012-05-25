@@ -1,75 +1,89 @@
-From: Josh Durgin <josh.durgin@inktank.com>
+From: Sage Weil <sage@inktank.com>
 Subject: Re: RBD format changes and layering
-Date: Fri, 25 May 2012 14:25:49 -0700
-Message-ID: <4FBFF8DD.90407@inktank.com>
-References: <4FBEBECD.6040403@inktank.com> <63BD3F6B9DF74617B6B7DC74B3105FF4@inktank.com>
+Date: Fri, 25 May 2012 15:26:01 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205251513290.5998@cobra.newdream.net>
+References: <4FBEBECD.6040403@inktank.com> <4FBF9DC2.8000508@dreamhost.com>
+ <4FBFE9BA.6090905@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:36647 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753467Ab2EYVZv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 May 2012 17:25:51 -0400
-Received: by pbbrp8 with SMTP id rp8so2239492pbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 25 May 2012 14:25:51 -0700 (PDT)
-In-Reply-To: <63BD3F6B9DF74617B6B7DC74B3105FF4@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:34996 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756213Ab2EYW0L (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 May 2012 18:26:11 -0400
+In-Reply-To: <4FBFE9BA.6090905@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Greg Farnum <greg@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: elder@inktank.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 05/25/2012 01:55 PM, Greg Farnum wrote:
-> On Thursday, May 24, 2012 at 4:05 PM, Josh Durgin wrote:
->
-> <snip>
->>
->> One thing that's not addressed in the earlier design is how to make
->> images read-only. The simplest way would be to only support layering
->> on top of snapshots, which are read-only by definition.
->>
->> Another way would be to allow images to be set read-only or
->> read-write, and disallow setting images with children read-write. Are
->> there many use cases that would justify this second, more complicated
->> way?
->
-> I'm pretty sure we want to require images to be based on snapshots. It's actually more flexible than read-write flags: service providers could provide several Ubuntu 12.04 installs with different packages available by simply snapshotting as they go through the install procedure. If they instead had to go to an endpoint and then mark the image read-only, they would need to duplicate all the shared data.
+On Fri, 25 May 2012, Josh Durgin wrote:
+> On 05/25/2012 07:57 AM, Alex Elder wrote:
+> > > /**
+> > > * Get the metadata about the image required to do I/O
+> > > * to it. In the future this may include extra information for
+> > > * features that require it, like encryption/compression type.
+> > > * This extra data will be added at the end of the response, so
+> > > * clients that don't support it don't interpret it.
+> > > *
+> > > * Features that would require clients to be updated to access
+> > > * the image correctly (such as image bitmaps) are set in
+> > > * the incompat_features field. A client that doesn't understand
+> > > * those features will return an error when they try to open
+> > > * the image.
+> > > *
+> > > * The size and any extra information is read from the appropriate
+> > > * snapshot metadata, if snapid is not CEPH_NOSNAP.
+> > > *
+> > > * Returns __le64 size, __le64 order, __le64 features,
+> > > * __le64 incompat_features, __le64 snapseq and
+> > > * list of __le64 snapids
+> > > */
+> > > get_info(__le64 snapid)
+> > 
+> > I think I would prefer to see these bits of information broken
+> > out into a few routines that group related information, or to
+> > separate what's supplied based on the time or frequency it might
+> > need to be accessed, or the "effort" involved in collecting it.
+> 
+> I was thinking that we might want these all in one operation for
+> atomicity, but we could add support for multi-operation transactions to
+> the kernel instead. These were added to userspace a few months ago.
 
-I like this approach better myself, since it's less confusing and has
-a smaller potential for errors.
+I would prefer separate operations too (e.g., get-size, get-order, 
+get-features, etc.).  IIRC there is already some infrastructure to handle 
+compound operations already.  Atomicity shouldn't be a concern, either 
+way.  This makes it simple to expand the header with other infos without 
+creating a get-info2 command or something similar.
 
->
->> Copy-up
->> =======
->>
->> Another feature we want to include with layering is the ability to
->> copy all remaining data from the parent image to the child image, to
->> break the dependency of the latter on the former. This does not change
->> snapshots that were taken earlier though - they still rely on the
->> parent image. Thus, the children of a parent image will need to
->> include snapshots as well, and the reference to the parent image will
->> be needed to interact with snapshots. Thus, we can't just remove the
->> information pointing the parent. Instead, we can add a boolean
->> has_parent field that is stored in the header and with each snapshot,
->> since some snapshots may be taken when the parent was still used, and
->> some after all the data has been copied to the child.
->
-> I understand why you're maintaining a reference to the parent image for old snapshots, but it makes me a little uneasy. This limitation means that you either need to delete snapshots or you need to maintain access to the parent image, which makes me a sad panda.
-> Have you looked into options for doing a full "local" copy of the needed parent data? I realize there are several tricky problems, but given some of the usage scenarios for layering (ie, migration) it would be an advantage.
+A couple other comments:
 
-I'm not quite sure what you mean by a full "local" copy.
+- The pools currently can't be renamed, but there isn't any reason why 
+they couldn't be... at least until we start refering to them by name in 
+the rbd parent pointers.  I'd rather use the pool ids to keep our options 
+open.
 
-My plan was to treat snapshots as extra children of the parent if they
-reference it. That is, snapshotting a cloned image would include
-calling add_child on the parent. This ensures that the parent won't be 
-deleted if child images or snapshots still need it.
+- Requiring parents be snapshots seems fine to me.  It just means the 
+child lists need to be per-snapshot, so that we know when it is safe to 
+remove snaps on the parent.
 
-> My last question is about recursive layering. I know it's been discussed some, and *hopefully* it won't impact the actual on-disk layout of RBD images; do you have enough of a design sketched out to be sure? (One example: given the security concerns you've raised, I think layered images are going to need to list themselves as a child of each of their ancestors, rather than letting that information be absorbed by the intermediate image. Can the plan for storing parent pointers handle that?)
+- I don't think that creating snapshots on the child needs to touch the 
+parent (if that is still the plan).  The child can remove itself as a 
+child one the final reference (head or snap) is removed; no need to bother 
+the parent with that information.  (It could also cause a lot of noise for 
+the parent 12.04 image with 10,000 children getting snapped regularly.)
 
-Since parents maintain a list of children, there's no need to add
-references at more than one level. If you have images A, B, and C,
-with each a child of the last, A can't be deleted until B is, and B
-can't be deleted until C is.
+- I wonder if it makes sense to create an 'open' method (and maybe 
+corresponding 'close').  I'm imagining future *compat* features (e.g., 
+bitmaps), where a new client creates some bitmaps, and then an old client 
+mounts the image.  The bitmap doesn't have to be incompat if the old 
+client invalidates it (e.g., via open with old feature set).  
 
-The only restriction is that the client needs to have read access to
-all the parent pools.
+This might be useful also when we add locking (so that clients get EBUSY 
+if multiple hosts try to map).
+
+- Will we have class methods for rbd_directory as well?  That seems like 
+the simplest way to maintain backwards compatibility.  Also, if we keep 
+the name, maybe rbd_header.* and rbd_data.* are more consistent.
+
+sage
