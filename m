@@ -1,304 +1,60 @@
-From: Josh Durgin <josh.durgin@inktank.com>
+From: Greg Farnum <greg@inktank.com>
 Subject: Re: RBD format changes and layering
-Date: Fri, 25 May 2012 13:21:14 -0700
-Message-ID: <4FBFE9BA.6090905@inktank.com>
-References: <4FBEBECD.6040403@inktank.com> <4FBF9DC2.8000508@dreamhost.com>
+Date: Fri, 25 May 2012 13:55:55 -0700
+Message-ID: <63BD3F6B9DF74617B6B7DC74B3105FF4@inktank.com>
+References: <4FBEBECD.6040403@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:49900 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750749Ab2EYUVQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 May 2012 16:21:16 -0400
-Received: by pbbrp8 with SMTP id rp8so2185914pbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 25 May 2012 13:21:16 -0700 (PDT)
-In-Reply-To: <4FBF9DC2.8000508@dreamhost.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:37928 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933574Ab2EYUz7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 25 May 2012 16:55:59 -0400
+Received: by dady13 with SMTP id y13so1706419dad.19
+        for <ceph-devel@vger.kernel.org>; Fri, 25 May 2012 13:55:59 -0700 (PDT)
+In-Reply-To: <4FBEBECD.6040403@inktank.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: elder@inktank.com
+To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 05/25/2012 07:57 AM, Alex Elder wrote:
-> On 05/24/2012 06:05 PM, Josh Durgin wrote:
->> RBD object format changes
->> =========================
->
-> In this message I respond only to the first part of your message.
-> I'll look at the layering stuff separately.
->
->> To enable us to add more features to rbd, including copy-on-write
->> cloning via layering, we need to change to rbd header object
->> format. Since this won't be backwards compatible, the old format will
->> still be used by default. Once layering is implemented, the old format
->> will be deprecated, but still usable with an extra option (something
->> like rbd create --legacy ...). Clients will still be able to read the
->> old format, and images can be converted by exporting and importing them.
->
-> Are you saying here that the clients will recognize both types and will
-> work with either? Or will clients need to specify how to interpret it?
-> Is there a plan to deprecate clients' support for the old format?
+On Thursday, May 24, 2012 at 4:05 PM, Josh Durgin wrote:
 
-I'm saying clients will recognize and read both types automatically.
-We should remove the old format eventually, but we probably want to wait
-a while so users of older kernels can upgrade.
+<snip> 
+> 
+> One thing that's not addressed in the earlier design is how to make
+> images read-only. The simplest way would be to only support layering
+> on top of snapshots, which are read-only by definition.
+> 
+> Another way would be to allow images to be set read-only or
+> read-write, and disallow setting images with children read-write. Are
+> there many use cases that would justify this second, more complicated
+> way?
 
->> While we're making these changes, we can clean up the way librbd and
->> the rbd kernel module access the header, so that they don't have to
->> change each time we change the header format. Instead of reading the
->> header directly, they can use the OSD class mechanism to interact with
->> it. librbd already does this for snapshots, but kernel rbd reads the
->> entire header directly. Making them both use a well-defined api will
->> make later format additions much simpler. I'll describe the changes
->> needed in general, and then those that are needed for rbd layering.
->>
->> New format, pre-layering
->> ========================
->>
->> Right now the header object is name $image_name.rbd, and the data
->> objects are named rb.$image_id_lowbits.$image_id_highbits.$object_number.
->> Since we're making other incompatible changes, we have a chance to
->> rename these to be less likely to collide with other objects. Prefixing
->> them with a more specific string will help, and will work well with
->> a new security feature for layering discussed later. The new
->> names are:
->>
->> rbd_header.$image_name
->> rbd_data.$id.$object_number
->
-> This is an improvement.
->
->> The new header will have the existing (used) fields of the old format as
->> key/value pairs in an omap (this is the rados interface that stores
->> key/value pairs in leveldb). Specifically, the existing fields are:
->>
->> * object_prefix // previously known as block_name
->> * order // bit shift to determine size of the data objects
->> * size // total size of the image in bytes
->
-> Is the size restricted to be a multiple of (2 ^ (object order))?
-> If so I would like to see the size expressed in units of
-> object-order-sized blocks.
+I'm pretty sure we want to require images to be based on snapshots. It's actually more flexible than read-write flags: service providers could provide several Ubuntu 12.04 installs with different packages available by simply snapshotting as they go through the install procedure. If they instead had to go to an endpoint and then mark the image read-only, they would need to duplicate all the shared data.
 
-No, it can be any number of bytes.
+ 
+> Copy-up
+> =======
+> 
+> Another feature we want to include with layering is the ability to
+> copy all remaining data from the parent image to the child image, to
+> break the dependency of the latter on the former. This does not change
+> snapshots that were taken earlier though - they still rely on the
+> parent image. Thus, the children of a parent image will need to
+> include snapshots as well, and the reference to the parent image will
+> be needed to interact with snapshots. Thus, we can't just remove the
+> information pointing the parent. Instead, we can add a boolean
+> has_parent field that is stored in the header and with each snapshot,
+> since some snapshots may be taken when the parent was still used, and
+> some after all the data has been copied to the child.
 
->> * snap_seq // latest snapshot id used with the image
->> * snapshots // list of (snap_name, snap_id, image_size) tuples
->
-> Can you remind me the distinction between the snap_name and the
-> snap_id? Are they both unique identifiers? Do both need to be
-> exposed, or just the snap_name? Is the name a user-supplied name
-> and the id an indication of sequence? (Sorry, haven't been looking
-> at this stuff in a while.)
+I understand why you're maintaining a reference to the parent image for old snapshots, but it makes me a little uneasy. This limitation means that you either need to delete snapshots or you need to maintain access to the parent image, which makes me a sad panda.
+Have you looked into options for doing a full "local" copy of the needed parent data? I realize there are several tricky problems, but given some of the usage scenarios for layering (ie, migration) it would be an advantage.
 
-snap_id is unique to the pool, and is an indication of sequence managed
-by the monitiors. snap_name is provided by the user, and
-is unique to the image.
+My last question is about recursive layering. I know it's been discussed some, and *hopefully* it won't impact the actual on-disk layout of RBD images; do you have enough of a design sketched out to be sure? (One example: given the security concerns you've raised, I think layered images are going to need to list themselves as a child of each of their ancestors, rather than letting that information be absorbed by the intermediate image. Can the plan for storing parent pointers handle that?)
+-Greg
 
-snap_id doesn't need to be exposed to the user, but the client does
-need it for the rados snapshot context that gets sent with every
-rados operation.
 
->> To make adding new things easier, there will be an additional
->> 'features' field, which is a mask of the features used by the image.
->> Clients will know whether they can use an image by checking if they
->> support all the features the image uses that the osd reports as being
->> incompatible (see get_info() below).
->
-> Does a feature vector of all zeroes (returned by the interface) indicate
-> old-style RBD? Maybe the first feature bit should simply indicate that
-> the new format is in used, which allows the new interfaces to be used
-> with old images, and lets the old/new question to be determined using
-> the interfaces you define below.
-
-Old images have the header stored in a differently named object, so
-existence of the old-style header ($image_name.rbd) means it's in the
-old format. I think it's simpler to keep the existing header
-interaction in clients when using the old format. This is needed anyway
-if the clients are upgraded before the osds.
-
-A zeroed feature vector means no new features (like layering) are
-enabled. I'm inclined to continue using the old format until layering
-is implemented, since the new format doesn't add much until
-layering is there. There would be an option to use it for testing,
-before layering is done, of course.
-
->> RBD class interface
->> ===================
->>
->> Here's a proposed basic interface - new features will
->> add more functions and data to existing ones.
->>
->> /**
->> * Initialize the header with basic metadata.
->> * Extra features may initialize more fields in the future.
->> * Everything is stored as key/value pairs as omaps in the header object.
->> *
->> * If features the OSD does not understand are requested, -ENOSYS is
->> * returned.
->> */
->> create(__le64 size, __le32 order, __le64 features)
->
-> Maybe I don't know where this interface lies in the software
-> stack. But all integer parameters here and elsewhere should
-> be expressed in CPU order, not little-endian. (And unless
-> there is a reason to make them signed, they should always
-> be unsigned.)
-
-Yeah, all of these should be unsigned.
-
-> The only place the conversion between CPU and little-endian
-> byte order should occur is at the interface with the wire
-> or persistent storage. This is not where these interfaces
-> sit (right?). (There may be some internal code that keeps
-> things in little-endian for various reasons, but that should
-> not be specified in an external interface like this.)
-
-Yeah, just replace all of the numerical types with uint64_t or uint32_t.
-
-> The fact that everything sent over-the-wire and on-disk is
-> in little-endian format is significant, but just needs to
-> be stated in a single blanket statement.
->
->> /**
->> * Get the metadata about the image required to do I/O
->> * to it. In the future this may include extra information for
->> * features that require it, like encryption/compression type.
->> * This extra data will be added at the end of the response, so
->> * clients that don't support it don't interpret it.
->> *
->> * Features that would require clients to be updated to access
->> * the image correctly (such as image bitmaps) are set in
->> * the incompat_features field. A client that doesn't understand
->> * those features will return an error when they try to open
->> * the image.
->> *
->> * The size and any extra information is read from the appropriate
->> * snapshot metadata, if snapid is not CEPH_NOSNAP.
->> *
->> * Returns __le64 size, __le64 order, __le64 features,
->> * __le64 incompat_features, __le64 snapseq and
->> * list of __le64 snapids
->> */
->> get_info(__le64 snapid)
->
-> I think I would prefer to see these bits of information broken
-> out into a few routines that group related information, or to
-> separate what's supplied based on the time or frequency it might
-> need to be accessed, or the "effort" involved in collecting it.
-
-I was thinking that we might want these all in one operation for
-atomicity, but we could add support for multi-operation transactions to
-the kernel instead. These were added to userspace a few months ago.
-
-> For example:
->
-> get_features() would supply the features and incompat_features.
-> It might not hurt to add "ible" to that second name too. As I
-> understand it "features" would be things that allow additional
-> functionality but which neither affect nor are affected by the
-> way old code (that does not support it) might manipulate the
-> persistent state of the RBD storage.
-
-Exactly.
-
-> Does it make sense for a snapshot to have features encoded in
-> it? Can you envision a feature that might affect snapshots,
-> and if so, would one want to have snapshots in the same RBD
-> device that have different feature sets? If the answer to
-> these is "no," then there's no need for a "snapid" to be
-> supplied for this interface, it would apply to an RBD device
-> itself.
-
-Features like allocation maps (of the entire image or for individual
-objects) might be added to existing images.
-
-> get_size() might supply the block size order and the size in
-> blocks of the RBD device (or a snapshot of the device).
->
-> I don't remember what the snapshot sequence number is for
-> at the moment, but get_snapseq() might provide that, and
-> would (I think) apply to a device, not a snapshot.
->
-> get_snapids() would supply all the snapshot id's recorded for
-> a device. This too is a device operation only, not a snapshot
-> operation. Is there a need for this interface *and* the
-> list_snapshots() you specify below?
-
-Together the snapids and the snap_seq form the snapshot context for a
-rados operation, and are always used together, so if we go for mulitple
-methods instead of get_info(), a get_snapcontext() that returns both
-snapids and snap_seq might make more sense.
-
-This snapshot context is different from rbd-level snapshot metadata,
-which is currently just snapshot name and size, but would include other
-fields like has_parent and features/incompatible_features in the future.
-
-> Rather than implicitly appending additional information to
-> the response, I think separate new entry points should be added
-> when features are added, extending the interface. Old code,
-> or new code operating on old-format RBD devices, would not need
-> to access the new entry points.
-
-This is fine as long as we add multi-operation transaction support to
-the kernel to make accessing all the image metadata needed for I/O
-atomic. This probably isn't too hard, but what do you think? The
-userspace client side parts were done in 
-fe077832b915175b8ed7880c1fa285309c642563.
-
->> /**
->> * Used when resizing the image. Sets the size in bytes.
->> */
->> set_size(__le64 size)
->
-> Maybe define the size in units of (order-dependent) blocks.
-
-I don't see any reason to restrict the size to a multiple of the object
-size.
-
->> /**
->> * The same as the existing snap_add/snap_remove methods, but using the
->> * new format.
->> */
->> snapshot_add(string snap_name, __le64 snap_id)
->
-> This probably reflects my ignorance, but does it make sense for
-> something "external" to the RBD implementation to specify the
-> snapshot id?
-
-The snapshot id is allocated by the monitors. Clients create
-snapshots by getting a new snap id from the monitors, and adding
-it to the header with the user-specified name.
-
->> snapshot_remove(string snap_name)
->
-> Can you remove by id?
-
-That would be better. It would prevent some unlikely races if
-someone deletes a snapshot while another client deleted one and created
-another with the same name.
-
->> /**
->> * list snapshots - like the existing snap_list, but
->> * can return a subset of them.
->> *
->> * Returns __le64 snap_seq, __le64 snap_count, and a list of tuples
->> * (snap_id, snap_size) just like the current snap_list
->> */
->> snapshot_list(__le64 max_len)
->>
->> /**
->> * The same as the existing method. Should only be called
->> * on the rbd_info object.
->> * Returns an id number to use for a new image.
->> */
->> assign_bid()
->
-> Why bid? I guess this is on the server side so I'm just not
-> familiar with it.
-
-bid stands for block id, but we could certainly change the name. It's
-only used when creating a new image, to get a unique id for use in the
-object names.
-
-Josh
