@@ -1,47 +1,59 @@
-From: Tomoki BENIYA <beniya@bit-isle.co.jp>
-Subject: Appearing messages per 10 sec
-Date: Mon, 28 May 2012 19:35:57 +0900
-Message-ID: <20120528185235.CBC5.33BC0F0F@bit-isle.co.jp>
+From: Jerker Nyberg <jerker@Update.UU.SE>
+Subject: distributed cluster
+Date: Mon, 28 May 2012 13:28:45 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1205281117360.358@Psilocybe.Update.UU.SE>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:39013 "HELO
-	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753209Ab2E1Kf7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 28 May 2012 06:35:59 -0400
-Received: by pbbrp8 with SMTP id rp8so5121572pbb.33
-        for <ceph-devel@vger.kernel.org>; Mon, 28 May 2012 03:35:58 -0700 (PDT)
+Received: from Psilocybe.Update.UU.SE ([130.238.19.25]:56423 "EHLO
+	Psilocybe.Update.UU.SE" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753985Ab2E1L2r (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 May 2012 07:28:47 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by Psilocybe.Update.UU.SE (Postfix) with ESMTP id A584330087
+	for <ceph-devel@vger.kernel.org>; Mon, 28 May 2012 13:28:45 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi, all.
 
-I'm using ceph0.47.2 on Debian7(64bit).
-And, I have 2 MDSes.
+This may not really be a subject ceph-devel mailinglist but rather a 
+potential ceph-users? I hope it is ok to write here. I would like to 
+discuss the if it sounds reasonable to run a Ceph cluster distributed over 
+a metro (city) network.
 
-Following messages are appearing per 10 sec on terminal of mds.1.
-But, not appearing on mds.0.
+Let us assume we have a couple of sites distributed over a metro network 
+with at least gigabit interconnect. The demands for storage capacity and 
+speed at our sites are increasing together with the demands for reasonably 
+stable storage. May Ceph be a port of a solution?
 
-What does these mean? And, how to stop these?
-============================================================
-Message from syslogd@mds1 at May 28 19:26:03 ...
- ceph-mds: 2012-05-28 19:26:03.497958 7fede74e5700  0 mds.0.bal   mds.0 mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0.05> = 0 ~ 0
+One idea is to set up Ceph distributed over this metro network. A public 
+service network is announced at all sites, anycasted from the storage 
+SMB/NFS/RGW(?)-to-Ceph gateway. (for stateless connections). Statefull 
+connections (iSCSI?) has to contact the individual storage gateways and 
+redundancy is handled at the application level (dual path). Ceph kernel 
+clients contact the storage servers directly.
 
-Message from syslogd@mds1 at May 28 19:26:03 ...
- ceph-mds: 2012-05-28 19:26:03.497977 7fede74e5700  0 mds.0.bal   mds.1 mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0> = 0 ~ 0
+Hopefully this means that clients at the sites with a storage gateway will 
+contact it. Clients at a site without a local storage gateway, or when the 
+local gateway is down, will contact a storage gateway at another site.
 
-Message from syslogd@mds1 at May 28 19:26:13 ...
- ceph-mds: 2012-05-28 19:26:13.498058 7fede74e5700  0 mds.0.bal   mds.0 mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0.05> = 0 ~ 0
+Hopefully not all power and network at the whole city will go 
+down at once!
 
-Message from syslogd@mds1 at May 28 19:26:13 ...
- ceph-mds: 2012-05-28 19:26:13.498080 7fede74e5700  0 mds.0.bal   mds.1 mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0> = 0 ~ 0
-============================================================
+Does this sound reasonable? It should be easy to scale up with more 
+storage nodes with Ceph. Or is it better to put all servers in the same 
+server room?
 
-Thanks.
+                         Internet
+                          |   |
+                         Routers
+                          |   |
+    Metro network  =============================
+                   |     |     |     |    |    |
+    Sites          R     R     R     R    R    R
+                   |     |     |     |
+    Servers      Ceph1 Ceph2 Ceph3 Ceph4
 
--- 
-Tomoki BENIYA <beniya@bit-isle.co.jp>
 
+--jerker
