@@ -1,120 +1,168 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: poor OSD performance using kernel 3.4
-Date: Mon, 28 May 2012 08:52:03 +0200 (CEST)
-Message-ID: <d88e7ec1-2170-44e3-b90c-1d1e3453e5fc@mailpro>
-References: <4FC31A54.4020306@profihost.ag>
+From: chandrashekhar <chandubigc@gmail.com>
+Subject: Re: OSD per disk.
+Date: Mon, 28 May 2012 09:25:36 +0000 (UTC)
+Message-ID: <loom.20120528T111434-469@post.gmane.org>
+References: <loom.20120528T080903-621@post.gmane.org> <1c048abb-0cbb-4d69-9922-419c16019887@mailpro>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:49821 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751327Ab2E1GwZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 May 2012 02:52:25 -0400
-In-Reply-To: <4FC31A54.4020306@profihost.ag>
+Received: from plane.gmane.org ([80.91.229.3]:50242 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751790Ab2E1JZs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 28 May 2012 05:25:48 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1SYwCv-0003IP-Us
+	for ceph-devel@vger.kernel.org; Mon, 28 May 2012 11:25:46 +0200
+Received: from segment-124-30.sify.net ([segment-124-30.sify.net])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 28 May 2012 11:25:45 +0200
+Received: from chandubigc by segment-124-30.sify.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 28 May 2012 11:25:45 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
-
-> I think filestore journal parallel works only with btrfs.=20
-> Other filesystem are writeahead.=20
->>... you might be right but i can't change ceph's implementation.=20
-
-See my schema,
-I think you see parallel writes, because you see flush write of first w=
-ave to disk, in the same time=20
-of second wave write to journal.
+To: ceph-devel@vger.kernel.org
 
 
->>I totally aggree with you but this is just a test setup AND if you ha=
-ve=20
->>a big log file to copy let's say 100GB your journal will never be big=
-=20
->>enough and the speed should never drop to 0MB/s. Also i see the corre=
-ct=20
->>behaviour with 3.0.X where the speed is maxed to the underlying devic=
-e.=20
->>So i still see no reason that with 3.4 the speed drops to 0MB/s and i=
-s=20
->>mostly 10-20MB/s instead of 130MB/s.=20
+Alexandre DERUMIER <aderumier <at> odiso.com> writes:
 
-Maybe something is wrong with 3.4, then your disk write more slowly. (x=
-fs bug, sata driver controller bug, ...)
-on my schema:
-Enough slowly to have the third wave to block on the journal. (so 0MB/S=
-)
-
-maybe some local benchmark of your ssd with 3.4 can give some tips ?
-
->> How many disks (7,2K) do you have by osd ?=20
->>>One intel 520 SSD per OSD.=20
-
-I see some benchmark on internet about 150-300MB/s (depend of the block=
-size).
-
-Something must be wrong, Doing local benchmark can really help I think.
-You can use sysbench-tools
-https://github.com/tsuna/sysbench-tools
-It make bench compare with nice graphs.
-
-
-
------ Mail original -----=20
-
-De: "Stefan Priebe" <s.priebe@profihost.ag>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: ceph-devel@vger.kernel.org, "Mark Nelson" <mark.nelson@inktank.com>=
-=20
-Envoy=C3=A9: Lundi 28 Mai 2012 08:25:24=20
-Objet: Re: poor OSD performance using kernel 3.4=20
-
-Am 28.05.2012 07:37, schrieb Alexandre DERUMIER:=20
-> I think filestore journal parallel works only with btrfs.=20
-> Other filesystem are writeahead.=20
-=2E.. you might be right but i can't change ceph's implementation.=20
-
-> if you write at 120MB/S, so your journal of 1GB is at 50% in 4sec.=20
 >=20
-> So you got around 480MB each 4sec, does your disks can flush sequenti=
-ally these 480MB in less than 4sec ?=20
-> (do a small benchmark of your disk in local filesystem, without ceph)=
-=20
+> Hi, just defined osds in ceph.conf, they mount each disk in correct m=
+ountpoint.
 >=20
-> If not, you can have spikes in your write stats if the journal.=20
+> this example :=20
+> 1st server :
+>   /dev/sdb1 -> /data/osd0
+>   /dev/sdc1 -> /data/osd1
+>   /dev/sdd1 -> /data/osd2
+>   ....
+> same for journal.(you can use differents disk for journal or use anot=
+her
+partition on same disk)
 >=20
-> simple schema if disks are not fast enough:=20
-I totally aggree with you but this is just a test setup AND if you have=
-=20
-a big log file to copy let's say 100GB your journal will never be big=20
-enough and the speed should never drop to 0MB/s. Also i see the correct=
-=20
-behaviour with 3.0.X where the speed is maxed to the underlying device.=
-=20
-So i still see no reason that with 3.4 the speed drops to 0MB/s and is=20
-mostly 10-20MB/s instead of 130MB/s.=20
+> ceph.conf
+> [osd]=20
+>=20
+> osd data =3D /data/osd$id=20
+> osd journal =3D /data/osd$id/journal=20
+> osd journal size =3D 512=20
+>=20
+> [osd.0]=20
+> host =3D ceph-node-1=20
+>=20
+> [osd.1]=20
+> host =3D ceph-node-1=20
+>=20
+> [osd.2]=20
+> host =3D ceph-node-1=20
+>=20
+> [osd.3]=20
+> host =3D ceph-node-2=20
+>=20
+> [osd.4]=20
+> host =3D ceph-node-2=20
+>=20
+> ----- Mail original -----=20
+>=20
+> De: "chandrashekhar" <chandubigc <at> gmail.com>=20
+> =C3=80: ceph-devel <at> vger.kernel.org=20
+> Envoy=C3=A9: Lundi 28 Mai 2012 08:19:17=20
+> Objet: OSD per disk.=20
+>=20
+> Hi,=20
+>=20
+> I want to setup a ceph cluster with 4 osds ( one OSD per disk), 2 mon=
+s, 1=20
+> mds. Please help me to configure this.=20
+>=20
+> I have a machine with following hardware:=20
+>=20
+> 4 hard disks ( each 500GB).=20
+>=20
+> /dev/sda - 500G ( OS )=20
+> /dev/sdb - 500G=20
+> /dev/sdc - 500G=20
+> /dev/sdd - 500G=20
+>=20
+> OS: ubuntu 12.O4 server ( 64 bit )=20
+>=20
+> Thanks,=20
+> Chandra.=20
+>=20
 
-> How many disks (7,2K) do you have by osd ?=20
-One intel 520 SSD per OSD.=20
+Thanks Alexandre,  I created four directories in /data  (osd0,osd1,osd2=
+,osd3)=20
+and mounted as below:
 
-Stefan=20
-
-
-
---=20
-
---=20
+/dev/sdb1 -> /data/osd1
+/dev/sdc1 -> /data/osd2
+/dev/sdd1 -> /data/osd3
 
 
+But when I start ceph its starting mons and md daemons but not osds. Pl=
+ease help
+me to get this working.
+
+>ceph -w
+2012-05-28 14:43:23.756895    pg v2: 792 pgs: 792 creating; 0 bytes dat=
+a, 0 KB
+used, 0 KB / 0 KB avail
+2012-05-28 14:43:23.762160   mds e1: 0/0/1 up
+2012-05-28 14:43:23.762296   osd e1: 0 osds: 0 up, 0 in
+2012-05-28 14:43:23.762586   log 2012-05-28 14:24:15.391671 mon.0
+192.168.7.10:6789/0 4 : [INF] mon.a@0 won leader election with quorum 0=
+,1
+2012-05-28 14:43:23.762741   mon e1: 2 mons at
+{a=3D192.168.7.10:6789/0,b=3D192.168.7.10:6790/0}
 
 
-	Alexandre D erumier=20
-Ing=C3=A9nieur Syst=C3=A8me=20
-=46ixe : 03 20 68 88 90=20
-=46ax : 03 20 68 90 81=20
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
-12 rue Marivaux 75002 Paris - France=20
-=09
+
+
+Here is my ceph.conf:
+-------------------------------------------------
+[global]
+   auth supported =3D cephx
+   keyring =3D /etc/ceph/keyring.admin
+
+[mon]
+   mon data =3D /data/mon.$id
+
+[mds]
+
+[osd]
+   osd data =3D /data/osd$id
+   osd journal =3D /data/osd$id/osd.$id.journal
+   osd journal size =3D 1000
+
+
+
+[mon.a]
+   host =3D testnode
+   mon addr =3D 192.168.7.10:6789
+[mon.b]
+  host =3D testnode
+  mon addr =3D 192.168.7.10:6790
+
+[osd.0]
+   host =3D testnode
+
+[osd.1]
+   host =3D testnode
+
+[osd.2]
+   host =3D testnode
+
+[osd.3]
+   host =3D testnode
+[mds.a]
+   host =3D testnode
+
+
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
