@@ -1,119 +1,110 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: OSD per disk.
-Date: Mon, 28 May 2012 08:37:55 +0200 (CEST)
-Message-ID: <1c048abb-0cbb-4d69-9922-419c16019887@mailpro>
-References: <loom.20120528T080903-621@post.gmane.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] ceph: check PG_Private flag before accessing page->private
+Date: Mon, 28 May 2012 14:44:30 +0800
+Message-ID: <1338187470-28060-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:44707 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753270Ab2E1GiS convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 May 2012 02:38:18 -0400
-In-Reply-To: <loom.20120528T080903-621@post.gmane.org>
+Received: from mga11.intel.com ([192.55.52.93]:36523 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751315Ab2E1Gob (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 28 May 2012 02:44:31 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: chandrashekhar <chandubigc@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi, just defined osds in ceph.conf, they mount each disk in correct mou=
-ntpoint.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-this example :=20
-1st server :
-  /dev/sdb1 -> /data/osd0
-  /dev/sdc1 -> /data/osd1
-  /dev/sdd1 -> /data/osd2
-  ....
-same for journal.(you can use differents disk for journal or use anothe=
-r partition on same disk)
+I got lots of NULL pointer dereference Oops when compiling kernel on ceph.
+The bug is because the kernel page migration routine replaces some pages
+in the page cache with new pages, these new pages' private can be non-zero.
 
+Signed-off-by: Zheng Yan <zheng.z.yan@intel.com>
+---
+ fs/ceph/addr.c |   21 ++++++++++++---------
+ 1 files changed, 12 insertions(+), 9 deletions(-)
 
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 173b1d2..8b67304e 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -54,7 +54,12 @@
+ 	(CONGESTION_ON_THRESH(congestion_kb) -				\
+ 	 (CONGESTION_ON_THRESH(congestion_kb) >> 2))
+ 
+-
++static inline struct ceph_snap_context *page_snap_context(struct page *page)
++{
++	if (PagePrivate(page))
++		return (void *)page->private;
++	return NULL;
++}
+ 
+ /*
+  * Dirty a page.  Optimistically adjust accounting, on the assumption
+@@ -142,10 +147,9 @@ static void ceph_invalidatepage(struct page *page, unsigned long offset)
+ {
+ 	struct inode *inode;
+ 	struct ceph_inode_info *ci;
+-	struct ceph_snap_context *snapc = (void *)page->private;
++	struct ceph_snap_context *snapc = page_snap_context(page);
+ 
+ 	BUG_ON(!PageLocked(page));
+-	BUG_ON(!page->private);
+ 	BUG_ON(!PagePrivate(page));
+ 	BUG_ON(!page->mapping);
+ 
+@@ -182,7 +186,6 @@ static int ceph_releasepage(struct page *page, gfp_t g)
+ 	struct inode *inode = page->mapping ? page->mapping->host : NULL;
+ 	dout("%p releasepage %p idx %lu\n", inode, page, page->index);
+ 	WARN_ON(PageDirty(page));
+-	WARN_ON(page->private);
+ 	WARN_ON(PagePrivate(page));
+ 	return 0;
+ }
+@@ -443,7 +446,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 	osdc = &fsc->client->osdc;
+ 
+ 	/* verify this is a writeable snap context */
+-	snapc = (void *)page->private;
++	snapc = page_snap_context(page);
+ 	if (snapc == NULL) {
+ 		dout("writepage %p page %p not dirty?\n", inode, page);
+ 		goto out;
+@@ -451,7 +454,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 	oldest = get_oldest_context(inode, &snap_size);
+ 	if (snapc->seq > oldest->seq) {
+ 		dout("writepage %p page %p snapc %p not writeable - noop\n",
+-		     inode, page, (void *)page->private);
++		     inode, page, snapc);
+ 		/* we should only noop if called by kswapd */
+ 		WARN_ON((current->flags & PF_MEMALLOC) == 0);
+ 		ceph_put_snap_context(oldest);
+@@ -591,7 +594,7 @@ static void writepages_finish(struct ceph_osd_request *req,
+ 			clear_bdi_congested(&fsc->backing_dev_info,
+ 					    BLK_RW_ASYNC);
+ 
+-		ceph_put_snap_context((void *)page->private);
++		ceph_put_snap_context(page_snap_context(page));
+ 		page->private = 0;
+ 		ClearPagePrivate(page);
+ 		dout("unlocking %d %p\n", i, page);
+@@ -795,7 +798,7 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 			}
+ 
+ 			/* only if matching snap context */
+-			pgsnapc = (void *)page->private;
++			pgsnapc = page_snap_context(page);
+ 			if (pgsnapc->seq > snapc->seq) {
+ 				dout("page snapc %p %lld > oldest %p %lld\n",
+ 				     pgsnapc, pgsnapc->seq, snapc, snapc->seq);
+@@ -984,7 +987,7 @@ static int ceph_update_writeable_page(struct file *file,
+ 	BUG_ON(!ci->i_snap_realm);
+ 	down_read(&mdsc->snap_rwsem);
+ 	BUG_ON(!ci->i_snap_realm->cached_context);
+-	snapc = (void *)page->private;
++	snapc = page_snap_context(page);
+ 	if (snapc && snapc != ci->i_head_snapc) {
+ 		/*
+ 		 * this page is already dirty in another (older) snap
+-- 
+1.7.7.6
 
-ceph.conf
-[osd]=20
-
-osd data =3D /data/osd$id=20
-osd journal =3D /data/osd$id/journal=20
-osd journal size =3D 512=20
-
-[osd.0]=20
-host =3D ceph-node-1=20
-
-
-[osd.1]=20
-host =3D ceph-node-1=20
-
-
-[osd.2]=20
-host =3D ceph-node-1=20
-
-
-
-[osd.3]=20
-host =3D ceph-node-2=20
-
-
-[osd.4]=20
-host =3D ceph-node-2=20
-
-
------ Mail original -----=20
-
-De: "chandrashekhar" <chandubigc@gmail.com>=20
-=C3=80: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Lundi 28 Mai 2012 08:19:17=20
-Objet: OSD per disk.=20
-
-Hi,=20
-
-I want to setup a ceph cluster with 4 osds ( one OSD per disk), 2 mons,=
- 1=20
-mds. Please help me to configure this.=20
-
-I have a machine with following hardware:=20
-
-4 hard disks ( each 500GB).=20
-
-/dev/sda - 500G ( OS )=20
-/dev/sdb - 500G=20
-/dev/sdc - 500G=20
-/dev/sdd - 500G=20
-
-
-OS: ubuntu 12.O4 server ( 64 bit )=20
-
-
-
-
-Thanks,=20
-Chandra.=20
-
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
-
-
-
---=20
-
---=20
-
-
-
-
-	Alexandre D erumier=20
-Ing=C3=A9nieur Syst=C3=A8me=20
-=46ixe : 03 20 68 88 90=20
-=46ax : 03 20 68 90 81=20
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
-12 rue Marivaux 75002 Paris - France=20
-=09
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
