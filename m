@@ -1,50 +1,49 @@
-From: chandrashekhar <chandubigc@gmail.com>
-Subject: OSD per disk.
-Date: Mon, 28 May 2012 06:19:17 +0000 (UTC)
-Message-ID: <loom.20120528T080903-621@post.gmane.org>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: Can we setup multiple osd's in a single machine.
+Date: Mon, 28 May 2012 08:22:51 +0200 (CEST)
+Message-ID: <8e3206c3-f170-47dc-85f8-d9782fbe04a2@mailpro>
+References: <loom.20120525T120321-115@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:49230 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753409Ab2E1GUG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 28 May 2012 02:20:06 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SYtJD-0005aD-33
-	for ceph-devel@vger.kernel.org; Mon, 28 May 2012 08:20:03 +0200
-Received: from segment-124-30.sify.net ([segment-124-30.sify.net])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 28 May 2012 08:20:03 +0200
-Received: from chandubigc by segment-124-30.sify.net with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 28 May 2012 08:20:03 +0200
+Received: from mailpro.odiso.net ([89.248.209.98]:39497 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751619Ab2E1GXM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 May 2012 02:23:12 -0400
+In-Reply-To: <loom.20120525T120321-115@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ramu <ramu.freesystems@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+Yes, you can have 1osd by disk
 
-      I want to setup a ceph cluster with 4 osds ( one OSD per disk), 2 mons, 1
-mds. Please help me to configure this.
+----- Mail original -----=20
 
-I have a machine with following hardware:
+De: "ramu" <ramu.freesystems@gmail.com>=20
+=C3=80: ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Vendredi 25 Mai 2012 12:09:09=20
+Objet: Can we setup multiple osd's in a single machine.=20
 
-4 hard disks ( each 500GB).
+Hi all,=20
+I have a system with 5 hard disks each is 500GB.I want to add multiple =
+osd's in=20
+that machine.If it is possible?=20
 
-/dev/sda - 500G ( OS )  
-/dev/sdb - 500G
-/dev/sdc - 500G
-/dev/sdd - 500G
-
-
-OS: ubuntu 12.O4 server ( 64 bit )
-
-
+Thanks,=20
+Ramu.=20
 
 
-Thanks,
-Chandra.
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
 
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
