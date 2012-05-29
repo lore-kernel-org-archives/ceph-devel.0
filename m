@@ -1,100 +1,89 @@
-From: Sam Zaydel <sam.zaydel@inktank.com>
-Subject: Re: distributed cluster
-Date: Tue, 29 May 2012 09:53:55 -0700
-Message-ID: <CAAs1YtHpzCn4is5N5FT6poqPnQhP3cDDF7Oz+EZAYYUUBep8Xg@mail.gmail.com>
-References: <Pine.LNX.4.64.1205281117360.358@Psilocybe.Update.UU.SE>
-	<CADvuQREnjHmnjOKimy2+FCrJ0yc2zGh6v4gtUtovX=jVDazRsQ@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: poor OSD performance using kernel 3.4
+Date: Tue, 29 May 2012 12:50:02 -0500
+Message-ID: <4FC50C4A.4090101@inktank.com>
+References: <5970d59f-9531-4f60-8600-3e1268824c83@mailpro> <4FC49B12.8020004@profihost.ag> <4FC4D1A8.1080001@univ-nantes.fr> <4FC4E0A9.8010008@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:36200 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754051Ab2E2Qx4 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 12:53:56 -0400
-Received: by pbbrp8 with SMTP id rp8so6196560pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 29 May 2012 09:53:55 -0700 (PDT)
-In-Reply-To: <CADvuQREnjHmnjOKimy2+FCrJ0yc2zGh6v4gtUtovX=jVDazRsQ@mail.gmail.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:56130 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754226Ab2E2RuI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 13:50:08 -0400
+Received: by obbtb18 with SMTP id tb18so7157508obb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 29 May 2012 10:50:07 -0700 (PDT)
+In-Reply-To: <4FC4E0A9.8010008@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Yann Dupont <Yann.Dupont@univ-nantes.fr>, ceph-devel@vger.kernel.org
 
-I could see a lot of use-cases for BC and DR tiers where performance
-may not be as much an issue, but availability being critical above
-all.
+On 05/29/2012 09:43 AM, Stefan Priebe - Profihost AG wrote:
+> Am 29.05.2012 15:39, schrieb Yann Dupont:
+>> On 29/05/2012 11:46, Stefan Priebe - Profihost AG wrote:
+>>> It would be really nice if somebody from inktank can comment this whole
+>>> sitation.
+>>>
+>> Hello.
+>> I think I have the same bug :
+>>
+>> My setup is with 8 OSD nodes, 3 MDS (1 active)&  3 MON.
+>> All my machines are debian, using a custom 3.4.0 kernel. Ceph is
+>> 0.47.2-1~bpo60+1 (debian package)
+> That sounds absolutely like the same issue. Sadly nobody from inktank
+> has replied to this problems for the last days.
 
-Most options in use today rely on some async rep. and are in most
-cases quite expensive and still do not view performance as their
-primary concern.
+Sorry about that, yesterday was a holiday in the US.
 
-On Tue, May 29, 2012 at 9:44 AM, Tommi Virtanen <tv@inktank.com> wrote:
-> On Mon, May 28, 2012 at 4:28 AM, Jerker Nyberg <jerker@update.uu.se> =
-wrote:
->> This may not really be a subject ceph-devel mailinglist but rather a
->> potential ceph-users? I hope it is ok to write here.
+I did some quick tests on a couple of nodes I had laying around this 
+morning.
+
+Distro: Oneiric (IE no syncfs in glibc)
+Ceph: 0.46-65-gf6c5dff
+
+1 1GbE Client node
+3 1GbE Mon nodes
+2 1GbE OSD nodes with 1 OSD on each mounted on a 7200rpm SAS drive.  
+btrfs with -l 64k -n64k, mounted using noatime.  H700 Raid controller 
+with each drive in a 1 disk raid0.  Journals are partitioned on a 
+separate drive.
+
+/proc/version:
+Linux version 3.4.0-ceph (autobuild-ceph@gitbuilder-kernel-amd64)
+
+rados -p data bench 120 write:
+
+Total time run:        120.601286
+Total writes made:     2979
+Write size:            4194304
+Bandwidth (MB/sec):    98.805
+
+Average Latency:       0.647507
+Max latency:           1.39966
+Min latency:           0.181663
+
+Once I get these nodes up to 0.47 and get them switched over to 10GbE 
+I'll redo the btrfs tests and try out xfs as well with longer running tests.
+
+>> As you can see, much more stable bandwith with this pool.
+> That's pretty strange...
+
+Indeed, that is very strange!  Can you check to see how many pgs are in 
+each?  Any difference in replication level?  You can check with:
+
+ceph osd pool get <pool> size
+ceph osd pool get <pool> pg_num
+
+>> I understand data&  rbd pool probably don't use the same internals, but
+>> is this difference expected ?
+> There must be differences in pool handling.
 >
-> It's absolutely ok to talk on this mailing list about using Ceph. We
-> may create a separate ceph-users later on, but right now this list is
-> where the conversation should go.
->
->> Let us assume we have a couple of sites distributed over a metro net=
-work
->> with at least gigabit interconnect. The demands for storage capacity=
- and
->> speed at our sites are increasing together with the demands for reas=
-onably
->> stable storage. May Ceph be a port of a solution?
->
-> Ceph was designed to work within a single data center. If parts of th=
-e
-> cluster reside in remote locations, you essentially suffer the worst
-> combination of their latency and bandwidth limits. A write that gets
-> replicated to three different data centers is not complete until the
-> data has been transferred to all three, and an acknowledgement has
-> been received.
->
-> For example: with data replicated over data centers A, B, C, connecte=
-d
-> at 1Gb/s, the fastest all of A will ever handle writes is 0.5Gb/s --
-> it'll need to replicate everything to B and C, over that single pipe.
->
-> I am aware of a few people building multi-dc Ceph clusters. Some have
-> shared their network latency, bandwidth and availability numbers with
-> me (confidentially), and at first glance their wide-area network
-> performs better than many single-dc networks. They are far above a 1
-> gigabit interconnect.
->
-> I would really recommend you embark on a project like this only if yo=
-u
-> are able to understand the Ceph replication model, and do the math fo=
-r
-> yourself and figure out what your expected service levels for Ceph
-> operations would be. (Naturally, Inktank Professional Services will
-> help you in your endeavors, though their first response should be
-> "that's not a recommended setup".)
->
->> One idea is to set up Ceph distributed over this metro network. A pu=
-blic
->> service network is announced at all sites, anycasted from the storag=
-e
->> SMB/NFS/RGW(?)-to-Ceph gateway. (for stateless connections). Statefu=
-ll
->> connections (iSCSI?) has to contact the individual storage gateways =
-and
->> redundancy is handled at the application level (dual path). Ceph ker=
-nel
->> clients contact the storage servers directly.
->
-> The Ceph Distributed File System is not considered production ready y=
-et.
+> Stefan
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Thanks,
+Mark
