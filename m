@@ -1,65 +1,44 @@
 From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: distributed cluster
-Date: Tue, 29 May 2012 09:44:19 -0700
-Message-ID: <CADvuQREnjHmnjOKimy2+FCrJ0yc2zGh6v4gtUtovX=jVDazRsQ@mail.gmail.com>
-References: <Pine.LNX.4.64.1205281117360.358@Psilocybe.Update.UU.SE>
+Subject: Re: Designing a cluster guide
+Date: Tue, 29 May 2012 09:50:40 -0700
+Message-ID: <CADvuQRGkf8AfQN_0-7G9ASsMX8GKsXuzeRMt9Hx2b=1z2cXLdA@mail.gmail.com>
+References: <4FB75BAD.3080709@profihost.ag> <8423c457-a8bb-4d26-a643-9573a8bb11a5@mailpro>
+ <CAMvP8PDRUTO8M0=4MvjDtEtUM7aKePOWvGRFiJA1onu4VgXHPw@mail.gmail.com>
+ <CAMwB3TicLaW54wAyZZ=-V7nY-DX0igU8XDh+ZRw_WuK0juH15A@mail.gmail.com>
+ <7111C6286D862F43B94FD6291D8989158644DD@EX01.onqtel.local>
+ <CAPYLRzgyyW5N894X1T=-gNyRdPmu-+VDr0=NuuLVEs93nGJZbw@mail.gmail.com>
+ <7111C6286D862F43B94FD6291D898915864560@EX01.onqtel.local>
+ <7111C6286D862F43B94FD6291D89891586456D@EX01.onqtel.local>
+ <6670030640068667781@unknownmsgid> <7111C6286D862F43B94FD6291D898915868504@EX01.onqtel.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:35540 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751397Ab2E2Qok (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 12:44:40 -0400
-Received: by pbbrp8 with SMTP id rp8so6185677pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 29 May 2012 09:44:39 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1205281117360.358@Psilocybe.Update.UU.SE>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:64869 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754485Ab2E2QvC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 12:51:02 -0400
+Received: by dady13 with SMTP id y13so5667457dad.19
+        for <ceph-devel@vger.kernel.org>; Tue, 29 May 2012 09:51:02 -0700 (PDT)
+In-Reply-To: <7111C6286D862F43B94FD6291D898915868504@EX01.onqtel.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jerker Nyberg <jerker@update.uu.se>
-Cc: ceph-devel@vger.kernel.org
+To: Quenten Grasso <QGrasso@onq.com.au>
+Cc: Slawomir Skowron <szibis@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, May 28, 2012 at 4:28 AM, Jerker Nyberg <jerker@update.uu.se> wrote:
-> This may not really be a subject ceph-devel mailinglist but rather a
-> potential ceph-users? I hope it is ok to write here.
+On Tue, May 29, 2012 at 12:25 AM, Quenten Grasso <QGrasso@onq.com.au> wrote:
+> So if we have 10 nodes vs. 3 nodes with the same mount of disks we should see better write and read performance as you would have less "overlap".
 
-It's absolutely ok to talk on this mailing list about using Ceph. We
-may create a separate ceph-users later on, but right now this list is
-where the conversation should go.
+First of all, a typical way to run Ceph is with say 8-12 disks per
+node, and an OSD per disk. That means your 3-10 node clusters actually
+have 24-120 OSDs on them. The number of physical machines is not
+really a factor, number of OSDs is what matters.
 
-> Let us assume we have a couple of sites distributed over a metro network
-> with at least gigabit interconnect. The demands for storage capacity and
-> speed at our sites are increasing together with the demands for reasonably
-> stable storage. May Ceph be a port of a solution?
+Secondly, 10-node or 3-node clusters are fairly uninteresting for
+Ceph. The real challenge is at the hundreds, thousands and above
+range.
 
-Ceph was designed to work within a single data center. If parts of the
-cluster reside in remote locations, you essentially suffer the worst
-combination of their latency and bandwidth limits. A write that gets
-replicated to three different data centers is not complete until the
-data has been transferred to all three, and an acknowledgement has
-been received.
+> Now we take BTRFS into the picture as I understand journals are not necessary due to the nature of the way it writes/snapshots and reads data this alone would be a major performance increase on a BTRFS Raid level (like ZFS RAIDZ).
 
-For example: with data replicated over data centers A, B, C, connected
-at 1Gb/s, the fastest all of A will ever handle writes is 0.5Gb/s --
-it'll need to replicate everything to B and C, over that single pipe.
-
-I am aware of a few people building multi-dc Ceph clusters. Some have
-shared their network latency, bandwidth and availability numbers with
-me (confidentially), and at first glance their wide-area network
-performs better than many single-dc networks. They are far above a 1
-gigabit interconnect.
-
-I would really recommend you embark on a project like this only if you
-are able to understand the Ceph replication model, and do the math for
-yourself and figure out what your expected service levels for Ceph
-operations would be. (Naturally, Inktank Professional Services will
-help you in your endeavors, though their first response should be
-"that's not a recommended setup".)
-
-> One idea is to set up Ceph distributed over this metro network. A public
-> service network is announced at all sites, anycasted from the storage
-> SMB/NFS/RGW(?)-to-Ceph gateway. (for stateless connections). Statefull
-> connections (iSCSI?) has to contact the individual storage gateways and
-> redundancy is handled at the application level (dual path). Ceph kernel
-> clients contact the storage servers directly.
-
-The Ceph Distributed File System is not considered production ready yet.
+A journal is still needed on btrfs, snapshots just enable us to write
+to the journal in parallel to the real write, instead of needing to
+journal first.
