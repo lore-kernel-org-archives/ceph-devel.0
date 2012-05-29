@@ -1,89 +1,50 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: poor OSD performance using kernel 3.4
-Date: Tue, 29 May 2012 12:50:02 -0500
-Message-ID: <4FC50C4A.4090101@inktank.com>
-References: <5970d59f-9531-4f60-8600-3e1268824c83@mailpro> <4FC49B12.8020004@profihost.ag> <4FC4D1A8.1080001@univ-nantes.fr> <4FC4E0A9.8010008@profihost.ag>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: Appearing messages per 10 sec
+Date: Tue, 29 May 2012 10:55:03 -0700
+Message-ID: <CADvuQRHszFehxiq-D0uQV+hLXK35rC3DR2xHK=kBfJ43h2NJ-g@mail.gmail.com>
+References: <20120528185235.CBC5.33BC0F0F@bit-isle.co.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:56130 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754226Ab2E2RuI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 13:50:08 -0400
-Received: by obbtb18 with SMTP id tb18so7157508obb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 29 May 2012 10:50:07 -0700 (PDT)
-In-Reply-To: <4FC4E0A9.8010008@profihost.ag>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:42993 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754545Ab2E2RzY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 13:55:24 -0400
+Received: by pbbrp8 with SMTP id rp8so6270394pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 29 May 2012 10:55:24 -0700 (PDT)
+In-Reply-To: <20120528185235.CBC5.33BC0F0F@bit-isle.co.jp>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Yann Dupont <Yann.Dupont@univ-nantes.fr>, ceph-devel@vger.kernel.org
+To: Tomoki BENIYA <beniya@bit-isle.co.jp>
+Cc: ceph-devel@vger.kernel.org
 
-On 05/29/2012 09:43 AM, Stefan Priebe - Profihost AG wrote:
-> Am 29.05.2012 15:39, schrieb Yann Dupont:
->> On 29/05/2012 11:46, Stefan Priebe - Profihost AG wrote:
->>> It would be really nice if somebody from inktank can comment this whole
->>> sitation.
->>>
->> Hello.
->> I think I have the same bug :
->>
->> My setup is with 8 OSD nodes, 3 MDS (1 active)&  3 MON.
->> All my machines are debian, using a custom 3.4.0 kernel. Ceph is
->> 0.47.2-1~bpo60+1 (debian package)
-> That sounds absolutely like the same issue. Sadly nobody from inktank
-> has replied to this problems for the last days.
-
-Sorry about that, yesterday was a holiday in the US.
-
-I did some quick tests on a couple of nodes I had laying around this 
-morning.
-
-Distro: Oneiric (IE no syncfs in glibc)
-Ceph: 0.46-65-gf6c5dff
-
-1 1GbE Client node
-3 1GbE Mon nodes
-2 1GbE OSD nodes with 1 OSD on each mounted on a 7200rpm SAS drive.  
-btrfs with -l 64k -n64k, mounted using noatime.  H700 Raid controller 
-with each drive in a 1 disk raid0.  Journals are partitioned on a 
-separate drive.
-
-/proc/version:
-Linux version 3.4.0-ceph (autobuild-ceph@gitbuilder-kernel-amd64)
-
-rados -p data bench 120 write:
-
-Total time run:        120.601286
-Total writes made:     2979
-Write size:            4194304
-Bandwidth (MB/sec):    98.805
-
-Average Latency:       0.647507
-Max latency:           1.39966
-Min latency:           0.181663
-
-Once I get these nodes up to 0.47 and get them switched over to 10GbE 
-I'll redo the btrfs tests and try out xfs as well with longer running tests.
-
->> As you can see, much more stable bandwith with this pool.
-> That's pretty strange...
-
-Indeed, that is very strange!  Can you check to see how many pgs are in 
-each?  Any difference in replication level?  You can check with:
-
-ceph osd pool get <pool> size
-ceph osd pool get <pool> pg_num
-
->> I understand data&  rbd pool probably don't use the same internals, but
->> is this difference expected ?
-> There must be differences in pool handling.
+On Mon, May 28, 2012 at 3:35 AM, Tomoki BENIYA <beniya@bit-isle.co.jp> =
+wrote:
+> Following messages are appearing per 10 sec on terminal of mds.1.
+> But, not appearing on mds.0.
 >
-> Stefan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> What does these mean? And, how to stop these?
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> Message from syslogd@mds1 at May 28 19:26:03 ...
+> =C2=A0ceph-mds: 2012-05-28 19:26:03.497958 7fede74e5700 =C2=A00 mds.0=
+=2Ebal =C2=A0 mds.0 mdsload<[0,0 0]/[0,0 0], req 0, hr 0, qlen 0, cpu 0=
+=2E05> =3D 0 ~ 0
 
-Thanks,
-Mark
+That looks like
+https://github.com/ceph/ceph/blob/master/src/mds/MDBalancer.cc#L472
+which looks like a diagnostic message only output by the root MDS.
+That's why you only see it on one of your MDS servers.
+
+It's a harmless status message. It's logged at a fairly high priority,
+but you can ignore it.
+
+The decision to output it to a console is made by your syslog daemon,
+and that is the right place to configure that.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
