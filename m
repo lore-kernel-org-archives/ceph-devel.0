@@ -1,125 +1,129 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: poor OSD performance using kernel 3.4
-Date: Tue, 29 May 2012 05:54:53 +0200 (CEST)
-Message-ID: <5970d59f-9531-4f60-8600-3e1268824c83@mailpro>
-References: <4FC3D692.7090701@profihost.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph: check PG_Private flag before accessing page->private
+Date: Mon, 28 May 2012 20:56:45 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205282055490.29306@cobra.newdream.net>
+References: <1338187470-28060-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:43947 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752360Ab2E2DzP convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 May 2012 23:55:15 -0400
-In-Reply-To: <4FC3D692.7090701@profihost.ag>
+Received: from cobra.newdream.net ([66.33.216.30]:47979 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751892Ab2E2D4s (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 28 May 2012 23:56:48 -0400
+In-Reply-To: <1338187470-28060-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
->> This happens with ext4 or btrfs too.=20
+On Mon, 28 May 2012, Yan, Zheng wrote:
 
-maybe this is related to io scheduler ?
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> I got lots of NULL pointer dereference Oops when compiling kernel on ceph.
+> The bug is because the kernel page migration routine replaces some pages
+> in the page cache with new pages, these new pages' private can be non-zero.
 
-did you have compared cfq,deadline,noop scheduler ?
+Thanks, this looks good!  I've applied this to the testing branch... if 
+all goes well it'll get included in the pull this week.
 
-noop should be fast with ssd.
+sage
 
-
-also what's is your sas/sata controller  ?
-
------ Mail original -----=20
-
-De: "Stefan Priebe" <s.priebe@profihost.ag>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: ceph-devel@vger.kernel.org, "Mark Nelson" <mark.nelson@inktank.com>=
-=20
-Envoy=C3=A9: Lundi 28 Mai 2012 21:48:34=20
-Objet: Re: poor OSD performance using kernel 3.4=20
-
-Am 28.05.2012 08:52, schrieb Alexandre DERUMIER:=20
->> I think filestore journal parallel works only with btrfs.=20
->> Other filesystem are writeahead.=20
->>> ... you might be right but i can't change ceph's implementation.=20
->=20
-> See my schema,=20
-> I think you see parallel writes, because you see flush write of first=
- wave to disk, in the same time=20
-> of second wave write to journal.=20
-Yes i fulll=C3=BD understand and agree - but still this should at least=
-=20
-result in a constant bandwidth near max of underlying disk.=20
-
->>> I totally aggree with you but this is just a test setup AND if you =
-have=20
->>> a big log file to copy let's say 100GB your journal will never be b=
-ig=20
->>> enough and the speed should never drop to 0MB/s. Also i see the cor=
-rect=20
->>> behaviour with 3.0.X where the speed is maxed to the underlying dev=
-ice.=20
->>> So i still see no reason that with 3.4 the speed drops to 0MB/s and=
- is=20
->>> mostly 10-20MB/s instead of 130MB/s.=20
->=20
-> Maybe something is wrong with 3.4, then your disk write more slowly. =
-(xfs bug, sata driver controller bug, ...)=20
-
-This happens with ext4 or btrfs too.=20
-
-Squential write speed to FS is exactly the same under 3.0 and 3.4 using=
-=20
-oflag=3Ddirect.=20
-
-3.4:=20
-10000+0 records in=20
-10000+0 records out=20
-10485760000 bytes (10 GB) copied, 41,4899 s, 253 MB/s=20
-
-3.0:=20
-10000+0 records in=20
-10000+0 records out=20
-10485760000 bytes (10 GB) copied, 40,861 s, 257 MB/s=20
-
-> maybe some local benchmark of your ssd with 3.4 can give some tips ?=20
-
->>> How many disks (7,2K) do you have by osd ?=20
->>>> One intel 520 SSD per OSD.=20
->=20
-> I see some benchmark on internet about 150-300MB/s (depend of the blo=
-cksize).=20
-bench OSD shows around 260MB/s=20
-
-ceph osd tell X bench shows me a speed of 260MB/s under both kernels=20
-which corresponds to the dd from above.=20
-
-> Something must be wrong, Doing local benchmark can really help I thin=
-k.=20
-> You can use sysbench-tools=20
-> https://github.com/tsuna/sysbench-tools=20
-> It make bench compare with nice graphs.=20
-Thx hopefully i'll find something.=20
-
-Stefan=20
-
-
-
---=20
-
---=20
-
-
-
-
-	Alexandre D erumier=20
-Ing=C3=A9nieur Syst=C3=A8me=20
-=46ixe : 03 20 68 88 90=20
-=46ax : 03 20 68 90 81=20
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
-12 rue Marivaux 75002 Paris - France=20
-=09
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> Signed-off-by: Zheng Yan <zheng.z.yan@intel.com>
+> ---
+>  fs/ceph/addr.c |   21 ++++++++++++---------
+>  1 files changed, 12 insertions(+), 9 deletions(-)
+> 
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 173b1d2..8b67304e 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -54,7 +54,12 @@
+>  	(CONGESTION_ON_THRESH(congestion_kb) -				\
+>  	 (CONGESTION_ON_THRESH(congestion_kb) >> 2))
+>  
+> -
+> +static inline struct ceph_snap_context *page_snap_context(struct page *page)
+> +{
+> +	if (PagePrivate(page))
+> +		return (void *)page->private;
+> +	return NULL;
+> +}
+>  
+>  /*
+>   * Dirty a page.  Optimistically adjust accounting, on the assumption
+> @@ -142,10 +147,9 @@ static void ceph_invalidatepage(struct page *page, unsigned long offset)
+>  {
+>  	struct inode *inode;
+>  	struct ceph_inode_info *ci;
+> -	struct ceph_snap_context *snapc = (void *)page->private;
+> +	struct ceph_snap_context *snapc = page_snap_context(page);
+>  
+>  	BUG_ON(!PageLocked(page));
+> -	BUG_ON(!page->private);
+>  	BUG_ON(!PagePrivate(page));
+>  	BUG_ON(!page->mapping);
+>  
+> @@ -182,7 +186,6 @@ static int ceph_releasepage(struct page *page, gfp_t g)
+>  	struct inode *inode = page->mapping ? page->mapping->host : NULL;
+>  	dout("%p releasepage %p idx %lu\n", inode, page, page->index);
+>  	WARN_ON(PageDirty(page));
+> -	WARN_ON(page->private);
+>  	WARN_ON(PagePrivate(page));
+>  	return 0;
+>  }
+> @@ -443,7 +446,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+>  	osdc = &fsc->client->osdc;
+>  
+>  	/* verify this is a writeable snap context */
+> -	snapc = (void *)page->private;
+> +	snapc = page_snap_context(page);
+>  	if (snapc == NULL) {
+>  		dout("writepage %p page %p not dirty?\n", inode, page);
+>  		goto out;
+> @@ -451,7 +454,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+>  	oldest = get_oldest_context(inode, &snap_size);
+>  	if (snapc->seq > oldest->seq) {
+>  		dout("writepage %p page %p snapc %p not writeable - noop\n",
+> -		     inode, page, (void *)page->private);
+> +		     inode, page, snapc);
+>  		/* we should only noop if called by kswapd */
+>  		WARN_ON((current->flags & PF_MEMALLOC) == 0);
+>  		ceph_put_snap_context(oldest);
+> @@ -591,7 +594,7 @@ static void writepages_finish(struct ceph_osd_request *req,
+>  			clear_bdi_congested(&fsc->backing_dev_info,
+>  					    BLK_RW_ASYNC);
+>  
+> -		ceph_put_snap_context((void *)page->private);
+> +		ceph_put_snap_context(page_snap_context(page));
+>  		page->private = 0;
+>  		ClearPagePrivate(page);
+>  		dout("unlocking %d %p\n", i, page);
+> @@ -795,7 +798,7 @@ static int ceph_writepages_start(struct address_space *mapping,
+>  			}
+>  
+>  			/* only if matching snap context */
+> -			pgsnapc = (void *)page->private;
+> +			pgsnapc = page_snap_context(page);
+>  			if (pgsnapc->seq > snapc->seq) {
+>  				dout("page snapc %p %lld > oldest %p %lld\n",
+>  				     pgsnapc, pgsnapc->seq, snapc, snapc->seq);
+> @@ -984,7 +987,7 @@ static int ceph_update_writeable_page(struct file *file,
+>  	BUG_ON(!ci->i_snap_realm);
+>  	down_read(&mdsc->snap_rwsem);
+>  	BUG_ON(!ci->i_snap_realm->cached_context);
+> -	snapc = (void *)page->private;
+> +	snapc = page_snap_context(page);
+>  	if (snapc && snapc != ci->i_head_snapc) {
+>  		/*
+>  		 * this page is already dirty in another (older) snap
+> -- 
+> 1.7.7.6
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
