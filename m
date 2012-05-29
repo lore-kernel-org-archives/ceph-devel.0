@@ -1,50 +1,44 @@
-From: Sam Just <sam.just@inktank.com>
-Subject: Re: Question regarding API doc
-Date: Tue, 29 May 2012 11:28:24 -0700
-Message-ID: <CA+4uBUZeF7UrdUTUxMddLphocs29uNA_bFfKCU2-z6CDKUHrPg@mail.gmail.com>
-References: <4FC0492F.3080901@gmail.com>
+From: Greg Farnum <greg@inktank.com>
+Subject: Re: Multiple named clusters on same nodes
+Date: Tue, 29 May 2012 11:54:48 -0700
+Message-ID: <AC2A719493A045CBACD9934439475A2B@inktank.com>
+References: <201205231100.28327.a.ott@m-privacy.de>
+ <CADvuQRHFR8_6EPy-02Xm9Zx-vUnPg3ngiTEr5hLZkKgaLNA--A@mail.gmail.com>
+ <201205240959.46764.a.ott@m-privacy.de>
+ <201205241058.02262.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:48134 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:62136 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754999Ab2E2S2Z convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 14:28:25 -0400
-Received: by pbbrp8 with SMTP id rp8so6309392pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 29 May 2012 11:28:25 -0700 (PDT)
-In-Reply-To: <4FC0492F.3080901@gmail.com>
+	with ESMTP id S1754536Ab2E2Syv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 14:54:51 -0400
+Received: by pbbrp8 with SMTP id rp8so6341880pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 29 May 2012 11:54:51 -0700 (PDT)
+In-Reply-To: <201205241058.02262.a.ott@m-privacy.de>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaopong Tran <xiaopong.tran@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: Tommi Virtanen <tv@inktank.com>, ceph-devel@vger.kernel.org
 
-You are quite right.  I've updated the documentation in master, commit
-f953c4c0b0ba69342cab52243c1b73987f7f94f6.  Thanks for the info!
--Sam
+On Thursday, May 24, 2012 at 1:58 AM, Amon Ott wrote:
+> On Thursday 24 May 2012 wrote Amon Ott:
+> > Attached is a patch based on current git stable that makes mkcephfs work
+> > fine for me with --cluster name. ceph-mon uses the wrong mkfs path for "mon
+> > data" (default "ceph" instead of supplied cluster name), so I put in a
+> > workaround.
+> > 
+> > Please have a look and consider inclusion as well as fixing mon data path.
+> > Thanks.
+> 
+> 
+> 
+> And another patch for the init script to handle multiple clusters.
 
-On Fri, May 25, 2012 at 8:08 PM, Xiaopong Tran <xiaopong.tran@gmail.com=
-> wrote:
-> I'm looking at the description in this API:
->
-> http://ceph.com/docs/master/api/librados/#rados_objects_list_next
->
-> For the parameters entry and key, the doc said "(caller must free)".
-> I looked up in the code, and found this statement in the doc
-> a bit misleading.
->
-> Is the doc outdated, or did I miss anything?
->
-> Cheers
->
-> xp
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Amon:
+Thanks for the patches! Unfortunately nobody who's competent to review these (ie, not me) has time to look into them right now, but they're on the queue when TV or Sage gets some time. :)
+-Greg
+
+
