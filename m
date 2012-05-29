@@ -1,61 +1,59 @@
-From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Subject: Re: poor OSD performance using kernel 3.4
-Date: Tue, 29 May 2012 23:45:17 +0200
-Message-ID: <4FC5436D.3090606@univ-nantes.fr>
-References: <5970d59f-9531-4f60-8600-3e1268824c83@mailpro> <4FC49B12.8020004@profihost.ag> <4FC4D1A8.1080001@univ-nantes.fr> <4FC4E0A9.8010008@profihost.ag> <4FC50C4A.4090101@inktank.com> <4FC53AC4.5020600@profihost.ag> <4FC54020.8040603@univ-nantes.fr> <4FC540DA.2050601@profihost.ag>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: RBD format changes and layering
+Date: Tue, 29 May 2012 15:08:42 -0700
+Message-ID: <CADvuQRF3Wo9VL9n7dnsu8ADBjJ+rUqkq33bk0QPwDo+z2WDbLw@mail.gmail.com>
+References: <4FBEBECD.6040403@inktank.com> <4FC010B9.3030101@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-cha.cpub.univ-nantes.fr ([193.52.103.113]:43328 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751557Ab2E2VpW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 17:45:22 -0400
-In-Reply-To: <4FC540DA.2050601@profihost.ag>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:47140 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754303Ab2E2WJE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 29 May 2012 18:09:04 -0400
+Received: by pbbrp8 with SMTP id rp8so6550409pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 29 May 2012 15:09:03 -0700 (PDT)
+In-Reply-To: <4FC010B9.3030101@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Le 29/05/2012 23:34, Stefan Priebe a =C3=A9crit :
-> Am 29.05.2012 23:31, schrieb Yann Dupont:
->> on the contrary, pool data is jumping up & down, no matter how much
->> thread involved :)
->>
->> Maybe this is because journal is too tight ? Or because 2 of the 8 n=
-odes
->> have slower disks ?
-> Can you try with 3.0.X? I would be really interested what happens in=20
-> this case.
+On Fri, May 25, 2012 at 4:07 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> To check whether children exist, you can iterate over
+> all the pools and check the rbd_clones object in each one.
+> Since the number of pools is relatively small, this isn't
+> very expensive. If the pool is deleted, by definition all the children in it
+> are deleted.
 >
-> Stefan
-hum...
-probably not directly. Older btrfs won't like big metadata, I think.=20
-This is quite a recent feature.
+> With separate namespaces in the future, this will be a bit more
+> expensive, but it's only needed at base image deletion time,
+> which is relatively rare. Deleting the image itself already
+> requires an I/O per object, so this is probably not the slow
+> part anyway.
+>
+> Yehuda, Tv, did I miss anything?
 
-but as my ceph is not in production, I can stop it, use an older kernel=
-=20
-, format new volumes in btrfs or xfs, or whatever, and try.
+One thing: that's still racy, and we discussed a solution.
 
-It will be a totally fresh install then.
+1. A: walk through all pools, look for clones, find none
+2. B: create a clone
+3. A: rbd unpreserve parent
+4. A: rbd rm parent
 
-I can do that thursday.
+Oopsie.
 
-Stefan, mark,
-I'll take the latest 3.0 kernel - or do you have a particular 3.0 kerne=
-l=20
-version to test ?
-And Do you want a particular xfs/btrfs format ?
+To avoid that, I proposed a "deleting" flag. Clones can only be
+created when parent is preserved && !deleting. Now,
 
-cheers,
+1. A: rbd deleting parent
+2. A: walk through all pools, look for clones, find none
+3. B: attempt to create a clone, fails
+...
 
---=20
-Yann Dupont - Service IRTS, DSI Universit=C3=A9 de Nantes
-Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+Now, that doesn't have to be strictly "deleting".. "going_unpreserved"
+or something; instead of deletion, the intended operation might be
+starting a vm against the parent image to e.g. add security updates.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+And, as we discussed, these flags would be per snapshot (or also on
+the master image, if you want to support that). Thus, one snapshot can
+preserved while an older one is scheduled for deletion.
