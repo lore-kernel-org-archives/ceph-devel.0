@@ -1,60 +1,48 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: rbd command : is it possible to pass authkey in argument ?
-Date: Wed, 30 May 2012 08:25:33 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205300825230.4642@cobra.newdream.net>
-References: <0a37bcdb-3791-4255-b403-1ca147cf02c0@mailpro> <4FC603E0.1080307@widodh.nl>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: NFS re-exporting CEPH cluster
+Date: Wed, 30 May 2012 08:30:43 -0700
+Message-ID: <E35ED251461442369738071603FE936C@inktank.com>
+References: <loom.20120524T071113-43@post.gmane.org>
+ <EAA87E18111B4AFFB0F9758A2C6F2C67@inktank.com>
+ <loom.20120529T161529-853@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35548 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752171Ab2E3PZe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 May 2012 11:25:34 -0400
-In-Reply-To: <4FC603E0.1080307@widodh.nl>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:48491 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750739Ab2E3PaZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 May 2012 11:30:25 -0400
+Received: by dady13 with SMTP id y13so7071783dad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 30 May 2012 08:30:25 -0700 (PDT)
+In-Reply-To: <loom.20120529T161529-853@post.gmane.org>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
+To: madhusudhana U <madhusudhana.u.acharya@gmail.com>
+Cc: ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
 
-On Wed, 30 May 2012, Wido den Hollander wrote:
-> Hi,
-> 
-> On 05/30/2012 11:15 AM, Alexandre DERUMIER wrote:
-> > Hi,
-> > 
-> > I'm writing rbd module for proxmox kvm distribution,
-> > 
-> > Is it possible to pass authkey as argument in rbd command line ? (I can do
-> > in with qemu-rbd drive option)
-> 
-> I'm not sure yet, have you tried with they argument "--key" ?
 
-Yep, --key is what you want.
 
-sage
+On Tuesday, May 29, 2012 at 7:18 AM, madhusudhana U wrote:
 
-> 
-> I tried and that failed and looking through the source-code it seems that it
-> isn't possible yet.
-> 
-> Adding it seems rather simple however, so it could be added.
-> 
-> Wido
+> Greg Farnum <greg <at> inktank.com (http://inktank.com)> writes:
 > 
 > > 
-> > Or does it need to use a keyring file ?
-> > 
-> > Regards,
-> > 
-> > Alexandre
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > Have you tried something and it failed? Or are you looking for suggestions?
+> > If the former, please report the failure. :)
+> > If the latter: http://ceph.com/wiki/Re-exporting_NFS
+> > -Greg
 > 
 > 
+> 
+> Greg,
+> I have tried the link. But, my production build (t_make) is failing on the
+> NFS exported ceph_cluster where as it runs fine over another NFS directory
+> coming from a NFS server.
+
+How is it failing?
+
+> Is CEPH is 100% compatible with NFS ?
+It ought to work, although I've heard of a few bugs which I believe are generally related to inode size. Are you running a 32- or 64-bit system?
+
