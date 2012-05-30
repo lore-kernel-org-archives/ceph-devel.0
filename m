@@ -1,104 +1,42 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: rbd command : is it possible to pass authkey in argument ?
-Date: Wed, 30 May 2012 18:04:44 +0200 (CEST)
-Message-ID: <5b9719d1-3349-4a5c-99f4-fa6fbd3cb4e8@mailpro>
-References: <Pine.LNX.4.64.1205300825230.4642@cobra.newdream.net>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: distributed cluster
+Date: Wed, 30 May 2012 09:20:13 -0700
+Message-ID: <CADvuQRHEXx7Y+VhAvD8Q0D+jEmZJcBaKjaNArVeZ7AGSTWtm_w@mail.gmail.com>
+References: <Pine.LNX.4.64.1205281117360.358@Psilocybe.Update.UU.SE>
+ <CADvuQREnjHmnjOKimy2+FCrJ0yc2zGh6v4gtUtovX=jVDazRsQ@mail.gmail.com> <Pine.LNX.4.64.1205300925290.358@Psilocybe.Update.UU.SE>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:47720 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753729Ab2E3QFR convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 May 2012 12:05:17 -0400
-In-Reply-To: <Pine.LNX.4.64.1205300825230.4642@cobra.newdream.net>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:62239 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751128Ab2E3QUe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 May 2012 12:20:34 -0400
+Received: by dady13 with SMTP id y13so7129553dad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 30 May 2012 09:20:34 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1205300925290.358@Psilocybe.Update.UU.SE>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org, Wido den Hollander <wido@widodh.nl>
+To: Jerker Nyberg <jerker@update.uu.se>
+Cc: ceph-devel@vger.kernel.org
 
-Thanks Sage.
+On Wed, May 30, 2012 at 4:47 AM, Jerker Nyberg <jerker@update.uu.se> wrote:
+> I am waiting as fast as I can for it to be production ready. :-)
 
-I didn't have found it,it seem to be undocumented (man or rbd -h).
+I feel like starting a quote of the week collection ;)
 
-I have tested it, it's works !
+One more thing I remember is worth mentioning: Ceph doesn't place
+objects "near you", CRUSH is completely deterministic based on the
+object name. Hence, your worst case may actually look like this:
 
-Alexandre
+sites: west, east
+servers: a,b in west; c,d in east
+client: x in west
 
------ Mail original -----=20
+Write from client, with bad luck, will go
+x->d, replication: d->a, d->b
 
-De: "Sage Weil" <sage@inktank.com>=20
-=C3=80: "Wido den Hollander" <wido@widodh.nl>=20
-Cc: "Alexandre DERUMIER" <aderumier@odiso.com>, ceph-devel@vger.kernel.=
-org=20
-Envoy=C3=A9: Mercredi 30 Mai 2012 17:25:33=20
-Objet: Re: rbd command : is it possible to pass authkey in argument ?=20
-
-On Wed, 30 May 2012, Wido den Hollander wrote:=20
-> Hi,=20
->=20
-> On 05/30/2012 11:15 AM, Alexandre DERUMIER wrote:=20
-> > Hi,=20
-> >=20
-> > I'm writing rbd module for proxmox kvm distribution,=20
-> >=20
-> > Is it possible to pass authkey as argument in rbd command line ? (I=
- can do=20
-> > in with qemu-rbd drive option)=20
->=20
-> I'm not sure yet, have you tried with they argument "--key" ?=20
-
-Yep, --key is what you want.=20
-
-sage=20
-
->=20
-> I tried and that failed and looking through the source-code it seems =
-that it=20
-> isn't possible yet.=20
->=20
-> Adding it seems rather simple however, so it could be added.=20
->=20
-> Wido=20
->=20
-> >=20
-> > Or does it need to use a keyring file ?=20
-> >=20
-> > Regards,=20
-> >=20
-> > Alexandre=20
-> >=20
-> > --=20
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in=20
-> > the body of a message to majordomo@vger.kernel.org=20
-> > More majordomo info at http://vger.kernel.org/majordomo-info.html=20
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in=20
-> the body of a message to majordomo@vger.kernel.org=20
-> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
->=20
->=20
+Now you've used 3x bandwidth on the WAN.
 
 
-
---=20
-
---=20
-
-
-
-
-	Alexandre D erumier=20
-Ing=C3=A9nieur Syst=C3=A8me=20
-=46ixe : 03 20 68 88 90=20
-=46ax : 03 20 68 90 81=20
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
-12 rue Marivaux 75002 Paris - France=20
-=09
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Currently, the only way to work around this is with pools, and there's
+nothing automatic about that.
