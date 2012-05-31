@@ -1,107 +1,59 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: SIGSEGV in cephfs-java, but probably in Ceph
-Date: Thu, 31 May 2012 07:35:17 -0700
-Message-ID: <B8A0E20B-A551-43C8-9F95-605C7A511777@cs.ucsc.edu>
-References: <CAHwdYF3na4dHqpQmAth+gEKBLeqLKSHAd-6MChgKjRyBrO+Ttw@mail.gmail.com> <CAHwdYF2CF77XnyHG16gi_hPbZ8VNbEzn0XpikKMDdcGWcd2-CQ@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1257)
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: Re: poor OSD performance using kernel 3.4 => problem found
+Date: Thu, 31 May 2012 16:42:01 +0200
+Message-ID: <4FC78339.10900@univ-nantes.fr>
+References: <4FBE415E.8030702@profihost.ag> <4FC54CDB.1000506@inktank.com> <4FC5BF27.5060704@profihost.ag> <CADdPHGs9dpSh9Oyu+5yDhyYU=Et_-zF5MuYybBuuAN5DgR433A@mail.gmail.com> <4FC5C941.6010105@profihost.ag> <CADdPHGuiJqZUCK-0qR_CrOo6GRhkjaCdkOhJ2boq3zD0_voTsA@mail.gmail.com> <4FC5FEC1.90103@profihost.ag> <4FC60FC8.207@inktank.com> <4FC61596.3050703@profihost.ag> <4FC62BB0.1020003@inktank.com> <4FC66A1F.1080407@profihost.ag> <CADdPHGuxa7TAyqXcXehb9WgKgkHwkybYTrj2oue_PKsiF+oR3A@mail.gmail.com> <4FC68CAA.9030708@profihost.ag> <CADdPHGutEwoDc=Kcrqcx2ZMO=dqhuoT5iLoP-WxqD+e5ZUmBRA@mail.gmail.com> <4FC7197D.5010406@profihost.ag> <CAC-hyiFjRFLVHYUKv8bGG0u8u2ZrHgP78U2Txt+3R7GGwtopZA@mail.gmail.com> <4FC77045.6050907@univ-nantes.fr> <4FC77407.1050401@profihost.ag> <4FC775F3.8080109@univ-nantes.fr>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [128.114.48.32] ([128.114.48.32]:39048 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1754316Ab2EaOiE convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 May 2012 10:38:04 -0400
-In-Reply-To: <CAHwdYF2CF77XnyHG16gi_hPbZ8VNbEzn0XpikKMDdcGWcd2-CQ@mail.gmail.com>
+Received: from smtptls1-lmb.cpub.univ-nantes.fr ([193.52.103.110]:34111 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752132Ab2EaOmH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 May 2012 10:42:07 -0400
+In-Reply-To: <4FC775F3.8080109@univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nam Dang <namd@de.cs.titech.ac.jp>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Yehuda Sadeh <yehuda@inktank.com>, Stefan Majer <stefan.majer@gmail.com>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org
+
+On 31/05/2012 15:45, Yann Dupont wrote:
+> On 31/05/2012 15:37, Stefan Priebe - Profihost AG wrote:
+
+> what puzzles me is that this morning, with 3.4.0 it was rbd that was
+> stable, and now I have the exact contrary.
+>
+> I'll begin to reboot with old 3.4.0 kernel to see if things are
+> reproductible.
+>
+> Cheers,
 
 
-On May 31, 2012, at 6:20 AM, Nam Dang wrote:
+I'd say my problem is probably not related. Freshly rebooting all osd=20
+nodes with 3.4.0 kernel (the same kernel I used this morning) now gives=
+=20
+pool data stable & rbd unstable. As with current git, and the exact=20
+opposite of results I had tuesday & this morning.
 
-> It turned out my monitor went down without my knowing.
-> So my bad, it wasn't because of Ceph.
+Go figure.
 
-I believe the segfault here is from client being null dereferenced in the c wrappers. Which patch set are you using?
+Could it have to do with previous usage in OSD ? or active mds ? or mon=
+ ?
 
-> 
-> Best regards,
-> 
-> Nam Dang
-> Tokyo Institute of Technology
-> Tokyo, Japan
-> 
-> 
-> On Thu, May 31, 2012 at 10:08 PM, Nam Dang <namd@de.cs.titech.ac.jp> wrote:
->> Dear all,
->> 
->> I am running a small benchmark for Ceph with multithreading and cephfs-java API.
->> I encountered this issue even when I use only two threads, and I used
->> only open file and creating directory operations.
->> 
->> The piece of code is simply:
->> String parent = filePath.substring(0, filePath.lastIndexOf('/'));
->> mount.mkdirs(parent, 0755); // create parents if the path does not exist
->> int fileID = mount.open(filePath, CephConstants.O_CREAT, 0666); //
->> open the file
->> 
->> Each thread mounts its own ceph mounting point (using
->> mount.mount(null)) and I don't have any interlocking mechanism across
->> the threads at all.
->> It appears the error is SIGSEGV sent off by libcepfs. The message is as follows:
->> 
->> #
->> # A fatal error has been detected by the Java Runtime Environment:
->> #
->> #  SIGSEGV (0xb) at pc=0x00007ff6af978d39, pid=14063, tid=140697400411904
->> #
->> # JRE version: 6.0_26-b03
->> # Java VM: Java HotSpot(TM) 64-Bit Server VM (20.1-b02 mixed mode
->> linux-amd64 compressed oops)
->> # Problematic frame:
->> # C  [libcephfs.so.1+0x139d39]  Mutex::Lock(bool)+0x9
->> #
->> # An error report file with more information is saved as:
->> # /home/namd/cephBench/hs_err_pid14063.log
->> #
->> # If you would like to submit a bug report, please visit:
->> #   http://java.sun.com/webapps/bugreport/crash.jsp
->> # The crash happened outside the Java Virtual Machine in native code.
->> # See problematic frame for where to report the bug.
->> 
->> I have also attached the hs_err_pid14063.log for your reference.
->> An excerpt from the file:
->> 
->> Stack: [0x00007ff6aa828000,0x00007ff6aa929000],
->> sp=0x00007ff6aa9274f0,  free space=1021k
->> Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
->> C  [libcephfs.so.1+0x139d39]  Mutex::Lock(bool)+0x9
->> 
->> Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
->> j  com.ceph.fs.CephMount.native_ceph_mkdirs(JLjava/lang/String;I)I+0
->> j  com.ceph.fs.CephMount.mkdirs(Ljava/lang/String;I)V+6
->> j  Benchmark$CreateFileStats.executeOp(IILjava/lang/String;Lcom/ceph/fs/CephMount;)J+37
->> j  Benchmark$StatsDaemon.benchmarkOne()V+22
->> j  Benchmark$StatsDaemon.run()V+26
->> v  ~StubRoutines::call_stub
->> 
->> So I think the probably may be due to the locking mechanism of ceph
->> internally. But Dr. Weil previously answered my email stating that the
->> mounting is done independently so multithreading should not lead to
->> this problem. If there is anyway to work around this, please let me
->> know.
->> 
->> Best regards,
->> 
->> Nam Dang
->> Email: namd@de.cs.titech.ac.jp
->> HP: (+81) 080-4465-1587
->> Yokota Lab, Dept. of Computer Science
->> Tokyo Institute of Technology
->> Tokyo, Japan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+As I already said, as my osd are using btrfs with big medata features,=20
+so going back in 3.0 kernel need a complete reformat of my OSD before.
 
+But I will do it if you judge it can bring some light on this case.
+
+Cheers,
+--=20
+Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
+Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
