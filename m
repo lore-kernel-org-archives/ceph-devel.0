@@ -1,39 +1,25 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Question about libcephfs mounting mechanism
-Date: Wed, 30 May 2012 21:40:37 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205302139140.21518@cobra.newdream.net>
-References: <CAHwdYF15M3FuiQicZBqZThz63g6AVGYGEHFutXktx64XrWNyEQ@mail.gmail.com>
+From: =?ISO-8859-1?Q?=22SPONEM=2C_Beno=EEt=22?= <b.sponem@baclesse.fr>
+Subject: Wiki Spam
+Date: Thu, 31 May 2012 09:05:32 +0200
+Message-ID: <4FC7183C.6010707@baclesse.fr>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59539 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750757Ab2EaEkm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 May 2012 00:40:42 -0400
-In-Reply-To: <CAHwdYF15M3FuiQicZBqZThz63g6AVGYGEHFutXktx64XrWNyEQ@mail.gmail.com>
+Received: from maili1.baclesse.fr ([195.220.156.5]:42824 "EHLO
+	S-RME1.baclesse.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750742Ab2EaHFe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 May 2012 03:05:34 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nam Dang <namd@de.cs.titech.ac.jp>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 31 May 2012, Nam Dang wrote:
-> Dear all,
-> 
-> I want to inquire on ceph's internal mounting mechanism. I am using
-> wip-java-cephfs API to access Ceph internal file system directly.
-> I want to create several threads that access cephFS simultaneously and
-> independently, i.e. the mounting in each thread is
-> independent from the other's, and there is no shared underlying data
-> structure. As far as I know, java-ceph does not use shared structure,
-> but I'm not so sure about the underlying code in libcephfs though. I'm
-> worried that it may be similar to Virtual File System layer, upon
-> which multiple threads can access concurrently but internally the
-> mounting point is shared. I hope somebody with experience with Ceph
-> can help me answer this question.
+Dear all,
 
-Each ceph_create() call instantiates a new instance of the client, and 
-nothing is shared between clients.  This should get you the behavior 
-you're after!
+Just for information, there are a lot of spam in Ceph's wiki
+(http://ceph.com/wiki/Special:RecentChanges,
+http://ceph.com/w/index.php?title=Special:LonelyPages&limit=250&offset=0
+<http://ceph.com/w/index.php?title=Special:LonelyPages&limit=250&offset=0>).
 
-Cheers-
-sage
+Regards,
+Benoit
