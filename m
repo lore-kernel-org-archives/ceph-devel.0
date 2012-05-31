@@ -1,42 +1,42 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: poor OSD performance using kernel 3.4
-Date: Wed, 30 May 2012 23:10:02 +0200
-Message-ID: <4FC68CAA.9030708@profihost.ag>
-References: <4FBE415E.8030702@profihost.ag> <4FC54CDB.1000506@inktank.com> <4FC5BF27.5060704@profihost.ag> <CADdPHGs9dpSh9Oyu+5yDhyYU=Et_-zF5MuYybBuuAN5DgR433A@mail.gmail.com> <4FC5C941.6010105@profihost.ag> <CADdPHGuiJqZUCK-0qR_CrOo6GRhkjaCdkOhJ2boq3zD0_voTsA@mail.gmail.com> <4FC5FEC1.90103@profihost.ag> <4FC60FC8.207@inktank.com> <4FC61596.3050703@profihost.ag> <4FC62BB0.1020003@inktank.com> <4FC66A1F.1080407@profihost.ag> <CADdPHGuxa7TAyqXcXehb9WgKgkHwkybYTrj2oue_PKsiF+oR3A@mail.gmail.com>
+From: Nam Dang <namd@de.cs.titech.ac.jp>
+Subject: Question about libcephfs mounting mechanism
+Date: Thu, 31 May 2012 13:35:56 +0900
+Message-ID: <CAHwdYF15M3FuiQicZBqZThz63g6AVGYGEHFutXktx64XrWNyEQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:51053 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753986Ab2E3VKD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 30 May 2012 17:10:03 -0400
-In-Reply-To: <CADdPHGuxa7TAyqXcXehb9WgKgkHwkybYTrj2oue_PKsiF+oR3A@mail.gmail.com>
+Received: from mail1.nap.gsic.titech.ac.jp ([131.112.222.51]:56027 "EHLO
+	mail1.nap.gsic.titech.ac.jp" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750899Ab2EaEga (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 31 May 2012 00:36:30 -0400
+Received: from 209.85.217.174 (209.85.217.174 [209.85.217.174])
+	by mail1.nap.gsic.titech.ac.jp (deepsmtpd.so 3.5.54)
+	with ESMTP id <CAHwdYF15M3FuiQicZBqZThz63g6AVGYGEHFutXktx64XrWNyEQ@mail.gmail.com>
+	for <ceph-devel@vger.kernel.org>; Thu, 31 May 2012 13:36:21 +0900
+Received: by lbbgm6 with SMTP id gm6so544428lbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 30 May 2012 21:36:17 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Majer <stefan.majer@gmail.com>
-Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Am 30.05.2012 20:47, schrieb Stefan Majer:
+Dear all,
 
->  From my perspective marks hints regarding blktrace end up in the same
-> summary as the iostat ouput gives.
-> You see stalls, not induced by disk by any means, no other obvious hints
-> where the lag might come from.
-> So if you want to know why kernels > 3.2 are slow for your workload i
-> would drill down this with git bisect.
+I want to inquire on ceph's internal mounting mechanism. I am using
+wip-java-cephfs API to access Ceph internal file system directly.
+I want to create several threads that access cephFS simultaneously and
+independently, i.e. the mounting in each thread is
+independent from the other's, and there is no shared underlying data
+structure. As far as I know, java-ceph does not use shared structure,
+but I'm not so sure about the underlying code in libcephfs though. I'm
+worried that it may be similar to Virtual File System layer, upon
+which multiple threads can access concurrently but internally the
+mounting point is shared. I hope somebody with experience with Ceph
+can help me answer this question.
 
-OK here are some tests regarding the kernel version - all made with XFS.
+Thank you very much,
 
-Starting with 3.2.0-rc1 it drops from 164MB/s (bonding) to 119MB/s but 
-it never goes down to 0MB/s. 3.2.18 shows the same as 3.2-rc1.
-
-Then with 3.3-rc1 i'm seeing even faster speed (178MB/s) than with 3.0.X 
-- so everything is fine again. So it seems 3.2.X had another bug which 
-reduced the speed which was fixed in 3.3.
-
-Beginning with 3.3-rc4 it get's bad with drops to 0MB/s. So it should be 
-a commit between 3.3-rc3 and 3.3-rc4. Sadly this are 370 commits. No 
-idea where to start.
-
-Stefan
+Best regards,
+Nam Dang
+Tokyo Institute of Technology
+Tokyo, Japan
