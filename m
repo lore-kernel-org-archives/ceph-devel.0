@@ -1,114 +1,210 @@
-From: Nam Dang <namd@de.cs.titech.ac.jp>
-Subject: Re: SIGSEGV in cephfs-java, but probably in Ceph
-Date: Thu, 31 May 2012 22:20:28 +0900
-Message-ID: <CAHwdYF2CF77XnyHG16gi_hPbZ8VNbEzn0XpikKMDdcGWcd2-CQ@mail.gmail.com>
-References: <CAHwdYF3na4dHqpQmAth+gEKBLeqLKSHAd-6MChgKjRyBrO+Ttw@mail.gmail.com>
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: Re: poor OSD performance using kernel 3.4 => problem found
+Date: Thu, 31 May 2012 15:21:09 +0200
+Message-ID: <4FC77045.6050907@univ-nantes.fr>
+References: <4FBE415E.8030702@profihost.ag> <4FC54CDB.1000506@inktank.com> <4FC5BF27.5060704@profihost.ag> <CADdPHGs9dpSh9Oyu+5yDhyYU=Et_-zF5MuYybBuuAN5DgR433A@mail.gmail.com> <4FC5C941.6010105@profihost.ag> <CADdPHGuiJqZUCK-0qR_CrOo6GRhkjaCdkOhJ2boq3zD0_voTsA@mail.gmail.com> <4FC5FEC1.90103@profihost.ag> <4FC60FC8.207@inktank.com> <4FC61596.3050703@profihost.ag> <4FC62BB0.1020003@inktank.com> <4FC66A1F.1080407@profihost.ag> <CADdPHGuxa7TAyqXcXehb9WgKgkHwkybYTrj2oue_PKsiF+oR3A@mail.gmail.com> <4FC68CAA.9030708@profihost.ag> <CADdPHGutEwoDc=Kcrqcx2ZMO=dqhuoT5iLoP-WxqD+e5ZUmBRA@mail.gmail.com> <4FC7197D.5010406@profihost.ag> <CAC-hyiFjRFLVHYUKv8bGG0u8u2ZrHgP78U2Txt+3R7GGwtopZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.nap.gsic.titech.ac.jp ([131.112.222.52]:50494 "EHLO
-	mail2.nap.gsic.titech.ac.jp" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757956Ab2EaNVA convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 31 May 2012 09:21:00 -0400
-Received: from 209.85.215.46 (209.85.215.46 [209.85.215.46])
-	by mail2.nap.gsic.titech.ac.jp (deepsmtpd.so 3.5.54)
-	with ESMTP id <CAHwdYF2CF77XnyHG16gi_hPbZ8VNbEzn0XpikKMDdcGWcd2-CQ@mail.gmail.com>
-	for <ceph-devel@vger.kernel.org>; Thu, 31 May 2012 22:20:52 +0900
-Received: by lahd3 with SMTP id d3so691974lah.19
-        for <ceph-devel@vger.kernel.org>; Thu, 31 May 2012 06:20:49 -0700 (PDT)
-In-Reply-To: <CAHwdYF3na4dHqpQmAth+gEKBLeqLKSHAd-6MChgKjRyBrO+Ttw@mail.gmail.com>
+Received: from smtptls1-lmb.cpub.univ-nantes.fr ([193.52.103.110]:35845 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1757948Ab2EaNVS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 May 2012 09:21:18 -0400
+In-Reply-To: <CAC-hyiFjRFLVHYUKv8bGG0u8u2ZrHgP78U2Txt+3R7GGwtopZA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Stefan Majer <stefan.majer@gmail.com>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org
 
-It turned out my monitor went down without my knowing.
-So my bad, it wasn't because of Ceph.
+On 31/05/2012 09:30, Yehuda Sadeh wrote:
+> On Thu, May 31, 2012 at 12:10 AM, Stefan Priebe - Profihost AG
+> <s.priebe@profihost.ag> wrote:
+>> Hi Marc, Hi Stefan,
+>>
 
-Best regards,
+Hello, back today
 
-Nam Dang
-Tokyo Institute of Technology
-Tokyo, Japan
+Today, I upgraded my 2 last osd nodes with big storage, so now all my=20
+nodes are equivalent.
+
+Using 3.4.0 kernel, I still have good results with rbd pool, but jumpin=
+g=20
+values with data.
 
 
-On Thu, May 31, 2012 at 10:08 PM, Nam Dang <namd@de.cs.titech.ac.jp> wr=
-ote:
-> Dear all,
+>> first thanks for all your help and time.
+>>
+>> I found the commit which results in this problem and it is TCP relat=
+ed
+>> but i'm still wondering if the expected behaviour of this commit is
+>> expected?
 >
-> I am running a small benchmark for Ceph with multithreading and cephf=
-s-java API.
-> I encountered this issue even when I use only two threads, and I used
-> only open file and creating directory operations.
+
+=2E...
+
+>>
+> Yeah, this might have affected the tcp performance. Looking at the
+> current linus tree this function looks more like it looked beforehand=
+,
+> so it was probable reverted this way or another!
 >
-> The piece of code is simply:
-> String parent =3D filePath.substring(0, filePath.lastIndexOf('/'));
-> mount.mkdirs(parent, 0755); // create parents if the path does not ex=
-ist
-> int fileID =3D mount.open(filePath, CephConstants.O_CREAT, 0666); //
-> open the file
->
-> Each thread mounts its own ceph mounting point (using
-> mount.mount(null)) and I don't have any interlocking mechanism across
-> the threads at all.
-> It appears the error is SIGSEGV sent off by libcepfs. The message is =
-as follows:
->
-> #
-> # A fatal error has been detected by the Java Runtime Environment:
-> #
-> # =A0SIGSEGV (0xb) at pc=3D0x00007ff6af978d39, pid=3D14063, tid=3D140=
-697400411904
-> #
-> # JRE version: 6.0_26-b03
-> # Java VM: Java HotSpot(TM) 64-Bit Server VM (20.1-b02 mixed mode
-> linux-amd64 compressed oops)
-> # Problematic frame:
-> # C =A0[libcephfs.so.1+0x139d39] =A0Mutex::Lock(bool)+0x9
-> #
-> # An error report file with more information is saved as:
-> # /home/namd/cephBench/hs_err_pid14063.log
-> #
-> # If you would like to submit a bug report, please visit:
-> # =A0 http://java.sun.com/webapps/bugreport/crash.jsp
-> # The crash happened outside the Java Virtual Machine in native code.
-> # See problematic frame for where to report the bug.
->
-> I have also attached the hs_err_pid14063.log for your reference.
-> An excerpt from the file:
->
-> Stack: [0x00007ff6aa828000,0x00007ff6aa929000],
-> sp=3D0x00007ff6aa9274f0, =A0free space=3D1021k
-> Native frames: (J=3Dcompiled Java code, j=3Dinterpreted, Vv=3DVM code=
-, C=3Dnative code)
-> C =A0[libcephfs.so.1+0x139d39] =A0Mutex::Lock(bool)+0x9
->
-> Java frames: (J=3Dcompiled Java code, j=3Dinterpreted, Vv=3DVM code)
-> j =A0com.ceph.fs.CephMount.native_ceph_mkdirs(JLjava/lang/String;I)I+=
-0
-> j =A0com.ceph.fs.CephMount.mkdirs(Ljava/lang/String;I)V+6
-> j =A0Benchmark$CreateFileStats.executeOp(IILjava/lang/String;Lcom/cep=
-h/fs/CephMount;)J+37
-> j =A0Benchmark$StatsDaemon.benchmarkOne()V+22
-> j =A0Benchmark$StatsDaemon.run()V+26
-> v =A0~StubRoutines::call_stub
->
-> So I think the probably may be due to the locking mechanism of ceph
-> internally. But Dr. Weil previously answered my email stating that th=
-e
-> mounting is done independently so multithreading should not lead to
-> this problem. If there is anyway to work around this, please let me
-> know.
->
-> Best regards,
->
-> Nam Dang
-> Email: namd@de.cs.titech.ac.jp
-> HP: (+81) 080-4465-1587
-> Yokota Lab, Dept. of Computer Science
-> Tokyo Institute of Technology
-> Tokyo, Japan
+> Yehuda
+
+Well, I saw you probably found the culprit.
+
+So tried the latest (this morning) git kernel.
+
+Now data gives good results :
+
+root@label5:~#  rados -p data bench 20 write -t 16
+Maintaining 16 concurrent writes of 4194304 bytes for at least 20 secon=
+ds.
+   sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg =
+lat
+     0       0         0         0         0         0         -       =
+  0
+     1      16       215       199   795.765       796  0.073769 0.0745=
+517
+     2      16       430       414   827.833       860  0.060165 0.0753=
+952
+     3      16       632       616   821.207       808  0.072241 0.0772=
+463
+     4      16       838       822   821.883       824  0.129571 0.0768=
+741
+     5      16      1039      1023   818.271       804  0.056867  0.077=
+637
+     6      16      1254      1238   825.209       860  0.078801 0.0771=
+122
+     7      16      1474      1458   833.023       880  0.062886 0.0764=
+071
+     8      16      1669      1653   826.389       780   0.09632 0.0767=
+323
+     9      16      1877      1861   827.003       832  0.083765 0.0770=
+398
+    10      16      2087      2071   828.294       840  0.051437  0.076=
+937
+    11      16      2309      2293   833.714       888  0.080584 0.0764=
+829
+    12      16      2535      2519   839.563       904  0.078095 0.0759=
+574
+    13      16      2762      2746   844.816       908  0.081323 0.0754=
+571
+    14      16      2984      2968   847.889       888  0.076973 0.0752=
+921
+    15      16      3203      3187   849.754       876  0.069877 0.0750=
+613
+    16      16      3437      3421   855.138       936  0.046845 0.0746=
+941
+    17      16      3655      3639   856.126       872  0.052258 0.0745=
+157
+    18      16      3862      3846   854.559       828  0.061542 0.0746=
+875
+    19      16      4085      4069   856.525       892  0.053889 0.0745=
+582
+min lat: 0.033007 max lat: 0.462951 avg lat: 0.0743988
+   sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg =
+lat
+    20      15      4308      4293   858.492       896  0.054176 0.0743=
+988
+Total time run:        20.103415
+Total writes made:     4309
+Write size:            4194304
+Bandwidth (MB/sec):    857.367
+
+Average Latency:       0.0746302
+Max latency:           0.462951
+Min latency:           0.033007
+
+
+
+But very strangely it's now rbd that isn't stable ?!
+
+root@label5:~#  rados -p rbd bench 20 write -t 16
+Maintaining 16 concurrent writes of 4194304 bytes for at least 20 secon=
+ds.
+   sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg =
+lat
+     0       0         0         0         0         0         -       =
+  0
+     1      16       155       139    555.87       556  0.046232  0.109=
+021
+     2      16       250       234   467.923       380  0.046793 0.0985=
+316
+     3      16       250       234   311.955         0         - 0.0985=
+316
+     4      16       250       234   233.965         0         - 0.0985=
+316
+     5      16       250       234   187.173         0         - 0.0985=
+316
+     6      16       266       250   166.645        16  0.038083  0.175=
+697
+     7      16       266       250   142.839         0         -  0.175=
+697
+     8      16       441       425   212.475       350   0.05512  0.298=
+391
+     9      16       476       460   204.422       140   0.04372  0.280=
+483
+    10      16       531       515   205.976       220  0.125076  0.309=
+449
+    11      16       734       718    261.06       812  0.127582  0.244=
+134
+    12      16       795       779   259.637       244  0.065158  0.234=
+156
+    13      16       818       802   246.742        92  0.054514  0.241=
+704
+    14      16       830       814   232.546        48  0.044386  0.239=
+006
+    15      16       837       821   218.909        28   3.41523  0.267=
+521
+    16      16      1043      1027   256.721       824   0.04898  0.248=
+212
+    17      16      1147      1131   266.088       416  0.048591  0.232=
+725
+    18      16      1147      1131   251.305         0         -  0.232=
+725
+    19      16      1202      1186   249.657       110  0.081777   0.25=
+501
+min lat: 0.033773 max lat: 5.92059 avg lat: 0.245711
+   sec Cur ops   started  finished  avg MB/s  cur MB/s  last lat   avg =
+lat
+    20      16      1296      1280    255.97       376  0.053797  0.245=
+711
+    21       9      1297      1288   245.305        32  0.708133  0.248=
+248
+    22       9      1297      1288   234.155         0         -  0.248=
+248
+    23       9      1297      1288   223.975         0         -  0.248=
+248
+    24       9      1297      1288   214.643         0         -  0.248=
+248
+    25       9      1297      1288   206.057         0         -  0.248=
+248
+    26       9      1297      1288   198.131         0         -  0.248=
+248
+Total time run:        26.829870
+Total writes made:     1297
+Write size:            4194304
+Bandwidth (MB/sec):    193.367
+
+Average Latency:       0.295922
+Max latency:           7.36701
+Min latency:           0.033773
+
+
+Strange. I'm wondering if this has something to do with cache (that is,=
+=20
+operation I could have done before on nodes, as all my nodes are just=20
+freshly rebooted).
+
+Cheers,
+
+--=20
+Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
+Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
