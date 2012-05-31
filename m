@@ -1,36 +1,50 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: poor OSD performance using kernel 3.4 => problem found
-Date: Thu, 31 May 2012 13:34:24 +0200
-Message-ID: <4FC75740.8090404@profihost.ag>
-References: <4FBE415E.8030702@profihost.ag> <4FC54CDB.1000506@inktank.com> <4FC5BF27.5060704@profihost.ag> <CADdPHGs9dpSh9Oyu+5yDhyYU=Et_-zF5MuYybBuuAN5DgR433A@mail.gmail.com> <4FC5C941.6010105@profihost.ag> <CADdPHGuiJqZUCK-0qR_CrOo6GRhkjaCdkOhJ2boq3zD0_voTsA@mail.gmail.com> <4FC5FEC1.90103@profihost.ag> <4FC60FC8.207@inktank.com> <4FC61596.3050703@profihost.ag> <4FC62BB0.1020003@inktank.com> <4FC66A1F.1080407@profihost.ag> <CADdPHGuxa7TAyqXcXehb9WgKgkHwkybYTrj2oue_PKsiF+oR3A@mail.gmail.com> <4FC68CAA.9030708@profihost.ag> <CADdPHGutEwoDc=Kcrqcx2ZMO=dqhuoT5iLoP-WxqD+e5ZUmBRA@mail.gmail.com> <4FC7197D.5010406@profihost.ag> <CADdPHGv0YjxDQFnZML-55jDj7XxHxaxUZ_FeQ=ReKK6Rs7NNhw@mail.gmail.com> <4FC725F0.9040207@profihost.ag> <CADdPHGtiTp8nK07O-6EiSd4k68TP_HQEa4_ZmOqV6zQrnhPo4w@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: Wiki Spam
+Date: Thu, 31 May 2012 06:51:59 -0500
+Message-ID: <4FC75B5F.2040602@inktank.com>
+References: <4FC7183C.6010707@baclesse.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:36903 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753476Ab2EaLe1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 May 2012 07:34:27 -0400
-In-Reply-To: <CADdPHGtiTp8nK07O-6EiSd4k68TP_HQEa4_ZmOqV6zQrnhPo4w@mail.gmail.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:55772 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753494Ab2EaLwB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 31 May 2012 07:52:01 -0400
+Received: by yenm10 with SMTP id m10so690140yen.19
+        for <ceph-devel@vger.kernel.org>; Thu, 31 May 2012 04:52:01 -0700 (PDT)
+In-Reply-To: <4FC7183C.6010707@baclesse.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Majer <stefan.majer@gmail.com>
-Cc: Mark Nelson <mark.nelson@inktank.com>, yehuda@inktank.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-1?Q?=22SPONEM=2C_Beno=EEt=22?= <b.sponem@baclesse.fr>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Am 31.05.2012 10:09, schrieb Stefan Majer:
-> Hi Stefan,
+Doh!
+
+Thanks for the heads-up.  We'll deal with it.
+
+Thanks,
+Mark
+
+On 5/31/12 2:05 AM, "SPONEM, Beno=EEt" wrote:
+> Dear all,
 >
-> then you should probably describe this in a short mail to Jason Wang
-> and ask him how to circumvent this commit with sysctl settings.
+> Just for information, there are a lot of spam in Ceph's wiki
+> (http://ceph.com/wiki/Special:RecentChanges,
+> http://ceph.com/w/index.php?title=3DSpecial:LonelyPages&limit=3D250&o=
+ffset=3D0
+> <http://ceph.com/w/index.php?title=3DSpecial:LonelyPages&limit=3D250&=
+offset=3D0>).
+>
+> Regards,
+> Benoit
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-done hopefully he can help
-
-> I=B4m pretty sure my sysctl setting reverts the first part of the
-> commit. So probably the second part is the evil one ?
-Yes it seems like that
-
-Stefan
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
