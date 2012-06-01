@@ -1,59 +1,77 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 03/13] libceph: delete useless SOCK_CLOSED manipulations
-Date: Fri, 01 Jun 2012 13:47:04 -0500
-Message-ID: <4FC90E28.6000604@inktank.com>
-References: <4FC673FC.3060004@inktank.com> <4FC67645.1050609@inktank.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: "rbd rm image" slow with big images ?
+Date: Fri, 01 Jun 2012 22:33:34 +0200
+Message-ID: <4FC9271E.6010809@widodh.nl>
+References: <b4c574f6-49bf-4d36-b8f2-526bcccb4c71@mailpro> <4FC7B528.30609@widodh.nl> <Pine.LNX.4.64.1205311118150.28422@cobra.newdream.net> <2839159.qIikQGmnXF@pc10>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:62750 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932805Ab2FASrH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 14:47:07 -0400
-Received: by yhmm54 with SMTP id m54so1905847yhm.19
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Jun 2012 11:47:05 -0700 (PDT)
-In-Reply-To: <4FC67645.1050609@inktank.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:58197 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751064Ab2FAUdh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 16:33:37 -0400
+In-Reply-To: <2839159.qIikQGmnXF@pc10>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Cc: ceph-devel@vger.kernel.org
 
-On 05/30/2012 02:34 PM, Alex Elder wrote:
-> In con_close_socket(), SOCK_CLOSED is set in the connection state,
-> then cleared again after shutting down the socket. Nothing between
-> the setting and clearing of that bit will ever be affected by it,
-> so there's no point in setting/clearing it at all. So don't.
+Hi,
+
+On 06/01/2012 03:51 PM, Guido Winkelmann wrote:
+> Am Donnerstag, 31. Mai 2012, 11:19:44 schrieben Sie:
+>> On Thu, 31 May 2012, Wido den Hollander wrote:
+>>> Hi,
+>>>
+>>>> Is it the normal behaviour ? Maybe some xfs tuning could help ?
+>>>
+>>> It's in the nature of RBD.
+>>
+>> Yes.
+>>
+>> That said, the current implementation is also stupid: it's doing a single
+>> io at a time.  #2256 (next sprint) will parallelize this to make it go
+>> much faster (probably an order of magnitude?).
 >
-> Signed-off-by: Alex Elder <elder@inktank.com>
-
-I am retracting this proposed change.
-
-I believe it's possible for the con->sock->ops->shutdown()
-call to trigger a TCP_CLOSE socket state change event,
-which means that there *is* something that can be affected
-by that state bit being set.
-
-					-Alex
-
-> ---
-> net/ceph/messenger.c | 2 --
-> 1 files changed, 0 insertions(+), 2 deletions(-)
->
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 07af994..fe3c2a1 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -338,11 +338,9 @@ static int con_close_socket(struct ceph_connection
-> *con)
-> dout("con_close_socket on %p sock %p\n", con, con->sock);
-> if (!con->sock)
-> return 0;
-> - set_bit(SOCK_CLOSED, &con->state);
-> rc = con->sock->ops->shutdown(con->sock, SHUT_RDWR);
-> sock_release(con->sock);
-> con->sock = NULL;
-> - clear_bit(SOCK_CLOSED, &con->state);
-> return rc;
-> }
+> Will it speed up copy operations as well? Those are a lot more important in
+> practice... A delete operation I can usually just fire off and leave running
+> in the background, but if I'm running a copy operation, there's usually
+> something else waiting (like starting a virtual server that's waiting for its
+> disk) that cannot proceed until the copy is actually finished.
 >
 
+#2256 is only about parallelizing deletions: 
+http://tracker.newdream.net/issues/2256
+
+I don't see a feature request in the tracker for parallelizing a copy, 
+but we can always create that one :)
+
+> On another note, it looks to me (correct me if I'm wrong) like rbd copy
+> operations always involve copying all the data objects from the source volume
+> to the machine on which the rbd command is running, and then back to the
+> cluster, even if that machine isn't even part of the cluster. Are there any
+> plans to streamline this?
+>
+
+You are running the rbd command on that client, so that client will read 
+the object and write them again as new RADOS objects.
+
+What you are asking is a "cluster-side" clone of a volume, correct?
+
+There is working on-going for layering, where you have one "golden 
+image" with multiple childs. With that you can achieve what you want, 
+but it's not always desired in every situation.
+
+There has been talking about promoting a child to a fresh volume, that 
+would be the same as the cloning you are talking about. I don't know the 
+status of that.
+
+Wido
+
+> Regards,
+> 	Guido
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
