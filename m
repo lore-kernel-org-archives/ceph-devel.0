@@ -1,206 +1,247 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 05/13] libceph: rename kvec_reset and kvec_add functions
-Date: Thu, 31 May 2012 21:02:53 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205312102480.2166@cobra.newdream.net>
-References: <4FC673FC.3060004@inktank.com> <4FC67655.7030206@inktank.com>
+Subject: Re: [PATCH 06/13] libceph: embed ceph messenger structure in
+ ceph_client
+Date: Thu, 31 May 2012 21:04:26 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205312104190.2166@cobra.newdream.net>
+References: <4FC673FC.3060004@inktank.com> <4FC6765A.8080100@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60063 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:60067 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751060Ab2FAECy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 00:02:54 -0400
-In-Reply-To: <4FC67655.7030206@inktank.com>
+	with ESMTP id S1751073Ab2FAEE1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 00:04:27 -0400
+In-Reply-To: <4FC6765A.8080100@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Yep
+Reviewed-by: Sage Weil <sage@inktank.com>
 
 On Wed, 30 May 2012, Alex Elder wrote:
 
-> The functions ceph_con_out_kvec_reset() and ceph_con_out_kvec_add()
-> are entirely private functions, so drop the "ceph_" prefix in their
-> name to make them slightly more wieldy.
+> A ceph client has a pointer to a ceph messenger structure in it.
+> There is always exactly one ceph messenger for a ceph client, so
+> there is no need to allocate it separate from the ceph client
+> structure.
+> 
+> Switch the ceph_client structure to embed its ceph_messenger
+> structure.
 > 
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->  net/ceph/messenger.c |   48 ++++++++++++++++++++++++------------------------
->  1 files changed, 24 insertions(+), 24 deletions(-)
+>  fs/ceph/mds_client.c           |    2 +-
+>  include/linux/ceph/libceph.h   |    2 +-
+>  include/linux/ceph/messenger.h |    9 +++++----
+>  net/ceph/ceph_common.c         |   18 +++++-------------
+>  net/ceph/messenger.c           |   30 +++++++++---------------------
+>  net/ceph/mon_client.c          |    6 +++---
+>  net/ceph/osd_client.c          |    4 ++--
+>  7 files changed, 26 insertions(+), 45 deletions(-)
 > 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 200bc87..ad30261 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -394,7 +394,7 @@ static struct ceph_mds_session *register_session(struct
+> ceph_mds_client *mdsc,
+>  	s->s_seq = 0;
+>  	mutex_init(&s->s_mutex);
+> 
+> -	ceph_con_init(mdsc->fsc->client->msgr, &s->s_con);
+> +	ceph_con_init(&mdsc->fsc->client->msgr, &s->s_con);
+>  	s->s_con.private = s;
+>  	s->s_con.ops = &mds_con_ops;
+>  	s->s_con.peer_name.type = CEPH_ENTITY_TYPE_MDS;
+> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+> index 92eef7c..927361c 100644
+> --- a/include/linux/ceph/libceph.h
+> +++ b/include/linux/ceph/libceph.h
+> @@ -131,7 +131,7 @@ struct ceph_client {
+>  	u32 supported_features;
+>  	u32 required_features;
+> 
+> -	struct ceph_messenger *msgr;   /* messenger instance */
+> +	struct ceph_messenger msgr;   /* messenger instance */
+>  	struct ceph_mon_client monc;
+>  	struct ceph_osd_client osdc;
+> 
+> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+> index 74f6c9b..3fbd4be 100644
+> --- a/include/linux/ceph/messenger.h
+> +++ b/include/linux/ceph/messenger.h
+> @@ -211,10 +211,11 @@ extern int ceph_msgr_init(void);
+>  extern void ceph_msgr_exit(void);
+>  extern void ceph_msgr_flush(void);
+> 
+> -extern struct ceph_messenger *ceph_messenger_create(
+> -	struct ceph_entity_addr *myaddr,
+> -	u32 features, u32 required);
+> -extern void ceph_messenger_destroy(struct ceph_messenger *);
+> +extern void ceph_messenger_init(struct ceph_messenger *msgr,
+> +			struct ceph_entity_addr *myaddr,
+> +			u32 supported_features,
+> +			u32 required_features,
+> +			bool nocrc);
+> 
+>  extern void ceph_con_init(struct ceph_messenger *msgr,
+>  			  struct ceph_connection *con);
+> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+> index cc91319..2de3ea1 100644
+> --- a/net/ceph/ceph_common.c
+> +++ b/net/ceph/ceph_common.c
+> @@ -468,19 +468,15 @@ struct ceph_client *ceph_create_client(struct
+> ceph_options *opt, void *private,
+>  	/* msgr */
+>  	if (ceph_test_opt(client, MYIP))
+>  		myaddr = &client->options->my_addr;
+> -	client->msgr = ceph_messenger_create(myaddr,
+> -					     client->supported_features,
+> -					     client->required_features);
+> -	if (IS_ERR(client->msgr)) {
+> -		err = PTR_ERR(client->msgr);
+> -		goto fail;
+> -	}
+> -	client->msgr->nocrc = ceph_test_opt(client, NOCRC);
+> +	ceph_messenger_init(&client->msgr, myaddr,
+> +		client->supported_features,
+> +		client->required_features,
+> +		ceph_test_opt(client, NOCRC));
+> 
+>  	/* subsystems */
+>  	err = ceph_monc_init(&client->monc, client);
+>  	if (err < 0)
+> -		goto fail_msgr;
+> +		goto fail;
+>  	err = ceph_osdc_init(&client->osdc, client);
+>  	if (err < 0)
+>  		goto fail_monc;
+> @@ -489,8 +485,6 @@ struct ceph_client *ceph_create_client(struct ceph_options
+> *opt, void *private,
+> 
+>  fail_monc:
+>  	ceph_monc_stop(&client->monc);
+> -fail_msgr:
+> -	ceph_messenger_destroy(client->msgr);
+>  fail:
+>  	kfree(client);
+>  	return ERR_PTR(err);
+> @@ -515,8 +509,6 @@ void ceph_destroy_client(struct ceph_client *client)
+> 
+>  	ceph_debugfs_client_cleanup(client);
+> 
+> -	ceph_messenger_destroy(client->msgr);
+> -
+>  	ceph_destroy_options(client->options);
+> 
+>  	kfree(client);
 > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 5ad1f0a..2e9054f 100644
+> index 2e9054f..19f1948 100644
 > --- a/net/ceph/messenger.c
 > +++ b/net/ceph/messenger.c
-> @@ -484,14 +484,14 @@ static u32 get_global_seq(struct ceph_messenger *msgr,
-> u32 gt)
->  	return ret;
->  }
+> @@ -2243,18 +2243,14 @@ out:
 > 
-> -static void ceph_con_out_kvec_reset(struct ceph_connection *con)
-> +static void con_out_kvec_reset(struct ceph_connection *con)
->  {
->  	con->out_kvec_left = 0;
->  	con->out_kvec_bytes = 0;
->  	con->out_kvec_cur = &con->out_kvec[0];
->  }
 > 
-> -static void ceph_con_out_kvec_add(struct ceph_connection *con,
-> +static void con_out_kvec_add(struct ceph_connection *con,
->  				size_t size, void *data)
->  {
->  	int index;
-> @@ -532,7 +532,7 @@ static void prepare_write_message(struct ceph_connection
-> *con)
->  	struct ceph_msg *m;
->  	u32 crc;
-> 
-> -	ceph_con_out_kvec_reset(con);
-> +	con_out_kvec_reset(con);
->  	con->out_kvec_is_msg = true;
->  	con->out_msg_done = false;
-> 
-> @@ -540,9 +540,9 @@ static void prepare_write_message(struct ceph_connection
-> *con)
->  	 * TCP packet that's a good thing. */
->  	if (con->in_seq > con->in_seq_acked) {
->  		con->in_seq_acked = con->in_seq;
-> -		ceph_con_out_kvec_add(con, sizeof (tag_ack), &tag_ack);
-> +		con_out_kvec_add(con, sizeof (tag_ack), &tag_ack);
->  		con->out_temp_ack = cpu_to_le64(con->in_seq_acked);
-> -		ceph_con_out_kvec_add(con, sizeof (con->out_temp_ack),
-> +		con_out_kvec_add(con, sizeof (con->out_temp_ack),
->  			&con->out_temp_ack);
->  	}
-> 
-> @@ -570,12 +570,12 @@ static void prepare_write_message(struct ceph_connection
-> *con)
->  	BUG_ON(le32_to_cpu(m->hdr.front_len) != m->front.iov_len);
-> 
->  	/* tag + hdr + front + middle */
-> -	ceph_con_out_kvec_add(con, sizeof (tag_msg), &tag_msg);
-> -	ceph_con_out_kvec_add(con, sizeof (m->hdr), &m->hdr);
-> -	ceph_con_out_kvec_add(con, m->front.iov_len, m->front.iov_base);
-> +	con_out_kvec_add(con, sizeof (tag_msg), &tag_msg);
-> +	con_out_kvec_add(con, sizeof (m->hdr), &m->hdr);
-> +	con_out_kvec_add(con, m->front.iov_len, m->front.iov_base);
-> 
->  	if (m->middle)
-> -		ceph_con_out_kvec_add(con, m->middle->vec.iov_len,
-> +		con_out_kvec_add(con, m->middle->vec.iov_len,
->  			m->middle->vec.iov_base);
-> 
->  	/* fill in crc (except data pages), footer */
-> @@ -624,12 +624,12 @@ static void prepare_write_ack(struct ceph_connection
-> *con)
->  	     con->in_seq_acked, con->in_seq);
->  	con->in_seq_acked = con->in_seq;
-> 
-> -	ceph_con_out_kvec_reset(con);
-> +	con_out_kvec_reset(con);
-> 
-> -	ceph_con_out_kvec_add(con, sizeof (tag_ack), &tag_ack);
-> +	con_out_kvec_add(con, sizeof (tag_ack), &tag_ack);
-> 
->  	con->out_temp_ack = cpu_to_le64(con->in_seq_acked);
-> -	ceph_con_out_kvec_add(con, sizeof (con->out_temp_ack),
-> +	con_out_kvec_add(con, sizeof (con->out_temp_ack),
->  				&con->out_temp_ack);
-> 
->  	con->out_more = 1;  /* more will follow.. eventually.. */
-> @@ -642,8 +642,8 @@ static void prepare_write_ack(struct ceph_connection *con)
->  static void prepare_write_keepalive(struct ceph_connection *con)
->  {
->  	dout("prepare_write_keepalive %p\n", con);
-> -	ceph_con_out_kvec_reset(con);
-> -	ceph_con_out_kvec_add(con, sizeof (tag_keepalive), &tag_keepalive);
-> +	con_out_kvec_reset(con);
-> +	con_out_kvec_add(con, sizeof (tag_keepalive), &tag_keepalive);
->  	set_bit(WRITE_PENDING, &con->state);
->  }
-> 
-> @@ -688,8 +688,8 @@ static struct ceph_auth_handshake
-> *get_connect_authorizer(struct ceph_connection
+>  /*
+> - * create a new messenger instance
+> + * initialize a new messenger instance
 >   */
->  static void prepare_write_banner(struct ceph_connection *con)
+> -struct ceph_messenger *ceph_messenger_create(struct ceph_entity_addr *myaddr,
+> -					     u32 supported_features,
+> -					     u32 required_features)
+> +void ceph_messenger_init(struct ceph_messenger *msgr,
+> +			struct ceph_entity_addr *myaddr,
+> +			u32 supported_features,
+> +			u32 required_features,
+> +			bool nocrc)
 >  {
-> -	ceph_con_out_kvec_add(con, strlen(CEPH_BANNER), CEPH_BANNER);
-> -	ceph_con_out_kvec_add(con, sizeof (con->msgr->my_enc_addr),
-> +	con_out_kvec_add(con, strlen(CEPH_BANNER), CEPH_BANNER);
-> +	con_out_kvec_add(con, sizeof (con->msgr->my_enc_addr),
->  					&con->msgr->my_enc_addr);
+> -	struct ceph_messenger *msgr;
+> -
+> -	msgr = kzalloc(sizeof(*msgr), GFP_KERNEL);
+> -	if (msgr == NULL)
+> -		return ERR_PTR(-ENOMEM);
+> -
+>  	msgr->supported_features = supported_features;
+>  	msgr->required_features = required_features;
 > 
->  	con->out_more = 0;
-> @@ -736,10 +736,10 @@ static int prepare_write_connect(struct ceph_connection
-> *con)
->  	con->out_connect.authorizer_len = auth ?
->  		cpu_to_le32(auth->authorizer_buf_len) : 0;
+> @@ -2267,19 +2263,11 @@ struct ceph_messenger *ceph_messenger_create(struct
+> ceph_entity_addr *myaddr,
+>  	msgr->inst.addr.type = 0;
+>  	get_random_bytes(&msgr->inst.addr.nonce,
+> sizeof(msgr->inst.addr.nonce));
+>  	encode_my_addr(msgr);
+> +	msgr->nocrc = nocrc;
 > 
-> -	ceph_con_out_kvec_add(con, sizeof (con->out_connect),
-> +	con_out_kvec_add(con, sizeof (con->out_connect),
->  					&con->out_connect);
->  	if (auth && auth->authorizer_buf_len)
-> -		ceph_con_out_kvec_add(con, auth->authorizer_buf_len,
-> +		con_out_kvec_add(con, auth->authorizer_buf_len,
->  					auth->authorizer_buf);
+> -	dout("messenger_create %p\n", msgr);
+> -	return msgr;
+> -}
+> -EXPORT_SYMBOL(ceph_messenger_create);
+> -
+> -void ceph_messenger_destroy(struct ceph_messenger *msgr)
+> -{
+> -	dout("destroy %p\n", msgr);
+> -	kfree(msgr);
+> -	dout("destroyed messenger %p\n", msgr);
+> +	dout("%s %p\n", __func__, msgr);
+>  }
+> -EXPORT_SYMBOL(ceph_messenger_destroy);
+> +EXPORT_SYMBOL(ceph_messenger_init);
 > 
->  	con->out_more = 0;
-> @@ -933,7 +933,7 @@ static int write_partial_msg_pages(struct ceph_connection
-> *con)
->  	/* prepare and queue up footer, too */
->  	if (!do_datacrc)
->  		con->out_msg->footer.flags |= CEPH_MSG_FOOTER_NOCRC;
-> -	ceph_con_out_kvec_reset(con);
-> +	con_out_kvec_reset(con);
->  	prepare_write_message_footer(con);
->  	ret = 1;
->  out:
-> @@ -1396,7 +1396,7 @@ static int process_connect(struct ceph_connection *con)
->  			return -1;
->  		}
->  		con->auth_retry = 1;
-> -		ceph_con_out_kvec_reset(con);
-> +		con_out_kvec_reset(con);
->  		ret = prepare_write_connect(con);
->  		if (ret < 0)
->  			return ret;
-> @@ -1417,7 +1417,7 @@ static int process_connect(struct ceph_connection *con)
->  		       ENTITY_NAME(con->peer_name),
->  		       ceph_pr_addr(&con->peer_addr.in_addr));
->  		reset_connection(con);
-> -		ceph_con_out_kvec_reset(con);
-> +		con_out_kvec_reset(con);
->  		ret = prepare_write_connect(con);
->  		if (ret < 0)
->  			return ret;
-> @@ -1443,7 +1443,7 @@ static int process_connect(struct ceph_connection *con)
->  		     le32_to_cpu(con->out_connect.connect_seq),
->  		     le32_to_cpu(con->in_connect.connect_seq));
->  		con->connect_seq = le32_to_cpu(con->in_connect.connect_seq);
-> -		ceph_con_out_kvec_reset(con);
-> +		con_out_kvec_reset(con);
->  		ret = prepare_write_connect(con);
->  		if (ret < 0)
->  			return ret;
-> @@ -1460,7 +1460,7 @@ static int process_connect(struct ceph_connection *con)
->  		     le32_to_cpu(con->in_connect.global_seq));
->  		get_global_seq(con->msgr,
->  			       le32_to_cpu(con->in_connect.global_seq));
-> -		ceph_con_out_kvec_reset(con);
-> +		con_out_kvec_reset(con);
->  		ret = prepare_write_connect(con);
->  		if (ret < 0)
->  			return ret;
-> @@ -1867,7 +1867,7 @@ more:
+>  static void clear_standby(struct ceph_connection *con)
+>  {
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index 1845cde..704dc95 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -763,7 +763,7 @@ int ceph_monc_init(struct ceph_mon_client *monc, struct
+> ceph_client *cl)
+>  	monc->con = kmalloc(sizeof(*monc->con), GFP_KERNEL);
+>  	if (!monc->con)
+>  		goto out_monmap;
+> -	ceph_con_init(monc->client->msgr, monc->con);
+> +	ceph_con_init(&monc->client->msgr, monc->con);
+>  	monc->con->private = monc;
+>  	monc->con->ops = &mon_con_ops;
 > 
->  	/* open the socket first? */
->  	if (con->sock == NULL) {
-> -		ceph_con_out_kvec_reset(con);
-> +		con_out_kvec_reset(con);
->  		prepare_write_banner(con);
->  		ret = prepare_write_connect(con);
->  		if (ret < 0)
+> @@ -880,8 +880,8 @@ static void handle_auth_reply(struct ceph_mon_client
+> *monc,
+>  	} else if (!was_auth && monc->auth->ops->is_authenticated(monc->auth))
+> {
+>  		dout("authenticated, starting session\n");
+> 
+> -		monc->client->msgr->inst.name.type = CEPH_ENTITY_TYPE_CLIENT;
+> -		monc->client->msgr->inst.name.num =
+> +		monc->client->msgr.inst.name.type = CEPH_ENTITY_TYPE_CLIENT;
+> +		monc->client->msgr.inst.name.num =
+>  					cpu_to_le64(monc->auth->global_id);
+> 
+>  		__send_subscribe(monc);
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index b098e7b..cca4c7f 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -639,7 +639,7 @@ static struct ceph_osd *create_osd(struct ceph_osd_client
+> *osdc)
+>  	INIT_LIST_HEAD(&osd->o_osd_lru);
+>  	osd->o_incarnation = 1;
+> 
+> -	ceph_con_init(osdc->client->msgr, &osd->o_con);
+> +	ceph_con_init(&osdc->client->msgr, &osd->o_con);
+>  	osd->o_con.private = osd;
+>  	osd->o_con.ops = &osd_con_ops;
+>  	osd->o_con.peer_name.type = CEPH_ENTITY_TYPE_OSD;
+> @@ -1391,7 +1391,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
+> struct ceph_msg *msg)
+>  			     epoch, maplen);
+>  			newmap = osdmap_apply_incremental(&p, next,
+>  							  osdc->osdmap,
+> -							  osdc->client->msgr);
+> +
+> &osdc->client->msgr);
+>  			if (IS_ERR(newmap)) {
+>  				err = PTR_ERR(newmap);
+>  				goto bad;
 > -- 
 > 1.7.5.4
 > 
