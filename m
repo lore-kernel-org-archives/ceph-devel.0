@@ -1,154 +1,239 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Fwd: Re: [PATCH 04/13] libceph: rename socket callbacks
-Date: Fri, 01 Jun 2012 07:03:09 -0500
-Message-ID: <4FC8AF7D.7070707@inktank.com>
-References: <4FC8AECA.7050004@inktank.com>
+Subject: Re: [PATCH 07/13] libceph: embed ceph connection structure in mon_client
+Date: Fri, 01 Jun 2012 07:12:13 -0500
+Message-ID: <4FC8B19D.2080204@inktank.com>
+References: <4FC673FC.3060004@inktank.com> <4FC67662.2060005@inktank.com> <Pine.LNX.4.64.1205312108540.2166@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:40042 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753108Ab2FAMDG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 08:03:06 -0400
-Received: by yenm10 with SMTP id m10so1645715yen.19
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Jun 2012 05:03:05 -0700 (PDT)
-In-Reply-To: <4FC8AECA.7050004@inktank.com>
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:60446 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753904Ab2FAMMK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 08:12:10 -0400
+Received: by gglu4 with SMTP id u4so1648767ggl.19
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Jun 2012 05:12:09 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1205312108540.2166@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-
-Forgot to "reply-all" my response.	-Alex
-
--------- Original Message --------
-Subject: Re: [PATCH 04/13] libceph: rename socket callbacks
-Date: Fri, 01 Jun 2012 07:00:10 -0500
-From: Alex Elder <elder@inktank.com>
 To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 05/31/2012 11:02 PM, Sage Weil wrote:
+On 05/31/2012 11:24 PM, Sage Weil wrote:
 > On Wed, 30 May 2012, Alex Elder wrote:
->> Change the names of the three socket callback functions to make it
->> more obvious they're specifically associated with a connection's
->> socket (not the ceph connection that uses it).
+>> A monitor client has a pointer to a ceph connection structure in it.
+>> This is the only one of the three ceph client types that do it this
+>> way; the OSD and MDS clients embed the connection into their main
+>> structures.  There is always exactly one ceph connection for a
+>> monitor client, so there is no need to allocate it separate from the
+>> monitor client structure.
+>>
+>> So switch the ceph_mon_client structure to embed its
+>> ceph_connection structure.
 >>
 >> Signed-off-by: Alex Elder<elder@inktank.com>
 >> ---
->>   net/ceph/messenger.c |   28 ++++++++++++++--------------
->>   1 files changed, 14 insertions(+), 14 deletions(-)
+>>   include/linux/ceph/mon_client.h |    2 +-
+>>   net/ceph/mon_client.c           |   47 ++++++++++++++++----------------------
+>>   2 files changed, 21 insertions(+), 28 deletions(-)
 >>
->> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->> index fe3c2a1..5ad1f0a 100644
->> --- a/net/ceph/messenger.c
->> +++ b/net/ceph/messenger.c
->> @@ -153,46 +153,46 @@ EXPORT_SYMBOL(ceph_msgr_flush);
->>    */
+>> diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
+>> index 545f859..2113e38 100644
+>> --- a/include/linux/ceph/mon_client.h
+>> +++ b/include/linux/ceph/mon_client.h
+>> @@ -70,7 +70,7 @@ struct ceph_mon_client {
+>>   	bool hunting;
+>>   	int cur_mon;                       /* last monitor i contacted */
+>>   	unsigned long sub_sent, sub_renew_after;
+>> -	struct ceph_connection *con;
+>> +	struct ceph_connection con;
+>>   	bool have_fsid;
 >>
->>   /* data available on socket, or listen socket received a connect */
->> -static void ceph_data_ready(struct sock *sk, int count_unused)
->> +static void ceph_sock_data_ready(struct sock *sk, int count_unused)
+>>   	/* pending generic requests */
+>> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+>> index 704dc95..ac4d6b1 100644
+>> --- a/net/ceph/mon_client.c
+>> +++ b/net/ceph/mon_client.c
+>> @@ -106,9 +106,9 @@ static void __send_prepared_auth_request(struct
+>> ceph_mon_client *monc, int len)
+>>   	monc->pending_auth = 1;
+>>   	monc->m_auth->front.iov_len = len;
+>>   	monc->m_auth->hdr.front_len = cpu_to_le32(len);
+>> -	ceph_con_revoke(monc->con, monc->m_auth);
+>> +	ceph_con_revoke(&monc->con, monc->m_auth);
+>>   	ceph_msg_get(monc->m_auth);  /* keep our ref */
+>> -	ceph_con_send(monc->con, monc->m_auth);
+>> +	ceph_con_send(&monc->con, monc->m_auth);
+>>   }
+>>
+>>   /*
+>> @@ -117,8 +117,8 @@ static void __send_prepared_auth_request(struct
+>> ceph_mon_client *monc, int len)
+>>   static void __close_session(struct ceph_mon_client *monc)
 >>   {
->>   	struct ceph_connection *con = sk->sk_user_data;
+>>   	dout("__close_session closing mon%d\n", monc->cur_mon);
+>> -	ceph_con_revoke(monc->con, monc->m_auth);
+>> -	ceph_con_close(monc->con);
+>> +	ceph_con_revoke(&monc->con, monc->m_auth);
+>> +	ceph_con_close(&monc->con);
+>>   	monc->cur_mon = -1;
+>>   	monc->pending_auth = 0;
+>>   	ceph_auth_reset(monc->auth);
+>> @@ -142,9 +142,9 @@ static int __open_session(struct ceph_mon_client *monc)
+>>   		monc->want_next_osdmap = !!monc->want_next_osdmap;
 >>
->>   	if (sk->sk_state != TCP_CLOSE_WAIT) {
->> -		dout("ceph_data_ready on %p state = %lu, queueing work\n",
->> +		dout("%s on %p state = %lu, queueing work\n", __func__,
+>>   		dout("open_session mon%d opening\n", monc->cur_mon);
+>> -		monc->con->peer_name.type = CEPH_ENTITY_TYPE_MON;
+>> -		monc->con->peer_name.num = cpu_to_le64(monc->cur_mon);
+>> -		ceph_con_open(monc->con,
+>> +		monc->con.peer_name.type = CEPH_ENTITY_TYPE_MON;
+>> +		monc->con.peer_name.num = cpu_to_le64(monc->cur_mon);
+>> +		ceph_con_open(&monc->con,
+>>   			&monc->monmap->mon_inst[monc->cur_mon].addr);
+>>
+>>   		/* initiatiate authentication handshake */
+>> @@ -226,8 +226,8 @@ static void __send_subscribe(struct ceph_mon_client *monc)
+>>
+>>   		msg->front.iov_len = p - msg->front.iov_base;
+>>   		msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
+>> -		ceph_con_revoke(monc->con, msg);
+>> -		ceph_con_send(monc->con, ceph_msg_get(msg));
+>> +		ceph_con_revoke(&monc->con, msg);
+>> +		ceph_con_send(&monc->con, ceph_msg_get(msg));
+>>
+>>   		monc->sub_sent = jiffies | 1;  /* never 0 */
+>>   	}
+>> @@ -247,7 +247,7 @@ static void handle_subscribe_ack(struct ceph_mon_client
+>> *monc,
+>>   	if (monc->hunting) {
+>>   		pr_info("mon%d %s session established\n",
+>>   			monc->cur_mon,
+>> -			ceph_pr_addr(&monc->con->peer_addr.in_addr));
+>> +			ceph_pr_addr(&monc->con.peer_addr.in_addr));
+>>   		monc->hunting = false;
+>>   	}
+>>   	dout("handle_subscribe_ack after %d seconds\n", seconds);
+>> @@ -461,7 +461,7 @@ static int do_generic_request(struct ceph_mon_client
+>> *monc,
+>>   	req->request->hdr.tid = cpu_to_le64(req->tid);
+>>   	__insert_generic_request(monc, req);
+>>   	monc->num_generic_requests++;
+>> -	ceph_con_send(monc->con, ceph_msg_get(req->request));
+>> +	ceph_con_send(&monc->con, ceph_msg_get(req->request));
+>>   	mutex_unlock(&monc->mutex);
+>>
+>>   	err = wait_for_completion_interruptible(&req->completion);
+>> @@ -684,8 +684,8 @@ static void __resend_generic_request(struct
+>> ceph_mon_client *monc)
+>>
+>>   	for (p = rb_first(&monc->generic_request_tree); p; p = rb_next(p)) {
+>>   		req = rb_entry(p, struct ceph_mon_generic_request, node);
+>> -		ceph_con_revoke(monc->con, req->request);
+>> -		ceph_con_send(monc->con, ceph_msg_get(req->request));
+>> +		ceph_con_revoke(&monc->con, req->request);
+>> +		ceph_con_send(&monc->con, ceph_msg_get(req->request));
+>>   	}
+>>   }
+>>
+>> @@ -705,7 +705,7 @@ static void delayed_work(struct work_struct *work)
+>>   		__close_session(monc);
+>>   		__open_session(monc);  /* continue hunting */
+>>   	} else {
+>> -		ceph_con_keepalive(monc->con);
+>> +		ceph_con_keepalive(&monc->con);
+>>
+>>   		__validate_auth(monc);
+>>
+>> @@ -760,19 +760,16 @@ int ceph_monc_init(struct ceph_mon_client *monc, struct
+>> ceph_client *cl)
+>>   		goto out;
+>>
+>>   	/* connection */
+>> -	monc->con = kmalloc(sizeof(*monc->con), GFP_KERNEL);
+>> -	if (!monc->con)
+>> -		goto out_monmap;
+>> -	ceph_con_init(&monc->client->msgr, monc->con);
+>> -	monc->con->private = monc;
+>> -	monc->con->ops =&mon_con_ops;
+>> +	ceph_con_init(&monc->client->msgr,&monc->con);
+>> +	monc->con.private = monc;
+>> +	monc->con.ops =&mon_con_ops;
+>>
+>>   	/* authentication */
+>>   	monc->auth = ceph_auth_init(cl->options->name,
+>>   				    cl->options->key);
+>>   	if (IS_ERR(monc->auth)) {
+>>   		err = PTR_ERR(monc->auth);
+>> -		goto out_con;
+>> +		goto out_monmap;
+>>   	}
+>>   	monc->auth->want_keys =
+>>   		CEPH_ENTITY_TYPE_AUTH | CEPH_ENTITY_TYPE_MON |
+>> @@ -824,8 +821,6 @@ out_subscribe_ack:
+>>   	ceph_msg_put(monc->m_subscribe_ack);
+>>   out_auth:
+>>   	ceph_auth_destroy(monc->auth);
+>> -out_con:
+>> -	monc->con->ops->put(monc->con);
 >
-> I think it's marginally better to do
+> AH!
 >
-> 		dout(__func__ " on %p state = %lu, queueing work\n",
+> This reminds me, these connections need to be refcounted.  There's a
+> ->get() and ->put() op defined so that you can refcount the containing
+> structure.  That means that this patch needs to alo change
 >
-> so that the concatenation happens at compile-time instead of runtime.
+> static const struct ceph_connection_operations mon_con_ops = {
+> 	.get = ceph_con_get,
+> 	.put = ceph_con_put,
+>
+> in mon_client.c.  Hopefully the mon_client itself is refcounted, *or* we
+> can ensure that it won't go away before the msgr workqueue is drained and
+> the get/put ops can turn to no-ops.
 
-I think that's a good idea, but we can't assume __func__ is in fact
-a constant, can we?  __LINE__ and __FILE__ are, but I think __func__
-is named lower case to emphasize that it is not a string literal but
-a variable.  And this concatenation only works for string literals.
+
+Earlier I looked at the ref counting stuff a bit and stopped myself
+from going off on that tangent.  But it didn't look like it was used
+consistently and made a note to myself to revisit it.
+
+> Also: when poking around, I noticed that ceph_con_get() and put() are
+> called directly from osd_client.c... that's a bug!  Those connections have
+> a get and put op defined that twiddles the containing ceph_osd struct's
+> ref count.
+>
+> I pushed several patches to your latest (wip-messenger-2) branch that fix
+> these issues.  Compile tested only!  The first should probably be folded
+> into this one, the others follow.
+
+I'll look at your patches and incorporate them as appropriate.  But at
+the moment I don't see them; whenever you are back online again perhaps
+you'll send me a link.
 
 					-Alex
 
-> Otherwise, looks good!
 >
-> Reviewed-by: Sage Weil<sage@inktank.com>
->
->>   		con, con->state);
->>   		queue_con(con);
->>   	}
->>   }
+>>   out_monmap:
+>>   	kfree(monc->monmap);
+>>   out:
+>> @@ -841,9 +836,7 @@ void ceph_monc_stop(struct ceph_mon_client *monc)
+>>   	mutex_lock(&monc->mutex);
+>>   	__close_session(monc);
 >>
->>   /* socket has buffer space for writing */
->> -static void ceph_write_space(struct sock *sk)
->> +static void ceph_sock_write_space(struct sock *sk)
->>   {
->>   	struct ceph_connection *con = sk->sk_user_data;
+>> -	monc->con->private = NULL;
+>> -	monc->con->ops->put(monc->con);
+>> -	monc->con = NULL;
+>> +	monc->con.private = NULL;
 >>
->>   	/* only queue to workqueue if there is data we want to write,
->>   	 * and there is sufficient space in the socket buffer to accept
->> -	 * more data.  clear SOCK_NOSPACE so that ceph_write_space()
->> +	 * more data.  clear SOCK_NOSPACE so that ceph_sock_write_space()
->>   	 * doesn't get called again until try_write() fills the socket
->>   	 * buffer. See net/ipv4/tcp_input.c:tcp_check_space()
->>   	 * and net/core/stream.c:sk_stream_write_space().
->>   	 */
->>   	if (test_bit(WRITE_PENDING,&con->state)) {
->>   		if (sk_stream_wspace(sk)>= sk_stream_min_wspace(sk)) {
->> -			dout("ceph_write_space %p queueing write work\n",
->> con);
->> +			dout("%s %p queueing write work\n", __func__, con);
->>   			clear_bit(SOCK_NOSPACE,&sk->sk_socket->flags);
->>   			queue_con(con);
->>   		}
->>   	} else {
->> -		dout("ceph_write_space %p nothing to write\n", con);
->> +		dout("%s %p nothing to write\n", __func__, con);
->>   	}
->>   }
+>>   	mutex_unlock(&monc->mutex);
 >>
->>   /* socket's state has changed */
->> -static void ceph_state_change(struct sock *sk)
->> +static void ceph_sock_state_change(struct sock *sk)
->>   {
->>   	struct ceph_connection *con = sk->sk_user_data;
+>> @@ -1021,7 +1014,7 @@ static void mon_fault(struct ceph_connection *con)
+>>   	if (!monc->hunting)
+>>   		pr_info("mon%d %s session lost, "
+>>   			"hunting for new mon\n", monc->cur_mon,
+>> -			ceph_pr_addr(&monc->con->peer_addr.in_addr));
+>> +			ceph_pr_addr(&monc->con.peer_addr.in_addr));
 >>
->> -	dout("ceph_state_change %p state = %lu sk_state = %u\n",
->> +	dout("%s %p state = %lu sk_state = %u\n", __func__,
->>   	     con, con->state, sk->sk_state);
->>
->>   	if (test_bit(CLOSED,&con->state))
->> @@ -200,9 +200,9 @@ static void ceph_state_change(struct sock *sk)
->>
->>   	switch (sk->sk_state) {
->>   	case TCP_CLOSE:
->> -		dout("ceph_state_change TCP_CLOSE\n");
->> +		dout("%s TCP_CLOSE\n", __func__);
->>   	case TCP_CLOSE_WAIT:
->> -		dout("ceph_state_change TCP_CLOSE_WAIT\n");
->> +		dout("%s TCP_CLOSE_WAIT\n", __func__);
->>   		if (test_and_set_bit(SOCK_CLOSED,&con->state) == 0) {
->>   			if (test_bit(CONNECTING,&con->state))
->>   				con->error_msg = "connection failed";
->> @@ -212,7 +212,7 @@ static void ceph_state_change(struct sock *sk)
->>   		}
->>   		break;
->>   	case TCP_ESTABLISHED:
->> -		dout("ceph_state_change TCP_ESTABLISHED\n");
->> +		dout("%s TCP_ESTABLISHED\n", __func__);
->>   		queue_con(con);
->>   		break;
->>   	default:	/* Everything else is uninteresting */
->> @@ -228,9 +228,9 @@ static void set_sock_callbacks(struct socket *sock,
->>   {
->>   	struct sock *sk = sock->sk;
->>   	sk->sk_user_data = con;
->> -	sk->sk_data_ready = ceph_data_ready;
->> -	sk->sk_write_space = ceph_write_space;
->> -	sk->sk_state_change = ceph_state_change;
->> +	sk->sk_data_ready = ceph_sock_data_ready;
->> +	sk->sk_write_space = ceph_sock_write_space;
->> +	sk->sk_state_change = ceph_sock_state_change;
->>   }
->>
->>
+>>   	__close_session(monc);
+>>   	if (!monc->hunting) {
 >> --
 >> 1.7.5.4
 >>
