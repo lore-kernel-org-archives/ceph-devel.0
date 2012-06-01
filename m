@@ -1,36 +1,81 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: SIGSEGV in cephfs-java, but probably in Ceph
-Date: Thu, 31 May 2012 21:49:10 -0700
-Message-ID: <CA2A1C92-866C-404D-ADF1-E2299A197B3B@cs.ucsc.edu>
-References: <CAHwdYF3na4dHqpQmAth+gEKBLeqLKSHAd-6MChgKjRyBrO+Ttw@mail.gmail.com> <CAHwdYF2CF77XnyHG16gi_hPbZ8VNbEzn0XpikKMDdcGWcd2-CQ@mail.gmail.com> <DC393A32-288A-4BF2-B618-9D6E0A5C29B9@cs.ucsc.edu> <05C460A496DC45689D6578B20D699425@inktank.com> <217DCA5E-26E6-4357-96E7-0C9AF4E06071@cs.ucsc.edu> <CAHwdYF00BLvDHDWHXs2CFuLS9AdA+BVNa0YLKHRf9c56eUFhtg@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1257)
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Re: OSD deadlock with cephfs client and OSD on same machine
+Date: Fri, 1 Jun 2012 11:35:37 +0200
+Message-ID: <201206011135.38119.a.ott@m-privacy.de>
+References: <201205290944.33983.a.ott@m-privacy.de> <Pine.LNX.4.64.1205290836350.14433@cobra.newdream.net> <201205300908.56991.a.ott@m-privacy.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-01.cse.ucsc.edu ([128.114.48.32]:54372 "EHLO
-	mail-01.cse.ucsc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755121Ab2FAEtM convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 00:49:12 -0400
-In-Reply-To: <CAHwdYF00BLvDHDWHXs2CFuLS9AdA+BVNa0YLKHRf9c56eUFhtg@mail.gmail.com>
+Received: from www.m-privacy.de ([85.214.237.71]:51026 "EHLO www.m-privacy.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759312Ab2FAJfs convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 05:35:48 -0400
+In-Reply-To: <201205300908.56991.a.ott@m-privacy.de>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nam Dang <namd@de.cs.titech.ac.jp>
-Cc: Greg Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
+On Wednesday 30 May 2012 wrote Amon Ott:
+> On Tuesday 29 May 2012 you wrote:
+> > On Tue, 29 May 2012, Amon Ott wrote:
+> > > Please consider putting out a fat warning at least at build time,=
+ if
+> > > syncfs() is not available, e.g. "No syncfs() syscall, please expe=
+ct a
+> > > deadlock when running osd on non-btrfs together with a local ceph=
+fs
+> > > mount." Even better would be a quick runtime test for missing syn=
+cfs()
+> > > and storage on non-btrfs that spits out a warning, if deadlock is
+> > > possible.
+> >
+> > I think a runtime warning makes more sense; nobody will see the bui=
+ld
+> > time warning (e.g., those installed debs).
+>
+> Yes, fully agreed.
 
-On May 31, 2012, at 9:44 PM, Nam Dang wrote:
+Thanks for the new log lines in master git. The warning without syncfs(=
+)=20
+support could be a bit more clear though - the system is not only slowe=
+r, it=20
+hangs needing a reset and reboot. This is much worse, specially if ceph=
+fs is=20
+permanently broken by bug 1047 afterwards. And I am pretty sure that ou=
+r=20
+systems were not running out of memory, because during our load tests w=
+e=20
+always have several GB of unused memory.
 
-> I pulled the Java lib from https://github.com/noahdesu/ceph/tree/wip-java-cephfs
-> However, I use ceph 0.47.1 installed directly from Ubuntu's repository
-> with apt-get, not the one that I built with the java library. I
-> assumed that since the java lib is just a wrapper.
-> 
->>> There are only two segfaults that I've ever encountered, one in which the C wrappers are used with an unmounted client, and the error Nam is seeing (although they
->>> could be related). I will re-submit an updated patch for the former, which should rule that out as the culprit.
-> 
-> No, this occurs when I call mount(null) with the monitor being taken
-> down. The library should throw an Exception instead,
+After backporting syncfs() support into Debian stable libc6 2.11 and=20
+recompiling Ceph with it, our test cluster is now running with syncfs()=
+=2E
 
-I agree. I'll push changes to the tree soon. Thanks.
+A first two hour load test this morning did not produce any problems, s=
+o I can=20
+say that syncfs() makes it significantly more stable than sync(). We wi=
+ll=20
+make a several day load test soon.
 
-- Noah
+Amon Ott
+--=20
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Am K=F6llnischen Park 1    Fax: +49 30 24342336
+10179 Berlin             http://www.m-privacy.de
+
+Amtsgericht Charlottenburg, HRB 84946
+
+Gesch=E4ftsf=FChrer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
+
+GnuPG-Key-ID: 0x2DD3A649
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
