@@ -1,136 +1,206 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 04/13] libceph: rename socket callbacks
-Date: Thu, 31 May 2012 21:02:31 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1205312101380.2166@cobra.newdream.net>
-References: <4FC673FC.3060004@inktank.com> <4FC6764C.8030503@inktank.com>
+Subject: Re: [PATCH 05/13] libceph: rename kvec_reset and kvec_add functions
+Date: Thu, 31 May 2012 21:02:53 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1205312102480.2166@cobra.newdream.net>
+References: <4FC673FC.3060004@inktank.com> <4FC67655.7030206@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60060 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:60063 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750898Ab2FAECo (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 00:02:44 -0400
-In-Reply-To: <4FC6764C.8030503@inktank.com>
+	with ESMTP id S1751060Ab2FAECy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 00:02:54 -0400
+In-Reply-To: <4FC67655.7030206@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
+Yep
+
 On Wed, 30 May 2012, Alex Elder wrote:
-> Change the names of the three socket callback functions to make it
-> more obvious they're specifically associated with a connection's
-> socket (not the ceph connection that uses it).
+
+> The functions ceph_con_out_kvec_reset() and ceph_con_out_kvec_add()
+> are entirely private functions, so drop the "ceph_" prefix in their
+> name to make them slightly more wieldy.
 > 
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->  net/ceph/messenger.c |   28 ++++++++++++++--------------
->  1 files changed, 14 insertions(+), 14 deletions(-)
+>  net/ceph/messenger.c |   48 ++++++++++++++++++++++++------------------------
+>  1 files changed, 24 insertions(+), 24 deletions(-)
 > 
 > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index fe3c2a1..5ad1f0a 100644
+> index 5ad1f0a..2e9054f 100644
 > --- a/net/ceph/messenger.c
 > +++ b/net/ceph/messenger.c
-> @@ -153,46 +153,46 @@ EXPORT_SYMBOL(ceph_msgr_flush);
+> @@ -484,14 +484,14 @@ static u32 get_global_seq(struct ceph_messenger *msgr,
+> u32 gt)
+>  	return ret;
+>  }
+> 
+> -static void ceph_con_out_kvec_reset(struct ceph_connection *con)
+> +static void con_out_kvec_reset(struct ceph_connection *con)
+>  {
+>  	con->out_kvec_left = 0;
+>  	con->out_kvec_bytes = 0;
+>  	con->out_kvec_cur = &con->out_kvec[0];
+>  }
+> 
+> -static void ceph_con_out_kvec_add(struct ceph_connection *con,
+> +static void con_out_kvec_add(struct ceph_connection *con,
+>  				size_t size, void *data)
+>  {
+>  	int index;
+> @@ -532,7 +532,7 @@ static void prepare_write_message(struct ceph_connection
+> *con)
+>  	struct ceph_msg *m;
+>  	u32 crc;
+> 
+> -	ceph_con_out_kvec_reset(con);
+> +	con_out_kvec_reset(con);
+>  	con->out_kvec_is_msg = true;
+>  	con->out_msg_done = false;
+> 
+> @@ -540,9 +540,9 @@ static void prepare_write_message(struct ceph_connection
+> *con)
+>  	 * TCP packet that's a good thing. */
+>  	if (con->in_seq > con->in_seq_acked) {
+>  		con->in_seq_acked = con->in_seq;
+> -		ceph_con_out_kvec_add(con, sizeof (tag_ack), &tag_ack);
+> +		con_out_kvec_add(con, sizeof (tag_ack), &tag_ack);
+>  		con->out_temp_ack = cpu_to_le64(con->in_seq_acked);
+> -		ceph_con_out_kvec_add(con, sizeof (con->out_temp_ack),
+> +		con_out_kvec_add(con, sizeof (con->out_temp_ack),
+>  			&con->out_temp_ack);
+>  	}
+> 
+> @@ -570,12 +570,12 @@ static void prepare_write_message(struct ceph_connection
+> *con)
+>  	BUG_ON(le32_to_cpu(m->hdr.front_len) != m->front.iov_len);
+> 
+>  	/* tag + hdr + front + middle */
+> -	ceph_con_out_kvec_add(con, sizeof (tag_msg), &tag_msg);
+> -	ceph_con_out_kvec_add(con, sizeof (m->hdr), &m->hdr);
+> -	ceph_con_out_kvec_add(con, m->front.iov_len, m->front.iov_base);
+> +	con_out_kvec_add(con, sizeof (tag_msg), &tag_msg);
+> +	con_out_kvec_add(con, sizeof (m->hdr), &m->hdr);
+> +	con_out_kvec_add(con, m->front.iov_len, m->front.iov_base);
+> 
+>  	if (m->middle)
+> -		ceph_con_out_kvec_add(con, m->middle->vec.iov_len,
+> +		con_out_kvec_add(con, m->middle->vec.iov_len,
+>  			m->middle->vec.iov_base);
+> 
+>  	/* fill in crc (except data pages), footer */
+> @@ -624,12 +624,12 @@ static void prepare_write_ack(struct ceph_connection
+> *con)
+>  	     con->in_seq_acked, con->in_seq);
+>  	con->in_seq_acked = con->in_seq;
+> 
+> -	ceph_con_out_kvec_reset(con);
+> +	con_out_kvec_reset(con);
+> 
+> -	ceph_con_out_kvec_add(con, sizeof (tag_ack), &tag_ack);
+> +	con_out_kvec_add(con, sizeof (tag_ack), &tag_ack);
+> 
+>  	con->out_temp_ack = cpu_to_le64(con->in_seq_acked);
+> -	ceph_con_out_kvec_add(con, sizeof (con->out_temp_ack),
+> +	con_out_kvec_add(con, sizeof (con->out_temp_ack),
+>  				&con->out_temp_ack);
+> 
+>  	con->out_more = 1;  /* more will follow.. eventually.. */
+> @@ -642,8 +642,8 @@ static void prepare_write_ack(struct ceph_connection *con)
+>  static void prepare_write_keepalive(struct ceph_connection *con)
+>  {
+>  	dout("prepare_write_keepalive %p\n", con);
+> -	ceph_con_out_kvec_reset(con);
+> -	ceph_con_out_kvec_add(con, sizeof (tag_keepalive), &tag_keepalive);
+> +	con_out_kvec_reset(con);
+> +	con_out_kvec_add(con, sizeof (tag_keepalive), &tag_keepalive);
+>  	set_bit(WRITE_PENDING, &con->state);
+>  }
+> 
+> @@ -688,8 +688,8 @@ static struct ceph_auth_handshake
+> *get_connect_authorizer(struct ceph_connection
 >   */
-> 
->  /* data available on socket, or listen socket received a connect */
-> -static void ceph_data_ready(struct sock *sk, int count_unused)
-> +static void ceph_sock_data_ready(struct sock *sk, int count_unused)
+>  static void prepare_write_banner(struct ceph_connection *con)
 >  {
->  	struct ceph_connection *con = sk->sk_user_data;
+> -	ceph_con_out_kvec_add(con, strlen(CEPH_BANNER), CEPH_BANNER);
+> -	ceph_con_out_kvec_add(con, sizeof (con->msgr->my_enc_addr),
+> +	con_out_kvec_add(con, strlen(CEPH_BANNER), CEPH_BANNER);
+> +	con_out_kvec_add(con, sizeof (con->msgr->my_enc_addr),
+>  					&con->msgr->my_enc_addr);
 > 
->  	if (sk->sk_state != TCP_CLOSE_WAIT) {
-> -		dout("ceph_data_ready on %p state = %lu, queueing work\n",
-> +		dout("%s on %p state = %lu, queueing work\n", __func__,
-
-I think it's marginally better to do
-
-		dout(__func__ " on %p state = %lu, queueing work\n",
-
-so that the concatenation happens at compile-time instead of runtime.
-
-Otherwise, looks good!
-
-Reviewed-by: Sage Weil <sage@inktank.com>
-
->  		     con, con->state);
->  		queue_con(con);
->  	}
->  }
+>  	con->out_more = 0;
+> @@ -736,10 +736,10 @@ static int prepare_write_connect(struct ceph_connection
+> *con)
+>  	con->out_connect.authorizer_len = auth ?
+>  		cpu_to_le32(auth->authorizer_buf_len) : 0;
 > 
->  /* socket has buffer space for writing */
-> -static void ceph_write_space(struct sock *sk)
-> +static void ceph_sock_write_space(struct sock *sk)
->  {
->  	struct ceph_connection *con = sk->sk_user_data;
+> -	ceph_con_out_kvec_add(con, sizeof (con->out_connect),
+> +	con_out_kvec_add(con, sizeof (con->out_connect),
+>  					&con->out_connect);
+>  	if (auth && auth->authorizer_buf_len)
+> -		ceph_con_out_kvec_add(con, auth->authorizer_buf_len,
+> +		con_out_kvec_add(con, auth->authorizer_buf_len,
+>  					auth->authorizer_buf);
 > 
->  	/* only queue to workqueue if there is data we want to write,
->  	 * and there is sufficient space in the socket buffer to accept
-> -	 * more data.  clear SOCK_NOSPACE so that ceph_write_space()
-> +	 * more data.  clear SOCK_NOSPACE so that ceph_sock_write_space()
->  	 * doesn't get called again until try_write() fills the socket
->  	 * buffer. See net/ipv4/tcp_input.c:tcp_check_space()
->  	 * and net/core/stream.c:sk_stream_write_space().
->  	 */
->  	if (test_bit(WRITE_PENDING, &con->state)) {
->  		if (sk_stream_wspace(sk) >= sk_stream_min_wspace(sk)) {
-> -			dout("ceph_write_space %p queueing write work\n",
-> con);
-> +			dout("%s %p queueing write work\n", __func__, con);
->  			clear_bit(SOCK_NOSPACE, &sk->sk_socket->flags);
->  			queue_con(con);
+>  	con->out_more = 0;
+> @@ -933,7 +933,7 @@ static int write_partial_msg_pages(struct ceph_connection
+> *con)
+>  	/* prepare and queue up footer, too */
+>  	if (!do_datacrc)
+>  		con->out_msg->footer.flags |= CEPH_MSG_FOOTER_NOCRC;
+> -	ceph_con_out_kvec_reset(con);
+> +	con_out_kvec_reset(con);
+>  	prepare_write_message_footer(con);
+>  	ret = 1;
+>  out:
+> @@ -1396,7 +1396,7 @@ static int process_connect(struct ceph_connection *con)
+>  			return -1;
 >  		}
->  	} else {
-> -		dout("ceph_write_space %p nothing to write\n", con);
-> +		dout("%s %p nothing to write\n", __func__, con);
->  	}
->  }
+>  		con->auth_retry = 1;
+> -		ceph_con_out_kvec_reset(con);
+> +		con_out_kvec_reset(con);
+>  		ret = prepare_write_connect(con);
+>  		if (ret < 0)
+>  			return ret;
+> @@ -1417,7 +1417,7 @@ static int process_connect(struct ceph_connection *con)
+>  		       ENTITY_NAME(con->peer_name),
+>  		       ceph_pr_addr(&con->peer_addr.in_addr));
+>  		reset_connection(con);
+> -		ceph_con_out_kvec_reset(con);
+> +		con_out_kvec_reset(con);
+>  		ret = prepare_write_connect(con);
+>  		if (ret < 0)
+>  			return ret;
+> @@ -1443,7 +1443,7 @@ static int process_connect(struct ceph_connection *con)
+>  		     le32_to_cpu(con->out_connect.connect_seq),
+>  		     le32_to_cpu(con->in_connect.connect_seq));
+>  		con->connect_seq = le32_to_cpu(con->in_connect.connect_seq);
+> -		ceph_con_out_kvec_reset(con);
+> +		con_out_kvec_reset(con);
+>  		ret = prepare_write_connect(con);
+>  		if (ret < 0)
+>  			return ret;
+> @@ -1460,7 +1460,7 @@ static int process_connect(struct ceph_connection *con)
+>  		     le32_to_cpu(con->in_connect.global_seq));
+>  		get_global_seq(con->msgr,
+>  			       le32_to_cpu(con->in_connect.global_seq));
+> -		ceph_con_out_kvec_reset(con);
+> +		con_out_kvec_reset(con);
+>  		ret = prepare_write_connect(con);
+>  		if (ret < 0)
+>  			return ret;
+> @@ -1867,7 +1867,7 @@ more:
 > 
->  /* socket's state has changed */
-> -static void ceph_state_change(struct sock *sk)
-> +static void ceph_sock_state_change(struct sock *sk)
->  {
->  	struct ceph_connection *con = sk->sk_user_data;
-> 
-> -	dout("ceph_state_change %p state = %lu sk_state = %u\n",
-> +	dout("%s %p state = %lu sk_state = %u\n", __func__,
->  	     con, con->state, sk->sk_state);
-> 
->  	if (test_bit(CLOSED, &con->state))
-> @@ -200,9 +200,9 @@ static void ceph_state_change(struct sock *sk)
-> 
->  	switch (sk->sk_state) {
->  	case TCP_CLOSE:
-> -		dout("ceph_state_change TCP_CLOSE\n");
-> +		dout("%s TCP_CLOSE\n", __func__);
->  	case TCP_CLOSE_WAIT:
-> -		dout("ceph_state_change TCP_CLOSE_WAIT\n");
-> +		dout("%s TCP_CLOSE_WAIT\n", __func__);
->  		if (test_and_set_bit(SOCK_CLOSED, &con->state) == 0) {
->  			if (test_bit(CONNECTING, &con->state))
->  				con->error_msg = "connection failed";
-> @@ -212,7 +212,7 @@ static void ceph_state_change(struct sock *sk)
->  		}
->  		break;
->  	case TCP_ESTABLISHED:
-> -		dout("ceph_state_change TCP_ESTABLISHED\n");
-> +		dout("%s TCP_ESTABLISHED\n", __func__);
->  		queue_con(con);
->  		break;
->  	default:	/* Everything else is uninteresting */
-> @@ -228,9 +228,9 @@ static void set_sock_callbacks(struct socket *sock,
->  {
->  	struct sock *sk = sock->sk;
->  	sk->sk_user_data = con;
-> -	sk->sk_data_ready = ceph_data_ready;
-> -	sk->sk_write_space = ceph_write_space;
-> -	sk->sk_state_change = ceph_state_change;
-> +	sk->sk_data_ready = ceph_sock_data_ready;
-> +	sk->sk_write_space = ceph_sock_write_space;
-> +	sk->sk_state_change = ceph_sock_state_change;
->  }
-> 
-> 
+>  	/* open the socket first? */
+>  	if (con->sock == NULL) {
+> -		ceph_con_out_kvec_reset(con);
+> +		con_out_kvec_reset(con);
+>  		prepare_write_banner(con);
+>  		ret = prepare_write_connect(con);
+>  		if (ret < 0)
 > -- 
 > 1.7.5.4
 > 
