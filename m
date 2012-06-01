@@ -1,74 +1,47 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: rbd command : is it possible to pass authkey in argument ?
-Date: Fri, 01 Jun 2012 15:36:33 +0200 (CEST)
-Message-ID: <99c07e74-1098-4d45-acb0-1a412f75439e@mailpro>
-References: <CADvuQRFSCJH5yyuUMK_QpnTW60xBXaPtuYujARjyxD+8=NgjYA@mail.gmail.com>
+From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Subject: Re: "rbd rm image" slow with big images ?
+Date: Fri, 01 Jun 2012 15:51:19 +0200
+Message-ID: <2839159.qIikQGmnXF@pc10>
+References: <b4c574f6-49bf-4d36-b8f2-526bcccb4c71@mailpro> <4FC7B528.30609@widodh.nl> <Pine.LNX.4.64.1205311118150.28422@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:33544 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759581Ab2FANhA convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 09:37:00 -0400
-In-Reply-To: <CADvuQRFSCJH5yyuUMK_QpnTW60xBXaPtuYujARjyxD+8=NgjYA@mail.gmail.com>
+Received: from unknownsite.de ([62.48.69.106]:55535 "EHLO hartes-hannover.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759921Ab2FANv1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 1 Jun 2012 09:51:27 -0400
+In-Reply-To: <Pine.LNX.4.64.1205311118150.28422@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Tommi,
-I was looking for a way to pass a keyfile, just found it
+Am Donnerstag, 31. Mai 2012, 11:19:44 schrieben Sie:
+> On Thu, 31 May 2012, Wido den Hollander wrote:
+> > Hi,
+> > 
+> > > Is it the normal behaviour ? Maybe some xfs tuning could help ?
+> > 
+> > It's in the nature of RBD.
+> 
+> Yes.
+> 
+> That said, the current implementation is also stupid: it's doing a single
+> io at a time.  #2256 (next sprint) will parallelize this to make it go
+> much faster (probably an order of magnitude?).
 
---keyfile  (both rbd and qemu drive option)
+Will it speed up copy operations as well? Those are a lot more important in 
+practice... A delete operation I can usually just fire off and leave running 
+in the background, but if I'm running a copy operation, there's usually 
+something else waiting (like starting a virtual server that's waiting for its 
+disk) that cannot proceed until the copy is actually finished.
 
+On another note, it looks to me (correct me if I'm wrong) like rbd copy 
+operations always involve copying all the data objects from the source volume 
+to the machine on which the rbd command is running, and then back to the 
+cluster, even if that machine isn't even part of the cluster. Are there any 
+plans to streamline this?
 
-Better indeed ;)
-
-
-
------ Mail original -----=20
-
-De: "Tommi Virtanen" <tv@inktank.com>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Mercredi 30 Mai 2012 19:40:46=20
-Objet: Re: rbd command : is it possible to pass authkey in argument ?=20
-
-On Wed, May 30, 2012 at 2:15 AM, Alexandre DERUMIER <aderumier@odiso.co=
-m> wrote:=20
-> Is it possible to pass authkey as argument in rbd command line ? (I c=
-an do in with qemu-rbd drive option)=20
-
-I see you got an answer for your actual question. I wanted to take a=20
-different angle.=20
-
-You should really avoid putting secrets on command lines, or in=20
-process environment. Those are readable to all local users. This is=20
-why I advocate keyring files.=20
-
-Alternatively, with qemu, the monitor command mechanism they have=20
-would let you add the drives, before starting up the vm, without the=20
-secrets being visible to others.=20
-
-
-
---=20
-
---=20
-
-
-
-
-	Alexandre D erumier=20
-Ing=C3=A9nieur Syst=C3=A8me=20
-=46ixe : 03 20 68 88 90=20
-=46ax : 03 20 68 90 81=20
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
-12 rue Marivaux 75002 Paris - France=20
-=09
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards,
+	Guido
