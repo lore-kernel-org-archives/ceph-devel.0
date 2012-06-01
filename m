@@ -1,238 +1,154 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 09/13] libceph: start tracking connection socket state
-Date: Fri, 01 Jun 2012 07:15:31 -0500
-Message-ID: <4FC8B263.4060703@inktank.com>
-References: <4FC673FC.3060004@inktank.com> <4FC6766B.1090307@inktank.com> <Pine.LNX.4.64.1205312127490.2166@cobra.newdream.net>
+Subject: Re: [PATCH 07/13] libceph: embed ceph connection structure in mon_client
+Date: Fri, 01 Jun 2012 08:30:56 -0500
+Message-ID: <4FC8C410.3080703@inktank.com>
+References: <4FC673FC.3060004@inktank.com> <4FC67662.2060005@inktank.com> <Pine.LNX.4.64.1205312108540.2166@cobra.newdream.net> <4FC8B19D.2080204@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:43939 "EHLO
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:44558 "EHLO
 	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759511Ab2FAMP2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 08:15:28 -0400
-Received: by gglu4 with SMTP id u4so1651124ggl.19
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Jun 2012 05:15:27 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1205312127490.2166@cobra.newdream.net>
+	with ESMTP id S1759743Ab2FANa6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 09:30:58 -0400
+Received: by gglu4 with SMTP id u4so1714428ggl.19
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Jun 2012 06:30:58 -0700 (PDT)
+In-Reply-To: <4FC8B19D.2080204@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 05/31/2012 11:28 PM, Sage Weil wrote:
-> On Wed, 30 May 2012, Alex Elder wrote:
->> Start explicitly keeping track of the state of a ceph connection's
->> socket, separate from the state of the connection itself.  Create
->> placeholder functions to encapsulate the state transitions.
->>
->>      --------
->>      | NEW* |  transient initial state
->>      --------
->>          | con_sock_state_init()
->>          v
->>      ----------
->>      | CLOSED |  initialized, but no socket (and no
->>      ----------  TCP connection)
->>       ^      \
->>       |       \ con_sock_state_connecting()
->>       |        ----------------------
->>       |                              \
->>       + con_sock_state_closed()       \
->>       |\                               \
->>       | \                               \
->>       |  -----------                     \
->>       |  | CLOSING |  socket event;       \
->>       |  -----------  await close          \
->>       |       ^                            |
->>       |       |                            |
->>       |       + con_sock_state_closing()   |
->>       |      / \                           |
->>       |     /   ---------------            |
->>       |    /                   \           v
->>       |   /                    --------------
->>       |  /    -----------------| CONNECTING |  socket created, TCP
->>       |  |   /                 --------------  connect initiated
->>       |  |   | con_sock_state_connected()
->>       |  |   v
->>      -------------
->>      | CONNECTED |  TCP connection established
->>      -------------
->
-> Can we put this beautiful pictures in the header next to the states?
+On 06/01/2012 07:12 AM, Alex Elder wrote:
+> On 05/31/2012 11:24 PM, Sage Weil wrote:
+>> On Wed, 30 May 2012, Alex Elder wrote:
+>>> A monitor client has a pointer to a ceph connection structure in it.
+>>> This is the only one of the three ceph client types that do it this
+>>> way; the OSD and MDS clients embed the connection into their main
+>>> structures. There is always exactly one ceph connection for a
+>>> monitor client, so there is no need to allocate it separate from the
+>>> monitor client structure.
+>>>
+>>> So switch the ceph_mon_client structure to embed its
+>>> ceph_connection structure.
+>>>
+>>> Signed-off-by: Alex Elder<elder@inktank.com>
 
-I can be quite the ASCII artist.  Yes, I will add this, when I update
-the state definitions with better names and numbers.
+. . .
+
+>>> /* authentication */
+>>> monc->auth = ceph_auth_init(cl->options->name,
+>>> cl->options->key);
+>>> if (IS_ERR(monc->auth)) {
+>>> err = PTR_ERR(monc->auth);
+>>> - goto out_con;
+>>> + goto out_monmap;
+>>> }
+>>> monc->auth->want_keys =
+>>> CEPH_ENTITY_TYPE_AUTH | CEPH_ENTITY_TYPE_MON |
+>>> @@ -824,8 +821,6 @@ out_subscribe_ack:
+>>> ceph_msg_put(monc->m_subscribe_ack);
+>>> out_auth:
+>>> ceph_auth_destroy(monc->auth);
+>>> -out_con:
+>>> - monc->con->ops->put(monc->con);
+>>
+>> AH!
+>>
+>> This reminds me, these connections need to be refcounted. There's a
+>> ->get() and ->put() op defined so that you can refcount the containing
+>> structure. That means that this patch needs to alo change
+
+Looking at this again.  Why do they need to be refcounted?  If
+this patch is correct in embedding the connection into the
+containing structure, then the last reference to the containing
+structure is coincident with with the last reference to the
+connection.  And the other connections are already embedded into
+other containing structures.
+
+So--again assuming it's OK to embed the connection--I would rather
+see the ->get and ->put methods for the connection go away entirely
+and have the containing structure take care of its own damned ref
+counting...
+
+This actually gets into another thing I wanted to do anyway (while
+digging through raw memory trying to figure out what's going on).
+I want every ceph_message to point back to the connection it is
+associated with.  That way there's no need for the OSD (for example)
+to keep track of the connection--a revoke is simply an operation
+on the message, which would already know the connection from which
+it is being revoked.
+
+If you think the above approach is good I'll gladly do it now
+rather than later.  I think it might eliminate the need for
+any need to reference count the connections.
+
+Anyway, when I'm done (if I ever finish!) the state of the connection
+will tell you whether any legitimate uses of a connection remain.
 
 					-Alex
 
-> Reviewed-by: Sage Weil<sage@inktank.com>
+>> static const struct ceph_connection_operations mon_con_ops = {
+>> .get = ceph_con_get,
+>> .put = ceph_con_put,
+>>
+>> in mon_client.c. Hopefully the mon_client itself is refcounted, *or* we
+>> can ensure that it won't go away before the msgr workqueue is drained and
+>> the get/put ops can turn to no-ops.
+>
+>
+> Earlier I looked at the ref counting stuff a bit and stopped myself
+> from going off on that tangent. But it didn't look like it was used
+> consistently and made a note to myself to revisit it.
+>
+>> Also: when poking around, I noticed that ceph_con_get() and put() are
+>> called directly from osd_client.c... that's a bug! Those connections have
+>> a get and put op defined that twiddles the containing ceph_osd struct's
+>> ref count.
+>>
+>> I pushed several patches to your latest (wip-messenger-2) branch that fix
+>> these issues. Compile tested only! The first should probably be folded
+>> into this one, the others follow.
+>
+> I'll look at your patches and incorporate them as appropriate. But at
+> the moment I don't see them; whenever you are back online again perhaps
+> you'll send me a link.
+>
+> -Alex
 >
 >>
->> Make the socket state an atomic variable, reinforcing that it's a
->> distinct transtion with no possible "intermediate/both" states.
->> This is almost certainly overkill at this point, though the
->> transitions into CONNECTED and CLOSING state do get called via
->> socket callback (the rest of the transitions occur with the
->> connection mutex held).  We can back out the atomicity later.
->>
->> Signed-off-by: Alex Elder<elder@inktank.com>
->> ---
->>   include/linux/ceph/messenger.h |    8 ++++-
->>   net/ceph/messenger.c           |   63
->> ++++++++++++++++++++++++++++++++++++++++
->>   2 files changed, 69 insertions(+), 2 deletions(-)
->>
->> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
->> index 920235e..5e852f4 100644
->> --- a/include/linux/ceph/messenger.h
->> +++ b/include/linux/ceph/messenger.h
->> @@ -137,14 +137,18 @@ struct ceph_connection {
->>   	const struct ceph_connection_operations *ops;
->>
->>   	struct ceph_messenger *msgr;
->> +
->> +	atomic_t sock_state;
->>   	struct socket *sock;
->> +	struct ceph_entity_addr peer_addr; /* peer address */
->> +	struct ceph_entity_addr peer_addr_for_me;
->> +
->>   	unsigned long flags;
->>   	unsigned long state;
->>   	const char *error_msg;  /* error message, if any */
->>
->> -	struct ceph_entity_addr peer_addr; /* peer address */
->>   	struct ceph_entity_name peer_name; /* peer name */
->> -	struct ceph_entity_addr peer_addr_for_me;
->> +
->>   	unsigned peer_features;
->>   	u32 connect_seq;      /* identify the most recent connection
->>   				 attempt for this connection, client */
->> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->> index 29055df..7e11b07 100644
->> --- a/net/ceph/messenger.c
->> +++ b/net/ceph/messenger.c
->> @@ -29,6 +29,14 @@
->>    * the sender.
->>    */
->>
->> +/* State values for ceph_connection->sock_state; NEW is assumed to be 0 */
->> +
->> +#define CON_SOCK_STATE_NEW		0	/* ->  CLOSED */
->> +#define CON_SOCK_STATE_CLOSED		1	/* ->  CONNECTING */
->> +#define CON_SOCK_STATE_CONNECTING	2	/* ->  CONNECTED or ->  CLOSING
->> */
->> +#define CON_SOCK_STATE_CONNECTED	3	/* ->  CLOSING or ->  CLOSED */
->> +#define CON_SOCK_STATE_CLOSING		4	/* ->  CLOSED */
->> +
->>   /* static tag bytes (protocol control messages) */
->>   static char tag_msg = CEPH_MSGR_TAG_MSG;
->>   static char tag_ack = CEPH_MSGR_TAG_ACK;
->> @@ -147,6 +155,54 @@ void ceph_msgr_flush(void)
->>   }
->>   EXPORT_SYMBOL(ceph_msgr_flush);
->>
->> +/* Connection socket state transition functions */
->> +
->> +static void con_sock_state_init(struct ceph_connection *con)
->> +{
->> +	int old_state;
->> +
->> +	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CLOSED);
->> +	if (WARN_ON(old_state != CON_SOCK_STATE_NEW))
->> +		printk("%s: unexpected old state %d\n", __func__, old_state);
->> +}
->> +
->> +static void con_sock_state_connecting(struct ceph_connection *con)
->> +{
->> +	int old_state;
->> +
->> +	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CONNECTING);
->> +	if (WARN_ON(old_state != CON_SOCK_STATE_CLOSED))
->> +		printk("%s: unexpected old state %d\n", __func__, old_state);
->> +}
->> +
->> +static void con_sock_state_connected(struct ceph_connection *con)
->> +{
->> +	int old_state;
->> +
->> +	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CONNECTED);
->> +	if (WARN_ON(old_state != CON_SOCK_STATE_CONNECTING))
->> +		printk("%s: unexpected old state %d\n", __func__, old_state);
->> +}
->> +
->> +static void con_sock_state_closing(struct ceph_connection *con)
->> +{
->> +	int old_state;
->> +
->> +	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CLOSING);
->> +	if (WARN_ON(old_state != CON_SOCK_STATE_CONNECTING&&
->> +			old_state != CON_SOCK_STATE_CONNECTED))
->> +		printk("%s: unexpected old state %d\n", __func__, old_state);
->> +}
->> +
->> +static void con_sock_state_closed(struct ceph_connection *con)
->> +{
->> +	int old_state;
->> +
->> +	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CLOSED);
->> +	if (WARN_ON(old_state != CON_SOCK_STATE_CONNECTED&&
->> +			old_state != CON_SOCK_STATE_CLOSING))
->> +		printk("%s: unexpected old state %d\n", __func__, old_state);
->> +}
->>
->>   /*
->>    * socket callback functions
->> @@ -203,6 +259,7 @@ static void ceph_sock_state_change(struct sock *sk)
->>   		dout("%s TCP_CLOSE\n", __func__);
->>   	case TCP_CLOSE_WAIT:
->>   		dout("%s TCP_CLOSE_WAIT\n", __func__);
->> +		con_sock_state_closing(con);
->>   		if (test_and_set_bit(SOCK_CLOSED,&con->flags) == 0) {
->>   			if (test_bit(CONNECTING,&con->state))
->>   				con->error_msg = "connection failed";
->> @@ -213,6 +270,7 @@ static void ceph_sock_state_change(struct sock *sk)
->>   		break;
->>   	case TCP_ESTABLISHED:
->>   		dout("%s TCP_ESTABLISHED\n", __func__);
->> +		con_sock_state_connected(con);
->>   		queue_con(con);
->>   		break;
->>   	default:	/* Everything else is uninteresting */
->> @@ -277,6 +335,7 @@ static int ceph_tcp_connect(struct ceph_connection *con)
->>   		return ret;
->>   	}
->>   	con->sock = sock;
->> +	con_sock_state_connecting(con);
->>
->>   	return 0;
->>   }
->> @@ -341,6 +400,7 @@ static int con_close_socket(struct ceph_connection *con)
->>   	rc = con->sock->ops->shutdown(con->sock, SHUT_RDWR);
->>   	sock_release(con->sock);
->>   	con->sock = NULL;
->> +	con_sock_state_closed(con);
->>   	return rc;
->>   }
->>
->> @@ -460,6 +520,9 @@ void ceph_con_init(struct ceph_messenger *msgr, struct
->> ceph_connection *con)
->>   	memset(con, 0, sizeof(*con));
->>   	atomic_set(&con->nref, 1);
->>   	con->msgr = msgr;
->> +
->> +	con_sock_state_init(con);
->> +
->>   	mutex_init(&con->mutex);
->>   	INIT_LIST_HEAD(&con->out_queue);
->>   	INIT_LIST_HEAD(&con->out_sent);
->> --
->> 1.7.5.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+>>> out_monmap:
+>>> kfree(monc->monmap);
+>>> out:
+>>> @@ -841,9 +836,7 @@ void ceph_monc_stop(struct ceph_mon_client *monc)
+>>> mutex_lock(&monc->mutex);
+>>> __close_session(monc);
+>>>
+>>> - monc->con->private = NULL;
+>>> - monc->con->ops->put(monc->con);
+>>> - monc->con = NULL;
+>>> + monc->con.private = NULL;
+>>>
+>>> mutex_unlock(&monc->mutex);
+>>>
+>>> @@ -1021,7 +1014,7 @@ static void mon_fault(struct ceph_connection *con)
+>>> if (!monc->hunting)
+>>> pr_info("mon%d %s session lost, "
+>>> "hunting for new mon\n", monc->cur_mon,
+>>> - ceph_pr_addr(&monc->con->peer_addr.in_addr));
+>>> + ceph_pr_addr(&monc->con.peer_addr.in_addr));
+>>>
+>>> __close_session(monc);
+>>> if (!monc->hunting) {
+>>> --
+>>> 1.7.5.4
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
 >>
 >
 
