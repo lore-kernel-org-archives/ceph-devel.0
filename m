@@ -1,47 +1,174 @@
-From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Subject: Re: "rbd rm image" slow with big images ?
-Date: Fri, 01 Jun 2012 15:51:19 +0200
-Message-ID: <2839159.qIikQGmnXF@pc10>
-References: <b4c574f6-49bf-4d36-b8f2-526bcccb4c71@mailpro> <4FC7B528.30609@widodh.nl> <Pine.LNX.4.64.1205311118150.28422@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 07/13] libceph: embed ceph connection structure in
+ mon_client
+Date: Fri, 1 Jun 2012 09:20:05 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206010918020.9007@cobra.newdream.net>
+References: <4FC673FC.3060004@inktank.com> <4FC67662.2060005@inktank.com>
+ <Pine.LNX.4.64.1205312108540.2166@cobra.newdream.net> <4FC8B19D.2080204@inktank.com>
+ <4FC8C410.3080703@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from unknownsite.de ([62.48.69.106]:55535 "EHLO hartes-hannover.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759921Ab2FANv1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 1 Jun 2012 09:51:27 -0400
-In-Reply-To: <Pine.LNX.4.64.1205311118150.28422@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:42874 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964978Ab2FAQUK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Jun 2012 12:20:10 -0400
+In-Reply-To: <4FC8C410.3080703@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-Am Donnerstag, 31. Mai 2012, 11:19:44 schrieben Sie:
-> On Thu, 31 May 2012, Wido den Hollander wrote:
-> > Hi,
-> > 
-> > > Is it the normal behaviour ? Maybe some xfs tuning could help ?
-> > 
-> > It's in the nature of RBD.
+On Fri, 1 Jun 2012, Alex Elder wrote:
+> On 06/01/2012 07:12 AM, Alex Elder wrote:
+> > On 05/31/2012 11:24 PM, Sage Weil wrote:
+> > > On Wed, 30 May 2012, Alex Elder wrote:
+> > > > A monitor client has a pointer to a ceph connection structure in it.
+> > > > This is the only one of the three ceph client types that do it this
+> > > > way; the OSD and MDS clients embed the connection into their main
+> > > > structures. There is always exactly one ceph connection for a
+> > > > monitor client, so there is no need to allocate it separate from the
+> > > > monitor client structure.
+> > > > 
+> > > > So switch the ceph_mon_client structure to embed its
+> > > > ceph_connection structure.
+> > > > 
+> > > > Signed-off-by: Alex Elder<elder@inktank.com>
 > 
-> Yes.
+> . . .
 > 
-> That said, the current implementation is also stupid: it's doing a single
-> io at a time.  #2256 (next sprint) will parallelize this to make it go
-> much faster (probably an order of magnitude?).
+> > > > /* authentication */
+> > > > monc->auth = ceph_auth_init(cl->options->name,
+> > > > cl->options->key);
+> > > > if (IS_ERR(monc->auth)) {
+> > > > err = PTR_ERR(monc->auth);
+> > > > - goto out_con;
+> > > > + goto out_monmap;
+> > > > }
+> > > > monc->auth->want_keys =
+> > > > CEPH_ENTITY_TYPE_AUTH | CEPH_ENTITY_TYPE_MON |
+> > > > @@ -824,8 +821,6 @@ out_subscribe_ack:
+> > > > ceph_msg_put(monc->m_subscribe_ack);
+> > > > out_auth:
+> > > > ceph_auth_destroy(monc->auth);
+> > > > -out_con:
+> > > > - monc->con->ops->put(monc->con);
+> > > 
+> > > AH!
+> > > 
+> > > This reminds me, these connections need to be refcounted. There's a
+> > > ->get() and ->put() op defined so that you can refcount the containing
+> > > structure. That means that this patch needs to alo change
+> 
+> Looking at this again.  Why do they need to be refcounted?  If
+> this patch is correct in embedding the connection into the
+> containing structure, then the last reference to the containing
+> structure is coincident with with the last reference to the
+> connection.  And the other connections are already embedded into
+> other containing structures.
+> 
+> So--again assuming it's OK to embed the connection--I would rather
+> see the ->get and ->put methods for the connection go away entirely
+> and have the containing structure take care of its own damned ref
+> counting...
 
-Will it speed up copy operations as well? Those are a lot more important in 
-practice... A delete operation I can usually just fire off and leave running 
-in the background, but if I'm running a copy operation, there's usually 
-something else waiting (like starting a virtual server that's waiting for its 
-disk) that cannot proceed until the copy is actually finished.
+The problem is that socket events queue work, which can take a while, and 
+race with, say, osd_client getting an osdmap and dropping it's 
+struct ceph_osd.  The ->get and ->put ops just twiddle the containing 
+struct's refcount, in that case, so the con_work will find the (now 
+closed) ceph_connection and do nothing...
 
-On another note, it looks to me (correct me if I'm wrong) like rbd copy 
-operations always involve copying all the data objects from the source volume 
-to the machine on which the rbd command is running, and then back to the 
-cluster, even if that machine isn't even part of the cluster. Are there any 
-plans to streamline this?
+> This actually gets into another thing I wanted to do anyway (while
+> digging through raw memory trying to figure out what's going on).
+> I want every ceph_message to point back to the connection it is
+> associated with.  That way there's no need for the OSD (for example)
+> to keep track of the connection--a revoke is simply an operation
+> on the message, which would already know the connection from which
+> it is being revoked.
+> 
+> If you think the above approach is good I'll gladly do it now
+> rather than later.  I think it might eliminate the need for
+> any need to reference count the connections.
 
-Regards,
-	Guido
+That sounds reasonable.. but i'm pretty sure the con refcounts can't go 
+away :)
+
+sage
+
+
+> 
+> Anyway, when I'm done (if I ever finish!) the state of the connection
+> will tell you whether any legitimate uses of a connection remain.
+> 
+> 					-Alex
+> 
+> > > static const struct ceph_connection_operations mon_con_ops = {
+> > > .get = ceph_con_get,
+> > > .put = ceph_con_put,
+> > > 
+> > > in mon_client.c. Hopefully the mon_client itself is refcounted, *or* we
+> > > can ensure that it won't go away before the msgr workqueue is drained and
+> > > the get/put ops can turn to no-ops.
+> > 
+> > 
+> > Earlier I looked at the ref counting stuff a bit and stopped myself
+> > from going off on that tangent. But it didn't look like it was used
+> > consistently and made a note to myself to revisit it.
+> > 
+> > > Also: when poking around, I noticed that ceph_con_get() and put() are
+> > > called directly from osd_client.c... that's a bug! Those connections have
+> > > a get and put op defined that twiddles the containing ceph_osd struct's
+> > > ref count.
+> > > 
+> > > I pushed several patches to your latest (wip-messenger-2) branch that fix
+> > > these issues. Compile tested only! The first should probably be folded
+> > > into this one, the others follow.
+> > 
+> > I'll look at your patches and incorporate them as appropriate. But at
+> > the moment I don't see them; whenever you are back online again perhaps
+> > you'll send me a link.
+> > 
+> > -Alex
+> > 
+> > > 
+> > > > out_monmap:
+> > > > kfree(monc->monmap);
+> > > > out:
+> > > > @@ -841,9 +836,7 @@ void ceph_monc_stop(struct ceph_mon_client *monc)
+> > > > mutex_lock(&monc->mutex);
+> > > > __close_session(monc);
+> > > > 
+> > > > - monc->con->private = NULL;
+> > > > - monc->con->ops->put(monc->con);
+> > > > - monc->con = NULL;
+> > > > + monc->con.private = NULL;
+> > > > 
+> > > > mutex_unlock(&monc->mutex);
+> > > > 
+> > > > @@ -1021,7 +1014,7 @@ static void mon_fault(struct ceph_connection *con)
+> > > > if (!monc->hunting)
+> > > > pr_info("mon%d %s session lost, "
+> > > > "hunting for new mon\n", monc->cur_mon,
+> > > > - ceph_pr_addr(&monc->con->peer_addr.in_addr));
+> > > > + ceph_pr_addr(&monc->con.peer_addr.in_addr));
+> > > > 
+> > > > __close_session(monc);
+> > > > if (!monc->hunting) {
+> > > > --
+> > > > 1.7.5.4
+> > > > 
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at http://vger.kernel.org/majordomo-info.html
+> > > > 
+> > > > 
+> > > 
+> > 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
