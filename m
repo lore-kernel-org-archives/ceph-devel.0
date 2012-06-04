@@ -1,37 +1,26 @@
-From: Mark Nelson <mark.nelson@inktank.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
 Subject: Re: Infiniband 40GB
-Date: Mon, 04 Jun 2012 10:34:55 -0500
-Message-ID: <4FCCD59F.9060009@inktank.com>
-References: <09037cad-1a2a-4adb-bedb-91fbdeb5ad79@mailpro> <4FCCB7E9.9080100@inktank.com> <A40092167CCE446784EFDBC498493457@inktank.com>
+Date: Mon, 04 Jun 2012 17:42:05 +0200
+Message-ID: <4FCCD74D.2030309@profihost.ag>
+References: <4FCB1C0A.4050504@profihost.ag> <CADdPHGvgE7ai6yjzsKmL9bfqEpyx+qxQaUKoOOYjiT4ZCJ-A0g@mail.gmail.com> <4FCC7E34.7040005@univ-nantes.fr> <201206041147.22993.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:62461 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753993Ab2FDPfH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jun 2012 11:35:07 -0400
-Received: by obbtb18 with SMTP id tb18so7343434obb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Jun 2012 08:35:06 -0700 (PDT)
-In-Reply-To: <A40092167CCE446784EFDBC498493457@inktank.com>
+Received: from mail.profihost.ag ([85.158.179.208]:54222 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752176Ab2FDPmI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jun 2012 11:42:08 -0400
+In-Reply-To: <201206041147.22993.a.ott@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: ceph-devel@vger.kernel.org, Alexandre DERUMIER <aderumier@odiso.com>, Amon Ott <a.ott@m-privacy.de>, Yann Dupont <Yann.Dupont@univ-nantes.fr>
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: Yann Dupont <Yann.Dupont@univ-nantes.fr>, ceph-devel@vger.kernel.org
 
-On 06/04/2012 10:11 AM, Gregory Farnum wrote:
-> On Monday, June 4, 2012 at 6:28 AM, Mark Nelson wrote:
->> Hi Alexandre,
->>
->> A lot of our testing is on Ubuntu right now. I'm using the ceph and
->> kernel debs from ceph.gitbuilder.com (http://ceph.gitbuilder.com) for my tests. Post some results to
->> the list once you get your cluster setup!
->>
->
-> I think he means gitbuilder.ceph.com. ;)
-> -Greg
->
+Hi Amon,
 
-Doh!  This is why I need caffeine before writing emails.  Thanks Greg. :)
+thanks for your backported patch. At least it doesn't cleanly apply to 
+debian squeeze stable as it wants a glic 2.12 in Versions.def but Debian 
+is only at 2.11? Do you use another patch too?
 
-Mark
+Stefan
