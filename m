@@ -1,119 +1,130 @@
-From: Noah Watkins <jayhawk@soe.ucsc.edu>
-Subject: Re: SIGSEGV in cephfs-java, but probably in Ceph
-Date: Sun, 3 Jun 2012 17:01:12 -0700
-Message-ID: <CAPrxi599c-oSE-1MJN5dGSPib5wjc0TmQxiqYroHWF67JEJAVA@mail.gmail.com>
-References: <CAHwdYF3na4dHqpQmAth+gEKBLeqLKSHAd-6MChgKjRyBrO+Ttw@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: ceph fs
+Date: Sun, 3 Jun 2012 17:42:15 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206031734380.13750@cobra.newdream.net>
+References: <fce756f2-a2b0-4c5b-9c61-5ea34b384e20@mail.linserv.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:52898 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755270Ab2FDABN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Jun 2012 20:01:13 -0400
-Received: by yenm10 with SMTP id m10so2679072yen.19
-        for <ceph-devel@vger.kernel.org>; Sun, 03 Jun 2012 17:01:13 -0700 (PDT)
-In-Reply-To: <CAHwdYF3na4dHqpQmAth+gEKBLeqLKSHAd-6MChgKjRyBrO+Ttw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:59234 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755383Ab2FDAmQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Jun 2012 20:42:16 -0400
+In-Reply-To: <fce756f2-a2b0-4c5b-9c61-5ea34b384e20@mail.linserv.se>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nam Dang <namd@de.cs.titech.ac.jp>
+To: Martin Wilderoth <martin.wilderoth@linserv.se>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Nam,
+Hi Martin,
 
-I pushed the following changes to my branch. It'd be great if you
-could give it a shot:
+On Sat, 2 Jun 2012, Martin Wilderoth wrote:
 
-  git://github.com/noahdesu/ceph.git wip-java-cephfs
+> I have some problems with my ceph filesystem. I have a folder that i 
+> cant remove.
+> 
+> I.E.
+> root@lintx2:/mnt/backuppc/pc# ls -la toberemoved/ 
+> total 0
+> drwxr-x--- 1 backuppc backuppc    28804802 May 15 13:29 .
+> drwxr-x--- 1 backuppc backuppc 29421083732 Jun  1 15:16 ..
+> 
+> root@lintx2:/mnt/backuppc/pc# rm -rf toberemoved 
+> rm: cannot remove `toberemoved': Directory not empty
 
-- Throws CephNotMountedException when the client is not mounted
-- Adds synchronization to the native code
+This is a bug in the internal rstats accounting that the rmdir is relying 
+on to verify the directory is empty.  Right now, the workaround is to just 
+rename that directory out of the way somewhere.  This will be at the top 
+of the list of MDS bugs we'll look at when we shift focus to the fs in the 
+next month or two.
 
-Thanks,
-Noah
+http://tracker.newdream.net/issues/2494
 
-On Thu, May 31, 2012 at 6:08 AM, Nam Dang <namd@de.cs.titech.ac.jp> wro=
-te:
->
-> Dear all,
->
-> I am running a small benchmark for Ceph with multithreading and
-> cephfs-java API.
-> I encountered this issue even when I use only two threads, and I used
-> only open file and creating directory operations.
->
-> The piece of code is simply:
-> String parent =3D filePath.substring(0, filePath.lastIndexOf('/'));
-> mount.mkdirs(parent, 0755); // create parents if the path does not ex=
-ist
-> int fileID =3D mount.open(filePath, CephConstants.O_CREAT, 0666); //
-> open the file
->
-> Each thread mounts its own ceph mounting point (using
-> mount.mount(null)) and I don't have any interlocking mechanism across
-> the threads at all.
-> It appears the error is SIGSEGV sent off by libcepfs. The message is =
-as
-> follows:
->
-> #
-> # A fatal error has been detected by the Java Runtime Environment:
-> #
-> # =C2=A0SIGSEGV (0xb) at pc=3D0x00007ff6af978d39, pid=3D14063, tid=3D=
-140697400411904
-> #
-> # JRE version: 6.0_26-b03
-> # Java VM: Java HotSpot(TM) 64-Bit Server VM (20.1-b02 mixed mode
-> linux-amd64 compressed oops)
-> # Problematic frame:
-> # C =C2=A0[libcephfs.so.1+0x139d39] =C2=A0Mutex::Lock(bool)+0x9
-> #
-> # An error report file with more information is saved as:
-> # /home/namd/cephBench/hs_err_pid14063.log
-> #
-> # If you would like to submit a bug report, please visit:
-> # =C2=A0 http://java.sun.com/webapps/bugreport/crash.jsp
-> # The crash happened outside the Java Virtual Machine in native code.
-> # See problematic frame for where to report the bug.
->
-> I have also attached the hs_err_pid14063.log for your reference.
-> An excerpt from the file:
->
-> Stack: [0x00007ff6aa828000,0x00007ff6aa929000],
-> sp=3D0x00007ff6aa9274f0, =C2=A0free space=3D1021k
-> Native frames: (J=3Dcompiled Java code, j=3Dinterpreted, Vv=3DVM code=
-, C=3Dnative
-> code)
-> C =C2=A0[libcephfs.so.1+0x139d39] =C2=A0Mutex::Lock(bool)+0x9
->
-> Java frames: (J=3Dcompiled Java code, j=3Dinterpreted, Vv=3DVM code)
-> j =C2=A0com.ceph.fs.CephMount.native_ceph_mkdirs(JLjava/lang/String;I=
-)I+0
-> j =C2=A0com.ceph.fs.CephMount.mkdirs(Ljava/lang/String;I)V+6
-> j
-> =C2=A0Benchmark$CreateFileStats.executeOp(IILjava/lang/String;Lcom/ce=
-ph/fs/CephMount;)J+37
-> j =C2=A0Benchmark$StatsDaemon.benchmarkOne()V+22
-> j =C2=A0Benchmark$StatsDaemon.run()V+26
-> v =C2=A0~StubRoutines::call_stub
->
-> So I think the probably may be due to the locking mechanism of ceph
-> internally. But Dr. Weil previously answered my email stating that th=
-e
-> mounting is done independently so multithreading should not lead to
-> this problem. If there is anyway to work around this, please let me
-> know.
->
-> Best regards,
->
-> Nam Dang
-> Email: namd@de.cs.titech.ac.jp
-> HP: (+81) 080-4465-1587
-> Yokota Lab, Dept. of Computer Science
-> Tokyo Institute of Technology
-> Tokyo, Japan
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I also have a folder that when I do ls i get the following message
+> 
+> [ 1828.569091] ceph: ceph_add_cap: couldn't find snap realm 100
+
+This too.  
+
+In both cases, if you are able to reproduce the bug reliably, that is 
+incredibly useful information that will make it much easier to fix the 
+bug.  Please include that info in the tracker, if you can!
+
+For example, on the second bug,
+
+http://tracker.newdream.net/issues/2506
+
+- what snapshots did you create?
+- what operations were you doing that triggered the bug?
+- (ideally) how do you reproduce it from a fresh fs or fresh mount?
+
+Thanks!  Sorry we can't be more help now, but we'll get to this soon...
+
+sage
+
+
+> [ 1828.569105] ------------[ cut here ]------------
+> [ 1828.569121] WARNING: at /build/buildd-linux-2.6_3.2.17-1~bpo60+1-amd64-CJo7Ex/linux-2.6-3.2.17/debian/build/source_amd64_none/fs/ceph/caps.c:590 ceph_add_cap+0x38e/0x49e [ceph]()
+> [ 1828.569139] Modules linked in: cryptd aes_x86_64 aes_generic cbc ceph libceph crc32c libcrc32c evdev snd_pcm snd_timer snd soundcore snd_page_alloc pcspkr ext3 jbd mbcache xen_netfront xen_blkfront
+> [ 1828.569182] Pid: 18, comm: kworker/0:1 Tainted: G        W    3.2.0-0.bpo.2-amd64 #1
+> [ 1828.569193] Call Trace:
+> [ 1828.569207]  [<ffffffff810497ec>] ? warn_slowpath_common+0x78/0x8c
+> [ 1828.569221]  [<ffffffffa00db647>] ? ceph_add_cap+0x38e/0x49e [ceph]
+> [ 1828.569233]  [<ffffffffa00d220a>] ? fill_inode+0x4eb/0x602 [ceph]
+> [ 1828.569244]  [<ffffffffa00d331b>] ? ceph_dentry_lru_touch+0x2a/0x68 [ceph]
+> [ 1828.569258]  [<ffffffffa00d317d>] ? ceph_readdir_prepopulate+0x2de/0x375 [ceph]
+> [ 1828.569271]  [<ffffffffa00e2d3f>] ? dispatch+0xa35/0xef2 [ceph]
+> [ 1828.569286]  [<ffffffffa00ae841>] ? ceph_tcp_recvmsg+0x43/0x4f [libceph]
+> [ 1828.569297]  [<ffffffffa00b0821>] ? con_work+0x1070/0x13b8 [libceph]
+> [ 1828.569308]  [<ffffffff81044580>] ? update_curr+0xbc/0x160
+> [ 1828.569319]  [<ffffffffa00af7b1>] ? try_write+0xbe1/0xbe1 [libceph]
+> [ 1828.569332]  [<ffffffff8105f8bb>] ? process_one_work+0x1cc/0x2ea
+> [ 1828.569342]  [<ffffffff8105fb06>] ? worker_thread+0x12d/0x247
+> [ 1828.569353]  [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea
+> [ 1828.569361]  [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea
+> [ 1828.569372]  [<ffffffff81063311>] ? kthread+0x7a/0x82
+> [ 1828.569384]  [<ffffffff8136bb34>] ? kernel_thread_helper+0x4/0x10
+> [ 1828.569395]  [<ffffffff81369bf3>] ? int_ret_from_sys_call+0x7/0x1b
+> [ 1828.569406]  [<ffffffff813646fc>] ? retint_restore_args+0x5/0x6
+> [ 1828.569417]  [<ffffffff8136bb30>] ? gs_change+0x13/0x13
+> [ 1828.569423] ---[ end trace 98770cddb79a6a55 ]---
+> [ 1828.569433] ceph: ceph_add_cap: couldn't find snap realm 100
+> [ 1828.569442] ------------[ cut here ]------------
+> [ 1828.569452] WARNING: at /build/buildd-linux-2.6_3.2.17-1~bpo60+1-amd64-CJo7Ex/linux-2.6-3.2.17/debian/build/source_amd64_none/fs/ceph/caps.c:590 ceph_add_cap+0x38e/0x49e [ceph]()
+> [ 1828.569467] Modules linked in: cryptd aes_x86_64 aes_generic cbc ceph libceph crc32c libcrc32c evdev snd_pcm snd_timer snd soundcore snd_page_alloc pcspkr ext3 jbd mbcache xen_netfront xen_blkfront
+> [ 1828.569500] Pid: 18, comm: kworker/0:1 Tainted: G        W    3.2.0-0.bpo.2-amd64 #1
+> [ 1828.569508] Call Trace:
+> [ 1828.569513]  [<ffffffff810497ec>] ? warn_slowpath_common+0x78/0x8c
+> [ 1828.569523]  [<ffffffffa00db647>] ? ceph_add_cap+0x38e/0x49e [ceph]
+> [ 1828.569533]  [<ffffffffa00d220a>] ? fill_inode+0x4eb/0x602 [ceph]
+> [ 1828.569543]  [<ffffffffa00d331b>] ? ceph_dentry_lru_touch+0x2a/0x68 [ceph]
+> [ 1828.569552]  [<ffffffffa00d317d>] ? ceph_readdir_prepopulate+0x2de/0x375 [ceph]
+> [ 1828.569563]  [<ffffffffa00e2d3f>] ? dispatch+0xa35/0xef2 [ceph]
+> [ 1828.569573]  [<ffffffffa00ae841>] ? ceph_tcp_recvmsg+0x43/0x4f [libceph]
+> [ 1828.569583]  [<ffffffffa00b0821>] ? con_work+0x1070/0x13b8 [libceph]
+> [ 1828.569590]  [<ffffffff81044580>] ? update_curr+0xbc/0x160
+> [ 1828.569599]  [<ffffffffa00af7b1>] ? try_write+0xbe1/0xbe1 [libceph]
+> [ 1828.569607]  [<ffffffff8105f8bb>] ? process_one_work+0x1cc/0x2ea
+> [ 1828.569615]  [<ffffffff8105fb06>] ? worker_thread+0x12d/0x247
+> [ 1828.569622]  [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea
+> [ 1828.569630]  [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea
+> [ 1828.569637]  [<ffffffff81063311>] ? kthread+0x7a/0x82
+> [ 1828.569644]  [<ffffffff8136bb34>] ? kernel_thread_helper+0x4/0x10
+> [ 1828.569652]  [<ffffffff81369bf3>] ? int_ret_from_sys_call+0x7/0x1b
+> [ 1828.569660]  [<ffffffff813646fc>] ? retint_restore_args+0x5/0x6
+> [ 1828.569667]  [<ffffffff8136bb30>] ? gs_change+0x13/0x13
+> [ 1828.569673] ---[ end trace 98770cddb79a6a56 ]---
+> Then i see some folders
+> 
+> Is there a way to remove this error directories or a reason / bug why I get this messages.
+> 
+> The folder that I try to remove had a similar problem as the one above, I manages to remove
+> all visible files.
+> 
+>  /Regards Martin
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
