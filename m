@@ -1,57 +1,38 @@
-From: Hannes Reinecke <hare@suse.de>
-Subject: Re: Infiniband 40GB
-Date: Mon, 04 Jun 2012 10:02:10 +0200
-Message-ID: <4FCC6B82.9080609@suse.de>
-References: <4FCB1C0A.4050504@profihost.ag> <4FCB5EED.30909@inktank.com> <4FCC5431.6070002@suse.de> <4FCC6328.3020606@profihost.ag> <4FCC6644.8010106@suse.de> <4FCC6963.7090202@profihost.ag>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Subject: [PATCH] rbd: Fix ceph_snap_context size calculation
+Date: Mon,  4 Jun 2012 16:11:09 +0800
+Message-ID: <1338797469-23314-1-git-send-email-zheng.z.yan@intel.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:51113 "EHLO mx2.suse.de"
+Received: from mga02.intel.com ([134.134.136.20]:63893 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751398Ab2FDICL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 4 Jun 2012 04:02:11 -0400
-In-Reply-To: <4FCC6963.7090202@profihost.ag>
+	id S1753406Ab2FDILL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 4 Jun 2012 04:11:11 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 06/04/2012 09:53 AM, Stefan Priebe - Profihost AG wrote:
-> Am 04.06.2012 09:39, schrieb Hannes Reinecke:
->> On 06/04/2012 09:26 AM, Stefan Priebe - Profihost AG wrote:
->>> Am 04.06.2012 08:22, schrieb Hannes Reinecke:
->>>> Hehe.
->>>> Good luck with that.
->>>>
->>>> We've tried on 10GigE with _disastrous_ results.
->>>> Up to the point where 1GigE was actually _faster_.
->>>
->>> So you mean you've tried 10GBE or 10GB ipoib with Infiniband?
->=20
-> Could you please answer this question too? Thx.
->=20
-This was plain 10GigE, ie TCP/IP. Not infiniband, I'm afraid.
+From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-However, given that our problems have not been related to the actual
-transport I'd be very much surprised if they would not occur on
-Infiniband.
+ceph_snap_context->snaps is an u64 array
 
-And I would _definitely_ like to hear if someone managed to get any
-decent speed (notably write speed) on fast interconnects.
-There's always a chance we've messed things up and were just
-measuring our crap setup ...
+Signed-off-by: Zheng Yan <zheng.z.yan@intel.com>
+---
+ drivers/block/rbd.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Cheers,
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 65665c9..8b9c173 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -499,7 +499,7 @@ static int rbd_header_from_disk(struct rbd_image_header *header,
+ 			 / sizeof (*ondisk))
+ 		return -EINVAL;
+ 	header->snapc = kmalloc(sizeof(struct ceph_snap_context) +
+-				snap_count * sizeof (*ondisk),
++				snap_count * sizeof(u64),
+ 				gfp_flags);
+ 	if (!header->snapc)
+ 		return -ENOMEM;
+-- 
+1.7.7.6
 
-Hannes
---=20
-Dr. Hannes Reinecke		      zSeries & Storage
-hare@suse.de			      +49 911 74053 688
-SUSE LINUX Products GmbH, Maxfeldstr. 5, 90409 N=FCrnberg
-GF: J. Hawn, J. Guild, F. Imend=F6rffer, HRB 16746 (AG N=FCrnberg)
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
