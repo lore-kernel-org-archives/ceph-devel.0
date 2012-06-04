@@ -1,67 +1,40 @@
 From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
 Subject: Re: Infiniband 40GB
-Date: Mon, 04 Jun 2012 11:53:48 +0200
-Message-ID: <4FCC85AC.209@univ-nantes.fr>
-References: <d1ba3477-a5ed-488a-8785-2a37f4301ffc@mailpro>
+Date: Mon, 04 Jun 2012 11:58:47 +0200
+Message-ID: <4FCC86D7.1020203@univ-nantes.fr>
+References: <4FCB1C0A.4050504@profihost.ag> <CADdPHGvgE7ai6yjzsKmL9bfqEpyx+qxQaUKoOOYjiT4ZCJ-A0g@mail.gmail.com> <4FCC7E34.7040005@univ-nantes.fr> <201206041147.22993.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
+Content-Type: text/plain; charset=ISO-8859-1;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-loi.cpub.univ-nantes.fr ([193.52.103.112]:54647 "EHLO
+Received: from smtptls1-loi.cpub.univ-nantes.fr ([193.52.103.112]:57793 "EHLO
 	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1756666Ab2FDJxx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jun 2012 05:53:53 -0400
-In-Reply-To: <d1ba3477-a5ed-488a-8785-2a37f4301ffc@mailpro>
+	with ESMTP id S932124Ab2FDJ6y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jun 2012 05:58:54 -0400
+In-Reply-To: <201206041147.22993.a.ott@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Hannes Reinecke <hare@suse.de>, Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org, Stefan Majer <stefan.majer@gmail.com>
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: ceph-devel@vger.kernel.org
 
-Le 04/06/2012 11:35, Alexandre DERUMIER a =C3=A9crit :
-> Hi,
-> about this:
->>> Turning off Virtualisation extension in BIOS. Don't know why, but i=
-t
->>> gaves us crappy performance. We usually put it on, because we use K=
-VM a
->>> lot. In our case, OSD are in bare metal and disabling virtualisatio=
-n
->>> extension gives us a very big boost.
->>> It may be a BIOS bug in our machines (DELL M610).
+Le 04/06/2012 11:47, Amon Ott a =E9crit :
+> even libc6 in Debian experimental has syncfs() support.
 >
-> It could be related to iommu, if you pass intel_iommu=3Don in grub.
-> I have already had this kind of problem.
->
-> When intel_iommu=3Don, Linux (completely unrelated to KVM) adds a new=
- level
-> of protection which didn't exist without an IOMMU - the network card,=
- which
-> without an IOMMU could write (via DMA) to any memory location, now is
-> not allowed - the card can only write to memory locates which the OS
-> wanted it to write. Theoretically, this can protect the OS against
-> various kinds of attacks. But what happens now is that every time tha=
-t
-> Linux passes a new buffer to the card, it needs to change the IOMMU
-> mappings. This noticably slows down I/O, unfortunately.
->
->
+> Also see thread "OSD deadlock with cephfs client and OSD on same mach=
+ine"
 
-Infortunately, this is not the case. The intel card supports it, but=20
-DELL M160 don't.
-And I just checked, ou linux command line don't include intel_iommu=3Do=
-n.
+Great , thanks for explanation.
 
-BTW, it seems that turning on virtualization on bios kills performance=20
-on integrated ixgbe driver. Sourceforge one seems less affected. Our=20
-tests were circa kernel 3.2 , it may have changed since.
+=2E.. lots of tests to do this afternoon :) I need to convert my OSD wi=
+th=20
+xfs, benchmark with standard libc, then convert libc with your patch &=20
+retest.
 
-Cheers,
-
-
-
+Thanks,
+cheers,
 --=20
-Yann Dupont - Service IRTS, DSI Universit=C3=A9 de Nantes
+Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
 Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
 
 
