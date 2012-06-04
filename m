@@ -1,57 +1,87 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: SIGSEGV in cephfs-java, but probably in Ceph
-Date: Mon, 4 Jun 2012 13:57:38 -0700
-Message-ID: <36FA810BCDCA43DDA8A20A4A99BFAFF8@inktank.com>
-References: <CAHwdYF3na4dHqpQmAth+gEKBLeqLKSHAd-6MChgKjRyBrO+Ttw@mail.gmail.com>
- <CAHwdYF2CF77XnyHG16gi_hPbZ8VNbEzn0XpikKMDdcGWcd2-CQ@mail.gmail.com>
- <DC393A32-288A-4BF2-B618-9D6E0A5C29B9@cs.ucsc.edu>
- <05C460A496DC45689D6578B20D699425@inktank.com>
- <217DCA5E-26E6-4357-96E7-0C9AF4E06071@cs.ucsc.edu>
- <9C7F8B20FB3B49508B9FBEE725AB34EE@inktank.com>
- <CAPrxi59++wux__pY1M0qu+=YcVWAbkbLVWuxa95=ZLo8R64XiA@mail.gmail.com>
+From: udit agarwal <fzdudit@gmail.com>
+Subject: Re: iozone test crashed on ceph
+Date: Mon, 4 Jun 2012 21:52:29 +0000 (UTC)
+Message-ID: <loom.20120604T235042-446@post.gmane.org>
+References: <loom.20120601T025228-787@post.gmane.org> <0F43C46A9543420FBEB081A55ACD1FB0@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:60360 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754093Ab2FDU6d (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jun 2012 16:58:33 -0400
-Received: by dady13 with SMTP id y13so6350366dad.19
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Jun 2012 13:58:33 -0700 (PDT)
-In-Reply-To: <CAPrxi59++wux__pY1M0qu+=YcVWAbkbLVWuxa95=ZLo8R64XiA@mail.gmail.com>
-Content-Disposition: inline
+Received: from plane.gmane.org ([80.91.229.3]:59587 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1760946Ab2FDVxA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 4 Jun 2012 17:53:00 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1SbfCh-00084d-Q3
+	for ceph-devel@vger.kernel.org; Mon, 04 Jun 2012 23:52:53 +0200
+Received: from mike-alien.esc.auckland.ac.nz ([130.216.209.155])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Jun 2012 23:52:47 +0200
+Received: from fzdudit by mike-alien.esc.auckland.ac.nz with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Jun 2012 23:52:47 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@soe.ucsc.edu>
-Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, Nam Dang <namd@de.cs.titech.ac.jp>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Monday, June 4, 2012 at 1:47 PM, Noah Watkins wrote:
-> On Mon, Jun 4, 2012 at 1:17 PM, Greg Farnum <greg@inktank.com (mailto:greg@inktank.com)> wrote:
-> 
-> > I'm not quite sure what you mean here. Ceph is definitely using pthread threading and mutexes, but I don't see how the use of a different threading library can break pthread mutexes (which are just using the kernel futex stuff, AFAIK).
-> > But I admit I'm not real good at handling those sorts of interactions, so maybe I'm missing something?
-> 
-> 
-> 
-> The basic idea was that threads in Java did not map 1:1 with kernel
-> threads (think co-routines), which would break a lot of stuff,
-> especially futex. Looking at some documentation, old JVMs had
-> something called Green Threads, but have now been abandoned in favor
-> of native threads. So maybe this theory is now irrelevant, and
-> evidence seems to suggest you're right and Java is using native
-> threads.
+I ran the 5g iozone test on my ceph system and I got the following output on the
+terminal: 
 
-Gotcha, that makes sense.
- 
-> 
-> > > The RADOS Java wrappers suffered from an interaction between the JVM and RADOS client signal handlers, in which either the JVM or RADOS would replace the handlers for the other (not sure which order). Anyway, the solution was to link in the JVM libjsig.so signal chaining library. This might be the same thing we are seeing here, but I'm betting it is the first theory I mentioned.
-> 
-> > Hmm. I think that's an issue we've run into but I thought it got fixed for librados. Perhaps I'm mixing that up with libceph, or just pulling past scenarios out of thin air. It never manifested as Mutex count bugs, though!
-> 
-> I haven't tested the Rados wrappers in a while. I've never had to link
-> in the signal chaining library for libcephfs.
-> 
-> I wonder if the Mutex::lock(bool) being printed out is a red herring... 
-Well, it's a SIGSEGV. So my guess is that's the frame that happens to be going outside its allowed bounds, probably because it's the first frame actually accessing the memory off of a bad (probably NULL) pointer. For instance, if it not only failed to mount the client, but even to create the context object? 
+hp1:/media/ceph # /opt/iozone/bin/iozone -Rab 20120519_1641_results_5g.xls -R -i
+0 -i 2 -f /media/ceph/iozone.file -s 5g
+	Iozone: Performance Test of File I/O
+	        Version $Revision: 3.408 $
+		Compiled for 64 bit mode.
+		Build: linux-AMD64 
+
+	Contributors:William Norcott, Don Capps, Isom Crawford, Kirby Collins
+	             Al Slater, Scott Rhine, Mike Wisner, Ken Goss
+	             Steve Landherr, Brad Smith, Mark Kelly, Dr. Alain CYR,
+	             Randy Dunlap, Mark Montague, Dan Million, Gavin Brebner,
+	             Jean-Marc Zucconi, Jeff Blomberg, Benny Halevy, Dave Boone,
+	             Erik Habbinga, Kris Strecker, Walter Wong, Joshua Root,
+	             Fabrice Bacchella, Zhenghua Xue, Qin Li, Darren Sawyer.
+	             Ben England.
+
+	Run began: Mon Jun  4 20:27:31 2012
+
+	Excel chart generation enabled
+	Auto Mode
+	Excel chart generation enabled
+	File size set to 5242880 KB
+	Command line used: /opt/iozone/bin/iozone -Rab 20120519_1641_results_5g.xls -R
+-i 0 -i 2 -f /media/ceph/iozone.file -s 5g
+	Output is in Kbytes/sec
+	Time Resolution = 0.000001 seconds.
+	Processor cache size set to 1024 Kbytes.
+	Processor cache line size set to 32 bytes.
+	File stride size set to 17 * record size.
+                                                            random  random   
+bkwd   record   stride                                   
+              KB  reclen   write rewrite    read    reread    read   write   
+read  rewrite     read   fwrite frewrite   fread  freread
+         5242880       4   34256   32763                  Killed
+
+Message from syslogd@hp1 at Jun  4 22:19:03 ...
+ kernel:[ 7627.132065] Oops: 0000 [#1] PREEMPT SMP 
+
+Message from syslogd@hp1 at Jun  4 22:19:03 ...
+ kernel:[ 7627.132190] Stack:
+
+Message from syslogd@hp1 at Jun  4 22:19:03 ...
+ kernel:[ 7627.132213] Call Trace:
+
+Message from syslogd@hp1 at Jun  4 22:19:03 ...
+ kernel:[ 7627.132356] Code: ab c0 fe ff ff 0f 84 85 00 00 00 31 f6 48 89 df e8
+03 d7 ff ff 4c 89 ef 48 89 44 24 28 e8 f6 91 ed e0 48 8b 44 24 28 48 8b 50 08 
+
+Message from syslogd@hp1 at Jun  4 22:19:03 ...
+ kernel:[ 7627.132426] CR2: 000000000000000a
+
+Can anybody help me with this??
+
+--Udit Agarwal
+
 
