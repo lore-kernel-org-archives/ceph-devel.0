@@ -1,155 +1,154 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: Infiniband 40GB
-Date: Mon, 04 Jun 2012 13:40:05 +0200 (CEST)
-Message-ID: <70f814ae-c265-4778-bd6c-7dbbe6f9952f@mailpro>
-References: <201206041147.22993.a.ott@m-privacy.de>
+From: Martin Wilderoth <martin.wilderoth@linserv.se>
+Subject: Re: ceph fs
+Date: Mon, 04 Jun 2012 07:58:24 -0400 (EDT)
+Message-ID: <1fa5b338-9cff-443d-97b1-d64f551d483e@mail.linserv.se>
+References: <Pine.LNX.4.64.1206031734380.13750@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:45922 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753001Ab2FDLke convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jun 2012 07:40:34 -0400
-In-Reply-To: <201206041147.22993.a.ott@m-privacy.de>
+Received: from 195-67-7-55.customer.telia.com ([195.67.7.55]:37009 "EHLO
+	mail.linserv.se" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1752563Ab2FDL6q (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jun 2012 07:58:46 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.linserv.se (Postfix) with ESMTP id 18444E7F2
+	for <ceph-devel@vger.kernel.org>; Mon,  4 Jun 2012 07:58:25 -0400 (EDT)
+Received: from mail.linserv.se ([127.0.0.1])
+	by localhost (mail.linserv.se [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id fDNHKdE+XEOy for <ceph-devel@vger.kernel.org>;
+	Mon,  4 Jun 2012 07:58:24 -0400 (EDT)
+Received: from mail.linserv.se (mail.linserv.se [195.67.7.55])
+	by mail.linserv.se (Postfix) with ESMTP id 1C353E7EE
+	for <ceph-devel@vger.kernel.org>; Mon,  4 Jun 2012 07:58:24 -0400 (EDT)
+In-Reply-To: <Pine.LNX.4.64.1206031734380.13750@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>
-Cc: ceph-devel@vger.kernel.org, Yann Dupont <Yann.Dupont@univ-nantes.fr>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,=20
+> Hi Martin, 
+>
+> On Sat, 2 Jun 2012, Martin Wilderoth wrote: 
+>
+> > I have some problems with my ceph filesystem. I have a folder that i 
+> > cant remove. 
+> > 
+> > I.E. 
+> > root@lintx2:/mnt/backuppc/pc# ls -la toberemoved/ 
+> > total 0 
+> > drwxr-x--- 1 backuppc backuppc 28804802 May 15 13:29 . 
+> > drwxr-x--- 1 backuppc backuppc 29421083732 Jun 1 15:16 .. 
+> > 
+> > root@lintx2:/mnt/backuppc/pc# rm -rf toberemoved 
+> > rm: cannot remove `toberemoved': Directory not empty 
+>
+> This is a bug in the internal rstats accounting that the rmdir is relying 
+> on to verify the directory is empty. Right now, the workaround is to just 
+> rename that directory out of the way somewhere. This will be at the top 
+> of the list of MDS bugs we'll look at when we shift focus to the fs in the 
+> next month or two. 
+>
+I used the workaround. And will wait for the update later.
+ 
+> http://tracker.newdream.net/issues/2494 
+>
+> > I also have a folder that when I do ls i get the following message 
+> > 
+> > [ 1828.569091] ceph: ceph_add_cap: couldn't find snap realm 100 
+>
+> This too. 
+>
+> In both cases, if you are able to reproduce the bug reliably, that is 
+> incredibly useful information that will make it much easier to fix the 
+> bug. Please include that info in the tracker, if you can! 
+>
+> For example, on the second bug, 
+>
+> http://tracker.newdream.net/issues/2506 
+>
+> - what snapshots did you create? 
+> - what operations were you doing that triggered the bug? 
+> - (ideally) how do you reproduce it from a fresh fs or fresh mount?
 
-I'm currently doing some tests with xfs, debian wheezy with standard li=
-bc6 (2.11.3-3) and 3.2 kernel.
+The error always appear when I do ls in this folder. I didn't do any snapshot that i'm aware of.
 
-I'm doing some iostats(3 nodes with 5 osd), and I see constant writes t=
-o disks.(as the datas are flushed each second from journal to disk).
+I have been running backuppc in this folder. It uses a lot of hardlinks in the filesystem.
+It is this senario that was creating the error.
 
-Journal is big enough (20GB tmpfs) to handle 30s of write.
+Not sure how easy it is to repeat exactly the same error. But running backuppc against a ceph share
+is always creating some errors in my system. I have beet trying with a fresh folder. 
 
-Do you think it's related to the missing syncfs() support ?
+I will also do some testing with ceph-fuse mount as this didn't generate the ls error.
 
--Alexandre
-
-
------ Mail original -----=20
-
-De: "Amon Ott" <a.ott@m-privacy.de>=20
-=C3=80: "Yann Dupont" <Yann.Dupont@univ-nantes.fr>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Lundi 4 Juin 2012 11:47:22=20
-Objet: Re: Infiniband 40GB=20
-
-On Monday 04 June 2012 you wrote:=20
-> Le 04/06/2012 10:23, Stefan Majer a =C3=A9crit :=20
-> > Hi Hannes,=20
-> >=20
-> > our production environment is running on 10GB infrastructure. We ha=
-d a=20
-> > lot of troubles till we got to where we are today.=20
-> > We use Intel X520 D2 cards on our OSD=C2=B4s and nexus switch=20
-> > infrastructure. All other cards we where testing failed horrible.=20
->=20
-> we have Intel Corporation 82599EB 10 Gigabit Dual Port Backplane=20
-> Connection (rev 01)... Don't know the 'commercial name'. ixgbe driver=
-=2E=20
->=20
-> > Some of the problems we encountered have been:=20
-> > - page allocation failures in the ixgbe driver --> fixed in upstrea=
-m=20
-> > - problems with jumbo frames, we had to disable tso, gro, lro -- >=20
-> > this is the most obscure thing=20
-> > - various tuning via sysctl in the net.tcp and net.ipv4 area --> th=
-is=20
-> > was also the outcome of stefan=C2=B4s benchmarking odysee.=20
->=20
-> some tuning we made :=20
->=20
-> -> Turning off Virtualisation extension in BIOS. Don't know why, but =
-it=20
-> gaves us crappy performance. We usually put it on, because we use KVM=
- a=20
-> lot. In our case, OSD are in bare metal and disabling virtualisation=20
-> extension gives us a very big boost.=20
-> It may be a BIOS bug in our machines (DELL M610).=20
->=20
-> -> One of my colleague played with receive flow steeting ; the intel=20
-> card supports multi queue, so it seems we can gain a little with it :=
-=20
->=20
-> !/bin/sh=20
->=20
-> for x in $(seq 0 23); do echo FFFFFFFF >=20
-> /sys/class/net/eth2/queues/rx-${x}/rps_cpus; done=20
-> echo 16384 > /proc/sys/net/core/rps_sock_flow_entries=20
-> for x in $(seq 0 23); do echo 16384 >=20
-> /sys/class/net/eth2/queues/rx-${x}/rps_flow_cnt; done=20
->=20
-> > But after all this we a quite happy actully and are only limited by=
-=20
-> > the speed of the drives (2TB SATA).=20
-> > The fsync is a fdatasync in fact which is available in newer glibc.=
- If=20
-> > you dont use btrfs (we use xfs) you need to use a recent glibc with=
-=20
-> > fdatasync support.=20
->=20
-> Does it may explain why we see loosy performance with xfs right now ?=
-=20
-> That the main reason we're stuck with btrfs for the moment.=20
->=20
-> we're using debian 'stable' : libc is=20
-> libc6 2.11.3-3=20
-> probably too old ?=20
-
-One reason for performance problems with that libc6 version is missing=20
-syncfs() support. I backported a patch for 2.13, originally by Andreas=20
-Schwab, schwab@redhat.com, to Debian stable code. Patch is attached.=20
-
-Copy the patch to eglibc's debian/patches/, add to debian/patches/serie=
-s,=20
-rebuild eglibc packages (including libc6) with dpkg-buildpackage, insta=
-ll new=20
-libc6-dev, rebuild ceph packages against it, install and retry. AFAIK, =
-not=20
-even libc6 in Debian experimental has syncfs() support.=20
-
-Also see thread "OSD deadlock with cephfs client and OSD on same machin=
-e"=20
-
-Amon Ott=20
---=20
-Dr. Amon Ott=20
-m-privacy GmbH Tel: +49 30 24342334=20
-Am K=C3=B6llnischen Park 1 Fax: +49 30 24342336=20
-10179 Berlin http://www.m-privacy.de=20
-
-Amtsgericht Charlottenburg, HRB 84946=20
-
-Gesch=C3=A4ftsf=C3=BChrer:=20
-Dipl.-Kfm. Holger Maczkowsky,=20
-Roman Maczkowsky=20
-
-GnuPG-Key-ID: 0x2DD3A649=20
+Best Regards Martin  
+>
+> Thanks! Sorry we can't be more help now, but we'll get to this soon... 
+>
+> sage 
 
 
-
---=20
-
---=20
-
-
-
-
-	Alexandre D erumier=20
-Ing=C3=A9nieur Syst=C3=A8me=20
-=46ixe : 03 20 68 88 90=20
-=46ax : 03 20 68 90 81=20
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
-12 rue Marivaux 75002 Paris - France=20
-=09
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> [ 1828.569105] ------------[ cut here ]------------ 
+> [ 1828.569121] WARNING: at /build/buildd-linux-2.6_3.2.17-1~bpo60+1-amd64-CJo7Ex/linux-2.6-3.2.17/debian/build/source_amd64_none/fs/ceph/caps.c:590 ceph_add_cap+0x38e/0x49e [ceph]() 
+> [ 1828.569139] Modules linked in: cryptd aes_x86_64 aes_generic cbc ceph libceph crc32c libcrc32c evdev snd_pcm snd_timer snd soundcore snd_page_alloc pcspkr ext3 jbd mbcache xen_netfront xen_blkfront 
+> [ 1828.569182] Pid: 18, comm: kworker/0:1 Tainted: G W 3.2.0-0.bpo.2-amd64 #1 
+> [ 1828.569193] Call Trace: 
+> [ 1828.569207] [<ffffffff810497ec>] ? warn_slowpath_common+0x78/0x8c 
+> [ 1828.569221] [<ffffffffa00db647>] ? ceph_add_cap+0x38e/0x49e [ceph] 
+> [ 1828.569233] [<ffffffffa00d220a>] ? fill_inode+0x4eb/0x602 [ceph] 
+> [ 1828.569244] [<ffffffffa00d331b>] ? ceph_dentry_lru_touch+0x2a/0x68 [ceph] 
+> [ 1828.569258] [<ffffffffa00d317d>] ? ceph_readdir_prepopulate+0x2de/0x375 [ceph] 
+> [ 1828.569271] [<ffffffffa00e2d3f>] ? dispatch+0xa35/0xef2 [ceph] 
+> [ 1828.569286] [<ffffffffa00ae841>] ? ceph_tcp_recvmsg+0x43/0x4f [libceph] 
+> [ 1828.569297] [<ffffffffa00b0821>] ? con_work+0x1070/0x13b8 [libceph] 
+> [ 1828.569308] [<ffffffff81044580>] ? update_curr+0xbc/0x160 
+> [ 1828.569319] [<ffffffffa00af7b1>] ? try_write+0xbe1/0xbe1 [libceph] 
+> [ 1828.569332] [<ffffffff8105f8bb>] ? process_one_work+0x1cc/0x2ea 
+> [ 1828.569342] [<ffffffff8105fb06>] ? worker_thread+0x12d/0x247 
+> [ 1828.569353] [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea 
+> [ 1828.569361] [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea 
+> [ 1828.569372] [<ffffffff81063311>] ? kthread+0x7a/0x82 
+> [ 1828.569384] [<ffffffff8136bb34>] ? kernel_thread_helper+0x4/0x10 
+> [ 1828.569395] [<ffffffff81369bf3>] ? int_ret_from_sys_call+0x7/0x1b 
+> [ 1828.569406] [<ffffffff813646fc>] ? retint_restore_args+0x5/0x6 
+> [ 1828.569417] [<ffffffff8136bb30>] ? gs_change+0x13/0x13 
+> [ 1828.569423] ---[ end trace 98770cddb79a6a55 ]--- 
+> [ 1828.569433] ceph: ceph_add_cap: couldn't find snap realm 100 
+> [ 1828.569442] ------------[ cut here ]------------ 
+> [ 1828.569452] WARNING: at /build/buildd-linux-2.6_3.2.17-1~bpo60+1-amd64-CJo7Ex/linux-2.6-3.2.17/debian/build/source_amd64_none/fs/ceph/caps.c:590 ceph_add_cap+0x38e/0x49e [ceph]() 
+> [ 1828.569467] Modules linked in: cryptd aes_x86_64 aes_generic cbc ceph libceph crc32c libcrc32c evdev snd_pcm snd_timer snd soundcore snd_page_alloc pcspkr ext3 jbd mbcache xen_netfront xen_blkfront 
+> [ 1828.569500] Pid: 18, comm: kworker/0:1 Tainted: G W 3.2.0-0.bpo.2-amd64 #1 
+> [ 1828.569508] Call Trace: 
+> [ 1828.569513] [<ffffffff810497ec>] ? warn_slowpath_common+0x78/0x8c 
+> [ 1828.569523] [<ffffffffa00db647>] ? ceph_add_cap+0x38e/0x49e [ceph] 
+> [ 1828.569533] [<ffffffffa00d220a>] ? fill_inode+0x4eb/0x602 [ceph] 
+> [ 1828.569543] [<ffffffffa00d331b>] ? ceph_dentry_lru_touch+0x2a/0x68 [ceph] 
+> [ 1828.569552] [<ffffffffa00d317d>] ? ceph_readdir_prepopulate+0x2de/0x375 [ceph] 
+> [ 1828.569563] [<ffffffffa00e2d3f>] ? dispatch+0xa35/0xef2 [ceph] 
+> [ 1828.569573] [<ffffffffa00ae841>] ? ceph_tcp_recvmsg+0x43/0x4f [libceph] 
+> [ 1828.569583] [<ffffffffa00b0821>] ? con_work+0x1070/0x13b8 [libceph] 
+> [ 1828.569590] [<ffffffff81044580>] ? update_curr+0xbc/0x160 
+> [ 1828.569599] [<ffffffffa00af7b1>] ? try_write+0xbe1/0xbe1 [libceph] 
+> [ 1828.569607] [<ffffffff8105f8bb>] ? process_one_work+0x1cc/0x2ea 
+> [ 1828.569615] [<ffffffff8105fb06>] ? worker_thread+0x12d/0x247 
+> [ 1828.569622] [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea 
+> [ 1828.569630] [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea 
+> [ 1828.569637] [<ffffffff81063311>] ? kthread+0x7a/0x82 
+> [ 1828.569644] [<ffffffff8136bb34>] ? kernel_thread_helper+0x4/0x10 
+> [ 1828.569652] [<ffffffff81369bf3>] ? int_ret_from_sys_call+0x7/0x1b 
+> [ 1828.569660] [<ffffffff813646fc>] ? retint_restore_args+0x5/0x6 
+> [ 1828.569667] [<ffffffff8136bb30>] ? gs_change+0x13/0x13 
+> [ 1828.569673] ---[ end trace 98770cddb79a6a56 ]--- 
+> Then i see some folders 
+> 
+> Is there a way to remove this error directories or a reason / bug why I get this messages. 
+> 
+> The folder that I try to remove had a similar problem as the one above, I manages to remove 
+> all visible files. 
+> 
+> /Regards Martin 
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
+> the body of a message to majordomo@vger.kernel.org 
+> More majordomo info at http://vger.kernel.org/majordomo-info.html 
+> 
+> 
