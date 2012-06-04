@@ -1,130 +1,109 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: ceph fs
-Date: Sun, 3 Jun 2012 17:42:15 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206031734380.13750@cobra.newdream.net>
-References: <fce756f2-a2b0-4c5b-9c61-5ea34b384e20@mail.linserv.se>
+From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Subject: Stuck OSD phantom
+Date: Mon, 04 Jun 2012 11:29:08 +0930
+Message-ID: <4FCC166C.30202@bashkirtsev.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59234 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755383Ab2FDAmQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Jun 2012 20:42:16 -0400
-In-Reply-To: <fce756f2-a2b0-4c5b-9c61-5ea34b384e20@mail.linserv.se>
+Received: from mail.logics.net.au ([150.101.56.178]:39904 "EHLO
+	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755598Ab2FDB7V (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Jun 2012 21:59:21 -0400
+Received: from x.logics.net.au (gw.logics.net.au [150.101.235.251] (may be forged))
+	(authenticated bits=0)
+	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q541x8VB026642
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-CAMELLIA256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Mon, 4 Jun 2012 11:29:14 +0930
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Wilderoth <martin.wilderoth@linserv.se>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Martin,
+Dear devs,
 
-On Sat, 2 Jun 2012, Martin Wilderoth wrote:
+While playing around with ceph with six OSDs I decided to retire two 
+OSDs simultaneously (I do triplication so ceph should withstand such 
+damage) to see how ceph will cope with it. I was doing it in different 
+ways trying to get ceph off-rails and it looks I have managed it. :)
 
-> I have some problems with my ceph filesystem. I have a folder that i 
-> cant remove.
-> 
-> I.E.
-> root@lintx2:/mnt/backuppc/pc# ls -la toberemoved/ 
-> total 0
-> drwxr-x--- 1 backuppc backuppc    28804802 May 15 13:29 .
-> drwxr-x--- 1 backuppc backuppc 29421083732 Jun  1 15:16 ..
-> 
-> root@lintx2:/mnt/backuppc/pc# rm -rf toberemoved 
-> rm: cannot remove `toberemoved': Directory not empty
+First of all I have tried to kill OSDs by pulling them off and then 
+doing ceph osd lost . Performed as expected. However ceph kept record of 
+former OSDs even so it did not try to use it. Looks correct.
 
-This is a bug in the internal rstats accounting that the rmdir is relying 
-on to verify the directory is empty.  Right now, the workaround is to just 
-rename that directory out of the way somewhere.  This will be at the top 
-of the list of MDS bugs we'll look at when we shift focus to the fs in the 
-next month or two.
+Then I have recreated OSDs and magically they just came back online and 
+filled up with data again. Again: that's what is expected.
 
-http://tracker.newdream.net/issues/2494
+At last I have tried planned removal of OSDs:
 
-> I also have a folder that when I do ls i get the following message
-> 
-> [ 1828.569091] ceph: ceph_add_cap: couldn't find snap realm 100
+ceph osd crush remove 3
+ceph osd rm osd.3
 
-This too.  
+Ceph complained that osd is still up. Shutdown OSD, tried again. 
+Success.  Done the same with second OSD. Everything looked fine still.
 
-In both cases, if you are able to reproduce the bug reliably, that is 
-incredibly useful information that will make it much easier to fix the 
-bug.  Please include that info in the tracker, if you can!
+And then accidentally (and that's perhaps good test) I have rebooted box 
+running osd.3 and it had ceph osd in rc. So osd.3 started without having 
+knowledge that it was evicted from cluster. Cluster magically took it 
+back and osd.3 joined the culster (however it did not got any load as it 
+was removed from crush). I removed it from rc, shut it down, done ceph 
+osd crush remove 3 (just to be certain) and ceph osd rm osd.3 (both 
+succeeded) but now I have osd.3 still counted towards total cluster 
+capacity, osd dump shows it as non existent, pg dump shows it as it 
+still member of a cluster:
 
-For example, on the second bug,
+[root@x ceph]# ceph osd dump
+dumped osdmap epoch 14892
+epoch 14892
+fsid 7719f573-4c48-4852-a27f-51c7a3fe1c1e
+created 2012-03-31 04:47:12.130128
+modifed 2012-06-04 11:16:57.687645
+flags
 
-http://tracker.newdream.net/issues/2506
+pool 0 'data' rep size 3 crush_ruleset 0 object_hash rjenkins pg_num 192 
+pgp_num 192 last_change 13812 owner 0 crash_replay_interval 45
+pool 1 'metadata' rep size 3 crush_ruleset 1 object_hash rjenkins pg_num 
+192 pgp_num 192 last_change 13815 owner 0
+pool 2 'rbd' rep size 3 crush_ruleset 2 object_hash rjenkins pg_num 192 
+pgp_num 192 last_change 13817 owner 0
 
-- what snapshots did you create?
-- what operations were you doing that triggered the bug?
-- (ideally) how do you reproduce it from a fresh fs or fresh mount?
+max_osd 6
+osd.0 up   in  weight 1 up_from 14407 up_thru 14890 down_at 14400 
+last_clean_interval [14383,14399) 172.16.64.200:6801/25023 
+172.16.64.200:6802/25023 172.16.64.200:6803/25023 exists,up
+osd.1 up   in  weight 1 up_from 14420 up_thru 14890 down_at 14413 
+last_clean_interval [14388,14412) lost_at 11147 172.16.64.201:6800/5719 
+172.16.64.201:6801/5719 172.16.64.201:6802/5719 exists,up 
+2c7ca892-e83c-4158-a3ae-7c4f96f040b0
+osd.4 up   in  weight 1 up_from 14432 up_thru 14890 down_at 14425 
+last_clean_interval [14393,14424) lost_at 13373 172.16.64.204:6800/17419 
+172.16.64.204:6802/17419 172.16.64.204:6803/17419 exists,up 
+19703275-74c3-403b-8647-85cc4f7ad870
+osd.5 up   in  weight 1 up_from 14448 up_thru 14890 down_at 14438 
+last_clean_interval [14366,14437) 172.16.64.205:6800/7021 
+172.16.64.205:6801/7021 172.16.64.205:6802/7021 exists,up 
+699a39ca-3806-4c4f-9cdc-76cbed61b2ab
 
-Thanks!  Sorry we can't be more help now, but we'll get to this soon...
+[root@x ceph]# ceph pg dump
+dumped all in format plain
+version 2223459
+last_osdmap_epoch 14892
+last_pg_scan 12769
+full_ratio 0.95
+nearfull_ratio 0.85
+<-snip->
+pool 0    21404    0    0    0    40635329394    23681638    23681638
+pool 1    114    0    0    0    234237438    4481899    4481899
+pool 2    113241    0    2    0    473699447111    27387426    27387426
+  sum    134759    0    2    0    514569013943    55550963    55550963
+osdstat    kbused    kbavail    kb    hb in    hb out
+0    399440780    316714764    744751104    [1,4,5]    []
+1    400369588    125798956    546603008    [0,4,5]    []
+3    130380    90124804    94470144    [0,1,4,5]    []
+4    387384720    132412912    540409856    [0,1,5]    []
+5    344705816    233764680    600997888    [0,1,4]    []
+  sum    1532031284    898816116    2527232000
 
-sage
+Any idea how to get rid of it completely?
 
-
-> [ 1828.569105] ------------[ cut here ]------------
-> [ 1828.569121] WARNING: at /build/buildd-linux-2.6_3.2.17-1~bpo60+1-amd64-CJo7Ex/linux-2.6-3.2.17/debian/build/source_amd64_none/fs/ceph/caps.c:590 ceph_add_cap+0x38e/0x49e [ceph]()
-> [ 1828.569139] Modules linked in: cryptd aes_x86_64 aes_generic cbc ceph libceph crc32c libcrc32c evdev snd_pcm snd_timer snd soundcore snd_page_alloc pcspkr ext3 jbd mbcache xen_netfront xen_blkfront
-> [ 1828.569182] Pid: 18, comm: kworker/0:1 Tainted: G        W    3.2.0-0.bpo.2-amd64 #1
-> [ 1828.569193] Call Trace:
-> [ 1828.569207]  [<ffffffff810497ec>] ? warn_slowpath_common+0x78/0x8c
-> [ 1828.569221]  [<ffffffffa00db647>] ? ceph_add_cap+0x38e/0x49e [ceph]
-> [ 1828.569233]  [<ffffffffa00d220a>] ? fill_inode+0x4eb/0x602 [ceph]
-> [ 1828.569244]  [<ffffffffa00d331b>] ? ceph_dentry_lru_touch+0x2a/0x68 [ceph]
-> [ 1828.569258]  [<ffffffffa00d317d>] ? ceph_readdir_prepopulate+0x2de/0x375 [ceph]
-> [ 1828.569271]  [<ffffffffa00e2d3f>] ? dispatch+0xa35/0xef2 [ceph]
-> [ 1828.569286]  [<ffffffffa00ae841>] ? ceph_tcp_recvmsg+0x43/0x4f [libceph]
-> [ 1828.569297]  [<ffffffffa00b0821>] ? con_work+0x1070/0x13b8 [libceph]
-> [ 1828.569308]  [<ffffffff81044580>] ? update_curr+0xbc/0x160
-> [ 1828.569319]  [<ffffffffa00af7b1>] ? try_write+0xbe1/0xbe1 [libceph]
-> [ 1828.569332]  [<ffffffff8105f8bb>] ? process_one_work+0x1cc/0x2ea
-> [ 1828.569342]  [<ffffffff8105fb06>] ? worker_thread+0x12d/0x247
-> [ 1828.569353]  [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea
-> [ 1828.569361]  [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea
-> [ 1828.569372]  [<ffffffff81063311>] ? kthread+0x7a/0x82
-> [ 1828.569384]  [<ffffffff8136bb34>] ? kernel_thread_helper+0x4/0x10
-> [ 1828.569395]  [<ffffffff81369bf3>] ? int_ret_from_sys_call+0x7/0x1b
-> [ 1828.569406]  [<ffffffff813646fc>] ? retint_restore_args+0x5/0x6
-> [ 1828.569417]  [<ffffffff8136bb30>] ? gs_change+0x13/0x13
-> [ 1828.569423] ---[ end trace 98770cddb79a6a55 ]---
-> [ 1828.569433] ceph: ceph_add_cap: couldn't find snap realm 100
-> [ 1828.569442] ------------[ cut here ]------------
-> [ 1828.569452] WARNING: at /build/buildd-linux-2.6_3.2.17-1~bpo60+1-amd64-CJo7Ex/linux-2.6-3.2.17/debian/build/source_amd64_none/fs/ceph/caps.c:590 ceph_add_cap+0x38e/0x49e [ceph]()
-> [ 1828.569467] Modules linked in: cryptd aes_x86_64 aes_generic cbc ceph libceph crc32c libcrc32c evdev snd_pcm snd_timer snd soundcore snd_page_alloc pcspkr ext3 jbd mbcache xen_netfront xen_blkfront
-> [ 1828.569500] Pid: 18, comm: kworker/0:1 Tainted: G        W    3.2.0-0.bpo.2-amd64 #1
-> [ 1828.569508] Call Trace:
-> [ 1828.569513]  [<ffffffff810497ec>] ? warn_slowpath_common+0x78/0x8c
-> [ 1828.569523]  [<ffffffffa00db647>] ? ceph_add_cap+0x38e/0x49e [ceph]
-> [ 1828.569533]  [<ffffffffa00d220a>] ? fill_inode+0x4eb/0x602 [ceph]
-> [ 1828.569543]  [<ffffffffa00d331b>] ? ceph_dentry_lru_touch+0x2a/0x68 [ceph]
-> [ 1828.569552]  [<ffffffffa00d317d>] ? ceph_readdir_prepopulate+0x2de/0x375 [ceph]
-> [ 1828.569563]  [<ffffffffa00e2d3f>] ? dispatch+0xa35/0xef2 [ceph]
-> [ 1828.569573]  [<ffffffffa00ae841>] ? ceph_tcp_recvmsg+0x43/0x4f [libceph]
-> [ 1828.569583]  [<ffffffffa00b0821>] ? con_work+0x1070/0x13b8 [libceph]
-> [ 1828.569590]  [<ffffffff81044580>] ? update_curr+0xbc/0x160
-> [ 1828.569599]  [<ffffffffa00af7b1>] ? try_write+0xbe1/0xbe1 [libceph]
-> [ 1828.569607]  [<ffffffff8105f8bb>] ? process_one_work+0x1cc/0x2ea
-> [ 1828.569615]  [<ffffffff8105fb06>] ? worker_thread+0x12d/0x247
-> [ 1828.569622]  [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea
-> [ 1828.569630]  [<ffffffff8105f9d9>] ? process_one_work+0x2ea/0x2ea
-> [ 1828.569637]  [<ffffffff81063311>] ? kthread+0x7a/0x82
-> [ 1828.569644]  [<ffffffff8136bb34>] ? kernel_thread_helper+0x4/0x10
-> [ 1828.569652]  [<ffffffff81369bf3>] ? int_ret_from_sys_call+0x7/0x1b
-> [ 1828.569660]  [<ffffffff813646fc>] ? retint_restore_args+0x5/0x6
-> [ 1828.569667]  [<ffffffff8136bb30>] ? gs_change+0x13/0x13
-> [ 1828.569673] ---[ end trace 98770cddb79a6a56 ]---
-> Then i see some folders
-> 
-> Is there a way to remove this error directories or a reason / bug why I get this messages.
-> 
-> The folder that I try to remove had a similar problem as the one above, I manages to remove
-> all visible files.
-> 
->  /Regards Martin
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Regards,
+Vladimir
