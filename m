@@ -1,39 +1,29 @@
-From: udit agarwal <fzdudit@gmail.com>
-Subject: Re: iozone test crashed on ceph
-Date: Mon, 4 Jun 2012 23:43:34 +0000 (UTC)
-Message-ID: <loom.20120605T014157-339@post.gmane.org>
-References: <loom.20120601T025228-787@post.gmane.org> <0F43C46A9543420FBEB081A55ACD1FB0@inktank.com> <loom.20120604T235042-446@post.gmane.org> <CADvuQRFRsc24feZFbQYo7Rkg=ot4PF7j9VCEFDO2PJq3AGkzsw@mail.gmail.com> <loom.20120605T012913-573@post.gmane.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: SIGSEGV in cephfs-java, but probably in Ceph
+Date: Mon, 4 Jun 2012 19:21:00 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206041920250.10445@cobra.newdream.net>
+References: <CAHwdYF3na4dHqpQmAth+gEKBLeqLKSHAd-6MChgKjRyBrO+Ttw@mail.gmail.com>
+ <CAHwdYF2CF77XnyHG16gi_hPbZ8VNbEzn0XpikKMDdcGWcd2-CQ@mail.gmail.com>
+ <DC393A32-288A-4BF2-B618-9D6E0A5C29B9@cs.ucsc.edu> <05C460A496DC45689D6578B20D699425@inktank.com>
+ <217DCA5E-26E6-4357-96E7-0C9AF4E06071@cs.ucsc.edu> <9C7F8B20FB3B49508B9FBEE725AB34EE@inktank.com>
+ <CAPrxi59++wux__pY1M0qu+=YcVWAbkbLVWuxa95=ZLo8R64XiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:44407 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751975Ab2FDXpK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 4 Jun 2012 19:45:10 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SbgxL-0008TC-Fb
-	for ceph-devel@vger.kernel.org; Tue, 05 Jun 2012 01:45:03 +0200
-Received: from mike-alien.esc.auckland.ac.nz ([130.216.209.155])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 01:45:03 +0200
-Received: from fzdudit by mike-alien.esc.auckland.ac.nz with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 01:45:03 +0200
+Received: from cobra.newdream.net ([66.33.216.30]:49369 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757656Ab2FECVQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Jun 2012 22:21:16 -0400
+In-Reply-To: <CAPrxi59++wux__pY1M0qu+=YcVWAbkbLVWuxa95=ZLo8R64XiA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Noah Watkins <jayhawk@soe.ucsc.edu>
+Cc: Greg Farnum <greg@inktank.com>, Noah Watkins <jayhawk@cs.ucsc.edu>, Nam Dang <namd@de.cs.titech.ac.jp>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Sorry ,the link is:
+On Mon, 4 Jun 2012, Noah Watkins wrote:
+> I wonder if the Mutex::lock(bool) being printed out is a red herring... 
 
-https://docs.google.com/document/d/
-1mYVyI75FGMYqPes5T5fkI0aUX8h2q6TFeWdoV9uJdQI/edit?pli=1
+FWIW this assert usually means a use-after-free.
 
-hope you can help me in this matter.
-
---Udit Agarwal
-
-
+sage
 
