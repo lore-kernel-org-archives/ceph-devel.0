@@ -1,64 +1,52 @@
-From: chandrashekhar <chandubigc@gmail.com>
-Subject: Re: OSD per disk.
-Date: Tue, 5 Jun 2012 12:34:23 +0000 (UTC)
-Message-ID: <loom.20120605T142846-305@post.gmane.org>
-References: <loom.20120528T080903-621@post.gmane.org> <1c048abb-0cbb-4d69-9922-419c16019887@mailpro> <loom.20120528T111434-469@post.gmane.org> <CADvuQREMRQtBv2NhM_QH0A_-mFE5wRGPVMHk0Wu7jhUvgXjcYQ@mail.gmail.com> <CA+7V1=Ey224p64Wo0172OrTTiA0sbg9x_13aJwRvBr7VRySHbQ@mail.gmail.com> <CADvuQRHzTy+Kvhah7sop6fdSvhYvA63ZNXBkntukmYLD_ejbVA@mail.gmail.com> <CA+4uBUY+qq0x81wg=Qom70ttAX4f-bwkDH=H5o6rPHdvpFgFuQ@mail.gmail.com>
+From: Holger Macht <hmacht@suse.de>
+Subject: [PATCH] ceph.spec.in: Fix license to GPL-2.0 and use SPDX format
+Date: Tue, 05 Jun 2012 15:00:57 +0200
+Message-ID: <4FCE0309.90104@suse.de>
+Reply-To: hmacht@suse.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:46809 "EHLO plane.gmane.org"
+Received: from cantor2.suse.de ([195.135.220.15]:59401 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753178Ab2FEMee (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 5 Jun 2012 08:34:34 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Sbsxz-0003Am-Tj
-	for ceph-devel@vger.kernel.org; Tue, 05 Jun 2012 14:34:32 +0200
-Received: from segment-124-30.sify.net ([segment-124-30.sify.net])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 14:34:31 +0200
-Received: from chandubigc by segment-124-30.sify.net with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 14:34:31 +0200
+	id S1757259Ab2FENBA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 Jun 2012 09:01:00 -0400
+Received: from relay1.suse.de (unknown [195.135.220.254])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by mx2.suse.de (Postfix) with ESMTP id BFAC6A0FF5
+	for <ceph-devel@vger.kernel.org>; Tue,  5 Jun 2012 15:00:59 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
->>
-I built ceph from source ( f859f25d7eaec01fb6a82b88409d005c8177fea2  branch).
+Minor spec file fix. LGPLv2 in spec file is not correct, because some of
+the included packages/binaries are GPLv2. For example:
 
-mkcephfs -a -c /etc/ceph/ceph.conf  -k /etc/ceph/keyring.admin -- is working
-fine, but when I tried to start ceph its showing following error.
+ src/os/btrfs_ioctl.h -> package ceph, binary ceph-osd
+ src/mount/mtab.c     -> package ceph, binary mount.ceph
+ src/common/fiemap.cc -> package ceph, binary rbd
 
->strace ceph -a start
+Also use SPDX format: http://www.spdx.org/licenses
 
-rt_sigprocmask(SIG_SETMASK, [PIPE], NULL, 8) = 0
-rt_sigprocmask(SIG_BLOCK, [PIPE], [PIPE], 8) = 0
-mmap(NULL, 8392704, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK,
--1, 0) = 0x7f1cc5a49000
-mprotect(0x7f1cc5a49000, 4096, PROT_NONE) = 0
-clone(child_stack=0x7f1cc6248f70,
-flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM
-|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID,
-parent_tidptr=0x7f1cc62499d0, tls=0x7f1cc6249700, 
-child_tidptr=0x7f1cc62499d0) =
-21042
-rt_sigprocmask(SIG_SETMASK, [PIPE], NULL, 8) = 0
-rt_sigprocmask(SIG_BLOCK, [PIPE], [PIPE], 8) = 0
-mmap(NULL, 1052672, PROT_READ|PROT_WRITE, 
-MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK,
--1, 0) = 0x7f1ccaa98000
-mprotect(0x7f1ccaa98000, 4096, PROT_NONE) = 0
-clone(child_stack=0x7f1ccab97f70,
-flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|
-CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID,
-parent_tidptr=0x7f1ccab989d0, tls=0x7f1ccab98700, child_tidptr=0x7f1ccab989d0) =
-21043
-rt_sigprocmask(SIG_SETMASK, [PIPE], NULL, 8) = 0
-futex(0x201b904, FUTEX_WAIT_PRIVATE, 1, NULL
+Signed-off-by: Holger Macht <hmacht@suse.de>
+---
+ ceph.spec.in |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-
+diff --git a/ceph.spec.in b/ceph.spec.in
+index 81e7040..3b3026d 100644
+--- a/ceph.spec.in
++++ b/ceph.spec.in
+@@ -17,7 +17,7 @@ Name:		ceph
+ Version:	@VERSION@
+ Release:	6%{?dist}
+ Summary:	User space components of the Ceph file system
+-License:	LGPLv2
++License:	GPL-2.0
+ Group:		System Environment/Base
+ URL:		http://ceph.newdream.net/
+ Source0:	http://ceph.newdream.net/download/%{name}-%{version}.tar.bz2
+-- 
+1.7.9.5
 
