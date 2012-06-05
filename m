@@ -1,47 +1,64 @@
-From: Nam Dang <namd@de.cs.titech.ac.jp>
-Subject: Re: SIGSEGV in cephfs-java, but probably in Ceph
-Date: Tue, 5 Jun 2012 20:22:28 +0900
-Message-ID: <CAHwdYF1Uhg5ZriNZBJN9xXNdLEP=gLoFRechn8OKO3dxDkUt9g@mail.gmail.com>
-References: <CAHwdYF3na4dHqpQmAth+gEKBLeqLKSHAd-6MChgKjRyBrO+Ttw@mail.gmail.com>
- <CAHwdYF2CF77XnyHG16gi_hPbZ8VNbEzn0XpikKMDdcGWcd2-CQ@mail.gmail.com>
- <DC393A32-288A-4BF2-B618-9D6E0A5C29B9@cs.ucsc.edu> <05C460A496DC45689D6578B20D699425@inktank.com>
- <217DCA5E-26E6-4357-96E7-0C9AF4E06071@cs.ucsc.edu> <9C7F8B20FB3B49508B9FBEE725AB34EE@inktank.com>
- <CAPrxi59++wux__pY1M0qu+=YcVWAbkbLVWuxa95=ZLo8R64XiA@mail.gmail.com>
+From: chandrashekhar <chandubigc@gmail.com>
+Subject: Re: OSD per disk.
+Date: Tue, 5 Jun 2012 12:34:23 +0000 (UTC)
+Message-ID: <loom.20120605T142846-305@post.gmane.org>
+References: <loom.20120528T080903-621@post.gmane.org> <1c048abb-0cbb-4d69-9922-419c16019887@mailpro> <loom.20120528T111434-469@post.gmane.org> <CADvuQREMRQtBv2NhM_QH0A_-mFE5wRGPVMHk0Wu7jhUvgXjcYQ@mail.gmail.com> <CA+7V1=Ey224p64Wo0172OrTTiA0sbg9x_13aJwRvBr7VRySHbQ@mail.gmail.com> <CADvuQRHzTy+Kvhah7sop6fdSvhYvA63ZNXBkntukmYLD_ejbVA@mail.gmail.com> <CA+4uBUY+qq0x81wg=Qom70ttAX4f-bwkDH=H5o6rPHdvpFgFuQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail2.nap.gsic.titech.ac.jp ([131.112.222.52]:35139 "EHLO
-	mail2.nap.gsic.titech.ac.jp" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933168Ab2FELXC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 07:23:02 -0400
-Received: from 209.85.215.46 (209.85.215.46 [209.85.215.46])
-	by mail2.nap.gsic.titech.ac.jp (deepsmtpd.so 3.5.54)
-	with ESMTP id <CAHwdYF1Uhg5ZriNZBJN9xXNdLEP=gLoFRechn8OKO3dxDkUt9g@mail.gmail.com>
-	for <ceph-devel@vger.kernel.org>; Tue, 5 Jun 2012 20:22:52 +0900
-Received: by lahd3 with SMTP id d3so3692886lah.19
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 04:22:49 -0700 (PDT)
-In-Reply-To: <CAPrxi59++wux__pY1M0qu+=YcVWAbkbLVWuxa95=ZLo8R64XiA@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:46809 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753178Ab2FEMee (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 Jun 2012 08:34:34 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Sbsxz-0003Am-Tj
+	for ceph-devel@vger.kernel.org; Tue, 05 Jun 2012 14:34:32 +0200
+Received: from segment-124-30.sify.net ([segment-124-30.sify.net])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 14:34:31 +0200
+Received: from chandubigc by segment-124-30.sify.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 14:34:31 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@soe.ucsc.edu>, Greg Farnum <greg@inktank.com>, Noah Watkins <jayhawk@cs.ucsc.edu>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi Noah,
+>>
+I built ceph from source ( f859f25d7eaec01fb6a82b88409d005c8177fea2  branch).
 
-Thank you for the push. Now I don't have SIGSEGV anymore. By the way,
-is there any way to move the ceph_is_mounted() function into the java
-library's code instead of putting it in the main Ceph's code?
+mkcephfs -a -c /etc/ceph/ceph.conf  -k /etc/ceph/keyring.admin -- is working
+fine, but when I tried to start ceph its showing following error.
 
-> The basic idea was that threads in Java did not map 1:1 with kernel
-> threads (think co-routines), which would break a lot of stuff,
-> especially futex. Looking at some documentation, old JVMs had
-> something called Green Threads, but have now been abandoned in favor
-> of native threads. So maybe this theory is now irrelevant, and
-> evidence seems to suggest you're right and Java is using native
-> threads.
+>strace ceph -a start
 
-I check the error without multithreading and it was the same. And I'm
-using Java 6, so threads should be real threads.
-My guess is that it's related to some internal locking mechanism.
+rt_sigprocmask(SIG_SETMASK, [PIPE], NULL, 8) = 0
+rt_sigprocmask(SIG_BLOCK, [PIPE], [PIPE], 8) = 0
+mmap(NULL, 8392704, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK,
+-1, 0) = 0x7f1cc5a49000
+mprotect(0x7f1cc5a49000, 4096, PROT_NONE) = 0
+clone(child_stack=0x7f1cc6248f70,
+flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM
+|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID,
+parent_tidptr=0x7f1cc62499d0, tls=0x7f1cc6249700, 
+child_tidptr=0x7f1cc62499d0) =
+21042
+rt_sigprocmask(SIG_SETMASK, [PIPE], NULL, 8) = 0
+rt_sigprocmask(SIG_BLOCK, [PIPE], [PIPE], 8) = 0
+mmap(NULL, 1052672, PROT_READ|PROT_WRITE, 
+MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK,
+-1, 0) = 0x7f1ccaa98000
+mprotect(0x7f1ccaa98000, 4096, PROT_NONE) = 0
+clone(child_stack=0x7f1ccab97f70,
+flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|
+CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID,
+parent_tidptr=0x7f1ccab989d0, tls=0x7f1ccab98700, child_tidptr=0x7f1ccab989d0) =
+21043
+rt_sigprocmask(SIG_SETMASK, [PIPE], NULL, 8) = 0
+futex(0x201b904, FUTEX_WAIT_PRIVATE, 1, NULL
 
-Best regards,
-Nam Dang
+
+
+
