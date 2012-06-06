@@ -1,211 +1,99 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/2] libceph: embed ceph connection structure in mon_client
-Date: Tue, 5 Jun 2012 22:22:49 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206052222420.22586@cobra.newdream.net>
-References: <4FCECD7F.9030002@inktank.com> <4FCECEEE.9020305@inktank.com>
+From: "Yan, Zheng" <zheng.z.yan@linux.intel.com>
+Subject: Re: Kernel crashes with RBD
+Date: Wed, 6 Jun 2012 15:32:22 +0800
+Message-ID: <CAAM7YAk-MubvemCX8=zxE+gfTh3+S9-sGWCwXM0r+gkkgtJ8=Q@mail.gmail.com>
+References: <4F860619.5040802@bisect.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51459 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751961Ab2FFFWu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 01:22:50 -0400
-In-Reply-To: <4FCECEEE.9020305@inktank.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:46502 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751530Ab2FFHcX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 03:32:23 -0400
+Received: by obbtb18 with SMTP id tb18so9921940obb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 00:32:22 -0700 (PDT)
+In-Reply-To: <4F860619.5040802@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Reviewed-by: Sage Weil <sage@inktank.com>
+I think I tracked this bug down, the Oops is due to 'msg->bio_iter =3D=3D=
+ NULL'.
 
-On Tue, 5 Jun 2012, Alex Elder wrote:
+---
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index f0993af..ac16f13 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -549,6 +549,10 @@ static void prepare_write_message(struct
+ceph_connection *con)
+ 	}
 
-> A monitor client has a pointer to a ceph connection structure in it.
-> This is the only one of the three ceph client types that do it this
-> way; the OSD and MDS clients embed the connection into their main
-> structures.  There is always exactly one ceph connection for a
-> monitor client, so there is no need to allocate it separate from the
-> monitor client structure.
-> 
-> So switch the ceph_mon_client structure to embed its
-> ceph_connection structure.
-> 
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->  include/linux/ceph/mon_client.h |    2 +-
->  net/ceph/mon_client.c           |   47
-> ++++++++++++++++----------------------
->  2 files changed, 21 insertions(+), 28 deletions(-)
-> 
-> diff --git a/include/linux/ceph/mon_client.h
-> b/include/linux/ceph/mon_client.h
-> index 545f859..2113e38 100644
-> --- a/include/linux/ceph/mon_client.h
-> +++ b/include/linux/ceph/mon_client.h
-> @@ -70,7 +70,7 @@ struct ceph_mon_client {
->  	bool hunting;
->  	int cur_mon;                       /* last monitor i contacted */
->  	unsigned long sub_sent, sub_renew_after;
-> -	struct ceph_connection *con;
-> +	struct ceph_connection con;
->  	bool have_fsid;
-> 
->  	/* pending generic requests */
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 704dc95..ac4d6b1 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -106,9 +106,9 @@ static void __send_prepared_auth_request(struct
-> ceph_mon_client *monc, int len)
->  	monc->pending_auth = 1;
->  	monc->m_auth->front.iov_len = len;
->  	monc->m_auth->hdr.front_len = cpu_to_le32(len);
-> -	ceph_con_revoke(monc->con, monc->m_auth);
-> +	ceph_con_revoke(&monc->con, monc->m_auth);
->  	ceph_msg_get(monc->m_auth);  /* keep our ref */
-> -	ceph_con_send(monc->con, monc->m_auth);
-> +	ceph_con_send(&monc->con, monc->m_auth);
->  }
-> 
->  /*
-> @@ -117,8 +117,8 @@ static void __send_prepared_auth_request(struct
-> ceph_mon_client *monc, int len)
->  static void __close_session(struct ceph_mon_client *monc)
->  {
->  	dout("__close_session closing mon%d\n", monc->cur_mon);
-> -	ceph_con_revoke(monc->con, monc->m_auth);
-> -	ceph_con_close(monc->con);
-> +	ceph_con_revoke(&monc->con, monc->m_auth);
-> +	ceph_con_close(&monc->con);
->  	monc->cur_mon = -1;
->  	monc->pending_auth = 0;
->  	ceph_auth_reset(monc->auth);
-> @@ -142,9 +142,9 @@ static int __open_session(struct ceph_mon_client *monc)
->  		monc->want_next_osdmap = !!monc->want_next_osdmap;
-> 
->  		dout("open_session mon%d opening\n", monc->cur_mon);
-> -		monc->con->peer_name.type = CEPH_ENTITY_TYPE_MON;
-> -		monc->con->peer_name.num = cpu_to_le64(monc->cur_mon);
-> -		ceph_con_open(monc->con,
-> +		monc->con.peer_name.type = CEPH_ENTITY_TYPE_MON;
-> +		monc->con.peer_name.num = cpu_to_le64(monc->cur_mon);
-> +		ceph_con_open(&monc->con,
->  			      &monc->monmap->mon_inst[monc->cur_mon].addr);
-> 
->  		/* initiatiate authentication handshake */
-> @@ -226,8 +226,8 @@ static void __send_subscribe(struct ceph_mon_client
-> *monc)
-> 
->  		msg->front.iov_len = p - msg->front.iov_base;
->  		msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
-> -		ceph_con_revoke(monc->con, msg);
-> -		ceph_con_send(monc->con, ceph_msg_get(msg));
-> +		ceph_con_revoke(&monc->con, msg);
-> +		ceph_con_send(&monc->con, ceph_msg_get(msg));
-> 
->  		monc->sub_sent = jiffies | 1;  /* never 0 */
->  	}
-> @@ -247,7 +247,7 @@ static void handle_subscribe_ack(struct
-> ceph_mon_client *monc,
->  	if (monc->hunting) {
->  		pr_info("mon%d %s session established\n",
->  			monc->cur_mon,
-> -			ceph_pr_addr(&monc->con->peer_addr.in_addr));
-> +			ceph_pr_addr(&monc->con.peer_addr.in_addr));
->  		monc->hunting = false;
->  	}
->  	dout("handle_subscribe_ack after %d seconds\n", seconds);
-> @@ -461,7 +461,7 @@ static int do_generic_request(struct ceph_mon_client
-> *monc,
->  	req->request->hdr.tid = cpu_to_le64(req->tid);
->  	__insert_generic_request(monc, req);
->  	monc->num_generic_requests++;
-> -	ceph_con_send(monc->con, ceph_msg_get(req->request));
-> +	ceph_con_send(&monc->con, ceph_msg_get(req->request));
->  	mutex_unlock(&monc->mutex);
-> 
->  	err = wait_for_completion_interruptible(&req->completion);
-> @@ -684,8 +684,8 @@ static void __resend_generic_request(struct
-> ceph_mon_client *monc)
-> 
->  	for (p = rb_first(&monc->generic_request_tree); p; p = rb_next(p)) {
->  		req = rb_entry(p, struct ceph_mon_generic_request, node);
-> -		ceph_con_revoke(monc->con, req->request);
-> -		ceph_con_send(monc->con, ceph_msg_get(req->request));
-> +		ceph_con_revoke(&monc->con, req->request);
-> +		ceph_con_send(&monc->con, ceph_msg_get(req->request));
->  	}
->  }
-> 
-> @@ -705,7 +705,7 @@ static void delayed_work(struct work_struct *work)
->  		__close_session(monc);
->  		__open_session(monc);  /* continue hunting */
->  	} else {
-> -		ceph_con_keepalive(monc->con);
-> +		ceph_con_keepalive(&monc->con);
-> 
->  		__validate_auth(monc);
-> 
-> @@ -760,19 +760,16 @@ int ceph_monc_init(struct ceph_mon_client *monc,
-> struct ceph_client *cl)
->  		goto out;
-> 
->  	/* connection */
-> -	monc->con = kmalloc(sizeof(*monc->con), GFP_KERNEL);
-> -	if (!monc->con)
-> -		goto out_monmap;
-> -	ceph_con_init(&monc->client->msgr, monc->con);
-> -	monc->con->private = monc;
-> -	monc->con->ops = &mon_con_ops;
-> +	ceph_con_init(&monc->client->msgr, &monc->con);
-> +	monc->con.private = monc;
-> +	monc->con.ops = &mon_con_ops;
-> 
->  	/* authentication */
->  	monc->auth = ceph_auth_init(cl->options->name,
->  				    cl->options->key);
->  	if (IS_ERR(monc->auth)) {
->  		err = PTR_ERR(monc->auth);
-> -		goto out_con;
-> +		goto out_monmap;
->  	}
->  	monc->auth->want_keys =
->  		CEPH_ENTITY_TYPE_AUTH | CEPH_ENTITY_TYPE_MON |
-> @@ -824,8 +821,6 @@ out_subscribe_ack:
->  	ceph_msg_put(monc->m_subscribe_ack);
->  out_auth:
->  	ceph_auth_destroy(monc->auth);
-> -out_con:
-> -	monc->con->ops->put(monc->con);
->  out_monmap:
->  	kfree(monc->monmap);
->  out:
-> @@ -841,9 +836,7 @@ void ceph_monc_stop(struct ceph_mon_client *monc)
->  	mutex_lock(&monc->mutex);
->  	__close_session(monc);
-> 
-> -	monc->con->private = NULL;
-> -	monc->con->ops->put(monc->con);
-> -	monc->con = NULL;
-> +	monc->con.private = NULL;
-> 
->  	mutex_unlock(&monc->mutex);
-> 
-> @@ -1021,7 +1014,7 @@ static void mon_fault(struct ceph_connection *con)
->  	if (!monc->hunting)
->  		pr_info("mon%d %s session lost, "
->  			"hunting for new mon\n", monc->cur_mon,
-> -			ceph_pr_addr(&monc->con->peer_addr.in_addr));
-> +			ceph_pr_addr(&monc->con.peer_addr.in_addr));
-> 
->  	__close_session(monc);
->  	if (!monc->hunting) {
-> -- 
-> 1.7.5.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+ 	m =3D list_first_entry(&con->out_queue, struct ceph_msg, list_head);
++#ifdef CONFIG_BLOCK
++	if (m->bio && m->bio_iter)
++		m->bio_iter =3D NULL;
++#endif
+ 	con->out_msg =3D m;
+
+ 	/* put message on sent list */
+
+
+On Thu, Apr 12, 2012 at 6:30 AM, Danny Kukawka <danny.kukawka@bisect.de=
+> wrote:
+> Hi,
+>
+> we are currently testing CEPH with RBD on a cluster with 1GBit and
+> 10Gbit interfaces. While we see no kernel crashes with RBD if the
+> cluster runs on the 1GBit interfaces, we see very frequent kernel
+> crashes with the 10Gbit network while running tests with e.g. fio
+> against the RBDs.
+>
+> I've tested it with kernel v3.0 and also 3.3.0 (with the patches from
+> the 'for-linus' branch from ceph-client.git at git.kernel.org).
+>
+> With more client machines running tests the crashes occur even much
+> faster. The issue is fully reproducible here.
+>
+> Has anyone seen similar problems? See the backtrace below.
+>
+> Regards
+>
+> Danny
+>
+> PID: 10902 =A0TASK: ffff88032a9a2080 =A0CPU: 0 =A0 COMMAND: "kworker/=
+0:0"
+> =A0#0 [ffff8803235fd950] machine_kexec at ffffffff810265ee
+> =A0#1 [ffff8803235fd9a0] crash_kexec at ffffffff810a3bda
+> =A0#2 [ffff8803235fda70] oops_end at ffffffff81444688
+> =A0#3 [ffff8803235fda90] __bad_area_nosemaphore at ffffffff81032a35
+> =A0#4 [ffff8803235fdb50] do_page_fault at ffffffff81446d3e
+> =A0#5 [ffff8803235fdc50] page_fault at ffffffff81443865
+> =A0 =A0[exception RIP: read_partial_message+816]
+> =A0 =A0RIP: ffffffffa041e500 =A0RSP: ffff8803235fdd00 =A0RFLAGS: 0001=
+0246
+> =A0 =A0RAX: 0000000000000000 =A0RBX: 00000000000009d7 =A0RCX: 0000000=
+000008000
+> =A0 =A0RDX: 0000000000000000 =A0RSI: 00000000000009d7 =A0RDI: fffffff=
+f813c8d78
+> =A0 =A0RBP: ffff880328827030 =A0 R8: 00000000000009d7 =A0 R9: 0000000=
+000004000
+> =A0 =A0R10: 0000000000000000 =A0R11: ffffffff81205800 =A0R12: 0000000=
+000000000
+> =A0 =A0R13: 0000000000000069 =A0R14: ffff88032a9bc780 =A0R15: 0000000=
+000000000
+> =A0 =A0ORIG_RAX: ffffffffffffffff =A0CS: 0010 =A0SS: 0018
+> =A0#6 [ffff8803235fdd38] thread_return at ffffffff81440e82
+> =A0#7 [ffff8803235fdd78] try_read at ffffffffa041ed58 [libceph]
+> =A0#8 [ffff8803235fddf8] con_work at ffffffffa041fb2e [libceph]
+> =A0#9 [ffff8803235fde28] process_one_work at ffffffff8107487c
+> #10 [ffff8803235fde78] worker_thread at ffffffff8107740a
+> #11 [ffff8803235fdee8] kthread at ffffffff8107b736
+> #12 [ffff8803235fdf48] kernel_thread_helper at ffffffff8144c144
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
