@@ -1,65 +1,39 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] ceph.spec.in: Fix license to GPL-2.0 and use SPDX format
-Date: Tue, 5 Jun 2012 19:29:51 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206051928360.5946@cobra.newdream.net>
-References: <4FCE0309.90104@suse.de>
+From: udit agarwal <fzdudit@gmail.com>
+Subject: Re: iozone test crashed on ceph
+Date: Wed, 6 Jun 2012 02:31:56 +0000 (UTC)
+Message-ID: <loom.20120606T041909-114@post.gmane.org>
+References: <loom.20120601T025228-787@post.gmane.org> <0F43C46A9543420FBEB081A55ACD1FB0@inktank.com> <loom.20120604T235042-446@post.gmane.org> <CADvuQRFRsc24feZFbQYo7Rkg=ot4PF7j9VCEFDO2PJq3AGkzsw@mail.gmail.com> <loom.20120605T012913-573@post.gmane.org> <loom.20120605T014157-339@post.gmane.org> <CADvuQRHMxM9PxOyxmej9_MuJajGNV2=yBxL9vN7P4KEvA7US5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49079 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752936Ab2FFC34 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 22:29:56 -0400
-In-Reply-To: <4FCE0309.90104@suse.de>
+Received: from plane.gmane.org ([80.91.229.3]:57749 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752709Ab2FFCcO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 5 Jun 2012 22:32:14 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Sc62d-0004AD-8m
+	for ceph-devel@vger.kernel.org; Wed, 06 Jun 2012 04:32:12 +0200
+Received: from en-439-0215-006.esc.auckland.ac.nz ([130.216.209.143])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 04:32:11 +0200
+Received: from fzdudit by en-439-0215-006.esc.auckland.ac.nz with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 04:32:11 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Holger Macht <hmacht@suse.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, 5 Jun 2012, Holger Macht wrote:
-> Minor spec file fix. LGPLv2 in spec file is not correct, because some of
-> the included packages/binaries are GPLv2. For example:
-> 
->  src/os/btrfs_ioctl.h -> package ceph, binary ceph-osd
+Hi,
+ Thanks for your reply.
+ After you hinted that this problem may have caused due to using record size of
+length 4k. Then, I ran iozone test on a 5m file with record length 4k and to my
+surprise, the ceph system again hanged up. Then, I tried same with record
+lengths from 8k to 1m and everything worked fine for these cases with 5 MB file.
+Now, I have already executed the iozone test with 5G file and with record sizes
+from 8k to 16m and will see what happens!!
 
-My understanding is that including a header file (in this case, to get the 
-ioctl number) does not create a derivative work.  Is that incorrect?
+--Udit Agarwal
 
->  src/mount/mtab.c     -> package ceph, binary mount.ceph
->  src/common/fiemap.cc -> package ceph, binary rbd
-> 
-> Also use SPDX format: http://www.spdx.org/licenses
-> 
-> Signed-off-by: Holger Macht <hmacht@suse.de>
-> ---
->  ceph.spec.in |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/ceph.spec.in b/ceph.spec.in
-> index 81e7040..3b3026d 100644
-> --- a/ceph.spec.in
-> +++ b/ceph.spec.in
-> @@ -17,7 +17,7 @@ Name:		ceph
->  Version:	@VERSION@
->  Release:	6%{?dist}
->  Summary:	User space components of the Ceph file system
-> -License:	LGPLv2
-> +License:	GPL-2.0
-
-So this is effectively the most restrictive license in the package?
-
-Thanks-
-sage
-
->  Group:		System Environment/Base
->  URL:		http://ceph.newdream.net/
->  Source0:	http://ceph.newdream.net/download/%{name}-%{version}.tar.bz2
-> -- 
-> 1.7.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
