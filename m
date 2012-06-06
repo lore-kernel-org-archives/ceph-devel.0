@@ -1,121 +1,110 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Can we mount cephfs in centos 5.7 ?
-Date: Wed, 6 Jun 2012 09:27:03 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206060924500.5397@cobra.newdream.net>
-References: <8512670932FB654F81AF0FEF1BE6D49D01790CEA@WHQBEMAIL1.whq.wistron>
- <CAAs1YtF5UkoG1O6yKBZq0KY4Z-MDsQ2K9VxneySpr5+JHFcA=g@mail.gmail.com>
- <CACkq2mpduy_6g=jUmXjwAHciuc+wsw41C231fpaENfmfZMp8yQ@mail.gmail.com>
- <CACkq2mrVkfGfAO4WJJA5DJ+TW-nt_1JC2M4Q6MZb8bMe_k-gCA@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: Infiniband 40GB
+Date: Wed, 06 Jun 2012 11:43:50 -0500
+Message-ID: <4FCF88C6.1000606@inktank.com>
+References: <98f9ad93-7b3b-4d07-90d8-ca5a3b5e319b@mailpro>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-578140878-1339000023=:5397"
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35031 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752879Ab2FFQ1K (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 12:27:10 -0400
-In-Reply-To: <CACkq2mrVkfGfAO4WJJA5DJ+TW-nt_1JC2M4Q6MZb8bMe_k-gCA@mail.gmail.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:58977 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754318Ab2FFQnw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 12:43:52 -0400
+Received: by obbtb18 with SMTP id tb18so10500123obb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 09:43:52 -0700 (PDT)
+In-Reply-To: <98f9ad93-7b3b-4d07-90d8-ca5a3b5e319b@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: ceph-devel@vger.kernel.org, sam.zaydel@inktank.com
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: Amon Ott <a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, Yann Dupont <Yann.Dupont@univ-nantes.fr>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Alexandre,
 
---557981400-578140878-1339000023=:5397
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+If you can run blktrace during your test on one of the OSD data disks=20
+and send me the results I can take a look at them.  Also, the rados=20
+bench settings and output would be useful too.
 
-On Wed, 6 Jun 2012, Travis Rhoden wrote:
-> Sorry for the re-post.=A0 First attempt got eaten by the mailing list
-> because it wasn't plain text.=A0 My first attempt!
->=20
-> > With CephFS not quite ready for production, what would be the=20
-> > recommended way for sharing Ceph to older operating systems?=A0=20
-> > Specifically, I want to share a file system (i.e. mount a common=20
-> > directory) on several CentOS5 and CentOS6 nodes.=A0 I don't think I can=
-=20
-> > mount an RBD from more than one node, so what is my best bet?
-> >
-> > Mount an RBD on a file "head" and export it via NFS?
-> >
-> > I feel like that is the only sane choice, but wanted to ask in case I=
-=20
-> > am missing something better.
+Thanks,
+Mark
 
-Two things:
+On 6/6/12 11:05 AM, Alexandre DERUMIER wrote:
+> Hi, I have rebuild my cluster with ubuntu precise,
+>
+> -kernel 3.2
+> -ceph 0.47.2
+> -libc6 2.15
+> -3 nodes - 5 osd (xfs) by node and 1 tmpfs with 5 journal file.
+>
+> I had launch rados bench,
+> and I see again constant writes to xfs....
+>
+> Maybe this is related to tmpfs ?
+>
+>
+> I'll retry with kernel 3.4 from intank tomorrow.
+> I'll also try with journal on a physical disk with xfs partition.
+>
+> I'll keep you in touch.
+>
+>
+> ----- Mail original -----
+>
+> De: "Mark Nelson"<mark.nelson@inktank.com>
+> =C3=80: "Alexandre DERUMIER"<aderumier@odiso.com>
+> Cc: "Amon Ott"<a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann=
+ Dupont"<Yann.Dupont@univ-nantes.fr>
+> Envoy=C3=A9: Lundi 4 Juin 2012 14:59:58
+> Objet: Re: Infiniband 40GB
+>
+> On 6/4/12 6:40 AM, Alexandre DERUMIER wrote:
+>> Hi,
+>>
+>> I'm currently doing some tests with xfs, debian wheezy with standard=
+ libc6 (2.11.3-3) and 3.2 kernel.
+>>
+>> I'm doing some iostats(3 nodes with 5 osd), and I see constant write=
+s to disks.(as the datas are flushed each second from journal to disk).
+>>
+>> Journal is big enough (20GB tmpfs) to handle 30s of write.
+>>
+>> Do you think it's related to the missing syncfs() support ?
+>>
+>> -Alexandre
+>
+> Hi Alexandre,
+>
+> I've included some seekwatcher results for rados bench tests using 16
+> concurrent 4MB writes on XFS OSD. One shows ubuntu oneiric and the
+> other precise (ie no syncfs support vs syncfs support in libc).
+> Unfortunately the original test was on 0.46 and the second test was o=
+n
+> 0.47.2, so multiple things changed between the tests. Both were teste=
+d
+> with kernel 3.4. Interestingly the seeks/second don't seem to drop mu=
+ch
+> but the overall performance has about doubled. This was using a singl=
+e
+> 7200rpm disk for the OSD data disk and a seperate 7200rpm disk for th=
+e
+> journal in both cases. I'd definitely try 0.47.2 with a new libc thou=
+gh
+> and see how that works for you.
+>
+> ceph 0.46/oneiric:
+> http://nhm.ceph.com/movies/mailinglist-tests/xfs-osd0-oneiric-3.4.mpg
+>
+> ceph 0.47.2/precise:
+> http://nhm.ceph.com/movies/mailinglist-tests/xfs-osd0-precise-3.4.mpg
+>
+> Mark
+>
+>
+>
 
-* 2.6.18 is crazy-old.  It's possible the libceph and rbd bits could be=20
-merged in, but getting the fs to work with ancient VFS will be a world of=
-=20
-pain. =20
-
-* NFS reexport works in basic scenarios, but should not be used in=20
-production as there are various conditions that can lead to ESTALE. =20
-Making it work is somewhere on the mid-term roadmap, but it'll be a while.
-
-Your best bet is to run cephfs on a modern kernel.  But be warned, we=20
-aren't ready to support the fs just yet.  Soon!
-
-sage
-
-
->=20
->  =A0- Travis
-> >
-> >
-> > On Wed, Jun 6, 2012 at 9:58 AM, Sam Zaydel <sam.zaydel@inktank.com> wro=
-te:
-> >>
-> >> I think you will be able to build from source the client bits that you
-> >> need, but I saw this from an earlier similar discussion mentioning
-> >> Python version, so I would make sure that python > 2.5 is used,
-> >> realistically 2.6 should be the norm today.
-> >>
-> >> http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/5717
-> >>
-> >> On Tue, Jun 5, 2012 at 6:16 PM, =A0<Eric_YH_Chen@wiwynn.com> wrote:
-> >> > Dear All:
-> >> >
-> >> >=FF=FF=FF=FF My ceph cluster is installed on Ubuntu 12.04 with kernel=
- 3.2.0.
-> >> >
-> >> >=FF=FF=FF=FF =A0=A0But I have a situation that I may need to mount ce=
-phfs on centos 5.7, which with kernel 2.6.18.
-> >> >
-> >> > =A0 =A0(that is to say , I only need to execute mount.ceph on the ce=
-ntos 5.7, not the whole ceph system)
-> >> >
-> >> > =A0 =A0I want to find a solution that can provide reliable and high =
-availability share file system.
-> >> >
-> >> > =A0 =A0Is it possible to do this? Or any other recommend way? =A0Ex:=
- =A0export NFS=FF=FF
-> >> >
-> >> > =A0 =A0Thanks!
-> >> >
-> >> >
-> >> > --
-> >> > To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
-> >> > the body of a message to majordomo@vger.kernel.org
-> >> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> >>
-> >> --
-> >> Inked by Sam Zaydel
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-> >
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-578140878-1339000023=:5397--
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
