@@ -1,53 +1,79 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Can we mount cephfs in centos 5.7 ?
-Date: Wed, 6 Jun 2012 09:24:25 -0700
-Message-ID: <CADvuQRFuvg5syrnfNEwnQ=5rwPJ-Gee3WhxHKd+bmJM3FWK2Bw@mail.gmail.com>
-References: <8512670932FB654F81AF0FEF1BE6D49D01790CEA@WHQBEMAIL1.whq.wistron>
- <CAAs1YtF5UkoG1O6yKBZq0KY4Z-MDsQ2K9VxneySpr5+JHFcA=g@mail.gmail.com>
- <CACkq2mpduy_6g=jUmXjwAHciuc+wsw41C231fpaENfmfZMp8yQ@mail.gmail.com> <CACkq2mrVkfGfAO4WJJA5DJ+TW-nt_1JC2M4Q6MZb8bMe_k-gCA@mail.gmail.com>
+From: Alex Elder <elder@dreamhost.com>
+Subject: Re: [PATCH v2 1/3] libceph: fix overflow in __decode_pool_names()
+Date: Wed, 06 Jun 2012 11:26:07 -0500
+Message-ID: <4FCF849F.7000704@dreamhost.com>
+References: <1335682765-1643-1-git-send-email-xi.wang@gmail.com> <4F9CE8A0.80306@gmail.com>
+Reply-To: elder@inktank.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:63412 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752410Ab2FFQYq convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 12:24:46 -0400
-Received: by dady13 with SMTP id y13so9004736dad.19
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 09:24:45 -0700 (PDT)
-In-Reply-To: <CACkq2mrVkfGfAO4WJJA5DJ+TW-nt_1JC2M4Q6MZb8bMe_k-gCA@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:36317 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752879Ab2FFQ0E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 12:26:04 -0400
+In-Reply-To: <4F9CE8A0.80306@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: ceph-devel@vger.kernel.org, sam.zaydel@inktank.com
+To: Xi Wang <xi.wang@gmail.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On Wed, Jun 6, 2012 at 7:25 AM, Travis Rhoden <trhoden@gmail.com> wrote=
-:
-> Sorry for the re-post.=C2=A0 First attempt got eaten by the mailing l=
-ist
-> because it wasn't plain text.=C2=A0 My first attempt!
->
->> With CephFS not quite ready for production, what would be the recomm=
-ended way for sharing Ceph to older operating systems?=C2=A0 Specifical=
-ly, I want to share a file system (i.e. mount a common directory) on se=
-veral CentOS5 and CentOS6 nodes.=C2=A0 I don't think I can mount an RBD=
- from more than one node, so what is my best bet?
->>
->> Mount an RBD on a file "head" and export it via NFS?
->>
->> I feel like that is the only sane choice, but wanted to ask in case =
-I am missing something better.
+On 04/29/2012 02:07 AM, Xi Wang wrote:
+> `len' is read from network and thus needs validation.  Otherwise a
+> large `len' would cause out-of-bounds access via the memcpy() call.
+> In addition, len = 0xffffffff would overflow the kmalloc() size,
+> leading to out-of-bounds write.
+> 
+> This patch adds a check of `len' via ceph_decode_need().  Also use
+> kstrndup rather than kmalloc/memcpy.
 
-Your other options are re-exporting NFS or CIFS, or trying to use ceph-=
-fuse.
+This looks good, however I'd like to correct one thing, and fix
+another (both noted below) before committing.  Please confirm/ack my
+suggested change; I'll still credit you with the original patch.
+Thanks.
 
-I recall using ceph-fuse on CentOS 6 personally and I've heard people
-talk about ceph-fuse on CentOS 5, though we don't currently actively
-test either. There, your biggest problem tends to be the 32-bit
-limitation; ceph inodes are 64-bit, and ceph-fuse really wants to run
-on a 64-bit machine.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+					-Alex
+
+> Signed-off-by: Xi Wang <xi.wang@gmail.com>
+> ---
+> Subject corrected.  Sorry, my bad.
+> ---
+>  net/ceph/osdmap.c |    9 +++------
+>  1 files changed, 3 insertions(+), 6 deletions(-)
+> 
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index 29ad46e..f80afc3 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -495,15 +495,12 @@ static int __decode_pool_names(void **p, void *end, struct ceph_osdmap *map)
+>  		ceph_decode_32_safe(p, end, pool, bad);
+>  		ceph_decode_32_safe(p, end, len, bad);
+>  		dout("  pool %d len %d\n", pool, len);
+> +		ceph_decode_need(p, end, len, bad);
+>  		pi = __lookup_pg_pool(&map->pg_pools, pool);
+>  		if (pi) {
+>  			kfree(pi->name);
+> -			pi->name = kmalloc(len + 1, GFP_NOFS);
+> -			if (pi->name) {
+> -				memcpy(pi->name, *p, len);
+> -				pi->name[len] = '\0';
+> -				dout("  name is %s\n", pi->name);
+> -			}
+> +			pi->name = kstrndup(*p, len, GFP_NOFS);
+> +			dout("  name is %s\n", pi->name);
+
+Instead:
+		if (pi) {
+			char *name = kstrndup(*p, len, GFP_NOFS);
+
+			if (!name)
+				return -ENOMEM;
+			kfree(pi->name);
+			pi->name = name;
+			dout("  name is %s\n", pi->name);
+		}
+
+>  		}
+>  		*p += len;
+>  	}
+
