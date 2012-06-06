@@ -1,41 +1,35 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 3/4] libceph: make ceph_con_revoke() a msg operation
-Date: Wed, 06 Jun 2012 06:51:47 -0500
-Message-ID: <4FCF4453.4070802@inktank.com>
-References: <4FCECD7F.9030002@inktank.com> <4FCECF25.2070300@inktank.com> <Pine.LNX.4.64.1206052217530.22586@cobra.newdream.net>
+From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Subject: Ceph and BackupPC (was: Re: mount: 10.0.6.10:/: can't read superblock)
+Date: Wed, 06 Jun 2012 15:29:05 +0200
+Message-ID: <3941218.dafc4yYMCO@pc10>
+References: <c99406dc-0969-47de-a75a-72a8f42eae52@mail.linserv.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:58172 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751493Ab2FFLvn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 07:51:43 -0400
-Received: by ghrr11 with SMTP id r11so5151485ghr.19
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 04:51:43 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1206052217530.22586@cobra.newdream.net>
+Received: from unknownsite.de ([62.48.69.106]:36474 "EHLO hartes-hannover.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753488Ab2FFN3L (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 Jun 2012 09:29:11 -0400
+In-Reply-To: <c99406dc-0969-47de-a75a-72a8f42eae52@mail.linserv.se>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Martin Wilderoth <martin.wilderoth@linserv.se>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 06/06/2012 12:18 AM, Sage Weil wrote:
-> I'm mildly concerned that if the msg isn't on the con the upper layer 
-> thinks it is it is a bug, and we might be better off keeping this arg and 
-> asserting that con == msg->con...
+Am Dienstag, 5. Juni 2012, 14:33:19 schrieb Martin Wilderoth:
 
-The patch I burned myself on over the weekend actually assumed that
-the msg->con was available to use by the client code.  I.e., it
-assumed that it was not reset to NULL whenever the message left
-the connection layer.
+> I have not done any changes installed at version 0.46 upgraded earlier and
+> have been testing with ceph and ceph-fuse and backuppc.
 
-Making it null like that allows for some run-time verification of
-things (e.g., BUG_ON(msg->con == NULL)) but those aren't strictly
-necessary, so we could have msg->con hold whatever non-null value
-it was last assigned.  We could even add a flag to indicate the
-notion of who "owns" it if we still wanted the verification.
+BackupPC and Ceph sounds like an interesting combination. Other than this 
+hanging MDS problem, what are your experiences with that?
 
-I'll just keep it as-is unless you have a strong preference for
-another option; I'm open.
+I'm asking because BackupPC is the only application I know of that actually 
+makes heavy use of hardlinks. Ceph, as far as I've understood it, supports 
+hardlinks, but works under the assumption that they're a rare and not 
+performance-critical corner case, and does some optimizations that help the 
+more common cases, but would probably hurt if you are using hardlinks a lot.
 
-					-Alex
+Regards,
+	Guido
