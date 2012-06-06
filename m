@@ -1,139 +1,50 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/4] libceph: make ceph_con_revoke_message() a msg op
-Date: Tue, 05 Jun 2012 22:31:56 -0500
-Message-ID: <4FCECF2C.8010200@inktank.com>
-References: <4FCECD7F.9030002@inktank.com>
+From: "Matt W. Benjamin" <matt@linuxbox.com>
+Subject: Re: [PATCH] ceph.spec.in: Fix license to GPL-2.0 and use SPDX
+ format
+Date: Tue, 5 Jun 2012 23:59:46 -0400 (EDT)
+Message-ID: <297035103.352.1338955186927.JavaMail.root@thunderbeast.private.linuxbox.com>
+References: <Pine.LNX.4.64.1206051928360.5946@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:40363 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752000Ab2FFDbw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 23:31:52 -0400
-Received: by mail-yx0-f174.google.com with SMTP id m10so4637648yen.19
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 20:31:51 -0700 (PDT)
-In-Reply-To: <4FCECD7F.9030002@inktank.com>
+Received: from aa.linuxbox.com ([134.215.213.37]:1024 "EHLO aa.linuxbox.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750908Ab2FFEFN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 Jun 2012 00:05:13 -0400
+In-Reply-To: <Pine.LNX.4.64.1206051928360.5946@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, Holger Macht <hmacht@suse.de>
 
-ceph_con_revoke_message() is passed both a message and a ceph
-connection.  A ceph_msg allocated for incoming messages on a
-connection always has a pointer to that connection, so there's no
-need to provide the connection when revoking such a message.
+That wouldn't seem to make a lot of sense, no.
 
-Note that the existing logic does not preclude the message supplied
-being a null/bogus message pointer.  The only user of this interface
-is the OSD client, and the only value an osd client passes is a
-request's r_reply field.  That is always non-null (except briefly in
-an error path in ceph_osdc_alloc_request(), and that drops the
-only reference so the request won't ever have a reply to revoke).
-So we can safely assume the passed-in message is non-null, but add a
-BUG_ON() to make it very obvious we are imposing this restriction.
+Matt
 
-Rename the function ceph_msg_revoke_incoming() to reflect that it is
-really an operation on an incoming message.
+----- "Sage Weil" <sage@inktank.com> wrote:
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- include/linux/ceph/messenger.h |    4 ++--
- net/ceph/messenger.c           |   19 +++++++++++++------
- net/ceph/osd_client.c          |    9 ++++-----
- 3 files changed, 19 insertions(+), 13 deletions(-)
+> On Tue, 5 Jun 2012, Holger Macht wrote:
+> > Minor spec file fix. LGPLv2 in spec file is not correct, because
+> some of
+> > the included packages/binaries are GPLv2. For example:
+> > 
+> >  src/os/btrfs_ioctl.h -> package ceph, binary ceph-osd
+> 
+> My understanding is that including a header file (in this case, to get
+> the 
+> ioctl number) does not create a derivative work.  Is that incorrect?
+> 
 
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index 9008f81..a334dbd 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -241,8 +241,8 @@ extern void ceph_con_close(struct ceph_connection *con);
- extern void ceph_con_send(struct ceph_connection *con, struct ceph_msg
-*msg);
 
- extern void ceph_msg_revoke(struct ceph_msg *msg);
--extern void ceph_con_revoke_message(struct ceph_connection *con,
--				  struct ceph_msg *msg);
-+extern void ceph_msg_revoke_incoming(struct ceph_msg *msg);
-+
- extern void ceph_con_keepalive(struct ceph_connection *con);
- extern struct ceph_connection *ceph_con_get(struct ceph_connection *con);
- extern void ceph_con_put(struct ceph_connection *con);
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 79f3032..a036141 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -2456,17 +2456,24 @@ void ceph_msg_revoke(struct ceph_msg *msg)
- /*
-  * Revoke a message that we may be reading data into
-  */
--void ceph_con_revoke_message(struct ceph_connection *con, struct
-ceph_msg *msg)
-+void ceph_msg_revoke_incoming(struct ceph_msg *msg)
- {
-+	struct ceph_connection *con;
-+
-+	BUG_ON(msg == NULL);
-+	if (!msg->con)
-+		return;		/* Message not in our posession */
-+
-+	con = msg->con;
- 	mutex_lock(&con->mutex);
--	if (con->in_msg && con->in_msg == msg) {
-+	if (con->in_msg == msg) {
- 		unsigned front_len = le32_to_cpu(con->in_hdr.front_len);
- 		unsigned middle_len = le32_to_cpu(con->in_hdr.middle_len);
- 		unsigned data_len = le32_to_cpu(con->in_hdr.data_len);
-
- 		/* skip rest of message */
--		dout("con_revoke_pages %p msg %p revoked\n", con, msg);
--			con->in_base_pos = con->in_base_pos -
-+		dout("%s %p msg %p revoked\n", __func__, con, msg);
-+		con->in_base_pos = con->in_base_pos -
- 				sizeof(struct ceph_msg_header) -
- 				front_len -
- 				middle_len -
-@@ -2477,8 +2484,8 @@ void ceph_con_revoke_message(struct
-ceph_connection *con, struct ceph_msg *msg)
- 		con->in_tag = CEPH_MSGR_TAG_READY;
- 		con->in_seq++;
- 	} else {
--		dout("con_revoke_pages %p msg %p pages %p no-op\n",
--		     con, con->in_msg, msg);
-+		dout("%s %p in_msg %p msg %p no-op\n",
-+		     __func__, con, con->in_msg, msg);
- 	}
- 	mutex_unlock(&con->mutex);
- }
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 403fefb..9f87edd 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -140,10 +140,9 @@ void ceph_osdc_release_request(struct kref *kref)
- 	if (req->r_request)
- 		ceph_msg_put(req->r_request);
- 	if (req->r_con_filling_msg) {
--		dout("release_request revoking pages %p from con %p\n",
-+		dout("%s revoking pages %p from con %p\n", __func__,
- 		     req->r_pages, req->r_con_filling_msg);
--		ceph_con_revoke_message(req->r_con_filling_msg,
--				      req->r_reply);
-+		ceph_msg_revoke_incoming(req->r_reply);
- 		req->r_con_filling_msg->ops->put(req->r_con_filling_msg);
- 	}
- 	if (req->r_reply)
-@@ -2022,9 +2021,9 @@ static struct ceph_msg *get_reply(struct
-ceph_connection *con,
- 	}
-
- 	if (req->r_con_filling_msg) {
--		dout("get_reply revoking msg %p from old con %p\n",
-+		dout("%s revoking msg %p from old con %p\n", __func__,
- 		     req->r_reply, req->r_con_filling_msg);
--		ceph_con_revoke_message(req->r_con_filling_msg, req->r_reply);
-+		ceph_msg_revoke_incoming(req->r_reply);
- 		req->r_con_filling_msg->ops->put(req->r_con_filling_msg);
- 		req->r_con_filling_msg = NULL;
- 	}
 -- 
-1.7.5.4
+Matt Benjamin
+The Linux Box
+206 South Fifth Ave. Suite 150
+Ann Arbor, MI  48104
 
+http://linuxbox.com
+
+tel. 734-761-4689
+fax. 734-769-8938
+cel. 734-216-5309
