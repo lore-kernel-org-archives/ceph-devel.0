@@ -1,39 +1,61 @@
-From: udit agarwal <fzdudit@gmail.com>
-Subject: Re: iozone test crashed on ceph
-Date: Wed, 6 Jun 2012 02:31:56 +0000 (UTC)
-Message-ID: <loom.20120606T041909-114@post.gmane.org>
-References: <loom.20120601T025228-787@post.gmane.org> <0F43C46A9543420FBEB081A55ACD1FB0@inktank.com> <loom.20120604T235042-446@post.gmane.org> <CADvuQRFRsc24feZFbQYo7Rkg=ot4PF7j9VCEFDO2PJq3AGkzsw@mail.gmail.com> <loom.20120605T012913-573@post.gmane.org> <loom.20120605T014157-339@post.gmane.org> <CADvuQRHMxM9PxOyxmej9_MuJajGNV2=yBxL9vN7P4KEvA7US5A@mail.gmail.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 00/11] continued messenger-related changes
+Date: Tue, 05 Jun 2012 22:24:47 -0500
+Message-ID: <4FCECD7F.9030002@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:57749 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752709Ab2FFCcO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 5 Jun 2012 22:32:14 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Sc62d-0004AD-8m
-	for ceph-devel@vger.kernel.org; Wed, 06 Jun 2012 04:32:12 +0200
-Received: from en-439-0215-006.esc.auckland.ac.nz ([130.216.209.143])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 04:32:11 +0200
-Received: from fzdudit by en-439-0215-006.esc.auckland.ac.nz with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 04:32:11 +0200
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:39387 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751420Ab2FFDYn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 23:24:43 -0400
+Received: by yenm10 with SMTP id m10so4635568yen.19
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 20:24:42 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi,
- Thanks for your reply.
- After you hinted that this problem may have caused due to using record size of
-length 4k. Then, I ran iozone test on a 5m file with record length 4k and to my
-surprise, the ceph system again hanged up. Then, I tried same with record
-lengths from 8k to 1m and everything worked fine for these cases with 5 MB file.
-Now, I have already executed the iozone test with 5G file and with record sizes
-from 8k to 16m and will see what happens!!
+This is a series of 11 related patches but I've grouped them into
+smaller sub-sets as follows.  A few of these were posted previously
+but their changes--if any--were merely related to adjustments to
+account for other patches inserted before them in the series.  Two
+of them are being submitted on behalf of Sage Weil.
 
---Udit Agarwal
+These patches can also be viewed here:
+    https://github.com/ceph/ceph-client/commits/wip-messenger-review
 
+					-Alex
+
+[PATCH] libceph: osd_client: don't drop reply reference too early
+    This fixes a potential bug found by inspection.
+
+[PATCH] libceph: use con get/put ops from osd_client
+    This fixes a possibly serious problem with reference counting
+    that Sage found while reviewing my last series of patches.
+
+[PATCH 1/2] libceph: embed ceph connection structure in mon_client
+[PATCH 2/2] libceph: drop connection refcounting for mon_client
+    These two rearrange how the ceph connection is represented in
+    a mon_client structure, and make the referencing counting
+    methods no-ops.
+
+[PATCH 1/2] libceph: init monitor connection when opening
+[PATCH 2/2] libceph: fully initialize connection in con_init()
+    This finishes a small sub-series from before that did not get
+    fully committed.  It unifies the way ceph connections are
+    initialized so that ceph connection fields are manipulated by
+    the messenger code, not the caller.
+
+[PATCH] libceph: tweak ceph_alloc_msg()
+    This is a standalone cleanup that aims to make the real purpose
+    of this function a bit more obvious.
+
+[PATCH 1/4] libceph: have messages point to their connection
+[PATCH 2/4] libceph: have messages take a connection reference
+[PATCH 3/4] libceph: make ceph_con_revoke() a msg operation
+[PATCH 4/4] libceph: make ceph_con_revoke_message() a msg op
+    These four patches make every message maintain a reference to
+    the connection it is associated with.  Having this reference
+    allows the revoke routines to be called with a message alone
+    rather than having to supply a connection pointer as well.
