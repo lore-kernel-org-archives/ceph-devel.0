@@ -1,156 +1,147 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 3/4] libceph: make ceph_con_revoke() a msg operation
-Date: Tue, 5 Jun 2012 22:18:38 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206052217530.22586@cobra.newdream.net>
-References: <4FCECD7F.9030002@inktank.com> <4FCECF25.2070300@inktank.com>
+Subject: Re: [PATCH 4/4] libceph: make ceph_con_revoke_message() a msg op
+Date: Tue, 5 Jun 2012 22:22:09 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206052219450.22586@cobra.newdream.net>
+References: <4FCECD7F.9030002@inktank.com> <4FCECF2C.8010200@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40629 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:40677 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751961Ab2FFFSl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 01:18:41 -0400
-In-Reply-To: <4FCECF25.2070300@inktank.com>
+	with ESMTP id S1752126Ab2FFFWS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 01:22:18 -0400
+In-Reply-To: <4FCECF2C.8010200@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Reviewed-by: Sage Weil <sage@inktank.com>
-
-I'm mildly concerned that if the msg isn't on the con the upper layer 
-thinks it is it is a bug, and we might be better off keeping this arg and 
-asserting that con == msg->con...
-
-
 On Tue, 5 Jun 2012, Alex Elder wrote:
+> ceph_con_revoke_message() is passed both a message and a ceph
+> connection.  A ceph_msg allocated for incoming messages on a
+> connection always has a pointer to that connection, so there's no
+> need to provide the connection when revoking such a message.
+> 
+> Note that the existing logic does not preclude the message supplied
+> being a null/bogus message pointer.  The only user of this interface
+> is the OSD client, and the only value an osd client passes is a
+> request's r_reply field.  That is always non-null (except briefly in
+> an error path in ceph_osdc_alloc_request(), and that drops the
+> only reference so the request won't ever have a reply to revoke).
+> So we can safely assume the passed-in message is non-null, but add a
+> BUG_ON() to make it very obvious we are imposing this restriction.
+> 
+> Rename the function ceph_msg_revoke_incoming() to reflect that it is
+> really an operation on an incoming message.
 
-> ceph_con_revoke() is passed both a message and a ceph connection.
-> Now that any message associated with a connection holds a pointer
-> to that connection, there's no need to provide the connection when
-> revoking a message.
-> 
-> This has the added benefit of precluding the possibility of the
-> providing the wrong connection pointer.  If the message's connection
-> pointer is null, it is not being tracked by any connection, so
-> revoking it is a no-op.  This is supported as a convenience for
-> upper layers, so they can revoke a message that is not actually
-> "in flight."
-> 
-> Rename the function ceph_msg_revoke() to reflect that it is really
-> an operation on a message, not a connection.
+Yes
+
 > 
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->  include/linux/ceph/messenger.h |    3 ++-
->  net/ceph/messenger.c           |    7 ++++++-
->  net/ceph/mon_client.c          |    8 ++++----
->  net/ceph/osd_client.c          |    4 ++--
->  4 files changed, 14 insertions(+), 8 deletions(-)
+>  include/linux/ceph/messenger.h |    4 ++--
+>  net/ceph/messenger.c           |   19 +++++++++++++------
+>  net/ceph/osd_client.c          |    9 ++++-----
+>  3 files changed, 19 insertions(+), 13 deletions(-)
 > 
 > diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 6df837f..9008f81 100644
+> index 9008f81..a334dbd 100644
 > --- a/include/linux/ceph/messenger.h
 > +++ b/include/linux/ceph/messenger.h
-> @@ -239,7 +239,8 @@ extern void ceph_con_open(struct ceph_connection *con,
->  extern bool ceph_con_opened(struct ceph_connection *con);
->  extern void ceph_con_close(struct ceph_connection *con);
+> @@ -241,8 +241,8 @@ extern void ceph_con_close(struct ceph_connection *con);
 >  extern void ceph_con_send(struct ceph_connection *con, struct ceph_msg
 > *msg);
-> -extern void ceph_con_revoke(struct ceph_connection *con, struct
-> ceph_msg *msg);
+> 
+>  extern void ceph_msg_revoke(struct ceph_msg *msg);
+> -extern void ceph_con_revoke_message(struct ceph_connection *con,
+> -				  struct ceph_msg *msg);
+> +extern void ceph_msg_revoke_incoming(struct ceph_msg *msg);
 > +
-> +extern void ceph_msg_revoke(struct ceph_msg *msg);
->  extern void ceph_con_revoke_message(struct ceph_connection *con,
->  				  struct ceph_msg *msg);
 >  extern void ceph_con_keepalive(struct ceph_connection *con);
+>  extern struct ceph_connection *ceph_con_get(struct ceph_connection *con);
+>  extern void ceph_con_put(struct ceph_connection *con);
 > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 336707b..79f3032 100644
+> index 79f3032..a036141 100644
 > --- a/net/ceph/messenger.c
 > +++ b/net/ceph/messenger.c
-> @@ -2421,8 +2421,13 @@ EXPORT_SYMBOL(ceph_con_send);
+> @@ -2456,17 +2456,24 @@ void ceph_msg_revoke(struct ceph_msg *msg)
 >  /*
->   * Revoke a message that was previously queued for send
+>   * Revoke a message that we may be reading data into
 >   */
-> -void ceph_con_revoke(struct ceph_connection *con, struct ceph_msg *msg)
-> +void ceph_msg_revoke(struct ceph_msg *msg)
+> -void ceph_con_revoke_message(struct ceph_connection *con, struct
+> ceph_msg *msg)
+> +void ceph_msg_revoke_incoming(struct ceph_msg *msg)
 >  {
-> +	struct ceph_connection *con = msg->con;
+> +	struct ceph_connection *con;
 > +
-> +	if (!con)
-> +		return;		/* Message not in our possession */
+> +	BUG_ON(msg == NULL);
+> +	if (!msg->con)
+> +		return;		/* Message not in our posession */
+
+This case weirds me out.  I think it can happen, but maybe we should at 
+least get a debug msg, like the no-op one below.
+
+Reviewed-by: Sage Weil <sage@inktank.com>
+
 > +
+> +	con = msg->con;
 >  	mutex_lock(&con->mutex);
->  	if (!list_empty(&msg->list_head)) {
->  		dout("%s %p msg %p - was on queue\n", __func__, con, msg);
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index ab6b24a..cf82e04 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -106,7 +106,7 @@ static void __send_prepared_auth_request(struct
-> ceph_mon_client *monc, int len)
->  	monc->pending_auth = 1;
->  	monc->m_auth->front.iov_len = len;
->  	monc->m_auth->hdr.front_len = cpu_to_le32(len);
-> -	ceph_con_revoke(&monc->con, monc->m_auth);
-> +	ceph_msg_revoke(monc->m_auth);
->  	ceph_msg_get(monc->m_auth);  /* keep our ref */
->  	ceph_con_send(&monc->con, monc->m_auth);
->  }
-> @@ -117,7 +117,7 @@ static void __send_prepared_auth_request(struct
-> ceph_mon_client *monc, int len)
->  static void __close_session(struct ceph_mon_client *monc)
->  {
->  	dout("__close_session closing mon%d\n", monc->cur_mon);
-> -	ceph_con_revoke(&monc->con, monc->m_auth);
-> +	ceph_msg_revoke(monc->m_auth);
->  	ceph_con_close(&monc->con);
->  	monc->con.private = NULL;
->  	monc->cur_mon = -1;
-> @@ -229,7 +229,7 @@ static void __send_subscribe(struct ceph_mon_client
-> *monc)
+> -	if (con->in_msg && con->in_msg == msg) {
+> +	if (con->in_msg == msg) {
+>  		unsigned front_len = le32_to_cpu(con->in_hdr.front_len);
+>  		unsigned middle_len = le32_to_cpu(con->in_hdr.middle_len);
+>  		unsigned data_len = le32_to_cpu(con->in_hdr.data_len);
 > 
->  		msg->front.iov_len = p - msg->front.iov_base;
->  		msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
-> -		ceph_con_revoke(&monc->con, msg);
-> +		ceph_msg_revoke(msg);
->  		ceph_con_send(&monc->con, ceph_msg_get(msg));
-> 
->  		monc->sub_sent = jiffies | 1;  /* never 0 */
-> @@ -687,7 +687,7 @@ static void __resend_generic_request(struct
-> ceph_mon_client *monc)
-> 
->  	for (p = rb_first(&monc->generic_request_tree); p; p = rb_next(p)) {
->  		req = rb_entry(p, struct ceph_mon_generic_request, node);
-> -		ceph_con_revoke(&monc->con, req->request);
-> +		ceph_msg_revoke(req->request);
->  		ceph_con_send(&monc->con, ceph_msg_get(req->request));
+>  		/* skip rest of message */
+> -		dout("con_revoke_pages %p msg %p revoked\n", con, msg);
+> -			con->in_base_pos = con->in_base_pos -
+> +		dout("%s %p msg %p revoked\n", __func__, con, msg);
+> +		con->in_base_pos = con->in_base_pos -
+>  				sizeof(struct ceph_msg_header) -
+>  				front_len -
+>  				middle_len -
+> @@ -2477,8 +2484,8 @@ void ceph_con_revoke_message(struct
+> ceph_connection *con, struct ceph_msg *msg)
+>  		con->in_tag = CEPH_MSGR_TAG_READY;
+>  		con->in_seq++;
+>  	} else {
+> -		dout("con_revoke_pages %p msg %p pages %p no-op\n",
+> -		     con, con->in_msg, msg);
+> +		dout("%s %p in_msg %p msg %p no-op\n",
+> +		     __func__, con, con->in_msg, msg);
 >  	}
+>  	mutex_unlock(&con->mutex);
 >  }
 > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 448c9da..403fefb 100644
+> index 403fefb..9f87edd 100644
 > --- a/net/ceph/osd_client.c
 > +++ b/net/ceph/osd_client.c
-> @@ -852,7 +852,7 @@ static void __unregister_request(struct
-> ceph_osd_client *osdc,
-> 
->  	if (req->r_osd) {
->  		/* make sure the original request isn't in flight. */
-> -		ceph_con_revoke(&req->r_osd->o_con, req->r_request);
-> +		ceph_msg_revoke(req->r_request);
-> 
->  		list_del_init(&req->r_osd_item);
->  		if (list_empty(&req->r_osd->o_requests) &&
-> @@ -879,7 +879,7 @@ static void __unregister_request(struct
-> ceph_osd_client *osdc,
->  static void __cancel_request(struct ceph_osd_request *req)
->  {
->  	if (req->r_sent && req->r_osd) {
-> -		ceph_con_revoke(&req->r_osd->o_con, req->r_request);
-> +		ceph_msg_revoke(req->r_request);
->  		req->r_sent = 0;
+> @@ -140,10 +140,9 @@ void ceph_osdc_release_request(struct kref *kref)
+>  	if (req->r_request)
+>  		ceph_msg_put(req->r_request);
+>  	if (req->r_con_filling_msg) {
+> -		dout("release_request revoking pages %p from con %p\n",
+> +		dout("%s revoking pages %p from con %p\n", __func__,
+>  		     req->r_pages, req->r_con_filling_msg);
+> -		ceph_con_revoke_message(req->r_con_filling_msg,
+> -				      req->r_reply);
+> +		ceph_msg_revoke_incoming(req->r_reply);
+>  		req->r_con_filling_msg->ops->put(req->r_con_filling_msg);
 >  	}
->  }
+>  	if (req->r_reply)
+> @@ -2022,9 +2021,9 @@ static struct ceph_msg *get_reply(struct
+> ceph_connection *con,
+>  	}
+> 
+>  	if (req->r_con_filling_msg) {
+> -		dout("get_reply revoking msg %p from old con %p\n",
+> +		dout("%s revoking msg %p from old con %p\n", __func__,
+>  		     req->r_reply, req->r_con_filling_msg);
+> -		ceph_con_revoke_message(req->r_con_filling_msg, req->r_reply);
+> +		ceph_msg_revoke_incoming(req->r_reply);
+>  		req->r_con_filling_msg->ops->put(req->r_con_filling_msg);
+>  		req->r_con_filling_msg = NULL;
+>  	}
 > -- 
 > 1.7.5.4
 > 
