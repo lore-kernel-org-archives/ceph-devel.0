@@ -1,44 +1,65 @@
-From: <Eric_YH_Chen@wiwynn.com>
-Subject: Can we mount cephfs in centos 5.7 ?
-Date: Wed, 6 Jun 2012 09:16:36 +0800
-Message-ID: <8512670932FB654F81AF0FEF1BE6D49D01790CEA@WHQBEMAIL1.whq.wistron>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph.spec.in: Fix license to GPL-2.0 and use SPDX format
+Date: Tue, 5 Jun 2012 19:29:51 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206051928360.5946@cobra.newdream.net>
+References: <4FCE0309.90104@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=big5
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw4.wistron.com ([220.128.89.24]:61311 "EHLO
-	TWNHUMSW4.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751976Ab2FFBQx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 21:16:53 -0400
-Received: from TWNHUFE4.whq.wistron (unverified [10.37.31.104]) by TWNHUMSW4.wistron.com
- (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta4cd82189dc0a8167216b0@TWNHUMSW4.wistron.com> for <ceph-devel@vger.kernel.org>;
- Wed, 6 Jun 2012 09:21:31 +0800
-Content-class: urn:content-classes:message
+Received: from cobra.newdream.net ([66.33.216.30]:49079 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752936Ab2FFC34 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 22:29:56 -0400
+In-Reply-To: <4FCE0309.90104@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Holger Macht <hmacht@suse.de>
+Cc: ceph-devel@vger.kernel.org
 
-Dear All:
+On Tue, 5 Jun 2012, Holger Macht wrote:
+> Minor spec file fix. LGPLv2 in spec file is not correct, because some of
+> the included packages/binaries are GPLv2. For example:
+> 
+>  src/os/btrfs_ioctl.h -> package ceph, binary ceph-osd
 
-=A1@=A1@My ceph cluster is installed on Ubuntu 12.04 with kernel 3.2.0.
-=A1@=A1@
-    But I have a situation that I may need to mount cephfs on centos 5.=
-7, which with kernel 2.6.18.
+My understanding is that including a header file (in this case, to get the 
+ioctl number) does not create a derivative work.  Is that incorrect?
 
-    (that is to say , I only need to execute mount.ceph on the centos 5=
-=2E7, not the whole ceph system)
+>  src/mount/mtab.c     -> package ceph, binary mount.ceph
+>  src/common/fiemap.cc -> package ceph, binary rbd
+> 
+> Also use SPDX format: http://www.spdx.org/licenses
+> 
+> Signed-off-by: Holger Macht <hmacht@suse.de>
+> ---
+>  ceph.spec.in |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/ceph.spec.in b/ceph.spec.in
+> index 81e7040..3b3026d 100644
+> --- a/ceph.spec.in
+> +++ b/ceph.spec.in
+> @@ -17,7 +17,7 @@ Name:		ceph
+>  Version:	@VERSION@
+>  Release:	6%{?dist}
+>  Summary:	User space components of the Ceph file system
+> -License:	LGPLv2
+> +License:	GPL-2.0
 
-    I want to find a solution that can provide reliable and high availa=
-bility share file system.=20
+So this is effectively the most restrictive license in the package?
 
-    Is it possible to do this? Or any other recommend way?  Ex:  export=
- NFS=A1K
+Thanks-
+sage
 
-    Thanks!
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  Group:		System Environment/Base
+>  URL:		http://ceph.newdream.net/
+>  Source0:	http://ceph.newdream.net/download/%{name}-%{version}.tar.bz2
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
