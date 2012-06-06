@@ -1,220 +1,161 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 2/4] libceph: have messages take a connection reference
-Date: Wed, 6 Jun 2012 10:06:24 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206060945410.5397@cobra.newdream.net>
-References: <4FCECD7F.9030002@inktank.com> <4FCECF1F.3050106@inktank.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: Re: Can we mount cephfs in centos 5.7 ?
+Date: Wed, 6 Jun 2012 13:23:27 -0400
+Message-ID: <CACkq2mrgFguqCEdc=-K63C3w3i6J04E2R1NJswpYeqxeprG+BA@mail.gmail.com>
+References: <8512670932FB654F81AF0FEF1BE6D49D01790CEA@WHQBEMAIL1.whq.wistron>
+ <CAAs1YtF5UkoG1O6yKBZq0KY4Z-MDsQ2K9VxneySpr5+JHFcA=g@mail.gmail.com>
+ <CACkq2mpduy_6g=jUmXjwAHciuc+wsw41C231fpaENfmfZMp8yQ@mail.gmail.com>
+ <CACkq2mrVkfGfAO4WJJA5DJ+TW-nt_1JC2M4Q6MZb8bMe_k-gCA@mail.gmail.com> <Pine.LNX.4.64.1206060924500.5397@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58581 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757334Ab2FFRG2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 13:06:28 -0400
-In-Reply-To: <4FCECF1F.3050106@inktank.com>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:35140 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932097Ab2FFRXt convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 6 Jun 2012 13:23:49 -0400
+Received: by lahd3 with SMTP id d3so4838293lah.19
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 10:23:47 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1206060924500.5397@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, sam.zaydel@inktank.com
 
-On Tue, 5 Jun 2012, Alex Elder wrote:
-> There are essentially two types of ceph messages: incoming and
-> outgoing.  Outgoing messages are always allocated via ceph_msg_new(),
-> and at the time of their allocation they are not associated with any
-> particular connection.  Incoming messages are always allocated via
-> ceph_con_in_msg_alloc(), and they are initially associated with the
-> connection from which incoming data will be placed into the message.
-> 
-> When an outgoing message gets sent, it becomes associated with a
-> connection and remains that way until the message is successfully
-> sent.  The association of an incoming message goes away at the point
-> it is sent to an upper layer via a con->ops->dispatch method.
-> 
-> This patch implements reference counting for all ceph messages, such
-> that every message holds a reference (and a pointer) to a connection
-> if and only if it is associated with that connection (as described
-> above).
-> 
-> 
-> For background, here is an explanation of the ceph message
-> lifecycle, emphasizing when an association exists between a message
-> and a connection.
-> 
-> Outgoing Messages
-> An outgoing message is "owned" by its allocator, from the time it is
-> allocated in ceph_msg_new() up to the point it gets queued for
-> sending in ceph_con_send().  Prior to that point the message's
-> msg->con pointer is null; at the point it is queued for sending its
-> message pointer is assigned to refer to the connection.  At that
-> time the message is inserted into a connection's out_queue list.
-> 
-> When a message on the out_queue list has been sent to the socket
-> layer to be put on the wire, it is transferred out of that list and
-> into the connection's out_sent list.  At that point it is still owned
-> by the connection, and will remain so until an acknowledgement is
-> received from the recipient that indicates the message was
-> successfully transferred.  When such an acknowledgement is received
-> (in process_ack()), the message is removed from its list (in
-> ceph_msg_remove()), at which point it is no longer associated with
-> the connection.
-> 
-> So basically, any time a message is on one of a connection's lists,
-> it is associated with that connection.  Reference counting outgoing
-> messages can thus be done at the points a message is added to the
-> out_queue (in ceph_con_send()) and the point it is removed from
-> either its two lists (in ceph_msg_remove())--at which point its
-> connection pointer becomes null.
-> 
-> Incoming Messages
-> When an incoming message on a connection is getting read (in
-> read_partial_message()) and there is no message in con->in_msg,
-> a new one is allocated using ceph_con_in_msg_alloc().  At that
-> point the message is associated with the connection.  Once that
-> message has been completely and successfully read, it is passed to
-> upper layer code using the connection's con->ops->dispatch method.
-> At that point the association between the message and the connection
-> no longer exists.
-> 
-> Reference counting of connections for incoming messages can be done
-> by taking a reference to the connection when the message gets
-> allocated, and releasing that reference when it gets handed off
-> using the dispatch method.
-> 
-> We should never fail to get a connection reference for a
-> message--the since the caller should already hold one.
-> 
-> Signed-off-by: Alex Elder <elder@inktank.com>
+Thanks folks.
 
-I have some reservations about this one.  Not because it's wrong, but 
-because I'm not sure what it will fix (now or later).  Right now the con 
-has references to the messages.  If we add refs the other way around, we 
-need to make sure those refs go away or else the con will leak.  And in 
-order to do that, the upper layer has to properly clean up.  Currently, if 
-it doesn't clean up, the messages would point to an invalid/released con, 
-but nothing would reference them.. they'd leak.  With this change, we 
-would also leak the con and it's containing structure.  I'm not sure 
-that's any better or worse.
+> * 2.6.18 is crazy-old.
+Certainly.    I'm hoping I only need to work with CentOS6, then I at
+least get 2.6.32.  I wouldn't try to do RBD with these kernels,
+though.  I would be more likely to have an Ubuntu 12.04 node mount an
+RBD and export with NFS.  But as you mention, that has it's own
+issues.
 
-The net effect here is that we're doing a lot of additional atomic 
-operations on the containing object's ref count.  Not sure if that cost is 
-important.
+> Your other options are re-exporting NFS or CIFS, or trying to use cep=
+h-fuse.
+ceph-fuse would only be for use with cephfs, no?  Or can ceph-fuse
+interface to RBD or radosgw?
 
-What do you think?
+I'm probably just slightly ahead of the curve here.  I am trying to
+shoehorn ceph into my scenario (exporting a single filesystem to lots
+of cluster nodes) without using cephfs since it's not quite ready.
+Even though I lose parallel file access when using NFS (all traffic
+would go through that one NFS node), I was hoping that mounting an
+RBD, formatting it, and exporting it with NFS would avoid the ESTALE
+issues (as opposed to using cephfs, mounting via ceph-fuse, and then
+exporting _that_ with NFS).
 
+I actually have a phone call with inktank tomorrow.  I'll ask some
+more questions then.
 
+ - Travis
 
-> ---
->  net/ceph/messenger.c |   24 ++++++++++++++++++------
->  1 files changed, 18 insertions(+), 6 deletions(-)
-> 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 59fa5fb..336707b 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -415,6 +415,7 @@ static void ceph_msg_remove(struct ceph_msg *msg)
->  {
->  	list_del_init(&msg->list_head);
->  	BUG_ON(msg->con == NULL);
-> +	ceph_con_put(msg->con);
->  	msg->con = NULL;
-> 
->  	ceph_msg_put(msg);
-> @@ -440,6 +441,7 @@ static void reset_connection(struct ceph_connection
-> *con)
->  		con->in_msg->con = NULL;
->  		ceph_msg_put(con->in_msg);
->  		con->in_msg = NULL;
-> +		ceph_con_put(con->in_msg->con);
->  	}
-> 
->  	con->connect_seq = 0;
-> @@ -1914,6 +1916,7 @@ static void process_message(struct ceph_connection
-> *con)
->  	con->in_msg->con = NULL;
->  	msg = con->in_msg;
->  	con->in_msg = NULL;
-> +	ceph_con_put(con);
-> 
->  	/* if first message, set peer_name */
->  	if (con->peer_name.type == 0)
-> @@ -2275,6 +2278,7 @@ static void ceph_fault(struct ceph_connection *con)
->  		con->in_msg->con = NULL;
->  		ceph_msg_put(con->in_msg);
->  		con->in_msg = NULL;
-> +		ceph_con_put(con);
->  	}
-> 
->  	/* Requeue anything that hasn't been acked */
-> @@ -2391,8 +2395,11 @@ void ceph_con_send(struct ceph_connection *con,
-> struct ceph_msg *msg)
-> 
->  	/* queue */
->  	mutex_lock(&con->mutex);
-> +
->  	BUG_ON(msg->con != NULL);
-> -	msg->con = con;
-> +	msg->con = ceph_con_get(con);
-> +	BUG_ON(msg->con == NULL);
-> +
->  	BUG_ON(!list_empty(&msg->list_head));
->  	list_add_tail(&msg->list_head, &con->out_queue);
->  	dout("----- %p to %s%lld %d=%s len %d+%d+%d -----\n", msg,
-> @@ -2421,10 +2428,11 @@ void ceph_con_revoke(struct ceph_connection
-> *con, struct ceph_msg *msg)
->  		dout("%s %p msg %p - was on queue\n", __func__, con, msg);
->  		list_del_init(&msg->list_head);
->  		BUG_ON(msg->con == NULL);
-> +		ceph_con_put(msg->con);
->  		msg->con = NULL;
-> +		msg->hdr.seq = 0;
-> 
->  		ceph_msg_put(msg);
-> -		msg->hdr.seq = 0;
->  	}
->  	if (con->out_msg == msg) {
->  		dout("%s %p msg %p - was sending\n", __func__, con, msg);
-> @@ -2433,8 +2441,9 @@ void ceph_con_revoke(struct ceph_connection *con,
-> struct ceph_msg *msg)
->  			con->out_skip = con->out_kvec_bytes;
->  			con->out_kvec_is_msg = false;
->  		}
-> -		ceph_msg_put(msg);
->  		msg->hdr.seq = 0;
-> +
-> +		ceph_msg_put(msg);
->  	}
->  	mutex_unlock(&con->mutex);
->  }
-> @@ -2615,8 +2624,10 @@ static bool ceph_con_in_msg_alloc(struct
-> ceph_connection *con,
->  		mutex_unlock(&con->mutex);
->  		con->in_msg = con->ops->alloc_msg(con, hdr, &skip);
->  		mutex_lock(&con->mutex);
-> -		if (con->in_msg)
-> -			con->in_msg->con = con;
-> +		if (con->in_msg) {
-> +			con->in_msg->con = ceph_con_get(con);
-> +			BUG_ON(con->in_msg->con == NULL);
-> +		}
->  		if (skip)
->  			con->in_msg = NULL;
-> 
-> @@ -2630,7 +2641,8 @@ static bool ceph_con_in_msg_alloc(struct
-> ceph_connection *con,
->  			       type, front_len);
->  			return false;
->  		}
-> -		con->in_msg->con = con;
-> +		con->in_msg->con = ceph_con_get(con);
-> +		BUG_ON(con->in_msg->con == NULL);
->  		con->in_msg->page_alignment = le16_to_cpu(hdr->data_off);
->  	}
->  	memcpy(&con->in_msg->hdr, &con->in_hdr, sizeof(con->in_hdr));
-> -- 
-> 1.7.5.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Wed, Jun 6, 2012 at 12:27 PM, Sage Weil <sage@inktank.com> wrote:
+> On Wed, 6 Jun 2012, Travis Rhoden wrote:
+>> Sorry for the re-post.=A0 First attempt got eaten by the mailing lis=
+t
+>> because it wasn't plain text.=A0 My first attempt!
+>>
+>> > With CephFS not quite ready for production, what would be the
+>> > recommended way for sharing Ceph to older operating systems?
+>> > Specifically, I want to share a file system (i.e. mount a common
+>> > directory) on several CentOS5 and CentOS6 nodes.=A0 I don't think =
+I can
+>> > mount an RBD from more than one node, so what is my best bet?
+>> >
+>> > Mount an RBD on a file "head" and export it via NFS?
+>> >
+>> > I feel like that is the only sane choice, but wanted to ask in cas=
+e I
+>> > am missing something better.
+>
+> Two things:
+>
+> * 2.6.18 is crazy-old. =A0It's possible the libceph and rbd bits coul=
+d be
+> merged in, but getting the fs to work with ancient VFS will be a worl=
+d of
+> pain.
+>
+> * NFS reexport works in basic scenarios, but should not be used in
+> production as there are various conditions that can lead to ESTALE.
+> Making it work is somewhere on the mid-term roadmap, but it'll be a w=
+hile.
+>
+> Your best bet is to run cephfs on a modern kernel. =A0But be warned, =
+we
+> aren't ready to support the fs just yet. =A0Soon!
+>
+> sage
+>
+>
+>>
+>> =A0=A0- Travis
+>> >
+>> >
+>> > On Wed, Jun 6, 2012 at 9:58 AM, Sam Zaydel <sam.zaydel@inktank.com=
+> wrote:
+>> >>
+>> >> I think you will be able to build from source the client bits tha=
+t you
+>> >> need, but I saw this from an earlier similar discussion mentionin=
+g
+>> >> Python version, so I would make sure that python > 2.5 is used,
+>> >> realistically 2.6 should be the norm today.
+>> >>
+>> >> http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/5717
+>> >>
+>> >> On Tue, Jun 5, 2012 at 6:16 PM, =A0<Eric_YH_Chen@wiwynn.com> wrot=
+e:
+>> >> > Dear All:
+>> >> >
+>> >> >=FF=FF=FF=FF My ceph cluster is installed on Ubuntu 12.04 with k=
+ernel 3.2.0.
+>> >> >
+>> >> >=FF=FF=FF=FF =A0=A0But I have a situation that I may need to mou=
+nt cephfs on centos 5.7, which with kernel 2.6.18.
+>> >> >
+>> >> > =A0 =A0(that is to say , I only need to execute mount.ceph on t=
+he centos 5.7, not the whole ceph system)
+>> >> >
+>> >> > =A0 =A0I want to find a solution that can provide reliable and =
+high availability share file system.
+>> >> >
+>> >> > =A0 =A0Is it possible to do this? Or any other recommend way? =A0=
+Ex: =A0export NFS=FF=FF
+>> >> >
+>> >> > =A0 =A0Thanks!
+>> >> >
+>> >> >
+>> >> > --
+>> >> > To unsubscribe from this list: send the line "unsubscribe ceph-=
+devel" in
+>> >> > the body of a message to majordomo@vger.kernel.org
+>> >> > More majordomo info at =A0http://vger.kernel.org/majordomo-info=
+=2Ehtml
+>> >>
+>> >>
+>> >>
+>> >> --
+>> >> Inked by Sam Zaydel
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.h=
+tml
+>> >
+>> >
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>>
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
