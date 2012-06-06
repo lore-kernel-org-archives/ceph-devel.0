@@ -1,119 +1,44 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: mount: 10.0.6.10:/: can't read superblock
-Date: Tue, 5 Jun 2012 13:16:44 -0700
-Message-ID: <273FD45CB9C44DCBB567EAFA580B0E0B@inktank.com>
-References: <9cacecd4-1c4e-4321-b8f0-47f75cb72317@mail.linserv.se>
+From: <Eric_YH_Chen@wiwynn.com>
+Subject: Can we mount cephfs in centos 5.7 ?
+Date: Wed, 6 Jun 2012 09:16:36 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D01790CEA@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=big5
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:33449 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751895Ab2FEUQt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 16:16:49 -0400
-Received: by pbbrp8 with SMTP id rp8so7919845pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 13:16:48 -0700 (PDT)
-In-Reply-To: <9cacecd4-1c4e-4321-b8f0-47f75cb72317@mail.linserv.se>
-Content-Disposition: inline
+Received: from twnhumsw4.wistron.com ([220.128.89.24]:61311 "EHLO
+	TWNHUMSW4.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751976Ab2FFBQx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 21:16:53 -0400
+Received: from TWNHUFE4.whq.wistron (unverified [10.37.31.104]) by TWNHUMSW4.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta4cd82189dc0a8167216b0@TWNHUMSW4.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Wed, 6 Jun 2012 09:21:31 +0800
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Wilderoth <martin.wilderoth@linserv.se>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-For future reference, that error was because the active MDS server was in replay. I can't tell why it didn't move on to active from what you posted, but I imagine it just got a little stuck since restarting made it work out. 
--Greg
+Dear All:
 
+=A1@=A1@My ceph cluster is installed on Ubuntu 12.04 with kernel 3.2.0.
+=A1@=A1@
+    But I have a situation that I may need to mount cephfs on centos 5.=
+7, which with kernel 2.6.18.
 
-On Tuesday, June 5, 2012 at 1:05 PM, Martin Wilderoth wrote:
+    (that is to say , I only need to execute mount.ceph on the centos 5=
+=2E7, not the whole ceph system)
 
-> Hello Again,
-> 
-> I restarted the mds on all servers and then it worked again
-> 
-> /Regards Martin
-> 
-> > Hello 
-> > 
-> > > Hi Martin, 
-> > > 
-> > > On 06/05/2012 08:07 PM, Martin Wilderoth wrote: 
-> > > > Hello 
-> > > > 
-> > > > Is there a way to recover this error. 
-> > > > 
-> > > > mount -t ceph 10.0.6.10:/ /mnt -vv -o name=admin,secret=XXXXXXXXXXXXXXXXXXXXXXX 
-> > > > [ 506.640433] libceph: loaded (mon/osd proto 15/24, osdmap 5/6 5/6) 
-> > > > [ 506.650594] ceph: loaded (mds proto 32) 
-> > > > [ 506.652353] libceph: client0 fsid a9d5f9e1-4bb9-4fab-b79b-ba4457631b01 
-> > > > [ 506.670876] Intel AES-NI instructions are not detected. 
-> > > > [ 506.678861] libceph: mon0 10.0.6.10:6789 session established 
-> > > > mount: 10.0.6.10:/: can't read superblock 
-> > > 
-> > > 
-> > > 
-> > > Could you share some more information? For example the output from: ceph -s 
-> > 
-> > 2012-06-05 20:25:05.307914 pg v1189604: 1152 pgs: 1152 active+clean; 191 GB data, 393 GB used, 973 GB / 1379 GB avail 
-> > 012-06-05 20:25:05.315871 mds e60: 1/1/1 up {0=c=up:replay}, 2 up:standby 
-> > 2012-06-05 20:25:05.315965 osd e1106: 8 osds: 8 up, 8 in 
-> > 2012-06-05 20:25:05.316165 log 2012-06-05 20:24:50.425527 mon.0 10.0.6.10:6789/0 75 : [INF] mds.? 10.0.6.11:6800/22974 up:boot 
-> > 2012-06-05 20:25:05.316371 mon e1: 3 mons at {a=10.0.6.10:6789/0,b=10.0.6.11:6789/0,c=10.0.6.12:6789/0} 
-> > 
-> > 
-> > > 
-> > > Did you change anything to the cluster since it worked? And what version 
-> > > are you running? 
-> > 
-> > 
-> > 
-> > I have not done any changes installed at version 0.46 upgraded earlier and have been testing with 
-> > ceph and ceph-fuse and backuppc. It was during the ceph-fuse it hanged. 
-> > 
-> > Current version 
-> > ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad372) 
-> > 
-> > > > One of my mds logs has 24G of data. 
-> > > 
-> > > Is it still running? 
-> > I have restarted mds.a and mds.b they seems to be running. But not everything. 
-> > mds.a was stoped not sure mds.b but it has a big logfile. 
-> > 
-> > > 
-> > > > 
-> > > > I have some rbd devices that I would like to keep. 
-> > > 
-> > > RBD doesn't use the MDS nor the POSIX filesystem, so you will probably 
-> > > be fine, but we need the output of "ceph -s" first. 
-> > > 
-> > > Does this work? 
-> > > $ rbd ls 
-> > 
-> > 
-> > this works I'm still using the rbd with no problem 
-> > > $ rados -p rbd ls 
-> > 
-> > 
-> > seems to work reports something simmilar to 
-> > rb.0.2.00000000052e 
-> > rb.0.0.0000000002f2 
-> > rb.0.7.000000000345 
-> > rb.0.7.000000000896 
-> > rb.0.0.000000000102 
-> > rb.0.9.000000000172 
-> > rb.0.1.000000000350 
-> > rb.0.4.000000000180 
-> > rb.0.4.00000000068b 
-> > rb.0.5.00000000054c 
-> > rb.0.2.0000000001e1 
-> > 
-> > > Wido 
-> > > 
-> > > > 
-> > > > /Regards Martin 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@vger.kernel.org)
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
+    I want to find a solution that can provide reliable and high availa=
+bility share file system.=20
+
+    Is it possible to do this? Or any other recommend way?  Ex:  export=
+ NFS=A1K
+
+    Thanks!
 
 
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
