@@ -1,7 +1,7 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/2] libceph: init monitor connection when opening
-Date: Tue, 05 Jun 2012 22:31:09 -0500
-Message-ID: <4FCECEFD.5060405@inktank.com>
+Subject: [PATCH 2/2] libceph: fully initialize connection in con_init()
+Date: Tue, 05 Jun 2012 22:31:23 -0500
+Message-ID: <4FCECF0B.2000809@inktank.com>
 References: <4FCECD7F.9030002@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
@@ -9,73 +9,135 @@ Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mail-yx0-f174.google.com ([209.85.213.174]:40363 "EHLO
 	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752000Ab2FFDbG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 23:31:06 -0400
-Received: by yenm10 with SMTP id m10so4637648yen.19
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 20:31:05 -0700 (PDT)
+	with ESMTP id S1752000Ab2FFDbU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Jun 2012 23:31:20 -0400
+Received: by mail-yx0-f174.google.com with SMTP id m10so4637648yen.19
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Jun 2012 20:31:19 -0700 (PDT)
 In-Reply-To: <4FCECD7F.9030002@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hold off initializing a monitor client's connection until just
-before it gets opened for use.
+Move the initialization of a ceph connection's private pointer,
+operations vector pointer, and peer name information into
+ceph_con_init().  Rearrange the arguments so the connection pointer
+is first.  Hide the byte-swapping of the peer entity number inside
+ceph_con_init()
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 Reviewed-by: Sage Weil <sage@inktank.com>
 ---
- net/ceph/mon_client.c |   13 ++++++-------
- 1 files changed, 6 insertions(+), 7 deletions(-)
+ fs/ceph/mds_client.c           |    7 ++-----
+ include/linux/ceph/messenger.h |    6 ++++--
+ net/ceph/messenger.c           |    9 ++++++++-
+ net/ceph/mon_client.c          |    8 +++-----
+ net/ceph/osd_client.c          |    7 ++-----
+ 5 files changed, 19 insertions(+), 18 deletions(-)
 
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index ad30261..ecd7f15 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -394,11 +394,8 @@ static struct ceph_mds_session
+*register_session(struct ceph_mds_client *mdsc,
+ 	s->s_seq = 0;
+ 	mutex_init(&s->s_mutex);
+
+-	ceph_con_init(&mdsc->fsc->client->msgr, &s->s_con);
+-	s->s_con.private = s;
+-	s->s_con.ops = &mds_con_ops;
+-	s->s_con.peer_name.type = CEPH_ENTITY_TYPE_MDS;
+-	s->s_con.peer_name.num = cpu_to_le64(mds);
++	ceph_con_init(&s->s_con, s, &mds_con_ops, &mdsc->fsc->client->msgr,
++		CEPH_ENTITY_TYPE_MDS, mds);
+
+ 	spin_lock_init(&s->s_gen_ttl_lock);
+ 	s->s_cap_gen = 0;
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 5e852f4..dd27837 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -227,8 +227,10 @@ extern void ceph_messenger_init(struct
+ceph_messenger *msgr,
+ 			u32 required_features,
+ 			bool nocrc);
+
+-extern void ceph_con_init(struct ceph_messenger *msgr,
+-			  struct ceph_connection *con);
++extern void ceph_con_init(struct ceph_connection *con, void *private,
++			const struct ceph_connection_operations *ops,
++			struct ceph_messenger *msgr, __u8 entity_type,
++			__u64 entity_num);
+ extern void ceph_con_open(struct ceph_connection *con,
+ 			  struct ceph_entity_addr *addr);
+ extern bool ceph_con_opened(struct ceph_connection *con);
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 36b440a..3b65f6e 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -521,15 +521,22 @@ void ceph_con_put(struct ceph_connection *con)
+ /*
+  * initialize a new connection.
+  */
+-void ceph_con_init(struct ceph_messenger *msgr, struct ceph_connection
+*con)
++void ceph_con_init(struct ceph_connection *con, void *private,
++	const struct ceph_connection_operations *ops,
++	struct ceph_messenger *msgr, __u8 entity_type, __u64 entity_num)
+ {
+ 	dout("con_init %p\n", con);
+ 	memset(con, 0, sizeof(*con));
++	con->private = private;
++	con->ops = ops;
+ 	atomic_set(&con->nref, 1);
+ 	con->msgr = msgr;
+
+ 	con_sock_state_init(con);
+
++	con->peer_name.type = (__u8) entity_type;
++	con->peer_name.num = cpu_to_le64(entity_num);
++
+ 	mutex_init(&con->mutex);
+ 	INIT_LIST_HEAD(&con->out_queue);
+ 	INIT_LIST_HEAD(&con->out_sent);
 diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index 062b724..6adbea7 100644
+index 6adbea7..ab6b24a 100644
 --- a/net/ceph/mon_client.c
 +++ b/net/ceph/mon_client.c
-@@ -119,6 +119,7 @@ static void __close_session(struct ceph_mon_client
-*monc)
- 	dout("__close_session closing mon%d\n", monc->cur_mon);
- 	ceph_con_revoke(&monc->con, monc->m_auth);
- 	ceph_con_close(&monc->con);
-+	monc->con.private = NULL;
- 	monc->cur_mon = -1;
- 	monc->pending_auth = 0;
- 	ceph_auth_reset(monc->auth);
-@@ -141,9 +142,13 @@ static int __open_session(struct ceph_mon_client *monc)
+@@ -142,11 +142,9 @@ static int __open_session(struct ceph_mon_client *monc)
  		monc->sub_renew_after = jiffies;  /* i.e., expired */
  		monc->want_next_osdmap = !!monc->want_next_osdmap;
 
--		dout("open_session mon%d opening\n", monc->cur_mon);
-+		ceph_con_init(&monc->client->msgr, &monc->con);
-+		monc->con.private = monc;
-+		monc->con.ops = &mon_con_ops;
- 		monc->con.peer_name.type = CEPH_ENTITY_TYPE_MON;
- 		monc->con.peer_name.num = cpu_to_le64(monc->cur_mon);
-+
-+		dout("open_session mon%d opening\n", monc->cur_mon);
+-		ceph_con_init(&monc->client->msgr, &monc->con);
+-		monc->con.private = monc;
+-		monc->con.ops = &mon_con_ops;
+-		monc->con.peer_name.type = CEPH_ENTITY_TYPE_MON;
+-		monc->con.peer_name.num = cpu_to_le64(monc->cur_mon);
++		ceph_con_init(&monc->con, monc, &mon_con_ops,
++			&monc->client->msgr,
++			CEPH_ENTITY_TYPE_MON, monc->cur_mon);
+
+ 		dout("open_session mon%d opening\n", monc->cur_mon);
  		ceph_con_open(&monc->con,
- 			      &monc->monmap->mon_inst[monc->cur_mon].addr);
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 5b41a69..448c9da 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -640,11 +640,8 @@ static struct ceph_osd *create_osd(struct
+ceph_osd_client *osdc, int onum)
+ 	INIT_LIST_HEAD(&osd->o_osd_lru);
+ 	osd->o_incarnation = 1;
 
-@@ -760,10 +765,6 @@ int ceph_monc_init(struct ceph_mon_client *monc,
-struct ceph_client *cl)
- 		goto out;
+-	ceph_con_init(&osdc->client->msgr, &osd->o_con);
+-	osd->o_con.private = osd;
+-	osd->o_con.ops = &osd_con_ops;
+-	osd->o_con.peer_name.type = CEPH_ENTITY_TYPE_OSD;
+-	osd->o_con.peer_name.num = cpu_to_le64(onum);
++	ceph_con_init(&osd->o_con, osd, &osd_con_ops, &osdc->client->msgr,
++		CEPH_ENTITY_TYPE_OSD, onum);
 
- 	/* connection */
--	ceph_con_init(&monc->client->msgr, &monc->con);
--	monc->con.private = monc;
--	monc->con.ops = &mon_con_ops;
--
- 	/* authentication */
- 	monc->auth = ceph_auth_init(cl->options->name,
- 				    cl->options->key);
-@@ -836,8 +837,6 @@ void ceph_monc_stop(struct ceph_mon_client *monc)
- 	mutex_lock(&monc->mutex);
- 	__close_session(monc);
-
--	monc->con.private = NULL;
--
- 	mutex_unlock(&monc->mutex);
-
- 	ceph_auth_destroy(monc->auth);
+ 	INIT_LIST_HEAD(&osd->o_keepalive_item);
+ 	return osd;
 -- 
 1.7.5.4
 
