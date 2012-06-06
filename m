@@ -1,62 +1,38 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: replicas in ceph storage
-Date: Wed, 06 Jun 2012 12:34:04 +0200
-Message-ID: <4FCF321C.1090507@widodh.nl>
-References: <loom.20120606T122126-155@post.gmane.org>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: Infiniband 40GB
+Date: Wed, 06 Jun 2012 12:48:44 +0200
+Message-ID: <4FCF358C.6080301@profihost.ag>
+References: <4FCB1C0A.4050504@profihost.ag> <CADdPHGvgE7ai6yjzsKmL9bfqEpyx+qxQaUKoOOYjiT4ZCJ-A0g@mail.gmail.com> <4FCC7E34.7040005@univ-nantes.fr> <201206041147.22993.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:35368 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751410Ab2FFKeH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 06:34:07 -0400
-In-Reply-To: <loom.20120606T122126-155@post.gmane.org>
+Received: from mail.profihost.ag ([85.158.179.208]:46349 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751329Ab2FFKss (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 06:48:48 -0400
+In-Reply-To: <201206041147.22993.a.ott@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: udit agarwal <fzdudit@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: Yann Dupont <Yann.Dupont@univ-nantes.fr>, ceph-devel@vger.kernel.org
 
-Hi,
+Hi Amon,
 
-On 06/06/2012 12:24 PM, udit agarwal wrote:
-> Hi,
->   I have a query regarding the way to determine the no. of replicas that are
-> created for each object in the ceph storage system. I couldn't find a way to
-> determine this. please help me with this.
->
+i've added your patch:
+# strings /lib/libc-2.11.3.so |grep -i syncfs
+syncfs
 
-The number of replicas is set by the "rep size" attribute of the pool 
-you are storing the object in.
+But configure of ceph still claims there is no syncfs support.
 
-$ ceph osd dump -o -|grep "rep size"
+# ./configure |grep -i sync
+checking for syncfs... no
+checking for sync_file_range... yes
 
-That will show something like:
+Any ideas?
 
-pool 0 'data' rep size 3 crush_ruleset 0 object_hash rjenkins pg_num 
-2560 pgp_num 2560 lpg_num 2 lpgp_num 2 last_change 91 owner 0 
-crash_replay_interval 45
-pool 1 'metadata' rep size 3 crush_ruleset 1 object_hash rjenkins pg_num 
-2560 pgp_num 2560 lpg_num 2 lpgp_num 2 last_change 90 owner 0
-pool 2 'rbd' rep size 3 crush_ruleset 2 object_hash rjenkins pg_num 2560 
-pgp_num 2560 lpg_num 2 lpgp_num 2 last_change 630 owner 0
-	removed_snaps [1~1]
+Hint: I'm compiling my packages on an OpenVZ RHEL6 based virtual 
+container - so THIS kernel where i'm compiling does not support syncfs 
+is this the reason?
 
-In this case all the pools have a "size" of 3, which means all objects 
-stored in these pools will be replicated three times.
-
-You can change this parameter with:
-
-$ ceph osd pool set <pool> size <size>
-
-Wido
-
->   Thanks in advance.
->
-> --Udit Agarwal
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Stefan
