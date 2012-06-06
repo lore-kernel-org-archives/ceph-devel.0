@@ -1,174 +1,182 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] libceph: tweak ceph_alloc_msg()
-Date: Tue, 5 Jun 2012 22:14:02 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206052210240.22586@cobra.newdream.net>
-References: <4FCECD7F.9030002@inktank.com> <4FCECF12.4050601@inktank.com>
+Subject: Re: [PATCH 1/4] libceph: have messages point to their connection
+Date: Tue, 5 Jun 2012 22:16:13 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206052216000.22586@cobra.newdream.net>
+References: <4FCECD7F.9030002@inktank.com> <4FCECF18.8060905@inktank.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51959 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:51979 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750713Ab2FFFOF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 01:14:05 -0400
-In-Reply-To: <4FCECF12.4050601@inktank.com>
+	with ESMTP id S1751199Ab2FFFQQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 01:16:16 -0400
+In-Reply-To: <4FCECF18.8060905@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
+Reviewed-by: Sage Weil <sage@inktank.com>
+
+
 On Tue, 5 Jun 2012, Alex Elder wrote:
 
-> The function ceph_alloc_msg() is only used to allocate a message
-> that will be assigned to a connection's in_msg pointer.  Rename the
-> function so this implied usage is more clear.
+> When a ceph message is queued for sending it is placed on a list of
+> pending messages (ceph_connection->out_queue).  When they are
+> actually sent over the wire, they are moved from that list to
+> another (ceph_connection->out_sent).  When acknowledgement for the
+> message is received, it is removed from the sent messages list.
 > 
-> In addition, make that assignment inside the function (again, since
-> that's precisely what it's intended to be used for).  This allows us
-> to return what is now provided via the passed-in address of a "skip"
-> variable.  The return type is now Boolean to be explicit that there
-> are only two possible outcomes.
+> During that entire time the message is "in the possession" of a
+> single ceph connection.  Keep track of that connection in the
+> message.  This will be used in the next patch (and is a helpful
+> bit of information for debugging anyway).
 > 
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->  net/ceph/messenger.c |   58
-> ++++++++++++++++++++++++++-----------------------
->  1 files changed, 31 insertions(+), 27 deletions(-)
+>  include/linux/ceph/messenger.h |    3 +++
+>  net/ceph/messenger.c           |   27 +++++++++++++++++++++++++--
+>  2 files changed, 28 insertions(+), 2 deletions(-)
 > 
+> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+> index dd27837..6df837f 100644
+> --- a/include/linux/ceph/messenger.h
+> +++ b/include/linux/ceph/messenger.h
+> @@ -77,7 +77,10 @@ struct ceph_msg {
+>  	unsigned nr_pages;              /* size of page array */
+>  	unsigned page_alignment;        /* io offset in first page */
+>  	struct ceph_pagelist *pagelist; /* instead of pages */
+> +
+> +	struct ceph_connection *con;
+>  	struct list_head list_head;
+> +
+>  	struct kref kref;
+>  	struct bio  *bio;		/* instead of pages/pagelist */
+>  	struct bio  *bio_iter;		/* bio iterator */
 > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 3b65f6e..f7c9061 100644
+> index f7c9061..59fa5fb 100644
 > --- a/net/ceph/messenger.c
 > +++ b/net/ceph/messenger.c
-> @@ -1655,9 +1655,8 @@ static int read_partial_message_section(struct
-> ceph_connection *con,
->  	return 1;
->  }
-> 
-> -static struct ceph_msg *ceph_alloc_msg(struct ceph_connection *con,
-> -				struct ceph_msg_header *hdr,
-> -				int *skip);
-> +static bool ceph_con_in_msg_alloc(struct ceph_connection *con,
-> +				struct ceph_msg_header *hdr);
-> 
-> 
->  static int read_partial_message_pages(struct ceph_connection *con,
-> @@ -1740,7 +1739,6 @@ static int read_partial_message(struct
-> ceph_connection *con)
->  	int ret;
->  	unsigned front_len, middle_len, data_len;
->  	bool do_datacrc = !con->msgr->nocrc;
-> -	int skip;
->  	u64 seq;
->  	u32 crc;
-> 
-> @@ -1793,9 +1791,7 @@ static int read_partial_message(struct
-> ceph_connection *con)
->  	if (!con->in_msg) {
->  		dout("got hdr type %d front %d data %d\n", con->in_hdr.type,
->  		     con->in_hdr.front_len, con->in_hdr.data_len);
-> -		skip = 0;
-> -		con->in_msg = ceph_alloc_msg(con, &con->in_hdr, &skip);
-> -		if (skip) {
-> +		if (ceph_con_in_msg_alloc(con, &con->in_hdr)) {
->  			/* skip this message */
->  			dout("alloc_msg said skip message\n");
->  			BUG_ON(con->in_msg);
-> @@ -2577,46 +2573,54 @@ static int ceph_alloc_middle(struct
-> ceph_connection *con, struct ceph_msg *msg)
->  }
-> 
->  /*
-> - * Generic message allocator, for incoming messages.
-> + * Allocate a message for receiving an incoming message on a
-> + * connection, and save the result in con->in_msg.  Uses the
-> + * connection's private alloc_msg op if available.
-> + *
-> + * Returns true if the message should be skipped, false otherwise.
-
-I would document that there are three possible outcomes:
-
-	true and in_msg == NULL  .. skip next msg
- 	false and in_msg != NULL .. msg is ready to go
-	false and in_msg == NULL .. ENOMEM :(
-
->   */
-> -static struct ceph_msg *ceph_alloc_msg(struct ceph_connection *con,
-> -				struct ceph_msg_header *hdr,
-> -				int *skip)
-> +static bool ceph_con_in_msg_alloc(struct ceph_connection *con,
-> +				struct ceph_msg_header *hdr)
+> @@ -414,6 +414,9 @@ static int con_close_socket(struct ceph_connection *con)
+>  static void ceph_msg_remove(struct ceph_msg *msg)
 >  {
->  	int type = le16_to_cpu(hdr->type);
->  	int front_len = le32_to_cpu(hdr->front_len);
->  	int middle_len = le32_to_cpu(hdr->middle_len);
-> -	struct ceph_msg *msg = NULL;
->  	int ret;
-> 
-> +	BUG_ON(con->in_msg != NULL);
+>  	list_del_init(&msg->list_head);
+> +	BUG_ON(msg->con == NULL);
+> +	msg->con = NULL;
 > +
->  	if (con->ops->alloc_msg) {
-> +		int skip = 0;
-> +
->  		mutex_unlock(&con->mutex);
-> -		msg = con->ops->alloc_msg(con, hdr, skip);
-> +		con->in_msg = con->ops->alloc_msg(con, hdr, &skip);
->  		mutex_lock(&con->mutex);
-> -		if (!msg || *skip)
-> -			return NULL;
-> +		if (skip)
-> +			con->in_msg = NULL;
-
-I think this can be a BUG_ON(con->in_msg)... the alloc_msg() op shouldn't 
-set skip = 1 *and* return a msg pointer.  That would have leaked with the 
-old code, which is a bug.
-
-> +
-> +		if (!con->in_msg)
-> +			return skip != 0;
-
-or maybe
-		if (skip || !con->in_msg)
-			return skip;
-
-?
-
-Reviewed-by: Sage Weil <sage@inktank.com>
-
->  	}
-> -	if (!msg) {
-> -		*skip = 0;
-> -		msg = ceph_msg_new(type, front_len, GFP_NOFS, false);
-> -		if (!msg) {
-> +	if (!con->in_msg) {
-> +		con->in_msg = ceph_msg_new(type, front_len, GFP_NOFS, false);
-> +		if (!con->in_msg) {
->  			pr_err("unable to allocate msg type %d len %d\n",
->  			       type, front_len);
-> -			return NULL;
-> +			return false;
->  		}
-> -		msg->page_alignment = le16_to_cpu(hdr->data_off);
-> +		con->in_msg->page_alignment = le16_to_cpu(hdr->data_off);
->  	}
-> -	memcpy(&msg->hdr, &con->in_hdr, sizeof(con->in_hdr));
-> +	memcpy(&con->in_msg->hdr, &con->in_hdr, sizeof(con->in_hdr));
-> 
-> -	if (middle_len && !msg->middle) {
-> -		ret = ceph_alloc_middle(con, msg);
-> +	if (middle_len && !con->in_msg->middle) {
-> +		ret = ceph_alloc_middle(con, con->in_msg);
->  		if (ret < 0) {
-> -			ceph_msg_put(msg);
-> -			return NULL;
-> +			ceph_msg_put(con->in_msg);
-> +			con->in_msg = NULL;
->  		}
->  	}
-> 
-> -	return msg;
-> +	return false;
+>  	ceph_msg_put(msg);
 >  }
+>  static void ceph_msg_remove_list(struct list_head *head)
+> @@ -433,6 +436,8 @@ static void reset_connection(struct ceph_connection
+> *con)
+>  	ceph_msg_remove_list(&con->out_sent);
 > 
+>  	if (con->in_msg) {
+> +		BUG_ON(con->in_msg->con != con);
+> +		con->in_msg->con = NULL;
+>  		ceph_msg_put(con->in_msg);
+>  		con->in_msg = NULL;
+>  	}
+> @@ -625,8 +630,10 @@ static void prepare_write_message(struct
+> ceph_connection *con)
+>  			&con->out_temp_ack);
+>  	}
 > 
+> +	BUG_ON(list_empty(&con->out_queue));
+>  	m = list_first_entry(&con->out_queue, struct ceph_msg, list_head);
+>  	con->out_msg = m;
+> +	BUG_ON(m->con != con);
+> 
+>  	/* put message on sent list */
+>  	ceph_msg_get(m);
+> @@ -1806,6 +1813,8 @@ static int read_partial_message(struct
+> ceph_connection *con)
+>  				"error allocating memory for incoming message";
+>  			return -ENOMEM;
+>  		}
+> +
+> +		BUG_ON(con->in_msg->con != con);
+>  		m = con->in_msg;
+>  		m->front.iov_len = 0;    /* haven't read it yet */
+>  		if (m->middle)
+> @@ -1901,6 +1910,8 @@ static void process_message(struct ceph_connection
+> *con)
+>  {
+>  	struct ceph_msg *msg;
+> 
+> +	BUG_ON(con->in_msg->con != con);
+> +	con->in_msg->con = NULL;
+>  	msg = con->in_msg;
+>  	con->in_msg = NULL;
+> 
+> @@ -2260,6 +2271,8 @@ static void ceph_fault(struct ceph_connection *con)
+>  	con_close_socket(con);
+> 
+>  	if (con->in_msg) {
+> +		BUG_ON(con->in_msg->con != con);
+> +		con->in_msg->con = NULL;
+>  		ceph_msg_put(con->in_msg);
+>  		con->in_msg = NULL;
+>  	}
+> @@ -2378,6 +2391,8 @@ void ceph_con_send(struct ceph_connection *con,
+> struct ceph_msg *msg)
+> 
+>  	/* queue */
+>  	mutex_lock(&con->mutex);
+> +	BUG_ON(msg->con != NULL);
+> +	msg->con = con;
+>  	BUG_ON(!list_empty(&msg->list_head));
+>  	list_add_tail(&msg->list_head, &con->out_queue);
+>  	dout("----- %p to %s%lld %d=%s len %d+%d+%d -----\n", msg,
+> @@ -2403,13 +2418,16 @@ void ceph_con_revoke(struct ceph_connection
+> *con, struct ceph_msg *msg)
+>  {
+>  	mutex_lock(&con->mutex);
+>  	if (!list_empty(&msg->list_head)) {
+> -		dout("con_revoke %p msg %p - was on queue\n", con, msg);
+> +		dout("%s %p msg %p - was on queue\n", __func__, con, msg);
+>  		list_del_init(&msg->list_head);
+> +		BUG_ON(msg->con == NULL);
+> +		msg->con = NULL;
+> +
+>  		ceph_msg_put(msg);
+>  		msg->hdr.seq = 0;
+>  	}
+>  	if (con->out_msg == msg) {
+> -		dout("con_revoke %p msg %p - was sending\n", con, msg);
+> +		dout("%s %p msg %p - was sending\n", __func__, con, msg);
+>  		con->out_msg = NULL;
+>  		if (con->out_kvec_is_msg) {
+>  			con->out_skip = con->out_kvec_bytes;
+> @@ -2478,6 +2496,8 @@ struct ceph_msg *ceph_msg_new(int type, int
+> front_len, gfp_t flags,
+>  	if (m == NULL)
+>  		goto out;
+>  	kref_init(&m->kref);
+> +
+> +	m->con = NULL;
+>  	INIT_LIST_HEAD(&m->list_head);
+> 
+>  	m->hdr.tid = 0;
+> @@ -2595,6 +2615,8 @@ static bool ceph_con_in_msg_alloc(struct
+> ceph_connection *con,
+>  		mutex_unlock(&con->mutex);
+>  		con->in_msg = con->ops->alloc_msg(con, hdr, &skip);
+>  		mutex_lock(&con->mutex);
+> +		if (con->in_msg)
+> +			con->in_msg->con = con;
+>  		if (skip)
+>  			con->in_msg = NULL;
+> 
+> @@ -2608,6 +2630,7 @@ static bool ceph_con_in_msg_alloc(struct
+> ceph_connection *con,
+>  			       type, front_len);
+>  			return false;
+>  		}
+> +		con->in_msg->con = con;
+>  		con->in_msg->page_alignment = le16_to_cpu(hdr->data_off);
+>  	}
+>  	memcpy(&con->in_msg->hdr, &con->in_hdr, sizeof(con->in_hdr));
 > -- 
 > 1.7.5.4
 > 
