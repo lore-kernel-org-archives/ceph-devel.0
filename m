@@ -1,213 +1,41 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/2] libceph: embed ceph connection structure in mon_client
-Date: Wed, 6 Jun 2012 09:19:42 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206060919310.6423@cobra.newdream.net>
-References: <4FCECD7F.9030002@inktank.com> <4FCECEEE.9020305@inktank.com>
+Subject: Re: Ceph and BackupPC (was: Re: mount: 10.0.6.10:/: can't read
+ superblock)
+Date: Wed, 6 Jun 2012 09:24:06 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206060923070.5397@cobra.newdream.net>
+References: <c99406dc-0969-47de-a75a-72a8f42eae52@mail.linserv.se>
+ <3941218.dafc4yYMCO@pc10>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56744 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:35012 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755181Ab2FFQTr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 12:19:47 -0400
-In-Reply-To: <4FCECEEE.9020305@inktank.com>
+	with ESMTP id S1754849Ab2FFQYJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 12:24:09 -0400
+In-Reply-To: <3941218.dafc4yYMCO@pc10>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Cc: Martin Wilderoth <martin.wilderoth@linserv.se>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Sage Weil <sage@inktank.com>
+On Wed, 6 Jun 2012, Guido Winkelmann wrote:
+> Am Dienstag, 5. Juni 2012, 14:33:19 schrieb Martin Wilderoth:
+> 
+> > I have not done any changes installed at version 0.46 upgraded earlier and
+> > have been testing with ceph and ceph-fuse and backuppc.
+> 
+> BackupPC and Ceph sounds like an interesting combination. Other than this 
+> hanging MDS problem, what are your experiences with that?
+> 
+> I'm asking because BackupPC is the only application I know of that actually 
+> makes heavy use of hardlinks. Ceph, as far as I've understood it, supports 
+> hardlinks, but works under the assumption that they're a rare and not 
+> performance-critical corner case, and does some optimizations that help the 
+> more common cases, but would probably hurt if you are using hardlinks a lot.
 
+Right.  There is currently a scalability limit on the number of hard 
+links, currently.  Any large set of backuppc data will eat a lot of memory 
+on mds.0 and (eventually) case problems.
 
+sage
 
-On Tue, 5 Jun 2012, Alex Elder wrote:
-
-> A monitor client has a pointer to a ceph connection structure in it.
-> This is the only one of the three ceph client types that do it this
-> way; the OSD and MDS clients embed the connection into their main
-> structures.  There is always exactly one ceph connection for a
-> monitor client, so there is no need to allocate it separate from the
-> monitor client structure.
-> 
-> So switch the ceph_mon_client structure to embed its
-> ceph_connection structure.
-> 
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->  include/linux/ceph/mon_client.h |    2 +-
->  net/ceph/mon_client.c           |   47
-> ++++++++++++++++----------------------
->  2 files changed, 21 insertions(+), 28 deletions(-)
-> 
-> diff --git a/include/linux/ceph/mon_client.h
-> b/include/linux/ceph/mon_client.h
-> index 545f859..2113e38 100644
-> --- a/include/linux/ceph/mon_client.h
-> +++ b/include/linux/ceph/mon_client.h
-> @@ -70,7 +70,7 @@ struct ceph_mon_client {
->  	bool hunting;
->  	int cur_mon;                       /* last monitor i contacted */
->  	unsigned long sub_sent, sub_renew_after;
-> -	struct ceph_connection *con;
-> +	struct ceph_connection con;
->  	bool have_fsid;
-> 
->  	/* pending generic requests */
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 704dc95..ac4d6b1 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -106,9 +106,9 @@ static void __send_prepared_auth_request(struct
-> ceph_mon_client *monc, int len)
->  	monc->pending_auth = 1;
->  	monc->m_auth->front.iov_len = len;
->  	monc->m_auth->hdr.front_len = cpu_to_le32(len);
-> -	ceph_con_revoke(monc->con, monc->m_auth);
-> +	ceph_con_revoke(&monc->con, monc->m_auth);
->  	ceph_msg_get(monc->m_auth);  /* keep our ref */
-> -	ceph_con_send(monc->con, monc->m_auth);
-> +	ceph_con_send(&monc->con, monc->m_auth);
->  }
-> 
->  /*
-> @@ -117,8 +117,8 @@ static void __send_prepared_auth_request(struct
-> ceph_mon_client *monc, int len)
->  static void __close_session(struct ceph_mon_client *monc)
->  {
->  	dout("__close_session closing mon%d\n", monc->cur_mon);
-> -	ceph_con_revoke(monc->con, monc->m_auth);
-> -	ceph_con_close(monc->con);
-> +	ceph_con_revoke(&monc->con, monc->m_auth);
-> +	ceph_con_close(&monc->con);
->  	monc->cur_mon = -1;
->  	monc->pending_auth = 0;
->  	ceph_auth_reset(monc->auth);
-> @@ -142,9 +142,9 @@ static int __open_session(struct ceph_mon_client *monc)
->  		monc->want_next_osdmap = !!monc->want_next_osdmap;
-> 
->  		dout("open_session mon%d opening\n", monc->cur_mon);
-> -		monc->con->peer_name.type = CEPH_ENTITY_TYPE_MON;
-> -		monc->con->peer_name.num = cpu_to_le64(monc->cur_mon);
-> -		ceph_con_open(monc->con,
-> +		monc->con.peer_name.type = CEPH_ENTITY_TYPE_MON;
-> +		monc->con.peer_name.num = cpu_to_le64(monc->cur_mon);
-> +		ceph_con_open(&monc->con,
->  			      &monc->monmap->mon_inst[monc->cur_mon].addr);
-> 
->  		/* initiatiate authentication handshake */
-> @@ -226,8 +226,8 @@ static void __send_subscribe(struct ceph_mon_client
-> *monc)
-> 
->  		msg->front.iov_len = p - msg->front.iov_base;
->  		msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
-> -		ceph_con_revoke(monc->con, msg);
-> -		ceph_con_send(monc->con, ceph_msg_get(msg));
-> +		ceph_con_revoke(&monc->con, msg);
-> +		ceph_con_send(&monc->con, ceph_msg_get(msg));
-> 
->  		monc->sub_sent = jiffies | 1;  /* never 0 */
->  	}
-> @@ -247,7 +247,7 @@ static void handle_subscribe_ack(struct
-> ceph_mon_client *monc,
->  	if (monc->hunting) {
->  		pr_info("mon%d %s session established\n",
->  			monc->cur_mon,
-> -			ceph_pr_addr(&monc->con->peer_addr.in_addr));
-> +			ceph_pr_addr(&monc->con.peer_addr.in_addr));
->  		monc->hunting = false;
->  	}
->  	dout("handle_subscribe_ack after %d seconds\n", seconds);
-> @@ -461,7 +461,7 @@ static int do_generic_request(struct ceph_mon_client
-> *monc,
->  	req->request->hdr.tid = cpu_to_le64(req->tid);
->  	__insert_generic_request(monc, req);
->  	monc->num_generic_requests++;
-> -	ceph_con_send(monc->con, ceph_msg_get(req->request));
-> +	ceph_con_send(&monc->con, ceph_msg_get(req->request));
->  	mutex_unlock(&monc->mutex);
-> 
->  	err = wait_for_completion_interruptible(&req->completion);
-> @@ -684,8 +684,8 @@ static void __resend_generic_request(struct
-> ceph_mon_client *monc)
-> 
->  	for (p = rb_first(&monc->generic_request_tree); p; p = rb_next(p)) {
->  		req = rb_entry(p, struct ceph_mon_generic_request, node);
-> -		ceph_con_revoke(monc->con, req->request);
-> -		ceph_con_send(monc->con, ceph_msg_get(req->request));
-> +		ceph_con_revoke(&monc->con, req->request);
-> +		ceph_con_send(&monc->con, ceph_msg_get(req->request));
->  	}
->  }
-> 
-> @@ -705,7 +705,7 @@ static void delayed_work(struct work_struct *work)
->  		__close_session(monc);
->  		__open_session(monc);  /* continue hunting */
->  	} else {
-> -		ceph_con_keepalive(monc->con);
-> +		ceph_con_keepalive(&monc->con);
-> 
->  		__validate_auth(monc);
-> 
-> @@ -760,19 +760,16 @@ int ceph_monc_init(struct ceph_mon_client *monc,
-> struct ceph_client *cl)
->  		goto out;
-> 
->  	/* connection */
-> -	monc->con = kmalloc(sizeof(*monc->con), GFP_KERNEL);
-> -	if (!monc->con)
-> -		goto out_monmap;
-> -	ceph_con_init(&monc->client->msgr, monc->con);
-> -	monc->con->private = monc;
-> -	monc->con->ops = &mon_con_ops;
-> +	ceph_con_init(&monc->client->msgr, &monc->con);
-> +	monc->con.private = monc;
-> +	monc->con.ops = &mon_con_ops;
-> 
->  	/* authentication */
->  	monc->auth = ceph_auth_init(cl->options->name,
->  				    cl->options->key);
->  	if (IS_ERR(monc->auth)) {
->  		err = PTR_ERR(monc->auth);
-> -		goto out_con;
-> +		goto out_monmap;
->  	}
->  	monc->auth->want_keys =
->  		CEPH_ENTITY_TYPE_AUTH | CEPH_ENTITY_TYPE_MON |
-> @@ -824,8 +821,6 @@ out_subscribe_ack:
->  	ceph_msg_put(monc->m_subscribe_ack);
->  out_auth:
->  	ceph_auth_destroy(monc->auth);
-> -out_con:
-> -	monc->con->ops->put(monc->con);
->  out_monmap:
->  	kfree(monc->monmap);
->  out:
-> @@ -841,9 +836,7 @@ void ceph_monc_stop(struct ceph_mon_client *monc)
->  	mutex_lock(&monc->mutex);
->  	__close_session(monc);
-> 
-> -	monc->con->private = NULL;
-> -	monc->con->ops->put(monc->con);
-> -	monc->con = NULL;
-> +	monc->con.private = NULL;
-> 
->  	mutex_unlock(&monc->mutex);
-> 
-> @@ -1021,7 +1014,7 @@ static void mon_fault(struct ceph_connection *con)
->  	if (!monc->hunting)
->  		pr_info("mon%d %s session lost, "
->  			"hunting for new mon\n", monc->cur_mon,
-> -			ceph_pr_addr(&monc->con->peer_addr.in_addr));
-> +			ceph_pr_addr(&monc->con.peer_addr.in_addr));
-> 
->  	__close_session(monc);
->  	if (!monc->hunting) {
-> -- 
-> 1.7.5.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
