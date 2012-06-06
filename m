@@ -1,65 +1,55 @@
-From: Sam Zaydel <sam.zaydel@inktank.com>
-Subject: Re: Can we mount cephfs in centos 5.7 ?
-Date: Wed, 6 Jun 2012 06:58:14 -0700
-Message-ID: <CAAs1YtF5UkoG1O6yKBZq0KY4Z-MDsQ2K9VxneySpr5+JHFcA=g@mail.gmail.com>
-References: <8512670932FB654F81AF0FEF1BE6D49D01790CEA@WHQBEMAIL1.whq.wistron>
+From: Alex Elder <elder@dreamhost.com>
+Subject: Re: [PATCH] rbd: Clear ceph_msg->bio_iter for retransmitted message
+Date: Wed, 06 Jun 2012 09:10:16 -0500
+Message-ID: <4FCF64C8.7060506@dreamhost.com>
+References: <1338969797-8412-1-git-send-email-zheng.z.yan@intel.com>
+Reply-To: elder@inktank.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:54799 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753591Ab2FFN6Q convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 09:58:16 -0400
-Received: by yenm10 with SMTP id m10so4964071yen.19
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 06:58:15 -0700 (PDT)
-In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D01790CEA@WHQBEMAIL1.whq.wistron>
+Received: from mail.hq.newdream.net ([66.33.206.127]:46817 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753834Ab2FFOKL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 10:10:11 -0400
+In-Reply-To: <1338969797-8412-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wiwynn.com
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
 Cc: ceph-devel@vger.kernel.org
 
-I think you will be able to build from source the client bits that you
-need, but I saw this from an earlier similar discussion mentioning
-Python version, so I would make sure that python > 2.5 is used,
-realistically 2.6 should be the norm today.
+On 06/06/2012 03:03 AM, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+> 
+> The bug can cause NULL pointer dereference in write_partial_msg_pages
 
-http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/5717
+Although this looks simple enough, I want to study it a little more
+before committing it.  I've been wanting to walk through this bit
+of code anyway so I'll do that today.
 
-On Tue, Jun 5, 2012 at 6:16 PM,  <Eric_YH_Chen@wiwynn.com> wrote:
-> Dear All:
->
-> =E3=80=80=E3=80=80My ceph cluster is installed on Ubuntu 12.04 with k=
-ernel 3.2.0.
->
-> =E3=80=80=E3=80=80 =C2=A0But I have a situation that I may need to mo=
-unt cephfs on centos 5.7, which with kernel 2.6.18.
->
-> =C2=A0 =C2=A0(that is to say , I only need to execute mount.ceph on t=
-he centos 5.7, not the whole ceph system)
->
-> =C2=A0 =C2=A0I want to find a solution that can provide reliable and =
-high availability share file system.
->
-> =C2=A0 =C2=A0Is it possible to do this? Or any other recommend way? =C2=
-=A0Ex: =C2=A0export NFS=E2=80=A6
->
-> =C2=A0 =C2=A0Thanks!
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
+One quick observation though:  m->bio_iter really ought to be
+initialized only within #ifdef CONFIG_BLOCK (although I see it's
+defined without it in the structure definition).  At some point
+I'll put together a cleanup patch to do that everywhere; feel free
+to do that yourself if you are so inclined.
 
+					-Alex
 
+> Signed-off-by: Zheng Yan <zheng.z.yan@intel.com>
+> ---
+>  net/ceph/messenger.c |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
+> 
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 1a80907..785b953 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -598,6 +598,7 @@ static void prepare_write_message(struct ceph_connection *con)
+>  	     le32_to_cpu(con->out_msg->footer.front_crc),
+>  	     le32_to_cpu(con->out_msg->footer.middle_crc));
+>  
+> +	m->bio_iter = NULL;
+>  	/* is there a data payload? */
+>  	if (le32_to_cpu(m->hdr.data_len) > 0) {
+>  		/* initialize page iterator */
 
---=20
-Inked by Sam Zaydel
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
