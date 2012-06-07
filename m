@@ -1,95 +1,50 @@
-From: Josh Durgin <josh.durgin@inktank.com>
+From: Andrey Korolyov <andrey@xdel.ru>
 Subject: Re: Random data corruption in VM, possibly caused by rbd
-Date: Thu, 07 Jun 2012 12:48:05 -0700
-Message-ID: <4FD10575.7010300@inktank.com>
-References: <21601270.dfB0BsVfyn@pc10>
+Date: Thu, 7 Jun 2012 23:54:04 +0400
+Message-ID: <CABYiri_BOv8NoTKTuHWyZMS4nA0oc3RH4XjdFqzF_i58X8xVRA@mail.gmail.com>
+References: <21601270.dfB0BsVfyn@pc10> <47203FB1-758C-46E9-A49A-6F9896B663DC@profihost.ag>
+ <3039502.NLSCFOhhFU@pc10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:39071 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753047Ab2FGTsJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jun 2012 15:48:09 -0400
-Received: by ghrr11 with SMTP id r11so716226ghr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Jun 2012 12:48:09 -0700 (PDT)
-In-Reply-To: <21601270.dfB0BsVfyn@pc10>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:63415 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751112Ab2FGTy0 convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Jun 2012 15:54:26 -0400
+Received: by lahd3 with SMTP id d3so716920lah.19
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Jun 2012 12:54:25 -0700 (PDT)
+In-Reply-To: <3039502.NLSCFOhhFU@pc10>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-On 06/07/2012 11:04 AM, Guido Winkelmann wrote:
-> Hi,
+Hmm, can`t reproduce that(phew!). Qemu-1.1-release, 0.47.2, guest/host
+mainly debian wheezy. Only one main difference with my setup from
+yours is a underlying fs - I`m tired of btrfs unpredictable load
+issues and moved back to xfs.
+
+BTW you calculate sha1 in test suite, not sha256 as you mentioned above=
+=2E
+
+On Thu, Jun 7, 2012 at 10:37 PM, Guido Winkelmann
+<guido-ceph@thisisnotatest.de> wrote:
+> Am Donnerstag, 7. Juni 2012, 20:18:52 schrieb Stefan Priebe:
+>> I think the test script would help a lot so others can test too.
 >
-> I'm using Ceph with RBD to provide network-transparent disk images for KVM-
-> based virtual servers. The last two days, I've been hunting some weird elusive
-> bug where data in the virtual machines would be corrupted in weird ways. It
-> usually manifests in files having some random data - usually zeroes - at the
-> start before the actual contents that should be in there start.
-
-I definitely want to figure out what's going on with this.
-A few questions:
-
-Are you using rbd caching? If so, what settings?
-
-In either case, does the corruption still occur if you
-switch caching on/off? There are different I/O paths here,
-and this might tell us if the problem is on the client side.
-
-Another thing to try is turning off sparse reads on the osd by setting
-filestore fiemap threshold = 0
-
-> To track this down, I wrote a simple io tester. It does the following:
+> Okay, I've attached the program. It's barely 2 KB. You need Boost 1.4=
+5+, CMake
+> 2.6+ and Crypto++ to compile it.
 >
-> - Create 1 Megabyte of random data
-> - Calculate the SHA256 hash of that data
-> - Write the data to a file on the harddisk, in a given directory, using the
-> hash as the filename
-> - Repeat until the disk is full
-> - Delete the last file (because it is very likely to be incompletely written)
-> - Read and delete all the files just written while checking that their sha256
-> sums are equal to their filenames
+> Warning: This will fill up your harddisk completely, which is not a g=
+ood idea
+> on in-production machines.
 >
-> When running this io tester in a VM that uses a qcow2 file on a local harddisk
-> for its virtual disk, no errors are found. When the same VM is running using
-> rbd, the io tester finds on average about one corruption every 200 Megabytes,
-> reproducably.
->
-> (As in an interesting aside, the io tester also prints how long it took to
-> read or write 100 MB, and it turns out reading the data back in again is about
-> three times slower than writing them in the first place...)
->
-> Ceph is version 0.47.2. Qemu KVM is 1.0, compiled with the spec file from
-> http://pkgs.fedoraproject.org/gitweb/?p=qemu.git;a=summary
-> (And compiled after ceph 0.47.2 was installed on that machine, so it would use
-> the correct headers...)
-> Both the Ceph cluster and the KVM host machines are running on Fedora 16, with
-> a fairly recent 3.3.x kernel.
-
-Those versions should all work.
-
-> The ceph cluster uses btrf for the osd's data dirs. The journal is on a tmpfs.
-> (This is not a production setup - luckily.)
-> The virtual machine is using ext4 as its filesystem.
-> There were no obvious other problems with either the ceph cluster or the KVM
-> host machines.
-
-Were there any nodes with osds restarted during the test runs? I wonder
-if it's a problem with losing the tmpfs journal.
-
-As Oliver suggested, switching the osd data dir filesystem might help
-too.
-
-> I have attached a copy of the ceph.conf in use, in case it might be helpful.
->
-> This is a huge problem, and any help in tracking it down would be much
-> appreciated.
-
-Agreed, and I'm happy to help.
-
-Josh
-
-> Regards,
->
-> 	Guido
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0Guido
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
