@@ -1,231 +1,245 @@
-From: John Axel Eriksson <john@insane.se>
-Subject: Re: radosgw authentication problems
-Date: Thu, 7 Jun 2012 12:16:02 +0200
-Message-ID: <CAMmJxtKZryK+i6jzoqRp=ojQXs1c_3d3Xsmjx7+c9GDpfwc9pg@mail.gmail.com>
-References: <CAMmJxt+QMPoY-6WOypGjoTDjXafk_-knRUhfrsoca3zRn=YcXA@mail.gmail.com>
-	<CAC-hyiFaTvhORZ-TdYSxgdBmZYuvWFKobHs_qvq8J8FY+pr=-g@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: Infiniband 40GB
+Date: Thu, 07 Jun 2012 13:25:07 +0200 (CEST)
+Message-ID: <d0e700bd-f7f5-423f-9955-28c3835969e2@mailpro>
+References: <bccb917b-a474-45a8-a260-ef45f4901309@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:52742 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750877Ab2FGKQD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jun 2012 06:16:03 -0400
-Received: by obbtb18 with SMTP id tb18so680829obb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Jun 2012 03:16:02 -0700 (PDT)
-In-Reply-To: <CAC-hyiFaTvhORZ-TdYSxgdBmZYuvWFKobHs_qvq8J8FY+pr=-g@mail.gmail.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:45304 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755792Ab2FGLZa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jun 2012 07:25:30 -0400
+In-Reply-To: <bccb917b-a474-45a8-a260-ef45f4901309@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Amon Ott <a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, Yann Dupont <Yann.Dupont@univ-nantes.fr>
 
-Thanks! That seems to have been the issue.
+others tests done today: (kernel 3.4 - ubuntu precise)
 
-In general I really like ceph but it does seem like it has a few rough
-edges. We're currently using another distributed object storage that
-has been slightly unreliable and we've lost data twice now. That's why
-we're looking at alternatives and ceph is at the top of my list.
+3 nodes with 5 osd with btrfs, 1GB journal in tmps forced in writeahead
+3 nodes with 1 osd with xfs,8GB journal in tmpfs
+3 nodes with 1 osd with btfs,8GB journal in tmpfs forced in writeahead
 
-What I understand is that cephs object storage is pretty stable and is
-used in production by some. We're only interested in the object
-storage/rados part so what's a more informed opinion on this than my
-speculation?
+3 nodes with 5 osd with btrfs, 20G journal on disk forced in writeahead
+3 nodes with 1 osd with xfs,20GB journal on disk
+3 nodes with 1 osd with btfs,20GB journal on disk forced in writeahead
 
-Thanks again for your help!
 
-John
 
-On Thu, Jun 7, 2012 at 9:14 AM, Yehuda Sadeh <yehuda@inktank.com> wrote=
-:
-> On Thu, Jun 7, 2012 at 12:03 AM, John Axel Eriksson <john@insane.se> =
-wrote:
->> Hi I'm new to the list.
->>
->> We've been looking at Ceph as a possible replacement for our current
->> distributed storage system. In particular
->> we're interested in the object storage, so I started researching the
->> radosgw. It did take me some time to get setup
->> and the docs/wiki is missing lots of information (not pointing any
->> fingers, just describing my experience).
->>
->> Anyway, I can't seem to actually do anything with the radosgw using
->> any S3-client I've tried. The one I tried first
->> was Fog (used in Chef for example). Fog is the "The Ruby cloud
->> services library", available here https://github.com/fog/fog.
->> Fog has support for many different cloud service providers.
->>
->> Anyway with Fog I get this in RadosGW logs:
->>
->> ##############################
->>
->> 2012-06-07 06:22:33.642827 7f638bfff700 =A02 req 4:0.000108:s3:GET /=
-::getting op
->> 2012-06-07 06:22:33.642831 7f638bfff700 =A02 req 4:0.000113:s3:GET
->> /:list_buckets:authorizing
->> 2012-06-07 06:22:33.642854 7f638bfff700 20 get_obj_state:
->> rctx=3D0x7f637c0051e0 obj=3D.users:A state=3D0x7f637c005298
->> s->prefetch_data=3D0
->> 2012-06-07 06:22:33.642863 7f638bfff700 10 moving .users+A to cache =
-LRU end
->> 2012-06-07 06:22:33.642866 7f638bfff700 10 cache get: name=3D.users+=
-A : hit
->> 2012-06-07 06:22:33.642872 7f638bfff700 20 get_obj_state: s->obj_tag
->> was set empty
->> 2012-06-07 06:22:33.642877 7f638bfff700 10 moving .users+A to cache =
-LRU end
->> 2012-06-07 06:22:33.642879 7f638bfff700 10 cache get: name=3D.users+=
-A : hit
->> 2012-06-07 06:22:33.642920 7f638bfff700 10 get_canon_resource(): des=
-t=3D/
->> 2012-06-07 06:22:33.642923 7f638bfff700 10 auth_hdr:
->> GET
->>
->>
->> Thu, 07 Jun 2012 06:22:33 +0000
->> /
->> 2012-06-07 06:22:33.642942 7f638bfff700 15 b64=3DzeK7YoQr63ajV6BRW6Z=
-/UB1c4nM=3D
->> 2012-06-07 06:22:33.642944 7f638bfff700 15
->> auth_sign=3DI9+abkuIjC89me95FoxmqApdrPs=3D
->> 2012-06-07 06:22:33.642946 7f638bfff700 15 compare=3D-49
->> 2012-06-07 06:22:33.642949 7f638bfff700 10 failed to authorize reque=
-st
->> 2012-06-07 06:22:33.642954 7f638bfff700 10 --> Status: 403
->>
->> So for some reason it fails to authorize the request.
->>
->> ###############################
->>
->> Then I moved to trying RightAws which is a different Cloud Services
->> Library in Ruby. Here I get a little further (because I first get a
->> 200 response):
->>
->> 2012-06-07 06:24:46.006867 7fde21d66700 10 cache get: name=3D.users+=
-A : miss
->> 2012-06-07 06:24:46.008245 7fde21d66700 10 cache put: name=3D.users+=
-A
->> 2012-06-07 06:24:46.008266 7fde21d66700 10 adding .users+A to cache =
-LRU end
->> 2012-06-07 06:24:46.008276 7fde21d66700 20 get_obj_state: s->obj_tag
->> was set empty
->> 2012-06-07 06:24:46.008283 7fde21d66700 10 moving .users+A to cache =
-LRU end
->> 2012-06-07 06:24:46.008291 7fde21d66700 10 cache get: name=3D.users+=
-A :
->> type miss (requested=3D1, cached=3D6)
->> 2012-06-07 06:24:46.008301 7fde21d66700 20 get_obj_state:
->> rctx=3D0x7fde040055b0 obj=3D.users:A state=3D0x7fde040068b8
->> s->prefetch_data=3D0
->> 2012-06-07 06:24:46.008308 7fde21d66700 10 moving .users+A to cache =
-LRU end
->> 2012-06-07 06:24:46.008311 7fde21d66700 10 cache get: name=3D.users+=
-A : hit
->> 2012-06-07 06:24:46.008315 7fde21d66700 20 get_obj_state: s->obj_tag
->> was set empty
->> 2012-06-07 06:24:46.008320 7fde21d66700 20 get_obj_state:
->> rctx=3D0x7fde040055b0 obj=3D.users:A state=3D0x7fde040068b8
->> s->prefetch_data=3D0
->> 2012-06-07 06:24:46.008324 7fde21d66700 20 state for obj=3D.users:A =
-is
->> not atomic, not appending atomic test
->> 2012-06-07 06:24:46.008327 7fde21d66700 20 rados->read obj-ofs=3D0
->> read_ofs=3D0 read_len=3D16384
->> 2012-06-07 06:24:46.008864 7fde21d66700 20 rados->read r=3D0 bl.leng=
-th=3D126
->> 2012-06-07 06:24:46.008898 7fde21d66700 10 cache put: name=3D.users+=
-A
->> 2012-06-07 06:24:46.008901 7fde21d66700 10 moving .users+A to cache =
-LRU end
->> 2012-06-07 06:24:46.008964 7fde21d66700 10 get_canon_resource(): des=
-t=3D/
->> 2012-06-07 06:24:46.008968 7fde21d66700 10 auth_hdr:
->> GET
->>
->>
->> Thu, 07 Jun 2012 06:24:46 GMT
->> /
->> 2012-06-07 06:24:46.009059 7fde21d66700 15 b64=3DjpZmnXpUiWZq8IHBmsT=
-KwKz4+Z4=3D
->> 2012-06-07 06:24:46.009063 7fde21d66700 15
->> auth_sign=3DjpZmnXpUiWZq8IHBmsTKwKz4+Z4=3D
->> 2012-06-07 06:24:46.009065 7fde21d66700 15 compare=3D0
->> 2012-06-07 06:24:46.009069 7fde21d66700 =A02 req 1:0.002478:s3:GET
->> /:list_buckets:reading permissions
->> 2012-06-07 06:24:46.009087 7fde21d66700 =A02 req 1:0.002496:s3:GET
->> /:list_buckets:verifying op permissions
->> 2012-06-07 06:24:46.009099 7fde21d66700 =A02 req 1:0.002509:s3:GET
->> /:list_buckets:verifying op params
->> 2012-06-07 06:24:46.009103 7fde21d66700 =A02 req 1:0.002513:s3:GET
->> /:list_buckets:executing
->> 2012-06-07 06:24:46.009750 7fde21d66700 10 --> Status: 200
->>
->> 2012-06-07 06:24:46.009799 7fde21d66700 10 --> Content-Length: 318
->>
->> 2012-06-07 06:24:46.009803 7fde21d66700 10 --> Accept-Ranges: bytes
->>
->> 2012-06-07 06:24:46.009807 7fde21d66700 10 --> Content-type: applica=
-tion/xml
->>
->> 2012-06-07 06:24:46.009825 7fde21d66700 =A05 nothing to log for oper=
-ation
->> 2012-06-07 06:24:46.009832 7fde21d66700 =A02 req 1:0.003241:s3:GET
->> /:list_buckets:http status=3D200
->>
->> And now I do a PUT:
->>
->> 2012-06-07 06:24:46.018316 7fde097fa700 =A02 req 2:0.000171:s3:PUT
->> /johnkey::getting op
->> 2012-06-07 06:24:46.018322 7fde097fa700 =A02 req 2:0.000177:s3:PUT
->> /johnkey:create_bucket:authorizing
->> 2012-06-07 06:24:46.018346 7fde097fa700 20 get_obj_state:
->> rctx=3D0x7fddfc0058a0 obj=3D.users:A state=3D0x7fddfc005958
->> s->prefetch_data=3D0
->> 2012-06-07 06:24:46.018356 7fde097fa700 10 moving .users+A to cache =
-LRU end
->> 2012-06-07 06:24:46.018360 7fde097fa700 10 cache get: name=3D.users+=
-A :
->> type miss (requested=3D6, cached=3D3)
->> 2012-06-07 06:24:46.019922 7fde097fa700 10 cache put: name=3D.users+=
-A
->> 2012-06-07 06:24:46.019931 7fde097fa700 10 moving .users+A to cache =
-LRU end
->> 2012-06-07 06:24:46.019940 7fde097fa700 20 get_obj_state: s->obj_tag
->> was set empty
->> 2012-06-07 06:24:46.019948 7fde097fa700 10 moving .users+A to cache =
-LRU end
->> 2012-06-07 06:24:46.019951 7fde097fa700 10 cache get: name=3D.users+=
-A : hit
->> 2012-06-07 06:24:46.019999 7fde097fa700 10 get_canon_resource(): des=
-t=3D/johnkey
->> 2012-06-07 06:24:46.020003 7fde097fa700 10 auth_hdr:
->> PUT
->>
->>
->> Thu, 07 Jun 2012 06:24:46 GMT
->> /johnkey
->> 2012-06-07 06:24:46.020026 7fde097fa700 15 b64=3DRPIY36txOP127RgLYse=
-HC8Ua9kc=3D
->> 2012-06-07 06:24:46.020028 7fde097fa700 15
->> auth_sign=3Dh020Ewm8NbfLYebWsXWkWCB6cDI=3D
->> 2012-06-07 06:24:46.020030 7fde097fa700 15 compare=3D22
->> 2012-06-07 06:24:46.020035 7fde097fa700 10 failed to authorize reque=
-st
->> 2012-06-07 06:24:46.020041 7fde097fa700 10 --> Status: 403
->>
->> #################################
->>
->> I've also tried s3cmd on the commandline which didn't work either. A=
-s
->> far as I've understood radosgw is supposed to be compatible with S3.
->>
->
-> It looks like the clients you're using are trying to access buckets
-> via the virtual host api: it preprends the bucket name to the service
-> host name. This requires wildcard dns, and also to have the 'rgw dns
-> name' config option correctly set in your ceph.conf.
->
-> Yehuda
+
+same behaviour for all cases, writes are constant to disk.
+
+benched with:
+rados -p pool3 bench 60 write -t 16
+
+also with=20
+fio, bonnie  , random/seq write from guest vm with differents block siz=
+e.
+
+
+
+
+----- Mail original -----=20
+
+De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+=C3=80: "Mark Nelson" <mark.nelson@inktank.com>=20
+Cc: "Amon Ott" <a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann =
+Dupont" <Yann.Dupont@univ-nantes.fr>=20
+Envoy=C3=A9: Jeudi 7 Juin 2012 05:31:15=20
+Objet: Re: Infiniband 40GB=20
+
+Hi again,=20
+I have done some tests with journals on a real disk, I have same behavi=
+our.=20
+
+iostat show constant write to journal and write to disks at the same ti=
+me since the beginning of the benchmark.=20
+
+
+maybe can I try to use differents partitions for each journal ? (curren=
+tly I have 1 partition with 5 journal files of each osd)=20
+
+-Alexandre=20
+
+
+
+----- Mail original -----=20
+
+De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+=C3=80: "Mark Nelson" <mark.nelson@inktank.com>=20
+Cc: "Amon Ott" <a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann =
+Dupont" <Yann.Dupont@univ-nantes.fr>=20
+Envoy=C3=A9: Jeudi 7 Juin 2012 05:11:15=20
+Objet: Re: Infiniband 40GB=20
+
+Hi mark,=20
+I have attached a blktrace of /dev/sdb1 of node1 (osd.0)=20
+
+and also iostat (showing constant writes)=20
+
+bench used:=20
+
+rados -p pool3 bench 60 write -t 16=20
+
+
+kernel use : 3.4 from intank=20
+
+I'll do tests with journal on an xfs partition today=20
+
+----- Mail original -----=20
+
+De: "Mark Nelson" <mark.nelson@inktank.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+Cc: "Amon Ott" <a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann =
+Dupont" <Yann.Dupont@univ-nantes.fr>=20
+Envoy=C3=A9: Mercredi 6 Juin 2012 18:43:50=20
+Objet: Re: Infiniband 40GB=20
+
+Hi Alexandre,=20
+
+If you can run blktrace during your test on one of the OSD data disks=20
+and send me the results I can take a look at them. Also, the rados=20
+bench settings and output would be useful too.=20
+
+Thanks,=20
+Mark=20
+
+On 6/6/12 11:05 AM, Alexandre DERUMIER wrote:=20
+> Hi, I have rebuild my cluster with ubuntu precise,=20
+>=20
+> -kernel 3.2=20
+> -ceph 0.47.2=20
+> -libc6 2.15=20
+> -3 nodes - 5 osd (xfs) by node and 1 tmpfs with 5 journal file.=20
+>=20
+> I had launch rados bench,=20
+> and I see again constant writes to xfs....=20
+>=20
+> Maybe this is related to tmpfs ?=20
+>=20
+>=20
+> I'll retry with kernel 3.4 from intank tomorrow.=20
+> I'll also try with journal on a physical disk with xfs partition.=20
+>=20
+> I'll keep you in touch.=20
+>=20
+>=20
+> ----- Mail original -----=20
+>=20
+> De: "Mark Nelson"<mark.nelson@inktank.com>=20
+> =C3=80: "Alexandre DERUMIER"<aderumier@odiso.com>=20
+> Cc: "Amon Ott"<a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann=
+ Dupont"<Yann.Dupont@univ-nantes.fr>=20
+> Envoy=C3=A9: Lundi 4 Juin 2012 14:59:58=20
+> Objet: Re: Infiniband 40GB=20
+>=20
+> On 6/4/12 6:40 AM, Alexandre DERUMIER wrote:=20
+>> Hi,=20
+>>=20
+>> I'm currently doing some tests with xfs, debian wheezy with standard=
+ libc6 (2.11.3-3) and 3.2 kernel.=20
+>>=20
+>> I'm doing some iostats(3 nodes with 5 osd), and I see constant write=
+s to disks.(as the datas are flushed each second from journal to disk).=
+=20
+>>=20
+>> Journal is big enough (20GB tmpfs) to handle 30s of write.=20
+>>=20
+>> Do you think it's related to the missing syncfs() support ?=20
+>>=20
+>> -Alexandre=20
+>=20
+> Hi Alexandre,=20
+>=20
+> I've included some seekwatcher results for rados bench tests using 16=
+=20
+> concurrent 4MB writes on XFS OSD. One shows ubuntu oneiric and the=20
+> other precise (ie no syncfs support vs syncfs support in libc).=20
+> Unfortunately the original test was on 0.46 and the second test was o=
+n=20
+> 0.47.2, so multiple things changed between the tests. Both were teste=
+d=20
+> with kernel 3.4. Interestingly the seeks/second don't seem to drop mu=
+ch=20
+> but the overall performance has about doubled. This was using a singl=
+e=20
+> 7200rpm disk for the OSD data disk and a seperate 7200rpm disk for th=
+e=20
+> journal in both cases. I'd definitely try 0.47.2 with a new libc thou=
+gh=20
+> and see how that works for you.=20
+>=20
+> ceph 0.46/oneiric:=20
+> http://nhm.ceph.com/movies/mailinglist-tests/xfs-osd0-oneiric-3.4.mpg=
+=20
+>=20
+> ceph 0.47.2/precise:=20
+> http://nhm.ceph.com/movies/mailinglist-tests/xfs-osd0-precise-3.4.mpg=
+=20
+>=20
+> Mark=20
+>=20
+>=20
+>=20
+
+
+
+
+--=20
+
+--=20
+
+
+
+
+Alexandre D erumier=20
+Ing=C3=A9nieur Syst=C3=A8me=20
+=46ixe : 03 20 68 88 90=20
+=46ax : 03 20 68 90 81=20
+45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
+12 rue Marivaux 75002 Paris - France=20
+
+
+
+--=20
+
+--=20
+
+
+
+
+Alexandre D erumier=20
+Ing=C3=A9nieur Syst=C3=A8me=20
+=46ixe : 03 20 68 88 90=20
+=46ax : 03 20 68 90 81=20
+45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
+12 rue Marivaux 75002 Paris - France=20
+
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+
+
+
+--=20
+
+--=20
+
+
+
+
+	Alexandre D erumier=20
+Ing=C3=A9nieur Syst=C3=A8me=20
+=46ixe : 03 20 68 88 90=20
+=46ax : 03 20 68 90 81=20
+45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
+12 rue Marivaux 75002 Paris - France=20
+=09
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
