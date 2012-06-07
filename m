@@ -1,50 +1,34 @@
-From: Andrey Korolyov <andrey@xdel.ru>
+From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
 Subject: Re: Random data corruption in VM, possibly caused by rbd
-Date: Thu, 7 Jun 2012 23:54:04 +0400
-Message-ID: <CABYiri_BOv8NoTKTuHWyZMS4nA0oc3RH4XjdFqzF_i58X8xVRA@mail.gmail.com>
-References: <21601270.dfB0BsVfyn@pc10> <47203FB1-758C-46E9-A49A-6F9896B663DC@profihost.ag>
- <3039502.NLSCFOhhFU@pc10>
+Date: Thu, 07 Jun 2012 23:03:28 +0200
+Message-ID: <44640465.OVpPW54edB@tolkien>
+References: <21601270.dfB0BsVfyn@pc10> <3039502.NLSCFOhhFU@pc10> <CABYiri_BOv8NoTKTuHWyZMS4nA0oc3RH4XjdFqzF_i58X8xVRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:63415 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751112Ab2FGTy0 convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 7 Jun 2012 15:54:26 -0400
-Received: by lahd3 with SMTP id d3so716920lah.19
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Jun 2012 12:54:25 -0700 (PDT)
-In-Reply-To: <3039502.NLSCFOhhFU@pc10>
+Received: from unknownsite.de ([62.48.69.106]:35950 "EHLO hartes-hannover.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932678Ab2FGVDg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Jun 2012 17:03:36 -0400
+In-Reply-To: <CABYiri_BOv8NoTKTuHWyZMS4nA0oc3RH4XjdFqzF_i58X8xVRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+To: Andrey Korolyov <andrey@xdel.ru>
 Cc: ceph-devel@vger.kernel.org
 
-Hmm, can`t reproduce that(phew!). Qemu-1.1-release, 0.47.2, guest/host
-mainly debian wheezy. Only one main difference with my setup from
-yours is a underlying fs - I`m tired of btrfs unpredictable load
-issues and moved back to xfs.
+On Thursday 07 June 2012 23:54:04 Andrey Korolyov wrote:
+> Hmm, can`t reproduce that(phew!). Qemu-1.1-release, 0.47.2, guest/host
+> mainly debian wheezy. Only one main difference with my setup from
+> yours is a underlying fs - I`m tired of btrfs unpredictable load
+> issues and moved back to xfs.
 
-BTW you calculate sha1 in test suite, not sha256 as you mentioned above=
-=2E
+I guess I'll try that tomorrow as well. Is there a guide somewhere for 
+switching from btrfs to xfs?
+ 
+> BTW you calculate sha1 in test suite, not sha256 as you mentioned above.
 
-On Thu, Jun 7, 2012 at 10:37 PM, Guido Winkelmann
-<guido-ceph@thisisnotatest.de> wrote:
-> Am Donnerstag, 7. Juni 2012, 20:18:52 schrieb Stefan Priebe:
->> I think the test script would help a lot so others can test too.
->
-> Okay, I've attached the program. It's barely 2 KB. You need Boost 1.4=
-5+, CMake
-> 2.6+ and Crypto++ to compile it.
->
-> Warning: This will fill up your harddisk completely, which is not a g=
-ood idea
-> on in-production machines.
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0Guido
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+True. I must have mixed that up somehow. Not that it matters - for what I'm 
+doing with it here, I might as well be using CRC32.
+
+	Guido
