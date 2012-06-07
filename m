@@ -1,112 +1,154 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Infiniband 40GB
-Date: Thu, 07 Jun 2012 12:15:24 -0500
-Message-ID: <4FD0E1AC.6020800@inktank.com>
-References: <d0e700bd-f7f5-423f-9955-28c3835969e2@mailpro>
+From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Subject: Random data corruption in VM, possibly caused by rbd
+Date: Thu, 07 Jun 2012 20:04:09 +0200
+Message-ID: <21601270.dfB0BsVfyn@pc10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary="nextPart2128551.d98ZmqMQco"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:44236 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932431Ab2FGRP2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jun 2012 13:15:28 -0400
-Received: by ghrr11 with SMTP id r11so591789ghr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Jun 2012 10:15:27 -0700 (PDT)
-In-Reply-To: <d0e700bd-f7f5-423f-9955-28c3835969e2@mailpro>
+Received: from unknownsite.de ([62.48.69.106]:45256 "EHLO hartes-hannover.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932678Ab2FGSEQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 7 Jun 2012 14:04:16 -0400
+Received: from pc10.localnet (pc10.asys-h.de [193.98.1.90])
+	by hartes-hannover.de (Postfix) with ESMTPSA id 625DD10C866
+	for <ceph-devel@vger.kernel.org>; Thu,  7 Jun 2012 20:04:15 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Amon Ott <a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, Yann Dupont <Yann.Dupont@univ-nantes.fr>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 6/7/12 6:25 AM, Alexandre DERUMIER wrote:
-> others tests done today: (kernel 3.4 - ubuntu precise)
->
-> 3 nodes with 5 osd with btrfs, 1GB journal in tmps forced in writeahe=
-ad
-> 3 nodes with 1 osd with xfs,8GB journal in tmpfs
-> 3 nodes with 1 osd with btfs,8GB journal in tmpfs forced in writeahea=
-d
->
-> 3 nodes with 5 osd with btrfs, 20G journal on disk forced in writeahe=
-ad
-> 3 nodes with 1 osd with xfs,20GB journal on disk
-> 3 nodes with 1 osd with btfs,20GB journal on disk forced in writeahea=
-d
->
->
->
->
-> same behaviour for all cases, writes are constant to disk.
->
-> benched with:
-> rados -p pool3 bench 60 write -t 16
->
-> also with
-> fio, bonnie  , random/seq write from guest vm with differents block s=
-ize.
->
->
->
->
-> ----- Mail original -----
->
-> De: "Alexandre DERUMIER"<aderumier@odiso.com>
-> =C3=80: "Mark Nelson"<mark.nelson@inktank.com>
-> Cc: "Amon Ott"<a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann=
- Dupont"<Yann.Dupont@univ-nantes.fr>
-> Envoy=C3=A9: Jeudi 7 Juin 2012 05:31:15
-> Objet: Re: Infiniband 40GB
->
-> Hi again,
-> I have done some tests with journals on a real disk, I have same beha=
-viour.
->
-> iostat show constant write to journal and write to disks at the same =
-time since the beginning of the benchmark.
->
->
-> maybe can I try to use differents partitions for each journal ? (curr=
-ently I have 1 partition with 5 journal files of each osd)
->
-> -Alexandre
->
->
->
-> ----- Mail original -----
->
-> De: "Alexandre DERUMIER"<aderumier@odiso.com>
-> =C3=80: "Mark Nelson"<mark.nelson@inktank.com>
-> Cc: "Amon Ott"<a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann=
- Dupont"<Yann.Dupont@univ-nantes.fr>
-> Envoy=C3=A9: Jeudi 7 Juin 2012 05:11:15
-> Objet: Re: Infiniband 40GB
->
-> Hi mark,
-> I have attached a blktrace of /dev/sdb1 of node1 (osd.0)
->
-> and also iostat (showing constant writes)
->
-> bench used:
->
-> rados -p pool3 bench 60 write -t 16
->
->
-> kernel use : 3.4 from intank
->
-> I'll do tests with journal on an xfs partition today
->
 
-Hi Alexandre,
+--nextPart2128551.d98ZmqMQco
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 
-I'll try to take a look at the data you sent me later today.
+Hi,
 
-Thanks!
-Mark
+I'm using Ceph with RBD to provide network-transparent disk images for KVM-
+based virtual servers. The last two days, I've been hunting some weird elusive 
+bug where data in the virtual machines would be corrupted in weird ways. It 
+usually manifests in files having some random data - usually zeroes - at the 
+start before the actual contents that should be in there start.
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To track this down, I wrote a simple io tester. It does the following:
+
+- Create 1 Megabyte of random data
+- Calculate the SHA256 hash of that data
+- Write the data to a file on the harddisk, in a given directory, using the 
+hash as the filename
+- Repeat until the disk is full
+- Delete the last file (because it is very likely to be incompletely written)
+- Read and delete all the files just written while checking that their sha256 
+sums are equal to their filenames
+
+When running this io tester in a VM that uses a qcow2 file on a local harddisk 
+for its virtual disk, no errors are found. When the same VM is running using 
+rbd, the io tester finds on average about one corruption every 200 Megabytes, 
+reproducably.
+
+(As in an interesting aside, the io tester also prints how long it took to 
+read or write 100 MB, and it turns out reading the data back in again is about 
+three times slower than writing them in the first place...)
+
+Ceph is version 0.47.2. Qemu KVM is 1.0, compiled with the spec file from 
+http://pkgs.fedoraproject.org/gitweb/?p=qemu.git;a=summary
+(And compiled after ceph 0.47.2 was installed on that machine, so it would use 
+the correct headers...)
+Both the Ceph cluster and the KVM host machines are running on Fedora 16, with 
+a fairly recent 3.3.x kernel.
+The ceph cluster uses btrf for the osd's data dirs. The journal is on a tmpfs. 
+(This is not a production setup - luckily.)
+The virtual machine is using ext4 as its filesystem.
+There were no obvious other problems with either the ceph cluster or the KVM 
+host machines.
+
+I have attached a copy of the ceph.conf in use, in case it might be helpful.
+
+This is a huge problem, and any help in tracking it down would be much 
+appreciated.
+
+Regards,
+
+	Guido
+--nextPart2128551.d98ZmqMQco
+Content-Disposition: attachment; filename="ceph.conf"
+Content-Transfer-Encoding: 7Bit
+Content-Type: application/octet-stream; name="ceph.conf"
+
+; global
+[global]
+	; enable secure authentication
+	; auth supported = cephx
+        max open files = 131072
+        log file = /var/log/ceph/$name.log
+        ; log_to_syslog = true        ; uncomment this line to log to syslog
+        pid file = /var/run/ceph/$name.pid
+
+; monitors
+[mon]
+        mon data = /mondata/$name
+
+[mon.alpha]
+	host = storage1
+	mon addr = 10.6.224.129:6789
+
+[mon.beta]
+	host = storage2
+	mon addr = 10.6.224.130:6789
+
+[mon.gamma]
+	host = storage3
+	mon addr = 10.6.224.131:6789
+
+; mds
+[mds]
+	; where the mds keeps it's secret encryption keys
+	keyring = /mdsdata/keyring.$name
+
+[mds.alpha]
+	host = storage1
+
+[mds.beta]
+	host = storage2
+
+[mds.gamma]
+	host = storage3
+
+; osd
+[osd]
+	osd data = /osddata/$name
+
+	osd journal = /journaldata/$name/journal
+	osd journal size = 1000 ; journal size, in megabytes
+
+        ; If you want to run the journal on a tmpfs, disable DirectIO
+        journal dio = false
+
+        osd recovery max active = 5
+
+	btrfs devs = /dev/sda5 /dev/sdb5
+
+	keyring = /osddata/$name/keyring
+
+[osd.0]
+	host = storage1
+	cluster addr = 10.6.224.193
+	public addr = 10.6.224.129
+
+[osd.1]
+	host = storage2
+	cluster addr = 10.6.224.194
+	public addr = 10.6.224.130
+
+[osd.2]
+	host = storage3
+	cluster addr = 10.6.224.195
+	public addr = 10.6.224.131
+
+[client]   ; userspace client
+;      debug ms = 1
+;      debug client = 10
+
+
+--nextPart2128551.d98ZmqMQco--
+
