@@ -1,80 +1,46 @@
-From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+From: Marcus Sorensen <shadowsor@gmail.com>
 Subject: Re: Random data corruption in VM, possibly caused by rbd
-Date: Thu, 07 Jun 2012 23:36:23 +0200
-Message-ID: <1432839.r57HJoU1Hp@tolkien>
-References: <21601270.dfB0BsVfyn@pc10> <4FD10575.7010300@inktank.com>
+Date: Thu, 7 Jun 2012 15:53:18 -0600
+Message-ID: <CALFpzo6sPgf+iK_1asQM0zW_mmmoW0yMjWC8PCc7=qCH=BVdYg@mail.gmail.com>
+References: <21601270.dfB0BsVfyn@pc10>
+	<47203FB1-758C-46E9-A49A-6F9896B663DC@profihost.ag>
+	<3039502.NLSCFOhhFU@pc10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from unknownsite.de ([62.48.69.106]:50201 "EHLO hartes-hannover.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757444Ab2FGVg3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 7 Jun 2012 17:36:29 -0400
-In-Reply-To: <4FD10575.7010300@inktank.com>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:54438 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933058Ab2FGVxU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jun 2012 17:53:20 -0400
+Received: by eaak11 with SMTP id k11so537312eaa.19
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Jun 2012 14:53:18 -0700 (PDT)
+In-Reply-To: <3039502.NLSCFOhhFU@pc10>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Cc: Stefan Priebe <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thursday 07 June 2012 12:48:05 Josh Durgin wrote:
-> On 06/07/2012 11:04 AM, Guido Winkelmann wrote:
-> > Hi,
-> > 
-> > I'm using Ceph with RBD to provide network-transparent disk images for
-> > KVM-
-> > based virtual servers. The last two days, I've been hunting some weird
-> > elusive bug where data in the virtual machines would be corrupted in
-> > weird ways. It usually manifests in files having some random data -
-> > usually zeroes - at the start before the actual contents that should be
-> > in there start.
-> 
-> I definitely want to figure out what's going on with this.
-> A few questions:
-> 
-> Are you using rbd caching? If so, what settings?
+Maybe I did something wrong with your iotester, but I had to mkdir
+=2E/iotest to get it to run. I straced and found that it died on 'no
+such file'.
 
-I'm not using rbd caching, and I wasn't planning on even trying before I have 
-a much better understanding of how it affects VM migration.
- 
-> In either case, does the corruption still occur if you
-> switch caching on/off? There are different I/O paths here,
-> and this might tell us if the problem is on the client side.
-> 
-> Another thing to try is turning off sparse reads on the osd by setting
-> filestore fiemap threshold = 0
-
-Okay, I will try these things tomorrow.
- 
-[...]
-> > The ceph cluster uses btrf for the osd's data dirs. The journal is on a
-> > tmpfs. (This is not a production setup - luckily.)
-> > The virtual machine is using ext4 as its filesystem.
-> > There were no obvious other problems with either the ceph cluster or the
-> > KVM host machines.
-> 
-> Were there any nodes with osds restarted during the test runs? I wonder
-> if it's a problem with losing the tmpfs journal.
-
-No, from the point when the rbd volume was created, all nodes were online all 
-the time. No nodes were added or removed.
- 
-> As Oliver suggested, switching the osd data dir filesystem might help
-> too.
-
-Again, I'll try that tomorrow. BTW, I could use some advice on how to go about 
-that. Right I would stop one osd process (not the whole machine), reformat and 
-remount its btrfs devices as XFS, delete the journal, restart the osd, wait 
-until the cluster is healthy again, repeat for all the osds in the cluster. Is 
-that sufficient?
-
-Oh, one other thing I just thought of:
-The rbd volume in question was created as a copy, using the rbd cp command, 
-from a template volume. I cannot recall seeing any corruption while using the 
-original volume (which was created using rbd import). Maybe the bug only bites 
-volumes that have been created as copies of other volumes? I'll have to do 
-more tests along those lines as well...
-
-Regards,
-	Guido
-
+On Thu, Jun 7, 2012 at 12:37 PM, Guido Winkelmann
+<guido-ceph@thisisnotatest.de> wrote:
+> Am Donnerstag, 7. Juni 2012, 20:18:52 schrieb Stefan Priebe:
+>> I think the test script would help a lot so others can test too.
+>
+> Okay, I've attached the program. It's barely 2 KB. You need Boost 1.4=
+5+, CMake
+> 2.6+ and Crypto++ to compile it.
+>
+> Warning: This will fill up your harddisk completely, which is not a g=
+ood idea
+> on in-production machines.
+>
+> =A0 =A0 =A0 =A0Guido
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
