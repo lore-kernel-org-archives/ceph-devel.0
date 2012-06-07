@@ -1,34 +1,38 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: Infiniband 40GB
-Date: Thu, 07 Jun 2012 14:44:34 +0200
-Message-ID: <4FD0A232.5020400@profihost.ag>
-References: <4FCB1C0A.4050504@profihost.ag> <201206061257.34525.a.ott@m-privacy.de> <4FCF38C7.8000802@profihost.ag> <201206071333.28197.a.ott@m-privacy.de>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: radosgw authentication problems
+Date: Thu, 7 Jun 2012 09:33:30 -0700
+Message-ID: <CADvuQRE=rUwwzByGSdiExNMOy8-d37DBmxcj=Ez-QwwW70BcjQ@mail.gmail.com>
+References: <CAMmJxt+QMPoY-6WOypGjoTDjXafk_-knRUhfrsoca3zRn=YcXA@mail.gmail.com>
+ <CAC-hyiFaTvhORZ-TdYSxgdBmZYuvWFKobHs_qvq8J8FY+pr=-g@mail.gmail.com> <CAMmJxtKZryK+i6jzoqRp=ojQXs1c_3d3Xsmjx7+c9GDpfwc9pg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:42973 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755504Ab2FGMoh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jun 2012 08:44:37 -0400
-In-Reply-To: <201206071333.28197.a.ott@m-privacy.de>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:53928 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755839Ab2FGQdv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jun 2012 12:33:51 -0400
+Received: by pbbrp8 with SMTP id rp8so1296323pbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Jun 2012 09:33:50 -0700 (PDT)
+In-Reply-To: <CAMmJxtKZryK+i6jzoqRp=ojQXs1c_3d3Xsmjx7+c9GDpfwc9pg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>
-Cc: ceph-devel@vger.kernel.org
+To: John Axel Eriksson <john@insane.se>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, ceph-devel@vger.kernel.org
 
-Am 07.06.2012 13:33, schrieb Amon Ott:
-> On Wednesday 06 June 2012 wrote Stefan Priebe - Profihost AG:
->> Am 06.06.2012 12:57, schrieb Amon Ott:
->>> On Wednesday 06 June 2012 wrote Stefan Priebe - Profihost AG:
->> /usr/include/unistd.h:
->> extern int syncfs (int __fd) __THROW;
->>
->> /usr/include/gnu/stubs-64.h:
->> #define __stub_syncfs
->
-> Are you building on 32 or 64 Bit? We have 32 here.
+On Thu, Jun 7, 2012 at 3:16 AM, John Axel Eriksson <john@insane.se> wrote:
+> In general I really like ceph but it does seem like it has a few rough
+> edges.
 
-64bit but does this make a difference?
+We're putting a significant amount of effort in the documentation,
+installability and manageability aspects of Ceph, and hope that more
+of the fruit of that labor will become useful to the larger community
+in the coming months.
 
-Stefan
+> What I understand is that cephs object storage is pretty stable and is
+> used in production by some. We're only interested in the object
+> storage/rados part so what's a more informed opinion on this than my
+> speculation?
+
+RADOS, RBD and radosgw are considered production ready, when
+configured correctly. Inktank is actively providing commercial support
+for those components.
