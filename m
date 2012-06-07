@@ -1,31 +1,31 @@
-From: "Guan Jun He" <gjhe@suse.com>
-Subject: typo of http://ceph.com/wiki/Rbd
-Date: Thu, 07 Jun 2012 01:22:25 -0600
-Message-ID: <4FD0C7310200001600011026@soto.provo.novell.com>
+From: Jerker Nyberg <jerker@Update.UU.SE>
+Subject: Re: Ceph and BackupPC
+Date: Thu, 7 Jun 2012 10:02:47 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1206070934110.358@Psilocybe.Update.UU.SE>
+References: <c99406dc-0969-47de-a75a-72a8f42eae52@mail.linserv.se>
+ <3941218.dafc4yYMCO@pc10>
+Reply-To: ceph-devel <ceph-devel@vger.kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soto.provo.novell.com ([137.65.250.214]:44035 "EHLO
-	soto.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755035Ab2FGHmm convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:1:1>);
-	Thu, 7 Jun 2012 03:42:42 -0400
-Content-Disposition: inline
+Received: from Psilocybe.Update.UU.SE ([130.238.19.25]:57145 "EHLO
+	Psilocybe.Update.UU.SE" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755454Ab2FGICt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Jun 2012 04:02:49 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by Psilocybe.Update.UU.SE (Postfix) with ESMTP id AB91D3007E
+	for <ceph-devel@vger.kernel.org>; Thu,  7 Jun 2012 10:02:47 +0200 (CEST)
+In-Reply-To: <3941218.dafc4yYMCO@pc10>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+On Wed, 6 Jun 2012, Guido Winkelmann wrote:
 
-Maybe there is a typo in this wiki:
+> I'm asking because BackupPC is the only application I know of that actually
+> makes heavy use of hardlinks.
 
-http://ceph.com/wiki/Rbd
+I used to run "rsync --link-dest" to create snapshot-like directories with 
+hard links but have been using real ZFS snapshots lately.
 
-it's located in the last title "Snaphots", I think it should be "Snapshots".
-
-
-thanks,
-Guanjun
-
-
+--jerker
