@@ -1,97 +1,189 @@
-From: "Yan, Zheng " <yanzheng@21cn.com>
-Subject: Re: [PATCH] rbd: Clear ceph_msg->bio_iter for retransmitted message
-Date: Thu, 7 Jun 2012 06:35:08 +0800
-Message-ID: <CAAM7YAmV7nG5fKuFuDKTRTggE4RKQGiDi9Bcf4tASr4_S43YOw@mail.gmail.com>
-References: <1338969797-8412-1-git-send-email-zheng.z.yan@intel.com>
-	<4FCFD56C.9050103@dreamhost.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: Infiniband 40GB
+Date: Thu, 07 Jun 2012 05:31:15 +0200 (CEST)
+Message-ID: <bccb917b-a474-45a8-a260-ef45f4901309@mailpro>
+References: <a81f3855-1c7d-447b-9bbf-6a891e372909@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:39131 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758968Ab2FFWfJ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 18:35:09 -0400
-Received: by obbtb18 with SMTP id tb18so10891132obb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Jun 2012 15:35:09 -0700 (PDT)
-In-Reply-To: <4FCFD56C.9050103@dreamhost.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:39344 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753310Ab2FGDbh convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Jun 2012 23:31:37 -0400
+In-Reply-To: <a81f3855-1c7d-447b-9bbf-6a891e372909@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: elder@inktank.com
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel@vger.kernel.org
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Amon Ott <a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, Yann Dupont <Yann.Dupont@univ-nantes.fr>
 
-On Thu, Jun 7, 2012 at 6:10 AM, Alex Elder <elder@dreamhost.com> wrote:
-> On 06/06/2012 03:03 AM, Yan, Zheng wrote:
->> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->>
->> The bug can cause NULL pointer dereference in write_partial_msg_page=
-s
->>
->> Signed-off-by: Zheng Yan <zheng.z.yan@intel.com>
->> ---
->> =A0net/ceph/messenger.c | =A0 =A01 +
->> =A01 files changed, 1 insertions(+), 0 deletions(-)
->>
->> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->> index 1a80907..785b953 100644
->> --- a/net/ceph/messenger.c
->> +++ b/net/ceph/messenger.c
->> @@ -598,6 +598,7 @@ static void prepare_write_message(struct ceph_co=
-nnection *con)
->> =A0 =A0 =A0 =A0 =A0 =A0le32_to_cpu(con->out_msg->footer.front_crc),
->> =A0 =A0 =A0 =A0 =A0 =A0le32_to_cpu(con->out_msg->footer.middle_crc))=
-;
->>
->> + =A0 =A0 m->bio_iter =3D NULL;
->> =A0 =A0 =A0 /* is there a data payload? */
->> =A0 =A0 =A0 if (le32_to_cpu(m->hdr.data_len) > 0) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* initialize page iterator */
->
-> OK, now that I've looked at this a little bit I think I have a small
-> preference for doing this assignment earlier in that function, where
-> there is already special handling that is dependent on whether the
-> message being processed is being re-sent or not:
->
-> =A0 =A0 =A0 =A0/*
-> =A0 =A0 =A0 =A0 * only assign outgoing seq # if we haven't sent this =
-message
-> =A0 =A0 =A0 =A0 * yet. =A0if it is requeued, resend with it's origina=
-l seq.
-> =A0 =A0 =A0 =A0 */
-> =A0 =A0 =A0 =A0if (m->needs_out_seq) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0m->hdr.seq =3D cpu_to_le64(++con->out_=
-seq);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0m->needs_out_seq =3D false;
-> =A0 =A0 =A0 =A0}
->
-> So I'd suggest it look like:
->
-> =A0 =A0 =A0 =A0/*
-> =A0 =A0 =A0 =A0 * only assign outgoing seq # if we haven't sent this =
-message
-> =A0 =A0 =A0 =A0 * yet. =A0if it is requeued, resend with it's origina=
-l seq.
-> =A0 =A0 =A0 =A0 */
-> =A0 =A0 =A0 =A0if (m->needs_out_seq) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0m->hdr.seq =3D cpu_to_le64(++con->out_=
-seq);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0m->needs_out_seq =3D false;
-> =A0 =A0 =A0 =A0}
-> #ifdef CONFIG_BLOCK
-> =A0 =A0 =A0 =A0else {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Need to reinitialize the iterator o=
-n resends */
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0m->bio_iter =3D NULL;
-> =A0 =A0 =A0 =A0}
-> #endif
->
-> Please let me know if you concur with my proposed modification or
-> whether you feel strongly we should go with your original fix.
->
-I'm OK with it.
+Hi again,=20
+I have done some tests with journals on a real disk, I have same behavi=
+our.
 
-Thanks
-Yan, Zheng
+iostat show constant write to journal and write to disks at the same ti=
+me since the beginning of the benchmark.
+
+
+maybe can I try to use differents partitions for each journal ? (curren=
+tly I have 1 partition with 5 journal files of each osd)
+
+-Alexandre
+
+
+
+----- Mail original -----=20
+
+De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+=C3=80: "Mark Nelson" <mark.nelson@inktank.com>=20
+Cc: "Amon Ott" <a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann =
+Dupont" <Yann.Dupont@univ-nantes.fr>=20
+Envoy=C3=A9: Jeudi 7 Juin 2012 05:11:15=20
+Objet: Re: Infiniband 40GB=20
+
+Hi mark,=20
+I have attached a blktrace of /dev/sdb1 of node1 (osd.0)=20
+
+and also iostat (showing constant writes)=20
+
+bench used:=20
+
+rados -p pool3 bench 60 write -t 16=20
+
+
+kernel use : 3.4 from intank=20
+
+I'll do tests with journal on an xfs partition today=20
+
+----- Mail original -----=20
+
+De: "Mark Nelson" <mark.nelson@inktank.com>=20
+=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
+Cc: "Amon Ott" <a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann =
+Dupont" <Yann.Dupont@univ-nantes.fr>=20
+Envoy=C3=A9: Mercredi 6 Juin 2012 18:43:50=20
+Objet: Re: Infiniband 40GB=20
+
+Hi Alexandre,=20
+
+If you can run blktrace during your test on one of the OSD data disks=20
+and send me the results I can take a look at them. Also, the rados=20
+bench settings and output would be useful too.=20
+
+Thanks,=20
+Mark=20
+
+On 6/6/12 11:05 AM, Alexandre DERUMIER wrote:=20
+> Hi, I have rebuild my cluster with ubuntu precise,=20
+>=20
+> -kernel 3.2=20
+> -ceph 0.47.2=20
+> -libc6 2.15=20
+> -3 nodes - 5 osd (xfs) by node and 1 tmpfs with 5 journal file.=20
+>=20
+> I had launch rados bench,=20
+> and I see again constant writes to xfs....=20
+>=20
+> Maybe this is related to tmpfs ?=20
+>=20
+>=20
+> I'll retry with kernel 3.4 from intank tomorrow.=20
+> I'll also try with journal on a physical disk with xfs partition.=20
+>=20
+> I'll keep you in touch.=20
+>=20
+>=20
+> ----- Mail original -----=20
+>=20
+> De: "Mark Nelson"<mark.nelson@inktank.com>=20
+> =C3=80: "Alexandre DERUMIER"<aderumier@odiso.com>=20
+> Cc: "Amon Ott"<a.ott@m-privacy.de>, ceph-devel@vger.kernel.org, "Yann=
+ Dupont"<Yann.Dupont@univ-nantes.fr>=20
+> Envoy=C3=A9: Lundi 4 Juin 2012 14:59:58=20
+> Objet: Re: Infiniband 40GB=20
+>=20
+> On 6/4/12 6:40 AM, Alexandre DERUMIER wrote:=20
+>> Hi,=20
+>>=20
+>> I'm currently doing some tests with xfs, debian wheezy with standard=
+ libc6 (2.11.3-3) and 3.2 kernel.=20
+>>=20
+>> I'm doing some iostats(3 nodes with 5 osd), and I see constant write=
+s to disks.(as the datas are flushed each second from journal to disk).=
+=20
+>>=20
+>> Journal is big enough (20GB tmpfs) to handle 30s of write.=20
+>>=20
+>> Do you think it's related to the missing syncfs() support ?=20
+>>=20
+>> -Alexandre=20
+>=20
+> Hi Alexandre,=20
+>=20
+> I've included some seekwatcher results for rados bench tests using 16=
+=20
+> concurrent 4MB writes on XFS OSD. One shows ubuntu oneiric and the=20
+> other precise (ie no syncfs support vs syncfs support in libc).=20
+> Unfortunately the original test was on 0.46 and the second test was o=
+n=20
+> 0.47.2, so multiple things changed between the tests. Both were teste=
+d=20
+> with kernel 3.4. Interestingly the seeks/second don't seem to drop mu=
+ch=20
+> but the overall performance has about doubled. This was using a singl=
+e=20
+> 7200rpm disk for the OSD data disk and a seperate 7200rpm disk for th=
+e=20
+> journal in both cases. I'd definitely try 0.47.2 with a new libc thou=
+gh=20
+> and see how that works for you.=20
+>=20
+> ceph 0.46/oneiric:=20
+> http://nhm.ceph.com/movies/mailinglist-tests/xfs-osd0-oneiric-3.4.mpg=
+=20
+>=20
+> ceph 0.47.2/precise:=20
+> http://nhm.ceph.com/movies/mailinglist-tests/xfs-osd0-precise-3.4.mpg=
+=20
+>=20
+> Mark=20
+>=20
+>=20
+>=20
+
+
+
+
+--=20
+
+--=20
+
+
+
+
+Alexandre D erumier=20
+Ing=C3=A9nieur Syst=C3=A8me=20
+=46ixe : 03 20 68 88 90=20
+=46ax : 03 20 68 90 81=20
+45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
+12 rue Marivaux 75002 Paris - France=20
+
+
+
+--=20
+
+--=20
+
+
+
+
+	Alexandre D erumier=20
+Ing=C3=A9nieur Syst=C3=A8me=20
+=46ixe : 03 20 68 88 90=20
+=46ax : 03 20 68 90 81=20
+45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
+12 rue Marivaux 75002 Paris - France=20
+=09
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
