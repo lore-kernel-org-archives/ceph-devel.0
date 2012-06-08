@@ -1,57 +1,53 @@
-From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Subject: Re: Random data corruption in VM, possibly caused by rbd
-Date: Fri, 08 Jun 2012 19:15:26 +0200
-Message-ID: <2194809.KXWDOvK1M7@pc10>
-References: <21601270.dfB0BsVfyn@pc10> <Pine.LNX.4.64.1206080652031.10292@cobra.newdream.net> <4FD2113C.3070906@inktank.com>
+From: Martin Wilderoth <martin.wilderoth@linserv.se>
+Subject: Re: mds dump
+Date: Fri, 08 Jun 2012 15:22:28 -0400 (EDT)
+Message-ID: <cacaf6c2-6adf-456e-85b3-b33a4f477cf7@mail.linserv.se>
+References: <Pine.LNX.4.64.1206080857530.8391@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from unknownsite.de ([62.48.69.106]:54999 "EHLO hartes-hannover.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754929Ab2FHRPb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 8 Jun 2012 13:15:31 -0400
-In-Reply-To: <4FD2113C.3070906@inktank.com>
+Received: from 195-67-7-55.customer.telia.com ([195.67.7.55]:40003 "EHLO
+	mail.linserv.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755983Ab2FHTWm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 15:22:42 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.linserv.se (Postfix) with ESMTP id E59ABDA033
+	for <ceph-devel@vger.kernel.org>; Fri,  8 Jun 2012 15:22:28 -0400 (EDT)
+Received: from mail.linserv.se ([127.0.0.1])
+	by localhost (mail.linserv.se [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id scTeh80DVKr0 for <ceph-devel@vger.kernel.org>;
+	Fri,  8 Jun 2012 15:22:28 -0400 (EDT)
+Received: from mail.linserv.se (mail.linserv.se [195.67.7.55])
+	by mail.linserv.se (Postfix) with ESMTP id 35A51DA031
+	for <ceph-devel@vger.kernel.org>; Fri,  8 Jun 2012 15:22:28 -0400 (EDT)
+In-Reply-To: <Pine.LNX.4.64.1206080857530.8391@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, Oliver Francke <Oliver.Francke@filoo.de>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Am Freitag, 8. Juni 2012, 07:50:36 schrieb Josh Durgin:
-> On 06/08/2012 06:55 AM, Sage Weil wrote:
-> > On Fri, 8 Jun 2012, Oliver Francke wrote:
-> >> Hi Guido,
-> >> 
-> >> yeah, there is something weird going on. I just started to establish some
-> >> test-VM's. Freshly imported from running *.qcow2 images.
-> >> Kernel panic with INIT, seg-faults and other "funny" stuff.
-> >> 
-> >> Just added the rbd_cache=true in my config, voila. All is
-> >> fast-n-up-n-running...
-> >> All my testing was done with cache enabled... Since our errors all came
-> >> from rbd_writeback from former ceph-versions...
+Hello and thanks,
+
+I have removed the data and metadata pool. Do I need to create them again, or 
+will they be created automaticly.
+Maybe I need the undocumented way of creating the mds map ?. I would like to
+get an empty cephfs to play with again.
+
+ /Best Regards Martin
+
+> On Fri, 8 Jun 2012, Tommi Virtanen wrote: 
+> > On Fri, Jun 8, 2012 at 12:35 AM, Martin Wilderoth 
+> > <martin.wilderoth@linserv.se> wrote: 
+> > > And if i just want to mkfs or similar in mds is that possible. Or or my rbd will 
+> > > also be removed ? Or how should I recover if I don't care of the data in 
+> > > the POSIX file system ? 
 > > 
-> > Are you guys able to reproduce the corruption with 'debug osd = 20' and
-> > 
-> > 'debug ms = 1'?  Ideally we'd like to:
-> >   - reproduce from a fresh vm, with osd logs
-> >   - identify the bad file
-> >   - map that file to a block offset (see
-> >   
-> >     http://ceph.com/qa/fiemap.[ch], linux_fiemap.h)
-> >   
-> >   - use that to identify the badness in the log
-> > 
-> > I suspect the cache is just masking the problem because it submits fewer
-> > IOs...
+> > By default, the Ceph Distributed File System puts file metadata in the 
+> > pool "metadata", and file contents in the pool "data". RBD images, by 
+> > default, are stored in the pool "rbd". This means you can empty/remove 
+> > the pools "metadata" and "data" without affecting RBD. 
 > 
-> The cache also doesn't do sparse reads. Is it still reproducible with
-> a fresh vm when you set filestore_fiemap_threshold = 0 for the osds,
-> and run without rbd caching?
-
-I have set filestore_fiemap_threshold = 0 on all osds and restarted them. The 
-problem is still there, and so bad I cannot even run this fiemap utility that 
-Sage posted. I guess I should have tried booting the VM from a livecd 
-instead...
-
-	Guido
+> There is also an undocumented way to recreate a new mdsmap (mds cluster) 
+> without affecting the rest of cluster. Is that what you're after? 
+> 
+> sage 
