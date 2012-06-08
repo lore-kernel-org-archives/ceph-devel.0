@@ -1,182 +1,102 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Random data corruption in VM, possibly caused by rbd
-Date: Fri, 08 Jun 2012 07:50:36 -0700
-Message-ID: <4FD2113C.3070906@inktank.com>
-References: <21601270.dfB0BsVfyn@pc10> <4FD10575.7010300@inktank.com> <6535521.l6e0muMKBm@pc10> <4FD1FFD2.6050707@filoo.de> <Pine.LNX.4.64.1206080652031.10292@cobra.newdream.net>
+From: Florian Haas <florian@hastexo.com>
+Subject: Ceph/OpenStack integration on Ubuntu precise: horribly broken, or am
+ I doing something wrong?
+Date: Fri, 8 Jun 2012 17:24:05 +0200
+Message-ID: <CAPUexz846keC+6KvFeethXV4xzpke3n_YKU0_oh-YfTCVR1ozw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:37025 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752774Ab2FHOuj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 10:50:39 -0400
-Received: by gglu4 with SMTP id u4so1307667ggl.19
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Jun 2012 07:50:39 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1206080652031.10292@cobra.newdream.net>
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:43159 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754204Ab2FHPYG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 11:24:06 -0400
+Received: by qabj40 with SMTP id j40so1245016qab.1
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Jun 2012 08:24:05 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Oliver Francke <Oliver.Francke@filoo.de>, Guido Winkelmann <guido-ceph@thisisnotatest.de>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, Openstack <openstack@lists.launchpad.net>
 
-On 06/08/2012 06:55 AM, Sage Weil wrote:
-> On Fri, 8 Jun 2012, Oliver Francke wrote:
->> Hi Guido,
->>
->> yeah, there is something weird going on. I just started to establish=
- some
->> test-VM's. Freshly imported from running *.qcow2 images.
->> Kernel panic with INIT, seg-faults and other "funny" stuff.
->>
->> Just added the rbd_cache=3Dtrue in my config, voila. All is
->> fast-n-up-n-running...
->> All my testing was done with cache enabled... Since our errors all c=
-ame from
->> rbd_writeback from former ceph-versions...
->
-> Are you guys able to reproduce the corruption with 'debug osd =3D 20'=
- and
-> 'debug ms =3D 1'?  Ideally we'd like to:
->
->   - reproduce from a fresh vm, with osd logs
->   - identify the bad file
->   - map that file to a block offset (see
->     http://ceph.com/qa/fiemap.[ch], linux_fiemap.h)
->   - use that to identify the badness in the log
->
-> I suspect the cache is just masking the problem because it submits fe=
-wer
-> IOs...
+Hi everyone,
 
-The cache also doesn't do sparse reads. Is it still reproducible with
-a fresh vm when you set filestore_fiemap_threshold =3D 0 for the osds,
-and run without rbd caching?
+apologies for the cross-post, and not sure if this is new information.
+I did do a cursory check of both list archives and didn't find
+anything pertinent, so here goes. Feel free to point me to an existing
+thread if I'm merely regurgitating something that's already known.
 
-Josh
+Either I'm doing something terribly wrong, or the current state of
+OpenStack/Ceph integration in Ubuntu precise is somewhat suboptimal.
+At least as far as sticking to packages available in Ubuntu repos is
+concerned.
 
-> sage
->
->
->>
->> Josh? Sage? Help?!
->>
->> Oliver.
->>
->> On 06/08/2012 02:55 PM, Guido Winkelmann wrote:
->>> Am Donnerstag, 7. Juni 2012, 12:48:05 schrieben Sie:
->>>> On 06/07/2012 11:04 AM, Guido Winkelmann wrote:
->>>>> Hi,
->>>>>
->>>>> I'm using Ceph with RBD to provide network-transparent disk image=
-s for
->>>>> KVM-
->>>>> based virtual servers. The last two days, I've been hunting some =
-weird
->>>>> elusive bug where data in the virtual machines would be corrupted=
- in
->>>>> weird ways. It usually manifests in files having some random data=
- -
->>>>> usually zeroes - at the start before the actual contents that sho=
-uld be
->>>>> in there start.
->>>> I definitely want to figure out what's going on with this.
->>>> A few questions:
->>>>
->>>> Are you using rbd caching? If so, what settings?
->>>>
->>>> In either case, does the corruption still occur if you
->>>> switch caching on/off? There are different I/O paths here,
->>>> and this might tell us if the problem is on the client side.
->>> Okay, I've tried enabling rbd caching now, and so far, the problem =
-appears
->>> to
->>> be gone.
->>>
->>> I am using libvirt for starting and managing the virtual machines, =
-and what
->>> I
->>> did was change the<source>   element for the virtual disk from
->>>
->>> <source protocol=3D'rbd' name=3D'rbd/name_of_image'>
->>>
->>> to
->>>
->>> <source protocol=3D'rbd' name=3D'rbd/name_of_image:rbd_cache=3Dtrue=
-'>
->>>
->>> and then restart the VM.
->>> (I found that in one of your mails on this list; there does not app=
-ear to be
->>> any proper documentation on this...)
->>>
->>> The iotester does not find any corruptions with these settings.
->>>
->>> The VM ist still horribly broken, but that's probably lingering fil=
-esystem
->>> damage from yesterday. I'll try with a fresh image next.
->>>
->>> I did not change anything else in the setup. In particular, the OSD=
-s still
->>> use
->>> btrfs. One of the OSD has been restarted, though. I will run anothe=
-r test
->>> with
->>> a VM without rbd caching, to make sure it wasn't by random chance r=
-estarting
->>> that one osd that made the real difference.
->>>
->>> Enabling btrfs did not appear to make any difference wrt performanc=
-e, but
->>> that's probably because my tests mostly create sustained sequential=
- IO, for
->>> which caches are generally not very helpful.
->>>
->>> Enabling rbd caching is not a solution I particularly like, for two=
- reasons:
->>>
->>> 1. In my setup, migrating VMs from one host to another is a normal =
-part of
->>> operation, and I still don't know ho to prevent data corruption (in=
- the form
->>> of silently lost writes) when combining rbd caching and migration.
->>>
->>> 2. I'm not really looking into speeding up single VM, I'm really mo=
-re
->>> interested in just how many VMs I can run before performance starts
->>> degrading
->>> for everyone, and I don't think rbd caching will help with that.
->>>
->>> Regards,
->>> 	Guido
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->> --
->>
->> Oliver Francke
->>
->> filoo GmbH
->> Moltkestra=DFe 25a
->> 33330 G=FCtersloh
->> HRB4355 AG G=FCtersloh
->>
->> Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
->>
->> Folgen Sie uns auf Twitter: http://twitter.com/filoogmbh
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+Steps to reproduce:
 
+1. On an installation using 12.04 with current updates, create a RADOS =
+pool.
+2. Configure glance to use "rbd" as its backend storage.
+3. Attempt to upload an image.
+
+glance add name=3D"Ubuntu 12.04 cloudimg amd64" is_public=3Dtrue
+container_format=3Dovf disk_format=3Dqcow2 <
+precise-server-cloudimg-amd64-disk1.img
+Uploading image 'Ubuntu 12.04 cloudimg amd64'
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D[
+92%]         222.109521M/s, ETA  0h  0m  0sFailed to add image. Got
+error:
+Data supplied was not valid.
+Details: 400 Bad Request
+
+The server could not comply with the request since it is either
+malformed or otherwise incorrect.
+
+ Error uploading image: (NameError): global name 'rados' is not defined
+
+Digging around in glance/store/rbd.py yields this:
+
+try:
+    import rados
+    import rbd
+except ImportError:
+    pass
+
+I will go so far as say the error handling here could be improved --
+however, the Swift store implementation seems to do the same.
+
+Now, in Ubuntu rados.py and rbd.py ship in the python-ceph package,
+which is available in universe, but has an unresolvable dependency on
+librgw1. librgw1 apparently had been in Ubuntu for quite a while, but
+was dropped just before the Essex release:
+
+https://launchpad.net/ubuntu/precise/amd64/radosgw
+
+=2E.. and if I read
+http://changelogs.ubuntu.com/changelogs/pool/main/c/ceph/ceph_0.41-1ubu=
+ntu2/changelog
+correctly, then the rationale for it was to "drop radosgw since
+libfcgi is not in main and the code may not be suitable for LTS." (I
+wonder why this wasn't factored out into a separate package then, as
+was apparently the case for ceph-mds).
+
+Does this really mean that radosgw functionality was dropped from
+Ubuntu because it wasn't considered ready for main, and now it
+completely breaks a package in universe that's essential for
+Ceph/OpenStack integration? AFAICT the only thing that would be
+unaffected by this would be nova-volume (now cinder) which rather than
+using the Ceph Python bindings just calls out to the rados and rbd
+binaries. But both the glance RBD store and the RADOS Swift and S3
+frontends (via radosgw) would be affected.
+
+This can of course all be fixed by using "upstream" packages from the
+Ceph guys (thanks to S=C3=A9bastien Han for pointing that out to me).
+
+Anyone able to confirm or refute these findings? Should there be an
+Ubuntu bug for this? If so, against what package?
+
+Cheers,
+=46lorian
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
