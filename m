@@ -1,37 +1,35 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: mds dump
-Date: Fri, 8 Jun 2012 08:58:39 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206080857530.8391@cobra.newdream.net>
-References: <9CFDA4F85EA1425B888F7F62DA77038E@inktank.com>
- <a1cf1173-9a9c-49b9-8f76-6a8267c692b3@mail.linserv.se>
- <CADvuQRF5-hEhHtA_VoyuV0VhpTZ_YY_md4Mc=0-82Cb6D2EvLw@mail.gmail.com>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: Ceph/OpenStack integration on Ubuntu precise: horribly broken, or
+ am I doing something wrong?
+Date: Fri, 8 Jun 2012 09:02:41 -0700
+Message-ID: <CADvuQREhLJJcuaMXNj-a-iXNqaPjQ1-NLrimd1H=7a3a7pj0fw@mail.gmail.com>
+References: <CAPUexz846keC+6KvFeethXV4xzpke3n_YKU0_oh-YfTCVR1ozw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51272 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751472Ab2FHP6m (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 11:58:42 -0400
-In-Reply-To: <CADvuQRF5-hEhHtA_VoyuV0VhpTZ_YY_md4Mc=0-82Cb6D2EvLw@mail.gmail.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:60964 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934356Ab2FHQDB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 12:03:01 -0400
+Received: by dady13 with SMTP id y13so2529627dad.19
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Jun 2012 09:03:01 -0700 (PDT)
+In-Reply-To: <CAPUexz846keC+6KvFeethXV4xzpke3n_YKU0_oh-YfTCVR1ozw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Martin Wilderoth <martin.wilderoth@linserv.se>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Florian Haas <florian@hastexo.com>
+Cc: ceph-devel@vger.kernel.org, Openstack <openstack@lists.launchpad.net>
 
-On Fri, 8 Jun 2012, Tommi Virtanen wrote:
-> On Fri, Jun 8, 2012 at 12:35 AM, Martin Wilderoth
-> <martin.wilderoth@linserv.se> wrote:
-> > And if i just want to mkfs or similar in mds is that possible. Or or my rbd will
-> > also be removed ? Or how should I recover if I don't care of the data in
-> > the POSIX file system ?
-> 
-> By default, the Ceph Distributed File System puts file metadata in the
-> pool "metadata", and file contents in the pool "data". RBD images, by
-> default, are stored in the pool "rbd". This means you can empty/remove
-> the pools "metadata" and "data" without affecting RBD.
+On Fri, Jun 8, 2012 at 8:24 AM, Florian Haas <florian@hastexo.com> wrot=
+e:
+> This can of course all be fixed by using "upstream" packages from the
+> Ceph guys (thanks to S=C3=A9bastien Han for pointing that out to me).
 
-There is also an undocumented way to recreate a new mdsmap (mds cluster) 
-without affecting the rest of cluster.  Is that what you're after?
-
-sage
-
+Yup. And I think that is the line you will be hearing for 12.04, I
+believe. Use 12.04 as the base OS, then install newer ceph debs on top
+of that.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
