@@ -1,171 +1,60 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Random data corruption in VM, possibly caused by rbd
-Date: Fri, 8 Jun 2012 06:55:19 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206080652031.10292@cobra.newdream.net>
-References: <21601270.dfB0BsVfyn@pc10> <4FD10575.7010300@inktank.com>
- <6535521.l6e0muMKBm@pc10> <4FD1FFD2.6050707@filoo.de>
+From: "Mr Kirsten Nematandani" <businessinvestment4@gmail.com>
+Subject: BUSINESS CO-OPERATION!
+Date: Fri, 08 Jun 2012 16:18:34 +0200
+Message-ID: <20120608161834.8ED12A11@centrum.cz>
+References: <20120524120421.A6D17D14@centrum.cz>, <20120525141305.3782FB35@centrum.cz>, <20120528154221.468F71BB@centrum.cz>, <20120528154243.DDF8393D@centrum.cz>, <20120528154310.CB1CBF92@centrum.cz>, <20120528154334.0FDD62F2@centrum.cz>, <20120529170044.ACC00E45@centrum.cz>, <20120529170106.1EA06B6C@centrum.cz>, <20120529170131.6508618B@centrum.cz>, <20120529170157.996197E1@centrum.cz>, <20120530174852.4482DA22@centrum.cz>, <20120530174915.E8B13F77@centrum.cz>, <20120530174935.05F0E25F@centrum.cz>, <20120530174956.A9DED48A@centrum.cz>, <20120531175153.53E671FF@centrum.cz>, <20120531175212.272E725E@centrum.cz>, <20120531175235.803B6222@centrum.cz>, <20120531175300.CF90BD68@centrum.cz>, <20120602123901.BD8CBE20@centrum.cz>, <20120602123921.C02CFEF5@centrum.cz>, <20120602123942.22FD5DAD@cen
+ trum.cz>, <20120602124002.92700855@centrum.cz>, <20120604112441.E8827696@centrum.cz>, <20120604112501.EDD87992@centrum.cz>, <20120604112523.55ACF46F@centrum.cz>, <20120604112552.5E394237@cen
+ trum.cz>, <20120605114729.E03BAEA9@centrum.cz>, <20120605114747.4D7C12C2@centrum.cz>, <20120605114809.95127C02@centrum.cz>, <20120605114831.6EAEA46A@centrum.cz>, <20120606150822.0B47939F@centrum.cz>, <20120606150846.66F55325@centrum.cz>, <20120606150903.32870B8D@centrum.cz>, <20120606150922.0E148551@centrum.cz>, <20120607161617.70A62286@centrum.cz>, <20120607161637.0DFD1E71@centrum.cz>, <20120607161658.CFE77227@centrum.cz>, <20120607161722.188578F9@centrum.cz>, <20120608161741.D66A24FC@centrum.cz>, <20120608161759.98AA1DA6@centrum.cz> <20120608161817.566DDD1D@centrum.cz>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1969212683-1339163719=:10292"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46847 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932082Ab2FHNzY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 09:55:24 -0400
-In-Reply-To: <4FD1FFD2.6050707@filoo.de>
+Received: from gmmr5.centrum.cz ([46.255.225.250]:44180 "EHLO gmmr5.centrum.cz"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757036Ab2FHOSh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 8 Jun 2012 10:18:37 -0400
+In-Reply-To: <20120608161817.566DDD1D@centrum.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Oliver Francke <Oliver.Francke@filoo.de>
-Cc: Guido Winkelmann <guido-ceph@thisisnotatest.de>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+=C2=A0
+Hello!
 
---557981400-1969212683-1339163719=:10292
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On Fri, 8 Jun 2012, Oliver Francke wrote:
-> Hi Guido,
->=20
-> yeah, there is something weird going on. I just started to establish some
-> test-VM's. Freshly imported from running *.qcow2 images.
-> Kernel panic with INIT, seg-faults and other "funny" stuff.
->=20
-> Just added the rbd_cache=3Dtrue in my config, voila. All is
-> fast-n-up-n-running...
-> All my testing was done with cache enabled... Since our errors all came f=
-rom
-> rbd_writeback from former ceph-versions...
-
-Are you guys able to reproduce the corruption with 'debug osd =3D 20' and=
-=20
-'debug ms =3D 1'?  Ideally we'd like to:
-
- - reproduce from a fresh vm, with osd logs
- - identify the bad file
- - map that file to a block offset (see=20
-   http://ceph.com/qa/fiemap.[ch], linux_fiemap.h)
- - use that to identify the badness in the log
-
-I suspect the cache is just masking the problem because it submits fewer=20
-IOs...
-
-sage
-
-
->=20
-> Josh? Sage? Help?!
->=20
-> Oliver.
->=20
-> On 06/08/2012 02:55 PM, Guido Winkelmann wrote:
-> > Am Donnerstag, 7. Juni 2012, 12:48:05 schrieben Sie:
-> > > On 06/07/2012 11:04 AM, Guido Winkelmann wrote:
-> > > > Hi,
-> > > >=20
-> > > > I'm using Ceph with RBD to provide network-transparent disk images =
-for
-> > > > KVM-
-> > > > based virtual servers. The last two days, I've been hunting some we=
-ird
-> > > > elusive bug where data in the virtual machines would be corrupted i=
+My name is Mr Kirsten Nematandani, I'm the President of South African F=
+ootball Association and we hosted 2010 world cup here in South Africa a=
+s you may be aware.
+=C2=A0
+I=E2=80=99m consulting you for my personal investment plan which I woul=
+d like to discuss with you and know the possibility of how we can co-op=
+erate and=C2=A0 work together to carry it out without jeopardizing my p=
+osition, which I=C2=A0 believe will be beneficial to both parties if ha=
+ndled with honesty.
+=C2=A0
+There is some fund I realized as a result of my position from the award=
+=C2=A0 of contracts to prospective contractors building stadiums and ot=
+her=C2=A0 projects which I would like to transfer abroad for investment=
+ purposes in your country. The total sum is USD $11 Million Dollars and=
+ it is securely deposited=C2=A0 abroad.
+=C2=A0
+If you can assist me to receive the fund and further invest it for me i=
+n=C2=A0 any kind of profitable business in your country, kindly contact=
+ me (businessinvestment@contractor.net), in other for us to discuss on =
+how to achieve this effectively.
+=C2=A0
+As soon as=C2=A0 your reply, I will then call you and discuss with=C2=A0=
+ you on further steps to be taken to achieve this. I'm willing to offer=
+=C2=A0 you 20% of the total fund for your kind assistance.
+=C2=A0
+Kindly include your full names, mobile/Office telephone numbers while r=
+eplying to enable me give you a call as soon as I've received your e-ma=
+il.
+=C2=A0
+Thanks as I await for your urgent and swift response.
+=C2=A0
+Regards,
+Mr Kirsten Nematandani.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-> > > > weird ways. It usually manifests in files having some random data -
-> > > > usually zeroes - at the start before the actual contents that shoul=
-d be
-> > > > in there start.
-> > > I definitely want to figure out what's going on with this.
-> > > A few questions:
-> > >=20
-> > > Are you using rbd caching? If so, what settings?
-> > >=20
-> > > In either case, does the corruption still occur if you
-> > > switch caching on/off? There are different I/O paths here,
-> > > and this might tell us if the problem is on the client side.
-> > Okay, I've tried enabling rbd caching now, and so far, the problem appe=
-ars
-> > to
-> > be gone.
-> >=20
-> > I am using libvirt for starting and managing the virtual machines, and =
-what
-> > I
-> > did was change the<source>  element for the virtual disk from
-> >=20
-> > <source protocol=3D'rbd' name=3D'rbd/name_of_image'>
-> >=20
-> > to
-> >=20
-> > <source protocol=3D'rbd' name=3D'rbd/name_of_image:rbd_cache=3Dtrue'>
-> >=20
-> > and then restart the VM.
-> > (I found that in one of your mails on this list; there does not appear =
-to be
-> > any proper documentation on this...)
-> >=20
-> > The iotester does not find any corruptions with these settings.
-> >=20
-> > The VM ist still horribly broken, but that's probably lingering filesys=
-tem
-> > damage from yesterday. I'll try with a fresh image next.
-> >=20
-> > I did not change anything else in the setup. In particular, the OSDs st=
-ill
-> > use
-> > btrfs. One of the OSD has been restarted, though. I will run another te=
-st
-> > with
-> > a VM without rbd caching, to make sure it wasn't by random chance resta=
-rting
-> > that one osd that made the real difference.
-> >=20
-> > Enabling btrfs did not appear to make any difference wrt performance, b=
-ut
-> > that's probably because my tests mostly create sustained sequential IO,=
- for
-> > which caches are generally not very helpful.
-> >=20
-> > Enabling rbd caching is not a solution I particularly like, for two rea=
-sons:
-> >=20
-> > 1. In my setup, migrating VMs from one host to another is a normal part=
- of
-> > operation, and I still don't know ho to prevent data corruption (in the=
- form
-> > of silently lost writes) when combining rbd caching and migration.
-> >=20
-> > 2. I'm not really looking into speeding up single VM, I'm really more
-> > interested in just how many VMs I can run before performance starts
-> > degrading
-> > for everyone, and I don't think rbd caching will help with that.
-> >=20
-> > Regards,
-> > =09Guido
-> >=20
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
-> --=20
->=20
-> Oliver Francke
->=20
-> filoo GmbH
-> Moltkestra=DFe 25a
-> 33330 G=FCtersloh
-> HRB4355 AG G=FCtersloh
->=20
-> Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
->=20
-> Folgen Sie uns auf Twitter: http://twitter.com/filoogmbh
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-1969212683-1339163719=:10292--
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
