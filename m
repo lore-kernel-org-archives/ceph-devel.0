@@ -1,50 +1,30 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: mds dump
-Date: Fri, 8 Jun 2012 12:46:15 -0700
-Message-ID: <96F588468D534E32AFF4784464C393E7@inktank.com>
-References: <Pine.LNX.4.64.1206080857530.8391@cobra.newdream.net>
- <cacaf6c2-6adf-456e-85b3-b33a4f477cf7@mail.linserv.se>
- <CADvuQRHR-EL+GpSgFUcSzQa1Jg++2LHvj83ZF3L1T_zT+NUqoA@mail.gmail.com>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: mount: 10.0.6.10:/: can't read superblock
+Date: Fri, 8 Jun 2012 12:52:03 -0700
+Message-ID: <CADvuQRFFXHscBVLD4k2K=NVZAz+TaiFfQm7uuusgg21JVFEMSg@mail.gmail.com>
+References: <CADvuQREEAKq3AJHe3=1y59VJS36FFVY3dXPcvOLFaYecmjb9xg@mail.gmail.com>
+ <c4db6453-e419-4366-8f7b-924912f31b15@mail.linserv.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:48499 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:50611 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933432Ab2FHTqU convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 15:46:20 -0400
-Received: by pbbrp8 with SMTP id rp8so2953120pbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 08 Jun 2012 12:46:20 -0700 (PDT)
-In-Reply-To: <CADvuQRHR-EL+GpSgFUcSzQa1Jg++2LHvj83ZF3L1T_zT+NUqoA@mail.gmail.com>
-Content-Disposition: inline
+	with ESMTP id S933436Ab2FHTwX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 15:52:23 -0400
+Received: by pbbrp8 with SMTP id rp8so2959183pbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Jun 2012 12:52:23 -0700 (PDT)
+In-Reply-To: <c4db6453-e419-4366-8f7b-924912f31b15@mail.linserv.se>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Martin Wilderoth <martin.wilderoth@linserv.se>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Martin Wilderoth <martin.wilderoth@linserv.se>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Friday, June 8, 2012 at 12:31 PM, Tommi Virtanen wrote:
-> On Fri, Jun 8, 2012 at 12:22 PM, Martin Wilderoth
-> <martin.wilderoth@linserv.se (mailto:martin.wilderoth@linserv.se)> wr=
-ote:
-> > I have removed the data and metadata pool. Do I need to create them=
- again, or
-> > will they be created automaticly.
-> > Maybe I need the undocumented way of creating the mds map ?. I woul=
-d like to
-> > get an empty cephfs to play with again.
-> =20
-> =20
-> =20
-> Just create them again with rados mkpool, that gets you back to squar=
-e one.
-Actually, this doesn't =E2=80=94 the MDS uses pool IDs for its access, =
-not pool names, so you need to do a bit more (Sage illustrated the simp=
-lest route for handling that).
--Greg
+On Fri, Jun 8, 2012 at 12:44 PM, Martin Wilderoth
+<martin.wilderoth@linserv.se> wrote:
+> When upgrading from different versions I just run apt-get upgrade in a running cluster.
+> I just stop ods,mds and mon on the host and then upgrade.
+>
+> Maybe this is very bad ?
 
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+In general, we work to make upgrades safe. MDS may not be getting as
+much attention as the other daemons, so that might be the issue here.
