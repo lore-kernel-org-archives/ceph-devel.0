@@ -1,78 +1,92 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: mds dump
-Date: Fri, 8 Jun 2012 12:36:11 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206081229290.13353@cobra.newdream.net>
-References: <cacaf6c2-6adf-456e-85b3-b33a4f477cf7@mail.linserv.se>
+From: Martin Wilderoth <martin.wilderoth@linserv.se>
+Subject: Re: mount: 10.0.6.10:/: can't read superblock
+Date: Fri, 08 Jun 2012 15:44:48 -0400 (EDT)
+Message-ID: <c4db6453-e419-4366-8f7b-924912f31b15@mail.linserv.se>
+References: <CADvuQREEAKq3AJHe3=1y59VJS36FFVY3dXPcvOLFaYecmjb9xg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47636 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757756Ab2FHTgQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 15:36:16 -0400
-In-Reply-To: <cacaf6c2-6adf-456e-85b3-b33a4f477cf7@mail.linserv.se>
+Received: from 195-67-7-55.customer.telia.com ([195.67.7.55]:40545 "EHLO
+	mail.linserv.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932496Ab2FHTpD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Jun 2012 15:45:03 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.linserv.se (Postfix) with ESMTP id A5D9ADA033
+	for <ceph-devel@vger.kernel.org>; Fri,  8 Jun 2012 15:44:49 -0400 (EDT)
+Received: from mail.linserv.se ([127.0.0.1])
+	by localhost (mail.linserv.se [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id MomcBPYtDket for <ceph-devel@vger.kernel.org>;
+	Fri,  8 Jun 2012 15:44:48 -0400 (EDT)
+Received: from mail.linserv.se (mail.linserv.se [195.67.7.55])
+	by mail.linserv.se (Postfix) with ESMTP id 9BD7BDA031
+	for <ceph-devel@vger.kernel.org>; Fri,  8 Jun 2012 15:44:48 -0400 (EDT)
+In-Reply-To: <CADvuQREEAKq3AJHe3=1y59VJS36FFVY3dXPcvOLFaYecmjb9xg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Wilderoth <martin.wilderoth@linserv.se>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 8 Jun 2012, Martin Wilderoth wrote:
-> Hello and thanks,
-> 
-> I have removed the data and metadata pool. Do I need to create them again, or 
-> will they be created automaticly.
-> Maybe I need the undocumented way of creating the mds map ?. I would like to
-> get an empty cephfs to play with again.
+Hello
 
-Kids, don't try this at home.
-
-1- Recreate the pools with something like
-
- ceph osd pool create data PGNUM
- ceph osd pool create metadata PGNUM
-
-where PGNUM is something like 50*num_osds, maybe rounded to a power of 
-two.
-
-2- get the numeric pool ids for data and metadata (the number after 
-"pool")
-
- ceph osd dump | grep ^pool
-
-3- create a new mdsmap with those pools
-
- ceph mds newfs METADATAPOOLID DATAPOOLID
-
-WARNING: This will clobber any fs data that is in those two pools.  And 
-make any data in the previous mdsmap's pool inaccessible.  In fact, I'm 
-going to add a --yes-i-really-mean-it argument to this command now.
-
-That should do it!
-sage
-
-
-> 
->  /Best Regards Martin
-> 
-> > On Fri, 8 Jun 2012, Tommi Virtanen wrote: 
-> > > On Fri, Jun 8, 2012 at 12:35 AM, Martin Wilderoth 
-> > > <martin.wilderoth@linserv.se> wrote: 
-> > > > And if i just want to mkfs or similar in mds is that possible. Or or my rbd will 
-> > > > also be removed ? Or how should I recover if I don't care of the data in 
-> > > > the POSIX file system ? 
-> > > 
-> > > By default, the Ceph Distributed File System puts file metadata in the 
-> > > pool "metadata", and file contents in the pool "data". RBD images, by 
-> > > default, are stored in the pool "rbd". This means you can empty/remove 
-> > > the pools "metadata" and "data" without affecting RBD. 
+> On Tue, Jun 5, 2012 at 9:37 PM, Martin Wilderoth 
+> <martin.wilderoth@linserv.se> wrote: 
+> > 0> 2012-06-06 05:38:37.200297 7f2d5ea08700 -1 mds/AnchorServer.cc: In function 'virtual void >AnchorServer::handle_query(MMDSTableRequest*)' thread 7f2d5ea08700 time 2012-06-06 05:38:37.198981 
+> > mds/AnchorServer.cc: 249: FAILED assert(anchor_map.count(curino) == 1) 
 > > 
-> > There is also an undocumented way to recreate a new mdsmap (mds cluster) 
-> > without affecting the rest of cluster. Is that what you're after? 
+> > ceph version 0.46 (commit:cb7f1c9c7520848b0899b26440ac34a8acea58d1) 
+> > 1: (AnchorServer::handle_query(MMDSTableRequest*)+0x175) [0x6bdc95] 
+> > 2: (MDS::handle_deferrable_message(Message*)+0xd84) [0x4b0474] 
+> > 3: (MDS::_dispatch(Message*)+0xaf8) [0x4c50b8] 
+... 
+> > root@ceph1:~# ceph -v 
+> > ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad372) 
+> > root@ceph1:~# ssh ceph2 ceph -v 
+> > ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad372) 
+> > root@ceph1:~# ssh ceph3 ceph -v 
+> > ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad372) 
+> > root@ceph1:~# ssh ceph4 ceph -v 
+> > ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad372) 
 > > 
-> > sage 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > is the 0.46 above reporting when the error occurred or am I running the wrong binaries 
+> > i use the debian packages ? 
 > 
+> That sounds weird. The ways I can see that being possible are 
 > 
+> 1. you had daemons still running from when you had 0.46 debs 
+> installed, and the package upgrade didn't restart them -- ceph.git 
+> uses "dh_installinit --no-start", so this might actually have 
+> happened? 
+
+When upgrading from different versions I just run apt-get upgrade in a running cluster.
+I just stop ods,mds and mon on the host and then upgrade.
+
+Maybe this is very bad ? 
+
+After the update I restart the server and take the next one.
+But it means that I'm running nodes with different version.
+
+In the last update I got HEALTH problems during the upgrade but when they were all upgraded
+it looked ok.
+
+The reason for doing like this is that if during the upgrade the upgrade host fails it's better
+to have the other tree running to be able to recover.
+
+But maybe this uppgrading process could create crashes :-(.
+
+Maybe better to stop the cluster and restart when upgraded. 
+But then the ceph.conf file has to be removed before restarting the host and copied back
+before starting it again.
+
+> 
+> 2. at some point, you checked out the 0.46 source and ran make 
+> install, and the binaries from that are installed at a path that takes 
+> precedence over the 0.47.2 ones in /usr/sbin 
+> 
+> But having mixed versions in your cluster might explain the crashes. 
+
+It was one package that was kept back during the upgrade. So I was runnig the wrong binary
+on the mds maybe more ???. The package name was ceph, not sure what binaries that were missing.
+but ceph -v reported 0.47.2. But doing apt-get install ceph installed the missing binary and
+one other package.
+
+ /Best Regards Martin
