@@ -1,40 +1,41 @@
-From: udit agarwal <fzdudit@gmail.com>
-Subject: Re: setting up virtual machines with ceph
-Date: Sun, 10 Jun 2012 10:51:20 +0000 (UTC)
-Message-ID: <loom.20120610T125057-110@post.gmane.org>
-References: <loom.20120607T085432-245@post.gmane.org> <CADvuQRG0GbYikc89M+X2nvDb1bhJ3trej8BW+GLN4jEHGu6dkg@mail.gmail.com>
+From: Florian Haas <florian@hastexo.com>
+Subject: Re: [Openstack] Ceph + OpenStack [HOW-TO]
+Date: Mon, 11 Jun 2012 00:51:54 +0200
+Message-ID: <4FD5250A.5090201@hastexo.com>
+References: <CAOLwVUkXCJyvD3bjE3EyDwCTGHR_An7PCP2Y014hyN5O8noVhw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:46778 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756342Ab2FJKvl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 10 Jun 2012 06:51:41 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Sdfk8-0003lG-SJ
-	for ceph-devel@vger.kernel.org; Sun, 10 Jun 2012 12:51:37 +0200
-Received: from en-439-0215-006.esc.auckland.ac.nz ([130.216.209.143])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sun, 10 Jun 2012 12:51:36 +0200
-Received: from fzdudit by en-439-0215-006.esc.auckland.ac.nz with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Sun, 10 Jun 2012 12:51:36 +0200
+Received: from mail-we0-f174.google.com ([74.125.82.174]:46738 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753127Ab2FJWv6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Jun 2012 18:51:58 -0400
+Received: by weyu7 with SMTP id u7so1688255wey.19
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Jun 2012 15:51:56 -0700 (PDT)
+In-Reply-To: <CAOLwVUkXCJyvD3bjE3EyDwCTGHR_An7PCP2Y014hyN5O8noVhw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: openstack@lists.launchpad.net
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Tommi,
-  Thanks for your reply. I want just virtualization on my ceph system. I will
-explain you the exact implementation that I want in my ceph system. I want to
-run 10 virtual machine instances on my ceph client whilst utilizing the storage
-on the rest of the two systems. I tried to study libvirt but couldn't succeed to
-help my way out to solve this problem. Please help me out with this problem..
+On 06/10/12 23:32, S=E9bastien Han wrote:
+> Hello everyone,
+>=20
+> I recently posted on my website an introduction to ceph and the
+> integration of Ceph in OpenStack.
+> It could be really helpful since the OpenStack documentation has not
+> dealt with it so far.
+>=20
+> Feel free to comment, express your opinions and share your personal
+> experience about both of them.
 
-   Thanx in advance.
+This is mighty comprehensive. :) Thanks!
 
-Regards
-udit agarwal
-
+Cheers,
+=46lorian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
