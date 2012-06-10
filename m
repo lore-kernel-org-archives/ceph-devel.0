@@ -1,35 +1,40 @@
-From: Sage Weil <sage@inktank.com>
-Subject: please review wip-keyrings
-Date: Sat, 9 Jun 2012 20:44:52 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206092039440.11295@cobra.newdream.net>
+From: udit agarwal <fzdudit@gmail.com>
+Subject: Re: setting up virtual machines with ceph
+Date: Sun, 10 Jun 2012 10:51:20 +0000 (UTC)
+Message-ID: <loom.20120610T125057-110@post.gmane.org>
+References: <loom.20120607T085432-245@post.gmane.org> <CADvuQRG0GbYikc89M+X2nvDb1bhJ3trej8BW+GLN4jEHGu6dkg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38263 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754962Ab2FJDoz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 9 Jun 2012 23:44:55 -0400
+Received: from plane.gmane.org ([80.91.229.3]:46778 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756342Ab2FJKvl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 10 Jun 2012 06:51:41 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1Sdfk8-0003lG-SJ
+	for ceph-devel@vger.kernel.org; Sun, 10 Jun 2012 12:51:37 +0200
+Received: from en-439-0215-006.esc.auckland.ac.nz ([130.216.209.143])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Jun 2012 12:51:36 +0200
+Received: from fzdudit by en-439-0215-006.esc.auckland.ac.nz with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 10 Jun 2012 12:51:36 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: yehuda@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Can you take a look at wip-keyrings?
+Hi Tommi,
+  Thanks for your reply. I want just virtualization on my ceph system. I will
+explain you the exact implementation that I want in my ceph system. I want to
+run 10 virtual machine instances on my ceph client whilst utilizing the storage
+on the rest of the two systems. I tried to study libvirt but couldn't succeed to
+help my way out to solve this problem. Please help me out with this problem..
 
- - generic config variable substitution, letting you put $any_config_var 
-   in any other config var (as opposed to the handful of magic 
-   metavariables supported now).  unit tests to go with it.
- - new 'mds data' and 'rgw data' config options, with defaults to 
-   /var/lib/ceph/mds or radosgw/$cluster-$id 
- - default keyring locations for osd, mds, rgw are $whatever_data/keyring
+   Thanx in advance.
 
-Right now these daemons don't have much in the way of local files except 
-their keyrings, but eventaully may have more.  Maybe rgw socket location 
-could default to that directory.  Maybe the MDS could stick something else 
-there.. who knows.
+Regards
+udit agarwal
 
-Anyway, this should get us closer to avoiding the need for any keyring 
-definitions in the configs, without breaking existing config files that 
-*do* specify those locations.
-
-sage
