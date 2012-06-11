@@ -1,41 +1,33 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Re: [Openstack] Ceph + OpenStack [HOW-TO]
-Date: Mon, 11 Jun 2012 00:51:54 +0200
-Message-ID: <4FD5250A.5090201@hastexo.com>
-References: <CAOLwVUkXCJyvD3bjE3EyDwCTGHR_An7PCP2Y014hyN5O8noVhw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Barry Pederson <bp@barryp.org>
+Subject: Re: radosgw authentication problems
+Date: Sun, 10 Jun 2012 19:03:23 -0500
+Message-ID: <CD61A602-91C1-4CB9-8118-4CAB9B9A9A4E@barryp.org>
+References: <CAMmJxt+QMPoY-6WOypGjoTDjXafk_-knRUhfrsoca3zRn=YcXA@mail.gmail.com> <CAC-hyiFaTvhORZ-TdYSxgdBmZYuvWFKobHs_qvq8J8FY+pr=-g@mail.gmail.com> <CAMmJxtKZryK+i6jzoqRp=ojQXs1c_3d3Xsmjx7+c9GDpfwc9pg@mail.gmail.com> <CADvuQRE=rUwwzByGSdiExNMOy8-d37DBmxcj=Ez-QwwW70BcjQ@mail.gmail.com>
+Mime-Version: 1.0 (Apple Message framework v1084)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:46738 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753127Ab2FJWv6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Jun 2012 18:51:58 -0400
-Received: by weyu7 with SMTP id u7so1688255wey.19
-        for <ceph-devel@vger.kernel.org>; Sun, 10 Jun 2012 15:51:56 -0700 (PDT)
-In-Reply-To: <CAOLwVUkXCJyvD3bjE3EyDwCTGHR_An7PCP2Y014hyN5O8noVhw@mail.gmail.com>
+Received: from itasca.hexavalent.net ([50.116.24.161]:33590 "EHLO
+	itasca.hexavalent.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751559Ab2FKAJX convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 10 Jun 2012 20:09:23 -0400
+Received: from mx1.hexavalent.net (host-145-114-107-208.midco.net [208.107.114.145])
+	by itasca.hexavalent.net (Postfix) with ESMTPS id BC6F118340
+	for <ceph-devel@vger.kernel.org>; Sun, 10 Jun 2012 19:03:27 -0500 (CDT)
+In-Reply-To: <CADvuQRE=rUwwzByGSdiExNMOy8-d37DBmxcj=Ez-QwwW70BcjQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: openstack@lists.launchpad.net
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tv@inktank.com>, ceph-devel@vger.kernel.org
 
-On 06/10/12 23:32, S=E9bastien Han wrote:
-> Hello everyone,
->=20
-> I recently posted on my website an introduction to ceph and the
-> integration of Ceph in OpenStack.
-> It could be really helpful since the OpenStack documentation has not
-> dealt with it so far.
->=20
-> Feel free to comment, express your opinions and share your personal
-> experience about both of them.
 
-This is mighty comprehensive. :) Thanks!
+On Jun 7, 2012, at 11:33 AM, Tommi Virtanen wrote:
 
-Cheers,
-=46lorian
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> RADOS, RBD and radosgw are considered production ready, when
+> configured correctly. Inktank is actively providing commercial support
+> for those components.
+
+Are there any particular minimum versions of the Linux kernel or qemu-kvm that would be considered production-ready for RBD usage as clients?  I was wondering if Ubuntu 12.04's 3.2.0-24 Kernel or qemu-kvm 1.0 would make the grade.
+
+	Barry
+
