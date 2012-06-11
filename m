@@ -1,36 +1,96 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
-Subject: Re: Ceph questions regarding auth and return on PUT from radosgw
-Date: Mon, 11 Jun 2012 08:08:08 -0700
-Message-ID: <CAC-hyiE3RFqeM7V3bXX_GXhYoFh-jMC8-Ch=ovMvzv62Mqq=ZQ@mail.gmail.com>
-References: <CAMmJxtJyzaqwV2+BgrHwMZSWiLJKhM7948MUuEme-MGjZofuWw@mail.gmail.com>
+From: Alex Elder <elder@dreamhost.com>
+Subject: Re: [PATCH] rbd: Clear ceph_msg->bio_iter for retransmitted message
+Date: Mon, 11 Jun 2012 10:48:53 -0500
+Message-ID: <4FD61365.3080805@dreamhost.com>
+References: <1338969797-8412-1-git-send-email-zheng.z.yan@intel.com> <4FCF64C8.7060506@dreamhost.com> <4FD19901.3010100@suse.de>
+Reply-To: elder@inktank.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:56878 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754323Ab2FKPIJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jun 2012 11:08:09 -0400
-Received: by bkcji2 with SMTP id ji2so3624699bkc.19
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Jun 2012 08:08:08 -0700 (PDT)
-In-Reply-To: <CAMmJxtJyzaqwV2+BgrHwMZSWiLJKhM7948MUuEme-MGjZofuWw@mail.gmail.com>
+Received: from mail.hq.newdream.net ([66.33.206.127]:35407 "EHLO
+	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752479Ab2FKPsn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jun 2012 11:48:43 -0400
+In-Reply-To: <4FD19901.3010100@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Axel Eriksson <john@insane.se>
-Cc: ceph-devel@vger.kernel.org
+To: Hannes Reinecke <hare@suse.de>
+Cc: elder@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel@vger.kernel.org
 
-On Mon, Jun 11, 2012 at 5:32 AM, John Axel Eriksson <john@insane.se> wrote:
->
-> Also, when PUTting something through radosgw, does ceph/rgw return as
-> soon as all data has been received or does it return
-> when it has ensured N replicas? (I've seen quite a delay after all
-> data has been sent before my PUT returns). I'm using nginx (1.2) by
-> the way.
->
+On 06/08/2012 01:17 AM, Hannes Reinecke wrote:
+> On 06/06/2012 04:10 PM, Alex Elder wrote:
+>> On 06/06/2012 03:03 AM, Yan, Zheng wrote:
+>>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
+>>>
+>>> The bug can cause NULL pointer dereference in write_partial_msg_pages
+>>
+>> Although this looks simple enough, I want to study it a little more
+>> before committing it.  I've been wanting to walk through this bit
+>> of code anyway so I'll do that today.
+>>
+>> One quick observation though:  m->bio_iter really ought to be
+>> initialized only within #ifdef CONFIG_BLOCK (although I see it's
+>> defined without it in the structure definition).  At some point
+>> I'll put together a cleanup patch to do that everywhere; feel free
+>> to do that yourself if you are so inclined.
+>>
+>> 					-Alex
+>>
+>>> Signed-off-by: Zheng Yan <zheng.z.yan@intel.com>
+>>> ---
+>>>  net/ceph/messenger.c |    1 +
+>>>  1 files changed, 1 insertions(+), 0 deletions(-)
+>>>
+>>> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+>>> index 1a80907..785b953 100644
+>>> --- a/net/ceph/messenger.c
+>>> +++ b/net/ceph/messenger.c
+>>> @@ -598,6 +598,7 @@ static void prepare_write_message(struct ceph_connection *con)
+>>>  	     le32_to_cpu(con->out_msg->footer.front_crc),
+>>>  	     le32_to_cpu(con->out_msg->footer.middle_crc));
+>>>  
+>>> +	m->bio_iter = NULL;
+>>>  	/* is there a data payload? */
+>>>  	if (le32_to_cpu(m->hdr.data_len) > 0) {
+>>>  		/* initialize page iterator */
+>>
+> Incidentally, we've come across the same issue. First thing which
+> struck me was this:
+> 
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 524f4e4..759d4d2 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -874,7 +874,7 @@ static int write_partial_msg_pages(struct
+> ceph_connection *c
+> on)
+>                         page = list_first_entry(&msg->pagelist->head,
+>                                                 struct page, lru);
+>  #ifdef CONFIG_BLOCK
+> -               } else if (msg->bio) {
+> +               } else if (msg->bio_iter) {
+>                         struct bio_vec *bv;
+> 
+>                         bv = bio_iovec_idx(msg->bio_iter, msg->bio_seg);
+> 
+> We've called bio_list_init() a few lines above; however, it might
+> return with a NULL bio_iter. So for consistency we should be
+> checking for ->bio_iter here, as this is what we'll be using
+> afterwards anyway.
 
-It sounds like that you're seeing the effect of nginx buffering of the
-entire request before sending it to to the radosgw process (via
-fastcgi). The same happens with apache when using mod_fcgi, unlike
-mod_fastcgi that actually streams the written data to the backend and
-thus acks are throttled accordingly.
+Zheng is right, the only way bio_iter will be null following the
+call to init_bio_iter() is if bio is also null, so it's roughly
+equivalent either way.  I do think it would be reassuring to have
+the check be against bio_iter as you suggest in this case, since
+that's the pointer we're then dereferencing.
 
-Yehuda
+I'm reworking this code today, and will update it to check the
+bio_iter pointer instead if this suggestion still applies.
+
+					-Alex
+
+> Cheers,
+> 
+> Hannes
+
