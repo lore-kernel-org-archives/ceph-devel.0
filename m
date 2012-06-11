@@ -1,96 +1,93 @@
-From: Alex Elder <elder@dreamhost.com>
-Subject: Re: [PATCH] rbd: Clear ceph_msg->bio_iter for retransmitted message
-Date: Mon, 11 Jun 2012 10:48:53 -0500
-Message-ID: <4FD61365.3080805@dreamhost.com>
-References: <1338969797-8412-1-git-send-email-zheng.z.yan@intel.com> <4FCF64C8.7060506@dreamhost.com> <4FD19901.3010100@suse.de>
-Reply-To: elder@inktank.com
+From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Subject: Re: Random data corruption in VM, possibly caused by rbd
+Date: Mon, 11 Jun 2012 17:50:14 +0200
+Message-ID: <25761303.PmWYZprmzc@pc10>
+References: <21601270.dfB0BsVfyn@pc10> <4FD1FFD2.6050707@filoo.de> <Pine.LNX.4.64.1206080652031.10292@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:35407 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752479Ab2FKPsn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jun 2012 11:48:43 -0400
-In-Reply-To: <4FD19901.3010100@suse.de>
+Received: from unknownsite.de ([62.48.69.106]:40474 "EHLO hartes-hannover.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752476Ab2FKPuU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 11 Jun 2012 11:50:20 -0400
+In-Reply-To: <Pine.LNX.4.64.1206080652031.10292@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Hannes Reinecke <hare@suse.de>
-Cc: elder@inktank.com, "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Oliver Francke <Oliver.Francke@filoo.de>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-On 06/08/2012 01:17 AM, Hannes Reinecke wrote:
-> On 06/06/2012 04:10 PM, Alex Elder wrote:
->> On 06/06/2012 03:03 AM, Yan, Zheng wrote:
->>> From: "Yan, Zheng" <zheng.z.yan@intel.com>
->>>
->>> The bug can cause NULL pointer dereference in write_partial_msg_pages
->>
->> Although this looks simple enough, I want to study it a little more
->> before committing it.  I've been wanting to walk through this bit
->> of code anyway so I'll do that today.
->>
->> One quick observation though:  m->bio_iter really ought to be
->> initialized only within #ifdef CONFIG_BLOCK (although I see it's
->> defined without it in the structure definition).  At some point
->> I'll put together a cleanup patch to do that everywhere; feel free
->> to do that yourself if you are so inclined.
->>
->> 					-Alex
->>
->>> Signed-off-by: Zheng Yan <zheng.z.yan@intel.com>
->>> ---
->>>  net/ceph/messenger.c |    1 +
->>>  1 files changed, 1 insertions(+), 0 deletions(-)
->>>
->>> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
->>> index 1a80907..785b953 100644
->>> --- a/net/ceph/messenger.c
->>> +++ b/net/ceph/messenger.c
->>> @@ -598,6 +598,7 @@ static void prepare_write_message(struct ceph_connection *con)
->>>  	     le32_to_cpu(con->out_msg->footer.front_crc),
->>>  	     le32_to_cpu(con->out_msg->footer.middle_crc));
->>>  
->>> +	m->bio_iter = NULL;
->>>  	/* is there a data payload? */
->>>  	if (le32_to_cpu(m->hdr.data_len) > 0) {
->>>  		/* initialize page iterator */
->>
-> Incidentally, we've come across the same issue. First thing which
-> struck me was this:
+Am Freitag, 8. Juni 2012, 06:55:19 schrieb Sage Weil:
+> On Fri, 8 Jun 2012, Oliver Francke wrote:
+> > Hi Guido,
+> > 
+> > yeah, there is something weird going on. I just started to establish some
+> > test-VM's. Freshly imported from running *.qcow2 images.
+> > Kernel panic with INIT, seg-faults and other "funny" stuff.
+> > 
+> > Just added the rbd_cache=true in my config, voila. All is
+> > fast-n-up-n-running...
+> > All my testing was done with cache enabled... Since our errors all came
+> > from rbd_writeback from former ceph-versions...
 > 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 524f4e4..759d4d2 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -874,7 +874,7 @@ static int write_partial_msg_pages(struct
-> ceph_connection *c
-> on)
->                         page = list_first_entry(&msg->pagelist->head,
->                                                 struct page, lru);
->  #ifdef CONFIG_BLOCK
-> -               } else if (msg->bio) {
-> +               } else if (msg->bio_iter) {
->                         struct bio_vec *bv;
+> Are you guys able to reproduce the corruption with 'debug osd = 20' and
+> 'debug ms = 1'?  Ideally we'd like to:
 > 
->                         bv = bio_iovec_idx(msg->bio_iter, msg->bio_seg);
+>  - reproduce from a fresh vm, with osd logs
+>  - identify the bad file
+>  - map that file to a block offset (see
+>    http://ceph.com/qa/fiemap.[ch], linux_fiemap.h)
+>  - use that to identify the badness in the log
 > 
-> We've called bio_list_init() a few lines above; however, it might
-> return with a NULL bio_iter. So for consistency we should be
-> checking for ->bio_iter here, as this is what we'll be using
-> afterwards anyway.
+> I suspect the cache is just masking the problem because it submits fewer
+> IOs...
 
-Zheng is right, the only way bio_iter will be null following the
-call to init_bio_iter() is if bio is also null, so it's roughly
-equivalent either way.  I do think it would be reassuring to have
-the check be against bio_iter as you suggest in this case, since
-that's the pointer we're then dereferencing.
+Okay, I added 'debug osd = 20' and 'debug ms = 1' under [global] and 
+'filestore fiemap = false' under [osd] and started a new VM. That worked 
+nicely, and the iotester found no corruptions. Then I removed 'filestore 
+fiemap = false' from the config, restarted all osds and ran the iotester 
+again. Output is as follows:
 
-I'm reworking this code today, and will update it to check the
-bio_iter pointer instead if this suggestion still applies.
+testserver-rbd11 iotester # date ; ./iotester /var/iotest ; date
+Mon Jun 11 17:34:44 CEST 2012
+Wrote 100 MiB of data in 1943 milliseconds
+Wrote 100 MiB of data in 1858 milliseconds
+Wrote 100 MiB of data in 2213 milliseconds
+Wrote 100 MiB of data in 3441 milliseconds
+Wrote 100 MiB of data in 2705 milliseconds
+Wrote 100 MiB of data in 1778 milliseconds
+Wrote 100 MiB of data in 1974 milliseconds
+Wrote 100 MiB of data in 2780 milliseconds
+Wrote 100 MiB of data in 1961 milliseconds
+Wrote 100 MiB of data in 2366 milliseconds
+Wrote 100 MiB of data in 1886 milliseconds
+Wrote 100 MiB of data in 3589 milliseconds
+Wrote 100 MiB of data in 1973 milliseconds
+Wrote 100 MiB of data in 2506 milliseconds
+Wrote 100 MiB of data in 1937 milliseconds
+Wrote 100 MiB of data in 3404 milliseconds
+Wrote 100 MiB of data in 1990 milliseconds
+Wrote 100 MiB of data in 3713 milliseconds
+Read 100 MiB of data in 4856 milliseconds
+Digest wrong for file "/var/iotest/b45e1a59f26830fb98af1ba9ed1360106f5580aa"
+Mon Jun 11 17:35:34 CEST 2012
+testserver-rbd11 iotester # ~/fiemap 
+/var/iotest/b45e1a59f26830fb98af1ba9ed1360106f5580aa
+File /var/iotest/b45e1a59f26830fb98af1ba9ed1360106f5580aa has 1 extents:
+#       Logical          Physical         Length           Flags
+0:      0000000000000000 00000000a8200000 0000000000100000 000
 
-					-Alex
+I looked into the file in question, and it started with zero-bytes from the 
+start until position 0xbff, even though it was supposed to all random data.
 
-> Cheers,
-> 
-> Hannes
+I have included timestamps in the hopes they might make it easier to find the 
+related entries in the logs.
+
+So what do I do now? The logs are very large and complex, and I don't 
+understand most of what's in there. I don't even know which OSD served that 
+particular block/object.
+
+Regards,
+
+	Guido
 
