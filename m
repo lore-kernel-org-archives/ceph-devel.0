@@ -1,122 +1,67 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Random data corruption in VM, possibly caused by rbd
-Date: Mon, 11 Jun 2012 09:30:42 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206110920150.10557@cobra.newdream.net>
-References: <21601270.dfB0BsVfyn@pc10> <4FD1FFD2.6050707@filoo.de>
- <Pine.LNX.4.64.1206080652031.10292@cobra.newdream.net> <25761303.PmWYZprmzc@pc10>
+Subject: Re: [PATCH] mon: fix pg state logging
+Date: Mon, 11 Jun 2012 09:52:30 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206110952160.10557@cobra.newdream.net>
+References: <1339381980-11571-1-git-send-email-zheng.z.yan@intel.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52695 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46238 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752029Ab2FKQaq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jun 2012 12:30:46 -0400
-In-Reply-To: <25761303.PmWYZprmzc@pc10>
+	with ESMTP id S1750877Ab2FKQwd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jun 2012 12:52:33 -0400
+In-Reply-To: <1339381980-11571-1-git-send-email-zheng.z.yan@intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Cc: Sage Weil <sage@inktank.com>, Oliver Francke <Oliver.Francke@filoo.de>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
+To: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 11 Jun 2012, Guido Winkelmann wrote:
-> Am Freitag, 8. Juni 2012, 06:55:19 schrieb Sage Weil:
-> > On Fri, 8 Jun 2012, Oliver Francke wrote:
-> > > Hi Guido,
-> > > 
-> > > yeah, there is something weird going on. I just started to establish some
-> > > test-VM's. Freshly imported from running *.qcow2 images.
-> > > Kernel panic with INIT, seg-faults and other "funny" stuff.
-> > > 
-> > > Just added the rbd_cache=true in my config, voila. All is
-> > > fast-n-up-n-running...
-> > > All my testing was done with cache enabled... Since our errors all came
-> > > from rbd_writeback from former ceph-versions...
-> > 
-> > Are you guys able to reproduce the corruption with 'debug osd = 20' and
-> > 'debug ms = 1'?  Ideally we'd like to:
-> > 
-> >  - reproduce from a fresh vm, with osd logs
-> >  - identify the bad file
-> >  - map that file to a block offset (see
-> >    http://ceph.com/qa/fiemap.[ch], linux_fiemap.h)
-> >  - use that to identify the badness in the log
-> > 
-> > I suspect the cache is just masking the problem because it submits fewer
-> > IOs...
+On Mon, 11 Jun 2012, Yan, Zheng wrote:
+> From: "Yan, Zheng" <zheng.z.yan@intel.com>
 > 
-> Okay, I added 'debug osd = 20' and 'debug ms = 1' under [global] and 
-> 'filestore fiemap = false' under [osd] and started a new VM. That worked 
-> nicely, and the iotester found no corruptions. Then I removed 'filestore 
-> fiemap = false' from the config, restarted all osds and ran the iotester 
-> again. Output is as follows:
-> 
-> testserver-rbd11 iotester # date ; ./iotester /var/iotest ; date
-> Mon Jun 11 17:34:44 CEST 2012
-> Wrote 100 MiB of data in 1943 milliseconds
-> Wrote 100 MiB of data in 1858 milliseconds
-> Wrote 100 MiB of data in 2213 milliseconds
-> Wrote 100 MiB of data in 3441 milliseconds
-> Wrote 100 MiB of data in 2705 milliseconds
-> Wrote 100 MiB of data in 1778 milliseconds
-> Wrote 100 MiB of data in 1974 milliseconds
-> Wrote 100 MiB of data in 2780 milliseconds
-> Wrote 100 MiB of data in 1961 milliseconds
-> Wrote 100 MiB of data in 2366 milliseconds
-> Wrote 100 MiB of data in 1886 milliseconds
-> Wrote 100 MiB of data in 3589 milliseconds
-> Wrote 100 MiB of data in 1973 milliseconds
-> Wrote 100 MiB of data in 2506 milliseconds
-> Wrote 100 MiB of data in 1937 milliseconds
-> Wrote 100 MiB of data in 3404 milliseconds
-> Wrote 100 MiB of data in 1990 milliseconds
-> Wrote 100 MiB of data in 3713 milliseconds
-> Read 100 MiB of data in 4856 milliseconds
-> Digest wrong for file "/var/iotest/b45e1a59f26830fb98af1ba9ed1360106f5580aa"
-> Mon Jun 11 17:35:34 CEST 2012
-> testserver-rbd11 iotester # ~/fiemap 
-> /var/iotest/b45e1a59f26830fb98af1ba9ed1360106f5580aa
-> File /var/iotest/b45e1a59f26830fb98af1ba9ed1360106f5580aa has 1 extents:
-> #       Logical          Physical         Length           Flags
-> 0:      0000000000000000 00000000a8200000 0000000000100000 000
-> 
-> I looked into the file in question, and it started with zero-bytes from the 
-> start until position 0xbff, even though it was supposed to all random data.
-> 
-> I have included timestamps in the hopes they might make it easier to find the 
-> related entries in the logs.
-> 
-> So what do I do now? The logs are very large and complex, and I don't 
-> understand most of what's in there. I don't even know which OSD served that 
-> particular block/object.
+> PGMap->num_pg_by_state is a PG state to number of PG in the state
+> mapping. PGMonitor::update_logger wrongly interprets the mapping.
 
-If you can reproduce it with 'debug filestore = 20' too, that will be 
-better, as it will tell us what the FIEMAP ioctl is returning.  Also, if 
-you can attach/post the contents of the object itself (rados -p rbd get 
-rb.0.1.0000000002a0 /tmp/foo) we can make sure the object has the right 
-data (and the sparse-read operation that librbd is doing is the culprit).
-
-As for the log:
-
-First, map the offset to an rbd block.  For example, taking the 'Physical' 
-value of 00000000a8200000 from above:
-
-$ printf "%012x\n" $((0x00000000a8200000 / (4096*1024) ))
-0000000002a0
-
-Then figure out what the object name prefix is:
-
-$ rbd info <imagename> | grep prefix
-        block_name_prefix: rb.0.1
-
-Then add the block number, 0000000002a0 to that, e.g. rb.0.1.0000000002a0.
-
-Then map that back to an osd with
-
-$ ceph osd map rbd rb.0.1.0000000002a0
-osdmap e19 pool 'rbd' (2) object 'rb.0.1.0000000002a0' -> pg 2.a2e06f65 
-(2.5) -> up [0,2] acting [0,2]
-
-You'll see the osd ids listed in brackets after 'active'.  We want the 
-first one, 0 in my example.  The log from that OSD is what we need.
-
-Thanks!
+Thanks, applied!
 sage
+
+
+> 
+> Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+> ---
+>  src/mon/PGMonitor.cc |   12 ++++++------
+>  1 file changed, 6 insertions(+), 6 deletions(-)
+> 
+> diff --git a/src/mon/PGMonitor.cc b/src/mon/PGMonitor.cc
+> index 97fbb1b..1b0a210 100644
+> --- a/src/mon/PGMonitor.cc
+> +++ b/src/mon/PGMonitor.cc
+> @@ -96,13 +96,13 @@ void PGMonitor::update_logger()
+>    for (hash_map<int,int>::iterator p = pg_map.num_pg_by_state.begin();
+>         p != pg_map.num_pg_by_state.end();
+>         ++p) {
+> -    if (p->second & PG_STATE_ACTIVE) {
+> -      active++;
+> -      if (p->second & PG_STATE_CLEAN)
+> -	active_clean++;
+> +    if (p->first & PG_STATE_ACTIVE) {
+> +      active += p->second;
+> +      if (p->first & PG_STATE_CLEAN)
+> +	active_clean += p->second;
+>      }
+> -    if (p->second & PG_STATE_PEERING)
+> -      peering++;
+> +    if (p->first & PG_STATE_PEERING)
+> +      peering += p->second;
+>    }
+>    mon->cluster_logger->set(l_cluster_num_pg_active_clean, active_clean);
+>    mon->cluster_logger->set(l_cluster_num_pg_active, active);
+> -- 
+> 1.7.10.2
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
