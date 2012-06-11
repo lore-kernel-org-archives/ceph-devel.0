@@ -1,54 +1,66 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Journal size of each disk
-Date: Mon, 11 Jun 2012 10:35:21 +0200
-Message-ID: <4FD5ADC9.3080208@widodh.nl>
-References: <8512670932FB654F81AF0FEF1BE6D49D017E52FD@WHQBEMAIL1.whq.wistron>
+From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Subject: Re: [RFC, PATCH, RESEND] fs: push rcu_barrier() from
+ deactivate_locked_super() to filesystems
+Date: Mon, 11 Jun 2012 12:16:00 +0300
+Message-ID: <20120611091600.GA1122@otc-wbsnb-06>
+References: <20120608221446.GA18250@otc-wbsnb-06>
+ <20120608152550.258d6a30.akpm@linux-foundation.org>
+ <20120608222734.GT30000@ZenIV.linux.org.uk>
+ <20120608153120.b722d7c3.akpm@linux-foundation.org>
+ <20120608233127.GB18981@otc-wbsnb-06>
+ <20120608163751.7a8ec2bc.akpm@linux-foundation.org>
+ <CA+55aFw5k3daxeoZb9H1HGcOCWjPF+d7inSbf0QHmG-atp4reQ@mail.gmail.com>
+ <20120608172842.9826b5cd.akpm@linux-foundation.org>
+ <4FD2F5F4.1000106@gmail.com>
+ <20120609002557.b8aba759.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:44848 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750795Ab2FKIfY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jun 2012 04:35:24 -0400
-In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D017E52FD@WHQBEMAIL1.whq.wistron>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wiwynn.com
-Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="LZvS9be/3tNcYl/X"
+Return-path: <linux-ext4-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20120609002557.b8aba759.akpm@linux-foundation.org>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Marco Stornelli <marco.stornelli@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Al Viro <viro@zeniv.linux.org.uk>, Boaz Harrosh <bharrosh@panasas.com>, Tao Ma <boyu.mt@taobao.com>, Nick Piggin <npiggin@kernel.dk>, "Dmitry V. Levin" <ldv@altlinux.org>, v9fs-developer@lists.sourceforge.net, linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-cifs@vger.kernel.org, samba-technical@lists.samba.org, codalist@telemann.coda.cs.cmu.edu, ecryptfs@vger.kernel.org, osd-dev@open-osd.org, linux-ext4@vger.kernel.org, fuse-devel@lists.sourceforge.net, linux-mtd@lists.infradead.org, jfs-discussion@lists.sourceforge.net, logfs@logfs.org, linux-nfs@vger.kernel.org, linux-nilfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, ocfs2-devel@oss.oracle.com, reiserfs-devel
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
 
-On 06/11/2012 08:47 AM, Eric_YH_Chen@wiwynn.com wrote:
-> Dear all:
->
->      I would like to know if the journal size influence the performance
-> of disk.
->
->      If the size of each of my disk is 1T, how much size should I prepare
-> for the journal?
->
+--LZvS9be/3tNcYl/X
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-You journal should be able to hold the writes for a short period of 
-time, something like 10 ~ 20 seconds.
+On Sat, Jun 09, 2012 at 12:25:57AM -0700, Andrew Morton wrote:
+> And...  it seems that I misread what's going on.  The individual
+> filesystems are doing the rcu freeing of their inodes, so it is
+> appropriate that they also call rcu_barrier() prior to running
+> kmem_cache_free().  Which is what Kirill's patch does.  oops.
 
-If your machine is on a 1Gbit line it will do something like 100MB/sec 
-of writes.
+Ack? ;)
 
-100MB * 20 seconds = 2000MB
+--=20
+ Kirill A. Shutemov
 
-So a journal of something like 2GB should be enough.
+--LZvS9be/3tNcYl/X
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-You can always scale it bigger to 4GB, that won't hurt anything.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-So it doesn't depend on the size of your data disk, but depends on how 
-fast the writes are coming in.
+iQIcBAEBAgAGBQJP1bdQAAoJEAd+omnVudOMOWIP/0ggxQY/gopg5nzCYdokfLxR
+gz+eQJznRY+O6tbDMn0QyMJNfwsqKWUKVPxVmBnzrXv2YXiU2s1pdeWcUrkhkGzo
+t+dSzoQYx3IsVY23ViQvCojLacfFODIUvb/fu7h+ZOFN3xkCB9VW7Do7y4JwflUV
+2kEzQc+a6BU660CPnkDsGVLQTj9gw6XSmKazzbHkLg6wAr4IyyKAq7MPvLQfocIo
+ZF9oqOTKx+2K0+YaupJJRzxPPPxOCXUzxPDjbJIAOJHJQ2DtJy2WEME5V4wS9R7K
++9ldJwDN4uu+IpWGVMJFNXCkRQk6UfmKgBLrVv+32Y2+B2VebXeaEj3QECpmqqcG
+vm3vLoQB0TITfjtGTSqojE7WjTJl61jarsFzXEY3bvwdJ3h1XHeUhK5pbBiRVcu2
+v7RkgZH04E5Y+3/FGJVvxWRy+GJafI7ip+G8Rdl2r7aNmuyjmqtkdmBms/VS53Pp
+Oc1bDv+wmVwJjPJzT6z/7gE/A8LHvizvZfvt8ttS2WbWHhTuObLvtSnNd03ayhWu
+ROYpfE7qQ6CTrcGilpOLg9+N5wZOrT1mxn4s8h9d2+mkUdLHkudMFOoM/aTUyR0r
+A+Jq0iCfFYO6+SdhRo4zbecLVf0aihZ+pdOHQJ428Cguf28QPHusRiPlaYYTrsHD
+8zzLHxfwcftJ4IqVR7K4
+=IpC+
+-----END PGP SIGNATURE-----
 
-Wido
-
->      Thanks for any comment.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--LZvS9be/3tNcYl/X--
