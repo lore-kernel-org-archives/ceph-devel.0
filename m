@@ -1,25 +1,32 @@
-From: Sage Weil <sage@inktank.com>
-Subject: class exec test
-Date: Sun, 10 Jun 2012 22:03:47 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206102200490.3347@cobra.newdream.net>
+From: <Eric_YH_Chen@wiwynn.com>
+Subject: Journal size of each disk
+Date: Mon, 11 Jun 2012 14:47:01 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D017E52FD@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33988 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752116Ab2FKFDu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jun 2012 01:03:50 -0400
+Received: from twnhumsw2.wistron.com ([220.128.89.22]:50830 "EHLO
+	TWNHUMSW2.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751130Ab2FKGrF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Jun 2012 02:47:05 -0400
+Received: from twnhufe2.whq.wistron (unverified [10.37.31.102]) by TWNHUMSW2.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta4e86b6aa0c0a816702224@TWNHUMSW2.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Mon, 11 Jun 2012 14:46:30 +0800
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: josh.durgin@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
 
-Hey-
+Dear all:
 
-The librados api tests were calling a dummy "test_exec" method in cls_rbd 
-that apparently got removed.  We probably want to replace the test with 
-*something*, though...  maybe a "version" or similar command that just 
-returns the version of the class?  Or an OSD built-in dummy class with 
-no-op methods?
+    I would like to know if the journal size influence the performance
+of disk.
 
-sage
+    If the size of each of my disk is 1T, how much size should I prepare
+for the journal?
+
+    Thanks for any comment.
+
