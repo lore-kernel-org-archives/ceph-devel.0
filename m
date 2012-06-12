@@ -1,20 +1,26 @@
-From: Matt Weil <mweil@genome.wustl.edu>
-Subject: file system creation
-Date: Tue, 12 Jun 2012 14:26:48 -0500
-Message-ID: <4FD797F8.7090606@genome.wustl.edu>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: file system creation
+Date: Tue, 12 Jun 2012 12:47:14 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206121245530.6742@cobra.newdream.net>
+References: <4FD797F8.7090606@genome.wustl.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from gscsmtp.wustl.edu ([128.252.233.26]:49865 "HELO
-	gscsmtp.wustl.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1752061Ab2FLT0t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 15:26:49 -0400
-Received: from dhcp-10-0-7-38.gsc.wustl.edu (dhcp-10-0-7-38.gsc.wustl.edu [10.0.7.38])
-	by gscsmtp.wustl.edu (Postfix) with ESMTPSA id 786CB40421
-	for <ceph-devel@vger.kernel.org>; Tue, 12 Jun 2012 14:26:48 -0500 (CDT)
+Received: from cobra.newdream.net ([66.33.216.30]:33527 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752568Ab2FLTrR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 15:47:17 -0400
+In-Reply-To: <4FD797F8.7090606@genome.wustl.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Matt Weil <mweil@genome.wustl.edu>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-is there a parallel option for mkcephfs? seems to create one osd at a time.
+On Tue, 12 Jun 2012, Matt Weil wrote:
+> is there a parallel option for mkcephfs? seems to create one osd at a time.
+
+No, but if you look at the top of /sbin/mkcephfs, you can see that it is 
+built to be run in distinct steps that can be parallelized with your 
+favorite tools.
+
+sage
