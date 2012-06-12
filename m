@@ -1,155 +1,100 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: "Radosgw installation and administration" docs
-Date: Tue, 12 Jun 2012 12:44:56 +0200
-Message-ID: <CAPUexz-nq-rs3CdougTBpiiur__W0royUcaMdYfpfamwkh7jNw@mail.gmail.com>
-References: <4FD71854.6060503@hastexo.com>
+From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Subject: Re: Random data corruption in VM, possibly caused by rbd
+Date: Tue, 12 Jun 2012 14:31:47 +0200
+Message-ID: <1815615.qFFlAnfNF8@pc10>
+References: <21601270.dfB0BsVfyn@pc10> <25761303.PmWYZprmzc@pc10> <Pine.LNX.4.64.1206110920150.10557@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f49.google.com ([209.85.216.49]:64031 "EHLO
-	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752256Ab2FLKo5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 06:44:57 -0400
-Received: by qabj40 with SMTP id j40so375340qab.1
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Jun 2012 03:44:56 -0700 (PDT)
-In-Reply-To: <4FD71854.6060503@hastexo.com>
+Received: from unknownsite.de ([62.48.69.106]:55821 "EHLO hartes-hannover.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752286Ab2FLMb4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 12 Jun 2012 08:31:56 -0400
+In-Reply-To: <Pine.LNX.4.64.1206110920150.10557@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Oliver Francke <Oliver.Francke@filoo.de>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi everyone,
+Am Montag, 11. Juni 2012, 09:30:42 schrieb Sage Weil:
+> If you can reproduce it with 'debug filestore = 20' too, that will be
+> better, as it will tell us what the FIEMAP ioctl is returning.
 
-I have a long flight ahead of me later this week and plan to be
-spending some time on http://ceph.com/docs/master/ops/radosgw/ -- which
-currently happens to be a bit, ahem, sparse.
+I ran another testrun with 'debug filestore = 20'.
 
-There's currently not a lot of documentation on radosgw, and some of it
-is inconsistent, so if one of the devs could answer the following
-questions, I can put them in a more comprehensive document that should
-make radosgw easier to set up and run.
+> Also, if
+> you can attach/post the contents of the object itself (rados -p rbd get
+> rb.0.1.0000000002a0 /tmp/foo) we can make sure the object has the right
+> data (and the sparse-read operation that librbd is doing is the culprit).
 
-1. Apache rewrite rule
+I tried that, with the block name that the steps further below gave me:
 
-Is the Apache configuration example listed in the man page correct and
-authoritative? Specifically, it seems unclear to me whether the
-rewrite engine rule:
+rados -p rbd get rb.0.13.00000000045a block
 
-(RewriteRule ^/([a-zA-Z0-9-_.]*)([/]?.*)
-/s3gw.fcgi?page=$1&params=$2&%{QUERY_STRING}
-[E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L])
+When I looked into the block, it looked like a bunch of temp files from the 
+portage system with padding in between, although it should be random data... I 
+think I got the wrong block after all...
 
-... is expected to work only for compatibility with S3 clients, or
-whether this rewrite rule is also for Swift clients.
+Here's what I did:
+Run the iotester again:
+testserver-rbd11 iotester # date ; ./iotester /var/iotest ; date                                                                                                                                                                 
+Tue Jun 12 13:51:58 CEST 2012                                                                                                               
+Wrote 100 MiB of data in 2004 milliseconds                                                                                                  
+[snip lots of irrelevant lines]
+Wrote 100 MiB of data in 2537 milliseconds
+Read 100 MiB of data in 3794 milliseconds
+Read 100 MiB of data in 10150 milliseconds
+Digest wrong for file "/var/iotest/4299a48eca63c75d6773bec3565190aa3b33c46e"
+Tue Jun 12 13:55:00 CEST 2012
 
+Run the fiemap tool on that file:
 
-2. FastCGI wrapper
+testserver-rbd11 ~ # ./fiemap 
+/var/iotest/4299a48eca63c75d6773bec3565190aa3b33c46e
+File /var/iotest/4299a48eca63c75d6773bec3565190aa3b33c46e has 1 extents:
+#       Logical          Physical         Length           Flags
+0:      0000000000000000 0000000116900000 0000000000100000 0001
 
-The radosgw man page says it should be "exec /usr/bin/radosgw -c
-/etc/ceph/ceph.conf -n client.radosgw.gateway", whereas the Wiki
-(http://ceph.com/wiki/RADOS_Gateway) omits the -n option. I didn't get
-it to work without the -n option, so is it safe to say that it is required?
+> As for the log:
+> 
+> First, map the offset to an rbd block.  For example, taking the 'Physical'
+> value of 00000000a8200000 from above:
+> 
+> $ printf "%012x\n" $((0x00000000a8200000 / (4096*1024) ))
+> 0000000002a0
 
+That gave me
 
-3. Apache/radosgw daemon/FastCGI wrapper interaction
+ $ printf "%012x\n" $((0x0000000116900000 / (4096*1024) ))
+00000000045a
+ 
+> Then figure out what the object name prefix is:
+> 
+> $ rbd info <imagename> | grep prefix
+>         block_name_prefix: rb.0.1
 
-Is it safe to say that we always need all three of these? The man page indicates
-so, the Wiki makes no mention of the daemon started by the init script.
+Result: block_name_prefix: rb.0.13
 
+> Then add the block number, 0000000002a0 to that, e.g. rb.0.1.0000000002a0.
 
-4. FastCGI configuration directives
+Result: rb.0.13.00000000045a
 
-The man page mentions:
-FastCgiExternalServer /var/www/s3gw.fcgi -socket /tmp/radosgw.sock
+> Then map that back to an osd with
+> 
+> $ ceph osd map rbd rb.0.1.0000000002a0
+> osdmap e19 pool 'rbd' (2) object 'rb.0.1.0000000002a0' -> pg 2.a2e06f65
+> (2.5) -> up [0,2] acting [0,2]
 
-The Wiki says:
-FastCgiWrapper /var/www/s3gw.fcgi
-FastCgiServer /usr/bin/radosgw
+That gives me
+[root@storage1 ~]# ceph osd map rbd rb.0.13.00000000045a 2> /dev/null 
+osdmap e101 pool 'rbd' (2) object 'rb.0.13.00000000045a' -> pg 2.80b039fb 
+(2.7b) -> up [2,1] acting [2,1]
+ 
+> You'll see the osd ids listed in brackets after 'active'.  We want the
+> first one, 0 in my example.  The log from that OSD is what we need.
 
-https://github.com/ceph/teuthology/blob/master/teuthology/task/apache.conf
-(which was mentioned as an additional reference on IRC at some point) says:
-FastCgiIPCDir /tmp/cephtest/apache/tmp/fastcgi_sock
-FastCgiExternalServer /tmp/cephtest/apache/htdocs/rgw.fcgi -socket rgw_sock
+Okay, i'm attaching the compressed log for osd.2 and the compressed block to 
+the issue report in the redmine.
 
-Which of these is required/preferred? -socket option or not? Wrapper,
-Server or ExternalServer? IPCDir?
-
-
-5. Logging
-
-What's the preferred way of adding debug logging for radosgw?
-
-https://github.com/ceph/teuthology/blob/master/teuthology/task/apache.conf
-mentions:
-
-SetEnv RGW_LOG_LEVEL 20
-SetEnv RGW_PRINT_CONTINUE yes
-SetEnv RGW_SHOULD_LOG yes
-
-... but it's unclear to me whether this is still current (I found no
-trace of those envars in the source, but maybe I was looking in the
-wrong place).
-
-https://github.com/ceph/ceph/commit/452b1248a68f743ad55641722da80e3fd5ad2ae9
-touched the "debug rgw" option. If that is the preferred way of doing
-things now, where should you set this? In ceph.conf, in the
-[client.radosgw.<name>] section?
-
-Also, for each of these, where would the logging output end up?
-/var/log/ceph? Apache error log? If so, only if the Apache LogLevel is
-more verbose than info? Syslog?
-
-
-6. Swift API: Keys
-
-Is it correct to assume that for any Swift client to work, we must set a
-Swift key for the user, like so?
-
-radosgw-admin key create --key-type=swift --uid=<user>
-
-If so, is the secret_key that that creates for the user:
-
-  "swift_keys": [
-        { "user": "<user>",
-          "secret_key": "<longbase64hash>"}]}
-
-
-... the same key that the swift command line client expects to be set
-with th -K option?
-
-
-7. Swift API: swift user name
-
-When we call "swift -U <user>", is that the verbatim user_id that we've
-defined with "radosgw-admin user create --uid=<user_id>"? Or do we need
-to set a prefix? Or define a separate Swift user ID?
-
-
-8. Swift API: authentication version
-
-When radosgw acts as the auth server for a Swift request, is it correct
-to say that only v1.0 Swift authentication is supported, not v2.0?
-
-
-9. Swift API: authentication URL
-
-What's the correct Swift authentication URL for "swift -A <url>"? It
-seems like it's "http://<rgw hostname>:<port>/auth", but confirmation
-would help.
-
-10. radosgw "OpenStack user" information
-
-From the radosgw-admin man page:
-       --os-user=group:name
-              The OpenStack user (only needed for use with OpenStack)
-       --os-secret=key
-              The OpenStack key
-
-What's this meant to be used for? Keystone authentication? If so, is
-there anything else that needs to be done for Keystone to work with
-this, such as add an endpoint URI?
-
-Please feel free to point me to existing documentation where it
-exists. Your help is much appreciated. Thanks!
-
-Cheers,
-Florian
+	Guido
