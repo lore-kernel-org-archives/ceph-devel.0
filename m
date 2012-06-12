@@ -1,44 +1,35 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: debian updates
-Date: Tue, 12 Jun 2012 08:18:37 +0200
-Message-ID: <4FD6DF3D.4010804@profihost.ag>
-References: <Pine.LNX.4.64.1206111939390.10716@cobra.newdream.net>
+From: Henry C Chang <henry.cy.chang@gmail.com>
+Subject: Handle unfound objects in v0.39
+Date: Tue, 12 Jun 2012 15:14:56 +0800
+Message-ID: <CANExM-N5Mg1U4wf6UuBfxsAZSFFt+3JbNe982mPGKn8KW2U=oA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:57448 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752050Ab2FLGSk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 02:18:40 -0400
-In-Reply-To: <Pine.LNX.4.64.1206111939390.10716@cobra.newdream.net>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:37171 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751125Ab2FLHO5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 03:14:57 -0400
+Received: by yhmm54 with SMTP id m54so3180770yhm.19
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Jun 2012 00:14:57 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Hi,
 
-i'm using debian but with a custom build. Should i use the debian branch 
-to build or the stable branch?
+We have some unfound objects in the cluster of ceph v0.39. While
+recent ceph versions provide the command to mark unfound objects lost,
+is there any manual procedure to handle unfound objects in v0.39?
 
-Thanks,
-Stefan
+Assume I know the pgid and oid of the unfound object. I am wondering
+if the following procedure works:
 
-Am 12.06.2012 04:41, schrieb Sage Weil:
-> Hi Laszlo,
->
-> Can you take a look at the last 4 commits of
->
-> 	https://github.com/ceph/ceph/commits/debian
->
-> and let me know if they address the issues you mentioned?
->
-> Thanks-
-> sage
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+1. Based on the pgid and oid, find out the real path and file name of
+the object on the osd.
+2. Put a fake 4M object to the path found in step 1.
+3. Restart the osds.
+
+If there is no manual procedure to handle unfound objects, is it safe
+to upgrade ceph from v0.39 to the latest versions?
+
+Henry
