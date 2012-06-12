@@ -1,35 +1,50 @@
-From: Henry C Chang <henry.cy.chang@gmail.com>
-Subject: Handle unfound objects in v0.39
-Date: Tue, 12 Jun 2012 15:14:56 +0800
-Message-ID: <CANExM-N5Mg1U4wf6UuBfxsAZSFFt+3JbNe982mPGKn8KW2U=oA@mail.gmail.com>
+From: John Axel Eriksson <john@insane.se>
+Subject: cephx auth question
+Date: Tue, 12 Jun 2012 11:31:59 +0200
+Message-ID: <CAMmJxtJViXYznfRuzMqJsvWZ7YEghkgD2HUhHZ9h4AyaXFz+cA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:37171 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751125Ab2FLHO5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 03:14:57 -0400
-Received: by yhmm54 with SMTP id m54so3180770yhm.19
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Jun 2012 00:14:57 -0700 (PDT)
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:40163 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750937Ab2FLJcA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 05:32:00 -0400
+Received: by yenm10 with SMTP id m10so3215721yen.19
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Jun 2012 02:31:59 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+I asked a similar question in a previous email but I didn't get any
+satisfying answers. What exactly does cephx auth secure?
+From the wiki I just get "this makes your cluster more secure", well
+from what? If I run on an internal network accessible only
+by a few trusted people - what does cephx auth secure in such a scenario?
 
-We have some unfound objects in the cluster of ceph v0.39. While
-recent ceph versions provide the command to mark unfound objects lost,
-is there any manual procedure to handle unfound objects in v0.39?
+In that previous email I got the answer that it secures the cluster
+from mistakenly connecting to wrong cluster with rados and
+accidentally deleting a pool... well, can rados really "accidentally"
+connect to the wrong cluster? Only if I have the wrong config
+file right? And if I have the wrong config-file won't it be possible
+that I also have the "wrong" key in that case?
 
-Assume I know the pgid and oid of the unfound object. I am wondering
-if the following procedure works:
+Another scenario would be if I take down an OSD that just sits in
+storage for say 6 months and then someone starts that machine
+again - with key-based auth that OSD wouldn't be able to
+connect(somehow? but if it has a working key?) but without auth it
+could
+possibly connect and wreak havoc in the cluster (since it is so much
+behind perhaps in both version of software and what's stored on it).
+I thought marking and OSD as down or out would do that?
 
-1. Based on the pgid and oid, find out the real path and file name of
-the object on the osd.
-2. Put a fake 4M object to the path found in step 1.
-3. Restart the osds.
+Are those the main reasons for having cephx auth? Is it to secure the
+cluster against people (myself included) making mistakes or  from
+hacking, or is there some technical reason that I don't know of or understand?
 
-If there is no manual procedure to handle unfound objects, is it safe
-to upgrade ceph from v0.39 to the latest versions?
+The reason I'm asking is because having cephx enabled makes cluster
+setup much more complicated...
 
-Henry
+
+Thanks,
+
+John
