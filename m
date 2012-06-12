@@ -1,41 +1,52 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 09/13] libceph: start tracking connection socket state
-Date: Tue, 12 Jun 2012 11:58:34 -0500
-Message-ID: <4FD7753A.7060000@inktank.com>
-References: <4FC673FC.3060004@inktank.com> <4FC6766B.1090307@inktank.com> <CAAM7YA=4M_NQq03UCiEO=RQ=D3d3LHq1T9fbCkiqBxvv-AQyLA@mail.gmail.com> <Pine.LNX.4.64.1206112158170.10716@cobra.newdream.net> <4FD6CD6A.9040505@linux.intel.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: debian updates
+Date: Tue, 12 Jun 2012 10:06:22 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206121004050.6742@cobra.newdream.net>
+References: <Pine.LNX.4.64.1206111939390.10716@cobra.newdream.net>
+ <1339471174.7726.71.camel@julia>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:40038 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751074Ab2FLQ6h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 12:58:37 -0400
-Received: by vcbf11 with SMTP id f11so2933321vcb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Jun 2012 09:58:36 -0700 (PDT)
-In-Reply-To: <4FD6CD6A.9040505@linux.intel.com>
+Received: from cobra.newdream.net ([66.33.216.30]:58943 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751306Ab2FLRGZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 13:06:25 -0400
+In-Reply-To: <1339471174.7726.71.camel@julia>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zheng.z.yan@linux.intel.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Cc: ceph-devel@vger.kernel.org
 
-On 06/12/2012 12:02 AM, Yan, Zheng wrote:
-> On 06/12/2012 01:00 PM, Sage Weil wrote:
->> Yep.  This was just fixed yesterday, in the testing-next branch, by 
->> 'libceph: transition socket state prior to actual connect'.
->>
->> Are you still hitting the bio null deref?
->>
-> No,
+On Tue, 12 Jun 2012, Laszlo Boszormenyi (GCS) wrote:
+> Hi Sage,
 > 
-> Cheers
-> Yan, Zheng
+> On Mon, 2012-06-11 at 19:41 -0700, Sage Weil wrote:
+> > Can you take a look at the last 4 commits of
+> > 	https://github.com/ceph/ceph/commits/debian
+> > and let me know if they address the issues you mentioned?
+>  Yes, they fixes those issues I've mentioned. However you could keep
+> ceph-kdump-copy for Ubuntu. It's not installable on Debian through, as
+> its dependency linux-crashdump is not available.
 
-Would you be able to narrow down exactly what fixed the bio null
-problem?  Are you able to easily reproduce it?  Are you running
-the master branch, or testing, or what?
+I already stuck it in a separate package in http://ceph.com/qa/debian, 
+since it really isn't directly related to ceph itself anyway.
 
-Thank you.
+> I can package it if
+> you want. Now my fingers are crossed to accept libs3 soon, it's freeze
+> for Wheezy soon[1]. Ceph 0.47.2 is waiting for that to be in Wheezy.
 
-					-Alex
+Great!  Let me know if there's anything else that can be fixed up on this 
+end.
 
+sage
+
+
+> Laszlo/GCS
+> [1] http://lists.debian.org/debian-devel-announce/2012/05/msg00004.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
