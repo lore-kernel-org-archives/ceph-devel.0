@@ -1,166 +1,155 @@
-From: John Axel Eriksson <john@insane.se>
-Subject: Re: cephx auth question
-Date: Tue, 12 Jun 2012 12:05:56 +0200
-Message-ID: <CAMmJxtLGhgtBUmShHyZDQmgqzKvkzgjjWxK-Atp220mziK67iA@mail.gmail.com>
-References: <CAMmJxtJViXYznfRuzMqJsvWZ7YEghkgD2HUhHZ9h4AyaXFz+cA@mail.gmail.com>
-	<4FD7116B.9030003@widodh.nl>
+From: Florian Haas <florian@hastexo.com>
+Subject: "Radosgw installation and administration" docs
+Date: Tue, 12 Jun 2012 12:44:56 +0200
+Message-ID: <CAPUexz-nq-rs3CdougTBpiiur__W0royUcaMdYfpfamwkh7jNw@mail.gmail.com>
+References: <4FD71854.6060503@hastexo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:55639 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750905Ab2FLKF5 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 06:05:57 -0400
-Received: by obbtb18 with SMTP id tb18so8097070obb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Jun 2012 03:05:56 -0700 (PDT)
-In-Reply-To: <4FD7116B.9030003@widodh.nl>
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:64031 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752256Ab2FLKo5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 06:44:57 -0400
+Received: by qabj40 with SMTP id j40so375340qab.1
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Jun 2012 03:44:56 -0700 (PDT)
+In-Reply-To: <4FD71854.6060503@hastexo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ok I think I have a better understanding now.
+Hi everyone,
 
-I really don't want to setup a cluster using mkcephfs, it "feels" like
-that's something built for test setups. If I(and I do) want to
-automate the setup of OSDs, MONs and RGW it definitely makes it more
-complicated using key based auth. I've seen the chef recipes but I'm
-not sure they're complete in any way.
+I have a long flight ahead of me later this week and plan to be
+spending some time on http://ceph.com/docs/master/ops/radosgw/ -- which
+currently happens to be a bit, ahem, sparse.
 
-I don't entirely understand if there is an order to the setup, if I
-have to partly setup the MON first, then OSDs, then configure the MON,
-then configure the OSDs and lastly configure RGW. If that's the case
-it's kind of complicated and adding keys into the mix doesn't help.
+There's currently not a lot of documentation on radosgw, and some of it
+is inconsistent, so if one of the devs could answer the following
+questions, I can put them in a more comprehensive document that should
+make radosgw easier to set up and run.
 
-I guess giving more time to my ceph-research will help me get a better
-understanding of the auth parts and the rest. I'll have to be less
-impatient ;-).
+1. Apache rewrite rule
 
-Thanks for responding,
+Is the Apache configuration example listed in the man page correct and
+authoritative? Specifically, it seems unclear to me whether the
+rewrite engine rule:
 
-John
+(RewriteRule ^/([a-zA-Z0-9-_.]*)([/]?.*)
+/s3gw.fcgi?page=$1&params=$2&%{QUERY_STRING}
+[E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L])
 
-On Tue, Jun 12, 2012 at 11:52 AM, Wido den Hollander <wido@widodh.nl> w=
-rote:
-> Hi,
->
->
-> On 06/12/2012 11:31 AM, John Axel Eriksson wrote:
->>
->> I asked a similar question in a previous email but I didn't get any
->> satisfying answers. What exactly does cephx auth secure?
->
->
-> I wanted to get back on your e-mail from yesterday, but you beat me t=
-o it!
-> :)
->
->
->> =A0From the wiki I just get "this makes your cluster more secure", w=
-ell
->> from what? If I run on an internal network accessible only
->> by a few trusted people - what does cephx auth secure in such a scen=
-ario?
->>
->
-> Never ever trust anything, even in a local network. Security has more
-> aspects then just uninvited guests accessing or modifying your data.
->
-> Like I said in the previous e-mail, it prevents you from having an ol=
-d
-> machine or just a plain configuration error on a client disrupting cl=
-uster
-> service.
->
->
->> In that previous email I got the answer that it secures the cluster
->> from mistakenly connecting to wrong cluster with rados and
->> accidentally deleting a pool... well, can rados really "accidentally=
-"
->> connect to the wrong cluster? Only if I have the wrong config
->> file right? And if I have the wrong config-file won't it be possible
->> that I also have the "wrong" key in that case?
->>
->
-> The "rados" command doesn't really need a config file, you can also s=
-pecify
-> the monitor address manually.
->
-> $ rados -p <mon address> rmpool data
->
-> If you'd issue that with the wrong monitor address while playing in y=
-our
-> local network you could remove the pool on the wrong cluster.
->
-> With cephx in place you also have to specify the correct key, it's ju=
-st a
-> second layer in place from preventing something like this happening.
->
->
->> Another scenario would be if I take down an OSD that just sits in
->> storage for say 6 months and then someone starts that machine
->> again - with key-based auth that OSD wouldn't be able to
->> connect(somehow? but if it has a working key?) but without auth it
->> could
->> possibly connect and wreak havoc in the cluster (since it is so much
->> behind perhaps in both version of software and what's stored on it).
->> I thought marking and OSD as down or out would do that?
->>
->
-> If you mark an OSD out it will get marked as "in" again when you star=
-t up
-> the OSD, but that also depends on your settings like "noautoin".
->
-> When you take an OSD out of production with cephx you would also remo=
-ve the
-> corresponding OSD key from the cluster keyring.
->
->
->> Are those the main reasons for having cephx auth? Is it to secure th=
-e
->> cluster against people (myself included) making mistakes or =A0from
->> hacking, or is there some technical reason that I don't know of or
->> understand?
->>
->
-> It can serve multiple purposes. In a bigger env you should never trus=
-t any
-> machine. So if you have a client which only has access to the "rbd" p=
-ool for
-> running Virtual Machines, it shouldn't get more permissions than that=
-=2E
->
-> So yes, it's again human error, but if a machine gets hacked, you can
-> prevent that machine from ruining your whole cluster.
->
->
->> The reason I'm asking is because having cephx enabled makes cluster
->> setup much more complicated...
->>
->
-> cephx might be complicated at first glance, but it isn't really that =
-hard.
->
-> It is up to you if you enable it, but take the recommendations above =
-into
-> account when making your decision.
->
-> Wido
->
->>
->> Thanks,
->>
->> John
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+... is expected to work only for compatibility with S3 clients, or
+whether this rewrite rule is also for Swift clients.
+
+
+2. FastCGI wrapper
+
+The radosgw man page says it should be "exec /usr/bin/radosgw -c
+/etc/ceph/ceph.conf -n client.radosgw.gateway", whereas the Wiki
+(http://ceph.com/wiki/RADOS_Gateway) omits the -n option. I didn't get
+it to work without the -n option, so is it safe to say that it is required?
+
+
+3. Apache/radosgw daemon/FastCGI wrapper interaction
+
+Is it safe to say that we always need all three of these? The man page indicates
+so, the Wiki makes no mention of the daemon started by the init script.
+
+
+4. FastCGI configuration directives
+
+The man page mentions:
+FastCgiExternalServer /var/www/s3gw.fcgi -socket /tmp/radosgw.sock
+
+The Wiki says:
+FastCgiWrapper /var/www/s3gw.fcgi
+FastCgiServer /usr/bin/radosgw
+
+https://github.com/ceph/teuthology/blob/master/teuthology/task/apache.conf
+(which was mentioned as an additional reference on IRC at some point) says:
+FastCgiIPCDir /tmp/cephtest/apache/tmp/fastcgi_sock
+FastCgiExternalServer /tmp/cephtest/apache/htdocs/rgw.fcgi -socket rgw_sock
+
+Which of these is required/preferred? -socket option or not? Wrapper,
+Server or ExternalServer? IPCDir?
+
+
+5. Logging
+
+What's the preferred way of adding debug logging for radosgw?
+
+https://github.com/ceph/teuthology/blob/master/teuthology/task/apache.conf
+mentions:
+
+SetEnv RGW_LOG_LEVEL 20
+SetEnv RGW_PRINT_CONTINUE yes
+SetEnv RGW_SHOULD_LOG yes
+
+... but it's unclear to me whether this is still current (I found no
+trace of those envars in the source, but maybe I was looking in the
+wrong place).
+
+https://github.com/ceph/ceph/commit/452b1248a68f743ad55641722da80e3fd5ad2ae9
+touched the "debug rgw" option. If that is the preferred way of doing
+things now, where should you set this? In ceph.conf, in the
+[client.radosgw.<name>] section?
+
+Also, for each of these, where would the logging output end up?
+/var/log/ceph? Apache error log? If so, only if the Apache LogLevel is
+more verbose than info? Syslog?
+
+
+6. Swift API: Keys
+
+Is it correct to assume that for any Swift client to work, we must set a
+Swift key for the user, like so?
+
+radosgw-admin key create --key-type=swift --uid=<user>
+
+If so, is the secret_key that that creates for the user:
+
+  "swift_keys": [
+        { "user": "<user>",
+          "secret_key": "<longbase64hash>"}]}
+
+
+... the same key that the swift command line client expects to be set
+with th -K option?
+
+
+7. Swift API: swift user name
+
+When we call "swift -U <user>", is that the verbatim user_id that we've
+defined with "radosgw-admin user create --uid=<user_id>"? Or do we need
+to set a prefix? Or define a separate Swift user ID?
+
+
+8. Swift API: authentication version
+
+When radosgw acts as the auth server for a Swift request, is it correct
+to say that only v1.0 Swift authentication is supported, not v2.0?
+
+
+9. Swift API: authentication URL
+
+What's the correct Swift authentication URL for "swift -A <url>"? It
+seems like it's "http://<rgw hostname>:<port>/auth", but confirmation
+would help.
+
+10. radosgw "OpenStack user" information
+
+From the radosgw-admin man page:
+       --os-user=group:name
+              The OpenStack user (only needed for use with OpenStack)
+       --os-secret=key
+              The OpenStack key
+
+What's this meant to be used for? Keystone authentication? If so, is
+there anything else that needs to be done for Keystone to work with
+this, such as add an endpoint URI?
+
+Please feel free to point me to existing documentation where it
+exists. Your help is much appreciated. Thanks!
+
+Cheers,
+Florian
