@@ -1,36 +1,53 @@
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 03/27] ceph: Push file_update_time() into ceph_page_mkwrite()
-Date: Tue, 12 Jun 2012 16:20:24 +0200
-Message-ID: <1339510848-16992-4-git-send-email-jack@suse.cz>
-References: <1339510848-16992-1-git-send-email-jack@suse.cz>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1339510848-16992-1-git-send-email-jack@suse.cz>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Al Viro <viro@ZenIV.linux.org.uk>
-Cc: LKML <linux-kernel@vger.kernel.org>, linux-fsdevel@suse.cz, Jan Kara <jack@suse.cz>, Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Sage Weil <sage@inktank.com>
+Subject: Re: debian updates
+Date: Tue, 12 Jun 2012 09:13:37 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206120913030.6742@cobra.newdream.net>
+References: <Pine.LNX.4.64.1206111939390.10716@cobra.newdream.net>
+ <4FD6DF3D.4010804@profihost.ag>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:44700 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751306Ab2FLQNm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 12:13:42 -0400
+In-Reply-To: <4FD6DF3D.4010804@profihost.ag>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: ceph-devel@vger.kernel.org
 
-CC: Sage Weil <sage@newdream.net>
-CC: ceph-devel@vger.kernel.org
-Acked-by: Sage Weil <sage@newdream.net>
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- fs/ceph/addr.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
+On Tue, 12 Jun 2012, Stefan Priebe - Profihost AG wrote:
+> Hi Sage,
+> 
+> i'm using debian but with a custom build. Should i use the debian branch to
+> build or the stable branch?
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 173b1d2..12b139f 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1181,6 +1181,9 @@ static int ceph_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
- 	loff_t size, len;
- 	int ret;
- 
-+	/* Update time before taking page lock */
-+	file_update_time(vma->vm_file);
-+
- 	size = i_size_read(inode);
- 	if (off + PAGE_CACHE_SIZE <= size)
- 		len = PAGE_CACHE_SIZE;
--- 
-1.7.1
+You should be fine with stable.  That branch just has cleanups for 
+wheezy.
+
+sage
+
+> 
+> Thanks,
+> Stefan
+> 
+> Am 12.06.2012 04:41, schrieb Sage Weil:
+> > Hi Laszlo,
+> > 
+> > Can you take a look at the last 4 commits of
+> > 
+> > 	https://github.com/ceph/ceph/commits/debian
+> > 
+> > and let me know if they address the issues you mentioned?
+> > 
+> > Thanks-
+> > sage
+> > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
