@@ -1,159 +1,183 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: cephx auth question
-Date: Tue, 12 Jun 2012 11:15:03 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206121114100.6742@cobra.newdream.net>
-References: <CAMmJxtJViXYznfRuzMqJsvWZ7YEghkgD2HUhHZ9h4AyaXFz+cA@mail.gmail.com>
- <Pine.LNX.4.64.1206120942040.6742@cobra.newdream.net>
- <CAMmJxtJaS3dXtkLXkieS6Z_8y+L56JCfBdfOoxy3NhpQqPEWtw@mail.gmail.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: "Radosgw installation and administration" docs
+Date: Tue, 12 Jun 2012 11:54:51 -0700
+Message-ID: <CAC-hyiF5PVR9nzjewG6VjPCGdjAeuio8Gqf9_juZKWRZZ1KpaQ@mail.gmail.com>
+References: <4FD71854.6060503@hastexo.com>
+	<CAPUexz-nq-rs3CdougTBpiiur__W0royUcaMdYfpfamwkh7jNw@mail.gmail.com>
+	<CAC-hyiEDLJTkDKXLgR64cPE5mcPvWUCs6kCCq+DiRaCtvDEEFQ@mail.gmail.com>
+	<4FD78636.9080607@hastexo.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1567536011-1339524903=:6742"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49447 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751745Ab2FLSPV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 14:15:21 -0400
-In-Reply-To: <CAMmJxtJaS3dXtkLXkieS6Z_8y+L56JCfBdfOoxy3NhpQqPEWtw@mail.gmail.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:64018 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751997Ab2FLSyx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Jun 2012 14:54:53 -0400
+Received: by bkcji2 with SMTP id ji2so4800266bkc.19
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Jun 2012 11:54:51 -0700 (PDT)
+In-Reply-To: <4FD78636.9080607@hastexo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Axel Eriksson <john@insane.se>
-Cc: ceph-devel@vger.kernel.org
+To: Florian Haas <florian@hastexo.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, Jun 12, 2012 at 11:11 AM, Florian Haas <florian@hastexo.com> wr=
+ote:
+> Hi Yehuda,
+>
+> thanks, that resolved a lot of questions for me. A few follow-up
+> comments below:
+>
+>>
+>> We currently use a slightly different rule:
+>>
+>> =A0 RewriteRule =A0 =A0 =A0 =A0 =A0 =A0 ^/(.*)
+>> /radosgw.fcgi?params=3D$1&%{QUERY_STRING}
+>> [E=3DHTTP_AUTHORIZATION:%{HTTP:Authorization},L]
+>
+> Could you explain what happened to "page"?
 
---557981400-1567536011-1339524903=:6742
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Not really. I don't remember, was probably necessary originally and
+now it's not. Looking at the code, I think you can also drop the
+params=3D$1 part:
 
-On Tue, 12 Jun 2012, John Axel Eriksson wrote:
-> Thanks alot for your input Sage!
->=20
-> I get a feeling that this is good for a larger cluster, especially
-> when you have many people logging in - some without root access.
-> We are currently a VERY small company (two people have logins and root
-> access - noone else has a login at all). We've been running
-> another distributed object storage solution for quite some time which
-> has no authentication whatsoever and it has worked just fine for
-> us. Now we're looking for a replacement since we're not entirely happy
-> with our current solution - it hasn't been entirely stable and we've
-> lost data twice.
->=20
-> I guess we could simply start off without authentication and later on
-> enable it if we do need it. Is that relatively easy to do in a running
-> cluster?
+  RewriteRule             ^/(.*) /radosgw.fcgi?%{QUERY_STRING}
+[E=3DHTTP_AUTHORIZATION:%{HTTP:Authorization},L]
 
-Yes.  The doc linked below outlines the steps that will be needed.
+>
+>>> Also, for each of these, where would the logging output end up?
+>>> /var/log/ceph? Apache error log? If so, only if the Apache LogLevel=
+ is
+>>> more verbose than info? Syslog?
+>>
+>>
+>> The debug log would end up wherever you specified in the 'log file'
+>> config option.
+>
+> ... or syslog, if log file =3D "" and syslog =3D true. (iirc)
 
-> Also is there a good place where I could read up on exactly what
-> happens if an OSD or something else fails? For example with the
-> default two replicas - will that data be copied to another OSD if one
-> fails, do I have to manually do anything, can I read the data as long
-> as there is one copy somewhere?
+Yeah. Whichever ceph logging scheme you're using.
 
-http://ceph.com/docs/master/ops/manage/failures/
+>
+>>> 6. Swift API: Keys
+>>>
+>>> Is it correct to assume that for any Swift client to work, we must =
+set a
+>>> Swift key for the user, like so?
+>>>
+>>> radosgw-admin key create --key-type=3Dswift --uid=3D<user>
+>>>
+>>> If so, is the secret_key that that creates for the user:
+>>>
+>>> =A0"swift_keys": [
+>>> =A0 =A0 =A0 =A0{ "user": "<user>",
+>>> =A0 =A0 =A0 =A0 =A0"secret_key": "<longbase64hash>"}]}
+>>>
+>>>
+>>> ... the same key that the swift command line client expects to be s=
+et
+>>> with th -K option?
+>>
+>> Yes.
+>
+> OK, but I realized that you apparently have to create a separate key
+> when creating a sub-user. Is that correct? Or is there a way for
+> sub-users to "inherit" the keys defined for their parent user?
+>
+>>> 7. Swift API: swift user name
+>>>
+>>> When we call "swift -U <user>", is that the verbatim user_id that w=
+e've
+>>> defined with "radosgw-admin user create --uid=3D<user_id>"? Or do w=
+e need
+>>> to set a prefix? Or define a separate Swift user ID?
+>>>
+>>
+>> In swift the terminology is a bit different. There is the account an=
+d
+>> under that there is the user. Since we already have a 'user' (which =
+is
+>> actually the swift account), we created a 'subuser'. So a one liner
+>> user and swift-subuser creation would be as follows:
+>>
+>> # radosgw-admin user create --subuser=3Dyehuda:yehuda1
+>> --display-name=3DYehuda --key-type=3Dswift --access=3Dfull
+>
+> It seems there is some magic involved so that if you do "user create"=
+,
+> set --subuser=3D<prefix>:<sub> and don't set --uid, it creates a new
+> parent user named <prefix>. Is this meant to be stable? Or is the
 
-has lots of information about managing and diagnosing failures.  If there=
-=20
-are gaps, please let us know!
+The <user>:<subuser> notation is stable.
 
-sage
+> supported way of doing things to always first create a user, and then
+> use "subuser create" to create the subuser?
 
+Both are supported, but note that the 'user create' command requires a
+display-name to be specified, whereas the 'subuser create' doesn't. We
+can change that later and only require the display-name if the user
+does not exist, but at the moment that's how it works.
 
->=20
-> john
->=20
-> On Tue, Jun 12, 2012 at 6:56 PM, Sage Weil <sage@inktank.com> wrote:
-> > A few things that Wido missed:
-> >
-> > On Tue, 12 Jun 2012, John Axel Eriksson wrote:
-> >
-> >> I asked a similar question in a previous email but I didn't get any
-> >> satisfying answers. What exactly does cephx auth secure?
-> >> >From the wiki I just get "this makes your cluster more secure", well
-> >> from what? If I run on an internal network accessible only
-> >> by a few trusted people - what does cephx auth secure in such a scenar=
-io?
-> >
-> > There is some very preliminary docs at
-> >
-> > =A0 =A0 =A0 =A0http://ceph.com/docs/wip-auth/ops/manage/security/
-> >
-> > Basically:
-> >
-> > =A0* mutual authentication between client and server
-> > =A0* capabilities limiting what clients are allowed to do
-> >
-> > But:
-> >
-> > =A0* no encryption of over-the-wire communications
-> > =A0* no protection from hijacked TCP sessions (although simpler
-> > =A0 man-in-the-middle attacks aren't possible)
-> >
-> >> In that previous email I got the answer that it secures the cluster
-> >> from mistakenly connecting to wrong cluster with rados and
-> >> accidentally deleting a pool... well, can rados really "accidentally"
-> >> connect to the wrong cluster?
-> >
-> > The client can accidentally connect to the wrong cluster if fed the
-> > wrong monitor address or config.
-> >
-> >> Only if I have the wrong config
-> >> file right? And if I have the wrong config-file won't it be possible
-> >> that I also have the "wrong" key in that case?
-> >
-> > Yes.
-> >
-> > That said, daemons are careful to validate the cluster fsid before
-> > communicating regardless of whether cephx is enabled or not.
-> >
-> > You *can* put fsid =3D ... in the config file, but the client side isn'=
+>
+>> { "user_id": "yehuda",
+>> =A0 "rados_uid": 0,
+>> =A0 "display_name": "Yehuda",
+>> =A0 "email": "",
+>> =A0 "suspended": 0,
+>> =A0 "max_buckets": 1000,
+>> =A0 "subusers": [
+>> =A0 =A0 =A0 =A0 { "id": "yehuda:yehuda1",
+>> =A0 =A0 =A0 =A0 =A0 "permissions": "full-control"}],
+>> =A0 "keys": [],
+>> =A0 "swift_keys": [
+>> =A0 =A0 =A0 =A0 { "user": "yehuda:yehuda1",
+>> =A0 =A0 =A0 =A0 =A0 "secret_key": "7TD5f2QrwxkCnhthwowC4d9uEJ4mnX8nG=
+sXjmnW8"}]}
+>>
+>
+>>> 10. radosgw "OpenStack user" information
+>>>
+>>> From the radosgw-admin man page:
+>>> =A0 =A0 =A0 --os-user=3Dgroup:name
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0The OpenStack user (only needed for use =
+with OpenStack)
+>>> =A0 =A0 =A0 --os-secret=3Dkey
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0The OpenStack key
+>>
+>> Obsolete. That was the old way to configure swift users.
+>
+> OK. Should this be removed from the man page then?
+
+Yeah, should be updated.
+
+>
+> Silly question: If "auth supported =3D none", is it still required to=
+ run
+> the ceph-authtool and ceph-auth commands specified in radosgw(8)?
+
+Not for setting up radosgw.
+
+>> =A0 =A0 =A0 =A0 log file =3D /var/log/radosgw/radosgw.log
+>> =A0 =A0 =A0 =A0 debug rgw =3D 20
+>> =A0 =A0 =A0 =A0 rgw cache enabled =3D 1
+>> ; =A0 =A0 =A0 rgw swift url =3D http://skinny
+>> ; =A0 =A0 =A0 rgw swift url prefix =3D swift
+>
+> I ran across this option sifting through src/rgw, can you explain wha=
 t
-> > validating it currently, and that won't help if you point at the wrong
-> > config file.
-> >
-> >> Another scenario would be if I take down an OSD that just sits in
-> >> storage for say 6 months and then someone starts that machine
-> >> again - with key-based auth that OSD wouldn't be able to
-> >> connect(somehow? but if it has a working key?) but without auth it
-> >> could
-> >> possibly connect and wreak havoc in the cluster (since it is so much
-> >> behind perhaps in both version of software and what's stored on it).
-> >> I thought marking and OSD as down or out would do that?
-> >
-> > Marking out manually will prevent the osd from being marked in
-> > automatically, but it will still start up and 'join' the cluster.
-> > However, whenever there is an incompatible change, we bump protocol
-> > numbers or add feature fits, so it shouldn't be able to do any damage.
-> >
-> > I think the main motivation is to prevent a non-root user from, say,
-> > deleting your data pool, or to limit such 'admin' activity to a select
-> > number of nodes (e.g., the monitor hosts).
-> >
-> > sage
-> >
-> >> Are those the main reasons for having cephx auth? Is it to secure the
-> >> cluster against people (myself included) making mistakes or =A0from
-> >> hacking, or is there some technical reason that I don't know of or und=
-erstand?
-> >>
-> >> The reason I'm asking is because having cephx enabled makes cluster
-> >> setup much more complicated...
-> >>
-> >>
-> >> Thanks,
-> >>
-> >> John
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
---557981400-1567536011-1339524903=:6742--
+> the URL prefix is used for?
+
+When authenticating the client, the swift_url and swift_prefix are
+concatenated and passed to the client as the storage URL, along with
+the token.
+
+
+
+Thanks,
+Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
