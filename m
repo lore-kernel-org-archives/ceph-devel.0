@@ -1,29 +1,40 @@
-From: Chris Samuel <chris@csamuel.org>
-Subject: Re: ceph-on-btrfs inline-cow regression fix for 3.4.3
-Date: Wed, 13 Jun 2012 15:04:06 +1000
-Message-ID: <4FD81F46.3010702@csamuel.org>
-References: <orvcivvppp.fsf@livre.localdomain>
+From: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Subject: Re: debian updates
+Date: Wed, 13 Jun 2012 05:05:27 +0000
+Message-ID: <1339563927.7726.90.camel@julia>
+References: <Pine.LNX.4.64.1206111939390.10716@cobra.newdream.net>
+	 <1339471174.7726.71.camel@julia>
+	 <Pine.LNX.4.64.1206121004050.6742@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-In-Reply-To: <orvcivvppp.fsf@livre.localdomain>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Josef Bacik <josef@redhat.com>, Chris Mason <chris.mason@oracle.com>, stable@vger.kernel.org, linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail.barcikacomp.hu ([94.248.160.10]:46289 "EHLO
+	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751153Ab2FMFF1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jun 2012 01:05:27 -0400
+In-Reply-To: <Pine.LNX.4.64.1206121004050.6742@cobra.newdream.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 13/06/12 13:46, Alexandre Oliva wrote:
+On Tue, 2012-06-12 at 10:06 -0700, Sage Weil wrote:
+> On Tue, 12 Jun 2012, Laszlo Boszormenyi (GCS) wrote:
+> > I can package it if
+> > you want. Now my fingers are crossed to accept libs3 soon, it's freeze
+> > for Wheezy soon[1]. Ceph 0.47.2 is waiting for that to be in Wheezy.
+ libs3 got accepted into the archives and being built on all
+architectures. In 12 hours the binaries will be available for the build
+network itself. This means I can upload Ceph 0.47.2 soon.
 
-> I know btrfs hasn't had maintenance fixes in stable series, but Chris
-> Mason tells me the only reason is that nobody stepped up to do so.
-> Given my interest, I might as well give it a try ;-)
+> Great!  Let me know if there's anything else that can be fixed up on this 
+> end.
+ I had a minor issue with building system libs3 and leveldb libraries.
+The build system of Ceph was still looking for
+$(BUILDDIR)/src/leveldb/libleveldb.a . Put a symlink there
+to /usr/lib/$(ARCH)/libleveldb.a and it was built. I'll recheck this
+issue in the afternoon.
 
-Actually 3.3.3 had a fix for btrfs in it.. :-)
+Laszlo/GCS
 
-http://lwn.net/Articles/493971/
-
-cheers,
-Chris
--- 
- Chris Samuel  :  http://www.csamuel.org/  :  Melbourne, VIC
