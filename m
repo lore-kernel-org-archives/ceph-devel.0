@@ -1,47 +1,51 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: debian updates
-Date: Wed, 13 Jun 2012 08:53:29 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206130851230.25437@cobra.newdream.net>
-References: <Pine.LNX.4.64.1206111939390.10716@cobra.newdream.net>
- <1339471174.7726.71.camel@julia> <Pine.LNX.4.64.1206121004050.6742@cobra.newdream.net>
- <1339563927.7726.90.camel@julia>
+Subject: auth settings
+Date: Wed, 13 Jun 2012 08:54:40 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206130839450.25437@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36370 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36374 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754125Ab2FMPxa (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jun 2012 11:53:30 -0400
-In-Reply-To: <1339563927.7726.90.camel@julia>
+	with ESMTP id S1751324Ab2FMPyl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jun 2012 11:54:41 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 55685BC670
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jun 2012 08:54:41 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 30691BC670
+	for <ceph-devel@vger.kernel.org>; Wed, 13 Jun 2012 08:54:41 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wed, 13 Jun 2012, Laszlo Boszormenyi (GCS) wrote:
-> On Tue, 2012-06-12 at 10:06 -0700, Sage Weil wrote:
-> > On Tue, 12 Jun 2012, Laszlo Boszormenyi (GCS) wrote:
-> > > I can package it if
-> > > you want. Now my fingers are crossed to accept libs3 soon, it's freeze
-> > > for Wheezy soon[1]. Ceph 0.47.2 is waiting for that to be in Wheezy.
->  libs3 got accepted into the archives and being built on all
-> architectures. In 12 hours the binaries will be available for the build
-> network itself. This means I can upload Ceph 0.47.2 soon.
-> 
-> > Great!  Let me know if there's anything else that can be fixed up on this 
-> > end.
->  I had a minor issue with building system libs3 and leveldb libraries.
-> The build system of Ceph was still looking for
-> $(BUILDDIR)/src/leveldb/libleveldb.a . Put a symlink there
-> to /usr/lib/$(ARCH)/libleveldb.a and it was built. I'll recheck this
-> issue in the afternoon.
+The wip-auth branch has a revamp of the authentication settings. 
+Currently, there is a single option, 'auth supported', which is an ordered 
+list of authentication methods (cephx or none) to use.  This is somewhat 
+limiting
 
-The wip-leveldb branch should fix this.  Once I verify it builds correctly 
-everywhere I'll push it to master.
+This branch replaces that with 3 new settings:
 
-Also, 0.48 will be released in a few more days.  If there isn't a rush on 
-getting this in, it is probably worth waiting to put that in wheezy.  It 
-looks like 0.48 will also be the basis for one of our first 'stable' 
-releases.
+ auth cluster required -- authentication method(s) required between ceph
+    cluster daemons (e.g., mds to mds, mds to mon, etc.)
+ auth service required -- auth method(s) required by daemons of clients
+ auth client required  -- what clients require of daemons
+
+This lets you do a few things:
+
+ - Require the cluster to internally use authentication, so that nobody can
+   impersonate an osd or monitor.  You could still leave auth off for clients
+   if you don't want to deal with distributing keys to users.
+ - Make the cluster require that clients authentication, but let the clients  
+   connect to whatever.
+
+For compatibility, the idea is that these are all blank by default, and in 
+that case default to the deprecated 'auth supported' option that many are 
+already using to enable cephx across the board.  
+
+There's also some preliminary docs on what cephx gets you and what it 
+doesn't, and on how to enable authentication on a cluster without it.
+
+This gets us one step closer to enabling auth by default...
 
 sage
