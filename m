@@ -1,59 +1,29 @@
-From: Sage Weil <sage@inktank.com>
-Subject: changing osd capability semantics
-Date: Thu, 14 Jun 2012 10:05:30 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206140958010.23137@cobra.newdream.net>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: rbd locking and handling broken clients
+Date: Thu, 14 Jun 2012 11:06:53 -0700
+Message-ID: <CADvuQRE3o166OFeNmJOyUivm6G+3L9U=B223TJfppUP2a6L3ag@mail.gmail.com>
+References: <CAPYLRzhWkma7rrR=ATQTFmq_pwizeJ+SDi3efMEU9gTYPqAY3g@mail.gmail.com>
+ <4FD8FA13.6070006@hastexo.com> <7BD677C5759B4061987311B2526E81D3@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59134 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752151Ab2FNRFh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jun 2012 13:05:37 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id D9960BC7BD
-	for <ceph-devel@vger.kernel.org>; Thu, 14 Jun 2012 10:05:36 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 31364BC7BD
-	for <ceph-devel@vger.kernel.org>; Thu, 14 Jun 2012 10:05:36 -0700 (PDT)
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:54171 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754912Ab2FNSHO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jun 2012 14:07:14 -0400
+Received: by dady13 with SMTP id y13so2897241dad.19
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Jun 2012 11:07:14 -0700 (PDT)
+In-Reply-To: <7BD677C5759B4061987311B2526E81D3@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Greg Farnum <greg@inktank.com>
+Cc: Florian Haas <florian@hastexo.com>, ceph-devel@vger.kernel.org, mandell@pistoncloud.com
 
-The current osd capabilities do a few things that, in retrospect, are more 
-complex than is necessary or desired.  In particular, the current 
-implementation allows
+On Wed, Jun 13, 2012 at 4:41 PM, Greg Farnum <greg@inktank.com> wrote:
+>> You know, I'd be really happy if this could be achieved by means of
+>> removing cephx keys.
+> Unfortunately, that wouldn't really solve the problem without dramatically decreasing the rotation interval for cluster access keys which cephx shares. Alternative (entirely theoretical) security schemes might, but they're well behind what's feasible for us to work on any time soon...
 
-	allow rwx, deny pool blah rwx
-
-The deny stuff is confusing to understand (it's ordering dependent), and 
-not used by anything (that we know of).
-
-There is also an idea of 'default permissions' on pools that you own.  For 
-example, if you have a blank capability, and create a pool 'foo' owned by 
-your auid, then you (by default) get rwx permissions.  Unless the cap says 
-otherwise, like
-
-	allow pool foo rw
-	allow auid 123 rw
-
-This is also sneaky and confusing.  You can get equivalent functionality 
-with an explicit cap like
-
-	allow auid 123 rwx
-
-The current implementation is also awkward to maintain and understand in 
-terms of grants. 
-
-So: there's a new implementation in wip-osdcap that removes 'deny' and the 
-default caps thing, has a well-defined grammar, and a simpler 
-implementation.  See
-
-	https://github.com/ceph/ceph/commits/wip-osdcap
-
-The danger is merging this is that someone out there has dived into the 
-old and documented caps code and started using the deny or default cap 
-functionality.  This is your fair warning!  If you're using deny, you 
-probably shouldn't, and if you're using the default caps, you need to 
-adjust them to explicitly allow access to pools you create.
-
-sage
+I wouldn't want to rely on timed rotation. Fencing triggering a
+rotation on demand, then again.. that I do like.
