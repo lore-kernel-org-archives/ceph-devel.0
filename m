@@ -1,37 +1,61 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: ceph next branch: error creating empty object store in /srv/osd.10:
- (22) Invalid argument
-Date: Thu, 14 Jun 2012 14:04:54 +0200
-Message-ID: <4FD9D366.3060305@profihost.ag>
-References: <4FD9D187.8030601@profihost.ag>
+From: Danny Kukawka <danny.kukawka@bisect.de>
+Subject: Re: OSD hotplugging & Chef cookbook ("chef-1")
+Date: Thu, 14 Jun 2012 15:32:52 +0200
+Message-ID: <4FD9E804.3050801@bisect.de>
+References: <CADvuQRHwR5M_bvUsSMR=9qUuoYY_qRdTA5Sac=troYNxhaFxNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig7F84D36B26D2E45100102697"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:57623 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752866Ab2FNMFB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Jun 2012 08:05:01 -0400
-In-Reply-To: <4FD9D187.8030601@profihost.ag>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:36796 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756071Ab2FNNyz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 14 Jun 2012 09:54:55 -0400
+In-Reply-To: <CADvuQRHwR5M_bvUsSMR=9qUuoYY_qRdTA5Sac=troYNxhaFxNg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tv@inktank.com>
+Cc: ceph-devel@vger.kernel.org, Danny Kukawka <dkukawka@suse.de>
 
-I got this fixed by deleting all content in /srv/osd.X. But now i get 
-with the next branch this one:
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig7F84D36B26D2E45100102697
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-=== osd.32 ===
-pushing conf and monmap to ssdstor002:/tmp/mkfs.ceph.4885
-2012-06-14 14:02:09.333309 7f815cd26780 -1 journal FileJournal::_open: 
-unable to open journal: open() failed: (2) No such file or directory
-2012-06-14 14:02:09.690097 7f815cd26780 -1 filestore(/srv/osd.32) could 
-not find 23c2fcde/osd_superblock/0//-1 in index: (2) No such file or 
-directory
-2012-06-14 14:02:09.758456 7f815cd26780 -1 created object store 
-/srv/osd.32 journal /journal/osd.32.journal for osd.32 fsid 
-308b2ada-5c2a-4b54-b094-b7035413d247
-creating private key for osd.32 keyring /etc/ceph/osd.32.keyring
-creating /etc/ceph/osd.32.keyring
-collecting osd.32 key
+Hi,
 
-Stefan
+Am 08.05.2012 00:58, schrieb Tommi Virtanen:
+[...]
+> The current work is in a branch called "ceph-1", and will be improved
+> upon, but it is now at a stage where others should start looking at
+> it.
+[...]
+
+And where can I find this branch? I've checked the git repo at:
+
+	https://github.com/ceph/ceph-cookbooks
+
+But couldn't find any branch called ceph-1.
+
+Danny
+
+
+
+--------------enig7F84D36B26D2E45100102697
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+
+iJwEAQECAAYFAk/Z6AoACgkQ9DHLX79LmTK6LwQApbNsQGdZlKyXD2iLZehSYIX8
+hK0UzlH4ANjNDZw2qRiq/WdpVHauxF3T2m9AT0Rxar5tx4k/ar1LEWpiclllf1sk
+JdjFyO8PqNjd5oHg0cU0E8dw4s7H/2EMkm5RodDj7GQrb317edmHCECMjhCyVw1P
+vGcfGFyjZljj70nOxIo=
+=yNN2
+-----END PGP SIGNATURE-----
+
+--------------enig7F84D36B26D2E45100102697--
