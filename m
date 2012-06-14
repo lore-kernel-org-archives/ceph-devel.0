@@ -1,98 +1,98 @@
-From: Greg Farnum <greg@inktank.com>
-Subject: Re: rbd locking and handling broken clients
-Date: Wed, 13 Jun 2012 16:41:30 -0700
-Message-ID: <7BD677C5759B4061987311B2526E81D3@inktank.com>
-References: <CAPYLRzhWkma7rrR=ATQTFmq_pwizeJ+SDi3efMEU9gTYPqAY3g@mail.gmail.com>
- <4FD8FA13.6070006@hastexo.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: auth settings
+Date: Wed, 13 Jun 2012 17:26:28 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206131723570.16470@cobra.newdream.net>
+References: <Pine.LNX.4.64.1206130839450.25437@cobra.newdream.net>
+ <efb7513b-6ec6-4347-adac-9fc7890cbd09@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1573542372-1339633588=:16470"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:55039 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751460Ab2FNANQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jun 2012 20:13:16 -0400
-Received: by dady13 with SMTP id y13so1754988dad.19
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Jun 2012 17:13:15 -0700 (PDT)
-In-Reply-To: <4FD8FA13.6070006@hastexo.com>
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:59862 "EHLO
+	cobra.newdream.net" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752870Ab2FNA1T (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Jun 2012 20:27:19 -0400
+In-Reply-To: <efb7513b-6ec6-4347-adac-9fc7890cbd09@email.android.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Florian Haas <florian@hastexo.com>
-Cc: ceph-devel@vger.kernel.org, mandell@pistoncloud.com, Tommi Virtanen <tv@inktank.com>
+To: Xiaopong Tran <xiaopong.tran@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wednesday, June 13, 2012 at 1:37 PM, Florian Haas wrote:
-> Greg,
-> =20
-> My understanding of Ceph code internals is far too limited to comment=
- on
-> your specific points, but allow me to ask a naive question.
-> =20
-> Couldn't you be stealing a lot of ideas from SCSI-3 Persistent
-> Reservations? If you had server-side (OSD) persistence of information=
- of
-> the "this device is in use by X" type (where anything other than X wo=
-uld
-> get an I/O error when attempting to access data), and you had a manua=
-l,
-> authenticated override akin to SCSI PR preemption, plus key
-> registration/exchange for that authentication, then you would at leas=
-t
-> have to have the combination of a misbehaving OSD plus a malicious
-> client for data corruption. A non-malicious but just broken client
-> probably won't do.
-> =20
-> Clearly I may be totally misguided, as Ceph is fundamentally
-> decentralized and SCSI isn't, but if PR-ish behavior comes even close=
- to
-> what you're looking for, grabbing those ideas would look better to me
-> than designing your own wheel.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Yeah, the problem here is exactly that Ceph (and RBD) are fundamentally=
- decentralized. :) I'm not familiar with the SCSI PR mechanism either, =
-but it looks to me like it deals in entirely local information =E2=80=94=
- the equivalent with RBD would require performing a locking operation o=
-n every object in the RBD image before you accessed it. We could do tha=
-t, but then opening an image would take time linear in its size=E2=80=A6=
- :(
+--557981400-1573542372-1339633588=:16470
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
+On Thu, 14 Jun 2012, Xiaopong Tran wrote:
+> Cool.  Will that be merged into master and ready for 0.48 as well=FF=FF
+>=20
+> cheers
+>=20
+> Xiaopong
 
-On Wednesday, June 13, 2012 at 4:14 PM, Tommi Virtanen wrote:
-> On Wed, Jun 13, 2012 at 10:40 AM, Gregory Farnum <greg@inktank.com (m=
-ailto:greg@inktank.com)> wrote:
-> > 2) Client fencing. See http://tracker.newdream.net/issues/2531. The=
-re
-> > is an existing "blacklist" functionality in the OSDs/OSDMap, where =
-you
-> > can specify an "entity_addr_t" (consisting of an IP, a port, and a
-> > nonce =E2=80=94 so essentially unique per-process) which is not all=
-owed to
-> > communicate with the cluster any longer. The problem with this is t=
-hat
-> =20
-> Does that work even after a TCP connection close & re-establish, wher=
-e
-> the client now has a new source port address? (Perhaps the port is 0
-> for clients?)
+Unfortunately this will to make it into 0.48.  It needs more careful=20
+testing to make sure we are handling the range of cases correctly, and=20
+there isn't enough time for that.
 
-Precisely =E2=80=94 client ports are 0 since they never accept incoming=
- connections.
+We do encourage you to enable auth with 'auth supported =3D cephx' in your=
+=20
+configs, though; this will make the upgrade when auth is eventually=20
+enabled by default painless.
 
+sage
 
-
-> You know, I'd be really happy if this could be achieved by means of
-> removing cephx keys.
-
-Unfortunately, that wouldn't really solve the problem without dramatica=
-lly decreasing the rotation interval for cluster access keys which ceph=
-x shares. Alternative (entirely theoretical) security schemes might, bu=
-t they're well behind what's feasible for us to work on any time soon..=
-=2E
-
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+> Sage Weil <sage@inktank.com> wrote:
+>=20
+> >The wip-auth branch has a revamp of the authentication settings.=20
+> >Currently, there is a single option, 'auth supported', which is an
+> >ordered=20
+> >list of authentication methods (cephx or none) to use.  This is
+> >somewhat=20
+> >limiting
+> >
+> >This branch replaces that with 3 new settings:
+> >
+> >auth cluster required -- authentication method(s) required between ceph
+> >    cluster daemons (e.g., mds to mds, mds to mon, etc.)
+> > auth service required -- auth method(s) required by daemons of clients
+> > auth client required  -- what clients require of daemons
+> >
+> >This lets you do a few things:
+> >
+> >- Require the cluster to internally use authentication, so that nobody
+> >can
+> >impersonate an osd or monitor.  You could still leave auth off for
+> >clients
+> >   if you don't want to deal with distributing keys to users.
+> >- Make the cluster require that clients authentication, but let the
+> >clients =20
+> >   connect to whatever.
+> >
+> >For compatibility, the idea is that these are all blank by default, and
+> >in=20
+> >that case default to the deprecated 'auth supported' option that many
+> >are=20
+> >already using to enable cephx across the board. =20
+> >
+> >There's also some preliminary docs on what cephx gets you and what it=20
+> >doesn't, and on how to enable authentication on a cluster without it.
+> >
+> >This gets us one step closer to enabling auth by default...
+> >
+> >sage
+> >--
+> >To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> >in
+> >the body of a message to majordomo@vger.kernel.org
+> >More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+--557981400-1573542372-1339633588=:16470--
