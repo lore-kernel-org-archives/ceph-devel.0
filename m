@@ -1,88 +1,58 @@
-From: Amon Ott <a.ott@m-privacy.de>
-Subject: MDS spinning wild after restart on all nodes
-Date: Fri, 15 Jun 2012 11:43:25 +0200
-Message-ID: <201206151143.25706.a.ott@m-privacy.de>
+From: sverre stoltenberg <sverrest@opera.com>
+Subject: Truncated file on posix mount
+Date: Fri, 15 Jun 2012 11:43:41 +0200
+Message-ID: <4FDB03CD.5010202@opera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.237.71]:33416 "EHLO www.m-privacy.de"
+Received: from smtp.opera.com ([213.236.208.81]:58205 "EHLO smtp.opera.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755824Ab2FOJnh convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 05:43:37 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by www.m-privacy.de (Postfix) with ESMTP id EC0BA63BE7
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Jun 2012 11:43:31 +0200 (CEST)
-Received: from www.m-privacy.de ([127.0.0.1])
- by localhost (www.m-privacy.de [127.0.0.1]) (amavisd-maia, port 10024)
- with ESMTP id 06666-01 for <ceph-devel@vger.kernel.org>;
- Fri, 15 Jun 2012 11:43:24 +0200 (CEST)
-Received: from gw.compuniverse.de (unknown [85.183.4.97])
-	(using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by www.m-privacy.de (Postfix) with ESMTPSA id 6AE3363BE6
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Jun 2012 11:43:24 +0200 (CEST)
-Received: from tgham.compuniverse.de (tgham.compuniverse.de [192.168.201.30])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by gw.compuniverse.de (Postfix) with ESMTPS id 377F5222F5
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Jun 2012 11:43:27 +0200 (CEST)
-Content-Disposition: inline
+	id S1756398Ab2FOJtu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 15 Jun 2012 05:49:50 -0400
+Received: from [10.20.18.133] (pat-tdc.opera.com [213.236.208.22])
+	(authenticated bits=0)
+	by smtp.opera.com (8.14.3/8.14.3/Debian-5+lenny1) with ESMTP id q5F9hfIi023419
+	(version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=NOT)
+	for <ceph-devel@vger.kernel.org>; Fri, 15 Jun 2012 09:43:46 GMT
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hello all,
+I have a ceph posix mount for openstack instances, and have found some 
+of my kernels truncated. It looks rather random, and I have not found a 
+way to reproduce it, but it will happen from time to time with normal use.
 
-I have seen this for a long time, but never investigated further. After=
- stable=20
-test runs for several days, this is our last known show stopper before =
-using=20
-Ceph in production. We are running 0.47.2 on 32 Bit.
+the 5e...aa checksum is the correct one.
 
-If we restart MDS (or all ceph daemons) on all nodes, one after another=
- or all=20
-together, they first recover and then the active one starts to spin wit=
-h full=20
-cpu and does not answer any more. After a while, the next takes over, s=
-tarts=20
-to spin, etc., until the whole cluster is unusable. This is completely=20
-reproducable and happens even without any active client.
+root@t06-16:/var/lib/nova/instances# md5sum */kernel
+3e0a48130ddb8bfe88239df05c073a0b  instance-00000001/kernel
+5e9463bd77757a3889a1d9758b2b94aa  instance-0000000f/kernel
+5e9463bd77757a3889a1d9758b2b94aa  instance-00000010/kernel
+5e9463bd77757a3889a1d9758b2b94aa  instance-00000011/kernel
+5e9463bd77757a3889a1d9758b2b94aa  instance-00000012/kernel
+5e9463bd77757a3889a1d9758b2b94aa  instance-00000013/kernel
+3e0a48130ddb8bfe88239df05c073a0b  instance-00000014/kernel
 
-As ecpected, ceph -w shows lots of
-"2012-06-15 11:35:28.588775   mds e959: 1/1/1 up {0=3D3=3Dup:active(lag=
-gy or=20
-crashed)}"
+root@t06-16:/var/lib/nova/instances/instance-00000001# stat kernel
+   File: `kernel'
+   Size: 2097152         Blocks: 4096       IO Block: 4194304 regular file
+Device: 0h/0d   Inode: 1099511627899  Links: 1
+Access: (0664/-rw-rw-r--)  Uid: (  109/libvirt-qemu)   Gid: (  111/     kvm)
+Access: 2012-06-13 11:56:56.462433802 +0200
+Modify: 2012-06-04 11:47:17.730781000 +0200
+Change: 2012-06-04 11:47:17.730781000 +0200
+  Birth: -
 
-It does not help to stop all services on all nodes for minutes or longe=
-r and=20
-to restart them - MDS will restart spinning. But: If we reboot the whol=
-e=20
-cluster, everything goes back to work.
+root@t06-16:/var/lib/nova/instances/instance-00000010# stat kernel
+   File: `kernel'
+   Size: 2424448         Blocks: 4736       IO Block: 4194304 regular file
+Device: 0h/0d   Inode: 1099511627989  Links: 1
+Access: (0664/-rw-rw-r--)  Uid: (  109/libvirt-qemu)   Gid: (  111/     kvm)
+Access: 2012-06-13 09:44:03.779892491 +0200
+Modify: 2012-06-13 09:43:47.178125000 +0200
+Change: 2012-06-13 09:44:00.020102878 +0200
+  Birth: -
 
-Today's MDS log is available at=20
-https://download.m-privacy.de/homeuser-mds.0.log.gz
-
-Is this a known problem? It has been with us for a looong time now, but=
- since=20
-rebooting used to help, we never tracked it down.
-
-Amon Ott
---=20
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Am K=F6llnischen Park 1    Fax: +49 30 24342336
-10179 Berlin             http://www.m-privacy.de
-
-Amtsgericht Charlottenburg, HRB 84946
-
-Gesch=E4ftsf=FChrer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
-
-GnuPG-Key-ID: 0x2DD3A649
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+/S.
