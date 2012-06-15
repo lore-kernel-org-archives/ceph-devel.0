@@ -1,34 +1,36 @@
-From: Sage Weil <sage@inktank.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
 Subject: Re: osd dies / crahes directly after mkcephfs
-Date: Fri, 15 Jun 2012 14:46:36 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206151445290.4551@cobra.newdream.net>
-References: <4FDBA78C.4050401@profihost.ag>
+Date: Fri, 15 Jun 2012 23:47:41 +0200
+Message-ID: <4FDBAD7D.6050707@profihost.ag>
+References: <4FDBA78C.4050401@profihost.ag> <Pine.LNX.4.64.1206151444550.4551@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36379 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757329Ab2FOVqi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 17:46:38 -0400
-In-Reply-To: <4FDBA78C.4050401@profihost.ag>
+Received: from mail.profihost.ag ([85.158.179.208]:57353 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757329Ab2FOVrj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 17:47:39 -0400
+In-Reply-To: <Pine.LNX.4.64.1206151444550.4551@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
+To: Sage Weil <sage@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 15 Jun 2012, Stefan Priebe wrote:
-> Hi,
-> 
-> i've seen several osd crashes on one of my machines directly after creating
-> the ceph fs.
-> 
-> Attached is the osd log. I also have a core dump file. Do you need it?
+Am 15.06.2012 23:45, schrieb Sage Weil:
+> On Fri, 15 Jun 2012, Stefan Priebe wrote:
+>> Hi,
+>>
+>> i've seen several osd crashes on one of my machines directly after creating
+>> the ceph fs.
+>>
+>> Attached is the osd log. I also have a core dump file. Do you need it?
+>
+> This happens when the underlying file system isn't responding.  Does
+> 'dmesg' include any kernel errors or warnings?
 
-Also, are you mounting the ceph file system on the same node as the osd?  
-This might be a sync(2)-induced deadlock.
+no last lines:
+[117189.774948] XFS (sde1): Mounting Filesystem
+[117189.799705] XFS (sde1): Ending clean mount
 
-Putting a ceph fs mount on the same node as an osd is dicey in low memory 
-situations.  On older glibcs and kernels without syncfs(2) support, it can 
-easily deadlock.
-
-sage
+Stefan
