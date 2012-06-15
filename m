@@ -1,79 +1,151 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: RBD speed vs threads
-Date: Fri, 15 Jun 2012 07:03:44 -0500
-Message-ID: <4FDB24A0.8000401@inktank.com>
-References: <4FDACEAA.8080306@profihost.ag>
+From: Stefan Majer <stefan.majer@gmail.com>
+Subject: Re: Random data corruption in VM, possibly caused by rbd
+Date: Fri, 15 Jun 2012 14:14:29 +0200
+Message-ID: <CADdPHGu0s=rjqRZiFn4K8+fVFc4JG0bOpd3r-HStk1S3nM69BQ@mail.gmail.com>
+References: <21601270.dfB0BsVfyn@pc10>
+	<25761303.PmWYZprmzc@pc10>
+	<Pine.LNX.4.64.1206110920150.10557@cobra.newdream.net>
+	<1815615.qFFlAnfNF8@pc10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:60877 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751868Ab2FOMDs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 08:03:48 -0400
-Received: by yhmm54 with SMTP id m54so2347701yhm.19
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Jun 2012 05:03:48 -0700 (PDT)
-In-Reply-To: <4FDACEAA.8080306@profihost.ag>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:50005 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755706Ab2FOMOa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 08:14:30 -0400
+Received: by yenl2 with SMTP id l2so1776019yen.19
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Jun 2012 05:14:29 -0700 (PDT)
+In-Reply-To: <1815615.qFFlAnfNF8@pc10>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Cc: Sage Weil <sage@inktank.com>, Oliver Francke <Oliver.Francke@filoo.de>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-On 06/15/2012 12:56 AM, Stefan Priebe - Profihost AG wrote:
-> Hello list,
+Hi,
+
+We had today a catastrophic fs corruption in one of our virtual
+machines, after fsck ~100MB was inside lost+found :-(
+So is think we hit the same bug (ceph-0.45.2, sparse rbd images)
+
+Is there any progress on this topic, or any hint how to help on this
+would be helpful.
+
+Greetings
+Stefan Majer
+
+On Tue, Jun 12, 2012 at 2:31 PM, Guido Winkelmann
+<guido-ceph@thisisnotatest.de> wrote:
+> Am Montag, 11. Juni 2012, 09:30:42 schrieb Sage Weil:
+>> If you can reproduce it with 'debug filestore =3D 20' too, that will=
+ be
+>> better, as it will tell us what the FIEMAP ioctl is returning.
 >
-> i still don't understand why the speed of the rados bench depends so
-> heavily on the threads.
+> I ran another testrun with 'debug filestore =3D 20'.
 >
-> Right now i get around 100MB/s per thread. So 1 thread is 100MB/s, 4
-> Threads 400MB/s and 16 threads results an about 1100MB/s.
+>> Also, if
+>> you can attach/post the contents of the object itself (rados -p rbd =
+get
+>> rb.0.1.0000000002a0 /tmp/foo) we can make sure the object has the ri=
+ght
+>> data (and the sparse-read operation that librbd is doing is the culp=
+rit).
 >
-> So 1100MB/s is great but i still don't get why 1 thread gets "only"
-> 100MB/s.
+> I tried that, with the block name that the steps further below gave m=
+e:
 >
-> Total time run: 30.037374
-> Total writes made: 8326
-> Write size: 4194304
-> Bandwidth (MB/sec): 1108.752
+> rados -p rbd get rb.0.13.00000000045a block
 >
-> Stddev Bandwidth: 47.5612
-> Max bandwidth (MB/sec): 1152
-> Min bandwidth (MB/sec): 948
-> Average Latency: 0.0577107
-> Stddev Latency: 0.020784
-> Max latency: 0.382413
-> Min latency: 0.026057
+> When I looked into the block, it looked like a bunch of temp files fr=
+om the
+> portage system with padding in between, although it should be random =
+data... I
+> think I got the wrong block after all...
 >
-> Stefan
+> Here's what I did:
+> Run the iotester again:
+> testserver-rbd11 iotester # date ; ./iotester /var/iotest ; date
+> Tue Jun 12 13:51:58 CEST 2012
+> Wrote 100 MiB of data in 2004 milliseconds
+> [snip lots of irrelevant lines]
+> Wrote 100 MiB of data in 2537 milliseconds
+> Read 100 MiB of data in 3794 milliseconds
+> Read 100 MiB of data in 10150 milliseconds
+> Digest wrong for file "/var/iotest/4299a48eca63c75d6773bec3565190aa3b=
+33c46e"
+> Tue Jun 12 13:55:00 CEST 2012
+>
+> Run the fiemap tool on that file:
+>
+> testserver-rbd11 ~ # ./fiemap
+> /var/iotest/4299a48eca63c75d6773bec3565190aa3b33c46e
+> File /var/iotest/4299a48eca63c75d6773bec3565190aa3b33c46e has 1 exten=
+ts:
+> # =A0 =A0 =A0 Logical =A0 =A0 =A0 =A0 =A0Physical =A0 =A0 =A0 =A0 Len=
+gth =A0 =A0 =A0 =A0 =A0 Flags
+> 0: =A0 =A0 =A00000000000000000 0000000116900000 0000000000100000 0001
+>
+>> As for the log:
+>>
+>> First, map the offset to an rbd block. =A0For example, taking the 'P=
+hysical'
+>> value of 00000000a8200000 from above:
+>>
+>> $ printf "%012x\n" $((0x00000000a8200000 / (4096*1024) ))
+>> 0000000002a0
+>
+> That gave me
+>
+> =A0$ printf "%012x\n" $((0x0000000116900000 / (4096*1024) ))
+> 00000000045a
+>
+>> Then figure out what the object name prefix is:
+>>
+>> $ rbd info <imagename> | grep prefix
+>> =A0 =A0 =A0 =A0 block_name_prefix: rb.0.1
+>
+> Result: block_name_prefix: rb.0.13
+>
+>> Then add the block number, 0000000002a0 to that, e.g. rb.0.1.0000000=
+002a0.
+>
+> Result: rb.0.13.00000000045a
+>
+>> Then map that back to an osd with
+>>
+>> $ ceph osd map rbd rb.0.1.0000000002a0
+>> osdmap e19 pool 'rbd' (2) object 'rb.0.1.0000000002a0' -> pg 2.a2e06=
+f65
+>> (2.5) -> up [0,2] acting [0,2]
+>
+> That gives me
+> [root@storage1 ~]# ceph osd map rbd rb.0.13.00000000045a 2> /dev/null
+> osdmap e101 pool 'rbd' (2) object 'rb.0.13.00000000045a' -> pg 2.80b0=
+39fb
+> (2.7b) -> up [2,1] acting [2,1]
+>
+>> You'll see the osd ids listed in brackets after 'active'. =A0We want=
+ the
+>> first one, 0 in my example. =A0The log from that OSD is what we need=
+=2E
+>
+> Okay, i'm attaching the compressed log for osd.2 and the compressed b=
+lock to
+> the issue report in the redmine.
+>
+> =A0 =A0 =A0 =A0Guido
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 
-Hi Stefan,
 
-Let me preface this by saying that I haven't specifically read through 
-the rados bench code.  Having said that, the basic idea here is that you 
-have a pipeline where a request is sent from the client to an OSD.  If 
-you specify "-t 1", the client will only send a single request at a 
-time, which means that the entire process is serial and you are entirely 
-latency bound.  Now think about what happens when the client sends the 
-request.  Before client gets an acknowledgement, the request must:
 
-1) Go through client side processing.
-2) Travel over the IP network to the destination OSD.
-3) Go through all of the queue processing code on the OSD.
-4a) Write the data to the journal (Or the faster of the journal/data 
-disk when using btrfs.  Note: The journal writes may stall if the data 
-disk is too slow and the journal has gotten sufficiently ahead of it)
-4b) Complete replication to other OSDs based on the pool's replication 
-level and the placement group the data gets put in. (basically steps 
-1,2,3,4a and 5 all over again with the OSD as the client).
-5) Send the Ack back to the client over the IP network
-
-If only one request is sent at a time, most of the hardware will sit 
-idle while the request is making it's way through the pipeline.  If you 
-have multiple concurrent requests, the OSD(s) can better utilize all of 
-the hardware (ie some requests can be coming in over the network, while 
-others can be writing to disk, while others can be replicating).
-
-You can probably imagine that once you have multiple OSDs on multiple 
-Nodes, having concurrent requests in flight help you even more.
-
-Mark
+--=20
+Stefan Majer
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
