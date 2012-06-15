@@ -1,15 +1,15 @@
 From: Sage Weil <sage@inktank.com>
 Subject: Re: osd dies / crahes directly after mkcephfs
-Date: Fri, 15 Jun 2012 14:45:21 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206151444550.4551@cobra.newdream.net>
+Date: Fri, 15 Jun 2012 14:46:36 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206151445290.4551@cobra.newdream.net>
 References: <4FDBA78C.4050401@profihost.ag>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36368 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:36379 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751324Ab2FOVpz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 17:45:55 -0400
+	with ESMTP id S1757329Ab2FOVqi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 17:46:38 -0400
 In-Reply-To: <4FDBA78C.4050401@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -24,7 +24,11 @@ On Fri, 15 Jun 2012, Stefan Priebe wrote:
 > 
 > Attached is the osd log. I also have a core dump file. Do you need it?
 
-This happens when the underlying file system isn't responding.  Does 
-'dmesg' include any kernel errors or warnings? 
+Also, are you mounting the ceph file system on the same node as the osd?  
+This might be a sync(2)-induced deadlock.
+
+Putting a ceph fs mount on the same node as an osd is dicey in low memory 
+situations.  On older glibcs and kernels without syncfs(2) support, it can 
+easily deadlock.
 
 sage
