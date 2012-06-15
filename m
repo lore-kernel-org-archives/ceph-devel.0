@@ -1,58 +1,50 @@
-From: sverre stoltenberg <sverrest@opera.com>
-Subject: Truncated file on posix mount
-Date: Fri, 15 Jun 2012 11:43:41 +0200
-Message-ID: <4FDB03CD.5010202@opera.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: mon disk access pattern
+Date: Fri, 15 Jun 2012 11:51:35 +0200
+Message-ID: <4FDB05A7.3080202@widodh.nl>
+References: <4FDACD90.2080807@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.opera.com ([213.236.208.81]:58205 "EHLO smtp.opera.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756398Ab2FOJtu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 15 Jun 2012 05:49:50 -0400
-Received: from [10.20.18.133] (pat-tdc.opera.com [213.236.208.22])
-	(authenticated bits=0)
-	by smtp.opera.com (8.14.3/8.14.3/Debian-5+lenny1) with ESMTP id q5F9hfIi023419
-	(version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Fri, 15 Jun 2012 09:43:46 GMT
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:52335 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756325Ab2FOJvi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 05:51:38 -0400
+In-Reply-To: <4FDACD90.2080807@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I have a ceph posix mount for openstack instances, and have found some 
-of my kernels truncated. It looks rather random, and I have not found a 
-way to reproduce it, but it will happen from time to time with normal use.
+Hi,
 
-the 5e...aa checksum is the correct one.
+On 15-06-12 07:52, Stefan Priebe - Profihost AG wrote:
+> Hello list,
+>
+> i read somewhere that the mon has "special" disk access patterns - even
+> though it does not write much data.
 
-root@t06-16:/var/lib/nova/instances# md5sum */kernel
-3e0a48130ddb8bfe88239df05c073a0b  instance-00000001/kernel
-5e9463bd77757a3889a1d9758b2b94aa  instance-0000000f/kernel
-5e9463bd77757a3889a1d9758b2b94aa  instance-00000010/kernel
-5e9463bd77757a3889a1d9758b2b94aa  instance-00000011/kernel
-5e9463bd77757a3889a1d9758b2b94aa  instance-00000012/kernel
-5e9463bd77757a3889a1d9758b2b94aa  instance-00000013/kernel
-3e0a48130ddb8bfe88239df05c073a0b  instance-00000014/kernel
+"special"? Where did you read that? The monitor has about 1 ~ 2GB of 
+storage.
 
-root@t06-16:/var/lib/nova/instances/instance-00000001# stat kernel
-   File: `kernel'
-   Size: 2097152         Blocks: 4096       IO Block: 4194304 regular file
-Device: 0h/0d   Inode: 1099511627899  Links: 1
-Access: (0664/-rw-rw-r--)  Uid: (  109/libvirt-qemu)   Gid: (  111/     kvm)
-Access: 2012-06-13 11:56:56.462433802 +0200
-Modify: 2012-06-04 11:47:17.730781000 +0200
-Change: 2012-06-04 11:47:17.730781000 +0200
-  Birth: -
+So if your monitor has something like 4GB ~ 8GB of RAM, your kernel 
+should cache almost all your monitor data.
 
-root@t06-16:/var/lib/nova/instances/instance-00000010# stat kernel
-   File: `kernel'
-   Size: 2424448         Blocks: 4736       IO Block: 4194304 regular file
-Device: 0h/0d   Inode: 1099511627989  Links: 1
-Access: (0664/-rw-rw-r--)  Uid: (  109/libvirt-qemu)   Gid: (  111/     kvm)
-Access: 2012-06-13 09:44:03.779892491 +0200
-Modify: 2012-06-13 09:43:47.178125000 +0200
-Change: 2012-06-13 09:44:00.020102878 +0200
-  Birth: -
+>
+> I'm using a patched debian squeeze with syncfs support (thanks to amon).
+> Are there any recommandations where to put the mon data? (SSD? Raid?
+> Which FS?)
+>
 
--- 
-/S.
+Something like a regular disk with ext4 should be fine, but you can 
+always put in an SSD if you want that.
+
+Wido
+
+> Greets,
+> Stefan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
