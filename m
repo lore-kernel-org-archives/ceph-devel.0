@@ -1,94 +1,95 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: RBD speed vs threads
-Date: Fri, 15 Jun 2012 09:33:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206150931440.4551@cobra.newdream.net>
-References: <4FDACEAA.8080306@profihost.ag> <4FDB24A0.8000401@inktank.com>
+Subject: Re: MDS spinning wild after restart on all nodes
+Date: Fri, 15 Jun 2012 09:44:23 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206150940460.4551@cobra.newdream.net>
+References: <201206151143.25706.a.ott@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1302635301-1339778663=:4551"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38503 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:44078 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932261Ab2FOQd7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 12:33:59 -0400
-In-Reply-To: <4FDB24A0.8000401@inktank.com>
+	with ESMTP id S1752265Ab2FOQo0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 12:44:26 -0400
+In-Reply-To: <201206151143.25706.a.ott@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, 15 Jun 2012, Mark Nelson wrote:
-> On 06/15/2012 12:56 AM, Stefan Priebe - Profihost AG wrote:
-> > Hello list,
-> > 
-> > i still don't understand why the speed of the rados bench depends so
-> > heavily on the threads.
-> > 
-> > Right now i get around 100MB/s per thread. So 1 thread is 100MB/s, 4
-> > Threads 400MB/s and 16 threads results an about 1100MB/s.
-> > 
-> > So 1100MB/s is great but i still don't get why 1 thread gets "only"
-> > 100MB/s.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-The one other thing worth mentioning here is that "thread" is really a 
-misnomer.  Rados bench is actually dispatching it's IO asynchronously from 
-a single thread, and the -t option is really controlling the number of 
-IO's in flight.  That is more or less what you get if you have N threads 
-doing a single synchronous IO each, which is why the option is called 
-that.
+--557981400-1302635301-1339778663=:4551
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
+On Fri, 15 Jun 2012, Amon Ott wrote:
+> Hello all,
+>=20
+> I have seen this for a long time, but never investigated further. After s=
+table=20
+> test runs for several days, this is our last known show stopper before us=
+ing=20
+> Ceph in production. We are running 0.47.2 on 32 Bit.
+>=20
+> If we restart MDS (or all ceph daemons) on all nodes, one after another o=
+r all=20
+> together, they first recover and then the active one starts to spin with =
+full=20
+> cpu and does not answer any more. After a while, the next takes over, sta=
+rts=20
+> to spin, etc., until the whole cluster is unusable. This is completely=20
+> reproducable and happens even without any active client.
+>=20
+> As ecpected, ceph -w shows lots of
+> "2012-06-15 11:35:28.588775   mds e959: 1/1/1 up {0=3D3=3Dup:active(laggy=
+ or=20
+> crashed)}"
+>=20
+> It does not help to stop all services on all nodes for minutes or longer =
+and=20
+> to restart them - MDS will restart spinning. But: If we reboot the whole=
+=20
+> cluster, everything goes back to work.
+>=20
+> Today's MDS log is available at=20
+> https://download.m-privacy.de/homeuser-mds.0.log.gz
+>=20
+> Is this a known problem? It has been with us for a looong time now, but s=
+ince=20
+> rebooting used to help, we never tracked it down.
+
+I haven't seen this before.  Can you attach to the spinning process with=20
+gdb and send us a dump of what the threads are doing?  'thread apply all=20
+bt'.  I opened #2596:
+
+=09http://tracker.newdream.net/issues/2596
+
+Thanks!
 sage
 
 
-> > 
-> > Total time run: 30.037374
-> > Total writes made: 8326
-> > Write size: 4194304
-> > Bandwidth (MB/sec): 1108.752
-> > 
-> > Stddev Bandwidth: 47.5612
-> > Max bandwidth (MB/sec): 1152
-> > Min bandwidth (MB/sec): 948
-> > Average Latency: 0.0577107
-> > Stddev Latency: 0.020784
-> > Max latency: 0.382413
-> > Min latency: 0.026057
-> > 
-> > Stefan
-> 
-> Hi Stefan,
-> 
-> Let me preface this by saying that I haven't specifically read through the
-> rados bench code.  Having said that, the basic idea here is that you have a
-> pipeline where a request is sent from the client to an OSD.  If you specify
-> "-t 1", the client will only send a single request at a time, which means that
-> the entire process is serial and you are entirely latency bound.  Now think
-> about what happens when the client sends the request.  Before client gets an
-> acknowledgement, the request must:
-> 
-> 1) Go through client side processing.
-> 2) Travel over the IP network to the destination OSD.
-> 3) Go through all of the queue processing code on the OSD.
-> 4a) Write the data to the journal (Or the faster of the journal/data disk when
-> using btrfs.  Note: The journal writes may stall if the data disk is too slow
-> and the journal has gotten sufficiently ahead of it)
-> 4b) Complete replication to other OSDs based on the pool's replication level
-> and the placement group the data gets put in. (basically steps 1,2,3,4a and 5
-> all over again with the OSD as the client).
-> 5) Send the Ack back to the client over the IP network
-> 
-> If only one request is sent at a time, most of the hardware will sit idle
-> while the request is making it's way through the pipeline.  If you have
-> multiple concurrent requests, the OSD(s) can better utilize all of the
-> hardware (ie some requests can be coming in over the network, while others can
-> be writing to disk, while others can be replicating).
-> 
-> You can probably imagine that once you have multiple OSDs on multiple Nodes,
-> having concurrent requests in flight help you even more.
-> 
-> Mark
+
+
+>=20
+> Amon Ott
+> --=20
+> Dr. Amon Ott
+> m-privacy GmbH           Tel: +49 30 24342334
+> Am K=F6llnischen Park 1    Fax: +49 30 24342336
+> 10179 Berlin             http://www.m-privacy.de
+>=20
+> Amtsgericht Charlottenburg, HRB 84946
+>=20
+> Gesch=E4ftsf=FChrer:
+>  Dipl.-Kfm. Holger Maczkowsky,
+>  Roman Maczkowsky
+>=20
+> GnuPG-Key-ID: 0x2DD3A649
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+>=20
+>=20
+--557981400-1302635301-1339778663=:4551--
