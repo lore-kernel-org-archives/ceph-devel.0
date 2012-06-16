@@ -1,428 +1,293 @@
-From: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
-Subject: sync Ceph packaging efforts for Debian/Ubuntu
-Date: Sat, 16 Jun 2012 00:10:12 +0000
-Message-ID: <1339805412.7726.160.camel@julia>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: RBD layering design draft
+Date: Fri, 15 Jun 2012 17:46:27 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206151742380.28086@cobra.newdream.net>
+References: <4FDB9FBB.9000807@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature";
-	boundary="=-f1NMkXOTwg/TKHahyYrf"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.barcikacomp.hu ([94.248.160.10]:44192 "EHLO
-	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754267Ab2FPAKX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 20:10:23 -0400
+Received: from cobra.newdream.net ([66.33.216.30]:60651 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758567Ab2FPAq3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Jun 2012 20:46:29 -0400
+In-Reply-To: <4FDB9FBB.9000807@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ben Collins <bcollins@ubuntu.com>, James Page <james.page@ubuntu.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, openstack-devel@lists.alioth.debian.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+Looks good!  Couple small things:
 
---=-f1NMkXOTwg/TKHahyYrf
-Content-Type: multipart/mixed; boundary="=-1udFED8HLpr8r4MlbFBL"
+On Fri, 15 Jun 2012, Josh Durgin wrote:
+> Here's a draft of a patch to the docs outlining the rbd layering
+> design. Is anything unclear? Any suggestions for improvement?
+> 
+> Josh
+> 
+> ============
+> RBD Layering
+> ============
+> 
+> RBD layering refers to the creation of copy-on-write clones of block
+> devices. This allows for fast image creation, for example to clone a
+> golden master image of a virtual machine into a new instance. To
+> simplify the semantics, you can only create a clone of a snapshot -
+> snapshots are always read-only, so the rest of the image is
+> unaffected, and there's no possibility of writing to them
+> accidentally.
+> 
+> Note: the terms `child` and `parent` below mean an rbd image created
+> by cloning, and the rbd image snapshot a child was cloned from.
+> 
+> Command line interface
+> ----------------------
+> 
+> Before cloning a snapshot, you must mark it as preserved, to prevent
+> it from being deleted while child images refer to it:
+> ::
+> 
+>     $ rbd preserve pool/image@snap
+> 
+> Then you can perform the clone:
+> ::
+> 
+>     $ rbd clone --parent pool/parent@snap pool2/child1
+> 
+> You can create a clone with different object sizes from the parent:
+> ::
+> 
+>     $ rbd clone --parent pool/parent@snap --order 25 pool2/child2
+> 
+> To delete the parent, you must first mark it unpreserved, which checks
+> that there are no children left:
+> ::
+> 
+>     $ rbd unpreserve pool/image@snap
+>     Error unpreserving: child images rely on this image
+>     $ rbd list_children pool/image@snap
+>     pool2/child1
+>     pool2/child2
+>     $ rbd copyup pool2/child1
+>     $ rbd rm pool2/child2
+>     $ rbd unpreserve pool/image@snap
 
+Is 'preserve' and 'unpreserve' the verbiage we want to use here?  Not sure 
+I have a better suggestion, but preserve is unusual.  
+ 
+> Then the snapshot can be deleted like normal:
+> ::
+> 
+>     $ rbd snap rm pool/image@snap
+> 
+> Implementation
+> --------------
+> 
+> Data Flow
+> ^^^^^^^^^
+> 
+> In the initial implementation, called 'trivial layering', there will
+> be no tracking of which objects exist in a clone. A read that hits a
+> non-existent object will attempt to read from the parent object, and
+> this will continue recursively until an object exists or an image with
+> no parent is found.
+> 
+> Before a write is performed, the object is checked for existence. If
+> it doesn't exist, a copy-up operation is performed, which means
+> reading the relevant range of data from the parent image and writing
+> it (plus the original write) to the child image. To prevent races with
+> multiple writes trying to copy-up the same object, this copy-up
+> operation will include an atomic create. If the atomic create fails,
+> the original write is done instead. This copy-up operation is
+> implemented as a class method so that extra metadata can be stored by
+> it in the future.
+> 
+> A future optimization could be storing a bitmap of which objects
+> actually exist in a child. This would obviate the check for existence
+> before each write, and let reads go directly to the parent if needed.
+> 
+> Parent/Child relationships
+> ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 
+> Children store a reference to their parent in their header, as a tuple
+> of (pool id, image id, snapshot id). This is enough information to
+> open the parent and read from it.
+> 
+> In addition to knowing which parent a given image has, we want to be
+> able to tell if a preserved image still has children. This is
+> accomplished with a new per-pool object, `rbd_children`, which maps
+> (parent pool, parent id, parent snapshot id) to a list of child
+> image ids. This is stored in the same pool as the child image
+> because the client creating a clone already has read/write access to
+> everything in this pool. This lets a client with read-only access to
+> one pool clone a snapshot from that pool into a pool they have full
+> access to. It increases the cost of unpreserving an image, since this
+> needs to check for children in every pool, but this is a rare
+> operation. It would likely only be done before removing old images,
+> which is already much more expensive because it involves deleting
+> every data object in the image.
+> 
+> Preservation
+> ^^^^^^^^^^^^
+> 
+> Internally, preservation_state is a field in the header object that
+> can be in three states. "preserved", "unpreserved", and
+> "unpreserving". The first two are set as the result of "rbd
+> preserve/unpreserve". The "unpreserving" state is set while the "rbd
+> unpreserve" command checks for any child images. Only snapshots in the
+> "preserved" state may be cloned, so the "unpreserving" state prevents
+> a race like:
+> 
+> 1. A: walk through all pools, look for clones, find none
+> 2. B: create a clone
+> 3. A: unpreserve parent
+> 4. A: rbd snap rm pool/parent@snap
+> 
+> Resizing
+> ^^^^^^^^
+> 
+> To support resizing of layered images, we need to keep track of the
+> minimum size the image ever was, so that if a child image is shrunk
+> and then expanded, the re-expanded space is treated as unused instead
+> of being read from the parent image. Since this can change over time,
+> we need to store this for each snapshot as well.
+> 
+> Renaming
+> ^^^^^^^^
+> 
+> Currently the rbd header object (that stores all the metadata about an
+> image) is named after the name of the image. This makes renaming
+> disrupt clients who have the image open (such as children reading from
+> a parent image). To avoid this, we can name the header object by the
+> id of the image, which does not change. That is, the name of the
+> header object could be `rbd_header.$id`, where $id is a unique id for
+> the image in the pool.
+> 
+> When a client opens an image, all it knows is the name. There is
+> already a per-pool `rbd_directory` object that maps image names to
+> ids, but if we relied on it to get the id, we could not open any
+> images in that pool if that single object was unavailable. To avoid
+> this dependency, we can store the id of an image in an object called
+> `rbd_id.$image_name`, where $image_name is the name of the image. The
+> per-pool `rbd_directory` object is still useful for listing all images
+> in a pool, however.
+> 
+> Header changes
+> --------------
+> 
+> The header needs a few new fields:
+> 
+> * uint64_t parent_pool_id
+> * string parent_image_id
+> * uint64_t parent_snap_id
+> * uint64_t min_size (smallest size the image ever was in bytes)
+> * bool has_parent
+> 
+> Note that all the image ids are strings instead of uint64_t to let us
+> easily switch to uuids in the future.
+> 
+> cls_rbd
+> ^^^^^^^
+> 
+> Some new methods are needed:
+> ::
+> 
+>     /***************** methods on the rbd header *********************/
+>     /**
+>      * Sets the parent, min_size, and has_parent keys.
+>      * Fails if any of these keys exist, since the image already
+>      * had a parent.
+>      */
+>     set_parent(uint64_t pool_id, string image_id, uint64_t snap_id)
 
---=-1udFED8HLpr8r4MlbFBL
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: quoted-printable
+     set_parent(uint64_t pool_id, string image_id, uint64_t snap_id,
+                uint64_t parent_size)
 
-Hi all parties,
+The actual overlap image stores will be the min of the parent_size and its 
+size.
 
-Ceph is packaged at three places: in Ubuntu, at upstream and in Debian.
-Its first 'stable' release, 0.48 is coming. At least as Sage wrote some
-days ago: "It looks like 0.48 will also be the basis for one of our
-first 'stable' releases.".
+> 
+>     /**
+>      * Returns the parent pool id, image id, and snap id, or -ENOENT
 
-Hereby I would like to sync our Debian related packaging efforts, not
-only for the mentioned stable release. The OpenStack packaging team
-would like to add Ceph to their stack. Howtos, helping hands on forums
-needs it as well.
-I'm not subscribed to the lists, please keep me in the loop with Cc-s.
+and overlap
 
-First patch, 0002-Add-support-PPC.patch is for upstream. Would help the
-in tree leveldb to build on PowerPC architectures as well.
-Second patch reflect the homepage and git tree changes for Ubuntu.
-Third patch is from them, noted as "Switch from libcryptopp to libnss as
-libcryptopp is not seeded.". So libnss3-dev is used as build-dependency
-instead. Sage, would you commit it?
-I've separated gceph out, if someone needs the CLI only, then s/he can
-do that without the GTK+ libraries. See below.
+>      * if has_parent is false
+>      */
+>     get_parent(uint64_t snapid)
+> 
+>     /**
+>      * Set has_parent to false.
+>      */
+>     remove_parent() // after all parent data is copied to the child
+> 
+>     /*************** methods on the rbd_children object *****************/
+> 
+>     add_child(uint64_t parent_pool_id, string parent_image_id,
+>               uint64_t parent_snap_id, string image_id);
+>     remove_child(uint64_t parent_pool_id, string parent_image_id,
+>                  uint64_t parent_snap_id, string image_id);
+>     /**
+>      * List image ids of a given parent
+>      */
+>     get_children(uint64_t parent_pool_id, string parent_image_id,
+>                  uint64_t parent_snap_id, uint64_t max_return,
+>                  string start);
+>     /**
+>      * List parent images
+>      */
+>     get_parents(uint64_t max_return, uint64_t start_pool_id,
+>                 string start_image_id, string start_snap_id);
+> 
+> 
+>     /************ methods on the rbd_id.$image_name object **************/
+>     /**
+>      * Create the object and set the id. Fail and return -EEXIST if
+>      * the object exists.
+>      */
+>     create_id(string id)
+>     get_id()
+> 
+>     /***************** methods on the rbd_data objects ******************/
+>     /**
+>      * Create an object with parent_data as its contents,
+>      * then write child_data to it. If the exclusive create fails,
+>      * just write the child_data.
+>      */
+>      copy_up(char *parent_data, uint64_t parent_data_len,
+>              char *child_data, uint64_t child_data_offset,
+>              uint64_t child_data_length)
+> 
+> One existing method will change if the image supports
+> layering:
+> ::
+> 
+>     snapshot_add - stores current min_size and has_parent with
+>                    other snapshot metadata (images that don't have
+>                    layering enabled aren't affected)
 
-Ben, James, can you please share in some sentences why ceph-fuse is
-dropped in Ubuntu? Do you need it Sage? If it's feasible, you may drop
-that as well.
-As I see, you still ship d/librgw1.install , d/librgw1.postrm ,
-d/librgw1.postinst and librgw-dev.install . They are not needed anymore.
-Maybe the biggest change is that ceph-mds was separated out and such,
-ceph-fs-common created for cephfs and mount.ceph .
-Please move the configure call to its target, as you can check in git.
-Add var/lib/ceph/mon , var/lib/ceph/osd and var/lib/ceph/mds to
-d/ceph.dirs .
+Also
 
-git patch is for Sage, upstream and contains what needed for the new
-packages. May I get commit rights to debian/ or should I go with git
-forks and you'll merge the changes?
+      set_size   - will adjust the parent overlap down as needed.
 
-Also it seems that limit the architectures to build on is not
-allowed[1]. I'll write an email to this issue, how to go with failing
-leveldb build-dependency on some archs.
-
-Loic, do you need anything or do you have any objections with these
-changes?
-
-Regards,
-Laszlo/GCS
-[1] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=3D677626
-
---=-1udFED8HLpr8r4MlbFBL
-Content-Disposition: attachment; filename="0002-Add-support-PPC.patch"
-Content-Type: text/x-patch; name="0002-Add-support-PPC.patch"; charset="ISO-8859-1"
-Content-Transfer-Encoding: base64
-
-RnJvbSA2ODA1ODc3Zjg5MTM5MzUwNzFmYjk3YzFiNzZlNGYwY2U5OTJkOGE2IE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQ0KRnJvbTogTm9idWhpcm8gSXdhbWF0c3UgPGl3YW1hdHN1QGRlYmlhbi5v
-cmc+DQpEYXRlOiBXZWQsIDI4IFNlcCAyMDExIDEyOjI3OjE5ICswOTAwDQpTdWJqZWN0OiBbUEFU
-Q0ggMi85XSBBZGQgc3VwcG9ydCBQUEMNCg0KU2lnbmVkLW9mZi1ieTogTm9idWhpcm8gSXdhbWF0
-c3UgPGl3YW1hdHN1QGRlYmlhbi5vcmc+DQotLS0NCiBwb3J0L2F0b21pY19wb2ludGVyLmggfCAg
-IDE4ICsrKysrKysrKysrKysrKysrKw0KIDEgZmlsZSBjaGFuZ2VkLCAxOCBpbnNlcnRpb25zKCsp
-DQoNCi0tLSBsZXZlbGRiLm9yaWcvcG9ydC9hdG9taWNfcG9pbnRlci5oDQorKysgbGV2ZWxkYi9w
-b3J0L2F0b21pY19wb2ludGVyLmgNCkBAIC0zNiw2ICszNiw4IEBADQogI2RlZmluZSBBUkNIX0NQ
-VV9YODZfRkFNSUxZIDENCiAjZWxpZiBkZWZpbmVkKF9fQVJNRUxfXykNCiAjZGVmaW5lIEFSQ0hf
-Q1BVX0FSTV9GQU1JTFkgMQ0KKyNlbGlmIGRlZmluZWQoX19wb3dlcnBjX18pIHx8IGRlZmluZWQo
-X19wb3dlcnBjNjRfXykgfHwgZGVmaW5lZChfX3BwY19fKQ0KKyNkZWZpbmUgQVJDSF9DUFVfUFBD
-X0ZBTUlMWSAxDQogI2VuZGlmDQogDQogbmFtZXNwYWNlIGxldmVsZGIgew0KQEAgLTEwMiw2ICsx
-MDQsMjEgQEAgaW5saW5lIHZvaWQgV3JpdGVNZW1vcnlCYXJyaWVyKCkgew0KIH0NCiAjZGVmaW5l
-IExFVkVMREJfSEFWRV9NRU1PUllfQkFSUklFUg0KIA0KKy8vIFBQQw0KKyNlbGlmIGRlZmluZWQo
-QVJDSF9DUFVfUFBDX0ZBTUlMWSkNCisNCitpbmxpbmUgdm9pZCBSZWFkTWVtb3J5QmFycmllcigp
-IHsNCisjaWZkZWYgX19wb3dlcnBjNjRfXw0KKyAgX19hc21fXyBfX3ZvbGF0aWxlX18gKCJsd3N5
-bmMiIDogOiA6ICJtZW1vcnkiKTsNCisjZWxzZQ0KKyAgX19hc21fXyBfX3ZvbGF0aWxlX18gKCJz
-eW5jIiA6IDogOiAibWVtb3J5Iik7DQorI2VuZGlmDQorfQ0KK2lubGluZSB2b2lkIFdyaXRlTWVt
-b3J5QmFycmllcigpIHsNCisgIF9fYXNtX18gX192b2xhdGlsZV9fICgic3luYyIgOiA6IDogIm1l
-bW9yeSIpOw0KK30NCisjZGVmaW5lIExFVkVMREJfSEFWRV9NRU1PUllfQkFSUklFUg0KKw0KICNl
-bmRpZg0KIA0KIC8vIEF0b21pY1BvaW50ZXIgYnVpbHQgdXNpbmcgcGxhdGZvcm0tc3BlY2lmaWMg
-TWVtb3J5QmFycmllcigpDQpAQCAtMTU2LDYgKzE3Myw3IEBAIGNsYXNzIEF0b21pY1BvaW50ZXIg
-ew0KICN1bmRlZiBMRVZFTERCX0hBVkVfTUVNT1JZX0JBUlJJRVINCiAjdW5kZWYgQVJDSF9DUFVf
-WDg2X0ZBTUlMWQ0KICN1bmRlZiBBUkNIX0NQVV9BUk1fRkFNSUxZDQorI3VuZGVmIEFSQ0hfQ1BV
-X1BQQ19GQU1JTFkNCiANCiB9ICAvLyBuYW1lc3BhY2UgcG9ydA0KIH0gIC8vIG5hbWVzcGFjZSBs
-ZXZlbGRiDQo=
-
-
---=-1udFED8HLpr8r4MlbFBL
-Content-Disposition: attachment; filename="changed_urls.patch"
-Content-Type: text/x-patch; name="changed_urls.patch"; charset="ISO-8859-1"
-Content-Transfer-Encoding: base64
-
-ZGlmZiAtTnVyIGNlcGgtMC40Ny4yLm9yaWcvZGViaWFuL2NvbnRyb2wgY2VwaC0wLjQ3LjIvZGVi
-aWFuL2NvbnRyb2wNCi0tLSBjZXBoLTAuNDcuMi5vcmlnL2RlYmlhbi9jb250cm9sCTIwMTItMDYt
-MDggMTg6MDg6MDcuMDAwMDAwMDAwICswMjAwDQorKysgY2VwaC0wLjQ3LjIvZGViaWFuL2NvbnRy
-b2wJMjAxMi0wNi0xNiAwMDoyNzoyNy45MzIyNTQ3MjggKzAyMDANCkBAIC0xLDkgKzEsOSBAQA0K
-IFNvdXJjZTogY2VwaA0KIFNlY3Rpb246IGFkbWluDQogUHJpb3JpdHk6IG9wdGlvbmFsDQotSG9t
-ZXBhZ2U6IGh0dHA6Ly9jZXBoLm5ld2RyZWFtLm5ldC8NCi1WY3MtR2l0OiBnaXQ6Ly9naXRodWIu
-Y29tL05ld0RyZWFtTmV0d29yay9jZXBoLmdpdA0KLVZjcy1Ccm93c2VyOiBodHRwczovL2dpdGh1
-Yi5jb20vTmV3RHJlYW1OZXR3b3JrL2NlcGgNCitIb21lcGFnZTogaHR0cDovL2NlcGguY29tLw0K
-K1Zjcy1HaXQ6IGdpdDovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLmdpdA0KK1Zjcy1Ccm93c2VyOiBo
-dHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoDQogTWFpbnRhaW5lcjogVWJ1bnR1IERldmVsb3Bl
-cnMgPHVidW50dS1kZXZlbC1kaXNjdXNzQGxpc3RzLnVidW50dS5jb20+DQogWFNCQy1PcmlnaW5h
-bC1NYWludGFpbmVyOiBMYXN6bG8gQm9zem9ybWVueWkgKEdDUykgPGdjc0BkZWJpYW4uaHU+DQog
-VXBsb2FkZXJzOiBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0Pg0K
-
-
---=-1udFED8HLpr8r4MlbFBL
-Content-Disposition: attachment; filename="libnss_change.patch"
-Content-Type: text/x-patch; name="libnss_change.patch"; charset="ISO-8859-1"
-Content-Transfer-Encoding: base64
-
-ZGlmZiAtLWdpdCBhL2RlYmlhbi9jb250cm9sIGIvZGViaWFuL2NvbnRyb2wNCmluZGV4IDAyM2Ux
-MzQuLjkyN2QyYmQgMTAwNjQ0DQotLS0gYS9kZWJpYW4vY29udHJvbA0KKysrIGIvZGViaWFuL2Nv
-bnRyb2wNCkBAIC02LDcgKzYsNyBAQCBWY3MtR2l0OiBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2Vw
-aC5naXQNCiBWY3MtQnJvd3NlcjogaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaA0KIE1haW50
-YWluZXI6IExhc3psbyBCb3N6b3JtZW55aSAoR0NTKSA8Z2NzQGRlYmlhbi5odT4NCiBVcGxvYWRl
-cnM6IFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+DQotQnVpbGQtRGVwZW5kczogZGViaGVs
-cGVyICg+PSA2LjAuN34pLCBhdXRvdG9vbHMtZGV2LCBhdXRvY29uZiwgYXV0b21ha2UsIGxpYmZ1
-c2UtZGV2LCBsaWJib29zdC1kZXYgKD49IDEuMzQpLCBsaWJlZGl0LWRldiwgbGliY3J5cHRvKyst
-ZGV2LCBsaWJ0b29sLCBsaWJleHBhdDEtZGV2LCBsaWJmY2dpLWRldiwgbGliYXRvbWljLW9wcy1k
-ZXYsIGxpYmdvb2dsZS1wZXJmdG9vbHMtZGV2IFtpMzg2IGFtZDY0XSwgcGtnLWNvbmZpZywgbGli
-Y3VybDQtZ251dGxzLWRldiwgbGlia2V5dXRpbHMtZGV2LCB1dWlkLWRldiwgbGliYWlvLWRldiwg
-cHl0aG9uICg+PSAyLjYuNi0zfiksIGxpYnhtbDItZGV2DQorQnVpbGQtRGVwZW5kczogZGViaGVs
-cGVyICg+PSA2LjAuN34pLCBhdXRvdG9vbHMtZGV2LCBhdXRvY29uZiwgYXV0b21ha2UsIGxpYmZ1
-c2UtZGV2LCBsaWJib29zdC1kZXYgKD49IDEuMzQpLCBsaWJlZGl0LWRldiwgbGlibnNzMy1kZXYs
-IGxpYnRvb2wsIGxpYmV4cGF0MS1kZXYsIGxpYmZjZ2ktZGV2LCBsaWJhdG9taWMtb3BzLWRldiwg
-bGliZ29vZ2xlLXBlcmZ0b29scy1kZXYgW2kzODYgYW1kNjRdLCBwa2ctY29uZmlnLCBsaWJjdXJs
-NC1nbnV0bHMtZGV2LCBsaWJrZXl1dGlscy1kZXYsIHV1aWQtZGV2LCBsaWJhaW8tZGV2LCBweXRo
-b24gKD49IDIuNi42LTN+KSwgbGlieG1sMi1kZXYNCiBTdGFuZGFyZHMtVmVyc2lvbjogMy45LjMN
-CiANCiBQYWNrYWdlOiBjZXBoDQo=
-
-
---=-1udFED8HLpr8r4MlbFBL
-Content-Disposition: attachment; filename="ceph-packaging-git.patch"
-Content-Type: text/x-patch; name="ceph-packaging-git.patch"; charset="ISO-8859-1"
-Content-Transfer-Encoding: base64
-
-ZGlmZiAtLWdpdCBhL2RlYmlhbi9jZXBoLWNvbW1vbi5pbnN0YWxsIGIvZGViaWFuL2NlcGgtY29t
-bW9uLmluc3RhbGwNCmluZGV4IDQ3NzI2NjMuLmZmYzQ2NzUgMTAwNjQ0DQotLS0gYS9kZWJpYW4v
-Y2VwaC1jb21tb24uaW5zdGFsbA0KKysrIGIvZGViaWFuL2NlcGgtY29tbW9uLmluc3RhbGwNCkBA
-IC0xLDYgKzEsNCBAQA0KLXNiaW4vbW91bnQuY2VwaA0KIHVzci9iaW4vY2VwaA0KLXVzci9iaW4v
-Y2VwaGZzDQogdXNyL2Jpbi9jZXBoLWNvbmYNCiB1c3IvYmluL2NlcGgtc3luDQogdXNyL2Jpbi9j
-ZXBoLWF1dGh0b29sDQpAQCAtMTQsNyArMTIsNSBAQCB1c3Ivc2hhcmUvbWFuL21hbjgvY2VwaC1j
-b25mLjgNCiB1c3Ivc2hhcmUvbWFuL21hbjgvY2VwaC1kZW5jb2Rlci44DQogdXNyL3NoYXJlL21h
-bi9tYW44L3JhZG9zLjgNCiB1c3Ivc2hhcmUvbWFuL21hbjgvcmJkLjgNCi11c3Ivc2hhcmUvbWFu
-L21hbjgvbW91bnQuY2VwaC44DQotdXNyL3NoYXJlL21hbi9tYW44L2NlcGhmcy44DQogZXRjL2Jh
-c2hfY29tcGxldGlvbi5kL3JhZG9zDQogZXRjL2Jhc2hfY29tcGxldGlvbi5kL3JiZA0KZGlmZiAt
-LWdpdCBhL2RlYmlhbi9jZXBoLWZzLWNvbW1vbi5pbnN0YWxsIGIvZGViaWFuL2NlcGgtZnMtY29t
-bW9uLmluc3RhbGwNCm5ldyBmaWxlIG1vZGUgMTAwNjQ0DQppbmRleCAwMDAwMDAwLi45YTUwMzYw
-DQotLS0gL2Rldi9udWxsDQorKysgYi9kZWJpYW4vY2VwaC1mcy1jb21tb24uaW5zdGFsbA0KQEAg
-LTAsMCArMSw0IEBADQorc2Jpbi9tb3VudC5jZXBoDQordXNyL2Jpbi9jZXBoZnMNCit1c3Ivc2hh
-cmUvbWFuL21hbjgvbW91bnQuY2VwaC44DQordXNyL3NoYXJlL21hbi9tYW44L2NlcGhmcy44DQpk
-aWZmIC0tZ2l0IGEvZGViaWFuL2NlcGgtbWRzLmluc3RhbGwgYi9kZWJpYW4vY2VwaC1tZHMuaW5z
-dGFsbA0KbmV3IGZpbGUgbW9kZSAxMDA2NDQNCmluZGV4IDAwMDAwMDAuLjhhNWQ3NGUNCi0tLSAv
-ZGV2L251bGwNCisrKyBiL2RlYmlhbi9jZXBoLW1kcy5pbnN0YWxsDQpAQCAtMCwwICsxLDIgQEAN
-Cit1c3IvYmluL2NlcGgtbWRzDQordXNyL3NoYXJlL21hbi9tYW44L2NlcGgtbWRzLjgNCmRpZmYg
-LS1naXQgYS9kZWJpYW4vY2VwaC5pbnN0YWxsIGIvZGViaWFuL2NlcGguaW5zdGFsbA0KaW5kZXgg
-NTFmYjMxMS4uMGE5NzVhYSAxMDA2NDQNCi0tLSBhL2RlYmlhbi9jZXBoLmluc3RhbGwNCisrKyBi
-L2RlYmlhbi9jZXBoLmluc3RhbGwNCkBAIC00LDE4ICs0LDE0IEBAIHVzci9iaW4vbW9ubWFwdG9v
-bA0KIHVzci9iaW4vb3NkbWFwdG9vbA0KIHVzci9iaW4vY2VwaC1ydW4NCiB1c3IvYmluL2NlcGgt
-bW9uDQotdXNyL2Jpbi9jZXBoLW1kcw0KIHVzci9iaW4vY2VwaC1vc2QNCiB1c3IvYmluL2NlcGgt
-ZGVidWdwYWNrDQotc2Jpbi9jZXBoLWRpc2stcHJlcGFyZSB1c3Ivc2Jpbi8NCi1zYmluL2NlcGgt
-ZGlzay1hY3RpdmF0ZSB1c3Ivc2Jpbi8NCiBzYmluL21rY2VwaGZzDQogdXNyL2xpYi9jZXBoL2Nl
-cGhfY29tbW9uLnNoDQogdXNyL2xpYi9yYWRvcy1jbGFzc2VzLyoNCiB1c3Ivc2hhcmUvZG9jL2Nl
-cGgvc2FtcGxlLmNlcGguY29uZg0KIHVzci9zaGFyZS9kb2MvY2VwaC9zYW1wbGUuZmV0Y2hfY29u
-ZmlnDQogdXNyL3NoYXJlL21hbi9tYW44L2NlcGgtbW9uLjgNCi11c3Ivc2hhcmUvbWFuL21hbjgv
-Y2VwaC1tZHMuOA0KIHVzci9zaGFyZS9tYW4vbWFuOC9jZXBoLW9zZC44DQogdXNyL3NoYXJlL21h
-bi9tYW44L21rY2VwaGZzLjgNCiB1c3Ivc2hhcmUvbWFuL21hbjgvY2VwaC1ydW4uOA0KZGlmZiAt
-LWdpdCBhL2RlYmlhbi9jb250cm9sIGIvZGViaWFuL2NvbnRyb2wNCmluZGV4IDAyM2UxMzQuLjBi
-MDdhMGYgMTAwNjQ0DQotLS0gYS9kZWJpYW4vY29udHJvbA0KKysrIGIvZGViaWFuL2NvbnRyb2wN
-CkBAIC0xMCwxOCArMTAsMjAgQEAgQnVpbGQtRGVwZW5kczogZGViaGVscGVyICg+PSA2LjAuN34p
-LCBhdXRvdG9vbHMtZGV2LCBhdXRvY29uZiwgYXV0b21ha2UsIGxpYmZ1c2UNCiBTdGFuZGFyZHMt
-VmVyc2lvbjogMy45LjMNCiANCiBQYWNrYWdlOiBjZXBoDQotQXJjaGl0ZWN0dXJlOiBhbWQ2NCBh
-cm1lbCBhcm1oZiBpMzg2IGlhNjQgbWlwc2VsDQorQXJjaGl0ZWN0dXJlOiBsaW51eC1hbnkNCiBE
-ZXBlbmRzOiAke3NobGliczpEZXBlbmRzfSwgJHttaXNjOkRlcGVuZHN9LCBzZHBhcm0gfCBoZHBh
-cm0sIGJpbnV0aWxzLCBjZXBoLWNvbW1vbiwgdXVpZC1ydW50aW1lLCBweXRob24NCi1SZWNvbW1l
-bmRzOiBjZXBoLWZ1c2UsIGxpYmNlcGhmczEsIGxpYnJhZG9zMiwgbGlicmJkMSwgYnRyZnMtdG9v
-bHMNCi1EZXNjcmlwdGlvbjogZGlzdHJpYnV0ZWQgc3RvcmFnZSBhbmQgZmlsZSBzeXN0ZW0NCitS
-ZWNvbW1lbmRzOiBjZXBoLWZ1c2UsIGxpYmNlcGhmczEsIGxpYnJhZG9zMiwgbGlicmJkMSwgYnRy
-ZnMtdG9vbHMsIGdjZXBoDQorRGVzY3JpcHRpb246IGRpc3RyaWJ1dGVkIHN0b3JhZ2UNCiAgQ2Vw
-aCBpcyBhIGRpc3RyaWJ1dGVkIHN0b3JhZ2UgYW5kIG5ldHdvcmsgZmlsZSBzeXN0ZW0gZGVzaWdu
-ZWQgdG8gcHJvdmlkZQ0KICBleGNlbGxlbnQgcGVyZm9ybWFuY2UsIHJlbGlhYmlsaXR5LCBhbmQg
-c2NhbGFiaWxpdHkuDQogIC4NCiAgVGhpcyBwYWNrYWdlIGNvbnRhaW5zIGFsbCBzZXJ2ZXIgZGFl
-bW9ucyBhbmQgbWFuYWdlbWVudCB0b29scyBmb3IgY3JlYXRpbmcsDQotIHJ1bm5pbmcsIGFuZCBh
-ZG1pbmlzdGVyaW5nIGEgQ2VwaCBzdG9yYWdlIGNsdXN0ZXIuDQorIHJ1bm5pbmcsIGFuZCBhZG1p
-bmlzdGVyaW5nIGEgQ2VwaCBzdG9yYWdlIGNsdXN0ZXIuIFRoaXMgZG9lcyBub3QgaW5jbHVkZQ0K
-KyB0aGUgUE9TSVggZmlsZXN5c3RlbSBzZXJ2ZXIsIGFzIHRoYXQgaGFzIGJlZW4gc3BsaXQgaW50
-byB0aGUgY2VwaC1tZHMNCisgcGFja2FnZS4NCiANCiBQYWNrYWdlOiBjZXBoLWRiZw0KLUFyY2hp
-dGVjdHVyZTogYW1kNjQgYXJtZWwgYXJtaGYgaTM4NiBpYTY0IG1pcHNlbA0KK0FyY2hpdGVjdHVy
-ZTogbGludXgtYW55DQogU2VjdGlvbjogZGVidWcNCiBQcmlvcml0eTogZXh0cmENCiBEZXBlbmRz
-OiBjZXBoICg9ICR7YmluYXJ5OlZlcnNpb259KSwgJHttaXNjOkRlcGVuZHN9DQpAQCAtMzEsOCAr
-MzMsNTIgQEAgRGVzY3JpcHRpb246IGRlYnVnZ2luZyBzeW1ib2xzIGZvciBjZXBoDQogIC4NCiAg
-VGhpcyBwYWNrYWdlIGNvbnRhaW5zIHRoZSBkZWJ1Z2dpbmcgc3ltYm9scyBmb3IgY2VwaC4NCiAN
-CitQYWNrYWdlOiBnY2VwaA0KK0FyY2hpdGVjdHVyZTogbGludXgtYW55DQorRGVwZW5kczogJHtz
-aGxpYnM6RGVwZW5kc30sICR7bWlzYzpEZXBlbmRzfQ0KK1N1Z2dlc3RzOiBjZXBoDQorRGVzY3Jp
-cHRpb246IEdyYXBoaWNhbCBjZXBoIGNsdXN0ZXIgc3RhdHVzIHV0aWxpdHkNCisgQ2VwaCBpcyBh
-IGRpc3RyaWJ1dGVkIG5ldHdvcmsgZmlsZSBzeXN0ZW0gZGVzaWduZWQgdG8gcHJvdmlkZQ0KKyBl
-eGNlbGxlbnQgcGVyZm9ybWFuY2UsIHJlbGlhYmlsaXR5LCBhbmQgc2NhbGFiaWxpdHkuICBUaGlz
-IGlzIGENCisgZ3RrLWJhc2VkIGd1aSB0byBtb25pdG9yIGNsdXN0ZXIgc3RhdHVzLCBzaW1pbGFy
-IHRvIHRoZSAnY2VwaCcNCisgY29tbWFuZC4NCisNCitQYWNrYWdlOiBnY2VwaC1kYmcNCitBcmNo
-aXRlY3R1cmU6IGxpbnV4LWFueQ0KK1NlY3Rpb246IGRlYnVnDQorUHJpb3JpdHk6IGV4dHJhDQor
-RGVwZW5kczogZ2NlcGggKD0gJHtiaW5hcnk6VmVyc2lvbn0pLCAke21pc2M6RGVwZW5kc30NCitE
-ZXNjcmlwdGlvbjogZGVidWdnaW5nIHN5bWJvbHMgZm9yIGdjZXBoDQorIENlcGggaXMgYSBkaXN0
-cmlidXRlZCBuZXR3b3JrIGZpbGUgc3lzdGVtIGRlc2lnbmVkIHRvIHByb3ZpZGUNCisgZXhjZWxs
-ZW50IHBlcmZvcm1hbmNlLCByZWxpYWJpbGl0eSwgYW5kIHNjYWxhYmlsaXR5LiAgVGhpcyBpcyBh
-DQorIGd0ay1iYXNlZCBndWkgdG8gbW9uaXRvciBjbHVzdGVyIHN0YXR1cywgc2ltaWxhciB0byB0
-aGUgJ2NlcGgnDQorIGNvbW1hbmQuDQorIC4NCisgVGhpcyBwYWNrYWdlIGNvbnRhaW5zIHRoZSBk
-ZWJ1Z2dpbmcgc3ltYm9scyBmb3IgZ2NlcGguDQorDQorUGFja2FnZTogY2VwaC1tZHMNCitBcmNo
-aXRlY3R1cmU6IGxpbnV4LWFueQ0KK0RlcGVuZHM6ICR7c2hsaWJzOkRlcGVuZHN9LCAke21pc2M6
-RGVwZW5kc30sIGNlcGgsIGNlcGgtZnMtY29tbW9uDQorRGVzY3JpcHRpb246IGRpc3RyaWJ1dGVk
-IGZpbGVzeXN0ZW0gc2VydmljZQ0KKyBDZXBoIGlzIGEgZGlzdHJpYnV0ZWQgc3RvcmFnZSBhbmQg
-bmV0d29yayBmaWxlIHN5c3RlbSBkZXNpZ25lZCB0byBwcm92aWRlDQorIGV4Y2VsbGVudCBwZXJm
-b3JtYW5jZSwgcmVsaWFiaWxpdHksIGFuZCBzY2FsYWJpbGl0eS4NCisgLg0KKyBUaGlzIHBhY2th
-Z2UgY29udGFpbnMgdGhlIGNlcGgtbWRzIGRhZW1vbiwgdXNlZCBmb3Igc2VydmluZyB0aGUgZGlz
-dHJpYnV0ZWQNCisgY2VwaCBmaWxlc3lzdGVtIG9uIHRvcCBvZiB0aGUgZGlzdHJpYnV0ZWQgc3Rv
-cmFnZSBjbHVzdGVyLg0KKw0KK1BhY2thZ2U6IGNlcGgtbWRzLWRiZw0KK0FyY2hpdGVjdHVyZTog
-bGludXgtYW55DQorU2VjdGlvbjogZGVidWcNCitQcmlvcml0eTogZXh0cmENCitEZXBlbmRzOiBj
-ZXBoICg9ICR7YmluYXJ5OlZlcnNpb259KSwgJHttaXNjOkRlcGVuZHN9DQorRGVzY3JpcHRpb246
-IGRlYnVnZ2luZyBzeW1ib2xzIGZvciBjZXBoDQorIENlcGggaXMgYSBkaXN0cmlidXRlZCBzdG9y
-YWdlIGFuZCBuZXR3b3JrIGZpbGUgc3lzdGVtIGRlc2lnbmVkIHRvIHByb3ZpZGUNCisgZXhjZWxs
-ZW50IHBlcmZvcm1hbmNlLCByZWxpYWJpbGl0eSwgYW5kIHNjYWxhYmlsaXR5Lg0KKyAuDQorIFRo
-aXMgcGFja2FnZSBjb250YWlucyB0aGUgZGVidWdnaW5nIHN5bWJvbHMgZm9yIGNlcGgtbWRzDQor
-DQogUGFja2FnZTogY2VwaC1mdXNlDQotQXJjaGl0ZWN0dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBp
-Mzg2IGlhNjQgbWlwc2VsDQorQXJjaGl0ZWN0dXJlOiBsaW51eC1hbnkNCiBEZXBlbmRzOiAke3No
-bGliczpEZXBlbmRzfSwgJHttaXNjOkRlcGVuZHN9DQogUmVjb21tZW5kczogZnVzZS11dGlscw0K
-IFN1Z2dlc3RzOiBjZXBoDQpAQCAtNDksNyArOTUsNyBAQCBEZXNjcmlwdGlvbjogRlVTRS1iYXNl
-ZCBjbGllbnQgZm9yIHRoZSBDZXBoIGRpc3RyaWJ1dGVkIGZpbGUgc3lzdGVtDQogIGRvLg0KIA0K
-IFBhY2thZ2U6IGNlcGgtZnVzZS1kYmcNCi1BcmNoaXRlY3R1cmU6IGFtZDY0IGFybWVsIGFybWhm
-IGkzODYgaWE2NCBtaXBzZWwNCitBcmNoaXRlY3R1cmU6IGxpbnV4LWFueQ0KIFNlY3Rpb246IGRl
-YnVnDQogUHJpb3JpdHk6IGV4dHJhDQogRGVwZW5kczogY2VwaC1mdXNlICg9ICR7YmluYXJ5OlZl
-cnNpb259KSwgJHttaXNjOkRlcGVuZHN9DQpAQCAtNjIsNyArMTA4LDcgQEAgRGVzY3JpcHRpb246
-IGRlYnVnZ2luZyBzeW1ib2xzIGZvciBjZXBoLWZ1c2UNCiAgVGhpcyBwYWNrYWdlIGNvbnRhaW5z
-IHRoZSBkZWJ1Z2dpbmcgc3ltYm9scyBmb3IgY2VwaC1mdXNlLg0KIA0KIFBhY2thZ2U6IGNlcGgt
-Y29tbW9uDQotQXJjaGl0ZWN0dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBpMzg2IGlhNjQgbWlwc2Vs
-DQorQXJjaGl0ZWN0dXJlOiBsaW51eC1hbnkNCiBEZXBlbmRzOiAke3NobGliczpEZXBlbmRzfSwg
-JHttaXNjOkRlcGVuZHN9LCBsaWJyYmQxICg9ICR7YmluYXJ5OlZlcnNpb259KQ0KIENvbmZsaWN0
-czogY2VwaC1jbGllbnQtdG9vbHMNCiBSZXBsYWNlczogY2VwaC1jbGllbnQtdG9vbHMNCkBAIC03
-NCw3ICsxMjAsNyBAQCBEZXNjcmlwdGlvbjogY29tbW9uIHV0aWxpdGllcyB0byBtb3VudCBhbmQg
-aW50ZXJhY3Qgd2l0aCBhIGNlcGggZmlsZXN5c3RlbQ0KICBjZXBoIGZzIHdpdGggdGhlIGtlcm5l
-bCBjbGllbnQuDQogDQogUGFja2FnZTogY2VwaC1jb21tb24tZGJnDQotQXJjaGl0ZWN0dXJlOiBh
-bWQ2NCBhcm1lbCBhcm1oZiBpMzg2IGlhNjQgbWlwc2VsDQorQXJjaGl0ZWN0dXJlOiBsaW51eC1h
-bnkNCiBEZXBlbmRzOiBjZXBoLWNvbW1vbiAoPSAke2JpbmFyeTpWZXJzaW9ufSksICR7bWlzYzpE
-ZXBlbmRzfQ0KIENvbmZsaWN0czogY2VwaC1jbGllbnQtdG9vbHMtZGJnDQogUmVwbGFjZXM6IGNl
-cGgtY2xpZW50LXRvb2xzLWRiZw0KQEAgLTg4LDggKzEzNCwzNyBAQCBEZXNjcmlwdGlvbjogZGVi
-dWdnaW5nIHN5bWJvbHMgZm9yIGNlcGgtY29tbW9uDQogIC4NCiAgVGhpcyBwYWNrYWdlIGNvbnRh
-aW5zIHRoZSBkZWJ1Z2dpbmcgc3ltYm9scyBmb3IgY2VwaC1jb21tb24uDQogDQorUGFja2FnZTog
-Y2VwaC1mcy1jb21tb24NCitBcmNoaXRlY3R1cmU6IGxpbnV4LWFueQ0KK0RlcGVuZHM6ICR7c2hs
-aWJzOkRlcGVuZHN9LCAke21pc2M6RGVwZW5kc30sIGNlcGgtY29tbW9uICg9ICR7YmluYXJ5OlZl
-cnNpb259KQ0KK0NvbmZsaWN0czogY2VwaC1jbGllbnQtdG9vbHMNCitSZXBsYWNlczogY2VwaC1j
-bGllbnQtdG9vbHMNCitTdWdnZXN0czogY2VwaA0KK0Rlc2NyaXB0aW9uOiBjb21tb24gdXRpbGl0
-aWVzIHRvIG1vdW50IGFuZCBpbnRlcmFjdCB3aXRoIGEgY2VwaCBmaWxlc3lzdGVtDQorIENlcGgg
-aXMgYSBkaXN0cmlidXRlZCBuZXR3b3JrIGZpbGUgc3lzdGVtIGRlc2lnbmVkIHRvIHByb3ZpZGUN
-CisgZXhjZWxsZW50IHBlcmZvcm1hbmNlLCByZWxpYWJpbGl0eSwgYW5kIHNjYWxhYmlsaXR5LiAg
-VGhpcyBpcyBhIGNvbGxlY3Rpb24NCisgb2YgY29tbW9uIHRvb2xzLCBpbmNsdWRpbmcgdGhlIG1v
-dW50IHV0aWxpdHksIHRoYXQgYWxsb3dzIG9uZSB0byBtb3VudCB0aGUNCisgY2VwaCBmcyB3aXRo
-IHRoZSBrZXJuZWwgY2xpZW50Lg0KKyAuDQorIFRoaXMgcGFja2FnZSBjb250YWlucyBjb21tb24g
-dXRpbGl0aWVzIGZvciB0aGUgQ2VwaCBmaWxlc3lzdGVtLg0KKw0KK1BhY2thZ2U6IGNlcGgtZnMt
-Y29tbW9uLWRiZw0KK0FyY2hpdGVjdHVyZTogbGludXgtYW55DQorRGVwZW5kczogY2VwaC1mcy1j
-b21tb24gKD0gJHtiaW5hcnk6VmVyc2lvbn0pLCAke21pc2M6RGVwZW5kc30NCitDb25mbGljdHM6
-IGNlcGgtY2xpZW50LXRvb2xzLWRiZw0KK1JlcGxhY2VzOiBjZXBoLWNsaWVudC10b29scy1kYmcN
-CitTZWN0aW9uOiBkZWJ1Zw0KK1ByaW9yaXR5OiBleHRyYQ0KK0Rlc2NyaXB0aW9uOiBkZWJ1Z2dp
-bmcgc3ltYm9scyBmb3IgY2VwaC1mcy1jb21tb24NCisgQ2VwaCBpcyBhIGRpc3RyaWJ1dGVkIG5l
-dHdvcmsgZmlsZSBzeXN0ZW0gZGVzaWduZWQgdG8gcHJvdmlkZQ0KKyBleGNlbGxlbnQgcGVyZm9y
-bWFuY2UsIHJlbGlhYmlsaXR5LCBhbmQgc2NhbGFiaWxpdHkuICBUaGlzIGlzIGEgY29sbGVjdGlv
-bg0KKyBvZiBjb21tb24gdG9vbHMsIGluY2x1ZGluZyB0aGUgbW91bnQgdXRpbGl0eSwgdGhhdCBh
-bGxvd3Mgb25lIHRvIG1vdW50IHRoZQ0KKyBjZXBoIGZzIHdpdGggdGhlIGtlcm5lbCBjbGllbnQu
-DQorIC4NCisgVGhpcyBwYWNrYWdlIGNvbnRhaW5zIHRoZSBkZWJ1Z2dpbmcgc3ltYm9scyBmb3Ig
-Y2VwaC1mcy1jb21tb24uDQorDQogUGFja2FnZTogY2VwaC1yZXNvdXJjZS1hZ2VudHMNCi1BcmNo
-aXRlY3R1cmU6IGFtZDY0IGFybWVsIGFybWhmIGkzODYgaWE2NCBtaXBzZWwNCitBcmNoaXRlY3R1
-cmU6IGxpbnV4LWFueQ0KIFJlY29tbWVuZHM6IHBhY2VtYWtlcg0KIFByaW9yaXR5OiBleHRyYQ0K
-IERlcGVuZHM6IGNlcGggKD0gJHtiaW5hcnk6VmVyc2lvbn0pLCAke21pc2M6RGVwZW5kc30sIHJl
-c291cmNlLWFnZW50cw0KQEAgLTEwNCw3ICsxNzksNyBAQCBEZXNjcmlwdGlvbjogT0NGLWNvbXBs
-aWFudCByZXNvdXJjZSBhZ2VudHMgZm9yIENlcGgNCiBQYWNrYWdlOiBsaWJyYWRvczINCiBDb25m
-bGljdHM6IGxpYnJhZG9zLCBsaWJyYWRvczENCiBSZXBsYWNlczogbGlicmFkb3MsIGxpYnJhZG9z
-MQ0KLUFyY2hpdGVjdHVyZTogYW1kNjQgYXJtZWwgYXJtaGYgaTM4NiBpYTY0IG1pcHNlbA0KK0Fy
-Y2hpdGVjdHVyZTogbGludXgtYW55DQogU2VjdGlvbjogbGlicw0KIERlcGVuZHM6ICR7c2hsaWJz
-OkRlcGVuZHN9LCAke21pc2M6RGVwZW5kc30NCiBEZXNjcmlwdGlvbjogUkFET1MgZGlzdHJpYnV0
-ZWQgb2JqZWN0IHN0b3JlIGNsaWVudCBsaWJyYXJ5DQpAQCAtMTE2LDcgKzE5MSw3IEBAIERlc2Ny
-aXB0aW9uOiBSQURPUyBkaXN0cmlidXRlZCBvYmplY3Qgc3RvcmUgY2xpZW50IGxpYnJhcnkNCiBQ
-YWNrYWdlOiBsaWJyYWRvczItZGJnDQogQ29uZmxpY3RzOiBsaWJyYWRvczEtZGJnDQogUmVwbGFj
-ZXM6IGxpYnJhZG9zMS1kYmcNCi1BcmNoaXRlY3R1cmU6IGFtZDY0IGFybWVsIGFybWhmIGkzODYg
-aWE2NCBtaXBzZWwNCitBcmNoaXRlY3R1cmU6IGxpbnV4LWFueQ0KIFNlY3Rpb246IGRlYnVnDQog
-UHJpb3JpdHk6IGV4dHJhDQogRGVwZW5kczogbGlicmFkb3MyICg9ICR7YmluYXJ5OlZlcnNpb259
-KSwgJHttaXNjOkRlcGVuZHN9DQpAQCAtMTI5LDcgKzIwNCw3IEBAIERlc2NyaXB0aW9uOiBkZWJ1
-Z2dpbmcgc3ltYm9scyBmb3IgbGlicmFkb3MNCiAgVGhpcyBwYWNrYWdlIGNvbnRhaW5zIGRlYnVn
-Z2luZyBzeW1ib2xzIGZvciBsaWJyYWRvcy4NCiANCiBQYWNrYWdlOiBsaWJyYWRvcy1kZXYNCi1B
-cmNoaXRlY3R1cmU6IGFtZDY0IGFybWVsIGFybWhmIGkzODYgaWE2NCBtaXBzZWwNCitBcmNoaXRl
-Y3R1cmU6IGxpbnV4LWFueQ0KIFNlY3Rpb246IGxpYmRldmVsDQogRGVwZW5kczogJHttaXNjOkRl
-cGVuZHN9LCBsaWJyYWRvczIgKD0gJHtiaW5hcnk6VmVyc2lvbn0pDQogQ29uZmxpY3RzOiBsaWJy
-YWRvczEtZGV2LCBsaWJyYWRvczItZGV2DQpAQCAtMTQ0LDcgKzIxOSw3IEBAIERlc2NyaXB0aW9u
-OiBSQURPUyBkaXN0cmlidXRlZCBvYmplY3Qgc3RvcmUgY2xpZW50IGxpYnJhcnkgKGRldmVsb3Bt
-ZW50IGZpbGVzKQ0KICBsaW5rIGFnYWluc3QgbGlicmFkb3MuDQogDQogUGFja2FnZTogbGlicmJk
-MQ0KLUFyY2hpdGVjdHVyZTogYW1kNjQgYXJtZWwgYXJtaGYgaTM4NiBpYTY0IG1pcHNlbA0KK0Fy
-Y2hpdGVjdHVyZTogbGludXgtYW55DQogU2VjdGlvbjogbGlicw0KIERlcGVuZHM6ICR7c2hsaWJz
-OkRlcGVuZHN9LCAke21pc2M6RGVwZW5kc30sIGxpYnJhZG9zMiAoPSAke2JpbmFyeTpWZXJzaW9u
-fSkNCiBEZXNjcmlwdGlvbjogUkFET1MgYmxvY2sgZGV2aWNlIGNsaWVudCBsaWJyYXJ5DQpAQCAt
-MTU0LDcgKzIyOSw3IEBAIERlc2NyaXB0aW9uOiBSQURPUyBibG9jayBkZXZpY2UgY2xpZW50IGxp
-YnJhcnkNCiAgc2hhcmVkIGxpYnJhcnkgYWxsb3dpbmcgYXBwbGljYXRpb25zIHRvIG1hbmFnZSB0
-aGVzZSBibG9jayBkZXZpY2VzLg0KIA0KIFBhY2thZ2U6IGxpYnJiZDEtZGJnDQotQXJjaGl0ZWN0
-dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBpMzg2IGlhNjQgbWlwc2VsDQorQXJjaGl0ZWN0dXJlOiBs
-aW51eC1hbnkNCiBTZWN0aW9uOiBkZWJ1Zw0KIFByaW9yaXR5OiBleHRyYQ0KIERlcGVuZHM6IGxp
-YnJiZDEgKD0gJHtiaW5hcnk6VmVyc2lvbn0pLCAke21pc2M6RGVwZW5kc30NCkBAIC0xNjcsNyAr
-MjQyLDcgQEAgRGVzY3JpcHRpb246IGRlYnVnZ2luZyBzeW1ib2xzIGZvciBsaWJyYmQxDQogIFRo
-aXMgcGFja2FnZSBjb250YWlucyBkZWJ1Z2dpbmcgc3ltYm9scyBmb3IgbGlicmJkMS4NCiANCiBQ
-YWNrYWdlOiBsaWJyYmQtZGV2DQotQXJjaGl0ZWN0dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBpMzg2
-IGlhNjQgbWlwc2VsDQorQXJjaGl0ZWN0dXJlOiBsaW51eC1hbnkNCiBTZWN0aW9uOiBsaWJkZXZl
-bA0KIERlcGVuZHM6ICR7bWlzYzpEZXBlbmRzfSwgbGlicmJkMSAoPSAke2JpbmFyeTpWZXJzaW9u
-fSksIGxpYnJhZG9zLWRldg0KIENvbmZsaWN0czogbGlicmJkMS1kZXYNCkBAIC0xODQsNyArMjU5
-LDcgQEAgRGVzY3JpcHRpb246IFJBRE9TIGJsb2NrIGRldmljZSBjbGllbnQgbGlicmFyeSAoZGV2
-ZWxvcG1lbnQgZmlsZXMpDQogUGFja2FnZTogbGliY2VwaGZzMQ0KIENvbmZsaWN0czogbGliY2Vw
-aGZzLCBsaWJjZXBoLCBsaWJjZXBoMQ0KIFJlcGxhY2VzOiBsaWJjZXBoZnMsIGxpYmNlcGgsIGxp
-YmNlcGgxDQotQXJjaGl0ZWN0dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBpMzg2IGlhNjQgbWlwc2Vs
-DQorQXJjaGl0ZWN0dXJlOiBsaW51eC1hbnkNCiBTZWN0aW9uOiBsaWJzDQogRGVwZW5kczogJHtz
-aGxpYnM6RGVwZW5kc30sICR7bWlzYzpEZXBlbmRzfQ0KIERlc2NyaXB0aW9uOiBDZXBoIGRpc3Ry
-aWJ1dGVkIGZpbGUgc3lzdGVtIGNsaWVudCBsaWJyYXJ5DQpAQCAtMTk0LDcgKzI2OSw3IEBAIERl
-c2NyaXB0aW9uOiBDZXBoIGRpc3RyaWJ1dGVkIGZpbGUgc3lzdGVtIGNsaWVudCBsaWJyYXJ5DQog
-IGZpbGUgc3lzdGVtIHZpYSBhIFBPU0lYLWxpa2UgaW50ZXJmYWNlLg0KIA0KIFBhY2thZ2U6IGxp
-YmNlcGhmczEtZGJnDQotQXJjaGl0ZWN0dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBpMzg2IGlhNjQg
-bWlwc2VsDQorQXJjaGl0ZWN0dXJlOiBsaW51eC1hbnkNCiBTZWN0aW9uOiBkZWJ1Zw0KIFByaW9y
-aXR5OiBleHRyYQ0KIERlcGVuZHM6IGxpYmNlcGhmczEgKD0gJHtiaW5hcnk6VmVyc2lvbn0pLCAk
-e21pc2M6RGVwZW5kc30NCkBAIC0yMDksNyArMjg0LDcgQEAgRGVzY3JpcHRpb246IGRlYnVnZ2lu
-ZyBzeW1ib2xzIGZvciBsaWJjZXBoZnMxDQogIFRoaXMgcGFja2FnZSBjb250YWlucyBkZWJ1Z2dp
-bmcgc3ltYm9scyBmb3IgbGliY2VwaGZzMS4NCiANCiBQYWNrYWdlOiBsaWJjZXBoZnMtZGV2DQot
-QXJjaGl0ZWN0dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBpMzg2IGlhNjQgbWlwc2VsDQorQXJjaGl0
-ZWN0dXJlOiBsaW51eC1hbnkNCiBTZWN0aW9uOiBsaWJkZXZlbA0KIERlcGVuZHM6ICR7bWlzYzpE
-ZXBlbmRzfSwgbGliY2VwaGZzMSAoPSAke2JpbmFyeTpWZXJzaW9ufSkNCiBDb25mbGljdHM6IGxp
-YmNlcGhmczEtZGV2LCBsaWJjZXBoMS1kZXYsIGxpYmNlcGgtZGV2DQpAQCAtMjI0LDcgKzI5OSw3
-IEBAIERlc2NyaXB0aW9uOiBDZXBoIGRpc3RyaWJ1dGVkIGZpbGUgc3lzdGVtIGNsaWVudCBsaWJy
-YXJ5IChkZXZlbG9wbWVudCBmaWxlcykNCiAgbGluayBhZ2FpbnN0IGxpYmNlcGhmcy4NCiANCiBQ
-YWNrYWdlOiByYWRvc2d3DQotQXJjaGl0ZWN0dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBpMzg2IGlh
-NjQgbWlwc2VsDQorQXJjaGl0ZWN0dXJlOiBsaW51eC1hbnkNCiBEZXBlbmRzOiAke3NobGliczpE
-ZXBlbmRzfSwgJHttaXNjOkRlcGVuZHN9LCBjZXBoLWNvbW1vbg0KIERlc2NyaXB0aW9uOiBSRVNU
-IGdhdGV3YXkgZm9yIFJBRE9TIGRpc3RyaWJ1dGVkIG9iamVjdCBzdG9yZQ0KICBSQURPUyBpcyBh
-IGRpc3RyaWJ1dGVkIG9iamVjdCBzdG9yZSB1c2VkIGJ5IHRoZSBDZXBoIGRpc3RyaWJ1dGVkDQpA
-QCAtMjM1LDcgKzMxMCw3IEBAIERlc2NyaXB0aW9uOiBSRVNUIGdhdGV3YXkgZm9yIFJBRE9TIGRp
-c3RyaWJ1dGVkIG9iamVjdCBzdG9yZQ0KICBUaGlzIHBhY2thZ2UgY29udGFpbnMgdGhlIHByb3h5
-IGRhZW1vbiBhbmQgcmVsYXRlZCB0b29scyBvbmx5Lg0KIA0KIFBhY2thZ2U6IHJhZG9zZ3ctZGJn
-DQotQXJjaGl0ZWN0dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBpMzg2IGlhNjQgbWlwc2VsDQorQXJj
-aGl0ZWN0dXJlOiBsaW51eC1hbnkNCiBTZWN0aW9uOiBkZWJ1Zw0KIFByaW9yaXR5OiBleHRyYQ0K
-IERlcGVuZHM6IHJhZG9zZ3cgKD0gJHtiaW5hcnk6VmVyc2lvbn0pLCAke21pc2M6RGVwZW5kc30N
-CkBAIC0yNDgsMTMgKzMyMywxMyBAQCBEZXNjcmlwdGlvbjogZGVidWdnaW5nIHN5bWJvbHMgZm9y
-IHJhZG9zZ3cNCiAgVGhpcyBwYWNrYWdlIGNvbnRhaW5zIGRlYnVnZ2luZyBzeW1ib2xzIGZvciBy
-YWRvc2d3Lg0KIA0KIFBhY2thZ2U6IHJlc3QtYmVuY2gNCi1BcmNoaXRlY3R1cmU6IGFtZDY0IGFy
-bWVsIGFybWhmIGkzODYgaWE2NCBtaXBzZWwNCitBcmNoaXRlY3R1cmU6IGxpbnV4LWFueQ0KIERl
-cGVuZHM6ICR7c2hsaWJzOkRlcGVuZHN9LCAke21pc2M6RGVwZW5kc30sIGNlcGgtY29tbW9uLCB4
-bWwyLCBjdXJsDQogRGVzY3JpcHRpb246IFJFU1RmdWwgYmVuY2hlciB0aGF0IGNhbiBiZSB1c2Vk
-IHRvIGJlbmNobWFyaw0KICByYWRvc2d3IHBlcmZvcm1hbmNlLg0KIA0KIFBhY2thZ2U6IHJlc3Qt
-YmVuY2gtZGJnDQotQXJjaGl0ZWN0dXJlOiBhbWQ2NCBhcm1lbCBhcm1oZiBpMzg2IGlhNjQgbWlw
-c2VsDQorQXJjaGl0ZWN0dXJlOiBsaW51eC1hbnkNCiBTZWN0aW9uOiBkZWJ1Zw0KIFByaW9yaXR5
-OiBleHRyYQ0KIERlcGVuZHM6ICR7c2hsaWJzOkRlcGVuZHN9LCAke21pc2M6RGVwZW5kc30sIGNl
-cGgtY29tbW9uLCB4bWwyLCBjdXJsDQpAQCAtMjYyLDcgKzMzNyw3IEBAIERlc2NyaXB0aW9uOiBS
-RVNUZnVsIGJlbmNoZXIgdGhhdCBjYW4gYmUgdXNlZCB0byBiZW5jaG1hcmsNCiAgcmFkb3NndyBw
-ZXJmb3JtYW5jZS4NCiANCiBQYWNrYWdlOiBvYnN5bmMNCi1BcmNoaXRlY3R1cmU6IGFtZDY0IGFy
-bWVsIGFybWhmIGkzODYgaWE2NCBtaXBzZWwNCitBcmNoaXRlY3R1cmU6IGxpbnV4LWFueQ0KIERl
-cGVuZHM6ICR7bWlzYzpEZXBlbmRzfSwgcHl0aG9uLCBweXRob24tYm90bywgcHl0aG9uLWNlcGgs
-IHB5dGhvbi1weXhhdHRyLCBweXRob24tbHhtbA0KIERlc2NyaXB0aW9uOiBzeW5jaHJvbml6ZSBk
-YXRhIGJldHdlZW4gY2xvdWQgb2JqZWN0IHN0b3JhZ2UgcHJvdmlkZXJzIG9yIGEgbG9jYWwgZGly
-ZWN0b3J5DQogIG9ic3luYyBpcyBhIHRvb2wgdG8gc3luY2hyb25pemUgb2JqZWN0cyBiZXR3ZWVu
-IGNsb3VkIG9iamVjdA0KQEAgLTI3MCw5ICszNDUsOSBAQCBEZXNjcmlwdGlvbjogc3luY2hyb25p
-emUgZGF0YSBiZXR3ZWVuIGNsb3VkIG9iamVjdCBzdG9yYWdlIHByb3ZpZGVycyBvciBhIGxvY2Fs
-DQogIENlcGggUkFET1MgY2x1c3Rlciwgb3IgYSBsb2NhbCBkaXJlY3RvcnkuDQogDQogUGFja2Fn
-ZTogcHl0aG9uLWNlcGgNCi1BcmNoaXRlY3R1cmU6IGFtZDY0IGFybWVsIGFybWhmIGkzODYgaWE2
-NCBtaXBzZWwNCitBcmNoaXRlY3R1cmU6IGxpbnV4LWFueQ0KIFNlY3Rpb246IHB5dGhvbg0KLURl
-cGVuZHM6ICR7cHl0aG9uOkRlcGVuZHN9LCBsaWJyYWRvczIsIGxpYnJiZDENCitEZXBlbmRzOiAk
-e21pc2M6RGVwZW5kc30sICR7cHl0aG9uOkRlcGVuZHN9LCBsaWJyYWRvczIsIGxpYnJiZDENCiBE
-ZXNjcmlwdGlvbjogUHl0aG9uIGxpYnJhcmllcyBmb3IgdGhlIENlcGggZGlzdHJpYnV0ZWQgZmls
-ZXN5c3RlbQ0KICBDZXBoIGlzIGEgZGlzdHJpYnV0ZWQgc3RvcmFnZSBhbmQgbmV0d29yayBmaWxl
-IHN5c3RlbSBkZXNpZ25lZCB0byBwcm92aWRlDQogIGV4Y2VsbGVudCBwZXJmb3JtYW5jZSwgcmVs
-aWFiaWxpdHksIGFuZCBzY2FsYWJpbGl0eS4NCmRpZmYgLS1naXQgYS9kZWJpYW4vZ2NlcGguaW5z
-dGFsbCBiL2RlYmlhbi9nY2VwaC5pbnN0YWxsDQpuZXcgZmlsZSBtb2RlIDEwMDY0NA0KaW5kZXgg
-MDAwMDAwMC4uMTQzZjgzNw0KLS0tIC9kZXYvbnVsbA0KKysrIGIvZGViaWFuL2djZXBoLmluc3Rh
-bGwNCkBAIC0wLDAgKzEsMiBAQA0KK3Vzci9iaW4vZ2NlcGgNCit1c3Ivc2hhcmUvY2VwaF90b29s
-L2d1aV9yZXNvdXJjZXMvKg0KZGlmZiAtLWdpdCBhL2RlYmlhbi9saWJyYWRvczIuaW5zdGFsbCBi
-L2RlYmlhbi9saWJyYWRvczIuaW5zdGFsbA0KaW5kZXggOGJhMTM5YS4uOGQ5ODlkNCAxMDA2NDQN
-Ci0tLSBhL2RlYmlhbi9saWJyYWRvczIuaW5zdGFsbA0KKysrIGIvZGViaWFuL2xpYnJhZG9zMi5p
-bnN0YWxsDQpAQCAtMSwyICsxIEBADQogdXNyL2xpYi9saWJyYWRvcy5zby4qDQotDQpkaWZmIC0t
-Z2l0IGEvZGViaWFuL3J1bGVzIGIvZGViaWFuL3J1bGVzDQppbmRleCA5NDFmMzA5Li40ZTZjMzcz
-IDEwMDc1NQ0KLS0tIGEvZGViaWFuL3J1bGVzDQorKysgYi9kZWJpYW4vcnVsZXMNCkBAIC0xMTUs
-OCArMTE1LDExIEBAIGJpbmFyeS1hcmNoOiBidWlsZCBpbnN0YWxsDQogCWRoX2xpbmsNCiANCiAJ
-ZGhfc3RyaXAgLXBjZXBoIC0tZGJnLXBhY2thZ2U9Y2VwaC1kYmcgLWsgLS1leGNsdWRlPWxpYmNs
-c18NCisJZGhfc3RyaXAgLXBnY2VwaCAtLWRiZy1wYWNrYWdlPWdjZXBoLWRiZw0KIAlkaF9zdHJp
-cCAtcGNlcGgtZnVzZSAtLWRiZy1wYWNrYWdlPWNlcGgtZnVzZS1kYmcNCisJZGhfc3RyaXAgLXBj
-ZXBoLW1kcyAtLWRiZy1wYWNrYWdlPWNlcGgtbWRzLWRiZyAtayAtLWV4Y2x1ZGU9bGliY2xzXw0K
-IAlkaF9zdHJpcCAtcGNlcGgtY29tbW9uIC0tZGJnLXBhY2thZ2U9Y2VwaC1jb21tb24tZGJnDQor
-CWRoX3N0cmlwIC1wY2VwaC1mcy1jb21tb24gLS1kYmctcGFja2FnZT1jZXBoLWZzLWNvbW1vbi1k
-YmcNCiAJZGhfc3RyaXAgLXBsaWJyYWRvczIgLS1kYmctcGFja2FnZT1saWJyYWRvczItZGJnDQog
-CWRoX3N0cmlwIC1wbGlicmJkMSAtLWRiZy1wYWNrYWdlPWxpYnJiZDEtZGJnDQogCWRoX3N0cmlw
-IC1wbGliY2VwaGZzMSAtLWRiZy1wYWNrYWdlPWxpYmNlcGhmczEtZGJnDQo=
-
-
---=-1udFED8HLpr8r4MlbFBL--
-
---=-f1NMkXOTwg/TKHahyYrf
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iEYEABECAAYFAk/bzuQACgkQGkxvZbuqR8kSBgCeKWdqo6sRDBDpSJP5zO1Seht+
-BeEAoJyn2VugTYuUWEj2rnNHfojoXjHk
-=EfF2
------END PGP SIGNATURE-----
-
---=-f1NMkXOTwg/TKHahyYrf--
-
+> 
+> librbd
+> ^^^^^^
+> 
+> Opening a child image opens its parent (and this will continue
+> recursively as needed). This means that an ImageCtx will contain a
+> pointer to the parent image context. Differing object sizes won't
+> matter, since reading from the parent will go through the parent
+> image context.
+> 
+> Discard will need to change for layered images so that it only
+> truncates objects, and does not remove them. If we removed objects, we
+> could not tell if we needed to read them from the parent.
+> 
+> A new clone method will be added, which takes the same arguments as
+> create except size (size of the parent image is used).
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
