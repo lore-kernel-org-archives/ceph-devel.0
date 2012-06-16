@@ -1,62 +1,102 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Unmountable btrfs filesystems
-Date: Sat, 16 Jun 2012 14:12:03 -0500
-Message-ID: <4FDCDA83.7070708@inktank.com>
-References: <4FDCD484.50706@widodh.nl>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: sync Ceph packaging efforts for Debian/Ubuntu
+Date: Sat, 16 Jun 2012 14:50:26 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206161442230.20239@cobra.newdream.net>
+References: <1339805412.7726.160.camel@julia>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:65360 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756702Ab2FPTMG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Jun 2012 15:12:06 -0400
-Received: by yenl2 with SMTP id l2so2621115yen.19
-        for <ceph-devel@vger.kernel.org>; Sat, 16 Jun 2012 12:12:06 -0700 (PDT)
-In-Reply-To: <4FDCD484.50706@widodh.nl>
+Received: from cobra.newdream.net ([66.33.216.30]:44155 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756892Ab2FPVu3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 16 Jun 2012 17:50:29 -0400
+In-Reply-To: <1339805412.7726.160.camel@julia>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Cc: Ben Collins <bcollins@ubuntu.com>, clint@fewbar.com, James Page <james.page@ubuntu.com>, Ceph Development <ceph-devel@vger.kernel.org>, openstack-devel@lists.alioth.debian.org
 
-On 6/16/12 1:46 PM, Wido den Hollander wrote:
-> Hi,
->
-> On my dev cluster (10 nodes, 40 OSD's) I'm still trying to run Ceph on
-> btrfs, but over the last couple of months I've lost multiple OSD's due
-> to btrfs.
->
-> On my nodes I've set kernel.panic=60 so that whenever a kernel panic
-> occurs I get the node back within two minutes.
->
-> Now, over the last time I've seen multiple nodes reboot (didn't see the
-> strace), but afterwards the btrfs filesystems on that node were
-> unmountable.
->
-> "btrfs: open_ctree failed"
->
-> I tried various kernels, the most recent 3.3.0 from kernel.ubuntu.com,
-> but I'm still seeing this.
->
-> Is anyone seeing the same or did everybody migrate away to ext4 or XFS?
->
-> I still prefer btrfs due to the snapshotting, but loosing all these
-> OSD's all the time is getting kind of frustrating.
->
-> Any thoughts or comments?
->
-> Wido
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
+Hi Laszlo,
 
-Hi Wido,
+I've take a closer look at these patches, and have a few questions.
 
-btrfsck might tell you what's wrong.  Sounds like there is a 
-btrfs-restore command in the dangerdonteveruse branch you could try. 
-Beyond that, I guess it just really comes down to tradeoffs.
+- The URL change and nss patches I've applied; they are in the ceph.git 
+'debian' branch.
 
-Good luck! ;)
+- Has the leveldb patch been sent upstream?  Once it is committed to 
+the upstream git, we can update ceph to use it; that's nicer than carrying 
+the patch.  However, I thought you needed to link against the existing 
+libleveldb1 package... which means we shouldn't do anything on our side, 
+right?
 
-Mark
+- I'm not sure how useful it is to break mount.ceph and cephfs into a 
+separate ceph-fs-common package, but we can do it.  Same goes for a 
+separate package for ceph-mds.  That was originally motivated by ubuntu 
+not wanting the mds in main, but in the end only the libraries went in, so 
+it's a moot point.  I'd rather hear from them what their intentions are 
+for 12.10 before complicating things...
+
+- That same patch also switched all the Architecture: lines back to 
+linux-any.  Was that intentional?  I just changed them from that last 
+week.
+
+- I did apply the python-ceph Depends: portion of that patch.
+
+The result so far is in the 'debian' branch of ceph.git.  Please take a 
+look.
+
+Thanks!
+sage
+
+
+On Sat, 
+16 Jun 2012, Laszlo Boszormenyi (GCS) wrote:
+
+> Hi all parties,
+> 
+> Ceph is packaged at three places: in Ubuntu, at upstream and in Debian.
+> Its first 'stable' release, 0.48 is coming. At least as Sage wrote some
+> days ago: "It looks like 0.48 will also be the basis for one of our
+> first 'stable' releases.".
+> 
+> Hereby I would like to sync our Debian related packaging efforts, not
+> only for the mentioned stable release. The OpenStack packaging team
+> would like to add Ceph to their stack. Howtos, helping hands on forums
+> needs it as well.
+> I'm not subscribed to the lists, please keep me in the loop with Cc-s.
+> 
+> First patch, 0002-Add-support-PPC.patch is for upstream. Would help the
+> in tree leveldb to build on PowerPC architectures as well.
+> Second patch reflect the homepage and git tree changes for Ubuntu.
+> Third patch is from them, noted as "Switch from libcryptopp to libnss as
+> libcryptopp is not seeded.". So libnss3-dev is used as build-dependency
+> instead. Sage, would you commit it?
+> I've separated gceph out, if someone needs the CLI only, then s/he can
+> do that without the GTK+ libraries. See below.
+> 
+> Ben, James, can you please share in some sentences why ceph-fuse is
+> dropped in Ubuntu? Do you need it Sage? If it's feasible, you may drop
+> that as well.
+> As I see, you still ship d/librgw1.install , d/librgw1.postrm ,
+> d/librgw1.postinst and librgw-dev.install . They are not needed anymore.
+> Maybe the biggest change is that ceph-mds was separated out and such,
+> ceph-fs-common created for cephfs and mount.ceph .
+> Please move the configure call to its target, as you can check in git.
+> Add var/lib/ceph/mon , var/lib/ceph/osd and var/lib/ceph/mds to
+> d/ceph.dirs .
+> 
+> git patch is for Sage, upstream and contains what needed for the new
+> packages. May I get commit rights to debian/ or should I go with git
+> forks and you'll merge the changes?
+> 
+> Also it seems that limit the architectures to build on is not
+> allowed[1]. I'll write an email to this issue, how to go with failing
+> leveldb build-dependency on some archs.
+> 
+> Loic, do you need anything or do you have any objections with these
+> changes?
+> 
+> Regards,
+> Laszlo/GCS
+> [1] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=677626
+> 
