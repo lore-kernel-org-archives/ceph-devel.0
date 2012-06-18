@@ -1,29 +1,27 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: all rbd users: set 'filestore fiemap = false'
-Date: Mon, 18 Jun 2012 04:57:20 -0400
-Message-ID: <20120618085719.GA7592@infradead.org>
-References: <Pine.LNX.4.64.1206172053320.16985@cobra.newdream.net>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: stable 10GBE under 3.4.2 or 3.5.0-rc2
+Date: Mon, 18 Jun 2012 11:11:16 +0200
+Message-ID: <4FDEF0B4.208@profihost.ag>
+References: <12a25ef8-317d-4f47-bfea-8bded75bd233@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 173-166-109-252-newengland.hfc.comcastbusiness.net ([173.166.109.252]:34216
-	"EHLO bombadil.infradead.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751716Ab2FRI5V (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 18 Jun 2012 04:57:21 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1206172053320.16985@cobra.newdream.net>
+Received: from mail.profihost.ag ([85.158.179.208]:50453 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752455Ab2FRJLS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 05:11:18 -0400
+In-Reply-To: <12a25ef8-317d-4f47-bfea-8bded75bd233@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: Alexandre DERUMIER <aderumier@odiso.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Sun, Jun 17, 2012 at 09:02:15PM -0700, Sage Weil wrote:
-> that data over the wire.  We have observed incorrect/changing FIEMAP on 
-> both btrfs:
+Am 18.06.2012 10:11, schrieb Alexandre DERUMIER:
+> maybe try to play with net.ipv4.tcp_congestion_control ?
+The default on my machines and even under RHEL6 is cubic. But i've now 
+alos tried, reno, bic and highspeed. But it doesn't change anything.
 
-both btrfs and?
+Everything is fine under 3.0.32 and pretty bad under 3.4.X or 3.5rc2.
 
-Btw, btrfs had SEEK_HOLE/SEEK_DATA which are a lot more useful for this
-kind of operations, and xfs has added support for it as well now.
-
+Stefan
