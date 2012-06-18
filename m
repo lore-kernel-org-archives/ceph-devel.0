@@ -1,153 +1,146 @@
-From: Mandell Degerness <mandell@pistoncloud.com>
-Subject: Re: Possible deadlock condition
-Date: Mon, 18 Jun 2012 15:17:57 -0700
-Message-ID: <CA+jddaO_BY08H2PPb17EKGLZ3TS1BZ7XpxSUxswPRAZ-QN1Cfg@mail.gmail.com>
-References: <CA+jddaPMp5R0adi2sLVUWeFytDzfOjAeryXL+jPjGAk8kKqafg@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: Heavy speed difference between rbd and custom pool
+Date: Mon, 18 Jun 2012 17:23:49 -0500
+Message-ID: <4FDFAA75.5070309@inktank.com>
+References: <4FDFA01A.2010107@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:52816 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751348Ab2FRWR6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 18:17:58 -0400
-Received: by yhmm54 with SMTP id m54so4299827yhm.19
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Jun 2012 15:17:57 -0700 (PDT)
-In-Reply-To: <CA+jddaPMp5R0adi2sLVUWeFytDzfOjAeryXL+jPjGAk8kKqafg@mail.gmail.com>
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:59698 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751305Ab2FRWX6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 18:23:58 -0400
+Received: by gglu4 with SMTP id u4so4163953ggl.19
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Jun 2012 15:23:57 -0700 (PDT)
+In-Reply-To: <4FDFA01A.2010107@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Here is, perhaps, a more useful traceback from a different run of
-tests that we just ran into:
-
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.680815] INFO: task
-flush-254:0:29582 blocked for more than 120 seconds.
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.681040] "echo 0 >
-/proc/sys/kernel/hung_task_timeout_secs" disables this message.
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.681458] flush-254:0
-  D ffff880bd9ca2fc0     0 29582      2 0x00000000
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.681740]
-ffff88006e51d160 0000000000000046 0000000000000002 ffff88061b362040
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.682173]
-ffff88006e51d160 00000000000120c0 00000000000120c0 00000000000120c0
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.682659]
-ffff88006e51dfd8 00000000000120c0 00000000000120c0 ffff88006e51dfd8
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683088] Call Trace:
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683302]
-[<ffffffff81520132>] schedule+0x5a/0x5c
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683514]
-[<ffffffff815203e7>] schedule_timeout+0x36/0xe3
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683784]
-[<ffffffff8101e0b2>] ? physflat_send_IPI_mask+0xe/0x10
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683999]
-[<ffffffff8101a237>] ? native_smp_send_reschedule+0x46/0x48
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.684219]
-[<ffffffff811e0071>] ? list_move_tail+0x27/0x2c
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.684432]
-[<ffffffff81520d13>] __down_common+0x90/0xd4
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.684708]
-[<ffffffff811e1120>] ? _xfs_buf_find+0x17f/0x210
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.684925]
-[<ffffffff81520dca>] __down+0x1d/0x1f
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.685139]
-[<ffffffff8105db4e>] down+0x2d/0x3d
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.685350]
-[<ffffffff811e0f68>] xfs_buf_lock+0x76/0xaf
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.685565]
-[<ffffffff811e1120>] _xfs_buf_find+0x17f/0x210
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.685836]
-[<ffffffff811e13b6>] xfs_buf_get+0x2a/0x177
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.686052]
-[<ffffffff811e19f6>] xfs_buf_read+0x1f/0xca
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.686270]
-[<ffffffff8122a0b7>] xfs_trans_read_buf+0x205/0x308
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.686490]
-[<ffffffff81205e01>] xfs_btree_read_buf_block.clone.22+0x4f/0xa7
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687015]
-[<ffffffff8122a3ee>] ? xfs_trans_log_buf+0xb2/0xc1
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687232]
-[<ffffffff81205edd>] xfs_btree_lookup_get_block+0x84/0xac
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687449]
-[<ffffffff81208e83>] xfs_btree_lookup+0x12b/0x3dc
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687721]
-[<ffffffff811f6bb2>] ? xfs_alloc_vextent+0x447/0x469
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687939]
-[<ffffffff811fd171>] xfs_bmbt_lookup_eq+0x1f/0x21
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.688156]
-[<ffffffff811ffa88>] xfs_bmap_add_extent_delay_real+0x5b5/0xfec
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.688378]
-[<ffffffff810f155b>] ? kmem_cache_alloc+0x87/0xf3
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.688650]
-[<ffffffff81204c40>] ? xfs_bmbt_init_cursor+0x3f/0x107
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.688867]
-[<ffffffff81201160>] xfs_bmapi_allocate+0x1f6/0x23a
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.689084]
-[<ffffffff812185bd>] ? xfs_iext_bno_to_irec+0x95/0xb9
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.689301]
-[<ffffffff81203414>] xfs_bmapi_write+0x32d/0x5a2
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.689519]
-[<ffffffff811e99e4>] xfs_iomap_write_allocate+0x1a5/0x29f
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.689797]
-[<ffffffff811df12a>] xfs_map_blocks+0x13e/0x1dd
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690016]
-[<ffffffff811dfbff>] xfs_vm_writepage+0x24e/0x410
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690233]
-[<ffffffff810bde1e>] __writepage+0x17/0x30
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690446]
-[<ffffffff810be6ed>] write_cache_pages+0x276/0x3c8
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690693]
-[<ffffffff810bde07>] ? set_page_dirty+0x60/0x60
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690908]
-[<ffffffff810be884>] generic_writepages+0x45/0x5c
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.691123]
-[<ffffffff811defcb>] xfs_vm_writepages+0x4d/0x54
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.691337]
-[<ffffffff810bf832>] do_writepages+0x21/0x2a
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.691552]
-[<ffffffff811218f5>] writeback_single_inode+0x12a/0x2cc
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.691800]
-[<ffffffff81121d92>] writeback_sb_inodes+0x174/0x215
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692016]
-[<ffffffff81122185>] __writeback_inodes_wb+0x78/0xb9
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692231]
-[<ffffffff811224b5>] wb_writeback+0x136/0x22a
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692444]
-[<ffffffff810becd1>] ? determine_dirtyable_memory+0x1d/0x26
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692692]
-[<ffffffff81122d1e>] wb_do_writeback+0x19c/0x1b7
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692907]
-[<ffffffff81122dc5>] bdi_writeback_thread+0x8c/0x20f
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.693122]
-[<ffffffff81122d39>] ? wb_do_writeback+0x1b7/0x1b7
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.693336]
-[<ffffffff81122d39>] ? wb_do_writeback+0x1b7/0x1b7
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.693553]
-[<ffffffff8105911d>] kthread+0x82/0x8a
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.693803]
-[<ffffffff81523c34>] kernel_thread_helper+0x4/0x10
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.694018]
-[<ffffffff8105909b>] ? kthread_worker_fn+0x13b/0x13b
-Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.694232]
-[<ffffffff81523c30>] ? gs_change+0xb/0xb
-
-
-On Mon, Jun 18, 2012 at 11:37 AM, Mandell Degerness
-<mandell@pistoncloud.com> wrote:
-> We've been seeing random issues of apparent deadlocks. =A0We are runn=
-ing
-> ceph 0.47 on kernel 3.2.18. =A0OSDs are running on XFS file system.
-> mysqld (which ran into the particular problems in the attached kernel
-> log) is running on an RBD with XFS (mounted on a system which include=
-s
-> OSDs). =A0We have sync_fs, and gcc ver 4.5.3-r2. =A0The mysqld proces=
-s in
-> both instances returned an error to the calling process.
+On 06/18/2012 04:39 PM, Stefan Priebe wrote:
+> Hello list,
 >
-> Regards,
-> Mandell Degerness
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> i'm getting these rbd bench values for pool rbd. They're high and constant.
+> ----------------------------- RBD pool
+> # rados -p rbd bench 30 write -t 16
+> Maintaining 16 concurrent writes of 4194304 bytes for at least 30 seconds.
+> sec Cur ops started finished avg MB/s cur MB/s last lat avg lat
+> 0 0 0 0 0 0 - 0
+> 1 16 274 258 1031.77 1032 0.043758 0.0602236
+> 2 16 549 533 1065.82 1100 0.072168 0.0590944
+> 3 16 825 809 1078.5 1104 0.040162 0.058682
+> 4 16 1103 1087 1086.84 1112 0.052508 0.0584277
+> 5 16 1385 1369 1095.04 1128 0.060233 0.0581288
+> 6 16 1654 1638 1091.85 1076 0.050697 0.0583385
+> 7 16 1939 1923 1098.71 1140 0.063716 0.057964
+> 8 16 2219 2203 1101.35 1120 0.055435 0.0579105
+> 9 16 2497 2481 1102.52 1112 0.060413 0.0578282
+> 10 16 2773 2757 1102.66 1104 0.051134 0.0578561
+> 11 16 3049 3033 1102.77 1104 0.057742 0.0578803
+> 12 16 3326 3310 1103.19 1108 0.053769 0.0578627
+> 13 16 3604 3588 1103.86 1112 0.064574 0.0578453
+> 14 16 3883 3867 1104.72 1116 0.056524 0.0578018
+> 15 16 4162 4146 1105.46 1116 0.054581 0.0577626
+> 16 16 4440 4424 1105.86 1112 0.079015 0.057758
+> 17 16 4725 4709 1107.86 1140 0.043511 0.0576647
+> 18 16 5007 4991 1108.97 1128 0.053005 0.0576147
+> 19 16 5292 5276 1110.6 1140 0.069004 0.057538
+> 2012-06-18 23:36:19.124472min lat: 0.028568 max lat: 0.201941 avg lat:
+> 0.0574953
+> sec Cur ops started finished avg MB/s cur MB/s last lat avg lat
+> 20 16 5574 5558 1111.46 1128 0.048482 0.0574953
+> 21 16 5861 5845 1113.18 1148 0.051923 0.0574146
+> 22 16 6147 6131 1114.58 1144 0.04461 0.0573461
+> 23 16 6438 6422 1116.72 1164 0.050383 0.0572406
+> 24 16 6724 6708 1117.85 1144 0.067827 0.0571864
+> 25 16 7008 6992 1118.57 1136 0.049128 0.057147
+> 26 16 7296 7280 1119.85 1152 0.050331 0.0570879
+> 27 16 7573 7557 1119.4 1108 0.052711 0.0571132
+> 28 16 7858 7842 1120.13 1140 0.056369 0.0570764
+> 29 16 8143 8127 1120.81 1140 0.046558 0.0570438
+> 30 16 8431 8415 1121.85 1152 0.049958 0.0569942
+> Total time run: 30.045481
+> Total writes made: 8431
+> Write size: 4194304
+> Bandwidth (MB/sec): 1122.432
+>
+> Stddev Bandwidth: 26.0451
+> Max bandwidth (MB/sec): 1164
+> Min bandwidth (MB/sec): 1032
+> Average Latency: 0.0570069
+> Stddev Latency: 0.0128039
+> Max latency: 0.235536
+> Min latency: 0.028568
+> -----------------------------
+>
+> I created then a custom pool called kvmpool.
+>
+> ~# ceph osd pool create kvmpool
+> pool 'kvmpool' created
+>
+> But with this one i get slow and jumping values:
+> -------------------------------- kvmpool
+> ~# rados -p kvmpool bench 30 write -t 16
+> Maintaining 16 concurrent writes of 4194304 bytes for at least 30 seconds.
+> sec Cur ops started finished avg MB/s cur MB/s last lat avg lat
+> 0 0 0 0 0 0 - 0
+> 1 16 231 215 859.863 860 0.204867 0.069195
+> 2 16 393 377 753.899 648 0.049444 0.0811933
+> 3 16 535 519 691.908 568 0.232365 0.0899074
+> 4 16 634 618 617.913 396 0.032758 0.0963399
+> 5 16 806 790 631.913 688 0.075811 0.099529
+> 6 16 948 932 621.249 568 0.156988 0.10179
+> 7 16 1086 1070 611.348 552 0.036177 0.102064
+> 8 16 1206 1190 594.922 480 0.028491 0.105235
+> 9 16 1336 1320 586.589 520 0.041009 0.108735
+> 10 16 1512 1496 598.32 704 0.258165 0.105086
+> 11 16 1666 1650 599.921 616 0.040967 0.106146
+> 12 15 1825 1810 603.255 640 0.198851 0.105463
+> 13 16 1925 1909 587.309 396 0.042577 0.108449
+> 14 16 2135 2119 605.352 840 0.035767 0.105219
+> 15 16 2272 2256 601.523 548 0.246136 0.105357
+> 16 16 2426 2410 602.424 616 0.19881 0.105692
+> 17 16 2529 2513 591.22 412 0.031322 0.105463
+> 18 16 2696 2680 595.48 668 0.028081 0.106749
+> 19 16 2878 2862 602.449 728 0.044929 0.105856
+> 2012-06-18 23:38:45.566094min lat: 0.023295 max lat: 0.763797 avg lat:
+> 0.105597
+> sec Cur ops started finished avg MB/s cur MB/s last lat avg lat
+> 20 16 3041 3025 604.921 652 0.036028 0.105597
+> 21 16 3182 3166 602.964 564 0.035072 0.104915
+> 22 16 3349 3333 605.916 668 0.030493 0.105304
+> 23 16 3512 3496 607.917 652 0.030523 0.10479
+> 24 16 3668 3652 608.584 624 0.232933 0.10475
+> 25 16 3821 3805 608.717 612 0.029881 0.104513
+> 26 16 3963 3947 607.148 568 0.050244 0.10531
+> 27 16 4112 4096 606.733 596 0.259069 0.105008
+> 28 16 4261 4245 606.347 596 0.211877 0.105215
+> 29 16 4437 4421 609.712 704 0.02802 0.104613
+> 30 16 4566 4550 606.586 516 0.047076 0.105111
+> Total time run: 30.062141
+> Total writes made: 4566
+> Write size: 4194304
+> Bandwidth (MB/sec): 607.542
+>
+> Stddev Bandwidth: 109.112
+> Max bandwidth (MB/sec): 860
+> Min bandwidth (MB/sec): 396
+> Average Latency: 0.10532
+> Stddev Latency: 0.108369
+> Max latency: 0.763797
+> Min latency: 0.023295
+> --------------------------------
+>
+> Why do these pools differ? Where is the difference?
+>
+> Stefan
+
+Are the number of placement groups the same for each pool?
+
+try running "ceph osd dump -o - | grep <pool>" and looking for the 
+pg_num value.
+
+Mark
+
