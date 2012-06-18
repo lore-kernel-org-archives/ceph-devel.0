@@ -1,170 +1,670 @@
 From: Alexandre DERUMIER <aderumier@odiso.com>
 Subject: Re: iostat show constants write to osd disk with writeahead journal, normal behaviour ?
-Date: Mon, 18 Jun 2012 16:47:18 +0200 (CEST)
-Message-ID: <d8526549-5d30-4bc2-8dc3-9f08e4640466@mailpro>
+Date: Mon, 18 Jun 2012 16:50:57 +0200 (CEST)
+Message-ID: <ab1faa94-df41-47a6-8237-780c5f4d9a4b@mailpro>
 References: <4FDF39A1.4060905@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:59903 "EHLO
+Received: from mailpro.odiso.net ([89.248.209.98]:35915 "EHLO
 	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751220Ab2FROrm convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 10:47:42 -0400
+	with ESMTP id S1752627Ab2FROvW convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 10:51:22 -0400
 In-Reply-To: <4FDF39A1.4060905@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mark.nelson@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
->>Yeah, I just wanted to make sure that the constant writes weren't=20
->>because the filestore was falling behind. You may want to take a look=
-=20
->>at some of the information that is provided by the admin socket for t=
-he=20
->>OSD while the test is running. dump_ops_in_flight, perf schema, and p=
-erf=20
->>dump are all useful.
+forget to send iostat -x 1 trace
 
+(osd's are on sdb,sbc,sdd,sde,sdf)
 
-don't know which values to check in these big json reponses ;)
-But I have try with more osd, so write are splitted on more disks and a=
-nd write are smaller, and the behaviour is same
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    55,00    0,00   31,00     0,00  1468,00    94=
+,71     0,21    6,77    0,00    6,77   5,16  16,00
+sdb               0,00     0,00    0,00   74,00     0,00 20516,00   554=
+,49     2,74   38,78    0,00   38,78   3,51  26,00
+sdc               0,00     0,00    0,00   57,00     0,00 15520,00   544=
+,56     1,77   28,60    0,00   28,60   3,68  21,00
+sdd               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,52   32,50    0,00   32,50   4,38   7,00
+sde               0,00     0,00    0,00   15,00     0,00  4104,00   547=
+,20     0,48   32,00    0,00   32,00   4,00   6,00
+sdf               0,00     0,00    0,00   46,00     0,00 12316,00   535=
+,48     1,42   30,87    0,00   30,87   3,70  17,00
 
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,55    0,00    7,09    1,16    0,00   90,21
 
-root@cephtest1:/var/run/ceph# ceph --admin-daemon ceph-osd.0.asok dump_=
-ops_in_flight
-{ "num_ops": 1,
-  "ops": [
-        { "description": "osd_op(client.4179.0:83 kvmtest1_1006560_obje=
-ct82 [write 0~4194304] 3.9f5c55af)",
-          "received_at": "2012-06-18 16:41:17.995167",
-          "age": "0.406678",
-          "flag_point": "waiting for sub ops",
-          "client_info": { "client": "client.4179",
-              "tid": 83}}]}
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    37,00    0,00   20,00     0,00   236,00    23=
+,60     0,12    6,00    0,00    6,00   5,00  10,00
+sdb               0,00     0,00    0,00   41,00     0,00 10780,00   525=
+,85     1,03   21,46    0,00   21,46   3,66  15,00
+sdc               0,00     0,00    0,00   78,00     0,00 21416,00   549=
+,13     3,20   42,82    0,00   42,82   3,08  24,00
+sdd               0,00    18,00    0,00  121,00     0,00 24859,00   410=
+,89     3,00   24,79    0,00   24,79   3,06  37,00
+sde               0,00     0,00    0,00    0,00     0,00     0,00     0=
+,00     0,00    0,00    0,00    0,00   0,00   0,00
+sdf               0,00    15,00    0,00   75,00     0,00 12521,00   333=
+,89     2,12   28,27    0,00   28,27   3,47  26,00
 
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,51    0,00    6,52    1,38    0,00   89,59
 
-root@cephtest1:/var/run/ceph# ceph --admin-daemon ceph-osd.0.asok perfc=
-ounters_dump
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    30,00    0,00   19,00     0,00   204,00    21=
+,47     0,10    5,26    0,00    5,26   5,26  10,00
+sdb               0,00    23,00    0,00  105,00     0,00 18281,50   348=
+,22     3,92   38,67    0,00   38,67   3,33  35,00
+sdc               0,00     0,00    0,00   31,00     0,00  8212,00   529=
+,81     0,89   28,71    0,00   28,71   3,87  12,00
+sdd               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,35   30,00    0,00   30,00   3,78  17,00
+sde               0,00    17,00    0,00   42,00     0,00  4308,00   205=
+,14     1,14   27,14    0,00   27,14   3,33  14,00
+sdf               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,33   29,56    0,00   29,56   3,78  17,00
 
-{"filestore":{"journal_queue_max_ops":500,"journal_queue_ops":0,"journa=
-l_ops":2198,"journal_queue_max_bytes":104857600,"journal_queue_bytes":0=
-,"journal_bytes":1012769525,"journal_latency":{"avgcount":2198,"sum":3.=
-13569},"op_queue_max_ops":500,"op_queue_ops":0,"ops":2198,"op_queue_max=
-_bytes":104857600,"op_queue_bytes":0,"bytes":1012757330,"apply_latency"=
-:{"avgcount":2198,"sum":290.27},"committing":0,"commitcycle":59,"commit=
-cycle_interval":{"avgcount":59,"sum":300.04},"commitcycle_latency":{"av=
-gcount":59,"sum":4.76299},"journal_full":0},"osd":{"opq":0,"op_wip":0,"=
-op":127,"op_in_bytes":532692449,"op_out_bytes":0,"op_latency":{"avgcoun=
-t":127,"sum":49.2627},"op_r":0,"op_r_out_bytes":0,"op_r_latency":{"avgc=
-ount":0,"sum":0},"op_w":127,"op_w_in_bytes":532692449,"op_w_rlat":{"avg=
-count":127,"sum":0},"op_w_latency":{"avgcount":127,"sum":49.2627},"op_r=
-w":0,"op_rw_in_bytes":0,"op_rw_out_bytes":0,"op_rw_rlat":{"avgcount":0,=
-"sum":0},"op_rw_latency":{"avgcount":0,"sum":0},"subop":114,"subop_in_b=
-ytes":478212311,"subop_latency":{"avgcount":114,"sum":8.82174},"subop_w=
-":0,"subop_w_in_bytes":478212311,"subop_w_latency":{"avgcount":114,"sum=
-":8.82174},"subop_pull":0,"subop_pull_latency":{"avgcount":0,"sum":0},"=
-subop_push":0,"subop_push_in_bytes":0,"subop_push_latency":{"avgcount":=
-0,"sum":0},"pull":0,"push":0,"push_out_bytes":0,"recovery_ops":0,"loada=
-vg":0.47,"buffer_bytes":0,"numpg":423,"numpg_primary":259,"numpg_replic=
-a":164,"numpg_stray":0,"heartbeat_to_peers":10,"heartbeat_from_peers":0=
-,"map_messages":34,"map_message_epochs":44,"map_message_epoch_dups":24}=
-,"throttle-filestore_bytes":{"val":0,"max":104857600,"get":0,"get_sum":=
-0,"get_or_fail_fail":0,"get_or_fail_success":0,"take":2198,"take_sum":1=
-012769525,"put":1503,"put_sum":1012769525,"wait":{"avgcount":0,"sum":0}=
-},"throttle-filestore_ops":{"val":0,"max":500,"get":0,"get_sum":0,"get_=
-or_fail_fail":0,"get_or_fail_success":0,"take":2198,"take_sum":2198,"pu=
-t":1503,"put_sum":2198,"wait":{"avgcount":0,"sum":0}},"throttle-msgr_di=
-spatch_throttler-client":{"val":4194469,"max":104857600,"get":243,"get_=
-sum":536987810,"get_or_fail_fail":0,"get_or_fail_success":0,"take":0,"t=
-ake_sum":0,"put":242,"put_sum":532793341,"wait":{"avgcount":0,"sum":0}}=
-,"throttle-msgr_dispatch_throttler-cluster":{"val":0,"max":104857600,"g=
-et":1480,"get_sum":482051948,"get_or_fail_fail":0,"get_or_fail_success"=
-:0,"take":0,"take_sum":0,"put":1480,"put_sum":482051948,"wait":{"avgcou=
-nt":0,"sum":0}},"throttle-msgr_dispatch_throttler-hbclient":{"val":0,"m=
-ax":104857600,"get":1077,"get_sum":50619,"get_or_fail_fail":0,"get_or_f=
-ail_success":0,"take":0,"take_sum":0,"put":1077,"put_sum":50619,"wait":=
-{"avgcount":0,"sum":0}},"throttle-msgr_dispatch_throttler-hbserver":{"v=
-al":0,"max":104857600,"get":972,"get_sum":45684,"get_or_fail_fail":0,"g=
-et_or_fail_success":0,"take":0,"take_sum":0,"put":972,"put_sum":45684,"=
-wait":{"avgcount":0,"sum":0}},"throttle-osd_client_bytes":{"val":419446=
-9,"max":524288000,"get":128,"get_sum":536892019,"get_or_fail_fail":0,"g=
-et_or_fail_success":0,"take":0,"take_sum":0,"put":254,"put_sum":5326975=
-50,"wait":{"avgcount":0,"sum":0}}}
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,28    0,00    4,31    0,00    0,00   93,41
 
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00     0,00    0,00    0,00     0,00     0,00     0=
+,00     0,00    0,00    0,00    0,00   0,00   0,00
+sdb               0,00     0,00    0,00   29,00     0,00  8204,00   565=
+,79     0,89   31,03    0,00   31,03   3,45  10,00
+sdc               0,00    21,00    0,00   85,00     0,00 12627,50   297=
+,12     2,66   31,29    0,00   31,29   2,94  25,00
+sdd               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,45   28,12    0,00   28,12   4,38   7,00
+sde               0,00     0,00    0,00   75,00     0,00 20520,00   547=
+,20     2,32   30,93    0,00   30,93   3,47  26,00
+sdf               0,00     0,00    0,00   17,00     0,00  4112,00   483=
+,76     0,39   22,94    0,00   22,94   2,94   5,00
 
-root@cephtest1:/var/run/ceph# ceph --admin-daemon ceph-osd.0.asok perfc=
-ounters_schema
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,92    0,00    8,97    1,54    0,00   87,56
 
-{"filestore":{"journal_queue_max_ops":{"type":2},"journal_queue_ops":{"=
-type":2},"journal_ops":{"type":10},"journal_queue_max_bytes":{"type":2}=
-,"journal_queue_bytes":{"type":2},"journal_bytes":{"type":10},"journal_=
-latency":{"type":5},"op_queue_max_ops":{"type":2},"op_queue_ops":{"type=
-":2},"ops":{"type":10},"op_queue_max_bytes":{"type":2},"op_queue_bytes"=
-:{"type":2},"bytes":{"type":10},"apply_latency":{"type":5},"committing"=
-:{"type":2},"commitcycle":{"type":10},"commitcycle_interval":{"type":5}=
-,"commitcycle_latency":{"type":5},"journal_full":{"type":10}},"osd":{"o=
-pq":{"type":2},"op_wip":{"type":2},"op":{"type":10},"op_in_bytes":{"typ=
-e":10},"op_out_bytes":{"type":10},"op_latency":{"type":5},"op_r":{"type=
-":10},"op_r_out_bytes":{"type":10},"op_r_latency":{"type":5},"op_w":{"t=
-ype":10},"op_w_in_bytes":{"type":10},"op_w_rlat":{"type":5},"op_w_laten=
-cy":{"type":5},"op_rw":{"type":10},"op_rw_in_bytes":{"type":10},"op_rw_=
-out_bytes":{"type":10},"op_rw_rlat":{"type":5},"op_rw_latency":{"type":=
-5},"subop":{"type":10},"subop_in_bytes":{"type":10},"subop_latency":{"t=
-ype":5},"subop_w":{"type":10},"subop_w_in_bytes":{"type":10},"subop_w_l=
-atency":{"type":5},"subop_pull":{"type":10},"subop_pull_latency":{"type=
-":5},"subop_push":{"type":10},"subop_push_in_bytes":{"type":10},"subop_=
-push_latency":{"type":5},"pull":{"type":10},"push":{"type":10},"push_ou=
-t_bytes":{"type":10},"recovery_ops":{"type":10},"loadavg":{"type":1},"b=
-uffer_bytes":{"type":2},"numpg":{"type":2},"numpg_primary":{"type":2},"=
-numpg_replica":{"type":2},"numpg_stray":{"type":2},"heartbeat_to_peers"=
-:{"type":2},"heartbeat_from_peers":{"type":2},"map_messages":{"type":10=
-},"map_message_epochs":{"type":10},"map_message_epoch_dups":{"type":10}=
-},"throttle-filestore_bytes":{"val":{"type":10},"max":{"type":10},"get"=
-:{"type":10},"get_sum":{"type":10},"get_or_fail_fail":{"type":10},"get_=
-or_fail_success":{"type":10},"take":{"type":10},"take_sum":{"type":10},=
-"put":{"type":10},"put_sum":{"type":10},"wait":{"type":5}},"throttle-fi=
-lestore_ops":{"val":{"type":10},"max":{"type":10},"get":{"type":10},"ge=
-t_sum":{"type":10},"get_or_fail_fail":{"type":10},"get_or_fail_success"=
-:{"type":10},"take":{"type":10},"take_sum":{"type":10},"put":{"type":10=
-},"put_sum":{"type":10},"wait":{"type":5}},"throttle-msgr_dispatch_thro=
-ttler-client":{"val":{"type":10},"max":{"type":10},"get":{"type":10},"g=
-et_sum":{"type":10},"get_or_fail_fail":{"type":10},"get_or_fail_success=
-":{"type":10},"take":{"type":10},"take_sum":{"type":10},"put":{"type":1=
-0},"put_sum":{"type":10},"wait":{"type":5}},"throttle-msgr_dispatch_thr=
-ottler-cluster":{"val":{"type":10},"max":{"type":10},"get":{"type":10},=
-"get_sum":{"type":10},"get_or_fail_fail":{"type":10},"get_or_fail_succe=
-ss":{"type":10},"take":{"type":10},"take_sum":{"type":10},"put":{"type"=
-:10},"put_sum":{"type":10},"wait":{"type":5}},"throttle-msgr_dispatch_t=
-hrottler-hbclient":{"val":{"type":10},"max":{"type":10},"get":{"type":1=
-0},"get_sum":{"type":10},"get_or_fail_fail":{"type":10},"get_or_fail_su=
-ccess":{"type":10},"take":{"type":10},"take_sum":{"type":10},"put":{"ty=
-pe":10},"put_sum":{"type":10},"wait":{"type":5}},"throttle-msgr_dispatc=
-h_throttler-hbserver":{"val":{"type":10},"max":{"type":10},"get":{"type=
-":10},"get_sum":{"type":10},"get_or_fail_fail":{"type":10},"get_or_fail=
-_success":{"type":10},"take":{"type":10},"take_sum":{"type":10},"put":{=
-"type":10},"put_sum":{"type":10},"wait":{"type":5}},"throttle-osd_clien=
-t_bytes":{"val":{"type":10},"max":{"type":10},"get":{"type":10},"get_su=
-m":{"type":10},"get_or_fail_fail":{"type":10},"get_or_fail_success":{"t=
-ype":10},"take":{"type":10},"take_sum":{"type":10},"put":{"type":10},"p=
-ut_sum":{"type":10},"wait":{"type":5}}}
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    51,00    0,00   32,00     0,00  1432,00    89=
+,50     0,21    7,19    0,00    7,19   5,00  16,00
+sdb               0,00     0,00    0,00   60,00     0,00 16416,00   547=
+,20     1,59   26,50    0,00   26,50   3,33  20,00
+sdc               0,00     0,00    0,00   48,00     0,00 12324,00   513=
+,50     1,41   23,96    0,00   23,96   3,54  17,00
+sdd               0,00     0,00    0,00   31,00     0,00  8212,00   529=
+,81     0,79   25,48    0,00   25,48   3,23  10,00
+sde               0,00     0,00    0,00   66,00     0,00 17704,00   536=
+,48     2,96   40,76    0,00   40,76   3,79  25,00
+sdf               0,00     0,00    0,00   46,00     0,00 12316,00   535=
+,48     1,33   28,91    0,00   28,91   3,91  18,00
 
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,29    0,00    5,22    1,66    0,00   90,83
 
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    51,00    0,00   30,00     0,00  1460,00    97=
+,33     0,15    5,00    0,00    5,00   4,67  14,00
+sdb               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,31   29,11    0,00   29,11   3,78  17,00
+sdc               0,00     0,00    0,00   29,00     0,00  8204,00   565=
+,79     0,62   30,34    0,00   30,34   3,45  10,00
+sdd               0,00     0,00    0,00   33,00     0,00  8220,00   498=
+,18     1,13   30,30    0,00   30,30   4,24  14,00
+sde               0,00     0,00    0,00   40,00     0,00 11028,00   551=
+,40     0,91   29,50    0,00   29,50   3,50  14,00
+sdf               0,00     0,00    0,00   64,00     0,00 16432,00   513=
+,50     1,69   26,41    0,00   26,41   3,91  25,00
 
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,93    0,00    6,05    1,93    0,00   90,09
 
->> Nuts. Do you still see the little peaks/valleys every couple seconds=
-?=20
-I see some little peak/valleys, but iostat is not precise enough if thi=
-nk, I'll try to do some seekwatcher movie.
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    34,00    0,00   19,00     0,00   220,00    23=
+,16     0,11    5,79    0,00    5,79   5,79  11,00
+sdb               0,00     0,00    0,00    0,00     0,00     0,00     0=
+,00     0,00    0,00    0,00    0,00   0,00   0,00
+sdc               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,13   25,11    0,00   25,11   3,33  15,00
+sdd               0,00    25,00    0,00  110,00     0,00 20841,00   378=
+,93     3,39   32,00    0,00   32,00   3,09  34,00
+sde               0,00     0,00    0,00  106,00     0,00 28732,00   542=
+,11     3,35   31,60    0,00   31,60   3,40  36,00
+sdf               0,00    21,00    0,00   57,00     0,00  4431,00   155=
+,47     2,18   38,25    0,00   38,25   3,16  18,00
 
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,29    0,00    7,64    2,17    0,00   87,90
 
-Do you have a seekwatcher movie of a normal write behaviour ?
-Do I need to see small peak period (when journal is flushed to osd) and=
- long valley period ?
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    30,00    0,00   18,00     0,00   200,00    22=
+,22     0,10    5,56    0,00    5,56   5,56  10,00
+sdb               0,00    29,00    0,00   92,00     0,00 16730,50   363=
+,71     2,95   32,07    0,00   32,07   3,59  33,00
+sdc               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,36   22,50    0,00   22,50   3,12   5,00
+sdd               0,00     0,00    0,00   51,00     0,00 12968,00   508=
+,55     1,18   20,98    0,00   20,98   3,33  17,00
+sde               0,00    33,00    0,00  115,00     0,00 20908,50   363=
+,63     4,25   36,96    0,00   36,96   3,39  39,00
+sdf               0,00     0,00    0,00   30,00     0,00  8208,00   547=
+,20     0,70   23,33    0,00   23,33   3,00   9,00
 
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,14    0,00    7,37    1,14    0,00   90,34
 
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    37,00    0,00   22,00     0,00   244,00    22=
+,18     0,12    5,45    0,00    5,45   4,55  10,00
+sdb               0,00     0,00    0,00   82,00     0,00 22444,00   547=
+,41     2,53   27,80    0,00   27,80   3,41  28,00
+sdc               0,00    19,00    0,00   65,00     0,00  8475,00   260=
+,77     2,14   32,92    0,00   32,92   3,08  20,00
+sdd               0,00     0,00    0,00   11,00     0,00  3456,00   628=
+,36     0,23   30,91    0,00   30,91   2,73   3,00
+sde               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,28   28,44    0,00   28,44   3,56  16,00
+sdf               0,00     0,00    0,00   60,00     0,00 16416,00   547=
+,20     1,72   28,67    0,00   28,67   3,33  20,00
 
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,18    0,00    6,40    1,54    0,00   89,88
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    49,00    0,00   31,00     0,00  1420,00    91=
+,61     0,20    6,45    0,00    6,45   5,16  16,00
+sdb               0,00     0,00    0,00   39,00     0,00 10392,00   532=
+,92     1,07   33,85    0,00   33,85   3,85  15,00
+sdc               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,37   30,44    0,00   30,44   4,00  18,00
+sdd               0,00     0,00    0,00   60,00     0,00 16416,00   547=
+,20     1,76   29,33    0,00   29,33   3,67  22,00
+sde               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,39   24,38    0,00   24,38   3,75   6,00
+sdf               0,00     0,00    0,00   83,00     0,00 22448,00   540=
+,92     2,55   28,19    0,00   28,19   3,73  31,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,66    0,00    4,95    1,65    0,00   90,74
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    57,00    0,00   32,00     0,00  1492,00    93=
+,25     0,18    5,62    0,00    5,62   4,06  13,00
+sdb               0,00     0,00    0,00   73,00     0,00 19628,00   537=
+,75     2,23   28,90    0,00   28,90   3,70  27,00
+sdc               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,49   30,62    0,00   30,62   4,38   7,00
+sdd               0,00     0,00    0,00   30,00     0,00  8208,00   547=
+,20     0,72   24,00    0,00   24,00   3,33  10,00
+sde               0,00     0,00    0,00   46,00     0,00 12316,00   535=
+,48     1,34   29,13    0,00   29,13   4,13  19,00
+sdf               0,00     0,00    0,00   53,00     0,00 14492,00   546=
+,87     1,02   23,21    0,00   23,21   3,21  17,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,02    0,00    4,45    1,27    0,00   93,26
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    38,00    0,00   21,00     0,00   244,00    23=
+,24     0,12    5,71    0,00    5,71   4,76  10,00
+sdb               0,00     0,00    0,00   79,00     0,00 21420,00   542=
+,28     3,87   50,51    0,00   50,51   3,42  27,00
+sdc               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,49   30,62    0,00   30,62   3,75   6,00
+sdd               0,00    23,00    0,00   51,00     0,00  4391,50   172=
+,22     1,58   30,98    0,00   30,98   3,33  17,00
+sde               0,00     0,00    0,00    1,00     0,00     4,00     8=
+,00     0,00    0,00    0,00    0,00   0,00   0,00
+sdf               0,00    27,00    0,00   81,00     0,00 11756,00   290=
+,27     2,52   30,00    0,00   30,00   3,33  27,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,78    0,00    4,71    1,27    0,00   92,23
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    32,00    0,00   19,00     0,00   212,00    22=
+,32     0,10    5,26    0,00    5,26   4,74   9,00
+sdb               0,00    42,00    0,00   97,00     0,00  4819,50    99=
+,37     5,26   54,23    0,00   54,23   3,20  31,00
+sdc               0,00    19,00    0,00  127,00     0,00 16998,50   267=
+,69     4,95   38,98    0,00   38,98   2,76  35,00
+sdd               0,00    17,00    0,00   83,00     0,00 12656,00   304=
+,96     3,03   36,51    0,00   36,51   3,25  27,00
+sde               0,00    28,00    0,00   99,00     0,00 12794,50   258=
+,47     3,59   35,76    0,00   35,76   3,03  30,00
+sdf               0,00    19,00    0,00   56,00     0,00  5343,50   190=
+,84     2,15   40,00    0,00   40,00   3,04  17,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,69    0,00    7,68    1,15    0,00   88,48
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    31,00    0,00   20,00     0,00   212,00    21=
+,20     0,12    6,00    0,00    6,00   5,50  11,00
+sdb               0,00     0,00    0,00   90,00     0,00 24624,00   547=
+,20     3,31   36,78    0,00   36,78   3,78  34,00
+sdc               0,00    11,00    0,00  102,00     0,00 20699,50   405=
+,87     2,72   26,67    0,00   26,67   3,33  34,00
+sdd               0,00     0,00    0,00   23,00     0,00  6032,00   524=
+,52     0,72   22,17    0,00   22,17   3,91   9,00
+sde               0,00     0,00    0,00   46,00     0,00 12316,00   535=
+,48     1,47   33,04    0,00   33,04   3,91  18,00
+sdf               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,49   33,11    0,00   33,11   3,56  16,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,94    0,00    7,54    1,79    0,00   87,72
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    49,00    0,00   31,00     0,00  1420,00    91=
+,61     0,18    5,81    0,00    5,81   4,84  15,00
+sdb               0,00     0,00    0,00  121,00     0,00 32836,00   542=
+,74     4,80   39,67    0,00   39,67   3,55  43,00
+sdc               0,00     0,00    0,00   33,00     0,00  8217,00   498=
+,00     1,11   29,70    0,00   29,70   4,24  14,00
+sdd               0,00     0,00    0,00   52,00     0,00 14488,00   557=
+,23     1,44   31,73    0,00   31,73   3,85  20,00
+sde               0,00     0,00    0,00   17,00     0,00  4112,00   483=
+,76     0,38   22,35    0,00   22,35   3,53   6,00
+sdf               0,00     0,00    0,00   15,00     0,00  4104,00   547=
+,20     0,49   32,67    0,00   32,67   4,00   6,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,81    0,00    5,63    1,28    0,00   90,28
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    54,00    0,00   30,00     0,00  1472,00    98=
+,13     0,18    6,00    0,00    6,00   4,67  14,00
+sdb               0,00     0,00    0,00   31,00     0,00  8212,00   529=
+,81     0,99   31,94    0,00   31,94   2,90   9,00
+sdc               0,00     0,00    0,00   43,00     0,00 12304,00   572=
+,28     1,01   26,51    0,00   26,51   3,26  14,00
+sdd               0,00     0,00    0,00   60,00     0,00 16416,00   547=
+,20     1,84   30,67    0,00   30,67   3,67  22,00
+sde               0,00     0,00    0,00   60,00     0,00 16416,00   547=
+,20     2,13   35,50    0,00   35,50   4,00  24,00
+sdf               0,00     0,00    0,00   61,00     0,00 16420,00   538=
+,36     1,77   29,02    0,00   29,02   3,77  23,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,18    0,00    5,51    1,41    0,00   90,90
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    35,00    0,00   21,00     0,00   232,00    22=
+,10     0,12    5,71    0,00    5,71   4,29   9,00
+sdb               0,00     0,00    0,00    9,00     0,00  1932,00   429=
+,33     0,40   21,11    0,00   21,11   4,44   4,00
+sdc               0,00     0,00    0,00   61,00     0,00 16420,00   538=
+,36     1,78   29,18    0,00   29,18   3,44  21,00
+sdd               0,00    22,00    0,00   72,00     0,00 12542,50   348=
+,40     2,15   29,86    0,00   29,86   3,61  26,00
+sde               0,00     0,00    0,00   35,00     0,00  8860,00   506=
+,29     0,94   23,71    0,00   23,71   4,00  14,00
+sdf               0,00    20,00    0,00   92,00     0,00 16663,00   362=
+,24     3,23   35,11    0,00   35,11   3,48  32,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,93    0,00    5,15    1,03    0,00   91,89
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    37,00    0,00   22,00     0,00   244,00    22=
+,18     0,11    5,00    0,00    5,00   4,09   9,00
+sdb               0,00    27,00    0,00   62,00     0,00  6624,50   213=
+,69     1,93   34,52    0,00   34,52   2,74  17,00
+sdc               0,00     0,00    0,00   76,00     0,00 20524,00   540=
+,11     2,62   34,47    0,00   34,47   3,55  27,00
+sdd               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,40   31,11    0,00   31,11   4,00  18,00
+sde               0,00    20,00    0,00   84,00     0,00 13861,00   330=
+,02     2,24   26,31    0,00   26,31   3,21  27,00
+sdf               0,00     0,00    0,00   30,00     0,00  8208,00   547=
+,20     0,95   31,67    0,00   31,67   4,00  12,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,93    0,00    5,39    1,16    0,00   91,53
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    31,00    0,00   19,00     0,00   208,00    21=
+,89     0,11    5,79    0,00    5,79   5,26  10,00
+sdb               0,00     0,00    0,00   15,00     0,00  3852,00   513=
+,60     0,30   18,00    0,00   18,00   3,33   5,00
+sdc               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,19   26,44    0,00   26,44   3,56  16,00
+sdd               0,00     0,00    0,00  107,00     0,00 28736,00   537=
+,12     2,85   26,64    0,00   26,64   3,64  39,00
+sde               0,00     0,00    0,00   23,00     0,00  6284,00   546=
+,43     0,55   30,00    0,00   30,00   3,91   9,00
+sdf               0,00     0,00    0,00   46,00     0,00 12316,00   535=
+,48     1,34   29,13    0,00   29,13   3,48  16,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,78    0,00    6,49    1,78    0,00   89,95
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    49,00    0,00   30,00     0,00  1416,00    94=
+,40     0,17    5,67    0,00    5,67   5,00  15,00
+sdb               0,00     0,00    0,00    1,00     0,00   256,00   512=
+,00     0,00   30,00    0,00   30,00   0,00   0,00
+sdc               0,00    22,00    0,00  100,00     0,00 16746,00   334=
+,92     3,90   39,00    0,00   39,00   3,20  32,00
+sdd               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,37   23,12    0,00   23,12   3,75   6,00
+sde               0,00     0,00    0,00  106,00     0,00 28732,00   542=
+,11     3,62   34,15    0,00   34,15   3,58  38,00
+sdf               0,00     0,00    0,00   46,00     0,00 12316,00   535=
+,48     1,24   26,96    0,00   26,96   3,70  17,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,79    0,00    6,03    1,67    0,00   90,51
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    54,00    0,00   34,00     0,00  1496,00    88=
+,00     0,20    5,88    0,00    5,88   4,71  16,00
+sdb               0,00     0,00    0,00  134,00     0,00 36680,00   547=
+,46     4,01   29,63    0,00   29,63   3,58  48,00
+sdc               0,00     0,00    0,00   31,00     0,00  8212,00   529=
+,81     0,92   29,68    0,00   29,68   3,87  12,00
+sdd               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,35   21,88    0,00   21,88   3,12   5,00
+sde               0,00     0,00    0,00   17,00     0,00  4112,00   483=
+,76     0,48   28,24    0,00   28,24   4,12   7,00
+sdf               0,00     0,00    0,00   15,00     0,00  4104,00   547=
+,20     0,50   33,33    0,00   33,33   4,00   6,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,30    0,00    6,79    1,41    0,00   89,50
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    35,00    0,00   19,00     0,00   224,00    23=
+,58     0,10    5,26    0,00    5,26   5,26  10,00
+sdb               0,00     0,00    0,00   46,00     0,00 12568,00   546=
+,43     1,06   23,91    0,00   23,91   3,26  15,00
+sdc               0,00     0,00    0,00   90,00     0,00 24624,00   547=
+,20     2,70   30,00    0,00   30,00   3,44  31,00
+sdd               0,00    25,00    0,00  103,00     0,00 16777,50   325=
+,78     3,46   33,59    0,00   33,59   3,30  34,00
+sde               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,51   31,88    0,00   31,88   3,75   6,00
+sdf               0,00    21,00    0,00   63,00     0,00  8462,50   268=
+,65     1,65   26,03    0,00   26,03   3,17  20,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,80    0,00    8,62    1,54    0,00   88,03
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    33,00    0,00   19,00     0,00   216,00    22=
+,74     0,09    4,74    0,00    4,74   4,74   9,00
+sdb               0,00    24,00    0,00   67,00     0,00  8514,00   254=
+,15     2,26   31,79    0,00   31,79   3,43  23,00
+sdc               0,00     0,00    0,00   61,00     0,00 16420,00   538=
+,36     1,58   25,90    0,00   25,90   3,61  22,00
+sdd               0,00     0,00    0,00   60,00     0,00 16416,00   547=
+,20     1,42   23,67    0,00   23,67   3,33  20,00
+sde               0,00    25,00    0,00   97,00     0,00 16731,50   344=
+,98     3,27   33,71    0,00   33,71   3,20  31,00
+sdf               0,00     0,00    0,00   59,00     0,00 16412,00   556=
+,34     1,61   27,46    0,00   27,46   3,56  21,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,40    0,00    5,97    1,02    0,00   91,61
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    32,00    0,00   19,00     0,00   212,00    22=
+,32     0,10    5,26    0,00    5,26   5,26  10,00
+sdb               0,00     0,00    0,00   29,00     0,00  8204,00   565=
+,79     0,65   26,90    0,00   26,90   3,10   9,00
+sdc               0,00     0,00    0,00    0,00     0,00     0,00     0=
+,00     0,00    0,00    0,00    0,00   0,00   0,00
+sdd               0,00     0,00    0,00   90,00     0,00 24624,00   547=
+,20     2,89   32,11    0,00   32,11   3,44  31,00
+sde               0,00     0,00    0,00   60,00     0,00 16416,00   547=
+,20     1,76   29,33    0,00   29,33   3,50  21,00
+sdf               0,00     0,00    0,00   31,00     0,00  8212,00   529=
+,81     1,06   34,19    0,00   34,19   4,19  13,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           3,32    0,00    6,90    1,66    0,00   88,12
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    52,00    0,00   33,00     0,00  1440,00    87=
+,27     0,18    5,45    0,00    5,45   4,55  15,00
+sdb               0,00     0,00    0,00   31,00     0,00  8212,00   529=
+,81     0,91   29,35    0,00   29,35   3,55  11,00
+sdc               0,00    21,00    0,00   75,00     0,00  8549,00   227=
+,97     3,18   42,40    0,00   42,40   2,93  22,00
+sdd               0,00     0,00    0,00   46,00     0,00 12316,00   535=
+,48     1,45   31,52    0,00   31,52   3,70  17,00
+sde               0,00     0,00    0,00   31,00     0,00  8212,00   529=
+,81     0,87   28,06    0,00   28,06   3,55  11,00
+sdf               0,00     0,00    0,00  121,00     0,00 32836,00   542=
+,74     5,44   44,96    0,00   44,96   3,47  42,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,19    0,00    5,93    2,06    0,00   89,82
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    63,00    0,00   46,00     0,00  1572,00    68=
+,35     0,63   13,70    0,00   13,70   4,78  22,00
+sdb               0,00     0,00    0,00  122,00     0,00 32840,00   538=
+,36     3,68   30,16    0,00   30,16   3,61  44,00
+sdc               0,00     0,00    0,00   47,00     0,00 12320,00   524=
+,26     1,22   25,96    0,00   25,96   3,62  17,00
+sdd               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,49   30,62    0,00   30,62   4,38   7,00
+sde               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,15   25,56    0,00   25,56   2,89  13,00
+sdf               0,00     0,00    0,00   15,00     0,00  4104,00   547=
+,20     0,35   23,33    0,00   23,33   3,33   5,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,66    0,00    5,62    1,53    0,00   91,19
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    35,00    0,00   18,00     0,00   220,00    24=
+,44     0,11    6,11    0,00    6,11   6,11  11,00
+sdb               0,00     0,00    0,00   15,00     0,00  4104,00   547=
+,20     0,42   28,00    0,00   28,00   4,00   6,00
+sdc               0,00     0,00    0,00   90,00     0,00 24624,00   547=
+,20     3,44   38,22    0,00   38,22   3,78  34,00
+sdd               0,00    27,00    0,00   86,00     0,00 12660,00   294=
+,42     2,70   31,40    0,00   31,40   3,26  28,00
+sde               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,29   28,67    0,00   28,67   4,00  18,00
+sdf               0,00    29,00    0,00   70,00     0,00  8575,00   245=
+,00     2,40   34,29    0,00   34,29   3,00  21,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,81    0,00    7,74    0,90    0,00   89,55
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    30,00    0,00   19,00     0,00   204,00    21=
+,47     0,12    6,32    0,00    6,32   5,79  11,00
+sdb               0,00     0,00    0,00   77,00     0,00 20556,00   533=
+,92     3,05   39,61    0,00   39,61   3,51  27,00
+sdc               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,11   24,67    0,00   24,67   3,33  15,00
+sdd               0,00     0,00    0,00   19,00     0,00  4752,00   500=
+,21     0,54   22,63    0,00   22,63   4,21   8,00
+sde               0,00    20,00    0,00  111,00     0,00 20827,50   375=
+,27     4,11   37,03    0,00   37,03   3,42  38,00
+sdf               0,00     0,00    0,00   32,00     0,00  8216,00   513=
+,50     0,94   29,38    0,00   29,38   4,06  13,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,77    0,00    5,67    1,13    0,00   91,42
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    39,00    0,00   24,00     0,00   260,00    21=
+,67     0,13    5,42    0,00    5,42   5,00  12,00
+sdb               0,00    30,00    0,00   53,00     0,00  4428,50   167=
+,11     1,63   30,75    0,00   30,75   2,83  15,00
+sdc               0,00     0,00    0,00   47,00     0,00 12320,00   524=
+,26     1,14   24,26    0,00   24,26   3,19  15,00
+sdd               0,00     0,00    0,00   43,00     0,00 11672,00   542=
+,88     1,01   26,05    0,00   26,05   3,26  14,00
+sde               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,35   21,88    0,00   21,88   3,12   5,00
+sdf               0,00     0,00    0,00   61,00     0,00 16420,00   538=
+,36     1,78   29,18    0,00   29,18   3,93  24,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,95    0,00    6,55    1,80    0,00   88,70
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    56,00    0,00   31,00     0,00  1448,00    93=
+,42     0,19    6,13    0,00    6,13   4,84  15,00
+sdb               0,00     0,00    0,00   81,00     0,00 21808,00   538=
+,47     2,35   27,65    0,00   27,65   3,70  30,00
+sdc               0,00    30,00    0,00   75,00     0,00  8598,00   229=
+,28     2,40   32,00    0,00   32,00   3,07  23,00
+sdd               0,00     0,00    0,00   76,00     0,00 20524,00   540=
+,11     2,29   30,13    0,00   30,13   3,68  28,00
+sde               0,00     0,00    0,00   30,00     0,00  8208,00   547=
+,20     0,94   31,33    0,00   31,33   3,67  11,00
+sdf               0,00     0,00    0,00   30,00     0,00  8208,00   547=
+,20     0,95   31,67    0,00   31,67   4,00  12,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,65    0,00    7,50    1,65    0,00   89,20
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    51,00    0,00   28,00     0,00  1452,00   103=
+,71     0,17    6,07    0,00    6,07   5,00  14,00
+sdb               0,00     0,00    0,00   41,00     0,00 11032,00   538=
+,15     0,96   26,10    0,00   26,10   3,41  14,00
+sdc               0,00     0,00    0,00   61,00     0,00 16420,00   538=
+,36     2,30   37,70    0,00   37,70   3,44  21,00
+sdd               0,00     0,00    0,00   32,00     0,00  8216,00   513=
+,50     1,21   37,81    0,00   37,81   3,75  12,00
+sde               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,31   29,11    0,00   29,11   3,33  15,00
+sdf               0,00     0,00    0,00   52,00     0,00 13604,00   523=
+,23     1,45   24,04    0,00   24,04   3,65  19,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,66    0,00    5,50    1,02    0,00   91,82
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    31,00    0,00   18,00     0,00   200,00    22=
+,22     0,10    5,56    0,00    5,56   4,44   8,00
+sdb               0,00     0,00    0,00   23,00     0,00  6032,00   524=
+,52     0,74   23,04    0,00   23,04   3,48   8,00
+sdc               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,29   28,67    0,00   28,67   3,78  17,00
+sdd               0,00    24,00    0,00   47,00     0,00  4363,00   185=
+,66     1,48   24,04    0,00   24,04   2,98  14,00
+sde               0,00     0,00    0,00   75,00     0,00 20520,00   547=
+,20     2,59   34,53    0,00   34,53   3,60  27,00
+sdf               0,00    30,00    0,00   93,00     0,00 15476,50   332=
+,83     3,19   36,45    0,00   36,45   3,23  30,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           3,16    0,00    5,82    0,63    0,00   90,38
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    15,00    0,00   13,00     0,00   116,00    17=
+,85     0,05    3,85    0,00    3,85   3,85   5,00
+sdb               0,00     0,00    0,00   67,00     0,00 18592,00   554=
+,99     1,73   28,96    0,00   28,96   3,58  24,00
+sdc               0,00     0,00    0,00    1,00     0,00     4,00     8=
+,00     0,01   10,00    0,00   10,00  10,00   1,00
+sdd               0,00     0,00    0,00   53,00     0,00 12362,00   466=
+,49     1,88   42,08    0,00   42,08   3,21  17,00
+sde               0,00    27,00    0,00   99,00     0,00 16748,00   338=
+,34     2,95   29,80    0,00   29,80   3,33  33,00
+sdf               0,00     0,00    0,00   61,00     0,00 16417,00   538=
+,26     2,42   39,67    0,00   39,67   3,44  21,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,55    0,00    5,41    1,03    0,00   92,01
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    25,00    0,00   16,00     0,00   172,00    21=
+,50     0,09    5,62    0,00    5,62   5,00   8,00
+sdb               0,00    29,00    0,00  106,00     0,00 19941,50   376=
+,25     4,73   43,49    0,00   43,49   3,11  33,00
+sdc               0,00     0,00    0,00   46,00     0,00 12316,00   535=
+,48     1,95   42,39    0,00   42,39   3,48  16,00
+sdd               0,00     0,00    0,00   15,00     0,00  4104,00   547=
+,20     0,36   24,00    0,00   24,00   3,33   5,00
+sde               0,00     0,00    0,00   61,00     0,00 16420,00   538=
+,36     1,60   26,23    0,00   26,23   3,61  22,00
+sdf               0,00     0,00    0,00   15,00     0,00  4104,00   547=
+,20     0,55   36,67    0,00   36,67   3,33   5,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1,92    0,00    5,76    1,54    0,00   90,78
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    48,00    0,00   30,00     0,00  1412,00    94=
+,13     0,18    6,00    0,00    6,00   4,67  14,00
+sdb               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,38   25,00    0,00   25,00   3,75   6,00
+sdc               0,00    18,00    0,00  117,00     0,00 20817,50   355=
+,85     3,83   32,74    0,00   32,74   2,99  35,00
+sdd               0,00     0,00    0,00   61,00     0,00 16420,00   538=
+,36     1,62   26,56    0,00   26,56   3,28  20,00
+sde               0,00     0,00    0,00   45,00     0,00 12312,00   547=
+,20     1,24   27,56    0,00   27,56   3,56  16,00
+sdf               0,00     0,00    0,00   31,00     0,00  8212,00   529=
+,81     0,85   27,42    0,00   27,42   3,87  12,00
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           2,93    0,00    7,76    2,04    0,00   87,28
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq=
+-sz avgqu-sz   await r_await w_await  svctm  %util
+sda               0,00    60,00    0,00   34,00     0,00  1512,00    88=
+,94     0,21    6,18    0,00    6,18   5,00  17,00
+sdb               0,00     0,00    0,00   64,00     0,00 17316,00   541=
+,12     1,91   31,56    0,00   31,56   3,59  23,00
+sdc               0,00     0,00    0,00   77,00     0,00 20528,00   533=
+,19     2,18   28,31    0,00   28,31   3,51  27,00
+sdd               0,00     0,00    0,00   33,00     0,00  8220,00   498=
+,18     0,93   28,18    0,00   28,18   3,94  13,00
+sde               0,00     0,00    0,00   63,00     0,00 16428,00   521=
+,52     1,76   27,94    0,00   27,94   3,65  23,00
+sdf               0,00     0,00    0,00   16,00     0,00  4108,00   513=
+,50     0,55   34,38    0,00   34,38   3,75   6,00
 
 
 ----- Mail original -----=20
