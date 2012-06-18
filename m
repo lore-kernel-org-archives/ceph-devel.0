@@ -1,39 +1,34 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/6] ceph: a few more messenger cleanups
-Date: Mon, 18 Jun 2012 10:29:12 -0500
-Message-ID: <4FDF4948.10306@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: all rbd users: set 'filestore fiemap = false'
+Date: Mon, 18 Jun 2012 08:32:50 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206180830160.7376@cobra.newdream.net>
+References: <Pine.LNX.4.64.1206172053320.16985@cobra.newdream.net>
+ <20120618085719.GA7592@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:35700 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751340Ab2FRP3N (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 11:29:13 -0400
-Received: by ghrr11 with SMTP id r11so3753039ghr.19
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Jun 2012 08:29:13 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:49413 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751340Ab2FRPcx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 11:32:53 -0400
+In-Reply-To: <20120618085719.GA7592@infradead.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Christoph Hellwig <hch@infradead.org>
+Cc: ceph-devel@vger.kernel.org
 
-Here are a few more messenger cleanup patches.
+On Mon, 18 Jun 2012, Christoph Hellwig wrote:
+> On Sun, Jun 17, 2012 at 09:02:15PM -0700, Sage Weil wrote:
+> > that data over the wire.  We have observed incorrect/changing FIEMAP on 
+> > both btrfs:
+> 
+> both btrfs and?
 
-[PATCH 1/6] libceph: encapsulate out message data setup
-[PATCH 2/6] libceph: encapsulate advancing msg page
-    These two encapsulate some code involved in sending message data
-    into separate functions.
-[PATCH 3/6] libceph: don't mark footer complete before it is
-    This moves the setting of the "FOOTER_COMPLETE" flag so that it
-    doesn't get done until the footer really is complete.
-[PATCH 4/6] libceph: move init_bio_*() functions up
-    This simply moves two functions, preparing for the next patch.
-[PATCH 5/6] libceph: move init of bio_iter
-    This makes a message's bio_iter field get initialized when
-    the rest of the message is initialized, rather than conditionally
-    every time any attempt is made to send message data.
-[PATCH 6/6] libceph: don't use bio_iter as a flag
-    Because bio_iter is now initialized in the "right" place we no
-    longer need to use its value as a flag to determine whether it
-    needs initialization.
+Whoops, it was XFS.  :/ 
 
-					-Alex
+> Btw, btrfs had SEEK_HOLE/SEEK_DATA which are a lot more useful for this
+> kind of operations, and xfs has added support for it as well now.
+
+Yeah, started looking at that last night.  (This code predates SEEK_HOLE.)
+
+sage
