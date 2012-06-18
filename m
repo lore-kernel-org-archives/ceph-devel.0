@@ -1,153 +1,99 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/6] libceph: encapsulate advancing msg page
-Date: Mon, 18 Jun 2012 10:33:12 -0500
-Message-ID: <4FDF4A38.9000900@inktank.com>
+Subject: [PATCH 4/6] libceph: move init_bio_*() functions up
+Date: Mon, 18 Jun 2012 10:33:23 -0500
+Message-ID: <4FDF4A43.4090702@inktank.com>
 References: <4FDF4948.10306@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:53239 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751340Ab2FRPdN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 11:33:13 -0400
-Received: by yhmm54 with SMTP id m54so3911691yhm.19
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Jun 2012 08:33:13 -0700 (PDT)
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:52517 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751340Ab2FRPdY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 11:33:24 -0400
+Received: by ghrr11 with SMTP id r11so3757733ghr.19
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Jun 2012 08:33:24 -0700 (PDT)
 In-Reply-To: <4FDF4948.10306@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-In write_partial_msg_pages(), once all the data from a page has been
-sent we advance to the next one.  Put the code that takes care of
-this into its own function.
-
-While modifying write_partial_msg_pages(), make its local variable
-"in_trail" be Boolean, and use the local variable "msg" (which is
-just the connection's current out_msg pointer) consistently.
+Move init_bio_iter() and iter_bio_next() up in their source file so
+the'll be defined before they're needed.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- net/ceph/messenger.c |   58
-+++++++++++++++++++++++++++++----------------------
- 1 file changed, 34 insertions(+), 24 deletions(-)
+ net/ceph/messenger.c |   50
++++++++++++++++++++++++++-------------------------
+ 1 file changed, 25 insertions(+), 25 deletions(-)
 
 Index: b/net/ceph/messenger.c
 ===================================================================
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -915,6 +915,33 @@ static void iter_bio_next(struct bio **b
+@@ -590,6 +590,31 @@ static void con_out_kvec_add(struct ceph
+ 	con->out_kvec_bytes += size;
  }
- #endif
 
-+static void out_msg_pos_next(struct ceph_connection *con, struct page
-*page,
-+			size_t len, size_t sent, bool in_trail)
-+{
-+	struct ceph_msg *msg = con->out_msg;
-+
-+	BUG_ON(!msg);
-+	BUG_ON(!sent);
-+
-+	con->out_msg_pos.data_pos += sent;
-+	con->out_msg_pos.page_pos += sent;
-+	if (sent == len) {
-+		con->out_msg_pos.page_pos = 0;
-+		con->out_msg_pos.page++;
-+		con->out_msg_pos.did_page_crc = false;
-+		if (in_trail)
-+			list_move_tail(&page->lru,
-+				       &msg->trail->head);
-+		else if (msg->pagelist)
-+			list_move_tail(&page->lru,
-+				       &msg->pagelist->head);
 +#ifdef CONFIG_BLOCK
-+		else if (msg->bio)
-+			iter_bio_next(&msg->bio_iter, &msg->bio_seg);
-+#endif
++static void init_bio_iter(struct bio *bio, struct bio **iter, int *seg)
++{
++	if (!bio) {
++		*iter = NULL;
++		*seg = 0;
++		return;
 +	}
++	*iter = bio;
++	*seg = bio->bi_idx;
 +}
 +
- /*
-  * Write as much message data payload as we can.  If we finish, queue
-  * up the footer.
-@@ -930,11 +957,11 @@ static int write_partial_msg_pages(struc
- 	bool do_datacrc = !con->msgr->nocrc;
- 	int ret;
- 	int total_max_write;
--	int in_trail = 0;
-+	bool in_trail = false;
- 	size_t trail_len = (msg->trail ? msg->trail->length : 0);
++static void iter_bio_next(struct bio **bio_iter, int *seg)
++{
++	if (*bio_iter == NULL)
++		return;
++
++	BUG_ON(*seg >= (*bio_iter)->bi_vcnt);
++
++	(*seg)++;
++	if (*seg == (*bio_iter)->bi_vcnt)
++		init_bio_iter((*bio_iter)->bi_next, bio_iter, seg);
++}
++#endif
++
+ static void prepare_write_message_data(struct ceph_connection *con)
+ {
+ 	struct ceph_msg *msg = con->out_msg;
+@@ -892,31 +917,6 @@ out:
+ 	return ret;  /* done! */
+ }
 
- 	dout("write_partial_msg_pages %p msg %p page %d/%d offset %d\n",
--	     con, con->out_msg, con->out_msg_pos.page, con->out_msg->nr_pages,
-+	     con, msg, con->out_msg_pos.page, msg->nr_pages,
- 	     con->out_msg_pos.page_pos);
-
- #ifdef CONFIG_BLOCK
-@@ -958,13 +985,12 @@ static int write_partial_msg_pages(struc
-
- 		/* have we reached the trail part of the data? */
- 		if (con->out_msg_pos.data_pos >= data_len - trail_len) {
--			in_trail = 1;
-+			in_trail = true;
-
- 			total_max_write = data_len - con->out_msg_pos.data_pos;
-
- 			page = list_first_entry(&msg->trail->head,
- 						struct page, lru);
--			max_write = PAGE_SIZE;
- 		} else if (msg->pages) {
- 			page = msg->pages[con->out_msg_pos.page];
- 		} else if (msg->pagelist) {
-@@ -988,14 +1014,14 @@ static int write_partial_msg_pages(struc
- 		if (do_datacrc && !con->out_msg_pos.did_page_crc) {
- 			void *base;
- 			u32 crc;
--			u32 tmpcrc = le32_to_cpu(con->out_msg->footer.data_crc);
-+			u32 tmpcrc = le32_to_cpu(msg->footer.data_crc);
- 			char *kaddr;
-
- 			kaddr = kmap(page);
- 			BUG_ON(kaddr == NULL);
- 			base = kaddr + con->out_msg_pos.page_pos + bio_offset;
- 			crc = crc32c(tmpcrc, base, len);
--			con->out_msg->footer.data_crc = cpu_to_le32(crc);
-+			msg->footer.data_crc = cpu_to_le32(crc);
- 			con->out_msg_pos.did_page_crc = true;
- 		}
- 		ret = ceph_tcp_sendpage(con->sock, page,
-@@ -1008,30 +1034,14 @@ static int write_partial_msg_pages(struc
- 		if (ret <= 0)
- 			goto out;
-
--		con->out_msg_pos.data_pos += ret;
--		con->out_msg_pos.page_pos += ret;
--		if (ret == len) {
--			con->out_msg_pos.page_pos = 0;
--			con->out_msg_pos.page++;
--			con->out_msg_pos.did_page_crc = false;
--			if (in_trail)
--				list_move_tail(&page->lru,
--					       &msg->trail->head);
--			else if (msg->pagelist)
--				list_move_tail(&page->lru,
--					       &msg->pagelist->head);
 -#ifdef CONFIG_BLOCK
--			else if (msg->bio)
--				iter_bio_next(&msg->bio_iter, &msg->bio_seg);
+-static void init_bio_iter(struct bio *bio, struct bio **iter, int *seg)
+-{
+-	if (!bio) {
+-		*iter = NULL;
+-		*seg = 0;
+-		return;
+-	}
+-	*iter = bio;
+-	*seg = bio->bi_idx;
+-}
+-
+-static void iter_bio_next(struct bio **bio_iter, int *seg)
+-{
+-	if (*bio_iter == NULL)
+-		return;
+-
+-	BUG_ON(*seg >= (*bio_iter)->bi_vcnt);
+-
+-	(*seg)++;
+-	if (*seg == (*bio_iter)->bi_vcnt)
+-		init_bio_iter((*bio_iter)->bi_next, bio_iter, seg);
+-}
 -#endif
--		}
-+		out_msg_pos_next(con, page, len, (size_t) ret, in_trail);
- 	}
-
- 	dout("write_partial_msg_pages %p msg %p done\n", con, msg);
-
- 	/* prepare and queue up footer, too */
- 	if (!do_datacrc)
--		con->out_msg->footer.flags |= CEPH_MSG_FOOTER_NOCRC;
-+		msg->footer.flags |= CEPH_MSG_FOOTER_NOCRC;
- 	con_out_kvec_reset(con);
- 	prepare_write_message_footer(con);
- 	ret = 1;
+-
+ static void out_msg_pos_next(struct ceph_connection *con, struct page
+*page,
+ 			size_t len, size_t sent, bool in_trail)
+ {
 
