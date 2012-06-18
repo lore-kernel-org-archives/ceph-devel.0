@@ -1,47 +1,45 @@
-From: Sage Weil <sage@inktank.com>
-Subject: all rbd users: set 'filestore fiemap = false'
-Date: Sun, 17 Jun 2012 21:02:15 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206172053320.16985@cobra.newdream.net>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: mon disk access pattern
+Date: Mon, 18 Jun 2012 08:39:38 +0200
+Message-ID: <4FDECD2A.5090607@profihost.ag>
+References: <4FDACD90.2080807@profihost.ag> <4FDB05A7.3080202@widodh.nl> <4FDB1DCC.6090701@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45958 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750698Ab2FRECS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 00:02:18 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id AFB72BC60D
-	for <ceph-devel@vger.kernel.org>; Sun, 17 Jun 2012 21:02:17 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 7D09FBC60D
-	for <ceph-devel@vger.kernel.org>; Sun, 17 Jun 2012 21:02:17 -0700 (PDT)
+Received: from mail.profihost.ag ([85.158.179.208]:45054 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751308Ab2FRGjk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 02:39:40 -0400
+In-Reply-To: <4FDB1DCC.6090701@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-If you are using RBD, and want to avoid potential image corruption, add
+Am 15.06.2012 13:34, schrieb Mark Nelson:
+> On 06/15/2012 04:51 AM, Wido den Hollander wrote:
+>> Hi,
+>>
+>> On 15-06-12 07:52, Stefan Priebe - Profihost AG wrote:
+>>> Hello list,
+>>>
+>>> i read somewhere that the mon has "special" disk access patterns - even
+>>> though it does not write much data.
+>>
+>> "special"? Where did you read that? The monitor has about 1 ~ 2GB of
+>> storage.
+>>
+>> So if your monitor has something like 4GB ~ 8GB of RAM, your kernel
+>> should cache almost all your monitor data.
+>>
+>
+> I think at some point someone mentioned to me that the mon can cause a
+> lot of syncs, so running them on the OSDs without syncfs might be
+> detrimental. For the majority of our internal performance testing I've
+> kept them off the OSDs just to be sure.
 
-	filestore fiemap = false
+My main idea behind that was what type of disk i need for a performant 
+mon system. SATA, SAS, SSD? Raid?
 
-to the [osd] section of your ceph.conf and restart your OSDs.
-
-We've tracked down the source of some corruption to racy/buggy FIEMAP 
-ioctl behavior.  The RBD client (when caching is diabled--the default) 
-uses a 'sparse read' operation that the OSD implements by doing an fsync 
-on the object file, mapping which extents are allocated, and sending only 
-that data over the wire.  We have observed incorrect/changing FIEMAP on 
-both btrfs:
-
-	fsync
-	fiemap returns mapping
-	<time passes, no modifications to file>
-	fiemap returns different mapping
-
-Josh is still tracking down which kernels and file system are affected; 
-fortunately it is relatively easy to reproduce with the test_librbd_fsx 
-tool.  In the meantime, the (mis)feature can be safely disabled. It will 
-default to off in 0.48. It is unclear whether it's really much of a 
-performance win anyway.
-
-Thanks!
-sage
+Stefan
