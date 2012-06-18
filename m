@@ -1,107 +1,57 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: stable 10GBE under 3.4.2 or 3.5.0-rc2
-Date: Mon, 18 Jun 2012 11:27:35 +0200 (CEST)
-Message-ID: <c37b9070-7a30-44d1-90c7-e24cde988ffd@mailpro>
-References: <1656f33e-a77c-42aa-ac97-e351f90db724@mailpro>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Unmountable btrfs filesystems
+Date: Mon, 18 Jun 2012 11:30:42 +0200
+Message-ID: <4FDEF542.3040704@widodh.nl>
+References: <4FDCD484.50706@widodh.nl> <4FDDE1DE.5030709@tuxadero.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:42169 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751972Ab2FRJ15 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 05:27:57 -0400
-In-Reply-To: <1656f33e-a77c-42aa-ac97-e351f90db724@mailpro>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:58777 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752396Ab2FRJao (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 05:30:44 -0400
+In-Reply-To: <4FDDE1DE.5030709@tuxadero.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: ceph-devel@vger.kernel.org
+To: martin@tuxadero.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-also , I see a new feature in 3.3
+Hi,
 
-byte_queue_limits=20
+On 06/17/2012 03:55 PM, Martin Mailand wrote:
+> Hi Wido,
+> until recently there were still a few bugs in btrfs which could be hit
+> quite easily with ceph. The last big one was fixed here
+> http://www.spinics.net/lists/ceph-devel/msg06270.html
+>
+> I am running a ceph cluster with btrfs on a 3.5-rc2 without a problem,
+> even under heavy test load.
+>
 
-1.5. Bufferbloat fighting: Byte queue limits
+I'll give that one a try, thanks!
 
-https://lwn.net/Articles/454390/
+I've also let the btrfs tools like fsck loose on those filesystems, but 
+they were beyond any repair. Al kinds of errors on the filesystems.
 
-"Bufferbloat" is a term used to describe the latency and throughput pro=
-blems caused by excessive buffering trough the several elements of a ne=
-twork connection. Some tools are being developed to help to alleviate t=
-hese problems, and this feature is one of them.
+Nothing wrong with the disk below them, but the filesystems were just 
+completely broken, no way of repairing.
 
-Byte queue limits are a configurable limit of packet data that can be p=
-ut in the transmission queue of a network device. As a result one can t=
-une things such that high priority packets get serviced with a reasonab=
-le amount of latency whilst not subjecting the hardware queue to emptyi=
-ng when data is available to send. Configuration of the queue limits is=
- in the tx-<n> sysfs directory for the queue under the byte_queue_limit=
-s directory.
+Wido
 
-I see some bug report about spike:
+> Hope that's helped.
+>
+> -martin
+>
+>
+> Am 16.06.2012 20:46, schrieb Wido den Hollander:
+>> I tried various kernels, the most recent 3.3.0 from kernel.ubuntu.com,
+>> but I'm still seeing this.
+>>
+>> Is anyone seeing the same or did everybody migrate away to ext4 or XFS?
+>>
+>> I still prefer btrfs due to the snapshotting, but loosing all these
+>> OSD's all the time is getting kind of frustrating.
+>>
+>> Any thoughts or comments?
 
-http://www.mail-archive.com/e1000-devel@lists.sourceforge.net/msg05538.=
-html
-
-
-
-maybe can you try to play with values in
-
-/sys/class/net/eth0/queues/tx-0/byte_queue_limits/*
-
------ Mail original -----=20
-
-De: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-=C3=80: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Lundi 18 Juin 2012 11:21:09=20
-Objet: Re: stable 10GBE under 3.4.2 or 3.5.0-rc2=20
-
-Did you use same driver version with the differents kernel version ?=20
-
-
-Maybe try to desactive tso,gso,... with ethtool ?=20
-
-
------ Mail original -----=20
-
-De: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>=20
-=C3=80: "Alexandre DERUMIER" <aderumier@odiso.com>=20
-Cc: ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Lundi 18 Juin 2012 11:11:16=20
-Objet: Re: stable 10GBE under 3.4.2 or 3.5.0-rc2=20
-
-Am 18.06.2012 10:11, schrieb Alexandre DERUMIER:=20
-> maybe try to play with net.ipv4.tcp_congestion_control ?=20
-The default on my machines and even under RHEL6 is cubic. But i've now=20
-alos tried, reno, bic and highspeed. But it doesn't change anything.=20
-
-Everything is fine under 3.0.32 and pretty bad under 3.4.X or 3.5rc2.=20
-
-Stefan=20
-
-
-
-
-
-
-
---=20
-
---=20
-
-
-
-
-	Alexandre D erumier=20
-Ing=C3=A9nieur Syst=C3=A8me=20
-=46ixe : 03 20 68 88 90=20
-=46ax : 03 20 68 90 81=20
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix - France=20
-12 rue Marivaux 75002 Paris - France=20
-=09
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
