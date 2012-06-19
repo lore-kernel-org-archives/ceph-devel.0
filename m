@@ -1,171 +1,238 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: Possible deadlock condition
-Date: Mon, 18 Jun 2012 16:34:09 -0700
-Message-ID: <4FDFBAF1.9090109@inktank.com>
-References: <CA+jddaPMp5R0adi2sLVUWeFytDzfOjAeryXL+jPjGAk8kKqafg@mail.gmail.com> <CA+jddaO_BY08H2PPb17EKGLZ3TS1BZ7XpxSUxswPRAZ-QN1Cfg@mail.gmail.com> <4FDFB26E.1060109@inktank.com> <CA+jddaM0muy1un2pEyRh6h8wnZTJbqUjPmKa95WjQS69BHQQRA@mail.gmail.com>
+From: <Eric_YH_Chen@wiwynn.com>
+Subject: RE: Performance benchmark of rbd
+Date: Tue, 19 Jun 2012 09:12:28 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D01885BDB@WHQBEMAIL1.whq.wistron>
+References: <8512670932FB654F81AF0FEF1BE6D49D01838FC3@WHQBEMAIL1.whq.wistron> <4FD887B1.2070202@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:33172 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752544Ab2FRXeM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 19:34:12 -0400
-Received: by pbbrp8 with SMTP id rp8so8850341pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Jun 2012 16:34:12 -0700 (PDT)
-In-Reply-To: <CA+jddaM0muy1un2pEyRh6h8wnZTJbqUjPmKa95WjQS69BHQQRA@mail.gmail.com>
+Received: from twnhumsw5.wistron.com ([220.128.89.25]:61989 "EHLO
+	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753511Ab2FSBMa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Jun 2012 21:12:30 -0400
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mandell Degerness <mandell@pistoncloud.com>
+To: mark.nelson@inktank.com, ceph-devel@vger.kernel.org
+Cc: Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
+
+Hi, Mark and all:
+
+I think you may miss this mail before, so I send it again. 
+
+======
+
+I forget to mention one thing, I create the rbd at the same machine and
+test it. That means the network latency may be lower than normal case.
+
+1. 
+I use ext4 as the backend filesystem and with following attribute.
+data=writeback,noatime,nodiratime,user_xattr
+
+2. 
+I use the default replication number, I think it is 2, right?
+
+3. 
+On my platform, I have 192GB memory
+
+4. Sorry about the column name is left-right reversal. Here is the
+correct one
+                    Seq-write		 Seq-read
+          32 KB		23 MB/s			 690 MB/s
+         512 KB		26 MB/s			 960 MB/s
+           4 MB   	27 MB/s			1290 MB/s
+          32 MB		36 MB/s			1435 MB/s
+
+5. If I put all the journal data on a SSD device (Intel 520). 
+  The sequence write performance would reach 135MB/s instead of
+  27MB/s in original. (object size = 4MB). And others are no different,
+  including random-write. I am curious why the SSD device doesn't 
+  help the performance of random-write.
+
+6. For the random read write, the data I provided before was correct.
+  But I can give you the detail. Is it too high than what you expected?
+  
+rand-write-4k		rand-write-16k
+bw		iops		bw		iops
+3,524 	881 	9,032 	564
+
+mix-4k (50/50)		
+r:bw		r:iops	w:bw	w:iops
+2,925 	731 	2,924 	731
+
+mix-8k (50/50)		
+r:bw		r:iops	w:bw	w:iops
+4,509 	563 	4,509 	563
+
+mix-16k (50/50)		
+r:bw		r:iops	w:bw	w:iops
+8,366 	522 	8,345 	521
+
+
+7. 
+Here is the hw raid cache policy we used now.
+Write Policy	Write Back with BBU
+Read Policy	ReadAhead
+
+If you are interested in how HW raid help the performance, I can do for
+little help, since we also want to know what is the best configuration
+on our platform. Any test you want to know?
+
+
+Furthermore, is there any suggestion for our platform that can improve
+the performance? Thanks!
+
+
+
+-----Original Message-----
+From: Mark Nelson [mailto:mark.nelson@inktank.com] 
+Sent: Wednesday, June 13, 2012 8:30 PM
+To: Eric YH Chen/WYHQ/Wiwynn
 Cc: ceph-devel@vger.kernel.org
+Subject: Re: Performance benchmark of rbd
 
-I don't know enough to know if there's a connection, but I do note this 
-prior thread that sounds kinda similar:
+Hi Eric!
 
-http://thread.gmane.org/gmane.comp.file-systems.ceph.devel/6574
-
-
-On 06/18/2012 04:08 PM, Mandell Degerness wrote:
-> None of the OSDs seem to be more than 82% full. I didn't think we were
-> running quite that close to the margin, but it is still far from
-> actually full.
+On 6/13/12 5:06 AM, Eric_YH_Chen@wiwynn.com wrote:
+> Hi, all:
 >
+>      I am doing some benchmark of rbd.
+>      The platform is on a NAS storage.
 >
-> On Mon, Jun 18, 2012 at 3:57 PM, Dan Mick<dan.mick@inktank.com>  wrote:
->> Does the xfs on the OSD have plenty of free space left, or could this be an
->> allocation deadlock?
->>
->>
->> On 06/18/2012 03:17 PM, Mandell Degerness wrote:
->>>
->>> Here is, perhaps, a more useful traceback from a different run of
->>> tests that we just ran into:
->>>
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.680815] INFO: task
->>> flush-254:0:29582 blocked for more than 120 seconds.
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.681040] "echo 0>
->>> /proc/sys/kernel/hung_task_timeout_secs" disables this message.
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.681458] flush-254:0
->>>    D ffff880bd9ca2fc0     0 29582      2 0x00000000
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.681740]
->>> ffff88006e51d160 0000000000000046 0000000000000002 ffff88061b362040
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.682173]
->>> ffff88006e51d160 00000000000120c0 00000000000120c0 00000000000120c0
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.682659]
->>> ffff88006e51dfd8 00000000000120c0 00000000000120c0 ffff88006e51dfd8
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683088] Call Trace:
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683302]
->>> [<ffffffff81520132>] schedule+0x5a/0x5c
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683514]
->>> [<ffffffff815203e7>] schedule_timeout+0x36/0xe3
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683784]
->>> [<ffffffff8101e0b2>] ? physflat_send_IPI_mask+0xe/0x10
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.683999]
->>> [<ffffffff8101a237>] ? native_smp_send_reschedule+0x46/0x48
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.684219]
->>> [<ffffffff811e0071>] ? list_move_tail+0x27/0x2c
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.684432]
->>> [<ffffffff81520d13>] __down_common+0x90/0xd4
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.684708]
->>> [<ffffffff811e1120>] ? _xfs_buf_find+0x17f/0x210
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.684925]
->>> [<ffffffff81520dca>] __down+0x1d/0x1f
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.685139]
->>> [<ffffffff8105db4e>] down+0x2d/0x3d
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.685350]
->>> [<ffffffff811e0f68>] xfs_buf_lock+0x76/0xaf
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.685565]
->>> [<ffffffff811e1120>] _xfs_buf_find+0x17f/0x210
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.685836]
->>> [<ffffffff811e13b6>] xfs_buf_get+0x2a/0x177
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.686052]
->>> [<ffffffff811e19f6>] xfs_buf_read+0x1f/0xca
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.686270]
->>> [<ffffffff8122a0b7>] xfs_trans_read_buf+0x205/0x308
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.686490]
->>> [<ffffffff81205e01>] xfs_btree_read_buf_block.clone.22+0x4f/0xa7
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687015]
->>> [<ffffffff8122a3ee>] ? xfs_trans_log_buf+0xb2/0xc1
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687232]
->>> [<ffffffff81205edd>] xfs_btree_lookup_get_block+0x84/0xac
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687449]
->>> [<ffffffff81208e83>] xfs_btree_lookup+0x12b/0x3dc
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687721]
->>> [<ffffffff811f6bb2>] ? xfs_alloc_vextent+0x447/0x469
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.687939]
->>> [<ffffffff811fd171>] xfs_bmbt_lookup_eq+0x1f/0x21
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.688156]
->>> [<ffffffff811ffa88>] xfs_bmap_add_extent_delay_real+0x5b5/0xfec
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.688378]
->>> [<ffffffff810f155b>] ? kmem_cache_alloc+0x87/0xf3
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.688650]
->>> [<ffffffff81204c40>] ? xfs_bmbt_init_cursor+0x3f/0x107
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.688867]
->>> [<ffffffff81201160>] xfs_bmapi_allocate+0x1f6/0x23a
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.689084]
->>> [<ffffffff812185bd>] ? xfs_iext_bno_to_irec+0x95/0xb9
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.689301]
->>> [<ffffffff81203414>] xfs_bmapi_write+0x32d/0x5a2
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.689519]
->>> [<ffffffff811e99e4>] xfs_iomap_write_allocate+0x1a5/0x29f
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.689797]
->>> [<ffffffff811df12a>] xfs_map_blocks+0x13e/0x1dd
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690016]
->>> [<ffffffff811dfbff>] xfs_vm_writepage+0x24e/0x410
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690233]
->>> [<ffffffff810bde1e>] __writepage+0x17/0x30
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690446]
->>> [<ffffffff810be6ed>] write_cache_pages+0x276/0x3c8
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690693]
->>> [<ffffffff810bde07>] ? set_page_dirty+0x60/0x60
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.690908]
->>> [<ffffffff810be884>] generic_writepages+0x45/0x5c
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.691123]
->>> [<ffffffff811defcb>] xfs_vm_writepages+0x4d/0x54
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.691337]
->>> [<ffffffff810bf832>] do_writepages+0x21/0x2a
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.691552]
->>> [<ffffffff811218f5>] writeback_single_inode+0x12a/0x2cc
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.691800]
->>> [<ffffffff81121d92>] writeback_sb_inodes+0x174/0x215
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692016]
->>> [<ffffffff81122185>] __writeback_inodes_wb+0x78/0xb9
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692231]
->>> [<ffffffff811224b5>] wb_writeback+0x136/0x22a
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692444]
->>> [<ffffffff810becd1>] ? determine_dirtyable_memory+0x1d/0x26
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692692]
->>> [<ffffffff81122d1e>] wb_do_writeback+0x19c/0x1b7
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.692907]
->>> [<ffffffff81122dc5>] bdi_writeback_thread+0x8c/0x20f
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.693122]
->>> [<ffffffff81122d39>] ? wb_do_writeback+0x1b7/0x1b7
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.693336]
->>> [<ffffffff81122d39>] ? wb_do_writeback+0x1b7/0x1b7
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.693553]
->>> [<ffffffff8105911d>] kthread+0x82/0x8a
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.693803]
->>> [<ffffffff81523c34>] kernel_thread_helper+0x4/0x10
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.694018]
->>> [<ffffffff8105909b>] ? kthread_worker_fn+0x13b/0x13b
->>> Jun 18 17:58:51 node-172-29-0-15 kernel: [242522.694232]
->>> [<ffffffff81523c30>] ? gs_change+0xb/0xb
->>>
->>>
->>> On Mon, Jun 18, 2012 at 11:37 AM, Mandell Degerness
->>> <mandell@pistoncloud.com>    wrote:
->>>>
->>>> We've been seeing random issues of apparent deadlocks.  We are running
->>>> ceph 0.47 on kernel 3.2.18.  OSDs are running on XFS file system.
->>>> mysqld (which ran into the particular problems in the attached kernel
->>>> log) is running on an RBD with XFS (mounted on a system which includes
->>>> OSDs).  We have sync_fs, and gcc ver 4.5.3-r2.  The mysqld process in
->>>> both instances returned an error to the calling process.
->>>>
->>>> Regards,
->>>> Mandell Degerness
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>      CPU: Intel E5640 2.67GHz
+>      Memory: 192 GB
+>      Hard Disk: SATA 250G * 1, 7200 rpm (H0) + SATA 1T * 12 , 7200rpm
+> (H1~ H12)
+>      RAID Card: LSI 9260-4i
+>      OS: Ubuntu12.04 with Kernel 3.2.0-24
+>      Network:  1 Gb/s
+>
+>      We create 12 OSD on H1 ~ H12 with the journal is put on H0.
+
+Just to make sure I understand, you have a single node with 12 OSDs and 
+3 mons, and all 12 OSDs are using the H0 disk for their journals?  What 
+filesystem are you using for the OSDs?  How much replication?
+
+>      We also create 3 MON in the cluster.
+>      In briefly, we setup a ceph cluster all-in-one, with 3 monitors
+and
+> 12 OSD.
+>
+>      The benchmark tool we used is fio 2.0.3. We had 7 basic test case
+>      1)  sequence write with bs=64k
+>      2)  sequence read with bs=64k
+>      3)  random write with bs=4k
+>      4)  random write with bs=16k
+>      5)  mix read/write with bs=4k
+>      6)  mix read/write with bs=8k
+>      7)  mix read/write with bs=16k
+>
+>      We create several rbd with different object size for the
+benchmark.
+>
+>      1.  size = 20G, object size =  32KB
+>      2.  size = 20G, object size = 512KB
+>      3.  size = 20G, object size =  4MB
+>      4.  size = 20G, object size = 32MB
+
+Given how much memory you have, you may want to increase the amount of 
+data you are writing during each test to rule out caching.
+
+>
+>      We have some conclusion after the benchmark.
+>
+>      a.  We can get better performance of sequence read/write when the
+> object size is bigger.
+>                     Seq-read			Seq-write
+>          32 KB		23 MB/s			 690 MB/s
+>         512 KB		26 MB/s			 960 MB/s
+>           4 MB   	27 MB/s			1290 MB/s
+>          32 MB		36 MB/s			1435 MB/s
+
+Which test are these results from?  I'm suspicious that the write 
+numbers are so high.  Figure that even with a local client and 1X 
+replication, your journals and data partitions are each writing out a 
+copy of the data.  You don't have enough disk in that box to sustain 
+1.4GB/s to both even under perfectly ideal conditions.  Given that it 
+sounds like you are using a single 7200rpm disk for 12 journals, I would
+
+expect far lower numbers...
+
+>
+>      b. There is no obvious influence for random read/write when the
+> object size is different.
+>        All the result are in a range not more than 10%.
+>
+>         rand-write-4K		rand-write-16K		mix-4K
+> mix-8k		mix-16k
+>         881 iops			564 iops
+> 1462 iops	1127 iops	1044 iops
+>
+>      c. It we change the environment, for every 3 hard drive, we bind
+> them together by RAID0. (LSI 9260-4i RAID card)
+>         So the ceph cluster becomes 3 MONs and 4 OSD (3T for each)
+>         We can get better performance on all items, around 10% ~ 20%
+> enhancement.
+
+Those IOPs numbers are more what I would expect.  Using HW raid0 may 
+provide some benefit depending on the number of OSDs per node.  It's 
+something we haven't had time to look at yet in detail, but is on our
+list.
+
+>
+> 	d. If we change H0 to a SSD device, and we also put all journal
+> on it. We can get better performance on sequence-write.
+>        It would reach 135MB/s. However, there are no different for
+other
+> test items.
+>
+>      We want to check with you, if all the conclusion are reasonable
+for
+> you? Or any seems strange? Thanks!
+
+When you say that using an SSD device increases the sequence-write 
+speeds to 135MB/s, what are you comparing that to?  Incidentally that 
+level of performance is entirely believable with 12 OSDs sharing a 
+single SSD for journals.
+
+The write results with the 7200rpm journal disk do look strange to me, 
+but it's tough to say what's going on.  If the numbers are accurate, I'd
+
+say writes aren't getting to the disks.  If they are mislabeled (IE 
+1.435MB/s or 1435Mb/s instead 1435MB/s), then things are more believable
+
+and I'd try putting your journals on a small partition on each disk 
+(causes some extra seek behavior and lower OSD throughput, but better 
+than stacking the journals up on a single slow disk).
+
+>
+>      ====
+>
+>      Here is some data if I use command provided by rados.
+> 	rados -p rbd bench 120 write -t 8
+>
+> 	Total time run:        120.751713
+> 	Total writes made:     930
+> 	Write size:            4194304
+> 	Bandwidth (MB/sec):    30.807
+>
+> 	Average Latency:       1.03807
+> 	Max latency:           2.63197
+> 	Min latency:           0.205726
+>
+> 	[INF] bench: wrote 1024 MB in blocks of 4096 KB in 13.219819 sec
+> at 79318 KB/sec
+
+That looks much closer to what I would expect if you have 12 journals 
+all sharing a single 7200rpm drive.
+
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Mark
