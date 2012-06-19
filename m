@@ -1,67 +1,37 @@
-From: "Guan Jun He" <gjhe@suse.com>
-Subject: Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy
-Date: Tue, 19 Jun 2012 03:44:06 -0600
-Message-ID: <4FE0BA660200001600012837@soto.provo.novell.com>
-References: <1339749120-7007-1-git-send-email-gjhe@suse.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [patch -next] libceph: fix NULL dereference in reset_connection()
+Date: Tue, 19 Jun 2012 13:33:39 +0300
+Message-ID: <20120619103339.GB7596@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soto.provo.novell.com ([137.65.250.214]:60922 "EHLO
-	soto.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751246Ab2FSJoV convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
-	Tue, 19 Jun 2012 05:44:21 -0400
-In-Reply-To: <1339749120-7007-1-git-send-email-gjhe@suse.com>
+Received: from acsinet15.oracle.com ([141.146.126.227]:47357 "EHLO
+	acsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751933Ab2FSKdw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jun 2012 06:33:52 -0400
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guanjun He <heguanbo@gmail.com>, sage@inktank.com, ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>, Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
 
-Hi,
+We dereference "con->in_msg" on the line after it was set to NULL.
 
-  Do you think this is needed? 
-The osdmap update need to hold this sem.As in function 
-void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
-and 
-function static int __map_request(), 
-etc.
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 
-Thanks a lot for your reply!
-
-thanks,
-Guanjun
-
->>> On 6/15/2012 at 04:32 PM, in message
-<1339749120-7007-1-git-send-email-gjhe@suse.com>, Guanjun He
-<heguanbo@gmail.com> wrote: 
-> From: Guanjun He <heguanbo@gmail.com>
-> 
-> 	I think the osdmap destroy code shoule be protected by map_sem.
-> If I was wrong, please correct me, thanks!
-> 
-> Signed-off-by: Guanjun He <gjhe@suse.com>
-> ---
->  net/ceph/osd_client.c |    2 ++
->  1 files changed, 2 insertions(+), 0 deletions(-)
-> 
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 1ffebed..718b100 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1872,11 +1872,13 @@ void ceph_osdc_stop(struct ceph_osd_client *osdc)
->  	destroy_workqueue(osdc->notify_wq);
->  	cancel_delayed_work_sync(&osdc->timeout_work);
->  	cancel_delayed_work_sync(&osdc->osds_timeout_work);
-> +	down_write(&osdc->map_sem);
->  	if (osdc->osdmap) {
->  		ceph_osdmap_destroy(osdc->osdmap);
->  		osdc->osdmap = NULL;
->  	}
->  	remove_all_osds(osdc);
-> +	up_write(&osdc->map_sem);
->  	mempool_destroy(osdc->req_mempool);
->  	ceph_msgpool_destroy(&osdc->msgpool_op);
->  	ceph_msgpool_destroy(&osdc->msgpool_op_reply);
-
-
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 5e9f61d..6aa671c 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -437,10 +437,10 @@ static void reset_connection(struct ceph_connection *con)
+ 
+ 	if (con->in_msg) {
+ 		BUG_ON(con->in_msg->con != con);
++		ceph_con_put(con->in_msg->con);
+ 		con->in_msg->con = NULL;
+ 		ceph_msg_put(con->in_msg);
+ 		con->in_msg = NULL;
+-		ceph_con_put(con->in_msg->con);
+ 	}
+ 
+ 	con->connect_seq = 0;
