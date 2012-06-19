@@ -1,132 +1,77 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Release names survey
-Date: Tue, 19 Jun 2012 14:41:27 -0700
-Message-ID: <CAC-hyiHbVGhT+q74EhjG83LYKN0GGW5F7ukZp1Bw2rggTOg4AQ@mail.gmail.com>
-References: <CAC-hyiGEXaN2a4kKi0fvrT=oJLbYJxt0JyDu1uosNWEN+90Ncw@mail.gmail.com>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: Building a small Ceph development environment
+Date: Tue, 19 Jun 2012 16:30:22 -0700
+Message-ID: <4FE10B8E.1040709@inktank.com>
+References: <CAJLzzs+9X3dWUMLavOnp1ijvOJLDprM3YsGDLo=DUEEkb9yp4w@mail.gmail.com> <CAPYLRzh0XbsvGFOJCzpGjvtn_e_CVXcXcT5u_nbGut9VMfmSgg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:63632 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752659Ab2FSVl3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jun 2012 17:41:29 -0400
-Received: by bkcji2 with SMTP id ji2so5620019bkc.19
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Jun 2012 14:41:27 -0700 (PDT)
-In-Reply-To: <CAC-hyiGEXaN2a4kKi0fvrT=oJLbYJxt0JyDu1uosNWEN+90Ncw@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:41010 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751377Ab2FSXaZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jun 2012 19:30:25 -0400
+Received: by pbbrp8 with SMTP id rp8so10298632pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Jun 2012 16:30:25 -0700 (PDT)
+In-Reply-To: <CAPYLRzh0XbsvGFOJCzpGjvtn_e_CVXcXcT5u_nbGut9VMfmSgg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Terrance Hutchinson <terrance.hutchinson@gmail.com>, ceph-devel@vger.kernel.org
 
-Official results!
+Yeah, it's certainly doable to run all the daemons on one server; they=20
+don't even really need a separate disk, but that's generally a nice=20
+partitioning.
 
-1. Cephalopods / Marine Animals
-2. Oceans / Seas
-3. Oceanic Trenches
-4. Pirates
-5. Ocean Currents
+You can usually get help on irc://irc.oftc.net/#ceph, too.
 
-It looks like the first Ceph stable release will be code-named 'Argonaut'.
-
-Yehuda
-
-On Tue, Jun 12, 2012 at 4:50 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
-> When will there be 1.0?
+On 06/19/2012 10:54 AM, Gregory Farnum wrote:
+> You don't need to virtualize anything =97 I'd recommend running Ubunt=
+u
+> 12.04 on it (you don't need to, but a lot of things will be more
+> performant), building from source, and then setting up the daemons so
+> everybody gets a separate disk.
+> Check out http://ceph.com/docs/master/source/ and the other docs and
+> let us know if you have any questions. :)
 >
-> Those of you who have been following Ceph, have probably noticed that
-> the Ceph version is going up in quite a rapid pace. This is due to the
-> fact that we try to follow Scrum, which is an agile methodology in
-> which we move in relatively small development cycles and deliver a new
-> version at the end of these cycles. This on one hand allows us to
-> present progress and to adapt while we are moving, but on the other
-> hand it makes it harder for some of our users. Not all users
-> necessarily want to run the bleeding edge.
-> We do provide a more stable branch, but that's usually the previous
-> release with critical fixes on top of it.
-> At this point we think that considering the project state, we should
-> provide a stable release. This is not going to be version 1.0. It will
-> be version A. Once version A is tagged, it'll get the full stable
-> release treatment, and there will be a relatively long period where
-> we'd backport bug fixes, and other required changes. The following
-> version would be version B, and so on. The current thought is that
-> we're going to have 2-4 releases a year, which will provide a much
-> more stable base than the current 15-20 annual releases.
->
-> One issue that we haven't cleared up yet, is how to name these
-> releases. Following the footsteps of other projects that use lettered
-> release names, we'd want to have some common theme. We did try, but
-> we'd need your help to make the final decision. Following are the
-> options (in no particular order). Also note that these are just
-> possible names examples, but there may be other names.
->
-> We have set up a survey here, so please make your selection:
->
-> http://bit.ly/LROUnL
->
->
-> * Oceanic Trenches
->
-> aleutian
-> bougainville
-> cayman
-> hikurangi
-> izu
-> japan
-> kermadec
-> mariana
-> newhebrides
-> philippine
-> ryukyu
-> sandwich
-> tonga
-> yap
->
-> * Pirates
->
-> ahoy / aaarrr
-> booty
-> cutlass
-> doubloon
-> eyepatch
-> furner
-> guybrush
-> ...
->
-> * Cephalopods/Marine Animals
->
-> argonaut
-> banana / bobtail
-> cuttlefish
-> dofleini
-> e?
-> flamboyant
-> ...
-> kraken
-> ...
-> vampire / vlugaris
->
->
-> * Ocean currents
->
-> angola
-> benguela
-> canary
-> equatorial
-> falkland
-> gulfstream
-> humboldt
-> irrminger
-> kuroshio
-> labrador
-> mozambique
->
-> * Oceans / Seas
->
-> adriatic
-> baltic
-> celtic / caribbean
-> davis / deadsea
-> ...
->
->
-> Thanks,
-> Yehuda
+> On Tue, Jun 19, 2012 at 10:47 AM, Terrance Hutchinson
+> <terrance.hutchinson@gmail.com>  wrote:
+>> Hi all,
+>>
+>> I have an HP ProLiant ML350 G5 server that is currently sitting idle
+>> at the moment. Would it be possible to virtualize a Ceph cluster so =
+I
+>> can mess around and begin contributing back to the community?
+>>
+>> Specs:
+>>
+>> ML350 G5
+>> 2 x Quad Core Xeon E5430
+>> 16GB RAM
+>> 7x 146GB SAS disks
+>> 1x 120 GB Intel 520 SSD
+>> HP P800 Smart Array Controller (can purchase an LSI 208E SAS HBA whi=
+ch
+>> will make the disks a JBOD)
+>>
+>> My goal is to create a small Ceph setup to do testing and bug fixes
+>> for the project which is why I posted this to the development list.
+>>
+>> Thanks in advance,
+>> Terrance
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
