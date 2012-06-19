@@ -1,53 +1,44 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] libceph: fix NULL dereference in reset_connection()
-Date: Tue, 19 Jun 2012 08:57:10 -0500
-Message-ID: <4FE08536.9040807@inktank.com>
-References: <20120619103339.GB7596@elgon.mountain> <4FE07E37.7000203@inktank.com> <20120619133316.GR4400@mwanda>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: bad performance fio random write - rados bench random write to compare?
+Date: Tue, 19 Jun 2012 16:05:53 +0200 (CEST)
+Message-ID: <5b71e1e3-b1be-4c12-897d-0bffbbcf8d33@mailpro>
+References: <4FE07B2A.7080209@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:36838 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750831Ab2FSN5N (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jun 2012 09:57:13 -0400
-Received: by yhmm54 with SMTP id m54so4769724yhm.19
-        for <ceph-devel@vger.kernel.org>; Tue, 19 Jun 2012 06:57:12 -0700 (PDT)
-In-Reply-To: <20120619133316.GR4400@mwanda>
+Received: from mailpro.odiso.net ([89.248.209.98]:50161 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751060Ab2FSOGQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jun 2012 10:06:16 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mailpro.odiso.net (Postfix) with ESMTP id 7F3E718030A3E
+	for <ceph-devel@vger.kernel.org>; Tue, 19 Jun 2012 16:05:58 +0200 (CEST)
+Received: from mailpro.odiso.net ([127.0.0.1])
+	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id D7cv7O3g7h0r for <ceph-devel@vger.kernel.org>;
+	Tue, 19 Jun 2012 16:05:53 +0200 (CEST)
+Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
+	by mailpro.odiso.net (Postfix) with ESMTP id 25B42180464FB
+	for <ceph-devel@vger.kernel.org>; Tue, 19 Jun 2012 16:05:53 +0200 (CEST)
+In-Reply-To: <4FE07B2A.7080209@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-I have already incorporated the following in the Ceph master
-branch (which is used for the -next build).  We will also send
-this to Linus soon.
+Hi,
+Is it possible to do random write bench with rados bench command ?
 
-					-Alex
-=========
+I have very base random write performance with 4K block size inside qemu-kvm,
+1000 iops/s max with 3 nodes with 3x 5 disk 15k
+(Maybe it's related to my constant disk writes, like datas are not flushed sequentially to disk)
 
-We dereference "con->in_msg" on the line after it was set to NULL.
+seekwatcher movie of 1 osd here :
+http://odisoweb1.odiso.net/random-write-4k.mpg
 
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-Reviewed-by: Alex Elder <elder@inktank.com>
----
- net/ceph/messenger.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+I would like to do tests on kvm host with rados command to compare.
+(I don't have rbd module in my kvm host kernel,so I can't use fio on the host)
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 5e9f61d..23073cf 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -440,7 +440,7 @@ static void reset_connection(struct ceph_connection
-*con)
- 		con->in_msg->con = NULL;
- 		ceph_msg_put(con->in_msg);
- 		con->in_msg = NULL;
--		ceph_con_put(con->in_msg->con);
-+		ceph_con_put(con);
- 	}
+Regards,
 
- 	con->connect_seq = 0;
-
-
-
+Alexandre
