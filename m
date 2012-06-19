@@ -1,44 +1,83 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: bad performance fio random write - rados bench random write to compare?
-Date: Tue, 19 Jun 2012 16:05:53 +0200 (CEST)
-Message-ID: <5b71e1e3-b1be-4c12-897d-0bffbbcf8d33@mailpro>
-References: <4FE07B2A.7080209@profihost.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy
+Date: Tue, 19 Jun 2012 08:33:31 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>
+References: <1339749120-7007-1-git-send-email-gjhe@suse.com>
+ <4FE0BA660200001600012837@soto.provo.novell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:50161 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751060Ab2FSOGQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jun 2012 10:06:16 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mailpro.odiso.net (Postfix) with ESMTP id 7F3E718030A3E
-	for <ceph-devel@vger.kernel.org>; Tue, 19 Jun 2012 16:05:58 +0200 (CEST)
-Received: from mailpro.odiso.net ([127.0.0.1])
-	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id D7cv7O3g7h0r for <ceph-devel@vger.kernel.org>;
-	Tue, 19 Jun 2012 16:05:53 +0200 (CEST)
-Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
-	by mailpro.odiso.net (Postfix) with ESMTP id 25B42180464FB
-	for <ceph-devel@vger.kernel.org>; Tue, 19 Jun 2012 16:05:53 +0200 (CEST)
-In-Reply-To: <4FE07B2A.7080209@profihost.ag>
+Received: from cobra.newdream.net ([66.33.216.30]:56068 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751413Ab2FSPde (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jun 2012 11:33:34 -0400
+In-Reply-To: <4FE0BA660200001600012837@soto.provo.novell.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Guan Jun He <gjhe@suse.com>
+Cc: Guanjun He <heguanbo@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi,
-Is it possible to do random write bench with rados bench command ?
+[Sorry for not responding earlier!]
 
-I have very base random write performance with 4K block size inside qemu-kvm,
-1000 iops/s max with 3 nodes with 3x 5 disk 15k
-(Maybe it's related to my constant disk writes, like datas are not flushed sequentially to disk)
+On Tue, 19 Jun 2012, Guan Jun He wrote:
+> Hi,
+> 
+>   Do you think this is needed? 
+> The osdmap update need to hold this sem.As in function 
+> void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+> and 
+> function static int __map_request(), 
+> etc.
 
-seekwatcher movie of 1 osd here :
-http://odisoweb1.odiso.net/random-write-4k.mpg
+I'm skeptical that this is necessary.  At the point that we're tearing 
+down the osd_client there shouldn't be anybody else referencing us, or the 
+osdmap.
 
-I would like to do tests on kvm host with rados command to compare.
-(I don't have rbd module in my kvm host kernel,so I can't use fio on the host)
+Actually, looking at the code a bit, I think the only kind of race we need 
+to worry about is an incoming message.  The correct fix is probably a call 
+to the messenger to drop all incoming traffic before we start to shut 
+everything else down.  Even with this, we might still end up with a new 
+osdmap that we leak, but stopping the msgr earlier would fix both issues.
 
-Regards,
+sage
 
-Alexandre
+> 
+> Thanks a lot for your reply!
+> 
+> thanks,
+> Guanjun
+> 
+> >>> On 6/15/2012 at 04:32 PM, in message
+> <1339749120-7007-1-git-send-email-gjhe@suse.com>, Guanjun He
+> <heguanbo@gmail.com> wrote: 
+> > From: Guanjun He <heguanbo@gmail.com>
+> > 
+> > 	I think the osdmap destroy code shoule be protected by map_sem.
+> > If I was wrong, please correct me, thanks!
+> > 
+> > Signed-off-by: Guanjun He <gjhe@suse.com>
+> > ---
+> >  net/ceph/osd_client.c |    2 ++
+> >  1 files changed, 2 insertions(+), 0 deletions(-)
+> > 
+> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> > index 1ffebed..718b100 100644
+> > --- a/net/ceph/osd_client.c
+> > +++ b/net/ceph/osd_client.c
+> > @@ -1872,11 +1872,13 @@ void ceph_osdc_stop(struct ceph_osd_client *osdc)
+> >  	destroy_workqueue(osdc->notify_wq);
+> >  	cancel_delayed_work_sync(&osdc->timeout_work);
+> >  	cancel_delayed_work_sync(&osdc->osds_timeout_work);
+> > +	down_write(&osdc->map_sem);
+> >  	if (osdc->osdmap) {
+> >  		ceph_osdmap_destroy(osdc->osdmap);
+> >  		osdc->osdmap = NULL;
+> >  	}
+> >  	remove_all_osds(osdc);
+> > +	up_write(&osdc->map_sem);
+> >  	mempool_destroy(osdc->req_mempool);
+> >  	ceph_msgpool_destroy(&osdc->msgpool_op);
+> >  	ceph_msgpool_destroy(&osdc->msgpool_op_reply);
+> 
+> 
+> 
