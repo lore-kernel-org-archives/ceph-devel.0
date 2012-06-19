@@ -1,37 +1,40 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [patch -next] libceph: fix NULL dereference in reset_connection()
-Date: Tue, 19 Jun 2012 13:33:39 +0300
-Message-ID: <20120619103339.GB7596@elgon.mountain>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: Heavy speed difference between rbd and custom pool
+Date: Tue, 19 Jun 2012 08:01:30 -0500
+Message-ID: <4FE0782A.1060104@inktank.com>
+References: <bfd5bdd7-1959-445f-8016-7b98ae5eb6e9@mailpro> <4FE01CE7.8000204@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from acsinet15.oracle.com ([141.146.126.227]:47357 "EHLO
-	acsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751933Ab2FSKdw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jun 2012 06:33:52 -0400
-Content-Disposition: inline
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:48413 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751982Ab2FSNBi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Jun 2012 09:01:38 -0400
+Received: by ghrr11 with SMTP id r11so4556665ghr.19
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Jun 2012 06:01:38 -0700 (PDT)
+In-Reply-To: <4FE01CE7.8000204@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
 
-We dereference "con->in_msg" on the line after it was set to NULL.
+On 06/19/2012 01:32 AM, Stefan Priebe - Profihost AG wrote:
+> Am 19.06.2012 06:41, schrieb Alexandre DERUMIER:
+>> Hi Stephann
+>> recommandations are 30-50 PGS by osd if I remember.
+>>
+> rbd, data and metadata have 2176 PGs with 12 OSD. This is 181,333333333
+> per OSD?!
+>
+> Stefan
 
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+That's probably fine, it just means that you will have a better 
+pseudo-random distribution of OSD combinations (It does have higher 
+cpu/memory overhead though).  Figuring out how many PGs you should have 
+per OSD depends on a lot of factors including how many OSDs you have, 
+how many nodes, CPU, memory, etc.  I'm guessing ~180 per OSD won't cause 
+problems.  On the other hand, with low OSD counts you could probably 
+have fewer and be fine too.
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 5e9f61d..6aa671c 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -437,10 +437,10 @@ static void reset_connection(struct ceph_connection *con)
- 
- 	if (con->in_msg) {
- 		BUG_ON(con->in_msg->con != con);
-+		ceph_con_put(con->in_msg->con);
- 		con->in_msg->con = NULL;
- 		ceph_msg_put(con->in_msg);
- 		con->in_msg = NULL;
--		ceph_con_put(con->in_msg->con);
- 	}
- 
- 	con->connect_seq = 0;
+Mark
