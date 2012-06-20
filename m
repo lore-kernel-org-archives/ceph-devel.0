@@ -1,106 +1,134 @@
-From: "Guan Jun He" <gjhe@suse.com>
-Subject: Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy
-Date: Wed, 20 Jun 2012 03:46:00 -0600
-Message-ID: <4FE20C580200001600012B1E@soto.provo.novell.com>
-References: <1339749120-7007-1-git-send-email-gjhe@suse.com>
- <4FE0BA660200001600012837@soto.provo.novell.com>
- <Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: still crashing osds with next branch
+Date: Wed, 20 Jun 2012 12:03:30 +0200
+Message-ID: <4FE19FF2.2090302@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soto.provo.novell.com ([137.65.250.214]:50361 "EHLO
-	soto.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755933Ab2FTJqN convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
-	Wed, 20 Jun 2012 05:46:13 -0400
-In-Reply-To: <Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>
-Content-Disposition: inline
+Received: from mail.profihost.ag ([85.158.179.208]:44219 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753873Ab2FTKDh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 06:03:37 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Guanjun He <heguanbo@gmail.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hello list,
+
+i'm still seeing osd crashes with next branch under KVM load. If you 
+need the core dump please tell me.
+
+Here are TWO different crashes.
+
+Here are the last log lines:
+
+########### CRASH 1 ###########
+
+     -3> 2012-06-20 11:59:06.446836 7f1660f4b700  0 osd.13 105 pg[4.64b( 
+v 105'29708 (103'28588,105'29708] n=25 ec=56 les/c 105/105 104/104/104) 
+[13] r=0 lpr=104 mlcod 105'29708 active+degraded] watch: 
+oi.user_version=28492
+     -2> 2012-06-20 11:59:06.496350 7f166074a700  0 osd.13 105 pg[4.64b( 
+v 105'29709 (103'28588,105'29709] n=25 ec=56 les/c 105/105 104/104/104) 
+[13] r=0 lpr=104 mlcod 105'29709 active+degraded] watch: 
+ctx->obc=0x9f94840 cookie=1 oi.version=29709 ctx->at_version=105'29710
+     -1> 2012-06-20 11:59:06.496386 7f166074a700  0 osd.13 105 pg[4.64b( 
+v 105'29709 (103'28588,105'29709] n=25 ec=56 les/c 105/105 104/104/104) 
+[13] r=0 lpr=104 mlcod 105'29709 active+degraded] watch: 
+oi.user_version=28492
+      0> 2012-06-20 11:59:06.499813 7f1664052700 -1 *** Caught signal 
+(Segmentation fault) **
+  in thread 7f1664052700
+
+  ceph version 0.47.2-521-g88c7629 
+(commit:88c7629e041699c25a7c91114bd1ac4ffc64c3eb)
+  1: /usr/bin/ceph-osd() [0x70e429]
+  2: (()+0xeff0) [0x7f16714d5ff0]
+  3: (OSD::disconnect_session_watches(OSD::Session*)+0x418) [0x5c80b8]
+  4: (OSD::ms_handle_reset(Connection*)+0x13b) [0x5c88db]
+  5: (SimpleMessenger::dispatch_entry()+0x1145) [0x72ca85]
+  6: (SimpleMessenger::DispatchThread::entry()+0xd) [0x719dad]
+  7: (()+0x68ca) [0x7f16714cd8ca]
+  8: (clone()+0x6d) [0x7f166fb51c0d]
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
+
+--- end dump of recent events ---
 
 
+########### CRASH 2 ###########
 
->>> On 6/19/2012 at 11:33 PM, in message
-<Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>, Sage Weil
-<sage@inktank.com> wrote: 
-> [Sorry for not responding earlier!]
-> 
-> On Tue, 19 Jun 2012, Guan Jun He wrote:
->> Hi,
->> 
->>   Do you think this is needed? 
->> The osdmap update need to hold this sem.As in function 
->> void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg 
-> *msg)
->> and 
->> function static int __map_request(), 
->> etc.
-> 
-> I'm skeptical that this is necessary.  At the point that we're tearing 
-> down the osd_client there shouldn't be anybody else referencing us, or the 
-> osdmap.
-> 
-> Actually, looking at the code a bit, I think the only kind of race we need 
-> to worry about is an incoming message.  The correct fix is probably a call 
-> to the messenger to drop all incoming traffic before we start to shut 
-> everything else down.  Even with this, we might still end up with a new 
-> osdmap that we leak, but stopping the msgr earlier would fix both issues.
+      0> 2012-06-20 11:56:46.339027 7f39d5c0a700 -1 ./common/Mutex.h: In 
+function 'void Mutex::Lock(bool)' thread 7f39d5c0a700 time 2012-06-20 
+11:56:46.338403
+./common/Mutex.h: 110: FAILED assert(r == 0)
 
-Yes, stopping the msgr earlier is a better fix.
-I will do some test and produce a new patch to this.
+  ceph version 0.47.2-521-g88c7629 
+(commit:88c7629e041699c25a7c91114bd1ac4ffc64c3eb)
+  1: /usr/bin/ceph-osd() [0x51a05d]
+  2: (ReplicatedPG::C_OSD_OndiskWriteUnlock::finish(int)+0x2a) [0x579c3a]
+  3: (FileStore::_finish_op(FileStore::OpSequencer*)+0x2dc) [0x68422c]
+  4: (ThreadPool::worker()+0xbb7) [0x7bbff7]
+  5: (ThreadPool::WorkThread::entry()+0xd) [0x5f1dad]
+  6: (()+0x68ca) [0x7f39e10818ca]
+  7: (clone()+0x6d) [0x7f39df705c0d]
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
 
+--- end dump of recent events ---
+2012-06-20 11:56:46.355013 7f39d5c0a700 -1 *** Caught signal (Aborted) **
+  in thread 7f39d5c0a700
 
-thanks,
-Guanjun
+  ceph version 0.47.2-521-g88c7629 
+(commit:88c7629e041699c25a7c91114bd1ac4ffc64c3eb)
+  1: /usr/bin/ceph-osd() [0x70e429]
+  2: (()+0xeff0) [0x7f39e1089ff0]
+  3: (gsignal()+0x35) [0x7f39df668225]
+  4: (abort()+0x180) [0x7f39df66b030]
+  5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f39dfefcdc5]
+  6: (()+0xcb166) [0x7f39dfefb166]
+  7: (()+0xcb193) [0x7f39dfefb193]
+  8: (()+0xcb28e) [0x7f39dfefb28e]
+  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char 
+const*)+0x940) [0x78ae90]
+  10: /usr/bin/ceph-osd() [0x51a05d]
+  11: (ReplicatedPG::C_OSD_OndiskWriteUnlock::finish(int)+0x2a) [0x579c3a]
+  12: (FileStore::_finish_op(FileStore::OpSequencer*)+0x2dc) [0x68422c]
+  13: (ThreadPool::worker()+0xbb7) [0x7bbff7]
+  14: (ThreadPool::WorkThread::entry()+0xd) [0x5f1dad]
+  15: (()+0x68ca) [0x7f39e10818ca]
+  16: (clone()+0x6d) [0x7f39df705c0d]
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
 
+--- begin dump of recent events ---
+      0> 2012-06-20 11:56:46.355013 7f39d5c0a700 -1 *** Caught signal 
+(Aborted) **
+  in thread 7f39d5c0a700
 
+  ceph version 0.47.2-521-g88c7629 
+(commit:88c7629e041699c25a7c91114bd1ac4ffc64c3eb)
+  1: /usr/bin/ceph-osd() [0x70e429]
+  2: (()+0xeff0) [0x7f39e1089ff0]
+  3: (gsignal()+0x35) [0x7f39df668225]
+  4: (abort()+0x180) [0x7f39df66b030]
+  5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7f39dfefcdc5]
+  6: (()+0xcb166) [0x7f39dfefb166]
+  7: (()+0xcb193) [0x7f39dfefb193]
+  8: (()+0xcb28e) [0x7f39dfefb28e]
+  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char 
+const*)+0x940) [0x78ae90]
+  10: /usr/bin/ceph-osd() [0x51a05d]
+  11: (ReplicatedPG::C_OSD_OndiskWriteUnlock::finish(int)+0x2a) [0x579c3a]
+  12: (FileStore::_finish_op(FileStore::OpSequencer*)+0x2dc) [0x68422c]
+  13: (ThreadPool::worker()+0xbb7) [0x7bbff7]
+  14: (ThreadPool::WorkThread::entry()+0xd) [0x5f1dad]
+  15: (()+0x68ca) [0x7f39e10818ca]
+  16: (clone()+0x6d) [0x7f39df705c0d]
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
 
+--- end dump of recent events ---
 
-> 
-> sage
-> 
->> 
->> Thanks a lot for your reply!
->> 
->> thanks,
->> Guanjun
->> 
->> >>> On 6/15/2012 at 04:32 PM, in message
->> <1339749120-7007-1-git-send-email-gjhe@suse.com>, Guanjun He
->> <heguanbo@gmail.com> wrote: 
->> > From: Guanjun He <heguanbo@gmail.com>
->> > 
->> > 	I think the osdmap destroy code shoule be protected by map_sem.
->> > If I was wrong, please correct me, thanks!
->> > 
->> > Signed-off-by: Guanjun He <gjhe@suse.com>
->> > ---
->> >  net/ceph/osd_client.c |    2 ++
->> >  1 files changed, 2 insertions(+), 0 deletions(-)
->> > 
->> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->> > index 1ffebed..718b100 100644
->> > --- a/net/ceph/osd_client.c
->> > +++ b/net/ceph/osd_client.c
->> > @@ -1872,11 +1872,13 @@ void ceph_osdc_stop(struct ceph_osd_client *osdc)
->> >  	destroy_workqueue(osdc->notify_wq);
->> >  	cancel_delayed_work_sync(&osdc->timeout_work);
->> >  	cancel_delayed_work_sync(&osdc->osds_timeout_work);
->> > +	down_write(&osdc->map_sem);
->> >  	if (osdc->osdmap) {
->> >  		ceph_osdmap_destroy(osdc->osdmap);
->> >  		osdc->osdmap = NULL;
->> >  	}
->> >  	remove_all_osds(osdc);
->> > +	up_write(&osdc->map_sem);
->> >  	mempool_destroy(osdc->req_mempool);
->> >  	ceph_msgpool_destroy(&osdc->msgpool_op);
->> >  	ceph_msgpool_destroy(&osdc->msgpool_op_reply);
->> 
->> 
->> 
-
-
+Stefan
