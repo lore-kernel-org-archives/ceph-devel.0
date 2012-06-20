@@ -1,83 +1,53 @@
-From: Oliver Francke <Oliver.Francke@filoo.de>
-Subject: Re: 0.48 imminent
-Date: Wed, 20 Jun 2012 10:40:27 +0200
-Message-ID: <4FE18C7B.8060109@filoo.de>
-References: <Pine.LNX.4.64.1206180951570.11790@cobra.newdream.net>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: problems with ceph.init / etc/hosts and ceph.conf
+Date: Wed, 20 Jun 2012 10:59:54 +0200
+Message-ID: <4FE1910A.3020708@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-3.de-punkt.de ([93.190.64.33]:33445 "EHLO
-	mail-3.de-punkt.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753365Ab2FTIka (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 04:40:30 -0400
-In-Reply-To: <Pine.LNX.4.64.1206180951570.11790@cobra.newdream.net>
+Received: from mail.profihost.ag ([85.158.179.208]:43458 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755817Ab2FTJAA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 05:00:00 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi *,
+Hello list,
 
-upgraded all instances to:
+i've some problems to find the correct combination of ceph.conf, 
+/etc/hosts for the init script to work correctly.
 
-     0.47.2-508-g95ac5ba
+My systems are named:
+ssdstor000i
+ssdstor001i
+ssdstor002i
 
-kernel on OSDs is 3.4.[23]. Running fine with workload from our=20
-test-setup with 8 VMs on 2 nodes and even more evil write/verify tests.
+These names point to the public external IP.
 
-So far, so very good... Hope others in the same boat with qemu/RBD can=20
-contribute same reports...
+These systems also have an alias (ssdstor000,ssdstor001) pointing to the 
+internal IP which should be used by ceph.
 
-Kind reg's,
+My ceph.conf looks like this:
 
-Oliver.
+...
+[osd.10]
+         host= ssdstor000
+[osd.11]
+         host= ssdstor000
+...
 
-On 06/18/2012 06:55 PM, Sage Weil wrote:
-> v0.48 is essentially ready, but we'd like to test it for a few more d=
-ays
-> before release.  If you are interested in helping out, it's the 'next=
-'
-> branch of ceph.git.
->
-> A few notes:
->
->   - There is a disk-format change in this release.  The first time yo=
-u
->     start ceph-osd it will do a slowish conversion, and you won't be =
-able
->     to downgrade.
->
->   - This will form the basis of our first named 'stable' release.  If=
- you
->     care what we name it, go vote at
->
-> 	http://bit.ly/LROUnL
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The ceph.init Script looks now for an entry called ssdstor000i but can't 
+find one and so it does not start or stop any services.
 
+My /etc/hosts file:
+192.168.0.100    ssdstor000.XYZ.de       ssdstor000i
 
---=20
+10.0.255.100    ssdstor000
 
-Oliver Francke
+What is the correct way to archieve that the default hostname is still 
+the public one but ceph uses the internal one?
 
-filoo GmbH
-Moltkestra=DFe 25a
-33330 G=FCtersloh
-HRB4355 AG G=FCtersloh
-
-Gesch=E4ftsf=FChrer: S.Grewing | J.Rehp=F6hler | C.Kunz
-
-=46olgen Sie uns auf Twitter: http://twitter.com/filoogmbh
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Greets
+Stefan
