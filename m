@@ -1,46 +1,131 @@
-From: Dan Mick <dan.mick@inktank.com>
-Subject: Re: Heavy speed difference between rbd and custom pool
-Date: Wed, 20 Jun 2012 16:21:42 -0700
-Message-ID: <4FE25B06.5080207@inktank.com>
-References: <bfd5bdd7-1959-445f-8016-7b98ae5eb6e9@mailpro> <4FE01CE7.8000204@profihost.ag> <4FE0782A.1060104@inktank.com> <4FE07B2A.7080209@profihost.ag> <Pine.LNX.4.64.1206190840550.21853@cobra.newdream.net> <418AE5C4-0677-423A-8635-BFCB837B0ADF@profihost.ag> <D7C8B960-F7C7-4AEC-8321-982E8908E7CA@inktank.com> <4FE171D1.2040807@profihost.ag>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: rgw objects cleanup
+Date: Wed, 20 Jun 2012 16:57:58 -0700
+Message-ID: <CAC-hyiEjaRnDsPzHUOhRWdHiZFBgq1E6UN-YLgpBPCSv0C2jRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:40171 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758530Ab2FTXVp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 19:21:45 -0400
-Received: by pbbrp8 with SMTP id rp8so1242915pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Jun 2012 16:21:45 -0700 (PDT)
-In-Reply-To: <4FE171D1.2040807@profihost.ag>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:40581 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754530Ab2FTX6A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 19:58:00 -0400
+Received: by bkcji2 with SMTP id ji2so29146bkc.19
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Jun 2012 16:57:58 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Sage Weil <sage@inktank.com>, Mark Nelson <mark.nelson@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+
+One of the issues we have now with rgw is that it requires running a
+maintenance utility every day so that we remove old objects. These
+objects were left behind for a while, so that any pending read could
+complete. There is no way currently to know whether there are reads in
+progress on any object, and we (obviously) don't want to introduce
+object locking for read operations.
+Here are a few issues that we'd like to tackle:
+1. Since we can't be sure when it is safe to remove the rados object,
+we need to wait for a period that is long enough so that it is safe to
+remove the object. Even then we can't be sure whether that object
+wasn't being read at the time. This is currently not a real problem,
+but might become a real once we have libradosgw.
+2. There is the burden of setting up to run the cleanup task periodically
+3. The clean up task doesn't run continuously, therefore the objects
+removal load isn't being spread uniformly
+
+and also note:
+
+4. rgw objects can be compromised of multiple rados objects. When
+reading an rgw object, we first read it's head, then read it's tail.
+The objects that are left behind are the tail data objects. When rgw
+reads an object, it iterates through the objects in the tail. When rgw
+removes an object, it removes it's head, and sends an intent for
+removal for all the objects that make up the tail.
+
+It was suggested in the past that we add a way to mark rados objects
+for deletion, and introduce an osd garbage collection mechanism to
+remove them later. That doesn't solve (1); we still can't know whether
+an object is still being read.
+
+As specified in (4), when we read rgw object we don't read a single
+rados object, but potentially a large number of objects (that are
+being read sequentially). The following solution takes that into
+account. Another solution that leverages osd-side garbage collection
+was also thought out, however, considering (4) lead me to select the
+following approach.
 
 
+A short description
 
-On 06/19/2012 11:46 PM, Stefan Priebe - Profihost AG wrote:
-> Am 19.06.2012 18:29, schrieb Dan Mick:
->> The number doesn't change currently (and can't currently be set
->> manually).
->
-> OK thanks, so for extending the storage this will be pretty important.
-> Do you have any plans for which version this feature will be complete?
->
-> Stefan
+Instead of operating the intent log, we'll have another kind of
+journal that will be processed by a garbage collection daemon
+(potentially the rgw daemon itself). We will mark objects for removal.
+When an object is being read, we'll check whether it was marked for
+removal and if so we'd send a keep-alive on the object as long as
+we're reading it.
+The keep-alive will prevent objects from getting removed.
+The garbage collector itself will poll the journal, and try to remove
+every object that was marked for deletion.
 
-It is one of the next things on our list, and depends on the fixup of 
-'pg splitting' (which once worked, but other features have made it
-impractical without rework).  Until then we have tracker issues about 
-the subject:
+Implementation
 
-http://tracker.newdream.net/issues/1515
-osd: pg split
+1. Object
 
-http://tracker.newdream.net/issues/84
-mon: auto adjust pg_num as pool grows
+ * Marked for deletion flag
 
-http://tracker.newdream.net/issues/85
-osd: pg_num shrink
+We add a flag to the object metadata that marks it for deletion. This
+flag can be manipulated through new rados class methods (set, get).
+
+
+ * Object keep-alive
+
+Whenever we read an object (that can be marked for deletion) on rgw,
+we also need to read the marked for deletion flag. If that flag is
+set, we need to send a periodic keep-alive through another class
+method, in order to prevent object removal.
+
+ * Conditional removal of object
+
+Object can be removed by sending a compound rados operation that
+consists of a guard that tests whether the object was kept-alive.
+
+2. Journal
+
+ * Objects removal journal
+
+A journal (or potentially multiple journals) that will be kept as an
+omap on a rados object, will index the objects that were marked for
+removal. The entries will be indexed by both timestamp (of when the
+object is supposed to be ready for removal) and by object name.
+Since there is a dependency between objects in a rgw object tail, the
+index will keep for each object:
+ - which objects depend on this object
+ - which object does this object depend on
+
+When an object is successfully removed by the garbage collector, its
+corresponding journal entry will be removed, and the journal entry of
+the object that depend on it will also be updated and reflect that the
+object can be removed.
+
+A rados class will handle journal operations. Journal methods will include:
+ - add journal entries
+ - remove journal entries
+ - get list of objects (that can be removed)
+
+3. RGW
+
+* Garbage collector
+
+The rgw process itself can serve as the garbage collector.
+The garbage collector will get periodically a list of objects that can
+be removed (by invoking the journal class method). The garbage
+collector will try to conditionally remove them, and for every object
+that cannot be removed, it'll update the journal.
+
+
+* Multiple garbage collectors
+
+Journal can be split across multiple objects. We can have a special
+mechanism that will distribute the garbage collectors roles to the
+different rgw instances. This is beyond this document.
+
+
+Yehuda
