@@ -1,135 +1,134 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Updated guide for chef installs, from where the docs stop onward
-Date: Wed, 20 Jun 2012 13:57:28 -0700
-Message-ID: <CADvuQRH=pfvhWWTzuXt_LqiyAwc3bxoRAM_sK4vUX3RWnqw2CQ@mail.gmail.com>
+From: Matthew Roy <imjustmatthew@gmail.com>
+Subject: Re: Should an OSD crash when journal device is out of space?
+Date: Wed, 20 Jun 2012 16:57:50 -0400
+Message-ID: <CADXA5U1vdZQnWwQ8SF=5U9S4bwB5UuFM5Dw86May_37U43JnkQ@mail.gmail.com>
+References: <CACkq2mpgqYhxwRCCYCj+xUJmAgWvGqU0LGrQK4EQMZUaA4uyAA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:39806 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753667Ab2FTU5t (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 16:57:49 -0400
-Received: by pbbrp8 with SMTP id rp8so1110782pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Jun 2012 13:57:49 -0700 (PDT)
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:48099 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753667Ab2FTU5v convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 16:57:51 -0400
+Received: by obbuo13 with SMTP id uo13so58672obb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Jun 2012 13:57:50 -0700 (PDT)
+In-Reply-To: <CACkq2mpgqYhxwRCCYCj+xUJmAgWvGqU0LGrQK4EQMZUaA4uyAA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, John Wilkins <john.wilkins@inktank.com>
-Cc: Juan Jose Galvez <juanjose.galvez@inktank.com>, Tamil Muthamizhan <tamil.muthamizhan@inktank.com>, Ken Franklin <ken.franklin@inktank.com>
+To: Travis Rhoden <trhoden@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-So, the docs for Chef install got some doc lovin' lately. It's all at
+I hit this a couple times and wondered the same thing. Why does the
+OSD need to bail when it runs out of journal space?
 
-http://ceph.com/docs/master/install/chef/
-http://ceph.com/docs/master/config-cluster/chef/
-
-but the docs still stop short from having an actual running Ceph
-cluster. Also, while the writing was in progress, I managed to lift
-the "single-mon" restriction, and now you can setup multi-monitor
-clusters with the cookbook. This email tries to list out the
-modernized version of what's missing, based on the earlier email I
-sent with the subject "OSD hotplugging & Chef cookbook ("chef-1")".
-
-I didn't test these exact commands, but I am writing this email based
-on a bunch of notes from how I tested it earlier.
-
-
-http://ceph.com/docs/master/config-cluster/chef/ ends with
-
-"""
-Then execute:
-
-knife create role {rolename}
-The vim editor opens with a JSON object, and you may edit the settings
-and save the JSON file.
-
-Finally configure the nodes.
-
-knife node edit {nodename}
-"""
-
-Instead, you want to create an *environment* not a role; the roles
-were created with the earlier "knife role from file" command, and
-don't need to be edited.
-
-To set up the environment, we need to get/create some bits of information:
-
-- monitor-secret: this is the "mon." key; to create one run
-  ceph-authtool /dev/stdout --name=mon. --gen-key
-  and take the value to the right of "key =", looks like
-"AQBAMuJPINJgFhAAziXIrLvTvAz4PRo5IK/Log=="
-- fsid: run "uuidgen -r" (from package uuid-runtime)
-- initial: list of chef node names (short hostnames), the majority of
-which are required to be in the first mon quorum;
-  avoids split brain syndrome. Can be just one host, if you don't need
-HA at cluster creation time.
-  Not used after first startup. For example: mymon01 mymon02 mymon03
-
-
-Using the {foo} convention from the docs for things you should edit:
-
-knife environment create {envname}
-
-edit the json you are presented and add
-
-  "default_attributes": {
-   # remove this line if you want to run release deb, or change to run
-any branch you want
-    "ceph_branch": "master"
-    "ceph": {
-      "monitor-secret": "{monitor-secret}",
-      "config": {
-        "fsid": "{fsid}",
-        "mon_initial_members": "{initial}",
-      }
-    }
-  },
-
-Then for each node, do
-
-knife node edit {nodename}
-
-and edit to look like this:
-
-  "chef_environment": "{envname}",
-  "run_list": [
-    "recipe[ceph::apt]",
-    "role[ceph-mon]",
-    "role[ceph-osd]"
-  ]
-
-leave out one of the ceph-mon and ceph-osd if you want that node to do
-just one thing.
-
-Now you can run chef-client on all the nodes. You may need a few
-rounds for things to come up (first to get mon going, then to get the
-osd bootstrap files in place).
-
-The above does not bring up any osds; we never told it what disks to
-use. In connection with my work on the deployment of Ceph, I switched
-osds to use "hotplugging"; they detect suitably flagged GPT partitions
-and start up automatically. All we need to do to start up some osds is
-to make a some disks have suitable contents. Here's how (WARNING: this
-will wipe out all of /dev/sdb! Adjust to fit!) (replace {fsid} just
-like above):
-
-sudo apt-get install gdisk
-sudo sgdisk /dev/sdb --zap-all --clear --mbrtogpt --largest-new=1
---change-name=1:'ceph data' --typecode=1:{fsid}
-# mkfs and allocate disk to cluster; any filesystem is ok, adjust for
-xfs/btrfs etc
-sudo mkfs -t ext4 /dev/sdb1
-sudo mount -o user_xattr /dev/sdb1 /mnt
-sudo ceph-disk-prepare --cluster-uuid={fsid} /mnt
-sudo umount /mnt
-# simulate hotplug event
-sudo udevadm trigger --subsystem-match=block --action=add
-
-The above will get simplified into a single command soon,
-http://tracker.newdream.net/issues/2546 and
-http://tracker.newdream.net/issues/2547 are the tickets for that work.
-
-Now you should have an osd started for that disk, too. See it with
-
-sudo initctl list | grep ceph
-
-(If not, you probably didn't run chef-client enough to finish the
-bootstrap key handshake.)
+On Wed, Jun 20, 2012 at 3:56 PM, Travis Rhoden <trhoden@gmail.com> wrot=
+e:
+> Not sure if this is a bug or not. =A0It was definitely user error -- =
+but
+> since the OSD process bailed, figured I would report it.
+>
+> I had /tmpfs mounted with 2.5GB of space:
+>
+> tmpfs on /tmpfs type tmpfs (rw,size=3D2560m)
+>
+> Then I decided to increase my journal size to 5G, but forgot to
+> increase the limit on /tmpfs. =A0=3D)
+>
+> osd journal size =3D 5000
+>
+>
+> Predictably, things didn't go well when I ran a rados bench that
+> filled up the journal. =A0I'm not sure if such a case can be handled
+> more gracefully:
+>
+>
+> =A0 =A0-4> 2012-06-20 12:39:36.648773 7fc042a5f780 =A01 journal _open
+> /tmpfs/osd.2.journal fd 30: 5242880000 bytes, block size 4096 bytes,
+> directio =3D 0, aio =3D 0
+> =A0 =A0-3> 2012-06-20 12:42:23.179164 7fc02e1ad700 =A01
+> CephxAuthorizeHandler::verify_authorizer isvalid=3D1
+> =A0 =A0-2> 2012-06-20 12:42:46.643205 7fc0396cf700 -1 journal
+> FileJournal::write_bl : write_fd failed: (28) No space left on device
+> =A0 =A0-1> 2012-06-20 12:42:46.643245 7fc0396cf700 -1 journal
+> FileJournal::do_write: write_bl(pos=3D2678079488) failed
+> =A0 =A0 0> 2012-06-20 12:42:46.676991 7fc0396cf700 -1 os/FileJournal.=
+cc:
+> In function 'void FileJournal::do_write(ceph::bufferlist&)' thread
+> 7fc0396cf700 time 2012-06-20 12:42:46.643315
+> os/FileJournal.cc: 994: FAILED assert(0)
+>
+> =A0ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad3=
+72)
+> =A01: (FileJournal::do_write(ceph::buffer::list&)+0xe22) [0x653082]
+> =A02: (FileJournal::write_thread_entry()+0x735) [0x659545]
+> =A03: (FileJournal::Writer::entry()+0xd) [0x5de41d]
+> =A04: (()+0x7e9a) [0x7fc042434e9a]
+> =A05: (clone()+0x6d) [0x7fc0409e94bd]
+> =A0NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+>
+> --- end dump of recent events ---
+> 2012-06-20 12:42:46.693963 7fc0396cf700 -1 *** Caught signal (Aborted=
+) **
+> =A0in thread 7fc0396cf700
+>
+> =A0ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad3=
+72)
+> =A01: /usr/bin/ceph-osd() [0x6eb32a]
+> =A02: (()+0xfcb0) [0x7fc04243ccb0]
+> =A03: (gsignal()+0x35) [0x7fc04092d445]
+> =A04: (abort()+0x17b) [0x7fc040930bab]
+> =A05: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fc04127b69=
+d]
+> =A06: (()+0xb5846) [0x7fc041279846]
+> =A07: (()+0xb5873) [0x7fc041279873]
+> =A08: (()+0xb596e) [0x7fc04127996e]
+> =A09: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x282) [0x79dd02]
+> =A010: (FileJournal::do_write(ceph::buffer::list&)+0xe22) [0x653082]
+> =A011: (FileJournal::write_thread_entry()+0x735) [0x659545]
+> =A012: (FileJournal::Writer::entry()+0xd) [0x5de41d]
+> =A013: (()+0x7e9a) [0x7fc042434e9a]
+> =A014: (clone()+0x6d) [0x7fc0409e94bd]
+> =A0NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+>
+> --- begin dump of recent events ---
+> =A0 =A0 0> 2012-06-20 12:42:46.693963 7fc0396cf700 -1 *** Caught sign=
+al
+> (Aborted) **
+> =A0in thread 7fc0396cf700
+>
+> =A0ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad3=
+72)
+> =A01: /usr/bin/ceph-osd() [0x6eb32a]
+> =A02: (()+0xfcb0) [0x7fc04243ccb0]
+> =A03: (gsignal()+0x35) [0x7fc04092d445]
+> =A04: (abort()+0x17b) [0x7fc040930bab]
+> =A05: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fc04127b69=
+d]
+> =A06: (()+0xb5846) [0x7fc041279846]
+> =A07: (()+0xb5873) [0x7fc041279873]
+> =A08: (()+0xb596e) [0x7fc04127996e]
+> =A09: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x282) [0x79dd02]
+> =A010: (FileJournal::do_write(ceph::buffer::list&)+0xe22) [0x653082]
+> =A011: (FileJournal::write_thread_entry()+0x735) [0x659545]
+> =A012: (FileJournal::Writer::entry()+0xd) [0x5de41d]
+> =A013: (()+0x7e9a) [0x7fc042434e9a]
+> =A014: (clone()+0x6d) [0x7fc0409e94bd]
+> =A0NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+>
+> --- end dump of recent events ---
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
