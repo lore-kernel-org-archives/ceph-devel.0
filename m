@@ -1,132 +1,55 @@
-From: Matthew Roy <imjustmatthew@gmail.com>
-Subject: Re: Should an OSD crash when journal device is out of space?
-Date: Wed, 20 Jun 2012 16:57:50 -0400
-Message-ID: <CADXA5U1vdZQnWwQ8SF=5U9S4bwB5UuFM5Dw86May_37U43JnkQ@mail.gmail.com>
-References: <CACkq2mpgqYhxwRCCYCj+xUJmAgWvGqU0LGrQK4EQMZUaA4uyAA@mail.gmail.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: Re: ceph osd crush add - uknown command crush
+Date: Wed, 20 Jun 2012 17:53:12 -0400
+Message-ID: <CACkq2moDXngPxLZ3Tb36SW_R+E-P-aE1vGELsK7mWa2XHBPJqQ@mail.gmail.com>
+References: <CAMwB3TjS_r-U55py7WPu1RZmNob78nodB6a=i9sb1sx3mxvXDw@mail.gmail.com>
+ <271B7E7C4B014BFE86FC17F9AF863BD8@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:48099 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753667Ab2FTU5v convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 16:57:51 -0400
-Received: by obbuo13 with SMTP id uo13so58672obb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 20 Jun 2012 13:57:50 -0700 (PDT)
-In-Reply-To: <CACkq2mpgqYhxwRCCYCj+xUJmAgWvGqU0LGrQK4EQMZUaA4uyAA@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:56711 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754629Ab2FTVxd convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 17:53:33 -0400
+Received: by lbbgm6 with SMTP id gm6so1195363lbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Jun 2012 14:53:32 -0700 (PDT)
+In-Reply-To: <271B7E7C4B014BFE86FC17F9AF863BD8@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Rhoden <trhoden@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Greg Farnum <greg@inktank.com>
+Cc: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>, ceph-devel@vger.kernel.org, Sage Weil <sage@inktank.com>
 
-I hit this a couple times and wondered the same thing. Why does the
-OSD need to bail when it runs out of journal space?
+This incorrect syntax is still published in the docs at
+http://ceph.com/docs/master/ops/manage/crush/#adjusting-crush
 
-On Wed, Jun 20, 2012 at 3:56 PM, Travis Rhoden <trhoden@gmail.com> wrot=
-e:
-> Not sure if this is a bug or not. =A0It was definitely user error -- =
-but
-> since the OSD process bailed, figured I would report it.
+Are the docs that end up on that page in GitHub?  I'd be happy to
+start making fixes and issuing pull-request.  I've run into a few
+gotchas when following the commands on those pages.
+
+ - Travis
+
+On Tue, May 22, 2012 at 4:27 PM, Greg Farnum <greg@inktank.com> wrote:
+> On Tuesday, May 22, 2012 at 1:15 PM, S=C5=82awomir Skowron wrote:
+>> /usr/bin/ceph -v
+>> ceph version 0.47.1 (commit:f5a9404445e2ed5ec2ee828aa53d73d4a002f7a5=
+)
+>>
+>> root@obs-10-177-66-4:/# /usr/bin/ceph osd crush add 1 osd.1 1.0
+>> pool=3Ddefault rack=3Dunknownrack host=3Dobs-10-177-66-4
+>> root@obs-10-177-66-4:/# unknown command crush
+>>
+>> Something has changed (there is no change in doc) or it's bug ??
+> Gah, something changed.
 >
-> I had /tmpfs mounted with 2.5GB of space:
+> Use "ceph osd crush set=E2=80=A6"
 >
-> tmpfs on /tmpfs type tmpfs (rw,size=3D2560m)
->
-> Then I decided to increase my journal size to 5G, but forgot to
-> increase the limit on /tmpfs. =A0=3D)
->
-> osd journal size =3D 5000
->
->
-> Predictably, things didn't go well when I ran a rados bench that
-> filled up the journal. =A0I'm not sure if such a case can be handled
-> more gracefully:
->
->
-> =A0 =A0-4> 2012-06-20 12:39:36.648773 7fc042a5f780 =A01 journal _open
-> /tmpfs/osd.2.journal fd 30: 5242880000 bytes, block size 4096 bytes,
-> directio =3D 0, aio =3D 0
-> =A0 =A0-3> 2012-06-20 12:42:23.179164 7fc02e1ad700 =A01
-> CephxAuthorizeHandler::verify_authorizer isvalid=3D1
-> =A0 =A0-2> 2012-06-20 12:42:46.643205 7fc0396cf700 -1 journal
-> FileJournal::write_bl : write_fd failed: (28) No space left on device
-> =A0 =A0-1> 2012-06-20 12:42:46.643245 7fc0396cf700 -1 journal
-> FileJournal::do_write: write_bl(pos=3D2678079488) failed
-> =A0 =A0 0> 2012-06-20 12:42:46.676991 7fc0396cf700 -1 os/FileJournal.=
-cc:
-> In function 'void FileJournal::do_write(ceph::bufferlist&)' thread
-> 7fc0396cf700 time 2012-06-20 12:42:46.643315
-> os/FileJournal.cc: 994: FAILED assert(0)
->
-> =A0ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad3=
-72)
-> =A01: (FileJournal::do_write(ceph::buffer::list&)+0xe22) [0x653082]
-> =A02: (FileJournal::write_thread_entry()+0x735) [0x659545]
-> =A03: (FileJournal::Writer::entry()+0xd) [0x5de41d]
-> =A04: (()+0x7e9a) [0x7fc042434e9a]
-> =A05: (clone()+0x6d) [0x7fc0409e94bd]
-> =A0NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
->
-> --- end dump of recent events ---
-> 2012-06-20 12:42:46.693963 7fc0396cf700 -1 *** Caught signal (Aborted=
-) **
-> =A0in thread 7fc0396cf700
->
-> =A0ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad3=
-72)
-> =A01: /usr/bin/ceph-osd() [0x6eb32a]
-> =A02: (()+0xfcb0) [0x7fc04243ccb0]
-> =A03: (gsignal()+0x35) [0x7fc04092d445]
-> =A04: (abort()+0x17b) [0x7fc040930bab]
-> =A05: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fc04127b69=
-d]
-> =A06: (()+0xb5846) [0x7fc041279846]
-> =A07: (()+0xb5873) [0x7fc041279873]
-> =A08: (()+0xb596e) [0x7fc04127996e]
-> =A09: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> const*)+0x282) [0x79dd02]
-> =A010: (FileJournal::do_write(ceph::buffer::list&)+0xe22) [0x653082]
-> =A011: (FileJournal::write_thread_entry()+0x735) [0x659545]
-> =A012: (FileJournal::Writer::entry()+0xd) [0x5de41d]
-> =A013: (()+0x7e9a) [0x7fc042434e9a]
-> =A014: (clone()+0x6d) [0x7fc0409e94bd]
-> =A0NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
->
-> --- begin dump of recent events ---
-> =A0 =A0 0> 2012-06-20 12:42:46.693963 7fc0396cf700 -1 *** Caught sign=
-al
-> (Aborted) **
-> =A0in thread 7fc0396cf700
->
-> =A0ceph version 0.47.2 (commit:8bf9fde89bd6ebc4b0645b2fe02dadb1c17ad3=
-72)
-> =A01: /usr/bin/ceph-osd() [0x6eb32a]
-> =A02: (()+0xfcb0) [0x7fc04243ccb0]
-> =A03: (gsignal()+0x35) [0x7fc04092d445]
-> =A04: (abort()+0x17b) [0x7fc040930bab]
-> =A05: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fc04127b69=
-d]
-> =A06: (()+0xb5846) [0x7fc041279846]
-> =A07: (()+0xb5873) [0x7fc041279873]
-> =A08: (()+0xb596e) [0x7fc04127996e]
-> =A09: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> const*)+0x282) [0x79dd02]
-> =A010: (FileJournal::do_write(ceph::buffer::list&)+0xe22) [0x653082]
-> =A011: (FileJournal::write_thread_entry()+0x735) [0x659545]
-> =A012: (FileJournal::Writer::entry()+0xd) [0x5de41d]
-> =A013: (()+0x7e9a) [0x7fc042434e9a]
-> =A014: (clone()+0x6d) [0x7fc0409e94bd]
-> =A0NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
->
-> --- end dump of recent events ---
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
  in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
+ml
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
