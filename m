@@ -1,43 +1,28 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: still crashing osds with next branch
-Date: Wed, 20 Jun 2012 11:11:07 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206201110540.14284@cobra.newdream.net>
-References: <4FE19FF2.2090302@profihost.ag> <4FE1D06A.1080906@profihost.ag>
- <4FE2062A.7060508@profihost.ag> <Pine.LNX.4.64.1206201034120.14284@cobra.newdream.net>
- <4FE21216.4050108@profihost.ag>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: how to monitor journal utilization
+Date: Wed, 20 Jun 2012 15:24:04 -0400
+Message-ID: <CACkq2mo=3_6QSbeSJvaEdhfkv5A-jQOgnF8UqzEtqfpKXYUKOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50781 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753210Ab2FTSLN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 14:11:13 -0400
-In-Reply-To: <4FE21216.4050108@profihost.ag>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:63971 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752292Ab2FTTYZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 15:24:25 -0400
+Received: by bkcji2 with SMTP id ji2so6575338bkc.19
+        for <ceph-devel@vger.kernel.org>; Wed, 20 Jun 2012 12:24:24 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Wed, 20 Jun 2012, Stefan Priebe wrote:
-> Am 20.06.2012 19:35, schrieb Sage Weil:
-> > On Wed, 20 Jun 2012, Stefan Priebe wrote:
-> > > Nobody an idea? Should i open up bugs in tracker?
-> > 
-> > Let's open up bugs.  If they are reproducible, debug osd = 20 logs would
-> > be awesome!
-> > 
-> > Also, the crash you mentioned in your earlier email we did see:
-> > 
-> > 	http://tracker.newdream.net/issues/2599
-> > 
-> > If you have logs from that crash, those would also be helpful.
-> 
-> i can't reproduce but it happens pretty often. So i can switch to debug osd =
-> 20 in general. What else do you need?
+Is there a way I can monitor the utilization of the OSD journal?  I
+would like to know if data is coming in fast enough to fill the
+journal, and thus slow down all the subsequent writes.
 
-That will probably be enough, but if you get a core file, don't throw it 
-away :)
+Once the journal is full, that becomes the bottleneck for writes, no?
+(assuming that writes to the journal are faster than the OSD -- such
+as with tmpfs or an SSD.  I'm using tmpfs).
 
-thanks!
-sage
+Thanks,
 
+Travis
