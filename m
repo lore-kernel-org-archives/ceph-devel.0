@@ -1,25 +1,106 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: filestore btrfs trans
-Date: Wed, 20 Jun 2012 11:43:50 +0200
-Message-ID: <4FE19B56.6010808@profihost.ag>
+From: "Guan Jun He" <gjhe@suse.com>
+Subject: Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy
+Date: Wed, 20 Jun 2012 03:46:00 -0600
+Message-ID: <4FE20C580200001600012B1E@soto.provo.novell.com>
+References: <1339749120-7007-1-git-send-email-gjhe@suse.com>
+ <4FE0BA660200001600012837@soto.provo.novell.com>
+ <Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:33164 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755716Ab2FTJn4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 05:43:56 -0400
+Received: from soto.provo.novell.com ([137.65.250.214]:50361 "EHLO
+	soto.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755933Ab2FTJqN convert rfc822-to-8bit (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
+	Wed, 20 Jun 2012 05:46:13 -0400
+In-Reply-To: <Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Guanjun He <heguanbo@gmail.com>, ceph-devel@vger.kernel.org
 
-Hello list,
 
-i've looked at the wiki (http://ceph.com/wiki/Ceph.conf) but there is no 
-exact desciption what filestore btrfs trans does. It seems it is false 
-by default.
 
-Should it be enabled when using btrfs?
+>>> On 6/19/2012 at 11:33 PM, in message
+<Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>, Sage Weil
+<sage@inktank.com> wrote: 
+> [Sorry for not responding earlier!]
+> 
+> On Tue, 19 Jun 2012, Guan Jun He wrote:
+>> Hi,
+>> 
+>>   Do you think this is needed? 
+>> The osdmap update need to hold this sem.As in function 
+>> void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg 
+> *msg)
+>> and 
+>> function static int __map_request(), 
+>> etc.
+> 
+> I'm skeptical that this is necessary.  At the point that we're tearing 
+> down the osd_client there shouldn't be anybody else referencing us, or the 
+> osdmap.
+> 
+> Actually, looking at the code a bit, I think the only kind of race we need 
+> to worry about is an incoming message.  The correct fix is probably a call 
+> to the messenger to drop all incoming traffic before we start to shut 
+> everything else down.  Even with this, we might still end up with a new 
+> osdmap that we leak, but stopping the msgr earlier would fix both issues.
 
-Stefan
+Yes, stopping the msgr earlier is a better fix.
+I will do some test and produce a new patch to this.
+
+
+thanks,
+Guanjun
+
+
+
+
+> 
+> sage
+> 
+>> 
+>> Thanks a lot for your reply!
+>> 
+>> thanks,
+>> Guanjun
+>> 
+>> >>> On 6/15/2012 at 04:32 PM, in message
+>> <1339749120-7007-1-git-send-email-gjhe@suse.com>, Guanjun He
+>> <heguanbo@gmail.com> wrote: 
+>> > From: Guanjun He <heguanbo@gmail.com>
+>> > 
+>> > 	I think the osdmap destroy code shoule be protected by map_sem.
+>> > If I was wrong, please correct me, thanks!
+>> > 
+>> > Signed-off-by: Guanjun He <gjhe@suse.com>
+>> > ---
+>> >  net/ceph/osd_client.c |    2 ++
+>> >  1 files changed, 2 insertions(+), 0 deletions(-)
+>> > 
+>> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> > index 1ffebed..718b100 100644
+>> > --- a/net/ceph/osd_client.c
+>> > +++ b/net/ceph/osd_client.c
+>> > @@ -1872,11 +1872,13 @@ void ceph_osdc_stop(struct ceph_osd_client *osdc)
+>> >  	destroy_workqueue(osdc->notify_wq);
+>> >  	cancel_delayed_work_sync(&osdc->timeout_work);
+>> >  	cancel_delayed_work_sync(&osdc->osds_timeout_work);
+>> > +	down_write(&osdc->map_sem);
+>> >  	if (osdc->osdmap) {
+>> >  		ceph_osdmap_destroy(osdc->osdmap);
+>> >  		osdc->osdmap = NULL;
+>> >  	}
+>> >  	remove_all_osds(osdc);
+>> > +	up_write(&osdc->map_sem);
+>> >  	mempool_destroy(osdc->req_mempool);
+>> >  	ceph_msgpool_destroy(&osdc->msgpool_op);
+>> >  	ceph_msgpool_destroy(&osdc->msgpool_op_reply);
+>> 
+>> 
+>> 
+
+
