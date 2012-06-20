@@ -1,67 +1,120 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: problems with ceph.init / etc/hosts and ceph.conf
-Date: Wed, 20 Jun 2012 15:46:28 +0200
-Message-ID: <4FE1D434.2080602@widodh.nl>
-References: <4FE1910A.3020708@profihost.ag> <4FE1943B.5060806@widodh.nl> <4FE195DE.50108@profihost.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy
+Date: Wed, 20 Jun 2012 09:04:50 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206200902110.14284@cobra.newdream.net>
+References: <1339749120-7007-1-git-send-email-gjhe@suse.com>
+ <4FE0BA660200001600012837@soto.provo.novell.com>
+ <Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>
+ <4FE20C580200001600012B1E@soto.provo.novell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:45140 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751291Ab2FTNqb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 09:46:31 -0400
-In-Reply-To: <4FE195DE.50108@profihost.ag>
+Received: from cobra.newdream.net ([66.33.216.30]:49685 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756945Ab2FTQEx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 20 Jun 2012 12:04:53 -0400
+In-Reply-To: <4FE20C580200001600012B1E@soto.provo.novell.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Guan Jun He <gjhe@suse.com>
+Cc: Guanjun He <heguanbo@gmail.com>, ceph-devel@vger.kernel.org
 
-On 06/20/2012 11:20 AM, Stefan Priebe - Profihost AG wrote:
-> Am 20.06.2012 11:13, schrieb Wido den Hollander:
->> On 06/20/2012 10:59 AM, Stefan Priebe - Profihost AG wrote:
->>> Hello list,
->>>
->>> i've some problems to find the correct combination of ceph.conf,
->>> /etc/hosts for the init script to work correctly.
->>>
->>> My systems are named:
->>> ssdstor000i
->>> ssdstor001i
->>> ssdstor002i
->>>
->> What does hostname | cut -d . -f 1 say?
-> It says ssdstor000i as the machine defaults to it's public IP.
->
-> Whouldn't it make sense to go through all aliases set in /etc/hosts
-> which point to a local IP?
+On Wed, 20 Jun 2012, Guan Jun He wrote:
+> 
+> 
+> >>> On 6/19/2012 at 11:33 PM, in message
+> <Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>, Sage Weil
+> <sage@inktank.com> wrote: 
+> > [Sorry for not responding earlier!]
+> > 
+> > On Tue, 19 Jun 2012, Guan Jun He wrote:
+> >> Hi,
+> >> 
+> >>   Do you think this is needed? 
+> >> The osdmap update need to hold this sem.As in function 
+> >> void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg 
+> > *msg)
+> >> and 
+> >> function static int __map_request(), 
+> >> etc.
+> > 
+> > I'm skeptical that this is necessary.  At the point that we're tearing 
+> > down the osd_client there shouldn't be anybody else referencing us, or the 
+> > osdmap.
+> > 
+> > Actually, looking at the code a bit, I think the only kind of race we need 
+> > to worry about is an incoming message.  The correct fix is probably a call 
+> > to the messenger to drop all incoming traffic before we start to shut 
+> > everything else down.  Even with this, we might still end up with a new 
+> > osdmap that we leak, but stopping the msgr earlier would fix both issues.
+> 
+> Yes, stopping the msgr earlier is a better fix.
+> I will do some test and produce a new patch to this.
 
-Ceph is not really intended to work with public or private IP's.
+Ok.  The trick here is that I think we want to set a flag to discard 
+incoming messages and then flush the workqueue, do all this other 
+tear down for osd_client etc., and then tear down the messenger.  I don't 
+think we can tear down the msgr fully before that, though, because 
+osd_client etc have their fingers in it.  We just need to prevent the race 
+of incoming work during teardown...
 
-The idea is that you have a Layer 2 or Layer 3 network over which all 
-the daemons and clients connect over a routable network, peer-to-peer, 
-no NAT in it's way.
+Thanks for looking at this!
+sage
 
-You can however have a seperate "osd" network where the OSD's 
-interconnect for their replication traffic, but that has nothing to do 
-with the hostnames.
-
-You can take a look at the configuration options "public_addr" and 
-"cluster_addr" for these.
-
-Besides that, Ceph would run on a "private" network. If you have KVM 
-hosts these will have a WAN connection over which they (and their VM's) 
-communicate with the outside world and over a dedicated NIC the host 
-communicates with the Ceph cluster.
-
-I'd recommend sticking with 1 IP-Address for each OSD, keep it simple.
-
-Wido
-
->
-> Stefan
+> thanks,
+> Guanjun
+> 
+> 
+> 
+> 
+> > 
+> > sage
+> > 
+> >> 
+> >> Thanks a lot for your reply!
+> >> 
+> >> thanks,
+> >> Guanjun
+> >> 
+> >> >>> On 6/15/2012 at 04:32 PM, in message
+> >> <1339749120-7007-1-git-send-email-gjhe@suse.com>, Guanjun He
+> >> <heguanbo@gmail.com> wrote: 
+> >> > From: Guanjun He <heguanbo@gmail.com>
+> >> > 
+> >> > 	I think the osdmap destroy code shoule be protected by map_sem.
+> >> > If I was wrong, please correct me, thanks!
+> >> > 
+> >> > Signed-off-by: Guanjun He <gjhe@suse.com>
+> >> > ---
+> >> >  net/ceph/osd_client.c |    2 ++
+> >> >  1 files changed, 2 insertions(+), 0 deletions(-)
+> >> > 
+> >> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> >> > index 1ffebed..718b100 100644
+> >> > --- a/net/ceph/osd_client.c
+> >> > +++ b/net/ceph/osd_client.c
+> >> > @@ -1872,11 +1872,13 @@ void ceph_osdc_stop(struct ceph_osd_client *osdc)
+> >> >  	destroy_workqueue(osdc->notify_wq);
+> >> >  	cancel_delayed_work_sync(&osdc->timeout_work);
+> >> >  	cancel_delayed_work_sync(&osdc->osds_timeout_work);
+> >> > +	down_write(&osdc->map_sem);
+> >> >  	if (osdc->osdmap) {
+> >> >  		ceph_osdmap_destroy(osdc->osdmap);
+> >> >  		osdc->osdmap = NULL;
+> >> >  	}
+> >> >  	remove_all_osds(osdc);
+> >> > +	up_write(&osdc->map_sem);
+> >> >  	mempool_destroy(osdc->req_mempool);
+> >> >  	ceph_msgpool_destroy(&osdc->msgpool_op);
+> >> >  	ceph_msgpool_destroy(&osdc->msgpool_op_reply);
+> >> 
+> >> 
+> >> 
+> 
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
-
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
