@@ -1,123 +1,111 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 09/12] libceph: distinguish two phases of connect sequence
-Date: Thu, 21 Jun 2012 09:22:32 -0500
-Message-ID: <4FE32E28.8030006@inktank.com>
+Subject: [PATCH 11/12] libceph: make ceph_con_get() (etc.) private
+Date: Thu, 21 Jun 2012 09:22:45 -0500
+Message-ID: <4FE32E35.3000807@inktank.com>
 References: <4FE32C84.2050408@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:52957 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753078Ab2FUOWe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 10:22:34 -0400
-Received: by ghrr11 with SMTP id r11so499988ghr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Jun 2012 07:22:33 -0700 (PDT)
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:59948 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754378Ab2FUOWq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 10:22:46 -0400
+Received: by mail-gg0-f174.google.com with SMTP id u4so497540ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Jun 2012 07:22:46 -0700 (PDT)
 In-Reply-To: <4FE32C84.2050408@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Currently a ceph connection enters a "CONNECTING" state when it
-begins the process of (re-)connecting with its peer.  Once the two
-ends have successfully exchanged their banner and addresses, an
-additional NEGOTIATING bit is set in the ceph connection's state to
-indicate the connection information exhange has begun.  The
-CONNECTING bit/state continues to be set during this phase.
-
-Rather than have the CONNECTING state continue while the NEGOTIATING
-bit is set, interpret these two phases as distinct states.  In other
-words, when NEGOTIATING is set, clear CONNECTING.  That way only
-one of them will be active at a time.
+The functions ceph_con_get() and ceph_con_put() are both only ever
+used in "net/ceph/messenger.c", so change them to have static scope.
+Move their definition up in the source file so they're both defined
+before their first use.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- net/ceph/messenger.c |   48
-++++++++++++++++++++++++++----------------------
- 1 file changed, 26 insertions(+), 22 deletions(-)
+ include/linux/ceph/messenger.h |    2 -
+ net/ceph/messenger.c           |   48
+++++++++++++++++++++---------------------
+ 2 files changed, 24 insertions(+), 26 deletions(-)
 
+Index: b/include/linux/ceph/messenger.h
+===================================================================
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -245,8 +245,6 @@ extern void ceph_msg_revoke(struct ceph_
+ extern void ceph_msg_revoke_incoming(struct ceph_msg *msg);
+
+ extern void ceph_con_keepalive(struct ceph_connection *con);
+-extern struct ceph_connection *ceph_con_get(struct ceph_connection *con);
+-extern void ceph_con_put(struct ceph_connection *con);
+
+ extern struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
+ 				     bool can_fail);
 Index: b/net/ceph/messenger.c
 ===================================================================
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -1583,7 +1583,6 @@ static int process_connect(struct ceph_c
- 			return -1;
- 		}
- 		clear_bit(NEGOTIATING, &con->state);
--		clear_bit(CONNECTING, &con->state);
- 		set_bit(CONNECTED, &con->state);
- 		con->peer_global_seq = le32_to_cpu(con->in_reply.global_seq);
- 		con->connect_seq++;
-@@ -2025,7 +2024,8 @@ more_kvec:
- 	}
+@@ -408,6 +408,30 @@ static int con_close_socket(struct ceph_
+ }
 
- do_next:
--	if (!test_bit(CONNECTING, &con->state)) {
-+	if (!test_bit(CONNECTING, &con->state) &&
-+			!test_bit(NEGOTIATING, &con->state)) {
- 		/* is anything else pending? */
- 		if (!list_empty(&con->out_queue)) {
- 			prepare_write_message(con);
-@@ -2082,25 +2082,29 @@ more:
- 	}
-
- 	if (test_bit(CONNECTING, &con->state)) {
--		if (!test_bit(NEGOTIATING, &con->state)) {
--			dout("try_read connecting\n");
--			ret = read_partial_banner(con);
--			if (ret <= 0)
--				goto out;
--			ret = process_banner(con);
--			if (ret < 0)
--				goto out;
-+		dout("try_read connecting\n");
-+		ret = read_partial_banner(con);
-+		if (ret <= 0)
-+			goto out;
-+		ret = process_banner(con);
-+		if (ret < 0)
-+			goto out;
-
--			/* Banner is good, exchange connection info */
--			ret = prepare_write_connect(con);
--			if (ret < 0)
--				goto out;
--			prepare_read_connect(con);
--			set_bit(NEGOTIATING, &con->state);
-+		clear_bit(CONNECTING, &con->state);
-+		set_bit(NEGOTIATING, &con->state);
-
--			/* Send connection info before awaiting response */
-+		/* Banner is good, exchange connection info */
-+		ret = prepare_write_connect(con);
-+		if (ret < 0)
- 			goto out;
--		}
-+		prepare_read_connect(con);
+ /*
++ * generic get/put
++ */
++static struct ceph_connection *ceph_con_get(struct ceph_connection *con)
++{
++	int nref = __atomic_add_unless(&con->nref, 1, 0);
 +
-+		/* Send connection info before awaiting response */
-+		goto out;
++	dout("con_get %p nref = %d -> %d\n", con, nref, nref + 1);
++
++	return nref ? con : NULL;
++}
++
++static void ceph_con_put(struct ceph_connection *con)
++{
++	int nref = atomic_dec_return(&con->nref);
++
++	BUG_ON(nref < 0);
++	if (nref == 0) {
++		BUG_ON(con->sock);
++		kfree(con);
 +	}
++	dout("con_put %p nref = %d -> %d\n", con, nref + 1, nref);
++}
 +
-+	if (test_bit(NEGOTIATING, &con->state)) {
-+		dout("try_read negotiating\n");
- 		ret = read_partial_connect(con);
- 		if (ret <= 0)
- 			goto out;
-@@ -2222,12 +2226,12 @@ restart:
- 	if (test_and_clear_bit(SOCK_CLOSED, &con->flags)) {
- 		if (test_and_clear_bit(CONNECTED, &con->state))
- 			con->error_msg = "socket closed";
--		else if (test_and_clear_bit(CONNECTING, &con->state)) {
--			clear_bit(NEGOTIATING, &con->state);
-+		else if (test_and_clear_bit(NEGOTIATING, &con->state))
-+			con->error_msg = "negotiation failed";
-+		else if (test_and_clear_bit(CONNECTING, &con->state))
- 			con->error_msg = "connection failed";
--		} else {
-+		else
- 			con->error_msg = "unrecognized con state";
--		}
- 		goto fault;
- 	}
++/*
+  * Reset a connection.  Discard all incoming and outgoing messages
+  * and clear *_seq state.
+  */
+@@ -504,30 +528,6 @@ bool ceph_con_opened(struct ceph_connect
+ }
 
+ /*
+- * generic get/put
+- */
+-struct ceph_connection *ceph_con_get(struct ceph_connection *con)
+-{
+-	int nref = __atomic_add_unless(&con->nref, 1, 0);
+-
+-	dout("con_get %p nref = %d -> %d\n", con, nref, nref + 1);
+-
+-	return nref ? con : NULL;
+-}
+-
+-void ceph_con_put(struct ceph_connection *con)
+-{
+-	int nref = atomic_dec_return(&con->nref);
+-
+-	BUG_ON(nref < 0);
+-	if (nref == 0) {
+-		BUG_ON(con->sock);
+-		kfree(con);
+-	}
+-	dout("con_put %p nref = %d -> %d\n", con, nref + 1, nref);
+-}
+-
+-/*
+  * initialize a new connection.
+  */
+ void ceph_con_init(struct ceph_connection *con, void *private,
