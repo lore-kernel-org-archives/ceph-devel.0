@@ -1,170 +1,75 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 09/12] libceph: distinguish two phases of connect sequence
-Date: Thu, 21 Jun 2012 13:54:37 -0500
-Message-ID: <4FE36DED.9060409@inktank.com>
-References: <4FE32C84.2050408@inktank.com> <4FE32E28.8030006@inktank.com> <Pine.LNX.4.64.1206211141460.23422@cobra.newdream.net>
+From: James Page <james.page@ubuntu.com>
+Subject: Re: [Openstack] Ceph/OpenStack integration on Ubuntu precise: horribly
+ broken, or am I doing something wrong?
+Date: Thu, 21 Jun 2012 20:43:10 +0100
+Message-ID: <4FE3794E.8000700@ubuntu.com>
+References: <CAPUexz846keC+6KvFeethXV4xzpke3n_YKU0_oh-YfTCVR1ozw@mail.gmail.com> <4FD21ECC.7040906@inktank.com> <4FD2217F.8040804@ubuntu.com> <CAPUexz9WtA3K8SN=vau1q0BwLW3bP3qU-SMWQt2yktR6_aVSPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:56265 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759329Ab2FUSyj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 14:54:39 -0400
-Received: by vcbf11 with SMTP id f11so481629vcb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Jun 2012 11:54:39 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1206211141460.23422@cobra.newdream.net>
+Received: from youngberry.canonical.com ([91.189.89.112]:35580 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755509Ab2FUTnP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 15:43:15 -0400
+In-Reply-To: <CAPUexz9WtA3K8SN=vau1q0BwLW3bP3qU-SMWQt2yktR6_aVSPg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Florian Haas <florian@hastexo.com>
+Cc: openstack@lists.launchpad.net, ceph-devel@vger.kernel.org
 
-On 06/21/2012 01:44 PM, Sage Weil wrote:
-> I get the feeling that all of these lists of clear/set_bit calls would go 
-> away if we
-> 
-> - verify we are under the mutex at each of these sites
-> - replace con->state with an enum
-> 
-> Is there a reason you stopped short of doing that (besides time)?
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
 
-Time.
+Hi Florian
 
-Where I was/am headed is to have functions just like I did with
-the connection socket states, in which a function would contain
-the state change itself and would verify we're transitioning
-from a valid previous state.
+On 08/06/12 17:11, Florian Haas wrote:
+>>> Hi Josh
+>>> 
+>>> On 08/06/12 16:48, Josh Durgin wrote:
+>>>>> There's an Ubuntu bug already:
+>>>>> 
+>>>>> https://bugs.launchpad.net/ubuntu/+source/ceph/+bug/981130
+>>>>> 
+>>>>> librgw was not complete, and wasn't actually used by
+>>>>> radosgw, so it was dropped. The Ubuntu package just needs
+>>>>> to be updated to remove the dependency and rgw.py, like
+>>>>> upstream did.
+>>> 
+>>> You can type faster than I can... I'm working on getting this
+>>> resolved in the current dev release of Ubuntu in the next few
+>>> days after which it will go through the normal SRU process for
+>>> Ubuntu 12.04.
+> Sweet, thanks!
 
-I also have been working toward having distinct, non-overlapping
-states, which has not really been the case here.
+The SRU to resolve the install-ability of python-ceph have just
+complete verification and should be available in Ubuntu 12.04 updates
+in the next few hours (depending on which mirror you use).
 
-But my approach has been to do all this incrementally, so at each
-step along the way it is easy to understand that a particular
-change is doing the right thing, and at with each change we can
-do regression tests to verify nothing is broken as a result.
+Cheers
 
-I probably have another dozen or more small patches that bring
-it even closer, but at this point I'll probably try to trickle
-them in as I get little blocks of time.  They need to be looked
-at again individually to make sure they still make sense before
-I send them out for review.
+James
 
-					-Alex
+- -- 
+James Page
+Ubuntu Core Developer
+Debian Maintainer
+james.page@ubuntu.com
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
 
-> sage
-> 
-> 
-> On Thu, 21 Jun 2012, Alex Elder wrote:
-> 
->> Currently a ceph connection enters a "CONNECTING" state when it
->> begins the process of (re-)connecting with its peer.  Once the two
->> ends have successfully exchanged their banner and addresses, an
->> additional NEGOTIATING bit is set in the ceph connection's state to
->> indicate the connection information exhange has begun.  The
->> CONNECTING bit/state continues to be set during this phase.
->>
->> Rather than have the CONNECTING state continue while the NEGOTIATING
->> bit is set, interpret these two phases as distinct states.  In other
->> words, when NEGOTIATING is set, clear CONNECTING.  That way only
->> one of them will be active at a time.
->>
->> Signed-off-by: Alex Elder <elder@inktank.com>
->> ---
->>  net/ceph/messenger.c |   48
->> ++++++++++++++++++++++++++----------------------
->>  1 file changed, 26 insertions(+), 22 deletions(-)
->>
->> Index: b/net/ceph/messenger.c
->> ===================================================================
->> --- a/net/ceph/messenger.c
->> +++ b/net/ceph/messenger.c
->> @@ -1583,7 +1583,6 @@ static int process_connect(struct ceph_c
->>  			return -1;
->>  		}
->>  		clear_bit(NEGOTIATING, &con->state);
->> -		clear_bit(CONNECTING, &con->state);
->>  		set_bit(CONNECTED, &con->state);
->>  		con->peer_global_seq = le32_to_cpu(con->in_reply.global_seq);
->>  		con->connect_seq++;
->> @@ -2025,7 +2024,8 @@ more_kvec:
->>  	}
->>
->>  do_next:
->> -	if (!test_bit(CONNECTING, &con->state)) {
->> +	if (!test_bit(CONNECTING, &con->state) &&
->> +			!test_bit(NEGOTIATING, &con->state)) {
->>  		/* is anything else pending? */
->>  		if (!list_empty(&con->out_queue)) {
->>  			prepare_write_message(con);
->> @@ -2082,25 +2082,29 @@ more:
->>  	}
->>
->>  	if (test_bit(CONNECTING, &con->state)) {
->> -		if (!test_bit(NEGOTIATING, &con->state)) {
->> -			dout("try_read connecting\n");
->> -			ret = read_partial_banner(con);
->> -			if (ret <= 0)
->> -				goto out;
->> -			ret = process_banner(con);
->> -			if (ret < 0)
->> -				goto out;
->> +		dout("try_read connecting\n");
->> +		ret = read_partial_banner(con);
->> +		if (ret <= 0)
->> +			goto out;
->> +		ret = process_banner(con);
->> +		if (ret < 0)
->> +			goto out;
->>
->> -			/* Banner is good, exchange connection info */
->> -			ret = prepare_write_connect(con);
->> -			if (ret < 0)
->> -				goto out;
->> -			prepare_read_connect(con);
->> -			set_bit(NEGOTIATING, &con->state);
->> +		clear_bit(CONNECTING, &con->state);
->> +		set_bit(NEGOTIATING, &con->state);
->>
->> -			/* Send connection info before awaiting response */
->> +		/* Banner is good, exchange connection info */
->> +		ret = prepare_write_connect(con);
->> +		if (ret < 0)
->>  			goto out;
->> -		}
->> +		prepare_read_connect(con);
->> +
->> +		/* Send connection info before awaiting response */
->> +		goto out;
->> +	}
->> +
->> +	if (test_bit(NEGOTIATING, &con->state)) {
->> +		dout("try_read negotiating\n");
->>  		ret = read_partial_connect(con);
->>  		if (ret <= 0)
->>  			goto out;
->> @@ -2222,12 +2226,12 @@ restart:
->>  	if (test_and_clear_bit(SOCK_CLOSED, &con->flags)) {
->>  		if (test_and_clear_bit(CONNECTED, &con->state))
->>  			con->error_msg = "socket closed";
->> -		else if (test_and_clear_bit(CONNECTING, &con->state)) {
->> -			clear_bit(NEGOTIATING, &con->state);
->> +		else if (test_and_clear_bit(NEGOTIATING, &con->state))
->> +			con->error_msg = "negotiation failed";
->> +		else if (test_and_clear_bit(CONNECTING, &con->state))
->>  			con->error_msg = "connection failed";
->> -		} else {
->> +		else
->>  			con->error_msg = "unrecognized con state";
->> -		}
->>  		goto fault;
->>  	}
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
-> 
-> 
-
+iQIcBAEBCAAGBQJP43lOAAoJEL/srsug59jDDJIP/2D19BaGN04rycrPHfIzlApX
+r8Tb0Du2B1pskRyN+cPZ6fW7ygjgbM/ZWFd3g1ozg1cpWCiTK6w2Y0NmMQqe/f0G
+nCVewI5bhvPFD2roGPJx6LqfK8qHA53CVjJUeqlhKbsUajNCybr6Fpgi3Nknt5u/
+kZ0CVu3BQKhR2x6hZkwxMm87gGRAz/Z2rD+BkmErVcYfMHEdA8BajABz9CePexeB
+1tlN5/PeAMbC5mNQTsx+QtpGd64KJNx/oRBzJxyUCEP07rPbNI7a3ZmQsvhXiNtc
+EoZPhd/JoL/RKHJRB13e8NIc7jPqtqfHy1Un5nqCIDZurtlLnAT4Qo0m0wh70Xv8
+rSShpRMe9n6ob/7T1n2iu4XYWdXNFoAaggZ6lrNkJLSMCr+NOhYwjdk4qVlP5oQJ
+39aPcribmnEYymf6eVqqGGxpvHwUHvI6zdLm58zTwMpkymdtZdhC12W6O5rT3AG7
+B0wXtvmUK23rtA0RdAIT8/gSTdMQ8cLcMqqLxEx0VQQ/Ma0LEBQhGy3zUuPElEZC
+SGnqSmKif7LENQr+hAAsOYNIo3uqPamqStzHuWnh0sa2mStOM9LaFife6pWbJizt
+MvwKNzTftiWc8LwkM+VvjYuhnMjTXo9XbXxKkT5sadGj+THG+RZTdizqKIywL9vX
++ZvnnBKr3+M00jJqjX0J
+=ID+V
+-----END PGP SIGNATURE-----
