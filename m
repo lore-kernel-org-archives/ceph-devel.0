@@ -1,88 +1,144 @@
-From: Guanjun He <heguanbo@gmail.com>
-Subject: [PATCH 1/1] client: prevent the race of incoming work during teardown
-Date: Thu, 21 Jun 2012 16:20:28 +0800
-Message-ID: <1340266828-26344-1-git-send-email-gjhe@suse.com>
+From: "Guan Jun He" <gjhe@suse.com>
+Subject: Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy
+Date: Thu, 21 Jun 2012 02:29:51 -0600
+Message-ID: <4FE34BFF0200001600012E2F@soto.provo.novell.com>
+References: <1339749120-7007-1-git-send-email-gjhe@suse.com>
+ <4FE0BA660200001600012837@soto.provo.novell.com>
+ <Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>
+ <4FE20C580200001600012B1E@soto.provo.novell.com>
+ <Pine.LNX.4.64.1206200902110.14284@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:50442 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758753Ab2FUIU5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 04:20:57 -0400
-Received: by weyu7 with SMTP id u7so228377wey.19
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Jun 2012 01:20:56 -0700 (PDT)
+Received: from soto.provo.novell.com ([137.65.250.214]:45097 "EHLO
+	soto.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758727Ab2FUIaF convert rfc822-to-8bit (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
+	Thu, 21 Jun 2012 04:30:05 -0400
+In-Reply-To: <Pine.LNX.4.64.1206200902110.14284@cobra.newdream.net>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, sage@inktank.com
-Cc: Guanjun He <gjhe@suse.com>
+To: Sage Weil <sage@inktank.com>
+Cc: Guanjun He <heguanbo@gmail.com>, ceph-devel@vger.kernel.org
 
-	Add an atomic variable 'teardowning' as flag in struct ceph_messenger,
-set this flag to 1 in function ceph_destroy_client(), and add the condition code
-in function ceph_data_ready() to test the flag value, if true(1), just return.
 
-Signed-off-by: Guanjun He <gjhe@suse.com>
----
- include/linux/ceph/messenger.h |    1 +
- net/ceph/ceph_common.c         |    5 +++--
- net/ceph/messenger.c           |    5 +++++
- 3 files changed, 9 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index 2521a95..70ff3b7 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -54,6 +54,7 @@ struct ceph_messenger {
- 	struct ceph_entity_addr my_enc_addr;
- 
- 	bool nocrc;
-+	atomic_t teardowning;
- 
- 	/*
- 	 * the global_seq counts connections i (attempt to) initiate
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index a776f75..7225e42 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -501,6 +501,9 @@ void ceph_destroy_client(struct ceph_client *client)
- {
- 	dout("destroy_client %p\n", client);
- 
-+	atomic_set(&client->msgr->teardowning, 1);
-+	ceph_msgr_flush();
-+
- 	/* unmount */
- 	ceph_osdc_stop(&client->osdc);
- 
-@@ -509,8 +512,6 @@ void ceph_destroy_client(struct ceph_client *client)
- 	 * auth module, which is needed to free those connections'
- 	 * ceph_authorizers.
- 	 */
--	ceph_msgr_flush();
--
- 	ceph_monc_stop(&client->monc);
- 
- 	ceph_debugfs_client_cleanup(client);
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 524f4e4..89a96e7 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -156,6 +156,9 @@ EXPORT_SYMBOL(ceph_msgr_flush);
- static void ceph_data_ready(struct sock *sk, int count_unused)
- {
- 	struct ceph_connection *con = sk->sk_user_data;
-+	if (atomic_read(&con->msgr->teardowning)) {
-+		return;
-+	}
- 
- 	if (sk->sk_state != TCP_CLOSE_WAIT) {
- 		dout("ceph_data_ready on %p state = %lu, queueing work\n",
-@@ -2281,6 +2284,8 @@ struct ceph_messenger *ceph_messenger_create(struct ceph_entity_addr *myaddr,
- 	get_random_bytes(&msgr->inst.addr.nonce, sizeof(msgr->inst.addr.nonce));
- 	encode_my_addr(msgr);
- 
-+	atomic_set(&msgr->teardowning, 0);
-+
- 	dout("messenger_create %p\n", msgr);
- 	return msgr;
- }
--- 
-1.7.3.4
+>>> On 6/21/2012 at 12:04 AM, in message
+<Pine.LNX.4.64.1206200902110.14284@cobra.newdream.net>, Sage Weil
+<sage@inktank.com> wrote: 
+> On Wed, 20 Jun 2012, Guan Jun He wrote:
+>> 
+>> 
+>> >>> On 6/19/2012 at 11:33 PM, in message
+>> <Pine.LNX.4.64.1206190828510.21853@cobra.newdream.net>, Sage Weil
+>> <sage@inktank.com> wrote: 
+>> > [Sorry for not responding earlier!]
+>> > 
+>> > On Tue, 19 Jun 2012, Guan Jun He wrote:
+>> >> Hi,
+>> >> 
+>> >>   Do you think this is needed? 
+>> >> The osdmap update need to hold this sem.As in function 
+>> >> void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg 
+>> > *msg)
+>> >> and 
+>> >> function static int __map_request(), 
+>> >> etc.
+>> > 
+>> > I'm skeptical that this is necessary.  At the point that we're tearing 
+>> > down the osd_client there shouldn't be anybody else referencing us, or the 
+>> > osdmap.
+>> > 
+>> > Actually, looking at the code a bit, I think the only kind of race we need 
+>> > to worry about is an incoming message.  The correct fix is probably a call 
+>> > to the messenger to drop all incoming traffic before we start to shut 
+>> > everything else down.  Even with this, we might still end up with a new 
+>> > osdmap that we leak, but stopping the msgr earlier would fix both issues.
+>> 
+>> Yes, stopping the msgr earlier is a better fix.
+>> I will do some test and produce a new patch to this.
+> 
+> Ok.  The trick here is that I think we want to set a flag to discard 
+> incoming messages and then flush the workqueue, do all this other 
+> tear down for osd_client etc., and then tear down the messenger.  I don't 
+> think we can tear down the msgr fully before that, though, because 
+> osd_client etc have their fingers in it.  We just need to prevent the race 
+> of incoming work during teardown...
+
+Have produced a new patch and sent in another mail, and the title is 
+'client: prevent the race of incoming work during teardown'
+
+
+thanks,
+Guanjun
+
+
+
+> 
+> Thanks for looking at this!
+> sage
+> 
+>> thanks,
+>> Guanjun
+>> 
+>> 
+>> 
+>> 
+>> > 
+>> > sage
+>> > 
+>> >> 
+>> >> Thanks a lot for your reply!
+>> >> 
+>> >> thanks,
+>> >> Guanjun
+>> >> 
+>> >> >>> On 6/15/2012 at 04:32 PM, in message
+>> >> <1339749120-7007-1-git-send-email-gjhe@suse.com>, Guanjun He
+>> >> <heguanbo@gmail.com> wrote: 
+>> >> > From: Guanjun He <heguanbo@gmail.com>
+>> >> > 
+>> >> > 	I think the osdmap destroy code shoule be protected by map_sem.
+>> >> > If I was wrong, please correct me, thanks!
+>> >> > 
+>> >> > Signed-off-by: Guanjun He <gjhe@suse.com>
+>> >> > ---
+>> >> >  net/ceph/osd_client.c |    2 ++
+>> >> >  1 files changed, 2 insertions(+), 0 deletions(-)
+>> >> > 
+>> >> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> >> > index 1ffebed..718b100 100644
+>> >> > --- a/net/ceph/osd_client.c
+>> >> > +++ b/net/ceph/osd_client.c
+>> >> > @@ -1872,11 +1872,13 @@ void ceph_osdc_stop(struct ceph_osd_client *osdc)
+>> >> >  	destroy_workqueue(osdc->notify_wq);
+>> >> >  	cancel_delayed_work_sync(&osdc->timeout_work);
+>> >> >  	cancel_delayed_work_sync(&osdc->osds_timeout_work);
+>> >> > +	down_write(&osdc->map_sem);
+>> >> >  	if (osdc->osdmap) {
+>> >> >  		ceph_osdmap_destroy(osdc->osdmap);
+>> >> >  		osdc->osdmap = NULL;
+>> >> >  	}
+>> >> >  	remove_all_osds(osdc);
+>> >> > +	up_write(&osdc->map_sem);
+>> >> >  	mempool_destroy(osdc->req_mempool);
+>> >> >  	ceph_msgpool_destroy(&osdc->msgpool_op);
+>> >> >  	ceph_msgpool_destroy(&osdc->msgpool_op_reply);
+>> >> 
+>> >> 
+>> >> 
+>> 
+>> 
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> 
+>> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
