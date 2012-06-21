@@ -1,122 +1,133 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 11/12] libceph: make ceph_con_get() (etc.) private
-Date: Thu, 21 Jun 2012 12:44:48 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206211244220.23422@cobra.newdream.net>
-References: <4FE32C84.2050408@inktank.com> <4FE32E35.3000807@inktank.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: reproducable osd crash
+Date: Thu, 21 Jun 2012 21:57:37 +0200
+Message-ID: <4FE37CB1.5060906@profihost.ag>
+References: <4FE319DF.3020106@profihost.ag> <4FE31C96.6050901@profihost.ag> <4FE31DDD.3090207@profihost.ag> <4FE32056.9070301@profihost.ag>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-15;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47769 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755355Ab2FUTp4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 15:45:56 -0400
-In-Reply-To: <4FE32E35.3000807@inktank.com>
+Received: from mail.profihost.ag ([85.158.179.208]:41880 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760033Ab2FUT5i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 15:57:38 -0400
+In-Reply-To: <4FE32056.9070301@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-These should actually go away entirely; pushed a couple patches that do 
-that, and remove the now-unused con->nref member.
+OK i discovered this time that all osds had the same disk usage before=20
+crash. After starting the osd again i got this one:
+/dev/sdb1             224G   23G  191G  11% /srv/osd.30
+/dev/sdc1             224G  1,5G  213G   1% /srv/osd.31
+/dev/sdd1             224G  1,5G  213G   1% /srv/osd.32
+/dev/sde1             224G  1,6G  213G   1% /srv/osd.33
 
-sage
+So instead of 1,5GB osd 30 now uses 23G.
 
-On Thu, 21 Jun 2012, Alex Elder wrote:
+Stefan
 
-> The functions ceph_con_get() and ceph_con_put() are both only ever
-> used in "net/ceph/messenger.c", so change them to have static scope.
-> Move their definition up in the source file so they're both defined
-> before their first use.
-> 
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->  include/linux/ceph/messenger.h |    2 -
->  net/ceph/messenger.c           |   48
-> ++++++++++++++++++++---------------------
->  2 files changed, 24 insertions(+), 26 deletions(-)
-> 
-> Index: b/include/linux/ceph/messenger.h
-> ===================================================================
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -245,8 +245,6 @@ extern void ceph_msg_revoke(struct ceph_
->  extern void ceph_msg_revoke_incoming(struct ceph_msg *msg);
-> 
->  extern void ceph_con_keepalive(struct ceph_connection *con);
-> -extern struct ceph_connection *ceph_con_get(struct ceph_connection *con);
-> -extern void ceph_con_put(struct ceph_connection *con);
-> 
->  extern struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
->  				     bool can_fail);
-> Index: b/net/ceph/messenger.c
-> ===================================================================
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -408,6 +408,30 @@ static int con_close_socket(struct ceph_
->  }
-> 
->  /*
-> + * generic get/put
-> + */
-> +static struct ceph_connection *ceph_con_get(struct ceph_connection *con)
-> +{
-> +	int nref = __atomic_add_unless(&con->nref, 1, 0);
-> +
-> +	dout("con_get %p nref = %d -> %d\n", con, nref, nref + 1);
-> +
-> +	return nref ? con : NULL;
-> +}
-> +
-> +static void ceph_con_put(struct ceph_connection *con)
-> +{
-> +	int nref = atomic_dec_return(&con->nref);
-> +
-> +	BUG_ON(nref < 0);
-> +	if (nref == 0) {
-> +		BUG_ON(con->sock);
-> +		kfree(con);
-> +	}
-> +	dout("con_put %p nref = %d -> %d\n", con, nref + 1, nref);
-> +}
-> +
-> +/*
->   * Reset a connection.  Discard all incoming and outgoing messages
->   * and clear *_seq state.
->   */
-> @@ -504,30 +528,6 @@ bool ceph_con_opened(struct ceph_connect
->  }
-> 
->  /*
-> - * generic get/put
-> - */
-> -struct ceph_connection *ceph_con_get(struct ceph_connection *con)
-> -{
-> -	int nref = __atomic_add_unless(&con->nref, 1, 0);
-> -
-> -	dout("con_get %p nref = %d -> %d\n", con, nref, nref + 1);
-> -
-> -	return nref ? con : NULL;
-> -}
-> -
-> -void ceph_con_put(struct ceph_connection *con)
-> -{
-> -	int nref = atomic_dec_return(&con->nref);
-> -
-> -	BUG_ON(nref < 0);
-> -	if (nref == 0) {
-> -		BUG_ON(con->sock);
-> -		kfree(con);
-> -	}
-> -	dout("con_put %p nref = %d -> %d\n", con, nref + 1, nref);
-> -}
-> -
-> -/*
->   * initialize a new connection.
->   */
->  void ceph_con_init(struct ceph_connection *con, void *private,
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Am 21.06.2012 15:23, schrieb Stefan Priebe - Profihost AG:
+> Mhm is this normal (ceph health is NOW OK again)
+>
+> /dev/sdb1             224G  655M  214G   1% /srv/osd.20
+> /dev/sdc1             224G  640M  214G   1% /srv/osd.21
+> /dev/sdd1             224G   34G  181G  16% /srv/osd.22
+> /dev/sde1             224G  608M  214G   1% /srv/osd.23
+>
+> Why does one OSD has so much more used space than the others?
+>
+> On my other OSD nodes all have around 600MB-700MB. Even when i reform=
+at
+> /dev/sdd1 after the backfill it has again 34GB?
+>
+> Stefan
+>
+> Am 21.06.2012 15:13, schrieb Stefan Priebe - Profihost AG:
+>> Another strange thing. Why does THIS OSD have 24GB and the others ju=
+st
+>> 650MB?
+>>
+>> /dev/sdb1 224G 654M 214G 1% /srv/osd.20
+>> /dev/sdc1 224G 638M 214G 1% /srv/osd.21
+>> /dev/sdd1 224G 24G 190G 12% /srv/osd.22
+>> /dev/sde1 224G 607M 214G 1% /srv/osd.23
+>>
+>>> When i start now the OSD again it seems to hang for forever. Load g=
+oes
+>>> up to 200 and I/O Waits rise vom 0% to 20%.
+>>>
+>>> Am 21.06.2012 14:55, schrieb Stefan Priebe - Profihost AG:
+>>>> Hello list,
+>>>>
+>>>> i'm able to reproducably crash osd daemons.
+>>>>
+>>>> How i can reproduce:
+>>>>
+>>>> Kernel: 3.5.0-rc3
+>>>> Ceph: 0.47.3
+>>>> FS: btrfs
+>>>> Journal: 2GB tmpfs per OSD
+>>>> OSD: 3x servers with 4x Intel SSD OSDs each
+>>>> 10GBE Network
+>>>> rbd_cache_max_age: 2.0
+>>>> rbd_cache_size: 33554432
+>>>>
+>>>> Disk is set to writeback.
+>>>>
+>>>> Start a KVM VM via PXE with the disk attached in writeback mode.
+>>>>
+>>>> Then run randwrite stress more than 2 time. Mostly OSD 22 in my ca=
+se
+>>>> crashes.
+>>>>
+>>>> # fio --filename=3D/dev/vda1 --direct=3D1 --rw=3Drandwrite --bs=3D=
+4k
+>>>> --size=3D200G
+>>>> --numjobs=3D50 --runtime=3D90 --group_reporting --name=3Dfile1; fi=
+o
+>>>> --filename=3D/dev/vda1 --direct=3D1 --rw=3Drandwrite --bs=3D4k --s=
+ize=3D200G
+>>>> --numjobs=3D50 --runtime=3D90 --group_reporting --name=3Dfile1; fi=
+o
+>>>> --filename=3D/dev/vda1 --direct=3D1 --rw=3Drandwrite --bs=3D4k --s=
+ize=3D200G
+>>>> --numjobs=3D50 --runtime=3D90 --group_reporting --name=3Dfile1; ha=
+lt
+>>>>
+>>>> Strangely exactly THIS OSD also has the most log entries:
+>>>> 64K ceph-osd.20.log
+>>>> 64K ceph-osd.21.log
+>>>> 1,3M ceph-osd.22.log
+>>>> 64K ceph-osd.23.log
+>>>>
+>>>> But all OSDs are set to debug osd =3D 20.
+>>>>
+>>>> dmesg shows:
+>>>> ceph-osd[5381]: segfault at 3f592c000 ip 00007fa281d8eb23 sp
+>>>> 00007fa27702d260 error 4 in libtcmalloc.so.0.0.0[7fa281d6a000+3d00=
+0]
+>>>>
+>>>> I uploaded the following files:
+>>>> priebe_fio_randwrite_ceph-osd.21.log.bz2 =3D> OSD which was OK and=
+ didn't
+>>>> crash
+>>>> priebe_fio_randwrite_ceph-osd.22.log.bz2 =3D> Log from the crashed=
+ OSD
+>>>> =FCu
+>>>> priebe_fio_randwrite_core.ssdstor001.27204.bz2 =3D> Core dump
+>>>> priebe_fio_randwrite_ceph-osd.bz2 =3D> osd binary
+>>>>
+>>>> Stefan
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-deve=
+l" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
