@@ -1,75 +1,82 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 00/12] more libceph changes
-Date: Thu, 21 Jun 2012 09:15:32 -0500
-Message-ID: <4FE32C84.2050408@inktank.com>
+Subject: [PATCH 02/12] libceph: don't change socket state on sock event
+Date: Thu, 21 Jun 2012 09:21:07 -0500
+Message-ID: <4FE32DD3.2020001@inktank.com>
+References: <4FE32C84.2050408@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:34476 "EHLO
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:48665 "EHLO
 	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752399Ab2FUOPe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 10:15:34 -0400
-Received: by gglu4 with SMTP id u4so489273ggl.19
-        for <ceph-devel@vger.kernel.org>; Thu, 21 Jun 2012 07:15:34 -0700 (PDT)
+	with ESMTP id S1756921Ab2FUOVK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 10:21:10 -0400
+Received: by gglu4 with SMTP id u4so495707ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Jun 2012 07:21:09 -0700 (PDT)
+In-Reply-To: <4FE32C84.2050408@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-I'm trying to wrap up a lot of work I've done recently on the
-Ceph client messenger code.  I had a number of loose ends that
-never got committed along the way as I narrowed my focus to
-things I discovered in the course of development.
+Currently the socket state change event handler records an error
+message on a connection to distinguish a close while connecting from
+a close while a connection was already established.
 
-I still have a few more, but here is another batch which are
-ready to go, having undergone several hours of testing without
-any problems.  They are based on the code resulting from this
-series, which I submitted the other day:
-    [PATCH 0/6] ceph: a few more messenger cleanups
+Changing connection information during handling of a socket event is
+not very clean, so instead move this assignment inside con_work(),
+where it can be done during normal connection-level processing (and
+under protection of the connection mutex as well).
 
-They're a bit of a random collection, but I've put them into
-several sort of related groups in the descriptions below.
+Move the handling of a socket closed event up to the top of the
+processing loop in con_work(); there's no point in handling backoff
+etc. if we have a newly-closed socket to take care of.
 
-					-Alex
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ net/ceph/messenger.c |   18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
 
-[PATCH 01/12] libceph: SOCK_CLOSED is a flag, not a state
-    This fixes a bug in which the SOCK_CLOSED bit was erroneously
-    being manipulated in a ceph connection's "state" field.
+Index: b/net/ceph/messenger.c
+===================================================================
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -261,13 +261,8 @@ static void ceph_sock_state_change(struc
+ 	case TCP_CLOSE_WAIT:
+ 		dout("%s TCP_CLOSE_WAIT\n", __func__);
+ 		con_sock_state_closing(con);
+-		if (test_and_set_bit(SOCK_CLOSED, &con->flags) == 0) {
+-			if (test_bit(CONNECTING, &con->state))
+-				con->error_msg = "connection failed";
+-			else
+-				con->error_msg = "socket closed";
++		if (!test_and_set_bit(SOCK_CLOSED, &con->flags))
+ 			queue_con(con);
+-		}
+ 		break;
+ 	case TCP_ESTABLISHED:
+ 		dout("%s TCP_ESTABLISHED\n", __func__);
+@@ -2212,6 +2207,14 @@ static void con_work(struct work_struct
 
-[PATCH 02/12] libceph: don't change socket state on sock event
-    This moves the setting of a ceph connection's error_msg
-    value out of the socket event handler.
+ 	mutex_lock(&con->mutex);
+ restart:
++	if (test_and_clear_bit(SOCK_CLOSED, &con->flags)) {
++		if (test_bit(CONNECTING, &con->state))
++			con->error_msg = "connection failed";
++		else
++			con->error_msg = "socket closed";
++		goto fault;
++	}
++
+ 	if (test_and_clear_bit(BACKOFF, &con->flags)) {
+ 		dout("con_work %p backing off\n", con);
+ 		if (queue_delayed_work(ceph_msgr_wq, &con->work,
+@@ -2241,9 +2244,6 @@ restart:
+ 		con_close_socket(con);
+ 	}
 
-[PATCH 03/12] libceph: just set SOCK_CLOSED when state changes
-    This makes it so the SOCK_CLOSED bit is set, rather than
-    test-and-set, when the underlying Linux socket has closed
-[PATCH 04/12] libceph: don't touch con state in con_close_socket()
-    This drops the slightly puzzling setting and clearing of
-    the SOCK_CLOSED bit in con_close_socket()
-
-[PATCH 05/12] libceph: clear CONNECTING in ceph_con_close()
-    This takes a step toward making the state bits always
-    reflect the real state of a connection.
-[PATCH 06/12] libceph: clear NEGOTIATING when done
-    The NEGOTIATING state was never getting cleared until just
-    before a new connection attempt was initiated.
-[PATCH 07/12] libceph: define and use an explicit CONNECTED state
-    This just defines a state to reflect when a ceph connection
-    is fully connected to its peer.
-
-[PATCH 08/12] libceph: separate banner and connect writes
-    This splits up how some connection negotiation information
-    gets sent when a client initiates a new connect sequence.
-[PATCH 09/12] libceph: distinguish two phases of connect sequence
-    This makes the banner and IP exchange portion of a connect
-    sequence get treated as distinct state (NEGOTIATING), rather
-    than being a sort of sub-state of CONNECTING.
-
-[PATCH 10/12] libceph: small changes to messenger.c
-    This just gathers a number of minor cleanups.
-[PATCH 11/12] libceph: make ceph_con_get() (etc.) private
-    This makes ceph_con_get() and ceph_con_put() have static
-    scope, since they are only used in "messenger.c".
-[PATCH 12/12] libceph: add some fine ASCII art
-    This inserts a state diagram for a ceph connection socket
-    into comments in "messenger.c".
+-	if (test_and_clear_bit(SOCK_CLOSED, &con->flags))
+-		goto fault;
+-
+ 	ret = try_read(con);
+ 	if (ret == -EAGAIN)
+ 		goto restart;
