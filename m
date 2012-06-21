@@ -1,117 +1,75 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: reproducable osd crash
-Date: Thu, 21 Jun 2012 15:23:34 +0200
-Message-ID: <4FE32056.9070301@profihost.ag>
-References: <4FE319DF.3020106@profihost.ag> <4FE31C96.6050901@profihost.ag> <4FE31DDD.3090207@profihost.ag>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 00/12] more libceph changes
+Date: Thu, 21 Jun 2012 09:15:32 -0500
+Message-ID: <4FE32C84.2050408@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:53254 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755077Ab2FUNXg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 09:23:36 -0400
-In-Reply-To: <4FE31DDD.3090207@profihost.ag>
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:34476 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752399Ab2FUOPe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 21 Jun 2012 10:15:34 -0400
+Received: by gglu4 with SMTP id u4so489273ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 21 Jun 2012 07:15:34 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Mhm is this normal (ceph health is NOW OK again)
+I'm trying to wrap up a lot of work I've done recently on the
+Ceph client messenger code.  I had a number of loose ends that
+never got committed along the way as I narrowed my focus to
+things I discovered in the course of development.
 
-/dev/sdb1             224G  655M  214G   1% /srv/osd.20
-/dev/sdc1             224G  640M  214G   1% /srv/osd.21
-/dev/sdd1             224G   34G  181G  16% /srv/osd.22
-/dev/sde1             224G  608M  214G   1% /srv/osd.23
+I still have a few more, but here is another batch which are
+ready to go, having undergone several hours of testing without
+any problems.  They are based on the code resulting from this
+series, which I submitted the other day:
+    [PATCH 0/6] ceph: a few more messenger cleanups
 
-Why does one OSD has so much more used space than the others?
+They're a bit of a random collection, but I've put them into
+several sort of related groups in the descriptions below.
 
-On my other OSD nodes all have around 600MB-700MB. Even when i reformat=
-=20
-/dev/sdd1 after the backfill it has again 34GB?
+					-Alex
 
-Stefan
+[PATCH 01/12] libceph: SOCK_CLOSED is a flag, not a state
+    This fixes a bug in which the SOCK_CLOSED bit was erroneously
+    being manipulated in a ceph connection's "state" field.
 
-Am 21.06.2012 15:13, schrieb Stefan Priebe - Profihost AG:
-> Another strange thing. Why does THIS OSD have 24GB and the others jus=
-t
-> 650MB?
->
-> /dev/sdb1 224G 654M 214G 1% /srv/osd.20
-> /dev/sdc1 224G 638M 214G 1% /srv/osd.21
-> /dev/sdd1 224G 24G 190G 12% /srv/osd.22
-> /dev/sde1 224G 607M 214G 1% /srv/osd.23
->
->> When i start now the OSD again it seems to hang for forever. Load go=
-es
->> up to 200 and I/O Waits rise vom 0% to 20%.
->>
->> Am 21.06.2012 14:55, schrieb Stefan Priebe - Profihost AG:
->>> Hello list,
->>>
->>> i'm able to reproducably crash osd daemons.
->>>
->>> How i can reproduce:
->>>
->>> Kernel: 3.5.0-rc3
->>> Ceph: 0.47.3
->>> FS: btrfs
->>> Journal: 2GB tmpfs per OSD
->>> OSD: 3x servers with 4x Intel SSD OSDs each
->>> 10GBE Network
->>> rbd_cache_max_age: 2.0
->>> rbd_cache_size: 33554432
->>>
->>> Disk is set to writeback.
->>>
->>> Start a KVM VM via PXE with the disk attached in writeback mode.
->>>
->>> Then run randwrite stress more than 2 time. Mostly OSD 22 in my cas=
-e
->>> crashes.
->>>
->>> # fio --filename=3D/dev/vda1 --direct=3D1 --rw=3Drandwrite --bs=3D4=
-k --size=3D200G
->>> --numjobs=3D50 --runtime=3D90 --group_reporting --name=3Dfile1; fio
->>> --filename=3D/dev/vda1 --direct=3D1 --rw=3Drandwrite --bs=3D4k --si=
-ze=3D200G
->>> --numjobs=3D50 --runtime=3D90 --group_reporting --name=3Dfile1; fio
->>> --filename=3D/dev/vda1 --direct=3D1 --rw=3Drandwrite --bs=3D4k --si=
-ze=3D200G
->>> --numjobs=3D50 --runtime=3D90 --group_reporting --name=3Dfile1; hal=
-t
->>>
->>> Strangely exactly THIS OSD also has the most log entries:
->>> 64K ceph-osd.20.log
->>> 64K ceph-osd.21.log
->>> 1,3M ceph-osd.22.log
->>> 64K ceph-osd.23.log
->>>
->>> But all OSDs are set to debug osd =3D 20.
->>>
->>> dmesg shows:
->>> ceph-osd[5381]: segfault at 3f592c000 ip 00007fa281d8eb23 sp
->>> 00007fa27702d260 error 4 in libtcmalloc.so.0.0.0[7fa281d6a000+3d000=
-]
->>>
->>> I uploaded the following files:
->>> priebe_fio_randwrite_ceph-osd.21.log.bz2 =3D> OSD which was OK and =
-didn't
->>> crash
->>> priebe_fio_randwrite_ceph-osd.22.log.bz2 =3D> Log from the crashed =
-OSD
->>> =FCu
->>> priebe_fio_randwrite_core.ssdstor001.27204.bz2 =3D> Core dump
->>> priebe_fio_randwrite_ceph-osd.bz2 =3D> osd binary
->>>
->>> Stefan
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[PATCH 02/12] libceph: don't change socket state on sock event
+    This moves the setting of a ceph connection's error_msg
+    value out of the socket event handler.
+
+[PATCH 03/12] libceph: just set SOCK_CLOSED when state changes
+    This makes it so the SOCK_CLOSED bit is set, rather than
+    test-and-set, when the underlying Linux socket has closed
+[PATCH 04/12] libceph: don't touch con state in con_close_socket()
+    This drops the slightly puzzling setting and clearing of
+    the SOCK_CLOSED bit in con_close_socket()
+
+[PATCH 05/12] libceph: clear CONNECTING in ceph_con_close()
+    This takes a step toward making the state bits always
+    reflect the real state of a connection.
+[PATCH 06/12] libceph: clear NEGOTIATING when done
+    The NEGOTIATING state was never getting cleared until just
+    before a new connection attempt was initiated.
+[PATCH 07/12] libceph: define and use an explicit CONNECTED state
+    This just defines a state to reflect when a ceph connection
+    is fully connected to its peer.
+
+[PATCH 08/12] libceph: separate banner and connect writes
+    This splits up how some connection negotiation information
+    gets sent when a client initiates a new connect sequence.
+[PATCH 09/12] libceph: distinguish two phases of connect sequence
+    This makes the banner and IP exchange portion of a connect
+    sequence get treated as distinct state (NEGOTIATING), rather
+    than being a sort of sub-state of CONNECTING.
+
+[PATCH 10/12] libceph: small changes to messenger.c
+    This just gathers a number of minor cleanups.
+[PATCH 11/12] libceph: make ceph_con_get() (etc.) private
+    This makes ceph_con_get() and ceph_con_put() have static
+    scope, since they are only used in "messenger.c".
+[PATCH 12/12] libceph: add some fine ASCII art
+    This inserts a state diagram for a ceph connection socket
+    into comments in "messenger.c".
