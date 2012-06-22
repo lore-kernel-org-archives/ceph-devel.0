@@ -1,137 +1,174 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/9] libceph: encapsulate and document connect sequence
-Date: Fri, 22 Jun 2012 17:48:13 -0500
-Message-ID: <4FE4F62D.3070207@inktank.com>
+Subject: [PATCH 2/9] libceph: encapsulate and document negotiation phase
+Date: Fri, 22 Jun 2012 17:48:18 -0500
+Message-ID: <4FE4F632.2020807@inktank.com>
 References: <4FE4F534.1000009@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:53187 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751284Ab2FVWsN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jun 2012 18:48:13 -0400
-Received: by gglu4 with SMTP id u4so1973383ggl.19
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 15:48:13 -0700 (PDT)
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:42424 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751284Ab2FVWsT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jun 2012 18:48:19 -0400
+Received: by yenl2 with SMTP id l2so1973211yen.19
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 15:48:18 -0700 (PDT)
 In-Reply-To: <4FE4F534.1000009@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Encapsulate the code handles the initial phase of establishing a
+Encapsulate the code handles the negotiation phase of establishing a
 ceph connection with a peer, and add a bunch of documentation about
-what's involved.  Change process_banner() to return 1 on success
-rather than 0, to allow the new ceph_con_connect_response() to
+what's involved.  Change process_connect() to return 1 on success
+rather than 0, to allow the new ceph_con_negotiate_response() to
 return 0 to indicate the response has not yet been completely read.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- net/ceph/messenger.c |   71
-++++++++++++++++++++++++++++++++++++++-------------
- 1 file changed, 54 insertions(+), 17 deletions(-)
+ net/ceph/messenger.c |  107
++++++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 91 insertions(+), 16 deletions(-)
 
 Index: b/net/ceph/messenger.c
 ===================================================================
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -1472,7 +1472,7 @@ static int process_banner(struct ceph_co
- 		     ceph_pr_addr(&con->msgr->inst.addr.in_addr));
+@@ -1633,7 +1633,7 @@ static int process_connect(struct ceph_c
+ 		con->error_msg = "protocol error, garbage tag during connect";
+ 		return -1;
  	}
-
 -	return 0;
 +	return 1;
  }
 
- static void fail_protocol(struct ceph_connection *con)
-@@ -1970,6 +1970,57 @@ static void process_message(struct ceph_
- 	prepare_read_tag(con);
+
+@@ -2023,6 +2023,82 @@ static int ceph_con_connect_response(str
  }
 
-+/*
-+ * Initiate the first phase of establishing a connection with
-+ * the peer (connecting).  This phase consists of:
-+ *     - client requests TCP connection to server
-+ *     - server accepts TCP connection from client
-+ *     - client sends banner to server
-+ *     - server receives and validates client's banner
-+ *     - client sends little-endian encoded own socket (IP) address
-+ *     - server recieves, validates, and records client's encoded address
+ /*
++ * The first phase of connecting with the peer succeeded.  Now start
++ * the second phase (negotiating), which consists of:
++ *  - client sends a connect message to server, specifying
++ *    information about itself, including the protocol it intends to
++ *    use and the features it supports.
++ *  - if authorizer data is needed for the connection, its length is
++ *    recorded in the connect message, and client sends its content
++ *    immediately after the connect message
++ *  - server receives the connect message from the client, and if it
++ *    indicates authorizer data follows, reads that also.
 + * If all is well to this point, then we begin processing the
-+ * connect response.
++ * negotiation response.
 + */
-+static int ceph_con_connect(struct ceph_connection *con)
-+{
-+	set_bit(CONNECTING, &con->state);
-+
-+	con_out_kvec_reset(con);
-+	prepare_write_banner(con);
-+	prepare_read_banner(con);
-+
-+	BUG_ON(con->in_msg);
-+	con->in_tag = CEPH_MSGR_TAG_READY;
-+	dout("%s initiating connect on %p new state %lu\n",
-+		__func__, con, con->state);
-+
-+	return ceph_tcp_connect(con);
-+}
-+
-+/*
-+ * Handle the response from the first phase of establishing a
-+ * connection with the peer.  This consists of:
-+ *     - server sends banner to client
-+ *     - client receives and validates server's banner
-+ *     - server sends little-endian encoded own socket (IP) address
-+ *     - client recieves, validates, and records server's encoded address
-+ *     - server sends little-endian encoded socket (IP) address for client
-+ *     - client recieves and records its encoded address supplied by server
-+ * If all is well to this point, then we can transition to the
-+ * NEGOTIATING state.
-+ */
-+static int ceph_con_connect_response(struct ceph_connection *con)
++static int ceph_con_negotiate(struct ceph_connection *con)
 +{
 +	int ret;
 +
-+	dout("%s connecting\n", __func__);
-+	ret = read_partial_banner(con);
-+	if (ret > 0)
-+		ret = process_banner(con);
++	clear_bit(CONNECTING, &con->state);
++	set_bit(NEGOTIATING, &con->state);
++
++	/* Banner was good, exchange connection info */
++	ret = prepare_write_connect(con);
++	if (ret >= 0)
++		prepare_read_connect(con);
 +
 +	return ret;
 +}
-
- /*
++
++/*
++ * Handle the response from the negotiating phase of connecting the
++ * peer.  This consists of:
++ *  - server validates the connect message (and possibly authorizer
++ *    data), and sends a response to the client:
++ *      - if the protocol version supplied by the client is not what
++ *        was expected, response is a BADPROTOVER tag
++ *      - if the features supported by the client are missing
++ *        features required by the server, response is a FEATURES
++ *        tag.
++ *      - if the features supported by the client are missing
++ *      - if authorizer data is supplied by the client and it is not
++ *        valid, response is a BADAUTHORIZER tag.
++ *      - (There are some other conditions related to message and
++ *        connection sequence numbers but they are not covered here)
++ *      - Otherwise the response will begin with a READY tag, and
++ *        will include a ceph connect reply message, which will
++ *        include the features supported by the server, and the
++ *        server's own authorization data.
++ *  - client validates the connect message (and possibly authorizer
++ *    data) from the server:
++ *      - If the tag indicates a bad protocol or mismatching
++ *        features, the connection attempt is abandoned, so the ceph
++ *        connection is reset and closed.
++ *      - If the tag indicates a bad authorizer, a second connect
++ *        attempt is initiated.  If a second attempt fails due to a
++ *        bad authorizer, the connection attempt fails.
++ *      - If the tag indicates READY, the client will check the
++ *        features supported by the server.  If the server's
++ *        features do not include a feature required by the client,
++ *        the connection attempt is abandoned, so the ceph
++ *        connection is reset and closed.
++ *  If no failures occurred to this point, the connection is established.
++ */
++static int ceph_con_negotiate_response(struct ceph_connection *con)
++{
++	int ret;
++
++	dout("%s negotiating\n", __func__);
++
++	ret = read_partial_connect(con);
++	if (ret > 0)
++		ret = process_connect(con);
++
++	return ret;
++}
++
++/*
   * Write something to the socket.  Called in a worker thread when the
-@@ -1986,17 +2037,7 @@ more:
-
- 	/* open the socket first? */
- 	if (con->sock == NULL) {
--		set_bit(CONNECTING, &con->state);
--
--		con_out_kvec_reset(con);
--		prepare_write_banner(con);
--		prepare_read_banner(con);
--
--		BUG_ON(con->in_msg);
--		con->in_tag = CEPH_MSGR_TAG_READY;
--		dout("try_write initiating connect on %p new state %lu\n",
--		     con, con->state);
--		ret = ceph_tcp_connect(con);
-+		ret = ceph_con_connect(con);
- 		if (ret < 0) {
- 			con->error_msg = "connect error";
- 			goto out;
-@@ -2095,13 +2136,9 @@ more:
+  * socket appears to be writeable and we have something ready to send.
+  */
+@@ -2136,31 +2212,30 @@ more:
  	}
 
  	if (test_bit(CONNECTING, &con->state)) {
--		dout("try_read connecting\n");
--		ret = read_partial_banner(con);
-+		ret = ceph_con_connect_response(con);
++		/*
++		 * See if we got the response we expect from our
++		 * connection request.
++		 */
+ 		ret = ceph_con_connect_response(con);
  		if (ret <= 0)
  			goto out;
--		ret = process_banner(con);
+
+-		clear_bit(CONNECTING, &con->state);
+-		set_bit(NEGOTIATING, &con->state);
+-
+-		/* Banner is good, exchange connection info */
+-		ret = prepare_write_connect(con);
 -		if (ret < 0)
 -			goto out;
+-		prepare_read_connect(con);
++		/*
++		 * All good.  Initiate the negotiation phase of the
++		 * connection.  If this succeeds, we're done reading
++		 * and we next need to send the messages we've
++		 * queued up.  If it fails, we're also done.
++		 */
++		ret = ceph_con_negotiate(con);
 
- 		clear_bit(CONNECTING, &con->state);
- 		set_bit(NEGOTIATING, &con->state);
+-		/* Send connection info before awaiting response */
+-		goto out;
++		goto out;	/* Regardless of result */
+ 	}
+
+ 	if (test_bit(NEGOTIATING, &con->state)) {
+-		dout("try_read negotiating\n");
+-		ret = read_partial_connect(con);
++		ret = ceph_con_negotiate_response(con);
+ 		if (ret <= 0)
+ 			goto out;
+-		ret = process_connect(con);
+-		if (ret < 0)
+-			goto out;
++
+ 		goto more;
+ 	}
+
