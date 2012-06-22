@@ -1,63 +1,137 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/9] another batch of messenger patches
-Date: Fri, 22 Jun 2012 17:44:04 -0500
-Message-ID: <4FE4F534.1000009@inktank.com>
+Subject: [PATCH 1/9] libceph: encapsulate and document connect sequence
+Date: Fri, 22 Jun 2012 17:48:13 -0500
+Message-ID: <4FE4F62D.3070207@inktank.com>
+References: <4FE4F534.1000009@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:34486 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753289Ab2FVWoF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jun 2012 18:44:05 -0400
-Received: by ghrr11 with SMTP id r11so1974731ghr.19
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 15:44:04 -0700 (PDT)
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:53187 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751284Ab2FVWsN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jun 2012 18:48:13 -0400
+Received: by gglu4 with SMTP id u4so1973383ggl.19
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 15:48:13 -0700 (PDT)
+In-Reply-To: <4FE4F534.1000009@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Here is another set of small (though not necessarily trivial)
-patches to the ceph client messenger code.
+Encapsulate the code handles the initial phase of establishing a
+ceph connection with a peer, and add a bunch of documentation about
+what's involved.  Change process_banner() to return 1 on success
+rather than 0, to allow the new ceph_con_connect_response() to
+return 0 to indicate the response has not yet been completely read.
 
-They are all the result of recent work that was aimed at making
-the messenger code more clearly based on independent states, in
-hopes of making the result a bit simpler and more reliable.
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ net/ceph/messenger.c |   71
+++++++++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 54 insertions(+), 17 deletions(-)
 
-Most of these involve making what happens when a connection
-reset or closed get handled a bit more completely and/or
-consistently.
+Index: b/net/ceph/messenger.c
+===================================================================
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -1472,7 +1472,7 @@ static int process_banner(struct ceph_co
+ 		     ceph_pr_addr(&con->msgr->inst.addr.in_addr));
+ 	}
 
-					-Alex
+-	return 0;
++	return 1;
+ }
 
-[PATCH 1/9] libceph: encapsulate and document connect sequence
-[PATCH 2/9] libceph: encapsulate and document negotiation phase
-    Each of these moves some blocks of code into their own functions,
-    and adds a lot of commentary about what's going on during the
-    connect sequence.
+ static void fail_protocol(struct ceph_connection *con)
+@@ -1970,6 +1970,57 @@ static void process_message(struct ceph_
+ 	prepare_read_tag(con);
+ }
 
-[PATCH 3/9] libceph: close the connection's socket on reset
-    Resetting a connection clears all connection state, but never
-    actually closes the socket.  Now it will.
++/*
++ * Initiate the first phase of establishing a connection with
++ * the peer (connecting).  This phase consists of:
++ *     - client requests TCP connection to server
++ *     - server accepts TCP connection from client
++ *     - client sends banner to server
++ *     - server receives and validates client's banner
++ *     - client sends little-endian encoded own socket (IP) address
++ *     - server recieves, validates, and records client's encoded address
++ * If all is well to this point, then we begin processing the
++ * connect response.
++ */
++static int ceph_con_connect(struct ceph_connection *con)
++{
++	set_bit(CONNECTING, &con->state);
++
++	con_out_kvec_reset(con);
++	prepare_write_banner(con);
++	prepare_read_banner(con);
++
++	BUG_ON(con->in_msg);
++	con->in_tag = CEPH_MSGR_TAG_READY;
++	dout("%s initiating connect on %p new state %lu\n",
++		__func__, con, con->state);
++
++	return ceph_tcp_connect(con);
++}
++
++/*
++ * Handle the response from the first phase of establishing a
++ * connection with the peer.  This consists of:
++ *     - server sends banner to client
++ *     - client receives and validates server's banner
++ *     - server sends little-endian encoded own socket (IP) address
++ *     - client recieves, validates, and records server's encoded address
++ *     - server sends little-endian encoded socket (IP) address for client
++ *     - client recieves and records its encoded address supplied by server
++ * If all is well to this point, then we can transition to the
++ * NEGOTIATING state.
++ */
++static int ceph_con_connect_response(struct ceph_connection *con)
++{
++	int ret;
++
++	dout("%s connecting\n", __func__);
++	ret = read_partial_banner(con);
++	if (ret > 0)
++		ret = process_banner(con);
++
++	return ret;
++}
 
-[PATCH 4/9] libceph: don't close socket in OPENING state
-    This removes the unnecessary call to con_close_socket() when
-    a socket is found to be in OPENING state.
+ /*
+  * Write something to the socket.  Called in a worker thread when the
+@@ -1986,17 +2037,7 @@ more:
 
-[PATCH 5/9] libceph: change TAG_CLOSE handling
-[PATCH 6/9] libceph: kill fail_protocol()
-    These let the normal fault handling code take care of the receipt
-    of a CLOSE tag from the peer, or of one of the other tags that
-    can be sent to indicate a connection problem.
+ 	/* open the socket first? */
+ 	if (con->sock == NULL) {
+-		set_bit(CONNECTING, &con->state);
+-
+-		con_out_kvec_reset(con);
+-		prepare_write_banner(con);
+-		prepare_read_banner(con);
+-
+-		BUG_ON(con->in_msg);
+-		con->in_tag = CEPH_MSGR_TAG_READY;
+-		dout("try_write initiating connect on %p new state %lu\n",
+-		     con, con->state);
+-		ret = ceph_tcp_connect(con);
++		ret = ceph_con_connect(con);
+ 		if (ret < 0) {
+ 			con->error_msg = "connect error";
+ 			goto out;
+@@ -2095,13 +2136,9 @@ more:
+ 	}
 
-[PATCH 7/9] libceph: close connection on reset tag
-    This causes a more complete reset to occur when a RESETSESSION
-    tag is received.
+ 	if (test_bit(CONNECTING, &con->state)) {
+-		dout("try_read connecting\n");
+-		ret = read_partial_banner(con);
++		ret = ceph_con_connect_response(con);
+ 		if (ret <= 0)
+ 			goto out;
+-		ret = process_banner(con);
+-		if (ret < 0)
+-			goto out;
 
-[PATCH 8/9] libceph: close connection on connect failure
-    This removes the unnecessary call to con_close_socket() when
-    a socket is found to be in CLOSED state.  (Probably should
-    have been moved up next to patch 4/9, above.)
-
-[PATCH 9/9] libceph: set CONNECTING state even earlier
-    This sets the state of a connection to CONNECTING earlier
-    than it was occurring before.
+ 		clear_bit(CONNECTING, &con->state);
+ 		set_bit(NEGOTIATING, &con->state);
