@@ -1,33 +1,36 @@
-From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
-Subject: Re: Unmountable btrfs filesystems
-Date: Fri, 22 Jun 2012 16:54:45 +0200
-Message-ID: <1994850.3pprtJuiTQ@pc10>
-References: <4FDCD484.50706@widodh.nl> <4FDDE1DE.5030709@tuxadero.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: all rbd users: set 'filestore fiemap = false'
+Date: Fri, 22 Jun 2012 11:16:23 -0400
+Message-ID: <20120622151623.GA18366@infradead.org>
+References: <Pine.LNX.4.64.1206172053320.16985@cobra.newdream.net>
+ <20120618085719.GA7592@infradead.org>
+ <Pine.LNX.4.64.1206180830160.7376@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from unknownsite.de ([62.48.69.106]:34828 "EHLO hartes-hannover.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755537Ab2FVOyr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 Jun 2012 10:54:47 -0400
-In-Reply-To: <4FDDE1DE.5030709@tuxadero.com>
+Received: from 173-166-109-252-newengland.hfc.comcastbusiness.net ([173.166.109.252]:55048
+	"EHLO bombadil.infradead.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758017Ab2FVPQY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 22 Jun 2012 11:16:24 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1206180830160.7376@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: martin@tuxadero.com
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: Christoph Hellwig <hch@infradead.org>, ceph-devel@vger.kernel.org
 
-Am Sonntag, 17. Juni 2012, 15:55:42 schrieb Martin Mailand:
-> Hi Wido,
-> until recently there were still a few bugs in btrfs which could be hit
-> quite easily with ceph. The last big one was fixed here
-> http://www.spinics.net/lists/ceph-devel/msg06270.html
+On Mon, Jun 18, 2012 at 08:32:50AM -0700, Sage Weil wrote:
+> On Mon, 18 Jun 2012, Christoph Hellwig wrote:
+> > On Sun, Jun 17, 2012 at 09:02:15PM -0700, Sage Weil wrote:
+> > > that data over the wire.  We have observed incorrect/changing FIEMAP on 
+> > > both btrfs:
+> > 
+> > both btrfs and?
+> 
+> Whoops, it was XFS.  :/
 
-I keep hearing things along the lines of "yes, btrfs is really really close to 
-ready, we just had some really nasty bug in the last release, so you 
-absolutely have to run the very latest Linux kernel" since at least Linux 3.1.
+If you manage to extract a minimal test case I'd love to see it,  FIEMAP
+is a complete mess, although most of the time the errors actually are on
+the users side due to it's complicated semantics.
 
-I think I will probably wait until there have been at least three major Linux 
-releases with no serious btrfs issues before I start using it in production.
-
-	Guido
