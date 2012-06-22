@@ -1,81 +1,63 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: btrfs call trace
-Date: Fri, 22 Jun 2012 23:57:58 +0200
-Message-ID: <4FE4EA66.4060708@profihost.ag>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 0/9] another batch of messenger patches
+Date: Fri, 22 Jun 2012 17:44:04 -0500
+Message-ID: <4FE4F534.1000009@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:46134 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753628Ab2FVV56 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jun 2012 17:57:58 -0400
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:34486 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753289Ab2FVWoF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jun 2012 18:44:05 -0400
+Received: by ghrr11 with SMTP id r11so1974731ghr.19
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 15:44:04 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Here is another set of small (though not necessarily trivial)
+patches to the ceph client messenger code.
 
-are these bugs known?
+They are all the result of recent work that was aimed at making
+the messenger code more clearly based on independent states, in
+hopes of making the result a bit simpler and more reliable.
 
-[ 2157.104532] INFO: task kworker/2:2:6278 blocked for more than 120 
-seconds.
-[ 2157.130649] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" 
-disables this message.
-[ 2157.156750] kworker/2:2     D ffffffff8180eba0     0  6278      2 
-0x00000000
-[ 2157.182763]  ffff880c3c0d7c90 0000000000000046 ffff880c3e2aa1c0 
-0000000000012280
-[ 2157.208662]  ffff880c3c0d7fd8 ffff880c3c0d6010 0000000000012280 
-0000000000012280
-[ 2157.234591]  ffff880c3c0d7fd8 0000000000012280 ffff880e78e5a240 
-ffff880c3e2aa1c0
-[ 2157.260573] Call Trace:
-[ 2157.285872]  [<ffffffff81620334>] schedule+0x24/0x70
-[ 2157.311097]  [<ffffffffa007f4e5>] wait_for_commit+0x55/0x90 [btrfs]
-[ 2157.311106]  [<ffffffff81060140>] ? wake_up_bit+0x40/0x40
-[ 2157.311129]  [<ffffffffa00810b5>] 
-btrfs_commit_transaction+0x655/0xab0 [btrfs]
-[ 2157.311134]  [<ffffffff810736f0>] ? set_next_entity+0x90/0xa0
-[ 2157.311138]  [<ffffffff81060140>] ? wake_up_bit+0x40/0x40
-[ 2157.311156]  [<ffffffffa0081810>] ? btrfs_end_transaction+0x20/0x20 
-[btrfs]
-[ 2157.311171]  [<ffffffffa008182a>] do_async_commit+0x1a/0x30 [btrfs]
-[ 2157.311175]  [<ffffffff81058eff>] process_one_work+0x11f/0x470
-[ 2157.311179]  [<ffffffff8105b128>] worker_thread+0x178/0x400
-[ 2157.311182]  [<ffffffff8105afb0>] ? manage_workers+0x210/0x210
-[ 2157.311185]  [<ffffffff8105fc46>] kthread+0x96/0xa0
-[ 2157.311190]  [<ffffffff81622dd4>] kernel_thread_helper+0x4/0x10
-[ 2157.311195]  [<ffffffff8105fbb0>] ? kthread_worker_fn+0x130/0x130
-[ 2157.311198]  [<ffffffff81622dd0>] ? gs_change+0xb/0xb
-[ 2157.311220] INFO: task ceph-osd:14426 blocked for more than 120 seconds.
-[ 2157.311220] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" 
-disables this message.
-[ 2157.311224] ceph-osd        D 0000000000000002     0 14426      1 
-0x00000000
-[ 2157.311228]  ffff880ae8c33c38 0000000000000082 ffff880a39142180 
-0000000000012280
-[ 2157.311231]  ffff880ae8c33fd8 ffff880ae8c32010 0000000000012280 
-0000000000012280
-[ 2157.311234]  ffff880ae8c33fd8 0000000000012280 ffff880983efa1c0 
-ffff880a39142180
-[ 2157.311235] Call Trace:
-[ 2157.311240]  [<ffffffff81620334>] schedule+0x24/0x70
-[ 2157.311256]  [<ffffffffa0081d85>] 
-btrfs_commit_transaction_async+0x1d5/0x240 [btrfs]
-[ 2157.311271]  [<ffffffffa0065eb6>] ? block_rsv_add_bytes+0x26/0x60 [btrfs]
-[ 2157.311275]  [<ffffffff81060140>] ? wake_up_bit+0x40/0x40
-[ 2157.311289]  [<ffffffffa0065f25>] ? block_rsv_migrate_bytes+0x35/0x50 
-[btrfs]
-[ 2157.311311]  [<ffffffffa00b2d5e>] btrfs_mksubvol+0x2be/0x350 [btrfs]
-[ 2157.311329]  [<ffffffffa00b2ef9>] 
-btrfs_ioctl_snap_create_transid+0x109/0x1a0 [btrfs]
-[ 2157.311346]  [<ffffffffa00b4bf4>] 
-btrfs_ioctl_snap_create_v2+0x84/0xf0 [btrfs]
-[ 2157.311363]  [<ffffffffa00b756f>] btrfs_ioctl+0x76f/0x12d0 [btrfs]
-[ 2157.311368]  [<ffffffff8114459a>] ? fsnotify+0x1ba/0x2e0
-[ 2157.311372]  [<ffffffff8111ade3>] do_vfs_ioctl+0x93/0x4f0
-[ 2157.311375]  [<ffffffff8111b28a>] sys_ioctl+0x4a/0x80
-[ 2157.311379]  [<ffffffff81621ba2>] system_call_fastpath+0x16/0x1b
+Most of these involve making what happens when a connection
+reset or closed get handled a bit more completely and/or
+consistently.
 
-Stefan
+					-Alex
+
+[PATCH 1/9] libceph: encapsulate and document connect sequence
+[PATCH 2/9] libceph: encapsulate and document negotiation phase
+    Each of these moves some blocks of code into their own functions,
+    and adds a lot of commentary about what's going on during the
+    connect sequence.
+
+[PATCH 3/9] libceph: close the connection's socket on reset
+    Resetting a connection clears all connection state, but never
+    actually closes the socket.  Now it will.
+
+[PATCH 4/9] libceph: don't close socket in OPENING state
+    This removes the unnecessary call to con_close_socket() when
+    a socket is found to be in OPENING state.
+
+[PATCH 5/9] libceph: change TAG_CLOSE handling
+[PATCH 6/9] libceph: kill fail_protocol()
+    These let the normal fault handling code take care of the receipt
+    of a CLOSE tag from the peer, or of one of the other tags that
+    can be sent to indicate a connection problem.
+
+[PATCH 7/9] libceph: close connection on reset tag
+    This causes a more complete reset to occur when a RESETSESSION
+    tag is received.
+
+[PATCH 8/9] libceph: close connection on connect failure
+    This removes the unnecessary call to con_close_socket() when
+    a socket is found to be in CLOSED state.  (Probably should
+    have been moved up next to patch 4/9, above.)
+
+[PATCH 9/9] libceph: set CONNECTING state even earlier
+    This sets the state of a connection to CONNECTING earlier
+    than it was occurring before.
