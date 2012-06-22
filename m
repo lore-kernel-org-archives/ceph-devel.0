@@ -1,34 +1,38 @@
 From: Guido Winkelmann <guido-ceph@thisisnotatest.de>
 Subject: Re: RBD layering design draft
-Date: Fri, 22 Jun 2012 16:36:12 +0200
-Message-ID: <1602699.FNKvkklAzR@pc10>
-References: <4FDB9FBB.9000807@inktank.com> <CADvuQRH0J2y2-G5wWbaUiHy79y_H=wMBLnyW1ZKNdo8J2aSiKw@mail.gmail.com>
+Date: Fri, 22 Jun 2012 16:37:12 +0200
+Message-ID: <2294446.qgV7dgiTVM@pc10>
+References: <4FDB9FBB.9000807@inktank.com> <4FE3976C.5000508@dreamhost.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from unknownsite.de ([62.48.69.106]:34363 "EHLO hartes-hannover.de"
+Received: from unknownsite.de ([62.48.69.106]:34373 "EHLO hartes-hannover.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932953Ab2FVOgO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 Jun 2012 10:36:14 -0400
-In-Reply-To: <CADvuQRH0J2y2-G5wWbaUiHy79y_H=wMBLnyW1ZKNdo8J2aSiKw@mail.gmail.com>
+	id S933085Ab2FVOhO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 22 Jun 2012 10:37:14 -0400
+In-Reply-To: <4FE3976C.5000508@dreamhost.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: elder@inktank.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-Am Montag, 18. Juni 2012, 10:00:32 schrieben Sie:
-> On Fri, Jun 15, 2012 at 1:48 PM, Josh Durgin <josh.durgin@inktank.com> 
-wrote:
-> >    $ rbd unpreserve pool/image@snap
-> >    Error unpreserving: child images rely on this image
+> On 06/15/2012 03:48 PM, Josh Durgin wrote:
+
+> > Then you can perform the clone:
+> >     $ rbd clone --parent pool/parent@snap pool2/child1
 > 
-> UX nit: this should also say what image it found.
+> Based on my comments above, if the parent had not been "preserved"
+> it would automatically be at this point, by virtue of the fact it
+> has a clone associated with it.
 > 
-> rbd: Cannot unpreserve: Still in use by pool2/image2
+> Since there is always exactly one parent and one child, I'd say
+> drop the "--parent" and just have the parent and child be
+> defined by their position.  If the parent could be optionally
+> skipped for some reason, then make it be the second one.
 
-What if it's in use by a lot of images? Should it print them all, or should it 
-print something like "Still in use by pool2/image2 and 50 others, use 
-list_children to see them all"?
+I think that would be a very bad idea. clone <source> <target> would be a good 
+idea; nearly all similar commandline utilities (cp, mv, ln) work like that. 
+clone <target> <source> would be counterintuitive and probably lead to 
+otherwise avoidable mistakes.
 
-	Guido
+        Guido
