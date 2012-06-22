@@ -1,68 +1,65 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/9] libceph: don't close socket in OPENING state
-Date: Fri, 22 Jun 2012 17:48:30 -0500
-Message-ID: <4FE4F63E.6040902@inktank.com>
+Subject: [PATCH 5/9] libceph: change TAG_CLOSE handling
+Date: Fri, 22 Jun 2012 17:48:35 -0500
+Message-ID: <4FE4F643.6010705@inktank.com>
 References: <4FE4F534.1000009@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:53187 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753289Ab2FVWs3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jun 2012 18:48:29 -0400
-Received: by mail-gg0-f174.google.com with SMTP id u4so1973383ggl.19
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 15:48:29 -0700 (PDT)
+Received: from mail-yw0-f51.google.com ([209.85.213.51]:51215 "EHLO
+	mail-yw0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753289Ab2FVWsf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jun 2012 18:48:35 -0400
+Received: by yhnn12 with SMTP id n12so2326227yhn.10
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 15:48:35 -0700 (PDT)
 In-Reply-To: <4FE4F534.1000009@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-The only way a socket enters OPENING state is via ceph_con_open().
+Currently, if a connection is READY in try_read(), and a CLOSE tag
+is the what is received next, the connection's state changes from
+CONNECTED to CLOSED and try_read() returns.
 
-The only times ceph_con_open() is called are:
-  - In fs/ceph/mds_client.c:register_session(), where it occurs
-    soon after a call to ceph_con_init().
-  - In fs/ceph/mds_client.c:send_mds_reconnect().  This is
-    called in two places.
-    - In fs/ceph/mds_client.c:check_new_map(), it is called
-      after a call to ceph_con_close()
-    - Or in fs/ceph/mds_client.c:peer_reset(), which is also only
-      called after reset_connection, which includes a call to
-      ceph_con_close().
-  - In net/ceph/mon_client.c:__open_session(), where it's called
-    right after a call to ceph_con_init().
-  - In net/ceph/osd_client.c:__reset_osd(), right after a call
-    to ceph_con_close().
-  - In net/ceph/osd_client.c:__map_request(), shortly after a call
-    to create_osd(), which includes a call to ceph_con_init().
+If this happens, control returns to con_work(), and try_write()
+is called.  If there was queued data to send, try_write() appears
+to attempt to send it despite the receipt of the CLOSE tag.
 
-After a call to ceph_con_init(), the state of a ceph connection is
-CLOSED, and its socket pointer is null.
+Eventually, try_write() will return either:
+  - A non-negative value, in which case con_work() will end, and
+    will at some point get triggered to run by an event.
+  - -EAGAIN, in which case control returns to the top of con_work()
+  - Some other error, which will cause con_work() to call
+    ceph_fault(), which will close the socket and force a new
+    connection sequence to be initiated on the next write.
 
-Similarly, after a call to ceph_con_close(), the state of the
-connection is CLOSED, the underlying socket is closed, and the
-connection's socket pointer is null.
+At the top of con_work(), if the connection is in CLOSED state,
+the same fault handling will be done as would happen for any
+other error.
 
-Therefore, there is no reason to call con_close_socket() when a
-connection is found to be in OPENING state in con_work(), because
-the socket will already be closed, and the connection will already
-be in CLOSED state.
+Instead of messing with the connection state deep inside try_read(),
+just have try_read() return a negative value (an errno), and let
+the fault handling code in con_work() take care of resetting the
+connection right away.  This will also close the connection before
+needlessly sending any queued data to the other end.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- net/ceph/messenger.c |    1 -
- 1 file changed, 1 deletion(-)
+ net/ceph/messenger.c |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
 Index: b/net/ceph/messenger.c
 ===================================================================
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -2387,7 +2387,6 @@ restart:
- 	if (test_and_clear_bit(OPENING, &con->state)) {
- 		/* reopen w/ new peer */
- 		dout("con_work OPENING\n");
--		con_close_socket(con);
- 	}
-
- 	ret = try_read(con);
+@@ -2273,8 +2273,7 @@ more:
+ 			prepare_read_ack(con);
+ 			break;
+ 		case CEPH_MSGR_TAG_CLOSE:
+-			clear_bit(CONNECTED, &con->state);
+-			set_bit(CLOSED, &con->state);   /* fixme */
++			ret = -EIO;
+ 			goto out;
+ 		default:
+ 			goto bad_tag;
