@@ -1,44 +1,35 @@
-From: Alex Elsayed <eternaleye@gmail.com>
-Subject: Re: RBD layering design draft
-Date: Fri, 22 Jun 2012 02:02:38 +0000 (UTC)
-Message-ID: <loom.20120622T035754-492@post.gmane.org>
-References: <4FDB9FBB.9000807@inktank.com> <CADvuQRH0J2y2-G5wWbaUiHy79y_H=wMBLnyW1ZKNdo8J2aSiKw@mail.gmail.com> <4FDF620E.7030704@inktank.com> <Pine.LNX.4.64.1206181059040.11790@cobra.newdream.net> <4FDFB4A4.1080107@inktank.com>
+From: ramu <ramu.freesystems@gmail.com>
+Subject: Re: ceph init script didn't stop the ceph.
+Date: Fri, 22 Jun 2012 06:07:48 +0000 (UTC)
+Message-ID: <loom.20120622T080650-126@post.gmane.org>
+References: <loom.20120621T131015-713@post.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:53706 "EHLO plane.gmane.org"
+Received: from plane.gmane.org ([80.91.229.3]:46363 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1760801Ab2FVCCv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 21 Jun 2012 22:02:51 -0400
+	id S1761290Ab2FVGIC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 22 Jun 2012 02:08:02 -0400
 Received: from list by plane.gmane.org with local (Exim 4.69)
 	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1ShtCy-0003XH-0Y
-	for ceph-devel@vger.kernel.org; Fri, 22 Jun 2012 04:02:48 +0200
-Received: from 66-87-112-231.pools.spcsdns.net ([66.87.112.231])
+	id 1Shx2E-0006Ce-Td
+	for ceph-devel@vger.kernel.org; Fri, 22 Jun 2012 08:07:59 +0200
+Received: from segment-124-30.sify.net ([segment-124-30.sify.net])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 04:02:48 +0200
-Received: from eternaleye by 66-87-112-231.pools.spcsdns.net with local (Gmexim 0.1 (Debian))
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 08:07:58 +0200
+Received: from ramu.freesystems by segment-124-30.sify.net with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 04:02:48 +0200
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 08:07:58 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Dan Mick <dan.mick <at> inktank.com> writes:
+ramu <ramu.freesystems <at> gmail.com> writes:
+No error messages displayed and ceph osd down 1 this command also not 
+working.When run this command in ceph-osd.1.log the error message is 
+map e38 wrongly marked me down.
 
-> 
-> On 06/18/2012 11:01 AM, Sage Weil wrote:
-> > On Mon, 18 Jun 2012, Josh Durgin wrote:
-> >>>>      $ rbd copyup pool2/child1
-
-> "disown" and "adopt"?  :)  (actually I started as a joke, but really I 
-> kinda like that; fits with the parent-child name)
-
-The issue I see with that is that the argument refers to the child rather than
-the parent, so it doesn't match. I personally like 'unshare' since it'll also
-work in the dedup case, but if we stick with the parent/child terminology
-'emancipate' might work (although it lacks a good reverse).
 
 
