@@ -1,36 +1,34 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: all rbd users: set 'filestore fiemap = false'
-Date: Fri, 22 Jun 2012 11:16:23 -0400
-Message-ID: <20120622151623.GA18366@infradead.org>
-References: <Pine.LNX.4.64.1206172053320.16985@cobra.newdream.net>
- <20120618085719.GA7592@infradead.org>
- <Pine.LNX.4.64.1206180830160.7376@cobra.newdream.net>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: RBD layering design draft
+Date: Fri, 22 Jun 2012 09:00:39 -0700
+Message-ID: <CADvuQRFdpy4G=jQJ0_QnY9F3Q6kSM_MkftN3iD6fbwx8Zx+HKg@mail.gmail.com>
+References: <4FDB9FBB.9000807@inktank.com> <CADvuQRH0J2y2-G5wWbaUiHy79y_H=wMBLnyW1ZKNdo8J2aSiKw@mail.gmail.com>
+ <1602699.FNKvkklAzR@pc10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 173-166-109-252-newengland.hfc.comcastbusiness.net ([173.166.109.252]:55048
-	"EHLO bombadil.infradead.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758017Ab2FVPQY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 22 Jun 2012 11:16:24 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1206180830160.7376@cobra.newdream.net>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:51919 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755442Ab2FVQBA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Jun 2012 12:01:00 -0400
+Received: by dady13 with SMTP id y13so2506292dad.19
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 09:01:00 -0700 (PDT)
+In-Reply-To: <1602699.FNKvkklAzR@pc10>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Christoph Hellwig <hch@infradead.org>, ceph-devel@vger.kernel.org
+To: Guido Winkelmann <guido-ceph@thisisnotatest.de>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 18, 2012 at 08:32:50AM -0700, Sage Weil wrote:
-> On Mon, 18 Jun 2012, Christoph Hellwig wrote:
-> > On Sun, Jun 17, 2012 at 09:02:15PM -0700, Sage Weil wrote:
-> > > that data over the wire.  We have observed incorrect/changing FIEMAP on 
-> > > both btrfs:
-> > 
-> > both btrfs and?
-> 
-> Whoops, it was XFS.  :/
+On Fri, Jun 22, 2012 at 7:36 AM, Guido Winkelmann
+<guido-ceph@thisisnotatest.de> wrote:
+>> rbd: Cannot unpreserve: Still in use by pool2/image2
+>
+> What if it's in use by a lot of images? Should it print them all, or should it
+> print something like "Still in use by pool2/image2 and 50 others, use
+> list_children to see them all"?
 
-If you manage to extract a minimal test case I'd love to see it,  FIEMAP
-is a complete mess, although most of the time the errors actually are on
-the users side due to it's complicated semantics.
-
+As walking through all the (potential) clones is an expensive
+operation, this should abort as soon as possible, and just complain
+about the one encountered so far. That could easily be a difference of
+a few seconds vs tens of seconds. We don't even know the count,
+without paying that cost, so that can't be printed either.
