@@ -1,36 +1,28 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: FS / Kernel question choosing the correct kernel version
-Date: Sat, 23 Jun 2012 20:26:45 +0200
-Message-ID: <4FE60A65.2030800@profihost.ag>
+From: Igor Laskovy <igor.laskovy@gmail.com>
+Subject: Ceph as a NOVA-INST-DIR/instances/ storage backend
+Date: Sat, 23 Jun 2012 21:42:12 +0300
+Message-ID: <CAC+dAwHKuGY=iVC8O9oNStrPLuBDruriK1MQyhqCAGqo_ik+rg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:53143 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755305Ab2FWS0o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 23 Jun 2012 14:26:44 -0400
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:60012 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753043Ab2FWSmN (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 23 Jun 2012 14:42:13 -0400
+Received: by wgbdr13 with SMTP id dr13so2806639wgb.1
+        for <ceph-devel@vger.kernel.org>; Sat, 23 Jun 2012 11:42:12 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: openstack-operators@lists.openstack.org
+Cc: "<openstack@lists.launchpad.net>" <openstack@lists.launchpad.net>, ceph-devel@vger.kernel.org
 
-Hi,
+Hi all from hot Kiev))
 
-i got stuck while selecting the right FS for ceph / RBD.
+Does anybody use Ceph as a backend storage for NOVA-INST-DIR/instances/ ?
+Is it in production use? Live migration is still possible?
+I kindly ask any advice of best practices point of view.
 
-XFS:
-- deadlock / hung task under 3.0.34 in xfs_ilock / xfs_buf_lock while syncfs
-- under 3.5-rc3 all my machines got loaded doing nothing than waiting 
-for XFS / SSDs so ceph is really slow / unuseable
-
-btrfs:
-- 3.5-rc3 ceph is pretty fast and works good until i see also a deadlock 
-while doing heavy random I/Os in my rbd / kvm.
-
-All processes hang in btrfs_commit_transaction or 
-btrfs_commit_transaction_async
-
-Are there tested / recommanded kernel versions for rbd and a specific fs.
-
-Greets
-Stefan
+--
+Igor Laskovy
+facebook.com/igor.laskovy
+Kiev, Ukraine
