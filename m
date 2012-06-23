@@ -1,61 +1,100 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: ceph osd crush add - uknown command crush
-Date: Fri, 22 Jun 2012 23:26:17 -0700
-Message-ID: <0F418367B1BD43F2A50EC0CBD0043A7A@inktank.com>
-References: <CAMwB3TjS_r-U55py7WPu1RZmNob78nodB6a=i9sb1sx3mxvXDw@mail.gmail.com>
- <271B7E7C4B014BFE86FC17F9AF863BD8@inktank.com>
- <CACkq2moDXngPxLZ3Tb36SW_R+E-P-aE1vGELsK7mWa2XHBPJqQ@mail.gmail.com>
- <CAPYLRzhTzMwORq75WJ81Lx6dTow=RFwFb4D57Z=e1wDVGYnXEQ@mail.gmail.com>
- <B0F7A6F1-020D-4CAB-BCFF-22C8CA4B068A@barryp.org>
-Mime-Version: 1.0
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: reproducable osd crash
+Date: Sat, 23 Jun 2012 08:32:40 +0200
+Message-ID: <FCDA3F05-DD3C-4271-A7D9-CBF2778BD57C@profihost.ag>
+References: <4FE319DF.3020106@profihost.ag> <B37E1F82-25E3-4ED4-B3E9-59BC2EC44CB6@profihost.ag> <4FE50D19.3090208@inktank.com>
+Mime-Version: 1.0 (1.0)
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:53004 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754229Ab2FWG0V convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 23 Jun 2012 02:26:21 -0400
-Received: by pbbrp8 with SMTP id rp8so4434107pbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Jun 2012 23:26:21 -0700 (PDT)
-In-Reply-To: <B0F7A6F1-020D-4CAB-BCFF-22C8CA4B068A@barryp.org>
-Content-Disposition: inline
+Received: from mail.profihost.ag ([85.158.179.208]:41433 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754167Ab2FWGcp convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 23 Jun 2012 02:32:45 -0400
+In-Reply-To: <4FE50D19.3090208@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Barry Pederson <bp@barryp.org>
-Cc: ceph-devel@vger.kernel.org
+To: Dan Mick <dan.mick@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thursday, June 21, 2012 at 11:12 AM, Barry Pederson wrote:
-> =20
-> On Jun 20, 2012, at 4:59 PM, Gregory Farnum wrote:
-> > On Wed, Jun 20, 2012 at 2:53 PM, Travis Rhoden <trhoden@gmail.com (=
-mailto:trhoden@gmail.com)> wrote:
-> > > This incorrect syntax is still published in the docs at
-> > > http://ceph.com/docs/master/ops/manage/crush/#adjusting-crush
-> > > =20
-> > > Are the docs that end up on that page in GitHub? I'd be happy to
-> > > start making fixes and issuing pull-request. I've run into a few
-> > > gotchas when following the commands on those pages.
-> > =20
-> > Yes, they are in git! All the docs are generated from the sources i=
-n
-> > doc/ under the same hierarchy as on the website. The page you're
-> > interested in is at "{ceph_root}/doc/ops/manage/crush.rst".
-> =20
-> =20
-> =20
-> I'm playing with ceph, and just now adding a 2nd node to an existing =
-cluster, and unfortunately still see the old commands on that webpage. =
-Can somebody give be a quick hint what the new equivalent to =20
-> =20
-> ceph osd crush add 123 osd.123 1.0 pool=3Ddefault rack=3Drackbar host=
-=3Dhostfoo
-> =20
+Thanks yes it is from the next branch.
 
+Am 23.06.2012 um 02:26 schrieb Dan Mick <dan.mick@inktank.com>:
 
-You're looking for "ceph osd crush set=E2=80=A6."
-The docs have been updated now, thanks to a pull request from Travis. :=
-)
-
+> The ceph-osd binary you sent claims to be version 0.47.2-521-g88c762,=
+ which is not quite 0.47.3.  You can get the version with <binary> -v, =
+or (in my case) examining strings in the binary.  I'm retrieving that v=
+ersion to analyze the core dump.
+>=20
+>=20
+> On 06/21/2012 11:43 PM, Stefan Priebe wrote:
+>> Does anybody have an idea? This is right now a showstopper to me.
+>>=20
+>> Am 21.06.2012 um 14:55 schrieb Stefan Priebe - Profihost AG<s.priebe=
+@profihost.ag>:
+>>=20
+>>> Hello list,
+>>>=20
+>>> i'm able to reproducably crash osd daemons.
+>>>=20
+>>> How i can reproduce:
+>>>=20
+>>> Kernel: 3.5.0-rc3
+>>> Ceph: 0.47.3
+>>> FS: btrfs
+>>> Journal: 2GB tmpfs per OSD
+>>> OSD: 3x servers with 4x Intel SSD OSDs each
+>>> 10GBE Network
+>>> rbd_cache_max_age: 2.0
+>>> rbd_cache_size: 33554432
+>>>=20
+>>> Disk is set to writeback.
+>>>=20
+>>> Start a KVM VM via PXE with the disk attached in writeback mode.
+>>>=20
+>>> Then run randwrite stress more than 2 time. Mostly OSD 22 in my cas=
+e crashes.
+>>>=20
+>>> # fio --filename=3D/dev/vda1 --direct=3D1 --rw=3Drandwrite --bs=3D4=
+k --size=3D200G --numjobs=3D50 --runtime=3D90 --group_reporting --name=3D=
+file1; fio --filename=3D/dev/vda1 --direct=3D1 --rw=3Drandwrite --bs=3D=
+4k --size=3D200G --numjobs=3D50 --runtime=3D90 --group_reporting --name=
+=3Dfile1; fio --filename=3D/dev/vda1 --direct=3D1 --rw=3Drandwrite --bs=
+=3D4k --size=3D200G --numjobs=3D50 --runtime=3D90 --group_reporting --n=
+ame=3Dfile1; halt
+>>>=20
+>>> Strangely exactly THIS OSD also has the most log entries:
+>>> 64K     ceph-osd.20.log
+>>> 64K     ceph-osd.21.log
+>>> 1,3M    ceph-osd.22.log
+>>> 64K     ceph-osd.23.log
+>>>=20
+>>> But all OSDs are set to debug osd =3D 20.
+>>>=20
+>>> dmesg shows:
+>>> ceph-osd[5381]: segfault at 3f592c000 ip 00007fa281d8eb23 sp 00007f=
+a27702d260 error 4 in libtcmalloc.so.0.0.0[7fa281d6a000+3d000]
+>>>=20
+>>> I uploaded the following files:
+>>> priebe_fio_randwrite_ceph-osd.21.log.bz2 =3D>  OSD which was OK and=
+ didn't crash
+>>> priebe_fio_randwrite_ceph-osd.22.log.bz2 =3D>  Log from the crashed=
+ OSD
+>>> =C3=BCu
+>>> priebe_fio_randwrite_core.ssdstor001.27204.bz2 =3D>  Core dump
+>>> priebe_fio_randwrite_ceph-osd.bz2 =3D>  osd binary
+>>>=20
+>>> Stefan
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
