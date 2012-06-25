@@ -1,108 +1,54 @@
-From: "Guan Jun He" <gjhe@suse.com>
-Subject: Re: [PATCH 1/1] client: prevent the race of incoming work
- during teardown
-Date: Sun, 24 Jun 2012 23:56:28 -0600
-Message-ID: <4FE86E0C0200001600013468@soto.provo.novell.com>
-References: <1340266828-26344-1-git-send-email-gjhe@suse.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+From: Guangliang Zhao <gzhao@suse.com>
+Subject: [PATCH] rbd: fix the memory leak of bio_chain_clone
+Date: Mon, 25 Jun 2012 15:37:43 +0800
+Message-ID: <1340609863-10971-1-git-send-email-gzhao@suse.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soto.provo.novell.com ([137.65.250.214]:33266 "EHLO
-	soto.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752408Ab2FYF4o convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
-	Mon, 25 Jun 2012 01:56:44 -0400
-In-Reply-To: <1340266828-26344-1-git-send-email-gjhe@suse.com>
-Content-Disposition: inline
+Received: from victor.provo.novell.com ([137.65.250.26]:54772 "EHLO
+	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753988Ab2FYHh6 (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Mon, 25 Jun 2012 03:37:58 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guanjun He <heguanbo@gmail.com>, sage@inktank.com, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: gzhao@suse.com
 
-Hi,
+Signed-off-by: Guangliang Zhao <gzhao@suse.com>
+---
+ drivers/block/rbd.c |   10 ++++------
+ 1 files changed, 4 insertions(+), 6 deletions(-)
 
-  Do you think atomic_t variable is necessary here? 
-or a normal bool variable will ok? or others?
-
-thanks a lot for your reply!
-
-thanks,
-Guanjun	
-
->>> On 6/21/2012 at 04:20 PM, in message
-<1340266828-26344-1-git-send-email-gjhe@suse.com>, Guanjun He
-<heguanbo@gmail.com> wrote: 
-> Add an atomic variable 'teardowning' as flag in struct ceph_messenger,
-> set this flag to 1 in function ceph_destroy_client(), and add the condition 
-> code
-> in function ceph_data_ready() to test the flag value, if true(1), just 
-> return.
-> 
-> Signed-off-by: Guanjun He <gjhe@suse.com>
-> ---
->  include/linux/ceph/messenger.h |    1 +
->  net/ceph/ceph_common.c         |    5 +++--
->  net/ceph/messenger.c           |    5 +++++
->  3 files changed, 9 insertions(+), 2 deletions(-)
-> 
-> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 2521a95..70ff3b7 100644
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -54,6 +54,7 @@ struct ceph_messenger {
->  	struct ceph_entity_addr my_enc_addr;
->  
->  	bool nocrc;
-> +	atomic_t teardowning;
->  
->  	/*
->  	 * the global_seq counts connections i (attempt to) initiate
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index a776f75..7225e42 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -501,6 +501,9 @@ void ceph_destroy_client(struct ceph_client *client)
->  {
->  	dout("destroy_client %p\n", client);
->  
-> +	atomic_set(&client->msgr->teardowning, 1);
-> +	ceph_msgr_flush();
-> +
->  	/* unmount */
->  	ceph_osdc_stop(&client->osdc);
->  
-> @@ -509,8 +512,6 @@ void ceph_destroy_client(struct ceph_client *client)
->  	 * auth module, which is needed to free those connections'
->  	 * ceph_authorizers.
->  	 */
-> -	ceph_msgr_flush();
-> -
->  	ceph_monc_stop(&client->monc);
->  
->  	ceph_debugfs_client_cleanup(client);
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 524f4e4..89a96e7 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -156,6 +156,9 @@ EXPORT_SYMBOL(ceph_msgr_flush);
->  static void ceph_data_ready(struct sock *sk, int count_unused)
->  {
->  	struct ceph_connection *con = sk->sk_user_data;
-> +	if (atomic_read(&con->msgr->teardowning)) {
-> +		return;
-> +	}
->  
->  	if (sk->sk_state != TCP_CLOSE_WAIT) {
->  		dout("ceph_data_ready on %p state = %lu, queueing work\n",
-> @@ -2281,6 +2284,8 @@ struct ceph_messenger *ceph_messenger_create(struct 
-> ceph_entity_addr *myaddr,
->  	get_random_bytes(&msgr->inst.addr.nonce, sizeof(msgr->inst.addr.nonce));
->  	encode_my_addr(msgr);
->  
-> +	atomic_set(&msgr->teardowning, 0);
-> +
->  	dout("messenger_create %p\n", msgr);
->  	return msgr;
->  }
-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 65665c9..3d6dfc8 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -719,8 +719,6 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
+ 			goto err_out;
+ 
+ 		if (total + old_chain->bi_size > len) {
+-			struct bio_pair *bp;
+-
+ 			/*
+ 			 * this split can only happen with a single paged bio,
+ 			 * split_bio will BUG_ON if this is not the case
+@@ -732,13 +730,13 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
+ 
+ 			/* split the bio. We'll release it either in the next
+ 			   call, or it will have to be released outside */
+-			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
+-			if (!bp)
++			*bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
++			if (!*bp)
+ 				goto err_out;
+ 
+-			__bio_clone(tmp, &bp->bio1);
++			__bio_clone(tmp, &(*bp)->bio1);
+ 
+-			*next = &bp->bio2;
++			*next = &(*bp)->bio2;
+ 		} else {
+ 			__bio_clone(tmp, old_chain);
+ 			*next = old_chain->bi_next;
+-- 
+1.7.3.4
 
