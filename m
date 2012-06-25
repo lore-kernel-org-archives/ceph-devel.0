@@ -1,79 +1,39 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Qemu fails to open RBD image when auth_supported is not set to
- 'none'
-Date: Mon, 25 Jun 2012 17:45:31 +0200
-Message-ID: <4FE8879B.7020103@widodh.nl>
-References: <4FE881A1.5070504@widodh.nl>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: Unable to restart Mon after reboot
+Date: Mon, 25 Jun 2012 08:58:13 -0700
+Message-ID: <CADvuQRFcgPOy765-cYSVT1DPjOZ5nPXSb1Lr1Xjt5e3rU7joNw@mail.gmail.com>
+References: <BDAE812E-2659-4025-9B30-2DEC6675B59A@100percentit.com>
+ <4FE55567.6080201@inktank.com> <4FE558CB.4010509@inktank.com> <F38AD123-3C97-44BD-ABE5-33635AD6D768@100percentit.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:53653 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755339Ab2FYPpd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Jun 2012 11:45:33 -0400
-Received: from [IPv6:2a00:f10:113:1:386f:2b24:235:7e53] (unknown [IPv6:2a00:f10:113:1:386f:2b24:235:7e53])
-	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id AC7137616B
-	for <ceph-devel@vger.kernel.org>; Mon, 25 Jun 2012 17:45:31 +0200 (CEST)
-In-Reply-To: <4FE881A1.5070504@widodh.nl>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:57314 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753022Ab2FYP6f (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Jun 2012 11:58:35 -0400
+Received: by dady13 with SMTP id y13so5505279dad.19
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Jun 2012 08:58:34 -0700 (PDT)
+In-Reply-To: <F38AD123-3C97-44BD-ABE5-33635AD6D768@100percentit.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: David Blundell <David.Blundell@100percentit.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 06/25/2012 05:20 PM, Wido den Hollander wrote:
-> Hi,
+On Sat, Jun 23, 2012 at 3:43 AM, David Blundell
+<David.Blundell@100percentit.com> wrote:
+> The logs on all three servers are full of messages like:
+> Jun 23 04:02:19 Store2 kernel: [63811.494955] ceph-osd: page allocation failure: order:3, mode:0x4020
 >
-> I just tried to start a VM with libvirt with the following disk:
+> The difference between the lines is that order: varies between 2, 3, 4 or 5
 >
-> <disk type='network' device='disk'>
->    <driver name='qemu' type='raw' cache='none'/>
->    <source protocol='rbd' name='rbd/8489c04f-aab8-4796-a22a-ebaa7be247a7'>
->      <host name='31.25.XX.XX' port='6789'/>
->    </source>
->    <target dev='vda' bus='virtio'/>
-> </disk>
->
-> That fails with: "Operation not supported"
->
-> I tried qemu-img:
->
-> qemu-img info
-> rbd:rbd/8489c04f-aab8-4796-a22a-ebaa7be247a7:mon_host=31.25.XX.XX\\:6789
->
-> Same result.
->
-> I then tried:
->
-> qemu-img info
-> rbd:rbd/8489c04f-aab8-4796-a22a-ebaa7be247a7:mon_host=31.25.XX.XX\\:6789:auth_supported=none
->
->
-> And that worked :)
->
-> This host does not have a local ceph.conf, all the parameters have to
-> come from the command line.
->
-> I know that recently auth_supported defaults to "cephx", but that now
-> break the libvirt integration since it doesn't set auth_supported to
-> explicitly none when no auth section is present.
->
-> Should this be something that gets fixed in librados or in libvirt?
+> Is this likely to be a btrfs bug?
 
-Thought about it, this is something in libvirt :)
+That means you're running out of memory, in kernelspace. The order is
+the power-of-two (2**n) of how many 4kB pages were requested, 0x4020 =
+GFP_COMP|GFP_HIGH (compound & access emergency pools). Btrfs may be
+indirectly related, it's not clear what's consuming all the memory,
+but that doesn't sound all that likely. That message should be
+followed by a stack dump, that might tell us more.
 
->
-> If it's libvirt, I'll write a patch for it :)
-
-Just did so, very simple patch: 
-https://www.redhat.com/archives/libvir-list/2012-June/msg01119.html
-
-Wido
-
->
-> Wido
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+Are you using the Ceph distributed filesystem, or just the RADOS
+level, e.g. RBD images?
