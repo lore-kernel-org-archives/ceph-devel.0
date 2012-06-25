@@ -1,34 +1,25 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Ceph as a NOVA-INST-DIR/instances/ storage backend
-Date: Mon, 25 Jun 2012 10:18:05 -0700
-Message-ID: <CADvuQREu_9ZOEg7T80ph14HMuxd+f+G-wTa6d21N9PKvcOQ_Qw@mail.gmail.com>
-References: <CAC+dAwHKuGY=iVC8O9oNStrPLuBDruriK1MQyhqCAGqo_ik+rg@mail.gmail.com>
- <CADvuQREy1iLz3HUECFh1Bud9uADTQRXFAh0HCWDmWQd0SmLGeA@mail.gmail.com> <CAC+dAwGFSBxfHh=tP6V7CqTqYxE6=0G+oT6AZxTmY31L1f1amg@mail.gmail.com>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: reproducable osd crash
+Date: Mon, 25 Jun 2012 19:19:44 +0200
+Message-ID: <4FE89DB0.1080606@profihost.ag>
+References: <4FE319DF.3020106@profihost.ag> <B37E1F82-25E3-4ED4-B3E9-59BC2EC44CB6@profihost.ag> <4FE4F806.1080501@inktank.com> <CA+4uBUb9WVk7-htq_qBNF-T_8i4-3KEsJePhTYoAHXuXfyOuKA@mail.gmail.com> <7855C271-3A73-4090-9F5F-2F4FB12C4E73@profihost.ag> <B8C4CA17-911D-4BA4-BE1D-4E81168A4212@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:56149 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757380Ab2FYRS0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Jun 2012 13:18:26 -0400
-Received: by pbbrp8 with SMTP id rp8so6824825pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 25 Jun 2012 10:18:25 -0700 (PDT)
-In-Reply-To: <CAC+dAwGFSBxfHh=tP6V7CqTqYxE6=0G+oT6AZxTmY31L1f1amg@mail.gmail.com>
+Received: from mail.profihost.ag ([85.158.179.208]:38226 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757511Ab2FYRTr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Jun 2012 13:19:47 -0400
+In-Reply-To: <B8C4CA17-911D-4BA4-BE1D-4E81168A4212@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Laskovy <igor.laskovy@gmail.com>
-Cc: openstack-operators@lists.openstack.org, "&lt,openstack@lists.launchpad.net&gt," <openstack@lists.launchpad.net>, ceph-devel@vger.kernel.org
+To: Dan Mick <dan.mick@inktank.com>
+Cc: Sam Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 25, 2012 at 10:03 AM, Igor Laskovy <igor.laskovy@gmail.com> wrote:
-> but can I use RBD for booting instances? I would like store whole VM on the
-> Ceph, not only persistent volumes (actually for my project I not prefer use
-> persistent volumes at all).
 
-OpenStack Essex does not make it convenient, but it can boot off of RBD.
+> I've yet to make the core match the binary.
 
-We don't have really good documentation on that yet, but the relevant
-resources are:
+I'm sorry. Is there a way to provide more / better information.
 
-https://github.com/ceph/ceph-openstack-tools/blob/master/boot-from-volume
-https://github.com/ceph/ceph-openstack-tools/blob/master/start-on-rbd.sh
-http://docs.openstack.org/trunk/openstack-compute/admin/content/boot-from-volume.html
+Stefan
