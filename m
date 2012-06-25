@@ -1,54 +1,65 @@
-From: Guangliang Zhao <gzhao@suse.com>
-Subject: [PATCH] rbd: fix the memory leak of bio_chain_clone
-Date: Mon, 25 Jun 2012 15:37:43 +0800
-Message-ID: <1340609863-10971-1-git-send-email-gzhao@suse.com>
+From: Florian Haas <florian@hastexo.com>
+Subject: radosgw forgetting subuser permissions when creating a fresh key
+Date: Mon, 25 Jun 2012 13:57:08 +0200
+Message-ID: <CAPUexz-dojn2sgsox0OaMMar=ptYUkExQcQd8=VoyvFe2XCq3g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:54772 "EHLO
-	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753988Ab2FYHh6 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Mon, 25 Jun 2012 03:37:58 -0400
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:59213 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751088Ab2FYL5J (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 25 Jun 2012 07:57:09 -0400
+Received: by qabj40 with SMTP id j40so1261496qab.1
+        for <ceph-devel@vger.kernel.org>; Mon, 25 Jun 2012 04:57:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: gzhao@suse.com
 
-Signed-off-by: Guangliang Zhao <gzhao@suse.com>
----
- drivers/block/rbd.c |   10 ++++------
- 1 files changed, 4 insertions(+), 6 deletions(-)
+Hi everyone,
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 65665c9..3d6dfc8 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -719,8 +719,6 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
- 			goto err_out;
- 
- 		if (total + old_chain->bi_size > len) {
--			struct bio_pair *bp;
--
- 			/*
- 			 * this split can only happen with a single paged bio,
- 			 * split_bio will BUG_ON if this is not the case
-@@ -732,13 +730,13 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
- 
- 			/* split the bio. We'll release it either in the next
- 			   call, or it will have to be released outside */
--			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
--			if (!bp)
-+			*bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
-+			if (!*bp)
- 				goto err_out;
- 
--			__bio_clone(tmp, &bp->bio1);
-+			__bio_clone(tmp, &(*bp)->bio1);
- 
--			*next = &bp->bio2;
-+			*next = &(*bp)->bio2;
- 		} else {
- 			__bio_clone(tmp, old_chain);
- 			*next = old_chain->bi_next;
--- 
-1.7.3.4
+I wonder if this is intentional: when I create a new Swift key for an
+existing subuser, which has previously been assigned "full control"
+permissions, those permissions appear to get lost upon key creation.
 
+# radosgw-admin subuser create --uid=johndoe --subuser=johndoe:swift
+--access=full
+{ "user_id": "johndoe",
+  "rados_uid": 0,
+  "display_name": "John Doe",
+  "email": "john@example.com",
+  "suspended": 0,
+  "subusers": [
+    { "id": "johndoe:swift",
+      "permissions": "full-control"}],
+  "keys": [
+    { "user": "johndoe",
+      "access_key": "QFAMEDSJP5DEKJO0DDXY",
+      "secret_key": "iaSFLDVvDdQt6lkNzHyW4fPLZugBAI1g17LO0+87"}],
+  "swift_keys": []}
+
+Note "permissions": "full-control"
+
+# radosgw-admin key create --subuser=johndoe:swift --key-type=swift
+{ "user_id": "johndoe",
+  "rados_uid": 0,
+  "display_name": "John Doe",
+  "email": "john@example.com",
+  "suspended": 0,
+  "subusers": [
+     { "id": "johndoe:swift",
+       "permissions": "<none>"}],
+  "keys": [
+    { "user": "johndoe",
+      "access_key": "QFAMEDSJP5DEKJO0DDXY",
+      "secret_key": "iaSFLDVvDdQt6lkNzHyW4fPLZugBAI1g17LO0+87"}],
+  "swift_keys": [
+    { "user": "johndoe:swift",
+      "secret_key": "E9T2rUZNu2gxUjcwUBO8n\/Ev4KX6\/GprEuH4qhu1"}]}
+
+Note that while there is now a key, the permissions are gone. Is this
+meant to be a security feature of sorts, or is this a bug? "subuser
+modify" can obviously restore the permissions, but it seems to be less
+than desirable to have to do that.
+
+Cheers,
+Florian
