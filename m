@@ -1,81 +1,99 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: FS / Kernel question choosing the correct kernel version
-Date: Tue, 26 Jun 2012 10:26:25 +0200
-Message-ID: <4FE97231.4070106@profihost.ag>
-References: <4FE60A65.2030800@profihost.ag> <Pine.LNX.4.64.1206251506070.22491@cobra.newdream.net> <20120626081442.GA12789@infradead.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Guanjun He <heguanbo@gmail.com>
+Subject: [PATCH 1/1] prevent the race of incoming work during teardown
+Date: Tue, 26 Jun 2012 16:41:28 +0800
+Message-ID: <1340700088-9556-1-git-send-email-gjhe@suse.com>
+References: <Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:60785 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756324Ab2FZI02 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jun 2012 04:26:28 -0400
-In-Reply-To: <20120626081442.GA12789@infradead.org>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:42639 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751537Ab2FZImO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jun 2012 04:42:14 -0400
+Received: by weyu7 with SMTP id u7so3397432wey.19
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jun 2012 01:42:13 -0700 (PDT)
+In-Reply-To: <Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, sage@inktank.com
+Cc: Guanjun He <gjhe@suse.com>
 
-Am 26.06.2012 10:14, schrieb Christoph Hellwig:
-> On Mon, Jun 25, 2012 at 03:11:17PM -0700, Sage Weil wrote:
->> On Sat, 23 Jun 2012, Stefan Priebe wrote:
->>> Hi,
->>>
->>> i got stuck while selecting the right FS for ceph / RBD.
->>>
->>> XFS:
->>> - deadlock / hung task under 3.0.34 in xfs_ilock / xfs_buf_lock while syncfs
->>
->> There was an ilock fix that went into 3.4, IIRC.  Have you tried vanilla
->> 3.4?  We are seeing some lockdep noise currently, but no deadlocks yet.
->
-> Stefan, which deadlock is this, did you report it to the XFS list?
+	As you suggested in last e_mail: "The trick here is that I think 
+we want to set a flag to discard incoming messages and then flush the workqueue, 
+do all this other tear down for osd_client etc., and then tear down the messenger.  
+I don't think we can tear down the msgr fully before that, though, because 
+osd_client etc have their fingers in it.  We just need to prevent the race 
+of incoming work during teardown..."
 
-Yes i did. You are in CC ;-)
+	We can not tear down the msgr fully, but we can set flag to discard the 
+incoming messages. And the following is the description of this patch:
+	Add a bool variable 'teardowning' as flag in struct ceph_messenger, init value
+is set to false, and set this flag to true in function ceph_destroy_client(), and add 
+the condition code in function ceph_data_ready() to test the flag value, if true, just return.
 
-http://oss.sgi.com/archives/xfs/2012-05/msg00307.html
+Signed-off-by: Guanjun He <gjhe@suse.com>
+---
+ include/linux/ceph/messenger.h |    1 +
+ net/ceph/ceph_common.c         |    4 +++-
+ net/ceph/messenger.c           |    6 ++++++
+ 3 files changed, 10 insertions(+), 1 deletions(-)
 
-But i did not send a sysrq trigger as i then started to work with btrfs. 
-As i archieve more than two times better performance with ceph and btrfs.
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 2521a95..61bb8e5 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -54,6 +54,7 @@ struct ceph_messenger {
+ 	struct ceph_entity_addr my_enc_addr;
+ 
+ 	bool nocrc;
++	bool teardowning;
+ 
+ 	/*
+ 	 * the global_seq counts connections i (attempt to) initiate
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index a776f75..3756afc 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -501,6 +501,9 @@ void ceph_destroy_client(struct ceph_client *client)
+ {
+ 	dout("destroy_client %p\n", client);
+ 
++	client->msgr->teardowning = true;
++	ceph_msgr_flush();
++
+ 	/* unmount */
+ 	ceph_osdc_stop(&client->osdc);
+ 
+@@ -509,7 +512,6 @@ void ceph_destroy_client(struct ceph_client *client)
+ 	 * auth module, which is needed to free those connections'
+ 	 * ceph_authorizers.
+ 	 */
+-	ceph_msgr_flush();
+ 
+ 	ceph_monc_stop(&client->monc);
+ 
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 524f4e4..fe8881e 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -157,6 +157,10 @@ static void ceph_data_ready(struct sock *sk, int count_unused)
+ {
+ 	struct ceph_connection *con = sk->sk_user_data;
+ 
++	if (con->msgr->teardowning) {
++		return;
++	}
++
+ 	if (sk->sk_state != TCP_CLOSE_WAIT) {
+ 		dout("ceph_data_ready on %p state = %lu, queueing work\n",
+ 		     con, con->state);
+@@ -2281,6 +2285,8 @@ struct ceph_messenger *ceph_messenger_create(struct ceph_entity_addr *myaddr,
+ 	get_random_bytes(&msgr->inst.addr.nonce, sizeof(msgr->inst.addr.nonce));
+ 	encode_my_addr(msgr);
+ 
++	msgr->teardowning = false;
++
+ 	dout("messenger_create %p\n", msgr);
+ 	return msgr;
+ }
+-- 
+1.7.3.4
 
-Stefan
-
-PS: i have this one laying around which is NOT in 3.0.X not sure whether 
-this is relevant:
-
-From: Christoph Hellwig <hch@lst.de>
-Subject: xfs: don't wait for all pending I/O in ->write_inode
-
-If we wait for all pending I/O in ->write_inode we can starve the caller,
-which sine recent changes can also be the flusher thread in kupdate mode.
-
-Fortunately there is no good reason to do the wait, as a blocking caller
-already waited for buffered I/O using filemap_write_and_wait_range, and thus
-we don't have to rely on this, and kupdated doesn't care for us to finish
-the write first, but just wants to snapshot the inode metadata to disk.
-
-Upstream this was fixed in a much more intrusive way by
-
-         xfs: remove i_iocount
-
-and the various patches leading towards it, including changes to the core
-AIO code.  I think this simpler patch is the better version for 3.0-stable.
-
-Signed-off-by: Christoph Hellwig <hch@lst.de>
-
-Index: linux-2.6/fs/xfs/linux-2.6/xfs_super.c
-===================================================================
---- linux-2.6.orig/fs/xfs/linux-2.6/xfs_super.c 2012-03-18 
-09:03:27.583397799 +0100
-+++ linux-2.6/fs/xfs/linux-2.6/xfs_super.c      2012-03-18 
-09:03:45.083398125 +0100
-@@ -892,7 +892,6 @@ xfs_fs_write_inode(
-                  * ->sync_fs call do that for thus, which reduces the 
-number
-                  * of synchronous log foces dramatically.
-                  */
--               xfs_ioend_wait(ip);
-                 error = xfs_log_dirty_inode(ip, NULL, 0);
-                 if (error)
-                         goto out;
