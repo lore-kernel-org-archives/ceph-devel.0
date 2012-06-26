@@ -1,45 +1,35 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] libceph: drop declaration of ceph_con_get()
-Date: Tue, 26 Jun 2012 14:47:41 -0700
-Message-ID: <4FEA2DFD.1060308@inktank.com>
+From: Nick Bartos <nick@pistoncloud.com>
+Subject: Re: Remove unrelated log output from command line utils?
+Date: Tue, 26 Jun 2012 16:17:55 -0700
+Message-ID: <CAPud5_7oG_rHP7VqpgJL6pwCM12S34KJ01J8vYXNnrBCuwMd-g@mail.gmail.com>
+References: <CAPud5_5iOr9sCXYQU9Nr5f-+NDBy-sPkGuc5x-wTETyP_MDtfg@mail.gmail.com>
+	<4FEA1945.4050208@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:59718 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753821Ab2FZVrn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jun 2012 17:47:43 -0400
-Received: by dady13 with SMTP id y13so464133dad.19
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Jun 2012 14:47:43 -0700 (PDT)
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:49725 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753843Ab2FZXR4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jun 2012 19:17:56 -0400
+Received: by pbbrp8 with SMTP id rp8so716556pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jun 2012 16:17:55 -0700 (PDT)
+In-Reply-To: <4FEA1945.4050208@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-For some reason the declaration of ceph_con_get() and
-ceph_con_put() did not get deleted in this commit:
-     d59315ca libceph: drop ceph_con_get/put helpers and nref member
+Thanks!
 
-Clean that up.
-
-Signed-off-by: Alex Elder <elder@inktank.com>
----
-  include/linux/ceph/messenger.h |    2 --
-  1 file changed, 2 deletions(-)
-
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index cb9d38f..478f814 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -244,8 +244,6 @@ extern void ceph_msg_revoke(struct ceph_msg *msg);
-  extern void ceph_msg_revoke_incoming(struct ceph_msg *msg);
-
-  extern void ceph_con_keepalive(struct ceph_connection *con);
--extern struct ceph_connection *ceph_con_get(struct ceph_connection *con);
--extern void ceph_con_put(struct ceph_connection *con);
-
-  extern struct ceph_msg *ceph_msg_new(int type, int front_len, gfp_t flags,
-  				     bool can_fail);
--- 
-1.7.9.5
-
+On Tue, Jun 26, 2012 at 1:19 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> On 06/26/2012 11:53 AM, Nick Bartos wrote:
+>>
+>> I think the stderr output should only be going to the logs, not to an
+>> arbitrary command line utility.
+>>
+>> Is there any way to change this behaviour?
+>
+>
+> Yes, set 'log to stderr = false' in your ceph.conf, or add
+> --no-log-to-stderr to your commands. You can do the same for errors
+> with 'err to stderr = false' and --no-err-to-stderr.
