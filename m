@@ -1,47 +1,51 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: FS / Kernel question choosing the correct kernel version
-Date: Tue, 26 Jun 2012 11:59:49 -0500
-Message-ID: <4FE9EA85.9030809@inktank.com>
-References: <4FE60A65.2030800@profihost.ag> <Pine.LNX.4.64.1206251506070.22491@cobra.newdream.net> <4FE97BE8.6010603@profihost.ag> <4FE9E006.6030404@profihost.ag> <4FE9E360.8050807@inktank.com> <4FE9E6CB.8080803@profihost.ag>
+From: Nick Bartos <nick@pistoncloud.com>
+Subject: Re: How to delete a mds?
+Date: Tue, 26 Jun 2012 10:16:55 -0700
+Message-ID: <CAPud5_7HcZGgg6PXK7Hw9-kmoJ5ew7=09rV5fR_dupNcoAd7Sg@mail.gmail.com>
+References: <CAPud5_4V=7U+OsVy7cyTwW3_dU8cEBhjw1bpEtM75WczyYvCqQ@mail.gmail.com>
+	<Pine.LNX.4.64.1206252114550.21315@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f51.google.com ([209.85.213.51]:40807 "EHLO
-	mail-yw0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758348Ab2FZRAG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jun 2012 13:00:06 -0400
-Received: by yhnn12 with SMTP id n12so176823yhn.10
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Jun 2012 10:00:06 -0700 (PDT)
-In-Reply-To: <4FE9E6CB.8080803@profihost.ag>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:48850 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758499Ab2FZRQ4 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jun 2012 13:16:56 -0400
+Received: by pbbrp8 with SMTP id rp8so339359pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jun 2012 10:16:55 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1206252114550.21315@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "hch@infradead.org >> Christoph Hellwig" <hch@infradead.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 06/26/2012 11:43 AM, Stefan Priebe wrote:
-> Am 26.06.2012 18:29, schrieb Mark Nelson:
->> On 06/26/2012 11:15 AM, Stefan Priebe wrote:
->> Hi Stefan,
+That did it, thanks.
+
+On Mon, Jun 25, 2012 at 9:16 PM, Sage Weil <sage@inktank.com> wrote:
+> On Mon, 25 Jun 2012, Nick Bartos wrote:
+>> We decided to stop using the posix filesystem, and as such have
+>> stopped running ceph-mds (and removed the mds things from ceph.conf)=
+=2E
+>> However we get warnings about the missing mds when running 'ceph
+>> health'.
 >>
->> If you can, it would be really interesting to see the blktrace results
->> during these tests for both xfs and btrfs. blktrace is in the ubuntu
->> repositories and can be run quite easily from the command line during
->> your test.
+>> How do I delete all the mdses? =A0I tried 'ceph mds rm <mdsname>' bu=
+t
+>> that doesn't seem to do any good.
 >
-> Sure any special parameters? I have 4 SSDs per OSD Server.
+> The 'rm' refuses to do it if it is in use. =A0Instead,
 >
-> Or just blktrace -o file?
+> =A0- make sure the ceph-mds daemon(s) aren't running
+> =A0- ceph mds newfs metadata data
 >
-> Stefan
-
-For each device you run it on you'll get one file per core.  There may 
-be some performance impact if you run blktrace on every device per node. 
-  If your data is well distributed, even a trace for one OSD (per test) 
-would be interesting.
-
-so blktrace -o <outfile prefix> -d <device> where device is your first 
-OSD or something.  If you can do it for both btrfs and xfs and maybe run 
-each test for a couple of minutes that might be enough.
-
-Mark
+> That will blow away the old mdsmap (and fs metadata!). =A0Until a new
+> 'first' ceph-mds starts up, ceph health won't complain.
+>
+> sage
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
