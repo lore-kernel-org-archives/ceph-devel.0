@@ -1,34 +1,47 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: reproducable osd crash
-Date: Tue, 26 Jun 2012 18:47:18 +0200
-Message-ID: <4FE9E796.4050000@profihost.ag>
-References: <4FE319DF.3020106@profihost.ag> <B37E1F82-25E3-4ED4-B3E9-59BC2EC44CB6@profihost.ag> <4FE4F806.1080501@inktank.com> <CA+4uBUb9WVk7-htq_qBNF-T_8i4-3KEsJePhTYoAHXuXfyOuKA@mail.gmail.com> <7855C271-3A73-4090-9F5F-2F4FB12C4E73@profihost.ag> <B8C4CA17-911D-4BA4-BE1D-4E81168A4212@inktank.com> <4FE89DB0.1080606@profihost.ag> <4FE8D1BF.3090108@inktank.com> <4FE8D5B5.8050902@profihost.ag> <4FE8FE36.6080001@inktank.com> <7F6C4684-EE9F-419D-B812-DFF1C498C36B@profihost.ag> <0F9BBB6D-F537-4C17-8E05-91931D89199D@profihost.ag> <CADvuQRGS4xCyxbYVPNNPVyc4dZQVgnDXbHcTkKf0ZbscPCjewA@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: FS / Kernel question choosing the correct kernel version
+Date: Tue, 26 Jun 2012 11:59:49 -0500
+Message-ID: <4FE9EA85.9030809@inktank.com>
+References: <4FE60A65.2030800@profihost.ag> <Pine.LNX.4.64.1206251506070.22491@cobra.newdream.net> <4FE97BE8.6010603@profihost.ag> <4FE9E006.6030404@profihost.ag> <4FE9E360.8050807@inktank.com> <4FE9E6CB.8080803@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:51245 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757370Ab2FZQrW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jun 2012 12:47:22 -0400
-In-Reply-To: <CADvuQRGS4xCyxbYVPNNPVyc4dZQVgnDXbHcTkKf0ZbscPCjewA@mail.gmail.com>
+Received: from mail-yw0-f51.google.com ([209.85.213.51]:40807 "EHLO
+	mail-yw0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758348Ab2FZRAG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Jun 2012 13:00:06 -0400
+Received: by yhnn12 with SMTP id n12so176823yhn.10
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Jun 2012 10:00:06 -0700 (PDT)
+In-Reply-To: <4FE9E6CB.8080803@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Dan Mick <dan.mick@inktank.com>, Sam Just <sam.just@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "hch@infradead.org >> Christoph Hellwig" <hch@infradead.org>
 
-Am 26.06.2012 18:05, schrieb Tommi Virtanen:
-> On Mon, Jun 25, 2012 at 10:48 PM, Stefan Priebe <s.priebe@profihost.ag> wrote:
->> Strange just copied /core.hostname and /usr/bin/ceph-osd no idea how this
->> can happen. For building I use the provided Debian scripts.
+On 06/26/2012 11:43 AM, Stefan Priebe wrote:
+> Am 26.06.2012 18:29, schrieb Mark Nelson:
+>> On 06/26/2012 11:15 AM, Stefan Priebe wrote:
+>> Hi Stefan,
+>>
+>> If you can, it would be really interesting to see the blktrace results
+>> during these tests for both xfs and btrfs. blktrace is in the ubuntu
+>> repositories and can be run quite easily from the command line during
+>> your test.
 >
-> Perhaps you upgraded the debs but did not restart the daemons? That
-> would make the on-disk executable with that name not match the
-> in-memory one.
+> Sure any special parameters? I have 4 SSDs per OSD Server.
+>
+> Or just blktrace -o file?
+>
+> Stefan
 
-No, i reboot after each upgrade ;-)
+For each device you run it on you'll get one file per core.  There may 
+be some performance impact if you run blktrace on every device per node. 
+  If your data is well distributed, even a trace for one OSD (per test) 
+would be interesting.
 
-Right now i'm witing for a FS fix xfs or btrfs and i will then reproduce 
-the issue.
+so blktrace -o <outfile prefix> -d <device> where device is your first 
+OSD or something.  If you can do it for both btrfs and xfs and maybe run 
+each test for a couple of minutes that might be enough.
 
-Stefan
+Mark
