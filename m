@@ -1,74 +1,44 @@
-From: Rutger ter Borg <rutger@terborg.net>
-Subject: [rados] Asynchronous operations
-Date: Wed, 27 Jun 2012 09:32:03 +0200
-Message-ID: <jsecti$m2u$1@dough.gmane.org>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: OSD Hardware questions
+Date: Wed, 27 Jun 2012 15:04:12 +0200
+Message-ID: <4FEB04CC.4050008@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:51073 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751903Ab2F0HcR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 27 Jun 2012 03:32:17 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SjmjU-0003aY-7S
-	for ceph-devel@vger.kernel.org; Wed, 27 Jun 2012 09:32:12 +0200
-Received: from 233-250-103-145.static.glaslokaal.nl ([145.103.250.233])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jun 2012 09:32:12 +0200
-Received: from rutger by 233-250-103-145.static.glaslokaal.nl with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Jun 2012 09:32:12 +0200
+Received: from mail.profihost.ag ([85.158.179.208]:59822 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751720Ab2F0NEQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jun 2012 09:04:16 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Hello list,
 
-Dear list,
+i'm still thinking about optimal OSD hardware and while reading through 
+the mailinglist and wiki had some questions.
 
-I'm currently writing a Boost.Asio-like interface to librados.hpp. Most 
-things are working like expected, and some things I couldn't figure out 
-from the available docs and code. I have itemized a couple of questions 
-below.
+I want to use SSD so my idea was to use a fast single socket cpu with 
+8-10 SSD disks per OSD.
 
-* to avoid allocations done by rados, I'm currently using 
-buffer::create_static() for both reads and writes. I suppose this is ok?
+I got the following recommandations through the mailinglist:
+"Dual socket servers will be overkill given the setup you're describing. 
+Our WAG rule of thumb is 1GHz of modern CPU per OSD daemon. You might 
+consider it if you decided you wanted to do an OSD per disk instead 
+(that's a more common configuration, but it requires more CPU and RAM 
+per disk and we don't know yet which is the better choice)."
 
-* suppose you have the following code example
+but in my tests i see a CPU usage of 160% + 15% kworker per OSD Daemon 
+on a 3,6ghz intel xeon CPU. That's far away of 1GHz per OSD. That's 
+around 6,3Ghz per OSD. Is anything wrong here?
 
-boost::asio::io_service ios;
-pool pool( "some pool", ios );
+When i want to use 8-10 SSD Disks i need around 20 cores with 3,6Ghz. 
+But there is no single socket with 20 cores with 3,6Ghz.
 
-std::string some_data( "this is an example string of data" );
-pool.async_write_object_at( "hello", 0, boost::asio::buffer( some_data 
-), &done );
+Or should i consider using a Raid 5 or 6?
 
-ios.run();
+Anything wrong?
 
-with respect to this interface, I have the following questions:
-
-a) the IoCtx's synchronous read() and write() functions return the 
-number of bytes read and written; is there a way to get to this number 
-from AioCompletion? I would like to define the function signature for 
-the callback handler (see 'done' in the example above) something like
-
-void( const boost::system::error_code&, std::size_t )
-
-where the second argument would be the number of bytes transferred.
-
-b) is it possible to cancel outstanding asynchronous operations? I.e., 
-have the possibility to implement something like
-
-pool.cancel();
-
-?
-
-TIA,
-Regards,
-
-Rutger
-
-
+Stefan
 
