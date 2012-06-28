@@ -1,38 +1,32 @@
 From: Stefan Priebe <s.priebe@profihost.ag>
 Subject: Re: OSD Hardware questions
-Date: Thu, 28 Jun 2012 18:00:36 +0200
-Message-ID: <4FEC7FA4.3010307@profihost.ag>
-References: <4FEB04CC.4050008@profihost.ag> <4FEB10DA.7010206@inktank.com> <4FEB2310.9080801@profihost.ag> <CAPYLRzj916kW=KLy3dMTVPJRoNtPMP_Ejz+YAxRUJ5jZc+HeMg@mail.gmail.com> <4FEB26A7.4070507@profihost.ag> <4FEB2E07.6010402@inktank.com> <4FEC5A4E.1090209@profihost.ag> <4FEC6C68.2030307@inktank.com>
+Date: Thu, 28 Jun 2012 18:01:52 +0200
+Message-ID: <4FEC7FF0.2010308@profihost.ag>
+References: <5d5b400b-c2b4-4bce-9231-b412ce1aff03@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:49254 "EHLO
+Received: from mail.profihost.ag ([85.158.179.208]:44578 "EHLO
 	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754050Ab2F1QAi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 12:00:38 -0400
-In-Reply-To: <4FEC6C68.2030307@inktank.com>
+	with ESMTP id S1752356Ab2F1QBy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 12:01:54 -0400
+In-Reply-To: <5d5b400b-c2b4-4bce-9231-b412ce1aff03@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
 
-Am 28.06.2012 16:38, schrieb Mark Nelson:
-> On 06/28/2012 08:21 AM, Stefan Priebe - Profihost AG wrote:
->> While doing sequential writes i see pretty low CPU usage. Random writes
->> is the problem.
->>
->> Stefan
+Am 28.06.2012 17:18, schrieb Alexandre DERUMIER:
+> Hi,
+> maybe it can help, I'm doing same tests that stefan,
+> random write  with 4K with 3 nodes with 5 osds (with 15K drives)
+> fio --filename=[disk] --direct=1 --rw=randwrite --bs=4k --size=100M --numjobs=50 --runtime=30 --group_reporting --name=file1
 >
-> It would be interesting to see where all your CPU time is being spent.
+> I can achieve 5500io/s (disks are not at 100%)
+>
+> cpu is around 30%idle ( 8 cores E5420  @ 2.50GHz)
 
-Correct - what do you need?
-
-> What benchmark are you using to do the random writes?
-in KVM VM:
-export DISK=/dev/vda
-
-fio --filename=$DISK --direct=1 --rw=randwrite --bs=4k --size=200G 
---numjobs=50 --runtime=90 --group_reporting --name=file1
+mine is 25-30% idle? May be this is the limit? So our osds are the problem?
 
 Stefan
