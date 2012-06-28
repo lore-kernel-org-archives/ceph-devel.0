@@ -1,102 +1,44 @@
-From: =?ISO-8859-1?Q?Daniel_God=E1s?= <dgodas@gmail.com>
-Subject: POSIX file lock doesn't get release on process termination
-Date: Thu, 28 Jun 2012 12:49:27 +0100
-Message-ID: <CAA--FSVx08BMSBf5_mcJ0OpW455RWv8z9oL3ymE0H7L=M2LZUA@mail.gmail.com>
-References: <CAA--FSU5cfvPNQ2d-veX3+DnRFO=eyWvDym8Etam_oY8N9WWXw@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Rados faster than KVM block device?
+Date: Thu, 28 Jun 2012 15:10:22 +0200
+Message-ID: <4FEC57BE.9060703@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:48552 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751833Ab2F1Lt2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 07:49:28 -0400
-Received: by dady13 with SMTP id y13so2773401dad.19
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012 04:49:28 -0700 (PDT)
-In-Reply-To: <CAA--FSU5cfvPNQ2d-veX3+DnRFO=eyWvDym8Etam_oY8N9WWXw@mail.gmail.com>
+Received: from mail.profihost.ag ([85.158.179.208]:40342 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755030Ab2F1NK2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 09:10:28 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Hello list,
 
-I obtained a POSIX file lock with the following code:
+my cluster is now pretty stable i'm just wondering about the sequential 
+write values.
 
---- snip ---
+With rados bench command and 16 threads i get totally different values 
+than with KVM and rbd block device.
 
-=2E..
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0std::string x =3D "/tmp/ceph_mount/lock_=
-file";
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 std::ofstream lock_file(x);
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 lock_file.close();
+rados -p kvmpool bench 60 write -t 16:
+pool size 2: Bandwidth (MB/sec):     1137.294
+pool size 3: Bandwidth (MB/sec):     846.983
 
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 // Lock automatically released by the O=
-S when the process dies
+Inside KVM with fio:
 
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (Sync::get_file_lock(x) =3D=3D -1) {
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return false;
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+fio --filename=$DISK --direct=1 --rw=write --bs=4M --size=200G 
+--numjobs=16 --runtime=60 --group_reporting --name=file1:
 
-=2E..
+pool size 2:
+   write: io=32984MB, bw=562046KB/s, iops=137 , runt= 60094msec
+pool size 3:
+   write: io=29124MB, bw=496024KB/s, iops=121 , runt= 60124msec
 
---- snip ---
+Even when i change the pool size to 3 i get with fio 520MB/s.
 
-The code should create the file if it doesnt exist or just open it and
-close it if it does. Then the lock is taken. This is the code for
-get_file_lock:
+Any ideas? Is this expected?
 
----snip---
-
-=A0 =A0 =A0 =A0 static int get_file_lock(const std::string& path,
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bool=
- block =3D false,
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bool=
- exclusive =3D true)
-=A0 =A0 =A0 =A0 {
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int fd, flags;
-
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((fd =3D open(path.c_str(), O_RDONLY=
-)) =3D=3D -1)
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 throw LockingException(=
-path);
-
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 flags =3D (exclusive ? LOCK_EX : LOCK_S=
-H);
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 flags |=3D (block ? 0 : LOCK_NB);
-
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (flock(fd, flags) =3D=3D 0)
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return fd;
-
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 close(fd);
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -1;
-=A0 =A0 =A0 =A0 }
-
----snip---
-
-I never release the lock but I expect the operating system (and ceph)
-to release it when the process terminates as this is normal POSIX
-behaviour. The observed behaviour is that the lock never gets released
-and after the process dies I can do the following:
-
----snip---
-
-dev proc # cat locks
-1: POSIX =A0ADVISORY =A0WRITE 4425 07:00:132 0 EOF
-2: FLOCK =A0ADVISORY =A0WRITE 2906 fd:02:783456 0 EOF
-
----snip---
-
-The lock taken by the process is the second one and the PID is correct
-(it's the PID of the process that took the lock). However the process
-doesn't exist any more, which I can verify with ps.
-
-Is this a bug in CEPH, am I doing something stupid, is it the expected
-behaviour?
-
-Regards,
-Dan
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Greets
+Stefan
