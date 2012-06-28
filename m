@@ -1,50 +1,125 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: OSD Hardware questions
-Date: Thu, 28 Jun 2012 09:38:32 -0500
-Message-ID: <4FEC6C68.2030307@inktank.com>
-References: <4FEB04CC.4050008@profihost.ag> <4FEB10DA.7010206@inktank.com> <4FEB2310.9080801@profihost.ag> <CAPYLRzj916kW=KLy3dMTVPJRoNtPMP_Ejz+YAxRUJ5jZc+HeMg@mail.gmail.com> <4FEB26A7.4070507@profihost.ag> <4FEB2E07.6010402@inktank.com> <4FEC5A4E.1090209@profihost.ag>
+From: "Guan Jun He" <gjhe@suse.com>
+Subject: Re: [PATCH 1/1] prevent the race of incoming work during
+ teardown
+Date: Thu, 28 Jun 2012 08:59:18 -0600
+Message-ID: <4FECE1C60200001600013E00@soto.provo.novell.com>
+References: <Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy>
+ <1340700088-9556-1-git-send-email-gjhe@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:47765 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752403Ab2F1Oiw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 10:38:52 -0400
-Received: by qcro28 with SMTP id o28so1161096qcr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012 07:38:51 -0700 (PDT)
-In-Reply-To: <4FEC5A4E.1090209@profihost.ag>
+Received: from soto.provo.novell.com ([137.65.250.214]:39633 "EHLO
+	soto.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755030Ab2F1PAF convert rfc822-to-8bit (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
+	Thu, 28 Jun 2012 11:00:05 -0400
+In-Reply-To: <1340700088-9556-1-git-send-email-gjhe@suse.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: elder@inktank.com, sage@inktank.com
+Cc: ceph-devel@vger.kernel.org
 
-On 06/28/2012 08:21 AM, Stefan Priebe - Profihost AG wrote:
-> Am 27.06.2012 18:00, schrieb Mark Nelson:
->> On 06/27/2012 10:28 AM, Stefan Priebe wrote:
->>>> Well, as we said, 1GHz/OSD was a WAG (wild-ass guess), but 3.6GHz+/OSD
->>>> is farther outside of that range than I would have expected. It might
->>>> just be a consequence of using SSDs, since they can sustain so much
->>>> more
->>>> throughput.
->>>
->>> Sure it was just so much away from 1Ghz that i wanted to ask.
->>>
->>>> What is the cluster doing when you see those CPU usage numbers?
->>> random write I/O from one KVM. 14k I/Ops with random 4k writes.
->>>
->>> Stefan
->>
->> I think I was seeing about 80-85% CPU utilization with 5 SSD OSDs on our
->> 6-core AMD nodes, but I was just doing sequential writes with rados
->> bench.
->
-> While doing sequential writes i see pretty low CPU usage. Random writes
-> is the problem.
->
-> Stefan
+Hi Sage and Elder,
 
-It would be interesting to see where all your CPU time is being spent. 
-What benchmark are you using to do the random writes?
+  I know you guys are very busy.So thank you very much to take a view to
+the following patch.
 
-Mark
+Your replys would be very appreciated!
+
+best,
+Guanjun
+	
+
+>>> On 6/26/2012 at 04:41 PM, in message
+<1340700088-9556-1-git-send-email-gjhe@suse.com>, Guanjun He
+<heguanbo@gmail.com> wrote: 
+> As you suggested in last e_mail: "The trick here is that I think 
+> we want to set a flag to discard incoming messages and then flush the 
+> workqueue, 
+> do all this other tear down for osd_client etc., and then tear down the 
+> messenger.  
+> I don't think we can tear down the msgr fully before that, though, because 
+> osd_client etc have their fingers in it.  We just need to prevent the race 
+> of incoming work during teardown..."
+> 
+> 	We can not tear down the msgr fully, but we can set flag to discard the 
+> incoming messages. And the following is the description of this patch:
+> 	Add a bool variable 'teardowning' as flag in struct ceph_messenger, init 
+> value
+> is set to false, and set this flag to true in function 
+> ceph_destroy_client(), and add 
+> the condition code in function ceph_data_ready() to test the flag value, if 
+> true, just return.
+> 
+> Signed-off-by: Guanjun He <gjhe@suse.com>
+> ---
+>  include/linux/ceph/messenger.h |    1 +
+>  net/ceph/ceph_common.c         |    4 +++-
+>  net/ceph/messenger.c           |    6 ++++++
+>  3 files changed, 10 insertions(+), 1 deletions(-)
+> 
+> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+> index 2521a95..61bb8e5 100644
+> --- a/include/linux/ceph/messenger.h
+> +++ b/include/linux/ceph/messenger.h
+> @@ -54,6 +54,7 @@ struct ceph_messenger {
+>  	struct ceph_entity_addr my_enc_addr;
+>  
+>  	bool nocrc;
+> +	bool teardowning;
+>  
+>  	/*
+>  	 * the global_seq counts connections i (attempt to) initiate
+> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+> index a776f75..3756afc 100644
+> --- a/net/ceph/ceph_common.c
+> +++ b/net/ceph/ceph_common.c
+> @@ -501,6 +501,9 @@ void ceph_destroy_client(struct ceph_client *client)
+>  {
+>  	dout("destroy_client %p\n", client);
+>  
+> +	client->msgr->teardowning = true;
+> +	ceph_msgr_flush();
+> +
+>  	/* unmount */
+>  	ceph_osdc_stop(&client->osdc);
+>  
+> @@ -509,7 +512,6 @@ void ceph_destroy_client(struct ceph_client *client)
+>  	 * auth module, which is needed to free those connections'
+>  	 * ceph_authorizers.
+>  	 */
+> -	ceph_msgr_flush();
+>  
+>  	ceph_monc_stop(&client->monc);
+>  
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index 524f4e4..fe8881e 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -157,6 +157,10 @@ static void ceph_data_ready(struct sock *sk, int 
+> count_unused)
+>  {
+>  	struct ceph_connection *con = sk->sk_user_data;
+>  
+> +	if (con->msgr->teardowning) {
+> +		return;
+> +	}
+> +
+>  	if (sk->sk_state != TCP_CLOSE_WAIT) {
+>  		dout("ceph_data_ready on %p state = %lu, queueing work\n",
+>  		     con, con->state);
+> @@ -2281,6 +2285,8 @@ struct ceph_messenger *ceph_messenger_create(struct 
+> ceph_entity_addr *myaddr,
+>  	get_random_bytes(&msgr->inst.addr.nonce, sizeof(msgr->inst.addr.nonce));
+>  	encode_my_addr(msgr);
+>  
+> +	msgr->teardowning = false;
+> +
+>  	dout("messenger_create %p\n", msgr);
+>  	return msgr;
+>  }
+
+
+
