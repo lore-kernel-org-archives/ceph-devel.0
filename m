@@ -1,34 +1,38 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
+From: Stefan Priebe <s.priebe@profihost.ag>
 Subject: Re: OSD Hardware questions
-Date: Thu, 28 Jun 2012 09:48:57 -0600
-Message-ID: <4FEC7CE9.9090401@sandia.gov>
-References: <3069bbf7-ebcf-467f-978f-c8026befe064@mailpro>
+Date: Thu, 28 Jun 2012 18:00:36 +0200
+Message-ID: <4FEC7FA4.3010307@profihost.ag>
+References: <4FEB04CC.4050008@profihost.ag> <4FEB10DA.7010206@inktank.com> <4FEB2310.9080801@profihost.ag> <CAPYLRzj916kW=KLy3dMTVPJRoNtPMP_Ejz+YAxRUJ5jZc+HeMg@mail.gmail.com> <4FEB26A7.4070507@profihost.ag> <4FEB2E07.6010402@inktank.com> <4FEC5A4E.1090209@profihost.ag> <4FEC6C68.2030307@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:48395 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751221Ab2F1PtY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 11:49:24 -0400
-In-Reply-To: <3069bbf7-ebcf-467f-978f-c8026befe064@mailpro>
+Received: from mail.profihost.ag ([85.158.179.208]:49254 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754050Ab2F1QAi (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 12:00:38 -0400
+In-Reply-To: <4FEC6C68.2030307@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Sage Weil <sage@inktank.com>, Mark Nelson <mark.nelson@inktank.com>, Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org, Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 06/28/2012 09:45 AM, Alexandre DERUMIER wrote:
->>> >>Definitely. Seeing perf/oprofile/whatever results for the osd under that
->>> >>workload would be very interesting! We need to get perf going in our
->>> >>testing environment...
-> I'm not an expert, but if you give me command line, I'll do it ;)
+Am 28.06.2012 16:38, schrieb Mark Nelson:
+> On 06/28/2012 08:21 AM, Stefan Priebe - Profihost AG wrote:
+>> While doing sequential writes i see pretty low CPU usage. Random writes
+>> is the problem.
+>>
+>> Stefan
+>
+> It would be interesting to see where all your CPU time is being spent.
 
-Thanks to Mark's help, I'm now using:
+Correct - what do you need?
 
-perf record -g -a sleep 10
-perf report --sort symbol --call-graph fractal,5 | more
+> What benchmark are you using to do the random writes?
+in KVM VM:
+export DISK=/dev/vda
 
--- Jim
+fio --filename=$DISK --direct=1 --rw=randwrite --bs=4k --size=200G 
+--numjobs=50 --runtime=90 --group_reporting --name=file1
 
+Stefan
