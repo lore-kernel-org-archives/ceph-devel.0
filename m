@@ -1,37 +1,56 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: OSD Hardware questions
-Date: Thu, 28 Jun 2012 23:25:36 +0200
-Message-ID: <4FECCBD0.3030909@profihost.ag>
-References: <5d5b400b-c2b4-4bce-9231-b412ce1aff03@mailpro> <Pine.LNX.4.64.1206280831590.32016@cobra.newdream.net>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Interesting results
+Date: Thu, 28 Jun 2012 16:37:36 -0600
+Message-ID: <4FECDCB0.7080406@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:38837 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751801Ab2F1VZi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 17:25:38 -0400
-In-Reply-To: <Pine.LNX.4.64.1206280831590.32016@cobra.newdream.net>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:48905 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751012Ab2F1WiI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 18:38:08 -0400
+Received: from interceptor1.sandia.gov (interceptor1.sandia.gov [132.175.109.5])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by sentry-two.sandia.gov (Postfix) with ESMTP id 1EB31D2ECC7
+	for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012 16:38:06 -0600 (MDT)
+Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21]) by interceptor1.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012 16:37:51 -0600
+Received: from mail.sandia.gov (exch04.sandia.gov [134.253.103.4] (may
+ be forged)) by mailgate.sandia.gov (8.14.4/8.14.4) with ESMTP id
+ q5SMbaeT004577 for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012
+ 16:37:36 -0600
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, Mark Nelson <mark.nelson@inktank.com>, Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 28.06.2012 17:33, schrieb Sage Weil:
-> Have you tried adjusting 'osd op threads'?  The default is 2, but bumping
-> that to, say, 8, might give you better concurrency and throughput.
-For me this doesn't change anything. I believe the ceph-osd processes 
-are the problem. I mean i've 8 cores x 3,6Ghz and 4 ceph-osd processses 
-use around 80%.
+Hi,
 
-> "Mark Nelson" <mark.nelson@inktank.com> wrote:
->> It would be interesting to see where all your CPU time is being spent.
->> What benchmark are you using to do the random writes?
->
-> Definitely.  Seeing perf/oprofile/whatever results for the osd under that
-> workload would be very interesting!  We need to get perf going in our
-> testing environment...
-I have it working. But even a call graph of 10s is around 120 000 lines 
-long ?!
+Lots of trouble reports go by on the list - I thought
+it would be useful to report a success.
 
-Stefan
+Using a patch (https://lkml.org/lkml/2012/6/28/446)
+on top of 2.5-rc4 for my OSD servers, the same kernel
+for my Linux clients, and a recent master branch
+tip (git://github.com/ceph/ceph commit 4142ac44b3f),
+I was able to sustain streaming writes from 166 linux
+clients for 2 hours:
+
+On 166 clients:
+   dd conv=fdatasync if=/dev/zero of=/mnt/ceph/stripe-4M/1/zero0.`hostname -s` bs=4k count=65536k
+
+Elapsed time:   7274.55 seconds
+Total data:     45629732.553 MB (43515904 MiB)
+Aggregate rate: 6272.516 MB/s
+
+That kernel patch was critical; without it this test
+runs into trouble after a few minutes because the
+kernel runs into trouble looking for pages to merge
+during page compaction.  Also critical were the ceph
+tunings I mentioned here:
+   http://www.spinics.net/lists/ceph-devel/msg07128.html
+
+-- Jim
+
