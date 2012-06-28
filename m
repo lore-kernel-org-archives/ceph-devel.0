@@ -1,110 +1,140 @@
-From: Sha Zhengju <handai.szj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH 4/7] Use vfs __set_page_dirty interface instead of doing it inside filesystem
-Date: Thu, 28 Jun 2012 19:03:43 +0800
-Message-ID: <1340881423-5703-1-git-send-email-handai.szj@taobao.com>
-References: <1340880885-5427-1-git-send-email-handai.szj@taobao.com>
-Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1340880885-5427-1-git-send-email-handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
-Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org, gthelen-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, yinghan-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mhocko-AlSwsSmVLrQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+From: Mel Gorman <mel@csn.ul.ie>
+Subject: Re: excessive CPU utilization by isolate_freepages?
+Date: Thu, 28 Jun 2012 12:36:19 +0100
+Message-ID: <20120628113619.GR8103@csn.ul.ie>
+References: <4FEB8237.6030402@sandia.gov>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-15
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <4FEB8237.6030402@sandia.gov>
+Sender: owner-linux-mm@kvack.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: Andrew Morton <akpm@linux-foundation.org>, KAMEZAWA Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Rik van Riel <riel@redhat.com>, Minchan Kim <minchan@kernel.org>, linux-mm@kvack.org, linux-kernel@vger.kernel.org, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-From: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+On Wed, Jun 27, 2012 at 03:59:19PM -0600, Jim Schutt wrote:
+> Hi,
+> 
+> I'm running into trouble with systems going unresponsive,
+> and perf suggests it's excessive CPU usage by isolate_freepages().
+> I'm currently testing 3.5-rc4, but I think this problem may have
+> first shown up in 3.4.  I'm only just learning how to use perf,
+> so I only currently have results to report for 3.5-rc4.
+> 
 
-Following we will treat SetPageDirty and dirty page accounting as an integrated
-operation. Filesystems had better use vfs interface directly to avoid those details.
+Out of curiosity, why do you think it showed up in 3.4? It's not
+surprising as such if it did show up there but I'm wondering what you
+are basing it on.
 
-Signed-off-by: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
----
- fs/buffer.c                 |    2 +-
- fs/ceph/addr.c              |   20 ++------------------
- include/linux/buffer_head.h |    2 ++
- 3 files changed, 5 insertions(+), 19 deletions(-)
+It's not a suprise because it's also where reclaim/compaction stopped
+depending on lumpy reclaim. In the past we would have reclaimed more
+pages but now rely on compaction more. It's plassible that for many
+parallel compactions that there would be higher CPU usage now.
 
-diff --git a/fs/buffer.c b/fs/buffer.c
-index e8d96b8..55522dd 100644
---- a/fs/buffer.c
-+++ b/fs/buffer.c
-@@ -610,7 +610,7 @@ EXPORT_SYMBOL(mark_buffer_dirty_inode);
-  * If warn is true, then emit a warning if the page is not uptodate and has
-  * not been truncated.
-  */
--static int __set_page_dirty(struct page *page,
-+int __set_page_dirty(struct page *page,
- 		struct address_space *mapping, int warn)
- {
- 	if (unlikely(!mapping))
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 8b67304..d028fbe 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -5,6 +5,7 @@
- #include <linux/mm.h>
- #include <linux/pagemap.h>
- #include <linux/writeback.h>	/* generic_writepages */
-+#include <linux/buffer_head.h>
- #include <linux/slab.h>
- #include <linux/pagevec.h>
- #include <linux/task_io_accounting_ops.h>
-@@ -73,14 +74,8 @@ static int ceph_set_page_dirty(struct page *page)
- 	int undo = 0;
- 	struct ceph_snap_context *snapc;
- 
--	if (unlikely(!mapping))
--		return !TestSetPageDirty(page);
--
--	if (TestSetPageDirty(page)) {
--		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
--		     mapping->host, page, page->index);
-+	if (!__set_page_dirty(page, mapping, 1))
- 		return 0;
--	}
- 
- 	inode = mapping->host;
- 	ci = ceph_inode(inode);
-@@ -107,14 +102,7 @@ static int ceph_set_page_dirty(struct page *page)
- 	     snapc, snapc->seq, snapc->num_snaps);
- 	spin_unlock(&ci->i_ceph_lock);
- 
--	/* now adjust page */
--	spin_lock_irq(&mapping->tree_lock);
- 	if (page->mapping) {	/* Race with truncate? */
--		WARN_ON_ONCE(!PageUptodate(page));
--		account_page_dirtied(page, page->mapping);
--		radix_tree_tag_set(&mapping->page_tree,
--				page_index(page), PAGECACHE_TAG_DIRTY);
--
- 		/*
- 		 * Reference snap context in page->private.  Also set
- 		 * PagePrivate so that we get invalidatepage callback.
-@@ -126,14 +114,10 @@ static int ceph_set_page_dirty(struct page *page)
- 		undo = 1;
- 	}
- 
--	spin_unlock_irq(&mapping->tree_lock);
--
- 	if (undo)
- 		/* whoops, we failed to dirty the page */
- 		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
- 
--	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
--
- 	BUG_ON(!PageDirty(page));
- 	return 1;
- }
-diff --git a/include/linux/buffer_head.h b/include/linux/buffer_head.h
-index 458f497..0a331a8 100644
---- a/include/linux/buffer_head.h
-+++ b/include/linux/buffer_head.h
-@@ -336,6 +336,8 @@ static inline void lock_buffer(struct buffer_head *bh)
- }
- 
- extern int __set_page_dirty_buffers(struct page *page);
-+extern int __set_page_dirty(struct page *page,
-+		struct address_space *mapping, int warn);
- 
- #else /* CONFIG_BLOCK */
- 
+> <SNIP>
+> 2012-06-27 14:00:03.219-06:00
+> vmstat -w 4 16
+> procs -------------------memory------------------ ---swap-- -----io---- --system-- -----cpu-------
+>  r  b       swpd       free       buff      cache   si   so    bi    bo   in   cs  us sy  id wa st
+> 75  1          0     566988        576   35664800    0    0     2  1355   21    3   1  4  95  0  0
+> 433  1          0     964052        576   35069112    0    0     7 456359 102256 20901   2 98   0  0  0
+> 547  3          0     820116        576   34893932    0    0    57 560507 114878 28115   3 96   0  0  0
+> 806  2          0     606992        576   34848180    0    0   339 309668 101230 21056   2 98   0  0  0
+> 708  1          0     529624        576   34708000    0    0   248 370886 101327 20062   2 97   0  0  0
+> 231  5          0     504772        576   34663880    0    0   305 334824 95045 20407   2 97   1  1  0
+> 158  6          0    1063088        576   33518536    0    0   531 847435 130696 47140   4 92   1  2  0
+> 193  0          0    1449156        576   33035572    0    0   363 371279 94470 18955   2 96   1  1  0
+> 266  6          0    1623512        576   32728164    0    0    77 241114 95730 15483   2 98   0  0  0
+> 243  8          0    1629504        576   32653080    0    0    81 471018 100223 20920   3 96   0  1  0
+> 70 11          0    1342140        576   33084020    0    0   100 925869 139876 56599   6 88   3  3  0
+> 211  7          0    1130316        576   33470432    0    0   290 1008984 150699 74320   6 83   6  5  0
+> 365  3          0     776736        576   34072772    0    0   182 747167 139436 67135   5 88   4  3  0
+> 29  1          0    1528412        576   34110640    0    0    50 612181 137403 77609   4 87   6  3  0
+> 266  5          0    1657688        576   34105696    0    0     3 258307 62879 38508   2 93   3  2  0
+> 1159  2          0    2002256        576   33775476    0    0    19 88554 42112 14230   1 98   0  0  0
+> 
+
+ok, so System CPU usage through the roof.
+
+> 
+> Right around 14:00 I was able to get a "perf -a -g"; here's the
+> beginning of what "perf report --sort symbol --call-graph fractal,5"
+> had to say:
+> 
+> #
+>     64.86%  [k] _raw_spin_lock_irqsave
+>             |
+>             |--97.94%-- isolate_freepages
+>             |          compaction_alloc
+>             |          unmap_and_move
+>             |          migrate_pages
+>             |          compact_zone
+>             |          |
+>             |          |--99.56%-- try_to_compact_pages
+>             |          |          __alloc_pages_direct_compact
+>             |          |          __alloc_pages_slowpath
+>             |          |          __alloc_pages_nodemask
+>             |          |          alloc_pages_vma
+>             |          |          do_huge_pmd_anonymous_page
+>             |          |          handle_mm_fault
+>             |          |          do_page_fault
+>             |          |          page_fault
+>             |          |          |
+>             |          |          |--53.53%-- skb_copy_datagram_iovec
+>             |          |          |          tcp_recvmsg
+>             |          |          |          inet_recvmsg
+>             |          |          |          sock_recvmsg
+>             |          |          |          sys_recvfrom
+>             |          |          |          system_call_fastpath
+>             |          |          |          __recv
+>             |          |          |          |
+>             |          |          |           --100.00%-- (nil)
+>             |          |          |
+>             |          |          |--27.80%-- __pthread_create_2_1
+>             |          |          |          (nil)
+>             |          |          |
+>             |          |           --18.67%-- memcpy
+>             |          |                     |
+>             |          |                     |--57.38%-- 0x50d000005
+>             |          |                     |
+>             |          |                     |--34.52%-- 0x3b300bf271940a35
+>             |          |                     |
+>             |          |                      --8.10%-- 0x1500000000000009
+>             |           --0.44%-- [...]
+>              --2.06%-- [...]
+> 
+
+This looks like lock contention to me on zone->lock which
+isolate_freepages takes and releases frequently. You do not describe the
+exact memory layout but it's likely that there are two very large zones
+with 12 CPUs each. If they all were running compaction they would pound
+zone->lock pretty heavily.
+
+> <SNIP>
+
+The other call traces also look like they are pounding zone->lock
+heavily.
+
+Rik's patch has the potential to reduce contention by virtue of the fact
+that less scanning is required. I'd be interested in hearing how much of
+an impact that patch has so please test that first.
+
+If that approach does not work I'll put together a patch that either
+backs off compaction on zone->lock contention.
+
+> I seem to be able to recreate this issue at will, so please
+> let me know what I can do to help learn what is going on.
+> 
+
+Thanks very much for testing.
+
 -- 
-1.7.1
+Mel Gorman
+SUSE Labs
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
