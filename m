@@ -1,125 +1,121 @@
-From: "Guan Jun He" <gjhe@suse.com>
-Subject: Re: [PATCH 1/1] prevent the race of incoming work during
- teardown
-Date: Thu, 28 Jun 2012 08:59:18 -0600
-Message-ID: <4FECE1C60200001600013E00@soto.provo.novell.com>
-References: <Re: [PATCH] net/ceph/osd_client.c add sem to osdmap destroy>
- <1340700088-9556-1-git-send-email-gjhe@suse.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: POSIX file lock doesn't get release on process termination
+Date: Thu, 28 Jun 2012 08:05:29 -0700
+Message-ID: <9F04F4F9E1BA42B291611579BFB11E54@inktank.com>
+References: <CAA--FSU5cfvPNQ2d-veX3+DnRFO=eyWvDym8Etam_oY8N9WWXw@mail.gmail.com>
+ <CAA--FSVx08BMSBf5_mcJ0OpW455RWv8z9oL3ymE0H7L=M2LZUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soto.provo.novell.com ([137.65.250.214]:39633 "EHLO
-	soto.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755030Ab2F1PAF convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:3:1>);
-	Thu, 28 Jun 2012 11:00:05 -0400
-In-Reply-To: <1340700088-9556-1-git-send-email-gjhe@suse.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:47111 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751733Ab2F1PFc convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 11:05:32 -0400
+Received: by dady13 with SMTP id y13so2994089dad.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012 08:05:32 -0700 (PDT)
+In-Reply-To: <CAA--FSVx08BMSBf5_mcJ0OpW455RWv8z9oL3ymE0H7L=M2LZUA@mail.gmail.com>
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: elder@inktank.com, sage@inktank.com
+To: =?utf-8?Q?Daniel_God=C3=A1s?= <dgodas@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Sage and Elder,
+What versions are you using? This sound familiar, although I think we p=
+reviously fixed it for fcntl locks, which are different than flock lock=
+s in some annoying ways.
+Anyway, I imagine this is a Ceph bug, but have you run this on a non-Ce=
+ph mount on the same system and checked that the behavior is as you exp=
+ect?
 
-  I know you guys are very busy.So thank you very much to take a view to
-the following patch.
 
-Your replys would be very appreciated!
+On Thursday, June 28, 2012 at 4:49 AM, Daniel God=C3=A1s wrote:
 
-best,
-Guanjun
-	
-
->>> On 6/26/2012 at 04:41 PM, in message
-<1340700088-9556-1-git-send-email-gjhe@suse.com>, Guanjun He
-<heguanbo@gmail.com> wrote: 
-> As you suggested in last e_mail: "The trick here is that I think 
-> we want to set a flag to discard incoming messages and then flush the 
-> workqueue, 
-> do all this other tear down for osd_client etc., and then tear down the 
-> messenger.  
-> I don't think we can tear down the msgr fully before that, though, because 
-> osd_client etc have their fingers in it.  We just need to prevent the race 
-> of incoming work during teardown..."
-> 
-> 	We can not tear down the msgr fully, but we can set flag to discard the 
-> incoming messages. And the following is the description of this patch:
-> 	Add a bool variable 'teardowning' as flag in struct ceph_messenger, init 
-> value
-> is set to false, and set this flag to true in function 
-> ceph_destroy_client(), and add 
-> the condition code in function ceph_data_ready() to test the flag value, if 
-> true, just return.
-> 
-> Signed-off-by: Guanjun He <gjhe@suse.com>
-> ---
->  include/linux/ceph/messenger.h |    1 +
->  net/ceph/ceph_common.c         |    4 +++-
->  net/ceph/messenger.c           |    6 ++++++
->  3 files changed, 10 insertions(+), 1 deletions(-)
-> 
-> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 2521a95..61bb8e5 100644
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -54,6 +54,7 @@ struct ceph_messenger {
->  	struct ceph_entity_addr my_enc_addr;
->  
->  	bool nocrc;
-> +	bool teardowning;
->  
->  	/*
->  	 * the global_seq counts connections i (attempt to) initiate
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index a776f75..3756afc 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -501,6 +501,9 @@ void ceph_destroy_client(struct ceph_client *client)
->  {
->  	dout("destroy_client %p\n", client);
->  
-> +	client->msgr->teardowning = true;
-> +	ceph_msgr_flush();
-> +
->  	/* unmount */
->  	ceph_osdc_stop(&client->osdc);
->  
-> @@ -509,7 +512,6 @@ void ceph_destroy_client(struct ceph_client *client)
->  	 * auth module, which is needed to free those connections'
->  	 * ceph_authorizers.
->  	 */
-> -	ceph_msgr_flush();
->  
->  	ceph_monc_stop(&client->monc);
->  
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 524f4e4..fe8881e 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -157,6 +157,10 @@ static void ceph_data_ready(struct sock *sk, int 
-> count_unused)
->  {
->  	struct ceph_connection *con = sk->sk_user_data;
->  
-> +	if (con->msgr->teardowning) {
-> +		return;
-> +	}
-> +
->  	if (sk->sk_state != TCP_CLOSE_WAIT) {
->  		dout("ceph_data_ready on %p state = %lu, queueing work\n",
->  		     con, con->state);
-> @@ -2281,6 +2285,8 @@ struct ceph_messenger *ceph_messenger_create(struct 
-> ceph_entity_addr *myaddr,
->  	get_random_bytes(&msgr->inst.addr.nonce, sizeof(msgr->inst.addr.nonce));
->  	encode_my_addr(msgr);
->  
-> +	msgr->teardowning = false;
-> +
->  	dout("messenger_create %p\n", msgr);
->  	return msgr;
->  }
+> Hi,
+> =20
+> I obtained a POSIX file lock with the following code:
+> =20
+> --- snip ---
+> =20
+> ...
+> std::string x =3D "/tmp/ceph_mount/lock_file";
+> std::ofstream lock_file(x);
+> lock_file.close();
+> =20
+> // Lock automatically released by the OS when the process dies
+> =20
+> if (Sync::get_file_lock(x) =3D=3D -1) {
+> return false;
+> }
+> =20
+> ...
+> =20
+> --- snip ---
+> =20
+> The code should create the file if it doesnt exist or just open it an=
+d
+> close it if it does. Then the lock is taken. This is the code for
+> get_file_lock:
+> =20
+> ---snip---
+> =20
+> static int get_file_lock(const std::string& path,
+> bool block =3D false,
+> bool exclusive =3D true)
+> {
+> int fd, flags;
+> =20
+> if ((fd =3D open(path.c_str(), O_RDONLY)) =3D=3D -1)
+> throw LockingException(path);
+> =20
+> flags =3D (exclusive ? LOCK_EX : LOCK_SH);
+> flags |=3D (block ? 0 : LOCK_NB);
+> =20
+> if (flock(fd, flags) =3D=3D 0)
+> return fd;
+> =20
+> close(fd);
+> return -1;
+> }
+> =20
+> ---snip---
+> =20
+> I never release the lock but I expect the operating system (and ceph)
+> to release it when the process terminates as this is normal POSIX
+> behaviour. The observed behaviour is that the lock never gets release=
+d
+> and after the process dies I can do the following:
+> =20
+> ---snip---
+> =20
+> dev proc # cat locks
+> 1: POSIX ADVISORY WRITE 4425 07:00:132 0 EOF
+> 2: FLOCK ADVISORY WRITE 2906 fd:02:783456 0 EOF
+> =20
+> ---snip---
+> =20
+> The lock taken by the process is the second one and the PID is correc=
+t
+> (it's the PID of the process that took the lock). However the process
+> doesn't exist any more, which I can verify with ps.
+> =20
+> Is this a bug in CEPH, am I doing something stupid, is it the expecte=
+d
+> behaviour?
+> =20
+> Regards,
+> Dan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@=
+vger.kernel.org)
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
 
 
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
