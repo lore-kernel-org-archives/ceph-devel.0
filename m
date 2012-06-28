@@ -1,105 +1,165 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: OSD Hardware questions
-Date: Thu, 28 Jun 2012 17:18:49 +0200 (CEST)
-Message-ID: <5d5b400b-c2b4-4bce-9231-b412ce1aff03@mailpro>
-References: <4FEC6C68.2030307@inktank.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: Re: excessive CPU utilization by isolate_freepages?
+Date: Thu, 28 Jun 2012 09:30:00 -0600
+Message-ID: <4FEC7878.6000906@sandia.gov>
+References: <4FEB8237.6030402@sandia.gov>
+ <20120628113619.GR8103@csn.ul.ie>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:33788 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751128Ab2F1PTN convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 11:19:13 -0400
-In-Reply-To: <4FEC6C68.2030307@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org, Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20120628113619.GR8103@csn.ul.ie>
+Sender: owner-linux-mm@kvack.org
+To: Mel Gorman <mel@csn.ul.ie>
+Cc: Andrew Morton <akpm@linux-foundation.org>, KAMEZAWA Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Rik van Riel <riel@redhat.com>, Minchan Kim <minchan@kernel.org>, linux-mm@kvack.org, linux-kernel@vger.kernel.org, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
-maybe it can help, I'm doing same tests that stefan,=20
-random write  with 4K with 3 nodes with 5 osds (with 15K drives)
-fio --filename=3D[disk] --direct=3D1 --rw=3Drandwrite --bs=3D4k --size=3D=
-100M --numjobs=3D50 --runtime=3D30 --group_reporting --name=3Dfile1=20
+On 06/28/2012 05:36 AM, Mel Gorman wrote:
+> On Wed, Jun 27, 2012 at 03:59:19PM -0600, Jim Schutt wrote:
+>> Hi,
+>>
+>> I'm running into trouble with systems going unresponsive,
+>> and perf suggests it's excessive CPU usage by isolate_freepages().
+>> I'm currently testing 3.5-rc4, but I think this problem may have
+>> first shown up in 3.4.  I'm only just learning how to use perf,
+>> so I only currently have results to report for 3.5-rc4.
+>>
+>
+> Out of curiosity, why do you think it showed up in 3.4? It's not
+> surprising as such if it did show up there but I'm wondering what you
+> are basing it on.
 
-I can achieve 5500io/s (disks are not at 100%)
+If I remember correctly, when I was testing this workload on 3.4 is
+when I first saw hundreds of runable threads being reported by vmstat.
+At that time I couldn't reproduce quite as reliably, and I didn't
+know how to get perf to give me call chains, so I didn't follow up :(
 
-cpu is around 30%idle ( 8 cores E5420  @ 2.50GHz)
+>
+> It's not a suprise because it's also where reclaim/compaction stopped
+> depending on lumpy reclaim. In the past we would have reclaimed more
+> pages but now rely on compaction more. It's plassible that for many
+> parallel compactions that there would be higher CPU usage now.
+>
+>> <SNIP>
+>> 2012-06-27 14:00:03.219-06:00
+>> vmstat -w 4 16
+>> procs -------------------memory------------------ ---swap-- -----io---- --system-- -----cpu-------
+>>   r  b       swpd       free       buff      cache   si   so    bi    bo   in   cs  us sy  id wa st
+>> 75  1          0     566988        576   35664800    0    0     2  1355   21    3   1  4  95  0  0
+>> 433  1          0     964052        576   35069112    0    0     7 456359 102256 20901   2 98   0  0  0
+>> 547  3          0     820116        576   34893932    0    0    57 560507 114878 28115   3 96   0  0  0
+>> 806  2          0     606992        576   34848180    0    0   339 309668 101230 21056   2 98   0  0  0
+>> 708  1          0     529624        576   34708000    0    0   248 370886 101327 20062   2 97   0  0  0
+>> 231  5          0     504772        576   34663880    0    0   305 334824 95045 20407   2 97   1  1  0
+>> 158  6          0    1063088        576   33518536    0    0   531 847435 130696 47140   4 92   1  2  0
+>> 193  0          0    1449156        576   33035572    0    0   363 371279 94470 18955   2 96   1  1  0
+>> 266  6          0    1623512        576   32728164    0    0    77 241114 95730 15483   2 98   0  0  0
+>> 243  8          0    1629504        576   32653080    0    0    81 471018 100223 20920   3 96   0  1  0
+>> 70 11          0    1342140        576   33084020    0    0   100 925869 139876 56599   6 88   3  3  0
+>> 211  7          0    1130316        576   33470432    0    0   290 1008984 150699 74320   6 83   6  5  0
+>> 365  3          0     776736        576   34072772    0    0   182 747167 139436 67135   5 88   4  3  0
+>> 29  1          0    1528412        576   34110640    0    0    50 612181 137403 77609   4 87   6  3  0
+>> 266  5          0    1657688        576   34105696    0    0     3 258307 62879 38508   2 93   3  2  0
+>> 1159  2          0    2002256        576   33775476    0    0    19 88554 42112 14230   1 98   0  0  0
+>>
+>
+> ok, so System CPU usage through the roof.
+>
+>>
+>> Right around 14:00 I was able to get a "perf -a -g"; here's the
+>> beginning of what "perf report --sort symbol --call-graph fractal,5"
+>> had to say:
+>>
+>> #
+>>      64.86%  [k] _raw_spin_lock_irqsave
+>>              |
+>>              |--97.94%-- isolate_freepages
+>>              |          compaction_alloc
+>>              |          unmap_and_move
+>>              |          migrate_pages
+>>              |          compact_zone
+>>              |          |
+>>              |          |--99.56%-- try_to_compact_pages
+>>              |          |          __alloc_pages_direct_compact
+>>              |          |          __alloc_pages_slowpath
+>>              |          |          __alloc_pages_nodemask
+>>              |          |          alloc_pages_vma
+>>              |          |          do_huge_pmd_anonymous_page
+>>              |          |          handle_mm_fault
+>>              |          |          do_page_fault
+>>              |          |          page_fault
+>>              |          |          |
+>>              |          |          |--53.53%-- skb_copy_datagram_iovec
+>>              |          |          |          tcp_recvmsg
+>>              |          |          |          inet_recvmsg
+>>              |          |          |          sock_recvmsg
+>>              |          |          |          sys_recvfrom
+>>              |          |          |          system_call_fastpath
+>>              |          |          |          __recv
+>>              |          |          |          |
+>>              |          |          |           --100.00%-- (nil)
+>>              |          |          |
+>>              |          |          |--27.80%-- __pthread_create_2_1
+>>              |          |          |          (nil)
+>>              |          |          |
+>>              |          |           --18.67%-- memcpy
+>>              |          |                     |
+>>              |          |                     |--57.38%-- 0x50d000005
+>>              |          |                     |
+>>              |          |                     |--34.52%-- 0x3b300bf271940a35
+>>              |          |                     |
+>>              |          |                      --8.10%-- 0x1500000000000009
+>>              |           --0.44%-- [...]
+>>               --2.06%-- [...]
+>>
+>
+> This looks like lock contention to me on zone->lock which
+> isolate_freepages takes and releases frequently. You do not describe the
+> exact memory layout but it's likely that there are two very large zones
+> with 12 CPUs each. If they all were running compaction they would pound
+> zone->lock pretty heavily.
+
+Does this tell you what you need to know?
+If not, let me know what you'd like to see.
+
+# grep -H MemTotal /sys/devices/system/node/node*/meminfo
+/sys/devices/system/node/node0/meminfo:Node 0 MemTotal:       25156644 kB
+/sys/devices/system/node/node1/meminfo:Node 1 MemTotal:       25165824 kB
+
+>
+>> <SNIP>
+>
+> The other call traces also look like they are pounding zone->lock
+> heavily.
+>
+> Rik's patch has the potential to reduce contention by virtue of the fact
+> that less scanning is required. I'd be interested in hearing how much of
+> an impact that patch has so please test that first.
+
+Working on that now....
+
+>
+> If that approach does not work I'll put together a patch that either
+> backs off compaction on zone->lock contention.
+>
+>> I seem to be able to recreate this issue at will, so please
+>> let me know what I can do to help learn what is going on.
+>>
+>
+> Thanks very much for testing.
+>
+
+No problem.  Thanks to you all for jumping on this so quickly.
+
+FWIW, perf rocks!  Thanks to all who've helped make it so great!
+
+-- Jim
 
 
------ Mail original -----=20
-
-De: "Mark Nelson" <mark.nelson@inktank.com>=20
-=C3=80: "Stefan Priebe - Profihost AG" <s.priebe@profihost.ag>=20
-Cc: "Gregory Farnum" <greg@inktank.com>, ceph-devel@vger.kernel.org=20
-Envoy=C3=A9: Jeudi 28 Juin 2012 16:38:32=20
-Objet: Re: OSD Hardware questions=20
-
-On 06/28/2012 08:21 AM, Stefan Priebe - Profihost AG wrote:=20
-> Am 27.06.2012 18:00, schrieb Mark Nelson:=20
->> On 06/27/2012 10:28 AM, Stefan Priebe wrote:=20
->>>> Well, as we said, 1GHz/OSD was a WAG (wild-ass guess), but 3.6GHz+=
-/OSD=20
->>>> is farther outside of that range than I would have expected. It mi=
-ght=20
->>>> just be a consequence of using SSDs, since they can sustain so muc=
-h=20
->>>> more=20
->>>> throughput.=20
->>>=20
->>> Sure it was just so much away from 1Ghz that i wanted to ask.=20
->>>=20
->>>> What is the cluster doing when you see those CPU usage numbers?=20
->>> random write I/O from one KVM. 14k I/Ops with random 4k writes.=20
->>>=20
->>> Stefan=20
->>=20
->> I think I was seeing about 80-85% CPU utilization with 5 SSD OSDs on=
- our=20
->> 6-core AMD nodes, but I was just doing sequential writes with rados=20
->> bench.=20
->=20
-> While doing sequential writes i see pretty low CPU usage. Random writ=
-es=20
-> is the problem.=20
->=20
-> Stefan=20
-
-It would be interesting to see where all your CPU time is being spent.=20
-What benchmark are you using to do the random writes?=20
-
-Mark=20
---=20
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n=20
-the body of a message to majordomo@vger.kernel.org=20
-More majordomo info at http://vger.kernel.org/majordomo-info.html=20
-
-
-
---=20
-
---=20
-
-
-
-=09
-
-Alexandre D e rumier=20
-
-Ing=C3=A9nieur Syst=C3=A8mes et R=C3=A9seaux=20
-
-
-=46ixe : 03 20 68 88 85=20
-
-=46ax : 03 20 68 90 88=20
-
-
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix=20
-12 rue Marivaux 75002 Paris=20
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
