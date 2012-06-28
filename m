@@ -1,140 +1,102 @@
-From: Mel Gorman <mel@csn.ul.ie>
-Subject: Re: excessive CPU utilization by isolate_freepages?
-Date: Thu, 28 Jun 2012 12:36:19 +0100
-Message-ID: <20120628113619.GR8103@csn.ul.ie>
-References: <4FEB8237.6030402@sandia.gov>
+From: =?ISO-8859-1?Q?Daniel_God=E1s?= <dgodas@gmail.com>
+Subject: POSIX file lock doesn't get release on process termination
+Date: Thu, 28 Jun 2012 12:49:27 +0100
+Message-ID: <CAA--FSVx08BMSBf5_mcJ0OpW455RWv8z9oL3ymE0H7L=M2LZUA@mail.gmail.com>
+References: <CAA--FSU5cfvPNQ2d-veX3+DnRFO=eyWvDym8Etam_oY8N9WWXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <4FEB8237.6030402@sandia.gov>
-Sender: owner-linux-mm@kvack.org
-To: Jim Schutt <jaschut@sandia.gov>
-Cc: Andrew Morton <akpm@linux-foundation.org>, KAMEZAWA Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Rik van Riel <riel@redhat.com>, Minchan Kim <minchan@kernel.org>, linux-mm@kvack.org, linux-kernel@vger.kernel.org, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:48552 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751833Ab2F1Lt2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 07:49:28 -0400
+Received: by dady13 with SMTP id y13so2773401dad.19
+        for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012 04:49:28 -0700 (PDT)
+In-Reply-To: <CAA--FSU5cfvPNQ2d-veX3+DnRFO=eyWvDym8Etam_oY8N9WWXw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Wed, Jun 27, 2012 at 03:59:19PM -0600, Jim Schutt wrote:
-> Hi,
-> 
-> I'm running into trouble with systems going unresponsive,
-> and perf suggests it's excessive CPU usage by isolate_freepages().
-> I'm currently testing 3.5-rc4, but I think this problem may have
-> first shown up in 3.4.  I'm only just learning how to use perf,
-> so I only currently have results to report for 3.5-rc4.
-> 
+Hi,
 
-Out of curiosity, why do you think it showed up in 3.4? It's not
-surprising as such if it did show up there but I'm wondering what you
-are basing it on.
+I obtained a POSIX file lock with the following code:
 
-It's not a suprise because it's also where reclaim/compaction stopped
-depending on lumpy reclaim. In the past we would have reclaimed more
-pages but now rely on compaction more. It's plassible that for many
-parallel compactions that there would be higher CPU usage now.
+--- snip ---
 
-> <SNIP>
-> 2012-06-27 14:00:03.219-06:00
-> vmstat -w 4 16
-> procs -------------------memory------------------ ---swap-- -----io---- --system-- -----cpu-------
->  r  b       swpd       free       buff      cache   si   so    bi    bo   in   cs  us sy  id wa st
-> 75  1          0     566988        576   35664800    0    0     2  1355   21    3   1  4  95  0  0
-> 433  1          0     964052        576   35069112    0    0     7 456359 102256 20901   2 98   0  0  0
-> 547  3          0     820116        576   34893932    0    0    57 560507 114878 28115   3 96   0  0  0
-> 806  2          0     606992        576   34848180    0    0   339 309668 101230 21056   2 98   0  0  0
-> 708  1          0     529624        576   34708000    0    0   248 370886 101327 20062   2 97   0  0  0
-> 231  5          0     504772        576   34663880    0    0   305 334824 95045 20407   2 97   1  1  0
-> 158  6          0    1063088        576   33518536    0    0   531 847435 130696 47140   4 92   1  2  0
-> 193  0          0    1449156        576   33035572    0    0   363 371279 94470 18955   2 96   1  1  0
-> 266  6          0    1623512        576   32728164    0    0    77 241114 95730 15483   2 98   0  0  0
-> 243  8          0    1629504        576   32653080    0    0    81 471018 100223 20920   3 96   0  1  0
-> 70 11          0    1342140        576   33084020    0    0   100 925869 139876 56599   6 88   3  3  0
-> 211  7          0    1130316        576   33470432    0    0   290 1008984 150699 74320   6 83   6  5  0
-> 365  3          0     776736        576   34072772    0    0   182 747167 139436 67135   5 88   4  3  0
-> 29  1          0    1528412        576   34110640    0    0    50 612181 137403 77609   4 87   6  3  0
-> 266  5          0    1657688        576   34105696    0    0     3 258307 62879 38508   2 93   3  2  0
-> 1159  2          0    2002256        576   33775476    0    0    19 88554 42112 14230   1 98   0  0  0
-> 
+=2E..
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0std::string x =3D "/tmp/ceph_mount/lock_=
+file";
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 std::ofstream lock_file(x);
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 lock_file.close();
 
-ok, so System CPU usage through the roof.
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 // Lock automatically released by the O=
+S when the process dies
 
-> 
-> Right around 14:00 I was able to get a "perf -a -g"; here's the
-> beginning of what "perf report --sort symbol --call-graph fractal,5"
-> had to say:
-> 
-> #
->     64.86%  [k] _raw_spin_lock_irqsave
->             |
->             |--97.94%-- isolate_freepages
->             |          compaction_alloc
->             |          unmap_and_move
->             |          migrate_pages
->             |          compact_zone
->             |          |
->             |          |--99.56%-- try_to_compact_pages
->             |          |          __alloc_pages_direct_compact
->             |          |          __alloc_pages_slowpath
->             |          |          __alloc_pages_nodemask
->             |          |          alloc_pages_vma
->             |          |          do_huge_pmd_anonymous_page
->             |          |          handle_mm_fault
->             |          |          do_page_fault
->             |          |          page_fault
->             |          |          |
->             |          |          |--53.53%-- skb_copy_datagram_iovec
->             |          |          |          tcp_recvmsg
->             |          |          |          inet_recvmsg
->             |          |          |          sock_recvmsg
->             |          |          |          sys_recvfrom
->             |          |          |          system_call_fastpath
->             |          |          |          __recv
->             |          |          |          |
->             |          |          |           --100.00%-- (nil)
->             |          |          |
->             |          |          |--27.80%-- __pthread_create_2_1
->             |          |          |          (nil)
->             |          |          |
->             |          |           --18.67%-- memcpy
->             |          |                     |
->             |          |                     |--57.38%-- 0x50d000005
->             |          |                     |
->             |          |                     |--34.52%-- 0x3b300bf271940a35
->             |          |                     |
->             |          |                      --8.10%-- 0x1500000000000009
->             |           --0.44%-- [...]
->              --2.06%-- [...]
-> 
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (Sync::get_file_lock(x) =3D=3D -1) {
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return false;
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
 
-This looks like lock contention to me on zone->lock which
-isolate_freepages takes and releases frequently. You do not describe the
-exact memory layout but it's likely that there are two very large zones
-with 12 CPUs each. If they all were running compaction they would pound
-zone->lock pretty heavily.
+=2E..
 
-> <SNIP>
+--- snip ---
 
-The other call traces also look like they are pounding zone->lock
-heavily.
+The code should create the file if it doesnt exist or just open it and
+close it if it does. Then the lock is taken. This is the code for
+get_file_lock:
 
-Rik's patch has the potential to reduce contention by virtue of the fact
-that less scanning is required. I'd be interested in hearing how much of
-an impact that patch has so please test that first.
+---snip---
 
-If that approach does not work I'll put together a patch that either
-backs off compaction on zone->lock contention.
+=A0 =A0 =A0 =A0 static int get_file_lock(const std::string& path,
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bool=
+ block =3D false,
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bool=
+ exclusive =3D true)
+=A0 =A0 =A0 =A0 {
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int fd, flags;
 
-> I seem to be able to recreate this issue at will, so please
-> let me know what I can do to help learn what is going on.
-> 
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((fd =3D open(path.c_str(), O_RDONLY=
+)) =3D=3D -1)
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 throw LockingException(=
+path);
 
-Thanks very much for testing.
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 flags =3D (exclusive ? LOCK_EX : LOCK_S=
+H);
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 flags |=3D (block ? 0 : LOCK_NB);
 
--- 
-Mel Gorman
-SUSE Labs
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (flock(fd, flags) =3D=3D 0)
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return fd;
 
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 close(fd);
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -1;
+=A0 =A0 =A0 =A0 }
+
+---snip---
+
+I never release the lock but I expect the operating system (and ceph)
+to release it when the process terminates as this is normal POSIX
+behaviour. The observed behaviour is that the lock never gets released
+and after the process dies I can do the following:
+
+---snip---
+
+dev proc # cat locks
+1: POSIX =A0ADVISORY =A0WRITE 4425 07:00:132 0 EOF
+2: FLOCK =A0ADVISORY =A0WRITE 2906 fd:02:783456 0 EOF
+
+---snip---
+
+The lock taken by the process is the second one and the PID is correct
+(it's the PID of the process that took the lock). However the process
+doesn't exist any more, which I can verify with ps.
+
+Is this a bug in CEPH, am I doing something stupid, is it the expected
+behaviour?
+
+Regards,
+Dan
 --
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
