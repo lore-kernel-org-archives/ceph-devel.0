@@ -1,235 +1,64 @@
-From: ramu <ramu.freesystems@gmail.com>
-Subject: Re: ceph was didn't stop.
-Date: Thu, 28 Jun 2012 05:05:52 +0000 (UTC)
-Message-ID: <loom.20120628T065725-838@post.gmane.org>
-References: <loom.20120627T061404-977@post.gmane.org> <4FEBA33F.8020700@inktank.com>
+From: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Subject: Re: sync Ceph packaging efforts for Debian/Ubuntu
+Date: Thu, 28 Jun 2012 05:39:15 +0000
+Message-ID: <1340861955.16563.33.camel@julia>
+References: <1339805412.7726.160.camel@julia>
+	 <Pine.LNX.4.64.1206161442230.20239@cobra.newdream.net>
+	 <4FDF0276.8030304@ubuntu.com>
+	 <Pine.LNX.4.64.1206180926100.9362@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:59800 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750789Ab2F1FGK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 28 Jun 2012 01:06:10 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Sk6vd-0007fV-Tp
-	for ceph-devel@vger.kernel.org; Thu, 28 Jun 2012 07:06:06 +0200
-Received: from segment-124-30.sify.net ([segment-124-30.sify.net])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012 07:06:05 +0200
-Received: from ramu.freesystems by segment-124-30.sify.net with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012 07:06:05 +0200
+Received: from mail.barcikacomp.hu ([94.248.160.10]:47522 "EHLO
+	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751152Ab2F1Fj1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 01:39:27 -0400
+In-Reply-To: <Pine.LNX.4.64.1206180926100.9362@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: James Page <james.page@ubuntu.com>, Ben Collins <bcollins@ubuntu.com>, clint@fewbar.com, Ceph Development <ceph-devel@vger.kernel.org>, openstack-devel@lists.alioth.debian.org
 
-Josh Durgin <josh.durgin <at> inktank.com> writes:
+Hi all,
 
-Hi Josh,
-  I tried to stop single osd with /etc/init.d/ceph -a stop osd.0.
-But it was not stop.And I changed" #!/bin/sh" to "#!/bin/sh -x" also,
-this is the one osd process in commandline.
+On Mon, 2012-06-18 at 09:44 -0700, Sage Weil wrote:
+> On Mon, 18 Jun 2012, James Page wrote:
+> > Laszlo - thanks for sending the original email - I'd like to get
+> > everything as closely in-sync as possible between the three packaging
+> > sources as well.
+ It seems I could sync with Ubuntu a bit, but you need to get libs3 and
+sync that with me if appreciated.
 
-=== osd.1 === 
-+ return 0
-+ get_conf pid_file /var/run/ceph/osd.1.pid pid file
-+ var=pid_file
-+ def=/var/run/ceph/osd.1.pid
-+ key=pid file
-+ shift
-+ shift
-+ shift
-+ [ -z  ]
-+ [ 0 -eq 1 ]
-+ /usr/local/bin/ceph-conf -c /etc/ceph/ceph.conf -n osd.1 pid file
-+ eval echo -n /var/run/ceph/osd.1.pid
-+ echo -n /var/run/ceph/osd.1.pid
-+ eval pid_file="/var/run/ceph/osd.1.pid"
-+ pid_file=/var/run/ceph/osd.1.pid
-+ [ -n /var/run/ceph/osd.1.pid ]
-+ dirname /var/run/ceph/osd.1.pid
-+ do_cmd mkdir -p /var/run/ceph
-+ [ -z ssh gamma ]
-+ [ 0 -eq 1 ]
-+ ssh gamma cd /etc/ceph ; ulimit -c unlimited ; mkdir -p /var/run/ceph
-+ get_conf log_dir  log dir
-+ var=log_dir
-+ def=
-+ key=log dir
-+ shift
-+ shift
-+ shift
-+ [ -z  ]
-+ [ 0 -eq 1 ]
-+ /usr/local/bin/ceph-conf -c /etc/ceph/ceph.conf -n osd.1 log dir
-+ eval echo -n 
-+ echo -n
-+ eval log_dir=""
-+ log_dir=
-+ get_conf log_sym_dir  log sym dir
-+ var=log_sym_dir
-+ def=
-+ key=log sym dir
-+ shift
-+ shift
-+ shift
-+ [ -z  ]
-+ [ 0 -eq 1 ]
-+ /usr/local/bin/ceph-conf -c /etc/ceph/ceph.conf -n osd.1 log sym dir
-+ eval echo -n 
-+ echo -n
-+ eval log_sym_dir=""
-+ log_sym_dir=
-+ [ -n  ]
-+ [ -n  ]
-+ [ stop = start ]
-+ binary=/usr/local/bin/ceph-osd
-+ [ stop = start ]
-+ cmd=/usr/local/bin/ceph-osd -i 1
-+ [ gamma = vu-AP480-S ]
-+ + grepecho -v -q alpha  gamma  gamma alpha
- alpha
-+ cur_conf=/tmp/ceph.conf.6982
-+ cmd=/usr/local/bin/ceph-osd -i 1 -c /tmp/ceph.conf.6982
-+ echo osd.1
-+ grep -q ^osd
-+ get_conf osd_data  osd data
-+ var=osd_data
-+ def=
-+ key=osd data
-+ shift
-+ shift
-+ shift
-+ [ -z  ]
-+ [ 0 -eq 1 ]
-+ /usr/local/bin/ceph-conf -c /etc/ceph/ceph.conf -n osd.1 osd data
-+ eval osd_data="/data/osd.1"
-+ osd_data=/data/osd.1
-+ get_conf btrfs_path /data/osd.1 btrfs path
-+ var=btrfs_path
-+ def=/data/osd.1
-+ key=btrfs path
-+ shift
-+ shift
-+ shift
-+ [ -z  ]
-+ [ 0 -eq 1 ]
-+ /usr/local/bin/ceph-conf -c /etc/ceph/ceph.conf -n osd.1 btrfs path
-+ eval echo -n /data/osd.1
-+ echo -n /data/osd.1
-+ eval btrfs_path="/data/osd.1"
-+ btrfs_path=/data/osd.1
-+ get_conf btrfs_devs  btrfs devs
-+ var=btrfs_devs
-+ def=
-+ key=btrfs devs
-+ shift
-+ shift
-+ shift
-+ [ -z  ]
-+ [ 0 -eq 1 ]
-+ /usr/local/bin/ceph-conf -c /etc/ceph/ceph.conf -n osd.1 btrfs devs
-+ eval echo -n 
-+ echo -n
-+ eval btrfs_devs=""
-+ btrfs_devs=
-+ echo
-+ cut -d  -f 1
-+ first_dev=
-+ get_conf lockfile /var/lock/subsys/ceph lock file
-+ var=lockfile
-+ def=/var/lock/subsys/ceph
-+ key=lock file
-+ shift
-+ shift
-+ shift
-+ [ -z  ]
-+ [ 0 -eq 1 ]
-+ /usr/local/bin/ceph-conf -c /etc/ceph/ceph.conf -n osd.1 lock file
-+ eval echo -n /var/lock/subsys/ceph
-+ echo -n /var/lock/subsys/ceph
-+ eval lockfile="/var/lock/subsys/ceph"
-+ lockfile=/var/lock/subsys/ceph
-+ dirname /var/lock/subsys/ceph
-+ lockdir=/var/lock/subsys
-+ [ ! -d /var/lock/subsys ]
-+ lockfile=
-+ get_conf pre_stop  pre stop command
-+ var=pre_stop
-+ def=
-+ key=pre stop command
-+ shift
-+ shift
-+ shift
-+ [ -z  ]
-+ [ 0 -eq 1 ]
-+ /usr/local/bin/ceph-conf -c /etc/ceph/ceph.conf -n osd.1 pre stop command
-+ eval echo -n 
-+ echo -n
-+ eval pre_stop=""
-+ pre_stop=
-+ get_conf post_stop  post stop command
-+ var=post_stop
-+ def=
-+ key=post stop command
-+ shift
-+ shift
-+ shift
-+ [ -z  ]
-+ [ 0 -eq 1 ]
-+ /usr/local/bin/ceph-conf -c /etc/ceph/ceph.conf -n osd.1 post stop command
-+ eval echo -n 
-+ echo -n
-+ eval post_stop=""
-+ post_stop=
-+ [ -n  ]
-+ stop_daemon osd.1 ceph-osd /var/run/ceph/osd.1.pid
-+ name=osd.1
-+ daemon=ceph-osd
-+ pidfile=/var/run/ceph/osd.1.pid
-+ signal=
-+ action=
-+ [ -z  ]
-+ action=Stopping
-+ echo -n Stopping Ceph osd.1 on gamma...
-Stopping Ceph osd.1 on gamma...+ do_cmd while [ 1 ]; do 
-	[ -e /var/run/ceph/osd.1.pid ] || break
-	pid=`cat /var/run/ceph/osd.1.pid`
-	while [ -e /proc/$pid ] && grep -q ceph-osd /proc/$pid/cmdline ; do
-	    cmd="kill  $pid"
-	    echo -n $cmd...
-	    $cmd
-	    sleep 1
-	    continue
-	done
-	break
-    done
-+ [ -z ssh gamma ]
-+ [ 0 -eq 1 ]
-+ ssh gamma cd /etc/ceph ; ulimit -c unlimited ; while [ 1 ]; do 
-	[ -e /var/run/ceph/osd.1.pid ] || break
-	pid=`cat /var/run/ceph/osd.1.pid`
-	while [ -e /proc/$pid ] && grep -q ceph-osd /proc/$pid/cmdline ; do
-	    cmd="kill  $pid"
-	    echo -n $cmd...
-	    $cmd
-	    sleep 1
-	    continue
-	done
-	break
-    done
-+ echo done
-done
-+ [ -n  ]
-+ [ -n  ]
-+ [ 0 -eq 1 ]
-+ exit 0
+> > On 16/06/12 22:50, Sage Weil wrote:
+> > > - Has the leveldb patch been sent upstream?  Once it is committed to 
+> > > the upstream git, we can update ceph to use it; that's nicer than carrying 
+> > > the patch.  However, I thought you needed to link against the existing
+> > > libleveldb1 package... which means we shouldn't do anything on our
+> > > side,
+> > > right?
+ Yes, the leveldb maintainer tries to port it to all architectures. It
+would be better to join efforts on this topic.
+Especially that Ceph is unbuildable on mips, powerpc, s390, s390x and
+sparc architectures (where previously it was built) due to leveldb is
+unbuildable on them. This means Ceph looses a lot of and big users. :(
 
-  
-Thanks,
-Ramu.  
+> > > - That same patch also switched all the Architecture: lines back to 
+> > > linux-any.  Was that intentional?  I just changed them from that last 
+> > > week.
+ Well, mostly. My step that Ceph and later leveldb should be limited to
+the archs where it's buildable is not accepted. Porting is going on for
+leveldb, but I still don't see that it will support all archs for
+Wheezy. Sorry for the extra work it caused.
 
+> Okay, keep us posted! 
+ To ones whom it may concerns, Ceph 0.47.2 is passed the new queue and
+accepted for Wheezy. This means that adding it to OpenStack can start.
+
+> I pushed a new 'debian' branch with those changes; please take a look and 
+> let me know if it loks okay.
+ Will do. Now I've to run.
+
+Regards,
+Laszlo/GCS
 
