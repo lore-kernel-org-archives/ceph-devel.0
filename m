@@ -1,40 +1,38 @@
-From: Minchan Kim <minchan@kernel.org>
+From: David Rientjes <rientjes@google.com>
 Subject: Re: excessive CPU utilization by isolate_freepages?
-Date: Thu, 28 Jun 2012 09:58:42 +0900
-Message-ID: <4FEBAC42.3030800@kernel.org>
-References: <4FEB8237.6030402@sandia.gov> <4FEB9E73.5040709@kernel.org> <4FEBA520.4030205@redhat.com> <alpine.DEB.2.00.1206271745170.9552@chino.kir.corp.google.com>
+Date: Wed, 27 Jun 2012 18:06:59 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1206271803280.10830@chino.kir.corp.google.com>
+References: <4FEB8237.6030402@sandia.gov> <4FEB9E73.5040709@kernel.org> <4FEBA520.4030205@redhat.com> <alpine.DEB.2.00.1206271745170.9552@chino.kir.corp.google.com> <4FEBAC42.3030800@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from LGEMRELSE1Q.lge.com ([156.147.1.111]:58154 "EHLO
-	LGEMRELSE1Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753821Ab2F1A6h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 27 Jun 2012 20:58:37 -0400
-In-Reply-To: <alpine.DEB.2.00.1206271745170.9552@chino.kir.corp.google.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: David Rientjes <rientjes@google.com>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <4FEBAC42.3030800@kernel.org>
+Sender: owner-linux-mm@kvack.org
+To: Minchan Kim <minchan@kernel.org>
 Cc: Rik van Riel <riel@redhat.com>, Jim Schutt <jaschut@sandia.gov>, Andrew Morton <akpm@linux-foundation.org>, Mel Gorman <mel@csn.ul.ie>, KAMEZAWA Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, linux-mm@kvack.org, linux-kernel@vger.kernel.org, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 06/28/2012 09:52 AM, David Rientjes wrote:
+On Thu, 28 Jun 2012, Minchan Kim wrote:
 
-> On Wed, 27 Jun 2012, Rik van Riel wrote:
+> >>> > > https://lkml.org/lkml/2012/6/21/30
+> >> > 
+> > Not sure if Jim is using memcg; if not, then this won't be helpful.
+> > 
 > 
->>> > > I doubt compaction try to migrate continuously although we have no free
->>> > > memory.
->>> > > Could you apply this patch and retest?
->>> > > 
->>> > > https://lkml.org/lkml/2012/6/21/30
->> > 
-> Not sure if Jim is using memcg; if not, then this won't be helpful.
+> 
+> It doesn't related to memcg.
+> if compaction_alloc can't find suitable migration target, it returns NULL.
+> Then, migrate_pages should be exit.
 > 
 
+If isolate_freepages() is going to fail, then this zone should have been 
+skipped when checking for compaction_suitable().  In Jim's perf output, 
+compaction_suitable() returns COMPACT_CONTINUE for a transparent hugepage.  
+Why is zone_watermark_ok(zone, 0 low_wmark + 1024, 0, 0) succeeding if 
+isolate_freepages() is going to fail?
 
-It doesn't related to memcg.
-if compaction_alloc can't find suitable migration target, it returns NULL.
-Then, migrate_pages should be exit.
-
--- 
-Kind regards,
-Minchan Kim
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
