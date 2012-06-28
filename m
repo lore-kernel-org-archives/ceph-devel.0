@@ -1,30 +1,110 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Re: "Radosgw installation and administration" docs
-Date: Thu, 28 Jun 2012 09:50:52 +0200
-Message-ID: <4FEC0CDC.2060105@hastexo.com>
-References: <4FD71854.6060503@hastexo.com> <CAPUexz-nq-rs3CdougTBpiiur__W0royUcaMdYfpfamwkh7jNw@mail.gmail.com> <CAC-hyiEDLJTkDKXLgR64cPE5mcPvWUCs6kCCq+DiRaCtvDEEFQ@mail.gmail.com> <4FD78636.9080607@hastexo.com> <CAC-hyiF5PVR9nzjewG6VjPCGdjAeuio8Gqf9_juZKWRZZ1KpaQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:41519 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756155Ab2F1Hu5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Jun 2012 03:50:57 -0400
-Received: by bkcji2 with SMTP id ji2so1694977bkc.19
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Jun 2012 00:50:55 -0700 (PDT)
-In-Reply-To: <CAC-hyiF5PVR9nzjewG6VjPCGdjAeuio8Gqf9_juZKWRZZ1KpaQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Sha Zhengju <handai.szj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH 4/7] Use vfs __set_page_dirty interface instead of doing it inside filesystem
+Date: Thu, 28 Jun 2012 19:03:43 +0800
+Message-ID: <1340881423-5703-1-git-send-email-handai.szj@taobao.com>
+References: <1340880885-5427-1-git-send-email-handai.szj@taobao.com>
+Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1340880885-5427-1-git-send-email-handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org, gthelen-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, yinghan-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mhocko-AlSwsSmVLrQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Yehuda,
+From: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
 
-Not sure if you've seen this; there's a pull request waiting that
-populates the radosgw admin guide.
+Following we will treat SetPageDirty and dirty page accounting as an integrated
+operation. Filesystems had better use vfs interface directly to avoid those details.
 
-https://github.com/ceph/ceph/pull/15
+Signed-off-by: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+---
+ fs/buffer.c                 |    2 +-
+ fs/ceph/addr.c              |   20 ++------------------
+ include/linux/buffer_head.h |    2 ++
+ 3 files changed, 5 insertions(+), 19 deletions(-)
 
-Cheers,
-Florian
+diff --git a/fs/buffer.c b/fs/buffer.c
+index e8d96b8..55522dd 100644
+--- a/fs/buffer.c
++++ b/fs/buffer.c
+@@ -610,7 +610,7 @@ EXPORT_SYMBOL(mark_buffer_dirty_inode);
+  * If warn is true, then emit a warning if the page is not uptodate and has
+  * not been truncated.
+  */
+-static int __set_page_dirty(struct page *page,
++int __set_page_dirty(struct page *page,
+ 		struct address_space *mapping, int warn)
+ {
+ 	if (unlikely(!mapping))
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 8b67304..d028fbe 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -5,6 +5,7 @@
+ #include <linux/mm.h>
+ #include <linux/pagemap.h>
+ #include <linux/writeback.h>	/* generic_writepages */
++#include <linux/buffer_head.h>
+ #include <linux/slab.h>
+ #include <linux/pagevec.h>
+ #include <linux/task_io_accounting_ops.h>
+@@ -73,14 +74,8 @@ static int ceph_set_page_dirty(struct page *page)
+ 	int undo = 0;
+ 	struct ceph_snap_context *snapc;
+ 
+-	if (unlikely(!mapping))
+-		return !TestSetPageDirty(page);
+-
+-	if (TestSetPageDirty(page)) {
+-		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
+-		     mapping->host, page, page->index);
++	if (!__set_page_dirty(page, mapping, 1))
+ 		return 0;
+-	}
+ 
+ 	inode = mapping->host;
+ 	ci = ceph_inode(inode);
+@@ -107,14 +102,7 @@ static int ceph_set_page_dirty(struct page *page)
+ 	     snapc, snapc->seq, snapc->num_snaps);
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+-	/* now adjust page */
+-	spin_lock_irq(&mapping->tree_lock);
+ 	if (page->mapping) {	/* Race with truncate? */
+-		WARN_ON_ONCE(!PageUptodate(page));
+-		account_page_dirtied(page, page->mapping);
+-		radix_tree_tag_set(&mapping->page_tree,
+-				page_index(page), PAGECACHE_TAG_DIRTY);
+-
+ 		/*
+ 		 * Reference snap context in page->private.  Also set
+ 		 * PagePrivate so that we get invalidatepage callback.
+@@ -126,14 +114,10 @@ static int ceph_set_page_dirty(struct page *page)
+ 		undo = 1;
+ 	}
+ 
+-	spin_unlock_irq(&mapping->tree_lock);
+-
+ 	if (undo)
+ 		/* whoops, we failed to dirty the page */
+ 		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+ 
+-	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
+-
+ 	BUG_ON(!PageDirty(page));
+ 	return 1;
+ }
+diff --git a/include/linux/buffer_head.h b/include/linux/buffer_head.h
+index 458f497..0a331a8 100644
+--- a/include/linux/buffer_head.h
++++ b/include/linux/buffer_head.h
+@@ -336,6 +336,8 @@ static inline void lock_buffer(struct buffer_head *bh)
+ }
+ 
+ extern int __set_page_dirty_buffers(struct page *page);
++extern int __set_page_dirty(struct page *page,
++		struct address_space *mapping, int warn);
+ 
+ #else /* CONFIG_BLOCK */
+ 
+-- 
+1.7.1
