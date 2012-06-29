@@ -1,101 +1,95 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: speedup ceph / scaling / find the bottleneck
-Date: Fri, 29 Jun 2012 08:28:58 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206290819170.30691@cobra.newdream.net>
-References: <4FED8792.1090905@profihost.ag> <4FED964D.3080201@inktank.com>
- <4FEDA777.1060309@profihost.ag>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: RBD support for primary storage in Apache CloudStack
+Date: Fri, 29 Jun 2012 18:01:11 +0200
+Message-ID: <4FEDD147.2090909@widodh.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55352 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932069Ab2F2P3C (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jun 2012 11:29:02 -0400
-In-Reply-To: <4FEDA777.1060309@profihost.ag>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:41860 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932069Ab2F2QBO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jun 2012 12:01:14 -0400
+Received: from [IPv6:2a00:f10:113:0:1161:41d7:bec:8402] (unknown [IPv6:2a00:f10:113:0:1161:41d7:bec:8402])
+	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPA id 3AC83DEB2E
+	for <ceph-devel@vger.kernel.org>; Fri, 29 Jun 2012 18:01:12 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Mark Nelson <mark.nelson@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, 29 Jun 2012, Stefan Priebe - Profihost AG wrote:
-> Am 29.06.2012 13:49, schrieb Mark Nelson:
-> > I'll try to replicate your findings in house.  I've got some other
-> > things I have to do today, but hopefully I can take a look next week. If
-> > I recall correctly, in the other thread you said that sequential writes
-> > are using much less CPU time on your systems?
-> 
-> Random 4k writes: 10% idle
-> Seq 4k writes: !! 99,7% !! idle
-> Seq 4M writes: 90% idle
+Hi,
 
-I take it 'rbd cache = true'?  It sounds like librbd (or the guest file 
-system) is coalescing the sequential writes into big writes.  I'm a bit 
-surprised that the 4k ones have lower CPU utilization, but there are lots 
-of opportunity for noise there, so I wouldn't read too far into it yet.
+I'm cross-posting this to the ceph-devel list since there might be 
+people around here running CloudStack and are interested in this.
 
-> >  Do you see better scaling in that case?
-> 
-> 3 osd nodes:
-> 1 VM:
-> Rand 4k writes: 7000 iops
-> Seq 4k writes: 19900 iops
-> 
-> 2 VMs:
-> Rand 4k writes: 6000 iops each
-> Seq 4k writes: 4000 iops each VM 1
-> Seq 4k writes: 18500 iops each VM 2
-> 
-> 
-> 4 osd nodes:
-> 1 VM:
-> Rand 4k writes: 14400 iops      <------ ????
+After a couple of months worth of work I'm happy to announce that the 
+RBD support for primary storage in CloudStack seems to be reaching a 
+point where it's good enough to be reviewed.
 
-Can you double-check this number?
+If you are planning to test RBD, please do read this e-mail carefully 
+since there are still some catches.
 
-> Seq 4k writes: 19000 iops
-> 
-> 2 VMs:
-> Rand 4k writes: 7000 iops each
-> Seq 4k writes: 18000 iops each
+Although the code inside CloudStack doesn't seem like a lot of code, I 
+had to modify code outside CloudStack to get RBD support working:
 
-With the exception of that one number above, it really sounds like the 
-bottleneck is in the client (VM or librbd+librados) and not in the 
-cluster.  Performance won't improve when you add OSDs if the limiting 
-factor is the clients ability to dispatch/stream/sustatin IOs.  That also 
-seems concistent with the fact that limiting the # of CPUs on the OSDs 
-doesn't affect much.
+1. RBD storage pool support in libvirt. [0] [1]
+2. Fix a couple of bugs in the libvirt-java bindings. [2]
 
-Aboe, with 2 VMs, for instance, your total iops for the cluster doubled 
-(36000 total).  Can you try with 4 VMs and see if it continues to scale in 
-that dimension?  At some point you will start to saturate the OSDs, and at 
-that point adding more OSDs should show aggregate throughput going up.  
+With those issues addressed I could implement RBD inside CloudStack.
 
-I think the typical way to approach this is to first scale the client side 
-independently to get the iops-per-osd figure, then pick a reasonable ratio 
-between the two, then scale both the client and server side proportional 
-to make sure the load distribution and network infrastructure scales 
-properly.
+While doing so I ran into multiple issues inside CloudStack which 
+delayed everything a bit.
 
-sage
+Now, the RBD support for primary storage knows limitations:
+
+- It only works with KVM
+
+- You are NOT able to snapshot RBD volumes. This is due to CloudStack 
+wanting to backup snapshots to the secondary storage and uses 'qemu-img 
+convert' for this. That doesn't work with RBD, but it's also very 
+inefficient.
+
+RBD supports native snapshots inside the Ceph cluster. RBD disks also 
+have the potential to reach very large sizes. Disks of 1TB won't be the 
+exception. It would stress your network heavily. I'm thinking about 
+implementing "internal snapshots", but that is step #2. For now no 
+snapshots.
+
+- You are able create a template from a RBD volume, but creating a new 
+instance with RBD storage from a template is still a hit-and-miss. 
+Working on that one.
+
+Other than these limitations, everything works. You can create instances 
+and attach RBD disks. It also supports cephx authorization, so no 
+problem there!
+
+What do you need to run this patch?
+- A Ceph cluster
+- libvirt with RBD storage pool support (>0.9.12)
+- Modified libvirt-java bindings (jar is in the patch)
+- Qemu with RBD support (>0.14)
+- A extra field "user_info" in the storage pool table, see the SQL 
+change in the patch
+
+You can fetch the code on my Github account [3].
+
+Warning: I'll be rebasing against the master branch regularly, so be 
+aware of git pull not always working nicely.
+
+I'd like to see this code reviewed while I'm working on the latest stuff 
+and getting all the patches upstream in other projects (mainly the 
+libvirt Java bindings).
+
+Any suggestions or comments?
+
+Thank you!
+
+Wido
 
 
-
-> 
-> 
-> 
-> > To figure out where CPU is being used, you could try various options:
-> > oprofile, perf, valgrind, strace.  Each has it's own advantages.
-> > 
-> > Here's how you can create a simple callgraph with perf:
-> > 
-> > http://lwn.net/Articles/340010/
-> 10s perf data output while doing random 4k writes:
-> https://raw.github.com/gist/2c16136faebec381ae35/09e6de68a5461a198430a9ec19dfd5392f276706/gistfile1.txt
-> 
-> Stefan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+[0]: 
+http://libvirt.org/git/?p=libvirt.git;a=commit;h=74951eadef85e2d100c7dc7bd9ae1093fbda722f
+[1]: 
+http://libvirt.org/git/?p=libvirt.git;a=commit;h=122fa379de44a2fd0a6d5fbcb634535d647ada17
+[2]: https://github.com/wido/libvirt-java/commits/cloudstack
+[3]: https://github.com/wido/CloudStack/commits/rbd
