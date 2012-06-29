@@ -1,113 +1,131 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 1/1] client: prevent the race of incoming work during
- teardown
-Date: Thu, 28 Jun 2012 21:24:14 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1206282120370.14996@cobra.newdream.net>
-References: <1340266828-26344-1-git-send-email-gjhe@suse.com>
+From: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 4/7] Use vfs __set_page_dirty interface instead of doing
+ it inside filesystem
+Date: Thu, 28 Jun 2012 22:21:48 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1206282218260.18049@cobra.newdream.net>
+References: <1340880885-5427-1-git-send-email-handai.szj@taobao.com>
+ <1340881423-5703-1-git-send-email-handai.szj@taobao.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44064 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750788Ab2F2EYR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jun 2012 00:24:17 -0400
-In-Reply-To: <1340266828-26344-1-git-send-email-gjhe@suse.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Guanjun He <heguanbo@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Guanjun He <gjhe@suse.com>
+Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1340881423-5703-1-git-send-email-handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sha Zhengju <handai.szj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org, gthelen-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, yinghan-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mhocko-AlSwsSmVLrQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-I take it back; this is pretty straightforward :)
+On Thu, 28 Jun 2012, Sha Zhengju wrote:
 
-On Thu, 21 Jun 2012, Guanjun He wrote:
-
-> 	Add an atomic variable 'teardowning' as flag in struct ceph_messenger,
-> set this flag to 1 in function ceph_destroy_client(), and add the condition code
-> in function ceph_data_ready() to test the flag value, if true(1), just return.
+> From: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
 > 
-> Signed-off-by: Guanjun He <gjhe@suse.com>
+> Following we will treat SetPageDirty and dirty page accounting as an integrated
+> operation. Filesystems had better use vfs interface directly to avoid those details.
+> 
+> Signed-off-by: Sha Zhengju <handai.szj-3b8fjiQLQpfQT0dZR+AlfA@public.gmane.org>
 > ---
->  include/linux/ceph/messenger.h |    1 +
->  net/ceph/ceph_common.c         |    5 +++--
->  net/ceph/messenger.c           |    5 +++++
->  3 files changed, 9 insertions(+), 2 deletions(-)
+>  fs/buffer.c                 |    2 +-
+>  fs/ceph/addr.c              |   20 ++------------------
+>  include/linux/buffer_head.h |    2 ++
+>  3 files changed, 5 insertions(+), 19 deletions(-)
 > 
-> diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-> index 2521a95..70ff3b7 100644
-> --- a/include/linux/ceph/messenger.h
-> +++ b/include/linux/ceph/messenger.h
-> @@ -54,6 +54,7 @@ struct ceph_messenger {
->  	struct ceph_entity_addr my_enc_addr;
->  
->  	bool nocrc;
-> +	atomic_t teardowning;
-
-Can we call this 'stopping'?
-
->  
->  	/*
->  	 * the global_seq counts connections i (attempt to) initiate
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index a776f75..7225e42 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -501,6 +501,9 @@ void ceph_destroy_client(struct ceph_client *client)
+> diff --git a/fs/buffer.c b/fs/buffer.c
+> index e8d96b8..55522dd 100644
+> --- a/fs/buffer.c
+> +++ b/fs/buffer.c
+> @@ -610,7 +610,7 @@ EXPORT_SYMBOL(mark_buffer_dirty_inode);
+>   * If warn is true, then emit a warning if the page is not uptodate and has
+>   * not been truncated.
+>   */
+> -static int __set_page_dirty(struct page *page,
+> +int __set_page_dirty(struct page *page,
+>  		struct address_space *mapping, int warn)
 >  {
->  	dout("destroy_client %p\n", client);
+>  	if (unlikely(!mapping))
+
+This also needs an EXPORT_SYMBOL(__set_page_dirty) to allow ceph to 
+continue to build as a module.
+
+With that fixed, the ceph bits are a welcome cleanup!
+
+Acked-by: Sage Weil <sage-4GqslpFJ+cxBDgjK7y7TUQ@public.gmane.org>
+
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 8b67304..d028fbe 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -5,6 +5,7 @@
+>  #include <linux/mm.h>
+>  #include <linux/pagemap.h>
+>  #include <linux/writeback.h>	/* generic_writepages */
+> +#include <linux/buffer_head.h>
+>  #include <linux/slab.h>
+>  #include <linux/pagevec.h>
+>  #include <linux/task_io_accounting_ops.h>
+> @@ -73,14 +74,8 @@ static int ceph_set_page_dirty(struct page *page)
+>  	int undo = 0;
+>  	struct ceph_snap_context *snapc;
 >  
-> +	atomic_set(&client->msgr->teardowning, 1);
-> +	ceph_msgr_flush();
-> +
-
-There is another patch in the master or testing branch of ceph-client.git 
-htat moves the ceph_msgr_flush() around; can you make sure this patch is 
-rebased against that?  In particular, it should add the atomic set and 
-checks, but not move the flush calls around (which is unrelated).
-
-Otherwise, this looks good to me!  Please resend with those changes and 
-we'll stick it in the tree.
-
-Thanks!
-sage
-
-
-
->  	/* unmount */
->  	ceph_osdc_stop(&client->osdc);
->  
-> @@ -509,8 +512,6 @@ void ceph_destroy_client(struct ceph_client *client)
->  	 * auth module, which is needed to free those connections'
->  	 * ceph_authorizers.
->  	 */
-> -	ceph_msgr_flush();
+> -	if (unlikely(!mapping))
+> -		return !TestSetPageDirty(page);
 > -
->  	ceph_monc_stop(&client->monc);
+> -	if (TestSetPageDirty(page)) {
+> -		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
+> -		     mapping->host, page, page->index);
+> +	if (!__set_page_dirty(page, mapping, 1))
+>  		return 0;
+> -	}
 >  
->  	ceph_debugfs_client_cleanup(client);
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 524f4e4..89a96e7 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -156,6 +156,9 @@ EXPORT_SYMBOL(ceph_msgr_flush);
->  static void ceph_data_ready(struct sock *sk, int count_unused)
->  {
->  	struct ceph_connection *con = sk->sk_user_data;
-> +	if (atomic_read(&con->msgr->teardowning)) {
-> +		return;
-> +	}
+>  	inode = mapping->host;
+>  	ci = ceph_inode(inode);
+> @@ -107,14 +102,7 @@ static int ceph_set_page_dirty(struct page *page)
+>  	     snapc, snapc->seq, snapc->num_snaps);
+>  	spin_unlock(&ci->i_ceph_lock);
 >  
->  	if (sk->sk_state != TCP_CLOSE_WAIT) {
->  		dout("ceph_data_ready on %p state = %lu, queueing work\n",
-> @@ -2281,6 +2284,8 @@ struct ceph_messenger *ceph_messenger_create(struct ceph_entity_addr *myaddr,
->  	get_random_bytes(&msgr->inst.addr.nonce, sizeof(msgr->inst.addr.nonce));
->  	encode_my_addr(msgr);
+> -	/* now adjust page */
+> -	spin_lock_irq(&mapping->tree_lock);
+>  	if (page->mapping) {	/* Race with truncate? */
+> -		WARN_ON_ONCE(!PageUptodate(page));
+> -		account_page_dirtied(page, page->mapping);
+> -		radix_tree_tag_set(&mapping->page_tree,
+> -				page_index(page), PAGECACHE_TAG_DIRTY);
+> -
+>  		/*
+>  		 * Reference snap context in page->private.  Also set
+>  		 * PagePrivate so that we get invalidatepage callback.
+> @@ -126,14 +114,10 @@ static int ceph_set_page_dirty(struct page *page)
+>  		undo = 1;
+>  	}
 >  
-> +	atomic_set(&msgr->teardowning, 0);
-> +
->  	dout("messenger_create %p\n", msgr);
->  	return msgr;
+> -	spin_unlock_irq(&mapping->tree_lock);
+> -
+>  	if (undo)
+>  		/* whoops, we failed to dirty the page */
+>  		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+>  
+> -	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
+> -
+>  	BUG_ON(!PageDirty(page));
+>  	return 1;
 >  }
+> diff --git a/include/linux/buffer_head.h b/include/linux/buffer_head.h
+> index 458f497..0a331a8 100644
+> --- a/include/linux/buffer_head.h
+> +++ b/include/linux/buffer_head.h
+> @@ -336,6 +336,8 @@ static inline void lock_buffer(struct buffer_head *bh)
+>  }
+>  
+>  extern int __set_page_dirty_buffers(struct page *page);
+> +extern int __set_page_dirty(struct page *page,
+> +		struct address_space *mapping, int warn);
+>  
+>  #else /* CONFIG_BLOCK */
+>  
 > -- 
-> 1.7.3.4
+> 1.7.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
