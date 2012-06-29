@@ -1,25 +1,57 @@
-From: Mark Nelson <mark.nelson@inktank.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
 Subject: Re: speedup ceph / scaling / find the bottleneck
-Date: Fri, 29 Jun 2012 06:49:33 -0500
-Message-ID: <4FED964D.3080201@inktank.com>
+Date: Fri, 29 Jun 2012 14:33:39 +0200
+Message-ID: <4FEDA0A3.3050001@profihost.ag>
 References: <4FED8792.1090905@profihost.ag>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:50404 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753754Ab2F2Ltj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jun 2012 07:49:39 -0400
-Received: by yenl2 with SMTP id l2so2586093yen.19
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Jun 2012 04:49:39 -0700 (PDT)
+Received: from mail.profihost.ag ([85.158.179.208]:57488 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752719Ab2F2Mdq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jun 2012 08:33:46 -0400
 In-Reply-To: <4FED8792.1090905@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 6/29/12 5:46 AM, Stefan Priebe - Profihost AG wrote:
+Some more testing / results:
+
+===== lowering CPU cores =====
+1.) disabling CPUs via
+echo 0 >/sys/devices/system/cpu/cpuX/online
+for core 4-7 does not change anything
+
+2.) When only 50% of the CPUs are available each ceph-osd process takes 
+only half of the CPU load they use when all are useable.
+
+3.) Even then iops stay at 14k
+
+===== changing replication level =====
+
+1.) Even changing the replication level from 2 to 1 results in still 14k 
+iops
+
+===== change random ios to sequential ios =====
+
+1.) when i change i do a write test with 4k blocks instead of randwrite 
+i get jumping values from 13k to 30k average is 18k
+
+2.) the interesting thing is here that the ceph-osd processes take just 
+1% CPU load
+
+===== direct io to disk =====
+
+1.) when i directly write to the OSD disk from the system itself i 
+archieve around 25000 iops
+
+2.) As with ceph the load should spread to several disks i should see 
+higher and not lower iops even when the network is involved
+
+Stefan
+
+Am 29.06.2012 12:46, schrieb Stefan Priebe - Profihost AG:
 > Hello list,
 >
 > i've made some further testing and have the problem that ceph doesn't
@@ -41,24 +73,6 @@ On 6/29/12 5:46 AM, Stefan Priebe - Profihost AG wrote:
 >
 > Could somebody recommand me a way to debug this? So we know where all
 > this CPU usage goes?
+>
+> Stefan
 
-Hi Stefan,
-
-I'll try to replicate your findings in house.  I've got some other 
-things I have to do today, but hopefully I can take a look next week. 
-If I recall correctly, in the other thread you said that sequential 
-writes are using much less CPU time on your systems?  Do you see better 
-scaling in that case?
-
-To figure out where CPU is being used, you could try various options: 
-oprofile, perf, valgrind, strace.  Each has it's own advantages.
-
-Here's how you can create a simple callgraph with perf:
-
-http://lwn.net/Articles/340010/
-
-A more general tutorial is here:
-
-https://perf.wiki.kernel.org/index.php/Tutorial
-
-Mark
