@@ -1,95 +1,69 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: RBD support for primary storage in Apache CloudStack
-Date: Fri, 29 Jun 2012 18:01:11 +0200
-Message-ID: <4FEDD147.2090909@widodh.nl>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Designing a cluster guide
+Date: Fri, 29 Jun 2012 11:07:05 -0700
+Message-ID: <CAPYLRzim+GHZe88_YA=1COKqh-A4XkPmUDYYiUyFVaQ2dxCuvA@mail.gmail.com>
+References: <4FABAFE9.5060202@profihost.ag>
+	<4FABC15C.3030500@profihost.ag>
+	<CAPYLRzgTWLcbZHHpVs0j=WZokXfh8CGLcTUF6nkV1CCYiSs1DQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:41860 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932069Ab2F2QBO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jun 2012 12:01:14 -0400
-Received: from [IPv6:2a00:f10:113:0:1161:41d7:bec:8402] (unknown [IPv6:2a00:f10:113:0:1161:41d7:bec:8402])
-	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPA id 3AC83DEB2E
-	for <ceph-devel@vger.kernel.org>; Fri, 29 Jun 2012 18:01:12 +0200 (CEST)
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:64434 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755693Ab2F2SHH convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jun 2012 14:07:07 -0400
+Received: by lbbgm6 with SMTP id gm6so4960050lbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Jun 2012 11:07:05 -0700 (PDT)
+In-Reply-To: <CAPYLRzgTWLcbZHHpVs0j=WZokXfh8CGLcTUF6nkV1CCYiSs1DQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+On Thu, May 17, 2012 at 2:27 PM, Gregory Farnum <greg@inktank.com> wrot=
+e:
+> Sorry this got left for so long...
+>
+> On Thu, May 10, 2012 at 6:23 AM, Stefan Priebe - Profihost AG
+> <s.priebe@profihost.ag> wrote:
+>> Hi,
+>>
+>> the "Designing a cluster guide"
+>> http://wiki.ceph.com/wiki/Designing_a_cluster is pretty good but it
+>> still leaves some questions unanswered.
+>>
+>> It mentions for example "Fast CPU" for the mds system. What does fas=
+t
+>> mean? Just the speed of one core? Or is ceph designed to use multi c=
+ore?
+>> Is multi core or more speed important?
+> Right now, it's primarily the speed of a single core. The MDS is
+> highly threaded but doing most things requires grabbing a big lock.
+> How fast is a qualitative rather than quantitative assessment at this
+> point, though.
+>
+>> The Cluster Design Recommendations mentions to seperate all Daemons =
+on
+>> dedicated machines. Is this also for the MON useful? As they're so
+>> leightweight why not running them on the OSDs?
+> It depends on what your nodes look like, and what sort of cluster
+> you're running. The monitors are pretty lightweight, but they will ad=
+d
+> *some* load. More important is their disk access patterns =97 they ha=
+ve
+> to do a lot of syncs. So if they're sharing a machine with some other
+> daemon you want them to have an independent disk and to be running a
+> new kernel&glibc so that they can use syncfs rather than sync. (The
+> only distribution I know for sure does this is Ubuntu 12.04.)
 
-I'm cross-posting this to the ceph-devel list since there might be 
-people around here running CloudStack and are interested in this.
-
-After a couple of months worth of work I'm happy to announce that the 
-RBD support for primary storage in CloudStack seems to be reaching a 
-point where it's good enough to be reviewed.
-
-If you are planning to test RBD, please do read this e-mail carefully 
-since there are still some catches.
-
-Although the code inside CloudStack doesn't seem like a lot of code, I 
-had to modify code outside CloudStack to get RBD support working:
-
-1. RBD storage pool support in libvirt. [0] [1]
-2. Fix a couple of bugs in the libvirt-java bindings. [2]
-
-With those issues addressed I could implement RBD inside CloudStack.
-
-While doing so I ran into multiple issues inside CloudStack which 
-delayed everything a bit.
-
-Now, the RBD support for primary storage knows limitations:
-
-- It only works with KVM
-
-- You are NOT able to snapshot RBD volumes. This is due to CloudStack 
-wanting to backup snapshots to the secondary storage and uses 'qemu-img 
-convert' for this. That doesn't work with RBD, but it's also very 
-inefficient.
-
-RBD supports native snapshots inside the Ceph cluster. RBD disks also 
-have the potential to reach very large sizes. Disks of 1TB won't be the 
-exception. It would stress your network heavily. I'm thinking about 
-implementing "internal snapshots", but that is step #2. For now no 
-snapshots.
-
-- You are able create a template from a RBD volume, but creating a new 
-instance with RBD storage from a template is still a hit-and-miss. 
-Working on that one.
-
-Other than these limitations, everything works. You can create instances 
-and attach RBD disks. It also supports cephx authorization, so no 
-problem there!
-
-What do you need to run this patch?
-- A Ceph cluster
-- libvirt with RBD storage pool support (>0.9.12)
-- Modified libvirt-java bindings (jar is in the patch)
-- Qemu with RBD support (>0.14)
-- A extra field "user_info" in the storage pool table, see the SQL 
-change in the patch
-
-You can fetch the code on my Github account [3].
-
-Warning: I'll be rebasing against the master branch regularly, so be 
-aware of git pull not always working nicely.
-
-I'd like to see this code reviewed while I'm working on the latest stuff 
-and getting all the patches upstream in other projects (mainly the 
-libvirt Java bindings).
-
-Any suggestions or comments?
-
-Thank you!
-
-Wido
-
-
-[0]: 
-http://libvirt.org/git/?p=libvirt.git;a=commit;h=74951eadef85e2d100c7dc7bd9ae1093fbda722f
-[1]: 
-http://libvirt.org/git/?p=libvirt.git;a=commit;h=122fa379de44a2fd0a6d5fbcb634535d647ada17
-[2]: https://github.com/wido/libvirt-java/commits/cloudstack
-[3]: https://github.com/wido/CloudStack/commits/rbd
+I just had it pointed out to me that I rather overstated the
+importance of syncfs if you were going to do this. The monitor mostly
+does fsync, not sync/syncfs(), so that's not so important. What is
+important is that it has highly seeky disk behavior, so you don't want
+a ceph-osd and ceph-mon daemon to be sharing a disk. :)
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
