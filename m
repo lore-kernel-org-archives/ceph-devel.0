@@ -1,56 +1,48 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Designing a cluster guide
-Date: Fri, 29 Jun 2012 14:11:22 -0700
-Message-ID: <CAPYLRzjiD+2dQ=C=VRbVa=3T4=05LD_WRvj0tJygfpqdZoYJ-g@mail.gmail.com>
-References: <4FABAFE9.5060202@profihost.ag>
-	<4FABC15C.3030500@profihost.ag>
-	<CAPYLRzgTWLcbZHHpVs0j=WZokXfh8CGLcTUF6nkV1CCYiSs1DQ@mail.gmail.com>
-	<CAPYLRzim+GHZe88_YA=1COKqh-A4XkPmUDYYiUyFVaQ2dxCuvA@mail.gmail.com>
-	<CAMsVa3vyJo05M4KkXmYwmRnoPi2V-sjM7SVHrM0ZJJ6JEZdCzA@mail.gmail.com>
-	<CAPYLRzguXka1S_CyQ5q-f9VmhACpkHRZer1_9kuk3LPpfXOMcw@mail.gmail.com>
-	<CAMsVa3vMBh6MoMS1pHc6HzNgJUhLp8Dyr5GzVYE9BKGFye2pBQ@mail.gmail.com>
+From: Brian Edmonds <mornir@gmail.com>
+Subject: Re: ceph performance under xen?
+Date: Fri, 29 Jun 2012 14:14:32 -0700
+Message-ID: <CAMsVa3s8hEMcwPQdkWw=DhBwUU=as6CoKcFeOexPaNDoQ95OAA@mail.gmail.com>
+References: <CAMsVa3t8foWYguozDeFCiHf0jrK6b2+L4pKtU__-G1mTVVHzWg@mail.gmail.com>
+ <CAPYLRzgMAPuTKOeZC78J48V1wCuL_7v-5Aj6YQX2Q=0BgQ5Cuw@mail.gmail.com>
+ <CAMsVa3tJOf0JcY6Maq2SJaor_=e-iMyxsOihuLJNSzTZ23ydtg@mail.gmail.com> <CAPYLRzjoNKEiG3UWxxyRGzpAmCFyGt5RvM9kkGpx8a+hu103EQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:52271 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752445Ab2F2VLY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jun 2012 17:11:24 -0400
-Received: by lbbgm6 with SMTP id gm6so5172114lbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Jun 2012 14:11:23 -0700 (PDT)
-In-Reply-To: <CAMsVa3vMBh6MoMS1pHc6HzNgJUhLp8Dyr5GzVYE9BKGFye2pBQ@mail.gmail.com>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:57143 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752445Ab2F2VOy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Jun 2012 17:14:54 -0400
+Received: by qcro28 with SMTP id o28so1986890qcr.19
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Jun 2012 14:14:53 -0700 (PDT)
+In-Reply-To: <CAPYLRzjoNKEiG3UWxxyRGzpAmCFyGt5RvM9kkGpx8a+hu103EQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brian Edmonds <mornir@gmail.com>
+To: Gregory Farnum <greg@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, Jun 29, 2012 at 1:59 PM, Brian Edmonds <mornir@gmail.com> wrote=
-:
-> On Fri, Jun 29, 2012 at 11:50 AM, Gregory Farnum <greg@inktank.com> w=
-rote:
->> If you lose a journal, you lose the OSD.
->
-> Really? =A0Everything? =A0Not just recent commits? =A0I would have ho=
-ped it
-> would just come back up in an old state. =A0Replication should have
-> already been taking care of regaining redundancy for the stuff that
-> was on it, particularly the newest stuff that wouldn't return with it
-> and say "Hi, I'm back."
->
-> I suppose it makes the design easier though. =3D)
+On Fri, Jun 29, 2012 at 2:06 PM, Gregory Farnum <greg@inktank.com> wrot=
+e:
+> Okay, there's two things I'd do here. First, create a cluster that
+> only has one MDS =97=A0the multi-MDS system is significantly less sta=
+ble.
 
-Well, actually this depends on the filesystem you're using. With
-btrfs, the OSD will roll back to a consistent state, but you don't
-know how out-of-date that state is. (Practically speaking, it's pretty
-new, but if you were doing any writes it is going to be data loss.)
-With xfs/ext4/other, the OSD can't create consistency points the same
-way it can with btrfs, and so the loss of a journal means that it
-can't repair itself.
+Ok, will do.
 
-Sorry for not mentioning the distinction earlier; I didn't think we'd
-implemented the rollback on btrfs. :)
--Greg
+> Second, you've got 3 monitors doing frequent fsyncs, and 4 OSDs doing
+> frequent syncs, which are all funneling into a single disk. That's
+> going to go poorly no matter what you're doing. ;) Try doing a smalle=
+r
+> cluster with just one monitor, one or two OSDs, and one MDS.
+
+Oh, I missed that part.  The disks on the dom0 are actually logical
+volumes on top of a (software) RAID5 with four physical disks.  That
+may, of course, not be a better situation. =3D)
+
+In any case, I'll rebuild the current four machines into one MON, one
+MDS and two OSDs and see how that goes.  Thanks for the advice.
+
+Brian.
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
