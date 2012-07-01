@@ -1,79 +1,58 @@
-From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Subject: Re: Ceph and KVM live migration
-Date: Sun, 01 Jul 2012 12:51:09 +0930
-Message-ID: <4FEFC225.5080204@bashkirtsev.com>
-References: <4FEF9CF1.6030008@bashkirtsev.com> <4FEFA53F.4020503@inktank.com> <4FEFB2D6.6010603@bashkirtsev.com> <4FEFB5EC.5090202@inktank.com>
+From: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Subject: Ceph status for Wheezy
+Date: Sun, 01 Jul 2012 05:56:50 +0000
+Message-ID: <1341122210.10000.46.camel@julia>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:42492 "EHLO
-	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754723Ab2GADW0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 30 Jun 2012 23:22:26 -0400
-In-Reply-To: <4FEFB5EC.5090202@inktank.com>
+Received: from mail.barcikacomp.hu ([94.248.160.10]:59954 "EHLO
+	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751144Ab2GAF5A (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Jul 2012 01:57:00 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 01/07/12 11:59, Josh Durgin wrote:
-> On 06/30/2012 07:15 PM, Vladimir Bashkirtsev wrote:
->> On 01/07/12 10:47, Josh Durgin wrote:
->>> On 06/30/2012 05:42 PM, Vladimir Bashkirtsev wrote:
->>>> Dear all,
->>>>
->>>> Currently I testing KVMs running on ceph and particularly testing 
->>>> recent
->>>> cache feature. Performance is of course vastly improved but still have
->>>> occasional KVM hold ups - not sure who is at blame ceph of KVM. But I
->>>> will deal with it later. Right now I've got myself a question which I
->>>> could not get answered myself: if I do live migration of KVM while 
->>>> there
->>>> some uncommitted data in ceph cache will this cache be committed prior
->>>> cut-over to another host? Reading through the list I've got an
->>>> impression that it may be left uncommitted and thus it may cause data
->>>> corruption. I just would like a simple confirmation if code which
->>>> commits cache on cut-over to new host does exist and no data 
->>>> corruption
->>>> due to RBD cache+live migration should happen.
->>>>
->>>> Regards,
->>>> Vladimir
->>>
->>> QEMU does a flush on all the disks when it stops the guest on the
->>> original host, so there will be no uncommitted data in the cache.
->>>
->>> Josh
->> Thank you for quick and precise answer. Now when I actually attempted to
->> live migrate ceph based VM I get:
->>
->> Unable to migrate guest: Invalid relative path
->> 'rbd/mail.logics.net.au:rbd_cache=true': Invalid argument
->>
->> I guess KVM does not like having :rbd_cache=true (migration works
->> without it). I know that it is most likely KVM problem but still decided
->> to ask here in case if you know about it. Any ideas how to fix it?
->>
->> Regards,
->> Vladimir
->
-> Is the destination librbd older and not supporting the cache option?
->
-> Migrating with rbd_cache=true and other options specified like that
-> worked in my testing.
->
-> Josh
-Both installations are the same:
-qemu 1.0.17
-ceph 0.47.3
-libvirt 0.9.12
+Hi Sage,
 
-I have googled around and found that if I call migration with --unsafe 
-option then it should go. And indeed: it works. Apparently this check 
-introduced in libvirt 0.9.12 . Did quick downgrade to libvirt 0.9.11 and 
-no problems migrating.
+As previously noted, using leveldb caused some trouble with Ceph could
+be included in Wheezy or not.
+I've proposed that the supported architectures should be limited in Ceph
+and leveldb to the ones the latter supports. I got a release critical
+bugreport[1] that it should be reversed. Alessio Treglia, the leveldb
+maintainer in Debian wrote the following:
+"I'm going to test leveldb on powerpc and then I'll report my results
+to upstream.
+Hence I cannot promise it will be ready in time for Wheezy, of course
+I'll upload a patch as soon as a fix becomes available.".
 
-Regards,
-Vladimir
+Upstream was asked[2], noted that it fails on big-endian architectures,
+but no answer until now.
+
+Then, as it was previously announced, the freeze of Wheezy started some
+hours ago[3].
+
+Soon, after that Julien Cristau, one of our Release Assistant noted
+about Ceph doesn't build on all architectures due to leveldb:
+"Unless this gets fixed we'll have to remove ceph from wheezy.  Which
+means qemu and qemu-kvm need to drop their build-deps on ceph packages.
+They can always be re-added if/when leveldb/ceph are fixed.".
+
+It seems everything is up to leveldb upstream/maintainer now. It is
+fixed in time on big-endian machines or the package will be limited to
+little-endian machines as I wanted to do with Ceph.
+
+But please look into the reason why Ceph fails to build on ia64[4].
+Also, how 0.48 goes? Will it contain big differences to 0.47.2? As you
+can read, even 0.47.2 is in question for Wheezy. But would you propose
+0.48 for inclusion when it's released?
+
+Fingers crossed. Regards,
+Laszlo/GCS
+[1] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=677626
+[2] http://code.google.com/p/leveldb/issues/detail?id=84
+[3] https://lists.debian.org/debian-devel-announce/2012/06/msg00009.html
+[4] https://buildd.debian.org/status/fetch.php?pkg=ceph&arch=ia64&ver=0.47.2-1&stamp=1340802492
 
