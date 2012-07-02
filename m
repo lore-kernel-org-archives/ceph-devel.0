@@ -1,84 +1,137 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: iostat show constants write to osd disk with writeahead journal,
-  normal behaviour ?
-Date: Mon, 2 Jul 2012 14:02:13 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1207021358591.24205@cobra.newdream.net>
-References: <4FDF4641.4070405@inktank.com> <2709e9e7-eed5-49c4-b7d2-9b0c7b0b9c3c@mailpro>
- <CAPYLRzh5BCeHfSZ+gfcrShRiT2JErYbZiy5Xwj=103XYUr_ajQ@mail.gmail.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: Ceph status for Wheezy
+Date: Mon, 2 Jul 2012 14:13:15 -0700
+Message-ID: <CAC-hyiFto=rtR+2A-z=id4SC1npLneR7qvPAZEBEzkE=UZba6g@mail.gmail.com>
+References: <1341122210.10000.46.camel@julia>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33519 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932092Ab2GBVCR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 17:02:17 -0400
-In-Reply-To: <CAPYLRzh5BCeHfSZ+gfcrShRiT2JErYbZiy5Xwj=103XYUr_ajQ@mail.gmail.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:63955 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755553Ab2GBVNR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 17:13:17 -0400
+Received: by bkwj10 with SMTP id j10so1107354bkw.19
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Jul 2012 14:13:16 -0700 (PDT)
+In-Reply-To: <1341122210.10000.46.camel@julia>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org
+To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Cc: Sage Weil <sage@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 2 Jul 2012, Gregory Farnum wrote:
-> On Tue, Jun 19, 2012 at 12:09 AM, Alexandre DERUMIER
-> <aderumier@odiso.com> wrote:
-> > Hi, more infos, I have active filestore debug = 20, min interval 29 and max interval 30.
-> >
-> > I see sync_entry each 30s, so it seem work as expected.
-> >
-> > cat ceph-osd.0.log |grep sync_entry
-> > 2012-06-19 07:56:00.084622 7fd09233b700 20 filestore(/srv/osd.0) sync_entry woke after 26.550294
-> > 2012-06-19 07:56:00.084641 7fd09233b700 20 filestore(/srv/osd.0) sync_entry waiting for another 2.449706 to reach min interval 29.000000
-> > 2012-06-19 07:56:02.534432 7fd09233b700 15 filestore(/srv/osd.0) sync_entry committing 18717 sync_epoch 5
-> > 2012-06-19 07:56:02.534481 7fd09233b700 15 filestore(/srv/osd.0) sync_entry doing a full sync (syncfs(2) if possible)
-> > 2012-06-19 07:56:02.963302 7fd09233b700 10 filestore(/srv/osd.0) sync_entry commit took 0.428878, interval was 29.428974
-> > 2012-06-19 07:56:02.963332 7fd09233b700 15 filestore(/srv/osd.0) sync_entry committed to op_seq 18717
-> > 2012-06-19 07:56:02.963341 7fd09233b700 20 filestore(/srv/osd.0) sync_entry waiting for max_interval 30.000000
-> > 2012-06-19 07:56:12.066002 7fd09233b700 20 filestore(/srv/osd.0) sync_entry woke after 9.102662
-> > 2012-06-19 07:56:12.066024 7fd09233b700 20 filestore(/srv/osd.0) sync_entry waiting for another 19.897338 to reach min interval 29.000000
-> > 2012-06-19 07:56:31.963460 7fd09233b700 15 filestore(/srv/osd.0) sync_entry committing 18935 sync_epoch 6
-> > 2012-06-19 07:56:31.963510 7fd09233b700 15 filestore(/srv/osd.0) sync_entry doing a full sync (syncfs(2) if possible)
-> > 2012-06-19 07:56:32.279737 7fd09233b700 10 filestore(/srv/osd.0) sync_entry commit took 0.316285, interval was 29.316396
-> > 2012-06-19 07:56:32.279778 7fd09233b700 15 filestore(/srv/osd.0) sync_entry committed to op_seq 18935
-> > 2012-06-19 07:56:32.279786 7fd09233b700 20 filestore(/srv/osd.0) sync_entry waiting for max_interval 30.000000
-> > 2012-06-19 07:56:44.837731 7fd09233b700 20 filestore(/srv/osd.0) sync_entry woke after 12.557945
-> > 2012-06-19 07:56:44.837757 7fd09233b700 20 filestore(/srv/osd.0) sync_entry waiting for another 16.442055 to reach min interval 29.000000
-> > 2012-06-19 07:57:01.279894 7fd09233b700 15 filestore(/srv/osd.0) sync_entry committing 19125 sync_epoch 7
-> > 2012-06-19 07:57:01.279939 7fd09233b700 15 filestore(/srv/osd.0) sync_entry doing a full sync (syncfs(2) if possible)
-> > 2012-06-19 07:57:01.558240 7fd09233b700 10 filestore(/srv/osd.0) sync_entry commit took 0.278354, interval was 29.278455
-> > 2012-06-19 07:57:01.558282 7fd09233b700 15 filestore(/srv/osd.0) sync_entry committed to op_seq 19125
-> > 2012-06-19 07:57:01.558291 7fd09233b700 20 filestore(/srv/osd.0) sync_entry waiting for max_interval 30.000000
-> > 2012-06-19 07:57:31.558394 7fd09233b700 20 filestore(/srv/osd.0) sync_entry woke after 30.000104
-> > 2012-06-19 07:57:31.558414 7fd09233b700 20 filestore(/srv/osd.0) sync_entry waiting for max_interval 30.000000
-> >
-> >
-> > But during all the time of the bench, I have flusher_entry logs.
-> > What is exactly flush_entry vs sync_entry?
-> 
-> flush_entry is doing sync_file_range, which sends the data to the disk
-> but doesn't flush disk caches, or do a whole host of other things that
-> are needed to maintain integrity. The idea is that we don't want the
-> filesystem to store up thirty seconds worth of writes and then sync
-> them out on command, but rather to continuously do writes to disk.
-> sync_file_range is the best tool we have for accomplishing that.
-> 
-> However, you could try turning it off and seeing if your performance
-> improves. :) Set filestore_sync_flush and filestore_flusher to false
-> in your config file.
+On Sat, Jun 30, 2012 at 10:56 PM, Laszlo Boszormenyi (GCS)
+<gcs@debian.hu> wrote:
+> Hi Sage,
+>
+> As previously noted, using leveldb caused some trouble with Ceph could
+> be included in Wheezy or not.
+> I've proposed that the supported architectures should be limited in Ceph
+> and leveldb to the ones the latter supports. I got a release critical
+> bugreport[1] that it should be reversed. Alessio Treglia, the leveldb
+> maintainer in Debian wrote the following:
+> "I'm going to test leveldb on powerpc and then I'll report my results
+> to upstream.
+> Hence I cannot promise it will be ready in time for Wheezy, of course
+> I'll upload a patch as soon as a fix becomes available.".
+>
+> Upstream was asked[2], noted that it fails on big-endian architectures,
+> but no answer until now.
+>
+> Then, as it was previously announced, the freeze of Wheezy started some
+> hours ago[3].
+>
+> Soon, after that Julien Cristau, one of our Release Assistant noted
+> about Ceph doesn't build on all architectures due to leveldb:
+> "Unless this gets fixed we'll have to remove ceph from wheezy.  Which
+> means qemu and qemu-kvm need to drop their build-deps on ceph packages.
+> They can always be re-added if/when leveldb/ceph are fixed.".
+>
+> It seems everything is up to leveldb upstream/maintainer now. It is
+> fixed in time on big-endian machines or the package will be limited to
+> little-endian machines as I wanted to do with Ceph.
+>
+> But please look into the reason why Ceph fails to build on ia64[4].
+> Also, how 0.48 goes? Will it contain big differences to 0.47.2? As you
+> can read, even 0.47.2 is in question for Wheezy. But would you propose
+> 0.48 for inclusion when it's released?
+>
+> Fingers crossed. Regards,
+> Laszlo/GCS
+> [1] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=677626
+> [2] http://code.google.com/p/leveldb/issues/detail?id=84
+> [3] https://lists.debian.org/debian-devel-announce/2012/06/msg00009.html
+> [4] https://buildd.debian.org/status/fetch.php?pkg=ceph&arch=ia64&ver=0.47.2-1&stamp=1340802492
+>
 
-One alternative is to let the kernel do this.  If you adjust the VM 
-tunables with something like
 
-	echo 10000000 > /proc/sys/vm/dirty_background_bytes
+I looked into why leveldb fails to build on big endian, and the reason
+seems quite trivial. The bloom_test unitest passes different input due
+to endianity, and the result is not as expected due to statistical
+difference of the input; there are more false positive. I played with
+it a bit, and when transforming the input to little endian it passed.
+I also got the same failure on a little endian machine when I
+transformed it to big endian. There are two solutions, one is to bump
+up the expected false positives to a higher number (e.g., 3% instead
+of 2%):
 
-and set
+diff --git a/util/bloom_test.cc b/util/bloom_test.cc
+index 4a6ea1b..61323af 100644
+--- a/util/bloom_test.cc
++++ b/util/bloom_test.cc
+@@ -139,7 +139,7 @@ TEST(BloomTest, VaryingLengths) {
+       fprintf(stderr, "False positives: %5.2f%% @ length = %6d ;
+bytes = %6d\n",
+               rate*100.0, length, static_cast<int>(FilterSize()));
+     }
+-    ASSERT_LE(rate, 0.02);   // Must not be over 2%
++    ASSERT_LE(rate, 0.03);   // Must not be over 2%
+     if (rate > 0.0125) mediocre_filters++;  // Allowed, but not too often
+     else good_filters++;
+   }
 
-	filestore flusher = false
 
-that will rely on the kernel to keep the amount of dirty data small.  This 
-affects the entire host, though, so keep in mind that it will affect other 
-processes and all mounted file systems.  Conceptually, this is what we are 
-trying to accomplish with the flushing stuff, but it's hard to do from a 
-user process.  Maybe the new cgroups stuff will make some of this 
-easier... I haven't been following it very closely.
 
-sage
+Another option is to transform data to little endian:
+
+
+diff --git a/util/bloom_test.cc b/util/bloom_test.cc
+index 4a6ea1b..6de7acc 100644
+--- a/util/bloom_test.cc
++++ b/util/bloom_test.cc
+@@ -5,6 +5,7 @@
+ #include "leveldb/filter_policy.h"
+
+ #include "util/logging.h"
++#include "util/coding.h"
+ #include "util/testharness.h"
+ #include "util/testutil.h"
+
+@@ -12,8 +13,22 @@ namespace leveldb {
+
+ static const int kVerbose = 1;
+
++static inline void EncodeFixed(char *buf, int32_t val)
++{
++    EncodeFixed32(buf, val);
++}
++
++static inline void EncodeFixed(char *buf, int64_t val)
++{
++    EncodeFixed64(buf, val);
++}
++
+ static Slice Key(int i, char* buffer) {
+-  memcpy(buffer, &i, sizeof(i));
++  if (port::kLittleEndian) {
++    memcpy(buffer, &i, sizeof(i));
++  } else {
++    EncodeFixed(buffer, i);
++  }
+   return Slice(buffer, sizeof(i));
+ }
+
+
+I also had some issues with other tests, but all those problems
+appeared to be due to the buggy std atomic implementation on older
+gcc.
+
+Yehuda
