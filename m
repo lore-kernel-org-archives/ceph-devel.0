@@ -1,75 +1,31 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
 Subject: Re: Interesting results
-Date: Mon, 2 Jul 2012 08:04:48 -0600
-Message-ID: <4FF1AA80.4070009@sandia.gov>
-References: <4FECDCB0.7080406@sandia.gov>
- <4FF0AB99.4060103@profihost.ag>
+Date: Mon, 02 Jul 2012 16:07:52 +0200
+Message-ID: <4FF1AB38.8050508@profihost.ag>
+References: <4FECDCB0.7080406@sandia.gov> <4FF0AB99.4060103@profihost.ag> <4FF1AA80.4070009@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:35841 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750838Ab2GBOFI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 10:05:08 -0400
-In-Reply-To: <4FF0AB99.4060103@profihost.ag>
+Received: from mail.profihost.ag ([85.158.179.208]:37594 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750838Ab2GBOHz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 10:07:55 -0400
+In-Reply-To: <4FF1AA80.4070009@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
+To: Jim Schutt <jaschut@sandia.gov>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 07/01/2012 01:57 PM, Stefan Priebe wrote:
-> thanks for sharing. Which btrfs mount options did you use?
-
-  -o noatime
-
-is all I use.
-
--- Jim
-
+Am 02.07.2012 16:04, schrieb Jim Schutt:
+> On 07/01/2012 01:57 PM, Stefan Priebe wrote:
+>> thanks for sharing. Which btrfs mount options did you use?
 >
-> Am 29.06.2012 00:37, schrieb Jim Schutt:
->> Hi,
->>
->> Lots of trouble reports go by on the list - I thought
->> it would be useful to report a success.
->>
->> Using a patch (https://lkml.org/lkml/2012/6/28/446)
->> on top of 2.5-rc4 for my OSD servers, the same kernel
->> for my Linux clients, and a recent master branch
->> tip (git://github.com/ceph/ceph commit 4142ac44b3f),
->> I was able to sustain streaming writes from 166 linux
->> clients for 2 hours:
->>
->> On 166 clients:
->> dd conv=fdatasync if=/dev/zero
->> of=/mnt/ceph/stripe-4M/1/zero0.`hostname -s` bs=4k count=65536k
->>
->> Elapsed time: 7274.55 seconds
->> Total data: 45629732.553 MB (43515904 MiB)
->> Aggregate rate: 6272.516 MB/s
->>
->> That kernel patch was critical; without it this test
->> runs into trouble after a few minutes because the
->> kernel runs into trouble looking for pages to merge
->> during page compaction. Also critical were the ceph
->> tunings I mentioned here:
->> http://www.spinics.net/lists/ceph-devel/msg07128.html
->>
->> -- Jim
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>   -o noatime
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
->
->
+> is all I use.
 
+Thanks. Have you ever measured random I/O performance? Or is sequential 
+all you need?
 
+Stefan
