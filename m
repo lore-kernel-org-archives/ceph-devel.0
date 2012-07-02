@@ -1,95 +1,94 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Qemu fails to open RBD image when auth_supported is not set to
- 'none'
-Date: Mon, 02 Jul 2012 21:21:18 +0200
-Message-ID: <4FF1F4AE.4080907@widodh.nl>
-References: <4FE881A1.5070504@widodh.nl> <4FE8879B.7020103@widodh.nl>
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: speedup ceph / scaling / find the bottleneck
+Date: Mon, 02 Jul 2012 21:22:30 +0200
+Message-ID: <4FF1F4F6.4030403@profihost.ag>
+References: <59beaaec-5f12-4fb2-9c03-69f41849e89e@mailpro> <4FF13BEB.8080906@profihost.ag> <CAPYLRzinbjLOhNJeYRq99gu9bLom6jkZOh5Z+taSDf0DGJ_ACw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:38526 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752434Ab2GBTVU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 15:21:20 -0400
-Received: from [IPv6:2a00:f10:11c:ab:51fe:1b50:6b5a:76ad] (unknown [IPv6:2a00:f10:11c:ab:51fe:1b50:6b5a:76ad])
-	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPA id 463BF761DD
-	for <ceph-devel@vger.kernel.org>; Mon,  2 Jul 2012 21:21:18 +0200 (CEST)
-In-Reply-To: <4FE8879B.7020103@widodh.nl>
+Received: from mail.profihost.ag ([85.158.179.208]:46306 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751752Ab2GBTWd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 15:22:33 -0400
+In-Reply-To: <CAPYLRzinbjLOhNJeYRq99gu9bLom6jkZOh5Z+taSDf0DGJ_ACw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
 
+Am 02.07.2012 18:51, schrieb Gregory Farnum:
+> On Sun, Jul 1, 2012 at 11:12 PM, Stefan Priebe - Profihost AG
+> <s.priebe@profihost.ag> wrote:
+>> @sage / mark
+>> How does the aggregation work? Does it work 4MB blockwise or target =
+node
+>> based?
+> Aggregation is based on the 4MB blocks, and if you've got caching
+> enabled then it's also not going to flush them out to disk very often
+> if you're continuously updating the block =97 I don't remember all th=
+e
+> conditions, but essentially, you'll run into dirty limits and it will
+> asynchronously flush out the data based on a combination of how old i=
+t
+> is, and how long it's been since some version of it was stable on
+> disk.
+Is there any way to check if rbd caching works correctly? For me the I/=
+O=20
+values do not change if i switch writeback on or of and it also doesn't=
+=20
+matter how large i set the cache size.
 
+=2E..
 
-On 06/25/2012 05:45 PM, Wido den Hollander wrote:
-> On 06/25/2012 05:20 PM, Wido den Hollander wrote:
->> Hi,
+>> Ceph:
+>> 2 VMs:
+>>    write: io=3D2234MB, bw=3D25405KB/s, iops=3D6351, runt=3D 90041mse=
+c
+>>    read : io=3D4760MB, bw=3D54156KB/s, iops=3D13538, runt=3D 90007ms=
+ec
+>>    write: io=3D56372MB, bw=3D638402KB/s, iops=3D155, runt=3D 90421ms=
+ec
+>>    read : io=3D86572MB, bw=3D981225KB/s, iops=3D239, runt=3D 90346ms=
+ec
 >>
->> I just tried to start a VM with libvirt with the following disk:
->>
->> <disk type='network' device='disk'>
->>    <driver name='qemu' type='raw' cache='none'/>
->>    <source protocol='rbd'
->> name='rbd/8489c04f-aab8-4796-a22a-ebaa7be247a7'>
->>      <host name='31.25.XX.XX' port='6789'/>
->>    </source>
->>    <target dev='vda' bus='virtio'/>
->> </disk>
->>
->> That fails with: "Operation not supported"
->>
->> I tried qemu-img:
->>
->> qemu-img info
->> rbd:rbd/8489c04f-aab8-4796-a22a-ebaa7be247a7:mon_host=31.25.XX.XX\\:6789
->>
->> Same result.
->>
->> I then tried:
->>
->> qemu-img info
->> rbd:rbd/8489c04f-aab8-4796-a22a-ebaa7be247a7:mon_host=31.25.XX.XX\\:6789:auth_supported=none
->>
->>
->>
->> And that worked :)
->>
->> This host does not have a local ceph.conf, all the parameters have to
->> come from the command line.
->>
->> I know that recently auth_supported defaults to "cephx", but that now
->> break the libvirt integration since it doesn't set auth_supported to
->> explicitly none when no auth section is present.
->>
->> Should this be something that gets fixed in librados or in libvirt?
+>>    write: io=3D2222MB, bw=3D25275KB/s, iops=3D6318, runt=3D 90011mse=
+c
+>>    read : io=3D4747MB, bw=3D54000KB/s, iops=3D13500, runt=3D 90008ms=
+ec
+>>    write: io=3D55300MB, bw=3D626733KB/s, iops=3D153, runt=3D 90353ms=
+ec
+>>    read : io=3D84992MB, bw=3D965283KB/s, iops=3D235, runt=3D 90162ms=
+ec
 >
-> Thought about it, this is something in libvirt :)
->
->>
->> If it's libvirt, I'll write a patch for it :)
->
-> Just did so, very simple patch:
-> https://www.redhat.com/archives/libvir-list/2012-June/msg01119.html
+> I can't quite tell what's going on here, can you describe the test in
+> more detail?
 
-libvirt 0.9.13 just got out. The good news is that the RBD storage pool 
-is in this release, but the patch above did not make it in time.
+I've network booted my VM and then run the following command:
+export DISK=3D/dev/vda; (fio --filename=3D$DISK --direct=3D1 --rw=3Dran=
+dwrite=20
+--bs=3D4k --size=3D200G --numjobs=3D50 --runtime=3D90 --group_reporting=
+=20
+--name=3Dfile1;fio --filename=3D$DISK --direct=3D1 --rw=3Drandread --bs=
+=3D4k=20
+--size=3D200G --numjobs=3D50 --runtime=3D90 --group_reporting --name=3D=
+file1;fio=20
+--filename=3D$DISK --direct=3D1 --rw=3Dwrite --bs=3D4M --size=3D200G --=
+numjobs=3D50=20
+--runtime=3D90 --group_reporting --name=3Dfile1;fio --filename=3D$DISK=20
+--direct=3D1 --rw=3Dread --bs=3D4M --size=3D200G --numjobs=3D50 --runti=
+me=3D90=20
+--group_reporting --name=3Dfile1 )|egrep " read| write"
 
-We'll have to wait for 0.9.14 to get that one in.
+- write random 4k I/O
+- read random 4k I/O
+- write seq 4M I/O
+- read seq 4M I/O
 
->
-> Wido
->
->>
->> Wido
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Stefan
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
