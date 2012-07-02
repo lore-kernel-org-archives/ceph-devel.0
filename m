@@ -1,38 +1,36 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: btrfs big metadata
-Date: Mon, 02 Jul 2012 19:40:09 +0200
-Message-ID: <4FF1DCF9.6050604@profihost.ag>
-References: <4FF1461D.9060304@profihost.ag> <CAPYLRzjDHf7m3BujRPw=BB_XHqrRqshgHjRetSqrb-EPF4GgXg@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: kernel BUG at fs/ceph/caps.c:1969!
+Date: Mon, 2 Jul 2012 11:01:57 -0700
+Message-ID: <CAPYLRziC9exdjKdfxX=4EzepGf_bd6+OZPOp0o6PGZk1uZT-ow@mail.gmail.com>
+References: <CANExM-OT7Ri0fXkq74DAf4hvPRUdfunNjPSV9cxg7nYsZwSJOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:42026 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752687Ab2GBRkO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 13:40:14 -0400
-In-Reply-To: <CAPYLRzjDHf7m3BujRPw=BB_XHqrRqshgHjRetSqrb-EPF4GgXg@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:44671 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753967Ab2GBSB6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 14:01:58 -0400
+Received: by lbbgm6 with SMTP id gm6so7967321lbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Jul 2012 11:01:57 -0700 (PDT)
+In-Reply-To: <CANExM-OT7Ri0fXkq74DAf4hvPRUdfunNjPSV9cxg7nYsZwSJOw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Henry C Chang <henry.cy.chang@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Am 02.07.2012 18:42, schrieb Gregory Farnum:
-> On Sun, Jul 1, 2012 at 11:56 PM, Stefan Priebe - Profihost AG
-> <s.priebe@profihost.ag> wrote:
->> Hello list,
->>
->> i found several people who use big metadata -n 64k -l 64k for ceph. But i
->> haven't found any ceph doc or info why to use this?
->>
->> What's the reason to use big metadata feature with ceph?
+This call trace doesn't look familiar to me, but 2.6.38 is pretty old
+and I know there have been a number of kernel fixes for when servers
+change lately. I'd recommend trying out a newer kernel and seeing if
+you can reproduce the problem. :)
+-Greg
+
+On Sun, Jul 1, 2012 at 9:17 AM, Henry C Chang <henry.cy.chang@gmail.com> wrote:
+> Hi list,
 >
-> One of the big problems users have had with Ceph-on-btrfs is that
-> Ceph's usage patterns cause btrfs to dramatically fragment its
-> metadata. Big metadata blocks reduce this fragmentation to a level
-> where some users find it faster than xfs (which it previously wasn't).
-
-Thanks!
-
-Stefan
-
+> I got this kernel BUG (see attached image file) when I stopped the
+> active mds and the standby one took over. Since my client is on Ubuntu
+> natty (2.6.38), I'd like to know if this bug has been fixed in the
+> latest kernel or anyone has seen this before?
+>
+> Thanks,
+> Henry
