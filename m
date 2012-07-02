@@ -1,106 +1,146 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: speedup ceph / scaling / find the bottleneck
-Date: Mon, 02 Jul 2012 13:30:19 -0700
-Message-ID: <4FF204DB.80709@inktank.com>
-References: <59beaaec-5f12-4fb2-9c03-69f41849e89e@mailpro> <4FF13BEB.8080906@profihost.ag> <CAPYLRzinbjLOhNJeYRq99gu9bLom6jkZOh5Z+taSDf0DGJ_ACw@mail.gmail.com> <4FF1F4F6.4030403@profihost.ag>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] ceph.spec.in: Change license of base package to GPL and
+ use SPDX format
+Date: Mon, 2 Jul 2012 13:51:46 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207021349590.24205@cobra.newdream.net>
+References: <4FF1F183.60507@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:34534 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932104Ab2GBUdJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 16:33:09 -0400
-Received: by pbbrp8 with SMTP id rp8so8010765pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Jul 2012 13:33:09 -0700 (PDT)
-In-Reply-To: <4FF1F4F6.4030403@profihost.ag>
+Received: from cobra.newdream.net ([66.33.216.30]:43295 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755467Ab2GBUvt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 16:51:49 -0400
+In-Reply-To: <4FF1F183.60507@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe <s.priebe@profihost.ag>
-Cc: Gregory Farnum <greg@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
+To: Holger Macht <hmacht@suse.de>
+Cc: ceph-devel@vger.kernel.org
 
-On 07/02/2012 12:22 PM, Stefan Priebe wrote:
-> Am 02.07.2012 18:51, schrieb Gregory Farnum:
->> On Sun, Jul 1, 2012 at 11:12 PM, Stefan Priebe - Profihost AG
->> <s.priebe@profihost.ag> wrote:
->>> @sage / mark
->>> How does the aggregation work? Does it work 4MB blockwise or target=
- node
->>> based?
->> Aggregation is based on the 4MB blocks, and if you've got caching
->> enabled then it's also not going to flush them out to disk very ofte=
-n
->> if you're continuously updating the block =97 I don't remember all t=
-he
->> conditions, but essentially, you'll run into dirty limits and it wil=
-l
->> asynchronously flush out the data based on a combination of how old =
-it
->> is, and how long it's been since some version of it was stable on
->> disk.
-> Is there any way to check if rbd caching works correctly? For me the =
-I/O
-> values do not change if i switch writeback on or of and it also doesn=
-'t
-> matter how large i set the cache size.
->
-> ...
+Applied, thanks!
 
-If you add admin_socket=3D/path/to/admin_socket for your client running
-qemu (in that client's ceph.conf section or manually in the qemu
-command line) you can check that caching is enabled:
+I think the mtab.c should eventually move to ceph-fs-common to mirror the 
+debian package structure (mount.ceph, cephfs tool).  It's probably not 
+worth replacing fiemap.cc, though, until someone actually makes a plugin 
+interface and wants to link to the ceph-osd binary that uses it.
 
-ceph --admin-daemon /path/to/admin_socket show config | grep rbd_cache
+sage
 
-And see statistics it generates (look for cache) with:
 
-ceph --admin-daemon /path/to/admin_socket perfcounters_dump
+On Mon, 2 Jul 2012, Holger Macht wrote:
 
-Josh
-
->>> Ceph:
->>> 2 VMs:
->>> write: io=3D2234MB, bw=3D25405KB/s, iops=3D6351, runt=3D 90041msec
->>> read : io=3D4760MB, bw=3D54156KB/s, iops=3D13538, runt=3D 90007msec
->>> write: io=3D56372MB, bw=3D638402KB/s, iops=3D155, runt=3D 90421msec
->>> read : io=3D86572MB, bw=3D981225KB/s, iops=3D239, runt=3D 90346msec
->>>
->>> write: io=3D2222MB, bw=3D25275KB/s, iops=3D6318, runt=3D 90011msec
->>> read : io=3D4747MB, bw=3D54000KB/s, iops=3D13500, runt=3D 90008msec
->>> write: io=3D55300MB, bw=3D626733KB/s, iops=3D153, runt=3D 90353msec
->>> read : io=3D84992MB, bw=3D965283KB/s, iops=3D235, runt=3D 90162msec
->>
->> I can't quite tell what's going on here, can you describe the test i=
-n
->> more detail?
->
-> I've network booted my VM and then run the following command:
-> export DISK=3D/dev/vda; (fio --filename=3D$DISK --direct=3D1 --rw=3Dr=
-andwrite
-> --bs=3D4k --size=3D200G --numjobs=3D50 --runtime=3D90 --group_reporti=
-ng
-> --name=3Dfile1;fio --filename=3D$DISK --direct=3D1 --rw=3Drandread --=
-bs=3D4k
-> --size=3D200G --numjobs=3D50 --runtime=3D90 --group_reporting --name=3D=
-file1;fio
-> --filename=3D$DISK --direct=3D1 --rw=3Dwrite --bs=3D4M --size=3D200G =
---numjobs=3D50
-> --runtime=3D90 --group_reporting --name=3Dfile1;fio --filename=3D$DIS=
-K
-> --direct=3D1 --rw=3Dread --bs=3D4M --size=3D200G --numjobs=3D50 --run=
-time=3D90
-> --group_reporting --name=3Dfile1 )|egrep " read| write"
->
-> - write random 4k I/O
-> - read random 4k I/O
-> - write seq 4M I/O
-> - read seq 4M I/O
->
-> Stefan
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> LGPLv2 in spec file is not correct, because some of the included
+> packages/binaries are GPLv2. For example:
+> 
+>  src/mount/mtab.c     -> package ceph, binary mount.ceph
+>  src/common/fiemap.cc -> package ceph, binary rbd
+> 
+> Also use SPDX format (http://www.spdx.org/licenses) for the sub-package
+> licenses.
+> 
+> Signed-off-by: Holger Macht <hmacht@suse.de>
+> ---
+>  ceph.spec.in |   18 ++++++++++--------
+>  1 file changed, 10 insertions(+), 8 deletions(-)
+> 
+> diff --git a/ceph.spec.in b/ceph.spec.in
+> index 461bd1f..d80cb46 100644
+> --- a/ceph.spec.in
+> +++ b/ceph.spec.in
+> @@ -17,7 +17,7 @@ Name:		ceph
+>  Version:	@VERSION@
+>  Release:	6%{?dist}
+>  Summary:	User space components of the Ceph file system
+> -License:	LGPLv2
+> +License:	GPL-2.0
+>  Group:		System Environment/Base
+>  URL:		http://ceph.com/
+>  Source0:	http://ceph.com/download/%{name}-%{version}.tar.bz2
+> @@ -73,6 +73,7 @@ performance, reliability, and scalability.
+>  %package fuse
+>  Summary:	Ceph fuse-based client
+>  Group:		System Environment/Base
+> +License:	LGPL-2.0
+>  Requires:	%{name} = %{version}-%{release}
+>  BuildRequires:	fuse-devel
+>  %description fuse
+> @@ -81,7 +82,7 @@ FUSE based client for Ceph distributed network file system
+>  %package devel
+>  Summary:	Ceph headers
+>  Group:		Development/Libraries
+> -License:	LGPLv2
+> +License:	LGPL-2.0
+>  Requires:	%{name} = %{version}-%{release}
+>  Requires:	librados2 = %{version}
+>  Requires:	librbd1 = %{version}
+> @@ -93,6 +94,7 @@ that use Ceph.
+>  %package radosgw
+>  Summary:	Rados REST gateway
+>  Group:		Development/Libraries
+> +License:	LGPL-2.0
+>  Requires:	librados2 = %{version}-%{release}
+>  %if 0%{defined suse_version}
+>  BuildRequires:	libexpat-devel
+> @@ -111,7 +113,7 @@ conjunction with any FastCGI capable web server.
+>  %package obsync
+>  Summary:	synchronize data between cloud object storage providers or a local directory
+>  Group:		Productivity/Networking/Other
+> -License:	LGPLv2
+> +License:	LGPL-2.0
+>  Requires:	python, python-boto
+>  %description obsync
+>  obsync is a tool to synchronize objects between cloud object
+> @@ -122,7 +124,7 @@ Ceph RADOS cluster, or a local directory.
+>  %package resource-agents
+>  Summary:	OCF-compliant resource agents for Ceph daemons
+>  Group:		System Environment/Base
+> -License:	LGPLv2
+> +License:	LGPL-2.0
+>  Requires:	%{name} = %{version}
+>  Requires:	resource-agents
+>  %description resource-agents
+> @@ -134,7 +136,7 @@ managers such as Pacemaker.
+>  %package -n librados2
+>  Summary:	RADOS distributed object store client library
+>  Group:		System Environment/Libraries
+> -License:	LGPLv2
+> +License:	LGPL-2.0
+>  %description -n librados2
+>  RADOS is a reliable, autonomic distributed object storage cluster
+>  developed as part of the Ceph distributed storage system. This is a
+> @@ -144,7 +146,7 @@ store using a simple file-like interface.
+>  %package -n librbd1
+>  Summary:	RADOS block device client library
+>  Group:		System Environment/Libraries
+> -License:	LGPLv2
+> +License:	LGPL-2.0
+>  Requires:	librados2 = %{version}-%{release}
+>  %description -n librbd1
+>  RBD is a block device striped across multiple distributed objects in
+> @@ -155,7 +157,7 @@ shared library allowing applications to manage these block devices.
+>  %package -n libcephfs1
+>  Summary:	Ceph distributed file system client library
+>  Group:		System Environment/Libraries
+> -License:	LGPLv2
+> +License:	LGPL-2.0
+>  %description -n libcephfs1
+>  Ceph is a distributed network file system designed to provide excellent
+>  performance, reliability, and scalability. This is a shared library
+> @@ -165,7 +167,7 @@ POSIX-like interface.
+>  %package -n python-ceph
+>  Summary:	Python libraries for the Ceph distributed filesystem
+>  Group:		System Environment/Libraries
+> -License:	LGPLv2
+> +License:	LGPL-2.0
+>  Requires:	librados2 = %{version}-%{release}
+>  Requires:	librbd1 = %{version}-%{release}
+>  Requires:	libcephfs1 = %{version}-%{release}
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
