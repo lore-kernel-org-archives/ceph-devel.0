@@ -1,82 +1,98 @@
-From: Guanjun He <heguanbo@gmail.com>
-Subject: Re: [PATCH 1/1] client: prevent the race of incoming work during teardown
-Date: Mon,  2 Jul 2012 11:31:41 +0800
-Message-ID: <1341199901-16730-1-git-send-email-gjhe@suse.com>
-References: <Re: [PATCH 1/1] client: prevent the race of incoming work during teardown>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: speedup ceph / scaling / find the bottleneck
+Date: Mon, 02 Jul 2012 07:02:49 +0200 (CEST)
+Message-ID: <59beaaec-5f12-4fb2-9c03-69f41849e89e@mailpro>
+References: <4FF0C0C2.2010407@profihost.ag>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:43766 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753311Ab2GBDdY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Jul 2012 23:33:24 -0400
-Received: by wibhr14 with SMTP id hr14so2729304wib.1
-        for <ceph-devel@vger.kernel.org>; Sun, 01 Jul 2012 20:33:22 -0700 (PDT)
-In-Reply-To: <Re: [PATCH 1/1] client: prevent the race of incoming work during teardown>
+Received: from mailpro.odiso.net ([89.248.209.98]:59700 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752086Ab2GBFDM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 01:03:12 -0400
+In-Reply-To: <4FF0C0C2.2010407@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com, ceph-devel@vger.kernel.org
-Cc: Guanjun He <gjhe@suse.com>
+To: Stefan Priebe <s.priebe@profihost.ag>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
 
-	Reproduce the patch against the latest source repo.
+Hi,
+my 2cent,
+maybe with lower range (like 100MB) of random io,
+you have more chance to aggregate them in 4MB block ?
 
-	Add an atomic variable 'stopping' as flag in struct ceph_messenger,
- set this flag to 1 in function ceph_destroy_client(), and add the condition code
- in function ceph_data_ready() to test the flag value, if true(1), just return.
+I'll do some tests today with my 15K drives
 
-Signed-off-by: Guanjun He <gjhe@suse.com>
----
- include/linux/ceph/messenger.h |    1 +
- net/ceph/ceph_common.c         |    2 ++
- net/ceph/messenger.c           |    5 +++++
- 3 files changed, 8 insertions(+), 0 deletions(-)
+----- Mail original -----=20
 
-diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
-index 2521a95..2586f34 100644
---- a/include/linux/ceph/messenger.h
-+++ b/include/linux/ceph/messenger.h
-@@ -53,6 +53,7 @@ struct ceph_messenger {
- 	struct ceph_entity_inst inst;    /* my name+address */
- 	struct ceph_entity_addr my_enc_addr;
- 
-+	atomic_t stopping;
- 	bool nocrc;
- 
- 	/*
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index ba4323b..478f3a4 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -501,6 +501,8 @@ void ceph_destroy_client(struct ceph_client *client)
- {
- 	dout("destroy_client %p\n", client);
- 
-+	atomic_set(&client->msgr->stopping, 1);
-+
- 	/* unmount */
- 	ceph_osdc_stop(&client->osdc);
- 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index b332c3d..11ea62e 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -156,6 +156,9 @@ EXPORT_SYMBOL(ceph_msgr_flush);
- static void ceph_data_ready(struct sock *sk, int count_unused)
- {
- 	struct ceph_connection *con = sk->sk_user_data;
-+	if (atomic_read(&con->msgr->stopping)) {
-+		return;
-+	}
- 
- 	if (sk->sk_state != TCP_CLOSE_WAIT) {
- 		dout("ceph_data_ready on %p state = %lu, queueing work\n",
-@@ -2285,6 +2288,8 @@ struct ceph_messenger *ceph_messenger_create(struct ceph_entity_addr *myaddr,
- 	get_random_bytes(&msgr->inst.addr.nonce, sizeof(msgr->inst.addr.nonce));
- 	encode_my_addr(msgr);
- 
-+	atomic_set(&msgr->stopping, 0);
-+
- 	dout("messenger_create %p\n", msgr);
- 	return msgr;
- }
--- 
-1.7.3.4
+De: "Stefan Priebe" <s.priebe@profihost.ag>=20
+=C3=80: "Mark Nelson" <mark.nelson@inktank.com>=20
+Cc: "Sage Weil" <sage@inktank.com>, ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Dimanche 1 Juillet 2012 23:27:30=20
+Objet: Re: speedup ceph / scaling / find the bottleneck=20
 
+Am 01.07.2012 23:13, schrieb Mark Nelson:=20
+> On 7/1/12 4:01 PM, Stefan Priebe wrote:=20
+>> Hello list,=20
+>> Hello sage,=20
+>>=20
+>> i've made some further tests.=20
+>>=20
+>> Sequential 4k writes over 200GB: 300% CPU usage of kvm process 34712=
+ iops=20
+>>=20
+>> Random 4k writes over 200GB: 170% CPU usage of kvm process 5500 iops=
+=20
+>>=20
+>> When i make random 4k writes over 100MB: 450% CPU usage of kvm proce=
+ss=20
+>> and !! 25059 iops !!=20
+>>=20
+> When you say 100MB vs 200GB, do you mean the total amount of data tha=
+t=20
+> is written for the test?=20
+
+Yes/No, it is the max amount of data written but for random I/O it is=20
+also the range like random block device position between 0 and X where=20
+to write the 4K block.=20
+
+> Also, are these starting out on a fresh=20
+> filesystem?=20
+Yes, 5 Min old in this case ;-)=20
+
+Stefan=20
+--=20
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n=20
+the body of a message to majordomo@vger.kernel.org=20
+More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+
+
+
+--=20
+
+--=20
+
+
+
+=09
+
+Alexandre D e rumier=20
+
+Ing=C3=A9nieur Syst=C3=A8mes et R=C3=A9seaux=20
+
+
+=46ixe : 03 20 68 88 85=20
+
+=46ax : 03 20 68 90 88=20
+
+
+45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix=20
+12 rue Marivaux 75002 Paris=20
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
