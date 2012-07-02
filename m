@@ -1,132 +1,95 @@
-From: Holger Macht <hmacht@suse.de>
-Subject: [PATCH] ceph.spec.in: Change license of base package to GPL and use
- SPDX format
-Date: Mon, 02 Jul 2012 21:07:47 +0200
-Message-ID: <4FF1F183.60507@suse.de>
-Reply-To: hmacht@suse.de
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Qemu fails to open RBD image when auth_supported is not set to
+ 'none'
+Date: Mon, 02 Jul 2012 21:21:18 +0200
+Message-ID: <4FF1F4AE.4080907@widodh.nl>
+References: <4FE881A1.5070504@widodh.nl> <4FE8879B.7020103@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:56477 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750917Ab2GBTHw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 2 Jul 2012 15:07:52 -0400
-Received: from relay2.suse.de (unknown [195.135.220.254])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by mx2.suse.de (Postfix) with ESMTP id 5DBD0912E4
-	for <ceph-devel@vger.kernel.org>; Mon,  2 Jul 2012 21:07:51 +0200 (CEST)
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:38526 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752434Ab2GBTVU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 15:21:20 -0400
+Received: from [IPv6:2a00:f10:11c:ab:51fe:1b50:6b5a:76ad] (unknown [IPv6:2a00:f10:11c:ab:51fe:1b50:6b5a:76ad])
+	by smtp01.mail.pcextreme.nl (Postfix) with ESMTPA id 463BF761DD
+	for <ceph-devel@vger.kernel.org>; Mon,  2 Jul 2012 21:21:18 +0200 (CEST)
+In-Reply-To: <4FE8879B.7020103@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-LGPLv2 in spec file is not correct, because some of the included
-packages/binaries are GPLv2. For example:
 
- src/mount/mtab.c     -> package ceph, binary mount.ceph
- src/common/fiemap.cc -> package ceph, binary rbd
 
-Also use SPDX format (http://www.spdx.org/licenses) for the sub-package
-licenses.
+On 06/25/2012 05:45 PM, Wido den Hollander wrote:
+> On 06/25/2012 05:20 PM, Wido den Hollander wrote:
+>> Hi,
+>>
+>> I just tried to start a VM with libvirt with the following disk:
+>>
+>> <disk type='network' device='disk'>
+>>    <driver name='qemu' type='raw' cache='none'/>
+>>    <source protocol='rbd'
+>> name='rbd/8489c04f-aab8-4796-a22a-ebaa7be247a7'>
+>>      <host name='31.25.XX.XX' port='6789'/>
+>>    </source>
+>>    <target dev='vda' bus='virtio'/>
+>> </disk>
+>>
+>> That fails with: "Operation not supported"
+>>
+>> I tried qemu-img:
+>>
+>> qemu-img info
+>> rbd:rbd/8489c04f-aab8-4796-a22a-ebaa7be247a7:mon_host=31.25.XX.XX\\:6789
+>>
+>> Same result.
+>>
+>> I then tried:
+>>
+>> qemu-img info
+>> rbd:rbd/8489c04f-aab8-4796-a22a-ebaa7be247a7:mon_host=31.25.XX.XX\\:6789:auth_supported=none
+>>
+>>
+>>
+>> And that worked :)
+>>
+>> This host does not have a local ceph.conf, all the parameters have to
+>> come from the command line.
+>>
+>> I know that recently auth_supported defaults to "cephx", but that now
+>> break the libvirt integration since it doesn't set auth_supported to
+>> explicitly none when no auth section is present.
+>>
+>> Should this be something that gets fixed in librados or in libvirt?
+>
+> Thought about it, this is something in libvirt :)
+>
+>>
+>> If it's libvirt, I'll write a patch for it :)
+>
+> Just did so, very simple patch:
+> https://www.redhat.com/archives/libvir-list/2012-June/msg01119.html
 
-Signed-off-by: Holger Macht <hmacht@suse.de>
----
- ceph.spec.in |   18 ++++++++++--------
- 1 file changed, 10 insertions(+), 8 deletions(-)
+libvirt 0.9.13 just got out. The good news is that the RBD storage pool 
+is in this release, but the patch above did not make it in time.
 
-diff --git a/ceph.spec.in b/ceph.spec.in
-index 461bd1f..d80cb46 100644
---- a/ceph.spec.in
-+++ b/ceph.spec.in
-@@ -17,7 +17,7 @@ Name:		ceph
- Version:	@VERSION@
- Release:	6%{?dist}
- Summary:	User space components of the Ceph file system
--License:	LGPLv2
-+License:	GPL-2.0
- Group:		System Environment/Base
- URL:		http://ceph.com/
- Source0:	http://ceph.com/download/%{name}-%{version}.tar.bz2
-@@ -73,6 +73,7 @@ performance, reliability, and scalability.
- %package fuse
- Summary:	Ceph fuse-based client
- Group:		System Environment/Base
-+License:	LGPL-2.0
- Requires:	%{name} = %{version}-%{release}
- BuildRequires:	fuse-devel
- %description fuse
-@@ -81,7 +82,7 @@ FUSE based client for Ceph distributed network file system
- %package devel
- Summary:	Ceph headers
- Group:		Development/Libraries
--License:	LGPLv2
-+License:	LGPL-2.0
- Requires:	%{name} = %{version}-%{release}
- Requires:	librados2 = %{version}
- Requires:	librbd1 = %{version}
-@@ -93,6 +94,7 @@ that use Ceph.
- %package radosgw
- Summary:	Rados REST gateway
- Group:		Development/Libraries
-+License:	LGPL-2.0
- Requires:	librados2 = %{version}-%{release}
- %if 0%{defined suse_version}
- BuildRequires:	libexpat-devel
-@@ -111,7 +113,7 @@ conjunction with any FastCGI capable web server.
- %package obsync
- Summary:	synchronize data between cloud object storage providers or a local directory
- Group:		Productivity/Networking/Other
--License:	LGPLv2
-+License:	LGPL-2.0
- Requires:	python, python-boto
- %description obsync
- obsync is a tool to synchronize objects between cloud object
-@@ -122,7 +124,7 @@ Ceph RADOS cluster, or a local directory.
- %package resource-agents
- Summary:	OCF-compliant resource agents for Ceph daemons
- Group:		System Environment/Base
--License:	LGPLv2
-+License:	LGPL-2.0
- Requires:	%{name} = %{version}
- Requires:	resource-agents
- %description resource-agents
-@@ -134,7 +136,7 @@ managers such as Pacemaker.
- %package -n librados2
- Summary:	RADOS distributed object store client library
- Group:		System Environment/Libraries
--License:	LGPLv2
-+License:	LGPL-2.0
- %description -n librados2
- RADOS is a reliable, autonomic distributed object storage cluster
- developed as part of the Ceph distributed storage system. This is a
-@@ -144,7 +146,7 @@ store using a simple file-like interface.
- %package -n librbd1
- Summary:	RADOS block device client library
- Group:		System Environment/Libraries
--License:	LGPLv2
-+License:	LGPL-2.0
- Requires:	librados2 = %{version}-%{release}
- %description -n librbd1
- RBD is a block device striped across multiple distributed objects in
-@@ -155,7 +157,7 @@ shared library allowing applications to manage these block devices.
- %package -n libcephfs1
- Summary:	Ceph distributed file system client library
- Group:		System Environment/Libraries
--License:	LGPLv2
-+License:	LGPL-2.0
- %description -n libcephfs1
- Ceph is a distributed network file system designed to provide excellent
- performance, reliability, and scalability. This is a shared library
-@@ -165,7 +167,7 @@ POSIX-like interface.
- %package -n python-ceph
- Summary:	Python libraries for the Ceph distributed filesystem
- Group:		System Environment/Libraries
--License:	LGPLv2
-+License:	LGPL-2.0
- Requires:	librados2 = %{version}-%{release}
- Requires:	librbd1 = %{version}-%{release}
- Requires:	libcephfs1 = %{version}-%{release}
--- 
-1.7.9.5
+We'll have to wait for 0.9.14 to get that one in.
+
+>
+> Wido
+>
+>>
+>> Wido
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
