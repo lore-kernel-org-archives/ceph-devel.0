@@ -1,51 +1,58 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Does radosgw really need to talk to an MDS?
-Date: Mon, 02 Jul 2012 13:44:14 +0200
-Message-ID: <4FF1898E.7000202@widodh.nl>
-References: <CAPUexz9T+qzyDwSs6f-Bq7_1d_jMfBBEwBHUpY+QdhZYTekmsQ@mail.gmail.com>
+From: Florian Haas <florian.haas@hastexo.com>
+Subject: Assertion failure when radosgw can't authenticate
+Date: Mon, 2 Jul 2012 13:45:38 +0200
+Message-ID: <CAPUexz-VFp0i8Q-MDH1TyEsEQRAuLx8JNfq6hxTms=U3zKnf5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:51335 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750815Ab2GBLoR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 07:44:17 -0400
-In-Reply-To: <CAPUexz9T+qzyDwSs6f-Bq7_1d_jMfBBEwBHUpY+QdhZYTekmsQ@mail.gmail.com>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:51286 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751306Ab2GBLpj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 07:45:39 -0400
+Received: by qaas11 with SMTP id s11so1807490qaa.19
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Jul 2012 04:45:39 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Florian Haas <florian@hastexo.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
 Hi,
 
-On 02-07-12 13:41, Florian Haas wrote:
-> Hi everyone,
->
-> radosgw(8) states that the following capabilities must be granted to
-> the user that radosgw uses to connect to RADOS.
->
-> ceph-authtool -n client.radosgw.gateway --cap mon 'allow r' --cap osd
-> 'allow rwx' --cap mds 'allow' /etc/ceph/keyring.radosgw.gateway
->
-> Could someone explain why we need an "mds 'allow'" in here? I thought
-> only CephFS clients talked to MDSs, and at first glance configuring
-> client.radosgw.gateway without any MDS capability seems not to break
-> anything (at least with my limited S3 tests). Am I missing something?
->
+in cephx enabled clusters (0.47.x), authentication failures from
+radosgw seem to lead to an uncaught assertion failure:
 
-You are not allowing the RADOS Gateway to do anything on the MDS.
+2012-07-02 11:26:46.559830 b69c5730  0 librados:
+client.radosgw.charlie authentication error (1) Operation not
+permitted
+2012-07-02 11:26:46.560093 b69c5730 -1 Couldn't init storage provider (RADOS)
+2012-07-02 11:26:46.560401 b69c5730 -1 common/Timer.cc: In function
+'SafeTimer::~SafeTimer()' thread b69c5730 time 2012-07-02
+11:26:46.5601
+10
+common/Timer.cc: 57: FAILED assert(thread == __null)
 
-There is no 'r',  'w' or 'x' permission which you are allowing. So there 
-is nothing the rgw has access to on the MDS.
+ ceph version 0.47.3 (commit:c467d9d1b2eac9d3d4706b8e044979aa63b009f8)
+ 1: (SafeTimer::~SafeTimer()+0x96) [0x80a5c76]
+ 2: (main()+0x56f) [0x809708f]
+ 3: (__libc_start_main()+0xe6) [0xb6cefca6]
+ 4: /usr/bin/radosgw() [0x807f4a1]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
 
-Wido
+--- begin dump of recent events ---
+    -2> 2012-07-02 11:26:46.559830 b69c5730  0 librados:
+client.radosgw.charlie authentication error (1) Operation not
+permitted
+    -1> 2012-07-02 11:26:46.560093 b69c5730 -1 Couldn't init storage
+provider (RADOS)
+     0> 2012-07-02 11:26:46.560401 b69c5730 -1 common/Timer.cc: In
+function 'SafeTimer::~SafeTimer()' thread b69c5730 time 2012-07-02
+11:26
+:46.560110
+common/Timer.cc: 57: FAILED assert(thread == __null)
 
-> Cheers,
-> Florian
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Kinda ugly. Maybe this could be fixed in the pending 0.48 release.
 
+The issue obviously goes away immediately after correcting the auth credentials.
+
+Cheers,
+Florian
