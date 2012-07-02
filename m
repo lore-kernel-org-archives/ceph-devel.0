@@ -1,92 +1,103 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH] rbd: fix the memory leak of bio_chain_clone
-Date: Mon, 2 Jul 2012 11:39:24 -0700
-Message-ID: <CAPYLRzhHiEPRm_zU-f_yzbZ72c6H--8NXh39zzCNurBVyHn35Q@mail.gmail.com>
-References: <1340609863-10971-1-git-send-email-gzhao@suse.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Ceph and KVM live migration
+Date: Mon, 02 Jul 2012 12:00:29 -0700
+Message-ID: <4FF1EFCD.9060604@inktank.com>
+References: <4FEF9CF1.6030008@bashkirtsev.com> <4FEFA53F.4020503@inktank.com> <4FEFB2D6.6010603@bashkirtsev.com> <4FEFB5EC.5090202@inktank.com> <4FEFC225.5080204@bashkirtsev.com> <CAPYLRzjWRwvud8cNKHE5X7bbTQL8ZjdxPdy=1gJ=pWp_brnX+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:33553 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754709Ab2GBSjZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 14:39:25 -0400
-Received: by lbbgm6 with SMTP id gm6so8012628lbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Jul 2012 11:39:24 -0700 (PDT)
-In-Reply-To: <1340609863-10971-1-git-send-email-gzhao@suse.com>
+Received: from mail-yw0-f51.google.com ([209.85.213.51]:47710 "EHLO
+	mail-yw0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750944Ab2GBTDh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 15:03:37 -0400
+Received: by yhnn12 with SMTP id n12so6244386yhn.10
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Jul 2012 12:03:36 -0700 (PDT)
+In-Reply-To: <CAPYLRzjWRwvud8cNKHE5X7bbTQL8ZjdxPdy=1gJ=pWp_brnX+g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>, Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>, ceph-devel@vger.kernel.org
 
-Hey guys,
-I'm checking through the archives and I didn't see any replies to this
-patch, nor does it appear in our tree that I can see. We should
-probably let him know what we're doing with it. :)
--Greg
+On 07/02/2012 11:21 AM, Gregory Farnum wrote:
+> On Sat, Jun 30, 2012 at 8:21 PM, Vladimir Bashkirtsev
+> <vladimir@bashkirtsev.com>  wrote:
+>> On 01/07/12 11:59, Josh Durgin wrote:
+>>>
+>>> On 06/30/2012 07:15 PM, Vladimir Bashkirtsev wrote:
+>>>>
+>>>> On 01/07/12 10:47, Josh Durgin wrote:
+>>>>>
+>>>>> On 06/30/2012 05:42 PM, Vladimir Bashkirtsev wrote:
+>>>>>>
+>>>>>> Dear all,
+>>>>>>
+>>>>>> Currently I testing KVMs running on ceph and particularly testing
+>>>>>> recent
+>>>>>> cache feature. Performance is of course vastly improved but still have
+>>>>>> occasional KVM hold ups - not sure who is at blame ceph of KVM. But I
+>>>>>> will deal with it later. Right now I've got myself a question which I
+>>>>>> could not get answered myself: if I do live migration of KVM while
+>>>>>> there
+>>>>>> some uncommitted data in ceph cache will this cache be committed prior
+>>>>>> cut-over to another host? Reading through the list I've got an
+>>>>>> impression that it may be left uncommitted and thus it may cause data
+>>>>>> corruption. I just would like a simple confirmation if code which
+>>>>>> commits cache on cut-over to new host does exist and no data corruption
+>>>>>> due to RBD cache+live migration should happen.
+>>>>>>
+>>>>>> Regards,
+>>>>>> Vladimir
+>>>>>
+>>>>>
+>>>>> QEMU does a flush on all the disks when it stops the guest on the
+>>>>> original host, so there will be no uncommitted data in the cache.
+>>>>>
+>>>>> Josh
+>>>>
+>>>> Thank you for quick and precise answer. Now when I actually attempted to
+>>>> live migrate ceph based VM I get:
+>>>>
+>>>> Unable to migrate guest: Invalid relative path
+>>>> 'rbd/mail.logics.net.au:rbd_cache=true': Invalid argument
+>>>>
+>>>> I guess KVM does not like having :rbd_cache=true (migration works
+>>>> without it). I know that it is most likely KVM problem but still decided
+>>>> to ask here in case if you know about it. Any ideas how to fix it?
+>>>>
+>>>> Regards,
+>>>> Vladimir
+>>>
+>>>
+>>> Is the destination librbd older and not supporting the cache option?
+>>>
+>>> Migrating with rbd_cache=true and other options specified like that
+>>> worked in my testing.
+>>>
+>>> Josh
+>>
+>> Both installations are the same:
+>> qemu 1.0.17
+>> ceph 0.47.3
+>> libvirt 0.9.12
+>>
+>> I have googled around and found that if I call migration with --unsafe
+>> option then it should go. And indeed: it works. Apparently this check
+>> introduced in libvirt 0.9.12 . Did quick downgrade to libvirt 0.9.11 and no
+>> problems migrating.
+>
+> Have we checked if the live migrate actually does do the cache flushes
+> when you use the unsafe flag? That worries me a little!
 
-On Mon, Jun 25, 2012 at 12:37 AM, Guangliang Zhao <gzhao@suse.com> wrot=
-e:
-> Signed-off-by: Guangliang Zhao <gzhao@suse.com>
-> ---
-> =A0drivers/block/rbd.c | =A0 10 ++++------
-> =A01 files changed, 4 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 65665c9..3d6dfc8 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -719,8 +719,6 @@ static struct bio *bio_chain_clone(struct bio **o=
-ld, struct bio **next,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_out;
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (total + old_chain->bi_size > len)=
- {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct bio_pair *bp;
-> -
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* this split can o=
-nly happen with a single paged bio,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* split_bio will B=
-UG_ON if this is not the case
-> @@ -732,13 +730,13 @@ static struct bio *bio_chain_clone(struct bio *=
-*old, struct bio **next,
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* split the bio. We'=
-ll release it either in the next
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0call, or it wi=
-ll have to be released outside */
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 bp =3D bio_split(old_ch=
-ain, (len - total) / SECTOR_SIZE);
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!bp)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 *bp =3D bio_split(old_c=
-hain, (len - total) / SECTOR_SIZE);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!*bp)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto =
-err_out;
->
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 __bio_clone(tmp, &bp->b=
-io1);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 __bio_clone(tmp, &(*bp)=
-->bio1);
->
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 *next =3D &bp->bio2;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 *next =3D &(*bp)->bio2;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 __bio_clone(tmp, old_=
-chain);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 *next =3D old_chain->=
-bi_next;
-> --
-> 1.7.3.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The unsafe flag is purely a libvirt mechanism for bypassing libvirt's
+format whitelist. It does not affect qemu at all.
+
+> In either case, I created a bug so we can try and make QEMU play nice:
+> http://tracker.newdream.net/issues/2685
+
+The issue is with libvirt, not qemu. I sent a patch fixing it to the 
+libvirt list:
+
+http://www.redhat.com/archives/libvir-list/2012-July/msg00021.html
+
+Josh
