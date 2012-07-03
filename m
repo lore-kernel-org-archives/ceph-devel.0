@@ -1,112 +1,163 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.48 "argonaut" released
-Date: Mon, 2 Jul 2012 21:29:24 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1207022126090.28976@cobra.newdream.net>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: iostat show constants write to osd disk with writeahead journal,  normal behaviour ?
+Date: Tue, 03 Jul 2012 06:30:42 +0200 (CEST)
+Message-ID: <6e2eace3-ec72-4c77-ba08-870b214953c5@mailpro>
+References: <Pine.LNX.4.64.1207021358591.24205@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1403585666-1341289764=:28976"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40063 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750791Ab2GCE31 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 00:29:27 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 612F2BC6FE
-	for <ceph-devel@vger.kernel.org>; Mon,  2 Jul 2012 21:29:27 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 3B023BC6FE
-	for <ceph-devel@vger.kernel.org>; Mon,  2 Jul 2012 21:29:27 -0700 (PDT)
+Received: from mailpro.odiso.net ([89.248.209.98]:44361 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750791Ab2GCEbG convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 00:31:06 -0400
+In-Reply-To: <Pine.LNX.4.64.1207021358591.24205@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, ceph-devel@vger.kernel.org, Gregory Farnum <greg@inktank.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Thanks,
+I'll try that.
 
---557981400-1403585666-1341289764=:28976
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+note: with btrfs, il can use filestore flusher =3D true + wip_flush_min=
+ git branch.
+      and I see write to disk each X second.
+      (2sec of seq write vs 30sec
 
-We're pleased to annouce the release of Ceph v0.48, code-named "argonaut."=
-=20
-This release will be the basis of our first long-term stable branch.=20
-Although we will continue to make releases every 3-4 weeks, this stable=20
-release will be maintained with bug fixes and select non-destabilizing=20
-feature additions for much longer than that. =A0Argonaut is recommended for=
-=20
-production users of rados and librados, rbd and librbd, and radosgw.
+with xfs,that doesn't work, filestore flusher =3D false + wip_flush,I s=
+ee constant writes, without flusher in the logs.
 
-The upgrade to v0.48 argonaut from previous versions includes a=20
-disk-format upgrade. =A0Please note:
 
- * You will not be able to downgrade from v0.48 to a previous version.
- * Each ceph-osd will need some time to convert its local data before
-   rejoining the cluster. =A0If you need to maintain availability, you will
-   need to do a "rolling upgrade" by restarting daemons on each host or
-   rack in sequence and allowing the cluster to recover before moving on
-   to the next one. =A0Note that for non-btrfs file systems especially this=
-=20
-   can be slow (many hours); plan accordingly.
- * The ceph tool's -s and -w commands from previous version are incompatibl=
-e=20
-   with this version. =A0Upgrade your client tools with your monitor if you=
-=20
-   rely on those commands.
+----- Mail original -----=20
 
-The highlights for this release include:
+De: "Sage Weil" <sage@inktank.com>=20
+=C3=80: "Gregory Farnum" <greg@inktank.com>=20
+Cc: "Alexandre DERUMIER" <aderumier@odiso.com>, "Mark Nelson" <mark.nel=
+son@inktank.com>, ceph-devel@vger.kernel.org=20
+Envoy=C3=A9: Lundi 2 Juillet 2012 23:02:13=20
+Objet: Re: iostat show constants write to osd disk with writeahead jour=
+nal, normal behaviour ?=20
 
- * osd: stability improvements
- * osd: capability model simplification
- * osd: simpler/safer --mkfs (no longer removes all files; safe to re-run=
-=20
-   on active osd)
- * osd: potentially buggy FIEMAP behavior disabled by default
- * rbd: caching improvements
- * rbd: improved instrumentation
- * rbd: bug fixes
- * radosgw: new, scalable usage logging infrastructure
- * radosgw: per-user bucket limits
- * mon: streamlined process for setting up authentication keys
- * mon: stability improvements
- * mon: log message throttling
- * doc: improved documentation (ceph, rbd, radosgw, chef, etc.)
- * config: new default locations for daemon keyrings
- * config: arbitrary variable substitutions
- * improved 'admin socket' daemon admin interface (ceph --admin-daemon=20
-   ...)
- * chef: support for multiple monitor clusters
- * upstart: basic support for monitors, mds, radosgw; osd support still a=
-=20
-   work in progress.
+On Mon, 2 Jul 2012, Gregory Farnum wrote:=20
+> On Tue, Jun 19, 2012 at 12:09 AM, Alexandre DERUMIER=20
+> <aderumier@odiso.com> wrote:=20
+> > Hi, more infos, I have active filestore debug =3D 20, min interval =
+29 and max interval 30.=20
+> >=20
+> > I see sync_entry each 30s, so it seem work as expected.=20
+> >=20
+> > cat ceph-osd.0.log |grep sync_entry=20
+> > 2012-06-19 07:56:00.084622 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry woke after 26.550294=20
+> > 2012-06-19 07:56:00.084641 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry waiting for another 2.449706 to reach min interval 29.000000=20
+> > 2012-06-19 07:56:02.534432 7fd09233b700 15 filestore(/srv/osd.0) sy=
+nc_entry committing 18717 sync_epoch 5=20
+> > 2012-06-19 07:56:02.534481 7fd09233b700 15 filestore(/srv/osd.0) sy=
+nc_entry doing a full sync (syncfs(2) if possible)=20
+> > 2012-06-19 07:56:02.963302 7fd09233b700 10 filestore(/srv/osd.0) sy=
+nc_entry commit took 0.428878, interval was 29.428974=20
+> > 2012-06-19 07:56:02.963332 7fd09233b700 15 filestore(/srv/osd.0) sy=
+nc_entry committed to op_seq 18717=20
+> > 2012-06-19 07:56:02.963341 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry waiting for max_interval 30.000000=20
+> > 2012-06-19 07:56:12.066002 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry woke after 9.102662=20
+> > 2012-06-19 07:56:12.066024 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry waiting for another 19.897338 to reach min interval 29.000000=20
+> > 2012-06-19 07:56:31.963460 7fd09233b700 15 filestore(/srv/osd.0) sy=
+nc_entry committing 18935 sync_epoch 6=20
+> > 2012-06-19 07:56:31.963510 7fd09233b700 15 filestore(/srv/osd.0) sy=
+nc_entry doing a full sync (syncfs(2) if possible)=20
+> > 2012-06-19 07:56:32.279737 7fd09233b700 10 filestore(/srv/osd.0) sy=
+nc_entry commit took 0.316285, interval was 29.316396=20
+> > 2012-06-19 07:56:32.279778 7fd09233b700 15 filestore(/srv/osd.0) sy=
+nc_entry committed to op_seq 18935=20
+> > 2012-06-19 07:56:32.279786 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry waiting for max_interval 30.000000=20
+> > 2012-06-19 07:56:44.837731 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry woke after 12.557945=20
+> > 2012-06-19 07:56:44.837757 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry waiting for another 16.442055 to reach min interval 29.000000=20
+> > 2012-06-19 07:57:01.279894 7fd09233b700 15 filestore(/srv/osd.0) sy=
+nc_entry committing 19125 sync_epoch 7=20
+> > 2012-06-19 07:57:01.279939 7fd09233b700 15 filestore(/srv/osd.0) sy=
+nc_entry doing a full sync (syncfs(2) if possible)=20
+> > 2012-06-19 07:57:01.558240 7fd09233b700 10 filestore(/srv/osd.0) sy=
+nc_entry commit took 0.278354, interval was 29.278455=20
+> > 2012-06-19 07:57:01.558282 7fd09233b700 15 filestore(/srv/osd.0) sy=
+nc_entry committed to op_seq 19125=20
+> > 2012-06-19 07:57:01.558291 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry waiting for max_interval 30.000000=20
+> > 2012-06-19 07:57:31.558394 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry woke after 30.000104=20
+> > 2012-06-19 07:57:31.558414 7fd09233b700 20 filestore(/srv/osd.0) sy=
+nc_entry waiting for max_interval 30.000000=20
+> >=20
+> >=20
+> > But during all the time of the bench, I have flusher_entry logs.=20
+> > What is exactly flush_entry vs sync_entry?=20
+>=20
+> flush_entry is doing sync_file_range, which sends the data to the dis=
+k=20
+> but doesn't flush disk caches, or do a whole host of other things tha=
+t=20
+> are needed to maintain integrity. The idea is that we don't want the=20
+> filesystem to store up thirty seconds worth of writes and then sync=20
+> them out on command, but rather to continuously do writes to disk.=20
+> sync_file_range is the best tool we have for accomplishing that.=20
+>=20
+> However, you could try turning it off and seeing if your performance=20
+> improves. :) Set filestore_sync_flush and filestore_flusher to false=20
+> in your config file.=20
 
-The new default keyring locations mean that when enabling authentication=20
-('auth supported =3D cephx'), keyring locations do not need to be specified=
-=20
-if the keyring file is located inside the daemon's data directory=20
-(/var/lib/ceph/$type/ceph-$id by default).
+One alternative is to let the kernel do this. If you adjust the VM=20
+tunables with something like=20
 
-There is also a lot of librbd code in this release that is laying the=20
-groundwork for the upcoming layering functionality, but is not actually=20
-used. =A0Likewise, the upstart support is still incomplete and not=20
-recommended; we will backport that functionality later if it turns out to=
-=20
-be non-disruptive.
+echo 10000000 > /proc/sys/vm/dirty_background_bytes=20
 
-For more information, please see the complete release notes:
+and set=20
 
-=09http://ceph.com/docs/master/release-notes/
+filestore flusher =3D false=20
 
-The current focus for upcoming development releases is on radosgw=20
-stability, RBD stability, and RBD layering. =A0There is also ongoing=20
-'devops' work on integration with management and provisioning tools like=20
-upstart, Chef, Juju, and Crowbar. =A0A major refactor of the OSD code is=20
-about to be merged which will improve performance and scalability, and our=
-=20
-testing coverage continues to improve.
+that will rely on the kernel to keep the amount of dirty data small. Th=
+is=20
+affects the entire host, though, so keep in mind that it will affect ot=
+her=20
+processes and all mounted file systems. Conceptually, this is what we a=
+re=20
+trying to accomplish with the flushing stuff, but it's hard to do from =
+a=20
+user process. Maybe the new cgroups stuff will make some of this=20
+easier... I haven't been following it very closely.=20
 
-You can get v0.48 argonaut from the usual locations:
+sage=20
 
- * Git at git://github.com/ceph/ceph.git
- * Tarball at=A0http://ceph.newdream.net/download/ceph-0.48.tar.gz
- * For Debian/Ubuntu packages,=20
-   see=A0http://ceph.newdream.net/docs/master/install/debian
---557981400-1403585666-1341289764=:28976--
+
+
+--=20
+
+--=20
+
+
+
+=09
+
+Alexandre D e rumier=20
+
+Ing=C3=A9nieur Syst=C3=A8mes et R=C3=A9seaux=20
+
+
+=46ixe : 03 20 68 88 85=20
+
+=46ax : 03 20 68 90 88=20
+
+
+45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix=20
+12 rue Marivaux 75002 Paris=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
