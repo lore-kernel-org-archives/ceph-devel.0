@@ -1,57 +1,111 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Throughput increase by LACP bonding
-Date: Tue, 03 Jul 2012 10:07:16 +0200
-Message-ID: <4FF2A834.3080400@widodh.nl>
-References: <loom.20120703T093148-928@post.gmane.org>
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: Re: domino-style OSD crash
+Date: Tue, 03 Jul 2012 10:40:11 +0200
+Message-ID: <4FF2AFEB.1010403@univ-nantes.fr>
+References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com> <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:49320 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755999Ab2GCIHT (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 04:07:19 -0400
-In-Reply-To: <loom.20120703T093148-928@post.gmane.org>
+Received: from smtptls1-loi.cpub.univ-nantes.fr ([193.52.103.112]:51812 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750840Ab2GCIkT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 04:40:19 -0400
+In-Reply-To: <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sam Just <sam.just@inktank.com>
+Cc: Tommi Virtanen <tv@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
-On 03-07-12 09:42, Madhusudhana U wrote:
-> Hi all,
-> I am trying to increase the throughput in the cluster by enabling
-> LACP on both in clients and all ceph cluster nodes. Each client and
-> ceph nodes has two 1G Ethernet interface which I want to aggregate
-> and make it 2G. LACP has been configured at switch side too. But even after
-> the configuration, I am not seeing any through put increase in ceph tell osd
-> bench command and also dd. They are taking the same amount as earlier. I am
-> constantly seeing around 100MB/sec throughput in both DD and ceph bench
-> commands. Can someone suggest me how i can increase the throughput of the
-> cluster ? Below are my configurations.
-
-Can you verify if both NIC's are actually doing something? Use bwm-ng 
-for example?
-
-Wido
-
->
-> 	No of OSD's 	: 5
-> 	No of MON's 	: 3
-> 	No of MDS's	: 2
-> 	Linux Kernel	: 3.4.4
-> 	Ceph version	: 0.47.3
->          Hard disks      : 2x160G SAS drives (raid 0 configuration)
->          CPU             : Intel(R) Xeon(R) Quad CPU E5506  @ 2.13GHz
->          Memory          : 6G
->
-> Thanks
-> __M
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Le 04/06/2012 19:40, Sam Just a =E9crit :
+> Can you send the osd logs?  The merge_log crashes are probably fixabl=
+e
+> if I can see the logs.
 >
 
+Well I'm sorry - As I send in private mail I was away from computer for=
+=20
+a long time.
+I can't send those logs anymore, they are rotated now...
+
+Anyway. Now that I'm back, I try to restart where I stopped, and tried=20
+to restart the failed nodes.
+
+Upgraded the kernel to 3.5.0-rc4 + some patches, seems btrfs is OK righ=
+t=20
+now.
+
+Tried to restart osd with 0.47.3, then next branch, and today with 0.48=
+=2E
+
+4 of 8 nodes fails with the same message :
+
+ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2=
+030)
+  1: /usr/bin/ceph-osd() [0x701929]
+  2: (()+0xf030) [0x7fe5b4777030]
+  3: (gsignal()+0x35) [0x7fe5b33fc4f5]
+  4: (abort()+0x180) [0x7fe5b33ff770]
+  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7fe5b3c4f68d]
+  6: (()+0x63796) [0x7fe5b3c4d796]
+  7: (()+0x637c3) [0x7fe5b3c4d7c3]
+  8: (()+0x639ee) [0x7fe5b3c4d9ee]
+  9: (std::__throw_length_error(char const*)+0x5d) [0x7fe5b3c9f5ed]
+  10: (()+0xbfad2) [0x7fe5b3ca9ad2]
+  11: (char* std::string::_S_construct<char const*>(char const*, char=20
+const*, std::allocator<char> const&, std::forward_iterator_tag)+0x35)=20
+[0x7fe5b3cab4a5]
+  12: (std::basic_string<char, std::char_traits<char>,=20
+std::allocator<char> >::basic_string(char const*, unsigned long,=20
+std::allocator<char> const&)+0x1d) [0x7fe5b3cab5bd]
+  13:=20
+(leveldb::InternalKeyComparator::FindShortestSeparator(std::string*,=20
+leveldb::Slice const&) const+0x4d) [0x6e811d]
+  14: (leveldb::TableBuilder::Add(leveldb::Slice const&, leveldb::Slice=
+=20
+const&)+0x9f) [0x6f681f]
+  15:=20
+(leveldb::DBImpl::DoCompactionWork(leveldb::DBImpl::CompactionState*)+0=
+x4d3)=20
+[0x6e3643]
+  16: (leveldb::DBImpl::BackgroundCompaction()+0x222) [0x6e45a2]
+  17: (leveldb::DBImpl::BackgroundCall()+0x68) [0x6e4e18]
+  18: /usr/bin/ceph-osd() [0x6fd401]
+  19: (()+0x6b50) [0x7fe5b476eb50]
+  20: (clone()+0x6d) [0x7fe5b34a278d]
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is=20
+needed to interpret this.
+
+ceph-osd is from the debian package (64 bits)
+I have a core dump, but I'm afraid it won't help much :
+
+gdb /usr/bin/ceph-osd core
+GNU gdb (GDB) 7.0.1-debian
+
+=2E...
+
+Core was generated by `/usr/bin/ceph-osd -i 2 --pid-file=20
+/var/run/ceph/osd.2.pid -c /etc/ceph/ceph.con'.
+Program terminated with signal 6, Aborted.
+---Type <return> to continue, or q <return> to quit---
+#0  0x00007fe5b4776efb in raise () from=20
+/lib/x86_64-linux-gnu/libpthread.so.0
+
+This time I REALLY CAN (knock on wood) furnish logs & core.
+
+Granted, this crash was very probably caused by corruption on btrfs, bu=
+t=20
+it could be great if there's a way to recover the crashed osd node.
+
+Cheers,
+
+--=20
+Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
+Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
