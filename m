@@ -1,62 +1,49 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: URL-safe base64 encoding for keys
-Date: Tue, 03 Jul 2012 21:18:51 +0200
-Message-ID: <4FF3459B.1050708@widodh.nl>
-References: <4FF2E40B.8090705@widodh.nl> <CADvuQRERYhuFiz07Kp_YxOo_ya6-jACJ3X2gNihp=5F83BJQiQ@mail.gmail.com>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: domino-style OSD crash
+Date: Tue, 3 Jul 2012 12:42:02 -0700
+Message-ID: <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
+References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com>
+ <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com> <4FF2AFEB.1010403@univ-nantes.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:34255 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751150Ab2GCTSy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 15:18:54 -0400
-In-Reply-To: <CADvuQRERYhuFiz07Kp_YxOo_ya6-jACJ3X2gNihp=5F83BJQiQ@mail.gmail.com>
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:42748 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751922Ab2GCTmY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 15:42:24 -0400
+Received: by ghrr11 with SMTP id r11so5719286ghr.19
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Jul 2012 12:42:23 -0700 (PDT)
+In-Reply-To: <4FF2AFEB.1010403@univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
-On 07/03/2012 05:35 PM, Tommi Virtanen wrote:
-> On Tue, Jul 3, 2012 at 5:22 AM, Wido den Hollander <wido@widodh.nl> wrote:
->> CloudStack's API expects a URI to be passed when adding a storage pool,
->> e.g.:
->>
->> addStoragePool?uri=rbd://user:cephxkey@monitor.addr/poolname
->>
->> If 'cephxkey' contains a / the URI parser in Java fails (java.net.URI) and
->> splits the URI in the wrong place.
+On Tue, Jul 3, 2012 at 1:40 AM, Yann Dupont <Yann.Dupont@univ-nantes.fr=
+> wrote:
+> Upgraded the kernel to 3.5.0-rc4 + some patches, seems btrfs is OK ri=
+ght
+> now.
 >
-> First, I actually agree with you -- urlsafe b64 just makes sense. We'd
-> have to go through some sort of a transition period, accepting both,
-> perhaps generating old-style, for some time.
+> Tried to restart osd with 0.47.3, then next branch, and today with 0.=
+48.
 >
-
-My thoughts exactly.
-
-> Second, have you tried quoting the unsafe characters? / is %2f, + is
-> %2b, % is %25.
-
-Yes, I have thought about that, but it would mean extra docs in the 
-CloudStack API docs.
-
-Warning: Please URL-encode your cephx secret since it may contain 
-invalid characters
-
-In the WebGUI (which talks to the API) I could do a URL-encode in 
-JavaScript and do the decode again in the CloudStack management server, 
-but it's not what you want.
-
-So yes, that has crossed my mind, but for now I took the easy way out 
-and generated myself a new key which doesn't contain slashes.
-
-Wido
-
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 4 of 8 nodes fails with the same message :
 >
+> ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2b=
+f2030)
+> =C2=A01: /usr/bin/ceph-osd() [0x701929]
+=2E..
+> =C2=A013: (leveldb::InternalKeyComparator::FindShortestSeparator(std:=
+:string*,
+> leveldb::Slice const&) const+0x4d) [0x6e811d]
 
+That looks like http://tracker.newdream.net/issues/2563 and the best
+we have for that ticket is "looks like you have a corrupted leveldb
+file". Is this reproducible with a freshly mkfs'ed data partition?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
