@@ -1,16 +1,16 @@
 From: Alexandre DERUMIER <aderumier@odiso.com>
 Subject: Re: speedup ceph / scaling / find the bottleneck
-Date: Tue, 03 Jul 2012 06:42:42 +0200 (CEST)
-Message-ID: <7a53c5da-aecb-47c3-afaa-4b0c02d110df@mailpro>
+Date: Tue, 03 Jul 2012 06:42:39 +0200 (CEST)
+Message-ID: <3529047d-a3f7-442a-a384-5829686ff385@mailpro>
 References: <4FF204DB.80709@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:34137 "EHLO
+Received: from mailpro.odiso.net ([89.248.209.98]:34132 "EHLO
 	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751402Ab2GCEnF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 00:43:05 -0400
+	with ESMTP id S1751402Ab2GCEnD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 00:43:03 -0400
 In-Reply-To: <4FF204DB.80709@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
