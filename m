@@ -1,104 +1,112 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Ceph status for Wheezy
-Date: Mon, 2 Jul 2012 16:12:35 -0700
-Message-ID: <CAC-hyiE-hem3BNO4G0xu4+Qz+vHkAteq9GNYyX3n9Zcz8eQyWg@mail.gmail.com>
-References: <1341122210.10000.46.camel@julia>
-	<CAC-hyiFto=rtR+2A-z=id4SC1npLneR7qvPAZEBEzkE=UZba6g@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.48 "argonaut" released
+Date: Mon, 2 Jul 2012 21:29:24 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207022126090.28976@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1403585666-1341289764=:28976"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:57238 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750944Ab2GBXMg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jul 2012 19:12:36 -0400
-Received: by bkwj10 with SMTP id j10so1154409bkw.19
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Jul 2012 16:12:35 -0700 (PDT)
-In-Reply-To: <CAC-hyiFto=rtR+2A-z=id4SC1npLneR7qvPAZEBEzkE=UZba6g@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:40063 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750791Ab2GCE31 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 00:29:27 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 612F2BC6FE
+	for <ceph-devel@vger.kernel.org>; Mon,  2 Jul 2012 21:29:27 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 3B023BC6FE
+	for <ceph-devel@vger.kernel.org>; Mon,  2 Jul 2012 21:29:27 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>, Sage Weil <sage@inktank.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Jul 2, 2012 at 2:13 PM, Yehuda Sadeh <yehuda@inktank.com> wrote:
-> On Sat, Jun 30, 2012 at 10:56 PM, Laszlo Boszormenyi (GCS)
-> <gcs@debian.hu> wrote:
->> Hi Sage,
->>
->> As previously noted, using leveldb caused some trouble with Ceph could
->> be included in Wheezy or not.
->> I've proposed that the supported architectures should be limited in Ceph
->> and leveldb to the ones the latter supports. I got a release critical
->> bugreport[1] that it should be reversed. Alessio Treglia, the leveldb
->> maintainer in Debian wrote the following:
->> "I'm going to test leveldb on powerpc and then I'll report my results
->> to upstream.
->> Hence I cannot promise it will be ready in time for Wheezy, of course
->> I'll upload a patch as soon as a fix becomes available.".
->>
->> Upstream was asked[2], noted that it fails on big-endian architectures,
->> but no answer until now.
->>
->> Then, as it was previously announced, the freeze of Wheezy started some
->> hours ago[3].
->>
->> Soon, after that Julien Cristau, one of our Release Assistant noted
->> about Ceph doesn't build on all architectures due to leveldb:
->> "Unless this gets fixed we'll have to remove ceph from wheezy.  Which
->> means qemu and qemu-kvm need to drop their build-deps on ceph packages.
->> They can always be re-added if/when leveldb/ceph are fixed.".
->>
->> It seems everything is up to leveldb upstream/maintainer now. It is
->> fixed in time on big-endian machines or the package will be limited to
->> little-endian machines as I wanted to do with Ceph.
->>
->> But please look into the reason why Ceph fails to build on ia64[4].
->> Also, how 0.48 goes? Will it contain big differences to 0.47.2? As you
->> can read, even 0.47.2 is in question for Wheezy. But would you propose
->> 0.48 for inclusion when it's released?
->>
->> Fingers crossed. Regards,
->> Laszlo/GCS
->> [1] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=677626
->> [2] http://code.google.com/p/leveldb/issues/detail?id=84
->> [3] https://lists.debian.org/debian-devel-announce/2012/06/msg00009.html
->> [4] https://buildd.debian.org/status/fetch.php?pkg=ceph&arch=ia64&ver=0.47.2-1&stamp=1340802492
->>
->
->
-> I looked into why leveldb fails to build on big endian, and the reason
-> seems quite trivial. The bloom_test unitest passes different input due
-> to endianity, and the result is not as expected due to statistical
-> difference of the input; there are more false positive. I played with
-> it a bit, and when transforming the input to little endian it passed.
-> I also got the same failure on a little endian machine when I
-> transformed it to big endian. There are two solutions, one is to bump
-> up the expected false positives to a higher number (e.g., 3% instead
-> of 2%):
->
-> diff --git a/util/bloom_test.cc b/util/bloom_test.cc
-> index 4a6ea1b..61323af 100644
-> --- a/util/bloom_test.cc
-> +++ b/util/bloom_test.cc
-> @@ -139,7 +139,7 @@ TEST(BloomTest, VaryingLengths) {
->        fprintf(stderr, "False positives: %5.2f%% @ length = %6d ;
-> bytes = %6d\n",
->                rate*100.0, length, static_cast<int>(FilterSize()));
->      }
-> -    ASSERT_LE(rate, 0.02);   // Must not be over 2%
-> +    ASSERT_LE(rate, 0.03);   // Must not be over 2%
->      if (rate > 0.0125) mediocre_filters++;  // Allowed, but not too often
->      else good_filters++;
->    }
->
->
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I sent a query to the leveldb mailing list (sorry for not cross
-posting, was having trouble with google groups). I got a response from
-Sanjay and he said that bumping up the check to 0.03 (as with the
-above patch) is ok as a quick solution. He'll work on a better
-solution along the lines of my other proposed change later. I made the
-above patch available in the following git repository:
+--557981400-1403585666-1341289764=:28976
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-https://code.google.com/r/yehuda-leveldb/
+We're pleased to annouce the release of Ceph v0.48, code-named "argonaut."=
+=20
+This release will be the basis of our first long-term stable branch.=20
+Although we will continue to make releases every 3-4 weeks, this stable=20
+release will be maintained with bug fixes and select non-destabilizing=20
+feature additions for much longer than that. =A0Argonaut is recommended for=
+=20
+production users of rados and librados, rbd and librbd, and radosgw.
 
-Yehuda
+The upgrade to v0.48 argonaut from previous versions includes a=20
+disk-format upgrade. =A0Please note:
+
+ * You will not be able to downgrade from v0.48 to a previous version.
+ * Each ceph-osd will need some time to convert its local data before
+   rejoining the cluster. =A0If you need to maintain availability, you will
+   need to do a "rolling upgrade" by restarting daemons on each host or
+   rack in sequence and allowing the cluster to recover before moving on
+   to the next one. =A0Note that for non-btrfs file systems especially this=
+=20
+   can be slow (many hours); plan accordingly.
+ * The ceph tool's -s and -w commands from previous version are incompatibl=
+e=20
+   with this version. =A0Upgrade your client tools with your monitor if you=
+=20
+   rely on those commands.
+
+The highlights for this release include:
+
+ * osd: stability improvements
+ * osd: capability model simplification
+ * osd: simpler/safer --mkfs (no longer removes all files; safe to re-run=
+=20
+   on active osd)
+ * osd: potentially buggy FIEMAP behavior disabled by default
+ * rbd: caching improvements
+ * rbd: improved instrumentation
+ * rbd: bug fixes
+ * radosgw: new, scalable usage logging infrastructure
+ * radosgw: per-user bucket limits
+ * mon: streamlined process for setting up authentication keys
+ * mon: stability improvements
+ * mon: log message throttling
+ * doc: improved documentation (ceph, rbd, radosgw, chef, etc.)
+ * config: new default locations for daemon keyrings
+ * config: arbitrary variable substitutions
+ * improved 'admin socket' daemon admin interface (ceph --admin-daemon=20
+   ...)
+ * chef: support for multiple monitor clusters
+ * upstart: basic support for monitors, mds, radosgw; osd support still a=
+=20
+   work in progress.
+
+The new default keyring locations mean that when enabling authentication=20
+('auth supported =3D cephx'), keyring locations do not need to be specified=
+=20
+if the keyring file is located inside the daemon's data directory=20
+(/var/lib/ceph/$type/ceph-$id by default).
+
+There is also a lot of librbd code in this release that is laying the=20
+groundwork for the upcoming layering functionality, but is not actually=20
+used. =A0Likewise, the upstart support is still incomplete and not=20
+recommended; we will backport that functionality later if it turns out to=
+=20
+be non-disruptive.
+
+For more information, please see the complete release notes:
+
+=09http://ceph.com/docs/master/release-notes/
+
+The current focus for upcoming development releases is on radosgw=20
+stability, RBD stability, and RBD layering. =A0There is also ongoing=20
+'devops' work on integration with management and provisioning tools like=20
+upstart, Chef, Juju, and Crowbar. =A0A major refactor of the OSD code is=20
+about to be merged which will improve performance and scalability, and our=
+=20
+testing coverage continues to improve.
+
+You can get v0.48 argonaut from the usual locations:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at=A0http://ceph.newdream.net/download/ceph-0.48.tar.gz
+ * For Debian/Ubuntu packages,=20
+   see=A0http://ceph.newdream.net/docs/master/install/debian
+--557981400-1403585666-1341289764=:28976--
