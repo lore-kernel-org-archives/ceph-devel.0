@@ -1,49 +1,53 @@
-From: David Blundell <David.Blundell@100percentit.com>
-Subject: RE: Unable to restart Mon after reboot
-Date: Tue, 3 Jul 2012 16:35:45 +0000
-Message-ID: <45F11B42CB5830479EF0E56A27F4E68D7F12ED@exchange1.ad.100it.net>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: Unable to restart Mon after reboot
+Date: Tue, 3 Jul 2012 09:44:38 -0700
+Message-ID: <CADvuQRFkf8gHOknnj5zyRDBivYttC2Z1CCueZeXH5mnk+11fvQ@mail.gmail.com>
 References: <BDAE812E-2659-4025-9B30-2DEC6675B59A@100percentit.com>
  <4FE55567.6080201@inktank.com> <4FE558CB.4010509@inktank.com>
- <F38AD123-3C97-44BD-ABE5-33635AD6D768@100percentit.com>
- <CADvuQRFcgPOy765-cYSVT1DPjOZ5nPXSb1Lr1Xjt5e3rU7joNw@mail.gmail.com>
+ <F38AD123-3C97-44BD-ABE5-33635AD6D768@100percentit.com> <CADvuQRFcgPOy765-cYSVT1DPjOZ5nPXSb1Lr1Xjt5e3rU7joNw@mail.gmail.com>
+ <45F11B42CB5830479EF0E56A27F4E68D7F12ED@exchange1.ad.100it.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp1.100percentit.com ([217.25.0.14]:55066 "EHLO
-	smtp.100percentit.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932357Ab2GCQf5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 12:35:57 -0400
-In-Reply-To: <CADvuQRFcgPOy765-cYSVT1DPjOZ5nPXSb1Lr1Xjt5e3rU7joNw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:53343 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750759Ab2GCQo6 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 12:44:58 -0400
+Received: by pbbrp8 with SMTP id rp8so9489055pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Jul 2012 09:44:58 -0700 (PDT)
+In-Reply-To: <45F11B42CB5830479EF0E56A27F4E68D7F12ED@exchange1.ad.100it.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
+To: David Blundell <David.Blundell@100percentit.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PiBUaGF0IG1lYW5zIHlvdSdyZSBydW5uaW5nIG91dCBvZiBtZW1vcnksIGluIGtlcm5lbHNwYWNl
-LiBUaGUgb3JkZXIgaXMgdGhlDQo+IHBvd2VyLW9mLXR3byAoMioqbikgb2YgaG93IG1hbnkgNGtC
-IHBhZ2VzIHdlcmUgcmVxdWVzdGVkLCAweDQwMjAgPQ0KPiBHRlBfQ09NUHxHRlBfSElHSCAoY29t
-cG91bmQgJiBhY2Nlc3MgZW1lcmdlbmN5IHBvb2xzKS4gQnRyZnMgbWF5DQo+IGJlIGluZGlyZWN0
-bHkgcmVsYXRlZCwgaXQncyBub3QgY2xlYXIgd2hhdCdzIGNvbnN1bWluZyBhbGwgdGhlIG1lbW9y
-eSwgYnV0DQo+IHRoYXQgZG9lc24ndCBzb3VuZCBhbGwgdGhhdCBsaWtlbHkuIFRoYXQgbWVzc2Fn
-ZSBzaG91bGQgYmUgZm9sbG93ZWQgYnkgYQ0KPiBzdGFjayBkdW1wLCB0aGF0IG1pZ2h0IHRlbGwg
-dXMgbW9yZS4NCj4gDQo+IEFyZSB5b3UgdXNpbmcgdGhlIENlcGggZGlzdHJpYnV0ZWQgZmlsZXN5
-c3RlbSwgb3IganVzdCB0aGUgUkFET1MgbGV2ZWwsIGUuZy4NCj4gUkJEIGltYWdlcz8NCg0KSGkg
-VG9tbWksDQoNClRoYW5rcyBmb3IgeW91ciBoZWxwLiAgQXMgYW4gdXBkYXRlIHRvIHRoaXMgdGhy
-ZWFkLCB0aGUgcHJvYmxlbSBwcm92ZWQgdG8gYmUgYnRyZnMgb24gRmVkb3JhIGFzIHNjcnVicyBz
-aG93ZWQgYmFkIGlub2RlcyBvbiBhbGwgdGhyZWUgc2VydmVycy4gIFdlIHdlcmUganVzdCB1c2lu
-ZyBSQURPUyB0byBob2xkIFJCRCBpbWFnZXMgYW5kIHRoZXJlIHNlZW1lZCB0byBiZSBwbGVudHkg
-b2YgZnJlZSBSQU0gLSBJJ20gdW5zdXJlIHdoYXQgY291bGQgaGF2ZSBjb25zdW1lZCBhbGwgb2Yg
-dGhlIG1lbW9yeS4NCg0KV2Ugc3dpdGNoZWQgdG8gVWJ1bnR1IDEyLjA0IGZvciB0aGUgdGVzdHMg
-d2hpY2ggc3RvcHBlZCBhbGwgYnRyZnMgcHJvYmxlbXMuDQoNCldlIGhhdmUgbm93IHNwZW50IGEg
-d2VlayBydW5uaW5nIHRoZSBpb3Rlc3RlciBjb3JydXB0aW9uIHRlc3RzIGluIEtWTSBpbnN0YW5j
-ZXMgd2hpbGUgbGl2ZSBtaWdyYXRpbmcgdGhlbSBldmVyeSA1IG1pbnV0ZXMgKHdpdGggYW5kIHdp
-dGhvdXQgY2FjaGUpLCBydW5uaW5nIGlvem9uZSBhbmQgdHJ5aW5nIGV2ZXJ5dGhpbmcgd2UgY291
-bGQgdG8gY29ycnVwdCB0aGUgVk1zLiAgVGhlIHRlc3RzIG9uIDAuNDcueCBhbGwgcGVyZm9ybWVk
-IGZsYXdsZXNzbHkuDQoNClRoZSB1cGdyYWRlIHRvIDAuNDggd2VudCBzbW9vdGhseSBidXQgc2lu
-Y2UgdGhlbiB3ZSBoYXZlIGhhZCBpc3N1ZXMgd2l0aCBzbG93IHJlcXVlc3RzIHNob3dpbmcgdXAg
-aW4gdGhlIGNlcGggbG9ncyBhbmQgZGlzayB0aW1lb3V0cyB3aGVuZXZlciB3ZSBydW4gaW96b25l
-IGluIHRoZSBWTXMuDQoNCkkgd2lsbCB3aXBlIHRoZSBjdXJyZW50IE9TRHMgYW5kIHN0YXJ0IHdp
-dGggZnJlc2ggYSAwLjQ4IGluc3RhbGxhdGlvbiB0byBzZWUgaWYgSSBjYW4gcmVwcm9kdWNlIHRo
-ZSBwcm9ibGVtLg0KDQpEYXZpZA0K
+On Tue, Jul 3, 2012 at 9:35 AM, David Blundell
+<David.Blundell@100percentit.com> wrote:
+> We switched to Ubuntu 12.04 for the tests which stopped all btrfs pro=
+blems.
+>
+> We have now spent a week running the iotester corruption tests in KVM=
+ instances while live migrating them every 5 minutes (with and without =
+cache), running iozone and trying everything we could to corrupt the VM=
+s. =C2=A0The tests on 0.47.x all performed flawlessly.
+
+Nice!
+
+> The upgrade to 0.48 went smoothly but since then we have had issues w=
+ith slow requests showing up in the ceph logs and disk timeouts wheneve=
+r we run iozone in the VMs.
+>
+> I will wipe the current OSDs and start with fresh a 0.48 installation=
+ to see if I can reproduce the problem.
+
+We've seen similar issues with btrfs, and others have reported that
+the large metadata btrfs option helps. We're still compiling
+information, but as of right now I hear best performance tends to
+happen with xfs; however, the lead position tends to shift around a
+lot.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
