@@ -1,50 +1,48 @@
-From: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
-Subject: Throughput increase by LACP bonding
-Date: Tue, 3 Jul 2012 07:42:03 +0000 (UTC)
-Message-ID: <loom.20120703T093148-928@post.gmane.org>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: speedup ceph / scaling / find the bottleneck
+Date: Tue, 03 Jul 2012 09:49:18 +0200
+Message-ID: <4FF2A3FE.7090205@profihost.ag>
+References: <59beaaec-5f12-4fb2-9c03-69f41849e89e@mailpro> <4FF13BEB.8080906@profihost.ag> <CAPYLRzinbjLOhNJeYRq99gu9bLom6jkZOh5Z+taSDf0DGJ_ACw@mail.gmail.com> <4FF1F4F6.4030403@profihost.ag> <4FF204DB.80709@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:43009 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755796Ab2GCHmV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 3 Jul 2012 03:42:21 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SlxkX-00065z-UW
-	for ceph-devel@vger.kernel.org; Tue, 03 Jul 2012 09:42:18 +0200
-Received: from 202.164.25.5 ([202.164.25.5])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Jul 2012 09:42:17 +0200
-Received: from madhusudhana.u.acharya by 202.164.25.5 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Jul 2012 09:42:17 +0200
+Received: from mail.profihost.ag ([85.158.179.208]:45412 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752086Ab2GCHtV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 03:49:21 -0400
+In-Reply-To: <4FF204DB.80709@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Gregory Farnum <greg@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
 
-Hi all,
-I am trying to increase the throughput in the cluster by enabling
-LACP on both in clients and all ceph cluster nodes. Each client and 
-ceph nodes has two 1G Ethernet interface which I want to aggregate
-and make it 2G. LACP has been configured at switch side too. But even after
-the configuration, I am not seeing any through put increase in ceph tell osd
-bench command and also dd. They are taking the same amount as earlier. I am 
-constantly seeing around 100MB/sec throughput in both DD and ceph bench 
-commands. Can someone suggest me how i can increase the throughput of the
-cluster ? Below are my configurations.
+Hello,
 
-	No of OSD's 	: 5
-	No of MON's 	: 3
-	No of MDS's	: 2
-	Linux Kernel	: 3.4.4
-	Ceph version	: 0.47.3
-        Hard disks      : 2x160G SAS drives (raid 0 configuration)
-        CPU             : Intel(R) Xeon(R) Quad CPU E5506  @ 2.13GHz
-        Memory          : 6G
 
-Thanks
-__M
+Am 02.07.2012 22:30, schrieb Josh Durgin:
+> If you add admin_socket=/path/to/admin_socket for your client running
+> qemu (in that client's ceph.conf section or manually in the qemu
+> command line) you can check that caching is enabled:
+>
+> ceph --admin-daemon /path/to/admin_socket show config | grep rbd_cache
+>
+> And see statistics it generates (look for cache) with:
+>
+> ceph --admin-daemon /path/to/admin_socket perfcounters_dump
 
+This doesn't work for me:
+ceph --admin-daemon /var/run/ceph.sock show config
+read only got 0 bytes of 4 expected for response length; invalid 
+command?2012-07-03 09:46:57.931821 7fa75d129700 -1 asok(0x8115a0) 
+AdminSocket: request 'show config' not defined
+
+Also perfcounters does not show anything:
+# ceph --admin-daemon /var/run/ceph.sock perfcounters_dump
+{}
+
+~]# ceph -v
+ceph version 0.48argonaut-2-gb576faa 
+(commit:b576faa6f24356f4d3ec7205e298d58659e29c68)
+
+Stefan
