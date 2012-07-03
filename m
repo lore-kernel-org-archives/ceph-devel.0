@@ -1,34 +1,49 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Stable/Master debian/rules not stripping all packages
-Date: Tue, 3 Jul 2012 08:55:35 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1207030854560.28638@cobra.newdream.net>
-References: <201207031358.20801.a.ott@m-privacy.de>
+From: David Blundell <David.Blundell@100percentit.com>
+Subject: RE: Unable to restart Mon after reboot
+Date: Tue, 3 Jul 2012 16:35:45 +0000
+Message-ID: <45F11B42CB5830479EF0E56A27F4E68D7F12ED@exchange1.ad.100it.net>
+References: <BDAE812E-2659-4025-9B30-2DEC6675B59A@100percentit.com>
+ <4FE55567.6080201@inktank.com> <4FE558CB.4010509@inktank.com>
+ <F38AD123-3C97-44BD-ABE5-33635AD6D768@100percentit.com>
+ <CADvuQRFcgPOy765-cYSVT1DPjOZ5nPXSb1Lr1Xjt5e3rU7joNw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:37872 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752339Ab2GCPzi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 11:55:38 -0400
-In-Reply-To: <201207031358.20801.a.ott@m-privacy.de>
+Received: from smtp1.100percentit.com ([217.25.0.14]:55066 "EHLO
+	smtp.100percentit.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S932357Ab2GCQf5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 12:35:57 -0400
+In-Reply-To: <CADvuQRFcgPOy765-cYSVT1DPjOZ5nPXSb1Lr1Xjt5e3rU7joNw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 3 Jul 2012, Amon Ott wrote:
-> Hi folks,
-> 
-> just found out that some Debian binary packages do not get stripped - a 53MB 
-> ceph-mds does look a bit weird.
-> 
-> Identified packages ceph-mds and gceph and added these lines:
->         dh_strip -pceph-mds --dbg-package=ceph-mds-dbg
->         dh_strip -pgceph --dbg-package=gceph-dbg
-
-I added stripping for ceph-mds, but gceph has been removed... I'm 
-curious which you're looking at that has both ceph-mds and gceph?
-
-Thanks!
-sage
-
+PiBUaGF0IG1lYW5zIHlvdSdyZSBydW5uaW5nIG91dCBvZiBtZW1vcnksIGluIGtlcm5lbHNwYWNl
+LiBUaGUgb3JkZXIgaXMgdGhlDQo+IHBvd2VyLW9mLXR3byAoMioqbikgb2YgaG93IG1hbnkgNGtC
+IHBhZ2VzIHdlcmUgcmVxdWVzdGVkLCAweDQwMjAgPQ0KPiBHRlBfQ09NUHxHRlBfSElHSCAoY29t
+cG91bmQgJiBhY2Nlc3MgZW1lcmdlbmN5IHBvb2xzKS4gQnRyZnMgbWF5DQo+IGJlIGluZGlyZWN0
+bHkgcmVsYXRlZCwgaXQncyBub3QgY2xlYXIgd2hhdCdzIGNvbnN1bWluZyBhbGwgdGhlIG1lbW9y
+eSwgYnV0DQo+IHRoYXQgZG9lc24ndCBzb3VuZCBhbGwgdGhhdCBsaWtlbHkuIFRoYXQgbWVzc2Fn
+ZSBzaG91bGQgYmUgZm9sbG93ZWQgYnkgYQ0KPiBzdGFjayBkdW1wLCB0aGF0IG1pZ2h0IHRlbGwg
+dXMgbW9yZS4NCj4gDQo+IEFyZSB5b3UgdXNpbmcgdGhlIENlcGggZGlzdHJpYnV0ZWQgZmlsZXN5
+c3RlbSwgb3IganVzdCB0aGUgUkFET1MgbGV2ZWwsIGUuZy4NCj4gUkJEIGltYWdlcz8NCg0KSGkg
+VG9tbWksDQoNClRoYW5rcyBmb3IgeW91ciBoZWxwLiAgQXMgYW4gdXBkYXRlIHRvIHRoaXMgdGhy
+ZWFkLCB0aGUgcHJvYmxlbSBwcm92ZWQgdG8gYmUgYnRyZnMgb24gRmVkb3JhIGFzIHNjcnVicyBz
+aG93ZWQgYmFkIGlub2RlcyBvbiBhbGwgdGhyZWUgc2VydmVycy4gIFdlIHdlcmUganVzdCB1c2lu
+ZyBSQURPUyB0byBob2xkIFJCRCBpbWFnZXMgYW5kIHRoZXJlIHNlZW1lZCB0byBiZSBwbGVudHkg
+b2YgZnJlZSBSQU0gLSBJJ20gdW5zdXJlIHdoYXQgY291bGQgaGF2ZSBjb25zdW1lZCBhbGwgb2Yg
+dGhlIG1lbW9yeS4NCg0KV2Ugc3dpdGNoZWQgdG8gVWJ1bnR1IDEyLjA0IGZvciB0aGUgdGVzdHMg
+d2hpY2ggc3RvcHBlZCBhbGwgYnRyZnMgcHJvYmxlbXMuDQoNCldlIGhhdmUgbm93IHNwZW50IGEg
+d2VlayBydW5uaW5nIHRoZSBpb3Rlc3RlciBjb3JydXB0aW9uIHRlc3RzIGluIEtWTSBpbnN0YW5j
+ZXMgd2hpbGUgbGl2ZSBtaWdyYXRpbmcgdGhlbSBldmVyeSA1IG1pbnV0ZXMgKHdpdGggYW5kIHdp
+dGhvdXQgY2FjaGUpLCBydW5uaW5nIGlvem9uZSBhbmQgdHJ5aW5nIGV2ZXJ5dGhpbmcgd2UgY291
+bGQgdG8gY29ycnVwdCB0aGUgVk1zLiAgVGhlIHRlc3RzIG9uIDAuNDcueCBhbGwgcGVyZm9ybWVk
+IGZsYXdsZXNzbHkuDQoNClRoZSB1cGdyYWRlIHRvIDAuNDggd2VudCBzbW9vdGhseSBidXQgc2lu
+Y2UgdGhlbiB3ZSBoYXZlIGhhZCBpc3N1ZXMgd2l0aCBzbG93IHJlcXVlc3RzIHNob3dpbmcgdXAg
+aW4gdGhlIGNlcGggbG9ncyBhbmQgZGlzayB0aW1lb3V0cyB3aGVuZXZlciB3ZSBydW4gaW96b25l
+IGluIHRoZSBWTXMuDQoNCkkgd2lsbCB3aXBlIHRoZSBjdXJyZW50IE9TRHMgYW5kIHN0YXJ0IHdp
+dGggZnJlc2ggYSAwLjQ4IGluc3RhbGxhdGlvbiB0byBzZWUgaWYgSSBjYW4gcmVwcm9kdWNlIHRo
+ZSBwcm9ibGVtLg0KDQpEYXZpZA0K
