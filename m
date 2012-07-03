@@ -1,58 +1,58 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Throughput increase by LACP bonding
-Date: Tue, 3 Jul 2012 08:18:53 -0700
-Message-ID: <8C571BF2075A4A28BEAB913A27D14C6D@inktank.com>
-References: <loom.20120703T093148-928@post.gmane.org>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: speedup ceph / scaling / find the bottleneck
+Date: Tue, 3 Jul 2012 08:31:14 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207030828240.27608@cobra.newdream.net>
+References: <59beaaec-5f12-4fb2-9c03-69f41849e89e@mailpro> <4FF13BEB.8080906@profihost.ag>
+ <CAPYLRzinbjLOhNJeYRq99gu9bLom6jkZOh5Z+taSDf0DGJ_ACw@mail.gmail.com>
+ <4FF1F4F6.4030403@profihost.ag> <4FF204DB.80709@inktank.com>
+ <4FF2A3FE.7090205@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:39954 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756460Ab2GCPS6 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 11:18:58 -0400
-Received: by pbbrp8 with SMTP id rp8so9381006pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Jul 2012 08:18:58 -0700 (PDT)
-In-Reply-To: <loom.20120703T093148-928@post.gmane.org>
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:56312 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754426Ab2GCPbV (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 11:31:21 -0400
+In-Reply-To: <4FF2A3FE.7090205@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Madhusudhana U <madhusudhana.u.acharya@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Cc: Josh Durgin <josh.durgin@inktank.com>, Gregory Farnum <greg@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
 
-On Tuesday, July 3, 2012 at 12:42 AM, Madhusudhana U wrote:
-> Hi all,
-> I am trying to increase the throughput in the cluster by enabling
-> LACP on both in clients and all ceph cluster nodes. Each client and =20
-> ceph nodes has two 1G Ethernet interface which I want to aggregate
-> and make it 2G. LACP has been configured at switch side too. But even=
- after
-> the configuration, I am not seeing any through put increase in ceph t=
-ell osd
-> bench command and also dd. They are taking the same amount as earlier=
-=2E I am =20
-> constantly seeing around 100MB/sec throughput in both DD and ceph ben=
-ch =20
-> commands. Can someone suggest me how i can increase the throughput of=
- the
-> cluster ? Below are my configurations.
-> =20
-> No of OSD's : 5
-> No of MON's : 3
-> No of MDS's : 2
-> Linux Kernel : 3.4.4
-> Ceph version : 0.47.3
-> Hard disks : 2x160G SAS drives (raid 0 configuration)
-> CPU : Intel(R) Xeon(R) Quad CPU E5506 @ 2.13GHz
-> Memory : 6G
+On Tue, 3 Jul 2012, Stefan Priebe - Profihost AG wrote:
+> Hello,
+> 
+> Am 02.07.2012 22:30, schrieb Josh Durgin:
+> > If you add admin_socket=/path/to/admin_socket for your client running
+> > qemu (in that client's ceph.conf section or manually in the qemu
+> > command line) you can check that caching is enabled:
+> > 
+> > ceph --admin-daemon /path/to/admin_socket show config | grep rbd_cache
+> > 
+> > And see statistics it generates (look for cache) with:
+> > 
+> > ceph --admin-daemon /path/to/admin_socket perfcounters_dump
+> 
+> This doesn't work for me:
+> ceph --admin-daemon /var/run/ceph.sock show config
+> read only got 0 bytes of 4 expected for response length; invalid
+> command?2012-07-03 09:46:57.931821 7fa75d129700 -1 asok(0x8115a0) AdminSocket:
+> request 'show config' not defined
 
-Apart from what's already been mentioned about checking your configurat=
-ion, keep in mind the osd bench is entirely a local test =E2=80=94 if i=
-t says 100MB/s, that means your OSD disk can do 100MB/s, and increasing=
- the network connectivity isn't going to change that. :)
+Oh, it's 'config show'.  Also, 'help' will list the supported commands.
+ 
+> Also perfcounters does not show anything:
+> # ceph --admin-daemon /var/run/ceph.sock perfcounters_dump
+> {}
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+There may be another daemon that tried to attach to the same socket file.  
+You might want to set 'admin socket = /var/run/ceph/$name.sock' or 
+something similar, or whatever else is necessary to make it a unique file.
+ 
+> ~]# ceph -v
+> ceph version 0.48argonaut-2-gb576faa
+> (commit:b576faa6f24356f4d3ec7205e298d58659e29c68)
+
+Out of curiousity, what patches are you applying on top of the release?
+
+sage
