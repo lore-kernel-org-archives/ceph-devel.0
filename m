@@ -1,28 +1,62 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: speedup ceph / scaling / find the bottleneck
-Date: Tue, 03 Jul 2012 21:16:10 +0200
-Message-ID: <4FF344FA.80708@profihost.ag>
-References: <59beaaec-5f12-4fb2-9c03-69f41849e89e@mailpro> <4FF13BEB.8080906@profihost.ag> <CAPYLRzinbjLOhNJeYRq99gu9bLom6jkZOh5Z+taSDf0DGJ_ACw@mail.gmail.com> <4FF1F4F6.4030403@profihost.ag> <4FF204DB.80709@inktank.com> <4FF2A3FE.7090205@profihost.ag> <Pine.LNX.4.64.1207030828240.27608@cobra.newdream.net>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: URL-safe base64 encoding for keys
+Date: Tue, 03 Jul 2012 21:18:51 +0200
+Message-ID: <4FF3459B.1050708@widodh.nl>
+References: <4FF2E40B.8090705@widodh.nl> <CADvuQRERYhuFiz07Kp_YxOo_ya6-jACJ3X2gNihp=5F83BJQiQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:41080 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932569Ab2GCTQO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 15:16:14 -0400
-In-Reply-To: <Pine.LNX.4.64.1207030828240.27608@cobra.newdream.net>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:34255 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751150Ab2GCTSy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 15:18:54 -0400
+In-Reply-To: <CADvuQRERYhuFiz07Kp_YxOo_ya6-jACJ3X2gNihp=5F83BJQiQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, Gregory Farnum <greg@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
+To: Tommi Virtanen <tv@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 03.07.2012 17:31, schrieb Sage Weil:
->> ~]# ceph -v
->> ceph version 0.48argonaut-2-gb576faa
->> (commit:b576faa6f24356f4d3ec7205e298d58659e29c68)
+
+
+On 07/03/2012 05:35 PM, Tommi Virtanen wrote:
+> On Tue, Jul 3, 2012 at 5:22 AM, Wido den Hollander <wido@widodh.nl> wrote:
+>> CloudStack's API expects a URI to be passed when adding a storage pool,
+>> e.g.:
+>>
+>> addStoragePool?uri=rbd://user:cephxkey@monitor.addr/poolname
+>>
+>> If 'cephxkey' contains a / the URI parser in Java fails (java.net.URI) and
+>> splits the URI in the wrong place.
 >
-> Out of curiousity, what patches are you applying on top of the release?
-just wip-filestore-min
+> First, I actually agree with you -- urlsafe b64 just makes sense. We'd
+> have to go through some sort of a transition period, accepting both,
+> perhaps generating old-style, for some time.
+>
 
-Stefan
+My thoughts exactly.
+
+> Second, have you tried quoting the unsafe characters? / is %2f, + is
+> %2b, % is %25.
+
+Yes, I have thought about that, but it would mean extra docs in the 
+CloudStack API docs.
+
+Warning: Please URL-encode your cephx secret since it may contain 
+invalid characters
+
+In the WebGUI (which talks to the API) I could do a URL-encode in 
+JavaScript and do the decode again in the CloudStack management server, 
+but it's not what you want.
+
+So yes, that has crossed my mind, but for now I took the easy way out 
+and generated myself a new key which doesn't contain slashes.
+
+Wido
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
