@@ -1,58 +1,41 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: speedup ceph / scaling / find the bottleneck
-Date: Tue, 3 Jul 2012 08:31:14 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1207030828240.27608@cobra.newdream.net>
-References: <59beaaec-5f12-4fb2-9c03-69f41849e89e@mailpro> <4FF13BEB.8080906@profihost.ag>
- <CAPYLRzinbjLOhNJeYRq99gu9bLom6jkZOh5Z+taSDf0DGJ_ACw@mail.gmail.com>
- <4FF1F4F6.4030403@profihost.ag> <4FF204DB.80709@inktank.com>
- <4FF2A3FE.7090205@profihost.ag>
+Subject: Re: Upgrade from 0.47.2 to 0.48 - osd crashes
+Date: Tue, 3 Jul 2012 08:32:42 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207030831250.27608@cobra.newdream.net>
+References: <CAMmJxtKb7zxf_eqyWhYWH7hq+qxnvAX5x7E8i7WeppppuYVTXg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56312 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:56319 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754426Ab2GCPbV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 11:31:21 -0400
-In-Reply-To: <4FF2A3FE.7090205@profihost.ag>
+	with ESMTP id S1753616Ab2GCPcp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 11:32:45 -0400
+In-Reply-To: <CAMmJxtKb7zxf_eqyWhYWH7hq+qxnvAX5x7E8i7WeppppuYVTXg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Josh Durgin <josh.durgin@inktank.com>, Gregory Farnum <greg@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org, Mark Nelson <mark.nelson@inktank.com>
+To: John Axel Eriksson <john@insane.se>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, 3 Jul 2012, Stefan Priebe - Profihost AG wrote:
-> Hello,
-> 
-> Am 02.07.2012 22:30, schrieb Josh Durgin:
-> > If you add admin_socket=/path/to/admin_socket for your client running
-> > qemu (in that client's ceph.conf section or manually in the qemu
-> > command line) you can check that caching is enabled:
-> > 
-> > ceph --admin-daemon /path/to/admin_socket show config | grep rbd_cache
-> > 
-> > And see statistics it generates (look for cache) with:
-> > 
-> > ceph --admin-daemon /path/to/admin_socket perfcounters_dump
-> 
-> This doesn't work for me:
-> ceph --admin-daemon /var/run/ceph.sock show config
-> read only got 0 bytes of 4 expected for response length; invalid
-> command?2012-07-03 09:46:57.931821 7fa75d129700 -1 asok(0x8115a0) AdminSocket:
-> request 'show config' not defined
+On Tue, 3 Jul 2012, John Axel Eriksson wrote:
+> So I first upgraded the mon, then went ahead and upgraded one of the
+> osds which crashed and keeps crashing - probably when trying to
+> upgrade the filestore.
+> How should I proceed? FS is btrfs, one mon two osds. This is the conf
+> for the osds:
+>
+> [...]
+> 'FileStore::op_tp thread 0x7f2d083e3700' had timed out after 60
+> 2012-07-03 07:55:11.037077 7f2d0bbea700  1 heartbeat_map is_healthy
+> 'FileStore::op_tp thread 0x7f2d083e3700' had suicide timed out after
+> 180
+> 2012-07-03 07:55:11.038755 7f2d0bbea700 -1 common/HeartbeatMap.cc: In
+> function 'bool ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d*,
+> const char*, time_t)' thread 7f2d0bbea700 time 2012-07-03
+> 07:55:11.037140
+> common/HeartbeatMap.cc: 78: FAILED assert(0 == "hit suicide timeout")
 
-Oh, it's 'config show'.  Also, 'help' will list the supported commands.
- 
-> Also perfcounters does not show anything:
-> # ceph --admin-daemon /var/run/ceph.sock perfcounters_dump
-> {}
-
-There may be another daemon that tried to attach to the same socket file.  
-You might want to set 'admin socket = /var/run/ceph/$name.sock' or 
-something similar, or whatever else is necessary to make it a unique file.
- 
-> ~]# ceph -v
-> ceph version 0.48argonaut-2-gb576faa
-> (commit:b576faa6f24356f4d3ec7205e298d58659e29c68)
-
-Out of curiousity, what patches are you applying on top of the release?
+This just means the fs wasn't getting work done quickly.  Either a kernel 
+bug, or extreme fragmentation, or something along those lines.  Glad to 
+hear that a reboot sorted it out!
 
 sage
