@@ -1,59 +1,54 @@
-From: Amon Ott <a.ott@m-privacy.de>
-Subject: Re: MDS spinning wild after restart on all nodes
-Date: Tue, 3 Jul 2012 08:46:29 +0200
-Message-ID: <201207030846.29754.a.ott@m-privacy.de>
-References: <201206151143.25706.a.ott@m-privacy.de> <Pine.LNX.4.64.1206150940460.4551@cobra.newdream.net> <CAPYLRzjW5BGuq0b8prLona3c3+d+kKCQd0MbxGjYcR7c8a7TXQ@mail.gmail.com>
+From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
+Subject: Re: bad performance fio random write - rados bench random write to
+ compare?
+Date: Tue, 03 Jul 2012 09:31:17 +0200
+Message-ID: <4FF29FC5.1050002@profihost.ag>
+References: <4FE07B2A.7080209@profihost.ag> <5b71e1e3-b1be-4c12-897d-0bffbbcf8d33@mailpro> <CAPYLRzhUsvweP-J7Be+XvLy7deJJUsFpzMHA8RvygA542uLuBA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.237.71]:34494 "EHLO www.m-privacy.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932325Ab2GCGqj convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 02:46:39 -0400
-In-Reply-To: <CAPYLRzjW5BGuq0b8prLona3c3+d+kKCQd0MbxGjYcR7c8a7TXQ@mail.gmail.com>
-Content-Disposition: inline
+Received: from mail.profihost.ag ([85.158.179.208]:48524 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752086Ab2GCHbT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 03:31:19 -0400
+In-Reply-To: <CAPYLRzhUsvweP-J7Be+XvLy7deJJUsFpzMHA8RvygA542uLuBA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <greg@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
 
-Hi Greg!
+Am 02.07.2012 21:52, schrieb Gregory Farnum:
+> On Tue, Jun 19, 2012 at 7:05 AM, Alexandre DERUMIER <aderumier@odiso.=
+com> wrote:
+>> Hi,
+>> Is it possible to do random write bench with rados bench command ?
+>>
+>> I have very base random write performance with 4K block size inside =
+qemu-kvm,
+>> 1000 iops/s max with 3 nodes with 3x 5 disk 15k
+>> (Maybe it's related to my constant disk writes, like datas are not f=
+lushed sequentially to disk)
+>>
+>> seekwatcher movie of 1 osd here :
+>> http://odisoweb1.odiso.net/random-write-4k.mpg
+>>
+>> I would like to do tests on kvm host with rados command to compare.
+>> (I don't have rbd module in my kvm host kernel,so I can't use fio on=
+ the host)
+>
+> Unfortunately, nobody's implemented a random write test in rados benc=
+h
+> yet (this might be a good bug for somebody who's interested in gettin=
+g
+> in to the project =97 rados bench is pretty simple). I'd offer more
+> suggestions but I think we've already discussed this elsewhere. :)
 
-On Monday 02 July 2012 you wrote:
-> Amon,
-> I've been going through my backlog of flagged emails and came across
-> this one. Did you ever get that information for the bug that you were
-> going to try and find?
+I think random I/O is very important for a lot of people at least for=20
+people using KVM on top of ceph. Sadly i can't implement it.
 
-After attaching my first results to the bug=20
-http://tracker.newdream.net/issues/2596 I retried with strace, but with=
-=20
-strace on it, MDS worked fine. This means it is probably a race somewhe=
-re.
-
-After that I meant to try again. Unfortunately, I got flooded with work=
- and=20
-have not yet found the time. I will retry with 0.48 release as soon as =
-I=20
-can - only three working days left before going on holidays there might=
- still=20
-be a chance.
-
-Amon Ott
---=20
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Am K=F6llnischen Park 1    Fax: +49 30 24342336
-10179 Berlin             http://www.m-privacy.de
-
-Amtsgericht Charlottenburg, HRB 84946
-
-Gesch=E4ftsf=FChrer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
-
-GnuPG-Key-ID: 0x2DD3A649
+Stefan
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
