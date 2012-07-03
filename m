@@ -1,33 +1,39 @@
 From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: domino-style OSD crash
-Date: Tue, 3 Jul 2012 14:38:47 -0700
-Message-ID: <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
-References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com>
- <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com>
- <4FF2AFEB.1010403@univ-nantes.fr> <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
- <4FF35C01.4070400@univ-nantes.fr>
+Subject: Re: Updated guide for chef installs, from where the docs stop onward
+Date: Tue, 3 Jul 2012 15:34:27 -0700
+Message-ID: <CADvuQRHetBF+rvadqoiXrEKdS07GVU36yp4Nzw_6g=OkjNXyfg@mail.gmail.com>
+References: <CADvuQRH=pfvhWWTzuXt_LqiyAwc3bxoRAM_sK4vUX3RWnqw2CQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:56909 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753726Ab2GCVjH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 17:39:07 -0400
-Received: by pbbrp8 with SMTP id rp8so9865000pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Jul 2012 14:39:07 -0700 (PDT)
-In-Reply-To: <4FF35C01.4070400@univ-nantes.fr>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:55366 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751119Ab2GCWes (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 18:34:48 -0400
+Received: by yhmm54 with SMTP id m54so6670618yhm.19
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Jul 2012 15:34:48 -0700 (PDT)
+In-Reply-To: <CADvuQRH=pfvhWWTzuXt_LqiyAwc3bxoRAM_sK4vUX3RWnqw2CQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, John Wilkins <john.wilkins@inktank.com>
+Cc: Juan Jose Galvez <juanjose.galvez@inktank.com>, Tamil Muthamizhan <tamil.muthamizhan@inktank.com>, Ken Franklin <ken.franklin@inktank.com>
 
-On Tue, Jul 3, 2012 at 1:54 PM, Yann Dupont <Yann.Dupont@univ-nantes.fr> wrote:
-> In the case I could repair, do you think a crashed FS as it is right now is
-> valuable for you, for future reference , as I saw you can't reproduce the
-> problem ? I can make an archive (or a btrfs dump ?), but it will be quite
-> big.
+On Wed, Jun 20, 2012 at 1:57 PM, Tommi Virtanen <tv@inktank.com> wrote:
+> sudo apt-get install gdisk
+> sudo sgdisk /dev/sdb --zap-all --clear --mbrtogpt --largest-new=1
+> --change-name=1:'ceph data' --typecode=1:{fsid}
+> # mkfs and allocate disk to cluster; any filesystem is ok, adjust for
+> xfs/btrfs etc
+> sudo mkfs -t ext4 /dev/sdb1
+> sudo mount -o user_xattr /dev/sdb1 /mnt
+> sudo ceph-disk-prepare --cluster-uuid={fsid} /mnt
+> sudo umount /mnt
 
-At this point, it's more about the upstream developers (of btrfs etc)
-than us; we're on good terms with them but not experts on the on-disk
-format(s). You might want to send an email to the relevant mailing
-lists before wiping the disks.
+I just pushed commit ad97415ef72b55934adfa5024fd9af8fd1f0f82d to
+master. With that, the above becomes just
+
+sudo apt-get install gdisk
+sudo ceph-disk-prepare /dev/sdb
+
+Beware, it'll erase any and all disks you point it at. Do not stare
+into laser with remaining eye.
