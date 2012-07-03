@@ -1,82 +1,33 @@
-From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+From: Tommi Virtanen <tv@inktank.com>
 Subject: Re: domino-style OSD crash
-Date: Tue, 03 Jul 2012 22:54:25 +0200
-Message-ID: <4FF35C01.4070400@univ-nantes.fr>
-References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com> <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com> <4FF2AFEB.1010403@univ-nantes.fr> <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
+Date: Tue, 3 Jul 2012 14:38:47 -0700
+Message-ID: <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
+References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com>
+ <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com>
+ <4FF2AFEB.1010403@univ-nantes.fr> <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
+ <4FF35C01.4070400@univ-nantes.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-cha.cpub.univ-nantes.fr ([193.52.103.113]:43344 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752673Ab2GCUyf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 16:54:35 -0400
-In-Reply-To: <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:56909 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753726Ab2GCVjH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jul 2012 17:39:07 -0400
+Received: by pbbrp8 with SMTP id rp8so9865000pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Jul 2012 14:39:07 -0700 (PDT)
+In-Reply-To: <4FF35C01.4070400@univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
+To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
 Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Le 03/07/2012 21:42, Tommi Virtanen a =C3=A9crit :
-> On Tue, Jul 3, 2012 at 1:40 AM, Yann Dupont <Yann.Dupont@univ-nantes.=
-fr> wrote:
->> Upgraded the kernel to 3.5.0-rc4 + some patches, seems btrfs is OK r=
-ight
->> now.
->>
->> Tried to restart osd with 0.47.3, then next branch, and today with 0=
-=2E48.
->>
->> 4 of 8 nodes fails with the same message :
->>
->> ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2=
-bf2030)
->>   1: /usr/bin/ceph-osd() [0x701929]
-> ...
->>   13: (leveldb::InternalKeyComparator::FindShortestSeparator(std::st=
-ring*,
->> leveldb::Slice const&) const+0x4d) [0x6e811d]
-> That looks like http://tracker.newdream.net/issues/2563 and the best
-> we have for that ticket is "looks like you have a corrupted leveldb
-> file". Is this reproducible with a freshly mkfs'ed data partition?
-Probably not. I have multiple data volumes on each nodes (I was plannin=
-g=20
-xfs vs ext4 vs btrfs benchmarks before being ill) and thoses nodes star=
-t=20
-OK with another data partition .
+On Tue, Jul 3, 2012 at 1:54 PM, Yann Dupont <Yann.Dupont@univ-nantes.fr> wrote:
+> In the case I could repair, do you think a crashed FS as it is right now is
+> valuable for you, for future reference , as I saw you can't reproduce the
+> problem ? I can make an archive (or a btrfs dump ?), but it will be quite
+> big.
 
-It's very probable that there is corruption somewhere, due to kernel bu=
-g=20
-, probably triggered by btrfs.
-
-Issue 2563 is probably the same.
-
-I'd like to restart those nodes without formatting them, not because th=
-e=20
-data is valuable, but because if the same thing happens in production, =
-a=20
-method similar to "fsck" the node could be of great value.
-
-I saw the method to check the leveldb. Will try tomorrow without garant=
-ees.
-
-In the case I could repair, do you think a crashed FS as it is right no=
-w=20
-is valuable for you, for future reference , as I saw you can't reproduc=
-e=20
-the problem ? I can make an archive (or a btrfs dump ?), but it will be=
-=20
-quite big.
-
-Cheers,
-
---=20
-Yann Dupont - Service IRTS, DSI Universit=C3=A9 de Nantes
-Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+At this point, it's more about the upstream developers (of btrfs etc)
+than us; we're on good terms with them but not experts on the on-disk
+format(s). You might want to send an email to the relevant mailing
+lists before wiping the disks.
