@@ -1,54 +1,92 @@
-From: Amon Ott <a.ott@m-privacy.de>
-Subject: Re: Stable/Master debian/rules not stripping all packages
-Date: Wed, 4 Jul 2012 08:41:13 +0200
-Message-ID: <201207040841.14683.a.ott@m-privacy.de>
-References: <201207031358.20801.a.ott@m-privacy.de> <Pine.LNX.4.64.1207030854560.28638@cobra.newdream.net>
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: Re: domino-style OSD crash
+Date: Wed, 04 Jul 2012 10:06:36 +0200
+Message-ID: <4FF3F98C.30602@univ-nantes.fr>
+References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com> <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com> <4FF2AFEB.1010403@univ-nantes.fr> <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com> <4FF35C01.4070400@univ-nantes.fr> <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.m-privacy.de ([85.214.237.71]:42581 "EHLO www.m-privacy.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753793Ab2GDGlX convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 02:41:23 -0400
-In-Reply-To: <Pine.LNX.4.64.1207030854560.28638@cobra.newdream.net>
-Content-Disposition: inline
+Received: from smtptls2-lmb.cpub.univ-nantes.fr ([193.52.103.111]:56687 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S933681Ab2GDIGr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 04:06:47 -0400
+In-Reply-To: <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tuesday 03 July 2012 wrote Sage Weil:
-> On Tue, 3 Jul 2012, Amon Ott wrote:
-> > just found out that some Debian binary packages do not get stripped=
- - a
-> > 53MB ceph-mds does look a bit weird.
-> >
-> > Identified packages ceph-mds and gceph and added these lines:
-> >         dh_strip -pceph-mds --dbg-package=3Dceph-mds-dbg
-> >         dh_strip -pgceph --dbg-package=3Dgceph-dbg
+Le 03/07/2012 23:38, Tommi Virtanen a =C3=A9crit :
+> On Tue, Jul 3, 2012 at 1:54 PM, Yann Dupont <Yann.Dupont@univ-nantes.=
+fr> wrote:
+>> In the case I could repair, do you think a crashed FS as it is right=
+ now is
+>> valuable for you, for future reference , as I saw you can't reproduc=
+e the
+>> problem ? I can make an archive (or a btrfs dump ?), but it will be =
+quite
+>> big.
+> At this point, it's more about the upstream developers (of btrfs etc)
+> than us; we're on good terms with them but not experts on the on-disk
+> format(s). You might want to send an email to the relevant mailing
+> lists before wiping the disks.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> I added stripping for ceph-mds, but gceph has been removed... I'm
-> curious which you're looking at that has both ceph-mds and gceph?
+>
+Well, I probably wasn't clear enough. I talked about crashed FS, but i=20
+was talking about ceph. The underlying FS (btrfs in that case) of 1 nod=
+e=20
+(and only one) has PROBABLY crashed in the past, causing corruption in=20
+ceph data on this node, and then the subsequent crash of other nodes.
 
-My fault, found that later when building again. I still had some old gc=
-eph-dbg=20
-package in my repository, deleted that now.
+RIGHT now btrfs on this node is OK. I can access the filesystem without=
+=20
+errors.
 
-Amon Ott
+=46or the moment, on 8 nodes, 4 refuse to restart .
+1 of the 4 nodes was the crashed node , the 3 others didn't had broblem=
+=20
+with the underlying fs as far as I can tell.
+
+So I think the scenario is :
+
+One node had problem with btrfs, leading first to kernel problem ,=20
+probably corruption (in disk/ in memory maybe ?) ,and ultimately to a=20
+kernel oops. Before that ultimate kernel oops, bad data has been=20
+transmitted to other (sane) nodes, leading to ceph-osd crash on thoses=20
+nodes.
+
+If you think this scenario is highly improbable in real life (that is,=20
+btrfs will probably be fixed for good, and then, corruption can't=20
+happen), it's ok.
+
+But I wonder if this scenario can be triggered with other problem, and=20
+bad data can be transmitted to other sane nodes (power outage, out of=20
+memory condition, disk full... for example)
+
+That's why I proposed you a crashed ceph volume image (I shouldn't have=
+=20
+talked about a crashed fs, sorry for the confusion)
+
+Talking about btrfs, there is a lot of fixes in btrfs between 3.4 and=20
+3.5rc. After the crash, I couldn't mount the btrfs volume. With 3.5rc I=
+=20
+can , and there is no sign of problem on it. It does'nt mean data is=20
+safe there, but i think it's a sign that at least, some bugs have been=20
+corrected in btrfs code.
+
+Cheers,
+
 --=20
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Am K=F6llnischen Park 1    Fax: +49 30 24342336
-10179 Berlin             http://www.m-privacy.de
+Yann Dupont - Service IRTS, DSI Universit=C3=A9 de Nantes
+Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
 
-Amtsgericht Charlottenburg, HRB 84946
-
-Gesch=E4ftsf=FChrer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
-
-GnuPG-Key-ID: 0x2DD3A649
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
