@@ -1,70 +1,41 @@
-From: Gregory Farnum <greg@inktank.com>
+From: Sage Weil <sage@inktank.com>
 Subject: Re: [PATCH] librados: Bump the version to 0.48
-Date: Wed, 4 Jul 2012 09:29:07 -0700
-Message-ID: <6ED535BAF3394911BDF4F16441761D6A@inktank.com>
+Date: Wed, 4 Jul 2012 09:33:18 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207040932090.6931@cobra.newdream.net>
 References: <1341409564-26660-1-git-send-email-wido@widodh.nl>
+ <6ED535BAF3394911BDF4F16441761D6A@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1429156764-1341419598=:6931"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:43435 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754683Ab2GDQ3E convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 12:29:04 -0400
-Received: by pbbrp8 with SMTP id rp8so11257474pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Jul 2012 09:29:04 -0700 (PDT)
-In-Reply-To: <1341409564-26660-1-git-send-email-wido@widodh.nl>
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:43913 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752128Ab2GDQdU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 12:33:20 -0400
+In-Reply-To: <6ED535BAF3394911BDF4F16441761D6A@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
 
-Hmmm =E2=80=94 we generally try to modify these versions when the API c=
-hanges, not on every sprint. It looks to me like Sage added one functio=
-n in 0.45 where we maybe should have bumped it, but that was a long tim=
-e ago and at this point we should maybe just eat it?
--Greg
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
+--557981400-1429156764-1341419598=:6931
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-On Wednesday, July 4, 2012 at 6:46 AM, Wido den Hollander wrote:
+On Wed, 4 Jul 2012, Gregory Farnum wrote:
+> Hmmm =FF=FF we generally try to modify these versions when the API change=
+s,=20
+> not on every sprint. It looks to me like Sage added one function in 0.45=
+=20
+> where we maybe should have bumped it, but that was a long time ago and=20
+> at this point we should maybe just eat it?
 
-> =20
-> Signed-off-by: Wido den Hollander <wido@widodh.nl (mailto:wido@widodh=
-=2Enl)>
-> ---
-> src/include/rados/librados.h | 2 +-
-> 1 file changed, 1 insertion(+), 1 deletion(-)
-> =20
-> diff --git a/src/include/rados/librados.h b/src/include/rados/librado=
-s.h
-> index 9f723f7..4870b0f 100644
-> --- a/src/include/rados/librados.h
-> +++ b/src/include/rados/librados.h
-> @@ -23,7 +23,7 @@ extern "C" {
-> #endif
-> =20
-> #define LIBRADOS_VER_MAJOR 0
-> -#define LIBRADOS_VER_MINOR 44
-> +#define LIBRADOS_VER_MINOR 48
-> #define LIBRADOS_VER_EXTRA 0
-> =20
-> #define LIBRADOS_VERSION(maj, min, extra) ((maj << 16) + (min << 8) +=
- extra)
-> -- =20
-> 1.7.9.5
-> =20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@=
-vger.kernel.org)
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
+Yeah, I went ahead and applied this to stable (argonaut) since it's as=20
+good a reference point as any.  Moving forward, we should try to sync=20
+this up with API changes as they happen.  Hmm, like that assert=20
+ObjectOperation that just went into master...=20
 
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
+--557981400-1429156764-1341419598=:6931--
