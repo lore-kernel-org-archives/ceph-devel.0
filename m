@@ -1,94 +1,201 @@
-From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Subject: Re: domino-style OSD crash
-Date: Wed, 04 Jul 2012 10:06:36 +0200
-Message-ID: <4FF3F98C.30602@univ-nantes.fr>
-References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com> <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com> <4FF2AFEB.1010403@univ-nantes.fr> <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com> <4FF35C01.4070400@univ-nantes.fr> <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
+From: Sha Zhengju <handai.szj@gmail.com>
+Subject: Re: [PATCH 4/7] Use vfs __set_page_dirty interface instead of doing
+ it inside filesystem
+Date: Wed, 04 Jul 2012 16:11:48 +0800
+Message-ID: <4FF3FAC4.1000005@gmail.com>
+References: <1340880885-5427-1-git-send-email-handai.szj@taobao.com> <1340881423-5703-1-git-send-email-handai.szj@taobao.com> <Pine.LNX.4.64.1206282218260.18049@cobra.newdream.net> <4FF15782.5090807@gmail.com> <Pine.LNX.4.64.1207020745180.23342@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls2-lmb.cpub.univ-nantes.fr ([193.52.103.111]:56687 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S933681Ab2GDIGr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 04:06:47 -0400
-In-Reply-To: <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <Pine.LNX.4.64.1207020745180.23342@cobra.newdream.net>
+Sender: owner-linux-mm@kvack.org
+To: Sage Weil <sage@inktank.com>
+Cc: linux-mm@kvack.org, cgroups@vger.kernel.org, kamezawa.hiroyu@jp.fujitsu.com, gthelen@google.com, yinghan@google.com, akpm@linux-foundation.org, mhocko@suse.cz, linux-kernel@vger.kernel.org, torvalds@linux-foundation.org, viro@zeniv.linux.org.uk, linux-fsdevel@vger.kernel.org, sage@newdream.net, ceph-devel@vger.kernel.org, Sha Zhengju <handai.szj@taobao.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Le 03/07/2012 23:38, Tommi Virtanen a =C3=A9crit :
-> On Tue, Jul 3, 2012 at 1:54 PM, Yann Dupont <Yann.Dupont@univ-nantes.=
-fr> wrote:
->> In the case I could repair, do you think a crashed FS as it is right=
- now is
->> valuable for you, for future reference , as I saw you can't reproduc=
-e the
->> problem ? I can make an archive (or a btrfs dump ?), but it will be =
-quite
->> big.
-> At this point, it's more about the upstream developers (of btrfs etc)
-> than us; we're on good terms with them but not experts on the on-disk
-> format(s). You might want to send an email to the relevant mailing
-> lists before wiping the disks.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 07/02/2012 10:49 PM, Sage Weil wrote:
+> On Mon, 2 Jul 2012, Sha Zhengju wrote:
+>> On 06/29/2012 01:21 PM, Sage Weil wrote:
+>>> On Thu, 28 Jun 2012, Sha Zhengju wrote:
+>>>
+>>>> From: Sha Zhengju<handai.szj@taobao.com>
+>>>>
+>>>> Following we will treat SetPageDirty and dirty page accounting as an
+>>>> integrated
+>>>> operation. Filesystems had better use vfs interface directly to avoid
+>>>> those details.
+>>>>
+>>>> Signed-off-by: Sha Zhengju<handai.szj@taobao.com>
+>>>> ---
+>>>>    fs/buffer.c                 |    2 +-
+>>>>    fs/ceph/addr.c              |   20 ++------------------
+>>>>    include/linux/buffer_head.h |    2 ++
+>>>>    3 files changed, 5 insertions(+), 19 deletions(-)
+>>>>
+>>>> diff --git a/fs/buffer.c b/fs/buffer.c
+>>>> index e8d96b8..55522dd 100644
+>>>> --- a/fs/buffer.c
+>>>> +++ b/fs/buffer.c
+>>>> @@ -610,7 +610,7 @@ EXPORT_SYMBOL(mark_buffer_dirty_inode);
+>>>>     * If warn is true, then emit a warning if the page is not uptodate and
+>>>> has
+>>>>     * not been truncated.
+>>>>     */
+>>>> -static int __set_page_dirty(struct page *page,
+>>>> +int __set_page_dirty(struct page *page,
+>>>>    		struct address_space *mapping, int warn)
+>>>>    {
+>>>>    	if (unlikely(!mapping))
+>>> This also needs an EXPORT_SYMBOL(__set_page_dirty) to allow ceph to
+>>> continue to build as a module.
+>>>
+>>> With that fixed, the ceph bits are a welcome cleanup!
+>>>
+>>> Acked-by: Sage Weil<sage@inktank.com>
+>> Further, I check the path again and may it be reworked as follows to avoid
+>> undo?
+>>
+>> __set_page_dirty();
+>> __set_page_dirty();
+>> ceph operations;                ==>                     if (page->mapping)
+>> if (page->mapping)                                            ceph operations;
+>>      ;
+>> else
+>>      undo = 1;
+>> if (undo)
+>>      xxx;
+> Yep.  Taking another look at the original code, though, I'm worried that
+> one reason the __set_page_dirty() actions were spread out the way they are
+> is because we wanted to ensure that the ceph operations were always
+> performed when PagePrivate was set.
+>
+
+Sorry, I've lost something:
+
+__set_page_dirty();                        __set_page_dirty();
+ceph operations;
+if(page->mapping)         ==>      if(page->mapping) {
+        SetPagePrivate;                            SetPagePrivate;
+else                                                      ceph operations;
+     undo = 1;                                  }
+
+if (undo)
+     XXX;
+
+I think this can ensure that ceph operations are performed together with
+SetPagePrivate.
+
+> It looks like invalidatepage won't get called if private isn't set, and
+> presumably it handles the truncate race with __set_page_dirty() properly
+> (right?).  What about writeback?  Do we need to worry about writepage[s]
+> getting called with a NULL page->private?
+
+__set_page_dirty does handle racing conditions with truncate and
+writeback writepage[s] also take page->private into consideration
+which is done inside specific filesystems. I notice that ceph has handled
+this in ceph_writepage().
+Sorry, not vfs expert and maybe I've not caught your point...
+
+
+Thanks,
+Sha
+
+> Thanks!
+> sage
 >
 >
-Well, I probably wasn't clear enough. I talked about crashed FS, but i=20
-was talking about ceph. The underlying FS (btrfs in that case) of 1 nod=
-e=20
-(and only one) has PROBABLY crashed in the past, causing corruption in=20
-ceph data on this node, and then the subsequent crash of other nodes.
-
-RIGHT now btrfs on this node is OK. I can access the filesystem without=
-=20
-errors.
-
-=46or the moment, on 8 nodes, 4 refuse to restart .
-1 of the 4 nodes was the crashed node , the 3 others didn't had broblem=
-=20
-with the underlying fs as far as I can tell.
-
-So I think the scenario is :
-
-One node had problem with btrfs, leading first to kernel problem ,=20
-probably corruption (in disk/ in memory maybe ?) ,and ultimately to a=20
-kernel oops. Before that ultimate kernel oops, bad data has been=20
-transmitted to other (sane) nodes, leading to ceph-osd crash on thoses=20
-nodes.
-
-If you think this scenario is highly improbable in real life (that is,=20
-btrfs will probably be fixed for good, and then, corruption can't=20
-happen), it's ok.
-
-But I wonder if this scenario can be triggered with other problem, and=20
-bad data can be transmitted to other sane nodes (power outage, out of=20
-memory condition, disk full... for example)
-
-That's why I proposed you a crashed ceph volume image (I shouldn't have=
-=20
-talked about a crashed fs, sorry for the confusion)
-
-Talking about btrfs, there is a lot of fixes in btrfs between 3.4 and=20
-3.5rc. After the crash, I couldn't mount the btrfs volume. With 3.5rc I=
-=20
-can , and there is no sign of problem on it. It does'nt mean data is=20
-safe there, but i think it's a sign that at least, some bugs have been=20
-corrected in btrfs code.
-
-Cheers,
-
---=20
-Yann Dupont - Service IRTS, DSI Universit=C3=A9 de Nantes
-Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+>
+>>
+>>
+>> Thanks,
+>> Sha
+>>
+>>>> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+>>>> index 8b67304..d028fbe 100644
+>>>> --- a/fs/ceph/addr.c
+>>>> +++ b/fs/ceph/addr.c
+>>>> @@ -5,6 +5,7 @@
+>>>>    #include<linux/mm.h>
+>>>>    #include<linux/pagemap.h>
+>>>>    #include<linux/writeback.h>	/* generic_writepages */
+>>>> +#include<linux/buffer_head.h>
+>>>>    #include<linux/slab.h>
+>>>>    #include<linux/pagevec.h>
+>>>>    #include<linux/task_io_accounting_ops.h>
+>>>> @@ -73,14 +74,8 @@ static int ceph_set_page_dirty(struct page *page)
+>>>>    	int undo = 0;
+>>>>    	struct ceph_snap_context *snapc;
+>>>>
+>>>> -	if (unlikely(!mapping))
+>>>> -		return !TestSetPageDirty(page);
+>>>> -
+>>>> -	if (TestSetPageDirty(page)) {
+>>>> -		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
+>>>> -		     mapping->host, page, page->index);
+>>>> +	if (!__set_page_dirty(page, mapping, 1))
+>>>>    		return 0;
+>>>> -	}
+>>>>
+>>>>    	inode = mapping->host;
+>>>>    	ci = ceph_inode(inode);
+>>>> @@ -107,14 +102,7 @@ static int ceph_set_page_dirty(struct page *page)
+>>>>    	     snapc, snapc->seq, snapc->num_snaps);
+>>>>    	spin_unlock(&ci->i_ceph_lock);
+>>>>
+>>>> -	/* now adjust page */
+>>>> -	spin_lock_irq(&mapping->tree_lock);
+>>>>    	if (page->mapping) {	/* Race with truncate? */
+>>>> -		WARN_ON_ONCE(!PageUptodate(page));
+>>>> -		account_page_dirtied(page, page->mapping);
+>>>> -		radix_tree_tag_set(&mapping->page_tree,
+>>>> -				page_index(page), PAGECACHE_TAG_DIRTY);
+>>>> -
+>>>>    		/*
+>>>>    		 * Reference snap context in page->private.  Also set
+>>>>    		 * PagePrivate so that we get invalidatepage callback.
+>>>> @@ -126,14 +114,10 @@ static int ceph_set_page_dirty(struct page *page)
+>>>>    		undo = 1;
+>>>>    	}
+>>>>
+>>>> -	spin_unlock_irq(&mapping->tree_lock);
+>>>> -
+>>>>    	if (undo)
+>>>>    		/* whoops, we failed to dirty the page */
+>>>>    		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+>>>>
+>>>> -	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
+>>>> -
+>>>>    	BUG_ON(!PageDirty(page));
+>>>>    	return 1;
+>>>>    }
+>>>> diff --git a/include/linux/buffer_head.h b/include/linux/buffer_head.h
+>>>> index 458f497..0a331a8 100644
+>>>> --- a/include/linux/buffer_head.h
+>>>> +++ b/include/linux/buffer_head.h
+>>>> @@ -336,6 +336,8 @@ static inline void lock_buffer(struct buffer_head *bh)
+>>>>    }
+>>>>
+>>>>    extern int __set_page_dirty_buffers(struct page *page);
+>>>> +extern int __set_page_dirty(struct page *page,
+>>>> +		struct address_space *mapping, int warn);
+>>>>
+>>>>    #else /* CONFIG_BLOCK */
+>>>>
+>>>> -- 
+>>>> 1.7.1
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-fsdevel"
+>>>> in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>
 
 --
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
