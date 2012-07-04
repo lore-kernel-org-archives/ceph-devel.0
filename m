@@ -1,120 +1,61 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: domino-style OSD crash
-Date: Wed, 4 Jul 2012 09:21:32 -0700
-Message-ID: <A1B0B821610446B587EA459CA7D88ECF@inktank.com>
-References: <4FCC7573.3000704@univ-nantes.fr>
- <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com>
- <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com>
- <4FF2AFEB.1010403@univ-nantes.fr>
- <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
- <4FF35C01.4070400@univ-nantes.fr>
- <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
- <4FF3F98C.30602@univ-nantes.fr>
+Subject: Re: monitor not starting
+Date: Wed, 4 Jul 2012 09:25:20 -0700
+Message-ID: <D2569975C9B14D6B974C162C58FA7401@inktank.com>
+References: <4FF42CD7.1060000@smart-weblications.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:55599 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:62919 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753584Ab2GDQV3 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 12:21:29 -0400
-Received: by pbbrp8 with SMTP id rp8so11247631pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Jul 2012 09:21:29 -0700 (PDT)
-In-Reply-To: <4FF3F98C.30602@univ-nantes.fr>
+	with ESMTP id S932084Ab2GDQZS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 12:25:18 -0400
+Received: by pbbrp8 with SMTP id rp8so11252508pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Jul 2012 09:25:17 -0700 (PDT)
+In-Reply-To: <4FF42CD7.1060000@smart-weblications.de>
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Cc: Tommi Virtanen <tv@inktank.com>, Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: f.wiessner@smart-weblications.de
+Cc: ceph-devel@vger.kernel.org
 
-On Wednesday, July 4, 2012 at 1:06 AM, Yann Dupont wrote:
-> Le 03/07/2012 23:38, Tommi Virtanen a =C3=A9crit :
-> > On Tue, Jul 3, 2012 at 1:54 PM, Yann Dupont <Yann.Dupont@univ-nante=
-s.fr (mailto:Yann.Dupont@univ-nantes.fr)> wrote:
-> > > In the case I could repair, do you think a crashed FS as it is ri=
-ght now is
-> > > valuable for you, for future reference , as I saw you can't repro=
-duce the
-> > > problem ? I can make an archive (or a btrfs dump ?), but it will =
-be quite
-> > > big.
-> > =20
-> > =20
-> > At this point, it's more about the upstream developers (of btrfs et=
-c)
-> > than us; we're on good terms with them but not experts on the on-di=
-sk
-> > format(s). You might want to send an email to the relevant mailing
-> > lists before wiping the disks.
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> > the body of a message to majordomo@vger.kernel.org (mailto:majordom=
-o@vger.kernel.org)
-> > More majordomo info at http://vger.kernel.org/majordomo-info.html
-> =20
-> =20
-> Well, I probably wasn't clear enough. I talked about crashed FS, but =
-i =20
-> was talking about ceph. The underlying FS (btrfs in that case) of 1 n=
-ode =20
-> (and only one) has PROBABLY crashed in the past, causing corruption i=
-n =20
-> ceph data on this node, and then the subsequent crash of other nodes.
-> =20
-> RIGHT now btrfs on this node is OK. I can access the filesystem witho=
-ut =20
-> errors.
-> =20
-> For the moment, on 8 nodes, 4 refuse to restart .
-> 1 of the 4 nodes was the crashed node , the 3 others didn't had brobl=
-em =20
-> with the underlying fs as far as I can tell.
-> =20
-> So I think the scenario is :
-> =20
-> One node had problem with btrfs, leading first to kernel problem , =20
-> probably corruption (in disk/ in memory maybe ?) ,and ultimately to a=
- =20
-> kernel oops. Before that ultimate kernel oops, bad data has been =20
-> transmitted to other (sane) nodes, leading to ceph-osd crash on those=
-s =20
-> nodes.
 
-I don't think that's actually possible =E2=80=94 the OSDs all do quite =
-a lot of interpretation between what they get off the wire and what goe=
-s on disk. What you've got here are 4 corrupted LevelDB databases, and =
-we pretty much can't do that through the interfaces we have. :/
- =20
-> =20
-> If you think this scenario is highly improbable in real life (that is=
-, =20
-> btrfs will probably be fixed for good, and then, corruption can't =20
-> happen), it's ok.
-> =20
-> But I wonder if this scenario can be triggered with other problem, an=
-d =20
-> bad data can be transmitted to other sane nodes (power outage, out of=
- =20
-> memory condition, disk full... for example)
-> =20
-> That's why I proposed you a crashed ceph volume image (I shouldn't ha=
-ve =20
-> talked about a crashed fs, sorry for the confusion)
 
-I appreciate the offer, but I don't think this will help much =E2=80=94=
- it's a disk state managed by somebody else, not our logical state, whi=
-ch has broken. If we could figure out how that state got broken that'd =
-be good, but a "ceph image" won't really help in doing so.
+On Wednesday, July 4, 2012 at 4:45 AM, Smart Weblications GmbH - Florian Wiessner wrote:
 
-I wonder if maybe there's a confounding factor here =E2=80=94 are all y=
-our nodes similar to each other, or are they running on different kinds=
- of hardware? How did you do your Ceph upgrades? What's ceph -s display=
- when the cluster is running as best it can?
+> Hi List,
+> 
+> 
+> i today upgraded from 0.43 to 0.48 and now i have one monitor which does not
+> want to start up anymore:
+> 
+> ceph version 0.48argonaut-125-g4e774fb
+> (commit:4e774fbcb38fd6883232b72352512a5f8e4a66e8)
+> 1: /usr/bin/ceph-mon() [0x52f9c9]
+> 2: (()+0xeff0) [0x7fb08dd11ff0]
+> 3: (gsignal()+0x35) [0x7fb08c4f41b5]
+> 4: (abort()+0x180) [0x7fb08c4f6fc0]
+> 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fb08cd88dc5]
+> 6: (()+0xcb166) [0x7fb08cd87166]
+> 7: (()+0xcb193) [0x7fb08cd87193]
+> 8: (()+0xcb28e) [0x7fb08cd8728e]
+> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x940)
+> [0x55b310]
+> 10: /usr/bin/ceph-mon() [0x497317]
+> 11: (Monitor::init()+0xc5a) [0x4857fa]
+> 12: (main()+0x2789) [0x46ac79]
+> 13: (__libc_start_main()+0xfd) [0x7fb08c4e0c8d]
+> 14: /usr/bin/ceph-mon() [0x468309]
+> NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+> interpret this.
+> 
+> --- end dump of recent events ---
+> 
+> 
+> How can i find out why it does not startup anymore? osd and mds is running fine..
+Is that all the output you get? There should be a line somewhere which says what the assert is, and what line number it's on. :)
+
+And while you're at it, is the rest of the cluster in fact working? I don't think 0.43 to 0.48 is an upgrade path we tested.
+
 -Greg
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
