@@ -1,82 +1,69 @@
-From: Michal Hocko <mhocko@suse.cz>
-Subject: Re: [PATCH 4/7] Use vfs __set_page_dirty interface instead of doing
- it inside filesystem
-Date: Wed, 4 Jul 2012 16:27:24 +0200
-Message-ID: <20120704142724.GK29842@tiehlicka.suse.cz>
-References: <1340880885-5427-1-git-send-email-handai.szj@taobao.com>
- <1340881423-5703-1-git-send-email-handai.szj@taobao.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] Generate URL-safe base64 strings for keys.
+Date: Wed, 4 Jul 2012 08:16:48 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207040816350.6931@cobra.newdream.net>
+References: <CADvuQRERYhuFiz07Kp_YxOo_ya6-jACJ3X2gNihp=5F83BJQiQ@mail.gmail.com>
+ <1341405987-26469-1-git-send-email-wido@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1340881423-5703-1-git-send-email-handai.szj@taobao.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Sha Zhengju <handai.szj@gmail.com>
-Cc: linux-mm@kvack.org, cgroups@vger.kernel.org, kamezawa.hiroyu@jp.fujitsu.com, gthelen@google.com, yinghan@google.com, akpm@linux-foundation.org, linux-kernel@vger.kernel.org, torvalds@linux-foundation.org, viro@zeniv.linux.org.uk, linux-fsdevel@vger.kernel.org, sage@newdream.net, ceph-devel@vger.kernel.org, Sha Zhengju <handai.szj@taobao.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:58045 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754218Ab2GDPQv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 11:16:51 -0400
+In-Reply-To: <1341405987-26469-1-git-send-email-wido@widodh.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu 28-06-12 19:03:43, Sha Zhengju wrote:
-> From: Sha Zhengju <handai.szj@taobao.com>
+On Wed, 4 Jul 2012, Wido den Hollander wrote:
+> By using this we prevent scenarios where cephx keys are not accepted
+> in various situations.
 > 
-> Following we will treat SetPageDirty and dirty page accounting as an integrated
-> operation. Filesystems had better use vfs interface directly to avoid those details.
+> Replacing the + and / by - and _ we generate URL-safe base64 keys
 > 
-> Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
+> Signed-off-by: Wido den Hollander <wido@widodh.nl>
+
+Do already properly decode URL-sage base64 encoding?
+
+sage
+
 > ---
->  fs/buffer.c                 |    2 +-
->  fs/ceph/addr.c              |   20 ++------------------
->  include/linux/buffer_head.h |    2 ++
->  3 files changed, 5 insertions(+), 19 deletions(-)
+>  src/common/armor.c |    6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 > 
-> diff --git a/fs/buffer.c b/fs/buffer.c
-> index e8d96b8..55522dd 100644
-> --- a/fs/buffer.c
-> +++ b/fs/buffer.c
-> @@ -610,7 +610,7 @@ EXPORT_SYMBOL(mark_buffer_dirty_inode);
->   * If warn is true, then emit a warning if the page is not uptodate and has
->   * not been truncated.
+> diff --git a/src/common/armor.c b/src/common/armor.c
+> index d1d5664..7f73da1 100644
+> --- a/src/common/armor.c
+> +++ b/src/common/armor.c
+> @@ -9,7 +9,7 @@
+>   * base64 encode/decode.
 >   */
-> -static int __set_page_dirty(struct page *page,
-> +int __set_page_dirty(struct page *page,
->  		struct address_space *mapping, int warn)
+>  
+> -const char *pem_key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+> +const char *pem_key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+>  
+>  static int encode_bits(int c)
 >  {
->  	if (unlikely(!mapping))
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 8b67304..d028fbe 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -5,6 +5,7 @@
->  #include <linux/mm.h>
->  #include <linux/pagemap.h>
->  #include <linux/writeback.h>	/* generic_writepages */
-> +#include <linux/buffer_head.h>
->  #include <linux/slab.h>
->  #include <linux/pagevec.h>
->  #include <linux/task_io_accounting_ops.h>
-> @@ -73,14 +74,8 @@ static int ceph_set_page_dirty(struct page *page)
->  	int undo = 0;
->  	struct ceph_snap_context *snapc;
->  
-> -	if (unlikely(!mapping))
-> -		return !TestSetPageDirty(page);
-> -
-> -	if (TestSetPageDirty(page)) {
-> -		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
-> -		     mapping->host, page, page->index);
-
-I am not familiar with the code but this looks we loose an information
-about something bad(?) is going on?
-
-> +	if (!__set_page_dirty(page, mapping, 1))
->  		return 0;
-> -	}
->  
->  	inode = mapping->host;
->  	ci = ceph_inode(inode);
--- 
-Michal Hocko
-SUSE Labs
-SUSE LINUX s.r.o.
-Lihovarska 1060/12
-190 00 Praha 9    
-Czech Republic
+> @@ -24,9 +24,9 @@ static int decode_bits(char c)
+>  		return c - 'a' + 26;
+>  	if (c >= '0' && c <= '9')
+>  		return c - '0' + 52;
+> -	if (c == '+')
+> +	if (c == '+' || c == '-')
+>  		return 62;
+> -	if (c == '/')
+> +	if (c == '/' || c == '_')
+>  		return 63;
+>  	if (c == '=')
+>  		return 0; /* just non-negative, please */
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
