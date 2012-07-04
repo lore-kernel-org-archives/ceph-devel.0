@@ -1,41 +1,67 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] librados: Bump the version to 0.48
-Date: Wed, 4 Jul 2012 09:33:18 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1207040932090.6931@cobra.newdream.net>
-References: <1341409564-26660-1-git-send-email-wido@widodh.nl>
- <6ED535BAF3394911BDF4F16441761D6A@inktank.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: OSD doesn't start
+Date: Wed, 4 Jul 2012 09:34:04 -0700
+Message-ID: <F1FB8F95B3FA4FF19D53AE9F060D88F5@inktank.com>
+References: <1563053.ttVafs9Pph@mranderson>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1429156764-1341419598=:6931"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43913 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752128Ab2GDQdU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 12:33:20 -0400
-In-Reply-To: <6ED535BAF3394911BDF4F16441761D6A@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:45239 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752128Ab2GDQeB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 12:34:01 -0400
+Received: by pbbrp8 with SMTP id rp8so11263098pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Jul 2012 09:34:01 -0700 (PDT)
+In-Reply-To: <1563053.ttVafs9Pph@mranderson>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+To: =?utf-8?Q?Sz=C3=A9kelyi_Szabolcs?= <szekelyi@niif.hu>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hrm, it looks like the OSD data directory got a little busted somehow. =
+How did you perform your upgrade? (That is, how did you kill your daemo=
+ns, in what order, and when did you bring them back up.) =20
+-Greg
 
---557981400-1429156764-1341419598=:6931
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-On Wed, 4 Jul 2012, Gregory Farnum wrote:
-> Hmmm =FF=FF we generally try to modify these versions when the API change=
-s,=20
-> not on every sprint. It looks to me like Sage added one function in 0.45=
-=20
-> where we maybe should have bumped it, but that was a long time ago and=20
-> at this point we should maybe just eat it?
+On Wednesday, July 4, 2012 at 8:31 AM, Sz=C3=A9kelyi Szabolcs wrote:
 
-Yeah, I went ahead and applied this to stable (argonaut) since it's as=20
-good a reference point as any.  Moving forward, we should try to sync=20
-this up with API changes as they happen.  Hmm, like that assert=20
-ObjectOperation that just went into master...=20
+> Hi,
+> =20
+> after upgrading to 0.48 "Argonaut", my OSDs won't start up again. Thi=
+s problem =20
+> might not be related to the upgrade, since the cluster had strange be=
+havior =20
+> before, too: ceph-fuse was spinning the CPU around 70%, so did the OS=
+Ds. This =20
+> happened to both of my clusters. Thought that upgrading might solve t=
+he =20
+> problem, but it just got worse.
+> =20
+> I've copied the log of the OSD run to http://pastebin.com/XYRtfFMU . =
+I've =20
+> rebooted all the nodes, but they still don't work.
+> =20
+> What should I do to resurrect my OSDs?
+> =20
+> Thanks,
+> -- =20
+> cc
+> =20
+> =20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@=
+vger.kernel.org)
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
 
-sage
---557981400-1429156764-1341419598=:6931--
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
