@@ -1,61 +1,70 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: monitor not starting
-Date: Wed, 4 Jul 2012 09:25:20 -0700
-Message-ID: <D2569975C9B14D6B974C162C58FA7401@inktank.com>
-References: <4FF42CD7.1060000@smart-weblications.de>
+Subject: Re: [PATCH] librados: Bump the version to 0.48
+Date: Wed, 4 Jul 2012 09:29:07 -0700
+Message-ID: <6ED535BAF3394911BDF4F16441761D6A@inktank.com>
+References: <1341409564-26660-1-git-send-email-wido@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:62919 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:43435 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932084Ab2GDQZS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 12:25:18 -0400
-Received: by pbbrp8 with SMTP id rp8so11252508pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Jul 2012 09:25:17 -0700 (PDT)
-In-Reply-To: <4FF42CD7.1060000@smart-weblications.de>
+	with ESMTP id S1754683Ab2GDQ3E convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 12:29:04 -0400
+Received: by pbbrp8 with SMTP id rp8so11257474pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Jul 2012 09:29:04 -0700 (PDT)
+In-Reply-To: <1341409564-26660-1-git-send-email-wido@widodh.nl>
 Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: f.wiessner@smart-weblications.de
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
-
-
-On Wednesday, July 4, 2012 at 4:45 AM, Smart Weblications GmbH - Florian Wiessner wrote:
-
-> Hi List,
-> 
-> 
-> i today upgraded from 0.43 to 0.48 and now i have one monitor which does not
-> want to start up anymore:
-> 
-> ceph version 0.48argonaut-125-g4e774fb
-> (commit:4e774fbcb38fd6883232b72352512a5f8e4a66e8)
-> 1: /usr/bin/ceph-mon() [0x52f9c9]
-> 2: (()+0xeff0) [0x7fb08dd11ff0]
-> 3: (gsignal()+0x35) [0x7fb08c4f41b5]
-> 4: (abort()+0x180) [0x7fb08c4f6fc0]
-> 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fb08cd88dc5]
-> 6: (()+0xcb166) [0x7fb08cd87166]
-> 7: (()+0xcb193) [0x7fb08cd87193]
-> 8: (()+0xcb28e) [0x7fb08cd8728e]
-> 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x940)
-> [0x55b310]
-> 10: /usr/bin/ceph-mon() [0x497317]
-> 11: (Monitor::init()+0xc5a) [0x4857fa]
-> 12: (main()+0x2789) [0x46ac79]
-> 13: (__libc_start_main()+0xfd) [0x7fb08c4e0c8d]
-> 14: /usr/bin/ceph-mon() [0x468309]
-> NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
-> interpret this.
-> 
-> --- end dump of recent events ---
-> 
-> 
-> How can i find out why it does not startup anymore? osd and mds is running fine..
-Is that all the output you get? There should be a line somewhere which says what the assert is, and what line number it's on. :)
-
-And while you're at it, is the rest of the cluster in fact working? I don't think 0.43 to 0.48 is an upgrade path we tested.
-
+Hmmm =E2=80=94 we generally try to modify these versions when the API c=
+hanges, not on every sprint. It looks to me like Sage added one functio=
+n in 0.45 where we maybe should have bumped it, but that was a long tim=
+e ago and at this point we should maybe just eat it?
 -Greg
+
+
+On Wednesday, July 4, 2012 at 6:46 AM, Wido den Hollander wrote:
+
+> =20
+> Signed-off-by: Wido den Hollander <wido@widodh.nl (mailto:wido@widodh=
+=2Enl)>
+> ---
+> src/include/rados/librados.h | 2 +-
+> 1 file changed, 1 insertion(+), 1 deletion(-)
+> =20
+> diff --git a/src/include/rados/librados.h b/src/include/rados/librado=
+s.h
+> index 9f723f7..4870b0f 100644
+> --- a/src/include/rados/librados.h
+> +++ b/src/include/rados/librados.h
+> @@ -23,7 +23,7 @@ extern "C" {
+> #endif
+> =20
+> #define LIBRADOS_VER_MAJOR 0
+> -#define LIBRADOS_VER_MINOR 44
+> +#define LIBRADOS_VER_MINOR 48
+> #define LIBRADOS_VER_EXTRA 0
+> =20
+> #define LIBRADOS_VERSION(maj, min, extra) ((maj << 16) + (min << 8) +=
+ extra)
+> -- =20
+> 1.7.9.5
+> =20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org (mailto:majordomo@=
+vger.kernel.org)
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
+
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
