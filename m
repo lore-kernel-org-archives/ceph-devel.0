@@ -1,118 +1,141 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Strange behavior after upgrading to 0.48
-Date: Thu, 5 Jul 2012 07:26:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1207050725550.6931@cobra.newdream.net>
-References: <4FF53706.7070003@gmail.com>
+Subject: Re: [PATCH] Generate URL-safe base64 strings for keys.
+Date: Thu, 5 Jul 2012 07:31:40 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207050729350.6931@cobra.newdream.net>
+References: <CADvuQRERYhuFiz07Kp_YxOo_ya6-jACJ3X2gNihp=5F83BJQiQ@mail.gmail.com>
+ <1341405987-26469-1-git-send-email-wido@widodh.nl>
+ <Pine.LNX.4.64.1207040816350.6931@cobra.newdream.net>
+ <1341418257.18922.2.camel@Nokia-N900-02-8> <Pine.LNX.4.64.1207040913420.6931@cobra.newdream.net>
+ <4FF5974E.5070308@widodh.nl>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51702 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:51755 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756264Ab2GEO06 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 10:26:58 -0400
-In-Reply-To: <4FF53706.7070003@gmail.com>
+	with ESMTP id S1751194Ab2GEObn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 10:31:43 -0400
+In-Reply-To: <4FF5974E.5070308@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaopong Tran <xiaopong.tran@gmail.com>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Thu, 5 Jul 2012, Wido den Hollander wrote:
+> On 04-07-12 18:18, Sage Weil wrote:
+> > On Wed, 4 Jul 2012, Wido den Hollander wrote:
+> > > > On Wed, 4 Jul 2012, Wido den Hollander wrote:
+> > > > > By using this we prevent scenarios where cephx keys are not accepted
+> > > > > in various situations.
+> > > > > 
+> > > > > Replacing the + and / by - and _ we generate URL-safe base64 keys
+> > > > > 
+> > > > > Signed-off-by: Wido den Hollander <wido@widodh.nl>
+> > > > 
+> > > > Do already properly decode URL-sage base64 encoding?
+> > > > 
+> > > 
+> > > Yes, it decodes URL-safe base64 as well.
+> > > 
+> > > See the if statements for 62 and 63, + and - are treated equally, just
+> > > like / and _.
+> > 
+> > Oh, got it.  The commit description confused me... I thought this was
+> > related encoding only.
+> > 
+> > I think we should break the encode and decode patches into separate
+> > versions, and apply the decode to a stable branch (argonaut) and the
+> > encode to the master.  That should avoid most problems with a
+> > rolling/staggered upgrade...
+> 
+> I just submitted a patch for decoding only.
 
-On Thu, 5 Jul 2012, Xiaopong Tran wrote:
-> Hi,
-> 
-> I put up a small cluster with 3 osds, 2 mds, 3 mons, on 3 machines.
-> They were running 0.47.2, and this is a test to do rolling upgrade to
-> 0.48.
-> 
-> I shutdown, upgraded the software, then restarted. One node at a time.
-> The first two seemed to be ok. The third one gave me some weird thing.
-> While it was doing the conversion and recovering, the command ceph -s gives
-> things like this:
-> 
-> 
-> root@china:/tmp# ceph -s
-> 2012-07-05 14:28:41.069470 7fa3c8443780  2 auth: KeyRing::load: loaded key
-> file /etc/ceph/client.admin.keyring
-> 2012-07-05 14:28:41.594229 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.596313 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.598949 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.601158 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.603069 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.605020 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.607436 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.609304 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.611047 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.667980 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.670283 7fa3c030e700  0 monclient: hunting for new mon
-> 2012-07-05 14:28:41.672274 7fa3c030e700  0 monclient: hunting for new mon
-> ....
+Applied, thanks!
 
-The problem is that the ceph utility itself is pre-0.48, but the monitors 
-are running 0.48.  You need to upgrade the utility as well.  (There was a 
-note about this in the release announcement.)
+> During some tests I did I found out that libvirt uses GNUlib and won't handle
+> URL-safe base64 encoded keys.
+> 
+> So, as long as Ceph allows them we're good. Users can always replace the + and
+> / in their key knowing it will be accepted by Ceph.
+> 
+> This works for me for now. The exact switch to base64url should be done at a
+> later stage I think.
+> 
+> The RFC on this: http://tools.ietf.org/html/rfc4648#page-7
 
-This only affects the -s and -w commands.
+We could:
+ - submit a patch for gnulib; someday it'll support it
+ - kludge the secret generation code in ceph so that it rejects secrets 
+   with problematic encoding... :/  (radosgw-admin does something 
+   similar with +'s in the s3-style user keys.)
 
 sage
 
 
+
 > 
-> And it never stopped. I was thinking, maybe it just behaved like
-> that during recovery. But after the recovery is done, it still
-> get the same thing:
+> Wido
 > 
-> root@china:/tmp# ceph health
-> 2012-07-05 14:28:55.077364 7f8306a0d780  2 auth: KeyRing::load: loaded key
-> file /etc/ceph/client.admin.keyring
-> HEALTH_OK
-> root@china:/tmp# ceph -s
-> 2012-07-05 14:30:49.688017 7feb6338e780  2 auth: KeyRing::load: loaded key
-> file /etc/ceph/client.admin.keyring
-> 2012-07-05 14:30:49.691690 7feb5b259700  0 monclient: hunting for new mon
-> 2012-07-05 14:30:49.694295 7feb5b259700  0 monclient: hunting for new mon
-> 2012-07-05 14:30:49.696487 7feb5b259700  0 monclient: hunting for new mon
-> 2012-07-05 14:30:49.698953 7feb5b259700  0 monclient: hunting for new mon
-> 2012-07-05 14:30:49.700833 7feb5b259700  0 monclient: hunting for new mon
-> ....
+> > 
+> > sage
+> > 
+> > 
+> > > 
+> > > Wido
+> > > 
+> > > 
+> > > > sage
+> > > > 
+> > > > > ---
+> > > > > src/common/armor.c |       6 +++---
+> > > > > 1 file changed, 3 insertions(+), 3 deletions(-)
+> > > > > 
+> > > > > diff --git a/src/common/armor.c b/src/common/armor.c
+> > > > > index d1d5664..7f73da1 100644
+> > > > > --- a/src/common/armor.c
+> > > > > +++ b/src/common/armor.c
+> > > > > @@ -9,7 +9,7 @@
+> > > > > * base64 encode/decode.
+> > > > > */
+> > > > > 
+> > > > > -const char *pem_key =
+> > > > > "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+> > > > > +const char *pem_key =
+> > > > > "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+> > > > > 
+> > > > > static int encode_bits(int c)
+> > > > > {
+> > > > > @@ -24,9 +24,9 @@ static int decode_bits(char c)
+> > > > >          return c - 'a' + 26;
+> > > > >      if (c >= '0' && c <= '9')
+> > > > >          return c - '0' + 52;
+> > > > > -    if (c == '+')
+> > > > > +    if (c == '+' || c == '-')
+> > > > >          return 62;
+> > > > > -    if (c == '/')
+> > > > > +    if (c == '/' || c == '_')
+> > > > >          return 63;
+> > > > >      if (c == '=')
+> > > > >          return 0; /* just non-negative, please */
+> > > > > --
+> > > > > 1.7.9.5
+> > > > > 
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > > > > in the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at   http://vger.kernel.org/majordomo-info.html
+> > > > > 
+> > > > > 
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at   http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
 > 
-> Upgrading the first two nodes have no such problem. This first two
-> nodes all run osd, mds, and mon. The third only runs osd and mon.
-> 
-> The mon log on the 3rd node shows this, not sure if this is helpful:
-> 
-> ....
-> 925291 lease_expire=2012-07-05 02:38:14.149966 has v44 lc 44
-> 2012-07-05 02:38:12.572107 7f7d9381a700  1 mon.a@0(leader).paxos(pgmap active
-> c 29531..30031) is_readable now=2012-07-05 02:38:12.572114
-> lease_expire=2012-07-05 02:38:15.889056 has v0 lc 30031
-> 2012-07-05 02:38:12.572128 7f7d9381a700  1 mon.a@0(leader).paxos(pgmap active
-> c 29531..30031) is_readable now=2012-07-05 02:38:12.572129
-> lease_expire=2012-07-05 02:38:15.889056 has v0 lc 30031
-> 2012-07-05 02:38:15.120439 7f7d9401b700  1 mon.a@0(leader).paxos(mdsmap active
-> c 1..44) is_readable now=2012-07-05 02:38:15.120446 lease_expire=2012-07-05
-> 02:38:17.149967 has v44 lc 44
-> 2012-07-05 02:38:15.925349 7f7d9401b700  1 mon.a@0(leader).paxos(mdsmap active
-> c 1..44) is_readable now=2012-07-05 02:38:15.925356 lease_expire=2012-07-05
-> 02:38:20.149971 has v44 lc 44
-> 2012-07-05 02:38:17.572181 7f7d9381a700  1 mon.a@0(leader).paxos(pgmap active
-> c 29531..30031) is_readable now=2012-07-05 02:38:17.572189
-> lease_expire=2012-07-05 02:38:21.889065 has v0 lc 30031
-> 2012-07-05 02:38:17.572204 7f7d9381a700  1 mon.a@0(leader).paxos(pgmap active
-> c 29531..30031) is_readable now=2012-07-05 02:38:17.572205
-> lease_expire=2012-07-05 02:38:21.889065 has v0 lc 30031
-> 2012-07-05 02:38:19.120463 7f7d9401b700  1 mon.a@0(leader).paxos(mdsmap active
-> c 1..44) is_readable now=2012-07-05 02:38:19.120470 lease_expire=2012-07-05
-> 02:38:23.149973 has v44 lc 44
-> 2012-07-05 02:38:19.925323 7f7d9401b700  1 mon.a@0(leader).paxos(mdsmap active
-> c 1..44) is_readable now=2012-07-05 02:38:19.925330 lease_expire=2012-07-05
-> 02:38:23.149973 has v44 lc 44
-> 
-> Could someone give a hint on this?
-> 
-> Thanks
-> 
-> Xiaopong
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
