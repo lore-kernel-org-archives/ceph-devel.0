@@ -1,20 +1,20 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Writes to mounted Ceph FS fail silently if client has no write
- capability on data pool
-Date: Thu, 5 Jul 2012 13:01:59 -0700
-Message-ID: <CAPYLRzhay0Jr9dV5WCR_s07c58Q5aGQ0dWCkTDeL6_oWCb_tRg@mail.gmail.com>
-References: <CAPUexz-2R40ZRyEhQeEuq29fzgENDkHk=O+xXF=7jiG7ZP0Xuw@mail.gmail.com>
+Subject: Re: cephfs show_location produces kernel "divide error: 0000 [#1]"
+ when run against a directory that is not the filesystem root
+Date: Thu, 5 Jul 2012 13:04:02 -0700
+Message-ID: <CAPYLRzgWiLDEv8=26hHrixe_dMmAbmHHt3XKBftA7wjjmXp_xQ@mail.gmail.com>
+References: <CAPUexz9+L+nrJCNh0gK0RGd8H5kk8ZGHZ+7WU4mP3mq5UHXLDQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:39642 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751383Ab2GEUCB convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 16:02:01 -0400
-Received: by lbbgm6 with SMTP id gm6so13378853lbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 13:01:59 -0700 (PDT)
-In-Reply-To: <CAPUexz-2R40ZRyEhQeEuq29fzgENDkHk=O+xXF=7jiG7ZP0Xuw@mail.gmail.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:46828 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755115Ab2GEUEE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 16:04:04 -0400
+Received: by bkwj10 with SMTP id j10so3835157bkw.19
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 13:04:03 -0700 (PDT)
+In-Reply-To: <CAPUexz9+L+nrJCNh0gK0RGd8H5kk8ZGHZ+7WU4mP3mq5UHXLDQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Florian Haas <florian@hastexo.com>
@@ -22,82 +22,77 @@ Cc: ceph-devel@vger.kernel.org
 
 On Thu, Jul 5, 2012 at 10:40 AM, Florian Haas <florian@hastexo.com> wro=
 te:
-> Hi everyone,
+> And one more issue report for today... :)
 >
-> please enlighten me if I'm misinterpreting something, but I think the
-> Ceph FS layer could handle the following situation better.
+> Really easy to reproduce on my 3.2.0 Debian squeeze-backports kernel:
+> mount a Ceph FS, create a directory in it. Then run "cephfs <dir>
+> show_location".
 >
-> How to reproduce (this is on a 3.2.0 kernel):
+> dmesg stacktrace:
 >
-> 1. Create a client, mine is named "test", with the following capabili=
-ties:
+> [ 7153.714260] libceph: mon2 192.168.42.116:6789 session established
+> [ 7308.584193] divide error: 0000 [#1] SMP
+> [ 7308.584936] Modules linked in: cryptd aes_i586 aes_generic cbc cep=
+h
+> libceph nfsd lockd nfs_acl auth_rpcgss sunrpc fuse joydev usbhid hid
+> snd_pcm snd_timer snd processor soundcore snd_page_alloc thermal_sys
+> button tpm_tis tpm tpm_bios psmouse i2c_piix4 evdev serio_raw i2c_cor=
+e
+> virtio_balloon pcspkr ext3 jbd mbcache btrfs zlib_deflate crc32c
+> libcrc32c sg sr_mod cdrom ata_generic virtio_net virtio_blk ata_piix
+> uhci_hcd ehci_hcd libata usbcore floppy scsi_mod virtio_pci usb_commo=
+n
+> [last unloaded: scsi_wait_scan]
+> [ 7308.588013]
+> [ 7308.588013] Pid: 1444, comm: cephfs Not tainted
+> 3.2.0-0.bpo.2-686-pae #1 Bochs Bochs
+> [ 7308.588013] EIP: 0060:[<f848c6c2>] EFLAGS: 00010246 CPU: 0
+> [ 7308.588013] EIP is at ceph_calc_file_object_mapping+0x44/0xe8 [lib=
+ceph]
+> [ 7308.588013] EAX: 00000000 EBX: 00000000 ECX: 00000000 EDX: 0000000=
+0
+> [ 7308.588013] ESI: 00000000 EDI: 00000000 EBP: 00000000 ESP: f7495ce=
+4
+> [ 7308.588013] =A0DS: 007b ES: 007b FS: 00d8 GS: 00e0 SS: 0068
+> [ 7308.588013] Process cephfs (pid: 1444, ti=3Df7494000 task=3Df7266a=
+60
+> task.ti=3Df7494000)
+> [ 7308.588013] Stack:
+> [ 7308.588013] =A000000000 00000000 00000000 0001b053 f5f20624 f5f203=
+f0
+> f749a800 f5f20420
+> [ 7308.588013] =A0f84ca6a7 f7495d40 f7495d58 f7495d50 f7495d38 000000=
+01
+> 00000246 f5f20420
+> [ 7308.588013] =A0f749a90c bff6ff70 c14203a4 fffba978 000a0050 000000=
+00
+> f79f0298 00000001
+> [ 7308.588013] Call Trace:
+> [ 7308.588013] =A0[<f84ca6a7>] ? ceph_ioctl_get_dataloc+0x9e/0x213 [c=
+eph]
+> [ 7308.588013] =A0[<c10b6781>] ? __do_fault+0x3ee/0x42b
+> [ 7308.588013] =A0[<c10b75f3>] ? handle_pte_fault+0x3aa/0xa67
+> [ 7308.588013] =A0[<c10e0844>] ? path_openat+0x27f/0x294
+> [ 7308.588013] =A0[<f84cac16>] ? ceph_ioctl+0x3fa/0x460 [ceph]
+> [ 7308.588013] =A0[<c10d9fdb>] ? cp_new_stat64+0xee/0x100
+> [ 7308.588013] =A0[<c10b7ebe>] ? handle_mm_fault+0x20e/0x224
+> [ 7308.588013] =A0[<f84ca81c>] ? ceph_ioctl_get_dataloc+0x213/0x213 [=
+ceph]
 >
-> client.test
-> =A0 =A0 =A0 =A0 key: <key>
-> =A0 =A0 =A0 =A0 caps: [mds] allow
-> =A0 =A0 =A0 =A0 caps: [mon] allow r
-> =A0 =A0 =A0 =A0 caps: [osd] allow rw pool=3Dtestpool
+> I unfortunately don't have a more recent kernel to test with, so if
+> this has been fixed upstream feel free to ignore me. Otherwise,
+> perhaps something that could go into the 3.5-rc cycle.
 >
-> Note the client only has access to a single pool, "testpool".
->
-> 2. Export the client's secret and mount a Ceph FS.
->
-> mount -t ceph -o name=3Dtest,secretfile=3D/etc/ceph/test.secret
-> daisy,eric,frank:/ /mnt
->
-> This succeeds, despite us not even having read access to the "data" p=
-ool.
->
-> 3. Write something to a file.
->
-> root@alice:/mnt# echo "hello world" > hello.txt
-> root@alice:/mnt# cat hello.txt
->
-> This too succeeds.
->
-> 4. Sync and clear caches.
->
-> root@alice:/mnt# sync
-> root@alice:/mnt# echo 3 > /proc/sys/vm/drop_caches
->
-> 5. Check file size and contents.
->
-> root@alice:/mnt# ls -la
-> total 5
-> drwxr-xr-x =A01 root root =A0 =A00 Jul =A05 17:15 .
-> drwxr-xr-x 21 root root 4096 Jun 11 09:03 ..
-> -rw-r--r-- =A01 root root =A0 12 Jul =A05 17:15 hello.txt
-> root@alice:/mnt# cat hello.txt
-> root@alice:/mnt#
->
-> Note the reported file size in unchanged, but the file is empty.
->
-> Checking the "data" pool with client.admin credentials obviously show=
-s
-> that that pool is empty, so objects are never written. Interestingly,
-> "cephfs hello.txt show_location" does list an object_name, identifyin=
-g
-> an object which doesn't exist.
->
-> Is there any way to make the client fail with -EIO, -EPERM,
-> -EOPNOTSUPP or whatever else is appropriate, rather than pretending t=
-o
-> write when it can't?
+> Doing show_location on a file, and on the root directory of the fs,
+> both work fine.
 
-There definitely are, but I don't think we're going to fix that until
-we get to working seriously on the filesystem. Create a bug! ;)
+And again, create a bug for when we get back to the filesystem. ;)
 
-> Also, going down the rabbit hole, how would this behavior change if I
-> used cephfs to set the default layout on some directory to use a
-> different pool?
-
-I'm not sure what you're asking here =97=A0if you have access to the
-metadata server, you can change the pool that new files go into, and I
-think you can set the pool to be whatever you like (and we should
-probably harden all this, too). So you can fix it if it's a problem,
-but you can also turn it into a problem.
-Is that what you were after?
--Greg
+But I have a few more queries while this is fresh. If you create a
+directory, unmount and remount, and get the location, does that work?
+(actually, just flushing caches would probably do it.) If you create a
+directory on one node, and then go look at it on another node and try
+to get the location from there, does that work?
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
