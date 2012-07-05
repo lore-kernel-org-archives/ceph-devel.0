@@ -1,43 +1,123 @@
 From: Wido den Hollander <wido@widodh.nl>
-Subject: [PATCH] Allow URL-safe base64 cephx keys to be decoded.
-Date: Thu,  5 Jul 2012 15:29:54 +0200
-Message-ID: <1341494994-32002-1-git-send-email-wido@widodh.nl>
-References: <67103350.513LE7Wbhg@linuix>
+Subject: Re: [PATCH] Generate URL-safe base64 strings for keys.
+Date: Thu, 05 Jul 2012 15:31:58 +0200
+Message-ID: <4FF5974E.5070308@widodh.nl>
+References: <CADvuQRERYhuFiz07Kp_YxOo_ya6-jACJ3X2gNihp=5F83BJQiQ@mail.gmail.com> <1341405987-26469-1-git-send-email-wido@widodh.nl> <Pine.LNX.4.64.1207040816350.6931@cobra.newdream.net> <1341418257.18922.2.camel@Nokia-N900-02-8> <Pine.LNX.4.64.1207040913420.6931@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:35473 "EHLO
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:35643 "EHLO
 	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754552Ab2GEN37 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 09:29:59 -0400
-In-Reply-To: <67103350.513LE7Wbhg@linuix>
+	with ESMTP id S932438Ab2GENcB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 09:32:01 -0400
+In-Reply-To: <Pine.LNX.4.64.1207040913420.6931@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Wido den Hollander <wido@widodh.nl>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-In these cases + and / are replaced by - and _ to prevent problems when using
-the base64 strings in URLs.
 
-Signed-off-by: Wido den Hollander <wido@widodh.nl>
----
- src/common/armor.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/src/common/armor.c b/src/common/armor.c
-index d1d5664..e4b8b86 100644
---- a/src/common/armor.c
-+++ b/src/common/armor.c
-@@ -24,9 +24,9 @@ static int decode_bits(char c)
- 		return c - 'a' + 26;
- 	if (c >= '0' && c <= '9')
- 		return c - '0' + 52;
--	if (c == '+')
-+	if (c == '+' || c == '-')
- 		return 62;
--	if (c == '/')
-+	if (c == '/' || c == '_')
- 		return 63;
- 	if (c == '=')
- 		return 0; /* just non-negative, please */
--- 
-1.7.9.5
+On 04-07-12 18:18, Sage Weil wrote:
+> On Wed, 4 Jul 2012, Wido den Hollander wrote:
+>>> On Wed, 4 Jul 2012, Wido den Hollander wrote:
+>>>> By using this we prevent scenarios where cephx keys are not accepted
+>>>> in various situations.
+>>>>
+>>>> Replacing the + and / by - and _ we generate URL-safe base64 keys
+>>>>
+>>>> Signed-off-by: Wido den Hollander <wido@widodh.nl>
+>>>
+>>> Do already properly decode URL-sage base64 encoding?
+>>>
+>>
+>> Yes, it decodes URL-safe base64 as well.
+>>
+>> See the if statements for 62 and 63, + and - are treated equally, just
+>> like / and _.
+>
+> Oh, got it.  The commit description confused me... I thought this was
+> related encoding only.
+>
+> I think we should break the encode and decode patches into separate
+> versions, and apply the decode to a stable branch (argonaut) and the
+> encode to the master.  That should avoid most problems with a
+> rolling/staggered upgrade...
+
+I just submitted a patch for decoding only.
+
+During some tests I did I found out that libvirt uses GNUlib and won't 
+handle URL-safe base64 encoded keys.
+
+So, as long as Ceph allows them we're good. Users can always replace the 
++ and / in their key knowing it will be accepted by Ceph.
+
+This works for me for now. The exact switch to base64url should be done 
+at a later stage I think.
+
+The RFC on this: http://tools.ietf.org/html/rfc4648#page-7
+
+Wido
+
+>
+> sage
+>
+>
+>>
+>> Wido
+>>
+>>
+>>> sage
+>>>
+>>>> ---
+>>>> src/common/armor.c |       6 +++---
+>>>> 1 file changed, 3 insertions(+), 3 deletions(-)
+>>>>
+>>>> diff --git a/src/common/armor.c b/src/common/armor.c
+>>>> index d1d5664..7f73da1 100644
+>>>> --- a/src/common/armor.c
+>>>> +++ b/src/common/armor.c
+>>>> @@ -9,7 +9,7 @@
+>>>> * base64 encode/decode.
+>>>> */
+>>>>
+>>>> -const char *pem_key =
+>>>> "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+>>>> +const char *pem_key =
+>>>> "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+>>>>
+>>>> static int encode_bits(int c)
+>>>> {
+>>>> @@ -24,9 +24,9 @@ static int decode_bits(char c)
+>>>>          return c - 'a' + 26;
+>>>>      if (c >= '0' && c <= '9')
+>>>>          return c - '0' + 52;
+>>>> -    if (c == '+')
+>>>> +    if (c == '+' || c == '-')
+>>>>          return 62;
+>>>> -    if (c == '/')
+>>>> +    if (c == '/' || c == '_')
+>>>>          return 63;
+>>>>      if (c == '=')
+>>>>          return 0; /* just non-negative, please */
+>>>> --
+>>>> 1.7.9.5
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>> in the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at   http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at   http://vger.kernel.org/majordomo-info.html
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 
