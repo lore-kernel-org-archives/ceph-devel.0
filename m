@@ -1,105 +1,121 @@
-From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
-Subject: Re: OSD doesn't start
-Date: Thu, 05 Jul 2012 16:12:42 +0200
-Message-ID: <95834053.QbLuzMQ4OG@mranderson>
-References: <1563053.ttVafs9Pph@mranderson> <F1FB8F95B3FA4FF19D53AE9F060D88F5@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Strange behavior after upgrading to 0.48
+Date: Thu, 5 Jul 2012 07:26:56 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207050725550.6931@cobra.newdream.net>
+References: <4FF53706.7070003@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from imap.ki.iif.hu ([193.6.222.244]:35545 "EHLO strudel.ki.iif.hu"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751182Ab2GEOMx convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 10:12:53 -0400
-Received: from cirkusz.lvs.iif.hu (cirkusz.lvs.iif.hu [193.225.14.182])
-	by strudel.ki.iif.hu (Postfix) with ESMTP id C1E3F3B0
-	for <ceph-devel@vger.kernel.org>; Thu,  5 Jul 2012 16:12:51 +0200 (CEST)
-Received: from strudel.ki.iif.hu ([IPv6:::ffff:193.6.222.244])
-	by cirkusz.lvs.iif.hu (cirkusz.lvs.iif.hu [::ffff:193.225.14.72]) (amavisd-new, port 10024)
-	with ESMTP id f8FD1KB2waqy for <ceph-devel@vger.kernel.org>;
-	Thu,  5 Jul 2012 16:12:43 +0200 (CEST)
-Received: from mranderson.localnet (unknown [IPv6:2001:738:0:401:f47e:7b88:6c9e:453a])
-	by strudel.ki.iif.hu (Postfix) with ESMTPSA id 6A9A33A8
-	for <ceph-devel@vger.kernel.org>; Thu,  5 Jul 2012 16:12:43 +0200 (CEST)
-In-Reply-To: <F1FB8F95B3FA4FF19D53AE9F060D88F5@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:51702 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756264Ab2GEO06 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 10:26:58 -0400
+In-Reply-To: <4FF53706.7070003@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Xiaopong Tran <xiaopong.tran@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 2012. July 4. 09:34:04 Gregory Farnum wrote:
-> Hrm, it looks like the OSD data directory got a little busted somehow=
-=2E How
-> did you perform your upgrade? (That is, how did you kill your daemons=
-, in
-> what order, and when did you bring them back up.)
+Hi,
 
-Since it would be hard and long to describe in text, I've collected the=
-=20
-relevant log entries, sorted by time at http://pastebin.com/Ev3M4DQ9 . =
-The=20
-short story is that after seeing that the OSDs won't start, I tried to =
-bring=20
-down the whole cluster and start it up from scratch. It didn't change=20
-anything, so I rebooted the two machines (running all three daemons), t=
-o see=20
-if it changes anything. It didn't and I gave up.
+On Thu, 5 Jul 2012, Xiaopong Tran wrote:
+> Hi,
+> 
+> I put up a small cluster with 3 osds, 2 mds, 3 mons, on 3 machines.
+> They were running 0.47.2, and this is a test to do rolling upgrade to
+> 0.48.
+> 
+> I shutdown, upgraded the software, then restarted. One node at a time.
+> The first two seemed to be ok. The third one gave me some weird thing.
+> While it was doing the conversion and recovering, the command ceph -s gives
+> things like this:
+> 
+> 
+> root@china:/tmp# ceph -s
+> 2012-07-05 14:28:41.069470 7fa3c8443780  2 auth: KeyRing::load: loaded key
+> file /etc/ceph/client.admin.keyring
+> 2012-07-05 14:28:41.594229 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.596313 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.598949 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.601158 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.603069 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.605020 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.607436 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.609304 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.611047 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.667980 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.670283 7fa3c030e700  0 monclient: hunting for new mon
+> 2012-07-05 14:28:41.672274 7fa3c030e700  0 monclient: hunting for new mon
+> ....
 
-My ceph config is available at http://pastebin.com/KKNjmiWM .
+The problem is that the ceph utility itself is pre-0.48, but the monitors 
+are running 0.48.  You need to upgrade the utility as well.  (There was a 
+note about this in the release announcement.)
 
-Since this is my test cluster, I'm not very concerned about the data on=
- it.=20
-But the other one, with the same config, is dying I think. ceph-fuse is=
- eating=20
-around 75% CPU on the sole monitor ("cc") node. The monitor about 15%. =
-On the=20
-other two nodes, the OSD eats around 50%, the MDS 15%, the monitor anot=
-her=20
-10%. No Ceph filesystem activity is going on at the moment. Blktrace re=
-ports=20
-about 1kB/s disk traffic on the partition hosting the OSD data dir. The=
- data=20
-seems to be accessible at the moment, but I'm afraid that my production=
-=20
-cluster will end up in a similar situation after upgrade, so I don't da=
-re to=20
-touch it.
+This only affects the -s and -w commands.
 
-Do you have any suggestion what I should check?
+sage
 
-Thanks,
---=20
-cc
 
-> On Wednesday, July 4, 2012 at 8:31 AM, Sz=E9kelyi Szabolcs wrote:
-> > Hi,
-> >=20
-> > after upgrading to 0.48 "Argonaut", my OSDs won't start up again. T=
-his
-> > problem might not be related to the upgrade, since the cluster had
-> > strange behavior before, too: ceph-fuse was spinning the CPU around=
- 70%,
-> > so did the OSDs. This happened to both of my clusters. Thought that
-> > upgrading might solve the problem, but it just got worse.
-> >=20
-> > I've copied the log of the OSD run to http://pastebin.com/XYRtfFMU =
-=2E I've
-> > rebooted all the nodes, but they still don't work.
-> >=20
-> > What should I do to resurrect my OSDs?
-> >=20
-> > Thanks,
-> > --
-> > cc
-> >=20
-> >=20
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> > the body of a message to majordomo@vger.kernel.org
-> > (mailto:majordomo@vger.kernel.org) More majordomo info at
-> > http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> And it never stopped. I was thinking, maybe it just behaved like
+> that during recovery. But after the recovery is done, it still
+> get the same thing:
+> 
+> root@china:/tmp# ceph health
+> 2012-07-05 14:28:55.077364 7f8306a0d780  2 auth: KeyRing::load: loaded key
+> file /etc/ceph/client.admin.keyring
+> HEALTH_OK
+> root@china:/tmp# ceph -s
+> 2012-07-05 14:30:49.688017 7feb6338e780  2 auth: KeyRing::load: loaded key
+> file /etc/ceph/client.admin.keyring
+> 2012-07-05 14:30:49.691690 7feb5b259700  0 monclient: hunting for new mon
+> 2012-07-05 14:30:49.694295 7feb5b259700  0 monclient: hunting for new mon
+> 2012-07-05 14:30:49.696487 7feb5b259700  0 monclient: hunting for new mon
+> 2012-07-05 14:30:49.698953 7feb5b259700  0 monclient: hunting for new mon
+> 2012-07-05 14:30:49.700833 7feb5b259700  0 monclient: hunting for new mon
+> ....
+> 
+> Upgrading the first two nodes have no such problem. This first two
+> nodes all run osd, mds, and mon. The third only runs osd and mon.
+> 
+> The mon log on the 3rd node shows this, not sure if this is helpful:
+> 
+> ....
+> 925291 lease_expire=2012-07-05 02:38:14.149966 has v44 lc 44
+> 2012-07-05 02:38:12.572107 7f7d9381a700  1 mon.a@0(leader).paxos(pgmap active
+> c 29531..30031) is_readable now=2012-07-05 02:38:12.572114
+> lease_expire=2012-07-05 02:38:15.889056 has v0 lc 30031
+> 2012-07-05 02:38:12.572128 7f7d9381a700  1 mon.a@0(leader).paxos(pgmap active
+> c 29531..30031) is_readable now=2012-07-05 02:38:12.572129
+> lease_expire=2012-07-05 02:38:15.889056 has v0 lc 30031
+> 2012-07-05 02:38:15.120439 7f7d9401b700  1 mon.a@0(leader).paxos(mdsmap active
+> c 1..44) is_readable now=2012-07-05 02:38:15.120446 lease_expire=2012-07-05
+> 02:38:17.149967 has v44 lc 44
+> 2012-07-05 02:38:15.925349 7f7d9401b700  1 mon.a@0(leader).paxos(mdsmap active
+> c 1..44) is_readable now=2012-07-05 02:38:15.925356 lease_expire=2012-07-05
+> 02:38:20.149971 has v44 lc 44
+> 2012-07-05 02:38:17.572181 7f7d9381a700  1 mon.a@0(leader).paxos(pgmap active
+> c 29531..30031) is_readable now=2012-07-05 02:38:17.572189
+> lease_expire=2012-07-05 02:38:21.889065 has v0 lc 30031
+> 2012-07-05 02:38:17.572204 7f7d9381a700  1 mon.a@0(leader).paxos(pgmap active
+> c 29531..30031) is_readable now=2012-07-05 02:38:17.572205
+> lease_expire=2012-07-05 02:38:21.889065 has v0 lc 30031
+> 2012-07-05 02:38:19.120463 7f7d9401b700  1 mon.a@0(leader).paxos(mdsmap active
+> c 1..44) is_readable now=2012-07-05 02:38:19.120470 lease_expire=2012-07-05
+> 02:38:23.149973 has v44 lc 44
+> 2012-07-05 02:38:19.925323 7f7d9401b700  1 mon.a@0(leader).paxos(mdsmap active
+> c 1..44) is_readable now=2012-07-05 02:38:19.925330 lease_expire=2012-07-05
+> 02:38:23.149973 has v44 lc 44
+> 
+> Could someone give a hint on this?
+> 
+> Thanks
+> 
+> Xiaopong
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
