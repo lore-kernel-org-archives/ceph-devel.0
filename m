@@ -1,72 +1,107 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: cephfs show_location produces kernel "divide error: 0000 [#1]" when
- run against a directory that is not the filesystem root
-Date: Thu, 5 Jul 2012 19:40:53 +0200
-Message-ID: <CAPUexz9+L+nrJCNh0gK0RGd8H5kk8ZGHZ+7WU4mP3mq5UHXLDQ@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Setting a big maxosd kills all mons
+Date: Thu, 5 Jul 2012 10:49:02 -0700
+Message-ID: <CAPYLRzhqbsKzR_TtAxKAV8t71aeHc29hSoqWUwi82bfXBcf_-A@mail.gmail.com>
+References: <CAPUexz9EHLsEvSCrw40U6L9zP=yWA6S81GCoeoBwXutPzxm9Cw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:42278 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751974Ab2GERky (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 13:40:54 -0400
-Received: by qcro28 with SMTP id o28so5013651qcr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 10:40:53 -0700 (PDT)
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:44130 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753265Ab2GERtD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 13:49:03 -0400
+Received: by bkwj10 with SMTP id j10so3713899bkw.19
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 10:49:02 -0700 (PDT)
+In-Reply-To: <CAPUexz9EHLsEvSCrw40U6L9zP=yWA6S81GCoeoBwXutPzxm9Cw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Florian Haas <florian@hastexo.com>
+Cc: ceph-devel@vger.kernel.org
 
-And one more issue report for today... :)
+On Thu, Jul 5, 2012 at 10:39 AM, Florian Haas <florian@hastexo.com> wro=
+te:
+> Hi guys,
+>
+> Someone I worked with today pointed me to a quick and easy way to
+> bring down an entire cluster, by making all mons kill themselves in
+> mass suicide:
+>
+> ceph osd setmaxosd 2147483647
+> 2012-07-05 16:29:41.893862 b5962b70 =A00 monclient: hunting for new m=
+on
+Ungh. Can you file a bug report? The problem here is that the monitor
+is trying to allocate a number of maps and arrays with that many
+entries; we probably need to put an artificial cap in place as a
+config option.
 
-Really easy to reproduce on my 3.2.0 Debian squeeze-backports kernel:
-mount a Ceph FS, create a directory in it. Then run "cephfs <dir>
-show_location".
 
-dmesg stacktrace:
+> I don't know what the actual threshold is, but setting your maxosd to
+> any sufficiently big number should do it. I had hoped 2^31-1 would be
+> fine, but evidently it's not.
+>
+> This is what's in the mon log -- the first line is obviously only on
+> the leader at the time of the command, the others are on all mons.
+>
+> =A0 =A0 -1> 2012-07-05 16:29:41.829470 b41a1b70 =A00 mon.daisy@0(lead=
+er) e1
+> handle_command mon_command(osd setmaxosd 2147483647 v 0) v1
+> =A0 =A0 =A00> 2012-07-05 16:29:41.887590 b41a1b70 -1 *** Caught signa=
+l (Aborted) **
+> =A0in thread b41a1b70
+>
+> =A0ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446=
+a2bf2030)
+> =A01: /usr/bin/ceph-mon() [0x816f461]
+> =A02: [0xb7738400]
+> =A03: [0xb7738424]
+> =A04: (gsignal()+0x51) [0xb731a781]
+> =A05: (abort()+0x182) [0xb731dbb2]
+> =A06: (__gnu_cxx::__verbose_terminate_handler()+0x14f) [0xb753b53f]
+> =A07: (()+0xbd405) [0xb7539405]
+> =A08: (()+0xbd442) [0xb7539442]
+> =A09: (()+0xbd581) [0xb7539581]
+> =A010: (()+0x11dea) [0xb7582dea]
+> =A011: (tc_new()+0x26) [0xb75a1636]
+> =A012: (std::vector<unsigned char, std::allocator<unsigned char>
+>>::_M_fill_insert(__gnu_cxx::__normal_iterator<unsigned char*,
+> std::vector<unsigned char, std::allocator<unsigned char> > >, unsigne=
+d
+> int, unsigned char const&)+0x79) [0x8185629]
+> =A013: (OSDMap::set_max_osd(int)+0x497) [0x817c6b7]
+>
+> From src/mon/OSDMonitor.cc:
+>
+> =A0 =A0 =A0 int newmax =3D atoi(m->cmd[2].c_str());
+> =A0 =A0 =A0 if (newmax < osdmap.crush->get_max_devices()) {
+> =A0 =A0 =A0 =A0 err =3D -ERANGE;
+> =A0 =A0 =A0 =A0 ss << "cannot set max_osd to " << newmax << " which i=
+s < crush
+> max_devices "
+> =A0 =A0 =A0 =A0 =A0 =A0<< osdmap.crush->get_max_devices();
+> =A0 =A0 =A0 =A0 goto out;
+> =A0 =A0 =A0 }
+>
+> I think that counts as unchecked user input, or has cmd[2] been
+> sanitized at any time before it gets here?
 
-[ 7153.714260] libceph: mon2 192.168.42.116:6789 session established
-[ 7308.584193] divide error: 0000 [#1] SMP
-[ 7308.584936] Modules linked in: cryptd aes_i586 aes_generic cbc ceph
-libceph nfsd lockd nfs_acl auth_rpcgss sunrpc fuse joydev usbhid hid
-snd_pcm snd_timer snd processor soundcore snd_page_alloc thermal_sys
-button tpm_tis tpm tpm_bios psmouse i2c_piix4 evdev serio_raw i2c_core
-virtio_balloon pcspkr ext3 jbd mbcache btrfs zlib_deflate crc32c
-libcrc32c sg sr_mod cdrom ata_generic virtio_net virtio_blk ata_piix
-uhci_hcd ehci_hcd libata usbcore floppy scsi_mod virtio_pci usb_common
-[last unloaded: scsi_wait_scan]
-[ 7308.588013]
-[ 7308.588013] Pid: 1444, comm: cephfs Not tainted
-3.2.0-0.bpo.2-686-pae #1 Bochs Bochs
-[ 7308.588013] EIP: 0060:[<f848c6c2>] EFLAGS: 00010246 CPU: 0
-[ 7308.588013] EIP is at ceph_calc_file_object_mapping+0x44/0xe8 [libceph]
-[ 7308.588013] EAX: 00000000 EBX: 00000000 ECX: 00000000 EDX: 00000000
-[ 7308.588013] ESI: 00000000 EDI: 00000000 EBP: 00000000 ESP: f7495ce4
-[ 7308.588013]  DS: 007b ES: 007b FS: 00d8 GS: 00e0 SS: 0068
-[ 7308.588013] Process cephfs (pid: 1444, ti=f7494000 task=f7266a60
-task.ti=f7494000)
-[ 7308.588013] Stack:
-[ 7308.588013]  00000000 00000000 00000000 0001b053 f5f20624 f5f203f0
-f749a800 f5f20420
-[ 7308.588013]  f84ca6a7 f7495d40 f7495d58 f7495d50 f7495d38 00000001
-00000246 f5f20420
-[ 7308.588013]  f749a90c bff6ff70 c14203a4 fffba978 000a0050 00000000
-f79f0298 00000001
-[ 7308.588013] Call Trace:
-[ 7308.588013]  [<f84ca6a7>] ? ceph_ioctl_get_dataloc+0x9e/0x213 [ceph]
-[ 7308.588013]  [<c10b6781>] ? __do_fault+0x3ee/0x42b
-[ 7308.588013]  [<c10b75f3>] ? handle_pte_fault+0x3aa/0xa67
-[ 7308.588013]  [<c10e0844>] ? path_openat+0x27f/0x294
-[ 7308.588013]  [<f84cac16>] ? ceph_ioctl+0x3fa/0x460 [ceph]
-[ 7308.588013]  [<c10d9fdb>] ? cp_new_stat64+0xee/0x100
-[ 7308.588013]  [<c10b7ebe>] ? handle_mm_fault+0x20e/0x224
-[ 7308.588013]  [<f84ca81c>] ? ceph_ioctl_get_dataloc+0x213/0x213 [ceph]
+Yeah, there's all kinds of unsanitized user input in the monitor
+command-parsing code.
 
-I unfortunately don't have a more recent kernel to test with, so if
-this has been fixed upstream feel free to ignore me. Otherwise,
-perhaps something that could go into the 3.5-rc cycle.
-
-Doing show_location on a file, and on the root directory of the fs,
-both work fine.
-
-Cheers,
-Florian
+> Also, is there a way to recover from this, short of reinitializing al=
+l mons?
+Hmm. We can do it by manipulating the disk format, but there's not any
+programmatic way to do so. I *think* that if you turn off all the
+monitors, and:
+1) delete the latest osdmap and osdmap_full entries,
+2) edit the osdmap and osdmap_full last_committed entries to be one
+prior to what they are,
+3) start the monitors
+then you should be okay. But it's possible that the "latest" entry got
+updated, in which case you'd also have to modify that to be an older
+map.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
