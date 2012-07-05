@@ -1,67 +1,91 @@
-From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Subject: Re: domino-style OSD crash
-Date: Fri, 06 Jul 2012 09:19:56 +0200
-Message-ID: <4FF6919C.8080201@univ-nantes.fr>
-References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com> <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com> <4FF2AFEB.1010403@univ-nantes.fr> <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com> <4FF35C01.4070400@univ-nantes.fr> <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com> <4FF3F98C.30602@univ-nantes.fr> <A1B0B821610446B587EA459CA7D88ECF@inktank.com> <4FF48317.5030802@univ-nantes.fr> <CAPYLRzg3vJNGYUwBrZ6e9G6x-URCodAxFLfXRL10T8yOqx+wVQ@mail.gmail.com>
+From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
+Subject: Re: OSD doesn't start
+Date: Fri, 06 Jul 2012 01:33:13 +0200
+Message-ID: <1680690.nczT3S6HBC@mranderson>
+References: <1563053.ttVafs9Pph@mranderson> <F1FB8F95B3FA4FF19D53AE9F060D88F5@inktank.com> <95834053.QbLuzMQ4OG@mranderson>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-lmb.cpub.univ-nantes.fr ([193.52.103.110]:59605 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750802Ab2GFIMP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 04:12:15 -0400
-In-Reply-To: <CAPYLRzg3vJNGYUwBrZ6e9G6x-URCodAxFLfXRL10T8yOqx+wVQ@mail.gmail.com>
+Received: from www.ki.iif.hu ([193.6.222.244]:38261 "EHLO strudel.ki.iif.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750786Ab2GFIvy convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 04:51:54 -0400
+Received: from cirkusz.lvs.iif.hu (cirkusz.lvs.iif.hu [193.225.14.182])
+	by strudel.ki.iif.hu (Postfix) with ESMTP id 4BFE4399
+	for <ceph-devel@vger.kernel.org>; Fri,  6 Jul 2012 10:51:50 +0200 (CEST)
+Received: from strudel.ki.iif.hu ([IPv6:::ffff:193.6.222.244])
+	by cirkusz.lvs.iif.hu (cirkusz.lvs.iif.hu [::ffff:193.225.14.72]) (amavisd-new, port 10024)
+	with ESMTP id l5rk6cUYk4TO for <ceph-devel@vger.kernel.org>;
+	Fri,  6 Jul 2012 10:51:43 +0200 (CEST)
+Received: from mranderson.localnet (adsl166.adsl.hungarnet.hu [193.6.17.166])
+	by strudel.ki.iif.hu (Postfix) with ESMTPSA id 8AB8D49
+	for <ceph-devel@vger.kernel.org>; Fri,  6 Jul 2012 10:51:42 +0200 (CEST)
+In-Reply-To: <95834053.QbLuzMQ4OG@mranderson>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Le 05/07/2012 23:32, Gregory Farnum a =E9crit :
+On 2012. July 5. 16:12:42 Sz=E9kelyi Szabolcs wrote:
+> On 2012. July 4. 09:34:04 Gregory Farnum wrote:
+> > Hrm, it looks like the OSD data directory got a little busted someh=
+ow. How
+> > did you perform your upgrade? (That is, how did you kill your daemo=
+ns, in
+> > what order, and when did you bring them back up.)
+>=20
+> Since it would be hard and long to describe in text, I've collected t=
+he
+> relevant log entries, sorted by time at http://pastebin.com/Ev3M4DQ9 =
+=2E The
+> short story is that after seeing that the OSDs won't start, I tried t=
+o bring
+> down the whole cluster and start it up from scratch. It didn't change
+> anything, so I rebooted the two machines (running all three daemons),=
+ to
+> see if it changes anything. It didn't and I gave up.
+>=20
+> My ceph config is available at http://pastebin.com/KKNjmiWM .
+>=20
+> Since this is my test cluster, I'm not very concerned about the data =
+on it.
+> But the other one, with the same config, is dying I think. ceph-fuse =
+is
+> eating around 75% CPU on the sole monitor ("cc") node. The monitor ab=
+out
+> 15%. On the other two nodes, the OSD eats around 50%, the MDS 15%, th=
+e
+> monitor another 10%. No Ceph filesystem activity is going on at the m=
+oment.
+> Blktrace reports about 1kB/s disk traffic on the partition hosting th=
+e OSD
+> data dir. The data seems to be accessible at the moment, but I'm afra=
+id
+> that my production cluster will end up in a similar situation after
+> upgrade, so I don't dare to touch it.
+>=20
+> Do you have any suggestion what I should check?
 
-[...]
->> ok, so as all nodes were identical, I probably have hit a btrfs bug =
-(like a
->> erroneous out of space ) in more or less the same time. And when 1 o=
-sd was
->> out,
+Yes, it definitely looks like dying. Besides the above symptoms all cli=
+ents'=20
+ceph-fuse burn the CPU, there are unreadable files on the fs (tar block=
+s on=20
+them infinitely), the FUSE clients emit messages like
 
-OH , I didn't finish the sentence... When 1 osd was out, missing data=20
-was copied on another nodes, probably speeding btrfs problem on those=20
-nodes (I suspect erroneous out of space conditions)
+ceph-fuse: 2012-07-05 23:21:41.583692 7f444dfd5700  0 -- client_ip:0/11=
+81=20
+send_message dropped message ping v1 because of no pipe on con 0x103400=
+0
 
-I've reformatted OSD with xfs. Performance is slightly worse for the=20
-moment (well, depend on the workload, and maybe lack of syncfs is to=20
-blame), but at least I hope to have the storage layer rock-solid. BTW,=20
-I've managed to keep the faulty btrfs volumes .
-
-[...]
-
->>> I wonder if maybe there's a confounding factor here =97 are all you=
-r nodes
->>> similar to each other,
->> Yes. I designed the cluster that way. All nodes are identical hardwa=
-re
->> (powerEdge M610, 10G intel ethernet + emulex fibre channel attached =
-to
->> storage (1 Array for 2 OSD nodes, 1 controller dedicated for each OS=
-D)
-> Oh, interesting. Are the broken nodes all on the same set of arrays?
-
-No. There are 4 completely independant raid arrays, in 4 different=20
-locations. They are similar (same brand & model, but slighltly differen=
-t=20
-disks, and 1 different firmware), all arrays are multipathed. I don't=20
-think the raid array is the problem. We use those particular models=20
-since 2/3 years, and in the logs I don't see any problem that can be=20
-caused by the storage itself (like scsi or multipath errors)
-
-Cheers,
+every 5 seconds. I tried to backup the data on it, but it got blocked i=
+n the=20
+middle. Since then I'm unable to get any data out of it, not even by ki=
+lling=20
+ceph-fuse and remounting the fs.
 
 --=20
-Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
-Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+cc
+
 
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
