@@ -1,79 +1,52 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Slow request warnings on 0.48
-Date: Thu, 05 Jul 2012 12:58:27 -0500
-Message-ID: <4FF5D5C3.80207@inktank.com>
+From: David Blundell <David.Blundell@100percentit.com>
+Subject: RE: Slow request warnings on 0.48
+Date: Thu, 5 Jul 2012 18:16:18 +0000
+Message-ID: <45F11B42CB5830479EF0E56A27F4E68D7F4DF0@exchange1.ad.100it.net>
 References: <44469a6e-79a3-4eaa-be25-c47192c8fc80@mailpro>
+ <4FF5D5C3.80207@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:43278 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752827Ab2GER6d (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 13:58:33 -0400
-Received: by yenl2 with SMTP id l2so7684809yen.19
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 10:58:33 -0700 (PDT)
-In-Reply-To: <44469a6e-79a3-4eaa-be25-c47192c8fc80@mailpro>
+Received: from smtp1.100percentit.com ([217.25.0.14]:45450 "EHLO
+	smtp.100percentit.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753152Ab2GESQ2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 14:16:28 -0400
+In-Reply-To: <4FF5D5C3.80207@inktank.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: David Blundell <David.Blundell@100percentit.com>, ceph-devel@vger.kernel.org
+To: Mark Nelson <mark.nelson@inktank.com>, Alexandre DERUMIER <aderumier@odiso.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 07/04/2012 11:58 AM, Alexandre DERUMIER wrote:
-> Hi, I see same messages here after upgrade to 0.48.
->
-> with random write benchmark.
->
-> I have more lags than before with 0.47 (but disks are at 100% usage, =
-so can't tell if it's normal or not)
->
->
-> ----- Mail original -----
->
-> De: "David Blundell"<David.Blundell@100percentit.com>
-> =C3=80: ceph-devel@vger.kernel.org
-> Envoy=C3=A9: Mercredi 4 Juillet 2012 18:53:02
-> Objet: Slow request warnings on 0.48
->
-> I have three servers running mon and osd using Ubuntu 12.04 that I ha=
-ve been testing with RADOS storing RBD KVM instances
->
-> 0.47.3 worked extremely well (once I got over a few btrfs issues). Th=
-e same servers running 0.48 give a large number of "[WRN] slow request"=
- messages whenever I generate a lot of random IO in the KVM instances u=
-sing iozone. The slow responses eventually leads to disk timeouts on th=
-e KVM instances.
->
-> I have erased the osds and recreated on new btrfs volumes with the sa=
-me result.
->
-> I have also tried switching to xfs using mkfs.xfs -n size=3D64k with =
-noatime, inode64,delaylog,logbufs=3D8,logbsize=3D256k
->
-> Xfs gives the same result - the iozone tests run fine until the rando=
-m IO starts and then there are lots of slow request warnings.
->
-> Does anyone have any ideas about the best place to start troubleshoot=
-ing / debugging?
->
-> Thanks,
->
-> David
-
-Hi David and Alexandre,
-
-Does this only happen with random writes or also sequential writes?  If=
-=20
-it happens with sequential writes as well, does it happen with rados be=
-nch?
-
---=20
-Mark Nelson
-Performance Engineer
-Inktank
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiBIaSBEYXZpZCBhbmQgQWxleGFuZHJlLA0KPiANCj4gRG9lcyB0aGlzIG9ubHkgaGFwcGVuIHdp
+dGggcmFuZG9tIHdyaXRlcyBvciBhbHNvIHNlcXVlbnRpYWwgd3JpdGVzPyAgSWYgaXQNCj4gaGFw
+cGVucyB3aXRoIHNlcXVlbnRpYWwgd3JpdGVzIGFzIHdlbGwsIGRvZXMgaXQgaGFwcGVuIHdpdGgg
+cmFkb3MgYmVuY2g/DQo+IA0KPiAtLQ0KPiBNYXJrIE5lbHNvbg0KPiBQZXJmb3JtYW5jZSBFbmdp
+bmVlcg0KPiBJbmt0YW5rDQoNCkhpIE1hcmssDQoNCkkgaGF2ZSBvbmx5IGV2ZXIgc2VlbiBpdCB3
+aXRoIHJhbmRvbSB3cml0ZXMuICBJJ2xsIHJldHJ5IHJhZG9zIGJlbmNoIGluIGEgZmV3IG1pbnV0
+ZXMgdG8gZG91YmxlIGNoZWNrIC0gYXJlIHRoZXJlIGFueSBvdGhlciB0ZXN0cyB5b3Ugd291bGQg
+bGlrZSBtZSB0byBydW4/DQoNCkknbSBjdXJyZW50bHkgd2FpdGluZyBmb3Igc29tZSBpb3pvbmUg
+dGVzdHMgdG8gZmluaXNoLiAgV2hlbiB0aGUgc2VxdWVudGlhbCB0ZXN0cyBhcmUgcnVubmluZyB0
+aGUgbG9ncyBhcmUgZmluZSwgYXMgc29vbiBhcyB0aGUgcmFuZG9tIHdyaXRlcyBzdGFydCwgdGhl
+IGxvZ3Mgc3RhcnQgdG8gZmlsbCB3aXRoIG1lc3NhZ2VzIGxpa2U6DQoNCjIwMTItMDctMDUgMTk6
+MTA6MDAuNTk5MjUwIG9zZC42IDEwLjAuMS40Mjo2ODAyLzIxNDUgMTE1MSA6IFtXUk5dIHNsb3cg
+cmVxdWVzdCAzNy45MzMwNzEgc2Vjb25kcyBvbGQsIHJlY2VpdmVkIGF0IDIwMTItMDctMDUgMTk6
+MDk6MjIuNjY1OTE3OiBvc2Rfb3AoY2xpZW50Ljk2NDE2LjA6OTE5NjUgcmIuMC4xLjAwMDAwMDAw
+MDE1ZiBbd3JpdGUgNDAyMjI3Mn40MDk2XSAyLjM3NzdlOTFhIHNuYXBjIDExPVsxMSwxMF0pIHY0
+IGN1cnJlbnRseSB3YWl0aW5nIGZvciBzdWIgb3BzDQoyMDEyLTA3LTA1IDE5OjEwOjAwLjU5OTI1
+OCBvc2QuNiAxMC4wLjEuNDI6NjgwMi8yMTQ1IDExNTIgOiBbV1JOXSBzbG93IHJlcXVlc3QgMzcu
+OTMyODM2IHNlY29uZHMgb2xkLCByZWNlaXZlZCBhdCAyMDEyLTA3LTA1IDE5OjA5OjIyLjY2NjE1
+Mjogb3NkX29wKGNsaWVudC45NjQxNi4wOjkxOTY2IHJiLjAuMS4wMDAwMDAwMDAxNWYgW3dyaXRl
+IDQwMzQ1NjB+NDA5Nl0gMi4zNzc3ZTkxYSBzbmFwYyAxMT1bMTEsMTBdKSB2NCBjdXJyZW50bHkg
+d2FpdGluZyBmb3Igc3ViIG9wcw0KMjAxMi0wNy0wNSAxOToxMDowMy4yNzgxNDEgbW9uLjAgMTAu
+MC4xLjQwOjY3ODkvMCA0OTMgOiBbSU5GXSBwZ21hcCB2NzU2NDogMTM0NCBwZ3M6IDEzNDQgYWN0
+aXZlK2NsZWFuOyA1MTgzIE1CIGRhdGEsIDExMDY2IE1CIHVzZWQsIDEzNjcgR0IgLyAxMzc3IEdC
+IGF2YWlsDQoyMDEyLTA3LTA1IDE5OjA5OjU1LjM4ODQ0OCBvc2QuMyAxMC4wLjEuNDE6NjgwMi8y
+NTQwIDE2MCA6IFtXUk5dIDYgc2xvdyByZXF1ZXN0cywgNiBpbmNsdWRlZCBiZWxvdzsgb2xkZXN0
+IGJsb2NrZWQgZm9yID4gMzIuNjIyMDE2IHNlY3MNCjIwMTItMDctMDUgMTk6MDk6NTUuMzg4NDYz
+IG9zZC4zIDEwLjAuMS40MTo2ODAyLzI1NDAgMTYxIDogW1dSTl0gc2xvdyByZXF1ZXN0IDMyLjYy
+MjAxNiBzZWNvbmRzIG9sZCwgcmVjZWl2ZWQgYXQgMjAxMi0wNy0wNSAxOTowOToyMi43NjYyNjk6
+IG9zZF9vcChjbGllbnQuOTY0MTYuMDo5MjMwOCByYi4wLjEuMDAwMDAwMDAwMTdiIFt3cml0ZSA0
+MDAxNzkyfjQwOTZdIDIuZjYwNmE2YzYgc25hcGMgMTE9WzExLDEwXSkgdjQgY3VycmVudGx5IHdh
+aXRpbmcgZm9yIHN1YiBvcHMJDQo=
