@@ -1,50 +1,105 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Slow request warnings on 0.48
-Date: Thu, 05 Jul 2012 14:49:17 -0500
-Message-ID: <4FF5EFBD.1060603@inktank.com>
-References: <44469a6e-79a3-4eaa-be25-c47192c8fc80@mailpro> <4FF5D5C3.80207@inktank.com> <45F11B42CB5830479EF0E56A27F4E68D7F4E54@exchange1.ad.100it.net>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Writes to mounted Ceph FS fail silently if client has no write
+ capability on data pool
+Date: Thu, 5 Jul 2012 13:01:59 -0700
+Message-ID: <CAPYLRzhay0Jr9dV5WCR_s07c58Q5aGQ0dWCkTDeL6_oWCb_tRg@mail.gmail.com>
+References: <CAPUexz-2R40ZRyEhQeEuq29fzgENDkHk=O+xXF=7jiG7ZP0Xuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:41519 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751004Ab2GETtW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 15:49:22 -0400
-Received: by gglu4 with SMTP id u4so7825367ggl.19
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 12:49:21 -0700 (PDT)
-In-Reply-To: <45F11B42CB5830479EF0E56A27F4E68D7F4E54@exchange1.ad.100it.net>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:39642 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751383Ab2GEUCB convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 16:02:01 -0400
+Received: by lbbgm6 with SMTP id gm6so13378853lbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 13:01:59 -0700 (PDT)
+In-Reply-To: <CAPUexz-2R40ZRyEhQeEuq29fzgENDkHk=O+xXF=7jiG7ZP0Xuw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Blundell <David.Blundell@100percentit.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Florian Haas <florian@hastexo.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 07/05/2012 01:43 PM, David Blundell wrote:
->> Hi David and Alexandre,
->>
->> Does this only happen with random writes or also sequential writes?  If it
->> happens with sequential writes as well, does it happen with rados bench?
->>
->> --
->> Mark Nelson
->> Performance Engineer
->> Inktank
+On Thu, Jul 5, 2012 at 10:40 AM, Florian Haas <florian@hastexo.com> wro=
+te:
+> Hi everyone,
 >
-> Hi Mark,
+> please enlighten me if I'm misinterpreting something, but I think the
+> Ceph FS layer could handle the following situation better.
 >
-> I just ran "rados -p data bench 60 write -t 16" and a few dd tests with no problems at all so at the moment it looks like only random IO triggers the slow writes.
+> How to reproduce (this is on a 3.2.0 kernel):
 >
-> Please do let me know if there are any other tests that I can do to help track down the cause.
+> 1. Create a client, mine is named "test", with the following capabili=
+ties:
 >
-> David
+> client.test
+> =A0 =A0 =A0 =A0 key: <key>
+> =A0 =A0 =A0 =A0 caps: [mds] allow
+> =A0 =A0 =A0 =A0 caps: [mon] allow r
+> =A0 =A0 =A0 =A0 caps: [osd] allow rw pool=3Dtestpool
+>
+> Note the client only has access to a single pool, "testpool".
+>
+> 2. Export the client's secret and mount a Ceph FS.
+>
+> mount -t ceph -o name=3Dtest,secretfile=3D/etc/ceph/test.secret
+> daisy,eric,frank:/ /mnt
+>
+> This succeeds, despite us not even having read access to the "data" p=
+ool.
+>
+> 3. Write something to a file.
+>
+> root@alice:/mnt# echo "hello world" > hello.txt
+> root@alice:/mnt# cat hello.txt
+>
+> This too succeeds.
+>
+> 4. Sync and clear caches.
+>
+> root@alice:/mnt# sync
+> root@alice:/mnt# echo 3 > /proc/sys/vm/drop_caches
+>
+> 5. Check file size and contents.
+>
+> root@alice:/mnt# ls -la
+> total 5
+> drwxr-xr-x =A01 root root =A0 =A00 Jul =A05 17:15 .
+> drwxr-xr-x 21 root root 4096 Jun 11 09:03 ..
+> -rw-r--r-- =A01 root root =A0 12 Jul =A05 17:15 hello.txt
+> root@alice:/mnt# cat hello.txt
+> root@alice:/mnt#
+>
+> Note the reported file size in unchanged, but the file is empty.
+>
+> Checking the "data" pool with client.admin credentials obviously show=
+s
+> that that pool is empty, so objects are never written. Interestingly,
+> "cephfs hello.txt show_location" does list an object_name, identifyin=
+g
+> an object which doesn't exist.
+>
+> Is there any way to make the client fail with -EIO, -EPERM,
+> -EOPNOTSUPP or whatever else is appropriate, rather than pretending t=
+o
+> write when it can't?
 
-Thanks David!  We've got some people internally taking a look at this. 
-I'll let you guys know if there is anything else we need!
+There definitely are, but I don't think we're going to fix that until
+we get to working seriously on the filesystem. Create a bug! ;)
 
-Thanks,
-Mark
+> Also, going down the rabbit hole, how would this behavior change if I
+> used cephfs to set the default layout on some directory to use a
+> different pool?
 
--- 
-Mark Nelson
-Performance Engineer
-Inktank
+I'm not sure what you're asking here =97=A0if you have access to the
+metadata server, you can change the pool that new files go into, and I
+think you can set the pool to be whatever you like (and we should
+probably harden all this, too). So you can fix it if it's a problem,
+but you can also turn it into a problem.
+Is that what you were after?
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
