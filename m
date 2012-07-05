@@ -1,74 +1,83 @@
 From: Florian Haas <florian@hastexo.com>
-Subject: Setting a big maxosd kills all mons
-Date: Thu, 5 Jul 2012 19:39:18 +0200
-Message-ID: <CAPUexz9EHLsEvSCrw40U6L9zP=yWA6S81GCoeoBwXutPzxm9Cw@mail.gmail.com>
+Subject: Writes to mounted Ceph FS fail silently if client has no write
+ capability on data pool
+Date: Thu, 5 Jul 2012 19:40:08 +0200
+Message-ID: <CAPUexz-2R40ZRyEhQeEuq29fzgENDkHk=O+xXF=7jiG7ZP0Xuw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:57996 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752662Ab2GERjU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 13:39:20 -0400
-Received: by qcro28 with SMTP id o28so5012775qcr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 10:39:19 -0700 (PDT)
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:60416 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754242Ab2GERkJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 13:40:09 -0400
+Received: by qadb17 with SMTP id b17so4031263qad.19
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 10:40:08 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi guys,
+Hi everyone,
 
-Someone I worked with today pointed me to a quick and easy way to
-bring down an entire cluster, by making all mons kill themselves in
-mass suicide:
+please enlighten me if I'm misinterpreting something, but I think the
+Ceph FS layer could handle the following situation better.
 
-ceph osd setmaxosd 2147483647
-2012-07-05 16:29:41.893862 b5962b70  0 monclient: hunting for new mon
+How to reproduce (this is on a 3.2.0 kernel):
 
-I don't know what the actual threshold is, but setting your maxosd to
-any sufficiently big number should do it. I had hoped 2^31-1 would be
-fine, but evidently it's not.
+1. Create a client, mine is named "test", with the following capabilities:
 
-This is what's in the mon log -- the first line is obviously only on
-the leader at the time of the command, the others are on all mons.
+client.test
+	key: <key>
+	caps: [mds] allow
+	caps: [mon] allow r
+	caps: [osd] allow rw pool=testpool
 
-    -1> 2012-07-05 16:29:41.829470 b41a1b70  0 mon.daisy@0(leader) e1
-handle_command mon_command(osd setmaxosd 2147483647 v 0) v1
-     0> 2012-07-05 16:29:41.887590 b41a1b70 -1 *** Caught signal (Aborted) **
- in thread b41a1b70
+Note the client only has access to a single pool, "testpool".
 
- ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
- 1: /usr/bin/ceph-mon() [0x816f461]
- 2: [0xb7738400]
- 3: [0xb7738424]
- 4: (gsignal()+0x51) [0xb731a781]
- 5: (abort()+0x182) [0xb731dbb2]
- 6: (__gnu_cxx::__verbose_terminate_handler()+0x14f) [0xb753b53f]
- 7: (()+0xbd405) [0xb7539405]
- 8: (()+0xbd442) [0xb7539442]
- 9: (()+0xbd581) [0xb7539581]
- 10: (()+0x11dea) [0xb7582dea]
- 11: (tc_new()+0x26) [0xb75a1636]
- 12: (std::vector<unsigned char, std::allocator<unsigned char>
->::_M_fill_insert(__gnu_cxx::__normal_iterator<unsigned char*,
-std::vector<unsigned char, std::allocator<unsigned char> > >, unsigned
-int, unsigned char const&)+0x79) [0x8185629]
- 13: (OSDMap::set_max_osd(int)+0x497) [0x817c6b7]
+2. Export the client's secret and mount a Ceph FS.
 
-From src/mon/OSDMonitor.cc:
+mount -t ceph -o name=test,secretfile=/etc/ceph/test.secret
+daisy,eric,frank:/ /mnt
 
-      int newmax = atoi(m->cmd[2].c_str());
-      if (newmax < osdmap.crush->get_max_devices()) {
-        err = -ERANGE;
-        ss << "cannot set max_osd to " << newmax << " which is < crush
-max_devices "
-           << osdmap.crush->get_max_devices();
-        goto out;
-      }
+This succeeds, despite us not even having read access to the "data" pool.
 
-I think that counts as unchecked user input, or has cmd[2] been
-sanitized at any time before it gets here?
+3. Write something to a file.
 
-Also, is there a way to recover from this, short of reinitializing all mons?
+root@alice:/mnt# echo "hello world" > hello.txt
+root@alice:/mnt# cat hello.txt
+
+This too succeeds.
+
+4. Sync and clear caches.
+
+root@alice:/mnt# sync
+root@alice:/mnt# echo 3 > /proc/sys/vm/drop_caches
+
+5. Check file size and contents.
+
+root@alice:/mnt# ls -la
+total 5
+drwxr-xr-x  1 root root    0 Jul  5 17:15 .
+drwxr-xr-x 21 root root 4096 Jun 11 09:03 ..
+-rw-r--r--  1 root root   12 Jul  5 17:15 hello.txt
+root@alice:/mnt# cat hello.txt
+root@alice:/mnt#
+
+Note the reported file size in unchanged, but the file is empty.
+
+Checking the "data" pool with client.admin credentials obviously shows
+that that pool is empty, so objects are never written. Interestingly,
+"cephfs hello.txt show_location" does list an object_name, identifying
+an object which doesn't exist.
+
+Is there any way to make the client fail with -EIO, -EPERM,
+-EOPNOTSUPP or whatever else is appropriate, rather than pretending to
+write when it can't?
+
+Also, going down the rabbit hole, how would this behavior change if I
+used cephfs to set the default layout on some directory to use a
+different pool?
+
+All thoughts appreciated.
 
 Cheers,
 Florian
