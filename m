@@ -1,44 +1,72 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: What does replica size mean?
-Date: Wed, 4 Jul 2012 19:35:09 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1207041934110.6931@cobra.newdream.net>
-References: <8512670932FB654F81AF0FEF1BE6D49D019C06A8@WHQBEMAIL1.whq.wistron>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Osd placement rule questions
+Date: Thu, 05 Jul 2012 15:45:22 +1200
+Message-ID: <4FF50DD2.6030507@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-205611126-1341455709=:6931"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57657 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751550Ab2GECfL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 22:35:11 -0400
-In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D019C06A8@WHQBEMAIL1.whq.wistron>
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:46854 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751208Ab2GEDve (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jul 2012 23:51:34 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.catalyst.net.nz (Postfix) with ESMTP id 40BAE31FF5
+	for <ceph-devel@vger.kernel.org>; Thu,  5 Jul 2012 15:45:23 +1200 (NZST)
+Received: from mail.catalyst.net.nz ([127.0.0.1])
+	by localhost (bertrand.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id LuwAiAOVfUh3 for <ceph-devel@vger.kernel.org>;
+	Thu,  5 Jul 2012 15:45:22 +1200 (NZST)
+Received: from [IPv6:2404:130:0:1000:982:3f18:550f:4cb] (unknown [IPv6:2404:130:0:1000:982:3f18:550f:4cb])
+	(Authenticated sender: mark.kirkwood)
+	by mail.catalyst.net.nz (Postfix) with ESMTPSA id A67D631D04
+	for <ceph-devel@vger.kernel.org>; Thu,  5 Jul 2012 15:45:22 +1200 (NZST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wiwynn.com
-Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
+To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi,
 
---557981400-205611126-1341455709=:6931
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+I am experimenting with ceph (rbd only for now), and have a few 
+questions about what is possible via placement rules.
 
-On Thu, 5 Jul 2012, Eric_YH_Chen@wiwynn.com wrote:
-> Hi, all:
->=20
-> Just want to make sure one thing.=20
-> If I set replica size as 2, that means one data with 2 copies, right?
-> Therefore, if I measure the performance of rbd is 100MB/s,=20
-> I can imagine the actually io throughputs on hard disk is over 100MB/s *3=
- =3D 300 MB/s. =A0
-> Am I correct?=20
+For example I am looking at a setup with a local datacenter 
+(datacenter0) and a remote one (datacenter1). I'm using a placement rule:
 
-Right.
+rule rbd {
+         ruleset 2
+         type replicated
+         min_size 1
+         max_size 10
+         step take datacenter0
+         step chooseleaf firstn -1 type host
+         step emit
+         step take datacenter1
+         step chooseleaf firstn 1 type host
+         step emit
+}
 
-"pool size" =3D> "pg size" =3D> number of osds in each PG =3D> number of re=
-plicas
+and I have the rdb pool set to size 3.
 
-So a pool with 'size 3' means 3x replication.
+So I *think* I am saying I want 2 replicas in datacenter0 and one in 
+datacenter1 [1].
 
-sage
---557981400-205611126-1341455709=:6931--
+The questions I have are:
+
+1/ I would like to be able to have a way to say something like: Make 2 
+copies at datacenter0, 1 at datacenter1 - wait for the ones at 
+datacenter0 to be written but not the ones at datacenter1 (so 
+asynchronous for the latter). Is this possible, or planned?
+
+2/ Also I would like to be able to say make my number of copies 3, but 
+if I lose datacenter0 (where 2 copies are), don't try to have 3 copies 
+at datacenter1 (so run degraded in that case). Is that possible?
+
+Cheers
+
+Mark
+
+[1] Might make more sense to have 2 copies at each, but I'm just trying 
+to see how this placement business works at this point...
+
+
