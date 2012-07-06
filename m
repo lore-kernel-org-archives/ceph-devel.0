@@ -1,142 +1,97 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: rbd map fail when the crushmap algorithm changed to tree
-Date: Fri, 6 Jul 2012 09:58:46 -0700
-Message-ID: <CAPYLRzhB0dmsgyKvwbkcK81+SRei6SCzik1gwRo1hNQJ=kbzSw@mail.gmail.com>
-References: <8512670932FB654F81AF0FEF1BE6D49D019C0EA7@WHQBEMAIL1.whq.wistron>
+Subject: Re: domino-style OSD crash
+Date: Fri, 6 Jul 2012 10:01:28 -0700
+Message-ID: <CAPYLRzgb7KU5jBjqWS7GiYc2KqNUXXjcOv=kRoD4cEavotaX0Q@mail.gmail.com>
+References: <4FCC7573.3000704@univ-nantes.fr>
+	<CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com>
+	<CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com>
+	<4FF2AFEB.1010403@univ-nantes.fr>
+	<CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
+	<4FF35C01.4070400@univ-nantes.fr>
+	<CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
+	<4FF3F98C.30602@univ-nantes.fr>
+	<A1B0B821610446B587EA459CA7D88ECF@inktank.com>
+	<4FF48317.5030802@univ-nantes.fr>
+	<CAPYLRzg3vJNGYUwBrZ6e9G6x-URCodAxFLfXRL10T8yOqx+wVQ@mail.gmail.com>
+	<4FF6919C.8080201@univ-nantes.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:48117 "EHLO
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:34278 "EHLO
 	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751407Ab2GFQ6s convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 12:58:48 -0400
-Received: by lbbgm6 with SMTP id gm6so15580116lbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Jul 2012 09:58:46 -0700 (PDT)
-In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D019C0EA7@WHQBEMAIL1.whq.wistron>
+	with ESMTP id S1752853Ab2GFRBa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 13:01:30 -0400
+Received: by lbbgm6 with SMTP id gm6so15584700lbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Jul 2012 10:01:28 -0700 (PDT)
+In-Reply-To: <4FF6919C.8080201@univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Eric_YH_Chen@wiwynn.com
-Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
+To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Jul 6, 2012 at 12:27 AM,  <Eric_YH_Chen@wiwynn.com> wrote:
-> Hi all:
+On Fri, Jul 6, 2012 at 12:19 AM, Yann Dupont <Yann.Dupont@univ-nantes.f=
+r> wrote:
+> Le 05/07/2012 23:32, Gregory Farnum a =E9crit :
 >
-> Here is the original crushmap, I change the algorithm of host to "tre=
-e"
-> and
-> set back to ceph cluster. However, when I try to map one imge to
-> rados block device (RBD), it would hang and no response until I press
-> ctrl-c.
-> ( rbd map xxxx =A0=3D> then hang)
+> [...]
 >
-> Is there any wrong in the crushmap? Thanks for help.
+>>> ok, so as all nodes were identical, I probably have hit a btrfs bug=
+ (like
+>>> a
+>>> erroneous out of space ) in more or less the same time. And when 1 =
+osd
+>>> was
+>>> out,
+>
+>
+> OH , I didn't finish the sentence... When 1 osd was out, missing data=
+ was
+> copied on another nodes, probably speeding btrfs problem on those nod=
+es (I
+> suspect erroneous out of space conditions)
 
-Hmm, your crush map looks okay to me.
+Ah. How full are/were the disks?
 
-What are the versions of everything (cluster, rbd tool, kernel),
-what's the exact command you run, and does it output anything? Is
-there any information in dmesg?
--Greg
+>
+> I've reformatted OSD with xfs. Performance is slightly worse for the =
+moment
+> (well, depend on the workload, and maybe lack of syncfs is to blame),=
+ but at
+> least I hope to have the storage layer rock-solid. BTW, I've managed =
+to keep
+> the faulty btrfs volumes .
+>
+> [...]
+>
+>
+>>>> I wonder if maybe there's a confounding factor here =97 are all yo=
+ur nodes
+>>>> similar to each other,
+>>>
+>>> Yes. I designed the cluster that way. All nodes are identical hardw=
+are
+>>> (powerEdge M610, 10G intel ethernet + emulex fibre channel attached=
+ to
+>>> storage (1 Array for 2 OSD nodes, 1 controller dedicated for each O=
+SD)
+>>
+>> Oh, interesting. Are the broken nodes all on the same set of arrays?
+>
+>
+> No. There are 4 completely independant raid arrays, in 4 different
+> locations. They are similar (same brand & model, but slighltly differ=
+ent
+> disks, and 1 different firmware), all arrays are multipathed. I don't=
+ think
+> the raid array is the problem. We use those particular models since 2=
+/3
+> years, and in the logs I don't see any problem that can be caused by =
+the
+> storage itself (like scsi or multipath errors)
 
-
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> # devices
-> device 0 osd.0
-> device 1 osd.1
-> device 2 osd.2
-> device 3 osd.3
-> device 4 osd.4
-> device 5 osd.5
-> device 6 osd.6
-> device 7 osd.7
-> device 8 osd.8
-> device 9 osd.9
-> device 10 osd.10
-> device 11 osd.11
->
-> # types
-> type 0 osd
-> type 1 host
-> type 2 rack
-> type 3 row
-> type 4 room
-> type 5 datacenter
-> type 6 pool
->
-> # buckets
-> host store-001 {
-> =A0 =A0 =A0 =A0 id -2 =A0 =A0 =A0 =A0 =A0 # do not change unnecessari=
-ly
-> =A0 =A0 =A0 =A0 # weight 12.000
-> =A0 =A0 =A0 =A0 alg straw
-> =A0 =A0 =A0 =A0 hash 0 =A0# rjenkins1
-> =A0 =A0 =A0 =A0 item osd.0 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.1 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.10 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.11 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.2 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.3 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.4 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.5 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.6 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.7 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.8 weight 1.000
-> =A0 =A0 =A0 =A0 item osd.9 weight 1.000
-> }
-> rack unknownrack {
-> =A0 =A0 =A0 =A0 id -3 =A0 =A0 =A0 =A0 =A0 # do not change unnecessari=
-ly
-> =A0 =A0 =A0 =A0 # weight 12.000
-> =A0 =A0 =A0 =A0 alg straw
-> =A0 =A0 =A0 =A0 hash 0 =A0# rjenkins1
-> =A0 =A0 =A0 =A0 item store-001 weight 12.000
-> }
-> pool default {
-> =A0 =A0 =A0 =A0 id -1 =A0 =A0 =A0 =A0 =A0 # do not change unnecessari=
-ly
-> =A0 =A0 =A0 =A0 # weight 12.000
-> =A0 =A0 =A0 =A0 alg straw
-> =A0 =A0 =A0 =A0 hash 0 =A0# rjenkins1
-> =A0 =A0 =A0 =A0 item unknownrack weight 12.000
-> }
->
-> # rules
-> rule data {
-> =A0 =A0 =A0 =A0 ruleset 0
-> =A0 =A0 =A0 =A0 type replicated
-> =A0 =A0 =A0 =A0 min_size 1
-> =A0 =A0 =A0 =A0 max_size 10
-> =A0 =A0 =A0 =A0 step take default
-> =A0 =A0 =A0 =A0 step choose firstn 0 type osd
-> =A0 =A0 =A0 =A0 step emit
-> }
-> rule metadata {
-> =A0 =A0 =A0 =A0 ruleset 1
-> =A0 =A0 =A0 =A0 type replicated
-> =A0 =A0 =A0 =A0 min_size 1
-> =A0 =A0 =A0 =A0 max_size 10
-> =A0 =A0 =A0 =A0 step take default
-> =A0 =A0 =A0 =A0 step choose firstn 0 type osd
-> =A0 =A0 =A0 =A0 step emit
-> }
-> rule rbd {
-> =A0 =A0 =A0 =A0 ruleset 2
-> =A0 =A0 =A0 =A0 type replicated
-> =A0 =A0 =A0 =A0 min_size 1
-> =A0 =A0 =A0 =A0 max_size 10
-> =A0 =A0 =A0 =A0 step take default
-> =A0 =A0 =A0 =A0 step choose firstn 0 type osd
-> =A0 =A0 =A0 =A0 step emit
-> }
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+I must have misunderstood then. What did you mean by "1 Array for 2 OSD=
+ nodes"?
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
