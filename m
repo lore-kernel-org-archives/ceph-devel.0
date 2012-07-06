@@ -1,154 +1,89 @@
 From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: [PATCH] Generate URL-safe base64 strings for keys.
-Date: Fri, 06 Jul 2012 10:48:38 +0200
-Message-ID: <4FF6A666.9080705@widodh.nl>
-References: <CADvuQRERYhuFiz07Kp_YxOo_ya6-jACJ3X2gNihp=5F83BJQiQ@mail.gmail.com> <1341405987-26469-1-git-send-email-wido@widodh.nl> <Pine.LNX.4.64.1207040816350.6931@cobra.newdream.net> <1341418257.18922.2.camel@Nokia-N900-02-8> <Pine.LNX.4.64.1207040913420.6931@cobra.newdream.net> <4FF5974E.5070308@widodh.nl> <Pine.LNX.4.64.1207050729350.6931@cobra.newdream.net>
+Subject: Re: [PATCH] librados: Bump the version to 0.48
+Date: Fri, 06 Jul 2012 10:52:49 +0200
+Message-ID: <4FF6A761.8090002@widodh.nl>
+References: <1341409564-26660-1-git-send-email-wido@widodh.nl> <6ED535BAF3394911BDF4F16441761D6A@inktank.com> <Pine.LNX.4.64.1207040932090.6931@cobra.newdream.net> <CAPYLRzjNhhWzmFyOkz+cDsFsZbZA4iP9bVG8ACWY5LP20wMYtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [109.72.87.137] ([109.72.87.137]:35593 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1751184Ab2GFJO1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 05:14:27 -0400
-In-Reply-To: <Pine.LNX.4.64.1207050729350.6931@cobra.newdream.net>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:35767 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752690Ab2GFJTL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 05:19:11 -0400
+In-Reply-To: <CAPYLRzjNhhWzmFyOkz+cDsFsZbZA4iP9bVG8ACWY5LP20wMYtQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
 
 
-On 07/05/2012 04:31 PM, Sage Weil wrote:
-> On Thu, 5 Jul 2012, Wido den Hollander wrote:
->> On 04-07-12 18:18, Sage Weil wrote:
->>> On Wed, 4 Jul 2012, Wido den Hollander wrote:
->>>>> On Wed, 4 Jul 2012, Wido den Hollander wrote:
->>>>>> By using this we prevent scenarios where cephx keys are not accepted
->>>>>> in various situations.
->>>>>>
->>>>>> Replacing the + and / by - and _ we generate URL-safe base64 keys
->>>>>>
->>>>>> Signed-off-by: Wido den Hollander <wido@widodh.nl>
->>>>>
->>>>> Do already properly decode URL-sage base64 encoding?
->>>>>
->>>>
->>>> Yes, it decodes URL-safe base64 as well.
->>>>
->>>> See the if statements for 62 and 63, + and - are treated equally, just
->>>> like / and _.
->>>
->>> Oh, got it.  The commit description confused me... I thought this was
->>> related encoding only.
->>>
->>> I think we should break the encode and decode patches into separate
->>> versions, and apply the decode to a stable branch (argonaut) and the
->>> encode to the master.  That should avoid most problems with a
->>> rolling/staggered upgrade...
+On 07/06/2012 12:33 AM, Gregory Farnum wrote:
+> On Wed, Jul 4, 2012 at 9:33 AM, Sage Weil <sage@inktank.com> wrote:
+>> On Wed, 4 Jul 2012, Gregory Farnum wrote:
+>>> Hmmm =FF=FF we generally try to modify these versions when the API =
+changes,
+>>> not on every sprint. It looks to me like Sage added one function in=
+ 0.45
+>>> where we maybe should have bumped it, but that was a long time ago =
+and
+>>> at this point we should maybe just eat it?
 >>
->> I just submitted a patch for decoding only.
+>> Yeah, I went ahead and applied this to stable (argonaut) since it's =
+as
+>> good a reference point as any.  Moving forward, we should try to syn=
+c
+>> this up with API changes as they happen.  Hmm, like that assert
+>> ObjectOperation that just went into master...
 >
-> Applied, thanks!
+> Yep, should probably bump it to .49 then! (Since that's the version i=
+t
+> will be part of, and nobody will get confused and try to bump it agai=
+n
+> before that release.)
 >
->> During some tests I did I found out that libvirt uses GNUlib and won't handle
->> URL-safe base64 encoded keys.
->>
->> So, as long as Ceph allows them we're good. Users can always replace the + and
->> / in their key knowing it will be accepted by Ceph.
->>
->> This works for me for now. The exact switch to base64url should be done at a
->> later stage I think.
->>
->> The RFC on this: http://tools.ietf.org/html/rfc4648#page-7
 >
-> We could:
->   - submit a patch for gnulib; someday it'll support it
+> On Thu, Jul 5, 2012 at 12:26 AM, Wido den Hollander <wido@widodh.nl> =
+wrote:
+>> That was my reasoning. I compiled phprados against 0.48 and saw that
+>> librados was reporting 0.44 as version.
+>>
+>> That could confuse users and they might think they still have an old=
+ library
+>> in place.
+>>
+>> Imho the version numbering should be totally different from Ceph if =
+you only
+>> want to bump the version on an API change.
+>
+> Well, the problem with bumping it on every Ceph version is that it
+> becomes a lot harder for tools to sync up to a known version of the
+> API. Perhaps we should have divorced it from the Ceph versioning
+> completely, but I don't know if we can still do that in a reasonable
+> way or not. :/
 
-I already did, but IF they accept anything else than RFC4648 they'll 
-implement a lot of the other format as well. That will be some work.
+You could always say: 0.48 was the "stable" release, from here on we ar=
+e=20
+only going to bump the librados version if any API change happends.
 
->   - kludge the secret generation code in ceph so that it rejects secrets
->     with problematic encoding... :/  (radosgw-admin does something
->     similar with +'s in the s3-style user keys.)
-
-Seems the easy way out, but it will work though.
+Sent out an e-mail on the devel list and write a blogpost? I don't thin=
+k=20
+we have a lot of developers using native librados at the moment.
 
 Wido
 
+> -Greg
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> sage
->
->
->
->>
->> Wido
->>
->>>
->>> sage
->>>
->>>
->>>>
->>>> Wido
->>>>
->>>>
->>>>> sage
->>>>>
->>>>>> ---
->>>>>> src/common/armor.c |       6 +++---
->>>>>> 1 file changed, 3 insertions(+), 3 deletions(-)
->>>>>>
->>>>>> diff --git a/src/common/armor.c b/src/common/armor.c
->>>>>> index d1d5664..7f73da1 100644
->>>>>> --- a/src/common/armor.c
->>>>>> +++ b/src/common/armor.c
->>>>>> @@ -9,7 +9,7 @@
->>>>>> * base64 encode/decode.
->>>>>> */
->>>>>>
->>>>>> -const char *pem_key =
->>>>>> "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
->>>>>> +const char *pem_key =
->>>>>> "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
->>>>>>
->>>>>> static int encode_bits(int c)
->>>>>> {
->>>>>> @@ -24,9 +24,9 @@ static int decode_bits(char c)
->>>>>>           return c - 'a' + 26;
->>>>>>       if (c >= '0' && c <= '9')
->>>>>>           return c - '0' + 52;
->>>>>> -    if (c == '+')
->>>>>> +    if (c == '+' || c == '-')
->>>>>>           return 62;
->>>>>> -    if (c == '/')
->>>>>> +    if (c == '/' || c == '_')
->>>>>>           return 63;
->>>>>>       if (c == '=')
->>>>>>           return 0; /* just non-negative, please */
->>>>>> --
->>>>>> 1.7.9.5
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>> in the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at   http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at   http://vger.kernel.org/majordomo-info.html
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
