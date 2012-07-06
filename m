@@ -1,121 +1,70 @@
-From: <Eric_YH_Chen@wiwynn.com>
-Subject: rbd map fail when the crushmap algorithm changed to tree
-Date: Fri, 6 Jul 2012 15:27:52 +0800
-Message-ID: <8512670932FB654F81AF0FEF1BE6D49D019C0EA7@WHQBEMAIL1.whq.wistron>
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: Re: domino-style OSD crash
+Date: Fri, 06 Jul 2012 09:19:56 +0200
+Message-ID: <4FF6919C.8080201@univ-nantes.fr>
+References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com> <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com> <4FF2AFEB.1010403@univ-nantes.fr> <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com> <4FF35C01.4070400@univ-nantes.fr> <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com> <4FF3F98C.30602@univ-nantes.fr> <A1B0B821610446B587EA459CA7D88ECF@inktank.com> <4FF48317.5030802@univ-nantes.fr> <CAPYLRzg3vJNGYUwBrZ6e9G6x-URCodAxFLfXRL10T8yOqx+wVQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw3.wistron.com ([220.128.89.23]:64751 "EHLO
-	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755561Ab2GFHjY convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 03:39:24 -0400
-Received: from twnhufe2.whq.wistron (unverified [10.37.31.102]) by TWNHUMSW3.wistron.com
- (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta56953336fc0a816711e0c@TWNHUMSW3.wistron.com> for <ceph-devel@vger.kernel.org>;
- Fri, 6 Jul 2012 15:31:04 +0800
-Content-class: urn:content-classes:message
+Received: from smtptls1-lmb.cpub.univ-nantes.fr ([193.52.103.110]:59605 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750802Ab2GFIMP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 04:12:15 -0400
+In-Reply-To: <CAPYLRzg3vJNGYUwBrZ6e9G6x-URCodAxFLfXRL10T8yOqx+wVQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi all:
+Le 05/07/2012 23:32, Gregory Farnum a =E9crit :
 
-Here is the original crushmap, I change the algorithm of host to "tree"
-and 
-set back to ceph cluster. However, when I try to map one imge to 
-rados block device (RBD), it would hang and no response until I press
-ctrl-c.
-( rbd map xxxx  => then hang)
+[...]
+>> ok, so as all nodes were identical, I probably have hit a btrfs bug =
+(like a
+>> erroneous out of space ) in more or less the same time. And when 1 o=
+sd was
+>> out,
 
-Is there any wrong in the crushmap? Thanks for help.
+OH , I didn't finish the sentence... When 1 osd was out, missing data=20
+was copied on another nodes, probably speeding btrfs problem on those=20
+nodes (I suspect erroneous out of space conditions)
 
-=============================================
-# devices
-device 0 osd.0
-device 1 osd.1
-device 2 osd.2
-device 3 osd.3
-device 4 osd.4
-device 5 osd.5
-device 6 osd.6
-device 7 osd.7
-device 8 osd.8
-device 9 osd.9
-device 10 osd.10
-device 11 osd.11
+I've reformatted OSD with xfs. Performance is slightly worse for the=20
+moment (well, depend on the workload, and maybe lack of syncfs is to=20
+blame), but at least I hope to have the storage layer rock-solid. BTW,=20
+I've managed to keep the faulty btrfs volumes .
 
-# types
-type 0 osd
-type 1 host
-type 2 rack
-type 3 row
-type 4 room
-type 5 datacenter
-type 6 pool
+[...]
 
-# buckets
-host store-001 {
-        id -2           # do not change unnecessarily
-        # weight 12.000
-        alg straw
-        hash 0  # rjenkins1
-        item osd.0 weight 1.000
-        item osd.1 weight 1.000
-        item osd.10 weight 1.000
-        item osd.11 weight 1.000
-        item osd.2 weight 1.000
-        item osd.3 weight 1.000
-        item osd.4 weight 1.000
-        item osd.5 weight 1.000
-        item osd.6 weight 1.000
-        item osd.7 weight 1.000
-        item osd.8 weight 1.000
-        item osd.9 weight 1.000
-}
-rack unknownrack {
-        id -3           # do not change unnecessarily
-        # weight 12.000
-        alg straw
-        hash 0  # rjenkins1
-        item store-001 weight 12.000
-}
-pool default {
-        id -1           # do not change unnecessarily
-        # weight 12.000
-        alg straw
-        hash 0  # rjenkins1
-        item unknownrack weight 12.000
-}
+>>> I wonder if maybe there's a confounding factor here =97 are all you=
+r nodes
+>>> similar to each other,
+>> Yes. I designed the cluster that way. All nodes are identical hardwa=
+re
+>> (powerEdge M610, 10G intel ethernet + emulex fibre channel attached =
+to
+>> storage (1 Array for 2 OSD nodes, 1 controller dedicated for each OS=
+D)
+> Oh, interesting. Are the broken nodes all on the same set of arrays?
 
-# rules
-rule data {
-        ruleset 0
-        type replicated
-        min_size 1
-        max_size 10
-        step take default
-        step choose firstn 0 type osd
-        step emit
-}
-rule metadata {
-        ruleset 1
-        type replicated
-        min_size 1
-        max_size 10
-        step take default
-        step choose firstn 0 type osd
-        step emit
-}
-rule rbd {
-        ruleset 2
-        type replicated
-        min_size 1
-        max_size 10
-        step take default
-        step choose firstn 0 type osd
-        step emit
-}
+No. There are 4 completely independant raid arrays, in 4 different=20
+locations. They are similar (same brand & model, but slighltly differen=
+t=20
+disks, and 1 different firmware), all arrays are multipathed. I don't=20
+think the raid array is the problem. We use those particular models=20
+since 2/3 years, and in the logs I don't see any problem that can be=20
+caused by the storage itself (like scsi or multipath errors)
 
+Cheers,
 
+--=20
+Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
+Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
