@@ -1,73 +1,121 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Strange behavior after upgrading to 0.48
-Date: Thu, 5 Jul 2012 22:07:33 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1207052206490.565@cobra.newdream.net>
-References: <4FF53706.7070003@gmail.com> <Pine.LNX.4.64.1207050725550.6931@cobra.newdream.net>
- <72a6b171-725b-417c-9538-07f6a4ef5032@email.android.com>
- <Pine.LNX.4.64.1207050737400.6931@cobra.newdream.net> <4FF64FB7.90709@gmail.com>
- <4FF66624.1040607@catalyst.net.nz> <Pine.LNX.4.64.1207052117080.565@cobra.newdream.net>
- <4FF66F0A.7000804@catalyst.net.nz>
+From: <Eric_YH_Chen@wiwynn.com>
+Subject: rbd map fail when the crushmap algorithm changed to tree
+Date: Fri, 6 Jul 2012 15:27:52 +0800
+Message-ID: <8512670932FB654F81AF0FEF1BE6D49D019C0EA7@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39771 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751076Ab2GFFHg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 01:07:36 -0400
-In-Reply-To: <4FF66F0A.7000804@catalyst.net.nz>
+Received: from twnhumsw3.wistron.com ([220.128.89.23]:64751 "EHLO
+	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755561Ab2GFHjY convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 03:39:24 -0400
+Received: from twnhufe2.whq.wistron (unverified [10.37.31.102]) by TWNHUMSW3.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta56953336fc0a816711e0c@TWNHUMSW3.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Fri, 6 Jul 2012 15:31:04 +0800
+Content-class: urn:content-classes:message
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Cc: Xiaopong Tran <xiaopong.tran@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
 
-On Fri, 6 Jul 2012, Mark Kirkwood wrote:
-> On 06/07/12 16:17, Sage Weil wrote:
-> > On Fri, 6 Jul 2012, Mark Kirkwood wrote:
-> > > 
-> > > FYI: I ran into this too - you need to do:
-> > > 
-> > > apt-get dist-upgrade
-> > > 
-> > > for the 0.47-2 packages to be replaced by 0.48 (of course purging 'em and
-> > > reinstalling works too...just a bit more drastic)!
-> > That's strange... anyone know why?
-> > 
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> From the apt-get manual:
-> 
->        upgrade
->            upgrade is used to install the newest versions of all packages
->            currently installed on the system from the sources enumerated in
->            /etc/apt/sources.list. Packages currently installed with new
->            versions available are retrieved and upgraded; under no
->            circumstances are currently installed packages removed, or packages
->            not already installed retrieved and installed. New versions of
->            currently installed packages that cannot be upgraded without
->            changing the install status of another package will be left at
->            their current version. An update must be performed first so that
->            apt-get knows that new versions of packages are available.
-> 
->        dist-upgrade
->            dist-upgrade in addition to performing the function of upgrade,
->            also intelligently handles changing dependencies with new versions
->            of packages; apt-get has a "smart" conflict resolution system, and
->            it will attempt to upgrade the most important packages at the
->            expense of less important ones if necessary. So, dist-upgrade
->            command may remove some packages. The /etc/apt/sources.list file
->            contains a list of locations from which to retrieve desired package
->            files. See also apt_preferences(5) for a mechanism for overriding
->            the general settings for individual packages.
-> 
-> Does 0.48 have new dependancies perhaps?
+Hi all:
 
-Oh, yeah.  We switched to libnss from libcrypto++ by default, among other 
-things; that would explain it!
+Here is the original crushmap, I change the algorithm of host to "tree"
+and 
+set back to ceph cluster. However, when I try to map one imge to 
+rados block device (RBD), it would hang and no response until I press
+ctrl-c.
+( rbd map xxxx  => then hang)
 
-Thanks-
-sage
+Is there any wrong in the crushmap? Thanks for help.
+
+=============================================
+# devices
+device 0 osd.0
+device 1 osd.1
+device 2 osd.2
+device 3 osd.3
+device 4 osd.4
+device 5 osd.5
+device 6 osd.6
+device 7 osd.7
+device 8 osd.8
+device 9 osd.9
+device 10 osd.10
+device 11 osd.11
+
+# types
+type 0 osd
+type 1 host
+type 2 rack
+type 3 row
+type 4 room
+type 5 datacenter
+type 6 pool
+
+# buckets
+host store-001 {
+        id -2           # do not change unnecessarily
+        # weight 12.000
+        alg straw
+        hash 0  # rjenkins1
+        item osd.0 weight 1.000
+        item osd.1 weight 1.000
+        item osd.10 weight 1.000
+        item osd.11 weight 1.000
+        item osd.2 weight 1.000
+        item osd.3 weight 1.000
+        item osd.4 weight 1.000
+        item osd.5 weight 1.000
+        item osd.6 weight 1.000
+        item osd.7 weight 1.000
+        item osd.8 weight 1.000
+        item osd.9 weight 1.000
+}
+rack unknownrack {
+        id -3           # do not change unnecessarily
+        # weight 12.000
+        alg straw
+        hash 0  # rjenkins1
+        item store-001 weight 12.000
+}
+pool default {
+        id -1           # do not change unnecessarily
+        # weight 12.000
+        alg straw
+        hash 0  # rjenkins1
+        item unknownrack weight 12.000
+}
+
+# rules
+rule data {
+        ruleset 0
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step choose firstn 0 type osd
+        step emit
+}
+rule metadata {
+        ruleset 1
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step choose firstn 0 type osd
+        step emit
+}
+rule rbd {
+        ruleset 2
+        type replicated
+        min_size 1
+        max_size 10
+        step take default
+        step choose firstn 0 type osd
+        step emit
+}
+
 
