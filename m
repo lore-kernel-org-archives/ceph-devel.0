@@ -1,66 +1,46 @@
-From: Jimmy Tang <jtang@tchpc.tcd.ie>
-Subject: unpackaged files in rpmbuild of 0.48
-Date: Fri, 6 Jul 2012 15:44:02 +0100
-Message-ID: <1E7E28F9-6612-4488-B7C2-0B2E48281765@tchpc.tcd.ie>
-Mime-Version: 1.0 (Apple Message framework v1278)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: Re: oops in rbd module (con_work in libceph)
+Date: Fri, 06 Jul 2012 17:35:22 +0200
+Message-ID: <4FF705BA.4080501@univ-nantes.fr>
+References: <4FF6A27B.7020808@univ-nantes.fr>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tabaet.tchpc.tcd.ie ([134.226.112.12]:39592 "EHLO
-	tabaet.tchpc.tcd.ie" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750906Ab2GFOwQ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 10:52:16 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id 3F9F18326E
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Jul 2012 15:44:03 +0100 (IST)
-Received: from tabaet.tchpc.tcd.ie ([127.0.0.1])
-	by localhost (tabaet.tchpc.tcd.ie [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id HG6y9rh1IWvI for <ceph-devel@vger.kernel.org>;
-	Fri,  6 Jul 2012 15:44:02 +0100 (IST)
-Received: from x00.tchpc.tcd.ie (x00.tchpc.tcd.ie [134.226.112.149])
-	by tabaet.tchpc.tcd.ie (Postfix) with ESMTP id 79E6D82DD7
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Jul 2012 15:44:02 +0100 (IST)
+Received: from smtptls2-lmb.cpub.univ-nantes.fr ([193.52.103.111]:38019 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755971Ab2GFPf1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 11:35:27 -0400
+In-Reply-To: <4FF6A27B.7020808@univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi All,
+Le 06/07/2012 10:31, Yann Dupont a =E9crit :
+> Hello.
+>
+> Bug happens in rbd client, at least in Kernel 3.4.4 . I have a=20
+> completely reproductible bug.
+just a note : 3.2.22 doesn't seems to exhibit the problem. I repeated=20
+the process 2 times without problems on this kernel.
 
-I'm not sure if this is intentional or not, but during a rpm build of 0.48 gives the following
+I'll launch realistic load on our ceph volume this week end (bacula=20
+backups). I'll see if 3.2.22 is solid.
 
-error: Installed (but unpackaged) file(s) found:
-   /sbin/ceph-disk-activate
-   /sbin/ceph-disk-prepare
+Then monday or tuesday I'll take the git bisect route to see which patc=
+h=20
+introduced the problem.
 
+Cheers,
 
-RPM build errors:
-    Installed (but unpackaged) file(s) found:
-   /sbin/ceph-disk-activate
-   /sbin/ceph-disk-prepare
-
-The following will fix the spec file
-
-diff -u ceph.spec.in.orig ceph.spec.in
---- ceph.spec.in.orig	2012-07-06 15:38:59.298497719 +0100
-+++ ceph.spec.in	2012-07-06 15:39:45.423560177 +0100
-@@ -326,6 +326,8 @@
- /usr/sbin/rcceph
- %{_libdir}/rados-classes/libcls_rbd.so*
- %{_libdir}/rados-classes/libcls_rgw.so*
-+/sbin/ceph-disk-activate
-+/sbin/ceph-disk-prepare
- 
- #################################################################################
- %files fuse
-
-I could of course ignore
-
-Regards,
-Jimmy Tang
+--=20
+Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
+Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
 
 --
-Senior Software Engineer, Digital Repository of Ireland (DRI)
-Trinity Centre for High Performance Computing,
-Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
-http://www.tchpc.tcd.ie/
-
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
