@@ -1,173 +1,154 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: speedup ceph / scaling / find the bottleneck
-Date: Fri, 6 Jul 2012 10:54:03 +0200
-Message-ID: <0F16C6A5-0D51-4575-AFF8-81F9FDD045ED@profihost.ag>
-References: <9437d87e-97db-48fc-a133-f25042b21a38@mailpro>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: [PATCH] Generate URL-safe base64 strings for keys.
+Date: Fri, 06 Jul 2012 10:48:38 +0200
+Message-ID: <4FF6A666.9080705@widodh.nl>
+References: <CADvuQRERYhuFiz07Kp_YxOo_ya6-jACJ3X2gNihp=5F83BJQiQ@mail.gmail.com> <1341405987-26469-1-git-send-email-wido@widodh.nl> <Pine.LNX.4.64.1207040816350.6931@cobra.newdream.net> <1341418257.18922.2.camel@Nokia-N900-02-8> <Pine.LNX.4.64.1207040913420.6931@cobra.newdream.net> <4FF5974E.5070308@widodh.nl> <Pine.LNX.4.64.1207050729350.6931@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:34311 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750992Ab2GFIyL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 04:54:11 -0400
-In-Reply-To: <9437d87e-97db-48fc-a133-f25042b21a38@mailpro>
+Received: from [109.72.87.137] ([109.72.87.137]:35593 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1751184Ab2GFJO1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 05:14:27 -0400
+In-Reply-To: <Pine.LNX.4.64.1207050729350.6931@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Am 06.07.2012 um 05:50 schrieb Alexandre DERUMIER <aderumier@odiso.com>=
-:
 
-> Hi,=20
-> Stefan is on vacation for the moment,I don't know if he can reply you=
-=2E
-Thanks!
 
->=20
-> But I can reoly for him for the kvm part (as we do same tests togethe=
-r in parallel).
->=20
-> - kvm is 1.1
-> - rbd 0.48
-> - drive option rbd:pool/volume:auth_supported=3Dcephx;none;keyring=3D=
-/etc/pve/priv/ceph/ceph.keyring:mon_host=3DX.X.X.X";
-> -using writeback
->=20
-> writeback tuning in ceph.conf on the kvm host
->=20
-> rbd_cache_size =3D 33554432=20
-> rbd_cache_max_age =3D 2.0=20
-Correct
+On 07/05/2012 04:31 PM, Sage Weil wrote:
+> On Thu, 5 Jul 2012, Wido den Hollander wrote:
+>> On 04-07-12 18:18, Sage Weil wrote:
+>>> On Wed, 4 Jul 2012, Wido den Hollander wrote:
+>>>>> On Wed, 4 Jul 2012, Wido den Hollander wrote:
+>>>>>> By using this we prevent scenarios where cephx keys are not accepted
+>>>>>> in various situations.
+>>>>>>
+>>>>>> Replacing the + and / by - and _ we generate URL-safe base64 keys
+>>>>>>
+>>>>>> Signed-off-by: Wido den Hollander <wido@widodh.nl>
+>>>>>
+>>>>> Do already properly decode URL-sage base64 encoding?
+>>>>>
+>>>>
+>>>> Yes, it decodes URL-safe base64 as well.
+>>>>
+>>>> See the if statements for 62 and 63, + and - are treated equally, just
+>>>> like / and _.
+>>>
+>>> Oh, got it.  The commit description confused me... I thought this was
+>>> related encoding only.
+>>>
+>>> I think we should break the encode and decode patches into separate
+>>> versions, and apply the decode to a stable branch (argonaut) and the
+>>> encode to the master.  That should avoid most problems with a
+>>> rolling/staggered upgrade...
+>>
+>> I just submitted a patch for decoding only.
+>
+> Applied, thanks!
+>
+>> During some tests I did I found out that libvirt uses GNUlib and won't handle
+>> URL-safe base64 encoded keys.
+>>
+>> So, as long as Ceph allows them we're good. Users can always replace the + and
+>> / in their key knowing it will be accepted by Ceph.
+>>
+>> This works for me for now. The exact switch to base64url should be done at a
+>> later stage I think.
+>>
+>> The RFC on this: http://tools.ietf.org/html/rfc4648#page-7
+>
+> We could:
+>   - submit a patch for gnulib; someday it'll support it
 
->=20
-> benchmark use in kvm guest:
-> fio --filename=3D$DISK --direct=3D1 --rw=3Drandwrite --bs=3D4k --size=
-=3D200G --numjobs=3D50 --runtime=3D90 --group_reporting --name=3Dfile1
->=20
-> results show max 14000io/s with 1 vm, 7000io/s by vm with 2vm,...
-> so it doesn't scale
-Correct too
+I already did, but IF they accept anything else than RFC4648 they'll 
+implement a lot of the other format as well. That will be some work.
 
->=20
-> (bench is with directio, so maybe writeback cache don't help)
->=20
-> hardware for ceph , is 3 nodes with 4 intel ssd each. (1 drive can ha=
-ndle 40000io/s randwrite locally)
-30000 but still enough
+>   - kludge the secret generation code in ceph so that it rejects secrets
+>     with problematic encoding... :/  (radosgw-admin does something
+>     similar with +'s in the s3-style user keys.)
 
-Stefan
+Seems the easy way out, but it will work though.
 
-> - Alexandre
->=20
-> ----- Mail original -----=20
->=20
-> De: "Gregory Farnum" <greg@inktank.com>=20
-> =C3=80: "Stefan Priebe" <s.priebe@profihost.ag>=20
-> Cc: ceph-devel@vger.kernel.org, "Sage Weil" <sage@inktank.com>=20
-> Envoy=C3=A9: Jeudi 5 Juillet 2012 23:33:18=20
-> Objet: Re: speedup ceph / scaling / find the bottleneck=20
->=20
-> Could you send over the ceph.conf on your KVM host, as well as how=20
-> you're configuring KVM to use rbd?=20
->=20
-> On Tue, Jul 3, 2012 at 11:20 AM, Stefan Priebe <s.priebe@profihost.ag=
-> wrote:=20
->> I'm sorry but this is the KVM Host Machine there is no ceph running =
-on this=20
->> machine.=20
->>=20
->> If i change the admin socket to:=20
->> admin_socket=3D/var/run/ceph_$name.sock=20
->>=20
->> i don't have any socket at all ;-(=20
->>=20
->> Am 03.07.2012 17:31, schrieb Sage Weil:=20
->>=20
->>> On Tue, 3 Jul 2012, Stefan Priebe - Profihost AG wrote:=20
->>>>=20
->>>> Hello,=20
->>>>=20
->>>> Am 02.07.2012 22:30, schrieb Josh Durgin:=20
->>>>>=20
->>>>> If you add admin_socket=3D/path/to/admin_socket for your client r=
-unning=20
->>>>> qemu (in that client's ceph.conf section or manually in the qemu=20
->>>>> command line) you can check that caching is enabled:=20
->>>>>=20
->>>>> ceph --admin-daemon /path/to/admin_socket show config | grep rbd_=
-cache=20
->>>>>=20
->>>>> And see statistics it generates (look for cache) with:=20
->>>>>=20
->>>>> ceph --admin-daemon /path/to/admin_socket perfcounters_dump=20
->>>>=20
->>>>=20
->>>> This doesn't work for me:=20
->>>> ceph --admin-daemon /var/run/ceph.sock show config=20
->>>> read only got 0 bytes of 4 expected for response length; invalid=20
->>>> command?2012-07-03 09:46:57.931821 7fa75d129700 -1 asok(0x8115a0)=20
->>>> AdminSocket:=20
->>>> request 'show config' not defined=20
->>>=20
->>>=20
->>> Oh, it's 'config show'. Also, 'help' will list the supported comman=
-ds.=20
->>>=20
->>>> Also perfcounters does not show anything:=20
->>>> # ceph --admin-daemon /var/run/ceph.sock perfcounters_dump=20
->>>> {}=20
->>>=20
->>>=20
->>> There may be another daemon that tried to attach to the same socket=
- file.=20
->>> You might want to set 'admin socket =3D /var/run/ceph/$name.sock' o=
-r=20
->>> something similar, or whatever else is necessary to make it a uniqu=
-e file.=20
->>>=20
->>>> ~]# ceph -v=20
->>>> ceph version 0.48argonaut-2-gb576faa=20
->>>> (commit:b576faa6f24356f4d3ec7205e298d58659e29c68)=20
->>>=20
->>>=20
->>> Out of curiousity, what patches are you applying on top of the rele=
-ase?=20
->>>=20
->>> sage=20
->>>=20
->>=20
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in=20
-> the body of a message to majordomo@vger.kernel.org=20
-> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
->=20
->=20
->=20
-> --=20
->=20
-> --=20
->=20
->=20
->=20
->   =20
->=20
-> Alexandre D e rumier=20
->=20
-> Ing=C3=A9nieur Syst=C3=A8mes et R=C3=A9seaux=20
->=20
->=20
-> Fixe : 03 20 68 88 85=20
->=20
-> Fax : 03 20 68 90 88=20
->=20
->=20
-> 45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix=20
-> 12 rue Marivaux 75002 Paris=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Wido
+
+>
+> sage
+>
+>
+>
+>>
+>> Wido
+>>
+>>>
+>>> sage
+>>>
+>>>
+>>>>
+>>>> Wido
+>>>>
+>>>>
+>>>>> sage
+>>>>>
+>>>>>> ---
+>>>>>> src/common/armor.c |       6 +++---
+>>>>>> 1 file changed, 3 insertions(+), 3 deletions(-)
+>>>>>>
+>>>>>> diff --git a/src/common/armor.c b/src/common/armor.c
+>>>>>> index d1d5664..7f73da1 100644
+>>>>>> --- a/src/common/armor.c
+>>>>>> +++ b/src/common/armor.c
+>>>>>> @@ -9,7 +9,7 @@
+>>>>>> * base64 encode/decode.
+>>>>>> */
+>>>>>>
+>>>>>> -const char *pem_key =
+>>>>>> "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+>>>>>> +const char *pem_key =
+>>>>>> "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+>>>>>>
+>>>>>> static int encode_bits(int c)
+>>>>>> {
+>>>>>> @@ -24,9 +24,9 @@ static int decode_bits(char c)
+>>>>>>           return c - 'a' + 26;
+>>>>>>       if (c >= '0' && c <= '9')
+>>>>>>           return c - '0' + 52;
+>>>>>> -    if (c == '+')
+>>>>>> +    if (c == '+' || c == '-')
+>>>>>>           return 62;
+>>>>>> -    if (c == '/')
+>>>>>> +    if (c == '/' || c == '_')
+>>>>>>           return 63;
+>>>>>>       if (c == '=')
+>>>>>>           return 0; /* just non-negative, please */
+>>>>>> --
+>>>>>> 1.7.9.5
+>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>>>> in the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at   http://vger.kernel.org/majordomo-info.html
+>>>>>>
+>>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at   http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+
