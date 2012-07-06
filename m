@@ -1,92 +1,171 @@
-From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
-Subject: Re: OSD doesn't start
-Date: Fri, 06 Jul 2012 01:33:13 +0200
-Message-ID: <1680690.nczT3S6HBC@mranderson>
-References: <1563053.ttVafs9Pph@mranderson> <F1FB8F95B3FA4FF19D53AE9F060D88F5@inktank.com> <95834053.QbLuzMQ4OG@mranderson>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+From: Stefan Priebe <s.priebe@profihost.ag>
+Subject: Re: speedup ceph / scaling / find the bottleneck
+Date: Fri, 6 Jul 2012 10:54:03 +0200
+Message-ID: <0F16C6A5-0D51-4575-AFF8-81F9FDD045ED@profihost.ag>
+References: <9437d87e-97db-48fc-a133-f25042b21a38@mailpro>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.ki.iif.hu ([193.6.222.244]:38261 "EHLO strudel.ki.iif.hu"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750786Ab2GFIvy convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 04:51:54 -0400
-Received: from cirkusz.lvs.iif.hu (cirkusz.lvs.iif.hu [193.225.14.182])
-	by strudel.ki.iif.hu (Postfix) with ESMTP id 4BFE4399
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Jul 2012 10:51:50 +0200 (CEST)
-Received: from strudel.ki.iif.hu ([IPv6:::ffff:193.6.222.244])
-	by cirkusz.lvs.iif.hu (cirkusz.lvs.iif.hu [::ffff:193.225.14.72]) (amavisd-new, port 10024)
-	with ESMTP id l5rk6cUYk4TO for <ceph-devel@vger.kernel.org>;
-	Fri,  6 Jul 2012 10:51:43 +0200 (CEST)
-Received: from mranderson.localnet (adsl166.adsl.hungarnet.hu [193.6.17.166])
-	by strudel.ki.iif.hu (Postfix) with ESMTPSA id 8AB8D49
-	for <ceph-devel@vger.kernel.org>; Fri,  6 Jul 2012 10:51:42 +0200 (CEST)
-In-Reply-To: <95834053.QbLuzMQ4OG@mranderson>
+Received: from mail.profihost.ag ([85.158.179.208]:34311 "EHLO
+	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750992Ab2GFIyL convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 04:54:11 -0400
+In-Reply-To: <9437d87e-97db-48fc-a133-f25042b21a38@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-On 2012. July 5. 16:12:42 Sz=E9kelyi Szabolcs wrote:
-> On 2012. July 4. 09:34:04 Gregory Farnum wrote:
-> > Hrm, it looks like the OSD data directory got a little busted someh=
-ow. How
-> > did you perform your upgrade? (That is, how did you kill your daemo=
-ns, in
-> > what order, and when did you bring them back up.)
+Am 06.07.2012 um 05:50 schrieb Alexandre DERUMIER <aderumier@odiso.com>=
+:
+
+> Hi,=20
+> Stefan is on vacation for the moment,I don't know if he can reply you=
+=2E
+Thanks!
+
 >=20
-> Since it would be hard and long to describe in text, I've collected t=
-he
-> relevant log entries, sorted by time at http://pastebin.com/Ev3M4DQ9 =
-=2E The
-> short story is that after seeing that the OSDs won't start, I tried t=
-o bring
-> down the whole cluster and start it up from scratch. It didn't change
-> anything, so I rebooted the two machines (running all three daemons),=
- to
-> see if it changes anything. It didn't and I gave up.
+> But I can reoly for him for the kvm part (as we do same tests togethe=
+r in parallel).
 >=20
-> My ceph config is available at http://pastebin.com/KKNjmiWM .
+> - kvm is 1.1
+> - rbd 0.48
+> - drive option rbd:pool/volume:auth_supported=3Dcephx;none;keyring=3D=
+/etc/pve/priv/ceph/ceph.keyring:mon_host=3DX.X.X.X";
+> -using writeback
 >=20
-> Since this is my test cluster, I'm not very concerned about the data =
-on it.
-> But the other one, with the same config, is dying I think. ceph-fuse =
-is
-> eating around 75% CPU on the sole monitor ("cc") node. The monitor ab=
-out
-> 15%. On the other two nodes, the OSD eats around 50%, the MDS 15%, th=
-e
-> monitor another 10%. No Ceph filesystem activity is going on at the m=
-oment.
-> Blktrace reports about 1kB/s disk traffic on the partition hosting th=
-e OSD
-> data dir. The data seems to be accessible at the moment, but I'm afra=
-id
-> that my production cluster will end up in a similar situation after
-> upgrade, so I don't dare to touch it.
+> writeback tuning in ceph.conf on the kvm host
 >=20
-> Do you have any suggestion what I should check?
+> rbd_cache_size =3D 33554432=20
+> rbd_cache_max_age =3D 2.0=20
+Correct
 
-Yes, it definitely looks like dying. Besides the above symptoms all cli=
-ents'=20
-ceph-fuse burn the CPU, there are unreadable files on the fs (tar block=
-s on=20
-them infinitely), the FUSE clients emit messages like
+>=20
+> benchmark use in kvm guest:
+> fio --filename=3D$DISK --direct=3D1 --rw=3Drandwrite --bs=3D4k --size=
+=3D200G --numjobs=3D50 --runtime=3D90 --group_reporting --name=3Dfile1
+>=20
+> results show max 14000io/s with 1 vm, 7000io/s by vm with 2vm,...
+> so it doesn't scale
+Correct too
 
-ceph-fuse: 2012-07-05 23:21:41.583692 7f444dfd5700  0 -- client_ip:0/11=
-81=20
-send_message dropped message ping v1 because of no pipe on con 0x103400=
-0
+>=20
+> (bench is with directio, so maybe writeback cache don't help)
+>=20
+> hardware for ceph , is 3 nodes with 4 intel ssd each. (1 drive can ha=
+ndle 40000io/s randwrite locally)
+30000 but still enough
 
-every 5 seconds. I tried to backup the data on it, but it got blocked i=
-n the=20
-middle. Since then I'm unable to get any data out of it, not even by ki=
-lling=20
-ceph-fuse and remounting the fs.
+Stefan
 
---=20
-cc
-
-
+> - Alexandre
+>=20
+> ----- Mail original -----=20
+>=20
+> De: "Gregory Farnum" <greg@inktank.com>=20
+> =C3=80: "Stefan Priebe" <s.priebe@profihost.ag>=20
+> Cc: ceph-devel@vger.kernel.org, "Sage Weil" <sage@inktank.com>=20
+> Envoy=C3=A9: Jeudi 5 Juillet 2012 23:33:18=20
+> Objet: Re: speedup ceph / scaling / find the bottleneck=20
+>=20
+> Could you send over the ceph.conf on your KVM host, as well as how=20
+> you're configuring KVM to use rbd?=20
+>=20
+> On Tue, Jul 3, 2012 at 11:20 AM, Stefan Priebe <s.priebe@profihost.ag=
+> wrote:=20
+>> I'm sorry but this is the KVM Host Machine there is no ceph running =
+on this=20
+>> machine.=20
+>>=20
+>> If i change the admin socket to:=20
+>> admin_socket=3D/var/run/ceph_$name.sock=20
+>>=20
+>> i don't have any socket at all ;-(=20
+>>=20
+>> Am 03.07.2012 17:31, schrieb Sage Weil:=20
+>>=20
+>>> On Tue, 3 Jul 2012, Stefan Priebe - Profihost AG wrote:=20
+>>>>=20
+>>>> Hello,=20
+>>>>=20
+>>>> Am 02.07.2012 22:30, schrieb Josh Durgin:=20
+>>>>>=20
+>>>>> If you add admin_socket=3D/path/to/admin_socket for your client r=
+unning=20
+>>>>> qemu (in that client's ceph.conf section or manually in the qemu=20
+>>>>> command line) you can check that caching is enabled:=20
+>>>>>=20
+>>>>> ceph --admin-daemon /path/to/admin_socket show config | grep rbd_=
+cache=20
+>>>>>=20
+>>>>> And see statistics it generates (look for cache) with:=20
+>>>>>=20
+>>>>> ceph --admin-daemon /path/to/admin_socket perfcounters_dump=20
+>>>>=20
+>>>>=20
+>>>> This doesn't work for me:=20
+>>>> ceph --admin-daemon /var/run/ceph.sock show config=20
+>>>> read only got 0 bytes of 4 expected for response length; invalid=20
+>>>> command?2012-07-03 09:46:57.931821 7fa75d129700 -1 asok(0x8115a0)=20
+>>>> AdminSocket:=20
+>>>> request 'show config' not defined=20
+>>>=20
+>>>=20
+>>> Oh, it's 'config show'. Also, 'help' will list the supported comman=
+ds.=20
+>>>=20
+>>>> Also perfcounters does not show anything:=20
+>>>> # ceph --admin-daemon /var/run/ceph.sock perfcounters_dump=20
+>>>> {}=20
+>>>=20
+>>>=20
+>>> There may be another daemon that tried to attach to the same socket=
+ file.=20
+>>> You might want to set 'admin socket =3D /var/run/ceph/$name.sock' o=
+r=20
+>>> something similar, or whatever else is necessary to make it a uniqu=
+e file.=20
+>>>=20
+>>>> ~]# ceph -v=20
+>>>> ceph version 0.48argonaut-2-gb576faa=20
+>>>> (commit:b576faa6f24356f4d3ec7205e298d58659e29c68)=20
+>>>=20
+>>>=20
+>>> Out of curiousity, what patches are you applying on top of the rele=
+ase?=20
+>>>=20
+>>> sage=20
+>>>=20
+>>=20
+> --=20
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in=20
+> the body of a message to majordomo@vger.kernel.org=20
+> More majordomo info at http://vger.kernel.org/majordomo-info.html=20
+>=20
+>=20
+>=20
+> --=20
+>=20
+> --=20
+>=20
+>=20
+>=20
+>   =20
+>=20
+> Alexandre D e rumier=20
+>=20
+> Ing=C3=A9nieur Syst=C3=A8mes et R=C3=A9seaux=20
+>=20
+>=20
+> Fixe : 03 20 68 88 85=20
+>=20
+> Fax : 03 20 68 90 88=20
+>=20
+>=20
+> 45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix=20
+> 12 rue Marivaux 75002 Paris=20
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
