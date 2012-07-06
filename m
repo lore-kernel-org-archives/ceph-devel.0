@@ -1,69 +1,73 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: [PATCH] librados: Bump the version to 0.48
-Date: Thu, 5 Jul 2012 15:33:39 -0700
-Message-ID: <CAPYLRzjNhhWzmFyOkz+cDsFsZbZA4iP9bVG8ACWY5LP20wMYtQ@mail.gmail.com>
-References: <1341409564-26660-1-git-send-email-wido@widodh.nl>
-	<6ED535BAF3394911BDF4F16441761D6A@inktank.com>
-	<Pine.LNX.4.64.1207040932090.6931@cobra.newdream.net>
+From: Xiaopong Tran <xiaopong.tran@gmail.com>
+Subject: Re: Strange behavior after upgrading to 0.48
+Date: Fri, 06 Jul 2012 10:38:47 +0800
+Message-ID: <4FF64FB7.90709@gmail.com>
+References: <4FF53706.7070003@gmail.com> <Pine.LNX.4.64.1207050725550.6931@cobra.newdream.net> <72a6b171-725b-417c-9538-07f6a4ef5032@email.android.com> <Pine.LNX.4.64.1207050737400.6931@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:39115 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932197Ab2GEWdk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 18:33:40 -0400
-Received: by lbbgm6 with SMTP id gm6so13657256lbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 15:33:39 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1207040932090.6931@cobra.newdream.net>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:46283 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932454Ab2GFCiw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jul 2012 22:38:52 -0400
+Received: by pbbrp8 with SMTP id rp8so13790734pbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 05 Jul 2012 19:38:52 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1207050737400.6931@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Jul 4, 2012 at 9:33 AM, Sage Weil <sage@inktank.com> wrote:
-> On Wed, 4 Jul 2012, Gregory Farnum wrote:
->> Hmmm =FF=FF we generally try to modify these versions when the API c=
-hanges,
->> not on every sprint. It looks to me like Sage added one function in =
-0.45
->> where we maybe should have bumped it, but that was a long time ago a=
-nd
->> at this point we should maybe just eat it?
+On 07/05/2012 10:38 PM, Sage Weil wrote:
+> On Thu, 5 Jul 2012, Xiaopong Tran wrote:
+>>> The problem is that the ceph utility itself is pre-0.48, but the
+>>> monitors
+>>> are running 0.48.  You need to upgrade the utility as well.  (There was
+>>> a
+>>> note about this in the release announcement.)
+>>>
+>>> This only affects the -s and -w commands.
+>>>
+>>> sage
+>>
+>> I have read the notes, andupgraded the utility first. There was no
+>> problem when the first two were upgraded and recovering. This only
+>> happened when the third node is upgraded.
+>>
+>> The nodes are running debian wheezy, while the client admin node is
+>> running ubuntu 12.04.
 >
-> Yeah, I went ahead and applied this to stable (argonaut) since it's a=
-s
-> good a reference point as any. =A0Moving forward, we should try to sy=
-nc
-> this up with API changes as they happen. =A0Hmm, like that assert
-> ObjectOperation that just went into master...
-
-Yep, should probably bump it to .49 then! (Since that's the version it
-will be part of, and nobody will get confused and try to bump it again
-before that release.)
-
-
-On Thu, Jul 5, 2012 at 12:26 AM, Wido den Hollander <wido@widodh.nl> wr=
-ote:
-> That was my reasoning. I compiled phprados against 0.48 and saw that
-> librados was reporting 0.44 as version.
+> Oooh, maybe the package for wheezy in the repo is wrong.  Can you confirm
+> which version the ceph utility is with 'ceph -v'?
 >
-> That could confuse users and they might think they still have an old =
-library
-> in place.
+> Thanks!
+> sage
 >
-> Imho the version numbering should be totally different from Ceph if y=
-ou only
-> want to bump the version on an API change.
+>
 
-Well, the problem with bumping it on every Ceph version is that it
-becomes a lot harder for tools to sync up to a known version of the
-API. Perhaps we should have divorced it from the Ceph versioning
-completely, but I don't know if we can still do that in a reasonable
-way or not. :/
--Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks for the quick reply, I didn't have the computer with me last
+night. But you were right. I checked the version of ceph on ubuntu,
+and it's still stuck with 0.47.3, despite upgrading. I redid the
+upgrade, and it's still stuck with that version. That's something
+I didn't pay attention to.
+
+I had to purge the ceph, ceph-common and other related packages,
+and re-install it, then I got 0.48. And now ceph -s works just
+as it should.
+
+So, somehow, the upgrade on ubuntu does not work properly.
+
+Thinking about this issue just right now, I think ceph -s
+still worked right because there was still an older version
+of mon when the first two nodes were being upgraded. When
+the last one was upgraded, there's no mon of the same version
+anymore.
+
+Sorry, should have checked if apt upgrade was done properly
+first :)
+
+Thanks
+
+
+Xiaopong
