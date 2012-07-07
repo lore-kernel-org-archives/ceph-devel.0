@@ -1,25 +1,31 @@
 From: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
 Subject: RE: mkcephfs failing on v0.48 "argonaut"
-Date: Sat, 7 Jul 2012 13:33:14 +1000
-Message-ID: <81C477727102DA4E9B2605AC748C495419104F51E0@exch10>
+Date: Sat, 7 Jul 2012 13:45:40 +1000
+Message-ID: <81C477727102DA4E9B2605AC748C495419104F51E1@exch10>
 References: <81C477727102DA4E9B2605AC748C495419104F51B3@exch10>
  <Pine.LNX.4.64.1207051512360.21201@cobra.newdream.net>
  <81C477727102DA4E9B2605AC748C495419104F51DA@exch10>
  <Pine.LNX.4.64.1207052107290.565@cobra.newdream.net>
+ <81C477727102DA4E9B2605AC748C495419104F51E0@exch10>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mf1.mach.net.au ([115.165.169.19]:41298 "EHLO mf1.mach.net.au"
+Received: from mf1.mach.net.au ([115.165.169.19]:48474 "EHLO mf1.mach.net.au"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751196Ab2GGDdZ convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 23:33:25 -0400
-In-Reply-To: <Pine.LNX.4.64.1207052107290.565@cobra.newdream.net>
+	id S1751261Ab2GGDpw convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jul 2012 23:45:52 -0400
+In-Reply-To: <81C477727102DA4E9B2605AC748C495419104F51E0@exch10>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+UPDATED code now within the below (paste snafu, sorry - ignore most recent post), my comments/findings the same however.......
+Paul
+
+-----Original Message-----
 
 Hi again Sage
 
@@ -34,18 +40,17 @@ which mkfs.btrfs
 echo "RUNNING: mkfs.btrfs $btrfs_devs"
     mkfs.btrfs $btrfs_devs
     btrfs device scan || btrfsctl -a
-echo "RUNNING: mount -t btrfs $btrfs_opt $first_dev $btrfs_path"
 which mount
+echo "RUNNING: mount -t btrfs $btrfs_opt $first_dev $btrfs_path"
     mount -t btrfs $btrfs_opt $first_dev $btrfs_path
 echo "DID I GET HERE - OR CRASH OUT WITH mount ABOVE?"
     chown $osd_user $btrfs_path
-
+    chmod +w $btrfs_path
 
 See below that the same command within the mkcephfs that is failing, is working fine on a standard command line:
 
 === osd.0 ===
---- dsanb1-coy# /sbin/mkcephfs -d /tmp/mkcephfs.xgk025tjkQ --prepare-osdfs osd.0
-umount: /srv/osd.0: not mounted
+--- dsanb1-coy# /sbin/mkcephfs -d /tmp/mkcephfs.ruZy4Apo23 --prepare-osdfs osd.0
 umount: /dev/sdc: not mounted
 /sbin/mkfs.btrfs
 RUNNING: mkfs.btrfs /dev/sdc
@@ -57,17 +62,17 @@ fs created label (null) on /dev/sdc
         nodesize 4096 leafsize 4096 sectorsize 4096 size 1.82TB
 Btrfs Btrfs v0.19
 Scanning for Btrfs filesystems
-RUNNING: mount -t btrfs -o noatime /dev/sdc /srv/osd.0
 /bin/mount
+RUNNING: mount -t btrfs -o noatime /dev/sdc /srv/osd.0
 mount: wrong fs type, bad option, bad superblock on /dev/sdc,
        missing codepage or helper program, or other error
        In some cases useful info is found in syslog - try
        dmesg | tail  or so
 
-failed: '/sbin/mkcephfs -d /tmp/mkcephfs.xgk025tjkQ --prepare-osdfs osd.0'
+failed: '/sbin/mkcephfs -d /tmp/mkcephfs.ruZy4Apo23 --prepare-osdfs osd.0'
+
 root@dsanb1-coy:~# /bin/mount -t btrfs -o noatime /dev/sdc /srv/osd.0
-root@dsanb1-coy:~# mount | grep btrfs
-/dev/sdc on /srv/osd.0 type btrfs (rw,noatime)
+root@dsanb1-coy:~# mount | grep btrfs /dev/sdc on /srv/osd.0 type btrfs (rw,noatime)
 
 
 Remember, this is not isolated to btrfs, as per my original post it fails when not specifying to use btrfs.
@@ -368,5 +373,9 @@ sage
 >
 >
 >
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
