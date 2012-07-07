@@ -1,97 +1,48 @@
-From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Subject: Re: domino-style OSD crash
-Date: Sat, 07 Jul 2012 10:19:44 +0200
-Message-ID: <4FF7F120.3040708@univ-nantes.fr>
-References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com> <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com> <4FF2AFEB.1010403@univ-nantes.fr> <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com> <4FF35C01.4070400@univ-nantes.fr> <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com> <4FF3F98C.30602@univ-nantes.fr> <A1B0B821610446B587EA459CA7D88ECF@inktank.com> <4FF48317.5030802@univ-nantes.fr> <CAPYLRzg3vJNGYUwBrZ6e9G6x-URCodAxFLfXRL10T8yOqx+wVQ@mail.gmail.com> <4FF6919C.8080201@univ-nantes.fr> <CAPYLRzgb7KU5jBjqWS7GiYc2KqNUXXjcOv=kRoD4cEavotaX0Q@mail.gmail.com>
+From: Jimmy Tang <jtang@tchpc.tcd.ie>
+Subject: Re: mds fails to start on SL6
+Date: Sat, 7 Jul 2012 09:43:52 +0100
+Message-ID: <CAD0JqPGFmN+72KGcg1qHh_w5fK8vr_XZTzpysGNHEcF_6mcE0w@mail.gmail.com>
+References: <sfid-H20120706-173805-+057.69-1@marduk.tchpc.tcd.ie>
+	<DC5475EA-BEE8-4623-BFE7-C6BBB68C8C35@tchpc.tcd.ie>
+	<4ff7146f.c6abd80a.2746.3555SMTPIN_ADDED@mx.google.com>
+Reply-To: jtang@tchpc.tcd.ie
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-cha.cpub.univ-nantes.fr ([193.52.103.113]:46114 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751720Ab2GGITu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Jul 2012 04:19:50 -0400
-In-Reply-To: <CAPYLRzgb7KU5jBjqWS7GiYc2KqNUXXjcOv=kRoD4cEavotaX0Q@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:65149 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750735Ab2GGInx (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 7 Jul 2012 04:43:53 -0400
+Received: by lbbgm6 with SMTP id gm6so16709482lbb.19
+        for <ceph-devel@vger.kernel.org>; Sat, 07 Jul 2012 01:43:52 -0700 (PDT)
+In-Reply-To: <4ff7146f.c6abd80a.2746.3555SMTPIN_ADDED@mx.google.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <greg@inktank.com>
-Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-Le 06/07/2012 19:01, Gregory Farnum a =E9crit :
-> On Fri, Jul 6, 2012 at 12:19 AM, Yann Dupont <Yann.Dupont@univ-nantes=
-=2Efr> wrote:
->> Le 05/07/2012 23:32, Gregory Farnum a =E9crit :
->>
->> [...]
->>
->>>> ok, so as all nodes were identical, I probably have hit a btrfs bu=
-g (like
->>>> a
->>>> erroneous out of space ) in more or less the same time. And when 1=
- osd
->>>> was
->>>> out,
->>
->> OH , I didn't finish the sentence... When 1 osd was out, missing dat=
-a was
->> copied on another nodes, probably speeding btrfs problem on those no=
-des (I
->> suspect erroneous out of space conditions)
-> Ah. How full are/were the disks?
+Hi Greg
 
-The OSD nodes were below 50 % (all are 5 To volumes):
+On Fri, Jul 6, 2012 at 5:38 PM, Gregory Farnum <greg@inktank.com> wrote:
+> Do you have more in the log? It looks like it's being instructed to
+> shut down before it's fully come up (thus the error in the Objecter
+> http://tracker.newdream.net/issues/2740, but is not the root cause),
+> but I can't see why.
+> -Greg
+That's all that appeared in the log, if you need additional information I
+was following a wiki page from <
+http://ceph.com/wiki/Installing_on_RedHat_or_CentOS> to do the installation
+and also made some updated notes of what I did to install it which I can
+provide if you need it (they are updated installation notes for the
+mentioned wiki page which others will find useful anyway). I also had
+followed the 5min quick guide to testing out ceph on a single machine.
 
-osd.0 : 31%
-osd.1 : 31%
-osd.2 : 39%
-osd.3 : 65%
-no osd.4 :)
-osd.5 : 35%
-osd.6 : 60%
-osd.7 : 42%
-osd.8 : 34%
+Unfortunately I'm going to be away for the next week or two so I won't be
+able to do much for a few weeks on this.
 
-all the volumes were using btrfs with lzo compress.
-
-[...]
->
-> Oh, interesting. Are the broken nodes all on the same set of arrays?
->>
->> No. There are 4 completely independant raid arrays, in 4 different
->> locations. They are similar (same brand & model, but slighltly diffe=
-rent
->> disks, and 1 different firmware), all arrays are multipathed. I don'=
-t think
->> the raid array is the problem. We use those particular models since =
-2/3
->> years, and in the logs I don't see any problem that can be caused by=
- the
->> storage itself (like scsi or multipath errors)
-> I must have misunderstood then. What did you mean by "1 Array for 2 O=
-SD nodes"?
-
-I have 8 osd nodes, in 4 different locations (several km away). In each=
-=20
-location I have 2 nodes and 1 raid Array.
-On each location, each raid array has 16 2To disks, 2 controllers with=20
-4x 8 Gb FC channels each. The 16 disks are organized in Raid 5 (8 disks=
-=20
-for one, 7 disks for the orher). Each raid set is primary attached to 1=
-=20
-controller, and each osd node on the location has acces to the=20
-controller with 2 distinct paths.
-
-There were no correlation between failed nodes & raid array.
-
-Cheers,
-
---=20
-Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
-Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Jimmy
+-- 
+Senior Software Engineer, Digital Repository of Ireland (DRI)
+Trinity Centre for High Performance Computing,
+Lloyd Building, Trinity College Dublin, Dublin 2, Ireland.
+http://www.tchpc.tcd.ie/
