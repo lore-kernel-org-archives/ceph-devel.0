@@ -1,40 +1,62 @@
-From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
-Subject: Re: OSD doesn't start
-Date: Sun, 08 Jul 2012 20:53:10 +0200
-Message-ID: <4278274.l3AdBruVPA@mranderson>
-References: <1563053.ttVafs9Pph@mranderson> <F1FB8F95B3FA4FF19D53AE9F060D88F5@inktank.com>
+From: Tiago Soares <tistesoa@gmail.com>
+Subject: Re: lazy io
+Date: Sun, 8 Jul 2012 20:54:11 +0000 (UTC)
+Message-ID: <loom.20120708T224619-67@post.gmane.org>
+References: <20100526210645.035A7224805A@bear.spirit.com> <Pine.LNX.4.64.1005261635380.24698@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.ki.iif.hu ([193.6.222.244]:57340 "EHLO strudel.ki.iif.hu"
+Received: from plane.gmane.org ([80.91.229.3]:40663 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751980Ab2GHSxP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 8 Jul 2012 14:53:15 -0400
-Received: from bolha.lvs.iif.hu (bolha.lvs.iif.hu [193.225.14.181])
-	by strudel.ki.iif.hu (Postfix) with ESMTP id 601283CA
-	for <ceph-devel@vger.kernel.org>; Sun,  8 Jul 2012 20:53:14 +0200 (CEST)
-Received: from strudel.ki.iif.hu ([IPv6:::ffff:193.6.222.244])
-	by bolha.lvs.iif.hu (bolha.lvs.iif.hu [::ffff:193.225.14.72]) (amavisd-new, port 10024)
-	with ESMTP id O-5RYr5A9dLT for <ceph-devel@vger.kernel.org>;
-	Sun,  8 Jul 2012 20:53:11 +0200 (CEST)
-Received: from mranderson.localnet (adsl166.adsl.hungarnet.hu [193.6.17.166])
-	by strudel.ki.iif.hu (Postfix) with ESMTPSA id 7E2F53BE
-	for <ceph-devel@vger.kernel.org>; Sun,  8 Jul 2012 20:53:11 +0200 (CEST)
-In-Reply-To: <F1FB8F95B3FA4FF19D53AE9F060D88F5@inktank.com>
+	id S1752276Ab2GHVAI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 8 Jul 2012 17:00:08 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1SnyaK-0006os-T6
+	for ceph-devel@vger.kernel.org; Sun, 08 Jul 2012 23:00:05 +0200
+Received: from 150.162.67.201 ([150.162.67.201])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 08 Jul 2012 23:00:04 +0200
+Received: from tistesoa by 150.162.67.201 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Sun, 08 Jul 2012 23:00:04 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-On 2012. July 4. 09:34:04 Gregory Farnum wrote:
-> Hrm, it looks like the OSD data directory got a little busted somehow. How
-> did you perform your upgrade? (That is, how did you kill your daemons, in
-> what order, and when did you bring them back up.) 
+Sage Weil <sage <at> newdream.net> writes:
 
-Just to make sure: what's the recommended upgrade process?
+> 
+> I just pushed out some "lazy io" patches to the unstable branches.  Lazy 
+> io is enabled on a file handle via a ceph ioctl (CEPH_IOC_LAZYIO).  Once 
+> that happens, an application can do buffered reads/writes even when a file 
+> is open on multiple clients, and is responsible for managing it's own 
+> cache conherency between nodes.
+> 
+> An application can flush dirty data using sync_file_range(2), and 
+> invalidate cached data using posix_fadvise(2) (POSIX_FADV_DONTNEED).  
+> These are equivalent to the lazyio_propagate(2) and lazyio_synchronise(2) 
+> in the original O_LAZY proposal from the POSIX IO group way back when.
+> 
+> If anybody is interested in testing this functionality, let us know!
+> 
+> sage
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo <at> vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
-Thanks,
--- 
-cc
-
+Hi Sage,
+Im looking for use Parallel HDF5 on CEPH, and I expecting that Lazy IO can 
+handle with Parallel IO on hdf file. I tried with ordinary CEPH although the 
+parallel processes stuck. I guess that each process read or write operation will 
+block until it is acknowledged by the OSD, right? How can I enable the Lazy IO 
+on CEPH? There is some branch that I can get it?
+Regards
+Tiago
 
