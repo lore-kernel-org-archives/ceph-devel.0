@@ -1,136 +1,97 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: domino-style OSD crash
-Date: Mon, 9 Jul 2012 10:14:03 -0700
-Message-ID: <CA+4uBUYGaUdYr97EqEGCLk9ByhUeXuqeeDyp2bzVRN7GeokePg@mail.gmail.com>
-References: <4FCC7573.3000704@univ-nantes.fr>
-	<CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com>
-	<CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com>
-	<4FF2AFEB.1010403@univ-nantes.fr>
-	<CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
-	<4FF35C01.4070400@univ-nantes.fr>
-	<CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
-	<4FF3F98C.30602@univ-nantes.fr>
-	<A1B0B821610446B587EA459CA7D88ECF@inktank.com>
-	<4FF48317.5030802@univ-nantes.fr>
-	<CAPYLRzg3vJNGYUwBrZ6e9G6x-URCodAxFLfXRL10T8yOqx+wVQ@mail.gmail.com>
-	<4FF6919C.8080201@univ-nantes.fr>
-	<CAPYLRzgb7KU5jBjqWS7GiYc2KqNUXXjcOv=kRoD4cEavotaX0Q@mail.gmail.com>
-	<4FF7F120.3040708@univ-nantes.fr>
+From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
+Subject: Re: Keys & caps
+Date: Mon, 09 Jul 2012 19:27:42 +0200
+Message-ID: <1968682.cis2SWxC6X@mranderson>
+References: <4183318.yLl07ggMzS@mranderson> <Pine.LNX.4.64.1207090925370.20547@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:42898 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750932Ab2GIROF convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 13:14:05 -0400
-Received: by ghrr11 with SMTP id r11so10323895ghr.19
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Jul 2012 10:14:04 -0700 (PDT)
-In-Reply-To: <4FF7F120.3040708@univ-nantes.fr>
+Received: from strudel.ki.iif.hu ([193.6.222.244]:53050 "EHLO
+	strudel.ki.iif.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751017Ab2GIR1v convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 13:27:51 -0400
+Received: from cirkusz.lvs.iif.hu (cirkusz.lvs.iif.hu [193.225.14.182])
+	by strudel.ki.iif.hu (Postfix) with ESMTP id B2ED73F1
+	for <ceph-devel@vger.kernel.org>; Mon,  9 Jul 2012 19:27:50 +0200 (CEST)
+Received: from strudel.ki.iif.hu ([IPv6:::ffff:193.6.222.244])
+	by cirkusz.lvs.iif.hu (cirkusz.lvs.iif.hu [::ffff:193.225.14.72]) (amavisd-new, port 10024)
+	with ESMTP id 2Ow1hxZ+GNft for <ceph-devel@vger.kernel.org>;
+	Mon,  9 Jul 2012 19:27:46 +0200 (CEST)
+Received: from mranderson.localnet (unknown [IPv6:2001:738:0:410:7506:f08e:836e:869b])
+	by strudel.ki.iif.hu (Postfix) with ESMTPSA id 88E6C3F2
+	for <ceph-devel@vger.kernel.org>; Mon,  9 Jul 2012 19:27:43 +0200 (CEST)
+In-Reply-To: <Pine.LNX.4.64.1207090925370.20547@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Can you restart the node that failed to complete the upgrade with
+On 2012. July 9. 09:33:22 Sage Weil wrote:
+> On Mon, 9 Jul 2012, Sz=E9kelyi Szabolcs wrote:
+> > this far I accessed my Ceph (0.48) FS with the client.admin key, bu=
+t I'd
+> > like to change that since I don't want to allow clients to control =
+the
+> > cluster.
+> >=20
+> > I thought I should create a new key, give it some caps (don't exact=
+ly know
+> > which ones), and distribute it to clients. Here are some things I d=
+on't
+> > know/understand:
+> >=20
+> > * What do the r, w, x, and * caps ("permissions"?) mean on a mon, m=
+ds, or
+> > osd?
+>=20
+> They roughly correspond to read, write, execute.  The distinction is
+> subtle and poorly specfied for mon caps; just use the documented valu=
+es
+> for now.
 
-debug filestore =3D 20
-debug osd =3D 20
+Does this mean that what I'm trying to achieve is not possible at the m=
+oment?=20
+I'd like to give access to my clients to the data in the filesystem, bu=
+t not=20
+control over the cluster. My thought was that removing some mon caps fr=
+om the=20
+clients' keys will get me there. But from what you write, it looks to m=
+e like=20
+if a client can access the data in the filesystem, it can also (for exa=
+mple)=20
+bring the cluster down...
 
-and post the log after an hour or so of running?  The upgrade process
-might legitimately take a while.
--Sam
+> The problem is that the mount.ceph command doesn't understand keyring=
+s; it
+> only understands secret=3D and secretfile=3D.  There is a longstandin=
+g feature
+> bug open for this
+>=20
+> 	http://tracker.newdream.net/issues/266
+>=20
+> but it hasn't been prioritized.  Sorry for the confusion!  It will ha=
+ppen
+> soon.
+>=20
+> In the meantime, you need
+>=20
+> 	 -o secretfile=3D/path/to/secretfile,name=3Daccess_fs
 
-On Sat, Jul 7, 2012 at 1:19 AM, Yann Dupont <Yann.Dupont@univ-nantes.fr=
-> wrote:
-> Le 06/07/2012 19:01, Gregory Farnum a =E9crit :
->
->> On Fri, Jul 6, 2012 at 12:19 AM, Yann Dupont <Yann.Dupont@univ-nante=
-s.fr>
->> wrote:
->>>
->>> Le 05/07/2012 23:32, Gregory Farnum a =E9crit :
->>>
->>> [...]
->>>
->>>>> ok, so as all nodes were identical, I probably have hit a btrfs b=
-ug
->>>>> (like
->>>>> a
->>>>> erroneous out of space ) in more or less the same time. And when =
-1 osd
->>>>> was
->>>>> out,
->>>
->>>
->>> OH , I didn't finish the sentence... When 1 osd was out, missing da=
-ta was
->>> copied on another nodes, probably speeding btrfs problem on those n=
-odes
->>> (I
->>> suspect erroneous out of space conditions)
->>
->> Ah. How full are/were the disks?
->
->
-> The OSD nodes were below 50 % (all are 5 To volumes):
->
-> osd.0 : 31%
-> osd.1 : 31%
-> osd.2 : 39%
-> osd.3 : 65%
-> no osd.4 :)
-> osd.5 : 35%
-> osd.6 : 60%
-> osd.7 : 42%
-> osd.8 : 34%
->
-> all the volumes were using btrfs with lzo compress.
->
-> [...]
->
->>
->> Oh, interesting. Are the broken nodes all on the same set of arrays?
->>>
->>>
->>> No. There are 4 completely independant raid arrays, in 4 different
->>> locations. They are similar (same brand & model, but slighltly diff=
-erent
->>> disks, and 1 different firmware), all arrays are multipathed. I don=
-'t
->>> think
->>> the raid array is the problem. We use those particular models since=
- 2/3
->>> years, and in the logs I don't see any problem that can be caused b=
-y the
->>> storage itself (like scsi or multipath errors)
->>
->> I must have misunderstood then. What did you mean by "1 Array for 2 =
-OSD
->> nodes"?
->
->
-> I have 8 osd nodes, in 4 different locations (several km away). In ea=
-ch
-> location I have 2 nodes and 1 raid Array.
-> On each location, each raid array has 16 2To disks, 2 controllers wit=
-h 4x 8
-> Gb FC channels each. The 16 disks are organized in Raid 5 (8 disks fo=
-r one,
-> 7 disks for the orher). Each raid set is primary attached to 1 contro=
-ller,
-> and each osd node on the location has acces to the controller with 2
-> distinct paths.
->
-> There were no correlation between failed nodes & raid array.
->
->
-> Cheers,
->
-> --
-> Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
-> Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
->
+Is this also true for the FUSE client? I have obscure memories about bi=
+g=20
+differences between the kernel and the FUSE client, for example the lat=
+ter=20
+being able to read ceph.conf, and get the necessary info, including the=
+=20
+keyring file, from there. Maybe I didn't emphasize it, but that's what =
+I'm=20
+using.
+
+Thanks,
+--=20
+cc
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
