@@ -1,70 +1,49 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: lazy io
-Date: Sun, 8 Jul 2012 21:18:56 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.1207082114090.13271@cobra.newdream.net>
-References: <20100526210645.035A7224805A@bear.spirit.com>
- <Pine.LNX.4.64.1005261635380.24698@cobra.newdream.net>
- <loom.20120708T224619-67@post.gmane.org>
+Subject: Re: Ceph status for Wheezy
+Date: Sun, 8 Jul 2012 21:39:48 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207082132170.13271@cobra.newdream.net>
+References: <1341122210.10000.46.camel@julia> <Pine.LNX.4.64.1206302303580.11497@cobra.newdream.net>
+ <1341786172.24592.49.camel@julia>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46446 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:48204 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750824Ab2GIES6 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 00:18:58 -0400
-In-Reply-To: <loom.20120708T224619-67@post.gmane.org>
+	with ESMTP id S1750940Ab2GIEjv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 00:39:51 -0400
+In-Reply-To: <1341786172.24592.49.camel@julia>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tiago Soares <tistesoa@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sun, 8 Jul 2012, Tiago Soares wrote:
-> Sage Weil <sage <at> newdream.net> writes:
-> 
-> > 
-> > I just pushed out some "lazy io" patches to the unstable branches.  Lazy 
-> > io is enabled on a file handle via a ceph ioctl (CEPH_IOC_LAZYIO).  Once 
-> > that happens, an application can do buffered reads/writes even when a file 
-> > is open on multiple clients, and is responsible for managing it's own 
-> > cache conherency between nodes.
-> > 
-> > An application can flush dirty data using sync_file_range(2), and 
-> > invalidate cached data using posix_fadvise(2) (POSIX_FADV_DONTNEED).  
-> > These are equivalent to the lazyio_propagate(2) and lazyio_synchronise(2) 
-> > in the original O_LAZY proposal from the POSIX IO group way back when.
-> > 
-> > If anybody is interested in testing this functionality, let us know!
-> > 
-> > sage
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo <at> vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> 
+On Sun, 8 Jul 2012, Laszlo Boszormenyi (GCS) wrote:
 > Hi Sage,
-> Im looking for use Parallel HDF5 on CEPH, and I expecting that Lazy IO can 
-> handle with Parallel IO on hdf file. I tried with ordinary CEPH although the 
-> parallel processes stuck. I guess that each process read or write operation will 
-> block until it is acknowledged by the OSD, right? How can I enable the Lazy IO 
-> on CEPH? There is some branch that I can get it?
+> 
+> On Sat, 2012-06-30 at 23:12 -0700, Sage Weil wrote:
+> > Fingers crossed!
+>  It may go into Wheezy, but I need some information.
+> 
+> > Barring any last-minute catastrophies, 0.48 should be released Monday.
+>  It was released since then. But there are several files that I don't
+> know where to install. First are some headers under /usr/include/crush :
+> crush.h , hash.h , mapper.h and types.h .
 
-First, does it behave correctly without enabling lazyio?
+I don't think these need to be installed anywhere; they're not currently 
+packaged.  Why do you mention them?
 
-The lazyio ioctl has been upstream for some time now; any recent (e.g., 
-3.0 or later) mainline kernel will certainly have it.
+> I'm sure that librados-config and its manpage goes to librados-dev .
 
-If you call the lazyio ioctl, it should just allow read caching and async 
-writeback on that inode.  Reads will block just as they did before (if you 
-don't have the data you have to wait), but in general writes will go to 
-the page cache and not wait, just as they would for a regular file with 
-one writer.
+Oh, right, we missed that; pushed a patch for that to wip-stable to make 
+sure it builds on all distributions.
 
-The lazyio code isnt regularly tested (that I know of) so I won't be 
-terribly surprised if it broke at some point, but it at least used to 
-work.  If you observe that the application normally behaves but stops 
-doing so when the lazyio ioctl is called that will be helpful!
+> What about ceph-disk-activate , ceph-disk-prepare exists , boto_tool and
+> ceph-coverage ? They are python scripts except the latter being a shell
+> script.
 
+ceph-disk-* are already in ceph.  The other two shouldn't be packaged.
+
+Is there anything missing on this end?
+
+Thanks!
 sage
