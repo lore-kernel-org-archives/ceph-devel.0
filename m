@@ -1,36 +1,24 @@
-From: Travis Rhoden <trhoden@gmail.com>
+From: Florian Haas <florian@hastexo.com>
 Subject: Re: specifying secret in rbd map command
-Date: Mon, 9 Jul 2012 11:07:03 -0400
-Message-ID: <CACkq2mr06WhXkoXZaoH_eJKQPkwqEN_un-Qs=UMzpB-fPs0AOg@mail.gmail.com>
+Date: Mon, 9 Jul 2012 17:13:22 +0200
+Message-ID: <CAPUexz9Z5em5-gci-TpreQJP7BHo_=Te15aJxfigpCZVHHPUBQ@mail.gmail.com>
 References: <CACkq2mq_shqJkq5qyq--wmh1Q32__NN=D9YJqVx6Mkx-ToHZzA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:59454 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754382Ab2GIPHZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 11:07:25 -0400
-Received: by lbbgm6 with SMTP id gm6so20228584lbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Jul 2012 08:07:23 -0700 (PDT)
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:49678 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754265Ab2GIPNX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 11:13:23 -0400
+Received: by qaas11 with SMTP id s11so1694481qaa.19
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jul 2012 08:13:22 -0700 (PDT)
 In-Reply-To: <CACkq2mq_shqJkq5qyq--wmh1Q32__NN=D9YJqVx6Mkx-ToHZzA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Travis Rhoden <trhoden@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-I should point out that I did notice (a little too late) the contents
-of "rbd --help" has this:
-
-For the map command:
-  --user <username>            rados user to authenticate as
-  --secret <path>              file containing secret key for use with cephx
-
-I should have seen it sooner.  But, I still wonder if accepting a
-keyring file would be nice.  And I can still update the docs to be
-consistent with what is actually acceptable to the command.
-
-- Travis
-
-On Mon, Jul 9, 2012 at 10:57 AM, Travis Rhoden <trhoden@gmail.com> wrote:
+On Mon, Jul 9, 2012 at 4:57 PM, Travis Rhoden <trhoden@gmail.com> wrote:
 > Hey folks,
 >
 > I had a bit of unexpected trouble today using the "rbd map" command to
@@ -66,7 +54,11 @@ On Mon, Jul 9, 2012 at 10:57 AM, Travis Rhoden <trhoden@gmail.com> wrote:
 > keyring file and pull out the key belonging to specified client name.
 > Either way, I can update the docs to make it clear that you are
 > specifying a file, not the key string itself.
->
-> Thanks,
->
->  - Travis
+
+I agree. This confuses quite a few people. Specifically because the
+Ceph filesystem client supports "secret" and "secretfile" as mount
+options, and expects a file only in the latter case. rbd acting
+differently does violate POLA in that way.
+
+Cheers,
+Florian
