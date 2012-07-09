@@ -1,128 +1,136 @@
-From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Subject: Re: oops in rbd module (con_work in libceph)
-Date: Mon, 09 Jul 2012 19:04:42 +0200
-Message-ID: <4FFB0F2A.6070601@univ-nantes.fr>
-References: <4FF6A27B.7020808@univ-nantes.fr> <4FF705BA.4080501@univ-nantes.fr> <4FF77FE8.9040408@inktank.com> <4FFB0CBA.6090806@univ-nantes.fr>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: domino-style OSD crash
+Date: Mon, 9 Jul 2012 10:14:03 -0700
+Message-ID: <CA+4uBUYGaUdYr97EqEGCLk9ByhUeXuqeeDyp2bzVRN7GeokePg@mail.gmail.com>
+References: <4FCC7573.3000704@univ-nantes.fr>
+	<CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com>
+	<CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com>
+	<4FF2AFEB.1010403@univ-nantes.fr>
+	<CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
+	<4FF35C01.4070400@univ-nantes.fr>
+	<CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
+	<4FF3F98C.30602@univ-nantes.fr>
+	<A1B0B821610446B587EA459CA7D88ECF@inktank.com>
+	<4FF48317.5030802@univ-nantes.fr>
+	<CAPYLRzg3vJNGYUwBrZ6e9G6x-URCodAxFLfXRL10T8yOqx+wVQ@mail.gmail.com>
+	<4FF6919C.8080201@univ-nantes.fr>
+	<CAPYLRzgb7KU5jBjqWS7GiYc2KqNUXXjcOv=kRoD4cEavotaX0Q@mail.gmail.com>
+	<4FF7F120.3040708@univ-nantes.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls2-lmb.cpub.univ-nantes.fr ([193.52.103.111]:52238 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752480Ab2GIREr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 13:04:47 -0400
-In-Reply-To: <4FFB0CBA.6090806@univ-nantes.fr>
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:42898 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750932Ab2GIROF convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 13:14:05 -0400
+Received: by ghrr11 with SMTP id r11so10323895ghr.19
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jul 2012 10:14:04 -0700 (PDT)
+In-Reply-To: <4FF7F120.3040708@univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Cc: Alex Elder <elder@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Le 09/07/2012 18:54, Yann Dupont a =E9crit :
+Can you restart the node that failed to complete the upgrade with
+
+debug filestore =3D 20
+debug osd =3D 20
+
+and post the log after an hour or so of running?  The upgrade process
+might legitimately take a while.
+-Sam
+
+On Sat, Jul 7, 2012 at 1:19 AM, Yann Dupont <Yann.Dupont@univ-nantes.fr=
+> wrote:
+> Le 06/07/2012 19:01, Gregory Farnum a =E9crit :
 >
-> Ok. I've compiled the kernel this afternoon, and tested it without=20
-> much success :
+>> On Fri, Jul 6, 2012 at 12:19 AM, Yann Dupont <Yann.Dupont@univ-nante=
+s.fr>
+>> wrote:
+>>>
+>>> Le 05/07/2012 23:32, Gregory Farnum a =E9crit :
+>>>
+>>> [...]
+>>>
+>>>>> ok, so as all nodes were identical, I probably have hit a btrfs b=
+ug
+>>>>> (like
+>>>>> a
+>>>>> erroneous out of space ) in more or less the same time. And when =
+1 osd
+>>>>> was
+>>>>> out,
+>>>
+>>>
+>>> OH , I didn't finish the sentence... When 1 osd was out, missing da=
+ta was
+>>> copied on another nodes, probably speeding btrfs problem on those n=
+odes
+>>> (I
+>>> suspect erroneous out of space conditions)
+>>
+>> Ah. How full are/were the disks?
 >
-> Jul  9 18:17:23 label5.u14.univ-nantes.prive kernel: [ 284.116236]=20
-> libceph: osd0 172.20.14.130:6801 socket closed
-> Jul  9 18:17:43 label5.u14.univ-nantes.prive kernel: [ 304.101545]=20
-> libceph: osd6 172.20.14.137:6800 socket closed
-> Jul  9 18:17:53 label5.u14.univ-nantes.prive kernel: [ 314.095155]=20
-> libceph: osd3 172.20.14.134:6800 socket closed
-> Jul  9 18:18:38 label5.u14.univ-nantes.prive kernel: [ 359.075473]=20
-> libceph: osd5 172.20.14.136:6800 socket closed
-> Jul  9 18:19:48 label5.u14.univ-nantes.prive kernel: [ 429.107334]=20
-> libceph: osd6 172.20.14.137:6800 socket closed
-
-just an interesting thing I just noticed in the logs :
-
-osd-0.log
-2012-07-09 18:17:23.763925 7ff9fc19e700  0 bad crc in data 3071411075 !=
-=3D=20
-exp 2231697357
-2012-07-09 18:17:23.777607 7ff9fc19e700  0 -- 172.20.14.130:6801/5842 >=
->=20
-172.20.14.132:0/1974511416 pipe(0x2236c80 sd=3D38 pgs=3D0 cs=3D0 l=3D0)=
-=2Eaccept=20
-peer addr is really 172.20.14.132:0/1974511416 (socket is=20
-172.20.14.132:57972/0)
-
-osd-3.log
-2012-07-09 18:17:53.770111 7fe35461c700  0 bad crc in data 826922774 !=3D=
-=20
-exp 2498450653
-2012-07-09 18:17:53.770972 7fe35461c700  0 -- 172.20.14.134:6800/4495 >=
->=20
-172.20.14.132:0/1974511416
-  pipe(0xa44ec80 sd=3D56 pgs=3D0 cs=3D0 l=3D0).accept peer addr is real=
-ly=20
-172.20.14.132:0/1974511416 (socket
-  is 172.20.14.132:40726/0)
-
-osd-5.log
-2012-07-09 18:18:38.766417 7ff4a66cb700  0 bad crc in data 3949121728 !=
-=3D=20
-exp 2496058560
-2012-07-09 18:18:38.773386 7ff4a66cb700  0 -- 172.20.14.136:6800/4876 >=
->=20
-172.20.14.132:0/1974511416 pipe(0x20eeb780 sd=3D56 pgs=3D0 cs=3D0 l=3D0=
-).accept=20
-peer addr is really 172.20.14.132:0/1974511416 (socket is=20
-172.20.14.132:57072/0)
-
-osd-6.log
-2012-07-09 18:17:43.765740 7fdf86b9d700  0 bad crc in data 2899452345 !=
-=3D=20
-exp 2656886014
-2012-07-09 18:17:43.772599 7fdf86b9d700  0 -- 172.20.14.137:6800/5260 >=
->=20
-172.20.14.132:0/1974511416
-  pipe(0x1ec64780 sd=3D31 pgs=3D0 cs=3D0 l=3D0).accept peer addr is rea=
-lly=20
-172.20.14.132:0/1974511416 (socke
-t is 172.20.14.132:48615/0)
-
-2012-07-09 18:17:43.773170 7fdf8c718700  0 osd.6 347 pg[2.60( v=20
-347'36181 (337'35180,347'36181] n=3D4
-144 ec=3D1 les/c 6/6 5/5/5) [6,7] r=3D0 lpr=3D5 mlcod 347'36180 active+=
-clean]=20
-watch: ctx->obc=3D0x102db340
-cookie=3D1 oi.version=3D36169 ctx->at_version=3D347'36182
-2012-07-09 18:17:43.773209 7fdf8c718700  0 osd.6 347 pg[2.60( v=20
-347'36181 (337'35180,347'36181] n=3D4144 ec=3D1 les/c 6/6 5/5/5) [6,7] =
-r=3D0=20
-lpr=3D5 mlcod 347'36180 active+clean] watch: oi.user_version=3D1559
-2012-07-09 18:19:48.837952 7fdf86b9d700  0 bad crc in data 1231964953 !=
-=3D=20
-exp 2305533436
-2012-07-09 18:19:48.838850 7fdf86b9d700  0 -- 172.20.14.137:6800/5260 >=
->=20
-172.20.14.132:0/1974511416 pipe(0x1ec64c80 sd=3D31 pgs=3D0 cs=3D0 l=3D0=
-).accept=20
-peer addr is really 172.20.14.132:0/1974511416 (socket is=20
-172.20.14.132:48618/0)
-2012-07-09 18:19:48.839493 7fdf8c718700  0 osd.6 347 pg[2.60( v=20
-347'36192 (337'35191,347'36192] n=3D4144 ec=3D1 les/c 6/6 5/5/5) [6,7] =
-r=3D0=20
-lpr=3D5 mlcod 347'36191 active+clean] watch: ctx->obc=3D0x102db340 cook=
-ie=3D1=20
-oi.version=3D36169 ctx->at_version=3D347'36193
-2012-07-09 18:19:48.839530 7fdf8c718700  0 osd.6 347 pg[2.60( v=20
-347'36192 (337'35191,347'36192] n=3D4144 ec=3D1 les/c 6/6 5/5/5) [6,7] =
-r=3D0=20
-lpr=3D5 mlcod 347'36191 active+clean] watch: oi.user_version=3D1559
-
-
-Each time, at the exact date, a bad CRC (they are the only ones for thi=
-s=20
-day, so it seems related)
-
-Cheers,
-
---=20
-Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
-Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
-
+>
+> The OSD nodes were below 50 % (all are 5 To volumes):
+>
+> osd.0 : 31%
+> osd.1 : 31%
+> osd.2 : 39%
+> osd.3 : 65%
+> no osd.4 :)
+> osd.5 : 35%
+> osd.6 : 60%
+> osd.7 : 42%
+> osd.8 : 34%
+>
+> all the volumes were using btrfs with lzo compress.
+>
+> [...]
+>
+>>
+>> Oh, interesting. Are the broken nodes all on the same set of arrays?
+>>>
+>>>
+>>> No. There are 4 completely independant raid arrays, in 4 different
+>>> locations. They are similar (same brand & model, but slighltly diff=
+erent
+>>> disks, and 1 different firmware), all arrays are multipathed. I don=
+'t
+>>> think
+>>> the raid array is the problem. We use those particular models since=
+ 2/3
+>>> years, and in the logs I don't see any problem that can be caused b=
+y the
+>>> storage itself (like scsi or multipath errors)
+>>
+>> I must have misunderstood then. What did you mean by "1 Array for 2 =
+OSD
+>> nodes"?
+>
+>
+> I have 8 osd nodes, in 4 different locations (several km away). In ea=
+ch
+> location I have 2 nodes and 1 raid Array.
+> On each location, each raid array has 16 2To disks, 2 controllers wit=
+h 4x 8
+> Gb FC channels each. The 16 disks are organized in Raid 5 (8 disks fo=
+r one,
+> 7 disks for the orher). Each raid set is primary attached to 1 contro=
+ller,
+> and each osd node on the location has acces to the controller with 2
+> distinct paths.
+>
+> There were no correlation between failed nodes & raid array.
+>
+>
+> Cheers,
+>
+> --
+> Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
+> Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
