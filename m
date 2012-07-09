@@ -1,58 +1,38 @@
-From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: speedup ceph / scaling / find the bottleneck
-Date: Mon, 09 Jul 2012 20:21:18 +0200
-Message-ID: <4FFB211E.9050707@profihost.ag>
-References: <CAPYLRzhU9pyp-ExVL0wfXL4=F=CHY4uWd7=3tPzgKA4-kPYTZg@mail.gmail.com> <9437d87e-97db-48fc-a133-f25042b21a38@mailpro> <CAPYLRziiFAAv8j=tJM1tmnmjoDQE8qbeLMQ==aE540xCCik7nA@mail.gmail.com> <D104B995-5AA4-46C2-B9D1-0A80878BEF4C@profihost.ag> <CAPYLRziuiGob-6mW+jkf0eC0=HoNYhkSe8LHfJQgviKkQbs1yg@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: rbd map fail when the crushmap algorithm changed to tree
+Date: Mon, 09 Jul 2012 11:23:27 -0700
+Message-ID: <4FFB219F.6020809@inktank.com>
+References: <8512670932FB654F81AF0FEF1BE6D49D019C0EA7@WHQBEMAIL1.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:50057 "EHLO
-	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752315Ab2GISVW (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 14:21:22 -0400
-In-Reply-To: <CAPYLRziuiGob-6mW+jkf0eC0=HoNYhkSe8LHfJQgviKkQbs1yg@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:50912 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752315Ab2GISXa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 14:23:30 -0400
+Received: by pbbrp8 with SMTP id rp8so19605997pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jul 2012 11:23:30 -0700 (PDT)
+In-Reply-To: <8512670932FB654F81AF0FEF1BE6D49D019C0EA7@WHQBEMAIL1.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
+To: Eric_YH_Chen@wiwynn.com
+Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
 
-Am 06.07.2012 20:17, schrieb Gregory Farnum:
->> Am 06.07.2012 um 19:11 schrieb Gregory Farnum <greg@inktank.com>:
->>> I'm interested in figuring out why we aren't getting useful data ou=
-t
->>> of the admin socket, and for that I need the actual configuration
->>> files. It wouldn't surprise me if there are several layers to this
->>> issue but I'd like to start at the client's endpoint. :)
->>
->> While I'm on holiday I can't send you my ceph.conf but it doesn't co=
-ntain anything else than the locations and journal dio false for tmpfs =
-and /var/run/ceph_$name.sock
+On 07/06/2012 12:27 AM, Eric_YH_Chen@wiwynn.com wrote:
+> Hi all:
 >
-> Is that socket in the global area?
-Yes
+> Here is the original crushmap, I change the algorithm of host to "tree"
+> and
+> set back to ceph cluster. However, when I try to map one imge to
+> rados block device (RBD), it would hang and no response until I press
+> ctrl-c.
+> ( rbd map xxxx  =>  then hang)
+>
+> Is there any wrong in the crushmap? Thanks for help.
 
- > Does the KVM process have
-> permission to access that directory?
-Yes it is also created if i skip $name and set it to /var/run/ceph.sock
+It looks like the kernel client is not able to parse the tree algorithm
+in the OSDMap. I filed http://tracker.newdream.net/issues/2759 to
+track this.
 
->>> Regarding the random IO, you shouldn't overestimate your storage.
->>> Under plenty of scenarios your drives are lucky to do more than 2k
->>> IO/s, which is about what you're seeing....
->>> http://techreport.com/articles.x/22415/9
->> You're fine if the ceph workload is the same as the iometer file ser=
-ver workload. I don't know. I've measured the raw random 4k workload. A=
-lso I've tested adding another osd and speed still doesn't change but w=
-ith a size of 200gb I should hit several osd servers.
-> Okay =97 just wanted to point it out.
-
-Thanks also with sheepdog i can get 40 000 IOp/s.
-
-Stefan
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Josh
