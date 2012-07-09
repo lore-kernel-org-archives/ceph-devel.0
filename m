@@ -1,30 +1,58 @@
 From: Stefan Priebe <s.priebe@profihost.ag>
-Subject: Re: Some findings on 0.48, qemu-1.0.1 eating up RDB-write-cache memory
-Date: Mon, 09 Jul 2012 20:16:17 +0200
-Message-ID: <4FFB1FF1.4050308@profihost.ag>
-References: <4FFAC001.4020503@filoo.de>
+Subject: Re: speedup ceph / scaling / find the bottleneck
+Date: Mon, 09 Jul 2012 20:21:18 +0200
+Message-ID: <4FFB211E.9050707@profihost.ag>
+References: <CAPYLRzhU9pyp-ExVL0wfXL4=F=CHY4uWd7=3tPzgKA4-kPYTZg@mail.gmail.com> <9437d87e-97db-48fc-a133-f25042b21a38@mailpro> <CAPYLRziiFAAv8j=tJM1tmnmjoDQE8qbeLMQ==aE540xCCik7nA@mail.gmail.com> <D104B995-5AA4-46C2-B9D1-0A80878BEF4C@profihost.ag> <CAPYLRziuiGob-6mW+jkf0eC0=HoNYhkSe8LHfJQgviKkQbs1yg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.profihost.ag ([85.158.179.208]:35301 "EHLO
+Received: from mail.profihost.ag ([85.158.179.208]:50057 "EHLO
 	mail.profihost.ag" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752342Ab2GISQV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 14:16:21 -0400
-In-Reply-To: <4FFAC001.4020503@filoo.de>
+	with ESMTP id S1752315Ab2GISVW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 14:21:22 -0400
+In-Reply-To: <CAPYLRziuiGob-6mW+jkf0eC0=HoNYhkSe8LHfJQgviKkQbs1yg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Oliver Francke <Oliver.Francke@filoo.de>
-Cc: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sage@inktank.com>
 
-Am 09.07.2012 13:26, schrieb Oliver Francke:
-> After doing some normal IOps testing with:
->      spew -v --raw -P -t -i 5 -b 4k -p random -B 4k 2G /tmp/doof.dat
+Am 06.07.2012 20:17, schrieb Gregory Farnum:
+>> Am 06.07.2012 um 19:11 schrieb Gregory Farnum <greg@inktank.com>:
+>>> I'm interested in figuring out why we aren't getting useful data ou=
+t
+>>> of the admin socket, and for that I need the actual configuration
+>>> files. It wouldn't surprise me if there are several layers to this
+>>> issue but I'd like to start at the client's endpoint. :)
+>>
+>> While I'm on holiday I can't send you my ceph.conf but it doesn't co=
+ntain anything else than the locations and journal dio false for tmpfs =
+and /var/run/ceph_$name.sock
 >
-> so a 2G file, tested for IOps-performance with 4k blocks I get a pretty
-> good value for 5x write/read-after-write:
+> Is that socket in the global area?
+Yes
 
-Just be interested as i'm still trying to get good IOps values. Have you 
-tried with a 200GB File / whole block device?
+ > Does the KVM process have
+> permission to access that directory?
+Yes it is also created if i skip $name and set it to /var/run/ceph.sock
+
+>>> Regarding the random IO, you shouldn't overestimate your storage.
+>>> Under plenty of scenarios your drives are lucky to do more than 2k
+>>> IO/s, which is about what you're seeing....
+>>> http://techreport.com/articles.x/22415/9
+>> You're fine if the ceph workload is the same as the iometer file ser=
+ver workload. I don't know. I've measured the raw random 4k workload. A=
+lso I've tested adding another osd and speed still doesn't change but w=
+ith a size of 200gb I should hit several osd servers.
+> Okay =97 just wanted to point it out.
+
+Thanks also with sheepdog i can get 40 000 IOp/s.
 
 Stefan
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
