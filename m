@@ -1,53 +1,88 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: domino-style OSD crash
-Date: Mon, 9 Jul 2012 10:43:30 -0700
-Message-ID: <CADvuQRFQCrQn3dF=r6VLPo3Q5vBVvCROowa99Rfak=qkbXb0rA@mail.gmail.com>
-References: <4FCC7573.3000704@univ-nantes.fr> <CADvuQRF1EUK-iuwd49TJibaSaTN4G6gbCHRvQ3W_e4JoOZ5ODA@mail.gmail.com>
- <CA+4uBUYoDFWcYhmd_EacQgJSf+i=WcA7x-PNWZ0EerD+_fTAjg@mail.gmail.com>
- <4FF2AFEB.1010403@univ-nantes.fr> <CADvuQRFukwLw6cCxxU_AA76=pQS2uVZQBgu47qkJay2DFd0FaQ@mail.gmail.com>
- <4FF35C01.4070400@univ-nantes.fr> <CADvuQRGyp8j=XXStvOFc37Gy7RoWD1AQK5ih-BHudJ8hH7dT7g@mail.gmail.com>
- <4FF3F98C.30602@univ-nantes.fr>
+From: Dan Mick <dan.mick@inktank.com>
+Subject: Re: librbd: error finding header
+Date: Mon, 09 Jul 2012 10:47:41 -0700
+Message-ID: <4FFB193D.7050207@inktank.com>
+References: <4FFA6F35.4040102@bashkirtsev.com> <4FFA9E6D.7030207@inktank.com> <4FFAB273.6030605@bashkirtsev.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:44047 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:61665 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751604Ab2GIRnv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 13:43:51 -0400
-Received: by pbbrp8 with SMTP id rp8so19560319pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Jul 2012 10:43:51 -0700 (PDT)
-In-Reply-To: <4FF3F98C.30602@univ-nantes.fr>
+	with ESMTP id S1751604Ab2GIRrr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 13:47:47 -0400
+Received: by pbbrp8 with SMTP id rp8so19564976pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jul 2012 10:47:47 -0700 (PDT)
+In-Reply-To: <4FFAB273.6030605@bashkirtsev.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Cc: Sam Just <sam.just@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 4, 2012 at 1:06 AM, Yann Dupont <Yann.Dupont@univ-nantes.fr> wrote:
-> Well, I probably wasn't clear enough. I talked about crashed FS, but i was
-> talking about ceph. The underlying FS (btrfs in that case) of 1 node (and
-> only one) has PROBABLY crashed in the past, causing corruption in ceph data
-> on this node, and then the subsequent crash of other nodes.
+Well, it's not so much those; those are the objects that hold data 
+blocks.  You're more interested in the objects whose names end in 
+'.rbd'.  These are the header objects, one per image, and are 
+interpreted by rbd info, but I'm concerned that one of them may not exist.
+
+On 07/09/2012 03:29 AM, Vladimir Bashkirtsev wrote:
+> On 09/07/12 18:33, Dan Mick wrote:
+>> Vladimir: you can do some investigation with the rados command.  What
+>> does
+>> rados -p rbd ls show you?
+> Rather long list of:
+> rb.0.11.000000002786
+> rb.0.d.0000000054a2
+> rb.0.6.000000002eb5
+> rb.0.d.000000008294
+> rb.0.13.000000000377
+> rb.0.e.000000000629
+> rb.0.6.000000002756
+> rb.0.d.000000006156
+> rb.0.d.000000009b82
+> rb.0.5.000000000c9e
+> rb.0.d.0000000080ba
+> rb.0.f.000000000e75
+> rb.0.6.00000000ab4f
+> rb.0.d.0000000048e4
+> rb.0.d.000000005f67
+> rb.0.13.0000000014ad
+> rb.0.d.00000000e074
+> rb.0.f.000000001a4b
+> rb.0.13.0000000004a3
+> ...
 >
-> RIGHT now btrfs on this node is OK. I can access the filesystem without
-> errors.
+> How to find out to which image these objects belong?
+>
+>>
+>> On 07/08/2012 10:42 PM, Vladimir Bashkirtsev wrote:
+>>> Hello,
+>>>
+>>> I just hit this error:
+>>>
+>>> error opening image sip.logics.net.au: (2) No such file or directory
+>>> 2012-07-09 15:03:59.935835 7ffbe0673780 -1 librbd: error finding
+>>> header: (2) No such file or directory
+>>>
+>>> Googled around and found that Oliver Francke had similar issue back
+>>> in March. Read your responses but still unclear where to start to
+>>> dig. Just upgraded from 0.47.3 to 0.48, done rolling upgrade and all
+>>> RBD images are OK with exception of this one. Notably as upgrade was
+>>> done while VM was up it continued to run unaffected (ie all data
+>>> inside of VM was written and read as nothing happened). It makes me
+>>> think that there no data loss but mere broken header.
+>>>
+>>> Of course I have a backup of VM and can pull it back in no time but I
+>>> am really interested (and I am sure other ceph users) how to recover
+>>> from such failures?
+>>>
+>>> Regards,
+>>> Vladimir
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>
+>
 
-But the LevelDB isn't. It's contents got corrupted, somehow somewhere,
-and it really is up to the LevelDB library to tolerate those errors;
-we have a simple get/put interface we use, and LevelDB is triggering
-an internal error.
-
-> One node had problem with btrfs, leading first to kernel problem , probably
-> corruption (in disk/ in memory maybe ?) ,and ultimately to a kernel oops.
-> Before that ultimate kernel oops, bad data has been transmitted to other
-> (sane) nodes, leading to ceph-osd crash on thoses nodes.
-
-The LevelDB binary contents are not transferred over to other nodes;
-this kind of corruption would not spread over the Ceph clustering
-mechanisms. It's more likely that you have 4 independently corrupted
-LevelDBs. Something in the workload Ceph runs makes that corruption
-quite likely.
-
-The information here isn't enough to say whether the cause of the
-corruption is btrfs or LevelDB, but the recovery needs to handled by
-LevelDB -- and upstream is working on making it more robust:
-http://code.google.com/p/leveldb/issues/detail?id=97
