@@ -1,85 +1,132 @@
-From: Travis Rhoden <trhoden@gmail.com>
-Subject: Re: specifying secret in rbd map command
-Date: Mon, 9 Jul 2012 12:32:17 -0400
-Message-ID: <CACkq2mobAF+iBvkRvi3YZRdhWFkta_iUfoR33jgqzjKX11wzOA@mail.gmail.com>
-References: <CACkq2mq_shqJkq5qyq--wmh1Q32__NN=D9YJqVx6Mkx-ToHZzA@mail.gmail.com>
- <Pine.LNX.4.64.1207090920480.20547@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Keys & caps
+Date: Mon, 9 Jul 2012 09:33:22 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.1207090925370.20547@cobra.newdream.net>
+References: <4183318.yLl07ggMzS@mranderson>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: MULTIPART/MIXED; BOUNDARY="557981400-1341915692-1341851602=:20547"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:53948 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752095Ab2GIQcj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 12:32:39 -0400
-Received: by lbbgm6 with SMTP id gm6so20370014lbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Jul 2012 09:32:38 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1207090920480.20547@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:42352 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752357Ab2GIQd2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 12:33:28 -0400
+In-Reply-To: <4183318.yLl07ggMzS@mranderson>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
 Cc: ceph-devel@vger.kernel.org
 
-Awesome.  Thanks, Sage.  I won't bother to try and fix up the docs,
-then.  Though I might take a look at the branch and see if they have
-been updated to capture the latest changes.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
- - Travis
+--557981400-1341915692-1341851602=:20547
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-On Mon, Jul 9, 2012 at 12:22 PM, Sage Weil <sage@inktank.com> wrote:
-> Hi Travis,
->
-> Sorry for the confusion!  There is a branch in git (wip-auth) that cleans
-> up the rbd map code to be consistent with the rest of the system, so that
-> you can use keyrings or explicit keys or keyfiles.  It should get merged
-> for 0.50.
->
-> sage
->
->
-> On Mon, 9 Jul 2012, Travis Rhoden wrote:
->
->> Hey folks,
->>
->> I had a bit of unexpected trouble today using the "rbd map" command to
->> map an RBD to a kernel object.  I had previously been using the "echo
->> ... > /sys/bus/rbd..." method of manipulating RBDs.
->>
->> I was looking at the instructions here:
->> http://ceph.com/docs/master/rbd/rbd-ko/
->>
->> When I tried to use the given syntax,  "sudo rbd map {image-name}
->> --pool {pool-name} --name {client-name} --secret {client-secret}", I
->> found the following:
->>
->> 1. {client-secret} is really supposed to be a file, not the actual
->> secret.  An strace on the command shows an attempt to open a file with
->> the secret as its name
->> 2. If I give a keyring file as the client-secret, the command does not
->> parse out the key for the given client-name.  In other words, I gave
->> the name as "client.admin", then gave it the keyring file which
->> contained merely
->>
->> [client.admin]
->>       key = AQB67+BPGNX0NhAA9iK7Epcj72Jck1wOAQBetA==
->>
->> But the command wouldn't parse out the key.
->>
->> 3. I had to create a new file, containing only the text of the key,
->> and pass that to the command instead.  Then everything is happy.
->>
->>
->> I"m happy to update the docs to make this process clear.  But I wonder
->> if there might be any plans to modify the command behavior to accept a
->> keyring file and pull out the key belonging to specified client name.
->> Either way, I can update the docs to make it clear that you are
->> specifying a file, not the key string itself.
->>
->> Thanks,
->>
->>  - Travis
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+Hi,
+
+On Mon, 9 Jul 2012, Sz=E9kelyi Szabolcs wrote:
+> Hello,
+>=20
+> this far I accessed my Ceph (0.48) FS with the client.admin key, but I'd =
+like=20
+> to change that since I don't want to allow clients to control the cluster=
+=2E
+>=20
+> I thought I should create a new key, give it some caps (don't exactly kno=
+w=20
+> which ones), and distribute it to clients. Here are some things I don't=
+=20
+> know/understand:
+>=20
+> * What do the r, w, x, and * caps ("permissions"?) mean on a mon, mds, or=
+ osd?
+
+They roughly correspond to read, write, execute.  The distinction is=20
+subtle and poorly specfied for mon caps; just use the documented values=20
+for now.  For the mds, it's just 'allow', as we haven't properly defined=20
+those yet either.  The osd ones are the most useful and well defined. =20
+There is a grammar in osd/OSDCap.h if you can grok the boost::spirit=20
+syntax.  In addition to rwx, you can grant by pool or object prefix. =20
+There is some preliminary/incomplete support for fine-grained control over=
+=20
+the use of rados classes.
+
+> * What's the difference between (for example) 'allow rw' and 'rw' caps? `=
+ceph=20
+> auth` seems to understand (and display as specified) both forms.
+
+'rw' is nonsense... it needs to be (a list of) 'allow <something>'=20
+phrase(s).  From the monitor's perspective, the osd and mds caps are=20
+opaque, so it won't enforce a particular syntax.  At some point we can=20
+make it verify they parse properly, but that hasn't happened yet.
+
+> Not to run into issues with caps, I've created a key with the same caps a=
+s the=20
+> current client.admin, but with a different key, called client.access_fs. =
+I=20
+> planned to narrow down the caps after I made the mount work with the new =
+key.
+>=20
+> $ sudo ceph auth list
+> installed auth entries:=20
+> [...]
+> client.access_fs
+>         key: AQ...=3D=3D
+>         caps: [mds] allow
+>         caps: [mon] allow *
+>         caps: [osd] allow *
+> [...]
+>=20
+> I've copied the key to the client as /etc/ceph/keyring:
+>=20
+> [client.access_fs]
+>         key =3D AQ...=3D=3D
+>=20
+> I have 'keyring =3D /etc/ceph/keyring' in my ceph.conf [global] section o=
+n the=20
+> client. Now trying to mount the filesystem fails with
+>=20
+> $ sudo mount /mnt/ceph
+> ceph-fuse[1784]: starting ceph client
+> ceph-fuse[1784]: ceph mount failed with (1) Operation not permitted
+> ceph-fuse[1782]: mount failed: (1) Operation not permitted
+>=20
+> Adding '-o name=3Dclient.access_fs' to the command line yields the same r=
+esult.=20
+> If I copy the client.admin key into the keyring file, it works. (However,=
+=20
+> adding the same mount option again (so the name=3D parameter and the key =
+name in=20
+> the file do not match), I get an error (which seems okay to me, not sure =
+about=20
+> the correctness):
+>=20
+> $ sudo mount /cloud/ -o name=3Dclient.access_fs
+> ceph-fuse[1835]: starting ceph client
+> ceph-fuse[1835]: starting fuse
+> fuse: unknown option `name=3Dclient.access_fs'
+> 2012-07-09 16:03:18.343793 7fb0e7b8b780 -1 fuse_lowlevel_new failed
+> ceph-fuse[1835]: fuse finished with error 33
+> ceph-fuse[1833]: mount failed: (33) Numerical argument out of domain
+>=20
+> Could you clear up the confusion in my head? :)
+
+The problem is that the mount.ceph command doesn't understand keyrings; it=
+=20
+only understands secret=3D and secretfile=3D.  There is a longstanding feat=
+ure=20
+bug open for this
+
+=09http://tracker.newdream.net/issues/266
+
+but it hasn't been prioritized.  Sorry for the confusion!  It will happen=
+=20
+soon. =20
+
+In the meantime, you need
+
+=09 -o secretfile=3D/path/to/secretfile,name=3Daccess_fs
+
+sage
+--557981400-1341915692-1341851602=:20547--
