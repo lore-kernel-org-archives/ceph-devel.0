@@ -1,119 +1,99 @@
-From: Josh Durgin <joshd@hq.newdream.net>
-Subject: Re: librbd: error finding header
-Date: Tue, 10 Jul 2012 13:08:28 -0700
-Message-ID: <4FFC8BBC.6010807@hq.newdream.net>
-References: <4FFA6F35.4040102@bashkirtsev.com> <4FFA9E6D.7030207@inktank.com> <4FFAB273.6030605@bashkirtsev.com> <4FFB193D.7050207@inktank.com> <4FFBA108.3010009@bashkirtsev.com> <4FFBB74F.2050702@inktank.com> <4FFBF505.4050400@bashkirtsev.com>
-Reply-To: joshd@hq.newdream.net
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Keys & caps
+Date: Tue, 10 Jul 2012 13:09:10 -0700
+Message-ID: <CAPYLRzgn6NC9193y4HsH7ASevtX-QWq9P=RrYJpmD3uvyoi8LA@mail.gmail.com>
+References: <4183318.yLl07ggMzS@mranderson>
+	<Pine.LNX.4.64.1207090925370.20547@cobra.newdream.net>
+	<1968682.cis2SWxC6X@mranderson>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.hq.newdream.net ([66.33.206.127]:53177 "EHLO
-	mail.hq.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751640Ab2GJUI3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jul 2012 16:08:29 -0400
-In-Reply-To: <4FFBF505.4050400@bashkirtsev.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:48127 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752741Ab2GJUJO convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jul 2012 16:09:14 -0400
+Received: by lbbgm6 with SMTP id gm6so951383lbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jul 2012 13:09:10 -0700 (PDT)
+In-Reply-To: <1968682.cis2SWxC6X@mranderson>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Cc: Dan Mick <dan.mick@inktank.com>, ceph-devel@vger.kernel.org
+To: =?ISO-8859-1?Q?Sz=E9kelyi_Szabolcs?= <szekelyi@niif.hu>
+Cc: ceph-devel@vger.kernel.org
 
-On 07/10/2012 02:25 AM, Vladimir Bashkirtsev wrote:
-> On 10/07/12 14:32, Dan Mick wrote:
+On Mon, Jul 9, 2012 at 10:27 AM, Sz=E9kelyi Szabolcs <szekelyi@niif.hu>=
+ wrote:
+> On 2012. July 9. 09:33:22 Sage Weil wrote:
+>> On Mon, 9 Jul 2012, Sz=E9kelyi Szabolcs wrote:
+>> > this far I accessed my Ceph (0.48) FS with the client.admin key, b=
+ut I'd
+>> > like to change that since I don't want to allow clients to control=
+ the
+>> > cluster.
+>> >
+>> > I thought I should create a new key, give it some caps (don't exac=
+tly know
+>> > which ones), and distribute it to clients. Here are some things I =
+don't
+>> > know/understand:
+>> >
+>> > * What do the r, w, x, and * caps ("permissions"?) mean on a mon, =
+mds, or
+>> > osd?
 >>
+>> They roughly correspond to read, write, execute.  The distinction is
+>> subtle and poorly specfied for mon caps; just use the documented val=
+ues
+>> for now.
+>
+> Does this mean that what I'm trying to achieve is not possible at the=
+ moment?
+> I'd like to give access to my clients to the data in the filesystem, =
+but not
+> control over the cluster. My thought was that removing some mon caps =
+from the
+> clients' keys will get me there. But from what you write, it looks to=
+ me like
+> if a client can access the data in the filesystem, it can also (for e=
+xample)
+> bring the cluster down...
+
+I believe your filesystem clients only need  'allow r' on the
+monitors, and they should be good with 'allow rw' on the OSDs (though
+still "allow" on the MDS). This is distinct from the "allow *" cap and
+does minimize some ability to cause damage. :)
+
+>> The problem is that the mount.ceph command doesn't understand keyrin=
+gs; it
+>> only understands secret=3D and secretfile=3D.  There is a longstandi=
+ng feature
+>> bug open for this
 >>
->> On 07/09/2012 08:27 PM, Vladimir Bashkirtsev wrote:
->>> On 10/07/12 03:17, Dan Mick wrote:
->>>> Well, it's not so much those; those are the objects that hold data
->>>> blocks.  You're more interested in the objects whose names end in
->>>> '.rbd'.  These are the header objects, one per image, and are
->>>> interpreted by rbd info, but I'm concerned that one of them may not
->>>> exist.
->>> Right on the ball: .rbd for image concerned just does not exist. So how
->>> can we recover from this? And why it has disappeared in first place? (I
->>> guess latter may be related to some sort of bug)
+>>       http://tracker.newdream.net/issues/266
 >>
->> Don't know why it might have disappeared.  Recovery: no easy way. It's
->> possible that image header could be reconstructed, but there aren't
->> any tools written to do it (the header format is pretty uncomplicated).
-> Well... Then somehow either I need to rebuild it manually or clean up
-> image remains to free up space. Given that rbd tool refuses to do
-> anything without .rbd object then clean up appears to be manual as well.
->
-> I have run rbd info on the rest of images and excluded rb.* objects
-> belonging to good images. Now I know broken image has prefix of rb.0.1
-> and technically I can clean out objects belonging to this image. But rbd
-> ls seems to pull the list of rbd images from somewhere: broken image
-> must be removed from there as well. Not sure where it is stored.
-
-This is stored in the rbd_directory object. 'rbd rm' tries to do
-as much as it can when missing the header, including removing the image
-from the directory. If you do 'rbd rm image --debug-rbd 2' you should
-see this happen. You'll still get the message about the header being
-missing, but it should continue and remove it from the rbd_directory
-object as well. It can't remove the data objects since it doesn't
-know the correct prefix without the header.
-
-> Alternatively how hard it would be to throw together a quick tool which
-> picks up these objects and reconstructs .rbd header? Something tells me
-> that it should be relatively straight forward.
-
-It's pretty simple if you don't have any snapshots. If you do have
-snapshots, you would need to figure out which snapshot ids they have,
-and without the header the only way you could do that would be to
-examine the rbd data objects on the osds (there's no way to examine
-which selfmanaged snapshots exist via librados right now).
-
-Alternatively, you could brute force the snapshot ids by attempting to 
-read from each snapshot id for each data object (since not all of them
-will have all snapshots). If they all return -ENOENT for a given
-snapshot id, that snapshot id doesn't exist in the image.
-
-If any snapshots had different sizes, or in future versions of rbd had 
-other metadata change, you might need to recreate that metadata to be 
-able to use the snapshot.
-
-If you created a new header ignoring any snapshots that existed,
-you would end up with space still being used by the snapshots after
-you removed the image.
-
-> I have no pressing need to recover this image - I have pulled the backup
-> and now it is on its merry way. But just for future sake we need to get
-> this one resolved: another day someone else will hit it.
->
-> ----------------------------------
->
-> 30 minutes later:
->
-> I have looked at structure of rbd_obj_header_ondisk and really it is
-> quite simple. Image has no snapshots and so it makes everything straight
-> forward. Order is default 22, size - well, unknown but finding object
-> with highest index provides some guidance. get rbd header from another
-> image, using hexedit changed name and size, put it back and viola -
-> image is back and running. Not quite sure about integrity but at least
-> now it will allow to remove image cleanly.
->
+>> but it hasn't been prioritized.  Sorry for the confusion!  It will h=
+appen
+>> soon.
 >>
->> It certainly shouldn't have just happened.  Any idea what operations
->> might have been in progress when it did?
-> Obviously not. I am running ceph over last few months trying to get it
-> off track and till now had no major issues. VM concerned was running
-> while I did upgrade from 0.47.3 to 0.48. After that point I have asked
-> the list if it is safe to live migrate VM with rbd cache on. Josh
-> confirmed that it is safe to do so. So I have live migrated VM to
-> another host. No dramas. Still everything runs. Then I have updated
-> hosts (rolling update again - migrating VMs away while rebooting hosts).
-> I have around 10 VMs (including heavily loaded) and all of them migrated
-> around without any issues. Then suddenly this VM refused to migrate.
-> While I was typing it I remembered that there was one issue between
-> upgrade of ceph and failure to migrate: one of pgs turned inconsistent.
-> pg repair fixed it and I immediately forgot about it. Could it be the
-> reason why this .rbd disappeared? (Went to check logs but logrotate
-> already removed it).
+>> In the meantime, you need
+>>
+>>        -o secretfile=3D/path/to/secretfile,name=3Daccess_fs
+>
+> Is this also true for the FUSE client? I have obscure memories about =
+big
+> differences between the kernel and the FUSE client, for example the l=
+atter
+> being able to read ceph.conf, and get the necessary info, including t=
+he
+> keyring file, from there. Maybe I didn't emphasize it, but that's wha=
+t I'm
+> using.
 
-Yeah, the the inconsistent pg was very likely the problem. If you see
-that happen again it would be good to save the osd logs so we can try to
-figure out how it happened. PG repair won't be able to replace missing 
-objects if they're missing on all replicas.
-
-Josh
+When using ceph-fuse, you want to specify the name with
+--name=3Daccess_fs =97 no -o required.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
