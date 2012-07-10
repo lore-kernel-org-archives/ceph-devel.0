@@ -1,110 +1,94 @@
-From: Tiago Soares <tistesoa@gmail.com>
-Subject: Re: lazy io
-Date: Tue, 10 Jul 2012 01:31:17 +0000 (UTC)
-Message-ID: <loom.20120710T032905-563@post.gmane.org>
-References: <20100526210645.035A7224805A@bear.spirit.com> <Pine.LNX.4.64.1005261635380.24698@cobra.newdream.net> <loom.20120708T224619-67@post.gmane.org> <Pine.LNX.4.64.1207082114090.13271@cobra.newdream.net>
+From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Subject: Re: librbd: error finding header
+Date: Tue, 10 Jul 2012 12:59:00 +0930
+Message-ID: <4FFBA17C.3050506@bashkirtsev.com>
+References: <4FFA6F35.4040102@bashkirtsev.com> <4FFA9E6D.7030207@inktank.com> <4FFAB273.6030605@bashkirtsev.com> <4FFB193D.7050207@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:50876 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751365Ab2GJBb3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 9 Jul 2012 21:31:29 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SoPIU-0004kZ-GT
-	for ceph-devel@vger.kernel.org; Tue, 10 Jul 2012 03:31:27 +0200
-Received: from 150.162.67.92 ([150.162.67.92])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Jul 2012 03:31:26 +0200
-Received: from tistesoa by 150.162.67.92 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Jul 2012 03:31:26 +0200
+Received: from mail.logics.net.au ([150.101.56.178]:41014 "EHLO
+	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751042Ab2GJD3S (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 23:29:18 -0400
+In-Reply-To: <4FFB193D.7050207@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Dan Mick <dan.mick@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Sage Weil <sage <at> inktank.com> writes:
-
-> 
-> On Sun, 8 Jul 2012, Tiago Soares wrote:
-> > Sage Weil <sage <at> newdream.net> writes:
-> > 
-> > > 
-> > > I just pushed out some "lazy io" patches to the unstable branches.  Lazy 
-> > > io is enabled on a file handle via a ceph ioctl (CEPH_IOC_LAZYIO).  Once 
-> > > that happens, an application can do buffered reads/writes even when a file 
-> > > is open on multiple clients, and is responsible for managing it's own 
-> > > cache conherency between nodes.
-> > > 
-> > > An application can flush dirty data using sync_file_range(2), and 
-> > > invalidate cached data using posix_fadvise(2) (POSIX_FADV_DONTNEED).  
-> > > These are equivalent to the lazyio_propagate(2) and lazyio_synchronise(2) 
-> > > in the original O_LAZY proposal from the POSIX IO group way back when.
-> > > 
-> > > If anybody is interested in testing this functionality, let us know!
-> > > 
-> > > sage
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo <at> vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > 
-> > Hi Sage,
-> > Im looking for use Parallel HDF5 on CEPH, and I expecting that Lazy IO can 
-> > handle with Parallel IO on hdf file. I tried with ordinary CEPH although the 
-> > parallel processes stuck. I guess that each process read or write operation 
-will 
-> > block until it is acknowledged by the OSD, right? How can I enable the Lazy 
-IO 
-> > on CEPH? There is some branch that I can get it?
-> 
-> First, does it behave correctly without enabling lazyio?
-
-No, it doesn't. The parallel process stuck in the firts attempt and int the 
-third attempt when I take off the file caching. The funny is, all the parallel 
-clients is the same ceph osd nodes and they all locked. There is one client 
-which is not a osd nodes and it still can access the ceph file system as serial 
-IO. I'm using ceph-fuse to all clients to access the ceph system, I don't know 
-if it could be a problem.
-Basically, in my cluster, I have 8 nodes as osd and as client-fuse of the 
-parallel application. One of them is a client-ceph, osd, mon and meta, which a 
-call as Master node. All the parallel node writing in the same hdf5 file. I can 
-confirm that the application works because I already run fine in PVFS, with no 
-problems. 
-
-
-> 
-> The lazyio ioctl has been upstream for some time now; any recent (e.g., 
-> 3.0 or later) mainline kernel will certainly have it.
-> 
-> If you call the lazyio ioctl, it should just allow read caching and async 
-> writeback on that inode.  Reads will block just as they did before (if you 
-> don't have the data you have to wait), but in general writes will go to 
-> the page cache and not wait, just as they would for a regular file with 
-> one writer.
-> 
-> The lazyio code isnt regularly tested (that I know of) so I won't be 
-> terribly surprised if it broke at some point, but it at least used to 
-> work.  If you observe that the application normally behaves but stops 
-> doing so when the lazyio ioctl is called that will be helpful!
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo <at> vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-
-If I understand, using kernel version 2.6.32 there is no way to use  lazyio 
-ioctl ?
-
-Regards
+On 10/07/12 03:17, Dan Mick wrote:
+> Well, it's not so much those; those are the objects that hold data 
+> blocks.  You're more interested in the objects whose names end in 
+> '.rbd'.  These are the header objects, one per image, and are 
+> interpreted by rbd info, but I'm concerned that one of them may not 
+> exist.
+Right on the ball: .rbd for image concerned just does not exist. So how 
+can we recover from this? And why it has disappeared in first place? (I 
+guess latter may be related to some sort of bug)
+>
+> On 07/09/2012 03:29 AM, Vladimir Bashkirtsev wrote:
+>> On 09/07/12 18:33, Dan Mick wrote:
+>>> Vladimir: you can do some investigation with the rados command.  What
+>>> does
+>>> rados -p rbd ls show you?
+>> Rather long list of:
+>> rb.0.11.000000002786
+>> rb.0.d.0000000054a2
+>> rb.0.6.000000002eb5
+>> rb.0.d.000000008294
+>> rb.0.13.000000000377
+>> rb.0.e.000000000629
+>> rb.0.6.000000002756
+>> rb.0.d.000000006156
+>> rb.0.d.000000009b82
+>> rb.0.5.000000000c9e
+>> rb.0.d.0000000080ba
+>> rb.0.f.000000000e75
+>> rb.0.6.00000000ab4f
+>> rb.0.d.0000000048e4
+>> rb.0.d.000000005f67
+>> rb.0.13.0000000014ad
+>> rb.0.d.00000000e074
+>> rb.0.f.000000001a4b
+>> rb.0.13.0000000004a3
+>> ...
+>>
+>> How to find out to which image these objects belong?
+>>
+>>>
+>>> On 07/08/2012 10:42 PM, Vladimir Bashkirtsev wrote:
+>>>> Hello,
+>>>>
+>>>> I just hit this error:
+>>>>
+>>>> error opening image sip.logics.net.au: (2) No such file or directory
+>>>> 2012-07-09 15:03:59.935835 7ffbe0673780 -1 librbd: error finding
+>>>> header: (2) No such file or directory
+>>>>
+>>>> Googled around and found that Oliver Francke had similar issue back
+>>>> in March. Read your responses but still unclear where to start to
+>>>> dig. Just upgraded from 0.47.3 to 0.48, done rolling upgrade and all
+>>>> RBD images are OK with exception of this one. Notably as upgrade was
+>>>> done while VM was up it continued to run unaffected (ie all data
+>>>> inside of VM was written and read as nothing happened). It makes me
+>>>> think that there no data loss but mere broken header.
+>>>>
+>>>> Of course I have a backup of VM and can pull it back in no time but I
+>>>> am really interested (and I am sure other ceph users) how to recover
+>>>> from such failures?
+>>>>
+>>>> Regards,
+>>>> Vladimir
+>>>> -- 
+>>>> To unsubscribe from this list: send the line "unsubscribe 
+>>>> ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>
+>>
+>
 
 
