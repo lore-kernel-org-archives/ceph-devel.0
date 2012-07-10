@@ -1,33 +1,24 @@
 From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
 Subject: Re: librbd: error finding header
-Date: Tue, 10 Jul 2012 12:59:00 +0930
-Message-ID: <4FFBA17C.3050506@bashkirtsev.com>
-References: <4FFA6F35.4040102@bashkirtsev.com> <4FFA9E6D.7030207@inktank.com> <4FFAB273.6030605@bashkirtsev.com> <4FFB193D.7050207@inktank.com>
+Date: Tue, 10 Jul 2012 12:58:55 +0930
+Message-ID: <4FFBA177.8010202@bashkirtsev.com>
+References: <4FFA6F35.4040102@bashkirtsev.com> <4FFA9E6D.7030207@inktank.com> <4FFAB273.6030605@bashkirtsev.com> <4FFB0740.3050709@hastexo.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:41014 "EHLO
+Received: from mail.logics.net.au ([150.101.56.178]:41016 "EHLO
 	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751042Ab2GJD3S (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 23:29:18 -0400
-In-Reply-To: <4FFB193D.7050207@inktank.com>
+	with ESMTP id S1752864Ab2GJD3Y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jul 2012 23:29:24 -0400
+In-Reply-To: <4FFB0740.3050709@hastexo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dan.mick@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Florian Haas <florian@hastexo.com>
+Cc: Dan Mick <dan.mick@inktank.com>, ceph-devel@vger.kernel.org
 
-On 10/07/12 03:17, Dan Mick wrote:
-> Well, it's not so much those; those are the objects that hold data 
-> blocks.  You're more interested in the objects whose names end in 
-> '.rbd'.  These are the header objects, one per image, and are 
-> interpreted by rbd info, but I'm concerned that one of them may not 
-> exist.
-Right on the ball: .rbd for image concerned just does not exist. So how 
-can we recover from this? And why it has disappeared in first place? (I 
-guess latter may be related to some sort of bug)
->
-> On 07/09/2012 03:29 AM, Vladimir Bashkirtsev wrote:
+On 10/07/12 02:00, Florian Haas wrote:
+> On 07/09/12 12:29, Vladimir Bashkirtsev wrote:
 >> On 09/07/12 18:33, Dan Mick wrote:
 >>> Vladimir: you can do some investigation with the rados command.  What
 >>> does
@@ -55,40 +46,11 @@ guess latter may be related to some sort of bug)
 >> ...
 >>
 >> How to find out to which image these objects belong?
->>
->>>
->>> On 07/08/2012 10:42 PM, Vladimir Bashkirtsev wrote:
->>>> Hello,
->>>>
->>>> I just hit this error:
->>>>
->>>> error opening image sip.logics.net.au: (2) No such file or directory
->>>> 2012-07-09 15:03:59.935835 7ffbe0673780 -1 librbd: error finding
->>>> header: (2) No such file or directory
->>>>
->>>> Googled around and found that Oliver Francke had similar issue back
->>>> in March. Read your responses but still unclear where to start to
->>>> dig. Just upgraded from 0.47.3 to 0.48, done rolling upgrade and all
->>>> RBD images are OK with exception of this one. Notably as upgrade was
->>>> done while VM was up it continued to run unaffected (ie all data
->>>> inside of VM was written and read as nothing happened). It makes me
->>>> think that there no data loss but mere broken header.
->>>>
->>>> Of course I have a backup of VM and can pull it back in no time but I
->>>> am really interested (and I am sure other ceph users) how to recover
->>>> from such failures?
->>>>
->>>> Regards,
->>>> Vladimir
->>>> -- 
->>>> To unsubscribe from this list: send the line "unsubscribe 
->>>> ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>
->>
+> "rbd info" would tell you the block prefix for the image you're looking
+> at. Or does that command give you an "error opening image" message as well?
+Yes, the same error. But Dan guessed it right.
 >
+> Cheers,
+> Florian
 
 
