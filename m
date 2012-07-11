@@ -1,50 +1,117 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: Ceph status for Wheezy
-Date: Wed, 11 Jul 2012 09:18:32 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1207110916020.693@cobra.newdream.net>
-References: <1341122210.10000.46.camel@julia> <Pine.LNX.4.64.1206302303580.11497@cobra.newdream.net> <1341786172.24592.49.camel@julia> <Pine.LNX.4.64.1207082132170.13271@cobra.newdream.net> <1342020952.12180.28.camel@julia>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH] Robustify ceph-rbdnamer and adapt udev rules
+Date: Wed, 11 Jul 2012 09:28:05 -0700
+Message-ID: <4FFDA995.70302@inktank.com>
+References: <1342012996.5511.27.camel@clawhammer>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38108 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755656Ab2GKQSx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 12:18:53 -0400
-In-Reply-To: <1342020952.12180.28.camel@julia>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:44587 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932738Ab2GKQ2J (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 12:28:09 -0400
+Received: by pbbrp8 with SMTP id rp8so2226096pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 09:28:09 -0700 (PDT)
+In-Reply-To: <1342012996.5511.27.camel@clawhammer>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Pascal de Bruijn | Unilogic Networks B.V." <pascal@unilogicnetworks.net>
+Cc: ceph-devel@vger.kernel.org, s.kleijkers@unilogic.nl
 
-On Wed, 11 Jul 2012, Laszlo Boszormenyi (GCS) wrote:
-> On Sun, 2012-07-08 at 21:39 -0700, Sage Weil wrote:
-> > On Sun, 8 Jul 2012, Laszlo Boszormenyi (GCS) wrote:
-> > >  It was released since then. But there are several files that I don't
-> > > know where to install. First are some headers under /usr/include/crush :
-> > > crush.h , hash.h , mapper.h and types.h .
-> > I don't think these need to be installed anywhere; they're not currently 
-> > packaged.  Why do you mention them?
->  They are installed to /usr/include on 'make install'. Didn't know the
-> reason, but will ignore them then.
-
-Oh, that old.. fixed it up.
-
-> > > What about ceph-disk-activate , ceph-disk-prepare exists , boto_tool and
-> > > ceph-coverage ? They are python scripts except the latter being a shell
-> > > script.
-> > ceph-disk-* are already in ceph.  The other two shouldn't be packaged.
->  OK, added them to my packaging as well. Adds a python dependency to the
-> base package.
+On 07/11/2012 06:23 AM, Pascal de Bruijn | Unilogic Networks B.V. wrote:
+> Below is a patch which makes the ceph-rbdnamer script more robust and
+> fixes a problem with the rbd udev rules.
 >
-> > Is there anything missing on this end?
->  Just checked, the python scripts are installed in your git tree.
-> Adjusted my packaging to match that. What do I miss? Manpages for
-> ceph-disk-activate , ceph-disk-prepare , rest-bench and maybe
-> librados-config .
+> On our setup we encountered a symlink which was linked to the wrong rbd:
+>
+>    /dev/rbd/mypool/myrbd ->  /dev/rbd1
+>
+> While that link should have gone to /dev/rbd3 (on which a
+> partition /dev/rbd3p1 was present).
+>
+> Now the old udev rule passes %n to the ceph-rbdnamer script, the problem
+> with %n is that %n results in a value of 3 (for rbd3), but in a value of
+> 1 (for rbd3p1), so it seems it can't be depended upon for rbdnaming.
+>
+> In the patch below the ceph-rbdnamer script is made more robust and it
+> now it can be called in various ways:
+>
+>    /usr/bin/ceph-rbdnamer /dev/rbd3
+>    /usr/bin/ceph-rbdnamer /dev/rbd3p1
+>    /usr/bin/ceph-rbdnamer rbd3
+>    /usr/bin/ceph-rbdnamer rbd3p1
+>    /usr/bin/ceph-rbdnamer 3
+>
+> Even with all these different styles of calling the modified script, it
+> should now return the same rbdname. This change "has" to be combined
+> with calling it from udev with %k though.
+>
+> With that fixed, we hit the second problem. We ended up with:
+>
+>    /dev/rbd/mypool/myrbd ->  /dev/rbd3p1
+>
+> So the rbdname was symlinked to the partition on the rbd instead of the
+> rbd itself. So what probably went wrong is udev discovering the disk and
+> running ceph-rbdnamer which resolved it to myrbd so the following
+> symlink was created:
+>
+>    /dev/rbd/mypool/myrbd ->  /dev/rbd3
+>
+> However partitions would be discovered next and ceph-rbdnamer would be
+> run with rbd3p1 (%k) as parameter, resulting in the name myrbd too, with
+> the previous correct symlink being overwritten with a faulty one:
+>
+>    /dev/rbd/mypool/myrbd ->  /dev/rbd3p1
+>
+> The solution to the problem is in differentiating between disks and
+> partitions in udev and handling them slightly differently. So with the
+> patch below partitions now get their own symlinks in the following style
+> (which is fairly consistent with other udev rules):
+>
+>    /dev/rbd/mypool/myrbd-part1 ->  /dev/rbd3p1
+>
+> Please let me know any feedback you have on this patch or the approach
+> used.
 
-Okay, those should be pretty simple.  There will be a point release before 
-too long that includes all of this stuff.  If there is anything in your 
-packaging that isn't fixed upstream let me know.
+This all makes sense, but maybe we should put the -part suffix in
+another namespace to avoid colliding with images that happen to have
+-partN in their name, e.g.:
 
-Thanks!
-sage
+     /dev/rbd/mypool/myrbd/part1 -> /dev/rbd3p1
+
+Josh
+
+> Regards,
+> Pascal de Bruijn
+> Unilogic B.V.
+>
+> Signed-off-by: Pascal de Bruijn<pascal@unilogicnetworks.net>
+>
+> --------------------------------------------------------------------------------
+> diff --git a/src/ceph-rbdnamer b/src/ceph-rbdnamer
+> index 49350a7..efb6804 100755
+> --- a/src/ceph-rbdnamer
+> +++ b/src/ceph-rbdnamer
+> @@ -1,8 +1,10 @@
+>   #!/bin/sh
+>
+> -POOL=`cat /sys/devices/rbd/$1/pool`
+> -IMAGE=`cat /sys/devices/rbd/$1/name`
+> -SNAP=`cat /sys/devices/rbd/$1/current_snap`
+> +DEV=$1
+> +NUM=`echo $DEV | sed 's#p.*##g' | tr -d 'a-z'`
+> +POOL=`cat /sys/devices/rbd/$NUM/pool`
+> +IMAGE=`cat /sys/devices/rbd/$NUM/name`
+> +SNAP=`cat /sys/devices/rbd/$NUM/current_snap`
+>   if [ "$SNAP" = "-" ]; then
+>   	echo -n "$POOL $IMAGE"
+>   else
+> diff --git a/udev/50-rbd.rules b/udev/50-rbd.rules
+> index 07f220f..406c31c 100644
+> --- a/udev/50-rbd.rules
+> +++ b/udev/50-rbd.rules
+> @@ -1 +1,2 @@
+> -KERNEL=="rbd[0-9]*", PROGRAM="/usr/bin/ceph-rbdnamer %n", SYMLINK+="rbd/%c{1}/%c{2}"
+> +KERNEL=="rbd[0-9]*", ENV{DEVTYPE}=="disk", PROGRAM="/usr/bin/ceph-rbdnamer %k", SYMLINK+="rbd/%c{1}/%c{2}"
+> +KERNEL=="rbd[0-9]*", ENV{DEVTYPE}=="partition", PROGRAM="/usr/bin/ceph-rbdnamer %k", SYMLINK+="rbd/%c{1}/%c{2}-part%n"
