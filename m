@@ -1,134 +1,142 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 09/16] rbd: dynamically allocate image header name
-Date: Wed, 11 Jul 2012 09:02:12 -0500
-Message-ID: <4FFD8764.9040607@inktank.com>
+Subject: [PATCH 10/16] rbd: dynamically allocate image name
+Date: Wed, 11 Jul 2012 09:02:17 -0500
+Message-ID: <4FFD8769.90501@inktank.com>
 References: <4FFD847C.7070205@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:58247 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932723Ab2GKOCO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 10:02:14 -0400
-Received: by mail-gh0-f174.google.com with SMTP id r11so1225639ghr.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 07:02:14 -0700 (PDT)
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:48415 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932605Ab2GKOCU (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 10:02:20 -0400
+Received: by yenl2 with SMTP id l2so1226905yen.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 07:02:20 -0700 (PDT)
 In-Reply-To: <4FFD847C.7070205@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-There is no need to impose a small limit the length of the header
-name recorded for an rbd image in a struct rbd_dev.  Remove the
-limitation by allocating space for the header name dynamically.
+There is no need to impose a small limit the length of the rbd image
+name recorded in a struct rbd_dev.  Remove the limitation by
+allocating space for the image name dynamically.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   33 +++++++++++++++++++++------------
- 1 files changed, 21 insertions(+), 12 deletions(-)
+ drivers/block/rbd.c       |   34 ++++++++++++++++++----------------
+ drivers/block/rbd_types.h |    1 -
+ 2 files changed, 18 insertions(+), 17 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 76e978c..4d11337 100644
+index 4d11337..28afff9 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -55,7 +55,6 @@
+@@ -161,8 +161,8 @@ struct rbd_device {
+ 	spinlock_t		lock;		/* queue lock */
 
- #define RBD_MINORS_PER_MAJOR	256		/* max minors per blkdev */
-
--#define RBD_MAX_MD_NAME_LEN	(RBD_MAX_OBJ_NAME_LEN + sizeof(RBD_SUFFIX))
- #define RBD_MAX_SNAP_NAME_LEN	32
- #define RBD_MAX_OPT_LEN		1024
-
-@@ -164,7 +163,7 @@ struct rbd_device {
  	struct rbd_image_header	header;
- 	char			obj[RBD_MAX_OBJ_NAME_LEN]; /* rbd image name */
- 	int			obj_len;
--	char			obj_md_name[RBD_MAX_MD_NAME_LEN]; /* hdr nm. */
-+	char			*obj_md_name; /* hdr nm. */
+-	char			obj[RBD_MAX_OBJ_NAME_LEN]; /* rbd image name */
+-	int			obj_len;
++	char			*obj; /* rbd image name */
++	size_t			obj_len;
+ 	char			*obj_md_name; /* hdr nm. */
  	int			pool_id;
 
- 	struct ceph_osd_event   *watch_event;
-@@ -2375,8 +2374,13 @@ static char *rbd_add_parse_args(struct rbd_device
-*rbd_dev,
+@@ -2333,6 +2333,8 @@ static inline char *dup_token(const char **buf,
+size_t *lenp)
+  * Returns a pointer to a dynamically-allocated buffer containing
+  * the pool name provided, or a pointer-coded errno if an error
+  * occurs.
++ *
++ * Note: rbd_dev is assumed to have been initially zero-filled.
+  */
+ static char *rbd_add_parse_args(struct rbd_device *rbd_dev,
+ 			      const char *buf,
+@@ -2360,27 +2362,22 @@ static char *rbd_add_parse_args(struct
+rbd_device *rbd_dev,
+ 	if (!len || len >= options_size)
+ 		goto out_err;
 
- 	rbd_dev->obj_len = len;
++	ret = -ENOMEM;
+ 	pool_name = dup_token(&buf, NULL);
+-	if (!pool_name) {
+-		ret = -ENOMEM;
++	if (!pool_name)
+ 		goto out_err;
+-	}
 
--	BUILD_BUG_ON(RBD_MAX_MD_NAME_LEN
--				< RBD_MAX_OBJ_NAME_LEN + sizeof (RBD_SUFFIX));
-+	/* Create the name of the header object */
-+
-+	rbd_dev->obj_md_name = kmalloc(len + sizeof (RBD_SUFFIX), GFP_KERNEL);
-+	if (!rbd_dev->obj_md_name) {
-+		ret = -ENOMEM;
-+		goto out_err;
-+	}
+-	len = copy_token(&buf, rbd_dev->obj, sizeof (rbd_dev->obj));
+-	if (!len || len >= sizeof (rbd_dev->obj))
++	rbd_dev->obj = dup_token(&buf, &rbd_dev->obj_len);
++	if (!rbd_dev->obj)
+ 		goto out_err;
+
+-	/* We have the object length in hand, save it. */
+-
+-	rbd_dev->obj_len = len;
+-
+ 	/* Create the name of the header object */
+
+-	rbd_dev->obj_md_name = kmalloc(len + sizeof (RBD_SUFFIX), GFP_KERNEL);
+-	if (!rbd_dev->obj_md_name) {
+-		ret = -ENOMEM;
++	rbd_dev->obj_md_name = kmalloc(rbd_dev->obj_len
++						+ sizeof (RBD_SUFFIX),
++					GFP_KERNEL);
++	if (!rbd_dev->obj_md_name)
+ 		goto out_err;
+-	}
  	sprintf(rbd_dev->obj_md_name, "%s%s", rbd_dev->obj, RBD_SUFFIX);
 
  	/*
-@@ -2393,6 +2397,7 @@ static char *rbd_add_parse_args(struct rbd_device
-*rbd_dev,
+@@ -2391,13 +2388,16 @@ static char *rbd_add_parse_args(struct
+rbd_device *rbd_dev,
+ 	if (!len)
+ 		memcpy(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
+ 			sizeof (RBD_SNAP_HEAD_NAME));
+-	else if (len >= sizeof (rbd_dev->snap_name))
++	else if (len >= sizeof (rbd_dev->snap_name)) {
++		ret = -EINVAL;
+ 		goto out_err;
++	}
+
  	return pool_name;
 
  out_err:
-+	kfree(rbd_dev->obj_md_name);
+ 	kfree(rbd_dev->obj_md_name);
++	kfree(rbd_dev->obj);
  	kfree(pool_name);
 
  	return ERR_PTR(ret);
-@@ -2402,23 +2407,23 @@ static ssize_t rbd_add(struct bus_type *bus,
- 		       const char *buf,
- 		       size_t count)
- {
--	struct rbd_device *rbd_dev;
-+	char *options;
-+	struct rbd_device *rbd_dev = NULL;
- 	const char *mon_addrs = NULL;
- 	size_t mon_addrs_size = 0;
--	char *options = NULL;
--	struct ceph_osd_client *osdc;
- 	char *pool_name;
-+	struct ceph_osd_client *osdc;
- 	int rc = -ENOMEM;
-
- 	if (!try_module_get(THIS_MODULE))
- 		return -ENODEV;
-
--	rbd_dev = kzalloc(sizeof(*rbd_dev), GFP_KERNEL);
--	if (!rbd_dev)
--		goto err_nomem;
- 	options = kmalloc(count, GFP_KERNEL);
- 	if (!options)
- 		goto err_nomem;
-+	rbd_dev = kzalloc(sizeof(*rbd_dev), GFP_KERNEL);
-+	if (!rbd_dev)
-+		goto err_nomem;
-
- 	/* static rbd_device initialization */
- 	spin_lock_init(&rbd_dev->lock);
-@@ -2499,11 +2504,14 @@ err_out_blkdev:
- err_out_client:
- 	rbd_put_client(rbd_dev);
+@@ -2506,6 +2506,7 @@ err_out_client:
  err_put_id:
--	kfree(pool_name);
-+	if (pool_name) {
-+		kfree(rbd_dev->obj_md_name);
-+		kfree(pool_name);
-+	}
+ 	if (pool_name) {
+ 		kfree(rbd_dev->obj_md_name);
++		kfree(rbd_dev->obj);
+ 		kfree(pool_name);
+ 	}
  	rbd_id_put(rbd_dev);
- err_nomem:
--	kfree(options);
- 	kfree(rbd_dev);
-+	kfree(options);
-
- 	dout("Error adding device %s\n", buf);
- 	module_put(THIS_MODULE);
-@@ -2548,6 +2556,7 @@ static void rbd_dev_release(struct device *dev)
- 	unregister_blkdev(rbd_dev->major, rbd_dev->name);
+@@ -2557,6 +2558,7 @@ static void rbd_dev_release(struct device *dev)
 
  	/* done with the id, and with the rbd_dev */
-+	kfree(rbd_dev->obj_md_name);
+ 	kfree(rbd_dev->obj_md_name);
++	kfree(rbd_dev->obj);
  	rbd_id_put(rbd_dev);
  	kfree(rbd_dev);
 
+diff --git a/drivers/block/rbd_types.h b/drivers/block/rbd_types.h
+index 9507086..0924e9e 100644
+--- a/drivers/block/rbd_types.h
++++ b/drivers/block/rbd_types.h
+@@ -31,7 +31,6 @@
+ #define RBD_MIN_OBJ_ORDER       16
+ #define RBD_MAX_OBJ_ORDER       30
+
+-#define RBD_MAX_OBJ_NAME_LEN	96
+ #define RBD_MAX_SEG_NAME_LEN	128
+
+ #define RBD_COMP_NONE		0
 -- 
 1.7.5.4
 
