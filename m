@@ -1,7 +1,7 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 13/16] rbd: rename some fields in struct rbd_dev
-Date: Wed, 11 Jul 2012 09:02:49 -0500
-Message-ID: <4FFD8789.2010204@inktank.com>
+Subject: [PATCH 14/16] rbd: more symbol renames
+Date: Wed, 11 Jul 2012 09:02:55 -0500
+Message-ID: <4FFD878F.5030905@inktank.com>
 References: <4FFD847C.7070205@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
@@ -9,25 +9,22 @@ Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mail-yw0-f52.google.com ([209.85.213.52]:50862 "EHLO
 	mail-yw0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932532Ab2GKOCv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 10:02:51 -0400
-Received: by yhpp61 with SMTP id p61so1430101yhp.11
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 07:02:51 -0700 (PDT)
+	with ESMTP id S932521Ab2GKOC5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 10:02:57 -0400
+Received: by mail-yw0-f52.google.com with SMTP id p61so1430101yhp.11
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 07:02:57 -0700 (PDT)
 In-Reply-To: <4FFD847C.7070205@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-An rbd image is not a single object, but a logical construct made up
-of an aggregation of objects.
+Rename variables named "obj" which represent object names so they're
+consistenly named "object_name".
 
-Rename some fields in struct rbd_dev, in hopes of reinforcing this.
-    obj         --> image_name
-    obj_len     --> image_name_len
-    obj_md_name --> header_name
-
-Also rename a related symbol name:
-    RBD_MAX_MD_NAME_LEN --> RBD_MAX_HEADER_NAME_LEN
+Rename the "cls" and "method" parameters in rbd_req_sync_exec()
+to be "class_name" and "method_name", and make similar changes
+to the names of local variables in that function representing
+the lengths of those names.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
@@ -36,189 +33,199 @@ Signed-off-by: Alex Elder <elder@inktank.com>
  1 files changed, 27 insertions(+), 26 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index c38246b..14e675c 100644
+index 14e675c..d29c864 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -161,9 +161,9 @@ struct rbd_device {
- 	spinlock_t		lock;		/* queue lock */
+@@ -857,7 +857,7 @@ static int rbd_do_request(struct request *rq,
+ 			  struct rbd_device *rbd_dev,
+ 			  struct ceph_snap_context *snapc,
+ 			  u64 snapid,
+-			  const char *obj, u64 ofs, u64 len,
++			  const char *object_name, u64 ofs, u64 len,
+ 			  struct bio *bio,
+ 			  struct page **pages,
+ 			  int num_pages,
+@@ -893,7 +893,8 @@ static int rbd_do_request(struct request *rq,
+ 		req_data->coll_index = coll_index;
+ 	}
 
- 	struct rbd_image_header	header;
--	char			*obj; /* rbd image name */
--	size_t			obj_len;
--	char			*obj_md_name; /* hdr nm. */
-+	char			*image_name;
-+	size_t			image_name_len;
-+	char			*header_name;
- 	int			pool_id;
+-	dout("rbd_do_request obj=%s ofs=%lld len=%lld\n", obj, len, ofs);
++	dout("rbd_do_request object_name=%s ofs=%lld len=%lld\n",
++		object_name, len, ofs);
 
- 	struct ceph_osd_event   *watch_event;
-@@ -1224,8 +1224,8 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
-u8 opcode, void *data)
- 	if (!rbd_dev)
- 		return;
+ 	down_read(&rbd_dev->header_rwsem);
 
--	dout("rbd_watch_cb %s notify_id=%lld opcode=%d\n", rbd_dev->obj_md_name,
--		notify_id, (int)opcode);
-+	dout("rbd_watch_cb %s notify_id=%lld opcode=%d\n",
-+		rbd_dev->header_name, notify_id, (int) opcode);
- 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
- 	rc = __rbd_refresh_header(rbd_dev);
- 	mutex_unlock(&ctl_mutex);
-@@ -1233,7 +1233,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
-u8 opcode, void *data)
- 		pr_warning(RBD_DRV_NAME "%d got notification but failed to "
- 			   " update snaps: %d\n", rbd_dev->major, rc);
+@@ -918,7 +919,7 @@ static int rbd_do_request(struct request *rq,
+ 	reqhead = req->r_request->front.iov_base;
+ 	reqhead->snapid = cpu_to_le64(CEPH_NOSNAP);
 
--	rbd_req_sync_notify_ack(rbd_dev, ver, notify_id, rbd_dev->obj_md_name);
-+	rbd_req_sync_notify_ack(rbd_dev, ver, notify_id, rbd_dev->header_name);
+-	strncpy(req->r_oid, obj, sizeof(req->r_oid));
++	strncpy(req->r_oid, object_name, sizeof(req->r_oid));
+ 	req->r_oid_len = strlen(req->r_oid);
+
+ 	layout = &req->r_file_layout;
+@@ -1019,7 +1020,7 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
+ 			   int flags,
+ 			   struct ceph_osd_req_op *orig_ops,
+ 			   int num_reply,
+-			   const char *obj,
++			   const char *object_name,
+ 			   u64 ofs, u64 len,
+ 			   char *buf,
+ 			   struct ceph_osd_request **linger_req,
+@@ -1050,7 +1051,7 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
+ 	}
+
+ 	ret = rbd_do_request(NULL, rbd_dev, snapc, snapid,
+-			  obj, ofs, len, NULL,
++			  object_name, ofs, len, NULL,
+ 			  pages, num_pages,
+ 			  flags,
+ 			  ops,
+@@ -1171,7 +1172,7 @@ static int rbd_req_read(struct request *rq,
+ static int rbd_req_sync_read(struct rbd_device *rbd_dev,
+ 			  struct ceph_snap_context *snapc,
+ 			  u64 snapid,
+-			  const char *obj,
++			  const char *object_name,
+ 			  u64 ofs, u64 len,
+ 			  char *buf,
+ 			  u64 *ver)
+@@ -1181,7 +1182,7 @@ static int rbd_req_sync_read(struct rbd_device
+*rbd_dev,
+ 			       CEPH_OSD_OP_READ,
+ 			       CEPH_OSD_FLAG_READ,
+ 			       NULL,
+-			       1, obj, ofs, len, buf, NULL, ver);
++			       1, object_name, ofs, len, buf, NULL, ver);
  }
 
  /*
-@@ -1321,7 +1321,7 @@ static void rbd_notify_cb(u64 ver, u64 notify_id,
-u8 opcode, void *data)
- 		return;
-
- 	dout("rbd_notify_cb %s notify_id=%lld opcode=%d\n",
--				rbd_dev->obj_md_name,
-+				rbd_dev->header_name,
- 		notify_id, (int)opcode);
- }
-
-@@ -1599,7 +1599,7 @@ static int rbd_read_header(struct rbd_device *rbd_dev,
-
- 		rc = rbd_req_sync_read(rbd_dev,
- 				       NULL, CEPH_NOSNAP,
--				       rbd_dev->obj_md_name,
-+				       rbd_dev->header_name,
- 				       0, len,
- 				       (char *)dh, &ver);
- 		if (rc < 0)
-@@ -1609,7 +1609,8 @@ static int rbd_read_header(struct rbd_device *rbd_dev,
- 		if (rc < 0) {
- 			if (rc == -ENXIO)
- 				pr_warning("unrecognized header format"
--					   " for image %s", rbd_dev->obj);
-+					   " for image %s\n",
-+					   rbd_dev->image_name);
- 			goto out_dh;
- 		}
-
-@@ -1665,7 +1666,7 @@ static int rbd_header_add_snap(struct rbd_device
+@@ -1190,7 +1191,7 @@ static int rbd_req_sync_read(struct rbd_device
 *rbd_dev,
- 	ceph_encode_string_safe(&p, e, snap_name, name_len, bad);
- 	ceph_encode_64_safe(&p, e, new_snapid, bad);
-
--	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->obj_md_name,
-+	ret = rbd_req_sync_exec(rbd_dev, rbd_dev->header_name,
- 				"rbd", "snap_add",
- 				data, p - data, &ver);
-
-@@ -1862,7 +1863,7 @@ static ssize_t rbd_name_show(struct device *dev,
+ static int rbd_req_sync_notify_ack(struct rbd_device *rbd_dev,
+ 				   u64 ver,
+ 				   u64 notify_id,
+-				   const char *obj)
++				   const char *object_name)
  {
- 	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
-
--	return sprintf(buf, "%s\n", rbd_dev->obj);
-+	return sprintf(buf, "%s\n", rbd_dev->image_name);
- }
-
- static ssize_t rbd_snap_show(struct device *dev,
-@@ -2164,7 +2165,7 @@ static int rbd_init_watch_dev(struct rbd_device
-*rbd_dev)
- 	int ret, rc;
-
- 	do {
--		ret = rbd_req_sync_watch(rbd_dev, rbd_dev->obj_md_name,
-+		ret = rbd_req_sync_watch(rbd_dev, rbd_dev->header_name,
- 					 rbd_dev->header.obj_version);
- 		if (ret == -ERANGE) {
- 			mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
-@@ -2327,7 +2328,7 @@ static inline char *dup_token(const char **buf,
-size_t *lenp)
- }
-
- /*
-- * This fills in the obj, obj_len, snap_name, rbd_dev, rbd_md_name,
-+ * This fills in the image, image_len, snap_name, rbd_dev, header_name,
-  * and name fields of the given rbd_dev, based on the list of
-  * monitor addresses and other options provided via /sys/bus/rbd/add.
-  *
-@@ -2368,18 +2369,18 @@ static char *rbd_add_parse_args(struct
+ 	struct ceph_osd_req_op *ops;
+ 	int ret;
+@@ -1204,7 +1205,7 @@ static int rbd_req_sync_notify_ack(struct
 rbd_device *rbd_dev,
- 	if (!pool_name)
- 		goto out_err;
+ 	ops[0].watch.flag = 0;
 
--	rbd_dev->obj = dup_token(&buf, &rbd_dev->obj_len);
--	if (!rbd_dev->obj)
-+	rbd_dev->image_name = dup_token(&buf, &rbd_dev->image_name_len);
-+	if (!rbd_dev->image_name)
- 		goto out_err;
-
- 	/* Create the name of the header object */
-
--	rbd_dev->obj_md_name = kmalloc(rbd_dev->obj_len
-+	rbd_dev->header_name = kmalloc(rbd_dev->image_name_len
- 						+ sizeof (RBD_SUFFIX),
- 					GFP_KERNEL);
--	if (!rbd_dev->obj_md_name)
-+	if (!rbd_dev->header_name)
- 		goto out_err;
--	sprintf(rbd_dev->obj_md_name, "%s%s", rbd_dev->obj, RBD_SUFFIX);
-+	sprintf(rbd_dev->header_name, "%s%s", rbd_dev->image_name, RBD_SUFFIX);
-
- 	/*
- 	 * The snapshot name is optional.  If none is is supplied,
-@@ -2403,8 +2404,8 @@ static char *rbd_add_parse_args(struct rbd_device
+ 	ret = rbd_do_request(NULL, rbd_dev, NULL, CEPH_NOSNAP,
+-			  obj, 0, 0, NULL,
++			  object_name, 0, 0, NULL,
+ 			  NULL, 0,
+ 			  CEPH_OSD_FLAG_READ,
+ 			  ops,
+@@ -1240,7 +1241,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
+u8 opcode, void *data)
+  * Request sync osd watch
+  */
+ static int rbd_req_sync_watch(struct rbd_device *rbd_dev,
+-			      const char *obj,
++			      const char *object_name,
+ 			      u64 ver)
+ {
+ 	struct ceph_osd_req_op *ops;
+@@ -1264,7 +1265,7 @@ static int rbd_req_sync_watch(struct rbd_device
 *rbd_dev,
- 	return pool_name;
+ 			      0,
+ 			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+ 			      ops,
+-			      1, obj, 0, 0, NULL,
++			      1, object_name, 0, 0, NULL,
+ 			      &rbd_dev->watch_request, NULL);
 
- out_err:
--	kfree(rbd_dev->obj_md_name);
--	kfree(rbd_dev->obj);
-+	kfree(rbd_dev->header_name);
-+	kfree(rbd_dev->image_name);
- 	kfree(pool_name);
+ 	if (ret < 0)
+@@ -1285,7 +1286,7 @@ fail:
+  * Request sync osd unwatch
+  */
+ static int rbd_req_sync_unwatch(struct rbd_device *rbd_dev,
+-				const char *obj)
++				const char *object_name)
+ {
+ 	struct ceph_osd_req_op *ops;
 
- 	return ERR_PTR(ret);
-@@ -2513,8 +2514,8 @@ err_out_client:
- err_put_id:
- 	if (pool_name) {
- 		kfree(rbd_dev->snap_name);
--		kfree(rbd_dev->obj_md_name);
--		kfree(rbd_dev->obj);
-+		kfree(rbd_dev->header_name);
-+		kfree(rbd_dev->image_name);
- 		kfree(pool_name);
- 	}
- 	rbd_id_put(rbd_dev);
-@@ -2556,7 +2557,7 @@ static void rbd_dev_release(struct device *dev)
- 						    rbd_dev->watch_request);
- 	}
- 	if (rbd_dev->watch_event)
--		rbd_req_sync_unwatch(rbd_dev, rbd_dev->obj_md_name);
-+		rbd_req_sync_unwatch(rbd_dev, rbd_dev->header_name);
+@@ -1302,7 +1303,7 @@ static int rbd_req_sync_unwatch(struct rbd_device
+*rbd_dev,
+ 			      0,
+ 			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+ 			      ops,
+-			      1, obj, 0, 0, NULL, NULL, NULL);
++			      1, object_name, 0, 0, NULL, NULL, NULL);
 
- 	rbd_put_client(rbd_dev);
+ 	rbd_destroy_ops(ops);
+ 	ceph_osdc_cancel_event(rbd_dev->watch_event);
+@@ -1329,7 +1330,7 @@ static void rbd_notify_cb(u64 ver, u64 notify_id,
+u8 opcode, void *data)
+  * Request sync osd notify
+  */
+ static int rbd_req_sync_notify(struct rbd_device *rbd_dev,
+-		          const char *obj)
++		          const char *object_name)
+ {
+ 	struct ceph_osd_req_op *ops;
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+@@ -1360,7 +1361,7 @@ static int rbd_req_sync_notify(struct rbd_device
+*rbd_dev,
+ 			       0,
+ 			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+ 			       ops,
+-			       1, obj, 0, 0, NULL, NULL, NULL);
++			       1, object_name, 0, 0, NULL, NULL, NULL);
+ 	if (ret < 0)
+ 		goto fail_event;
 
-@@ -2566,8 +2567,8 @@ static void rbd_dev_release(struct device *dev)
+@@ -1380,25 +1381,25 @@ fail:
+  * Request sync osd read
+  */
+ static int rbd_req_sync_exec(struct rbd_device *rbd_dev,
+-			     const char *obj,
+-			     const char *cls,
+-			     const char *method,
++			     const char *object_name,
++			     const char *class_name,
++			     const char *method_name,
+ 			     const char *data,
+ 			     int len,
+ 			     u64 *ver)
+ {
+ 	struct ceph_osd_req_op *ops;
+-	int cls_len = strlen(cls);
+-	int method_len = strlen(method);
++	int class_name_len = strlen(class_name);
++	int method_name_len = strlen(method_name);
+ 	int ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_CALL,
+-				    cls_len + method_len + len);
++				    class_name_len + method_name_len + len);
+ 	if (ret < 0)
+ 		return ret;
 
- 	/* done with the id, and with the rbd_dev */
- 	kfree(rbd_dev->snap_name);
--	kfree(rbd_dev->obj_md_name);
--	kfree(rbd_dev->obj);
-+	kfree(rbd_dev->header_name);
-+	kfree(rbd_dev->image_name);
- 	rbd_id_put(rbd_dev);
- 	kfree(rbd_dev);
+-	ops[0].cls.class_name = cls;
+-	ops[0].cls.class_len = (__u8)cls_len;
+-	ops[0].cls.method_name = method;
+-	ops[0].cls.method_len = (__u8)method_len;
++	ops[0].cls.class_name = class_name;
++	ops[0].cls.class_len = (__u8) class_name_len;
++	ops[0].cls.method_name = method_name;
++	ops[0].cls.method_len = (__u8) method_name_len;
+ 	ops[0].cls.argc = 0;
+ 	ops[0].cls.indata = data;
+ 	ops[0].cls.indata_len = len;
+@@ -1408,7 +1409,7 @@ static int rbd_req_sync_exec(struct rbd_device
+*rbd_dev,
+ 			       0,
+ 			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
+ 			       ops,
+-			       1, obj, 0, 0, NULL, NULL, ver);
++			       1, object_name, 0, 0, NULL, NULL, ver);
 
-@@ -2638,7 +2639,7 @@ static ssize_t rbd_snap_add(struct device *dev,
- 	mutex_unlock(&ctl_mutex);
+ 	rbd_destroy_ops(ops);
 
- 	/* make a best effort, don't error if failed */
--	rbd_req_sync_notify(rbd_dev, rbd_dev->obj_md_name);
-+	rbd_req_sync_notify(rbd_dev, rbd_dev->header_name);
-
- 	ret = count;
- 	kfree(name);
 -- 
 1.7.5.4
 
