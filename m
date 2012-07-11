@@ -1,75 +1,109 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 00/16] rbd: updates and enhancements
-Date: Wed, 11 Jul 2012 08:49:48 -0500
-Message-ID: <4FFD847C.7070205@inktank.com>
+From: "Pascal de Bruijn | Unilogic Networks B.V."
+	<pascal@unilogicnetworks.net>
+Subject: [PATCH] Robustify ceph-rbdnamer and adapt udev rules
+Date: Wed, 11 Jul 2012 15:23:16 +0200
+Message-ID: <1342012996.5511.27.camel@clawhammer>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:48480 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757478Ab2GKNtv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 09:49:51 -0400
-Received: by yenl2 with SMTP id l2so1212076yen.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 06:49:51 -0700 (PDT)
+Received: from mail-out117.unilogicnetworks.net ([62.133.206.117]:34439 "EHLO
+	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752628Ab2GKN4X (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 11 Jul 2012 09:56:23 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: s.kleijkers@unilogic.nl
 
-The following series of patches constitute a few minor
-fixes and cleanups, as well as some new utility routines
-in the rbd code.  Some of these comprise a foundation
-that's being used to add support for the "new" rbd image
-format.
+Below is a patch which makes the ceph-rbdnamer script more robust and
+fixes a problem with the rbd udev rules.
 
-We've agreed to refer to the "old" and "new" formats as
-format 1 and 2, respectively.
+On our setup we encountered a symlink which was linked to the wrong rbd:
 
-					-Alex
+  /dev/rbd/mypool/myrbd -> /dev/rbd1
 
-[PATCH 01/16] libceph: fix off-by-one bug in ceph_encode_filepath()
-    This is a minor bug fix.
+While that link should have gone to /dev/rbd3 (on which a
+partition /dev/rbd3p1 was present).
 
-[PATCH 02/16] rbd: drop a useless local variable
-    This is a minor cleanup.
+Now the old udev rule passes %n to the ceph-rbdnamer script, the problem
+with %n is that %n results in a value of 3 (for rbd3), but in a value of
+1 (for rbd3p1), so it seems it can't be depended upon for rbdnaming.
 
-[PATCH 03/16] libceph: define ceph_decode_string()
-[PATCH 04/16] libceph: define ceph_extract_encoded_string()
-[PATCH 05/16] rbd: define dup_token()
-    Each of these defines a new utility routine.  They are
-    all going to be used in some upcoming rbd patches, but
-    they're ready for review now.
+In the patch below the ceph-rbdnamer script is made more robust and it
+now it can be called in various ways:
 
-[PATCH 06/16] rbd: rename rbd_dev->block_name
-[PATCH 07/16] rbd: dynamically allocate object prefix
-    These update the "block_name" field of a rbd_dev structure
-    to be named "object_prefix", which is consistent with the
-    way the new rbd format describes it.  It also removes the
-    unnecessary fixed limit on the length of that string.
+  /usr/bin/ceph-rbdnamer /dev/rbd3
+  /usr/bin/ceph-rbdnamer /dev/rbd3p1
+  /usr/bin/ceph-rbdnamer rbd3
+  /usr/bin/ceph-rbdnamer rbd3p1
+  /usr/bin/ceph-rbdnamer 3
 
-[PATCH 08/16] rbd: don't store pool name in struct rbd_dev
-    Since a pool name can change, this patch makes sure the
-    rbd client code doesn't save a copy of it--relying instead
-    on the invariant pool id.  The "pool" entry has been
-    replaced by "pool_id" in /sys/bus/rbd/<N>.
+Even with all these different styles of calling the modified script, it
+should now return the same rbdname. This change "has" to be combined
+with calling it from udev with %k though.
 
-[PATCH 09/16] rbd: dynamically allocate image header name
-[PATCH 10/16] rbd: dynamically allocate image name
-[PATCH 11/16] rbd: dynamically allocate snapshot name
-    These three change some more fields for in-core data
-    structures so they aren't arbitrarily limited to a fixed
-    size.
+With that fixed, we hit the second problem. We ended up with:
 
-[PATCH 12/16] rbd: use rbd_dev consistently
-    This makes all variables representing a struct rbd_device
-    be named "rbd_dev".
+  /dev/rbd/mypool/myrbd -> /dev/rbd3p1
 
-[PATCH 13/16] rbd: rename some fields in struct rbd_dev
-[PATCH 14/16] rbd: more symbol renames
-[PATCH 15/16] rbd: option symbol renames
-    These change the names of some fields and symbols so
-    they are (hopefully) a bit more descriptive.
+So the rbdname was symlinked to the partition on the rbd instead of the
+rbd itself. So what probably went wrong is udev discovering the disk and
+running ceph-rbdnamer which resolved it to myrbd so the following
+symlink was created:
 
-[PATCH 16/16] rbd: kill num_reply parameters
-    This eliminates an unused parameter that was defined in
-    a number of functions.
+  /dev/rbd/mypool/myrbd -> /dev/rbd3
+
+However partitions would be discovered next and ceph-rbdnamer would be
+run with rbd3p1 (%k) as parameter, resulting in the name myrbd too, with
+the previous correct symlink being overwritten with a faulty one:
+
+  /dev/rbd/mypool/myrbd -> /dev/rbd3p1
+
+The solution to the problem is in differentiating between disks and
+partitions in udev and handling them slightly differently. So with the
+patch below partitions now get their own symlinks in the following style
+(which is fairly consistent with other udev rules):
+
+  /dev/rbd/mypool/myrbd-part1 -> /dev/rbd3p1
+
+Please let me know any feedback you have on this patch or the approach
+used.
+
+Regards,
+Pascal de Bruijn
+Unilogic B.V.
+
+Signed-off-by: Pascal de Bruijn <pascal@unilogicnetworks.net>
+
+--------------------------------------------------------------------------------
+diff --git a/src/ceph-rbdnamer b/src/ceph-rbdnamer
+index 49350a7..efb6804 100755
+--- a/src/ceph-rbdnamer
++++ b/src/ceph-rbdnamer
+@@ -1,8 +1,10 @@
+ #!/bin/sh
+ 
+-POOL=`cat /sys/devices/rbd/$1/pool`
+-IMAGE=`cat /sys/devices/rbd/$1/name`
+-SNAP=`cat /sys/devices/rbd/$1/current_snap`
++DEV=$1
++NUM=`echo $DEV | sed 's#p.*##g' | tr -d 'a-z'`
++POOL=`cat /sys/devices/rbd/$NUM/pool`
++IMAGE=`cat /sys/devices/rbd/$NUM/name`
++SNAP=`cat /sys/devices/rbd/$NUM/current_snap`
+ if [ "$SNAP" = "-" ]; then
+ 	echo -n "$POOL $IMAGE"
+ else
+diff --git a/udev/50-rbd.rules b/udev/50-rbd.rules
+index 07f220f..406c31c 100644
+--- a/udev/50-rbd.rules
++++ b/udev/50-rbd.rules
+@@ -1 +1,2 @@
+-KERNEL=="rbd[0-9]*", PROGRAM="/usr/bin/ceph-rbdnamer %n", SYMLINK+="rbd/%c{1}/%c{2}"
++KERNEL=="rbd[0-9]*", ENV{DEVTYPE}=="disk", PROGRAM="/usr/bin/ceph-rbdnamer %k", SYMLINK+="rbd/%c{1}/%c{2}"
++KERNEL=="rbd[0-9]*", ENV{DEVTYPE}=="partition", PROGRAM="/usr/bin/ceph-rbdnamer %k", SYMLINK+="rbd/%c{1}/%c{2}-part%n"
+
+
+
