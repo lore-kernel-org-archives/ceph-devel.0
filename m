@@ -1,7 +1,7 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 04/16] libceph: define ceph_extract_encoded_string()
-Date: Wed, 11 Jul 2012 09:01:11 -0500
-Message-ID: <4FFD8727.7050106@inktank.com>
+Subject: [PATCH 05/16] rbd: define dup_token()
+Date: Wed, 11 Jul 2012 09:01:23 -0500
+Message-ID: <4FFD8733.9090305@inktank.com>
 References: <4FFD847C.7070205@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
@@ -9,69 +9,74 @@ Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mail-yx0-f174.google.com ([209.85.213.174]:63502 "EHLO
 	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757819Ab2GKOBN (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 10:01:13 -0400
-Received: by yenl2 with SMTP id l2so1225622yen.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 07:01:13 -0700 (PDT)
+	with ESMTP id S1757702Ab2GKOB1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 10:01:27 -0400
+Received: by mail-yx0-f174.google.com with SMTP id l2so1225622yen.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 07:01:27 -0700 (PDT)
 In-Reply-To: <4FFD847C.7070205@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This adds a new utility routine which will return a dynamically-
-allocated buffer containing a string that has been decoded from ceph
-over-the-wire format.  It also returns the length of the string
-if the address of a size variable is supplied to receive it.
+Define a new function dup_token(), to be used during argument
+parsing for making dynamically-allocated copies of tokens being
+parsed.
 
 For now, no gfp_flags parameter is defined (GFP_KERNEL is used) but
 it could be easily be added if needed.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- include/linux/ceph/decode.h |   29 +++++++++++++++++++++++++++++
- 1 files changed, 29 insertions(+), 0 deletions(-)
+ drivers/block/rbd.c |   36 ++++++++++++++++++++++++++++++++++++
+ 1 files changed, 36 insertions(+), 0 deletions(-)
 
-diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
-index 7ead11fc..7759164 100644
---- a/include/linux/ceph/decode.h
-+++ b/include/linux/ceph/decode.h
-@@ -80,6 +80,35 @@ static inline size_t ceph_decode_string(void **p,
-char *s, size_t size)
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 2ae3bb0..63c132f 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2281,6 +2281,42 @@ static inline size_t copy_token(const char **buf,
  }
 
  /*
-+ * Allocate a buffer big enough to hold the wire-encoded string, and
-+ * decode the string into it.  The resulting string will always be
-+ * terminated with '\0'.  If successful, *p will be advanced
-+ * past the decoded data.  Also, if lenp is not a null pointer, the
-+ * length (not including the terminating '\0') will be recorded in
-+ * it.  Note that a zero-length string is a valid return value.
++ * Finds the next token in *buf, dynamically allocates a buffer big
++ * enough to hold a copy of it, and copies the token into the new
++ * buffer.  The copy is guaranteed to be terminated with '\0'.  Note
++ * that a duplicate buffer is created even for a zero-length token.
 + *
-+ * Returns a pointer to the newly-allocated string buffer, or a
-+ * null pointer if memory could not be allocated for the result.
-+ * Neither of the arguments is updated if NULL is returned.
++ * Returns a pointer to the newly-allocated duplicate, or a null
++ * pointer if memory for the duplicate was not available.  If
++ * the lenp argument is a non-null pointer, the length of the token
++ * (not including the '\0') is returned in *lenp.
++ *
++ * If successful, the *buf pointer will be updated to point beyond
++ * the end of the found token.
++ *
++ * Note:  For now, the memory is allocated using GFP_KERNEL.
 + */
-+static inline char *ceph_extract_encoded_string(void **p, size_t *lenp)
++static inline char *dup_token(const char **buf, size_t *lenp)
 +{
++	char *dup;
 +	size_t len;
-+	char *buf;
 +
-+	len = ceph_decode_string(p, NULL, 0);
-+	buf = kmalloc(len + 1, GFP_KERNEL);
-+	if (!buf)
++	len = next_token(buf);
++	dup = kmalloc(len + 1, GFP_KERNEL);
++	if (!dup)
 +		return NULL;
 +
-+	(void) ceph_decode_string(p, buf, len + 1);
++	memcpy(dup, *buf, len);
++	*(dup + len) = '\0';
++	*buf += len;
++
 +	if (lenp)
 +		*lenp = len;
 +
-+	return buf;
++	return dup;
 +}
 +
 +/*
-  * bounds check input.
-  */
- static inline int ceph_has_room(void **p, void *end, size_t n)
+  * This fills in the pool_name, obj, obj_len, snap_name, obj_len,
+  * rbd_dev, rbd_md_name, and name fields of the given rbd_dev, based
+  * on the list of monitor addresses and other options provided via
 -- 
 1.7.5.4
 
