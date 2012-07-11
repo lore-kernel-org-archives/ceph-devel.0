@@ -1,334 +1,168 @@
 From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
 Subject: Re: Pg stuck stale...why?
-Date: Wed, 11 Jul 2012 13:32:39 +1200
-Message-ID: <4FFCD7B7.5020707@catalyst.net.nz>
-References: <4FFCD2AC.3040809@catalyst.net.nz> <4FFCD53F.108@inktank.com>
+Date: Wed, 11 Jul 2012 13:35:42 +1200
+Message-ID: <4FFCD86E.6040402@catalyst.net.nz>
+References: <4FFCD2AC.3040809@catalyst.net.nz> <4FFCD53F.108@inktank.com> <4FFCD7B7.5020707@catalyst.net.nz>
 Mime-Version: 1.0
 Content-Type: multipart/mixed;
- boundary="------------020307040207080604090403"
+ boundary="------------010008080606030805040203"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:42724 "EHLO
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:42925 "EHLO
 	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755076Ab2GKBcq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jul 2012 21:32:46 -0400
-In-Reply-To: <4FFCD53F.108@inktank.com>
+	with ESMTP id S1755022Ab2GKBfq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jul 2012 21:35:46 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.catalyst.net.nz (Postfix) with ESMTP id B44A5328E7
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 13:35:43 +1200 (NZST)
+Received: from mail.catalyst.net.nz ([127.0.0.1])
+	by localhost (bertrand.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id yjekhHMi1xqm for <ceph-devel@vger.kernel.org>;
+	Wed, 11 Jul 2012 13:35:42 +1200 (NZST)
+Received: from [IPv6:2404:130:0:1000:6108:63c7:84a8:708b] (unknown [IPv6:2404:130:0:1000:6108:63c7:84a8:708b])
+	(Authenticated sender: mark.kirkwood)
+	by mail.catalyst.net.nz (Postfix) with ESMTPSA id 751C33249D
+	for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 13:35:42 +1200 (NZST)
+In-Reply-To: <4FFCD7B7.5020707@catalyst.net.nz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
 This is a multi-part message in MIME format.
---------------020307040207080604090403
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+--------------010008080606030805040203
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-On 11/07/12 13:22, Josh Durgin wrote:
-> On 07/10/2012 06:11 PM, Mark Kirkwood wrote:
->> I am seeing this:
->>
->> # ceph -s
->> health HEALTH_WARN 256 pgs stale; 256 pgs stuck stale
->> monmap e1: 3 mons at
->> {ved1=192.168.122.11:6789/0,ved2=192.168.122.12:6789/0,ved3=192.168.122.13:6789/0}, 
->>
->> election epoch 18, quorum 0,1,2 ved1,ved2,ved3
->> osdmap e62: 4 osds: 4 up, 4 in
->> pgmap v47148: 768 pgs: 512 active+clean, 256 stale+active+clean; 2224 MB
->> data, 15442 MB used, 86907 MB / 102350 MB avail
->> mdsmap e1: 0/0/1
->>
->> In particular 256 pgs stuck stale - I've tried a) waiting a while
->> (overnight), b) a rolling restart of all 4 osd's, c) restarting all ceph
->> services on all 4 nodes. All without changing this.
->>
->> As far as I understand what stuck state means, I can't see why they need
->> to stay that way, given all osd's and mon's are up. (I have no mds
->> configured)....any ideas? Or is this just expected?
->>
->> Regards
->>
->> Mark
+On 11/07/12 13:32, Mark Kirkwood wrote:
 >
-> What does 'ceph pg dump_stuck stale' show? Stale means that the
-> monitors haven't gotten updates about those pgs from the osds within
-> the a certain period of time (default is 300 seconds), so something may
-> be wrong with your crushmap or those pgs themselves.
->
-> Josh
+> I have attached the dump of stuck stale pgs, and the crushmap in use.
 
-I have attached the dump of stuck stale pgs, and the crushmap in use.
 
-I did wonder if it is to do with not using any mds - i.e could this mean 
-the meta data pgs never get touched?
+...of course I left off the crushmap, so here it is, plus my ceph.conf 
+for good measure.
+
 
 Mark
 
-
---------------020307040207080604090403
+--------------010008080606030805040203
 Content-Type: text/plain; charset=UTF-8;
- name="pg-stale.dump"
-Content-Transfer-Encoding: 7bit
+ name="crush.txt"
+Content-Transfer-Encoding: base64
 Content-Disposition: attachment;
- filename="pg-stale.dump"
+ filename="crush.txt"
 
-ok
-pg_stat	objects	mip	degr	unf	bytes	log	disklog	state	state_stamp	v	reported	up	acting	last_scrub	scrub_stamp
-0.c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.398997	0'0	5'13	[1,0,2,3]	[1,0,2,3]	0'0	0.000000
-0.b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.547700	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.548638	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.9	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399058	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.8	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.549203	0'0	4'13	[3,0,1,2]	[3,0,1,2]	0'0	0.000000
-0.7	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.225656	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.6	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.549348	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.5	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399093	0'0	5'13	[1,2,3,0]	[1,2,3,0]	0'0	0.000000
-0.4	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.550016	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.3	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.550764	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.2	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399135	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.1	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.551391	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.0	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.377207	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.ff	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.377591	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.fe	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.548875	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.fd	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.549702	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.fc	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399168	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.fb	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.377897	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.fa	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.378378	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.f9	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399204	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.f8	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.551621	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.f7	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399237	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.f6	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.551991	0'0	4'13	[3,0,2,1]	[3,0,2,1]	0'0	0.000000
-0.f5	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399273	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.f4	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399305	0'0	5'13	[1,2,3,0]	[1,2,3,0]	0'0	0.000000
-0.f3	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.550251	0'0	2'16	[0,3,2,1]	[0,3,2,1]	0'0	0.000000
-0.f2	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.550929	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.f1	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399338	0'0	5'13	[1,2,3,0]	[1,2,3,0]	0'0	0.000000
-0.f0	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.551940	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.ef	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.378957	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.ee	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.379533	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.ed	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.552712	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.ec	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.554542	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.eb	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.555242	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.ea	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.552494	0'0	4'13	[3,0,1,2]	[3,0,1,2]	0'0	0.000000
-0.e9	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.399372	0'0	5'13	[1,3,0,2]	[1,3,0,2]	0'0	0.000000
-0.e8	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.553346	0'0	4'13	[3,0,2,1]	[3,0,2,1]	0'0	0.000000
-0.e7	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.555787	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.e6	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.553848	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.e5	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.379900	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.e4	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.556264	0'0	2'16	[0,3,2,1]	[0,3,2,1]	0'0	0.000000
-0.e3	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.486976	0'0	5'13	[1,0,3,2]	[1,0,3,2]	0'0	0.000000
-0.e2	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.556925	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.e1	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.554403	0'0	4'13	[3,0,1,2]	[3,0,1,2]	0'0	0.000000
-0.e0	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.557482	0'0	2'16	[0,1,3,2]	[0,1,3,2]	0'0	0.000000
-0.df	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.380084	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.de	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.555001	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.dd	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.558353	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.dc	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.559043	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.db	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.559800	0'0	2'16	[0,3,2,1]	[0,3,2,1]	0'0	0.000000
-0.da	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.380490	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.d9	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.380751	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.d8	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.487108	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.d7	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.487218	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.d6	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.487324	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.d5	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.380805	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.d4	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.555555	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.d3	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.560628	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.d2	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.556332	0'0	4'13	[3,0,1,2]	[3,0,1,2]	0'0	0.000000
-0.d1	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.487434	0'0	5'13	[1,0,3,2]	[1,0,3,2]	0'0	0.000000
-0.d0	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.487545	0'0	5'13	[1,0,2,3]	[1,0,2,3]	0'0	0.000000
-0.cf	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.562376	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.ce	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.488773	0'0	5'13	[1,2,3,0]	[1,2,3,0]	0'0	0.000000
-0.cd	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.380842	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.cc	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.488970	0'0	5'13	[1,3,0,2]	[1,3,0,2]	0'0	0.000000
-0.cb	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.380955	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.ca	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.563030	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.c9	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.381041	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.c8	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.489080	0'0	5'13	[1,0,3,2]	[1,0,3,2]	0'0	0.000000
-0.c7	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.381189	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.c6	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.563908	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.c5	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.564494	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.c4	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.556848	0'0	4'13	[3,0,2,1]	[3,0,2,1]	0'0	0.000000
-0.c3	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.565018	0'0	2'16	[0,1,3,2]	[0,1,3,2]	0'0	0.000000
-0.c2	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.381294	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.c1	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.565542	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.c0	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.566142	0'0	2'16	[0,3,2,1]	[0,3,2,1]	0'0	0.000000
-0.bf	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.489177	0'0	5'13	[1,3,0,2]	[1,3,0,2]	0'0	0.000000
-0.be	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.382223	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.bd	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.489302	0'0	5'13	[1,2,3,0]	[1,2,3,0]	0'0	0.000000
-0.bc	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.382601	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.bb	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.557404	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.ba	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.489410	0'0	5'13	[1,0,2,3]	[1,0,2,3]	0'0	0.000000
-0.b9	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.557867	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.b8	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.566749	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.b7	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.558295	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.b6	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.489512	0'0	5'13	[1,0,2,3]	[1,0,2,3]	0'0	0.000000
-0.b5	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.382939	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.b4	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.567778	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.b3	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.568995	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.b2	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.489720	0'0	5'13	[1,3,0,2]	[1,3,0,2]	0'0	0.000000
-0.b1	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.569605	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.b0	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.383154	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.af	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.383421	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.ae	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.558791	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.ad	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.571039	0'0	2'16	[0,3,2,1]	[0,3,2,1]	0'0	0.000000
-0.ac	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.383737	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.ab	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.383994	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.aa	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.505084	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.a9	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.489833	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.a8	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.505207	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.a7	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.489951	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.a6	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.505312	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.a5	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.559997	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.a4	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.505421	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.a3	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.505524	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.a2	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.560282	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.a1	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.560511	0'0	4'13	[3,0,1,2]	[3,0,1,2]	0'0	0.000000
-0.a0	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.505635	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.9f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.490060	0'0	5'13	[1,3,0,2]	[1,3,0,2]	0'0	0.000000
-0.9e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.560679	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.9d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.571888	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.9c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.490164	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.9b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.505739	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.9a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.572393	0'0	2'16	[0,1,3,2]	[0,1,3,2]	0'0	0.000000
-0.99	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.490272	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.98	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.490395	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.97	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.572933	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.96	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.560887	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.95	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.573397	0'0	2'16	[0,3,2,1]	[0,3,2,1]	0'0	0.000000
-0.94	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.561045	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.93	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.505843	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.92	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.505945	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.91	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.561219	0'0	4'13	[3,0,1,2]	[3,0,1,2]	0'0	0.000000
-0.90	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.561379	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.8f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.506049	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.8e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.574844	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.8d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.491064	0'0	5'13	[1,3,0,2]	[1,3,0,2]	0'0	0.000000
-0.8c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.561558	0'0	4'13	[3,0,1,2]	[3,0,1,2]	0'0	0.000000
-0.8b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.561707	0'0	4'13	[3,0,2,1]	[3,0,2,1]	0'0	0.000000
-0.8a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.509347	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.89	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.509492	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.88	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.509599	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.87	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.575476	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.86	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.561932	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.85	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.575693	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.84	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.562961	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.83	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.509707	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.82	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.576348	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.81	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.563243	0'0	4'13	[3,0,2,1]	[3,0,2,1]	0'0	0.000000
-0.80	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.576671	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.7f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.510869	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.7e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.491434	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.7d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511088	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.7c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.566688	0'0	4'13	[3,0,1,2]	[3,0,1,2]	0'0	0.000000
-0.7b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.567048	0'0	4'13	[3,0,1,2]	[3,0,1,2]	0'0	0.000000
-0.7a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.491675	0'0	5'13	[1,0,3,2]	[1,0,3,2]	0'0	0.000000
-0.79	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.491972	0'0	5'13	[1,2,3,0]	[1,2,3,0]	0'0	0.000000
-0.78	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511216	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.77	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511305	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.76	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.567322	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.75	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.567583	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.74	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.567815	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.73	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.568076	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.72	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.568317	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.71	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.492295	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.70	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511377	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.6f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.568566	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.6e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511449	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.6d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511525	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.6c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.569747	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.6b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.576967	0'0	2'16	[0,1,3,2]	[0,1,3,2]	0'0	0.000000
-0.6a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.492539	0'0	5'13	[1,0,3,2]	[1,0,3,2]	0'0	0.000000
-0.69	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511596	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.68	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511668	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.67	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.577272	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.66	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.577657	0'0	2'16	[0,3,2,1]	[0,3,2,1]	0'0	0.000000
-0.65	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.577960	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.64	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511740	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.63	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.578287	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.62	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.570034	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.61	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511824	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.60	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.578769	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.5f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.492914	0'0	5'13	[1,0,3,2]	[1,0,3,2]	0'0	0.000000
-0.5e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.511981	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.5d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.512060	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.5c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.524809	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.5b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.493371	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.5a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.493630	0'0	5'13	[1,2,3,0]	[1,2,3,0]	0'0	0.000000
-0.59	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.579193	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.58	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.525403	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.57	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.525848	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.56	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.570314	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.55	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.579632	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.54	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.570660	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.53	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.526338	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.52	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.570919	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.51	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.526842	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.50	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.527131	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.4f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.580034	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.4e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.527444	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.4d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.493979	0'0	5'13	[1,3,0,2]	[1,3,0,2]	0'0	0.000000
-0.4c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.494295	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.4b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.527677	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.4a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.571185	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.49	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.580358	0'0	2'16	[0,1,3,2]	[0,1,3,2]	0'0	0.000000
-0.48	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.528093	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.47	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.529074	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.46	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.529248	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.45	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.580649	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.44	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.529387	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.43	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.581019	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.42	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.529519	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.41	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.763560	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
-0.40	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.763684	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.3f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.571389	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.3e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.529654	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.3d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.763788	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.3c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.529787	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.3b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.763891	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.3a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.494559	0'0	5'13	[1,0,3,2]	[1,0,3,2]	0'0	0.000000
-0.39	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.529929	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.38	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.571652	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.37	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.494790	0'0	5'13	[1,2,3,0]	[1,2,3,0]	0'0	0.000000
-0.36	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764003	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.35	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764107	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.34	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.530061	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.33	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.767830	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.32	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.495022	0'0	5'13	[1,0,2,3]	[1,0,2,3]	0'0	0.000000
-0.31	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.530198	0'0	3'13	[2,0,3,1]	[2,0,3,1]	0'0	0.000000
-0.30	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531072	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.2f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531217	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.2e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.495284	0'0	5'13	[1,2,0,3]	[1,2,0,3]	0'0	0.000000
-0.2d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.769244	0'0	4'13	[3,2,1,0]	[3,2,1,0]	0'0	0.000000
-0.2c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.769389	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.2b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.495582	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.2a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764216	0'0	2'16	[0,1,3,2]	[0,1,3,2]	0'0	0.000000
-0.29	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.495800	0'0	5'13	[1,2,3,0]	[1,2,3,0]	0'0	0.000000
-0.28	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531335	0'0	3'13	[2,3,0,1]	[2,3,0,1]	0'0	0.000000
-0.27	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531584	0'0	3'13	[2,1,3,0]	[2,1,3,0]	0'0	0.000000
-0.26	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764318	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.25	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531655	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.24	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764420	0'0	2'16	[0,3,2,1]	[0,3,2,1]	0'0	0.000000
-0.23	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531708	0'0	3'13	[2,0,1,3]	[2,0,1,3]	0'0	0.000000
-0.22	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.769765	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.21	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531760	0'0	3'13	[2,1,0,3]	[2,1,0,3]	0'0	0.000000
-0.20	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531809	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.1f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531858	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.1e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764520	0'0	2'16	[0,2,1,3]	[0,2,1,3]	0'0	0.000000
-0.1d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764626	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.1c	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764731	0'0	2'16	[0,3,2,1]	[0,3,2,1]	0'0	0.000000
-0.1b	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764818	0'0	2'16	[0,1,3,2]	[0,1,3,2]	0'0	0.000000
-0.1a	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.769937	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.19	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.495930	0'0	5'13	[1,3,2,0]	[1,3,2,0]	0'0	0.000000
-0.18	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.496497	0'0	5'13	[1,3,0,2]	[1,3,0,2]	0'0	0.000000
-0.17	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.770146	0'0	4'13	[3,1,2,0]	[3,1,2,0]	0'0	0.000000
-0.16	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.496825	0'0	5'13	[1,0,3,2]	[1,0,3,2]	0'0	0.000000
-0.15	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.764909	0'0	2'16	[0,2,3,1]	[0,2,3,1]	0'0	0.000000
-0.14	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.531905	0'0	3'13	[2,3,1,0]	[2,3,1,0]	0'0	0.000000
-0.13	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.497045	0'0	5'13	[1,0,2,3]	[1,0,2,3]	0'0	0.000000
-0.12	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.770357	0'0	4'13	[3,1,0,2]	[3,1,0,2]	0'0	0.000000
-0.11	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.770512	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.10	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:55:00.198661	0'0	5'13	[1,3,0,2]	[1,3,0,2]	0'0	0.000000
-0.f	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.251880	0'0	2'16	[0,1,2,3]	[0,1,2,3]	0'0	0.000000
-0.e	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.771042	0'0	4'13	[3,2,0,1]	[3,2,0,1]	0'0	0.000000
-0.d	0	0	0	0	0	0	0	stale+active+clean	2012-07-05 18:54:53.547897	0'0	2'16	[0,3,1,2]	[0,3,1,2]	0'0	0.000000
+IyBiZWdpbiBjcnVzaCBtYXAKCiMgZGV2aWNlcwpkZXZpY2UgMCBvc2QwCmRldmljZSAxIG9z
+ZDEKZGV2aWNlIDIgb3NkMgpkZXZpY2UgMyBvc2QzCgojIHR5cGVzCnR5cGUgMCBkZXZpY2UK
+dHlwZSAxIGhvc3QKdHlwZSAyIGRhdGFjZW50ZXIKdHlwZSAzIHJvb3QKCiMgYnVja2V0cwpo
+b3N0IHZlZDEgewoJaWQgLTEJCSMgZG8gbm90IGNoYW5nZSB1bm5lY2Vzc2FyaWx5CgkjIHdl
+aWdodCAxLjAwMAoJYWxnIHN0cmF3CgloYXNoIDAJIyByamVua2luczEKCWl0ZW0gb3NkMCB3
+ZWlnaHQgMS4wMDAKfQpob3N0IHZlZDIgewoJaWQgLTIJCSMgZG8gbm90IGNoYW5nZSB1bm5l
+Y2Vzc2FyaWx5CgkjIHdlaWdodCAxLjAwMAoJYWxnIHN0cmF3CgloYXNoIDAJIyByamVua2lu
+czEKCWl0ZW0gb3NkMSB3ZWlnaHQgMS4wMDAKfQpob3N0IHZlZDMgewoJaWQgLTMJCSMgZG8g
+bm90IGNoYW5nZSB1bm5lY2Vzc2FyaWx5CgkjIHdlaWdodCAxLjAwMAoJYWxnIHN0cmF3Cglo
+YXNoIDAJIyByamVua2luczEKCWl0ZW0gb3NkMiB3ZWlnaHQgMS4wMDAKfQpob3N0IHZlZDQg
+ewoJaWQgLTQJCSMgZG8gbm90IGNoYW5nZSB1bm5lY2Vzc2FyaWx5CgkjIHdlaWdodCAxLjAw
+MAoJYWxnIHN0cmF3CgloYXNoIDAJIyByamVua2luczEKCWl0ZW0gb3NkMyB3ZWlnaHQgMS4w
+MDAKfQpkYXRhY2VudGVyIGRhdGFjZW50ZXIwIHsKCWlkIC01CQkjIGRvIG5vdCBjaGFuZ2Ug
+dW5uZWNlc3NhcmlseQoJIyB3ZWlnaHQgMi4wMDAKCWFsZyBzdHJhdwoJaGFzaCAwCSMgcmpl
+bmtpbnMxCglpdGVtIHZlZDEgd2VpZ2h0IDEuMDAwCglpdGVtIHZlZDIgd2VpZ2h0IDEuMDAw
+Cn0KZGF0YWNlbnRlciBkYXRhY2VudGVyMSB7CglpZCAtNgkJIyBkbyBub3QgY2hhbmdlIHVu
+bmVjZXNzYXJpbHkKCSMgd2VpZ2h0IDIuMDAwCglhbGcgc3RyYXcKCWhhc2ggMAkjIHJqZW5r
+aW5zMQoJaXRlbSB2ZWQzIHdlaWdodCAxLjAwMAoJaXRlbSB2ZWQ0IHdlaWdodCAxLjAwMAp9
+CnJvb3Qgcm9vdCB7CglpZCAtNwkJIyBkbyBub3QgY2hhbmdlIHVubmVjZXNzYXJpbHkKCSMg
+d2VpZ2h0IDQuMDAwCglhbGcgc3RyYXcKCWhhc2ggMAkjIHJqZW5raW5zMQoJaXRlbSBkYXRh
+Y2VudGVyMCB3ZWlnaHQgMi4wMDAKCWl0ZW0gZGF0YWNlbnRlcjEgd2VpZ2h0IDIuMDAwCn0K
+CiMgcnVsZXMKcnVsZSBkYXRhIHsKCXJ1bGVzZXQgMQoJdHlwZSByZXBsaWNhdGVkCgltaW5f
+c2l6ZSAyCgltYXhfc2l6ZSAxMAoJc3RlcCB0YWtlIGRhdGFjZW50ZXIwCglzdGVwIGNob29z
+ZWxlYWYgZmlyc3RuIC0yIHR5cGUgaG9zdAoJc3RlcCBlbWl0CglzdGVwIHRha2UgZGF0YWNl
+bnRlcjEKCXN0ZXAgY2hvb3NlbGVhZiBmaXJzdG4gMiB0eXBlIGhvc3QKCXN0ZXAgZW1pdAp9
+CnJ1bGUgcmJkIHsKCXJ1bGVzZXQgMgoJdHlwZSByZXBsaWNhdGVkCgltaW5fc2l6ZSAyCglt
+YXhfc2l6ZSAxMAoJc3RlcCB0YWtlIGRhdGFjZW50ZXIwCglzdGVwIGNob29zZWxlYWYgZmly
+c3RuIC0yIHR5cGUgaG9zdAoJc3RlcCBlbWl0CglzdGVwIHRha2UgZGF0YWNlbnRlcjEKCXN0
+ZXAgY2hvb3NlbGVhZiBmaXJzdG4gMiB0eXBlIGhvc3QKCXN0ZXAgZW1pdAp9CgojIGVuZCBj
+cnVzaCBtYXAK
+--------------010008080606030805040203
+Content-Type: text/plain; charset=UTF-8;
+ name="ceph.conf"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="ceph.conf"
 
-
---------------020307040207080604090403--
+Owo7IFNhbXBsZSBjZXBoIGNlcGguY29uZiBmaWxlLgo7CjsgVGhpcyBmaWxlIGRlZmluZXMg
+Y2x1c3RlciBtZW1iZXJzaGlwLCB0aGUgdmFyaW91cyBsb2NhdGlvbnMKOyB0aGF0IENlcGgg
+c3RvcmVzIGRhdGEsIGFuZCBhbnkgb3RoZXIgcnVudGltZSBvcHRpb25zLgoKOwo7IEV4cGVy
+aW1lbnRhbCBzZXR1cCBmb3IgNCBvc2QsIDMgbW9uIGFuZCAwIG1kcy4gCjsgV2lsbCBleHBl
+cmltZW50IHdpdGggY3J1c2ggcnVsZXMgbGF0ZXIuLi4KOwoKOyBJZiBhICdob3N0JyBpcyBk
+ZWZpbmVkIGZvciBhIGRhZW1vbiwgdGhlIHN0YXJ0L3N0b3Agc2NyaXB0IHdpbGwKOyB2ZXJp
+ZnkgdGhhdCBpdCBtYXRjaGVzIHRoZSBob3N0bmFtZSAob3IgZWxzZSBpZ25vcmUgaXQpLiAg
+SWYgaXQgaXMKOyBub3QgZGVmaW5lZCwgaXQgaXMgYXNzdW1lZCB0aGF0IHRoZSBkYWVtb24g
+aXMgaW50ZW5kZWQgdG8gc3RhcnQgb24KOyB0aGUgY3VycmVudCBob3N0IChlLmcuLCBpbiBh
+IHNldHVwIHdpdGggYSBzdGFydHVwLmNvbmYgb24gZWFjaAo7IG5vZGUpLgoKOyBUaGUgdmFy
+aWFibGVzICR0eXBlLCAkaWQgYW5kICRuYW1lIGFyZSBhdmFpbGFibGUgdG8gdXNlIGluIHBh
+dGhzCjsgJHR5cGUgPSBUaGUgdHlwZSBvZiBkYWVtb24sIHBvc3NpYmxlIHZhbHVlczogbW9u
+LCBtZHMgYW5kIG9zZAo7ICRpZCA9IFRoZSBJRCBvZiB0aGUgZGFlbW9uLCBmb3IgbW9uLmFs
+cGhhLCAkaWQgd2lsbCBiZSBhbHBoYQo7ICRuYW1lID0gJHR5cGUuJGlkCgo7IEZvciBleGFt
+cGxlOgo7IG9zZC4wCjsgICR0eXBlID0gb3NkCjsgICRpZCA9IDAKOyAgJG5hbWUgPSBvc2Qu
+MAoKOyBtb24uYmV0YQo7ICAkdHlwZSA9IG1vbgo7ICAkaWQgPSBiZXRhCjsgICRuYW1lID0g
+bW9uLmJldGEKCjsgZ2xvYmFsCltnbG9iYWxdCgk7IGVuYWJsZSBzZWN1cmUgYXV0aGVudGlj
+YXRpb24KCTthdXRoIHN1cHBvcnRlZCA9IGNlcGh4Cgk7a2V5cmluZyA9IC9ldGMvY2VwaC9j
+ZXBoLmtleXJpbmcKCiAgICAgICAgOyBhbGxvdyBvdXJzZWx2ZXMgdG8gb3BlbiBhIGxvdCBv
+ZiBmaWxlcwogICAgICAgIG1heCBvcGVuIGZpbGVzID0gMTMxMDcyCgogICAgICAgIDsgc2V0
+IGxvZyBmaWxlCiAgICAgICAgbG9nIGZpbGUgPSAvdmFyL2xvZy9jZXBoLyRuYW1lLmxvZwog
+ICAgICAgIDsgbG9nX3RvX3N5c2xvZyA9IHRydWUgICAgICAgIDsgdW5jb21tZW50IHRoaXMg
+bGluZSB0byBsb2cgdG8gc3lzbG9nCgogICAgICAgIDsgc2V0IHVwIHBpZCBmaWxlcwogICAg
+ICAgIHBpZCBmaWxlID0gL3Zhci9ydW4vY2VwaC8kbmFtZS5waWQKCiAgICAgICAgOyBJZiB5
+b3Ugd2FudCB0byBydW4gYSBJUHY2IGNsdXN0ZXIsIHNldCB0aGlzIHRvIHRydWUuIER1YWwt
+c3RhY2sgaXNuJ3QgcG9zc2libGUKICAgICAgICA7bXMgYmluZCBpcHY2ID0gdHJ1ZQoKOyBt
+b25pdG9ycwo7ICBZb3UgbmVlZCBhdCBsZWFzdCBvbmUuICBZb3UgbmVlZCBhdCBsZWFzdCB0
+aHJlZSBpZiB5b3Ugd2FudCB0bwo7ICB0b2xlcmF0ZSBhbnkgbm9kZSBmYWlsdXJlcy4gIEFs
+d2F5cyBjcmVhdGUgYW4gb2RkIG51bWJlci4KW21vbl0KICAgICAgICBtb24gZGF0YSA9IC92
+YXIvZGF0YS8kbmFtZQoJO2tleXJpbmcgPSAvdmFyL2RhdGEva2V5cmluZy4kbmFtZQoKICAg
+ICAgICA7IElmIHlvdSBhcmUgdXNpbmcgZm9yIGV4YW1wbGUgdGhlIFJBRE9TIEdhdGV3YXkg
+YW5kIHdhbnQgdG8gaGF2ZSB5b3VyIG5ld2x5IGNyZWF0ZWQKICAgICAgICA7IHBvb2xzIGEg
+aGlnaGVyIHJlcGxpY2F0aW9uIGxldmVsLCB5b3UgY2FuIHNldCBhIGRlZmF1bHQKICAgICAg
+ICA7b3NkIHBvb2wgZGVmYXVsdCBzaXplID0gMwoKICAgICAgICA7IFlvdSBjYW4gYWxzbyBz
+cGVjaWZ5IGEgQ1JVU0ggcnVsZSBmb3IgbmV3IHBvb2xzCiAgICAgICAgOyBXaWtpOiBodHRw
+Oi8vY2VwaC5uZXdkcmVhbS5uZXQvd2lraS9DdXN0b21fZGF0YV9wbGFjZW1lbnRfd2l0aF9D
+UlVTSAogICAgICAgIDtvc2QgcG9vbCBkZWZhdWx0IGNydXNoIHJ1bGUgPSAwCgogICAgICAg
+IDsgVGltaW5nIGlzIGNyaXRpY2FsIGZvciBtb25pdG9ycywgYnV0IGlmIHlvdSB3YW50IHRv
+IGFsbG93IHRoZSBjbG9ja3MgdG8gZHJpZnQgYQogICAgICAgIDsgYml0IG1vcmUsIHlvdSBj
+YW4gc3BlY2lmeSB0aGUgbWF4IGRyaWZ0LgogICAgICAgIDttb24gY2xvY2sgZHJpZnQgYWxs
+b3dlZCA9IDEKCiAgICAgICAgOyBUZWxsIHRoZSBtb25pdG9yIHRvIGJhY2tvZmYgZnJvbSB0
+aGlzIHdhcm5pbmcgZm9yIDMwIHNlY29uZHMKICAgICAgICA7bW9uIGNsb2NrIGRyaWZ0IHdh
+cm4gYmFja29mZiA9IDMwCgoJOyBsb2dnaW5nLCBmb3IgZGVidWdnaW5nIG1vbml0b3IgY3Jh
+c2hlcywgaW4gb3JkZXIgb2YKCTsgdGhlaXIgbGlrZWxpaG9vZCBvZiBiZWluZyBoZWxwZnVs
+IDopCgk7ZGVidWcgbXMgPSAxCgk7ZGVidWcgbW9uID0gMjAKCTtkZWJ1ZyBwYXhvcyA9IDIw
+Cgk7ZGVidWcgYXV0aCA9IDIwCgpbbW9uLnZlZDFdCglob3N0ID0gdmVkMQoJbW9uIGFkZHIg
+PSAxOTIuMTY4LjEyMi4xMTo2Nzg5CgpbbW9uLnZlZDJdCglob3N0ID0gdmVkMgoJbW9uIGFk
+ZHIgPSAxOTIuMTY4LjEyMi4xMjo2Nzg5CgpbbW9uLnZlZDNdCglob3N0ID0gdmVkMwoJbW9u
+IGFkZHIgPSAxOTIuMTY4LjEyMi4xMzo2Nzg5Cgo7IG9zZAo7ICBZb3UgbmVlZCBhdCBsZWFz
+dCBvbmUuICBUd28gaWYgeW91IHdhbnQgZGF0YSB0byBiZSByZXBsaWNhdGVkLgo7ICBEZWZp
+bmUgYXMgbWFueSBhcyB5b3UgbGlrZS4KW29zZF0KCTsgVGhpcyBpcyB3aGVyZSB0aGUgYnRy
+ZnMgdm9sdW1lIHdpbGwgYmUgbW91bnRlZC4KCW9zZCBkYXRhID0gL3Zhci9kYXRhLyRuYW1l
+Cgk7a2V5cmluZyA9IC92YXIvZGF0YS9rZXlyaW5nLiRuYW1lCgoJOyBJZGVhbGx5LCBtYWtl
+IHRoaXMgYSBzZXBhcmF0ZSBkaXNrIG9yIHBhcnRpdGlvbi4gIEEgZmV3CiAJOyBodW5kcmVk
+IE1CIHNob3VsZCBiZSBlbm91Z2g7IG1vcmUgaWYgeW91IGhhdmUgZmFzdCBvciBtYW55CiAJ
+OyBkaXNrcy4gIFlvdSBjYW4gdXNlIGEgZmlsZSB1bmRlciB0aGUgb3NkIGRhdGEgZGlyIGlm
+IG5lZWQgYmUKIAk7IChlLmcuIC9kYXRhLyRuYW1lL2pvdXJuYWwpLCBidXQgaXQgd2lsbCBi
+ZSBzbG93ZXIgdGhhbiBhCiAJOyBzZXBhcmF0ZSBkaXNrIG9yIHBhcnRpdGlvbi4KCiAgICAg
+ICAgOyBUaGlzIGlzIGFuIGV4YW1wbGUgb2YgYSBmaWxlLWJhc2VkIGpvdXJuYWwuCglvc2Qg
+am91cm5hbCA9IC92YXIvZGF0YS8kbmFtZS9qb3VybmFsCglvc2Qgam91cm5hbCBzaXplID0g
+MTAwMCA7IGpvdXJuYWwgc2l6ZSwgaW4gbWVnYWJ5dGVzCgogICAgICAgIDsgSWYgeW91IHdh
+bnQgdG8gcnVuIHRoZSBqb3VybmFsIG9uIGEgdG1wZnMsIGRpc2FibGUgRGlyZWN0SU8KICAg
+ICAgICA7am91cm5hbCBkaW8gPSBmYWxzZQoKICAgICAgICA7IFlvdSBjYW4gY2hhbmdlIHRo
+ZSBudW1iZXIgb2YgcmVjb3Zlcnkgb3BlcmF0aW9ucyB0byBzcGVlZCB1cCByZWNvdmVyeQog
+ICAgICAgIDsgb3Igc2xvdyBpdCBkb3duIGlmIHlvdXIgbWFjaGluZXMgY2FuJ3QgaGFuZGxl
+IGl0CiAgICAgICAgOyBvc2QgcmVjb3ZlcnkgbWF4IGFjdGl2ZSA9IDMKCgk7IG9zZCBsb2dn
+aW5nIHRvIGRlYnVnIG9zZCBpc3N1ZXMsIGluIG9yZGVyIG9mIGxpa2VsaWhvb2Qgb2YgYmVp
+bmcKCTsgaGVscGZ1bAoJO2RlYnVnIG1zID0gMQoJO2RlYnVnIG9zZCA9IDIwCgk7ZGVidWcg
+ZmlsZXN0b3JlID0gMjAKCTtkZWJ1ZyBqb3VybmFsID0gMjAKCltvc2QuMF0KCWhvc3QgPSB2
+ZWQxCgoJOyBpZiAnYnRyZnMgZGV2cycgaXMgbm90IHNwZWNpZmllZCwgeW91J3JlIHJlc3Bv
+bnNpYmxlIGZvcgoJOyBzZXR0aW5nIHVwIHRoZSAnb3NkIGRhdGEnIGRpci4gIGlmIGl0IGlz
+IG5vdCBidHJmcywgdGhpbmdzCgk7IHdpbGwgYmVoYXZlIHVwIHVudGlsIHlvdSB0cnkgdG8g
+cmVjb3ZlciBmcm9tIGEgY3Jhc2ggKHdoaWNoCgk7IHVzdWFsbHkgZmluZSBmb3IgYmFzaWMg
+dGVzdGluZykuCgk7YnRyZnMgZGV2cyA9IC9kZXYvc2R4CgogICAgICAgIDsgSWYgeW91IHdh
+bnQgdG8gc3BlY2lmeSBzb21lIG90aGVyIG1vdW50IG9wdGlvbnMsIHlvdSBjYW4gZG8gc28u
+CiAgICAgICAgOyBUaGUgZGVmYXVsdCB2YWx1ZXMgYXJlIHJ3LG5vYXRpbWUKICAgICAgICA7
+YnRyZnMgb3B0aW9ucyA9IHJ3LG5vYXRpbWUKCltvc2QuMV0KCWhvc3QgPSB2ZWQyCgpbb3Nk
+LjJdCglob3N0ID0gdmVkMwoKW29zZC4zXQoJaG9zdCA9IHZlZDQK
+--------------010008080606030805040203--
