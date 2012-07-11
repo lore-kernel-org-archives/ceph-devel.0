@@ -1,168 +1,75 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+From: Josh Durgin <josh.durgin@inktank.com>
 Subject: Re: Pg stuck stale...why?
-Date: Wed, 11 Jul 2012 13:35:42 +1200
-Message-ID: <4FFCD86E.6040402@catalyst.net.nz>
+Date: Tue, 10 Jul 2012 18:55:37 -0700
+Message-ID: <4FFCDD19.3010700@inktank.com>
 References: <4FFCD2AC.3040809@catalyst.net.nz> <4FFCD53F.108@inktank.com> <4FFCD7B7.5020707@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------010008080606030805040203"
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:42925 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755022Ab2GKBfq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jul 2012 21:35:46 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by mail.catalyst.net.nz (Postfix) with ESMTP id B44A5328E7
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 13:35:43 +1200 (NZST)
-Received: from mail.catalyst.net.nz ([127.0.0.1])
-	by localhost (bertrand.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id yjekhHMi1xqm for <ceph-devel@vger.kernel.org>;
-	Wed, 11 Jul 2012 13:35:42 +1200 (NZST)
-Received: from [IPv6:2404:130:0:1000:6108:63c7:84a8:708b] (unknown [IPv6:2404:130:0:1000:6108:63c7:84a8:708b])
-	(Authenticated sender: mark.kirkwood)
-	by mail.catalyst.net.nz (Postfix) with ESMTPSA id 751C33249D
-	for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 13:35:42 +1200 (NZST)
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:42642 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753332Ab2GKBzk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jul 2012 21:55:40 -0400
+Received: by pbbrp8 with SMTP id rp8so1177314pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jul 2012 18:55:40 -0700 (PDT)
 In-Reply-To: <4FFCD7B7.5020707@catalyst.net.nz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
 Cc: ceph-devel@vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------010008080606030805040203
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-
-On 11/07/12 13:32, Mark Kirkwood wrote:
+On 07/10/2012 06:32 PM, Mark Kirkwood wrote:
+> On 11/07/12 13:22, Josh Durgin wrote:
+>> On 07/10/2012 06:11 PM, Mark Kirkwood wrote:
+>>> I am seeing this:
+>>>
+>>> # ceph -s
+>>> health HEALTH_WARN 256 pgs stale; 256 pgs stuck stale
+>>> monmap e1: 3 mons at
+>>> {ved1=192.168.122.11:6789/0,ved2=192.168.122.12:6789/0,ved3=192.168.122.13:6789/0},
+>>>
+>>> election epoch 18, quorum 0,1,2 ved1,ved2,ved3
+>>> osdmap e62: 4 osds: 4 up, 4 in
+>>> pgmap v47148: 768 pgs: 512 active+clean, 256 stale+active+clean; 2224 MB
+>>> data, 15442 MB used, 86907 MB / 102350 MB avail
+>>> mdsmap e1: 0/0/1
+>>>
+>>> In particular 256 pgs stuck stale - I've tried a) waiting a while
+>>> (overnight), b) a rolling restart of all 4 osd's, c) restarting all ceph
+>>> services on all 4 nodes. All without changing this.
+>>>
+>>> As far as I understand what stuck state means, I can't see why they need
+>>> to stay that way, given all osd's and mon's are up. (I have no mds
+>>> configured)....any ideas? Or is this just expected?
+>>>
+>>> Regards
+>>>
+>>> Mark
+>>
+>> What does 'ceph pg dump_stuck stale' show? Stale means that the
+>> monitors haven't gotten updates about those pgs from the osds within
+>> the a certain period of time (default is 300 seconds), so something may
+>> be wrong with your crushmap or those pgs themselves.
+>>
+>> Josh
 >
 > I have attached the dump of stuck stale pgs, and the crushmap in use.
+>
+> I did wonder if it is to do with not using any mds - i.e could this mean
+> the meta data pgs never get touched?
+>
+> Mark
+>
 
+It doesn't look like a problem with your crushmap - the pgs are all 
+mapped to osds, and there's no common osd holding things up.
 
-...of course I left off the crushmap, so here it is, plus my ceph.conf 
-for good measure.
+Not using the mds doesn't affect the pgs. They should still be active.
+All the stuck ones are in pool 0 though. Is there anything special about 
+that pool? Were there any changes before the pgs became stuck?
 
+I don't think it should work in this case, but you might try 'ceph pg 
+force_create_pg 0.c'.
 
-Mark
-
---------------010008080606030805040203
-Content-Type: text/plain; charset=UTF-8;
- name="crush.txt"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename="crush.txt"
-
-IyBiZWdpbiBjcnVzaCBtYXAKCiMgZGV2aWNlcwpkZXZpY2UgMCBvc2QwCmRldmljZSAxIG9z
-ZDEKZGV2aWNlIDIgb3NkMgpkZXZpY2UgMyBvc2QzCgojIHR5cGVzCnR5cGUgMCBkZXZpY2UK
-dHlwZSAxIGhvc3QKdHlwZSAyIGRhdGFjZW50ZXIKdHlwZSAzIHJvb3QKCiMgYnVja2V0cwpo
-b3N0IHZlZDEgewoJaWQgLTEJCSMgZG8gbm90IGNoYW5nZSB1bm5lY2Vzc2FyaWx5CgkjIHdl
-aWdodCAxLjAwMAoJYWxnIHN0cmF3CgloYXNoIDAJIyByamVua2luczEKCWl0ZW0gb3NkMCB3
-ZWlnaHQgMS4wMDAKfQpob3N0IHZlZDIgewoJaWQgLTIJCSMgZG8gbm90IGNoYW5nZSB1bm5l
-Y2Vzc2FyaWx5CgkjIHdlaWdodCAxLjAwMAoJYWxnIHN0cmF3CgloYXNoIDAJIyByamVua2lu
-czEKCWl0ZW0gb3NkMSB3ZWlnaHQgMS4wMDAKfQpob3N0IHZlZDMgewoJaWQgLTMJCSMgZG8g
-bm90IGNoYW5nZSB1bm5lY2Vzc2FyaWx5CgkjIHdlaWdodCAxLjAwMAoJYWxnIHN0cmF3Cglo
-YXNoIDAJIyByamVua2luczEKCWl0ZW0gb3NkMiB3ZWlnaHQgMS4wMDAKfQpob3N0IHZlZDQg
-ewoJaWQgLTQJCSMgZG8gbm90IGNoYW5nZSB1bm5lY2Vzc2FyaWx5CgkjIHdlaWdodCAxLjAw
-MAoJYWxnIHN0cmF3CgloYXNoIDAJIyByamVua2luczEKCWl0ZW0gb3NkMyB3ZWlnaHQgMS4w
-MDAKfQpkYXRhY2VudGVyIGRhdGFjZW50ZXIwIHsKCWlkIC01CQkjIGRvIG5vdCBjaGFuZ2Ug
-dW5uZWNlc3NhcmlseQoJIyB3ZWlnaHQgMi4wMDAKCWFsZyBzdHJhdwoJaGFzaCAwCSMgcmpl
-bmtpbnMxCglpdGVtIHZlZDEgd2VpZ2h0IDEuMDAwCglpdGVtIHZlZDIgd2VpZ2h0IDEuMDAw
-Cn0KZGF0YWNlbnRlciBkYXRhY2VudGVyMSB7CglpZCAtNgkJIyBkbyBub3QgY2hhbmdlIHVu
-bmVjZXNzYXJpbHkKCSMgd2VpZ2h0IDIuMDAwCglhbGcgc3RyYXcKCWhhc2ggMAkjIHJqZW5r
-aW5zMQoJaXRlbSB2ZWQzIHdlaWdodCAxLjAwMAoJaXRlbSB2ZWQ0IHdlaWdodCAxLjAwMAp9
-CnJvb3Qgcm9vdCB7CglpZCAtNwkJIyBkbyBub3QgY2hhbmdlIHVubmVjZXNzYXJpbHkKCSMg
-d2VpZ2h0IDQuMDAwCglhbGcgc3RyYXcKCWhhc2ggMAkjIHJqZW5raW5zMQoJaXRlbSBkYXRh
-Y2VudGVyMCB3ZWlnaHQgMi4wMDAKCWl0ZW0gZGF0YWNlbnRlcjEgd2VpZ2h0IDIuMDAwCn0K
-CiMgcnVsZXMKcnVsZSBkYXRhIHsKCXJ1bGVzZXQgMQoJdHlwZSByZXBsaWNhdGVkCgltaW5f
-c2l6ZSAyCgltYXhfc2l6ZSAxMAoJc3RlcCB0YWtlIGRhdGFjZW50ZXIwCglzdGVwIGNob29z
-ZWxlYWYgZmlyc3RuIC0yIHR5cGUgaG9zdAoJc3RlcCBlbWl0CglzdGVwIHRha2UgZGF0YWNl
-bnRlcjEKCXN0ZXAgY2hvb3NlbGVhZiBmaXJzdG4gMiB0eXBlIGhvc3QKCXN0ZXAgZW1pdAp9
-CnJ1bGUgcmJkIHsKCXJ1bGVzZXQgMgoJdHlwZSByZXBsaWNhdGVkCgltaW5fc2l6ZSAyCglt
-YXhfc2l6ZSAxMAoJc3RlcCB0YWtlIGRhdGFjZW50ZXIwCglzdGVwIGNob29zZWxlYWYgZmly
-c3RuIC0yIHR5cGUgaG9zdAoJc3RlcCBlbWl0CglzdGVwIHRha2UgZGF0YWNlbnRlcjEKCXN0
-ZXAgY2hvb3NlbGVhZiBmaXJzdG4gMiB0eXBlIGhvc3QKCXN0ZXAgZW1pdAp9CgojIGVuZCBj
-cnVzaCBtYXAK
---------------010008080606030805040203
-Content-Type: text/plain; charset=UTF-8;
- name="ceph.conf"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename="ceph.conf"
-
-Owo7IFNhbXBsZSBjZXBoIGNlcGguY29uZiBmaWxlLgo7CjsgVGhpcyBmaWxlIGRlZmluZXMg
-Y2x1c3RlciBtZW1iZXJzaGlwLCB0aGUgdmFyaW91cyBsb2NhdGlvbnMKOyB0aGF0IENlcGgg
-c3RvcmVzIGRhdGEsIGFuZCBhbnkgb3RoZXIgcnVudGltZSBvcHRpb25zLgoKOwo7IEV4cGVy
-aW1lbnRhbCBzZXR1cCBmb3IgNCBvc2QsIDMgbW9uIGFuZCAwIG1kcy4gCjsgV2lsbCBleHBl
-cmltZW50IHdpdGggY3J1c2ggcnVsZXMgbGF0ZXIuLi4KOwoKOyBJZiBhICdob3N0JyBpcyBk
-ZWZpbmVkIGZvciBhIGRhZW1vbiwgdGhlIHN0YXJ0L3N0b3Agc2NyaXB0IHdpbGwKOyB2ZXJp
-ZnkgdGhhdCBpdCBtYXRjaGVzIHRoZSBob3N0bmFtZSAob3IgZWxzZSBpZ25vcmUgaXQpLiAg
-SWYgaXQgaXMKOyBub3QgZGVmaW5lZCwgaXQgaXMgYXNzdW1lZCB0aGF0IHRoZSBkYWVtb24g
-aXMgaW50ZW5kZWQgdG8gc3RhcnQgb24KOyB0aGUgY3VycmVudCBob3N0IChlLmcuLCBpbiBh
-IHNldHVwIHdpdGggYSBzdGFydHVwLmNvbmYgb24gZWFjaAo7IG5vZGUpLgoKOyBUaGUgdmFy
-aWFibGVzICR0eXBlLCAkaWQgYW5kICRuYW1lIGFyZSBhdmFpbGFibGUgdG8gdXNlIGluIHBh
-dGhzCjsgJHR5cGUgPSBUaGUgdHlwZSBvZiBkYWVtb24sIHBvc3NpYmxlIHZhbHVlczogbW9u
-LCBtZHMgYW5kIG9zZAo7ICRpZCA9IFRoZSBJRCBvZiB0aGUgZGFlbW9uLCBmb3IgbW9uLmFs
-cGhhLCAkaWQgd2lsbCBiZSBhbHBoYQo7ICRuYW1lID0gJHR5cGUuJGlkCgo7IEZvciBleGFt
-cGxlOgo7IG9zZC4wCjsgICR0eXBlID0gb3NkCjsgICRpZCA9IDAKOyAgJG5hbWUgPSBvc2Qu
-MAoKOyBtb24uYmV0YQo7ICAkdHlwZSA9IG1vbgo7ICAkaWQgPSBiZXRhCjsgICRuYW1lID0g
-bW9uLmJldGEKCjsgZ2xvYmFsCltnbG9iYWxdCgk7IGVuYWJsZSBzZWN1cmUgYXV0aGVudGlj
-YXRpb24KCTthdXRoIHN1cHBvcnRlZCA9IGNlcGh4Cgk7a2V5cmluZyA9IC9ldGMvY2VwaC9j
-ZXBoLmtleXJpbmcKCiAgICAgICAgOyBhbGxvdyBvdXJzZWx2ZXMgdG8gb3BlbiBhIGxvdCBv
-ZiBmaWxlcwogICAgICAgIG1heCBvcGVuIGZpbGVzID0gMTMxMDcyCgogICAgICAgIDsgc2V0
-IGxvZyBmaWxlCiAgICAgICAgbG9nIGZpbGUgPSAvdmFyL2xvZy9jZXBoLyRuYW1lLmxvZwog
-ICAgICAgIDsgbG9nX3RvX3N5c2xvZyA9IHRydWUgICAgICAgIDsgdW5jb21tZW50IHRoaXMg
-bGluZSB0byBsb2cgdG8gc3lzbG9nCgogICAgICAgIDsgc2V0IHVwIHBpZCBmaWxlcwogICAg
-ICAgIHBpZCBmaWxlID0gL3Zhci9ydW4vY2VwaC8kbmFtZS5waWQKCiAgICAgICAgOyBJZiB5
-b3Ugd2FudCB0byBydW4gYSBJUHY2IGNsdXN0ZXIsIHNldCB0aGlzIHRvIHRydWUuIER1YWwt
-c3RhY2sgaXNuJ3QgcG9zc2libGUKICAgICAgICA7bXMgYmluZCBpcHY2ID0gdHJ1ZQoKOyBt
-b25pdG9ycwo7ICBZb3UgbmVlZCBhdCBsZWFzdCBvbmUuICBZb3UgbmVlZCBhdCBsZWFzdCB0
-aHJlZSBpZiB5b3Ugd2FudCB0bwo7ICB0b2xlcmF0ZSBhbnkgbm9kZSBmYWlsdXJlcy4gIEFs
-d2F5cyBjcmVhdGUgYW4gb2RkIG51bWJlci4KW21vbl0KICAgICAgICBtb24gZGF0YSA9IC92
-YXIvZGF0YS8kbmFtZQoJO2tleXJpbmcgPSAvdmFyL2RhdGEva2V5cmluZy4kbmFtZQoKICAg
-ICAgICA7IElmIHlvdSBhcmUgdXNpbmcgZm9yIGV4YW1wbGUgdGhlIFJBRE9TIEdhdGV3YXkg
-YW5kIHdhbnQgdG8gaGF2ZSB5b3VyIG5ld2x5IGNyZWF0ZWQKICAgICAgICA7IHBvb2xzIGEg
-aGlnaGVyIHJlcGxpY2F0aW9uIGxldmVsLCB5b3UgY2FuIHNldCBhIGRlZmF1bHQKICAgICAg
-ICA7b3NkIHBvb2wgZGVmYXVsdCBzaXplID0gMwoKICAgICAgICA7IFlvdSBjYW4gYWxzbyBz
-cGVjaWZ5IGEgQ1JVU0ggcnVsZSBmb3IgbmV3IHBvb2xzCiAgICAgICAgOyBXaWtpOiBodHRw
-Oi8vY2VwaC5uZXdkcmVhbS5uZXQvd2lraS9DdXN0b21fZGF0YV9wbGFjZW1lbnRfd2l0aF9D
-UlVTSAogICAgICAgIDtvc2QgcG9vbCBkZWZhdWx0IGNydXNoIHJ1bGUgPSAwCgogICAgICAg
-IDsgVGltaW5nIGlzIGNyaXRpY2FsIGZvciBtb25pdG9ycywgYnV0IGlmIHlvdSB3YW50IHRv
-IGFsbG93IHRoZSBjbG9ja3MgdG8gZHJpZnQgYQogICAgICAgIDsgYml0IG1vcmUsIHlvdSBj
-YW4gc3BlY2lmeSB0aGUgbWF4IGRyaWZ0LgogICAgICAgIDttb24gY2xvY2sgZHJpZnQgYWxs
-b3dlZCA9IDEKCiAgICAgICAgOyBUZWxsIHRoZSBtb25pdG9yIHRvIGJhY2tvZmYgZnJvbSB0
-aGlzIHdhcm5pbmcgZm9yIDMwIHNlY29uZHMKICAgICAgICA7bW9uIGNsb2NrIGRyaWZ0IHdh
-cm4gYmFja29mZiA9IDMwCgoJOyBsb2dnaW5nLCBmb3IgZGVidWdnaW5nIG1vbml0b3IgY3Jh
-c2hlcywgaW4gb3JkZXIgb2YKCTsgdGhlaXIgbGlrZWxpaG9vZCBvZiBiZWluZyBoZWxwZnVs
-IDopCgk7ZGVidWcgbXMgPSAxCgk7ZGVidWcgbW9uID0gMjAKCTtkZWJ1ZyBwYXhvcyA9IDIw
-Cgk7ZGVidWcgYXV0aCA9IDIwCgpbbW9uLnZlZDFdCglob3N0ID0gdmVkMQoJbW9uIGFkZHIg
-PSAxOTIuMTY4LjEyMi4xMTo2Nzg5CgpbbW9uLnZlZDJdCglob3N0ID0gdmVkMgoJbW9uIGFk
-ZHIgPSAxOTIuMTY4LjEyMi4xMjo2Nzg5CgpbbW9uLnZlZDNdCglob3N0ID0gdmVkMwoJbW9u
-IGFkZHIgPSAxOTIuMTY4LjEyMi4xMzo2Nzg5Cgo7IG9zZAo7ICBZb3UgbmVlZCBhdCBsZWFz
-dCBvbmUuICBUd28gaWYgeW91IHdhbnQgZGF0YSB0byBiZSByZXBsaWNhdGVkLgo7ICBEZWZp
-bmUgYXMgbWFueSBhcyB5b3UgbGlrZS4KW29zZF0KCTsgVGhpcyBpcyB3aGVyZSB0aGUgYnRy
-ZnMgdm9sdW1lIHdpbGwgYmUgbW91bnRlZC4KCW9zZCBkYXRhID0gL3Zhci9kYXRhLyRuYW1l
-Cgk7a2V5cmluZyA9IC92YXIvZGF0YS9rZXlyaW5nLiRuYW1lCgoJOyBJZGVhbGx5LCBtYWtl
-IHRoaXMgYSBzZXBhcmF0ZSBkaXNrIG9yIHBhcnRpdGlvbi4gIEEgZmV3CiAJOyBodW5kcmVk
-IE1CIHNob3VsZCBiZSBlbm91Z2g7IG1vcmUgaWYgeW91IGhhdmUgZmFzdCBvciBtYW55CiAJ
-OyBkaXNrcy4gIFlvdSBjYW4gdXNlIGEgZmlsZSB1bmRlciB0aGUgb3NkIGRhdGEgZGlyIGlm
-IG5lZWQgYmUKIAk7IChlLmcuIC9kYXRhLyRuYW1lL2pvdXJuYWwpLCBidXQgaXQgd2lsbCBi
-ZSBzbG93ZXIgdGhhbiBhCiAJOyBzZXBhcmF0ZSBkaXNrIG9yIHBhcnRpdGlvbi4KCiAgICAg
-ICAgOyBUaGlzIGlzIGFuIGV4YW1wbGUgb2YgYSBmaWxlLWJhc2VkIGpvdXJuYWwuCglvc2Qg
-am91cm5hbCA9IC92YXIvZGF0YS8kbmFtZS9qb3VybmFsCglvc2Qgam91cm5hbCBzaXplID0g
-MTAwMCA7IGpvdXJuYWwgc2l6ZSwgaW4gbWVnYWJ5dGVzCgogICAgICAgIDsgSWYgeW91IHdh
-bnQgdG8gcnVuIHRoZSBqb3VybmFsIG9uIGEgdG1wZnMsIGRpc2FibGUgRGlyZWN0SU8KICAg
-ICAgICA7am91cm5hbCBkaW8gPSBmYWxzZQoKICAgICAgICA7IFlvdSBjYW4gY2hhbmdlIHRo
-ZSBudW1iZXIgb2YgcmVjb3Zlcnkgb3BlcmF0aW9ucyB0byBzcGVlZCB1cCByZWNvdmVyeQog
-ICAgICAgIDsgb3Igc2xvdyBpdCBkb3duIGlmIHlvdXIgbWFjaGluZXMgY2FuJ3QgaGFuZGxl
-IGl0CiAgICAgICAgOyBvc2QgcmVjb3ZlcnkgbWF4IGFjdGl2ZSA9IDMKCgk7IG9zZCBsb2dn
-aW5nIHRvIGRlYnVnIG9zZCBpc3N1ZXMsIGluIG9yZGVyIG9mIGxpa2VsaWhvb2Qgb2YgYmVp
-bmcKCTsgaGVscGZ1bAoJO2RlYnVnIG1zID0gMQoJO2RlYnVnIG9zZCA9IDIwCgk7ZGVidWcg
-ZmlsZXN0b3JlID0gMjAKCTtkZWJ1ZyBqb3VybmFsID0gMjAKCltvc2QuMF0KCWhvc3QgPSB2
-ZWQxCgoJOyBpZiAnYnRyZnMgZGV2cycgaXMgbm90IHNwZWNpZmllZCwgeW91J3JlIHJlc3Bv
-bnNpYmxlIGZvcgoJOyBzZXR0aW5nIHVwIHRoZSAnb3NkIGRhdGEnIGRpci4gIGlmIGl0IGlz
-IG5vdCBidHJmcywgdGhpbmdzCgk7IHdpbGwgYmVoYXZlIHVwIHVudGlsIHlvdSB0cnkgdG8g
-cmVjb3ZlciBmcm9tIGEgY3Jhc2ggKHdoaWNoCgk7IHVzdWFsbHkgZmluZSBmb3IgYmFzaWMg
-dGVzdGluZykuCgk7YnRyZnMgZGV2cyA9IC9kZXYvc2R4CgogICAgICAgIDsgSWYgeW91IHdh
-bnQgdG8gc3BlY2lmeSBzb21lIG90aGVyIG1vdW50IG9wdGlvbnMsIHlvdSBjYW4gZG8gc28u
-CiAgICAgICAgOyBUaGUgZGVmYXVsdCB2YWx1ZXMgYXJlIHJ3LG5vYXRpbWUKICAgICAgICA7
-YnRyZnMgb3B0aW9ucyA9IHJ3LG5vYXRpbWUKCltvc2QuMV0KCWhvc3QgPSB2ZWQyCgpbb3Nk
-LjJdCglob3N0ID0gdmVkMwoKW29zZC4zXQoJaG9zdCA9IHZlZDQK
---------------010008080606030805040203--
+Josh
