@@ -1,58 +1,136 @@
-From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
-Subject: Re: oops in rbd module (con_work in libceph)
-Date: Wed, 11 Jul 2012 22:23:34 +0200
-Message-ID: <4FFDE0C6.50807@univ-nantes.fr>
-References: <4FF6A27B.7020808@univ-nantes.fr> <4FF705BA.4080501@univ-nantes.fr> <4FF77FE8.9040408@inktank.com> <4FFB0CBA.6090806@univ-nantes.fr> <4FFB0F2A.6070601@univ-nantes.fr> <CAPYLRzj0=hs5BYrG2veYMBUOaU1HmAJoBRPdwj1y3PuMUveb0w@mail.gmail.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 09/16] rbd: dynamically allocate image header name
+Date: Wed, 11 Jul 2012 13:41:12 -0700
+Message-ID: <4FFDE4E8.4050502@inktank.com>
+References: <4FFD847C.7070205@inktank.com> <4FFD8764.9040607@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtptls1-loi.cpub.univ-nantes.fr ([193.52.103.112]:42612 "EHLO
-	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751571Ab2GKUXr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 16:23:47 -0400
-In-Reply-To: <CAPYLRzj0=hs5BYrG2veYMBUOaU1HmAJoBRPdwj1y3PuMUveb0w@mail.gmail.com>
+Received: from mail-yw0-f52.google.com ([209.85.213.52]:42708 "EHLO
+	mail-yw0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933220Ab2GKUlQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 16:41:16 -0400
+Received: by yhpp61 with SMTP id p61so1962385yhp.11
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 13:41:15 -0700 (PDT)
+In-Reply-To: <4FFD8764.9040607@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Alex Elder <elder@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Le 10/07/2012 19:46, Gregory Farnum a =E9crit :
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+On 07/11/2012 07:02 AM, Alex Elder wrote:
+> There is no need to impose a small limit the length of the header
+> name recorded for an rbd image in a struct rbd_dev.  Remove the
+> limitation by allocating space for the header name dynamically.
 >
+> Signed-off-by: Alex Elder<elder@inktank.com>
+> ---
+>   drivers/block/rbd.c |   33 +++++++++++++++++++++------------
+>   1 files changed, 21 insertions(+), 12 deletions(-)
 >
-> Each time, at the exact date, a bad CRC (they are the only ones for t=
-his
-> day, so it seems related)
-> Yes; a bad CRC should cause the socket to close =97 that's intended
-> behavior (although you might want to look into why that's happening,
-ah ! very interesting ! 3.2 is ok, 3.4 not (even with latest ceph-clien=
-t=20
-patch).
-the 8 nodes are similar (poweredge M610, intel 10 Gb), but the client i=
-s=20
-not : Also M610 (older) but with brocade 10Gb.
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 76e978c..4d11337 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -55,7 +55,6 @@
+>
+>   #define RBD_MINORS_PER_MAJOR	256		/* max minors per blkdev */
+>
+> -#define RBD_MAX_MD_NAME_LEN	(RBD_MAX_OBJ_NAME_LEN + sizeof(RBD_SUFFIX))
+>   #define RBD_MAX_SNAP_NAME_LEN	32
+>   #define RBD_MAX_OPT_LEN		1024
+>
+> @@ -164,7 +163,7 @@ struct rbd_device {
+>   	struct rbd_image_header	header;
+>   	char			obj[RBD_MAX_OBJ_NAME_LEN]; /* rbd image name */
+>   	int			obj_len;
+> -	char			obj_md_name[RBD_MAX_MD_NAME_LEN]; /* hdr nm. */
+> +	char			*obj_md_name; /* hdr nm. */
+>   	int			pool_id;
+>
+>   	struct ceph_osd_event   *watch_event;
+> @@ -2375,8 +2374,13 @@ static char *rbd_add_parse_args(struct rbd_device
+> *rbd_dev,
+>
+>   	rbd_dev->obj_len = len;
+>
+> -	BUILD_BUG_ON(RBD_MAX_MD_NAME_LEN
+> -				<  RBD_MAX_OBJ_NAME_LEN + sizeof (RBD_SUFFIX));
+> +	/* Create the name of the header object */
+> +
+> +	rbd_dev->obj_md_name = kmalloc(len + sizeof (RBD_SUFFIX), GFP_KERNEL);
+> +	if (!rbd_dev->obj_md_name) {
+> +		ret = -ENOMEM;
+> +		goto out_err;
+> +	}
+>   	sprintf(rbd_dev->obj_md_name, "%s%s", rbd_dev->obj, RBD_SUFFIX);
+>
+>   	/*
+> @@ -2393,6 +2397,7 @@ static char *rbd_add_parse_args(struct rbd_device
+> *rbd_dev,
+>   	return pool_name;
+>
+>   out_err:
+> +	kfree(rbd_dev->obj_md_name);
+>   	kfree(pool_name);
+>
+>   	return ERR_PTR(ret);
+> @@ -2402,23 +2407,23 @@ static ssize_t rbd_add(struct bus_type *bus,
+>   		       const char *buf,
+>   		       size_t count)
+>   {
+> -	struct rbd_device *rbd_dev;
+> +	char *options;
+> +	struct rbd_device *rbd_dev = NULL;
+>   	const char *mon_addrs = NULL;
+>   	size_t mon_addrs_size = 0;
+> -	char *options = NULL;
+> -	struct ceph_osd_client *osdc;
+>   	char *pool_name;
+> +	struct ceph_osd_client *osdc;
+>   	int rc = -ENOMEM;
+>
+>   	if (!try_module_get(THIS_MODULE))
+>   		return -ENODEV;
+>
+> -	rbd_dev = kzalloc(sizeof(*rbd_dev), GFP_KERNEL);
+> -	if (!rbd_dev)
+> -		goto err_nomem;
+>   	options = kmalloc(count, GFP_KERNEL);
+>   	if (!options)
+>   		goto err_nomem;
+> +	rbd_dev = kzalloc(sizeof(*rbd_dev), GFP_KERNEL);
+> +	if (!rbd_dev)
+> +		goto err_nomem;
+>
+>   	/* static rbd_device initialization */
+>   	spin_lock_init(&rbd_dev->lock);
+> @@ -2499,11 +2504,14 @@ err_out_blkdev:
+>   err_out_client:
+>   	rbd_put_client(rbd_dev);
+>   err_put_id:
+> -	kfree(pool_name);
+> +	if (pool_name) {
+> +		kfree(rbd_dev->obj_md_name);
+> +		kfree(pool_name);
+> +	}
+>   	rbd_id_put(rbd_dev);
+>   err_nomem:
+> -	kfree(options);
+>   	kfree(rbd_dev);
+> +	kfree(options);
+>
+>   	dout("Error adding device %s\n", buf);
+>   	module_put(THIS_MODULE);
+> @@ -2548,6 +2556,7 @@ static void rbd_dev_release(struct device *dev)
+>   	unregister_blkdev(rbd_dev->major, rbd_dev->name);
+>
+>   	/* done with the id, and with the rbd_dev */
+> +	kfree(rbd_dev->obj_md_name);
+>   	rbd_id_put(rbd_dev);
+>   	kfree(rbd_dev);
+>
 
-I'll also try another client with intel 10Gb and 3.4 kernel, to see if=20
-that change things.
-And then I'll narrow the gap between working & not working, and try to=20
-bisect that.
-
-> since it's not something we've seen locally at all). Not handling tha=
-t
-> socket close is definitely a bug in the kernel that needs to get
-> tracked down, though.
-Ok, the oops is not the root cause, just an unfortunate consequence
-
-Thanks,
-Cheers
-
---=20
-Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
-Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
