@@ -1,86 +1,85 @@
 From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH 03/16] libceph: define ceph_decode_string()
-Date: Wed, 11 Jul 2012 10:13:53 -0700
-Message-ID: <CAC-hyiEx3CRpGT6SNp3TD48FLVBFysHMss84BG8xzONhU63_Rw@mail.gmail.com>
+Subject: Re: [PATCH 04/16] libceph: define ceph_extract_encoded_string()
+Date: Wed, 11 Jul 2012 10:20:52 -0700
+Message-ID: <CAC-hyiFrftSudtCUHaGwWyrzMBoAcm-uzRK4Bz7f-crO+dbfBg@mail.gmail.com>
 References: <4FFD847C.7070205@inktank.com>
-	<4FFD871B.6020704@inktank.com>
+	<4FFD8727.7050106@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:62847 "EHLO
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:57868 "EHLO
 	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932131Ab2GKRNy (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 13:13:54 -0400
-Received: by bkwj10 with SMTP id j10so1361225bkw.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 10:13:53 -0700 (PDT)
-In-Reply-To: <4FFD871B.6020704@inktank.com>
+	with ESMTP id S1751660Ab2GKRUy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 13:20:54 -0400
+Received: by bkwj10 with SMTP id j10so1369432bkw.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 10:20:52 -0700 (PDT)
+In-Reply-To: <4FFD8727.7050106@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Reviewed-by: Yehuda Sadeh <yehuda@inktank.com>
+On Wed, Jul 11, 2012 at 7:01 AM, Alex Elder <elder@inktank.com> wrote:
+> This adds a new utility routine which will return a dynamically-
+> allocated buffer containing a string that has been decoded from ceph
+> over-the-wire format.  It also returns the length of the string
+> if the address of a size variable is supplied to receive it.
+>
+> For now, no gfp_flags parameter is defined (GFP_KERNEL is used) but
+> it could be easily be added if needed.
+>
 
-On Wed, Jul 11, 2012 at 7:00 AM, Alex Elder <elder@inktank.com> wrote:
-> There is no string decoding function defined in <decode.h>, so this
-> defines one.
->
-> This function is a little different from the others in that the
-> length of the encoded string is not known a priori.  So the
-> interface is defined a bit like snprintf(), where the value returned
-> indicates the space required--even if it's more than the space
-> allotted.
->
+I'd rather have it upfront, will help avoiding future errors.
+
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->  include/linux/ceph/decode.h |   36 ++++++++++++++++++++++++++++++++++++
->  1 files changed, 36 insertions(+), 0 deletions(-)
+>  include/linux/ceph/decode.h |   29 +++++++++++++++++++++++++++++
+>  1 files changed, 29 insertions(+), 0 deletions(-)
 >
 > diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
-> index bcbd66c..7ead11fc 100644
+> index 7ead11fc..7759164 100644
 > --- a/include/linux/ceph/decode.h
 > +++ b/include/linux/ceph/decode.h
-> @@ -44,6 +44,42 @@ static inline void ceph_decode_copy(void **p, void
-> *pv, size_t n)
+> @@ -80,6 +80,35 @@ static inline size_t ceph_decode_string(void **p,
+> char *s, size_t size)
 >  }
 >
 >  /*
-> + * Decode the wire-encoded string at *p into the buffer "s"
-> + * provided, whose size is indicated by "size".  Note that "s" can
-> + * be a null pointer if size is 0.  If it fits, the resulting string
-> + * will always be terminated with '\0'; otherwise the buffer will
-> + * be unchanged.
+> + * Allocate a buffer big enough to hold the wire-encoded string, and
+> + * decode the string into it.  The resulting string will always be
+> + * terminated with '\0'.  If successful, *p will be advanced
+> + * past the decoded data.  Also, if lenp is not a null pointer, the
+> + * length (not including the terminating '\0') will be recorded in
+> + * it.  Note that a zero-length string is a valid return value.
 > + *
-> + * Returns the length of the encoded string (which may be greater
-> + * than or equal to the buffer size).  The return value does not
-> + * include the terminating '\0'.
-> + *
-> + * If the the return value is less than the size provided, *p will
-> + * be advanced past the decoded data; otherwise it is unchanged.
-> + * This allows for a two call sequence to be used to allocate
-> + * sufficient space for the string.
-> + *
-> + * NB  It is assumed that *p refers to a block of valid memory
-> + *     sufficient to hold the length field followed by the number
-> + *     of bytes indicated by that field.
+> + * Returns a pointer to the newly-allocated string buffer, or a
+> + * null pointer if memory could not be allocated for the result.
+> + * Neither of the arguments is updated if NULL is returned.
 > + */
-> +static inline size_t ceph_decode_string(void **p, char *s, size_t size)
+> +static inline char *ceph_extract_encoded_string(void **p, size_t *lenp)
 > +{
 > +       size_t len;
+> +       char *buf;
 > +
-> +       len = get_unaligned_le32(*p);
-> +       if (size < len + 1)
-> +               return len;
+> +       len = ceph_decode_string(p, NULL, 0);
+> +       buf = kmalloc(len + 1, GFP_KERNEL);
+> +       if (!buf)
+> +               return NULL;
 > +
-> +       if (len)
-> +               memcpy(s, (char *) *p + sizeof (u32), len);
-> +       *(s + len) = '\0';
-> +       *p += sizeof (u32) + len;
+> +       (void) ceph_decode_string(p, buf, len + 1);
+> +       if (lenp)
+> +               *lenp = len;
 > +
-> +       return len;
+> +       return buf;
 > +}
 > +
 > +/*
+
+We don't make an effort here to check whether encoded string buffer is
+valid. While we may be checking it somewhere up the stack, this seem
+like a generic enough function that could be naively used. Either make
+it clear that it's an internal function, or make it check p bounds.
+
 >   * bounds check input.
 >   */
 >  static inline int ceph_has_room(void **p, void *end, size_t n)
