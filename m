@@ -1,108 +1,165 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Re: Pg stuck stale...why?
-Date: Wed, 11 Jul 2012 15:23:04 +1200
-Message-ID: <4FFCF198.7010605@catalyst.net.nz>
-References: <4FFCD2AC.3040809@catalyst.net.nz> <4FFCD53F.108@inktank.com> <4FFCD7B7.5020707@catalyst.net.nz> <4FFCDD19.3010700@inktank.com> <4FFCE03F.3050602@catalyst.net.nz>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Guangliang Zhao <gzhao@suse.com>
+Subject: [PATCH] rbd: fix the memory leak of bio_chain_clone
+Date: Wed, 11 Jul 2012 20:34:13 +0800
+Message-ID: <1342010053-9306-1-git-send-email-gzhao@suse.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:50000 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932362Ab2GKDXI (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jul 2012 23:23:08 -0400
-In-Reply-To: <4FFCE03F.3050602@catalyst.net.nz>
+Received: from victor.provo.novell.com ([137.65.250.26]:51245 "EHLO
+	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752072Ab2GKMee (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+	Wed, 11 Jul 2012 08:34:34 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: yehuda@inktank.com, sage@inktank.com
 
-On 11/07/12 14:09, Mark Kirkwood wrote:
-> On 11/07/12 13:55, Josh Durgin wrote:
->> On 07/10/2012 06:32 PM, Mark Kirkwood wrote:
->>> On 11/07/12 13:22, Josh Durgin wrote:
->>>> On 07/10/2012 06:11 PM, Mark Kirkwood wrote:
->>>>> I am seeing this:
->>>>>
->>>>> # ceph -s
->>>>> health HEALTH_WARN 256 pgs stale; 256 pgs stuck stale
->>>>> monmap e1: 3 mons at
->>>>> {ved1=192.168.122.11:6789/0,ved2=192.168.122.12:6789/0,ved3=192.168.122.13:6789/0}, 
->>>>>
->>>>>
->>>>> election epoch 18, quorum 0,1,2 ved1,ved2,ved3
->>>>> osdmap e62: 4 osds: 4 up, 4 in
->>>>> pgmap v47148: 768 pgs: 512 active+clean, 256 stale+active+clean; 
->>>>> 2224 MB
->>>>> data, 15442 MB used, 86907 MB / 102350 MB avail
->>>>> mdsmap e1: 0/0/1
->>>>>
->>>>> In particular 256 pgs stuck stale - I've tried a) waiting a while
->>>>> (overnight), b) a rolling restart of all 4 osd's, c) restarting 
->>>>> all ceph
->>>>> services on all 4 nodes. All without changing this.
->>>>>
->>>>> As far as I understand what stuck state means, I can't see why 
->>>>> they need
->>>>> to stay that way, given all osd's and mon's are up. (I have no mds
->>>>> configured)....any ideas? Or is this just expected?
->>>>>
->>>>> Regards
->>>>>
->>>>> Mark
->>>>
->>>> What does 'ceph pg dump_stuck stale' show? Stale means that the
->>>> monitors haven't gotten updates about those pgs from the osds within
->>>> the a certain period of time (default is 300 seconds), so something 
->>>> may
->>>> be wrong with your crushmap or those pgs themselves.
->>>>
->>>> Josh
->>>
->>> I have attached the dump of stuck stale pgs, and the crushmap in use.
->>>
->>> I did wonder if it is to do with not using any mds - i.e could this 
->>> mean
->>> the meta data pgs never get touched?
->>>
->>> Mark
->>>
->>
->> It doesn't look like a problem with your crushmap - the pgs are all 
->> mapped to osds, and there's no common osd holding things up.
->>
->> Not using the mds doesn't affect the pgs. They should still be active.
->> All the stuck ones are in pool 0 though. Is there anything special 
->> about that pool? Were there any changes before the pgs became stuck?
->>
->> I don't think it should work in this case, but you might try 'ceph pg 
->> force_create_pg 0.c'.
->>
->>
->
-> Hmm - good observation - pool 0 is data, and I am only using rbd at 
-> the moment, and:
->
-> $ ceph osd dump -o -|grep size
-> pool 0 'data' rep size 4 crush_ruleset 0 object_hash rjenkins pg_num 
-> 256 pgp_num 256 last_change 8 owner 0 crash_replay_interval 45
-> pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins 
-> pg_num 256 pgp_num 256 last_change 1 owner 0
-> pool 2 'rbd' rep size 4 crush_ruleset 2 object_hash rjenkins pg_num 
-> 256 pgp_num 256 last_change 11 owner 0
->
-> ... pool 0 is mapped to crush ruleset 0 - and I don't have a ruleset 
-> 0. Could that be the problem?
->
-> Mark
+The bio_pair alloced in bio_chain_clone would not be freed,
+this will cause a memory leak. It could be freed actually only
+after 3 times release, because the reference count of bio_pair
+is initialized to 3 when bio_split and bio_pair_release only
+drops the reference count.
 
-...and that was it:
+The function bio_pair_release must be called three times for
+releasing bio_pair, and the callback functions of bios on the
+requests will be called when the last release time in bio_pair_release,
+however, these functions will also be called in rbd_req_cb. In
+other words, they will be called twice, and it may cause serious
+consequences.
 
-$ ceph osd pool set data crush_ruleset 1
+This patch clones bio chian from the origin directly, doesn't use
+bio_split(without bio_pair). The new bio chain can be release
+whenever we don't need it.
 
-$ ceph health
-HEALTH_OK
+Signed-off-by: Guangliang Zhao <gzhao@suse.com>
+---
+ drivers/block/rbd.c |   66 ++++++++++++++++++++-------------------------------
+ 1 files changed, 26 insertions(+), 40 deletions(-)
 
-Thanks for making me think about this more carefully!
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 013c7a5..6a12040 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -712,51 +712,43 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
+ 	}
+ }
+ 
+-/*
+- * bio_chain_clone - clone a chain of bios up to a certain length.
+- * might return a bio_pair that will need to be released.
++/**
++ *      bio_chain_clone - clone a chain of bios up to a certain length.
++ *      @old: bio to clone
++ *      @offset: start point for bio clone
++ *      @len: length of bio chain
++ *      @gfp_mask: allocation priority
++ *
++ *      RETURNS:
++ *      Pointer to new bio chain on success, NULL on failure.
+  */
+-static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
+-				   struct bio_pair **bp,
++static struct bio *bio_chain_clone(struct bio **old, int *offset,
+ 				   int len, gfp_t gfpmask)
+ {
+ 	struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
+ 	int total = 0;
+ 
+-	if (*bp) {
+-		bio_pair_release(*bp);
+-		*bp = NULL;
+-	}
+-
+ 	while (old_chain && (total < len)) {
++		int need = len - total;
++
+ 		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
+ 		if (!tmp)
+ 			goto err_out;
+ 
+-		if (total + old_chain->bi_size > len) {
+-			struct bio_pair *bp;
+-
++		__bio_clone(tmp, old_chain);
++		if (total + (tmp->bi_size - *offset) > len) {
++			tmp->bi_sector += *offset >> SECTOR_SHIFT;
++			tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
+ 			/*
+-			 * this split can only happen with a single paged bio,
+-			 * split_bio will BUG_ON if this is not the case
++			 * This can only happen with a single paged bio,
++			 * rbd_merge_bvec would guarantee it.
+ 			 */
+-			dout("bio_chain_clone split! total=%d remaining=%d"
+-			     "bi_size=%d\n",
+-			     (int)total, (int)len-total,
+-			     (int)old_chain->bi_size);
+-
+-			/* split the bio. We'll release it either in the next
+-			   call, or it will have to be released outside */
+-			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
+-			if (!bp)
+-				goto err_out;
+-
+-			__bio_clone(tmp, &bp->bio1);
+-
+-			*next = &bp->bio2;
++			tmp->bi_size = need;
++			tmp->bi_io_vec->bv_len = need;
++			*offset += need;
+ 		} else {
+-			__bio_clone(tmp, old_chain);
+-			*next = old_chain->bi_next;
++			old_chain = old_chain->bi_next;
++			*offset = 0;
+ 		}
+ 
+ 		tmp->bi_bdev = NULL;
+@@ -769,7 +761,6 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
+ 			tail->bi_next = tmp;
+ 			tail = tmp;
+ 		}
+-		old_chain = old_chain->bi_next;
+ 
+ 		total += tmp->bi_size;
+ 	}
+@@ -1447,13 +1438,12 @@ static void rbd_rq_fn(struct request_queue *q)
+ {
+ 	struct rbd_device *rbd_dev = q->queuedata;
+ 	struct request *rq;
+-	struct bio_pair *bp = NULL;
+ 
+ 	while ((rq = blk_fetch_request(q))) {
+ 		struct bio *bio;
+-		struct bio *rq_bio, *next_bio = NULL;
++		struct bio *rq_bio;
+ 		bool do_write;
+-		int size, op_size = 0;
++		int size, op_size = 0, offset = 0;
+ 		u64 ofs;
+ 		int num_segs, cur_seg = 0;
+ 		struct rbd_req_coll *coll;
+@@ -1503,7 +1493,7 @@ static void rbd_rq_fn(struct request_queue *q)
+ 						  ofs, size,
+ 						  NULL, NULL);
+ 			kref_get(&coll->kref);
+-			bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
++			bio = bio_chain_clone(&rq_bio, &offset,
+ 					      op_size, GFP_ATOMIC);
+ 			if (!bio) {
+ 				rbd_coll_end_req_index(rq, coll, cur_seg,
+@@ -1531,12 +1521,8 @@ next_seg:
+ 			ofs += op_size;
+ 
+ 			cur_seg++;
+-			rq_bio = next_bio;
+ 		} while (size > 0);
+ 		kref_put(&coll->kref, rbd_coll_release);
+-
+-		if (bp)
+-			bio_pair_release(bp);
+ 		spin_lock_irq(q->queue_lock);
+ 	}
+ }
+-- 
+1.7.3.4
 
-Mark
