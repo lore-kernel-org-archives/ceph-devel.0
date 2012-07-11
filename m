@@ -1,154 +1,117 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 16/16] rbd: kill num_reply parameters
-Date: Wed, 11 Jul 2012 14:07:54 -0700
-Message-ID: <4FFDEB2A.9040800@inktank.com>
-References: <4FFD847C.7070205@inktank.com> <4FFD87A0.4000602@inktank.com>
+From: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>
+Subject: Re: Ceph Upstream Tarball + Re: Ceph status for Wheezy
+Date: Wed, 11 Jul 2012 21:43:13 +0000
+Message-ID: <1342042993.12180.98.camel@julia>
+References: <4FFC44BE.6090505@ubuntu.com> <1341966632.12180.22.camel@julia>
+	 <4FFD40DA.7020408@ubuntu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature";
+	boundary="=-p5KMX5fA5rB8hrlKwNuV"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:62731 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754993Ab2GKVH5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 17:07:57 -0400
-Received: by pbbrp8 with SMTP id rp8so2556798pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 14:07:56 -0700 (PDT)
-In-Reply-To: <4FFD87A0.4000602@inktank.com>
+Received: from mail.barcikacomp.hu ([94.248.160.10]:39823 "EHLO
+	mail.barcikacomp.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754093Ab2GKVnf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 17:43:35 -0400
+In-Reply-To: <4FFD40DA.7020408@ubuntu.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: James Page <james.page@ubuntu.com>, Sage Weil <sage@inktank.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
-On 07/11/2012 07:03 AM, Alex Elder wrote:
-> Several functions include a num_reply parameter, but it is never
-> used.  Just get rid of it everywhere--it seems to be something
-> that never got fully implemented.
->
-> Signed-off-by: Alex Elder<elder@inktank.com>
-> ---
->   drivers/block/rbd.c |   19 ++++++-------------
->   1 files changed, 6 insertions(+), 13 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index c99ea08..c023be5 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -863,7 +863,6 @@ static int rbd_do_request(struct request *rq,
->   			  int num_pages,
->   			  int flags,
->   			  struct ceph_osd_req_op *ops,
-> -			  int num_reply,
->   			  struct rbd_req_coll *coll,
->   			  int coll_index,
->   			  void (*rbd_cb)(struct ceph_osd_request *req,
-> @@ -1019,7 +1018,6 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
->   			   int opcode,
->   			   int flags,
->   			   struct ceph_osd_req_op *orig_ops,
-> -			   int num_reply,
->   			   const char *object_name,
->   			   u64 ofs, u64 len,
->   			   char *buf,
-> @@ -1055,7 +1053,6 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
->   			  pages, num_pages,
->   			  flags,
->   			  ops,
-> -			  2,
->   			  NULL, 0,
->   			  NULL,
->   			  linger_req, ver);
-> @@ -1080,7 +1077,7 @@ static int rbd_do_op(struct request *rq,
->   		     struct rbd_device *rbd_dev,
->   		     struct ceph_snap_context *snapc,
->   		     u64 snapid,
-> -		     int opcode, int flags, int num_reply,
-> +		     int opcode, int flags,
->   		     u64 ofs, u64 len,
->   		     struct bio *bio,
->   		     struct rbd_req_coll *coll,
-> @@ -1119,7 +1116,6 @@ static int rbd_do_op(struct request *rq,
->   			     NULL, 0,
->   			     flags,
->   			     ops,
-> -			     num_reply,
->   			     coll, coll_index,
->   			     rbd_req_cb, 0, NULL);
->
-> @@ -1143,7 +1139,6 @@ static int rbd_req_write(struct request *rq,
->   	return rbd_do_op(rq, rbd_dev, snapc, CEPH_NOSNAP,
->   			 CEPH_OSD_OP_WRITE,
->   			 CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
-> -			 2,
->   			 ofs, len, bio, coll, coll_index);
->   }
->
-> @@ -1162,7 +1157,6 @@ static int rbd_req_read(struct request *rq,
->   			 snapid,
->   			 CEPH_OSD_OP_READ,
->   			 CEPH_OSD_FLAG_READ,
-> -			 2,
->   			 ofs, len, bio, coll, coll_index);
->   }
->
-> @@ -1182,7 +1176,7 @@ static int rbd_req_sync_read(struct rbd_device
-> *rbd_dev,
->   			       CEPH_OSD_OP_READ,
->   			       CEPH_OSD_FLAG_READ,
->   			       NULL,
-> -			       1, object_name, ofs, len, buf, NULL, ver);
-> +			       object_name, ofs, len, buf, NULL, ver);
->   }
->
->   /*
-> @@ -1209,7 +1203,6 @@ static int rbd_req_sync_notify_ack(struct
-> rbd_device *rbd_dev,
->   			  NULL, 0,
->   			  CEPH_OSD_FLAG_READ,
->   			  ops,
-> -			  1,
->   			  NULL, 0,
->   			  rbd_simple_req_cb, 0, NULL);
->
-> @@ -1265,7 +1258,7 @@ static int rbd_req_sync_watch(struct rbd_device
-> *rbd_dev,
->   			      0,
->   			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
->   			      ops,
-> -			      1, object_name, 0, 0, NULL,
-> +			      object_name, 0, 0, NULL,
->   			&rbd_dev->watch_request, NULL);
->
->   	if (ret<  0)
-> @@ -1303,7 +1296,7 @@ static int rbd_req_sync_unwatch(struct rbd_device
-> *rbd_dev,
->   			      0,
->   			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
->   			      ops,
-> -			      1, object_name, 0, 0, NULL, NULL, NULL);
-> +			      object_name, 0, 0, NULL, NULL, NULL);
->
->   	rbd_destroy_ops(ops);
->   	ceph_osdc_cancel_event(rbd_dev->watch_event);
-> @@ -1361,7 +1354,7 @@ static int rbd_req_sync_notify(struct rbd_device
-> *rbd_dev,
->   			       0,
->   			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
->   			       ops,
-> -			       1, object_name, 0, 0, NULL, NULL, NULL);
-> +			       object_name, 0, 0, NULL, NULL, NULL);
->   	if (ret<  0)
->   		goto fail_event;
->
-> @@ -1409,7 +1402,7 @@ static int rbd_req_sync_exec(struct rbd_device
-> *rbd_dev,
->   			       0,
->   			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
->   			       ops,
-> -			       1, object_name, 0, 0, NULL, NULL, ver);
-> +			       object_name, 0, 0, NULL, NULL, ver);
->
->   	rbd_destroy_ops(ops);
->
+--=-p5KMX5fA5rB8hrlKwNuV
+Content-Type: multipart/mixed; boundary="=-OetBDsnAvYHeNOWIDU8L"
+
+
+--=-OetBDsnAvYHeNOWIDU8L
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: quoted-printable
+
+Hi James, Sage,
+
+Let me answer you both at once.
+
+On Wed, 2012-07-11 at 10:01 +0100, James Page wrote:
+> On 11/07/12 01:30, Laszlo Boszormenyi (GCS) wrote:
+> > You are right, the watch file is outdated.
+ An updated watch file is attached. Please commit it Sage. It goes for
+numbers only, so 0.48argonaut will be 0.48 .
+
+> Ah-ha!  Thanks for this information - I had not realised the leveldb
+> and libs3 source was overlaid outside of git.
+ Sage still consider it better, to be able to build everything needed
+from one tarball. I've two small patches to build with system leveldb
+and libs3 instead.
+
+> This creates a short term issue for me in that leveldb and libs3 are
+> not currently in Ubuntu main (MIR is raised but still pending review
+> and approval) so not having the bundled source for these libraries is
+> a pain as I can't easily use the same upstream tarball that you are
+> using [...]
+ Is there any ETA when/if it will be in Ubuntu main? Sage, would you
+reconsider the all-in-one tarball if Debian and Ubuntu will have leveldb
+and libs3 in their package list? I _may_ become a RedHat / Fedora
+package maintainer as well and when it happens, I'll add them to those
+distributions as well.
+
+> - guess I could plugin the required bundles in the interim as
+> patches as I would like to push 0.48 to quantal this week.
+ You may wait a bit. At least please see:
+[ Sage and me about "Ceph status for Wheezy" ]
+On Wed, 2012-07-11 at 09:18 -0700, Sage Weil wrote:
+> > What do I miss? Manpages for
+> > ceph-disk-activate , ceph-disk-prepare , rest-bench and maybe
+> > librados-config .
+> Okay, those should be pretty simple.  There will be a point release befor=
+e=20
+> too long that includes all of this stuff.  If there is anything in your=
+=20
+> packaging that isn't fixed upstream let me know.
+ It sounds 0.48.1 may happen within a week time. I've added symbol
+versioning, but don't know if it has any use. Currently kvm doesn't
+work when compiled with previous version of Ceph, see Debian bug
+#679686[1]. In answer, my symbol files are created with 0.47.2 and
+updated to 0.48 . Didn't go more back with versions and don't know how
+much Ceph libraries will change in the future.
+Sage, can you please give us more detail how do you plan the releases?
+Is there any plan for more stable releases on every (say) 3 months, with
+bugfixing only? Should we follow the actual development tree, no matter
+what?
+
+> I'm hoping to get to a point where the packaging is the same; if
+> nothing else it saves extra work!
+ Sure, that would be better. I've a package of v0.48 ready to upload[2],
+but can wait some days if you would like to check what I may need to
+merge from your package.
+
+Cheers,
+Laszlo/GCS
+[1] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=3D679686
+[2] dget -x http://www.barcikacomp.hu/gcs/ceph_0.48-1.dsc
+
+--=-OetBDsnAvYHeNOWIDU8L
+Content-Disposition: attachment; filename="watch"
+Content-Type: text/plain; name="watch"; charset="ISO-8859-1"
+Content-Transfer-Encoding: base64
+
+dmVyc2lvbj0zDQpodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3RhZ3MgLiovemlwYmFsbC92
+KFxkW1xkXC5dKykuKg0K
+
+
+--=-OetBDsnAvYHeNOWIDU8L--
+
+--=-p5KMX5fA5rB8hrlKwNuV
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iEYEABECAAYFAk/983IACgkQGkxvZbuqR8mPggCgn72PHJYdrdM50SGiiv/kLpES
+1Y4An1icrCxc/sxJxLqlTabOrLXp0J4K
+=Q0zc
+-----END PGP SIGNATURE-----
+
+--=-p5KMX5fA5rB8hrlKwNuV--
 
