@@ -1,19 +1,19 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 02/16] rbd: drop a useless local variable
-Date: Wed, 11 Jul 2012 11:36:02 -0700
-Message-ID: <4FFDC792.5030401@inktank.com>
-References: <4FFD847C.7070205@inktank.com> <4FFD8710.60002@inktank.com>
+Subject: Re: [PATCH 03/16] libceph: define ceph_decode_string()
+Date: Wed, 11 Jul 2012 11:43:54 -0700
+Message-ID: <4FFDC96A.2000605@inktank.com>
+References: <4FFD847C.7070205@inktank.com> <4FFD871B.6020704@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:55343 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:59288 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755082Ab2GKSgE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 14:36:04 -0400
-Received: by pbbrp8 with SMTP id rp8so2377277pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 11:36:03 -0700 (PDT)
-In-Reply-To: <4FFD8710.60002@inktank.com>
+	with ESMTP id S1755297Ab2GKSn5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 14:43:57 -0400
+Received: by pbbrp8 with SMTP id rp8so2386362pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 11:43:57 -0700 (PDT)
+In-Reply-To: <4FFD871B.6020704@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
@@ -22,35 +22,66 @@ Cc: ceph-devel@vger.kernel.org
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
 On 07/11/2012 07:00 AM, Alex Elder wrote:
-> In rbd_req_sync_notify_ack(), a local variable was needlessly being
-> used to hold a null pointer.  Just pass NULL instead.
+> There is no string decoding function defined in<decode.h>, so this
+> defines one.
+>
+> This function is a little different from the others in that the
+> length of the encoded string is not known a priori.  So the
+> interface is defined a bit like snprintf(), where the value returned
+> indicates the space required--even if it's more than the space
+> allotted.
 >
 > Signed-off-by: Alex Elder<elder@inktank.com>
 > ---
->   drivers/block/rbd.c |    3 +--
->   1 files changed, 1 insertions(+), 2 deletions(-)
+>   include/linux/ceph/decode.h |   36 ++++++++++++++++++++++++++++++++++++
+>   1 files changed, 36 insertions(+), 0 deletions(-)
 >
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 8f428a8..2ae3bb0 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -1187,7 +1187,6 @@ static int rbd_req_sync_notify_ack(struct
-> rbd_device *dev,
->   				   const char *obj)
->   {
->   	struct ceph_osd_req_op *ops;
-> -	struct page **pages = NULL;
->   	int ret;
+> diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
+> index bcbd66c..7ead11fc 100644
+> --- a/include/linux/ceph/decode.h
+> +++ b/include/linux/ceph/decode.h
+> @@ -44,6 +44,42 @@ static inline void ceph_decode_copy(void **p, void
+> *pv, size_t n)
+>   }
 >
->   	ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_NOTIFY_ACK, 0);
-> @@ -1200,7 +1199,7 @@ static int rbd_req_sync_notify_ack(struct
-> rbd_device *dev,
->
->   	ret = rbd_do_request(NULL, dev, NULL, CEPH_NOSNAP,
->   			  obj, 0, 0, NULL,
-> -			  pages, 0,
-> +			  NULL, 0,
->   			  CEPH_OSD_FLAG_READ,
->   			  ops,
->   			  1,
+>   /*
+> + * Decode the wire-encoded string at *p into the buffer "s"
+> + * provided, whose size is indicated by "size".  Note that "s" can
+> + * be a null pointer if size is 0.  If it fits, the resulting string
+> + * will always be terminated with '\0'; otherwise the buffer will
+> + * be unchanged.
+> + *
+> + * Returns the length of the encoded string (which may be greater
+> + * than or equal to the buffer size).  The return value does not
+> + * include the terminating '\0'.
+> + *
+> + * If the the return value is less than the size provided, *p will
+> + * be advanced past the decoded data; otherwise it is unchanged.
+> + * This allows for a two call sequence to be used to allocate
+> + * sufficient space for the string.
+> + *
+> + * NB  It is assumed that *p refers to a block of valid memory
+> + *     sufficient to hold the length field followed by the number
+> + *     of bytes indicated by that field.
+> + */
+> +static inline size_t ceph_decode_string(void **p, char *s, size_t size)
+> +{
+> +	size_t len;
+> +
+> +	len = get_unaligned_le32(*p);
+> +	if (size<  len + 1)
+> +		return len;
+> +
+> +	if (len)
+> +		memcpy(s, (char *) *p + sizeof (u32), len);
+> +	*(s + len) = '\0';
+> +	*p += sizeof (u32) + len;
+> +
+> +	return len;
+> +}
+> +
+> +/*
+>    * bounds check input.
+>    */
+>   static inline int ceph_has_room(void **p, void *end, size_t n)
 
