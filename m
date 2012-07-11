@@ -1,97 +1,110 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Re: Pg stuck stale...why?
-Date: Wed, 11 Jul 2012 14:09:03 +1200
-Message-ID: <4FFCE03F.3050602@catalyst.net.nz>
-References: <4FFCD2AC.3040809@catalyst.net.nz> <4FFCD53F.108@inktank.com> <4FFCD7B7.5020707@catalyst.net.nz> <4FFCDD19.3010700@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 1/1] client: prevent the race of incoming work during
+ teardown
+Date: Tue, 10 Jul 2012 19:21:28 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1207101920530.25754@cobra.newdream.net>
+References: <Re: [PATCH 1/1] client: prevent the race of incoming work during teardown> <1341199901-16730-1-git-send-email-gjhe@suse.com> <4FFAC3AA02000016000150A3@soto.provo.novell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:45028 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753687Ab2GKCJJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jul 2012 22:09:09 -0400
-In-Reply-To: <4FFCDD19.3010700@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:34316 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752417Ab2GKCVd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jul 2012 22:21:33 -0400
+In-Reply-To: <4FFAC3AA02000016000150A3@soto.provo.novell.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Guan Jun He <gjhe@suse.com>
+Cc: Guanjun He <heguanbo@gmail.com>, ceph-devel@vger.kernel.org
 
-On 11/07/12 13:55, Josh Durgin wrote:
-> On 07/10/2012 06:32 PM, Mark Kirkwood wrote:
->> On 11/07/12 13:22, Josh Durgin wrote:
->>> On 07/10/2012 06:11 PM, Mark Kirkwood wrote:
->>>> I am seeing this:
->>>>
->>>> # ceph -s
->>>> health HEALTH_WARN 256 pgs stale; 256 pgs stuck stale
->>>> monmap e1: 3 mons at
->>>> {ved1=192.168.122.11:6789/0,ved2=192.168.122.12:6789/0,ved3=192.168.122.13:6789/0}, 
->>>>
->>>>
->>>> election epoch 18, quorum 0,1,2 ved1,ved2,ved3
->>>> osdmap e62: 4 osds: 4 up, 4 in
->>>> pgmap v47148: 768 pgs: 512 active+clean, 256 stale+active+clean; 
->>>> 2224 MB
->>>> data, 15442 MB used, 86907 MB / 102350 MB avail
->>>> mdsmap e1: 0/0/1
->>>>
->>>> In particular 256 pgs stuck stale - I've tried a) waiting a while
->>>> (overnight), b) a rolling restart of all 4 osd's, c) restarting all 
->>>> ceph
->>>> services on all 4 nodes. All without changing this.
->>>>
->>>> As far as I understand what stuck state means, I can't see why they 
->>>> need
->>>> to stay that way, given all osd's and mon's are up. (I have no mds
->>>> configured)....any ideas? Or is this just expected?
->>>>
->>>> Regards
->>>>
->>>> Mark
->>>
->>> What does 'ceph pg dump_stuck stale' show? Stale means that the
->>> monitors haven't gotten updates about those pgs from the osds within
->>> the a certain period of time (default is 300 seconds), so something may
->>> be wrong with your crushmap or those pgs themselves.
->>>
->>> Josh
->>
->> I have attached the dump of stuck stale pgs, and the crushmap in use.
->>
->> I did wonder if it is to do with not using any mds - i.e could this mean
->> the meta data pgs never get touched?
->>
->> Mark
->>
->
-> It doesn't look like a problem with your crushmap - the pgs are all 
-> mapped to osds, and there's no common osd holding things up.
->
-> Not using the mds doesn't affect the pgs. They should still be active.
-> All the stuck ones are in pool 0 though. Is there anything special 
-> about that pool? Were there any changes before the pgs became stuck?
->
-> I don't think it should work in this case, but you might try 'ceph pg 
-> force_create_pg 0.c'.
->
->
+Hey,
 
-Hmm - good observation - pool 0 is data, and I am only using rbd at the 
-moment, and:
+I've rebased this and applied it to the testing branch, along with a few 
+other fixes.
 
-$ ceph osd dump -o -|grep size
-pool 0 'data' rep size 4 crush_ruleset 0 object_hash rjenkins pg_num 256 
-pgp_num 256 last_change 8 owner 0 crash_replay_interval 45
-pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 
-256 pgp_num 256 last_change 1 owner 0
-pool 2 'rbd' rep size 4 crush_ruleset 2 object_hash rjenkins pg_num 256 
-pgp_num 256 last_change 11 owner 0
-
-... pool 0 is mapped to crush ruleset 0 - and I don't have a ruleset 0. 
-Could that be the problem?
-
-Mark
+Thanks!
+sage
 
 
+On Sun, 8 Jul 2012, Guan Jun He wrote:
 
+> Hi Sage,
+> 
+>   I have resubmited the patch with changes we talked in last e_mail.
+> Please take a view of it and give a reply.
+> Thank you very much for your time! 	
+> 
+> best,
+> Guanjun
+> 
+> 
+> >>> On 7/2/2012 at 11:31 AM, in message
+> <1341199901-16730-1-git-send-email-gjhe@suse.com>, Guanjun He
+> <heguanbo@gmail.com> wrote: 
+> > Reproduce the patch against the latest source repo.
+> > 
+> > 	Add an atomic variable 'stopping' as flag in struct ceph_messenger,
+> >  set this flag to 1 in function ceph_destroy_client(), and add the condition 
+> > code
+> >  in function ceph_data_ready() to test the flag value, if true(1), just 
+> > return.
+> > 
+> > Signed-off-by: Guanjun He <gjhe@suse.com>
+> > ---
+> >  include/linux/ceph/messenger.h |    1 +
+> >  net/ceph/ceph_common.c         |    2 ++
+> >  net/ceph/messenger.c           |    5 +++++
+> >  3 files changed, 8 insertions(+), 0 deletions(-)
+> > 
+> > diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+> > index 2521a95..2586f34 100644
+> > --- a/include/linux/ceph/messenger.h
+> > +++ b/include/linux/ceph/messenger.h
+> > @@ -53,6 +53,7 @@ struct ceph_messenger {
+> >  	struct ceph_entity_inst inst;    /* my name+address */
+> >  	struct ceph_entity_addr my_enc_addr;
+> >  
+> > +	atomic_t stopping;
+> >  	bool nocrc;
+> >  
+> >  	/*
+> > diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+> > index ba4323b..478f3a4 100644
+> > --- a/net/ceph/ceph_common.c
+> > +++ b/net/ceph/ceph_common.c
+> > @@ -501,6 +501,8 @@ void ceph_destroy_client(struct ceph_client *client)
+> >  {
+> >  	dout("destroy_client %p\n", client);
+> >  
+> > +	atomic_set(&client->msgr->stopping, 1);
+> > +
+> >  	/* unmount */
+> >  	ceph_osdc_stop(&client->osdc);
+> >  
+> > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> > index b332c3d..11ea62e 100644
+> > --- a/net/ceph/messenger.c
+> > +++ b/net/ceph/messenger.c
+> > @@ -156,6 +156,9 @@ EXPORT_SYMBOL(ceph_msgr_flush);
+> >  static void ceph_data_ready(struct sock *sk, int count_unused)
+> >  {
+> >  	struct ceph_connection *con = sk->sk_user_data;
+> > +	if (atomic_read(&con->msgr->stopping)) {
+> > +		return;
+> > +	}
+> >  
+> >  	if (sk->sk_state != TCP_CLOSE_WAIT) {
+> >  		dout("ceph_data_ready on %p state = %lu, queueing work\n",
+> > @@ -2285,6 +2288,8 @@ struct ceph_messenger *ceph_messenger_create(struct 
+> > ceph_entity_addr *myaddr,
+> >  	get_random_bytes(&msgr->inst.addr.nonce, sizeof(msgr->inst.addr.nonce));
+> >  	encode_my_addr(msgr);
+> >  
+> > +	atomic_set(&msgr->stopping, 0);
+> > +
+> >  	dout("messenger_create %p\n", msgr);
+> >  	return msgr;
+> >  }
+> 
+> 
+> 
