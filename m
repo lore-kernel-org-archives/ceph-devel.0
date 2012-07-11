@@ -1,231 +1,173 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 14/16] rbd: more symbol renames
-Date: Wed, 11 Jul 2012 09:02:55 -0500
-Message-ID: <4FFD878F.5030905@inktank.com>
+Subject: [PATCH 15/16] rbd: option symbol renames
+Date: Wed, 11 Jul 2012 09:03:05 -0500
+Message-ID: <4FFD8799.80105@inktank.com>
 References: <4FFD847C.7070205@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f52.google.com ([209.85.213.52]:50862 "EHLO
-	mail-yw0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932521Ab2GKOC5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 10:02:57 -0400
-Received: by mail-yw0-f52.google.com with SMTP id p61so1430101yhp.11
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 07:02:57 -0700 (PDT)
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:38020 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932521Ab2GKODI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 10:03:08 -0400
+Received: by ghrr11 with SMTP id r11so1227157ghr.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 07:03:08 -0700 (PDT)
 In-Reply-To: <4FFD847C.7070205@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Rename variables named "obj" which represent object names so they're
-consistenly named "object_name".
+Use the name "ceph_opts" consistently (rather than just "opt") for
+pointers to a ceph_options structure.
 
-Rename the "cls" and "method" parameters in rbd_req_sync_exec()
-to be "class_name" and "method_name", and make similar changes
-to the names of local variables in that function representing
-the lengths of those names.
+Change the few spots that don't use "rbd_opts" for a rbd_options
+pointer to match the rest.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   53
-++++++++++++++++++++++++++-------------------------
- 1 files changed, 27 insertions(+), 26 deletions(-)
+ drivers/block/rbd.c |   40 ++++++++++++++++++++--------------------
+ 1 files changed, 20 insertions(+), 20 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 14e675c..d29c864 100644
+index d29c864..c99ea08 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -857,7 +857,7 @@ static int rbd_do_request(struct request *rq,
- 			  struct rbd_device *rbd_dev,
- 			  struct ceph_snap_context *snapc,
- 			  u64 snapid,
--			  const char *obj, u64 ofs, u64 len,
-+			  const char *object_name, u64 ofs, u64 len,
- 			  struct bio *bio,
- 			  struct page **pages,
- 			  int num_pages,
-@@ -893,7 +893,8 @@ static int rbd_do_request(struct request *rq,
- 		req_data->coll_index = coll_index;
- 	}
+@@ -270,9 +270,9 @@ static const struct block_device_operations
+rbd_bd_ops = {
 
--	dout("rbd_do_request obj=%s ofs=%lld len=%lld\n", obj, len, ofs);
-+	dout("rbd_do_request object_name=%s ofs=%lld len=%lld\n",
-+		object_name, len, ofs);
+ /*
+  * Initialize an rbd client instance.
+- * We own *opt.
++ * We own *ceph_opts.
+  */
+-static struct rbd_client *rbd_client_create(struct ceph_options *opt,
++static struct rbd_client *rbd_client_create(struct ceph_options *ceph_opts,
+ 					    struct rbd_options *rbd_opts)
+ {
+ 	struct rbd_client *rbdc;
+@@ -288,10 +288,10 @@ static struct rbd_client *rbd_client_create(struct
+ceph_options *opt,
 
- 	down_read(&rbd_dev->header_rwsem);
+ 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
 
-@@ -918,7 +919,7 @@ static int rbd_do_request(struct request *rq,
- 	reqhead = req->r_request->front.iov_base;
- 	reqhead->snapid = cpu_to_le64(CEPH_NOSNAP);
+-	rbdc->client = ceph_create_client(opt, rbdc, 0, 0);
++	rbdc->client = ceph_create_client(ceph_opts, rbdc, 0, 0);
+ 	if (IS_ERR(rbdc->client))
+ 		goto out_mutex;
+-	opt = NULL; /* Now rbdc->client is responsible for opt */
++	ceph_opts = NULL; /* Now rbdc->client is responsible for ceph_opts */
 
--	strncpy(req->r_oid, obj, sizeof(req->r_oid));
-+	strncpy(req->r_oid, object_name, sizeof(req->r_oid));
- 	req->r_oid_len = strlen(req->r_oid);
-
- 	layout = &req->r_file_layout;
-@@ -1019,7 +1020,7 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
- 			   int flags,
- 			   struct ceph_osd_req_op *orig_ops,
- 			   int num_reply,
--			   const char *obj,
-+			   const char *object_name,
- 			   u64 ofs, u64 len,
- 			   char *buf,
- 			   struct ceph_osd_request **linger_req,
-@@ -1050,7 +1051,7 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
- 	}
-
- 	ret = rbd_do_request(NULL, rbd_dev, snapc, snapid,
--			  obj, ofs, len, NULL,
-+			  object_name, ofs, len, NULL,
- 			  pages, num_pages,
- 			  flags,
- 			  ops,
-@@ -1171,7 +1172,7 @@ static int rbd_req_read(struct request *rq,
- static int rbd_req_sync_read(struct rbd_device *rbd_dev,
- 			  struct ceph_snap_context *snapc,
- 			  u64 snapid,
--			  const char *obj,
-+			  const char *object_name,
- 			  u64 ofs, u64 len,
- 			  char *buf,
- 			  u64 *ver)
-@@ -1181,7 +1182,7 @@ static int rbd_req_sync_read(struct rbd_device
-*rbd_dev,
- 			       CEPH_OSD_OP_READ,
- 			       CEPH_OSD_FLAG_READ,
- 			       NULL,
--			       1, obj, ofs, len, buf, NULL, ver);
-+			       1, object_name, ofs, len, buf, NULL, ver);
+ 	ret = ceph_open_session(rbdc->client);
+ 	if (ret < 0)
+@@ -314,23 +314,23 @@ out_mutex:
+ 	mutex_unlock(&ctl_mutex);
+ 	kfree(rbdc);
+ out_opt:
+-	if (opt)
+-		ceph_destroy_options(opt);
++	if (ceph_opts)
++		ceph_destroy_options(ceph_opts);
+ 	return ERR_PTR(ret);
  }
 
  /*
-@@ -1190,7 +1191,7 @@ static int rbd_req_sync_read(struct rbd_device
-*rbd_dev,
- static int rbd_req_sync_notify_ack(struct rbd_device *rbd_dev,
- 				   u64 ver,
- 				   u64 notify_id,
--				   const char *obj)
-+				   const char *object_name)
- {
- 	struct ceph_osd_req_op *ops;
- 	int ret;
-@@ -1204,7 +1205,7 @@ static int rbd_req_sync_notify_ack(struct
-rbd_device *rbd_dev,
- 	ops[0].watch.flag = 0;
-
- 	ret = rbd_do_request(NULL, rbd_dev, NULL, CEPH_NOSNAP,
--			  obj, 0, 0, NULL,
-+			  object_name, 0, 0, NULL,
- 			  NULL, 0,
- 			  CEPH_OSD_FLAG_READ,
- 			  ops,
-@@ -1240,7 +1241,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
-u8 opcode, void *data)
-  * Request sync osd watch
+  * Find a ceph client with specific addr and configuration.
   */
- static int rbd_req_sync_watch(struct rbd_device *rbd_dev,
--			      const char *obj,
-+			      const char *object_name,
- 			      u64 ver)
+-static struct rbd_client *__rbd_client_find(struct ceph_options *opt)
++static struct rbd_client *__rbd_client_find(struct ceph_options *ceph_opts)
  {
- 	struct ceph_osd_req_op *ops;
-@@ -1264,7 +1265,7 @@ static int rbd_req_sync_watch(struct rbd_device
-*rbd_dev,
- 			      0,
- 			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			      ops,
--			      1, obj, 0, 0, NULL,
-+			      1, object_name, 0, 0, NULL,
- 			      &rbd_dev->watch_request, NULL);
+ 	struct rbd_client *client_node;
 
- 	if (ret < 0)
-@@ -1285,7 +1286,7 @@ fail:
-  * Request sync osd unwatch
-  */
- static int rbd_req_sync_unwatch(struct rbd_device *rbd_dev,
--				const char *obj)
-+				const char *object_name)
+-	if (opt->flags & CEPH_OPT_NOSHARE)
++	if (ceph_opts->flags & CEPH_OPT_NOSHARE)
+ 		return NULL;
+
+ 	list_for_each_entry(client_node, &rbd_client_list, node)
+-		if (ceph_compare_options(opt, client_node->client) == 0)
++		if (!ceph_compare_options(ceph_opts, client_node->client))
+ 			return client_node;
+ 	return NULL;
+ }
+@@ -346,7 +346,7 @@ enum {
+ 	/* string args above */
+ };
+
+-static match_table_t rbdopt_tokens = {
++static match_table_t rbd_opts_tokens = {
+ 	{Opt_notify_timeout, "notify_timeout=%d"},
+ 	/* int args above */
+ 	/* string args above */
+@@ -355,11 +355,11 @@ static match_table_t rbdopt_tokens = {
+
+ static int parse_rbd_opts_token(char *c, void *private)
  {
- 	struct ceph_osd_req_op *ops;
+-	struct rbd_options *rbdopt = private;
++	struct rbd_options *rbd_opts = private;
+ 	substring_t argstr[MAX_OPT_ARGS];
+ 	int token, intval, ret;
 
-@@ -1302,7 +1303,7 @@ static int rbd_req_sync_unwatch(struct rbd_device
-*rbd_dev,
- 			      0,
- 			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			      ops,
--			      1, obj, 0, 0, NULL, NULL, NULL);
-+			      1, object_name, 0, 0, NULL, NULL, NULL);
+-	token = match_token(c, rbdopt_tokens, argstr);
++	token = match_token(c, rbd_opts_tokens, argstr);
+ 	if (token < 0)
+ 		return -EINVAL;
 
- 	rbd_destroy_ops(ops);
- 	ceph_osdc_cancel_event(rbd_dev->watch_event);
-@@ -1329,7 +1330,7 @@ static void rbd_notify_cb(u64 ver, u64 notify_id,
-u8 opcode, void *data)
-  * Request sync osd notify
-  */
- static int rbd_req_sync_notify(struct rbd_device *rbd_dev,
--		          const char *obj)
-+		          const char *object_name)
+@@ -380,7 +380,7 @@ static int parse_rbd_opts_token(char *c, void *private)
+
+ 	switch (token) {
+ 	case Opt_notify_timeout:
+-		rbdopt->notify_timeout = intval;
++		rbd_opts->notify_timeout = intval;
+ 		break;
+ 	default:
+ 		BUG_ON(token);
+@@ -397,7 +397,7 @@ static struct rbd_client *rbd_get_client(const char
+*mon_addr,
+ 					 char *options)
  {
- 	struct ceph_osd_req_op *ops;
- 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-@@ -1360,7 +1361,7 @@ static int rbd_req_sync_notify(struct rbd_device
-*rbd_dev,
- 			       0,
- 			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			       ops,
--			       1, obj, 0, 0, NULL, NULL, NULL);
-+			       1, object_name, 0, 0, NULL, NULL, NULL);
- 	if (ret < 0)
- 		goto fail_event;
+ 	struct rbd_client *rbdc;
+-	struct ceph_options *opt;
++	struct ceph_options *ceph_opts;
+ 	struct rbd_options *rbd_opts;
 
-@@ -1380,25 +1381,25 @@ fail:
-  * Request sync osd read
-  */
- static int rbd_req_sync_exec(struct rbd_device *rbd_dev,
--			     const char *obj,
--			     const char *cls,
--			     const char *method,
-+			     const char *object_name,
-+			     const char *class_name,
-+			     const char *method_name,
- 			     const char *data,
- 			     int len,
- 			     u64 *ver)
- {
- 	struct ceph_osd_req_op *ops;
--	int cls_len = strlen(cls);
--	int method_len = strlen(method);
-+	int class_name_len = strlen(class_name);
-+	int method_name_len = strlen(method_name);
- 	int ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_CALL,
--				    cls_len + method_len + len);
-+				    class_name_len + method_name_len + len);
- 	if (ret < 0)
- 		return ret;
+ 	rbd_opts = kzalloc(sizeof(*rbd_opts), GFP_KERNEL);
+@@ -406,29 +406,29 @@ static struct rbd_client *rbd_get_client(const
+char *mon_addr,
 
--	ops[0].cls.class_name = cls;
--	ops[0].cls.class_len = (__u8)cls_len;
--	ops[0].cls.method_name = method;
--	ops[0].cls.method_len = (__u8)method_len;
-+	ops[0].cls.class_name = class_name;
-+	ops[0].cls.class_len = (__u8) class_name_len;
-+	ops[0].cls.method_name = method_name;
-+	ops[0].cls.method_len = (__u8) method_name_len;
- 	ops[0].cls.argc = 0;
- 	ops[0].cls.indata = data;
- 	ops[0].cls.indata_len = len;
-@@ -1408,7 +1409,7 @@ static int rbd_req_sync_exec(struct rbd_device
-*rbd_dev,
- 			       0,
- 			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			       ops,
--			       1, obj, 0, 0, NULL, NULL, ver);
-+			       1, object_name, 0, 0, NULL, NULL, ver);
+ 	rbd_opts->notify_timeout = RBD_NOTIFY_TIMEOUT_DEFAULT;
 
- 	rbd_destroy_ops(ops);
+-	opt = ceph_parse_options(options, mon_addr,
++	ceph_opts = ceph_parse_options(options, mon_addr,
+ 				mon_addr + mon_addr_len,
+ 				parse_rbd_opts_token, rbd_opts);
+-	if (IS_ERR(opt)) {
++	if (IS_ERR(ceph_opts)) {
+ 		kfree(rbd_opts);
+-		return ERR_CAST(opt);
++		return ERR_CAST(ceph_opts);
+ 	}
 
+ 	spin_lock(&rbd_client_list_lock);
+-	rbdc = __rbd_client_find(opt);
++	rbdc = __rbd_client_find(ceph_opts);
+ 	if (rbdc) {
+ 		/* using an existing client */
+ 		kref_get(&rbdc->kref);
+ 		spin_unlock(&rbd_client_list_lock);
+
+-		ceph_destroy_options(opt);
++		ceph_destroy_options(ceph_opts);
+ 		kfree(rbd_opts);
+
+ 		return rbdc;
+ 	}
+ 	spin_unlock(&rbd_client_list_lock);
+
+-	rbdc = rbd_client_create(opt, rbd_opts);
++	rbdc = rbd_client_create(ceph_opts, rbd_opts);
+
+ 	if (IS_ERR(rbdc))
+ 		kfree(rbd_opts);
 -- 
 1.7.5.4
 
