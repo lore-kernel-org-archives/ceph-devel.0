@@ -1,37 +1,101 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 07/16] rbd: dynamically allocate object prefix
-Date: Wed, 11 Jul 2012 14:17:59 -0500
-Message-ID: <4FFDD167.6010602@inktank.com>
-References: <4FFD847C.7070205@inktank.com> <4FFD8750.7010407@inktank.com> <4FFDD014.9090208@inktank.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: [PATCH 04/16] libceph: define ceph_extract_encoded_string()
+Date: Wed, 11 Jul 2012 12:26:08 -0700
+Message-ID: <CAC-hyiE+g5jDTTUm90DPrSk3NbwenR_Nta8eypXPOC3BZLTmjQ@mail.gmail.com>
+References: <4FFD847C.7070205@inktank.com>
+	<4FFD8727.7050106@inktank.com>
+	<CAC-hyiFrftSudtCUHaGwWyrzMBoAcm-uzRK4Bz7f-crO+dbfBg@mail.gmail.com>
+	<4FFDD0B2.1010406@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f52.google.com ([209.85.213.52]:50050 "EHLO
-	mail-yw0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932191Ab2GKTSA (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 15:18:00 -0400
-Received: by yhpp61 with SMTP id p61so1856808yhp.11
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 12:18:00 -0700 (PDT)
-In-Reply-To: <4FFDD014.9090208@inktank.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:50116 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932388Ab2GKT0K (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jul 2012 15:26:10 -0400
+Received: by bkwj10 with SMTP id j10so1505803bkw.19
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 12:26:08 -0700 (PDT)
+In-Reply-To: <4FFDD0B2.1010406@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
+To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 07/11/2012 02:12 PM, Josh Durgin wrote:
->>   /*
->> @@ -1711,15 +1721,17 @@ static int __rbd_refresh_header(struct
->> rbd_device *rbd_dev)
->>              if head moves */
->>           follow_seq = 1;
+On Wed, Jul 11, 2012 at 12:14 PM, Alex Elder <elder@inktank.com> wrote:
+> On 07/11/2012 12:20 PM, Yehuda Sadeh wrote:
+>> On Wed, Jul 11, 2012 at 7:01 AM, Alex Elder <elder@inktank.com> wrote:
+>>> This adds a new utility routine which will return a dynamically-
+>>> allocated buffer containing a string that has been decoded from ceph
+>>> over-the-wire format.  It also returns the length of the string
+>>> if the address of a size variable is supplied to receive it.
+>>>
+>>> For now, no gfp_flags parameter is defined (GFP_KERNEL is used) but
+>>> it could be easily be added if needed.
+>>>
 >>
->> -    kfree(rbd_dev->header.snapc);
->> -    kfree(rbd_dev->header.snap_names);
->> +    kfree(rbd_dev->header.object_prefix);
-> 
-> Object prefix isn't going to change, so it doesn't need to be reset
-> here. Otherwise looks good.
+>> I'd rather have it upfront, will help avoiding future errors.
+>
+> I actually wanted to do exactly that before I sent it but I
+> forgot.  I guess I got all caught up in the excitement.
+>
+>>> Signed-off-by: Alex Elder <elder@inktank.com>
+>>> ---
+>>>  include/linux/ceph/decode.h |   29 +++++++++++++++++++++++++++++
+>>>  1 files changed, 29 insertions(+), 0 deletions(-)
+>>>
+>>> diff --git a/include/linux/ceph/decode.h b/include/linux/ceph/decode.h
+>>> index 7ead11fc..7759164 100644
+>>> --- a/include/linux/ceph/decode.h
+>>> +++ b/include/linux/ceph/decode.h
+>>> @@ -80,6 +80,35 @@ static inline size_t ceph_decode_string(void **p,
+>>> char *s, size_t size)
+>>>  }
+>>>
+>>>  /*
+>>> + * Allocate a buffer big enough to hold the wire-encoded string, and
+>>> + * decode the string into it.  The resulting string will always be
+>>> + * terminated with '\0'.  If successful, *p will be advanced
+>>> + * past the decoded data.  Also, if lenp is not a null pointer, the
+>>> + * length (not including the terminating '\0') will be recorded in
+>>> + * it.  Note that a zero-length string is a valid return value.
+>>> + *
+>>> + * Returns a pointer to the newly-allocated string buffer, or a
+>>> + * null pointer if memory could not be allocated for the result.
+>>> + * Neither of the arguments is updated if NULL is returned.
+>>> + */
+>>> +static inline char *ceph_extract_encoded_string(void **p, size_t *lenp)
+>>> +{
+>>> +       size_t len;
+>>> +       char *buf;
+>>> +
+>>> +       len = ceph_decode_string(p, NULL, 0);
+>>> +       buf = kmalloc(len + 1, GFP_KERNEL);
+>>> +       if (!buf)
+>>> +               return NULL;
+>>> +
+>>> +       (void) ceph_decode_string(p, buf, len + 1);
+>>> +       if (lenp)
+>>> +               *lenp = len;
+>>> +
+>>> +       return buf;
+>>> +}
+>>> +
+>>> +/*
+>>
+>> We don't make an effort here to check whether encoded string buffer is
+>> valid. While we may be checking it somewhere up the stack, this seem
+>> like a generic enough function that could be naively used. Either make
+>> it clear that it's an internal function, or make it check p bounds.
+>
+> Are you saying I should have the caller provide the length of the
+> buffer, and ensure we don't exceed it?
+
+Yeah. There are several examples of us doing it (look at ceph_decode_need).
+
+>
+> Should I assume that applies to the previous patch also?
+
+Right. Good call.
 
 
-In that case I will verify that and warn if they do differ.	-Alex
+Yehuda
