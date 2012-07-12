@@ -1,45 +1,34 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: Bug with ceph_mount and non-existent directory
-Date: Thu, 12 Jul 2012 08:26:23 -0700
-Message-ID: <CAPrxi59OzF9YhWkmuKF_v2guO5bofJoufHVj5FLws88bPCJy7A@mail.gmail.com>
-References: <071130CA-B2AB-4C9D-80A7-23BE3DEF12C9@cs.ucsc.edu>
-	<CAPYLRzi_2Bvn=fcC_hWBzNTRj4fLPzx1NMfj_X=6ZVsM9n+Mcw@mail.gmail.com>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: librbd: error finding header
+Date: Thu, 12 Jul 2012 09:00:14 -0700
+Message-ID: <CADvuQRH0+AxZEsCePMeRr7Oyr1NWZgwVUEA-OxmKDZwLCBCp-w@mail.gmail.com>
+References: <4FFA6F35.4040102@bashkirtsev.com> <4FFA9E6D.7030207@inktank.com>
+ <4FFAB273.6030605@bashkirtsev.com> <4FFB193D.7050207@inktank.com>
+ <4FFBA108.3010009@bashkirtsev.com> <4FFBB74F.2050702@inktank.com>
+ <4FFBF505.4050400@bashkirtsev.com> <4FFC8BBC.6010807@hq.newdream.net>
+ <4FFE3939.2000000@bashkirtsev.com> <4FFE5567.3060807@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:42836 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932528Ab2GLP0Y (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jul 2012 11:26:24 -0400
-Received: by yenl2 with SMTP id l2so2521032yen.19
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Jul 2012 08:26:23 -0700 (PDT)
-In-Reply-To: <CAPYLRzi_2Bvn=fcC_hWBzNTRj4fLPzx1NMfj_X=6ZVsM9n+Mcw@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:36782 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030320Ab2GLQAg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jul 2012 12:00:36 -0400
+Received: by pbbrp8 with SMTP id rp8so3917729pbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Jul 2012 09:00:36 -0700 (PDT)
+In-Reply-To: <4FFE5567.3060807@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>, Dan Mick <dan.mick@inktank.com>, ceph-devel@vger.kernel.org
 
-On Mon, Jul 2, 2012 at 10:04 AM, Gregory Farnum <greg@inktank.com> wrote:
-> On Tue, Jun 26, 2012 at 8:20 PM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
->> I get the following assert failure during cleanup if ceph_mount() is passed a non-existent directory, while ceph_mount() returns success. Nothing critical, but it got triggered with Java unit test framework.
+On Wed, Jul 11, 2012 at 9:41 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> You're right about the object name - you can get its offset in the
+> image that way. Since rbd is thin-provisioned, however, the highest
+> index object might not be the highest possible object. When you first
+> create an image, only the header object is created.
 
-Hey Greg, I didn't test if the mount is functional, but it doesn't
-return an error.
-
-- Noah
-
->>
->>     [junit] ./include/xlist.h: In function 'xlist<T>::item::~item() [with T = Inode*]' thread 7fafb175f700 time 2012-06-24 11:11:03.038030
->>     [junit] ./include/xlist.h: 28: FAILED assert(!is_on_list())
->>     [junit]  ceph version 0.47.2-414-gc4bf133 (commit:c4bf133b87403016cff0355cbebd54f95d3f753b)
->>     [junit]  1: (()+0x1073c8) [0x7fafa862d3c8]
->>     [junit]  2: (Inode::~Inode()+0x249) [0x7fafa867f8f9]
->>     [junit]  3: (Client::tear_down_cache()+0x2c3) [0x7fafa8667393]
->>     [junit]  4: (Client::~Client()+0x2f) [0x7fafa866747f]
->>     [junit]  5: (Client::~Client()+0x9) [0x7fafa8667b49]
->>     [junit]  6: (ceph_mount()+0x136) [0x7fafa862f8d6]
->
-> Sorry to leave this so long. Just to make sure I understand: if you
-> pass ceph_mount a directory (to be the root of the local mount) which
-> doesn't exist, it mounts successfully (at root?), but then asserts on
-> cleanup?
+You can re-create it with a size that's known to be greater than the
+old size (put in a terabyte extra, or something), and then use a
+partitioning tool to see what the disk layout really is, and resize
+based on that.
