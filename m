@@ -1,47 +1,46 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: How to compile Java-Rados.
-Date: Wed, 11 Jul 2012 22:32:35 -0700
-Message-ID: <CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com>
-References: <loom.20120712T065146-882@post.gmane.org>
+From: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Subject: Re: oops in rbd module (con_work in libceph)
+Date: Thu, 12 Jul 2012 09:15:36 +0200
+Message-ID: <4FFE7998.9020002@univ-nantes.fr>
+References: <4FF6A27B.7020808@univ-nantes.fr> <4FF705BA.4080501@univ-nantes.fr> <4FF77FE8.9040408@inktank.com> <4FFB0CBA.6090806@univ-nantes.fr> <4FFB0F2A.6070601@univ-nantes.fr> <CAPYLRzj0=hs5BYrG2veYMBUOaU1HmAJoBRPdwj1y3PuMUveb0w@mail.gmail.com> <4FFDE0C6.50807@univ-nantes.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:49978 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751355Ab2GLFcf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jul 2012 01:32:35 -0400
-Received: by yhmm54 with SMTP id m54so2339449yhm.19
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jul 2012 22:32:35 -0700 (PDT)
-In-Reply-To: <loom.20120712T065146-882@post.gmane.org>
+Received: from smtptls1-cha.cpub.univ-nantes.fr ([193.52.103.113]:34435 "EHLO
+	smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752759Ab2GLHPm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jul 2012 03:15:42 -0400
+In-Reply-To: <4FFDE0C6.50807@univ-nantes.fr>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ramu <ramu.freesystems@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yann Dupont <Yann.Dupont@univ-nantes.fr>
+Cc: Gregory Farnum <greg@inktank.com>, Alex Elder <elder@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Ramu,
-
-I just pushed a patch that should fix your compile problems:
-
-  https://github.com/noahdesu/java-rados/commit/0a68aebe2360ca140d470f7dacfc555a618dd976
-
-Note that you may need to change JAVA_HOME in src/native/Makefile.am
-for your distribution.
-
-Hope things work for you. The bindings are old, but there isn't any
-reason they shouldn't still function correctly.
-
-- Noah
-
-On Wed, Jul 11, 2012 at 9:53 PM, ramu <ramu.freesystems@gmail.com> wrote:
-> Hi,
+Le 11/07/2012 22:23, Yann Dupont a =E9crit :
+> Le 10/07/2012 19:46, Gregory Farnum a =E9crit :
+>>
+>>
+>> Each time, at the exact date, a bad CRC (they are the only ones for =
+this
+>> day, so it seems related)
+>> Yes; a bad CRC should cause the socket to close =97 that's intended
+>> behavior (although you might want to look into why that's happening,
+> ah ! very interesting ! 3.2 is ok, 3.4 not (even with latest=20
+> ceph-client patch).
+> the 8 nodes are similar (poweredge M610, intel 10 Gb), but the client=
+=20
+> is not : Also M610 (older) but with brocade 10Gb.
 >
-> I want to compile java-rados against ceph-0.47.Please help me how to compile
-> java-rados.
->
-> Thanks,
-> Ramu.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It is broadcom 10 Gb, not brocade . sorry for the confusion
+
+--=20
+Yann Dupont - Service IRTS, DSI Universit=E9 de Nantes
+Tel : 02.53.48.49.20 - Mail/Jabber : Yann.Dupont@univ-nantes.fr
+
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
