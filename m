@@ -1,34 +1,62 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: librbd: error finding header
-Date: Thu, 12 Jul 2012 09:00:14 -0700
-Message-ID: <CADvuQRH0+AxZEsCePMeRr7Oyr1NWZgwVUEA-OxmKDZwLCBCp-w@mail.gmail.com>
-References: <4FFA6F35.4040102@bashkirtsev.com> <4FFA9E6D.7030207@inktank.com>
- <4FFAB273.6030605@bashkirtsev.com> <4FFB193D.7050207@inktank.com>
- <4FFBA108.3010009@bashkirtsev.com> <4FFBB74F.2050702@inktank.com>
- <4FFBF505.4050400@bashkirtsev.com> <4FFC8BBC.6010807@hq.newdream.net>
- <4FFE3939.2000000@bashkirtsev.com> <4FFE5567.3060807@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: outstanding branches
+Date: Thu, 12 Jul 2012 09:16:13 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1207120910060.693@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:36782 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030320Ab2GLQAg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jul 2012 12:00:36 -0400
-Received: by pbbrp8 with SMTP id rp8so3917729pbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Jul 2012 09:00:36 -0700 (PDT)
-In-Reply-To: <4FFE5567.3060807@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:46332 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755191Ab2GLQQO (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jul 2012 12:16:14 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id CB04A80481
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Jul 2012 09:16:13 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id A4E0180481
+	for <ceph-devel@vger.kernel.org>; Thu, 12 Jul 2012 09:16:13 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>, Dan Mick <dan.mick@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Wed, Jul 11, 2012 at 9:41 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> You're right about the object name - you can get its offset in the
-> image that way. Since rbd is thin-provisioned, however, the highest
-> index object might not be the highest possible object. When you first
-> create an image, only the header object is created.
+These branches need some attention:
 
-You can re-create it with a size that's known to be greater than the
-old size (put in a terabyte extra, or something), and then use a
-partitioning tool to see what the disk layout really is, and resize
-based on that.
+- wip-mon-mkfs
+
+Avoid doing rm -rf (literally) during ceph-mon --mkfs.  Do it in vstart.sh 
+and mkcephfs instead.
+
+- wip-omap-comparison
+
+Eleanor is using this.  It should probbaly just go in master... Sam?
+
+- wip-2650
+
+rgw: don't override subuser perm mask if perm not specified
+
+Just needs to be merged into master, probably Stable/next too... Yehuda?
+
+- wip-rbd-locking
+
+This is in flux as Yehuda is converting the OSD support into a generic 
+class.
+
+- wip-2504
+
+rgw: use multiple notification objects
+
+Should this be merged with a default of 1 (to cooperate with previous 
+code)?
+
+
+These are probably on hold for the time being:
+
+- wip-rados-bench4
+
+On hold while Mike finishes chunky scrub... probably 0.51?
+
+- wip-auth
+
+Cleaning up 'rbd map' options to be consistent with everythign else.  Misc 
+keyring handling cleanup.  New auth configuration options, negotiation, 
+etc.  This needs some significant review and testing.  
