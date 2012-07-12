@@ -1,112 +1,128 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: create pool_id device attribute
-Date: Thu, 12 Jul 2012 10:16:45 -0700
-Message-ID: <4FFF067D.8050603@inktank.com>
-References: <4FFD847C.7070205@inktank.com> <4FFD875B.3060608@inktank.com> <4FFF03D0.2010604@inktank.com>
+Subject: Re: [PATCH] rbd: dynamically allocate pool name
+Date: Thu, 12 Jul 2012 10:21:57 -0700
+Message-ID: <4FFF07B5.7010103@inktank.com>
+References: <4FFD847C.7070205@inktank.com> <4FFD875B.3060608@inktank.com> <4FFF03D7.6000605@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:51577 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932586Ab2GLRQt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jul 2012 13:16:49 -0400
-Received: by yhmm54 with SMTP id m54so2954070yhm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Jul 2012 10:16:48 -0700 (PDT)
-In-Reply-To: <4FFF03D0.2010604@inktank.com>
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:45120 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161288Ab2GLRWA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jul 2012 13:22:00 -0400
+Received: by ghrr11 with SMTP id r11so2662155ghr.19
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Jul 2012 10:22:00 -0700 (PDT)
+In-Reply-To: <4FFF03D7.6000605@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Looks good.
-
-I forgot to mention that this should also update the sysfs
-documentation at Documentation/ABI/testing/sysfs-bus-rbd.
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
 On 07/12/2012 10:05 AM, Alex Elder wrote:
-> Add an entry under /sys/bus/rbd/devices/<N>/ named "pool_id" that
-> provides the id for the pool the rbd image is assocatied with.  This
-> is in addition to the pool name already provided.
->
-> Rename the "poolid" field in struct rbd_device  to be "pool_id".
+> There is no need to impose a small limit the length of the pool name
+> recorded for an rbd image in a struct rbd_device.  Remove the
+> limitation by allocating space for the pool name ynamically.
 >
 > Signed-off-by: Alex Elder<elder@inktank.com>
 > ---
->   drivers/block/rbd.c |   18 ++++++++++++++----
->   1 file changed, 14 insertions(+), 4 deletions(-)
+>   drivers/block/rbd.c |   27 +++++++++++++++++++--------
+>   1 file changed, 19 insertions(+), 8 deletions(-)
 >
 > Index: b/drivers/block/rbd.c
 > ===================================================================
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -167,7 +167,7 @@ struct rbd_device {
+> @@ -56,7 +56,6 @@
+>   #define RBD_MINORS_PER_MAJOR	256		/* max minors per blkdev */
+>
+>   #define RBD_MAX_MD_NAME_LEN	(RBD_MAX_OBJ_NAME_LEN + sizeof(RBD_SUFFIX))
+> -#define RBD_MAX_POOL_NAME_LEN	64
+>   #define RBD_MAX_SNAP_NAME_LEN	32
+>   #define RBD_MAX_OPT_LEN		1024
+>
+> @@ -166,7 +165,7 @@ struct rbd_device {
+>   	char			obj[RBD_MAX_OBJ_NAME_LEN]; /* rbd image name */
 >   	int			obj_len;
 >   	char			obj_md_name[RBD_MAX_MD_NAME_LEN]; /* hdr nm. */
->   	char			pool_name[RBD_MAX_POOL_NAME_LEN];
-> -	int			poolid;
-> +	int			pool_id;
+> -	char			pool_name[RBD_MAX_POOL_NAME_LEN];
+> +	char			*pool_name;
+>   	int			pool_id;
 >
 >   	struct ceph_osd_event   *watch_event;
->   	struct ceph_osd_request *watch_request;
-> @@ -920,7 +920,7 @@ static int rbd_do_request(struct request
->   	layout->fl_stripe_unit = cpu_to_le32(1<<  RBD_MAX_OBJ_ORDER);
->   	layout->fl_stripe_count = cpu_to_le32(1);
->   	layout->fl_object_size = cpu_to_le32(1<<  RBD_MAX_OBJ_ORDER);
-> -	layout->fl_pg_pool = cpu_to_le32(dev->poolid);
-> +	layout->fl_pg_pool = cpu_to_le32(dev->pool_id);
->   	ceph_calc_raw_layout(osdc, layout, snapid, ofs,&len,&bno,
->   				req, ops);
+> @@ -2331,6 +2330,8 @@ static inline char *dup_token(const char
+>    * rbd_dev, rbd_md_name, and name fields of the given rbd_dev, based
+>    * on the list of monitor addresses and other options provided via
+>    * /sys/bus/rbd/add.
+> + *
+> + * Note: rbd_dev is assumed to have been initially zero-filled.
+>    */
+>   static int rbd_add_parse_args(struct rbd_device *rbd_dev,
+>   			      const char *buf,
+> @@ -2339,7 +2340,8 @@ static int rbd_add_parse_args(struct rbd
+>   			      char *options,
+>   			      size_t options_size)
+>   {
+> -	size_t	len;
+> +	size_t len;
+> +	int ret;
 >
-> @@ -1643,7 +1643,7 @@ static int rbd_header_add_snap(struct rb
+>   	/* The first four tokens are required */
+>
+> @@ -2355,13 +2357,14 @@ static int rbd_add_parse_args(struct rbd
+>   	if (!len || len>= options_size)
 >   		return -EINVAL;
 >
->   	monc =&dev->rbd_client->client->monc;
-> -	ret = ceph_monc_create_snapid(monc, dev->poolid,&new_snapid);
-> +	ret = ceph_monc_create_snapid(monc, dev->pool_id,&new_snapid);
->   	dout("created snapid=%lld\n", new_snapid);
->   	if (ret<  0)
->   		return ret;
-> @@ -1847,6 +1847,14 @@ static ssize_t rbd_pool_show(struct devi
->   	return sprintf(buf, "%s\n", rbd_dev->pool_name);
+> -	len = copy_token(&buf, rbd_dev->pool_name, sizeof (rbd_dev->pool_name));
+> -	if (!len || len>= sizeof (rbd_dev->pool_name))
+> -		return -EINVAL;
+> +	rbd_dev->pool_name = dup_token(&buf, NULL);
+> +	if (!rbd_dev->pool_name)
+> +		return -ENOMEM;
+>
+> +	ret = -EINVAL;
+>   	len = copy_token(&buf, rbd_dev->obj, sizeof (rbd_dev->obj));
+>   	if (!len || len>= sizeof (rbd_dev->obj))
+> -		return -EINVAL;
+> +		goto out_err;
+>
+>   	/* We have the object length in hand, save it. */
+>
+> @@ -2380,9 +2383,15 @@ static int rbd_add_parse_args(struct rbd
+>   		memcpy(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
+>   			sizeof (RBD_SNAP_HEAD_NAME));
+>   	else if (len>= sizeof (rbd_dev->snap_name))
+> -		return -EINVAL;
+> +		goto out_err;
+>
+>   	return 0;
+> +
+> +out_err:
+> +	kfree(rbd_dev->pool_name);
+> +	rbd_dev->pool_name = NULL;
+> +
+> +	return ret;
 >   }
 >
-> +static ssize_t rbd_pool_id_show(struct device *dev,
-> +			     struct device_attribute *attr, char *buf)
-> +{
-> +	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
-> +
-> +	return sprintf(buf, "%d\n", rbd_dev->pool_id);
-> +}
-> +
->   static ssize_t rbd_name_show(struct device *dev,
->   			     struct device_attribute *attr, char *buf)
->   {
-> @@ -1887,6 +1895,7 @@ static DEVICE_ATTR(size, S_IRUGO, rbd_si
->   static DEVICE_ATTR(major, S_IRUGO, rbd_major_show, NULL);
->   static DEVICE_ATTR(client_id, S_IRUGO, rbd_client_id_show, NULL);
->   static DEVICE_ATTR(pool, S_IRUGO, rbd_pool_show, NULL);
-> +static DEVICE_ATTR(pool_id, S_IRUGO, rbd_pool_id_show, NULL);
->   static DEVICE_ATTR(name, S_IRUGO, rbd_name_show, NULL);
->   static DEVICE_ATTR(refresh, S_IWUSR, NULL, rbd_image_refresh);
->   static DEVICE_ATTR(current_snap, S_IRUGO, rbd_snap_show, NULL);
-> @@ -1897,6 +1906,7 @@ static struct attribute *rbd_attrs[] = {
->   	&dev_attr_major.attr,
->   	&dev_attr_client_id.attr,
->   	&dev_attr_pool.attr,
-> +	&dev_attr_pool_id.attr,
->   	&dev_attr_name.attr,
->   	&dev_attr_current_snap.attr,
->   	&dev_attr_refresh.attr,
-> @@ -2430,7 +2440,7 @@ static ssize_t rbd_add(struct bus_type *
->   	rc = ceph_pg_poolid_by_name(osdc->osdmap, rbd_dev->pool_name);
->   	if (rc<  0)
->   		goto err_out_client;
-> -	rbd_dev->poolid = rc;
-> +	rbd_dev->pool_id = rc;
+>   static ssize_t rbd_add(struct bus_type *bus,
+> @@ -2480,6 +2489,7 @@ err_out_blkdev:
+>   err_out_client:
+>   	rbd_put_client(rbd_dev);
+>   err_put_id:
+> +	kfree(rbd_dev->pool_name);
+>   	rbd_id_put(rbd_dev);
+>   err_nomem:
+>   	kfree(options);
+> @@ -2528,6 +2538,7 @@ static void rbd_dev_release(struct devic
+>   	unregister_blkdev(rbd_dev->major, rbd_dev->name);
 >
->   	/* register our block device */
->   	rc = register_blkdev(0, rbd_dev->name);
+>   	/* done with the id, and with the rbd_dev */
+> +	kfree(rbd_dev->pool_name);
+>   	rbd_id_put(rbd_dev);
+>   	kfree(rbd_dev);
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
