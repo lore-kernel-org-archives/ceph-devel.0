@@ -1,54 +1,49 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH] ceph: fix potential double free
-Date: Fri, 13 Jul 2012 11:53:48 -0500
-Message-ID: <5000529C.50202@inktank.com>
-References: <20120713142839.23587.58658.stgit@localhost.localdomain> <50003289.5010805@inktank.com> <20120713155610.4638b307@pyramind.ukuu.org.uk> <50004140.8010901@inktank.com> <20120713173722.1786d02f@pyramind.ukuu.org.uk>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: ceph status reporting non-existing osd
+Date: Fri, 13 Jul 2012 10:03:58 -0700
+Message-ID: <CAPYLRzgOHf9nMdK5oOrs6++H22iFLYvcbhMQsZtd8Z3OskX=yw@mail.gmail.com>
+References: <4FFFD9AB.40608@xdel.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:64460 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757002Ab2GMQxu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jul 2012 12:53:50 -0400
-Received: by gglu4 with SMTP id u4so3788808ggl.19
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Jul 2012 09:53:50 -0700 (PDT)
-In-Reply-To: <20120713173722.1786d02f@pyramind.ukuu.org.uk>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:58332 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932288Ab2GMREA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jul 2012 13:04:00 -0400
+Received: by lbbgm6 with SMTP id gm6so6073548lbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Jul 2012 10:03:58 -0700 (PDT)
+In-Reply-To: <4FFFD9AB.40608@xdel.ru>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
+To: Andrey Korolyov <andrey@xdel.ru>
 Cc: ceph-devel@vger.kernel.org
 
-On 07/13/2012 11:37 AM, Alan Cox wrote:
->> Is that clear?  Is there something I'm still missing?
-> 
-> Basically if they are not invariant I don't see why it can't go around
-> the loop, allocate the buffer, free it and then the next time find there
-> is nothing there and thus double free.
-> 
-> Either way if its patched the problem goes away so it's mostly for my own
-> understanding.
+On Fri, Jul 13, 2012 at 1:17 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
+> Hi,
+>
+> Recently I`ve reduced my test suite from 6 to 4 osds at ~60% usage on
+> six-node,
+> and I have removed a bunch of rbd objects during recovery to avoid
+> overfill.
+> Right now I`m constantly receiving a warn about nearfull state on
+> non-existing osd:
+>
+>    health HEALTH_WARN 1 near full osd(s)
+>    monmap e3: 3 mons at
+> {0=192.168.10.129:6789/0,1=192.168.10.128:6789/0,2=192.168.10.127:6789/0},
+> election epoch 240, quorum 0,1,2 0,1,2
+>    osdmap e2098: 4 osds: 4 up, 4 in
+>     pgmap v518696: 464 pgs: 464 active+clean; 61070 MB data, 181 GB
+> used, 143 GB / 324 GB avail
+>    mdsmap e181: 1/1/1 up {0=a=up:active}
+>
+> HEALTH_WARN 1 near full osd(s)
+> osd.4 is near full at 89%
+>
+> Needless to say, osd.4 remains only in ceph.conf, but not at crushmap.
+> Reducing has been done 'on-line', e.g. without restart entire cluster.
 
-The key is that xattrs is a local variable I think.
-
-1)  enter the "if" block
-2)  spin_unlock()
-3)  xattrs = kcalloc()...
-4)  spin_lock()
-5)  version changes, so:
-6)    kfree everything (now xattrs is invalid)
-7)    goto start
-
-Then either:
-8a) re-enter the "if" block
-9a) spin_unlock()
-10a) xattrs = kcalloc()... <- now xattrs is valid again
-. . .
-
-Or:
-8b)  do not enter the "if" block
-9b)  return err... <- xattrs is not referenced again
-
-					-Alex
-
-
+Whoops! It looks like Sage has written some patches to fix this, but
+for now you should be good if you just update your ratios to a larger
+number, and then bring them back down again. :)
+-Greg
