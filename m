@@ -1,71 +1,33 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: How to compile Java-Rados.
-Date: Fri, 13 Jul 2012 08:04:25 -0700
-Message-ID: <CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com>
-References: <loom.20120712T065146-882@post.gmane.org>
-	<CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com>
-	<loom.20120712T111906-426@post.gmane.org>
-	<CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com>
-	<loom.20120713T085715-195@post.gmane.org>
+From: Florian Haas <florian@hastexo.com>
+Subject: Ceph BoF at OSCON
+Date: Fri, 13 Jul 2012 17:32:24 +0200
+Message-ID: <CAPUexz_bLx7qwC3tGqLmDwq0OqocXpfDDUve7jQoAUdmaxm9AQ@mail.gmail.com>
+References: <CAPUexz_H--=_NrFRB+a9WoTo9E-CJgQpcqr2uZ1y1gqoQWzCYA@mail.gmail.com>
+	<CAPUexz-h7ZbY0Fx7WZB5wxeeMLF1P6RaPOY2-DNx5Yz=8SMeLA@mail.gmail.com>
+	<CAPUexz_SuasidVOiCvti9FGPo1VOps+8Dr4oUmsaQuW8x5AbLA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:54030 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755141Ab2GMPEZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jul 2012 11:04:25 -0400
-Received: by ghrr11 with SMTP id r11so3654058ghr.19
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Jul 2012 08:04:25 -0700 (PDT)
-In-Reply-To: <loom.20120713T085715-195@post.gmane.org>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:63359 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751148Ab2GMPcZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jul 2012 11:32:25 -0400
+Received: by qadb17 with SMTP id b17so413031qad.19
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Jul 2012 08:32:24 -0700 (PDT)
+In-Reply-To: <CAPUexz_SuasidVOiCvti9FGPo1VOps+8Dr4oUmsaQuW8x5AbLA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ramu <ramu.freesystems@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Ramu,
+Hi everyone,
 
-The "libtool --mode=install" hack has apparently stopped working. You
-can get around this problem for the time being by copying the library
-files you want from src/native/.libs/ into the dist folder.
+For those of you attending OSCON in Portland next week, there will be
+a birds-of-a-feather session on Ceph Monday night. All OSCON attendees
+interested in Ceph are very welcome.
 
-- Noah
+Details about the BoF are in this blog post:
 
-On Fri, Jul 13, 2012 at 12:00 AM, ramu <ramu.freesystems@gmail.com> wrote:
-> Hi Noah,
->
-> When Iam running ant command Build successful,but in dist folder only
-> librados.jar is came ,there is no libjavarados.a.
->
-> After i run the ant test ,it is showing error is,
-> makedir:
->
-> compile-rados:
->
-> compile-tests:
->
-> jar:
->
-> test:
-> [junit] Running ClusterStatsTest
-> [junit] Tests run: 1, Failures: 0, Errors: 2, Time elapsed: 0.026 sec
->
-> BUILD FAILED
-> /home/vu/java-rados/build.xml:134: Test ClusterStatsTest failed
->
-> Total time: 1 second
->
-> Thanks,
-> Ramu.
->
->
->
->
->
->
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+http://www.hastexo.com/blogs/florian/2012/07/12/openstack-high-availability-and-ceph-oscon
+
+Looking forward to meeting you there!
+Florian
