@@ -1,62 +1,41 @@
-From: ramu <ramu.freesystems@gmail.com>
-Subject: Re: How to compile Java-Rados.
-Date: Fri, 13 Jul 2012 07:00:40 +0000 (UTC)
-Message-ID: <loom.20120713T085715-195@post.gmane.org>
-References: <loom.20120712T065146-882@post.gmane.org> <CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com> <loom.20120712T111906-426@post.gmane.org> <CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: ceph status reporting non-existing osd
+Date: Fri, 13 Jul 2012 12:17:47 +0400
+Message-ID: <4FFFD9AB.40608@xdel.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:44623 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752751Ab2GMHAz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 13 Jul 2012 03:00:55 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SpZrw-0003S0-PG
-	for ceph-devel@vger.kernel.org; Fri, 13 Jul 2012 09:00:53 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Jul 2012 09:00:52 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Jul 2012 09:00:52 +0200
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:60879 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753570Ab2GMIRz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jul 2012 04:17:55 -0400
+Received: by lbbgm6 with SMTP id gm6so5459652lbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Jul 2012 01:17:53 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi Noah,
+Hi,
 
-When Iam running ant command Build successful,but in dist folder only 
-librados.jar is came ,there is no libjavarados.a.
+Recently I`ve reduced my test suite from 6 to 4 osds at ~60% usage on
+six-node,
+and I have removed a bunch of rbd objects during recovery to avoid
+overfill.
+Right now I`m constantly receiving a warn about nearfull state on
+non-existing osd:
 
-After i run the ant test ,it is showing error is,
-makedir:
+   health HEALTH_WARN 1 near full osd(s)
+   monmap e3: 3 mons at
+{0=192.168.10.129:6789/0,1=192.168.10.128:6789/0,2=192.168.10.127:6789/0},
+election epoch 240, quorum 0,1,2 0,1,2
+   osdmap e2098: 4 osds: 4 up, 4 in
+    pgmap v518696: 464 pgs: 464 active+clean; 61070 MB data, 181 GB
+used, 143 GB / 324 GB avail
+   mdsmap e181: 1/1/1 up {0=a=up:active}
 
-compile-rados:
+HEALTH_WARN 1 near full osd(s)
+osd.4 is near full at 89%
 
-compile-tests:
-
-jar:
-
-test:
-[junit] Running ClusterStatsTest
-[junit] Tests run: 1, Failures: 0, Errors: 2, Time elapsed: 0.026 sec
-
-BUILD FAILED
-/home/vu/java-rados/build.xml:134: Test ClusterStatsTest failed
-
-Total time: 1 second
-
-Thanks,
-Ramu.
-
-
-
-
-
-
-
-
-
+Needless to say, osd.4 remains only in ceph.conf, but not at crushmap.
+Reducing has been done 'on-line', e.g. without restart entire cluster.
