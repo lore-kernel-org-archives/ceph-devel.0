@@ -1,63 +1,80 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: ceph status reporting non-existing osd
-Date: Sat, 14 Jul 2012 18:20:26 +0400
-Message-ID: <CABYiri9wEoPs87qUr2MANX_AHB-aHprJBdXV0o4TxeDPj6SrhQ@mail.gmail.com>
-References: <4FFFD9AB.40608@xdel.ru> <CAPYLRzgOHf9nMdK5oOrs6++H22iFLYvcbhMQsZtd8Z3OskX=yw@mail.gmail.com>
- <alpine.DEB.2.00.1207131009280.9771@cobra.newdream.net>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: ceph init script does not start
+Date: Sat, 14 Jul 2012 07:42:34 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1207140741070.3898@cobra.newdream.net>
+References: <50012AF1.4040300@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:40191 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752655Ab2GNOUr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 Jul 2012 10:20:47 -0400
-Received: by wibhm11 with SMTP id hm11so1466405wib.1
-        for <ceph-devel@vger.kernel.org>; Sat, 14 Jul 2012 07:20:46 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1207131009280.9771@cobra.newdream.net>
+Received: from cobra.newdream.net ([66.33.216.30]:60215 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751086Ab2GNOmf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 Jul 2012 10:42:35 -0400
+In-Reply-To: <50012AF1.4040300@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: Xiaopong Tran <xiaopong.tran@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Fri, Jul 13, 2012 at 9:09 PM, Sage Weil <sage@inktank.com> wrote:
-> On Fri, 13 Jul 2012, Gregory Farnum wrote:
->> On Fri, Jul 13, 2012 at 1:17 AM, Andrey Korolyov <andrey@xdel.ru> wrote:
->> > Hi,
->> >
->> > Recently I`ve reduced my test suite from 6 to 4 osds at ~60% usage on
->> > six-node,
->> > and I have removed a bunch of rbd objects during recovery to avoid
->> > overfill.
->> > Right now I`m constantly receiving a warn about nearfull state on
->> > non-existing osd:
->> >
->> >    health HEALTH_WARN 1 near full osd(s)
->> >    monmap e3: 3 mons at
->> > {0=192.168.10.129:6789/0,1=192.168.10.128:6789/0,2=192.168.10.127:6789/0},
->> > election epoch 240, quorum 0,1,2 0,1,2
->> >    osdmap e2098: 4 osds: 4 up, 4 in
->> >     pgmap v518696: 464 pgs: 464 active+clean; 61070 MB data, 181 GB
->> > used, 143 GB / 324 GB avail
->> >    mdsmap e181: 1/1/1 up {0=a=up:active}
->> >
->> > HEALTH_WARN 1 near full osd(s)
->> > osd.4 is near full at 89%
->> >
->> > Needless to say, osd.4 remains only in ceph.conf, but not at crushmap.
->> > Reducing has been done 'on-line', e.g. without restart entire cluster.
->>
->> Whoops! It looks like Sage has written some patches to fix this, but
->> for now you should be good if you just update your ratios to a larger
->> number, and then bring them back down again. :)
->
-> Restarting ceph-mon should also do the trick.
->
-> Thanks for the bug report!
-> sage
+On Sat, 14 Jul 2012, Xiaopong Tran wrote:
+> Hi,
+> 
+> I'm getting this funny issue. I had setup two test clusters, and
+> mkcephfs and the ceph start up script worked just fine. We are
+> now ready to go production, we have 6 nodes, with 10 disks
+> each, and one osd per disk, with 3 mds and 3 mons.
+> 
+> The script mkcephfs ran without problem, everything was created
+> properly. See attached log file. However, when I run
+> 
+> /etc/init.d/ceph start
+> 
+> nothing happens, not even a line of message, not on concole,
+> neither in system log.
+> 
+> But can I manually start up each individual osd, mds, and mon.
 
-Should I restart mons simultaneously? Restarting one by one has no
-effect, same as filling up data pool up to ~95 percent(btw, when I
-deleted this 50Gb file on cephfs, mds was stuck permanently and usage
-remained same until I dropped and recreated data pool - hope it`s one
-of known posix layer bugs). I also deleted entry from config, and then
-restarted mons, with no effect. Any suggestions?
+This is usually related to the 'host = ...' lines in ceph.conf.  They need 
+to match the output of the `hostname` command in order for that daemon to 
+be automatically started or stopped.
+
+If that appears correct, you can try running with -x (sh -x 
+/etc/init.d/ceph start) to see exactly what the script it 
+getting/comparing for the host.
+
+sage
+
+
+> 
+> Here is more information:
+> 
+> root@s100001:~# ceph health
+> HEALTH_OK
+> root@s100001:~# ceph -s
+>    health HEALTH_OK
+>    monmap e1: 3 mons at
+> {a=10.1.0.11:6789/0,b=10.1.0.13:6789/0,c=10.1.0.15:6789/0}, election epoch 6,
+> quorum 0,1,2 a,b,c
+>    osdmap e24: 60 osds: 60 up, 60 in
+>     pgmap v143: 11520 pgs: 11520 active+clean; 8730 bytes data, 242 GB used,
+> 83552 GB / 83794 GB avail
+>    mdsmap e6: 1/1/1 up {0=c=up:active}, 2 up:standby
+> 
+> root@s100001:~# ceph -v
+> ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+> root@s100001:~#
+> 
+> The only difference this time vs the time when I setup
+> the test clusters was that, for the test clusters,
+> I started with 0.47.3 (and one of the cluster did
+> a rolling upgrade to 0.48), but for this, all machines
+> started from fresh, with 0.48.
+> 
+> This is on Debian wheezy.
+> 
+> Can someone give a hint where else can I look into?
+> 
+> Thanks
+> 
+> Xiaopong
+> 
