@@ -1,80 +1,99 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: ceph init script does not start
-Date: Sat, 14 Jul 2012 07:42:34 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1207140741070.3898@cobra.newdream.net>
-References: <50012AF1.4040300@gmail.com>
+From: =?UTF-8?B?6JSh5qyK5pix?= <chuanyu@cs.nctu.edu.tw>
+Subject: Re: About deleting container/bucket from radosgw
+Date: Sat, 14 Jul 2012 23:04:51 +0800
+Message-ID: <CAKG+gh--UPGuwqXbSKvJtq2DJG5Z2NCr7E7fJR0nGbTqhwcpHg@mail.gmail.com>
+References: <CAKG+gh-25-9PgjPBpXx4PoGSinjudVtk8xXit-LBuqXDhPyUvA@mail.gmail.com>
+	<CAC-hyiE7aQ50jJHR4CMcfxv2rsBvONj6z5MFJsg=gfyWVr=w-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60215 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751086Ab2GNOmf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 Jul 2012 10:42:35 -0400
-In-Reply-To: <50012AF1.4040300@gmail.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:48984 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753567Ab2GNPEx convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 14 Jul 2012 11:04:53 -0400
+Received: by eekb15 with SMTP id b15so1182448eek.19
+        for <ceph-devel@vger.kernel.org>; Sat, 14 Jul 2012 08:04:52 -0700 (PDT)
+In-Reply-To: <CAC-hyiE7aQ50jJHR4CMcfxv2rsBvONj6z5MFJsg=gfyWVr=w-w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaopong Tran <xiaopong.tran@gmail.com>
+To: Yehuda Sadeh <yehuda@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Sat, 14 Jul 2012, Xiaopong Tran wrote:
-> Hi,
-> 
-> I'm getting this funny issue. I had setup two test clusters, and
-> mkcephfs and the ceph start up script worked just fine. We are
-> now ready to go production, we have 6 nodes, with 10 disks
-> each, and one osd per disk, with 3 mds and 3 mons.
-> 
-> The script mkcephfs ran without problem, everything was created
-> properly. See attached log file. However, when I run
-> 
-> /etc/init.d/ceph start
-> 
-> nothing happens, not even a line of message, not on concole,
-> neither in system log.
-> 
-> But can I manually start up each individual osd, mds, and mon.
+2012/7/14 Yehuda Sadeh <yehuda@inktank.com>:
+> On Sat, Jul 14, 2012 at 6:45 AM, =E8=94=A1=E6=AC=8A=E6=98=B1 <chuanyu=
+@cs.nctu.edu.tw> wrote:
+>> Hello everyone,
+>>
+>> I try to use radosgw to supply s3/swift storage,
+>>
+>> everything is fine, but I found that something strange
+>>
+>> after deleting a container/bucket from radosgw,
+>>
+>> the following are commands I ran:
+>>
+>> 1. check the pool empty or not
+>> $ rados --pool=3D.rgw ls | grep -v "^\." ; echo =3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D; rados
+>> --pool=3D.rgw.buckets ls
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>>
+>> 2. create a container "buck1"
+>> $ swift -A http://volume/auth -U account -K key post buck1
+>>
+>> 3. show created objs in ceph
+>> $ rados --pool=3D.rgw ls | grep -v "^\." ; echo =3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D; rados
+>> --pool=3D.rgw.buckets ls
+>> 9352.10
+>> buck1
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> .dir.9352.10
+>>
+>> 4. delete "buck1"
+>> swift -A http://volume/auth -U account -K key delete buck1
+>>
+>> 5. show objs in ceph
+>> $ rados --pool=3D.rgw ls | grep -v "^\." ; echo =3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D; rados
+>> --pool=3D.rgw.buckets ls
+>> 9352.10
+>>
+>> Then, the object '9352.10' seems like be leaved in pool forever ?
+>> I have tried create & delete bucket by s3lib, too,
+>> and the result is the same.
+>>
+>> However, the function works fine,
+>> I just want to know is this a normal case?
+>>
+>
+> This is normal, though we modified this behavior recently, so you
+> shouldn't see that in the next versions. We used to keep the bucket
+> index by bucket instance id for archival and also for usage
+> processing.
+OK, I see.
 
-This is usually related to the 'host = ...' lines in ceph.conf.  They need 
-to match the output of the `hostname` command in order for that daemon to 
-be automatically started or stopped.
+On the other hand, why radosgw-admin doesn't supply "bucket rm" call?
+When I want to "user rm" a user, it seems like I need to "bucket unlink=
+"
+all buckets belongs to the user, but the buckets are still in there!
+Then, the other users can not create the same name of bucket
+anymore(by s3/swift).
 
-If that appears correct, you can try running with -x (sh -x 
-/etc/init.d/ceph start) to see exactly what the script it 
-getting/comparing for the host.
+So, Is this the only way I can do by using s3/swift client to delete bu=
+ckets
+which belongs to that user before "radosgw-admin user rm" ?
 
-sage
+Can I "rm" all buckets, and "rm" the user only by radosgw-admin?
 
+Thanks for your help!
 
-> 
-> Here is more information:
-> 
-> root@s100001:~# ceph health
-> HEALTH_OK
-> root@s100001:~# ceph -s
->    health HEALTH_OK
->    monmap e1: 3 mons at
-> {a=10.1.0.11:6789/0,b=10.1.0.13:6789/0,c=10.1.0.15:6789/0}, election epoch 6,
-> quorum 0,1,2 a,b,c
->    osdmap e24: 60 osds: 60 up, 60 in
->     pgmap v143: 11520 pgs: 11520 active+clean; 8730 bytes data, 242 GB used,
-> 83552 GB / 83794 GB avail
->    mdsmap e6: 1/1/1 up {0=c=up:active}, 2 up:standby
-> 
-> root@s100001:~# ceph -v
-> ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
-> root@s100001:~#
-> 
-> The only difference this time vs the time when I setup
-> the test clusters was that, for the test clusters,
-> I started with 0.47.3 (and one of the cluster did
-> a rolling upgrade to 0.48), but for this, all machines
-> started from fresh, with 0.48.
-> 
-> This is on Debian wheezy.
-> 
-> Can someone give a hint where else can I look into?
-> 
-> Thanks
-> 
-> Xiaopong
-> 
+Chuanyu
+>
+> Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
