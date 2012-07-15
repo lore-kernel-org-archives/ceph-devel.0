@@ -1,53 +1,66 @@
-From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Subject: Poor read performance in KVM
-Date: Sun, 15 Jul 2012 22:43:57 +0930
-Message-ID: <5002C215.108@bashkirtsev.com>
+From: =?ISO-8859-1?Q?Sz=E9kelyi?= Szabolcs <szekelyi@niif.hu>
+Subject: Re: ceph init script does not start
+Date: Sun, 15 Jul 2012 20:05:02 +0200
+Message-ID: <3046989.AgMSmANe5F@mranderson>
+References: <50012AF1.4040300@gmail.com> <alpine.DEB.2.00.1207140741070.3898@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:59099 "EHLO
-	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751624Ab2GONOX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Jul 2012 09:14:23 -0400
-Received: from x.logics.net.au (gw.logics.net.au [150.101.235.251] (may be forged))
-	(authenticated bits=0)
-	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q6FDDvKo003609
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-CAMELLIA256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Sun, 15 Jul 2012 22:43:58 +0930
+Received: from strudel.ki.iif.hu ([193.6.222.244]:34043 "EHLO
+	strudel.ki.iif.hu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751634Ab2GOSFJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 15 Jul 2012 14:05:09 -0400
+Received: from bolha.lvs.iif.hu (bolha.lvs.iif.hu [193.225.14.181])
+	by strudel.ki.iif.hu (Postfix) with ESMTP id 56732344
+	for <ceph-devel@vger.kernel.org>; Sun, 15 Jul 2012 20:05:07 +0200 (CEST)
+Received: from strudel.ki.iif.hu ([IPv6:::ffff:193.6.222.244])
+	by bolha.lvs.iif.hu (bolha.lvs.iif.hu [::ffff:193.225.14.72]) (amavisd-new, port 10024)
+	with ESMTP id nGZxz-sbDNKE for <ceph-devel@vger.kernel.org>;
+	Sun, 15 Jul 2012 20:05:04 +0200 (CEST)
+Received: from mranderson.localnet (adsl166.adsl.hungarnet.hu [193.6.17.166])
+	by strudel.ki.iif.hu (Postfix) with ESMTPSA id A0D5C33A
+	for <ceph-devel@vger.kernel.org>; Sun, 15 Jul 2012 20:05:03 +0200 (CEST)
+In-Reply-To: <alpine.DEB.2.00.1207140741070.3898@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hello,
+On 2012. July 14. 07:42:34 Sage Weil wrote:
+> On Sat, 14 Jul 2012, Xiaopong Tran wrote:
+> > I'm getting this funny issue. I had setup two test clusters, and
+> > mkcephfs and the ceph start up script worked just fine. We are
+> > now ready to go production, we have 6 nodes, with 10 disks
+> > each, and one osd per disk, with 3 mds and 3 mons.
+> > 
+> > The script mkcephfs ran without problem, everything was created
+> > properly. See attached log file. However, when I run
+> > 
+> > /etc/init.d/ceph start
+> > 
+> > nothing happens, not even a line of message, not on concole,
+> > neither in system log.
+> > 
+> > But can I manually start up each individual osd, mds, and mon.
+> 
+> This is usually related to the 'host = ...' lines in ceph.conf.  They need
+> to match the output of the `hostname` command in order for that daemon to
+> be automatically started or stopped.
 
-Lately I was trying to get KVM to perform well on RBD. But it still 
-appears elusive.
+Just a humble remark here: actually the host= setting has to match the 
+hostname *until the first dot*. If your hostname contains a dot, this will not 
+work. This can be useful in a number of cases, like setting the hostname to 
+indicate the group of a hierarchy level in the name so that the administrator 
+can extactly know what he's working on after logging in (I mean hostnames like 
+node<X>.rack<Y> in a datacenter or node<X>.<site> when running a 
+geographically distributed cluster).
 
-[root@alpha etc]# rados -p rbd bench 120 seq -t 8
+From this comes my request: do you think it's possible to change (I mean, in 
+the repository) ceph_common.sh not to cut the output of `hostname` at the first 
+dot? I'm running a cluster with hostnames like that, and now I have to edit 
+that file after each upgrade.
 
-Total time run:        16.873277
-Total reads made:     302
-Read size:            4194304
-Bandwidth (MB/sec):    71.592
+-- 
+cc
 
-Average Latency:       0.437984
-Max latency:           3.26817
-Min latency:           0.015786
-
-Fairly good performance. But when I run in KVM:
-
-[root@mail ~]# hdparm -tT /dev/vda
-
-/dev/vda:
-  Timing cached reads:   8808 MB in  2.00 seconds = 4411.49 MB/sec
-  Timing buffered disk reads:  10 MB in  6.21 seconds =   1.61 MB/sec
-
-Not even close to what rados bench show! I even seen 900KB/sec 
-performance. Such slow read performance of course affecting guests.
-
-Any ideas where to start to look for performance boost?
-
-Regards,
-Vladimir
 
