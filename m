@@ -1,97 +1,51 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: How to compile Java-Rados.
-Date: Mon, 16 Jul 2012 08:26:01 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1207160824220.9848@cobra.newdream.net>
-References: <loom.20120712T065146-882@post.gmane.org> <CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com> <loom.20120712T111906-426@post.gmane.org> <CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com> <loom.20120713T085715-195@post.gmane.org>
- <CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com> <loom.20120716T061714-349@post.gmane.org> <C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu> <loom.20120716T072848-760@post.gmane.org>
- <CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com>
+From: Adrian Fita <adrian.fita@gmail.com>
+Subject: obsync crashes when src file is unreadable
+Date: Mon, 16 Jul 2012 18:42:04 +0300
+Message-ID: <CAAEuNhHfbx=AWe_704w+eqCmWvDNK8EvM0K1WtWN2nT57ShicA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43652 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751261Ab2GPP0B (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 11:26:01 -0400
-In-Reply-To: <CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:37168 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752333Ab2GPPm0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 11:42:26 -0400
+Received: by lbbgm6 with SMTP id gm6so8848892lbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 08:42:25 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ramu <ramu.freesystems@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, 16 Jul 2012, Noah Watkins wrote:
-> Ramu,
-> 
-> I receive the same error code in my installation when the
-> CEPH_CONF_FILE environment variable contains an invalid path. Could
-> you please verify that the path you are using points to a valid Ceph
-> configuration?
+Hello. I'm trying to synchronize 2 Amazon S3 buckets, but obsync keeps
+crashing when it tries to read a certain file. Here is the message
+displayed when run with --verbose --more-verbose:
 
-BTW it's CEPH_CONF for the config file (not CEPH_CONFG_FILE).
+Mon, 16 Jul 2012 15:24:48 GMT
+/src-bucket/1356/file
+Traceback (most recent call last):
+  File "/usr/bin/obsync", line 1165, in <module>
+    sobj = src_all_objects.next()
+  File "/usr/bin/obsync", line 636, in next
+    k = self.bucket.get_key(key.name)
+  File "/usr/lib/python2.7/dist-packages/boto/s3/bucket.py", line 195,
+in get_key
+    response.status, response.reason, '')
+S3ResponseError: S3ResponseError: 403 Forbidden
 
-Alternatively, you can stick config options in the same format as the 
-command line arguments in CEPH_ARGS.  E.g.,
+ERROR TYPE: unknown, ORIGIN: source
 
-	CEPH_ARGS="--debug-ms 1 --log-file foo" some_command ...
+I checked with other S3 clients the state of the file and indeed, it
+can not be read and I can't change its ACLs. From what I gather, this
+is one of those very rare cases of unreadable Amazon S3 files due to
+the failure of Amazon's underlying storage (I think the file will be
+automatically recovered at some point later by S3).
 
-sage
+It would be nice if obsync would get over this error, continue with
+the other files and just display a warning message that the file
+couldn't be read. Is there something I can do right now that can make
+obsync continue copying (maybe a quick hack in the code or something)?
 
+This is happening on Ubuntu 12.10 2012-07-05, obsync version 0.47.2-0ubuntu2.
 
-> 
-> Thanks,
-> - Noah
-> 
-> On Sun, Jul 15, 2012 at 10:32 PM, ramu <ramu.freesystems@gmail.com> wrote:
-> >
-> > Hi Noah,
-> >
-> > I tried but am getting following error in terminal ,
-> >
-> > Buildfile: /home/vu/java-rados/build.xml
-> >
-> > makedir:
-> >
-> > compile-rados:
-> >
-> > compile-tests:
-> >
-> > jar:
-> >
-> > test:
-> >     [junit] Running ClusterStatsTest
-> >     [junit] Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.04 sec
-> >
-> > BUILD FAILED
-> > /home/vu/java-rados/build.xml:134: Test ClusterStatsTest failed
-> >
-> > Total time: 1 second
-> >
-> > and one more error file
-> > is /home/vu/java-rados/TEST-ClusterStatsTest.txt in that file the text is like
-> > this,
-> >
-> > Testsuite: ClusterStatsTest
-> > Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.04 sec
-> >
-> > Testcase: test_ClusterStats took 0.022 sec
-> >         Caused an ERROR
-> > conf_read_file: ret=-22
-> > net.newdream.ceph.rados.RadosException: conf_read_file: ret=-22
-> >         at net.newdream.ceph.rados.Cluster.native_conf_read_file(Native Method)
-> >         at net.newdream.ceph.rados.Cluster.readConfigFile(Unknown Source)
-> >         at ClusterStatsTest.setup(Unknown Source)
-> >
-> > Thanks,
-> > Ramu.
-> >
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Thanks.
+--
+Fita Adrian
