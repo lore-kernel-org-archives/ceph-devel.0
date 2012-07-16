@@ -1,88 +1,59 @@
-From: "Guan Jun He" <gjhe@suse.com>
-Subject: kernel hanged when try to remove a rbd device
-Date: Mon, 16 Jul 2012 05:43:57 -0600
-Message-ID: <50048B1D020000160000EB3E@soto.provo.novell.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] libceph: trivial fix for the incorrect debug output
+Date: Mon, 16 Jul 2012 07:55:16 -0500
+Message-ID: <50040F34.3080909@inktank.com>
+References: <1342334726-28541-1-git-send-email-jjzhang@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from soto.provo.novell.com ([137.65.250.214]:33952 "EHLO
-	soto.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751992Ab2GPLoG convert rfc822-to-8bit (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:2:1>);
-	Mon, 16 Jul 2012 07:44:06 -0400
-Content-Disposition: inline
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:46792 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753117Ab2GPMzS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 08:55:18 -0400
+Received: by yenl2 with SMTP id l2so4915408yen.19
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 05:55:17 -0700 (PDT)
+In-Reply-To: <1342334726-28541-1-git-send-email-jjzhang@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com, ceph-devel@vger.kernel.org
+To: Jiaju Zhang <jjzhang@suse.de>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On 07/15/2012 01:45 AM, Jiaju Zhang wrote:
+> This is a trivial fix for the debug output, as it is inconsistent
+> with the function name so may confuse people when debugging.
+> 
+> Signed-off-by: Jiaju Zhang <jjzhang@suse.de>
 
- kernel hanged when try to remove a rbd device, detail steps are:
+I have been converting these to use __func__ whenever I touch
+code nearby.  Mind if I do that here as well?
 
-    Create a rbd image and map it to client;
-then stop ceph cluster through '/etc/init.d/ceph -a stop';
+Reviewed-by: Alex Elder <elder@inktank.com>
 
-then in client side, run command 'echo id > /sys/bus/rbd/remove',and
-this command can not return. Checking dmesg, seems like it enters an
-endless loop, try to re-connect osds and mons;
+> ---
+>  net/ceph/osd_client.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 1ffebed..ad6d745 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -688,7 +688,7 @@ static void __remove_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
+>  
+>  static void remove_all_osds(struct ceph_osd_client *osdc)
+>  {
+> -	dout("__remove_old_osds %p\n", osdc);
+> +	dout("__remove_all_osds %p\n", osdc);
 
-Then press keys 'CTRL + C' to send an INT signal to 
-'echo id > /sys/bus/rbd/remove',then kernel hanged.
+        dout("%s %p\n", __func__, osdc);
 
-Can I use rados in this way?
+>  	mutex_lock(&osdc->request_mutex);
+>  	while (!RB_EMPTY_ROOT(&osdc->osds)) {
+>  		struct ceph_osd *osd = rb_entry(rb_first(&osdc->osds),
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-
-with the following patch, kernel will not hang, but ,this patch is not
-good as well, for there is transaction has not been finished, if just
-delete it, maybe the data will be inconsistent.
-
-But, seems like there is no way to stop this transaction safely,I mean
-cancel this transaction(avoid data inconsistence) and tell it's caller
-that this transaction has been failed and has been canceled.
-(well,If any one know there is a way/or many ways,please tell
-me,thanks).
-Also, if there are plans to do these things, I'am very glad to join in
-and do some work.
-
-Or, are there any other resolving plans?
-
-thanks a lot for your reply!
-
-
-Signed-off-by: Guanjun He <heguanbo@gmail.com>
----
- net/ceph/osd_client.c |    9 +++++++++
- 1 files changed, 9 insertions(+), 0 deletions(-)
-
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 1ffebed..4dba062 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -688,11 +688,20 @@ static void __remove_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
- 
- static void remove_all_osds(struct ceph_osd_client *osdc)
- {
-+	struct list_head *pos, *q;
-+	struct ceph_osd_request *req;
-+
- 	dout("__remove_old_osds %p\n", osdc);
- 	mutex_lock(&osdc->request_mutex);
- 	while (!RB_EMPTY_ROOT(&osdc->osds)) {
- 		struct ceph_osd *osd = rb_entry(rb_first(&osdc->osds),
- 						struct ceph_osd, o_node);
-+		list_for_each_safe(pos, q, &osd->o_requests) {
-+			req = list_entry(pos, struct ceph_osd_request,
-+							r_osd_item);
-+			list_del(pos);
-+			__unregister_request(osdc, req);
-+			kfree(req);
-+		}
- 		__remove_osd(osdc, osd);
- 	}
- 	mutex_unlock(&osdc->request_mutex);
-
--- 
-best,
-Guanjun <gjhe@suse.com>
 
