@@ -1,67 +1,87 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Poor read performance in KVM
-Date: Sun, 15 Jul 2012 23:16:44 -0700
-Message-ID: <5003B1CC.4060909@inktank.com>
-References: <5002C215.108@bashkirtsev.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: How to compile Java-Rados.
+Date: Mon, 16 Jul 2012 00:12:59 -0700
+Message-ID: <CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com>
+References: <loom.20120712T065146-882@post.gmane.org>
+	<CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com>
+	<loom.20120712T111906-426@post.gmane.org>
+	<CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com>
+	<loom.20120713T085715-195@post.gmane.org>
+	<CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com>
+	<loom.20120716T061714-349@post.gmane.org>
+	<C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu>
+	<loom.20120716T072848-760@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:60338 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750798Ab2GPGQq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 02:16:46 -0400
-Received: by yenl2 with SMTP id l2so4681945yen.19
-        for <ceph-devel@vger.kernel.org>; Sun, 15 Jul 2012 23:16:45 -0700 (PDT)
-In-Reply-To: <5002C215.108@bashkirtsev.com>
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:44100 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751567Ab2GPHNA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 03:13:00 -0400
+Received: by ghrr11 with SMTP id r11so4709497ghr.19
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 00:12:59 -0700 (PDT)
+In-Reply-To: <loom.20120716T072848-760@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+To: ramu <ramu.freesystems@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 07/15/2012 06:13 AM, Vladimir Bashkirtsev wrote:
-> Hello,
->
-> Lately I was trying to get KVM to perform well on RBD. But it still
-> appears elusive.
->
-> [root@alpha etc]# rados -p rbd bench 120 seq -t 8
->
-> Total time run:        16.873277
-> Total reads made:     302
-> Read size:            4194304
-> Bandwidth (MB/sec):    71.592
->
-> Average Latency:       0.437984
-> Max latency:           3.26817
-> Min latency:           0.015786
->
-> Fairly good performance. But when I run in KVM:
->
-> [root@mail ~]# hdparm -tT /dev/vda
->
-> /dev/vda:
->   Timing cached reads:   8808 MB in  2.00 seconds = 4411.49 MB/sec
+Ramu,
 
-This is just the guest page cache - it's reading the first two
-megabytes of the device repeatedly.
+I receive the same error code in my installation when the
+CEPH_CONF_FILE environment variable contains an invalid path. Could
+you please verify that the path you are using points to a valid Ceph
+configuration?
 
->   Timing buffered disk reads:  10 MB in  6.21 seconds =   1.61 MB/sec
+Thanks,
+- Noah
 
-This is a sequential read, so readahead in the guest should help here.
-
-> Not even close to what rados bench show! I even seen 900KB/sec
-> performance. Such slow read performance of course affecting guests.
+On Sun, Jul 15, 2012 at 10:32 PM, ramu <ramu.freesystems@gmail.com> wrote:
 >
-> Any ideas where to start to look for performance boost?
-
-Do you have rbd caching enabled? It would also be interesting to see
-how the guest reads are translating to rados reads. hdparm is doing
-2MiB sequential reads of the block device. If you add
-admin_socket=/var/run/ceph/kvm.asok to the rbd device on the qemu
-command line) you can see number of requests, latency, and
-request size info while the guest is running via:
-
-ceph --admin-daemon /var/run/ceph/kvm.asok perf dump
-
-Josh
+> Hi Noah,
+>
+> I tried but am getting following error in terminal ,
+>
+> Buildfile: /home/vu/java-rados/build.xml
+>
+> makedir:
+>
+> compile-rados:
+>
+> compile-tests:
+>
+> jar:
+>
+> test:
+>     [junit] Running ClusterStatsTest
+>     [junit] Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.04 sec
+>
+> BUILD FAILED
+> /home/vu/java-rados/build.xml:134: Test ClusterStatsTest failed
+>
+> Total time: 1 second
+>
+> and one more error file
+> is /home/vu/java-rados/TEST-ClusterStatsTest.txt in that file the text is like
+> this,
+>
+> Testsuite: ClusterStatsTest
+> Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.04 sec
+>
+> Testcase: test_ClusterStats took 0.022 sec
+>         Caused an ERROR
+> conf_read_file: ret=-22
+> net.newdream.ceph.rados.RadosException: conf_read_file: ret=-22
+>         at net.newdream.ceph.rados.Cluster.native_conf_read_file(Native Method)
+>         at net.newdream.ceph.rados.Cluster.readConfigFile(Unknown Source)
+>         at ClusterStatsTest.setup(Unknown Source)
+>
+> Thanks,
+> Ramu.
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
