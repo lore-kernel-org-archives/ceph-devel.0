@@ -1,96 +1,77 @@
-From: Travis Rhoden <trhoden@gmail.com>
+From: Tommi Virtanen <tv@inktank.com>
 Subject: Re: can "rbd unmap" detect if device is mounted?
-Date: Mon, 16 Jul 2012 19:00:43 -0400
-Message-ID: <CACkq2mqM2vDke-0VnWvy0Mwh102heUc10AxJ=8KSZRNbM7eJ7A@mail.gmail.com>
+Date: Mon, 16 Jul 2012 16:37:02 -0700
+Message-ID: <CADvuQREm_PCatUUdgUjsUNMNBNEtB9_z9LTvo9D0Gyq7dR8XeQ@mail.gmail.com>
 References: <CACkq2mqt5ae4U_-yhNM94GYQnE_negqXqHTf3JaSZ0zsxya9Yw@mail.gmail.com>
  <500498FC.9070806@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:46720 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751759Ab2GPXBF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 19:01:05 -0400
-Received: by lbbgm6 with SMTP id gm6so9342791lbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 16:01:04 -0700 (PDT)
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:64383 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751463Ab2GPXhW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 19:37:22 -0400
+Received: by pbbrp8 with SMTP id rp8so10787486pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 16:37:22 -0700 (PDT)
 In-Reply-To: <500498FC.9070806@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+Cc: Travis Rhoden <trhoden@gmail.com>, ceph-devel@vger.kernel.org
 
-Thanks for the response, Josh. Sorry I didn't send in my version info
-with the initial message.
-
-On Mon, Jul 16, 2012 at 6:43 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> On 07/16/2012 12:59 PM, Travis Rhoden wrote:
->>
->> Hi folks,
->>
+On Mon, Jul 16, 2012 at 3:43 PM, Josh Durgin <josh.durgin@inktank.com> wrote:
 >> I've made this mistake a couple of times now (completely my fault,
 >> when will I learn?), and am wondering if a bit of protection can be
 >> put in place against user errors.
->
->
 > Yeah, we've been working on advisory locking. The first step is
 > just adding an option to lock via the rbd command line tool, so you
 > could script lock/map and unmap/unlock.
->
-> This is described a little more in this thread:
->
-> http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/7094
 
-I had in fact seen this.  Looks like the advisory locking is targeted
-for 0.49.  That's great!  Thanks for reminding me of it.  I'll look
-forward to it.
->
->
->> I mapped a device "rbd map", then formatted and and mounted the device
->> ("mkfs.extf /dev/rbd0..., mount /dev/rbd0...").  Then sometime later,
->> I want to remove the RBD device.  Stupidly, I do the "rbd unmap"
->> command before I unmount the device.  The kernel doesn't really care
->> for this.  Or more accurately, I can't remap that same RBD because I
->> run into:
->>
->> kernel: [2248653.941688] sysfs: cannot create duplicate filename
->> '/devices/virtual/block/rbd0'
->> ....
->> kernel: [2248653.941833] kobject_add_internal failed for rbd0 with
->> -EEXIST, don't try to register things with the same name in the same
->> directory.
->>
->> At this point, the "rbd map" command hangs indefinitely (producing the
->> logs from above).  Ctrl-C does exit out, though.  But if I try to fix
->> my mistake by doing the unmount now, I get the error:
->>
->> umount: device is busy.
->>
->> So really I get stuck.  I can't unmount without the device, and I
->> can't remap the device to the old block device.  I have to reboot to
->> clean up and move on.
->
->
-> A similar issue was fixed in 3.4 (see
-> http://tracker.newdream.net/issues/1907).
-> What kernel are you using? 3.2 had a nasty possibility of preventing
-> further operations if mapping hung while trying to connect to the
-> monitors.
+Is his problem really about the locking?
 
-I am using the stock Ubuntu 12.04 kernel, which is in fact 3.2  Good
-point.  So, the only way for me to get the updates you mentioned is to
-upgrade to a 3.4 kernel, correct?
->
->
->> I imagine other bad things can happen with the block device goes away
->> out from under the mount point.  Any way the "rbd unmap" command can
->> detect when the device is in use or mounted and inform the user?
->
->
-> Before actually unmapping the device, rbd unmap could check if it was
-> present in mtab. If it's being used as a raw block device and not
-> mounted or you created and used your own device node this wouldn't
-> help, but it would be better than nothing.
+It sounded to me like, he has something (the mount) referencing a
+block device, and we're letting the block device disappear.
 
-That would be awesome.  Every little bit helps.
->
-> Josh
+The locking you guys have been talking about sounds like that lock
+would be held whenever the image is mapped, regardless of whether it's
+mounted or not (think mkfs).
+
+
+Should unmap even be possible while the block device is open?
+Shouldn't there be a refcount and an -EBUSY? That's what other block
+device providers do:
+
+[0 tv@dreamer ~]$ dd if=/dev/zero of=foo bs=1M count=40
+40+0 records in
+40+0 records out
+41943040 bytes (42 MB) copied, 0.167171 s, 251 MB/s
+[1 tv@dreamer ~]$ sudo losetup --show -f foo
+/dev/loop0
+[0 tv@dreamer ~]$ sudo mkfs /dev/loop0
+mke2fs 1.42 (29-Nov-2011)
+Discarding device blocks: done
+Filesystem label=
+OS type: Linux
+Block size=1024 (log=0)
+Fragment size=1024 (log=0)
+Stride=0 blocks, Stripe width=0 blocks
+10240 inodes, 40960 blocks
+2048 blocks (5.00%) reserved for the super user
+First data block=1
+Maximum filesystem blocks=41943040
+5 block groups
+8192 blocks per group, 8192 fragments per group
+2048 inodes per group
+Superblock backups stored on blocks:
+	8193, 24577
+
+Allocating group tables: done
+Writing inode tables: done
+Writing superblocks and filesystem accounting information: done
+
+[0 tv@dreamer ~]$ sudo mount /dev/loop0 /mnt
+[0 tv@dreamer ~]$ sudo losetup -d /dev/loop0
+loop: can't delete device /dev/loop0: Device or resource busy
+[1 tv@dreamer ~]$ sudo umount /mnt
+[0 tv@dreamer ~]$ sudo losetup -d /dev/loop0
+[0 tv@dreamer ~]$
