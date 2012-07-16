@@ -1,72 +1,67 @@
-From: ramu <ramu.freesystems@gmail.com>
-Subject: Re: How to compile Java-Rados.
-Date: Mon, 16 Jul 2012 05:32:49 +0000 (UTC)
-Message-ID: <loom.20120716T072848-760@post.gmane.org>
-References: <loom.20120712T065146-882@post.gmane.org> <CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com> <loom.20120712T111906-426@post.gmane.org> <CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com> <loom.20120713T085715-195@post.gmane.org> <CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com> <loom.20120716T061714-349@post.gmane.org> <C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Poor read performance in KVM
+Date: Sun, 15 Jul 2012 23:16:44 -0700
+Message-ID: <5003B1CC.4060909@inktank.com>
+References: <5002C215.108@bashkirtsev.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:37235 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751072Ab2GPFdG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 16 Jul 2012 01:33:06 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Sqdva-0002No-QR
-	for ceph-devel@vger.kernel.org; Mon, 16 Jul 2012 07:33:02 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 07:33:02 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 07:33:02 +0200
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:60338 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750798Ab2GPGQq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 02:16:46 -0400
+Received: by yenl2 with SMTP id l2so4681945yen.19
+        for <ceph-devel@vger.kernel.org>; Sun, 15 Jul 2012 23:16:45 -0700 (PDT)
+In-Reply-To: <5002C215.108@bashkirtsev.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Cc: ceph-devel@vger.kernel.org
 
+On 07/15/2012 06:13 AM, Vladimir Bashkirtsev wrote:
+> Hello,
+>
+> Lately I was trying to get KVM to perform well on RBD. But it still
+> appears elusive.
+>
+> [root@alpha etc]# rados -p rbd bench 120 seq -t 8
+>
+> Total time run:        16.873277
+> Total reads made:     302
+> Read size:            4194304
+> Bandwidth (MB/sec):    71.592
+>
+> Average Latency:       0.437984
+> Max latency:           3.26817
+> Min latency:           0.015786
+>
+> Fairly good performance. But when I run in KVM:
+>
+> [root@mail ~]# hdparm -tT /dev/vda
+>
+> /dev/vda:
+>   Timing cached reads:   8808 MB in  2.00 seconds = 4411.49 MB/sec
 
-Hi Noah,
+This is just the guest page cache - it's reading the first two
+megabytes of the device repeatedly.
 
-I tried but am getting following error in terminal ,
+>   Timing buffered disk reads:  10 MB in  6.21 seconds =   1.61 MB/sec
 
-Buildfile: /home/vu/java-rados/build.xml
+This is a sequential read, so readahead in the guest should help here.
 
-makedir:
+> Not even close to what rados bench show! I even seen 900KB/sec
+> performance. Such slow read performance of course affecting guests.
+>
+> Any ideas where to start to look for performance boost?
 
-compile-rados:
+Do you have rbd caching enabled? It would also be interesting to see
+how the guest reads are translating to rados reads. hdparm is doing
+2MiB sequential reads of the block device. If you add
+admin_socket=/var/run/ceph/kvm.asok to the rbd device on the qemu
+command line) you can see number of requests, latency, and
+request size info while the guest is running via:
 
-compile-tests:
+ceph --admin-daemon /var/run/ceph/kvm.asok perf dump
 
-jar:
-
-test:
-    [junit] Running ClusterStatsTest
-    [junit] Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.04 sec
-
-BUILD FAILED
-/home/vu/java-rados/build.xml:134: Test ClusterStatsTest failed
-
-Total time: 1 second
-
-and one more error file 
-is /home/vu/java-rados/TEST-ClusterStatsTest.txt in that file the text is like 
-this,
-
-Testsuite: ClusterStatsTest
-Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.04 sec
-
-Testcase: test_ClusterStats took 0.022 sec
-        Caused an ERROR
-conf_read_file: ret=-22
-net.newdream.ceph.rados.RadosException: conf_read_file: ret=-22
-        at net.newdream.ceph.rados.Cluster.native_conf_read_file(Native Method)
-        at net.newdream.ceph.rados.Cluster.readConfigFile(Unknown Source)
-        at ClusterStatsTest.setup(Unknown Source)
-
-Thanks,
-Ramu.
-
-
-
+Josh
