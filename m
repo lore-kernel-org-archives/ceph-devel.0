@@ -1,119 +1,70 @@
-From: Noah Watkins <jayhawk@cs.ucsc.edu>
-Subject: Re: How to compile Java-Rados.
-Date: Mon, 16 Jul 2012 08:49:49 -0700
-Message-ID: <CAPrxi5-2STepCif9aN1GyfTwFEzs56o5Nzg7NuHmBqq=7qWVEQ@mail.gmail.com>
-References: <loom.20120712T065146-882@post.gmane.org>
-	<CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com>
-	<loom.20120712T111906-426@post.gmane.org>
-	<CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com>
-	<loom.20120713T085715-195@post.gmane.org>
-	<CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com>
-	<loom.20120716T061714-349@post.gmane.org>
-	<C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu>
-	<loom.20120716T072848-760@post.gmane.org>
-	<CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com>
-	<alpine.DEB.2.00.1207160824220.9848@cobra.newdream.net>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: ceph init script does not start
+Date: Mon, 16 Jul 2012 08:50:02 -0700
+Message-ID: <CADvuQRE9SHHV94U0gqyNmXKZMZQNvVXgeCheMfB5T0KM9qK+7A@mail.gmail.com>
+References: <50012AF1.4040300@gmail.com> <alpine.DEB.2.00.1207140741070.3898@cobra.newdream.net>
+ <3046989.AgMSmANe5F@mranderson>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:63952 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751736Ab2GPPtu (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 11:49:50 -0400
-Received: by ghrr11 with SMTP id r11so5127930ghr.19
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 08:49:49 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1207160824220.9848@cobra.newdream.net>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:40266 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751994Ab2GPPub convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 11:50:31 -0400
+Received: by pbbrp8 with SMTP id rp8so10229160pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 08:50:31 -0700 (PDT)
+In-Reply-To: <3046989.AgMSmANe5F@mranderson>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ramu <ramu.freesystems@gmail.com>, ceph-devel@vger.kernel.org
+To: =?UTF-8?Q?Sz=C3=A9kelyi_Szabolcs?= <szekelyi@niif.hu>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Jul 16, 2012 at 8:26 AM, Sage Weil <sage@inktank.com> wrote:
-> On Mon, 16 Jul 2012, Noah Watkins wrote:
->> Ramu,
->>
->> I receive the same error code in my installation when the
->> CEPH_CONF_FILE environment variable contains an invalid path. Could
->> you please verify that the path you are using points to a valid Ceph
->> configuration?
+On Sun, Jul 15, 2012 at 11:05 AM, Sz=C3=A9kelyi Szabolcs <szekelyi@niif=
+=2Ehu> wrote:
+> Just a humble remark here: actually the host=3D setting has to match =
+the
+> hostname *until the first dot*. If your hostname contains a dot, this=
+ will not
+> work. This can be useful in a number of cases, like setting the hostn=
+ame to
+> indicate the group of a hierarchy level in the name so that the admin=
+istrator
+> can extactly know what he's working on after logging in (I mean hostn=
+ames like
+> node<X>.rack<Y> in a datacenter or node<X>.<site> when running a
+> geographically distributed cluster).
 >
-> BTW it's CEPH_CONF for the config file (not CEPH_CONFG_FILE).
+> From this comes my request: do you think it's possible to change (I m=
+ean, in
+> the repository) ceph_common.sh not to cut the output of `hostname` at=
+ the first
+> dot? I'm running a cluster with hostnames like that, and now I have t=
+o edit
+> that file after each upgrade.
 
-It turns out to be quite awkward to tell the unit tests about the
-configuration location, and using an environment variable is
-convenient. However, I wasn't aware of CEPH_CONF, and in fact the unit
-test framework looks for CEPH_CONFIG_FILE. The later should definitely
-be removed (ramu, can you try CEPH_CONF?), and this isn't an issue in
-libcephfs wrappers -- the rados wrappers are incredibly old.
+There are two concepts here:
 
-Thanks, Noah
+- the "short" hostname is just a string, stored in the kernel, can be
+changed with "sudo hostname foo.bar" and seen with "hostname"
+- the "fqdn" (fully qualified domain name) is what you get from
+"hostname -f"; that is reached by taking the "short" hostname,
+resolving it to an IP address, and then reverse resolving the IP to
+dns name; usually all the info needed is in /etc/hosts, but it'll use
+DNS if it has to. If this cannot be done, the "fqdn" is the same as
+the "short" hostname.
 
+I see ceph_common.sh currently does hostname=3D`hostname | cut -d . -f =
+1`.
 
->
-> Alternatively, you can stick config options in the same format as the
-> command line arguments in CEPH_ARGS.  E.g.,
->
->         CEPH_ARGS="--debug-ms 1 --log-file foo" some_command ...
->
-> sage
->
->
->>
->> Thanks,
->> - Noah
->>
->> On Sun, Jul 15, 2012 at 10:32 PM, ramu <ramu.freesystems@gmail.com> wrote:
->> >
->> > Hi Noah,
->> >
->> > I tried but am getting following error in terminal ,
->> >
->> > Buildfile: /home/vu/java-rados/build.xml
->> >
->> > makedir:
->> >
->> > compile-rados:
->> >
->> > compile-tests:
->> >
->> > jar:
->> >
->> > test:
->> >     [junit] Running ClusterStatsTest
->> >     [junit] Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.04 sec
->> >
->> > BUILD FAILED
->> > /home/vu/java-rados/build.xml:134: Test ClusterStatsTest failed
->> >
->> > Total time: 1 second
->> >
->> > and one more error file
->> > is /home/vu/java-rados/TEST-ClusterStatsTest.txt in that file the text is like
->> > this,
->> >
->> > Testsuite: ClusterStatsTest
->> > Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.04 sec
->> >
->> > Testcase: test_ClusterStats took 0.022 sec
->> >         Caused an ERROR
->> > conf_read_file: ret=-22
->> > net.newdream.ceph.rados.RadosException: conf_read_file: ret=-22
->> >         at net.newdream.ceph.rados.Cluster.native_conf_read_file(Native Method)
->> >         at net.newdream.ceph.rados.Cluster.readConfigFile(Unknown Source)
->> >         at ClusterStatsTest.setup(Unknown Source)
->> >
->> > Thanks,
->> > Ramu.
->> >
->> >
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+I think ceph.conf should use the "short" hostname, without
+modification. So whatever you tell your kernel the hostname is, that's
+what it'd use. For example, you could set up a hostname of foo.bar,
+and make the fqdn be foo.bar.baz.example.com.
+
+But that change might break existing setups..
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
