@@ -1,70 +1,60 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: ceph init script does not start
-Date: Mon, 16 Jul 2012 08:50:02 -0700
-Message-ID: <CADvuQRE9SHHV94U0gqyNmXKZMZQNvVXgeCheMfB5T0KM9qK+7A@mail.gmail.com>
-References: <50012AF1.4040300@gmail.com> <alpine.DEB.2.00.1207140741070.3898@cobra.newdream.net>
- <3046989.AgMSmANe5F@mranderson>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: How to compile Java-Rados.
+Date: Mon, 16 Jul 2012 08:54:57 -0700
+Message-ID: <CAPrxi5-MZ0WS+-fGds99fOiR4oyVx=e6SEpwpCFMj0f3M7YxfA@mail.gmail.com>
+References: <loom.20120712T065146-882@post.gmane.org>
+	<CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com>
+	<loom.20120712T111906-426@post.gmane.org>
+	<CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com>
+	<loom.20120713T085715-195@post.gmane.org>
+	<CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com>
+	<loom.20120716T061714-349@post.gmane.org>
+	<C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu>
+	<loom.20120716T072848-760@post.gmane.org>
+	<CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com>
+	<loom.20120716T092022-386@post.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:40266 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751994Ab2GPPub convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 11:50:31 -0400
-Received: by pbbrp8 with SMTP id rp8so10229160pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 08:50:31 -0700 (PDT)
-In-Reply-To: <3046989.AgMSmANe5F@mranderson>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:53750 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751611Ab2GPPzF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 11:55:05 -0400
+Received: by yhmm54 with SMTP id m54so5435056yhm.19
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 08:55:04 -0700 (PDT)
+In-Reply-To: <loom.20120716T092022-386@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Sz=C3=A9kelyi_Szabolcs?= <szekelyi@niif.hu>
+To: ramu <ramu.freesystems@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Sun, Jul 15, 2012 at 11:05 AM, Sz=C3=A9kelyi Szabolcs <szekelyi@niif=
-=2Ehu> wrote:
-> Just a humble remark here: actually the host=3D setting has to match =
-the
-> hostname *until the first dot*. If your hostname contains a dot, this=
- will not
-> work. This can be useful in a number of cases, like setting the hostn=
-ame to
-> indicate the group of a hierarchy level in the name so that the admin=
-istrator
-> can extactly know what he's working on after logging in (I mean hostn=
-ames like
-> node<X>.rack<Y> in a datacenter or node<X>.<site> when running a
-> geographically distributed cluster).
+Disregard that last message. Ok, I'm not sure where else EINVAL gets
+returned in the configuration path, but I can look into it this
+evening. I tested the wrappers on a clean install last night and they
+seem to be working for me. Can you turn on debug logging with
+CEPH_ARGS (as per Sage's last email)?
+
+On Mon, Jul 16, 2012 at 12:23 AM, ramu <ramu.freesystems@gmail.com> wrote:
+> Hi Noah,
 >
-> From this comes my request: do you think it's possible to change (I m=
-ean, in
-> the repository) ceph_common.sh not to cut the output of `hostname` at=
- the first
-> dot? I'm running a cluster with hostnames like that, and now I have t=
-o edit
-> that file after each upgrade.
-
-There are two concepts here:
-
-- the "short" hostname is just a string, stored in the kernel, can be
-changed with "sudo hostname foo.bar" and seen with "hostname"
-- the "fqdn" (fully qualified domain name) is what you get from
-"hostname -f"; that is reached by taking the "short" hostname,
-resolving it to an IP address, and then reverse resolving the IP to
-dns name; usually all the info needed is in /etc/hosts, but it'll use
-DNS if it has to. If this cannot be done, the "fqdn" is the same as
-the "short" hostname.
-
-I see ceph_common.sh currently does hostname=3D`hostname | cut -d . -f =
-1`.
-
-I think ceph.conf should use the "short" hostname, without
-modification. So whatever you tell your kernel the hostname is, that's
-what it'd use. For example, you could set up a hostname of foo.bar,
-and make the fqdn be foo.bar.baz.example.com.
-
-But that change might break existing setups..
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I printed the CONF_FILE and file and states,the printed as following,these
+> are in ClusterStatsTest.java.
+>
+> test:
+>     [junit] Running ClusterStatsTest
+>     [junit] conffile--->/etc/ceph/ceph.conf
+>     [junit] state-->CONFIGURING
+>     [junit] file--->/etc/ceph/ceph.conf
+>     [junit] state-->CONFIGURING
+>     [junit] Tests run: 1, Failures: 0, Errors: 1, Time elapsed: 0.123 sec
+>
+> BUILD FAILED
+> /home/ramu/java-rados/build.xml:134: Test ClusterStatsTest failed
+>
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
