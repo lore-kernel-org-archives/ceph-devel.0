@@ -1,130 +1,70 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] Robustify ceph-rbdnamer and adapt udev rules
-Date: Mon, 16 Jul 2012 18:03:32 -0700
-Message-ID: <5004B9E4.3000501@inktank.com>
-References: <1342012996.5511.27.camel@clawhammer>  <4FFDA995.70302@inktank.com> <1342079352.2204.16.camel@clawhammer>
+From: Australian Jade <sales@australianjade.com>
+Subject: Intermittent loss of connectivity with KVM-Ceph-Network (solved)
+Date: Tue, 17 Jul 2012 09:51:54 +0930
+Message-ID: <5004B022.1070805@australianjade.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:52671 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751719Ab2GQBDf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 21:03:35 -0400
-Received: by pbbrp8 with SMTP id rp8so10892216pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 18:03:34 -0700 (PDT)
-In-Reply-To: <1342079352.2204.16.camel@clawhammer>
+Received: from mail.logics.net.au ([150.101.56.178]:46022 "EHLO
+	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750906Ab2GQB04 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 21:26:56 -0400
+Received: from x.logics.net.au (gw.logics.net.au [150.101.235.251] (may be forged))
+	(authenticated bits=0)
+	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q6H0Ls8X003501
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-CAMELLIA256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Tue, 17 Jul 2012 09:51:58 +0930
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Pascal de Bruijn | Unilogic Networks B.V." <pascal@unilogicnetworks.net>
-Cc: ceph-devel@vger.kernel.org, s.kleijkers@unilogic.nl
+To: ceph-devel@vger.kernel.org
 
-On 07/12/2012 12:49 AM, Pascal de Bruijn | Unilogic Networks B.V. wrote:
-> On Wed, 2012-07-11 at 09:28 -0700, Josh Durgin wrote:
->> On 07/11/2012 06:23 AM, Pascal de Bruijn | Unilogic Networks B.V. wrote:
->>> Below is a patch which makes the ceph-rbdnamer script more robust and
->>> fixes a problem with the rbd udev rules.
->>>
->>> On our setup we encountered a symlink which was linked to the wrong rbd:
->>>
->>>     /dev/rbd/mypool/myrbd ->   /dev/rbd1
->>>
->>> While that link should have gone to /dev/rbd3 (on which a
->>> partition /dev/rbd3p1 was present).
->>>
->>> Now the old udev rule passes %n to the ceph-rbdnamer script, the problem
->>> with %n is that %n results in a value of 3 (for rbd3), but in a value of
->>> 1 (for rbd3p1), so it seems it can't be depended upon for rbdnaming.
->>>
->>> In the patch below the ceph-rbdnamer script is made more robust and it
->>> now it can be called in various ways:
->>>
->>>     /usr/bin/ceph-rbdnamer /dev/rbd3
->>>     /usr/bin/ceph-rbdnamer /dev/rbd3p1
->>>     /usr/bin/ceph-rbdnamer rbd3
->>>     /usr/bin/ceph-rbdnamer rbd3p1
->>>     /usr/bin/ceph-rbdnamer 3
->>>
->>> Even with all these different styles of calling the modified script, it
->>> should now return the same rbdname. This change "has" to be combined
->>> with calling it from udev with %k though.
->>>
->>> With that fixed, we hit the second problem. We ended up with:
->>>
->>>     /dev/rbd/mypool/myrbd ->   /dev/rbd3p1
->>>
->>> So the rbdname was symlinked to the partition on the rbd instead of the
->>> rbd itself. So what probably went wrong is udev discovering the disk and
->>> running ceph-rbdnamer which resolved it to myrbd so the following
->>> symlink was created:
->>>
->>>     /dev/rbd/mypool/myrbd ->   /dev/rbd3
->>>
->>> However partitions would be discovered next and ceph-rbdnamer would be
->>> run with rbd3p1 (%k) as parameter, resulting in the name myrbd too, with
->>> the previous correct symlink being overwritten with a faulty one:
->>>
->>>     /dev/rbd/mypool/myrbd ->   /dev/rbd3p1
->>>
->>> The solution to the problem is in differentiating between disks and
->>> partitions in udev and handling them slightly differently. So with the
->>> patch below partitions now get their own symlinks in the following style
->>> (which is fairly consistent with other udev rules):
->>>
->>>     /dev/rbd/mypool/myrbd-part1 ->   /dev/rbd3p1
->>>
->>> Please let me know any feedback you have on this patch or the approach
->>> used.
->>
->> This all makes sense, but maybe we should put the -part suffix in
->> another namespace to avoid colliding with images that happen to have
->> -partN in their name, e.g.:
->>
->>       /dev/rbd/mypool/myrbd/part1 ->  /dev/rbd3p1
->
-> Well my current patch changes the udev rules in a way that's consistent
-> with other udev bits. For example:
->
->    /dev/disk/by-id/cciss-3600508b1001038353220202020200006
->    /dev/disk/by-id/cciss-3600508b1001038353220202020200006-part1
->    /dev/disk/by-id/cciss-3600508b1001038353220202020200006-part2
->
-> There is no namespacing there either. That said, those rules tends to
-> use serials/unique-id's for naming (and not user specified strings), so
-> there is little risk of conflicting with the -part%n bit.
->
-> Also, having a namespace as suggested:
->
->    /dev/rbd/mypool/myrbd/part1 ->  /dev/rbd3p1
->
-> Also precludes:
->
->    /dev/rbd/mypool/myrbd ->  /dev/rbd3
->
->  From existing, as myrbd can't be both a device file and directory at the
-> same time :)
->
-> Assuming you'd want to continue with this approach the disk udev link
-> should probably be something like:
->
->    /dev/rbd/mypool/myrbd/disk ->  /dev/rbd3
->
-> Please do note that this would change the udev rules in a way that could
-> potentially break people's existing scripts which might assume the old
-> udev scheme (whereas my current patch does not break the old scheme).
+Hello,
 
-Good point.
+Just want to share my recent experience with KVM backed by RBD. Ceph 
+appears to be not at fault but I post it here for others to read as my 
+configuration is something other users of Ceph may configure.
 
-> Maybe it's worth considering applying my patch as-is to the 0.48.x
-> stable tree, and experimenting with other udev schemes in newer
-> development releases?
+Over last three weeks I was battling some elusive issue: KVM backed by 
+RBD intermittently lost network under some consistent (but relatively 
+low) load. It was driving me nuts as nothing appeared in the logs and 
+everything was seemingly OK. With only one exception: pings to nearby 
+host sometimes were coming with "No buffer space available" error and 
+number of pings could be delayed by 20-30 seconds (obviously such delay 
+causes a lot of timeouts). KVM has two network virtio interfaces and on 
+host vhost_net module running. One interface is publicly available, 
+second one connected to private network. I have tried to change virtio 
+to e1000, increase network buffers - all in vain. I also noticed that 
+when hold up on interface happened pings come back with second 
+difference: ie they piling up on interface and then suddenly sent 
+through all at once and remote host returns all of them pretty much 
+simultaneously. Another observation which I have made: this behaviour 
+was clearly evident when network/disk activity was reasonable - during 
+backup. I have stopped backup for one day but it did not help (however 
+loss of connectivity did not happen as much).
 
-That sounds best. I've applied your patch to the stable, next, and
-master branches.
+Being unable to identify the cause I started to pull things apart: I 
+have moved image from RBD to qcow and magically everything became 
+normal. Back to RBD and issue manifested itself again. But on other hand 
+I had number of freshly installed VMs which also backed by RBD and do 
+not have such issue. VMs which had this fault were different: they were 
+migrated from hardware hosts to VM environment. Fresh VMs and migrated 
+VMs are distro-synched FC17 and so I did not expect any difference. The 
+only difference I had left was that migrated VMs were 32 bit and freshly 
+installed were 64 bit. So in the end I have upgraded kernel in one 
+faulty VM to 64 bit (while leaving balance of the system 32 bit) and 
+problem disappeared! Next day I have upgraded another VM the same way 
+and it also became problem free! So I am now sure that problem lies in 
+32 bit kernel which is run on 64 bit host.
 
-Thanks!
-Josh
+So I guess that there some race condition, likely in virtio_net driver 
+or in tcp stack, which is apparently triggered by context switching from 
+32 bit to 64 bit and io delays introduced by QEMU-RBD driver. Only when 
+32 bit VM runs on 64 bit host and it is backed by RBD image this issue 
+appears. Being unable to identify exact spot in the kernel were the 
+problem is I even not sure where exactly I should report it to so I 
+decided to post it here as the place where people with VMs backed by RBD 
+most likely will look for solution.
 
-> Regards,
-> Pascal de Bruijn
-
+Regards,
+Vladimir
