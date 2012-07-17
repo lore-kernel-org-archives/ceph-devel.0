@@ -1,64 +1,48 @@
-From: James Page <james.page@ubuntu.com>
-Subject: Re: Ceph exception for wheezy
-Date: Tue, 17 Jul 2012 13:14:00 +0100
-Message-ID: <50055708.3040509@ubuntu.com>
-References: <50055069.703@enovance.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: How to compile Java-Rados.
+Date: Tue, 17 Jul 2012 08:42:33 -0700
+Message-ID: <CAPrxi5_wA8sxJg6vN115E-sQO9LjT13dQFZ+2rqV4rPBborX_Q@mail.gmail.com>
+References: <loom.20120712T065146-882@post.gmane.org>
+	<CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com>
+	<loom.20120712T111906-426@post.gmane.org>
+	<CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com>
+	<loom.20120713T085715-195@post.gmane.org>
+	<CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com>
+	<loom.20120716T061714-349@post.gmane.org>
+	<C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu>
+	<loom.20120716T072848-760@post.gmane.org>
+	<CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com>
+	<alpine.DEB.2.00.1207160824220.9848@cobra.newdream.net>
+	<CAPrxi5-2STepCif9aN1GyfTwFEzs56o5Nzg7NuHmBqq=7qWVEQ@mail.gmail.com>
+	<loom.20120717T073350-472@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:52221 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751146Ab2GQMOF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jul 2012 08:14:05 -0400
-In-Reply-To: <50055069.703@enovance.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:62622 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751284Ab2GQPmd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jul 2012 11:42:33 -0400
+Received: by yhmm54 with SMTP id m54so506951yhm.19
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Jul 2012 08:42:33 -0700 (PDT)
+In-Reply-To: <loom.20120717T073350-472@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@enovance.com>
-Cc: "Laszlo Boszormenyi (GCS)" <gcs@debian.hu>, Ceph Development <ceph-devel@vger.kernel.org>, openstack-devel@lists.alioth.debian.org
+To: ramu <ramu.freesystems@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
+On Mon, Jul 16, 2012 at 10:39 PM, ramu <ramu.freesystems@gmail.com> wrote:
+> Hi Noah,
+>
+> Testcase: test_ClusterStats took 0.036 sec
+>         Caused an ERROR
+> rados_connect: ret=-1
+> net.newdream.ceph.rados.RadosException: rados_connect: ret=-1
+>         at net.newdream.ceph.rados.Cluster.native_connect(Native Method)
+>         at net.newdream.ceph.rados.Cluster.connect(Unknown Source)
 
-On 17/07/12 12:45, Loic Dachary wrote:
-> Thank you for uploading 0.48 in testing: it's great to have a
-> stable version for wheezy. If you need support in getting an
-> exception to migrate to testing despite the freeze, I'd be happy to
-> help.
+That return code, -1, should correspond to -EPERM. I don't see this
+error code in the rados client code. Are you able to use the same
+ceph.conf file to connect and interact with RADOS using a interface
+other than the Java wrappers?
 
-The required fix to support big-endian architectures in leveldb has
-just been uploaded to unstable (see [0]) as well which should help
-unblock but I also see some issue with the symbols files added in the
-last update causing issues on non-amd64 architectures.
-
-Laszlo - are you looking at this? I can find some time if you need a hand.
-
-Cheers
-
-James
-
-[0] http://packages.qa.debian.org/l/leveldb/news/20120717T120234Z.html
-
-- -- 
-James Page
-Ubuntu Core Developer
-Debian Maintainer
-james.page@ubuntu.com
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iQIcBAEBCAAGBQJQBVcIAAoJEL/srsug59jDwnQP/ja/9RSwP6VytiUemuXSOQJH
-MC/ShtHWBxB32Xn8o81sMpLHzNoX4yeTiy9GDB5i4QjqiZ+JMSfngmsyRMuk3twV
-R1y6X3CAha9h5tAzMC1HiaX+S7xUyn/8E8QMHYrn12z/HQBxJCU2RosV/SUe4lbP
-ygX51p4gWiYo95z+iXNIqfV/MmPhcJU0j3NDaKo/HHnS8Oy9OyoLFhZ33ew8QLyQ
-ermP6o18yYRKX9SAjz97MXeTeD2QQNUduWhtdoyvYrw9iXwI2mbh/i7b4w6Cbaff
-qzXaybBhtKPGKzFoFVSjdPnW8TVM0FneAvDnQ/vvoU66OnjPUKNaMXNqvabl8sQl
-yaH+/TFCBJi8wkKx7gQpcL+JnxOGJx7B9N2azVyRLzx9d5dMi8U04mpR+0RBRuC5
-hnYN1+MHzzAxy7d1ux/QbaJiEqe+alcmJc9u5YNicMb6ZFWkco0jGx1BvO+Z71Vv
-sxCvlLFTriiqhAZN5cjcrsCIbM/JwxMSHJfY8r15sstusvHdn93ogxJ9a44pPKsQ
-4aReA+NGXRik6A9m5o8HbvpTpw2yvBdkYuYh7+AYtGKwYvbshk/qlG5f9wYZQdGE
-81agkpMjOQyRRpImktIoUQzA1Phs+MWOEOQNjWcq2n+J/VbyTO+WlCNa9Yq1ASHV
-Es5qBLhRRVxQRDpvumPH
-=wUJR
------END PGP SIGNATURE-----
+Checking the OSD logs might reveal the problem... do you have these available?
