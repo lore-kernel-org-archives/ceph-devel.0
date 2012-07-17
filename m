@@ -1,51 +1,130 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: can "rbd unmap" detect if device is mounted?
-Date: Mon, 16 Jul 2012 17:43:40 -0700
-Message-ID: <5004B53C.9020705@inktank.com>
-References: <CACkq2mqt5ae4U_-yhNM94GYQnE_negqXqHTf3JaSZ0zsxya9Yw@mail.gmail.com> <500498FC.9070806@inktank.com> <CADvuQREm_PCatUUdgUjsUNMNBNEtB9_z9LTvo9D0Gyq7dR8XeQ@mail.gmail.com>
+Subject: Re: [PATCH] Robustify ceph-rbdnamer and adapt udev rules
+Date: Mon, 16 Jul 2012 18:03:32 -0700
+Message-ID: <5004B9E4.3000501@inktank.com>
+References: <1342012996.5511.27.camel@clawhammer>  <4FFDA995.70302@inktank.com> <1342079352.2204.16.camel@clawhammer>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:64246 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:52671 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751308Ab2GQAnn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 20:43:43 -0400
-Received: by pbbrp8 with SMTP id rp8so10867613pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 17:43:43 -0700 (PDT)
-In-Reply-To: <CADvuQREm_PCatUUdgUjsUNMNBNEtB9_z9LTvo9D0Gyq7dR8XeQ@mail.gmail.com>
+	with ESMTP id S1751719Ab2GQBDf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jul 2012 21:03:35 -0400
+Received: by pbbrp8 with SMTP id rp8so10892216pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jul 2012 18:03:34 -0700 (PDT)
+In-Reply-To: <1342079352.2204.16.camel@clawhammer>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Travis Rhoden <trhoden@gmail.com>, ceph-devel@vger.kernel.org
+To: "Pascal de Bruijn | Unilogic Networks B.V." <pascal@unilogicnetworks.net>
+Cc: ceph-devel@vger.kernel.org, s.kleijkers@unilogic.nl
 
-On 07/16/2012 04:37 PM, Tommi Virtanen wrote:
-> On Mon, Jul 16, 2012 at 3:43 PM, Josh Durgin<josh.durgin@inktank.com>  wrote:
->>> I've made this mistake a couple of times now (completely my fault,
->>> when will I learn?), and am wondering if a bit of protection can be
->>> put in place against user errors.
->> Yeah, we've been working on advisory locking. The first step is
->> just adding an option to lock via the rbd command line tool, so you
->> could script lock/map and unmap/unlock.
+On 07/12/2012 12:49 AM, Pascal de Bruijn | Unilogic Networks B.V. wrote:
+> On Wed, 2012-07-11 at 09:28 -0700, Josh Durgin wrote:
+>> On 07/11/2012 06:23 AM, Pascal de Bruijn | Unilogic Networks B.V. wrote:
+>>> Below is a patch which makes the ceph-rbdnamer script more robust and
+>>> fixes a problem with the rbd udev rules.
+>>>
+>>> On our setup we encountered a symlink which was linked to the wrong rbd:
+>>>
+>>>     /dev/rbd/mypool/myrbd ->   /dev/rbd1
+>>>
+>>> While that link should have gone to /dev/rbd3 (on which a
+>>> partition /dev/rbd3p1 was present).
+>>>
+>>> Now the old udev rule passes %n to the ceph-rbdnamer script, the problem
+>>> with %n is that %n results in a value of 3 (for rbd3), but in a value of
+>>> 1 (for rbd3p1), so it seems it can't be depended upon for rbdnaming.
+>>>
+>>> In the patch below the ceph-rbdnamer script is made more robust and it
+>>> now it can be called in various ways:
+>>>
+>>>     /usr/bin/ceph-rbdnamer /dev/rbd3
+>>>     /usr/bin/ceph-rbdnamer /dev/rbd3p1
+>>>     /usr/bin/ceph-rbdnamer rbd3
+>>>     /usr/bin/ceph-rbdnamer rbd3p1
+>>>     /usr/bin/ceph-rbdnamer 3
+>>>
+>>> Even with all these different styles of calling the modified script, it
+>>> should now return the same rbdname. This change "has" to be combined
+>>> with calling it from udev with %k though.
+>>>
+>>> With that fixed, we hit the second problem. We ended up with:
+>>>
+>>>     /dev/rbd/mypool/myrbd ->   /dev/rbd3p1
+>>>
+>>> So the rbdname was symlinked to the partition on the rbd instead of the
+>>> rbd itself. So what probably went wrong is udev discovering the disk and
+>>> running ceph-rbdnamer which resolved it to myrbd so the following
+>>> symlink was created:
+>>>
+>>>     /dev/rbd/mypool/myrbd ->   /dev/rbd3
+>>>
+>>> However partitions would be discovered next and ceph-rbdnamer would be
+>>> run with rbd3p1 (%k) as parameter, resulting in the name myrbd too, with
+>>> the previous correct symlink being overwritten with a faulty one:
+>>>
+>>>     /dev/rbd/mypool/myrbd ->   /dev/rbd3p1
+>>>
+>>> The solution to the problem is in differentiating between disks and
+>>> partitions in udev and handling them slightly differently. So with the
+>>> patch below partitions now get their own symlinks in the following style
+>>> (which is fairly consistent with other udev rules):
+>>>
+>>>     /dev/rbd/mypool/myrbd-part1 ->   /dev/rbd3p1
+>>>
+>>> Please let me know any feedback you have on this patch or the approach
+>>> used.
+>>
+>> This all makes sense, but maybe we should put the -part suffix in
+>> another namespace to avoid colliding with images that happen to have
+>> -partN in their name, e.g.:
+>>
+>>       /dev/rbd/mypool/myrbd/part1 ->  /dev/rbd3p1
 >
-> Is his problem really about the locking?
+> Well my current patch changes the udev rules in a way that's consistent
+> with other udev bits. For example:
 >
-> It sounded to me like, he has something (the mount) referencing a
-> block device, and we're letting the block device disappear.
+>    /dev/disk/by-id/cciss-3600508b1001038353220202020200006
+>    /dev/disk/by-id/cciss-3600508b1001038353220202020200006-part1
+>    /dev/disk/by-id/cciss-3600508b1001038353220202020200006-part2
 >
-> The locking you guys have been talking about sounds like that lock
-> would be held whenever the image is mapped, regardless of whether it's
-> mounted or not (think mkfs).
+> There is no namespacing there either. That said, those rules tends to
+> use serials/unique-id's for naming (and not user specified strings), so
+> there is little risk of conflicting with the -part%n bit.
 >
+> Also, having a namespace as suggested:
 >
-> Should unmap even be possible while the block device is open?
-> Shouldn't there be a refcount and an -EBUSY? That's what other block
-> device providers do:
+>    /dev/rbd/mypool/myrbd/part1 ->  /dev/rbd3p1
+>
+> Also precludes:
+>
+>    /dev/rbd/mypool/myrbd ->  /dev/rbd3
+>
+>  From existing, as myrbd can't be both a device file and directory at the
+> same time :)
+>
+> Assuming you'd want to continue with this approach the disk udev link
+> should probably be something like:
+>
+>    /dev/rbd/mypool/myrbd/disk ->  /dev/rbd3
+>
+> Please do note that this would change the udev rules in a way that could
+> potentially break people's existing scripts which might assume the old
+> udev scheme (whereas my current patch does not break the old scheme).
 
-That would be the best solution. Looking into it, the rbd driver
-is already keeping a refcount just like the loop driver (in 
-block_device_operations .open/.release). The rbd driver is only using
-it for the struct device though, instead of struct rbd_device. This
-shouldn't be too hard to fix.
+Good point.
 
+> Maybe it's worth considering applying my patch as-is to the 0.48.x
+> stable tree, and experimenting with other udev schemes in newer
+> development releases?
+
+That sounds best. I've applied your patch to the stable, next, and
+master branches.
+
+Thanks!
 Josh
+
+> Regards,
+> Pascal de Bruijn
+
