@@ -1,33 +1,34 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Intermittent loss of connectivity with KVM-Ceph-Network (solved)
-Date: Tue, 17 Jul 2012 09:24:44 -0700
-Message-ID: <CADvuQRGYoEm2yzw=rQ+pLLSDvBH7xSRpSwHGyfgmxoR9P-qt5Q@mail.gmail.com>
-References: <5004B022.1070805@australianjade.com>
+From: Travis Rhoden <trhoden@gmail.com>
+Subject: snapshot storage use
+Date: Tue, 17 Jul 2012 14:11:56 -0400
+Message-ID: <CACkq2motpiYUmTNNJjFe-H0ZS95CaArz16MXMFxuqGHZ24Kt5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:63398 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752357Ab2GQQZG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jul 2012 12:25:06 -0400
-Received: by yenl2 with SMTP id l2so564244yen.19
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Jul 2012 09:25:05 -0700 (PDT)
-In-Reply-To: <5004B022.1070805@australianjade.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:53923 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753868Ab2GQSMR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jul 2012 14:12:17 -0400
+Received: by bkwj10 with SMTP id j10so674466bkw.19
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Jul 2012 11:12:16 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Australian Jade <sales@australianjade.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, Jul 16, 2012 at 5:21 PM, Australian Jade
-<sales@australianjade.com> wrote:
-> all in vain. I also noticed that when hold up on interface happened pings
-> come back with second difference: ie they piling up on interface and then
-> suddenly sent through all at once and remote host returns all of them pretty
-> much simultaneously. Another observation which I have made: this behaviour
+Hey folks,
 
-That sounds like an interrupt (or some virtualized equivalent of one)
-going across the vm-hypervisor boundary is getting lost.
+Sorry if this info is covered elsewhere -- I searched but was unable
+to find a description of what I wanted.
 
-I've actually seen that symptom with actual hardware, back in the day,
-when driver bugs turned off the NICs interrupt handling too
-heavyhandedly. The queues were still polled once a second..
+Roughly how much storage is used by snapshots?  Is it really just
+marking the version of certain objects, such that multiple snapshots
+of the same (unchanged) object consume essentially no new space?
+Correspondingly, once that object is finally modified, it is copied
+and the snapshots still point to the original (old) copy?  Is this
+done by using hardlinks or some other method?
+
+Just wanted the 10,000 foot view explanation.  =)
+
+Thanks,
+
+ - Travis
