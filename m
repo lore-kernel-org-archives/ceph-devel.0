@@ -1,194 +1,122 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH] rbd: fix the memory leak of bio_chain_clone
-Date: Tue, 17 Jul 2012 13:18:50 -0700
-Message-ID: <CAC-hyiGfngpUAEusoJEedNQv5BymczfwraEsOo2wSvNF4hJL2g@mail.gmail.com>
-References: <1342010053-9306-1-git-send-email-gzhao@suse.com>
+From: "Jim Schutt" <jaschut@sandia.gov>
+Subject: osd/OSDMap.h: 330: FAILED assert(is_up(osd))
+Date: Tue, 17 Jul 2012 14:49:34 -0600
+Message-ID: <5005CFDE.5010100@sandia.gov>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+ charset=utf-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:45834 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754813Ab2GQUSv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jul 2012 16:18:51 -0400
-Received: by bkwj10 with SMTP id j10so821964bkw.19
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Jul 2012 13:18:50 -0700 (PDT)
-In-Reply-To: <1342010053-9306-1-git-send-email-gzhao@suse.com>
+Received: from sentry-two.sandia.gov ([132.175.109.14]:59233 "EHLO
+	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755096Ab2GQUuE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jul 2012 16:50:04 -0400
+Received: from interceptor1.sandia.gov (interceptor1.sandia.gov [132.175.109.5])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by sentry-two.sandia.gov (Postfix) with ESMTP id 169C6D2C889
+	for <ceph-devel@vger.kernel.org>; Tue, 17 Jul 2012 14:50:03 -0600 (MDT)
+Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21]) by interceptor1.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Tue, 17 Jul 2012 14:49:49 -0600
+Received: from mail.sandia.gov (exch02.sandia.gov [134.253.103.2] (may
+ be forged)) by mailgate.sandia.gov (8.14.4/8.14.4) with ESMTP id
+ q6HKngkM016136 for <ceph-devel@vger.kernel.org>; Tue, 17 Jul 2012
+ 14:49:43 -0600
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guangliang Zhao <gzhao@suse.com>
-Cc: ceph-devel@vger.kernel.org, sage@inktank.com
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Jul 11, 2012 at 5:34 AM, Guangliang Zhao <gzhao@suse.com> wrote:
->
-> The bio_pair alloced in bio_chain_clone would not be freed,
-> this will cause a memory leak. It could be freed actually only
-> after 3 times release, because the reference count of bio_pair
-> is initialized to 3 when bio_split and bio_pair_release only
-> drops the reference count.
->
-> The function bio_pair_release must be called three times for
-> releasing bio_pair, and the callback functions of bios on the
-> requests will be called when the last release time in bio_pair_release,
-> however, these functions will also be called in rbd_req_cb. In
-> other words, they will be called twice, and it may cause serious
-> consequences.
->
-> This patch clones bio chian from the origin directly, doesn't use
-> bio_split(without bio_pair). The new bio chain can be release
-> whenever we don't need it.
->
-> Signed-off-by: Guangliang Zhao <gzhao@suse.com>
-> ---
->  drivers/block/rbd.c |   66
-> ++++++++++++++++++++-------------------------------
->  1 files changed, 26 insertions(+), 40 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 013c7a5..6a12040 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -712,51 +712,43 @@ static void zero_bio_chain(struct bio *chain, int
-> start_ofs)
->         }
->  }
->
-> -/*
-> - * bio_chain_clone - clone a chain of bios up to a certain length.
-> - * might return a bio_pair that will need to be released.
-> +/**
-> + *      bio_chain_clone - clone a chain of bios up to a certain length.
-> + *      @old: bio to clone
-> + *      @offset: start point for bio clone
-> + *      @len: length of bio chain
-> + *      @gfp_mask: allocation priority
-> + *
-> + *      RETURNS:
-> + *      Pointer to new bio chain on success, NULL on failure.
->   */
-> -static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
-> -                                  struct bio_pair **bp,
-> +static struct bio *bio_chain_clone(struct bio **old, int *offset,
->                                    int len, gfp_t gfpmask)
->  {
->         struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail =
-> NULL;
->         int total = 0;
->
-> -       if (*bp) {
-> -               bio_pair_release(*bp);
-> -               *bp = NULL;
-> -       }
-> -
->         while (old_chain && (total < len)) {
-> +               int need = len - total;
-> +
->                 tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
->                 if (!tmp)
->                         goto err_out;
->
-> -               if (total + old_chain->bi_size > len) {
-> -                       struct bio_pair *bp;
-> -
-> +               __bio_clone(tmp, old_chain);
-> +               if (total + (tmp->bi_size - *offset) > len) {
+Hi,
 
-can change this to:
-  if (tmp->bi_size - *offset > need)
+Recent master branch is asserting for me like this:
 
-I think it'll be slightly more readable
+  ceph version 0.48argonaut-404-gabe05a3 (commit:abe05a3fbbb120d8d354623258d9104584db66f7)
+  1: (OSDMap::get_cluster_inst(int) const+0xc9) [0x58cde9]
+  2: (OSD::handle_osd_ping(MOSDPing*)+0x8cf) [0x5d4b4f]
+  3: (OSD::heartbeat_dispatch(Message*)+0x71) [0x5d5491]
+  4: (SimpleMessenger::DispatchQueue::entry()+0x583) [0x7d5683]
+  5: (SimpleMessenger::dispatch_entry()+0x15) [0x7d6a05]
+  6: (SimpleMessenger::DispatchThread::entry()+0xd) [0x7957bd]
+  7: (()+0x77f1) [0x7ffff76507f1]
+  8: (clone()+0x6d) [0x7ffff6aa1ccd]
 
-> +                       tmp->bi_sector += *offset >> SECTOR_SHIFT;
-> +                       tmp->bi_io_vec->bv_offset += *offset >>
-> SECTOR_SHIFT;
+gdb had this to say:
 
-Shouldn't these two lines be outside this if?
+(gdb) bt
+#0  0x00007ffff765836b in raise (sig=6) at ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:42
+#1  0x00000000007245b7 in reraise_fatal (signum=6) at global/signal_handler.cc:58
+#2  handle_fatal_signal (signum=6) at global/signal_handler.cc:104
+#3  <signal handler called>
+#4  0x00007ffff69ee885 in raise (sig=6) at ../nptl/sysdeps/unix/sysv/linux/raise.c:64
+#5  0x00007ffff69f0065 in abort () at abort.c:92
+#6  0x0000003be84bea7d in __gnu_cxx::__verbose_terminate_handler() () from /usr/lib64/libstdc++.so.6
+#7  0x0000003be84bcc06 in ?? () from /usr/lib64/libstdc++.so.6
+#8  0x0000003be84bcc33 in std::terminate() () from /usr/lib64/libstdc++.so.6
+#9  0x0000003be84bcd2e in __cxa_throw () from /usr/lib64/libstdc++.so.6
+#10 0x000000000074b9e3 in ceph::__ceph_assert_fail (assertion=0x1488000 "\001", file=0x2d828a0 "\260m\"\003", line=330, func=0x8701e0 "entity_inst_t OSDMap::get_cluster_inst(int) const") at common/assert.cc:77
+#11 0x000000000058cde9 in OSDMap::get_cluster_inst (this=<value optimized out>, osd=<value optimized out>) at osd/OSDMap.h:330
+#12 0x00000000005d4b4f in OSD::handle_osd_ping (this=0x14d8000, m=<value optimized out>) at osd/OSD.cc:1717
+#13 0x00000000005d5491 in OSD::heartbeat_dispatch (this=0x14d8000, m=0x24383100) at osd/OSD.cc:2784
+#14 0x00000000007d5683 in ms_deliver_dispatch (this=0x1472960) at msg/Messenger.h:504
+#15 SimpleMessenger::DispatchQueue::entry (this=0x1472960) at msg/SimpleMessenger.cc:367
+#16 0x00000000007d6a05 in SimpleMessenger::dispatch_entry (this=0x1472880) at msg/SimpleMessenger.cc:384
+#17 0x00000000007957bd in SimpleMessenger::DispatchThread::entry (this=<value optimized out>) at ./msg/SimpleMessenger.h:807
+#18 0x00007ffff76507f1 in start_thread (arg=0x7fffe6ec6700) at pthread_create.c:301
+#19 0x00007ffff6aa1ccd in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:115
+(gdb) f 12
+#12 0x00000000005d4b4f in OSD::handle_osd_ping (this=0x14d8000, m=<value optimized out>) at osd/OSD.cc:1717
+1717		  _share_map_outgoing(service.get_osdmap()->get_cluster_inst(from));
+(gdb) l
+1712	      hbserver_messenger->send_message(r, m->get_connection());
+1713	
+1714	      if (osdmap->is_up(from)) {
+1715		note_peer_epoch(from, m->map_epoch);
+1716		if (locked && is_active())
+1717		  _share_map_outgoing(service.get_osdmap()->get_cluster_inst(from));
+1718	      }
+1719	    }
+1720	    break;
+1721	
+(gdb) f 11
+#11 0x000000000058cde9 in OSDMap::get_cluster_inst (this=<value optimized out>, osd=<value optimized out>) at osd/OSDMap.h:330
+330	    assert(is_up(osd));
+(gdb) l
+325	  entity_inst_t get_inst(int osd) const {
+326	    assert(is_up(osd));
+327	    return entity_inst_t(entity_name_t::OSD(osd), get_addr(osd));
+328	  }
+329	  entity_inst_t get_cluster_inst(int osd) const {
+330	    assert(is_up(osd));
+331	    return entity_inst_t(entity_name_t::OSD(osd), get_cluster_addr(osd));
+332	  }
+333	  entity_inst_t get_hb_inst(int osd) const {
+334	    assert(is_up(osd));
 
 
+Apparently osdmap member in class OSD don't have the
+same map contents as the osdmap member in OSDService
+in this instance?
 
->                         /*
-> -                        * this split can only happen with a single paged
-> bio,
-> -                        * split_bio will BUG_ON if this is not the case
-> +                        * This can only happen with a single paged bio,
-> +                        * rbd_merge_bvec would guarantee it.
->                          */
-> -                       dout("bio_chain_clone split! total=%d
-> remaining=%d"
-> -                            "bi_size=%d\n",
-> -                            (int)total, (int)len-total,
-> -                            (int)old_chain->bi_size);
-> -
-> -                       /* split the bio. We'll release it either in the
-> next
-> -                          call, or it will have to be released outside */
-> -                       bp = bio_split(old_chain, (len - total) /
-> SECTOR_SIZE);
-> -                       if (!bp)
-> -                               goto err_out;
-> -
-> -                       __bio_clone(tmp, &bp->bio1);
-> -
-> -                       *next = &bp->bio2;
-> +                       tmp->bi_size = need;
-> +                       tmp->bi_io_vec->bv_len = need;
-> +                       *offset += need;
->                 } else {
-> -                       __bio_clone(tmp, old_chain);
-> -                       *next = old_chain->bi_next;
-> +                       old_chain = old_chain->bi_next;
-> +                       *offset = 0;
->                 }
->
->                 tmp->bi_bdev = NULL;
-> @@ -769,7 +761,6 @@ static struct bio *bio_chain_clone(struct bio **old,
-> struct bio **next,
->                         tail->bi_next = tmp;
->                         tail = tmp;
->                 }
-> -               old_chain = old_chain->bi_next;
->
->                 total += tmp->bi_size;
->         }
-> @@ -1447,13 +1438,12 @@ static void rbd_rq_fn(struct request_queue *q)
->  {
->         struct rbd_device *rbd_dev = q->queuedata;
->         struct request *rq;
-> -       struct bio_pair *bp = NULL;
->
->         while ((rq = blk_fetch_request(q))) {
->                 struct bio *bio;
-> -               struct bio *rq_bio, *next_bio = NULL;
-> +               struct bio *rq_bio;
->                 bool do_write;
-> -               int size, op_size = 0;
-> +               int size, op_size = 0, offset = 0;
->                 u64 ofs;
->                 int num_segs, cur_seg = 0;
->                 struct rbd_req_coll *coll;
-> @@ -1503,7 +1493,7 @@ static void rbd_rq_fn(struct request_queue *q)
->                                                   ofs, size,
->                                                   NULL, NULL);
->                         kref_get(&coll->kref);
-> -                       bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
-> +                       bio = bio_chain_clone(&rq_bio, &offset,
->                                               op_size, GFP_ATOMIC);
->                         if (!bio) {
->                                 rbd_coll_end_req_index(rq, coll, cur_seg,
-> @@ -1531,12 +1521,8 @@ next_seg:
->                         ofs += op_size;
->
->                         cur_seg++;
-> -                       rq_bio = next_bio;
->                 } while (size > 0);
->                 kref_put(&coll->kref, rbd_coll_release);
-> -
-> -               if (bp)
-> -                       bio_pair_release(bp);
->                 spin_lock_irq(q->queue_lock);
->         }
->  }
+Why are there two osdmaps?  Under what conditions is it
+appropriate for them to have different contents?
 
-Yeah, looks cleaner.
+Is this the appropriate fix?
 
-Thanks,
-Yehuda
+@@ -1711,10 +1711,10 @@ void OSD::handle_osd_ping(MOSDPing *m)
+  				m->stamp);
+        hbserver_messenger->send_message(r, m->get_connection());
+
+-      if (osdmap->is_up(from)) {
++      if (locked && osdmap->is_up(from)) {
+  	note_peer_epoch(from, m->map_epoch);
+-	if (locked && is_active())
+-	  _share_map_outgoing(service.get_osdmap()->get_cluster_inst(from));
++	if (is_active())
++	  _share_map_outgoing(osdmap->get_cluster_inst(from));
+        }
+      }
+      break;
+
+
+Thanks -- Jim
+
