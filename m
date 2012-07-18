@@ -1,17 +1,17 @@
 From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
 Subject: Re: Poor read performance in KVM
-Date: Wed, 18 Jul 2012 15:16:53 +0930
-Message-ID: <50064DCD.8040904@bashkirtsev.com>
+Date: Wed, 18 Jul 2012 15:19:06 +0930
+Message-ID: <50064E52.2090700@bashkirtsev.com>
 References: <5002C215.108@bashkirtsev.com> <5003B1CC.4060909@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII;
 	format=flowed
 Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:58885 "EHLO
+Received: from mail.logics.net.au ([150.101.56.178]:58887 "EHLO
 	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750939Ab2GRFwL convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jul 2012 01:52:11 -0400
+	with ESMTP id S1751675Ab2GRFwg convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jul 2012 01:52:36 -0400
 In-Reply-To: <5003B1CC.4060909@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
