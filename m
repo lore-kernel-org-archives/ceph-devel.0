@@ -1,85 +1,211 @@
-From: ramu <ramu.freesystems@gmail.com>
-Subject: Re: How to compile Java-Rados.
-Date: Wed, 18 Jul 2012 06:24:02 +0000 (UTC)
-Message-ID: <loom.20120718T082223-738@post.gmane.org>
-References: <loom.20120712T065146-882@post.gmane.org> <CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com> <loom.20120712T111906-426@post.gmane.org> <CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com> <loom.20120713T085715-195@post.gmane.org> <CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com> <loom.20120716T061714-349@post.gmane.org> <C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu> <loom.20120716T072848-760@post.gmane.org> <CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com> <alpine.DEB.2.00.1207160824220.9848@cobra.newdream.net> <CAPrxi5-2STepCif9aN1GyfTwFEzs56o5Nzg7NuHmBqq=7qWVEQ@mail.gmail.com> <loom.20120717T073350-472@post.gmane.org> <CAPrxi5_wA8sxJg6vN115E-sQO9LjT13dQFZ+2rqV4rPBborX_Q@mail.gmail.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: ceph status reporting non-existing osd
+Date: Wed, 18 Jul 2012 00:18:43 -0700
+Message-ID: <9D6CE6A067E543BFBDDD0A29BB2E34F9@inktank.com>
+References: <4FFFD9AB.40608@xdel.ru>
+ <CAPYLRzgOHf9nMdK5oOrs6++H22iFLYvcbhMQsZtd8Z3OskX=yw@mail.gmail.com>
+ <alpine.DEB.2.00.1207131009280.9771@cobra.newdream.net>
+ <CABYiri9wEoPs87qUr2MANX_AHB-aHprJBdXV0o4TxeDPj6SrhQ@mail.gmail.com>
+ <823856EB9E9B4D1EBB352F93465B742A@inktank.com>
+ <CABYiri-D4qPv1nQ4KHkwDS6wrH9gZdSu=b6ePxk61Ks-qx+Ajg@mail.gmail.com>
+ <C286CA87975941CD913337EAC9844935@inktank.com>
+ <CABYiri9RAYrVaqePQq00J-KK32_Y_pf1c0jHxhJD2ZVBRrxOhA@mail.gmail.com>
+ <45F07A6460B34ED5A9C589696933A936@inktank.com>
+ <CABYiri_sCkq=7-NFgP6ohT=yZxFJboqgC5es_xDb+ijUZ5hrYg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:35836 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751204Ab2GRGYQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 18 Jul 2012 02:24:16 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SrNgE-0002AL-6G
-	for ceph-devel@vger.kernel.org; Wed, 18 Jul 2012 08:24:15 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jul 2012 08:24:14 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jul 2012 08:24:14 +0200
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:43381 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752078Ab2GRHSr convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jul 2012 03:18:47 -0400
+Received: by pbbrp8 with SMTP id rp8so2153875pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jul 2012 00:18:46 -0700 (PDT)
+In-Reply-To: <CABYiri_sCkq=7-NFgP6ohT=yZxFJboqgC5es_xDb+ijUZ5hrYg@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Andrey Korolyov <andrey@xdel.ru>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi Noah,
+On Tuesday, July 17, 2012 at 11:22 PM, Andrey Korolyov wrote:
+> On Wed, Jul 18, 2012 at 10:09 AM, Gregory Farnum <greg@inktank.com (m=
+ailto:greg@inktank.com)> wrote:
+> > On Monday, July 16, 2012 at 11:55 AM, Andrey Korolyov wrote:
+> > > On Mon, Jul 16, 2012 at 10:48 PM, Gregory Farnum <greg@inktank.co=
+m (mailto:greg@inktank.com)> wrote:
+> > > > "ceph pg set_full_ratio 0.95"
+> > > > "ceph pg set_nearfull_ratio 0.94"
+> > > > =20
+> > > > =20
+> > > > On Monday, July 16, 2012 at 11:42 AM, Andrey Korolyov wrote:
+> > > > =20
+> > > > > On Mon, Jul 16, 2012 at 8:12 PM, Gregory Farnum <greg@inktank=
+=2Ecom (mailto:greg@inktank.com)> wrote:
+> > > > > > On Saturday, July 14, 2012 at 7:20 AM, Andrey Korolyov wrot=
+e:
+> > > > > > > On Fri, Jul 13, 2012 at 9:09 PM, Sage Weil <sage@inktank.=
+com (mailto:sage@inktank.com)> wrote:
+> > > > > > > > On Fri, 13 Jul 2012, Gregory Farnum wrote:
+> > > > > > > > > On Fri, Jul 13, 2012 at 1:17 AM, Andrey Korolyov <and=
+rey@xdel.ru (mailto:andrey@xdel.ru)> wrote:
+> > > > > > > > > > Hi,
+> > > > > > > > > > =20
+> > > > > > > > > > Recently I`ve reduced my test suite from 6 to 4 osd=
+s at ~60% usage on
+> > > > > > > > > > six-node,
+> > > > > > > > > > and I have removed a bunch of rbd objects during re=
+covery to avoid
+> > > > > > > > > > overfill.
+> > > > > > > > > > Right now I`m constantly receiving a warn about nea=
+rfull state on
+> > > > > > > > > > non-existing osd:
+> > > > > > > > > > =20
+> > > > > > > > > > health HEALTH_WARN 1 near full osd(s)
+> > > > > > > > > > monmap e3: 3 mons at
+> > > > > > > > > > {0=3D192.168.10.129:6789/0,1=3D192.168.10.128:6789/=
+0,2=3D192.168.10.127:6789/0},
+> > > > > > > > > > election epoch 240, quorum 0,1,2 0,1,2
+> > > > > > > > > > osdmap e2098: 4 osds: 4 up, 4 in
+> > > > > > > > > > pgmap v518696: 464 pgs: 464 active+clean; 61070 MB =
+data, 181 GB
+> > > > > > > > > > used, 143 GB / 324 GB avail
+> > > > > > > > > > mdsmap e181: 1/1/1 up {0=3Da=3Dup:active}
+> > > > > > > > > > =20
+> > > > > > > > > > HEALTH_WARN 1 near full osd(s)
+> > > > > > > > > > osd.4 is near full at 89%
+> > > > > > > > > > =20
+> > > > > > > > > > Needless to say, osd.4 remains only in ceph.conf, b=
+ut not at crushmap.
+> > > > > > > > > > Reducing has been done 'on-line', e.g. without rest=
+art entire cluster.
+> > > > > > > > > =20
+> > > > > > > > > =20
+> > > > > > > > > =20
+> > > > > > > > > =20
+> > > > > > > > > =20
+> > > > > > > > > =20
+> > > > > > > > > =20
+> > > > > > > > > =20
+> > > > > > > > > =20
+> > > > > > > > > Whoops! It looks like Sage has written some patches t=
+o fix this, but
+> > > > > > > > > for now you should be good if you just update your ra=
+tios to a larger
+> > > > > > > > > number, and then bring them back down again. :)
+> > > > > > > > =20
+> > > > > > > > =20
+> > > > > > > > =20
+> > > > > > > > =20
+> > > > > > > > =20
+> > > > > > > > =20
+> > > > > > > > =20
+> > > > > > > > =20
+> > > > > > > > =20
+> > > > > > > > Restarting ceph-mon should also do the trick.
+> > > > > > > > =20
+> > > > > > > > Thanks for the bug report!
+> > > > > > > > sage
+> > > > > > > =20
+> > > > > > > =20
+> > > > > > > =20
+> > > > > > > =20
+> > > > > > > =20
+> > > > > > > =20
+> > > > > > > =20
+> > > > > > > =20
+> > > > > > > =20
+> > > > > > > Should I restart mons simultaneously?
+> > > > > > I don't think restarting will actually do the trick for you=
+ =E2=80=94 you actually will need to set the ratios again.
+> > > > > > =20
+> > > > > > > Restarting one by one has no
+> > > > > > > effect, same as filling up data pool up to ~95 percent(bt=
+w, when I
+> > > > > > > deleted this 50Gb file on cephfs, mds was stuck permanent=
+ly and usage
+> > > > > > > remained same until I dropped and recreated data pool - h=
+ope it`s one
+> > > > > > > of known posix layer bugs). I also deleted entry from con=
+fig, and then
+> > > > > > > restarted mons, with no effect. Any suggestions?
+> > > > > > =20
+> > > > > > =20
+> > > > > > =20
+> > > > > > =20
+> > > > > > =20
+> > > > > > =20
+> > > > > > =20
+> > > > > > I'm not sure what you're asking about here?
+> > > > > > -Greg
+> > > > > =20
+> > > > > =20
+> > > > > =20
+> > > > > =20
+> > > > > =20
+> > > > > =20
+> > > > > =20
+> > > > > Oh, sorry, I have mislooked and thought that you suggested fi=
+lling up
+> > > > > osds. How do I can set full/nearfull ratios correctly?
+> > > > > =20
+> > > > > $ceph injectargs '--mon_osd_full_ratio 96'
+> > > > > parsed options
+> > > > > $ ceph injectargs '--mon_osd_near_full_ratio 94'
+> > > > > parsed options
+> > > > > =20
+> > > > > ceph pg dump | grep 'full'
+> > > > > full_ratio 0.95
+> > > > > nearfull_ratio 0.85
+> > > > > =20
+> > > > > Setting parameters in the ceph.conf and then restarting mons =
+does not
+> > > > > affect ratios either.
+> > > > =20
+> > > =20
+> > > =20
+> > > =20
+> > > =20
+> > > =20
+> > > Thanks, it worked, but setting values back result to turn warning=
+ back.
+> > Hrm. That shouldn't be possible if the OSD has been removed. How di=
+d you take it out? It sounds like maybe you just marked it in the OUT s=
+tate (and turned it off quite quickly) without actually taking it out o=
+f the cluster?
+> > -Greg
+> =20
+> =20
+> =20
+> As I have did removal, it was definitely not like that - at first
+> place, I have marked osds(4 and 5 on same host) out, then rebuilt
+> crushmap and then kill osd processes. As I mentioned before, osd.4
+> doest not exist in crushmap and therefore it shouldn`t be reported at
+> all(theoretically).
 
-After reinstalled java-rados,when I run ant test now am getting follwing 
-error in terminal,
-Buildfile: /home/vutp/java-rados/build.xml
+Okay, that's what happened =E2=80=94 marking an OSD out in the CRUSH ma=
+p means all the data gets moved off it, but that doesn't remove it from=
+ all the places where it's registered in the monitor and in the map, fo=
+r a couple reasons: =20
+1) You might want to mark an OSD out before taking it down, to allow fo=
+r more orderly data movement.
+2) OSDs can get marked out automatically, but the system shouldn't be a=
+ble to forget about them on its own.
+3) You might want to remove an OSD from the CRUSH map in the process of=
+ placing it somewhere else (perhaps you moved the physical machine to a=
+ new location).
+etc.
 
-makedir:
+You want to run "ceph osd rm 4 5" and that should unregister both of th=
+em from everything[1]. :)
+-Greg
+[1]: Except for the full lists, which have a bug in the version of code=
+ you're running =E2=80=94 remove the OSDs, then adjust the full ratios =
+again, and all will be well.
 
-compile-rados:
-
-compile-tests:
-    [javac] Compiling 1 source file to /home/vutp/java-rados/build/test
-
-jar:
-
-test:
-    [junit] Running ClusterStatsTest
-    [junit] Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0.044 sec
-    [junit] Running ClusterTest
-    [junit] Tests run: 7, Failures: 1, Errors: 0, Time elapsed: 6.569 sec
-
-BUILD FAILED
-/home/vutp/java-rados/build.xml:134: Test ClusterTest failed
-
-Total time: 10 seconds
-
--->And also two txt files generated in Java-Rados directory one is TEST-
-ClusterStatsTest.txt in this file the text is ,
-Testsuite: ClusterStatsTest
-Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0.044 sec
-Testcase: test_ClusterStats took 0.027 sec
-
--->and one more txt file is TEST-ClusterTest.txt in this file the text is ,
-
-Testsuite: ClusterTest
-Tests run: 7, Failures: 1, Errors: 0, Time elapsed: 6.569 sec
-
-Testcase: test_ConfigOption took 0.026 sec
-        FAILED
-
-junit.framework.AssertionFailedError:
-        at ClusterTest.test_ConfigOption(Unknown Source)
-
-Testcase: test_getClusterStats took 0.005 sec
-Testcase: test_getInstancePointer took 0.004 sec
-Testcase: test_getVersion took 0.005 sec
-Testcase: test_PoolOperations took 1.821 sec
-Testcase: test_openIOContext took 2.134 sec
-Testcase: test_PoolList took 2.543 sec
-
-Thanks,
-Ramu.
-
-
-
-
-
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
