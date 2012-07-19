@@ -1,53 +1,113 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/6] rbd: old patches from Josh
-Date: Thu, 19 Jul 2012 07:30:34 -0500
-Message-ID: <5007FDEA.9010605@inktank.com>
+Subject: [PATCH 1/6] rbd: return errors for mapped but deleted snapshot
+Date: Thu, 19 Jul 2012 07:34:36 -0500
+Message-ID: <5007FEDC.8070602@inktank.com>
+References: <5007FDEA.9010605@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:60240 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751170Ab2GSMag (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 08:30:36 -0400
-Received: by yhmm54 with SMTP id m54so2668348yhm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 05:30:36 -0700 (PDT)
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:39184 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750748Ab2GSMei (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 08:34:38 -0400
+Received: by ghrr11 with SMTP id r11so2682359ghr.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 05:34:38 -0700 (PDT)
+In-Reply-To: <5007FDEA.9010605@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Late last year Josh Durgin had put together a series of
-fixes for rbd that never got committed.  I told him I
-would get them in, and this series represents the last
-six that remain.
+When a snapshot is deleted, the OSD will return ENOENT when reading
+from it. This is normally interpreted as a hole by rbd, which will
+return zeroes. To minimize the time in which this can happen, stop
+requests early when we are notified that our snapshot no longer
+exists.
 
-Here's a summary:
-[PATCH 1/6] rbd: return errors for mapped but deleted snapshot
-    This adds code to distinguish the result of attempting
-    to read data from a deleted snapshot from the the result
-    of reading a hole in a snapshot.  The former now produces
-    ENXIO.
-[PATCH 2/6] rbd: only reset capacity when pointing to head
-    When an rbd header is refreshed, its capacity is set in
-    case it has been changed.  This should not happen for
-    mapped snapshots.
-[PATCH 3/6] rbd: expose the correct size of the device in sysfs
-    An rbd_dev--even one mapping a snashot--holds the size of
-    it's base image in its header's image_size field.  The sysfs
-    entry for the snapshot size was showing the wrong value.
-[PATCH 4/6] rbd: set image size when header is updated
-    The rbd image size was not getting updated when a header
-    was refrehsed.
-[PATCH 5/6] rbd: use reference counting for the snap context
-    This makes sure the rbd code takes a reference to its
-    snapshot context while a request related to that context
-    is underway.
-[PATCH 6/6] rbd: send header version when notifying
-    This ensures the version that gets sent back on a watch
-    notify acknowledgement is the one that got read as
-    a result of refreshing the header.
+[elder@inktank.com: updated __rbd_init_snaps_header() logic]
 
-I've reviewed them all, but am posting them for a chance for
-others to comment before I commit them.
+Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
+Reviewed-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |   32 ++++++++++++++++++++++++++++++--
+ 1 files changed, 30 insertions(+), 2 deletions(-)
 
-					-Alex
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index b124442..730d0ce 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -172,9 +172,13 @@ struct rbd_device {
+
+ 	/* protects updating the header */
+ 	struct rw_semaphore     header_rwsem;
++	/* name of the snapshot this device reads from */
+ 	char                    *snap_name;
++	/* id of the snapshot this device reads from */
+ 	u64                     snap_id;	/* current snapshot id */
+-	int read_only;
++	/* whether the snap_id this device reads from still exists */
++	bool                    snap_exists;
++	int                     read_only;
+
+ 	struct list_head	node;
+
+@@ -597,6 +601,7 @@ static int rbd_header_set_snap(struct rbd_device
+*rbd_dev, u64 *size)
+ 		else
+ 			snapc->seq = 0;
+ 		rbd_dev->snap_id = CEPH_NOSNAP;
++		rbd_dev->snap_exists = false;
+ 		rbd_dev->read_only = 0;
+ 		if (size)
+ 			*size = header->image_size;
+@@ -606,6 +611,7 @@ static int rbd_header_set_snap(struct rbd_device
+*rbd_dev, u64 *size)
+ 		if (ret < 0)
+ 			goto done;
+ 		rbd_dev->snap_id = snapc->seq;
++		rbd_dev->snap_exists = true;
+ 		rbd_dev->read_only = 1;
+ 	}
+
+@@ -1468,6 +1474,21 @@ static void rbd_rq_fn(struct request_queue *q)
+
+ 		spin_unlock_irq(q->queue_lock);
+
++		if (rbd_dev->snap_id != CEPH_NOSNAP) {
++			bool snap_exists;
++
++			down_read(&rbd_dev->header_rwsem);
++			snap_exists = rbd_dev->snap_exists;
++			up_read(&rbd_dev->header_rwsem);
++
++			if (!snap_exists) {
++				dout("request for non-existent snapshot");
++				spin_lock_irq(q->queue_lock);
++				__blk_end_request_all(rq, -ENXIO);
++				continue;
++			}
++		}
++
+ 		dout("%s 0x%x bytes at 0x%llx\n",
+ 		     do_write ? "write" : "read",
+ 		     size, blk_rq_pos(rq) * SECTOR_SIZE);
+@@ -2088,7 +2109,14 @@ static int __rbd_init_snaps_header(struct
+rbd_device *rbd_dev)
+ 			cur_id = rbd_dev->header.snapc->snaps[i - 1];
+
+ 		if (!i || old_snap->id < cur_id) {
+-			/* old_snap->id was skipped, thus was removed */
++			/*
++			 * old_snap->id was skipped, thus was
++			 * removed.  If this rbd_dev is mapped to
++			 * the removed snapshot, record that it no
++			 * longer exists, to prevent further I/O.
++			 */
++			if (rbd_dev->snap_id == old_snap->id)
++				rbd_dev->snap_exists = false;
+ 			__rbd_remove_snap_dev(rbd_dev, old_snap);
+ 			continue;
+ 		}
+-- 
+1.7.5.4
+
