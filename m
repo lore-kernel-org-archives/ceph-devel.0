@@ -1,213 +1,238 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+From: Calvin Morrow <calvin.morrow@gmail.com>
 Subject: Re: Ceph doesn't update the block device size while a rbd image is mounted
-Date: Thu, 19 Jul 2012 21:44:05 +0200
-Message-ID: <CAOLwVU=d+tMB1d-sfd4PThM_piE=+8c--msija6NSrhxa548xg@mail.gmail.com>
+Date: Thu, 19 Jul 2012 13:54:34 -0600
+Message-ID: <CADxhoDRuQKcEHiR4sV0xqMu0b0UazPgN9A7_wsb=XoT5FOKOTA@mail.gmail.com>
 References: <CAOLwVUkWUrjQTxQw5-umpWnY6G-AjReCwLTyQCOdCyNT175KgA@mail.gmail.com>
- <CAOLwVUm-31QzWb2fnZP+tsntunXEJOcaFLRenqJtAQ9nYPmLyA@mail.gmail.com>
- <50082476.4020109@widodh.nl> <CAOLwVUm+NnB-ooMiCDx+rkHJhn7tCE7xM67wY6mmMckG87CrQQ@mail.gmail.com>
- <50082BFB.9000605@widodh.nl> <CAOLwVU=dJ3r5V+_3bSF=-tHf_2pq8_0GA2g2L6zVv1s2mVV_BA@mail.gmail.com>
+	<CAOLwVUm-31QzWb2fnZP+tsntunXEJOcaFLRenqJtAQ9nYPmLyA@mail.gmail.com>
+	<50082476.4020109@widodh.nl>
+	<CAOLwVUm+NnB-ooMiCDx+rkHJhn7tCE7xM67wY6mmMckG87CrQQ@mail.gmail.com>
+	<50082BFB.9000605@widodh.nl>
+	<CAOLwVU=dJ3r5V+_3bSF=-tHf_2pq8_0GA2g2L6zVv1s2mVV_BA@mail.gmail.com>
+	<CAOLwVU=d+tMB1d-sfd4PThM_piE=+8c--msija6NSrhxa548xg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:39073 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751189Ab2GSTo2 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 15:44:28 -0400
-Received: by bkwj10 with SMTP id j10so2801621bkw.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 12:44:26 -0700 (PDT)
-In-Reply-To: <CAOLwVU=dJ3r5V+_3bSF=-tHf_2pq8_0GA2g2L6zVv1s2mVV_BA@mail.gmail.com>
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:41348 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751170Ab2GSTyf convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 15:54:35 -0400
+Received: by gglu4 with SMTP id u4so3209563ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 12:54:35 -0700 (PDT)
+In-Reply-To: <CAOLwVU=d+tMB1d-sfd4PThM_piE=+8c--msija6NSrhxa548xg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel <ceph-devel@vger.kernel.org>
 
-With LVM, you can re-scan the scsi bus to extend a physical drive and
-then run a pvextend.
+I haven't tried resizing an rbd yet, but I was changing partitions on
+a non-ceph two-node cluster with shared storage yesterday while
+certain partitions were in use (partitions 1,2,5 were mounted,
+deleting partition ids 6+, adding new ones) and fdisk wasn't
+re-reading disk changes.  Partprobe followed by cfdisk seemed to
+update the kernel with the on-disk changes.
 
-@Calvin: I tried your solution
+I realize its not exactly what you are doing, but I figured it might
+be close enough to be worth a shot.  cfdisk seems to make a system
+call to refresh disk information that vanilla fdisk doesn't.
 
-# partprobe /dev/rbd1
+Calvin
 
-Unfortunatly nothing changed.
-
-Did you make it working?
-
-Cheers!
-
-
-On Thu, Jul 19, 2012 at 5:50 PM, S=E9bastien Han <han.sebastien@gmail.c=
+On Thu, Jul 19, 2012 at 1:44 PM, S=E9bastien Han <han.sebastien@gmail.c=
 om> wrote:
-> Hum ok, I see. Thanks!
+> With LVM, you can re-scan the scsi bus to extend a physical drive and
+> then run a pvextend.
 >
-> But if you have any clue to force the kernel to re-read without
-> unmont/mounting :)
+> @Calvin: I tried your solution
 >
-> On Thu, Jul 19, 2012 at 5:47 PM, Wido den Hollander <wido@widodh.nl> =
-wrote:
->>
->>
->> On 19-07-12 17:26, S=E9bastien Han wrote:
->>>
->>> Ok I got your point seems logic, but why is this possible with LVM =
-for
->>> example?
->>>
->>> You can easily do this with LVM without un-mounting the device.
->>>
->>
->>
->> LVM runs through the device mapper and are not regular block devices=
-=2E
->>
->> If you resize the disk underneath LVM you won't see an increased VG =
-or PV
->> size unless you change the availability of the VG to unavailable and=
- back to
->> available again.
->>
->> I'm not a 100% sure what the exact root cause is, but the kernel won=
-'t read
->> the new size of a block device as long as it is in use.
->>
->> Wido
->>
->>
->>
->>> Cheers.
->>>
->>>
->>> On Thu, Jul 19, 2012 at 5:15 PM, Wido den Hollander <wido@widodh.nl=
+> # partprobe /dev/rbd1
 >
->>> wrote:
->>>>
->>>> Hi,
->>>>
->>>>
->>>> On 19-07-12 16:55, S=E9bastien Han wrote:
->>>>>
->>>>>
->>>>> Hi Cephers!
->>>>>
->>>>> I'm working with rbd mapping. I figured out that the block device=
- size
->>>>> of the rbd device is not update while the device is mounted. Here=
- my
->>>>> tests:
->>>>>
->>>>
->>>> iirc this is not something RBD specific, but since the device is i=
-n use
->>>> it
->>>> can't be re-read by the kernel.
->>>>
->>>> So when you unmount it the kernel can re-read the header and resiz=
-e the
->>>> device.
->>>>
->>>> Wido
->>>>
->>>>> 1. Pick up a device and check his size
->>>>>
->>>>> # rbd ls
->>>>> size
->>>>>
->>>>> # rbd info test
->>>>> rbd image 'test':
->>>>> size 10000 MB in 2500 objects
->>>>> order 22 (4096 KB objects)
->>>>> block_name_prefix: rb.0.6
->>>>> parent:  (pool -1)
->>>>>
->>>>> 2. Map the device
->>>>>
->>>>> # rbd map --secret /etc/ceph/secret test
->>>>> # rbd showmapped
->>>>> id pool image snap device
->>>>> 1 rbd test - /dev/rbd1
->>>>>
->>>>> 3. Put a fs on it and check the block device size
->>>>>
->>>>> # mkfs.ext4 /dev/rdb1
->>>>> ...
->>>>> ...
->>>>>
->>>>> # fdisk -l /dev/rbd1
->>>>>
->>>>> Disk /dev/rbd1: 10.5 GB, 10485760000 bytes
->>>>>
->>>>> 4. Mount it
->>>>>
->>>>> # mount /dev/rbd1 /mnt
->>>>> # df -h
->>>>> /dev/rbd1                   9.8G  277M  9.0G   3% /mnt
->>>>>
->>>>>
->>>>> 5. Change the image size
->>>>>
->>>>> # rbd resize --size 11000 test
->>>>> Resizing image: 100% complete...done.
->>>>>
->>>>> # rbd info test
->>>>> rbd image 'test':
->>>>> size 11000 MB in 2750 objects
->>>>> order 22 (4096 KB objects)
->>>>> block_name_prefix: rb.0.6
->>>>> parent:  (pool -1)
->>>>>
->>>>> At this point of time, if you perform the fdisk -l /dev/rbd1, the
->>>>> block device size will remain the same.
->>>>>
->>>>> 6. Unmount the device:
->>>>>
->>>>> # umount /media
->>>>>
->>>>> # fdisk -l /dev/rbd1
->>>>> Disk /dev/rbd1: 11.5 GB, 11534336000 bytes
->>>>>
->>>>> Unmounting the directory did update the block device size.
->>>>>
->>>>> Of course you can do something really fast like:
->>>>>
->>>>> # umount /media && mount /dev/rbd1 /media
->>>>>
->>>>> That will work, it's a valid solution as long as there is no open=
-ed
->>>>> file. I won't use this trick in production...
->>>>>
->>>>> I also tried to "mount -o remount" and it didn't work.
->>>>>
->>>>> 7. Resize the fs (this can be performed while the fs is mounted):
->>>>>
->>>>> # e2fsck -f /dev/rbd1
->>>>> e2fsck 1.42 (29-Nov-2011)
->>>>> Pass 1: Checking inodes, blocks, and sizes
->>>>> Pass 2: Checking directory structure
->>>>> Pass 3: Checking directory connectivity
->>>>> Pass 4: Checking reference counts
->>>>> Pass 5: Checking group summary information
->>>>> /dev/rbd1: 11/644640 files (0.0% non-contiguous), 77173/2560000 b=
-locks
->>>>>
->>>>> # resize2fs /dev/rbd1
->>>>> resize2fs 1.42 (29-Nov-2011)
->>>>> Resizing the filesystem on /dev/rbd1 to 2816000 (4k) blocks.
->>>>> The filesystem on /dev/rbd1 is now 2816000 blocks long.
->>>>>
->>>>>
->>>>> Did I miss something?
->>>>> Is this feature coming?
->>>>>
->>>>> Thank you in advance :)
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
-l
->>>>>
->>>>
+> Unfortunatly nothing changed.
+>
+> Did you make it working?
+>
+> Cheers!
+>
+>
+> On Thu, Jul 19, 2012 at 5:50 PM, S=E9bastien Han <han.sebastien@gmail=
+=2Ecom> wrote:
+>> Hum ok, I see. Thanks!
 >>
+>> But if you have any clue to force the kernel to re-read without
+>> unmont/mounting :)
+>>
+>> On Thu, Jul 19, 2012 at 5:47 PM, Wido den Hollander <wido@widodh.nl>=
+ wrote:
+>>>
+>>>
+>>> On 19-07-12 17:26, S=E9bastien Han wrote:
+>>>>
+>>>> Ok I got your point seems logic, but why is this possible with LVM=
+ for
+>>>> example?
+>>>>
+>>>> You can easily do this with LVM without un-mounting the device.
+>>>>
+>>>
+>>>
+>>> LVM runs through the device mapper and are not regular block device=
+s.
+>>>
+>>> If you resize the disk underneath LVM you won't see an increased VG=
+ or PV
+>>> size unless you change the availability of the VG to unavailable an=
+d back to
+>>> available again.
+>>>
+>>> I'm not a 100% sure what the exact root cause is, but the kernel wo=
+n't read
+>>> the new size of a block device as long as it is in use.
+>>>
+>>> Wido
+>>>
+>>>
+>>>
+>>>> Cheers.
+>>>>
+>>>>
+>>>> On Thu, Jul 19, 2012 at 5:15 PM, Wido den Hollander <wido@widodh.n=
+l>
+>>>> wrote:
+>>>>>
+>>>>> Hi,
+>>>>>
+>>>>>
+>>>>> On 19-07-12 16:55, S=E9bastien Han wrote:
+>>>>>>
+>>>>>>
+>>>>>> Hi Cephers!
+>>>>>>
+>>>>>> I'm working with rbd mapping. I figured out that the block devic=
+e size
+>>>>>> of the rbd device is not update while the device is mounted. Her=
+e my
+>>>>>> tests:
+>>>>>>
+>>>>>
+>>>>> iirc this is not something RBD specific, but since the device is =
+in use
+>>>>> it
+>>>>> can't be re-read by the kernel.
+>>>>>
+>>>>> So when you unmount it the kernel can re-read the header and resi=
+ze the
+>>>>> device.
+>>>>>
+>>>>> Wido
+>>>>>
+>>>>>> 1. Pick up a device and check his size
+>>>>>>
+>>>>>> # rbd ls
+>>>>>> size
+>>>>>>
+>>>>>> # rbd info test
+>>>>>> rbd image 'test':
+>>>>>> size 10000 MB in 2500 objects
+>>>>>> order 22 (4096 KB objects)
+>>>>>> block_name_prefix: rb.0.6
+>>>>>> parent:  (pool -1)
+>>>>>>
+>>>>>> 2. Map the device
+>>>>>>
+>>>>>> # rbd map --secret /etc/ceph/secret test
+>>>>>> # rbd showmapped
+>>>>>> id pool image snap device
+>>>>>> 1 rbd test - /dev/rbd1
+>>>>>>
+>>>>>> 3. Put a fs on it and check the block device size
+>>>>>>
+>>>>>> # mkfs.ext4 /dev/rdb1
+>>>>>> ...
+>>>>>> ...
+>>>>>>
+>>>>>> # fdisk -l /dev/rbd1
+>>>>>>
+>>>>>> Disk /dev/rbd1: 10.5 GB, 10485760000 bytes
+>>>>>>
+>>>>>> 4. Mount it
+>>>>>>
+>>>>>> # mount /dev/rbd1 /mnt
+>>>>>> # df -h
+>>>>>> /dev/rbd1                   9.8G  277M  9.0G   3% /mnt
+>>>>>>
+>>>>>>
+>>>>>> 5. Change the image size
+>>>>>>
+>>>>>> # rbd resize --size 11000 test
+>>>>>> Resizing image: 100% complete...done.
+>>>>>>
+>>>>>> # rbd info test
+>>>>>> rbd image 'test':
+>>>>>> size 11000 MB in 2750 objects
+>>>>>> order 22 (4096 KB objects)
+>>>>>> block_name_prefix: rb.0.6
+>>>>>> parent:  (pool -1)
+>>>>>>
+>>>>>> At this point of time, if you perform the fdisk -l /dev/rbd1, th=
+e
+>>>>>> block device size will remain the same.
+>>>>>>
+>>>>>> 6. Unmount the device:
+>>>>>>
+>>>>>> # umount /media
+>>>>>>
+>>>>>> # fdisk -l /dev/rbd1
+>>>>>> Disk /dev/rbd1: 11.5 GB, 11534336000 bytes
+>>>>>>
+>>>>>> Unmounting the directory did update the block device size.
+>>>>>>
+>>>>>> Of course you can do something really fast like:
+>>>>>>
+>>>>>> # umount /media && mount /dev/rbd1 /media
+>>>>>>
+>>>>>> That will work, it's a valid solution as long as there is no ope=
+ned
+>>>>>> file. I won't use this trick in production...
+>>>>>>
+>>>>>> I also tried to "mount -o remount" and it didn't work.
+>>>>>>
+>>>>>> 7. Resize the fs (this can be performed while the fs is mounted)=
+:
+>>>>>>
+>>>>>> # e2fsck -f /dev/rbd1
+>>>>>> e2fsck 1.42 (29-Nov-2011)
+>>>>>> Pass 1: Checking inodes, blocks, and sizes
+>>>>>> Pass 2: Checking directory structure
+>>>>>> Pass 3: Checking directory connectivity
+>>>>>> Pass 4: Checking reference counts
+>>>>>> Pass 5: Checking group summary information
+>>>>>> /dev/rbd1: 11/644640 files (0.0% non-contiguous), 77173/2560000 =
+blocks
+>>>>>>
+>>>>>> # resize2fs /dev/rbd1
+>>>>>> resize2fs 1.42 (29-Nov-2011)
+>>>>>> Resizing the filesystem on /dev/rbd1 to 2816000 (4k) blocks.
+>>>>>> The filesystem on /dev/rbd1 is now 2816000 blocks long.
+>>>>>>
+>>>>>>
+>>>>>> Did I miss something?
+>>>>>> Is this feature coming?
+>>>>>>
+>>>>>> Thank you in advance :)
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
+evel" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
+ml
+>>>>>>
+>>>>>
+>>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
