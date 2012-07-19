@@ -1,39 +1,53 @@
-From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Subject: Re: Poor read performance in KVM
-Date: Thu, 19 Jul 2012 21:49:58 +0930
-Message-ID: <5007FB6E.1080307@bashkirtsev.com>
-References: <5002C215.108@bashkirtsev.com> <5003B1CC.4060909@inktank.com> <50064DCD.8040904@bashkirtsev.com> <5006D5FB.8030700@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 0/6] rbd: old patches from Josh
+Date: Thu, 19 Jul 2012 07:30:34 -0500
+Message-ID: <5007FDEA.9010605@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:43148 "EHLO
-	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750804Ab2GSMUK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 08:20:10 -0400
-In-Reply-To: <5006D5FB.8030700@inktank.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:60240 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751170Ab2GSMag (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 08:30:36 -0400
+Received: by yhmm54 with SMTP id m54so2668348yhm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 05:30:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+Late last year Josh Durgin had put together a series of
+fixes for rbd that never got committed.  I told him I
+would get them in, and this series represents the last
+six that remain.
 
-> Try to determine how much of the 200ms avg latency comes from osds vs
-> the qemu block driver.
-Look like that osd.0 performs with low latency but osd.1 latency is way 
-too high and on average it appears as 200ms. osd is backed by btrfs over 
-LVM2. May be issue lie in backing fs selection? All four osds running 
-similar setup: btrfs over LVM2 so I have some doubts that it may be a 
-reason as osd.0 performs well.
+Here's a summary:
+[PATCH 1/6] rbd: return errors for mapped but deleted snapshot
+    This adds code to distinguish the result of attempting
+    to read data from a deleted snapshot from the the result
+    of reading a hole in a snapshot.  The former now produces
+    ENXIO.
+[PATCH 2/6] rbd: only reset capacity when pointing to head
+    When an rbd header is refreshed, its capacity is set in
+    case it has been changed.  This should not happen for
+    mapped snapshots.
+[PATCH 3/6] rbd: expose the correct size of the device in sysfs
+    An rbd_dev--even one mapping a snashot--holds the size of
+    it's base image in its header's image_size field.  The sysfs
+    entry for the snapshot size was showing the wrong value.
+[PATCH 4/6] rbd: set image size when header is updated
+    The rbd image size was not getting updated when a header
+    was refrehsed.
+[PATCH 5/6] rbd: use reference counting for the snap context
+    This makes sure the rbd code takes a reference to its
+    snapshot context while a request related to that context
+    is underway.
+[PATCH 6/6] rbd: send header version when notifying
+    This ensures the version that gets sent back on a watch
+    notify acknowledgement is the one that got read as
+    a result of refreshing the header.
 
-I have read full log between osd_op for 3670 and osd_reply and there's 
-number of pings from other osds (which were responded to quickly) and 
-good number of osd_op_reply writes (osd_sub_op for these writes came 10 
-seconds before). So it appears 3670 was delayed by backlog of operations.
->
-> Once the latency is under control, you might look into changing guest 
-> settings to send larger requests and readahead more.
->
-> Josh
+I've reviewed them all, but am posting them for a chance for
+others to comment before I commit them.
 
-
+					-Alex
