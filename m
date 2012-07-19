@@ -1,61 +1,141 @@
-From: ramu <ramu.freesystems@gmail.com>
-Subject: Re: How to compile Java-Rados.
-Date: Thu, 19 Jul 2012 03:38:18 +0000 (UTC)
-Message-ID: <loom.20120719T053505-362@post.gmane.org>
-References: <loom.20120712T065146-882@post.gmane.org> <CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com> <loom.20120712T111906-426@post.gmane.org> <CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com> <loom.20120713T085715-195@post.gmane.org> <CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com> <loom.20120716T061714-349@post.gmane.org> <C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu> <loom.20120716T072848-760@post.gmane.org> <CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com> <alpine.DEB.2.00.1207160824220.9848@cobra.newdream.net> <CAPrxi5-2STepCif9aN1GyfTwFEzs56o5Nzg7NuHmBqq=7qWVEQ@mail.gmail.com> <loom.20120717T073350-472@post.gmane.org> <CAPrxi5_wA8sxJg6vN115E-sQO9LjT13dQFZ+2rqV4rPBborX_Q@mail.gmail.com> <loom.20120718T
- 082223-738@post.gmane.org> <CAPrxi5_W_AghtjXLHNBQhv3Zbk_AyTBJOnDtvFYk9dh3H9VVrw@mail.gmail.com>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: ceph status reporting non-existing osd
+Date: Thu, 19 Jul 2012 10:17:12 +0400
+Message-ID: <CABYiri8zbVc-P_RKZLg-PN9fdHVWY-NTOXT9Bryo9wuHp=hjqg@mail.gmail.com>
+References: <4FFFD9AB.40608@xdel.ru> <CAPYLRzgOHf9nMdK5oOrs6++H22iFLYvcbhMQsZtd8Z3OskX=yw@mail.gmail.com>
+ <alpine.DEB.2.00.1207131009280.9771@cobra.newdream.net> <CABYiri9wEoPs87qUr2MANX_AHB-aHprJBdXV0o4TxeDPj6SrhQ@mail.gmail.com>
+ <823856EB9E9B4D1EBB352F93465B742A@inktank.com> <CABYiri-D4qPv1nQ4KHkwDS6wrH9gZdSu=b6ePxk61Ks-qx+Ajg@mail.gmail.com>
+ <C286CA87975941CD913337EAC9844935@inktank.com> <CABYiri9RAYrVaqePQq00J-KK32_Y_pf1c0jHxhJD2ZVBRrxOhA@mail.gmail.com>
+ <45F07A6460B34ED5A9C589696933A936@inktank.com> <CABYiri_sCkq=7-NFgP6ohT=yZxFJboqgC5es_xDb+ijUZ5hrYg@mail.gmail.com>
+ <9D6CE6A067E543BFBDDD0A29BB2E34F9@inktank.com> <CABYiri9neTby8heHcw9PsZG0tGgX4nJYrCQiBmE-rKX0X8W3LA@mail.gmail.com>
+ <CAPYLRzg9anTj8vgX82=RJBiw57fyhQ1qBWs8Q4-Ymrv-f3Q2jg@mail.gmail.com>
+ <CABYiri9WYyip_TVXi8EGTfSV7=opcaJ9DWV6+guMwX--Lj+jng@mail.gmail.com> <CAPYLRzgLFD9MqMwarnwUZA8iTRzZu-HagqG5bxh7V7cOirK-eg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:60887 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751852Ab2GSDih (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 18 Jul 2012 23:38:37 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1SrhZQ-0001xP-S8
-	for ceph-devel@vger.kernel.org; Thu, 19 Jul 2012 05:38:33 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 05:38:32 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 05:38:32 +0200
+Received: from mail-we0-f174.google.com ([74.125.82.174]:59863 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751420Ab2GSGRj convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 02:17:39 -0400
+Received: by weyx8 with SMTP id x8so1437987wey.19
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jul 2012 23:17:33 -0700 (PDT)
+In-Reply-To: <CAPYLRzgLFD9MqMwarnwUZA8iTRzZu-HagqG5bxh7V7cOirK-eg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi Noah,
+On Thu, Jul 19, 2012 at 1:28 AM, Gregory Farnum <greg@inktank.com> wrot=
+e:
+> On Wed, Jul 18, 2012 at 12:07 PM, Andrey Korolyov <andrey@xdel.ru> wr=
+ote:
+>> On Wed, Jul 18, 2012 at 10:30 PM, Gregory Farnum <greg@inktank.com> =
+wrote:
+>>> On Wed, Jul 18, 2012 at 12:47 AM, Andrey Korolyov <andrey@xdel.ru> =
+wrote:
+>>>> On Wed, Jul 18, 2012 at 11:18 AM, Gregory Farnum <greg@inktank.com=
+> wrote:
+>>>>> On Tuesday, July 17, 2012 at 11:22 PM, Andrey Korolyov wrote:
+>>>>>> On Wed, Jul 18, 2012 at 10:09 AM, Gregory Farnum <greg@inktank.c=
+om (mailto:greg@inktank.com)> wrote:
+>>>>>> > Hrm. That shouldn't be possible if the OSD has been removed. H=
+ow did you take it out? It sounds like maybe you just marked it in the =
+OUT state (and turned it off quite quickly) without actually taking it =
+out of the cluster?
+>>>>>> > -Greg
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> As I have did removal, it was definitely not like that - at firs=
+t
+>>>>>> place, I have marked osds(4 and 5 on same host) out, then rebuil=
+t
+>>>>>> crushmap and then kill osd processes. As I mentioned before, osd=
+=2E4
+>>>>>> doest not exist in crushmap and therefore it shouldn`t be report=
+ed at
+>>>>>> all(theoretically).
+>>>>>
+>>>>> Okay, that's what happened =E2=80=94 marking an OSD out in the CR=
+USH map means all the data gets moved off it, but that doesn't remove i=
+t from all the places where it's registered in the monitor and in the m=
+ap, for a couple reasons:
+>>>>> 1) You might want to mark an OSD out before taking it down, to al=
+low for more orderly data movement.
+>>>>> 2) OSDs can get marked out automatically, but the system shouldn'=
+t be able to forget about them on its own.
+>>>>> 3) You might want to remove an OSD from the CRUSH map in the proc=
+ess of placing it somewhere else (perhaps you moved the physical machin=
+e to a new location).
+>>>>> etc.
+>>>>>
+>>>>> You want to run "ceph osd rm 4 5" and that should unregister both=
+ of them from everything[1]. :)
+>>>>> -Greg
+>>>>> [1]: Except for the full lists, which have a bug in the version o=
+f code you're running =E2=80=94 remove the OSDs, then adjust the full r=
+atios again, and all will be well.
+>>>>>
+>>>>
+>>>> $ ceph osd rm 4
+>>>> osd.4 does not exist
+>>>> $ ceph -s
+>>>>    health HEALTH_WARN 1 near full osd(s)
+>>>>    monmap e3: 3 mons at
+>>>> {0=3D192.168.10.129:6789/0,1=3D192.168.10.128:6789/0,2=3D192.168.1=
+0.127:6789/0},
+>>>> election epoch 58, quorum 0,1,2 0,1,2
+>>>>    osdmap e2198: 4 osds: 4 up, 4 in
+>>>>     pgmap v586056: 464 pgs: 464 active+clean; 66645 MB data, 231 G=
+B
+>>>> used, 95877 MB / 324 GB avail
+>>>>    mdsmap e207: 1/1/1 up {0=3Da=3Dup:active}
+>>>>
+>>>> $ ceph health detail
+>>>> HEALTH_WARN 1 near full osd(s)
+>>>> osd.4 is near full at 89%
+>>>>
+>>>> $ ceph osd dump
+>>>> ....
+>>>> max_osd 4
+>>>> osd.0 up   in  weight 1 up_from 2183 up_thru 2187 down_at 2172
+>>>> last_clean_interval [2136,2171) 192.168.10.128:6800/4030
+>>>> 192.168.10.128:6801/4030 192.168.10.128:6802/4030 exists,up
+>>>> 68b3deec-e80a-48b7-9c29-1b98f5de4f62
+>>>> osd.1 up   in  weight 1 up_from 2136 up_thru 2186 down_at 2135
+>>>> last_clean_interval [2115,2134) 192.168.10.129:6800/2980
+>>>> 192.168.10.129:6801/2980 192.168.10.129:6802/2980 exists,up
+>>>> b2a26fe9-aaa8-445f-be1f-fa7d2a283b57
+>>>> osd.2 up   in  weight 1 up_from 2181 up_thru 2187 down_at 2172
+>>>> last_clean_interval [2136,2171) 192.168.10.128:6803/4128
+>>>> 192.168.10.128:6804/4128 192.168.10.128:6805/4128 exists,up
+>>>> 378d367a-f7fb-4892-9ec9-db8ffdd2eb20
+>>>> osd.3 up   in  weight 1 up_from 2136 up_thru 2186 down_at 2135
+>>>> last_clean_interval [2115,2134) 192.168.10.129:6803/3069
+>>>> 192.168.10.129:6804/3069 192.168.10.129:6805/3069 exists,up
+>>>> faf8eda8-55fc-4a0e-899f-47dbd32b81b8
+>>>> ....
+>>>
+>>> Hrm. How did you create your new crush map? All the normal avenues =
+of
+>>> removing an OSD from the map set a flag which the PGMap uses to del=
+ete
+>>> its records (which would prevent it reappearing in the full list), =
+and
+>>> I can't see how setcrushmap would remove an OSD from the map (altho=
+ugh
+>>> there might be a code path I haven't found).
+>>
+>> Manually, by deleting osd4|5 entries and reweighing remaining nodes.
+>
+> So you extracted the CRUSH map, edited it, and injected it using "cep=
+h
+> osd setrcrushmap"?
 
-Thank u for your reply,it is working fine but Iam getting one more error
-in terminal is,BUILD FAILED
-/home/vu/java-rados/build.xml:134: Test IOContextTest failed
-
-Total time: 43 seconds
-
-and in TEST-IOContextTest.txt file the error is,
-
-Testsuite: IOContextTest
-Tests run: 11, Failures: 1, Errors: 0, Time elapsed: 32.302 sec
-
-Testcase: test_toString took 1.791 sec
-Testcase: test_getCluster took 2.116 sec
-Testcase: test_getPoolStats took 2.364 sec
-Testcase: test_setLocatorKey took 2.046 sec
-Testcase: test_write took 3.109 sec
-Testcase: test_writeFull took 3.188 sec
-Testcase: test_getLastVersion took 2.46 sec
-Testcase: test_append took 3.505 sec
-Testcase: test_truncate took 3.423 sec
-Testcase: test_getsetAttribute took 3.161 sec
-Testcase: test_getObjects took 5.101 sec
-        FAILED
-
-junit.framework.AssertionFailedError:
-        at IOContextTest.test_getObjects(Unknown Source)
-
-Thanks,
-Ramu.
-
+Yep, exactly.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
