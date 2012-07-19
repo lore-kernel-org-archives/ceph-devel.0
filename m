@@ -1,43 +1,35 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [GIT PULL] Ceph fixes for 3.5
-Date: Thu, 19 Jul 2012 15:33:48 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1207191451090.24473@cobra.newdream.net>
+Subject: making objdump useful
+Date: Thu, 19 Jul 2012 16:22:05 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1207191618520.28682@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38031 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:38369 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751036Ab2GSWdt (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 18:33:49 -0400
+	with ESMTP id S1751652Ab2GSXWF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 19:22:05 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 775368133E
+	for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 16:22:05 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 503C68133E
+	for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 16:22:05 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Linus,
+I finally figured out how to make objdump interleave the source code in 
+the .ko file dumps on our qa machines.  The problem is that the debug info 
+refeferences the path where the kernel was compiled (which is non-obvious 
+since the info is compressed).  For our environment, this is a quick 
+workaround:
 
-Please pull these last minute fixes for Ceph from:
+ sudo mkdir -p /srv/autobuild-ceph/gitbuilder.git
+ sudo ln -s /path/to/your/kernel/tree /srv/autobuild-ceph/gitbuilder.git/build
+ objdump -rdS whatever.ko | less
 
- git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+Now, to figure out why kdb freezes on the 'dmesg' command...
 
-The important one fixes a bug in the socket failure handling behavior that 
-was turned up in some recent failure injection testing.  The other two are 
-minor bug fixes.
-
-Thanks!
 sage
 
-----------------------------------------------------------------
-Dan Carpenter (1):
-      rbd: endian bug in rbd_req_cb()
-
-Sage Weil (1):
-      libceph: fix messenger retry
-
-Yan, Zheng (1):
-      rbd: Fix ceph_snap_context size calculation
-
- drivers/block/rbd.c            |    4 ++--
- include/linux/ceph/messenger.h |   12 ++----------
- net/ceph/messenger.c           |   12 ++++++------
- 3 files changed, 10 insertions(+), 18 deletions(-)
