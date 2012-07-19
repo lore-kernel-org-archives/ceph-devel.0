@@ -1,50 +1,43 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 0/4] rbd: use snapc->seq the way server does
-Date: Thu, 19 Jul 2012 15:12:10 -0700
-Message-ID: <5008863A.5030407@inktank.com>
-References: <50083F65.5030104@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: [GIT PULL] Ceph fixes for 3.5
+Date: Thu, 19 Jul 2012 15:33:48 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1207191451090.24473@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:36362 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752409Ab2GSWMP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 18:12:15 -0400
-Received: by ghrr11 with SMTP id r11so3376015ghr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 15:12:14 -0700 (PDT)
-In-Reply-To: <50083F65.5030104@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:38031 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751036Ab2GSWdt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 18:33:49 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org
 
-On 07/19/2012 10:09 AM, Alex Elder wrote:
-> This series of patches changes the way the snap context "seq" field
-> is used.  Currently it is used in a way that isn't really useful, and
-> as such is a bit confusing.  This behavior seems to be a hold over
-> from a time when there was no snap_id field maintained for an rbd_dev.
->
-> Summary:
-> [PATCH 1/4] rbd: don't use snapc->seq that way
->      Removes special handling in __rbd_refresh_header() that ensured
->      the seq field was updated to point to the head if it had been
->      at the start of the function.
-> [PATCH 2/4] rbd: preserve snapc->seq in rbd_header_set_snap()
->      Changes rbd_header_set_snap() so it doesn't set the seq field
->      to the snapshot id (for a snapshot mapping) or the highest
->      snapshot id (for the base image).
-> [PATCH 3/4] rbd: set snapc->seq only when refreshing header
->      Assigns snapc->seq whenever an updated rbd image header is
->      received rather than when a new snapshot id has been
->      assigned.
-> [PATCH 4/4] rbd: kill rbd_image_header->snap_seq
->      Gets rid of the rbd_image_header->snap_seq field, which
->      previously kept the same information now maintained in
->      the snapc->seq field.
->
-> 					-Alex
+Hi Linus,
 
-The rest of the series looks good too.
+Please pull these last minute fixes for Ceph from:
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+ git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git for-linus
+
+The important one fixes a bug in the socket failure handling behavior that 
+was turned up in some recent failure injection testing.  The other two are 
+minor bug fixes.
+
+Thanks!
+sage
+
+----------------------------------------------------------------
+Dan Carpenter (1):
+      rbd: endian bug in rbd_req_cb()
+
+Sage Weil (1):
+      libceph: fix messenger retry
+
+Yan, Zheng (1):
+      rbd: Fix ceph_snap_context size calculation
+
+ drivers/block/rbd.c            |    4 ++--
+ include/linux/ceph/messenger.h |   12 ++----------
+ net/ceph/messenger.c           |   12 ++++++------
+ 3 files changed, 10 insertions(+), 18 deletions(-)
