@@ -1,84 +1,82 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/4] rbd: don't use snapc->seq that way
-Date: Thu, 19 Jul 2012 12:11:33 -0500
-Message-ID: <50083FC5.3050902@inktank.com>
+Subject: [PATCH 2/4] rbd: preserve snapc->seq in rbd_header_set_snap()
+Date: Thu, 19 Jul 2012 12:11:37 -0500
+Message-ID: <50083FC9.1030300@inktank.com>
 References: <50083F65.5030104@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:58965 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752102Ab2GSRLf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 13:11:35 -0400
-Received: by ghrr11 with SMTP id r11so3011822ghr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 10:11:35 -0700 (PDT)
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:50845 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752102Ab2GSRLj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 13:11:39 -0400
+Received: by mail-gg0-f174.google.com with SMTP id u4so3010257ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 10:11:39 -0700 (PDT)
 In-Reply-To: <50083F65.5030104@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-In what appears to be an artifact of a different way of encoding
-whether an rbd image maps a snapshot, __rbd_refresh_header() has
-code that arranges to update the seq value in an rbd image's
-snapshot context to point to the first entry in its snapshot
-array if that's where it was pointing initially.
+In rbd_header_set_snap(), there is logic to make the snap context's
+seq field get set to a particular snapshot id, or 0 if there is no
+snapshot for the rbd image.
 
-We now use rbd_dev->snap_id to record the snapshot id--using
-the special value SNAP_NONE to indicate the rbd_dev is not mapping
-a snapshot at all.
+This seems to be an artifact of how the current snapshot id for an
+rbd_dev was recorded before the rbd_dev->snap_id field began to be
+used for that purpose.
 
-There is therefore no need to check for this case, nor to update the
-seq value, in __rbd_refresh_header().  Just preserve the seq value
-that rbd_read_header() provides (which, at the moment, is nothing).
+There's no need to update the value of snapc->seq here any more, so
+stop doing it.  Tidy up a few local variables in that function
+while we're at it.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   14 --------------
- 1 files changed, 0 insertions(+), 14 deletions(-)
+ drivers/block/rbd.c |   18 +++++++-----------
+ 1 files changed, 7 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 4d3a1e0..8a46599 100644
+index 8a46599..ac8a83f 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1718,8 +1718,6 @@ static int __rbd_refresh_header(struct rbd_device
-*rbd_dev)
+@@ -588,29 +588,25 @@ static int snap_by_name(struct rbd_image_header
+*header, const char *snap_name,
+
+ static int rbd_header_set_snap(struct rbd_device *rbd_dev, u64 *size)
  {
- 	int ret;
- 	struct rbd_image_header h;
--	u64 snap_seq;
--	int follow_seq = 0;
+-	struct rbd_image_header *header = &rbd_dev->header;
+-	struct ceph_snap_context *snapc = header->snapc;
+-	int ret = -ENOENT;
++	int ret;
 
- 	ret = rbd_read_header(rbd_dev, &h);
- 	if (ret < 0)
-@@ -1735,13 +1733,6 @@ static int __rbd_refresh_header(struct rbd_device
-*rbd_dev)
- 		set_capacity(rbd_dev->disk, size);
+ 	down_write(&rbd_dev->header_rwsem);
+
+ 	if (!memcmp(rbd_dev->snap_name, RBD_SNAP_HEAD_NAME,
+ 		    sizeof (RBD_SNAP_HEAD_NAME))) {
+-		if (header->total_snaps)
+-			snapc->seq = header->snap_seq;
+-		else
+-			snapc->seq = 0;
+ 		rbd_dev->snap_id = CEPH_NOSNAP;
+ 		rbd_dev->snap_exists = false;
+ 		rbd_dev->read_only = 0;
+ 		if (size)
+-			*size = header->image_size;
++			*size = rbd_dev->header.image_size;
+ 	} else {
+-		ret = snap_by_name(header, rbd_dev->snap_name,
+-					&snapc->seq, size);
++		u64 snap_id = 0;
++
++		ret = snap_by_name(&rbd_dev->header, rbd_dev->snap_name,
++					&snap_id, size);
+ 		if (ret < 0)
+ 			goto done;
+-		rbd_dev->snap_id = snapc->seq;
++		rbd_dev->snap_id = snap_id;
+ 		rbd_dev->snap_exists = true;
+ 		rbd_dev->read_only = 1;
  	}
-
--	snap_seq = rbd_dev->header.snapc->seq;
--	if (rbd_dev->header.total_snaps &&
--	    rbd_dev->header.snapc->snaps[0] == snap_seq)
--		/* pointing at the head, will need to follow that
--		   if head moves */
--		follow_seq = 1;
--
- 	/* rbd_dev->header.object_prefix shouldn't change */
- 	kfree(rbd_dev->header.snap_sizes);
- 	kfree(rbd_dev->header.snap_names);
-@@ -1759,11 +1750,6 @@ static int __rbd_refresh_header(struct rbd_device
-*rbd_dev)
- 	WARN_ON(strcmp(rbd_dev->header.object_prefix, h.object_prefix));
- 	kfree(h.object_prefix);
-
--	if (follow_seq)
--		rbd_dev->header.snapc->seq = rbd_dev->header.snapc->snaps[0];
--	else
--		rbd_dev->header.snapc->seq = snap_seq;
--
- 	ret = __rbd_init_snaps_header(rbd_dev);
-
- 	up_write(&rbd_dev->header_rwsem);
 -- 
 1.7.5.4
 
