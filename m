@@ -1,32 +1,42 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Poor read performance in KVM
-Date: Thu, 19 Jul 2012 08:52:41 -0700
-Message-ID: <CADvuQRGaivtgho4R=rk3c_B6eJ2GfG=tZFGNy9knoKyh2CR-zg@mail.gmail.com>
-References: <5002C215.108@bashkirtsev.com> <5003B1CC.4060909@inktank.com>
- <50064DCD.8040904@bashkirtsev.com> <5006D5FB.8030700@inktank.com> <5007FB6E.1080307@bashkirtsev.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 0/4] rbd: use snapc->seq the way server does
+Date: Thu, 19 Jul 2012 12:09:57 -0500
+Message-ID: <50083F65.5030104@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:55184 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750867Ab2GSPxC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 11:53:02 -0400
-Received: by pbbrp8 with SMTP id rp8so4557590pbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 08:53:02 -0700 (PDT)
-In-Reply-To: <5007FB6E.1080307@bashkirtsev.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:54145 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751300Ab2GSRJ7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 13:09:59 -0400
+Received: by yenl2 with SMTP id l2so3010889yen.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 10:09:58 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, Jul 19, 2012 at 5:19 AM, Vladimir Bashkirtsev
-<vladimir@bashkirtsev.com> wrote:
-> Look like that osd.0 performs with low latency but osd.1 latency is way too
-> high and on average it appears as 200ms. osd is backed by btrfs over LVM2.
-> May be issue lie in backing fs selection? All four osds running similar
+This series of patches changes the way the snap context "seq" field
+is used.  Currently it is used in a way that isn't really useful, and
+as such is a bit confusing.  This behavior seems to be a hold over
+from a time when there was no snap_id field maintained for an rbd_dev.
 
-Our typical experience with btrfs right now seems to be that it works
-fast when the filesystem is fresh, but as it ages, it starts to have
-higher and higher delays on syncing writes. This does not seem to be
-completely deterministic, that is, if you run many btrfs'es, the
-symptoms start to appear at different times on different instances.
+Summary:
+[PATCH 1/4] rbd: don't use snapc->seq that way
+    Removes special handling in __rbd_refresh_header() that ensured
+    the seq field was updated to point to the head if it had been
+    at the start of the function.
+[PATCH 2/4] rbd: preserve snapc->seq in rbd_header_set_snap()
+    Changes rbd_header_set_snap() so it doesn't set the seq field
+    to the snapshot id (for a snapshot mapping) or the highest
+    snapshot id (for the base image).
+[PATCH 3/4] rbd: set snapc->seq only when refreshing header
+    Assigns snapc->seq whenever an updated rbd image header is
+    received rather than when a new snapshot id has been
+    assigned.
+[PATCH 4/4] rbd: kill rbd_image_header->snap_seq
+    Gets rid of the rbd_image_header->snap_seq field, which
+    previously kept the same information now maintained in
+    the snapc->seq field.
+
+					-Alex
