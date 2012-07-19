@@ -1,29 +1,48 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 1/4] rbd: don't use snapc->seq that way
-Date: Thu, 19 Jul 2012 14:02:41 -0700
-Message-ID: <500875F1.2030303@inktank.com>
-References: <50083F65.5030104@inktank.com> <50083FC5.3050902@inktank.com>
+From: Alex Elder <elder@inktank.com>
+Subject: [PATCH 01/12] rbd: drop extra header_rwsem init
+Date: Thu, 19 Jul 2012 16:08:17 -0500
+Message-ID: <50087741.2030005@inktank.com>
+References: <500874F5.4090205@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:49694 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751287Ab2GSVCp (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 17:02:45 -0400
-Received: by pbbrp8 with SMTP id rp8so4935549pbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 14:02:45 -0700 (PDT)
-In-Reply-To: <50083FC5.3050902@inktank.com>
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:52082 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751525Ab2GSVIT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 17:08:19 -0400
+Received: by gglu4 with SMTP id u4so3299611ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 14:08:19 -0700 (PDT)
+In-Reply-To: <500874F5.4090205@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 07/19/2012 10:11 AM, Alex Elder wrote:
-> We now use rbd_dev->snap_id to record the snapshot id--using
-> the special value SNAP_NONE to indicate the rbd_dev is not mapping
-> a snapshot at all.
+In commit c666601a there was inadvertently added an extra
+initialization of rbd_dev->header_rwsem.  This gets rid of the
+duplicate.
 
-That's CEPH_NOSNAP, not SNAP_NONE, right? In any case,
+(Guangliang Zhao also offered up the same fix.)
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Reported-by: Guangliang Zhao <gzhao@suse.com>
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 6df8c62..b9895fe 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2458,8 +2458,6 @@ static ssize_t rbd_add(struct bus_type *bus,
+ 	INIT_LIST_HEAD(&rbd_dev->snaps);
+ 	init_rwsem(&rbd_dev->header_rwsem);
+
+-	init_rwsem(&rbd_dev->header_rwsem);
+-
+ 	/* generate unique id: find highest unique id, add one */
+ 	rbd_id_get(rbd_dev);
+
+-- 
+1.7.5.4
+
