@@ -1,45 +1,61 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Puppet modules for Ceph
-Date: Wed, 18 Jul 2012 15:31:20 -0700
-Message-ID: <CADvuQRFcBKwjmai+W1VArbv29GHm0CBgh2PKiy5tSN6X=GDjMQ@mail.gmail.com>
-References: <20120718135854.GI15546@potjevlesh.enovance.com>
- <CADvuQRG5jot8yhmWWk8cNFUF7BkoHKbyL6fCVVF6GMu_DpPy7g@mail.gmail.com>
- <CAKsDvb0Eq0amkEq=+9RrKcBv4RJ0PFwUGpzDpV8CzBHLQpMHtg@mail.gmail.com>
- <CADvuQRHt9ViPdD7B0==X-3kh-PT_NkX7+GNa9WZUb9zDSYTs0A@mail.gmail.com> <CAKsDvb2d63hDTq0LvmGL0z+yr09cNSr3ythWiqg6WVmzjxy8BA@mail.gmail.com>
+From: ramu <ramu.freesystems@gmail.com>
+Subject: Re: How to compile Java-Rados.
+Date: Thu, 19 Jul 2012 03:38:18 +0000 (UTC)
+Message-ID: <loom.20120719T053505-362@post.gmane.org>
+References: <loom.20120712T065146-882@post.gmane.org> <CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com> <loom.20120712T111906-426@post.gmane.org> <CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com> <loom.20120713T085715-195@post.gmane.org> <CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com> <loom.20120716T061714-349@post.gmane.org> <C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu> <loom.20120716T072848-760@post.gmane.org> <CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com> <alpine.DEB.2.00.1207160824220.9848@cobra.newdream.net> <CAPrxi5-2STepCif9aN1GyfTwFEzs56o5Nzg7NuHmBqq=7qWVEQ@mail.gmail.com> <loom.20120717T073350-472@post.gmane.org> <CAPrxi5_wA8sxJg6vN115E-sQO9LjT13dQFZ+2rqV4rPBborX_Q@mail.gmail.com> <loom.20120718T
+ 082223-738@post.gmane.org> <CAPrxi5_W_AghtjXLHNBQhv3Zbk_AyTBJOnDtvFYk9dh3H9VVrw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:36311 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751467Ab2GRWbl (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jul 2012 18:31:41 -0400
-Received: by gglu4 with SMTP id u4so2163929ggl.19
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jul 2012 15:31:40 -0700 (PDT)
-In-Reply-To: <CAKsDvb2d63hDTq0LvmGL0z+yr09cNSr3ythWiqg6WVmzjxy8BA@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:60887 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751852Ab2GSDih (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 18 Jul 2012 23:38:37 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1SrhZQ-0001xP-S8
+	for ceph-devel@vger.kernel.org; Thu, 19 Jul 2012 05:38:33 +0200
+Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 05:38:32 +0200
+Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 05:38:32 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Teyo Tyree <teyo@puppetlabs.com>
-Cc: =?UTF-8?Q?Fran=C3=A7ois_Charlier?= <francois.charlier@enovance.com>, puppet-users@googlgroups.com, ceph-devel@vger.kernel.org, puppet-openstack@puppetlabs.com
+To: ceph-devel@vger.kernel.org
 
-On Wed, Jul 18, 2012 at 3:26 PM, Teyo Tyree <teyo@puppetlabs.com> wrote:
-> Ha, that would be an interesting experiment indeed. I think Francois would
-> like to have the Puppet module done sooner rather than later. Are the
-> current Chef cookbooks functional enough for us to get started with them as
-> a reference?
+Hi Noah,
 
-I think so. They Work For Me(tm). The ugly stuff is mostly things like
-needing to wait a few rounds due to Chef's asynchronous data store,
-and it's missing just about all internal documentation; the
-user-visible aspects have a decent write-up, but nothing explains e.g.
-what exactly /var/lib/ceph/bootstrap-osd/ is about.
+Thank u for your reply,it is working fine but Iam getting one more error
+in terminal is,BUILD FAILED
+/home/vu/java-rados/build.xml:134: Test IOContextTest failed
 
-I'd love to help you work through that though, so please keep talking
-to me and make me explain everything in enough detail. It's just that
-I don't have anything except source to give you right now.
+Total time: 43 seconds
 
-The end user Chef deployment docs are at
-http://ceph.com/docs/master/install/chef/
-http://ceph.com/docs/master/config-cluster/chef/
+and in TEST-IOContextTest.txt file the error is,
 
-The cookbook is at https://github.com/ceph/ceph-cookbooks and
-currently it assumes Ubuntu 12.04.
+Testsuite: IOContextTest
+Tests run: 11, Failures: 1, Errors: 0, Time elapsed: 32.302 sec
+
+Testcase: test_toString took 1.791 sec
+Testcase: test_getCluster took 2.116 sec
+Testcase: test_getPoolStats took 2.364 sec
+Testcase: test_setLocatorKey took 2.046 sec
+Testcase: test_write took 3.109 sec
+Testcase: test_writeFull took 3.188 sec
+Testcase: test_getLastVersion took 2.46 sec
+Testcase: test_append took 3.505 sec
+Testcase: test_truncate took 3.423 sec
+Testcase: test_getsetAttribute took 3.161 sec
+Testcase: test_getObjects took 5.101 sec
+        FAILED
+
+junit.framework.AssertionFailedError:
+        at IOContextTest.test_getObjects(Unknown Source)
+
+Thanks,
+Ramu.
+
