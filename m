@@ -1,196 +1,32 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: Ceph doesn't update the block device size while a rbd image is mounted
-Date: Thu, 19 Jul 2012 17:50:21 +0200
-Message-ID: <CAOLwVU=dJ3r5V+_3bSF=-tHf_2pq8_0GA2g2L6zVv1s2mVV_BA@mail.gmail.com>
-References: <CAOLwVUkWUrjQTxQw5-umpWnY6G-AjReCwLTyQCOdCyNT175KgA@mail.gmail.com>
- <CAOLwVUm-31QzWb2fnZP+tsntunXEJOcaFLRenqJtAQ9nYPmLyA@mail.gmail.com>
- <50082476.4020109@widodh.nl> <CAOLwVUm+NnB-ooMiCDx+rkHJhn7tCE7xM67wY6mmMckG87CrQQ@mail.gmail.com>
- <50082BFB.9000605@widodh.nl>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: Poor read performance in KVM
+Date: Thu, 19 Jul 2012 08:52:41 -0700
+Message-ID: <CADvuQRGaivtgho4R=rk3c_B6eJ2GfG=tZFGNy9knoKyh2CR-zg@mail.gmail.com>
+References: <5002C215.108@bashkirtsev.com> <5003B1CC.4060909@inktank.com>
+ <50064DCD.8040904@bashkirtsev.com> <5006D5FB.8030700@inktank.com> <5007FB6E.1080307@bashkirtsev.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:37598 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751253Ab2GSPun convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 11:50:43 -0400
-Received: by eekc13 with SMTP id c13so737699eek.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 08:50:41 -0700 (PDT)
-In-Reply-To: <50082BFB.9000605@widodh.nl>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:55184 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750867Ab2GSPxC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 11:53:02 -0400
+Received: by pbbrp8 with SMTP id rp8so4557590pbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 08:53:02 -0700 (PDT)
+In-Reply-To: <5007FB6E.1080307@bashkirtsev.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-Hum ok, I see. Thanks!
+On Thu, Jul 19, 2012 at 5:19 AM, Vladimir Bashkirtsev
+<vladimir@bashkirtsev.com> wrote:
+> Look like that osd.0 performs with low latency but osd.1 latency is way too
+> high and on average it appears as 200ms. osd is backed by btrfs over LVM2.
+> May be issue lie in backing fs selection? All four osds running similar
 
-But if you have any clue to force the kernel to re-read without
-unmont/mounting :)
-
-On Thu, Jul 19, 2012 at 5:47 PM, Wido den Hollander <wido@widodh.nl> wr=
-ote:
->
->
-> On 19-07-12 17:26, S=E9bastien Han wrote:
->>
->> Ok I got your point seems logic, but why is this possible with LVM f=
-or
->> example?
->>
->> You can easily do this with LVM without un-mounting the device.
->>
->
->
-> LVM runs through the device mapper and are not regular block devices.
->
-> If you resize the disk underneath LVM you won't see an increased VG o=
-r PV
-> size unless you change the availability of the VG to unavailable and =
-back to
-> available again.
->
-> I'm not a 100% sure what the exact root cause is, but the kernel won'=
-t read
-> the new size of a block device as long as it is in use.
->
-> Wido
->
->
->
->> Cheers.
->>
->>
->> On Thu, Jul 19, 2012 at 5:15 PM, Wido den Hollander <wido@widodh.nl>
->> wrote:
->>>
->>> Hi,
->>>
->>>
->>> On 19-07-12 16:55, S=E9bastien Han wrote:
->>>>
->>>>
->>>> Hi Cephers!
->>>>
->>>> I'm working with rbd mapping. I figured out that the block device =
-size
->>>> of the rbd device is not update while the device is mounted. Here =
-my
->>>> tests:
->>>>
->>>
->>> iirc this is not something RBD specific, but since the device is in=
- use
->>> it
->>> can't be re-read by the kernel.
->>>
->>> So when you unmount it the kernel can re-read the header and resize=
- the
->>> device.
->>>
->>> Wido
->>>
->>>> 1. Pick up a device and check his size
->>>>
->>>> # rbd ls
->>>> size
->>>>
->>>> # rbd info test
->>>> rbd image 'test':
->>>> size 10000 MB in 2500 objects
->>>> order 22 (4096 KB objects)
->>>> block_name_prefix: rb.0.6
->>>> parent:  (pool -1)
->>>>
->>>> 2. Map the device
->>>>
->>>> # rbd map --secret /etc/ceph/secret test
->>>> # rbd showmapped
->>>> id pool image snap device
->>>> 1 rbd test - /dev/rbd1
->>>>
->>>> 3. Put a fs on it and check the block device size
->>>>
->>>> # mkfs.ext4 /dev/rdb1
->>>> ...
->>>> ...
->>>>
->>>> # fdisk -l /dev/rbd1
->>>>
->>>> Disk /dev/rbd1: 10.5 GB, 10485760000 bytes
->>>>
->>>> 4. Mount it
->>>>
->>>> # mount /dev/rbd1 /mnt
->>>> # df -h
->>>> /dev/rbd1                   9.8G  277M  9.0G   3% /mnt
->>>>
->>>>
->>>> 5. Change the image size
->>>>
->>>> # rbd resize --size 11000 test
->>>> Resizing image: 100% complete...done.
->>>>
->>>> # rbd info test
->>>> rbd image 'test':
->>>> size 11000 MB in 2750 objects
->>>> order 22 (4096 KB objects)
->>>> block_name_prefix: rb.0.6
->>>> parent:  (pool -1)
->>>>
->>>> At this point of time, if you perform the fdisk -l /dev/rbd1, the
->>>> block device size will remain the same.
->>>>
->>>> 6. Unmount the device:
->>>>
->>>> # umount /media
->>>>
->>>> # fdisk -l /dev/rbd1
->>>> Disk /dev/rbd1: 11.5 GB, 11534336000 bytes
->>>>
->>>> Unmounting the directory did update the block device size.
->>>>
->>>> Of course you can do something really fast like:
->>>>
->>>> # umount /media && mount /dev/rbd1 /media
->>>>
->>>> That will work, it's a valid solution as long as there is no opene=
-d
->>>> file. I won't use this trick in production...
->>>>
->>>> I also tried to "mount -o remount" and it didn't work.
->>>>
->>>> 7. Resize the fs (this can be performed while the fs is mounted):
->>>>
->>>> # e2fsck -f /dev/rbd1
->>>> e2fsck 1.42 (29-Nov-2011)
->>>> Pass 1: Checking inodes, blocks, and sizes
->>>> Pass 2: Checking directory structure
->>>> Pass 3: Checking directory connectivity
->>>> Pass 4: Checking reference counts
->>>> Pass 5: Checking group summary information
->>>> /dev/rbd1: 11/644640 files (0.0% non-contiguous), 77173/2560000 bl=
-ocks
->>>>
->>>> # resize2fs /dev/rbd1
->>>> resize2fs 1.42 (29-Nov-2011)
->>>> Resizing the filesystem on /dev/rbd1 to 2816000 (4k) blocks.
->>>> The filesystem on /dev/rbd1 is now 2816000 blocks long.
->>>>
->>>>
->>>> Did I miss something?
->>>> Is this feature coming?
->>>>
->>>> Thank you in advance :)
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
-el" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Our typical experience with btrfs right now seems to be that it works
+fast when the filesystem is fresh, but as it ages, it starts to have
+higher and higher delays on syncing writes. This does not seem to be
+completely deterministic, that is, if you run many btrfs'es, the
+symptoms start to appear at different times on different instances.
