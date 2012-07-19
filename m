@@ -1,64 +1,215 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Poor read performance in KVM
-Date: Thu, 19 Jul 2012 11:42:32 -0700
-Message-ID: <50085518.80507@inktank.com>
-References: <5002C215.108@bashkirtsev.com> <5003B1CC.4060909@inktank.com> <50064DCD.8040904@bashkirtsev.com> <5006D5FB.8030700@inktank.com> <50080D9D.8010306@bashkirtsev.com>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: Ceph doesn't update the block device size while a rbd image is mounted
+Date: Thu, 19 Jul 2012 21:44:05 +0200
+Message-ID: <CAOLwVU=d+tMB1d-sfd4PThM_piE=+8c--msija6NSrhxa548xg@mail.gmail.com>
+References: <CAOLwVUkWUrjQTxQw5-umpWnY6G-AjReCwLTyQCOdCyNT175KgA@mail.gmail.com>
+ <CAOLwVUm-31QzWb2fnZP+tsntunXEJOcaFLRenqJtAQ9nYPmLyA@mail.gmail.com>
+ <50082476.4020109@widodh.nl> <CAOLwVUm+NnB-ooMiCDx+rkHJhn7tCE7xM67wY6mmMckG87CrQQ@mail.gmail.com>
+ <50082BFB.9000605@widodh.nl> <CAOLwVU=dJ3r5V+_3bSF=-tHf_2pq8_0GA2g2L6zVv1s2mVV_BA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:62527 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751170Ab2GSSmi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 14:42:38 -0400
-Received: by gglu4 with SMTP id u4so3121141ggl.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 11:42:37 -0700 (PDT)
-In-Reply-To: <50080D9D.8010306@bashkirtsev.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:39073 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751189Ab2GSTo2 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 15:44:28 -0400
+Received: by bkwj10 with SMTP id j10so2801621bkw.19
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 12:44:26 -0700 (PDT)
+In-Reply-To: <CAOLwVU=dJ3r5V+_3bSF=-tHf_2pq8_0GA2g2L6zVv1s2mVV_BA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 07/19/2012 06:37 AM, Vladimir Bashkirtsev wrote:
->
->> Try to determine how much of the 200ms avg latency comes from osds vs
->> the qemu block driver.
-> Now I see following:
->
-> 2012-07-19 22:59:55.604365 osd.1 [WRN] 6 slow requests, 6 included
-> below; oldest blocked for > 38.034575 secs
-> 2012-07-19 22:59:55.604377 osd.1 [WRN] slow request 38.034575 seconds
-> old, received at 2012-07-19 22:59:17.569653:
-> osd_op(client.154924.0:5640639 rb.0.11.00000000268d [write 2912256~4096]
-> 2.9e04890a) v4 currently waiting for sub ops
-> 2012-07-19 22:59:55.604384 osd.1 [WRN] slow request 38.034442 seconds
-> old, received at 2012-07-19 22:59:17.569786:
-> osd_op(client.154924.0:5640640 rb.0.11.00000000296f [write 2269184~4096]
-> 2.bc0707d9) v4 currently waiting for sub ops
-> 2012-07-19 22:59:55.604389 osd.1 [WRN] slow request 37.813370 seconds
-> old, received at 2012-07-19 22:59:17.790858:
-> osd_op(client.152350.0:2269710 rb.0.d.000000001e9e [write
-> 2097152~1048576] 2.bb4282ca) v4 currently waiting for sub ops
-> 2012-07-19 22:59:55.604396 osd.1 [WRN] slow request 37.715288 seconds
-> old, received at 2012-07-19 22:59:17.888940:
-> osd_op(client.152365.0:1474333 rb.0.12.0000000004d7 [write 274432~4096]
-> 2.d68a2203) v4 currently waiting for sub ops
-> 2012-07-19 22:59:55.604402 osd.1 [WRN] slow request 32.812673 seconds
-> old, received at 2012-07-19 22:59:22.791555:
-> osd_op(client.158304.0:11002 rb.0.13.000000001c6d [write 1978368~12288]
-> 2.dada321f) v4 currently waiting for sub ops
->
-> Looks like an indication of something bigger than just latency. Similar
-> problems on osd.2 too. So with two osds misbehaving not really surprised
-> that KVM reads are slow. Do these slow requests hold up reads?
+With LVM, you can re-scan the scsi bus to extend a physical drive and
+then run a pvextend.
 
-Yes, they can hold up reads to the same object. Depending on where 
-they're stuck, they may be blocking other requests as well if they're
-e.g. taking up all the filestore threads. Waiting for subops means
-they're waiting for replicas to acknowledge the write and commit it to
-disk. The real cause for slowness of those ops is the replicas. If you
-enable 'debug osd = 25', 'filestore = 25', and 'debug journal = 20' you
-can trace through the logs to see exactly what's happening with the
-subops for those requests.
+@Calvin: I tried your solution
 
-Josh
+# partprobe /dev/rbd1
+
+Unfortunatly nothing changed.
+
+Did you make it working?
+
+Cheers!
+
+
+On Thu, Jul 19, 2012 at 5:50 PM, S=E9bastien Han <han.sebastien@gmail.c=
+om> wrote:
+> Hum ok, I see. Thanks!
+>
+> But if you have any clue to force the kernel to re-read without
+> unmont/mounting :)
+>
+> On Thu, Jul 19, 2012 at 5:47 PM, Wido den Hollander <wido@widodh.nl> =
+wrote:
+>>
+>>
+>> On 19-07-12 17:26, S=E9bastien Han wrote:
+>>>
+>>> Ok I got your point seems logic, but why is this possible with LVM =
+for
+>>> example?
+>>>
+>>> You can easily do this with LVM without un-mounting the device.
+>>>
+>>
+>>
+>> LVM runs through the device mapper and are not regular block devices=
+=2E
+>>
+>> If you resize the disk underneath LVM you won't see an increased VG =
+or PV
+>> size unless you change the availability of the VG to unavailable and=
+ back to
+>> available again.
+>>
+>> I'm not a 100% sure what the exact root cause is, but the kernel won=
+'t read
+>> the new size of a block device as long as it is in use.
+>>
+>> Wido
+>>
+>>
+>>
+>>> Cheers.
+>>>
+>>>
+>>> On Thu, Jul 19, 2012 at 5:15 PM, Wido den Hollander <wido@widodh.nl=
+>
+>>> wrote:
+>>>>
+>>>> Hi,
+>>>>
+>>>>
+>>>> On 19-07-12 16:55, S=E9bastien Han wrote:
+>>>>>
+>>>>>
+>>>>> Hi Cephers!
+>>>>>
+>>>>> I'm working with rbd mapping. I figured out that the block device=
+ size
+>>>>> of the rbd device is not update while the device is mounted. Here=
+ my
+>>>>> tests:
+>>>>>
+>>>>
+>>>> iirc this is not something RBD specific, but since the device is i=
+n use
+>>>> it
+>>>> can't be re-read by the kernel.
+>>>>
+>>>> So when you unmount it the kernel can re-read the header and resiz=
+e the
+>>>> device.
+>>>>
+>>>> Wido
+>>>>
+>>>>> 1. Pick up a device and check his size
+>>>>>
+>>>>> # rbd ls
+>>>>> size
+>>>>>
+>>>>> # rbd info test
+>>>>> rbd image 'test':
+>>>>> size 10000 MB in 2500 objects
+>>>>> order 22 (4096 KB objects)
+>>>>> block_name_prefix: rb.0.6
+>>>>> parent:  (pool -1)
+>>>>>
+>>>>> 2. Map the device
+>>>>>
+>>>>> # rbd map --secret /etc/ceph/secret test
+>>>>> # rbd showmapped
+>>>>> id pool image snap device
+>>>>> 1 rbd test - /dev/rbd1
+>>>>>
+>>>>> 3. Put a fs on it and check the block device size
+>>>>>
+>>>>> # mkfs.ext4 /dev/rdb1
+>>>>> ...
+>>>>> ...
+>>>>>
+>>>>> # fdisk -l /dev/rbd1
+>>>>>
+>>>>> Disk /dev/rbd1: 10.5 GB, 10485760000 bytes
+>>>>>
+>>>>> 4. Mount it
+>>>>>
+>>>>> # mount /dev/rbd1 /mnt
+>>>>> # df -h
+>>>>> /dev/rbd1                   9.8G  277M  9.0G   3% /mnt
+>>>>>
+>>>>>
+>>>>> 5. Change the image size
+>>>>>
+>>>>> # rbd resize --size 11000 test
+>>>>> Resizing image: 100% complete...done.
+>>>>>
+>>>>> # rbd info test
+>>>>> rbd image 'test':
+>>>>> size 11000 MB in 2750 objects
+>>>>> order 22 (4096 KB objects)
+>>>>> block_name_prefix: rb.0.6
+>>>>> parent:  (pool -1)
+>>>>>
+>>>>> At this point of time, if you perform the fdisk -l /dev/rbd1, the
+>>>>> block device size will remain the same.
+>>>>>
+>>>>> 6. Unmount the device:
+>>>>>
+>>>>> # umount /media
+>>>>>
+>>>>> # fdisk -l /dev/rbd1
+>>>>> Disk /dev/rbd1: 11.5 GB, 11534336000 bytes
+>>>>>
+>>>>> Unmounting the directory did update the block device size.
+>>>>>
+>>>>> Of course you can do something really fast like:
+>>>>>
+>>>>> # umount /media && mount /dev/rbd1 /media
+>>>>>
+>>>>> That will work, it's a valid solution as long as there is no open=
+ed
+>>>>> file. I won't use this trick in production...
+>>>>>
+>>>>> I also tried to "mount -o remount" and it didn't work.
+>>>>>
+>>>>> 7. Resize the fs (this can be performed while the fs is mounted):
+>>>>>
+>>>>> # e2fsck -f /dev/rbd1
+>>>>> e2fsck 1.42 (29-Nov-2011)
+>>>>> Pass 1: Checking inodes, blocks, and sizes
+>>>>> Pass 2: Checking directory structure
+>>>>> Pass 3: Checking directory connectivity
+>>>>> Pass 4: Checking reference counts
+>>>>> Pass 5: Checking group summary information
+>>>>> /dev/rbd1: 11/644640 files (0.0% non-contiguous), 77173/2560000 b=
+locks
+>>>>>
+>>>>> # resize2fs /dev/rbd1
+>>>>> resize2fs 1.42 (29-Nov-2011)
+>>>>> Resizing the filesystem on /dev/rbd1 to 2816000 (4k) blocks.
+>>>>> The filesystem on /dev/rbd1 is now 2816000 blocks long.
+>>>>>
+>>>>>
+>>>>> Did I miss something?
+>>>>> Is this feature coming?
+>>>>>
+>>>>> Thank you in advance :)
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-de=
+vel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
+l
+>>>>>
+>>>>
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
