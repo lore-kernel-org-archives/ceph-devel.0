@@ -1,65 +1,73 @@
-From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Subject: Re: Poor read performance in KVM
-Date: Sat, 21 Jul 2012 02:23:25 +0930
-Message-ID: <50098D05.2080704@bashkirtsev.com>
-References: <5002C215.108@bashkirtsev.com> <5003B1CC.4060909@inktank.com> <50064DCD.8040904@bashkirtsev.com> <5006D5FB.8030700@inktank.com> <50080D9D.8010306@bashkirtsev.com> <50085518.80507@inktank.com> <500984AC.9030104@bashkirtsev.com> <CADvuQRG1z0YQezCoJhCNFnC+03UDv6H3aJPUWBcbBw3-iUnA8Q@mail.gmail.com>
+From: Florian Haas <florian@hastexo.com>
+Subject: Re: Tuning placement group
+Date: Fri, 20 Jul 2012 11:08:01 -0700
+Message-ID: <CAPUexz90BKESODbNMX8H=yCkxQYHx1RXd1sQ17WUpO8Amt3gvQ@mail.gmail.com>
+References: <20120720163311.GB17454@potjevlesh.enovance.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:41440 "EHLO
-	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752846Ab2GTQxg (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 12:53:36 -0400
-In-Reply-To: <CADvuQRG1z0YQezCoJhCNFnC+03UDv6H3aJPUWBcbBw3-iUnA8Q@mail.gmail.com>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:49826 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752507Ab2GTSID convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 14:08:03 -0400
+Received: by qcro28 with SMTP id o28so2453757qcr.19
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Jul 2012 11:08:01 -0700 (PDT)
+In-Reply-To: <20120720163311.GB17454@potjevlesh.enovance.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?Q?Fran=C3=A7ois_Charlier?= <francois.charlier@enovance.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 21/07/2012 2:12 AM, Tommi Virtanen wrote:
-> On Fri, Jul 20, 2012 at 9:17 AM, Vladimir Bashkirtsev
-> <vladimir@bashkirtsev.com> wrote:
->> not running. So I ended up rebooting hosts and that's where fun begin: btrfs
->> has failed to umount , on boot up it spit out "btrfs: free space inode
->> generation (0) did not match free space cache generation (177431)". I have
->> not started ceph and made an attempt to umount and umount just froze.
->> Another reboot: same stuff. I have rebooted second host and it came back
->> with the same error. So in effect I was unable to mount btrfs and read it:
->> no wonder that ceph was unable to run. Actually according to mons ceph was
-> The btrfs developers tend to be good about bug reports that severe --
-> I think you should email that mailing list and ask if that sounds like
-> known bug, and ask what information you should capture if it happens
-> again (assuming the workload is complex enough that you can't easily
-> capture/reproduce all of that).
-Well... Work load was fairly high - not something usually happening on 
-MySQL. Our client keeps imagery in MySQL and his system was regenerating 
-images (it takes hi-res image and produces five or six images which are 
-of smaller size + watermark). Stuff runs imagemagick which keeps its 
-temporary data on disk (and to ceph it is not really temporary data - it 
-is data which must be committed to osds) and then innodb in MySQL stores 
-results - which of course creates number of pages and so it appears as 
-random writes to underlying file system. And from what I have seen write 
-traffic created by this process was in TB range (my whole ceph cluster 
-is just 3.3TB). So it was considerable amount of changes on filesystem.
-
-I guess if we will start that process again we will end up with the 
-similar result in few days - but by some reason I don't want to try it 
-in production system :)
-
-I can scavenge something from logs and post it to btrfs devs. Thanks for 
-a tip.
+On Fri, Jul 20, 2012 at 9:33 AM, Fran=C3=A7ois Charlier
+<francois.charlier@enovance.com> wrote:
+> Hello,
 >
->> But it leaves me with very final question: should we rely on btrfs at this
->> point given it is having such major faults? What if I will use well tested
->> by time ext4?
-> You might want to try xfs. We hear/see problems with all three, but
-> xfs currently seems to have the best long-term performance and
-> reliability.
+> Reading    http://ceph.com/docs/master/ops/manage/grow/placement-grou=
+ps/
+> and thinking to build a ceph cluster with potentially 1000 OSDs.
 >
-> I'm not sure if anyone's run detailed tests with ext4 after the
-> xattrs-in-leveldb feature; before that, we ran into fs limitations.
-That's what I was thinking: before xattrs-in-leveldb I even did not 
-consider ext4 as viable alternative but now it may be reasonable to give 
-it a go. Or even may be have a mix of osds backed by different file 
-systems? What is devs opinion on this?
+> Using the recommandations on the previously cited link, it would requ=
+ire
+> pg_num being set between 10,000 &  30,000. Okay with that. Let's use =
+the
+> recommended value of 16,384 ; this  is alreay about 160 placement gro=
+ups
+> per OSD.
+>
+> What  if, for  a start,  we choose  to reach  this number  of 1000  O=
+SDs
+> slowly, starting with 100 OSDs ? It's now 1600 placement groups per O=
+SD.
+>
+> What if  we chose 30,000 (or  32,768) placement groups to  keep room =
+for
+> expansion ?
+>
+> My question  is : How will  behave a Ceph  pool with 1000, 5000  or e=
+ven
+> 10000 placement groups per OSD ?  Will this impact performance ? How =
+bad
+> ? Can it be worked around ? Is this a problem of RAM size ? CPU usage=
+ ?
+>
+> Any hint about this would be much appreciated.
+
+If I may, I'd like to add an additional point of consideration,
+specifically for radosgw setups:
+
+What's the recommended way to set the number of PGs for the half-dozen
+pools that radosgw normally creates on its own (.rgw, .rgw.users,
+=2Ergw.buckets and so on)? I *think* wanting to set a custom number of
+PGs would require pre-creating these pools manually, but there may be
+a way -- undocumented? -- to instruct radosgw to set a user-configured
+number of PGs on pool creation. Insight on that would be much
+appreciated.
+
+Cheers,
+=46lorian
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
