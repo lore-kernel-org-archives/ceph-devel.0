@@ -1,91 +1,32 @@
-From: Tim Flavin <tim.flavin@gmail.com>
-Subject: mkcephfs problem
-Date: Thu, 19 Jul 2012 21:46:26 -0400
-Message-ID: <CAEj+kbmn=UY1dUKkyDDymqhbTuvEypVM+o4Ny-phS1SKZkmshA@mail.gmail.com>
+From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Subject: Re: Poor read performance in KVM
+Date: Fri, 20 Jul 2012 14:50:37 +0930
+Message-ID: <5008EAA5.3000908@bashkirtsev.com>
+References: <5002C215.108@bashkirtsev.com> <5003B1CC.4060909@inktank.com> <50064DCD.8040904@bashkirtsev.com> <5006D5FB.8030700@inktank.com> <5007FB6E.1080307@bashkirtsev.com> <CADvuQRGaivtgho4R=rk3c_B6eJ2GfG=tZFGNy9knoKyh2CR-zg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:39817 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752087Ab2GTBq1 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jul 2012 21:46:27 -0400
-Received: by vbbff1 with SMTP id ff1so2515281vbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jul 2012 18:46:27 -0700 (PDT)
+Received: from mail.logics.net.au ([150.101.56.178]:54097 "EHLO
+	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750740Ab2GTFU4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 01:20:56 -0400
+In-Reply-To: <CADvuQRGaivtgho4R=rk3c_B6eJ2GfG=tZFGNy9knoKyh2CR-zg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-I am trying to get Ceph running on an ARM system, currently one quad
-core node, running Ubuntu 12.04.
-
-It compiles fine, currently without tcmalloc and google perf tools, but
-I am running into a problem with mkcephfs.  'mkcephfs -a -c ceph.conf'
-didn't work so I did it piece by piece until I got this:
-
-root@ubuntu:/home/tim# mkcephfs -d /tmp/foo --prepare-mon
-Building generic osdmap from /tmp/foo/conf
-/usr/local/bin/osdmaptool: osdmap file '/tmp/foo/osdmap'
-/usr/local/bin/osdmaptool: writing epoch 1 to /tmp/foo/osdmap
-Generating admin key at /tmp/foo/keyring.admin
-creating /tmp/foo/keyring.admin
-Building initial monitor keyring
-cat: /tmp/foo/key.*: No such file or directory
-
-There are no key.* files in /tmp/foo
-
-# ls /tmp/foo
-conf  keyring.admin  keyring.mon  monmap  osdmap
-
-
-If you are running everything on one node, is it OK to use localhost and
-127.0.0.1?
-
-
-Here is my config file:
-
-[osd]
-        osd journal size = 1000
-        filestore xattr use omap = true
-
-[mon.a]
-        host = localhost
-        mon addr = 127.0.0.1:6789
-
-[osd.0]
-        host = localhost
-
-
-[mds.a]
-        host = localhost
-
-
-Here are are the other configuration commands:
-
-root@ubuntu:/home/tim# mkcephfs -c ceph.conf -d /tmp/foo --prepare-monmap
-preparing monmap in /tmp/foo/monmap
-/usr/local/bin/monmaptool --create --clobber --add a 127.0.0.1:6789
---print /tmp/foo/monmap
-/usr/local/bin/monmaptool: monmap file /tmp/foo/monmap
-/usr/local/bin/monmaptool: generated fsid 8e4f846b-1829-46e4-9902-5d8316c3fa4f
-epoch 0
-fsid 8e4f846b-1829-46e4-9902-5d8316c3fa4f
-last_changed 2012-07-19 22:40:38.651045
-created 2012-07-19 22:40:38.651045
-0: 127.0.0.1:6789/0 mon.a
-/usr/local/bin/monmaptool: writing epoch 0 to /tmp/foo/monmap (1 monitors)
-root@ubuntu:/home/tim# mkcephfs -d /tmp/foo --init-local-daemons mds
-root@ubuntu:/home/tim# mkcephfs -d /tmp/foo --init-local-daemons osd
-root@ubuntu:/home/tim# mkcephfs -d /tmp/foo --prepare-mon
-Building generic osdmap from /tmp/foo/conf
-/usr/local/bin/osdmaptool: osdmap file '/tmp/foo/osdmap'
-/usr/local/bin/osdmaptool: writing epoch 1 to /tmp/foo/osdmap
-Generating admin key at /tmp/foo/keyring.admin
-creating /tmp/foo/keyring.admin
-Building initial monitor keyring
-cat: /tmp/foo/key.*: No such file or directory
-root@ubuntu:/home/tim#
-
-
-Any ideas?  Which command was supposed to generate the key.* files?
-
-Tim
+On 20/07/2012 1:22 AM, Tommi Virtanen wrote:
+> On Thu, Jul 19, 2012 at 5:19 AM, Vladimir Bashkirtsev
+> <vladimir@bashkirtsev.com> wrote:
+>> Look like that osd.0 performs with low latency but osd.1 latency is way too
+>> high and on average it appears as 200ms. osd is backed by btrfs over LVM2.
+>> May be issue lie in backing fs selection? All four osds running similar
+> Our typical experience with btrfs right now seems to be that it works
+> fast when the filesystem is fresh, but as it ages, it starts to have
+> higher and higher delays on syncing writes. This does not seem to be
+> completely deterministic, that is, if you run many btrfs'es, the
+> symptoms start to appear at different times on different instances.
+I would suspect it as well but all btrfs are relatively fresh as we have 
+moved ceph from test bed to a production environment.
