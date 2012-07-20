@@ -1,37 +1,29 @@
-From: ramu <ramu.freesystems@gmail.com>
-Subject: Re: How to compile Java-Rados.
-Date: Fri, 20 Jul 2012 05:21:14 +0000 (UTC)
-Message-ID: <loom.20120720T071745-353@post.gmane.org>
-References: <loom.20120712T065146-882@post.gmane.org> <CAPrxi59LMX7aPuG3FrzgAsWS++6kNdi_11DnZQwZifDStdmWYg@mail.gmail.com> <loom.20120712T111906-426@post.gmane.org> <CAPrxi59yCsE+4iNd3URAFtvwJKus2O+Z0LOouPbL8NVSGC0jsQ@mail.gmail.com> <loom.20120713T085715-195@post.gmane.org> <CAPrxi59UXDag=h7n8oYNSfE7+hscZJ+eb0XsOFtPPAFas26uZQ@mail.gmail.com> <loom.20120716T061714-349@post.gmane.org> <C20749A7-440C-49D6-8C53-3C756B17E079@cs.ucsc.edu> <loom.20120716T072848-760@post.gmane.org> <CAPrxi5-dB2_P71zNzvE9hx-zXaC2wtm_KpQ=bA8QaE6qzz7JFw@mail.gmail.com> <alpine.DEB.2.00.1207160824220.9848@cobra.newdream.net> <CAPrxi5-2STepCif9aN1GyfTwFEzs56o5Nzg7NuHmBqq=7qWVEQ@mail.gmail.com> <loom.20120717T073350-472@post.gmane.org> <CAPrxi5_wA8sxJg6vN115E-sQO9LjT13dQFZ+2rqV4rPBborX_Q@mail.gmail.com> <loom.20120718T
-  082223-738@post.gmane.org> <CAPrxi5_W_AghtjXLHNBQhv3Zbk_AyTBJOnDtvFYk9dh3H9VVrw@mail.gmail.com> <loom.20120719T053505-362@post.gmane.org>
+From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Subject: Re: Poor read performance in KVM
+Date: Fri, 20 Jul 2012 14:54:30 +0930
+Message-ID: <5008EB8E.30708@bashkirtsev.com>
+References: <5002C215.108@bashkirtsev.com>	<5003B1CC.4060909@inktank.com>	<50064DCD.8040904@bashkirtsev.com>	<5006D5FB.8030700@inktank.com>	<5007FB6E.1080307@bashkirtsev.com>	<CADvuQRGaivtgho4R=rk3c_B6eJ2GfG=tZFGNy9knoKyh2CR-zg@mail.gmail.com> <CADxhoDT8rimSwP+Y75tGVo3Nd5WYw8xHyDxBAMV8tb5no0OP4Q@mail.gmail.com> <50084EC3.60003@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:59158 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751353Ab2GTFVe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 20 Jul 2012 01:21:34 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1Ss5eW-0005PJ-PQ
-	for ceph-devel@vger.kernel.org; Fri, 20 Jul 2012 07:21:25 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Jul 2012 07:21:24 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Jul 2012 07:21:24 +0200
+Received: from mail.logics.net.au ([150.101.56.178]:54221 "EHLO
+	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751306Ab2GTFYo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 01:24:44 -0400
+In-Reply-To: <50084EC3.60003@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: Calvin Morrow <calvin.morrow@gmail.com>, Tommi Virtanen <tv@inktank.com>, Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi Noah,
 
-Thank you for fixes and suggestions of compilation of java-rados ,
-It's working fine now.
-
-Thanks,
-Ramu.
-
+>
+> We are seeing degradation at 64k node/leaf sizes as well.  So far the 
+> degradation is most obvious with small writes.  it affects XFS as 
+> well, though not as severely.  We are vigorously looking into it. :)
+>
+Just confirming that one of our clients has run fair amount (on 
+gigabytes scale) of mysql updates in preceding few days. So it appears 
+all performance degradation stems from random writes. Perhaps I will 
+rebuild each osd to check if it would help to recover.
