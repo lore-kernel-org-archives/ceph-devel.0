@@ -1,214 +1,119 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Ceph write performance on RAM-DISK
-Date: Fri, 20 Jul 2012 16:28:24 -0500
-Message-ID: <5009CD78.7050301@inktank.com>
-References: <500931CF.9040407@selectel.ru> <20120720104150.GA16630@oder.kd-bie.de> <50093798.9020903@selectel.ru> <500945CA.8000406@inktank.com> <20120720203646.GA6587@oder.kd-bie.de>
+From: Joe Landman <landman@scalableinformatics.com>
+Subject: Running into an error with mkcephfs
+Date: Fri, 20 Jul 2012 17:45:49 -0400
+Message-ID: <5009D18D.6050506@scalableinformatics.com>
+Reply-To: landman@scalableinformatics.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:60509 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752111Ab2GTV21 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 17:28:27 -0400
-Received: by yenl2 with SMTP id l2so4444905yen.19
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Jul 2012 14:28:27 -0700 (PDT)
-In-Reply-To: <20120720203646.GA6587@oder.kd-bie.de>
+Received: from ec2-23-23-234-153.compute-1.amazonaws.com ([23.23.234.153]:55191
+	"EHLO mail2.scalableinformatics.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753043Ab2GTVvE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 20 Jul 2012 17:51:04 -0400
+Received: from mail2.scalableinformatics.com (localhost [127.0.0.1])
+	by mail2.scalableinformatics.com (Postfix) with ESMTP id 6824D20C04
+	for <ceph-devel@vger.kernel.org>; Fri, 20 Jul 2012 21:44:36 +0000 (UTC)
+Received: from [192.168.1.171] (alamo.scalableinformatics.com [173.10.54.97])
+	(using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	(Authenticated sender: landman)
+	by mail2.scalableinformatics.com (Postfix) with ESMTPSA id 4764720A50
+	for <ceph-devel@vger.kernel.org>; Fri, 20 Jul 2012 21:44:36 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dieter Kasper <d.kasper@kabelmail.de>
-Cc: George Shuklin <shuklin@selectel.ru>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 07/20/2012 03:36 PM, Dieter Kasper wrote:
-> Hi Mark, George,
->
-> I can observe a similar (poor) Performance on my system with fio on /dev/rbd1
->
-> #--- seq. write RBD
-> RX37-0:~ # dd if=/dev/zero of=/dev/rbd1 bs=1024k count=10000
-> 10000+0 records in
-> 10000+0 records out
-> 10485760000 bytes (10 GB) copied, 41.1819 s, 255 MB/s
->
-> #--- seq. read RBD
-> RX37-0:~ # dd of=/dev/zero if=/dev/rbd1 bs=1024k count=10000
-> 10000+0 records in
-> 10000+0 records out
-> 10485760000 bytes (10 GB) copied, 40.9595 s, 256 MB/s
->
-> #--- seq. read /dev/ramX
-> RX37-0:~ # dd of=/dev/zero if=/dev/ram0 bs=1024k count=10000
-> 10000+0 records in
-> 10000+0 records out
-> 10485760000 bytes (10 GB) copied, 4.68389 s, 2.2 GB/s
->
-> Does ceph-osd/filestore 'eat' 90% of my resources/bandwidth/latency ?
->
+Hi folks:
 
-Well, there are multiple layers involved here, so it's possible that 
-some of the code for RBD is playing a part in this too.  I have 
-specifically seen slow performance with smaller requests with the 
-filestore though, so that is where I'm focusing my energy right now.
+   Setting up a test cluster.  Simple ceph.conf
 
->
-> RX37-0:~ # fio --filename=/dev/rbd1 --direct=1 --rw=randwrite --bs=4k --size=5G --numjobs=64 --runtime=30 --group_reporting --name=file1
-> (...)
->    write: io=461592KB, bw=15371KB/s, iops=3842 , runt= 30030msec
->    write: io=5120.0MB, bw=893927KB/s, iops=223481 , runt=  5865msec (on /dev/ram0)
->
->
-> RX37-0:~ # fio --filename=/dev/rbd1 --direct=1 --rw=randread --bs=4k --size=5G --numjobs=64 --runtime=30 --group_reporting --name=file1
-> (...)
->    read : io=698356KB, bw=23240KB/s, iops=5809 , runt= 30050msec
->    read : io=5120.0MB, bw=1631.1MB/s, iops=417559 , runt=  3139msec (on /dev/ram0)
->
->
-> RX37-0:~ # fio --filename=/dev/rbd1 --direct=1 --rw=randwrite --bs=1m --size=5G --numjobs=4 --runtime=10 --group_reporting --name=file1
-> (...)
->    write: io=6377.0MB, bw=217125KB/s, iops=212 , runt= 30075msec
->    write: io=5120.0MB, bw=2114.9MB/s, iops=2114 , runt=  2421msec (on /dev/ram0)
->
->
-> Where is the bottleneck ?
-> What is filestore doing ?
-> How can I disable the journal and write only to the btrfs OSDs ? (like as they would be SSDs)
-> How can I get better performance ?
+[global]
+  	auth supported = cephx
 
-Not yet sure where the bottleneck is, but we are actively looking into 
-it.  Sadly the process has been complicated by potential bottleneck in 
-our test hardware that could be masking real issues in the code.
+[mon]
+	mon data = /data/mon$id
+	debug ms = 1
 
->
->
-> Regards,
-> Dieter
->
-> P.S. I will try to get the "test_filestore_workloadgen"
->
->
-> On Fri, Jul 20, 2012 at 06:49:30AM -0500, Mark Nelson wrote:
->> Hi George,
->>
->> I think you may find that the limitation is in the the filestore.
->> It's one of the things I've been working on trying to track down as
->> I've seen low performance on SSDs with small request sizes as well.
->> You can use the test_filestore_workloadgen to specifically test the
->> filestore code with small requests if you'd like.  I'm not sure if
->> it is included with the binary distribution but it can be compiled
->> if you download the src.  I think it's "make
->> test_filestore_workloadgen" in the src directory.
->>
->> Mark
->>
->> On 7/20/12 5:48 AM, George Shuklin wrote:
->>> On 20.07.2012 14:41, Dieter Kasper (KD) wrote:
->>>
->>> Good day.
->>>
->>> Thank you for attention.
->>>
->>> ramdisk size ~70Gb (modprobe brd rd_size=70000000)
->>> journal seems be on same device as storage
->>> size of OSD was unchanged (... means I create it by manual and do not
->>> make any specific changes)
->>>
->>> During test I watch IO load closely, IO on MDS/MON was insignificant
->>> (most of the time zero, sometimes few very mild peaks).
->>>
->>> Just in case, configs:
->>>
->>> ceph.conf:
->>>
->>> [osd]
->>>          osd journal size = 1000
->>>          filestore xattr use omap = true
->>>
->>> [mon.a]
->>>          host = srv1
->>>          mon addr = 192.168.0.1:6789
->>>
->>> [osd.0]
->>>          host = srv1
->>>
->>> [mds.a]
->>>          host = srv1
->>>
->>> fio.ini:
->>> [test]
->>> blocksize=4k
->>> filename=/media/test
->>> size=16g
->>> fallocate=posix
->>> rw=randread
->>> direct=1
->>> buffered=0
->>> ioengine=libaio
->>> iodepth=32
->>>
->>>
->>> Thanks for advising, I'll recheck with new settings.
->>>
->>>> George,
->>>>
->>>> please share more details of your config:
->>>> - RAM size of your system
->>>> - location of the journal
->>>> - size of your OSD
->>>>
->>>> Can you try (just for the 1st test) to
->>>> .. put the journal on RAM disk
->>>> .. put the MDS on RAM disk
->>>> .. put the MON on RAM disk
->>>> .. use btrfs for OSD
->>>>
->>>> As an alternative to isolate the bottleneck you can try to
->>>> - run without a journal
->>>> - use RBD instead Ceph-FS
->>>>    + create a File System on top of the /dev/rbd0
->>>>
->>>> Regards,
->>>> Dieter Kasper
->>>>
->>>>
->>>> On Fri, Jul 20, 2012 at 12:24:15PM +0200, George Shuklin wrote:
->>>>> Good day.
->>>>>
->>>>> I've start to play with Ceph... And I found some kinda strange
->>>>> performance issues. I'm not sure if this is due ceph limitation or my
->>>>> bad setup.
->>>>>
->>>>> Setup:
->>>>>
->>>>> osd - xfs on ramdisk (only one osd)
->>>>> mds - raid0 on 10 disks
->>>>> mon - second raid0 on 10 disks
->>>>>
->>>>> I've mount ceph share at localhost and run FIO (randwrite, 4k,
->>>>> iodepth=32)
->>>>>
->>>>> What I've got: 1900 IOPS on writing (4k block, 1Gb span).
->>>>>
->>>>> Normally fio shows about 200kIOPS writing on ramdisk.
->>>>>
->>>>> Why it was so slow? I've  done setup exactly like described here:
->>>>> http://ceph.com/docs/master/start/quick-start/#start-the-ceph-cluster
->>>>> (but one osd).
->>>>>
->>>>> Thanks.
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+[mon.0]
+	host = n01
+	mon addr = 10.202.1.142:6789
+
+[mon.1]
+	host = n02
+	mon addr = 10.202.1.141:6789
+
+[mon.2]
+	host = siflash-ssd
+	mon addr = 10.202.1.128:6789
+
+[mds]
+	keyring = /data/keyring.$name
+
+[mds.a]
+	host = siflash-ssd-1
+
+[osd]
+	osd data = /data/1/osd$id
+	osd journal = /data/2/osd$id/journal
+         osd journal size = 512
+
+[osd.0]
+	host = dv4-1
+
+
+[osd.1]
+	host = dv4-2
+
+
+Following along on the directions: 
+http://ceph.com/docs/master/start/quick-start/
+
+mkcephfs -a -c /etc/ceph/ceph.conf -k ceph.keyring
+
+[root@n01 ceph]# mkcephfs -a -c /etc/ceph/ceph.conf -k ceph.keyringtemp 
+dir is /tmp/mkcephfs.W73fq9MYo0
+preparing monmap in /tmp/mkcephfs.W73fq9MYo0/monmap
+/usr/bin/monmaptool --create --clobber --add 0 10.202.1.142:6789 --add 1 
+10.202.1.141:6789 --add 2 10.202.1.128:6789 --print 
+/tmp/mkcephfs.W73fq9MYo0/monmap
+/usr/bin/monmaptool: monmap file /tmp/mkcephfs.W73fq9MYo0/monmap
+/usr/bin/monmaptool: generated fsid 3ffcf9f3-f589-4dae-a534-f53daa3bc12c
+epoch 0
+fsid 3ffcf9f3-f589-4dae-a534-f53daa3bc12c
+last_changed 2012-07-19 17:35:14.024091
+created 2012-07-19 17:35:14.024091
+0: 10.202.1.128:6789/0 mon.2
+1: 10.202.1.141:6789/0 mon.1
+2: 10.202.1.142:6789/0 mon.0
+/usr/bin/monmaptool: writing epoch 0 to /tmp/mkcephfs.W73fq9MYo0/monmap 
+(3 monitors)
+=== osd.0 ===
+pushing conf and monmap to dv4-1:/tmp/mkfs.ceph.26215
+2012-07-20 17:38:12.605503 7f30d6d41760 -1  ** ERROR: error creating 
+empty object store in /data/1/osd0: (2) No such file or directory
+failed: 'ssh root@dv4-1 /sbin/mkcephfs -d /tmp/mkfs.ceph.26215 
+--init-daemon osd.0'
+
+Not sure what its having trouble with doing, the code path suggests that 
+an mkfs failed (we are using an xfs backing store already built and 
+mounted).
+
+OS is Centos 6.3 with a 3.2.[12]3 kernel.  Any clues on what I should 
+look for, or try by hand?
+
+Thanks!
 
 
 -- 
-Mark Nelson
-Performance Engineer
-Inktank
+Joseph Landman, Ph.D
+Founder and CEO
+Scalable Informatics Inc.
+email: landman@scalableinformatics.com
+web  : http://scalableinformatics.com
+        http://scalableinformatics.com/sicluster
+phone: +1 734 786 8423 x121
+fax  : +1 866 888 3112
+cell : +1 734 612 4615
+
