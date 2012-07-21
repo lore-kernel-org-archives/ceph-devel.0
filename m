@@ -1,12 +1,12 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 5/9] libceph: resubmit linger ops when pg mapping changes
-Date: Fri, 20 Jul 2012 17:41:44 -0700
-Message-ID: <1342831308-18815-6-git-send-email-sage@inktank.com>
+Subject: [PATCH 1/9] libceph: move feature bits to separate header
+Date: Fri, 20 Jul 2012 17:41:40 -0700
+Message-ID: <1342831308-18815-2-git-send-email-sage@inktank.com>
 References: <1342831308-18815-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46570 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46558 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752845Ab2GUAdK (ORCPT
+	with ESMTP id S1752543Ab2GUAdK (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 20:33:10 -0400
 In-Reply-To: <1342831308-18815-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -14,78 +14,140 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>
 
-The linger op registration (i.e., watch) modifies the object state.  As
-such, the OSD will reply with success if it has already applied without
-doing the associated side-effects (setting up the watch session state).
-If we lose the ACK and resubmit, we will see success but the watch will not
-be correctly registered and we won't get notifies.
-
-To fix this, always resubmit the linger op with a new tid.  We accomplish
-this by re-registering as a linger (i.e., 'registered') if we are not yet
-registered.  Then the second loop will treat this just like a normal
-case of re-registering.
-
-This mirrors a similar fix on the userland ceph.git, commit 5dd68b95, and
-ceph bug #2796.
+This is simply cleanup that will keep things more closely synced with the
+userland code.
 
 Signed-off-by: Sage Weil <sage@inktank.com>
 ---
- net/ceph/osd_client.c |   26 +++++++++++++++++++++-----
- 1 files changed, 21 insertions(+), 5 deletions(-)
+ fs/ceph/mds_client.c               |    1 +
+ fs/ceph/super.c                    |    1 +
+ include/linux/ceph/ceph_features.h |   24 ++++++++++++++++++++++++
+ include/linux/ceph/ceph_fs.h       |   14 --------------
+ include/linux/ceph/libceph.h       |    6 ------
+ net/ceph/ceph_common.c             |    5 +++--
+ 6 files changed, 29 insertions(+), 22 deletions(-)
+ create mode 100644 include/linux/ceph/ceph_features.h
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 07920ca..c605705 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -891,7 +891,9 @@ static void __register_linger_request(struct ceph_osd_client *osdc,
- {
- 	dout("__register_linger_request %p\n", req);
- 	list_add_tail(&req->r_linger_item, &osdc->req_linger);
--	list_add_tail(&req->r_linger_osd, &req->r_osd->o_linger_requests);
-+	if (req->r_osd)
-+		list_add_tail(&req->r_linger_osd,
-+			      &req->r_osd->o_linger_requests);
- }
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 418f6a8..39b76d6 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -10,6 +10,7 @@
+ #include "super.h"
+ #include "mds_client.h"
  
- static void __unregister_linger_request(struct ceph_osd_client *osdc,
-@@ -1305,8 +1307,9 @@ static void kick_requests(struct ceph_osd_client *osdc, int force_resend)
++#include <linux/ceph/ceph_features.h>
+ #include <linux/ceph/messenger.h>
+ #include <linux/ceph/decode.h>
+ #include <linux/ceph/pagelist.h>
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 1e67dd7..2c47ecf 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -18,6 +18,7 @@
+ #include "super.h"
+ #include "mds_client.h"
  
- 	dout("kick_requests %s\n", force_resend ? " (force resend)" : "");
- 	mutex_lock(&osdc->request_mutex);
--	for (p = rb_first(&osdc->requests); p; p = rb_next(p)) {
-+	for (p = rb_first(&osdc->requests); p; ) {
- 		req = rb_entry(p, struct ceph_osd_request, r_node);
-+		p = rb_next(p);
- 		err = __map_request(osdc, req, force_resend);
- 		if (err < 0)
- 			continue;  /* error */
-@@ -1314,10 +1317,23 @@ static void kick_requests(struct ceph_osd_client *osdc, int force_resend)
- 			dout("%p tid %llu maps to no osd\n", req, req->r_tid);
- 			needmap++;  /* request a newer map */
- 		} else if (err > 0) {
--			dout("%p tid %llu requeued on osd%d\n", req, req->r_tid,
--			     req->r_osd ? req->r_osd->o_osd : -1);
--			if (!req->r_linger)
-+			if (!req->r_linger) {
-+				dout("%p tid %llu requeued on osd%d\n", req,
-+				     req->r_tid,
-+				     req->r_osd ? req->r_osd->o_osd : -1);
- 				req->r_flags |= CEPH_OSD_FLAG_RETRY;
-+			}
-+		}
-+		if (req->r_linger && list_empty(&req->r_linger_item)) {
-+			/*
-+			 * register as a linger so that we will
-+			 * re-submit below and get a new tid
-+			 */
-+			dout("%p tid %llu restart on osd%d\n",
-+			     req, req->r_tid,
-+			     req->r_osd ? req->r_osd->o_osd : -1);
-+			__register_linger_request(osdc, req);
-+			__unregister_request(osdc, req);
- 		}
- 	}
++#include <linux/ceph/ceph_features.h>
+ #include <linux/ceph/decode.h>
+ #include <linux/ceph/mon_client.h>
+ #include <linux/ceph/auth.h>
+diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+new file mode 100644
+index 0000000..342f93d
+--- /dev/null
++++ b/include/linux/ceph/ceph_features.h
+@@ -0,0 +1,24 @@
++#ifndef __CEPH_FEATURES
++#define __CEPH_FEATURES
++
++/*
++ * feature bits
++ */
++#define CEPH_FEATURE_UID            (1<<0)
++#define CEPH_FEATURE_NOSRCADDR      (1<<1)
++#define CEPH_FEATURE_MONCLOCKCHECK  (1<<2)
++#define CEPH_FEATURE_FLOCK          (1<<3)
++#define CEPH_FEATURE_SUBSCRIBE2     (1<<4)
++#define CEPH_FEATURE_MONNAMES       (1<<5)
++#define CEPH_FEATURE_RECONNECT_SEQ  (1<<6)
++#define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
++
++/*
++ * Features supported.
++ */
++#define CEPH_FEATURES_SUPPORTED_DEFAULT  \
++	(CEPH_FEATURE_NOSRCADDR)
++
++#define CEPH_FEATURES_REQUIRED_DEFAULT   \
++	(CEPH_FEATURE_NOSRCADDR)
++#endif
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index e81ab30..d021610 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -35,20 +35,6 @@
+ /* arbitrary limit on max # of monitors (cluster of 3 is typical) */
+ #define CEPH_MAX_MON   31
  
+-
+-/*
+- * feature bits
+- */
+-#define CEPH_FEATURE_UID            (1<<0)
+-#define CEPH_FEATURE_NOSRCADDR      (1<<1)
+-#define CEPH_FEATURE_MONCLOCKCHECK  (1<<2)
+-#define CEPH_FEATURE_FLOCK          (1<<3)
+-#define CEPH_FEATURE_SUBSCRIBE2     (1<<4)
+-#define CEPH_FEATURE_MONNAMES       (1<<5)
+-#define CEPH_FEATURE_RECONNECT_SEQ  (1<<6)
+-#define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
+-
+-
+ /*
+  * ceph_file_layout - describe data layout for a file/inode
+  */
+diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+index 98ec36a..ea072e1 100644
+--- a/include/linux/ceph/libceph.h
++++ b/include/linux/ceph/libceph.h
+@@ -23,12 +23,6 @@
+ #include "ceph_fs.h"
+ 
+ /*
+- * Supported features
+- */
+-#define CEPH_FEATURE_SUPPORTED_DEFAULT CEPH_FEATURE_NOSRCADDR
+-#define CEPH_FEATURE_REQUIRED_DEFAULT  CEPH_FEATURE_NOSRCADDR
+-
+-/*
+  * mount options
+  */
+ #define CEPH_OPT_FSID             (1<<0)
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 3b45e01..69e38db 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -17,6 +17,7 @@
+ #include <linux/string.h>
+ 
+ 
++#include <linux/ceph/ceph_features.h>
+ #include <linux/ceph/libceph.h>
+ #include <linux/ceph/debugfs.h>
+ #include <linux/ceph/decode.h>
+@@ -460,9 +461,9 @@ struct ceph_client *ceph_create_client(struct ceph_options *opt, void *private,
+ 	client->auth_err = 0;
+ 
+ 	client->extra_mon_dispatch = NULL;
+-	client->supported_features = CEPH_FEATURE_SUPPORTED_DEFAULT |
++	client->supported_features = CEPH_FEATURES_SUPPORTED_DEFAULT |
+ 		supported_features;
+-	client->required_features = CEPH_FEATURE_REQUIRED_DEFAULT |
++	client->required_features = CEPH_FEATURES_REQUIRED_DEFAULT |
+ 		required_features;
+ 
+ 	/* msgr */
 -- 
 1.7.9
 
