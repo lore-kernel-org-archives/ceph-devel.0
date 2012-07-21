@@ -1,54 +1,50 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 3/9] libceph: report socket read/write error message
-Date: Fri, 20 Jul 2012 17:41:42 -0700
-Message-ID: <1342831308-18815-4-git-send-email-sage@inktank.com>
-References: <1342831308-18815-1-git-send-email-sage@inktank.com>
+Subject: [PATCH 0/9] messenger fixups, batch #1
+Date: Fri, 20 Jul 2012 17:41:39 -0700
+Message-ID: <1342831308-18815-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46562 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46556 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752686Ab2GUAdK (ORCPT
+	with ESMTP id S1752160Ab2GUAdK (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 20:33:10 -0400
-In-Reply-To: <1342831308-18815-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>
 
-We need to set error_msg to something useful before calling ceph_fault();
-do so here for try_{read,write}().  This is more informative than
+This is the series I elbowed into testing today.  There is the CRUSH
+support, and some incremental cleanups and fixes to the messenger that my
+testing with socket failure injection turned up.  The basic strategy here
+is to move more things under the con->mutex and drop useless checks/calls
+where possible.
 
-libceph: osd0 192.168.106.220:6801 (null)
+Sage Weil (8):
+  libceph: move feature bits to separate header
+  libceph: report socket read/write error message
+  libceph: fix mutex coverage for ceph_con_close
+  libceph: resubmit linger ops when pg mapping changes
+  libceph: (re)initialize bio_iter on start of message receive
+  ceph: close old con before reopening on mds reconnect
+  libceph: protect ceph_con_open() with mutex
+  libceph: reset connection retry on successfully negotiation
 
-Signed-off-by: Sage Weil <sage@inktank.com>
----
- net/ceph/messenger.c |    8 ++++++--
- 1 files changed, 6 insertions(+), 2 deletions(-)
+caleb miles (1):
+  libceph: support crush tunables
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index 12419a0..7105908 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -2291,14 +2291,18 @@ restart:
- 	ret = try_read(con);
- 	if (ret == -EAGAIN)
- 		goto restart;
--	if (ret < 0)
-+	if (ret < 0) {
-+		con->error_msg = "socket error on read";
- 		goto fault;
-+	}
- 
- 	ret = try_write(con);
- 	if (ret == -EAGAIN)
- 		goto restart;
--	if (ret < 0)
-+	if (ret < 0) {
-+		con->error_msg = "socket error on write";
- 		goto fault;
-+	}
- 
- done:
- 	mutex_unlock(&con->mutex);
+ fs/ceph/mds_client.c               |    2 +
+ fs/ceph/super.c                    |    1 +
+ include/linux/ceph/ceph_features.h |   26 ++++++++++++++++++++++++
+ include/linux/ceph/ceph_fs.h       |   14 ------------
+ include/linux/ceph/libceph.h       |    6 -----
+ include/linux/crush/crush.h        |    8 +++++++
+ net/ceph/ceph_common.c             |    5 ++-
+ net/ceph/crush/mapper.c            |   13 ++++++-----
+ net/ceph/messenger.c               |   31 +++++++++++++++++++++-------
+ net/ceph/osd_client.c              |   26 +++++++++++++++++++----
+ net/ceph/osdmap.c                  |   39 ++++++++++++++++++++++++++++++++++++
+ 11 files changed, 130 insertions(+), 41 deletions(-)
+ create mode 100644 include/linux/ceph/ceph_features.h
+
 -- 
 1.7.9
 
