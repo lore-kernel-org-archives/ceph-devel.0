@@ -1,153 +1,189 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 1/9] libceph: move feature bits to separate header
-Date: Fri, 20 Jul 2012 17:41:40 -0700
-Message-ID: <1342831308-18815-2-git-send-email-sage@inktank.com>
+Subject: [PATCH 2/9] libceph: support crush tunables
+Date: Fri, 20 Jul 2012 17:41:41 -0700
+Message-ID: <1342831308-18815-3-git-send-email-sage@inktank.com>
 References: <1342831308-18815-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46558 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46560 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752543Ab2GUAdK (ORCPT
+	with ESMTP id S1752571Ab2GUAdK (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 20:33:10 -0400
 In-Reply-To: <1342831308-18815-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>
+Cc: caleb miles <caleb.miles@inktank.com>
 
-This is simply cleanup that will keep things more closely synced with the
-userland code.
+From: caleb miles <caleb.miles@inktank.com>
 
-Signed-off-by: Sage Weil <sage@inktank.com>
+The server side recently added support for tuning some magic
+crush variables. Decode these variables if they are present, or use the
+default values if they are not present.
+
+Corresponds to ceph.git commit 89af369c25f274fe62ef730e5e8aad0c54f1e5a5.
+
+Signed-off-by: caleb miles <caleb.miles@inktank.com>
+Reviewed-by: Sage Weil <sage@inktank.com>
 ---
- fs/ceph/mds_client.c               |    1 +
- fs/ceph/super.c                    |    1 +
- include/linux/ceph/ceph_features.h |   24 ++++++++++++++++++++++++
- include/linux/ceph/ceph_fs.h       |   14 --------------
- include/linux/ceph/libceph.h       |    6 ------
- net/ceph/ceph_common.c             |    5 +++--
- 6 files changed, 29 insertions(+), 22 deletions(-)
- create mode 100644 include/linux/ceph/ceph_features.h
+ include/linux/ceph/ceph_features.h |    4 ++-
+ include/linux/crush/crush.h        |    8 +++++++
+ net/ceph/crush/mapper.c            |   13 ++++++-----
+ net/ceph/osdmap.c                  |   39 ++++++++++++++++++++++++++++++++++++
+ 4 files changed, 57 insertions(+), 7 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 418f6a8..39b76d6 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -10,6 +10,7 @@
- #include "super.h"
- #include "mds_client.h"
- 
-+#include <linux/ceph/ceph_features.h>
- #include <linux/ceph/messenger.h>
- #include <linux/ceph/decode.h>
- #include <linux/ceph/pagelist.h>
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 1e67dd7..2c47ecf 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -18,6 +18,7 @@
- #include "super.h"
- #include "mds_client.h"
- 
-+#include <linux/ceph/ceph_features.h>
- #include <linux/ceph/decode.h>
- #include <linux/ceph/mon_client.h>
- #include <linux/ceph/auth.h>
 diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-new file mode 100644
-index 0000000..342f93d
---- /dev/null
+index 342f93d..df25dcf 100644
+--- a/include/linux/ceph/ceph_features.h
 +++ b/include/linux/ceph/ceph_features.h
-@@ -0,0 +1,24 @@
-+#ifndef __CEPH_FEATURES
-+#define __CEPH_FEATURES
-+
-+/*
-+ * feature bits
-+ */
-+#define CEPH_FEATURE_UID            (1<<0)
-+#define CEPH_FEATURE_NOSRCADDR      (1<<1)
-+#define CEPH_FEATURE_MONCLOCKCHECK  (1<<2)
-+#define CEPH_FEATURE_FLOCK          (1<<3)
-+#define CEPH_FEATURE_SUBSCRIBE2     (1<<4)
-+#define CEPH_FEATURE_MONNAMES       (1<<5)
-+#define CEPH_FEATURE_RECONNECT_SEQ  (1<<6)
-+#define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
-+
-+/*
-+ * Features supported.
-+ */
-+#define CEPH_FEATURES_SUPPORTED_DEFAULT  \
-+	(CEPH_FEATURE_NOSRCADDR)
-+
-+#define CEPH_FEATURES_REQUIRED_DEFAULT   \
-+	(CEPH_FEATURE_NOSRCADDR)
-+#endif
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index e81ab30..d021610 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -35,20 +35,6 @@
- /* arbitrary limit on max # of monitors (cluster of 3 is typical) */
- #define CEPH_MAX_MON   31
- 
--
--/*
-- * feature bits
-- */
--#define CEPH_FEATURE_UID            (1<<0)
--#define CEPH_FEATURE_NOSRCADDR      (1<<1)
--#define CEPH_FEATURE_MONCLOCKCHECK  (1<<2)
--#define CEPH_FEATURE_FLOCK          (1<<3)
--#define CEPH_FEATURE_SUBSCRIBE2     (1<<4)
--#define CEPH_FEATURE_MONNAMES       (1<<5)
--#define CEPH_FEATURE_RECONNECT_SEQ  (1<<6)
--#define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
--
--
- /*
-  * ceph_file_layout - describe data layout for a file/inode
-  */
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 98ec36a..ea072e1 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -23,12 +23,6 @@
- #include "ceph_fs.h"
+@@ -12,12 +12,14 @@
+ #define CEPH_FEATURE_MONNAMES       (1<<5)
+ #define CEPH_FEATURE_RECONNECT_SEQ  (1<<6)
+ #define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
++#define CEPH_FEATURE_CRUSH_TUNABLES (1<<18)
  
  /*
-- * Supported features
-- */
--#define CEPH_FEATURE_SUPPORTED_DEFAULT CEPH_FEATURE_NOSRCADDR
--#define CEPH_FEATURE_REQUIRED_DEFAULT  CEPH_FEATURE_NOSRCADDR
--
--/*
-  * mount options
+  * Features supported.
   */
- #define CEPH_OPT_FSID             (1<<0)
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index 3b45e01..69e38db 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -17,6 +17,7 @@
- #include <linux/string.h>
+ #define CEPH_FEATURES_SUPPORTED_DEFAULT  \
+-	(CEPH_FEATURE_NOSRCADDR)
++	(CEPH_FEATURE_NOSRCADDR |	 \
++	 CEPH_FEATURE_CRUSH_TUNABLES)
+ 
+ #define CEPH_FEATURES_REQUIRED_DEFAULT   \
+ 	(CEPH_FEATURE_NOSRCADDR)
+diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
+index 7c47508..25baa28 100644
+--- a/include/linux/crush/crush.h
++++ b/include/linux/crush/crush.h
+@@ -154,6 +154,14 @@ struct crush_map {
+ 	__s32 max_buckets;
+ 	__u32 max_rules;
+ 	__s32 max_devices;
++
++	/* choose local retries before re-descent */
++	__u32 choose_local_tries;
++	/* choose local attempts using a fallback permutation before
++	 * re-descent */
++	__u32 choose_local_fallback_tries;
++	/* choose attempts before giving up */ 
++	__u32 choose_total_tries;
+ };
  
  
-+#include <linux/ceph/ceph_features.h>
- #include <linux/ceph/libceph.h>
- #include <linux/ceph/debugfs.h>
- #include <linux/ceph/decode.h>
-@@ -460,9 +461,9 @@ struct ceph_client *ceph_create_client(struct ceph_options *opt, void *private,
- 	client->auth_err = 0;
+diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
+index d7edc24..35fce75 100644
+--- a/net/ceph/crush/mapper.c
++++ b/net/ceph/crush/mapper.c
+@@ -306,7 +306,6 @@ static int crush_choose(const struct crush_map *map,
+ 	int item = 0;
+ 	int itemtype;
+ 	int collide, reject;
+-	const unsigned int orig_tries = 5; /* attempts before we fall back to search */
  
- 	client->extra_mon_dispatch = NULL;
--	client->supported_features = CEPH_FEATURE_SUPPORTED_DEFAULT |
-+	client->supported_features = CEPH_FEATURES_SUPPORTED_DEFAULT |
- 		supported_features;
--	client->required_features = CEPH_FEATURE_REQUIRED_DEFAULT |
-+	client->required_features = CEPH_FEATURES_REQUIRED_DEFAULT |
- 		required_features;
+ 	dprintk("CHOOSE%s bucket %d x %d outpos %d numrep %d\n", recurse_to_leaf ? "_LEAF" : "",
+ 		bucket->id, x, outpos, numrep);
+@@ -351,8 +350,9 @@ static int crush_choose(const struct crush_map *map,
+ 					reject = 1;
+ 					goto reject;
+ 				}
+-				if (flocal >= (in->size>>1) &&
+-				    flocal > orig_tries)
++				if (map->choose_local_fallback_tries > 0 &&
++				    flocal >= (in->size>>1) &&
++				    flocal > map->choose_local_fallback_tries)
+ 					item = bucket_perm_choose(in, x, r);
+ 				else
+ 					item = crush_bucket_choose(in, x, r);
+@@ -422,13 +422,14 @@ reject:
+ 					ftotal++;
+ 					flocal++;
  
- 	/* msgr */
+-					if (collide && flocal < 3)
++					if (collide && flocal <= map->choose_local_tries)
+ 						/* retry locally a few times */
+ 						retry_bucket = 1;
+-					else if (flocal <= in->size + orig_tries)
++					else if (map->choose_local_fallback_tries > 0 &&
++						 flocal <= in->size + map->choose_local_fallback_tries)
+ 						/* exhaustive bucket search */
+ 						retry_bucket = 1;
+-					else if (ftotal < 20)
++					else if (ftotal <= map->choose_total_tries)
+ 						/* then retry descent */
+ 						retry_descent = 1;
+ 					else
+diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+index 9600674..3124b71 100644
+--- a/net/ceph/osdmap.c
++++ b/net/ceph/osdmap.c
+@@ -135,6 +135,21 @@ bad:
+ 	return -EINVAL;
+ }
+ 
++static int skip_name_map(void **p, void *end)
++{
++        int len;
++        ceph_decode_32_safe(p, end, len ,bad);
++        while (len--) {
++                int strlen;
++                *p += sizeof(u32);
++                ceph_decode_32_safe(p, end, strlen, bad);
++                *p += strlen;
++}
++        return 0;
++bad:
++        return -EINVAL;
++}
++
+ static struct crush_map *crush_decode(void *pbyval, void *end)
+ {
+ 	struct crush_map *c;
+@@ -143,6 +158,7 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+ 	void **p = &pbyval;
+ 	void *start = pbyval;
+ 	u32 magic;
++	u32 num_name_maps;
+ 
+ 	dout("crush_decode %p to %p len %d\n", *p, end, (int)(end - *p));
+ 
+@@ -150,6 +166,11 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+ 	if (c == NULL)
+ 		return ERR_PTR(-ENOMEM);
+ 
++        /* set tunables to default values */
++        c->choose_local_tries = 2;
++        c->choose_local_fallback_tries = 5;
++        c->choose_total_tries = 19;
++
+ 	ceph_decode_need(p, end, 4*sizeof(u32), bad);
+ 	magic = ceph_decode_32(p);
+ 	if (magic != CRUSH_MAGIC) {
+@@ -297,7 +318,25 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+ 	}
+ 
+ 	/* ignore trailing name maps. */
++        for (num_name_maps = 0; num_name_maps < 3; num_name_maps++) {
++                err = skip_name_map(p, end);
++                if (err < 0)
++                        goto done;
++        }
++
++        /* tunables */
++        ceph_decode_need(p, end, 3*sizeof(u32), done);
++        c->choose_local_tries = ceph_decode_32(p);
++        c->choose_local_fallback_tries =  ceph_decode_32(p);
++        c->choose_total_tries = ceph_decode_32(p);
++        dout("crush decode tunable choose_local_tries = %d",
++             c->choose_local_tries);
++        dout("crush decode tunable choose_local_fallback_tries = %d",
++             c->choose_local_fallback_tries);
++        dout("crush decode tunable choose_total_tries = %d",
++             c->choose_total_tries);
+ 
++done:
+ 	dout("crush_decode success\n");
+ 	return c;
+ 
 -- 
 1.7.9
 
