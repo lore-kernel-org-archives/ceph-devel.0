@@ -1,64 +1,71 @@
-From: Smart Weblications GmbH - Florian Wiessner
-	<f.wiessner@smart-weblications.de>
-Subject: 32bit ceph-osd on 64bit kernel
-Date: Sat, 21 Jul 2012 03:43:08 +0200
-Message-ID: <500A092C.5050506@smart-weblications.de>
-Reply-To: f.wiessner@smart-weblications.de
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Increase number of PG
+Date: Sat, 21 Jul 2012 10:13:09 -0700
+Message-ID: <E9D5D1F5A022447F836E2F731FFED769@inktank.com>
+References: <-6895602369310022884@unknownmsgid>
+ <CADvuQRFPBDeQE+aAmutJg2tkY_k-63Q0=abTA3xfOmFFNMX4wg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx02.smart-weblications.de ([188.65.144.37]:46391 "EHLO
-	mx02.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753043Ab2GUBne (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 20 Jul 2012 21:43:34 -0400
-Received: from office.smart-weblications.net (office.smart-weblications.net [91.204.168.193])
-	by mx02.smart-weblications.de (Postfix) with ESMTPA id 72B45C6E6A3
-	for <ceph-devel@vger.kernel.org>; Sat, 21 Jul 2012 01:43:32 +0000 (UTC)
-Received: from [192.168.201.110] (unknown [192.168.201.110])
-	by office.smart-weblications.net (Postfix) with ESMTPA id D86E69991DB
-	for <ceph-devel@vger.kernel.org>; Sat, 21 Jul 2012 03:43:31 +0200 (CEST)
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:63964 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751782Ab2GURNM convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 21 Jul 2012 13:13:12 -0400
+Received: by pbbrp8 with SMTP id rp8so8131027pbb.19
+        for <ceph-devel@vger.kernel.org>; Sat, 21 Jul 2012 10:13:12 -0700 (PDT)
+In-Reply-To: <CADvuQRFPBDeQE+aAmutJg2tkY_k-63Q0=abTA3xfOmFFNMX4wg@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: =?utf-8?Q?S=C5=82awomir_Skowron?= <szibis@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi List,
+On Fri, Jul 20, 2012 at 1:15 PM, Tommi Virtanen <tv@inktank.com (mailto=
+:tv@inktank.com)> wrote:
+> On Fri, Jul 20, 2012 at 8:31 AM, S=C5=82awomir Skowron <szibis@gmail.=
+com (mailto:szibis@gmail.com)> wrote:
+> > I know that this feature is disabled, are you planning to enable th=
+is
+> > in near future ??
+> > =20
+> =20
+> =20
+> PG splitting/joining is the next major project for the OSD. It won't
+> be backported to argonaut, but it will be in the next stable release,
+> and will probably appear in our regular development release in 2-3
+> months.
+> =20
+> > I have many of drives, and my S3 instalation use only few of them i=
+n
+> > one time, and i need to improve that.
+> > =20
+> > When i use it as rbd it use all of them.
+> =20
+> Radosgw normally stores most of the data for a single S3-level object
+> in a single RADOS object, where as RBD stripes disk images across
+> objects by default in 4MB chunks. If you have only a few S3 objects,
+> you will see an uneven distribution. It will get more balanced as you
+> upload more images. Also, if you use multi-part uploads, each part
+> goes into a separate RADOS object, so that'll spread the load more
+> evenly.
+> =20
 
-when running a 32bit ceph-osd binary on 64bit kernel i get:
-
-[  601.181640] ioctl32(ceph-osd:3399): Unknown cmd fd(20)
-cmd(00009408){t:ffffff94;sz:0} arg(0000000f) on /data/ceph_backend/osd
-[  612.156104] ioctl32(ceph-osd:3399): Unknown cmd fd(20)
-cmd(00009408){t:ffffff94;sz:0} arg(0000000f) on /data/ceph_backend/osd
-[  617.478025] ioctl32(ceph-osd:3399): Unknown cmd fd(20)
-cmd(00009408){t:ffffff94;sz:0} arg(0000000f) on /data/ceph_backend/osd
+RGW only does this for small objects =E2=80=94 I believe its default ch=
+unk size is also 4MB.
 
 
-is this normal or do i have to worry about something?
+But I'm pretty sure this is his problem:
+> Now, if your problem comes from the rgw pools having too few PGs to
+> begin with, the distribution will be.. lumpy.. even with more objects=
+=2E
+> Here's another mailing list thread that talks about what you can do
+> about that: http://article.gmane.org/gmane.comp.file-systems.ceph.dev=
+el/8069
+> =20
 
+-Greg
 
-
---=20
-
-Mit freundlichen Gr=FC=DFen,
-
-=46lorian Wiessner
-
-Smart Weblications GmbH
-Martinsberger Str. 1
-D-95119 Naila
-
-fon.: +49 9282 9638 200
-fax.: +49 9282 9638 205
-24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-http://www.smart-weblications.de
-
---
-Sitz der Gesellschaft: Naila
-Gesch=E4ftsf=FChrer: Florian Wiessner
-HRB-Nr.: HRB 3840 Amtsgericht Hof
-*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
