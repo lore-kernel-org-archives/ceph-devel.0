@@ -1,40 +1,91 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 7/9] ceph: close old con before reopening on mds reconnect
-Date: Fri, 20 Jul 2012 17:41:46 -0700
-Message-ID: <1342831308-18815-8-git-send-email-sage@inktank.com>
+Subject: [PATCH 5/9] libceph: resubmit linger ops when pg mapping changes
+Date: Fri, 20 Jul 2012 17:41:44 -0700
+Message-ID: <1342831308-18815-6-git-send-email-sage@inktank.com>
 References: <1342831308-18815-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46572 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:46570 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752957Ab2GUAdL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 20:33:11 -0400
+	with ESMTP id S1752845Ab2GUAdK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jul 2012 20:33:10 -0400
 In-Reply-To: <1342831308-18815-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>
 
-When we detect a mds session reset, close the old ceph_connection before
-reopening it.  This ensures we clean up the old socket properly and keep
-the ceph_connection state correct.
+The linger op registration (i.e., watch) modifies the object state.  As
+such, the OSD will reply with success if it has already applied without
+doing the associated side-effects (setting up the watch session state).
+If we lose the ACK and resubmit, we will see success but the watch will not
+be correctly registered and we won't get notifies.
+
+To fix this, always resubmit the linger op with a new tid.  We accomplish
+this by re-registering as a linger (i.e., 'registered') if we are not yet
+registered.  Then the second loop will treat this just like a normal
+case of re-registering.
+
+This mirrors a similar fix on the userland ceph.git, commit 5dd68b95, and
+ceph bug #2796.
 
 Signed-off-by: Sage Weil <sage@inktank.com>
 ---
- fs/ceph/mds_client.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ net/ceph/osd_client.c |   26 +++++++++++++++++++++-----
+ 1 files changed, 21 insertions(+), 5 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 39b76d6..a5a7354 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -2518,6 +2518,7 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
- 	session->s_state = CEPH_MDS_SESSION_RECONNECTING;
- 	session->s_seq = 0;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 07920ca..c605705 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -891,7 +891,9 @@ static void __register_linger_request(struct ceph_osd_client *osdc,
+ {
+ 	dout("__register_linger_request %p\n", req);
+ 	list_add_tail(&req->r_linger_item, &osdc->req_linger);
+-	list_add_tail(&req->r_linger_osd, &req->r_osd->o_linger_requests);
++	if (req->r_osd)
++		list_add_tail(&req->r_linger_osd,
++			      &req->r_osd->o_linger_requests);
+ }
  
-+	ceph_con_close(&session->s_con);
- 	ceph_con_open(&session->s_con,
- 		      CEPH_ENTITY_TYPE_MDS, mds,
- 		      ceph_mdsmap_get_addr(mdsc->mdsmap, mds));
+ static void __unregister_linger_request(struct ceph_osd_client *osdc,
+@@ -1305,8 +1307,9 @@ static void kick_requests(struct ceph_osd_client *osdc, int force_resend)
+ 
+ 	dout("kick_requests %s\n", force_resend ? " (force resend)" : "");
+ 	mutex_lock(&osdc->request_mutex);
+-	for (p = rb_first(&osdc->requests); p; p = rb_next(p)) {
++	for (p = rb_first(&osdc->requests); p; ) {
+ 		req = rb_entry(p, struct ceph_osd_request, r_node);
++		p = rb_next(p);
+ 		err = __map_request(osdc, req, force_resend);
+ 		if (err < 0)
+ 			continue;  /* error */
+@@ -1314,10 +1317,23 @@ static void kick_requests(struct ceph_osd_client *osdc, int force_resend)
+ 			dout("%p tid %llu maps to no osd\n", req, req->r_tid);
+ 			needmap++;  /* request a newer map */
+ 		} else if (err > 0) {
+-			dout("%p tid %llu requeued on osd%d\n", req, req->r_tid,
+-			     req->r_osd ? req->r_osd->o_osd : -1);
+-			if (!req->r_linger)
++			if (!req->r_linger) {
++				dout("%p tid %llu requeued on osd%d\n", req,
++				     req->r_tid,
++				     req->r_osd ? req->r_osd->o_osd : -1);
+ 				req->r_flags |= CEPH_OSD_FLAG_RETRY;
++			}
++		}
++		if (req->r_linger && list_empty(&req->r_linger_item)) {
++			/*
++			 * register as a linger so that we will
++			 * re-submit below and get a new tid
++			 */
++			dout("%p tid %llu restart on osd%d\n",
++			     req, req->r_tid,
++			     req->r_osd ? req->r_osd->o_osd : -1);
++			__register_linger_request(osdc, req);
++			__unregister_request(osdc, req);
+ 		}
+ 	}
+ 
 -- 
 1.7.9
 
