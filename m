@@ -1,52 +1,100 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: getting started with RADOSGW
-Date: Sun, 22 Jul 2012 07:59:40 -0700
-Message-ID: <CAC-hyiGaY6b=3PgY2jANMLM6ALLbe02j9KfWv7vR9JLW5q2XAA@mail.gmail.com>
-References: <CABZB-shn=RtKNFyXEaK5difh=NTfUVzgiF7DGJ8fJJSGO+5pFQ@mail.gmail.com>
+From: Tim Flavin <tim.flavin@gmail.com>
+Subject: Re: mkcephfs problem
+Date: Sun, 22 Jul 2012 11:35:57 -0400
+Message-ID: <CAEj+kbmhDRF5X=Yn=MDOPbphqDgu=rFwSQ9DBzfSwXC_d346OA@mail.gmail.com>
+References: <CAEj+kbmn=UY1dUKkyDDymqhbTuvEypVM+o4Ny-phS1SKZkmshA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:41066 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750926Ab2GVO7m (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Jul 2012 10:59:42 -0400
-Received: by bkwj10 with SMTP id j10so4522844bkw.19
-        for <ceph-devel@vger.kernel.org>; Sun, 22 Jul 2012 07:59:40 -0700 (PDT)
-In-Reply-To: <CABZB-shn=RtKNFyXEaK5difh=NTfUVzgiF7DGJ8fJJSGO+5pFQ@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:50205 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751233Ab2GVPf7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Jul 2012 11:35:59 -0400
+Received: by vcbfk26 with SMTP id fk26so4112766vcb.19
+        for <ceph-devel@vger.kernel.org>; Sun, 22 Jul 2012 08:35:58 -0700 (PDT)
+In-Reply-To: <CAEj+kbmn=UY1dUKkyDDymqhbTuvEypVM+o4Ny-phS1SKZkmshA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jonathan Proulx <jon@jonproulx.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Sun, Jul 22, 2012 at 7:43 AM, Jonathan Proulx <jon@jonproulx.com> wrote:
-> Hi All,
->
-> I've created a testuser with testuser:swift subuser, setup apache with
-> fcgi but client access with either S3 or Swift clients result in HTTP
-> 500 errors on the server:
->
-> [Sun Jul 22 10:14:33 2012] [error] [client 128.52.x.x] (2)No such file
-> or directory: FastCGI: failed to connect to server
-> "/var/www/s3gw.fcgi": connect() failed
-> [Sun Jul 22 10:14:33 2012] [error] [client 128.52.x.x] FastCGI:
-> incomplete headers (0 bytes) received from server "/var/www/s3gw.fcgi"
->
->
->  ls -lh /var/www/s3gw.fcgi
-> -rwxrwxr-x 1 root root 79 Jul 10 10:28 /var/www/s3gw.fcgi
->
-> cat /var/www/s3gw.fcgi
-> #!/bin/sh
-> exec /usr/bin/radosgw -c /etc/ceph/ceph.conf -n client.rados.gateway
->
-> /usr/bin/radosgw is in the right place and executable by all
-> /etc/ceph/ceph.conf is also in the correct location and readable by
-> all, so I'm a bit confused by the "No such file or directory" error.
->
-> I *think* I've followed all the steps but have obviously missed
-> something, any idea what?
->
-I think you've set up your apache to use external fastcgi, but you
-have to run radosgw manually using this method.
+In addition to localhost, I found a number of other network related
+problems with my setup.
+When I fixed them mkcephfs was much happier.
 
-Yehuda
+Tim
+
+On Thu, Jul 19, 2012 at 9:46 PM, Tim Flavin <tim.flavin@gmail.com> wrote:
+> I am trying to get Ceph running on an ARM system, currently one quad
+> core node, running Ubuntu 12.04.
+>
+> It compiles fine, currently without tcmalloc and google perf tools, but
+> I am running into a problem with mkcephfs.  'mkcephfs -a -c ceph.conf'
+> didn't work so I did it piece by piece until I got this:
+>
+> root@ubuntu:/home/tim# mkcephfs -d /tmp/foo --prepare-mon
+> Building generic osdmap from /tmp/foo/conf
+> /usr/local/bin/osdmaptool: osdmap file '/tmp/foo/osdmap'
+> /usr/local/bin/osdmaptool: writing epoch 1 to /tmp/foo/osdmap
+> Generating admin key at /tmp/foo/keyring.admin
+> creating /tmp/foo/keyring.admin
+> Building initial monitor keyring
+> cat: /tmp/foo/key.*: No such file or directory
+>
+> There are no key.* files in /tmp/foo
+>
+> # ls /tmp/foo
+> conf  keyring.admin  keyring.mon  monmap  osdmap
+>
+>
+> If you are running everything on one node, is it OK to use localhost and
+> 127.0.0.1?
+>
+>
+> Here is my config file:
+>
+> [osd]
+>         osd journal size = 1000
+>         filestore xattr use omap = true
+>
+> [mon.a]
+>         host = localhost
+>         mon addr = 127.0.0.1:6789
+>
+> [osd.0]
+>         host = localhost
+>
+>
+> [mds.a]
+>         host = localhost
+>
+>
+> Here are are the other configuration commands:
+>
+> root@ubuntu:/home/tim# mkcephfs -c ceph.conf -d /tmp/foo --prepare-monmap
+> preparing monmap in /tmp/foo/monmap
+> /usr/local/bin/monmaptool --create --clobber --add a 127.0.0.1:6789
+> --print /tmp/foo/monmap
+> /usr/local/bin/monmaptool: monmap file /tmp/foo/monmap
+> /usr/local/bin/monmaptool: generated fsid 8e4f846b-1829-46e4-9902-5d8316c3fa4f
+> epoch 0
+> fsid 8e4f846b-1829-46e4-9902-5d8316c3fa4f
+> last_changed 2012-07-19 22:40:38.651045
+> created 2012-07-19 22:40:38.651045
+> 0: 127.0.0.1:6789/0 mon.a
+> /usr/local/bin/monmaptool: writing epoch 0 to /tmp/foo/monmap (1 monitors)
+> root@ubuntu:/home/tim# mkcephfs -d /tmp/foo --init-local-daemons mds
+> root@ubuntu:/home/tim# mkcephfs -d /tmp/foo --init-local-daemons osd
+> root@ubuntu:/home/tim# mkcephfs -d /tmp/foo --prepare-mon
+> Building generic osdmap from /tmp/foo/conf
+> /usr/local/bin/osdmaptool: osdmap file '/tmp/foo/osdmap'
+> /usr/local/bin/osdmaptool: writing epoch 1 to /tmp/foo/osdmap
+> Generating admin key at /tmp/foo/keyring.admin
+> creating /tmp/foo/keyring.admin
+> Building initial monitor keyring
+> cat: /tmp/foo/key.*: No such file or directory
+> root@ubuntu:/home/tim#
+>
+>
+> Any ideas?  Which command was supposed to generate the key.* files?
+>
+> Tim
