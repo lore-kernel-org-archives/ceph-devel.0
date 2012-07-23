@@ -1,39 +1,36 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Increase number of PG
-Date: Mon, 23 Jul 2012 09:00:15 -0700
-Message-ID: <CADvuQREG6Wcyq9uTDjgWxZpDOcY-9EY7-mtZS4UGD_rQ6YTfhw@mail.gmail.com>
-References: <-6895602369310022884@unknownmsgid> <CADvuQRFPBDeQE+aAmutJg2tkY_k-63Q0=abTA3xfOmFFNMX4wg@mail.gmail.com>
- <E9D5D1F5A022447F836E2F731FFED769@inktank.com> <CAC-hyiGK9kNCdsCj4baS6ugrBD1scY3FfKMpy5jjtDk6+YOJ5A@mail.gmail.com>
- <-5358762692366662001@unknownmsgid>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [rados] Asynchronous operations
+Date: Mon, 23 Jul 2012 09:07:20 -0700
+Message-ID: <500D76B8.1070705@inktank.com>
+References: <jsecti$m2u$1@dough.gmane.org> <Pine.LNX.4.64.1206270821040.18530@cobra.newdream.net> <jujscq$sug$1@dough.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:46047 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754299Ab2GWQAg convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jul 2012 12:00:36 -0400
-Received: by vbbff1 with SMTP id ff1so4814058vbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Jul 2012 09:00:36 -0700 (PDT)
-In-Reply-To: <-5358762692366662001@unknownmsgid>
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:41696 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752855Ab2GWQHX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jul 2012 12:07:23 -0400
+Received: by ghrr11 with SMTP id r11so5614368ghr.19
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Jul 2012 09:07:23 -0700 (PDT)
+In-Reply-To: <jujscq$sug$1@dough.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?S=C5=82awomir_Skowron?= <szibis@gmail.com>
-Cc: Yehuda Sadeh <yehuda@inktank.com>, Gregory Farnum <greg@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Rutger ter Borg <rutger@terborg.net>
+Cc: ceph-devel@vger.kernel.org
 
-On Sun, Jul 22, 2012 at 11:57 PM, S=C5=82awomir Skowron <szibis@gmail.c=
-om> wrote:
-> My workload looks like this:
+On 07/23/2012 08:59 AM, Rutger ter Borg wrote:
+> On 06/27/2012 05:22 PM, Sage Weil wrote:
+>>
+>> There is a get_return_value() method on the AioCompletion that gives you
+>> bytes read (for reads).  For write operations, it is always 0
+>> (success) or
+>> an error code.
+>>
 >
-> - Max 20% are PUTs, with 99% of objects smaller then 4MB,
-> - 80% are GETs, and S3 metadata operations.
+> Thanks for the info. Maybe a bit of a newbie question, but in that case,
+> how do I detect a read error, given an AioCompletion object?
 
-Well, the good news is that that's actually the easy to fix part --
-just increase the number of PGs (which you currently have to do the
-awkward way, as explained earlier in this thread), nothing else
-needed.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It's the same as with writes - if there's an error, get_return_value
+will give you the negative error code (i.e. -ENOENT, -EPERM, etc).
+
