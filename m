@@ -1,110 +1,91 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Re: Increase number of PG
-Date: Mon, 23 Jul 2012 08:57:43 +0200
-Message-ID: <-5358762692366662001@unknownmsgid>
-References: <-6895602369310022884@unknownmsgid> <CADvuQRFPBDeQE+aAmutJg2tkY_k-63Q0=abTA3xfOmFFNMX4wg@mail.gmail.com>
- <E9D5D1F5A022447F836E2F731FFED769@inktank.com> <CAC-hyiGK9kNCdsCj4baS6ugrBD1scY3FfKMpy5jjtDk6+YOJ5A@mail.gmail.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Pascal de Bruijn | Unilogic B.V." <p.debruijn@unilogic.nl>
+Subject: Ceph status Icinga/NAGIOS plugin
+Date: Mon, 23 Jul 2012 14:40:36 +0200
+Message-ID: <1343047236.9475.10.camel@clawhammer>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:61328 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753387Ab2GWG5q convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jul 2012 02:57:46 -0400
-Received: by lbbgm6 with SMTP id gm6so7580105lbb.19
-        for <ceph-devel@vger.kernel.org>; Sun, 22 Jul 2012 23:57:44 -0700 (PDT)
-In-Reply-To: <CAC-hyiGK9kNCdsCj4baS6ugrBD1scY3FfKMpy5jjtDk6+YOJ5A@mail.gmail.com>
+Received: from mail-out117.unilogicnetworks.net ([62.133.206.117]:39980 "EHLO
+	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752675Ab2GWMkl (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 23 Jul 2012 08:40:41 -0400
+Received: from router (router.unilogic.nl [62.133.193.82])
+	by mail.unilogicnetworks.net (Postfix) with ESMTP id A60474A0F6
+	for <ceph-devel@vger.kernel.org>; Mon, 23 Jul 2012 14:40:39 +0200 (CEST)
+Received: from mail.unilogic.local (mail.unilogic.nl [10.0.11.245])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by router (Postfix) with ESMTP id 81F536E787
+	for <ceph-devel@vger.kernel.org>; Mon, 23 Jul 2012 14:40:33 +0200 (CEST)
+Received: from localhost ([127.0.0.1])
+	by mail.unilogic.local
+	(using TLSv1/SSLv3 with cipher AES256-SHA (256 bits))
+	for ceph-devel@vger.kernel.org;
+	Mon, 23 Jul 2012 14:40:36 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, Tommi Virtanen <tv@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Dnia 21 lip 2012 o godz. 20:08 Yehuda Sadeh <yehuda@inktank.com> napisa=
-=C5=82(a):
+Hi,
 
-> On Sat, Jul 21, 2012 at 10:13 AM, Gregory Farnum <greg@inktank.com> w=
-rote:
->> On Fri, Jul 20, 2012 at 1:15 PM, Tommi Virtanen <tv@inktank.com (mai=
-lto:tv@inktank.com)> wrote:
->>> On Fri, Jul 20, 2012 at 8:31 AM, S=C5=82awomir Skowron <szibis@gmai=
-l.com (mailto:szibis@gmail.com)> wrote:
->>>> I know that this feature is disabled, are you planning to enable t=
-his
->>>> in near future ??
->>>>
->>>
->>>
->>> PG splitting/joining is the next major project for the OSD. It won'=
-t
->>> be backported to argonaut, but it will be in the next stable releas=
-e,
->>> and will probably appear in our regular development release in 2-3
->>> months.
+We use Icinga to monitor most of our infrastructure, and thus wanted to
+monitor our Ceph cluster using that as well.
 
-Ok, so i am waiting for this feature, but in a meantime i can move my
-objects to a new pool with more PG's manualy created, and use it as a
-bucket pool in radosgw ?? How can i tell radosgw to use this pool, or
-i can't ??
-At this moment my pool .rgw.buckets have default 8 PG's, and it is
-small amount, too small.
+We created a simple check_ceph_status script which is executed locally
+on all of our MONs/MDSes via NRPE.
 
->>>
->>>> I have many of drives, and my S3 instalation use only few of them =
-in
->>>> one time, and i need to improve that.
->>>>
->>>> When i use it as rbd it use all of them.
->>>
->>> Radosgw normally stores most of the data for a single S3-level obje=
-ct
->>> in a single RADOS object, where as RBD stripes disk images across
->>> objects by default in 4MB chunks. If you have only a few S3 objects=
-,
->>> you will see an uneven distribution. It will get more balanced as y=
-ou
->>> upload more images. Also, if you use multi-part uploads, each part
->>> goes into a separate RADOS object, so that'll spread the load more
->>> evenly.
->>>
->>
->> RGW only does this for small objects =E2=80=94 I believe its default=
- chunk size is also 4MB.
->
+It seems there are other efforts in this area as well, but we needed
+something that was fairly simple and would work straight away.
 
-Yes i have a lots of small objects (500k) from bajts to 2-3MB in
-=2Ergw.buckets pool. They are not even hit multipart.
+What the script does is
+ - execute ceph status
+ - look for the first line with HEALTH_ on it
+ - remove HEALTH_ and everything that precedes it from that line
+ - replace WARN and ERR with WARNING and ERROR respectively
+ - Depending on the first few remaining characters on the line we 
+   generate an exit code (OK #0 / WARNING #1 / ERROR #2)
+ - If all else fails exit with a UNKNOWN exit code (#3)
 
-> Actually no. While the infrastructure is there, currently a regular
-> object upload at the moment is not going to create more than 2 rados
-> objects. The head object, which ad is capped at 512k and the tail, wh=
-ich
-> will contain the rest. As Tommi specified, multipart upload chunks
-> depend on the actual upload.
-> There's actually no real reason anymore for not striping, and it's
-> easy enough to implement, so it might be something that we're going t=
-o
-> do soon.
->
+The actual script is attached below. Feel free to do with it whatever
+you like.
 
-This can be useful. But now in my case,  objects are too small, and if
-i think right, my only option is to have more PG's to balance new
-objects in more drives.
+Regards,
+Pascal de Bruijn
+Unilogic B.V.
 
-My workload looks like this:
+========================================================================
 
-- Max 20% are PUTs, with 99% of objects smaller then 4MB,
-- 80% are GETs, and S3 metadata operations.
+#!/bin/bash
+#
+# Ceph status Icinga plugin
+#
+# Copyright (c) 2012 Unilogic B.V.
+#                    Pascal de Bruijn
+#
+# This script isn't /bin/dash compatible as it
+# uses /bin/bash specific syntax for clarity
+#
 
-When workload hit worse scenario (PUT, and then only one GET), then
-every GET miss the cache in NGINX, and it's goes from only few drives,
-and it's hurts ;)
+CEPH_STATUS=$(ceph status | grep 'HEALTH_' | head -n 1 | sed 's#.*HEALTH_##' | sed 's#WARN#WARNING#' | sed 's#ERR#ERROR#')
 
-> Yehuda
->
-> Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+echo "${CEPH_STATUS}"
+
+if [[ "${CEPH_STATUS:0:2}" == "OK" ]]; then
+  exit 0
+fi
+
+if [[ "${CEPH_STATUS:0:7}" == "WARNING" ]]; then
+  exit 1
+fi
+
+if [[ "${CEPH_STATUS:0:5}" == "ERROR" ]]; then
+  exit 2
+fi
+
+# if no OK, WARNING or ERROR status has been detected we exit with an UNKNOWN status code
+exit 3
+
+
+
