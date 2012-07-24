@@ -1,170 +1,86 @@
-From: Guangliang Zhao <gzhao@suse.com>
-Subject: [PATCH v2] rbd: fix the memory leak of bio_chain_clone
-Date: Tue, 24 Jul 2012 14:06:47 +0800
-Message-ID: <1343110007-10922-1-git-send-email-gzhao@suse.com>
+From: Mehdi Abaakouk <sileht@sileht.net>
+Subject: Ceph Benchmark HowTo
+Date: Tue, 24 Jul 2012 16:43:00 +0200
+Message-ID: <20120724144300.GA3317@mail.sileht.net>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="RnlQjJ0d97Da+TV1"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:38642 "EHLO
-	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755297Ab2GXGHP (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Tue, 24 Jul 2012 02:07:15 -0400
+Received: from sileht.net ([178.33.111.110]:54016 "EHLO mail.sileht.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753790Ab2GXOxj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 24 Jul 2012 10:53:39 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: yehuda@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-The bio_pair alloced in bio_chain_clone would not be freed,
-this will cause a memory leak. It could be freed actually only
-after 3 times release, because the reference count of bio_pair
-is initialized to 3 when bio_split and bio_pair_release only
-drops the reference count.
 
-The function bio_pair_release must be called three times for
-releasing bio_pair, and the callback functions of bios on the
-requests will be called when the last release time in bio_pair_release,
-however, these functions will also be called in rbd_req_cb. In
-other words, they will be called twice, and it may cause serious
-consequences.
+--RnlQjJ0d97Da+TV1
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This patch clones bio chian from the origin directly, doesn't use
-bio_split(without bio_pair). The new bio chain can be release
-whenever we don't need it.
+Hi all,
 
-Signed-off-by: Guangliang Zhao <gzhao@suse.com>
----
- drivers/block/rbd.c |   73 +++++++++++++++++++++-----------------------------
- 1 files changed, 31 insertions(+), 42 deletions(-)
+I am currently doing some tests on Ceph, more precisely on the RDB and RADO=
+SGW=20
+parts.=20
+My goal is to get some performance metrics according to the hardwares and=
+=20
+the Ceph setup.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 013c7a5..5aa45fa 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -712,51 +712,46 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
- 	}
- }
- 
--/*
-- * bio_chain_clone - clone a chain of bios up to a certain length.
-- * might return a bio_pair that will need to be released.
-+/**
-+ *      bio_chain_clone - clone a chain of bios up to a certain length.
-+ *      @old: bio to clone
-+ *      @offset: start point for bio clone
-+ *      @len: length of bio chain
-+ *      @gfp_mask: allocation priority
-+ *
-+ *      RETURNS:
-+ *      Pointer to new bio chain on success, NULL on failure.
-  */
--static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
--				   struct bio_pair **bp,
-+static struct bio *bio_chain_clone(struct bio **old, int *offset,
- 				   int len, gfp_t gfpmask)
- {
- 	struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
- 	int total = 0;
- 
--	if (*bp) {
--		bio_pair_release(*bp);
--		*bp = NULL;
--	}
--
- 	while (old_chain && (total < len)) {
-+		int need = len - total;
-+
- 		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
- 		if (!tmp)
- 			goto err_out;
- 
--		if (total + old_chain->bi_size > len) {
--			struct bio_pair *bp;
--
--			/*
--			 * this split can only happen with a single paged bio,
--			 * split_bio will BUG_ON if this is not the case
--			 */
--			dout("bio_chain_clone split! total=%d remaining=%d"
--			     "bi_size=%d\n",
--			     (int)total, (int)len-total,
--			     (int)old_chain->bi_size);
--
--			/* split the bio. We'll release it either in the next
--			   call, or it will have to be released outside */
--			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
--			if (!bp)
--				goto err_out;
--
--			__bio_clone(tmp, &bp->bio1);
--
--			*next = &bp->bio2;
-+		__bio_clone(tmp, old_chain);
-+		tmp->bi_sector += *offset >> SECTOR_SHIFT;
-+		tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
-+		/*
-+		 * The bios span across multiple osd objects must be
-+		 * single paged, rbd_merge_bvec would guarantee it.
-+		 * So we needn't worry about other things.
-+		 */
-+		if (tmp->bi_size - *offset > need) {
-+			tmp->bi_size = need;
-+			tmp->bi_io_vec->bv_len = need;
-+			*offset += need;
- 		} else {
--			__bio_clone(tmp, old_chain);
--			*next = old_chain->bi_next;
-+			old_chain = old_chain->bi_next;
-+			tmp->bi_size -= *offset;
-+			tmp->bi_io_vec->bv_offset -= *offset;
-+			*offset = 0;
- 		}
- 
- 		tmp->bi_bdev = NULL;
-@@ -769,7 +764,6 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
- 			tail->bi_next = tmp;
- 			tail = tmp;
- 		}
--		old_chain = old_chain->bi_next;
- 
- 		total += tmp->bi_size;
- 	}
-@@ -1447,13 +1441,12 @@ static void rbd_rq_fn(struct request_queue *q)
- {
- 	struct rbd_device *rbd_dev = q->queuedata;
- 	struct request *rq;
--	struct bio_pair *bp = NULL;
- 
- 	while ((rq = blk_fetch_request(q))) {
- 		struct bio *bio;
--		struct bio *rq_bio, *next_bio = NULL;
-+		struct bio *rq_bio;
- 		bool do_write;
--		int size, op_size = 0;
-+		int size, op_size = 0, offset = 0;
- 		u64 ofs;
- 		int num_segs, cur_seg = 0;
- 		struct rbd_req_coll *coll;
-@@ -1503,7 +1496,7 @@ static void rbd_rq_fn(struct request_queue *q)
- 						  ofs, size,
- 						  NULL, NULL);
- 			kref_get(&coll->kref);
--			bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
-+			bio = bio_chain_clone(&rq_bio, &offset,
- 					      op_size, GFP_ATOMIC);
- 			if (!bio) {
- 				rbd_coll_end_req_index(rq, coll, cur_seg,
-@@ -1531,12 +1524,8 @@ next_seg:
- 			ofs += op_size;
- 
- 			cur_seg++;
--			rq_bio = next_bio;
- 		} while (size > 0);
- 		kref_put(&coll->kref, rbd_coll_release);
--
--		if (bp)
--			bio_pair_release(bp);
- 		spin_lock_irq(q->queue_lock);
- 	}
- }
--- 
-1.7.3.4
+To do so, I am preparing a benchmark how-to, to help people to compare their
+metrics.
 
+I have started the how-to here : http://ceph.com/w/index.php?title=3DBenchm=
+ark
+I have linked it in the misc section of the main page.
+
+Then, first question, is it alright if I continue publishing this procedure=
+=20
+on your wiki ?
+
+The how-to is not finished yet, this is only a first draft.
+My test platform is not ready yet too, so the result of the bench can't be
+used yet.
+
+The next work I will do on the how-to is to add some explanations on how
+to interpret the results of benchmark.
+
+So, if you have some comments, ideas of benchmarks, or anything that can be=
+=20
+helpful to me to improve the how-to and/or compare future results,=20
+I would be glad to read them.
+
+And thanks a lot for your work on Ceph, this is a great storage system :)
+
+Best Regards,
+--=20
+Mehdi Abaakouk for eNovance
+mail: sileht@sileht.net
+irc: sileht
+
+--RnlQjJ0d97Da+TV1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBCAAGBQJQDrR0AAoJEBiStC/OquvIHCMP/jzFhtHkzL7K2s0vpn9Fmgsv
+SplrgDwq8nSufgCUR9xZga0iHFX2EVx7qKwIhJLPTI5TD1G0/CAp2/3J7YjaEed9
+5uXr3dPQ0p7yGWIyg3NPDViXk7Q1MObWGgFLGNM89qLNp8s5KMFFWIXBQYgVsJEO
+WvIcYRWYnYJt6ROjtY1KDLuEFxKJYr8hNoMGJ4I8ul8Wd4517X8f4Lq0xG5i/m7f
+FppmwhcwmehS7tAeSx/Obrm/qwx2yrjRMI3LA2noWqBXY6cx9ter9iBheyb9htZa
+wfq6MVmUJY8w4NPFNbsVB5oNeZPPO3iD98vM8LGXmA8n9zl4P3YPuLm5ha6CWarB
+CfCAMRWniLsE6i8D6y0fe/sGgTWq5OgA59dE9oyXtDGDvWt1NoJyBM+WrYGrKPBB
+QcGkQ8712EeH+WIcFOGXTA4KSkTLtnfijSHtwIRW+kJ/vII0zwAV88XxyuSGV6Zz
+tefeRJHaRobmaeCutVkgueujQAjPuWoEZ1y/UuxJwbMaDI/Wjlrgygq/+IuO/rLa
+0JbxHXMwJnNcT7yL9ovFmU6At9oHhjBopf0nZyKlii7Jn1JXayHcrEsHYPHV7eQ3
+xEDAjFR61uX8Lp/ozMRIdkds2FMT6tdzSQ/z5gXfuuhjJK/l/xXNDNl4UxcgOW1e
+RrLCrzGUswwB9J2ve6sO
+=IPzf
+-----END PGP SIGNATURE-----
+
+--RnlQjJ0d97Da+TV1--
