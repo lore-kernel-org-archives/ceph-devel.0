@@ -1,86 +1,206 @@
-From: Mehdi Abaakouk <sileht@sileht.net>
-Subject: Ceph Benchmark HowTo
-Date: Tue, 24 Jul 2012 16:43:00 +0200
-Message-ID: <20120724144300.GA3317@mail.sileht.net>
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner@smart-weblications.de>
+Subject: Re: monitor not starting
+Date: Tue, 24 Jul 2012 17:14:42 +0200
+Message-ID: <500EBBE2.5070406@smart-weblications.de>
+References: <4FF42CD7.1060000@smart-weblications.de> <D2569975C9B14D6B974C162C58FA7401@inktank.com> <4FF47717.1030401@smart-weblications.de> <9A431747660F45EB8122D5A66F0DEF1A@inktank.com>
+Reply-To: f.wiessner@smart-weblications.de
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="RnlQjJ0d97Da+TV1"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sileht.net ([178.33.111.110]:54016 "EHLO mail.sileht.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753790Ab2GXOxj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 24 Jul 2012 10:53:39 -0400
-Content-Disposition: inline
+Received: from mx03.smart-weblications.de ([188.65.144.38]:56538 "EHLO
+	mx03.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753671Ab2GXPOj (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 24 Jul 2012 11:14:39 -0400
+In-Reply-To: <9A431747660F45EB8122D5A66F0DEF1A@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: ceph-devel@vger.kernel.org
+
+Am 04.07.2012 21:05, schrieb Gregory Farnum:
+
+>=20
+> Yep, that line. This means the monitor's on-disk state is inconsisten=
+t, but I can think of a number of scenarios which could have caused thi=
+s, depending on how you upgraded your cluster (older monitors didn't ma=
+rk on-disk whenever they deliberately went inconsistent on a catchup, w=
+hich I bet is what happened here).
+>  =20
+>> ceph version 0.48argonaut-125-g4e774fb
+>> (commit:4e774fbcb38fd6883232b72352512a5f8e4a66e8)
+>> 1: /usr/bin/ceph-mon() [0x497317]
+>> 2: (Monitor::init()+0xc5a) [0x4857fa]
+>> 3: (main()+0x2789) [0x46ac79]
+>> 4: (__libc_start_main()+0xfd) [0x7f423bcfbc8d]
+>> 5: /usr/bin/ceph-mon() [0x468309]
+>> NOTE: a copy of the executable, or `objdump -rdS <executable>` is ne=
+eded to
+>> interpret this.
+>> =20
+
+>=20
+> No, that won't be necessary. Thanks though! =20
+
+ ceph version 0.48argonaut-125-g4e774fb
+(commit:4e774fbcb38fd6883232b72352512a5f8e4a66e8)
+ 1: /usr/bin/ceph-mon() [0x52f9c9]
+ 2: (()+0xeff0) [0x7fe93db6dff0]
+ 3: (gsignal()+0x35) [0x7fe93c3501b5]
+ 4: (abort()+0x180) [0x7fe93c352fc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fe93cbe4dc5]
+ 6: (()+0xcb166) [0x7fe93cbe3166]
+ 7: (()+0xcb193) [0x7fe93cbe3193]
+ 8: (()+0xcb28e) [0x7fe93cbe328e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const=
+*)+0x940)
+[0x55b310]
+ 10: /usr/bin/ceph-mon() [0x497317]
+ 11: (Monitor::init()+0xc5a) [0x4857fa]
+ 12: (main()+0x2789) [0x46ac79]
+ 13: (__libc_start_main()+0xfd) [0x7fe93c33cc8d]
+ 14: /usr/bin/ceph-mon() [0x468309]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
+ed to
+interpret this.
+
+--- end dump of recent events ---
+2012-07-24 17:03:22.791401 7fd3045af780  1 mon.1@-1(probing) e1 init fs=
+id
+4553d0f6-1b31-4ba5-9d97-edae55bcaab4
+2012-07-24 17:03:22.791890 7fd3045af780 -1 mon/Paxos.cc: In function 'b=
+ool
+Paxos::is_consistent()' thread 7fd3045af780 time 2012-07-24 17:03:22.79=
+1528
+mon/Paxos.cc: 1031: FAILED assert(consistent || (slurping =3D=3D 1))
+
+ ceph version 0.48argonaut-125-g4e774fb
+(commit:4e774fbcb38fd6883232b72352512a5f8e4a66e8)
+ 1: /usr/bin/ceph-mon() [0x497317]
+ 2: (Monitor::init()+0xc5a) [0x4857fa]
+ 3: (main()+0x2789) [0x46ac79]
+ 4: (__libc_start_main()+0xfd) [0x7fd302967c8d]
+ 5: /usr/bin/ceph-mon() [0x468309]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
+ed to
+interpret this.
 
 
---RnlQjJ0d97Da+TV1
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Well, again my cluster rebootet and now only 1 of 4 monitors is willing=
+ to start...
 
-Hi all,
+ ceph version 0.48argonaut-125-g4e774fb
+(commit:4e774fbcb38fd6883232b72352512a5f8e4a66e8)
+ 1: /usr/bin/ceph-mon() [0x497317]
+ 2: (Monitor::init()+0xc5a) [0x4857fa]
+ 3: (main()+0x2789) [0x46ac79]
+ 4: (__libc_start_main()+0xfd) [0x7fd302967c8d]
+ 5: /usr/bin/ceph-mon() [0x468309]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
+ed to
+interpret this.
 
-I am currently doing some tests on Ceph, more precisely on the RDB and RADO=
-SGW=20
-parts.=20
-My goal is to get some performance metrics according to the hardwares and=
-=20
-the Ceph setup.
+--- begin dump of recent events ---
+    -3> 2012-07-24 17:03:22.729549 7fd3045af780  1 store(/data/ceph/mon=
+) mount
+    -2> 2012-07-24 17:03:22.729667 7fd3045af780  0 ceph version
+0.48argonaut-125-g4e774fb (commit:4e774fbcb38fd6883232b72352512a5f8e4a6=
+6e8),
+process ceph-mon, pid 6962
+    -1> 2012-07-24 17:03:22.791401 7fd3045af780  1 mon.1@-1(probing) e1=
+ init
+fsid 4553d0f6-1b31-4ba5-9d97-edae55bcaab4
+     0> 2012-07-24 17:03:22.791890 7fd3045af780 -1 mon/Paxos.cc: In fun=
+ction
+'bool Paxos::is_consistent()' thread 7fd3045af780 time 2012-07-24 17:03=
+:22.791528
+mon/Paxos.cc: 1031: FAILED assert(consistent || (slurping =3D=3D 1))
 
-To do so, I am preparing a benchmark how-to, to help people to compare their
-metrics.
 
-I have started the how-to here : http://ceph.com/w/index.php?title=3DBenchm=
-ark
-I have linked it in the misc section of the main page.
+--- end dump of recent events ---
+2012-07-24 17:03:22.792461 7fd3045af780 -1 *** Caught signal (Aborted) =
+**
+ in thread 7fd3045af780
 
-Then, first question, is it alright if I continue publishing this procedure=
-=20
-on your wiki ?
+ ceph version 0.48argonaut-125-g4e774fb
+(commit:4e774fbcb38fd6883232b72352512a5f8e4a66e8)
+ 1: /usr/bin/ceph-mon() [0x52f9c9]
+ 2: (()+0xeff0) [0x7fd304198ff0]
+ 3: (gsignal()+0x35) [0x7fd30297b1b5]
+ 4: (abort()+0x180) [0x7fd30297dfc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fd30320fdc5]
+ 6: (()+0xcb166) [0x7fd30320e166]
+ 7: (()+0xcb193) [0x7fd30320e193]
+ 8: (()+0xcb28e) [0x7fd30320e28e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const=
+*)+0x940)
+[0x55b310]
+ 10: /usr/bin/ceph-mon() [0x497317]
+ 11: (Monitor::init()+0xc5a) [0x4857fa]
+ 12: (main()+0x2789) [0x46ac79]
+ 13: (__libc_start_main()+0xfd) [0x7fd302967c8d]
+ 14: /usr/bin/ceph-mon() [0x468309]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
+ed to
+interpret this.
 
-The how-to is not finished yet, this is only a first draft.
-My test platform is not ready yet too, so the result of the bench can't be
-used yet.
+--- begin dump of recent events ---
+     0> 2012-07-24 17:03:22.792461 7fd3045af780 -1 *** Caught signal (A=
+borted) **
+ in thread 7fd3045af780
 
-The next work I will do on the how-to is to add some explanations on how
-to interpret the results of benchmark.
+ ceph version 0.48argonaut-125-g4e774fb
+(commit:4e774fbcb38fd6883232b72352512a5f8e4a66e8)
+ 1: /usr/bin/ceph-mon() [0x52f9c9]
+ 2: (()+0xeff0) [0x7fd304198ff0]
+ 3: (gsignal()+0x35) [0x7fd30297b1b5]
+ 4: (abort()+0x180) [0x7fd30297dfc0]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x115) [0x7fd30320fdc5]
+ 6: (()+0xcb166) [0x7fd30320e166]
+ 7: (()+0xcb193) [0x7fd30320e193]
+ 8: (()+0xcb28e) [0x7fd30320e28e]
+ 9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const=
+*)+0x940)
+[0x55b310]
+ 10: /usr/bin/ceph-mon() [0x497317]
+ 11: (Monitor::init()+0xc5a) [0x4857fa]
+ 12: (main()+0x2789) [0x46ac79]
+ 13: (__libc_start_main()+0xfd) [0x7fd302967c8d]
+ 14: /usr/bin/ceph-mon() [0x468309]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is need=
+ed to
+interpret this.
 
-So, if you have some comments, ideas of benchmarks, or anything that can be=
-=20
-helpful to me to improve the how-to and/or compare future results,=20
-I would be glad to read them.
+--- end dump of recent events ---
 
-And thanks a lot for your work on Ceph, this is a great storage system :)
 
-Best Regards,
+
+How can i fix this or prevent this from happening?
+
 --=20
-Mehdi Abaakouk for eNovance
-mail: sileht@sileht.net
-irc: sileht
 
---RnlQjJ0d97Da+TV1
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+Mit freundlichen Gr=C3=BC=C3=9Fen,
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
+=46lorian Wiessner
 
-iQIcBAEBCAAGBQJQDrR0AAoJEBiStC/OquvIHCMP/jzFhtHkzL7K2s0vpn9Fmgsv
-SplrgDwq8nSufgCUR9xZga0iHFX2EVx7qKwIhJLPTI5TD1G0/CAp2/3J7YjaEed9
-5uXr3dPQ0p7yGWIyg3NPDViXk7Q1MObWGgFLGNM89qLNp8s5KMFFWIXBQYgVsJEO
-WvIcYRWYnYJt6ROjtY1KDLuEFxKJYr8hNoMGJ4I8ul8Wd4517X8f4Lq0xG5i/m7f
-FppmwhcwmehS7tAeSx/Obrm/qwx2yrjRMI3LA2noWqBXY6cx9ter9iBheyb9htZa
-wfq6MVmUJY8w4NPFNbsVB5oNeZPPO3iD98vM8LGXmA8n9zl4P3YPuLm5ha6CWarB
-CfCAMRWniLsE6i8D6y0fe/sGgTWq5OgA59dE9oyXtDGDvWt1NoJyBM+WrYGrKPBB
-QcGkQ8712EeH+WIcFOGXTA4KSkTLtnfijSHtwIRW+kJ/vII0zwAV88XxyuSGV6Zz
-tefeRJHaRobmaeCutVkgueujQAjPuWoEZ1y/UuxJwbMaDI/Wjlrgygq/+IuO/rLa
-0JbxHXMwJnNcT7yL9ovFmU6At9oHhjBopf0nZyKlii7Jn1JXayHcrEsHYPHV7eQ3
-xEDAjFR61uX8Lp/ozMRIdkds2FMT6tdzSQ/z5gXfuuhjJK/l/xXNDNl4UxcgOW1e
-RrLCrzGUswwB9J2ve6sO
-=IPzf
------END PGP SIGNATURE-----
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
 
---RnlQjJ0d97Da+TV1--
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=C3=A4ftsf=C3=BChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
