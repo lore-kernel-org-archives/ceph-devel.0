@@ -1,76 +1,67 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Clusters and pools
-Date: Wed, 25 Jul 2012 17:02:24 +0200
-Message-ID: <50100A80.2020301@widodh.nl>
-References: <F5955DC568F9AF4DB00BE0F7E950BE0C0E903140@BLUPRD0411MB438.namprd04.prod.outlook.com>
+From: Mehdi Abaakouk <sileht@sileht.net>
+Subject: Re: Ceph Benchmark HowTo
+Date: Wed, 25 Jul 2012 18:37:38 +0200
+Message-ID: <20120725163738.GA21878@mail.sileht.net>
+References: <20120724144300.GA3317@mail.sileht.net>
+ <500EC579.4060707@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="Dxnq1zWXvFF0Q93v"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:52101 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964773Ab2GYPC0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jul 2012 11:02:26 -0400
-In-Reply-To: <F5955DC568F9AF4DB00BE0F7E950BE0C0E903140@BLUPRD0411MB438.namprd04.prod.outlook.com>
+Received: from sileht.net ([178.33.111.110]:34398 "EHLO mail.sileht.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754968Ab2GYQhl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 25 Jul 2012 12:37:41 -0400
+Content-Disposition: inline
+In-Reply-To: <500EC579.4060707@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ryan Nicholson <Ryan.Nicholson@kcrg.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.nelson@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
 
+--Dxnq1zWXvFF0Q93v
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On 07/25/2012 06:34 AM, Ryan Nicholson wrote:
-> I'm running a cluster based on 4 hosts that each have 3 fast, SCSI osd's, and 1 very large SATA osd, meaning, 12 fast osd's and 4 slow osd's total. I wish to segregate these into 2 pools, that operate independently. The goal is to use the faster disks as an area to hold rbd based VM's, and the larger area to host rbd-base large volumes (to start), and possibly have that become just a big cephfs area once, the fs side of things is considered more stable.
+On Tue, Jul 24, 2012 at 10:55:37AM -0500, Mark Nelson wrote:
+> On 07/24/2012 09:43 AM, Mehdi Abaakouk wrote:
+>=20
+> Thanks for taking the time to put all of your benchmarking
+> procedures into writing!  Having this kind of community
 >
-> Now, I've been thrown a couple options, and am still unsettled. Which is best?:
-> - Create 2 independent clusters; one with the 12 SCSI osd's and the other with just the 4 large OSD's on the same hosts. This seems to be more complex from a scripting and boot time standpoint, but easier for my head.
-> - Create a single cluster and use CRUSH rules to separate the two. This one STILL has me lost, as I'm having trouble understanding the crushmap syntax, the Crushmap import/export commands, and the other mkpool or otherwise commands from the docs in order to "make rbd's come from this faster pool", while "cephfs, you come from this slower pool". I really would like to entertain this path, however, as this allows ceph to handle the entire situation, and, it would seem more elegant.
+> ...
 >
-> I'm also open to other options as well.
 
-The "easiest" way to approach this:
+Thanks, for yours comments and these tools, that will help me for sure.
 
-Set up the cluster with the 12 fast OSD's first en leave the other 4 out 
-of the configuration.
 
-Get everything up and running and play with it.
+--=20
+Mehdi Abaakouk
+mail: sileht@sileht.net
+irc: sileht
 
-Then, add the 4 remaining OSD's to the cluster:
-1. Add them to ceph.conf
-2. Increment max_osd
-3. Add them to the keyring
-4. Format the OSD's
-5. Start the OSD's
+--Dxnq1zWXvFF0Q93v
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-Now they should show up in your "ceph -s" output, but no data will go to 
-them.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-The next step is to export your current crushmap:
+iQIcBAEBCAAGBQJQECDSAAoJEBiStC/OquvIl1MQAJ0OV8WIVWIRkjiYdLLpK8gw
+dIaQA/nk0SAn8XOFkoOZo6fWl+ByOjaOd05XfCoVhJ3COuUYsTtrU2HbNyUVhYXb
+WiyvWhoiA6iEpgaIsILSyMU9tX3dVC18G2uFyauPT5Z7zRVrdDAV8n7wHcdxxOge
+ism7Rbt4r1eqU0JM3qX2KjZUJY4r06kIcuOCoZySOVo9nQBpyhQc9P7TBK6tWh5j
+4RDNTXczF2obZutA1FQDj1sBbzyMHYx6y17PwHV02GPnapZxetAlpljbT/wcBsa3
+2xGSVbK1OGq0XFSfxy2/5WIjbH8sMtwVDMyotqD8zB/P/jmczhuAbM4ivy72ONMQ
++VvwkLP9e+lmtgiuHpYUGH4omQ/CNFpKiEoMy0z3yBdoLjD7QbiSaTI943NOLu+p
+EnAK35YodJk8TtkMZdPZaFh+4rMHv2tmHfsDDVh4BglEfep7n6O/IEzTcy+D2SKH
+mu/+N5+VNuH5pE+LYqcTQ+iISwhVQEuN1gyF7eFH7kOoQ4yFX3TU3kPZGJPsj9AD
+vCBKOO2BP7rvHJfIjlEeKtviRnXQjGNSSXUCrPv20kUWMLyM+zVSSZely6G3HlIn
+YEyFBEQX1YmqafRjXKeQmUXRn0VJn3/UG7cteVKhSlcUS3w/kNlNYMr/DcJku1lD
+j+qFv0BfvOZovSgEoY1G
+=tANt
+-----END PGP SIGNATURE-----
 
-$ ceph osd getcrushmap -o crushmap
-$ crushtool -d crushmap -o crushmap.txt
-
-You should now add 4 new hosts to the crushmap, something like 
-"hostA-slow" and add one OSD under each of them.
-
-Now you can add a new rack called "slowrbd" for example, add a new pool 
-and a new rule afterwards.
-
-Compile crushmap.txt back again to "crushmap" and load it into the cluster.
-
-You can now create a new pool with a specific crushrule.
-
-All the data in that pool will go onto those 4 slower OSD's.
-
-Wido
-
->
-> Thanks!
->
-> Ryan Nicholson
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+--Dxnq1zWXvFF0Q93v--
