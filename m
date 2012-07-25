@@ -1,67 +1,41 @@
-From: Mehdi Abaakouk <sileht@sileht.net>
+From: Florian Haas <florian@hastexo.com>
 Subject: Re: Ceph Benchmark HowTo
-Date: Wed, 25 Jul 2012 18:37:38 +0200
-Message-ID: <20120725163738.GA21878@mail.sileht.net>
+Date: Wed, 25 Jul 2012 21:39:09 +0200
+Message-ID: <CAPUexz9LO4YOK0P0_KfZbj_E75655HpVq6-kGjokwRFnBySzJQ@mail.gmail.com>
 References: <20120724144300.GA3317@mail.sileht.net>
- <500EC579.4060707@inktank.com>
+	<500EC579.4060707@inktank.com>
+	<CADvuQREt3SY9LyqGAr6+0LhypHMHO=vZ3txpp=2688tUQ7ORmw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="Dxnq1zWXvFF0Q93v"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sileht.net ([178.33.111.110]:34398 "EHLO mail.sileht.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754968Ab2GYQhl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 25 Jul 2012 12:37:41 -0400
-Content-Disposition: inline
-In-Reply-To: <500EC579.4060707@inktank.com>
+Received: from mail-qc0-f180.google.com ([209.85.216.180]:44223 "EHLO
+	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751468Ab2GYTjK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jul 2012 15:39:10 -0400
+Received: by qcmv28 with SMTP id v28so732516qcm.11
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Jul 2012 12:39:09 -0700 (PDT)
+In-Reply-To: <CADvuQREt3SY9LyqGAr6+0LhypHMHO=vZ3txpp=2688tUQ7ORmw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: Mark Nelson <mark.nelson@inktank.com>, Mehdi Abaakouk <sileht@sileht.net>, ceph-devel@vger.kernel.org
 
-
---Dxnq1zWXvFF0Q93v
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Jul 24, 2012 at 10:55:37AM -0500, Mark Nelson wrote:
-> On 07/24/2012 09:43 AM, Mehdi Abaakouk wrote:
->=20
-> Thanks for taking the time to put all of your benchmarking
-> procedures into writing!  Having this kind of community
+On Tue, Jul 24, 2012 at 6:19 PM, Tommi Virtanen <tv@inktank.com> wrote:
+> On Tue, Jul 24, 2012 at 8:55 AM, Mark Nelson <mark.nelson@inktank.com> wrote:
+>> personally I think it's fine to have it on the wiki.  I do want to stress
+>> that performance is going to be (hopefully!) improving over the next couple
+>> of months so we will probably want to have updated results (or at least
+>> remove old results!) as things improve.  Also, I'm not sure if we will be
+>> keeping the wiki around in it's current form. There was some talk about
+>> migrating to something else, but I don't really remember the details.
 >
-> ...
->
+> Sounds like a job for doc/dev/benchmark/index.rst!  (It, or parts of
+> it, can move out from under "Internal" if/when it gets user friendly
+> enough to not need as much skill to use.)
 
-Thanks, for yours comments and these tools, that will help me for sure.
+If John is currently busy (which I assume he always is :) ), I should
+be able to take care of that. In that case, would someone please open
+a documentation bug and assign that to me?
 
-
---=20
-Mehdi Abaakouk
-mail: sileht@sileht.net
-irc: sileht
-
---Dxnq1zWXvFF0Q93v
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBCAAGBQJQECDSAAoJEBiStC/OquvIl1MQAJ0OV8WIVWIRkjiYdLLpK8gw
-dIaQA/nk0SAn8XOFkoOZo6fWl+ByOjaOd05XfCoVhJ3COuUYsTtrU2HbNyUVhYXb
-WiyvWhoiA6iEpgaIsILSyMU9tX3dVC18G2uFyauPT5Z7zRVrdDAV8n7wHcdxxOge
-ism7Rbt4r1eqU0JM3qX2KjZUJY4r06kIcuOCoZySOVo9nQBpyhQc9P7TBK6tWh5j
-4RDNTXczF2obZutA1FQDj1sBbzyMHYx6y17PwHV02GPnapZxetAlpljbT/wcBsa3
-2xGSVbK1OGq0XFSfxy2/5WIjbH8sMtwVDMyotqD8zB/P/jmczhuAbM4ivy72ONMQ
-+VvwkLP9e+lmtgiuHpYUGH4omQ/CNFpKiEoMy0z3yBdoLjD7QbiSaTI943NOLu+p
-EnAK35YodJk8TtkMZdPZaFh+4rMHv2tmHfsDDVh4BglEfep7n6O/IEzTcy+D2SKH
-mu/+N5+VNuH5pE+LYqcTQ+iISwhVQEuN1gyF7eFH7kOoQ4yFX3TU3kPZGJPsj9AD
-vCBKOO2BP7rvHJfIjlEeKtviRnXQjGNSSXUCrPv20kUWMLyM+zVSSZely6G3HlIn
-YEyFBEQX1YmqafRjXKeQmUXRn0VJn3/UG7cteVKhSlcUS3w/kNlNYMr/DcJku1lD
-j+qFv0BfvOZovSgEoY1G
-=tANt
------END PGP SIGNATURE-----
-
---Dxnq1zWXvFF0Q93v--
+Cheers,
+Florian
