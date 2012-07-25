@@ -1,43 +1,103 @@
-From: Tommi Virtanen <tv@inktank.com>
+From: Mehdi Abaakouk <sileht@sileht.net>
 Subject: Re: Ceph Benchmark HowTo
-Date: Wed, 25 Jul 2012 13:35:20 -0700
-Message-ID: <CADvuQRGzddGRfkN_jY4-aoAKVtfcW10Yf3c4Bj+j-RD4RMm7DQ@mail.gmail.com>
-References: <20120724144300.GA3317@mail.sileht.net> <CAPUexz-G2R_amz9_Eh7bisOVrOC66uowMqavvdg7n87XTz56QQ@mail.gmail.com>
- <CAPYLRzjkEisL6GqXQDMJUnYbiObRBSw-jELXr7u2Je=zFk4hqg@mail.gmail.com>
+Date: Wed, 25 Jul 2012 23:31:43 +0200
+Message-ID: <20120725213143.GA11390@mail.sileht.net>
+References: <20120724144300.GA3317@mail.sileht.net>
+ <CAPUexz-G2R_amz9_Eh7bisOVrOC66uowMqavvdg7n87XTz56QQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="ZGiS0Q5IWpPtfppv"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:34121 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752344Ab2GYUfl convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jul 2012 16:35:41 -0400
-Received: by vbbff1 with SMTP id ff1so980341vbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Jul 2012 13:35:40 -0700 (PDT)
-In-Reply-To: <CAPYLRzjkEisL6GqXQDMJUnYbiObRBSw-jELXr7u2Je=zFk4hqg@mail.gmail.com>
+Received: from sileht.net ([178.33.111.110]:36109 "EHLO mail.sileht.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751187Ab2GYVbq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 25 Jul 2012 17:31:46 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPUexz-G2R_amz9_Eh7bisOVrOC66uowMqavvdg7n87XTz56QQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Florian Haas <florian@hastexo.com>, Mehdi Abaakouk <sileht@sileht.net>, ceph-devel@vger.kernel.org
+To: Florian Haas <florian@hastexo.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Jul 25, 2012 at 1:25 PM, Gregory Farnum <greg@inktank.com> wrot=
-e:
-> Yeah, an average isn't necessarily very useful here =E2=80=94 it's wh=
-at you
-> get because that's easy to implement (with a sum and a counter
-> variable, instead of binning). The inclusion of max and min latencies
-> is an attempt to cheaply compensate for that...but if somebody wants
-> to find/write an appropriately-licensed statistical counting library
-> and integrate it with rados bench, then (say it with me) contribution=
-s
-> are welcome! ;)
 
-How about "output results in a good machine-readable format and here's
-the pandas script to crunch it to a useful summary".
+--ZGiS0Q5IWpPtfppv
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-http://pandas.pydata.org/
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi Florian,
+
+On Wed, Jul 25, 2012 at 10:06:04PM +0200, Florian Haas wrote:
+> Hi Mehdi,
+> For the OSD tests, which OSD filesystem are you testing on? Are you      =
+                                                                           =
+               =20
+> using a separate journal device? If yes, what type?    =20
+
+Actually, I use xfs and the journal is on a same disk in an other partition.
+After reading documentation, I seems that using a dedicated disk is=20
+better and SSD is a good choice.
+
+> seekwatcher -t rbd-latency-write.trace -o rbd-latency-write.png -p 'dd
+> if=3D/dev/zero of=3D/dev/rbd0 bs=3D4M count=3D1000 oflag=3Ddirect' -d /de=
+v/rbd0
+>=20
+> Just making sure: are you getting the same numbers just with dd,
+> rather than dd invoked by seekwatcher?
+
+yes
+
+>=20
+> Also, for your dd latency test of 4M direct I/O reads writes, you seem
+> to be getting 39 and 300 ms average latency, yet further down it says
+> "RBD latency read/write: 28ms and 114.5ms". Any explanation for the
+> write latency being cut in half on what was apparently a different
+> test run?
+
+Yes this is a different run, the one on the bottom was with less servers
+but with better hardware.
+
+>=20
+> Also, were read and write caches cleared between tests? (echo 3 >
+> /proc/sys/vm/drop_caches)
+
+No, I will add it=20
+
+> Cheers,
+> Florian
+
+I known that my setup is not really optimal,
+Writing these tests help me to understand how ceph work and
+I'm sure with your advice I will build a better cluster :)
+
+Thanks for your help.
+
+Cheers,
+--=20
+Mehdi Abaakouk
+mail: sileht@sileht.net
+irc: sileht
+
+--ZGiS0Q5IWpPtfppv
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBCAAGBQJQEGW/AAoJEBiStC/OquvI9zwQAJhmrxenPBaPYqEBMriZWwyW
+fjsqCUqD/7MjbdC0lj9QBSn733vLLdqF/d5ZQ+Wb35dG9qZduD00jodMkeT+ZXgs
+zhMJLiUVmoipnYEBgAuCu3D78p0ibbhQQfSi0kgQJFHdBG9bLptmY1oUWAar9YP7
+vCBpEiiUqI+mc17IQFOkn8vCvLMI3Vso4lM+Z32w2pKnMNpfpvz4EqlFw3ix20qK
+wP6SmoaVRJ+yxXffksMVyAspOZm8UltOZqNyX7nZKWKhacAnDgkd1/t70+MNKpT9
+XYKIW+7QmnEbsKnVZrK8prO4cFMSIexqCM7hdpVrckYr6nKNuJE8MhTbJUsHEN4n
+gLCZiTAvYBdYOEjrLu8kSt6YkOSeuayh5kTqJOnwHHXq3qX348bRgh95Qb0agwSl
+zDlAmZyUA3JbH7DFtfaWufBR/OP4AkBvI/jutE6UTl33EgygNSxesb8jlqgUKnaF
+/v6i0cQG0kE+VCwCtrPXl4orFQAP76k35YBpqWvuX+WCHRyU4OFp9VwbTnWf4BXo
+dKTtp0RCbv7H0H+bOEtUrcnidDVRVDftjs/N7sAnhFlADge+Z/JH137PtHhUx1Jl
+Nm9KwA3lvhyVM/lKxpQbh/d/0tuQXjxpf7nAA61K0Wdr9CyXGSVrRw6Z3xW+9SLk
+K+huYvOjxLg8b6VctdVe
+=qq4+
+-----END PGP SIGNATURE-----
+
+--ZGiS0Q5IWpPtfppv--
