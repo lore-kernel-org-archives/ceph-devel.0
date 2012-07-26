@@ -1,30 +1,46 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 0/6] ceph: simple cleanups (mostly rbd)
-Date: Thu, 26 Jul 2012 13:40:51 -0500
-Message-ID: <50118F33.7080502@inktank.com>
+Subject: [PATCH 1/6] rbd: drop extra header_rwsem init
+Date: Thu, 26 Jul 2012 13:44:39 -0500
+Message-ID: <50119017.2010903@inktank.com>
+References: <50118F33.7080502@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:47721 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752123Ab2GZSkx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jul 2012 14:40:53 -0400
-Received: by yhmm54 with SMTP id m54so2318362yhm.19
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Jul 2012 11:40:52 -0700 (PDT)
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:59777 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751941Ab2GZSol (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jul 2012 14:44:41 -0400
+Received: by gglu4 with SMTP id u4so2311502ggl.19
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Jul 2012 11:44:41 -0700 (PDT)
+In-Reply-To: <50118F33.7080502@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This series includes a set of fairly minor code cleanups in rbd.
-I won't bother summarizing them here.  They are all simple nad
-their descriptions ought to be sufficient.
+In commit c666601a there was inadvertently added an extra
+initialization of rbd_dev->header_rwsem.  This gets rid of the
+duplicate.
 
-					-Alex
+Reported-by: Guangliang Zhao <gzhao@suse.com>
+Signed-off-by: Alex Elder <elder@inktank.com>
+---
+ drivers/block/rbd.c |    2 --
+ 1 file changed, 2 deletions(-)
 
-[PATCH 1/6] rbd: drop extra header_rwsem init
-[PATCH 2/6] rbd: simplify __rbd_remove_all_snaps()
-[PATCH 3/6] rbd: clean up a few dout() calls
-[PATCH 4/6] ceph: define snap counts as u32 everywhere
-[PATCH 5/6] rbd: encapsulate header validity test
-[PATCH 6/6] rbd: rename rbd_device->id
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 6df8c62..b9895fe 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -2458,8 +2458,6 @@ static ssize_t rbd_add(struct bus_type *bus,
+ 	INIT_LIST_HEAD(&rbd_dev->snaps);
+ 	init_rwsem(&rbd_dev->header_rwsem);
+
+-	init_rwsem(&rbd_dev->header_rwsem);
+-
+ 	/* generate unique id: find highest unique id, add one */
+ 	rbd_id_get(rbd_dev);
+
+-- 
+1.7.9.5
+
