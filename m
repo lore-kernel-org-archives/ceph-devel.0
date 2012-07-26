@@ -1,92 +1,104 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 2/7] rbd: drop rbd_header_from_disk() gfp_flags parameter
-Date: Thu, 26 Jul 2012 13:57:23 -0500
-Message-ID: <50119313.1010508@inktank.com>
+Subject: [PATCH 3/7] rbd: drop rbd_dev parameter in snap functions
+Date: Thu, 26 Jul 2012 13:57:29 -0500
+Message-ID: <50119319.4050400@inktank.com>
 References: <50119076.1030307@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:53985 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752426Ab2GZS5Z (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jul 2012 14:57:25 -0400
-Received: by ghrr11 with SMTP id r11so2351940ghr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Jul 2012 11:57:25 -0700 (PDT)
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:54228 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752426Ab2GZS5b (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jul 2012 14:57:31 -0400
+Received: by yhmm54 with SMTP id m54so2338429yhm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Jul 2012 11:57:30 -0700 (PDT)
 In-Reply-To: <50119076.1030307@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-The function rbd_header_from_disk() is only called in one spot, and
-it passes GFP_KERNEL as its value for the gfp_flags parameter.
-
-Just drop that parameter and substitute GFP_KERNEL everywhere within
-that function it had been used.  (If we find we need the parameter
-again in the future it's easy enough to add back again.)
+Both rbd_register_snap_dev() and __rbd_remove_snap_dev() have
+rbd_dev parameters that are unused.  Remove them.
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   13 ++++++-------
- 1 file changed, 6 insertions(+), 7 deletions(-)
+ drivers/block/rbd.c |   19 +++++++------------
+ 1 file changed, 7 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 64d3dbd..597ebaa 100644
+index 597ebaa..a748448 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -493,8 +493,7 @@ static bool rbd_dev_ondisk_valid(struct
-rbd_image_header_ondisk *ondisk)
-  */
- static int rbd_header_from_disk(struct rbd_image_header *header,
- 				 struct rbd_image_header_ondisk *ondisk,
--				 u32 allocated_snaps,
--				 gfp_t gfp_flags)
-+				 u32 allocated_snaps)
+@@ -202,8 +202,7 @@ static ssize_t rbd_snap_add(struct device *dev,
+ 			    struct device_attribute *attr,
+ 			    const char *buf,
+ 			    size_t count);
+-static void __rbd_remove_snap_dev(struct rbd_device *rbd_dev,
+-				  struct rbd_snap *snap);
++static void __rbd_remove_snap_dev(struct rbd_snap *snap);
+
+ static ssize_t rbd_add(struct bus_type *bus, const char *buf,
+ 		       size_t count);
+@@ -1698,7 +1697,7 @@ static void __rbd_remove_all_snaps(struct
+rbd_device *rbd_dev)
+ 	struct rbd_snap *next;
+
+ 	list_for_each_entry_safe(snap, next, &rbd_dev->snaps, node)
+-		__rbd_remove_snap_dev(rbd_dev, snap);
++		__rbd_remove_snap_dev(snap);
+ }
+
+ /*
+@@ -2006,15 +2005,13 @@ static struct device_type rbd_snap_device_type = {
+ 	.release	= rbd_snap_dev_release,
+ };
+
+-static void __rbd_remove_snap_dev(struct rbd_device *rbd_dev,
+-				  struct rbd_snap *snap)
++static void __rbd_remove_snap_dev(struct rbd_snap *snap)
  {
- 	u32 i, snap_count;
+ 	list_del(&snap->node);
+ 	device_unregister(&snap->dev);
+ }
 
-@@ -507,18 +506,18 @@ static int rbd_header_from_disk(struct
-rbd_image_header *header,
- 		return -EINVAL;
- 	header->snapc = kmalloc(sizeof(struct ceph_snap_context) +
- 				snap_count * sizeof(u64),
--				gfp_flags);
-+				GFP_KERNEL);
- 	if (!header->snapc)
- 		return -ENOMEM;
-
- 	header->snap_names_len = le64_to_cpu(ondisk->snap_names_len);
- 	if (snap_count) {
- 		header->snap_names = kmalloc(header->snap_names_len,
--					     gfp_flags);
-+					     GFP_KERNEL);
- 		if (!header->snap_names)
- 			goto err_snapc;
- 		header->snap_sizes = kmalloc(snap_count * sizeof(u64),
--					     gfp_flags);
-+					     GFP_KERNEL);
- 		if (!header->snap_sizes)
- 			goto err_names;
- 	} else {
-@@ -527,7 +526,7 @@ static int rbd_header_from_disk(struct
-rbd_image_header *header,
+-static int rbd_register_snap_dev(struct rbd_device *rbd_dev,
+-				  struct rbd_snap *snap,
++static int rbd_register_snap_dev(struct rbd_snap *snap,
+ 				  struct device *parent)
+ {
+ 	struct device *dev = &snap->dev;
+@@ -2041,8 +2038,7 @@ static int __rbd_add_snap_dev(struct rbd_device
+*rbd_dev,
+ 	snap->size = rbd_dev->header.snap_sizes[i];
+ 	snap->id = rbd_dev->header.snapc->snaps[i];
+ 	if (device_is_registered(&rbd_dev->dev)) {
+-		ret = rbd_register_snap_dev(rbd_dev, snap,
+-					     &rbd_dev->dev);
++		ret = rbd_register_snap_dev(snap, &rbd_dev->dev);
+ 		if (ret < 0)
+ 			goto err;
  	}
+@@ -2107,7 +2103,7 @@ static int __rbd_init_snaps_header(struct
+rbd_device *rbd_dev)
+ 			 */
+ 			if (rbd_dev->snap_id == old_snap->id)
+ 				rbd_dev->snap_exists = false;
+-			__rbd_remove_snap_dev(rbd_dev, old_snap);
++			__rbd_remove_snap_dev(old_snap);
+ 			continue;
+ 		}
+ 		if (old_snap->id == cur_id) {
+@@ -2171,8 +2167,7 @@ static int rbd_bus_add_dev(struct rbd_device *rbd_dev)
+ 		goto out;
 
- 	header->object_prefix = kmalloc(sizeof (ondisk->block_name) + 1,
--					gfp_flags);
-+					GFP_KERNEL);
- 	if (!header->object_prefix)
- 		goto err_sizes;
-
-@@ -1621,7 +1620,7 @@ static int rbd_read_header(struct rbd_device *rbd_dev,
- 		if (rc < 0)
- 			goto out_dh;
-
--		rc = rbd_header_from_disk(header, dh, snap_count, GFP_KERNEL);
-+		rc = rbd_header_from_disk(header, dh, snap_count);
- 		if (rc < 0) {
- 			if (rc == -ENXIO)
- 				pr_warning("unrecognized header format"
+ 	list_for_each_entry(snap, &rbd_dev->snaps, node) {
+-		ret = rbd_register_snap_dev(rbd_dev, snap,
+-					     &rbd_dev->dev);
++		ret = rbd_register_snap_dev(snap, &rbd_dev->dev);
+ 		if (ret < 0)
+ 			break;
+ 	}
 -- 
 1.7.9.5
 
