@@ -1,7 +1,7 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 4/7] rbd: always pass ops array to rbd_req_sync_op()
-Date: Thu, 26 Jul 2012 14:08:51 -0500
-Message-ID: <501195C3.1070005@inktank.com>
+Subject: [PATCH 6/7] rbd: return obj version in __rbd_refresh_header()
+Date: Thu, 26 Jul 2012 14:09:10 -0500
+Message-ID: <501195D6.4000609@inktank.com>
 References: <50119421.1090702@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
@@ -9,159 +9,111 @@ Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mail-gh0-f174.google.com ([209.85.160.174]:34949 "EHLO
 	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752472Ab2GZTIx (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jul 2012 15:08:53 -0400
+	with ESMTP id S1752590Ab2GZTJL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jul 2012 15:09:11 -0400
 Received: by mail-gh0-f174.google.com with SMTP id r11so2366170ghr.19
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Jul 2012 12:08:53 -0700 (PDT)
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Jul 2012 12:09:11 -0700 (PDT)
 In-Reply-To: <50119421.1090702@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-All of the callers of rbd_req_sync_op() except one pass a non-null
-"ops" pointer.  The only one that does not is rbd_req_sync_read(),
-which passes CEPH_OSD_OP_READ as its "opcode" and, CEPH_OSD_FLAG_READ
-for "flags".
-
-By allocating the ops array in rbd_req_sync_read() and moving the
-special case code for the null ops pointer into it, it becomes
-clear that much of that code is not even necessary.
-
-In addition, the "opcode" argument to rbd_req_sync_op() is never
-actually used, so get rid of that.
+Add a new parameter to __rbd_refresh_header() through which the
+version of the header object is passed back to the caller.  In most
+cases this isn't needed.  The main motivation is to normalize
+(almost) all calls to __rbd_refresh_header() so they are all
+wrapped immediately by mutex_lock()/mutex_unlock().
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |   46 ++++++++++++++++------------------------------
- 1 file changed, 16 insertions(+), 30 deletions(-)
+ drivers/block/rbd.c |   25 +++++++++++--------------
+ 1 file changed, 11 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index eacf255..4584500 100644
+index 3daf8fb..31be4ca 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1019,9 +1019,8 @@ static void rbd_simple_req_cb(struct
-ceph_osd_request *req, struct ceph_msg *msg
- static int rbd_req_sync_op(struct rbd_device *rbd_dev,
- 			   struct ceph_snap_context *snapc,
- 			   u64 snapid,
--			   int opcode,
- 			   int flags,
--			   struct ceph_osd_req_op *orig_ops,
-+			   struct ceph_osd_req_op *ops,
- 			   const char *object_name,
- 			   u64 ofs, u64 len,
- 			   char *buf,
-@@ -1031,28 +1030,14 @@ static int rbd_req_sync_op(struct rbd_device
-*rbd_dev,
- 	int ret;
- 	struct page **pages;
- 	int num_pages;
--	struct ceph_osd_req_op *ops = orig_ops;
--	u32 payload_len;
-+
-+	BUG_ON(ops == NULL);
-
- 	num_pages = calc_pages_for(ofs , len);
- 	pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
- 	if (IS_ERR(pages))
- 		return PTR_ERR(pages);
-
--	if (!orig_ops) {
--		payload_len = (flags & CEPH_OSD_FLAG_WRITE ? len : 0);
--		ret = -ENOMEM;
--		ops = rbd_create_rw_ops(1, opcode, payload_len);
--		if (!ops)
--			goto done;
--
--		if ((flags & CEPH_OSD_FLAG_WRITE) && buf) {
--			ret = ceph_copy_to_page_vector(pages, buf, ofs, len);
--			if (ret < 0)
--				goto done_ops;
--		}
--	}
--
- 	ret = rbd_do_request(NULL, rbd_dev, snapc, snapid,
- 			  object_name, ofs, len, NULL,
- 			  pages, num_pages,
-@@ -1062,14 +1047,11 @@ static int rbd_req_sync_op(struct rbd_device
-*rbd_dev,
- 			  NULL,
- 			  linger_req, ver);
- 	if (ret < 0)
--		goto done_ops;
-+		goto done;
-
- 	if ((flags & CEPH_OSD_FLAG_READ) && buf)
- 		ret = ceph_copy_from_page_vector(pages, buf, ofs, ret);
-
--done_ops:
--	if (!orig_ops)
--		rbd_destroy_ops(ops);
- done:
- 	ceph_release_page_vector(pages, num_pages);
- 	return ret;
-@@ -1176,12 +1158,20 @@ static int rbd_req_sync_read(struct rbd_device
-*rbd_dev,
- 			  char *buf,
- 			  u64 *ver)
- {
--	return rbd_req_sync_op(rbd_dev, NULL,
-+	struct ceph_osd_req_op *ops;
-+	int ret;
-+
-+	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_READ, 0);
-+	if (!ops)
-+		return -ENOMEM;
-+
-+	ret = rbd_req_sync_op(rbd_dev, NULL,
- 			       snapid,
--			       CEPH_OSD_OP_READ,
- 			       CEPH_OSD_FLAG_READ,
--			       NULL,
--			       object_name, ofs, len, buf, NULL, ver);
-+			       ops, object_name, ofs, len, buf, NULL, ver);
-+	rbd_destroy_ops(ops);
-+
-+	return ret;
+@@ -240,7 +240,7 @@ static void rbd_put_dev(struct rbd_device *rbd_dev)
+ 	put_device(&rbd_dev->dev);
  }
 
+-static int __rbd_refresh_header(struct rbd_device *rbd_dev);
++static int __rbd_refresh_header(struct rbd_device *rbd_dev, u64 *hver);
+
+ static int rbd_open(struct block_device *bdev, fmode_t mode)
+ {
+@@ -1223,8 +1223,7 @@ static void rbd_watch_cb(u64 ver, u64 notify_id,
+u8 opcode, void *data)
+ 	dout("rbd_watch_cb %s notify_id=%lld opcode=%d\n",
+ 		rbd_dev->header_name, notify_id, (int) opcode);
+ 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+-	rc = __rbd_refresh_header(rbd_dev);
+-	hver = rbd_dev->header.obj_version;
++	rc = __rbd_refresh_header(rbd_dev, &hver);
+ 	mutex_unlock(&ctl_mutex);
+ 	if (rc)
+ 		pr_warning(RBD_DRV_NAME "%d got notification but failed to "
+@@ -1702,7 +1701,7 @@ static void __rbd_remove_all_snaps(struct
+rbd_device *rbd_dev)
  /*
-@@ -1260,7 +1250,6 @@ static int rbd_req_sync_watch(struct rbd_device
+  * only read the first part of the ondisk header, without the snaps info
+  */
+-static int __rbd_refresh_header(struct rbd_device *rbd_dev)
++static int __rbd_refresh_header(struct rbd_device *rbd_dev, u64 *hver)
+ {
+ 	int ret;
+ 	struct rbd_image_header h;
+@@ -1727,6 +1726,8 @@ static int __rbd_refresh_header(struct rbd_device
 *rbd_dev)
+ 	/* osd requests may still refer to snapc */
+ 	ceph_put_snap_context(rbd_dev->header.snapc);
 
- 	ret = rbd_req_sync_op(rbd_dev, NULL,
- 			      CEPH_NOSNAP,
--			      0,
- 			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			      ops,
- 			      rbd_dev->header_name,
-@@ -1299,7 +1288,6 @@ static int rbd_req_sync_unwatch(struct rbd_device
++	if (hver)
++		*hver = h.obj_version;
+ 	rbd_dev->header.obj_version = h.obj_version;
+ 	rbd_dev->header.image_size = h.image_size;
+ 	rbd_dev->header.total_snaps = h.total_snaps;
+@@ -1896,17 +1897,13 @@ static ssize_t rbd_image_refresh(struct device *dev,
+ 				 size_t size)
+ {
+ 	struct rbd_device *rbd_dev = dev_to_rbd_dev(dev);
+-	int rc;
+-	int ret = size;
++	int ret;
+
+ 	mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+-
+-	rc = __rbd_refresh_header(rbd_dev);
+-	if (rc < 0)
+-		ret = rc;
+-
++	ret = __rbd_refresh_header(rbd_dev, NULL);
+ 	mutex_unlock(&ctl_mutex);
+-	return ret;
++
++	return ret < 0 ? ret : size;
+ }
+
+ static DEVICE_ATTR(size, S_IRUGO, rbd_size_show, NULL);
+@@ -2195,7 +2192,7 @@ static int rbd_init_watch_dev(struct rbd_device
 *rbd_dev)
+ 		ret = rbd_req_sync_watch(rbd_dev);
+ 		if (ret == -ERANGE) {
+ 			mutex_lock_nested(&ctl_mutex, SINGLE_DEPTH_NESTING);
+-			rc = __rbd_refresh_header(rbd_dev);
++			rc = __rbd_refresh_header(rbd_dev, NULL);
+ 			mutex_unlock(&ctl_mutex);
+ 			if (rc < 0)
+ 				return rc;
+@@ -2645,7 +2642,7 @@ static ssize_t rbd_snap_add(struct device *dev,
+ 	if (ret < 0)
+ 		goto err_unlock;
 
- 	ret = rbd_req_sync_op(rbd_dev, NULL,
- 			      CEPH_NOSNAP,
--			      0,
- 			      CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			      ops,
- 			      rbd_dev->header_name,
-@@ -1357,7 +1345,6 @@ static int rbd_req_sync_notify(struct rbd_device
-*rbd_dev)
+-	ret = __rbd_refresh_header(rbd_dev);
++	ret = __rbd_refresh_header(rbd_dev, NULL);
+ 	if (ret < 0)
+ 		goto err_unlock;
 
- 	ret = rbd_req_sync_op(rbd_dev, NULL,
- 			       CEPH_NOSNAP,
--			       0,
- 			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			       ops,
- 			       rbd_dev->header_name,
-@@ -1408,7 +1395,6 @@ static int rbd_req_sync_exec(struct rbd_device
-*rbd_dev,
-
- 	ret = rbd_req_sync_op(rbd_dev, NULL,
- 			       CEPH_NOSNAP,
--			       0,
- 			       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
- 			       ops,
- 			       object_name, 0, 0, NULL, NULL, ver);
 -- 
 1.7.9.5
 
