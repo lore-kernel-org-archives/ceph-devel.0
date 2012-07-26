@@ -1,46 +1,49 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 1/6] rbd: drop extra header_rwsem init
-Date: Thu, 26 Jul 2012 13:44:39 -0500
-Message-ID: <50119017.2010903@inktank.com>
+Subject: [PATCH 2/6] rbd: simplify __rbd_remove_all_snaps()
+Date: Thu, 26 Jul 2012 13:44:47 -0500
+Message-ID: <5011901F.2020704@inktank.com>
 References: <50118F33.7080502@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:59777 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751941Ab2GZSol (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jul 2012 14:44:41 -0400
-Received: by gglu4 with SMTP id u4so2311502ggl.19
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Jul 2012 11:44:41 -0700 (PDT)
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:34666 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751941Ab2GZSow (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jul 2012 14:44:52 -0400
+Received: by yhmm54 with SMTP id m54so2323144yhm.19
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Jul 2012 11:44:51 -0700 (PDT)
 In-Reply-To: <50118F33.7080502@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-In commit c666601a there was inadvertently added an extra
-initialization of rbd_dev->header_rwsem.  This gets rid of the
-duplicate.
+This just replaces a while loop with list_for_each_entry_safe()
+in __rbd_remove_all_snaps().
 
-Reported-by: Guangliang Zhao <gzhao@suse.com>
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |    2 --
- 1 file changed, 2 deletions(-)
+ drivers/block/rbd.c |    5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 6df8c62..b9895fe 100644
+index b9895fe..74e6a33 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -2458,8 +2458,6 @@ static ssize_t rbd_add(struct bus_type *bus,
- 	INIT_LIST_HEAD(&rbd_dev->snaps);
- 	init_rwsem(&rbd_dev->header_rwsem);
+@@ -1692,11 +1692,10 @@ bad:
+ static void __rbd_remove_all_snaps(struct rbd_device *rbd_dev)
+ {
+ 	struct rbd_snap *snap;
++	struct rbd_snap *next;
 
--	init_rwsem(&rbd_dev->header_rwsem);
--
- 	/* generate unique id: find highest unique id, add one */
- 	rbd_id_get(rbd_dev);
+-	while (!list_empty(&rbd_dev->snaps)) {
+-		snap = list_first_entry(&rbd_dev->snaps, struct rbd_snap, node);
++	list_for_each_entry_safe(snap, next, &rbd_dev->snaps, node)
+ 		__rbd_remove_snap_dev(rbd_dev, snap);
+-	}
+ }
 
+ /*
 -- 
 1.7.9.5
 
