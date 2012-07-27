@@ -1,122 +1,125 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Clusters and pools
-Date: Fri, 27 Jul 2012 08:26:03 +0200
-Message-ID: <5012347B.9040306@widodh.nl>
-References: <F5955DC568F9AF4DB00BE0F7E950BE0C0E903140@BLUPRD0411MB438.namprd04.prod.outlook.com> <50100A80.2020301@widodh.nl> <F5955DC568F9AF4DB00BE0F7E950BE0C0E9053A5@BLUPRD0411MB438.namprd04.prod.outlook.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:47966 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751413Ab2G0G0F (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Jul 2012 02:26:05 -0400
-In-Reply-To: <F5955DC568F9AF4DB00BE0F7E950BE0C0E9053A5@BLUPRD0411MB438.namprd04.prod.outlook.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ryan Nicholson <Ryan.Nicholson@kcrg.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Sha Zhengju <handai.szj@gmail.com>
+Subject: [PATCH V2 3/6] Use vfs __set_page_dirty interface instead of doing it inside filesystem
+Date: Fri, 27 Jul 2012 18:27:05 +0800
+Message-ID: <1343384825-20127-1-git-send-email-handai.szj@taobao.com>
+References: <1343384432-19903-1-git-send-email-handai.szj@taobao.com>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1343384432-19903-1-git-send-email-handai.szj@taobao.com>
+Sender: owner-linux-mm@kvack.org
+To: linux-mm@kvack.org, cgroups@vger.kernel.org
+Cc: fengguang.wu@intel.com, gthelen@google.com, akpm@linux-foundation.org, yinghan@google.com, mhocko@suse.cz, linux-kernel@vger.kernel.org, hannes@cmpxchg.org, torvalds@linux-foundation.org, viro@zeniv.linux.org.uk, linux-fsdevel@vger.kernel.org, sage@newdream.net, ceph-devel@vger.kernel.org, Sha Zhengju <handai.szj@taobao.com>
+List-Id: ceph-devel.vger.kernel.org
 
+From: Sha Zhengju <handai.szj@taobao.com>
 
+Following we will treat SetPageDirty and dirty page accounting as an integrated
+operation. Filesystems had better use vfs interface directly to avoid those details.
 
-On 07/27/2012 03:25 AM, Ryan Nicholson wrote:
-> Thanks, Wido, for your help. Here's another question for the group:
->
-> I've created 2 new rados pools;
->
-> SCSI and
-> Large
-> I've also REMOVED 'data' from the pools. <--not sure if this is an issue.
->
-> How do I setup mountpoints? I wish to mount SCSI as CephFS, or, LaCie as CephFS. My goal is, from the client's perspective to treat these two entities as separate. In production, only RBD's will be on SCSI, and CephFS stuff would live on Large but I do want to learn how to configure this before I take the system out of testing.
->
-> I wasn't sure if there was an option for mount.ceph that allowed me to select the pool? Say, x.x.x.x:6789:??:/ or otherwise.
->
+Signed-off-by: Sha Zhengju <handai.szj@taobao.com>
+Acked-by: Sage Weil <sage@inktank.com>
+---
+ fs/buffer.c                 |    3 ++-
+ fs/ceph/addr.c              |   20 ++------------------
+ include/linux/buffer_head.h |    2 ++
+ 3 files changed, 6 insertions(+), 19 deletions(-)
 
-I'm not completely sure about this one. But the "data" pool is being 
-used by the filesystem.
+diff --git a/fs/buffer.c b/fs/buffer.c
+index 5e0b0d2..ffcfb87 100644
+--- a/fs/buffer.c
++++ b/fs/buffer.c
+@@ -610,7 +610,7 @@ EXPORT_SYMBOL(mark_buffer_dirty_inode);
+  * If warn is true, then emit a warning if the page is not uptodate and has
+  * not been truncated.
+  */
+-static int __set_page_dirty(struct page *page,
++int __set_page_dirty(struct page *page,
+ 		struct address_space *mapping, int warn)
+ {
+ 	if (unlikely(!mapping))
+@@ -631,6 +631,7 @@ static int __set_page_dirty(struct page *page,
+ 
+ 	return 1;
+ }
++EXPORT_SYMBOL(__set_page_dirty);
+ 
+ /*
+  * Add a page to the dirty page list.
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 8b67304..d028fbe 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -5,6 +5,7 @@
+ #include <linux/mm.h>
+ #include <linux/pagemap.h>
+ #include <linux/writeback.h>	/* generic_writepages */
++#include <linux/buffer_head.h>
+ #include <linux/slab.h>
+ #include <linux/pagevec.h>
+ #include <linux/task_io_accounting_ops.h>
+@@ -73,14 +74,8 @@ static int ceph_set_page_dirty(struct page *page)
+ 	int undo = 0;
+ 	struct ceph_snap_context *snapc;
+ 
+-	if (unlikely(!mapping))
+-		return !TestSetPageDirty(page);
+-
+-	if (TestSetPageDirty(page)) {
+-		dout("%p set_page_dirty %p idx %lu -- already dirty\n",
+-		     mapping->host, page, page->index);
++	if (!__set_page_dirty(page, mapping, 1))
+ 		return 0;
+-	}
+ 
+ 	inode = mapping->host;
+ 	ci = ceph_inode(inode);
+@@ -107,14 +102,7 @@ static int ceph_set_page_dirty(struct page *page)
+ 	     snapc, snapc->seq, snapc->num_snaps);
+ 	spin_unlock(&ci->i_ceph_lock);
+ 
+-	/* now adjust page */
+-	spin_lock_irq(&mapping->tree_lock);
+ 	if (page->mapping) {	/* Race with truncate? */
+-		WARN_ON_ONCE(!PageUptodate(page));
+-		account_page_dirtied(page, page->mapping);
+-		radix_tree_tag_set(&mapping->page_tree,
+-				page_index(page), PAGECACHE_TAG_DIRTY);
+-
+ 		/*
+ 		 * Reference snap context in page->private.  Also set
+ 		 * PagePrivate so that we get invalidatepage callback.
+@@ -126,14 +114,10 @@ static int ceph_set_page_dirty(struct page *page)
+ 		undo = 1;
+ 	}
+ 
+-	spin_unlock_irq(&mapping->tree_lock);
+-
+ 	if (undo)
+ 		/* whoops, we failed to dirty the page */
+ 		ceph_put_wrbuffer_cap_refs(ci, 1, snapc);
+ 
+-	__mark_inode_dirty(mapping->host, I_DIRTY_PAGES);
+-
+ 	BUG_ON(!PageDirty(page));
+ 	return 1;
+ }
+diff --git a/include/linux/buffer_head.h b/include/linux/buffer_head.h
+index 458f497..0a331a8 100644
+--- a/include/linux/buffer_head.h
++++ b/include/linux/buffer_head.h
+@@ -336,6 +336,8 @@ static inline void lock_buffer(struct buffer_head *bh)
+ }
+ 
+ extern int __set_page_dirty_buffers(struct page *page);
++extern int __set_page_dirty(struct page *page,
++		struct address_space *mapping, int warn);
+ 
+ #else /* CONFIG_BLOCK */
+ 
+-- 
+1.7.1
 
-There is only one tree for the filesystem, but sub-directories can be 
-given separate pools.
-
-So, create the "data" pool again and create a directory called "scsi" 
-and "large".
-
-With the cephfs tool you should now be able to say that all the data of 
-the scsi directory goes into the SCSI pool and all the data of the large 
-directory goes into the pool "large".
-
-I haven't done this myself yet, so I'm not completely sure about the 
-syntax for the cephfs tool.
-
-Wido
-
-> Thanks!
->
-> Ryan
->
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wido den Hollander
-> Sent: Wednesday, July 25, 2012 10:02 AM
-> To: Ryan Nicholson
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Clusters and pools
->
->
->
-> On 07/25/2012 06:34 AM, Ryan Nicholson wrote:
->> I'm running a cluster based on 4 hosts that each have 3 fast, SCSI osd's, and 1 very large SATA osd, meaning, 12 fast osd's and 4 slow osd's total. I wish to segregate these into 2 pools, that operate independently. The goal is to use the faster disks as an area to hold rbd based VM's, and the larger area to host rbd-base large volumes (to start), and possibly have that become just a big cephfs area once, the fs side of things is considered more stable.
->>
->> Now, I've been thrown a couple options, and am still unsettled. Which is best?:
->> - Create 2 independent clusters; one with the 12 SCSI osd's and the other with just the 4 large OSD's on the same hosts. This seems to be more complex from a scripting and boot time standpoint, but easier for my head.
->> - Create a single cluster and use CRUSH rules to separate the two. This one STILL has me lost, as I'm having trouble understanding the crushmap syntax, the Crushmap import/export commands, and the other mkpool or otherwise commands from the docs in order to "make rbd's come from this faster pool", while "cephfs, you come from this slower pool". I really would like to entertain this path, however, as this allows ceph to handle the entire situation, and, it would seem more elegant.
->>
->> I'm also open to other options as well.
->
-> The "easiest" way to approach this:
->
-> Set up the cluster with the 12 fast OSD's first en leave the other 4 out of the configuration.
->
-> Get everything up and running and play with it.
->
-> Then, add the 4 remaining OSD's to the cluster:
-> 1. Add them to ceph.conf
-> 2. Increment max_osd
-> 3. Add them to the keyring
-> 4. Format the OSD's
-> 5. Start the OSD's
->
-> Now they should show up in your "ceph -s" output, but no data will go to them.
->
-> The next step is to export your current crushmap:
->
-> $ ceph osd getcrushmap -o crushmap
-> $ crushtool -d crushmap -o crushmap.txt
->
-> You should now add 4 new hosts to the crushmap, something like "hostA-slow" and add one OSD under each of them.
->
-> Now you can add a new rack called "slowrbd" for example, add a new pool and a new rule afterwards.
->
-> Compile crushmap.txt back again to "crushmap" and load it into the cluster.
->
-> You can now create a new pool with a specific crushrule.
->
-> All the data in that pool will go onto those 4 slower OSD's.
->
-> Wido
->
->>
->> Thanks!
->>
->> Ryan Nicholson
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
