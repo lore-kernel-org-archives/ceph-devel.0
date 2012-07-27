@@ -1,101 +1,103 @@
-From: Paul Collins <paul.collins@canonical.com>
-Subject: [PATCH] skip loading keyrings when auth supported = none
-Date: Fri, 27 Jul 2012 11:38:00 +1200
-Message-ID: <87wr1qnlev.fsf@agnew.wgtn.ondioline.org>
-References: <871uk0pw8p.fsf@agnew.wgtn.ondioline.org>
+From: Ryan Nicholson <Ryan.Nicholson@kcrg.com>
+Subject: RE: Clusters and pools
+Date: Fri, 27 Jul 2012 01:25:14 +0000
+Message-ID: <F5955DC568F9AF4DB00BE0F7E950BE0C0E9053A5@BLUPRD0411MB438.namprd04.prod.outlook.com>
+References: <F5955DC568F9AF4DB00BE0F7E950BE0C0E903140@BLUPRD0411MB438.namprd04.prod.outlook.com>
+ <50100A80.2020301@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:38680 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753173Ab2GZXiJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jul 2012 19:38:09 -0400
-Received: from [203.79.106.241] (helo=agnew.wgtn.ondioline.org)
-	by youngberry.canonical.com with esmtpsa (TLS1.0:DHE_RSA_AES_256_CBC_SHA1:32)
-	(Exim 4.71)
-	(envelope-from <paul.collins@canonical.com>)
-	id 1SuXd9-00060S-KS
-	for ceph-devel@vger.kernel.org; Thu, 26 Jul 2012 23:38:07 +0000
-Received: from agnew (agnew [127.0.0.1])
-	by agnew.wgtn.ondioline.org (Postfix) with ESMTP id 4F07C2030E
-	for <ceph-devel@vger.kernel.org>; Fri, 27 Jul 2012 11:38:01 +1200 (NZST)
-In-Reply-To: <871uk0pw8p.fsf@agnew.wgtn.ondioline.org>
-References: <871uk0pw8p.fsf@agnew.wgtn.ondioline.org>
+Received: from co1ehsobe002.messaging.microsoft.com ([216.32.180.185]:18408
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752779Ab2G0BkY convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 26 Jul 2012 21:40:24 -0400
+In-Reply-To: <50100A80.2020301@widodh.nl>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-If the cluster is not currently using authentication, then it's
-possible that no keyrings were ever created.  Proceed with monitor
-initialization regardless and explain what we did.
+Thanks, Wido, for your help. Here's another question for the group:
 
-With this patch applied, my 0.48 monitor cluster starts up
-correctly even when no keyring files are present in the monitors'
-data directories.
+I've created 2 new rados pools;
 
-Signed-off-by: Paul Collins <paul.collins@canonical.com>
----
- src/mon/Monitor.cc |   40 ++++++++++++++++++++++------------------
- 1 file changed, 22 insertions(+), 18 deletions(-)
+SCSI and
+Large
+I've also REMOVED 'data' from the pools. <--not sure if this is an issue.
 
-diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
-index c415dbf..bdd6a91 100644
---- a/src/mon/Monitor.cc
-+++ b/src/mon/Monitor.cc
-@@ -322,22 +322,26 @@ int Monitor::init()
-     extract_save_mon_key(keyring);
-   }
- 
--  ostringstream os;
--  os << g_conf->mon_data << "/keyring";
--  int r = keyring.load(cct, os.str());
--  if (r < 0) {
--    EntityName mon_name;
--    mon_name.set_type(CEPH_ENTITY_TYPE_MON);
--    EntityAuth mon_key;
--    if (key_server.get_auth(mon_name, mon_key)) {
--      dout(1) << "copying mon. key from old db to external keyring" << dendl;
--      keyring.add(mon_name, mon_key);
--      bufferlist bl;
--      keyring.encode_plaintext(bl);
--      store->put_bl_ss(bl, "keyring", NULL);
--    } else {
--      derr << "unable to load initial keyring " << g_conf->keyring << dendl;
--      return r;
-+  if (auth_supported.is_supported_auth(CEPH_AUTH_NONE)) {
-+    dout(10) << "auth supported = none, no keys to load" << dendl;
-+  } else {
-+    ostringstream os;
-+    os << g_conf->mon_data << "/keyring";
-+    int r = keyring.load(cct, os.str());
-+    if (r < 0) {
-+      EntityName mon_name;
-+      mon_name.set_type(CEPH_ENTITY_TYPE_MON);
-+      EntityAuth mon_key;
-+      if (key_server.get_auth(mon_name, mon_key)) {
-+	dout(1) << "copying mon. key from old db to external keyring" << dendl;
-+	keyring.add(mon_name, mon_key);
-+	bufferlist bl;
-+	keyring.encode_plaintext(bl);
-+	store->put_bl_ss(bl, "keyring", NULL);
-+      } else {
-+	derr << "unable to load initial keyring " << g_conf->keyring << dendl;
-+	return r;
-+      }
-     }
-   }
- 
-@@ -346,8 +350,8 @@ int Monitor::init()
- 
-   // unlock while registering to avoid mon_lock -> admin socket lock dependency.
-   lock.Unlock();
--  r = admin_socket->register_command("mon_status", admin_hook,
--				     "show current monitor status");
-+  int r = admin_socket->register_command("mon_status", admin_hook,
-+					 "show current monitor status");
-   assert(r == 0);
-   r = admin_socket->register_command("quorum_status", admin_hook,
- 					 "show current quorum status");
--- 
-1.7.10.4
+How do I setup mountpoints? I wish to mount SCSI as CephFS, or, LaCie as CephFS. My goal is, from the client's perspective to treat these two entities as separate. In production, only RBD's will be on SCSI, and CephFS stuff would live on Large but I do want to learn how to configure this before I take the system out of testing.
+
+I wasn't sure if there was an option for mount.ceph that allowed me to select the pool? Say, x.x.x.x:6789:??:/ or otherwise.
+
+Thanks!
+
+Ryan
+
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wido den Hollander
+Sent: Wednesday, July 25, 2012 10:02 AM
+To: Ryan Nicholson
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: Clusters and pools
+
+
+
+On 07/25/2012 06:34 AM, Ryan Nicholson wrote:
+> I'm running a cluster based on 4 hosts that each have 3 fast, SCSI osd's, and 1 very large SATA osd, meaning, 12 fast osd's and 4 slow osd's total. I wish to segregate these into 2 pools, that operate independently. The goal is to use the faster disks as an area to hold rbd based VM's, and the larger area to host rbd-base large volumes (to start), and possibly have that become just a big cephfs area once, the fs side of things is considered more stable.
+>
+> Now, I've been thrown a couple options, and am still unsettled. Which is best?:
+> - Create 2 independent clusters; one with the 12 SCSI osd's and the other with just the 4 large OSD's on the same hosts. This seems to be more complex from a scripting and boot time standpoint, but easier for my head.
+> - Create a single cluster and use CRUSH rules to separate the two. This one STILL has me lost, as I'm having trouble understanding the crushmap syntax, the Crushmap import/export commands, and the other mkpool or otherwise commands from the docs in order to "make rbd's come from this faster pool", while "cephfs, you come from this slower pool". I really would like to entertain this path, however, as this allows ceph to handle the entire situation, and, it would seem more elegant.
+>
+> I'm also open to other options as well.
+
+The "easiest" way to approach this:
+
+Set up the cluster with the 12 fast OSD's first en leave the other 4 out of the configuration.
+
+Get everything up and running and play with it.
+
+Then, add the 4 remaining OSD's to the cluster:
+1. Add them to ceph.conf
+2. Increment max_osd
+3. Add them to the keyring
+4. Format the OSD's
+5. Start the OSD's
+
+Now they should show up in your "ceph -s" output, but no data will go to them.
+
+The next step is to export your current crushmap:
+
+$ ceph osd getcrushmap -o crushmap
+$ crushtool -d crushmap -o crushmap.txt
+
+You should now add 4 new hosts to the crushmap, something like "hostA-slow" and add one OSD under each of them.
+
+Now you can add a new rack called "slowrbd" for example, add a new pool and a new rule afterwards.
+
+Compile crushmap.txt back again to "crushmap" and load it into the cluster.
+
+You can now create a new pool with a specific crushrule.
+
+All the data in that pool will go onto those 4 slower OSD's.
+
+Wido
+
+>
+> Thanks!
+>
+> Ryan Nicholson
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 
