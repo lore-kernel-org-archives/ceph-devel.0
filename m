@@ -1,170 +1,122 @@
-From: Guangliang Zhao <gzhao@suse.com>
-Subject: [PATCH v3] rbd: fix the memory leak of bio_chain_clone
-Date: Fri, 27 Jul 2012 14:20:17 +0800
-Message-ID: <1343370017-8794-1-git-send-email-gzhao@suse.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Clusters and pools
+Date: Fri, 27 Jul 2012 08:26:03 +0200
+Message-ID: <5012347B.9040306@widodh.nl>
+References: <F5955DC568F9AF4DB00BE0F7E950BE0C0E903140@BLUPRD0411MB438.namprd04.prod.outlook.com> <50100A80.2020301@widodh.nl> <F5955DC568F9AF4DB00BE0F7E950BE0C0E9053A5@BLUPRD0411MB438.namprd04.prod.outlook.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:40068 "EHLO
-	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752260Ab2G0GUz (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 27 Jul 2012 02:20:55 -0400
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:47966 "EHLO
+	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751413Ab2G0G0F (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Jul 2012 02:26:05 -0400
+In-Reply-To: <F5955DC568F9AF4DB00BE0F7E950BE0C0E9053A5@BLUPRD0411MB438.namprd04.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: yehuda@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: Ryan Nicholson <Ryan.Nicholson@kcrg.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The bio_pair alloced in bio_chain_clone would not be freed,
-this will cause a memory leak. It could be freed actually only
-after 3 times release, because the reference count of bio_pair
-is initialized to 3 when bio_split and bio_pair_release only
-drops the reference count.
 
-The function bio_pair_release must be called three times for
-releasing bio_pair, and the callback functions of bios on the
-requests will be called when the last release time in bio_pair_release,
-however, these functions will also be called in rbd_req_cb. In
-other words, they will be called twice, and it may cause serious
-consequences.
 
-This patch clones bio chian from the origin directly, doesn't use
-bio_split(without bio_pair). The new bio chain can be release
-whenever we don't need it.
+On 07/27/2012 03:25 AM, Ryan Nicholson wrote:
+> Thanks, Wido, for your help. Here's another question for the group:
+>
+> I've created 2 new rados pools;
+>
+> SCSI and
+> Large
+> I've also REMOVED 'data' from the pools. <--not sure if this is an issue.
+>
+> How do I setup mountpoints? I wish to mount SCSI as CephFS, or, LaCie as CephFS. My goal is, from the client's perspective to treat these two entities as separate. In production, only RBD's will be on SCSI, and CephFS stuff would live on Large but I do want to learn how to configure this before I take the system out of testing.
+>
+> I wasn't sure if there was an option for mount.ceph that allowed me to select the pool? Say, x.x.x.x:6789:??:/ or otherwise.
+>
 
-Signed-off-by: Guangliang Zhao <gzhao@suse.com>
----
- drivers/block/rbd.c |   73 +++++++++++++++++++++-----------------------------
- 1 files changed, 31 insertions(+), 42 deletions(-)
+I'm not completely sure about this one. But the "data" pool is being 
+used by the filesystem.
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 013c7a5..356657d 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -712,51 +712,46 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
- 	}
- }
- 
--/*
-- * bio_chain_clone - clone a chain of bios up to a certain length.
-- * might return a bio_pair that will need to be released.
-+/**
-+ *      bio_chain_clone - clone a chain of bios up to a certain length.
-+ *      @old: bio to clone
-+ *      @offset: start point for bio clone
-+ *      @len: length of bio chain
-+ *      @gfp_mask: allocation priority
-+ *
-+ *      RETURNS:
-+ *      Pointer to new bio chain on success, NULL on failure.
-  */
--static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
--				   struct bio_pair **bp,
-+static struct bio *bio_chain_clone(struct bio **old, int *offset,
- 				   int len, gfp_t gfpmask)
- {
- 	struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
- 	int total = 0;
- 
--	if (*bp) {
--		bio_pair_release(*bp);
--		*bp = NULL;
--	}
--
- 	while (old_chain && (total < len)) {
-+		int need = len - total;
-+
- 		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
- 		if (!tmp)
- 			goto err_out;
- 
--		if (total + old_chain->bi_size > len) {
--			struct bio_pair *bp;
--
--			/*
--			 * this split can only happen with a single paged bio,
--			 * split_bio will BUG_ON if this is not the case
--			 */
--			dout("bio_chain_clone split! total=%d remaining=%d"
--			     "bi_size=%d\n",
--			     (int)total, (int)len-total,
--			     (int)old_chain->bi_size);
--
--			/* split the bio. We'll release it either in the next
--			   call, or it will have to be released outside */
--			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
--			if (!bp)
--				goto err_out;
--
--			__bio_clone(tmp, &bp->bio1);
--
--			*next = &bp->bio2;
-+		__bio_clone(tmp, old_chain);
-+		tmp->bi_sector += *offset >> SECTOR_SHIFT;
-+		tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
-+		/*
-+		 * The bios span across multiple osd objects must be
-+		 * single paged, rbd_merge_bvec would guarantee it.
-+		 * So we needn't worry about other things.
-+		 */
-+		if (tmp->bi_size - *offset > need) {
-+			tmp->bi_size = need;
-+			tmp->bi_io_vec->bv_len = need;
-+			*offset += need;
- 		} else {
--			__bio_clone(tmp, old_chain);
--			*next = old_chain->bi_next;
-+			old_chain = old_chain->bi_next;
-+			tmp->bi_size -= *offset;
-+			tmp->bi_io_vec->bv_len -= *offset;
-+			*offset = 0;
- 		}
- 
- 		tmp->bi_bdev = NULL;
-@@ -769,7 +764,6 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
- 			tail->bi_next = tmp;
- 			tail = tmp;
- 		}
--		old_chain = old_chain->bi_next;
- 
- 		total += tmp->bi_size;
- 	}
-@@ -1447,13 +1441,12 @@ static void rbd_rq_fn(struct request_queue *q)
- {
- 	struct rbd_device *rbd_dev = q->queuedata;
- 	struct request *rq;
--	struct bio_pair *bp = NULL;
- 
- 	while ((rq = blk_fetch_request(q))) {
- 		struct bio *bio;
--		struct bio *rq_bio, *next_bio = NULL;
-+		struct bio *rq_bio;
- 		bool do_write;
--		int size, op_size = 0;
-+		int size, op_size = 0, offset = 0;
- 		u64 ofs;
- 		int num_segs, cur_seg = 0;
- 		struct rbd_req_coll *coll;
-@@ -1503,7 +1496,7 @@ static void rbd_rq_fn(struct request_queue *q)
- 						  ofs, size,
- 						  NULL, NULL);
- 			kref_get(&coll->kref);
--			bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
-+			bio = bio_chain_clone(&rq_bio, &offset,
- 					      op_size, GFP_ATOMIC);
- 			if (!bio) {
- 				rbd_coll_end_req_index(rq, coll, cur_seg,
-@@ -1531,12 +1524,8 @@ next_seg:
- 			ofs += op_size;
- 
- 			cur_seg++;
--			rq_bio = next_bio;
- 		} while (size > 0);
- 		kref_put(&coll->kref, rbd_coll_release);
--
--		if (bp)
--			bio_pair_release(bp);
- 		spin_lock_irq(q->queue_lock);
- 	}
- }
--- 
-1.7.3.4
+There is only one tree for the filesystem, but sub-directories can be 
+given separate pools.
 
+So, create the "data" pool again and create a directory called "scsi" 
+and "large".
+
+With the cephfs tool you should now be able to say that all the data of 
+the scsi directory goes into the SCSI pool and all the data of the large 
+directory goes into the pool "large".
+
+I haven't done this myself yet, so I'm not completely sure about the 
+syntax for the cephfs tool.
+
+Wido
+
+> Thanks!
+>
+> Ryan
+>
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wido den Hollander
+> Sent: Wednesday, July 25, 2012 10:02 AM
+> To: Ryan Nicholson
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Clusters and pools
+>
+>
+>
+> On 07/25/2012 06:34 AM, Ryan Nicholson wrote:
+>> I'm running a cluster based on 4 hosts that each have 3 fast, SCSI osd's, and 1 very large SATA osd, meaning, 12 fast osd's and 4 slow osd's total. I wish to segregate these into 2 pools, that operate independently. The goal is to use the faster disks as an area to hold rbd based VM's, and the larger area to host rbd-base large volumes (to start), and possibly have that become just a big cephfs area once, the fs side of things is considered more stable.
+>>
+>> Now, I've been thrown a couple options, and am still unsettled. Which is best?:
+>> - Create 2 independent clusters; one with the 12 SCSI osd's and the other with just the 4 large OSD's on the same hosts. This seems to be more complex from a scripting and boot time standpoint, but easier for my head.
+>> - Create a single cluster and use CRUSH rules to separate the two. This one STILL has me lost, as I'm having trouble understanding the crushmap syntax, the Crushmap import/export commands, and the other mkpool or otherwise commands from the docs in order to "make rbd's come from this faster pool", while "cephfs, you come from this slower pool". I really would like to entertain this path, however, as this allows ceph to handle the entire situation, and, it would seem more elegant.
+>>
+>> I'm also open to other options as well.
+>
+> The "easiest" way to approach this:
+>
+> Set up the cluster with the 12 fast OSD's first en leave the other 4 out of the configuration.
+>
+> Get everything up and running and play with it.
+>
+> Then, add the 4 remaining OSD's to the cluster:
+> 1. Add them to ceph.conf
+> 2. Increment max_osd
+> 3. Add them to the keyring
+> 4. Format the OSD's
+> 5. Start the OSD's
+>
+> Now they should show up in your "ceph -s" output, but no data will go to them.
+>
+> The next step is to export your current crushmap:
+>
+> $ ceph osd getcrushmap -o crushmap
+> $ crushtool -d crushmap -o crushmap.txt
+>
+> You should now add 4 new hosts to the crushmap, something like "hostA-slow" and add one OSD under each of them.
+>
+> Now you can add a new rack called "slowrbd" for example, add a new pool and a new rule afterwards.
+>
+> Compile crushmap.txt back again to "crushmap" and load it into the cluster.
+>
+> You can now create a new pool with a specific crushrule.
+>
+> All the data in that pool will go onto those 4 slower OSD's.
+>
+> Wido
+>
+>>
+>> Thanks!
+>>
+>> Ryan Nicholson
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
