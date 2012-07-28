@@ -1,20 +1,20 @@
 From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
 Subject: Increasing number of PGs
-Date: Sat, 28 Jul 2012 19:23:11 +0930
-Message-ID: <5013B687.6020103@bashkirtsev.com>
+Date: Sat, 28 Jul 2012 19:29:03 +0930
+Message-ID: <5013B7E7.3020407@bashkirtsev.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:37843 "EHLO
+Received: from mail.logics.net.au ([150.101.56.178]:37849 "EHLO
 	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751329Ab2G1Jzn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Jul 2012 05:55:43 -0400
+	with ESMTP id S1751637Ab2G1J7e (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Jul 2012 05:59:34 -0400
 Received: from x.logics.net.au (gw.logics.net.au [150.101.235.251] (may be forged))
 	(authenticated bits=0)
-	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q6S9rBPD017770
+	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q6S9x3PZ017920
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-CAMELLIA256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Sat, 28 Jul 2012 19:23:12 +0930
+	for <ceph-devel@vger.kernel.org>; Sat, 28 Jul 2012 19:29:04 +0930
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
