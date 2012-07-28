@@ -1,57 +1,44 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: RBD support in CloudStack 4.0
-Date: Sat, 28 Jul 2012 00:28:26 +0200
-Message-ID: <5013160A.5000509@widodh.nl>
+From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Subject: Increasing number of PGs
+Date: Sat, 28 Jul 2012 19:23:11 +0930
+Message-ID: <5013B687.6020103@bashkirtsev.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:56146 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751197Ab2G0W20 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Jul 2012 18:28:26 -0400
-Received: from [IPv6:2a00:f10:11c:ab:b86d:9128:f4ca:37f5] (unknown [IPv6:2a00:f10:11c:ab:b86d:9128:f4ca:37f5])
-	by smtp02.mail.pcextreme.nl (Postfix) with ESMTPA id 1E3FC40386
-	for <ceph-devel@vger.kernel.org>; Sat, 28 Jul 2012 00:28:23 +0200 (CEST)
+Received: from mail.logics.net.au ([150.101.56.178]:37843 "EHLO
+	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751329Ab2G1Jzn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Jul 2012 05:55:43 -0400
+Received: from x.logics.net.au (gw.logics.net.au [150.101.235.251] (may be forged))
+	(authenticated bits=0)
+	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q6S9rBPD017770
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-CAMELLIA256-SHA bits=256 verify=NO)
+	for <ceph-devel@vger.kernel.org>; Sat, 28 Jul 2012 19:23:12 +0930
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+Hello,
 
-About 24 hours ago the RBD support for CloudStack got merged [0] into 
-the master branch of CloudStack.
+I am working on optimization of ceph performance: CPU load vs OSD data 
+load. Right now I have 576 PGs in total. Three pools: metadata, data, 
+rbd. Each pool has 192 PGs. data is not used heavily, rbd is in heavy 
+use. In total 6 OSDs in cluster. I have read recommendation about 100 
+PGs per OSD. Roughly I do have 100 PGs per OSD. But now it seems that 
+PGs in data pool are mostly empty while PGs in rbd pool are quite busy. 
+Would it make sense to increase number of PGs to be 100 per rbd pool per 
+OSD? Technically it should take some memory and CPU but because other 
+two pools are virtually stand still it should not make big difference 
+while improving data placement on OSDs (which is currently somewhat skewed).
 
-At the moment we're (I'm a CloudStack committer) planning the release 
-for CloudStack 4.0. Right now it seems that CS 4.0 will be released in 
-early september.
+So here two questions:
 
-Since my last e-mail a couple of things have changed:
-* libvirt 0.9.13 got released with RBD storage pool support [1]
-* libvirt-java 0.4.8 with a couple of bugfixes got released [2]
+1. Should I increase number of PGs in rbd pool or better leave it where 
+it is?
+2. Wiki says that increase in PGs is not tested and only should be 
+attempted on empty pool. Date on Wiki is quite old. Is this still an 
+issue? Is it safe to increase PGs number on 0.49 on pool in use?
 
-To run CloudStack with RBD support you need:
-* libvirt 0.9.13 with RBD enabled
-* libvirt-java 0.4.8 (included with CloudStack)
-* Qemu with RBD support enabled
-
-In August there will be a release candidate (probably multiple) of 4.0 
-before the final release in September goes out. Testing is needed! So if 
-you got some spare hardware and time, please do test CS 4.0 and the RBD 
-support.
-
-Bugs can be reported on the CloudStack development list, via 
-bugs.cloudstack.org or directly to me (while I prefer public).
-
-The guys from Inktank are currently working on documentation which will 
-hopefully be out before the CS 4.0 release.
-
-If you have any problems with getting CloudStack and RBD running, please 
-do ask!
-
-Wido
-
-[0]: 
-https://git-wip-us.apache.org/repos/asf?p=incubator-cloudstack.git;a=commit;h=406fd95d87bfcdbb282d65589ab1fb6e9fd0018a
-[1]: http://libvirt.org/sources/libvirt-0.9.13.tar.gz
-[2]: http://libvirt.org/sources/java/libvirt-java-0.4.8.tar.gz
+Regards,
+Vladimir
