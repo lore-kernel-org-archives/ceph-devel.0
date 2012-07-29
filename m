@@ -1,44 +1,49 @@
 From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Subject: Increasing number of PGs
-Date: Sat, 28 Jul 2012 19:29:03 +0930
-Message-ID: <5013B7E7.3020407@bashkirtsev.com>
+Subject: Re: Poor read performance in KVM
+Date: Mon, 30 Jul 2012 01:01:08 +0930
+Message-ID: <5015573C.6040305@bashkirtsev.com>
+References: <5002C215.108@bashkirtsev.com> <5003B1CC.4060909@inktank.com> <50064DCD.8040904@bashkirtsev.com> <5006D5FB.8030700@inktank.com> <50080D9D.8010306@bashkirtsev.com> <50085518.80507@inktank.com> <500984AC.9030104@bashkirtsev.com> <CADvuQRG1z0YQezCoJhCNFnC+03UDv6H3aJPUWBcbBw3-iUnA8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:37849 "EHLO
+Received: from mail.logics.net.au ([150.101.56.178]:60563 "EHLO
 	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751637Ab2G1J7e (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Jul 2012 05:59:34 -0400
-Received: from x.logics.net.au (gw.logics.net.au [150.101.235.251] (may be forged))
-	(authenticated bits=0)
-	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q6S9x3PZ017920
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-CAMELLIA256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Sat, 28 Jul 2012 19:29:04 +0930
+	with ESMTP id S1753168Ab2G2PcK (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 29 Jul 2012 11:32:10 -0400
+In-Reply-To: <CADvuQRG1z0YQezCoJhCNFnC+03UDv6H3aJPUWBcbBw3-iUnA8Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello,
+On 21/07/12 02:12, Tommi Virtanen wrote:
+> But it leaves me with very final question: should we rely on btrfs at this
+> point given it is having such major faults? What if I will use well tested
+> by time ext4?
+> You might want to try xfs. We hear/see problems with all three, but
+> xfs currently seems to have the best long-term performance and
+> reliability.
+>
+> I'm not sure if anyone's run detailed tests with ext4 after the
+> xattrs-in-leveldb feature; before that, we ran into fs limitations.
+Just reporting back what was going on for last week. I have rebuilt all 
+OSDs with fresh btrfs and leaf size of 64K. Straight after rebuild 
+everything was flying! But mysql processing I wrote about continued and 
+whole cluster was brought again to a stand still in a week. I have done 
+some investigation as to causes and it appears that fragmentation went 
+ballistic. Reading somewhere on the net I have seen suggestion that if 
+cow is not really needed then btrfs mounted with nocow option less 
+likely to get overly fragmented. Haven't tried it actually but wondering 
+will ceph cope well with nocow? ie does it rely on cow feature? 
+Something tells me that as ceph can run on FS which does not have cow we 
+actually can mount nocow. Just need some confirmation from devs.
 
-I am working on optimization of ceph performance: CPU load vs OSD data 
-load. Right now I have 576 PGs in total. Three pools: metadata, data, 
-rbd. Each pool has 192 PGs. data is not used heavily, rbd is in heavy 
-use. In total 6 OSDs in cluster. I have read recommendation about 100 
-PGs per OSD. Roughly I do have 100 PGs per OSD. But now it seems that 
-PGs in data pool are mostly empty while PGs in rbd pool are quite busy. 
-Would it make sense to increase number of PGs to be 100 per rbd pool per 
-OSD? Technically it should take some memory and CPU but because other 
-two pools are virtually stand still it should not make big difference 
-while improving data placement on OSDs (which is currently somewhat skewed).
+In the mean time I opted to convert all OSDs to xfs. Even after 
+rebuilding only two OSDs performance boost is apparent again. So it 
+appears that btrfs as it currently is in 3.4.6 is not up to prime time 
+and good number of random writes consistently bring it to a halt.
 
-So here two questions:
-
-1. Should I increase number of PGs in rbd pool or better leave it where 
-it is?
-2. Wiki says that increase in PGs is not tested and only should be 
-attempted on empty pool. Date on Wiki is quite old. Is this still an 
-issue? Is it safe to increase PGs number on 0.49 on pool in use?
-
-Regards,
-Vladimir
+As xfs apparently have its own share of problems when ageing I think 
+that periodic online defragmentation may bring xfs back to reasonable 
+condition. Have anyone tried xfs defragmentation while ceph uses it?
