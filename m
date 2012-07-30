@@ -1,47 +1,45 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: RadosGW on ubuntu is OK but CentOS fails
-Date: Mon, 30 Jul 2012 09:59:25 -0700
-Message-ID: <CADvuQRE8Xb+P=3Jo2vOmn7Z93nguugLUvDys0rVc2euc6muPDg@mail.gmail.com>
-References: <CAMm-wcJ7aFjgW_ROb-=+Mk9RdRB_NCoFCChA+8U_s8jd5cgFOw@mail.gmail.com>
+From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Subject: Re: Increasing number of PGs
+Date: Tue, 31 Jul 2012 03:15:40 +0930
+Message-ID: <5016C844.7010106@bashkirtsev.com>
+References: <5013B7E7.3020407@bashkirtsev.com> <5016B34A.8090902@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:52486 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754291Ab2G3Q7t convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 12:59:49 -0400
-Received: by vcbfk26 with SMTP id fk26so4872687vcb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 09:59:45 -0700 (PDT)
-In-Reply-To: <CAMm-wcJ7aFjgW_ROb-=+Mk9RdRB_NCoFCChA+8U_s8jd5cgFOw@mail.gmail.com>
+Received: from mail.logics.net.au ([150.101.56.178]:55169 "EHLO
+	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754167Ab2G3Rpz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 13:45:55 -0400
+In-Reply-To: <5016B34A.8090902@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?6KKB5Yas?= <yuandong1222@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Jul 30, 2012 at 12:58 AM, =E8=A2=81=E5=86=AC <yuandong1222@gmai=
-l.com> wrote:
-> I deploy an instance including 1 mon, 1 osd and 1 radosgw on one
-> machine which based on CentOS 6.2. I can access the system from
-> browser(Chrome) which tells me that: no bucket for anonymous user.
+On 31/07/12 01:46, Josh Durgin wrote:
 >
-> I think I get everything fine, but when I use S3-tests to test this
-> instance, the test script is very very slow and got lots of errors.
+>> So here two questions:
+>>
+>> 1. Should I increase number of PGs in rbd pool or better leave it where
+>> it is?
 >
-> I deploy another instance which is all the same with the first
-> excepted it is based on Ubuntu 12.04 Sever. Browser access is still O=
-K
-> and S3-tests completed fast with 209 OK, 8 Fall and 38 Error, I think
-> this is the correct result.
+> It would be better to increase it from a data balancing point of view,
+> but it's not clear that it would help performance.
+I would care about data balancing first - as I said it is currently 
+skewed a bit. Performance wise perhaps it will take a bit more 
+CPU/memory to process but not to the extent where it will affect 
+performance.
+>
+>> 2. Wiki says that increase in PGs is not tested and only should be
+>> attempted on empty pool. Date on Wiki is quite old. Is this still an
+>> issue? Is it safe to increase PGs number on 0.49 on pool in use?
+>
+> Right now the number of pgs in a pool can't be increased. This should
+> be possible in a couple months. If you can stop I/O to the current pool,
+> you can create a new one with more pgs, copy all the data to it, delete
+> the original and rename the new one.
+Then I am stuck with current number of PGs: pool is in heavy use and 
+there virtually no chance to increase PGs number offline. Will wait for 
+a version which will make it possible.
 
-So radosgw on CentOS is slow, Ubuntu 12.04 is fast? Check and compare
-
-- networking: what if you have packet loss or DNS failures to your
-CentOS server, but not to your Ubuntu one
-- filesystem used for OSDs
-- kernel version
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
