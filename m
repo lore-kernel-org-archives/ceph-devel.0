@@ -1,58 +1,109 @@
-From: =?UTF-8?B?6KKB5Yas?= <yuandong1222@gmail.com>
-Subject: RadosGW on ubuntu is OK but CentOS fails
-Date: Mon, 30 Jul 2012 15:58:11 +0800
-Message-ID: <CAMm-wcJ7aFjgW_ROb-=+Mk9RdRB_NCoFCChA+8U_s8jd5cgFOw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Sage Weil <sage@inktank.com>
+Subject: [PATCH 3/8] libceph: fix handling of immediate socket connect failure
+Date: Mon, 30 Jul 2012 08:59:26 -0700
+Message-ID: <1343663971-3221-4-git-send-email-sage@inktank.com>
+References: <1343663971-3221-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:47018 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753714Ab2G3H6L convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 03:58:11 -0400
-Received: by mail-qc0-f174.google.com with SMTP id o28so2764471qcr.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 00:58:11 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:45765 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753817Ab2G3P7l (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 11:59:41 -0400
+In-Reply-To: <1343663971-3221-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: Sage Weil <sage@inktank.com>
 
-Hi everyone.
+If the connect() call immediately fails such that sock == NULL, we
+still need con_close_socket() to reset our socket state to CLOSED.
 
-Nowadays, I start to play with radosgw.
+Signed-off-by: Sage Weil <sage@inktank.com>
+---
+ net/ceph/messenger.c |   26 +++++++++++++++++++-------
+ 1 file changed, 19 insertions(+), 7 deletions(-)
 
-I deploy an instance including 1 mon, 1 osd and 1 radosgw on one
-machine which based on CentOS 6.2. I can access the system from
-browser(Chrome) which tells me that: no bucket for anonymous user.
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index fa16f2c..a6a0c7a 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -224,6 +224,8 @@ static void con_sock_state_init(struct ceph_connection *con)
+ 	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CLOSED);
+ 	if (WARN_ON(old_state != CON_SOCK_STATE_NEW))
+ 		printk("%s: unexpected old state %d\n", __func__, old_state);
++	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
++	     CON_SOCK_STATE_CLOSED);
+ }
+ 
+ static void con_sock_state_connecting(struct ceph_connection *con)
+@@ -233,6 +235,8 @@ static void con_sock_state_connecting(struct ceph_connection *con)
+ 	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CONNECTING);
+ 	if (WARN_ON(old_state != CON_SOCK_STATE_CLOSED))
+ 		printk("%s: unexpected old state %d\n", __func__, old_state);
++	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
++	     CON_SOCK_STATE_CONNECTING);
+ }
+ 
+ static void con_sock_state_connected(struct ceph_connection *con)
+@@ -242,6 +246,8 @@ static void con_sock_state_connected(struct ceph_connection *con)
+ 	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CONNECTED);
+ 	if (WARN_ON(old_state != CON_SOCK_STATE_CONNECTING))
+ 		printk("%s: unexpected old state %d\n", __func__, old_state);
++	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
++	     CON_SOCK_STATE_CONNECTED);
+ }
+ 
+ static void con_sock_state_closing(struct ceph_connection *con)
+@@ -253,6 +259,8 @@ static void con_sock_state_closing(struct ceph_connection *con)
+ 			old_state != CON_SOCK_STATE_CONNECTED &&
+ 			old_state != CON_SOCK_STATE_CLOSING))
+ 		printk("%s: unexpected old state %d\n", __func__, old_state);
++	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
++	     CON_SOCK_STATE_CLOSING);
+ }
+ 
+ static void con_sock_state_closed(struct ceph_connection *con)
+@@ -262,8 +270,11 @@ static void con_sock_state_closed(struct ceph_connection *con)
+ 	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CLOSED);
+ 	if (WARN_ON(old_state != CON_SOCK_STATE_CONNECTED &&
+ 		    old_state != CON_SOCK_STATE_CLOSING &&
+-		    old_state != CON_SOCK_STATE_CONNECTING))
++		    old_state != CON_SOCK_STATE_CONNECTING &&
++		    old_state != CON_SOCK_STATE_CLOSED))
+ 		printk("%s: unexpected old state %d\n", __func__, old_state);
++	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
++	     CON_SOCK_STATE_CLOSED);
+ }
+ 
+ /*
+@@ -448,14 +459,14 @@ static int ceph_tcp_sendpage(struct socket *sock, struct page *page,
+  */
+ static int con_close_socket(struct ceph_connection *con)
+ {
+-	int rc;
++	int rc = 0;
+ 
+ 	dout("con_close_socket on %p sock %p\n", con, con->sock);
+-	if (!con->sock)
+-		return 0;
+-	rc = con->sock->ops->shutdown(con->sock, SHUT_RDWR);
+-	sock_release(con->sock);
+-	con->sock = NULL;
++	if (con->sock) {
++		rc = con->sock->ops->shutdown(con->sock, SHUT_RDWR);
++		sock_release(con->sock);
++		con->sock = NULL;
++	}
+ 
+ 	/*
+ 	 * Forcibly clear the SOCK_CLOSED flag.  It gets set
+@@ -464,6 +475,7 @@ static int con_close_socket(struct ceph_connection *con)
+ 	 * shut the socket down.
+ 	 */
+ 	clear_bit(CON_FLAG_SOCK_CLOSED, &con->flags);
++
+ 	con_sock_state_closed(con);
+ 	return rc;
+ }
+-- 
+1.7.9.5
 
-I think I get everything fine, but when I use S3-tests to test this
-instance, the test script is very very slow and got lots of errors.
-
-I deploy another instance which is all the same with the first
-excepted it is based on Ubuntu 12.04 Sever. Browser access is still OK
-and S3-tests completed fast with 209 OK, 8 Fall and 38 Error, I think
-this is the correct result.
-
-I compare these two instance including Ceph version, ceph.conf,
-S3TEST_CONF and httpd.conf. they are all the same expected some random
-passwords.
-
-I also read the radosgw log, even the logs on the two instance are
-seems to be the same. The log on the CentOS shows that AUTHORITY
-action is OK, then PUT BUCKET  action is OK .... the log is too large
-to read them all.
-
-Did somebody meet this situation?
-
-Thanks.
-
---=20
-=E8=A2=81=E5=86=AC
-Tel:13573888215
-Email:yuandong1222@gmail.com
-QQ:10200230
-MSN:yuandong1222@hotmail.com
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
