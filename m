@@ -1,124 +1,179 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 1/7] rbd: have __rbd_add_snap_dev() return a pointer
-Date: Mon, 30 Jul 2012 13:42:18 -0700
-Message-ID: <5016F1AA.4040605@inktank.com>
-References: <50119421.1090702@inktank.com> <501195AD.8080405@inktank.com>
+Subject: Re: [PATCH 2/7] rbd: make rbd_create_rw_ops() return a pointer
+Date: Mon, 30 Jul 2012 13:46:19 -0700
+Message-ID: <5016F29B.7010001@inktank.com>
+References: <50119421.1090702@inktank.com> <501195B2.1050503@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:45932 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:42536 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754896Ab2G3UmV (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 16:42:21 -0400
-Received: by pbbrp8 with SMTP id rp8so10394353pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 13:42:21 -0700 (PDT)
-In-Reply-To: <501195AD.8080405@inktank.com>
+	with ESMTP id S1754195Ab2G3UqW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 16:46:22 -0400
+Received: by pbbrp8 with SMTP id rp8so10399586pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 13:46:22 -0700 (PDT)
+In-Reply-To: <501195B2.1050503@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
 On 07/26/2012 12:08 PM, Alex Elder wrote:
-> It's not obvious whether the snapshot pointer whose address is
-> provided to __rbd_add_snap_dev() will be assigned by that function.
-> Change it to return the snapshot, or a pointer-coded errno in the
-> event of a failure.
+> Either rbd_create_rw_ops() will succeed, or it will fail because a
+> memory allocation failed.  Have it just return a valid pointer or
+> null rather than stuffing a pointer into a provided address and
+> returning an errno.
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 
 Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
 
 > ---
->   drivers/block/rbd.c |   37 ++++++++++++++++++++++---------------
->   1 file changed, 22 insertions(+), 15 deletions(-)
+>   drivers/block/rbd.c |   70
+> ++++++++++++++++++++++++++++-----------------------
+>   1 file changed, 39 insertions(+), 31 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index fd5f3038..fd91964 100644
+> index fd91964..4d8b52c 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -2025,15 +2025,21 @@ static int rbd_register_snap_dev(struct rbd_snap
-> *snap,
->   	return ret;
->   }
->
-> -static int __rbd_add_snap_dev(struct rbd_device *rbd_dev,
-> -			      int i, const char *name,
-> -			      struct rbd_snap **snapp)
-> +static struct rbd_snap *__rbd_add_snap_dev(struct rbd_device *rbd_dev,
-> +					      int i, const char *name)
->   {
-> +	struct rbd_snap *snap;
->   	int ret;
-> -	struct rbd_snap *snap = kzalloc(sizeof(*snap), GFP_KERNEL);
-> +
-> +	snap = kzalloc(sizeof (*snap), GFP_KERNEL);
->   	if (!snap)
-> -		return -ENOMEM;
-> +		return ERR_PTR(-ENOMEM);
-> +
-> +	ret = -ENOMEM;
->   	snap->name = kstrdup(name, GFP_KERNEL);
-> +	if (!snap->name)
-> +		goto err;
-> +
->   	snap->size = rbd_dev->header.snap_sizes[i];
->   	snap->id = rbd_dev->header.snapc->snaps[i];
->   	if (device_is_registered(&rbd_dev->dev)) {
-> @@ -2041,12 +2047,14 @@ static int __rbd_add_snap_dev(struct rbd_device
-> *rbd_dev,
->   		if (ret < 0)
->   			goto err;
->   	}
-> -	*snapp = snap;
-> -	return 0;
-> +
-> +	return snap;
-> +
->   err:
->   	kfree(snap->name);
->   	kfree(snap);
-> -	return ret;
-> +
-> +	return ERR_PTR(ret);
->   }
->
+> @@ -789,22 +789,24 @@ err_out:
 >   /*
-> @@ -2079,7 +2087,6 @@ static int __rbd_init_snaps_header(struct
-> rbd_device *rbd_dev)
->   	const char *name, *first_name;
->   	int i = rbd_dev->header.total_snaps;
->   	struct rbd_snap *snap, *old_snap = NULL;
-> -	int ret;
->   	struct list_head *p, *n;
+>    * helpers for osd request op vectors.
+>    */
+> -static int rbd_create_rw_ops(struct ceph_osd_req_op **ops,
+> -			    int num_ops,
+> -			    int opcode,
+> -			    u32 payload_len)
+> -{
+> -	*ops = kzalloc(sizeof(struct ceph_osd_req_op) * (num_ops + 1),
+> -		       GFP_NOIO);
+> -	if (!*ops)
+> -		return -ENOMEM;
+> -	(*ops)[0].op = opcode;
+> +static struct ceph_osd_req_op *rbd_create_rw_ops(int num_ops,
+> +					int opcode, u32 payload_len)
+> +{
+> +	struct ceph_osd_req_op *ops;
+> +
+> +	ops = kzalloc(sizeof (*ops) * (num_ops + 1), GFP_NOIO);
+> +	if (!ops)
+> +		return NULL;
+> +
+> +	ops[0].op = opcode;
+> +
+>   	/*
+>   	 * op extent offset and length will be set later on
+>   	 * in calc_raw_layout()
+>   	 */
+> -	(*ops)[0].payload_len = payload_len;
+> -	return 0;
+> +	ops[0].payload_len = payload_len;
+> +
+> +	return ops;
+>   }
 >
->   	first_name = rbd_dev->header.snap_names;
-> @@ -2122,9 +2129,9 @@ static int __rbd_init_snaps_header(struct
-> rbd_device *rbd_dev)
->   			if (cur_id >= old_snap->id)
->   				break;
->   			/* a new snapshot */
-> -			ret = __rbd_add_snap_dev(rbd_dev, i - 1, name, &snap);
-> -			if (ret < 0)
-> -				return ret;
-> +			snap = __rbd_add_snap_dev(rbd_dev, i - 1, name);
-> +			if (IS_ERR(snap))
-> +				return PTR_ERR(snap);
+>   static void rbd_destroy_ops(struct ceph_osd_req_op *ops)
+> @@ -1039,8 +1041,9 @@ static int rbd_req_sync_op(struct rbd_device *rbd_dev,
 >
->   			/* note that we add it backward so using n and not p */
->   			list_add(&snap->node, n);
-> @@ -2138,9 +2145,9 @@ static int __rbd_init_snaps_header(struct
-> rbd_device *rbd_dev)
->   			WARN_ON(1);
->   			return -EINVAL;
->   		}
-> -		ret = __rbd_add_snap_dev(rbd_dev, i - 1, name, &snap);
+>   	if (!orig_ops) {
+>   		payload_len = (flags & CEPH_OSD_FLAG_WRITE ? len : 0);
+> -		ret = rbd_create_rw_ops(&ops, 1, opcode, payload_len);
 > -		if (ret < 0)
-> -			return ret;
-> +		snap = __rbd_add_snap_dev(rbd_dev, i - 1, name);
-> +		if (IS_ERR(snap))
-> +			return PTR_ERR(snap);
->   		list_add(&snap->node, &rbd_dev->snaps);
->   	}
+> +		ret = -ENOMEM;
+> +		ops = rbd_create_rw_ops(1, opcode, payload_len);
+> +		if (!ops)
+>   			goto done;
+>
+>   		if ((flags & CEPH_OSD_FLAG_WRITE) && buf) {
+> @@ -1103,8 +1106,9 @@ static int rbd_do_op(struct request *rq,
+>
+>   	payload_len = (flags & CEPH_OSD_FLAG_WRITE ? seg_len : 0);
+>
+> -	ret = rbd_create_rw_ops(&ops, 1, opcode, payload_len);
+> -	if (ret < 0)
+> +	ret = -ENOMEM;
+> +	ops = rbd_create_rw_ops(1, opcode, payload_len);
+> +	if (!ops)
+>   		goto done;
+>
+>   	/* we've taken care of segment sizes earlier when we
+> @@ -1190,9 +1194,9 @@ static int rbd_req_sync_notify_ack(struct
+> rbd_device *rbd_dev,
+>   	struct ceph_osd_req_op *ops;
+>   	int ret;
+>
+> -	ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_NOTIFY_ACK, 0);
+> -	if (ret < 0)
+> -		return ret;
+> +	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_NOTIFY_ACK, 0);
+> +	if (!ops)
+> +		return -ENOMEM;
+>
+>   	ops[0].watch.ver = cpu_to_le64(ver);
+>   	ops[0].watch.cookie = notify_id;
+> @@ -1239,10 +1243,11 @@ static int rbd_req_sync_watch(struct rbd_device
+> *rbd_dev)
+>   {
+>   	struct ceph_osd_req_op *ops;
+>   	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+> +	int ret;
+>
+> -	int ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_WATCH, 0);
+> -	if (ret < 0)
+> -		return ret;
+> +	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_WATCH, 0);
+> +	if (!ops)
+> +		return -ENOMEM;
+>
+>   	ret = ceph_osdc_create_event(osdc, rbd_watch_cb, 0,
+>   				     (void *)rbd_dev, &rbd_dev->watch_event);
+> @@ -1282,10 +1287,11 @@ fail:
+>   static int rbd_req_sync_unwatch(struct rbd_device *rbd_dev)
+>   {
+>   	struct ceph_osd_req_op *ops;
+> +	int ret;
+>
+> -	int ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_WATCH, 0);
+> -	if (ret < 0)
+> -		return ret;
+> +	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_WATCH, 0);
+> +	if (!ops)
+> +		return -ENOMEM;
+>
+>   	ops[0].watch.ver = 0;
+>   	ops[0].watch.cookie = cpu_to_le64(rbd_dev->watch_event->cookie);
+> @@ -1332,9 +1338,9 @@ static int rbd_req_sync_notify(struct rbd_device
+> *rbd_dev)
+>   	int payload_len = sizeof(u32) + sizeof(u32);
+>   	int ret;
+>
+> -	ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_NOTIFY, payload_len);
+> -	if (ret < 0)
+> -		return ret;
+> +	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_NOTIFY, payload_len);
+> +	if (!ops)
+> +		return -ENOMEM;
+>
+>   	info.rbd_dev = rbd_dev;
+>
+> @@ -1385,10 +1391,12 @@ static int rbd_req_sync_exec(struct rbd_device
+> *rbd_dev,
+>   	struct ceph_osd_req_op *ops;
+>   	int class_name_len = strlen(class_name);
+>   	int method_name_len = strlen(method_name);
+> -	int ret = rbd_create_rw_ops(&ops, 1, CEPH_OSD_OP_CALL,
+> +	int ret;
+> +
+> +	ops = rbd_create_rw_ops(1, CEPH_OSD_OP_CALL,
+>   				    class_name_len + method_name_len + len);
+> -	if (ret < 0)
+> -		return ret;
+> +	if (!ops)
+> +		return -ENOMEM;
+>
+>   	ops[0].cls.class_name = class_name;
+>   	ops[0].cls.class_len = (__u8) class_name_len;
 >
 
