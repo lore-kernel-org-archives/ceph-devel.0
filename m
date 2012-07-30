@@ -1,109 +1,55 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 3/8] libceph: fix handling of immediate socket connect failure
-Date: Mon, 30 Jul 2012 08:59:26 -0700
-Message-ID: <1343663971-3221-4-git-send-email-sage@inktank.com>
+Subject: [PATCH 6/8] libceph: avoid dropping con mutex before fault
+Date: Mon, 30 Jul 2012 08:59:29 -0700
+Message-ID: <1343663971-3221-7-git-send-email-sage@inktank.com>
 References: <1343663971-3221-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45765 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:45771 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753817Ab2G3P7l (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 11:59:41 -0400
+	with ESMTP id S1752936Ab2G3P7n (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 11:59:43 -0400
 In-Reply-To: <1343663971-3221-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>
 
-If the connect() call immediately fails such that sock == NULL, we
-still need con_close_socket() to reset our socket state to CLOSED.
+The ceph_fault() function takes the con mutex, so we should avoid
+dropping it before calling it.  This fixes a potential race with
+another thread calling ceph_con_close(), or _open(), or similar (we
+don't reverify con->state after retaking the lock).
+
+Add annotation so that lockdep realizes we will drop the mutex before
+returning.
 
 Signed-off-by: Sage Weil <sage@inktank.com>
 ---
- net/ceph/messenger.c |   26 +++++++++++++++++++-------
- 1 file changed, 19 insertions(+), 7 deletions(-)
+ net/ceph/messenger.c |    4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
 diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index fa16f2c..a6a0c7a 100644
+index feb5a2a..c3b628c 100644
 --- a/net/ceph/messenger.c
 +++ b/net/ceph/messenger.c
-@@ -224,6 +224,8 @@ static void con_sock_state_init(struct ceph_connection *con)
- 	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CLOSED);
- 	if (WARN_ON(old_state != CON_SOCK_STATE_NEW))
- 		printk("%s: unexpected old state %d\n", __func__, old_state);
-+	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-+	     CON_SOCK_STATE_CLOSED);
- }
+@@ -2336,7 +2336,6 @@ done_unlocked:
+ 	return;
  
- static void con_sock_state_connecting(struct ceph_connection *con)
-@@ -233,6 +235,8 @@ static void con_sock_state_connecting(struct ceph_connection *con)
- 	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CONNECTING);
- 	if (WARN_ON(old_state != CON_SOCK_STATE_CLOSED))
- 		printk("%s: unexpected old state %d\n", __func__, old_state);
-+	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-+	     CON_SOCK_STATE_CONNECTING);
+ fault:
+-	mutex_unlock(&con->mutex);
+ 	ceph_fault(con);     /* error/fault path */
+ 	goto done_unlocked;
  }
- 
- static void con_sock_state_connected(struct ceph_connection *con)
-@@ -242,6 +246,8 @@ static void con_sock_state_connected(struct ceph_connection *con)
- 	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CONNECTED);
- 	if (WARN_ON(old_state != CON_SOCK_STATE_CONNECTING))
- 		printk("%s: unexpected old state %d\n", __func__, old_state);
-+	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-+	     CON_SOCK_STATE_CONNECTED);
- }
- 
- static void con_sock_state_closing(struct ceph_connection *con)
-@@ -253,6 +259,8 @@ static void con_sock_state_closing(struct ceph_connection *con)
- 			old_state != CON_SOCK_STATE_CONNECTED &&
- 			old_state != CON_SOCK_STATE_CLOSING))
- 		printk("%s: unexpected old state %d\n", __func__, old_state);
-+	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-+	     CON_SOCK_STATE_CLOSING);
- }
- 
- static void con_sock_state_closed(struct ceph_connection *con)
-@@ -262,8 +270,11 @@ static void con_sock_state_closed(struct ceph_connection *con)
- 	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CLOSED);
- 	if (WARN_ON(old_state != CON_SOCK_STATE_CONNECTED &&
- 		    old_state != CON_SOCK_STATE_CLOSING &&
--		    old_state != CON_SOCK_STATE_CONNECTING))
-+		    old_state != CON_SOCK_STATE_CONNECTING &&
-+		    old_state != CON_SOCK_STATE_CLOSED))
- 		printk("%s: unexpected old state %d\n", __func__, old_state);
-+	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-+	     CON_SOCK_STATE_CLOSED);
- }
- 
- /*
-@@ -448,14 +459,14 @@ static int ceph_tcp_sendpage(struct socket *sock, struct page *page,
+@@ -2347,9 +2346,8 @@ fault:
+  * exponential backoff
   */
- static int con_close_socket(struct ceph_connection *con)
+ static void ceph_fault(struct ceph_connection *con)
++	__releases(con->mutex)
  {
--	int rc;
-+	int rc = 0;
- 
- 	dout("con_close_socket on %p sock %p\n", con, con->sock);
--	if (!con->sock)
--		return 0;
--	rc = con->sock->ops->shutdown(con->sock, SHUT_RDWR);
--	sock_release(con->sock);
--	con->sock = NULL;
-+	if (con->sock) {
-+		rc = con->sock->ops->shutdown(con->sock, SHUT_RDWR);
-+		sock_release(con->sock);
-+		con->sock = NULL;
-+	}
- 
- 	/*
- 	 * Forcibly clear the SOCK_CLOSED flag.  It gets set
-@@ -464,6 +475,7 @@ static int con_close_socket(struct ceph_connection *con)
- 	 * shut the socket down.
- 	 */
- 	clear_bit(CON_FLAG_SOCK_CLOSED, &con->flags);
-+
- 	con_sock_state_closed(con);
- 	return rc;
- }
+-	mutex_lock(&con->mutex);
+-
+ 	pr_err("%s%lld %s %s\n", ENTITY_NAME(con->peer_name),
+ 	       ceph_pr_addr(&con->peer_addr.in_addr), con->error_msg);
+ 	dout("fault %p state %lu to peer %s\n",
 -- 
 1.7.9.5
 
