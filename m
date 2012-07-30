@@ -1,132 +1,111 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH v3] rbd: fix the memory leak of bio_chain_clone
-Date: Mon, 30 Jul 2012 14:54:44 -0700
-Message-ID: <CAC-hyiH=HQVfGz-GQAMyymttMsW2NuuCjpZpwKec=O6T5B1Lgg@mail.gmail.com>
-References: <1343370017-8794-1-git-send-email-gzhao@suse.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 5/9] libceph: resubmit linger ops when pg mapping changes
+Date: Mon, 30 Jul 2012 17:40:02 -0500
+Message-ID: <50170D42.5060705@inktank.com>
+References: <1342831308-18815-1-git-send-email-sage@inktank.com> <1342831308-18815-6-git-send-email-sage@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:34278 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754633Ab2G3Vyq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 17:54:46 -0400
-Received: by bkwj10 with SMTP id j10so3025859bkw.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 14:54:44 -0700 (PDT)
-In-Reply-To: <1343370017-8794-1-git-send-email-gzhao@suse.com>
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:49412 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751075Ab2G3WkC (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 18:40:02 -0400
+Received: by gglu4 with SMTP id u4so5439588ggl.19
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 15:40:02 -0700 (PDT)
+In-Reply-To: <1342831308-18815-6-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guangliang Zhao <gzhao@suse.com>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Jul 26, 2012 at 11:20 PM, Guangliang Zhao <gzhao@suse.com> wrote:
-> The bio_pair alloced in bio_chain_clone would not be freed,
-> this will cause a memory leak. It could be freed actually only
-> after 3 times release, because the reference count of bio_pair
-> is initialized to 3 when bio_split and bio_pair_release only
-> drops the reference count.
->
-> The function bio_pair_release must be called three times for
-> releasing bio_pair, and the callback functions of bios on the
-> requests will be called when the last release time in bio_pair_release,
-> however, these functions will also be called in rbd_req_cb. In
-> other words, they will be called twice, and it may cause serious
-> consequences.
->
-> This patch clones bio chian from the origin directly, doesn't use
-> bio_split(without bio_pair). The new bio chain can be release
-> whenever we don't need it.
->
-> Signed-off-by: Guangliang Zhao <gzhao@suse.com>
-> ---
->  drivers/block/rbd.c |   73 +++++++++++++++++++++-----------------------------
->  1 files changed, 31 insertions(+), 42 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 013c7a5..356657d 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -712,51 +712,46 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
->         }
->  }
->
-> -/*
-> - * bio_chain_clone - clone a chain of bios up to a certain length.
-> - * might return a bio_pair that will need to be released.
-> +/**
-> + *      bio_chain_clone - clone a chain of bios up to a certain length.
-> + *      @old: bio to clone
-> + *      @offset: start point for bio clone
-> + *      @len: length of bio chain
-> + *      @gfp_mask: allocation priority
-> + *
-> + *      RETURNS:
-> + *      Pointer to new bio chain on success, NULL on failure.
->   */
-> -static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
-> -                                  struct bio_pair **bp,
-> +static struct bio *bio_chain_clone(struct bio **old, int *offset,
->                                    int len, gfp_t gfpmask)
->  {
->         struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
->         int total = 0;
->
-> -       if (*bp) {
-> -               bio_pair_release(*bp);
-> -               *bp = NULL;
-> -       }
-> -
->         while (old_chain && (total < len)) {
-> +               int need = len - total;
-> +
->                 tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
->                 if (!tmp)
->                         goto err_out;
->
-> -               if (total + old_chain->bi_size > len) {
-> -                       struct bio_pair *bp;
-> -
-> -                       /*
-> -                        * this split can only happen with a single paged bio,
-> -                        * split_bio will BUG_ON if this is not the case
-> -                        */
-> -                       dout("bio_chain_clone split! total=%d remaining=%d"
-> -                            "bi_size=%d\n",
-> -                            (int)total, (int)len-total,
-> -                            (int)old_chain->bi_size);
-> -
-> -                       /* split the bio. We'll release it either in the next
-> -                          call, or it will have to be released outside */
-> -                       bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
-> -                       if (!bp)
-> -                               goto err_out;
-> -
-> -                       __bio_clone(tmp, &bp->bio1);
-> -
-> -                       *next = &bp->bio2;
-> +               __bio_clone(tmp, old_chain);
-> +               tmp->bi_sector += *offset >> SECTOR_SHIFT;
-> +               tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
-> +               /*
-> +                * The bios span across multiple osd objects must be
-> +                * single paged, rbd_merge_bvec would guarantee it.
-> +                * So we needn't worry about other things.
-> +                */
-> +               if (tmp->bi_size - *offset > need) {
-> +                       tmp->bi_size = need;
-> +                       tmp->bi_io_vec->bv_len = need;
-> +                       *offset += need;
->                 } else {
-> -                       __bio_clone(tmp, old_chain);
-> -                       *next = old_chain->bi_next;
-> +                       old_chain = old_chain->bi_next;
-> +                       tmp->bi_size -= *offset;
-> +                       tmp->bi_io_vec->bv_len -= *offset;
-> +                       *offset = 0;
->                 }
->
-There's still some inherent issue here, which is it assumes
-tmp->bi_io_vec points to the only iovec for this bio. I don't think
-that is necessarily true, there may be multiple iovecs, and the size
-only needs to be adjusted for the tail.
+On 07/20/2012 07:41 PM, Sage Weil wrote:
+> The linger op registration (i.e., watch) modifies the object state.  As
+> such, the OSD will reply with success if it has already applied without
+> doing the associated side-effects (setting up the watch session state).
+> If we lose the ACK and resubmit, we will see success but the watch will not
+> be correctly registered and we won't get notifies.
+> 
+> To fix this, always resubmit the linger op with a new tid.  We accomplish
+> this by re-registering as a linger (i.e., 'registered') if we are not yet
+> registered.  Then the second loop will treat this just like a normal
+> case of re-registering.
+> 
+> This mirrors a similar fix on the userland ceph.git, commit 5dd68b95, and
+> ceph bug #2796.
+> 
+> Signed-off-by: Sage Weil <sage@inktank.com>
 
-Yehuda
+I have two minor comments below.  I confess I don't enough about what's
+going on conceptually here to offer a high quality review.  However the
+change seems be doing what you say is needed, so I guess I'll say it
+looks OK to me.  Please try to get another reviewer to sign off though.
+
+Reviewed-by: Alex Elder <elder@inktank.com>)
+
+> ---
+>  net/ceph/osd_client.c |   26 +++++++++++++++++++++-----
+>  1 files changed, 21 insertions(+), 5 deletions(-)
+> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index 07920ca..c605705 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -891,7 +891,9 @@ static void __register_linger_request(struct ceph_osd_client *osdc,
+>  {
+>  	dout("__register_linger_request %p\n", req);
+>  	list_add_tail(&req->r_linger_item, &osdc->req_linger);
+> -	list_add_tail(&req->r_linger_osd, &req->r_osd->o_linger_requests);
+> +	if (req->r_osd)
+> +		list_add_tail(&req->r_linger_osd,
+> +			      &req->r_osd->o_linger_requests);
+>  }
+>  
+>  static void __unregister_linger_request(struct ceph_osd_client *osdc,
+> @@ -1305,8 +1307,9 @@ static void kick_requests(struct ceph_osd_client *osdc, int force_resend)
+>  
+>  	dout("kick_requests %s\n", force_resend ? " (force resend)" : "");
+>  	mutex_lock(&osdc->request_mutex);
+> -	for (p = rb_first(&osdc->requests); p; p = rb_next(p)) {
+> +	for (p = rb_first(&osdc->requests); p; ) {
+>  		req = rb_entry(p, struct ceph_osd_request, r_node);
+> +		p = rb_next(p);
+
+Why is this hunk necessary?  Can the request's rb pointer(s)
+get updated somehow via __map_request() or something?
+
+>  		err = __map_request(osdc, req, force_resend);
+>  		if (err < 0)
+>  			continue;  /* error */
+> @@ -1314,10 +1317,23 @@ static void kick_requests(struct ceph_osd_client *osdc, int force_resend)
+>  			dout("%p tid %llu maps to no osd\n", req, req->r_tid);
+>  			needmap++;  /* request a newer map */
+>  		} else if (err > 0) {
+> -			dout("%p tid %llu requeued on osd%d\n", req, req->r_tid,
+> -			     req->r_osd ? req->r_osd->o_osd : -1);
+> -			if (!req->r_linger)
+> +			if (!req->r_linger) {
+> +				dout("%p tid %llu requeued on osd%d\n", req,
+> +				     req->r_tid,
+> +				     req->r_osd ? req->r_osd->o_osd : -1);
+>  				req->r_flags |= CEPH_OSD_FLAG_RETRY;
+> +			}
+> +		}
+> +		if (req->r_linger && list_empty(&req->r_linger_item)) {
+> +			/*
+> +			 * register as a lingkker so that we will
+                                             ^^
+Is this the Swedish spelling?
+
+> +			 * re-submit below and get a new tid
+> +			 */
+> +			dout("%p tid %llu restart on osd%d\n",
+> +			     req, req->r_tid,
+> +			     req->r_osd ? req->r_osd->o_osd : -1);
+> +			__register_linger_request(osdc, req);
+> +			__unregister_request(osdc, req);
+>  		}
+>  	}
+>  
+> 
+
