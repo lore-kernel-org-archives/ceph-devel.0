@@ -1,152 +1,61 @@
-From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 7/8] libceph: change ceph_con_in_msg_alloc convention to be less weird
-Date: Mon, 30 Jul 2012 08:59:30 -0700
-Message-ID: <1343663971-3221-8-git-send-email-sage@inktank.com>
-References: <1343663971-3221-1-git-send-email-sage@inktank.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Increasing number of PGs
+Date: Mon, 30 Jul 2012 09:16:10 -0700
+Message-ID: <5016B34A.8090902@inktank.com>
+References: <5013B7E7.3020407@bashkirtsev.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45772 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753952Ab2G3P7o (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 11:59:44 -0400
-In-Reply-To: <1343663971-3221-1-git-send-email-sage@inktank.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:43377 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752707Ab2G3QQQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 12:16:16 -0400
+Received: by pbbrp8 with SMTP id rp8so10051665pbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 09:16:16 -0700 (PDT)
+In-Reply-To: <5013B7E7.3020407@bashkirtsev.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>
+To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Cc: ceph-devel@vger.kernel.org
 
-This function's calling convention is very limiting.  In particular,
-we can't return any error other than ENOMEM (and only implicitly),
-which is a problem (see next patch).
+On 07/28/2012 02:59 AM, Vladimir Bashkirtsev wrote:
+> Hello,
+>
+> I am working on optimization of ceph performance: CPU load vs OSD data
+> load. Right now I have 576 PGs in total. Three pools: metadata, data,
+> rbd. Each pool has 192 PGs. data is not used heavily, rbd is in heavy
+> use. In total 6 OSDs in cluster. I have read recommendation about 100
+> PGs per OSD. Roughly I do have 100 PGs per OSD. But now it seems that
+> PGs in data pool are mostly empty while PGs in rbd pool are quite busy.
+> Would it make sense to increase number of PGs to be 100 per rbd pool per
+> OSD? Technically it should take some memory and CPU but because other
+> two pools are virtually stand still it should not make big difference
+> while improving data placement on OSDs (which is currently somewhat
+> skewed).
 
-Instead, return an normal 0 or error code, and make the skip a pointer
-output parameter.  Drop the useless in_hdr argument (we have the con
-pointer).
+If you're not using them, you can delete the data and metadata pools.
+You can always recreate them later, or use different pools for cephfs.
 
-Signed-off-by: Sage Weil <sage@inktank.com>
----
- net/ceph/messenger.c |   56 ++++++++++++++++++++++++++++----------------------
- 1 file changed, 31 insertions(+), 25 deletions(-)
+> So here two questions:
+>
+> 1. Should I increase number of PGs in rbd pool or better leave it where
+> it is?
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index c3b628c..5177af0 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -1733,9 +1733,7 @@ static int read_partial_message_section(struct ceph_connection *con,
- 	return 1;
- }
- 
--static bool ceph_con_in_msg_alloc(struct ceph_connection *con,
--				struct ceph_msg_header *hdr);
--
-+static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip);
- 
- static int read_partial_message_pages(struct ceph_connection *con,
- 				      struct page **pages,
-@@ -1864,9 +1862,14 @@ static int read_partial_message(struct ceph_connection *con)
- 
- 	/* allocate message? */
- 	if (!con->in_msg) {
-+		int skip = 0;
-+
- 		dout("got hdr type %d front %d data %d\n", con->in_hdr.type,
- 		     con->in_hdr.front_len, con->in_hdr.data_len);
--		if (ceph_con_in_msg_alloc(con, &con->in_hdr)) {
-+		ret = ceph_con_in_msg_alloc(con, &skip);
-+		if (ret < 0)
-+			return ret;
-+		if (skip) {
- 			/* skip this message */
- 			dout("alloc_msg said skip message\n");
- 			BUG_ON(con->in_msg);
-@@ -1876,12 +1879,8 @@ static int read_partial_message(struct ceph_connection *con)
- 			con->in_seq++;
- 			return 0;
- 		}
--		if (!con->in_msg) {
--			con->error_msg =
--				"error allocating memory for incoming message";
--			return -ENOMEM;
--		}
- 
-+		BUG_ON(!con->in_msg);
- 		BUG_ON(con->in_msg->con != con);
- 		m = con->in_msg;
- 		m->front.iov_len = 0;    /* haven't read it yet */
-@@ -2715,43 +2714,50 @@ static int ceph_alloc_middle(struct ceph_connection *con, struct ceph_msg *msg)
-  * connection, and save the result in con->in_msg.  Uses the
-  * connection's private alloc_msg op if available.
-  *
-- * Returns true if the message should be skipped, false otherwise.
-- * If true is returned (skip message), con->in_msg will be NULL.
-- * If false is returned, con->in_msg will contain a pointer to the
-- * newly-allocated message, or NULL in case of memory exhaustion.
-+ * Returns 0 on success, or a negative error code.
-+ *
-+ * On success, *skip may be set to 1:
-+ *  - the next message should be skipped and ignored.
-+ *  - con->in_msg == NULL.
-+ * or *skip may be 0:
-+ *  - con->in_msg is non-zero.
-+ * On error (ENOMEM, EAGAIN, ...),
-+ *  - con->in_msg == NULL
-  */
--static bool ceph_con_in_msg_alloc(struct ceph_connection *con,
--				struct ceph_msg_header *hdr)
-+static int ceph_con_in_msg_alloc(struct ceph_connection *con, int *skip)
- {
-+	struct ceph_msg_header *hdr = &con->in_hdr;
- 	int type = le16_to_cpu(hdr->type);
- 	int front_len = le32_to_cpu(hdr->front_len);
- 	int middle_len = le32_to_cpu(hdr->middle_len);
--	int ret;
-+	int ret = 0;
- 
- 	BUG_ON(con->in_msg != NULL);
- 
- 	if (con->ops->alloc_msg) {
--		int skip = 0;
--
- 		mutex_unlock(&con->mutex);
--		con->in_msg = con->ops->alloc_msg(con, hdr, &skip);
-+		con->in_msg = con->ops->alloc_msg(con, hdr, skip);
- 		mutex_lock(&con->mutex);
- 		if (con->in_msg) {
- 			con->in_msg->con = con->ops->get(con);
- 			BUG_ON(con->in_msg->con == NULL);
- 		}
--		if (skip)
-+		if (*skip) {
- 			con->in_msg = NULL;
--
--		if (!con->in_msg)
--			return skip != 0;
-+			return 0;
-+		}
-+		if (!con->in_msg) {
-+			con->error_msg =
-+				"error allocating memory for incoming message";
-+			return -ENOMEM;
-+		}
- 	}
- 	if (!con->in_msg) {
- 		con->in_msg = ceph_msg_new(type, front_len, GFP_NOFS, false);
- 		if (!con->in_msg) {
- 			pr_err("unable to allocate msg type %d len %d\n",
- 			       type, front_len);
--			return false;
-+			return -ENOMEM;
- 		}
- 		con->in_msg->con = con->ops->get(con);
- 		BUG_ON(con->in_msg->con == NULL);
-@@ -2767,7 +2773,7 @@ static bool ceph_con_in_msg_alloc(struct ceph_connection *con,
- 		}
- 	}
- 
--	return false;
-+	return ret;
- }
- 
- 
--- 
-1.7.9.5
+It would be better to increase it from a data balancing point of view,
+but it's not clear that it would help performance.
+
+> 2. Wiki says that increase in PGs is not tested and only should be
+> attempted on empty pool. Date on Wiki is quite old. Is this still an
+> issue? Is it safe to increase PGs number on 0.49 on pool in use?
+
+Right now the number of pgs in a pool can't be increased. This should
+be possible in a couple months. If you can stop I/O to the current pool,
+you can create a new one with more pgs, copy all the data to it, delete
+the original and rename the new one.
+
+Josh
+
+> Regards,
+> Vladimir
 
