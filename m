@@ -1,201 +1,117 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH] ceph: simplify+fix atomic_open
-Date: Mon, 30 Jul 2012 16:11:23 -0700
-Message-ID: <1343689883-16746-1-git-send-email-sage@inktank.com>
+Subject: Re: [PATCH 5/9] libceph: resubmit linger ops when pg mapping
+ changes
+Date: Mon, 30 Jul 2012 16:03:07 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1207301602490.3171@cobra.newdream.net>
+References: <1342831308-18815-1-git-send-email-sage@inktank.com> <1342831308-18815-6-git-send-email-sage@inktank.com> <50170D42.5060705@inktank.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48462 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:48486 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754826Ab2G3XBi (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 19:01:38 -0400
+	with ESMTP id S1754916Ab2G3XDI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 19:03:08 -0400
+In-Reply-To: <50170D42.5060705@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Sage Weil <sage@inktank.com>
+To: Alex Elder <elder@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-The initial ->atomic_open op was carried over from the old intent code,
-which was incomplete and didn't really work.  Replace it with a fresh
-method.  In particular:
+On Mon, 30 Jul 2012, Alex Elder wrote:
+> On 07/20/2012 07:41 PM, Sage Weil wrote:
+> > The linger op registration (i.e., watch) modifies the object state.  As
+> > such, the OSD will reply with success if it has already applied without
+> > doing the associated side-effects (setting up the watch session state).
+> > If we lose the ACK and resubmit, we will see success but the watch will not
+> > be correctly registered and we won't get notifies.
+> > 
+> > To fix this, always resubmit the linger op with a new tid.  We accomplish
+> > this by re-registering as a linger (i.e., 'registered') if we are not yet
+> > registered.  Then the second loop will treat this just like a normal
+> > case of re-registering.
+> > 
+> > This mirrors a similar fix on the userland ceph.git, commit 5dd68b95, and
+> > ceph bug #2796.
+> > 
+> > Signed-off-by: Sage Weil <sage@inktank.com>
+> 
+> I have two minor comments below.  I confess I don't enough about what's
+> going on conceptually here to offer a high quality review.  However the
+> change seems be doing what you say is needed, so I guess I'll say it
+> looks OK to me.  Please try to get another reviewer to sign off though.
+> 
+> Reviewed-by: Alex Elder <elder@inktank.com>)
+> 
+> > ---
+> >  net/ceph/osd_client.c |   26 +++++++++++++++++++++-----
+> >  1 files changed, 21 insertions(+), 5 deletions(-)
+> > 
+> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> > index 07920ca..c605705 100644
+> > --- a/net/ceph/osd_client.c
+> > +++ b/net/ceph/osd_client.c
+> > @@ -891,7 +891,9 @@ static void __register_linger_request(struct ceph_osd_client *osdc,
+> >  {
+> >  	dout("__register_linger_request %p\n", req);
+> >  	list_add_tail(&req->r_linger_item, &osdc->req_linger);
+> > -	list_add_tail(&req->r_linger_osd, &req->r_osd->o_linger_requests);
+> > +	if (req->r_osd)
+> > +		list_add_tail(&req->r_linger_osd,
+> > +			      &req->r_osd->o_linger_requests);
+> >  }
+> >  
+> >  static void __unregister_linger_request(struct ceph_osd_client *osdc,
+> > @@ -1305,8 +1307,9 @@ static void kick_requests(struct ceph_osd_client *osdc, int force_resend)
+> >  
+> >  	dout("kick_requests %s\n", force_resend ? " (force resend)" : "");
+> >  	mutex_lock(&osdc->request_mutex);
+> > -	for (p = rb_first(&osdc->requests); p; p = rb_next(p)) {
+> > +	for (p = rb_first(&osdc->requests); p; ) {
+> >  		req = rb_entry(p, struct ceph_osd_request, r_node);
+> > +		p = rb_next(p);
+> 
+> Why is this hunk necessary?  Can the request's rb pointer(s)
+> get updated somehow via __map_request() or something?
 
- * always attempt to do an atomic open+lookup, both for the create case
-   and for lookups of existing files.
- * fix symlink handling by returning 1 to the VFS so that we can follow
-   the link to its destination. This fixes a longstanding ceph bug (#2392).
+Exactly.
 
-Signed-off-by: Sage Weil <sage@inktank.com>
----
- fs/ceph/dir.c   |   38 ------------------------------------
- fs/ceph/file.c  |   58 +++++++++++++++++++++++++++++++-----------------------
- fs/ceph/super.h |    6 ++--
- 3 files changed, 36 insertions(+), 66 deletions(-)
+> 
+> >  		err = __map_request(osdc, req, force_resend);
+> >  		if (err < 0)
+> >  			continue;  /* error */
+> > @@ -1314,10 +1317,23 @@ static void kick_requests(struct ceph_osd_client *osdc, int force_resend)
+> >  			dout("%p tid %llu maps to no osd\n", req, req->r_tid);
+> >  			needmap++;  /* request a newer map */
+> >  		} else if (err > 0) {
+> > -			dout("%p tid %llu requeued on osd%d\n", req, req->r_tid,
+> > -			     req->r_osd ? req->r_osd->o_osd : -1);
+> > -			if (!req->r_linger)
+> > +			if (!req->r_linger) {
+> > +				dout("%p tid %llu requeued on osd%d\n", req,
+> > +				     req->r_tid,
+> > +				     req->r_osd ? req->r_osd->o_osd : -1);
+> >  				req->r_flags |= CEPH_OSD_FLAG_RETRY;
+> > +			}
+> > +		}
+> > +		if (req->r_linger && list_empty(&req->r_linger_item)) {
+> > +			/*
+> > +			 * register as a lingkker so that we will
+>                                              ^^
+> Is this the Swedish spelling?
 
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index f391f1e..e5b7731 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -633,44 +633,6 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
- 	return dentry;
- }
- 
--int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
--		     struct file *file, unsigned flags, umode_t mode,
--		     int *opened)
--{
--	int err;
--	struct dentry *res = NULL;
--
--	if (!(flags & O_CREAT)) {
--		if (dentry->d_name.len > NAME_MAX)
--			return -ENAMETOOLONG;
--
--		err = ceph_init_dentry(dentry);
--		if (err < 0)
--			return err;
--
--		return ceph_lookup_open(dir, dentry, file, flags, mode, opened);
--	}
--
--	if (d_unhashed(dentry)) {
--		res = ceph_lookup(dir, dentry, 0);
--		if (IS_ERR(res))
--			return PTR_ERR(res);
--
--		if (res)
--			dentry = res;
--	}
--
--	/* We don't deal with positive dentries here */
--	if (dentry->d_inode)
--		return finish_no_open(file, res);
--
--	*opened |= FILE_CREATED;
--	err = ceph_lookup_open(dir, dentry, file, flags, mode, opened);
--	dput(res);
--
--	return err;
--}
--
- /*
-  * If we do a create but get no trace back from the MDS, follow up with
-  * a lookup (the VFS expects us to link up the provided dentry).
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 1b81d6c..8975832 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -4,6 +4,7 @@
- #include <linux/sched.h>
- #include <linux/slab.h>
- #include <linux/file.h>
-+#include <linux/mount.h>
- #include <linux/namei.h>
- #include <linux/writeback.h>
- 
-@@ -106,9 +107,6 @@ static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
- }
- 
- /*
-- * If the filp already has private_data, that means the file was
-- * already opened by intent during lookup, and we do nothing.
-- *
-  * If we already have the requisite capabilities, we can satisfy
-  * the open request locally (no need to request new caps from the
-  * MDS).  We do, however, need to inform the MDS (asynchronously)
-@@ -207,24 +205,29 @@ out:
- 
- 
- /*
-- * Do a lookup + open with a single request.
-- *
-- * If this succeeds, but some subsequent check in the vfs
-- * may_open() fails, the struct *file gets cleaned up (i.e.
-- * ceph_release gets called).  So fear not!
-+ * Do a lookup + open with a single request.  If we get a non-existent
-+ * file or symlink, return 1 so the VFS can retry.
-  */
--int ceph_lookup_open(struct inode *dir, struct dentry *dentry,
-+int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 		     struct file *file, unsigned flags, umode_t mode,
- 		     int *opened)
- {
- 	struct ceph_fs_client *fsc = ceph_sb_to_client(dir->i_sb);
- 	struct ceph_mds_client *mdsc = fsc->mdsc;
- 	struct ceph_mds_request *req;
--	struct dentry *ret;
-+	struct dentry *dn;
- 	int err;
- 
--	dout("ceph_lookup_open dentry %p '%.*s' flags %d mode 0%o\n",
--	     dentry, dentry->d_name.len, dentry->d_name.name, flags, mode);
-+	dout("atomic_open %p dentry %p '%.*s' flags %d mode 0%o\n",
-+	     dir, dentry, dentry->d_name.len, dentry->d_name.name,
-+	     flags, mode);
-+
-+	if (dentry->d_name.len > NAME_MAX)
-+		return -ENAMETOOLONG;
-+
-+	err = ceph_init_dentry(dentry);
-+	if (err < 0)
-+		return err;
- 
- 	/* do the open */
- 	req = prepare_open_request(dir->i_sb, flags, mode);
-@@ -241,22 +244,27 @@ int ceph_lookup_open(struct inode *dir, struct dentry *dentry,
- 				   (flags & (O_CREAT|O_TRUNC)) ? dir : NULL,
- 				   req);
- 	err = ceph_handle_snapdir(req, dentry, err);
--	if (err)
--		goto out;
--	if ((flags & O_CREAT) && !req->r_reply_info.head->is_dentry)
-+	if (err == 0 && (flags & O_CREAT) && !req->r_reply_info.head->is_dentry)
- 		err = ceph_handle_notrace_create(dir, dentry);
--	if (err)
--		goto out;
--	err = finish_open(file, req->r_dentry, ceph_open, opened);
--out:
--	ret = ceph_finish_lookup(req, dentry, err);
--	ceph_mdsc_put_request(req);
--	dout("ceph_lookup_open result=%p\n", ret);
- 
--	if (IS_ERR(ret))
--		return PTR_ERR(ret);
-+	dn = ceph_finish_lookup(req, dentry, err);
-+	if (IS_ERR(dn)) {
-+		err = PTR_ERR(dn);
-+		goto out_err;
-+	}
-+	if (dn || dentry->d_inode == NULL || S_ISLNK(dentry->d_inode->i_mode)) {
-+		finish_no_open(file, dn);
-+		err = 1;
-+		goto out_err;
-+	}
-+	dout("file %p *opened = %d dentry %p\n", file, *opened, dentry);
-+	err = finish_open(file, dentry, ceph_open, opened);
-+	dout("finish_open returns %d mode is 0%o\n", err,
-+	     dentry->d_inode->i_mode);
- 
--	dput(ret);
-+out_err:
-+	ceph_mdsc_put_request(req);
-+	dout("ceph_atomic_open result=%d\n", err);
- 	return err;
- }
- 
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index ebc95cc..66ebe72 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -806,9 +806,9 @@ extern int ceph_copy_from_page_vector(struct page **pages,
- 				    loff_t off, size_t len);
- extern struct page **ceph_alloc_page_vector(int num_pages, gfp_t flags);
- extern int ceph_open(struct inode *inode, struct file *file);
--extern int ceph_lookup_open(struct inode *dir, struct dentry *dentry,
--			     struct file *od, unsigned flags,
--			     umode_t mode, int *opened);
-+extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
-+			    struct file *file, unsigned flags, umode_t mode,
-+			    int *opened);
- extern int ceph_release(struct inode *inode, struct file *filp);
- 
- /* dir.c */
--- 
-1.7.9
+Sigh, will fix!
 
+> 
+> > +			 * re-submit below and get a new tid
+> > +			 */
+> > +			dout("%p tid %llu restart on osd%d\n",
+> > +			     req, req->r_tid,
+> > +			     req->r_osd ? req->r_osd->o_osd : -1);
+> > +			__register_linger_request(osdc, req);
+> > +			__unregister_request(osdc, req);
+> >  		}
+> >  	}
+> >  
+> > 
+> 
+> 
