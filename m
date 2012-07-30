@@ -1,64 +1,64 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH 2/9] libceph: support crush tunables
-Date: Mon, 30 Jul 2012 16:45:13 -0700
-Message-ID: <CAC-hyiE766iAXMDA0W=pg7i=hZc-TqOtYDm-xGod1NVE_wSbzg@mail.gmail.com>
-References: <1342831308-18815-1-git-send-email-sage@inktank.com>
-	<1342831308-18815-3-git-send-email-sage@inktank.com>
-	<CAC-hyiGu--5SUgbexOM-8o-kzRzXLV+5Mve+P-6dYcfo-AX78w@mail.gmail.com>
-	<alpine.DEB.2.00.1207301613430.31602@cobra.newdream.net>
+From: =?UTF-8?B?6KKB5Yas?= <yuandong1222@gmail.com>
+Subject: Re: RadosGW on ubuntu is OK but CentOS fails
+Date: Tue, 31 Jul 2012 07:47:03 +0800
+Message-ID: <CAMm-wc+UY6su9PX70XMKhL_=+22BTJUOyYt10+PMEy20UU_3JA@mail.gmail.com>
+References: <CAMm-wcJ7aFjgW_ROb-=+Mk9RdRB_NCoFCChA+8U_s8jd5cgFOw@mail.gmail.com>
+	<CADvuQRE8Xb+P=3Jo2vOmn7Z93nguugLUvDys0rVc2euc6muPDg@mail.gmail.com>
+	<CAMm-wcKeLa_pBASEBxDY=MDdiaMFFnS03N4YO3OG2=NCqswYUw@mail.gmail.com>
+	<CADvuQRH7y+yM=6Muva_FQ3ku-Wd3ZJwkrV_w0NXzncJuMMKFxg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:44816 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751291Ab2G3XpO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 19:45:14 -0400
-Received: by bkwj10 with SMTP id j10so3047596bkw.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 16:45:13 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1207301613430.31602@cobra.newdream.net>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:51823 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751291Ab2G3XrE convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 19:47:04 -0400
+Received: by qcro28 with SMTP id o28so3356090qcr.19
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 16:47:03 -0700 (PDT)
+In-Reply-To: <CADvuQRH7y+yM=6Muva_FQ3ku-Wd3ZJwkrV_w0NXzncJuMMKFxg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org, caleb miles <caleb.miles@inktank.com>
+To: Tommi Virtanen <tv@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jul 30, 2012 at 4:14 PM, Sage Weil <sage@inktank.com> wrote:
->
-> On Tue, 24 Jul 2012, Yehuda Sadeh wrote:
-> > On Fri, Jul 20, 2012 at 5:41 PM, Sage Weil <sage@inktank.com> wrote:
-> > > From: caleb miles <caleb.miles@inktank.com>
-> > >
-> > > The server side recently added support for tuning some magic
-> > > crush variables. Decode these variables if they are present, or use
-> > > the
-> > > default values if they are not present.
-> > >
-> > > Corresponds to ceph.git commit
-> > > 89af369c25f274fe62ef730e5e8aad0c54f1e5a5.
-> > >
-> > > Signed-off-by: caleb miles <caleb.miles@inktank.com>
-> > > Reviewed-by: Sage Weil <sage@inktank.com>
-> > > ---
-> > >  include/linux/ceph/ceph_features.h |    4 ++-
-> > >  include/linux/crush/crush.h        |    8 +++++++
-> > >  net/ceph/crush/mapper.c            |   13 ++++++-----
-> > >  net/ceph/osdmap.c                  |   39
-> > > ++++++++++++++++++++++++++++++++++++
-> > >  4 files changed, 57 insertions(+), 7 deletions(-)
-> > >
-> > > diff --git a/include/linux/ceph/ceph_features.h
-> > > b/include/linux/ceph/ceph_features.h
-> > > index 342f93d..df25dcf 100644
-> > > --- a/include/linux/ceph/ceph_features.h
-> > > +++ b/include/linux/ceph/ceph_features.h
-> > > @@ -12,12 +12,14 @@
-> > >  #define CEPH_FEATURE_MONNAMES       (1<<5)
-> > >  #define CEPH_FEATURE_RECONNECT_SEQ  (1<<6)
-> > >  #define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
-> > > +#define CEPH_FEATURE_CRUSH_TUNABLES (1<<18)
-> >
-> > any reason why this is 18 and not 8?
->
-> 9-17 are used.. just not implemented/used by the kernel code.
->
+I will try them and report lately.
 
-Maybe mention it somewhere in a comment, to avoid future confusion?
+Thanks.
+
+On 31 July 2012 07:41, Tommi Virtanen <tv@inktank.com> wrote:
+> On Mon, Jul 30, 2012 at 4:24 PM, =D4=AC=B6=AC <yuandong1222@gmail.com=
+> wrote:
+>>> - filesystem used for OSDs
+>> Both instance use btrfs file system. Is there some difference of btr=
+fs
+>> between CentOS and Ubuntu?
+>>
+>>> - kernel version
+>> CentOS Kernel Version: 3.4.0
+>> Ubuntu Kernel Version: 3.2.0
+>
+> There's five months of active development between those two kernels,
+> including plenty of btrfs work:
+> http://kernelnewbies.org/Linux_3.4#head-8ad9e3d4ad73e1da565f52c2abbe9=
+acf7efdc614
+>
+> I'd recommend building the latest & greatest kernel, same version, on
+> both your ubuntu and centos servers. That'll make the comparison more
+> even.
+>
+> Additionally, you might want to try xfs.
+
+
+
+--=20
+=D4=AC=B6=AC
+Tel:13573888215
+Email:yuandong1222@gmail.com
+QQ:10200230
+MSN:yuandong1222@hotmail.com
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
