@@ -1,86 +1,61 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 2/8] ceph: update MAINTAINERS file
-Date: Mon, 30 Jul 2012 18:09:56 -0500
-Message-ID: <50171444.2070502@inktank.com>
-References: <1343663971-3221-1-git-send-email-sage@inktank.com> <1343663971-3221-3-git-send-email-sage@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH 7/9] ceph: close old con before reopening on mds
+ reconnect
+Date: Mon, 30 Jul 2012 16:11:07 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1207301611010.31602@cobra.newdream.net>
+References: <1342831308-18815-1-git-send-email-sage@inktank.com> <1342831308-18815-8-git-send-email-sage@inktank.com> <CAC-hyiHfbYof7mXjLOFh=QDBYDmSHfEeoBMaic0SKUkzjmzkhg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:52972 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754929Ab2G3XJ4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 19:09:56 -0400
-Received: by gglu4 with SMTP id u4so5465117ggl.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 16:09:56 -0700 (PDT)
-In-Reply-To: <1343663971-3221-3-git-send-email-sage@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:48538 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755027Ab2G3XLH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 19:11:07 -0400
+In-Reply-To: <CAC-hyiHfbYof7mXjLOFh=QDBYDmSHfEeoBMaic0SKUkzjmzkhg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
+To: Yehuda Sadeh <yehuda@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 07/30/2012 10:59 AM, Sage Weil wrote:
->  * shiny new inktank.com email addresses
->  * add include/linux/crush directory (previous oversight)
+On Tue, 24 Jul 2012, Yehuda Sadeh wrote:
+> On Fri, Jul 20, 2012 at 5:41 PM, Sage Weil <sage@inktank.com> wrote:
+> > When we detect a mds session reset, close the old ceph_connection before
+> > reopening it.  This ensures we clean up the old socket properly and keep
+> > the ceph_connection state correct.
+> >
+> > Signed-off-by: Sage Weil <sage@inktank.com>
+> > ---
+> >  fs/ceph/mds_client.c |    1 +
+> >  1 files changed, 1 insertions(+), 0 deletions(-)
+> >
+> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> > index 39b76d6..a5a7354 100644
+> > --- a/fs/ceph/mds_client.c
+> > +++ b/fs/ceph/mds_client.c
+> > @@ -2518,6 +2518,7 @@ static void send_mds_reconnect(struct ceph_mds_client *mdsc,
+> >         session->s_state = CEPH_MDS_SESSION_RECONNECTING;
+> >         session->s_seq = 0;
+> >
+> > +       ceph_con_close(&session->s_con);
+> >         ceph_con_open(&session->s_con,
 > 
-> Signed-off-by: Sage Weil <sage@inktank.com>
+> Should we also BUG_ON in ceph_con_open if connection is not closed?
 
-If you implement my suggestions below, then:
-
-Reviewed-by: Alex Elder <elder@inktank.com>
-
-> ---
->  MAINTAINERS |    9 +++++----
->  1 file changed, 5 insertions(+), 4 deletions(-)
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index fe643e7..b8af81a 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -1761,15 +1761,16 @@ F:	arch/powerpc/oprofile/*cell*
->  F:	arch/powerpc/platforms/cell/
->  
->  CEPH DISTRIBUTED FILE SYSTEM CLIENT
-> -M:	Sage Weil <sage@newdream.net>
-> +M:	Sage Weil <sage@inktank.com>
->  L:	ceph-devel@vger.kernel.org
-> -W:	http://ceph.newdream.net/
-> +W:	http://ceph.ceph/
-
-        http://ceph.com/   ?
-
-
->  T:	git git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git
->  S:	Supported
->  F:	Documentation/filesystems/ceph.txt
->  F:	fs/ceph
->  F:	net/ceph
->  F:	include/linux/ceph
-> +F:	include/linux/crush
->  
->  CERTIFIED WIRELESS USB (WUSB) SUBSYSTEM:
->  L:	linux-usb@vger.kernel.org
-> @@ -5596,8 +5597,8 @@ F:	arch/hexagon/
->  
->  RADOS BLOCK DEVICE (RBD)
->  F:	include/linux/qnxtypes.h
-
-Delete this ^^^.
-
-> -M:	Yehuda Sadeh <yehuda@hq.newdream.net>
-> -M:	Sage Weil <sage@newdream.net>
-> +M:	Yehuda Sadeh <yehuda@inktank.com>
-> +M:	Sage Weil <sage@inktank.com>
->  M:	ceph-devel@vger.kernel.org
-
-Add this:
-T:	git git://git.kernel.org/pub/scm/linux/kernel/git/sage/ceph-client.git
-
->  S:	Supported
->  F:	drivers/block/rbd.c
-
-Add this:
-F:     drivers/block/rbd_types.h
+Yeah, adding that.
 
 > 
-
+> >                       CEPH_ENTITY_TYPE_MDS, mds,
+> >                       ceph_mdsmap_get_addr(mdsc->mdsmap, mds));
+> > --
+> > 1.7.9
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
