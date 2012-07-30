@@ -1,98 +1,53 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH] rbd: kill rbd_init_watch_dev()
-Date: Mon, 30 Jul 2012 17:48:42 -0500
-Message-ID: <50170F4A.8030505@inktank.com>
-References: <50119656.9080709@inktank.com> <501700B1.8030002@inktank.com>
+Subject: Re: [PATCH 1/8] libceph: be less chatty about stray replies
+Date: Mon, 30 Jul 2012 18:00:17 -0500
+Message-ID: <50171201.40703@inktank.com>
+References: <1343663971-3221-1-git-send-email-sage@inktank.com> <1343663971-3221-2-git-send-email-sage@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:36228 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754715Ab2G3Wsm (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 18:48:42 -0400
-Received: by yenl2 with SMTP id l2so5448394yen.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 15:48:42 -0700 (PDT)
-In-Reply-To: <501700B1.8030002@inktank.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:40551 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754599Ab2G3XAS (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 19:00:18 -0400
+Received: by yhmm54 with SMTP id m54so5463162yhm.19
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 16:00:17 -0700 (PDT)
+In-Reply-To: <1343663971-3221-2-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 07/30/2012 04:46 PM, Josh Durgin wrote:
-> On 07/26/2012 12:11 PM, Alex Elder wrote:
->> When an rbd image is mapped, a watch request is issued so that the
->> client will get notified in the event the image header object
->> changes.  This is done using rbd_init_watch_dev(), which calls
->> rbd_req_sync_watch().
->>
->> rbd_init_watch_dev() is organized as a loop, arranging to re-issue
->> the request after refreshing the header if -ERANGE ever gets
->> returned.  But the only way rbd_req_sync_watch() will return -ERANGE
->> is if the CEPH_OSD_OP_WATCH operation returns that, which it will
->> not.
->>
->> As a result, the whole looping structure and in fact the whole
->> function becomes excessive.  So get rid of rbd_init_watch_dev(),
->> and call rbd_req_sync_watch() directly in the one place it's used.
+On 07/30/2012 10:59 AM, Sage Weil wrote:
+> There are many (normal) conditions that can lead to us getting
+> unexpected replies, include cluster topology changes, osd failures,
+> and timeouts.  There's no need to spam the console about it.
 > 
-> Instead of getting rid of this loop, we should make it
-> send a compound operation consisting of (CEPH_OSD_OP_ASSERT_VER,
-> CEPH_OSD_OP_WATCH). Then we will get -ERANGE if our version
-> of the header is out of data, so we don't lose header updates
-> before the watch is established.
+> Signed-off-by: Sage Weil <sage@inktank.com>
 
-I don't have compound operations going yet, but now I see why it
-may have been written this way.  So I'll drop this patch, and
-will make a note to re-visit this spot later.
+Looks good.
 
-					-Alex
+Reviewed-by: Alex Elder <elder@inktank.com>
 
-> Josh
+> ---
+>  net/ceph/osd_client.c |    4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
->> Signed-off-by: Alex Elder <elder@inktank.com>
->> ---
->>   drivers/block/rbd.c |   18 +-----------------
->>   1 file changed, 1 insertion(+), 17 deletions(-)
->>
->> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index 94d0745..71e3f3b 100644
->> --- a/drivers/block/rbd.c
->> +++ b/drivers/block/rbd.c
->> @@ -2191,22 +2191,6 @@ static void rbd_bus_del_dev(struct rbd_device
->> *rbd_dev)
->>       device_unregister(&rbd_dev->dev);
->>   }
->>
->> -static int rbd_init_watch_dev(struct rbd_device *rbd_dev)
->> -{
->> -    int ret, rc;
->> -
->> -    do {
->> -        ret = rbd_req_sync_watch(rbd_dev);
->> -        if (ret == -ERANGE) {
->> -            rc = rbd_refresh_header(rbd_dev, NULL);
->> -            if (rc < 0)
->> -                return rc;
->> -        }
->> -    } while (ret == -ERANGE);
->> -
->> -    return ret;
->> -}
->> -
->>   static atomic64_t rbd_id_max = ATOMIC64_INIT(0);
->>
->>   /*
->> @@ -2510,7 +2494,7 @@ static ssize_t rbd_add(struct bus_type *bus,
->>       if (rc)
->>           goto err_out_bus;
->>
->> -    rc = rbd_init_watch_dev(rbd_dev);
->> +    rc = rbd_req_sync_watch(rbd_dev);
->>       if (rc)
->>           goto err_out_bus;
->>
-> 
-> 
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index ad427e6..42119c0 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -2037,8 +2037,8 @@ static struct ceph_msg *get_reply(struct ceph_connection *con,
+>  	if (!req) {
+>  		*skip = 1;
+>  		m = NULL;
+> -		pr_info("get_reply unknown tid %llu from osd%d\n", tid,
+> -			osd->o_osd);
+> +		dout("get_reply unknown tid %llu from osd%d\n", tid,
+> +		     osd->o_osd);
+>  		goto out;
+>  	}
+>  
 > 
 
