@@ -1,210 +1,216 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH 2/9] libceph: support crush tunables
-Date: Mon, 30 Jul 2012 16:14:06 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1207301613430.31602@cobra.newdream.net>
-References: <1342831308-18815-1-git-send-email-sage@inktank.com> <1342831308-18815-3-git-send-email-sage@inktank.com> <CAC-hyiGu--5SUgbexOM-8o-kzRzXLV+5Mve+P-6dYcfo-AX78w@mail.gmail.com>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH] rbd: __rbd_init_snaps_header() bug
+Date: Mon, 30 Jul 2012 18:16:10 -0500
+Message-ID: <501715BA.70407@inktank.com>
+References: <50119685.4010106@inktank.com> <5017132C.9010407@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48546 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754864Ab2G3XOH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 19:14:07 -0400
-In-Reply-To: <CAC-hyiGu--5SUgbexOM-8o-kzRzXLV+5Mve+P-6dYcfo-AX78w@mail.gmail.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:50768 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754864Ab2G3XQL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 19:16:11 -0400
+Received: by yenl2 with SMTP id l2so5473464yen.19
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 16:16:10 -0700 (PDT)
+In-Reply-To: <5017132C.9010407@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel@vger.kernel.org, caleb miles <caleb.miles@inktank.com>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, 24 Jul 2012, Yehuda Sadeh wrote:
-> On Fri, Jul 20, 2012 at 5:41 PM, Sage Weil <sage@inktank.com> wrote:
-> > From: caleb miles <caleb.miles@inktank.com>
-> >
-> > The server side recently added support for tuning some magic
-> > crush variables. Decode these variables if they are present, or use the
-> > default values if they are not present.
-> >
-> > Corresponds to ceph.git commit 89af369c25f274fe62ef730e5e8aad0c54f1e5a5.
-> >
-> > Signed-off-by: caleb miles <caleb.miles@inktank.com>
-> > Reviewed-by: Sage Weil <sage@inktank.com>
-> > ---
-> >  include/linux/ceph/ceph_features.h |    4 ++-
-> >  include/linux/crush/crush.h        |    8 +++++++
-> >  net/ceph/crush/mapper.c            |   13 ++++++-----
-> >  net/ceph/osdmap.c                  |   39 ++++++++++++++++++++++++++++++++++++
-> >  4 files changed, 57 insertions(+), 7 deletions(-)
-> >
-> > diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
-> > index 342f93d..df25dcf 100644
-> > --- a/include/linux/ceph/ceph_features.h
-> > +++ b/include/linux/ceph/ceph_features.h
-> > @@ -12,12 +12,14 @@
-> >  #define CEPH_FEATURE_MONNAMES       (1<<5)
-> >  #define CEPH_FEATURE_RECONNECT_SEQ  (1<<6)
-> >  #define CEPH_FEATURE_DIRLAYOUTHASH  (1<<7)
-> > +#define CEPH_FEATURE_CRUSH_TUNABLES (1<<18)
+On 07/30/2012 06:05 PM, Josh Durgin wrote:
+> On 07/26/2012 12:12 PM, Alex Elder wrote:
+>> There is a bug in the way __rbd_init_snaps_header() handles newly-
+>> discovered snapshots, in the unusual case where the new snapshot id
+>> is less than an existing rbd snapshot id.
+>>
+>>
+>> When a new snapshot for an rbd image is created it is assigned a new
+>> snapshot id.  The client requests the id from a monitor, and later
+>> updates the osds with information about the snapshot.  The sequence
+>> of snapshot ids is monotonically increasing, which guarantees each
+>> is unique.  And typically all new snapshots will have higher ids
+>> than any others a client has encountered.
+>>
+>> Because of the delay between getting assigned a snapshot id and
+>> recording the snapshot, there is a possible race between two clients
+>> requesting new snapshots on the same rbd image.  It's possible in
+>> this case for the client granted a higher id to be the first to
+>> update the set of snapshots for the rbd image.  This leaves a sort
+>> of gap in the set of snapshots until the other client's update gets
+>> recorded.
+>>
+>> This is an unlikely scenario, but it appears to be possible.  I'm
+>> not sure whether we even support multiple concurrent clients for the
+>> same rbd image.  However there is code in place to handle this case
+>> and it's wrong, so it needs to be fixed.
 > 
-> any reason why this is 18 and not 8?
+> To fully handle this race, we'd need to sort the snapshot context and
+> set its seq to the maximum id, instead of the lower id set by the race.
 
-9-17 are used.. just not implemented/used by the kernel code.
+I had assumed both of these were true.  In fact, I was under the
+impression that the value of "seq" was precisely that--the maximum
+snapshot id issued for this rbd image by the server.
 
+> If we don't do this, the race makes the image unwritable since the
+> non-sorted snapshot context would be rejected by the osds.
+
+Looking at the kernel client only (which was how I found this bug,
+via inspection), this code is still buggy and could cause a kernel
+fault if it were to be hit.
+
+The risk is low right now, though.  So I'll just set this patch
+aside now until we can get a chance to discuss the best course
+of action.
+
+					-Alex
+
+> This would complicate things a bunch, so I'm not sure if we should
+> try to handle this bug on the client side. I've got a fix to prevent
+> it from happening in the first place, and as you said, it's rare,
+> and requires you to be taking snapshots of the same image from multiple
+> clients at once, which is generally not a good idea (that is, writing
+> to the image from multiple clients).
 > 
-> >
-> >  /*
-> >   * Features supported.
-> >   */
-> >  #define CEPH_FEATURES_SUPPORTED_DEFAULT  \
-> > -       (CEPH_FEATURE_NOSRCADDR)
-> > +       (CEPH_FEATURE_NOSRCADDR |        \
-> > +        CEPH_FEATURE_CRUSH_TUNABLES)
-> >
-> >  #define CEPH_FEATURES_REQUIRED_DEFAULT   \
-> >         (CEPH_FEATURE_NOSRCADDR)
-> > diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-> > index 7c47508..25baa28 100644
-> > --- a/include/linux/crush/crush.h
-> > +++ b/include/linux/crush/crush.h
-> > @@ -154,6 +154,14 @@ struct crush_map {
-> >         __s32 max_buckets;
-> >         __u32 max_rules;
-> >         __s32 max_devices;
-> > +
-> > +       /* choose local retries before re-descent */
-> > +       __u32 choose_local_tries;
-> > +       /* choose local attempts using a fallback permutation before
-> > +        * re-descent */
-> > +       __u32 choose_local_fallback_tries;
-> > +       /* choose attempts before giving up */
-> > +       __u32 choose_total_tries;
-> >  };
-> >
-> >
-> > diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-> > index d7edc24..35fce75 100644
-> > --- a/net/ceph/crush/mapper.c
-> > +++ b/net/ceph/crush/mapper.c
-> > @@ -306,7 +306,6 @@ static int crush_choose(const struct crush_map *map,
-> >         int item = 0;
-> >         int itemtype;
-> >         int collide, reject;
-> > -       const unsigned int orig_tries = 5; /* attempts before we fall back to search */
-> >
-> >         dprintk("CHOOSE%s bucket %d x %d outpos %d numrep %d\n", recurse_to_leaf ? "_LEAF" : "",
-> >                 bucket->id, x, outpos, numrep);
-> > @@ -351,8 +350,9 @@ static int crush_choose(const struct crush_map *map,
-> >                                         reject = 1;
-> >                                         goto reject;
-> >                                 }
-> > -                               if (flocal >= (in->size>>1) &&
-> > -                                   flocal > orig_tries)
-> > +                               if (map->choose_local_fallback_tries > 0 &&
-> > +                                   flocal >= (in->size>>1) &&
-> > +                                   flocal > map->choose_local_fallback_tries)
+>> The job of __rbd_init_snaps_header() is to compare an rbd's existing
+>> list of snapshots to a new set, and remove any existing snapshots
+>> that are not present in the new set and create any new ones not
+>> present in the existing set.
+>>
+>> If any new snapshots exist after the entire list of existing ones
+>> has been examined, all the new ones that remain need to be created.
+>> The logic for handling these last snapshots correct.
+>>
+>> However, if a new snapshot is found whose id is less than an
+>> existing one, the logic for handling this is wrong.  The basic
+>> problem is that the name and current id used here are taken from
+>> a place one position beyond where they should be.  In the event
+>> this block of code is executed the first pass through the outer
+>> loop, for example, these values will refer to invalid memory.
+>>
+>> The fix is to make this block of code more closely match the
+>> block that handles adding new snapshots at the end.  There are
+>> three differences:
+>>      - we use a do..while loop because we know we initially have an
+>>        entry to process.
+>>      - we insert the new entry at a position within the list instead
+>>        of at the beginning
+>>      - because we use it in the loop condition, we need to update
+>>        our notion of "current id" each pass through.
+>>
+>> Signed-off-by: Alex Elder <elder@inktank.com>
+>> ---
+>>   drivers/block/rbd.c |   55
+>> +++++++++++++++++++++++++++++----------------------
+>>   1 file changed, 31 insertions(+), 24 deletions(-)
+>>
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>> index 71e3f3b..da09c0d 100644
+>> --- a/drivers/block/rbd.c
+>> +++ b/drivers/block/rbd.c
+>> @@ -2090,13 +2090,14 @@ static int __rbd_init_snaps_header(struct
+>> rbd_device *rbd_dev)
+>>   {
+>>       const char *name, *first_name;
+>>       int i = rbd_dev->header.total_snaps;
+>> -    struct rbd_snap *snap, *old_snap = NULL;
+>> +    struct rbd_snap *snap;
+>>       struct list_head *p, *n;
+>>
+>>       first_name = rbd_dev->header.snap_names;
+>>       name = first_name + rbd_dev->header.snap_names_len;
+>>
+>>       list_for_each_prev_safe(p, n, &rbd_dev->snaps) {
+>> +        struct rbd_snap *old_snap;
+>>           u64 cur_id;
+>>
+>>           old_snap = list_entry(p, struct rbd_snap, node);
+>> @@ -2104,12 +2105,16 @@ static int __rbd_init_snaps_header(struct
+>> rbd_device *rbd_dev)
+>>           if (i)
+>>               cur_id = rbd_dev->header.snapc->snaps[i - 1];
+>>
+>> +        /*
+>> +         * If old id is not present in the new context, or
+>> +         * if there are no more snapshots in the new
+>> +         * context, this snapshot should be removed.
+>> +         */
+>>           if (!i || old_snap->id < cur_id) {
+>>               /*
+>> -             * old_snap->id was skipped, thus was
+>> -             * removed.  If this rbd_dev is mapped to
+>> -             * the removed snapshot, record that it no
+>> -             * longer exists, to prevent further I/O.
+>> +             * If this rbd_dev is mapped to the removed
+>> +             * snapshot, record that it no longer exists,
+>> +             * to prevent further I/O.
+>>                */
+>>               if (rbd_dev->snap_id == old_snap->id)
+>>                   rbd_dev->snap_exists = false;
+>> @@ -2122,34 +2127,36 @@ static int __rbd_init_snaps_header(struct
+>> rbd_device *rbd_dev)
+>>               name = rbd_prev_snap_name(name, first_name);
+>>               continue;
+>>           }
+>> -        for (; i > 0;
+>> -             i--, name = rbd_prev_snap_name(name, first_name)) {
+>> -            if (!name) {
+>> -                WARN_ON(1);
+>> +
+>> +        /*
+>> +         * A new snapshot (or possibly more than one)
+>> +         * appeared in the middle of our set of snapshots.
+>> +         * This could happen of two hosts raced while
 > 
-> is flocal right here or should it be ftotal?
+> of -> if, and hosts -> clients (could be the same host, i.e. via the
+> rbd snap create).
 > 
-> >                                         item = bucket_perm_choose(in, x, r);
-> >                                 else
-> >                                         item = crush_bucket_choose(in, x, r);
-> > @@ -422,13 +422,14 @@ reject:
-> >                                         ftotal++;
-> >                                         flocal++;
-> >
-> > -                                       if (collide && flocal < 3)
-> > +                                       if (collide && flocal <= map->choose_local_tries)
-> >                                                 /* retry locally a few times */
-> >                                                 retry_bucket = 1;
-> > -                                       else if (flocal <= in->size + orig_tries)
-> > +                                       else if (map->choose_local_fallback_tries > 0 &&
-> > +                                                flocal <= in->size + map->choose_local_fallback_tries)
-> >                                                 /* exhaustive bucket search */
-> >                                                 retry_bucket = 1;
-> > -                                       else if (ftotal < 20)
-> > +                                       else if (ftotal <= map->choose_total_tries)
-> >                                                 /* then retry descent */
-> >                                                 retry_descent = 1;
-> >                                         else
-> > diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> > index 9600674..3124b71 100644
-> > --- a/net/ceph/osdmap.c
-> > +++ b/net/ceph/osdmap.c
-> > @@ -135,6 +135,21 @@ bad:
-> >         return -EINVAL;
-> >  }
-> >
-> > +static int skip_name_map(void **p, void *end)
-> > +{
-> > +        int len;
-> > +        ceph_decode_32_safe(p, end, len ,bad);
-> > +        while (len--) {
-> > +                int strlen;
-> use u32 for strlen
-> 
-> > +                *p += sizeof(u32);
-> > +                ceph_decode_32_safe(p, end, strlen, bad);
-> > +                *p += strlen;
-> > +}
-> > +        return 0;
-> > +bad:
-> > +        return -EINVAL;
-> > +}
-> > +
-> >  static struct crush_map *crush_decode(void *pbyval, void *end)
-> >  {
-> >         struct crush_map *c;
-> > @@ -143,6 +158,7 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
-> >         void **p = &pbyval;
-> >         void *start = pbyval;
-> >         u32 magic;
-> > +       u32 num_name_maps;
-> >
-> >         dout("crush_decode %p to %p len %d\n", *p, end, (int)(end - *p));
-> >
-> > @@ -150,6 +166,11 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
-> >         if (c == NULL)
-> >                 return ERR_PTR(-ENOMEM);
-> >
-> > +        /* set tunables to default values */
-> > +        c->choose_local_tries = 2;
-> > +        c->choose_local_fallback_tries = 5;
-> > +        c->choose_total_tries = 19;
-> > +
-> >         ceph_decode_need(p, end, 4*sizeof(u32), bad);
-> >         magic = ceph_decode_32(p);
-> >         if (magic != CRUSH_MAGIC) {
-> > @@ -297,7 +318,25 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
-> >         }
-> >
-> >         /* ignore trailing name maps. */
-> > +        for (num_name_maps = 0; num_name_maps < 3; num_name_maps++) {
-> > +                err = skip_name_map(p, end);
-> > +                if (err < 0)
-> > +                        goto done;
-> > +        }
-> > +
-> > +        /* tunables */
-> > +        ceph_decode_need(p, end, 3*sizeof(u32), done);
-> > +        c->choose_local_tries = ceph_decode_32(p);
-> > +        c->choose_local_fallback_tries =  ceph_decode_32(p);
-> > +        c->choose_total_tries = ceph_decode_32(p);
-> > +        dout("crush decode tunable choose_local_tries = %d",
-> > +             c->choose_local_tries);
-> > +        dout("crush decode tunable choose_local_fallback_tries = %d",
-> > +             c->choose_local_fallback_tries);
-> > +        dout("crush decode tunable choose_total_tries = %d",
-> > +             c->choose_total_tries);
-> >
-> > +done:
-> >         dout("crush_decode success\n");
-> >         return c;
-> >
-> > --
-> > 1.7.9
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> +         * creating snapshots, and the one that was granted
+>> +         * a higher snapshot id managed to get its snapshot
+>> +         * saved before the other.
+>> +         */
+>> +        do {
+>> +            i--;
+>> +            name = rbd_prev_snap_name(name, first_name);
+>> +            if (WARN_ON(!name))
+>>                   return -EINVAL;
+>> -            }
+>> -            cur_id = rbd_dev->header.snapc->snaps[i];
+>> -            /* snapshot removal? handle it above */
+>> -            if (cur_id >= old_snap->id)
+>> -                break;
+>> -            /* a new snapshot */
+>> -            snap = __rbd_add_snap_dev(rbd_dev, i - 1, name);
+>> +            snap = __rbd_add_snap_dev(rbd_dev, i, name);
+>>               if (IS_ERR(snap))
+>>                   return PTR_ERR(snap);
+>> -
+>>               /* note that we add it backward so using n and not p */
+>>               list_add(&snap->node, n);
+>> -            p = &snap->node;
+>> -        }
+>> +
+>> +            cur_id = rbd_dev->header.snapc->snaps[i];
+>> +        } while (i && cur_id < old_snap->id);
+>>       }
+>>       /* we're done going over the old snap list, just add what's left */
+>> -    for (; i > 0; i--) {
+>> +    while (i) {
+>> +        i--;
+>>           name = rbd_prev_snap_name(name, first_name);
+>> -        if (!name) {
+>> -            WARN_ON(1);
+>> +        if (WARN_ON(!name))
+>>               return -EINVAL;
+>> -        }
+>> -        snap = __rbd_add_snap_dev(rbd_dev, i - 1, name);
+>> +        snap = __rbd_add_snap_dev(rbd_dev, i, name);
+>>           if (IS_ERR(snap))
+>>               return PTR_ERR(snap);
+>>           list_add(&snap->node, &rbd_dev->snaps);
+>>
 > 
 > 
+> 
+
