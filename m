@@ -1,45 +1,50 @@
 From: Sage Weil <sage@inktank.com>
-Subject: [PATCH 0/8] Last batch of messenger fixes, misc
-Date: Mon, 30 Jul 2012 08:59:23 -0700
-Message-ID: <1343663971-3221-1-git-send-email-sage@inktank.com>
+Subject: [PATCH 4/8] libceph: revoke mon_client messages on session restart
+Date: Mon, 30 Jul 2012 08:59:27 -0700
+Message-ID: <1343663971-3221-5-git-send-email-sage@inktank.com>
+References: <1343663971-3221-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45760 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:45767 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750918Ab2G3P7l (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 11:59:41 -0400
+	with ESMTP id S1752546Ab2G3P7m (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 11:59:42 -0400
+In-Reply-To: <1343663971-3221-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sage@inktank.com>
 
-After banging my head against an ffsb failure (#2867) for much of the 
-weekend, I finally realized there were several places in the messenger 
-were we were dropping and retaking the con mutex and not revalidating 
-the con->state. Along the way a few other minor issues came up.
+Revoke all mon_client messages when we shut down the old connection.
+This is mostly moot since we are re-using the same ceph_connection,
+but it is cleaner.
 
-Please review, especialy the con_in_msg_alloc refactor.  With this batch 
-I think things are ready to send to Linus for 3.6-rc1.
+Signed-off-by: Sage Weil <sage@inktank.com>
+---
+ net/ceph/mon_client.c |    4 ++++
+ 1 file changed, 4 insertions(+)
 
-Thanks!
-sage
-
-
-Sage Weil (8):
-  libceph: be less chatty about stray replies
-  ceph: update MAINTAINERS file
-  libceph: fix handling of immediate socket connect failure
-  libceph: revoke mon_client messages on session restart
-  libceph: verify state after retaking con lock after dispatch
-  libceph: avoid dropping con mutex before fault
-  libceph: change ceph_con_in_msg_alloc convention to be less weird
-  libceph: recheck con state after allocating incoming message
-
- MAINTAINERS           |    9 ++---
- net/ceph/messenger.c  |   94 +++++++++++++++++++++++++++++++------------------
- net/ceph/mon_client.c |    4 +++
- net/ceph/osd_client.c |    4 +--
- 4 files changed, 70 insertions(+), 41 deletions(-)
-
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index bfd21a8..105d533 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -118,6 +118,9 @@ static void __close_session(struct ceph_mon_client *monc)
+ {
+ 	dout("__close_session closing mon%d\n", monc->cur_mon);
+ 	ceph_msg_revoke(monc->m_auth);
++	ceph_msg_revoke_incoming(monc->m_auth_reply);
++	ceph_msg_revoke(monc->m_subscribe);
++	ceph_msg_revoke_incoming(monc->m_subscribe_ack);
+ 	ceph_con_close(&monc->con);
+ 	monc->cur_mon = -1;
+ 	monc->pending_auth = 0;
+@@ -685,6 +688,7 @@ static void __resend_generic_request(struct ceph_mon_client *monc)
+ 	for (p = rb_first(&monc->generic_request_tree); p; p = rb_next(p)) {
+ 		req = rb_entry(p, struct ceph_mon_generic_request, node);
+ 		ceph_msg_revoke(req->request);
++		ceph_msg_revoke_incoming(req->reply);
+ 		ceph_con_send(&monc->con, ceph_msg_get(req->request));
+ 	}
+ }
 -- 
 1.7.9.5
 
