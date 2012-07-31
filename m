@@ -1,84 +1,156 @@
-From: Mehdi Abaakouk <sileht@sileht.net>
-Subject: Re: About teuthology
-Date: Tue, 31 Jul 2012 18:16:33 +0200
-Message-ID: <20120731161633.GB23001@mail.sileht.net>
-References: <20120731135955.GA23001@mail.sileht.net>
- <5017EB6A.5040104@inktank.com>
+From: Guangliang Zhao <gzhao@suse.com>
+Subject: Re: [PATCH v3] rbd: fix the memory leak of bio_chain_clone
+Date: Wed, 1 Aug 2012 00:42:39 +0800
+Message-ID: <20120731164239.GA24447@linux-b964.site>
+References: <1343370017-8794-1-git-send-email-gzhao@suse.com>
+ <CAC-hyiH=HQVfGz-GQAMyymttMsW2NuuCjpZpwKec=O6T5B1Lgg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="WYTEVAkct0FjGQmd"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sileht.net ([178.33.111.110]:36119 "EHLO mail.sileht.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755205Ab2GaQQe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 31 Jul 2012 12:16:34 -0400
+Received: from [106.3.63.68] ([106.3.63.68]:12721 "EHLO linux-b964.site"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755683Ab2GaQmm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 31 Jul 2012 12:42:42 -0400
 Content-Disposition: inline
-In-Reply-To: <5017EB6A.5040104@inktank.com>
+In-Reply-To: <CAC-hyiH=HQVfGz-GQAMyymttMsW2NuuCjpZpwKec=O6T5B1Lgg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
+To: Yehuda Sadeh <yehuda@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
+On Mon, Jul 30, 2012 at 02:54:44PM -0700, Yehuda Sadeh wrote:
+> On Thu, Jul 26, 2012 at 11:20 PM, Guangliang Zhao <gzhao@suse.com> wrote:
+> > The bio_pair alloced in bio_chain_clone would not be freed,
+> > this will cause a memory leak. It could be freed actually only
+> > after 3 times release, because the reference count of bio_pair
+> > is initialized to 3 when bio_split and bio_pair_release only
+> > drops the reference count.
+> >
+> > The function bio_pair_release must be called three times for
+> > releasing bio_pair, and the callback functions of bios on the
+> > requests will be called when the last release time in bio_pair_release,
+> > however, these functions will also be called in rbd_req_cb. In
+> > other words, they will be called twice, and it may cause serious
+> > consequences.
+> >
+> > This patch clones bio chian from the origin directly, doesn't use
+> > bio_split(without bio_pair). The new bio chain can be release
+> > whenever we don't need it.
+> >
+> > Signed-off-by: Guangliang Zhao <gzhao@suse.com>
+> > ---
+> >  drivers/block/rbd.c |   73 +++++++++++++++++++++-----------------------------
+> >  1 files changed, 31 insertions(+), 42 deletions(-)
+> >
+> > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> > index 013c7a5..356657d 100644
+> > --- a/drivers/block/rbd.c
+> > +++ b/drivers/block/rbd.c
+> > @@ -712,51 +712,46 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
+> >         }
+> >  }
+> >
+> > -/*
+> > - * bio_chain_clone - clone a chain of bios up to a certain length.
+> > - * might return a bio_pair that will need to be released.
+> > +/**
+> > + *      bio_chain_clone - clone a chain of bios up to a certain length.
+> > + *      @old: bio to clone
+> > + *      @offset: start point for bio clone
+> > + *      @len: length of bio chain
+> > + *      @gfp_mask: allocation priority
+> > + *
+> > + *      RETURNS:
+> > + *      Pointer to new bio chain on success, NULL on failure.
+> >   */
+> > -static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
+> > -                                  struct bio_pair **bp,
+> > +static struct bio *bio_chain_clone(struct bio **old, int *offset,
+> >                                    int len, gfp_t gfpmask)
+> >  {
+> >         struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
+> >         int total = 0;
+> >
+> > -       if (*bp) {
+> > -               bio_pair_release(*bp);
+> > -               *bp = NULL;
+> > -       }
+> > -
+> >         while (old_chain && (total < len)) {
+> > +               int need = len - total;
+> > +
+> >                 tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
+> >                 if (!tmp)
+> >                         goto err_out;
+> >
+> > -               if (total + old_chain->bi_size > len) {
+> > -                       struct bio_pair *bp;
+> > -
+> > -                       /*
+> > -                        * this split can only happen with a single paged bio,
+> > -                        * split_bio will BUG_ON if this is not the case
+> > -                        */
+> > -                       dout("bio_chain_clone split! total=%d remaining=%d"
+> > -                            "bi_size=%d\n",
+> > -                            (int)total, (int)len-total,
+> > -                            (int)old_chain->bi_size);
+> > -
+> > -                       /* split the bio. We'll release it either in the next
+> > -                          call, or it will have to be released outside */
+> > -                       bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
+> > -                       if (!bp)
+> > -                               goto err_out;
+> > -
+> > -                       __bio_clone(tmp, &bp->bio1);
+> > -
+> > -                       *next = &bp->bio2;
+> > +               __bio_clone(tmp, old_chain);
+> > +               tmp->bi_sector += *offset >> SECTOR_SHIFT;
+> > +               tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
+> > +               /*
+> > +                * The bios span across multiple osd objects must be
+> > +                * single paged, rbd_merge_bvec would guarantee it.
+> > +                * So we needn't worry about other things.
+> > +                */
+> > +               if (tmp->bi_size - *offset > need) {
+> > +                       tmp->bi_size = need;
+> > +                       tmp->bi_io_vec->bv_len = need;
+> > +                       *offset += need;
+> >                 } else {
+> > -                       __bio_clone(tmp, old_chain);
+> > -                       *next = old_chain->bi_next;
+> > +                       old_chain = old_chain->bi_next;
+> > +                       tmp->bi_size -= *offset;
+> > +                       tmp->bi_io_vec->bv_len -= *offset;
+> > +                       *offset = 0;
+> >                 }
+> >
+> There's still some inherent issue here, which is it assumes
+> tmp->bi_io_vec points to the only iovec for this bio. I don't think
+> that is necessarily true, there may be multiple iovecs, 
 
---WYTEVAkct0FjGQmd
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Yes, the bios on the requests may have one or more pages, but the ones span across
+multiple osds *must* be single page bios because of rbd_merge_bvec.
 
-On Tue, Jul 31, 2012 at 09:27:54AM -0500, Mark Nelson wrote:
-> On 7/31/12 8:59 AM, Mehdi Abaakouk wrote:
-> Hi Mehdi,
->=20
-> I think a number of the test related tasks should run fine without
-> strictly requiring the ceph task.  You may have to change binary
-> locations for things like rados, but those should be pretty minor.
->=20
-> Best way to find out is to give it a try!
+With rbd_merge_bvec, the new bvec will not permitted to merge, if it make the bio cross 
+the osd boundary, except the bvec is the first one. In other words, there are two 
+types of bio:
 
-Thanks for your quick answer :)
+1) The bios don't cross the osd boundary, they may have several iovecs. 
+The value of offset will always be 0 in this case, so nothing will be changed, and
+the code changes tmp bios doesn't take effact at all.
 
-I have already tried, but the code massively refers to files in
-/tmp/cephtest/, it seems to me that changing the path of the=20
-binaries isn't enough, some of them are built by the ceph task.
+2) The bios cross the osd boundary, each one have only one page.
+These bios need to be split in this case, and the offset is used to indicate the next bio, 
+it makes sense only in this instance. The orgin code use bio_split which can only handle 
+single page bios too.
 
-Perhaps a quicker (a bit dirty) way is to create a new task 'cephdist',
-that prepares the required files in /tmp/cephtest.
-ie:
-- link dist binary to /tmp/cephtest/binary/usr/local/bin/...
-- link /etc/ceph/ceph.conf to /tmp/cephtest/ceph.conf
-- ship cephtest tool in /tmp/cephtest (like ceph task)
-- make dummy script for coverage (because distributed ceph doesn't seem
-  to have ceph-coverage)
+So, you maybe worry about the multiple iovecs bios. They wouldn't cross the osd boundary,
+offset is always 0, so tmp bios are as same as the orgins. The needn't and wouldn't to 
+be changed. 
 
-What do you think about it ?
+Thanks for your reply :).
 
-Cheers
-
---=20
-Mehdi Abaakouk for eNovance
-mail: sileht@sileht.net
-irc: sileht
-
---WYTEVAkct0FjGQmd
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBCAAGBQJQGATgAAoJEBiStC/OquvIn4cQAKVFvxQrG2FoarWGLA7lNnul
-+uQxGkKd7LN1wnIhJHAq1pKMxbrW7fI0Cdzam2ZE593T75+kz1uA6iz8AUdUsKrS
-KKK+Y3sCn+r9IKcpun/1lA24ZLV4K2NLlu0GgkcvAcVRj4R3f8g0zzMXTo974k8P
-QMimPbhG77pRFjZiWby4tGrgyk+obWHOC8IV1RoEJnHeHvZ3+Uz7QWXJvWDr+B2U
-yl5YY7CX6iRFtTIVms2HEsLZ824vEaDQH8A1Q9V0ChHf649Gk94vX+Fc0+xbmd5k
-rnPIkjwH5QP0GleoSEaHV6pmO/hM20ibrU5OrFe7jRyjKXCsPcaR49/5O2bRVoSF
-LHWPuD5nL9/FOs7jVbqwACj86v/05iyEMRUQeeORERdI6eeFY2BEZED9xqvcGW5J
-4btNkaXT8hbnnSHLay2FzveRLyEoil3vs/32lyKyRaLigv79XPOABTO1RZn7lKaH
-yaFTUqtJzcEv8ckdESKdxQY0KtQBD3xTIShxlqgOsT7AiOGTaXmm0dwVo8Bxqdti
-BVnjpXgN0q/0SjkA2r5YTnYxNATr8S6v4c5utNcGeBmm3R1kztt9yvUU1f0L7vMj
-evlMd7OjkxvjFKEubO6lBYOJidlsikhEiDqPAOKTirA6caMmYi6z/9lERxt0o8KW
-Oktn30XqHF3hkxvYaOLn
-=cMEQ
------END PGP SIGNATURE-----
-
---WYTEVAkct0FjGQmd--
+-- 
+Best regards,
+Guangliang
