@@ -1,156 +1,195 @@
-From: Guangliang Zhao <gzhao@suse.com>
-Subject: Re: [PATCH v3] rbd: fix the memory leak of bio_chain_clone
-Date: Wed, 1 Aug 2012 00:42:39 +0800
-Message-ID: <20120731164239.GA24447@linux-b964.site>
-References: <1343370017-8794-1-git-send-email-gzhao@suse.com>
- <CAC-hyiH=HQVfGz-GQAMyymttMsW2NuuCjpZpwKec=O6T5B1Lgg@mail.gmail.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: cannot startup one of the osd
+Date: Tue, 31 Jul 2012 10:36:19 -0700
+Message-ID: <CA+4uBUZgZXJ8TZz4T3OFeVYmNgvwXg0Ye6jwjrwXpPKbXufXbw@mail.gmail.com>
+References: <60E83269D669544E8069A09CB69135EA011DB4@GDC-CLDMBX-P02.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [106.3.63.68] ([106.3.63.68]:12721 "EHLO linux-b964.site"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755683Ab2GaQmm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 31 Jul 2012 12:42:42 -0400
-Content-Disposition: inline
-In-Reply-To: <CAC-hyiH=HQVfGz-GQAMyymttMsW2NuuCjpZpwKec=O6T5B1Lgg@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:51963 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752353Ab2GaRgU convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jul 2012 13:36:20 -0400
+Received: by vcbfk26 with SMTP id fk26so6087971vcb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 31 Jul 2012 10:36:19 -0700 (PDT)
+In-Reply-To: <60E83269D669544E8069A09CB69135EA011DB4@GDC-CLDMBX-P02.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: Eric_YH_Chen@wiwynn.com
+Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
 
-On Mon, Jul 30, 2012 at 02:54:44PM -0700, Yehuda Sadeh wrote:
-> On Thu, Jul 26, 2012 at 11:20 PM, Guangliang Zhao <gzhao@suse.com> wrote:
-> > The bio_pair alloced in bio_chain_clone would not be freed,
-> > this will cause a memory leak. It could be freed actually only
-> > after 3 times release, because the reference count of bio_pair
-> > is initialized to 3 when bio_split and bio_pair_release only
-> > drops the reference count.
-> >
-> > The function bio_pair_release must be called three times for
-> > releasing bio_pair, and the callback functions of bios on the
-> > requests will be called when the last release time in bio_pair_release,
-> > however, these functions will also be called in rbd_req_cb. In
-> > other words, they will be called twice, and it may cause serious
-> > consequences.
-> >
-> > This patch clones bio chian from the origin directly, doesn't use
-> > bio_split(without bio_pair). The new bio chain can be release
-> > whenever we don't need it.
-> >
-> > Signed-off-by: Guangliang Zhao <gzhao@suse.com>
-> > ---
-> >  drivers/block/rbd.c |   73 +++++++++++++++++++++-----------------------------
-> >  1 files changed, 31 insertions(+), 42 deletions(-)
-> >
-> > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> > index 013c7a5..356657d 100644
-> > --- a/drivers/block/rbd.c
-> > +++ b/drivers/block/rbd.c
-> > @@ -712,51 +712,46 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
-> >         }
-> >  }
-> >
-> > -/*
-> > - * bio_chain_clone - clone a chain of bios up to a certain length.
-> > - * might return a bio_pair that will need to be released.
-> > +/**
-> > + *      bio_chain_clone - clone a chain of bios up to a certain length.
-> > + *      @old: bio to clone
-> > + *      @offset: start point for bio clone
-> > + *      @len: length of bio chain
-> > + *      @gfp_mask: allocation priority
-> > + *
-> > + *      RETURNS:
-> > + *      Pointer to new bio chain on success, NULL on failure.
-> >   */
-> > -static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
-> > -                                  struct bio_pair **bp,
-> > +static struct bio *bio_chain_clone(struct bio **old, int *offset,
-> >                                    int len, gfp_t gfpmask)
-> >  {
-> >         struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
-> >         int total = 0;
-> >
-> > -       if (*bp) {
-> > -               bio_pair_release(*bp);
-> > -               *bp = NULL;
-> > -       }
-> > -
-> >         while (old_chain && (total < len)) {
-> > +               int need = len - total;
-> > +
-> >                 tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
-> >                 if (!tmp)
-> >                         goto err_out;
-> >
-> > -               if (total + old_chain->bi_size > len) {
-> > -                       struct bio_pair *bp;
-> > -
-> > -                       /*
-> > -                        * this split can only happen with a single paged bio,
-> > -                        * split_bio will BUG_ON if this is not the case
-> > -                        */
-> > -                       dout("bio_chain_clone split! total=%d remaining=%d"
-> > -                            "bi_size=%d\n",
-> > -                            (int)total, (int)len-total,
-> > -                            (int)old_chain->bi_size);
-> > -
-> > -                       /* split the bio. We'll release it either in the next
-> > -                          call, or it will have to be released outside */
-> > -                       bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
-> > -                       if (!bp)
-> > -                               goto err_out;
-> > -
-> > -                       __bio_clone(tmp, &bp->bio1);
-> > -
-> > -                       *next = &bp->bio2;
-> > +               __bio_clone(tmp, old_chain);
-> > +               tmp->bi_sector += *offset >> SECTOR_SHIFT;
-> > +               tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
-> > +               /*
-> > +                * The bios span across multiple osd objects must be
-> > +                * single paged, rbd_merge_bvec would guarantee it.
-> > +                * So we needn't worry about other things.
-> > +                */
-> > +               if (tmp->bi_size - *offset > need) {
-> > +                       tmp->bi_size = need;
-> > +                       tmp->bi_io_vec->bv_len = need;
-> > +                       *offset += need;
-> >                 } else {
-> > -                       __bio_clone(tmp, old_chain);
-> > -                       *next = old_chain->bi_next;
-> > +                       old_chain = old_chain->bi_next;
-> > +                       tmp->bi_size -= *offset;
-> > +                       tmp->bi_io_vec->bv_len -= *offset;
-> > +                       *offset = 0;
-> >                 }
-> >
-> There's still some inherent issue here, which is it assumes
-> tmp->bi_io_vec points to the only iovec for this bio. I don't think
-> that is necessarily true, there may be multiple iovecs, 
+This crash happens on each startup?
+-Sam
 
-Yes, the bios on the requests may have one or more pages, but the ones span across
-multiple osds *must* be single page bios because of rbd_merge_bvec.
-
-With rbd_merge_bvec, the new bvec will not permitted to merge, if it make the bio cross 
-the osd boundary, except the bvec is the first one. In other words, there are two 
-types of bio:
-
-1) The bios don't cross the osd boundary, they may have several iovecs. 
-The value of offset will always be 0 in this case, so nothing will be changed, and
-the code changes tmp bios doesn't take effact at all.
-
-2) The bios cross the osd boundary, each one have only one page.
-These bios need to be split in this case, and the offset is used to indicate the next bio, 
-it makes sense only in this instance. The orgin code use bio_split which can only handle 
-single page bios too.
-
-So, you maybe worry about the multiple iovecs bios. They wouldn't cross the osd boundary,
-offset is always 0, so tmp bios are as same as the orgins. The needn't and wouldn't to 
-be changed. 
-
-Thanks for your reply :).
-
--- 
-Best regards,
-Guangliang
+On Tue, Jul 31, 2012 at 2:32 AM,  <Eric_YH_Chen@wiwynn.com> wrote:
+> Hi, all:
+>
+> My Environment:  two servers, and 12 hard-disk on each server.
+>                  Version: Ceph 0.48, Kernel: 3.2.0-27
+>
+> We create a ceph cluster with 24 osd, 3 monitors
+> Osd.0 ~ osd.11 is on server1
+> Osd.12 ~ osd.23 is on server2
+> Mon.0 is on server1
+> Mon.1 is on server2
+> Mon.2 is on server3 which has no osd
+>
+> root@ubuntu:~$ ceph -s
+>    health HEALTH_WARN 227 pgs degraded; 93 pgs down; 93 pgs peering; 85 pgs recovering; 82 pgs stuck inactive; 255 pgs stuck unclean; recovery 4808/138644 degraded (3.468%); 202/69322 unfound (0.291%); 1/24 in osds are down
+>    monmap e1: 3 mons at {006=192.168.200.84:6789/0,008=192.168.200.86:6789/0,009=192.168.200.87:6789/0}, election epoch 564, quorum 0,1,2 006,008,009
+>    osdmap e1911: 24 osds: 23 up, 24 in
+>     pgmap v292031: 4608 pgs: 4251 active+clean, 85 active+recovering+degraded, 37 active+remapped, 58 down+peering, 142 active+degraded, 35 down+replay+peering; 257 GB data, 948 GB used, 19370 GB / 21390 GB avail; 4808/138644 degraded (3.468%); 202/69322 unfound (0.291%)
+>    mdsmap e1: 0/0/1 up
+>
+> I find one of the osd cannot startup anymore. Before that, I am testing HA of Ceph cluster.
+>
+> Step1:  shutdown server1, wait 5 min
+> Step2:  bootup server1, wait 5 min until ceph enter health status
+> Step3:  shutdown server2, wait 5 min
+> Step4:  bootup server2, wait 5 min until ceph enter health status
+> Repeat Step1~ Step4 several times, then I met this problem.
+>
+>
+> Log of ceph-osd.22.log
+> 2012-07-31 17:18:15.120678 7f9375300780  0 filestore(/srv/disk10/data) mount found snaps <>
+> 2012-07-31 17:18:15.122081 7f9375300780  0 filestore(/srv/disk10/data) mount: enabling WRITEAHEAD journal mode: btrfs not detected
+> 2012-07-31 17:18:15.128544 7f9375300780  1 journal _open /srv/disk10/journal fd 23: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+> 2012-07-31 17:18:15.257302 7f9375300780  1 journal _open /srv/disk10/journal fd 23: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+> 2012-07-31 17:18:15.273163 7f9375300780  1 journal close /srv/disk10/journal
+> 2012-07-31 17:18:15.274395 7f9375300780 -1 filestore(/srv/disk10/data) limited size xattrs -- filestore_xattr_use_omap enabled
+> 2012-07-31 17:18:15.275169 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is supported and appears to work
+> 2012-07-31 17:18:15.275180 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is disabled via 'filestore fiemap' config option
+> 2012-07-31 17:18:15.275312 7f9375300780  0 filestore(/srv/disk10/data) mount did NOT detect btrfs
+> 2012-07-31 17:18:15.276060 7f9375300780  0 filestore(/srv/disk10/data) mount syncfs(2) syscall fully supported (by glib and kernel)
+> 2012-07-31 17:18:15.276154 7f9375300780  0 filestore(/srv/disk10/data) mount found snaps <>
+> 2012-07-31 17:18:15.277031 7f9375300780  0 filestore(/srv/disk10/data) mount: enabling WRITEAHEAD journal mode: btrfs not detected
+> 2012-07-31 17:18:15.280906 7f9375300780  1 journal _open /srv/disk10/journal fd 32: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+> 2012-07-31 17:18:15.307761 7f9375300780  1 journal _open /srv/disk10/journal fd 32: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+> 2012-07-31 17:18:19.466921 7f9360a97700  0 -- 192.168.200.82:6830/18744 >> 192.168.200.83:0/3485583732 pipe(0x45bd000 sd=34 pgs=0 cs=0 l=0).accept peer addr is really 192.168.200.83:0/3485583732 (socket is 192.168.200.83:45653/0)
+> 2012-07-31 17:18:19.671681 7f9363a9d700 -1 os/DBObjectMap.cc: In function 'virtual bool DBObjectMap::DBObjectMapIteratorImpl::valid()' thread 7f9363a9d700 time 2012-07-31 17:18:19.670082
+> os/DBObjectMap.cc: 396: FAILED assert(!valid || cur_iter->valid())
+>
+> ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+>  1: /usr/bin/ceph-osd() [0x6a3123]
+>  2: (ReplicatedPG::send_push(int, ObjectRecoveryInfo, ObjectRecoveryProgress, ObjectRecoveryProgress*)+0x684) [0x53f314]
+>  3: (ReplicatedPG::push_start(ReplicatedPG::ObjectContext*, hobject_t const&, int, eversion_t, interval_set<unsigned long>&, std::map<hobject_t, interval_set<unsigned long>, std::less<hobject_t>, std::allocator<std::pair<hobject_t const, interval_set<unsigned long> > > >&)+0x333) [0x54c873]
+>  4: (ReplicatedPG::push_to_replica(ReplicatedPG::ObjectContext*, hobject_t const&, int)+0x343) [0x54cdc3]
+>  5: (ReplicatedPG::recover_object_replicas(hobject_t const&, eversion_t)+0x35f) [0x5527bf]
+>  6: (ReplicatedPG::wait_for_degraded_object(hobject_t const&, std::tr1::shared_ptr<OpRequest>)+0x17b) [0x55406b]
+>  7: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>)+0x9de) [0x56305e]
+>  8: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x199) [0x5fda89]
+>  9: (OSD::dequeue_op(PG*)+0x238) [0x5bf668]
+>  10: (ThreadPool::worker()+0x605) [0x796d55]
+>  11: (ThreadPool::WorkThread::entry()+0xd) [0x5d5d0d]
+>  12: (()+0x7e9a) [0x7f9374794e9a]
+>  13: (clone()+0x6d) [0x7f93734344bd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>
+> --- begin dump of recent events ---
+>    -21> 2012-07-31 17:18:15.114905 7f9375300780  0 ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030), process ceph-osd, pid 18744
+>    -20> 2012-07-31 17:18:15.118038 7f9375300780 -1 filestore(/srv/disk10/data) limited size xattrs -- filestore_xattr_use_omap enabled
+>    -19> 2012-07-31 17:18:15.119172 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is supported and appears to work
+>    -18> 2012-07-31 17:18:15.119185 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is disabled via 'filestore fiemap' config option
+>    -17> 2012-07-31 17:18:15.119339 7f9375300780  0 filestore(/srv/disk10/data) mount did NOT detect btrfs
+>    -16> 2012-07-31 17:18:15.120567 7f9375300780  0 filestore(/srv/disk10/data) mount syncfs(2) syscall fully supported (by glibc and kernel)
+>    -15> 2012-07-31 17:18:15.120678 7f9375300780  0 filestore(/srv/disk10/data) mount found snaps <>
+>    -14> 2012-07-31 17:18:15.122081 7f9375300780  0 filestore(/srv/disk10/data) mount: enabling WRITEAHEAD journal mode:btrfs not detected
+>    -13> 2012-07-31 17:18:15.128544 7f9375300780  1 journal _open /srv/disk10/journal fd 23: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+>    -12> 2012-07-31 17:18:15.257302 7f9375300780  1 journal _open /srv/disk10/journal fd 23: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+>    -11> 2012-07-31 17:18:15.273163 7f9375300780  1 journal close /srv/disk10/journal
+>    -10> 2012-07-31 17:18:15.274395 7f9375300780 -1 filestore(/srv/disk10/data) limited size xattrs -- filestore_xattr_use_omap enabled
+>     -9> 2012-07-31 17:18:15.275169 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is supported and appea
+>     -8> 2012-07-31 17:18:15.275180 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is disabled via 'filestore fiemap' config option
+>     -7> 2012-07-31 17:18:15.275312 7f9375300780  0 filestore(/srv/disk10/data) mount did NOT detect btrfs
+>     -6> 2012-07-31 17:18:15.276060 7f9375300780  0 filestore(/srv/disk10/data) mount syncfs(2) syscall fully supported (by glibc and kernel)
+>     -5> 2012-07-31 17:18:15.276154 7f9375300780  0 filestore(/srv/disk10/data) mount found snaps <>
+>     -4> 2012-07-31 17:18:15.277031 7f9375300780  0 filestore(/srv/disk10/data) mount: enabling WRITEAHEAD journal mode: btrfs not detected
+>     -3> 2012-07-31 17:18:15.280906 7f9375300780  1 journal _open /srv/disk10/journal fd 32: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+>     -2> 2012-07-31 17:18:15.307761 7f9375300780  1 journal _open /srv/disk10/journal fd 32: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+>     -1> 2012-07-31 17:18:19.466921 7f9360a97700  0 -- 192.168.200.82:6830/18744 >> 192.168.200.83:0/3485583732 pipe(0x45bd000 sd=34 pgs=0 cs=0 l=0).accept peer addr is really 192.168.200.83:0/3485583732 (socket is 192.168.200.83:45653/0)
+>      0> 2012-07-31 17:18:19.671681 7f9363a9d700 -1 os/DBObjectMap.cc: In function 'virtual bool DBObjectMap::DBObjectMapIteratorImpl::valid()' thread 7f9363a9d700 time 2012-07-31 17:18:19.670082
+> os/DBObjectMap.cc: 396: FAILED assert(!valid || cur_iter->valid())
+>
+>
+>  ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+>  1: /usr/bin/ceph-osd() [0x6a3123]
+>  2: (ReplicatedPG::send_push(int, ObjectRecoveryInfo, ObjectRecoveryProgress, ObjectRecoveryProgress*)+0x684) [0x53f314]
+>  3: (ReplicatedPG::push_start(ReplicatedPG::ObjectContext*, hobject_t const&, int, eversion_t, interval_set<unsigned long>&, std::map<hobject_t, interval_set<unsigned long>, std::less<hobject_t>, std::allocator<std::pair<hobject_t const, interval_set<unsigned long> > > >&)+0x333) [0x54c873]
+>  4: (ReplicatedPG::push_to_replica(ReplicatedPG::ObjectContext*, hobject_t const&, int)+0x343) [0x54cdc3]
+>  5: (ReplicatedPG::recover_object_replicas(hobject_t const&, eversion_t)+0x35f) [0x5527bf]
+>  6: (ReplicatedPG::wait_for_degraded_object(hobject_t const&, std::tr1::shared_ptr<OpRequest>)+0x17b) [0x55406b]
+>  7: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>)+0x9de) [0x56305e]
+>  8: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x199) [0x5fda89]
+>  9: (OSD::dequeue_op(PG*)+0x238) [0x5bf668]
+>  10: (ThreadPool::worker()+0x605) [0x796d55]
+>  11: (ThreadPool::WorkThread::entry()+0xd) [0x5d5d0d]
+>  12: (()+0x7e9a) [0x7f9374794e9a]
+>  13: (clone()+0x6d) [0x7f93734344bd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>
+> --- end dump of recent events ---
+> 2012-07-31 17:18:19.673801 7f9363a9d700 -1 *** Caught signal (Aborted) **
+>  in thread 7f9363a9d700
+>
+>  ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+>  1: /usr/bin/ceph-osd() [0x6e900a]
+>  2: (()+0xfcb0) [0x7f937479ccb0]
+>  3: (gsignal()+0x35) [0x7f9373378445]
+>  4: (abort()+0x17b) [0x7f937337bbab]
+>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f9373cc669d]
+>  6: (()+0xb5846) [0x7f9373cc4846]
+>  7: (()+0xb5873) [0x7f9373cc4873]
+>  8: (()+0xb596e) [0x7f9373cc496e]
+>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x282) [0x79f662]
+>  10: /usr/bin/ceph-osd() [0x6a3123]
+>  11: (ReplicatedPG::send_push(int, ObjectRecoveryInfo, ObjectRecoveryProgress, ObjectRecoveryProgress*)+0x684) [0x53f314
+> ]
+>  12: (ReplicatedPG::push_start(ReplicatedPG::ObjectContext*, hobject_t const&, int, eversion_t, interval_set<unsigned lo
+> ng>&, std::map<hobject_t, interval_set<unsigned long>, std::less<hobject_t>, std::allocator<std::pair<hobject_t const, i
+> nterval_set<unsigned long> > > >&)+0x333) [0x54c873]
+>  13: (ReplicatedPG::push_to_replica(ReplicatedPG::ObjectContext*, hobject_t const&, int)+0x343) [0x54cdc3]
+>  14: (ReplicatedPG::recover_object_replicas(hobject_t const&, eversion_t)+0x35f) [0x5527bf]
+>  15: (ReplicatedPG::wait_for_degraded_object(hobject_t const&, std::tr1::shared_ptr<OpRequest>)+0x17b) [0x55406b]
+>  16: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>)+0x9de) [0x56305e]
+>  17: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x199) [0x5fda89]
+>  18: (OSD::dequeue_op(PG*)+0x238) [0x5bf668]
+>  19: (ThreadPool::worker()+0x605) [0x796d55]
+>  20: (ThreadPool::WorkThread::entry()+0xd) [0x5d5d0d]
+>  21: (()+0x7e9a) [0x7f9374794e9a]
+>  22: (clone()+0x6d) [0x7f93734344bd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+> --- begin dump of recent events ---
+>      0> 2012-07-31 17:18:19.673801 7f9363a9d700 -1 *** Caught signal (Aborted) **
+>  in thread 7f9363a9d700
+>
+>  ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+>  1: /usr/bin/ceph-osd() [0x6e900a]
+>  2: (()+0xfcb0) [0x7f937479ccb0]
+>  3: (gsignal()+0x35) [0x7f9373378445]
+>  4: (abort()+0x17b) [0x7f937337bbab]
+>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f9373cc669d]
+>  6: (()+0xb5846) [0x7f9373cc4846]
+>  7: (()+0xb5873) [0x7f9373cc4873]
+>  8: (()+0xb596e) [0x7f9373cc496e]
+>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x282) [0x79f662]
+>  10: /usr/bin/ceph-osd() [0x6a3123]
+>  11: (ReplicatedPG::send_push(int, ObjectRecoveryInfo, ObjectRecoveryProgress, ObjectRecoveryProgress*)+0x684) [0x53f314]
+>  12: (ReplicatedPG::push_start(ReplicatedPG::ObjectContext*, hobject_t const&, int, eversion_t, interval_set<unsigned long>&, std::map<hobject_t, interval_set<unsigned long>, std::less<hobject_t>, std::allocator<std::pair<hobject_t const, interval_set<unsigned long> > > >&)+0x333) [0x54c873]
+>  13: (ReplicatedPG::push_to_replica(ReplicatedPG::ObjectContext*, hobject_t const&, int)+0x343) [0x54cdc3]
+>  14: (ReplicatedPG::recover_object_replicas(hobject_t const&, eversion_t)+0x35f) [0x5527bf]
+>  15: (ReplicatedPG::wait_for_degraded_object(hobject_t const&, std::tr1::shared_ptr<OpRequest>)+0x17b) [0x55406b]
+>  16: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>)+0x9de) [0x56305e]
+>  17: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x199) [0x5fda89]
+>  18: (OSD::dequeue_op(PG*)+0x238) [0x5bf668]
+>  19: (ThreadPool::worker()+0x605) [0x796d55]
+>  20: (ThreadPool::WorkThread::entry()+0xd) [0x5d5d0d]
+>  21: (()+0x7e9a) [0x7f9374794e9a]
+>  22: (clone()+0x6d) [0x7f93734344bd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>
+> --- end dump of recent events ---
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
