@@ -1,69 +1,90 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: Puppet modules for Ceph
-Date: Tue, 31 Jul 2012 12:09:13 -0700
-Message-ID: <CADvuQREVc0gqheYSo89m7cpsdCg02EFkxFJ5LvcMrVLwBMsO7Q@mail.gmail.com>
-References: <20120718135854.GI15546@potjevlesh.enovance.com>
- <CADvuQRG5jot8yhmWWk8cNFUF7BkoHKbyL6fCVVF6GMu_DpPy7g@mail.gmail.com>
- <CAKsDvb0Eq0amkEq=+9RrKcBv4RJ0PFwUGpzDpV8CzBHLQpMHtg@mail.gmail.com>
- <CADvuQRHt9ViPdD7B0==X-3kh-PT_NkX7+GNa9WZUb9zDSYTs0A@mail.gmail.com>
- <CAKsDvb2d63hDTq0LvmGL0z+yr09cNSr3ythWiqg6WVmzjxy8BA@mail.gmail.com>
- <CADvuQRFcBKwjmai+W1VArbv29GHm0CBgh2PKiy5tSN6X=GDjMQ@mail.gmail.com>
- <5391f2cc-e01f-4cf4-b6cb-b4479bd15df0@puppetlabs.com> <CADvuQRFZB6hR_KNg1rp8rCXX4BUoQmjN58rBS7sCheLmO=7hWg@mail.gmail.com>
- <alpine.DEB.2.00.1207311150140.3171@cobra.newdream.net>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: another performance-related thread
+Date: Tue, 31 Jul 2012 23:49:58 +0400
+Message-ID: <501836E6.1060809@xdel.ru>
+References: <CABYiri94jQb4z9UMgKP1S686pcn7o6v26tbgMp7h1WCivRwL-A@mail.gmail.com> <5017FF6C.8000509@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:41969 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751840Ab2GaTJe (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jul 2012 15:09:34 -0400
-Received: by vbbff1 with SMTP id ff1so6131316vbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 31 Jul 2012 12:09:33 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1207311150140.3171@cobra.newdream.net>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:58381 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751735Ab2GaTuD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 31 Jul 2012 15:50:03 -0400
+Received: by lahd3 with SMTP id d3so4252839lah.19
+        for <ceph-devel@vger.kernel.org>; Tue, 31 Jul 2012 12:50:01 -0700 (PDT)
+In-Reply-To: <5017FF6C.8000509@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: loic.dachary@enovance.com, puppet-openstack@puppetlabs.com, Teyo Tyree <teyo@puppetlabs.com>, =?UTF-8?Q?Fran=C3=A7ois_Charlier?= <francois.charlier@enovance.com>, puppet-users@googlgroups.com, ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Jul 31, 2012 at 11:51 AM, Sage Weil <sage@inktank.com> wrote:
-> It is also possible to feed initial keys to the monitors during the 'mkfs'
-> stage.  If the keys can be agreed on somehow beforehand, then they will
-> already be in place when the initial quorum is reached.  Not sure if that
-> helps in this situation or not...
+On 07/31/2012 07:53 PM, Josh Durgin wrote:
+> On 07/31/2012 08:03 AM, Andrey Korolyov wrote:
+>> Hi,
+>>
+>> I`ve finally managed to run rbd-related test on relatively powerful
+>> machines and what I have got:
+>>
+>> 1) Reads on almost fair balanced cluster(eight nodes) did very well,
+>> utilizing almost all disk and bandwidth (dual gbit 802.3ad nics, sata
+>> disks beyond lsi sas 2108 with wt cache gave me ~1.6Gbyte/s on linear
+>> and sequential reads, which is close to overall disk throughput)
+>> 2) Writes get much worse, both on rados bench and on fio test when I
+>> ran fio simularly on 120 vms - at it best, overall performance is
+>> about 400Mbyte/s, using rados bench -t 12 on three host nodes
+>
+> How are your osd journals configured? What's your ceph.conf for the
+> osds?
+>
+>> fio config:
+>>
+>> rw=(randread|randwrite|seqread|seqwrite)
+>> size=256m
+>> direct=1
+>> directory=/test
+>> numjobs=1
+>> iodepth=12
+>> group_reporting
+>> name=random-ead-direct
+>> bs=1M
+>> loops=12
+>>
+>> for 120 vm set, Mbyte/s
+>> linear reads:
+>> MEAN: 14156
+>> STDEV: 612.596
+>> random reads:
+>> MEAN: 14128
+>> STDEV: 911.789
+>> linear writes:
+>> MEAN: 2956
+>> STDEV: 283.165
+>> random writes:
+>> MEAN: 2986
+>> STDEV: 361.311
+>>
+>> each node holds 15 vms and for 64M rbd cache all possible three states
+>> - wb, wt and no-cache has almost same numbers at the tests. I wonder
+>> if it possible to raise write/read ratio somehow. Seems that osd
+>> underutilize itself, e.g. I am not able to get single-threaded rbd
+>> write to get above 35Mb/s. Adding second osd on same disk only raising
+>> iowait time, but not benchmark results.
+>
+> Are these write tests using direct I/O? That will bypass the cache for
+> writes, which would explain the similar numbers with different cache
+> modes.
 
-Yeah, we're going that way for the "mon." key in the chef cookbooks
-(to get the mons talking to each other at all, that *has* to be done
-that way), but putting more and more stuff there is not very nice.
+I have previously forgot that direct flag may affect rbd cache behaviout.
 
-Your typical CM framework does not let the recipe run arbitrary code
-at that sort of an instantiation time, and pushing this work on the
-admin makes it laborous and brittle; what happens when we need a new
-type of a bootstrap-foo key? Get all admins to cram an extra entry
-into their environment json?
-http://ceph.com/docs/master/config-cluster/chef/#configure-your-ceph-environment
+Without it on wb cache, read rate remained same and writes increased by
+~ 0.15:
+random writes:
+MEAN: 3370
+STDEV: 939.99
 
-That just does not seem like a good way.
+linear writes:
+MEAN: 3561
+STDEV: 824.954
 
-Juju seems to provide a real-time notification mechanism between
-peers, using it's <name>-relation-changed hook. Other CM frameworks
-may need to step up their game, or be subject to the "keep re-running
-chef-client until it works" limitation.
-
-If the CM makes it safe to trigger a run manually (e.g. "sudo
-chef-client" whenever you feel like it), we can trigger that locally
-when we finally create the keys. This still doesn't help the receiving
-side to notice any faster.
-
-If the CM makes it safe for us to change node attributes outside of
-the full CM run, we can do trigger that when we finally create the
-keys. Chef seems to have a "full overwrites only" semantic, so this is
-probably not safe with it. And as above, this does not help the
-receiving side to notice that it has information to fetch.
-
-What I want to do longer term, is make the Chef cookbook for Ceph very
-thin, push everything except the cross-node communication into Ceph
-proper, and then write a "mkcephfs v2.0" that uses SSH connections as
-appropriate, from a central "workstation" host that can SSH anywhere,
-to trigger these actions ASAP. Then that becomes the goal for CM
-frameworks: "provide me a communication mechanism between these nodes
-that can do *this*".
