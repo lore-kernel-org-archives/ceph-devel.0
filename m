@@ -1,90 +1,107 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: [EXTERNAL] Re: avoiding false detection of down OSDs
-Date: Tue, 31 Jul 2012 13:58:58 -0600
-Message-ID: <50183902.40906@sandia.gov>
-References: <CAPYLRzjoaWkMkz4U+=rZQ+YMS76vkLf_KVZfbWmdLnPuCYadSw@mail.gmail.com>
- <50170EF0.5040004@sandia.gov>
- <CAPYLRzhH-MNPHhXbg36jkMGGdh3mtn+jqR5FQDzGta0y67UkPw@mail.gmail.com>
- <5017F4CC.9070308@sandia.gov>
- <CAPYLRzg6=xc0ib=Wdv96TzuCYWdw6zbUSVWvvYPPNp0_ExpW9g@mail.gmail.com>
- <alpine.DEB.2.00.1207311136130.3171@cobra.newdream.net>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: The cluster do not aware some osd are disappear
+Date: Tue, 31 Jul 2012 14:42:53 -0700
+Message-ID: <5018515D.7000909@inktank.com>
+References: <60E83269D669544E8069A09CB69135EA011D62@GDC-CLDMBX-P02.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:43878 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752271Ab2GaT7c (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jul 2012 15:59:32 -0400
-In-Reply-To: <alpine.DEB.2.00.1207311136130.3171@cobra.newdream.net>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:57036 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752952Ab2GaVm4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jul 2012 17:42:56 -0400
+Received: by yenl2 with SMTP id l2so6625663yen.19
+        for <ceph-devel@vger.kernel.org>; Tue, 31 Jul 2012 14:42:56 -0700 (PDT)
+In-Reply-To: <60E83269D669544E8069A09CB69135EA011D62@GDC-CLDMBX-P02.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel@vger.kernel.org
+To: Eric_YH_Chen@wiwynn.com
+Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
 
-On 07/31/2012 12:40 PM, Sage Weil wrote:
-> On Tue, 31 Jul 2012, Gregory Farnum wrote:
->> On Tue, Jul 31, 2012 at 8:07 AM, Jim Schutt<jaschut@sandia.gov>  wrote:
-
->>> Also, FWIW I've been running my Ceph servers with no swap,
->>> and I've recently doubled the size of my storage cluster.
->>> Is it possible to have map processing do a little memory
->>> accounting and log it, or to provide some way to learn
->>> that map processing is chewing up significant amounts of
->>> memory?  Or maybe there's already a way to learn this that
->>> I need to learn about?  I sometimes run into something that
->>> shares some characteristics with what you describe, but is
->>> primarily triggered by high client write load.  I'd like
->>> to be able to confirm or deny it's the same basic issue
->>> you've described.
->>
->> I think that we've done all our diagnosis using profiling tools, but
->> there's now a map cache and it probably wouldn't be too difficult to
->> have it dump data via perfcounters if you poked around...anything like
->> this exist yet, Sage?
+On 07/31/2012 12:48 AM, Eric_YH_Chen@wiwynn.com wrote:
+> Dear All:
 >
-> Much of the bad behavior was triggered by #2860, fixes for which just went
-> into the stable and master branches yesterday.  It's difficult to fully
-> observe the bad behavior, though (lots of time spend in
-> generate_past_intervals, reading old maps off disk).  With the fix, we
-> pretty much only process maps during handle_osd_map.
+> My Environment:  two servers, and 12 hard-disk on each server.
+>                   Version: Ceph 0.48, Kernel: 3.2.0-27
 >
-> Adding perfcounters in the methods that grab a map out of the cache or
-> (more importantly) read it off disk will give you better visibility into
-> that.  It should be pretty easy to instrument that (and I'll gladly
-> take patches that implement that... :).  Without knowing more about what
-> you're seeing, it's hard to say if its related, though.  This was
-> triggered by long periods of unclean pgs and lots of data migration, not
-> high load.
-
-An issue I've been seeing is unusually high OSD memory use.
-It seems to be triggered by linux clients timing out requests
-and resetting OSDs during a heavy write load, but I was hoping
-to rule out any memory-use issues caused by map processing.
-However, this morning I started testing your server wip-msgr
-branch together with the kernel-side patches queued up for 3.6,
-and so far with that combination I've been unable to trigger the
-behavior I was seeing.  So, that's great news, and I think
-confirms that issue was unrelated to any map issues.
-
-I've also sometimes had issues with my cluster becoming unstable
-when failing an OSD while the cluster is under a heavy write load,
-but hadn't been successful at characterizing under what conditions
-it couldn't recover.  I expect that situation is now improved as
-well, and will retest.
-
-Thanks -- Jim
-
+> We create a ceph cluster with 24 osd, 3 monitors
+> Osd.0 ~ osd.11 is on server1
+> Osd.12 ~ osd.23 is on server2
+> Mon.0 is on server1
+> Mon.1 is on server2
+> Mon.2 is on server3 which has no osd
 >
-> sage
+> When I turn off the network of server1, we expect that server2 would aware 12 osd (on server 1) disappear.
+> However, when I type ceph -s, it still show 24 osd there.
+
+There's a grace period before osds are marked down by their heartbeat
+peers (configured by osd_heartbeat_grace), which is 20 seconds by
+default. This avoids unnecessary data movement from short-lived issues.
+
+> And from the log of osd.0 and osd.11, we can find heartbeat check on server1, but not on server2.
+> What happened to server2? Can we restart the heartbeat server? Thanks!
+
+There's no separate heartbeat server, it's a thread in the osd. If the
+heartbeat thread stopped, the process would exit. If waiting longer
+doesn't trigger the heartbeat failures, your crushmap might not
+be separating peers onto different hosts correctly. OSDs heartbeat
+with their peers.
+
+Josh
+
+> root@wistor-002:~# ceph -s
+>     health HEALTH_WARN 1 mons down, quorum 1,2 008,009
+>     monmap e1: 3 mons at {006=192.168.200.84:6789/0,008=192.168.200.86:6789/0,009=192.168.200.87:6789/0}, election epoch 522, quorum 1,2 008,009
+>     osdmap e1388: 24 osds: 24 up, 24 in
+>      pgmap v288663: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+>     mdsmap e1: 0/0/1 up
+>
+> log of ceph -w (we turn of server1 arround 15:20, that cause the new monitor election)
+> 2012-07-31 15:21:25.966572 mon.0 [INF] pgmap v288658: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+> 2012-07-31 15:20:10.400566 mon.1 [INF] mon.008 calling new monitor election
+> 2012-07-31 15:21:36.030473 mon.1 [INF] mon.008 calling new monitor election
+> 2012-07-31 15:21:36.079772 mon.2 [INF] mon.009 calling new monitor election
+> 2012-07-31 15:21:46.102587 mon.1 [INF] mon.008@1 won leader election with quorum 1,2
+> 2012-07-31 15:21:46.273253 mon.1 [INF] pgmap v288659: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+> 2012-07-31 15:21:46.273379 mon.1 [INF] mdsmap e1: 0/0/1 up
+> 2012-07-31 15:21:46.273495 mon.1 [INF] osdmap e1388: 24 osds: 24 up, 24 in
+> 2012-07-31 15:21:46.273814 mon.1 [INF] monmap e1: 3 mons at {006=192.168.200.84:6789/0,008=192.168.200.86:6789/0,009=192.168.200.87:6789/0}
+> 2012-07-31 15:21:46.587679 mon.1 [INF] pgmap v288660: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+> 2012-07-31 15:22:01.245813 mon.1 [INF] pgmap v288661: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+> 2012-07-31 15:22:33.970838 mon.1 [INF] pgmap v288662: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+>
+> Log of osd.0 (on server 1)
+> 2012-07-31 15:20:25.309264 7fdc06470700  0 -- 192.168.200.81:6825/12162 >> 192.168.200.82:6840/8772 pipe(0x4dbea00 sd=52 pgs=0 cs=0 l=0).accept connect_seq 0 vs existing 0 state 1
+> 2012-07-31 15:20:25.310887 7fdc1c551700  0 -- 192.168.200.81:6825/12162 >> 192.168.200.82:6833/15570 pipe(0x4dbec80 sd=51 pgs=0 cs=0 l=0).accept connect_seq 0 vs existing 0 state 1
+> 2012-07-31 15:21:46.861458 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.12 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861496 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.13 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861506 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.14 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861514 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.15 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861522 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.16 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861530 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.17 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861538 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.18 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861546 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.19 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861556 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.20 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861576 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.21 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861609 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.22 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+> 2012-07-31 15:21:46.861618 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.23 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+>
+> Log of osd.12 (on server 2)
+> 2012-07-31 15:20:31.475815 7f9eac5ba700  0 osd.12 1387 pg[2.16f( v 1356'10485 (465'9480,1356'10485] n=42 ec=1 les/c 1387/1387 1383/1383/1383) [12,0] r=0 lpr=1383 mlcod 0'0 active+clean] watch: oi.user_version=45
+> 2012-07-31 15:20:31.475817 7f9eabdb9700  0 osd.12 1387 pg[2.205( v 1282'26975 (1254'25973,1282'26975] n=86 ec=1 les/c 1387/1387 1383/1383/1383) [12,9] r=0 lpr=1383 lcod 0'0 mlcod 0'0 active+clean] watch: ctx->obc=0x5838dc0 cookie=9 oi.version=26975 ctx->at_version=1387'26976
+> 2012-07-31 15:20:31.475837 7f9eabdb9700  0 osd.12 1387 pg[2.205( v 1282'26975 (1254'25973,1282'26975] n=86 ec=1 les/c 1387/1387 1383/1383/1383) [12,9] r=0 lpr=1383 lcod 0'0 mlcod 0'0 active+clean] watch: oi.user_version=1043
+> 2012-07-31 15:35:31.512306 7f9ea6f8e700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6847/18544 pipe(0x4633780 sd=41 pgs=82 cs=1 l=0).fault with nothing to send, going to standby
+> 2012-07-31 15:35:31.512342 7f9ea7897700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6853/19122 pipe(0x4a68280 sd=43 pgs=83 cs=1 l=0).fault with nothing to send, going to standby
+> 2012-07-31 15:35:31.579095 7f9ea6c8b700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6809/17957 pipe(0x6309c80 sd=55 pgs=80 cs=1 l=0).fault with nothing to send, going to standby
+> 2012-07-31 15:35:31.592368 7f9ea7a99700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6840/12656 pipe(0x4b44780 sd=44 pgs=104 cs=1 l=0).fault with nothing to send, going to standby
+> 2012-07-31 15:35:31.596484 7f9ea94b3700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6836/18275 pipe(0x4cfb780 sd=48 pgs=76 cs=1 l=0).fault with nothing to send, going to standby
+> 2012-07-31 15:35:31.720803 7f9ea5a79700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6838/12409 pipe(0xeb4000 sd=38 pgs=105 cs=1 l=0).fault with nothing to send, going to standby
+>
 >
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
->
-
 
