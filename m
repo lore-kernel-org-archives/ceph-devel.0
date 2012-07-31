@@ -1,89 +1,88 @@
 From: <Eric_YH_Chen@wiwynn.com>
-Subject: RE: High-availability testing of ceph
-Date: Tue, 31 Jul 2012 07:31:30 +0000
-Message-ID: <60E83269D669544E8069A09CB69135EA011D31@GDC-CLDMBX-P02.whq.wistron>
-References: <60E83269D669544E8069A09CB69135EA011444@GDC-CLDMBX-P02.whq.wistron>
- <5017735D.3060206@inktank.com>
+Subject: The cluster do not aware some osd are disappear
+Date: Tue, 31 Jul 2012 07:48:20 +0000
+Message-ID: <60E83269D669544E8069A09CB69135EA011D62@GDC-CLDMBX-P02.whq.wistron>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from twnhumsw3.wistron.com ([220.128.89.23]:53849 "EHLO
-	TWNHUMSW3.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752729Ab2GaHbp convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jul 2012 03:31:45 -0400
-In-Reply-To: <5017735D.3060206@inktank.com>
+Received: from twnhumsw4.wistron.com ([220.128.89.24]:52736 "EHLO
+	TWNHUMSW4.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750957Ab2GaHsV convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jul 2012 03:48:21 -0400
+Received: from GDC-CLDCAS-P07.whq.wistron (unverified [10.37.38.68]) by TWNHUMSW4.wistron.com
+ (Clearswift SMTPRS 5.4.0) with ESMTP id <Ta5ea28db64c0a816721890@TWNHUMSW4.wistron.com> for <ceph-devel@vger.kernel.org>;
+ Tue, 31 Jul 2012 15:55:49 +0800
 Content-Language: zh-TW
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: josh.durgin@inktank.com
-Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
+To: ceph-devel@vger.kernel.org
+Cc: Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
 
-Hi, Josh:
+Dear All:
 
-Thanks for your reply. However, I had asked a question about replica setting before.
-http://www.spinics.net/lists/ceph-devel/msg07346.html
+My Environment:  two servers, and 12 hard-disk on each server. 
+                 Version: Ceph 0.48, Kernel: 3.2.0-27
 
-If the performance of rbd device is n MB/s under replica=2,
-then that means the total io throughputs on hard disk is over 3 * n MB/s. 
-Because I think the total number of copies is 3 in original.
+We create a ceph cluster with 24 osd, 3 monitors
+Osd.0 ~ osd.11 is on server1
+Osd.12 ~ osd.23 is on server2
+Mon.0 is on server1
+Mon.1 is on server2
+Mon.2 is on server3 which has no osd
 
-So, it seems not correct now, the total number of copies is only 2. 
-The total io through puts on disk should be 2 * n MB/s. Right?
+When I turn off the network of server1, we expect that server2 would aware 12 osd (on server 1) disappear.
+However, when I type ceph -s, it still show 24 osd there.
 
------Original Message-----
-From: Josh Durgin [mailto:josh.durgin@inktank.com] 
-Sent: Tuesday, July 31, 2012 1:56 PM
-To: Eric YH Chen/WYHQ/Wiwynn
-Cc: ceph-devel@vger.kernel.org; Chris YT Huang/WYHQ/Wiwynn; Victor CY Chang/WYHQ/Wiwynn
-Subject: Re: High-availability testing of ceph
+And from the log of osd.0 and osd.11, we can find heartbeat check on server1, but not on server2. 
+What happened to server2? Can we restart the heartbeat server? Thanks!
 
-On 07/30/2012 07:46 PM, Eric_YH_Chen@wiwynn.com wrote:
-> Hi, all:
->
-> I am testing high-availability of ceph.
->
-> Environment:  two servers, and 12 hard-disk on each server. Version: Ceph 0.48
->               Kernel: 3.2.0-27
->
-> We create a ceph cluster with 24 osd.
-> Osd.0 ~ osd.11 is on server1
-> Osd.12 ~ osd.23 is on server2
->
-> The crush rule is using default rule.
-> rule rbd {
->          ruleset 2
->          type replicated
->          min_size 1
->          max_size 10
->          step take default
->          step chooseleaf firstn 0 type host
->          step emit
-> }
->
-> pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 
-> 1536 pgp_num 1536 last_change 1172 owner 0
->
-> Test case 1:
-> 1. Create a rbd device and read/write to it 2. Random turn off one osd 
-> on server1  (service ceph stop osd.0) 3. check the read/write of rbd 
-> device
->
-> Test case 2:
-> 1. Create a rbd device and read/write to it 2. Random turn off one osd 
-> on server1  (service ceph stop osd.0) 2. Random turn off one osd on 
-> server2  (service ceph stop osd.12) 3. check the read/write of rbd 
-> device
->
-> About test case 1, we can access the rbd device as normal. But about test case 2, we would hang there and no response.
-> Is it a correct scenario ?
->
-> I imagine that we can turn off any two osd when we set the replication as 2.
-> Because without the master data, we have two other copies on two different osd.
-> Even when we turn off two osd, we can find the data on third osd.
-> Any misunderstanding? Thanks!
+root@wistor-002:~# ceph -s
+   health HEALTH_WARN 1 mons down, quorum 1,2 008,009
+   monmap e1: 3 mons at {006=192.168.200.84:6789/0,008=192.168.200.86:6789/0,009=192.168.200.87:6789/0}, election epoch 522, quorum 1,2 008,009
+   osdmap e1388: 24 osds: 24 up, 24 in
+    pgmap v288663: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+   mdsmap e1: 0/0/1 up
 
-rep size is the total number of copies, so stopping two osds with rep size 2 may cause you to lose access to some objects.
+log of ceph -w (we turn of server1 arround 15:20, that cause the new monitor election)
+2012-07-31 15:21:25.966572 mon.0 [INF] pgmap v288658: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+2012-07-31 15:20:10.400566 mon.1 [INF] mon.008 calling new monitor election
+2012-07-31 15:21:36.030473 mon.1 [INF] mon.008 calling new monitor election
+2012-07-31 15:21:36.079772 mon.2 [INF] mon.009 calling new monitor election
+2012-07-31 15:21:46.102587 mon.1 [INF] mon.008@1 won leader election with quorum 1,2
+2012-07-31 15:21:46.273253 mon.1 [INF] pgmap v288659: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+2012-07-31 15:21:46.273379 mon.1 [INF] mdsmap e1: 0/0/1 up
+2012-07-31 15:21:46.273495 mon.1 [INF] osdmap e1388: 24 osds: 24 up, 24 in
+2012-07-31 15:21:46.273814 mon.1 [INF] monmap e1: 3 mons at {006=192.168.200.84:6789/0,008=192.168.200.86:6789/0,009=192.168.200.87:6789/0}
+2012-07-31 15:21:46.587679 mon.1 [INF] pgmap v288660: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+2012-07-31 15:22:01.245813 mon.1 [INF] pgmap v288661: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
+2012-07-31 15:22:33.970838 mon.1 [INF] pgmap v288662: 4608 pgs: 4608 active+clean; 257 GB data, 988 GB used, 20214 GB / 22320 GB avail
 
-Josh
+Log of osd.0 (on server 1)
+2012-07-31 15:20:25.309264 7fdc06470700  0 -- 192.168.200.81:6825/12162 >> 192.168.200.82:6840/8772 pipe(0x4dbea00 sd=52 pgs=0 cs=0 l=0).accept connect_seq 0 vs existing 0 state 1
+2012-07-31 15:20:25.310887 7fdc1c551700  0 -- 192.168.200.81:6825/12162 >> 192.168.200.82:6833/15570 pipe(0x4dbec80 sd=51 pgs=0 cs=0 l=0).accept connect_seq 0 vs existing 0 state 1
+2012-07-31 15:21:46.861458 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.12 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861496 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.13 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861506 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.14 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861514 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.15 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861522 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.16 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861530 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.17 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861538 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.18 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861546 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.19 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861556 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.20 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861576 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.21 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861609 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.22 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+2012-07-31 15:21:46.861618 7fdc14e9d700 -1 osd.0 1388 heartbeat_check: no reply from osd.23 since 2012-07-31 15:21:26.770108 (cutoff 2012-07-31 15:21:26.861458)
+
+Log of osd.12 (on server 2)
+2012-07-31 15:20:31.475815 7f9eac5ba700  0 osd.12 1387 pg[2.16f( v 1356'10485 (465'9480,1356'10485] n=42 ec=1 les/c 1387/1387 1383/1383/1383) [12,0] r=0 lpr=1383 mlcod 0'0 active+clean] watch: oi.user_version=45
+2012-07-31 15:20:31.475817 7f9eabdb9700  0 osd.12 1387 pg[2.205( v 1282'26975 (1254'25973,1282'26975] n=86 ec=1 les/c 1387/1387 1383/1383/1383) [12,9] r=0 lpr=1383 lcod 0'0 mlcod 0'0 active+clean] watch: ctx->obc=0x5838dc0 cookie=9 oi.version=26975 ctx->at_version=1387'26976
+2012-07-31 15:20:31.475837 7f9eabdb9700  0 osd.12 1387 pg[2.205( v 1282'26975 (1254'25973,1282'26975] n=86 ec=1 les/c 1387/1387 1383/1383/1383) [12,9] r=0 lpr=1383 lcod 0'0 mlcod 0'0 active+clean] watch: oi.user_version=1043
+2012-07-31 15:35:31.512306 7f9ea6f8e700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6847/18544 pipe(0x4633780 sd=41 pgs=82 cs=1 l=0).fault with nothing to send, going to standby
+2012-07-31 15:35:31.512342 7f9ea7897700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6853/19122 pipe(0x4a68280 sd=43 pgs=83 cs=1 l=0).fault with nothing to send, going to standby
+2012-07-31 15:35:31.579095 7f9ea6c8b700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6809/17957 pipe(0x6309c80 sd=55 pgs=80 cs=1 l=0).fault with nothing to send, going to standby
+2012-07-31 15:35:31.592368 7f9ea7a99700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6840/12656 pipe(0x4b44780 sd=44 pgs=104 cs=1 l=0).fault with nothing to send, going to standby
+2012-07-31 15:35:31.596484 7f9ea94b3700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6836/18275 pipe(0x4cfb780 sd=48 pgs=76 cs=1 l=0).fault with nothing to send, going to standby
+2012-07-31 15:35:31.720803 7f9ea5a79700  0 -- 192.168.200.82:6840/8772 >> 192.168.200.81:6838/12409 pipe(0xeb4000 sd=38 pgs=105 cs=1 l=0).fault with nothing to send, going to standby
+
 
