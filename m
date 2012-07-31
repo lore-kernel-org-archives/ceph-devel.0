@@ -1,123 +1,60 @@
 From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 3/8] libceph: fix handling of immediate socket connect
- failure
-Date: Mon, 30 Jul 2012 19:08:23 -0500
-Message-ID: <501721F7.8080301@inktank.com>
-References: <1343663971-3221-1-git-send-email-sage@inktank.com> <1343663971-3221-4-git-send-email-sage@inktank.com>
+Subject: Re: [PATCH 4/8] libceph: revoke mon_client messages on session restart
+Date: Mon, 30 Jul 2012 19:09:18 -0500
+Message-ID: <5017222E.50805@inktank.com>
+References: <1343663971-3221-1-git-send-email-sage@inktank.com> <1343663971-3221-5-git-send-email-sage@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:54340 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752014Ab2GaAIY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 20:08:24 -0400
-Received: by gglu4 with SMTP id u4so5509146ggl.19
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 17:08:23 -0700 (PDT)
-In-Reply-To: <1343663971-3221-4-git-send-email-sage@inktank.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:50400 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752176Ab2GaAJT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jul 2012 20:09:19 -0400
+Received: by yenl2 with SMTP id l2so5512602yen.19
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jul 2012 17:09:19 -0700 (PDT)
+In-Reply-To: <1343663971-3221-5-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
 On 07/30/2012 10:59 AM, Sage Weil wrote:
-> If the connect() call immediately fails such that sock == NULL, we
-> still need con_close_socket() to reset our socket state to CLOSED.
+> Revoke all mon_client messages when we shut down the old connection.
+> This is mostly moot since we are re-using the same ceph_connection,
+> but it is cleaner.
 > 
 > Signed-off-by: Sage Weil <sage@inktank.com>
 
 Looks good.
 
-I'm glad you're adding in dout() calls...  I hadn't been doing
-that as I was working on the messenger code.
-
 Reviewed-by: Alex Elder <elder@inktank.com>
 
 > ---
->  net/ceph/messenger.c |   26 +++++++++++++++++++-------
->  1 file changed, 19 insertions(+), 7 deletions(-)
+>  net/ceph/mon_client.c |    4 ++++
+>  1 file changed, 4 insertions(+)
 > 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index fa16f2c..a6a0c7a 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -224,6 +224,8 @@ static void con_sock_state_init(struct ceph_connection *con)
->  	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CLOSED);
->  	if (WARN_ON(old_state != CON_SOCK_STATE_NEW))
->  		printk("%s: unexpected old state %d\n", __func__, old_state);
-> +	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-> +	     CON_SOCK_STATE_CLOSED);
->  }
->  
->  static void con_sock_state_connecting(struct ceph_connection *con)
-> @@ -233,6 +235,8 @@ static void con_sock_state_connecting(struct ceph_connection *con)
->  	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CONNECTING);
->  	if (WARN_ON(old_state != CON_SOCK_STATE_CLOSED))
->  		printk("%s: unexpected old state %d\n", __func__, old_state);
-> +	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-> +	     CON_SOCK_STATE_CONNECTING);
->  }
->  
->  static void con_sock_state_connected(struct ceph_connection *con)
-> @@ -242,6 +246,8 @@ static void con_sock_state_connected(struct ceph_connection *con)
->  	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CONNECTED);
->  	if (WARN_ON(old_state != CON_SOCK_STATE_CONNECTING))
->  		printk("%s: unexpected old state %d\n", __func__, old_state);
-> +	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-> +	     CON_SOCK_STATE_CONNECTED);
->  }
->  
->  static void con_sock_state_closing(struct ceph_connection *con)
-> @@ -253,6 +259,8 @@ static void con_sock_state_closing(struct ceph_connection *con)
->  			old_state != CON_SOCK_STATE_CONNECTED &&
->  			old_state != CON_SOCK_STATE_CLOSING))
->  		printk("%s: unexpected old state %d\n", __func__, old_state);
-> +	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-> +	     CON_SOCK_STATE_CLOSING);
->  }
->  
->  static void con_sock_state_closed(struct ceph_connection *con)
-> @@ -262,8 +270,11 @@ static void con_sock_state_closed(struct ceph_connection *con)
->  	old_state = atomic_xchg(&con->sock_state, CON_SOCK_STATE_CLOSED);
->  	if (WARN_ON(old_state != CON_SOCK_STATE_CONNECTED &&
->  		    old_state != CON_SOCK_STATE_CLOSING &&
-> -		    old_state != CON_SOCK_STATE_CONNECTING))
-> +		    old_state != CON_SOCK_STATE_CONNECTING &&
-> +		    old_state != CON_SOCK_STATE_CLOSED))
->  		printk("%s: unexpected old state %d\n", __func__, old_state);
-> +	dout("%s con %p sock %d -> %d\n", __func__, con, old_state,
-> +	     CON_SOCK_STATE_CLOSED);
->  }
->  
->  /*
-> @@ -448,14 +459,14 @@ static int ceph_tcp_sendpage(struct socket *sock, struct page *page,
->   */
->  static int con_close_socket(struct ceph_connection *con)
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index bfd21a8..105d533 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -118,6 +118,9 @@ static void __close_session(struct ceph_mon_client *monc)
 >  {
-> -	int rc;
-> +	int rc = 0;
->  
->  	dout("con_close_socket on %p sock %p\n", con, con->sock);
-> -	if (!con->sock)
-> -		return 0;
-> -	rc = con->sock->ops->shutdown(con->sock, SHUT_RDWR);
-> -	sock_release(con->sock);
-> -	con->sock = NULL;
-> +	if (con->sock) {
-> +		rc = con->sock->ops->shutdown(con->sock, SHUT_RDWR);
-> +		sock_release(con->sock);
-> +		con->sock = NULL;
-> +	}
->  
->  	/*
->  	 * Forcibly clear the SOCK_CLOSED flag.  It gets set
-> @@ -464,6 +475,7 @@ static int con_close_socket(struct ceph_connection *con)
->  	 * shut the socket down.
->  	 */
->  	clear_bit(CON_FLAG_SOCK_CLOSED, &con->flags);
-> +
->  	con_sock_state_closed(con);
->  	return rc;
+>  	dout("__close_session closing mon%d\n", monc->cur_mon);
+>  	ceph_msg_revoke(monc->m_auth);
+> +	ceph_msg_revoke_incoming(monc->m_auth_reply);
+> +	ceph_msg_revoke(monc->m_subscribe);
+> +	ceph_msg_revoke_incoming(monc->m_subscribe_ack);
+>  	ceph_con_close(&monc->con);
+>  	monc->cur_mon = -1;
+>  	monc->pending_auth = 0;
+> @@ -685,6 +688,7 @@ static void __resend_generic_request(struct ceph_mon_client *monc)
+>  	for (p = rb_first(&monc->generic_request_tree); p; p = rb_next(p)) {
+>  		req = rb_entry(p, struct ceph_mon_generic_request, node);
+>  		ceph_msg_revoke(req->request);
+> +		ceph_msg_revoke_incoming(req->reply);
+>  		ceph_con_send(&monc->con, ceph_msg_get(req->request));
+>  	}
 >  }
 > 
 
