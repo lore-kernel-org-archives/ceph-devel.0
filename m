@@ -1,128 +1,103 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Re: [EXTERNAL] Re: avoiding false detection of down OSDs
-Date: Tue, 31 Jul 2012 09:07:56 -0600
-Message-ID: <5017F4CC.9070308@sandia.gov>
-References: <CAPYLRzjoaWkMkz4U+=rZQ+YMS76vkLf_KVZfbWmdLnPuCYadSw@mail.gmail.com>
- <50170EF0.5040004@sandia.gov>
- <CAPYLRzhH-MNPHhXbg36jkMGGdh3mtn+jqR5FQDzGta0y67UkPw@mail.gmail.com>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: another performance-related thread
+Date: Tue, 31 Jul 2012 10:17:00 -0500
+Message-ID: <5017F6EC.5050209@inktank.com>
+References: <CABYiri94jQb4z9UMgKP1S686pcn7o6v26tbgMp7h1WCivRwL-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:38401 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753987Ab2GaPIS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jul 2012 11:08:18 -0400
-In-Reply-To: <CAPYLRzhH-MNPHhXbg36jkMGGdh3mtn+jqR5FQDzGta0y67UkPw@mail.gmail.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:49898 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754921Ab2GaPRL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 31 Jul 2012 11:17:11 -0400
+Received: by yenl2 with SMTP id l2so6155211yen.19
+        for <ceph-devel@vger.kernel.org>; Tue, 31 Jul 2012 08:17:11 -0700 (PDT)
+In-Reply-To: <CABYiri94jQb4z9UMgKP1S686pcn7o6v26tbgMp7h1WCivRwL-A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
+To: Andrey Korolyov <andrey@xdel.ru>
 Cc: ceph-devel@vger.kernel.org
 
-On 07/30/2012 06:24 PM, Gregory Farnum wrote:
-> On Mon, Jul 30, 2012 at 3:47 PM, Jim Schutt<jaschut@sandia.gov>  wrot=
-e:
->>
->> Above you mentioned that you are seeing these issues as you scaled
->> out a storage cluster, but none of the solutions you mentioned
->> address scaling.  Let's assume your preferred solution handles
->> this issue perfectly on the biggest cluster anyone has built
->> today.  What do you predict will happen when that cluster size
->> is scaled up by a factor of 2, or 10, or 100?
-> Sage should probably describe in more depth what we've seen since he'=
-s
-> looked at it the most, but I can expand on it a little. In argonaut
-> and earlier version of Ceph, processing a new OSDMap for an OSD is
-> very expensive. I don't remember the precise numbers we'd whittled it
-> down to but it required at least one disk sync as well as pausing all
-> request processing for a while. If you combined this expense with a
-> large number of large maps (if, perhaps, one quarter of your 800-OSD
-> system had been down but not out for 6+ hours), you could cause memor=
-y
-> thrashing on OSDs as they came up, which could force them to become
-> very, very, veeery slow. In the next version of Ceph, map processing
-> is much less expensive (no syncs or full-system pauses required),
-> which will prevent request backup. And there are a huge number of way=
-s
-> to reduce the memory utilization of maps, some of which can be
-> backported to argonaut and some of which can't.
-> Now, if we can't prevent our internal processes from running an OSD
-> out of memory, we'll have failed. But we don't think this is an
-> intractable problem; in fact we have reason to hope we've cleared it
-> up now that we've seen the problem =E2=80=94 although we don't think =
-it's
-> something that we can absolutely prevent on argonaut (too much code
-> churn).
-> So we're looking for something that we can apply to argonaut as a
-> band-aid, but that we can also keep around in case forces external to
-> Ceph start causing similar cluster-scale resource shortages beyond ou=
-r
-> control (runaway co-located process eats up all the memory on lots of
-> boxes, switch fails and bandwidth gets cut in half, etc). If somethin=
-g
-> happens that means Ceph can only supply half as much throughput as it
-> was previously, then Ceph should provide that much throughput; right
-> now if that kind of incident occurs then Ceph won't provide any
-> throughput because it'll all be eaten by spurious recovery work.
+Hi Andrey!
 
-Ah, thanks for the extra context.  I hadn't fully appreciated
-the proposal was primarily a mitigation for argonaut, and
-otherwise as a fail-safe mechanism.
-
->>
->> As I mentioned above, I'm concerned this is addressing
->> symptoms, rather than root causes.  I'm concerned the
->> root cause has something to do with how the map processing
->> work scales with number of OSDs/PGs, and that this will
->> limit the maximum size of a Ceph storage cluster.
-> I think I discussed this above enough already? :)
-
-Yep, thanks.
+On 07/31/2012 10:03 AM, Andrey Korolyov wrote:
+> Hi,
 >
+> I`ve finally managed to run rbd-related test on relatively powerful
+> machines and what I have got:
 >
->> But, if you really just want to not mark down an OSD that is
->> laggy, I know this will sound simplistic, but I keep thinking
->> that the OSD knows for itself if it's up, even when the
->> heartbeat mechanism is backed up.  Couldn't there be some way
->> to ask an OSD suspected of being down whether it is or not,
->> separate from the heartbeat mechanism?  I mean, if you're
->> considering having the monitor ignore OSD down reports for a
->> while based on some estimate of past behavior, wouldn't it be
->> better for the monitor to just ask such an OSD, "hey, are you
->> still there?"  If it gets an immediate "I'm busy, come back later",
->> extend the grace period; otherwise, mark the OSD down.
-> Hmm. The concern is that if an OSD is stuck on disk swapping then it'=
-s
-> going to be just as stuck for the monitors as the OSDs =E2=80=94 they=
-'re all
-> using the same network in the basic case, etc. We want to be able to
-> make that guess before the OSD is able to answer such questions.
-> But I'll think on if we could try something else similar.
+> 1) Reads on almost fair balanced cluster(eight nodes) did very well,
+> utilizing almost all disk and bandwidth (dual gbit 802.3ad nics, sata
+> disks beyond lsi sas 2108 with wt cache gave me ~1.6Gbyte/s on linear
+> and sequential reads, which is close to overall disk throughput)
 
-OK - thanks.
+Does your 2108 have the RAID or JBOD firmware?  I'm guessing the RAID 
+firmware given that you are able to change the caching behavior?  How do 
+you have the arrays setup for the OSDs?
 
-Also, FWIW I've been running my Ceph servers with no swap,
-and I've recently doubled the size of my storage cluster.
-Is it possible to have map processing do a little memory
-accounting and log it, or to provide some way to learn
-that map processing is chewing up significant amounts of
-memory?  Or maybe there's already a way to learn this that
-I need to learn about?  I sometimes run into something that
-shares some characteristics with what you describe, but is
-primarily triggered by high client write load.  I'd like
-to be able to confirm or deny it's the same basic issue
-you've described.
-
-Thanks -- Jim
-
-> -Greg
+> 2) Writes get much worse, both on rados bench and on fio test when I
+> ran fio simularly on 120 vms - at it best, overall performance is
+> about 400Mbyte/s, using rados bench -t 12 on three host nodes
 >
+> fio config:
 >
+> rw=(randread|randwrite|seqread|seqwrite)
+> size=256m
+> direct=1
+> directory=/test
+> numjobs=1
+> iodepth=12
+> group_reporting
+> name=random-ead-direct
+> bs=1M
+> loops=12
+>
+> for 120 vm set, Mbyte/s
+> linear reads:
+> MEAN: 14156
+> STDEV: 612.596
+> random reads:
+> MEAN: 14128
+> STDEV: 911.789
+> linear writes:
+> MEAN: 2956
+> STDEV: 283.165
+> random writes:
+> MEAN: 2986
+> STDEV: 361.311
+>
+> each node holds 15 vms and for 64M rbd cache all possible three states
+> - wb, wt and no-cache has almost same numbers at the tests. I wonder
+> if it possible to raise write/read ratio somehow. Seems that osd
+> underutilize itself, e.g. I am not able to get single-threaded rbd
+> write to get above 35Mb/s. Adding second osd on same disk only raising
+> iowait time, but not benchmark results.
+
+I've seen high IO wait times (especially with small writes) via rados 
+bench as well.  It's something we are actively investigating.  Part of 
+the issue with rados bench is that every single request is getting 
+written to a seperate file, so especially at small IO sizes there is a 
+lot of underlying filesystem metadata traffic.  For us, this is 
+happening on 9260 controllers with RAID firmware.  I think we may see 
+some improvement by switching to 2X08 cards with the JBOD (ie IT) 
+firmware, but we haven't confirmed it yet.
+
+We actually just purchased a variety of alternative RAID and SAS 
+controllers to test with to see how universal this problem is. 
+Theoretically RBD shouldn't suffer from this as badly as small writes to 
+the same file should get buffered.  The same is true for CephFS when 
+doing buffered IO to a single file due to the Linux buffer cache.  Small 
+writes to many files will likely suffer in the same way that rados bench 
+does though.
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Mark Nelson
+Performance Engineer
+Inktank
