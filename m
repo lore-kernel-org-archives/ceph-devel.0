@@ -1,77 +1,321 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: PG stuck stale
-Date: Wed, 01 Aug 2012 11:41:02 -0700
-Message-ID: <5019783E.4010705@inktank.com>
-References: <CAF6-1L5R9DaP778-Wdcpni6C6KpYMd0t3zF9t91CLd5oqAW7ZA@mail.gmail.com> <50197493.1040805@inktank.com>
+From: Samuel Just <sam.just@inktank.com>
+Subject: Re: cannot startup one of the osd
+Date: Wed, 1 Aug 2012 11:43:33 -0700
+Message-ID: <CA+4uBUY1bT869XyzoqoDVENwpKzPe8eCDsQEBO0JeVit7jfadg@mail.gmail.com>
+References: <60E83269D669544E8069A09CB69135EA011DB4@GDC-CLDMBX-P02.whq.wistron>
+	<CA+4uBUZgZXJ8TZz4T3OFeVYmNgvwXg0Ye6jwjrwXpPKbXufXbw@mail.gmail.com>
+	<60E83269D669544E8069A09CB69135EA01245B@GDC-CLDMBX-P02.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:47041 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753384Ab2HASlF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Aug 2012 14:41:05 -0400
-Received: by pbbrp8 with SMTP id rp8so1484618pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Aug 2012 11:41:05 -0700 (PDT)
-In-Reply-To: <50197493.1040805@inktank.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:39902 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752154Ab2HASne convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Aug 2012 14:43:34 -0400
+Received: by vcbfk26 with SMTP id fk26so7363418vcb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Aug 2012 11:43:33 -0700 (PDT)
+In-Reply-To: <60E83269D669544E8069A09CB69135EA01245B@GDC-CLDMBX-P02.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: ceph-devel@vger.kernel.org
+To: Eric_YH_Chen@wiwynn.com
+Cc: ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
 
-On 08/01/2012 11:25 AM, Josh Durgin wrote:
-> On 08/01/2012 08:12 AM, Sylvain Munaut wrote:
->> Hi,
->>
->> I'm doing a few tests on ceph (radosgw more precisely).
->>
->> One of the scenario I'm testing is:
->>   - A radogw bucket stored in a rados pool with size=1 (so no
->> replication)
->>   - Complete/Irrecoverable failure of an OSD ( osd.0 )
->>
->> Now obviously in that situation, some of the placement groups will be
->> completely lost and there will be no way to get the data back and I'm
->> OK with that.
->>
->> But my current issue is that after rebuilding a new osd.0 from
->> scratch, the PG that were previously on it and nowhere else are "stuck
->> stale" and I can't figure out how to tell it that it's OK to loose
->> those data but come back to HEALTHY ...
+I'm not sure how the crash could have happened.  Can you reproduce the
+crash with logging on? (debug osd = 20 and debug filestore = 20).
+Also, can you gzip up the current/omap directory on the crashed osd
+and post it?  It seems that one of the ondisk structures may have been
+corrupted.
+
+Even with that, the cluster should have recovered.  Can you post:
+1) The osdmap.  This can be obtained by running
+       ceph osd getmap -o <outfile>
+    where outfile is the name of the file into which you want the map
+to be written.
+
+2) The output of
+       ceph osd dump
+3) The output of
+       ceph pg dump
+
+Thanks
+-Sam
+
+On Wed, Aug 1, 2012 at 1:11 AM,  <Eric_YH_Chen@wiwynn.com> wrote:
+> Hi, Samuel:
 >
-> Those pgs shouldn't be stale. How did you rebuild osd.0? Did you just
-> redo ceph-osd --mkfs?
+> And the ceph cluster stays at a not healthy status. How could we fix it?
+> There are 230 object unfound and we cannot access some rbd devices now.
+> It would hang at "rbd info <image_name>".
 >
-> The objects should show up as unfound in ceph -s, and then you can
-> deal with them as described here:
+> root@ubuntu:~$ ceph -s
+>    health HEALTH_WARN 96 pgs backfill; 96 pgs degraded; 96 pgs recovering; 96 pgs stuck unclean; recovery 4978/138644 de
+> graded (3.590%); 230/69322 unfound (0.332%)
+>    monmap e1: 3 mons at {006=192.168.200.84:6789/0,008=192.168.200.86:6789/0,009=192.168.200.87:6789/0}, election epoch
+> 6, quorum 0,1,2 006,008,009
+>    osdmap e2944: 24 osds: 23 up, 23 in
+>     pgmap v297084: 4608 pgs: 4512 active+clean, 50 active+recovering+degraded+remapped+backfill, 46 active+recovering+de
+> graded+backfill; 257 GB data, 952 GB used, 19367 GB / 21390 GB avail; 4978/138644 degraded (3.590%); 230/69322 unfound (
+> 0.332%)
+>    mdsmap e1: 0/0/1 up
 >
-> http://ceph.com/docs/master/ops/manage/failures/osd/#unfound-objects
 >
->> I tried doing 'ceph osd lost 0' after I shut it down and before I
->> start it up from scratch again but that didn't change anything.
+> -----Original Message-----
+> From: Eric YH Chen/WYHQ/Wiwynn
+> Sent: Wednesday, August 01, 2012 9:01 AM
+> To: 'Samuel Just'
+> Cc: ceph-devel@vger.kernel.org; Chris YT Huang/WYHQ/Wiwynn; Victor CY Chang/WYHQ/Wiwynn
+> Subject: RE: cannot startup one of the osd
 >
-> This is probably not working due to the stale pgs. Stale means no osd
-> is reporting anything about them, so they're probably not being updated
-> and marked unfound.
+> Hi, Samuel:
 >
->> So how can I make the cluster HEALTHY again ?
-
-I didn't notice before, but since you only have 1 copy of the data,
-no other osds will tell the new osd.0 that it should have those pgs.
-That's why they're stale. You can force osd.0 to notice the pgs it needs
-by running:
-
-ceph pg force_create_pg <pgid>
-
-for each pg that's mapped to osd.0 in 'ceph pg dump'.
-
-Once those are all created, and recovery has noticed that those pgs are
-all out of date, the mark_unfound_lost command should work.
-
-Josh
-
+> It happens every startup, I cannot fix it now.
+>
+> -----Original Message-----
+> From: Samuel Just [mailto:sam.just@inktank.com]
+> Sent: Wednesday, August 01, 2012 1:36 AM
+> To: Eric YH Chen/WYHQ/Wiwynn
+> Cc: ceph-devel@vger.kernel.org; Chris YT Huang/WYHQ/Wiwynn; Victor CY Chang/WYHQ/Wiwynn
+> Subject: Re: cannot startup one of the osd
+>
+> This crash happens on each startup?
+> -Sam
+>
+> On Tue, Jul 31, 2012 at 2:32 AM,  <Eric_YH_Chen@wiwynn.com> wrote:
+>> Hi, all:
 >>
->> Cheers,
+>> My Environment:  two servers, and 12 hard-disk on each server.
+>>                  Version: Ceph 0.48, Kernel: 3.2.0-27
 >>
->>      Sylvain
-
+>> We create a ceph cluster with 24 osd, 3 monitors
+>> Osd.0 ~ osd.11 is on server1
+>> Osd.12 ~ osd.23 is on server2
+>> Mon.0 is on server1
+>> Mon.1 is on server2
+>> Mon.2 is on server3 which has no osd
+>>
+>> root@ubuntu:~$ ceph -s
+>>    health HEALTH_WARN 227 pgs degraded; 93 pgs down; 93 pgs peering; 85 pgs recovering; 82 pgs stuck inactive; 255 pgs stuck unclean; recovery 4808/138644 degraded (3.468%); 202/69322 unfound (0.291%); 1/24 in osds are down
+>>    monmap e1: 3 mons at {006=192.168.200.84:6789/0,008=192.168.200.86:6789/0,009=192.168.200.87:6789/0}, election epoch 564, quorum 0,1,2 006,008,009
+>>    osdmap e1911: 24 osds: 23 up, 24 in
+>>     pgmap v292031: 4608 pgs: 4251 active+clean, 85 active+recovering+degraded, 37 active+remapped, 58 down+peering, 142 active+degraded, 35 down+replay+peering; 257 GB data, 948 GB used, 19370 GB / 21390 GB avail; 4808/138644 degraded (3.468%); 202/69322 unfound (0.291%)
+>>    mdsmap e1: 0/0/1 up
+>>
+>> I find one of the osd cannot startup anymore. Before that, I am testing HA of Ceph cluster.
+>>
+>> Step1:  shutdown server1, wait 5 min
+>> Step2:  bootup server1, wait 5 min until ceph enter health status
+>> Step3:  shutdown server2, wait 5 min
+>> Step4:  bootup server2, wait 5 min until ceph enter health status
+>> Repeat Step1~ Step4 several times, then I met this problem.
+>>
+>>
+>> Log of ceph-osd.22.log
+>> 2012-07-31 17:18:15.120678 7f9375300780  0 filestore(/srv/disk10/data)
+>> mount found snaps <>
+>> 2012-07-31 17:18:15.122081 7f9375300780  0 filestore(/srv/disk10/data)
+>> mount: enabling WRITEAHEAD journal mode: btrfs not detected
+>> 2012-07-31 17:18:15.128544 7f9375300780  1 journal _open
+>> /srv/disk10/journal fd 23: 6442450944 bytes, block size 4096 bytes,
+>> directio = 1, aio = 0
+>> 2012-07-31 17:18:15.257302 7f9375300780  1 journal _open
+>> /srv/disk10/journal fd 23: 6442450944 bytes, block size 4096 bytes,
+>> directio = 1, aio = 0
+>> 2012-07-31 17:18:15.273163 7f9375300780  1 journal close
+>> /srv/disk10/journal
+>> 2012-07-31 17:18:15.274395 7f9375300780 -1 filestore(/srv/disk10/data)
+>> limited size xattrs -- filestore_xattr_use_omap enabled
+>> 2012-07-31 17:18:15.275169 7f9375300780  0 filestore(/srv/disk10/data)
+>> mount FIEMAP ioctl is supported and appears to work
+>> 2012-07-31 17:18:15.275180 7f9375300780  0 filestore(/srv/disk10/data)
+>> mount FIEMAP ioctl is disabled via 'filestore fiemap' config option
+>> 2012-07-31 17:18:15.275312 7f9375300780  0 filestore(/srv/disk10/data)
+>> mount did NOT detect btrfs
+>> 2012-07-31 17:18:15.276060 7f9375300780  0 filestore(/srv/disk10/data)
+>> mount syncfs(2) syscall fully supported (by glib and kernel)
+>> 2012-07-31 17:18:15.276154 7f9375300780  0 filestore(/srv/disk10/data)
+>> mount found snaps <>
+>> 2012-07-31 17:18:15.277031 7f9375300780  0 filestore(/srv/disk10/data)
+>> mount: enabling WRITEAHEAD journal mode: btrfs not detected
+>> 2012-07-31 17:18:15.280906 7f9375300780  1 journal _open
+>> /srv/disk10/journal fd 32: 6442450944 bytes, block size 4096 bytes,
+>> directio = 1, aio = 0
+>> 2012-07-31 17:18:15.307761 7f9375300780  1 journal _open
+>> /srv/disk10/journal fd 32: 6442450944 bytes, block size 4096 bytes,
+>> directio = 1, aio = 0
+>> 2012-07-31 17:18:19.466921 7f9360a97700  0 --
+>> 192.168.200.82:6830/18744 >> 192.168.200.83:0/3485583732
+>> pipe(0x45bd000 sd=34 pgs=0 cs=0 l=0).accept peer addr is really
+>> 192.168.200.83:0/3485583732 (socket is 192.168.200.83:45653/0)
+>> 2012-07-31 17:18:19.671681 7f9363a9d700 -1 os/DBObjectMap.cc: In
+>> function 'virtual bool DBObjectMap::DBObjectMapIteratorImpl::valid()'
+>> thread 7f9363a9d700 time 2012-07-31 17:18:19.670082
+>> os/DBObjectMap.cc: 396: FAILED assert(!valid || cur_iter->valid())
+>>
+>> ceph version 0.48argonaut
+>> (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+>>  1: /usr/bin/ceph-osd() [0x6a3123]
+>>  2: (ReplicatedPG::send_push(int, ObjectRecoveryInfo,
+>> ObjectRecoveryProgress, ObjectRecoveryProgress*)+0x684) [0x53f314]
+>>  3: (ReplicatedPG::push_start(ReplicatedPG::ObjectContext*, hobject_t
+>> const&, int, eversion_t, interval_set<unsigned long>&,
+>> std::map<hobject_t, interval_set<unsigned long>, std::less<hobject_t>,
+>> std::allocator<std::pair<hobject_t const, interval_set<unsigned long>
+>> > > >&)+0x333) [0x54c873]
+>>  4: (ReplicatedPG::push_to_replica(ReplicatedPG::ObjectContext*,
+>> hobject_t const&, int)+0x343) [0x54cdc3]
+>>  5: (ReplicatedPG::recover_object_replicas(hobject_t const&,
+>> eversion_t)+0x35f) [0x5527bf]
+>>  6: (ReplicatedPG::wait_for_degraded_object(hobject_t const&,
+>> std::tr1::shared_ptr<OpRequest>)+0x17b) [0x55406b]
+>>  7: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>)+0x9de)
+>> [0x56305e]
+>>  8: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x199) [0x5fda89]
+>>  9: (OSD::dequeue_op(PG*)+0x238) [0x5bf668]
+>>  10: (ThreadPool::worker()+0x605) [0x796d55]
+>>  11: (ThreadPool::WorkThread::entry()+0xd) [0x5d5d0d]
+>>  12: (()+0x7e9a) [0x7f9374794e9a]
+>>  13: (clone()+0x6d) [0x7f93734344bd]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>>
+>> --- begin dump of recent events ---
+>>    -21> 2012-07-31 17:18:15.114905 7f9375300780  0 ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030), process ceph-osd, pid 18744
+>>    -20> 2012-07-31 17:18:15.118038 7f9375300780 -1 filestore(/srv/disk10/data) limited size xattrs -- filestore_xattr_use_omap enabled
+>>    -19> 2012-07-31 17:18:15.119172 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is supported and appears to work
+>>    -18> 2012-07-31 17:18:15.119185 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is disabled via 'filestore fiemap' config option
+>>    -17> 2012-07-31 17:18:15.119339 7f9375300780  0 filestore(/srv/disk10/data) mount did NOT detect btrfs
+>>    -16> 2012-07-31 17:18:15.120567 7f9375300780  0 filestore(/srv/disk10/data) mount syncfs(2) syscall fully supported (by glibc and kernel)
+>>    -15> 2012-07-31 17:18:15.120678 7f9375300780  0 filestore(/srv/disk10/data) mount found snaps <>
+>>    -14> 2012-07-31 17:18:15.122081 7f9375300780  0 filestore(/srv/disk10/data) mount: enabling WRITEAHEAD journal mode:btrfs not detected
+>>    -13> 2012-07-31 17:18:15.128544 7f9375300780  1 journal _open /srv/disk10/journal fd 23: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+>>    -12> 2012-07-31 17:18:15.257302 7f9375300780  1 journal _open /srv/disk10/journal fd 23: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+>>    -11> 2012-07-31 17:18:15.273163 7f9375300780  1 journal close /srv/disk10/journal
+>>    -10> 2012-07-31 17:18:15.274395 7f9375300780 -1 filestore(/srv/disk10/data) limited size xattrs -- filestore_xattr_use_omap enabled
+>>     -9> 2012-07-31 17:18:15.275169 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is supported and appea
+>>     -8> 2012-07-31 17:18:15.275180 7f9375300780  0 filestore(/srv/disk10/data) mount FIEMAP ioctl is disabled via 'filestore fiemap' config option
+>>     -7> 2012-07-31 17:18:15.275312 7f9375300780  0 filestore(/srv/disk10/data) mount did NOT detect btrfs
+>>     -6> 2012-07-31 17:18:15.276060 7f9375300780  0 filestore(/srv/disk10/data) mount syncfs(2) syscall fully supported (by glibc and kernel)
+>>     -5> 2012-07-31 17:18:15.276154 7f9375300780  0 filestore(/srv/disk10/data) mount found snaps <>
+>>     -4> 2012-07-31 17:18:15.277031 7f9375300780  0 filestore(/srv/disk10/data) mount: enabling WRITEAHEAD journal mode: btrfs not detected
+>>     -3> 2012-07-31 17:18:15.280906 7f9375300780  1 journal _open /srv/disk10/journal fd 32: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+>>     -2> 2012-07-31 17:18:15.307761 7f9375300780  1 journal _open /srv/disk10/journal fd 32: 6442450944 bytes, block size 4096 bytes, directio = 1, aio = 0
+>>     -1> 2012-07-31 17:18:19.466921 7f9360a97700  0 -- 192.168.200.82:6830/18744 >> 192.168.200.83:0/3485583732 pipe(0x45bd000 sd=34 pgs=0 cs=0 l=0).accept peer addr is really 192.168.200.83:0/3485583732 (socket is 192.168.200.83:45653/0)
+>>      0> 2012-07-31 17:18:19.671681 7f9363a9d700 -1 os/DBObjectMap.cc:
+>> In function 'virtual bool
+>> DBObjectMap::DBObjectMapIteratorImpl::valid()' thread 7f9363a9d700
+>> time 2012-07-31 17:18:19.670082
+>> os/DBObjectMap.cc: 396: FAILED assert(!valid || cur_iter->valid())
+>>
+>>
+>>  ceph version 0.48argonaut
+>> (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+>>  1: /usr/bin/ceph-osd() [0x6a3123]
+>>  2: (ReplicatedPG::send_push(int, ObjectRecoveryInfo,
+>> ObjectRecoveryProgress, ObjectRecoveryProgress*)+0x684) [0x53f314]
+>>  3: (ReplicatedPG::push_start(ReplicatedPG::ObjectContext*, hobject_t
+>> const&, int, eversion_t, interval_set<unsigned long>&,
+>> std::map<hobject_t, interval_set<unsigned long>, std::less<hobject_t>,
+>> std::allocator<std::pair<hobject_t const, interval_set<unsigned long>
+>> > > >&)+0x333) [0x54c873]
+>>  4: (ReplicatedPG::push_to_replica(ReplicatedPG::ObjectContext*,
+>> hobject_t const&, int)+0x343) [0x54cdc3]
+>>  5: (ReplicatedPG::recover_object_replicas(hobject_t const&,
+>> eversion_t)+0x35f) [0x5527bf]
+>>  6: (ReplicatedPG::wait_for_degraded_object(hobject_t const&,
+>> std::tr1::shared_ptr<OpRequest>)+0x17b) [0x55406b]
+>>  7: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>)+0x9de)
+>> [0x56305e]
+>>  8: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x199) [0x5fda89]
+>>  9: (OSD::dequeue_op(PG*)+0x238) [0x5bf668]
+>>  10: (ThreadPool::worker()+0x605) [0x796d55]
+>>  11: (ThreadPool::WorkThread::entry()+0xd) [0x5d5d0d]
+>>  12: (()+0x7e9a) [0x7f9374794e9a]
+>>  13: (clone()+0x6d) [0x7f93734344bd]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>>
+>> --- end dump of recent events ---
+>> 2012-07-31 17:18:19.673801 7f9363a9d700 -1 *** Caught signal (Aborted)
+>> **  in thread 7f9363a9d700
+>>
+>>  ceph version 0.48argonaut
+>> (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+>>  1: /usr/bin/ceph-osd() [0x6e900a]
+>>  2: (()+0xfcb0) [0x7f937479ccb0]
+>>  3: (gsignal()+0x35) [0x7f9373378445]
+>>  4: (abort()+0x17b) [0x7f937337bbab]
+>>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f9373cc669d]
+>>  6: (()+0xb5846) [0x7f9373cc4846]
+>>  7: (()+0xb5873) [0x7f9373cc4873]
+>>  8: (()+0xb596e) [0x7f9373cc496e]
+>>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x282) [0x79f662]
+>>  10: /usr/bin/ceph-osd() [0x6a3123]
+>>  11: (ReplicatedPG::send_push(int, ObjectRecoveryInfo,
+>> ObjectRecoveryProgress, ObjectRecoveryProgress*)+0x684) [0x53f314 ]
+>>  12: (ReplicatedPG::push_start(ReplicatedPG::ObjectContext*, hobject_t
+>> const&, int, eversion_t, interval_set<unsigned lo
+>> ng>&, std::map<hobject_t, interval_set<unsigned long>,
+>> ng>std::less<hobject_t>, std::allocator<std::pair<hobject_t const, i
+>> nterval_set<unsigned long> > > >&)+0x333) [0x54c873]
+>>  13: (ReplicatedPG::push_to_replica(ReplicatedPG::ObjectContext*,
+>> hobject_t const&, int)+0x343) [0x54cdc3]
+>>  14: (ReplicatedPG::recover_object_replicas(hobject_t const&,
+>> eversion_t)+0x35f) [0x5527bf]
+>>  15: (ReplicatedPG::wait_for_degraded_object(hobject_t const&,
+>> std::tr1::shared_ptr<OpRequest>)+0x17b) [0x55406b]
+>>  16: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>)+0x9de)
+>> [0x56305e]
+>>  17: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x199)
+>> [0x5fda89]
+>>  18: (OSD::dequeue_op(PG*)+0x238) [0x5bf668]
+>>  19: (ThreadPool::worker()+0x605) [0x796d55]
+>>  20: (ThreadPool::WorkThread::entry()+0xd) [0x5d5d0d]
+>>  21: (()+0x7e9a) [0x7f9374794e9a]
+>>  22: (clone()+0x6d) [0x7f93734344bd]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>> --- begin dump of recent events ---
+>>      0> 2012-07-31 17:18:19.673801 7f9363a9d700 -1 *** Caught signal
+>> (Aborted) **  in thread 7f9363a9d700
+>>
+>>  ceph version 0.48argonaut
+>> (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+>>  1: /usr/bin/ceph-osd() [0x6e900a]
+>>  2: (()+0xfcb0) [0x7f937479ccb0]
+>>  3: (gsignal()+0x35) [0x7f9373378445]
+>>  4: (abort()+0x17b) [0x7f937337bbab]
+>>  5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f9373cc669d]
+>>  6: (()+0xb5846) [0x7f9373cc4846]
+>>  7: (()+0xb5873) [0x7f9373cc4873]
+>>  8: (()+0xb596e) [0x7f9373cc496e]
+>>  9: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x282) [0x79f662]
+>>  10: /usr/bin/ceph-osd() [0x6a3123]
+>>  11: (ReplicatedPG::send_push(int, ObjectRecoveryInfo,
+>> ObjectRecoveryProgress, ObjectRecoveryProgress*)+0x684) [0x53f314]
+>>  12: (ReplicatedPG::push_start(ReplicatedPG::ObjectContext*, hobject_t
+>> const&, int, eversion_t, interval_set<unsigned long>&,
+>> std::map<hobject_t, interval_set<unsigned long>, std::less<hobject_t>,
+>> std::allocator<std::pair<hobject_t const, interval_set<unsigned long>
+>> > > >&)+0x333) [0x54c873]
+>>  13: (ReplicatedPG::push_to_replica(ReplicatedPG::ObjectContext*,
+>> hobject_t const&, int)+0x343) [0x54cdc3]
+>>  14: (ReplicatedPG::recover_object_replicas(hobject_t const&,
+>> eversion_t)+0x35f) [0x5527bf]
+>>  15: (ReplicatedPG::wait_for_degraded_object(hobject_t const&,
+>> std::tr1::shared_ptr<OpRequest>)+0x17b) [0x55406b]
+>>  16: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>)+0x9de)
+>> [0x56305e]
+>>  17: (PG::do_request(std::tr1::shared_ptr<OpRequest>)+0x199)
+>> [0x5fda89]
+>>  18: (OSD::dequeue_op(PG*)+0x238) [0x5bf668]
+>>  19: (ThreadPool::worker()+0x605) [0x796d55]
+>>  20: (ThreadPool::WorkThread::entry()+0xd) [0x5d5d0d]
+>>  21: (()+0x7e9a) [0x7f9374794e9a]
+>>  22: (clone()+0x6d) [0x7f93734344bd]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>>
+>> --- end dump of recent events ---
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
