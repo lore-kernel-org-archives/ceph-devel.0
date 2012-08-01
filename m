@@ -1,42 +1,38 @@
-From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: PG stuck stale
-Date: Wed, 1 Aug 2012 17:12:32 +0200
-Message-ID: <CAF6-1L5R9DaP778-Wdcpni6C6KpYMd0t3zF9t91CLd5oqAW7ZA@mail.gmail.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: How to write a backend for sdfs to talk directly to rados.
+Date: Wed, 1 Aug 2012 08:21:32 -0700
+Message-ID: <CAC-hyiEAU_1Q0Tfd-=CcAqkB04=Lm3DfX+SG2BfCA_qQH+WRew@mail.gmail.com>
+References: <loom.20120801T090829-546@post.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:33912 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755325Ab2HAPMd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Aug 2012 11:12:33 -0400
-Received: by vcbfk26 with SMTP id fk26so7130935vcb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Aug 2012 08:12:32 -0700 (PDT)
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:44917 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755502Ab2HAPVe (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Aug 2012 11:21:34 -0400
+Received: by bkwj10 with SMTP id j10so3835134bkw.19
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Aug 2012 08:21:32 -0700 (PDT)
+In-Reply-To: <loom.20120801T090829-546@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ramu <ramu.freesystems@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Wed, Aug 1, 2012 at 12:09 AM, ramu <ramu.freesystems@gmail.com> wrote:
+> Hi,
+>
+> How to write a backend for sdfs to talk directly to rados (java-rados).
+> Please help me to write bakend for sdfs talk directly to rados.
+>
 
-I'm doing a few tests on ceph (radosgw more precisely).
+I'm not too familiar with sdfs, but browsing through some online
+material it seems that it already has plugin for Amazon S3. Why not
+just using it with the rados gateway as a start? While hooking
+directly to rados is probably possible, it really depends on the sdfs
+requirements, whether it's going to be easy or not. Specifically I can
+think of an issue like the atomic read/write of large objects that you
+don't get out of the box with rados, but the radosgw solves and hides
+the details.
 
-One of the scenario I'm testing is:
- - A radogw bucket stored in a rados pool with size=1 (so no replication)
- - Complete/Irrecoverable failure of an OSD ( osd.0 )
 
-Now obviously in that situation, some of the placement groups will be
-completely lost and there will be no way to get the data back and I'm
-OK with that.
-
-But my current issue is that after rebuilding a new osd.0 from
-scratch, the PG that were previously on it and nowhere else are "stuck
-stale" and I can't figure out how to tell it that it's OK to loose
-those data but come back to HEALTHY ...
-
-I tried doing 'ceph osd lost 0' after I shut it down and before I
-start it up from scratch again but that didn't change anything.
-
-So how can I make the cluster HEALTHY again ?
-
-Cheers,
-
-    Sylvain
+Yehuda
