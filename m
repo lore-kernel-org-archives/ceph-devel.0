@@ -1,38 +1,105 @@
-From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: cephfs: one cause of mount error 5 = Input/output error
-Date: Thu, 2 Aug 2012 08:46:41 -0700
-Message-ID: <CADvuQRENc8M_RBwxAjnnZ+DfNsDRwPkD26S1b+PCKjvZ_MvNhQ@mail.gmail.com>
-References: <CAKG+gh-kgwFADFkXQZ+6vrMg+MUwSTDVxeM9hKTUbunov50H_w@mail.gmail.com>
+From: Mehdi Abaakouk <sileht@sileht.net>
+Subject: Re: Ceph Benchmark HowTo
+Date: Thu, 2 Aug 2012 17:48:19 +0200
+Message-ID: <20120802154818.GA3315@mail.sileht.net>
+References: <20120724144300.GA3317@mail.sileht.net>
+ <20120731123106.GA29835@mail.sileht.net>
+ <501937F4.4080401@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="CE+1k2dSO48ffgeK"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:63504 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752281Ab2HBPrC convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 11:47:02 -0400
-Received: by vbbff1 with SMTP id ff1so8249890vbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 08:47:02 -0700 (PDT)
-In-Reply-To: <CAKG+gh-kgwFADFkXQZ+6vrMg+MUwSTDVxeM9hKTUbunov50H_w@mail.gmail.com>
+Received: from sileht.net ([178.33.111.110]:45156 "EHLO mail.sileht.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752281Ab2HBPsU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 2 Aug 2012 11:48:20 -0400
+Content-Disposition: inline
+In-Reply-To: <501937F4.4080401@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?6JSh5qyK5pix?= <chuanyu@cs.nctu.edu.tw>
+To: Mark Nelson <mark.nelson@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Aug 2, 2012 at 7:54 AM, =E8=94=A1=E6=AC=8A=E6=98=B1 <chuanyu@cs=
-=2Enctu.edu.tw> wrote:
-> I've found that a cause of Input/output error when I mount the cephfs=
-,
-> however, I'm not sure which part should be improved ( perhaps me ),
-> but this error would occur when your client has more than 1 network a=
-ddress.
 
-To my knowledge no part of Ceph does IP-based accepting/rejecting of
-connections. The log for the failure case showed no actual reason for
-the failure. I don't think we've reached the full explanation of your
-symptoms yet.
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--CE+1k2dSO48ffgeK
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, Aug 01, 2012 at 09:06:44AM -0500, Mark Nelson wrote:
+> I haven't actually used bonnie++ myself, but I've read some rather
+> bad reports from various other people in the industry.  Not sure how
+> much it's changed since then...
+>=20
+> https://blogs.oracle.com/roch/entry/decoding_bonnie
+> http://www.quora.com/What-are-some-file-system-benchmarks
+> http://scalability.org/?p=3D1685
+> http://scalability.org/?p=3D1688
+>=20
+> I'd say to just take extra care to make sure that that it's behaving
+> the way you intended it to (probably good advice no matter which
+> benchmark you use!)
+
+Thanks, for this good links :), I have started to try fio too for its
+flexibility.
+
+> >All results are good, my benchmark is clearly limited by my network
+> >connection ~ 110MB/s.
+>=20
+> Gigabit Ethernet is definitely going to be a limitation with large
+> block sequential IO for most modern disks.  I'm concerned with your
+> 6 client numbers though.  I assume those numbers are per client?
+> Even so, with 10 OSDs that performance is pretty bad!  Are you
+> getting a good distribution of writes across all OSDs?  Consistent
+> throughput over time on each?
+
+This is a network issue too, the 6 clients tests are not really=20
+representatives, all clients share the same 1 gigabit link, I will=20
+acquire more hardwares to be more realistic soon (and replace these
+results).
+
+Some precisions have been added to the benchmark page.
+
+> >In exception of the rest-api bench, the value seems really low.
+> > ...
+> >Is my rest-bench result normal ? Have I missed something ?
+>=20
+> You may want to try increasing the number of concurrent rest-bench
+> operations.  Also I'd explicitly specify the number of PGs for the
+> pool you create to make sure that you are getting a good
+> distribution.
+
+During my test the number of PGs is 640 for 10 OSDs, I have tried with more
+concurrent operation 32 and 64, but the result is almost the same with
+more latency.=20
+
+
+Cheers,
+--=20
+Mehdi Abaakouk for eNovance
+mail: sileht@sileht.net
+irc: sileht
+
+--CE+1k2dSO48ffgeK
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBCAAGBQJQGqFCAAoJEBiStC/OquvIGG4P/3fywB6C4ItWcOpJLIojVCrT
+g528w6KFj+3EaWPGVy6zb06JlPAN+46jWchTEfZvBhhmc6BUCh/jultMS7Pwhx0Z
+JgkdFYQfIhEfVEJNu+t9GOBxISbd/ViWY3/UhkZlNDJyZthC4i0jdFJAzQNsYBdB
+ISMpJKjNuO6frpBpw0e1D0TBiQgfIHG3pJRy76ts9KE3OhPzAANoAPmZSpeo2sm6
+54d9tczEzpgC14xHdg2rkfFzROTkaMQUDenlXQsML//G6AsbaVHFk86T05U/tBwd
+3l7NeyiCTSl3cQM4HgLExav3EEA0GQHrW2Rrn93BrXR0Fi5r2j5+VnfDXYZ9G0h9
+/yNhQiS4h8jEMSOvXTTfNRbeTnY8pvod9m1xbKtid7haq+7YiLgXHCcIOewdOKfe
+ucR/sbCWLYYdFlPh/s3/QxAXEJml0kmdt55yuNNSmteqZZwp4Xd+B2vjANvV5Khl
+BQ6EA6T2b8uYxHyCe0MH2OjZRTFQVNyEDAmL76xIjYZ1cyOKVPSlUOthFtKxVMzp
+3VCmgImalKB4taKW2C0SAUXARThpC9m9wkHdRLQ2ocOYazocJ0z0GSyCcDlJ3GbK
+NQfqj2x00s6vVO6W33NRZVLdHuwdyo5+so3B6XKD8hsCLPzc8g4K4OJIaIuC+hlK
+2pOIYZTBW8TLJVLL00v3
+=chPM
+-----END PGP SIGNATURE-----
+
+--CE+1k2dSO48ffgeK--
