@@ -1,81 +1,62 @@
-From: =?UTF-8?B?6JSh5qyK5pix?= <chuanyu@cs.nctu.edu.tw>
-Subject: cephfs: one cause of mount error 5 = Input/output error
-Date: Thu, 2 Aug 2012 22:54:23 +0800
-Message-ID: <CAKG+gh-kgwFADFkXQZ+6vrMg+MUwSTDVxeM9hKTUbunov50H_w@mail.gmail.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: RADOSGW internals ?
+Date: Thu, 2 Aug 2012 17:22:43 +0200
+Message-ID: <CAF6-1L69+Q9KbXX=JZo8w2B-kVk8pg0kBEAqZtJZqx3bfXOEMw@mail.gmail.com>
+References: <CAF6-1L6Yu-eFnV0uytwNoYBj1W7=MGJvOHvEwve4fCXGQx==dA@mail.gmail.com>
+	<CAC-hyiG0HvPG_cf0495z_0UnPLeKt475PfQMW+ao-e_3y0yyyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:38708 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752281Ab2HBOyZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 10:54:25 -0400
-Received: by eeil10 with SMTP id l10so2416185eei.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 07:54:24 -0700 (PDT)
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:65524 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750786Ab2HBPWp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 11:22:45 -0400
+Received: by vcbfk26 with SMTP id fk26so8318158vcb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 08:22:44 -0700 (PDT)
+In-Reply-To: <CAC-hyiG0HvPG_cf0495z_0UnPLeKt475PfQMW+ao-e_3y0yyyA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
 Hi,
 
-I've found that a cause of Input/output error when I mount the cephfs,
-however, I'm not sure which part should be improved ( perhaps me ),
-but this error would occur when your client has more than 1 network address.
 
-Environment setting:
-Ceph mon
-  listen on 192.168.10.1:6789
+> Will need logs in order to say what happened exactly, if that's of any
+> interest. You removed some crucial data for the full operation of that
+> bucket. It may also be that some of the data was still cached so that
+> you were able to complete some operations but not the others.
 
-Ceph client
-  use private ip: 192.168.100.11
-  public ip: 140.113.98.244
+In this particular case, some rados object were lost, in particular
+the  .dir.NNNN.N file that described the bucket.
+I tried recreating an empty file in its place but that doesn't seem to
+be enough.
 
----------------------------------------------------
+As I said, they're test scenarios on test data. I expect this case to
+happen only on bucket that we mapped on low replication pools (size=1
+or 2) and I don't really care if even the entire bucket is lost
+(they're used for temporary data transfer between services), but I
+need to be able to return to a consistent state.
+Because in this case I'm stuck ( can't call create bucket again, it
+thinks it's done already. can't call delete on the bucket because it
+thinks it doesn't exist ... ).
 
-<< ceph client node >>
-# ip r
-192.168.10.0/24 dev eth0 scope link
+That's why I needed to know where every trace of a bucket can be so I
+can go and wipe it manually to recreate the bucket from scratch.
 
-# mount -t ceph 192.168.10.1:/ /mnt/ceph -o name=admin,secret=<adminscret>
-mount error 5 = Input/output error
+The loss of rados objects related to S3 objects seems easier to fix:
+just rm all rados object for it (seems there can be several with
+special prefixes) and then remove it from the entries in the
+.dir.NNNN.N object. So it should be fairly easy to write a "fix"
+utility that just rescans all objects in a bucket and deletes the
+inconsistent ones.
 
-# netstat -ntu
-tcp        0      0 140.113.98.244:57667    192.168.10.1:6789       ESTABLISHED
 
-<< ceph mon node >>
-# tail mon.log
-Aug  2 21:53:57 ceph1 ceph-mon: 2012-08-02 21:53:57.348598
-7f19d62cc700  0 mon.0@0(leader) e5 handle_command mon_command(status v
-0) v1
-Aug  2 21:54:59 ceph1 ceph-mon: 2012-08-02 21:54:59.277523
-7f19d31a9700  0 -- 192.168.10.1:6789/0 >> 140.113.98.244:0/1892356839
-pipe(0x299a000 sd=33 pgs=0 cs=0 l=0).accept peer addr is really
-140.113.98.244:0/1892356839 (socket is 140.113.98.244:57667/0)
+> the users bucket index itself is in .users.uid, where it is kept under
+> an object named <uid>.buckets.
 
----------------------------------------------------
-Another successful tries
+Ah yes, I see. Clearing it from there works.
 
-<< ceph client node >>
-# ip r
-192.168.10.0/24 dev eth0 proto kernel  scope link  src 192.168.100.11
+Cheers,
 
-# mount -t ceph 192.168.10.1:/ /mnt/ceph -o name=admin,secret=<adminscret>
-Ok
-
-# netstat -ntu
-tcp        0      0 192.168.100.11:40545    192.168.10.1:6789       ESTABLISHED
-
-<< ceph mon node >>
-# tail mon.log
-Aug  2 22:00:51 ceph1 ceph-mon: 2012-08-02 22:00:51.456517
-7f19d31a9700  0 -- 192.168.10.1:6789/0 >> 192.168.100.11:0/3665654333
-pipe(0x2e54780 sd=33 pgs=0 cs=0 l=0).accept peer addr is really
-192.168.100.11:0/3665654333 (socket is 192.168.100.11:40545/0)
-Aug  2 22:00:52 ceph1 ceph-mon: 2012-08-02 22:00:52.531184
-7f19d62cc700  0 log [INF] : pgmap v194887: 3472 pgs: 3472
-active+clean; 274 MB data, 18458 MB used, 12616 GB / 12668 GB avail
-
-For your reference,
-
-Thanks.
-
-Chuanyu
+    Sylvain
