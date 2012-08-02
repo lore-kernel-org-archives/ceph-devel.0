@@ -1,54 +1,38 @@
 From: Tommi Virtanen <tv@inktank.com>
-Subject: Re: [PATCH] doc: Correct Git URL for clone
-Date: Thu, 2 Aug 2012 08:39:12 -0700
-Message-ID: <CADvuQRHbVPFT+QTUg8UevenMDFmWxW3BL57RmEGZB-1UisRk2w@mail.gmail.com>
-References: <1343904506-3633-1-git-send-email-wido@widodh.nl>
+Subject: Re: cephfs: one cause of mount error 5 = Input/output error
+Date: Thu, 2 Aug 2012 08:46:41 -0700
+Message-ID: <CADvuQRENc8M_RBwxAjnnZ+DfNsDRwPkD26S1b+PCKjvZ_MvNhQ@mail.gmail.com>
+References: <CAKG+gh-kgwFADFkXQZ+6vrMg+MUwSTDVxeM9hKTUbunov50H_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:43952 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752281Ab2HBPjd (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 11:39:33 -0400
-Received: by vcbfk26 with SMTP id fk26so8339421vcb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 08:39:33 -0700 (PDT)
-In-Reply-To: <1343904506-3633-1-git-send-email-wido@widodh.nl>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:63504 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752281Ab2HBPrC convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 11:47:02 -0400
+Received: by vbbff1 with SMTP id ff1so8249890vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 08:47:02 -0700 (PDT)
+In-Reply-To: <CAKG+gh-kgwFADFkXQZ+6vrMg+MUwSTDVxeM9hKTUbunov50H_w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>, John Wilkins <john.wilkins@inktank.com>
+To: =?UTF-8?B?6JSh5qyK5pix?= <chuanyu@cs.nctu.edu.tw>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Aug 2, 2012 at 3:48 AM, Wido den Hollander <wido@widodh.nl> wrote:
-> Signed-off-by: Wido den Hollander <wido@widodh.nl>
-> ---
->  doc/source/clone-source.rst |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/doc/source/clone-source.rst b/doc/source/clone-source.rst
-> index e2bc95d..2236b37 100644
-> --- a/doc/source/clone-source.rst
-> +++ b/doc/source/clone-source.rst
-> @@ -9,7 +9,7 @@ Clone the Source
->  ----------------
->  To clone the Ceph source code repository, execute::
->
-> -       git clone git@github.com:ceph/ceph.git
-> +       git clone git://github.com/ceph/ceph.git
+On Thu, Aug 2, 2012 at 7:54 AM, =E8=94=A1=E6=AC=8A=E6=98=B1 <chuanyu@cs=
+=2Enctu.edu.tw> wrote:
+> I've found that a cause of Input/output error when I mount the cephfs=
+,
+> however, I'm not sure which part should be improved ( perhaps me ),
+> but this error would occur when your client has more than 1 network a=
+ddress.
 
-Actually, in the world of github, https://github.com/ceph/ceph.git is
-the best option. MITM safe and passes through more firewalls. I
-amended the patch to say that, and pushed to master. Thank you for
-noticing!
-
-(I'm also rewriting the next paragraph after that, as it's both
-cumbersome and actually wrong.)
-
-
-John, the docs at http://ceph.com/docs/master/source/git/ could still
-use improvement -- nobody needs a Github account just to clone a
-repository. The "Generate SSH keys" and "Add the key" sections belong
-under http://ceph.com/docs/master/source/contributing/ -- which then
-again should talk about sending patches to mailing list, doing work in
-your own fork on Github, perhaps using Github pull requests, etc. This
-is the old school explanation, largely copied over from the Linux
-kernel: https://github.com/ceph/ceph/blob/master/SubmittingPatches
+To my knowledge no part of Ceph does IP-based accepting/rejecting of
+connections. The log for the failure case showed no actual reason for
+the failure. I don't think we've reached the full explanation of your
+symptoms yet.
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
