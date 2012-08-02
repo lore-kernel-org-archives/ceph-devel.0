@@ -1,60 +1,81 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: RADOSGW internals ?
-Date: Thu, 2 Aug 2012 07:23:36 -0700
-Message-ID: <CAC-hyiG0HvPG_cf0495z_0UnPLeKt475PfQMW+ao-e_3y0yyyA@mail.gmail.com>
-References: <CAF6-1L6Yu-eFnV0uytwNoYBj1W7=MGJvOHvEwve4fCXGQx==dA@mail.gmail.com>
+From: =?UTF-8?B?6JSh5qyK5pix?= <chuanyu@cs.nctu.edu.tw>
+Subject: cephfs: one cause of mount error 5 = Input/output error
+Date: Thu, 2 Aug 2012 22:54:23 +0800
+Message-ID: <CAKG+gh-kgwFADFkXQZ+6vrMg+MUwSTDVxeM9hKTUbunov50H_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:43974 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753995Ab2HBOXh (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 10:23:37 -0400
-Received: by bkwj10 with SMTP id j10so4277740bkw.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 07:23:36 -0700 (PDT)
-In-Reply-To: <CAF6-1L6Yu-eFnV0uytwNoYBj1W7=MGJvOHvEwve4fCXGQx==dA@mail.gmail.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:38708 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752281Ab2HBOyZ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 10:54:25 -0400
+Received: by eeil10 with SMTP id l10so2416185eei.19
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 07:54:24 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, Aug 2, 2012 at 6:49 AM, Sylvain Munaut
-<s.munaut@whatever-company.com> wrote:
->
-> Hi,
->
->
-> Is there a document explaining how radosgw maps things to rados ?
+Hi,
 
-I was actually working on such a document. There are some general
-architectural blog posts in ceph.com, however, some may have been
-obsolete by now.
+I've found that a cause of Input/output error when I mount the cephfs,
+however, I'm not sure which part should be improved ( perhaps me ),
+but this error would occur when your client has more than 1 network address.
 
->
-> My situation is that I'm currently running various failure scenarios
-> to see how to recover. One of them includes the complete loss of a
-> placement group and in my case this lead into a weirdly inconsistent
-> bucket. I could still add and get object from it, but I couldn't do
-> list or delete ... ( tracing the error, the cls_head call was failing
-> in rgw_rados ).
+Environment setting:
+Ceph mon
+  listen on 192.168.10.1:6789
 
-Will need logs in order to say what happened exactly, if that's of any
-interest. You removed some crucial data for the full operation of that
-bucket. It may also be that some of the data was still cached so that
-you were able to complete some operations but not the others.
+Ceph client
+  use private ip: 192.168.100.11
+  public ip: 140.113.98.244
 
->
-> I also tried starting from scratch by stopping radosgw and deleting
-> all .rgw .rgw.control .rgw.buckets pools ... and when I restarted, a
-> 's3 -u list' _still_ showed the previous buckets names ?!?
+---------------------------------------------------
 
-.rgw.buckets pool holds all the objects data by default.
-.rgw holds all the buckets meta information, aka 'head' (e.g., bucket
-acls, bucket instance id)
-.rgw.control holds a notification object that is being used for cache control
+<< ceph client node >>
+# ip r
+192.168.10.0/24 dev eth0 scope link
 
-the users bucket index itself is in .users.uid, where it is kept under
-an object named <uid>.buckets.
+# mount -t ceph 192.168.10.1:/ /mnt/ceph -o name=admin,secret=<adminscret>
+mount error 5 = Input/output error
 
-Hope that helps,
-Yehuda
+# netstat -ntu
+tcp        0      0 140.113.98.244:57667    192.168.10.1:6789       ESTABLISHED
+
+<< ceph mon node >>
+# tail mon.log
+Aug  2 21:53:57 ceph1 ceph-mon: 2012-08-02 21:53:57.348598
+7f19d62cc700  0 mon.0@0(leader) e5 handle_command mon_command(status v
+0) v1
+Aug  2 21:54:59 ceph1 ceph-mon: 2012-08-02 21:54:59.277523
+7f19d31a9700  0 -- 192.168.10.1:6789/0 >> 140.113.98.244:0/1892356839
+pipe(0x299a000 sd=33 pgs=0 cs=0 l=0).accept peer addr is really
+140.113.98.244:0/1892356839 (socket is 140.113.98.244:57667/0)
+
+---------------------------------------------------
+Another successful tries
+
+<< ceph client node >>
+# ip r
+192.168.10.0/24 dev eth0 proto kernel  scope link  src 192.168.100.11
+
+# mount -t ceph 192.168.10.1:/ /mnt/ceph -o name=admin,secret=<adminscret>
+Ok
+
+# netstat -ntu
+tcp        0      0 192.168.100.11:40545    192.168.10.1:6789       ESTABLISHED
+
+<< ceph mon node >>
+# tail mon.log
+Aug  2 22:00:51 ceph1 ceph-mon: 2012-08-02 22:00:51.456517
+7f19d31a9700  0 -- 192.168.10.1:6789/0 >> 192.168.100.11:0/3665654333
+pipe(0x2e54780 sd=33 pgs=0 cs=0 l=0).accept peer addr is really
+192.168.100.11:0/3665654333 (socket is 192.168.100.11:40545/0)
+Aug  2 22:00:52 ceph1 ceph-mon: 2012-08-02 22:00:52.531184
+7f19d62cc700  0 log [INF] : pgmap v194887: 3472 pgs: 3472
+active+clean; 274 MB data, 18458 MB used, 12616 GB / 12668 GB avail
+
+For your reference,
+
+Thanks.
+
+Chuanyu
