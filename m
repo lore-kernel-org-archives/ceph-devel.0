@@ -1,75 +1,49 @@
-From: Smart Weblications GmbH - Florian Wiessner
-	<f.wiessner@smart-weblications.de>
-Subject: Re: Ceph fs stability
-Date: Thu, 02 Aug 2012 19:26:49 +0200
-Message-ID: <501AB859.4040402@smart-weblications.de>
-References: <501AB499.1080706@gmail.com>
-Reply-To: f.wiessner@smart-weblications.de
+From: Calvin Morrow <calvin.morrow@gmail.com>
+Subject: Re: TIER: combine SSDs and HDDs into a single block device
+Date: Thu, 2 Aug 2012 11:32:45 -0600
+Message-ID: <CADxhoDQCH-=MRKKcpTO2deHxGS-GyOEoK8GfNNw8gmNoxrsH7A@mail.gmail.com>
+References: <CADvuQRExAsO2yKo6pT+MMfj8Gwt7a7SGkkOgm-0kjQ+nRzU75g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx01.smart-weblications.de ([188.65.144.36]:56616 "EHLO
-	mx01.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754513Ab2HBR0Y (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 13:26:24 -0400
-In-Reply-To: <501AB499.1080706@gmail.com>
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:41117 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753300Ab2HBRcr (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 13:32:47 -0400
+Received: by ghrr11 with SMTP id r11so2527072ghr.19
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 10:32:46 -0700 (PDT)
+In-Reply-To: <CADvuQRExAsO2yKo6pT+MMfj8Gwt7a7SGkkOgm-0kjQ+nRzU75g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Niko! <nicola.ranaldo@gmail.com>
+To: Tommi Virtanen <tv@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-Am 02.08.2012 19:10, schrieb Niko!:
-> Hi!
->=20
-> we are using ceph 0.48 on three nodes to provide rbd images for furth=
-er four kvm
-> nodes (not kernel mapped) with no big issues and would mount the ceph=
- fs on the
-> kvm nodes just to store xml virtual machine definitions in order to h=
-ave them
-> immediately in the case an host crashes (we are in multimds configura=
-tion). As
-> ceph fs is not production ready what are the possible problems? May t=
-he fs
-> corrupt the rbd pool or damages will be limited only to the data/meta=
-data pools
-> (acceptable for us)? may the fs hang the entire cluster or kvm client=
- nodes?
->=20
+I played with TIER about a week ago.  Definitely a decent
+implementation of HSM and seems to work well from my testing.
+Assuming a three tier setup (we'll say SSD, 15K SAS, 7K SATA), the
+code drops sequential I/O on tier 2 (the 15K) first, moving it down as
+tier 2 fills up and/or blocks are unused.  If you do a lot of I/O on a
+particular segment, it moves it up to the faster tiers.
 
+Kent Overstreet (the bcache developer) also took a look at the code
+and weighed in.  He said it was impressive what TIER managed to do in
+~3K lines of code, although expressed his concern that TIER uses a lot
+of rb trees which would limit random read I/O performance.
 
+Current caveats:  TIER devices can't be expanded.  TIER devices also
+can't have additional TIERs added after setup.  The developer said
+he's working on adding those features and hopes to have them in the
+next 2-3 months.
 
-Don't use it for now, it is too buggy - you sometimes cannot delete fil=
-es or
-rename them, or the fuse client crashes..
+Calvin
 
-
-what we do instead is use a mapped rbd device with ocfs2 - works stable=
-=2E
-
---=20
-
-Mit freundlichen Gr=FC=DFen,
-
-=46lorian Wiessner
-
-Smart Weblications GmbH
-Martinsberger Str. 1
-D-95119 Naila
-
-fon.: +49 9282 9638 200
-fax.: +49 9282 9638 205
-24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-http://www.smart-weblications.de
-
---
-Sitz der Gesellschaft: Naila
-Gesch=E4ftsf=FChrer: Florian Wiessner
-HRB-Nr.: HRB 3840 Amtsgericht Hof
-*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Thu, Aug 2, 2012 at 10:13 AM, Tommi Virtanen <tv@inktank.com> wrote:
+> Sounds like bcache in writeback mode. Assumes all underlying block
+> devices are RAIDed, or losing one will mean losing data; that is, for
+> example RAID1(SSD+SSD) & RAID5(8*HDD).
+>
+> http://www.lessfs.com/wordpress/?p=776
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
