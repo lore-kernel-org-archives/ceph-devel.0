@@ -1,75 +1,50 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Documentation and Versions
-Date: Wed, 01 Aug 2012 17:34:45 -0700
-Message-ID: <5019CB25.6060405@inktank.com>
-References: <CA+jddaM3S1-H7ZsDBLu94Sd_NsEkOJJCDKSTNk47UhQ1tg7vqw@mail.gmail.com> <50196388.5020805@inktank.com> <CA+jddaP4OGoA6bVC_ciJv_sob_V3g_PbtzWuUpiWJR0HZUaJNw@mail.gmail.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: PG stuck stale
+Date: Thu, 2 Aug 2012 11:27:56 +0200
+Message-ID: <CAF6-1L7anuS_gwSsbdJt8BJLmUrSTwb2xpikHsPhD-wzD8YwjQ@mail.gmail.com>
+References: <CAF6-1L5R9DaP778-Wdcpni6C6KpYMd0t3zF9t91CLd5oqAW7ZA@mail.gmail.com>
+	<50197493.1040805@inktank.com>
+	<5019783E.4010705@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:36924 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750983Ab2HBAes (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Aug 2012 20:34:48 -0400
-Received: by ghrr11 with SMTP id r11so1551778ghr.19
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Aug 2012 17:34:48 -0700 (PDT)
-In-Reply-To: <CA+jddaP4OGoA6bVC_ciJv_sob_V3g_PbtzWuUpiWJR0HZUaJNw@mail.gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:42194 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753831Ab2HBJ15 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 05:27:57 -0400
+Received: by vbbff1 with SMTP id ff1so7901591vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 02:27:57 -0700 (PDT)
+In-Reply-To: <5019783E.4010705@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mandell Degerness <mandell@pistoncloud.com>
+To: Josh Durgin <josh.durgin@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 08/01/2012 11:53 AM, Mandell Degerness wrote:
-> Thank you.
+Hi,
+
+> I didn't notice before, but since you only have 1 copy of the data,
+> no other osds will tell the new osd.0 that it should have those pgs.
+> That's why they're stale. You can force osd.0 to notice the pgs it needs
+> by running:
 >
-> I'd like to make two additional, related requests:
+> ceph pg force_create_pg <pgid>
 >
-> 1) The internal ceph --help output should include the new command options
-
-Yeah, the help output could certainly be improved. The client tool
-needs to talk to the monitors to determine what basic commands are
-available, but it would help to give each subsystem a "help" command
-that queried them as necessary to report available commands.
-
-Some commands (like ceph osd tell ...) are implemented on the osds,
-so the available subcommands could vary if osd versions differed, but
-it's still possible to provide usage info for a given osd.
-
-I've opened http://www.tracker.newdream.net/issues/2894 for this.
-
-> 2) The internal error information should be better written.  Right
-> now, "ceph osd crush set ..." seems to work (on 0.48).  If, however,
-> you type "ceph osd crush get" (i.e. trying to see what other options
-> work), you get the result "unknown command crush" which implies to me
-> that none of the crush subcommands are implemented, rather than that
-> the "get" subcommand is not implemented.
-
-Yeah, the command processing could be a lot better.
-I created http://www.tracker.newdream.net/issues/2895 for this
-particular error.
-
-Josh
-
-> Regards,
-> Mandell Degerness
+> for each pg that's mapped to osd.0 in 'ceph pg dump'.
 >
-> On Wed, Aug 1, 2012 at 10:12 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
->> On 07/31/2012 03:10 PM, Mandell Degerness wrote:
->>>
->>> I was looking through the latest documentation on ceph.com and I
->>> really like some of the new ways of doing things.  What I find
->>> confusing, however, is the lack of documentation as to what version of
->>> ceph you need to be running in order to use the commands.  In
->>> particular, what is the required version of ceph to run the "ceph osd
->>> crush ..." commands?
->>
->>
->> Yeah, there should probably be versions in the docs. The 'ceph osd crush'
->> commands were added in 0.46, but there are bug fixes for
->> 'ceph osd crush set' in 0.48 and 'ceph osd crush move' in 0.49.
->>
->>> Regards,
->>> Mandell Degerness
->>
->>
+> Once those are all created, and recovery has noticed that those pgs are
+> all out of date, the mark_unfound_lost command should work.
 
+Thanks, it worked.
+
+It didn't go through the "unfound" step though. For the pg that were
+empty it was good directly and for the pg that had object in them, it
+went to unclean/inactive for a few minutes and then they were back as
+just empty pg ... and the cluster was HEALTHY again.
+
+Radosgw however doesn't seem to handle the situation too well because
+the bucket that had data in this pg still appears in a 'list' but you
+can't delete or list and stat it ...
+
+Cheers,
+
+    Sylvain
