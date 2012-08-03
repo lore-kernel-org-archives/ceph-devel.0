@@ -1,46 +1,91 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: TIER: combine SSDs and HDDs into a single block device
-Date: Thu, 02 Aug 2012 16:49:11 -0500
-Message-ID: <501AF5D7.9060004@inktank.com>
-References: <CADvuQRExAsO2yKo6pT+MMfj8Gwt7a7SGkkOgm-0kjQ+nRzU75g@mail.gmail.com> <501AB2B4.2010406@inktank.com> <20120802175700.GA16693@infradead.org>
+From: <Eric_YH_Chen@wiwynn.com>
+Subject: RE: The cluster do not aware some osd are disappear
+Date: Fri, 3 Aug 2012 01:43:45 +0000
+Message-ID: <60E83269D669544E8069A09CB69135EA012DB9@GDC-CLDMBX-P02.whq.wistron>
+References: <60E83269D669544E8069A09CB69135EA011D62@GDC-CLDMBX-P02.whq.wistron>
+ <5018515D.7000909@inktank.com>
+ <60E83269D669544E8069A09CB69135EA012278@GDC-CLDMBX-P02.whq.wistron>
+ <CADvuQRFHBG+kEvAndqDv5c12SYaMWs_z1GsZdUiXMkQiD+p25Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:34700 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753090Ab2HBVt0 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 17:49:26 -0400
-Received: by obbuo13 with SMTP id uo13so24384obb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Aug 2012 14:49:25 -0700 (PDT)
-In-Reply-To: <20120802175700.GA16693@infradead.org>
+Received: from twnhumsw5.wistron.com ([220.128.89.25]:55371 "EHLO
+	TWNHUMSW5.wistron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750813Ab2HCBnp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Aug 2012 21:43:45 -0400
+In-Reply-To: <CADvuQRFHBG+kEvAndqDv5c12SYaMWs_z1GsZdUiXMkQiD+p25Q@mail.gmail.com>
+Content-Language: zh-TW
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Tommi Virtanen <tv@inktank.com>, ceph-devel@vger.kernel.org
+To: tv@inktank.com
+Cc: josh.durgin@inktank.com, ceph-devel@vger.kernel.org, Chris_YT_Huang@wiwynn.com, Victor_CY_Chang@wiwynn.com
 
-On 08/02/2012 12:57 PM, Christoph Hellwig wrote:
-> On Thu, Aug 02, 2012 at 12:02:44PM -0500, Mark Nelson wrote:
->> Alex is also trying to bug the XFS guys (and Sage bugged the BTRFS
->> guys) about ways to put metadata on SSD while keeping data on
->> spinning disk. It sounds like there is a hack for XFS that would let
->> us keep inodes in the lower portion of a volume up to some
->> configurable boundary and then we could use lvm to assign that
->> portion of the volume to an SSD.  The BTRFS guys have a SOC project
->> in the works to separate out metadata onto another disk.
->
-> Also with XFS you can use the realtime device for data and the main
-> device for all metadata.
->
-
-I was thinking of doing that.  Is the realtime allocator a good fit for 
-this kind of thing?  I think dchinner mentioned on the xfs mailing list 
-last year that it's single threaded and not very well optimized (and 
-maybe not production viable?)
-
-Mark
-
--- 
-Mark Nelson
-Performance Engineer
-Inktank
+SGksIFRvbW1pOg0KDQpJIHVzZSB0aGlzIHR3byBjb21tYW5kIHRvIGdldCB0aGUgY3J1c2ggbWFw
+LCBob3cgc2hvdWxkIEkgbW9kaWZ5IGl0Pw0KICAgIGNlcGggb3NkIGdldGNydXNobWFwIC1vIGN1
+cm1hcA0KICAgIGNydXNodG9vbCAtZCBjdXJtYXAgLW8gY3VybWFwLnR4dA0KDQojIGJlZ2luIGNy
+dXNoIG1hcA0KIyBkZXZpY2VzDQpkZXZpY2UgMCBvc2QuMA0KZGV2aWNlIDEgb3NkLjENCmRldmlj
+ZSAyIG9zZC4yDQpkZXZpY2UgMyBvc2QuMw0KZGV2aWNlIDQgb3NkLjQNCmRldmljZSA1IG9zZC41
+DQpkZXZpY2UgNiBvc2QuNg0KZGV2aWNlIDcgb3NkLjcNCmRldmljZSA4IG9zZC44DQpkZXZpY2Ug
+OSBvc2QuOQ0KZGV2aWNlIDEwIG9zZC4xMA0KZGV2aWNlIDExIG9zZC4xMQ0KZGV2aWNlIDEyIG9z
+ZC4xMg0KZGV2aWNlIDEzIG9zZC4xMw0KZGV2aWNlIDE0IG9zZC4xNA0KZGV2aWNlIDE1IG9zZC4x
+NQ0KZGV2aWNlIDE2IG9zZC4xNg0KZGV2aWNlIDE3IG9zZC4xNw0KZGV2aWNlIDE4IG9zZC4xOA0K
+ZGV2aWNlIDE5IG9zZC4xOQ0KZGV2aWNlIDIwIG9zZC4yMA0KZGV2aWNlIDIxIG9zZC4yMQ0KZGV2
+aWNlIDIyIG9zZC4yMg0KZGV2aWNlIDIzIG9zZC4yMw0KDQojIHR5cGVzDQp0eXBlIDAgb3NkDQp0
+eXBlIDEgaG9zdA0KdHlwZSAyIHJhY2sNCnR5cGUgMyByb3cNCnR5cGUgNCByb29tDQp0eXBlIDUg
+ZGF0YWNlbnRlcg0KdHlwZSA2IHBvb2wNCg0KIyBidWNrZXRzDQpob3N0IHdpc3Rvci0wMDEgew0K
+ICAgICAgICBpZCAtMiAgICAgICAgICAgIyBkbyBub3QgY2hhbmdlIHVubmVjZXNzYXJpbHkNCiAg
+ICAgICAgIyB3ZWlnaHQgMTIuMDAwDQogICAgICAgIGFsZyBzdHJhdw0KICAgICAgICBoYXNoIDAg
+ICMgcmplbmtpbnMxDQogICAgICAgIGl0ZW0gb3NkLjAgd2VpZ2h0IDEuMDAwDQogICAgICAgIGl0
+ZW0gb3NkLjEgd2VpZ2h0IDEuMDAwDQogICAgICAgIGl0ZW0gb3NkLjEwIHdlaWdodCAxLjAwMA0K
+ICAgICAgICBpdGVtIG9zZC4xMSB3ZWlnaHQgMS4wMDANCiAgICAgICAgaXRlbSBvc2QuMiB3ZWln
+aHQgMS4wMDANCiAgICAgICAgaXRlbSBvc2QuMyB3ZWlnaHQgMS4wMDANCiAgICAgICAgaXRlbSBv
+c2QuNCB3ZWlnaHQgMS4wMDANCiAgICAgICAgaXRlbSBvc2QuNSB3ZWlnaHQgMS4wMDANCiAgICAg
+ICAgaXRlbSBvc2QuNiB3ZWlnaHQgMS4wMDANCiAgICAgICAgaXRlbSBvc2QuNyB3ZWlnaHQgMS4w
+MDANCiAgICAgICAgaXRlbSBvc2QuOCB3ZWlnaHQgMS4wMDANCiAgICAgICAgaXRlbSBvc2QuOSB3
+ZWlnaHQgMS4wMDANCn0NCmhvc3Qgd2lzdG9yLTAwMiB7DQogICAgICAgIGlkIC00ICAgICAgICAg
+ICAjIGRvIG5vdCBjaGFuZ2UgdW5uZWNlc3NhcmlseQ0KICAgICAgICAjIHdlaWdodCAxMi4wMDAN
+CiAgICAgICAgYWxnIHN0cmF3DQogICAgICAgIGhhc2ggMCAgIyByamVua2luczENCiAgICAgICAg
+aXRlbSBvc2QuMTIgd2VpZ2h0IDEuMDAwDQogICAgICAgIGl0ZW0gb3NkLjEzIHdlaWdodCAxLjAw
+MA0KICAgICAgICBpdGVtIG9zZC4xNCB3ZWlnaHQgMS4wMDANCiAgICAgICAgaXRlbSBvc2QuMTUg
+d2VpZ2h0IDEuMDAwDQogICAgICAgIGl0ZW0gb3NkLjE2IHdlaWdodCAxLjAwMA0KICAgICAgICBp
+dGVtIG9zZC4xNyB3ZWlnaHQgMS4wMDANCiAgICAgICAgaXRlbSBvc2QuMTggd2VpZ2h0IDEuMDAw
+DQogICAgICAgIGl0ZW0gb3NkLjE5IHdlaWdodCAxLjAwMA0KICAgICAgICBpdGVtIG9zZC4yMCB3
+ZWlnaHQgMS4wMDANCiAgICAgICAgaXRlbSBvc2QuMjEgd2VpZ2h0IDEuMDAwDQogICAgICAgIGl0
+ZW0gb3NkLjIyIHdlaWdodCAxLjAwMA0KICAgICAgICBpdGVtIG9zZC4yMyB3ZWlnaHQgMS4wMDAN
+Cn0NCnJhY2sgdW5rbm93bnJhY2sgew0KICAgICAgICBpZCAtMyAgICAgICAgICAgIyBkbyBub3Qg
+Y2hhbmdlIHVubmVjZXNzYXJpbHkNCiAgICAgICAgIyB3ZWlnaHQgMjQuMDAwDQogICAgICAgIGFs
+ZyBzdHJhdw0KICAgICAgICBoYXNoIDAgICMgcmplbmtpbnMxDQogICAgICAgIGl0ZW0gd2lzdG9y
+LTAwMSB3ZWlnaHQgMTIuMDAwDQogICAgICAgIGl0ZW0gd2lzdG9yLTAwMiB3ZWlnaHQgMTIuMDAw
+DQp9DQpwb29sIGRlZmF1bHQgew0KICAgICAgICBpZCAtMSAgICAgICAgICAgIyBkbyBub3QgY2hh
+bmdlIHVubmVjZXNzYXJpbHkNCiAgICAgICAgIyB3ZWlnaHQgMjQuMDAwDQogICAgICAgIGFsZyBz
+dHJhdw0KICAgICAgICBoYXNoIDAgICMgcmplbmtpbnMxDQogICAgICAgIGl0ZW0gdW5rbm93bnJh
+Y2sgd2VpZ2h0IDI0LjAwMA0KfQ0KDQojIHJ1bGVzDQpydWxlIGRhdGEgew0KICAgICAgICBydWxl
+c2V0IDANCiAgICAgICAgdHlwZSByZXBsaWNhdGVkDQogICAgICAgIG1pbl9zaXplIDENCiAgICAg
+ICAgbWF4X3NpemUgMTANCiAgICAgICAgc3RlcCB0YWtlIGRlZmF1bHQNCiAgICAgICAgc3RlcCBj
+aG9vc2VsZWFmIGZpcnN0biAwIHR5cGUgaG9zdA0KICAgICAgICBzdGVwIGVtaXQNCn0NCnJ1bGUg
+bWV0YWRhdGEgew0KICAgICAgICBydWxlc2V0IDENCiAgICAgICAgdHlwZSByZXBsaWNhdGVkDQog
+ICAgICAgIG1pbl9zaXplIDENCiAgICAgICAgbWF4X3NpemUgMTANCiAgICAgICAgc3RlcCB0YWtl
+IGRlZmF1bHQNCiAgICAgICAgc3RlcCBjaG9vc2VsZWFmIGZpcnN0biAwIHR5cGUgaG9zdA0KICAg
+ICAgICBzdGVwIGVtaXQNCn0NCnJ1bGUgcmJkIHsNCiAgICAgICAgcnVsZXNldCAyDQogICAgICAg
+IHR5cGUgcmVwbGljYXRlZA0KICAgICAgICBtaW5fc2l6ZSAxDQogICAgICAgIG1heF9zaXplIDEw
+DQogICAgICAgIHN0ZXAgdGFrZSBkZWZhdWx0DQogICAgICAgIHN0ZXAgY2hvb3NlbGVhZiBmaXJz
+dG4gMCB0eXBlIGhvc3QNCiAgICAgICAgc3RlcCBlbWl0DQp9DQoNCiMgZW5kIGNydXNoIG1hcA0K
+DQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBUb21taSBWaXJ0YW5lbiBbbWFp
+bHRvOnR2QGlua3RhbmsuY29tXSANClNlbnQ6IFdlZG5lc2RheSwgQXVndXN0IDAxLCAyMDEyIDEx
+OjU4IFBNDQpUbzogRXJpYyBZSCBDaGVuL1dZSFEvV2l3eW5uDQpDYzogam9zaC5kdXJnaW5AaW5r
+dGFuay5jb207IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBDaHJpcyBZVCBIdWFuZy9XWUhR
+L1dpd3lubjsgVmljdG9yIENZIENoYW5nL1dZSFEvV2l3eW5uDQpTdWJqZWN0OiBSZTogVGhlIGNs
+dXN0ZXIgZG8gbm90IGF3YXJlIHNvbWUgb3NkIGFyZSBkaXNhcHBlYXINCg0KT24gVHVlLCBKdWwg
+MzEsIDIwMTIgYXQgNjowNyBQTSwgIDxFcmljX1lIX0NoZW5Ad2l3eW5uLmNvbT4gd3JvdGU6DQo+
+IEhpLCBKb3NoOg0KPg0KPiBJIGRvIG5vdCBhc3NpZ24gdGhlIGNydXNobWFwIGJ5IG15c2VsZiwg
+SSB1c2UgdGhlIGRlZmF1bHQgc2V0dGluZy4NCj4gQW5kIGFmdGVyIEkgcmVib290IHRoZSBzZXJ2
+ZXIsIEkgY2Fubm90IHJlcHJvZHVjZSB0aGlzIHNpdHVhdGlvbi4NCj4gVGhlIGhlYXJ0YmVhdCBj
+aGVjayB3b3JrcyBmaW5lIHdoZW4gb25lIG9mIHRoZSBzZXJ2ZXIgbm90IGF2YWlsYWJsZS4NCg0K
+SWYgeW91IGRvbid0IGRvIGFueXRoaW5nIHRvIHlvdXIgY3J1c2htYXAsIGFsbCB5b3VycyBvc2Rz
+IGFyZSBpbiBhIGZsYXQgdHJlZSwgd2l0aCBubyB1bmRlcnN0YW5kaW5nIG9mIHlvdXIgZmFpbHVy
+ZSBkb21haW5zLiBZb3UgcmVhbGx5IHNob3VsZCBjb25maWd1cmUgaXQuIChXZSByZWFsbHkgc2hv
+dWxkIGRvY3VtZW50IGl0IGJldHRlciEpDQoNClRoZSBuZXdlciB1cHN0YXJ0IHNjcmlwdHMgKC9l
+dGMvaW5pdC9jZXBoLW9zZC5jb25mIGluc3RlYWQgb2YNCi9ldGMvaW5pdC5kL2NlcGgpIGF0IGxl
+YXN0IHNldCB0aGUgaG9zdG5hbWUgYnkgZGVmYXVsdCwgYnV0IHRoYXQgc3RpbGwgaWdub3JlcyBy
+YWNrcywgcm9vbXMgZXRjLg0K
