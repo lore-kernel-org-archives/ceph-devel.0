@@ -1,189 +1,122 @@
-From: Guangliang Zhao <gzhao@suse.com>
-Subject: [PATCH v4] rbd: fix the memory leak of bio_chain_clone
-Date: Sat,  4 Aug 2012 01:33:08 +0800
-Message-ID: <1344015188-11289-1-git-send-email-gzhao@suse.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: ceph-0.48: osd hits assertion with rbd benchmark: ENOSPC not
+ handled
+Date: Fri, 03 Aug 2012 18:14:12 -0700
+Message-ID: <501C7764.1010600@inktank.com>
+References: <501B79D2.3030106@itxperts.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from victor.provo.novell.com ([137.65.250.26]:36973 "EHLO
-	victor.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751045Ab2HCRd2 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-	Fri, 3 Aug 2012 13:33:28 -0400
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:51928 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752423Ab2HDBOQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Aug 2012 21:14:16 -0400
+Received: by pbbrp8 with SMTP id rp8so2181654pbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 03 Aug 2012 18:14:15 -0700 (PDT)
+In-Reply-To: <501B79D2.3030106@itxperts.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: yehuda@inktank.com
-Cc: ceph-devel@vger.kernel.org
+To: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-The bio_pair alloced in bio_chain_clone would not be freed,
-this will cause a memory leak. It could be freed actually only
-after 3 times release, because the reference count of bio_pair
-is initialized to 3 when bio_split and bio_pair_release only
-drops the reference count.
+On 08/03/2012 12:12 AM, Andreas Bluemle wrote:
+> Hi,
+>
+> running rados benchmark
+>
+>     rados -p rbd bench 120 write -t 8
+>
+> hits end-of-device and forces ceph-osd daemons to die.
+>
+> Log file output:
+>
+> 2012-08-02 17:24:42.388250 7f85bb94e700  0 filestore(/data/osd.2)
+>   error (28) No space left on device not handled on operation 10
+>   (6962.1.0, or op 0, counting from 0)
+> 2012-08-02 17:24:42.388275 7f85bb94e700  0 filestore(/data/osd.2)
+>   ENOSPC handling not implemented
+>
+> 2012-08-02 17:24:42.389481 7f85bb94e700 -1 os/FileStore.cc:
+>   In function 'unsigned int
+> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int)'
+>   thread 7f85bb94e700 time 2012-08-02 17:24:42.388353
+>   os/FileStore.cc: 2955: FAILED assert(0 == "unexpected error")
+>
+>
+> 2012-08-02 17:24:42.390885 7f85bc14f700  0  -9895> 2012-08-02
+> 17:24:40.931547 7f
+> 85ba94c700  5 filestore(/data/osd.2)  transaction dump:
+> { "ops": [
+>         { "op_num": 0,
+>           "op_name": "write",
+>           "collection": "2.8_head",
+>           "oid": "77c18908\/CIBDB1_7638_object8048\/head\/\/2",
+>           "length": 4194304,
+>           "offset": 0,
+>           "bufferlist length": 4194304},
+>         { "op_num": 1,
+>           "op_name": "setattr",
+>           "collection": "2.8_head",
+>           "oid": "77c18908\/CIBDB1_7638_object8048\/head\/\/2",
+>           "name": "_",
+>           "length": 221},
+>         { "op_num": 2,
+>           "op_name": "setattr",
+>           "collection": "2.8_head",
+>           "oid": "77c18908\/CIBDB1_7638_object8048\/head\/\/2",
+>           "name": "snapset",
+>           "length": 31}]}
+> --OSD::tracker-- reqid: client.4102.0:7792, seq: 9858,
+> time: 2012-08-02 17:24:40.931546, event: sub_op_applied, request:
+> osd_sub_op(cli
+> ent.4102.0:7792 2.3b 1d0d503b/CIBDB1_7638_object7791/head//2 [] v 6'27
+> snapset=0
+> =[]:[] snapc=0=[]) v7
+>
+>
+> ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+> 1: (FileStore::_do_transaction(ObjectStore::Transaction&, unsigned long,
+> int)+0
+> x1f50) [0x6ca490]
+> 2: (FileStore::do_transactions(std::list<ObjectStore::Transaction*,
+> std::alloca
+> tor<ObjectStore::Transaction*> >&, unsigned long)+0x86) [0x6d0836]
+> 3: (FileStore::_do_op(FileStore::OpSequencer*)+0x1e9) [0x699fc9]
+> 4: (ThreadPool::worker()+0x543) [0x814a33]
+> 5: (ThreadPool::WorkThread::entry()+0xd) [0x60876d]
+> 6: (()+0x7f05) [0x7f85c7215f05]
+> 7: (clone()+0x6d) [0x7f85c59e810d]
+> NOTE: a copy of the executable, or `objdump -rdS <executable>`
+> is needed to interpret this.
+>
+>
+> Is this a known issue?
 
-The function bio_pair_release must be called three times for
-releasing bio_pair, and the callback functions of bios on the
-requests will be called when the last release time in bio_pair_release,
-however, these functions will also be called in rbd_req_cb. In
-other words, they will be called twice, and it may cause serious
-consequences.
+Yes, if your storage is fast enough, you can bypass the thresholds
+described here:
 
-This patch clones bio chain from the origin directly instead of
-bio_split. The new bio chain can be released whenever we don't
-need it.
+http://ceph.com/docs/master/ops/manage/failures/osd/#full-cluster
 
-This patch can just handle the split of *single page* bios, but
-it's enough here for the following reasons:
+Usage information is reported by the osds to the monitors
+asynchronously. If an osd fills up before the monitors notice
+it's full and the new osdmap marking it full is distributed, the osd
+will hit that assert.
 
-Only bios span across multiple osds need to be split, and these bios
-*must* be single page because of rbd_merge_bvec. With the function,
-the new bvec will not permitted to merge, if it make the bio cross
-the osd boundary, except it is the first one. In other words, there
-are two types of bio:
+You can adjust the thresholds with:
+ceph pg set_full_ratio 0.95
+ceph pg set_nearfull_ratio 0.85
 
-	- the bios don't cross the osd boundary
-	  They have one or more pages. The value of offset will
-	  always be 0 in this case, so nothing will be changed, and
-	  the code changes tmp bios doesn't take effact at all.
+You can force more frequent stats reporting by adjusting the osd config:
+osd_mon_report_interval_min (default 5 seconds)
+osd_mon_report_interval_max (default 120 seconds)
 
-	- the bios cross the osd boundary
-	  Each one have only one page. These bios need to be split,
-	  and the offset is used to indicate the next bio, it makes
-	  sense only in this instance.
+Josh
 
-Signed-off-by: Guangliang Zhao <gzhao@suse.com>
----
- drivers/block/rbd.c |   73 +++++++++++++++++++++-----------------------------
- 1 files changed, 31 insertions(+), 42 deletions(-)
-
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 013c7a5..356657d 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -712,51 +712,46 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
- 	}
- }
- 
--/*
-- * bio_chain_clone - clone a chain of bios up to a certain length.
-- * might return a bio_pair that will need to be released.
-+/**
-+ *      bio_chain_clone - clone a chain of bios up to a certain length.
-+ *      @old: bio to clone
-+ *      @offset: start point for bio clone
-+ *      @len: length of bio chain
-+ *      @gfp_mask: allocation priority
-+ *
-+ *      RETURNS:
-+ *      Pointer to new bio chain on success, NULL on failure.
-  */
--static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
--				   struct bio_pair **bp,
-+static struct bio *bio_chain_clone(struct bio **old, int *offset,
- 				   int len, gfp_t gfpmask)
- {
- 	struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
- 	int total = 0;
- 
--	if (*bp) {
--		bio_pair_release(*bp);
--		*bp = NULL;
--	}
--
- 	while (old_chain && (total < len)) {
-+		int need = len - total;
-+
- 		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
- 		if (!tmp)
- 			goto err_out;
- 
--		if (total + old_chain->bi_size > len) {
--			struct bio_pair *bp;
--
--			/*
--			 * this split can only happen with a single paged bio,
--			 * split_bio will BUG_ON if this is not the case
--			 */
--			dout("bio_chain_clone split! total=%d remaining=%d"
--			     "bi_size=%d\n",
--			     (int)total, (int)len-total,
--			     (int)old_chain->bi_size);
--
--			/* split the bio. We'll release it either in the next
--			   call, or it will have to be released outside */
--			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
--			if (!bp)
--				goto err_out;
--
--			__bio_clone(tmp, &bp->bio1);
--
--			*next = &bp->bio2;
-+		__bio_clone(tmp, old_chain);
-+		tmp->bi_sector += *offset >> SECTOR_SHIFT;
-+		tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
-+		/*
-+		 * The bios span across multiple osd objects must be
-+		 * single paged, rbd_merge_bvec would guarantee it.
-+		 * So we needn't worry about other things.
-+		 */
-+		if (tmp->bi_size - *offset > need) {
-+			tmp->bi_size = need;
-+			tmp->bi_io_vec->bv_len = need;
-+			*offset += need;
- 		} else {
--			__bio_clone(tmp, old_chain);
--			*next = old_chain->bi_next;
-+			old_chain = old_chain->bi_next;
-+			tmp->bi_size -= *offset;
-+			tmp->bi_io_vec->bv_len -= *offset;
-+			*offset = 0;
- 		}
- 
- 		tmp->bi_bdev = NULL;
-@@ -769,7 +764,6 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
- 			tail->bi_next = tmp;
- 			tail = tmp;
- 		}
--		old_chain = old_chain->bi_next;
- 
- 		total += tmp->bi_size;
- 	}
-@@ -1447,13 +1441,12 @@ static void rbd_rq_fn(struct request_queue *q)
- {
- 	struct rbd_device *rbd_dev = q->queuedata;
- 	struct request *rq;
--	struct bio_pair *bp = NULL;
- 
- 	while ((rq = blk_fetch_request(q))) {
- 		struct bio *bio;
--		struct bio *rq_bio, *next_bio = NULL;
-+		struct bio *rq_bio;
- 		bool do_write;
--		int size, op_size = 0;
-+		int size, op_size = 0, offset = 0;
- 		u64 ofs;
- 		int num_segs, cur_seg = 0;
- 		struct rbd_req_coll *coll;
-@@ -1503,7 +1496,7 @@ static void rbd_rq_fn(struct request_queue *q)
- 						  ofs, size,
- 						  NULL, NULL);
- 			kref_get(&coll->kref);
--			bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
-+			bio = bio_chain_clone(&rq_bio, &offset,
- 					      op_size, GFP_ATOMIC);
- 			if (!bio) {
- 				rbd_coll_end_req_index(rq, coll, cur_seg,
-@@ -1531,12 +1524,8 @@ next_seg:
- 			ofs += op_size;
- 
- 			cur_seg++;
--			rq_bio = next_bio;
- 		} while (size > 0);
- 		kref_put(&coll->kref, rbd_coll_release);
--
--		if (bp)
--			bio_pair_release(bp);
- 		spin_lock_irq(q->queue_lock);
- 	}
- }
--- 
-1.7.3.4
+> Regards
+>
+> Andreas Bluemle
+>
+>
+>
 
