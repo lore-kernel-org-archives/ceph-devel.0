@@ -1,45 +1,32 @@
-From: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
-Subject: Crash of almost full ceph
-Date: Sat, 04 Aug 2012 20:07:48 +0930
-Message-ID: <501CFB7C.1040601@bashkirtsev.com>
+From: Matthew Roy <imjustmatthew@gmail.com>
+Subject: "no key for auth" when running "auth export mon. -o /tmp/monkey"?
+Date: Sun, 5 Aug 2012 02:13:59 -0400
+Message-ID: <CADXA5U0m-PXRnZJhN83+HQ6uZXiM76A+ZD=q2JdrUD_8-q0Gmg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.logics.net.au ([150.101.56.178]:48185 "EHLO
-	mail.logics.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751271Ab2HDKhz (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Aug 2012 06:37:55 -0400
-Received: from x.logics.net.au (gw.logics.net.au [150.101.235.251] (may be forged))
-	(authenticated bits=0)
-	by mail.logics.net.au (8.14.5/8.14.1) with ESMTP id q74AbmMM025647
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-CAMELLIA256-SHA bits=256 verify=NO)
-	for <ceph-devel@vger.kernel.org>; Sat, 4 Aug 2012 20:07:49 +0930
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:64105 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751163Ab2HEGN7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Aug 2012 02:13:59 -0400
+Received: by pbbrr13 with SMTP id rr13so736063pbb.19
+        for <ceph-devel@vger.kernel.org>; Sat, 04 Aug 2012 23:13:59 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hello,
+When following http://ceph.com/docs/master/ops/manage/grow/mon/#adding-a-monitor
+running the command:
 
-Yesterday finally I have managed to screw up my installation of ceph! :)
+ceph auth export mon. -o /tmp/monkey
 
-My ceph was at 80% capacity. I have rebooted one of OSDs remotely and 
-managed to screw up with fstab. Host failed to come up and while I was 
-driving from home to my office ceph took recovery action. But it meant 
-that it has filled up another OSDs completely and it has failed. Ceph 
-continued to recover and killed other OSDs in the same fashion. Not 
-quite good. Attempt to restart OSDs was in vain: they were unable to 
-test for xattrs because file system was full and only growing file 
-system allowed them to restart.
+on a working cluster gives the result:
 
-Now this leads me to a question/proposal: is there a feature which 
-allows ceph to halt recovery process if any of live OSDs exceeding say 
-95% percent capacity? It is quite distinct from what is considered full 
-or near full OSD as any writes when OSD is near full or full coming from 
-clients and inability to write leads to client lock up. But halting 
-recovery should allow clients to continue even so ceph is in degraded 
-state. It does not make sense to me to allow ceph go from degraded state 
-to crashed state when no client needs it.
+no key for auth(auid = <20 digits> key=AAAAAAAAAAAAAAAA with 0 caps)
 
-Regards,
-Vladimir
+The key "mon." is in the monitors' keyrings, but not in the list of
+keys returned by "ceph auth list". Is this an indication of a problem
+with the cluster or a bug in the documentation?
+
+Thanks for your help,
+Matthew
