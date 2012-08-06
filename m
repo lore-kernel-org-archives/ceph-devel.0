@@ -1,37 +1,54 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Crush not deliverying data uniformly -> HEALTH_ERR full osd
-Date: Sun, 5 Aug 2012 18:15:54 -0700
-Message-ID: <CAC-hyiG54FgJmhHibkY6a-qqePALEjGrWrxNwHo2KhehswLfpw@mail.gmail.com>
+From: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
+Subject: RE: Crush not deliverying data uniformly -> HEALTH_ERR full osd
+Date: Mon, 6 Aug 2012 13:08:27 +1000
+Message-ID: <81C477727102DA4E9B2605AC748C495419104F5553@exch10>
 References: <81C477727102DA4E9B2605AC748C495419104F5549@exch10>
+ <CAC-hyiG54FgJmhHibkY6a-qqePALEjGrWrxNwHo2KhehswLfpw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:60303 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755051Ab2HFBP4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Aug 2012 21:15:56 -0400
-Received: by bkwj10 with SMTP id j10so836201bkw.19
-        for <ceph-devel@vger.kernel.org>; Sun, 05 Aug 2012 18:15:54 -0700 (PDT)
-In-Reply-To: <81C477727102DA4E9B2605AC748C495419104F5549@exch10>
+Received: from mf1.mach.net.au ([115.165.169.19]:36599 "EHLO mf1.mach.net.au"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755513Ab2HFDIe convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Aug 2012 23:08:34 -0400
+In-Reply-To: <CAC-hyiG54FgJmhHibkY6a-qqePALEjGrWrxNwHo2KhehswLfpw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
+To: Yehuda Sadeh <yehuda@inktank.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sun, Aug 5, 2012 at 5:16 PM, Paul Pettigrew
-<Paul.Pettigrew@mach.com.au> wrote:
+Hi Yehuda, we have:
+
+root@dsanb1-coy:/mnt/ceph# ceph osd dump | grep ^pool
+pool 0 'data' rep size 2 crush_ruleset 0 object_hash rjenkins pg_num 1472 pgp_num 1472 last_change 1 owner 0 crash_replay_interval 45
+pool 1 'metadata' rep size 2 crush_ruleset 1 object_hash rjenkins pg_num 1472 pgp_num 1472 last_change 1 owner 0
+pool 2 'rbd' rep size 2 crush_ruleset 2 object_hash rjenkins pg_num 1472 pgp_num 1472 last_change 1 owner 0
+pool 3 'backup' rep size 1 crush_ruleset 3 object_hash rjenkins pg_num 1472 pgp_num 1472 last_change 1 owner 0
+
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Yehuda Sadeh
+Sent: Monday, 6 August 2012 11:16 AM
+To: Paul Pettigrew
+Cc: ceph-devel@vger.kernel.org
+Subject: Re: Crush not deliverying data uniformly -> HEALTH_ERR full osd
+
+On Sun, Aug 5, 2012 at 5:16 PM, Paul Pettigrew <Paul.Pettigrew@mach.com.au> wrote:
 >
 > Hi Ceph community
 >
-> We are at the stage of performance capacity testing, where significant
+> We are at the stage of performance capacity testing, where significant 
 > amounts of backup data is being written to Ceph.
 >
-> The issue we have, is that the underlying HDD's are not being populated
-> (roughly) uniformly, and our Ceph system hits a brick wall after a couple of
-> days our 30TB storage system is no longer able to operate after having only
-> stored ~7TB.
+> The issue we have, is that the underlying HDD's are not being 
+> populated
+> (roughly) uniformly, and our Ceph system hits a brick wall after a 
+> couple of days our 30TB storage system is no longer able to operate 
+> after having only stored ~7TB.
 >
-> Basically, despite HDD's (1:1 ratio between OSD and HDD) all being the
+> Basically, despite HDD's (1:1 ratio between OSD and HDD) all being the 
 > same storage size and weighting in the Crushmap, we have disks either:
 > a) using 1% space;
 > b) using 48%; or
@@ -97,7 +114,7 @@ On Sun, Aug 5, 2012 at 5:16 PM, Paul Pettigrew
 > [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]      []
 >  sum    7475488140      25609393172     33131684328
 >
-> 2012-08-06 10:03:58.964716 7f06783bb700  0 -- 10.32.0.10:0/15147
+> 2012-08-06 10:03:58.964716 7f06783bb700  0 -- 10.32.0.10:0/15147 
 > send_keepalive con 0x223f690, no pipe.
 >
 >
@@ -133,11 +150,11 @@ On Sun, Aug 5, 2012 at 5:16 PM, Paul Pettigrew
 > 10.32.0.10,10.32.0.25,10.32.0.11:6789:/   31T  7.1T   24T  23% /mnt/ceph
 >
 >
-> We are writing via fstab based cephfs mounts, and the above is going to
-> pool3, which is a "backup" pool where we are testing replication level of 1x
-> only. This should not have any effect though? Below will illustrate the
-> layout we are using (above data writing issue is only going to the first
-> node per our testing design):
+> We are writing via fstab based cephfs mounts, and the above is going 
+> to pool3, which is a "backup" pool where we are testing replication 
+> level of 1x only. This should not have any effect though? Below will 
+> illustrate the layout we are using (above data writing issue is only 
+> going to the first node per our testing design):
 >
 > root@dsanb1-coy:~# ceph osd tree
 > dumped osdmap tree epoch 136
@@ -194,3 +211,7 @@ $ ceph osd dump | grep ^pool
 
 Thanks,
 Yehuda
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
