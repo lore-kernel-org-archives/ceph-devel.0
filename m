@@ -1,67 +1,73 @@
 From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Lazy Erasure Coding for RADOS
-Date: Mon, 6 Aug 2012 09:19:05 -0700
-Message-ID: <CAPYLRzjnLtUuR0hL_XBKVyNCjtbrF=iRxBy4sB9je5Gpw9TWbw@mail.gmail.com>
-References: <00b201cd73e2$d2cf5a60$786e0f20$@netmass.com>
+Subject: Re: Crash of almost full ceph
+Date: Mon, 6 Aug 2012 09:25:14 -0700
+Message-ID: <CAPYLRzgTCu-_mvKBQNaHrmXqmBVib0cvcGKPmaL-yWGZ=uioww@mail.gmail.com>
+References: <501CFB7C.1040601@bashkirtsev.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:64578 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756396Ab2HFQTH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Aug 2012 12:19:07 -0400
-Received: by lbbgm6 with SMTP id gm6so2917280lbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Aug 2012 09:19:05 -0700 (PDT)
-In-Reply-To: <00b201cd73e2$d2cf5a60$786e0f20$@netmass.com>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:34366 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756546Ab2HFQZP convert rfc822-to-8bit
+	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 6 Aug 2012 12:25:15 -0400
+Received: by lagy9 with SMTP id y9so841812lag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Aug 2012 09:25:14 -0700 (PDT)
+In-Reply-To: <501CFB7C.1040601@bashkirtsev.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stephen Perkins <perkins@netmass.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Monday, August 6, 2012, Stephen Perkins wrote:
+On Sat, Aug 4, 2012 at 3:37 AM, Vladimir Bashkirtsev
+<vladimir@bashkirtsev.com> wrote:
+> Hello,
 >
-> Hi all,
+> Yesterday finally I have managed to screw up my installation of ceph!=
+ :)
 >
-> I would like to build a fully geo-redundant and highly available storage
-> solution.  I read a research paper that describes the architecture of the
-> Microsoft Azure deployment (looking to hit several hundred petabytes soon).
-> This was presented at the 23rd ACM Symposium on Operating System Principles.
-> Information and paper here:
+> My ceph was at 80% capacity. I have rebooted one of OSDs remotely and
+> managed to screw up with fstab. Host failed to come up and while I wa=
+s
+> driving from home to my office ceph took recovery action. But it mean=
+t that
+> it has filled up another OSDs completely and it has failed. Ceph cont=
+inued
+> to recover and killed other OSDs in the same fashion. Not quite good.
+> Attempt to restart OSDs was in vain: they were unable to test for xat=
+trs
+> because file system was full and only growing file system allowed the=
+m to
+> restart.
 >
-> http://blogs.msdn.com/b/windowsazure/archive/2011/11/21/windows-azure-storag
-> e-a-highly-available-cloud-storage-service-with-strong-consistency.aspx
->
-> The thing I took away from it was that Microsoft considered 3 copies locally
-> to be the minimum number required for protection.  However, they also
-> realized that you cannot afford to scale to an Exabyte with a 3x overhead
-> for storage.  So. they have a lazy process that goes around and behind the
-> scenes and converts objects stored with 3X redundancy to an object that is
-> erasure coded with Reed-Solomon having a 1.3 or 1.6 overhead.   At the same
-> time, the RS coding provides a better long term availability than the 3x
-> replication approach.
->
-> Specifics of the RS coding are here (best paper award at Usenix):
->
-> https://www.usenix.org/conference/usenixfederatedconferencesweek/erasure-cod
-> ing-windows-azure-storage
->
-> As far as I have found, there are two implementations of R-S coded object
-> stores out there:
->                 Commercial - Cleversafe (http://www.cleversafe.com/)
->                 Open Source - Tahoe-LAFS (http://www.tahoe-lafs.org/)
->
-> Given a certain availability metric, stronger erasure coding can make a HUGE
-> difference in the cost of deployment.  See "Erasure Coding vs Replication: A
-> Quantitative Comparison" here:
-> http://oceanstore.cs.berkeley.edu/publications/papers/pdf/erasure_iptps.pdf
->
-> Has any thought been given to implementing stronger erasure coding in RADOS
-> (either directly or in a lazy fashion)?
+> Now this leads me to a question/proposal: is there a feature which al=
+lows
+> ceph to halt recovery process if any of live OSDs exceeding say 95% p=
+ercent
+> capacity? It is quite distinct from what is considered full or near f=
+ull OSD
+> as any writes when OSD is near full or full coming from clients and
+> inability to write leads to client lock up. But halting recovery shou=
+ld
+> allow clients to continue even so ceph is in degraded state. It does =
+not
+> make sense to me to allow ceph go from degraded state to crashed stat=
+e when
+> no client needs it.
 
-It's been thought about in the "RADOS should support erasure codes
-instead of just replication" sense, but not in the "we would do this
-to implement it" sense. I don't know how Azure's storage system works
-(will need to check out that paper!), but implementing erasure coding
-in the OSDs would essentially require re-implementing or extending all
-of their difficult code, which is obviously not something we're eager
-to do at this time.
+There is not yet any such feature, no =97=A0dealing with full systems i=
+s
+notoriously hard and we haven't come up with a great solution yet. One
+thing you can do is experiment with the "mon_osd_min_in_ratio"
+parameter, which prevents the monitors from marking out more than a
+certain percentage of the OSD cluster (and without something being
+marked out, no data will be moved around). If you don't want the
+cluster to automatically mark any OSDs out, you can also set the
+"mon_osd_down_out_interval" to zero.
+-Greg
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
