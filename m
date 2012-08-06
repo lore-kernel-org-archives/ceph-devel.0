@@ -1,38 +1,50 @@
-From: Caleb Miles <caleb.miles@inktank.com>
-Subject: Re: Crush not deliverying data uniformly -> HEALTH_ERR full osd
-Date: Mon, 6 Aug 2012 16:28:30 -0700
-Message-ID: <CA+zLgM3Xd_refw5CDix7TAngtiU0EAh03BoroQ7J5RxKEROt4A@mail.gmail.com>
+From: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
+Subject: RE: Crush not deliverying data uniformly -> HEALTH_ERR full osd
+Date: Tue, 7 Aug 2012 09:48:21 +1000
+Message-ID: <81C477727102DA4E9B2605AC748C495419104F5583@exch10>
 References: <81C477727102DA4E9B2605AC748C495419104F5549@exch10>
 	<CAC-hyiG54FgJmhHibkY6a-qqePALEjGrWrxNwHo2KhehswLfpw@mail.gmail.com>
 	<81C477727102DA4E9B2605AC748C495419104F5553@exch10>
 	<CAC-hyiFs=chueJTHPiBKXOyAg+y2LRQhxUHZsasbqhVRZZSrwQ@mail.gmail.com>
 	<CA+zLgM0mko410C0MXWjuoqrc4oM9niF47wpPfzU7Ts6-AFF8Jg@mail.gmail.com>
 	<81C477727102DA4E9B2605AC748C495419104F5579@exch10>
+ <CA+zLgM3Xd_refw5CDix7TAngtiU0EAh03BoroQ7J5RxKEROt4A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:52412 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757059Ab2HFX2b (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Aug 2012 19:28:31 -0400
-Received: by obbuo13 with SMTP id uo13so6595230obb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Aug 2012 16:28:30 -0700 (PDT)
-In-Reply-To: <81C477727102DA4E9B2605AC748C495419104F5579@exch10>
+Received: from mf1.mach.net.au ([115.165.169.19]:59224 "EHLO mf1.mach.net.au"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756161Ab2HFXsa convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Aug 2012 19:48:30 -0400
+In-Reply-To: <CA+zLgM3Xd_refw5CDix7TAngtiU0EAh03BoroQ7J5RxKEROt4A@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
+To: Caleb Miles <caleb.miles@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+Hi Caleb, using:
+
+root@dsanb1-coy:~# ceph --version
+ceph version 0.48argonaut (commit:c2b20ca74249892c8e5e40c12aa14446a2bf2030)
+
+
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Caleb Miles
+Sent: Tuesday, 7 August 2012 9:29 AM
+To: Paul Pettigrew
 Cc: ceph-devel@vger.kernel.org
+Subject: Re: Crush not deliverying data uniformly -> HEALTH_ERR full osd
 
 Hi Paul,
 
-What version of Ceph are you running, perhaps your issue could be
-related to an issue with the choose_local_tries parameter used in
-earlier versions of the CRUSH mapper code..
+What version of Ceph are you running, perhaps your issue could be related to an issue with the choose_local_tries parameter used in earlier versions of the CRUSH mapper code..
 
 caleb
 
-On Mon, Aug 6, 2012 at 3:40 PM, Paul Pettigrew
-<Paul.Pettigrew@mach.com.au> wrote:
+On Mon, Aug 6, 2012 at 3:40 PM, Paul Pettigrew <Paul.Pettigrew@mach.com.au> wrote:
 > Hi Caleb
 > Crushmap below, thanks!
 > Paul
@@ -188,10 +200,12 @@ On Mon, Aug 6, 2012 at 3:40 PM, Paul Pettigrew
 >
 >
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Caleb Miles
+> From: ceph-devel-owner@vger.kernel.org
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Caleb Miles
 > Sent: Tuesday, 7 August 2012 6:09 AM
 > To: ceph-devel@vger.kernel.org
-> Subject: Re: Crush not deliverying data uniformly -> HEALTH_ERR full osd
+> Subject: Re: Crush not deliverying data uniformly -> HEALTH_ERR full
+> osd
 >
 > Hello Paul,
 >
@@ -348,11 +362,11 @@ On Mon, Aug 6, 2012 at 3:40 PM, Paul Pettigrew
 >> > 10.32.0.10,10.32.0.25,10.32.0.11:6789:/   31T  7.1T   24T  23% /mnt/ceph
 >> >
 >> >
->> > We are writing via fstab based cephfs mounts, and the above is going
->> > to pool3, which is a "backup" pool where we are testing replication
->> > level of 1x only. This should not have any effect though? Below will
->> > illustrate the layout we are using (above data writing issue is only
->> > going to the first node per our testing design):
+>> > We are writing via fstab based cephfs mounts, and the above is
+>> > going to pool3, which is a "backup" pool where we are testing
+>> > replication level of 1x only. This should not have any effect
+>> > though? Below will illustrate the layout we are using (above data
+>> > writing issue is only going to the first node per our testing design):
 >> >
 >> > root@dsanb1-coy:~# ceph osd tree
 >> > dumped osdmap tree epoch 136
@@ -414,6 +428,12 @@ On Mon, Aug 6, 2012 at 3:40 PM, Paul Pettigrew
 >> in the body of a message to majordomo@vger.kernel.org More majordomo
 >> info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> in the body of a message to majordomo@vger.kernel.org More majordomo
+> info at  http://vger.kernel.org/majordomo-info.html
 >
 >
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
