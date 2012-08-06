@@ -1,32 +1,32 @@
-From: Dieter Kasper <d.kasper@kabelmail.de>
-Subject: send/receive feature to determine the difference between snapshots
-Date: Mon, 6 Aug 2012 09:24:10 +0200
-Message-ID: <20120806072410.GA27179@oder.kd-bie.de>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Re: Crush not deliverying data uniformly -> HEALTH_ERR full osd
+Date: Mon, 6 Aug 2012 13:55:01 +0200
+Message-ID: <CAF6-1L5fYgw5s25oPPFVi+OTF95wb33RfAwqYPT1iN7cXT7LzQ@mail.gmail.com>
+References: <81C477727102DA4E9B2605AC748C495419104F5549@exch10>
+	<CAC-hyiG54FgJmhHibkY6a-qqePALEjGrWrxNwHo2KhehswLfpw@mail.gmail.com>
+	<81C477727102DA4E9B2605AC748C495419104F5553@exch10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpa1.mediabeam.com ([194.25.41.13]:55575 "EHLO
-	smtpa2.mediabeam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752714Ab2HFHY5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Aug 2012 03:24:57 -0400
-Content-Disposition: inline
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:62754 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756006Ab2HFLzB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Aug 2012 07:55:01 -0400
+Received: by vcbfk26 with SMTP id fk26so2510471vcb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Aug 2012 04:55:01 -0700 (PDT)
+In-Reply-To: <81C477727102DA4E9B2605AC748C495419104F5553@exch10>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: "Dieter Kasper (KD)" <d.kasper@kabelmail.de>
+To: Paul Pettigrew <Paul.Pettigrew@mach.com.au>
+Cc: Yehuda Sadeh <yehuda@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-@All,
+Out of curiosity is it the data that's not properly distributed inside
+the placement groups or are the placement groups not distributed among
+the OSDs ?
 
-I just read about a 
-  "send/receive feature in Kernel-3.6 for btrfs which can be used by backup solutions to determine the difference between snapshots"
+Can you can provide a full 'ceph pg dump' ? (as a text attachement or
+something).
 
-http://www.h-online.com/open/news/item/First-release-candidate-of-Linux-kernel-version-3-6-1659576.html
-http://lwn.net/Articles/506244/
+Cheers,
 
-This is a very efficient interface for backup tools, especially for large Cluster File Systems!
-Can we put it on the feature list for Ceph-FS ?
-
-
-Best Regards,
--Dieter
-
+    Sylvain
