@@ -1,79 +1,78 @@
-From: "Stephen Perkins" <perkins@netmass.com>
-Subject: Lazy Erasure Coding for RADOS
-Date: Mon, 6 Aug 2012 09:50:29 -0500
-Message-ID: <00b201cd73e2$d2cf5a60$786e0f20$@netmass.com>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: "no key for auth" when running "auth export mon. -o /tmp/monkey"?
+Date: Mon, 6 Aug 2012 08:55:38 -0700
+Message-ID: <CADvuQRG=3bX0L2BfTpnQkv3S8OvnZ2qo8uf0ezvta0MYZmzSiQ@mail.gmail.com>
+References: <CADXA5U0m-PXRnZJhN83+HQ6uZXiM76A+ZD=q2JdrUD_8-q0Gmg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 142.122.233.72.static.reverse.ltdomains.com ([72.233.122.142]:53918
-	"EHLO stgateway01.netmass.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932074Ab2HFOuf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Aug 2012 10:50:35 -0400
-Received: from stgateway01.netmass.com (localhost [127.0.0.1])
-	by stgateway01.netmass.com (Postfix) with ESMTP id DAADA42202D
-	for <ceph-devel@vger.kernel.org>; Mon,  6 Aug 2012 09:50:34 -0500 (CDT)
-Received: from sidney (sidney.netmass.com [10.10.120.10])
-	(using TLSv1 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by stgateway01.netmass.com (Postfix) with ESMTPS id AC18C422023
-	for <ceph-devel@vger.kernel.org>; Mon,  6 Aug 2012 09:50:29 -0500 (CDT)
-Content-Language: en-us
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:44236 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756396Ab2HFPz7 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Aug 2012 11:55:59 -0400
+Received: by vbbff1 with SMTP id ff1so2713288vbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Aug 2012 08:55:58 -0700 (PDT)
+In-Reply-To: <CADXA5U0m-PXRnZJhN83+HQ6uZXiM76A+ZD=q2JdrUD_8-q0Gmg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Matthew Roy <imjustmatthew@gmail.com>, John Wilkins <john.wilkins@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+On Sat, Aug 4, 2012 at 11:13 PM, Matthew Roy <imjustmatthew@gmail.com> wrote:
+> When following http://ceph.com/docs/master/ops/manage/grow/mon/#adding-a-monitor
+> running the command:
+>
+> ceph auth export mon. -o /tmp/monkey
+>
+> on a working cluster gives the result:
+>
+> no key for auth(auid = <20 digits> key=AAAAAAAAAAAAAAAA with 0 caps)
+>
+> The key "mon." is in the monitors' keyrings, but not in the list of
+> keys returned by "ceph auth list". Is this an indication of a problem
+> with the cluster or a bug in the documentation?
 
-I would like to build a fully geo-redundant and highly available storage
-solution.  I read a research paper that describes the architecture of the
-Microsoft Azure deployment (looking to hit several hundred petabytes soon).
-This was presented at the 23rd ACM Symposium on Operating System Principles.
-Information and paper here:  
-
-http://blogs.msdn.com/b/windowsazure/archive/2011/11/21/windows-azure-storag
-e-a-highly-available-cloud-storage-service-with-strong-consistency.aspx
-
-The thing I took away from it was that Microsoft considered 3 copies locally
-to be the minimum number required for protection.  However, they also
-realized that you cannot afford to scale to an Exabyte with a 3x overhead
-for storage.  So. they have a lazy process that goes around and behind the
-scenes and converts objects stored with 3X redundancy to an object that is
-erasure coded with Reed-Solomon having a 1.3 or 1.6 overhead.   At the same
-time, the RS coding provides a better long term availability than the 3x
-replication approach.
-
-Specifics of the RS coding are here (best paper award at Usenix):  
-
-https://www.usenix.org/conference/usenixfederatedconferencesweek/erasure-cod
-ing-windows-azure-storage
-
-As far as I have found, there are two implementations of R-S coded object
-stores out there:
-                Commercial - Cleversafe (http://www.cleversafe.com/)
-                Open Source - Tahoe-LAFS (http://www.tahoe-lafs.org/)
-
-Given a certain availability metric, stronger erasure coding can make a HUGE
-difference in the cost of deployment.  See "Erasure Coding vs Replication: A
-Quantitative Comparison" here:
-http://oceanstore.cs.berkeley.edu/publications/papers/pdf/erasure_iptps.pdf
-
-Has any thought been given to implementing stronger erasure coding in RADOS
-(either directly or in a lazy fashion)?
-
-Thanks in advance for any thoughts,
-
-- Steve
-
----
-Stephen Perkins
-NetMass Incorporated
-800-731-2737 x5005
-+1-972-838-1520 x5005
-perkins@netmass.com
- 
-NetMassT
-The safe data company.
+I think you're encountering side effects of these commits:
 
 
+commit 7830f859e0c8c317c516736343eb9f3d8d824f77
+Author: Sage Weil <sage@newdream.net>
+Date:   2012-05-08 16:30:26 -0700
+
+    mon: use external keyring for mon->mon auth
+
+    - Feed our keyring into the auth methods.
+    - Do not fail to build a ticket for type MON when we don't have a cap; it
+      won't be in the auth database.  Also, we don't have caps on the monitors
+      that are enfoced between each other.
+
+    Signed-off-by: Sage Weil <sage@newdream.net>
+
+commit 7be78101da85d8db9d2cd319beee7dbef2ecd7a7
+Author: Sage Weil <sage@inktank.com>
+Date:   2012-05-14 20:13:40 -0700
+
+    mon: keep mon. secret in an external keyring
+
+    - Keep the mon. key in a separate keyring files, "keyring", in the mon
+      data dir.
+    - During init, if we don't find that file, copy the key from the keyserver
+      database.
+    - During mkfs, put the mon. key in that file, and remove it from the seed
+      file that primes the auth database.
+
+    This will allow admins to change the mon. key without bringing the cluster
+    online and doing something wonky.
+
+    Signed-off-by: Sage Weil <sage@newdream.net>
+
+We'll need to edit the docs. Do you have the file "keyring" in your
+mon data dir, and does it contain a [mon.] section? If so, that
+section is what you need in /tmp/monkey. If you're going by defaults,
+there should be no other section in the file, and you can use the file
+as-is.
+
+John, for the docs, Sage is probably the best person to say what those
+commands really should be; I don't know if there's a good way to
+extract just the [mon.] section from the file with a single
+ceph-authtool command, etc.
