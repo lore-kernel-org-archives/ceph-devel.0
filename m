@@ -1,65 +1,60 @@
 From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: OSD's journal size
-Date: Tue, 7 Aug 2012 11:14:30 +0200
-Message-ID: <CAOLwVU=ho2H5KsXX1ETrNR4ky_XKNQUtC8ZCURBHnetGSATo4w@mail.gmail.com>
-References: <CAOLwVU=SjpOAAYNohhMN4oYZqTXMEQkTrCjW7L+E+Dr5M=mNBg@mail.gmail.com>
- <5020D1AB.6070309@widodh.nl>
+Subject: Re: CephFS state of art
+Date: Tue, 7 Aug 2012 11:41:40 +0200
+Message-ID: <CAOLwVUnCoQ28_CLHFVVnnn-VXxA+Qf1kWNHAuZyQBh2aBKM+6g@mail.gmail.com>
+References: <CAOLwVUn_O5VHo=Fi2fQzWER9GKkNFBFUFnFK+5b0hKw1Waf8Vg@mail.gmail.com>
+ <CAOLwVU=6o1KpxfDjLm7EwTWuO9=LMZXfktTaiZDBpqjhaoM3-g@mail.gmail.com> <CAPYLRzj7MFD27OrZh+74X9x58u2MT2R0+wHc-doxq=iukRt1PA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:63500 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751297Ab2HGJOw convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 7 Aug 2012 05:14:52 -0400
-Received: by lagy9 with SMTP id y9so1244289lag.19
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Aug 2012 02:14:50 -0700 (PDT)
-In-Reply-To: <5020D1AB.6070309@widodh.nl>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:51333 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751690Ab2HGJmD convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Aug 2012 05:42:03 -0400
+Received: by lbbgm6 with SMTP id gm6so3332428lbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Aug 2012 02:42:00 -0700 (PDT)
+In-Reply-To: <CAPYLRzj7MFD27OrZh+74X9x58u2MT2R0+wHc-doxq=iukRt1PA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
+To: Gregory Farnum <greg@inktank.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Ok thanks!
+Hi Gregory,
 
-Seems logic, just need to test that.
+Thanks for all those updates :)
 
-Thanks ;)
-
-
-On Tue, Aug 7, 2012 at 10:28 AM, Wido den Hollander <wido@widodh.nl> wr=
-ote:
->
-> On 08/07/2012 09:18 AM, S=E9bastien Han wrote:
->>
+On Mon, Aug 6, 2012 at 9:48 PM, Gregory Farnum <greg@inktank.com> wrote=
+:
+> On Mon, Aug 6, 2012 at 11:46 AM, S=E9bastien Han <han.sebastien@gmail=
+=2Ecom> wrote:
 >> Hi everyone,
 >>
->> I did a couple of research about journal's size on the Internet but =
-I
->> didn't find any good results.
+>> The major statement about CephFS remains the same for a couple of
+>> months: it's not ready for production yet. The wiki page
+>> http://ceph.com/docs/master/faq/#is-ceph-production-quality hasn't
+>> changed for ages.
 >>
->> How do you calculate the 'ideal/required' size of an OSD journal? I
->> suppose that the calculation is based on the disk size, but...
->>
+>> Is it still true?
+> Yes; CephFS is not ready for production yet. We haven't done much wor=
+k
+> on it in the last 6-8 months, as we've been focusing on RADOS itself.
 >
-> I found a post on the devel list from about 2 months ago.
+>> If so, could please elaborate on these points? :)
+> There are a couple of known bugs in the filesystem that haven't been
+> tracked down yet, and the QA that we do on it is still very limited.
+> We run a lot of tests on it with working systems, but we (Inktank)
+> haven't done aged filesystem tests, or done good testing under failur=
+e
+> scenarios, etc. And multi-mds systems are entirely unreliable.
+> Now, I believe there are people running long-term systems that have
+> done so successfully =97 it depends on what features you make use of,
+> etc.
 >
-> This should explain: http://comments.gmane.org/gmane.comp.file-system=
-s.ceph.devel/7032
->
-> Wido
->
->> Thank you in advance.
->>
->> Cheers!
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+>> How far are we from a stable release?
+> We really don't know enough about what work still remains to be able
+> to answer that question. :/
+> -Greg
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
