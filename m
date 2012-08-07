@@ -1,62 +1,51 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: CephFS state of art
-Date: Tue, 7 Aug 2012 11:41:40 +0200
-Message-ID: <CAOLwVUnCoQ28_CLHFVVnnn-VXxA+Qf1kWNHAuZyQBh2aBKM+6g@mail.gmail.com>
-References: <CAOLwVUn_O5VHo=Fi2fQzWER9GKkNFBFUFnFK+5b0hKw1Waf8Vg@mail.gmail.com>
- <CAOLwVU=6o1KpxfDjLm7EwTWuO9=LMZXfktTaiZDBpqjhaoM3-g@mail.gmail.com> <CAPYLRzj7MFD27OrZh+74X9x58u2MT2R0+wHc-doxq=iukRt1PA@mail.gmail.com>
+From: "Jonathan D. Proulx" <jon@csail.mit.edu>
+Subject: Re: Puppet modules for Ceph
+Date: Tue, 7 Aug 2012 09:51:44 -0400
+Message-ID: <20120807135144.GA10072@csail.mit.edu>
+References: <20120718135854.GI15546@potjevlesh.enovance.com>
+ <CADvuQRG5jot8yhmWWk8cNFUF7BkoHKbyL6fCVVF6GMu_DpPy7g@mail.gmail.com>
+ <CAKsDvb0Eq0amkEq=+9RrKcBv4RJ0PFwUGpzDpV8CzBHLQpMHtg@mail.gmail.com>
+ <CADvuQRHt9ViPdD7B0==X-3kh-PT_NkX7+GNa9WZUb9zDSYTs0A@mail.gmail.com>
+ <CAKsDvb2d63hDTq0LvmGL0z+yr09cNSr3ythWiqg6WVmzjxy8BA@mail.gmail.com>
+ <CADvuQRFcBKwjmai+W1VArbv29GHm0CBgh2PKiy5tSN6X=GDjMQ@mail.gmail.com>
+ <5391f2cc-e01f-4cf4-b6cb-b4479bd15df0@puppetlabs.com>
+ <CADvuQRFZB6hR_KNg1rp8rCXX4BUoQmjN58rBS7sCheLmO=7hWg@mail.gmail.com>
+ <alpine.DEB.2.00.1207311150140.3171@cobra.newdream.net>
+ <CADvuQREVc0gqheYSo89m7cpsdCg02EFkxFJ5LvcMrVLwBMsO7Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:51333 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751690Ab2HGJmD convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Aug 2012 05:42:03 -0400
-Received: by lbbgm6 with SMTP id gm6so3332428lbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Aug 2012 02:42:00 -0700 (PDT)
-In-Reply-To: <CAPYLRzj7MFD27OrZh+74X9x58u2MT2R0+wHc-doxq=iukRt1PA@mail.gmail.com>
+Received: from outgoing.csail.mit.edu ([128.30.2.149]:48471 "EHLO
+	outgoing.csail.mit.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754996Ab2HGOAW (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Aug 2012 10:00:22 -0400
+Content-Disposition: inline
+In-Reply-To: <CADvuQREVc0gqheYSo89m7cpsdCg02EFkxFJ5LvcMrVLwBMsO7Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tv@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, loic.dachary@enovance.com, puppet-openstack@puppetlabs.com, Teyo Tyree <teyo@puppetlabs.com>, =?iso-8859-1?Q?Fran=E7ois?= Charlier <francois.charlier@enovance.com>, puppet-users@googlgroups.com, ceph-devel@vger.kernel.org
 
-Hi Gregory,
+On Tue, Jul 31, 2012 at 12:09:13PM -0700, Tommi Virtanen wrote:
 
-Thanks for all those updates :)
+:Juju seems to provide a real-time notification mechanism between
+:peers, using it's <name>-relation-changed hook. Other CM frameworks
+:may need to step up their game, or be subject to the "keep re-running
+:chef-client until it works" limitation.
 
-On Mon, Aug 6, 2012 at 9:48 PM, Gregory Farnum <greg@inktank.com> wrote=
-:
-> On Mon, Aug 6, 2012 at 11:46 AM, S=E9bastien Han <han.sebastien@gmail=
-=2Ecom> wrote:
->> Hi everyone,
->>
->> The major statement about CephFS remains the same for a couple of
->> months: it's not ready for production yet. The wiki page
->> http://ceph.com/docs/master/faq/#is-ceph-production-quality hasn't
->> changed for ages.
->>
->> Is it still true?
-> Yes; CephFS is not ready for production yet. We haven't done much wor=
-k
-> on it in the last 6-8 months, as we've been focusing on RADOS itself.
->
->> If so, could please elaborate on these points? :)
-> There are a couple of known bugs in the filesystem that haven't been
-> tracked down yet, and the QA that we do on it is still very limited.
-> We run a lot of tests on it with working systems, but we (Inktank)
-> haven't done aged filesystem tests, or done good testing under failur=
-e
-> scenarios, etc. And multi-mds systems are entirely unreliable.
-> Now, I believe there are people running long-term systems that have
-> done so successfully =97 it depends on what features you make use of,
-> etc.
->
->> How far are we from a stable release?
-> We really don't know enough about what work still remains to be able
-> to answer that question. :/
-> -Greg
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Have you lloked at "puppet kick"
+
+puppet-kick(8) -- Remotely control puppet agent
+========
+
+SYNOPSIS
+--------
+Trigger a puppet agent run on a set of hosts.
+
+I'm not using it in my environment and it does require some specific
+puppet config on the agent side to make it work so less than ideal,
+but might atleast provide a path.
+
+-Jon
+
+
