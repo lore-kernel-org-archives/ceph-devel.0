@@ -1,61 +1,83 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Errors compiling ceph argonaut
-Date: Tue, 07 Aug 2012 12:23:14 -0700
-Message-ID: <50216B22.7050209@inktank.com>
-References: <501A832A02000099000E6EDB@collaborate.seakr.com>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: Crash of almost full ceph
+Date: Tue, 7 Aug 2012 12:35:26 -0700
+Message-ID: <CAPYLRzg1OxcZJKoGBLF0iSS+2-mRY+hML4-5+Ovq13M7sYOb8w@mail.gmail.com>
+References: <501CFB7C.1040601@bashkirtsev.com>
+	<CAPYLRzgTCu-_mvKBQNaHrmXqmBVib0cvcGKPmaL-yWGZ=uioww@mail.gmail.com>
+	<501FF332.3060005@bashkirtsev.com>
+	<CAPYLRzgzZHuZQbCe6TY+hFJYn5MiC32QTdWSnxSNB=bR5r3CBA@mail.gmail.com>
+	<5020B458.40106@bashkirtsev.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:63872 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755872Ab2HGTXS (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Aug 2012 15:23:18 -0400
-Received: by yenl2 with SMTP id l2so4084114yen.19
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Aug 2012 12:23:17 -0700 (PDT)
-In-Reply-To: <501A832A02000099000E6EDB@collaborate.seakr.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:55844 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751639Ab2HGTf1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Aug 2012 15:35:27 -0400
+Received: by lboi8 with SMTP id i8so60924lbo.19
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Aug 2012 12:35:26 -0700 (PDT)
+In-Reply-To: <5020B458.40106@bashkirtsev.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Couchman <Nick.Couchman@seakr.com>
+To: Vladimir Bashkirtsev <vladimir@bashkirtsev.com>, Samuel Just <sam.just@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 08/02/2012 12:39 PM, Nick Couchman wrote:
-> Running into some errors compiling ceph-0.48 (argonaut) on RHEL5.  It gets most of the way through the build process and then throws the following:
+On Mon, Aug 6, 2012 at 11:23 PM, Vladimir Bashkirtsev
+<vladimir@bashkirtsev.com> wrote:
+>> Oh, I see what you're saying. Given how distributed Ceph is this is
+>> actually harder than it sounds =97 we could get closer by refusing t=
+o
+>> mark OSDs out whenever the full list is non-empty, but we could not
+>> for instance do partial recovery and then stop once an OSD gets full=
+=2E
+>> In any case, I've made a bug (http://tracker.newdream.net/issues/291=
+1)
+>> since this isn't something I can hack together right now. :)
+>> -Greg
 >
->    CXX    librbd_la-cls_rbd_client.lo
-> /usr/include/sys/types.h:46: error: conflicting declaration 'typedef __loff_t loff_t'
-> /usr/include/linux/types.h:30: error: 'loff_t' has a previous declaration as 'typedef __kernel_loff_t loff_t'
-> /usr/include/sys/types.h:62: error: conflicting declaration 'typedef __dev_t dev_t'
-> /usr/include/linux/types.h:13: error: 'dev_t' has a previous declaration as 'typedef __kernel_dev_t dev_t'
-> /usr/include/time.h:105: error: conflicting declaration 'typedef void* timer_t'
-> /usr/include/linux/types.h:22: error: 'timer_t' has a previous declaration as 'typedef __kernel_timer_t timer_t'
-> /usr/include/sys/types.h:198: error: conflicting declaration 'typedef long int int64_t'
-> /usr/include/linux/types.h:98: error: 'int64_t' has a previous declaration as 'typedef __s64 int64_t'
-> /usr/include/sys/types.h:204: error: conflicting declaration 'typedef long unsigned int u_int64_t'
-> /usr/include/linux/types.h:97: error: 'u_int64_t' has a previous declaration as 'typedef __u64 u_int64_t'
-> /usr/include/sys/select.h:78: error: conflicting declaration 'typedef struct fd_set fd_set'
-> /usr/include/linux/types.h:12: error: 'fd_set' has a previous declaration as 'typedef struct __kernel_fd_set fd_set'
-> /usr/include/sys/types.h:248: error: conflicting declaration 'typedef __blkcnt64_t blkcnt_t'
-> /usr/include/linux/types.h:114: error: 'blkcnt_t' has a previous declaration as 'typedef long unsigned int blkcnt_t'
-> /usr/include/stdint.h:56: error: conflicting declaration 'typedef long unsigned int uint64_t'
-> /usr/include/linux/types.h:96: error: 'uint64_t' has a previous declaration as 'typedef __u64 uint64_t'
-> make[3]: *** [librbd_la-cls_rbd_client.lo] Error 1
-> make[3]: *** Waiting for unfinished jobs....
-> make[3]: Leaving directory `/usr/src/redhat/BUILD/ceph-0.48argonaut.test/src'
-> make[2]: *** [all-recursive] Error 1
-> make[2]: Leaving directory `/usr/src/redhat/BUILD/ceph-0.48argonaut.test/src'
-> make[1]: *** [all] Error 2
-> make[1]: Leaving directory `/usr/src/redhat/BUILD/ceph-0.48argonaut.test/src'
-> make: *** [all-recursive] Error 1
+> Refusing to mark OSDs out when full list is non-empty will definitely=
+ be a
+> big step in right direction. It will prevent cascading failure I have
+> described originally. But on other hand I think the way around compli=
+cation
+> of distributed nature is to have OSD itself to refuse backfill when i=
+t has
+> reached full state regardless of where backfill coming from. In this =
+case
+> backfill will stall while clients activity still will be handled as p=
+er
+> normal. Or OSD does not distinguish backfill requests from other OSDs=
+ and
+> clients requests? Question of course is what other OSD will do when i=
+ts peer
+> refuses to accept backfill while it is still marked as in. There some
+> stand-off period required on OSD which sends backfill. So it looks li=
+ke OSD
+> should have two things:
+> 1. When receiving backfill check if already full and if it is drop re=
+quest,
+> don't ack back.
+> 2. When sending backfill if ack did not arrive in reasonable time ret=
+ry
+> later after some time has passed (something tells me that such functi=
+onality
+> already in place).
 >
-> So, looks like a source file is pulling in both sys/types.h and linux/types.h, and that's causing problems.  From what I can see, most of the files only pull in one or the other (via some ifdef/elif code blocks), but evidently one of them does not.  I have not been able to track it down, yet - is this something anyone else has encountered?  0.44 seemed to work fine, this seems to be unique to 0.48.
+> I should admit I have not read ceph code but with all experience whic=
+h I
+> have got with ceph it seems that it should be fairly easy to implemen=
+t.
 
-It looks like this might be src/include/types.h including sys/types.h 
-and src/include/rbd_types.h, which is including linux/types.h.
+That's one possibility, but it has a lot of side effects which could
+be troubling =97=A0for instance, it means that pg_temp entries go from
+being around until backfill completes, to being around until the OSD
+is no longer full and backfill completes. The chances for map growth
+etc are high and worrying.
 
-Does adding ifdefs to src/include/types.h so it includes linux/types.h 
-on linux work?
-
-> Thanks,
-> Nick
-
+Do you have any thoughts, Sam?
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
