@@ -1,117 +1,126 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: [PATCH 3.6-rc1] libceph: ensure banner is written on client
- connect before feature negotiation starts
-Date: Wed,  8 Aug 2012 12:09:38 -0600
-Message-ID: <1344449378-304-1-git-send-email-jaschut@sandia.gov>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: Ceph RBD performance - random writes
+Date: Wed, 08 Aug 2012 11:46:12 -0700
+Message-ID: <5022B3F4.5050109@inktank.com>
+References: <5021F6D1.7000004@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:56646 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030232Ab2HHSKK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 14:10:10 -0400
-Received: from interceptor2.sandia.gov (interceptor2.sandia.gov [132.175.109.18])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by sentry-two.sandia.gov (Postfix) with ESMTP id 1B4D6D2CFF0
-	for <ceph-devel@vger.kernel.org>; Wed,  8 Aug 2012 12:10:04 -0600 (MDT)
-Received: from sentry.sandia.gov (mm04snlnto.sandia.gov [132.175.109.21]) by interceptor2.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Wed, 8 Aug 2012 12:09:59 -0600
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:33147 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753374Ab2HHSqR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 14:46:17 -0400
+Received: by ghrr11 with SMTP id r11so1130000ghr.19
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Aug 2012 11:46:17 -0700 (PDT)
+In-Reply-To: <5021F6D1.7000004@catalyst.net.nz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Jim Schutt <jaschut@sandia.gov>
+To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Cc: ceph-devel@vger.kernel.org
 
-Because the Ceph client messenger uses a non-blocking connect, it is possible
-for the sending of the client banner to race with the arrival of the banner
-sent by the peer.
+On 08/07/2012 10:19 PM, Mark Kirkwood wrote:
+> I've been looking at using Ceph RBD as a block store for database use.
+> As part of this I'm looking a how (particularly random) IO of smallish
+> (4K, 8K) block sizes performs.
+>
+> I've setup Ceph with a single osd and mon spread over two SSD (Intel
+> 520) - 2G journal on one and the osd data on the other (xfs filesystem).
+> The Intel's are pretty fast, and (despite being shackled by a crappy
+> Nvidia SATA controller) fly for random IO.
+>
+> However I am not seeing that reflected in the RBD case. I have the
+> device mounted on the local machine where the osd and mon are running
+> (so network performance should not be a factor here).
+>
+> Here is what I did:
+>
+> Create a rbd device of 10G and mount on /mnt/vol0:
+>
+> $ rbd create --size 10240 vol0
+> $ rbd map vol0
+> $ mkfx.xfs /dev/rbd0
+> $ rbd mount /dev/rdb0 /mnt/vol0
+>
+> Make a file:
+>
+> $ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4k count=300000 conv=fsync
+> 1228800000 bytes (1.2 GB) copied, 13.4361 s, 91.5 MB/s
+>
+> Performance ok if file size < journal (2G).
+>
+> $ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4096k count=200 conv=fsync
+> 838860800 bytes (839 MB) copied, 9.47086 s, 88.6 MB/s
+>
+> Not so good if file size > journal.
+>
+> $ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4096k count=1000 conv=fsync
+> 4194304000 bytes (4.2 GB) copied, 279.891 s, 15.0 MB/s
+>
+> Random writes (see attached file) sync'ed with sync_file_range are ok if
+> block size big:
+>
+> $ ./writetest /mnt/vol0/dump/file 4194304 0 1
+> random writes: 292 of: 4194304 bytes elapsed: 9.8397s io rate: 30/s
+> (118.70 MB/s)
+>
+> $ ./writetest /mnt/vol0/dump/file 1048576 0 1
+> random writes: 1171 of: 1048576 bytes elapsed: 10.6042s io rate: 110/s
+> (110.43 MB/s)
+>
+> $ ./writetest /mnt/vol0/dump/file 131072 0 1
+> random writes: 9375 of: 131072 bytes elapsed: 15.8075s io rate: 593/s
+> (74.13 MB/s)
+>
+>
+> However smallish block size is suicide (trigger suicide assert after a
+> while), I see 100 IOPS or less on actual devices, all 100% util:
+>
+> $ ./writetest /mnt/vol0/dump/file 8192 0 1
+>
+> I am running into http://tracker.newdream.net/issues/2784 here I think.
 
-When ceph_sock_state_change() notices the connect has completed, it schedules
-work to process the socket via con_work().  During this time the peer is
-writing its banner, and arrival of the peer banner races with con_work().
+This can be a sign of a bug in the underlying filesystem or hardware -
+maybe your controller? That assert is hit when a single operation to
+the filesystem beneath the osd takes longer than 180 seconds (by
+default).
 
-If con_work() calls try_read() before the peer banner arrives, there is
-nothing for it to do, after which con_work() calls try_write() to send the
-client's banner.  In this case Ceph's protocol negotiation can complete
-succesfully.
+> Note that the actual SSD are very fast for this when accessed directly:
+>
+> $ ./writetest /data1/ceph/1/file 8192 0 1
+> random writes: 1000000 of: 8192 bytes elapsed: 125.7907s io rate: 7950/s
+> (62.11 MB/s)
+>
+>
+> Thanks for your patience in reading so far - some actual questions now :-)
+>
+> 1/ Why is the appending write from dd when the size of file > journal so
+> slow, despite reasonably capable storage devices?
 
-If, however, the peer's banner arrives before con_work() calls try_read(),
-then try_read() will read the banner and prepare protocol negotiation info via
-prepare_write_connect().  prepare_write_connect() calls con_out_kvec_reset(),
-which discards the as-yet-unsent client banner.  Next, con_work() calls
-try_write(), which sends the protocol negotiation info rather than the banner
-that the peer is expecting.
+It's possible you need to use more threads to have more operations in
+flight in to the filestore (the main storage for the osd). Try
+something like this in your ceph configuration for the osds:
 
-The result is that the peer sees an invalid banner, and the client reports
-"negotiation failed".
+     osd op threads = 24
+     osd disk threads = 24
+     filestore op threads = 6
+     filestore queue max ops = 24
 
-Fix this by moving con_out_kvec_reset() out of prepare_write_connect() to its
-callers at all locations except the one where the banner might still need to
-be sent.
+(from http://www.spinics.net/lists/ceph-devel/msg07128.html)
 
-Signed-off-by: Jim Schutt <jaschut@sandia.gov>
----
- net/ceph/messenger.c |   11 +++++++++--
- 1 files changed, 9 insertions(+), 2 deletions(-)
+> 2/ Is the sudden dramatic drop in random write performance a
+> manifestation of the "small requests  are slow" issue? or is this
+> something else?
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index b979675..24c5eea 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -915,7 +915,6 @@ static int prepare_write_connect(struct ceph_connection *con)
- 	con->out_connect.authorizer_len = auth ?
- 		cpu_to_le32(auth->authorizer_buf_len) : 0;
- 
--	con_out_kvec_reset(con);
- 	con_out_kvec_add(con, sizeof (con->out_connect),
- 					&con->out_connect);
- 	if (auth && auth->authorizer_buf_len)
-@@ -1557,6 +1556,7 @@ static int process_connect(struct ceph_connection *con)
- 			return -1;
- 		}
- 		con->auth_retry = 1;
-+		con_out_kvec_reset(con);
- 		ret = prepare_write_connect(con);
- 		if (ret < 0)
- 			return ret;
-@@ -1577,6 +1577,7 @@ static int process_connect(struct ceph_connection *con)
- 		       ENTITY_NAME(con->peer_name),
- 		       ceph_pr_addr(&con->peer_addr.in_addr));
- 		reset_connection(con);
-+		con_out_kvec_reset(con);
- 		ret = prepare_write_connect(con);
- 		if (ret < 0)
- 			return ret;
-@@ -1601,6 +1602,7 @@ static int process_connect(struct ceph_connection *con)
- 		     le32_to_cpu(con->out_connect.connect_seq),
- 		     le32_to_cpu(con->in_reply.connect_seq));
- 		con->connect_seq = le32_to_cpu(con->in_reply.connect_seq);
-+		con_out_kvec_reset(con);
- 		ret = prepare_write_connect(con);
- 		if (ret < 0)
- 			return ret;
-@@ -1617,6 +1619,7 @@ static int process_connect(struct ceph_connection *con)
- 		     le32_to_cpu(con->in_reply.global_seq));
- 		get_global_seq(con->msgr,
- 			       le32_to_cpu(con->in_reply.global_seq));
-+		con_out_kvec_reset(con);
- 		ret = prepare_write_connect(con);
- 		if (ret < 0)
- 			return ret;
-@@ -2135,7 +2138,11 @@ more:
- 		BUG_ON(con->state != CON_STATE_CONNECTING);
- 		con->state = CON_STATE_NEGOTIATING;
- 
--		/* Banner is good, exchange connection info */
-+		/*
-+		 * Received banner is good, exchange connection info.
-+		 * Do not reset out_kvec, as sending our banner raced
-+		 * with receiving peer banner after connect completed.
-+		 */
- 		ret = prepare_write_connect(con);
- 		if (ret < 0)
- 			goto out;
--- 
-1.7.8.2
+It's probably that. Sam's actively looking into it, and once he has
+something it will be interesting to see how well it works on your
+hardware.
 
+Josh
+
+> Thanks
+>
+> Mark
+>
+>
 
