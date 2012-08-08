@@ -1,278 +1,184 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH 4/4] rbd: separate reading header from decoding it
-Date: Tue, 07 Aug 2012 21:05:53 -0700
-Message-ID: <5021E5A1.7000609@inktank.com>
-References: <502009D1.7090005@inktank.com> <50200A56.90506@inktank.com> <5021B9A3.9060004@inktank.com> <5021CBFF.8030606@inktank.com>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Ceph RBD performance - random writes
+Date: Wed, 08 Aug 2012 17:19:13 +1200
+Message-ID: <5021F6D1.7000004@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+ boundary="------------040203020305060703040000"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:37845 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751051Ab2HHEF5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 00:05:57 -0400
-Received: by pbbrr13 with SMTP id rr13so774402pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Aug 2012 21:05:56 -0700 (PDT)
-In-Reply-To: <5021CBFF.8030606@inktank.com>
+Received: from bertrand.catalyst.net.nz ([202.78.240.40]:40662 "EHLO
+	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750936Ab2HHFTT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 01:19:19 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.catalyst.net.nz (Postfix) with ESMTP id 5B71A3300E
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Aug 2012 17:19:15 +1200 (NZST)
+Received: from mail.catalyst.net.nz ([127.0.0.1])
+	by localhost (bertrand.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id A7+DRmWHU+EN for <ceph-devel@vger.kernel.org>;
+	Wed,  8 Aug 2012 17:19:14 +1200 (NZST)
+Received: from [IPv6:2404:130:0:1000:69c0:b106:4686:27e5] (unknown [IPv6:2404:130:0:1000:69c0:b106:4686:27e5])
+	(Authenticated sender: mark.kirkwood)
+	by mail.catalyst.net.nz (Postfix) with ESMTPSA id 17BBB32EBA
+	for <ceph-devel@vger.kernel.org>; Wed,  8 Aug 2012 17:19:14 +1200 (NZST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 08/07/2012 07:16 PM, Alex Elder wrote:
-> On 08/07/2012 05:58 PM, Josh Durgin wrote:
->> On 08/06/2012 11:17 AM, Alex Elder wrote:
->>> Right now rbd_read_header() both reads the header object for an rbd
->>> image and decodes its contents.  It does this repeatedly if needed,
->>> in order to ensure a complete and intact header is obtained.
->>>
->>> Separate this process into two steps--reading of the raw header
->>> data (in new function, rbd_dev_v1_header_read()) and separately
->>> decoding its contents (in rbd_header_from_disk()).  As a result,
->>> the latter function no longer requires its allocated_snaps argument.
->>>
->>> Signed-off-by: Alex Elder <elder@inktank.com>
->>> ---
->>>   drivers/block/rbd.c |  132
->>> +++++++++++++++++++++++++++++-----------------------
->>>   1 file changed, 76 insertions(+), 56 deletions(-)
->>>
->>> Index: b/drivers/block/rbd.c
->>> ===================================================================
->>> --- a/drivers/block/rbd.c
->>> +++ b/drivers/block/rbd.c
->>> @@ -514,15 +514,11 @@ static bool rbd_dev_ondisk_valid(struct
->>>    * header.
->>>    */
->>>   static int rbd_header_from_disk(struct rbd_image_header *header,
->>> -                 struct rbd_image_header_ondisk *ondisk,
->>> -                 u32 allocated_snaps)
->>> +                 struct rbd_image_header_ondisk *ondisk)
->>>   {
->>>       u32 snap_count;
->>>       size_t size;
->>>
->>> -    if (!rbd_dev_ondisk_valid(ondisk))
->>> -        return -ENXIO;
->>> -
->>>       memset(header, 0, sizeof (*header));
->>>
->>>       snap_count = le32_to_cpu(ondisk->snap_count);
->>> @@ -559,15 +555,6 @@ static int rbd_header_from_disk(struct r
->>>       header->comp_type = ondisk->options.comp_type;
->>>       header->total_snaps = snap_count;
->>>
->>> -    /*
->>> -     * If the number of snapshot ids provided by the caller
->>> -     * doesn't match the number in the entire context there's
->>> -     * no point in going further.  Caller will try again after
->>> -     * getting an updated snapshot context from the server.
->>> -     */
->>> -    if (allocated_snaps != snap_count)
->>> -        return 0;
->>> -
->>>       size = sizeof (struct ceph_snap_context);
->>>       size += snap_count * sizeof (header->snapc->snaps[0]);
->>>       header->snapc = kzalloc(size, GFP_KERNEL);
->>> @@ -1630,61 +1617,94 @@ static void rbd_free_disk(struct rbd_dev
->>>   }
->>>
->>>   /*
->>> - * reload the ondisk the header
->>> + * Read the complete header for the given rbd device.
->>> + *
->>> + * Returns a pointer to a dynamically-allocated buffer containing
->>> + * the complete and validated header.  Caller can pass the address
->>> + * of a variable that will be filled in with the version of the
->>> + * header object at the time it was read.
->>> + *
->>> + * Returns a pointer-coded errno if a failure occurs.
->>>    */
->>> -static int rbd_read_header(struct rbd_device *rbd_dev,
->>> -               struct rbd_image_header *header)
->>> +static struct rbd_image_header_ondisk *
->>> +rbd_dev_v1_header_read(struct rbd_device *rbd_dev, u64 *version)
->>>   {
->>> -    ssize_t rc;
->>> -    struct rbd_image_header_ondisk *dh;
->>> +    struct rbd_image_header_ondisk *ondisk = NULL;
->>>       u32 snap_count = 0;
->>> -    u64 ver;
->>> -    size_t len;
->>> +    u64 names_size = 0;
->>> +    u32 want_count;
->>> +    int ret;
->>>
->>>       /*
->>> -     * First reads the fixed-size header to determine the number
->>> -     * of snapshots, then re-reads it, along with all snapshot
->>> -     * records as well as their stored names.
->>> +     * The complete header will include an array of its 64-bit
->>> +     * snapshot ids, followed by the names of those snapshots as
->>> +     * a contiguous block of null-terminated strings.  Note that
->>
->> minor nit, but '\0' is NUL, not NULL.
->
-> Maybe "null" is either/both?  (I actually try to avoid this wording
-> for just this reason...  I use "...terminating '\0'...")
->
-> I'll use "NUL" instead of "null."
->
->>> +     * the number of snapshots could change by the time we read
->>> +     * it in, in which case we re-read it.
->>>        */
->>> -    len = sizeof (*dh);
->>> -    while (1) {
->>> -        dh = kmalloc(len, GFP_KERNEL);
->>> -        if (!dh)
->>> -            return -ENOMEM;
->>> +    do {
->>> +        size_t size;
->>> +
->>> +        kfree(ondisk);
->>>
->>> -        rc = rbd_req_sync_read(rbd_dev,
->>> -                       CEPH_NOSNAP,
->>> +        size = sizeof (*ondisk);
->>> +        size += snap_count * sizeof (struct rbd_image_snap_ondisk);
->>> +        size += names_size;
->>> +        ondisk = kmalloc(size, GFP_KERNEL);
->>> +        if (!ondisk)
->>> +            return ERR_PTR(-ENOMEM);
->>> +
->>> +        ret = rbd_req_sync_read(rbd_dev, CEPH_NOSNAP,
->>>                          rbd_dev->header_name,
->>> -                       0, len,
->>> -                       (char *)dh, &ver);
->>> -        if (rc < 0)
->>> -            goto out_dh;
->>> -
->>> -        rc = rbd_header_from_disk(header, dh, snap_count);
->>> -        if (rc < 0) {
->>> -            if (rc == -ENXIO)
->>> -                pr_warning("unrecognized header format"
->>> -                       " for image %s\n",
->>> -                       rbd_dev->image_name);
->>> -            goto out_dh;
->>> +                       0, size,
->>> +                       (char *) ondisk, version);
->>> +
->>> +        if (ret < 0)
->>> +            goto out_err;
->>> +        if (WARN_ON(ret < size)) {
->>> +            ret = -ENXIO;
->>
->> Maybe -EIO, or with a pr_warning so we can distinguish between this and
->> the next check?
->
-> I originally had a BUG_ON() here, but wasn't sure whether
-> a sync read actually could return a short-but-not-erroneous
-> read.  I think it could though, for a bogus and short header
-> object.  (And of course, this is a new check, which was not
-> present before.)
+This is a multi-part message in MIME format.
+--------------040203020305060703040000
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 
-It can be a short read just as you described.
+I've been looking at using Ceph RBD as a block store for database use. 
+As part of this I'm looking a how (particularly random) IO of smallish 
+(4K, 8K) block sizes performs.
 
-> A short header object is invalid in somewhat the same way as a
-> header containing bad information, so I think the return value
-> should be the same.  I'll add this here:
->
->                          pr_warning("short header read for image %s"
->                                          " (want %d got %d)\n",
->                                  rbd_dev->image_name, size, ret);
->
+I've setup Ceph with a single osd and mon spread over two SSD (Intel 
+520) - 2G journal on one and the osd data on the other (xfs filesystem). 
+The Intel's are pretty fast, and (despite being shackled by a crappy 
+Nvidia SATA controller) fly for random IO.
 
-ok
+However I am not seeing that reflected in the RBD case. I have the 
+device mounted on the local machine where the osd and mon are running 
+(so network performance should not be a factor here).
 
->>
->>> +            goto out_err;
->>> +        }
->>> +        if (!rbd_dev_ondisk_valid(ondisk)) {
->>> +            ret = -ENXIO;
->>> +            goto out_err;
->>>           }
->>>
->>> -        if (snap_count == header->total_snaps)
->>> -            break;
->>> +        names_size = le64_to_cpu(ondisk->snap_names_len);
->>> +        want_count = snap_count;
->>> +        snap_count = le32_to_cpu(ondisk->snap_count);
->>> +    } while (snap_count != want_count);
->>>
->>> -        snap_count = header->total_snaps;
->>> -        len = sizeof (*dh) +
->>> -            snap_count * sizeof(struct rbd_image_snap_ondisk) +
->>> -            header->snap_names_len;
->>> +    return ondisk;
->>>
->>> -        rbd_header_free(header);
->>> -        kfree(dh);
->>> -    }
->>> -    header->obj_version = ver;
->>> +out_err:
->>> +    kfree(ondisk);
->>> +
->>> +    return ERR_PTR(ret);
->>> +}
->>> +
->>> +/*
->>> + * reload the ondisk the header
->>> + */
->>> +static int rbd_read_header(struct rbd_device *rbd_dev,
->>> +               struct rbd_image_header *header)
->>> +{
->>> +    struct rbd_image_header_ondisk *ondisk;
->>> +    u64 ver = 0;
->>> +    int ret;
->>> +
->>> +    ondisk = rbd_dev_v1_header_read(rbd_dev, &ver);
->>> +    if (IS_ERR(ondisk))
->>> +        return PTR_ERR(ondisk);
->>> +    ret = rbd_header_from_disk(header, ondisk);
->>> +    if (ret >= 0)
->>> +        header->obj_version = ver;
->>> +    else if (ret == -ENXIO)
->>
->> This isn't returned from rbd_header_from_disk anymore, since you moved
->> the check into rbd_dev_v1_header_read. It seems like warnings should
->> be printed from rbd_dev_v1_header_read so more specific messages can be
->> given if you want to add them back in.
->
-> I hadn't even noticed that.  rbd_header_from_disk() only returns 0
-> or -ENOMEM now.
->
-> I'll move that "unrecognized header format" warning into
-> rbd_dev_v1_header_read(), and will reword it "invalid header
-> format..."
->
-> The other errors that could occur are -ENOMEM, or the
-> result code from the read operation if it was an error.
-> Unless someone insists it's necessary, I will not be
-> adding warnings for them.
->
-> Do you want me to re-post my updated patch, or is my plan
-> described here enough to get your signoff?
+Here is what I did:
 
-Your plan is good enough.
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Create a rbd device of 10G and mount on /mnt/vol0:
 
-Josh
+$ rbd create --size 10240 vol0
+$ rbd map vol0
+$ mkfx.xfs /dev/rbd0
+$ rbd mount /dev/rdb0 /mnt/vol0
 
->
->                      -Alex
->
->>
->>> +        pr_warning("unrecognized header format for image %s\n",
->>> +            rbd_dev->image_name);
->>> +    kfree(ondisk);
->>>
->>> -out_dh:
->>> -    kfree(dh);
->>> -    return rc;
->>> +    return ret;
->>>   }
->>>
->>>   /*
->>
->
+Make a file:
 
+$ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4k count=300000 conv=fsync
+1228800000 bytes (1.2 GB) copied, 13.4361 s, 91.5 MB/s
+
+Performance ok if file size < journal (2G).
+
+$ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4096k count=200 conv=fsync
+838860800 bytes (839 MB) copied, 9.47086 s, 88.6 MB/s
+
+Not so good if file size > journal.
+
+$ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4096k count=1000 conv=fsync
+4194304000 bytes (4.2 GB) copied, 279.891 s, 15.0 MB/s
+
+Random writes (see attached file) sync'ed with sync_file_range are ok if 
+block size big:
+
+$ ./writetest /mnt/vol0/dump/file 4194304 0 1
+random writes: 292 of: 4194304 bytes elapsed: 9.8397s io rate: 30/s 
+(118.70 MB/s)
+
+$ ./writetest /mnt/vol0/dump/file 1048576 0 1
+random writes: 1171 of: 1048576 bytes elapsed: 10.6042s io rate: 110/s 
+(110.43 MB/s)
+
+$ ./writetest /mnt/vol0/dump/file 131072 0 1
+random writes: 9375 of: 131072 bytes elapsed: 15.8075s io rate: 593/s 
+(74.13 MB/s)
+
+
+However smallish block size is suicide (trigger suicide assert after a 
+while), I see 100 IOPS or less on actual devices, all 100% util:
+
+$ ./writetest /mnt/vol0/dump/file 8192 0 1
+
+I am running into http://tracker.newdream.net/issues/2784 here I think.
+
+Note that the actual SSD are very fast for this when accessed directly:
+
+$ ./writetest /data1/ceph/1/file 8192 0 1
+random writes: 1000000 of: 8192 bytes elapsed: 125.7907s io rate: 7950/s 
+(62.11 MB/s)
+
+
+Thanks for your patience in reading so far - some actual questions now :-)
+
+1/ Why is the appending write from dd when the size of file > journal so 
+slow, despite reasonably capable storage devices?
+
+2/ Is the sudden dramatic drop in random write performance a 
+manifestation of the "small requests  are slow" issue? or is this 
+something else?
+
+
+Thanks
+
+Mark
+
+
+
+--------------040203020305060703040000
+Content-Type: application/x-gzip;
+ name="ceph.conf.gz"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="ceph.conf.gz"
+
+H4sICFjxIVAAA2NlcGguY29uZgB9Vu9v2zYQ/Rz9FTdgwFbA849kaLoY/tA1wJYPRYc2Q1EU
+gUGJJ4sLJQokZcf76/eOkh05SxIDkUXy3t29u3v0MlvSLYdomg0V3Fbp37RwTUmlsTzNljjw
+lUk7alwkzaVpmGodJqQCucbuqQti7HMth3F6Y12ubPa9f95lNPwtSVnrduQ6H9huOVB05Fpu
+SJEFtutdhqNBrR76/bRMK1pcLOaX59kIMXCE7SadOC4fFmAx2yo/w/tM0pr92Kiap3gdIeBt
+Hd067IOYrSj6jh93u6Zwdc1NpFiZQFaSR9RyFI/e6Gk8XUut0U9yOawcYvJdM44J22OYm5L2
+rqOdEseOcBgc3fy1fUuF7UJkP0meUkzYl5indN0p+0uIqrgnE5qfIrUuBJOPiFnWgXLTaDIt
+oPpcpWK1a0x0PuArfYPfhlmTArOsAurSAPyZ9Vh5ZjInoQpCdJa9ikyq2aNpNFOpjO08B8C8
+tzu1D1R47k+Q05qars7ZT7PvCOSxX/BCWkUllMlz0RM27yl7hi7leWjG0nniB1W3IDxWTJ/f
+X3/6Qn/AJbzDqz5SW6kti7FHcjs0cx+YHoG3ztkA+iuzqdiT59aaQkWD6Cxv2U6S7wKpSEmU
+jIjqbDwiuKATxmGDgvlX2mAxzuDbAKFsQFu1XJgScdKHz39/+RPlRxqSEkLswxlZfjX35oqq
+GNurWSJoilMaWdT4Emc7bM8+oGdcvRYS161VBUtHr3cmVuvk4eVYC9+Fqg9gRfNxxLemFqaN
+1NJEMGJTiIdWmlDexSfNMcy/FKSwrrhPvau9KUHbCDk3ETCeR8QOhIiliEKymY7aGrVIiAc0
+8YNWfULyLVvbY/RBivsc4+JKKI93dT9PO+WbQw9dzFFUiKEOLzuT80eYFUyy7CzJygYokwSj
+Oe/S69Fz4VWoGCwZTIDX6CtXihmiMx4yc8/WVM5pEcWcxbJi25adpas3OJcAqU6a+PiKwFZ0
+Pj8utOrBhdMl1cWqX0nDNt2yxgAUd9lZ5TDSKxoWsjNBU1p7cXF+OZ3js7h6e/nut0wUA43y
+mljc7txJ7dMYC9t8nB+W64Lour9QcJfUIhd4ipEQADmAlzth5VbqIqXBAPYDnUdfBto629VM
+O4O65lLWrkm4Z9LHr0kHMG80o032E/i9577yCsVuVZIubcI9CgMKfTQy6yJdVPIuI9hWXYMJ
+0/TxdwqV66wW79y4blMtU+sekk/qUiZefEowmQt4GCRV2rsLIKC/HQCMXpAMjyloNATgEs05
+J4CfebqZ9pn1Gc3+gYI1yr4Zxi4eOQkyCYIo4pKMX8lxPCwnvAn56IeZ5u0s6OJ8kmJeIC8x
+liZ1UcQxIGhp+CGcH/pKDG+pGAkgX5xuDIp4Pv/1HTyPV9OA1LxR+T7iNn39ihTaDsbSvRTr
+tsSMIVGFa5Cujeci3nx6RDmc1sbBfwn15edUuQB7m77x+qtKMgaW27Lfy08Un+6DpGfQKhQK
+vwEO+yM8MCP1kPpot2uGLpHOKCpMQRBnuLfhTSNcE8emoOvoUTRQFdFshbWL1M6yP2hOUtU0
+7bJoQuieCM1z+iIYg8S8pC+CdiIm6RdOlHY/WX4sd5IZmE3n/xeY7D9ISgBpegoAAA==
+--------------040203020305060703040000
+Content-Type: application/x-gzip;
+ name="writetest.c.gz"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="writetest.c.gz"
+
+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
+--------------040203020305060703040000--
