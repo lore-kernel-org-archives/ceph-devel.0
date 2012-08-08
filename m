@@ -1,126 +1,114 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Ceph RBD performance - random writes
-Date: Wed, 08 Aug 2012 11:46:12 -0700
-Message-ID: <5022B3F4.5050109@inktank.com>
-References: <5021F6D1.7000004@catalyst.net.nz>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] skip loading keyrings when auth supported = none
+Date: Wed, 8 Aug 2012 14:06:12 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208081405110.3347@cobra.newdream.net>
+References: <871uk0pw8p.fsf@agnew.wgtn.ondioline.org> <87wr1qnlev.fsf@agnew.wgtn.ondioline.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:33147 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753374Ab2HHSqR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 14:46:17 -0400
-Received: by ghrr11 with SMTP id r11so1130000ghr.19
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Aug 2012 11:46:17 -0700 (PDT)
-In-Reply-To: <5021F6D1.7000004@catalyst.net.nz>
+Received: from cobra.newdream.net ([66.33.216.30]:48851 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753001Ab2HHVGM (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 17:06:12 -0400
+In-Reply-To: <87wr1qnlev.fsf@agnew.wgtn.ondioline.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+To: Paul Collins <paul.collins@canonical.com>
 Cc: ceph-devel@vger.kernel.org
 
-On 08/07/2012 10:19 PM, Mark Kirkwood wrote:
-> I've been looking at using Ceph RBD as a block store for database use.
-> As part of this I'm looking a how (particularly random) IO of smallish
-> (4K, 8K) block sizes performs.
->
-> I've setup Ceph with a single osd and mon spread over two SSD (Intel
-> 520) - 2G journal on one and the osd data on the other (xfs filesystem).
-> The Intel's are pretty fast, and (despite being shackled by a crappy
-> Nvidia SATA controller) fly for random IO.
->
-> However I am not seeing that reflected in the RBD case. I have the
-> device mounted on the local machine where the osd and mon are running
-> (so network performance should not be a factor here).
->
-> Here is what I did:
->
-> Create a rbd device of 10G and mount on /mnt/vol0:
->
-> $ rbd create --size 10240 vol0
-> $ rbd map vol0
-> $ mkfx.xfs /dev/rbd0
-> $ rbd mount /dev/rdb0 /mnt/vol0
->
-> Make a file:
->
-> $ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4k count=300000 conv=fsync
-> 1228800000 bytes (1.2 GB) copied, 13.4361 s, 91.5 MB/s
->
-> Performance ok if file size < journal (2G).
->
-> $ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4096k count=200 conv=fsync
-> 838860800 bytes (839 MB) copied, 9.47086 s, 88.6 MB/s
->
-> Not so good if file size > journal.
->
-> $ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4096k count=1000 conv=fsync
-> 4194304000 bytes (4.2 GB) copied, 279.891 s, 15.0 MB/s
->
-> Random writes (see attached file) sync'ed with sync_file_range are ok if
-> block size big:
->
-> $ ./writetest /mnt/vol0/dump/file 4194304 0 1
-> random writes: 292 of: 4194304 bytes elapsed: 9.8397s io rate: 30/s
-> (118.70 MB/s)
->
-> $ ./writetest /mnt/vol0/dump/file 1048576 0 1
-> random writes: 1171 of: 1048576 bytes elapsed: 10.6042s io rate: 110/s
-> (110.43 MB/s)
->
-> $ ./writetest /mnt/vol0/dump/file 131072 0 1
-> random writes: 9375 of: 131072 bytes elapsed: 15.8075s io rate: 593/s
-> (74.13 MB/s)
->
->
-> However smallish block size is suicide (trigger suicide assert after a
-> while), I see 100 IOPS or less on actual devices, all 100% util:
->
-> $ ./writetest /mnt/vol0/dump/file 8192 0 1
->
-> I am running into http://tracker.newdream.net/issues/2784 here I think.
+Hi Paul,
 
-This can be a sign of a bug in the underlying filesystem or hardware -
-maybe your controller? That assert is hit when a single operation to
-the filesystem beneath the osd takes longer than 180 seconds (by
-default).
+I pushed a different patch that fixes mkcephfs to use the correct default 
+locations for keyrings.  The intended (and now, actual) behavior of 
+mkcephfs is that it will generate and install keys regardless of whether 
+cephx is enabled/required so that you can turn it on later.
 
-> Note that the actual SSD are very fast for this when accessed directly:
->
-> $ ./writetest /data1/ceph/1/file 8192 0 1
-> random writes: 1000000 of: 8192 bytes elapsed: 125.7907s io rate: 7950/s
-> (62.11 MB/s)
->
->
-> Thanks for your patience in reading so far - some actual questions now :-)
->
-> 1/ Why is the appending write from dd when the size of file > journal so
-> slow, despite reasonably capable storage devices?
+This just hit the stable branch and will be in 0.48.1argonaut (a few days 
+away).
 
-It's possible you need to use more threads to have more operations in
-flight in to the filestore (the main storage for the osd). Try
-something like this in your ceph configuration for the osds:
+Thanks!
+sage
 
-     osd op threads = 24
-     osd disk threads = 24
-     filestore op threads = 6
-     filestore queue max ops = 24
 
-(from http://www.spinics.net/lists/ceph-devel/msg07128.html)
+On Fri, 27 Jul 2012, Paul Collins wrote:
 
-> 2/ Is the sudden dramatic drop in random write performance a
-> manifestation of the "small requests  are slow" issue? or is this
-> something else?
-
-It's probably that. Sam's actively looking into it, and once he has
-something it will be interesting to see how well it works on your
-hardware.
-
-Josh
-
-> Thanks
->
-> Mark
->
->
-
+> If the cluster is not currently using authentication, then it's
+> possible that no keyrings were ever created.  Proceed with monitor
+> initialization regardless and explain what we did.
+> 
+> With this patch applied, my 0.48 monitor cluster starts up
+> correctly even when no keyring files are present in the monitors'
+> data directories.
+> 
+> Signed-off-by: Paul Collins <paul.collins@canonical.com>
+> ---
+>  src/mon/Monitor.cc |   40 ++++++++++++++++++++++------------------
+>  1 file changed, 22 insertions(+), 18 deletions(-)
+> 
+> diff --git a/src/mon/Monitor.cc b/src/mon/Monitor.cc
+> index c415dbf..bdd6a91 100644
+> --- a/src/mon/Monitor.cc
+> +++ b/src/mon/Monitor.cc
+> @@ -322,22 +322,26 @@ int Monitor::init()
+>      extract_save_mon_key(keyring);
+>    }
+>  
+> -  ostringstream os;
+> -  os << g_conf->mon_data << "/keyring";
+> -  int r = keyring.load(cct, os.str());
+> -  if (r < 0) {
+> -    EntityName mon_name;
+> -    mon_name.set_type(CEPH_ENTITY_TYPE_MON);
+> -    EntityAuth mon_key;
+> -    if (key_server.get_auth(mon_name, mon_key)) {
+> -      dout(1) << "copying mon. key from old db to external keyring" << dendl;
+> -      keyring.add(mon_name, mon_key);
+> -      bufferlist bl;
+> -      keyring.encode_plaintext(bl);
+> -      store->put_bl_ss(bl, "keyring", NULL);
+> -    } else {
+> -      derr << "unable to load initial keyring " << g_conf->keyring << dendl;
+> -      return r;
+> +  if (auth_supported.is_supported_auth(CEPH_AUTH_NONE)) {
+> +    dout(10) << "auth supported = none, no keys to load" << dendl;
+> +  } else {
+> +    ostringstream os;
+> +    os << g_conf->mon_data << "/keyring";
+> +    int r = keyring.load(cct, os.str());
+> +    if (r < 0) {
+> +      EntityName mon_name;
+> +      mon_name.set_type(CEPH_ENTITY_TYPE_MON);
+> +      EntityAuth mon_key;
+> +      if (key_server.get_auth(mon_name, mon_key)) {
+> +	dout(1) << "copying mon. key from old db to external keyring" << dendl;
+> +	keyring.add(mon_name, mon_key);
+> +	bufferlist bl;
+> +	keyring.encode_plaintext(bl);
+> +	store->put_bl_ss(bl, "keyring", NULL);
+> +      } else {
+> +	derr << "unable to load initial keyring " << g_conf->keyring << dendl;
+> +	return r;
+> +      }
+>      }
+>    }
+>  
+> @@ -346,8 +350,8 @@ int Monitor::init()
+>  
+>    // unlock while registering to avoid mon_lock -> admin socket lock dependency.
+>    lock.Unlock();
+> -  r = admin_socket->register_command("mon_status", admin_hook,
+> -				     "show current monitor status");
+> +  int r = admin_socket->register_command("mon_status", admin_hook,
+> +					 "show current monitor status");
+>    assert(r == 0);
+>    r = admin_socket->register_command("quorum_status", admin_hook,
+>  					 "show current quorum status");
+> -- 
+> 1.7.10.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
