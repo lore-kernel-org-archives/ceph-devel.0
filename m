@@ -1,94 +1,144 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: [PATCH] docs: Add CloudStack documentation
-Date: Wed,  8 Aug 2012 23:51:10 +0200
-Message-ID: <1344462671-21848-1-git-send-email-wido@widodh.nl>
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: Ceph RBD performance - random writes
+Date: Wed, 08 Aug 2012 16:58:57 -0500
+Message-ID: <5022E121.4070004@inktank.com>
+References: <5021F6D1.7000004@catalyst.net.nz> <5022B3F4.5050109@inktank.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:44650 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751639Ab2HHVvU (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 17:51:20 -0400
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:39065 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751439Ab2HHV7B (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 17:59:01 -0400
+Received: by yhmm54 with SMTP id m54so1348486yhm.19
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Aug 2012 14:59:00 -0700 (PDT)
+In-Reply-To: <5022B3F4.5050109@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Wido den Hollander <wido@widodh.nl>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>, ceph-devel@vger.kernel.org
 
-The basic documentation about how you can use RBD with CloudStack
+On 8/8/12 1:46 PM, Josh Durgin wrote:
+> On 08/07/2012 10:19 PM, Mark Kirkwood wrote:
+>> I've been looking at using Ceph RBD as a block store for database use.
+>> As part of this I'm looking a how (particularly random) IO of smallish
+>> (4K, 8K) block sizes performs.
+>>
+>> I've setup Ceph with a single osd and mon spread over two SSD (Intel
+>> 520) - 2G journal on one and the osd data on the other (xfs filesystem).
+>> The Intel's are pretty fast, and (despite being shackled by a crappy
+>> Nvidia SATA controller) fly for random IO.
+>>
+>> However I am not seeing that reflected in the RBD case. I have the
+>> device mounted on the local machine where the osd and mon are running
+>> (so network performance should not be a factor here).
+>>
+>> Here is what I did:
+>>
+>> Create a rbd device of 10G and mount on /mnt/vol0:
+>>
+>> $ rbd create --size 10240 vol0
+>> $ rbd map vol0
+>> $ mkfx.xfs /dev/rbd0
+>> $ rbd mount /dev/rdb0 /mnt/vol0
+>>
+>> Make a file:
+>>
+>> $ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4k count=300000 conv=fsync
+>> 1228800000 bytes (1.2 GB) copied, 13.4361 s, 91.5 MB/s
+>>
+>> Performance ok if file size < journal (2G).
+>>
+>> $ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4096k count=200 conv=fsync
+>> 838860800 bytes (839 MB) copied, 9.47086 s, 88.6 MB/s
+>>
+>> Not so good if file size > journal.
+>>
+>> $ dd if=/dev/zero of=/mnt/vol0/dump/file bs=4096k count=1000 conv=fsync
+>> 4194304000 bytes (4.2 GB) copied, 279.891 s, 15.0 MB/s
+>>
+>> Random writes (see attached file) sync'ed with sync_file_range are ok if
+>> block size big:
+>>
+>> $ ./writetest /mnt/vol0/dump/file 4194304 0 1
+>> random writes: 292 of: 4194304 bytes elapsed: 9.8397s io rate: 30/s
+>> (118.70 MB/s)
+>>
+>> $ ./writetest /mnt/vol0/dump/file 1048576 0 1
+>> random writes: 1171 of: 1048576 bytes elapsed: 10.6042s io rate: 110/s
+>> (110.43 MB/s)
+>>
+>> $ ./writetest /mnt/vol0/dump/file 131072 0 1
+>> random writes: 9375 of: 131072 bytes elapsed: 15.8075s io rate: 593/s
+>> (74.13 MB/s)
+>>
+>>
+>> However smallish block size is suicide (trigger suicide assert after a
+>> while), I see 100 IOPS or less on actual devices, all 100% util:
+>>
+>> $ ./writetest /mnt/vol0/dump/file 8192 0 1
+>>
+>> I am running into http://tracker.newdream.net/issues/2784 here I think.
+>
+> This can be a sign of a bug in the underlying filesystem or hardware -
+> maybe your controller? That assert is hit when a single operation to
+> the filesystem beneath the osd takes longer than 180 seconds (by
+> default).
+>
+>> Note that the actual SSD are very fast for this when accessed directly:
+>>
+>> $ ./writetest /data1/ceph/1/file 8192 0 1
+>> random writes: 1000000 of: 8192 bytes elapsed: 125.7907s io rate: 7950/s
+>> (62.11 MB/s)
+>>
+>>
+>> Thanks for your patience in reading so far - some actual questions now
+>> :-)
+>>
+>> 1/ Why is the appending write from dd when the size of file > journal so
+>> slow, despite reasonably capable storage devices?
+>
+> It's possible you need to use more threads to have more operations in
+> flight in to the filestore (the main storage for the osd). Try
+> something like this in your ceph configuration for the osds:
+>
+>      osd op threads = 24
+>      osd disk threads = 24
+>      filestore op threads = 6
+>      filestore queue max ops = 24
+>
+> (from http://www.spinics.net/lists/ceph-devel/msg07128.html)
+>
 
-Signed-off-by: Wido den Hollander <wido@widodh.nl>
----
- doc/rbd/rbd-cloudstack.rst |   49 ++++++++++++++++++++++++++++++++++++++++++++
- doc/rbd/rbd.rst            |    2 +-
- 2 files changed, 50 insertions(+), 1 deletion(-)
- create mode 100644 doc/rbd/rbd-cloudstack.rst
+It's probably worth giving a try, but I haven't had much luck improving 
+small IO performance with more threads/queued ops.
 
-diff --git a/doc/rbd/rbd-cloudstack.rst b/doc/rbd/rbd-cloudstack.rst
-new file mode 100644
-index 0000000..04e1a7c
---- /dev/null
-+++ b/doc/rbd/rbd-cloudstack.rst
-@@ -0,0 +1,49 @@
-+===================
-+ RBD and Apache CloudStack
-+===================
-+You can use RBD to run instances on in Apache CloudStack.
-+
-+This can be done by adding a RBD pool as Primary Storage.
-+
-+There are a couple of prerequisites:
-+* You need to CloudStack 4.0 or higher
-+* Qemu on the Hypervisor has to be compiled with RBD enabled
-+* The libvirt version on the Hypervisor has to be at least 0.10 with RBD enabled
-+
-+Make sure you meet this requirements before installing the CloudStack Agent on the Hypervisor(s)!
-+
-+.. important:: To use RBD with CloudStack, you must have a running Ceph cluster!
-+
-+Limitations
-+-------------
-+Running instances from RBD has a couple of limitations:
-+
-+* An additional NFS Primary Storage pool is required for running System VM's
-+* Snapshotting RBD volumes is not possible (at this moment)
-+* Only one monitor can be configured
-+
-+Add Hypervisor
-+-------------
-+Please follow the official CloudStack documentation how to do this.
-+
-+There is no special way of adding a Hypervisor when using RBD, nor is any configuration needed on the hypervisor.
-+
-+Add RBD Primary Storage
-+-------------
-+Once the hypervisor has been added, log on to the CloudStack UI.
-+
-+* Infrastructure 
-+* Primary Storage
-+* "Add Primary Storage"
-+* Select "Protocol" RBD
-+* Fill in your cluster information (cephx is supported)
-+* Optionally add the tag 'rbd'
-+
-+Now you should be able to deploy instances on RBD.
-+
-+RBD Disk Offering
-+-------------
-+Create a special "Disk Offering" which needs to match the tag 'rbd' so you can make sure the StoragePoolAllocator
-+chooses the RBD pool when searching for a suiteable storage pool.
-+
-+Since there is also a NFS storage pool it's possible that instances get deployed on NFS instead of RBD.
-diff --git a/doc/rbd/rbd.rst b/doc/rbd/rbd.rst
-index af1682f..6fd1999 100644
---- a/doc/rbd/rbd.rst
-+++ b/doc/rbd/rbd.rst
-@@ -31,7 +31,7 @@ the Ceph FS filesystem, and RADOS block devices simultaneously.
- 	QEMU and RBD <qemu-rbd>
- 	libvirt <libvirt>
- 	RBD and OpenStack <rbd-openstack>
--	
-+	RBD and CloudStack <rbd-cloudstack>
- 	
- 	
- 	
--- 
-1.7.9.5
+>> 2/ Is the sudden dramatic drop in random write performance a
+>> manifestation of the "small requests  are slow" issue? or is this
+>> something else?
+>
+> It's probably that. Sam's actively looking into it, and once he has
+> something it will be interesting to see how well it works on your
+> hardware.
+
+For what it's worth, with mostly default settings I was seeing about 
+8MB/s to dell branded samsung SSDs with 4k IOs using rados bench.  That 
+was with 256 concurrent client requests.  This is definitely something 
+we are working hard on tracking down.
+
+>
+> Josh
+>
+>> Thanks
+>>
+>> Mark
+>>
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 
