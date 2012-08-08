@@ -1,209 +1,278 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH v4] rbd: fix the memory leak of bio_chain_clone
-Date: Tue, 07 Aug 2012 19:49:21 -0700
-Message-ID: <5021D3B1.20401@inktank.com>
-References: <1344015188-11289-1-git-send-email-gzhao@suse.com>
+From: Josh Durgin <josh.durgin@inktank.com>
+Subject: Re: [PATCH 4/4] rbd: separate reading header from decoding it
+Date: Tue, 07 Aug 2012 21:05:53 -0700
+Message-ID: <5021E5A1.7000609@inktank.com>
+References: <502009D1.7090005@inktank.com> <50200A56.90506@inktank.com> <5021B9A3.9060004@inktank.com> <5021CBFF.8030606@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:60644 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:37845 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754972Ab2HHCtY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Aug 2012 22:49:24 -0400
-Received: by pbbrr13 with SMTP id rr13so677148pbb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Aug 2012 19:49:24 -0700 (PDT)
-In-Reply-To: <1344015188-11289-1-git-send-email-gzhao@suse.com>
+	with ESMTP id S1751051Ab2HHEF5 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 00:05:57 -0400
+Received: by pbbrr13 with SMTP id rr13so774402pbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Aug 2012 21:05:56 -0700 (PDT)
+In-Reply-To: <5021CBFF.8030606@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Guangliang Zhao <gzhao@suse.com>
-Cc: yehuda@inktank.com, ceph-devel@vger.kernel.org
+To: Alex Elder <elder@inktank.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 08/03/2012 10:33 AM, Guangliang Zhao wrote:
-> The bio_pair alloced in bio_chain_clone would not be freed,
-> this will cause a memory leak. It could be freed actually only
-> after 3 times release, because the reference count of bio_pair
-> is initialized to 3 when bio_split and bio_pair_release only
-> drops the reference count.
+On 08/07/2012 07:16 PM, Alex Elder wrote:
+> On 08/07/2012 05:58 PM, Josh Durgin wrote:
+>> On 08/06/2012 11:17 AM, Alex Elder wrote:
+>>> Right now rbd_read_header() both reads the header object for an rbd
+>>> image and decodes its contents.  It does this repeatedly if needed,
+>>> in order to ensure a complete and intact header is obtained.
+>>>
+>>> Separate this process into two steps--reading of the raw header
+>>> data (in new function, rbd_dev_v1_header_read()) and separately
+>>> decoding its contents (in rbd_header_from_disk()).  As a result,
+>>> the latter function no longer requires its allocated_snaps argument.
+>>>
+>>> Signed-off-by: Alex Elder <elder@inktank.com>
+>>> ---
+>>>   drivers/block/rbd.c |  132
+>>> +++++++++++++++++++++++++++++-----------------------
+>>>   1 file changed, 76 insertions(+), 56 deletions(-)
+>>>
+>>> Index: b/drivers/block/rbd.c
+>>> ===================================================================
+>>> --- a/drivers/block/rbd.c
+>>> +++ b/drivers/block/rbd.c
+>>> @@ -514,15 +514,11 @@ static bool rbd_dev_ondisk_valid(struct
+>>>    * header.
+>>>    */
+>>>   static int rbd_header_from_disk(struct rbd_image_header *header,
+>>> -                 struct rbd_image_header_ondisk *ondisk,
+>>> -                 u32 allocated_snaps)
+>>> +                 struct rbd_image_header_ondisk *ondisk)
+>>>   {
+>>>       u32 snap_count;
+>>>       size_t size;
+>>>
+>>> -    if (!rbd_dev_ondisk_valid(ondisk))
+>>> -        return -ENXIO;
+>>> -
+>>>       memset(header, 0, sizeof (*header));
+>>>
+>>>       snap_count = le32_to_cpu(ondisk->snap_count);
+>>> @@ -559,15 +555,6 @@ static int rbd_header_from_disk(struct r
+>>>       header->comp_type = ondisk->options.comp_type;
+>>>       header->total_snaps = snap_count;
+>>>
+>>> -    /*
+>>> -     * If the number of snapshot ids provided by the caller
+>>> -     * doesn't match the number in the entire context there's
+>>> -     * no point in going further.  Caller will try again after
+>>> -     * getting an updated snapshot context from the server.
+>>> -     */
+>>> -    if (allocated_snaps != snap_count)
+>>> -        return 0;
+>>> -
+>>>       size = sizeof (struct ceph_snap_context);
+>>>       size += snap_count * sizeof (header->snapc->snaps[0]);
+>>>       header->snapc = kzalloc(size, GFP_KERNEL);
+>>> @@ -1630,61 +1617,94 @@ static void rbd_free_disk(struct rbd_dev
+>>>   }
+>>>
+>>>   /*
+>>> - * reload the ondisk the header
+>>> + * Read the complete header for the given rbd device.
+>>> + *
+>>> + * Returns a pointer to a dynamically-allocated buffer containing
+>>> + * the complete and validated header.  Caller can pass the address
+>>> + * of a variable that will be filled in with the version of the
+>>> + * header object at the time it was read.
+>>> + *
+>>> + * Returns a pointer-coded errno if a failure occurs.
+>>>    */
+>>> -static int rbd_read_header(struct rbd_device *rbd_dev,
+>>> -               struct rbd_image_header *header)
+>>> +static struct rbd_image_header_ondisk *
+>>> +rbd_dev_v1_header_read(struct rbd_device *rbd_dev, u64 *version)
+>>>   {
+>>> -    ssize_t rc;
+>>> -    struct rbd_image_header_ondisk *dh;
+>>> +    struct rbd_image_header_ondisk *ondisk = NULL;
+>>>       u32 snap_count = 0;
+>>> -    u64 ver;
+>>> -    size_t len;
+>>> +    u64 names_size = 0;
+>>> +    u32 want_count;
+>>> +    int ret;
+>>>
+>>>       /*
+>>> -     * First reads the fixed-size header to determine the number
+>>> -     * of snapshots, then re-reads it, along with all snapshot
+>>> -     * records as well as their stored names.
+>>> +     * The complete header will include an array of its 64-bit
+>>> +     * snapshot ids, followed by the names of those snapshots as
+>>> +     * a contiguous block of null-terminated strings.  Note that
+>>
+>> minor nit, but '\0' is NUL, not NULL.
+>
+> Maybe "null" is either/both?  (I actually try to avoid this wording
+> for just this reason...  I use "...terminating '\0'...")
+>
+> I'll use "NUL" instead of "null."
+>
+>>> +     * the number of snapshots could change by the time we read
+>>> +     * it in, in which case we re-read it.
+>>>        */
+>>> -    len = sizeof (*dh);
+>>> -    while (1) {
+>>> -        dh = kmalloc(len, GFP_KERNEL);
+>>> -        if (!dh)
+>>> -            return -ENOMEM;
+>>> +    do {
+>>> +        size_t size;
+>>> +
+>>> +        kfree(ondisk);
+>>>
+>>> -        rc = rbd_req_sync_read(rbd_dev,
+>>> -                       CEPH_NOSNAP,
+>>> +        size = sizeof (*ondisk);
+>>> +        size += snap_count * sizeof (struct rbd_image_snap_ondisk);
+>>> +        size += names_size;
+>>> +        ondisk = kmalloc(size, GFP_KERNEL);
+>>> +        if (!ondisk)
+>>> +            return ERR_PTR(-ENOMEM);
+>>> +
+>>> +        ret = rbd_req_sync_read(rbd_dev, CEPH_NOSNAP,
+>>>                          rbd_dev->header_name,
+>>> -                       0, len,
+>>> -                       (char *)dh, &ver);
+>>> -        if (rc < 0)
+>>> -            goto out_dh;
+>>> -
+>>> -        rc = rbd_header_from_disk(header, dh, snap_count);
+>>> -        if (rc < 0) {
+>>> -            if (rc == -ENXIO)
+>>> -                pr_warning("unrecognized header format"
+>>> -                       " for image %s\n",
+>>> -                       rbd_dev->image_name);
+>>> -            goto out_dh;
+>>> +                       0, size,
+>>> +                       (char *) ondisk, version);
+>>> +
+>>> +        if (ret < 0)
+>>> +            goto out_err;
+>>> +        if (WARN_ON(ret < size)) {
+>>> +            ret = -ENXIO;
+>>
+>> Maybe -EIO, or with a pr_warning so we can distinguish between this and
+>> the next check?
+>
+> I originally had a BUG_ON() here, but wasn't sure whether
+> a sync read actually could return a short-but-not-erroneous
+> read.  I think it could though, for a bogus and short header
+> object.  (And of course, this is a new check, which was not
+> present before.)
 
-Last Friday I added this patch to the testing branch and
-ran the xfstests-on-rbd suite on it, and it triggered some
-new errors.  I did not have time to investigate them though.
+It can be a short read just as you described.
 
-I am taking this latest version and will apply it and will
-run it through the same series of tests.
+> A short header object is invalid in somewhat the same way as a
+> header containing bad information, so I think the return value
+> should be the same.  I'll add this here:
+>
+>                          pr_warning("short header read for image %s"
+>                                          " (want %d got %d)\n",
+>                                  rbd_dev->image_name, size, ret);
+>
 
-I also had hoped to give your patch a careful review, but
-so far I haven't managed to do that (yet).
+ok
 
-I just want you to know you haven't been forgotten...
+>>
+>>> +            goto out_err;
+>>> +        }
+>>> +        if (!rbd_dev_ondisk_valid(ondisk)) {
+>>> +            ret = -ENXIO;
+>>> +            goto out_err;
+>>>           }
+>>>
+>>> -        if (snap_count == header->total_snaps)
+>>> -            break;
+>>> +        names_size = le64_to_cpu(ondisk->snap_names_len);
+>>> +        want_count = snap_count;
+>>> +        snap_count = le32_to_cpu(ondisk->snap_count);
+>>> +    } while (snap_count != want_count);
+>>>
+>>> -        snap_count = header->total_snaps;
+>>> -        len = sizeof (*dh) +
+>>> -            snap_count * sizeof(struct rbd_image_snap_ondisk) +
+>>> -            header->snap_names_len;
+>>> +    return ondisk;
+>>>
+>>> -        rbd_header_free(header);
+>>> -        kfree(dh);
+>>> -    }
+>>> -    header->obj_version = ver;
+>>> +out_err:
+>>> +    kfree(ondisk);
+>>> +
+>>> +    return ERR_PTR(ret);
+>>> +}
+>>> +
+>>> +/*
+>>> + * reload the ondisk the header
+>>> + */
+>>> +static int rbd_read_header(struct rbd_device *rbd_dev,
+>>> +               struct rbd_image_header *header)
+>>> +{
+>>> +    struct rbd_image_header_ondisk *ondisk;
+>>> +    u64 ver = 0;
+>>> +    int ret;
+>>> +
+>>> +    ondisk = rbd_dev_v1_header_read(rbd_dev, &ver);
+>>> +    if (IS_ERR(ondisk))
+>>> +        return PTR_ERR(ondisk);
+>>> +    ret = rbd_header_from_disk(header, ondisk);
+>>> +    if (ret >= 0)
+>>> +        header->obj_version = ver;
+>>> +    else if (ret == -ENXIO)
+>>
+>> This isn't returned from rbd_header_from_disk anymore, since you moved
+>> the check into rbd_dev_v1_header_read. It seems like warnings should
+>> be printed from rbd_dev_v1_header_read so more specific messages can be
+>> given if you want to add them back in.
+>
+> I hadn't even noticed that.  rbd_header_from_disk() only returns 0
+> or -ENOMEM now.
+>
+> I'll move that "unrecognized header format" warning into
+> rbd_dev_v1_header_read(), and will reword it "invalid header
+> format..."
+>
+> The other errors that could occur are -ENOMEM, or the
+> result code from the read operation if it was an error.
+> Unless someone insists it's necessary, I will not be
+> adding warnings for them.
+>
+> Do you want me to re-post my updated patch, or is my plan
+> described here enough to get your signoff?
 
-					-Alex
+Your plan is good enough.
+Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+
+Josh
+
 >
-> The function bio_pair_release must be called three times for
-> releasing bio_pair, and the callback functions of bios on the
-> requests will be called when the last release time in bio_pair_release,
-> however, these functions will also be called in rbd_req_cb. In
-> other words, they will be called twice, and it may cause serious
-> consequences.
+>                      -Alex
 >
-> This patch clones bio chain from the origin directly instead of
-> bio_split. The new bio chain can be released whenever we don't
-> need it.
->
-> This patch can just handle the split of *single page* bios, but
-> it's enough here for the following reasons:
->
-> Only bios span across multiple osds need to be split, and these bios
-> *must* be single page because of rbd_merge_bvec. With the function,
-> the new bvec will not permitted to merge, if it make the bio cross
-> the osd boundary, except it is the first one. In other words, there
-> are two types of bio:
->
-> 	- the bios don't cross the osd boundary
-> 	  They have one or more pages. The value of offset will
-> 	  always be 0 in this case, so nothing will be changed, and
-> 	  the code changes tmp bios doesn't take effact at all.
->
-> 	- the bios cross the osd boundary
-> 	  Each one have only one page. These bios need to be split,
-> 	  and the offset is used to indicate the next bio, it makes
-> 	  sense only in this instance.
->
-> Signed-off-by: Guangliang Zhao <gzhao@suse.com>
-> ---
->   drivers/block/rbd.c |   73 +++++++++++++++++++++-----------------------------
->   1 files changed, 31 insertions(+), 42 deletions(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 013c7a5..356657d 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -712,51 +712,46 @@ static void zero_bio_chain(struct bio *chain, int start_ofs)
->   	}
->   }
->
-> -/*
-> - * bio_chain_clone - clone a chain of bios up to a certain length.
-> - * might return a bio_pair that will need to be released.
-> +/**
-> + *      bio_chain_clone - clone a chain of bios up to a certain length.
-> + *      @old: bio to clone
-> + *      @offset: start point for bio clone
-> + *      @len: length of bio chain
-> + *      @gfp_mask: allocation priority
-> + *
-> + *      RETURNS:
-> + *      Pointer to new bio chain on success, NULL on failure.
->    */
-> -static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
-> -				   struct bio_pair **bp,
-> +static struct bio *bio_chain_clone(struct bio **old, int *offset,
->   				   int len, gfp_t gfpmask)
->   {
->   	struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
->   	int total = 0;
->
-> -	if (*bp) {
-> -		bio_pair_release(*bp);
-> -		*bp = NULL;
-> -	}
-> -
->   	while (old_chain && (total < len)) {
-> +		int need = len - total;
-> +
->   		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
->   		if (!tmp)
->   			goto err_out;
->
-> -		if (total + old_chain->bi_size > len) {
-> -			struct bio_pair *bp;
-> -
-> -			/*
-> -			 * this split can only happen with a single paged bio,
-> -			 * split_bio will BUG_ON if this is not the case
-> -			 */
-> -			dout("bio_chain_clone split! total=%d remaining=%d"
-> -			     "bi_size=%d\n",
-> -			     (int)total, (int)len-total,
-> -			     (int)old_chain->bi_size);
-> -
-> -			/* split the bio. We'll release it either in the next
-> -			   call, or it will have to be released outside */
-> -			bp = bio_split(old_chain, (len - total) / SECTOR_SIZE);
-> -			if (!bp)
-> -				goto err_out;
-> -
-> -			__bio_clone(tmp, &bp->bio1);
-> -
-> -			*next = &bp->bio2;
-> +		__bio_clone(tmp, old_chain);
-> +		tmp->bi_sector += *offset >> SECTOR_SHIFT;
-> +		tmp->bi_io_vec->bv_offset += *offset >> SECTOR_SHIFT;
-> +		/*
-> +		 * The bios span across multiple osd objects must be
-> +		 * single paged, rbd_merge_bvec would guarantee it.
-> +		 * So we needn't worry about other things.
-> +		 */
-> +		if (tmp->bi_size - *offset > need) {
-> +			tmp->bi_size = need;
-> +			tmp->bi_io_vec->bv_len = need;
-> +			*offset += need;
->   		} else {
-> -			__bio_clone(tmp, old_chain);
-> -			*next = old_chain->bi_next;
-> +			old_chain = old_chain->bi_next;
-> +			tmp->bi_size -= *offset;
-> +			tmp->bi_io_vec->bv_len -= *offset;
-> +			*offset = 0;
->   		}
->
->   		tmp->bi_bdev = NULL;
-> @@ -769,7 +764,6 @@ static struct bio *bio_chain_clone(struct bio **old, struct bio **next,
->   			tail->bi_next = tmp;
->   			tail = tmp;
->   		}
-> -		old_chain = old_chain->bi_next;
->
->   		total += tmp->bi_size;
->   	}
-> @@ -1447,13 +1441,12 @@ static void rbd_rq_fn(struct request_queue *q)
->   {
->   	struct rbd_device *rbd_dev = q->queuedata;
->   	struct request *rq;
-> -	struct bio_pair *bp = NULL;
->
->   	while ((rq = blk_fetch_request(q))) {
->   		struct bio *bio;
-> -		struct bio *rq_bio, *next_bio = NULL;
-> +		struct bio *rq_bio;
->   		bool do_write;
-> -		int size, op_size = 0;
-> +		int size, op_size = 0, offset = 0;
->   		u64 ofs;
->   		int num_segs, cur_seg = 0;
->   		struct rbd_req_coll *coll;
-> @@ -1503,7 +1496,7 @@ static void rbd_rq_fn(struct request_queue *q)
->   						  ofs, size,
->   						  NULL, NULL);
->   			kref_get(&coll->kref);
-> -			bio = bio_chain_clone(&rq_bio, &next_bio, &bp,
-> +			bio = bio_chain_clone(&rq_bio, &offset,
->   					      op_size, GFP_ATOMIC);
->   			if (!bio) {
->   				rbd_coll_end_req_index(rq, coll, cur_seg,
-> @@ -1531,12 +1524,8 @@ next_seg:
->   			ofs += op_size;
->
->   			cur_seg++;
-> -			rq_bio = next_bio;
->   		} while (size > 0);
->   		kref_put(&coll->kref, rbd_coll_release);
-> -
-> -		if (bp)
-> -			bio_pair_release(bp);
->   		spin_lock_irq(q->queue_lock);
->   	}
->   }
+>>
+>>> +        pr_warning("unrecognized header format for image %s\n",
+>>> +            rbd_dev->image_name);
+>>> +    kfree(ondisk);
+>>>
+>>> -out_dh:
+>>> -    kfree(dh);
+>>> -    return rc;
+>>> +    return ret;
+>>>   }
+>>>
+>>>   /*
+>>
 >
 
