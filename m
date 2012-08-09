@@ -1,124 +1,93 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH] ceph: let path portion of mount "device" be optional
-Date: Thu, 09 Aug 2012 13:32:04 -0700
-Message-ID: <50241E44.2010308@inktank.com>
+From: "Nick Couchman" <Nick.Couchman@seakr.com>
+Subject: Re: Errors compiling ceph argonaut
+Date: Thu, 09 Aug 2012 15:04:08 -0600
+Message-ID: <5023D16802000099000E76C3@collaborate.seakr.com>
+References: <501A832A02000099000E6EDB@collaborate.seakr.com>
+ <50216B22.7050209@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:34862 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759625Ab2HIUcG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Aug 2012 16:32:06 -0400
-Received: by pbbrr13 with SMTP id rr13so1444563pbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Aug 2012 13:32:06 -0700 (PDT)
+Received: from mx1.seakr.com ([64.2.143.10]:45771 "EHLO mx1.seakr.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751276Ab2HIVEK convert rfc822-to-8bit (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:1:1>);
+	Thu, 9 Aug 2012 17:04:10 -0400
+Received: from mx-inside.seakr.com ([192.168.100.31])
+	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q79L2xEP022798
+	for <ceph-devel@vger.kernel.org>; Thu, 9 Aug 2012 15:03:00 -0600
+Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
+	by mx-inside.seakr.com (Postfix) with ESMTP id 0975244CDD
+	for <ceph-devel@vger.kernel.org>; Thu,  9 Aug 2012 15:04:09 -0600 (MDT)
+In-Reply-To: <50216B22.7050209@inktank.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-A recent change to /sbin/mountall causes any trailing '/' character
-in the "device" (or fs_spec) field in /etc/fstab to be stripped.  As
-a result, an entry for a ceph mount that intends to mount the root
-of the name space ends up with now path portion, and the ceph mount
-option processing code rejects this.
+> On 08/02/2012 12:39 PM, Nick Couchman wrote:
+>> Running into some errors compiling ceph-0.48 (argonaut) on RHEL5.  It gets 
+> most of the way through the build process and then throws the following:
+>>
+>>    CXX    librbd_la-cls_rbd_client.lo
+>> /usr/include/sys/types.h:46: error: conflicting declaration 'typedef 
+> __loff_t loff_t'
+>> /usr/include/linux/types.h:30: error: 'loff_t' has a previous declaration as 
+> 'typedef __kernel_loff_t loff_t'
+>> /usr/include/sys/types.h:62: error: conflicting declaration 'typedef __dev_t 
+> dev_t'
+>> /usr/include/linux/types.h:13: error: 'dev_t' has a previous declaration as 
+> 'typedef __kernel_dev_t dev_t'
+>> /usr/include/time.h:105: error: conflicting declaration 'typedef void* 
+> timer_t'
+>> /usr/include/linux/types.h:22: error: 'timer_t' has a previous declaration 
+> as 'typedef __kernel_timer_t timer_t'
+>> /usr/include/sys/types.h:198: error: conflicting declaration 'typedef long 
+> int int64_t'
+>> /usr/include/linux/types.h:98: error: 'int64_t' has a previous declaration 
+> as 'typedef __s64 int64_t'
+>> /usr/include/sys/types.h:204: error: conflicting declaration 'typedef long 
+> unsigned int u_int64_t'
+>> /usr/include/linux/types.h:97: error: 'u_int64_t' has a previous declaration 
+> as 'typedef __u64 u_int64_t'
+>> /usr/include/sys/select.h:78: error: conflicting declaration 'typedef struct 
+> fd_set fd_set'
+>> /usr/include/linux/types.h:12: error: 'fd_set' has a previous declaration as 
+> 'typedef struct __kernel_fd_set fd_set'
+>> /usr/include/sys/types.h:248: error: conflicting declaration 'typedef 
+> __blkcnt64_t blkcnt_t'
+>> /usr/include/linux/types.h:114: error: 'blkcnt_t' has a previous declaration 
+> as 'typedef long unsigned int blkcnt_t'
+>> /usr/include/stdint.h:56: error: conflicting declaration 'typedef long 
+> unsigned int uint64_t'
+>> /usr/include/linux/types.h:96: error: 'uint64_t' has a previous declaration 
+> as 'typedef __u64 uint64_t'
+>> make[3]: *** [librbd_la-cls_rbd_client.lo] Error 1
+>> make[3]: *** Waiting for unfinished jobs....
+>> make[3]: Leaving directory `/usr/src/redhat/BUILD/ceph-0.48argonaut.test/src'
+>> make[2]: *** [all-recursive] Error 1
+>> make[2]: Leaving directory `/usr/src/redhat/BUILD/ceph-0.48argonaut.test/src'
+>> make[1]: *** [all] Error 2
+>> make[1]: Leaving directory `/usr/src/redhat/BUILD/ceph-0.48argonaut.test/src'
+>> make: *** [all-recursive] Error 1
+>>
+>> So, looks like a source file is pulling in both sys/types.h and 
+> linux/types.h, and that's causing problems.  From what I can see, most of the 
+> files only pull in one or the other (via some ifdef/elif code blocks), but 
+> evidently one of them does not.  I have not been able to track it down, yet - 
+> is this something anyone else has encountered?  0.44 seemed to work fine, 
+> this seems to be unique to 0.48.
+> 
 
-That is, an entry in /etc/fstab like:
-     cephserver:port:/ /mnt ceph defaults 0 0
-provides to the ceph code just "cephserver:port:" as the "device,"
-and that gets rejected.
+Well, I got it to build, but had to do a couple of things that I'm not sure how they will affect the functionality.  Hopefully someone can tell me if I've misstepped.  Here's what I did:
+- Remove all includes for linux/types.h and just went with sys/types.h.  This fixed the above compile issues.
+- Then ran into a "undefined reference to sync_file_range", which I traced back to the following RHEL5 bug: https://bugzilla.redhat.com/show_bug.cgi?id=518581.  This is marked as CANTFIX, so I used the code mentioned in one of the comments as a work around - I placed it in the FileStore.cc file.
 
-Although this is a bug in /sbin/mountall, we can have the ceph mount
-code support an empty/nonexistent path, interpreting it to mean the
-root of the name space.
+I can send over the full patch if anyone is interested - most of the folks using Ceph are probably building on newer platforms that don't have these issues, but I have a good collection of EL5 systems that I need to keep around that I'd like to run Ceph on, so it's fairly important for me.  I have packages build in the OpenSuSE Build System for CentOS5, SLES11, openSuSE 11.4/12.1/12.2.
 
-RFC 5952 offers recommendations for how to express IPv6 addresses,
-and recommends the usage found in RFC 3986 (which specifies the
-format for URI's) for representing both IPv4 and IPv6 addresses that
-include port numbers.  (See in particular the definition of
-"authority" found in the Appendix of RFC 3986.)
+-Nick
 
-According to those standards, no host specification will ever
-contain a '/' character.  As a result, it is sufficient to scan a
-provided "device" from an /etc/fstab entry for the first '/'
-character, and if it's found, treat that as the beginning of the
-path.  If no '/' character is present, we can treat the entire
-string as the monitor host specification(s), and assume the path
-to be the root of the name space.  We'll still require a ':' to
-separate the host portion from the (possibly empty) path portion.
 
-This means that we can more formally define how ceph will interpret
-the "device" it's provided when processing a mount request:
+--------
 
-     "device" will look like:
-         <server_spec>[,<server_spec>...]:[<path>]
-     where
-         <server_spec> is <ip>[:<port>]
-         <path> is optional, but if present must begin with '/'
-
-This addresses http://tracker.newdream.net/issues/2919
-
-Signed-off-by: Alex Elder <elder@inktank.com>
----
-  fs/ceph/super.c |   37 ++++++++++++++++++++++++++-----------
-  1 file changed, 26 insertions(+), 11 deletions(-)
-
-Index: b/fs/ceph/super.c
-===================================================================
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -307,7 +307,10 @@ static int parse_mount_options(struct ce
-  {
-  	struct ceph_mount_options *fsopt;
-  	const char *dev_name_end;
--	int err = -ENOMEM;
-+	int err;
-+
-+	if (!dev_name || !*dev_name)
-+		return -EINVAL;
-
-  	fsopt = kzalloc(sizeof(*fsopt), GFP_KERNEL);
-  	if (!fsopt)
-@@ -328,21 +331,33 @@ static int parse_mount_options(struct ce
-  	fsopt->max_readdir_bytes = CEPH_MAX_READDIR_BYTES_DEFAULT;
-  	fsopt->congestion_kb = default_congestion_kb();
-
--	/* ip1[:port1][,ip2[:port2]...]:/subdir/in/fs */
-+	/*
-+	 * Distinguish the server list from the path in "dev_name".
-+	 * Internally we do not include the leading '/' in the path.
-+	 *
-+	 * "dev_name" will look like:
-+	 *     <server_spec>[,<server_spec>...]:[<path>]
-+	 * where
-+	 *     <server_spec> is <ip>[:<port>]
-+	 *     <path> is optional, but if present must begin with '/'
-+	 */
-+	dev_name_end = strchr(dev_name, '/');
-+	if (dev_name_end) {
-+		/* skip over leading '/' for path */
-+		*path = dev_name_end + 1;
-+	} else {
-+		/* path is empty */
-+		dev_name_end = dev_name + strlen(dev_name);
-+		*path = dev_name_end;
-+	}
-  	err = -EINVAL;
--	if (!dev_name)
--		goto out;
--	*path = strstr(dev_name, ":/");
--	if (*path == NULL) {
--		pr_err("device name is missing path (no :/ in %s)\n",
-+	dev_name_end--;		/* back up to ':' separator */
-+	if (*dev_name_end != ':') {
-+		pr_err("device name is missing path (no : separator in %s)\n",
-  				dev_name);
-  		goto out;
-  	}
--	dev_name_end = *path;
-  	dout("device name '%.*s'\n", (int)(dev_name_end - dev_name), dev_name);
--
--	/* path on server */
--	*path += 2;
-  	dout("server path '%s'\n", *path);
-
-  	*popt = ceph_parse_options(options, dev_name, dev_name_end,
+This e-mail may contain confidential and privileged material for the sole use of the intended recipient.  If this email is not intended for you, or you are not responsible for the delivery of this message to the intended recipient, please note that this message may contain SEAKR Engineering (SEAKR) Privileged/Proprietary Information.  In such a case, you are strictly prohibited from downloading, photocopying, distributing or otherwise using this message, its contents or attachments in any way.  If you have received this message in error, please notify us immediately by replying to this e-mail and delete the message from your mailbox.  Information contained in this message that does not relate to the business of SEAKR is neither endorsed by nor attributable to SEAKR.
