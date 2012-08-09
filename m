@@ -1,108 +1,125 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Re: Ceph RBD performance - random writes
-Date: Thu, 09 Aug 2012 12:43:03 +1200
-Message-ID: <50230797.8040008@catalyst.net.nz>
-References: <5021F6D1.7000004@catalyst.net.nz> <5022B3F4.5050109@inktank.com> <5022E121.4070004@inktank.com> <5022F7EF.2020007@catalyst.net.nz>
+From: Alex Elder <elder@inktank.com>
+Subject: Re: [PATCH 3.6-rc1] libceph: ensure banner is written on client connect
+ before feature negotiation starts
+Date: Wed, 08 Aug 2012 18:13:29 -0700
+Message-ID: <50230EB9.1070302@inktank.com>
+References: <1344449378-304-1-git-send-email-jaschut@sandia.gov>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:49710 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758675Ab2HIAnH (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 20:43:07 -0400
-In-Reply-To: <5022F7EF.2020007@catalyst.net.nz>
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:38887 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751970Ab2HIBNd (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Aug 2012 21:13:33 -0400
+Received: by ghrr11 with SMTP id r11so1492244ghr.19
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Aug 2012 18:13:33 -0700 (PDT)
+In-Reply-To: <1344449378-304-1-git-send-email-jaschut@sandia.gov>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
+To: Jim Schutt <jaschut@sandia.gov>
+Cc: ceph-devel@vger.kernel.org
 
-On 09/08/12 11:36, Mark Kirkwood wrote:
-> On 09/08/12 09:58, Mark Nelson wrote:
->>
->> For what it's worth, with mostly default settings I was seeing about 
->> 8MB/s to dell branded samsung SSDs with 4k IOs using rados bench.  
->> That was with 256 concurrent client requests.  This is definitely 
->> something we are working hard on tracking down.
->>
+On 08/08/2012 11:09 AM, Jim Schutt wrote:
+> Because the Ceph client messenger uses a non-blocking connect, it is possible
+> for the sending of the client banner to race with the arrival of the banner
+> sent by the peer.
+
+This is possible because the server-side messenger immediately sends
+its banner and addresses after accepting a connect request, *before*
+actually attempting to read or verify the banner from the client.
+
+> When ceph_sock_state_change() notices the connect has completed, it schedules
+> work to process the socket via con_work().  During this time the peer is
+> writing its banner, and arrival of the peer banner races with con_work().
 >
-> Right (FWIW I think the Dells are actually Toshiba devices - and are 
-> pretty good). This is what I get doing the rados bench for 1M and 4K 
-> blocks:
+> If con_work() calls try_read() before the peer banner arrives, there is
+> nothing for it to do, after which con_work() calls try_write() to send the
+> client's banner.  In this case Ceph's protocol negotiation can complete
+> succesfully.
 >
+> If, however, the peer's banner arrives before con_work() calls try_read(),
+> then try_read() will read the banner and prepare protocol negotiation info via
+> prepare_write_connect().  prepare_write_connect() calls con_out_kvec_reset(),
+> which discards the as-yet-unsent client banner.  Next, con_work() calls
+> try_write(), which sends the protocol negotiation info rather than the banner
+> that the peer is expecting.
+
+I believe your analysis is correct.  And I think your solution sounds
+good as well.  I think Sage was going to take a look at this also, and
+I'll wait for him to have a chance to comment.  But in any case, your
+fix looks good.  Nice job.
+
+Reviewed-by: Alex Elder <elder@inktank.com>
+
+> The result is that the peer sees an invalid banner, and the client reports
+> "negotiation failed".
 >
-
-Sorry Josh - I completely missed the word "Samsung" in your 
-post...(we've been testing some Dell branded SSD for another project and 
-it was like giving blood to get the actual brand and model out of them)...
-
+> Fix this by moving con_out_kvec_reset() out of prepare_write_connect() to its
+> callers at all locations except the one where the banner might still need to
+> be sent.
 >
-> $ rados bench -b 1048576 -t 256 -p rbd 100  write
-> Total writes made:      3879
-> Write size:             1048576
-> Bandwidth (MB/sec):     38.414
+> Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+> ---
+>   net/ceph/messenger.c |   11 +++++++++--
+>   1 files changed, 9 insertions(+), 2 deletions(-)
 >
-> Stddev Bandwidth:       40.157
-> Max bandwidth (MB/sec): 174
-> Min bandwidth (MB/sec): 0
-> Average Latency:        6.57279
-> Stddev Latency:         6.20373
-> Max latency:            28.531
-> Min latency:            0.435691
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index b979675..24c5eea 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -915,7 +915,6 @@ static int prepare_write_connect(struct ceph_connection *con)
+>   	con->out_connect.authorizer_len = auth ?
+>   		cpu_to_le32(auth->authorizer_buf_len) : 0;
 >
+> -	con_out_kvec_reset(con);
+>   	con_out_kvec_add(con, sizeof (con->out_connect),
+>   					&con->out_connect);
+>   	if (auth && auth->authorizer_buf_len)
+> @@ -1557,6 +1556,7 @@ static int process_connect(struct ceph_connection *con)
+>   			return -1;
+>   		}
+>   		con->auth_retry = 1;
+> +		con_out_kvec_reset(con);
+>   		ret = prepare_write_connect(con);
+>   		if (ret < 0)
+>   			return ret;
+> @@ -1577,6 +1577,7 @@ static int process_connect(struct ceph_connection *con)
+>   		       ENTITY_NAME(con->peer_name),
+>   		       ceph_pr_addr(&con->peer_addr.in_addr));
+>   		reset_connection(con);
+> +		con_out_kvec_reset(con);
+>   		ret = prepare_write_connect(con);
+>   		if (ret < 0)
+>   			return ret;
+> @@ -1601,6 +1602,7 @@ static int process_connect(struct ceph_connection *con)
+>   		     le32_to_cpu(con->out_connect.connect_seq),
+>   		     le32_to_cpu(con->in_reply.connect_seq));
+>   		con->connect_seq = le32_to_cpu(con->in_reply.connect_seq);
+> +		con_out_kvec_reset(con);
+>   		ret = prepare_write_connect(con);
+>   		if (ret < 0)
+>   			return ret;
+> @@ -1617,6 +1619,7 @@ static int process_connect(struct ceph_connection *con)
+>   		     le32_to_cpu(con->in_reply.global_seq));
+>   		get_global_seq(con->msgr,
+>   			       le32_to_cpu(con->in_reply.global_seq));
+> +		con_out_kvec_reset(con);
+>   		ret = prepare_write_connect(con);
+>   		if (ret < 0)
+>   			return ret;
+> @@ -2135,7 +2138,11 @@ more:
+>   		BUG_ON(con->state != CON_STATE_CONNECTING);
+>   		con->state = CON_STATE_NEGOTIATING;
 >
-> $ rados bench -b 4096 -t 256 -p rbd 100  write
-> Total writes made:      4851
-> Write size:             4096
-> Bandwidth (MB/sec):     0.179
+> -		/* Banner is good, exchange connection info */
+> +		/*
+> +		 * Received banner is good, exchange connection info.
+> +		 * Do not reset out_kvec, as sending our banner raced
+> +		 * with receiving peer banner after connect completed.
+> +		 */
+>   		ret = prepare_write_connect(con);
+>   		if (ret < 0)
+>   			goto out;
 >
-> Stddev Bandwidth:       0.378904
-> Max bandwidth (MB/sec): 3.22266
-> Min bandwidth (MB/sec): 0
-> Average Latency:        5.60013
-> Stddev Latency:         8.18634
-> Max latency:            22.6542
-> Min latency:            0.020016
->
->
-
-I tried out a raft of xfs config changes and also made the Ceph journal 
-really big (10G):
-
-$ mkfs.xfs -f -l internal,size=1024m -d agcount=4 /dev/sd[b,c]2
-
-+ mount options with nobarrier,logbufs=8
-
-The results improved a little, but still very slow for small request 
-sizes...
-
-
-$ rados bench -b 1048576 -t 256 -p rbd 100  write
-Total writes made:      5165
-Write size:             1048576
-Bandwidth (MB/sec):     50.646
-
-Stddev Bandwidth:       18.8124
-Max bandwidth (MB/sec): 205
-Min bandwidth (MB/sec): 0
-Average Latency:        4.93633
-Stddev Latency:         0.549063
-Max latency:            5.58999
-Min latency:            1.90631
-
-
-$ rados bench -b 4096 -t 256 -p rbd 100  write
-Write size:             4096
-Bandwidth (MB/sec):     0.316
-
-Stddev Bandwidth:       0.874144
-Max bandwidth (MB/sec): 3.96484
-Min bandwidth (MB/sec): 0
-Average Latency:        3.16257
-Stddev Latency:         11.9167
-Max latency:            58.1325
-Min latency:            0.017823
-
-
-
 
