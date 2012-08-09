@@ -1,65 +1,84 @@
-From: Matthew Richardson <m.richardson@ed.ac.uk>
-Subject: Re: Ceph RBD performance - random writes
-Date: Thu, 09 Aug 2012 15:48:50 +0100
-Message-ID: <5023CDD2.6040307@ed.ac.uk>
-References: <5021F6D1.7000004@catalyst.net.nz>
+From: "Nick Couchman" <Nick.Couchman@seakr.com>
+Subject: Re: Errors compiling ceph argonaut
+Date: Thu, 09 Aug 2012 09:26:25 -0600
+Message-ID: <5023824102000099000E75C5@collaborate.seakr.com>
+References: <501A832A02000099000E6EDB@collaborate.seakr.com>
+ <50216B22.7050209@inktank.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig804B3C354ABDCFB3B2491CB0"
+Content-Type: text/plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nougat.ucs.ed.ac.uk ([129.215.13.205]:38523 "EHLO
-	nougat.ucs.ed.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751293Ab2HIPYL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Aug 2012 11:24:11 -0400
-Received: from lmtp1.ucs.ed.ac.uk (lmtp1.ucs.ed.ac.uk [129.215.149.64])
-	by nougat.ucs.ed.ac.uk (8.13.8/8.13.4) with ESMTP id q79EmoXT024903
-	for <ceph-devel@vger.kernel.org>; Thu, 9 Aug 2012 15:48:52 +0100 (BST)
-Received: from [129.215.183.3] (pcw3047.see.ed.ac.uk [129.215.183.3])
-	(authenticated user=mrichar1 mech=PLAIN bits=0)
-	by lmtp1.ucs.ed.ac.uk (8.13.8/8.13.7) with ESMTP id q79Emo8B028301
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Thu, 9 Aug 2012 15:48:50 +0100 (BST)
-In-Reply-To: <5021F6D1.7000004@catalyst.net.nz>
+Received: from mx1.seakr.com ([64.2.143.10]:41960 "EHLO mx1.seakr.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758411Ab2HIP02 (ORCPT
+	<rfc822;groupwise-ceph-devel@vger.kernel.org:2:1>);
+	Thu, 9 Aug 2012 11:26:28 -0400
+Received: from mx-inside.seakr.com ([192.168.100.31])
+	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q79FPIvb015683
+	for <ceph-devel@vger.kernel.org>; Thu, 9 Aug 2012 09:25:19 -0600
+Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
+	by mx-inside.seakr.com (Postfix) with ESMTP id 7AC6644CE5
+	for <ceph-devel@vger.kernel.org>; Thu,  9 Aug 2012 09:26:26 -0600 (MDT)
+In-Reply-To: <50216B22.7050209@inktank.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig804B3C354ABDCFB3B2491CB0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-On 08/08/12 06:19, Mark Kirkwood wrote:
-> I've been looking at using Ceph RBD as a block store for database use.
-> As part of this I'm looking a how (particularly random) IO of smallish
-> (4K, 8K) block sizes performs.
-
-It may or may not be related, but have a look at the message thread here:=
-
-
-http://www.mail-archive.com/ceph-devel@vger.kernel.org/msg07678.html
-
-It looks like there might be a specific bug relating to random writes.
-
-Matthew
-
---=20
-The University of Edinburgh is a charitable body, registered in
-Scotland, with registration number SC005336.
-
-
---------------enig804B3C354ABDCFB3B2491CB0
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAlAjzdIACgkQRWpi1WYCQdKpkwCfXlskKRT0wqZw1ClBoC5m2wZ2
-wm0AoJm6/pCsJ89OKNVm2MLDWVTdyUOL
-=h8Z4
------END PGP SIGNATURE-----
-
---------------enig804B3C354ABDCFB3B2491CB0--
+Pj4+IE9uIDIwMTIvMDgvMDcgYXQgMTM6MjMsIEpvc2ggRHVyZ2luIDxqb3NoLmR1cmdpbkBpbmt0
+YW5rLmNvbT4gd3JvdGU6Cgo+IAo+IEl0IGxvb2tzIGxpa2UgdGhpcyBtaWdodCBiZSBzcmMvaW5j
+bHVkZS90eXBlcy5oIGluY2x1ZGluZyBzeXMvdHlwZXMuaAoKPiBhbmQgc3JjL2luY2x1ZGUvcmJk
+X3R5cGVzLmgsIHdoaWNoIGlzIGluY2x1ZGluZyBsaW51eC90eXBlcy5oLgo+IAo+IERvZXMgYWRk
+aW5nIGlmZGVmcyB0byBzcmMvaW5jbHVkZS90eXBlcy5oIHNvIGl0IGluY2x1ZGVzCmxpbnV4L3R5
+cGVzLmggCj4gb24gbGludXggd29yaz8KPiAKCkhlcmUncyB3aGF0IEkgcHV0IGluIHNyYy9pbmNs
+dWRlL3R5cGVzLmg6CgojaWYgZGVmaW5lZChfX2xpbnV4X18pCiNpbmNsdWRlIDxsaW51eC90eXBl
+cy5oPgojZWxpZiBkZWZpbmVkKF9fRnJlZUJTRF9fKQojaW5jbHVkZSA8c3lzL3R5cGVzLmg+CiNl
+bmRpZgoKKHRoaXMgaXMgY29waWVkIGZyb20gb3RoZXIgaW5jbHVkZSBmaWxlcyBpbiB0aGUgY2Vw
+aCB0cmVlKS4KCgpUaGlzIGFjdHVhbGx5IGNhdXNlcyB0aGUgY29tcGlsZSB0byBmYWlsIGVhcmxp
+ZXIsIG9uCmxpYnJnd19hLWxpYnJndy5vOgoKbWFrZVszXTogRW50ZXJpbmcgZGlyZWN0b3J5IGAv
+cm9vdC9jZXBoLTAuNDhhcmdvbmF1dC9zcmMnCiAgQ1hYICAgIGxpYnJnd19hLWxpYnJndy5vCi91
+c3IvaW5jbHVkZS9zdGRpbnQuaDo0MTogZXJyb3I6IGNvbmZsaWN0aW5nIGRlY2xhcmF0aW9uICp0
+eXBlZGVmCmxvbmcgaW50IGludDY0X3QqCi91c3IvaW5jbHVkZS9saW51eC90eXBlcy5oOjk4OiBl
+cnJvcjogKmludDY0X3QqIGhhcyBhIHByZXZpb3VzCmRlY2xhcmF0aW9uIGFzICp0eXBlZGVmIF9f
+czY0IGludDY0X3QqCi91c3IvaW5jbHVkZS9zdGRpbnQuaDo1NjogZXJyb3I6IGNvbmZsaWN0aW5n
+IGRlY2xhcmF0aW9uICp0eXBlZGVmCmxvbmcgdW5zaWduZWQgaW50IHVpbnQ2NF90KgovdXNyL2lu
+Y2x1ZGUvbGludXgvdHlwZXMuaDo5NjogZXJyb3I6ICp1aW50NjRfdCogaGFzIGEgcHJldmlvdXMK
+ZGVjbGFyYXRpb24gYXMgKnR5cGVkZWYgX191NjQgdWludDY0X3QqCi91c3IvaW5jbHVkZS9zeXMv
+dHlwZXMuaDo0NjogZXJyb3I6IGNvbmZsaWN0aW5nIGRlY2xhcmF0aW9uICp0eXBlZGVmCl9fbG9m
+Zl90IGxvZmZfdCoKL3Vzci9pbmNsdWRlL2xpbnV4L3R5cGVzLmg6MzA6IGVycm9yOiAqbG9mZl90
+KiBoYXMgYSBwcmV2aW91cwpkZWNsYXJhdGlvbiBhcyAqdHlwZWRlZiBfX2tlcm5lbF9sb2ZmX3Qg
+bG9mZl90KgovdXNyL2luY2x1ZGUvc3lzL3R5cGVzLmg6NjI6IGVycm9yOiBjb25mbGljdGluZyBk
+ZWNsYXJhdGlvbiAqdHlwZWRlZgpfX2Rldl90IGRldl90KgovdXNyL2luY2x1ZGUvbGludXgvdHlw
+ZXMuaDoxMzogZXJyb3I6ICpkZXZfdCogaGFzIGEgcHJldmlvdXMKZGVjbGFyYXRpb24gYXMgKnR5
+cGVkZWYgX19rZXJuZWxfZGV2X3QgZGV2X3QqCi91c3IvaW5jbHVkZS90aW1lLmg6MTA1OiBlcnJv
+cjogY29uZmxpY3RpbmcgZGVjbGFyYXRpb24gKnR5cGVkZWYKdm9pZCogdGltZXJfdCoKL3Vzci9p
+bmNsdWRlL2xpbnV4L3R5cGVzLmg6MjI6IGVycm9yOiAqdGltZXJfdCogaGFzIGEgcHJldmlvdXMK
+ZGVjbGFyYXRpb24gYXMgKnR5cGVkZWYgX19rZXJuZWxfdGltZXJfdCB0aW1lcl90KgovdXNyL2lu
+Y2x1ZGUvc3lzL3R5cGVzLmg6MjA0OiBlcnJvcjogY29uZmxpY3RpbmcgZGVjbGFyYXRpb24gKnR5
+cGVkZWYKbG9uZyB1bnNpZ25lZCBpbnQgdV9pbnQ2NF90KgovdXNyL2luY2x1ZGUvbGludXgvdHlw
+ZXMuaDo5NzogZXJyb3I6ICp1X2ludDY0X3QqIGhhcyBhIHByZXZpb3VzCmRlY2xhcmF0aW9uIGFz
+ICp0eXBlZGVmIF9fdTY0IHVfaW50NjRfdCoKL3Vzci9pbmNsdWRlL3N5cy9zZWxlY3QuaDo3ODog
+ZXJyb3I6IGNvbmZsaWN0aW5nIGRlY2xhcmF0aW9uICp0eXBlZGVmCnN0cnVjdCBmZF9zZXQgZmRf
+c2V0KgovdXNyL2luY2x1ZGUvbGludXgvdHlwZXMuaDoxMjogZXJyb3I6ICpmZF9zZXQqIGhhcyBh
+IHByZXZpb3VzCmRlY2xhcmF0aW9uIGFzICp0eXBlZGVmIHN0cnVjdCBfX2tlcm5lbF9mZF9zZXQg
+ZmRfc2V0KgovdXNyL2luY2x1ZGUvc3lzL3R5cGVzLmg6MjQ4OiBlcnJvcjogY29uZmxpY3Rpbmcg
+ZGVjbGFyYXRpb24gKnR5cGVkZWYKX19ibGtjbnQ2NF90IGJsa2NudF90KgovdXNyL2luY2x1ZGUv
+bGludXgvdHlwZXMuaDoxMTQ6IGVycm9yOiAqYmxrY250X3QqIGhhcyBhIHByZXZpb3VzCmRlY2xh
+cmF0aW9uIGFzICp0eXBlZGVmIGxvbmcgdW5zaWduZWQgaW50IGJsa2NudF90KgptYWtlWzNdOiAq
+KiogW2xpYnJnd19hLWxpYnJndy5vXSBFcnJvciAxCgotTmljawoKCi0tLS0tLS0tDQpUaGlzIGUt
+bWFpbCBtYXkgY29udGFpbiBjb25maWRlbnRpYWwgYW5kIHByaXZpbGVnZWQgbWF0ZXJpYWwgZm9y
+IHRoZSBzb2xlIHVzZSBvZiB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LiAgSWYgdGhpcyBlbWFpbCBp
+cyBub3QgaW50ZW5kZWQgZm9yIHlvdSwgb3IgeW91IGFyZSBub3QgcmVzcG9uc2libGUgZm9yIHRo
+ZSBkZWxpdmVyeSBvZiB0aGlzIG1lc3NhZ2UgdG8gdGhlIGludGVuZGVkIHJlY2lwaWVudCwgcGxl
+YXNlIG5vdGUgdGhhdCB0aGlzIG1lc3NhZ2UgbWF5IGNvbnRhaW4gU0VBS1IgRW5naW5lZXJpbmcg
+KFNFQUtSKSBQcml2aWxlZ2VkL1Byb3ByaWV0YXJ5IEluZm9ybWF0aW9uLiAgSW4gc3VjaCBhIGNh
+c2UsIHlvdSBhcmUgc3RyaWN0bHkgcHJvaGliaXRlZCBmcm9tIGRvd25sb2FkaW5nLCBwaG90b2Nv
+cHlpbmcsIGRpc3RyaWJ1dGluZyBvciBvdGhlcndpc2UgdXNpbmcgdGhpcyBtZXNzYWdlLCBpdHMg
+Y29udGVudHMgb3IgYXR0YWNobWVudHMgaW4gYW55IHdheS4gIElmIHlvdSBoYXZlIHJlY2VpdmVk
+IHRoaXMgbWVzc2FnZSBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB1cyBpbW1lZGlhdGVseSBieSBy
+ZXBseWluZyB0byB0aGlzIGUtbWFpbCBhbmQgZGVsZXRlIHRoZSBtZXNzYWdlIGZyb20geW91ciBt
+YWlsYm94LiAgSW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgbWVzc2FnZSB0aGF0IGRvZXMg
+bm90IHJlbGF0ZSB0byB0aGUgYnVzaW5lc3Mgb2YgU0VBS1IgaXMgbmVpdGhlciBlbmRvcnNlZCBi
+eSBub3IgYXR0cmlidXRhYmxlIHRvIFNFQUtSLgo=
