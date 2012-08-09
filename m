@@ -1,69 +1,45 @@
-From: Danny Kukawka <danny.kukawka@bisect.de>
-Subject: Re: [PATCH] make mkcephfs and init-ceph osd filesystem handling more
- flexible
-Date: Thu, 09 Aug 2012 19:03:18 +0200
-Message-ID: <5023ED56.9070102@bisect.de>
-References: <1344526971-17035-1-git-send-email-danny.kukawka@bisect.de> <CADvuQRGLUpPT=RxYqptGq+9Ku2dNiKLsdY8a=KjjfoquucBc7w@mail.gmail.com> <5023E96E.30209@sandia.gov> <CADvuQRG9DrG6irjuD8ZZcAz_grgS=9i6M6GDV0-gYWfAyje4uw@mail.gmail.com>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: Puppet modules for Ceph
+Date: Thu, 9 Aug 2012 10:04:56 -0700
+Message-ID: <CADvuQRGOkwH2enFdJa_haobpVursD3Li_ZfCVyJsvmjH8y48Gw@mail.gmail.com>
+References: <20120718135854.GI15546@potjevlesh.enovance.com>
+ <CADvuQRG5jot8yhmWWk8cNFUF7BkoHKbyL6fCVVF6GMu_DpPy7g@mail.gmail.com>
+ <CAKsDvb0Eq0amkEq=+9RrKcBv4RJ0PFwUGpzDpV8CzBHLQpMHtg@mail.gmail.com>
+ <CADvuQRHt9ViPdD7B0==X-3kh-PT_NkX7+GNa9WZUb9zDSYTs0A@mail.gmail.com>
+ <CAKsDvb2d63hDTq0LvmGL0z+yr09cNSr3ythWiqg6WVmzjxy8BA@mail.gmail.com>
+ <CADvuQRFcBKwjmai+W1VArbv29GHm0CBgh2PKiy5tSN6X=GDjMQ@mail.gmail.com>
+ <5391f2cc-e01f-4cf4-b6cb-b4479bd15df0@puppetlabs.com> <CADvuQRFZB6hR_KNg1rp8rCXX4BUoQmjN58rBS7sCheLmO=7hWg@mail.gmail.com>
+ <alpine.DEB.2.00.1207311150140.3171@cobra.newdream.net> <CADvuQREVc0gqheYSo89m7cpsdCg02EFkxFJ5LvcMrVLwBMsO7Q@mail.gmail.com>
+ <20120807135144.GA10072@csail.mit.edu>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig6006CA25125F32CF82A6A904"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:44935 "EHLO
-	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751396Ab2HIRD2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Aug 2012 13:03:28 -0400
-In-Reply-To: <CADvuQRG9DrG6irjuD8ZZcAz_grgS=9i6M6GDV0-gYWfAyje4uw@mail.gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:47160 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751723Ab2HIRFT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Aug 2012 13:05:19 -0400
+Received: by vbbff1 with SMTP id ff1so175713vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Aug 2012 10:05:17 -0700 (PDT)
+In-Reply-To: <20120807135144.GA10072@csail.mit.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Tommi Virtanen <tv@inktank.com>, Jim Schutt <jaschut@sandia.gov>
+To: "Jonathan D. Proulx" <jon@csail.mit.edu>
+Cc: Sage Weil <sage@inktank.com>, loic.dachary@enovance.com, puppet-openstack@puppetlabs.com, Teyo Tyree <teyo@puppetlabs.com>, =?UTF-8?Q?Fran=C3=A7ois_Charlier?= <francois.charlier@enovance.com>, puppet-users@googlgroups.com, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig6006CA25125F32CF82A6A904
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On Tue, Aug 7, 2012 at 6:51 AM, Jonathan D. Proulx <jon@csail.mit.edu> wrote:
+> :Juju seems to provide a real-time notification mechanism between
+> :peers, using it's <name>-relation-changed hook. Other CM frameworks
+> :may need to step up their game, or be subject to the "keep re-running
+> :chef-client until it works" limitation.
+>
+> Have you lloked at "puppet kick"
+>
+> puppet-kick(8) -- Remotely control puppet agent
 
-Am 09.08.2012 18:53, schrieb Tommi Virtanen:
-> On Thu, Aug 9, 2012 at 9:46 AM, Jim Schutt <jaschut@sandia.gov> wrote:
->> I'm embarrassed to admit I haven't been keeping up with this,
->> but I seem to recall that early versions didn't handle a
->> journal on a partition.  Did I get that wrong, or maybe that
->> capability exists now?  In the past I've found it to have a
->> small performance benefit, and would hate to lose it.
->=20
-> It's still not quite ready for prime time. Journal placement was cut
-> out to allow us to focus on the distributed aspects of it first; those
-> are now working pretty well. Putting much effort on the alternative is
-> probably not a good bet.
->=20
-> This ticket needs to get fixed (and defined better, first!) to have
-> more flexibility with journals:
-> http://tracker.newdream.net/issues/2398
+I haven't really used puppet, but that doesn't look like it's peer to
+peer, the manpage talks about reading the "master's" config file. I
+may be wrong in that.
 
-So you mean chef?! Will there be an alternative to simply setup a
-cluster from console?
-
-We (SUSE) are already working on an own chef ceph cookbook. But from
-what I've seen till now it's really hard and more laborious to initially
-setup a cluster with chef than with mkcephfs.
-
-Danny
-
-
---------------enig6006CA25125F32CF82A6A904
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-
-iJwEAQECAAYFAlAj7VsACgkQ9DHLX79LmTI0owP/VDX7K+/d8kF/GQlMT9bHzADT
-ponqOPF4rEH7He51VaI7nuW5v6aJg5qG8OgPcwHXgrIifdeDJZCTOtyqpipsUtbM
-7lrq6RDkLZPsYi7sPakq1AFehEHmwkwrh1U50RaiGUunlUviU9H597Bmo34lR/iM
-Hk4kU4XEvswgGDlRRFM=
-=zFkG
------END PGP SIGNATURE-----
-
---------------enig6006CA25125F32CF82A6A904--
+The other nice thing Juju is let you transfer data between the peers
+in a relationship -- e.g. we could transport the crypto secret to a
+new OSD that way.
