@@ -1,84 +1,96 @@
-From: "Nick Couchman" <Nick.Couchman@seakr.com>
-Subject: Re: Errors compiling ceph argonaut
-Date: Thu, 09 Aug 2012 09:26:25 -0600
-Message-ID: <5023824102000099000E75C5@collaborate.seakr.com>
-References: <501A832A02000099000E6EDB@collaborate.seakr.com>
- <50216B22.7050209@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: accident corruption in osdmap
+Date: Thu, 9 Aug 2012 08:53:59 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208090852010.27600@cobra.newdream.net>
+References: <60E83269D669544E8069A09CB69135EA01C298@GDC-CLDMBX-P02.whq.wistron>
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.seakr.com ([64.2.143.10]:41960 "EHLO mx1.seakr.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758411Ab2HIP02 (ORCPT
-	<rfc822;groupwise-ceph-devel@vger.kernel.org:2:1>);
-	Thu, 9 Aug 2012 11:26:28 -0400
-Received: from mx-inside.seakr.com ([192.168.100.31])
-	by mx1.seakr.com (8.13.8/8.13.8) with ESMTP id q79FPIvb015683
-	for <ceph-devel@vger.kernel.org>; Thu, 9 Aug 2012 09:25:19 -0600
-Received: from collaborate.seakr.com (collaborate.seakr.com [192.168.100.28])
-	by mx-inside.seakr.com (Postfix) with ESMTP id 7AC6644CE5
-	for <ceph-devel@vger.kernel.org>; Thu,  9 Aug 2012 09:26:26 -0600 (MDT)
-In-Reply-To: <50216B22.7050209@inktank.com>
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:53375 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031231Ab2HIPyA (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Aug 2012 11:54:00 -0400
+In-Reply-To: <60E83269D669544E8069A09CB69135EA01C298@GDC-CLDMBX-P02.whq.wistron>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
+To: Eric_YH_Chen@wiwynn.com
 Cc: ceph-devel@vger.kernel.org
 
-Pj4+IE9uIDIwMTIvMDgvMDcgYXQgMTM6MjMsIEpvc2ggRHVyZ2luIDxqb3NoLmR1cmdpbkBpbmt0
-YW5rLmNvbT4gd3JvdGU6Cgo+IAo+IEl0IGxvb2tzIGxpa2UgdGhpcyBtaWdodCBiZSBzcmMvaW5j
-bHVkZS90eXBlcy5oIGluY2x1ZGluZyBzeXMvdHlwZXMuaAoKPiBhbmQgc3JjL2luY2x1ZGUvcmJk
-X3R5cGVzLmgsIHdoaWNoIGlzIGluY2x1ZGluZyBsaW51eC90eXBlcy5oLgo+IAo+IERvZXMgYWRk
-aW5nIGlmZGVmcyB0byBzcmMvaW5jbHVkZS90eXBlcy5oIHNvIGl0IGluY2x1ZGVzCmxpbnV4L3R5
-cGVzLmggCj4gb24gbGludXggd29yaz8KPiAKCkhlcmUncyB3aGF0IEkgcHV0IGluIHNyYy9pbmNs
-dWRlL3R5cGVzLmg6CgojaWYgZGVmaW5lZChfX2xpbnV4X18pCiNpbmNsdWRlIDxsaW51eC90eXBl
-cy5oPgojZWxpZiBkZWZpbmVkKF9fRnJlZUJTRF9fKQojaW5jbHVkZSA8c3lzL3R5cGVzLmg+CiNl
-bmRpZgoKKHRoaXMgaXMgY29waWVkIGZyb20gb3RoZXIgaW5jbHVkZSBmaWxlcyBpbiB0aGUgY2Vw
-aCB0cmVlKS4KCgpUaGlzIGFjdHVhbGx5IGNhdXNlcyB0aGUgY29tcGlsZSB0byBmYWlsIGVhcmxp
-ZXIsIG9uCmxpYnJnd19hLWxpYnJndy5vOgoKbWFrZVszXTogRW50ZXJpbmcgZGlyZWN0b3J5IGAv
-cm9vdC9jZXBoLTAuNDhhcmdvbmF1dC9zcmMnCiAgQ1hYICAgIGxpYnJnd19hLWxpYnJndy5vCi91
-c3IvaW5jbHVkZS9zdGRpbnQuaDo0MTogZXJyb3I6IGNvbmZsaWN0aW5nIGRlY2xhcmF0aW9uICp0
-eXBlZGVmCmxvbmcgaW50IGludDY0X3QqCi91c3IvaW5jbHVkZS9saW51eC90eXBlcy5oOjk4OiBl
-cnJvcjogKmludDY0X3QqIGhhcyBhIHByZXZpb3VzCmRlY2xhcmF0aW9uIGFzICp0eXBlZGVmIF9f
-czY0IGludDY0X3QqCi91c3IvaW5jbHVkZS9zdGRpbnQuaDo1NjogZXJyb3I6IGNvbmZsaWN0aW5n
-IGRlY2xhcmF0aW9uICp0eXBlZGVmCmxvbmcgdW5zaWduZWQgaW50IHVpbnQ2NF90KgovdXNyL2lu
-Y2x1ZGUvbGludXgvdHlwZXMuaDo5NjogZXJyb3I6ICp1aW50NjRfdCogaGFzIGEgcHJldmlvdXMK
-ZGVjbGFyYXRpb24gYXMgKnR5cGVkZWYgX191NjQgdWludDY0X3QqCi91c3IvaW5jbHVkZS9zeXMv
-dHlwZXMuaDo0NjogZXJyb3I6IGNvbmZsaWN0aW5nIGRlY2xhcmF0aW9uICp0eXBlZGVmCl9fbG9m
-Zl90IGxvZmZfdCoKL3Vzci9pbmNsdWRlL2xpbnV4L3R5cGVzLmg6MzA6IGVycm9yOiAqbG9mZl90
-KiBoYXMgYSBwcmV2aW91cwpkZWNsYXJhdGlvbiBhcyAqdHlwZWRlZiBfX2tlcm5lbF9sb2ZmX3Qg
-bG9mZl90KgovdXNyL2luY2x1ZGUvc3lzL3R5cGVzLmg6NjI6IGVycm9yOiBjb25mbGljdGluZyBk
-ZWNsYXJhdGlvbiAqdHlwZWRlZgpfX2Rldl90IGRldl90KgovdXNyL2luY2x1ZGUvbGludXgvdHlw
-ZXMuaDoxMzogZXJyb3I6ICpkZXZfdCogaGFzIGEgcHJldmlvdXMKZGVjbGFyYXRpb24gYXMgKnR5
-cGVkZWYgX19rZXJuZWxfZGV2X3QgZGV2X3QqCi91c3IvaW5jbHVkZS90aW1lLmg6MTA1OiBlcnJv
-cjogY29uZmxpY3RpbmcgZGVjbGFyYXRpb24gKnR5cGVkZWYKdm9pZCogdGltZXJfdCoKL3Vzci9p
-bmNsdWRlL2xpbnV4L3R5cGVzLmg6MjI6IGVycm9yOiAqdGltZXJfdCogaGFzIGEgcHJldmlvdXMK
-ZGVjbGFyYXRpb24gYXMgKnR5cGVkZWYgX19rZXJuZWxfdGltZXJfdCB0aW1lcl90KgovdXNyL2lu
-Y2x1ZGUvc3lzL3R5cGVzLmg6MjA0OiBlcnJvcjogY29uZmxpY3RpbmcgZGVjbGFyYXRpb24gKnR5
-cGVkZWYKbG9uZyB1bnNpZ25lZCBpbnQgdV9pbnQ2NF90KgovdXNyL2luY2x1ZGUvbGludXgvdHlw
-ZXMuaDo5NzogZXJyb3I6ICp1X2ludDY0X3QqIGhhcyBhIHByZXZpb3VzCmRlY2xhcmF0aW9uIGFz
-ICp0eXBlZGVmIF9fdTY0IHVfaW50NjRfdCoKL3Vzci9pbmNsdWRlL3N5cy9zZWxlY3QuaDo3ODog
-ZXJyb3I6IGNvbmZsaWN0aW5nIGRlY2xhcmF0aW9uICp0eXBlZGVmCnN0cnVjdCBmZF9zZXQgZmRf
-c2V0KgovdXNyL2luY2x1ZGUvbGludXgvdHlwZXMuaDoxMjogZXJyb3I6ICpmZF9zZXQqIGhhcyBh
-IHByZXZpb3VzCmRlY2xhcmF0aW9uIGFzICp0eXBlZGVmIHN0cnVjdCBfX2tlcm5lbF9mZF9zZXQg
-ZmRfc2V0KgovdXNyL2luY2x1ZGUvc3lzL3R5cGVzLmg6MjQ4OiBlcnJvcjogY29uZmxpY3Rpbmcg
-ZGVjbGFyYXRpb24gKnR5cGVkZWYKX19ibGtjbnQ2NF90IGJsa2NudF90KgovdXNyL2luY2x1ZGUv
-bGludXgvdHlwZXMuaDoxMTQ6IGVycm9yOiAqYmxrY250X3QqIGhhcyBhIHByZXZpb3VzCmRlY2xh
-cmF0aW9uIGFzICp0eXBlZGVmIGxvbmcgdW5zaWduZWQgaW50IGJsa2NudF90KgptYWtlWzNdOiAq
-KiogW2xpYnJnd19hLWxpYnJndy5vXSBFcnJvciAxCgotTmljawoKCi0tLS0tLS0tDQpUaGlzIGUt
-bWFpbCBtYXkgY29udGFpbiBjb25maWRlbnRpYWwgYW5kIHByaXZpbGVnZWQgbWF0ZXJpYWwgZm9y
-IHRoZSBzb2xlIHVzZSBvZiB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LiAgSWYgdGhpcyBlbWFpbCBp
-cyBub3QgaW50ZW5kZWQgZm9yIHlvdSwgb3IgeW91IGFyZSBub3QgcmVzcG9uc2libGUgZm9yIHRo
-ZSBkZWxpdmVyeSBvZiB0aGlzIG1lc3NhZ2UgdG8gdGhlIGludGVuZGVkIHJlY2lwaWVudCwgcGxl
-YXNlIG5vdGUgdGhhdCB0aGlzIG1lc3NhZ2UgbWF5IGNvbnRhaW4gU0VBS1IgRW5naW5lZXJpbmcg
-KFNFQUtSKSBQcml2aWxlZ2VkL1Byb3ByaWV0YXJ5IEluZm9ybWF0aW9uLiAgSW4gc3VjaCBhIGNh
-c2UsIHlvdSBhcmUgc3RyaWN0bHkgcHJvaGliaXRlZCBmcm9tIGRvd25sb2FkaW5nLCBwaG90b2Nv
-cHlpbmcsIGRpc3RyaWJ1dGluZyBvciBvdGhlcndpc2UgdXNpbmcgdGhpcyBtZXNzYWdlLCBpdHMg
-Y29udGVudHMgb3IgYXR0YWNobWVudHMgaW4gYW55IHdheS4gIElmIHlvdSBoYXZlIHJlY2VpdmVk
-IHRoaXMgbWVzc2FnZSBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB1cyBpbW1lZGlhdGVseSBieSBy
-ZXBseWluZyB0byB0aGlzIGUtbWFpbCBhbmQgZGVsZXRlIHRoZSBtZXNzYWdlIGZyb20geW91ciBt
-YWlsYm94LiAgSW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgbWVzc2FnZSB0aGF0IGRvZXMg
-bm90IHJlbGF0ZSB0byB0aGUgYnVzaW5lc3Mgb2YgU0VBS1IgaXMgbmVpdGhlciBlbmRvcnNlZCBi
-eSBub3IgYXR0cmlidXRhYmxlIHRvIFNFQUtSLgo=
+On Thu, 9 Aug 2012, Eric_YH_Chen@wiwynn.com wrote:
+> Dear all:
+> 
+> My Environment:  two servers, and 12 hard-disk on each server.
+>                   Version: Ceph 0.48, Kernel: 3.2.0-27
+> 
+>  We create a ceph cluster with 24 osd, 3 monitors
+>  Osd.0 ~ osd.11 is on server1
+>  Osd.12 ~ osd.23 is on server2
+>  Mon.0 is on server1
+>  Mon.1 is on server2
+>  Mon.2 is on server3 which has no osd
+> 
+> We create a rbd device and mount it as ext4 file system. 
+> During read/write data on the rbd device, one of the storage server is shutdown by accident. 
+> After reboot the server, we cannot access the rbd device any more.
+> One of the log shows the osdmap is corrupted.
+> 
+> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998582] libceph: corrupt inc osdmap epoch 78 off 98 (ffffc9000177d07e of ffffc9000177d01c-ffffc9000177edf2)
+> 
+> We would like to know what kind of scenario would cause the corruption of osdmap and how to avoid it?
+> It seems that osdmap corruption cannot be recovered by the ceph cluster itself.
+
+Which kernel version are you running?
+
+> Is it the same issue with http://tracker.newdream.net/issues/2446?
+> In which version of kernel that we can find this patch? Thanks!
+
+If it is that issue, simply restarting the client is a workaround.  It may 
+crop up again on a newer epoch as the cluster recovers/rebalances data, 
+but in each case a client restart will get past it.
+
+If that doesn't work, please attach a copy of the incremental osdmap 
+($mon_data/osdmap/78 from one of your monitors) and we can see what the 
+actual corruption is.
+
+Thanks!
+sage
+
+> 
+> 
+> ============= /var/log/kern.log =================================================================
+> Aug  5 15:31:44 ubuntu-002 kernel: [78240.712542] libceph: osd11 down
+> Aug  5 15:31:49 ubuntu-002 kernel: [78244.817151] libceph: osd12 down
+> Aug  5 15:31:52 ubuntu-002 kernel: [78248.151815] libceph: osd13 down
+> Aug  5 15:31:52 ubuntu-002 kernel: [78248.151913] libceph: osd14 down
+> Aug  5 15:31:53 ubuntu-002 kernel: [78249.250991] libceph: get_reply unknown tid 96452 from osd7
+> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833033] libceph: osd15 down
+> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833037] libceph: osd16 down
+> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833039] libceph: osd17 down
+> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833040] libceph: osd18 down
+> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833042] libceph: osd19 down
+> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833062] libceph: osd20 down
+> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833064] libceph: osd21 down
+> Aug  5 15:36:46 ubuntu-002 kernel: [78541.813963] libceph: osd11 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811236] libceph: osd12 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811238] libceph: osd13 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811264] libceph: osd14 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811265] libceph: osd15 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811266] libceph: osd16 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811271] libceph: osd17 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811272] libceph: osd18 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811273] libceph: osd19 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811314] libceph: osd20 weight 0x0 (out)
+> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811315] libceph: osd21 weight 0x0 (out)
+> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998582] libceph: corrupt inc osdmap epoch 78 off 98 (ffffc9000177d07e of ffffc9000177d01c-ffffc9000177edf2)
+> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998737] osdmap: 00000000: 05 00 70 d6 52 f9 b3 cc 44 c5 a2 eb c1 33 1d a2  ..p.R...D....3..
+> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998739] osdmap: 00000010: 45 3d 4e 00 00 00 b3 22 1e 50 d0 b3 f3 2d ff ff  E=N....".P...-..
+> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998742] osdmap: 00000020: ff ff ff ff ff ff 00 00 00 00 00 00 00 00 ff ff  ................
+> ...
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
