@@ -1,246 +1,110 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: Ceph doesn't update the block device size while a rbd image is mounted
-Date: Thu, 9 Aug 2012 21:32:23 +0200
-Message-ID: <CAOLwVU=4HHFkWaZEB0pkznj_bwP6EDn7Eki+gMGStXJX2qR_kQ@mail.gmail.com>
-References: <CAOLwVUkWUrjQTxQw5-umpWnY6G-AjReCwLTyQCOdCyNT175KgA@mail.gmail.com>
- <CAOLwVUm-31QzWb2fnZP+tsntunXEJOcaFLRenqJtAQ9nYPmLyA@mail.gmail.com>
- <50082476.4020109@widodh.nl> <CAOLwVUm+NnB-ooMiCDx+rkHJhn7tCE7xM67wY6mmMckG87CrQQ@mail.gmail.com>
- <50082BFB.9000605@widodh.nl> <CAOLwVU=dJ3r5V+_3bSF=-tHf_2pq8_0GA2g2L6zVv1s2mVV_BA@mail.gmail.com>
- <CAOLwVU=d+tMB1d-sfd4PThM_piE=+8c--msija6NSrhxa548xg@mail.gmail.com> <50086F86.9010100@hastexo.com>
+From: Stefan Kleijkers <stefan@unilogicnetworks.net>
+Subject: Re: accident corruption in osdmap
+Date: Thu, 09 Aug 2012 21:29:56 +0200
+Message-ID: <50240FB4.1070103@unilogicnetworks.net>
+References: <60E83269D669544E8069A09CB69135EA01C298@GDC-CLDMBX-P02.whq.wistron> <alpine.DEB.2.00.1208090852010.27600@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:43476 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759194Ab2HITcq convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Aug 2012 15:32:46 -0400
-Received: by lboi8 with SMTP id i8so482883lbo.19
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Aug 2012 12:32:44 -0700 (PDT)
-In-Reply-To: <50086F86.9010100@hastexo.com>
+Received: from mail-out117.unilogicnetworks.net ([62.133.206.117]:43003 "EHLO
+	mail.unilogicnetworks.net" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1759378Ab2HITxE (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Aug 2012 15:53:04 -0400
+In-Reply-To: <alpine.DEB.2.00.1208090852010.27600@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Kurz <andreas@hastexo.com>
-Cc: ceph-devel@vger.kernel.org
+To: Eric_YH_Chen@wiwynn.com
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-Hi Andreas,
+Hello Eric,
 
-Sorry the long response, I also tried blockdev but without success :/
+We had the same problem and upgraded to the 3.5 kernel. The messages 
+disappeared from dmesg. We had a 3.4.x running. Don't know the exact 
+number anymore, but it was a low one (2 or something). So it seems that 
+upgrading the kernel fixes the problem.
 
-Cheers!
+Stefan
 
+On 08/09/2012 05:53 PM, Sage Weil wrote:
+> On Thu, 9 Aug 2012, Eric_YH_Chen@wiwynn.com wrote:
+>> Dear all:
+>>
+>> My Environment:  two servers, and 12 hard-disk on each server.
+>>                    Version: Ceph 0.48, Kernel: 3.2.0-27
+>>
+>>   We create a ceph cluster with 24 osd, 3 monitors
+>>   Osd.0 ~ osd.11 is on server1
+>>   Osd.12 ~ osd.23 is on server2
+>>   Mon.0 is on server1
+>>   Mon.1 is on server2
+>>   Mon.2 is on server3 which has no osd
+>>
+>> We create a rbd device and mount it as ext4 file system.
+>> During read/write data on the rbd device, one of the storage server is shutdown by accident.
+>> After reboot the server, we cannot access the rbd device any more.
+>> One of the log shows the osdmap is corrupted.
+>>
+>> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998582] libceph: corrupt inc osdmap epoch 78 off 98 (ffffc9000177d07e of ffffc9000177d01c-ffffc9000177edf2)
+>>
+>> We would like to know what kind of scenario would cause the corruption of osdmap and how to avoid it?
+>> It seems that osdmap corruption cannot be recovered by the ceph cluster itself.
+> Which kernel version are you running?
+>
+>> Is it the same issue with http://tracker.newdream.net/issues/2446?
+>> In which version of kernel that we can find this patch? Thanks!
+> If it is that issue, simply restarting the client is a workaround.  It may
+> crop up again on a newer epoch as the cluster recovers/rebalances data,
+> but in each case a client restart will get past it.
+>
+> If that doesn't work, please attach a copy of the incremental osdmap
+> ($mon_data/osdmap/78 from one of your monitors) and we can see what the
+> actual corruption is.
+>
+> Thanks!
+> sage
+>
+>>
+>> ============= /var/log/kern.log =================================================================
+>> Aug  5 15:31:44 ubuntu-002 kernel: [78240.712542] libceph: osd11 down
+>> Aug  5 15:31:49 ubuntu-002 kernel: [78244.817151] libceph: osd12 down
+>> Aug  5 15:31:52 ubuntu-002 kernel: [78248.151815] libceph: osd13 down
+>> Aug  5 15:31:52 ubuntu-002 kernel: [78248.151913] libceph: osd14 down
+>> Aug  5 15:31:53 ubuntu-002 kernel: [78249.250991] libceph: get_reply unknown tid 96452 from osd7
+>> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833033] libceph: osd15 down
+>> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833037] libceph: osd16 down
+>> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833039] libceph: osd17 down
+>> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833040] libceph: osd18 down
+>> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833042] libceph: osd19 down
+>> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833062] libceph: osd20 down
+>> Aug  5 15:31:59 ubuntu-002 kernel: [78254.833064] libceph: osd21 down
+>> Aug  5 15:36:46 ubuntu-002 kernel: [78541.813963] libceph: osd11 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811236] libceph: osd12 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811238] libceph: osd13 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811264] libceph: osd14 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811265] libceph: osd15 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811266] libceph: osd16 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811271] libceph: osd17 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811272] libceph: osd18 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811273] libceph: osd19 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811314] libceph: osd20 weight 0x0 (out)
+>> Aug  5 15:37:09 ubuntu-002 kernel: [78564.811315] libceph: osd21 weight 0x0 (out)
+>> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998582] libceph: corrupt inc osdmap epoch 78 off 98 (ffffc9000177d07e of ffffc9000177d01c-ffffc9000177edf2)
+>> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998737] osdmap: 00000000: 05 00 70 d6 52 f9 b3 cc 44 c5 a2 eb c1 33 1d a2  ..p.R...D....3..
+>> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998739] osdmap: 00000010: 45 3d 4e 00 00 00 b3 22 1e 50 d0 b3 f3 2d ff ff  E=N....".P...-..
+>> Aug  5 15:37:24 ubuntu-002 kernel: [78579.998742] osdmap: 00000020: ff ff ff ff ff ff 00 00 00 00 00 00 00 00 ff ff  ................
+>> ...
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-On Thu, Jul 19, 2012 at 10:35 PM, Andreas Kurz <andreas@hastexo.com> wr=
-ote:
->
-> On 07/19/2012 09:44 PM, S=E9bastien Han wrote:
-> > With LVM, you can re-scan the scsi bus to extend a physical drive a=
-nd
-> > then run a pvextend.
-> >
-> > @Calvin: I tried your solution
-> >
-> > # partprobe /dev/rbd1
->
-> Did you try blockdev?
->
-> # blockdev --rereadpt /dev/rbd1
->
-> Regards,
-> Andreas
->
-> >
-> > Unfortunatly nothing changed.
-> >
-> > Did you make it working?
-> >
-> > Cheers!
-> >
-> >
-> > On Thu, Jul 19, 2012 at 5:50 PM, S=E9bastien Han <han.sebastien@gma=
-il.com> wrote:
-> >> Hum ok, I see. Thanks!
-> >>
-> >> But if you have any clue to force the kernel to re-read without
-> >> unmont/mounting :)
-> >>
-> >> On Thu, Jul 19, 2012 at 5:47 PM, Wido den Hollander <wido@widodh.n=
-l> wrote:
-> >>>
-> >>>
-> >>> On 19-07-12 17:26, S=E9bastien Han wrote:
-> >>>>
-> >>>> Ok I got your point seems logic, but why is this possible with L=
-VM for
-> >>>> example?
-> >>>>
-> >>>> You can easily do this with LVM without un-mounting the device.
-> >>>>
-> >>>
-> >>>
-> >>> LVM runs through the device mapper and are not regular block devi=
-ces.
-> >>>
-> >>> If you resize the disk underneath LVM you won't see an increased =
-VG or PV
-> >>> size unless you change the availability of the VG to unavailable =
-and back to
-> >>> available again.
-> >>>
-> >>> I'm not a 100% sure what the exact root cause is, but the kernel =
-won't read
-> >>> the new size of a block device as long as it is in use.
-> >>>
-> >>> Wido
-> >>>
-> >>>
-> >>>
-> >>>> Cheers.
-> >>>>
-> >>>>
-> >>>> On Thu, Jul 19, 2012 at 5:15 PM, Wido den Hollander <wido@widodh=
-=2Enl>
-> >>>> wrote:
-> >>>>>
-> >>>>> Hi,
-> >>>>>
-> >>>>>
-> >>>>> On 19-07-12 16:55, S=E9bastien Han wrote:
-> >>>>>>
-> >>>>>>
-> >>>>>> Hi Cephers!
-> >>>>>>
-> >>>>>> I'm working with rbd mapping. I figured out that the block dev=
-ice size
-> >>>>>> of the rbd device is not update while the device is mounted. H=
-ere my
-> >>>>>> tests:
-> >>>>>>
-> >>>>>
-> >>>>> iirc this is not something RBD specific, but since the device i=
-s in use
-> >>>>> it
-> >>>>> can't be re-read by the kernel.
-> >>>>>
-> >>>>> So when you unmount it the kernel can re-read the header and re=
-size the
-> >>>>> device.
-> >>>>>
-> >>>>> Wido
-> >>>>>
-> >>>>>> 1. Pick up a device and check his size
-> >>>>>>
-> >>>>>> # rbd ls
-> >>>>>> size
-> >>>>>>
-> >>>>>> # rbd info test
-> >>>>>> rbd image 'test':
-> >>>>>> size 10000 MB in 2500 objects
-> >>>>>> order 22 (4096 KB objects)
-> >>>>>> block_name_prefix: rb.0.6
-> >>>>>> parent:  (pool -1)
-> >>>>>>
-> >>>>>> 2. Map the device
-> >>>>>>
-> >>>>>> # rbd map --secret /etc/ceph/secret test
-> >>>>>> # rbd showmapped
-> >>>>>> id pool image snap device
-> >>>>>> 1 rbd test - /dev/rbd1
-> >>>>>>
-> >>>>>> 3. Put a fs on it and check the block device size
-> >>>>>>
-> >>>>>> # mkfs.ext4 /dev/rdb1
-> >>>>>> ...
-> >>>>>> ...
-> >>>>>>
-> >>>>>> # fdisk -l /dev/rbd1
-> >>>>>>
-> >>>>>> Disk /dev/rbd1: 10.5 GB, 10485760000 bytes
-> >>>>>>
-> >>>>>> 4. Mount it
-> >>>>>>
-> >>>>>> # mount /dev/rbd1 /mnt
-> >>>>>> # df -h
-> >>>>>> /dev/rbd1                   9.8G  277M  9.0G   3% /mnt
-> >>>>>>
-> >>>>>>
-> >>>>>> 5. Change the image size
-> >>>>>>
-> >>>>>> # rbd resize --size 11000 test
-> >>>>>> Resizing image: 100% complete...done.
-> >>>>>>
-> >>>>>> # rbd info test
-> >>>>>> rbd image 'test':
-> >>>>>> size 11000 MB in 2750 objects
-> >>>>>> order 22 (4096 KB objects)
-> >>>>>> block_name_prefix: rb.0.6
-> >>>>>> parent:  (pool -1)
-> >>>>>>
-> >>>>>> At this point of time, if you perform the fdisk -l /dev/rbd1, =
-the
-> >>>>>> block device size will remain the same.
-> >>>>>>
-> >>>>>> 6. Unmount the device:
-> >>>>>>
-> >>>>>> # umount /media
-> >>>>>>
-> >>>>>> # fdisk -l /dev/rbd1
-> >>>>>> Disk /dev/rbd1: 11.5 GB, 11534336000 bytes
-> >>>>>>
-> >>>>>> Unmounting the directory did update the block device size.
-> >>>>>>
-> >>>>>> Of course you can do something really fast like:
-> >>>>>>
-> >>>>>> # umount /media && mount /dev/rbd1 /media
-> >>>>>>
-> >>>>>> That will work, it's a valid solution as long as there is no o=
-pened
-> >>>>>> file. I won't use this trick in production...
-> >>>>>>
-> >>>>>> I also tried to "mount -o remount" and it didn't work.
-> >>>>>>
-> >>>>>> 7. Resize the fs (this can be performed while the fs is mounte=
-d):
-> >>>>>>
-> >>>>>> # e2fsck -f /dev/rbd1
-> >>>>>> e2fsck 1.42 (29-Nov-2011)
-> >>>>>> Pass 1: Checking inodes, blocks, and sizes
-> >>>>>> Pass 2: Checking directory structure
-> >>>>>> Pass 3: Checking directory connectivity
-> >>>>>> Pass 4: Checking reference counts
-> >>>>>> Pass 5: Checking group summary information
-> >>>>>> /dev/rbd1: 11/644640 files (0.0% non-contiguous), 77173/256000=
-0 blocks
-> >>>>>>
-> >>>>>> # resize2fs /dev/rbd1
-> >>>>>> resize2fs 1.42 (29-Nov-2011)
-> >>>>>> Resizing the filesystem on /dev/rbd1 to 2816000 (4k) blocks.
-> >>>>>> The filesystem on /dev/rbd1 is now 2816000 blocks long.
-> >>>>>>
-> >>>>>>
-> >>>>>> Did I miss something?
-> >>>>>> Is this feature coming?
-> >>>>>>
-> >>>>>> Thank you in advance :)
-> >>>>>> --
-> >>>>>> To unsubscribe from this list: send the line "unsubscribe ceph=
--devel" in
-> >>>>>> the body of a message to majordomo@vger.kernel.org
-> >>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.=
-html
-> >>>>>>
-> >>>>>
-> >>>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
->
->
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
