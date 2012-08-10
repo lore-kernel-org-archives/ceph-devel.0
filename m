@@ -1,40 +1,74 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: Strange about radosgw-admin bucket link/unlink
-Date: Fri, 10 Aug 2012 09:45:42 -0700
-Message-ID: <CAC-hyiFAm6X+LWTrgPAoYO9uEdjPRs9ukNpm+CkRHGRAGhqJHQ@mail.gmail.com>
-References: <CAKG+gh8OygctHM6aHzfXD-mnGOs-ftyfpo35sTZGQJSd4QQHRQ@mail.gmail.com>
+From: Mandell Degerness <mandell@pistoncloud.com>
+Subject: Re: [PATCH] make mkcephfs and init-ceph osd filesystem handling more flexible
+Date: Fri, 10 Aug 2012 09:57:02 -0700
+Message-ID: <CA+jddaMq2G5Y8b81T7XKDL6=sbFTB8TWd_hy2wcQ=N=mpAMH5g@mail.gmail.com>
+References: <1344526971-17035-1-git-send-email-danny.kukawka@bisect.de>
+	<alpine.DEB.2.00.1208100851260.8611@cobra.newdream.net>
+	<502530C9.7030008@bisect.de>
+	<alpine.DEB.2.00.1208100909190.8611@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:58394 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752421Ab2HJQpo convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 12:45:44 -0400
-Received: by bkwj10 with SMTP id j10so672085bkw.19
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Aug 2012 09:45:43 -0700 (PDT)
-In-Reply-To: <CAKG+gh8OygctHM6aHzfXD-mnGOs-ftyfpo35sTZGQJSd4QQHRQ@mail.gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:36734 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751810Ab2HJQ5E (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 12:57:04 -0400
+Received: by vbbff1 with SMTP id ff1so1341445vbb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Aug 2012 09:57:03 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1208100909190.8611@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?6JSh5qyK5pix?= <chuanyu@cs.nctu.edu.tw>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Thu, Aug 9, 2012 at 11:28 PM, =E8=94=A1=E6=AC=8A=E6=98=B1 <chuanyu@c=
-s.nctu.edu.tw> wrote:
-> Hi,
->
-> Is it a bug or my usage is wrong?
-> When I link a bucket to another specified user, all bucket's contents
-> are cleaned,
-> on the other hand, after unlinking a bucket, original user still can
-> access the bucket contents.
->
-Looks like a bug. I opened issue #2935.
+Comment below in-line:
 
-Thanks,
-Yehuda
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Fri, Aug 10, 2012 at 9:12 AM, Sage Weil <sage@inktank.com> wrote:
+> On Fri, 10 Aug 2012, Danny Kukawka wrote:
+>> Am 10.08.2012 17:54, schrieb Sage Weil:
+>> > On Thu, 9 Aug 2012, Danny Kukawka wrote:
+>> >> Remove btrfs specific keys and replace them by more generic
+>> >> keys to be able to replace btrfs with e.g. xfs or ext4 easily.
+>> >>
+>> >> Add new key to define the osd fs type: 'fstype', which can get
+>> >> defined in the [osd] section for all OSDs.
+>> >>
+>> >> Replace:
+>> >> - 'btrfs devs' -> 'devs'
+>> >> - 'btrfs path' -> 'fs path'
+>> >> - 'btrfs options' -> 'fs options'
+>> >> - mkcephfs: replace --mkbtrfs with --mkfs
+
+I'm just a little concerned about this as --mkfs in other parts of the
+project refers to the on file system changes to prepare the directory
+structure for use by the daemons.  I actually prefer the usage here, I
+only want to point out the confusing CLI parameter collision.
+
+>> >> - init-ceph: replace --btrfs with --fsmount, --nobtrfs
+>> >> with --nofsmount, --btrfsumount with --fsumount
+>> >>
+>> >> Update documentation, manpage and example config files.
+>> >
+>> > Maybe this should keep the old options as well, so that --mkbtrfs is an
+>> > alias for --mkfs --btrfs...
+>>
+>> I can add this to the patch, no problem!
+>>
+>> > Tommi, is this kind of invocation compatible with your notion of what
+>> > mkcephfs 2.0 should be?  If we can jump to the target interface and
+>> > rewrite the implementation in terms of the new tools that would capture
+>> > the best of both worlds.
+>>
+>> If you can point me to some documentation how the target interface
+>> works, I could take a look at adapting mkcephfs to the new tools as soon
+>> as the new interface/workflow is ready.
+>
+> It's not defined yet.  I know Tommi has something in his head, but I'm not
+> sure if it's something similar to the current one (a cluster-wide
+> ceph.conf) or something else.  He's off today, so we probably have to wait
+> to find out.
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
