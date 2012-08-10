@@ -1,86 +1,38 @@
-From: =?iso-8859-1?Q?Fran=E7ois?= Charlier
-	<francois.charlier@enovance.com>
-Subject: Re: Puppet modules for Ceph
-Date: Fri, 10 Aug 2012 18:21:12 +0200
-Message-ID: <20120810162112.GG1882@potjevlesh.enovance.com>
-References: <20120718135854.GI15546@potjevlesh.enovance.com>
- <5006CB25.105@inktank.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
+Subject: Re: Strange about radosgw-admin bucket link/unlink
+Date: Fri, 10 Aug 2012 09:45:42 -0700
+Message-ID: <CAC-hyiFAm6X+LWTrgPAoYO9uEdjPRs9ukNpm+CkRHGRAGhqJHQ@mail.gmail.com>
+References: <CAKG+gh8OygctHM6aHzfXD-mnGOs-ftyfpo35sTZGQJSd4QQHRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mxi1.enovance.com ([94.143.114.217]:4137 "EHLO
-	mxi1.enovance.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754437Ab2HJQVP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 12:21:15 -0400
-Content-Disposition: inline
-In-Reply-To: <5006CB25.105@inktank.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:58394 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752421Ab2HJQpo convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 12:45:44 -0400
+Received: by bkwj10 with SMTP id j10so672085bkw.19
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Aug 2012 09:45:43 -0700 (PDT)
+In-Reply-To: <CAKG+gh8OygctHM6aHzfXD-mnGOs-ftyfpo35sTZGQJSd4QQHRQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: puppet-users@googlegroups.com, ceph-devel@vger.kernel.org, puppet-openstack@puppetlabs.com
+To: =?UTF-8?B?6JSh5qyK5pix?= <chuanyu@cs.nctu.edu.tw>
+Cc: ceph-devel@vger.kernel.org
 
-On Jul 18 09:41, Mark Nelson wrote:
-> On 7/18/12 8:58 AM, Fran=C3=A7ois Charlier wrote:
-> >Hi,
-> >
-> >I'm currently working on writing a Puppet module for Ceph.
-> >
-> >As after some research I found no existing module, I'll start from
-> >scratch but I would be glad to hear from people who would already ha=
-ve
-> >started working or this or having any idea or pointers regarding thi=
-s
-> >subject.
-> >
-> >Thanks,
-> >
-> >[ By the way, I'm fc on #ceph ! ]
-> >
->=20
-> Hi Francois,
->=20
-> That's great!  You might want to look at the chef work that has been
-> done as a base to start from.  I'm not very familiar with what is in
-> place, but Tommi or Dan may chime in later with more details.  Some
-> of the folks from Mediawiki were actually just talking about puppet
-> modules yesterday on the IRC channel so they may be interested in
-> collaborating too.
->=20
-> Thanks,
-> Mark
+On Thu, Aug 9, 2012 at 11:28 PM, =E8=94=A1=E6=AC=8A=E6=98=B1 <chuanyu@c=
+s.nctu.edu.tw> wrote:
+> Hi,
+>
+> Is it a bug or my usage is wrong?
+> When I link a bucket to another specified user, all bucket's contents
+> are cleaned,
+> on the other hand, after unlinking a bucket, original user still can
+> access the bucket contents.
+>
+Looks like a bug. I opened issue #2935.
 
-Hi,
-
-I'd like to keep you updated on the progress I made so far :
-
-- the module is published on github: https://github.com/fcharlier/puppe=
-t-ceph
-
-- it's currently (only) able to install some MONs
-
-- I hope to be able to add support for OSDs before next tuesday (becaus=
-e
-  I'm on vacation after that =E2=80=A6)
-
-- I listed the necessary =E2=80=9Cmanual=E2=80=9D actions needed to ins=
-tall a Ceph
-  cluster (gathered from the Ceph Chef Cookbook and the mkcephfs script=
-)
-  on our wiki : https://labs.enovance.com/projects/puppet/wiki/Puppet-c=
-eph
-  but it might still contain some errors.
-
-- I've decided to stick with exported resources to transfer information
-  between the nodes.
-
-Any comment or contribution would be much appreciated !
-
-Sincerely,
---=20
-=46ran=C3=A7ois Charlier                     Software Engineer
-// eNovance labs               http://labs.enovance.com
-// =E2=9C=89 francois.charlier@enovance.com =E2=98=8E +33 1 49 70 99 81
-// fc on OFTC / fc___ on FreeNode
+Thanks,
+Yehuda
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
