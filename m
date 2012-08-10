@@ -1,72 +1,426 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Where to run ceph for openstack
-Date: Fri, 10 Aug 2012 10:17:17 +0200
-Message-ID: <5024C38D.4050607@widodh.nl>
-References: <CAJ_JamA4XjMN816Gbk79FPApLXywwAzA0utWUtu+icpB2Cx97g@mail.gmail.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] make mkcephfs and init-ceph osd filesystem handling more
+ flexible
+Date: Fri, 10 Aug 2012 08:54:55 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208100851260.8611@cobra.newdream.net>
+References: <1344526971-17035-1-git-send-email-danny.kukawka@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:43699 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757569Ab2HJIRY (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 04:17:24 -0400
-In-Reply-To: <CAJ_JamA4XjMN816Gbk79FPApLXywwAzA0utWUtu+icpB2Cx97g@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:60012 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751810Ab2HJPy4 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 11:54:56 -0400
+In-Reply-To: <1344526971-17035-1-git-send-email-danny.kukawka@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Curtis C." <serverascode@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Danny Kukawka <danny.kukawka@bisect.de>
+Cc: ceph-devel@vger.kernel.org, Danny Kukawka <dkukawka@suse.de>
 
-On 08/10/2012 03:33 AM, Curtis C. wrote:
-> Hi All,
->
-> My workplace is considering deploying Ceph for OpenStack block storage
-> to try to provide volume and vm migration.
->
+On Thu, 9 Aug 2012, Danny Kukawka wrote:
+> Remove btrfs specific keys and replace them by more generic
+> keys to be able to replace btrfs with e.g. xfs or ext4 easily.
+> 
+> Add new key to define the osd fs type: 'fstype', which can get
+> defined in the [osd] section for all OSDs.
+> 
+> Replace:
+> - 'btrfs devs' -> 'devs'
+> - 'btrfs path' -> 'fs path'
+> - 'btrfs options' -> 'fs options'
+> - mkcephfs: replace --mkbtrfs with --mkfs
+> - init-ceph: replace --btrfs with --fsmount, --nobtrfs
+> with --nofsmount, --btrfsumount with --fsumount
+> 
+> Update documentation, manpage and example config files.
 
-Disclaimer: I have never worked with OpenStack, only with CloudStack.
+Maybe this should keep the old options as well, so that --mkbtrfs is an 
+alias for --mkfs --btrfs...
 
-> Immediately I decided, perhaps wrongly, that this meant a dedicated
-> Ceph cluster of physical servers. But a colleague suggested that
-> perhaps it would be better to run Ceph on the compute nodes instead of
-> a distinct, separate cluster.
->
+Tommi, is this kind of invocation compatible with your notion of what 
+mkcephfs 2.0 should be?  If we can jump to the target interface and 
+rewrite the implementation in terms of the new tools that would capture 
+the best of both worlds.
 
-I think it's common to run Ceph on dedicated hardware, but it is not 
-mandatory.
+Thanks!
+sage
 
-There is however a situation where running Kernel-RBD or the Ceph 
-filesystem on an OSD leads into a lock situation (still valid?), but 
-with Qemu RBD this shouldn't be a problem.
 
-> Is one of these a more appropriate solution (in a perfect world)? Or
-> is this a half-dozen one way, six the other type situation?
->
-> I can definitely understand trying to make compute and storage generic
-> and plentiful by keeping them on the same node. But I also feel like
-> it's ok to split things out sometimes too.
->
-
-You should be able to run the OSD daemons on compute nodes, but you will 
-need a cluster of monitors (3 recommended), I'd not run those on the 
-compute nodes.
-
-Be aware however that OSDs can eat a lot of memory and CPU. They 
-sometimes eat so much memory that they can press a machine out of 
-memory. Won't be nice if it took a couple of your instances with it.
-
-So, technically you can run the OSDs on Compute nodes, but in terms of 
-stability I wouldn't recommend it.
-
-Wido
-
-> Any thoughts, suggestions, or reference architecture pointers?
->
-> Thanks for any help,
-> Curtis.
+> 
+> Signed-off-by: Danny Kukawka <danny.kukawka@bisect.de>
+> ---
+>  doc/man/8/mkcephfs.rst                      |   17 +++-----
+>  man/mkcephfs.8                              |   15 +++----
+>  src/ceph.conf.twoosds                       |    7 ++--
+>  src/init-ceph.in                            |   50 +++++++++++++---------
+>  src/mkcephfs.in                             |   60 +++++++++++++++++----------
+>  src/sample.ceph.conf                        |   15 ++++---
+>  src/test/cli/osdmaptool/ceph.conf.withracks |    3 +-
+>  7 Dateien ge?ndert, 95 Zeilen hinzugef?gt(+), 72 Zeilen entfernt(-)
+> 
+> diff --git a/doc/man/8/mkcephfs.rst b/doc/man/8/mkcephfs.rst
+> index ddc378a..dd3fbd5 100644
+> --- a/doc/man/8/mkcephfs.rst
+> +++ b/doc/man/8/mkcephfs.rst
+> @@ -70,20 +70,15 @@ Options
+>     default is ``/etc/ceph/keyring`` (or whatever is specified in the
+>     config file).
+>  
+> -.. option:: --mkbtrfs
+> +.. option:: --mkfs
+>  
+> -   Create and mount the any btrfs file systems specified in the
+> -   ceph.conf for OSD data storage using mkfs.btrfs. The "btrfs devs"
+> -   and (if it differs from "osd data") "btrfs path" options must be
+> -   defined.
+> +   Create and mount any file system specified in the ceph.conf for 
+> +   OSD data storage using mkfs. The "devs" and (if it differs from 
+> +   "osd data") "fs path" options must be defined.
+>  
+>     **NOTE** Btrfs is still considered experimental.  This option
+> -   can ease some configuration pain, but is the use of btrfs is not
+> -   required when ``osd data`` directories are mounted manually by the
+> -   adminstrator.
+> -
+> -   **NOTE** This option is deprecated and will be removed in a future
+> -   release.
+> +   can ease some configuration pain, but is not required when 
+> +   ``osd data`` directories are mounted manually by the adminstrator.
+>  
+>  .. option:: --no-copy-conf
+>  
+> diff --git a/man/mkcephfs.8 b/man/mkcephfs.8
+> index 8544a01..22a5335 100644
+> --- a/man/mkcephfs.8
+> +++ b/man/mkcephfs.8
+> @@ -32,7 +32,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+>  .
+>  .SH SYNOPSIS
+>  .nf
+> -\fBmkcephfs\fP [ \-c \fIceph.conf\fP ] [ \-\-mkbtrfs ] [ \-a, \-\-all\-hosts [ \-k
+> +\fBmkcephfs\fP [ \-c \fIceph.conf\fP ] [ \-\-mkfs ] [ \-a, \-\-all\-hosts [ \-k
+>  \fI/path/to/admin.keyring\fP ] ]
+>  .fi
+>  .sp
+> @@ -111,19 +111,16 @@ config file).
+>  .UNINDENT
+>  .INDENT 0.0
+>  .TP
+> -.B \-\-mkbtrfs
+> -Create and mount the any btrfs file systems specified in the
+> -ceph.conf for OSD data storage using mkfs.btrfs. The "btrfs devs"
+> -and (if it differs from "osd data") "btrfs path" options must be
+> +.B \-\-mkfs
+> +Create and mount any file systems specified in the
+> +ceph.conf for OSD data storage using mkfs.*. The "devs"
+> +and (if it differs from "osd data") "fs path" options must be
+>  defined.
+>  .sp
+>  \fBNOTE\fP Btrfs is still considered experimental.  This option
+> -can ease some configuration pain, but is the use of btrfs is not
+> +can ease some configuration pain, but the use of this option is not
+>  required when \fBosd data\fP directories are mounted manually by the
+>  adminstrator.
+> -.sp
+> -\fBNOTE\fP This option is deprecated and will be removed in a future
+> -release.
+>  .UNINDENT
+>  .INDENT 0.0
+>  .TP
+> diff --git a/src/ceph.conf.twoosds b/src/ceph.conf.twoosds
+> index c0cfc68..05ca754 100644
+> --- a/src/ceph.conf.twoosds
+> +++ b/src/ceph.conf.twoosds
+> @@ -67,7 +67,8 @@
+>  	debug journal = 20
+>  	log dir = /data/cosd$id
+>  	osd data = /mnt/osd$id
+> -	btrfs options = "flushoncommit,usertrans"
+> +	fs options = "flushoncommit,usertrans"
+> +	fstype = btrfs
+>  ;	user = root
+>  
+>  ;	osd journal = /mnt/osd$id/journal
+> @@ -75,8 +76,8 @@
+>  	osd journal = "/dev/disk/by-path/pci-0000:05:02.0-scsi-6:0:0:0"
+>  ;	filestore max sync interval = 1
+>  
+> -	btrfs devs = "/dev/disk/by-path/pci-0000:05:01.0-scsi-2:0:0:0"
+> -;	btrfs devs = "/dev/disk/by-path/pci-0000:05:01.0-scsi-2:0:0:0 \
+> +	devs = "/dev/disk/by-path/pci-0000:05:01.0-scsi-2:0:0:0"
+> +;	devs = "/dev/disk/by-path/pci-0000:05:01.0-scsi-2:0:0:0 \
+>  ;	      	   /dev/disk/by-path/pci-0000:05:01.0-scsi-3:0:0:0 \
+>  ;		   /dev/disk/by-path/pci-0000:05:01.0-scsi-4:0:0:0 \
+>  ;		   /dev/disk/by-path/pci-0000:05:01.0-scsi-5:0:0:0 \
+> diff --git a/src/init-ceph.in b/src/init-ceph.in
+> index a8c5a29..32bcc9a 100644
+> --- a/src/init-ceph.in
+> +++ b/src/init-ceph.in
+> @@ -100,8 +100,8 @@ docrun=
+>  allhosts=0
+>  debug=0
+>  monaddr=
+> -dobtrfs=1
+> -dobtrfsumount=0
+> +dofsmount=1
+> +dofsumount=0
+>  verbose=0
+>  
+>  while echo $1 | grep -q '^-'; do     # FIXME: why not '^-'?
+> @@ -130,14 +130,14 @@ case $1 in
+>  	    shift
+>  	    MON_ADDR=$1
+>  	    ;;
+> -    --btrfs)
+> -	    dobtrfs=1
+> +    --fsmount)
+> +	    dofsmount=1
+>  	    ;;
+> -    --nobtrfs)
+> -	    dobtrfs=0
+> +    --nofsmount)
+> +	    dofsmount=0
+>  	    ;;
+> -    --btrfsumount)
+> -	    dobtrfsumount=1
+> +    --fsumount)
+> +	    dofsumount=1
+>  	    ;;
+>      --conf | -c)
+>  	    [ -z "$2" ] && usage_exit
+> @@ -222,9 +222,9 @@ for name in $what; do
+>  
+>      if echo $name | grep -q ^osd; then
+>  	get_conf osd_data "" "osd data"
+> -	get_conf btrfs_path "$osd_data" "btrfs path"  # mount point defaults so osd data
+> -	get_conf btrfs_devs "" "btrfs devs"
+> -	first_dev=`echo $btrfs_devs | cut '-d ' -f 1`
+> +	get_conf fs_path "$osd_data" "fs path"  # mount point defaults so osd data
+> +	get_conf fs_devs "" "devs"
+> +	first_dev=`echo $fs_devs | cut '-d ' -f 1`
+>      fi
+>  
+>      # do lockfile, if RH
+> @@ -262,13 +262,25 @@ for name in $what; do
+>  
+>  	    cmd="$wrap $cmd $runmode"
+>  	    
+> -	    if [ $dobtrfs -eq 1 ] && [ -n "$btrfs_devs" ]; then
+> +	    if [ $dofsmount -eq 1 ] && [ -n "$fs_devs" ]; then
+>  		get_conf pre_mount "true" "pre mount command"
+> -		get_conf btrfs_opt "noatime" "btrfs options"
+> -		[ -n "$btrfs_opt" ] && btrfs_opt="-o $btrfs_opt"
+> +		get_conf fs_opt "noatime" "fs options"
+> +		get_conf fs_type "" "fstype"
+> +
+> +		if [ -z "$fs_type" ]; then
+> +		    echo No filesystem type defined!
+> +		    exit 0
+> +                fi 
+> +
+> +		[ -n "$fs_opt" ] && fs_opt="-o $fs_opt"
+>  		[ -n "$pre_mount" ] && do_cmd "$pre_mount"
+> -		echo Mounting Btrfs on $host:$btrfs_path
+> -		do_root_cmd "modprobe btrfs ; btrfs device scan || btrfsctl -a ; egrep -q '^[^ ]+ $btrfs_path' /proc/mounts || mount -t btrfs $btrfs_opt $first_dev $btrfs_path"
+> +
+> +		if [ "$fs_type" == "btrfs" ]; then
+> +		    echo Mounting Btrfs on $host:$fs_path
+> +		    do_root_cmd "modprobe btrfs ; btrfs device scan || btrfsctl -a ; egrep -q '^[^ ]+ $fs_path' /proc/mounts || mount -t btrfs $fs_opt $first_dev $fs_path"
+> +		else
+> +		    do_root_cmd "modprobe $fs_type ; egrep -q '^[^ ]+ $fs_path' /proc/mounts || mount -t $fs_type $fs_opt $first_dev $fs_path"
+> +		fi
+>  	    fi
+>  	    echo Starting Ceph $name on $host...
+>  	    mkdir -p $RUN_DIR
+> @@ -289,9 +301,9 @@ for name in $what; do
+>  	    stop_daemon $name ceph-$type $pid_file
+>  	    [ -n "$post_stop" ] && do_cmd "$post_stop"
+>  	    [ -n "$lockfile" ] && [ "$?" -eq 0 ] && rm -f $lockfile
+> -	    if [ $dobtrfsumount -eq 1 ] && [ -n "$btrfs_devs" ]; then
+> -		echo Unmounting Btrfs on $host:$btrfs_path
+> -		do_root_cmd "umount $btrfs_path || true"
+> +	    if [ $dofsumount -eq 1 ] && [ -n "$fs_devs" ]; then
+> +		echo Unmounting OSD volume on $host:$fs_path
+> +		do_root_cmd "umount $fs_path || true"
+>  	    fi
+>  	    ;;
+>  
+> diff --git a/src/mkcephfs.in b/src/mkcephfs.in
+> index c507709..492d4b6 100644
+> --- a/src/mkcephfs.in
+> +++ b/src/mkcephfs.in
+> @@ -60,7 +60,7 @@ else
+>  fi
+>  
+>  usage_exit() {
+> -    echo "usage: $0 -a -c ceph.conf [-k adminkeyring] [--mkbtrfs]"
+> +    echo "usage: $0 -a -c ceph.conf [-k adminkeyring] [--mkfs]"
+>      echo "   to generate a new ceph cluster on all nodes; for advanced usage see man page"
+>      echo "   ** be careful, this WILL clobber old data; check your ceph.conf carefully **"
+>      exit
+> @@ -70,7 +70,7 @@ usage_exit() {
+>  
+>  
+>  allhosts=0
+> -mkbtrfs=0
+> +mkfs=0
+>  preparemonmap=0
+>  prepareosdfs=""
+>  initdaemon=""
+> @@ -130,8 +130,8 @@ case $1 in
+>  	    preparemon=1
+>              manual_action=1
+>  	    ;;
+> -    --mkbtrfs)
+> -	    mkbtrfs=1
+> +    --mkfs)
+> +	    mkfs=1
+>  	    ;;
+>      --no-copy-conf)
+>  	    nocopyconf=1
+> @@ -306,21 +306,26 @@ if [ -n "$prepareosdfs" ]; then
+>  
+>      get_conf osd_data "/var/lib/ceph/osd/ceph-$id" "osd data"
+>      get_conf osd_journal "$osd_data/journal" "osd journal"
+> -    get_conf btrfs_path "$osd_data" "btrfs path"  # mount point defaults so osd data
+> -    get_conf btrfs_devs "" "btrfs devs"
+> +    get_conf fs_path "$osd_data" "fs path"  # mount point defaults so osd data
+> +    get_conf fs_devs "" "devs"
+> +    get_conf fs_type "" "fstype"
+>  
+> -    if [ -z "$btrfs_devs" ]; then
+> -	echo "no btrfs devs defined for $name"
+> +    if [ -z "$fs_devs" ]; then
+> +	echo "no devs defined for $name"
+> +	exit 0
+> +    fi
+> +    if [ -z "$fs_type" ]; then
+> +	echo "no filesystem type defined for $name"
+>  	exit 0
+>      fi
+>  
+> -    first_dev=`echo $btrfs_devs | cut '-d ' -f 1`
+> -    get_conf btrfs_opt "noatime" "btrfs options"
+> -    [ -n "$btrfs_opt" ] && btrfs_opt="-o $btrfs_opt"
+> +    first_dev=`echo $fs_devs | cut '-d ' -f 1`
+> +    get_conf fs_opt "noatime" "fs options"
+> +    [ -n "$fs_opt" ] && fs_opt="-o $fs_opt"
+>      get_conf osd_user "root" "user"
+>      
+> -    if [ -n "$osd_journal" ] && echo "$btrfs_devs" | grep -q -w "$osd_journal" ; then
+> -	echo "ERROR: osd journal device ($osd_journal) also used by btrfs devs ($btrfs_devs)"
+> +    if [ -n "$osd_journal" ] && echo "fs_devs" | grep -q -w "$osd_journal" ; then
+> +	echo "ERROR: osd journal device ($osd_journal) also used by devs ($fs_devs)"
+>  	exit 1
+>      fi
+>      
+> @@ -330,18 +335,27 @@ if [ -n "$prepareosdfs" ]; then
+>  	test -d $osd_journal || mkdir -p `dirname $osd_journal`
+>      fi
+>  
+> -    umount $btrfs_path || true
+> -    for f in $btrfs_devs ; do
+> +    umount $fs_path || true
+> +    for f in $fs_devs ; do
+>  	umount $f || true
+>      done
+>  
+> -    modprobe btrfs || true
+> -    mkfs.btrfs $btrfs_devs
+> -    btrfs device scan || btrfsctl -a
+> -    sync   # seems to fix problems for some people...
+> -    mount -t btrfs $btrfs_opt $first_dev $btrfs_path
+> -    chown $osd_user $btrfs_path
+> -    chmod +w $btrfs_path
+> +    if [ "$fs_type" == "btrfs" ]; then 
+> +        modprobe btrfs || true
+> +        mkfs.btrfs $fs_devs
+> +        btrfs device scan || btrfsctl -a
+> +	sync # seems to fix problems for some people...
+> +    elif [ "$fs_type" == "xfs" ]; then
+> +        modprobe xfs || true
+> +	mkfs.xfs -f $fs_devs
+> +    else
+> +	modprobe $fs_type || true
+> +	mkfs.$fs_type $fs_devs
+> +    fi
+> +
+> +    mount -t $fs_type $fs_opt $first_dev $fs_path
+> +    chown $osd_user $fs_path
+> +    chmod +w $fs_path
+>      
+>      exit 0
+>  fi
+> @@ -459,7 +473,7 @@ if [ $allhosts -eq 1 ]; then
+>  	    fi
+>  	fi
+>  	
+> -	if [ $mkbtrfs -eq 1 ] && [ "$type" = "osd" ]; then
+> +	if [ $mkfs -eq 1 ] && [ "$type" = "osd" ]; then
+>  	    do_root_cmd "$0 -d $rdir --prepare-osdfs $name"
+>  	fi
+>  
+> diff --git a/src/sample.ceph.conf b/src/sample.ceph.conf
+> index 88f7f02..147777d 100644
+> --- a/src/sample.ceph.conf
+> +++ b/src/sample.ceph.conf
+> @@ -131,27 +131,30 @@
+>  	;debug filestore = 20
+>  	;debug journal = 20
+>  
+> +	; The filesystem used on the volumes
+> +	fstype = btrfs
+> +
+>  [osd.0]
+>  	host = delta
+>  
+> -	; if 'btrfs devs' is not specified, you're responsible for
+> +	; if 'devs' is not specified, you're responsible for
+>  	; setting up the 'osd data' dir.  if it is not btrfs, things
+>  	; will behave up until you try to recover from a crash (which
+>  	; usually fine for basic testing).
+> -	btrfs devs = /dev/sdx
+> +	devs = /dev/sdx
+>  
+>          ; If you want to specify some other mount options, you can do so.
+>          ; The default values are rw,noatime
+> -        ;btrfs options = rw,noatime
+> +        ; options = rw,noatime
+>  
+>  [osd.1]
+>  	host = epsilon
+> -	btrfs devs = /dev/sdy
+> +	devs = /dev/sdy
+>  
+>  [osd.2]
+>  	host = zeta
+> -	btrfs devs = /dev/sdx
+> +	devs = /dev/sdx
+>  
+>  [osd.3]
+>  	host = eta
+> -	btrfs devs = /dev/sdy
+> +	devs = /dev/sdy
+> diff --git a/src/test/cli/osdmaptool/ceph.conf.withracks b/src/test/cli/osdmaptool/ceph.conf.withracks
+> index 1e14411..87b0716 100644
+> --- a/src/test/cli/osdmaptool/ceph.conf.withracks
+> +++ b/src/test/cli/osdmaptool/ceph.conf.withracks
+> @@ -42,7 +42,8 @@
+>    keyring = /mnt/osd.$id/keyring
+>    osd data = /mnt/osd.$id
+>    osd journal = /dev/disk/by-label/osd.$id.journal
+> -  btrfs devs = /dev/disk/by-label/osd.$id.data
+> +  devs = /dev/disk/by-label/osd.$id.data
+> +  fstype = btrfs
+>  ; temp sage
+>    debug osd = 20
+>    debug ms = 1
+> -- 
+> 1.7.10.4
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+> 
+> 
