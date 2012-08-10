@@ -1,68 +1,35 @@
-From: =?UTF-8?B?6JSh5qyK5pix?= <chuanyu@cs.nctu.edu.tw>
-Subject: Strange about radosgw-admin bucket link/unlink
-Date: Fri, 10 Aug 2012 14:28:55 +0800
-Message-ID: <CAKG+gh8OygctHM6aHzfXD-mnGOs-ftyfpo35sTZGQJSd4QQHRQ@mail.gmail.com>
+From: ramu <ramu.freesystems@gmail.com>
+Subject: How to create volume.
+Date: Fri, 10 Aug 2012 06:39:10 +0000 (UTC)
+Message-ID: <loom.20120810T083722-396@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:61324 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754355Ab2HJG24 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 02:28:56 -0400
-Received: by eaac11 with SMTP id c11so386361eaa.19
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Aug 2012 23:28:55 -0700 (PDT)
+Received: from plane.gmane.org ([80.91.229.3]:48688 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751396Ab2HJGj3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 10 Aug 2012 02:39:29 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1SzisU-00016c-TI
+	for ceph-devel@vger.kernel.org; Fri, 10 Aug 2012 08:39:23 +0200
+Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Aug 2012 08:39:22 +0200
+Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Aug 2012 08:39:22 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
 Hi,
 
-Is it a bug or my usage is wrong?
-When I link a bucket to another specified user, all bucket's contents
-are cleaned,
-on the other hand, after unlinking a bucket, original user still can
-access the bucket contents.
+How to create volume from java-code.please help me to create volume in ceph
+using java code.
 
-+My original bucket:
-$ sudo radosgw-admin bucket stats --bucket 456
-{ "bucket": "456",
-  "pool": ".rgw.buckets",
-  "id": "4731.1",
-  "marker": "4731.1",
-  "owner": "707ceba699b54cde9a4cff854bea9fde",
-  "usage": { "rgw.main": { "size_kb": 856,
-          "size_kb_actual": 856,
-          "num_objects": 1}}}
+Thanks,
+Ramu.
 
-+Unlink it, the owner doesn't change,
-+although I can't see it in bucket list, I can access the contents in it:
-$ sudo radosgw-admin bucket unlink --bucket 456 --uid
-"707ceba699b54cde9a4cff854bea9fde"
-$ sudo radosgw-admin bucket stats --bucket 456
-{ "bucket": "456",
-  "pool": ".rgw.buckets",
-  "id": "4731.1",
-  "marker": "4731.1",
-  "owner": "707ceba699b54cde9a4cff854bea9fde",
-  "usage": { "rgw.main": { "size_kb": 856,
-          "size_kb_actual": 856,
-          "num_objects": 1}}}
-
-+ When link to another user, usage change to {},
-+ and all files in bucket have losed
-$ sudo radosgw-admin bucket link --bucket 456 --uid admin
-$ sudo radosgw-admin bucket stats --bucket 456
-{ "bucket": "456",
-  "pool": ".rgw.buckets",
-  "id": "4934.1",
-  "marker": "4934.1",
-  "owner": "admin",
-  "usage": {}}
-
-And just one more question,
-is there a way to link a bucket to multiple users?
-
-
-Thanks.
--- 
-Chuanyu Tsai
