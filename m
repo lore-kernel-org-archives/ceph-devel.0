@@ -1,58 +1,88 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] make mkcephfs and init-ceph osd filesystem handling more
- flexible
-Date: Fri, 10 Aug 2012 09:12:47 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208100909190.8611@cobra.newdream.net>
-References: <1344526971-17035-1-git-send-email-danny.kukawka@bisect.de> <alpine.DEB.2.00.1208100851260.8611@cobra.newdream.net> <502530C9.7030008@bisect.de>
+From: =?iso-8859-1?Q?Fran=E7ois?= Charlier
+	<francois.charlier@enovance.com>
+Subject: Re: Puppet modules for Ceph
+Date: Fri, 10 Aug 2012 18:21:12 +0200
+Message-ID: <20120810162112.GG1882@potjevlesh.enovance.com>
+References: <20120718135854.GI15546@potjevlesh.enovance.com>
+ <5006CB25.105@inktank.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60115 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751810Ab2HJQMs (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 12:12:48 -0400
-In-Reply-To: <502530C9.7030008@bisect.de>
+Received: from mxi1.enovance.com ([94.143.114.217]:4137 "EHLO
+	mxi1.enovance.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754437Ab2HJQVP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 12:21:15 -0400
+Content-Disposition: inline
+In-Reply-To: <5006CB25.105@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Danny Kukawka <danny.kukawka@bisect.de>
-Cc: ceph-devel@vger.kernel.org
+To: puppet-users@googlegroups.com, ceph-devel@vger.kernel.org, puppet-openstack@puppetlabs.com
 
-On Fri, 10 Aug 2012, Danny Kukawka wrote:
-> Am 10.08.2012 17:54, schrieb Sage Weil:
-> > On Thu, 9 Aug 2012, Danny Kukawka wrote:
-> >> Remove btrfs specific keys and replace them by more generic
-> >> keys to be able to replace btrfs with e.g. xfs or ext4 easily.
-> >>
-> >> Add new key to define the osd fs type: 'fstype', which can get
-> >> defined in the [osd] section for all OSDs.
-> >>
-> >> Replace:
-> >> - 'btrfs devs' -> 'devs'
-> >> - 'btrfs path' -> 'fs path'
-> >> - 'btrfs options' -> 'fs options'
-> >> - mkcephfs: replace --mkbtrfs with --mkfs
-> >> - init-ceph: replace --btrfs with --fsmount, --nobtrfs
-> >> with --nofsmount, --btrfsumount with --fsumount
-> >>
-> >> Update documentation, manpage and example config files.
-> > 
-> > Maybe this should keep the old options as well, so that --mkbtrfs is an 
-> > alias for --mkfs --btrfs...
-> 
-> I can add this to the patch, no problem!
-> 
-> > Tommi, is this kind of invocation compatible with your notion of what 
-> > mkcephfs 2.0 should be?  If we can jump to the target interface and 
-> > rewrite the implementation in terms of the new tools that would capture 
-> > the best of both worlds.
-> 
-> If you can point me to some documentation how the target interface
-> works, I could take a look at adapting mkcephfs to the new tools as soon
-> as the new interface/workflow is ready.
+On Jul 18 09:41, Mark Nelson wrote:
+> On 7/18/12 8:58 AM, Fran=C3=A7ois Charlier wrote:
+> >Hi,
+> >
+> >I'm currently working on writing a Puppet module for Ceph.
+> >
+> >As after some research I found no existing module, I'll start from
+> >scratch but I would be glad to hear from people who would already ha=
+ve
+> >started working or this or having any idea or pointers regarding thi=
+s
+> >subject.
+> >
+> >Thanks,
+> >
+> >[ By the way, I'm fc on #ceph ! ]
+> >
+>=20
+> Hi Francois,
+>=20
+> That's great!  You might want to look at the chef work that has been
+> done as a base to start from.  I'm not very familiar with what is in
+> place, but Tommi or Dan may chime in later with more details.  Some
+> of the folks from Mediawiki were actually just talking about puppet
+> modules yesterday on the IRC channel so they may be interested in
+> collaborating too.
+>=20
+> Thanks,
+> Mark
 
-It's not defined yet.  I know Tommi has something in his head, but I'm not 
-sure if it's something similar to the current one (a cluster-wide 
-ceph.conf) or something else.  He's off today, so we probably have to wait 
-to find out.
+Hi,
 
-sage
+I'd like to keep you updated on the progress I made so far :
+
+- the module is published on github: https://github.com/fcharlier/puppe=
+t-ceph
+
+- it's currently (only) able to install some MONs
+
+- I hope to be able to add support for OSDs before next tuesday (becaus=
+e
+  I'm on vacation after that =E2=80=A6)
+
+- I listed the necessary =E2=80=9Cmanual=E2=80=9D actions needed to ins=
+tall a Ceph
+  cluster (gathered from the Ceph Chef Cookbook and the mkcephfs script=
+)
+  on our wiki : https://labs.enovance.com/projects/puppet/wiki/Puppet-c=
+eph
+  but it might still contain some errors.
+
+- I've decided to stick with exported resources to transfer information
+  between the nodes.
+
+Any comment or contribution would be much appreciated !
+
+Sincerely,
+--=20
+=46ran=C3=A7ois Charlier                     Software Engineer
+// eNovance labs               http://labs.enovance.com
+// =E2=9C=89 francois.charlier@enovance.com =E2=98=8E +33 1 49 70 99 81
+// fc on OFTC / fc___ on FreeNode
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
