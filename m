@@ -1,55 +1,33 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: [PATCH] rbd: drop dev reference on error in rbd_open()
-Date: Fri, 10 Aug 2012 12:36:29 -0700
-Message-ID: <502562BD.9000209@inktank.com>
-References: <50255E0F.4070406@inktank.com>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: No lock on RBD allow several mount on different servers...
+Date: Sun, 12 Aug 2012 01:50:05 +0200
+Message-ID: <CAOLwVUkWEOdo_HjKRZwU0rGi4S8rA33-o5gCMBJvhJahkrLXpQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:65288 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754876Ab2HJTgf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Aug 2012 15:36:35 -0400
-Received: by pbbrr13 with SMTP id rr13so3183382pbb.19
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Aug 2012 12:36:35 -0700 (PDT)
-In-Reply-To: <50255E0F.4070406@inktank.com>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:61937 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752887Ab2HKXu0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Sat, 11 Aug 2012 19:50:26 -0400
+Received: by lagy9 with SMTP id y9so1486594lag.19
+        for <ceph-devel@vger.kernel.org>; Sat, 11 Aug 2012 16:50:25 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
+Hi guys,
 
-On 08/10/2012 12:16 PM, Alex Elder wrote:
-> If a read-only rbd device is opened for writing in rbd_open(), it
-> returns without dropping the just-acquired device reference.
->
-> Fix this by moving the read-only check before getting the reference.
->
-> Signed-off-by: Alex Elder <elder@inktank.com>
-> ---
->   drivers/block/rbd.c |    7 +++----
->   1 file changed, 3 insertions(+), 4 deletions(-)
->
-> Index: b/drivers/block/rbd.c
-> ===================================================================
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -246,13 +246,12 @@ static int rbd_open(struct block_device
->   {
->       struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
->
-> -    rbd_get_dev(rbd_dev);
-> -
-> -    set_device_ro(bdev, rbd_dev->read_only);
-> -
->       if ((mode & FMODE_WRITE) && rbd_dev->read_only)
->           return -EROFS;
->
-> +    rbd_get_dev(rbd_dev);
-> +    set_device_ro(bdev, rbd_dev->read_only);
-> +
->       return 0;
->   }
+With RBD images, the theory makes possible to mount them multiple
+times on different servers, of course **no one** wants that. If you
+care about the consistency of your data :D
+I was wondering if ceph has any lock ability on the RBD device like
+DRBD does with secondary resource. Apparently not, I was able to mount
+an image on multiple server and wrote data on both.
 
+Is this an incoming feature?
+
+I don't really know the difficulty level that this kind of feature
+implies, but it would be nice to have it.
+
+Cheers!
