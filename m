@@ -1,71 +1,47 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: No lock on RBD allow several mount on different servers...
-Date: Mon, 13 Aug 2012 10:49:45 -0700
-Message-ID: <CAC-hyiE_iOcSVqnq9rsy0WFZErbCBmMGAK1hjeUrBoUbLE5mDg@mail.gmail.com>
-References: <CAOLwVUkWEOdo_HjKRZwU0rGi4S8rA33-o5gCMBJvhJahkrLXpQ@mail.gmail.com>
-	<CALFpzo49Urnf8rnFCQ=wQ8eFMR0-8FWh2=9nKrCAxb+0Xm0rVQ@mail.gmail.com>
-	<CAOLwVUnSUpAC69W48gbz-+7L7+p9z5tioODh_hPwVEt39GDvHw@mail.gmail.com>
-	<CALFpzo4X7iL6aEUtqyEBp4AMDxKkK9wtwPx35WQVauYQbe8Hng@mail.gmail.com>
-	<CALFpzo4up8oqKNESWDzm2AVpZ0Z5WyB5PQX-8Cu2+Sga7i=zbQ@mail.gmail.com>
-	<CALFpzo7YicrNh8qCoTAe2hUU+onkci8PbggKWfUjn1TJ635HUw@mail.gmail.com>
-	<06A44B2B-FA7F-418C-B9D2-D0602F4EB95B@gmail.com>
-	<alpine.DEB.2.00.1208120825320.19162@cobra.newdream.net>
-	<CAPYLRzhXmwt2AzvmUPZQWeHn75ViFTuCVq5EFwmiG+wV8cjKDQ@mail.gmail.com>
-	<502937E1.6010000@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: v0.50 released
+Date: Mon, 13 Aug 2012 14:45:45 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208131445160.28931@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:55214 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750861Ab2HMRtq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Aug 2012 13:49:46 -0400
-Received: by bkwj10 with SMTP id j10so1427362bkw.19
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 10:49:45 -0700 (PDT)
-In-Reply-To: <502937E1.6010000@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:49955 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752688Ab2HMVpp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Aug 2012 17:45:45 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 63CE08004B
+	for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 14:45:45 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 2BA3D8004B
+	for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 14:45:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sebastien HAN <han.sebastien@gmail.com>, Marcus Sorensen <shadowsor@gmail.com>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Aug 13, 2012 at 10:22 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
-> On 08/13/2012 09:55 AM, Gregory Farnum wrote:
->>
->> We've discussed some of the issues here a little bit before. See
->> http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/7094 if
->> you're interested.
->>
->> Josh, can you discuss the current status of the advisory locking?
->> -Greg
->
->
-> Yehuda reworked it into a generic rados class so it can be used outside
-> of rbd. It hasn't been re-integrated with rbd yet, and I haven't looked
-> at it closely since the generalization. Yehuda could describe it in
-> more detail.
->
+The next development release v0.50 is ready, and includes:
 
-The lock objclass provides a generic way to set locks on objects. It
-is a cooperative scheme. The following operations are available:
- - lock (exclusive or shared)
- - unlock -- remove a lock that was set by the same client instance
- - break -- remove a lock that was set by a different client instance
+ * osd: major refactor of PG peering and threading
+ * osd: more/better dump info about in-progress operations
+ * osd: better tracking of recent slow operations
+ * osd: misc fixes
+ * librados: watch/notify fixes, misc memory leaks
+ * mon: misc fixes
+ * mon: less-destructive ceph-mon --mkfs behavior
+ * rados: copy rados pools
+ * radosgw: various compatibility fixes
 
-A lock can be set indefinitely, or can be timed out after a specified
-period. A lock can be renewed.
+Right now the main development going on is with the RBD layering, which 
+will hit master shortly, and OSD performance, various bits of which are 
+being integrated. There was also a large pile of messenger cleanups and 
+races fixes that will be on v0.52.
 
-For the use of rbd, a client will have to set an exclusive lock on the
-rbd header, with a specified (and relatively short timeout). It
-shouldn't do any I/O operations without holding that lock. It'll have
-to renew that lock, and failing to do so (meaning the lock was broken
-by another client) will require it to stop any I/O operations. The
-overriding client should wait for the original client's lock period
-timeout before initiating a new new I/O. As I said, this is a
-cooperative scheme, it doesn't prevent a buggy/bad client to send
-unwanted I/Os to the osds. A client cannot know that its lock was
-broken without explicitly checking it, or trying to renew it (when
-it's an exclusive lock). We can achieve that using watch/notify,
-though I'm not sure it's worth the extra trouble (watch/notify doesn't
-solve everything either).
+You can get v0.50 from the usual locations:
 
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball athttp://ceph.com/download/ceph-0.50.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/master/install/debian
 
-Yehuda
+One note: there was a build issue with the latest gcc that affected the 
+Debian squeeze and wheezy builds; those packages were not built for this 
+release.
