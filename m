@@ -1,73 +1,44 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: No lock on RBD allow several mount on different servers...
-Date: Sun, 12 Aug 2012 08:44:34 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208120825320.19162@cobra.newdream.net>
-References: <CAOLwVUkWEOdo_HjKRZwU0rGi4S8rA33-o5gCMBJvhJahkrLXpQ@mail.gmail.com> <CALFpzo49Urnf8rnFCQ=wQ8eFMR0-8FWh2=9nKrCAxb+0Xm0rVQ@mail.gmail.com> <CAOLwVUnSUpAC69W48gbz-+7L7+p9z5tioODh_hPwVEt39GDvHw@mail.gmail.com> <CALFpzo4X7iL6aEUtqyEBp4AMDxKkK9wtwPx35WQVauYQbe8Hng@mail.gmail.com>
- <CALFpzo4up8oqKNESWDzm2AVpZ0Z5WyB5PQX-8Cu2+Sga7i=zbQ@mail.gmail.com> <CALFpzo7YicrNh8qCoTAe2hUU+onkci8PbggKWfUjn1TJ635HUw@mail.gmail.com> <06A44B2B-FA7F-418C-B9D2-D0602F4EB95B@gmail.com>
+From: Hemant Surale <hemant.surale@gmail.com>
+Subject: Ceph setup
+Date: Mon, 13 Aug 2012 04:50:55 +0000 (UTC)
+Message-ID: <loom.20120813T064451-323@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42292 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751032Ab2HLPof (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Aug 2012 11:44:35 -0400
-In-Reply-To: <06A44B2B-FA7F-418C-B9D2-D0602F4EB95B@gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:43938 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753391Ab2HMFzK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 13 Aug 2012 01:55:10 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1T0ncL-0002K1-1C
+	for ceph-devel@vger.kernel.org; Mon, 13 Aug 2012 07:55:09 +0200
+Received: from 202.3.120.4 ([202.3.120.4])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 07:55:08 +0200
+Received: from hemant.surale by 202.3.120.4 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 07:55:08 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sebastien HAN <han.sebastien@gmail.com>
-Cc: Marcus Sorensen <shadowsor@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-RBD image locking is on roadmap, but it's tricky.  Almost all of the 
-pieces are in place for exclusive locking of the image header, which will 
-let the user know when other nodes have the image mapped, and give them 
-the option to break their lock and take over ownership.
+Hi ALL,
 
-The real challenge is fencing.  Unlike move conventional options like 
-SCSI, the RBD image is distributed across the entire cluster, so ensuring 
-that the old guy doesn't still have IOs in flight that will stomp on the 
-new owner means that potentially everyone needs to be informed that the 
-bad guy should be locked out.
 
-I think there are a few options:
+Can anyone help me out to install ceph. Official site is having many leads and
+thats kind of confusing for a new developer. uptill now I have tried installing
+ceph by following sections listed below
 
-1- The user has their own fencing or STOGITH on top of rbd, informed by 
-   the rbd locking.  Pull the plug, update your iptables, whatever.  Not 
-   very friendly.
-2- Extend the rados 'blacklist' functionality to let you ensure that every 
-   node in the cluster has received the updated osdmap+blacklist 
-   information, so that you can be sure no further IO from the old guy is 
-   possible.
-3- Use the same approach that ceph-mds fencing uses, in which the old 
-   owner isn't known to be fenced away from a particular object until the 
-   new owner reads/touches that object.
+1) Installing Debian/Ubuntu Packages
+2) Installing RPM Packages ( here i tried building ceph from tar file)
+3) Installing Chef
+..
 
-My hope is that we can get away with #3, in which case all of the basic 
-pieces are in place and the real remaining work is integration and 
-testing.  The logic goes something like this:
 
-File systems write to blocks on disk in a somewhat ordered fashion.  
-After writing a bunch of data, they approach a 'consistency point' where 
-their journal and/or superblocks must be flushed and things 'commit' to 
-disk.  At that point, if the IO fails or blocks, it won't continue to 
-clobber other parts of the disk.
+Any help is appreciable.
 
-When an fs in mounted, those same critical areas are read (superblock, 
-journal, etc.).  The existing client/osd interaction ensures that if 
-the new guy knows that the old guy is fenced, the act of reading 
-ensures that the relevant ceph-osds will find out too and that 
-paticular object will be fenced.
+- Hemant Surale.
 
-The resulting conclusion is that if a file system (or application on top 
-of it doing direct io) is sufficiently well-behaved that will be not 
-corrupt itself when the disk reorders IOs (they do) and issues 
-barrier/flush operations at the appropriate time (in modern kernels, they 
-do), then it will work.
-
-I suppose it's roughly analogous to Schroedinger's cat: until the new 
-owner reads a block, it may or may not still be modified/modifiable by the 
-old guy, but as soon as it is observed, its state is known.
-
-What do you guys think?  If that doesn't work, I think we're stuck with 
-#2, which is expensive but doable.
-
-sage
