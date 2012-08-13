@@ -1,96 +1,71 @@
-From: Josh Durgin <josh.durgin@inktank.com>
+From: Yehuda Sadeh <yehuda@inktank.com>
 Subject: Re: No lock on RBD allow several mount on different servers...
-Date: Mon, 13 Aug 2012 10:22:41 -0700
-Message-ID: <502937E1.6010000@inktank.com>
-References: <CAOLwVUkWEOdo_HjKRZwU0rGi4S8rA33-o5gCMBJvhJahkrLXpQ@mail.gmail.com> <CALFpzo49Urnf8rnFCQ=wQ8eFMR0-8FWh2=9nKrCAxb+0Xm0rVQ@mail.gmail.com> <CAOLwVUnSUpAC69W48gbz-+7L7+p9z5tioODh_hPwVEt39GDvHw@mail.gmail.com> <CALFpzo4X7iL6aEUtqyEBp4AMDxKkK9wtwPx35WQVauYQbe8Hng@mail.gmail.com> <CALFpzo4up8oqKNESWDzm2AVpZ0Z5WyB5PQX-8Cu2+Sga7i=zbQ@mail.gmail.com> <CALFpzo7YicrNh8qCoTAe2hUU+onkci8PbggKWfUjn1TJ635HUw@mail.gmail.com> <06A44B2B-FA7F-418C-B9D2-D0602F4EB95B@gmail.com> <alpine.DEB.2.00.1208120825320.19162@cobra.newdream.net> <CAPYLRzhXmwt2AzvmUPZQWeHn75ViFTuCVq5EFwmiG+wV8cjKDQ@mail.gmail.com>
+Date: Mon, 13 Aug 2012 10:49:45 -0700
+Message-ID: <CAC-hyiE_iOcSVqnq9rsy0WFZErbCBmMGAK1hjeUrBoUbLE5mDg@mail.gmail.com>
+References: <CAOLwVUkWEOdo_HjKRZwU0rGi4S8rA33-o5gCMBJvhJahkrLXpQ@mail.gmail.com>
+	<CALFpzo49Urnf8rnFCQ=wQ8eFMR0-8FWh2=9nKrCAxb+0Xm0rVQ@mail.gmail.com>
+	<CAOLwVUnSUpAC69W48gbz-+7L7+p9z5tioODh_hPwVEt39GDvHw@mail.gmail.com>
+	<CALFpzo4X7iL6aEUtqyEBp4AMDxKkK9wtwPx35WQVauYQbe8Hng@mail.gmail.com>
+	<CALFpzo4up8oqKNESWDzm2AVpZ0Z5WyB5PQX-8Cu2+Sga7i=zbQ@mail.gmail.com>
+	<CALFpzo7YicrNh8qCoTAe2hUU+onkci8PbggKWfUjn1TJ635HUw@mail.gmail.com>
+	<06A44B2B-FA7F-418C-B9D2-D0602F4EB95B@gmail.com>
+	<alpine.DEB.2.00.1208120825320.19162@cobra.newdream.net>
+	<CAPYLRzhXmwt2AzvmUPZQWeHn75ViFTuCVq5EFwmiG+wV8cjKDQ@mail.gmail.com>
+	<502937E1.6010000@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:40690 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752434Ab2HMRXr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Aug 2012 13:23:47 -0400
-Received: by qcro28 with SMTP id o28so2466265qcr.19
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 10:23:47 -0700 (PDT)
-In-Reply-To: <CAPYLRzhXmwt2AzvmUPZQWeHn75ViFTuCVq5EFwmiG+wV8cjKDQ@mail.gmail.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:55214 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750861Ab2HMRtq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Aug 2012 13:49:46 -0400
+Received: by bkwj10 with SMTP id j10so1427362bkw.19
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 10:49:45 -0700 (PDT)
+In-Reply-To: <502937E1.6010000@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sebastien HAN <han.sebastien@gmail.com>, Marcus Sorensen <shadowsor@gmail.com>
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sebastien HAN <han.sebastien@gmail.com>, Marcus Sorensen <shadowsor@gmail.com>
 
-On 08/13/2012 09:55 AM, Gregory Farnum wrote:
-> We've discussed some of the issues here a little bit before. See
-> http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/7094 if
-> you're interested.
+On Mon, Aug 13, 2012 at 10:22 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
+> On 08/13/2012 09:55 AM, Gregory Farnum wrote:
+>>
+>> We've discussed some of the issues here a little bit before. See
+>> http://comments.gmane.org/gmane.comp.file-systems.ceph.devel/7094 if
+>> you're interested.
+>>
+>> Josh, can you discuss the current status of the advisory locking?
+>> -Greg
 >
-> Josh, can you discuss the current status of the advisory locking?
-> -Greg
+>
+> Yehuda reworked it into a generic rados class so it can be used outside
+> of rbd. It hasn't been re-integrated with rbd yet, and I haven't looked
+> at it closely since the generalization. Yehuda could describe it in
+> more detail.
+>
 
-Yehuda reworked it into a generic rados class so it can be used outside
-of rbd. It hasn't been re-integrated with rbd yet, and I haven't looked
-at it closely since the generalization. Yehuda could describe it in
-more detail.
+The lock objclass provides a generic way to set locks on objects. It
+is a cooperative scheme. The following operations are available:
+ - lock (exclusive or shared)
+ - unlock -- remove a lock that was set by the same client instance
+ - break -- remove a lock that was set by a different client instance
 
-Josh
+A lock can be set indefinitely, or can be timed out after a specified
+period. A lock can be renewed.
 
-> On Sun, Aug 12, 2012 at 8:44 AM, Sage Weil <sage@inktank.com> wrote:
->> RBD image locking is on roadmap, but it's tricky.  Almost all of the
->> pieces are in place for exclusive locking of the image header, which will
->> let the user know when other nodes have the image mapped, and give them
->> the option to break their lock and take over ownership.
->>
->> The real challenge is fencing.  Unlike move conventional options like
->> SCSI, the RBD image is distributed across the entire cluster, so ensuring
->> that the old guy doesn't still have IOs in flight that will stomp on the
->> new owner means that potentially everyone needs to be informed that the
->> bad guy should be locked out.
->>
->> I think there are a few options:
->>
->> 1- The user has their own fencing or STOGITH on top of rbd, informed by
->>     the rbd locking.  Pull the plug, update your iptables, whatever.  Not
->>     very friendly.
->> 2- Extend the rados 'blacklist' functionality to let you ensure that every
->>     node in the cluster has received the updated osdmap+blacklist
->>     information, so that you can be sure no further IO from the old guy is
->>     possible.
->> 3- Use the same approach that ceph-mds fencing uses, in which the old
->>     owner isn't known to be fenced away from a particular object until the
->>     new owner reads/touches that object.
->>
->> My hope is that we can get away with #3, in which case all of the basic
->> pieces are in place and the real remaining work is integration and
->> testing.  The logic goes something like this:
->>
->> File systems write to blocks on disk in a somewhat ordered fashion.
->> After writing a bunch of data, they approach a 'consistency point' where
->> their journal and/or superblocks must be flushed and things 'commit' to
->> disk.  At that point, if the IO fails or blocks, it won't continue to
->> clobber other parts of the disk.
->>
->> When an fs in mounted, those same critical areas are read (superblock,
->> journal, etc.).  The existing client/osd interaction ensures that if
->> the new guy knows that the old guy is fenced, the act of reading
->> ensures that the relevant ceph-osds will find out too and that
->> paticular object will be fenced.
->>
->> The resulting conclusion is that if a file system (or application on top
->> of it doing direct io) is sufficiently well-behaved that will be not
->> corrupt itself when the disk reorders IOs (they do) and issues
->> barrier/flush operations at the appropriate time (in modern kernels, they
->> do), then it will work.
->>
->> I suppose it's roughly analogous to Schroedinger's cat: until the new
->> owner reads a block, it may or may not still be modified/modifiable by the
->> old guy, but as soon as it is observed, its state is known.
->>
->> What do you guys think?  If that doesn't work, I think we're stuck with
->> #2, which is expensive but doable.
->>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+For the use of rbd, a client will have to set an exclusive lock on the
+rbd header, with a specified (and relatively short timeout). It
+shouldn't do any I/O operations without holding that lock. It'll have
+to renew that lock, and failing to do so (meaning the lock was broken
+by another client) will require it to stop any I/O operations. The
+overriding client should wait for the original client's lock period
+timeout before initiating a new new I/O. As I said, this is a
+cooperative scheme, it doesn't prevent a buggy/bad client to send
+unwanted I/Os to the osds. A client cannot know that its lock was
+broken without explicitly checking it, or trying to renew it (when
+it's an exclusive lock). We can achieve that using watch/notify,
+though I'm not sure it's worth the extra trouble (watch/notify doesn't
+solve everything either).
 
+
+Yehuda
