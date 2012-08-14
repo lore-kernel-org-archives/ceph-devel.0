@@ -1,68 +1,42 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Re: Ceph RBD performance - random writes
-Date: Tue, 14 Aug 2012 17:41:44 +1200
-Message-ID: <5029E518.5070500@catalyst.net.nz>
-References: <5021F6D1.7000004@catalyst.net.nz> <5022B3F4.5050109@inktank.com> <5022E121.4070004@inktank.com> <5022F7EF.2020007@catalyst.net.nz> <50230797.8040008@catalyst.net.nz> <5023347B.6060806@catalyst.net.nz> <5023A22C.10100@inktank.com> <50244863.3030907@catalyst.net.nz>
+From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <slawomir.skowron@gmail.com>
+Subject: RadosGW hanging
+Date: Tue, 14 Aug 2012 08:33:26 +0200
+Message-ID: <CAMwB3TgG_JZJApvfT2ST9pMr+iHCH7E8vRXi77Sm0Jd+3ES+3A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bertrand.catalyst.net.nz ([202.78.240.40]:37586 "EHLO
-	mail.catalyst.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753664Ab2HNFls (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 01:41:48 -0400
-In-Reply-To: <50244863.3030907@catalyst.net.nz>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:62798 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751950Ab2HNGd1 convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 02:33:27 -0400
+Received: by qcro28 with SMTP id o28so18777qcr.19
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 23:33:27 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
-Cc: Josh Durgin <josh.durgin@inktank.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On 10/08/12 11:31, Mark Kirkwood wrote:
->
->
-> There could well be an additional factor connected with xfs and lots 
-> of files on these Intel 520s - I have just had a conversation with a 
-> workmate who switched xfs to ext4 due to this. I will see if ext4 or 
-> btrfs (scary) do any better on these drives...
->
+Cluster version  0.47.2-1precise.
 
-Actually that seems to be a different issue (mass deletion of many small 
-files)...I am not seeing significant differences using ext4 or btrfs. So 
-back to using xfs again :-)
+Now i can't say what triggers the problem, but cluster is loosing some
+OSD, and when it's remmaping, and rebooting this osd's, and finaly
+returning to normal (with as lot of delayed operations on delete), But
+when cluster is starting to be loosing some OSD, then radogw goes a
+wild, and every operation that hit radosgw fcgi, returning only http
+code 502 from nginx, for every request.
 
-One thing that *does* seems to have made a difference is upgrading from 
-0.48 to 0.50 (also Ubuntu kernel patched from 3.2.0-27 to 3.2.0-29):
+Process of radosgw is working, and after restart radosgw on each host,
+everything back to normal, after cluster back to normal.
 
-$ rados bench -b 4096 -t 256 -p rbd 100  write
-Total writes made:      65202
-Write size:             4096
-Bandwidth (MB/sec):     2.534
+Is anybody see such kind of behavior  ??
 
-Stddev Bandwidth:       0.851288
-Max bandwidth (MB/sec): 4.67969
-Min bandwidth (MB/sec): 0
-Average Latency:        0.39456
-Stddev Latency:         0.283639
-Max latency:            4.07996
-Min latency:            0.022397
+--=20
+-----
+Regards
 
-(Recall Bandwidth was about 0.3 MB/sec previously). Typical iostat looks 
-much happier:
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rMB/s wMB/s avgrq-sz 
-avgqu-sz   await r_await w_await  svctm  %util
-sdc               0.00     0.00    0.00  364.00     0.00 4.14    
-23.30     0.06    0.18    0.00    0.18   0.18   6.40
-sdb               0.00  1006.00    0.00 1091.00     0.00 10.77    
-20.21    12.77   11.66    0.00   11.66   0.66  72.00
-
-
-I'll get collectl info using this version unless Mark especially wants 
-the data for 0.48 (but it *looks* like some nice improvements are in 
-there already with the later version).
-
-Cheers
-
-Mark
-
-
+S=C5=82awek "sZiBis" Skowron
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
