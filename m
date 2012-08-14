@@ -1,149 +1,73 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Pre-creating pools for radosgw
-Date: Tue, 14 Aug 2012 11:16:08 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208141115550.18862@cobra.newdream.net>
-References: <CAMmJxt+JsGEU_oxJSKv-=4ofVWGfHyU4rNnPMavjmJj+SqCLag@mail.gmail.com> <alpine.DEB.2.00.1208141056130.18862@cobra.newdream.net> <CAMmJxt+PjdCLEQ=2SjoPn8cp58tKw4CdF=aBxfKKq058-+tRzw@mail.gmail.com>
+Subject: v0.48.1 argonaut stable update released
+Date: Tue, 14 Aug 2012 11:18:51 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208141116420.18862@cobra.newdream.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55875 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:55892 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757021Ab2HNSQJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 14:16:09 -0400
-In-Reply-To: <CAMmJxt+PjdCLEQ=2SjoPn8cp58tKw4CdF=aBxfKKq058-+tRzw@mail.gmail.com>
+	with ESMTP id S1754871Ab2HNSSw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 14:18:52 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 101FA80446
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 11:18:52 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id E00FD80446
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 11:18:51 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Axel Eriksson <john@insane.se>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Tue, 14 Aug 2012, John Axel Eriksson wrote:
-> I guess I could use either:
-> 
-> ceph osd pool create .rgw.buckets 1024 1024
-> 
-> OR
-> 
-> ceph osd pool create .rgw.buckets 1024
-> (where pgp_num would default to 1024)
-> 
-> right?
+We've built and pushed the first update to the argonaut stable release.  
+This branch has a range of small fixes for stability, compatibility, and 
+performance, but no major changes in functionality.  The stability fixes 
+are particularly important for large clusters with many OSDs, and for 
+network environments where intermittent network failures are more common.
 
-Yep!
+The highlights include:
 
-> 
-> Thanks alot for your input!
+ * mkcephfs: use default `keyring', `osd data', `osd journal' paths when 
+   not specified in conf
+ * msgr: various fixes to socket error handling
+ * osd: reduce scrub overhead
+ * osd: misc peering fixes (past_interval sharing, pgs stuck in `peering' 
+   states)
+ * osd: fail on EIO in read path (do not silently ignore read errors from 
+   failing disks)
+ * osd: avoid internal heartbeat errors by breaking some large 
+   transactions into pieces
+ * osd: fix osdmap catch-up during startup (catch up and then add daemon 
+   to osdmap)
+ * osd: fix spurious `misdirected op' messages
+ * osd: report scrub status via `pg # query'
+ * rbd: fix race when watch registrations are resent
+ * rbd: fix rbd image id assignment scheme (new image data objects have 
+   slightly different names)
+ * rbd: fix perf stats for cache hit rate
+ * rbd tool: fix off-by-one in key name (crash when empty key specified)
+ * rbd: more robust udev rules
+ * rados tool: copy object, pool commands
+ * radosgw: fix in usage stats trimming
+ * radosgw: misc compatibility fixes (date strings, ETag quoting, swift 
+   headers, etc.)
+ * ceph-fuse: fix locking in read/write paths
+ * mon: fix rare race corrupting on-disk data
+ * config: fix admin socket `config set' command
+ * log: fix in-memory log event gathering
+ * debian: remove crush headers, include librados-config
+ * rpm: add ceph-disk-{activate, prepare}
 
-No problem.
+The fix for the radosgw usage trimming is incompatible with v0.48 (which 
+was effectively broken).  You now need to use the v0.48.1 version of 
+radosgw-admin to initiate usage stats trimming.
 
-sage
+There are a range of smaller bug fixes as well.  For a complete list of 
+what went into this release, please see the release notes and changelog.
 
+You can get this stable update from the usual locations:
 
-> 
-> On Tue, Aug 14, 2012 at 7:59 PM, Sage Weil <sage@inktank.com> wrote:
-> > On Tue, 14 Aug 2012, John Axel Eriksson wrote:
-> >> Hi,
-> >>
-> >> Since we setup a test cluster, only for use with radosgw, we've
-> >> noticed that pg_num is set to 8 for all the pools rgw uses. Our
-> >> test-cluster only has two OSDs but when we go live we plan on having a
-> >> few more of them. We anticipate going to maybe 10 OSDs in 6 months
-> >> time.
-> >> There's been talk on this list about this before and there have been
-> >> some solutions... I'd like to properly set it up before we go live
-> >> though and I've come to understand that it's not something you easily
-> >> change after data has been stored to the cluster (through rgw). I've
-> >> checked the existing pools and as I said, the rgw ones are all set to
-> >> 8 pgs. I assume ALL pools starting with "." are created by rgw even
-> >> though not all of them are called .rgw.<something> (such as .log,
-> >> .intent-log, .users.email etc). Anyway, some of them could probably
-> >> stay at 8 pgs I guess. I did a pretty quick calculation and came up
-> >> with something like this:
-> >>
-> >> .rgw.buckets = 1024
-> >> .log = 84
-> >> .rgw: 52
-> >> .rgw.control: 8 # eg. default value
-> >> .users.uid: 32
-> >> .users.email: 32
-> >> .users: 8 # eg. default value
-> >> .usage: 8 # eg. default value
-> >> .intent-log: 32
-> >>
-> >> this totals to 1280. Afaik a power of two is slightly more performant.
-> >> The other pools - data, metadata and rbd won't be used by us - they're
-> >> all set to 256 by default. Adding that we end up with 2048 pools.
-> >> Would this be a reasonable value?
-> >
-> > For 10 OSDs, yes.
-> >
-> >> Also can we perhaps delete the data, metadata and rbd pools if we're
-> >> only using rgw?
-> >
-> > Yes.
-> >
-> >> We plan on having 2 copies (the default I think) of everything in the
-> >> cluster but may go to 3 - not sure.
-> >>
-> >> How would I pre-create the pools by the way? I assume you would go
-> >> about it like this:
-> >>
-> >> rados mkpool .rgw.buckets
-> >> ceph osd pool set .rgw.buckets pg_num 1024
-> >
-> > ceph osd pool create .rgw.buckets 1024
-> >
-> >>
-> >> etc
-> >>
-> >> All of that BEFORE ever starting/using RadosGW. I wouldn't have to
-> >> create the pools with default values I guess. Am I correct in my
-> >> assumptions?
-> >>
-> >> Also what do these mean (from docs):
-> >>
-> >> pg_num: See above.
-> >> pgp_num: See above.
-> >> lpg_num: The number of local PGs.
-> >> lpgp_num: The number used for placing the local PGs.
-> >
-> > l* values are deprecated.
-> >
-> > pgp_num lets you have a larger number of PGs but place/distribute them as
-> > if there were a smaller number.  It is part of the legacy split process,
-> > but may not be needed for the new implementation.  You can ignore them
-> > all; just worry about pg_num (pgp_num will match that).
-> >
-> >>
-> >> Should I set any of these?
-> >>
-> >>
-> >> I assume changing the number of replicas would be done like this:
-> >>
-> >> ceph osd pool set .rgw.buckets size 3 # for 3 replicas
-> >>
-> >> Above can be done after data has been stored through rgw, right?
-> >
-> > Right.
-> >
-> >> I also assume that the actual data stored via radosgw is stored in
-> >> .rgw.buckets. I know you're planning on adding pg-splitting but I'd
-> >> like to do this well before that is released.
-> >>
-> >> So, could you please just confirm or correct what I assume?
-> >
-> > Looks like you're on the right track.
-> >
-> > sage
-> >
-> >>
-> >> Thanks alot!
-> >>
-> >> John
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> 
-> 
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball at http://ceph.newdream.net/download/ceph-0.48.1.tar.gz
+ * For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/master/install/debian
+
