@@ -1,28 +1,36 @@
-From: Tobias Florek <tobias.florek@bytesandbutter.de>
-Subject: Re: cannot mount cephfs (with rbd working)
-Date: Tue, 14 Aug 2012 13:04:32 +0200
-Message-ID: <502A30C0.2010402@bytesandbutter.de>
-References: <50299B30.6060102@bytesandbutter.de> <50299F7D.4080808@inktank.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from bytesandbutter.de ([176.9.76.40]:57060 "EHLO
-	mail.bytesandbutter.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752708Ab2HNLEk (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 07:04:40 -0400
-In-Reply-To: <50299F7D.4080808@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+From: Iulius Curt <iulius.curt@gmail.com>
+Subject: [PATCH] libceph: Fix sparse warning
+Date: Tue, 14 Aug 2012 16:27:37 +0300
+Message-ID: <1344950857-32139-1-git-send-email-icurt@ixiacom.com>
+Return-path: <netdev-owner@vger.kernel.org>
+Sender: netdev-owner@vger.kernel.org
+To: davem@davemloft.net
+Cc: sage@inktank.com, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, dbaluta@ixiacom.com, Iulius Curt <iulius.curt@gmail.com>, Iulius Curt <icurt@ixiacom.com>
+List-Id: ceph-devel.vger.kernel.org
 
-hi josh, hi list,
+From: Iulius Curt <iulius.curt@gmail.com>
 
->> [msd.a]
-> 
-> That should be mds. Due to that typo, you have no mds running, which is
-> required for cephfs.
+Make ceph_monc_do_poolop() static to remove the following sparse warning:
+ * net/ceph/mon_client.c:616:5: warning: symbol 'ceph_monc_do_poolop' was not
+   declared. Should it be static?
 
-thanks. i do not know why i did not catch this. thank you very much!
+Signed-off-by: Iulius Curt <icurt@ixiacom.com>
+---
+ net/ceph/mon_client.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-tobi
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index 105d533..3875c60 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -613,7 +613,7 @@ bad:
+ /*
+  * Do a synchronous pool op.
+  */
+-int ceph_monc_do_poolop(struct ceph_mon_client *monc, u32 op,
++static int ceph_monc_do_poolop(struct ceph_mon_client *monc, u32 op,
+ 			u32 pool, u64 snapid,
+ 			char *buf, int len)
+ {
+-- 
+1.7.9.5
