@@ -1,62 +1,36 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: cannot mount cephfs (with rbd working)
-Date: Mon, 13 Aug 2012 17:44:45 -0700
-Message-ID: <50299F7D.4080808@inktank.com>
-References: <50299B30.6060102@bytesandbutter.de>
+From: Sage Weil <sage@inktank.com>
+Subject: out of order osd replies
+Date: Mon, 13 Aug 2012 18:21:16 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208131815500.21875@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:62313 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753192Ab2HNAov (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Aug 2012 20:44:51 -0400
-Received: by obbuo13 with SMTP id uo13so7672261obb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 17:44:51 -0700 (PDT)
-In-Reply-To: <50299B30.6060102@bytesandbutter.de>
+Received: from cobra.newdream.net ([66.33.216.30]:51477 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753471Ab2HNBVR (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Aug 2012 21:21:17 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tobias Florek <tobias.florek@bytesandbutter.de>
+To: sam.just@inktank.com
 Cc: ceph-devel@vger.kernel.org
 
-On 08/13/2012 05:26 PM, Tobias Florek wrote:
-<snip>
-> # cat /etc/ceph/ceph.conf
-> [osd]
->      osd journal_size = 1000
->
-> [mon.a]
->      host = storage1
->      mon addr = 10.0.0.5:6789
->
-> [osd.0]
->      host = storage1
->
-> [osd.1]
->      host = storage1
->
-> [msd.a]
+I just tracked down what caused the out-of-order reply:
 
-That should be mds. Due to that typo, you have no mds running, which is
-required for cephfs.
+- req 1 hit a degraded object, put on waiting_for_missing_object
+- pg change, NullEvt queued
+- req 2 dequeued, put on waiting_on_active list
+- on_change()
+  - scrub_clear_state()
+    - requeues waiting_on_active
+  - requeues waiting_for_missing_object
+...
 
-Josh
+Obvious fix for this case is to reoder the call to scrub_clear_state() in 
+on_change(), but I wonder if there are other cases where scrub's use of 
+waiting_for_active could break ordering.
 
->      host = storage1
->
-> [mount]
->      allow = %everyone
->
-> # /etc/init.d/ceph status
-> === mon.a ===
-> mon.a: running 0.48argonaut
-> === osd.0 ===
-> osd.0: running 0.48argonaut
-> === osd.1 ===
-> osd.1: running 0.48argonaut
->
->
->
-> thank you in advance for your help,
->   tobias florek
+It is probably worth mapping out what the wait lists order, where they 
+overlap, and carefully define what order they need to be woken up in.  I 
+suspect that re-using waiting_for_active in this case is problematic...
 
+sage
