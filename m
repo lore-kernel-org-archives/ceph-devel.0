@@ -1,79 +1,56 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Fix local messages and lost wake-up in SimpleMessenger
-Date: Tue, 14 Aug 2012 09:00:02 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208140857400.18862@cobra.newdream.net>
-References: <or7gt2ypox.fsf@livre.localdomain>
+Subject: Re: cherry-pick 7adc6c08f14 for stable branch
+Date: Tue, 14 Aug 2012 09:10:54 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208140910140.18862@cobra.newdream.net>
+References: <502A1013.6040302@bisect.de>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54898 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54982 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755396Ab2HNQAD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 12:00:03 -0400
-In-Reply-To: <or7gt2ypox.fsf@livre.localdomain>
+	with ESMTP id S1751573Ab2HNQKz (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 12:10:55 -0400
+In-Reply-To: <502A1013.6040302@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+To: Danny Kukawka <danny.kukawka@bisect.de>
 Cc: ceph-devel@vger.kernel.org
 
-A huge pile of SimpleMessenger refactors, cleanups, and fixes (wip-msgr) 
-was just merged into master, and this code was changed around quite a bit.  
-Did you have a specific test case that was triggering the problem?  If so, 
-do you mind running it on the current master?
+On Tue, 14 Aug 2012, Danny Kukawka wrote:
+> Hi,
+> 
+> could you please cherry-pick:
+> ---------------
+> commit 7adc6c08f1474806c83ef6c89e8752d6cfd35bfd
+> Author: Sage Weil <sage@inktank.com>
+> Date:   Mon Jul 9 17:24:19 2012 -0700
+> 
+>     mon: simplify logmonitor check_subs; less noise
+> 
+>      * simple helper to translate name to id
+>      * verify sub type is valid in caller
+>      * assert sub type is valid in method
+>      * simplify iterator usage
+> 
+>     Among other things, this gets rid of this noise in the logs:
+> 
+>     2012-07-10 20:51:42.617152 7facb23f1700  1 mon.a@1(peon).log v310
+> check_sub sub monmap not log type
+> 
+>     Signed-off-by: Sage Weil <sage@inktank.com>
+> ---------------
+> 
+> from master to the stable branch?
 
-Most of the cleanups/fixes were motivated by testing with socket failure 
-injection enabled (e.g., 'ms inject socket failures = 500' to simulate a 
-failure on every ~500th socket read or write).  This is being added to the 
-rados regression test suite.
+No problem.  I just tagged and built 0.48.1, but I'll put this into stable 
+for 0.48.2.
 
-Thanks!
 sage
 
 
-On Tue, 14 Aug 2012, Alexandre Oliva wrote:
-
-> Don't wait for a signal if the dispatch queue is non-empty already,
-> and support a non-NULL pipe for local responses.  If we were to
-> require pipe to be NULL for that, the response would be lost.
 > 
-> Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-> ---
->  src/msg/SimpleMessenger.cc |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
+> Thanks!
 > 
-> diff --git a/src/msg/SimpleMessenger.cc b/src/msg/SimpleMessenger.cc
-> index 53e36cd..973219f 100644
-> --- a/src/msg/SimpleMessenger.cc
-> +++ b/src/msg/SimpleMessenger.cc
-> @@ -373,7 +373,7 @@ void SimpleMessenger::DispatchQueue::entry()
->        }
->        lock.Lock();
->      }
-> -    if (!stop)
-> +    if (queued_pipes.empty() && !stop)
->        cond.Wait(lock); //wait for something to be put on queue
->    }
->    lock.Unlock();
-> @@ -2477,7 +2477,7 @@ void SimpleMessenger::submit_message(Message *m, Connection *con, const entity_a
->    }
->  
->    // local?
-> -  if (!pipe && my_inst.addr == dest_addr) {
-> +  if (my_inst.addr == dest_addr) {
->      if (!destination_stopped) {
->        // local
->        ldout(cct,20) << "submit_message " << *m << " local" << dendl;
-> -- 
-> 1.7.7.6
-> 
-> -- 
-> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-> You must be the change you wish to see in the world. -- Gandhi
-> Be Free! -- http://FSFLA.org/   FSF Latin America board member
-> Free Software Evangelist      Red Hat Brazil Compiler Engineer
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Danny
 > 
 > 
