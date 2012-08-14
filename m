@@ -1,115 +1,91 @@
 From: John Axel Eriksson <john@insane.se>
-Subject: Re: Radosgw nginx config
-Date: Tue, 14 Aug 2012 18:37:38 +0200
-Message-ID: <CAMmJxtLWLRrkFq_Z+NqAaqHkMY5+iOX1tOZMBfDuDptxNpxPHg@mail.gmail.com>
-References: <CAJGA66vj5zNVfSff2m26ZYD7cauAqrqkximc0myzBN8oUUFtLA@mail.gmail.com>
+Subject: Pre-creating pools for radosgw
+Date: Tue, 14 Aug 2012 19:29:37 +0200
+Message-ID: <CAMmJxt+JsGEU_oxJSKv-=4ofVWGfHyU4rNnPMavjmJj+SqCLag@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:51566 "EHLO
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:61029 "EHLO
 	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752551Ab2HNQhj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 12:37:39 -0400
-Received: by vcbfk26 with SMTP id fk26so529558vcb.19
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 09:37:38 -0700 (PDT)
-In-Reply-To: <CAJGA66vj5zNVfSff2m26ZYD7cauAqrqkximc0myzBN8oUUFtLA@mail.gmail.com>
+	with ESMTP id S1752809Ab2HNR3i (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 13:29:38 -0400
+Received: by vcbfk26 with SMTP id fk26so588905vcb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 10:29:37 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Senner, Talin" <senner@wildcardcorp.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-We too really prefer nginx but have chosen Apache for RadosGW. The
-reason is that we don't like how Nginx does fastcgi. Basically what
-happens, for example, when you PUT something to radosgw through nginx
-is that nginx buffers the data until you've sent it all then it starts
-sending it to radosgw so:
-client -> nginx (wait until nginx received it)
-then nginx -> radosgw (client still waiting for response until done).
+Hi,
 
-PUTing 1 GB of data is nicer through Apache really and more
-responsive. If you find a way to make nginx NOT buffer fastcgi, please
-do tell.
+Since we setup a test cluster, only for use with radosgw, we've
+noticed that pg_num is set to 8 for all the pools rgw uses. Our
+test-cluster only has two OSDs but when we go live we plan on having a
+few more of them. We anticipate going to maybe 10 OSDs in 6 months
+time.
+There's been talk on this list about this before and there have been
+some solutions... I'd like to properly set it up before we go live
+though and I've come to understand that it's not something you easily
+change after data has been stored to the cluster (through rgw). I've
+checked the existing pools and as I said, the rgw ones are all set to
+8 pgs. I assume ALL pools starting with "." are created by rgw even
+though not all of them are called .rgw.<something> (such as .log,
+.intent-log, .users.email etc). Anyway, some of them could probably
+stay at 8 pgs I guess. I did a pretty quick calculation and came up
+with something like this:
+
+.rgw.buckets = 1024
+.log = 84
+.rgw: 52
+.rgw.control: 8 # eg. default value
+.users.uid: 32
+.users.email: 32
+.users: 8 # eg. default value
+.usage: 8 # eg. default value
+.intent-log: 32
+
+this totals to 1280. Afaik a power of two is slightly more performant.
+The other pools - data, metadata and rbd won't be used by us - they're
+all set to 256 by default. Adding that we end up with 2048 pools.
+Would this be a reasonable value? Also can we perhaps delete the data,
+metadata and rbd pools if we're only using rgw?
+
+We plan on having 2 copies (the default I think) of everything in the
+cluster but may go to 3 - not sure.
+
+How would I pre-create the pools by the way? I assume you would go
+about it like this:
+
+rados mkpool .rgw.buckets
+ceph osd pool set .rgw.buckets pg_num 1024
+
+etc
+
+All of that BEFORE ever starting/using RadosGW. I wouldn't have to
+create the pools with default values I guess. Am I correct in my
+assumptions?
+
+Also what do these mean (from docs):
+
+pg_num: See above.
+pgp_num: See above.
+lpg_num: The number of local PGs.
+lpgp_num: The number used for placing the local PGs.
+
+Should I set any of these?
+
+
+I assume changing the number of replicas would be done like this:
+
+ceph osd pool set .rgw.buckets size 3 # for 3 replicas
+
+Above can be done after data has been stored through rgw, right?
+
+I also assume that the actual data stored via radosgw is stored in
+.rgw.buckets. I know you're planning on adding pg-splitting but I'd
+like to do this well before that is released.
+
+So, could you please just confirm or correct what I assume?
+
+Thanks alot!
 
 John
-
-On Tue, Aug 14, 2012 at 5:25 PM, Senner, Talin <senner@wildcardcorp.com> wrote:
-> All,
->
-> I did not see this in the online wiki, but we prefer nginx in most all
-> deployments as wel like the ease of config a little better.  Below
-> find the minimal nginx configuration block for fascgi to the radosgw
-> socket.  Some clients S3/Swift require https  so you'll have to add
-> that in as well. This seems to be working okay for us, although we
-> haven't tested it significantly.
->
-> We hope this helps anybody that is looking for nginx/fastcgi and the
-> rados gw (and can be added to the online docs after some further
-> testing)
->
-> Thanks
->
-> Talin
->
-> http {
-> .....
->
-> #if you want caching add below and uncomment the sections in server block:
->
->
->       fastcgi_cache_path   /tmp/cache  levels=1:2
->                        keys_zone=NAME:10m
->                        inactive=5m;
->
->          fastcgi_cache_key "$scheme$request_method$host$request_uri";
->
->
-> ...
-> }
->
-> server {
->         listen   80; ## listen for ipv4; this line is default and implied
->         #listen   [::]:80 default ipv6only=on; ## listen for ipv6
->
->         root /usr/share/nginx/www;
->         index index.html index.htm;
->
->         server_name _ ;
->
->         location / {
->
->   fastcgi_param  QUERY_STRING     $query_string;
->   fastcgi_param  REQUEST_METHOD   $request_method;
->   fastcgi_param  CONTENT_TYPE     $content_type;
->   fastcgi_param  CONTENT_LENGTH   $content_length;
->
-> #             fastcgi_cache   NAME;
-> #      fastcgi_cache_valid   200 302  1h;
-> #      fastcgi_cache_valid   301      1d;
-> #      fastcgi_cache_valid   any      1m;
-> #      fastcgi_cache_min_uses  1;
-> #      fastcgi_cache_use_stale error  timeout invalid_header http_500;
->
->       fastcgi_pass_header Authorization;
->       fastcgi_pass_request_headers on;
->
->                 fastcgi_pass unix:/tmp/radosgw.sock;
->                 include fastcgi_params;
->         }
->
-> }
->
->
->
->
-> Talin Senner
-> Wildcard Corp.
->
-> http://cdig.me  -  http://www.wildcardcorp.com
-> Secure Web CMS Hosting - CDN - DNS - IPv6
->
-> Security.Technology.Solutions
-> *We do it all for you*
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
