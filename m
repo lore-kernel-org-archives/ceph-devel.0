@@ -1,55 +1,54 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: Search for srcdir/.git in check_version
-Date: Tue, 14 Aug 2012 08:57:33 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208140857160.18862@cobra.newdream.net>
-References: <orboieypq9.fsf@livre.localdomain>
+Subject: Re: Don't package no longer installed crush headers
+Date: Tue, 14 Aug 2012 08:57:38 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208140857340.18862@cobra.newdream.net>
+References: <or393qypje.fsf@livre.localdomain>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54877 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:54882 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753006Ab2HNP5e (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 11:57:34 -0400
-In-Reply-To: <orboieypq9.fsf@livre.localdomain>
+	with ESMTP id S1754021Ab2HNP5j (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 11:57:39 -0400
+In-Reply-To: <or393qypje.fsf@livre.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 Cc: ceph-devel@vger.kernel.org
 
-Applied to next branch (will become v0.51).
+Applied, thanks!
 
 On Tue, 14 Aug 2012, Alexandre Oliva wrote:
 
-> Support srcdir != . looking for .git in srcdir when computing the ceph
-> release and git tag.
+> The rules that install crush headers are commented out in
+> src/Makefile.am, so don't attempt to package them.
 > 
 > Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 > ---
->  src/check_version |    9 +++++----
->  1 files changed, 5 insertions(+), 4 deletions(-)
+>  ceph.spec.in |   10 +++++-----
+>  1 files changed, 5 insertions(+), 5 deletions(-)
 > 
-> diff --git a/src/check_version b/src/check_version
-> index e31ca49..8600c55 100755
-> --- a/src/check_version
-> +++ b/src/check_version
-> @@ -1,12 +1,13 @@
->  #!/bin/sh
->  
-> -if [ ! -d ../.git ]; then
-> -    echo "not updating .git_version (no ../.git)"
-> +dname=`dirname $0`
-> +
-> +if [ ! -d $dname/../.git ]; then
-> +    echo "not updating .git_version (no $dname/../.git)"
->      exit 0
->  fi
->  
-> -dname=`dirname $0`
-> -cur=`git rev-parse HEAD 2>/dev/null; git describe 2>/dev/null`
-> +cur=`cd $dname && git rev-parse HEAD 2>/dev/null; git describe 2>/dev/null`
->  [ -e $1 ] && old=`cat $1`
->  
->  if [ "$cur" != "$old" ]; then
+> diff --git a/ceph.spec.in b/ceph.spec.in
+> index 70e9e08..af204e9 100644
+> --- a/ceph.spec.in
+> +++ b/ceph.spec.in
+> @@ -340,11 +340,11 @@ fi
+>  %defattr(-,root,root,-)
+>  %dir %{_includedir}/cephfs
+>  %{_includedir}/cephfs/libcephfs.h
+> -%dir %{_includedir}/crush
+> -%{_includedir}/crush/crush.h
+> -%{_includedir}/crush/hash.h
+> -%{_includedir}/crush/mapper.h
+> -%{_includedir}/crush/types.h
+> +# %dir %{_includedir}/crush
+> +# %{_includedir}/crush/crush.h
+> +# %{_includedir}/crush/hash.h
+> +# %{_includedir}/crush/mapper.h
+> +# %{_includedir}/crush/types.h
+>  %dir %{_includedir}/rados
+>  %{_includedir}/rados/librados.h
+>  %{_includedir}/rados/librados.hpp
 > -- 
 > 1.7.7.6
 > 
