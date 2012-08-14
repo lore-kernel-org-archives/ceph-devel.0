@@ -1,73 +1,79 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.48.1 argonaut stable update released
-Date: Tue, 14 Aug 2012 11:18:51 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208141116420.18862@cobra.newdream.net>
+From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Subject: Re: Fix local messages and lost wake-up in SimpleMessenger
+Date: Tue, 14 Aug 2012 15:50:21 -0300
+Message-ID: <orsjbpxq8i.fsf@livre.localdomain>
+References: <or7gt2ypox.fsf@livre.localdomain>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55892 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754871Ab2HNSSw (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 14:18:52 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 101FA80446
-	for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 11:18:52 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id E00FD80446
-	for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 11:18:51 -0700 (PDT)
+Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:38135 "EHLO
+	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1757254Ab2HNSu1 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 14 Aug 2012 14:50:27 -0400
+Received: from freie (gw-to-emilia.oliva.athome.lsd.ic.unicamp.br [172.31.160.17] (may be forged))
+	by boneca.lsd.ic.unicamp.br (8.14.5/8.14.5) with ESMTP id q7EIoOGA001551
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 15:50:25 -0300
+Received: from livre.localdomain (livre-to-gw.oliva.athome.lsd.ic.unicamp.br [172.31.160.19])
+	by freie (8.14.5/8.14.5) with ESMTP id q7EIoN6u007367
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 15:50:24 -0300
+In-Reply-To: <or7gt2ypox.fsf@livre.localdomain> (Alexandre Oliva's message of
+	"Tue, 14 Aug 2012 01:55:11 -0300")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-We've built and pushed the first update to the argonaut stable release.  
-This branch has a range of small fixes for stability, compatibility, and 
-performance, but no major changes in functionality.  The stability fixes 
-are particularly important for large clusters with many OSDs, and for 
-network environments where intermittent network failures are more common.
+On Aug 14, 2012, Alexandre Oliva <oliva@lsd.ic.unicamp.br> wrote:
 
-The highlights include:
+> Don't wait for a signal if the dispatch queue is non-empty already,
+> and support a non-NULL pipe for local responses.  If we were to
+> require pipe to be NULL for that, the response would be lost.
 
- * mkcephfs: use default `keyring', `osd data', `osd journal' paths when 
-   not specified in conf
- * msgr: various fixes to socket error handling
- * osd: reduce scrub overhead
- * osd: misc peering fixes (past_interval sharing, pgs stuck in `peering' 
-   states)
- * osd: fail on EIO in read path (do not silently ignore read errors from 
-   failing disks)
- * osd: avoid internal heartbeat errors by breaking some large 
-   transactions into pieces
- * osd: fix osdmap catch-up during startup (catch up and then add daemon 
-   to osdmap)
- * osd: fix spurious `misdirected op' messages
- * osd: report scrub status via `pg # query'
- * rbd: fix race when watch registrations are resent
- * rbd: fix rbd image id assignment scheme (new image data objects have 
-   slightly different names)
- * rbd: fix perf stats for cache hit rate
- * rbd tool: fix off-by-one in key name (crash when empty key specified)
- * rbd: more robust udev rules
- * rados tool: copy object, pool commands
- * radosgw: fix in usage stats trimming
- * radosgw: misc compatibility fixes (date strings, ETag quoting, swift 
-   headers, etc.)
- * ceph-fuse: fix locking in read/write paths
- * mon: fix rare race corrupting on-disk data
- * config: fix admin socket `config set' command
- * log: fix in-memory log event gathering
- * debian: remove crush headers, include librados-config
- * rpm: add ceph-disk-{activate, prepare}
+Although this patch applies to 0.50, I developed it on 0.48argonaut, I
+failed to mention.  It occurred to me that I haven't even tried to
+duplicate on 0.50 the problem I'd observed consistently on 0.48, namely,
+that accessing (stat) hardlinks that were not in the MDS cache would
+hard-block the client, because the MDS would issue an archortable
+request to itself, and the response wouldn't find its way back.
 
-The fix for the radosgw usage trimming is incompatible with v0.48 (which 
-was effectively broken).  You now need to use the v0.48.1 version of 
-radosgw-admin to initiate usage stats trimming.
+At first, I thought the response had been queued but not picked up
+because it would be signalled before the dispatcher returned and
+Wait()ed for the signal, so it could be a lost wake-up race condition.
+That turned out to not fix the problem, but I figured I'd leave the hunk
+in, for it appeared to make sense on its own (the spelling of the
+empty() call is different in 0.50 and 0.48, FWIW).
 
-There are a range of smaller bug fixes as well.  For a complete list of 
-what went into this release, please see the release notes and changelog.
+> -    if (!stop)
+> +    if (queued_pipes.empty() && !stop)
+>        cond.Wait(lock); //wait for something to be put on queue
 
-You can get this stable update from the usual locations:
 
- * Git at git://github.com/ceph/ceph.git
- * Tarball at http://ceph.newdream.net/download/ceph-0.48.1.tar.gz
- * For Debian/Ubuntu packages, see http://ceph.newdream.net/docs/master/install/debian
+Debugging further, I noticed that the anchortable request was issued the
+first time (and never re-issued, for the request remained in the pending
+queue), but the response didn't make it back: it was handled as a remote
+request, rather than a local one, because we find a pipe at the time of
+posting the response.  However, since there aren't threads for such
+local pipes, the response is AFAICT queued but never sent.  Once I
+enabled the destination for the response to be recognized as local in
+spite of the existence of the pipe, the response found its way back to
+the (local) requester and the client didn't hang any more.  At that
+point, I stopped digging.
 
+>    // local?
+> -  if (!pipe && my_inst.addr == dest_addr) {
+> +  if (my_inst.addr == dest_addr) {
+
+
+I ran a 0.48 with this (or rather the equivalent) change for a bit, then
+upgraded to 0.50, ported the patches, tested them for a bit, and posted
+the patches.  The client hang was 100% reproducible with the unpatched
+0.48, as long as the hardlinked inode was out of the MDS cache, and it
+could only be temporarily averted by accessing the hardlinked file by
+another name that, I suppose, didn't require a self-request of
+anchortable lookup.  After the patch, the problem is gone for good.
+
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
