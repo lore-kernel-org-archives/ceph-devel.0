@@ -1,42 +1,60 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <slawomir.skowron@gmail.com>
-Subject: RadosGW hanging
-Date: Tue, 14 Aug 2012 08:33:26 +0200
-Message-ID: <CAMwB3TgG_JZJApvfT2ST9pMr+iHCH7E8vRXi77Sm0Jd+3ES+3A@mail.gmail.com>
+From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Subject: Search for srcdir/.git in check_version
+Date: Tue, 14 Aug 2012 00:59:42 -0300
+Message-ID: <orboieypq9.fsf@livre.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:62798 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751950Ab2HNGd1 convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 02:33:27 -0400
-Received: by qcro28 with SMTP id o28so18777qcr.19
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Aug 2012 23:33:27 -0700 (PDT)
+Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:36868 "EHLO
+	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751783Ab2HNGmB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 14 Aug 2012 02:42:01 -0400
+Received: from freie (gw-to-emilia.oliva.athome.lsd.ic.unicamp.br [172.31.160.17] (may be forged))
+	by boneca.lsd.ic.unicamp.br (8.14.5/8.14.5) with ESMTP id q7E63ieu016733
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 03:03:45 -0300
+Received: from livre.localdomain (livre-to-gw.oliva.athome.lsd.ic.unicamp.br [172.31.160.19])
+	by freie (8.14.5/8.14.5) with ESMTP id q7E63hWO012766
+	for <ceph-devel@vger.kernel.org>; Tue, 14 Aug 2012 03:03:44 -0300
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Cluster version  0.47.2-1precise.
+Support srcdir != . looking for .git in srcdir when computing the ceph
+release and git tag.
 
-Now i can't say what triggers the problem, but cluster is loosing some
-OSD, and when it's remmaping, and rebooting this osd's, and finaly
-returning to normal (with as lot of delayed operations on delete), But
-when cluster is starting to be loosing some OSD, then radogw goes a
-wild, and every operation that hit radosgw fcgi, returning only http
-code 502 from nginx, for every request.
+Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+---
+ src/check_version |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
 
-Process of radosgw is working, and after restart radosgw on each host,
-everything back to normal, after cluster back to normal.
+diff --git a/src/check_version b/src/check_version
+index e31ca49..8600c55 100755
+--- a/src/check_version
++++ b/src/check_version
+@@ -1,12 +1,13 @@
+ #!/bin/sh
+ 
+-if [ ! -d ../.git ]; then
+-    echo "not updating .git_version (no ../.git)"
++dname=`dirname $0`
++
++if [ ! -d $dname/../.git ]; then
++    echo "not updating .git_version (no $dname/../.git)"
+     exit 0
+ fi
+ 
+-dname=`dirname $0`
+-cur=`git rev-parse HEAD 2>/dev/null; git describe 2>/dev/null`
++cur=`cd $dname && git rev-parse HEAD 2>/dev/null; git describe 2>/dev/null`
+ [ -e $1 ] && old=`cat $1`
+ 
+ if [ "$cur" != "$old" ]; then
+-- 
+1.7.7.6
 
-Is anybody see such kind of behavior  ??
-
---=20
------
-Regards
-
-S=C5=82awek "sZiBis" Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
