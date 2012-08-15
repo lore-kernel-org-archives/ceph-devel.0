@@ -1,52 +1,79 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] libceph: Assign different global_id for each ceph_auth_client.
-Date: Wed, 15 Aug 2012 17:23:31 +0800
-Message-ID: <1345022611-14080-1-git-send-email-zheng.z.yan@intel.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: [PATCH] docs: Add EU mirror for getting Ceph source and packages
+Date: Wed, 15 Aug 2012 12:13:07 +0200
+Message-ID: <1345025587-1393-1-git-send-email-wido@widodh.nl>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:50805 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751388Ab2HOJXe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 15 Aug 2012 05:23:34 -0400
+Received: from [109.72.87.138] ([109.72.87.138]:38977 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1751549Ab2HOKN2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Wed, 15 Aug 2012 06:13:28 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
+Cc: Wido den Hollander <wido@widodh.nl>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-The global_id for ceph_auth_client is always zero. It prevents the
-kernel from creating more than one ceph_clients that are connected
-to the same cluster. (ceph_debugfs_client_init() fails to create
-debugfs directory)
-
-Without this patch, I can't using rbd and cephfs on the same machine.
-
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
+Signed-off-by: Wido den Hollander <wido@widodh.nl>
 ---
- net/ceph/auth.c | 3 +++
- 1 file changed, 3 insertions(+)
+ doc/install/debian.rst        |    8 ++++++++
+ doc/source/build-packages.rst |    4 ++++
+ doc/source/get-tarballs.rst   |    3 ++-
+ 3 files changed, 14 insertions(+), 1 deletion(-)
 
-diff --git a/net/ceph/auth.c b/net/ceph/auth.c
-index b4bf4ac..2b00d3a 100644
---- a/net/ceph/auth.c
-+++ b/net/ceph/auth.c
-@@ -12,6 +12,8 @@
- #include "auth_x.h"
+diff --git a/doc/install/debian.rst b/doc/install/debian.rst
+index be39827..f49e68c 100644
+--- a/doc/install/debian.rst
++++ b/doc/install/debian.rst
+@@ -25,6 +25,10 @@ supported. ::
  
+ 	echo deb http://ceph.com/debian/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
  
-+static u64 auth_global_id;
++For the European users there is also a mirror in the Netherlands at http://eu.ceph.com/
 +
- /*
-  * get protocol handler
-  */
-@@ -54,6 +56,7 @@ struct ceph_auth_client *ceph_auth_init(const char *name, const struct ceph_cryp
- 		ac->name = CEPH_AUTH_NAME_DEFAULT;
- 	dout("auth_init name %s\n", ac->name);
- 	ac->key = key;
-+	ac->global_id = ++auth_global_id;
- 	return ac;
++	echo deb http://eu.ceph.com/debian/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
++
+ Add Development Release Packages
+ --------------------------------
  
- out:
+@@ -45,6 +49,10 @@ supported. ::
+ 
+ 	echo deb http://ceph.com/debian-testing/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
+ 
++For the European users there is also a mirror in the Netherlands at http://eu.ceph.com/
++
++	echo deb http://eu.ceph.com/debian-testing/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
++
+ Add Development Testing Packages
+ --------------------------------
+ 
+diff --git a/doc/source/build-packages.rst b/doc/source/build-packages.rst
+index a860c7c..7a6ce61 100644
+--- a/doc/source/build-packages.rst
++++ b/doc/source/build-packages.rst
+@@ -39,6 +39,10 @@ Fetch the source tarball for the RPM compilation environment::
+ 
+ 	wget -P ~/rpmbuild/SOURCES/ http://ceph.com/download/ceph-<version>.tar.gz
+ 
++Or from the EU mirror
++
++	wget -P ~/rpmbuild/SOURCES/ http://eu.ceph.com/download/ceph-<version>.tar.gz
++
+ Build the RPM packages::
+ 
+ 	rpmbuild -tb ~/rpmbuild/SOURCES/ceph-<version>.tar.gz
+diff --git a/doc/source/get-tarballs.rst b/doc/source/get-tarballs.rst
+index 816795a..c68c953 100644
+--- a/doc/source/get-tarballs.rst
++++ b/doc/source/get-tarballs.rst
+@@ -8,4 +8,5 @@ source code. You may download source code tarballs for Ceph releases here:
+ `Ceph Release Tarballs`_
+ 
+ 
+-.. _Ceph Release Tarballs: http://ceph.com/download/
+\ No newline at end of file
++.. _Ceph Release Tarballs: http://ceph.com/download/
++.. _Ceph Release Tarballs (EU mirror): http://eu.ceph.com/download/
 -- 
-1.7.11.2
+1.7.9.5
 
