@@ -1,100 +1,65 @@
-From: Sage Weil <sage@inktank.com>
+From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
 Subject: Re: Fix local messages and lost wake-up in SimpleMessenger
-Date: Tue, 14 Aug 2012 15:49:36 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208141534040.18862@cobra.newdream.net>
-References: <or7gt2ypox.fsf@livre.localdomain> <orsjbpxq8i.fsf@livre.localdomain>
+Date: Tue, 14 Aug 2012 23:28:41 -0300
+Message-ID: <or8vdgx50m.fsf@livre.localdomain>
+References: <or7gt2ypox.fsf@livre.localdomain>
+	<orsjbpxq8i.fsf@livre.localdomain>
+	<alpine.DEB.2.00.1208141534040.18862@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57605 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751863Ab2HNWth (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Aug 2012 18:49:37 -0400
-In-Reply-To: <orsjbpxq8i.fsf@livre.localdomain>
+Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:39010 "EHLO
+	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1755656Ab2HOC2v (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 14 Aug 2012 22:28:51 -0400
+In-Reply-To: <alpine.DEB.2.00.1208141534040.18862@cobra.newdream.net> (Sage
+	Weil's message of "Tue, 14 Aug 2012 15:49:36 -0700 (PDT)")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+To: Sage Weil <sage@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Tue, 14 Aug 2012, Alexandre Oliva wrote:
-> On Aug 14, 2012, Alexandre Oliva <oliva@lsd.ic.unicamp.br> wrote:
-> 
-> > Don't wait for a signal if the dispatch queue is non-empty already,
-> > and support a non-NULL pipe for local responses.  If we were to
-> > require pipe to be NULL for that, the response would be lost.
-> 
-> Although this patch applies to 0.50, I developed it on 0.48argonaut, I
-> failed to mention.  It occurred to me that I haven't even tried to
-> duplicate on 0.50 the problem I'd observed consistently on 0.48, namely,
-> that accessing (stat) hardlinks that were not in the MDS cache would
-> hard-block the client, because the MDS would issue an archortable
-> request to itself, and the response wouldn't find its way back.
-> 
-> At first, I thought the response had been queued but not picked up
-> because it would be signalled before the dispatcher returned and
-> Wait()ed for the signal, so it could be a lost wake-up race condition.
-> That turned out to not fix the problem, but I figured I'd leave the hunk
-> in, for it appeared to make sense on its own (the spelling of the
-> empty() call is different in 0.50 and 0.48, FWIW).
-> 
-> > -    if (!stop)
-> > +    if (queued_pipes.empty() && !stop)
-> >        cond.Wait(lock); //wait for something to be put on queue
-> 
-> 
-> Debugging further, I noticed that the anchortable request was issued the
-> first time (and never re-issued, for the request remained in the pending
-> queue), but the response didn't make it back: it was handled as a remote
-> request, rather than a local one, because we find a pipe at the time of
-> posting the response.  However, since there aren't threads for such
-> local pipes, the response is AFAICT queued but never sent.  Once I
-> enabled the destination for the response to be recognized as local in
-> spite of the existence of the pipe, the response found its way back to
-> the (local) requester and the client didn't hang any more.  At that
-> point, I stopped digging.
+On Aug 14, 2012, Sage Weil <sage@inktank.com> wrote:
 
-That's a nice bit of debugging!
- 
-> >    // local?
-> > -  if (!pipe && my_inst.addr == dest_addr) {
-> > +  if (my_inst.addr == dest_addr) {
-> 
-> 
-> I ran a 0.48 with this (or rather the equivalent) change for a bit, then
-> upgraded to 0.50, ported the patches, tested them for a bit, and posted
-> the patches.  The client hang was 100% reproducible with the unpatched
-> 0.48, as long as the hardlinked inode was out of the MDS cache, and it
-> could only be temporarily averted by accessing the hardlinked file by
-> another name that, I suppose, didn't require a self-request of
-> anchortable lookup.  After the patch, the problem is gone for good.
+> Do you mind trying to reproduce this on the current master?
 
-Do you mind trying to reproduce this on the current master?  A quick 
-inspection of the code makes me think this isn't present after the 
-refactor, but I suspect it'll be quicker for you to reproduce than for me.  
+Tried, but couldn't.  It looks like it is indeed fixed in master, but
+not in 0.50.
 
-BTW, if you have a script or anything you were using to test, that'd be 
-great to add to our test suite.  Something like
+> BTW, if you have a script or anything you were using to test, that'd be 
+> great to add to our test suite.
 
-  #!/bin/sh
+It occurred occasionally while rsyncing (with -aH) trees containing
+hardlinks into the ceph filesystem, but it became a real problem when I
+decided to stop using snapshots and use hardlink farms instead.
+Creating a hardlink farm of a tree containing hardlinks (like
+/usr/share/zoneinfo) presumably compounds the problem, but I've hit it
+most often after creating linkfarms of a few backups of my phone's root
+directory, some old SHR GNU/Linux release, probably just because those
+have enough directories and files to get stuff kicked out of the mds
+cache.
 
-  mkdir sub1
-  touch sub1/a
+You could probably trigger it with something like this:
 
-  # put hardlink in separate dir so b lookup doesn't load a's inode
-  mkdir sub2
-  ln sub1/a sub2/b
- 
-  # push it out of the mds cache
-  for dir in `seq 1 100` ; do
-    mkdir $dir
-    for file in `seq 1 100` ; do
-      touch $dir/$file
-    done
-  done
+rsync -aH /usr/share/zoneinfo/ /mnt/ceph/sub1/
+rsync -aH /usr/share/zoneinfo/ /mnt/ceph/sub2/ --link-dest=/mnt/ceph/sub1/
 
-  stat b
+umount /mnt/ceph
+# ceph-fuse survives the umount, so wait
+# till it flushes everything to the mds:
+while killall -0 ceph-fuse; do sleep 1; done 
+restart mds # maybe not needed
+mount /mnt/ceph
 
-?
+# kick all of sub1/ and sub2/ out of the cache somehow, and then:
 
-Thanks again!
-sage
+ls -lR /mnt/ceph/sub2 # freezes
+
+# restarting mds at this point may get it stuck at rejoin
+
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
