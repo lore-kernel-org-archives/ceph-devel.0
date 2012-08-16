@@ -1,122 +1,75 @@
-From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-Subject: Preserve dir default_file_layout in encoded inode
-Date: Thu, 16 Aug 2012 02:34:57 -0300
-Message-ID: <orr4r7tn5q.fsf@livre.localdomain>
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Re: Ceph setup on single node : prob with "
+Date: Thu, 16 Aug 2012 14:49:07 +0530
+Message-ID: <CAGfy=6=ftMyZ6vjZqj+cwbGT4S96acBi5_-h8_S3nYSaMT_=5A@mail.gmail.com>
+References: <CAGfy=6mCWNY4mn2_H3b=8FENmY=2SGXUB78RObprSdvzye_h1g@mail.gmail.com>
+	<CADvuQRFzjzKO4OC20jvKZMKUx29o5sKmjxVFAm2vqAc2eufiMw@mail.gmail.com>
+	<CAGfy=6nJR+jRmM8sVaWOOjwm+DXfjTQ762K9JhLpxyRYt0eghQ@mail.gmail.com>
+	<502C8157.5050609@catalyst.net.nz>
+	<CAGfy=6k9c1RyzTABxJvJ9A6MaS-yqSQR8oiKGs-DED0rfgxbUQ@mail.gmail.com>
+	<502C8439.1060403@catalyst.net.nz>
+	<CAGfy=6=VMEHTPKv1v83BfyxC=P6=ysPj5S44w_zCQNhLAOAhjg@mail.gmail.com>
+	<502C94B7.9090203@catalyst.net.nz>
+	<CAGfy=6=SzFvBjmdj-F2qtZnb-e8xFReQ76G8JK4+UjM=xfNdxw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:41484 "EHLO
-	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751457Ab2HPFfJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Thu, 16 Aug 2012 01:35:09 -0400
-Received: from freie (gw-to-emilia.oliva.athome.lsd.ic.unicamp.br [172.31.160.17] (may be forged))
-	by boneca.lsd.ic.unicamp.br (8.14.5/8.14.5) with ESMTP id q7G5Z4VT018564
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Aug 2012 02:35:04 -0300
-Received: from livre.localdomain (livre-to-gw.oliva.athome.lsd.ic.unicamp.br [172.31.160.19])
-	by freie (8.14.5/8.14.5) with ESMTP id q7G5Z3Pf026892
-	for <ceph-devel@vger.kernel.org>; Thu, 16 Aug 2012 02:35:03 -0300
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:45182 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756564Ab2HPJTI (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Aug 2012 05:19:08 -0400
+Received: by obbuo13 with SMTP id uo13so3414886obb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Aug 2012 02:19:07 -0700 (PDT)
+In-Reply-To: <CAGfy=6=SzFvBjmdj-F2qtZnb-e8xFReQ76G8JK4+UjM=xfNdxw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Store dir layouts not only in the journal, but also in inode
-information for the directory, so that they aren't dropped on the
-floor when dirs are evicted from the MDS cache and dropped from the
-journal.  Also restore dir layouts when fetching dirs back into the
-MDS cache.
+Hello Mark, Ceph community
 
-This is supposed to fix for bug 1435, except that it doesn't look like
-a layout change to a directory will trigger a commit of the new layout
-if the directory is not otherwise modified before the change is
-evicted from the cache and the journal.  This can be sorted out in a
-separate patch.
+I tried the suggested ceph.conf file as well and I continue to face
+the same problem. Moreover, hemant-virtual-machine is a real host
+(virtual machine).
 
-Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
----
- src/mds/CDir.cc  |   16 +++++++++++++++-
- src/mds/CInode.h |    9 +++++++--
- 2 files changed, 22 insertions(+), 3 deletions(-)
+Ceph version: 0.50.
 
-diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
-index 6761c6f..df19252 100644
---- a/src/mds/CDir.cc
-+++ b/src/mds/CDir.cc
-@@ -1552,8 +1552,16 @@ void CDir::_fetched(bufferlist &bl, const string& want_dn)
- 	    << " already exists at " << inopath << "\n";
- 	  continue;
- 	} else {
-+	  ceph_file_layout unset_fl = ceph_file_layout(), *fl;
-+
-+	  if (inode.is_dir ()
-+	      && memcmp (&inode.layout, &unset_fl, sizeof (unset_fl)) != 0)
-+	    fl = &inode.layout;
-+	  else
-+	    fl = NULL;
-+
- 	  // inode
--	  in = new CInode(cache, true, first, last);
-+	  in = new CInode(cache, true, first, last, fl);
- 	  in->inode = inode;
- 	  
- 	  // symlink?
-@@ -1845,6 +1853,12 @@ void CDir::_encode_dentry(CDentry *dn, bufferlist& bl,
-     
-     dout(14) << " pos " << bl.length() << " dn '" << dn->name << "' inode " << *in << dendl;
-     
-+    ceph_file_layout *fl = in->get_projected_dir_layout ();
-+    if (fl)
-+      in->inode.layout = *fl;
-+    else
-+      memset (&in->inode.layout, 0, sizeof (in->inode.layout));
-+
-     // marker, name, inode, [symlink string]
-     bl.append('I');         // inode
-     ::encode(in->inode, bl);
-diff --git a/src/mds/CInode.h b/src/mds/CInode.h
-index 57c76c4..8b42f6f 100644
---- a/src/mds/CInode.h
-+++ b/src/mds/CInode.h
-@@ -71,6 +71,9 @@ struct default_file_layout {
- 
-   ceph_file_layout layout;
- 
-+  default_file_layout() {};
-+  default_file_layout(ceph_file_layout l) : layout(l) {};
-+
-   void encode(bufferlist &bl) const {
-     __u8 struct_v = 1;
-     ::encode(struct_v, bl);
-@@ -458,12 +461,13 @@ private:
- 
-  public:
-   // ---------------------------
--  CInode(MDCache *c, bool auth=true, snapid_t f=2, snapid_t l=CEPH_NOSNAP) : 
-+  CInode(MDCache *c, bool auth=true, snapid_t f=2, snapid_t l=CEPH_NOSNAP,
-+	 ceph_file_layout *dl = NULL) : 
-     mdcache(c),
-     snaprealm(0), containing_realm(0),
-     first(f), last(l),
-     last_journaled(0), //last_open_journaled(0), 
--    default_layout(NULL),
-+    default_layout(dl ? new default_file_layout (*dl) : NULL),
-     //hack_accessed(true),
-     stickydir_ref(0),
-     parent(0),
-@@ -498,6 +502,7 @@ private:
-     g_num_inos++;
-     close_dirfrags();
-     close_snaprealm();
-+    delete default_layout;
-   }
-   
- 
--- 
-1.7.7.6
+Please guide me through this I continue to get the same frustrating error:
 
+"=== osd.0 ===
+2012-08-16 14:47:26.157823 7fde12e10780 -1  ** ERROR: error creating
+empty objec            t store in /ceph_data/osd.0: (2) No such file
+or directory
+failed: '/sbin/mkcephfs -d /tmp/mkcephfs.YFCUqpT8Qh --init-daemon osd.0'
+"
 
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
+Looking forward to any other tricks that I could try. Please refer to
+my previous emails to get a copy of my conf file and installation and
+platform details.
+
+regards
+Hemant
+
+On Thu, Aug 16, 2012 at 12:05 PM, Mark Kirkwood
+<mark.kirkwood@catalyst.net.nz> wrote:
+> On 16/08/12 17:36, hemant surale wrote:
+>>
+>> Still same problem sir. I have attached ceph.conf here. I tried to
+>> google it as well but unable to figure out what exact error is.
+>>
+>>
+>
+> Hi your ceph.conf have a few errors: any names *must* be real hosts - e.g
+> myserver01 must be real. Also you can't have xxx.alpha... I am guessing that
+> should be myserver01...unless they should all be hemant-virtual-machine (see
+> suggestions attached).
+>
+> You may need to specify directory for mds too (I am not using any)...with
+> some edits I can do a mkcephfs with the attached file on my system - I was
+> reproducing your error with yours. Enjoy (I am off home).
+>
+> Cheers
+>
+> Mark
+>
+>
+>
