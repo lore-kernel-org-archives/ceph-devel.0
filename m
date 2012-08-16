@@ -1,115 +1,59 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: SimpleMessenger dispatching: cause of performance problems?
-Date: Thu, 16 Aug 2012 09:58:02 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208160951190.26904@cobra.newdream.net>
-References: <502D1B07.3030101@itxperts.de>
+From: Danny Kukawka <danny.kukawka@bisect.de>
+Subject: Re: [PATCH] fix keyring generation for mds and osd
+Date: Thu, 16 Aug 2012 19:51:14 +0200
+Message-ID: <502D3312.60504@bisect.de>
+References: <1345114618-3464-1-git-send-email-danny.kukawka@bisect.de> <alpine.DEB.2.00.1208160925221.26904@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig4AA42D6683984A9D4BA7E36B"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:40501 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751880Ab2HPQ6D (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Aug 2012 12:58:03 -0400
-In-Reply-To: <502D1B07.3030101@itxperts.de>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:46406 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756713Ab2HPRvb (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Thu, 16 Aug 2012 13:51:31 -0400
+In-Reply-To: <alpine.DEB.2.00.1208160925221.26904@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org, Danny Kukawka <dkukawka@suse.de>
 
-Hi Andreas,
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig4AA42D6683984A9D4BA7E36B
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, 16 Aug 2012, Andreas Bluemle wrote:
-> Hi,
-> 
-> I have been trying to migrate a ceph cluster (ceph-0.48argonaut)
-> to a high speed cluster network and encounter scalability problems:
-> the overall performance of the ceph cluster does not scale well
-> with an increase in the underlying networking speed.
-> 
-> In short:
-> 
-> I believe that the dispatching from SimpleMessenger to
-> OSD worker queues causes that scalability issue.
-> 
-> Question: is it possible that this dispatching is causing performance
-> problems?
+Hi Sage,
 
-There is a single 'dispatch' thread that's processing this queue, and 
-conveniently perf lets you break down its profiling data on a per-thread 
-basis.  Once you've ruled out the throttler as the culprit, you might try 
-running the daemon with 'perf record -g -- ceph-osd ...' and then look 
-specifically at where that thread is spending its time.  We shouldn't be 
-burning that much CPU just doing the sanity checks and then handing 
-requests off to PGs...
+could you please cherry-pick them also to stable(-next)?
 
-sage
+Thanks!
+
+Danny
+
+Am 16.08.2012 18:25, schrieb Sage Weil:
+> Hi Danny,
+>=20
+> I've applied both of these.  Thanks!
+>=20
+> sage
 
 
-> 
-> 
-> In detail:
-> 
-> In order to find out more about this problem, I have added profiling to
-> the ceph code in various place; for write operations to the primary or the
-> secondary, timestamps are recorded for OSD object, offset and length of
-> the such a write request.
-> 
-> Timestamps record:
->  - receipt time at SimpleMessenger
->  - processing time at osd
->  - for primary write operations: wait time until replication operation
->    is acknowledged.
-> 
-> What I believe is happening: dispatching requests from SimpleMessenger to
-> OSD worker threads seems to consume a fair amount of time. This ends
-> up in a widening gap between subsequent receipts of requests and the start
-> of OSD processing them.
-> 
-> A primary write suffers twice from this problem: first because
-> the delay happens on the primary OSD and second because the replicating
-> OSD also suffers from the same problem - and hence causes additional delays
-> at the primary OSD when it waits for the commit from the replicating OSD.
-> 
-> In the attached graphics, the x-axis shows the time (in seconds)
-> The y-axis shows the offset where a request to write happened.
-> 
-> The red bar represents the SimpleMessenger receive, i.e. from reading
-> the message header until enqueuing the completely decoded message into
-> the SImpleMessenger dispatch queue.
-> 
-> The green bar represents the time required for local processing, i.e.
-> dispatching the the OSD worker, writing to filesystem and journal, send
-> out the replication operation to the replicating OSD. It right
-> end of the green bar is the time when locally everything has finished
-> and a commit could happen.
-> 
-> The blue bar represents the time until the replicating OSD has sent a commit
-> back to the primary OSD and the original write request can be committed to
-> the client.
-> 
-> The green bar is interrupted by a black bar: the left end represents
-> the time when the request has been enqueued on the OSD worker queue. The
-> right end gives the time when the request is taken off the OSD worker
-> queue and actual OSD processing starts.
-> 
-> The test was a simple sequential write to a rados block device.
-> 
-> Receiption of the write requests at the OSD is also sequential in the
-> graphics: the bar to the bottom of the graphics shows an earlier write
-> request.
-> 
-> Note that the dispatching of a later request in all cases relates to the
-> enqueue time at the OSD worker queue of the previous write request: the left
-> end of a black bar relates nicely to the beginning of a green bar above it.
-> 
-> 
-> 
-> -- 
-> Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
-> ITXperts GmbH                       http://www.itxperts.de
-> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
-> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
-> 
-> Company details: http://www.itxperts.de/imprint.htm
-> 
-> 
+
+--------------enig4AA42D6683984A9D4BA7E36B
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+
+iJwEAQECAAYFAlAtMxwACgkQ9DHLX79LmTLkdwP9FrCRiFhnaKhcuooPj/Lr8ffg
+dwd2ewFfnY15yuzE/Q4v0KOmBQZ69Z2lb0GHlBJeYYH42mTQt5pXaZi5JufO8Y1M
+06IEm4GK/rMEyskkNMmuzCt6fAesCGz0NzzYMwnHM7ONwCCPwPQHFNtpmhQPhJ9A
+EOCE4zahHs/VS4HsrbM=
+=5xJU
+-----END PGP SIGNATURE-----
+
+--------------enig4AA42D6683984A9D4BA7E36B--
