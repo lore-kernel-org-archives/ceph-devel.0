@@ -1,37 +1,32 @@
-From: ramu <ramu.freesystems@gmail.com>
-Subject: How to write data to rados pool.
-Date: Fri, 17 Aug 2012 06:00:40 +0000 (UTC)
-Message-ID: <loom.20120817T075847-947@post.gmane.org>
+From: Gregory Farnum <greg@inktank.com>
+Subject: Re: How to write data to rados pool.
+Date: Thu, 16 Aug 2012 23:12:47 -0700
+Message-ID: <6F69B412D76D49808942F99B99B96ACB@inktank.com>
+References: <loom.20120817T075847-947@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:45912 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754386Ab2HQGAx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 17 Aug 2012 02:00:53 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1T2Fc1-0004bd-Ve
-	for ceph-devel@vger.kernel.org; Fri, 17 Aug 2012 08:00:49 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 17 Aug 2012 08:00:49 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Fri, 17 Aug 2012 08:00:49 +0200
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:48279 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750792Ab2HQGMt (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Aug 2012 02:12:49 -0400
+Received: by pbbrr13 with SMTP id rr13so2815003pbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Aug 2012 23:12:49 -0700 (PDT)
+In-Reply-To: <loom.20120817T075847-947@post.gmane.org>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: ramu <ramu.freesystems@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi all,
+On Thursday, August 16, 2012 at 11:00 PM, ramu wrote:
+> Hi all,
+> 
+> I want to write or insert text file to rados pool,please help me to how to 
+> write or insert to rados pool.
 
-  I want to write or insert text file to rados pool,please help me to how to 
-write or insert to rados pool.
-
-Thanks,
-Ramu.
-
-
+Depending on what you're after, you'll want to explore using librados (for programmatic access) or the rados tool binary, which gives you command-line access to objects.
+Of course, if you want a filesystem or a block device, you'll want to check out setting up the full distributed filesystem (http://ceph.com/docs/master/cephfs/) or using RBD (http://ceph.com/docs/master/rbd/rbd/).
+-Greg
 
