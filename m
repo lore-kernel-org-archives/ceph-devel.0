@@ -1,86 +1,149 @@
 From: Sage Weil <sage@inktank.com>
-Subject: Re: [PATCH] make mkcephfs and init-ceph osd filesystem handling more
- flexible
-Date: Thu, 16 Aug 2012 16:40:34 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208161635290.26904@cobra.newdream.net>
-References: <1344526971-17035-1-git-send-email-danny.kukawka@bisect.de> <alpine.DEB.2.00.1208100851260.8611@cobra.newdream.net> <502530C9.7030008@bisect.de> <alpine.DEB.2.00.1208100909190.8611@cobra.newdream.net> <alpine.DEB.2.00.1208161448060.26904@cobra.newdream.net>
- <CADvuQRGBEva_8OB--M2JxMBoCXQ3i5GJkaJ-QvP-SoVqv7xDzw@mail.gmail.com>
+Subject: Re: Preserve dir default_file_layout in encoded inode
+Date: Thu, 16 Aug 2012 18:07:30 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208161759460.16032@cobra.newdream.net>
+References: <orr4r7tn5q.fsf@livre.localdomain>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42951 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:43407 "EHLO
 	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751421Ab2HPXkf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Aug 2012 19:40:35 -0400
-In-Reply-To: <CADvuQRGBEva_8OB--M2JxMBoCXQ3i5GJkaJ-QvP-SoVqv7xDzw@mail.gmail.com>
+	with ESMTP id S1755178Ab2HQBHa (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Aug 2012 21:07:30 -0400
+In-Reply-To: <orr4r7tn5q.fsf@livre.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Danny Kukawka <danny.kukawka@bisect.de>, ceph-devel@vger.kernel.org
+To: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, 16 Aug 2012, Tommi Virtanen wrote:
-> On Thu, Aug 16, 2012 at 3:32 PM, Sage Weil <sage@inktank.com> wrote:
-> > As for the new options, I suggest:
-> >
-> >  * osd fs type
-> >  * osd fs devs   (will work for mkcephfs, not for new stuff)
-> >  * osd fs path
-> >  * osd fs options
-> 
-> What does osd_fs_path mean, and how is it different from the osd_data dir?
+Hi Alexandre,
 
-The idea was that you might wand the fs mounted somewhere other that 
-osd_data.  I'm not sure it's useful; we may as well drop that...
+I'm glad to you picked this up again; it'll be nice to get this issue 
+behind us.  Sadly it's been a while since I've looked at this code...
 
-> I'm expecting to need both mkfs-time options (btrfs metadata block
-> size etc) and mount-time options (noatime etc).
-> 
-> It would be nice if there was a way to set the options for all
-> fstypes, and then just toggle which one is used (by default). That
-> avoids bugs like trying to mkfs/mount btrfs with xfs-specific options,
-> and vice versa.
-> 
-> I'm not sure how well our config system will handle dynamic variable
-> names -- ceph-authtool was fine with me just putting data in
-> osd_crush_location, and we don't need to access these variables from
-> C++, so it should be fine. If you really wanted to, you could probably
-> cram the them into a single variable, with ad hoc structured data in
-> the string value, but that's ugly.. Or just hardcode the list of
-> possible filesystems, and then it's not dynamic variable names
-> anymore.
+On Thu, 16 Aug 2012, Alexandre Oliva wrote:
+> Store dir layouts not only in the journal, but also in inode
+> information for the directory, so that they aren't dropped on the
+> floor when dirs are evicted from the MDS cache and dropped from the
+> journal.  Also restore dir layouts when fetching dirs back into the
+> MDS cache.
 
-Yeah, ceph-conf will happily take anything.  The C++ code has to do 
-slightly more work to get arbitrary config fields, but that's not an 
-issue.
+That sounds like the right diagnosis.  I'm not sure this fix is correct, 
+though (see below).  It looks like I had a patch from a while back that 
+simplified a lot of this code, though, and fixed teh storage issue for 
+free.  I've dusted it off and repushed it.. can you take a look?  
+wip-mds-layout.
 
-> So I'm dreaming of something like:
+> This is supposed to fix for bug 1435, except that it doesn't look like
+> a layout change to a directory will trigger a commit of the new layout
+> if the directory is not otherwise modified before the change is
+> evicted from the cache and the journal.  This can be sorted out in a
+> separate patch.
 > 
-> [osd]
-> # what mount options will be passed when an osd data disk is using
-> # one of these filesystems; these are passed to mount -o
-> osd mount options btrfs = herp,foo=bar
-> osd mount options xfs = noatime,derp
+> Signed-off-by: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+> ---
+>  src/mds/CDir.cc  |   16 +++++++++++++++-
+>  src/mds/CInode.h |    9 +++++++--
+>  2 files changed, 22 insertions(+), 3 deletions(-)
 > 
-> # what mkfs options are used when creating new osd data disk
-> # filesystems
-> osd mkfs options btrfs = --hur
-> osd mkfs options xfs = --dur
-> 
-> # what fstype to use by default when mkfs'ing; mounting will detect
-> # what's there (with blkid) and work with anything
-> osd mkfs type = btrfs
-> 
-> # this may go away with "mkcephfs 2.0", and it will have to get more
-> # complex if we provide something for journals too, etc, because you
-> # may want to pair specific data disks to specific journals (DH has
-> # this need).. haven't had time to think it through, which is why i'm
-> # leaning toward "and here's a hook where you run something on the
-> # host that calls ceph-disk-prepare etc on all the disks you want",
-> # and using uuids to match journals to data disks -- this work has
-> # not yet started)
-> osd fs devs = /dev/sdb /dev/sdc
+> diff --git a/src/mds/CDir.cc b/src/mds/CDir.cc
+> index 6761c6f..df19252 100644
+> --- a/src/mds/CDir.cc
+> +++ b/src/mds/CDir.cc
+> @@ -1552,8 +1552,16 @@ void CDir::_fetched(bufferlist &bl, const string& want_dn)
+>  	    << " already exists at " << inopath << "\n";
+>  	  continue;
+>  	} else {
+> +	  ceph_file_layout unset_fl = ceph_file_layout(), *fl;
+> +
+> +	  if (inode.is_dir ()
+> +	      && memcmp (&inode.layout, &unset_fl, sizeof (unset_fl)) != 0)
+> +	    fl = &inode.layout;
+> +	  else
+> +	    fl = NULL;
+> +
+>  	  // inode
+> -	  in = new CInode(cache, true, first, last);
+> +	  in = new CInode(cache, true, first, last, fl);
+>  	  in->inode = inode;
+>  	  
+>  	  // symlink?
+> @@ -1845,6 +1853,12 @@ void CDir::_encode_dentry(CDentry *dn, bufferlist& bl,
+>      
+>      dout(14) << " pos " << bl.length() << " dn '" << dn->name << "' inode " << *in << dendl;
+>      
+> +    ceph_file_layout *fl = in->get_projected_dir_layout ();
 
-This all looks good to me.  What do you think, Danny?
+We aren't allowed to write any "projected" (i.e., unjournaled) changes to 
+other objects until they've committed.  If this were the 
+committed/journaled layout, it'd be close, though.
 
+In any case, can you try out wip-mds-layout?  I don't have a full 
+environment on my laptop so I haven't tested it yet; I'll try to do that 
+later tonight.
+
+Thanks!
 sage
 
+
+> +    if (fl)
+> +      in->inode.layout = *fl;
+> +    else
+> +      memset (&in->inode.layout, 0, sizeof (in->inode.layout));
+> +
+>      // marker, name, inode, [symlink string]
+>      bl.append('I');         // inode
+>      ::encode(in->inode, bl);
+> diff --git a/src/mds/CInode.h b/src/mds/CInode.h
+> index 57c76c4..8b42f6f 100644
+> --- a/src/mds/CInode.h
+> +++ b/src/mds/CInode.h
+> @@ -71,6 +71,9 @@ struct default_file_layout {
+>  
+>    ceph_file_layout layout;
+>  
+> +  default_file_layout() {};
+> +  default_file_layout(ceph_file_layout l) : layout(l) {};
+> +
+>    void encode(bufferlist &bl) const {
+>      __u8 struct_v = 1;
+>      ::encode(struct_v, bl);
+> @@ -458,12 +461,13 @@ private:
+>  
+>   public:
+>    // ---------------------------
+> -  CInode(MDCache *c, bool auth=true, snapid_t f=2, snapid_t l=CEPH_NOSNAP) : 
+> +  CInode(MDCache *c, bool auth=true, snapid_t f=2, snapid_t l=CEPH_NOSNAP,
+> +	 ceph_file_layout *dl = NULL) : 
+>      mdcache(c),
+>      snaprealm(0), containing_realm(0),
+>      first(f), last(l),
+>      last_journaled(0), //last_open_journaled(0), 
+> -    default_layout(NULL),
+> +    default_layout(dl ? new default_file_layout (*dl) : NULL),
+>      //hack_accessed(true),
+>      stickydir_ref(0),
+>      parent(0),
+> @@ -498,6 +502,7 @@ private:
+>      g_num_inos++;
+>      close_dirfrags();
+>      close_snaprealm();
+> +    delete default_layout;
+>    }
+>    
+>  
+> -- 
+> 1.7.7.6
+> 
+> 
+> -- 
+> Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+> You must be the change you wish to see in the world. -- Gandhi
+> Be Free! -- http://FSFLA.org/   FSF Latin America board member
+> Free Software Evangelist      Red Hat Brazil Compiler Engineer
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
