@@ -1,46 +1,37 @@
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
-Subject: [PATCH] ceph: Fix oops when mounting cephfs with non-existing path
-Date: Fri, 17 Aug 2012 13:55:59 +0800
-Message-ID: <1345182959-6486-1-git-send-email-zheng.z.yan@intel.com>
+From: ramu <ramu.freesystems@gmail.com>
+Subject: How to write data to rados pool.
+Date: Fri, 17 Aug 2012 06:00:40 +0000 (UTC)
+Message-ID: <loom.20120817T075847-947@post.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:32012 "EHLO mga03.intel.com"
+Received: from plane.gmane.org ([80.91.229.3]:45912 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750792Ab2HQF4C (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 17 Aug 2012 01:56:02 -0400
+	id S1754386Ab2HQGAx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 17 Aug 2012 02:00:53 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1T2Fc1-0004bd-Ve
+	for ceph-devel@vger.kernel.org; Fri, 17 Aug 2012 08:00:49 +0200
+Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 17 Aug 2012 08:00:49 +0200
+Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Fri, 17 Aug 2012 08:00:49 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>
 
-From: "Yan, Zheng" <zheng.z.yan@intel.com>
+Hi all,
 
-req->r_locked_dir is NULL if the request was created by
-open_root_dentry(). ceph_fill_trace() lacks check for this case.
-It causes oops when mounting cephfs with non-existing path.
+  I want to write or insert text file to rados pool,please help me to how to 
+write or insert to rados pool.
 
-Signed-off-by: Yan, Zheng <zheng.z.yan@intel.com>
----
- fs/ceph/inode.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+Thanks,
+Ramu.
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 9fff9f3..40e2ef1 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -992,6 +992,13 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
- 	if (rinfo->head->is_dentry) {
- 		struct inode *dir = req->r_locked_dir;
- 
-+		/*
-+		 * req->r_locked_dir is null if the request was created
-+		 * by open_root_dentry()
-+		 */
-+		if (!dir)
-+			return le32_to_cpu(rinfo->head->result);
-+
- 		err = fill_inode(dir, &rinfo->diri, rinfo->dirfrag,
- 				 session, req->r_request_started, -1,
- 				 &req->r_caps_reservation);
--- 
-1.7.11.2
+
 
