@@ -1,191 +1,109 @@
-From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH 1/2] libceph: delay debugfs initialization until we learn global_id
-Date: Sat, 18 Aug 2012 20:52:33 -0700
-Message-ID: <CAC-hyiEsH752No6B1x9_ez72e_oKyb4KeQY7fq3sTbEC0zn7aw@mail.gmail.com>
-References: <1345222204-9583-1-git-send-email-sage@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: regression with poll(2)
+Date: Sun, 19 Aug 2012 11:49:31 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
+References: <alpine.DEB.2.00.1208151226250.15721@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:40459 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750918Ab2HSDwf (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 18 Aug 2012 23:52:35 -0400
-Received: by bkwj10 with SMTP id j10so1609516bkw.19
-        for <ceph-devel@vger.kernel.org>; Sat, 18 Aug 2012 20:52:33 -0700 (PDT)
-In-Reply-To: <1345222204-9583-1-git-send-email-sage@inktank.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org, zheng.z.yan@intel.com
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.00.1208151226250.15721@cobra.newdream.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: mgorman@suse.de, davem@davemloft.net, netdev@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, neilb@suse.de, a.p.zijlstra@chello.nl, michaelc@cs.wisc.edu, emunson@mgebm.net, eric.dumazet@gmail.com, sebastian@breakpoint.cc, cl@linux.com, akpm@linux-foundation.org, torvalds@linux-foundation.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Aug 17, 2012 at 9:50 AM, Sage Weil <sage@inktank.com> wrote:
-> The debugfs directory includes the cluster fsid and our unique global_id.
-> We need to delay the initialization of the debug entry until we have
-> learned both the fsid and our global_id from the monitor or else the
-> second client can't create its debugfs entry and will fail (and multiple
-> client instances aren't properly reflected in debugfs).
->
-> Reported by: Yan, Zheng <zheng.z.yan@intel.com>
-> Signed-off-by: Sage Weil <sage@inktank.com>
-> ---
->  fs/ceph/debugfs.c      |    1 +
->  net/ceph/ceph_common.c |    1 -
->  net/ceph/debugfs.c     |    4 +++
->  net/ceph/mon_client.c  |   49 +++++++++++++++++++++++++++++++++++++++++++----
->  4 files changed, 49 insertions(+), 6 deletions(-)
->
-> diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-> index fb962ef..6d59006 100644
-> --- a/fs/ceph/debugfs.c
-> +++ b/fs/ceph/debugfs.c
-> @@ -201,6 +201,7 @@ int ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
->         int err = -ENOMEM;
->
->         dout("ceph_fs_debugfs_init\n");
-> +       BUG_ON(!fsc->client->debugfs_dir);
->         fsc->debugfs_congestion_kb =
->                 debugfs_create_file("writeback_congestion_kb",
->                                     0600,
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index 69e38db..a802029 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -84,7 +84,6 @@ int ceph_check_fsid(struct ceph_client *client, struct ceph_fsid *fsid)
->                         return -1;
->                 }
->         } else {
-> -               pr_info("client%lld fsid %pU\n", ceph_client_id(client), fsid);
->                 memcpy(&client->fsid, fsid, sizeof(*fsid));
->         }
->         return 0;
-> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-> index 54b531a..38b5dc1 100644
-> --- a/net/ceph/debugfs.c
-> +++ b/net/ceph/debugfs.c
-> @@ -189,6 +189,9 @@ int ceph_debugfs_client_init(struct ceph_client *client)
->         snprintf(name, sizeof(name), "%pU.client%lld", &client->fsid,
->                  client->monc.auth->global_id);
->
-> +       dout("ceph_debugfs_client_init %p %s\n", client, name);
-> +
-> +       BUG_ON(client->debugfs_dir);
->         client->debugfs_dir = debugfs_create_dir(name, ceph_debugfs_dir);
->         if (!client->debugfs_dir)
->                 goto out;
-> @@ -234,6 +237,7 @@ out:
->
->  void ceph_debugfs_client_cleanup(struct ceph_client *client)
->  {
-> +       dout("ceph_debugfs_client_cleanup %p\n", client);
->         debugfs_remove(client->debugfs_osdmap);
->         debugfs_remove(client->debugfs_monmap);
->         debugfs_remove(client->osdc.debugfs_file);
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 105d533..b9f412d 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -311,6 +311,17 @@ int ceph_monc_open_session(struct ceph_mon_client *monc)
->  EXPORT_SYMBOL(ceph_monc_open_session);
->
->  /*
-> + * We require the fsid and global_id in order to initialize our
-> + * debugfs dir.
-> + */
-> +static bool have_debugfs_info(struct ceph_mon_client *monc)
-> +{
-> +       dout("have_debugfs_info fsid %d globalid %lld\n",
-> +            (int)monc->client->have_fsid, monc->auth->global_id);
-> +       return monc->client->have_fsid && monc->auth->global_id > 0;
-> +}
-> +
-> +/*
->   * The monitor responds with mount ack indicate mount success.  The
->   * included client ticket allows the client to talk to MDSs and OSDs.
->   */
-> @@ -320,9 +331,12 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
->         struct ceph_client *client = monc->client;
->         struct ceph_monmap *monmap = NULL, *old = monc->monmap;
->         void *p, *end;
-> +       int had_debugfs_info, init_debugfs = 0;
->
->         mutex_lock(&monc->mutex);
->
-> +       had_debugfs_info = have_debugfs_info(monc);
-> +
->         dout("handle_monmap\n");
->         p = msg->front.iov_base;
->         end = p + msg->front.iov_len;
-> @@ -344,12 +358,21 @@ static void ceph_monc_handle_map(struct ceph_mon_client *monc,
->
->         if (!client->have_fsid) {
->                 client->have_fsid = true;
-> +               if (!had_debugfs_info && have_debugfs_info(monc)) {
-> +                       pr_info("client%lld fsid %pU\n",
-> +                               ceph_client_id(monc->client),
-> +                               &monc->client->fsid);
-> +                       init_debugfs = 1;
-> +               }
->                 mutex_unlock(&monc->mutex);
-> -               /*
-> -                * do debugfs initialization without mutex to avoid
-> -                * creating a locking dependency
-> -                */
-> -               ceph_debugfs_client_init(client);
-> +
-> +               if (init_debugfs)
+I've bisected and identified this commit:
 
-You should really add brackets here
+    netvm: propagate page->pfmemalloc to skb
+    
+    The skb->pfmemalloc flag gets set to true iff during the slab allocation
+    of data in __alloc_skb that the the PFMEMALLOC reserves were used.  If the
+    packet is fragmented, it is possible that pages will be allocated from the
+    PFMEMALLOC reserve without propagating this information to the skb.  This
+    patch propagates page->pfmemalloc from pages allocated for fragments to
+    the skb.
+    
+    Signed-off-by: Mel Gorman <mgorman@suse.de>
+    Acked-by: David S. Miller <davem@davemloft.net>
+    Cc: Neil Brown <neilb@suse.de>
+    Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Cc: Mike Christie <michaelc@cs.wisc.edu>
+    Cc: Eric B Munson <emunson@mgebm.net>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Cc: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
+    Cc: Mel Gorman <mgorman@suse.de>
+    Cc: Christoph Lameter <cl@linux.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 
-> +                       /*
-> +                        * do debugfs initialization without mutex to avoid
-> +                        * creating a locking dependency
-> +                        */
-> +                       ceph_debugfs_client_init(monc->client);
-> +
->                 goto out_unlocked;
->         }
->  out:
-> @@ -865,8 +888,10 @@ static void handle_auth_reply(struct ceph_mon_client *monc,
->  {
->         int ret;
->         int was_auth = 0;
-> +       int had_debugfs_info, init_debugfs = 0;
->
->         mutex_lock(&monc->mutex);
-> +       had_debugfs_info = have_debugfs_info(monc);
->         if (monc->auth->ops)
->                 was_auth = monc->auth->ops->is_authenticated(monc->auth);
->         monc->pending_auth = 0;
-> @@ -889,7 +914,21 @@ static void handle_auth_reply(struct ceph_mon_client *monc,
->                 __send_subscribe(monc);
->                 __resend_generic_request(monc);
->         }
-> +
-> +       if (!had_debugfs_info && have_debugfs_info(monc)) {
-> +               pr_info("client%lld fsid %pU\n",
-> +                       ceph_client_id(monc->client),
-> +                       &monc->client->fsid);
-> +               init_debugfs = 1;
-> +       }
->         mutex_unlock(&monc->mutex);
-> +
-> +       if (init_debugfs)
+I've retested several times and confirmed that this change leads to the 
+breakage, and also confirmed that reverting it on top of -rc1 also fixes 
+the problem.
 
-Same here
+I've also added some additional instrumentation to my code and confirmed 
+that the process is blocking on poll(2) while netstat is reporting 
+data available on the socket.
+
+What can I do to help track this down?
+
+Thanks!
+sage
 
 
-> +               /*
-> +                * do debugfs initialization without mutex to avoid
-> +                * creating a locking dependency
-> +                */
-> +               ceph_debugfs_client_init(monc->client);
->  }
->
->  static int __validate_auth(struct ceph_mon_client *monc)
-> --
-> 1.7.9
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Wed, 15 Aug 2012, Sage Weil wrote:
+
+> I'm experiencing a stall with Ceph daemons communicating over TCP that 
+> occurs reliably with 3.6-rc1 (and linus/master) but not 3.5.  The basic 
+> situation is:
+> 
+>  - the socket is two processes communicating over TCP on the same host, e.g. 
+> 
+> tcp        0 2164849 10.214.132.38:6801      10.214.132.38:51729     ESTABLISHED
+> 
+>  - one end writes a bunch of data in
+>  - the other end consumes data, but at some point stalls.
+>  - reads are nonblocking, e.g.
+> 
+>   int got = ::recv( sd, buf, len, MSG_DONTWAIT );
+> 
+>  and between those calls we wait with
+> 
+>   struct pollfd pfd;
+>   short evmask;
+>   pfd.fd = sd;
+>   pfd.events = POLLIN;
+> #if defined(__linux__)
+>   pfd.events |= POLLRDHUP;
+> #endif
+> 
+>   if (poll(&pfd, 1, msgr->timeout) <= 0)
+>     return -1;
+> 
+>  - in my case the timeout is ~15 minutes.  at that point it errors out, 
+> and the daemons reconnect and continue for a while until hitting this 
+> again.
+> 
+>  - at the time of the stall, the reading process is blocked on that 
+> poll(2) call.  There are a bunch of threads stuck on poll(2), some of them 
+> stuck and some not, but they all have stacks like
+> 
+> [<ffffffff8118f6f9>] poll_schedule_timeout+0x49/0x70
+> [<ffffffff81190baf>] do_sys_poll+0x35f/0x4c0
+> [<ffffffff81190deb>] sys_poll+0x6b/0x100
+> [<ffffffff8163d369>] system_call_fastpath+0x16/0x1b
+> 
+>  - you'll note that the netstat output shows data queued:
+> 
+> tcp        0 1163264 10.214.132.36:6807      10.214.132.36:41738     ESTABLISHED
+> tcp        0 1622016 10.214.132.36:41738     10.214.132.36:6807      ESTABLISHED
+> 
+> etc.
+> 
+> Is this a known regression?  Or might I be misusing the API?  What 
+> information would help track it down?
+> 
+> Thanks!
+> sage
+> 
+> 
+> 
