@@ -1,56 +1,33 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: regression with poll(2)
-Date: Mon, 20 Aug 2012 16:20:46 -0700
-Message-ID: <20120820162046.f827f758.akpm@linux-foundation.org>
-References: <alpine.DEB.2.00.1208151226250.15721@cobra.newdream.net>
-	<alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
-	<20120820090443.GA3275@suse.de>
-	<1345455059.5158.302.camel@edumazet-glaptop>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: mkcephfs problem
+Date: Mon, 20 Aug 2012 16:24:29 -0700
+Message-ID: <CADvuQREPJ5Q_sQSpbsgEuiV82kbjiW17p3+_s71M1cZQm-SBjA@mail.gmail.com>
+References: <CAEj+kbmn=UY1dUKkyDDymqhbTuvEypVM+o4Ny-phS1SKZkmshA@mail.gmail.com>
+ <CAEj+kbmhDRF5X=Yn=MDOPbphqDgu=rFwSQ9DBzfSwXC_d346OA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1345455059.5158.302.camel@edumazet-glaptop>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Eric Dumazet <eric.dumazet@gmail.com>
-Cc: Mel Gorman <mgorman@suse.de>, Sage Weil <sage@inktank.com>, davem@davemloft.net, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, neilb@suse.de, a.p.zijlstra@chello.nl, michaelc@cs.wisc.edu, emunson@mgebm.net, sebastian@breakpoint.cc, cl@linux.com, torvalds@linux-foundation.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:38883 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756618Ab2HTXYv (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Aug 2012 19:24:51 -0400
+Received: by vbbff1 with SMTP id ff1so5919724vbb.19
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Aug 2012 16:24:50 -0700 (PDT)
+In-Reply-To: <CAEj+kbmhDRF5X=Yn=MDOPbphqDgu=rFwSQ9DBzfSwXC_d346OA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Tim Flavin <tim.flavin@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, 20 Aug 2012 11:30:59 +0200
-Eric Dumazet <eric.dumazet@gmail.com> wrote:
+On Sun, Jul 22, 2012 at 8:35 AM, Tim Flavin <tim.flavin@gmail.com> wrote:
+>> cat: /tmp/foo/key.*: No such file or directory
+...
+> In addition to localhost, I found a number of other network related
+> problems with my setup.
+> When I fixed them mkcephfs was much happier.
 
-> On Mon, 2012-08-20 at 10:04 +0100, Mel Gorman wrote:
-> 
-> > Can the following patch be tested please? It is reported to fix an fio
-> > regression that may be similar to what you are experiencing but has not
-> > been picked up yet.
-> > 
-> > -
-> 
-> This seems to help here.
-> 
-> Boot your machine with "mem=768M" or a bit less depending on your setup,
-> and try a netperf.
-> 
-> -> before patch :
-> 
-> # netperf
-> MIGRATED TCP STREAM TEST from 0.0.0.0 (0.0.0.0) port 0 AF_INET to
-> localhost.localdomain () port 0 AF_INET
-> Recv   Send    Send                          
-> Socket Socket  Message  Elapsed              
-> Size   Size    Size     Time     Throughput  
-> bytes  bytes   bytes    secs.    10^6bits/sec  
-> 
->  87380  16384  16384    14.00       6.05   
-> 
-> -> after patch :
-> 
-> Recv   Send    Send                          
-> Socket Socket  Message  Elapsed              
-> Size   Size    Size     Time     Throughput  
-> bytes  bytes   bytes    secs.    10^6bits/sec  
-> 
->  87380  16384  16384    10.00    18509.73   
+Hi. I wanted to check back on this; we just stumbled on this same
+problem, and I tracked down what's going on. The simplest fix is
+exactly what you discovered; don't use "host=localhost" in ceph.conf.
 
-"seem to help"?  Was previous performance fully restored?
+The ticket for this is http://tracker.newdream.net/issues/3001
