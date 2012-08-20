@@ -1,20 +1,24 @@
-From: Eric Dumazet <eric.dumazet@gmail.com>
+From: Mel Gorman <mgorman@suse.de>
 Subject: Re: regression with poll(2)
-Date: Mon, 20 Aug 2012 10:07:53 +0200
-Message-ID: <1345450073.5158.272.camel@edumazet-glaptop>
+Date: Mon, 20 Aug 2012 10:04:44 +0100
+Message-ID: <20120820090443.GA3275@suse.de>
 References: <alpine.DEB.2.00.1208151226250.15721@cobra.newdream.net>
-	 <alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
+ <alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=iso-8859-15
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:52508 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753721Ab2HTJKj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 20 Aug 2012 05:10:39 -0400
+Content-Disposition: inline
 In-Reply-To: <alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: mgorman@suse.de, davem@davemloft.net, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, neilb@suse.de, a.p.zijlstra@chello.nl, michaelc@cs.wisc.edu, emunson@mgebm.net, sebastian@breakpoint.cc, cl@linux.com, akpm@linux-foundation.org, torvalds@linux-foundation.org
-List-Id: ceph-devel.vger.kernel.org
+Cc: davem@davemloft.net, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, neilb@suse.de, a.p.zijlstra@chello.nl, michaelc@cs.wisc.edu, emunson@mgebm.net, eric.dumazet@gmail.com, sebastian@breakpoint.cc, cl@linux.com, akpm@linux-foundation.org, torvalds@linux-foundation.org
 
-On Sun, 2012-08-19 at 11:49 -0700, Sage Weil wrote:
+On Sun, Aug 19, 2012 at 11:49:31AM -0700, Sage Weil wrote:
 > I've bisected and identified this commit:
 > 
 >     netvm: propagate page->pfmemalloc to skb
@@ -39,6 +43,9 @@ On Sun, 2012-08-19 at 11:49 -0700, Sage Weil wrote:
 >     Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 >     Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 > 
+
+Ok, thanks.
+
 > I've retested several times and confirmed that this change leads to the 
 > breakage, and also confirmed that reverting it on top of -rc1 also fixes 
 > the problem.
@@ -49,70 +56,87 @@ On Sun, 2012-08-19 at 11:49 -0700, Sage Weil wrote:
 > 
 > What can I do to help track this down?
 > 
-> Thanks!
-> sage
-> 
-> 
-> On Wed, 15 Aug 2012, Sage Weil wrote:
-> 
-> > I'm experiencing a stall with Ceph daemons communicating over TCP that 
-> > occurs reliably with 3.6-rc1 (and linus/master) but not 3.5.  The basic 
-> > situation is:
-> > 
-> >  - the socket is two processes communicating over TCP on the same host, e.g. 
-> > 
-> > tcp        0 2164849 10.214.132.38:6801      10.214.132.38:51729     ESTABLISHED
-> > 
-> >  - one end writes a bunch of data in
-> >  - the other end consumes data, but at some point stalls.
-> >  - reads are nonblocking, e.g.
-> > 
-> >   int got = ::recv( sd, buf, len, MSG_DONTWAIT );
-> > 
-> >  and between those calls we wait with
-> > 
-> >   struct pollfd pfd;
-> >   short evmask;
-> >   pfd.fd = sd;
-> >   pfd.events = POLLIN;
-> > #if defined(__linux__)
-> >   pfd.events |= POLLRDHUP;
-> > #endif
-> > 
-> >   if (poll(&pfd, 1, msgr->timeout) <= 0)
-> >     return -1;
-> > 
-> >  - in my case the timeout is ~15 minutes.  at that point it errors out, 
-> > and the daemons reconnect and continue for a while until hitting this 
-> > again.
-> > 
-> >  - at the time of the stall, the reading process is blocked on that 
-> > poll(2) call.  There are a bunch of threads stuck on poll(2), some of them 
-> > stuck and some not, but they all have stacks like
-> > 
-> > [<ffffffff8118f6f9>] poll_schedule_timeout+0x49/0x70
-> > [<ffffffff81190baf>] do_sys_poll+0x35f/0x4c0
-> > [<ffffffff81190deb>] sys_poll+0x6b/0x100
-> > [<ffffffff8163d369>] system_call_fastpath+0x16/0x1b
-> > 
-> >  - you'll note that the netstat output shows data queued:
-> > 
-> > tcp        0 1163264 10.214.132.36:6807      10.214.132.36:41738     ESTABLISHED
-> > tcp        0 1622016 10.214.132.36:41738     10.214.132.36:6807      ESTABLISHED
-> > 
 
-In this netstat output, we can see some data in output queues, but no
-data on receive queues. poll() is OK.
+Can the following patch be tested please? It is reported to fix an fio
+regression that may be similar to what you are experiencing but has not
+been picked up yet.
 
-Some TCP frames are not properly delivered, even after a retransmit.
+---8<---
+From: Alex Shi <alex.shi@intel.com>
+Subject: [PATCH] mm: correct page->pfmemalloc to fix deactivate_slab regression
 
-( to see useful stats/counters : ss -emoi dst 10.214.132.36)
+commit cfd19c5a9ec (mm: only set page->pfmemalloc when
+ALLOC_NO_WATERMARKS was used) try to narrow down page->pfmemalloc
+setting, but it missed some places the pfmemalloc should be set.
 
-For loopback transmits, skbs are taken from the output queue, cloned and
-feeded to local stack.
+So, in __slab_alloc, the unalignment pfmemalloc and ALLOC_NO_WATERMARKS
+cause incorrect deactivate_slab() on our core2 server:
 
-If they have the pfmemalloc bit, they wont be delivered to normal
-sockets, but dropped.
+    64.73%           fio  [kernel.kallsyms]     [k] _raw_spin_lock
+                     |
+                     --- _raw_spin_lock
+                        |
+                        |---0.34%-- deactivate_slab
+                        |          __slab_alloc
+                        |          kmem_cache_alloc
+                        |          |
 
-tcp_sendmsg() seems to be able to queue skbs with pfmemalloc set to
-true, and this makes no sense to me.
+That causes our fio sync write performance has 40% regression.
+
+This patch move the checking in get_page_from_freelist, that resolved
+this issue.
+
+Signed-off-by: Alex Shi <alex.shi@intel.com>
+---
+ mm/page_alloc.c |   21 +++++++++++----------
+ 1 files changed, 11 insertions(+), 10 deletions(-)
+
+diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+index 009ac28..07f1924 100644
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -1928,6 +1928,17 @@ this_zone_full:
+ 		zlc_active = 0;
+ 		goto zonelist_scan;
+ 	}
++
++	if (page)
++		/*
++		 * page->pfmemalloc is set when ALLOC_NO_WATERMARKS was
++		 * necessary to allocate the page. The expectation is
++		 * that the caller is taking steps that will free more
++		 * memory. The caller should avoid the page being used
++		 * for !PFMEMALLOC purposes.
++		 */
++		page->pfmemalloc = !!(alloc_flags & ALLOC_NO_WATERMARKS);
++
+ 	return page;
+ }
+ 
+@@ -2389,14 +2400,6 @@ rebalance:
+ 				zonelist, high_zoneidx, nodemask,
+ 				preferred_zone, migratetype);
+ 		if (page) {
+-			/*
+-			 * page->pfmemalloc is set when ALLOC_NO_WATERMARKS was
+-			 * necessary to allocate the page. The expectation is
+-			 * that the caller is taking steps that will free more
+-			 * memory. The caller should avoid the page being used
+-			 * for !PFMEMALLOC purposes.
+-			 */
+-			page->pfmemalloc = true;
+ 			goto got_pg;
+ 		}
+ 	}
+@@ -2569,8 +2572,6 @@ retry_cpuset:
+ 		page = __alloc_pages_slowpath(gfp_mask, order,
+ 				zonelist, high_zoneidx, nodemask,
+ 				preferred_zone, migratetype);
+-	else
+-		page->pfmemalloc = false;
+ 
+ 	trace_mm_page_alloc(page, order, gfp_mask, migratetype);
+ 
+-- 
+1.7.5.4
+
