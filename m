@@ -1,56 +1,36 @@
-From: Eric Dumazet <eric.dumazet@gmail.com>
-Subject: Re: regression with poll(2)
-Date: Mon, 20 Aug 2012 11:30:59 +0200
-Message-ID: <1345455059.5158.302.camel@edumazet-glaptop>
-References: <alpine.DEB.2.00.1208151226250.15721@cobra.newdream.net>
-	 <alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
-	 <20120820090443.GA3275@suse.de>
+From: ramu <ramu.freesystems@gmail.com>
+Subject: Re: S3 comapatible with java-rados.
+Date: Mon, 20 Aug 2012 09:43:42 +0000 (UTC)
+Message-ID: <loom.20120820T114056-239@post.gmane.org>
+References: <loom.20120820T091919-196@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:40724 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756057Ab2HTJbF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Aug 2012 05:31:05 -0400
-In-Reply-To: <20120820090443.GA3275@suse.de>
+Received: from plane.gmane.org ([80.91.229.3]:59932 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753558Ab2HTJny (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 20 Aug 2012 05:43:54 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1T3OWW-0005ZQ-Em
+	for ceph-devel@vger.kernel.org; Mon, 20 Aug 2012 11:43:52 +0200
+Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Aug 2012 11:43:52 +0200
+Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Aug 2012 11:43:52 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mel Gorman <mgorman@suse.de>
-Cc: Sage Weil <sage@inktank.com>, davem@davemloft.net, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, neilb@suse.de, a.p.zijlstra@chello.nl, michaelc@cs.wisc.edu, emunson@mgebm.net, sebastian@breakpoint.cc, cl@linux.com, akpm@linux-foundation.org, torvalds@linux-foundation.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, 2012-08-20 at 10:04 +0100, Mel Gorman wrote:
+Hi,
 
-> Can the following patch be tested please? It is reported to fix an fio
-> regression that may be similar to what you are experiencing but has not
-> been picked up yet.
-> 
-> -
+ I want to install RADOS Gateway Rest interface.Please help me to install rados
+gateway for rest interface(S3gw).
 
-This seems to help here.
-
-Boot your machine with "mem=768M" or a bit less depending on your setup,
-and try a netperf.
-
--> before patch :
-
-# netperf
-MIGRATED TCP STREAM TEST from 0.0.0.0 (0.0.0.0) port 0 AF_INET to
-localhost.localdomain () port 0 AF_INET
-Recv   Send    Send                          
-Socket Socket  Message  Elapsed              
-Size   Size    Size     Time     Throughput  
-bytes  bytes   bytes    secs.    10^6bits/sec  
-
- 87380  16384  16384    14.00       6.05   
-
--> after patch :
-
-Recv   Send    Send                          
-Socket Socket  Message  Elapsed              
-Size   Size    Size     Time     Throughput  
-bytes  bytes   bytes    secs.    10^6bits/sec  
-
- 87380  16384  16384    10.00    18509.73   
-
+Thanks,
+Ramu.
 
