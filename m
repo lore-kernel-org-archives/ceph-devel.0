@@ -1,142 +1,56 @@
-From: Mel Gorman <mgorman@suse.de>
+From: Eric Dumazet <eric.dumazet@gmail.com>
 Subject: Re: regression with poll(2)
-Date: Mon, 20 Aug 2012 10:04:44 +0100
-Message-ID: <20120820090443.GA3275@suse.de>
+Date: Mon, 20 Aug 2012 11:30:59 +0200
+Message-ID: <1345455059.5158.302.camel@edumazet-glaptop>
 References: <alpine.DEB.2.00.1208151226250.15721@cobra.newdream.net>
- <alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
+	 <alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
+	 <20120820090443.GA3275@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:52508 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753721Ab2HTJKj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 20 Aug 2012 05:10:39 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:40724 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756057Ab2HTJbF (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Aug 2012 05:31:05 -0400
+In-Reply-To: <20120820090443.GA3275@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: davem@davemloft.net, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, neilb@suse.de, a.p.zijlstra@chello.nl, michaelc@cs.wisc.edu, emunson@mgebm.net, eric.dumazet@gmail.com, sebastian@breakpoint.cc, cl@linux.com, akpm@linux-foundation.org, torvalds@linux-foundation.org
+To: Mel Gorman <mgorman@suse.de>
+Cc: Sage Weil <sage@inktank.com>, davem@davemloft.net, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, neilb@suse.de, a.p.zijlstra@chello.nl, michaelc@cs.wisc.edu, emunson@mgebm.net, sebastian@breakpoint.cc, cl@linux.com, akpm@linux-foundation.org, torvalds@linux-foundation.org
 
-On Sun, Aug 19, 2012 at 11:49:31AM -0700, Sage Weil wrote:
-> I've bisected and identified this commit:
+On Mon, 2012-08-20 at 10:04 +0100, Mel Gorman wrote:
+
+> Can the following patch be tested please? It is reported to fix an fio
+> regression that may be similar to what you are experiencing but has not
+> been picked up yet.
 > 
->     netvm: propagate page->pfmemalloc to skb
->     
->     The skb->pfmemalloc flag gets set to true iff during the slab allocation
->     of data in __alloc_skb that the the PFMEMALLOC reserves were used.  If the
->     packet is fragmented, it is possible that pages will be allocated from the
->     PFMEMALLOC reserve without propagating this information to the skb.  This
->     patch propagates page->pfmemalloc from pages allocated for fragments to
->     the skb.
->     
->     Signed-off-by: Mel Gorman <mgorman@suse.de>
->     Acked-by: David S. Miller <davem@davemloft.net>
->     Cc: Neil Brown <neilb@suse.de>
->     Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
->     Cc: Mike Christie <michaelc@cs.wisc.edu>
->     Cc: Eric B Munson <emunson@mgebm.net>
->     Cc: Eric Dumazet <eric.dumazet@gmail.com>
->     Cc: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
->     Cc: Mel Gorman <mgorman@suse.de>
->     Cc: Christoph Lameter <cl@linux.com>
->     Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
->     Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-> 
+> -
 
-Ok, thanks.
+This seems to help here.
 
-> I've retested several times and confirmed that this change leads to the 
-> breakage, and also confirmed that reverting it on top of -rc1 also fixes 
-> the problem.
-> 
-> I've also added some additional instrumentation to my code and confirmed 
-> that the process is blocking on poll(2) while netstat is reporting 
-> data available on the socket.
-> 
-> What can I do to help track this down?
-> 
+Boot your machine with "mem=768M" or a bit less depending on your setup,
+and try a netperf.
 
-Can the following patch be tested please? It is reported to fix an fio
-regression that may be similar to what you are experiencing but has not
-been picked up yet.
+-> before patch :
 
----8<---
-From: Alex Shi <alex.shi@intel.com>
-Subject: [PATCH] mm: correct page->pfmemalloc to fix deactivate_slab regression
+# netperf
+MIGRATED TCP STREAM TEST from 0.0.0.0 (0.0.0.0) port 0 AF_INET to
+localhost.localdomain () port 0 AF_INET
+Recv   Send    Send                          
+Socket Socket  Message  Elapsed              
+Size   Size    Size     Time     Throughput  
+bytes  bytes   bytes    secs.    10^6bits/sec  
 
-commit cfd19c5a9ec (mm: only set page->pfmemalloc when
-ALLOC_NO_WATERMARKS was used) try to narrow down page->pfmemalloc
-setting, but it missed some places the pfmemalloc should be set.
+ 87380  16384  16384    14.00       6.05   
 
-So, in __slab_alloc, the unalignment pfmemalloc and ALLOC_NO_WATERMARKS
-cause incorrect deactivate_slab() on our core2 server:
+-> after patch :
 
-    64.73%           fio  [kernel.kallsyms]     [k] _raw_spin_lock
-                     |
-                     --- _raw_spin_lock
-                        |
-                        |---0.34%-- deactivate_slab
-                        |          __slab_alloc
-                        |          kmem_cache_alloc
-                        |          |
+Recv   Send    Send                          
+Socket Socket  Message  Elapsed              
+Size   Size    Size     Time     Throughput  
+bytes  bytes   bytes    secs.    10^6bits/sec  
 
-That causes our fio sync write performance has 40% regression.
+ 87380  16384  16384    10.00    18509.73   
 
-This patch move the checking in get_page_from_freelist, that resolved
-this issue.
-
-Signed-off-by: Alex Shi <alex.shi@intel.com>
----
- mm/page_alloc.c |   21 +++++++++++----------
- 1 files changed, 11 insertions(+), 10 deletions(-)
-
-diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index 009ac28..07f1924 100644
---- a/mm/page_alloc.c
-+++ b/mm/page_alloc.c
-@@ -1928,6 +1928,17 @@ this_zone_full:
- 		zlc_active = 0;
- 		goto zonelist_scan;
- 	}
-+
-+	if (page)
-+		/*
-+		 * page->pfmemalloc is set when ALLOC_NO_WATERMARKS was
-+		 * necessary to allocate the page. The expectation is
-+		 * that the caller is taking steps that will free more
-+		 * memory. The caller should avoid the page being used
-+		 * for !PFMEMALLOC purposes.
-+		 */
-+		page->pfmemalloc = !!(alloc_flags & ALLOC_NO_WATERMARKS);
-+
- 	return page;
- }
- 
-@@ -2389,14 +2400,6 @@ rebalance:
- 				zonelist, high_zoneidx, nodemask,
- 				preferred_zone, migratetype);
- 		if (page) {
--			/*
--			 * page->pfmemalloc is set when ALLOC_NO_WATERMARKS was
--			 * necessary to allocate the page. The expectation is
--			 * that the caller is taking steps that will free more
--			 * memory. The caller should avoid the page being used
--			 * for !PFMEMALLOC purposes.
--			 */
--			page->pfmemalloc = true;
- 			goto got_pg;
- 		}
- 	}
-@@ -2569,8 +2572,6 @@ retry_cpuset:
- 		page = __alloc_pages_slowpath(gfp_mask, order,
- 				zonelist, high_zoneidx, nodemask,
- 				preferred_zone, migratetype);
--	else
--		page->pfmemalloc = false;
- 
- 	trace_mm_page_alloc(page, order, gfp_mask, migratetype);
- 
--- 
-1.7.5.4
 
