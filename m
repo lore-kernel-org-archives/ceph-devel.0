@@ -1,54 +1,45 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: [patch] ceph: divide by zero bug in __validate_layout()
-Date: Mon, 20 Aug 2012 15:33:28 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208201532410.32470@cobra.newdream.net>
-References: <20120818155638.GC22424@elgon.mountain>
+From: Mandell Degerness <mandell@pistoncloud.com>
+Subject: Re: ceph osd create
+Date: Mon, 20 Aug 2012 15:53:45 -0700
+Message-ID: <CA+jddaNNHAEyvD8QKOhKrLQgMGarE47DGnTN6CH60VL8AmU8XA@mail.gmail.com>
+References: <CA+jddaMGhVvOReO854qbQM=j2X3rhM2FtbwLu4DOpYLkr5UW_A@mail.gmail.com>
+	<CADvuQRGCpKP+ePn4phE_WbvG0nYubKhL_oa3CaqO5D4AuU-5+g@mail.gmail.com>
+	<CA+jddaP=-6kO-ewLoNnWeg6b552p=nLA6ycQt_4qoDj7sVHy0w@mail.gmail.com>
+	<CADvuQRFTz_xBUuZueNQLuNTEmK7CqZE8cDAD9B6=3hQYbDXyLQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36881 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754289Ab2HTWd3 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Aug 2012 18:33:29 -0400
-In-Reply-To: <20120818155638.GC22424@elgon.mountain>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:47120 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754289Ab2HTWxq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Aug 2012 18:53:46 -0400
+Received: by qcro28 with SMTP id o28so4705181qcr.19
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Aug 2012 15:53:46 -0700 (PDT)
+In-Reply-To: <CADvuQRFTz_xBUuZueNQLuNTEmK7CqZE8cDAD9B6=3hQYbDXyLQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: ceph-devel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Hi Dan,
+We're running Argonaut and it only has the OSD id in the whoami file
+and nothing else.
 
-I've applied a slightly different fix to the ceph tree that just skips the 
-mod if stripe_unit is 0 but doesn't return EINVAL, since passing 0 is 
-valid (it means 'do not change').
+-Mandell
 
-Thanks!
-sage
-
-
-On Sat, 18 Aug 2012, Dan Carpenter wrote:
-
-> If "l->stripe_unit" is zero the the mod on the next line will cause a
-> divide by zero bug.  This comes from the copy_from_user() in
-> ceph_ioctl_set_layout_policy()
-> 
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-> 
-> diff --git a/fs/ceph/ioctl.c b/fs/ceph/ioctl.c
-> index 8e3fb69..81ec22b 100644
-> --- a/fs/ceph/ioctl.c
-> +++ b/fs/ceph/ioctl.c
-> @@ -42,6 +42,7 @@ static long __validate_layout(struct ceph_mds_client *mdsc,
->  	/* validate striping parameters */
->  	if ((l->object_size & ~PAGE_MASK) ||
->  	    (l->stripe_unit & ~PAGE_MASK) ||
-> +	    (l->stripe_unit == 0) ||
->  	    ((unsigned)l->object_size % (unsigned)l->stripe_unit))
->  		return -EINVAL;
->  
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Mon, Aug 20, 2012 at 1:37 PM, Tommi Virtanen <tv@inktank.com> wrote:
+> On Mon, Aug 20, 2012 at 1:30 PM, Mandell Degerness
+> <mandell@pistoncloud.com> wrote:
+>> Is there now, or will there be a migration path that works to add
+>> existing OSDs to the function such that future calls to "ceph osd
+>> create <uuid>" return the current OSD number used in an existing
+>> configuration?  I am content if it is an undocumented hack that I can
+>> run on each OSD to register the information with the monitors (I am
+>> assuming that is where the correlation is stored).
+>
+> Hmm. My understanding is that OSDs have had the uuid for a while, and
+> are submitting it to be part of the osdmap, so that *should* just
+> start working right if you're running recent code.
+>
+> It's stored in the "whoami" file in the osd_data dir. Pick an OSD, cat
+> its whoami file, run "ceph osd create <uuid>", and if you get back an
+> id that doesn't match with what that osd was, say oops and "ceph osd
+> rm <new_bad_id>".
