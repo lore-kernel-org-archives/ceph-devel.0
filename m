@@ -1,45 +1,56 @@
-From: Mandell Degerness <mandell@pistoncloud.com>
-Subject: Re: ceph osd create
-Date: Mon, 20 Aug 2012 15:53:45 -0700
-Message-ID: <CA+jddaNNHAEyvD8QKOhKrLQgMGarE47DGnTN6CH60VL8AmU8XA@mail.gmail.com>
-References: <CA+jddaMGhVvOReO854qbQM=j2X3rhM2FtbwLu4DOpYLkr5UW_A@mail.gmail.com>
-	<CADvuQRGCpKP+ePn4phE_WbvG0nYubKhL_oa3CaqO5D4AuU-5+g@mail.gmail.com>
-	<CA+jddaP=-6kO-ewLoNnWeg6b552p=nLA6ycQt_4qoDj7sVHy0w@mail.gmail.com>
-	<CADvuQRFTz_xBUuZueNQLuNTEmK7CqZE8cDAD9B6=3hQYbDXyLQ@mail.gmail.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: regression with poll(2)
+Date: Mon, 20 Aug 2012 16:20:46 -0700
+Message-ID: <20120820162046.f827f758.akpm@linux-foundation.org>
+References: <alpine.DEB.2.00.1208151226250.15721@cobra.newdream.net>
+	<alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
+	<20120820090443.GA3275@suse.de>
+	<1345455059.5158.302.camel@edumazet-glaptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:47120 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754289Ab2HTWxq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Aug 2012 18:53:46 -0400
-Received: by qcro28 with SMTP id o28so4705181qcr.19
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Aug 2012 15:53:46 -0700 (PDT)
-In-Reply-To: <CADvuQRFTz_xBUuZueNQLuNTEmK7CqZE8cDAD9B6=3hQYbDXyLQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1345455059.5158.302.camel@edumazet-glaptop>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Eric Dumazet <eric.dumazet@gmail.com>
+Cc: Mel Gorman <mgorman@suse.de>, Sage Weil <sage@inktank.com>, davem@davemloft.net, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, neilb@suse.de, a.p.zijlstra@chello.nl, michaelc@cs.wisc.edu, emunson@mgebm.net, sebastian@breakpoint.cc, cl@linux.com, torvalds@linux-foundation.org
+List-Id: ceph-devel.vger.kernel.org
 
-We're running Argonaut and it only has the OSD id in the whoami file
-and nothing else.
+On Mon, 20 Aug 2012 11:30:59 +0200
+Eric Dumazet <eric.dumazet@gmail.com> wrote:
 
--Mandell
+> On Mon, 2012-08-20 at 10:04 +0100, Mel Gorman wrote:
+> 
+> > Can the following patch be tested please? It is reported to fix an fio
+> > regression that may be similar to what you are experiencing but has not
+> > been picked up yet.
+> > 
+> > -
+> 
+> This seems to help here.
+> 
+> Boot your machine with "mem=768M" or a bit less depending on your setup,
+> and try a netperf.
+> 
+> -> before patch :
+> 
+> # netperf
+> MIGRATED TCP STREAM TEST from 0.0.0.0 (0.0.0.0) port 0 AF_INET to
+> localhost.localdomain () port 0 AF_INET
+> Recv   Send    Send                          
+> Socket Socket  Message  Elapsed              
+> Size   Size    Size     Time     Throughput  
+> bytes  bytes   bytes    secs.    10^6bits/sec  
+> 
+>  87380  16384  16384    14.00       6.05   
+> 
+> -> after patch :
+> 
+> Recv   Send    Send                          
+> Socket Socket  Message  Elapsed              
+> Size   Size    Size     Time     Throughput  
+> bytes  bytes   bytes    secs.    10^6bits/sec  
+> 
+>  87380  16384  16384    10.00    18509.73   
 
-On Mon, Aug 20, 2012 at 1:37 PM, Tommi Virtanen <tv@inktank.com> wrote:
-> On Mon, Aug 20, 2012 at 1:30 PM, Mandell Degerness
-> <mandell@pistoncloud.com> wrote:
->> Is there now, or will there be a migration path that works to add
->> existing OSDs to the function such that future calls to "ceph osd
->> create <uuid>" return the current OSD number used in an existing
->> configuration?  I am content if it is an undocumented hack that I can
->> run on each OSD to register the information with the monitors (I am
->> assuming that is where the correlation is stored).
->
-> Hmm. My understanding is that OSDs have had the uuid for a while, and
-> are submitting it to be part of the osdmap, so that *should* just
-> start working right if you're running recent code.
->
-> It's stored in the "whoami" file in the osd_data dir. Pick an OSD, cat
-> its whoami file, run "ceph osd create <uuid>", and if you get back an
-> id that doesn't match with what that osd was, say oops and "ceph osd
-> rm <new_bad_id>".
+"seem to help"?  Was previous performance fully restored?
