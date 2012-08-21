@@ -1,150 +1,118 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: ceph 0.48.1 osd die
-Date: Tue, 21 Aug 2012 20:25:49 +0200
-Message-ID: <CAMwB3Tig2ZTk5sbesUE_Q+DvZYEmNFNgQjDvYZLFEreL9YbP6w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Sage Weil <sage@inktank.com>
+Subject: [PATCH 3/4] libceph: avoid truncation due to racing banners
+Date: Tue, 21 Aug 2012 12:19:31 -0700
+Message-ID: <1345576772-3284-4-git-send-email-sage@inktank.com>
+References: <1345576772-3284-1-git-send-email-sage@inktank.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:36442 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758235Ab2HUSZu convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Aug 2012 14:25:50 -0400
-Received: by qcro28 with SMTP id o28so88436qcr.19
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Aug 2012 11:25:50 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:42593 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756630Ab2HUTHT (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Aug 2012 15:07:19 -0400
+In-Reply-To: <1345576772-3284-1-git-send-email-sage@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: Jim Schutt <jaschut@sandia.gov>
 
-Ubuntu precise, ceph 0.48.1
+From: Jim Schutt <jaschut@sandia.gov>
 
-After crush change, whole cluster reorganize, but one machine get very
-hight load, and 4 OSD on this machine die with this in log.
+Because the Ceph client messenger uses a non-blocking connect, it is
+possible for the sending of the client banner to race with the
+arrival of the banner sent by the peer.
 
-After that i reboot machine, and re-init this OSD (i left one to
-diagnose if needed), for full stability. Now everything is ok, but
-maybe this will be useful.
+When ceph_sock_state_change() notices the connect has completed, it
+schedules work to process the socket via con_work().  During this
+time the peer is writing its banner, and arrival of the peer banner
+races with con_work().
 
---- begin dump of recent events ---
-   -36> 2012-08-21 20:18:52.286460 7f4c5785a780  5 asok(0x1e4c000)
-register_command perfcounters_dump hook 0x1e3f010
-   -35> 2012-08-21 20:18:52.286490 7f4c5785a780  5 asok(0x1e4c000)
-register_command 1 hook 0x1e3f010
-   -34> 2012-08-21 20:18:52.286493 7f4c5785a780  5 asok(0x1e4c000)
-register_command perf dump hook 0x1e3f010
-   -33> 2012-08-21 20:18:52.286502 7f4c5785a780  5 asok(0x1e4c000)
-register_command perfcounters_schema hook 0x1e3f010
-   -32> 2012-08-21 20:18:52.286506 7f4c5785a780  5 asok(0x1e4c000)
-register_command 2 hook 0x1e3f010
-   -31> 2012-08-21 20:18:52.286508 7f4c5785a780  5 asok(0x1e4c000)
-register_command perf schema hook 0x1e3f010
-   -30> 2012-08-21 20:18:52.286514 7f4c5785a780  5 asok(0x1e4c000)
-register_command config show hook 0x1e3f010
-   -29> 2012-08-21 20:18:52.286533 7f4c5785a780  5 asok(0x1e4c000)
-register_command config set hook 0x1e3f010
-   -28> 2012-08-21 20:18:52.286536 7f4c5785a780  5 asok(0x1e4c000)
-register_command log flush hook 0x1e3f010
-   -27> 2012-08-21 20:18:52.286538 7f4c5785a780  5 asok(0x1e4c000)
-register_command log dump hook 0x1e3f010
-   -26> 2012-08-21 20:18:52.286541 7f4c5785a780  5 asok(0x1e4c000)
-register_command log reopen hook 0x1e3f010
-   -25> 2012-08-21 20:18:52.289243 7f4c5785a780  0 ceph version
-0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373ca6bba7c),
-process ceph-osd, pid 24314
-   -24> 2012-08-21 20:18:52.290166 7f4c5785a780  1 finished
-global_init_daemonize
-   -23> 2012-08-21 20:18:52.293285 7f4c5785a780  5 asok(0x1e4c000)
-init /var/run/ceph/ceph-osd.30.asok
-   -22> 2012-08-21 20:18:52.293343 7f4c5785a780  5 asok(0x1e4c000)
-bind_and_listen /var/run/ceph/ceph-osd.30.asok
-   -21> 2012-08-21 20:18:52.293377 7f4c5785a780  5 asok(0x1e4c000)
-register_command 0 hook 0x1e3e0a0
-   -20> 2012-08-21 20:18:52.293401 7f4c5785a780  5 asok(0x1e4c000)
-register_command version hook 0x1e3e0a0
-   -19> 2012-08-21 20:18:52.293405 7f4c5785a780  5 asok(0x1e4c000)
-register_command git_version hook 0x1e3e0a0
-   -18> 2012-08-21 20:18:52.293412 7f4c5785a780  5 asok(0x1e4c000)
-register_command help hook 0x1e3f0c0
-   -17> 2012-08-21 20:18:52.293504 7f4c53914700  5 asok(0x1e4c000) entr=
-y start
-   -16> 2012-08-21 20:18:52.296295 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount FIEMAP ioctl is supported and
-appears to work
-   -15> 2012-08-21 20:18:52.296310 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount FIEMAP ioctl is disabled via
-'filestore fiemap' config option
-   -14> 2012-08-21 20:18:52.296575 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount did NOT detect btrfs
-   -13> 2012-08-21 20:18:52.341323 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount syncfs(2) syscall fully supported
-(by glibc and kernel)
-   -12> 2012-08-21 20:18:52.341448 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount found snaps <>
-   -11> 2012-08-21 20:18:52.344103 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount: WRITEAHEAD journal mode explicitly
-enabled in conf
-   -10> 2012-08-21 20:18:52.520247 7f4c5110f700  1 FileStore::op_tp
-worker finish
-    -9> 2012-08-21 20:18:52.520325 7f4c5010d700  1 FileStore::op_tp
-worker finish
-    -8> 2012-08-21 20:18:52.520399 7f4c4f90c700  1 FileStore::op_tp
-worker finish
-    -7> 2012-08-21 20:18:52.520458 7f4c5090e700  1 FileStore::op_tp
-worker finish
-    -6> 2012-08-21 20:18:52.535297 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount FIEMAP ioctl is supported and
-appears to work
-    -5> 2012-08-21 20:18:52.535316 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount FIEMAP ioctl is disabled via
-'filestore fiemap' config option
-    -4> 2012-08-21 20:18:52.535704 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount did NOT detect btrfs
-    -3> 2012-08-21 20:18:52.538389 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount syncfs(2) syscall fully supported
-(by glibc and kernel)
-    -2> 2012-08-21 20:18:52.538459 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount found snaps <>
-    -1> 2012-08-21 20:18:52.540296 7f4c5785a780  0
-filestore(/vol0/data/osd.30) mount: WRITEAHEAD journal mode explicitly
-enabled in conf
-     0> 2012-08-21 20:18:52.805875 7f4c5785a780 -1 *** Caught signal
-(Aborted) **
- in thread 7f4c5785a780
+If con_work() calls try_read() before the peer banner arrives, there
+is nothing for it to do, after which con_work() calls try_write() to
+send the client's banner.  In this case Ceph's protocol negotiation
+can complete succesfully.
 
- ceph version 0.48.1argonaut (commit:a7ad701b9bd479f20429f19e6fea7373ca=
-6bba7c)
- 1: /usr/bin/ceph-osd() [0x6edaba]
- 2: (()+0xfcb0) [0x7f4c56cf7cb0]
- 3: (gsignal()+0x35) [0x7f4c558d3445]
- 4: (abort()+0x17b) [0x7f4c558d6bab]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x11d) [0x7f4c5622169d]
- 6: (()+0xb5846) [0x7f4c5621f846]
- 7: (()+0xb5873) [0x7f4c5621f873]
- 8: (()+0xb596e) [0x7f4c5621f96e]
- 9: (ceph::buffer::list::iterator::copy(unsigned int, char*)+0x127) [0x=
-7a94f7]
- 10: (void decode<unsigned int, pg_interval_t>(std::map<unsigned int,
-pg_interval_t, std::less<unsigned int>,
-std::allocator<std::pair<unsigned int const, pg_interval_t> > >&,
-ceph::buffer::list::iterator&)+0x2e) [0x58b66e]
- 11: (PG::read_state(ObjectStore*)+0x33b) [0x62e56b]
- 12: (OSD::load_pgs()+0x71f) [0x5d1b2f]
- 13: (OSD::init()+0x585) [0x5d26a5]
- 14: (main()+0x2377) [0x518067]
- 15: (__libc_start_main()+0xed) [0x7f4c558be76d]
- 16: /usr/bin/ceph-osd() [0x51a239]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
+The server-side messenger immediately sends its banner and addresses
+after accepting a connect request, *before* actually attempting to
+read or verify the banner from the client.  As a result, it is
+possible for the banner from the server to arrive before con_work()
+calls try_read().  If that happens, try_read() will read the banner
+and prepare protocol negotiation info via prepare_write_connect().
+prepare_write_connect() calls con_out_kvec_reset(), which discards
+the as-yet-unsent client banner.  Next, con_work() calls
+try_write(), which sends the protocol negotiation info rather than
+the banner that the peer is expecting.
 
---- end dump of recent events ---
+The result is that the peer sees an invalid banner, and the client
+reports "negotiation failed".
 
---=20
------
-Pozdrawiam
+Fix this by moving con_out_kvec_reset() out of
+prepare_write_connect() to its callers at all locations except the
+one where the banner might still need to be sent.
 
-S=C5=82awek "sZiBis" Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[elder@inktak.com: added note about server-side behavior]
+
+Signed-off-by: Jim Schutt <jaschut@sandia.gov>
+Reviewed-by: Alex Elder <elder@inktank.com>
+---
+ net/ceph/messenger.c |   11 +++++++++--
+ 1 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index b979675..24c5eea 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -915,7 +915,6 @@ static int prepare_write_connect(struct ceph_connection *con)
+ 	con->out_connect.authorizer_len = auth ?
+ 		cpu_to_le32(auth->authorizer_buf_len) : 0;
+ 
+-	con_out_kvec_reset(con);
+ 	con_out_kvec_add(con, sizeof (con->out_connect),
+ 					&con->out_connect);
+ 	if (auth && auth->authorizer_buf_len)
+@@ -1557,6 +1556,7 @@ static int process_connect(struct ceph_connection *con)
+ 			return -1;
+ 		}
+ 		con->auth_retry = 1;
++		con_out_kvec_reset(con);
+ 		ret = prepare_write_connect(con);
+ 		if (ret < 0)
+ 			return ret;
+@@ -1577,6 +1577,7 @@ static int process_connect(struct ceph_connection *con)
+ 		       ENTITY_NAME(con->peer_name),
+ 		       ceph_pr_addr(&con->peer_addr.in_addr));
+ 		reset_connection(con);
++		con_out_kvec_reset(con);
+ 		ret = prepare_write_connect(con);
+ 		if (ret < 0)
+ 			return ret;
+@@ -1601,6 +1602,7 @@ static int process_connect(struct ceph_connection *con)
+ 		     le32_to_cpu(con->out_connect.connect_seq),
+ 		     le32_to_cpu(con->in_reply.connect_seq));
+ 		con->connect_seq = le32_to_cpu(con->in_reply.connect_seq);
++		con_out_kvec_reset(con);
+ 		ret = prepare_write_connect(con);
+ 		if (ret < 0)
+ 			return ret;
+@@ -1617,6 +1619,7 @@ static int process_connect(struct ceph_connection *con)
+ 		     le32_to_cpu(con->in_reply.global_seq));
+ 		get_global_seq(con->msgr,
+ 			       le32_to_cpu(con->in_reply.global_seq));
++		con_out_kvec_reset(con);
+ 		ret = prepare_write_connect(con);
+ 		if (ret < 0)
+ 			return ret;
+@@ -2135,7 +2138,11 @@ more:
+ 		BUG_ON(con->state != CON_STATE_CONNECTING);
+ 		con->state = CON_STATE_NEGOTIATING;
+ 
+-		/* Banner is good, exchange connection info */
++		/*
++		 * Received banner is good, exchange connection info.
++		 * Do not reset out_kvec, as sending our banner raced
++		 * with receiving peer banner after connect completed.
++		 */
+ 		ret = prepare_write_connect(con);
+ 		if (ret < 0)
+ 			goto out;
+-- 
+1.7.9
+
