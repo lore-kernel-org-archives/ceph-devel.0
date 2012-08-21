@@ -1,50 +1,42 @@
-From: Mel Gorman <mgorman@suse.de>
-Subject: Re: regression with poll(2)
-Date: Tue, 21 Aug 2012 08:05:15 +0100
-Message-ID: <20120821070515.GA1657@suse.de>
-References: <alpine.DEB.2.00.1208151226250.15721@cobra.newdream.net>
- <alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
- <20120820090443.GA3275@suse.de>
- <alpine.DEB.2.00.1208200930510.26904@cobra.newdream.net>
+From: ramu <ramu.freesystems@gmail.com>
+Subject: Re: S3 comapatible with java-rados.
+Date: Tue, 21 Aug 2012 09:06:53 +0000 (UTC)
+Message-ID: <loom.20120821T110501-143@post.gmane.org>
+References: <loom.20120820T091919-196@post.gmane.org> <loom.20120821T072518-665@post.gmane.org> <loom.20120821T082125-510@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:54315 "EHLO mx2.suse.de"
+Received: from plane.gmane.org ([80.91.229.3]:47902 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751582Ab2HUHLM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 21 Aug 2012 03:11:12 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1208200930510.26904@cobra.newdream.net>
+	id S1754758Ab2HUJHI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Tue, 21 Aug 2012 05:07:08 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1T3kQU-0001Th-SI
+	for ceph-devel@vger.kernel.org; Tue, 21 Aug 2012 11:07:07 +0200
+Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Aug 2012 11:07:06 +0200
+Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Aug 2012 11:07:06 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: davem@davemloft.net, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, neilb@suse.de, a.p.zijlstra@chello.nl, michaelc@cs.wisc.edu, emunson@mgebm.net, eric.dumazet@gmail.com, sebastian@breakpoint.cc, cl@linux.com, akpm@linux-foundation.org, torvalds@linux-foundation.org
+To: ceph-devel@vger.kernel.org
 
-On Mon, Aug 20, 2012 at 09:54:59AM -0700, Sage Weil wrote:
-> > <SNIP>
-> > 
-> > > I've retested several times and confirmed that this change leads to the 
-> > > breakage, and also confirmed that reverting it on top of -rc1 also fixes 
-> > > the problem.
-> > > 
-> > > I've also added some additional instrumentation to my code and confirmed 
-> > > that the process is blocking on poll(2) while netstat is reporting 
-> > > data available on the socket.
-> > > 
-> > > What can I do to help track this down?
-> > > 
-> > 
-> > Can the following patch be tested please? It is reported to fix an fio
-> > regression that may be similar to what you are experiencing but has not
-> > been picked up yet.
-> 
-> This patch appears to resolve things for me as well, at least after a 
-> couple of passes.  I'll let you know if I see any further problems come up 
-> with more testing.
-> 
+    And also create bucket using this command"s3 -u create test"
+But it is showing error,
 
-Thanks very much Sage.
+root@vu-AP480-S:/home/vu# export S3_ACCESS_KEY_ID=NUQ18TE2DPLGIQAJN83B
+root@vu-AP480-S:/home/vu# export 
+S3_SECRET_ACCESS_KEY=hLgKCloH+ZI4rWAnS3JH89zSFd9lMXbA6lwpbqRr
+root@vu-AP480-S:/home/vu# export S3_HOSTNAME=rgw.node32
+root@vu-AP480-S:/home/vu# s3 -u create alpha
+s3: command not found
+root@vu-AP480-S:/home/vu# s3 -u list
+s3: command not found
 
--- 
-Mel Gorman
-SUSE Labs
+
+
