@@ -1,269 +1,113 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: SimpleMessenger dispatching: cause of performance problems?
-Date: Tue, 21 Aug 2012 07:43:56 -0500
-Message-ID: <5033828C.8080102@inktank.com>
-References: <502D1B07.3030101@itxperts.de> <alpine.DEB.2.00.1208160951190.26904@cobra.newdream.net> <50323001.5050300@itxperts.de> <alpine.DEB.2.00.1208201320160.26904@cobra.newdream.net> <5033599C.70504@itxperts.de>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: regression with poll(2)
+Date: Tue, 21 Aug 2012 08:58:05 -0700
+Message-ID: <20120821085805.41a102f1.akpm@linux-foundation.org>
+References: <alpine.DEB.2.00.1208151226250.15721@cobra.newdream.net>
+	<alpine.DEB.2.00.1208191051150.15570@cobra.newdream.net>
+	<20120820090443.GA3275@suse.de>
+	<CA+55aFw6S85jR+5zP9W6YykdsTMSVw9T5ibW93Gtx2rjw-b2EA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:51523 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754350Ab2HUMn7 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Aug 2012 08:43:59 -0400
-Received: by ggdk6 with SMTP id k6so5744836ggd.19
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Aug 2012 05:43:58 -0700 (PDT)
-In-Reply-To: <5033599C.70504@itxperts.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Bluemle <andreas.bluemle@itxperts.de>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CA+55aFw6S85jR+5zP9W6YykdsTMSVw9T5ibW93Gtx2rjw-b2EA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Mel Gorman <mgorman@suse.de>, Sage Weil <sage@inktank.com>, David Miller <davem@davemloft.net>, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, ceph-devel@vger.kernel.org, Neil Brown <neilb@suse.de>, Peter Zijlstra <a.p.zijlstra@chello.nl>, michaelc@cs.wisc.edu, emunson@mgebm.net, Eric Dumazet <eric.dumazet@gmail.com>, Christoph Lameter <cl@linux.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Andreas,
+On Mon, 20 Aug 2012 10:02:05 -0700 Linus Torvalds <torvalds@linux-foundation.org> wrote:
 
-Most of the performance work that Sam, Mike, and I have been doing over 
-the past week has been looking directly at the filestore.  I actually 
-haven't done any wallclock profiling with the messenger yet.
+> On Mon, Aug 20, 2012 at 2:04 AM, Mel Gorman <mgorman@suse.de> wrote:
+> >
+> > Can the following patch be tested please? It is reported to fix an fio
+> > regression that may be similar to what you are experiencing but has not
+> > been picked up yet.
+> 
+> Andrew, is this in your queue, or should I take this directly, or
+> what? It seems to fix the problem for Eric and Sage, at least.
 
-So just to make sure I've got a good idea of what you are doing / seeing:
-
-- 4 OSD cluster with 2 replicas, kernel client.
-- client is issuing 40MB worth of single sequential 128k buffered writes.
-- Contention seems to appear immediately and only grows as the test runs.
-
-Out of curiosity, have you tried your test with replication set to 1? 
-It would be good to just do a quick sanity check to make sure this 
-eliminates the problem if it's contention between primary/secondary 
-simplemessenger instances.
-
-Mark
+Yes, I have a copy queued:
 
 
-On 08/21/2012 04:49 AM, Andreas Bluemle wrote:
-> Hi Sage,
->
-> as mentioned, the workload is a single sequential write on
-> the client. The write is not O_DIRECT; and consequently
-> the messages arrive at the OSD with 124 KByte per write request.
->
-> The attached pdf shows a timing diagram of two concurrent
-> write operations (one primary and one replication / secondary).
->
-> The time spent on the primary write to get the OSD.:osd_lock
-> releates nicely with the time when this lock is released by the
-> secondary write.
->
->
-> Hope this helps
->
-> Andreas
->
->
->
-> Sage Weil wrote:
->> On Mon, 20 Aug 2012, Andreas Bluemle wrote:
->>> Hi Sage,
->>>
->>> Sage Weil wrote:
->>>> Hi Andreas,
->>>>
->>>> On Thu, 16 Aug 2012, Andreas Bluemle wrote:
->>>>> Hi,
->>>>>
->>>>> I have been trying to migrate a ceph cluster (ceph-0.48argonaut)
->>>>> to a high speed cluster network and encounter scalability problems:
->>>>> the overall performance of the ceph cluster does not scale well
->>>>> with an increase in the underlying networking speed.
->>>>>
->>>>> In short:
->>>>>
->>>>> I believe that the dispatching from SimpleMessenger to
->>>>> OSD worker queues causes that scalability issue.
->>>>>
->>>>> Question: is it possible that this dispatching is causing performance
->>>>> problems?
->>>> There is a single 'dispatch' thread that's processing this queue, and
->>>> conveniently perf lets you break down its profiling data on a
->>>> per-thread
->>>> basis. Once you've ruled out the throttler as the culprit, you might
->>>> try
->>>> running the daemon with 'perf record -g -- ceph-osd ...' and then look
->>>> specifically at where that thread is spending its time. We shouldn't be
->>>> burning that much CPU just doing the sanity checks and then handing
->>>> requests
->>>> off to PGs...
->>>>
->>>> sage
->>>>
->>>>
->>> The effect, which I am seeing, may be related to some locking issue.
->>> As I read the code, there are multiple dispatchers running: one per
->>> SimpleMessenger.
->>>
->>> On a typical OSD node, there is
->>>
->>> - the instance of the SimpleMessenger processing input from the client
->>> (primary writes)
->>> - other instances of SimpleMessenger, which process input from
->>> neighbor OSD
->>> nodes
->>>
->>> the latter generate replication writes to the OSD I am looking at.
->>>
->>> On the other hand, there is a single instance of the OSD object
->>> within the
->>> ceph-osd daemon.
->>> When dispatching messages to the OSD, then the OSD::osd_lock is held
->>> for the
->>> complete
->>> process of dispatching; see code below.
->>>
->>> When the write load increases, then multiple SimpleMessenger
->>> instances start
->>> to
->>> congest on the OSD::osd_lock.
->>> And this may cause delays in the individual dispatch process.
->>
->> This is definitely possible, yes, although it would surprise me if
->> it's happening here (unless your workload is all small writes). Just
->> to confirm, are you actually observing osd_lock contention, or
->> speculating about what is causing the delays you're seeing?
->>
->> I'm not sure what the best tool is to measure lock contention. Mark
->> was playing with a 'poor man's wall clock profiler' using stack trace
->> sampling from gdb. That would tell us whether threads were really
->> blocking while obtaining the osd_lock...
->>
->> Can you tell us a bit more about what your workload is?
->>
->> sage
->>
->>
->>> bool OSD::ms_dispatch(Message *m)
->>> {
->>> // lock!
->>> osd_lock.Lock();
->>>
->>> while (dispatch_running) {
->>> dout(10) << "ms_dispatch waiting for other dispatch thread to
->>> complete" <<
->>> dendl;
->>> dispatch_cond.Wait(osd_lock);
->>> }
->>> dispatch_running = true;
->>>
->>> do_waiters();
->>> _dispatch(m);
->>> do_waiters();
->>>
->>> dispatch_running = false;
->>> dispatch_cond.Signal();
->>>
->>> osd_lock.Unlock();
->>> return true;
->>> }
->>>
->>>
->>>>> In detail:
->>>>>
->>>>> In order to find out more about this problem, I have added
->>>>> profiling to
->>>>> the ceph code in various place; for write operations to the primary
->>>>> or the
->>>>> secondary, timestamps are recorded for OSD object, offset and
->>>>> length of
->>>>> the such a write request.
->>>>>
->>>>> Timestamps record:
->>>>> - receipt time at SimpleMessenger
->>>>> - processing time at osd
->>>>> - for primary write operations: wait time until replication operation
->>>>> is acknowledged.
->>>>>
->>>>> What I believe is happening: dispatching requests from
->>>>> SimpleMessenger to
->>>>> OSD worker threads seems to consume a fair amount of time. This ends
->>>>> up in a widening gap between subsequent receipts of requests and
->>>>> the start
->>>>> of OSD processing them.
->>>>>
->>>>> A primary write suffers twice from this problem: first because
->>>>> the delay happens on the primary OSD and second because the
->>>>> replicating
->>>>> OSD also suffers from the same problem - and hence causes additional
->>>>> delays
->>>>> at the primary OSD when it waits for the commit from the
->>>>> replicating OSD.
->>>>>
->>>>> In the attached graphics, the x-axis shows the time (in seconds)
->>>>> The y-axis shows the offset where a request to write happened.
->>>>>
->>>>> The red bar represents the SimpleMessenger receive, i.e. from reading
->>>>> the message header until enqueuing the completely decoded message into
->>>>> the SImpleMessenger dispatch queue.
->>>>>
->>>>> The green bar represents the time required for local processing, i.e.
->>>>> dispatching the the OSD worker, writing to filesystem and journal,
->>>>> send
->>>>> out the replication operation to the replicating OSD. It right
->>>>> end of the green bar is the time when locally everything has finished
->>>>> and a commit could happen.
->>>>>
->>>>> The blue bar represents the time until the replicating OSD has sent a
->>>>> commit
->>>>> back to the primary OSD and the original write request can be
->>>>> committed to
->>>>> the client.
->>>>>
->>>>> The green bar is interrupted by a black bar: the left end represents
->>>>> the time when the request has been enqueued on the OSD worker
->>>>> queue. The
->>>>> right end gives the time when the request is taken off the OSD worker
->>>>> queue and actual OSD processing starts.
->>>>>
->>>>> The test was a simple sequential write to a rados block device.
->>>>>
->>>>> Receiption of the write requests at the OSD is also sequential in the
->>>>> graphics: the bar to the bottom of the graphics shows an earlier write
->>>>> request.
->>>>>
->>>>> Note that the dispatching of a later request in all cases relates
->>>>> to the
->>>>> enqueue time at the OSD worker queue of the previous write request:
->>>>> the
->>>>> left
->>>>> end of a black bar relates nicely to the beginning of a green bar
->>>>> above
->>>>> it.
->>>>>
->>>>>
->>>>>
->>>>> --
->>>>> Andreas Bluemle mailto:Andreas.Bluemle@itxperts.de
->>>>> ITXperts GmbH http://www.itxperts.de
->>>>> Balanstrasse 73, Geb. 08 Phone: (+49) 89 89044917
->>>>> D-81541 Muenchen (Germany) Fax: (+49) 89 89044910
->>>>>
->>>>> Company details: http://www.itxperts.de/imprint.htm
->>>>>
->>>>>
->>> --
->>> Andreas Bluemle mailto:Andreas.Bluemle@itxperts.de
->>> ITXperts GmbH http://www.itxperts.de
->>> Balanstrasse 73, Geb. 08 Phone: (+49) 89 89044917
->>> D-81541 Muenchen (Germany) Fax: (+49) 89 89044910
->>>
->>> Company details: http://www.itxperts.de/imprint.htm
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>
->>
->>
->
->
+From: Alex Shi <alex.shi@intel.com>
+Subject: mm: correct page->pfmemalloc to fix deactivate_slab regression
 
+cfd19c5a9ec ("mm: only set page->pfmemalloc when ALLOC_NO_WATERMARKS was
+used") tried to narrow down page->pfmemalloc setting, but it missed some
+places the pfmemalloc should be set.
+
+So, in __slab_alloc, the unalignment pfmemalloc and ALLOC_NO_WATERMARKS
+cause incorrect deactivate_slab() on our core2 server:
+
+    64.73%           fio  [kernel.kallsyms]     [k] _raw_spin_lock
+                     |
+                     --- _raw_spin_lock
+                        |
+                        |---0.34%-- deactivate_slab
+                        |          __slab_alloc
+                        |          kmem_cache_alloc
+                        |          |
+
+That causes our fio sync write performance to have a 40% regression.
+
+Move the checking in get_page_from_freelist() which resolves this issue.
+
+Signed-off-by: Alex Shi <alex.shi@intel.com>
+Acked-by: Mel Gorman <mgorman@suse.de>
+Cc: David Miller <davem@davemloft.net
+Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+Tested-by: Eric Dumazet <eric.dumazet@gmail.com>
+Tested-by: Sage Weil <sage@inktank.com>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ mm/page_alloc.c |   21 +++++++++++----------
+ 1 file changed, 11 insertions(+), 10 deletions(-)
+
+diff -puN mm/page_alloc.c~mm-correct-page-pfmemalloc-to-fix-deactivate_slab-regression mm/page_alloc.c
+--- a/mm/page_alloc.c~mm-correct-page-pfmemalloc-to-fix-deactivate_slab-regression
++++ a/mm/page_alloc.c
+@@ -1928,6 +1928,17 @@ this_zone_full:
+ 		zlc_active = 0;
+ 		goto zonelist_scan;
+ 	}
++
++	if (page)
++		/*
++		 * page->pfmemalloc is set when ALLOC_NO_WATERMARKS was
++		 * necessary to allocate the page. The expectation is
++		 * that the caller is taking steps that will free more
++		 * memory. The caller should avoid the page being used
++		 * for !PFMEMALLOC purposes.
++		 */
++		page->pfmemalloc = !!(alloc_flags & ALLOC_NO_WATERMARKS);
++
+ 	return page;
+ }
+ 
+@@ -2389,14 +2400,6 @@ rebalance:
+ 				zonelist, high_zoneidx, nodemask,
+ 				preferred_zone, migratetype);
+ 		if (page) {
+-			/*
+-			 * page->pfmemalloc is set when ALLOC_NO_WATERMARKS was
+-			 * necessary to allocate the page. The expectation is
+-			 * that the caller is taking steps that will free more
+-			 * memory. The caller should avoid the page being used
+-			 * for !PFMEMALLOC purposes.
+-			 */
+-			page->pfmemalloc = true;
+ 			goto got_pg;
+ 		}
+ 	}
+@@ -2569,8 +2572,6 @@ retry_cpuset:
+ 		page = __alloc_pages_slowpath(gfp_mask, order,
+ 				zonelist, high_zoneidx, nodemask,
+ 				preferred_zone, migratetype);
+-	else
+-		page->pfmemalloc = false;
+ 
+ 	trace_mm_page_alloc(page, order, gfp_mask, migratetype);
+ 
+_
