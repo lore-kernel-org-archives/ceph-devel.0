@@ -1,47 +1,59 @@
-From: Jonathan Proulx <jon@csail.mit.edu>
-Subject: Re: Ideal hardware spec?
-Date: Wed, 22 Aug 2012 11:46:15 -0400
-Message-ID: <20120822154615.GF10015@csail.mit.edu>
-References: <20120822135530.GB10015@csail.mit.edu>
- <5034E9F3.10001@widodh.nl>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: [PATCH] libceph: Fix sparse warning
+Date: Wed, 22 Aug 2012 08:53:23 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208220852210.25274@cobra.newdream.net>
+References: <1344950857-32139-1-git-send-email-icurt@ixiacom.com> <CAEnQRZBcX7vmaa2rc3-CcCSpayKZca2p11_3eSQaEsj_FAQLNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from outgoing.csail.mit.edu ([128.30.2.149]:38887 "EHLO
-	outgoing.csail.mit.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757362Ab2HVPqR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Aug 2012 11:46:17 -0400
-Content-Disposition: inline
-In-Reply-To: <5034E9F3.10001@widodh.nl>
+Received: from cobra.newdream.net ([66.33.216.30]:47956 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754147Ab2HVPxX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Aug 2012 11:53:23 -0400
+In-Reply-To: <CAEnQRZBcX7vmaa2rc3-CcCSpayKZca2p11_3eSQaEsj_FAQLNg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@widodh.nl>
-Cc: ceph-devel@vger.kernel.org
+To: Daniel Baluta <dbaluta@ixiacom.com>
+Cc: davem@davemloft.net, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, Iulius Curt <icurt@ixiacom.com>
 
-On Wed, Aug 22, 2012 at 04:17:23PM +0200, Wido den Hollander wrote:
+On Wed, 22 Aug 2012, Daniel Baluta wrote:
+> On Tue, Aug 14, 2012 at 4:27 PM, Iulius Curt <iulius.curt@gmail.com> wrote:
+> > From: Iulius Curt <iulius.curt@gmail.com>
+> >
+> > Make ceph_monc_do_poolop() static to remove the following sparse warning:
+> >  * net/ceph/mon_client.c:616:5: warning: symbol 'ceph_monc_do_poolop' was not
+> >    declared. Should it be static?
+> >
+> > Signed-off-by: Iulius Curt <icurt@ixiacom.com>
+> > ---
+> >  net/ceph/mon_client.c |    2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> > index 105d533..3875c60 100644
+> > --- a/net/ceph/mon_client.c
+> > +++ b/net/ceph/mon_client.c
+> > @@ -613,7 +613,7 @@ bad:
+> >  /*
+> >   * Do a synchronous pool op.
+> >   */
+> > -int ceph_monc_do_poolop(struct ceph_mon_client *monc, u32 op,
+> > +static int ceph_monc_do_poolop(struct ceph_mon_client *monc, u32 op,
+> >                         u32 pool, u64 snapid,
+> >                         char *buf, int len)
+> >  {
+> > --
+> > 1.7.9.5
+> >
+> > --
+> 
+> Hi Sage,
+> 
+> Can you have a look on this? :)
 
-:On 08/22/2012 03:55 PM, Jonathan Proulx wrote:
+Sorry, this one fell through the cracks.  Yes, we can switch it to static, 
+but while we're doing that let's drop the ceph_monc_ prefix too (since 
+it's private).
 
-:You can also use the USB sticks[0] from Stec, they have servergrade
-:onboard USB sticks for these kind of applications.
-
-Those look quite interesting.
-
-:A couple of questions still need to be answered though:
-:* Which OS are you planning on using? Ubuntu 12.04 is recommended
-
-Ubuntu 12.04 is our current preferred OS
-
-:* Which filesystem do you want to use underneath the OSDs?
-
-Whatever I can get to work best in testing :)
-
-Since this is for a research platform not a product I'd likely start with
-BTRFS and see if it is "stable enough" and "performant enough" with
-fall back to XFS if needed
-
--Jon
-
-:Wido
-:
-:[0]: http://www.stec-inc.com/product/ufm.php
+Thanks!
+sage
