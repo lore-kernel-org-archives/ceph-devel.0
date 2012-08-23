@@ -1,63 +1,37 @@
-From: Iulius Curt <iulius.curt@gmail.com>
-Subject: [PATCH v2] libceph: Fix sparse warning
-Date: Thu, 23 Aug 2012 15:14:29 +0300
-Message-ID: <1345724069-12405-1-git-send-email-icurt@ixiacom.com>
+From: Joao Eduardo Luis <joao.luis@inktank.com>
+Subject: Re: [ceph-commit] How to build ceph upon zfs filesystem.
+Date: Thu, 23 Aug 2012 14:48:09 +0100
+Message-ID: <50363499.6020406@inktank.com>
+References: <CAKC2VXosxK0HZcqjOEFU3+rNMxrNPo3ttOferu5p3Pfg6b09kQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:59090 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932930Ab2HWMOF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Aug 2012 08:14:05 -0400
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:33746 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933649Ab2HWNsm (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Aug 2012 09:48:42 -0400
+Received: by eaac11 with SMTP id c11so234955eaa.19
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Aug 2012 06:48:41 -0700 (PDT)
+In-Reply-To: <CAKC2VXosxK0HZcqjOEFU3+rNMxrNPo3ttOferu5p3Pfg6b09kQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com
-Cc: davem@davemloft.net, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, dbaluta@ixiacom.com, Iulius Curt <iulius.curt@gmail.com>, Iulius Curt <icurt@ixiacom.com>
+To: RamuNaidu Eppa <eppa.ramu@gmail.com>
+Cc: ceph-commit@lists.ceph.newdream.net, ceph-devel@vger.kernel.org
 
-From: Iulius Curt <iulius.curt@gmail.com>
+On 08/23/2012 11:41 AM, RamuNaidu Eppa wrote:
+> Hi all,
+> 
+>   I want build ceph upon zfs file system,now iam installed ceph upon
+> btrfs filesystem.
+> Please help me to ceph buils upon zfs filesystem.
+> 
+> Thanks,
+> Ramu.
 
-Make ceph_monc_do_poolop() static to remove the following sparse warning:
- * net/ceph/mon_client.c:616:5: warning: symbol 'ceph_monc_do_poolop' was not
-   declared. Should it be static?
-Also drops the 'ceph_monc_' prefix, now being a private function.
+Hello Ramu,
 
-Signed-off-by: Iulius Curt <icurt@ixiacom.com>
----
-v1 ---> v2
- * drop the 'ceph_monc_' prefix
----
- net/ceph/mon_client.c |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+I suspect the right place for this question would be the ceph-devel list
+(CC'ed), not ceph-commits. :-)
 
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index 105d533..84ce495 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -613,7 +613,7 @@ bad:
- /*
-  * Do a synchronous pool op.
-  */
--int ceph_monc_do_poolop(struct ceph_mon_client *monc, u32 op,
-+static int do_poolop(struct ceph_mon_client *monc, u32 op,
- 			u32 pool, u64 snapid,
- 			char *buf, int len)
- {
-@@ -663,7 +663,7 @@ out:
- int ceph_monc_create_snapid(struct ceph_mon_client *monc,
- 			    u32 pool, u64 *snapid)
- {
--	return ceph_monc_do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
-+	return do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
- 				   pool, 0, (char *)snapid, sizeof(*snapid));
-
- }
-@@ -672,7 +672,7 @@ EXPORT_SYMBOL(ceph_monc_create_snapid);
- int ceph_monc_delete_snapid(struct ceph_mon_client *monc,
- 			    u32 pool, u64 snapid)
- {
--	return ceph_monc_do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
-+	return do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
- 				   pool, snapid, 0, 0);
-
- }
---
-1.7.9.5
-
+  -Joao
