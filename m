@@ -1,259 +1,448 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Ideal hardware spec?
-Date: Thu, 23 Aug 2012 10:24:11 +0200
-Message-ID: <5035E8AB.8090006@widodh.nl>
-References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl> <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com>
+From: Andreas Bluemle <andreas.bluemle@itxperts.de>
+Subject: Re: SimpleMessenger dispatching: cause of performance problems?
+Date: Thu, 23 Aug 2012 11:37:46 +0200
+Message-ID: <5035F9EA.1060100@itxperts.de>
+References: <502D1B07.3030101@itxperts.de>	<alpine.DEB.2.00.1208160951190.26904@cobra.newdream.net>	<50323001.5050300@itxperts.de>	<alpine.DEB.2.00.1208201320160.26904@cobra.newdream.net>	<5033599C.70504@itxperts.de>	<alpine.DEB.2.00.1208211105170.32470@cobra.newdream.net>	<alpine.DEB.2.00.1208211217560.29978@cobra.newdream.net>	<CA+4uBUan6jUon6SbVTxZTcTcAa4GYOWeXLgLW7upW41LLO=Vog@mail.gmail.com>	<50346E3B.60602@itxperts.de> <CA+4uBUYt5R7v7GoWqww0HG4H7r8-F582OSp+tvdZX1A3Dc7fYA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:48812 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933740Ab2HWIYP (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Aug 2012 04:24:15 -0400
-In-Reply-To: <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com>
+Received: from mail.itxperts.de ([212.202.108.166]:36019 "EHLO
+	mail.itxperts.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932365Ab2HWJhw (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Aug 2012 05:37:52 -0400
+In-Reply-To: <CA+4uBUYt5R7v7GoWqww0HG4H7r8-F582OSp+tvdZX1A3Dc7fYA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stephen Perkins <perkins@netmass.com>
-Cc: 'Jonathan Proulx' <jon@csail.mit.edu>, ceph-devel@vger.kernel.org
+To: Samuel Just <sam.just@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-On 08/22/2012 04:39 PM, Stephen Perkins wrote:
-> Hi all,
+Hi,
+
+the size of the rbd data objects on the OSD is 4 MByte (default).
+
+
+Best Regards
+
+Andreas
+
+Samuel Just wrote:
+> What rbd block size were you using?
+> -Sam
 >
-> Is there a place we can set up a group of hardware recipes that people can
-> query and modify over time?  It would be good if people could submit and
-> "group modify" the recipes.   I would envision "hypothetical" configurations
-> and "deployed/tested" configurations.
->
-> Trekking back through email exchanges like this becomes hard for people who
-> join later.
->
-
-At the moment there isn't, but yes, a "show your setup" would be useful. 
-I don't know if there is any really reference material right now, but in 
-a later stage some showcases could be a great reference.
-
-> I'd like to see a "best" hardware config as well... however, I'm interested
-> in a SAS switching fabric where the nodes do not have any storage (except
-> possibly onboard boot drive/USB as listed below).  Each node would have a
-> SAS HBA that allows it to access a LARGE jbod  provided by a HA set of SAS
-> Switches (http://www.lsi.com/solutions/Pages/SwitchedSAS.aspx). The drives
-> are lun masked for each host.
->
-> The thought here is that you can add compute nodes, storage shelves, and
-> disks all independently.  With proper masking, you could provide redundancy
-> to cover drive, node, and shelf failures.    You could also add disks
-> "horizontally" if you have spare slots in a shelf, and you could add shelves
-> "vertically" and increase the disk count available to existing nodes.
->
-
-What would the benefit be from building such a complex SAS environment? 
-You'd be spending a lot of money on SAS switch, JBODs and cabling.
-
-Your SPOF would still be your whole SAS setup.
-
-And what is the benefit for having Ceph run on top of that? If you have 
-all the disks available to all the nodes, why not run ZFS? ZFS would 
-give you better performance since what you are building would actually 
-be a local filesystem.
-
-For risk spreading you should not interconnect all the nodes.
-
-The more complexity you add to the whole setup, the more likely it's to 
-go down completely at some point in time.
-
-I'm just trying to understand why you would want to run a distributed 
-filesystem on top of a bunch of direct attached disks.
-
-Again, if all the disks are attached locally you'd be better of by using 
-ZFS.
-
-> My goal is to be able to scale without having to draw the enormous power of
-> lots of 1U devices or buy lots of disks and shelves each time I wasn't to
-> add a little capacity.
->
-
-You can do that, scale by adding a 1U node with 2, 3 of 4 disks at the 
-time, depending on your crushmap you might need to add 3 machines at a once.
-
-If you have three "racks" in your crushmap each containing 5 nodes, you 
-need to add a new node to each rack when expanding capacity to keep the 
-racks balanced.
-
-This way you would add three nodes when expanding.
-
-> Anybody looked at atom processors?
->
-
-Yes, I have.
-
-I'm running Atom D525 (SuperMicro X7SPA-HF) nodes with 4GB of RAM and 4 
-2TB disks and a 80GB SSD (old X25-M) for journaling.
-
-That works, but what I notice is that under heavy recover the Atoms 
-can't cope with it.
-
-I'm thinking about building a couple of nodes with the AMD Brazos 
-mainboard, somelike like an Asus E35M1-I.
-
-That is not a serverboard, but it would just be a reference to see what 
-it does.
-
-One of the problems with the Atoms is the 4GB memory limitation, with 
-the AMD Brazos you can use 8GB.
-
-I'm trying to figure out a way to have a really large amount of small 
-nodes for a low price to have a massive cluster where the impact of 
-loosing one node is very small.
-
-Wido
-
-> - Steve
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wido den Hollander
-> Sent: Wednesday, August 22, 2012 9:17 AM
-> To: Jonathan Proulx
-> Cc: ceph-devel@vger.kernel.org
-> Subject: Re: Ideal hardware spec?
->
-> Hi,
->
-> On 08/22/2012 03:55 PM, Jonathan Proulx wrote:
->> Hi All,
+> On Tue, Aug 21, 2012 at 10:29 PM, Andreas Bluemle
+> <andreas.bluemle@itxperts.de> wrote:
+>   
+>> Hi,
 >>
->> Yes I'm asking the impossible question, what is the "best" hardware
->> confing.
 >>
->> I'm looking at (possibly) using ceph as backing store for images and
->> volumes on OpenStack as well as exposing at least the object store for
->> direct use.
+>> Samuel Just wrote:
+>>     
+>>> Was the cluster complete healthy at the time that those traces were taken?
+>>> If there were osds going in/out/up/down, it would trigger osdmap updates
+>>> which
+>>> would tend to hold the osd_lock for an extended period of time.
+>>>
+>>>
+>>>       
+>> The cluster was completely healthy.
 >>
->> The openstack cluster exists and is currently in the early stages of
->> use by researchers here, approx 1500 vCPU (counts hyperthreads
->> actually 768 physical cores) and 3T or RAM across 64 physical nodes.
+>>     
+>>> v0.50 included some changes that drastically reduce the purview of
+>>> osd_lock.
+>>> In particular, pg op handling no longer grabs the osd_lock and
+>>> handle_osd_map
+>>> can proceed independently of the pg worker threads.  Trying that might be
+>>> interesting.
+>>>
+>>>
+>>>       
+>> I'll grab v0.50 and take a look.
 >>
->> On the object store side it would be a new resource for usand hard to
->> say what people would do with it except that it would be many
->> different things and the use profile would be constantly changing
->> (which is true of all our existing storage).
 >>
->> In this sense, even though it's a "private cloud" the somewhat
->> unpredictable useage profile gives it some charateristics of a small
->> public cloud.
+>>     
+>>> -Sam
+>>>
+>>> On Tue, Aug 21, 2012 at 12:20 PM, Sage Weil <sage@inktank.com> wrote:
+>>>
+>>>       
+>>>> On Tue, 21 Aug 2012, Sage Weil wrote:
+>>>>
+>>>>         
+>>>>> On Tue, 21 Aug 2012, Andreas Bluemle wrote:
+>>>>>
+>>>>>           
+>>>>>> Hi Sage,
+>>>>>>
+>>>>>> as mentioned, the workload is a single sequential write on
+>>>>>> the client. The write is not O_DIRECT; and consequently
+>>>>>> the messages arrive at the OSD with 124 KByte per write request.
+>>>>>>
+>>>>>> The attached pdf shows a timing diagram of two concurrent
+>>>>>> write operations (one primary and one replication / secondary).
+>>>>>>
+>>>>>> The time spent on the primary write to get the OSD.:osd_lock
+>>>>>> releates nicely with the time when this lock is released by the
+>>>>>> secondary write.
+>>>>>>
+>>>>>>             
+>>>> Looking again at this diagram, I'm a bit confused.  Is the Y access the
+>>>> thread id or something?  And the X axis is time in seconds?
+>>>>
+>>>>
+>>>>         
+>> X-Axis is time, Y Axis is absolute offset of the write request on the rados
+>> block device.
 >>
->> Size wise I'm hoping to start out with 3 monitors  and  5(+) OSD nodes
->> to end up with a 20-30T 3x replicated storage (call me paranoid).
+>>     
+>>>> The big question for me is what on earth the secondary write (or primary,
+>>>> for that matter) is doing with osd_lock for a full 3 ms...  If my reading
+>>>> of the units is correct, *that* is the real problem.  It shouldn't be
+>>>> doing anything that takes that long.  The exception is osdmap handling,
+>>>> which can do more work, but request processing should be very fast.
+>>>>
+>>>> Thanks-
+>>>> sage
+>>>>
+>>>>
+>>>>
+>>>>         
+>>>>> Ah, I see.
+>>>>>
+>>>>> There isn't a trivial way to pull osd_lock out of the picture; there are
+>>>>> several data structures it's protecting (pg_map, osdmaps, peer epoch
+>>>>> map,
+>>>>> etc.).  Before we try going down that road, I suspect it might be more
+>>>>> fruitful to see where cpu time is being spent while osd_lock is held.
+>>>>>
+>>>>> How much of an issue does it look like this specific contention is for
+>>>>> you?  Does it go away with larger writes?
+>>>>>
+>>>>> sage
+>>>>>
+>>>>>
+>>>>>
+>>>>>           
+>>>>>> Hope this helps
+>>>>>>
+>>>>>> Andreas
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> Sage Weil wrote:
+>>>>>>
+>>>>>>             
+>>>>>>> On Mon, 20 Aug 2012, Andreas Bluemle wrote:
+>>>>>>>
+>>>>>>>
+>>>>>>>               
+>>>>>>>> Hi Sage,
+>>>>>>>>
+>>>>>>>> Sage Weil wrote:
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>                 
+>>>>>>>>> Hi Andreas,
+>>>>>>>>>
+>>>>>>>>> On Thu, 16 Aug 2012, Andreas Bluemle wrote:
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>                   
+>>>>>>>>>> Hi,
+>>>>>>>>>>
+>>>>>>>>>> I have been trying to migrate a ceph cluster (ceph-0.48argonaut)
+>>>>>>>>>> to a high speed cluster network and encounter scalability problems:
+>>>>>>>>>> the overall performance of the ceph cluster does not scale well
+>>>>>>>>>> with an increase in the underlying networking speed.
+>>>>>>>>>>
+>>>>>>>>>> In short:
+>>>>>>>>>>
+>>>>>>>>>> I believe that the dispatching from SimpleMessenger to
+>>>>>>>>>> OSD worker queues causes that scalability issue.
+>>>>>>>>>>
+>>>>>>>>>> Question: is it possible that this dispatching is causing
+>>>>>>>>>> performance
+>>>>>>>>>> problems?
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>>                     
+>>>>>>>>> There is a single 'dispatch' thread that's processing this queue,
+>>>>>>>>> and
+>>>>>>>>> conveniently perf lets you break down its profiling data on a
+>>>>>>>>> per-thread
+>>>>>>>>> basis.  Once you've ruled out the throttler as the culprit, you
+>>>>>>>>> might
+>>>>>>>>> try
+>>>>>>>>> running the daemon with 'perf record -g -- ceph-osd ...' and then
+>>>>>>>>> look
+>>>>>>>>> specifically at where that thread is spending its time.  We
+>>>>>>>>> shouldn't be
+>>>>>>>>> burning that much CPU just doing the sanity checks and then handing
+>>>>>>>>> requests
+>>>>>>>>> off to PGs...
+>>>>>>>>>
+>>>>>>>>> sage
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>                   
+>>>>>>>>   The effect, which I am seeing, may be related to some locking
+>>>>>>>> issue.
+>>>>>>>> As I read the code, there are multiple dispatchers running: one per
+>>>>>>>> SimpleMessenger.
+>>>>>>>>
+>>>>>>>> On a typical OSD node, there is
+>>>>>>>>
+>>>>>>>> - the instance of the SimpleMessenger processing input from the
+>>>>>>>> client
+>>>>>>>> (primary writes)
+>>>>>>>> - other instances of SimpleMessenger, which process input from
+>>>>>>>> neighbor
+>>>>>>>> OSD
+>>>>>>>> nodes
+>>>>>>>>
+>>>>>>>> the latter generate replication writes to the OSD I am looking at.
+>>>>>>>>
+>>>>>>>> On the other hand, there is a single instance of the OSD object
+>>>>>>>> within the
+>>>>>>>> ceph-osd daemon.
+>>>>>>>> When dispatching messages to the OSD, then the OSD::osd_lock is held
+>>>>>>>> for
+>>>>>>>> the
+>>>>>>>> complete
+>>>>>>>> process of dispatching; see code below.
+>>>>>>>>
+>>>>>>>> When the write load increases, then multiple SimpleMessenger
+>>>>>>>> instances
+>>>>>>>> start
+>>>>>>>> to
+>>>>>>>> congest on the OSD::osd_lock.
+>>>>>>>> And this may cause delays in the individual dispatch process.
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>                 
+>>>>>>> This is definitely possible, yes, although it would surprise me if
+>>>>>>> it's
+>>>>>>> happening here (unless your workload is all small writes).  Just to
+>>>>>>> confirm,
+>>>>>>> are you actually observing osd_lock contention, or speculating about
+>>>>>>> what is
+>>>>>>> causing the delays you're seeing?
+>>>>>>>
+>>>>>>> I'm not sure what the best tool is to measure lock contention.  Mark
+>>>>>>> was
+>>>>>>> playing with a 'poor man's wall clock profiler' using stack trace
+>>>>>>> sampling
+>>>>>>> from gdb.  That would tell us whether threads were really blocking
+>>>>>>> while
+>>>>>>> obtaining the osd_lock...
+>>>>>>>
+>>>>>>> Can you tell us a bit more about what your workload is?
+>>>>>>>
+>>>>>>> sage
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>>               
+>>>>>>>> bool OSD::ms_dispatch(Message *m)
+>>>>>>>> {
+>>>>>>>> // lock!
+>>>>>>>> osd_lock.Lock();
+>>>>>>>>
+>>>>>>>> while (dispatch_running) {
+>>>>>>>> dout(10) << "ms_dispatch waiting for other dispatch thread to
+>>>>>>>> complete" <<
+>>>>>>>> dendl;
+>>>>>>>> dispatch_cond.Wait(osd_lock);
+>>>>>>>> }
+>>>>>>>> dispatch_running = true;
+>>>>>>>>
+>>>>>>>> do_waiters();
+>>>>>>>> _dispatch(m);
+>>>>>>>> do_waiters();
+>>>>>>>>
+>>>>>>>> dispatch_running = false;
+>>>>>>>> dispatch_cond.Signal();
+>>>>>>>>
+>>>>>>>> osd_lock.Unlock();
+>>>>>>>> return true;
+>>>>>>>> }
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>                 
+>>>>>>>>>> In detail:
+>>>>>>>>>>
+>>>>>>>>>> In order to find out more about this problem, I have added
+>>>>>>>>>> profiling
+>>>>>>>>>> to
+>>>>>>>>>> the ceph code in various place; for write operations to the primary
+>>>>>>>>>> or
+>>>>>>>>>> the
+>>>>>>>>>> secondary, timestamps are recorded for OSD object, offset and
+>>>>>>>>>> length
+>>>>>>>>>> of
+>>>>>>>>>> the such a write request.
+>>>>>>>>>>
+>>>>>>>>>> Timestamps record:
+>>>>>>>>>>  - receipt time at SimpleMessenger
+>>>>>>>>>>  - processing time at osd
+>>>>>>>>>>  - for primary write operations: wait time until replication
+>>>>>>>>>> operation
+>>>>>>>>>>    is acknowledged.
+>>>>>>>>>>
+>>>>>>>>>> What I believe is happening: dispatching requests from
+>>>>>>>>>> SimpleMessenger
+>>>>>>>>>> to
+>>>>>>>>>> OSD worker threads seems to consume a fair amount of time. This
+>>>>>>>>>> ends
+>>>>>>>>>> up in a widening gap between subsequent receipts of requests and
+>>>>>>>>>> the
+>>>>>>>>>> start
+>>>>>>>>>> of OSD processing them.
+>>>>>>>>>>
+>>>>>>>>>> A primary write suffers twice from this problem: first because
+>>>>>>>>>> the delay happens on the primary OSD and second because the
+>>>>>>>>>> replicating
+>>>>>>>>>> OSD also suffers from the same problem - and hence causes
+>>>>>>>>>> additional
+>>>>>>>>>> delays
+>>>>>>>>>> at the primary OSD when it waits for the commit from the
+>>>>>>>>>> replicating
+>>>>>>>>>> OSD.
+>>>>>>>>>>
+>>>>>>>>>> In the attached graphics, the x-axis shows the time (in seconds)
+>>>>>>>>>> The y-axis shows the offset where a request to write happened.
+>>>>>>>>>>
+>>>>>>>>>> The red bar represents the SimpleMessenger receive, i.e. from
+>>>>>>>>>> reading
+>>>>>>>>>> the message header until enqueuing the completely decoded message
+>>>>>>>>>> into
+>>>>>>>>>> the SImpleMessenger dispatch queue.
+>>>>>>>>>>
+>>>>>>>>>> The green bar represents the time required for local processing,
+>>>>>>>>>> i.e.
+>>>>>>>>>> dispatching the the OSD worker, writing to filesystem and journal,
+>>>>>>>>>> send
+>>>>>>>>>> out the replication operation to the replicating OSD. It right
+>>>>>>>>>> end of the green bar is the time when locally everything has
+>>>>>>>>>> finished
+>>>>>>>>>> and a commit could happen.
+>>>>>>>>>>
+>>>>>>>>>> The blue bar represents the time until the replicating OSD has sent
+>>>>>>>>>> a
+>>>>>>>>>> commit
+>>>>>>>>>> back to the primary OSD and the original write request can be
+>>>>>>>>>> committed to
+>>>>>>>>>> the client.
+>>>>>>>>>>
+>>>>>>>>>> The green bar is interrupted by a black bar: the left end
+>>>>>>>>>> represents
+>>>>>>>>>> the time when the request has been enqueued on the OSD worker
+>>>>>>>>>> queue.
+>>>>>>>>>> The
+>>>>>>>>>> right end gives the time when the request is taken off the OSD
+>>>>>>>>>> worker
+>>>>>>>>>> queue and actual OSD processing starts.
+>>>>>>>>>>
+>>>>>>>>>> The test was a simple sequential write to a rados block device.
+>>>>>>>>>>
+>>>>>>>>>> Receiption of the write requests at the OSD is also sequential in
+>>>>>>>>>> the
+>>>>>>>>>> graphics: the bar to the bottom of the graphics shows an earlier
+>>>>>>>>>> write
+>>>>>>>>>> request.
+>>>>>>>>>>
+>>>>>>>>>> Note that the dispatching of a later request in all cases relates
+>>>>>>>>>> to
+>>>>>>>>>> the
+>>>>>>>>>> enqueue time at the OSD worker queue of the previous write request:
+>>>>>>>>>> the
+>>>>>>>>>> left
+>>>>>>>>>> end of a black bar relates nicely to the beginning of a green bar
+>>>>>>>>>> above
+>>>>>>>>>> it.
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> --
+>>>>>>>>>> Andreas Bluemle
+>>>>>>>>>> mailto:Andreas.Bluemle@itxperts.de
+>>>>>>>>>> ITXperts GmbH                       http://www.itxperts.de
+>>>>>>>>>> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+>>>>>>>>>> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
+>>>>>>>>>>
+>>>>>>>>>> Company details: http://www.itxperts.de/imprint.htm
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>>                     
+>>>>>>>> --
+>>>>>>>> Andreas Bluemle
+>>>>>>>> mailto:Andreas.Bluemle@itxperts.de
+>>>>>>>> ITXperts GmbH                       http://www.itxperts.de
+>>>>>>>> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+>>>>>>>> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
+>>>>>>>>
+>>>>>>>> Company details: http://www.itxperts.de/imprint.htm
+>>>>>>>>
+>>>>>>>> --
+>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>>>>>> in
+>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>                 
+>>>>>>>
+>>>>>>>
+>>>>>>>               
+>>>>>> --
+>>>>>> Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+>>>>>> ITXperts GmbH                       http://www.itxperts.de
+>>>>>> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+>>>>>> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
+>>>>>>
+>>>>>> Company details: http://www.itxperts.de/imprint.htm
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>>             
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>         
+>>>
+>>>
+>>>       
 >>
->
-> I prefer 3x replication as well. I've seen the "wrong" OSDs die on me too
-> often.
->
->> So the monitor specs seem relatively easy to come up with.  For the
->> OSDs it looks like
->> http://ceph.com/docs/master/install/hardware-recommendations suggests
->> 1 drive, 1 core and  2G RAM per OSD (with multiple OSDs per storage
->> node).  On list discussions seem to frequently include an SSD for
->> journaling (which is similar to what we do for our current ZFS back
->> NFS storage).
->>
->> I'm hoping to wrap the hardware in a grant and willing to experiment a
->> bit with different software configurations to tune it up when/if I get
->> the hardware in.  So my imediate concern is a hardware spec that will
->> ahve a reasonable processor:memory:disk ratio and opinions (or better
->> data) on the utility of SSD.
->>
->> First is the documented core to disk ratio still current best
->> practice?  Given a platform with more drive slots could 8 cores handle
->> more disk? would that need/like more memory?
->>
->
-> I'd still suggest about 2GB of RAM per OSD. The more RAM you have in the OSD
-> machines, the more the kernel can buffer, which will always be a performance
-> gain.
->
-> You should however ask yourself the question if you want a lot of OSDs per
-> server and not go for smaller machines with less disks.
->
-> For example
->
-> - 1U
-> - 4 cores
-> - 8GB RAM
-> - 4 disks
-> - 1 SSD
->
-> Or
->
-> - 2U
-> - 8 cores
-> - 16GB RAM
-> - 8 disks
-> - 1|2 SSDs
->
-> Both will give you the same amount of storage, but the impact of loosing one
-> physicial machine will be larger with the 2U machine.
->
-> If you take 1TB disks you'd loose 8TB of storage, that is a lot of recovery
-> to be done.
->
-> Since btrfs (Assuming you are going to use that) is still in development
-> it's not excluded that your machine goes down due to a kernel panic or other
-> problems.
->
-> My personal favor is having multiple small(er) machines than having a couple
-> of large machines.
->
->> Have SSD been shown to speed performance with this architecture?
->>
->
-> I've seen a improvement in performance indeed. Make sure however you have a
-> recent version of glibc with syncfs support.
->
->> If so given the 8 drive slot example with seven OSDs presented in the
->> docs what is the liklihood that using a high performance SSD for the
->> OS image and also cutting journal/log partitions out of it for the
->> remaining 7 2-3T near line SAS drives?
->>
->
-> You should make sure your SSD is capable of doing line-speed of your
-> network.
->
-> If you are connecting the machines with 4G trunks, make sure the SSD is
-> capable of doing around 400MB/sec of sustained writes.
->
-> I'd recommended the Intel 520 SSDs and change their available capacity with
-> hdparm to about 20% of their original capacity. This way the SSD always has
-> a lot of free cells available for writing. Reprogramming cells is expensive
-> on an SSD.
->
-> You can run the OS on the same SSD since that won't do that much I/O.
-> I'd recommend not logging locally though, since that will also write to the
-> same SSD. Try using remote syslog.
->
-> You can also use the USB sticks[0] from Stec, they have servergrade onboard
-> USB sticks for these kind of applications.
->
-> A couple of questions still need to be answered though:
-> * Which OS are you planning on using? Ubuntu 12.04 is recommended
-> * Which filesystem do you want to use underneath the OSDs?
->
-> Wido
->
-> [0]: http://www.stec-inc.com/product/ufm.php
->
->> Thanks,
->> -Jon
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
+>> Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+>> ITXperts GmbH                       http://www.itxperts.de
+>> Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+>> D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
 >>
+>> Company details: http://www.itxperts.de/imprint.htm
+>>
+>>     
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
 >
+>   
+
+
+-- 
+Andreas Bluemle                     mailto:Andreas.Bluemle@itxperts.de
+ITXperts GmbH                       http://www.itxperts.de
+Balanstrasse 73, Geb. 08            Phone: (+49) 89 89044917
+D-81541 Muenchen (Germany)          Fax:   (+49) 89 89044910
+
+Company details: http://www.itxperts.de/imprint.htm
 
