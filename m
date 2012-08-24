@@ -1,70 +1,82 @@
-From: Wido den Hollander <wido@widodh.nl>
+From: Mark Nelson <mark.nelson@inktank.com>
 Subject: Re: Ideal hardware spec?
-Date: Fri, 24 Aug 2012 20:12:11 +0200
-Message-ID: <5037C3FB.200@widodh.nl>
-References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl> <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com> <5035E8AB.8090006@widodh.nl> <005b01cd8203$43f6e860$cbe4b920$@netmass.com> <50379830.4000000@inktank.com>
+Date: Fri, 24 Aug 2012 13:23:30 -0500
+Message-ID: <5037C6A2.4050403@inktank.com>
+References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl> <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com> <5035E8AB.8090006@widodh.nl> <005b01cd8203$43f6e860$cbe4b920$@netmass.com> <50379830.4000000@inktank.com> <5037C3FB.200@widodh.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:52684 "EHLO
-	smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754092Ab2HXSMM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 14:12:12 -0400
-In-Reply-To: <50379830.4000000@inktank.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:47572 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753582Ab2HXSXg (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 14:23:36 -0400
+Received: by ialo24 with SMTP id o24so3923823ial.19
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Aug 2012 11:23:32 -0700 (PDT)
+In-Reply-To: <5037C3FB.200@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.nelson@inktank.com>
+To: Wido den Hollander <wido@widodh.nl>
 Cc: ceph-devel@vger.kernel.org
 
-
-
-On 08/24/2012 05:05 PM, Mark Nelson wrote:
+On 08/24/2012 01:12 PM, Wido den Hollander wrote:
+>
+>
+> On 08/24/2012 05:05 PM, Mark Nelson wrote:
+>>>>
+>>>> I'm running Atom D525 (SuperMicro X7SPA-HF) nodes with 4GB of RAM and
+>>>> 4 2TB
+>>> disks and a 80GB SSD (old X25-M) for journaling.
+>>>>
+>>>> That works, but what I notice is that under heavy recover the Atoms
+>>>> can't
+>>> cope with it.
+>>>>
+>>>> I'm thinking about building a couple of nodes with the AMD Brazos
+>>> mainboard, somelike like an Asus E35M1-I.
+>>>>
+>>>> That is not a serverboard, but it would just be a reference to see
+>>>> what it
+>>> does.
+>>>>
+>>>> One of the problems with the Atoms is the 4GB memory limitation, with
+>>>> the
+>>> AMD Brazos you can use 8GB.
+>>>>
+>>>> I'm trying to figure out a way to have a really large amount of small
+>>>> nodes
+>>> for a low price to have
+>>>> a massive cluster where the impact of loosing one node is very small.
 >>>
->>> I'm running Atom D525 (SuperMicro X7SPA-HF) nodes with 4GB of RAM and
->>> 4 2TB
->> disks and a 80GB SSD (old X25-M) for journaling.
->>>
->>> That works, but what I notice is that under heavy recover the Atoms
->>> can't
->> cope with it.
->>>
->>> I'm thinking about building a couple of nodes with the AMD Brazos
->> mainboard, somelike like an Asus E35M1-I.
->>>
->>> That is not a serverboard, but it would just be a reference to see
->>> what it
->> does.
->>>
->>> One of the problems with the Atoms is the 4GB memory limitation, with
->>> the
->> AMD Brazos you can use 8GB.
->>>
->>> I'm trying to figure out a way to have a really large amount of small
->>> nodes
->> for a low price to have
->>> a massive cluster where the impact of loosing one node is very small.
+>>> Given that "massive" is a relative term, I am as well... but I'm also
+>>> trying
+>>> to reduce the footprint (power and space) of that "massive" cluster.
+>>> I also
+>>> want to start small (1/2 rack) and scale as needed.
 >>
->> Given that "massive" is a relative term, I am as well... but I'm also
->> trying
->> to reduce the footprint (power and space) of that "massive" cluster.
->> I also
->> want to start small (1/2 rack) and scale as needed.
+>> If you do end up testing Brazos processes, please post your results! I
+>> think it really depends on what kind of performance you are aiming for.
+>> Our stock 2U test boxes have 6-core opterons, and our SC847a has dual
+>> 6-core low power Xeon E5s. At 10GbE+ these are probably going to be
+>> pushed pretty hard, especially during recovery.
+>>
 >
-> If you do end up testing Brazos processes, please post your results!  I
-> think it really depends on what kind of performance you are aiming for.
->   Our stock 2U test boxes have 6-core opterons, and our SC847a has dual
-> 6-core low power Xeon E5s.  At 10GbE+ these are probably going to be
-> pushed pretty hard, especially during recovery.
+> I'm aiming for a Ceph cluster of a couple of hundred TB consisting out
+> of 5 or 6 racks full of 1U machines with each 4x 1TB.
 >
+> Having about ~200 of these nodes all doing not that much work.
+>
+> If one fails I'd loose 0.5% of my cluster and recovery shouldn't be that
+> hard. Assuming here that the node crashes due to hardware failure, not
+> being plagued by some Ceph or BTRFS bug cluster-wide :)
+>
+> Wido
 
-I'm aiming for a Ceph cluster of a couple of hundred TB consisting out 
-of 5 or 6 racks full of 1U machines with each 4x 1TB.
+Just based on past experience, I figure the most common causes of 
+failure are going to be drive "failure", and controller failure.  Your 
+solution mitigates that by just going with tons of 1U nodes with few 
+drives.  I'm hoping we can also mitigate it by skipping expanders and 
+doing no more than 8 drives per controller.  It does mean you top out at 
+like 40-48 drives per node max on most server boards.
 
-Having about ~200 of these nodes all doing not that much work.
-
-If one fails I'd loose 0.5% of my cluster and recovery shouldn't be that 
-hard. Assuming here that the node crashes due to hardware failure, not 
-being plagued by some Ceph or BTRFS bug cluster-wide :)
-
-Wido
+Mark
