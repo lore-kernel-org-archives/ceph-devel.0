@@ -1,7 +1,7 @@
 From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 07/11] rbd: kill notify_timeout option
-Date: Fri, 24 Aug 2012 11:34:48 -0500
-Message-ID: <5037AD28.4050805@inktank.com>
+Subject: [PATCH 08/11] rbd: bio_chain_clone() cleanups
+Date: Fri, 24 Aug 2012 11:35:04 -0500
+Message-ID: <5037AD38.9070701@inktank.com>
 References: <5037AB20.4000103@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
@@ -9,79 +9,95 @@ Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
 Received: from mail-iy0-f174.google.com ([209.85.210.174]:45658 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964839Ab2HXQex (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 12:34:53 -0400
+	with ESMTP id S964839Ab2HXQfL (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 12:35:11 -0400
 Received: by mail-iy0-f174.google.com with SMTP id o24so3735552ial.19
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Aug 2012 09:34:52 -0700 (PDT)
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Aug 2012 09:35:11 -0700 (PDT)
 In-Reply-To: <5037AB20.4000103@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-The "notify_timeout" rbd device option is never used, so get rid of
-it.
+In bio_chain_clone(), at the end of the function the bi_next field
+of the tail of the new bio chain is nulled.  This isn't necessary,
+because if "tail" is non-null, its value will be the last bio
+structure allocated at the top of the while loop in that function.
+And before that structure is added to the end of the new chain, its
+bi_next pointer is always made null.
+
+While touching that function, clean a few other things:
+    - define each local variable on its own line
+    - move the definition of "tmp" to an inner scope
+    - move the modification of gfpmask closer to where it's used
+    - rearrange the logic that sets the chain's tail pointer
 
 Signed-off-by: Alex Elder <elder@inktank.com>
 ---
- drivers/block/rbd.c |    8 --------
- 1 file changed, 8 deletions(-)
+ drivers/block/rbd.c |   21 ++++++++++-----------
+ 1 file changed, 10 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 5e22bb5..e94336d 100644
+index e94336d..bb8dad7 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -69,7 +69,6 @@
- #define DEV_NAME_LEN		32
- #define MAX_INT_FORMAT_WIDTH	((5 * sizeof (int)) / 2 + 1)
+@@ -741,7 +741,9 @@ static struct bio *bio_chain_clone(struct bio **old,
+struct bio **next,
+ 				   struct bio_pair **bp,
+ 				   int len, gfp_t gfpmask)
+ {
+-	struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
++	struct bio *old_chain = *old;
++	struct bio *new_chain = NULL;
++	struct bio *tail;
+ 	int total = 0;
 
--#define RBD_NOTIFY_TIMEOUT_DEFAULT	10
- #define RBD_READ_ONLY_DEFAULT		false
-
- /*
-@@ -91,7 +90,6 @@ struct rbd_image_header {
- };
-
- struct rbd_options {
--	int	notify_timeout;
- 	bool	read_only;
- };
-
-@@ -348,7 +346,6 @@ static struct rbd_client *rbd_client_find(struct
-ceph_options *ceph_opts)
-  * mount options
-  */
- enum {
--	Opt_notify_timeout,
- 	Opt_last_int,
- 	/* int args above */
- 	Opt_last_string,
-@@ -359,7 +356,6 @@ enum {
- };
-
- static match_table_t rbd_opts_tokens = {
--	{Opt_notify_timeout, "notify_timeout=%d"},
- 	/* int args above */
- 	/* string args above */
- 	{Opt_read_only, "read_only"},
-@@ -396,9 +392,6 @@ static int parse_rbd_opts_token(char *c, void *private)
+ 	if (*bp) {
+@@ -750,9 +752,12 @@ static struct bio *bio_chain_clone(struct bio
+**old, struct bio **next,
  	}
 
- 	switch (token) {
--	case Opt_notify_timeout:
--		rbd_opts->notify_timeout = intval;
--		break;
- 	case Opt_read_only:
- 		rbd_opts->read_only = !rbd_opts->read_only;
- 		break;
-@@ -419,7 +412,6 @@ static int rbd_get_client(struct rbd_device
-*rbd_dev, const char *mon_addr,
- 	struct ceph_options *ceph_opts;
- 	struct rbd_client *rbdc;
+ 	while (old_chain && (total < len)) {
++		struct bio *tmp;
++
+ 		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
+ 		if (!tmp)
+ 			goto err_out;
++		gfpmask &= ~__GFP_WAIT;	/* can't wait after the first */
 
--	rbd_opts->notify_timeout = RBD_NOTIFY_TIMEOUT_DEFAULT;
- 	rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
+ 		if (total + old_chain->bi_size > len) {
+ 			struct bio_pair *bp;
+@@ -780,15 +785,12 @@ static struct bio *bio_chain_clone(struct bio
+**old, struct bio **next,
+ 		}
 
- 	ceph_opts = ceph_parse_options(options, mon_addr,
+ 		tmp->bi_bdev = NULL;
+-		gfpmask &= ~__GFP_WAIT;
+ 		tmp->bi_next = NULL;
+-
+-		if (!new_chain) {
+-			new_chain = tail = tmp;
+-		} else {
++		if (new_chain)
+ 			tail->bi_next = tmp;
+-			tail = tmp;
+-		}
++		else
++			new_chain = tmp;
++		tail = tmp;
+ 		old_chain = old_chain->bi_next;
+
+ 		total += tmp->bi_size;
+@@ -796,9 +798,6 @@ static struct bio *bio_chain_clone(struct bio **old,
+struct bio **next,
+
+ 	BUG_ON(total < len);
+
+-	if (tail)
+-		tail->bi_next = NULL;
+-
+ 	*old = old_chain;
+
+ 	return new_chain;
 -- 
 1.7.9.5
 
