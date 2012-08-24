@@ -1,26 +1,35 @@
-From: Joe Landman <landman@scalableinformatics.com>
+From: Mark Nelson <mark.nelson@inktank.com>
 Subject: Re: Ideal hardware spec?
-Date: Fri, 24 Aug 2012 10:41:13 -0400
-Message-ID: <50379289.305@scalableinformatics.com>
+Date: Fri, 24 Aug 2012 10:05:20 -0500
+Message-ID: <50379830.4000000@inktank.com>
 References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl> <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com> <5035E8AB.8090006@widodh.nl> <005b01cd8203$43f6e860$cbe4b920$@netmass.com>
-Reply-To: landman@scalableinformatics.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ec2-23-23-234-153.compute-1.amazonaws.com ([23.23.234.153]:38890
-	"EHLO mail2.scalableinformatics.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S964819Ab2HXOkK (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 24 Aug 2012 10:40:10 -0400
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:51664 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755844Ab2HXPFX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 11:05:23 -0400
+Received: by ialo24 with SMTP id o24so3582774ial.19
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Aug 2012 08:05:22 -0700 (PDT)
 In-Reply-To: <005b01cd8203$43f6e860$cbe4b920$@netmass.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Stephen Perkins <perkins@netmass.com>
 Cc: 'Wido den Hollander' <wido@widodh.nl>, ceph-devel@vger.kernel.org
 
-On 08/24/2012 10:17 AM, Stephen Perkins wrote:
-
+On 08/24/2012 09:17 AM, Stephen Perkins wrote:
+> Morning Wido (and all),
+>
+>>> I'd like to see a "best" hardware config as well... however, I'm
+>>> interested in a SAS switching fabric where the nodes do not have any
+>>> storage (except possibly onboard boot drive/USB as listed below).
+>>> Each node would have a SAS HBA that allows it to access a LARGE jbod
+>>> provided by a HA set of SAS Switches
+>>> (http://www.lsi.com/solutions/Pages/SwitchedSAS.aspx). The drives are lun
+> masked for each host.
+>>>
 >>> The thought here is that you can add compute nodes, storage shelves,
 >>> and disks all independently.  With proper masking, you could provide
 > redundancy
@@ -34,30 +43,16 @@ On 08/24/2012 10:17 AM, Stephen Perkins wrote:
 >> You'd be spending a lot of money on SAS switch, JBODs and cabling.
 >
 > Density.
+>
 
-As a solutions vendor, we try to stay out of these discussions in 
-general, as we are biased (of course).
-
-Your discussion of being able to scale up density, fabric, and other 
-relevant things is rather precisely what one of our products is meant to 
-do, though we take a different route on the fabric.
-
-Rather than using SAS switching and SAS targets, we use iSCSI and iSER 
-transports over 10 and 40GbE and IB.  Our targets are iSCSI/iSER.  Put 
-these underneath what we call the presentation layer, where the Ceph 
-OSDs, MDSs, etc will live.
-
-Otherwise they are quite similar.
-
-I don't want to pollute this discussion with a commercial.  Just wanted 
-to chime in here to let Stephen know that we've been doing that sort of 
-design for a while.
+Trying to balance between dense solutions with more failure points vs 
+cheap low density solutions is always tough.  Though not the densest 
+solution out there, we are starting to investigate performance on an 
+SC847a chassis with 36 hotswap drives in 4U (along with internal drives 
+for the system).  Our setup doesn't use SAS expanders which is nice 
+bonus, though it does require a lot of controllers.
 
 >> Your SPOF would still be your whole SAS setup.
-
-Actually no.  This design is, when well implemented, more resilient than 
-many others.
-
 >
 > Well... I'm not sure I would consider it a single point of failure...  a
 > pair of cross-connected switches and 3-5 disk shelves.  Shelves can be
@@ -80,18 +75,6 @@ many others.
 > You can get 3 - 4 of those compute enclosure with dual SAS connectors (each
 > enclosure not necessarily fully populated initially). The beauty is that the
 > SAS interconnect is fast.   Much faster than Ethernet.
-
-You remove SPOFs by accepting the reality that its effectively 
-impossible to have truly redundant power/data pathways on single 
-backplane boards (literally the definition of a single point of 
-failure).  If your redundant power supplies have a single power path to 
-your backplane, is that redundant power (in the event of a short on the 
-backplane)?  No, not even close.  And if your expander unit completely 
-fails and locks hard ..., do you have a completely electrically separate 
-pathway to your data?  With the single backplane/data path units, no you 
-don't have this.  So putting multiple RAID cards into these units 
-provides you with something akin to "security theatre".
-
 >
 > Please bear in mind that I am looking to create a highly available and
 > scalable storage system that will fit in as small an area as possible and
@@ -101,7 +84,9 @@ provides you with something akin to "security theatre".
 > operational expense.  Therefore, for me, density and incremental scalability
 > are important.
 
-Not trying to be a commercial:  Think multi PB per 42U rack without heroics.
+There are some pretty interesting solutions on the horizon from various 
+vendors that achieve a pretty decent amount of density.  Should be 
+interesting times ahead. :)
 
 >
 >> And what is the benefit for having Ceph run on top of that? If you have all
@@ -114,12 +99,6 @@ Not trying to be a commercial:  Think multi PB per 42U rack without heroics.
 > replication, but a RAIN approach appeals to me.  That is what I see in Ceph.
 > Don't get me wrong... I love ZFS... but am trying to figure out a scalable
 > HA solution that looks like RAIN. (Am I missing a feature of ZFS)?
-
-RAIN has some use cases, but rebuild times for a limited number of RAIDs 
-and a huge number of drives will be HUGE.  Especially if your 
-distributed LUNs start looking like multi tens to hundreds of TB. 
-Really, you'd have to go Ceph at this point.
-
 >
 >> For risk spreading you should not interconnect all the nodes.
 >
@@ -207,8 +186,11 @@ Really, you'd have to go Ceph at this point.
 > to reduce the footprint (power and space) of that "massive" cluster.  I also
 > want to start small (1/2 rack) and scale as needed.
 
-Again, not a commericial:  Think 1PB in less than 1/2 a 42U rack, with a 
-little more than 1 ton of AC.
+If you do end up testing Brazos processes, please post your results!  I 
+think it really depends on what kind of performance you are aiming for. 
+  Our stock 2U test boxes have 6-core opterons, and our SC847a has dual 
+6-core low power Xeon E5s.  At 10GbE+ these are probably going to be 
+pushed pretty hard, especially during recovery.
 
 >
 > - Steve
@@ -218,16 +200,4 @@ little more than 1 ton of AC.
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
 
-
--- 
-Joseph Landman, Ph.D
-Founder and CEO
-Scalable Informatics Inc.
-email: landman@scalableinformatics.com
-web  : http://scalableinformatics.com
-        http://scalableinformatics.com/sicluster
-phone: +1 734 786 8423 x121
-fax  : +1 866 888 3112
-cell : +1 734 612 4615
