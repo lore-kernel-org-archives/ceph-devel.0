@@ -1,103 +1,121 @@
-From: Alex Elder <elder@inktank.com>
-Subject: [PATCH 08/11] rbd: bio_chain_clone() cleanups
-Date: Fri, 24 Aug 2012 11:35:04 -0500
-Message-ID: <5037AD38.9070701@inktank.com>
-References: <5037AB20.4000103@inktank.com>
+From: Sage Weil <sage@inktank.com>
+Subject: Re: Ceph remap/recovery stuck
+Date: Fri, 24 Aug 2012 09:35:28 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208240931200.29719@cobra.newdream.net>
+References: <CAMwB3TidwXsCFUFGE79S+axZRm6trFz_sX_woTeoPcxanMMkTA@mail.gmail.com> <CAMwB3TiX2xYAA9mUp5g4G=f2+odvRwk3RNpeTNVQ_GwMLLJaig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:45658 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964839Ab2HXQfL (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 12:35:11 -0400
-Received: by mail-iy0-f174.google.com with SMTP id o24so3735552ial.19
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Aug 2012 09:35:11 -0700 (PDT)
-In-Reply-To: <5037AB20.4000103@inktank.com>
+Received: from cobra.newdream.net ([66.33.216.30]:60861 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964839Ab2HXQf3 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 12:35:29 -0400
+In-Reply-To: <CAMwB3TiX2xYAA9mUp5g4G=f2+odvRwk3RNpeTNVQ_GwMLLJaig@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-In bio_chain_clone(), at the end of the function the bi_next field
-of the tail of the new bio chain is nulled.  This isn't necessary,
-because if "tail" is non-null, its value will be the last bio
-structure allocated at the top of the while loop in that function.
-And before that structure is added to the end of the new chain, its
-bi_next pointer is always made null.
+On Fri, 24 Aug 2012, S?awomir Skowron wrote:
+> I have found workaround.
+> 
+> Change CRUSH to replication to osd in rule for this pool, and after
+> recovery, remapped data, i just change same rule into rack awarenes,
+> and whole cluster, recover again, and back to normal.
+> 
+> Is there any way, to start refill, recovery in this situation for this
+> specyfic OSD ??
 
-While touching that function, clean a few other things:
-    - define each local variable on its own line
-    - move the definition of "tmp" to an inner scope
-    - move the modification of gfpmask closer to where it's used
-    - rearrange the logic that sets the chain's tail pointer
+This sounds like it might be a problem with the crush retry behavior.  
+In some cases it would fail to generate teh right number of replicas for a 
+given input.  We fixed this by adding tunables that disable the old/bad 
+behavior, but haven't enabled it by default because support is only now 
+showing up in new kernels.  If you aren't using older kernel clients, you 
+can enable the new values on your cluster by following the instructions 
+at:
 
-Signed-off-by: Alex Elder <elder@inktank.com>
----
- drivers/block/rbd.c |   21 ++++++++++-----------
- 1 file changed, 10 insertions(+), 11 deletions(-)
+	http://ceph.com/docs/master/ops/manage/crush/#tunables
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e94336d..bb8dad7 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -741,7 +741,9 @@ static struct bio *bio_chain_clone(struct bio **old,
-struct bio **next,
- 				   struct bio_pair **bp,
- 				   int len, gfp_t gfpmask)
- {
--	struct bio *tmp, *old_chain = *old, *new_chain = NULL, *tail = NULL;
-+	struct bio *old_chain = *old;
-+	struct bio *new_chain = NULL;
-+	struct bio *tail;
- 	int total = 0;
+FWIW you can test whether this helps by extracting your crushmap from 
+the cluster, making whatever changes you are planning to the map, and then 
+running
 
- 	if (*bp) {
-@@ -750,9 +752,12 @@ static struct bio *bio_chain_clone(struct bio
-**old, struct bio **next,
- 	}
+ crushtool -i newmap --test
 
- 	while (old_chain && (total < len)) {
-+		struct bio *tmp;
-+
- 		tmp = bio_kmalloc(gfpmask, old_chain->bi_max_vecs);
- 		if (!tmp)
- 			goto err_out;
-+		gfpmask &= ~__GFP_WAIT;	/* can't wait after the first */
+and verify that you get the right number of results for numrep=3 and 
+below.  There are a bunch of options you can pass to adjust the range of 
+inputs that are tested (e.g.,  --min-x 1 --max-x 100000, --num-rep 3, 
+etc.).  crushtool is also used to adjust the tunables to 0, so you can 
+then verify that it fixes the problem... all before injecting the new map 
+into the cluster and actually triggering any data migration.
 
- 		if (total + old_chain->bi_size > len) {
- 			struct bio_pair *bp;
-@@ -780,15 +785,12 @@ static struct bio *bio_chain_clone(struct bio
-**old, struct bio **next,
- 		}
+sage
 
- 		tmp->bi_bdev = NULL;
--		gfpmask &= ~__GFP_WAIT;
- 		tmp->bi_next = NULL;
--
--		if (!new_chain) {
--			new_chain = tail = tmp;
--		} else {
-+		if (new_chain)
- 			tail->bi_next = tmp;
--			tail = tmp;
--		}
-+		else
-+			new_chain = tmp;
-+		tail = tmp;
- 		old_chain = old_chain->bi_next;
 
- 		total += tmp->bi_size;
-@@ -796,9 +798,6 @@ static struct bio *bio_chain_clone(struct bio **old,
-struct bio **next,
-
- 	BUG_ON(total < len);
-
--	if (tail)
--		tail->bi_next = NULL;
--
- 	*old = old_chain;
-
- 	return new_chain;
--- 
-1.7.9.5
-
+> 
+> On Thu, Aug 23, 2012 at 3:52 PM, S?awomir Skowron <szibis@gmail.com> wrote:
+> > 3 osd after crash rebuilds ok, but rebuild of two more osd (12 and
+> > 30), i can't make cluster to be active+clean
+> >
+> > I do rebuild like in doc:
+> >
+> > stop osd,
+> > remove from crush,
+> > rm from map,
+> > recreate a osd, after cluster get stable
+> >
+> > But now, all osd are in, and up, and data won't remap, and some of PG,
+> > have only two osd in chain with replication level 3 for this pool.
+> >
+> > 2012-08-23 15:26:46.073685 mon.0 [INF] pgmap v117192: 6472 pgs: 63
+> > active, 4457 active+clean, 1942 active+remapped, 10 active+degraded;
+> > 596 GB data, 1650 GB used, 20059 GB / 21710 GB avail; 57815/4705888
+> > degraded (1.229%)
+> >
+> > In attachment output from:
+> >
+> > ceph osd dump -o -
+> >
+> > I can't find any info in doc for this situation.
+> >
+> > HEALTH_WARN 10 pgs degraded; 2015 pgs stuck unclean; recovery
+> > 57871/4706179 degraded (1.230%)
+> > root@s3-10-177-64-6:~# ceph -s
+> >    health HEALTH_WARN 10 pgs degraded; 2015 pgs stuck unclean;
+> > recovery 57871/4706179 degraded (1.230%)
+> >    monmap e4: 3 mons at
+> > {0=10.177.64.4:6789/0,1=10.177.64.6:6789/0,2=10.177.64.8:6789/0},
+> > election epoch 16, quorum 0,1,2 0,1,2
+> >    osdmap e1300: 78 osds: 78 up, 78 in
+> >     pgmap v117464: 6472 pgs: 63 active, 4457 active+clean, 1942
+> > active+remapped, 10 active+degraded; 596 GB data, 1651 GB used, 20059
+> > GB / 21710 GB avail; 57871/4706179 degraded (1.230%)
+> >    mdsmap e1: 0/0/1 up
+> >
+> > Please help, i will try to give you any output you need.
+> >
+> >
+> > And one more thing, little bug in 0.48.1:
+> >
+> > ceph health blabla command, does same thing, as ceph health details.
+> > Whatever is after health, means details.
+> >
+> > --
+> > -----
+> > Regards
+> >
+> > S?awek "sZiBis" Skowron
+> 
+> 
+> 
+> -- 
+> -----
+> Pozdrawiam
+> 
+> S?awek "sZiBis" Skowron
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
