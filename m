@@ -1,68 +1,28 @@
-From: "Stephen Perkins" <perkins@netmass.com>
-Subject: Best insertion point for storage shim
-Date: Fri, 24 Aug 2012 10:49:21 -0500
-Message-ID: <00b201cd8210$077de070$1679a150$@netmass.com>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: Ideal hardware spec?
+Date: Fri, 24 Aug 2012 09:12:23 -0700
+Message-ID: <CADvuQRGovEd3vewn95QmeyRyrkxEV59=tm9-xv8KSRKx=xytkw@mail.gmail.com>
+References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl>
+ <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com> <5035E8AB.8090006@widodh.nl> <005b01cd8203$43f6e860$cbe4b920$@netmass.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 142.122.233.72.static.reverse.ltdomains.com ([72.233.122.142]:51555
-	"EHLO stgateway01.netmass.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759674Ab2HXPtZ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Fri, 24 Aug 2012 11:49:25 -0400
-Received: from stgateway01.netmass.com (localhost [127.0.0.1])
-	by stgateway01.netmass.com (Postfix) with ESMTP id 2B10F422035
-	for <ceph-devel@vger.kernel.org>; Fri, 24 Aug 2012 10:49:25 -0500 (CDT)
-Received: from sidney (sidney.netmass.com [10.10.120.10])
-	(using TLSv1 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by stgateway01.netmass.com (Postfix) with ESMTPS id 6A95442202D
-	for <ceph-devel@vger.kernel.org>; Fri, 24 Aug 2012 10:49:20 -0500 (CDT)
-Content-Language: en-us
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:63917 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753829Ab2HXQMo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 12:12:44 -0400
+Received: by vcbfk26 with SMTP id fk26so2311137vcb.19
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Aug 2012 09:12:44 -0700 (PDT)
+In-Reply-To: <005b01cd8203$43f6e860$cbe4b920$@netmass.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Stephen Perkins <perkins@netmass.com>
+Cc: Wido den Hollander <wido@widodh.nl>, ceph-devel@vger.kernel.org
 
-Hi all,
+On Fri, Aug 24, 2012 at 7:17 AM, Stephen Perkins <perkins@netmass.com> wrote:
+> Adding three machines at once is what I was trying to avoid (I believe that
+> I need 3 replicas to make things reasonably redundant).  From first glance,
 
-I'd like to get feedback from folks as to where the best place would be to
-insert a "shim" into the RADOS object storage.
-
-Currently, you can configure RADOS to use copy based storage to store
-redundant copies of a file (I like 3 redundant copies so I will use that as
-an example).  So... each file is stored in three locations on independent
-hardware.   The redundancy has a cost of 3x the storage.
-
-I would assume that it is "possible" to configure RADOS to store only 1 copy
-of a file (bear with me here).
-
-I'd like to see where it may be possible to insert a "shim" in the storage
-such that I can take the file to be stored and apply some erasure coding to
-it. Therefore, the file now becomes multiple files that are handed off to
-RADOS.  
-
-The shim would also have to take read file requests and read some small
-portion of the fragments and recombine.
-
-Basically... what I am asking is...  where would be the best place to start
-looking at adding this:
-	https://tahoe-lafs.org/trac/tahoe-lafs#
-	
-(just the erasure coded part).
-
-Here is the real rationale.  Extreme availability at only 1.3 or 1.6 time
-redundancy:
-
-	http://www.zdnet.com/videos/whiteboard/dispersed-storage/156114
-
-Thoughts appreciated,
-
-- Steve
-
-P.S. yes... I posted on this earlier.  Microsoft Azure storage takes this
-approach by lazy erasure coding inactive files to significantly reduce
-storage costs while increasing reliability.
-
-
+You need 3 machines to *start with*, to have 3 truly independent
+replicas. After that point, there's nothing preventing you from
+growing one machine -- or one disk -- at a time.
