@@ -1,97 +1,178 @@
-From: =?ISO-8859-2?Q?S=B3awomir_Skowron?= <szibis@gmail.com>
-Subject: Re: Ceph remap/recovery stuck
-Date: Fri, 24 Aug 2012 13:54:18 +0200
-Message-ID: <CAMwB3TiX2xYAA9mUp5g4G=f2+odvRwk3RNpeTNVQ_GwMLLJaig@mail.gmail.com>
-References: <CAMwB3TidwXsCFUFGE79S+axZRm6trFz_sX_woTeoPcxanMMkTA@mail.gmail.com>
+From: "Stephen Perkins" <perkins@netmass.com>
+Subject: RE: Ideal hardware spec?
+Date: Fri, 24 Aug 2012 09:17:59 -0500
+Message-ID: <005b01cd8203$43f6e860$cbe4b920$@netmass.com>
+References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl> <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com> <5035E8AB.8090006@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:48337 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751646Ab2HXLyT convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 07:54:19 -0400
-Received: by qcro28 with SMTP id o28so1136364qcr.19
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Aug 2012 04:54:18 -0700 (PDT)
-In-Reply-To: <CAMwB3TidwXsCFUFGE79S+axZRm6trFz_sX_woTeoPcxanMMkTA@mail.gmail.com>
+Received: from 142.122.233.72.static.reverse.ltdomains.com ([72.233.122.142]:54398
+	"EHLO stgateway01.netmass.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757700Ab2HXOSJ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Fri, 24 Aug 2012 10:18:09 -0400
+In-Reply-To: <5035E8AB.8090006@widodh.nl>
+Content-Language: en-us
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: 'Wido den Hollander' <wido@widodh.nl>
+Cc: ceph-devel@vger.kernel.org
 
-I have found workaround.
+Morning Wido (and all),
 
-Change CRUSH to replication to osd in rule for this pool, and after
-recovery, remapped data, i just change same rule into rack awarenes,
-and whole cluster, recover again, and back to normal.
+>> I'd like to see a "best" hardware config as well... however, I'm 
+>> interested in a SAS switching fabric where the nodes do not have any 
+>> storage (except possibly onboard boot drive/USB as listed below).  
+>> Each node would have a SAS HBA that allows it to access a LARGE jbod  
+>> provided by a HA set of SAS Switches 
+>> (http://www.lsi.com/solutions/Pages/SwitchedSAS.aspx). The drives are lun
+masked for each host.
+>>
+>> The thought here is that you can add compute nodes, storage shelves, 
+>> and disks all independently.  With proper masking, you could provide
+redundancy
+>> to cover drive, node, and shelf failures.    You could also add disks
+>> "horizontally" if you have spare slots in a shelf, and you could add 
+>> shelves "vertically" and increase the disk count available to existing
+nodes.
+>>
+>
+>What would the benefit be from building such a complex SAS environment? 
+>You'd be spending a lot of money on SAS switch, JBODs and cabling.
 
-Is there any way, to start refill, recovery in this situation for this
-specyfic OSD ??
+Density.
 
-On Thu, Aug 23, 2012 at 3:52 PM, S=B3awomir Skowron <szibis@gmail.com> =
-wrote:
-> 3 osd after crash rebuilds ok, but rebuild of two more osd (12 and
-> 30), i can't make cluster to be active+clean
+>Your SPOF would still be your whole SAS setup.
+
+Well... I'm not sure I would consider it a single point of failure...  a
+pair of cross-connected switches and 3-5 disk shelves.  Shelves can be
+purchased with fully redundant internals (dual data paths etc to SAS
+drives).  That is not even that important. If each shelf is just looked at
+as JBOD, then you can group disks from different shelves into btrfs or
+hardware RAID groups.  Or... you can look at each disk as its own storage
+with its own OSD.
+
+A SAS switch going offline would have no impact since everything is cross
+connected.
+
+A whole shelf can go offline and it would only appear as a single drive
+failure in a RAID group (if disks groups are distributed properly).
+
+You can then get compute nodes fairly densely packed by purchasing
+SuperMicro 2uTwin enclosures:
+	http://www.supermicro.com/products/nfo/2UTwin2.cfm
+
+You can get 3 - 4 of those compute enclosure with dual SAS connectors (each
+enclosure not necessarily fully populated initially). The beauty is that the
+SAS interconnect is fast.   Much faster than Ethernet.
+
+Please bear in mind that I am looking to create a highly available and
+scalable storage system that will fit in as small an area as possible and
+draw as little power as possible.  The reasoning is that we co-locate all
+our equipment at remote data centers.  Each rack (along with its associated
+power and any needed cross connects) represents a significant ongoing
+operational expense.  Therefore, for me, density and incremental scalability
+are important.
+
+>And what is the benefit for having Ceph run on top of that? If you have all
+the disks available to all the nodes, why not run ZFS?
+> ZFS would give you better performance since what you are building would
+actually be a local filesystem.
+
+There is no high availability here.  Yes... You can try to do old school
+magic with SAN file systems, complicated clustering, and synchronous
+replication, but a RAIN approach appeals to me.  That is what I see in Ceph.
+Don't get me wrong... I love ZFS... but am trying to figure out a scalable
+HA solution that looks like RAIN. (Am I missing a feature of ZFS)?
+
+>For risk spreading you should not interconnect all the nodes.
+
+I do understand this.  However, our operational setup will not allow
+multiple racks at the beginning.  So... given the constraints of 1 rack
+(with dual power and dual WAN links), I do not see that a pair of cross
+connected SAS switches is any less reliable than a pair of cross connected
+ethernet switches...
+
+As storage scales and we outgrow the single rack at a location, we can
+overflow into a second rack etc.
+
+>The more complexity you add to the whole setup, the more likely it's to go
+down completely at some point in time.
 >
-> I do rebuild like in doc:
+>I'm just trying to understand why you would want to run a distributed
+filesystem on top of a bunch of direct attached disks.
+
+I guess I don't consider a SAN a bunch of direct attached disks.  The SAS
+infrastructure is a SAN with SAS interconnects  (versus fiber,  iscsi or
+infiniband)...  The disks are accessed via JBOD if desired... or you can put
+RAID on top of a group of them.  The multiple shelves of drives are a way to
+attempt to reduce the dependence on a single piece of hardware (i.e. it
+becomes RAIN).
+
+>Again, if all the disks are attached locally you'd be better of by using
+ZFS.
+
+This is not highly available, and AFAICT, the compute load would not scale
+with the storage.
+
+>> My goal is to be able to scale without having to draw the enormous 
+>> power of lots of 1U devices or buy lots of disks and shelves each time 
+>> I wasn't to add a little capacity.
+>>
 >
-> stop osd,
-> remove from crush,
-> rm from map,
-> recreate a osd, after cluster get stable
+>You can do that, scale by adding a 1U node with 2, 3 of 4 disks at the
+time, depending on your crushmap you might need to add 3 machines at a once.
+
+Adding three machines at once is what I was trying to avoid (I believe that
+I need 3 replicas to make things reasonably redundant).  From first glance,
+it does not seem like a very dense solution to try to add a bunch of 1U
+servers with a few disks.  The associated cost of a bunch of 1U Servers over
+JBOD, plus (and more importantly) the rack space and power draw, can cause
+OPEX problems.  I can purchase multiple enclosures, but not fully populate
+them with disks/cpus.  This gives me a redundant array of nodes (RAIN).
+Then. as needed, I can add drives or compute cards to the existing
+enclosures for little incremental cost.
+
+In your 3 1U server case above, I can add 12 disks to existing 4 enclosures
+(in groups of three) instead of three 1U servers with 4 disks each.  I can
+then either run more OSDs on existing compute nodes or I can add one more
+compute node and it can handle the new drives with one or more OSDs.  If I
+run out of space in enclosures, I can add one more shelf (just one) and
+start adding drives.  I can then "include" the new drives into existing OSDs
+such that each existing OSD has a little more storage it needs to worry
+about.  (The specifics of growing an existing OSD by adding a disk is still
+a little fuzzy to me).
+
+>> Anybody looked at atom processors?
+>>
 >
-> But now, all osd are in, and up, and data won't remap, and some of PG=
-,
-> have only two osd in chain with replication level 3 for this pool.
+>Yes, I have..
 >
-> 2012-08-23 15:26:46.073685 mon.0 [INF] pgmap v117192: 6472 pgs: 63
-> active, 4457 active+clean, 1942 active+remapped, 10 active+degraded;
-> 596 GB data, 1650 GB used, 20059 GB / 21710 GB avail; 57815/4705888
-> degraded (1.229%)
+>I'm running Atom D525 (SuperMicro X7SPA-HF) nodes with 4GB of RAM and 4 2TB
+disks and a 80GB SSD (old X25-M) for journaling.
 >
-> In attachment output from:
+>That works, but what I notice is that under heavy recover the Atoms can't
+cope with it.
 >
-> ceph osd dump -o -
+>I'm thinking about building a couple of nodes with the AMD Brazos
+mainboard, somelike like an Asus E35M1-I.
 >
-> I can't find any info in doc for this situation.
+>That is not a serverboard, but it would just be a reference to see what it
+does.
 >
-> HEALTH_WARN 10 pgs degraded; 2015 pgs stuck unclean; recovery
-> 57871/4706179 degraded (1.230%)
-> root@s3-10-177-64-6:~# ceph -s
->    health HEALTH_WARN 10 pgs degraded; 2015 pgs stuck unclean;
-> recovery 57871/4706179 degraded (1.230%)
->    monmap e4: 3 mons at
-> {0=3D10.177.64.4:6789/0,1=3D10.177.64.6:6789/0,2=3D10.177.64.8:6789/0=
-},
-> election epoch 16, quorum 0,1,2 0,1,2
->    osdmap e1300: 78 osds: 78 up, 78 in
->     pgmap v117464: 6472 pgs: 63 active, 4457 active+clean, 1942
-> active+remapped, 10 active+degraded; 596 GB data, 1651 GB used, 20059
-> GB / 21710 GB avail; 57871/4706179 degraded (1.230%)
->    mdsmap e1: 0/0/1 up
+>One of the problems with the Atoms is the 4GB memory limitation, with the
+AMD Brazos you can use 8GB.
 >
-> Please help, i will try to give you any output you need.
->
->
-> And one more thing, little bug in 0.48.1:
->
-> ceph health blabla command, does same thing, as ceph health details.
-> Whatever is after health, means details.
->
-> --
-> -----
-> Regards
->
-> S=B3awek "sZiBis" Skowron
+>I'm trying to figure out a way to have a really large amount of small nodes
+for a low price to have
+> a massive cluster where the impact of loosing one node is very small.
+
+Given that "massive" is a relative term, I am as well... but I'm also trying
+to reduce the footprint (power and space) of that "massive" cluster.  I also
+want to start small (1/2 rack) and scale as needed.
+
+- Steve
 
 
-
---=20
------
-Pozdrawiam
-
-S=B3awek "sZiBis" Skowron
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
