@@ -1,143 +1,144 @@
-From: Andrey Korolyov <andrey@xdel.ru>
-Subject: Re: OSD crash
-Date: Sat, 25 Aug 2012 12:30:48 +0400
-Message-ID: <CABYiri_d1tRmiPfpc6wO3Kg6=wQ90xd1feBKT3mO0iYjEjk6KA@mail.gmail.com>
-References: <CABYiri_Fi4uMSqLnoFLp4_2kQ8FSXv=jjSSQiER=DwCOG0hqkA@mail.gmail.com>
- <alpine.DEB.2.00.1208221532350.29719@cobra.newdream.net> <CABYiri_y+GeKWoxNpmxMDbWThqb-9JmazohN2Zeroq9KNOZFTg@mail.gmail.com>
- <CAPYLRzgUviKbU5i7XDDkcTdHKS6JGYxwEoEXbDRUB8rHeAN5Bg@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: Ideal hardware spec?
+Date: Sat, 25 Aug 2012 13:48:25 +0200
+Message-ID: <5038BB89.9020405@widodh.nl>
+References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl> <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com> <5035E8AB.8090006@widodh.nl> <005b01cd8203$43f6e860$cbe4b920$@netmass.com> <50379830.4000000@inktank.com> <5037C3FB.200@widodh.nl> <00ae01cd823e$84e2ed20$8ea8c760$@netmass.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:35616 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753849Ab2HYIbM (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Aug 2012 04:31:12 -0400
-Received: by wgbdr13 with SMTP id dr13so2121060wgb.1
-        for <ceph-devel@vger.kernel.org>; Sat, 25 Aug 2012 01:31:08 -0700 (PDT)
-In-Reply-To: <CAPYLRzgUviKbU5i7XDDkcTdHKS6JGYxwEoEXbDRUB8rHeAN5Bg@mail.gmail.com>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:59407 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751031Ab2HYLs0 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sat, 25 Aug 2012 07:48:26 -0400
+In-Reply-To: <00ae01cd823e$84e2ed20$8ea8c760$@netmass.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
+To: Stephen Perkins <perkins@netmass.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 23, 2012 at 4:09 AM, Gregory Farnum <greg@inktank.com> wrote:
-> The tcmalloc backtrace on the OSD suggests this may be unrelated, but
-> what's the fd limit on your monitor process? You may be approaching
-> that limit if you've got 500 OSDs and a similar number of clients.
+(CC back to the list)
+
+On 08/24/2012 11:22 PM, Stephen Perkins wrote:
+> Hi Wildo,
+>
+> Why 4 x 1TB?  I get the 4 (many boards seem to have  4 sata connectors so
+> you don't need a separate controller).  However... why not 2TB or 3TB
+> drives?  Is recover time too large?
 >
 
-Thanks! I didn`t measured a # of connection because of bearing in mind
-1 conn per client, raising limit did the thing. Previously mentioned
-qemu-kvm zombie does not related to rbd itself - it can be created by
-destroying libvirt domain which is in saving state or vice-versa, so
-I`ll put a workaround on this. Right now I am faced different problem
-- osds dying silently, e.g. not leaving a core, I`ll check logs on the
-next testing phase.
+Yes, due to recovery time mainly. With 4x 1TB I'd loose about 3.2TB of 
+data (85% full) at max, that is recoverable for the cluster.
 
-> On Wed, Aug 22, 2012 at 6:55 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
->> On Thu, Aug 23, 2012 at 2:33 AM, Sage Weil <sage@inktank.com> wrote:
->>> On Thu, 23 Aug 2012, Andrey Korolyov wrote:
->>>> Hi,
+Would I increase that to 2TB or 3TB disks the recovery would indeed get 
+harder for the CPU and Memory.
+
+I could have less nodes to get the same amount of storage, but in this 
+situation I also get more IOps since I have more spindles running.
+
+> I'm guessing no RAID and one OSD process per disk?
+>
+
+Correct. RAID is expensive and the Ceph replication already provides the 
+data redundancy here.
+
+> I'm still evaluating your "looking at things differently" to see about a
+> bunch of cheap 1Us.
+>
+> Would your 1Us have redundant power and be redundantly Ethernet connected?
+> Or... cheaper single power and single Ethernet (reduced cabling)?
+>
+> ECC memory?
+>
+
+No redundant power, no redundant Ethernet (or switches) and no ECC memory.
+
+I'm quoting here from the CRUSH publication Sage wrote [0]:
+
+"Data safety is of critical importance in large storage systems,
+where the large number of devices makes hardware failure
+the rule rather than the exception." (4.4 Reliability)
+
+I've been designing by that rule.
+
+I'm relying on CRUSH to do all the redundancy work for me. By 
+strategically placing nodes on different power feeds and different 
+switches I can mitigate hardware failure. You just have to make sure 
+that your CRUSH map resembles your physical layout of your cluster.
+
+Make sure that two copies of your data never end up in the same rack or 
+on the same switch.
+
+Wido
+
+[0]: http://ceph.newdream.net/papers/weil-crush-sc06.pdf
+
+> - Steve
+>
+>
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Wido den Hollander
+> Sent: Friday, August 24, 2012 1:12 PM
+> To: Mark Nelson
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Ideal hardware spec?
+>
+>
+>
+> On 08/24/2012 05:05 PM, Mark Nelson wrote:
 >>>>
->>>> today during heavy test a pair of osds and one mon died, resulting to
->>>> hard lockup of some kvm processes - they went unresponsible and was
->>>> killed leaving zombie processes ([kvm] <defunct>). Entire cluster
->>>> contain sixteen osd on eight nodes and three mons, on first and last
->>>> node and on vm outside cluster.
+>>>> I'm running Atom D525 (SuperMicro X7SPA-HF) nodes with 4GB of RAM
+>>>> and
+>>>> 4 2TB
+>>> disks and a 80GB SSD (old X25-M) for journaling.
 >>>>
->>>> osd bt:
->>>> #0  0x00007fc37d490be3 in
->>>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
->>>> unsigned long, int) () from /usr/lib/libtcmalloc.so.4
->>>> (gdb) bt
->>>> #0  0x00007fc37d490be3 in
->>>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
->>>> unsigned long, int) () from /usr/lib/libtcmalloc.so.4
->>>> #1  0x00007fc37d490eb4 in tcmalloc::ThreadCache::Scavenge() () from
->>>> /usr/lib/libtcmalloc.so.4
->>>> #2  0x00007fc37d4a2287 in tc_delete () from /usr/lib/libtcmalloc.so.4
->>>> #3  0x00000000008b1224 in _M_dispose (__a=..., this=0x6266d80) at
->>>> /usr/include/c++/4.7/bits/basic_string.h:246
->>>> #4  ~basic_string (this=0x7fc3736639d0, __in_chrg=<optimized out>) at
->>>> /usr/include/c++/4.7/bits/basic_string.h:536
->>>> #5  ~basic_stringbuf (this=0x7fc373663988, __in_chrg=<optimized out>)
->>>> at /usr/include/c++/4.7/sstream:60
->>>> #6  ~basic_ostringstream (this=0x7fc373663980, __in_chrg=<optimized
->>>> out>, __vtt_parm=<optimized out>) at /usr/include/c++/4.7/sstream:439
->>>> #7  pretty_version_to_str () at common/version.cc:40
->>>> #8  0x0000000000791630 in ceph::BackTrace::print (this=0x7fc373663d10,
->>>> out=...) at common/BackTrace.cc:19
->>>> #9  0x000000000078f450 in handle_fatal_signal (signum=11) at
->>>> global/signal_handler.cc:91
->>>> #10 <signal handler called>
->>>> #11 0x00007fc37d490be3 in
->>>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
->>>> unsigned long, int) () from /usr/lib/libtcmalloc.so.4
->>>> #12 0x00007fc37d490eb4 in tcmalloc::ThreadCache::Scavenge() () from
->>>> /usr/lib/libtcmalloc.so.4
->>>> #13 0x00007fc37d49eb97 in tc_free () from /usr/lib/libtcmalloc.so.4
->>>> #14 0x00007fc37d1c6670 in __gnu_cxx::__verbose_terminate_handler() ()
->>>> from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
->>>> #15 0x00007fc37d1c4796 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
->>>> #16 0x00007fc37d1c47c3 in std::terminate() () from
->>>> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
->>>> #17 0x00007fc37d1c49ee in __cxa_throw () from
->>>> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
->>>> #18 0x0000000000844e11 in ceph::__ceph_assert_fail (assertion=0x90c01c
->>>> "0 == \"unexpected error\"", file=<optimized out>, line=3007,
->>>>     func=0x90ef80 "unsigned int
->>>> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int)")
->>>> at common/assert.cc:77
+>>>> That works, but what I notice is that under heavy recover the Atoms
+>>>> can't
+>>> cope with it.
+>>>>
+>>>> I'm thinking about building a couple of nodes with the AMD Brazos
+>>> mainboard, somelike like an Asus E35M1-I.
+>>>>
+>>>> That is not a serverboard, but it would just be a reference to see
+>>>> what it
+>>> does.
+>>>>
+>>>> One of the problems with the Atoms is the 4GB memory limitation,
+>>>> with the
+>>> AMD Brazos you can use 8GB.
+>>>>
+>>>> I'm trying to figure out a way to have a really large amount of
+>>>> small nodes
+>>> for a low price to have
+>>>> a massive cluster where the impact of loosing one node is very small.
 >>>
->>> This means it got an unexpected error when talking to the file system.  If
->>> you look in the osd log, it may tell you what that was.  (It may
->>> not--there isn't usually the other tcmalloc stuff triggered from the
->>> assert handler.)
->>>
->>> What happens if you restart that ceph-osd daemon?
->>>
->>> sage
->>>
->>>
+>>> Given that "massive" is a relative term, I am as well... but I'm also
+>>> trying to reduce the footprint (power and space) of that "massive"
+>>> cluster.
+>>> I also
+>>> want to start small (1/2 rack) and scale as needed.
 >>
->> Unfortunately I have completely disabled logs during test, so there
->> are no suggestion of assert_fail. The main problem was revealed -
->> created VMs was pointed to one monitor instead set of three, so there
->> may be some unusual things(btw, crashed mon isn`t one from above, but
->> a neighbor of crashed osds on first node). After IPMI reset node
->> returns back well and cluster behavior seems to be okay - stuck kvm
->> I/O somehow prevented even other module load|unload on this node, so I
->> finally decided to do hard reset. Despite I`m using almost generic
->> wheezy, glibc was updated to 2.15, may be because of this my trace
->> appears first time ever. I`m almost sure that fs does not triggered
->> this crash and mainly suspecting stuck kvm processes. I`ll rerun test
->> with same conditions tomorrow(~500 vms pointed to one mon and very
->> high I/O, but with osd logging).
+>> If you do end up testing Brazos processes, please post your results!
+>> I think it really depends on what kind of performance you are aiming for.
+>>    Our stock 2U test boxes have 6-core opterons, and our SC847a has
+>> dual 6-core low power Xeon E5s.  At 10GbE+ these are probably going to
+>> be pushed pretty hard, especially during recovery.
 >>
->>>> #19 0x000000000073148f in FileStore::_do_transaction
->>>> (this=this@entry=0x2cde000, t=..., op_seq=op_seq@entry=429545,
->>>> trans_num=trans_num@entry=0) at os/FileStore.cc:3007
->>>> #20 0x000000000073484e in FileStore::do_transactions (this=0x2cde000,
->>>> tls=..., op_seq=429545) at os/FileStore.cc:2436
->>>> #21 0x000000000070c680 in FileStore::_do_op (this=0x2cde000,
->>>> osr=<optimized out>) at os/FileStore.cc:2259
->>>> #22 0x000000000083ce01 in ThreadPool::worker (this=0x2cde828) at
->>>> common/WorkQueue.cc:54
->>>> #23 0x00000000006823ed in ThreadPool::WorkThread::entry
->>>> (this=<optimized out>) at ./common/WorkQueue.h:126
->>>> #24 0x00007fc37e3eee9a in start_thread () from
->>>> /lib/x86_64-linux-gnu/libpthread.so.0
->>>> #25 0x00007fc37c9864cd in clone () from /lib/x86_64-linux-gnu/libc.so.6
->>>> #26 0x0000000000000000 in ?? ()
->>>>
->>>> mon bt was exactly the same as in http://tracker.newdream.net/issues/2762
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> I'm aiming for a Ceph cluster of a couple of hundred TB consisting out of 5
+> or 6 racks full of 1U machines with each 4x 1TB.
+>
+> Having about ~200 of these nodes all doing not that much work.
+>
+> If one fails I'd loose 0.5% of my cluster and recovery shouldn't be that
+> hard. Assuming here that the node crashes due to hardware failure, not being
+> plagued by some Ceph or BTRFS bug cluster-wide :)
+>
+> Wido
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
+>
