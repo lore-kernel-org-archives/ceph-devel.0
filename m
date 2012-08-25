@@ -1,46 +1,39 @@
-From: Sage Weil <sage@inktank.com>
-Subject: Re: ceph bug
-Date: Fri, 24 Aug 2012 19:21:22 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208241920340.788@cobra.newdream.net>
-References: <CALJAiJWABHQCVQMVnpmNfL-+nezTVmchuBKFDPZgzrzMn-UJdg@mail.gmail.com>
+From: Quenten Grasso <QGrasso@onq.com.au>
+Subject: Openstack
+Date: Sat, 25 Aug 2012 02:31:28 +0000
+Message-ID: <35DD34C9-6FDC-4735-A363-CB69C1F6E18B@onqtel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:36048 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750787Ab2HYCVX (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 22:21:23 -0400
-In-Reply-To: <CALJAiJWABHQCVQMVnpmNfL-+nezTVmchuBKFDPZgzrzMn-UJdg@mail.gmail.com>
+Received: from mx1.onqtel.net ([120.88.69.160]:46486 "EHLO mx1.onqtel.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752304Ab2HYCiQ convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Aug 2012 22:38:16 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mx1.onqtel.net (Postfix) with ESMTP id 5A55C8D07D
+	for <ceph-devel@vger.kernel.org>; Sat, 25 Aug 2012 12:31:58 +1000 (EST)
+Received: from mx1.onqtel.net ([127.0.0.1])
+	by localhost (mx1.onqtel.net [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id yEplxA5Qvvvx for <ceph-devel@vger.kernel.org>;
+	Sat, 25 Aug 2012 12:31:53 +1000 (EST)
+Received: from ex01.onqtel.local (ex01.onqtel.local [10.21.0.30])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by mx1.onqtel.net (Postfix) with ESMTPS id E76C48D077
+	for <ceph-devel@vger.kernel.org>; Sat, 25 Aug 2012 12:31:52 +1000 (EST)
+Content-Language: en-US
+Content-ID: <75B331B53B9AEE4D93D010F2D401777B@onq.com.au>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jx z <seaepigone@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, 25 Aug 2012, jx z wrote:
-> hello!
-> When I use the CEPH, ceph-mds crashes at line 2125 in
-> mds/Server.cc,because the mdr->dn[0] is empty, so modify it to:
->   reply_request(mdr, 0, ref,
->   (req->get_op() == CEPH_MDS_OP_LOOKUP && !mdr->dn[0].empty()) ?
-> mdr->dn[0].back() : 0);
-> Is this right?
+Hi All
 
-Hmm, I think if mdr->dn[0] is empty there is someting else going on.  Is 
-this something you can reproduce with 'debug mds = 20'?  That should tell 
-us the full picture.
+Just wondering if anyone has any tips on getting openstack Essex working with boot from RBD with the dashboard.
 
-Thanks!
-sage
+Glance and RBD is fairly well documented and Nova with attaching ceph RBD vols,   However I haven't found much on getting boot from RBD to work.
 
-
-> 
-> thanks
-> 
-> 
-> name:zhangjianxin
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Regards,
+Quenten Grasso
+Sent from my iPhone
