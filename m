@@ -1,47 +1,150 @@
-From: Sage Weil <sage@inktank.com>
-Subject: v0.51 released
-Date: Sun, 26 Aug 2012 08:58:36 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1208260858010.11218@cobra.newdream.net>
+From: Andrey Korolyov <andrey@xdel.ru>
+Subject: Re: OSD crash
+Date: Sun, 26 Aug 2012 20:52:32 +0400
+Message-ID: <CABYiri_Lcwi4fxMQH=VeOri-A3_9eQX5-1CXC9F4yATdPNSF4A@mail.gmail.com>
+References: <CABYiri_Fi4uMSqLnoFLp4_2kQ8FSXv=jjSSQiER=DwCOG0hqkA@mail.gmail.com>
+ <alpine.DEB.2.00.1208221532350.29719@cobra.newdream.net> <CABYiri_y+GeKWoxNpmxMDbWThqb-9JmazohN2Zeroq9KNOZFTg@mail.gmail.com>
+ <CAPYLRzgUviKbU5i7XDDkcTdHKS6JGYxwEoEXbDRUB8rHeAN5Bg@mail.gmail.com> <CABYiri_d1tRmiPfpc6wO3Kg6=wQ90xd1feBKT3mO0iYjEjk6KA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42932 "EHLO
-	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751970Ab2HZP6h (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 11:58:37 -0400
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id 0D19380079
-	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 08:58:37 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-	by cobra.newdream.net (Postfix) with ESMTP id D7FC880079
-	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 08:58:36 -0700 (PDT)
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:41789 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750858Ab2HZQwy (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 12:52:54 -0400
+Received: by wicr5 with SMTP id r5so2783986wic.1
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 09:52:52 -0700 (PDT)
+In-Reply-To: <CABYiri_d1tRmiPfpc6wO3Kg6=wQ90xd1feBKT3mO0iYjEjk6KA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-The latest development release v0.51 is ready. Notable changes include:
+During recovery, following crash happens(simular to
+http://tracker.newdream.net/issues/2126 which marked resolved long
+ago):
 
- * crush: tunables documented; feature bit now present and enforced
- * osd: various fixes for out-of-order op replies
- * osd: several rare peering cases fixed
- * osd: fixed detection of EIO errors from fs on read
- * osd: new 'lock' rados class for generic object locking
- * librbd: fixed memory leak on discard
- * librbd: image layering/cloning
- * radosgw: fix range header for large objects, ETag quoting, GMT dates, 
-   other compatibility fixes
- * mkcephfs: fix for default keyring, osd data/journal locations
- * wireshark: ceph protocol dissector patch updated
- * ceph.spec: fixed packaging problem with crush headers
+http://xdel.ru/downloads/ceph-log/osd-2012-08-26.txt
 
-Full RBD cloning support will be in place in v0.52, as will a refactor of 
-the messenger code with many bug fixes in the socket failure handling. 
-This is available for testing now in 'next' for the adventurous. Improved 
-OSD scrubbing is also coming soon. We should (finally) be building some 
-release RPMs for v0.52 as well.
-
-You can get v0.51 from the usual locations:
-
- * Git at git://github.com/ceph/ceph.git
- * Tarball athttp://ceph.newdream.net/download/ceph-0.51.tar.gz
- * For Debian/Ubuntu packages, seehttp://ceph.newdream.net/docs/master/install/debian
+On Sat, Aug 25, 2012 at 12:30 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+> On Thu, Aug 23, 2012 at 4:09 AM, Gregory Farnum <greg@inktank.com> wrote:
+>> The tcmalloc backtrace on the OSD suggests this may be unrelated, but
+>> what's the fd limit on your monitor process? You may be approaching
+>> that limit if you've got 500 OSDs and a similar number of clients.
+>>
+>
+> Thanks! I didn`t measured a # of connection because of bearing in mind
+> 1 conn per client, raising limit did the thing. Previously mentioned
+> qemu-kvm zombie does not related to rbd itself - it can be created by
+> destroying libvirt domain which is in saving state or vice-versa, so
+> I`ll put a workaround on this. Right now I am faced different problem
+> - osds dying silently, e.g. not leaving a core, I`ll check logs on the
+> next testing phase.
+>
+>> On Wed, Aug 22, 2012 at 6:55 PM, Andrey Korolyov <andrey@xdel.ru> wrote:
+>>> On Thu, Aug 23, 2012 at 2:33 AM, Sage Weil <sage@inktank.com> wrote:
+>>>> On Thu, 23 Aug 2012, Andrey Korolyov wrote:
+>>>>> Hi,
+>>>>>
+>>>>> today during heavy test a pair of osds and one mon died, resulting to
+>>>>> hard lockup of some kvm processes - they went unresponsible and was
+>>>>> killed leaving zombie processes ([kvm] <defunct>). Entire cluster
+>>>>> contain sixteen osd on eight nodes and three mons, on first and last
+>>>>> node and on vm outside cluster.
+>>>>>
+>>>>> osd bt:
+>>>>> #0  0x00007fc37d490be3 in
+>>>>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
+>>>>> unsigned long, int) () from /usr/lib/libtcmalloc.so.4
+>>>>> (gdb) bt
+>>>>> #0  0x00007fc37d490be3 in
+>>>>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
+>>>>> unsigned long, int) () from /usr/lib/libtcmalloc.so.4
+>>>>> #1  0x00007fc37d490eb4 in tcmalloc::ThreadCache::Scavenge() () from
+>>>>> /usr/lib/libtcmalloc.so.4
+>>>>> #2  0x00007fc37d4a2287 in tc_delete () from /usr/lib/libtcmalloc.so.4
+>>>>> #3  0x00000000008b1224 in _M_dispose (__a=..., this=0x6266d80) at
+>>>>> /usr/include/c++/4.7/bits/basic_string.h:246
+>>>>> #4  ~basic_string (this=0x7fc3736639d0, __in_chrg=<optimized out>) at
+>>>>> /usr/include/c++/4.7/bits/basic_string.h:536
+>>>>> #5  ~basic_stringbuf (this=0x7fc373663988, __in_chrg=<optimized out>)
+>>>>> at /usr/include/c++/4.7/sstream:60
+>>>>> #6  ~basic_ostringstream (this=0x7fc373663980, __in_chrg=<optimized
+>>>>> out>, __vtt_parm=<optimized out>) at /usr/include/c++/4.7/sstream:439
+>>>>> #7  pretty_version_to_str () at common/version.cc:40
+>>>>> #8  0x0000000000791630 in ceph::BackTrace::print (this=0x7fc373663d10,
+>>>>> out=...) at common/BackTrace.cc:19
+>>>>> #9  0x000000000078f450 in handle_fatal_signal (signum=11) at
+>>>>> global/signal_handler.cc:91
+>>>>> #10 <signal handler called>
+>>>>> #11 0x00007fc37d490be3 in
+>>>>> tcmalloc::ThreadCache::ReleaseToCentralCache(tcmalloc::ThreadCache::FreeList*,
+>>>>> unsigned long, int) () from /usr/lib/libtcmalloc.so.4
+>>>>> #12 0x00007fc37d490eb4 in tcmalloc::ThreadCache::Scavenge() () from
+>>>>> /usr/lib/libtcmalloc.so.4
+>>>>> #13 0x00007fc37d49eb97 in tc_free () from /usr/lib/libtcmalloc.so.4
+>>>>> #14 0x00007fc37d1c6670 in __gnu_cxx::__verbose_terminate_handler() ()
+>>>>> from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>>>>> #15 0x00007fc37d1c4796 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>>>>> #16 0x00007fc37d1c47c3 in std::terminate() () from
+>>>>> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>>>>> #17 0x00007fc37d1c49ee in __cxa_throw () from
+>>>>> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+>>>>> #18 0x0000000000844e11 in ceph::__ceph_assert_fail (assertion=0x90c01c
+>>>>> "0 == \"unexpected error\"", file=<optimized out>, line=3007,
+>>>>>     func=0x90ef80 "unsigned int
+>>>>> FileStore::_do_transaction(ObjectStore::Transaction&, uint64_t, int)")
+>>>>> at common/assert.cc:77
+>>>>
+>>>> This means it got an unexpected error when talking to the file system.  If
+>>>> you look in the osd log, it may tell you what that was.  (It may
+>>>> not--there isn't usually the other tcmalloc stuff triggered from the
+>>>> assert handler.)
+>>>>
+>>>> What happens if you restart that ceph-osd daemon?
+>>>>
+>>>> sage
+>>>>
+>>>>
+>>>
+>>> Unfortunately I have completely disabled logs during test, so there
+>>> are no suggestion of assert_fail. The main problem was revealed -
+>>> created VMs was pointed to one monitor instead set of three, so there
+>>> may be some unusual things(btw, crashed mon isn`t one from above, but
+>>> a neighbor of crashed osds on first node). After IPMI reset node
+>>> returns back well and cluster behavior seems to be okay - stuck kvm
+>>> I/O somehow prevented even other module load|unload on this node, so I
+>>> finally decided to do hard reset. Despite I`m using almost generic
+>>> wheezy, glibc was updated to 2.15, may be because of this my trace
+>>> appears first time ever. I`m almost sure that fs does not triggered
+>>> this crash and mainly suspecting stuck kvm processes. I`ll rerun test
+>>> with same conditions tomorrow(~500 vms pointed to one mon and very
+>>> high I/O, but with osd logging).
+>>>
+>>>>> #19 0x000000000073148f in FileStore::_do_transaction
+>>>>> (this=this@entry=0x2cde000, t=..., op_seq=op_seq@entry=429545,
+>>>>> trans_num=trans_num@entry=0) at os/FileStore.cc:3007
+>>>>> #20 0x000000000073484e in FileStore::do_transactions (this=0x2cde000,
+>>>>> tls=..., op_seq=429545) at os/FileStore.cc:2436
+>>>>> #21 0x000000000070c680 in FileStore::_do_op (this=0x2cde000,
+>>>>> osr=<optimized out>) at os/FileStore.cc:2259
+>>>>> #22 0x000000000083ce01 in ThreadPool::worker (this=0x2cde828) at
+>>>>> common/WorkQueue.cc:54
+>>>>> #23 0x00000000006823ed in ThreadPool::WorkThread::entry
+>>>>> (this=<optimized out>) at ./common/WorkQueue.h:126
+>>>>> #24 0x00007fc37e3eee9a in start_thread () from
+>>>>> /lib/x86_64-linux-gnu/libpthread.so.0
+>>>>> #25 0x00007fc37c9864cd in clone () from /lib/x86_64-linux-gnu/libc.so.6
+>>>>> #26 0x0000000000000000 in ?? ()
+>>>>>
+>>>>> mon bt was exactly the same as in http://tracker.newdream.net/issues/2762
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
