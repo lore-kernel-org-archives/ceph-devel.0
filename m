@@ -1,47 +1,41 @@
-From: Samuel Just <sam.just@inktank.com>
-Subject: Re: On tmap, omap, xattr physical layout
-Date: Sun, 26 Aug 2012 11:08:13 -0700
-Message-ID: <CA+4uBUZc1YKEUVyLHLiKFrTfs+jz9vD5V68e4QATZBP=7xxWBg@mail.gmail.com>
-References: <CAPrxi58O6PTgQ70GGrQbcvkOTwN6212=wGWaRNo+9-GFGqCGHw@mail.gmail.com>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Ceph doesn't detect journal failure while the OSD is running
+Date: Sun, 26 Aug 2012 20:09:25 +0200
+Message-ID: <CAOLwVUkKW4FhSb4+YKrC7j+_EFAkh--mS_famV44Zd67OgB-oQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:43246 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752376Ab2HZSIO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 14:08:14 -0400
-Received: by vcbfk26 with SMTP id fk26so3700155vcb.19
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 11:08:13 -0700 (PDT)
-In-Reply-To: <CAPrxi58O6PTgQ70GGrQbcvkOTwN6212=wGWaRNo+9-GFGqCGHw@mail.gmail.com>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:44790 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752376Ab2HZSJq (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Sun, 26 Aug 2012 14:09:46 -0400
+Received: by lagy9 with SMTP id y9so2111373lag.19
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 11:09:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <jayhawk@cs.ucsc.edu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Tmap simply places the keys and values in order in the normal object data.  The
-only advantage of tmap over simply writing the values out sequentially using
-normal operations is that you don't need to read in the the tmap to do
-an insertion.
-Tmap probably shouldn't be used at this stage.
+Hi guys!
 
-Omaps are stored separately in a leveldb store and can be used independently
-of the actual object contents.
+Ceph doesn't seem to detect a journal failure. The cluster keeps
+writing data even if the journal doesn't exist anymore.
+I can find anywhere in the log or from the ceph's command output any
+information about a journal failure. Obviously if an OSD is restarted
+ceph will complain but a failure on fly won't be detected.
 
-Xattrs are stored either as filesystem xattrs or in the leveldb store
-alongside the
-omap depending on:
-filestore_xattr_use_omap, filestore_max_inline_xattr_size, and
-filestore_max_inline_xattrs.
--Sam
+It seems that Ceph just writes directly to the backend filesystem
+without complaining.
 
-On Sun, Aug 26, 2012 at 10:09 AM, Noah Watkins <jayhawk@cs.ucsc.edu> wrote:
-> Would anyone mind giving a short overview of the difference between
-> tmap, omap, and xattrs, and the physical layout of these with respect
-> to the object payload?
->
-> Thanks,
-> Noah
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yes my monitoring system will tell me that the disk which contains my
+journals is down... But it's not the point here :)
+
+The really good point for me is that the cluster keeps running even if
+the journal is gone. The bad point is obviously that the cluster keeps
+writing data to the backend filesystem (without O_DIRECT I guess...).
+I'll prefer a 'read only' cluster facility while the journal is down.
+Being able to retrieve the data is as crucial as writing data.
+
+Any reaction about that? Roadmap feature maybe?
+
+Cheers!
