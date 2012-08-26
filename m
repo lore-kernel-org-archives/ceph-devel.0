@@ -1,53 +1,66 @@
 From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: How to build ceph upon zfs filesystem.
-Date: Sun, 26 Aug 2012 08:14:42 -0500
-Message-ID: <503A2142.2000505@inktank.com>
-References: <loom.20120826T033818-148@post.gmane.org>
+Subject: Re: Ideal hardware spec?
+Date: Sun, 26 Aug 2012 08:29:40 -0500
+Message-ID: <503A24C4.5060807@inktank.com>
+References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl> <20120822154615.GF10015@csail.mit.edu> <5035FF18.3030209@widodh.nl> <CABYiri_-73UyTKHcHWDZdjqb=rozjraVzxd166NZV2ir53tduA@mail.gmail.com> <503A056E.2020804@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:51908 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:45895 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751897Ab2HZNOq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 09:14:46 -0400
-Received: by ialo24 with SMTP id o24so6386815ial.19
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 06:14:45 -0700 (PDT)
-In-Reply-To: <loom.20120826T033818-148@post.gmane.org>
+	with ESMTP id S1751457Ab2HZN3p (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 09:29:45 -0400
+Received: by ialo24 with SMTP id o24so6399770ial.19
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 06:29:45 -0700 (PDT)
+In-Reply-To: <503A056E.2020804@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ramu <ramu.freesystems@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Andrey Korolyov <andrey@xdel.ru>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Ramu,
-
-You'll probably want to use the zfs on linux sources from here:
-
-http://zfsonlinux.org
-
-Testing this has been on my list but keeps getting pushed back.  Someone 
-else on the list may have given it a try already though.  Keep in mind 
-that Ceph won't be using any special tricks that ZFS supports as we 
-haven't really been targeting it.  I think the xattr support for the 
-linux port is pretty good so hopefully that should all work fine.  If 
-you have problems you may want to try with:
-
-filestore xattr use omap = true
-
-Mark
-
-On 08/25/2012 08:39 PM, ramu wrote:
-> Hi all,
+On 08/26/2012 06:15 AM, Wido den Hollander wrote:
+> CC'ing this one back to the list.
 >
->    I want build ceph upon zfs file system,now iam installed ceph upon btrfs
-> filesystem.
-> Please help me to ceph builds upon zfs filesystem.
+> On 08/25/2012 09:58 PM, Andrey Korolyov wrote:
+>>>
+>>> They should be much more reliable than regular USB sticks due to
+>>> their SLC
+>>> memory.
+>>>
+>>> You could also take a look at these:
+>>> http://www.transcend-info.com/industry/products_details.asp?CatNo=2&SerNo=14&ModNo=28&Func1No=1
+>>>
+>>>
+>>>
+>>
+>> Did you tried yet those or simular sticks for CEPH journal? Right now
+>> I am using Intel 313`s, which is very fast and have durability/price
+>> ratio a far higher than any imaginable MLC, but they occupying one HDD
+>> slot which is a quite impractical.
+>>
 >
-> Thanks,
-> Ramu.
+> No, I haven't tried, but I think it won't work.
 >
+> These kind of SLC chips don't do random writes that great, you'll
+> probably get something like 4MB/sec in random writes.
+>
+> Bigger SSDs have more cells to spread the writes over, those small
+> sticks don't.
+>
+> The Intel 3XX or 5XX serie should work just fine for journaling, I'd
+> however recommend you change the Host Protected Area to ~50% of the
+> available capacity to prevent write-degradation over time.
+>
+> Wido
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> More majordomo info at http://vger.kernel.org/majordomo-info.html
 
+Not just write degradation, but undersubscribing the SSDs should 
+hopefully help them last a little longer under such a heavy write 
+workload.  We are doing 3 10GB journals per 180GB Intel 520 on our 
+supermicro test node.
+
+Mark
