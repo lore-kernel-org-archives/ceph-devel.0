@@ -1,59 +1,82 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: Ceph doesn't detect journal failure while the OSD is
- running
-Date: Sun, 26 Aug 2012 12:43:49 -0700
-Message-ID: <F13ACA9DFF5F414BB9E2B7502BD9EC33@inktank.com>
-References: <CAOLwVUkKW4FhSb4+YKrC7j+_EFAkh--mS_famV44Zd67OgB-oQ@mail.gmail.com>
+From: Wido den Hollander <wido@widodh.nl>
+Subject: Re: About sparse images
+Date: Sun, 26 Aug 2012 21:53:34 +0200
+Message-ID: <503A7EBE.1060500@widodh.nl>
+References: <CAOLwVUnGz4ZvWdNo6JKHuS06YZYCeT7WjaDdGiDipRv8UZVLhA@mail.gmail.com> <649A15670E764B2E9397EDA1919205C7@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:52312 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752397Ab2HZTnk convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 15:43:40 -0400
-Received: by dady13 with SMTP id y13so2059648dad.19
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 12:43:40 -0700 (PDT)
-In-Reply-To: <CAOLwVUkKW4FhSb4+YKrC7j+_EFAkh--mS_famV44Zd67OgB-oQ@mail.gmail.com>
-Content-Disposition: inline
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:46332 "EHLO
+	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751636Ab2HZTx2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 15:53:28 -0400
+In-Reply-To: <649A15670E764B2E9397EDA1919205C7@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?Q?S=C3=A9bastien_Han?= <han.sebastien@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <greg@inktank.com>
+Cc: =?UTF-8?B?U8OpYmFzdGllbiBIYW4=?= <han.sebastien@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sunday, August 26, 2012 at 11:09 AM, S=C3=A9bastien Han wrote:
-> Hi guys!
-> =20
-> Ceph doesn't seem to detect a journal failure. The cluster keeps
-> writing data even if the journal doesn't exist anymore.
-> I can find anywhere in the log or from the ceph's command output any
-> information about a journal failure. Obviously if an OSD is restarted
-> ceph will complain but a failure on fly won't be detected.
-> =20
-> It seems that Ceph just writes directly to the backend filesystem
-> without complaining.
-> =20
-> Yes my monitoring system will tell me that the disk which contains my
-> journals is down... But it's not the point here :)
-> =20
-> The really good point for me is that the cluster keeps running even i=
-f
-> the journal is gone. The bad point is obviously that the cluster keep=
+
+
+On 08/26/2012 09:42 PM, Gregory Farnum wrote:
+> On Sunday, August 26, 2012 at 11:11 AM, S=C3=A9bastien Han wrote:
+>> Hi all!
+>>
+>> I know that ceph images (rbd) are sparse. It's good but I have some
+>> interrogations about the ceph -s (-w) output. Let's say your create =
+a
+>> 10G image, map it, format it and mount it. Finally you filled up the
+>> entire space available. You notice that the 'data' and 'used' space
+>> had grown. Now delete the content of your image but **not** this
+>> image, not now. You notice that nothing changed from the ceph output=
+,
+>> it's not surprising because of the sparse capability. At this point =
+of
+>> time the output from the command ceph is neither right nor wrong. It
+>> only shows the space used by the sparse image, but it doesn't mean
+>> that you have 'real' data in it, just a simple object allocation. It=
+'s
+>> not so relevant, the only solution is to remove the image (obviously=
+).
+>> My feeling is that we should be careful about the ceph's output, it'=
 s
-> writing data to the backend filesystem (without O_DIRECT I guess...).
-> I'll prefer a 'read only' cluster facility while the journal is down.
-> Being able to retrieve the data is as crucial as writing data.
-> =20
-> Any reaction about that? Roadmap feature maybe?
-So are you saying the filesystem that the journal was located on disapp=
-eared? Or the underlying disk disappeared?
-And then the OSD didn't notice?
+>> not a good indicator for 'real' data. Ok Ceph won't replace a
+>> monitoring system but I'll be happy to trust the ceph output at 100%
+>> :)
+>
+> The output of ceph -s is intended to describe the amount of space all=
+ocated by RADOS across the OSDs. As far as any part of the Ceph project=
+ knows, the objects in those RBD images are real data and can't be remo=
+ved.
+> If you're interested in removing them, subsets of the RBD clients do =
+support TRIM operations, which will remove the objects themselves. Josh=
+ or somebody will have to speak about which clients, though.
+> -Greg
+>
 
-If so, that's definitely a problem to be corrected as soon as we can=E2=
-=80=A6It's more likely to make the OSD shut down than to continue servi=
-ng reads, though.
--Greg
+As far as I know TRIM / Discard only works with KVM and SCSI disks,=20
+VirtIO still seems to lack this functionality, not sure about kernel RB=
+D.
 
+On the filesystem side, ext4 with the "discard" mount option does this.
+
+But it's important (like Greg already said) to note that RBD/RADOS can'=
+t=20
+know which object is still important and which isn't. When you unlink a=
+=20
+file the filesystem doesn't zero that particular block, it just clears=20
+all references to it so the freed up space can be used again.
+
+Wido
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
