@@ -1,26 +1,28 @@
-From: Smart Weblications GmbH <info@smart-weblications.de>
+From: Gregory Farnum <greg@inktank.com>
 Subject: Re: About sparse images
-Date: Sun, 26 Aug 2012 20:38:02 +0200
-Message-ID: <503A6D0A.8050207@smart-weblications.de>
+Date: Sun, 26 Aug 2012 12:42:20 -0700
+Message-ID: <649A15670E764B2E9397EDA1919205C7@inktank.com>
 References: <CAOLwVUnGz4ZvWdNo6JKHuS06YZYCeT7WjaDdGiDipRv8UZVLhA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx04.smart-weblications.de ([188.65.144.39]:57913 "EHLO
-	mx04.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753686Ab2HZSjD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 26 Aug 2012 14:39:03 -0400
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:59677 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752397Ab2HZTmN convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 15:42:13 -0400
+Received: by dady13 with SMTP id y13so2059205dad.19
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 12:42:13 -0700 (PDT)
 In-Reply-To: <CAOLwVUnGz4ZvWdNo6JKHuS06YZYCeT7WjaDdGiDipRv8UZVLhA@mail.gmail.com>
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+To: =?utf-8?Q?S=C3=A9bastien_Han?= <han.sebastien@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Am 26.08.2012 20:11, schrieb S=E9bastien Han:
+On Sunday, August 26, 2012 at 11:11 AM, S=C3=A9bastien Han wrote:
 > Hi all!
->=20
+> =20
 > I know that ceph images (rbd) are sparse. It's good but I have some
 > interrogations about the ceph -s (-w) output. Let's say your create a
 > 10G image, map it, format it and mount it. Finally you filled up the
@@ -29,7 +31,7 @@ Am 26.08.2012 20:11, schrieb S=E9bastien Han:
 > image, not now. You notice that nothing changed from the ceph output,
 > it's not surprising because of the sparse capability. At this point o=
 f
-> time  the output from the command ceph is neither right nor wrong. It
+> time the output from the command ceph is neither right nor wrong. It
 > only shows the space used by the sparse image, but it doesn't mean
 > that you have 'real' data in it, just a simple object allocation. It'=
 s
@@ -39,36 +41,16 @@ s
 > not a good indicator for 'real' data. Ok Ceph won't replace a
 > monitoring system but I'll be happy to trust the ceph output at 100%
 > :)
->=20
-> I would appreciate some reactions about that :)
->=20
 
+The output of ceph -s is intended to describe the amount of space alloc=
+ated by RADOS across the OSDs. As far as any part of the Ceph project k=
+nows, the objects in those RBD images are real data and can't be remove=
+d.
+If you're interested in removing them, subsets of the RBD clients do su=
+pport TRIM operations, which will remove the objects themselves. Josh o=
+r somebody will have to speak about which clients, though.
+-Greg
 
-why not gather real image size with rbd info <imagename>, sum up used s=
-pace,
-then look at ceph -s to get total avail space?
-
-
-
---=20
-
-Mit freundlichen Gr=FC=DFen,
-
-
-Smart Weblications GmbH
-Martinsberger Str. 1
-D-95119 Naila
-
-fon.: +49 9282 9638 200
-fax.: +49 9282 9638 205
-24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-http://www.smart-weblications.de
-
---
-Sitz der Gesellschaft: Naila
-Gesch=E4ftsf=FChrer: Florian Wiessner
-HRB-Nr.: HRB 3840 Amtsgericht Hof
-*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
