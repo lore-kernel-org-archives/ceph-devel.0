@@ -1,34 +1,47 @@
-From: John Wright <jwright@psfc.mit.edu>
-Subject: MPI applications on ceph fs
-Date: Sun, 26 Aug 2012 10:03:12 -0400
-Message-ID: <36202107-A075-42E6-8B4B-AF6FEB86E2AD@psfc.mit.edu>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Sage Weil <sage@inktank.com>
+Subject: v0.51 released
+Date: Sun, 26 Aug 2012 08:58:36 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1208260858010.11218@cobra.newdream.net>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from DMZ-MAILSEC-SCANNER-7.MIT.EDU ([18.7.68.36]:57990 "EHLO
-	dmz-mailsec-scanner-7.mit.edu" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753144Ab2HZOIQ convert rfc822-to-8bit
-	(ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 26 Aug 2012 10:08:16 -0400
-Received: from outgoing.mit.edu (OUTGOING-AUTH.MIT.EDU [18.7.22.103])
-	by mailhub-auth-1.mit.edu (8.13.8/8.9.2) with ESMTP id q7QE3E5Q007851
-	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 10:03:14 -0400
-Received: from [192.168.2.140] (c-66-30-248-143.hsd1.ma.comcast.net [66.30.248.143])
-	(authenticated bits=0)
-        (User authenticated as jcwright@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.13.6/8.12.4) with ESMTP id q7QE3Cqg014679
-	(version=TLSv1/SSLv3 cipher=AES128-SHA bits=128 verify=NOT)
-	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 10:03:13 -0400 (EDT)
+Received: from cobra.newdream.net ([66.33.216.30]:42932 "EHLO
+	cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751970Ab2HZP6h (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 11:58:37 -0400
+Received: from cobra.newdream.net (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id 0D19380079
+	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 08:58:37 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+	by cobra.newdream.net (Postfix) with ESMTP id D7FC880079
+	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 08:58:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi All,
-We're running ceph 0.48 on  small three node test cluster. We've had good stability with I/O using dd and iozone especially after upgrading to 0.48. However, we're running into a repeatable lockup of the linux ceph client ( 3.3.5-2.fc16.x86_64 ) when running an mpi program that has simple I/O on a ceph mount. This is an mpi program running processes on two nodes. It is the remote node on which the ceph client locks up. The cient becomes immediately unresponsive and any attempt to access the mounted volume produces a process with status 'D'. I can see no indication in the server logs that it is ever contacted. Regular serial processes run fine on the volume. MPI runs on the nodes work fine when not using the ceph volume.
+The latest development release v0.51 is ready. Notable changes include:
 
-So any suggestions on where to look? Any one have an experience testing parallel programs on ceph?
+ * crush: tunables documented; feature bit now present and enforced
+ * osd: various fixes for out-of-order op replies
+ * osd: several rare peering cases fixed
+ * osd: fixed detection of EIO errors from fs on read
+ * osd: new 'lock' rados class for generic object locking
+ * librbd: fixed memory leak on discard
+ * librbd: image layering/cloning
+ * radosgw: fix range header for large objects, ETag quoting, GMT dates, 
+   other compatibility fixes
+ * mkcephfs: fix for default keyring, osd data/journal locations
+ * wireshark: ceph protocol dissector patch updated
+ * ceph.spec: fixed packaging problem with crush headers
 
-thanks,
--john
+Full RBD cloning support will be in place in v0.52, as will a refactor of 
+the messenger code with many bug fixes in the socket failure handling. 
+This is available for testing now in 'next' for the adventurous. Improved 
+OSD scrubbing is also coming soon. We should (finally) be building some 
+release RPMs for v0.52 as well.
 
+You can get v0.51 from the usual locations:
+
+ * Git at git://github.com/ceph/ceph.git
+ * Tarball athttp://ceph.newdream.net/download/ceph-0.51.tar.gz
+ * For Debian/Ubuntu packages, seehttp://ceph.newdream.net/docs/master/install/debian
