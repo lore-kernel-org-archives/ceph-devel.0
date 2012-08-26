@@ -1,41 +1,40 @@
 From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Ceph doesn't detect journal failure while the OSD is running
-Date: Sun, 26 Aug 2012 20:09:25 +0200
-Message-ID: <CAOLwVUkKW4FhSb4+YKrC7j+_EFAkh--mS_famV44Zd67OgB-oQ@mail.gmail.com>
+Subject: About sparse images
+Date: Sun, 26 Aug 2012 20:11:53 +0200
+Message-ID: <CAOLwVUnGz4ZvWdNo6JKHuS06YZYCeT7WjaDdGiDipRv8UZVLhA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:44790 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752376Ab2HZSJq (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 26 Aug 2012 14:09:46 -0400
-Received: by lagy9 with SMTP id y9so2111373lag.19
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 11:09:45 -0700 (PDT)
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:60315 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753281Ab2HZSMP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 14:12:15 -0400
+Received: by lbbgj3 with SMTP id gj3so2097381lbb.19
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 11:12:14 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi guys!
+Hi all!
 
-Ceph doesn't seem to detect a journal failure. The cluster keeps
-writing data even if the journal doesn't exist anymore.
-I can find anywhere in the log or from the ceph's command output any
-information about a journal failure. Obviously if an OSD is restarted
-ceph will complain but a failure on fly won't be detected.
+I know that ceph images (rbd) are sparse. It's good but I have some
+interrogations about the ceph -s (-w) output. Let's say your create a
+10G image, map it, format it and mount it. Finally you filled up the
+entire space available. You notice that the 'data' and 'used' space
+had grown. Now delete the content of your image but **not** this
+image, not now. You notice that nothing changed from the ceph output,
+it's not surprising because of the sparse capability. At this point of
+time  the output from the command ceph is neither right nor wrong. It
+only shows the space used by the sparse image, but it doesn't mean
+that you have 'real' data in it, just a simple object allocation. It's
+not so relevant, the only solution is to remove the image (obviously).
+My feeling is that we should be careful about the ceph's output, it's
+not a good indicator for 'real' data. Ok Ceph won't replace a
+monitoring system but I'll be happy to trust the ceph output at 100%
+:)
 
-It seems that Ceph just writes directly to the backend filesystem
-without complaining.
+I would appreciate some reactions about that :)
 
-Yes my monitoring system will tell me that the disk which contains my
-journals is down... But it's not the point here :)
-
-The really good point for me is that the cluster keeps running even if
-the journal is gone. The bad point is obviously that the cluster keeps
-writing data to the backend filesystem (without O_DIRECT I guess...).
-I'll prefer a 'read only' cluster facility while the journal is down.
-Being able to retrieve the data is as crucial as writing data.
-
-Any reaction about that? Roadmap feature maybe?
+Thank you in advance.
 
 Cheers!
