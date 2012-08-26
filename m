@@ -1,102 +1,128 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: Ceph doesn't detect journal failure while the OSD is running
-Date: Sun, 26 Aug 2012 23:07:47 +0200
-Message-ID: <CAOLwVU=r46QGy_P7Lc2HNmY4cJKfi3bpTHM_Wad_P2TaXX5WEg@mail.gmail.com>
-References: <CAOLwVUkKW4FhSb4+YKrC7j+_EFAkh--mS_famV44Zd67OgB-oQ@mail.gmail.com>
- <F13ACA9DFF5F414BB9E2B7502BD9EC33@inktank.com> <CAOLwVUkigWf-tSLepaaTOj8dsN43gpuLsJ2h=4Lm6GLAG16g1A@mail.gmail.com>
- <alpine.DEB.2.00.1208261355520.11218@cobra.newdream.net>
+From: Smart Weblications GmbH - Florian Wiessner
+	<f.wiessner@smart-weblications.de>
+Subject: cannot ceph-osd -i 1 --mkfs - mkfs: BTRFS_IOC_SUBVOL_CREATE failed
+ with error (22) Invalid argument
+Date: Sun, 26 Aug 2012 23:44:53 +0200
+Message-ID: <503A98D5.8010908@smart-weblications.de>
+Reply-To: f.wiessner@smart-weblications.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:51044 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750764Ab2HZVIJ (ORCPT
+Received: from mx04.smart-weblications.de ([188.65.144.39]:60689 "EHLO
+	mx04.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752773Ab2HZVpC (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 26 Aug 2012 17:08:09 -0400
-Received: by lagy9 with SMTP id y9so2158558lag.19
-        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 14:08:08 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1208261355520.11218@cobra.newdream.net>
+	Sun, 26 Aug 2012 17:45:02 -0400
+Received: from office.smart-weblications.net (office.smart-weblications.net [91.204.168.193])
+	by mx04.smart-weblications.de (Postfix) with ESMTPA id 4F559278624C
+	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 21:45:00 +0000 (UTC)
+Received: from [192.168.201.110] (unknown [192.168.201.110])
+	by office.smart-weblications.net (Postfix) with ESMTPA id 76FC95A17AF
+	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 23:44:59 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-I used:
+Hi List,
 
-umount -l to bypassed the warning.
+i try to recreate osd on ext4 after a crash:
 
-I agree for the second one, that's a normal behavior, even if the file
-doesn't exist anymore, the file is still opened by the OSD process.
+node02:/data/ceph_backend# ceph --version
+ceph version 0.51 (commit:c03ca95d235c9a072dcd8a77ad5274a52e93ae30)
 
-On Sun, Aug 26, 2012 at 10:59 PM, Sage Weil <sage@inktank.com> wrote:
-> On Sun, 26 Aug 2012, S?bastien Han wrote:
->> Hi Greg,
->>
->> My first test was:
->>
->> * put a journal on tmpfs
->> * umount the tmpfs
->
-> This should have errored out with 'device is busy'.  Are you sure it
-> actually umounted?
->
->> The second one was almost the same:
->>
->> * rm -rf /journals/*
->>
->> Here /journals contains every journal... (3 actually)
->
-> That's normal Unix behavior.  The file doesn't go away until all names are
-> unlinked/removed *and* all open file handles are closed...
->
-> sage
->
->
->> This action wiped off the journal and ceph didn't detect anything.
->>
->> After that I created a new pool, a new image inside it, mapped it,
->> formated it and wrote data in it with dd. I also used rados bench to
->> write data.
->> Ceph didn't see anything, only a service ceph restart osd make them
->> the OSDs crashed.
->
->
->
->>
->>
->> On Sun, Aug 26, 2012 at 9:43 PM, Gregory Farnum <greg@inktank.com> wrote:
->> >
->> > On Sunday, August 26, 2012 at 11:09 AM, S?bastien Han wrote:
->> > > Hi guys!
->> > >
->> > > Ceph doesn't seem to detect a journal failure. The cluster keeps
->> > > writing data even if the journal doesn't exist anymore.
->> > > I can find anywhere in the log or from the ceph's command output any
->> > > information about a journal failure. Obviously if an OSD is restarted
->> > > ceph will complain but a failure on fly won't be detected.
->> > >
->> > > It seems that Ceph just writes directly to the backend filesystem
->> > > without complaining.
->> > >
->> > > Yes my monitoring system will tell me that the disk which contains my
->> > > journals is down... But it's not the point here :)
->> > >
->> > > The really good point for me is that the cluster keeps running even if
->> > > the journal is gone. The bad point is obviously that the cluster keeps
->> > > writing data to the backend filesystem (without O_DIRECT I guess...).
->> > > I'll prefer a 'read only' cluster facility while the journal is down.
->> > > Being able to retrieve the data is as crucial as writing data.
->> > >
->> > > Any reaction about that? Roadmap feature maybe?
->> > So are you saying the filesystem that the journal was located on disappeared? Or the underlying disk disappeared?
->> > And then the OSD didn't notice?
->> >
->> > If so, that's definitely a problem to be corrected as soon as we can?It's more likely to make the OSD shut down than to continue serving reads, though.
->> > -Greg
->> >
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+node02:/data/ceph_backend# ceph-osd -c /etc/ceph/ceph.conf -i 1 --mkfs =
+--monmap
+/tmp/monmap  --mkkey
+2012-08-26 23:43:24.572064 f733e710 -1 filestore(/data/ceph_backend/osd=
+) mkfs:
+BTRFS_IOC_SUBVOL_CREATE failed with error (22) Invalid argument
+2012-08-26 23:43:24.572088 f733e710 -1 OSD::mkfs: FileStore::mkfs faile=
+d with
+error -22
+2012-08-26 23:43:24.572104 f733e710 -1  ** ERROR: error creating empty =
+object
+store in /data/ceph_backend/osd: (22) Invalid argument
+
+
+
+[global]
+       pid file =3D /var/run/ceph/$name.pid
+#       debug ms =3D 1
+        auth supported =3D cephx
+        keyring =3D /etc/ceph/keyring
+       osd journal =3D /data/ceph_backend/ceph.journal
+       osd_journal_size =3D 512
+       filestore journal writeahead =3D true
+#       filestore journal parallel =3D true
+        filestore_xattr_use_omap =3D 1
+        mds max =3D 5
+ filestore btrfs snap =3D false
+ filestore btrfs trans =3Dfalse
+
+[mon]
+       mon data =3D /data/ceph_backend/mon
+[mon.0]
+       host =3D node01
+       mon addr =3D xxx.xxx.xxx.xxx:6789
+[mon.1]
+       host =3Dnode02
+       mon addr =3D xxx.xxx.xxx.xxx:6789
+[mon.2]
+       host =3D node03
+       mon addr =3D xxx.xxx.xxx.xxx:6789
+
+
+[mds]
+        keyring =3D /etc/ceph/keyring.$name
+#       mds dir max commit size 32
+
+[mds.0]
+       host =3D node01
+[mds.1]
+       host =3D node02
+[osd]
+       sudo =3D true
+       osd data =3D /data/ceph_backend/osd
+        keyring =3D /etc/ceph/keyring.$name
+
+
+
+[osd.0]
+       host =3D node01
+ btrfs devs =3D
+
+       osd data =3D /data/ceph_backend/osd
+        keyring =3D /etc/ceph/keyring.$name
+
+[osd.1]
+       host =3D node02
+        btrfs devs =3D
+       osd data =3D /data/ceph_backend/osd
+        keyring =3D /etc/ceph/keyring.$name
+
+--=20
+
+Mit freundlichen Gr=FC=DFen,
+
+=46lorian Wiessner
+
+Smart Weblications GmbH
+Martinsberger Str. 1
+D-95119 Naila
+
+fon.: +49 9282 9638 200
+fax.: +49 9282 9638 205
+24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+http://www.smart-weblications.de
+
+--
+Sitz der Gesellschaft: Naila
+Gesch=E4ftsf=FChrer: Florian Wiessner
+HRB-Nr.: HRB 3840 Amtsgericht Hof
+*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
