@@ -1,128 +1,41 @@
-From: Smart Weblications GmbH - Florian Wiessner
-	<f.wiessner@smart-weblications.de>
-Subject: cannot ceph-osd -i 1 --mkfs - mkfs: BTRFS_IOC_SUBVOL_CREATE failed
- with error (22) Invalid argument
-Date: Sun, 26 Aug 2012 23:44:53 +0200
-Message-ID: <503A98D5.8010908@smart-weblications.de>
-Reply-To: f.wiessner@smart-weblications.de
+From: Mark Nelson <mark.nelson@inktank.com>
+Subject: Re: MPI applications on ceph fs
+Date: Sun, 26 Aug 2012 19:37:59 -0500
+Message-ID: <503AC167.1060502@inktank.com>
+References: <36202107-A075-42E6-8B4B-AF6FEB86E2AD@psfc.mit.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx04.smart-weblications.de ([188.65.144.39]:60689 "EHLO
-	mx04.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752773Ab2HZVpC (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Sun, 26 Aug 2012 17:45:02 -0400
-Received: from office.smart-weblications.net (office.smart-weblications.net [91.204.168.193])
-	by mx04.smart-weblications.de (Postfix) with ESMTPA id 4F559278624C
-	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 21:45:00 +0000 (UTC)
-Received: from [192.168.201.110] (unknown [192.168.201.110])
-	by office.smart-weblications.net (Postfix) with ESMTPA id 76FC95A17AF
-	for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 23:44:59 +0200 (CEST)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:52432 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750775Ab2H0AiB (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Sun, 26 Aug 2012 20:38:01 -0400
+Received: by ialo24 with SMTP id o24so7055989ial.19
+        for <ceph-devel@vger.kernel.org>; Sun, 26 Aug 2012 17:38:01 -0700 (PDT)
+In-Reply-To: <36202107-A075-42E6-8B4B-AF6FEB86E2AD@psfc.mit.edu>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: John Wright <jwright@psfc.mit.edu>
+Cc: ceph-devel@vger.kernel.org
 
-Hi List,
+Hi John,
 
-i try to recreate osd on ext4 after a crash:
+Is the MPI application writing to one file from multiple ranks?  Any 
+idea what the application was doing when the lookup happens?
 
-node02:/data/ceph_backend# ceph --version
-ceph version 0.51 (commit:c03ca95d235c9a072dcd8a77ad5274a52e93ae30)
+Mark
 
-node02:/data/ceph_backend# ceph-osd -c /etc/ceph/ceph.conf -i 1 --mkfs =
---monmap
-/tmp/monmap  --mkkey
-2012-08-26 23:43:24.572064 f733e710 -1 filestore(/data/ceph_backend/osd=
-) mkfs:
-BTRFS_IOC_SUBVOL_CREATE failed with error (22) Invalid argument
-2012-08-26 23:43:24.572088 f733e710 -1 OSD::mkfs: FileStore::mkfs faile=
-d with
-error -22
-2012-08-26 23:43:24.572104 f733e710 -1  ** ERROR: error creating empty =
-object
-store in /data/ceph_backend/osd: (22) Invalid argument
-
-
-
-[global]
-       pid file =3D /var/run/ceph/$name.pid
-#       debug ms =3D 1
-        auth supported =3D cephx
-        keyring =3D /etc/ceph/keyring
-       osd journal =3D /data/ceph_backend/ceph.journal
-       osd_journal_size =3D 512
-       filestore journal writeahead =3D true
-#       filestore journal parallel =3D true
-        filestore_xattr_use_omap =3D 1
-        mds max =3D 5
- filestore btrfs snap =3D false
- filestore btrfs trans =3Dfalse
-
-[mon]
-       mon data =3D /data/ceph_backend/mon
-[mon.0]
-       host =3D node01
-       mon addr =3D xxx.xxx.xxx.xxx:6789
-[mon.1]
-       host =3Dnode02
-       mon addr =3D xxx.xxx.xxx.xxx:6789
-[mon.2]
-       host =3D node03
-       mon addr =3D xxx.xxx.xxx.xxx:6789
-
-
-[mds]
-        keyring =3D /etc/ceph/keyring.$name
-#       mds dir max commit size 32
-
-[mds.0]
-       host =3D node01
-[mds.1]
-       host =3D node02
-[osd]
-       sudo =3D true
-       osd data =3D /data/ceph_backend/osd
-        keyring =3D /etc/ceph/keyring.$name
-
-
-
-[osd.0]
-       host =3D node01
- btrfs devs =3D
-
-       osd data =3D /data/ceph_backend/osd
-        keyring =3D /etc/ceph/keyring.$name
-
-[osd.1]
-       host =3D node02
-        btrfs devs =3D
-       osd data =3D /data/ceph_backend/osd
-        keyring =3D /etc/ceph/keyring.$name
-
---=20
-
-Mit freundlichen Gr=FC=DFen,
-
-=46lorian Wiessner
-
-Smart Weblications GmbH
-Martinsberger Str. 1
-D-95119 Naila
-
-fon.: +49 9282 9638 200
-fax.: +49 9282 9638 205
-24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-http://www.smart-weblications.de
-
---
-Sitz der Gesellschaft: Naila
-Gesch=E4ftsf=FChrer: Florian Wiessner
-HRB-Nr.: HRB 3840 Amtsgericht Hof
-*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 08/26/2012 09:03 AM, John Wright wrote:
+> Hi All,
+> We're running ceph 0.48 on  small three node test cluster. We've had good stability with I/O using dd and iozone especially after upgrading to 0.48. However, we're running into a repeatable lockup of the linux ceph client ( 3.3.5-2.fc16.x86_64 ) when running an mpi program that has simple I/O on a ceph mount. This is an mpi program running processes on two nodes. It is the remote node on which the ceph client locks up. The cient becomes immediately unresponsive and any attempt to access the mounted volume produces a process with status 'D'. I can see no indication in the server logs that it is ever contacted. Regular serial processes run fine on the volume. MPI runs on the nodes work fine when not using the ceph volume.
+>
+> So any suggestions on where to look? Any one have an experience testing parallel programs on ceph?
+>
+> thanks,
+> -john
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
