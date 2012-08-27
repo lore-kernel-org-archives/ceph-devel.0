@@ -1,127 +1,78 @@
-From: Smart Weblications GmbH - Florian Wiessner
-	<f.wiessner@smart-weblications.de>
-Subject: mkfs: BTRFS_IOC_SUBVOL_CREATE failed with error (22) Invalid argument
-Date: Mon, 27 Aug 2012 13:35:36 +0200
-Message-ID: <503B5B88.8020807@smart-weblications.de>
-Reply-To: f.wiessner@smart-weblications.de
+From: Iulius Curt <icurt@ixiacom.com>
+Subject: Re: [PATCH v2] libceph: Fix sparse warning
+Date: Mon, 27 Aug 2012 15:20:52 +0300
+Message-ID: <503B6624.5000408@ixiacom.com>
+References: <1345724069-12405-1-git-send-email-icurt@ixiacom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx01.smart-weblications.de ([188.65.144.36]:40770 "EHLO
-	mx01.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750839Ab2H0Lff (ORCPT
+Received: from [216.32.180.11] ([216.32.180.11]:8868 "EHLO
+	va3outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751931Ab2H0MUb (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Aug 2012 07:35:35 -0400
-Received: from office.smart-weblications.net (office.smart-weblications.net [91.204.168.193])
-	by mx01.smart-weblications.de (Postfix) with ESMTPA id D515226DC019
-	for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 11:35:33 +0000 (UTC)
-Received: from [192.168.200.13] (callosum.office.smart-weblications.net [192.168.200.13])
-	by office.smart-weblications.net (Postfix) with ESMTP id 3E6C55A17AF
-	for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 13:35:33 +0200 (CEST)
+	Mon, 27 Aug 2012 08:20:31 -0400
+In-Reply-To: <1345724069-12405-1-git-send-email-icurt@ixiacom.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: sage@inktank.com
+Cc: Iulius Curt <iulius.curt@gmail.com>, davem@davemloft.net, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, dbaluta@ixiacom.com
 
-Hi List,
+On 08/23/2012 03:14 PM, Iulius Curt wrote:
+> From: Iulius Curt<iulius.curt@gmail.com>
+>
+> Make ceph_monc_do_poolop() static to remove the following sparse warning:
+>   * net/ceph/mon_client.c:616:5: warning: symbol 'ceph_monc_do_poolop' was not
+>     declared. Should it be static?
+> Also drops the 'ceph_monc_' prefix, now being a private function.
+>
+> Signed-off-by: Iulius Curt<icurt@ixiacom.com>
+> ---
+> v1 --->  v2
+>   * drop the 'ceph_monc_' prefix
+> ---
+>   net/ceph/mon_client.c |    6 +++---
+>   1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index 105d533..84ce495 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -613,7 +613,7 @@ bad:
+>   /*
+>    * Do a synchronous pool op.
+>    */
+> -int ceph_monc_do_poolop(struct ceph_mon_client *monc, u32 op,
+> +static int do_poolop(struct ceph_mon_client *monc, u32 op,
+>   			u32 pool, u64 snapid,
+>   			char *buf, int len)
+>   {
+> @@ -663,7 +663,7 @@ out:
+>   int ceph_monc_create_snapid(struct ceph_mon_client *monc,
+>   			    u32 pool, u64 *snapid)
+>   {
+> -	return ceph_monc_do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
+> +	return do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
+>   				   pool, 0, (char *)snapid, sizeof(*snapid));
+>
+>   }
+> @@ -672,7 +672,7 @@ EXPORT_SYMBOL(ceph_monc_create_snapid);
+>   int ceph_monc_delete_snapid(struct ceph_mon_client *monc,
+>   			    u32 pool, u64 snapid)
+>   {
+> -	return ceph_monc_do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
+> +	return do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
+>   				   pool, snapid, 0, 0);
+>
+>   }
+> --
+> 1.7.9.5
+>
+>
+Hi Sage,
 
-i try to recreate osd on ext4 after a crash:
+Can you, please, have a look.
 
-node02:/data/ceph_backend# ceph --version
-ceph version 0.51 (commit:c03ca95d235c9a072dcd8a77ad5274a52e93ae30)
+Thanks,
+Iulius
 
-node02:/data/ceph_backend# ceph-osd -c /etc/ceph/ceph.conf -i 1 --mkfs =
---monmap
-/tmp/monmap  --mkkey
-2012-08-26 23:43:24.572064 f733e710 -1 filestore(/data/ceph_backend/osd=
-) mkfs:
-BTRFS_IOC_SUBVOL_CREATE failed with error (22) Invalid argument
-2012-08-26 23:43:24.572088 f733e710 -1 OSD::mkfs: FileStore::mkfs faile=
-d with
-error -22
-2012-08-26 23:43:24.572104 f733e710 -1  ** ERROR: error creating empty =
-object
-store in /data/ceph_backend/osd: (22) Invalid argument
-
-
-
-[global]
-       pid file =3D /var/run/ceph/$name.pid
-#       debug ms =3D 1
-        auth supported =3D cephx
-        keyring =3D /etc/ceph/keyring
-       osd journal =3D /data/ceph_backend/ceph.journal
-       osd_journal_size =3D 512
-       filestore journal writeahead =3D true
-#       filestore journal parallel =3D true
-        filestore_xattr_use_omap =3D 1
-        mds max =3D 5
- filestore btrfs snap =3D false
- filestore btrfs trans =3Dfalse
-
-[mon]
-       mon data =3D /data/ceph_backend/mon
-[mon.0]
-       host =3D node01
-       mon addr =3D xxx.xxx.xxx.xxx:6789
-[mon.1]
-       host =3Dnode02
-       mon addr =3D xxx.xxx.xxx.xxx:6789
-[mon.2]
-       host =3D node03
-       mon addr =3D xxx.xxx.xxx.xxx:6789
-
-
-[mds]
-        keyring =3D /etc/ceph/keyring.$name
-#       mds dir max commit size 32
-
-[mds.0]
-       host =3D node01
-[mds.1]
-       host =3D node02
-[osd]
-       sudo =3D true
-       osd data =3D /data/ceph_backend/osd
-        keyring =3D /etc/ceph/keyring.$name
-
-
-
-[osd.0]
-       host =3D node01
- btrfs devs =3D
-
-       osd data =3D /data/ceph_backend/osd
-        keyring =3D /etc/ceph/keyring.$name
-
-[osd.1]
-       host =3D node02
-        btrfs devs =3D
-       osd data =3D /data/ceph_backend/osd
-        keyring =3D /etc/ceph/keyring.$name
-
---=20
-
-Mit freundlichen Gr=FC=DFen,
-
-=46lorian Wiessner
-
-Smart Weblications GmbH
-Martinsberger Str. 1
-D-95119 Naila
-
-fon.: +49 9282 9638 200
-fax.: +49 9282 9638 205
-24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-http://www.smart-weblications.de
-
---
-Sitz der Gesellschaft: Naila
-Gesch=E4ftsf=FChrer: Florian Wiessner
-HRB-Nr.: HRB 3840 Amtsgericht Hof
-*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
