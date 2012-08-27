@@ -1,32 +1,30 @@
-From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: Openstack
-Date: Mon, 27 Aug 2012 13:33:25 -0700
-Message-ID: <503BD995.3060609@inktank.com>
-References: <35DD34C9-6FDC-4735-A363-CB69C1F6E18B@onqtel.com>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Ceph benchmarks
+Date: Mon, 27 Aug 2012 22:47:06 +0200
+Message-ID: <CAOLwVUn-Xs=3c4YDizYPcRfWaKpf79zgpjRp=52ge3nZEusrLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:48867 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754418Ab2H0Ud2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Aug 2012 16:33:28 -0400
-Received: by pbbrr13 with SMTP id rr13so8053601pbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 13:33:27 -0700 (PDT)
-In-Reply-To: <35DD34C9-6FDC-4735-A363-CB69C1F6E18B@onqtel.com>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:53667 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754372Ab2H0Ur2 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Aug 2012 16:47:28 -0400
+Received: by lagy9 with SMTP id y9so2824986lag.19
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 13:47:27 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Quenten Grasso <QGrasso@onq.com.au>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 08/24/2012 07:31 PM, Quenten Grasso wrote:
-> Hi All
->
-> Just wondering if anyone has any tips on getting openstack Essex working with boot from RBD with the dashboard.
->
-> Glance and RBD is fairly well documented and Nova with attaching ceph RBD vols,   However I haven't found much on getting boot from RBD to work.
+Hi community,
 
-These are still the best references for Essex:
+For those of you who are interested, I performed several benchmarks of
+RADOS and RBD on different types of hardware and use case.
+You can find my results here:
+http://www.sebastien-han.fr/blog/2012/08/26/ceph-benchmarks/
 
-http://permalink.gmane.org/gmane.comp.file-systems.ceph.devel/7386
+Hope it helps :)
 
+Feel free to comment, critic... :)
+
+Cheers!
