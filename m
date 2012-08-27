@@ -1,71 +1,51 @@
-From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Subject: Re: Ceph doesn't detect journal failure while the OSD is running
-Date: Mon, 27 Aug 2012 19:37:29 +0200
-Message-ID: <CAOLwVU=zGUxz2gUuaf7jxGODt0=mD68C9b=r+=mOTghYvzYexQ@mail.gmail.com>
-References: <CAOLwVUkKW4FhSb4+YKrC7j+_EFAkh--mS_famV44Zd67OgB-oQ@mail.gmail.com>
- <F13ACA9DFF5F414BB9E2B7502BD9EC33@inktank.com> <CAOLwVUkigWf-tSLepaaTOj8dsN43gpuLsJ2h=4Lm6GLAG16g1A@mail.gmail.com>
- <alpine.DEB.2.00.1208261355520.11218@cobra.newdream.net> <CAOLwVU=r46QGy_P7Lc2HNmY4cJKfi3bpTHM_Wad_P2TaXX5WEg@mail.gmail.com>
- <Pine.LNX.4.64.1208271041090.25096@Psilocybe.Update.UU.SE>
- <CAOLwVUn2-YsOXB4dYTS_HO5BGJgSpfEW3rR3+v1T2qBnnDQWfg@mail.gmail.com> <CAPYLRzjv2+DWNeyiVM9fch9vTT7w_+XF38Cpxz1_dMH8TD2NpA@mail.gmail.com>
+From: "Stephen Perkins" <perkins@netmass.com>
+Subject: RE: Ideal hardware spec?
+Date: Mon, 27 Aug 2012 13:05:32 -0500
+Message-ID: <00b301cd847e$8cb65e00$a6231a00$@netmass.com>
+References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl> <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com> <5035E8AB.8090006@widodh.nl> <005b01cd8203$43f6e860$cbe4b920$@netmass.com> <50379830.4000000@inktank.com> <5037C3FB.200@widodh.nl> <5037C6A2.4050403@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:39575 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752656Ab2H0Rhv convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Aug 2012 13:37:51 -0400
-Received: by lbbgj3 with SMTP id gj3so2676560lbb.19
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 10:37:49 -0700 (PDT)
-In-Reply-To: <CAPYLRzjv2+DWNeyiVM9fch9vTT7w_+XF38Cpxz1_dMH8TD2NpA@mail.gmail.com>
+Received: from 142.122.233.72.static.reverse.ltdomains.com ([72.233.122.142]:54002
+	"EHLO stgateway01.netmass.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750971Ab2H0SFh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Aug 2012 14:05:37 -0400
+In-Reply-To: <5037C6A2.4050403@inktank.com>
+Content-Language: en-us
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <greg@inktank.com>
-Cc: Jerker Nyberg <jerker@update.uu.se>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: 'Mark Nelson' <mark.nelson@inktank.com>
 
-Ok, I see. Thanks for the clarification :)
-
-
-On Mon, Aug 27, 2012 at 6:20 PM, Gregory Farnum <greg@inktank.com> wrot=
-e:
-> On Mon, Aug 27, 2012 at 9:10 AM, S=E9bastien Han <han.sebastien@gmail=
-=2Ecom> wrote:
->> Ok for the lazy umount but the journal is not here anymore, maybe
->> still written in memory.
+>>> Given that "massive" is a relative term, I am as well... but I'm 
+>>> also trying to reduce the footprint (power and space) of that 
+>>> "massive" cluster.
+>>> I also
+>>> want to start small (1/2 rack) and scale as needed.
+>>
+>> If you do end up testing Brazos processes, please post your results! 
+>> I think it really depends on what kind of performance you are aiming for.
+>> Our stock 2U test boxes have 6-core opterons, and our SC847a has dual 
+>> 6-core low power Xeon E5s. At 10GbE+ these are probably going to be 
+>> pushed pretty hard, especially during recovery.
+>>
 >
-> The lazy unmount keeps the filesystem attached to the tree until
-> nobody's using it anymore. What you've done here is to say "as soon a=
-s
-> nobody's touching this, kill it!" So the Ceph OSD keeps on using the
-> journal, and Linux keeps it around...and then when you shut down the
-> OSD, Linux removes the journal (*after* the OSD is done with it).
-> There is literally nothing that Ceph can do about this scenario.
-> -Greg
->
->> On Mon, Aug 27, 2012 at 10:59 AM, Jerker Nyberg <jerker@update.uu.se=
-> wrote:
->>> On Sun, 26 Aug 2012, S=E9bastien Han wrote:
->>>
->>>> I used:
->>>>
->>>> umount -l to bypassed the warning.
->>>
->>>
->>> "umount -l" does a lazy unmount. The file system is not really unmo=
-unted
->>> until it is not busy anymore. Ceph may continue to use the open jou=
-rnals and
->>> they should be visible in the file system hierarchy.
->>>
->>> Kind regards,
->>> Jerker Nyberg.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I'm aiming for a Ceph cluster of a couple of hundred TB consisting out 
+> of 5 or 6 racks full of 1U machines with each 4x 1TB.
+
+Thinking along the lines of the approach of many 1U by 4 drive host (as
+above) with no hardware RAID... what are the thoughts between SATAII (3G/s)
+vs SATAIII (6G/s) and on 1G Ethernet versus 10G Ethernet.
+
+- Steve
+
+P.S.  I will be assuming a replication level of 3 copies and would probably
+be looking at 10 nodes or less initially.  Maybe populating with 6 drives
+instead of 4 (if I can find the right chassis).
+
+
+
+
