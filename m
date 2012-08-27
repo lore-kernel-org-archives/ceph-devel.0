@@ -1,78 +1,61 @@
-From: Iulius Curt <icurt@ixiacom.com>
-Subject: Re: [PATCH v2] libceph: Fix sparse warning
-Date: Mon, 27 Aug 2012 15:20:52 +0300
-Message-ID: <503B6624.5000408@ixiacom.com>
-References: <1345724069-12405-1-git-send-email-icurt@ixiacom.com>
+From: Martin Mailand <martin@tuxadero.com>
+Subject: Re: v0.51 released
+Date: Mon, 27 Aug 2012 17:15:53 +0200
+Message-ID: <503B8F29.4070001@tuxadero.com>
+References: <alpine.DEB.2.00.1208260858010.11218@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [216.32.180.11] ([216.32.180.11]:8868 "EHLO
-	va3outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751931Ab2H0MUb (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Aug 2012 08:20:31 -0400
-In-Reply-To: <1345724069-12405-1-git-send-email-icurt@ixiacom.com>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:47550 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751653Ab2H0PQD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Aug 2012 11:16:03 -0400
+In-Reply-To: <alpine.DEB.2.00.1208260858010.11218@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@inktank.com
-Cc: Iulius Curt <iulius.curt@gmail.com>, davem@davemloft.net, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, dbaluta@ixiacom.com
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 08/23/2012 03:14 PM, Iulius Curt wrote:
-> From: Iulius Curt<iulius.curt@gmail.com>
->
-> Make ceph_monc_do_poolop() static to remove the following sparse warning:
->   * net/ceph/mon_client.c:616:5: warning: symbol 'ceph_monc_do_poolop' was not
->     declared. Should it be static?
-> Also drops the 'ceph_monc_' prefix, now being a private function.
->
-> Signed-off-by: Iulius Curt<icurt@ixiacom.com>
-> ---
-> v1 --->  v2
->   * drop the 'ceph_monc_' prefix
-> ---
->   net/ceph/mon_client.c |    6 +++---
->   1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 105d533..84ce495 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -613,7 +613,7 @@ bad:
->   /*
->    * Do a synchronous pool op.
->    */
-> -int ceph_monc_do_poolop(struct ceph_mon_client *monc, u32 op,
-> +static int do_poolop(struct ceph_mon_client *monc, u32 op,
->   			u32 pool, u64 snapid,
->   			char *buf, int len)
->   {
-> @@ -663,7 +663,7 @@ out:
->   int ceph_monc_create_snapid(struct ceph_mon_client *monc,
->   			    u32 pool, u64 *snapid)
->   {
-> -	return ceph_monc_do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
-> +	return do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
->   				   pool, 0, (char *)snapid, sizeof(*snapid));
->
->   }
-> @@ -672,7 +672,7 @@ EXPORT_SYMBOL(ceph_monc_create_snapid);
->   int ceph_monc_delete_snapid(struct ceph_mon_client *monc,
->   			    u32 pool, u64 snapid)
->   {
-> -	return ceph_monc_do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
-> +	return do_poolop(monc,  POOL_OP_CREATE_UNMANAGED_SNAP,
->   				   pool, snapid, 0, 0);
->
->   }
-> --
-> 1.7.9.5
->
->
 Hi Sage,
 
-Can you, please, have a look.
+is in this release the rbd layering/cloning already testable?
+Do you have a link to the docs how to use it?
 
-Thanks,
-Iulius
+Best Regards,
+  martin
+
+
+Am 26.08.2012 17:58, schrieb Sage Weil:
+> The latest development release v0.51 is ready. Notable changes include:
+>
+>   * crush: tunables documented; feature bit now present and enforced
+>   * osd: various fixes for out-of-order op replies
+>   * osd: several rare peering cases fixed
+>   * osd: fixed detection of EIO errors from fs on read
+>   * osd: new 'lock' rados class for generic object locking
+>   * librbd: fixed memory leak on discard
+>   * librbd: image layering/cloning
+>   * radosgw: fix range header for large objects, ETag quoting, GMT dates,
+>     other compatibility fixes
+>   * mkcephfs: fix for default keyring, osd data/journal locations
+>   * wireshark: ceph protocol dissector patch updated
+>   * ceph.spec: fixed packaging problem with crush headers
+>
+> Full RBD cloning support will be in place in v0.52, as will a refactor of
+> the messenger code with many bug fixes in the socket failure handling.
+> This is available for testing now in 'next' for the adventurous. Improved
+> OSD scrubbing is also coming soon. We should (finally) be building some
+> release RPMs for v0.52 as well.
+>
+> You can get v0.51 from the usual locations:
+>
+>   * Git at git://github.com/ceph/ceph.git
+>   * Tarball athttp://ceph.newdream.net/download/ceph-0.51.tar.gz
+>   * For Debian/Ubuntu packages, seehttp://ceph.newdream.net/docs/master/install/debian
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
