@@ -1,67 +1,33 @@
-From: "Stephen Perkins" <perkins@netmass.com>
-Subject: ESXi and ideal hardware spec
-Date: Mon, 27 Aug 2012 13:17:12 -0500
-Message-ID: <00b501cd8480$2dc46b60$894d4220$@netmass.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
+Subject: Re: On tmap, omap, xattr physical layout
+Date: Mon, 27 Aug 2012 12:25:23 -0700
+Message-ID: <CAPrxi58gbo-PofkJzvrF-BFpDUZbNRpMMhtS+90WbwVfJSKXgQ@mail.gmail.com>
+References: <CAPrxi58O6PTgQ70GGrQbcvkOTwN6212=wGWaRNo+9-GFGqCGHw@mail.gmail.com>
+	<CAPYLRzhCz1Si2-NuR-JKp2LNf3RkuL+OpYkCyhfi1upUNe8cHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 142.122.233.72.static.reverse.ltdomains.com ([72.233.122.142]:56759
-	"EHLO stgateway01.netmass.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752231Ab2H0SRO (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Aug 2012 14:17:14 -0400
-Received: from stgateway01.netmass.com (localhost [127.0.0.1])
-	by stgateway01.netmass.com (Postfix) with ESMTP id BD717422068
-	for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 13:17:13 -0500 (CDT)
-Received: from sidney (sidney.netmass.com [10.10.120.10])
-	(using TLSv1 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by stgateway01.netmass.com (Postfix) with ESMTPS id 3F1B8422069
-	for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 13:17:12 -0500 (CDT)
-Content-Language: en-us
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:43366 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752558Ab2H0TZX (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Aug 2012 15:25:23 -0400
+Received: by ialo24 with SMTP id o24so8916320ial.19
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 12:25:23 -0700 (PDT)
+In-Reply-To: <CAPYLRzhCz1Si2-NuR-JKp2LNf3RkuL+OpYkCyhfi1upUNe8cHQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <greg@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi all,
+Thanks for the clarification, guys!
 
-As part of the ideal hardware spec thread that has been going around, I
-wanted to ask comments on virtualizing the OS.  Since my deployment would
-eventually be co-located at a remote "lights out" environment,  I require
-that I have support for:
+On Sun, Aug 26, 2012 at 11:06 AM, Gregory Farnum <greg@inktank.com> wrote:
 
-	out of band remote access on dedicated port
-		- Dell DRAC
-		- HP iLO
-		- SuperMicro IPMI with KVM
-		- ASUS with Remote Management Chip
-		- VMWare on the actual virtual machine instances.
+> omaps are put in a per-osd leveldb store, carefully keyed so they can
 
-	Remote monitoring of physical hardware
-		- Dell OpenManage
-		- HP Insight Manager
-		- SuperMicro SuperDoctor III
-		- VMWare
+Interesting. Is this really per OSD, or is it per PG? And if it is the
+former, wouldn't this mean that an OSD failure would need to
+explicitly request each individual key/value pair for the re-mapped
+objects?
 
-	Integration with a Service Monitor solution
-		- Nagios
-		- Zabbix
-		- VMWare
-
-One thing that integrates well with all of these is the free VMWare ESXi
-Hypervisor.
-
-Are there any thoughts on placing all Ceph nodes as single virtual machines
-running on top of an ESXi hypervisor?   What I mean by this is that each
-brick runs ESXi and then only runs one virtual machine.  
-
-Are there any advantages of running the MON and MDS servers as independent
-virtual machines on the same physical brick as an OSD virtual machine
-(rather than just running the processes)?  Multi-port Ethernet systems can
-segregate traffic between the instances...
-
-- Steve
-
-
+- Noah
