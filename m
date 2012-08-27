@@ -1,51 +1,67 @@
 From: "Stephen Perkins" <perkins@netmass.com>
-Subject: RE: Ideal hardware spec?
-Date: Mon, 27 Aug 2012 13:05:32 -0500
-Message-ID: <00b301cd847e$8cb65e00$a6231a00$@netmass.com>
-References: <20120822135530.GB10015@csail.mit.edu> <5034E9F3.10001@widodh.nl> <00d301cd8073$faa0f7e0$efe2e7a0$@netmass.com> <5035E8AB.8090006@widodh.nl> <005b01cd8203$43f6e860$cbe4b920$@netmass.com> <50379830.4000000@inktank.com> <5037C3FB.200@widodh.nl> <5037C6A2.4050403@inktank.com>
+Subject: ESXi and ideal hardware spec
+Date: Mon, 27 Aug 2012 13:17:12 -0500
+Message-ID: <00b501cd8480$2dc46b60$894d4220$@netmass.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
 	charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 142.122.233.72.static.reverse.ltdomains.com ([72.233.122.142]:54002
+Received: from 142.122.233.72.static.reverse.ltdomains.com ([72.233.122.142]:56759
 	"EHLO stgateway01.netmass.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750971Ab2H0SFh (ORCPT
+	by vger.kernel.org with ESMTP id S1752231Ab2H0SRO (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Aug 2012 14:05:37 -0400
-In-Reply-To: <5037C6A2.4050403@inktank.com>
+	Mon, 27 Aug 2012 14:17:14 -0400
+Received: from stgateway01.netmass.com (localhost [127.0.0.1])
+	by stgateway01.netmass.com (Postfix) with ESMTP id BD717422068
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 13:17:13 -0500 (CDT)
+Received: from sidney (sidney.netmass.com [10.10.120.10])
+	(using TLSv1 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by stgateway01.netmass.com (Postfix) with ESMTPS id 3F1B8422069
+	for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 13:17:12 -0500 (CDT)
 Content-Language: en-us
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
-Cc: 'Mark Nelson' <mark.nelson@inktank.com>
 
->>> Given that "massive" is a relative term, I am as well... but I'm 
->>> also trying to reduce the footprint (power and space) of that 
->>> "massive" cluster.
->>> I also
->>> want to start small (1/2 rack) and scale as needed.
->>
->> If you do end up testing Brazos processes, please post your results! 
->> I think it really depends on what kind of performance you are aiming for.
->> Our stock 2U test boxes have 6-core opterons, and our SC847a has dual 
->> 6-core low power Xeon E5s. At 10GbE+ these are probably going to be 
->> pushed pretty hard, especially during recovery.
->>
->
-> I'm aiming for a Ceph cluster of a couple of hundred TB consisting out 
-> of 5 or 6 racks full of 1U machines with each 4x 1TB.
+Hi all,
 
-Thinking along the lines of the approach of many 1U by 4 drive host (as
-above) with no hardware RAID... what are the thoughts between SATAII (3G/s)
-vs SATAIII (6G/s) and on 1G Ethernet versus 10G Ethernet.
+As part of the ideal hardware spec thread that has been going around, I
+wanted to ask comments on virtualizing the OS.  Since my deployment would
+eventually be co-located at a remote "lights out" environment,  I require
+that I have support for:
+
+	out of band remote access on dedicated port
+		- Dell DRAC
+		- HP iLO
+		- SuperMicro IPMI with KVM
+		- ASUS with Remote Management Chip
+		- VMWare on the actual virtual machine instances.
+
+	Remote monitoring of physical hardware
+		- Dell OpenManage
+		- HP Insight Manager
+		- SuperMicro SuperDoctor III
+		- VMWare
+
+	Integration with a Service Monitor solution
+		- Nagios
+		- Zabbix
+		- VMWare
+
+One thing that integrates well with all of these is the free VMWare ESXi
+Hypervisor.
+
+Are there any thoughts on placing all Ceph nodes as single virtual machines
+running on top of an ESXi hypervisor?   What I mean by this is that each
+brick runs ESXi and then only runs one virtual machine.  
+
+Are there any advantages of running the MON and MDS servers as independent
+virtual machines on the same physical brick as an OSD virtual machine
+(rather than just running the processes)?  Multi-port Ethernet systems can
+segregate traffic between the instances...
 
 - Steve
-
-P.S.  I will be assuming a replication level of 3 copies and would probably
-be looking at 10 nodes or less initially.  Maybe populating with 6 drives
-instead of 4 (if I can find the right chassis).
-
-
 
 
