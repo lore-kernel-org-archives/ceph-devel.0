@@ -1,77 +1,51 @@
-From: Mark Nelson <mark.nelson@inktank.com>
-Subject: Re: Ceph benchmarks
-Date: Mon, 27 Aug 2012 21:18:46 -0500
-Message-ID: <503C2A86.8080503@inktank.com>
-References: <CAOLwVUn-Xs=3c4YDizYPcRfWaKpf79zgpjRp=52ge3nZEusrLw@mail.gmail.com>
+From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+Subject: Re: [PATCH] Add old_inodes to emetablob
+Date: Mon, 27 Aug 2012 23:20:37 -0300
+Message-ID: <orzk5frc3u.fsf@livre.localdomain>
+References: <orboos1qyu.fsf@livre.localdomain>
+	<Pine.LNX.4.64.1202222159060.27988@cobra.newdream.net>
+	<ork43bbbbb.fsf@livre.localdomain>
+	<Pine.LNX.4.64.1203031551560.11992@cobra.newdream.net>
+	<ora9xsbm9w.fsf@livre.localdomain> <orzk5ra8m9.fsf@livre.localdomain>
+	<alpine.DEB.2.00.1208191415240.26858@cobra.newdream.net>
+	<alpine.DEB.2.00.1208191422110.26858@cobra.newdream.net>
+	<orehmss3ro.fsf@livre.localdomain>
+	<alpine.DEB.2.00.1208270943480.29719@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:63960 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751002Ab2H1CSv (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Aug 2012 22:18:51 -0400
-Received: by ialo24 with SMTP id o24so9644636ial.19
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Aug 2012 19:18:50 -0700 (PDT)
-In-Reply-To: <CAOLwVUn-Xs=3c4YDizYPcRfWaKpf79zgpjRp=52ge3nZEusrLw@mail.gmail.com>
+Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:42204 "EHLO
+	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751002Ab2H1CVD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Aug 2012 22:21:03 -0400
+In-Reply-To: <alpine.DEB.2.00.1208270943480.29719@cobra.newdream.net> (Sage
+	Weil's message of "Mon, 27 Aug 2012 09:44:42 -0700 (PDT)")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 08/27/2012 03:47 PM, S=E9bastien Han wrote:
-> Hi community,
->
+On Aug 27, 2012, Sage Weil <sage@inktank.com> wrote:
 
-Hi!
+>> +	  if (!in->old_inodes.empty()) {
+>> +	    snapid_t newfirst = in->old_inodes.rbegin()->first + 1;
+>> +	    if (newfirst > in->first)
+>> +	      in->first = newfirst;
 
-> For those of you who are interested, I performed several benchmarks o=
-f
-> RADOS and RBD on different types of hardware and use case.
-> You can find my results here:
-> http://www.sebastien-han.fr/blog/2012/08/26/ceph-benchmarks/
->
-> Hope it helps :)
->
-> Feel free to comment, critic... :)
+> Hmm, did you observe a case where in->first was already > the newest 
+> old_inode?
 
-A couple of thoughts:
+No, that was just me doing defensive programming and forgetting to add a
+warning for this case ;-)
 
-1) With so few OSDs going from 1000 to 10000 pgs shouldn't make too muc=
-h=20
-of a difference.  It would be concerning if it did!
+IIRC I reasoned I didn't want an already-bugfixed or already-advanced
+in->first in the MDS journal to be overwritten with a buggy/outdated
+->first from the inode proper.  However, since I didn't put the warning,
+I don't know whether it ever hit :-(
 
-2) Were the commodity results with SSDs using replication of 3?  Also,=20
-was that test with the flusher on or off?  I'd hope that with 15k drive=
-s=20
-you'd see a bit better throughput with journals on the SSDs.
-
-3) It would be interesting to try these tests without the raid1 and see=
-=20
-if you can max out the bonded interface.
-
-4) I think the R520 backplane is using SAS expanders like in the R515s=20
-we have.  We've had some performance problems caused either by them or=20
-by something goofy going on with our H700 controllers.
-
-5) rados bench tests with smaller requests could be interesting on 15k=20
-drives.  I typically see about 1-2MB/s per OSD for 4k requests with=20
-7200rpm SATA disks.
-
-Mark
-
->
-> Cheers!
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist      Red Hat Brazil Compiler Engineer
