@@ -1,35 +1,38 @@
 From: Smart Weblications GmbH - Florian Wiessner
 	<f.wiessner@smart-weblications.de>
-Subject: Re: RBD performance - tuning hints
-Date: Tue, 28 Aug 2012 20:53:46 +0200
-Message-ID: <503D13BA.8090104@smart-weblications.de>
-References: <500931CF.9040407@selectel.ru> <20120828174842.GA9872@oder.mch.fsc.net>
+Subject: Re: Integration work
+Date: Tue, 28 Aug 2012 20:57:02 +0200
+Message-ID: <503D147E.9020003@smart-weblications.de>
+References: <503D0A00.2080905@inktank.com> <20120828185116.GC9872@oder.mch.fsc.net>
 Reply-To: f.wiessner@smart-weblications.de
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx01.smart-weblications.de ([188.65.144.36]:50084 "EHLO
-	mx01.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751875Ab2H1Sxg (ORCPT
+Received: from mx04.smart-weblications.de ([188.65.144.39]:39507 "EHLO
+	mx04.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753117Ab2H1S4w (ORCPT
 	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Aug 2012 14:53:36 -0400
-In-Reply-To: <20120828174842.GA9872@oder.mch.fsc.net>
+	Tue, 28 Aug 2012 14:56:52 -0400
+In-Reply-To: <20120828185116.GC9872@oder.mch.fsc.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dieter Kasper <d.kasper@kabelmail.de>, ceph-devel@vger.kernel.org
+To: Dieter Kasper <d.kasper@kabelmail.de>
+Cc: Ross Turk <ross@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 28.08.2012 19:48, schrieb Dieter Kasper:
-> Hi,
->=20
-> on my 4-node system (SSD + 10GbE, see bench-config.txt for details)
-> I can observe a pretty nice rados bench performance=20
-> (see bench-rados.txt for details):
+Am 28.08.2012 20:51, schrieb Dieter Kasper:
 
-i'd like to know which 10GE Switch you have used? Do you use 10GE-Base-=
-T?
+> Performance enhancements - especially to reduce the latency of a sing=
+le IO / increase IOPS -
+> and a stronger engagement on the CephFS client would be very much app=
+reciated.
+> A stable and fast CephFS client would allow an efficient integration =
+with
+> - (clustered) NFS (v3 and v4)
+> - (clustered) Samba v4
 
-
+Have you tried ocfs2 ontop of rbd in the meanwhile until cephFS gets re=
+ady?
 
 
 --=20
