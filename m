@@ -1,51 +1,93 @@
-From: Alexandre Oliva <oliva@lsd.ic.unicamp.br>
-Subject: Re: [PATCH] Add old_inodes to emetablob
-Date: Mon, 27 Aug 2012 23:20:37 -0300
-Message-ID: <orzk5frc3u.fsf@livre.localdomain>
-References: <orboos1qyu.fsf@livre.localdomain>
-	<Pine.LNX.4.64.1202222159060.27988@cobra.newdream.net>
-	<ork43bbbbb.fsf@livre.localdomain>
-	<Pine.LNX.4.64.1203031551560.11992@cobra.newdream.net>
-	<ora9xsbm9w.fsf@livre.localdomain> <orzk5ra8m9.fsf@livre.localdomain>
-	<alpine.DEB.2.00.1208191415240.26858@cobra.newdream.net>
-	<alpine.DEB.2.00.1208191422110.26858@cobra.newdream.net>
-	<orehmss3ro.fsf@livre.localdomain>
-	<alpine.DEB.2.00.1208270943480.29719@cobra.newdream.net>
+From: ramu eppa <ramu.freesystems@gmail.com>
+Subject: Re: RADOS gateway and the S3 compatibility.
+Date: Tue, 28 Aug 2012 03:48:49 +0000 (UTC)
+Message-ID: <loom.20120828T054548-835@post.gmane.org>
+References: <loom.20120827T091156-421@post.gmane.org> <CAC-hyiHm+-aU9pfXE_eb2Gpji2vC3U15YfBwyLMF4XsZRMWkBQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from lsd-gw.ic.unicamp.br ([143.106.7.165]:42204 "EHLO
-	boneca.lsd.ic.unicamp.br" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751002Ab2H1CVD (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Mon, 27 Aug 2012 22:21:03 -0400
-In-Reply-To: <alpine.DEB.2.00.1208270943480.29719@cobra.newdream.net> (Sage
-	Weil's message of "Mon, 27 Aug 2012 09:44:42 -0700 (PDT)")
+Received: from plane.gmane.org ([80.91.229.3]:56406 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750894Ab2H1DtC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+	Mon, 27 Aug 2012 23:49:02 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
+	id 1T6CnU-00064R-6B
+	for ceph-devel@vger.kernel.org; Tue, 28 Aug 2012 05:49:00 +0200
+Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 05:49:00 +0200
+Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 05:49:00 +0200
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@inktank.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-On Aug 27, 2012, Sage Weil <sage@inktank.com> wrote:
+Hi,
 
->> +	  if (!in->old_inodes.empty()) {
->> +	    snapid_t newfirst = in->old_inodes.rbegin()->first + 1;
->> +	    if (newfirst > in->first)
->> +	      in->first = newfirst;
+   I configured apache correctly and it was running correctly.
+The apache2 error log is,
 
-> Hmm, did you observe a case where in->first was already > the newest 
-> old_inode?
+radosgw: must specify 'rgw socket path' to run as a daemon
+[Tue Aug 28 08:59:10 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+(pid 6492) terminated by calling exit with status '1'
+[Tue Aug 28 08:59:10 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+has failed to remain running for 30 seconds given 3 attempts, its restart 
+interval has been backed off to 600 seconds
+[Tue Aug 28 08:59:10 2012] [warn] FastCGI: server "/usr/local/bin/radosgw" has 
+failed to remain running for 30 seconds given 3 attempts, its restart interval 
+has been backed off to 600 seconds
+[Tue Aug 28 09:04:10 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+has failed to remain running for 30 seconds given 3 attempts, its restart 
+interval has been backed off to 600 seconds
+[Tue Aug 28 09:04:10 2012] [warn] FastCGI: server "/usr/local/bin/radosgw" has 
+failed to remain running for 30 seconds given 3 attempts, its restart interval 
+has been backed off to 600 seconds
+[Tue Aug 28 09:09:02 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+has failed to remain running for 30 seconds given 3 attempts, its restart 
+interval has been backed off to 600 seconds
+[Tue Aug 28 09:09:02 2012] [warn] FastCGI: server "/usr/local/bin/radosgw" has 
+failed to remain running for 30 seconds given 3 attempts, its restart interval 
+has been backed off to 600 seconds
+[Tue Aug 28 09:09:02 2012] [warn] FastCGI: server "/usr/local/bin/radosgw" (uid 
+33, gid 33) restarted (pid 6504)
+radosgw: must specify 'rgw socket path' to run as a daemon
+[Tue Aug 28 09:09:02 2012] [warn] FastCGI: server "/usr/local/bin/radosgw" (pid 
+6504) terminated by calling exit with status '1'
+[Tue Aug 28 09:09:02 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+has failed to remain running for 30 seconds given 3 attempts, its restart 
+interval has been backed off to 600 seconds
+[Tue Aug 28 09:09:02 2012] [warn] FastCGI: server "/usr/local/bin/radosgw" has 
+failed to remain running for 30 seconds given 3 attempts, its restart interval 
+has been backed off to 600 seconds
+[Tue Aug 28 09:09:10 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+has failed to remain running for 30 seconds given 3 attempts, its restart 
+interval has been backed off to 600 seconds
+[Tue Aug 28 09:09:10 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+(uid 0, gid 0) restarted (pid 6510)
+[Tue Aug 28 09:09:10 2012] [warn] FastCGI: server "/usr/local/bin/radosgw" has 
+failed to remain running for 30 seconds given 3 attempts, its restart interval 
+has been backed off to 600 seconds
+radosgw: must specify 'rgw socket path' to run as a daemon
+[Tue Aug 28 09:09:11 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+(pid 6510) terminated by calling exit with status '1'
+[Tue Aug 28 09:09:11 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+has failed to remain running for 30 seconds given 3 attempts, its restart 
+interval has been backed off to 600 seconds
+[Tue Aug 28 09:09:11 2012] [warn] FastCGI: server "/usr/local/bin/radosgw" has 
+failed to remain running for 30 seconds given 3 attempts, its restart interval 
+has been backed off to 600 seconds
+[Tue Aug 28 09:14:11 2012] [warn] FastCGI: (dynamic) server "/var/www/s3gw.fcgi" 
+has failed to remain running for 30 seconds given 3 attempts, its restart 
+interval has been backed off to 600 seconds
+[Tue Aug 28 09:14:11 2012] [warn] FastCGI: server "/usr/local/bin/radosgw" has 
+failed to remain running for 30 seconds given 3 attempts, its restart interval 
+has been backed off to 600 seconds
 
-No, that was just me doing defensive programming and forgetting to add a
-warning for this case ;-)
+Thanks,
+Ramu.
 
-IIRC I reasoned I didn't want an already-bugfixed or already-advanced
-in->first in the MDS journal to be overwritten with a buggy/outdated
-->first from the inode proper.  However, since I didn't put the warning,
-I don't know whether it ever hit :-(
 
--- 
-Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
-You must be the change you wish to see in the world. -- Gandhi
-Be Free! -- http://FSFLA.org/   FSF Latin America board member
-Free Software Evangelist      Red Hat Brazil Compiler Engineer
