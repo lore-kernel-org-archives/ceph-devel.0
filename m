@@ -1,25 +1,39 @@
-From: "Plaetinck, Dieter" <dieter@vimeo.com>
+From: Dieter Kasper <d.kasper@kabelmail.de>
 Subject: Re: Integration work
-Date: Tue, 28 Aug 2012 20:32:35 +0200
-Message-ID: <20120828203235.45f1e3a5@dieter-t420s>
+Date: Tue, 28 Aug 2012 20:51:16 +0200
+Message-ID: <20120828185116.GC9872@oder.mch.fsc.net>
 References: <503D0A00.2080905@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ny-iacmail.iac.com ([63.119.10.45]:12130 "EHLO
-	ny-iacmail.iac.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751167Ab2H1SeE (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 14:34:04 -0400
+Received: from smtpa1.mediabeam.com ([194.25.41.13]:41291 "EHLO
+	smtpa2.mediabeam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751236Ab2H1SwQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 14:52:16 -0400
+Content-Disposition: inline
 In-Reply-To: <503D0A00.2080905@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ross Turk <ross@inktank.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Dieter Kasper (KD)" <d.kasper@kabelmail.de>
 
-On Tue, 28 Aug 2012 11:12:16 -0700
-Ross Turk <ross@inktank.com> wrote:
+Hi Ross,
 
+focusing on core stability and feature expansion for RBD was the right appoach 
+in the past and I feel you have reached an adequate maturity level here.
+
+Performance enhancements - especially to reduce the latency of a single IO / increase IOPS -
+and a stronger engagement on the CephFS client would be very much appreciated.
+A stable and fast CephFS client would allow an efficient integration with
+- (clustered) NFS (v3 and v4)
+- (clustered) Samba v4
+
+
+Cheers,
+-Dieter
+
+
+On Tue, Aug 28, 2012 at 08:12:16PM +0200, Ross Turk wrote:
 > 
 > Hi, ceph-devel! It's me, your friendly community guy.
 > 
@@ -35,10 +49,25 @@ Ross Turk <ross@inktank.com> wrote:
 > we think Ceph should play nicely with).
 > 
 > What other sorts of integrations would you like to see Inktank engineers 
-> work on?
+> work on? For example, are you interested in seeing Inktank spend more of 
+> its resources improving interoperability with Apache CloudStack or 
+> Eucalyptus? How about Xen?
+> 
+> Please share your thoughts. We want to contribute in the best way 
+> possible with the resources we have, and your input can help.
+> 
+> Thx,
+> Ross
+> 
+> --
+> Ross Turk
+> Community, Ceph
+> @rossturk @inktank @ceph
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-are we only supposed to give answers wrt. integration with other software?
-if not, I would suggest to write documentation.
-and also integration with CM like puppet/chef
-both of these points can give a shorter "time from zero to working cluster" which IMHO is critical
-in attracting new users. (myself included)
