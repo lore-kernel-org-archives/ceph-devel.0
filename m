@@ -1,70 +1,64 @@
-From: Gregory Farnum <greg@inktank.com>
-Subject: Re: mon crash on debian wheezy
-Date: Tue, 28 Aug 2012 09:21:16 -0700
-Message-ID: <CAPYLRzgoRf11m6NampLc=p2uNA2VZ_4qwRK-2TOwZCutiYg1Hg@mail.gmail.com>
-References: <5037376F.4080201@gmail.com>
-	<alpine.DEB.2.00.1208240927490.29719@cobra.newdream.net>
-	<503CDACA.6040303@gmail.com>
+From: Tim Flavin <tim.flavin@gmail.com>
+Subject: mkcehfs: ** ERROR: error creating empty object store in /data/sd1:
+ (2) No such file or directory
+Date: Tue, 28 Aug 2012 13:12:22 -0400
+Message-ID: <CAEj+kbmZs=x+8MVRwDs4PDbozFqSk+Qgd4EYEEe4HVQUYjxGLg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:36121 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753140Ab2H1QVR (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 12:21:17 -0400
-Received: by ialo24 with SMTP id o24so10998326ial.19
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 09:21:16 -0700 (PDT)
-In-Reply-To: <503CDACA.6040303@gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:63278 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751667Ab2H1RMY (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 13:12:24 -0400
+Received: by vcbfk26 with SMTP id fk26so6138740vcb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 10:12:22 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaopong Tran <xiaopong.tran@gmail.com>
-Cc: Sage Weil <sage@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, Aug 28, 2012 at 7:50 AM, Xiaopong Tran <xiaopong.tran@gmail.com> wrote:
-> On 08/25/2012 12:28 AM, Sage Weil wrote:
->>
->> On Fri, 24 Aug 2012, Xiaopong Tran wrote:
->>>
->>> Hello,
->>>
->>> I've been running the 0.48argonaut on production for over a month
->>> without any issue. and today, I suddenly lost one mon. Taking a look
->>> into the syslog file, I see the following trace log. I just couldn't
->>> see what's wrong from the trace log. However, this event created
->>> a gigantic core file. Here's the size of the core file:
->>>
->>> -rw------- 1 root root 16085647360 Aug 24 14:53 core
->>>
->>> This happened while we were migrating data from our old storage
->>> to the ceph. We are running about 20 processes, migrating data
->>> into ceph, while there are about 30 more application processes
->>> reading from and writing new data to it.
->>>
->>> The following is from syslog:
->>
->>
->> We've seen these backtraces before too, but haven't figured out what
->> causes them.  (See, for example, http://tracker.newdream.net/issues/2026.)
->>
->> Was there anything in the mon's log file?  In most cases, a crash results
->> in a stack trace of ceph-mon in the mon log file.
->>
->> Glad to hear everything recovered nicely afterwards.  :)
->>
->> Thanks!
->> sage
->>
->
-> Ah well, I got two crashes in less than 3 days. I browsed thru the
-> mon log files, and the ceph log files, and there is nothing suspicious,
-> no trace dump or anything.
->
-> One question I don't get is, after mon has crashed, it's not running
-> anymore, who is creating that empty mon log? The same question goes
-> for osd. I had two osd down today, and I also see empty osd log files.
->
-> And how does the crash end up generating such a huge core file?
->
-> If there's any information I can provide, I'd be happy to do so.
+Hi:
 
-Can you extract the backtrace from the core dump?
+I am having a problem with mkcephfs.  I built ceph from the 48.1 tarball.
+
+When I type:   sudo mkcephfs -a -c ceph.conf -k ceph.keyring
+
+I get:
+
+(monmap tool related stuff is ok)
+
+
+=== osd.0 ===
+2012-08-28 11:51:49.549651 b6f85000 -1 OSD::mkfs: FileStore::mkfs
+failed with error -2
+2012-08-28 11:51:49.549767 b6f85000 -1  ** ERROR: error creating empty
+object store in /data/sd1: (2) No such file or directory
+failed: '/usr/local/sbin/mkcephfs -d /tmp/mkcephfs.mKzTuonWuF
+--init-daemon osd.0'
+
+
+user1@ceph4:~$ cat ceph.conf
+[osd]
+	osd journal size = 1000
+	filestore xattr use omap = true
+
+[mon.a]
+	host = ceph4
+	mon addr = 64.20.246.210
+
+[osd.0]
+	host = ceph4
+        osd data = /data/sd1
+	; osd data = /dev/user1/data
+	; osd journal = /dev/sdc1
+	osd journal = /user1/log
+
+
+user1@ceph4:~$ ls /data/sd1
+current  d1  fsid  lost+found  store_version
+
+/data/sd1 is an ext4 file system with -o noatime,user_xattr
+
+Any ideas?
+
+
+Tim Flavin
