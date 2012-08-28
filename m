@@ -1,74 +1,51 @@
-From: Dieter Kasper <d.kasper@kabelmail.de>
-Subject: Re: RBD performance - tuning hints
-Date: Tue, 28 Aug 2012 21:04:46 +0200
-Message-ID: <20120828190446.GA17695@oder.kd-bie.de>
-References: <500931CF.9040407@selectel.ru>
- <20120828174842.GA9872@oder.mch.fsc.net>
- <503D13BA.8090104@smart-weblications.de>
+From: Tim Flavin <tim.flavin@gmail.com>
+Subject: Re: mkcehfs: ** ERROR: error creating empty object store in
+ /data/sd1: (2) No such file or directory
+Date: Tue, 28 Aug 2012 15:52:44 -0400
+Message-ID: <CAEj+kb=GuhZ+wyVoMMp8OUhiMUTSGRo3DtUjE7rwy9ZHwkFruQ@mail.gmail.com>
+References: <CAEj+kbmZs=x+8MVRwDs4PDbozFqSk+Qgd4EYEEe4HVQUYjxGLg@mail.gmail.com>
+	<alpine.DEB.2.00.1208281013360.25640@cobra.newdream.net>
+	<CAEj+kbmaQRQbWtj_+e6tw+UjE0HqxGU=aQY8DTbmxC5XUDoJLw@mail.gmail.com>
+	<CADvuQRFm0nVgOjZhbo=YEkOoAJo5Rep4psofPfgFeVe==G=Sjw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpa1.mediabeam.com ([194.25.41.13]:52677 "EHLO
-	smtpa2.mediabeam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751937Ab2H1TFt convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 15:05:49 -0400
-Content-Disposition: inline
-In-Reply-To: <503D13BA.8090104@smart-weblications.de>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:49847 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752302Ab2H1Twp (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 15:52:45 -0400
+Received: by vbbff1 with SMTP id ff1so6209872vbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 12:52:44 -0700 (PDT)
+In-Reply-To: <CADvuQRFm0nVgOjZhbo=YEkOoAJo5Rep4psofPfgFeVe==G=Sjw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Smart Weblications GmbH - Florian Wiessner <f.wiessner@smart-weblications.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tv@inktank.com>
+Cc: Sage Weil <sage@inktank.com>, ceph-devel@vger.kernel.org
 
-On Tue, Aug 28, 2012 at 08:53:46PM +0200, Smart Weblications GmbH - Flo=
-rian Wiessner wrote:
-> Am 28.08.2012 19:48, schrieb Dieter Kasper:
-> > Hi,
-> >=20
-> > on my 4-node system (SSD + 10GbE, see bench-config.txt for details)
-> > I can observe a pretty nice rados bench performance=20
-> > (see bench-rados.txt for details):
->=20
-> i'd like to know which 10GE Switch you have used? Do you use 10GE-Bas=
-e-T?
-http://www.brocade.com/products/all/switches/product-details/turboiron-=
-24x-switch/index.page
+Tommi:
 
-Mit freundlichen Gr=FC=DFen
-Dieter Kasper
+That was it.
 
->=20
->=20
->=20
->=20
-> --=20
->=20
-> Mit freundlichen Gr=FC=DFen,
->=20
-> Florian Wiessner
->=20
-> Smart Weblications GmbH
-> Martinsberger Str. 1
-> D-95119 Naila
->=20
-> fon.: +49 9282 9638 200
-> fax.: +49 9282 9638 205
-> 24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-> http://www.smart-weblications.de
->=20
-> --
-> Sitz der Gesellschaft: Naila
-> Gesch=E4ftsf=FChrer: Florian Wiessner
-> HRB-Nr.: HRB 3840 Amtsgericht Hof
-> *aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+osd    journal = /user1/log
 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+should have been
+
+osd     journal = /home/user1/log
+
+Works much better now.  The error message was a bit confusing.    I
+was looking for ENOENTs related to /data/sd1 not /user1/log.  It was
+there, but there were other ENOENTs after it.
+
+
+Tim
+
+
+
+
+On Tue, Aug 28, 2012 at 2:20 PM, Tommi Virtanen <tv@inktank.com> wrote:
+> On Tue, Aug 28, 2012 at 1:38 PM, Tim Flavin <tim.flavin@gmail.com> wrote:
+>> Sage:  Yes I tried that.
+>
+> I wonder if the journal file exists..
+>
+>
