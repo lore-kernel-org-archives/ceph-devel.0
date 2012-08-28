@@ -1,60 +1,72 @@
-From: Smart Weblications GmbH - Florian Wiessner
-	<f.wiessner@smart-weblications.de>
-Subject: Re: Integration work
-Date: Tue, 28 Aug 2012 20:57:02 +0200
-Message-ID: <503D147E.9020003@smart-weblications.de>
-References: <503D0A00.2080905@inktank.com> <20120828185116.GC9872@oder.mch.fsc.net>
-Reply-To: f.wiessner@smart-weblications.de
+From: Dieter Kasper <d.kasper@kabelmail.de>
+Subject: Re: RBD performance - tuning hints
+Date: Tue, 28 Aug 2012 21:04:46 +0200
+Message-ID: <20120828190446.GA17695@oder.kd-bie.de>
+References: <500931CF.9040407@selectel.ru>
+ <20120828174842.GA9872@oder.mch.fsc.net>
+ <503D13BA.8090104@smart-weblications.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx04.smart-weblications.de ([188.65.144.39]:39507 "EHLO
-	mx04.smart-weblications.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753117Ab2H1S4w (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Aug 2012 14:56:52 -0400
-In-Reply-To: <20120828185116.GC9872@oder.mch.fsc.net>
+Received: from smtpa1.mediabeam.com ([194.25.41.13]:52677 "EHLO
+	smtpa2.mediabeam.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751937Ab2H1TFt convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 15:05:49 -0400
+Content-Disposition: inline
+In-Reply-To: <503D13BA.8090104@smart-weblications.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dieter Kasper <d.kasper@kabelmail.de>
-Cc: Ross Turk <ross@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Smart Weblications GmbH - Florian Wiessner <f.wiessner@smart-weblications.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Am 28.08.2012 20:51, schrieb Dieter Kasper:
+On Tue, Aug 28, 2012 at 08:53:46PM +0200, Smart Weblications GmbH - Flo=
+rian Wiessner wrote:
+> Am 28.08.2012 19:48, schrieb Dieter Kasper:
+> > Hi,
+> >=20
+> > on my 4-node system (SSD + 10GbE, see bench-config.txt for details)
+> > I can observe a pretty nice rados bench performance=20
+> > (see bench-rados.txt for details):
+>=20
+> i'd like to know which 10GE Switch you have used? Do you use 10GE-Bas=
+e-T?
+http://www.brocade.com/products/all/switches/product-details/turboiron-=
+24x-switch/index.page
 
-> Performance enhancements - especially to reduce the latency of a sing=
-le IO / increase IOPS -
-> and a stronger engagement on the CephFS client would be very much app=
-reciated.
-> A stable and fast CephFS client would allow an efficient integration =
-with
-> - (clustered) NFS (v3 and v4)
-> - (clustered) Samba v4
+Mit freundlichen Gr=FC=DFen
+Dieter Kasper
 
-Have you tried ocfs2 ontop of rbd in the meanwhile until cephFS gets re=
-ady?
+>=20
+>=20
+>=20
+>=20
+> --=20
+>=20
+> Mit freundlichen Gr=FC=DFen,
+>=20
+> Florian Wiessner
+>=20
+> Smart Weblications GmbH
+> Martinsberger Str. 1
+> D-95119 Naila
+>=20
+> fon.: +49 9282 9638 200
+> fax.: +49 9282 9638 205
+> 24/7: +49 900 144 000 00 - 0,99 EUR/Min*
+> http://www.smart-weblications.de
+>=20
+> --
+> Sitz der Gesellschaft: Naila
+> Gesch=E4ftsf=FChrer: Florian Wiessner
+> HRB-Nr.: HRB 3840 Amtsgericht Hof
+> *aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-
---=20
-
-Mit freundlichen Gr=FC=DFen,
-
-=46lorian Wiessner
-
-Smart Weblications GmbH
-Martinsberger Str. 1
-D-95119 Naila
-
-fon.: +49 9282 9638 200
-fax.: +49 9282 9638 205
-24/7: +49 900 144 000 00 - 0,99 EUR/Min*
-http://www.smart-weblications.de
-
---
-Sitz der Gesellschaft: Naila
-Gesch=E4ftsf=FChrer: Florian Wiessner
-HRB-Nr.: HRB 3840 Amtsgericht Hof
-*aus dem dt. Festnetz, ggf. abweichende Preise aus dem Mobilfunknetz
 --
 To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
