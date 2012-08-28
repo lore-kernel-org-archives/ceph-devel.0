@@ -1,46 +1,52 @@
-From: ramu eppa <ramu.freesystems@gmail.com>
-Subject: Re: RADOS gateway and the S3 compatibility.
-Date: Tue, 28 Aug 2012 07:13:03 +0000 (UTC)
-Message-ID: <loom.20120828T091214-710@post.gmane.org>
-References: <loom.20120827T091156-421@post.gmane.org> <CAC-hyiHm+-aU9pfXE_eb2Gpji2vC3U15YfBwyLMF4XsZRMWkBQ@mail.gmail.com> <loom.20120828T054548-835@post.gmane.org> <20120828035420.GB19573@splice>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: Ceph benchmarks
+Date: Tue, 28 Aug 2012 10:32:34 +0200
+Message-ID: <CAOLwVUkxo5pzvHmmr1PBW98wBWuVJW==Tk34wUMNedKxNQf+4Q@mail.gmail.com>
+References: <CAOLwVUn-Xs=3c4YDizYPcRfWaKpf79zgpjRp=52ge3nZEusrLw@mail.gmail.com>
+ <503C2A86.8080503@inktank.com> <503C48A6.5060205@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:34941 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752347Ab2H1HNQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Tue, 28 Aug 2012 03:13:16 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1T6FzA-0002NX-D0
-	for ceph-devel@vger.kernel.org; Tue, 28 Aug 2012 09:13:17 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 09:13:16 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 09:13:16 +0200
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:60304 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750757Ab2H1Ic6 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 04:32:58 -0400
+Received: by lbbgj3 with SMTP id gj3so3079090lbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 01:32:55 -0700 (PDT)
+In-Reply-To: <503C48A6.5060205@catalyst.net.nz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Cc: Mark Nelson <mark.nelson@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+@Alexandre: I don't have all the machines anymore, I'll see what I can
+do :). Only the commodity cluster remains
 
-  After i configured ,and start the apache2,am getting 
-following error,
+@Mark Nelson: 2) Which bench? The RADOS one?
+3) Sorry the RAID controller doesn't support JBOD...
+5) I still have the commodity cluster, I'll perform some little rados benchmarks
 
-* Starting web server apache2    
-                                                                                                   
-Syntax error on line 1 of /etc/apache2/httpd.conf
-Invalid command 'FastCgiExternalServer', perhaps misspelled or 
-defined by a module not included in the server configuration
-Action 'start' failed.
-The Apache error log may have more information.
-                                                                                                                              
-[fail]
+Cheers!
 
-Thanks,
-Ramu.
-
+On Tue, Aug 28, 2012 at 6:27 AM, Mark Kirkwood
+<mark.kirkwood@catalyst.net.nz> wrote:
+> +1 to that. I've been seeing 4-6 MB/s for 4K writes for 1 OSD with 1 SSD for
+> journal and another for data [1]. Interestingly I did see some nice scaling
+> with 4K random reads: 2-4 MB/s per thread for up to 8 threads (looked like
+> it plateaued thereafter).
+>
+> Cheers
+>
+> Mark
+>
+> [1] FYI not on the box I posted about before - on a more modern pc with
+> 6Bbit/s SATA.
+>
+>
+> On 28/08/12 14:18, Mark Nelson wrote:
+>>
+>> 5) rados bench tests with smaller requests could be interesting on 15k
+>> drives.  I typically see about 1-2MB/s per OSD for 4k requests with 7200rpm
+>> SATA disks.
+>
+>
