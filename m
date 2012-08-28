@@ -1,58 +1,61 @@
-From: "Jim Schutt" <jaschut@sandia.gov>
-Subject: Lots of misdirected client requests with 73984 PGs/pool
-Date: Tue, 28 Aug 2012 16:01:11 -0600
-Message-ID: <503D3FA7.2050603@sandia.gov>
+From: =?ISO-8859-1?Q?S=E9bastien_Han?= <han.sebastien@gmail.com>
+Subject: Re: Ceph benchmarks
+Date: Wed, 29 Aug 2012 00:16:28 +0200
+Message-ID: <CAOLwVU=HYFOVegVsRTKjF9deq4r3VAvHOdkdLKMxt+Fu0sWt=Q@mail.gmail.com>
+References: <CAOLwVUn-Xs=3c4YDizYPcRfWaKpf79zgpjRp=52ge3nZEusrLw@mail.gmail.com>
+ <CADvuQRGvz3Fy=vxAFfETMkcLRVBBROCUxXFDdF4C1Mupf5oPHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sentry-two.sandia.gov ([132.175.109.14]:33278 "EHLO
-	sentry-two.sandia.gov" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751397Ab2H1WBj (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 18:01:39 -0400
-Received: from interceptor1.sandia.gov (interceptor1.sandia.gov [132.175.109.5])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by sentry-two.sandia.gov (Postfix) with ESMTP id 1EE9AD2C869
-	for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 16:01:36 -0600 (MDT)
-Received: from sentry.sandia.gov (sentry.sandia.gov [132.175.109.21]) by interceptor1.sandia.gov (RSA Interceptor) for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 16:01:25 -0600
-Received: from mail.sandia.gov (exch01.sandia.gov [134.253.103.1] (may
- be forged)) by mailgate.sandia.gov (8.14.4/8.14.4) with ESMTP id
- q7SM1BQV015320 for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012
- 16:01:11 -0600
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:43568 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753432Ab2H1WQu convert rfc822-to-8bit (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Aug 2012 18:16:50 -0400
+Received: by lbbgj3 with SMTP id gj3so3610729lbb.19
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Aug 2012 15:16:48 -0700 (PDT)
+In-Reply-To: <CADvuQRGvz3Fy=vxAFfETMkcLRVBBROCUxXFDdF4C1Mupf5oPHQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Tommi Virtanen <tv@inktank.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+@Mark Nelson: thanks for the precision, I'll think about that the next
+time I'll build an array. It was raid1 with 2 disks (no broken array)
 
-I was testing on 288 OSDs with pg_bits=8, for 73984 PGs/pool,
-221952 total PGs.
+@Plaetinck, Dieter: Sorry I made a little mistake, I was referring
+about the system cache (page cache), the one which considers write
+operations to the storage system complete after the data has been
+copied into it. Secondly the disk write cache (hard drive disk), the
+one stored into the hard drive disk. I'm going to make the sentence
+clearer and remove the disk write cache part.
 
-Writing from CephFS clients generates lots of messages like this:
+@Jerker Nyberg: I performed some measure on each system during a write
+but it's more in my head than on the paper. As I can say, the
+commodity cluster was struggling during the write. The other machines
+barely showed a load, even when I deactivated every cores and kept
+only 1 or 2 it was ok. The CPU load from the OSD wasn't so high.
 
-2012-08-28 14:53:33.772344 osd.235 [WRN] client.4533 172.17.135.45:0/1432642641 misdirected client.4533.1:124 pg 0.8b9d12d4 to osd.235 in e7, client e7 pg 0.112d4 features 262282
+@Tommi Virtanen: nice catch! I'm gonna update the article :)
 
-There's no trouble with 288 OSDs and pg_bits=7 (36992 PGs/pool).
+Thank you for all the feedback, I'll try to perform some of the tests
+guys mentioned above :)
 
-This is all with current Linus master branch + ceph-client testing
-branch, and master branch on the server side.
-
-Does this have anything to do with old_pg_t AKA struct ceph_pg
-only using 16 bits for the placement seed?
-
-I'd about to start testing on 576 OSDs, and was hoping to use
-pg_bits=7 to get more uniform data placement across OSDs.
-My first step on that path was 288 OSDs with pg_bits=8.
-
-Maybe I can't, or I have to just ignore the warnings, until
-the kernel's libceph learns about 32-bit placement seeds?
-
-Or maybe this 16-bit seed theory is all wrong, and something
-else is going on?  If so, what more information is needed
-to help sort this out?
-
-Thanks -- Jim
-
+On Tue, Aug 28, 2012 at 3:11 PM, Tommi Virtanen <tv@inktank.com> wrote:
+> On Mon, Aug 27, 2012 at 1:47 PM, S=E9bastien Han <han.sebastien@gmail=
+=2Ecom> wrote:
+>> For those of you who are interested, I performed several benchmarks =
+of
+>> RADOS and RBD on different types of hardware and use case.
+>> You can find my results here:
+>> http://www.sebastien-han.fr/blog/2012/08/26/ceph-benchmarks/
+>
+> Nice!
+>
+> Minor nit: "sudo echo 3 | tee /proc/sys/vm/drop_caches && sudo sync"
+> you probably want "say echo 3 | sudo tee ... && sync"
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
