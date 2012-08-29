@@ -1,77 +1,110 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: qemu-rbd : savevm monitor command don't save vmstate, is it normal
- ?
-Date: Wed, 29 Aug 2012 10:05:03 -0700
-Message-ID: <503E4BBF.8060703@inktank.com>
-References: <3aa58a4b-8f7f-48ac-8ab7-510924be9e2a@mailpro> <503E4015.7050707@inktank.com> <CAC-hyiHURKbxNcW+MNMi2onw9iar7d7RD=y3pw_EoHQB711-iA@mail.gmail.com>
+Subject: Re: RBD performance - tuning hints
+Date: Wed, 29 Aug 2012 10:37:36 -0700
+Message-ID: <503E5360.50705@inktank.com>
+References: <5867fa5f-5c24-4279-954a-5a1df06f3394@mailpro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:56445 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752929Ab2H2RFG (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 13:05:06 -0400
-Received: by pbbrr13 with SMTP id rr13so1553815pbb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 10:05:06 -0700 (PDT)
-In-Reply-To: <CAC-hyiHURKbxNcW+MNMi2onw9iar7d7RD=y3pw_EoHQB711-iA@mail.gmail.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:55346 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754276Ab2H2Rhk (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 13:37:40 -0400
+Received: by dady13 with SMTP id y13so572080dad.19
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 10:37:39 -0700 (PDT)
+In-Reply-To: <5867fa5f-5c24-4279-954a-5a1df06f3394@mailpro>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh <yehuda@inktank.com>
-Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
+To: Alexandre DERUMIER <aderumier@odiso.com>
+Cc: Dieter Kasper <d.kasper@kabelmail.de>, ceph-devel@vger.kernel.org
 
-On 08/29/2012 09:25 AM, Yehuda Sadeh wrote:
-> On Wed, Aug 29, 2012 at 9:15 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
->> On 08/29/2012 06:40 AM, Alexandre DERUMIER wrote:
->>>
->>> Hi,
->>>
->>> I'm trying to take a full vm state snapshot with savevm monitor command
->>> (qemu 0.12rc1 + rbd 0.48.1)
->>>
->>> it seem that vmstate is not saved in the snapshot. (I also don't notice
->>> any vm hang during snapshot)
->>> Snapshot of disk is correctly made.
->>
->>
->> AFAIK the only block backend that supports saving the vmstate is qcow2.
->> For rbd, the savevm/loadvm monitor commands are equivalent to
->> 'rbd snap create' and 'rbd snap rollback'. They just save/rollback the
->> disk.
->>
->>
->>> using loadvm monitor command, rollback correctly to disk snapshot but vm
->>> hang.
->>
->>
->> If you don't quiesce i/o i.e. via xfsfreeze (it works on the vfs level
->> now, so it's not xfs-specific anymore) before snapshotting a running
->> vm, the fs might require a fsck to be usable. This is only rolling back
->> the disk, and not the memory state, so doing it while the vm is running
->> is likely to cause problems.
->>
->>
->>> starting qemu with -loadvm snapshotname give
->>> kvm: Error -22 while loading VM state
->>>
->>>
->>> Is it normal ? Not implemented ?
->>
->>
->> bdrv_{save|load}_vmstate are not implemented.
->>
-> How complicated would it be to implement it? Looking at the api it
-> seems trivial. We can add a new block with a .vmstate prefix and keeps
-> the raw data on it. We should probably add some librbd functionality
-> that stores and retrieves alternative data payloads and use it for
-> that.
+On 08/29/2012 01:50 AM, Alexandre DERUMIER wrote:
+> Nice results !
+> (can you make same benchmark from a qemu-kvm guest with virtio-driver=
+ ?
+> I have made some bench some month ago with stephan priebe, and we nev=
+er be able to have more than 20000iops, with a full ssd 3nodes cluster)
 >
-> Yehuda
+>>> How can I set the variables when the Journal data have go to the OS=
+D ? (after X seconds and/or when Y %-full)
+> I think you can try to tune these values
+>
+> filestore max sync interval =3D 30
+> filestore min sync interval =3D 29
+> filestore flusher =3D false
+> filestore queue max ops =3D 10000
+
+Increasing filestore_op_threads might help as well.
+
+> ----- Mail original -----
+>
+> De: "Dieter Kasper" <d.kasper@kabelmail.de>
+> =C3=80: ceph-devel@vger.kernel.org
+> Cc: "Dieter Kasper (KD)" <d.kasper@kabelmail.de>
+> Envoy=C3=A9: Mardi 28 Ao=C3=BBt 2012 19:48:42
+> Objet: RBD performance - tuning hints
+>
+> Hi,
+>
+> on my 4-node system (SSD + 10GbE, see bench-config.txt for details)
+> I can observe a pretty nice rados bench performance
+> (see bench-rados.txt for details):
+>
+> Bandwidth (MB/sec): 961.710
+> Max bandwidth (MB/sec): 1040
+> Min bandwidth (MB/sec): 772
+>
+>
+> Also the bandwidth performance generated with
+> fio --filename=3D/dev/rbd1 --direct=3D1 --rw=3D$io --bs=3D$bs --size=3D=
+2G --iodepth=3D$threads --ioengine=3Dlibaio --runtime=3D60 --group_repo=
+rting --name=3Dfile1 --output=3Dfio_${io}_${bs}_${threads}
+>
+> .... is acceptable, e.g.
+> fio_write_4m_16 795 MB/s
+> fio_randwrite_8m_128 717 MB/s
+> fio_randwrite_8m_16 714 MB/s
+> fio_randwrite_2m_32 692 MB/s
+>
+>
+> But, the write IOPS seems to be limited around 19k ...
+> RBD 4M 64k (=3D optimal_io_size)
+> fio_randread_512_128 53286 55925
+> fio_randread_4k_128 51110 44382
+> fio_randread_8k_128 30854 29938
+> fio_randwrite_512_128 18888 2386
+> fio_randwrite_512_64 18844 2582
+> fio_randwrite_8k_64 17350 2445
+> (...)
+> fio_read_4k_128 10073 53151
+> fio_read_4k_64 9500 39757
+> fio_read_4k_32 9220 23650
+> (...)
+> fio_read_4k_16 9122 14322
+> fio_write_4k_128 2190 14306
+> fio_read_8k_32 706 13894
+> fio_write_4k_64 2197 12297
+> fio_write_8k_64 3563 11705
+> fio_write_8k_128 3444 11219
+>
+>
+> Any hints for tuning the IOPS (read and/or write) would be appreciate=
+d.
+>
+> How can I set the variables when the Journal data have go to the OSD =
+? (after X seconds and/or when Y %-full)
+>
+>
+> Kind Regards,
+> -Dieter
+>
+>
 >
 
-We probably wouldn't want to keep it in a single object, since it could
-be very large, but it wouldn't be hard to reuse the regular I/O code to
-stripe it across objects as well. It wouldn't be very complicated to
-implement.
-
-Josh
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
