@@ -1,69 +1,75 @@
-From: Joseph Glanville <joseph.glanville@orionvm.com.au>
-Subject: Re: Integration work
-Date: Thu, 30 Aug 2012 01:19:04 +1000
-Message-ID: <CAOzFzEj=_YZcoXm6+gGemd1X-EU_PhZrFdscFMG5xPt_3uY1sg@mail.gmail.com>
-References: <503D0A00.2080905@inktank.com>
-	<CAF6-1L6QKQbgPZvXYMQw+0_vaLrP0cr_P0_nZs56Lh+A2B9k8Q@mail.gmail.com>
-	<503DE69B.70804@widodh.nl>
-	<CAF6-1L4sVnMsx79APO5X0zEEUyDoBD2PUvjTZw6Gzb7rgfpKkg@mail.gmail.com>
-	<503E1BC6.8080308@widodh.nl>
-	<CADvuQREkbfxTfzdjqYof00BF7GVa+ft+SXFzHzO0NwJOkSDP3g@mail.gmail.com>
+From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+Subject: Re: RBD kernel: Weird messages about "connect authorization failure"
+ or "socket closed"
+Date: Wed, 29 Aug 2012 08:26:27 -0700
+Message-ID: <CAC-hyiFgPdRVWTj7=M4QQyVKz2UHQvJrV+8bVew5zNGzjSC_SQ@mail.gmail.com>
+References: <CAF6-1L4q5PsDjE=393oOjRZ56n-=7XjdQQu0i+1KhOeWc7KsGA@mail.gmail.com>
+	<CAF6-1L7nf1+jUjSMDbP-1yhELndm1mNQiAVcsAOvMetD=hnAoQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:61069 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751658Ab2H2PTF (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 11:19:05 -0400
-Received: by obbuo13 with SMTP id uo13so1197605obb.19
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 08:19:05 -0700 (PDT)
-In-Reply-To: <CADvuQREkbfxTfzdjqYof00BF7GVa+ft+SXFzHzO0NwJOkSDP3g@mail.gmail.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:36497 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751644Ab2H2P02 (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 11:26:28 -0400
+Received: by bkwj10 with SMTP id j10so353725bkw.19
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 08:26:27 -0700 (PDT)
+In-Reply-To: <CAF6-1L7nf1+jUjSMDbP-1yhELndm1mNQiAVcsAOvMetD=hnAoQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tommi Virtanen <tv@inktank.com>
-Cc: Wido den Hollander <wido@widodh.nl>, Sylvain Munaut <s.munaut@whatever-company.com>, Ross Turk <ross@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, xen-devel <xen-devel@lists.xen.org>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 29 August 2012 23:43, Tommi Virtanen <tv@inktank.com> wrote:
-> On Wed, Aug 29, 2012 at 9:40 AM, Wido den Hollander <wido@widodh.nl> wrote:
->>> Huh ... I've never heard this. Also the guys in ##xen haven't either.
->>> I'm not really involved in xen dev and don't follow it closely but
->>> that seems unlikely. The few slides I looked at from the Xen Summit a
->>> couple days ago show that they really like their PV model.
->> I must be wrong then!
+On Wed, Aug 29, 2012 at 8:04 AM, Sylvain Munaut
+<s.munaut@whatever-company.com> wrote:
 >
-> They are (at least, Red Hat is) looking at using more qemu for
-> xen-hvm. Whether that has any effect on the PV side, I wouldn't know.
-> It might make sense for them to use virtio even for PV, so they might
-> use qemu to implement the hypervisor side of virtio too, and that
-> would get you librbd support.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Hi,
+>
+> In the OSD log I see thos " auth: could not find secret_id=0" ... Any idea
+> ?
+>
+> Because obviously it succeeds a couple of millisecond later.
+>
+>
+> 2012-08-29 13:47:17.873583 7f981ae9d700  0 -- 192.168.1.71:6807/2080
+> >> 192.168.1.28:0/440990652 pipe(0x75d6800 sd=33 pgs=0 cs=0
+> l=0).accept peer addr is really 192.168.1.28:0/440990652 (socket is
+> 192.168.1.28:38689/0)
+> 2012-08-29 13:47:17.873717 7f981ae9d700  0 auth: could not find
+> secret_id=0
+> 2012-08-29 13:47:17.873727 7f981ae9d700  0 cephx: verify_authorizer
+> could not get service secret for service osd secret_id=0
+> 2012-08-29 13:47:17.873731 7f981ae9d700  1
+> CephxAuthorizeHandler::verify_authorizer isvalid=0
+> 2012-08-29 13:47:17.873733 7f981ae9d700  0 -- 192.168.1.71:6807/2080
+> >> 192.168.1.28:0/440990652 pipe(0x75d6800 sd=33 pgs=0 cs=0
+> l=1).accept bad authorizer
+> 2012-08-29 13:47:17.873925 7f981ae9d700  0 auth: could not find
+> secret_id=0
+> 2012-08-29 13:47:17.873938 7f981ae9d700  0 cephx: verify_authorizer
+> could not get service secret for service osd secret_id=0
+> 2012-08-29 13:47:17.873941 7f981ae9d700  1
+> CephxAuthorizeHandler::verify_authorizer isvalid=0
+> 2012-08-29 13:47:17.873942 7f981ae9d700  0 -- 192.168.1.71:6807/2080
+> >> 192.168.1.28:0/440990652 pipe(0x75d6800 sd=33 pgs=0 cs=0
+> l=1).accept bad authorizer
+> 2012-08-29 13:47:18.599819 7f981ae9d700  0 -- 192.168.1.71:6807/2080
+> >> 192.168.1.28:0/440990652 pipe(0x56e6600 sd=33 pgs=0 cs=0
+> l=0).accept peer addr is really 192.168.1.28:0/440990652 (socket is
+> 192.168.1.28:38690/0)
+> 2012-08-29 13:47:18.600056 7f981ae9d700  1
+> CephxAuthorizeHandler::verify_authorizer isvalid=1
+> 2012-08-29 13:47:18.600433 7f981e2ae700  0 osd.3 913 pg[2.14( v
+> 905'2959 (79'1958,905'2959] n=17 ec=1 les/c 913/913 912/912/904) [3,0]
+> r=0 lpr=912 mlcod 0'0 active+clean] watch: ctx->obc=0x5bccb00 cookie=6
+> oi.version=2956 ctx->at_version=913'2960
+> 2012-08-29 13:47:18.600443 7f981e2ae700  0 osd.3 913 pg[2.14( v
+> 905'2959 (79'1958,905'2959] n=17 ec=1 les/c 913/913 912/912/904) [3,0]
+> r=0 lpr=912 mlcod 0'0 active+clean] watch: oi.user_version=2955
+>
+>
+Did that happen just once, or is it a reoccurring incident? What it
+basically says that the client sent a request using an old ticket. Did
+the client just wake up?
 
-I don't there is much going on in terms of increasing use of QEMU,
-only that Xen can now use upsteam QEMU rather than the Xen specific
-fork (qemu-xen-traditional).
-There was GSOC project to build a virtio front/backend for Xen but I
-am not sure if this would be the way to go.
-As far as I can see Xen dominates KVM in terms network and I/O
-performance on every benchmark so apart from compatibility the gains
-of using virtio don't seem that great... Xen's blkback/netback PV
-system is just that much faster and more scalable with large numbers
-of domains or 100k+ IOPs.
-
-With regards to blktap.. blktap is currently in a state where blktap2
-is included in a minimal amount of distros and is non-upstreamable.
-blktap3 which is coming will but fully userspace but I have never been
-a big fan of userspace block devices, YMMV.
-That being said, building blktap devices is really easy (similar to tuntap).
-
-Ideally improving the kernel RBD device would provide the best
-performance across the board and the most compatibility (anything can
-use a raw block device).
-
-Joseph.
-
--- 
-CTO | Orion Virtualisation Solutions | www.orionvm.com.au
-Phone: 1300 56 99 52 | Mobile: 0428 754 846
+Yehuda
