@@ -1,125 +1,39 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: RBD performance - tuning hints
-Date: Wed, 29 Aug 2012 10:50:12 +0200 (CEST)
-Message-ID: <5867fa5f-5c24-4279-954a-5a1df06f3394@mailpro>
-References: <20120828174842.GA9872@oder.mch.fsc.net>
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Unable to set pg_num property of pool "data"
+Date: Wed, 29 Aug 2012 15:12:07 +0530
+Message-ID: <CAGfy=6n9X87iOwJjT3n3WuBRSxmUS6LnL27v0H10=SJ4YG5f0w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.209.98]:39120 "EHLO
-	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750732Ab2H2Iui convert rfc822-to-8bit (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 04:50:38 -0400
-In-Reply-To: <20120828174842.GA9872@oder.mch.fsc.net>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:47183 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751177Ab2H2JmH (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 05:42:07 -0400
+Received: by vcbfk26 with SMTP id fk26so363011vcb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 02:42:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dieter Kasper <d.kasper@kabelmail.de>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-Nice results !
-(can you make same benchmark from a qemu-kvm guest with virtio-driver ?=
-=20
-I have made some bench some month ago with stephan priebe, and we never=
- be able to have more than 20000iops, with a full ssd 3nodes cluster)
+Hi Ceph Community ,
+     I am facing problem while I am explicitly  trying to set
+"pg_number" of "data" pool.
 
->>How can I set the variables when the Journal data have go to the OSD =
-? (after X seconds and/or when Y %-full)=20
-I think you can try to tune these values
-
-filestore max sync interval =3D 30
-filestore min sync interval =3D 29
-filestore flusher =3D false
-filestore queue max ops =3D 10000
+--------------------------------------------------------------------------------------------------------------------
+root@third-virtual-machine:~# ceph osd pool set data pg_num 100
+2012-08-29 15:08:52.388446 mon <- [osd,pool,set,data,pg_num,100]
+2012-08-29 15:08:52.388924 mon0 -> 'specified pg_num 100 <= current 200' (-22)
 
 
+root@third-virtual-machine:~# ceph osd pool get data pg_num
+2012-08-29 15:09:04.788365 mon <- [osd,pool,get,data,pg_num]
+2012-08-29 15:09:04.788833 mon0 -> 'PG_NUM: 200' (0)
 
------ Mail original -----=20
-
-De: "Dieter Kasper" <d.kasper@kabelmail.de>=20
-=C3=80: ceph-devel@vger.kernel.org=20
-Cc: "Dieter Kasper (KD)" <d.kasper@kabelmail.de>=20
-Envoy=C3=A9: Mardi 28 Ao=C3=BBt 2012 19:48:42=20
-Objet: RBD performance - tuning hints=20
-
-Hi,=20
-
-on my 4-node system (SSD + 10GbE, see bench-config.txt for details)=20
-I can observe a pretty nice rados bench performance=20
-(see bench-rados.txt for details):=20
-
-Bandwidth (MB/sec): 961.710=20
-Max bandwidth (MB/sec): 1040=20
-Min bandwidth (MB/sec): 772=20
+-----------------------------------------------------------------------------------------------------------------
+Why is it not working to set pg_number to 100. The cmd is executed
+while ceph is running.
+(ceph v. 0.36, ubuntu 11.10)
 
 
-Also the bandwidth performance generated with=20
-fio --filename=3D/dev/rbd1 --direct=3D1 --rw=3D$io --bs=3D$bs --size=3D=
-2G --iodepth=3D$threads --ioengine=3Dlibaio --runtime=3D60 --group_repo=
-rting --name=3Dfile1 --output=3Dfio_${io}_${bs}_${threads}=20
-
-=2E... is acceptable, e.g.=20
-fio_write_4m_16 795 MB/s=20
-fio_randwrite_8m_128 717 MB/s=20
-fio_randwrite_8m_16 714 MB/s=20
-fio_randwrite_2m_32 692 MB/s=20
-
-
-But, the write IOPS seems to be limited around 19k ...=20
-RBD 4M 64k (=3D optimal_io_size)=20
-fio_randread_512_128 53286 55925=20
-fio_randread_4k_128 51110 44382=20
-fio_randread_8k_128 30854 29938=20
-fio_randwrite_512_128 18888 2386=20
-fio_randwrite_512_64 18844 2582=20
-fio_randwrite_8k_64 17350 2445=20
-(...)=20
-fio_read_4k_128 10073 53151=20
-fio_read_4k_64 9500 39757=20
-fio_read_4k_32 9220 23650=20
-(...)=20
-fio_read_4k_16 9122 14322=20
-fio_write_4k_128 2190 14306=20
-fio_read_8k_32 706 13894=20
-fio_write_4k_64 2197 12297=20
-fio_write_8k_64 3563 11705=20
-fio_write_8k_128 3444 11219=20
-
-
-Any hints for tuning the IOPS (read and/or write) would be appreciated.=
-=20
-
-How can I set the variables when the Journal data have go to the OSD ? =
-(after X seconds and/or when Y %-full)=20
-
-
-Kind Regards,=20
--Dieter=20
-
-
-
---=20
-
---=20
-
-
-
-=09
-
-Alexandre D e rumier=20
-
-Ing=C3=A9nieur Syst=C3=A8mes et R=C3=A9seaux=20
-
-
-=46ixe : 03 20 68 88 85=20
-
-=46ax : 03 20 68 90 88=20
-
-
-45 Bvd du G=C3=A9n=C3=A9ral Leclerc 59100 Roubaix=20
-12 rue Marivaux 75002 Paris=20
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards,
+hemant surale.
