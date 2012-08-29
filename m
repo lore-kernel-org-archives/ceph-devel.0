@@ -1,50 +1,50 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Integration work
-Date: Wed, 29 Aug 2012 15:40:22 +0200
-Message-ID: <503E1BC6.8080308@widodh.nl>
-References: <503D0A00.2080905@inktank.com> <CAF6-1L6QKQbgPZvXYMQw+0_vaLrP0cr_P0_nZs56Lh+A2B9k8Q@mail.gmail.com> <503DE69B.70804@widodh.nl> <CAF6-1L4sVnMsx79APO5X0zEEUyDoBD2PUvjTZw6Gzb7rgfpKkg@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: qemu-rbd : savevm monitor command don't save vmstate, is it normal ?
+Date: Wed, 29 Aug 2012 15:40:08 +0200 (CEST)
+Message-ID: <3aa58a4b-8f7f-48ac-8ab7-510924be9e2a@mailpro>
+References: <k1ksi5$q2p$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:59613 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752717Ab2H2Nk2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 09:40:28 -0400
-In-Reply-To: <CAF6-1L4sVnMsx79APO5X0zEEUyDoBD2PUvjTZw6Gzb7rgfpKkg@mail.gmail.com>
+Received: from mailpro.odiso.net ([89.248.209.98]:41890 "EHLO
+	mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753742Ab2H2Nko (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 09:40:44 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mailpro.odiso.net (Postfix) with ESMTP id EBC8718026266
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 15:40:13 +0200 (CEST)
+Received: from mailpro.odiso.net ([127.0.0.1])
+	by localhost (mailpro.odiso.net [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id hlpHF8K+0TIB for <ceph-devel@vger.kernel.org>;
+	Wed, 29 Aug 2012 15:40:08 +0200 (CEST)
+Received: from mailpro.odiso.net (mailpro.odiso.net [10.1.31.112])
+	by mailpro.odiso.net (Postfix) with ESMTP id B197B180933C9
+	for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 15:40:08 +0200 (CEST)
+In-Reply-To: <k1ksi5$q2p$1@ger.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: Ross Turk <ross@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 08/29/2012 02:35 PM, Sylvain Munaut wrote:
->> Correct me if I'm wrong, but when I was at Citrix in May this year somebody
->> there told me that Xen was going 100% Qemu?
->
-> Huh ... I've never heard this. Also the guys in ##xen haven't either.
-> I'm not really involved in xen dev and don't follow it closely but
-> that seems unlikely. The few slides I looked at from the Xen Summit a
-> couple days ago show that they really like their PV model.
->
+Hi, 
 
-I must be wrong then!
+I'm trying to take a full vm state snapshot with savevm monitor command  (qemu 0.12rc1 + rbd 0.48.1)
 
-> AFAIK QEMU is only used for HVM guests to emulate the hw. And even for
-> those HVM guest, it's recommended to use PV drivers for performance
-> which bypass the qemu layer all together.
->
+it seem that vmstate is not saved in the snapshot. (I also don't notice any vm hang during snapshot)
+Snapshot of disk is correctly made.
 
-Not sure where this came from then, but in that case it would take work 
-from Citrix to get RBD in Xen.
 
-Wido
 
-> Cheers,
->
->      Sylvain
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+using loadvm monitor command, rollback correctly to disk snapshot but vm hang.
 
+
+starting qemu with -loadvm snapshotname give
+kvm: Error -22 while loading VM state
+
+
+Is it normal ? Not implemented ?
+
+
+Regards,
+
+Alexandre
