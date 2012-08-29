@@ -1,93 +1,34 @@
-From: Wido den Hollander <wido@widodh.nl>
-Subject: Re: Unable to set pg_num property of pool "data"
-Date: Wed, 29 Aug 2012 15:42:26 +0200
-Message-ID: <503E1C42.6040408@widodh.nl>
-References: <CAGfy=6n9X87iOwJjT3n3WuBRSxmUS6LnL27v0H10=SJ4YG5f0w@mail.gmail.com> <503DE638.9020002@widodh.nl> <CAGfy=6m-hhwvG4CabDdUy=04ejkDHrnkPqyUCrOkEzETUEd8Uw@mail.gmail.com>
+From: Tommi Virtanen <tv@inktank.com>
+Subject: Re: Integration work
+Date: Wed, 29 Aug 2012 09:43:16 -0400
+Message-ID: <CADvuQREkbfxTfzdjqYof00BF7GVa+ft+SXFzHzO0NwJOkSDP3g@mail.gmail.com>
+References: <503D0A00.2080905@inktank.com> <CAF6-1L6QKQbgPZvXYMQw+0_vaLrP0cr_P0_nZs56Lh+A2B9k8Q@mail.gmail.com>
+ <503DE69B.70804@widodh.nl> <CAF6-1L4sVnMsx79APO5X0zEEUyDoBD2PUvjTZw6Gzb7rgfpKkg@mail.gmail.com>
+ <503E1BC6.8080308@widodh.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.138]:59698 "EHLO
-	smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753734Ab2H2Nm2 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 09:42:28 -0400
-In-Reply-To: <CAGfy=6m-hhwvG4CabDdUy=04ejkDHrnkPqyUCrOkEzETUEd8Uw@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:54595 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753687Ab2H2Nnh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 09:43:37 -0400
+Received: by vcbfk26 with SMTP id fk26so596857vcb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 06:43:36 -0700 (PDT)
+In-Reply-To: <503E1BC6.8080308@widodh.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hemant surale <hemant.surale@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@widodh.nl>
+Cc: Sylvain Munaut <s.munaut@whatever-company.com>, Ross Turk <ross@inktank.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-CC back to the list.
+On Wed, Aug 29, 2012 at 9:40 AM, Wido den Hollander <wido@widodh.nl> wrote:
+>> Huh ... I've never heard this. Also the guys in ##xen haven't either.
+>> I'm not really involved in xen dev and don't follow it closely but
+>> that seems unlikely. The few slides I looked at from the Xen Summit a
+>> couple days ago show that they really like their PV model.
+> I must be wrong then!
 
-On 08/29/2012 12:15 PM, hemant surale wrote:
-> $  ceph osd dump -o -|grep pg_num
->
-> pg_pool 0 'data' pg_pool(rep pg_size 1 crush_ruleset 0 object_hash
-> rjenkins pg_num 200 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 78
-> owner 0)
-
-So you are trying to decrease the number of PGs.
-
-Now, I'm not sure if that is supported. But why would you want to do this?
-
-Wido
-
-> pg_pool 1 'metadata' pg_pool(rep pg_size 1 crush_ruleset 1 object_hash
-> rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 39
-> owner 0)
-> pg_pool 2 'rbd' pg_pool(rep pg_size 1 crush_ruleset 2 object_hash
-> rjenkins pg_num 192 pgp_num 192 lpg_num 2 lpgp_num 2 last_change 41
-> owner 0)
->   wrote 1108 byte payload to -
->
->
->
-> ----------------------------------------------------------------------------------------------------------------------
-> On Wed, Aug 29, 2012 at 3:21 PM, Wido den Hollander <wido@widodh.nl> wrote:
->> On 08/29/2012 11:42 AM, hemant surale wrote:
->>>
->>> Hi Ceph Community ,
->>>        I am facing problem while I am explicitly  trying to set
->>> "pg_number" of "data" pool.
->>>
->>>
->>> --------------------------------------------------------------------------------------------------------------------
->>> root@third-virtual-machine:~# ceph osd pool set data pg_num 100
->>> 2012-08-29 15:08:52.388446 mon <- [osd,pool,set,data,pg_num,100]
->>> 2012-08-29 15:08:52.388924 mon0 -> 'specified pg_num 100 <= current 200'
->>> (-22)
->>>
->>
->> Could you show us the output of the following command?
->>
->> $ ceph osd dump -o -|grep pg_num
->>
->> It seems like you are trying to decrease the number of PGs?
->>
->>
->>>
->>> root@third-virtual-machine:~# ceph osd pool get data pg_num
->>> 2012-08-29 15:09:04.788365 mon <- [osd,pool,get,data,pg_num]
->>> 2012-08-29 15:09:04.788833 mon0 -> 'PG_NUM: 200' (0)
->>>
->>>
->>> -----------------------------------------------------------------------------------------------------------------
->>> Why is it not working to set pg_number to 100. The cmd is executed
->>> while ceph is running.
->>> (ceph v. 0.36, ubuntu 11.10)
->>>
->>
->> I recommend upgrading to Ubuntu 12.04.1 with Ceph 0.48.1
->>
->> Wido
->>
->>>
->>> Regards,
->>> hemant surale.
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
-
+They are (at least, Red Hat is) looking at using more qemu for
+xen-hvm. Whether that has any effect on the PV side, I wouldn't know.
+It might make sense for them to use virtio even for PV, so they might
+use qemu to implement the hypervisor side of virtio too, and that
+would get you librbd support.
