@@ -1,73 +1,77 @@
 From: Josh Durgin <josh.durgin@inktank.com>
-Subject: Re: RBD Async request: When / How are the call back called ?
-Date: Wed, 29 Aug 2012 09:48:06 -0700
-Message-ID: <503E47C6.2040200@inktank.com>
-References: <CAF6-1L5JfGW-cw45gTbOX7+igu9WnG7=fp75aoTg1HL4AtsF-Q@mail.gmail.com>
+Subject: Re: qemu-rbd : savevm monitor command don't save vmstate, is it normal
+ ?
+Date: Wed, 29 Aug 2012 10:05:03 -0700
+Message-ID: <503E4BBF.8060703@inktank.com>
+References: <3aa58a4b-8f7f-48ac-8ab7-510924be9e2a@mailpro> <503E4015.7050707@inktank.com> <CAC-hyiHURKbxNcW+MNMi2onw9iar7d7RD=y3pw_EoHQB711-iA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:32995 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751149Ab2H2QsJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 12:48:09 -0400
-Received: by mail-pz0-f46.google.com with SMTP id y13so543802dad.19
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 09:48:09 -0700 (PDT)
-In-Reply-To: <CAF6-1L5JfGW-cw45gTbOX7+igu9WnG7=fp75aoTg1HL4AtsF-Q@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:56445 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752929Ab2H2RFG (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 13:05:06 -0400
+Received: by pbbrr13 with SMTP id rr13so1553815pbb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 10:05:06 -0700 (PDT)
+In-Reply-To: <CAC-hyiHURKbxNcW+MNMi2onw9iar7d7RD=y3pw_EoHQB711-iA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yehuda Sadeh <yehuda@inktank.com>
+Cc: Alexandre DERUMIER <aderumier@odiso.com>, ceph-devel@vger.kernel.org
 
-On 08/29/2012 07:57 AM, Sylvain Munaut wrote:
-> Hi,
+On 08/29/2012 09:25 AM, Yehuda Sadeh wrote:
+> On Wed, Aug 29, 2012 at 9:15 AM, Josh Durgin <josh.durgin@inktank.com> wrote:
+>> On 08/29/2012 06:40 AM, Alexandre DERUMIER wrote:
+>>>
+>>> Hi,
+>>>
+>>> I'm trying to take a full vm state snapshot with savevm monitor command
+>>> (qemu 0.12rc1 + rbd 0.48.1)
+>>>
+>>> it seem that vmstate is not saved in the snapshot. (I also don't notice
+>>> any vm hang during snapshot)
+>>> Snapshot of disk is correctly made.
+>>
+>>
+>> AFAIK the only block backend that supports saving the vmstate is qcow2.
+>> For rbd, the savevm/loadvm monitor commands are equivalent to
+>> 'rbd snap create' and 'rbd snap rollback'. They just save/rollback the
+>> disk.
+>>
+>>
+>>> using loadvm monitor command, rollback correctly to disk snapshot but vm
+>>> hang.
+>>
+>>
+>> If you don't quiesce i/o i.e. via xfsfreeze (it works on the vfs level
+>> now, so it's not xfs-specific anymore) before snapshotting a running
+>> vm, the fs might require a fsck to be usable. This is only rolling back
+>> the disk, and not the memory state, so doing it while the vm is running
+>> is likely to cause problems.
+>>
+>>
+>>> starting qemu with -loadvm snapshotname give
+>>> kvm: Error -22 while loading VM state
+>>>
+>>>
+>>> Is it normal ? Not implemented ?
+>>
+>>
+>> bdrv_{save|load}_vmstate are not implemented.
+>>
+> How complicated would it be to implement it? Looking at the api it
+> seems trivial. We can add a new block with a .vmstate prefix and keeps
+> the raw data on it. We should probably add some librbd functionality
+> that stores and retrieves alternative data payloads and use it for
+> that.
 >
+> Yehuda
 >
-> It might be obvious for people knowing the API but somehow I can't
-> figure it out:
->
-> How and when will the call back specified in a rbd_completion_t be called ?
->
-> Imagine I do a rbd_aio_write and then do while (1); ... I don't see
-> how the library could call my callback unless there is threads
-> involved (and then my cb would be called in another thread context
-> which is not great ...)
 
-It's called from another thread. There are several threads for
-messaging started when you connect with a rados_cluster_t. When a
-request is complete, it's put into a queue inside librados, and a
-'finisher' thread reads from the queue and calls callbacks as
-appropriate.
+We probably wouldn't want to keep it in a single object, since it could
+be very large, but it wouldn't be hard to reuse the regular I/O code to
+stripe it across objects as well. It wouldn't be very complicated to
+implement.
 
-In the case of rbd, a single rbd_aio_write may translate to many rados
-requests, but when the last is complete, the callback you provided is
-called by the librados finisher thread. At this point the data is on
-disk on all replicas.
-
-> (Of course the 'while (1)' here is just a stub, in reality it's a call
-> to a library beyond my control)
->
->
-> My problem here is that I need to integrate inside the main loop of
-> another software and I can't block, but I still need to be able to
-> 'notify' when the requests are over. I can ask the scheduler of that
-> main loop to call me on some even on a file descriptor (but I don't
-> see any fd here), or to call me periodically (but I don't see any call
-> to test for completion without waiting for it).
-
-The way this is done in the qemu block driver (since qemu I/O
-must be completed from the original qemu thread context) is to have a
-pipe that the qemu thread reads from. When an rbd I/O completes, the
-callback (called by a librados thread) tells the qemu thread that it's
-done via the pipe. Here's the original discussion about this:
-
-http://lists.gnu.org/archive/html/qemu-devel/2010-10/msg00420.html
-
-and the code:
-
-http://git.qemu.org/?p=qemu.git;a=blob;f=block/rbd.c;h=5a0f79fc8f38e90c5c635a86b60db4c0f2f20c2f;hb=HEAD
-
-> Cheers,
->
->       Sylvain
-
+Josh
