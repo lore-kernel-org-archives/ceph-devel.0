@@ -1,75 +1,42 @@
-From: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
 Subject: Re: RBD kernel: Weird messages about "connect authorization failure"
  or "socket closed"
-Date: Wed, 29 Aug 2012 08:26:27 -0700
-Message-ID: <CAC-hyiFgPdRVWTj7=M4QQyVKz2UHQvJrV+8bVew5zNGzjSC_SQ@mail.gmail.com>
+Date: Wed, 29 Aug 2012 17:37:43 +0200
+Message-ID: <CAF6-1L6q22CWN7DrmpE5KSTPxaag4crwaTM=mBdXeyzA7N9sSg@mail.gmail.com>
 References: <CAF6-1L4q5PsDjE=393oOjRZ56n-=7XjdQQu0i+1KhOeWc7KsGA@mail.gmail.com>
 	<CAF6-1L7nf1+jUjSMDbP-1yhELndm1mNQiAVcsAOvMetD=hnAoQ@mail.gmail.com>
+	<CAC-hyiFgPdRVWTj7=M4QQyVKz2UHQvJrV+8bVew5zNGzjSC_SQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:36497 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751644Ab2H2P02 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 11:26:28 -0400
-Received: by bkwj10 with SMTP id j10so353725bkw.19
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 08:26:27 -0700 (PDT)
-In-Reply-To: <CAF6-1L7nf1+jUjSMDbP-1yhELndm1mNQiAVcsAOvMetD=hnAoQ@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:58589 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753918Ab2H2Pho (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Aug 2012 11:37:44 -0400
+Received: by vcbfk26 with SMTP id fk26so761584vcb.19
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Aug 2012 08:37:43 -0700 (PDT)
+In-Reply-To: <CAC-hyiFgPdRVWTj7=M4QQyVKz2UHQvJrV+8bVew5zNGzjSC_SQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
+To: Yehuda Sadeh Weinraub <yehudasa@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Wed, Aug 29, 2012 at 8:04 AM, Sylvain Munaut
-<s.munaut@whatever-company.com> wrote:
->
-> Hi,
->
-> In the OSD log I see thos " auth: could not find secret_id=0" ... Any idea
-> ?
->
-> Because obviously it succeeds a couple of millisecond later.
->
->
-> 2012-08-29 13:47:17.873583 7f981ae9d700  0 -- 192.168.1.71:6807/2080
-> >> 192.168.1.28:0/440990652 pipe(0x75d6800 sd=33 pgs=0 cs=0
-> l=0).accept peer addr is really 192.168.1.28:0/440990652 (socket is
-> 192.168.1.28:38689/0)
-> 2012-08-29 13:47:17.873717 7f981ae9d700  0 auth: could not find
-> secret_id=0
-> 2012-08-29 13:47:17.873727 7f981ae9d700  0 cephx: verify_authorizer
-> could not get service secret for service osd secret_id=0
-> 2012-08-29 13:47:17.873731 7f981ae9d700  1
-> CephxAuthorizeHandler::verify_authorizer isvalid=0
-> 2012-08-29 13:47:17.873733 7f981ae9d700  0 -- 192.168.1.71:6807/2080
-> >> 192.168.1.28:0/440990652 pipe(0x75d6800 sd=33 pgs=0 cs=0
-> l=1).accept bad authorizer
-> 2012-08-29 13:47:17.873925 7f981ae9d700  0 auth: could not find
-> secret_id=0
-> 2012-08-29 13:47:17.873938 7f981ae9d700  0 cephx: verify_authorizer
-> could not get service secret for service osd secret_id=0
-> 2012-08-29 13:47:17.873941 7f981ae9d700  1
-> CephxAuthorizeHandler::verify_authorizer isvalid=0
-> 2012-08-29 13:47:17.873942 7f981ae9d700  0 -- 192.168.1.71:6807/2080
-> >> 192.168.1.28:0/440990652 pipe(0x75d6800 sd=33 pgs=0 cs=0
-> l=1).accept bad authorizer
-> 2012-08-29 13:47:18.599819 7f981ae9d700  0 -- 192.168.1.71:6807/2080
-> >> 192.168.1.28:0/440990652 pipe(0x56e6600 sd=33 pgs=0 cs=0
-> l=0).accept peer addr is really 192.168.1.28:0/440990652 (socket is
-> 192.168.1.28:38690/0)
-> 2012-08-29 13:47:18.600056 7f981ae9d700  1
-> CephxAuthorizeHandler::verify_authorizer isvalid=1
-> 2012-08-29 13:47:18.600433 7f981e2ae700  0 osd.3 913 pg[2.14( v
-> 905'2959 (79'1958,905'2959] n=17 ec=1 les/c 913/913 912/912/904) [3,0]
-> r=0 lpr=912 mlcod 0'0 active+clean] watch: ctx->obc=0x5bccb00 cookie=6
-> oi.version=2956 ctx->at_version=913'2960
-> 2012-08-29 13:47:18.600443 7f981e2ae700  0 osd.3 913 pg[2.14( v
-> 905'2959 (79'1958,905'2959] n=17 ec=1 les/c 913/913 912/912/904) [3,0]
-> r=0 lpr=912 mlcod 0'0 active+clean] watch: oi.user_version=2955
->
->
-Did that happen just once, or is it a reoccurring incident? What it
-basically says that the client sent a request using an old ticket. Did
-the client just wake up?
+Hi,
 
-Yehuda
+> Did that happen just once, or is it a reoccurring incident? What it
+> basically says that the client sent a request using an old ticket. Did
+> the client just wake up?
+
+It happens every 15 / 20 min ... it varies a bit.
+
+But what's weird is that it happens only one one OSD. Even though
+there is a second OSD daemon running on the same machine ...
+
+I also made sure all the machine are running NTP and peered to the
+same server, all having the same time.
+
+Cluster is running 0.48.1argonaut-1precise btw. Client is 3.2 / 3.6-rc3.
+
+Cheers,
+
+    Sylvain
