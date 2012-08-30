@@ -1,163 +1,135 @@
 From: Yehuda Sadeh <yehuda@inktank.com>
-Subject: Re: [PATCH 05/11] rbd: move rbd_opts to struct rbd_device
-Date: Thu, 30 Aug 2012 10:07:56 -0700
-Message-ID: <CAC-hyiE42C1CahCDAxh0LawehFdY2c2VYiUxWcinqVAf4uJ27A@mail.gmail.com>
+Subject: Re: [PATCH 06/11] rbd: add read_only rbd map option
+Date: Thu, 30 Aug 2012 10:29:52 -0700
+Message-ID: <CAC-hyiF89PV9=J9rTL0DY-8C2Rg4b7+VyZwEYfer0g2dAY4HvQ@mail.gmail.com>
 References: <5037AB20.4000103@inktank.com>
-	<5037ACF3.5000506@inktank.com>
+	<5037AD10.9010203@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:35925 "EHLO
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:49745 "EHLO
 	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751997Ab2H3RH5 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 13:07:57 -0400
-Received: by bkwj10 with SMTP id j10so917789bkw.19
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 10:07:56 -0700 (PDT)
-In-Reply-To: <5037ACF3.5000506@inktank.com>
+	with ESMTP id S1751002Ab2H3R3y (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 13:29:54 -0400
+Received: by bkwj10 with SMTP id j10so926896bkw.19
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 10:29:52 -0700 (PDT)
+In-Reply-To: <5037AD10.9010203@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Alex Elder <elder@inktank.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Fri, Aug 24, 2012 at 9:33 AM, Alex Elder <elder@inktank.com> wrote:
-> The rbd options don't really apply to the ceph client.  So don't
-> store a pointer to it in the ceph_client structure, and put them
-> (a struct, not a pointer) into the rbd_dev structure proper.
->
-> Pass the rbd device structure to rbd_client_create() so it can
-> assign rbd_dev->rbdc if successful, and have it return an error code
-> instead of the rbd client pointer.
+On Fri, Aug 24, 2012 at 9:34 AM, Alex Elder <elder@inktank.com> wrote:
+> Add the ability to map an rbd image read-only, by specifying either
+> "read_only" or "ro" as an option on the rbd "command line."
 >
 > Signed-off-by: Alex Elder <elder@inktank.com>
 > ---
->  drivers/block/rbd.c |   49
-> ++++++++++++++++---------------------------------
->  1 file changed, 16 insertions(+), 33 deletions(-)
+>  drivers/block/rbd.c |   22 ++++++++++++++++++----
+>  1 file changed, 18 insertions(+), 4 deletions(-)
 >
 > diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 130dbc2..b40f553 100644
+> index b40f553..5e22bb5 100644
 > --- a/drivers/block/rbd.c
 > +++ b/drivers/block/rbd.c
-> @@ -98,7 +98,6 @@ struct rbd_options {
->   */
->  struct rbd_client {
->         struct ceph_client      *client;
-> -       struct rbd_options      *rbd_opts;
->         struct kref             kref;
->         struct list_head        node;
+> @@ -69,7 +69,8 @@
+>  #define DEV_NAME_LEN           32
+>  #define MAX_INT_FORMAT_WIDTH   ((5 * sizeof (int)) / 2 + 1)
+>
+> -#define RBD_NOTIFY_TIMEOUT_DEFAULT 10
+> +#define RBD_NOTIFY_TIMEOUT_DEFAULT     10
+> +#define RBD_READ_ONLY_DEFAULT          false
+>
+>  /*
+>   * block device image metadata (in-memory version)
+> @@ -91,6 +92,7 @@ struct rbd_image_header {
+>
+>  struct rbd_options {
+>         int     notify_timeout;
+> +       bool    read_only;
 >  };
-> @@ -152,6 +151,7 @@ struct rbd_device {
->         struct gendisk          *disk;          /* blkdev's gendisk and rq */
->         struct request_queue    *q;
 >
-> +       struct rbd_options      rbd_opts;
->         struct rbd_client       *rbd_client;
+>  /*
+> @@ -176,7 +178,7 @@ struct rbd_device {
+>         u64                     snap_id;        /* current snapshot id */
+>         /* whether the snap_id this device reads from still exists */
+>         bool                    snap_exists;
+> -       int                     read_only;
+> +       bool                    read_only;
 >
->         char                    name[DEV_NAME_LEN]; /* blkdev name, e.g. rbd3 */
-> @@ -273,8 +273,7 @@ static const struct block_device_operations
-> rbd_bd_ops = {
->   * Initialize an rbd client instance.
->   * We own *ceph_opts.
->   */
-> -static struct rbd_client *rbd_client_create(struct ceph_options *ceph_opts,
-> -                                           struct rbd_options *rbd_opts)
-> +static struct rbd_client *rbd_client_create(struct ceph_options *ceph_opts)
->  {
+>         struct list_head        node;
+>
+> @@ -351,12 +353,18 @@ enum {
+>         /* int args above */
+>         Opt_last_string,
+>         /* string args above */
+> +       Opt_read_only,
+> +       /* Boolean args above */
+> +       Opt_last_bool,
+>  };
+>
+>  static match_table_t rbd_opts_tokens = {
+>         {Opt_notify_timeout, "notify_timeout=%d"},
+>         /* int args above */
+>         /* string args above */
+> +       {Opt_read_only, "read_only"},
+> +       {Opt_read_only, "ro"},          /* Alternate spelling */
+> +       /* Boolean args above */
+>         {-1, NULL}
+>  };
+>
+> @@ -381,6 +389,8 @@ static int parse_rbd_opts_token(char *c, void *private)
+>         } else if (token > Opt_last_int && token < Opt_last_string) {
+>                 dout("got string token %d val %s\n", token,
+>                      argstr[0].from);
+> +       } else if (token > Opt_last_string && token < Opt_last_bool) {
+> +               dout("got Boolean token %d\n", token);
+>         } else {
+>                 dout("got token %d\n", token);
+>         }
+> @@ -389,6 +399,9 @@ static int parse_rbd_opts_token(char *c, void *private)
+>         case Opt_notify_timeout:
+>                 rbd_opts->notify_timeout = intval;
+>                 break;
+> +       case Opt_read_only:
+> +               rbd_opts->read_only = !rbd_opts->read_only;
+
+should this be a flip-flop? better have "rw" and "read_write" options
+instead, or just set it to true here.
+
+> +               break;
+>         default:
+>                 BUG_ON(token);
+>         }
+> @@ -407,6 +420,7 @@ static int rbd_get_client(struct rbd_device
+> *rbd_dev, const char *mon_addr,
 >         struct rbd_client *rbdc;
->         int ret = -ENOMEM;
-> @@ -298,8 +297,6 @@ static struct rbd_client *rbd_client_create(struct
-> ceph_options *ceph_opts,
->         if (ret < 0)
->                 goto out_err;
->
-> -       rbdc->rbd_opts = rbd_opts;
-> -
->         spin_lock(&rbd_client_list_lock);
->         list_add_tail(&rbdc->node, &rbd_client_list);
->         spin_unlock(&rbd_client_list_lock);
-> @@ -402,42 +399,33 @@ static int parse_rbd_opts_token(char *c, void
-> *private)
->   * Get a ceph client with specific addr and configuration, if one does
->   * not exist create it.
->   */
-> -static struct rbd_client *rbd_get_client(const char *mon_addr,
-> -                                        size_t mon_addr_len,
-> -                                        char *options)
-> +static int rbd_get_client(struct rbd_device *rbd_dev, const char *mon_addr,
-> +                               size_t mon_addr_len, char *options)
->  {
-> -       struct rbd_client *rbdc;
-> +       struct rbd_options *rbd_opts = &rbd_dev->rbd_opts;
->         struct ceph_options *ceph_opts;
-> -       struct rbd_options *rbd_opts;
-> -
-> -       rbd_opts = kzalloc(sizeof(*rbd_opts), GFP_KERNEL);
-> -       if (!rbd_opts)
-> -               return ERR_PTR(-ENOMEM);
-> +       struct rbd_client *rbdc;
 >
 >         rbd_opts->notify_timeout = RBD_NOTIFY_TIMEOUT_DEFAULT;
+> +       rbd_opts->read_only = RBD_READ_ONLY_DEFAULT;
 >
 >         ceph_opts = ceph_parse_options(options, mon_addr,
 >                                         mon_addr + mon_addr_len,
->                                         parse_rbd_opts_token, rbd_opts);
-> -       if (IS_ERR(ceph_opts)) {
-> -               kfree(rbd_opts);
-> -               return ERR_CAST(ceph_opts);
-> -       }
-> +       if (IS_ERR(ceph_opts))
-> +               return PTR_ERR(ceph_opts);
->
->         rbdc = rbd_client_find(ceph_opts);
->         if (rbdc) {
->                 /* using an existing client */
->                 ceph_destroy_options(ceph_opts);
-
-It'll probably be better to use a reference count to control ceph_opts lifecycle
-
-> -               kfree(rbd_opts);
-> -
-> -               return rbdc;
-> +       } else {
-> +               rbdc = rbd_client_create(ceph_opts);
-> +               if (IS_ERR(rbdc))
-> +                       return PTR_ERR(rbdc);
+> @@ -613,7 +627,7 @@ static int rbd_header_set_snap(struct rbd_device
+> *rbd_dev, u64 *size)
+>                     sizeof (RBD_SNAP_HEAD_NAME))) {
+>                 rbd_dev->snap_id = CEPH_NOSNAP;
+>                 rbd_dev->snap_exists = false;
+> -               rbd_dev->read_only = 0;
+> +               rbd_dev->read_only = rbd_dev->rbd_opts.read_only;
+>                 if (size)
+>                         *size = rbd_dev->header.image_size;
+>         } else {
+> @@ -625,7 +639,7 @@ static int rbd_header_set_snap(struct rbd_device
+> *rbd_dev, u64 *size)
+>                         goto done;
+>                 rbd_dev->snap_id = snap_id;
+>                 rbd_dev->snap_exists = true;
+> -               rbd_dev->read_only = 1;
+> +               rbd_dev->read_only = true;      /* No choice for snapshots */
 >         }
-> +       rbd_dev->rbd_client = rbdc;
 >
-> -       rbdc = rbd_client_create(ceph_opts, rbd_opts);
-> -       if (IS_ERR(rbdc))
-> -               kfree(rbd_opts);
-> -
-> -       return rbdc;
-> +       return 0;
->  }
->
->  /*
-> @@ -455,7 +443,6 @@ static void rbd_client_release(struct kref *kref)
->         spin_unlock(&rbd_client_list_lock);
->
->         ceph_destroy_client(rbdc->client);
-> -       kfree(rbdc->rbd_opts);
->         kfree(rbdc);
->  }
->
-> @@ -2526,13 +2513,9 @@ static ssize_t rbd_add(struct bus_type *bus,
->         if (rc)
->                 goto err_put_id;
->
-> -       rbd_dev->rbd_client = rbd_get_client(mon_addrs, mon_addrs_size - 1,
-> -                                               options);
-> -       if (IS_ERR(rbd_dev->rbd_client)) {
-> -               rc = PTR_ERR(rbd_dev->rbd_client);
-> -               rbd_dev->rbd_client = NULL;
-> +       rc = rbd_get_client(rbd_dev, mon_addrs, mon_addrs_size - 1, options);
-> +       if (rc < 0)
->                 goto err_put_id;
-> -       }
->
->         /* pick the pool */
->         osdc = &rbd_dev->rbd_client->client->osdc;
+>         ret = 0;
 > --
 > 1.7.9.5
 >
