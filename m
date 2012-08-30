@@ -1,35 +1,32 @@
 From: Mike Ryan <mike.ryan@inktank.com>
-Subject: Re: RBD Async request: When / How are the call back called ?
-Date: Thu, 30 Aug 2012 07:52:10 -0700
-Message-ID: <20120830145209.GE19573@splice>
-References: <CAF6-1L5JfGW-cw45gTbOX7+igu9WnG7=fp75aoTg1HL4AtsF-Q@mail.gmail.com>
- <503E47C6.2040200@inktank.com>
- <CAF6-1L7GstF3ooOV7hOfCKXvFPP51Ce-mFovpt5oRm-_T=sffg@mail.gmail.com>
+Subject: Re: RADOS gateway and the S3 compatibility.
+Date: Thu, 30 Aug 2012 07:53:37 -0700
+Message-ID: <20120830145337.GF19573@splice>
+References: <loom.20120827T091156-421@post.gmane.org>
+ <loom.20120828T122919-139@post.gmane.org>
+ <20120828160607.GC19573@splice>
+ <loom.20120829T083049-345@post.gmane.org>
+ <loom.20120829T133922-563@post.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:52816 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:60796 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752780Ab2H3OwQ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 10:52:16 -0400
-Received: by pbbrr13 with SMTP id rr13so3258417pbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 07:52:16 -0700 (PDT)
+	with ESMTP id S1752455Ab2H3Oxo (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 10:53:44 -0400
+Received: by pbbrr13 with SMTP id rr13so3260786pbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 07:53:44 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CAF6-1L7GstF3ooOV7hOfCKXvFPP51Ce-mFovpt5oRm-_T=sffg@mail.gmail.com>
+In-Reply-To: <loom.20120829T133922-563@post.gmane.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sylvain Munaut <s.munaut@whatever-company.com>
+To: ramu eppa <ramu.freesystems@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Aug 30, 2012 at 02:16:36PM +0200, Sylvain Munaut wrote:
-> One more question: When I have async read pending, I would have
-> expected rbd_flush and/or rbd_close to wait for them to finish but
-> they dont. Is there a way to wait for all operation to be complete ?
-> Because if I shutdown everything before they are, the application
-> hangs ...
+On Wed, Aug 29, 2012 at 11:41:47AM +0000, ramu eppa wrote:
+>    After starting apache2 ,The s3 -u list command working properly,but s3 -u 
+> create mytest was not working it is showing error is,
+> ERROR:XMLParseFailure
+> And error.log is,
 
-There's nothing in the API for that. You have to manually iterate over
-all your completion contexts calling wait_for_safe_and_cb() on each.
-
-Note: even if you don't have a callback, you should use the _cb()
-version. I just fixed a use-after-free bug the was caused by this.
+How about access.log? Is the script exiting with 200 or something else?
