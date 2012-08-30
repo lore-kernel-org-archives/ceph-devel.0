@@ -1,60 +1,86 @@
-From: Alex Elder <elder@inktank.com>
-Subject: Re: [PATCH 00/11] rbd: another set of patches
-Date: Thu, 30 Aug 2012 07:32:43 -0500
-Message-ID: <503F5D6B.9030509@inktank.com>
-References: <5037AB20.4000103@inktank.com>
+From: =?UTF-8?B?Sm/Do28gRWR1YXJkbyBMdcOtcw==?= <jecluis@gmail.com>
+Subject: Re: Integration work
+Date: Thu, 30 Aug 2012 15:00:45 +0100
+Message-ID: <503F720D.5060303@gmail.com>
+References: <503D0A00.2080905@inktank.com> <20120828203235.45f1e3a5@dieter-t420s> <503D3214.4000503@hastexo.com> <CADvuQRHs_t0WT_eERPP_1Eb3wTM0yX5_v+WW3rRnY3JqWw2-3A@mail.gmail.com> <503D3636.40609@inktank.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigF64AE6B17239FA8E7F63AC2D"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:53106 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751613Ab2H3Mcr (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 08:32:47 -0400
-Received: by yenl14 with SMTP id l14so318585yen.19
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 05:32:46 -0700 (PDT)
-In-Reply-To: <5037AB20.4000103@inktank.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:63824 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752187Ab2H3OBn (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 10:01:43 -0400
+Received: by eekc1 with SMTP id c1so742220eek.19
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 07:01:42 -0700 (PDT)
+In-Reply-To: <503D3636.40609@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Josh Durgin <josh.durgin@inktank.com>
+Cc: Tommi Virtanen <tv@inktank.com>, Florian Haas <florian@hastexo.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Plaetinck, Dieter" <dieter@vimeo.com>, Ross Turk <ross@inktank.com>
 
-On 08/24/2012 11:26 AM, Alex Elder wrote:
-> I keep moving simple and simplifying patches to the front of
-> my patch queue.  This is my latest set of things that are
-> ready to get reviewed and committed.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigF64AE6B17239FA8E7F63AC2D
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Anyone have time to review these?  They're mostly very simple.
-Thanks.
+On 08/28/2012 10:20 PM, Josh Durgin wrote:
+> On 08/28/2012 02:15 PM, Tommi Virtanen wrote:
+>> On Tue, Aug 28, 2012 at 5:03 PM, Florian Haas <florian@hastexo.com>
+>> wrote:
+>>> I for my part, in the documentation space, would love for the admin
+>>> tools to become self-documenting. For example, I would love a "help"
+>>> subcommand at any level of the ceph shell, listing the supported
+>>> subcommands in that level. As in "ceph help", "ceph mon help", "ceph =
+osd
+>>> getmap help".
+>>>
+>>> Even better, the ceph shell could support a general-purpose hook that=
 
-					-Alex
+>>> bash-completion can use (kind of like "hg" does in Mercurial), and th=
+is
+>>> and the above-conjectured help facility could arguably share quite a =
+bit
+>>> of code.
+>>
+>> I would love to see all of that. But, a lot of the "ceph" tool
+>> functionality is implemented by shoveling strings in and out of the
+>> monitors. It largely doesn't understand what's happening.
+>=20
+> It doesn't need to understand what's happening to give basic usage info=
 
-> [PATCH 01/11] rbd: handle locking inside __rbd_client_find()
->     This simplifies a little code.
-> [PATCH 02/11] rbd: don't over-allocate space for object prefix
->     Don't allocate the max required space for the object prefix.
->     This also ensures that the object prefix is either terminated
->     with '\0' or else is maximally-sized.
-> [PATCH 03/11] rbd: kill incore snap_names_len
->     Eliminate an unnecessary field in struct rbd_image_header.
-> [PATCH 04/11] rbd: more cleanup in rbd_header_from_disk()
->     Rearrange some code, for better logical grouping.
-> [PATCH 05/11] rbd: move rbd_opts to struct rbd_device
->     Tie rbd-specific options to the rbd_device, not the client.
-> [PATCH 06/11] rbd: add read_only rbd map option
-> [PATCH 07/11] rbd: kill notify_timeout option
->     These two were done together, in this order, to preserve the
->     argument parsing code.  The first adds the ability to map an
->     rbd image read-only.  The second eliminates the only other
->     rbd option, which is otherwise unused.
-> [PATCH 08/11] rbd: bio_chain_clone() cleanups
->     Simple refactoring.
-> [PATCH 09/11] rbd: drop needless test in rbd_rq_fn()
->     Trivial.
-> [PATCH 10/11] rbd: check for overflow in rbd_get_num_segments()
->     Make sure we don't exceed 64-bit maximum when adding offset
->     and length.
-> [PATCH 11/11] rbd: split up rbd_get_segment()
->     Refactor rbd_get_segment() into three separate functions,
->     which return a segment name, offset, and length.
-> 
+> though - the monitors can provide that themselves in the short term
+> while we don't have an admin api like you describe below.
+>=20
+> I added a feature request for this a little while back:
+>=20
+> http://www.tracker.newdream.net/issues/2894
 
+I believe this is pretty straightforward to get done.
+
+
+--=20
+Jo=C3=A3o Eduardo Lu=C3=ADs
+gpg key: 477C26E5 from pool.keyserver.eu
+
+
+--------------enigF64AE6B17239FA8E7F63AC2D
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iQEcBAEBAgAGBQJQP3ITAAoJEJ9vvxhHfCbl0o4H/2uGkh+P7SdmrrvlkYGvaqYh
+4on+JeFj7hGkP4kk0wtRo05EVvS3ENjJObc70KyBr/pKVqPlUOf3rsMdZ82dPN7S
+HzzBuqwcWYQUHZL6+A79xW0vgX5xKCE1arUO1AYTowRq4XY3yRh6ef1HvGWhN9lS
+pzvhC6jmkw4FUZV0nslDSxw9NXF/jPWvQB1+YsgtnzLJcWDDC4oYy+aDJsrFvl0c
+uLuCIJWO1nRgA3bNsNacpkNP9FqpBUU8N1pnzFiavmnk7SCFdCvoI/jM8Sdjwfwa
+x1ZSJjPVk1N+KFTR6b73rn2w1Zp7VoUdKs4tIP2349RDp+xgL0laIZpCq/d8nbg=
+=r4J0
+-----END PGP SIGNATURE-----
+
+--------------enigF64AE6B17239FA8E7F63AC2D--
