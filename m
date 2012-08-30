@@ -1,38 +1,35 @@
 From: Sylvain Munaut <s.munaut@whatever-company.com>
-Subject: Re: Unable to set pg_num property of pool "data"
-Date: Thu, 30 Aug 2012 13:07:08 +0200
-Message-ID: <CAF6-1L7vz-aaa2ydAXi1bQByP8ckpYNB6r691aUfcKbLnHoMrA@mail.gmail.com>
-References: <CAGfy=6n9X87iOwJjT3n3WuBRSxmUS6LnL27v0H10=SJ4YG5f0w@mail.gmail.com>
-	<503DE638.9020002@widodh.nl>
-	<CAGfy=6m-hhwvG4CabDdUy=04ejkDHrnkPqyUCrOkEzETUEd8Uw@mail.gmail.com>
-	<503E1C42.6040408@widodh.nl>
-	<CADvuQRF+Q2msar-z1qqn0zj5uPgqJ78SWJQ+eovmXYCcHv+vJw@mail.gmail.com>
-	<CAGfy=6kZSF=4p4v6GJBEwhnUPPzdquZOefudfE1Vf282979Piw@mail.gmail.com>
+Subject: Re: RBD Async request: When / How are the call back called ?
+Date: Thu, 30 Aug 2012 14:16:36 +0200
+Message-ID: <CAF6-1L7GstF3ooOV7hOfCKXvFPP51Ce-mFovpt5oRm-_T=sffg@mail.gmail.com>
+References: <CAF6-1L5JfGW-cw45gTbOX7+igu9WnG7=fp75aoTg1HL4AtsF-Q@mail.gmail.com>
+	<503E47C6.2040200@inktank.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:57194 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751032Ab2H3LHJ (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 07:07:09 -0400
-Received: by vbbff1 with SMTP id ff1so1681704vbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 04:07:08 -0700 (PDT)
-In-Reply-To: <CAGfy=6kZSF=4p4v6GJBEwhnUPPzdquZOefudfE1Vf282979Piw@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:43595 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750892Ab2H3MQh (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 08:16:37 -0400
+Received: by vcbfk26 with SMTP id fk26so1780973vcb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 05:16:36 -0700 (PDT)
+In-Reply-To: <503E47C6.2040200@inktank.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hemant surale <hemant.surale@gmail.com>
-Cc: Tommi Virtanen <tv@inktank.com>, Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Josh Durgin <josh.durgin@inktank.com>, Mike Ryan <mike.ryan@inktank.com>
+Cc: ceph-devel@vger.kernel.org
 
-> I was able to increase the PG_num property but only problem is to
-> reduce it. Anyways thanks for your  valuable reply.
+Hi,
 
-AFAIK the old tool allowed you to do that but it didn't really work
-internally if the pool wasn't empty.
-In the new version it has been removed completely because it wasn't
-really working anyway (despite what the command line might lead you to
-believe).
+Thanks Mike and Josh for the answer, I see how it works now.
 
-And it will be implemented soon-ish properly.
+Using a pipe seems like a good fit for me.
+
+One more question: When I have async read pending, I would have
+expected rbd_flush and/or rbd_close to wait for them to finish but
+they dont. Is there a way to wait for all operation to be complete ?
+Because if I shutdown everything before they are, the application
+hangs ...
 
 Cheers,
 
