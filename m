@@ -1,35 +1,35 @@
 From: Mike Ryan <mike.ryan@inktank.com>
-Subject: Re: How to mount all cluster data to one particular Dir in single
- Host.
-Date: Thu, 30 Aug 2012 07:45:49 -0700
-Message-ID: <20120830144549.GD19573@splice>
-References: <CAGfy=6nT2w7wqH30QscDREydNg2CS7uGURdx0E-2_qOGqaScoQ@mail.gmail.com>
+Subject: Re: RBD Async request: When / How are the call back called ?
+Date: Thu, 30 Aug 2012 07:52:10 -0700
+Message-ID: <20120830145209.GE19573@splice>
+References: <CAF6-1L5JfGW-cw45gTbOX7+igu9WnG7=fp75aoTg1HL4AtsF-Q@mail.gmail.com>
+ <503E47C6.2040200@inktank.com>
+ <CAF6-1L7GstF3ooOV7hOfCKXvFPP51Ce-mFovpt5oRm-_T=sffg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:55707 "EHLO
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:52816 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752167Ab2H3Op4 (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 10:45:56 -0400
-Received: by pbbrr13 with SMTP id rr13so3248173pbb.19
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 07:45:55 -0700 (PDT)
+	with ESMTP id S1752780Ab2H3OwQ (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 10:52:16 -0400
+Received: by pbbrr13 with SMTP id rr13so3258417pbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 07:52:16 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CAGfy=6nT2w7wqH30QscDREydNg2CS7uGURdx0E-2_qOGqaScoQ@mail.gmail.com>
+In-Reply-To: <CAF6-1L7GstF3ooOV7hOfCKXvFPP51Ce-mFovpt5oRm-_T=sffg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hemant surale <hemant.surale@gmail.com>
+To: Sylvain Munaut <s.munaut@whatever-company.com>
 Cc: ceph-devel@vger.kernel.org
 
-On Thu, Aug 30, 2012 at 04:36:13PM +0530, hemant surale wrote:
-> Is it possible to mount all cluster data on directory present at
-> single node?
+On Thu, Aug 30, 2012 at 02:16:36PM +0200, Sylvain Munaut wrote:
+> One more question: When I have async read pending, I would have
+> expected rbd_flush and/or rbd_close to wait for them to finish but
+> they dont. Is there a way to wait for all operation to be complete ?
+> Because if I shutdown everything before they are, the application
+> hangs ...
 
-Are you trying to see the raw data, how files are stored by the OSD? You
-can't mount them remotely, but you can log into your VMs and look in the
-OSDs' data directories.
+There's nothing in the API for that. You have to manually iterate over
+all your completion contexts calling wait_for_safe_and_cb() on each.
 
-> v0.31 & ubuntu 11.10
-
-These are both very old, and we don't support them anymore. For ceph you
-should look into argonaut v0.48.1 or a more recent tag v0.51. For
-Ubuntu, we recommend Precise 12.04.
+Note: even if you don't have a callback, you should use the _cb()
+version. I just fixed a use-after-free bug the was caused by this.
