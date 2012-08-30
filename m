@@ -1,37 +1,38 @@
-From: ramu eppa <ramu.freesystems@gmail.com>
-Subject: Re: How to build ceph upon zfs filesystem.
-Date: Thu, 30 Aug 2012 03:54:29 +0000 (UTC)
-Message-ID: <loom.20120830T055024-954@post.gmane.org>
-References: <loom.20120826T033818-148@post.gmane.org> <503A2142.2000505@inktank.com> <loom.20120827T063044-980@post.gmane.org> <loom.20120829T153702-223@post.gmane.org> <503E1E25.6060704@smart-weblications.de>
+From: hemant surale <hemant.surale@gmail.com>
+Subject: Re: Unable to set pg_num property of pool "data"
+Date: Thu, 30 Aug 2012 16:32:34 +0530
+Message-ID: <CAGfy=6kZSF=4p4v6GJBEwhnUPPzdquZOefudfE1Vf282979Piw@mail.gmail.com>
+References: <CAGfy=6n9X87iOwJjT3n3WuBRSxmUS6LnL27v0H10=SJ4YG5f0w@mail.gmail.com>
+	<503DE638.9020002@widodh.nl>
+	<CAGfy=6m-hhwvG4CabDdUy=04ejkDHrnkPqyUCrOkEzETUEd8Uw@mail.gmail.com>
+	<503E1C42.6040408@widodh.nl>
+	<CADvuQRF+Q2msar-z1qqn0zj5uPgqJ78SWJQ+eovmXYCcHv+vJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:58558 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750990Ab2H3Dyn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-	Wed, 29 Aug 2012 23:54:43 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <gcfcd-ceph-devel3-2@m.gmane.org>)
-	id 1T6vq6-00038H-RX
-	for ceph-devel@vger.kernel.org; Thu, 30 Aug 2012 05:54:43 +0200
-Received: from 81-254-187-203.static.youbroadband.in ([81-254-187-203.static.youbroadband.in])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 05:54:42 +0200
-Received: from ramu.freesystems by 81-254-187-203.static.youbroadband.in with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 05:54:42 +0200
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:51452 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751032Ab2H3LCf (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 07:02:35 -0400
+Received: by vcbfk26 with SMTP id fk26so1708762vcb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 04:02:34 -0700 (PDT)
+In-Reply-To: <CADvuQRF+Q2msar-z1qqn0zj5uPgqJ78SWJQ+eovmXYCcHv+vJw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Tommi Virtanen <tv@inktank.com>
+Cc: Wido den Hollander <wido@widodh.nl>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Wiessner,
+I was able to increase the PG_num property but only problem is to
+reduce it. Anyways thanks for your  valuable reply.
 
-   Actually I created zpool and this is mounted to /dev/sdb and then set a 
-mountpint to osd.The space showing is 144GB.But the osd's are going down after 
-rbd image is while running.
 
-Thanks,
-Ramu.
+- Hemant Surale.
 
+On Wed, Aug 29, 2012 at 7:13 PM, Tommi Virtanen <tv@inktank.com> wrote:
+> On Wed, Aug 29, 2012 at 9:42 AM, Wido den Hollander <wido@widodh.nl> wrote:
+>> So you are trying to decrease the number of PGs.
+>>
+>> Now, I'm not sure if that is supported. But why would you want to do this?
+>
+> Support for pg shrinking will come pretty much exactly at the same
+> time as support for pg growing -- soon, but not yet.
