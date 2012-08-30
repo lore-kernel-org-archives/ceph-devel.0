@@ -1,86 +1,85 @@
-From: =?UTF-8?B?Sm/Do28gRWR1YXJkbyBMdcOtcw==?= <jecluis@gmail.com>
-Subject: Re: Integration work
-Date: Thu, 30 Aug 2012 15:00:45 +0100
-Message-ID: <503F720D.5060303@gmail.com>
-References: <503D0A00.2080905@inktank.com> <20120828203235.45f1e3a5@dieter-t420s> <503D3214.4000503@hastexo.com> <CADvuQRHs_t0WT_eERPP_1Eb3wTM0yX5_v+WW3rRnY3JqWw2-3A@mail.gmail.com> <503D3636.40609@inktank.com>
+From: Sylvain Munaut <s.munaut@whatever-company.com>
+Subject: Ceph + RBD + Xen: Complete collapse -> Network issue in domU / Bad
+ data for OSD / OOM Kill
+Date: Thu, 30 Aug 2012 16:06:02 +0200
+Message-ID: <CAF6-1L5t9CGk_kB08UPKdrOhQeZZXdbr5n+we1Oae+STpodxtg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigF64AE6B17239FA8E7F63AC2D"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:63824 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752187Ab2H3OBn (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 10:01:43 -0400
-Received: by eekc1 with SMTP id c1so742220eek.19
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 07:01:42 -0700 (PDT)
-In-Reply-To: <503D3636.40609@inktank.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:64804 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752298Ab2H3OGD (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 10:06:03 -0400
+Received: by vbbff1 with SMTP id ff1so1891086vbb.19
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 07:06:02 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <josh.durgin@inktank.com>
-Cc: Tommi Virtanen <tv@inktank.com>, Florian Haas <florian@hastexo.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Plaetinck, Dieter" <dieter@vimeo.com>, Ross Turk <ross@inktank.com>
+To: xen-users@lists.xen.org, ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigF64AE6B17239FA8E7F63AC2D
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-On 08/28/2012 10:20 PM, Josh Durgin wrote:
-> On 08/28/2012 02:15 PM, Tommi Virtanen wrote:
->> On Tue, Aug 28, 2012 at 5:03 PM, Florian Haas <florian@hastexo.com>
->> wrote:
->>> I for my part, in the documentation space, would love for the admin
->>> tools to become self-documenting. For example, I would love a "help"
->>> subcommand at any level of the ceph shell, listing the supported
->>> subcommands in that level. As in "ceph help", "ceph mon help", "ceph =
-osd
->>> getmap help".
->>>
->>> Even better, the ceph shell could support a general-purpose hook that=
-
->>> bash-completion can use (kind of like "hg" does in Mercurial), and th=
-is
->>> and the above-conjectured help facility could arguably share quite a =
-bit
->>> of code.
->>
->> I would love to see all of that. But, a lot of the "ceph" tool
->> functionality is implemented by shoveling strings in and out of the
->> monitors. It largely doesn't understand what's happening.
->=20
-> It doesn't need to understand what's happening to give basic usage info=
-
-> though - the monitors can provide that themselves in the short term
-> while we don't have an admin api like you describe below.
->=20
-> I added a feature request for this a little while back:
->=20
-> http://www.tracker.newdream.net/issues/2894
-
-I believe this is pretty straightforward to get done.
+Hi,
 
 
---=20
-Jo=C3=A3o Eduardo Lu=C3=ADs
-gpg key: 477C26E5 from pool.keyserver.eu
+A bit of explanation of what I'm trying to achieve :
+We have a bunch of homogeneous nodes that have CPU + RAM + Storage and
+we want to use that as some generic cluster. The idea is to have Xen
+on all of these and run Ceph OSD in a domU on each to "export" the
+local storage space to the entire cluster. And then use RBD to store /
+access VM images from any of the machines.
+
+We did setup a working ceph cluster and RBD works well as long as we
+don't access it from a dom0 that run a VM hosting a OSD.
+
+When attaching a RBD image to a Dom0 that runs a VM hosting an OSD,
+things get interesting. It seems works fine when accessed from the
+Dom0 itself. But if we try to use that RBD image to boot another domU,
+then things go _very_ wrong.
 
 
---------------enigF64AE6B17239FA8E7F63AC2D
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+On the Dom0, I see a lot of message in dmesg:
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+    "osd1 192.168.3.70:6802 socket closed"  and I mean a _lot_ like
+dozens per seconds.
 
-iQEcBAEBAgAGBQJQP3ITAAoJEJ9vvxhHfCbl0o4H/2uGkh+P7SdmrrvlkYGvaqYh
-4on+JeFj7hGkP4kk0wtRo05EVvS3ENjJObc70KyBr/pKVqPlUOf3rsMdZ82dPN7S
-HzzBuqwcWYQUHZL6+A79xW0vgX5xKCE1arUO1AYTowRq4XY3yRh6ef1HvGWhN9lS
-pzvhC6jmkw4FUZV0nslDSxw9NXF/jPWvQB1+YsgtnzLJcWDDC4oYy+aDJsrFvl0c
-uLuCIJWO1nRgA3bNsNacpkNP9FqpBUU8N1pnzFiavmnk7SCFdCvoI/jM8Sdjwfwa
-x1ZSJjPVk1N+KFTR6b73rn2w1Zp7VoUdKs4tIP2349RDp+xgL0laIZpCq/d8nbg=
-=r4J0
------END PGP SIGNATURE-----
 
---------------enigF64AE6B17239FA8E7F63AC2D--
+On the DomU running the OSD, I see in the dmesg a bunch of:
+
+     "net eth0: rx->offset: 0, size: 4294967295"
+
+
+And in the OSD log itself I see a lot of :
+
+2012-08-30 13:26:48.683948 7f3be9bea700  1
+CephxAuthorizeHandler::verify_authorizer isvalid=1
+2012-08-30 13:26:48.684124 7f3be9bea700  0 bad crc in data 1035043868
+!= exp 606937680
+2012-08-30 13:26:48.684771 7f3be9bea700  0 -- 192.168.3.70:6803/1032
+>> 192.168.3.30:0/4221752725 pipe(0x5ba5c00 sd=40 pgs=0 cs=0
+l=0).accept peer addr is really 192.168.3.30:0/4221752725 (socket is
+192.168.3.30:40477/0)
+2012-08-30 13:26:48.686520 7f3be9bea700  1
+CephxAuthorizeHandler::verify_authorizer isvalid=1
+2012-08-30 13:26:48.686723 7f3be9bea700  0 bad crc in data 1385604259
+!= exp 606937680
+2012-08-30 13:26:48.687306 7f3be9bea700  0 -- 192.168.3.70:6803/1032
+>> 192.168.3.30:0/4221752725 pipe(0x5ba5200 sd=40 pgs=0 cs=0
+l=0).accept peer addr is really 192.168.3.30:0/4221752725 (socket is
+192.168.3.30:40478/0)
+
+The memory of the OSD keeps very quickly and ends up being killed by
+the OOM Killer.
+
+I tried turning off all the offloading options on the virtual network
+interfaces like suggested in some old 2010 post from the Xen list, but
+without any effect.
+
+
+So something is going _very_ wrong here .... any suggestions from anyone ?
+
+Note that when using the exact same setup on a dom0 that doesn't run
+any OSD in a domU, it works fine. Also, only the OSD running under
+that dom0 is affected, the rest of the cluster is working nicely.
+
+
+Cheers,
+
+    Sylvain
