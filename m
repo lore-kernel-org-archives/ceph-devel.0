@@ -1,7 +1,7 @@
-From: Gregory Farnum <greg@inktank.com>
+From: Noah Watkins <jayhawk@cs.ucsc.edu>
 Subject: Re: CephFS mount delay
-Date: Thu, 30 Aug 2012 13:23:00 -0700
-Message-ID: <CAPYLRzhLpmmTX+GjSPtiToY+yRUSwhc1EJ6G9q=pExi4n3A1QQ@mail.gmail.com>
+Date: Thu, 30 Aug 2012 13:24:14 -0700
+Message-ID: <CAPrxi58oZZ25BmcftEz+TgnHy70dPsHhivuFtXd6KkkF7NG8LQ@mail.gmail.com>
 References: <CAPrxi5_g2Nfa4AHAUkCx4LRybtDfKqwQuAH7ziVizmgq5oTJwg@mail.gmail.com>
 	<alpine.DEB.2.00.1208301233260.8588@cobra.newdream.net>
 	<CAPrxi59tZRzv4KG=_U375Vqg7tb5h3nLe6za0L0_B17V5mGw=w@mail.gmail.com>
@@ -9,38 +9,28 @@ References: <CAPrxi5_g2Nfa4AHAUkCx4LRybtDfKqwQuAH7ziVizmgq5oTJwg@mail.gmail.com>
 	<CAPrxi5_G1cQ9XK9dnOP0Sgda_PYNQmj9TyqdO7D+Y7TXoYvuOQ@mail.gmail.com>
 	<alpine.DEB.2.00.1208301314370.8588@cobra.newdream.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:55006 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:48372 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751916Ab2H3UXB (ORCPT
-	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 16:23:01 -0400
-Received: by iahk25 with SMTP id k25so82686iah.19
-        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 13:23:00 -0700 (PDT)
+	with ESMTP id S1750964Ab2H3UYP (ORCPT
+	<rfc822;ceph-devel@vger.kernel.org>); Thu, 30 Aug 2012 16:24:15 -0400
+Received: by iahk25 with SMTP id k25so84847iah.19
+        for <ceph-devel@vger.kernel.org>; Thu, 30 Aug 2012 13:24:14 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.00.1208301314370.8588@cobra.newdream.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@inktank.com>
-Cc: Noah Watkins <jayhawk@cs.ucsc.edu>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Gregory Farnum <greg@inktank.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-It's not an MDS problem; it handles the client mount requests in at
-most .2 seconds. I'm looking through the client log and I see:
+Here ya go:
 
-2012-08-30 12:48:21.875546 7f8a6d1f3780 10 client.4105  target mds.0
-not active, waiting for new mdsmap
-2012-08-30 12:48:21.875771 7f8a68737710  1 -- 192.168.106.225:0/2716
-<== mon.0 192.168.106.225:6789/0 5 ==== osd_map(5..5 src has 1..5) v3
-==== 1376+0+0 (2208396468 0 0) 0x2e56a00 con 0x2e68640
-2012-08-30 12:48:24.872889 7f8a67f36710  1 -- 192.168.106.225:0/2716
---> 192.168.106.225:6789/0 -- mon_subscribe({mdsmap=0+,monmap=2+}) v2
--- ?+0 0x2e65700 con 0x2e68640
+https://dl.dropbox.com/u/7899675/client.log
+https://dl.dropbox.com/u/7899675/mds.a.log
+https://dl.dropbox.com/u/7899675/mds.b.log
+https://dl.dropbox.com/u/7899675/mds.c.log
 
-So it looks like it's waiting for some internal tick before sending
-off the MDSMap request to the monitor?
-(Both the monitor and MDS logs indicate they're promptly satisfying
-the client requests as soon as received, as well. So this is
-definitely the issue.)
--Greg
+- Noah
 
 On Thu, Aug 30, 2012 at 1:15 PM, Sage Weil <sage@inktank.com> wrote:
 > I see that Server::handle_client_session is calling mdlog->flush(), so
